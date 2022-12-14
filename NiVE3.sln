@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33205.214
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NiVE3", "NiVE3\NiVE3.csproj", "{1E1E55E1-8C64-43CE-A204-6AA3DFC56B7B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AvalonDock", "AvalonDock\source\Components\AvalonDock\AvalonDock.csproj", "{B9E8F6F1-51AC-450A-A362-C6CFA096D6C5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1E1E55E1-8C64-43CE-A204-6AA3DFC56B7B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1E1E55E1-8C64-43CE-A204-6AA3DFC56B7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1E1E55E1-8C64-43CE-A204-6AA3DFC56B7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1E1E55E1-8C64-43CE-A204-6AA3DFC56B7B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B9E8F6F1-51AC-450A-A362-C6CFA096D6C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B9E8F6F1-51AC-450A-A362-C6CFA096D6C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B9E8F6F1-51AC-450A-A362-C6CFA096D6C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B9E8F6F1-51AC-450A-A362-C6CFA096D6C5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {001B9CE4-F9A8-4EB2-B639-8EEFB2332FAD}
+	EndGlobalSection
+EndGlobal
