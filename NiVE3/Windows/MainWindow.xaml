@@ -7,7 +7,6 @@
         xmlns:pr="http://prismlibrary.com/"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    <Grid>
-
+    <Grid Background="{DynamicResource BackgroundFill}">
     </Grid>
 </Window>
