@@ -9,7 +9,7 @@ using System.Windows;
 
 namespace NiVE3.Mvvm
 {
-    internal class PropertyPublisher<T> : INotifyPropertyChanged, IGenericWeakEventHandler<PropertyChangedEventArgs>
+    class PropertyPublisher<T> : INotifyPropertyChanged, IGenericWeakEventHandler<PropertyChangedEventArgs>
     {
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -58,7 +58,7 @@ namespace NiVE3.Mvvm
         }
     }
 
-    internal class PropertySubscriber<T> : IWeakEventListener, IDisposable
+    class PropertySubscriber<T> : IWeakEventListener, IDisposable
     {
         public PropertySubscriber(PropertyPublisher<T?> source, Action<T?> handler)
         {

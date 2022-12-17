@@ -7,7 +7,7 @@ using System.Windows;
 
 namespace NiVE3.Event
 {
-    internal class GenericWeakEventManager<TSource, TEventArgs> : WeakEventManager where TEventArgs : EventArgs where TSource : IGenericWeakEventHandler<TEventArgs>
+    class GenericWeakEventManager<TSource, TEventArgs> : WeakEventManager where TEventArgs : EventArgs where TSource : IGenericWeakEventHandler<TEventArgs>
     {
         static GenericWeakEventManager<TSource, TEventArgs> Manager { get; }
 
@@ -54,7 +54,7 @@ namespace NiVE3.Event
         }
     }
 
-    internal interface IGenericWeakEventHandler<TEventArgs> where TEventArgs : EventArgs
+    interface IGenericWeakEventHandler<TEventArgs> where TEventArgs : EventArgs
     {
         event EventHandler<TEventArgs> EventRaised;
     }

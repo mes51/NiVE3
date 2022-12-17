@@ -12,7 +12,7 @@ using NiVE3.Config;
 
 namespace NiVE3.View.Resource
 {
-    internal class AppearanceResourceDictionary : ResourceDictionary
+    class AppearanceResourceDictionary : ResourceDictionary
     {
         public PropertyPublisher<double> Appearance { get; private set; } = new PropertyPublisher<double>(0.0);
 

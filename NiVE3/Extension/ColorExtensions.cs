@@ -7,7 +7,7 @@ using System.Windows.Media;
 
 namespace NiVE3.Extension
 {
-    internal static class ColorExtensions
+    static class ColorExtensions
     {
         public static Color FromHex(string hex)
         {

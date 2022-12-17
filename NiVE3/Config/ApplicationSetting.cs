@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace NiVE3.Config
 {
-    internal class ApplicationSetting
+    class ApplicationSetting
     {
         public static ApplicationSetting Setting { get; }
 

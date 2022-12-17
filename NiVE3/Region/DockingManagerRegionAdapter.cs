@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace NiVE3.Region
 {
-    internal class DockingManagerRegionAdapter : RegionAdapterBase<DockingManager>
+    class DockingManagerRegionAdapter : RegionAdapterBase<DockingManager>
     {
         IRegion? Region { get; set; }
 

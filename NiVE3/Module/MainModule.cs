@@ -12,7 +12,7 @@ using System.Windows;
 
 namespace NiVE3.Module
 {
-    internal class MainModule : IModule
+    class MainModule : IModule
     {
         IRegionManager RegionManager { get; }
 

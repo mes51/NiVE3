@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace NiVE3.ViewModel
 {
-    internal class MainWindowViewModel : BindableBase
+    class MainWindowViewModel : BindableBase
     {
         public static string RegionName = "MainWindow";
 

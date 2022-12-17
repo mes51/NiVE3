@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace NiVE3.Extension
 {
-    internal static class EnumerableExtensions
+    static class EnumerableExtensions
     {
         public static IEnumerable<IEnumerable<T>> Grouped<T>(this IEnumerable<T> source, int count)
         {

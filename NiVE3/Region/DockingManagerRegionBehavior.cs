@@ -13,7 +13,7 @@ using NiVE3.ViewModel;
 
 namespace NiVE3.Region
 {
-    internal class DockingManagerRegionBehavior : RegionBehavior, IHostAwareRegionBehavior
+    class DockingManagerRegionBehavior : RegionBehavior, IHostAwareRegionBehavior
     {
         public static string BehaviorName = nameof(DockingManagerRegionAdapter);
 
