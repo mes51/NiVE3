@@ -5,8 +5,15 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:NiVE3.Windows"
         xmlns:pr="http://prismlibrary.com/"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+        xmlns:a="clr-namespace:NiVE3.Wpf.Attach"
+        xmlns:b="clr-namespace:NiVE3.Wpf.Behavior"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="450" Width="800"
+        a:ShortcutKeyBindingProperty.InputBinding="True">
     <Grid Background="{DynamicResource BackgroundFill}">
     </Grid>
+    <i:Interaction.Behaviors>
+        <b:WindowGestureBehavior />
+    </i:Interaction.Behaviors>
 </Window>

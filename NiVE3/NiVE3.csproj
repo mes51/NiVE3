@@ -8,12 +8,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Dirkster.AvalonDock" Version="4.70.3" />
     <PackageReference Include="Prism.DryIoc" Version="8.1.97" />
     <PackageReference Include="Prism.Wpf" Version="8.1.97" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\AvalonDock\source\Components\AvalonDock\AvalonDock.csproj" />
   </ItemGroup>
 
 </Project>
