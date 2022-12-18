@@ -9,7 +9,7 @@
         xmlns:a="clr-namespace:NiVE3.Wpf.Attach"
         xmlns:b="clr-namespace:NiVE3.Wpf.Behavior"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800"
+        Title="{DynamicResource MainWindow_Title}" Height="450" Width="800"
         a:ShortcutKeyBindingProperty.InputBinding="True">
     <Grid Background="{DynamicResource BackgroundFill}">
     </Grid>
