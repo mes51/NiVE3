@@ -7,43 +7,61 @@ using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows;
 using NiVE3.Extension;
-using NiVE3.Mvvm;
 using NiVE3.Config;
+using static ImTools.ImMap;
 
 namespace NiVE3.View.Resource
 {
     class AppearanceResourceDictionary : ResourceDictionary
     {
-        public PropertyPublisher<double> Appearance { get; private set; } = new PropertyPublisher<double>(0.0);
+        static Dictionary<string, AppearanceChangeableAttribute> ColorKeys { get; }
 
         [BrushColorRange("#313131", "#FFFFFF")]
-        public object? BackgroundFill { get; private set; }
+        public static string BackgroundFill = nameof(BackgroundFill);
+
+        double appearance = 0.0;
+        public double Appearance
+        {
+            get => appearance;
+            set
+            {
+                if (value != appearance)
+                {
+                    appearance = value;
+                    Update();
+                }
+            }
+        }
+
+        static AppearanceResourceDictionary()
+        {
+            ColorKeys = typeof(AppearanceResourceDictionary).GetFields(BindingFlags.Static | BindingFlags.Public)
+                .Select(f => (f.Name, f.GetCustomAttribute<AppearanceChangeableAttribute>()))
+                .Where(t => t.Item2 != null)
+                .ToDictionary(t => t.Name, t => t.Item2!);
+        }
 
         public AppearanceResourceDictionary()
         {
-            foreach (var property in GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
-            {
-                var attribute = property.GetCustomAttribute<AppearanceChangeableAttribute>();
-                if (attribute != null)
-                {
-                    var subscriber = Appearance.Subscribe(value => {
-                        var color = attribute.GetValue(value);
-                        this[property.Name] = color;
-                    });
-                    property.SetValue(this, subscriber);
-                }
-            }
-
-            Appearance.ForceUpdateValue(ApplicationSetting.Setting.Appearance);
+            appearance = ApplicationSetting.Setting.Appearance;
+            Update();
         }
 
-        [AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
+        void Update()
+        {
+            foreach (var (key, attribute) in ColorKeys)
+            {
+                this[key] = attribute.GetValue(Appearance);
+            }
+        }
+
+        [AttributeUsage(AttributeTargets.Field, Inherited = false, AllowMultiple = false)]
         abstract class AppearanceChangeableAttribute : Attribute
         {
             public abstract object GetValue(double appearance);
         }
 
-        [AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
+        [AttributeUsage(AttributeTargets.Field, Inherited = false, AllowMultiple = false)]
         sealed class BrushColorRangeAttribute : AppearanceChangeableAttribute
         {
             public Color DarkColor { get; set; }
