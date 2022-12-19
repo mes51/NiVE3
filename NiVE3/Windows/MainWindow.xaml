@@ -8,10 +8,18 @@
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:a="clr-namespace:NiVE3.Wpf.Attach"
         xmlns:b="clr-namespace:NiVE3.Wpf.Behavior"
+        xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
         mc:Ignorable="d"
-        Title="{DynamicResource MainWindow_Title}" Height="450" Width="800"
+        Title="{gm:LanguageResource ResourceKey=MainWindow_Title}" Height="450" Width="800"
         a:ShortcutKeyBindingProperty.InputBinding="True">
-    <Grid Background="{DynamicResource BackgroundFill}">
+    <Grid Background="{gm:AppearanceResource ResourceKey=BackgroundFill}">
+        <Menu VerticalAlignment="Top">
+            <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_Menu_File}">
+                <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_Menu_OpenProject}"/>
+                <Separator />
+                <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_Menu_Exit}"/>
+            </MenuItem>
+        </Menu>
     </Grid>
     <i:Interaction.Behaviors>
         <b:WindowGestureBehavior />

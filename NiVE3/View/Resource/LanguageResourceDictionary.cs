@@ -5,15 +5,26 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using NiVE3.ResourceMarkupGenerator;
 
 namespace NiVE3.View.Resource
 {
+    [MarkupableResourceDictionary]
     class LanguageResourceDictionary : ResourceDictionary
     {
         static Dictionary<string, Tuple<string, Version>> LanguageKeys { get; }
 
-        [DefaultValue("NicoVisualEffects 3", FromVersion = "0.0.0.0")]
-        public static string MainWindow_Title = nameof(MainWindow_Title);
+        [ShowInMarkup, DefaultValue("NicoVisualEffects 3")]
+        public static readonly string MainWindow_Title = nameof(MainWindow_Title);
+
+        [ShowInMarkup, DefaultValue("ファイル(_F)")]
+        public static readonly string MainWindow_Menu_File = nameof(MainWindow_Menu_File);
+
+        [ShowInMarkup, DefaultValue("プロジェクトを開く(_O)")]
+        public static readonly string MainWindow_Menu_OpenProject = nameof(MainWindow_Menu_OpenProject);
+
+        [ShowInMarkup, DefaultValue("終了(_X)")]
+        public static readonly string MainWindow_Menu_Exit = nameof(MainWindow_Menu_Exit);
 
         static LanguageResourceDictionary()
         {

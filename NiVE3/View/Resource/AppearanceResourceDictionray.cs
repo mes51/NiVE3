@@ -8,16 +8,17 @@ using System.Windows.Media;
 using System.Windows;
 using NiVE3.Extension;
 using NiVE3.Config;
-using static ImTools.ImMap;
+using NiVE3.ResourceMarkupGenerator;
 
 namespace NiVE3.View.Resource
 {
+    [MarkupableResourceDictionary]
     class AppearanceResourceDictionary : ResourceDictionary
     {
         static Dictionary<string, AppearanceChangeableAttribute> ColorKeys { get; }
 
-        [BrushColorRange("#313131", "#FFFFFF")]
-        public static string BackgroundFill = nameof(BackgroundFill);
+        [ShowInMarkup, BrushColorRange("#313131", "#FFFFFF")]
+        public static readonly string BackgroundFill = nameof(BackgroundFill);
 
         double appearance = 0.0;
         public double Appearance
@@ -36,9 +37,9 @@ namespace NiVE3.View.Resource
         static AppearanceResourceDictionary()
         {
             ColorKeys = typeof(AppearanceResourceDictionary).GetFields(BindingFlags.Static | BindingFlags.Public)
-                .Select(f => (f.Name, f.GetCustomAttribute<AppearanceChangeableAttribute>()))
+                .Select(f => ((string)f.GetValue(null)!, f.GetCustomAttribute<AppearanceChangeableAttribute>()))
                 .Where(t => t.Item2 != null)
-                .ToDictionary(t => t.Name, t => t.Item2!);
+                .ToDictionary(t => t.Item1, t => t.Item2!);
         }
 
         public AppearanceResourceDictionary()
