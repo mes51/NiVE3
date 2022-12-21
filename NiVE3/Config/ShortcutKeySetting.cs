@@ -22,8 +22,8 @@ namespace NiVE3.Config
             new PropertyMetadata(new KeyGesture(Key.O, ModifierKeys.Control))
         );
 
-        public static readonly DependencyProperty ExitProperty = DependencyProperty.Register(
-            nameof(Exit),
+        public static readonly DependencyProperty ExitGestureProperty = DependencyProperty.Register(
+            nameof(ExitGesture),
             typeof(InputGesture),
             typeof(ShortcutKeySetting),
             new PropertyMetadata(new KeyGesture(Key.F4, ModifierKeys.Alt))
@@ -35,10 +35,10 @@ namespace NiVE3.Config
             set { SetValue(OpenProjectGestureProperty, value); }
         }
 
-        public InputGesture Exit
+        public InputGesture ExitGesture
         {
-            get { return (InputGesture)GetValue(ExitProperty); }
-            set { SetValue(ExitProperty, value); }
+            get { return (InputGesture)GetValue(ExitGestureProperty); }
+            set { SetValue(ExitGestureProperty, value); }
         }
 
         static ShortcutKeySetting()

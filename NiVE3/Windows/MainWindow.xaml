@@ -15,9 +15,9 @@
     <Grid Background="{gm:AppearanceResource ResourceKey=BackgroundFill}">
         <Menu VerticalAlignment="Top">
             <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_Menu_File}">
-                <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_Menu_OpenProject}"/>
+                <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_Menu_OpenProject}" a:MenuItemGestureBindingProperty.InputBinding="{Binding ElementName=OpenProjectGesture}"/>
                 <Separator />
-                <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_Menu_Exit}"/>
+                <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_Menu_Exit}" a:MenuItemGestureBindingProperty.InputBinding="{Binding ElementName=ExitGesture}"/>
             </MenuItem>
         </Menu>
     </Grid>
