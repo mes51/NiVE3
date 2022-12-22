@@ -43,7 +43,7 @@ namespace NiVE3.Wpf.Input
 
         public string GetDisplayStringForCulture(CultureInfo cultureInfo)
         {
-            return Converter.ConvertTo(null, cultureInfo, Key, typeof(string)) as string ?? "";
+            return (IsUseShift ? "Shift + " : "") + Converter.ConvertTo(null, cultureInfo, Key, typeof(string)) as string ?? "";
         }
     }
 }

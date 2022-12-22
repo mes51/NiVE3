@@ -24,5 +24,10 @@ namespace NiVE3.Windows
         {
             InitializeComponent();
         }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            NiVE3.Config.ShortcutKeySetting.Setting.Save();
+        }
     }
 }
