@@ -10,6 +10,7 @@
                 <r:AppearanceResourceDictionary x:Name="Appearance"/>
                 <r:LanguageResourceDictionary x:Name="Language"/>
                 <ResourceDictionary Source="/View/Resource/Theme.xaml"/>
+                <ResourceDictionary Source="/View/Resource/ViewSelectorTemplate.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </pr:PrismApplication.Resources>

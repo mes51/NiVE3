@@ -37,6 +37,13 @@ namespace NiVE3.Config
             new PropertyMetadata(new KeyGesture(Key.F4, ModifierKeys.Alt))
         );
 
+        public static readonly DependencyProperty OpenFileGestureProperty = DependencyProperty.Register(
+            nameof(OpenFileGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new KeyGesture(Key.O, ModifierKeys.Control | ModifierKeys.Shift))
+        );
+
         public InputGesture OpenProjectGesture
         {
             get { return (InputGesture)GetValue(OpenProjectGestureProperty); }
@@ -47,6 +54,12 @@ namespace NiVE3.Config
         {
             get { return (InputGesture)GetValue(ExitGestureProperty); }
             set { SetValue(ExitGestureProperty, value); }
+        }
+
+        public InputGesture OpenFileGesture
+        {
+            get { return (InputGesture)GetValue(OpenFileGestureProperty); }
+            set { SetValue(OpenFileGestureProperty, value); }
         }
 
         static ShortcutKeySetting()

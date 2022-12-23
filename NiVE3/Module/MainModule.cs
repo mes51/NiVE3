@@ -30,11 +30,13 @@ namespace NiVE3.Module
         public void OnInitialized(IContainerProvider containerProvider)
         {
             Application.Current.MainWindow.DataContext = Container.Resolve<MainWindowViewModel>();
+            ViewRegistry.RegisterViewWithRegion(MainWindowViewModel.RegionName, typeof(FootageViewModel));
         }
 
         public void RegisterTypes(IContainerRegistry containerRegistry)
         {
             Container.Register<MainWindowViewModel>(Reuse.Singleton, FactoryMethod.ConstructorWithResolvableArguments);
+            Container.Register<FootageViewModel>(Reuse.Transient, FactoryMethod.ConstructorWithResolvableArguments);
         }
     }
 }

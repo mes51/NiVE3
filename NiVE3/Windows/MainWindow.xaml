@@ -6,21 +6,47 @@
         xmlns:local="clr-namespace:NiVE3.Windows"
         xmlns:pr="http://prismlibrary.com/"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+        xmlns:ad="https://github.com/Dirkster99/AvalonDock"
+        xmlns:vd="clr-namespace:NiVE3.View.Dock"
+        xmlns:vm="clr-namespace:NiVE3.ViewModel"
         xmlns:a="clr-namespace:NiVE3.Wpf.Attach"
         xmlns:b="clr-namespace:NiVE3.Wpf.Behavior"
         xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
         mc:Ignorable="d"
+        x:Name="RootWindow"
         Closing="Window_Closing"
         Title="{gm:LanguageResource ResourceKey=MainWindow_Title}" Height="450" Width="800"
         a:ShortcutKeyBindingProperty.InputBinding="True">
+    <Window.Resources>
+        <vd:LayoutInitializer x:Key="LayoutInitializer" ViewModel="{Binding Source={x:Reference RootWindow}, Path=DataContext}"/>
+    </Window.Resources>
     <Grid Background="{gm:AppearanceResource ResourceKey=BackgroundFill}">
-        <Menu VerticalAlignment="Top">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <Menu Grid.Row="0" VerticalAlignment="Top">
             <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_Menu_File}">
                 <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_Menu_OpenProject}" a:MenuItemGestureBindingProperty.InputBinding="{Binding ElementName=OpenProjectGesture}"/>
                 <Separator />
                 <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_Menu_Exit}" a:MenuItemGestureBindingProperty.InputBinding="{Binding ElementName=ExitGesture}"/>
             </MenuItem>
         </Menu>
+
+        <ad:DockingManager x:Name="Manager"
+                           Grid.Row="1"
+                           pr:RegionManager.RegionName="{x:Static vm:MainWindowViewModel.RegionName}"
+                           LayoutUpdateStrategy="{StaticResource LayoutInitializer}">
+            <ad:LayoutRoot>
+                <ad:LayoutPanel x:Name="MainLayoutPanel_Vertical" Orientation="Vertical">
+                    <ad:LayoutPanel x:Name="MainLayoutPanel_Horizontal" Orientation="Horizontal">
+                        <ad:LayoutDocumentPaneGroup>
+                            <ad:LayoutDocumentPane />
+                        </ad:LayoutDocumentPaneGroup>
+                    </ad:LayoutPanel>
+                </ad:LayoutPanel>
+            </ad:LayoutRoot>
+        </ad:DockingManager>
     </Grid>
     <i:Interaction.Behaviors>
         <b:WindowGestureBehavior />
