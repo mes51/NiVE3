@@ -13,15 +13,20 @@ namespace NiVE3.ViewModel
 {
     [PaneLocation(PaneLocation.Left)]
     [CommandHandling(nameof(FootageViewModel.OpenFileCommand), nameof(ShortcutKeySetting.OpenFileGesture), IsGlobal = true)]
+    [CommandHandling(nameof(FootageViewModel.DeleteFootageCommand), nameof(ShortcutKeySetting.DeleteItemGesture))]
     class FootageViewModel : PaneViewModelBase
     {
         public ICommand OpenFileCommand { get; }
+
+        public ICommand DeleteFootageCommand { get; }
 
         public FootageViewModel()
         {
             Title = "フッテージ";
 
             OpenFileCommand = new DelegateCommand(() => System.Diagnostics.Debug.WriteLine("FootageViewModel.OpenFileCommand is not implemented"));
+
+            DeleteFootageCommand = new DelegateCommand(() => System.Diagnostics.Debug.WriteLine("FootageViewModel.DeleteFootageCommand is not implemented"));
         }
     }
 }

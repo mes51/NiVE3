@@ -19,6 +19,24 @@
         a:ShortcutKeyBindingProperty.InputBinding="True">
     <Window.Resources>
         <vd:LayoutInitializer x:Key="LayoutInitializer" ViewModel="{Binding Source={x:Reference RootWindow}, Path=DataContext}"/>
+
+        <Style x:Key="LayoutItemContainerStyleBase" TargetType="{x:Type ad:LayoutItem}">
+            <Setter Property="IsActive" Value="{Binding Model.IsActive, Mode=TwoWay}"/>
+            <Setter Property="IsSelected" Value="{Binding Model.IsSelected, Mode=TwoWay}"/>
+            <Setter Property="Title" Value="{Binding Model.Title}"/>
+            <Setter Property="ContentId" Value="{Binding Model.ContentId}"/>
+        </Style>
+        
+        <vd:LayoutItemContainerStyleSelector x:Key="LayoutItemContainerStyleSelector">
+            <vd:LayoutItemContainerStyle ViewModelType="{x:Type vm:FootageViewModel}">
+                <Style TargetType="{x:Type ad:LayoutAnchorableItem}" BasedOn="{StaticResource LayoutItemContainerStyleBase}">
+                    <Setter Property="Visibility" Value="{Binding Model.Visibility, Mode=TwoWay}"/>
+                </Style>
+            </vd:LayoutItemContainerStyle>
+            <vd:LayoutItemContainerStyle ViewModelType="{x:Type vm:PreviewViewModel}">
+                <Style TargetType="{x:Type ad:LayoutItem}" BasedOn="{StaticResource LayoutItemContainerStyleBase}" />
+            </vd:LayoutItemContainerStyle>
+        </vd:LayoutItemContainerStyleSelector>
     </Window.Resources>
     <Grid Background="{gm:AppearanceResource ResourceKey=BackgroundFill}">
         <Grid.RowDefinitions>
@@ -36,6 +54,7 @@
         <ad:DockingManager x:Name="Manager"
                            Grid.Row="1"
                            pr:RegionManager.RegionName="{x:Static vm:MainWindowViewModel.RegionName}"
+                           LayoutItemContainerStyleSelector="{StaticResource LayoutItemContainerStyleSelector}"
                            LayoutUpdateStrategy="{StaticResource LayoutInitializer}">
             <ad:LayoutRoot>
                 <ad:LayoutPanel x:Name="MainLayoutPanel_Vertical" Orientation="Vertical">

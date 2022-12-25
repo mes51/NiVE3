@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Threading;
 using System.Windows;
+using NiVE3.View.Command;
 
 namespace NiVE3.Wpf.Behavior
 {
@@ -55,33 +56,34 @@ namespace NiVE3.Wpf.Behavior
 
         ICommand? FindCommand(string gesture)
         {
-            // TODO: 各Paneを実装したら中身を書く
-            //var windows = FindAllWindow(AssociatedObject).ToArray();
-
-            return new Prism.Commands.DelegateCommand(() => System.Diagnostics.Debug.WriteLine("Exec Command: " + gesture));
-        }
-
-        IEnumerable<Window> FindAllWindow(Window window)
-        {
-            if (window.Owner != null)
+            var mainWindowViewModel = (((MainWindow)Application.Current.MainWindow).DataContext as MainWindowViewModel);
+            if (mainWindowViewModel == null)
             {
-                return FindAllWindow(window.Owner);
+                return null;
             }
 
-            var list = new List<Window>();
-            var queue = new Queue<Window>();
-            queue.Enqueue(window);
-            while (queue.Count > 0)
+            var activeViewModel = mainWindowViewModel.ViewModels
+                .OfType<PaneViewModelBase>()
+                .FirstOrDefault(vm => vm.IsActive && vm.IsSelected);
+            if (activeViewModel != null)
             {
-                var w = queue.Dequeue();
-                list.Add(w);
-                foreach (var child in w.OwnedWindows.OfType<Window>())
+                var command = CommandHandlingAttribute.GetCommand(activeViewModel, gesture, false);
+                if (command != null)
                 {
-                    queue.Enqueue(child);
+                    return command;
                 }
             }
 
-            return list;
+            var globalCommand = mainWindowViewModel.ViewModels
+                .OfType<PaneViewModelBase>()
+                .Select(vm => CommandHandlingAttribute.GetCommand(vm, gesture, true))
+                .FirstOrDefault(c => c != null);
+            if (globalCommand != null)
+            {
+                return globalCommand;
+            }
+
+            return CommandHandlingAttribute.GetCommand(mainWindowViewModel, gesture, false);
         }
 
         private void GestureCommand_PreviewCanExecute(object sender, CanExecuteRoutedEventArgs e)

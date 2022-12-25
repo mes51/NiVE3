@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using Prism.Mvvm;
 
 namespace NiVE3.ViewModel
@@ -30,6 +31,13 @@ namespace NiVE3.ViewModel
         {
             get { return isSelected; }
             set { SetProperty(ref isSelected, value); }
+        }
+
+        private Visibility visibility;
+        public Visibility Visibility
+        {
+            get { return visibility; }
+            set { SetProperty(ref visibility, value); }
         }
     }
 }

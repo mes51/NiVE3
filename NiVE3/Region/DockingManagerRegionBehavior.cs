@@ -9,7 +9,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using NiVE3.ViewModel;
+using NiVE3.View.Dock;
+using System.Reflection;
 
 namespace NiVE3.Region
 {
@@ -50,7 +51,7 @@ namespace NiVE3.Region
                 var item = e.NewItems?[0];
                 if (item != null)
                 {
-                    if (item.GetType().GetCustomAttributes(typeof(DocumentViewModelAttribute), true)?.Length > 0)
+                    if (item.GetType().GetCustomAttribute<PaneLocationAttribute>()?.Layout == PaneLocation.Document)
                     {
                         Application.Current.Dispatcher.Invoke(() =>
                         {
@@ -72,7 +73,7 @@ namespace NiVE3.Region
                 var item = e.OldItems?[0];
                 if (item != null)
                 {
-                    if (item.GetType().GetCustomAttributes(typeof(DocumentViewModelAttribute), true)?.Length > 0)
+                    if (item.GetType().GetCustomAttribute<PaneLocationAttribute>()?.Layout == PaneLocation.Document)
                     {
                         Application.Current.Dispatcher.Invoke(() =>
                         {

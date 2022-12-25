@@ -31,12 +31,8 @@ namespace NiVE3.View.Dock
 
         public void AfterInsertAnchorable(LayoutRoot layout, LayoutAnchorable anchorableShown)
         {
-            anchorableShown.CanClose = true;
-            if (anchorableShown.Content is PaneViewModelBase vm)
-            {
-                anchorableShown.ContentId = vm.ContentId;
-                anchorableShown.Title = vm.Title;
-            }
+            // TODO: コンポジションの時だけ消す?
+            //anchorableShown.CanClose = true;
 
             EventHandler? closed = null;
             closed = (object? sender, EventArgs e) =>
@@ -50,11 +46,6 @@ namespace NiVE3.View.Dock
 
         public void AfterInsertDocument(LayoutRoot layout, LayoutDocument anchorableShown)
         {
-            if (anchorableShown.Content is PaneViewModelBase vm)
-            {
-                anchorableShown.ContentId = vm.ContentId;
-                anchorableShown.Title = vm.Title;
-            }
         }
 
         public bool BeforeInsertAnchorable(LayoutRoot layout, LayoutAnchorable anchorableToShow, ILayoutContainer destinationContainer)
@@ -87,9 +78,17 @@ namespace NiVE3.View.Dock
         LayoutAnchorablePane CreateAnchorablePane(LayoutRoot layout, PaneLocation location)
         {
             var orientation = location == PaneLocation.Top || location == PaneLocation.Bottom ? Orientation.Vertical : Orientation.Horizontal;
-            //var parent = layout.Descendents().OfType<LayoutPanel>().First(p => p.Orientation == orientation);
             var parent = (LayoutPanel)layout.Manager.FindName(PanelNamePrefix + orientation.ToString());
             var pane = new LayoutAnchorablePane { Name = location.ToString() };
+
+            if (location == PaneLocation.Top || location == PaneLocation.Bottom)
+            {
+                pane.DockHeight = new GridLength(100.0);
+            }
+            else
+            {
+                pane.DockWidth = new GridLength(100.0);
+            }
 
             if (location == PaneLocation.Top || location == PaneLocation.Left)
             {

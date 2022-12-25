@@ -17,6 +17,6 @@ namespace NiVE3.Config
 
         private ApplicationSetting() { }
 
-        public double Appearance { get; set; }
+        public double Appearance { get; set; } = 1.0;
     }
 }

@@ -44,6 +44,13 @@ namespace NiVE3.Config
             new PropertyMetadata(new KeyGesture(Key.O, ModifierKeys.Control | ModifierKeys.Shift))
         );
 
+        public static readonly DependencyProperty DeleteItemGestureProperty = DependencyProperty.Register(
+            nameof(DeleteItemGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new FrameworkPropertyMetadata(new SingleKeyGesture(Key.Delete), FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsRender)
+        );
+
         public InputGesture OpenProjectGesture
         {
             get { return (InputGesture)GetValue(OpenProjectGestureProperty); }
@@ -60,6 +67,12 @@ namespace NiVE3.Config
         {
             get { return (InputGesture)GetValue(OpenFileGestureProperty); }
             set { SetValue(OpenFileGestureProperty, value); }
+        }
+
+        public InputGesture DeleteItemGesture
+        {
+            get { return (InputGesture)GetValue(DeleteItemGestureProperty); }
+            set { SetValue(DeleteItemGestureProperty, value); }
         }
 
         static ShortcutKeySetting()

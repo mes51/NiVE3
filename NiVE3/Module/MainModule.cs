@@ -31,12 +31,14 @@ namespace NiVE3.Module
         {
             Application.Current.MainWindow.DataContext = Container.Resolve<MainWindowViewModel>();
             ViewRegistry.RegisterViewWithRegion(MainWindowViewModel.RegionName, typeof(FootageViewModel));
+            ViewRegistry.RegisterViewWithRegion(MainWindowViewModel.RegionName, typeof(PreviewViewModel));
         }
 
         public void RegisterTypes(IContainerRegistry containerRegistry)
         {
             Container.Register<MainWindowViewModel>(Reuse.Singleton, FactoryMethod.ConstructorWithResolvableArguments);
             Container.Register<FootageViewModel>(Reuse.Transient, FactoryMethod.ConstructorWithResolvableArguments);
+            Container.Register<PreviewViewModel>(Reuse.Transient, FactoryMethod.ConstructorWithResolvableArguments);
         }
     }
 }
