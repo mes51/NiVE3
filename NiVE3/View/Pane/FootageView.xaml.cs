@@ -13,14 +13,14 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace NiVE3.View
+namespace NiVE3.View.Pane
 {
     /// <summary>
-    /// PreviewView.xaml の相互作用ロジック
+    /// FootageView.xaml の相互作用ロジック
     /// </summary>
-    public partial class PreviewView : UserControl
+    public partial class FootageView : UserControl
     {
-        public PreviewView()
+        public FootageView()
         {
             InitializeComponent();
         }

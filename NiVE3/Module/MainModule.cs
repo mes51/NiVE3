@@ -1,4 +1,5 @@
 ﻿using DryIoc;
+using NiVE3.Model;
 using NiVE3.ViewModel;
 using Prism.Ioc;
 using Prism.Modularity;
@@ -30,15 +31,18 @@ namespace NiVE3.Module
         public void OnInitialized(IContainerProvider containerProvider)
         {
             Application.Current.MainWindow.DataContext = Container.Resolve<MainWindowViewModel>();
-            ViewRegistry.RegisterViewWithRegion(MainWindowViewModel.RegionName, typeof(FootageViewModel));
-            ViewRegistry.RegisterViewWithRegion(MainWindowViewModel.RegionName, typeof(PreviewViewModel));
+            ViewRegistry.RegisterViewWithRegion(MainWindowViewModel.RegionName, typeof(FootageListViewModel));
         }
 
         public void RegisterTypes(IContainerRegistry containerRegistry)
         {
+            Container.Register<FootageListModel>(Reuse.Singleton, FactoryMethod.ConstructorWithResolvableArguments);
+            Container.Register<ProjectModel>(Reuse.Singleton, FactoryMethod.ConstructorWithResolvableArguments);
+
             Container.Register<MainWindowViewModel>(Reuse.Singleton, FactoryMethod.ConstructorWithResolvableArguments);
-            Container.Register<FootageViewModel>(Reuse.Transient, FactoryMethod.ConstructorWithResolvableArguments);
+            Container.Register<FootageListViewModel>(Reuse.Singleton, FactoryMethod.ConstructorWithResolvableArguments);
             Container.Register<PreviewViewModel>(Reuse.Transient, FactoryMethod.ConstructorWithResolvableArguments);
+            Container.Register<TimelineViewModel>(Reuse.Transient, FactoryMethod.ConstructorWithResolvableArguments);
         }
     }
 }

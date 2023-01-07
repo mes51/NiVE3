@@ -15,7 +15,7 @@
         mc:Ignorable="d"
         x:Name="RootWindow"
         Closing="Window_Closing"
-        Title="{gm:LanguageResource ResourceKey=MainWindow_Title}" Height="450" Width="800"
+        Title="{gm:LanguageResource ResourceKey=MainWindow_Title}" Height="800" Width="1600"
         a:ShortcutKeyBindingProperty.InputBinding="True">
     <Window.Resources>
         <vd:LayoutInitializer x:Key="LayoutInitializer" ViewModel="{Binding Source={x:Reference RootWindow}, Path=DataContext}"/>
@@ -28,13 +28,19 @@
         </Style>
         
         <vd:LayoutItemContainerStyleSelector x:Key="LayoutItemContainerStyleSelector">
-            <vd:LayoutItemContainerStyle ViewModelType="{x:Type vm:FootageViewModel}">
+            <vd:LayoutItemContainerStyle ViewModelType="{x:Type vm:FootageListViewModel}">
                 <Style TargetType="{x:Type ad:LayoutAnchorableItem}" BasedOn="{StaticResource LayoutItemContainerStyleBase}">
                     <Setter Property="Visibility" Value="{Binding Model.Visibility, Mode=TwoWay}"/>
                 </Style>
             </vd:LayoutItemContainerStyle>
             <vd:LayoutItemContainerStyle ViewModelType="{x:Type vm:PreviewViewModel}">
                 <Style TargetType="{x:Type ad:LayoutItem}" BasedOn="{StaticResource LayoutItemContainerStyleBase}" />
+            </vd:LayoutItemContainerStyle>
+            <vd:LayoutItemContainerStyle ViewModelType="{x:Type vm:TimelineViewModel}">
+                <Style TargetType="{x:Type ad:LayoutAnchorableItem}" BasedOn="{StaticResource LayoutItemContainerStyleBase}">
+                    <Setter Property="Visibility" Value="{Binding Model.Visibility, Mode=TwoWay}"/>
+                    <Setter Property="CanClose" Value="True"/>
+                </Style>
             </vd:LayoutItemContainerStyle>
         </vd:LayoutItemContainerStyleSelector>
     </Window.Resources>

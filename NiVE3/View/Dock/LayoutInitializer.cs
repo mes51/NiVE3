@@ -18,26 +18,23 @@ namespace NiVE3.View.Dock
 
         public static readonly DependencyProperty ViewModelProperty = DependencyProperty.Register(
             nameof(ViewModel),
-            typeof(object),
+            typeof(MainWindowViewModel),
             typeof(LayoutInitializer),
             new PropertyMetadata(null)
         );
 
-        public object? ViewModel
+        public MainWindowViewModel? ViewModel
         {
-            get { return (object)GetValue(ViewModelProperty); }
+            get { return (MainWindowViewModel)GetValue(ViewModelProperty); }
             set { SetValue(ViewModelProperty, value); }
         }
 
         public void AfterInsertAnchorable(LayoutRoot layout, LayoutAnchorable anchorableShown)
         {
-            // TODO: コンポジションの時だけ消す?
-            //anchorableShown.CanClose = true;
-
             EventHandler? closed = null;
             closed = (object? sender, EventArgs e) =>
             {
-                // TODO: Remove ViewModel from Region
+                ViewModel?.RemoveViewModelCommand?.Execute(anchorableShown.Content);
                 anchorableShown.Closed -= closed;
             };
 
