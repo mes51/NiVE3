@@ -9,6 +9,7 @@ using System.Windows;
 using System.Windows.Input;
 using NiVE3.Data.Config;
 using NiVE3.Extension;
+using NiVE3.Util;
 using NiVE3.Wpf.Input;
 using SpanJson;
 using SpanJson.Resolvers;
@@ -17,7 +18,7 @@ namespace NiVE3.Config
 {
     class ShortcutKeySetting : DependencyObject
     {
-        static readonly string FilePath = Path.Combine(SettingPath.ConfigDirectory, "shortcut_keys.json");
+        static readonly string FilePath = Path.Combine(Paths.ConfigDirectory, "shortcut_keys.json");
 
         public static ShortcutKeySetting Setting { get; }
 

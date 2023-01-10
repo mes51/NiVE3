@@ -6,19 +6,23 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NiVE3.Config
+namespace NiVE3.Util
 {
-    public static class SettingPath
+    // TODO: 名前空間はここで良いのか?
+    public static class Paths
     {
         public static readonly string ExecutionFileDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "";
 
+        public static readonly string PluginDirectory = Path.Combine(ExecutionFileDirectory, "Plugins");
+
         public static readonly string ConfigDirectory = Path.Combine(ExecutionFileDirectory, "Config");
 
-        static SettingPath()
+        static Paths()
         {
             try
             {
-                Directory.CreateDirectory(SettingPath.ConfigDirectory);
+                Directory.CreateDirectory(ConfigDirectory);
+                Directory.CreateDirectory(PluginDirectory);
             }
             catch { }
         }
