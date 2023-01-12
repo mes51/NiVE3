@@ -11,4 +11,7 @@
     <DataTemplate DataType="{x:Type vm:TimelineViewModel}">
         <v:TimelineView />
     </DataTemplate>
+    <DataTemplate DataType="{x:Type vm:EffectListViewModel}">
+        <v:EffectListView />
+    </DataTemplate>
 </ResourceDictionary>

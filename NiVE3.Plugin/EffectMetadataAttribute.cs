@@ -37,6 +37,11 @@ namespace NiVE3.Plugin
         /// この値は全てのエフェクトの中で一意で或必要があります
         /// </summary>
         public string EffectUuid { get; }
+
+        /// <summary>
+        /// 何もしないエフェクトであることを表します
+        /// </summary>
+        public bool IsDummyEffect { get; }
     }
 
     /// <summary>
@@ -55,6 +60,8 @@ namespace NiVE3.Plugin
         public string Category { get; }
 
         public string EffectUuid { get; }
+
+        public bool IsDummyEffect { get; set; } = false;
 
         /// <summary>
         /// コンストラクタ
