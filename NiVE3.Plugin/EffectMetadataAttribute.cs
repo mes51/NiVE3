@@ -15,33 +15,33 @@ namespace NiVE3.Plugin
         /// <summary>
         /// エフェクトの表示名
         /// </summary>
-        public string Name { get; }
+        string Name { get; }
 
         /// <summary>
         /// エフェクトの作成者
         /// </summary>
-        public string Author { get; }
+        string Author { get; }
 
         /// <summary>
         /// エフェクトのカテゴリ
         /// </summary>
-        public string Category { get; }
+        string Category { get; }
 
         /// <summary>
         /// エフェクトの概要
         /// </summary>
-        public string Description { get; }
+        string Description { get; }
 
         /// <summary>
         /// エフェクトの識別のためのGuid
         /// この値は全てのエフェクトの中で一意で或必要があります
         /// </summary>
-        public string EffectUuid { get; }
+        string EffectUuid { get; }
 
         /// <summary>
         /// 何もしないエフェクトであることを表します
         /// </summary>
-        public bool IsDummyEffect { get; }
+        bool IsDummyEffect { get; }
     }
 
     /// <summary>
