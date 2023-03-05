@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Plugin;
+using NiVE3.Plugin.Attributes;
+using NiVE3.Plugin.Interfaces;
 
 namespace NiVE3.PresetPlugin.Effect.ExpressionControl
 {

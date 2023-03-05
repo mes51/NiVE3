@@ -6,7 +6,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Model;
-using NiVE3.Plugin;
+using NiVE3.Plugin.Attributes;
+using NiVE3.Plugin.Interfaces;
 
 namespace NiVE3.Test.Model
 {

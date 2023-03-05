@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NiVE3.Plugin
+namespace NiVE3.Plugin.Attributes
 {
     /// <summary>
     /// エフェクトの概要

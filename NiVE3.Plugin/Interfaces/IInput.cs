@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using NiVE3.Plugin.Image;
 
-namespace NiVE3.Plugin
+namespace NiVE3.Plugin.Interfaces
 {
     /// <summary>
     /// 入力プラグインを表すインターフェース
