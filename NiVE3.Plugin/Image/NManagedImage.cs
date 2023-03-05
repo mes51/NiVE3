@@ -18,15 +18,19 @@ namespace NiVE3.Plugin.Image
         public float[] Data { get; }
 
         /// <summary>
-        /// NManagedImageの新しいインスタンスを生成します
+        /// NManagedImageの新しいインスタンスを生成します。配列はArrayPoolから取得します
         /// </summary>
         /// <param name="width">画像の幅</param>
         /// <param name="height">画像の高さ</param>
-        public NManagedImage(int width, int height) : base(width, height)
+        /// <param name="needClear">ArrayPoolから取得した配列の0クリアが必要かどうか</param>
+        public NManagedImage(int width, int height, bool needClear = true) : base(width, height)
         {
             var length = width * height * 4;
             Data = ArrayPool<float>.Shared.Rent(length);
-            Data.AsSpan(0, length).Fill(0.0F);
+            if (needClear)
+            {
+                Data.AsSpan().Fill(0.0F);
+            }
         }
 
         /// <summary>

@@ -48,10 +48,15 @@ namespace NiVE3.Plugin.Image
         /// CPU側にコピーした画像データを取得します
         /// </summary>
         /// <param name="rentFromArrayPool">配列をArrayPoolから取得するかどうか</param>
+        /// <param name="needClear">ArrayPoolから取得した配列の0クリアが必要かどうか</param>
         /// <returns>取得した画像データ</returns>
-        public float[] GetData(bool rentFromArrayPool)
+        public float[] GetData(bool rentFromArrayPool, bool needClear = false)
         {
             var result = rentFromArrayPool ? ArrayPool<float>.Shared.Rent(DataLength) : new float[DataLength];
+            if (rentFromArrayPool && needClear)
+            {
+                result.AsSpan().Fill(0.0F);
+            }
             var handle = GCHandle.Alloc(result, GCHandleType.Pinned);
 
             using (var cpuBuffer = CPUMemoryBuffer.Create(Accelerator, handle.AddrOfPinnedObject(), DataLength, sizeof(float)))
@@ -67,10 +72,11 @@ namespace NiVE3.Plugin.Image
         /// <summary>
         /// 画像データをCPU側にコピーしたNImageを新たに生成します
         /// </summary>
+        /// <param name="needClear">ArrayPoolから取得した配列の0クリアが必要かどうか</param>
         /// <returns>生成されたNImage</returns>
-        public NImage CopyToCpu()
+        public NImage CopyToCpu(bool needClear = false)
         {
-            var result = new NManagedImage(Width, Height);
+            var result = new NManagedImage(Width, Height, needClear);
             var handle = GCHandle.Alloc(result.Data, GCHandleType.Pinned);
 
             using (var cpuBuffer = CPUMemoryBuffer.Create(Accelerator, handle.AddrOfPinnedObject(), result.DataLength, sizeof(float)))
