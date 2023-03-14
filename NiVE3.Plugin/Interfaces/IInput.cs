@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using ILGPU.Runtime;
 using NiVE3.Plugin.Image;
 
 namespace NiVE3.Plugin.Interfaces
@@ -45,6 +46,7 @@ namespace NiVE3.Plugin.Interfaces
         /// <param name="time">読み込むタイミングの時間</param>
         /// <param name="toGpu">GPU上に直接読み込む場合はtrue、CPU上に読み込む場合はfalse</param>
         /// <returns>読み込んだ画像を表すNImage</returns>
+        // TODO: Acceleratorをラップしたものを渡す
         NImage Read(double time, bool toGpu);
 
         /// <summary>
