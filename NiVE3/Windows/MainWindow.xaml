@@ -16,7 +16,8 @@
         x:Name="RootWindow"
         Closing="Window_Closing"
         Title="{gm:LanguageResource ResourceKey=MainWindow_Title}" Height="800" Width="1600"
-        a:ShortcutKeyBindingProperty.InputBinding="True">
+        a:ShortcutKeyBindingProperty.InputBinding="True"
+        pr:ViewModelLocator.AutoWireViewModel="False">
     <Window.Resources>
         <vd:LayoutInitializer x:Key="LayoutInitializer" ViewModel="{Binding Source={x:Reference RootWindow}, Path=DataContext}"/>
 
