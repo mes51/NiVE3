@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace NiVE3.ResourceMarkupGenerator
+namespace NiVE3.SourceGenerator.ResourceMarkupGenerator
 {
     class DiagnosticDescriptors
     {

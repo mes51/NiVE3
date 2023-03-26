@@ -8,7 +8,7 @@ using System.Windows.Media;
 using System.Windows;
 using NiVE3.Extension;
 using NiVE3.Config;
-using NiVE3.ResourceMarkupGenerator;
+using NiVE3.SourceGenerator.ResourceMarkupGenerator;
 
 namespace NiVE3.View.Resource
 {

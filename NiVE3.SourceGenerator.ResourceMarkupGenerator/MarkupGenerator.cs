@@ -6,12 +6,14 @@ using System.Text;
 
 // SEE: https://neue.cc/2022/12/16_IncrementalSourceGenerator.html
 
-namespace NiVE3.ResourceMarkupGenerator
+namespace NiVE3.SourceGenerator.ResourceMarkupGenerator
 {
     [Generator(LanguageNames.CSharp)]
     public partial class MarkupGenerator : IIncrementalGenerator
     {
-        const string ShowInMarkupFullName = "NiVE3.ResourceMarkupGenerator.ShowInMarkupAttribute";
+        static readonly string Namespace = typeof(MarkupGenerator).Namespace;
+
+        static readonly string ShowInMarkupFullName = Namespace + ".ShowInMarkupAttribute";
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
@@ -19,8 +21,7 @@ namespace NiVE3.ResourceMarkupGenerator
             {
                 context.CancellationToken.ThrowIfCancellationRequested();
 
-                context.AddSource("MarkupableResourceDictionaryAttribute", """
-namespace NiVE3.ResourceMarkupGenerator;
+                context.AddSource("MarkupableResourceDictionaryAttribute", $"namespace {Namespace};" + """
 
 using System;
 
@@ -30,8 +31,7 @@ sealed class MarkupableResourceDictionaryAttribute : Attribute { }
 
                 context.CancellationToken.ThrowIfCancellationRequested();
 
-                context.AddSource("ShowInMarkupAttribute", """
-namespace NiVE3.ResourceMarkupGenerator;
+                context.AddSource("ShowInMarkupAttribute", $"namespace {Namespace};" + """
 
 using System;
 
@@ -41,7 +41,7 @@ sealed class ShowInMarkupAttribute : Attribute { }
             });
 
             var typeDefinitions = context.SyntaxProvider.ForAttributeWithMetadataName(
-                "NiVE3.ResourceMarkupGenerator.MarkupableResourceDictionaryAttribute",
+                $"{Namespace}.MarkupableResourceDictionaryAttribute",
                 static (node, token) => node is ClassDeclarationSyntax,
                 static (context, token) => (TypeDeclarationSyntax)context.TargetNode
             );

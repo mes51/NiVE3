@@ -17,10 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\NiVE3.Plugin\NiVE3.Plugin.csproj" />
-    <ProjectReference Include="..\NiVE3.ResourceMarkupGenerator\NiVE3.ResourceMarkupGenerator.csproj">
-      <ReferenceOutputAssembly>False</ReferenceOutputAssembly>
-      <OutputItemType>Analyzer</OutputItemType>
-    </ProjectReference>
+    <ProjectReference Include="..\NiVE3.SourceGenerator.ResourceMarkupGenerator\NiVE3.SourceGenerator.ResourceMarkupGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
   </ItemGroup>
 
 </Project>

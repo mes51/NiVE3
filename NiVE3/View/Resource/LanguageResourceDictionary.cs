@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using NiVE3.ResourceMarkupGenerator;
+using NiVE3.SourceGenerator.ResourceMarkupGenerator;
 
 namespace NiVE3.View.Resource
 {
