@@ -13,7 +13,7 @@ namespace NiVE3.SourceGenerator.ResourceMarkupGenerator
     {
         static readonly string Namespace = typeof(MarkupGenerator).Namespace;
 
-        static readonly string ShowInMarkupFullName = Namespace + ".ShowInMarkupAttribute";
+        static readonly string ShowInMarkupFullName = $"{Namespace}.ShowInMarkupAttribute";
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
