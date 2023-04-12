@@ -27,6 +27,8 @@ namespace NiVE3.Test.Model
 
         public double FrameRate => throw new NotImplementedException();
 
+        public double Duration => throw new NotImplementedException();
+
         public int Width => throw new NotImplementedException();
 
         public int Height => throw new NotImplementedException();

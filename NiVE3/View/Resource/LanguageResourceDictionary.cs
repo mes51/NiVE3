@@ -26,6 +26,27 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("終了(_X)")]
         public static readonly string MainWindow_Menu_Exit = nameof(MainWindow_Menu_Exit);
 
+        [ShowInMarkup, DefaultValue("名前")]
+        public static readonly string FootageListView_FootageName = nameof(FootageListView_FootageName);
+
+        [ShowInMarkup, DefaultValue("サイズ")]
+        public static readonly string FootageListView_FootageSize = nameof(FootageListView_FootageSize);
+
+        [ShowInMarkup, DefaultValue("フレームレート")]
+        public static readonly string FootageListView_FootageFrameRate = nameof(FootageListView_FootageFrameRate);
+
+        [ShowInMarkup, DefaultValue("デュレーション")]
+        public static readonly string FootageListView_FootageDuration = nameof(FootageListView_FootageDuration);
+
+        [ShowInMarkup, DefaultValue("ファイルパス")]
+        public static readonly string FootageListView_FootageFilePath = nameof(FootageListView_FootageFilePath);
+
+        [ShowInMarkup, DefaultValue("拡張子")]
+        public static readonly string FootageListView_FootageFileExtension = nameof(FootageListView_FootageFileExtension);
+
+        [ShowInMarkup, DefaultValue("コメント")]
+        public static readonly string FootageListView_FootageFileComment = nameof(FootageListView_FootageFileComment);
+
         static LanguageResourceDictionary()
         {
             LanguageKeys = typeof(LanguageResourceDictionary).GetFields(BindingFlags.Static | BindingFlags.Public)

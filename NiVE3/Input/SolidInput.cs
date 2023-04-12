@@ -21,9 +21,11 @@ namespace NiVE3.Input
     {
         const string ID = "08FE7B2F-4FC5-419B-8CE0-A9262348D630";
 
-        public string FilePath => "";
+        public string FilePath => "平面";
 
         public double FrameRate => 0.0;
+
+        public double Duration => 0.0;
 
         public int Width { get; private set; }
 

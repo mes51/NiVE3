@@ -14,6 +14,8 @@ namespace NiVE3.View.Dock
     // SEE: https://qiita.com/ugaya40/items/58e9e3c3340cc1f61b4f
     class LayoutInitializer : Freezable, ILayoutUpdateStrategy
     {
+        const int InitialSidePaneSize = 200;
+
         public static readonly string PanelNamePrefix = "MainLayoutPanel_";
 
         public static readonly DependencyProperty ViewModelProperty = DependencyProperty.Register(
@@ -80,11 +82,11 @@ namespace NiVE3.View.Dock
 
             if (location == PaneLocation.Top || location == PaneLocation.Bottom)
             {
-                pane.DockHeight = new GridLength(100.0);
+                pane.DockHeight = new GridLength(InitialSidePaneSize);
             }
             else
             {
-                pane.DockWidth = new GridLength(100.0);
+                pane.DockWidth = new GridLength(InitialSidePaneSize);
             }
 
             if (location == PaneLocation.Top || location == PaneLocation.Left)

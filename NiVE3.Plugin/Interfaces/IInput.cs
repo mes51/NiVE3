@@ -35,6 +35,11 @@ namespace NiVE3.Plugin.Interfaces
         int Height { get; }
 
         /// <summary>
+        /// 読み込んだファイルの長さ
+        /// </summary>
+        double Duration { get; }
+
+        /// <summary>
         /// ファイルを読み込みます
         /// </summary>
         /// <param name="filePath">読み込むファイルのパス</param>

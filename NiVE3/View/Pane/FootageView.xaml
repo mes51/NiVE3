@@ -4,9 +4,39 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:NiVE3.View.Pane"
-             mc:Ignorable="d" 
+             xmlns:cv="clr-namespace:NiVE3.View.Converter"
+        xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
+             mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <cv:WidthHeightToStringConverter x:Key="WidthHeightToStringConverter"/>
+    </UserControl.Resources>
     <Grid>
-        <TextBlock Text="フッテージ一覧"/>
+        <DataGrid x:Name="FootageDataGrid"
+                  AutoGenerateColumns="False"
+                  CanUserAddRows="False"
+                  CanUserDeleteRows="False"
+                  CanUserReorderColumns="False"
+                  CanUserResizeColumns="True"
+                  CanUserResizeRows="False"
+                  CanUserSortColumns="False"
+                  ItemsSource="{Binding Footages}">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageName}" Binding="{Binding Name}" Width="100"/>
+                <DataGridTextColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageFileExtension}" Binding="{Binding FileExtension, Mode=OneWay}" Width="50"/>
+                <DataGridTextColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageSize}" Width="100">
+                    <DataGridTextColumn.Binding>
+                        <MultiBinding Mode="OneWay" Converter="{StaticResource WidthHeightToStringConverter}">
+                            <Binding Path="Width"/>
+                            <Binding Path="Height"/>
+                        </MultiBinding>
+                    </DataGridTextColumn.Binding>
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageFrameRate}" Binding="{Binding FrameRate, Mode=OneWay}" Width="100"/>
+                <DataGridTextColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageDuration}" Binding="{Binding Duration, Mode=OneWay}" Width="100"/>
+                <DataGridTextColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageFileComment}" Binding="{Binding Comment}" Width="100"/>
+                <DataGridTextColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageFilePath}" Binding="{Binding FilePath, Mode=OneWay}" Width="100"/>
+            </DataGrid.Columns>
+        </DataGrid>
     </Grid>
 </UserControl>

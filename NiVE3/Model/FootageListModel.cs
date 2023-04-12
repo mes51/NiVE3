@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
 using System.Linq;
@@ -20,6 +21,13 @@ namespace NiVE3.Model
         [ImportMany]
         List<ExportFactory<IInput, IInputMetadata>>? Inputs { get; set; }
 
+        private ObservableCollection<FootageModel> footages = new ObservableCollection<FootageModel>();
+        public ObservableCollection<FootageModel> Footages
+        {
+            get { return footages; }
+            set{ SetProperty(ref footages, value); }
+        }
+
         public FootageListModel()
         {
             var pluginCatalog = new DirectoryCatalog(Paths.PluginDirectory);
@@ -36,6 +44,11 @@ namespace NiVE3.Model
             {
                 InputMetadatas = new List<IInputMetadata>();
             }
+
+            // for test
+            var testInput = new Input.SolidInput();
+            testInput.Load("");
+            Footages.Add(new FootageModel(testInput));
         }
     }
 }
