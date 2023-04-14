@@ -7,12 +7,13 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ImTools;
 
 namespace NiVE3.Mvvm
 {
-    class ObservableCollectionView<T, TView> : IList, IList<TView>, INotifyCollectionChanged, INotifyPropertyChanged, IDisposable
+    partial class ObservableCollectionView<T, TView> : IList, IList<TView>, INotifyCollectionChanged, INotifyPropertyChanged
     {
+        static readonly object SyncObj = new object();
+
         const string IndexerName = "Item[]";
 
         public event NotifyCollectionChangedEventHandler? CollectionChanged;
@@ -20,8 +21,6 @@ namespace NiVE3.Mvvm
         public event PropertyChangedEventHandler? PropertyChanged;
 
         public event EventHandler<NotifyCollectionViewChangedEventArgs<T, TView>>? ViewsCollectionChanged;
-
-        ObservableCollection<T> Models { get; }
 
         Func<T, TView> Transform { get; }
 
@@ -33,11 +32,11 @@ namespace NiVE3.Mvvm
 
         public bool IsReadOnly => false;
 
-        public bool IsFixedSize => throw new NotImplementedException();
+        public bool IsFixedSize => false;
 
-        public bool IsSynchronized => throw new NotImplementedException();
+        public bool IsSynchronized => false;
 
-        public object SyncRoot => throw new NotImplementedException();
+        public object SyncRoot => SyncObj;
 
         object? IList.this[int index]
         {
@@ -53,10 +52,9 @@ namespace NiVE3.Mvvm
 
         public ObservableCollectionView(ObservableCollection<T> models, Func<T, TView> transform)
         {
-            Models = models;
             Transform = transform;
-            Views = Models.Select<T, (T Model, TView View)>(m => (m, transform(m))).ToList();
-            models.CollectionChanged += Models_CollectionChanged;
+            Views = models.Select<T, (T Model, TView View)>(m => (m, transform(m))).ToList();
+            BindCollectionChanged(models);
         }
 
         public int IndexOf(TView item)
@@ -176,6 +174,8 @@ namespace NiVE3.Mvvm
             return Views.Select(t => t.View).GetEnumerator();
         }
 
+        partial void BindCollectionChanged(ObservableCollection<T> models);
+
         void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
@@ -191,116 +191,6 @@ namespace NiVE3.Mvvm
         {
             ViewsCollectionChanged?.Invoke(this, new NotifyCollectionViewChangedEventArgs<T, TView>(NotifyCollectionChangedAction.Reset));
             CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
-        }
-
-        private void Models_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
-        {
-            switch (e.Action)
-            {
-                case NotifyCollectionChangedAction.Reset:
-                    Clear();
-                    break;
-                case NotifyCollectionChangedAction.Move:
-                    {
-                        var models = e.NewItems ?? e.OldItems;
-                        if (models == null)
-                        {
-                            throw new InvalidOperationException(nameof(e));
-                        }
-                        var items = Views.Where(t => models.Contains(t.Model)).ToArray();
-                        var oldStartIndex = items.IndexOf(items[0]);
-                        foreach (var i in items)
-                        {
-                            Views.Remove(i);
-                        }
-
-                        var newIndex = e.NewStartingIndex;
-                        foreach (var i in items)
-                        {
-                            Views.Insert(newIndex, i);
-                            newIndex++;
-                        }
-
-                        OnPropertyChanged(IndexerName);
-                        ViewsCollectionChanged?.Invoke(this, new NotifyCollectionViewChangedEventArgs<T, TView>(items.ToList(), e.NewStartingIndex, oldStartIndex));
-                        CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Move, items.Select(t => t.View).ToList(), e.NewStartingIndex, oldStartIndex));
-                    }
-                    break;
-                case NotifyCollectionChangedAction.Replace:
-                    {
-                        var oldModels = e.OldItems;
-                        var newModels = e.NewItems;
-                        if (oldModels == null || newModels == null)
-                        {
-                            throw new InvalidOperationException(nameof(e));
-                        }
-                        var oldItems = Views.Where(t => oldModels.Contains(t.Model)).ToArray();
-                        var newItems = newModels.OfType<T>().Select<T, (T Model, TView View)>(m => (m, Transform(m))).ToArray();
-                        var oldStartingIndex = oldItems.Length > 0 ? Views.IndexOf(oldItems[0]) : -1;
-                        var newIndex = e.NewStartingIndex;
-
-                        foreach (var i in oldItems)
-                        {
-                            Views.Remove(i);
-                        }
-                        foreach (var i in newItems)
-                        {
-                            Views.Insert(newIndex, i);
-                            newIndex++;
-                        }
-
-                        if (oldItems.Length != newItems.Length)
-                        {
-                            OnPropertyChanged(nameof(Count));
-                        }
-                        OnPropertyChanged(IndexerName);
-                        ViewsCollectionChanged?.Invoke(this, new NotifyCollectionViewChangedEventArgs<T, TView>(newItems, oldItems, oldStartingIndex));
-                        CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, newItems.Select(t => t.View).ToList(), oldItems.Select(t => t.View).ToList(), oldStartingIndex));
-                    }
-                    break;
-                case NotifyCollectionChangedAction.Add:
-                    {
-                        var newItems = (e.NewItems as IEnumerable<T> ?? Enumerable.Empty<T>()).Select<T, (T Model, TView View)>(m => (m, Transform(m))).ToList();
-                        var newIndex = e.NewStartingIndex > -1 ? e.NewStartingIndex : Views.Count;
-                        foreach (var i in newItems)
-                        {
-                            Views.Insert(newIndex, i);
-                            newIndex++;
-                        }
-
-                        ViewsCollectionChanged?.Invoke(this, new NotifyCollectionViewChangedEventArgs<T, TView>(NotifyCollectionChangedAction.Add, newItems, e.NewStartingIndex));
-                        CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, newItems.Select(t => t.View).ToList(), e.NewStartingIndex));
-                    }
-                    break;
-                case NotifyCollectionChangedAction.Remove:
-                    {
-                        var oldItems = (e.OldItems as IEnumerable<T> ?? Enumerable.Empty<T>()).Select(m => Views.Find(t => m.Equals(t.Model))).ToList();
-                        var oldIndex = oldItems.Count > 0 ? Views.IndexOf(oldItems[0]) : -1;
-                        foreach (var i in oldItems)
-                        {
-                            Views.Remove(i);
-                        }
-
-                        ViewsCollectionChanged?.Invoke(this, new NotifyCollectionViewChangedEventArgs<T, TView>(NotifyCollectionChangedAction.Remove, oldItems, oldIndex));
-                        CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, oldItems.Select(t => t.View).ToList(), oldIndex));
-                    }
-                    break;
-            }
-        }
-
-        public void Dispose()
-        {
-            if (!Disposed)
-            {
-                Models.CollectionChanged -= Models_CollectionChanged;
-                Disposed = true;
-                GC.SuppressFinalize(this);
-            }
-        }
-
-        ~ObservableCollectionView()
-        {
-            Dispose();
         }
     }
 
