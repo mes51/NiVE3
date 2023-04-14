@@ -44,8 +44,10 @@ namespace NiVE3.Model
             {
                 InputMetadatas = new List<IInputMetadata>();
             }
+        }
 
-            // for test
+        public void AddSolid()
+        {
             var testInput = new Input.SolidInput();
             testInput.Load("");
             Footages.Add(new FootageModel(testInput));

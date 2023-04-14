@@ -3,7 +3,7 @@
                     xmlns:v="clr-namespace:NiVE3.View.Pane"
                     xmlns:vm="clr-namespace:NiVE3.ViewModel">
     <DataTemplate DataType="{x:Type vm:FootageListViewModel}">
-        <v:FootageView />
+        <v:FootageListView />
     </DataTemplate>
     <DataTemplate DataType="{x:Type vm:PreviewViewModel}">
         <v:PreviewView />

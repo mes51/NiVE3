@@ -18,9 +18,9 @@ namespace NiVE3.View.Pane
     /// <summary>
     /// FootageView.xaml の相互作用ロジック
     /// </summary>
-    public partial class FootageView : UserControl
+    public partial class FootageListView : UserControl
     {
-        public FootageView()
+        public FootageListView()
         {
             InitializeComponent();
         }

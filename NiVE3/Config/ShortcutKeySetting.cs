@@ -49,15 +49,28 @@ namespace NiVE3.Config
             nameof(DeleteItemGesture),
             typeof(InputGesture),
             typeof(ShortcutKeySetting),
-            new FrameworkPropertyMetadata(new SingleKeyGesture(Key.Delete), FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsRender)
+            new PropertyMetadata(new SingleKeyGesture(Key.Delete))
         );
 
         public static readonly DependencyProperty NewCompositionGestureProperty = DependencyProperty.Register(
             nameof(NewCompositionGesture),
             typeof(InputGesture),
             typeof(ShortcutKeySetting),
-            new FrameworkPropertyMetadata(new KeyGesture(Key.N, ModifierKeys.Control), FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsRender)
+            new PropertyMetadata(new KeyGesture(Key.N, ModifierKeys.Control))
         );
+
+        public static readonly DependencyProperty AddSolidGestureProperty = DependencyProperty.Register(
+            nameof(AddSolidGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new KeyGesture(Key.Y, ModifierKeys.Control))
+        );
+
+        public InputGesture AddSolidGesture
+        {
+            get { return (InputGesture)GetValue(AddSolidGestureProperty); }
+            set { SetValue(AddSolidGestureProperty, value); }
+        }
 
         public InputGesture OpenProjectGesture
         {

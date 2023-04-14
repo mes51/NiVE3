@@ -15,6 +15,7 @@ namespace NiVE3.ViewModel
 {
     [PaneLocation(PaneLocation.Left)]
     [CommandHandling(nameof(OpenFileCommand), nameof(ShortcutKeySetting.OpenFileGesture), IsGlobal = true)]
+    [CommandHandling(nameof(AddSolidCommand), nameof(ShortcutKeySetting.AddSolidGesture), IsGlobal = true)]
     [CommandHandling(nameof(DeleteFootageCommand), nameof(ShortcutKeySetting.DeleteItemGesture))]
     class FootageListViewModel : PaneViewModelBase
     {
@@ -28,6 +29,8 @@ namespace NiVE3.ViewModel
         public ICommand OpenFileCommand { get; }
 
         public ICommand DeleteFootageCommand { get; }
+
+        public ICommand AddSolidCommand { get; }
 
         FootageListModel FootageListModel { get; }
 
@@ -43,6 +46,8 @@ namespace NiVE3.ViewModel
             OpenFileCommand = new DelegateCommand(() => System.Diagnostics.Debug.WriteLine("FootageViewModel.OpenFileCommand is not implemented"));
 
             DeleteFootageCommand = new DelegateCommand(() => System.Diagnostics.Debug.WriteLine("FootageViewModel.DeleteFootageCommand is not implemented"));
+
+            AddSolidCommand = new DelegateCommand(() => FootageListModel.AddSolid());
         }
     }
 }
