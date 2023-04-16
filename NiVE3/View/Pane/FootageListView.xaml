@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:NiVE3.View.Pane"
+             xmlns:pv="clr-namespace:NiVE3.View.Primitive"
              xmlns:cv="clr-namespace:NiVE3.View.Converter"
         xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
              mc:Ignorable="d"
@@ -12,31 +13,23 @@
         <cv:WidthHeightToStringConverter x:Key="WidthHeightToStringConverter"/>
     </UserControl.Resources>
     <Grid>
-        <DataGrid x:Name="FootageDataGrid"
-                  AutoGenerateColumns="False"
-                  CanUserAddRows="False"
-                  CanUserDeleteRows="False"
-                  CanUserReorderColumns="False"
-                  CanUserResizeColumns="True"
-                  CanUserResizeRows="False"
-                  CanUserSortColumns="False"
-                  ItemsSource="{Binding Footages}">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageName}" Binding="{Binding Name}" Width="100"/>
-                <DataGridTextColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageFileExtension}" Binding="{Binding FileExtension, Mode=OneWay}" Width="50"/>
-                <DataGridTextColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageSize}" Width="100">
-                    <DataGridTextColumn.Binding>
+        <pv:TreeListView x:Name="FootageTreeListView" ItemsSource="{Binding Footages}">
+            <pv:TreeListView.Columns>
+                <pv:TreeListExpandableGridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageName}" LowPriorityDisplayMemberBinding="{Binding Name}" Width="100" ExpanderStyle="{StaticResource TreeListViewItemExpanderStyle}"/>
+                <GridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageFileExtension}" DisplayMemberBinding="{Binding FileType, Mode=OneWay}" Width="50"/>
+                <GridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageSize}" Width="100">
+                    <GridViewColumn.DisplayMemberBinding>
                         <MultiBinding Mode="OneWay" Converter="{StaticResource WidthHeightToStringConverter}">
                             <Binding Path="Width"/>
                             <Binding Path="Height"/>
                         </MultiBinding>
-                    </DataGridTextColumn.Binding>
-                </DataGridTextColumn>
-                <DataGridTextColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageFrameRate}" Binding="{Binding FrameRate, Mode=OneWay}" Width="100"/>
-                <DataGridTextColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageDuration}" Binding="{Binding Duration, Mode=OneWay}" Width="100"/>
-                <DataGridTextColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageFileComment}" Binding="{Binding Comment}" Width="100"/>
-                <DataGridTextColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageFilePath}" Binding="{Binding FilePath, Mode=OneWay}" Width="100"/>
-            </DataGrid.Columns>
-        </DataGrid>
+                    </GridViewColumn.DisplayMemberBinding>
+                </GridViewColumn>
+                <GridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageFrameRate}" DisplayMemberBinding="{Binding FrameRate, Mode=OneWay}" Width="100"/>
+                <GridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageDuration}" DisplayMemberBinding="{Binding Duration, Mode=OneWay}" Width="100"/>
+                <GridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageFileComment}" DisplayMemberBinding="{Binding Comment}" Width="100"/>
+                <GridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageFilePath}" DisplayMemberBinding="{Binding FilePath, Mode=OneWay}" Width="100"/>
+            </pv:TreeListView.Columns>
+        </pv:TreeListView>
     </Grid>
 </UserControl>
