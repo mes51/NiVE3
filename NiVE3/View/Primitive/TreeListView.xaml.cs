@@ -170,6 +170,20 @@ namespace NiVE3.View.Primitive
                     SelectedItems.Add(i);
                 }
             }
+            else if (SelectedItems.Contains(item))
+            {
+                foreach (var i in SelectedItems.ToArray())
+                {
+                    if (i != item)
+                    {
+                        SetIsSelectedItem(i, false);
+                        SelectedItems.Remove(i);
+                    }
+                }
+
+                SetIsSelectedItem(item, true);
+                LastSelected = item;
+            }
             else
             {
                 foreach (var i in SelectedItems)

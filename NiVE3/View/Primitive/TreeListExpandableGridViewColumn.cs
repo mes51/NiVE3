@@ -64,10 +64,17 @@ namespace NiVE3.View.Primitive
 
         static DataTemplate CreateCellTemplate(TreeListExpandableGridViewColumn self)
         {
-            var container = new FrameworkElementFactory(typeof(StackPanel), "ContainerFactory");
-            container.SetValue(StackPanel.OrientationProperty, Orientation.Horizontal);
+            var container = new FrameworkElementFactory(typeof(Grid), "ContainerFactory");
+
+            var containerColumn1 = new FrameworkElementFactory(typeof(ColumnDefinition));
+            containerColumn1.SetValue(ColumnDefinition.WidthProperty, new GridLength(1, GridUnitType.Auto));
+            var containerColumn2 = new FrameworkElementFactory(typeof(ColumnDefinition));
+            containerColumn2.SetValue(ColumnDefinition.WidthProperty, new GridLength(1, GridUnitType.Star));
+            container.AppendChild(containerColumn1);
+            container.AppendChild(containerColumn2);
 
             var expander = new FrameworkElementFactory(typeof(ToggleButton), ExpanderButtonName);
+            expander.SetValue(Grid.ColumnProperty, 0);
             expander.SetValue(ButtonBase.ClickModeProperty, ClickMode.Press);
             expander.SetBinding(FrameworkElement.StyleProperty, new Binding(nameof(ExpanderStyle)) { Source = self });
             expander.SetBinding(FrameworkElement.MarginProperty, new Binding(nameof(TreeListViewItem.Indent)) { RelativeSource = new RelativeSource { AncestorType = typeof(TreeListViewItem) }, Converter = new DoubleToThicknessConverter(), ConverterParameter = ThicknessConvertFace.Left });
@@ -77,6 +84,7 @@ namespace NiVE3.View.Primitive
             if (self.CellContentTemplate != null)
             {
                 var content = new FrameworkElementFactory(typeof(ContentPresenter), "Content");
+                content.SetValue(Grid.ColumnProperty, 1);
                 content.SetBinding(ContentPresenter.ContentTemplateProperty, new Binding(nameof(CellContentTemplate)) { Source = self });
                 content.SetBinding(ContentPresenter.ContentProperty, new Binding());
                 container.AppendChild(content);
@@ -84,6 +92,7 @@ namespace NiVE3.View.Primitive
             else if (self.LowPriorityDisplayMemberBinding != null)
             {
                 var text = new FrameworkElementFactory(typeof(TextBlock));
+                text.SetValue(Grid.ColumnProperty, 1);
                 text.SetBinding(TextBlock.TextProperty, self.LowPriorityDisplayMemberBinding);
                 text.SetBinding(FrameworkElement.DataContextProperty, new Binding());
                 container.AppendChild(text);

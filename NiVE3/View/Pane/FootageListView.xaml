@@ -4,30 +4,95 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:NiVE3.View.Pane"
+             xmlns:vm="clr-namespace:NiVE3.ViewModel"
              xmlns:pv="clr-namespace:NiVE3.View.Primitive"
              xmlns:cv="clr-namespace:NiVE3.View.Converter"
-        xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
+             xmlns:r="clr-namespace:NiVE3.View.Resource"
+             xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
              mc:Ignorable="d"
+             x:Name="Root"
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
-        <cv:WidthHeightToStringConverter x:Key="WidthHeightToStringConverter"/>
-    </UserControl.Resources>
-    <Grid>
-        <pv:TreeListView x:Name="FootageTreeListView" ItemsSource="{Binding Footages}">
-            <pv:TreeListView.Columns>
-                <pv:TreeListExpandableGridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageName}" LowPriorityDisplayMemberBinding="{Binding Name}" Width="100" ExpanderStyle="{StaticResource TreeListViewItemExpanderStyle}"/>
-                <GridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageFileExtension}" DisplayMemberBinding="{Binding FileType, Mode=OneWay}" Width="50"/>
-                <GridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageSize}" Width="100">
-                    <GridViewColumn.DisplayMemberBinding>
-                        <MultiBinding Mode="OneWay" Converter="{StaticResource WidthHeightToStringConverter}">
+        <cv:WidthHeightConverter x:Key="WidthHeightConverter"/>
+        <cv:TimeConverter x:Key="TimeConverter"/>
+
+        <r:DataTemplateCollection x:Key="SizeTemplate" DefaultIsEmpty="True">
+            <DataTemplate DataType="{x:Type vm:FootageViewModel}">
+                <TextBlock>
+                    <TextBlock.Text>
+                        <MultiBinding Mode="OneWay" Converter="{StaticResource WidthHeightConverter}">
                             <Binding Path="Width"/>
                             <Binding Path="Height"/>
                         </MultiBinding>
-                    </GridViewColumn.DisplayMemberBinding>
-                </GridViewColumn>
-                <GridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageFrameRate}" DisplayMemberBinding="{Binding FrameRate, Mode=OneWay}" Width="100"/>
-                <GridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageDuration}" DisplayMemberBinding="{Binding Duration, Mode=OneWay}" Width="100"/>
-                <GridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageFileComment}" DisplayMemberBinding="{Binding Comment}" Width="100"/>
+                    </TextBlock.Text>
+                </TextBlock>
+            </DataTemplate>
+        </r:DataTemplateCollection>
+
+        <r:DataTemplateCollection x:Key="FrameRateTemplate" DefaultIsEmpty="True">
+            <DataTemplate DataType="{x:Type vm:FootageViewModel}">
+                <TextBlock Text="{Binding FrameRate, StringFormat={}{0:F3}, Mode=OneWay}"/>
+            </DataTemplate>
+        </r:DataTemplateCollection>
+
+        <r:DataTemplateCollection x:Key="DurationTemplate" DefaultIsEmpty="True">
+            <DataTemplate DataType="{x:Type vm:FootageViewModel}">
+                <TextBlock>
+                    <TextBlock.Text>
+                        <MultiBinding Mode="OneWay" Converter="{StaticResource TimeConverter}">
+                            <Binding Path="Duration"/>
+                            <Binding Path="FrameRate"/>
+                        </MultiBinding>
+                    </TextBlock.Text>
+                </TextBlock>
+            </DataTemplate>
+        </r:DataTemplateCollection>
+
+        <r:DataTemplateCollection x:Key="FileExtensionTemplate" DefaultIsEmpty="True">
+            <DataTemplate DataType="{x:Type vm:FootageViewModel}">
+                <TextBlock Text="{Binding FileExtension, Mode=OneWay}"/>
+            </DataTemplate>
+        </r:DataTemplateCollection>
+
+        <HierarchicalDataTemplate DataType="{x:Type vm:IFootageViewModel}" ItemsSource="{Binding Children}">
+            <pv:TreeListViewItem DataContext="{Binding}"/>
+        </HierarchicalDataTemplate>
+
+        <DataTemplate x:Key="FootageNameTemplate" DataType="{x:Type vm:FootageViewModel}">
+            <Grid>
+                <TextBlock x:Name="FootageNameDisplayText" Text="{Binding Name, Mode=OneWay}" PreviewMouseDown="FootageNameDisplayText_PreviewMouseDown"/>
+                <TextBox x:Name="FootageNameEditTextBox" Text="{Binding Name}" Visibility="Hidden" PreviewKeyDown="FootageEditTextBox_PreviewKeyDown"/>
+            </Grid>
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding EditingPropertyName}" Value="Name">
+                    <Setter TargetName="FootageNameDisplayText" Property="Visibility" Value="Hidden"/>
+                    <Setter TargetName="FootageNameEditTextBox" Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
+
+        <DataTemplate x:Key="FootageCommentTemplate" DataType="{x:Type vm:FootageViewModel}">
+            <Grid>
+                <TextBlock x:Name="FootageCommentDisplayText" Text="{Binding Comment, Mode=OneWay}" PreviewMouseDown="FootageCommentDisplayText_PreviewMouseDown"/>
+                <TextBox x:Name="FootageCommentEditTextBox" Text="{Binding Comment}" Visibility="Hidden" PreviewKeyDown="FootageEditTextBox_PreviewKeyDown"/>
+            </Grid>
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding EditingPropertyName}" Value="Comment">
+                    <Setter TargetName="FootageCommentDisplayText" Property="Visibility" Value="Hidden"/>
+                    <Setter TargetName="FootageCommentEditTextBox" Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
+    </UserControl.Resources>
+    <Grid>
+        <pv:TreeListView x:Name="FootageTreeListView" ItemsSource="{Binding Footages}" SelectedItems="{Binding ElementName=Root, Path=SelectedItems}">
+            <pv:TreeListView.Columns>
+                <pv:TreeListExpandableGridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageName}" CellContentTemplate="{StaticResource FootageNameTemplate}" Width="100" ExpanderStyle="{StaticResource TreeListViewItemExpanderStyle}"/>
+                <GridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageFileExtension}" CellTemplateSelector="{StaticResource FileExtensionTemplate}" Width="50"/>
+                <GridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageSize}" CellTemplateSelector="{StaticResource SizeTemplate}" Width="100"/>
+                <GridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageFrameRate}" CellTemplateSelector="{StaticResource FrameRateTemplate}" Width="100"/>
+                <GridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageDuration}" CellTemplateSelector="{StaticResource DurationTemplate}" Width="100"/>
+                <GridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageComment}" CellTemplate="{StaticResource FootageCommentTemplate}" Width="100"/>
                 <GridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageFilePath}" DisplayMemberBinding="{Binding FilePath, Mode=OneWay}" Width="100"/>
             </pv:TreeListView.Columns>
         </pv:TreeListView>

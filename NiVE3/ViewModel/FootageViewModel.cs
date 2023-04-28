@@ -1,20 +1,50 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Model;
-using NiVE3.Plugin.Interfaces;
+using NiVE3.Mvvm;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
 using Prism.Mvvm;
 
 namespace NiVE3.ViewModel
 {
-    [ViewModelWireable(nameof(WiringModel))]
-    partial class FootageViewModel : BindableBase, IEditableObject
+    interface IFootageViewModel : INotifyPropertyChanged
     {
+        Guid FootageId { get; }
+
+        string Name { get; set; }
+
+        int Width { get; }
+
+        int Height { get; }
+
+        double FrameRate { get; }
+
+        double Duration { get; }
+
+        string FilePath { get; }
+
+        string Comment { get; set; }
+
+        string? EditingPropertyName { get; }
+
+        ObservableCollectionView<IFootageModel, IFootageViewModel>? Children { get; }
+
+        void BeginEditProperty(string propertyName);
+
+        void EndEditProperty();
+    }
+
+    [ViewModelWireable(nameof(WiringModel))]
+    partial class FootageViewModel : BindableBase, IFootageViewModel
+    {
+        public Guid FootageId { get; private set; }
+
         private string name;
         [NeedWire(nameof(Footage))]
         public string Name
@@ -63,11 +93,11 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref filePath, value); }
         }
 
-        private string fileType;
-        public string FileType
+        private string fileExtension;
+        public string FileExtension
         {
-            get { return fileType; }
-            set { SetProperty(ref fileType, value); }
+            get { return fileExtension; }
+            set { SetProperty(ref fileExtension, value); }
         }
 
         private string comment = "";
@@ -78,20 +108,31 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref comment, value); }
         }
 
-        FootageModel Footage { get; }
+        private string? editingPropertyName;
+        public string? EditingPropertyName
+        {
+            get { return editingPropertyName; }
+            private set { SetProperty(ref editingPropertyName, value); }
+        }
+
+        public ObservableCollectionView<IFootageModel, IFootageViewModel>? Children => null;
+
+        IFootageModel Footage { get; }
 
 #pragma warning disable CS8618 // 各フィールドには初期化時に必ず値を代入するため無視
-        public FootageViewModel(FootageModel footage)
+        public FootageViewModel(IFootageModel footage)
 #pragma warning restore CS8618
         {
             Footage = footage;
+            FootageId = footage.FootageId;
             Name = footage.Name;
             Width = footage.Width;
             Height = footage.Height;
             FrameRate = footage.FrameRate;
             Duration = footage.Duration;
             FilePath = footage.FilePath;
-            FileType = Path.GetExtension(footage.FilePath);
+            FileExtension = Path.GetExtension(footage.FilePath);
+            Comment = footage.Comment;
 
             WiringModel();
 
@@ -102,22 +143,95 @@ namespace NiVE3.ViewModel
         {
             if (e.PropertyName == nameof(FilePath))
             {
-                FileType = Path.GetExtension(FilePath);
+                FileExtension = Path.GetExtension(FilePath);
             }
         }
 
         partial void WiringModel();
 
-        public void BeginEdit()
+        public void BeginEditProperty(string propertyName)
         {
+            EditingPropertyName = propertyName;
         }
 
-        public void CancelEdit()
+        public void EndEditProperty()
         {
+            // TODO: ヒストリの確定
+
+            EditingPropertyName = null;
+        }
+    }
+
+    [ViewModelWireable(nameof(WiringModel))]
+    partial class FootageFolderViewModel : BindableBase, IFootageViewModel
+    {
+        public Guid FootageId { get; private set; }
+
+        private string name;
+        [NeedWire(nameof(Folder))]
+        public string Name
+        {
+            get { return name; }
+            set { SetProperty(ref name, value); }
         }
 
-        public void EndEdit()
+        public int Width => 0;
+
+        public int Height => 0;
+
+        public double FrameRate => 0.0;
+
+        public double Duration => 0.0;
+
+        public string FilePath => "";
+
+        private string comment;
+        [NeedWire(nameof(Folder))]
+        public string Comment
         {
+            get { return comment; }
+            set { SetProperty(ref comment, value); }
+        }
+
+        private ObservableCollectionView<IFootageModel, IFootageViewModel> children;
+        public ObservableCollectionView<IFootageModel, IFootageViewModel> Children
+        {
+            get { return children; }
+            set { SetProperty(ref children, value); }
+        }
+
+        private string? editingPropertyName;
+        public string? EditingPropertyName
+        {
+            get { return editingPropertyName; }
+            private set { SetProperty(ref editingPropertyName, value); }
+        }
+
+        IFootageModel Folder { get; }
+
+#pragma warning disable CS8618 // 各フィールドには初期化時に必ず値を代入するため無視
+        public FootageFolderViewModel(FootageFolderModel folder)
+#pragma warning restore CS8618
+        {
+            Folder = folder;
+            FootageId = folder.FootageId;
+            Name = folder.Name;
+            Comment = folder.Comment;
+            Children = folder.Children.CreateViewCollection<IFootageModel, IFootageViewModel>(m => m is FootageModel ? new FootageViewModel((FootageModel)m) : new FootageFolderViewModel((FootageFolderModel)m));
+        }
+
+        partial void WiringModel();
+
+        public void BeginEditProperty(string propertyName)
+        {
+            EditingPropertyName = propertyName;
+        }
+
+        public void EndEditProperty()
+        {
+            // TODO: ヒストリの確定
+
+            EditingPropertyName = null;
         }
     }
 }

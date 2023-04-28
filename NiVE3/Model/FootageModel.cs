@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -9,8 +11,33 @@ using Prism.Mvvm;
 
 namespace NiVE3.Model
 {
-    class FootageModel : BindableBase
+    interface IFootageModel : INotifyPropertyChanged
     {
+        Guid FootageId { get; }
+
+        string Name { get; set; }
+
+        int Width { get; }
+
+        int Height { get; }
+
+        double FrameRate { get; }
+
+        double Duration { get; }
+
+        string FilePath { get; }
+
+        string Comment { get; set; }
+
+        string FileName { get; }
+
+        ObservableCollection<IFootageModel>? Children { get; }
+    }
+
+    class FootageModel : BindableBase, IFootageModel
+    {
+        public Guid FootageId { get; private set; } = Guid.NewGuid();
+
         private string name = "";
         public string Name
         {
@@ -36,21 +63,21 @@ namespace NiVE3.Model
         public double FrameRate
         {
             get { return frameRate; }
-            set { SetProperty(ref frameRate, value); }
+            private set { SetProperty(ref frameRate, value); }
         }
 
         private double duration;
         public double Duration
         {
             get { return duration; }
-            set { SetProperty(ref duration, value); }
+            private set { SetProperty(ref duration, value); }
         }
 
         private string filePath = "";
         public string FilePath
         {
             get { return filePath; }
-            set { SetProperty(ref filePath, value); }
+            private set { SetProperty(ref filePath, value); }
         }
 
         private string comment = "";
@@ -61,6 +88,8 @@ namespace NiVE3.Model
         }
 
         public string FileName => Path.GetFileName(Input.FilePath);
+
+        public ObservableCollection<IFootageModel>? Children => null;
 
         IInput Input { get; }
 
@@ -73,6 +102,50 @@ namespace NiVE3.Model
             FrameRate = input.FrameRate;
             Duration = input.Duration;
             FilePath = input.FilePath;
+        }
+    }
+
+    class FootageFolderModel : BindableBase, IFootageModel
+    {
+        public Guid FootageId { get; private set; } = Guid.NewGuid();
+
+        private string name = "";
+        public string Name
+        {
+            get { return name; }
+            set { SetProperty(ref name, value); }
+        }
+
+        public int Width => 0;
+
+        public int Height => 0;
+
+        public double FrameRate => 0.0;
+
+        public double Duration => 0.0;
+
+        public string FilePath => "";
+
+        private string comment = "";
+        public string Comment
+        {
+            get { return comment; }
+            set { SetProperty(ref comment, value); }
+        }
+
+        public string FileName => "";
+
+        private ObservableCollection<IFootageModel> children = new ObservableCollection<IFootageModel>();
+        public ObservableCollection<IFootageModel> Children
+        {
+            get { return children; }
+            set { SetProperty(ref children, value); }
+        }
+
+        public FootageFolderModel()
+        {
+            FootageId = Guid.NewGuid();
+            Name = "New Folder";
         }
     }
 }

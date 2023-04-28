@@ -66,6 +66,19 @@ namespace NiVE3.Config
             new PropertyMetadata(new KeyGesture(Key.Y, ModifierKeys.Control))
         );
 
+        public static readonly DependencyProperty AddFootageFolderGestureProperty = DependencyProperty.Register(
+            nameof(AddFootageFolderGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new KeyGesture(Key.N, ModifierKeys.Shift | ModifierKeys.Control | ModifierKeys.Alt))
+        );
+
+        public InputGesture AddFootageFolderGesture
+        {
+            get { return (InputGesture)GetValue(AddFootageFolderGestureProperty); }
+            set { SetValue(AddFootageFolderGestureProperty, value); }
+        }
+
         public InputGesture AddSolidGesture
         {
             get { return (InputGesture)GetValue(AddSolidGestureProperty); }

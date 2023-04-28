@@ -21,8 +21,8 @@ namespace NiVE3.Model
         [ImportMany]
         List<ExportFactory<IInput, IInputMetadata>>? Inputs { get; set; }
 
-        private ObservableCollection<FootageModel> footages = new ObservableCollection<FootageModel>();
-        public ObservableCollection<FootageModel> Footages
+        private ObservableCollection<IFootageModel> footages = new ObservableCollection<IFootageModel>();
+        public ObservableCollection<IFootageModel> Footages
         {
             get { return footages; }
             set{ SetProperty(ref footages, value); }
@@ -51,6 +51,11 @@ namespace NiVE3.Model
             var testInput = new Input.SolidInput();
             testInput.Load("");
             Footages.Add(new FootageModel(testInput));
+        }
+
+        public void AddFolder()
+        {
+            Footages.Add(new FootageFolderModel());
         }
     }
 }

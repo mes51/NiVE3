@@ -45,7 +45,7 @@ namespace NiVE3.View.Resource
         public static readonly string FootageListView_FootageFileExtension = nameof(FootageListView_FootageFileExtension);
 
         [ShowInMarkup, DefaultValue("コメント")]
-        public static readonly string FootageListView_FootageFileComment = nameof(FootageListView_FootageFileComment);
+        public static readonly string FootageListView_FootageComment = nameof(FootageListView_FootageComment);
 
         static LanguageResourceDictionary()
         {
