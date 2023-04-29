@@ -30,9 +30,20 @@ namespace NiVE3.View.Resource
         public override DataTemplate SelectTemplate(object item, DependencyObject container)
         {
             var type = item.GetType();
+
+            // concrete type
             foreach (var template in Templates)
             {
                 if (template.DataType is Type dt && dt == type)
+                {
+                    return template;
+                }
+            }
+
+            // assignable type
+            foreach (var template in Templates)
+            {
+                if (template.DataType is Type dt && type.IsAssignableTo(dt))
                 {
                     return template;
                 }

@@ -100,7 +100,7 @@ namespace NiVE3.View.Primitive
 
             var expanderVisibility = new DataTrigger
             {
-                Binding = new Binding(nameof(TreeView.HasItems)) { RelativeSource = new RelativeSource { AncestorType = typeof(TreeListViewItem) } },
+                Binding = new Binding(nameof(ItemsControl.HasItems)) { RelativeSource = new RelativeSource { AncestorType = typeof(TreeListViewItem) } },
                 Value = false
             };
             expanderVisibility.Setters.Add(new Setter(UIElement.VisibilityProperty, Visibility.Hidden, expander.Name));

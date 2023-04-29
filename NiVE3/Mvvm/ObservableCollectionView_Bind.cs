@@ -91,6 +91,8 @@ namespace NiVE3.Mvvm
                             newIndex++;
                         }
 
+                        OnPropertyChanged(nameof(Count));
+                        OnPropertyChanged(IndexerName);
                         ViewsCollectionChanged?.Invoke(this, new NotifyCollectionViewChangedEventArgs<T, TView>(NotifyCollectionChangedAction.Add, newItems, e.NewStartingIndex));
                         CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, newItems.Select(t => t.View).ToList(), e.NewStartingIndex));
                     }
@@ -104,6 +106,8 @@ namespace NiVE3.Mvvm
                             Views.Remove(i);
                         }
 
+                        OnPropertyChanged(nameof(Count));
+                        OnPropertyChanged(IndexerName);
                         ViewsCollectionChanged?.Invoke(this, new NotifyCollectionViewChangedEventArgs<T, TView>(NotifyCollectionChangedAction.Remove, oldItems, oldIndex));
                         CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, oldItems.Select(t => t.View).ToList(), oldIndex));
                     }

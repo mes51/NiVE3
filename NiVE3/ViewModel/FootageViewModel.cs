@@ -6,14 +6,16 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using NiVE3.Model;
 using NiVE3.Mvvm;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
+using Prism.Commands;
 using Prism.Mvvm;
 
 namespace NiVE3.ViewModel
 {
-    interface IFootageViewModel : INotifyPropertyChanged
+    interface IFootageViewModel : INotifyPropertyChanged, IFootageViewModelList
     {
         Guid FootageId { get; }
 
@@ -33,7 +35,7 @@ namespace NiVE3.ViewModel
 
         string? EditingPropertyName { get; }
 
-        ObservableCollectionView<IFootageModel, IFootageViewModel>? Children { get; }
+        bool IsFolder { get; }
 
         void BeginEditProperty(string propertyName);
 
@@ -115,12 +117,14 @@ namespace NiVE3.ViewModel
             private set { SetProperty(ref editingPropertyName, value); }
         }
 
-        public ObservableCollectionView<IFootageModel, IFootageViewModel>? Children => null;
+        public bool IsFolder => false;
 
-        IFootageModel Footage { get; }
+        public ObservableCollectionView<IFootageModel, IFootageViewModel>? Footages => null;
+
+        FootageModel Footage { get; }
 
 #pragma warning disable CS8618 // 各フィールドには初期化時に必ず値を代入するため無視
-        public FootageViewModel(IFootageModel footage)
+        public FootageViewModel(FootageModel footage)
 #pragma warning restore CS8618
         {
             Footage = footage;
@@ -193,11 +197,11 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref comment, value); }
         }
 
-        private ObservableCollectionView<IFootageModel, IFootageViewModel> children;
-        public ObservableCollectionView<IFootageModel, IFootageViewModel> Children
+        private ObservableCollectionView<IFootageModel, IFootageViewModel> footages;
+        public ObservableCollectionView<IFootageModel, IFootageViewModel> Footages
         {
-            get { return children; }
-            set { SetProperty(ref children, value); }
+            get { return footages; }
+            set { SetProperty(ref footages, value); }
         }
 
         private string? editingPropertyName;
@@ -207,7 +211,9 @@ namespace NiVE3.ViewModel
             private set { SetProperty(ref editingPropertyName, value); }
         }
 
-        IFootageModel Folder { get; }
+        public bool IsFolder => true;
+
+        FootageFolderModel Folder { get; }
 
 #pragma warning disable CS8618 // 各フィールドには初期化時に必ず値を代入するため無視
         public FootageFolderViewModel(FootageFolderModel folder)
@@ -217,7 +223,7 @@ namespace NiVE3.ViewModel
             FootageId = folder.FootageId;
             Name = folder.Name;
             Comment = folder.Comment;
-            Children = folder.Children.CreateViewCollection<IFootageModel, IFootageViewModel>(m => m is FootageModel ? new FootageViewModel((FootageModel)m) : new FootageFolderViewModel((FootageFolderModel)m));
+            Footages = folder.Children.CreateViewCollection<IFootageModel, IFootageViewModel>(m => m is FootageModel ? new FootageViewModel((FootageModel)m) : new FootageFolderViewModel((FootageFolderModel)m));
         }
 
         partial void WiringModel();

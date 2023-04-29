@@ -9,6 +9,7 @@
              xmlns:cv="clr-namespace:NiVE3.View.Converter"
              xmlns:r="clr-namespace:NiVE3.View.Resource"
              xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
+             xmlns:dd="urn:gong-wpf-dragdrop"
              mc:Ignorable="d"
              x:Name="Root"
              d:DesignHeight="450" d:DesignWidth="800">
@@ -53,10 +54,10 @@
                 <TextBlock Text="{Binding FileExtension, Mode=OneWay}"/>
             </DataTemplate>
         </r:DataTemplateCollection>
-
-        <HierarchicalDataTemplate DataType="{x:Type vm:IFootageViewModel}" ItemsSource="{Binding Children}">
-            <pv:TreeListViewItem DataContext="{Binding}"/>
-        </HierarchicalDataTemplate>
+        
+        <Style x:Key="ItemContainerStyle" TargetType="{x:Type pv:TreeListViewItem}">
+            <Setter Property="ItemsSource" Value="{Binding Footages}"/>
+        </Style>
 
         <DataTemplate x:Key="FootageNameTemplate" DataType="{x:Type vm:FootageViewModel}">
             <Grid>
@@ -85,7 +86,7 @@
         </DataTemplate>
     </UserControl.Resources>
     <Grid>
-        <pv:TreeListView x:Name="FootageTreeListView" ItemsSource="{Binding Footages}" SelectedItems="{Binding ElementName=Root, Path=SelectedItems}">
+        <pv:TreeListView x:Name="FootageTreeListView" ItemsSource="{Binding Footages}" SelectedItems="{Binding ElementName=Root, Path=SelectedItems}" dd:DragDrop.IsDragSource="True" dd:DragDrop.IsDropTarget="True" dd:DragDrop.DropHandler="{Binding}" ItemContainerStyle="{StaticResource ItemContainerStyle}">
             <pv:TreeListView.Columns>
                 <pv:TreeListExpandableGridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageName}" CellContentTemplate="{StaticResource FootageNameTemplate}" Width="100" ExpanderStyle="{StaticResource TreeListViewItemExpanderStyle}"/>
                 <GridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageFileExtension}" CellTemplateSelector="{StaticResource FileExtensionTemplate}" Width="50"/>

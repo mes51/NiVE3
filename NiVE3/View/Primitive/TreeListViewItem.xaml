@@ -7,54 +7,48 @@
               mc:Ignorable="d" 
               x:Name="Root"
               d:DesignHeight="450" d:DesignWidth="800">
-    <TreeViewItem.Style>
-        <Style TargetType="{x:Type TreeViewItem}">
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type TreeViewItem}">
-                        <StackPanel>
-                            <Border Name="Bd" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}">
-                                <GridViewRowPresenter x:Name="PART_Header" Content="{TemplateBinding DataContext}" Columns="{Binding Columns, RelativeSource={RelativeSource AncestorType={x:Type local:TreeListView}}}"/>
-                            </Border>
-                            <ItemsPresenter x:Name="ItemsHost"/>
-                        </StackPanel>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsExpanded" Value="False">
-                                <Setter TargetName="ItemsHost" Property="Visibility" Value="Collapsed"/>
-                            </Trigger>
-                            <MultiTrigger>
-                                <MultiTrigger.Conditions>
-                                    <Condition Property="HasHeader" Value="False"/>
-                                    <Condition Property="Width" Value="Auto"/>
-                                </MultiTrigger.Conditions>
-                                <Setter TargetName="PART_Header" Property="MinWidth" Value="{Binding MinHeight, RelativeSource={RelativeSource AncestorType={x:Type local:TreeListViewItem}}}"/>
-                            </MultiTrigger>
-                            <MultiTrigger>
-                                <MultiTrigger.Conditions>
-                                    <Condition Property="HasHeader" Value="False"/>
-                                    <Condition Property="Height" Value="Auto"/>
-                                </MultiTrigger.Conditions>
-                                <Setter TargetName="PART_Header" Property="MinHeight" Value="{Binding MinHeight, RelativeSource={RelativeSource AncestorType={x:Type local:TreeListViewItem}}}"/>
-                            </MultiTrigger>
-                            <Trigger Property="local:TreeListView.IsSelectedItem" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
-                                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.HighlightTextBrushKey}}"/>
-                            </Trigger>
-                            <MultiTrigger>
-                                <MultiTrigger.Conditions>
-                                    <Condition Property="local:TreeListView.IsSelectedItem" Value="True"/>
-                                    <Condition Property="IsSelectionActive" Value="false"/>
-                                </MultiTrigger.Conditions>
-                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource  {x:Static SystemColors.ControlBrushKey}}"/>
-                                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
-                            </MultiTrigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-    </TreeViewItem.Style>
+    <TreeViewItem.Template>
+        <ControlTemplate TargetType="{x:Type TreeViewItem}">
+            <StackPanel>
+                <Border Name="Bd" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}">
+                    <GridViewRowPresenter x:Name="PART_Header" Content="{TemplateBinding DataContext}" Columns="{Binding Columns, RelativeSource={RelativeSource AncestorType={x:Type local:TreeListView}}}"/>
+                </Border>
+                <ItemsPresenter x:Name="ItemsHost"/>
+            </StackPanel>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsExpanded" Value="False">
+                    <Setter TargetName="ItemsHost" Property="Visibility" Value="Collapsed"/>
+                </Trigger>
+                <MultiTrigger>
+                    <MultiTrigger.Conditions>
+                        <Condition Property="HasHeader" Value="False"/>
+                        <Condition Property="Width" Value="Auto"/>
+                    </MultiTrigger.Conditions>
+                    <Setter TargetName="PART_Header" Property="MinWidth" Value="{Binding MinHeight, RelativeSource={RelativeSource AncestorType={x:Type local:TreeListViewItem}}}"/>
+                </MultiTrigger>
+                <MultiTrigger>
+                    <MultiTrigger.Conditions>
+                        <Condition Property="HasHeader" Value="False"/>
+                        <Condition Property="Height" Value="Auto"/>
+                    </MultiTrigger.Conditions>
+                    <Setter TargetName="PART_Header" Property="MinHeight" Value="{Binding MinHeight, RelativeSource={RelativeSource AncestorType={x:Type local:TreeListViewItem}}}"/>
+                </MultiTrigger>
+                <Trigger Property="local:TreeListView.IsSelectedItem" Value="True">
+                    <Setter TargetName="Bd" Property="Background" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.HighlightTextBrushKey}}"/>
+                </Trigger>
+                <MultiTrigger>
+                    <MultiTrigger.Conditions>
+                        <Condition Property="local:TreeListView.IsSelectedItem" Value="True"/>
+                        <Condition Property="IsSelectionActive" Value="false"/>
+                    </MultiTrigger.Conditions>
+                    <Setter TargetName="Bd" Property="Background" Value="{DynamicResource  {x:Static SystemColors.ControlBrushKey}}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+                </MultiTrigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+    </TreeViewItem.Template>
 </TreeViewItem>

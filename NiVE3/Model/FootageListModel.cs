@@ -57,5 +57,84 @@ namespace NiVE3.Model
         {
             Footages.Add(new FootageFolderModel());
         }
+
+        public void MoveFootage(Guid sourceFootageId, Guid targetFolderId)
+        {
+            var model = FindModel(sourceFootageId, Footages);
+            var targetFolder = FindModel(targetFolderId, Footages) as FootageFolderModel;
+
+            if (model == null || targetFolder == null)
+            {
+                return;
+            }
+
+            var oldParent = FindParent(sourceFootageId);
+            if (oldParent == null)
+            {
+                // root
+                Footages.Remove(model);
+            }
+            else
+            {
+                oldParent.Children.Remove(model);
+            }
+            targetFolder.Children.Add(model);
+        }
+
+        public void MoveFootageToRoot(Guid sourceFootageId)
+        {
+            var model = FindModel(sourceFootageId, Footages);
+            if (model == null)
+            {
+                return;
+            }
+
+            var oldParent = FindParent(sourceFootageId);
+            if (oldParent != null)
+            {
+                oldParent.Children.Remove(model);
+                Footages.Add(model);
+            }
+        }
+
+        FootageFolderModel? FindParent(Guid targetId)
+        {
+            // rootの場合はnull
+            if (Footages.Any(f => f.FootageId == targetId))
+            {
+                return null;
+            }
+
+            return Footages.OfType<FootageFolderModel>()
+                .Select(f => FindParent(targetId, f))
+                .SkipWhile(p => p == null)
+                .FirstOrDefault();
+        }
+
+        static IFootageModel? FindModel(Guid targetId, IEnumerable<IFootageModel> list)
+        {
+            var model = list.FirstOrDefault(f => f.FootageId == targetId);
+            if (model != null)
+            {
+                return model;
+            }
+
+            return list.OfType<FootageFolderModel>()
+                .Select(l => FindModel(targetId, l.Children))
+                .SkipWhile(r => r == null).FirstOrDefault();
+        }
+
+        static FootageFolderModel? FindParent(Guid targetId, FootageFolderModel parent)
+        {
+            if (parent.Children?.Any(f => f.FootageId == targetId) ?? false)
+            {
+                return parent;
+            }
+
+            return parent.Children?.OfType<FootageFolderModel>()
+                ?.Select(f => FindParent(targetId, f))
+                ?.SkipWhile(p => p == null)
+                ?.FirstOrDefault();
+        }
     }
 }
