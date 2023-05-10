@@ -43,6 +43,48 @@ namespace NiVE3.ViewModel
             private set { SetProperty(ref editingFootage, value); }
         }
 
+        private bool showFileExtension = true;
+        public bool ShowFileExtension
+        {
+            get { return showFileExtension; }
+            set { SetProperty(ref showFileExtension, value); }
+        }
+
+        private bool showSize = true;
+        public bool ShowSize
+        {
+            get { return showSize; }
+            set { SetProperty(ref showSize, value); }
+        }
+
+        private bool showFrameRate = true;
+        public bool ShowFrameRate
+        {
+            get { return showFrameRate; }
+            set { SetProperty(ref showFrameRate, value); }
+        }
+
+        private bool showDuration = true;
+        public bool ShowDuration
+        {
+            get { return showDuration; }
+            set { SetProperty(ref showDuration, value); }
+        }
+
+        private bool showComment = true;
+        public bool ShowComment
+        {
+            get { return showComment; }
+            set { SetProperty(ref showComment, value); }
+        }
+
+        private bool showFilePath = true;
+        public bool ShowFilePath
+        {
+            get { return showFilePath; }
+            set { SetProperty(ref showFilePath, value); }
+        }
+
         public ICommand MoveFootageCommand { get; }
 
         public ICommand OpenFileCommand { get; }

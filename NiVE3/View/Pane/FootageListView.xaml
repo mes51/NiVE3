@@ -7,6 +7,7 @@
              xmlns:vm="clr-namespace:NiVE3.ViewModel"
              xmlns:pv="clr-namespace:NiVE3.View.Primitive"
              xmlns:cv="clr-namespace:NiVE3.View.Converter"
+             xmlns:a="clr-namespace:NiVE3.Wpf.Attach"
              xmlns:r="clr-namespace:NiVE3.View.Resource"
              xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
              xmlns:dd="urn:gong-wpf-dragdrop"
@@ -89,13 +90,23 @@
         <pv:TreeListView x:Name="FootageTreeListView" ItemsSource="{Binding Footages}" SelectedItems="{Binding ElementName=Root, Path=SelectedItems}" dd:DragDrop.IsDragSource="True" dd:DragDrop.IsDropTarget="True" dd:DragDrop.DropHandler="{Binding}" ItemContainerStyle="{StaticResource ItemContainerStyle}">
             <pv:TreeListView.Columns>
                 <pv:TreeListExpandableGridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageName}" CellContentTemplate="{StaticResource FootageNameTemplate}" Width="100" ExpanderStyle="{StaticResource TreeListViewItemExpanderStyle}"/>
-                <GridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageFileExtension}" CellTemplateSelector="{StaticResource FileExtensionTemplate}" Width="50"/>
-                <GridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageSize}" CellTemplateSelector="{StaticResource SizeTemplate}" Width="100"/>
-                <GridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageFrameRate}" CellTemplateSelector="{StaticResource FrameRateTemplate}" Width="100"/>
-                <GridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageDuration}" CellTemplateSelector="{StaticResource DurationTemplate}" Width="100"/>
-                <GridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageComment}" CellTemplate="{StaticResource FootageCommentTemplate}" Width="100"/>
-                <GridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageFilePath}" DisplayMemberBinding="{Binding FilePath, Mode=OneWay}" Width="100"/>
+                <GridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageFileExtension}" CellTemplateSelector="{StaticResource FileExtensionTemplate}" Width="50" a:GridViewColumnVisibility.Visibility="{Binding ShowFileExtension}"/>
+                <GridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageSize}" CellTemplateSelector="{StaticResource SizeTemplate}" Width="100" a:GridViewColumnVisibility.Visibility="{Binding ShowSize}"/>
+                <GridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageFrameRate}" CellTemplateSelector="{StaticResource FrameRateTemplate}" Width="100" a:GridViewColumnVisibility.Visibility="{Binding ShowFrameRate}"/>
+                <GridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageDuration}" CellTemplateSelector="{StaticResource DurationTemplate}" Width="100" a:GridViewColumnVisibility.Visibility="{Binding ShowDuration}"/>
+                <GridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageComment}" CellTemplate="{StaticResource FootageCommentTemplate}" Width="100" a:GridViewColumnVisibility.Visibility="{Binding ShowComment}"/>
+                <GridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageFilePath}" DisplayMemberBinding="{Binding FilePath, Mode=OneWay}" Width="100" a:GridViewColumnVisibility.Visibility="{Binding ShowFilePath}"/>
             </pv:TreeListView.Columns>
+            <pv:TreeListView.HeaderContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="{gm:LanguageResource ResourceKey=FootageListView_FootageFileExtension}" IsCheckable="True" IsChecked="{Binding ShowFileExtension}"/>
+                    <MenuItem Header="{gm:LanguageResource ResourceKey=FootageListView_FootageSize}" IsCheckable="True" IsChecked="{Binding ShowSize}"/>
+                    <MenuItem Header="{gm:LanguageResource ResourceKey=FootageListView_FootageFrameRate}" IsCheckable="True" IsChecked="{Binding ShowFrameRate}"/>
+                    <MenuItem Header="{gm:LanguageResource ResourceKey=FootageListView_FootageDuration}" IsCheckable="True" IsChecked="{Binding ShowDuration}"/>
+                    <MenuItem Header="{gm:LanguageResource ResourceKey=FootageListView_FootageComment}" IsCheckable="True" IsChecked="{Binding ShowComment}"/>
+                    <MenuItem Header="{gm:LanguageResource ResourceKey=FootageListView_FootageFilePath}" IsCheckable="True" IsChecked="{Binding ShowFilePath}"/>
+                </ContextMenu>
+            </pv:TreeListView.HeaderContextMenu>
         </pv:TreeListView>
     </Grid>
 </UserControl>

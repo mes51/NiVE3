@@ -53,6 +53,19 @@ namespace NiVE3.View.Primitive
             new FrameworkPropertyMetadata(new ObservableCollection<TreeListViewItem>(), FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
+        public static readonly DependencyProperty HeaderContextMenuProperty = DependencyProperty.Register(
+            nameof(HeaderContextMenu),
+            typeof(ContextMenu),
+            typeof(TreeListView),
+            new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        public ContextMenu? HeaderContextMenu
+        {
+            get { return (ContextMenu)GetValue(HeaderContextMenuProperty); }
+            set { SetValue(HeaderContextMenuProperty, value); }
+        }
+
         public ObservableCollection<TreeListViewItem> SelectedItems
         {
             get { return (ObservableCollection<TreeListViewItem>)GetValue(SelectedItemsProperty); }

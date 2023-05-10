@@ -16,7 +16,7 @@
                             <DockPanel>
                                 <ScrollViewer x:Name="HeaderScrollViewer" VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Hidden" DockPanel.Dock="Top">
                                     <StackPanel Orientation="Horizontal">
-                                        <GridViewHeaderRowPresenter Columns="{Binding Columns, ElementName=Root}"/>
+                                        <GridViewHeaderRowPresenter Columns="{Binding ElementName=Root, Path=Columns}" ContextMenu="{Binding ElementName=Root, Path=HeaderContextMenu}"/>
                                         <ScrollBar Orientation="Vertical" Visibility="Hidden" Height="1"/>
                                     </StackPanel>
                                 </ScrollViewer>
