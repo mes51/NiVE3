@@ -58,12 +58,13 @@
         
         <Style x:Key="ItemContainerStyle" TargetType="{x:Type pv:TreeListViewItem}">
             <Setter Property="ItemsSource" Value="{Binding Footages}"/>
+            <EventSetter Event="PreviewKeyDown" Handler="TreeListViewItem_PreviewKeyDown"/>
         </Style>
 
         <DataTemplate x:Key="FootageNameTemplate" DataType="{x:Type vm:FootageViewModel}">
             <Grid>
-                <TextBlock x:Name="FootageNameDisplayText" Text="{Binding Name, Mode=OneWay}" PreviewMouseDown="FootageNameDisplayText_PreviewMouseDown"/>
-                <TextBox x:Name="FootageNameEditTextBox" Text="{Binding Name}" Visibility="Hidden" PreviewKeyDown="FootageEditTextBox_PreviewKeyDown"/>
+                <TextBlock x:Name="FootageNameDisplayText" Text="{Binding Name, Mode=OneWay}"/>
+                <TextBox x:Name="FootageNameEditTextBox" Text="{Binding Name}" Visibility="Hidden" PreviewKeyDown="FootageEditTextBox_PreviewKeyDown" IsVisibleChanged="EditTextBox_IsVisibleChanged"/>
             </Grid>
             <DataTemplate.Triggers>
                 <DataTrigger Binding="{Binding EditingPropertyName}" Value="Name">
@@ -76,7 +77,7 @@
         <DataTemplate x:Key="FootageCommentTemplate" DataType="{x:Type vm:FootageViewModel}">
             <Grid>
                 <TextBlock x:Name="FootageCommentDisplayText" Text="{Binding Comment, Mode=OneWay}" PreviewMouseDown="FootageCommentDisplayText_PreviewMouseDown"/>
-                <TextBox x:Name="FootageCommentEditTextBox" Text="{Binding Comment}" Visibility="Hidden" PreviewKeyDown="FootageEditTextBox_PreviewKeyDown"/>
+                <TextBox x:Name="FootageCommentEditTextBox" Text="{Binding Comment}" Visibility="Hidden" PreviewKeyDown="FootageEditTextBox_PreviewKeyDown" IsVisibleChanged="EditTextBox_IsVisibleChanged"/>
             </Grid>
             <DataTemplate.Triggers>
                 <DataTrigger Binding="{Binding EditingPropertyName}" Value="Comment">

@@ -14,6 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 using NiVE3.View.Primitive;
 using NiVE3.ViewModel;
 
@@ -45,9 +46,9 @@ namespace NiVE3.View.Pane
 
         FootageListViewModel? ViewModel => DataContext as FootageListViewModel;
 
-        private void FootageNameDisplayText_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        private void TreeListViewItem_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            if (e.LeftButton == MouseButtonState.Pressed && e.ClickCount == 2)
+            if (e.Key == Key.Enter && e.OriginalSource is TreeListViewItem targetItem)
             {
                 if (sender is FrameworkElement fe && fe.DataContext is IFootageViewModel vm)
                 {
@@ -92,6 +93,18 @@ namespace NiVE3.View.Pane
                 {
                     newItems.CollectionChanged += footageListView.SelectedItems_CollectionChanged;
                 }
+            }
+        }
+
+        private void EditTextBox_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (sender is TextBox editTextBox)
+            {
+                Dispatcher.BeginInvoke(() =>
+                {
+                    editTextBox.CaretIndex = int.MaxValue;
+                    editTextBox.Focus();
+                }, DispatcherPriority.Render);
             }
         }
     }
