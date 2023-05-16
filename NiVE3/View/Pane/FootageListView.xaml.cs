@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -41,7 +42,9 @@ namespace NiVE3.View.Pane
         public FootageListView()
         {
             InitializeComponent();
+
             SelectedItems.CollectionChanged += SelectedItems_CollectionChanged;
+            AddHandler(ButtonBase.ClickEvent, new RoutedEventHandler(GridViewColumnHeader_Clicked));
         }
 
         FootageListViewModel? ViewModel => DataContext as FootageListViewModel;
@@ -106,6 +109,11 @@ namespace NiVE3.View.Pane
                     editTextBox.Focus();
                 }, DispatcherPriority.Render);
             }
+        }
+
+        private void GridViewColumnHeader_Clicked(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

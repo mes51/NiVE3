@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NiVE3.Extension;
 using NiVE3.Plugin.Interfaces;
 using Prism.Mvvm;
 
@@ -31,7 +32,15 @@ namespace NiVE3.Model
 
         string FileName { get; }
 
+        FootageSortKey SortKey { get; set; }
+
+        bool SortIsAscending { get; set; }
+
         ObservableCollection<IFootageModel>? Children { get; }
+
+        void AddFootage(IFootageModel footage);
+
+        void RemoveFootage(IFootageModel footage);
     }
 
     class FootageModel : BindableBase, IFootageModel
@@ -87,6 +96,20 @@ namespace NiVE3.Model
             set { SetProperty(ref comment, value); }
         }
 
+        private FootageSortKey sortKey;
+        public FootageSortKey SortKey
+        {
+            get { return sortKey; }
+            set { SetProperty(ref sortKey, value); }
+        }
+
+        private bool sortIsAscending;
+        public bool SortIsAscending
+        {
+            get { return sortIsAscending; }
+            set { SetProperty(ref sortIsAscending, value); }
+        }
+
         public string FileName => Path.GetFileName(Input.FilePath);
 
         public ObservableCollection<IFootageModel>? Children => null;
@@ -103,6 +126,10 @@ namespace NiVE3.Model
             Duration = input.Duration;
             FilePath = input.FilePath;
         }
+
+        public void AddFootage(IFootageModel footage) { }
+
+        public void RemoveFootage(IFootageModel footage) { }
     }
 
     class FootageFolderModel : BindableBase, IFootageModel
@@ -135,6 +162,20 @@ namespace NiVE3.Model
 
         public string FileName => "";
 
+        private FootageSortKey sortKey;
+        public FootageSortKey SortKey
+        {
+            get { return sortKey; }
+            set { SetProperty(ref sortKey, value); }
+        }
+
+        private bool sortIsAscending;
+        public bool SortIsAscending
+        {
+            get { return sortIsAscending; }
+            set { SetProperty(ref sortIsAscending, value); }
+        }
+
         private ObservableCollection<IFootageModel> children = new ObservableCollection<IFootageModel>();
         public ObservableCollection<IFootageModel> Children
         {
@@ -146,6 +187,44 @@ namespace NiVE3.Model
         {
             FootageId = Guid.NewGuid();
             Name = "New Folder";
+            PropertyChanged += FootageFolderModel_PropertyChanged;
+        }
+
+        public void AddFootage(IFootageModel footage)
+        {
+            footage.PropertyChanged += Footage_PropertyChanged;
+            Children.Add(footage);
+            Children.Sort(new FootageComparer(SortKey, SortIsAscending));
+        }
+
+        public void RemoveFootage(IFootageModel footage)
+        {
+            if (Children.Contains(footage))
+            {
+                footage.PropertyChanged -= Footage_PropertyChanged;
+                Children.Remove(footage);
+            }
+        }
+
+        private void FootageFolderModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(SortKey) || e.PropertyName == nameof(SortIsAscending))
+            {
+                foreach (var child in Children)
+                {
+                    child.SortKey = SortKey;
+                    child.SortIsAscending = SortIsAscending;
+                }
+                Children.Sort(new FootageComparer(SortKey, SortIsAscending));
+            }
+        }
+
+        private void Footage_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (Enum.TryParse(typeof(FootageSortKey), e.PropertyName, out var changed) && SortKey == (FootageSortKey)changed)
+            {
+                Children.Sort(new FootageComparer(SortKey, SortIsAscending));
+            }
         }
     }
 }

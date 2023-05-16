@@ -30,7 +30,7 @@ namespace NiVE3.Mvvm
 
         public int Count => Views.Count;
 
-        public bool IsReadOnly => false;
+        public bool IsReadOnly => true;
 
         public bool IsFixedSize => false;
 
@@ -69,11 +69,7 @@ namespace NiVE3.Mvvm
 
         public void RemoveAt(int index)
         {
-            var removed = Views[index];
-            Views.RemoveAt(index);
-            OnPropertyChanged(nameof(Count));
-            OnPropertyChanged(IndexerName);
-            OnCollectionItemRemoved(removed, index);
+            throw new NotImplementedException();
         }
 
         public void Add(TView item)
@@ -83,10 +79,7 @@ namespace NiVE3.Mvvm
 
         public void Clear()
         {
-            Views.Clear();
-            OnPropertyChanged(nameof(Count));
-            OnPropertyChanged(IndexerName);
-            OnCollectionCleared();
+            throw new NotImplementedException();
         }
 
         public bool Contains(TView item)
@@ -102,16 +95,7 @@ namespace NiVE3.Mvvm
 
         public bool Remove(TView item)
         {
-            var index = IndexOf(item);
-            if (index > -1)
-            {
-                RemoveAt(index);
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            throw new NotImplementedException();
         }
 
         public int Add(object? value)
@@ -150,10 +134,7 @@ namespace NiVE3.Mvvm
 
         public void Remove(object? value)
         {
-            if (value is TView view)
-            {
-                Remove(view);
-            }
+            throw new NotImplementedException();
         }
 
         public void CopyTo(Array array, int index)

@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media.Effects;
+using NiVE3.Extension;
 using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Util;
@@ -25,7 +29,21 @@ namespace NiVE3.Model
         public ObservableCollection<IFootageModel> Footages
         {
             get { return footages; }
-            set{ SetProperty(ref footages, value); }
+            set { SetProperty(ref footages, value); }
+        }
+
+        private FootageSortKey sortKey = FootageSortKey.Name;
+        public FootageSortKey SortKey
+        {
+            get { return sortKey; }
+            set { SetProperty(ref sortKey, value); }
+        }
+
+        private bool sortIsAscending = true;
+        public bool SortIsAscending
+        {
+            get { return sortIsAscending; }
+            set { SetProperty(ref sortIsAscending, value); }
         }
 
         public FootageListModel()
@@ -44,18 +62,23 @@ namespace NiVE3.Model
             {
                 InputMetadatas = new List<IInputMetadata>();
             }
+
+            //TODO: イベントの追加方法をfieldに対し行うか、nullableにした上でコンストラクタでインスタンスをセットするのが良いか
+            Footages = new ObservableCollection<IFootageModel>();
+
+            PropertyChanged += FootageListModel_PropertyChanged;
         }
 
         public void AddSolid()
         {
             var testInput = new Input.SolidInput();
             testInput.Load("");
-            Footages.Add(new FootageModel(testInput));
+            AddFootage(new FootageModel(testInput));
         }
 
         public void AddFolder()
         {
-            Footages.Add(new FootageFolderModel());
+            AddFootage(new FootageFolderModel());
         }
 
         public void MoveFootage(Guid sourceFootageId, Guid targetFolderId)
@@ -72,13 +95,13 @@ namespace NiVE3.Model
             if (oldParent == null)
             {
                 // root
-                Footages.Remove(model);
+                RemoveFootageFromRoot(model);
             }
             else
             {
-                oldParent.Children.Remove(model);
+                oldParent.RemoveFootage(model);
             }
-            targetFolder.Children.Add(model);
+            targetFolder.AddFootage(model);
         }
 
         public void MoveFootageToRoot(Guid sourceFootageId)
@@ -92,8 +115,8 @@ namespace NiVE3.Model
             var oldParent = FindParent(sourceFootageId);
             if (oldParent != null)
             {
-                oldParent.Children.Remove(model);
-                Footages.Add(model);
+                oldParent.RemoveFootage(model);
+                AddFootageToRoot(model);
             }
         }
 
@@ -109,6 +132,29 @@ namespace NiVE3.Model
                 .Select(f => FindParent(targetId, f))
                 .SkipWhile(p => p == null)
                 .FirstOrDefault();
+        }
+
+        void AddFootage(IFootageModel footage)
+        {
+            footage.SortKey = SortKey;
+            footage.SortIsAscending = SortIsAscending;
+            AddFootageToRoot(footage);
+        }
+
+        void AddFootageToRoot(IFootageModel footage)
+        {
+            footage.PropertyChanged += Footage_PropertyChanged;
+            Footages.Add(footage);
+            Footages.Sort(new FootageComparer(SortKey, SortIsAscending));
+        }
+
+        void RemoveFootageFromRoot(IFootageModel footage)
+        {
+            if (Footages.Contains(footage))
+            {
+                footage.PropertyChanged -= Footage_PropertyChanged;
+                Footages.Remove(footage);
+            }
         }
 
         static IFootageModel? FindModel(Guid targetId, IEnumerable<IFootageModel> list)
@@ -135,6 +181,85 @@ namespace NiVE3.Model
                 ?.Select(f => FindParent(targetId, f))
                 ?.SkipWhile(p => p == null)
                 ?.FirstOrDefault();
+        }
+
+        private void FootageListModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(SortKey) || e.PropertyName == nameof(SortIsAscending))
+            {
+                foreach (var footage in Footages)
+                {
+                    footage.SortKey = SortKey;
+                    footage.SortIsAscending = SortIsAscending;
+                }
+                Footages.Sort(new FootageComparer(SortKey, SortIsAscending));
+            }
+        }
+
+        private void Footage_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (Enum.TryParse(typeof(FootageSortKey), e.PropertyName, out var changed) && SortKey == (FootageSortKey)changed)
+            {
+                Footages.Sort(new FootageComparer(SortKey, SortIsAscending));
+            }
+        }
+    }
+
+    enum FootageSortKey
+    {
+        Name,
+        Width,
+        FrameRate,
+        Duration,
+        Comment,
+        FilePath
+    }
+
+    class FootageComparer : IComparer<IFootageModel>
+    {
+        FootageSortKey Key { get; }
+
+        bool Ascending { get; }
+
+        public FootageComparer(FootageSortKey sortKey, bool ascending)
+        {
+            Key = sortKey;
+            Ascending = ascending;
+        }
+
+        public int Compare(IFootageModel? x, IFootageModel? y)
+        {
+            if (x == null)
+            {
+                if (y != null)
+                {
+                    return -1;
+                }
+                else
+                {
+                    return 0;
+                }
+            }
+            else if (y == null)
+            {
+                return 1;
+            }
+
+            switch (Key)
+            {
+                case FootageSortKey.Width:
+                    return x.Width.CompareTo(y.Width);
+                case FootageSortKey.FrameRate:
+                    return x.FrameRate.CompareTo(y.FrameRate);
+                case FootageSortKey.Duration:
+                    return x.Duration.CompareTo(y.Duration);
+                case FootageSortKey.Comment:
+                    return x.Comment.CompareTo(y.Comment);
+                case FootageSortKey.FilePath:
+                    return x.FilePath.CompareTo(y.FilePath);
+                default:
+                    return x.Name.CompareTo(y.Name);
+            }
         }
     }
 }

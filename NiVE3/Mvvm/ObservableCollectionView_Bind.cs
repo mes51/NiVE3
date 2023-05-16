@@ -15,13 +15,21 @@ namespace NiVE3.Mvvm
             _ = new ObservableCollectionBinder<T, TView>(models, this);
         }
 
+        void ClearInternal()
+        {
+            Views.Clear();
+            OnPropertyChanged(nameof(Count));
+            OnPropertyChanged(IndexerName);
+            OnCollectionCleared();
+        }
+
         // ObservableCollectionBinderから参照したいが外には公開したくないのでfile partialで定義する
         internal void Models_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             switch (e.Action)
             {
                 case NotifyCollectionChangedAction.Reset:
-                    Clear();
+                    ClearInternal();
                     break;
                 case NotifyCollectionChangedAction.Move:
                     {
@@ -57,28 +65,34 @@ namespace NiVE3.Mvvm
                         {
                             throw new InvalidOperationException(nameof(e));
                         }
-                        var oldItems = Views.Where(t => oldModels.Contains(t.Model)).ToArray();
-                        var newItems = newModels.OfType<T>().Select<T, (T Model, TView View)>(m => (m, Transform(m))).ToArray();
-                        var oldStartingIndex = oldItems.Length > 0 ? Views.IndexOf(oldItems[0]) : -1;
-                        var newIndex = e.NewStartingIndex;
-
-                        foreach (var i in oldItems)
+                        else if (oldModels.Count > 1 || newModels.Count > 1)
                         {
-                            Views.Remove(i);
+                            // NOTE: ObservableCollectionは範囲アクションに非対応なのでここは来ないはず
+                            throw new NotSupportedException("Not supported range action.");
                         }
-                        foreach (var i in newItems)
+                        else if (e.OldStartingIndex != e.NewStartingIndex)
                         {
-                            Views.Insert(newIndex, i);
-                            newIndex++;
+                            // NOTE: 変更前後でインデックスが異なる場合は非対応(ObservableCollectionについては発生しないはず)
+                            throw new NotSupportedException("Not supported differ in the index before and after the change.");
                         }
 
-                        if (oldItems.Length != newItems.Length)
+                        var oldItem = Views.First(t => oldModels.Contains(t.Model));
+                        // ?? が使用できないため3項演算子を使用する
+                        var newItem = Views.Any(t => newModels.Contains(t.Model))
+                            ? Views.First(t => newModels.Contains(t.Model))
+                            : newModels.OfType<T>().Select<T, (T Model, TView View)>(m => (m, Transform(m))).First();
+
+                        var index = e.OldStartingIndex;
+                        if (index == -1)
                         {
-                            OnPropertyChanged(nameof(Count));
+                            index = Views.IndexOf(oldItem);
                         }
+
+                        Views[index] = newItem;
+
                         OnPropertyChanged(IndexerName);
-                        ViewsCollectionChanged?.Invoke(this, new NotifyCollectionViewChangedEventArgs<T, TView>(newItems, oldItems, oldStartingIndex));
-                        CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, newItems.Select(t => t.View).ToList(), oldItems.Select(t => t.View).ToList(), oldStartingIndex));
+                        ViewsCollectionChanged?.Invoke(this, new NotifyCollectionViewChangedEventArgs<T, TView>(newItem, oldItem, index));
+                        CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, newItem.View, oldItem.View, index));
                     }
                     break;
                 case NotifyCollectionChangedAction.Add:
