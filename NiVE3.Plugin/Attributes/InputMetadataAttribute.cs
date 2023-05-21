@@ -10,6 +10,11 @@ namespace NiVE3.Plugin.Attributes
     public interface IInputMetadata
     {
         /// <summary>
+        /// 入力プラグインの型
+        /// </summary>
+        Type PluginType { get; }
+
+        /// <summary>
         /// 入力プラグインの表示名
         /// </summary>
         string Name { get; }
@@ -33,7 +38,7 @@ namespace NiVE3.Plugin.Attributes
         /// <summary>
         /// 読み込み時の設定画面が存在するかどうか
         /// </summary>
-        bool HasSettingWindow { get; }
+        bool HasSettingView { get; }
     }
 
     /// <summary>
@@ -43,6 +48,8 @@ namespace NiVE3.Plugin.Attributes
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
     public class InputMetadataAttribute : Attribute, IInputMetadata
     {
+        public Type PluginType { get; }
+
         public string Name { get; }
 
         public string Author { get; }
@@ -51,23 +58,25 @@ namespace NiVE3.Plugin.Attributes
 
         public string SupportedFileType { get; }
 
-        public bool HasSettingWindow { get; }
+        public bool HasSettingView { get; }
 
         /// <summary>
         /// コンストラクタ
         /// </summary>
+        /// <param name="pluginType">入力プラグインの型</param>
         /// <param name="name">入力プラグインの名前</param>
         /// <param name="author">入力プラグインの作成者</param>
         /// <param name="inputUuid">入力プラグインの識別のためのGuid</param>
         /// <param name="supportedFileType">対応するファイルの拡張子</param>
-        /// <param name="hasSettingWindow">読み込み時の設定画面が存在するかどうか</param>
-        public InputMetadataAttribute(string name, string author, string inputUuid, string supportedFileType, bool hasSettingWindow = false)
+        /// <param name="hasSettingView">読み込み時の設定画面が存在するかどうか</param>
+        public InputMetadataAttribute(Type pluginType, string name, string author, string inputUuid, string supportedFileType, bool hasSettingView = false)
         {
+            PluginType = pluginType;
             Name = name;
             Author = author;
             InputUuid = inputUuid;
             SupportedFileType = supportedFileType;
-            HasSettingWindow = hasSettingWindow;
+            HasSettingView = hasSettingView;
         }
     }
 }

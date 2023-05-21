@@ -40,10 +40,17 @@ namespace NiVE3.Plugin.Interfaces
         double Duration { get; }
 
         /// <summary>
+        /// 対応するファイルの拡張子
+        /// 書式はOpenFileDialog.Filterに合わせる必要があります
+        /// </summary>
+        string SupportedFileExtensions { get; }
+
+        /// <summary>
         /// ファイルを読み込みます
         /// </summary>
         /// <param name="filePath">読み込むファイルのパス</param>
-        void Load(string filePath);
+        /// <returns>読み込みが成功した場合はtrue(HasSettingViewがtrueの場合は、GetLoadSettingを呼び出しても問題ない場合)、そうでない場合はfalse</returns>
+        bool Load(string filePath);
 
         /// <summary>
         /// ファイルから画像を読み込みます
@@ -64,13 +71,23 @@ namespace NiVE3.Plugin.Interfaces
         /// 入力プラグインの状態を読み込みます
         /// </summary>
         /// <param name="data">読み込む入力プラグインの状態を表すobject</param>
-        void LoadData(object? data) { }
+        /// <returns>プラグインの初期化、およびファイルの読み込みが完了した場合はtrue、そうでない場合はfalse</returns>
+        bool LoadData(object? data) => true;
 
         /// <summary>
-        /// 入力プラグインの設定画面を表示するためのウインドウを取得します
-        /// InputMetadataAttribute.HasSettingWindowがtrueの時のみ、Loadメソッド呼び出し後に呼ばれます
+        /// 入力プラグインの設定画面を表示するためのウインドウを取得します。
+        /// InputMetadataAttribute.HasSettingViewがtrueの時のみ、Loadメソッド呼び出し後に呼ばれます。
         /// </summary>
-        /// <returns>入力プラグインの設定画面のWindow</returns>
-        Window? ShowLoadSetting() => null;
+        /// <param name="compositionSize">現在開いているコンポジションのサイズ。開いていない場合はnull。</param>
+        /// <returns>入力プラグインの設定画面のView。ファイルによって設定画面が存在しない場合はnull</returns>
+        FrameworkElement? GetLoadSetting(Size? compositionSize) => null;
+
+        /// <summary>
+        /// 入力プラグインの読み込み時の設定を適用します。
+        /// GetLoadSettingで取得したViewを表示後、ユーザーによってOKが選択されたときに呼び出されます。
+        /// </summary>
+        /// <param name="setting">GetLoadSettingで取得したViewのDataContext</param>
+        /// <returns>設定を反映し、ファイルの読み込みが完了した場合はtrue、そうでない場合はfalse</returns>
+        bool ApplyLoadSetting(object? setting) => true;
     }
 }

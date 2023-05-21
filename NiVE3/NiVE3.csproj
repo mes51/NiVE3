@@ -22,4 +22,8 @@
 	  <ProjectReference Include="..\NiVE3.SourceGenerator.ViewModelWireGenerator\NiVE3.SourceGenerator.ViewModelWireGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="DialogService\" />
+  </ItemGroup>
+
 </Project>

@@ -1,6 +1,8 @@
 ﻿using DryIoc;
 using NiVE3.Model;
+using NiVE3.View.Dialog;
 using NiVE3.ViewModel;
+using NiVE3.ViewModel.Dialog;
 using Prism.Ioc;
 using Prism.Modularity;
 using Prism.Regions;
@@ -47,6 +49,8 @@ namespace NiVE3.Module
 
             Container.Register<PreviewViewModel>(Reuse.Transient, FactoryMethod.ConstructorWithResolvableArguments);
             Container.Register<TimelineViewModel>(Reuse.Transient, FactoryMethod.ConstructorWithResolvableArguments);
+
+            containerRegistry.RegisterDialog<InputSettingView, InputSettingViewModel>();
         }
     }
 }

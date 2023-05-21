@@ -12,8 +12,11 @@ using NiVE3.Config;
 using NiVE3.Model;
 using NiVE3.Mvvm;
 using NiVE3.View.Command;
+using NiVE3.View.Dialog;
 using NiVE3.View.Dock;
+using NiVE3.ViewModel.Dialog;
 using Prism.Commands;
+using Prism.Services.Dialogs;
 
 namespace NiVE3.ViewModel
 {
@@ -101,11 +104,14 @@ namespace NiVE3.ViewModel
 
         FootageListModel FootageListModel { get; }
 
+        IDialogService DialogService { get; }
+
 #pragma warning disable CS8618 // 各フィールドには初期化時に必ず値を代入するため無視
-        public FootageListViewModel(FootageListModel footageListModel)
+        public FootageListViewModel(FootageListModel footageListModel, IDialogService dialogService)
 #pragma warning restore CS8618
         {
             FootageListModel = footageListModel;
+            DialogService = dialogService;
             Footages = footageListModel.Footages.CreateViewCollection<IFootageModel, IFootageViewModel>(m => m is FootageModel ? new FootageViewModel((FootageModel)m) : new FootageFolderViewModel((FootageFolderModel)m));
 
             Title = "フッテージ";
@@ -150,6 +156,8 @@ namespace NiVE3.ViewModel
                     EditingFootage = null;
                 }
             });
+
+            FootageListModel.ShowLoadSetting += FootageListModel_ShowLoadSetting;
         }
 
         public void DragOver(IDropInfo dropInfo)
@@ -204,6 +212,17 @@ namespace NiVE3.ViewModel
             }
 
             return false;
+        }
+
+        private void FootageListModel_ShowLoadSetting(object? sender, ShowLoadSettingEventArgs e)
+        {
+            var param = new DialogParameters
+            {
+                { nameof(InputSettingViewModel.SettingView), e.View }
+            };
+            IDialogResult? result = null;
+            DialogService.ShowDialog(nameof(InputSettingView), param, r => result = r);
+            e.IsOK = result?.Result == ButtonResult.OK;
         }
     }
 }

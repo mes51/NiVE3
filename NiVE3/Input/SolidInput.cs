@@ -8,20 +8,23 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using ILGPU.Runtime;
+using NiVE3.Data;
 using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Image;
 using NiVE3.Plugin.Interfaces;
+using NiVE3.View.Input;
+using NiVE3.ViewModel.Input;
 
 namespace NiVE3.Input
 {
     [Export(typeof(IInput))]
-    [InputMetadata("SolidInput", "mes51", ID, "", true)]
+    [InputMetadata(typeof(SolidInput), "SolidInput", "mes51", ID, "", true)]
     [InternalInput]
     class SolidInput : IInput
     {
         const string ID = "08FE7B2F-4FC5-419B-8CE0-A9262348D630";
 
-        public string FilePath => "平面";
+        public string FilePath { get; private set; } = "平面";
 
         public double FrameRate => 0.0;
 
@@ -31,11 +34,17 @@ namespace NiVE3.Input
 
         public int Height { get; private set; }
 
-        public void Load(string filePath)
+        public string SupportedFileExtensions => "";
+
+        FloatColor Color { get; set; } = new FloatColor(0.0F, 0.0F, 0.0F, 1.0F);
+
+        public bool Load(string filePath)
         {
             // TODO
             Width = 1920;
             Height = 1080;
+
+            return true;
         }
 
         public NImage Read(double time, bool toGpu)
@@ -56,9 +65,25 @@ namespace NiVE3.Input
 
         public void Dispose() { }
 
-        public Window? ShowLoadSetting()
+        public FrameworkElement? GetLoadSetting(Size? compositionSize)
         {
-            return null; // TODO
+            return new SolidSettingView { DataContext = new SolidSettingViewModel() };
+        }
+
+        public bool ApplyLoadSetting(object? setting)
+        {
+            if (setting is SolidSettingViewModel vm)
+            {
+                FilePath = vm.Name;
+                Width = vm.Width;
+                Height = vm.Height;
+                Color = vm.Color;
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 }

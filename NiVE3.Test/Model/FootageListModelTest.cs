@@ -18,7 +18,7 @@ namespace NiVE3.Test.Model
     }
 
     [Export(typeof(IInput))]
-    [InputMetadata("TestInput", "mes51", ID, "*.*")]
+    [InputMetadata(typeof(TestInput), "TestInput", "mes51", ID, "*.*")]
     public class TestInput : IInput
     {
         public const string ID = "D0D13BF8-2486-4452-840E-0AB4C5CC8745";
@@ -33,14 +33,16 @@ namespace NiVE3.Test.Model
 
         public int Height => throw new NotImplementedException();
 
+        public string SupportedFileExtensions => throw new NotImplementedException();
+
         public void Dispose()
         {
             throw new NotImplementedException();
         }
 
-        public void Load(string filePath)
+        public bool Load(string filePath)
         {
-            throw new NotImplementedException();
+            return true;
         }
 
         public NImage Read(double time, bool toGpu)

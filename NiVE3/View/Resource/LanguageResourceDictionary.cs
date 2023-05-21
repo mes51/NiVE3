@@ -47,6 +47,33 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("コメント")]
         public static readonly string FootageListView_FootageComment = nameof(FootageListView_FootageComment);
 
+        [ShowInMarkup, DefaultValue("名前:")]
+        public static readonly string SolidInputSettingView_FootageName = nameof(SolidInputSettingView_FootageName);
+
+        [ShowInMarkup, DefaultValue("サイズ")]
+        public static readonly string SolidInputSettingView_Group_Size = nameof(SolidInputSettingView_Group_Size);
+
+        [ShowInMarkup, DefaultValue("カラー")]
+        public static readonly string SolidInputSettingView_Group_Color = nameof(SolidInputSettingView_Group_Color);
+
+        [ShowInMarkup, DefaultValue("幅:")]
+        public static readonly string SolidInputSettingView_Width = nameof(SolidInputSettingView_Width);
+
+        [ShowInMarkup, DefaultValue("高さ:")]
+        public static readonly string SolidInputSettingView_Height = nameof(SolidInputSettingView_Height);
+
+        [ShowInMarkup, DefaultValue("縦横比を固定する")]
+        public static readonly string SolidInputSettingView_IsFixRatio = nameof(SolidInputSettingView_IsFixRatio);
+
+        [ShowInMarkup, DefaultValue("コンポジションサイズに合わせる")]
+        public static readonly string SolidInputSettingView_FitCompositionSize = nameof(SolidInputSettingView_FitCompositionSize);
+
+        [ShowInMarkup, DefaultValue("OK")]
+        public static readonly string Dialog_OK = nameof(Dialog_OK);
+
+        [ShowInMarkup, DefaultValue("キャンセル")]
+        public static readonly string Dialog_Cancel = nameof(Dialog_Cancel);
+
         static LanguageResourceDictionary()
         {
             LanguageKeys = typeof(LanguageResourceDictionary).GetFields(BindingFlags.Static | BindingFlags.Public)

@@ -9,8 +9,10 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Media.Effects;
 using NiVE3.Extension;
+using NiVE3.Input;
 using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Util;
@@ -20,7 +22,7 @@ namespace NiVE3.Model
 {
     class FootageListModel : BindableBase
     {
-        public IReadOnlyList<IInputMetadata> InputMetadatas { get; }
+        public IReadOnlyDictionary<Type, IInputMetadata> InputMetadatas { get; }
 
         [ImportMany]
         List<ExportFactory<IInput, IInputMetadata>>? Inputs { get; set; }
@@ -46,6 +48,8 @@ namespace NiVE3.Model
             set { SetProperty(ref sortIsAscending, value); }
         }
 
+        public event EventHandler<ShowLoadSettingEventArgs>? ShowLoadSetting;
+
         public FootageListModel()
         {
             var pluginCatalog = new DirectoryCatalog(Paths.PluginDirectory);
@@ -56,11 +60,11 @@ namespace NiVE3.Model
 
             if (Inputs != null)
             {
-                InputMetadatas = Inputs.Select(e => e.Metadata).ToList();
+                InputMetadatas = Inputs.Select(e => e.Metadata).ToDictionary(m => m.PluginType, m => m);
             }
             else
             {
-                InputMetadatas = new List<IInputMetadata>();
+                InputMetadatas = new ReadOnlyDictionary<Type, IInputMetadata>(new Dictionary<Type, IInputMetadata>());
             }
 
             //TODO: イベントの追加方法をfieldに対し行うか、nullableにした上でコンストラクタでインスタンスをセットするのが良いか
@@ -71,9 +75,8 @@ namespace NiVE3.Model
 
         public void AddSolid()
         {
-            var testInput = new Input.SolidInput();
-            testInput.Load("");
-            AddFootage(new FootageModel(testInput));
+            var solidInput = new SolidInput();
+            LoadFile(solidInput, "");
         }
 
         public void AddFolder()
@@ -132,6 +135,39 @@ namespace NiVE3.Model
                 .Select(f => FindParent(targetId, f))
                 .SkipWhile(p => p == null)
                 .FirstOrDefault();
+        }
+
+        void LoadFile(IInput plugin, string fileName)
+        {
+            if (!plugin.Load(fileName))
+            {
+                plugin.Dispose();
+                return;
+            }
+
+            if (InputMetadatas[plugin.GetType()].HasSettingView)
+            {
+                // TODO: コンポジションサイズをとってくる
+                var view = plugin.GetLoadSetting(null);
+                if (view != null)
+                {
+                    var e = new ShowLoadSettingEventArgs(view);
+                    ShowLoadSetting?.Invoke(this, e);
+                    if (!e.IsOK)
+                    {
+                        plugin.Dispose();
+                        return;
+                    }
+
+                    if (!plugin.ApplyLoadSetting(view.DataContext))
+                    {
+                        plugin.Dispose();
+                        return;
+                    }
+                }
+            }
+
+            AddFootage(new FootageModel(plugin));
         }
 
         void AddFootage(IFootageModel footage)
@@ -261,5 +297,17 @@ namespace NiVE3.Model
                     return x.Name.CompareTo(y.Name);
             }
         }
+    }
+
+    class ShowLoadSettingEventArgs : EventArgs
+    {
+        public ShowLoadSettingEventArgs(FrameworkElement view)
+        {
+            View = view;
+        }
+
+        public FrameworkElement View { get; }
+
+        public bool IsOK { get; set; }
     }
 }
