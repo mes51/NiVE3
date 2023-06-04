@@ -39,7 +39,7 @@ namespace NiVE3.Plugin.Image
 
         internal NImage(int width, int height)
         {
-            if (width * height < MaxPixelCount)
+            if (width * height > MaxPixelCount)
             {
                 throw new ArgumentException("画像のピクセル数がMaxPixelCountを超えています");
             }

@@ -27,25 +27,28 @@ namespace NiVE3.View.Resource
             };
         }
 
-        public override DataTemplate SelectTemplate(object item, DependencyObject container)
+        public override DataTemplate SelectTemplate(object? item, DependencyObject container)
         {
-            var type = item.GetType();
-
-            // concrete type
-            foreach (var template in Templates)
+            if (item != null)
             {
-                if (template.DataType is Type dt && dt == type)
+                var type = item.GetType();
+
+                // concrete type
+                foreach (var template in Templates)
                 {
-                    return template;
+                    if (template.DataType is Type dt && dt == type)
+                    {
+                        return template;
+                    }
                 }
-            }
 
-            // assignable type
-            foreach (var template in Templates)
-            {
-                if (template.DataType is Type dt && type.IsAssignableTo(dt))
+                // assignable type
+                foreach (var template in Templates)
                 {
-                    return template;
+                    if (template.DataType is Type dt && type.IsAssignableTo(dt))
+                    {
+                        return template;
+                    }
                 }
             }
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -6,9 +7,13 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Input;
+using System.Windows;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using NiVE3.Model;
 using NiVE3.Mvvm;
+using NiVE3.Plugin.Image;
+using NiVE3.Plugin.Interfaces;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
 using Prism.Commands;
 using Prism.Mvvm;
@@ -33,9 +38,13 @@ namespace NiVE3.ViewModel
 
         string Comment { get; set; }
 
+        InputType InputType { get; }
+
         string? EditingPropertyName { get; }
 
         bool IsFolder { get; }
+
+        BitmapSource? SampleImage { get; }
 
         void BeginEditProperty(string propertyName);
 
@@ -110,6 +119,14 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref comment, value); }
         }
 
+        private InputType inputType;
+        [NeedWire(nameof(Footage), IsOneWay = true)]
+        public InputType InputType
+        {
+            get { return inputType; }
+            set { SetProperty(ref inputType, value); }
+        }
+
         private string? editingPropertyName;
         public string? EditingPropertyName
         {
@@ -118,6 +135,13 @@ namespace NiVE3.ViewModel
         }
 
         public bool IsFolder => false;
+
+        private BitmapSource? sampleImage;
+        public BitmapSource? SampleImage
+        {
+            get { return sampleImage; }
+            set { SetProperty(ref sampleImage, value); }
+        }
 
         public ObservableCollectionView<IFootageModel, IFootageViewModel>? Footages => null;
 
@@ -137,6 +161,9 @@ namespace NiVE3.ViewModel
             FilePath = footage.FilePath;
             FileExtension = Path.GetExtension(footage.FilePath);
             Comment = footage.Comment;
+            InputType = footage.InputType;
+
+            UpdateSampleImage();
 
             WiringModel();
 
@@ -148,6 +175,7 @@ namespace NiVE3.ViewModel
             if (e.PropertyName == nameof(FilePath))
             {
                 FileExtension = Path.GetExtension(FilePath);
+                UpdateSampleImage();
             }
         }
 
@@ -163,6 +191,29 @@ namespace NiVE3.ViewModel
             // TODO: ヒストリの確定
 
             EditingPropertyName = null;
+        }
+
+        void UpdateSampleImage()
+        {
+            if (Footage.InputType == InputType.Image || (Footage.InputType & InputType.Video) != InputType.None)
+            {
+                using var image = Footage.ReadImage(Duration * 0.5, false) as NManagedImage;
+                if (image != null)
+                {
+                    var dataSize = image.DataLength;
+                    var floatData = image.GetData();
+                    var data = ArrayPool<byte>.Shared.Rent(dataSize);
+                    for (var i = 0; i < dataSize; i++)
+                    {
+                        // TODO: SDR変換を入れるかどうか
+                        data[i] = (byte)MathF.Round(floatData[i] * 255.0F);
+                    }
+                    var writable = new WriteableBitmap(image.Width, image.Height, 96.0, 96.0, PixelFormats.Bgra32, null);
+                    writable.WritePixels(new Int32Rect(0, 0, image.Width, image.Height), data, image.Width * 4, 0);
+                    SampleImage = writable;
+                    ArrayPool<byte>.Shared.Return(data);
+                }
+            }
         }
     }
 
@@ -197,6 +248,8 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref comment, value); }
         }
 
+        public InputType InputType => InputType.None;
+
         private ObservableCollectionView<IFootageModel, IFootageViewModel> footages;
         public ObservableCollectionView<IFootageModel, IFootageViewModel> Footages
         {
@@ -212,6 +265,8 @@ namespace NiVE3.ViewModel
         }
 
         public bool IsFolder => true;
+
+        public BitmapSource? SampleImage => null;
 
         FootageFolderModel Folder { get; }
 

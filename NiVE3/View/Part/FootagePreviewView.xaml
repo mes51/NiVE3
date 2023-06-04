@@ -1,0 +1,126 @@
+﻿<UserControl x:Class="NiVE3.View.Part.FootagePreviewView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:NiVE3.View.Part"
+             xmlns:vm="clr-namespace:NiVE3.ViewModel"
+             xmlns:cv="clr-namespace:NiVE3.View.Converter"
+             xmlns:r="clr-namespace:NiVE3.View.Resource"
+             xmlns:plg="clr-namespace:NiVE3.Plugin.Interfaces;assembly=NiVE3.Plugin"
+             mc:Ignorable="d" 
+             x:Name="Root"
+             Height="80"
+             d:DesignWidth="800" ClipToBounds="True">
+    <UserControl.Resources>
+        <cv:WidthHeightConverter x:Key="WidthHeightConverter"/>
+        <cv:TimeConverter x:Key="TimeConverter"/>
+
+        <r:DataTemplateCollection x:Key="PreviewTemplateSelector">
+            <DataTemplate DataType="{x:Type vm:FootageViewModel}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+
+                    <Image Grid.Column="0" Source="{Binding SampleImage}" Stretch="Uniform" Width="100" Margin="0,0,5,0"/>
+                    <Grid Grid.Column="1" Margin="5,0,0,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Text="{Binding Name}" VerticalAlignment="Top" d:Text="Name"/>
+                        <TextBlock Grid.Row="1" VerticalAlignment="Center" d:Text="1920x1080">
+                            <TextBlock.Style>
+                                <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
+                                    <Setter Property="Text">
+                                        <Setter.Value>
+                                            <MultiBinding Mode="OneWay" Converter="{StaticResource WidthHeightConverter}">
+                                                <Binding Path="Width"/>
+                                                <Binding Path="Height"/>
+                                            </MultiBinding>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding InputType}" Value="{x:Static plg:InputType.Audio}">
+                                            <Setter Property="Text" Value=""/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding InputType}" Value="{x:Static plg:InputType.None}">
+                                            <Setter Property="Text" Value=""/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                        <TextBlock Grid.Row="2" d:Text="0:00:01.00, 30fps" VerticalAlignment="Bottom">
+                            <TextBlock.Style>
+                                <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
+                                    <Setter Property="Text" Value=""/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding InputType}" Value="{x:Static plg:InputType.Audio}">
+                                            <Setter Property="Text">
+                                                <Setter.Value>
+                                                    <MultiBinding Mode="OneWay" Converter="{StaticResource TimeConverter}" StringFormat="{}{0}">
+                                                        <Binding Path="Duration"/>
+                                                        <Binding Path="FrameRate"/>
+                                                    </MultiBinding>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding InputType}" Value="{x:Static plg:InputType.Video}">
+                                            <Setter Property="Text">
+                                                <Setter.Value>
+                                                    <MultiBinding Mode="OneWay" Converter="{StaticResource TimeConverter}" StringFormat="{}{0}, {1}fps">
+                                                        <Binding Path="Duration"/>
+                                                        <Binding Path="FrameRate"/>
+                                                    </MultiBinding>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding InputType}" Value="{x:Static plg:InputType.VideoAndAudio}">
+                                            <Setter Property="Text">
+                                                <Setter.Value>
+                                                    <MultiBinding Mode="OneWay" Converter="{StaticResource TimeConverter}" StringFormat="{}{0}, {1}fps">
+                                                        <Binding Path="Duration"/>
+                                                        <Binding Path="FrameRate"/>
+                                                    </MultiBinding>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Grid>
+                </Grid>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:FootageFolderViewModel}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+
+                    <Image Grid.Column="0" Stretch="Uniform" Width="100" Margin="0,0,5,0"/>
+                    <Grid Grid.Column="1" Margin="5,0,0,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Text="{Binding Name}" VerticalAlignment="Top" d:Text="Name"/>
+                        <TextBlock Grid.Row="1" Text="{Binding Footages.Count, StringFormat={}{0}アイテム}" VerticalAlignment="Center"/>
+                    </Grid>
+                </Grid>
+            </DataTemplate>
+        </r:DataTemplateCollection>
+        
+    </UserControl.Resources>
+    <Grid>
+        <ContentPresenter Content="{Binding ElementName=Root, Path=SelectedFirstFootage}" ContentTemplateSelector="{StaticResource PreviewTemplateSelector}" Margin="10"/>
+    </Grid>
+</UserControl>

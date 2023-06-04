@@ -6,6 +6,7 @@
              xmlns:local="clr-namespace:NiVE3.View.Pane"
              xmlns:vm="clr-namespace:NiVE3.ViewModel"
              xmlns:pv="clr-namespace:NiVE3.View.Primitive"
+             xmlns:pt="clr-namespace:NiVE3.View.Part"
              xmlns:cv="clr-namespace:NiVE3.View.Converter"
              xmlns:a="clr-namespace:NiVE3.Wpf.Attach"
              xmlns:r="clr-namespace:NiVE3.View.Resource"
@@ -88,7 +89,13 @@
         </DataTemplate>
     </UserControl.Resources>
     <Grid>
-        <pv:TreeListView x:Name="FootageTreeListView" ItemsSource="{Binding Footages}" SelectedItems="{Binding ElementName=Root, Path=SelectedItems}" dd:DragDrop.IsDragSource="True" dd:DragDrop.IsDropTarget="True" dd:DragDrop.DropHandler="{Binding}" ItemContainerStyle="{StaticResource ItemContainerStyle}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition />
+        </Grid.RowDefinitions>
+
+        <pt:FootagePreviewView Grid.Row="0" SelectedFootages="{Binding ElementName=Root, Path=SelectedFootages}"/>
+        <pv:TreeListView Grid.Row="1" x:Name="FootageTreeListView" ItemsSource="{Binding Footages}" SelectedItems="{Binding ElementName=Root, Path=SelectedItems}" dd:DragDrop.IsDragSource="True" dd:DragDrop.IsDropTarget="True" dd:DragDrop.DropHandler="{Binding}" ItemContainerStyle="{StaticResource ItemContainerStyle}">
             <pv:TreeListView.Columns>
                 <pv:TreeListExpandableGridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageName}" CellContentTemplate="{StaticResource FootageNameTemplate}" Width="100" ExpanderStyle="{StaticResource TreeListViewItemExpanderStyle}"/>
                 <GridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageFileExtension}" CellTemplateSelector="{StaticResource FileExtensionTemplate}" Width="50" a:GridViewColumnVisibility.Visibility="{Binding ShowFileExtension}"/>

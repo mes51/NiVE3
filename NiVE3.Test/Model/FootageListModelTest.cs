@@ -35,6 +35,8 @@ namespace NiVE3.Test.Model
 
         public string SupportedFileExtensions => throw new NotImplementedException();
 
+        public InputType InputType => throw new NotImplementedException();
+
         public void Dispose()
         {
             throw new NotImplementedException();

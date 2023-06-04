@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Extension;
+using NiVE3.Plugin.Image;
 using NiVE3.Plugin.Interfaces;
 using Prism.Mvvm;
 
@@ -31,6 +32,8 @@ namespace NiVE3.Model
         string Comment { get; set; }
 
         string FileName { get; }
+
+        InputType InputType { get; }
 
         FootageSortKey SortKey { get; set; }
 
@@ -96,6 +99,13 @@ namespace NiVE3.Model
             set { SetProperty(ref comment, value); }
         }
 
+        private InputType inputType;
+        public InputType InputType
+        {
+            get { return inputType; }
+            set { SetProperty(ref inputType, value); }
+        }
+
         private FootageSortKey sortKey;
         public FootageSortKey SortKey
         {
@@ -125,11 +135,17 @@ namespace NiVE3.Model
             FrameRate = input.FrameRate;
             Duration = input.Duration;
             FilePath = input.FilePath;
+            InputType = input.InputType;
         }
 
         public void AddFootage(IFootageModel footage) { }
 
         public void RemoveFootage(IFootageModel footage) { }
+
+        public NImage ReadImage(double time, bool toGpu)
+        {
+            return Input.Read(time, toGpu);
+        }
     }
 
     class FootageFolderModel : BindableBase, IFootageModel
@@ -161,6 +177,8 @@ namespace NiVE3.Model
         }
 
         public string FileName => "";
+
+        public InputType InputType => InputType.None;
 
         private FootageSortKey sortKey;
         public FootageSortKey SortKey

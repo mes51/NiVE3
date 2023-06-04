@@ -33,10 +33,25 @@ namespace NiVE3.View.Pane
             new FrameworkPropertyMetadata(new ObservableCollection<TreeListViewItem>(), SelectedItemChanged)
         );
 
+        private static readonly DependencyPropertyKey SelectedFootagesPropertyKey = DependencyProperty.RegisterReadOnly(
+            nameof(SelectedFootages),
+            typeof(ObservableCollection<IFootageViewModel>),
+            typeof(FootageListView),
+            new FrameworkPropertyMetadata(new ObservableCollection<IFootageViewModel>(), FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        internal static readonly DependencyProperty SelectedFootagesProperty = SelectedFootagesPropertyKey.DependencyProperty;
+
         public ObservableCollection<TreeListViewItem> SelectedItems
         {
             get { return (ObservableCollection<TreeListViewItem>)GetValue(SelectedItemsProperty); }
             set { SetValue(SelectedItemsProperty, value); }
+        }
+
+        internal ObservableCollection<IFootageViewModel> SelectedFootages
+        {
+            get { return (ObservableCollection<IFootageViewModel>)GetValue(SelectedFootagesProperty); }
+            private set { SetValue(SelectedFootagesPropertyKey, value); }
         }
 
         public FootageListView()
@@ -82,6 +97,22 @@ namespace NiVE3.View.Pane
         private void SelectedItems_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             ViewModel?.EndEditPropertyCommand?.Execute(null);
+
+            switch (e.Action)
+            {
+                case NotifyCollectionChangedAction.Reset:
+                    SelectedFootages.Clear();
+                    break;
+                case NotifyCollectionChangedAction.Add when e.NewItems?.OfType<TreeListViewItem>()?.FirstOrDefault()?.DataContext is IFootageViewModel newItem:
+                    SelectedFootages.Add(newItem);
+                    break;
+                case NotifyCollectionChangedAction.Remove when e.OldItems?.OfType<TreeListViewItem>()?.FirstOrDefault()?.DataContext is IFootageViewModel oldItem:
+                    SelectedFootages.Remove(oldItem);
+                    break;
+                case NotifyCollectionChangedAction.Replace when e.NewItems?.OfType<TreeListViewItem>()?.FirstOrDefault()?.DataContext is IFootageViewModel newItem:
+                    SelectedFootages[e.NewStartingIndex] = newItem;
+                    break;
+            }
         }
 
         static void SelectedItemChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)

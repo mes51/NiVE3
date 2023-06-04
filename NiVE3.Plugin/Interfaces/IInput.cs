@@ -40,6 +40,11 @@ namespace NiVE3.Plugin.Interfaces
         double Duration { get; }
 
         /// <summary>
+        /// 読み込んだファイルのメディアの形式
+        /// </summary>
+        InputType InputType { get; }
+
+        /// <summary>
         /// 対応するファイルの拡張子
         /// 書式はOpenFileDialog.Filterに合わせる必要があります
         /// </summary>
@@ -89,5 +94,32 @@ namespace NiVE3.Plugin.Interfaces
         /// <param name="setting">GetLoadSettingで取得したViewのDataContext</param>
         /// <returns>設定を反映し、ファイルの読み込みが完了した場合はtrue、そうでない場合はfalse</returns>
         bool ApplyLoadSetting(object? setting) => true;
+    }
+
+    /// <summary>
+    /// フッテージのメディアの形式を表します。
+    /// </summary>
+    public enum InputType
+    {
+        /// <summary>
+        /// なし
+        /// </summary>
+        None = 0b000,
+        /// <summary>
+        /// 画像
+        /// </summary>
+        Image = 0b001,
+        /// <summary>
+        /// 音声
+        /// </summary>
+        Audio = 0b010,
+        /// <summary>
+        /// ビデオ(音声なし)
+        /// </summary>
+        Video = 0b100,
+        /// <summary>
+        /// ビデオ+音声
+        /// </summary>
+        VideoAndAudio = Video | Audio
     }
 }
