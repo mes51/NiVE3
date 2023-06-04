@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using Prism.Commands;
 using Prism.Mvvm;
@@ -19,8 +20,17 @@ namespace NiVE3.ViewModel.Dialog
         public FrameworkElement? SettingView
         {
             get { return settingView; }
-            set { SetProperty(ref settingView, value); }
+            private set { SetProperty(ref settingView, value); }
         }
+
+        private bool hasErrors;
+        public bool HasErrors
+        {
+            get { return hasErrors; }
+            set { SetProperty(ref hasErrors, value); }
+        }
+
+        int ErrorCount { get; set; }
 
         public event Action<IDialogResult>? RequestClose;
 
@@ -44,7 +54,20 @@ namespace NiVE3.ViewModel.Dialog
 
         public void OnDialogOpened(IDialogParameters parameters)
         {
+            // TODO: 何らか専用のエラー通知プロパティを作ってそこを優先して見る
             SettingView = parameters.GetValue<FrameworkElement>(nameof(SettingView));
+            Validation.AddErrorHandler(SettingView, (sender, e) =>
+            {
+                if (e.Action == ValidationErrorEventAction.Added)
+                {
+                    ErrorCount++;
+                }
+                else
+                {
+                    ErrorCount--;
+                }
+                HasErrors = ErrorCount > 0;
+            });
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -21,13 +22,35 @@ namespace NiVE3.View.Converter
         {
             if (value is string str)
             {
-                // TODO: 式のparse&計算
-                if (int.TryParse(str, out var parsedValue))
+                try
                 {
-                    return parsedValue;
+                    var result = new DataTable().Compute(str, null);
+                    switch (result)
+                    {
+                        case byte v:
+                            return (int)v;
+                        case short v:
+                            return (int)v;
+                        case int v:
+                            return v;
+                        case long v:
+                            return (int)v;
+                        case sbyte v:
+                            return (int)v;
+                        case ushort v:
+                            return (int)v;
+                        case uint v:
+                            return (int)v;
+                        case ulong v:
+                            return (int)v;
+                        case float v:
+                            return (int)v;
+                        case double v:
+                            return (int)v;
+                    }
                 }
+                catch { } // 例外発生時はすべてUnsetValue
             }
-
 
             return DependencyProperty.UnsetValue;
         }
