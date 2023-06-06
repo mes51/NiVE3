@@ -68,6 +68,15 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("コンポジションサイズに合わせる")]
         public static readonly string SolidInputSettingView_FitCompositionSize = nameof(SolidInputSettingView_FitCompositionSize);
 
+        [ShowInMarkup, DefaultValue("{0}, {1}fps")]
+        public static readonly string FootagePreviewView_TimeFormat = nameof(FootagePreviewView_TimeFormat);
+
+        [ShowInMarkup, DefaultValue("{0}アイテム")]
+        public static readonly string FootagePreviewView_FolderItemCount = nameof(FootagePreviewView_FolderItemCount);
+
+        [ShowInMarkup, DefaultValue("{0}アイテム選択中")]
+        public static readonly string FootagePreviewView_SelectedItemCount = nameof(FootagePreviewView_SelectedItemCount);
+
         [ShowInMarkup, DefaultValue("OK")]
         public static readonly string Dialog_OK = nameof(Dialog_OK);
 

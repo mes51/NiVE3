@@ -7,6 +7,7 @@
              xmlns:vm="clr-namespace:NiVE3.ViewModel"
              xmlns:cv="clr-namespace:NiVE3.View.Converter"
              xmlns:r="clr-namespace:NiVE3.View.Resource"
+             xmlns:mg="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
              xmlns:plg="clr-namespace:NiVE3.Plugin.Interfaces;assembly=NiVE3.Plugin"
              mc:Ignorable="d" 
              x:Name="Root"
@@ -15,6 +16,31 @@
     <UserControl.Resources>
         <cv:WidthHeightConverter x:Key="WidthHeightConverter"/>
         <cv:TimeConverter x:Key="TimeConverter"/>
+        <cv:LocalizationConverter x:Key="LocalizedTimeConverter">
+            <cv:LocalizationConverter.MultiValueConverter>
+                <cv:TimeConverter />
+            </cv:LocalizationConverter.MultiValueConverter>
+        </cv:LocalizationConverter>
+        <cv:LocalizationConverter x:Key="FolderItemCountConverter" LocalizeFormat="{mg:LanguageResource ResourceKey=FootagePreviewView_FolderItemCount}"/>
+        <cv:LocalizationConverter x:Key="SelectedItemCountConverter" LocalizeFormat="{mg:LanguageResource ResourceKey=FootagePreviewView_SelectedItemCount}"/>
+
+        <Style x:Key="FootageInfoStyle" TargetType="{x:Type ContentPresenter}">
+            <Setter Property="Visibility" Value="Visible"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ElementName=Root, Path=HasMultipleSelectedFootage}" Value="True">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="MultipleSelectedStyle" TargetType="{x:Type Grid}">
+            <Setter Property="Visibility" Value="Collapsed"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ElementName=Root, Path=HasMultipleSelectedFootage}" Value="True">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
 
         <r:DataTemplateCollection x:Key="PreviewTemplateSelector">
             <DataTemplate DataType="{x:Type vm:FootageViewModel}">
@@ -63,7 +89,7 @@
                                         <DataTrigger Binding="{Binding InputType}" Value="{x:Static plg:InputType.Audio}">
                                             <Setter Property="Text">
                                                 <Setter.Value>
-                                                    <MultiBinding Mode="OneWay" Converter="{StaticResource TimeConverter}" StringFormat="{}{0}">
+                                                    <MultiBinding Mode="OneWay" Converter="{StaticResource TimeConverter}">
                                                         <Binding Path="Duration"/>
                                                         <Binding Path="FrameRate"/>
                                                     </MultiBinding>
@@ -73,7 +99,7 @@
                                         <DataTrigger Binding="{Binding InputType}" Value="{x:Static plg:InputType.Video}">
                                             <Setter Property="Text">
                                                 <Setter.Value>
-                                                    <MultiBinding Mode="OneWay" Converter="{StaticResource TimeConverter}" StringFormat="{}{0}, {1}fps">
+                                                    <MultiBinding Mode="OneWay" Converter="{StaticResource LocalizedTimeConverter}">
                                                         <Binding Path="Duration"/>
                                                         <Binding Path="FrameRate"/>
                                                     </MultiBinding>
@@ -83,7 +109,7 @@
                                         <DataTrigger Binding="{Binding InputType}" Value="{x:Static plg:InputType.VideoAndAudio}">
                                             <Setter Property="Text">
                                                 <Setter.Value>
-                                                    <MultiBinding Mode="OneWay" Converter="{StaticResource TimeConverter}" StringFormat="{}{0}, {1}fps">
+                                                    <MultiBinding Mode="OneWay" Converter="{StaticResource LocalizedTimeConverter}">
                                                         <Binding Path="Duration"/>
                                                         <Binding Path="FrameRate"/>
                                                     </MultiBinding>
@@ -113,14 +139,17 @@
                         </Grid.RowDefinitions>
 
                         <TextBlock Grid.Row="0" Text="{Binding Name}" VerticalAlignment="Top" d:Text="Name"/>
-                        <TextBlock Grid.Row="1" Text="{Binding Footages.Count, StringFormat={}{0}アイテム}" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="1" Text="{Binding Footages.Count, Converter={StaticResource FolderItemCountConverter}}" VerticalAlignment="Center"/>
                     </Grid>
                 </Grid>
             </DataTemplate>
         </r:DataTemplateCollection>
         
     </UserControl.Resources>
-    <Grid>
-        <ContentPresenter Content="{Binding ElementName=Root, Path=SelectedFirstFootage}" ContentTemplateSelector="{StaticResource PreviewTemplateSelector}" Margin="10"/>
+    <Grid Margin="10">
+        <ContentPresenter Content="{Binding ElementName=Root, Path=SelectedFirstFootage}" ContentTemplateSelector="{StaticResource PreviewTemplateSelector}" Style="{StaticResource FootageInfoStyle}"/>
+        <Grid Style="{StaticResource MultipleSelectedStyle}">
+            <TextBlock Text="{Binding ElementName=Root, Path=SelectedFootages.Count, Converter={StaticResource SelectedItemCountConverter}}" Margin="105,0,0,0" VerticalAlignment="Top"/>
+        </Grid>
     </Grid>
 </UserControl>

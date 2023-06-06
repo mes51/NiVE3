@@ -39,6 +39,13 @@ namespace NiVE3.View.Part
 
         internal static readonly DependencyProperty SelectedFirstFootageProperty = SelectedFirstFootagePropertyKey.DependencyProperty;
 
+        private static readonly DependencyPropertyKey HasMultipleSelectedFootagePropertyKey = DependencyProperty.RegisterReadOnly(
+            nameof(HasMultipleSelectedFootage),
+            typeof(bool),
+            typeof(FootagePreviewView),
+            new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
         internal ObservableCollection<IFootageViewModel> SelectedFootages
         {
             get { return (ObservableCollection<IFootageViewModel>)GetValue(SelectedFootagesProperty); }
@@ -51,6 +58,14 @@ namespace NiVE3.View.Part
             private set { SetValue(SelectedFirstFootagePropertyKey, value); }
         }
 
+        public static readonly DependencyProperty HasMultipleSelectedFootageProperty = HasMultipleSelectedFootagePropertyKey.DependencyProperty;
+
+        public bool HasMultipleSelectedFootage
+        {
+            get { return (bool)GetValue(HasMultipleSelectedFootageProperty); }
+            private set { SetValue(HasMultipleSelectedFootagePropertyKey, value); }
+        }
+
         public FootagePreviewView()
         {
             InitializeComponent();
@@ -59,6 +74,7 @@ namespace NiVE3.View.Part
         private void SelectedFootages_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             SelectedFirstFootage = SelectedFootages?.FirstOrDefault();
+            HasMultipleSelectedFootage = (SelectedFootages?.Count ?? 0) > 1;
         }
 
         static void SelectedItemsChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
