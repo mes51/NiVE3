@@ -16,7 +16,7 @@
     <UserControl.Resources>
         <cv:WidthHeightConverter x:Key="WidthHeightConverter"/>
         <cv:TimeConverter x:Key="TimeConverter"/>
-        <cv:LocalizationConverter x:Key="LocalizedTimeConverter">
+        <cv:LocalizationConverter x:Key="LocalizedTimeConverter" LocalizeFormat="{mg:LanguageResource ResourceKey=FootagePreviewView_TimeFormat}">
             <cv:LocalizationConverter.MultiValueConverter>
                 <cv:TimeConverter />
             </cv:LocalizationConverter.MultiValueConverter>

@@ -31,7 +31,7 @@ namespace NiVE3.Plugin.Attributes
         string InputUuid { get; }
 
         /// <summary>
-        /// 対応するファイルの拡張子。フォーマットはOpenFileDialogのFilterの構文に準じます
+        /// 対応するファイルの拡張子。複数ある場合はカンマ(,)で区切ります。
         /// </summary>
         string SupportedFileType { get; }
 

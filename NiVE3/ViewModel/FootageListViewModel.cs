@@ -102,6 +102,8 @@ namespace NiVE3.ViewModel
 
         public ICommand EndEditPropertyCommand { get; }
 
+        public ICommand LoadFileCommand { get; }
+
         FootageListModel FootageListModel { get; }
 
         IDialogService DialogService { get; }
@@ -157,6 +159,11 @@ namespace NiVE3.ViewModel
                 }
             });
 
+            LoadFileCommand = new DelegateCommand<Tuple<string, Guid?>>(t =>
+            {
+                FootageListModel.LoadFile(t.Item1, t.Item2);
+            });
+
             FootageListModel.ShowLoadSetting += FootageListModel_ShowLoadSetting;
         }
 
@@ -167,10 +174,18 @@ namespace NiVE3.ViewModel
 
             if (source == null)
             {
-                return;
-            }
+                if (dropInfo.Data is IDataObject dataObject && dataObject.GetData(DataFormats.FileDrop) is string[] files)
+                {
+                    if (files.Any(f => !FootageListModel.CheckSupportFile(f)))
+                    {
+                        return;
+                    }
 
-            if (target is not IFootageViewModel targetFootage || (source.FootageId != targetFootage.FootageId && targetFootage.IsFolder))
+                    dropInfo.Effects |= DragDropEffects.Copy;
+                    dropInfo.DropTargetAdorner = DropTargetAdorners.Highlight;
+                }
+            }
+            else if (target is not IFootageViewModel targetFootage || (source.FootageId != targetFootage.FootageId && targetFootage.IsFolder))
             {
                 if (source is not FootageFolderViewModel sourceFolder || !IsContainsTree(sourceFolder.Footages, target))
                 {
@@ -187,10 +202,16 @@ namespace NiVE3.ViewModel
 
             if (source == null)
             {
-                return;
+                if (dropInfo.Data is IDataObject dataObject && dataObject.GetData(DataFormats.FileDrop) is string[] files)
+                {
+                    var targetFolderId = (target as IFootageViewModel)?.FootageId;
+                    foreach (var f in files)
+                    {
+                        LoadFileCommand.Execute(Tuple.Create(f, targetFolderId));
+                    }
+                }
             }
-
-            if (target is not IFootageViewModel targetFootage || (source.FootageId != targetFootage.FootageId && targetFootage.IsFolder))
+            else if (target is not IFootageViewModel targetFootage || (source.FootageId != targetFootage.FootageId && targetFootage.IsFolder))
             {
                 if (source is FootageFolderViewModel sourceFolder && IsContainsTree(sourceFolder.Footages, target))
                 {

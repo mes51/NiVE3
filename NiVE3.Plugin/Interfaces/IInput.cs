@@ -45,15 +45,9 @@ namespace NiVE3.Plugin.Interfaces
         InputType InputType { get; }
 
         /// <summary>
-        /// 対応するファイルの拡張子
-        /// 書式はOpenFileDialog.Filterに合わせる必要があります
-        /// </summary>
-        string SupportedFileExtensions { get; }
-
-        /// <summary>
         /// ファイルを読み込みます
         /// </summary>
-        /// <param name="filePath">読み込むファイルのパス</param>
+        /// <param name="filePath">読み込むファイルのパス。ファイルはすでに存在チェック済みになります。</param>
         /// <returns>読み込みが成功した場合はtrue(HasSettingViewがtrueの場合は、GetLoadSettingを呼び出しても問題ない場合)、そうでない場合はfalse</returns>
         bool Load(string filePath);
 

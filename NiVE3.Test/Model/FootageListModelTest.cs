@@ -33,8 +33,6 @@ namespace NiVE3.Test.Model
 
         public int Height => throw new NotImplementedException();
 
-        public string SupportedFileExtensions => throw new NotImplementedException();
-
         public InputType InputType => throw new NotImplementedException();
 
         public void Dispose()

@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -48,6 +49,8 @@ namespace NiVE3.Model
             set { SetProperty(ref sortIsAscending, value); }
         }
 
+        Dictionary<Type, string[]> SupportedFileTypes { get; }
+
         public event EventHandler<ShowLoadSettingEventArgs>? ShowLoadSetting;
 
         public FootageListModel()
@@ -67,6 +70,8 @@ namespace NiVE3.Model
                 InputMetadatas = new ReadOnlyDictionary<Type, IInputMetadata>(new Dictionary<Type, IInputMetadata>());
             }
 
+            SupportedFileTypes = InputMetadatas.ToDictionary(m => m.Key, m => m.Value.SupportedFileType.Split(",").Select(e => e.Trim('*', '.')).ToArray());
+
             //TODO: イベントの追加方法をfieldに対し行うか、nullableにした上でコンストラクタでインスタンスをセットするのが良いか
             Footages = new ObservableCollection<IFootageModel>();
 
@@ -76,12 +81,12 @@ namespace NiVE3.Model
         public void AddSolid()
         {
             var solidInput = new SolidInput();
-            LoadFile(solidInput, "");
+            LoadFile(solidInput, "", null);
         }
 
         public void AddFolder()
         {
-            AddFootage(new FootageFolderModel());
+            AddFootage(new FootageFolderModel(), null);
         }
 
         public void MoveFootage(Guid sourceFootageId, Guid targetFolderId)
@@ -123,6 +128,39 @@ namespace NiVE3.Model
             }
         }
 
+        public bool CheckSupportFile(string filePath)
+        {
+            var ext = Path.GetExtension(filePath).Trim('.');
+            return SupportedFileTypes.Values.Any(e => e.Contains(ext));
+        }
+
+        public void LoadFile(string filePath, Guid? targetFolderId)
+        {
+            if (Inputs == null || !File.Exists(filePath))
+            {
+                return;
+            }
+
+            var ext = Path.GetExtension(filePath).Trim('.');
+            foreach (var (t, supported) in SupportedFileTypes)
+            {
+                if (!supported.Contains(ext))
+                {
+                    continue;
+                }
+
+                var context = Inputs.First(i => i.Metadata.PluginType == t).CreateExport();
+                if (LoadFile(context.Value, filePath, targetFolderId))
+                {
+                    break;
+                }
+                else
+                {
+                    context.Dispose();
+                }
+            }
+        }
+
         FootageFolderModel? FindParent(Guid targetId)
         {
             // rootの場合はnull
@@ -137,12 +175,12 @@ namespace NiVE3.Model
                 .FirstOrDefault();
         }
 
-        void LoadFile(IInput plugin, string fileName)
+        bool LoadFile(IInput plugin, string fileName, Guid? targetFolderId)
         {
             if (!plugin.Load(fileName))
             {
                 plugin.Dispose();
-                return;
+                return false;
             }
 
             if (InputMetadatas[plugin.GetType()].HasSettingView)
@@ -156,25 +194,33 @@ namespace NiVE3.Model
                     if (!e.IsOK)
                     {
                         plugin.Dispose();
-                        return;
+                        return false;
                     }
 
                     if (!plugin.ApplyLoadSetting(view.DataContext))
                     {
                         plugin.Dispose();
-                        return;
+                        return false;
                     }
                 }
             }
 
-            AddFootage(new FootageModel(plugin));
+            AddFootage(new FootageModel(plugin), targetFolderId);
+            return false;
         }
 
-        void AddFootage(IFootageModel footage)
+        void AddFootage(IFootageModel footage, Guid? targetFolderId)
         {
             footage.SortKey = SortKey;
             footage.SortIsAscending = SortIsAscending;
-            AddFootageToRoot(footage);
+            if (targetFolderId.HasValue && FindModel(targetFolderId.Value, Footages) is FootageFolderModel folder)
+            {
+                folder.AddFootage(footage);
+            }
+            else
+            {
+                AddFootageToRoot(footage);
+            }
         }
 
         void AddFootageToRoot(IFootageModel footage)

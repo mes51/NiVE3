@@ -34,8 +34,6 @@ namespace NiVE3.Input
 
         public int Height { get; private set; }
 
-        public string SupportedFileExtensions => "";
-
         FloatColor Color { get; set; } = new FloatColor(0.0F, 0.0F, 0.0F, 1.0F);
 
         public InputType InputType => InputType.Image;

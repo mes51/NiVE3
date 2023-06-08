@@ -94,7 +94,7 @@ namespace NiVE3.View.Converter
                 var convertedValue = converter.Convert(values, TargetType ?? DefaultTargetType ?? targetType, parameter, culture);
                 if (format != null)
                 {
-                    return string.Format(format, convertedValue);
+                    return string.Format(format, values.Skip(1).Prepend(convertedValue).ToArray());
                 }
                 else
                 {
