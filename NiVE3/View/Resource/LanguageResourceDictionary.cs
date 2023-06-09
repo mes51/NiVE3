@@ -77,6 +77,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("{0}アイテム選択中")]
         public static readonly string FootagePreviewView_SelectedItemCount = nameof(FootagePreviewView_SelectedItemCount);
 
+        [ShowInMarkup, DefaultValue("色の選択")]
+        public static readonly string ColorPickerWindow_Title = nameof(ColorPickerWindow_Title);
+
         [ShowInMarkup, DefaultValue("OK")]
         public static readonly string Dialog_OK = nameof(Dialog_OK);
 

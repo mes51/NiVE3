@@ -11,6 +11,19 @@
     <UserControl.Resources>
         <Thickness x:Key="ItemMargin">10,10,10,0</Thickness>
         <cv:CalcIntConverter x:Key="CalcIntConverter"/>
+
+        <Style x:Key="ColorChangeButtonStyle" TargetType="{x:Type Button}">
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+                            <Rectangle Fill="{Binding ColorBrush}"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </UserControl.Resources>
     <Grid>
         <Grid>
@@ -60,7 +73,7 @@
                         <ColumnDefinition />
                     </Grid.ColumnDefinitions>
 
-                    <Rectangle Grid.Column="0" Width="48" Height="27" Margin="0,10,5,10" Stroke="Black" StrokeThickness="1" HorizontalAlignment="Right"/>
+                    <Button Grid.Column="0" Width="48" Height="27" Margin="0,10,5,10" HorizontalAlignment="Right" BorderBrush="{gm:AppearanceResource ResourceKey=BorderBrush}" Style="{StaticResource ColorChangeButtonStyle}" Click="ColorChangeButton_Click"/>
                     <Button Grid.Column="1" Width="24" Height="24" Margin="0,10" HorizontalAlignment="Left"/>
                 </Grid>
             </GroupBox>

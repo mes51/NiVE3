@@ -20,6 +20,12 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, BrushColorRange("#313131", "#FFFFFF")]
         public static readonly string BackgroundFill = nameof(BackgroundFill);
 
+        [ShowInMarkup, BrushColorRange("#FFFFFF", "#000000")]
+        public static readonly string BorderBrush = nameof(BorderBrush);
+
+        [ShowInMarkup, BrushColorRange("#FFFFFF", "#313131")]
+        public static readonly string TextBrush = nameof(TextBrush);
+
         double appearance = 0.0;
         public double Appearance
         {

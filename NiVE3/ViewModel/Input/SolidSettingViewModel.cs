@@ -4,8 +4,10 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using System.Windows.Media;
 using NiVE3.Data;
+using Prism.Commands;
 using Prism.Mvvm;
 
 namespace NiVE3.ViewModel.Input
@@ -49,6 +51,13 @@ namespace NiVE3.ViewModel.Input
             set { SetProperty(ref color, value); }
         }
 
+        private Brush colorBrush = Brushes.White;
+        public Brush ColorBrush
+        {
+            get { return colorBrush; }
+            set { SetProperty(ref colorBrush, value); }
+        }
+
         public double FixedRatio { get; private set; }
 
         public SolidSettingViewModel()
@@ -77,6 +86,9 @@ namespace NiVE3.ViewModel.Input
                     {
                         FixedRatio = Width / (double)Height;
                     }
+                    break;
+                case nameof(Color):
+                    ColorBrush = new SolidColorBrush(Color.ToByteColor());
                     break;
             }
         }

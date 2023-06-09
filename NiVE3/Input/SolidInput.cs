@@ -34,7 +34,7 @@ namespace NiVE3.Input
 
         public int Height { get; private set; }
 
-        FloatColor Color { get; set; } = new FloatColor(0.0F, 0.0F, 0.0F, 1.0F);
+        FloatColor Color { get; set; } = new FloatColor(0.0F, 0.0F, 1.0F, 1.0F);
 
         public InputType InputType => InputType.Image;
 
@@ -58,7 +58,7 @@ namespace NiVE3.Input
             {
                 var image = new NManagedImage(Width, Height, true);
                 var span = image.Data.AsSpan(0, image.DataLength);
-                MemoryMarshal.Cast<float, Vector128<float>>(span).Fill(Vector128.Create(0.0F, 0.0F, 1.0F, 1.0F));
+                MemoryMarshal.Cast<float, Vector128<float>>(span).Fill(Color);
                 return image;
             }
         }
