@@ -113,6 +113,11 @@ class {{markupTypeName}} : MarkupExtension
 {
     public {{enumTypeName}} ResourceKey { get; set; }
 
+    /// <summary>
+    /// DataTemplate内で使用する時はTrue、そうでない場合はFalse
+    /// </summary>
+    public bool ReturnDynamicResource { get; set; }
+
     public {{markupTypeName}}() { }
 
     public {{markupTypeName}}({{enumTypeName}} resourceKey)
@@ -126,7 +131,14 @@ class {{markupTypeName}} : MarkupExtension
         if (key != null)
         {
             var dr = new DynamicResourceExtension(key);
-            return dr.ProvideValue(serviceProvider);
+            if (ReturnDynamicResource)
+            {
+                return dr;
+            }
+            else
+            {
+                return dr.ProvideValue(serviceProvider);
+            }
         }
         else
         {

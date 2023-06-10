@@ -50,9 +50,8 @@
                         <ColumnDefinition />
                     </Grid.ColumnDefinitions>
 
-                    <!-- NOTE: なぜかDataTemplate内でDynamicResourceを返すMarkup拡張が使用できないため、直接DynamicResourceを使用する -->
                     <Grid Grid.Column="0" Width="100">
-                        <Border BorderBrush="{DynamicResource ResourceKey=BorderBrush}" BorderThickness="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Border BorderBrush="{gm:AppearanceResource ResourceKey=BorderBrush, ReturnDynamicResource=True}" BorderThickness="1" HorizontalAlignment="Center" VerticalAlignment="Center">
                             <Image Grid.Column="0" Source="{Binding SampleImage}" Stretch="Uniform"/>
                         </Border>
                     </Grid>
