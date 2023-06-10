@@ -36,7 +36,7 @@ namespace NiVE3.PresetPlugin.Input
 
         public InputType InputType { get; private set; }
 
-        ISourceReader? Reader { get; set; }
+        VideoSourceReaderBase? Reader { get; set; }
 
         public void Dispose()
         {
@@ -47,10 +47,10 @@ namespace NiVE3.PresetPlugin.Input
         {
             FilePath = filePath;
 
-            Reader = new AcceleratedSourceReader(filePath);
+            Reader = new AcceleratedVideoSourceReader(filePath);
             if (!Reader.Succeeded)
             {
-                Reader = new SoftwareSourceReader(filePath);
+                Reader = new SoftwareVideoSourceReader(filePath);
             }
 
             if (Reader.Succeeded)
@@ -58,9 +58,8 @@ namespace NiVE3.PresetPlugin.Input
                 // NOTE: 読み込み時にサイズが変わる可能性があるため1フレームだけ読み込む
                 Reader.GetFrame(0.0);
 
-                var format = Reader.Format;
-                Width = format.Width;
-                Height = format.Height;
+                Width = Reader.Width;
+                Height = Reader.Height;
                 FrameRate = Reader.FrameRate;
                 Duration = Reader.Duration;
                 InputType = InputType.Video;
