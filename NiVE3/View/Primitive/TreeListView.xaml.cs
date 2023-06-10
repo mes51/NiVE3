@@ -280,8 +280,8 @@ namespace NiVE3.View.Primitive
 
         void RefreshSelectedItems()
         {
-            var removedSelectedItems = SelectedItems.Except(ItemsSource.OfType<object>());
-            var newSelectedItems = SelectedItems.Except(removedSelectedItems);
+            var removedSelectedItems = SelectedItems.Except(ItemsSource.OfType<object>()).ToArray();
+            var newSelectedItems = SelectedItems.Except(removedSelectedItems).ToArray();
             var oldSelectedTreeListViewItems = SelectedTreeListViewItems.ToArray();
 
             SelectedTreeListViewItems.Clear();

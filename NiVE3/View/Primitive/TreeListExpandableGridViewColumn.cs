@@ -135,7 +135,7 @@ namespace NiVE3.View.Primitive
                 }
                 if (column.CellContentTemplateSelector != null)
                 {
-                    column.CellContentTemplateSelector = new TreeListExpandableGridViewColumnTemplateSelector(column, column.CellContentTemplateSelector);
+                    column.CellTemplateSelector = new TreeListExpandableGridViewColumnTemplateSelector(column, column.CellContentTemplateSelector);
                 }
             }
         }
