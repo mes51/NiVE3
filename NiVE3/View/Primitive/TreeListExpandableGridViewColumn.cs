@@ -20,14 +20,21 @@ namespace NiVE3.View.Primitive
             nameof(ExpanderStyle),
             typeof(Style),
             typeof(TreeListExpandableGridViewColumn),
-            new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, UpdateTemplate)
+            new PropertyMetadata(null, UpdateExpanderStyle)
         );
 
         public static readonly DependencyProperty CellContentTemplateProperty = DependencyProperty.Register(
             nameof(CellContentTemplate),
             typeof(DataTemplate),
             typeof(TreeListExpandableGridViewColumn),
-            new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, UpdateTemplate)
+            new PropertyMetadata(null, UpdateTemplate)
+        );
+
+        public static readonly DependencyProperty CellContentTemplateSelectorProperty = DependencyProperty.Register(
+            nameof(CellContentTemplateSelector),
+            typeof(DataTemplateSelector),
+            typeof(TreeListExpandableGridViewColumn),
+            new PropertyMetadata(null, UpdateTemplateSelector)
         );
 
         BindingBase? lowPriorityDisplayMemberBinding;
@@ -49,6 +56,12 @@ namespace NiVE3.View.Primitive
         {
             get { return (DataTemplate)GetValue(CellContentTemplateProperty); }
             set { SetValue(CellContentTemplateProperty, value); }
+        }
+
+        public DataTemplateSelector CellContentTemplateSelector
+        {
+            get { return (DataTemplateSelector)GetValue(CellContentTemplateSelectorProperty); }
+            set { SetValue(CellContentTemplateSelectorProperty, value); }
         }
 
         public Style ExpanderStyle
@@ -112,12 +125,98 @@ namespace NiVE3.View.Primitive
             return result;
         }
 
+        static void UpdateExpanderStyle(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is TreeListExpandableGridViewColumn column)
+            {
+                if (column.CellContentTemplate != null)
+                {
+                    column.CellTemplate = CreateCellTemplate(column);
+                }
+                if (column.CellContentTemplateSelector != null)
+                {
+                    column.CellContentTemplateSelector = new TreeListExpandableGridViewColumnTemplateSelector(column, column.CellContentTemplateSelector);
+                }
+            }
+        }
+
         static void UpdateTemplate(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is TreeListExpandableGridViewColumn column)
             {
                 column.CellTemplate = CreateCellTemplate(column);
             }
+        }
+
+        static void UpdateTemplateSelector(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is TreeListExpandableGridViewColumn column)
+            {
+                if (column.CellContentTemplate == null)
+                {
+                    column.CellTemplate = null;
+                }
+                column.CellTemplateSelector = new TreeListExpandableGridViewColumnTemplateSelector(column, column.CellContentTemplateSelector);
+            }
+        }
+    }
+
+    file class TreeListExpandableGridViewColumnTemplateSelector : DataTemplateSelector
+    {
+        TreeListExpandableGridViewColumn Column { get; }
+
+        DataTemplateSelector Selector { get; }
+
+        public TreeListExpandableGridViewColumnTemplateSelector(TreeListExpandableGridViewColumn column, DataTemplateSelector selector)
+        {
+            Column = column;
+            Selector = selector;
+        }
+
+        public override DataTemplate SelectTemplate(object item, DependencyObject container)
+        {
+            // NOTE: 同じDataTemplateを使用する際、DataContextが更新されない場合があるためキャッシュはせず、常に新しいインスタンスを作成する
+            // SEE: SEE: https://stackoverflow.com/a/65750003
+            return CreateCellTemplate(Selector.SelectTemplate(item, container));
+        }
+
+        DataTemplate CreateCellTemplate(DataTemplate? template)
+        {
+            var container = new FrameworkElementFactory(typeof(Grid), "ContainerFactory");
+
+            var containerColumn1 = new FrameworkElementFactory(typeof(ColumnDefinition));
+            containerColumn1.SetValue(ColumnDefinition.WidthProperty, new GridLength(1, GridUnitType.Auto));
+            var containerColumn2 = new FrameworkElementFactory(typeof(ColumnDefinition));
+            containerColumn2.SetValue(ColumnDefinition.WidthProperty, new GridLength(1, GridUnitType.Star));
+            container.AppendChild(containerColumn1);
+            container.AppendChild(containerColumn2);
+
+            var expander = new FrameworkElementFactory(typeof(ToggleButton), TreeListExpandableGridViewColumn.ExpanderButtonName);
+            expander.SetValue(Grid.ColumnProperty, 0);
+            expander.SetValue(ButtonBase.ClickModeProperty, ClickMode.Press);
+            expander.SetBinding(FrameworkElement.StyleProperty, new Binding(nameof(TreeListExpandableGridViewColumn.ExpanderStyle)) { Source = Column });
+            expander.SetBinding(FrameworkElement.MarginProperty, new Binding(nameof(TreeListViewItem.Indent)) { RelativeSource = new RelativeSource { AncestorType = typeof(TreeListViewItem) }, Converter = new DoubleToThicknessConverter(), ConverterParameter = ThicknessConvertFace.Left });
+            expander.SetBinding(ToggleButton.IsCheckedProperty, new Binding(nameof(TreeListViewItem.IsExpanded)) { RelativeSource = new RelativeSource { AncestorType = typeof(TreeListViewItem) } });
+            container.AppendChild(expander);
+
+            var content = new FrameworkElementFactory(typeof(ContentPresenter), "Content");
+            content.SetValue(Grid.ColumnProperty, 1);
+            content.SetValue(ContentPresenter.ContentTemplateProperty, template);
+            content.SetBinding(ContentPresenter.ContentProperty, new Binding());
+            container.AppendChild(content);
+
+            var expanderVisibility = new DataTrigger
+            {
+                Binding = new Binding(nameof(ItemsControl.HasItems)) { RelativeSource = new RelativeSource { AncestorType = typeof(TreeListViewItem) } },
+                Value = false
+            };
+            expanderVisibility.Setters.Add(new Setter(UIElement.VisibilityProperty, Visibility.Hidden, expander.Name));
+
+            var result = new DataTemplate();
+            result.VisualTree = container;
+            result.Triggers.Add(expanderVisibility);
+
+            return result;
         }
     }
 }

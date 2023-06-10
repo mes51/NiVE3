@@ -19,6 +19,13 @@ namespace NiVE3.View.Resource
 
         public bool DefaultIsEmpty { get; set; }
 
+        /// <summary>
+        /// DataTemplate使用時、DataContextが更新されない場合がある時用
+        /// SEE: https://stackoverflow.com/a/65750003
+        /// TODO: ラッパー側のContentPresenterのスタイルが邪魔になったときにStyleプロパティを用意する
+        /// </summary>
+        public bool AlwaysWrapTemplate { get; set; }
+
         static DataTemplateCollection()
         {
             EmptyTemplate = new DataTemplate
@@ -29,37 +36,59 @@ namespace NiVE3.View.Resource
 
         public override DataTemplate SelectTemplate(object? item, DependencyObject container)
         {
+            DataTemplate? template = null;
             if (item != null)
             {
-                var type = item.GetType();
-
-                // concrete type
-                foreach (var template in Templates)
-                {
-                    if (template.DataType is Type dt && dt == type)
-                    {
-                        return template;
-                    }
-                }
-
-                // assignable type
-                foreach (var template in Templates)
-                {
-                    if (template.DataType is Type dt && type.IsAssignableTo(dt))
-                    {
-                        return template;
-                    }
-                }
+                template = FindTemplate(item.GetType());
             }
 
-            if (DefaultIsEmpty)
+            if (template == null && DefaultIsEmpty)
             {
                 return EmptyTemplate;
             }
+
+            template ??= base.SelectTemplate(item, container);
+            if (AlwaysWrapTemplate)
+            {
+                return WrapTemplate(template);
+            }
             else
             {
-                return base.SelectTemplate(item, container);
+                return template;
             }
+        }
+
+        DataTemplate? FindTemplate(Type type)
+        {
+            // concrete type
+            foreach (var template in Templates)
+            {
+                if (template.DataType is Type dt && dt == type)
+                {
+                    return template;
+                }
+            }
+
+            // assignable type
+            foreach (var template in Templates)
+            {
+                if (template.DataType is Type dt && type.IsAssignableTo(dt))
+                {
+                    return template;
+                }
+            }
+
+            return null;
+        }
+
+        DataTemplate WrapTemplate(DataTemplate inner)
+        {
+            var wrapperContentPresenterFactory = new FrameworkElementFactory(typeof(ContentPresenter));
+            wrapperContentPresenterFactory.SetValue(ContentPresenter.ContentTemplateProperty, inner);
+            return new DataTemplate
+            {
+                VisualTree = wrapperContentPresenterFactory
+            };
         }
     }
 }

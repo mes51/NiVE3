@@ -88,6 +88,7 @@ namespace NiVE3.View.Pane
 
         private void FootageEditTextBox_PreviewKeyDown(object sender, KeyEventArgs e)
         {
+            // TODO: Escによるキャンセル
             if (e.Key == Key.Enter && e.ImeProcessedKey == Key.None)
             {
                 ViewModel?.EndEditPropertyCommand?.Execute(null);

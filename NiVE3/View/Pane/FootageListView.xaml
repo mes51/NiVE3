@@ -62,18 +62,20 @@
             <EventSetter Event="PreviewKeyDown" Handler="TreeListViewItem_PreviewKeyDown"/>
         </Style>
 
-        <DataTemplate x:Key="FootageNameTemplate" DataType="{x:Type vm:FootageViewModel}">
-            <Grid>
-                <TextBlock x:Name="FootageNameDisplayText" Text="{Binding Name, Mode=OneWay}"/>
-                <TextBox x:Name="FootageNameEditTextBox" Text="{Binding Name}" Visibility="Hidden" PreviewKeyDown="FootageEditTextBox_PreviewKeyDown" IsVisibleChanged="EditTextBox_IsVisibleChanged"/>
-            </Grid>
-            <DataTemplate.Triggers>
-                <DataTrigger Binding="{Binding EditingPropertyName}" Value="Name">
-                    <Setter TargetName="FootageNameDisplayText" Property="Visibility" Value="Hidden"/>
-                    <Setter TargetName="FootageNameEditTextBox" Property="Visibility" Value="Visible"/>
-                </DataTrigger>
-            </DataTemplate.Triggers>
-        </DataTemplate>
+        <r:DataTemplateCollection x:Key="FootageNameTemplateSelector">
+            <DataTemplate DataType="{x:Type vm:FootageViewModel}">
+                <Grid>
+                    <TextBlock x:Name="FootageNameDisplayText" Text="{Binding Name, Mode=OneWay}"/>
+                    <TextBox x:Name="FootageNameEditTextBox" Text="{Binding Name}" Visibility="Hidden" PreviewKeyDown="FootageEditTextBox_PreviewKeyDown" IsVisibleChanged="EditTextBox_IsVisibleChanged"/>
+                </Grid>
+                <DataTemplate.Triggers>
+                    <DataTrigger Binding="{Binding EditingPropertyName}" Value="Name">
+                        <Setter TargetName="FootageNameDisplayText" Property="Visibility" Value="Hidden"/>
+                        <Setter TargetName="FootageNameEditTextBox" Property="Visibility" Value="Visible"/>
+                    </DataTrigger>
+                </DataTemplate.Triggers>
+            </DataTemplate>
+        </r:DataTemplateCollection>
 
         <DataTemplate x:Key="FootageCommentTemplate" DataType="{x:Type vm:FootageViewModel}">
             <Grid>
@@ -97,7 +99,7 @@
         <pt:FootagePreviewView Grid.Row="0" SelectedFootages="{Binding ElementName=Root, Path=SelectedFootages}"/>
         <pv:TreeListView Grid.Row="1" x:Name="FootageTreeListView" ItemsSource="{Binding Footages}" SelectedItems="{Binding ElementName=Root, Path=SelectedItems}" dd:DragDrop.IsDragSource="True" dd:DragDrop.IsDropTarget="True" dd:DragDrop.DropHandler="{Binding}" ItemContainerStyle="{StaticResource ItemContainerStyle}">
             <pv:TreeListView.Columns>
-                <pv:TreeListExpandableGridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageName}" CellContentTemplate="{StaticResource FootageNameTemplate}" Width="100" ExpanderStyle="{StaticResource TreeListViewItemExpanderStyle}"/>
+                <pv:TreeListExpandableGridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageName}" CellContentTemplateSelector="{StaticResource FootageNameTemplateSelector}" Width="100" ExpanderStyle="{StaticResource TreeListViewItemExpanderStyle}"/>
                 <GridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageFileExtension}" CellTemplateSelector="{StaticResource FileExtensionTemplate}" Width="50" a:GridViewColumnVisibility.Visibility="{Binding ShowFileExtension}"/>
                 <GridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageSize}" CellTemplateSelector="{StaticResource SizeTemplate}" Width="100" a:GridViewColumnVisibility.Visibility="{Binding ShowSize}"/>
                 <GridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageFrameRate}" CellTemplateSelector="{StaticResource FrameRateTemplate}" Width="100" a:GridViewColumnVisibility.Visibility="{Binding ShowFrameRate}"/>
