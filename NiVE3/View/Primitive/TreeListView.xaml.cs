@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -48,9 +49,9 @@ namespace NiVE3.View.Primitive
 
         public static readonly DependencyProperty SelectedItemsProperty = DependencyProperty.Register(
             nameof(SelectedItems),
-            typeof(ObservableCollection<TreeListViewItem>),
+            typeof(ObservableCollection<object>),
             typeof(TreeListView),
-            new FrameworkPropertyMetadata(new ObservableCollection<TreeListViewItem>(), FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+            new FrameworkPropertyMetadata(new ObservableCollection<object>(), FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
         public static readonly DependencyProperty HeaderContextMenuProperty = DependencyProperty.Register(
@@ -66,9 +67,9 @@ namespace NiVE3.View.Primitive
             set { SetValue(HeaderContextMenuProperty, value); }
         }
 
-        public ObservableCollection<TreeListViewItem> SelectedItems
+        public ObservableCollection<object> SelectedItems
         {
-            get { return (ObservableCollection<TreeListViewItem>)GetValue(SelectedItemsProperty); }
+            get { return (ObservableCollection<object>)GetValue(SelectedItemsProperty); }
             set { SetValue(SelectedItemsProperty, value); }
         }
 
@@ -79,6 +80,13 @@ namespace NiVE3.View.Primitive
         }
 
         TreeListViewItem? LastSelected { get; set; }
+
+        List<TreeListViewItem> SelectedTreeListViewItems { get; } = new List<TreeListViewItem>();
+
+        static TreeListView()
+        {
+            ItemsSourceProperty.AddOwner(typeof(TreeListView), new FrameworkPropertyMetadata(null, ItemsSourcePropertyChanged));
+        }
 
         public TreeListView()
         {
@@ -120,17 +128,20 @@ namespace NiVE3.View.Primitive
 
         void SelectItem(TreeListViewItem item)
         {
+            var dataContext = item.DataContext;
             if (IsKeyDownControl())
             {
-                if (SelectedItems.Contains(item))
+                if (SelectedItems.Contains(dataContext))
                 {
                     SetIsSelectedItem(item, false);
-                    SelectedItems.Remove(item);
+                    SelectedItems.Remove(dataContext);
+                    SelectedTreeListViewItems.Remove(item);
                 }
                 else
                 {
                     SetIsSelectedItem(item, true);
-                    SelectedItems.Add(item);
+                    SelectedItems.Add(dataContext);
+                    SelectedTreeListViewItems.Add(item);
                 }
 
                 LastSelected = item;
@@ -143,23 +154,25 @@ namespace NiVE3.View.Primitive
                     return;
                 }
 
-                var oldSelectedItems = SelectedItems.ToArray();
+                var oldSelectedItems = SelectedTreeListViewItems.ToArray();
                 var startIndex = items.IndexOf(LastSelected ?? items[0]);
                 var endIndex = items.IndexOf(item);
                 if (startIndex == endIndex)
                 {
                     foreach (var i in oldSelectedItems)
                     {
-                        if (i != item)
+                        if (i.DataContext != dataContext)
                         {
                             SetIsSelectedItem(i, false);
-                            SelectedItems.Remove(i);
+                            SelectedItems.Remove(i.DataContext);
+                            SelectedTreeListViewItems.Remove(i);
                         }
                     }
-                    if (!SelectedItems.Contains(item))
+                    if (!SelectedItems.Contains(dataContext))
                     {
                         SetIsSelectedItem(item, true);
-                        SelectedItems.Add(item);
+                        SelectedItems.Add(dataContext);
+                        SelectedTreeListViewItems.Add(item);
                     }
                     return;
                 }
@@ -174,23 +187,26 @@ namespace NiVE3.View.Primitive
                 foreach (var i in oldSelectedItems.Except(targets))
                 {
                     SetIsSelectedItem(i, false);
-                    SelectedItems.Remove(i);
+                    SelectedItems.Remove(i.DataContext);
+                    SelectedTreeListViewItems.Remove(i);
                 }
 
                 foreach (var i in targets.Except(oldSelectedItems))
                 {
                     SetIsSelectedItem(i, true);
-                    SelectedItems.Add(i);
+                    SelectedItems.Add(i.DataContext);
+                    SelectedTreeListViewItems.Add(i);
                 }
             }
-            else if (SelectedItems.Contains(item))
+            else if (SelectedItems.Contains(dataContext))
             {
-                foreach (var i in SelectedItems.ToArray())
+                foreach (var i in SelectedTreeListViewItems.ToArray())
                 {
-                    if (i != item)
+                    if (i.DataContext != dataContext)
                     {
                         SetIsSelectedItem(i, false);
-                        SelectedItems.Remove(i);
+                        SelectedItems.Remove(i.DataContext);
+                        SelectedTreeListViewItems.Remove(i);
                     }
                 }
 
@@ -199,26 +215,20 @@ namespace NiVE3.View.Primitive
             }
             else
             {
-                foreach (var i in SelectedItems)
+                foreach (var i in SelectedTreeListViewItems)
                 {
-                    if (i != item)
+                    if (i.DataContext != dataContext)
                     {
                         SetIsSelectedItem(i, false);
                     }
                 }
                 SelectedItems.Clear();
+                SelectedTreeListViewItems.Clear();
 
                 SetIsSelectedItem(item, true);
-                SelectedItems.Add(item);
+                SelectedItems.Add(dataContext);
+                SelectedTreeListViewItems.Add(item);
                 LastSelected = item;
-            }
-        }
-
-        private void ContentScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
-        {
-            if (Template.FindName("HeaderScrollViewer", this) is ScrollViewer headerScrollViewer && Template.FindName("ContentScrollViewer", this) is ScrollViewer contentScrollViewewr)
-            {
-                headerScrollViewer.ScrollToHorizontalOffset(contentScrollViewewr.HorizontalOffset);
             }
         }
 
@@ -266,6 +276,92 @@ namespace NiVE3.View.Primitive
             }
 
             return null;
+        }
+
+        void RefreshSelectedItems()
+        {
+            var removedSelectedItems = SelectedItems.Except(ItemsSource.OfType<object>());
+            var newSelectedItems = SelectedItems.Except(removedSelectedItems);
+            var oldSelectedTreeListViewItems = SelectedTreeListViewItems.ToArray();
+
+            SelectedTreeListViewItems.Clear();
+
+            var items = GetAllItems().ToArray();
+            foreach (var i in newSelectedItems)
+            {
+                var treeListViewItem = items.FirstOrDefault(t => t.DataContext == i);
+                if (treeListViewItem != null)
+                {
+                    SetIsSelectedItem(treeListViewItem, true);
+                    SelectedTreeListViewItems.Add(treeListViewItem);
+                }
+            }
+
+            foreach (var i in removedSelectedItems)
+            {
+                SelectedItems.Remove(i);
+            }
+            foreach (var t in oldSelectedTreeListViewItems.Except(SelectedTreeListViewItems))
+            {
+                SetIsSelectedItem(t, false);
+            }
+
+            if (LastSelected != null)
+            {
+                LastSelected = SelectedTreeListViewItems.FirstOrDefault(i => i.DataContext == LastSelected.DataContext);
+            }
+        }
+
+        IEnumerable<TreeListViewItem> GetAllItems(Visual? parent = null)
+        {
+            if (parent == null)
+            {
+                parent = this;
+            }
+
+            var result = new List<TreeListViewItem>();
+
+            for (int i = 0, count = VisualTreeHelper.GetChildrenCount(parent); i < count; i++)
+            {
+                if (VisualTreeHelper.GetChild(parent, i) is Visual child)
+                {
+                    if (child is TreeListViewItem item)
+                    {
+                        result.Add(item);
+                    }
+                    result.AddRange(GetAllItems(child));
+                }
+            }
+
+            return result;
+        }
+
+        private void ContentScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
+        {
+            if (Template.FindName("HeaderScrollViewer", this) is ScrollViewer headerScrollViewer && Template.FindName("ContentScrollViewer", this) is ScrollViewer contentScrollViewewr)
+            {
+                headerScrollViewer.ScrollToHorizontalOffset(contentScrollViewewr.HorizontalOffset);
+            }
+        }
+
+        private void ItemsCource_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            RefreshSelectedItems();
+        }
+
+        static void ItemsSourcePropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (sender is TreeListView treeListView)
+            {
+                if (e.OldValue is INotifyCollectionChanged oldItemsSource)
+                {
+                    oldItemsSource.CollectionChanged -= treeListView.ItemsCource_CollectionChanged;
+                }
+                if (e.NewValue is INotifyCollectionChanged newItemsSource)
+                {
+                    newItemsSource.CollectionChanged += treeListView.ItemsCource_CollectionChanged;
+                }
+            }
         }
     }
 }
