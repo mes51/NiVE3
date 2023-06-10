@@ -206,7 +206,7 @@ namespace NiVE3.Model
             }
 
             AddFootage(new FootageModel(plugin), targetFolderId);
-            return false;
+            return true;
         }
 
         void AddFootage(IFootageModel footage, Guid? targetFolderId)
