@@ -17,10 +17,40 @@ namespace NiVE3.Wpf.Attach
         public static readonly DependencyProperty VisibilityProperty = DependencyProperty.RegisterAttached(
             "Visibility",
             typeof(bool),
-            typeof(GridViewColumnVisibility), new PropertyMetadata(false, VisibilityChanged)
+            typeof(GridViewColumnVisibility),
+            new PropertyMetadata(false, VisibilityChanged)
         );
 
-        static Dictionary<WeakReference<GridViewColumn>, double> Widths { get; } = new Dictionary<WeakReference<GridViewColumn>, double>(new WeakReferenceEqualityComparer<GridViewColumn>());
+        public static readonly DependencyProperty ColumnsProperty = DependencyProperty.RegisterAttached(
+            "Columns",
+            typeof(GridViewColumnCollection),
+            typeof(GridViewColumnVisibility),
+            new PropertyMetadata(new GridViewColumnCollection(), ColumnsChanged)
+        );
+
+        private static readonly DependencyProperty PrivateRegisteredColumnsProperty = DependencyProperty.RegisterAttached(
+            "PrivateRegisteredColumns",
+            typeof(GridViewColumn[]),
+            typeof(GridViewColumnVisibility),
+            new PropertyMetadata(Array.Empty<GridViewColumn>())
+        );
+
+        private static readonly DependencyProperty PrivateColumnParentProperty = DependencyProperty.RegisterAttached(
+            "PrivateColumnParent",
+            typeof(DependencyObject),
+            typeof(GridViewColumnVisibility),
+            new PropertyMetadata(null)
+        );
+
+        public static GridViewColumnCollection GetColumns(DependencyObject obj)
+        {
+            return (GridViewColumnCollection)obj.GetValue(ColumnsProperty);
+        }
+
+        public static void SetColumns(DependencyObject obj, GridViewColumnCollection value)
+        {
+            obj.SetValue(ColumnsProperty, value);
+        }
 
         public static bool GetVisibility(DependencyObject obj)
         {
@@ -34,63 +64,67 @@ namespace NiVE3.Wpf.Attach
 
         static void VisibilityChanged(DependencyObject obj, DependencyPropertyChangedEventArgs e)
         {
-            if (obj is GridViewColumn column)
+            if (obj is GridViewColumn column && column.GetValue(PrivateColumnParentProperty) is DependencyObject parent && parent.GetValue(PrivateRegisteredColumnsProperty) is GridViewColumn[] registeredColumns && registeredColumns.Length > 0)
             {
+                var columns = GetColumns(parent);
                 if (e.NewValue is bool visible)
                 {
                     if (visible)
                     {
-                        if (Widths.TryGetValue(new WeakReference<GridViewColumn>(column), out var width))
+                        if (columns.Contains(column))
                         {
-                            column.Width = width;
+                            return;
                         }
-                        else
+
+                        var index = Array.IndexOf(registeredColumns, column);
+                        if (index < 0)
                         {
-                            column.Width = column.Width <= 0.0 ? DefaultWidth : column.Width;
+                            return;
                         }
+
+                        for (var i = 0; i < columns.Count; i++)
+                        {
+                            var ci = Array.IndexOf(registeredColumns, columns[i]);
+                            if (ci < 0)
+                            {
+                                continue;
+                            }
+
+                            if (index < ci)
+                            {
+                                columns.Insert(i, column);
+                                return;
+                            }
+                        }
+
+                        columns.Add(column);
                     }
                     else
                     {
-                        var key = new WeakReference<GridViewColumn>(column);
-                        if (Widths.ContainsKey(key))
+                        if (!columns.Contains(column))
                         {
-                            Widths[key] = column.Width;
-                        }
-                        else
-                        {
-                            Widths.Add(key, column.Width);
+                            return;
                         }
 
-                        column.Width = 0.0;
+                        columns.Remove(column);
                     }
                 }
             }
         }
-    }
 
-    class WeakReferenceEqualityComparer<T> : IEqualityComparer<WeakReference<T>> where T : class
-    {
-        public bool Equals(WeakReference<T>? x, WeakReference<T>? y)
+        static void ColumnsChanged(DependencyObject obj, DependencyPropertyChangedEventArgs e)
         {
-            if ((x?.TryGetTarget(out var vx) ?? false) && (y?.TryGetTarget(out var vy) ?? false))
+            if (e.NewValue is GridViewColumnCollection collection)
             {
-                return EqualityComparer<T>.Default.Equals(vx, vy);
+                obj.SetValue(PrivateRegisteredColumnsProperty, collection.ToArray());
+                foreach (var column in collection)
+                {
+                    column.SetValue(PrivateColumnParentProperty, obj);
+                }
             }
             else
             {
-                return false;
-            }
-        }
-
-        public int GetHashCode([DisallowNull] WeakReference<T> obj)
-        {
-            if (obj.TryGetTarget(out var v))
-            {
-                return v.GetHashCode();
-            }
-            else
-            {
-                return 0;
+                obj.SetValue(PrivateRegisteredColumnsProperty, Array.Empty<GridViewColumn>());
             }
         }
     }

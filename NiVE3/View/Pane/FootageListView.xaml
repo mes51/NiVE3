@@ -89,6 +89,16 @@
                 </DataTrigger>
             </DataTemplate.Triggers>
         </DataTemplate>
+
+        <GridViewColumnCollection x:Key="ColumnHeaders">
+            <pv:TreeListExpandableGridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageName}" CellContentTemplateSelector="{StaticResource FootageNameTemplateSelector}" Width="100" ExpanderStyle="{StaticResource TreeListViewItemExpanderStyle}"/>
+            <GridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageFileExtension}" CellTemplateSelector="{StaticResource FileExtensionTemplate}" Width="50" a:GridViewColumnVisibility.Visibility="{Binding ShowFileExtension}"/>
+            <GridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageSize}" CellTemplateSelector="{StaticResource SizeTemplate}" Width="100" a:GridViewColumnVisibility.Visibility="{Binding ShowSize}"/>
+            <GridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageFrameRate}" CellTemplateSelector="{StaticResource FrameRateTemplate}" Width="100" a:GridViewColumnVisibility.Visibility="{Binding ShowFrameRate}"/>
+            <GridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageDuration}" CellTemplateSelector="{StaticResource DurationTemplate}" Width="100" a:GridViewColumnVisibility.Visibility="{Binding ShowDuration}"/>
+            <GridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageComment}" CellTemplate="{StaticResource FootageCommentTemplate}" Width="100" a:GridViewColumnVisibility.Visibility="{Binding ShowComment}"/>
+            <GridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageFilePath}" DisplayMemberBinding="{Binding FilePath, Mode=OneWay}" Width="100" a:GridViewColumnVisibility.Visibility="{Binding ShowFilePath}"/>
+        </GridViewColumnCollection>
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -97,16 +107,7 @@
         </Grid.RowDefinitions>
 
         <pt:FootagePreviewView Grid.Row="0" SelectedFootages="{Binding ElementName=Root, Path=SelectedFootages}"/>
-        <pv:TreeListView Grid.Row="1" x:Name="FootageTreeListView" ItemsSource="{Binding Footages}" SelectedItems="{Binding ElementName=Root, Path=SelectedItems}" dd:DragDrop.IsDragSource="True" dd:DragDrop.IsDropTarget="True" dd:DragDrop.DropHandler="{Binding}" ItemContainerStyle="{StaticResource ItemContainerStyle}">
-            <pv:TreeListView.Columns>
-                <pv:TreeListExpandableGridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageName}" CellContentTemplateSelector="{StaticResource FootageNameTemplateSelector}" Width="100" ExpanderStyle="{StaticResource TreeListViewItemExpanderStyle}"/>
-                <GridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageFileExtension}" CellTemplateSelector="{StaticResource FileExtensionTemplate}" Width="50" a:GridViewColumnVisibility.Visibility="{Binding ShowFileExtension}"/>
-                <GridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageSize}" CellTemplateSelector="{StaticResource SizeTemplate}" Width="100" a:GridViewColumnVisibility.Visibility="{Binding ShowSize}"/>
-                <GridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageFrameRate}" CellTemplateSelector="{StaticResource FrameRateTemplate}" Width="100" a:GridViewColumnVisibility.Visibility="{Binding ShowFrameRate}"/>
-                <GridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageDuration}" CellTemplateSelector="{StaticResource DurationTemplate}" Width="100" a:GridViewColumnVisibility.Visibility="{Binding ShowDuration}"/>
-                <GridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageComment}" CellTemplate="{StaticResource FootageCommentTemplate}" Width="100" a:GridViewColumnVisibility.Visibility="{Binding ShowComment}"/>
-                <GridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageFilePath}" DisplayMemberBinding="{Binding FilePath, Mode=OneWay}" Width="100" a:GridViewColumnVisibility.Visibility="{Binding ShowFilePath}"/>
-            </pv:TreeListView.Columns>
+        <pv:TreeListView Grid.Row="1" x:Name="FootageTreeListView" ItemsSource="{Binding Footages}" SelectedItems="{Binding ElementName=Root, Path=SelectedItems}" dd:DragDrop.IsDragSource="True" dd:DragDrop.IsDropTarget="True" dd:DragDrop.DropHandler="{Binding}" ItemContainerStyle="{StaticResource ItemContainerStyle}" Columns="{StaticResource ColumnHeaders}" a:GridViewColumnVisibility.Columns="{Binding Columns, RelativeSource={RelativeSource Self}}">
             <pv:TreeListView.HeaderContextMenu>
                 <ContextMenu>
                     <MenuItem Header="{gm:LanguageResource ResourceKey=FootageListView_FootageFileExtension}" IsCheckable="True" IsChecked="{Binding ShowFileExtension}"/>
