@@ -8,6 +8,7 @@
              xmlns:cv="clr-namespace:NiVE3.View.Converter"
              xmlns:r="clr-namespace:NiVE3.View.Resource"
              xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
+             xmlns:ui="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
              xmlns:plg="clr-namespace:NiVE3.Plugin.Interfaces;assembly=NiVE3.Plugin"
              mc:Ignorable="d" 
              x:Name="Root"
@@ -51,7 +52,7 @@
                     </Grid.ColumnDefinitions>
 
                     <Grid Grid.Column="0" Width="100">
-                        <Border BorderBrush="{gm:AppearanceResource ResourceKey=BorderBrush, ReturnDynamicResource=True}" BorderThickness="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Border BorderBrush="{ui:AppearanceResource ResourceKey=BorderBrush, ReturnDynamicResource=True}" BorderThickness="1" HorizontalAlignment="Center" VerticalAlignment="Center">
                             <Image Grid.Column="0" Source="{Binding SampleImage}" Stretch="Uniform"/>
                         </Border>
                     </Grid>

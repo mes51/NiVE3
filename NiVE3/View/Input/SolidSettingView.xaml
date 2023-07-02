@@ -6,6 +6,7 @@
              xmlns:local="clr-namespace:NiVE3.View.Input"
              xmlns:cv="clr-namespace:NiVE3.View.Converter"
              xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
+             xmlns:ui="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
              mc:Ignorable="d"
              Width="500">
     <UserControl.Resources>
@@ -73,7 +74,7 @@
                         <ColumnDefinition />
                     </Grid.ColumnDefinitions>
 
-                    <Button Grid.Column="0" Width="48" Height="27" Margin="0,10,5,10" HorizontalAlignment="Right" BorderBrush="{gm:AppearanceResource ResourceKey=BorderBrush}" Style="{StaticResource ColorChangeButtonStyle}" Click="ColorChangeButton_Click"/>
+                    <Button Grid.Column="0" Width="48" Height="27" Margin="0,10,5,10" HorizontalAlignment="Right" BorderBrush="{ui:AppearanceResource ResourceKey=BorderBrush}" Style="{StaticResource ColorChangeButtonStyle}" Click="ColorChangeButton_Click"/>
                     <Button Grid.Column="1" Width="24" Height="24" Margin="0,10" HorizontalAlignment="Left"/>
                 </Grid>
             </GroupBox>

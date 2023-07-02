@@ -12,6 +12,7 @@
         xmlns:a="clr-namespace:NiVE3.Wpf.Attach"
         xmlns:b="clr-namespace:NiVE3.Wpf.Behavior"
         xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
+        xmlns:ui="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
         mc:Ignorable="d"
         x:Name="RootWindow"
         Closing="Window_Closing"
@@ -50,7 +51,7 @@
             </vd:LayoutItemContainerStyle>
         </vd:LayoutItemContainerStyleSelector>
     </Window.Resources>
-    <Grid Background="{gm:AppearanceResource ResourceKey=BackgroundFill}">
+    <Grid Background="{ui:AppearanceResource ResourceKey=BackgroundFill}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition />

@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:NiVE3.View.Primitive"
-             xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
+             xmlns:ui="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
              mc:Ignorable="d" 
              x:Name="Root"
              d:DesignHeight="23" d:DesignWidth="100">
@@ -30,7 +30,7 @@
         <RepeatButton Name="UpButton" HorizontalAlignment="Right" Width="20" Click="UpButton_Click" BorderThickness="0,1,1,0" Style="{StaticResource UpDownButtonStyle}">
             <RepeatButton.Content>
                 <Grid>
-                    <Path Fill="{gm:AppearanceResource ResourceKey=TextBrush}">
+                    <Path Fill="{ui:AppearanceResource ResourceKey=TextBrush}">
                         <Path.Data>
                             <PathGeometry Figures="M 3.5,0 L 0,3.5 L 7,3.5 z"/>
                         </Path.Data>
@@ -41,7 +41,7 @@
         <RepeatButton Name="DownButton" HorizontalAlignment="Right" Width="20" Grid.Row="1" Click="DownButton_Click" BorderThickness="0,1,1,1" Style="{StaticResource UpDownButtonStyle}">
             <RepeatButton.Content>
                 <Grid>
-                    <Path Fill="{gm:AppearanceResource ResourceKey=TextBrush}">
+                    <Path Fill="{ui:AppearanceResource ResourceKey=TextBrush}">
                         <Path.Data>
                             <PathGeometry Figures="M 0,0 L 7,0 L 3.5,3.5 z"/>
                         </Path.Data>

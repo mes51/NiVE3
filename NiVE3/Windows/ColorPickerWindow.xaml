@@ -6,6 +6,7 @@
         xmlns:cv="clr-namespace:NiVE3.View.Converter"
         xmlns:pv="clr-namespace:NiVE3.View.Primitive"
         xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
+        xmlns:ui="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
         xmlns:local="clr-namespace:NiVE3.Windows"
         mc:Ignorable="d"
         ResizeMode="NoResize"
@@ -31,7 +32,7 @@
     <StackPanel>
         <Grid Margin="10">
             <StackPanel Orientation="Horizontal">
-                <Border Width="258" Height="258" VerticalAlignment="Top" HorizontalAlignment="Left" BorderBrush="{gm:AppearanceResource ResourceKey=BorderBrush}" BorderThickness="1">
+                <Border Width="258" Height="258" VerticalAlignment="Top" HorizontalAlignment="Left" BorderBrush="{ui:AppearanceResource ResourceKey=BorderBrush}" BorderThickness="1">
                     <Grid>
                         <Image x:Name="ColorPickArea" Source="{Binding ElementName=RootWindow, Path=ColorPickAreaImage}" MouseDown="ColorPickArea_MouseDown" MouseMove="ColorPickArea_MouseMove" MouseUp="ColorPickArea_MouseUp"/>
                         <Canvas IsHitTestVisible="False">
@@ -43,17 +44,17 @@
                     </Grid>
                 </Border>
                 <Grid Margin="4,0,0,0">
-                    <Border Width="26" Height="258" VerticalAlignment="Top" HorizontalAlignment="Center" BorderBrush="{gm:AppearanceResource ResourceKey=BorderBrush}" BorderThickness="1">
+                    <Border Width="26" Height="258" VerticalAlignment="Top" HorizontalAlignment="Center" BorderBrush="{ui:AppearanceResource ResourceKey=BorderBrush}" BorderThickness="1">
                         <Image x:Name="ColorBar" Source="{Binding ElementName=RootWindow, Path=ColorBarImage}" MouseDown="ColorBar_MouseDown" MouseMove="ColorBar_MouseMove" MouseUp="ColorBar_MouseUp"/>
                     </Border>
                     <Canvas Width="42" IsHitTestVisible="False">
                         <Grid x:Name="SelectedColorBarArrow" Width="42" Canvas.Top="-2">
-                            <Path Data="M0,0 3,3 0,6 M39.5,0 36.5,3 39.5,6" Stroke="{gm:AppearanceResource ResourceKey=BorderBrush}" StrokeThickness="2" HorizontalAlignment="Center"/>
+                            <Path Data="M0,0 3,3 0,6 M39.5,0 36.5,3 39.5,6" Stroke="{ui:AppearanceResource ResourceKey=BorderBrush}" StrokeThickness="2" HorizontalAlignment="Center"/>
                         </Grid>
                     </Canvas>
                 </Grid>
                 <StackPanel Margin="4,0,0,0" Grid.IsSharedSizeScope="True">
-                    <Border BorderBrush="{gm:AppearanceResource ResourceKey=BorderBrush}" BorderThickness="1">
+                    <Border BorderBrush="{ui:AppearanceResource ResourceKey=BorderBrush}" BorderThickness="1">
                         <StackPanel>
                             <Rectangle x:Name="NewColor" Height="30"/>
                             <Rectangle x:Name="OldColor" Height="30"/>

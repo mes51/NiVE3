@@ -3,15 +3,17 @@
                      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                      xmlns:pr="http://prismlibrary.com/"
                      xmlns:r="clr-namespace:NiVE3.View.Resource"
+                     xmlns:ui="clr-namespace:NiVE3.UI.Resources;assembly=NiVE3.UI"
                      xmlns:local="clr-namespace:NiVE3">
     <pr:PrismApplication.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <r:AppearanceResourceDictionary x:Name="Appearance"/>
+                <ui:AppearanceResourceDictionary x:Name="Appearance"/>
                 <r:LanguageResourceDictionary x:Name="Language"/>
                 <ResourceDictionary Source="/View/Resource/Theme.xaml"/>
                 <ResourceDictionary Source="/View/Resource/NamedTheme.xaml"/>
                 <ResourceDictionary Source="/View/Resource/ViewSelectorTemplate.xaml"/>
+                <ResourceDictionary Source="pack://application:,,,/NiVE3.UI;component/Resources/Theme.xaml"/>
             </ResourceDictionary.MergedDictionaries>
             <FontFamily x:Key="FontAwesome">/NiVE3;component/Resources/Font Awesome 6 Free-Solid-900.otf#Font Awesome 6 Free Solid</FontFamily>
         </ResourceDictionary>

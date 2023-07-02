@@ -16,7 +16,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NiVE3.PresetPlugin", "NiVE3
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NiVE3.SourceGenerator.ResourceMarkupGenerator", "NiVE3.SourceGenerator.ResourceMarkupGenerator\NiVE3.SourceGenerator.ResourceMarkupGenerator.csproj", "{44737DDC-83B2-4D8C-93CB-28842963868D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NiVE3.SourceGenerator.ViewModelWireGenerator", "NiVE3.SourceGenerator.ViewModelWireGenerator\NiVE3.SourceGenerator.ViewModelWireGenerator.csproj", "{3F02DD23-221A-4C23-8966-80C36374D7DC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NiVE3.SourceGenerator.ViewModelWireGenerator", "NiVE3.SourceGenerator.ViewModelWireGenerator\NiVE3.SourceGenerator.ViewModelWireGenerator.csproj", "{3F02DD23-221A-4C23-8966-80C36374D7DC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NiVE3.UI", "NiVE3.UI\NiVE3.UI.csproj", "{466B8ED7-B9BE-41AF-BD1E-2EA80CE9BDEC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -48,6 +50,10 @@ Global
 		{3F02DD23-221A-4C23-8966-80C36374D7DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3F02DD23-221A-4C23-8966-80C36374D7DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3F02DD23-221A-4C23-8966-80C36374D7DC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{466B8ED7-B9BE-41AF-BD1E-2EA80CE9BDEC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{466B8ED7-B9BE-41AF-BD1E-2EA80CE9BDEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{466B8ED7-B9BE-41AF-BD1E-2EA80CE9BDEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{466B8ED7-B9BE-41AF-BD1E-2EA80CE9BDEC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
