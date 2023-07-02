@@ -23,7 +23,7 @@ namespace NiVE3.Model
 {
     class FootageListModel : BindableBase
     {
-        public IReadOnlyDictionary<Type, IInputMetadata> InputMetadatas { get; }
+        public IReadOnlyDictionary<Type, IInputMetadata> InputMetadatas { get; private set; } = new Dictionary<Type, IInputMetadata>();
 
         [ImportMany]
         List<ExportFactory<IInput, IInputMetadata>>? Inputs { get; set; }
@@ -49,7 +49,7 @@ namespace NiVE3.Model
             set { SetProperty(ref sortIsAscending, value); }
         }
 
-        Dictionary<Type, string[]> SupportedFileTypes { get; }
+        Dictionary<Type, string[]> SupportedFileTypes { get; set; } = new Dictionary<Type, string[]>();
 
         List<InputModel> LoadedInputs { get; } = new List<InputModel>();
 
@@ -63,16 +63,7 @@ namespace NiVE3.Model
             var container = new CompositionContainer(catalog);
             container.ComposeParts(this);
 
-            if (Inputs != null)
-            {
-                InputMetadatas = Inputs.Select(e => e.Metadata).ToDictionary(m => m.PluginType, m => m);
-            }
-            else
-            {
-                InputMetadatas = new ReadOnlyDictionary<Type, IInputMetadata>(new Dictionary<Type, IInputMetadata>());
-            }
-
-            SupportedFileTypes = InputMetadatas.ToDictionary(m => m.Key, m => m.Value.SupportedFileType.Split(",").Select(e => e.Trim('*', '.')).ToArray());
+            InitializePlugin();
 
             //TODO: イベントの追加方法をfieldに対し行うか、nullableにした上でコンストラクタでインスタンスをセットするのが良いか
             Footages = new ObservableCollection<IFootageModel>();
@@ -274,6 +265,23 @@ namespace NiVE3.Model
                 footage.PropertyChanged -= Footage_PropertyChanged;
                 Footages.Remove(footage);
             }
+        }
+
+        // for test
+        // NOTE: 本来は不要(直接コンストラクタに書きたい)が、MEFの都合上、テスト用のモッククラスを差し込めるようにするため、メソッドに切り出す
+        // TODO: オブジェクト作成時にCatalogにモッククラスを差し込める方法があれば差し替える
+        void InitializePlugin()
+        {
+            if (Inputs != null)
+            {
+                InputMetadatas = Inputs.Select(e => e.Metadata).ToDictionary(m => m.PluginType, m => m);
+            }
+            else
+            {
+                InputMetadatas = new ReadOnlyDictionary<Type, IInputMetadata>(new Dictionary<Type, IInputMetadata>());
+            }
+
+            SupportedFileTypes = InputMetadatas.ToDictionary(m => m.Key, m => m.Value.SupportedFileType.Split(",").Select(e => e.Trim('*', '.')).ToArray());
         }
 
         static IFootageModel? FindModel(Guid targetId, IEnumerable<IFootageModel> list)
