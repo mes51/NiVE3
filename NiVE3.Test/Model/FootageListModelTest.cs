@@ -25,17 +25,12 @@ namespace NiVE3.Test.Model
 
         public string FilePath => throw new NotImplementedException();
 
-        public double FrameRate => throw new NotImplementedException();
-
-        public double Duration => throw new NotImplementedException();
-
-        public int Width => throw new NotImplementedException();
-
-        public int Height => throw new NotImplementedException();
-
-        public InputType InputType => throw new NotImplementedException();
-
         public void Dispose()
+        {
+            throw new NotImplementedException();
+        }
+
+        public FootageSourceGroup GetGroup()
         {
             throw new NotImplementedException();
         }
@@ -43,11 +38,6 @@ namespace NiVE3.Test.Model
         public bool Load(string filePath)
         {
             return true;
-        }
-
-        public NImage Read(double time, bool toGpu)
-        {
-            throw new NotImplementedException();
         }
     }
 }

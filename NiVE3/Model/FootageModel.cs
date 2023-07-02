@@ -33,7 +33,7 @@ namespace NiVE3.Model
 
         string FileName { get; }
 
-        InputType InputType { get; }
+        SourceType InputType { get; }
 
         FootageSortKey SortKey { get; set; }
 
@@ -99,8 +99,8 @@ namespace NiVE3.Model
             set { SetProperty(ref comment, value); }
         }
 
-        private InputType inputType;
-        public InputType InputType
+        private SourceType inputType;
+        public SourceType InputType
         {
             get { return inputType; }
             set { SetProperty(ref inputType, value); }
@@ -120,22 +120,25 @@ namespace NiVE3.Model
             set { SetProperty(ref sortIsAscending, value); }
         }
 
-        public string FileName => Path.GetFileName(Input.FilePath);
+        public string FileName => Path.GetFileName(InputModel.FilePath);
 
         public ObservableCollection<IFootageModel>? Children => null;
 
-        IInput Input { get; }
+        IFootageSource Source { get; }
 
-        public FootageModel(IInput input)
+        InputModel InputModel { get; }
+
+        public FootageModel(InputModel input, IFootageSource source)
         {
-            Input = input;
+            InputModel = input;
+            Source = source;
             Name = Path.GetFileName(input.FilePath);
-            Width = input.Width;
-            Height = input.Height;
-            FrameRate = input.FrameRate;
-            Duration = input.Duration;
+            Width = source.Width;
+            Height = source.Height;
+            FrameRate = source.FrameRate;
+            Duration = source.Duration;
             FilePath = input.FilePath;
-            InputType = input.InputType;
+            InputType = source.SourceType;
         }
 
         public void AddFootage(IFootageModel footage) { }
@@ -144,7 +147,7 @@ namespace NiVE3.Model
 
         public NImage ReadImage(double time, bool toGpu)
         {
-            return Input.Read(time, toGpu);
+            return Source.Read(time, toGpu);
         }
     }
 
@@ -178,7 +181,7 @@ namespace NiVE3.Model
 
         public string FileName => "";
 
-        public InputType InputType => InputType.None;
+        public SourceType InputType => SourceType.None;
 
         private FootageSortKey sortKey;
         public FootageSortKey SortKey

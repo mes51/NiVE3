@@ -38,7 +38,7 @@ namespace NiVE3.ViewModel
 
         string Comment { get; set; }
 
-        InputType InputType { get; }
+        SourceType InputType { get; }
 
         string? EditingPropertyName { get; }
 
@@ -119,9 +119,9 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref comment, value); }
         }
 
-        private InputType inputType;
+        private SourceType inputType;
         [NeedWire(nameof(Footage), IsOneWay = true)]
-        public InputType InputType
+        public SourceType InputType
         {
             get { return inputType; }
             set { SetProperty(ref inputType, value); }
@@ -195,7 +195,7 @@ namespace NiVE3.ViewModel
 
         void UpdateSampleImage()
         {
-            if (Footage.InputType == InputType.Image || (Footage.InputType & InputType.Video) != InputType.None)
+            if (Footage.InputType == SourceType.Image || (Footage.InputType & SourceType.Video) != SourceType.None)
             {
                 using var image = Footage.ReadImage(Duration * 0.5, false) as NManagedImage;
                 if (image != null)
@@ -248,7 +248,7 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref comment, value); }
         }
 
-        public InputType InputType => InputType.None;
+        public SourceType InputType => SourceType.None;
 
         private ObservableCollectionView<IFootageModel, IFootageViewModel> footages;
         public ObservableCollectionView<IFootageModel, IFootageViewModel> Footages

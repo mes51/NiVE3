@@ -9,6 +9,7 @@ using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Documents;
+using System.Windows.Input;
 using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Image;
 using NiVE3.Plugin.Interfaces;
@@ -24,19 +25,9 @@ namespace NiVE3.PresetPlugin.Input
 
         const string ID = "3BB12986-32DF-4C41-8D36-46C5E402C6AC";
 
-        public string FilePath { get; private set; } = "";
-
-        public double FrameRate { get; private set; }
-
-        public int Width { get; private set; }
-
-        public int Height { get; private set; }
-
-        public double Duration { get; private set; }
-
-        public InputType InputType { get; private set; }
-
         VideoSourceReaderBase? Reader { get; set; }
+
+        public string FilePath { get; private set; } = "";
 
         public void Dispose()
         {
@@ -57,12 +48,6 @@ namespace NiVE3.PresetPlugin.Input
             {
                 // NOTE: 読み込み時にサイズが変わる可能性があるため1フレームだけ読み込む
                 Reader.GetFrame(0.0);
-
-                Width = Reader.Width;
-                Height = Reader.Height;
-                FrameRate = Reader.FrameRate;
-                Duration = Reader.Duration;
-                InputType = InputType.Video;
                 return true;
             }
             else
@@ -71,13 +56,50 @@ namespace NiVE3.PresetPlugin.Input
             }
         }
 
-        public NImage Read(double time, bool toGpu)
+        public FootageSourceGroup GetGroup()
         {
-            if (Reader == null)
+            if (Reader != null)
             {
+                return new FootageSourceGroup(new IFootageSource[] { new MediaFoundationFootageSource(Reader) });
+            }
+            else
+            {
+                // == Loadがfalseの時に呼んだ
                 throw new InvalidOperationException();
             }
+        }
+    }
 
+    class MediaFoundationFootageSource : IFootageSource
+    {
+        readonly Vector128<float> ByteToFloat128 = Vector128.Create(0.00392156862745098F);
+
+        public string SourceId => "0"; // TODO
+
+        public double FrameRate { get; }
+
+        public int Width { get; }
+
+        public int Height { get; }
+
+        public double Duration { get; }
+
+        public SourceType SourceType { get; }
+
+        VideoSourceReaderBase Reader { get; set; }
+
+        public MediaFoundationFootageSource(VideoSourceReaderBase reader)
+        {
+            Reader = reader;
+            Width = reader.Width;
+            Height = reader.Height;
+            FrameRate = reader.FrameRate;
+            Duration = reader.Duration;
+            SourceType = SourceType.Video;
+        }
+
+        public NImage Read(double time, bool toGpu)
+        {
             if (toGpu)
             {
                 // TODO

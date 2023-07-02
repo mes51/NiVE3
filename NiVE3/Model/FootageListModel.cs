@@ -51,6 +51,8 @@ namespace NiVE3.Model
 
         Dictionary<Type, string[]> SupportedFileTypes { get; }
 
+        List<InputModel> LoadedInputs { get; } = new List<InputModel>();
+
         public event EventHandler<ShowLoadSettingEventArgs>? ShowLoadSetting;
 
         public FootageListModel()
@@ -205,8 +207,43 @@ namespace NiVE3.Model
                 }
             }
 
-            AddFootage(new FootageModel(plugin), targetFolderId);
+            var inputModel = new InputModel(plugin);
+
+            var group = plugin.GetGroup();
+            if (!group.Flatten().Any())
+            {
+                // ソースが何もなかった
+                plugin.Dispose();
+                return false;
+            }
+
+            if (group.ChildrenGroup.Length < 1 && group.Sources.Length < 2)
+            {
+                AddFootage(new FootageModel(inputModel, group.Sources[0]), targetFolderId);
+            }
+            else
+            {
+                AddFootageSourceGroup(inputModel, group, targetFolderId);
+            }
+
+            LoadedInputs.Add(inputModel);
+
             return true;
+        }
+
+        void AddFootageSourceGroup(InputModel inputModel, FootageSourceGroup group, Guid? targetFolderId)
+        {
+            var folder = new FootageFolderModel { Name = group.Name };
+            AddFootage(folder, targetFolderId);
+            foreach (var s in group.Sources)
+            {
+                AddFootage(new FootageModel(inputModel, s), folder.FootageId);
+            }
+
+            foreach (var c in group.ChildrenGroup)
+            {
+                AddFootageSourceGroup(inputModel, c, folder.FootageId);
+            }
         }
 
         void AddFootage(IFootageModel footage, Guid? targetFolderId)
@@ -355,5 +392,13 @@ namespace NiVE3.Model
         public FrameworkElement View { get; }
 
         public bool IsOK { get; set; }
+    }
+
+    file static class FootageSourceGroupExtension
+    {
+        public static IEnumerable<IFootageSource> Flatten(this FootageSourceGroup group)
+        {
+            return group.Sources.Concat(group.ChildrenGroup.SelectMany(c => c.Flatten()));
+        }
     }
 }

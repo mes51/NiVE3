@@ -20,45 +20,11 @@ namespace NiVE3.Plugin.Interfaces
         string FilePath { get; }
 
         /// <summary>
-        /// 読み込んだファイルのフレームレート
-        /// </summary>
-        double FrameRate { get; }
-
-        /// <summary>
-        /// 読み込んだファイルの画像の幅
-        /// </summary>
-        int Width { get; }
-
-        /// <summary>
-        /// 読み込んだファイルの画像の高さ
-        /// </summary>
-        int Height { get; }
-
-        /// <summary>
-        /// 読み込んだファイルの長さ
-        /// </summary>
-        double Duration { get; }
-
-        /// <summary>
-        /// 読み込んだファイルのメディアの形式
-        /// </summary>
-        InputType InputType { get; }
-
-        /// <summary>
         /// ファイルを読み込みます
         /// </summary>
         /// <param name="filePath">読み込むファイルのパス。ファイルはすでに存在チェック済みになります。</param>
         /// <returns>読み込みが成功した場合はtrue(HasSettingViewがtrueの場合は、GetLoadSettingを呼び出しても問題ない場合)、そうでない場合はfalse</returns>
         bool Load(string filePath);
-
-        /// <summary>
-        /// ファイルから画像を読み込みます
-        /// </summary>
-        /// <param name="time">読み込むタイミングの時間</param>
-        /// <param name="toGpu">GPU上に直接読み込む場合はtrue、CPU上に読み込む場合はfalse</param>
-        /// <returns>読み込んだ画像を表すNImage</returns>
-        // TODO: Acceleratorをラップしたものを渡す
-        NImage Read(double time, bool toGpu);
 
         /// <summary>
         /// 現在の入力プラグインの状態を表すデータをシリアル化可能な状態で取得します
@@ -88,32 +54,58 @@ namespace NiVE3.Plugin.Interfaces
         /// <param name="setting">GetLoadSettingで取得したViewのDataContext</param>
         /// <returns>設定を反映し、ファイルの読み込みが完了した場合はtrue、そうでない場合はfalse</returns>
         bool ApplyLoadSetting(object? setting) => true;
+
+        /// <summary>
+        /// 読み込んだファイルから、ソースを取得します
+        /// </summary>
+        /// <returns>読み込んだファイルのソースを表すFootageSourceGroup</returns>
+        FootageSourceGroup GetGroup();
     }
 
     /// <summary>
-    /// フッテージのメディアの形式を表します。
+    /// 読み込んだソースのまとまりを表すクラス
     /// </summary>
-    public enum InputType
+    public class FootageSourceGroup
     {
         /// <summary>
-        /// なし
+        /// グループの名前。最上位のグループ以外はこの名前でフッテージパネルにフォルダが作成されます。
         /// </summary>
-        None = 0b000,
+        public string Name { get; }
+
         /// <summary>
-        /// 画像
+        /// 子のグループ。
         /// </summary>
-        Image = 0b001,
+        public FootageSourceGroup[] ChildrenGroup { get; }
+
         /// <summary>
-        /// 音声
+        /// このグループに属するソース。
         /// </summary>
-        Audio = 0b010,
+        public IFootageSource[] Sources { get; }
+
         /// <summary>
-        /// ビデオ(音声なし)
+        /// コンストラクタ。最上位のグループ、かつ子グループ、が存在しない場合に使用します。
         /// </summary>
-        Video = 0b100,
+        /// <param name="sources">このグループに属するソース</param>
+        public FootageSourceGroup(IFootageSource[] sources) : this("Root", Array.Empty<FootageSourceGroup>(), sources) { }
+
         /// <summary>
-        /// ビデオ+音声
+        /// コンストラクタ。子グループ、が存在しない場合に使用します。
         /// </summary>
-        VideoAndAudio = Video | Audio
+        /// <param name="name">グループの名前</param>
+        /// <param name="sources">このグループに属するソース</param>
+        public FootageSourceGroup(string name, IFootageSource[] sources) : this(name, Array.Empty<FootageSourceGroup>(), sources) { }
+
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="name">このグループの名前</param>
+        /// <param name="childrenGroup">子グループ</param>
+        /// <param name="sources">このグループに属するソース</param>
+        public FootageSourceGroup(string name, FootageSourceGroup[] childrenGroup, IFootageSource[] sources)
+        {
+            Name = name;
+            ChildrenGroup = childrenGroup;
+            Sources = sources;
+        }
     }
 }

@@ -75,10 +75,10 @@
                                         </Setter.Value>
                                     </Setter>
                                     <Style.Triggers>
-                                        <DataTrigger Binding="{Binding InputType}" Value="{x:Static plg:InputType.Audio}">
+                                        <DataTrigger Binding="{Binding InputType}" Value="{x:Static plg:SourceType.Audio}">
                                             <Setter Property="Text" Value=""/>
                                         </DataTrigger>
-                                        <DataTrigger Binding="{Binding InputType}" Value="{x:Static plg:InputType.None}">
+                                        <DataTrigger Binding="{Binding InputType}" Value="{x:Static plg:SourceType.None}">
                                             <Setter Property="Text" Value=""/>
                                         </DataTrigger>
                                     </Style.Triggers>
@@ -90,7 +90,7 @@
                                 <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
                                     <Setter Property="Text" Value=""/>
                                     <Style.Triggers>
-                                        <DataTrigger Binding="{Binding InputType}" Value="{x:Static plg:InputType.Audio}">
+                                        <DataTrigger Binding="{Binding InputType}" Value="{x:Static plg:SourceType.Audio}">
                                             <Setter Property="Text">
                                                 <Setter.Value>
                                                     <MultiBinding Mode="OneWay" Converter="{StaticResource TimeConverter}">
@@ -100,7 +100,7 @@
                                                 </Setter.Value>
                                             </Setter>
                                         </DataTrigger>
-                                        <DataTrigger Binding="{Binding InputType}" Value="{x:Static plg:InputType.Video}">
+                                        <DataTrigger Binding="{Binding InputType}" Value="{x:Static plg:SourceType.Video}">
                                             <Setter Property="Text">
                                                 <Setter.Value>
                                                     <MultiBinding Mode="OneWay" Converter="{StaticResource LocalizedTimeConverter}">
@@ -110,7 +110,7 @@
                                                 </Setter.Value>
                                             </Setter>
                                         </DataTrigger>
-                                        <DataTrigger Binding="{Binding InputType}" Value="{x:Static plg:InputType.VideoAndAudio}">
+                                        <DataTrigger Binding="{Binding InputType}" Value="{x:Static plg:SourceType.VideoAndAudio}">
                                             <Setter Property="Text">
                                                 <Setter.Value>
                                                     <MultiBinding Mode="OneWay" Converter="{StaticResource LocalizedTimeConverter}">
