@@ -21,7 +21,7 @@ using Prism.Mvvm;
 
 namespace NiVE3.Model
 {
-    class FootageListModel : BindableBase
+    partial class FootageListModel : BindableBase
     {
         public IReadOnlyDictionary<Type, IInputMetadata> InputMetadatas { get; private set; } = new Dictionary<Type, IInputMetadata>();
 
@@ -53,9 +53,11 @@ namespace NiVE3.Model
 
         List<InputModel> LoadedInputs { get; } = new List<InputModel>();
 
+        HistoryModel HistoryModel { get; }
+
         public event EventHandler<ShowLoadSettingEventArgs>? ShowLoadSetting;
 
-        public FootageListModel()
+        public FootageListModel(HistoryModel historyModel)
         {
             var pluginCatalog = new DirectoryCatalog(Paths.PluginDirectory);
             var selfCatalog = new AssemblyCatalog(typeof(FootageListModel).Assembly);
@@ -64,6 +66,8 @@ namespace NiVE3.Model
             container.ComposeParts(this);
 
             InitializePlugin();
+
+            HistoryModel = historyModel;
 
             //TODO: イベントの追加方法をfieldに対し行うか、nullableにした上でコンストラクタでインスタンスをセットするのが良いか
             Footages = new ObservableCollection<IFootageModel>();
@@ -79,7 +83,10 @@ namespace NiVE3.Model
 
         public void AddFolder()
         {
-            AddFootage(new FootageFolderModel(), null);
+            var folder = new FootageFolderModel();
+            AddFootage(folder, null);
+
+            HistoryModel.Add(new AddFolderHistoryCommand(this, folder.FootageId, null));
         }
 
         public void MoveFootage(Guid sourceFootageId, Guid targetFolderId)
@@ -103,6 +110,8 @@ namespace NiVE3.Model
                 oldParent.RemoveFootage(model);
             }
             targetFolder.AddFootage(model);
+
+            HistoryModel.Add(new MoveHistoryCommand(this, sourceFootageId, oldParent?.FootageId, targetFolderId));
         }
 
         public void MoveFootageToRoot(Guid sourceFootageId)
@@ -118,6 +127,8 @@ namespace NiVE3.Model
             {
                 oldParent.RemoveFootage(model);
                 AddFootageToRoot(model);
+
+                HistoryModel.Add(new MoveHistoryCommand(this, sourceFootageId, oldParent.FootageId, null));
             }
         }
 
@@ -152,6 +163,16 @@ namespace NiVE3.Model
                     context.Dispose();
                 }
             }
+        }
+
+        void AddInput(InputModel inputModel)
+        {
+            LoadedInputs.Add(inputModel);
+        }
+
+        void RemoveInput(InputModel inputModel)
+        {
+            LoadedInputs.Remove(inputModel);
         }
 
         FootageFolderModel? FindParent(Guid targetId)
@@ -208,21 +229,25 @@ namespace NiVE3.Model
                 return false;
             }
 
+            IFootageModel loadedFootage;
             if (group.ChildrenGroup.Length < 1 && group.Sources.Length < 2)
             {
-                AddFootage(new FootageModel(inputModel, group.Sources[0]), targetFolderId);
+                loadedFootage = new FootageModel(inputModel, group.Sources[0]);
+                AddFootage(loadedFootage, targetFolderId);
             }
             else
             {
-                AddFootageSourceGroup(inputModel, group, targetFolderId);
+                loadedFootage = AddFootageSourceGroup(inputModel, group, targetFolderId);
             }
 
-            LoadedInputs.Add(inputModel);
+            AddInput(inputModel);
+
+            HistoryModel.Add(new LoadFileHistoryCommand(this, inputModel, loadedFootage, targetFolderId));
 
             return true;
         }
 
-        void AddFootageSourceGroup(InputModel inputModel, FootageSourceGroup group, Guid? targetFolderId)
+        IFootageModel AddFootageSourceGroup(InputModel inputModel, FootageSourceGroup group, Guid? targetFolderId)
         {
             var folder = new FootageFolderModel { Name = group.Name };
             AddFootage(folder, targetFolderId);
@@ -235,6 +260,8 @@ namespace NiVE3.Model
             {
                 AddFootageSourceGroup(inputModel, c, folder.FootageId);
             }
+
+            return folder;
         }
 
         void AddFootage(IFootageModel footage, Guid? targetFolderId)
@@ -256,6 +283,19 @@ namespace NiVE3.Model
             footage.PropertyChanged += Footage_PropertyChanged;
             Footages.Add(footage);
             Footages.Sort(new FootageComparer(SortKey, SortIsAscending));
+        }
+
+        void RemoveFootage(IFootageModel footage)
+        {
+            var folder = FindParent(footage.FootageId);
+            if (folder != null)
+            {
+                folder.RemoveFootage(footage);
+            }
+            else
+            {
+                RemoveFootageFromRoot(footage);
+            }
         }
 
         void RemoveFootageFromRoot(IFootageModel footage)

@@ -73,6 +73,32 @@ namespace NiVE3.Config
             new PropertyMetadata(new KeyGesture(Key.N, ModifierKeys.Shift | ModifierKeys.Control | ModifierKeys.Alt))
         );
 
+        public static readonly DependencyProperty UndoGestureProperty = DependencyProperty.Register(
+            nameof(UndoGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new KeyGesture(Key.Z, ModifierKeys.Control))
+        );
+
+        public static readonly DependencyProperty RedoGestureProperty = DependencyProperty.Register(
+            nameof(RedoGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new KeyGesture(Key.Z, ModifierKeys.Shift | ModifierKeys.Control))
+        );
+
+        public InputGesture RedoGesture
+        {
+            get { return (InputGesture)GetValue(RedoGestureProperty); }
+            set { SetValue(RedoGestureProperty, value); }
+        }
+
+        public InputGesture UndoGesture
+        {
+            get { return (InputGesture)GetValue(UndoGestureProperty); }
+            set { SetValue(UndoGestureProperty, value); }
+        }
+
         public InputGesture AddFootageFolderGesture
         {
             get { return (InputGesture)GetValue(AddFootageFolderGestureProperty); }

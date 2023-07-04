@@ -11,6 +11,7 @@ using System.Windows.Input;
 using System.Windows.Threading;
 using System.Windows;
 using NiVE3.View.Command;
+using Prism.Mvvm;
 
 namespace NiVE3.Wpf.Behavior
 {
@@ -76,6 +77,8 @@ namespace NiVE3.Wpf.Behavior
 
             var globalCommand = mainWindowViewModel.ViewModels
                 .OfType<PaneViewModelBase>()
+                .Cast<BindableBase>()
+                .Concat(mainWindowViewModel.CommandOnlyViewModels)
                 .Select(vm => CommandHandlingAttribute.GetCommand(vm, gesture, true))
                 .FirstOrDefault(c => c != null);
             if (globalCommand != null)

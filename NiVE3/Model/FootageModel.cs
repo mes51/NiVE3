@@ -48,7 +48,7 @@ namespace NiVE3.Model
 
     class FootageModel : BindableBase, IFootageModel
     {
-        public Guid FootageId { get; private set; } = Guid.NewGuid();
+        public Guid FootageId { get; private set; }
 
         private string name = "";
         public string Name
@@ -128,8 +128,11 @@ namespace NiVE3.Model
 
         InputModel InputModel { get; }
 
-        public FootageModel(InputModel input, IFootageSource source)
+        public FootageModel(InputModel input, IFootageSource source) : this(input, source, null) { }
+
+        public FootageModel(InputModel input, IFootageSource source, Guid? footageId)
         {
+            FootageId = footageId ?? Guid.NewGuid();
             InputModel = input;
             Source = source;
             Name = Path.GetFileName(input.FilePath);
@@ -153,7 +156,7 @@ namespace NiVE3.Model
 
     class FootageFolderModel : BindableBase, IFootageModel
     {
-        public Guid FootageId { get; private set; } = Guid.NewGuid();
+        public Guid FootageId { get; private set; }
 
         private string name = "";
         public string Name
@@ -204,9 +207,11 @@ namespace NiVE3.Model
             set { SetProperty(ref children, value); }
         }
 
-        public FootageFolderModel()
+        public FootageFolderModel() : this(null) { }
+
+        public FootageFolderModel(Guid? footageId)
         {
-            FootageId = Guid.NewGuid();
+            FootageId = footageId ?? Guid.NewGuid();
             Name = "New Folder";
             PropertyChanged += FootageFolderModel_PropertyChanged;
         }

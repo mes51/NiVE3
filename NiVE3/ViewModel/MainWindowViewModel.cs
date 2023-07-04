@@ -15,9 +15,9 @@ using System.Windows.Input;
 
 namespace NiVE3.ViewModel
 {
-    [CommandHandling(nameof(MainWindowViewModel.OpenProjectCommand), nameof(ShortcutKeySetting.OpenProjectGesture))]
-    [CommandHandling(nameof(MainWindowViewModel.ExitCommand), nameof(ShortcutKeySetting.ExitGesture))]
-    [CommandHandling(nameof(MainWindowViewModel.NewCompositionCommand), nameof(ShortcutKeySetting.NewCompositionGesture))]
+    [CommandHandling(nameof(OpenProjectCommand), nameof(ShortcutKeySetting.OpenProjectGesture))]
+    [CommandHandling(nameof(ExitCommand), nameof(ShortcutKeySetting.ExitGesture))]
+    [CommandHandling(nameof(NewCompositionCommand), nameof(ShortcutKeySetting.NewCompositionGesture))]
     class MainWindowViewModel : BindableBase
     {
         public static string RegionName = "MainWindow";
@@ -29,6 +29,8 @@ namespace NiVE3.ViewModel
         IRegion MainRegion => Region.Regions[RegionName];
 
         public object[] ViewModels => MainRegion.Views.ToArray();
+
+        public CommandOnlyViewModelBase[] CommandOnlyViewModels => Container.ResolveMany<CommandOnlyViewModelBase>().ToArray();
 
         public ICommand OpenProjectCommand { get; }
 
@@ -54,7 +56,7 @@ namespace NiVE3.ViewModel
 
             NewCompositionCommand = new DelegateCommand(() => ProjectModel.CreateComposition());
 
-            RemoveViewModelCommand = new DelegateCommand<BindableBase>(vm => MainRegion.Remove(vm));
+            RemoveViewModelCommand = new DelegateCommand<BindableBase>(MainRegion.Remove);
         }
 
         private void CompositionModels_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
