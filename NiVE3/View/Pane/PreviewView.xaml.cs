@@ -24,5 +24,56 @@ namespace NiVE3.View.Pane
         {
             InitializeComponent();
         }
+
+        bool IsMouseDown { get; set; }
+
+        Point ClickPoint { get; set; }
+
+        Point PrevPoint { get; set; }
+
+        private void PreviewCanvas_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            IsMouseDown = true;
+            ClickPoint = e.GetPosition(PreviewCanvas);
+            PrevPoint = new Point(Canvas.GetLeft(PreviewArea), Canvas.GetTop(PreviewArea));
+            PreviewCanvas.CaptureMouse();
+        }
+
+        private void PreviewCanvas_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (IsMouseDown)
+            {
+                var newPoint = e.GetPosition(PreviewCanvas) - ClickPoint + PrevPoint;
+                Canvas.SetLeft(PreviewArea, newPoint.X);
+                Canvas.SetTop(PreviewArea, newPoint.Y);
+            }
+        }
+
+        private void PreviewCanvas_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if (IsMouseDown)
+            {
+                var newPoint = e.GetPosition(PreviewCanvas) - ClickPoint + PrevPoint;
+                Canvas.SetLeft(PreviewArea, newPoint.X);
+                Canvas.SetTop(PreviewArea, newPoint.Y);
+                PreviewCanvas.ReleaseMouseCapture();
+                IsMouseDown = false;
+            }
+        }
+
+        private void Root_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (double.IsNaN(Canvas.GetLeft(PreviewArea)))
+            {
+                Canvas.SetLeft(PreviewArea, (PreviewCanvas.ActualWidth - PreviewArea.ActualWidth) * 0.5);
+                Canvas.SetTop(PreviewArea, (PreviewCanvas.ActualHeight - PreviewArea.ActualHeight) * 0.5);
+            }
+            else
+            {
+                var move = ((Point)e.NewSize - (Point)e.PreviousSize) * 0.5;
+                Canvas.SetLeft(PreviewArea, Canvas.GetLeft(PreviewArea) + move.X);
+                Canvas.SetTop(PreviewArea, Canvas.GetTop(PreviewArea) + move.Y);
+            }
+        }
     }
 }

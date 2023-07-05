@@ -87,6 +87,19 @@ namespace NiVE3.Config
             new PropertyMetadata(new KeyGesture(Key.Z, ModifierKeys.Shift | ModifierKeys.Control))
         );
 
+        public static readonly DependencyProperty NewPreviewGestureProperty = DependencyProperty.Register(
+            nameof(NewPreviewGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new KeyGesture(Key.D3, ModifierKeys.Control))
+        );
+
+        public InputGesture NewPreviewGesture
+        {
+            get { return (InputGesture)GetValue(NewPreviewGestureProperty); }
+            set { SetValue(NewPreviewGestureProperty, value); }
+        }
+
         public InputGesture RedoGesture
         {
             get { return (InputGesture)GetValue(RedoGestureProperty); }

@@ -45,6 +45,15 @@ namespace NiVE3.View.Dock
 
         public void AfterInsertDocument(LayoutRoot layout, LayoutDocument anchorableShown)
         {
+            EventHandler? closed = null;
+            closed += (object? sender, EventArgs e) =>
+            {
+                ViewModel?.RemoveViewModelCommand?.Execute(anchorableShown.Content);
+                anchorableShown.Closed -= closed;
+            };
+
+            anchorableShown.Closed += closed;
+
         }
 
         public bool BeforeInsertAnchorable(LayoutRoot layout, LayoutAnchorable anchorableToShow, ILayoutContainer destinationContainer)

@@ -18,6 +18,7 @@ namespace NiVE3.ViewModel
     [CommandHandling(nameof(OpenProjectCommand), nameof(ShortcutKeySetting.OpenProjectGesture))]
     [CommandHandling(nameof(ExitCommand), nameof(ShortcutKeySetting.ExitGesture))]
     [CommandHandling(nameof(NewCompositionCommand), nameof(ShortcutKeySetting.NewCompositionGesture))]
+    [CommandHandling(nameof(NewPreviewCommand), nameof(ShortcutKeySetting.NewPreviewGesture))]
     class MainWindowViewModel : BindableBase
     {
         public static string RegionName = "MainWindow";
@@ -38,6 +39,8 @@ namespace NiVE3.ViewModel
 
         public ICommand NewCompositionCommand { get; }
 
+        public ICommand NewPreviewCommand { get; }
+
         public ICommand RemoveViewModelCommand { get; }
 
         ProjectModel ProjectModel { get; }
@@ -50,11 +53,15 @@ namespace NiVE3.ViewModel
 
             ProjectModel.CompositionModels.CollectionChanged += CompositionModels_CollectionChanged;
 
+            ProjectModel.PreviewModels.CollectionChanged += PreviewModels_CollectionChanged;
+
             OpenProjectCommand = new DelegateCommand(() => System.Diagnostics.Debug.WriteLine("Exec Command: OpenProjectCommand"));
 
             ExitCommand = new DelegateCommand(() => System.Diagnostics.Debug.WriteLine("Exec Command: ExitCommand"));
 
             NewCompositionCommand = new DelegateCommand(() => ProjectModel.CreateComposition());
+
+            NewPreviewCommand = new DelegateCommand(() => ProjectModel.CreatePreview());
 
             RemoveViewModelCommand = new DelegateCommand<BindableBase>(MainRegion.Remove);
         }
@@ -64,6 +71,15 @@ namespace NiVE3.ViewModel
             foreach (var newComposition in e.NewItems?.OfType<CompositionModel>() ?? Enumerable.Empty<CompositionModel>())
             {
                 var viewModel = Container.Resolve<TimelineViewModel>(new object[] { newComposition });
+                MainRegion.Add(viewModel);
+            }
+        }
+
+        private void PreviewModels_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            foreach (var newPreview in e.NewItems?.OfType<PreviewModel>() ?? Enumerable.Empty<PreviewModel>())
+            {
+                var viewModel = Container.Resolve<PreviewViewModel>(new object[] { newPreview });
                 MainRegion.Add(viewModel);
             }
         }

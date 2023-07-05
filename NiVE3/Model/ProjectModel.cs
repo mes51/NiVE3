@@ -12,6 +12,8 @@ namespace NiVE3.Model
     {
         public ObservableCollection<CompositionModel> CompositionModels { get; } = new ObservableCollection<CompositionModel>();
 
+        public ObservableCollection<PreviewModel> PreviewModels { get; } = new ObservableCollection<PreviewModel>();
+
         FootageListModel FootageListModel { get; }
 
         public ProjectModel(FootageListModel footageListModel)
@@ -22,6 +24,11 @@ namespace NiVE3.Model
         public void CreateComposition()
         {
             CompositionModels.Add(new CompositionModel());
+        }
+
+        public void CreatePreview()
+        {
+            PreviewModels.Add(new PreviewModel());
         }
     }
 }
