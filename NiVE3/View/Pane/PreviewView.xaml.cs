@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using NiVE3.ViewModel;
 
 namespace NiVE3.View.Pane
 {
@@ -31,12 +32,18 @@ namespace NiVE3.View.Pane
 
         Point PrevPoint { get; set; }
 
+        PreviewViewModel? ViewModel => DataContext as PreviewViewModel;
+
         private void PreviewCanvas_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            IsMouseDown = true;
-            ClickPoint = e.GetPosition(PreviewCanvas);
-            PrevPoint = new Point(Canvas.GetLeft(PreviewArea), Canvas.GetTop(PreviewArea));
-            PreviewCanvas.CaptureMouse();
+            var viewModel = ViewModel;
+            if (viewModel != null && !viewModel.IsFootage)
+            {
+                IsMouseDown = true;
+                ClickPoint = e.GetPosition(PreviewCanvas);
+                PrevPoint = new Point(Canvas.GetLeft(PreviewArea), Canvas.GetTop(PreviewArea));
+                PreviewCanvas.CaptureMouse();
+            }
         }
 
         private void PreviewCanvas_MouseMove(object sender, MouseEventArgs e)
@@ -63,7 +70,7 @@ namespace NiVE3.View.Pane
 
         private void Root_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            if (double.IsNaN(Canvas.GetLeft(PreviewArea)))
+            if ((ViewModel?.IsFootage ?? false) || double.IsNaN(Canvas.GetLeft(PreviewArea)))
             {
                 Canvas.SetLeft(PreviewArea, (PreviewCanvas.ActualWidth - PreviewArea.ActualWidth) * 0.5);
                 Canvas.SetTop(PreviewArea, (PreviewCanvas.ActualHeight - PreviewArea.ActualHeight) * 0.5);
