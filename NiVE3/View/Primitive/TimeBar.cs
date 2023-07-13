@@ -83,6 +83,7 @@ namespace NiVE3.View.Primitive
             drawingContext.PushClip(new RectangleGeometry(new Rect(0.0, 0.0, ActualWidth, ActualHeight)));
 
             var timePerPixel = Range / ActualWidth;
+            var textWidth = this.CreateFormattedText("00:00s", Foreground).Width;
 
             var (timeUnit, measureTime) = (timePerPixel * MinGap) switch
             {
@@ -127,18 +128,12 @@ namespace NiVE3.View.Primitive
             }
 
             var minTextWidth = timePerGap / timePerPixel;
-            for (var w = -((RangeStart / timePerPixel) % minTextWidth); w <= ActualWidth; w += minTextWidth)
+            for (double w = -((RangeStart / timePerPixel) % minTextWidth), limit = ActualWidth + textWidth; w <= limit; w += minTextWidth)
             {
-                if (w < 0.0)
-                {
-                    continue;
-                }
-
                 var time = Math.Round(timePerPixel * w + RangeStart, 7); // TODO: 7桁で足りるか?
                 var timeText = CreateTimeText(time, timeUnit, forceFullFormat);
                 var formattedText = this.CreateFormattedText(timeText, Foreground);
-                var x = Math.Clamp(w - formattedText.Width * 0.5, 0.0, Math.Max(ActualWidth - formattedText.Width, 0.0));
-                drawingContext.DrawText(formattedText, new Point(x, ActualHeight - formattedText.Height - 5));
+                drawingContext.DrawText(formattedText, new Point(w - formattedText.Width * 0.5, ActualHeight - formattedText.Height - 5));
 
                 drawingContext.DrawLine(MeasreLinePen, new Point(w, ActualHeight - 5), new Point(w, ActualHeight));
             }
