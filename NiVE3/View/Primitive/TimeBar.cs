@@ -44,6 +44,15 @@ namespace NiVE3.View.Primitive
             new FrameworkPropertyMetadata(1.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsRender, MeasureLinePropertyChanged)
         );
 
+        private static readonly DependencyPropertyKey MinimumRangePropertyKey = DependencyProperty.RegisterReadOnly(
+            nameof(MinimumRange),
+            typeof(double),
+            typeof(TimeBar),
+            new FrameworkPropertyMetadata(0.01, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        public static readonly DependencyProperty MinimumRangeProperty = MinimumRangePropertyKey.DependencyProperty;
+
         public double MeasureLineWidth
         {
             get { return (double)GetValue(MeasureLineWidthProperty); }
@@ -68,6 +77,12 @@ namespace NiVE3.View.Primitive
             set { SetValue(RangeProperty, value); }
         }
 
+        public double MinimumRange
+        {
+            get { return (double)GetValue(MinimumRangeProperty); }
+            private set { SetValue(MinimumRangePropertyKey, value); }
+        }
+
         Pen MeasreLinePen { get; set; } = new Pen(SystemColors.ControlTextBrush, 1.0);
 
         static TimeBar()
@@ -75,6 +90,8 @@ namespace NiVE3.View.Primitive
             FontSizeProperty.OverrideMetadata(typeof(TimeBar), new FrameworkPropertyMetadata(10.0, FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.Inherits));
             ClipToBoundsProperty.OverrideMetadata(typeof(TimeBar), new FrameworkPropertyMetadata(true, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsRender));
             ForegroundProperty.OverrideMetadata(typeof(TimeBar), new FrameworkPropertyMetadata(SystemColors.ControlTextBrush, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsRender, MeasureLinePropertyChanged));
+
+            EventManager.RegisterClassHandler(typeof(TimeBar), SizeChangedEvent, new SizeChangedEventHandler(SizeChangedEventHandler));
         }
 
         protected override void OnRender(DrawingContext drawingContext)
@@ -197,6 +214,14 @@ namespace NiVE3.View.Primitive
             if (sender is TimeBar timeBar)
             {
                 timeBar.MeasreLinePen = new Pen(timeBar.Foreground, timeBar.MeasureLineWidth);
+            }
+        }
+
+        static void SizeChangedEventHandler(object sender, SizeChangedEventArgs e)
+        {
+            if (sender is TimeBar timeBar)
+            {
+                timeBar.MinimumRange = timeBar.ActualWidth * (1.0 / timeBar.FrameRate / MinGap);
             }
         }
 

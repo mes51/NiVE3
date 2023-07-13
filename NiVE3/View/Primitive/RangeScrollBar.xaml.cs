@@ -22,6 +22,9 @@ namespace NiVE3.View.Primitive
     /// </summary>
     public partial class RangeScrollBar : UserControl
     {
+        // TODO: デザイン決定後調整
+        const double RangeThumbWidth = 20.0;
+
         public static readonly DependencyProperty MinimumProperty = DependencyProperty.Register(
             nameof(Minimum),
             typeof(double),
@@ -104,6 +107,8 @@ namespace NiVE3.View.Primitive
             set { SetValue(MinimumProperty, value); }
         }
 
+        double RangeWidth => ActualWidth - RangeThumbWidth;
+
         bool IsRangeStartThumbDragging { get; set; }
 
         bool IsRangeThumbDragging { get; set; }
@@ -126,9 +131,10 @@ namespace NiVE3.View.Primitive
         {
             base.ArrangeOverride(arrangeBounds);
 
-            var area = Maximum - Minimum;
-            var rangeGridWidth = (Range / area) * arrangeBounds.Width;
-            DecreaseButton.Width = (RangeStart / area) * arrangeBounds.Width;
+            var totalRange = Maximum - Minimum;
+            var rangeBounds = arrangeBounds.Width - RangeThumbWidth;
+            var rangeGridWidth = (Range / totalRange) * rangeBounds + RangeThumbWidth;
+            DecreaseButton.Width = (RangeStart / totalRange) * rangeBounds;
             IncreaseButton.Width = Math.Max(arrangeBounds.Width - (DecreaseButton.Width + rangeGridWidth), 0.0);
 
             return arrangeBounds;
@@ -150,7 +156,7 @@ namespace NiVE3.View.Primitive
             }
 
             var area = Maximum - Minimum;
-            var rangePerPixel = area / ActualWidth;
+            var rangePerPixel = area / RangeWidth;
             var prevRangeStart = RangeStart;
             var changed = Math.Min(Math.Max(-e.HorizontalChange * rangePerPixel, MinimumRange - Range), RangeStart);
             Range += changed;
@@ -178,7 +184,7 @@ namespace NiVE3.View.Primitive
             }
 
             var area = Maximum - Minimum;
-            var rangePerPixel = area / ActualWidth;
+            var rangePerPixel = area / RangeWidth;
             RangeStart += Math.Max(Math.Min(e.HorizontalChange * rangePerPixel, Maximum - (RangeStart + Range)), -RangeStart);
         }
 
@@ -203,7 +209,7 @@ namespace NiVE3.View.Primitive
             }
 
             var area = Maximum - Minimum;
-            var rangePerPixel = area / ActualWidth;
+            var rangePerPixel = area / RangeWidth;
             var changed = Math.Min(Math.Max(e.HorizontalChange * rangePerPixel, MinimumRange - Range), Maximum - (RangeStart + Range));
             var prevRangeStart = RangeStart;
             Range += changed;
