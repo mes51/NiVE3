@@ -16,18 +16,18 @@ namespace NiVE3.View.Primitive
 
         static readonly int[] CountScale = new int[] { 1, 2, 5, 10, 20, 50, 60, 120, 240, 480, 960, 1920 };
 
-        public static readonly DependencyProperty StartTimeProperty = DependencyProperty.Register(
-            nameof(StartTime),
+        public static readonly DependencyProperty RangeProperty = DependencyProperty.Register(
+            nameof(Range),
+            typeof(double),
+            typeof(TimeBar),
+            new FrameworkPropertyMetadata(1.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsRender)
+        );
+
+        public static readonly DependencyProperty RangeStartProperty = DependencyProperty.Register(
+            nameof(RangeStart),
             typeof(double),
             typeof(TimeBar),
             new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsRender)
-        );
-
-        public static readonly DependencyProperty TimePerPixelProperty = DependencyProperty.Register(
-            nameof(TimePerPixel),
-            typeof(double),
-            typeof(TimeBar),
-            new FrameworkPropertyMetadata(1.0 / 30.0 / MinGap, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsRender)
         );
 
         public static readonly DependencyProperty FrameRateProperty = DependencyProperty.Register(
@@ -56,16 +56,16 @@ namespace NiVE3.View.Primitive
             set { SetValue(FrameRateProperty, value); }
         }
 
-        public double TimePerPixel
+        public double RangeStart
         {
-            get { return (double)GetValue(TimePerPixelProperty); }
-            set { SetValue(TimePerPixelProperty, value); }
+            get { return (double)GetValue(RangeStartProperty); }
+            set { SetValue(RangeStartProperty, value); }
         }
 
-        public double StartTime
+        public double Range
         {
-            get { return (double)GetValue(StartTimeProperty); }
-            set { SetValue(StartTimeProperty, value); }
+            get { return (double)GetValue(RangeProperty); }
+            set { SetValue(RangeProperty, value); }
         }
 
         Pen MeasreLinePen { get; set; } = new Pen(SystemColors.ControlTextBrush, 1.0);
@@ -82,7 +82,9 @@ namespace NiVE3.View.Primitive
             base.OnRender(drawingContext);
             drawingContext.PushClip(new RectangleGeometry(new Rect(0.0, 0.0, ActualWidth, ActualHeight)));
 
-            var (timeUnit, measureTime) = (TimePerPixel * MinGap) switch
+            var timePerPixel = Range / ActualWidth;
+
+            var (timeUnit, measureTime) = (timePerPixel * MinGap) switch
             {
                 var g when (g >= 3600.0) => (TimeUnit.Hour, g / 3600.0),
                 var g when (g >= 60.0) => (TimeUnit.Minute, g / 60.0),
@@ -113,7 +115,7 @@ namespace NiVE3.View.Primitive
                     timePerGap *= 3600.0;
                     break;
             }
-            if (timePerGap / TimePerPixel < MinGap)
+            if (timePerGap / timePerPixel < MinGap)
             {
                 (timeUnit, timePerGap) = timeUnit switch
                 {
@@ -124,10 +126,16 @@ namespace NiVE3.View.Primitive
                 };
             }
 
-            var minTextWidth = timePerGap / TimePerPixel;
-            for (var w = 0.0; w < ActualWidth; w += minTextWidth)
+            var minTextWidth = timePerGap / timePerPixel;
+            for (var w = -((RangeStart / timePerPixel) % minTextWidth); w <= ActualWidth; w += minTextWidth)
             {
-                var timeText = CreateTimeText(TimePerPixel * w + StartTime, timeUnit, forceFullFormat);
+                if (w < 0.0)
+                {
+                    continue;
+                }
+
+                var time = Math.Round(timePerPixel * w + RangeStart, 7); // TODO: 7桁で足りるか?
+                var timeText = CreateTimeText(time, timeUnit, forceFullFormat);
                 var formattedText = this.CreateFormattedText(timeText, Foreground);
                 var x = Math.Clamp(w - formattedText.Width * 0.5, 0.0, Math.Max(ActualWidth - formattedText.Width, 0.0));
                 drawingContext.DrawText(formattedText, new Point(x, ActualHeight - formattedText.Height - 5));
@@ -162,7 +170,7 @@ namespace NiVE3.View.Primitive
                         var minute = (second / 60) % 60;
                         if (forceLongFormat || second % 60 == 0)
                         {
-                            return $"{minute:D02}:{second:D02}s";
+                            return $"{minute:D02}:{second % 60:D02}s";
                         }
                         else
                         {
@@ -175,7 +183,7 @@ namespace NiVE3.View.Primitive
                         var hour = (minute / 60) % 60;
                         if (forceLongFormat || minute % 60 == 0)
                         {
-                            return $"{hour:D02}:{minute:D02}m";
+                            return $"{hour:D02}:{minute % 60:D02}m";
                         }
                         else
                         {

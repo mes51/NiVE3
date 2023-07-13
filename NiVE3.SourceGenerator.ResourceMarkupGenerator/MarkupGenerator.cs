@@ -13,6 +13,8 @@ namespace NiVE3.SourceGenerator.ResourceMarkupGenerator
     {
         static readonly string Namespace = typeof(MarkupGenerator).Namespace;
 
+        static readonly string MarkupableResourceDictionaryFullName = $"{Namespace}.MarkupableResourceDictionaryAttribute";
+
         static readonly string ShowInMarkupFullName = $"{Namespace}.ShowInMarkupAttribute";
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -26,7 +28,10 @@ namespace NiVE3.SourceGenerator.ResourceMarkupGenerator
 using System;
 
 [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
-sealed class MarkupableResourceDictionaryAttribute : Attribute { }
+sealed class MarkupableResourceDictionaryAttribute : Attribute
+{
+    public bool IsPublic { get; set; }
+}
 """);
 
                 context.CancellationToken.ThrowIfCancellationRequested();
@@ -69,11 +74,25 @@ sealed class ShowInMarkupAttribute : Attribute { }
                 return;
             }
 
+            var markupableResourceDictionary = compilation.GetTypeByMetadataName(MarkupableResourceDictionaryFullName);
+            if (markupableResourceDictionary == null)
+            {
+                throw new InvalidOperationException($"{MarkupableResourceDictionaryFullName} is not found");
+            }
+
             var showInMarkup = compilation.GetTypeByMetadataName(ShowInMarkupFullName);
             if (showInMarkup == null)
             {
                 throw new InvalidOperationException($"{ShowInMarkupFullName} is not found");
             }
+
+            var markupableResourceDictionaryAttribute = typeSymbol.GetAttributes().FirstOrDefault(a => SymbolEqualityComparer.Default.Equals(markupableResourceDictionary, a.AttributeClass));
+            if (markupableResourceDictionaryAttribute == null)
+            {
+                throw new InvalidOperationException("processing class is not applied MarkupableResourceDictionaryAttribute"); // may be bug
+            }
+
+            var isPublic = (bool?)markupableResourceDictionaryAttribute.NamedArguments.FirstOrDefault(a => a.Key == "IsPublic").Value.Value ?? false;
 
             var resourceDictionarySymbol = compilation.GetTypeByMetadataName("System.Windows.ResourceDictionary");
             if (!SymbolEqualityComparer.Default.Equals(typeSymbol.BaseType, resourceDictionarySymbol))
@@ -109,7 +128,7 @@ using System.Windows.Markup;
 
 {{ns}}
 
-class {{markupTypeName}} : MarkupExtension
+{{(isPublic ? "public " : "")}}class {{markupTypeName}} : MarkupExtension
 {
     public {{enumTypeName}} ResourceKey { get; set; }
 
@@ -147,7 +166,7 @@ class {{markupTypeName}} : MarkupExtension
     }
 }
 
-enum {{enumTypeName}}
+{{(isPublic ? "public " : "")}}enum {{enumTypeName}}
 {
 
 """);

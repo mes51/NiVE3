@@ -24,7 +24,7 @@
             </Style.Triggers>
         </Style>
 
-        <Style x:Key="TimelineAreaStyle" TargetType="{x:Type Grid}">
+        <Style x:Key="TimelineAreaStyle" TargetType="{x:Type StackPanel}">
             <Setter Property="Visibility" Value="Visible"/>
 
             <Style.Triggers>
@@ -49,8 +49,9 @@
             </Grid>
         </Canvas>
 
-        <Grid Grid.Row="1" x:Name="TimelineArea" Style="{StaticResource TimelineAreaStyle}">
-            <pr:TimeBar Height="20"/>
-        </Grid>
+        <StackPanel Grid.Row="1" x:Name="TimelineArea" Style="{StaticResource TimelineAreaStyle}">
+            <pr:RangeScrollBar Height="10" Minimum="0" Maximum="{Binding Duration}" Range="{Binding TimeBarRange, Mode=TwoWay}" RangeStart="{Binding TimeBarRangeStart, Mode=TwoWay}"/>
+            <pr:TimeBar Height="20" Range="{Binding TimeBarRange}" RangeStart="{Binding TimeBarRangeStart}"/>
+        </StackPanel>
     </Grid>
 </UserControl>

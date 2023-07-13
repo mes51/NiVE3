@@ -10,7 +10,7 @@ using NiVE3.SourceGenerator.ResourceMarkupGenerator;
 
 namespace NiVE3.UI.Resources
 {
-    [MarkupableResourceDictionary]
+    [MarkupableResourceDictionary(IsPublic = true)]
     public class AppearanceResourceDictionary : ResourceDictionary
     {
         static Dictionary<string, AppearanceChangeableAttribute> ColorKeys { get; }

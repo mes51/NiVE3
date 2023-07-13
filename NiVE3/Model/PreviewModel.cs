@@ -23,5 +23,12 @@ namespace NiVE3.Model
             get { return sourceType; }
             set { SetProperty(ref sourceType, value); }
         }
+
+        private double duration = 60.0;
+        public double Duration
+        {
+            get { return duration; }
+            set { SetProperty(ref duration, value); }
+        }
     }
 }

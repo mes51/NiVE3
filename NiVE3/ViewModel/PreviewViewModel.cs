@@ -23,10 +23,33 @@ namespace NiVE3.ViewModel
         }
 
         private SourceType sourceType;
+        [NeedWire(nameof(PreviewModel), IsOneWay = true)]
         public SourceType SourceType
         {
             get { return sourceType; }
             set { SetProperty(ref sourceType, value); }
+        }
+
+        private double duration;
+        [NeedWire(nameof(PreviewModel), IsOneWay = true)]
+        public double Duration
+        {
+            get { return duration; }
+            set { SetProperty(ref duration, value); }
+        }
+
+        private double timeBarRange;
+        public double TimeBarRange
+        {
+            get { return timeBarRange; }
+            set { SetProperty(ref timeBarRange, value); }
+        }
+
+        private double timeBarRangeStart;
+        public double TimeBarRangeStart
+        {
+            get { return timeBarRangeStart; }
+            set { SetProperty(ref timeBarRangeStart, value); }
         }
 
         PreviewModel PreviewModel { get; }
@@ -38,6 +61,8 @@ namespace NiVE3.ViewModel
             PreviewModel = previewModel;
             IsFootage = previewModel.IsFootage;
             SourceType = previewModel.SourceType;
+            TimeBarRange = previewModel.Duration;
+            Duration = previewModel.Duration;
 
             WiringModel();
         }
