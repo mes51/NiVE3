@@ -12,9 +12,26 @@ namespace NiVE3.View.Primitive
 {
     class TimeBar : Control
     {
+        // TODO: デザイン決定後調整
+        const double SideSpacerWidth = 15.0;
+
         const double MinGap = 75.0;
 
         static readonly int[] CountScale = new int[] { 1, 2, 5, 10, 20, 50, 60, 120, 240, 480, 960, 1920 };
+
+        public static readonly DependencyProperty SideSpacerBrushProperty = DependencyProperty.Register(
+            nameof(SideSpacerBrush),
+            typeof(Brush),
+            typeof(TimeBar),
+            new FrameworkPropertyMetadata(Brushes.LightGray, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsRender)
+        );
+
+        public static readonly DependencyProperty DurationProperty = DependencyProperty.Register(
+            nameof(Duration),
+            typeof(double),
+            typeof(TimeBar),
+            new FrameworkPropertyMetadata(1.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsRender)
+        );
 
         public static readonly DependencyProperty RangeProperty = DependencyProperty.Register(
             nameof(Range),
@@ -77,6 +94,18 @@ namespace NiVE3.View.Primitive
             set { SetValue(RangeProperty, value); }
         }
 
+        public double Duration
+        {
+            get { return (double)GetValue(DurationProperty); }
+            set { SetValue(DurationProperty, value); }
+        }
+
+        public Brush SideSpacerBrush
+        {
+            get { return (Brush)GetValue(SideSpacerBrushProperty); }
+            set { SetValue(SideSpacerBrushProperty, value); }
+        }
+
         public double MinimumRange
         {
             get { return (double)GetValue(MinimumRangeProperty); }
@@ -99,7 +128,7 @@ namespace NiVE3.View.Primitive
             base.OnRender(drawingContext);
             drawingContext.PushClip(new RectangleGeometry(new Rect(0.0, 0.0, ActualWidth, ActualHeight)));
 
-            var timePerPixel = Range / ActualWidth;
+            var timePerPixel = Range / (ActualWidth - SideSpacerWidth * 2.0);
             var textWidth = this.CreateFormattedText("00:00s", Foreground).Width;
 
             var (timeUnit, measureTime) = (timePerPixel * MinGap) switch
@@ -145,9 +174,12 @@ namespace NiVE3.View.Primitive
             }
 
             var minTextWidth = timePerGap / timePerPixel;
-            for (double w = -((RangeStart / timePerPixel) % minTextWidth), limit = ActualWidth + textWidth; w <= limit; w += minTextWidth)
+            var rangeStartX = -RangeStart / timePerPixel;
+            drawingContext.DrawRectangle(SideSpacerBrush, null, new Rect(rangeStartX, 0.0, SideSpacerWidth, ActualHeight));
+            drawingContext.DrawRectangle(SideSpacerBrush, null, new Rect(rangeStartX + Duration / timePerPixel + SideSpacerWidth, 0.0, SideSpacerWidth, ActualHeight));
+            for (double w = (rangeStartX % minTextWidth) + SideSpacerWidth, limit = ActualWidth + textWidth; w <= limit; w += minTextWidth)
             {
-                var time = Math.Round(timePerPixel * w + RangeStart, 7); // TODO: 7桁で足りるか?
+                var time = Math.Round(timePerPixel * (w - SideSpacerWidth) + RangeStart, 7); // TODO: 7桁で足りるか?
                 var timeText = CreateTimeText(time, timeUnit, forceFullFormat);
                 var formattedText = this.CreateFormattedText(timeText, Foreground);
                 drawingContext.DrawText(formattedText, new Point(w - formattedText.Width * 0.5, ActualHeight - formattedText.Height - 5));
@@ -169,7 +201,7 @@ namespace NiVE3.View.Primitive
                         frame -= second * FrameRate;
                         if (forceLongFormat || frame < 1.0)
                         {
-                            return $"{second:D02}:{(int)frame:D02}f";
+                            return $"{second % 60:D02}:{(int)frame:D02}f";
                         }
                         else
                         {
@@ -182,7 +214,7 @@ namespace NiVE3.View.Primitive
                         var minute = (second / 60) % 60;
                         if (forceLongFormat || second % 60 == 0)
                         {
-                            return $"{minute:D02}:{second % 60:D02}s";
+                            return $"{minute % 60:D02}:{second % 60:D02}s";
                         }
                         else
                         {
@@ -221,7 +253,7 @@ namespace NiVE3.View.Primitive
         {
             if (sender is TimeBar timeBar)
             {
-                timeBar.MinimumRange = timeBar.ActualWidth * (1.0 / timeBar.FrameRate / MinGap);
+                timeBar.MinimumRange = (timeBar.ActualWidth - SideSpacerWidth * 2.0) * (1.0 / timeBar.FrameRate / MinGap);
             }
         }
 

@@ -51,7 +51,7 @@
 
         <StackPanel Grid.Row="1" x:Name="TimelineArea" Style="{StaticResource TimelineAreaStyle}">
             <pr:RangeScrollBar Height="10" Minimum="0" Maximum="{Binding Duration}" Range="{Binding TimeBarRange, Mode=TwoWay}" RangeStart="{Binding TimeBarRangeStart, Mode=TwoWay}" MinimumRange="{Binding ElementName=TimeBar, Path=MinimumRange, Mode=OneWay}"/>
-            <pr:TimeBar x:Name="TimeBar" Height="20" Range="{Binding TimeBarRange}" RangeStart="{Binding TimeBarRangeStart}"/>
+            <pr:TimeBar x:Name="TimeBar" Height="20" Duration="{Binding Duration}" Range="{Binding TimeBarRange}" RangeStart="{Binding TimeBarRangeStart}"/>
         </StackPanel>
     </Grid>
 </UserControl>
