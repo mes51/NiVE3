@@ -30,5 +30,12 @@ namespace NiVE3.Model
             get { return duration; }
             set { SetProperty(ref duration, value); }
         }
+
+        private double currentTime;
+        public double CurrentTime
+        {
+            get { return currentTime; }
+            set { SetProperty(ref currentTime, value); }
+        }
     }
 }

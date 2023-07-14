@@ -38,6 +38,14 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref duration, value); }
         }
 
+        private double currentTime;
+        [NeedWire(nameof(PreviewModel))]
+        public double CurrentTime
+        {
+            get { return currentTime; }
+            set { SetProperty(ref currentTime, value); }
+        }
+
         private double timeBarRange;
         public double TimeBarRange
         {

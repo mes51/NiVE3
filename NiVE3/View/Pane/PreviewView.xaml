@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:NiVE3.View.Pane"
-             xmlns:pr="clr-namespace:NiVE3.View.Primitive"
+             xmlns:pt="clr-namespace:NiVE3.View.Part"
              xmlns:pl="clr-namespace:NiVE3.Plugin.Interfaces;assembly=NiVE3.Plugin"
              mc:Ignorable="d" 
              x:Name="Root"
@@ -49,9 +49,6 @@
             </Grid>
         </Canvas>
 
-        <StackPanel Grid.Row="1" x:Name="TimelineArea" Style="{StaticResource TimelineAreaStyle}">
-            <pr:RangeScrollBar Height="10" Minimum="0" Maximum="{Binding Duration}" Range="{Binding TimeBarRange, Mode=TwoWay}" RangeStart="{Binding TimeBarRangeStart, Mode=TwoWay}" MinimumRange="{Binding ElementName=TimeBar, Path=MinimumRange, Mode=OneWay}"/>
-            <pr:TimeBar x:Name="TimeBar" Height="20" Duration="{Binding Duration}" Range="{Binding TimeBarRange}" RangeStart="{Binding TimeBarRangeStart}"/>
-        </StackPanel>
+        <pt:TimeLocatorView Grid.Row="1" Duration="{Binding Duration}" Range="{Binding TimeBarRange, Mode=TwoWay}" RangeStart="{Binding TimeBarRangeStart, Mode=TwoWay}" CurrentTime="{Binding CurrentTime, Mode=TwoWay}"/>
     </Grid>
 </UserControl>

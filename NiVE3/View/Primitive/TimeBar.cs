@@ -12,12 +12,16 @@ namespace NiVE3.View.Primitive
 {
     class TimeBar : Control
     {
-        // TODO: デザイン決定後調整
-        const double SideSpacerWidth = 15.0;
-
         const double MinGap = 75.0;
 
         static readonly int[] CountScale = new int[] { 1, 2, 5, 10, 20, 50, 60, 120, 240, 480, 960, 1920 };
+
+        public static readonly DependencyProperty SideSpacerWidthProperty = DependencyProperty.Register(
+            nameof(SideSpacerWidth),
+            typeof(double),
+            typeof(TimeBar),
+            new FrameworkPropertyMetadata(10.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
 
         public static readonly DependencyProperty SideSpacerBrushProperty = DependencyProperty.Register(
             nameof(SideSpacerBrush),
@@ -104,6 +108,12 @@ namespace NiVE3.View.Primitive
         {
             get { return (Brush)GetValue(SideSpacerBrushProperty); }
             set { SetValue(SideSpacerBrushProperty, value); }
+        }
+
+        public double SideSpacerWidth
+        {
+            get { return (double)GetValue(SideSpacerWidthProperty); }
+            set { SetValue(SideSpacerWidthProperty, value); }
         }
 
         public double MinimumRange
@@ -253,7 +263,7 @@ namespace NiVE3.View.Primitive
         {
             if (sender is TimeBar timeBar)
             {
-                timeBar.MinimumRange = (timeBar.ActualWidth - SideSpacerWidth * 2.0) * (1.0 / timeBar.FrameRate / MinGap);
+                timeBar.MinimumRange = (timeBar.ActualWidth - timeBar.SideSpacerWidth * 2.0) * (1.0 / timeBar.FrameRate / MinGap);
             }
         }
 

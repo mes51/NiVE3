@@ -1,0 +1,25 @@
+﻿<UserControl x:Class="NiVE3.View.Part.TimeLocatorView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:NiVE3.View.Part"
+             xmlns:pr="clr-namespace:NiVE3.View.Primitive"
+             mc:Ignorable="d" 
+             x:Name="Root"
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition />
+        </Grid.RowDefinitions>
+
+        <pr:RangeScrollBar Grid.Row="0" Height="10" Minimum="0" Maximum="{Binding ElementName=Root, Path=Duration}" Range="{Binding ElementName=Root, Path=Range, Mode=TwoWay}" RangeStart="{Binding ElementName=Root, Path=RangeStart, Mode=TwoWay}" MinimumRange="{Binding ElementName=TimeBar, Path=MinimumRange, Mode=OneWay}"/>
+        <pr:TimeBar Grid.Row="1" x:Name="TimeBar" Height="20" Duration="{Binding ElementName=Root, Path=Duration}" Range="{Binding ElementName=Root, Path=Range}" RangeStart="{Binding ElementName=Root, Path=RangeStart}" SideSpacerWidth="{x:Static local:TimeLocatorView.SideSpacerWidth}"/>
+        <Canvas Grid.Row="1" Grid.RowSpan="2" x:Name="IndicatorContainer" ClipToBounds="True">
+            <pr:IndicatorView Height="{Binding ElementName=IndicatorContainer, Path=ActualHeight}" SnapsToDevicePixels="True" Canvas.Left="{Binding ElementName=Root, Path=IndicatorPosition}" Canvas.Top="8"/>
+        </Canvas>
+        <Rectangle Grid.Row="1" x:Name="ScrubbingArea" Height="12" Fill="Transparent" VerticalAlignment="Bottom" MouseDown="ScrubbingArea_MouseDown"  MouseMove="ScrubbingArea_MouseMove"  MouseUp="ScrubbingArea_MouseUp"/>
+    </Grid>
+</UserControl>
