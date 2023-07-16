@@ -44,8 +44,8 @@
         </Grid.RowDefinitions>
 
         <Canvas Grid.Row="0" x:Name="PreviewCanvas" MouseDown="PreviewCanvas_MouseDown" MouseMove="PreviewCanvas_MouseMove" MouseUp="PreviewCanvas_MouseUp" Background="Transparent" ClipToBounds="True">
-            <Grid x:Name="PreviewArea" Width="960" Height="540" Background="Black" Style="{StaticResource PreviewAreaStyle}">
-
+            <Grid x:Name="PreviewArea" Width="{Binding Width}" Height="{Binding Height}" Background="Black" Style="{StaticResource PreviewAreaStyle}" SizeChanged="PreviewArea_SizeChanged" ClipToBounds="True">
+                <Image Source="{Binding CurrentFrame}" Stretch="Uniform"/>
             </Grid>
         </Canvas>
 

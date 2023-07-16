@@ -86,6 +86,14 @@ namespace NiVE3.View.Pane
             }
         }
 
+        private void TreeListViewItem_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is FrameworkElement fe && fe.DataContext is FootageViewModel vm)
+            {
+                ViewModel?.ShowPreviewCommand?.Execute(vm);
+            }
+        }
+
         private void FootageEditTextBox_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             // TODO: Escによるキャンセル

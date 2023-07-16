@@ -136,9 +136,13 @@ namespace NiVE3.View.Primitive
         protected override void OnRender(DrawingContext drawingContext)
         {
             base.OnRender(drawingContext);
-            drawingContext.PushClip(new RectangleGeometry(new Rect(0.0, 0.0, ActualWidth, ActualHeight)));
 
             var timePerPixel = Range / (ActualWidth - SideSpacerWidth * 2.0);
+            if (timePerPixel <= 0.0)
+            {
+                return;
+            }
+
             var textWidth = this.CreateFormattedText("00:00s", Foreground).Width;
 
             var (timeUnit, measureTime) = (timePerPixel * MinGap) switch
@@ -185,6 +189,9 @@ namespace NiVE3.View.Primitive
 
             var minTextWidth = timePerGap / timePerPixel;
             var rangeStartX = -RangeStart / timePerPixel;
+
+            drawingContext.PushClip(new RectangleGeometry(new Rect(0.0, 0.0, ActualWidth, ActualHeight)));
+
             drawingContext.DrawRectangle(SideSpacerBrush, null, new Rect(rangeStartX, 0.0, SideSpacerWidth, ActualHeight));
             drawingContext.DrawRectangle(SideSpacerBrush, null, new Rect(rangeStartX + Duration / timePerPixel + SideSpacerWidth, 0.0, SideSpacerWidth, ActualHeight));
             for (double w = (rangeStartX % minTextWidth) + SideSpacerWidth, limit = ActualWidth + textWidth; w <= limit; w += minTextWidth)

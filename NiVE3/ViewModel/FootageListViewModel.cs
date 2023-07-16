@@ -104,6 +104,8 @@ namespace NiVE3.ViewModel
 
         public ICommand LoadFileCommand { get; }
 
+        public ICommand ShowPreviewCommand { get; }
+
         FootageListModel FootageListModel { get; }
 
         IDialogService DialogService { get; }
@@ -159,10 +161,9 @@ namespace NiVE3.ViewModel
                 }
             });
 
-            LoadFileCommand = new DelegateCommand<Tuple<string, Guid?>>(t =>
-            {
-                FootageListModel.LoadFile(t.Item1, t.Item2);
-            });
+            LoadFileCommand = new DelegateCommand<Tuple<string, Guid?>>(t => FootageListModel.LoadFile(t.Item1, t.Item2));
+
+            ShowPreviewCommand = new DelegateCommand<FootageViewModel>(f => FootageListModel.ShowPreview(f.FootageId));
 
             FootageListModel.ShowLoadSetting += FootageListModel_ShowLoadSetting;
         }

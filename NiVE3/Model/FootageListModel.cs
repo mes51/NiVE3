@@ -57,6 +57,8 @@ namespace NiVE3.Model
 
         public event EventHandler<ShowLoadSettingEventArgs>? ShowLoadSetting;
 
+        public event EventHandler<ShowFootagePreviewEventArgs>? ShowFootagePreview;
+
         public FootageListModel(HistoryModel historyModel)
         {
             var pluginCatalog = new DirectoryCatalog(Paths.PluginDirectory);
@@ -163,6 +165,17 @@ namespace NiVE3.Model
                     context.Dispose();
                 }
             }
+        }
+
+        public void ShowPreview(Guid footageId)
+        {
+            var footage = FindModel(footageId, Footages) as FootageModel;
+            if (footage == null)
+            {
+                return;
+            }
+
+            ShowFootagePreview?.Invoke(this, new ShowFootagePreviewEventArgs(footage));
         }
 
         void AddInput(InputModel inputModel)
@@ -440,6 +453,16 @@ namespace NiVE3.Model
         public FrameworkElement View { get; }
 
         public bool IsOK { get; set; }
+    }
+
+    class ShowFootagePreviewEventArgs : EventArgs
+    {
+        public ShowFootagePreviewEventArgs(FootageModel footage)
+        {
+            Footage = footage;
+        }
+
+        public FootageModel Footage { get; }
     }
 
     file static class FootageSourceGroupExtension

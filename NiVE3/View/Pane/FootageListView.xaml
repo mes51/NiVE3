@@ -60,6 +60,7 @@
         <Style x:Key="ItemContainerStyle" TargetType="{x:Type pv:TreeListViewItem}">
             <Setter Property="ItemsSource" Value="{Binding Footages}"/>
             <EventSetter Event="PreviewKeyDown" Handler="TreeListViewItem_PreviewKeyDown"/>
+            <EventSetter Event="MouseDoubleClick" Handler="TreeListViewItem_MouseDoubleClick"/>
         </Style>
 
         <r:DataTemplateCollection x:Key="FootageNameTemplateSelector">

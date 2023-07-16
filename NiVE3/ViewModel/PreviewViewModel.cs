@@ -1,8 +1,13 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using NiVE3.Model;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
@@ -46,6 +51,30 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref currentTime, value); }
         }
 
+        private int width;
+        [NeedWire(nameof(PreviewModel), IsOneWay = true)]
+        public int Width
+        {
+            get { return width; }
+            set { SetProperty(ref width, value); }
+        }
+
+        private int height;
+        [NeedWire(nameof(PreviewModel), IsOneWay = true)]
+        public int Height
+        {
+            get { return height; }
+            set { SetProperty(ref height, value); }
+        }
+
+        private bool isLock;
+        [NeedWire(nameof(PreviewModel))]
+        public bool IsLock
+        {
+            get { return isLock; }
+            set { SetProperty(ref isLock, value); }
+        }
+
         private double timeBarRange;
         public double TimeBarRange
         {
@@ -60,9 +89,11 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref timeBarRangeStart, value); }
         }
 
-        PreviewModel PreviewModel { get; }
+        public WriteableBitmap CurrentFrame { get; set; }
 
-        public PreviewViewModel(PreviewModel previewModel)
+        PreviewModelBase PreviewModel { get; }
+
+        public PreviewViewModel(PreviewModelBase previewModel)
         {
             Title = "プレビュー";
 
@@ -71,10 +102,60 @@ namespace NiVE3.ViewModel
             SourceType = previewModel.SourceType;
             TimeBarRange = previewModel.Duration;
             Duration = previewModel.Duration;
+            Width = previewModel.Width;
+            Height = previewModel.Height;
+            IsLock = previewModel.IsLock;
 
             WiringModel();
+
+            CurrentFrame = new WriteableBitmap(Width, Height, 96.0, 96.0, PixelFormats.Bgra32, null);
+            PropertyChanged += PreviewViewModel_PropertyChanged;
         }
 
         partial void WiringModel();
+
+        void UpdateCurrentFrame()
+        {
+            using var image = PreviewModel.GetImage(CurrentTime);
+            if (image != null)
+            {
+                var dataSize = image.DataLength;
+                var floatData = image.GetData();
+                var data = ArrayPool<byte>.Shared.Rent(dataSize);
+                for (var i = 0; i < dataSize; i++)
+                {
+                    // TODO: SDR変換を入れるかどうか
+                    data[i] = (byte)MathF.Round(floatData[i] * 255.0F);
+                }
+                CurrentFrame.WritePixels(new Int32Rect(0, 0, image.Width, image.Height), data, image.Width * 4, 0);
+                ArrayPool<byte>.Shared.Return(data);
+            }
+            else
+            {
+                var data = ArrayPool<byte>.Shared.Rent(CurrentFrame.PixelWidth * CurrentFrame.PixelHeight * 4);
+                CurrentFrame.WritePixels(new Int32Rect(0, 0, CurrentFrame.PixelWidth, CurrentFrame.PixelHeight), data, CurrentFrame.PixelWidth * 4, 0);
+                ArrayPool<byte>.Shared.Return(data);
+            }
+            RaisePropertyChanged(nameof(CurrentFrame));
+        }
+
+        private void PreviewViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(Width):
+                case nameof(Height):
+                    CurrentFrame = new WriteableBitmap(Width, Height, 96.0, 96.0, PixelFormats.Bgra32, null);
+                    UpdateCurrentFrame();
+                    break;
+                case nameof(CurrentTime):
+                    UpdateCurrentFrame();
+                    break;
+                case nameof(Duration):
+                    TimeBarRange = Duration;
+                    TimeBarRangeStart = 0.0;
+                    break;
+            }
+        }
     }
 }

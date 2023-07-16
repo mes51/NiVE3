@@ -12,13 +12,15 @@ namespace NiVE3.Model
     {
         public ObservableCollection<CompositionModel> CompositionModels { get; } = new ObservableCollection<CompositionModel>();
 
-        public ObservableCollection<PreviewModel> PreviewModels { get; } = new ObservableCollection<PreviewModel>();
+        public ObservableCollection<PreviewModelBase> PreviewModels { get; } = new ObservableCollection<PreviewModelBase>();
 
         FootageListModel FootageListModel { get; }
 
         public ProjectModel(FootageListModel footageListModel)
         {
             FootageListModel= footageListModel;
+
+            FootageListModel.ShowFootagePreview += FootageListModel_ShowFootagePreview;
         }
 
         public void CreateComposition()
@@ -28,7 +30,20 @@ namespace NiVE3.Model
 
         public void CreatePreview()
         {
-            PreviewModels.Add(new PreviewModel());
+            //PreviewModels.Add(new FootagePreviewModel());
+        }
+
+        private void FootageListModel_ShowFootagePreview(object? sender, ShowFootagePreviewEventArgs e)
+        {
+            var freePreviewModel = PreviewModels.OfType<FootagePreviewModel>().FirstOrDefault(p => !p.IsLock);
+            if (freePreviewModel != null)
+            {
+                freePreviewModel.Footage = e.Footage;
+            }
+            else
+            {
+                PreviewModels.Add(new FootagePreviewModel { Footage = e.Footage });
+            }
         }
     }
 }

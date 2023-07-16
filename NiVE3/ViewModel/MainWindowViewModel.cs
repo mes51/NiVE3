@@ -77,7 +77,7 @@ namespace NiVE3.ViewModel
 
         private void PreviewModels_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
-            foreach (var newPreview in e.NewItems?.OfType<PreviewModel>() ?? Enumerable.Empty<PreviewModel>())
+            foreach (var newPreview in e.NewItems?.OfType<PreviewModelBase>() ?? Enumerable.Empty<PreviewModelBase>())
             {
                 var viewModel = Container.Resolve<PreviewViewModel>(new object[] { newPreview });
                 MainRegion.Add(viewModel);

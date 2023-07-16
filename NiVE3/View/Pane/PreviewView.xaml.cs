@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,6 +25,8 @@ namespace NiVE3.View.Pane
         public PreviewView()
         {
             InitializeComponent();
+
+            DataContextChanged += PreviewView_DataContextChanged;
         }
 
         bool IsMouseDown { get; set; }
@@ -33,6 +36,13 @@ namespace NiVE3.View.Pane
         Point PrevPoint { get; set; }
 
         PreviewViewModel? ViewModel => DataContext as PreviewViewModel;
+
+        bool NeedPositionReset { get; set; } = true;
+
+        private void PreviewView_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            NeedPositionReset = true;
+        }
 
         private void PreviewCanvas_MouseDown(object sender, MouseButtonEventArgs e)
         {
@@ -68,12 +78,23 @@ namespace NiVE3.View.Pane
             }
         }
 
-        private void Root_SizeChanged(object sender, SizeChangedEventArgs e)
+        private void PreviewArea_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            if ((ViewModel?.IsFootage ?? false) || double.IsNaN(Canvas.GetLeft(PreviewArea)))
+            if ((ViewModel?.IsFootage ?? false) || NeedPositionReset)
             {
                 Canvas.SetLeft(PreviewArea, (PreviewCanvas.ActualWidth - PreviewArea.ActualWidth) * 0.5);
                 Canvas.SetTop(PreviewArea, (PreviewCanvas.ActualHeight - PreviewArea.ActualHeight) * 0.5);
+                NeedPositionReset = false;
+            }
+        }
+
+        private void Root_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if ((ViewModel?.IsFootage ?? false) || NeedPositionReset)
+            {
+                Canvas.SetLeft(PreviewArea, (PreviewCanvas.ActualWidth - PreviewArea.ActualWidth) * 0.5);
+                Canvas.SetTop(PreviewArea, (PreviewCanvas.ActualHeight - PreviewArea.ActualHeight) * 0.5);
+                NeedPositionReset = false;
             }
             else
             {
