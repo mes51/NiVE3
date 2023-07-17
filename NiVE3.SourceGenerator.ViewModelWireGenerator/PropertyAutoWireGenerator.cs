@@ -33,6 +33,8 @@ sealed class ViewModelWireableAttribute : Attribute
 {
     public string BindMethodName { get; }
 
+    public bool WithInitializeProperty { get; set; }
+
     public ViewModelWireableAttribute(string bindMethodName)
     {
         BindMethodName = bindMethodName;
@@ -109,6 +111,7 @@ sealed class NeedWireAttribute : Attribute
             {
                 throw new InvalidOperationException("processing class is not applied ViewModelWireableAttribute"); // may be bug
             }
+            var withInitializeProperty = (bool?)wireableAttribute.NamedArguments.FirstOrDefault(a => a.Key == "WithInitializeProperty").Value.Value ?? false;
 
             if (!Validate(context, syntax, compilation, typeSymbol, wireableAttribute))
             {
@@ -121,7 +124,7 @@ sealed class NeedWireAttribute : Attribute
                 return;
             }
 
-            var (binderClasses, bindingCodes) = GenerateBinderCode(typeSymbol, handlerPairs);
+            var (binderClasses, bindingCodes) = GenerateBinderCode(typeSymbol, handlerPairs, withInitializeProperty);
 
             var fileName = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
                 .Replace("global::", "")
@@ -322,7 +325,7 @@ partial class {{typeSymbol.Name}}
             return handlerPair;
         }
 
-        static (string, string) GenerateBinderCode(INamedTypeSymbol typeSymbol, Dictionary<string, (ITypeSymbol, List<(string propertyName, string sourcePropertyName, bool isOneWay)>)> handlerPairs)
+        static (string, string) GenerateBinderCode(INamedTypeSymbol typeSymbol, Dictionary<string, (ITypeSymbol, List<(string propertyName, string sourcePropertyName, bool isOneWay)>)> handlerPairs, bool withInitializeProperty)
         {
             var binderClasses = new StringBuilder();
             var bindingCodes = new StringBuilder();
@@ -345,6 +348,11 @@ partial class {{typeSymbol.Name}}
                     model.{{sourcePropertyName}} = viewModel.{{propertyName}};
                     break;
 """);
+                    }
+
+                    if (withInitializeProperty)
+                    {
+                        bindingCodes.AppendLine($"        {propertyName} = {sourceName}.{sourcePropertyName};");
                     }
                 }
 

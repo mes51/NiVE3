@@ -16,7 +16,7 @@ using NiVE3.View.Dock;
 namespace NiVE3.ViewModel
 {
     [PaneLocation(PaneLocation.Document)]
-    [ViewModelWireable(nameof(WiringModel))]
+    [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
     partial class PreviewViewModel : PaneViewModelBase
     {
         private string name = "";
@@ -104,18 +104,11 @@ namespace NiVE3.ViewModel
         public PreviewViewModel(PreviewModelBase previewModel)
         {
             PreviewModel = previewModel;
-            Name = previewModel.Name;
-            IsFootage = previewModel.IsFootage;
-            SourceType = previewModel.SourceType;
-            TimeBarRange = previewModel.Duration;
-            Duration = previewModel.Duration;
-            Width = previewModel.Width;
-            Height = previewModel.Height;
-            IsLock = previewModel.IsLock;
-
-            Title = $"{(IsFootage ? "フッテージ" : "コンポジション")} {(SourceType != SourceType.None ? Name : "(なし)")}";
 
             WiringModel();
+
+            Title = $"{(IsFootage ? "フッテージ" : "コンポジション")} {(SourceType != SourceType.None ? Name : "(なし)")}";
+            TimeBarRange = previewModel.Duration;
 
             CurrentFrame = new WriteableBitmap(Math.Max(Width, 1), Math.Max(Height, 1), 96.0, 96.0, PixelFormats.Bgra32, null);
             PropertyChanged += PreviewViewModel_PropertyChanged;
@@ -126,7 +119,7 @@ namespace NiVE3.ViewModel
         void UpdateCurrentFrame()
         {
             using var image = PreviewModel.GetImage(CurrentTime);
-            if (image != null)
+            if (image != null && CurrentFrame.PixelWidth == image.Width && CurrentFrame.PixelHeight == image.Height)
             {
                 var dataSize = image.DataLength;
                 var floatData = image.GetData();
