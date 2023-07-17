@@ -60,6 +60,8 @@ namespace NiVE3.Model
 
             IFootageModel LoadedFootage { get; }
 
+            IFootageModel[] LoadedSourceModels { get; }
+
             Guid? TargetFootageId { get; }
 
             public LoadFileHistoryCommand(FootageListModel model, InputModel InputModel, IFootageModel loadedFootage, Guid? targetFootageId)
@@ -68,6 +70,27 @@ namespace NiVE3.Model
                 Input = InputModel;
                 LoadedFootage = loadedFootage;
                 TargetFootageId = targetFootageId;
+
+                var remain = new Queue<IFootageModel>();
+                remain.Enqueue(LoadedFootage);
+                var sources = new List<IFootageModel>();
+                while (remain.Count > 0)
+                {
+                    var f = remain.Dequeue();
+                    if (f is FootageModel)
+                    {
+                        sources.Add(f);
+                    }
+                    else if (f.Children != null)
+                    {
+                        foreach (var child in f.Children)
+                        { 
+                            remain.Enqueue(child);
+                        }
+                    }
+                }
+
+                LoadedSourceModels = sources.ToArray();
             }
 
             public void Redo()
@@ -80,6 +103,8 @@ namespace NiVE3.Model
             {
                 Model.RemoveInput(Input);
                 Model.RemoveFootage(LoadedFootage);
+
+                Model.RemoveFootageByUndo?.Invoke(Model, new FootageEventArgs(LoadedSourceModels));
             }
 
             public void Dispose() { }

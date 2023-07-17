@@ -21,6 +21,7 @@ namespace NiVE3.Model
             FootageListModel= footageListModel;
 
             FootageListModel.ShowFootagePreview += FootageListModel_ShowFootagePreview;
+            FootageListModel.RemoveFootageByUndo += FootageListModel_RemoveFootageByUndo;
         }
 
         public void CreateComposition()
@@ -43,6 +44,18 @@ namespace NiVE3.Model
             else
             {
                 PreviewModels.Add(new FootagePreviewModel { Footage = e.Footage });
+            }
+        }
+
+        private void FootageListModel_RemoveFootageByUndo(object? sender, FootageEventArgs e)
+        {
+            foreach (var f in e.Footages)
+            {
+                var preview = PreviewModels.OfType<FootagePreviewModel>().FirstOrDefault(p => p.Footage == f);
+                if (preview != null)
+                {
+                    preview.Footage = null;
+                }
             }
         }
     }

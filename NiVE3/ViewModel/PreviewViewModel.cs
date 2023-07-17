@@ -19,6 +19,14 @@ namespace NiVE3.ViewModel
     [ViewModelWireable(nameof(WiringModel))]
     partial class PreviewViewModel : PaneViewModelBase
     {
+        private string name = "";
+        [NeedWire(nameof(PreviewModel), IsOneWay = true)]
+        public string Name
+        {
+            get { return name; }
+            set { SetProperty(ref name, value); }
+        }
+
         private bool isFootage;
         [NeedWire(nameof(PreviewModel), IsOneWay = true)]
         public bool IsFootage
@@ -95,9 +103,8 @@ namespace NiVE3.ViewModel
 
         public PreviewViewModel(PreviewModelBase previewModel)
         {
-            Title = "プレビュー";
-
             PreviewModel = previewModel;
+            Name = previewModel.Name;
             IsFootage = previewModel.IsFootage;
             SourceType = previewModel.SourceType;
             TimeBarRange = previewModel.Duration;
@@ -106,9 +113,11 @@ namespace NiVE3.ViewModel
             Height = previewModel.Height;
             IsLock = previewModel.IsLock;
 
+            Title = $"{(IsFootage ? "フッテージ" : "コンポジション")} {(SourceType != SourceType.None ? Name : "(なし)")}";
+
             WiringModel();
 
-            CurrentFrame = new WriteableBitmap(Width, Height, 96.0, 96.0, PixelFormats.Bgra32, null);
+            CurrentFrame = new WriteableBitmap(Math.Max(Width, 1), Math.Max(Height, 1), 96.0, 96.0, PixelFormats.Bgra32, null);
             PropertyChanged += PreviewViewModel_PropertyChanged;
         }
 
@@ -143,9 +152,13 @@ namespace NiVE3.ViewModel
         {
             switch (e.PropertyName)
             {
+                case nameof(SourceType):
+                case nameof(Name):
+                    Title = $"{(IsFootage ? "フッテージ" : "コンポジション")} {(SourceType != SourceType.None ? Name : "(なし)")}";
+                    break;
                 case nameof(Width):
                 case nameof(Height):
-                    CurrentFrame = new WriteableBitmap(Width, Height, 96.0, 96.0, PixelFormats.Bgra32, null);
+                    CurrentFrame = new WriteableBitmap(Math.Max(Width, 1), Math.Max(Height, 1), 96.0, 96.0, PixelFormats.Bgra32, null);
                     UpdateCurrentFrame();
                     break;
                 case nameof(CurrentTime):

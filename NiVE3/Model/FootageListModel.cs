@@ -59,6 +59,8 @@ namespace NiVE3.Model
 
         public event EventHandler<ShowFootagePreviewEventArgs>? ShowFootagePreview;
 
+        public event EventHandler<FootageEventArgs>? RemoveFootageByUndo;
+
         public FootageListModel(HistoryModel historyModel)
         {
             var pluginCatalog = new DirectoryCatalog(Paths.PluginDirectory);
@@ -463,6 +465,18 @@ namespace NiVE3.Model
         }
 
         public FootageModel Footage { get; }
+    }
+
+    class FootageEventArgs : EventArgs
+    {
+        public FootageEventArgs(IFootageModel footage) : this(new IFootageModel[] { footage }) { }
+
+        public FootageEventArgs(IFootageModel[] footages)
+        {
+            Footages = footages;
+        }
+
+        public IFootageModel[] Footages { get; }
     }
 
     file static class FootageSourceGroupExtension

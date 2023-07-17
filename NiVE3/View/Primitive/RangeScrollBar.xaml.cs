@@ -225,7 +225,10 @@ namespace NiVE3.View.Primitive
         {
             if (d is RangeScrollBar scrollBar)
             {
-                scrollBar.Range = Math.Clamp(scrollBar.Range, scrollBar.MinimumRange, scrollBar.Maximum);
+                // MinimumRangeよりもMaximumが先に更新されてしまう
+                // TODO: Clampを使わない、もしくはPropergyChangedを分ける?
+                var min = Math.Min(scrollBar.MinimumRange, scrollBar.Maximum);
+                scrollBar.Range = Math.Clamp(scrollBar.Range, min, scrollBar.Maximum);
             }
         }
 
@@ -278,7 +281,10 @@ namespace NiVE3.View.Primitive
         {
             if (d is RangeScrollBar scrollBar)
             {
-                return Math.Clamp((double)value, scrollBar.MinimumRange, scrollBar.Maximum);
+                // MinimumRangeよりもMaximumが先に更新されてしまう
+                // TODO: Clampを使わない、もしくは他の方法を考える?
+                var min = Math.Min(scrollBar.MinimumRange, scrollBar.Maximum);
+                return Math.Clamp((double)value, min, scrollBar.Maximum);
             }
             else
             {

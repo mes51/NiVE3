@@ -258,6 +258,12 @@ namespace NiVE3.View.Primitive
             }
         }
 
+        void UpdateMinimumRange()
+        {
+            var newMinimumRange = Math.Min((ActualWidth - SideSpacerWidth * 2.0) * (1.0 / FrameRate / MinGap), Duration);
+            MinimumRange = newMinimumRange;
+        }
+
         static void MeasureLinePropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
             if (sender is TimeBar timeBar)
@@ -266,11 +272,19 @@ namespace NiVE3.View.Primitive
             }
         }
 
+        static void DurationChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (sender is TimeBar timeBar)
+            {
+                timeBar.UpdateMinimumRange();
+            }
+        }
+
         static void SizeChangedEventHandler(object sender, SizeChangedEventArgs e)
         {
             if (sender is TimeBar timeBar)
             {
-                timeBar.MinimumRange = (timeBar.ActualWidth - timeBar.SideSpacerWidth * 2.0) * (1.0 / timeBar.FrameRate / MinGap);
+                timeBar.UpdateMinimumRange();
             }
         }
 

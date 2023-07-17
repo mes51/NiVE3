@@ -15,6 +15,13 @@ namespace NiVE3.Model
     {
         public abstract bool IsFootage { get; }
 
+        private string name = "";
+        public string Name
+        {
+            get { return name; }
+            set { SetProperty(ref name, value); }
+        }
+
         private SourceType sourceType = SourceType.Video;
         public SourceType SourceType
         {
@@ -22,7 +29,7 @@ namespace NiVE3.Model
             set { SetProperty(ref sourceType, value); }
         }
 
-        private double duration = 60.0;
+        private double duration;
         public double Duration
         {
             get { return duration; }
@@ -91,6 +98,7 @@ namespace NiVE3.Model
                     Duration = Footage.Duration;
                     Width = Footage.Width;
                     Height = Footage.Height;
+                    Name = Footage.Name;
                 }
                 else
                 {
@@ -98,6 +106,7 @@ namespace NiVE3.Model
                     Duration = 0.0;
                     Width = 0;
                     Height = 0;
+                    Name = "";
                 }
                 CurrentTime = 0.0;
             }
