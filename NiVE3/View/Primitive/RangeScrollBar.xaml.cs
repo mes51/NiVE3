@@ -29,7 +29,7 @@ namespace NiVE3.View.Primitive
             nameof(Minimum),
             typeof(double),
             typeof(RangeScrollBar),
-            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange, RangeDependentPropertyChanged, CoerceMinimum),
+            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange, null, CoerceMinimum),
             IsValidDouble
         );
 
@@ -37,7 +37,7 @@ namespace NiVE3.View.Primitive
             nameof(Maximum),
             typeof(double),
             typeof(RangeScrollBar),
-            new FrameworkPropertyMetadata(1.0, FrameworkPropertyMetadataOptions.AffectsArrange, RangeDependentPropertyChanged, CoerceMaximum),
+            new FrameworkPropertyMetadata(1.0, FrameworkPropertyMetadataOptions.AffectsArrange, null, CoerceMaximum),
             IsValidDouble
         );
 
@@ -45,14 +45,14 @@ namespace NiVE3.View.Primitive
             nameof(MinimumRange),
             typeof(double),
             typeof(RangeScrollBar),
-            new FrameworkPropertyMetadata(0.01, FrameworkPropertyMetadataOptions.AffectsArrange, RangeDependentPropertyChanged)
+            new FrameworkPropertyMetadata(0.01, FrameworkPropertyMetadataOptions.AffectsArrange)
         );
 
         public static readonly DependencyProperty RangeProperty = DependencyProperty.Register(
             nameof(Range),
             typeof(double),
             typeof(RangeScrollBar),
-            new FrameworkPropertyMetadata(1.0, FrameworkPropertyMetadataOptions.AffectsArrange, RangeChanged, CoerceRange),
+            new FrameworkPropertyMetadata(1.0, FrameworkPropertyMetadataOptions.AffectsArrange, RangeChanged),
             IsValidDouble
         );
 
@@ -109,6 +109,9 @@ namespace NiVE3.View.Primitive
 
         double RangeWidth => ActualWidth - RangeThumbWidth;
 
+        // NOTE: Bindingの値の更新タイミング的にRangeの更新よりも先にMaximumの更新が出来ない(っぽい?)ため、Coerceによる値の修正は行わず、使用時にClampする
+        double ClampedRange => Math.Clamp(Range, MinimumRange, Maximum);
+
         bool IsRangeStartThumbDragging { get; set; }
 
         bool IsRangeThumbDragging { get; set; }
@@ -155,11 +158,12 @@ namespace NiVE3.View.Primitive
                 return;
             }
 
+            var clampedRange = ClampedRange;
             var area = Maximum - Minimum;
             var rangePerPixel = area / RangeWidth;
             var prevRangeStart = RangeStart;
-            var changed = Math.Min(Math.Max(-e.HorizontalChange * rangePerPixel, MinimumRange - Range), RangeStart);
-            Range += changed;
+            var changed = Math.Min(Math.Max(-e.HorizontalChange * rangePerPixel, MinimumRange - clampedRange), RangeStart);
+            Range = clampedRange + changed;
             RangeStart = prevRangeStart - changed;
         }
 
@@ -185,7 +189,7 @@ namespace NiVE3.View.Primitive
 
             var area = Maximum - Minimum;
             var rangePerPixel = area / RangeWidth;
-            RangeStart += Math.Max(Math.Min(e.HorizontalChange * rangePerPixel, Maximum - (RangeStart + Range)), -RangeStart);
+            RangeStart += Math.Max(Math.Min(e.HorizontalChange * rangePerPixel, Maximum - (RangeStart + ClampedRange)), -RangeStart);
         }
 
         private void RangeThumb_DragCompleted(object sender, DragCompletedEventArgs e)
@@ -219,17 +223,6 @@ namespace NiVE3.View.Primitive
         private void RangeEndThumb_DragCompleted(object sender, DragCompletedEventArgs e)
         {
             IsRangeEndThumbDragging = false;
-        }
-
-        static void RangeDependentPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            if (d is RangeScrollBar scrollBar)
-            {
-                // MinimumRangeよりもMaximumが先に更新されてしまう
-                // TODO: Clampを使わない、もしくはPropergyChangedを分ける?
-                var min = Math.Min(scrollBar.MinimumRange, scrollBar.Maximum);
-                scrollBar.Range = Math.Clamp(scrollBar.Range, min, scrollBar.Maximum);
-            }
         }
 
         static void RangeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -270,21 +263,6 @@ namespace NiVE3.View.Primitive
             if (d is RangeScrollBar scrollBar)
             {
                 return Math.Clamp((double)value, scrollBar.Minimum, scrollBar.Maximum);
-            }
-            else
-            {
-                return DependencyProperty.UnsetValue;
-            }
-        }
-
-        static object CoerceRange(DependencyObject d, object value)
-        {
-            if (d is RangeScrollBar scrollBar)
-            {
-                // MinimumRangeよりもMaximumが先に更新されてしまう
-                // TODO: Clampを使わない、もしくは他の方法を考える?
-                var min = Math.Min(scrollBar.MinimumRange, scrollBar.Maximum);
-                return Math.Clamp((double)value, min, scrollBar.Maximum);
             }
             else
             {
