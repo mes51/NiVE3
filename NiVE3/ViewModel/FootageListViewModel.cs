@@ -30,7 +30,7 @@ namespace NiVE3.ViewModel
     [CommandHandling(nameof(AddSolidCommand), nameof(ShortcutKeySetting.AddSolidGesture), IsGlobal = true)]
     [CommandHandling(nameof(AddFootageFolderCommand), nameof(ShortcutKeySetting.AddFootageFolderGesture), IsGlobal = true)]
     [CommandHandling(nameof(DeleteFootageCommand), nameof(ShortcutKeySetting.DeleteItemGesture))]
-    class FootageListViewModel : PaneViewModelBase, IFootageViewModelList, IDropTarget
+    class FootageListViewModel : SingletonePaneViewModelBase, IFootageViewModelList, IDropTarget
     {
         private ObservableCollectionView<IFootageModel, IFootageViewModel> footages;
         public ObservableCollectionView<IFootageModel, IFootageViewModel> Footages

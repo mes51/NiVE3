@@ -8,6 +8,7 @@
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:ad="https://github.com/Dirkster99/AvalonDock"
         xmlns:vd="clr-namespace:NiVE3.View.Dock"
+        xmlns:cv="clr-namespace:NiVE3.View.Converter"
         xmlns:vm="clr-namespace:NiVE3.ViewModel"
         xmlns:a="clr-namespace:NiVE3.Wpf.Attach"
         xmlns:b="clr-namespace:NiVE3.Wpf.Behavior"
@@ -20,6 +21,7 @@
         a:ShortcutKeyBindingProperty.InputBinding="True"
         pr:ViewModelLocator.AutoWireViewModel="False">
     <Window.Resources>
+        <cv:VisibilityToBoolConverter x:Key="VisibilityToBoolConverter"/>
         <vd:LayoutInitializer x:Key="LayoutInitializer" ViewModel="{Binding Source={x:Reference RootWindow}, Path=DataContext}"/>
 
         <Style x:Key="LayoutItemContainerStyleBase" TargetType="{x:Type ad:LayoutItem}">
@@ -36,11 +38,12 @@
                 </Style>
             </vd:LayoutItemContainerStyle>
             <vd:LayoutItemContainerStyle ViewModelType="{x:Type vm:PreviewViewModel}">
-                <Style TargetType="{x:Type ad:LayoutItem}" BasedOn="{StaticResource LayoutItemContainerStyleBase}" />
+                <Style TargetType="{x:Type ad:LayoutItem}" BasedOn="{StaticResource LayoutItemContainerStyleBase}">
+                    <Setter Property="CanClose" Value="True"/>
+                </Style>
             </vd:LayoutItemContainerStyle>
             <vd:LayoutItemContainerStyle ViewModelType="{x:Type vm:TimelineViewModel}">
                 <Style TargetType="{x:Type ad:LayoutAnchorableItem}" BasedOn="{StaticResource LayoutItemContainerStyleBase}">
-                    <Setter Property="Visibility" Value="{Binding Model.Visibility, Mode=TwoWay}"/>
                     <Setter Property="CanClose" Value="True"/>
                 </Style>
             </vd:LayoutItemContainerStyle>
@@ -61,6 +64,19 @@
                 <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_Menu_OpenProject}" a:MenuItemGestureBindingProperty.InputBinding="{Binding ElementName=OpenProjectGesture}"/>
                 <Separator />
                 <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_Menu_Exit}" a:MenuItemGestureBindingProperty.InputBinding="{Binding ElementName=ExitGesture}"/>
+            </MenuItem>
+            <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_Menu_View}" ItemsSource="{Binding SingletonViewModels}">
+                <MenuItem.ItemContainerStyle>
+                    <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource {x:Type MenuItem}}">
+                        <Setter Property="IsChecked" Value="{Binding Visibility, Mode=TwoWay, Converter={StaticResource VisibilityToBoolConverter}}" />
+                        <Setter Property="IsCheckable" Value="True" />
+                    </Style>
+                </MenuItem.ItemContainerStyle>
+                <MenuItem.ItemTemplate>
+                    <HierarchicalDataTemplate DataType="{x:Type vm:SingletonePaneViewModelBase}">
+                        <TextBlock Text="{Binding Title}"/>
+                    </HierarchicalDataTemplate>
+                </MenuItem.ItemTemplate>
             </MenuItem>
         </Menu>
 

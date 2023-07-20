@@ -7,6 +7,7 @@ using AvalonDock.Layout;
 using NiVE3.ViewModel;
 using System.Windows.Controls;
 using System.Windows;
+using NiVE3.Extension;
 
 namespace NiVE3.View.Dock
 {
@@ -33,6 +34,11 @@ namespace NiVE3.View.Dock
 
         public void AfterInsertAnchorable(LayoutRoot layout, LayoutAnchorable anchorableShown)
         {
+            if (anchorableShown.Content is SingletonePaneViewModelBase)
+            {
+                return;
+            }
+
             EventHandler? closed = null;
             closed = (object? sender, EventArgs e) =>
             {
@@ -45,6 +51,11 @@ namespace NiVE3.View.Dock
 
         public void AfterInsertDocument(LayoutRoot layout, LayoutDocument anchorableShown)
         {
+            if (anchorableShown.Content is SingletonePaneViewModelBase)
+            {
+                return;
+            }
+
             EventHandler? closed = null;
             closed += (object? sender, EventArgs e) =>
             {

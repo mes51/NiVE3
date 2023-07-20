@@ -26,6 +26,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("終了(_X)")]
         public static readonly string MainWindow_Menu_Exit = nameof(MainWindow_Menu_Exit);
 
+        [ShowInMarkup, DefaultValue("表示(_V)")]
+        public static readonly string MainWindow_Menu_View = nameof(MainWindow_Menu_View);
+
         [ShowInMarkup, DefaultValue("名前")]
         public static readonly string FootageListView_FootageName = nameof(FootageListView_FootageName);
 

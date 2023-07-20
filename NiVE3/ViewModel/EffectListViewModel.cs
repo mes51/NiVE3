@@ -11,7 +11,7 @@ using Prism.Mvvm;
 namespace NiVE3.ViewModel
 {
     [PaneLocation(PaneLocation.Right)]
-    class EffectListViewModel : PaneViewModelBase
+    class EffectListViewModel : SingletonePaneViewModelBase
     {
         private ObservableCollection<Tuple<string, string, Guid>> effects = new ObservableCollection<Tuple<string, string, Guid>>();
         public ObservableCollection<Tuple<string, string, Guid>> Effects

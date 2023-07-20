@@ -32,7 +32,10 @@ namespace NiVE3.ViewModel
             get { return isSelected; }
             set { SetProperty(ref isSelected, value); }
         }
+    }
 
+    abstract class SingletonePaneViewModelBase : PaneViewModelBase
+    {
         private Visibility visibility;
         public Visibility Visibility
         {

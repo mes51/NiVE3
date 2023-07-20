@@ -11,6 +11,7 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 
 namespace NiVE3.ViewModel
@@ -30,6 +31,8 @@ namespace NiVE3.ViewModel
         IRegion MainRegion => Region.Regions[RegionName];
 
         public object[] ViewModels => MainRegion.Views.ToArray();
+
+        public object[] SingletonViewModels => MainRegion.Views.OfType<SingletonePaneViewModelBase>().ToArray();
 
         public CommandOnlyViewModelBase[] CommandOnlyViewModels => Container.ResolveMany<CommandOnlyViewModelBase>().ToArray();
 
@@ -64,6 +67,8 @@ namespace NiVE3.ViewModel
             NewPreviewCommand = new DelegateCommand(() => ProjectModel.CreatePreview());
 
             RemoveViewModelCommand = new DelegateCommand<BindableBase>(MainRegion.Remove);
+
+            MainRegion.Views.CollectionChanged += ViewModels_CollectionChanged;
         }
 
         private void CompositionModels_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -81,6 +86,15 @@ namespace NiVE3.ViewModel
             {
                 var viewModel = Container.Resolve<PreviewViewModel>(new object[] { newPreview });
                 MainRegion.Add(viewModel);
+            }
+        }
+
+        private void ViewModels_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            RaisePropertyChanged(nameof(ViewModels));
+            if ((e.OldItems?.Cast<PaneViewModelBase>()?.Any(v => v is SingletonePaneViewModelBase) ?? false) || (e.NewItems?.Cast<PaneViewModelBase>()?.Any(v => v is SingletonePaneViewModelBase) ?? false))
+            {
+                RaisePropertyChanged(nameof(SingletonViewModels));
             }
         }
     }
