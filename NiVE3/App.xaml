@@ -9,7 +9,7 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ui:AppearanceResourceDictionary x:Name="Appearance"/>
-                <r:LanguageResourceDictionary x:Name="Language"/>
+                <x:StaticExtension Member="r:LanguageResourceDictionary.Dictionary" x:Name="Language"/>
                 <ResourceDictionary Source="/View/Resource/Theme.xaml"/>
                 <ResourceDictionary Source="/View/Resource/NamedTheme.xaml"/>
                 <ResourceDictionary Source="/View/Resource/ViewSelectorTemplate.xaml"/>

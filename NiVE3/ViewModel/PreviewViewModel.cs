@@ -12,6 +12,7 @@ using NiVE3.Model;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
 using NiVE3.View.Dock;
+using NiVE3.View.Resource;
 
 namespace NiVE3.ViewModel
 {
@@ -107,7 +108,7 @@ namespace NiVE3.ViewModel
 
             WiringModel();
 
-            Title = $"{(IsFootage ? "フッテージ" : "コンポジション")} {(SourceType != SourceType.None ? Name : "(なし)")}";
+            Title = $"{LanguageResourceDictionary.Dictionary.GetText(IsFootage ? LanguageResourceDictionary.PreviewView_FootageTitle : LanguageResourceDictionary.PreviewView_CompositionTitle)} {(SourceType != SourceType.None ? Name : LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.PreviewView_Title_ItemEmpty))}";
             TimeBarRange = previewModel.Duration;
 
             CurrentFrame = new WriteableBitmap(Math.Max(Width, 1), Math.Max(Height, 1), 96.0, 96.0, PixelFormats.Bgra32, null);

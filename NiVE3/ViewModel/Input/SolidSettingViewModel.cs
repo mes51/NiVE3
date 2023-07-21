@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Media;
 using NiVE3.Data;
+using NiVE3.View.Resource;
 using Prism.Commands;
 using Prism.Mvvm;
 
@@ -16,7 +17,7 @@ namespace NiVE3.ViewModel.Input
     {
         const int MinSize = 4;
 
-        private string name = "平面";
+        private string name = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.SolidInputSettingView_DefaultName);
         public string Name
         {
             get { return name; }

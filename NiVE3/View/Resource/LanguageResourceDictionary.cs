@@ -12,6 +12,8 @@ namespace NiVE3.View.Resource
     [MarkupableResourceDictionary]
     class LanguageResourceDictionary : ResourceDictionary
     {
+        public static LanguageResourceDictionary Dictionary { get; }
+
         static Dictionary<string, Tuple<string, Version>> LanguageKeys { get; }
 
         [ShowInMarkup, DefaultValue("NicoVisualEffects 3")]
@@ -28,6 +30,9 @@ namespace NiVE3.View.Resource
 
         [ShowInMarkup, DefaultValue("表示(_V)")]
         public static readonly string MainWindow_Menu_View = nameof(MainWindow_Menu_View);
+
+        [ShowInMarkup, DefaultValue("フッテージ")]
+        public static readonly string FootageListView_Title = nameof(FootageListView_Title);
 
         [ShowInMarkup, DefaultValue("名前")]
         public static readonly string FootageListView_FootageName = nameof(FootageListView_FootageName);
@@ -49,6 +54,27 @@ namespace NiVE3.View.Resource
 
         [ShowInMarkup, DefaultValue("コメント")]
         public static readonly string FootageListView_FootageComment = nameof(FootageListView_FootageComment);
+
+        [ShowInMarkup, DefaultValue("エフェクト")]
+        public static readonly string EffectListView_Title = nameof(EffectListView_Title);
+
+        [ShowInMarkup, DefaultValue("フッテージ")]
+        public static readonly string PreviewView_FootageTitle = nameof(PreviewView_FootageTitle);
+
+        [ShowInMarkup, DefaultValue("コンポジション")]
+        public static readonly string PreviewView_CompositionTitle = nameof(PreviewView_CompositionTitle);
+
+        [ShowInMarkup, DefaultValue("(なし)")]
+        public static readonly string PreviewView_Title_ItemEmpty = nameof(PreviewView_Title_ItemEmpty);
+
+        [ShowInMarkup, DefaultValue("タイムライン")]
+        public static readonly string TimelineView_Title = nameof(TimelineView_Title);
+
+        [ShowInMarkup, DefaultValue("入力設定")]
+        public static readonly string InputSettingView_Title = nameof(InputSettingView_Title);
+
+        [ShowInMarkup, DefaultValue("平面")]
+        public static readonly string SolidInputSettingView_DefaultName = nameof(SolidInputSettingView_DefaultName);
 
         [ShowInMarkup, DefaultValue("名前:")]
         public static readonly string SolidInputSettingView_FootageName = nameof(SolidInputSettingView_FootageName);
@@ -95,6 +121,8 @@ namespace NiVE3.View.Resource
                 .Select(f => (f.Name, f.GetCustomAttribute<DefaultValueAttribute>()))
                 .Where(t => t.Item2 != null)
                 .ToDictionary(t => t.Name, t => Tuple.Create(t.Item2!.DefaultValue, Version.Parse(t.Item2!.FromVersion)));
+
+            Dictionary = new LanguageResourceDictionary();
         }
 
         string selectedLanguage = "";
@@ -122,6 +150,18 @@ namespace NiVE3.View.Resource
             foreach (var (key, (defaultValue, version)) in LanguageKeys)
             {
                 this[key] = defaultValue;
+            }
+        }
+
+        public string GetText(string key)
+        {
+            if (Contains(key))
+            {
+                return (string)this[key];
+            }
+            else
+            {
+                return "";
             }
         }
 

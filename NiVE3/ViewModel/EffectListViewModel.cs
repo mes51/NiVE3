@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Model;
 using NiVE3.View.Dock;
+using NiVE3.View.Resource;
 using Prism.Mvvm;
 
 namespace NiVE3.ViewModel
@@ -26,7 +27,7 @@ namespace NiVE3.ViewModel
         {
             EffectListModel = effectListModel;
 
-            Title = "エフェクト";
+            Title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.EffectListView_Title);
 
             foreach (var e in EffectListModel.EffectMetadatas)
             {

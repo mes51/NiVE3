@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using NiVE3.View.Resource;
 using Prism.Commands;
 using Prism.Mvvm;
 using Prism.Services.Dialogs;
@@ -14,7 +15,7 @@ namespace NiVE3.ViewModel.Dialog
 {
     class InputSettingViewModel : BindableBase, IDialogAware
     {
-        public string Title => "入力設定";
+        public string Title => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.InputSettingView_Title);
 
         private FrameworkElement? settingView;
         public FrameworkElement? SettingView

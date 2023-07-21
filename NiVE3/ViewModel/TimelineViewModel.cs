@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Model;
 using NiVE3.View.Dock;
+using NiVE3.View.Resource;
 
 namespace NiVE3.ViewModel
 {
@@ -16,7 +17,7 @@ namespace NiVE3.ViewModel
         public TimelineViewModel(CompositionModel compositionModel)
         {
             CompositionModel = compositionModel;
-            Title = "タイムライン";
+            Title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.TimelineView_Title);
         }
     }
 }
