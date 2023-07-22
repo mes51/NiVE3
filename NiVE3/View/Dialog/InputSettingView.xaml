@@ -28,9 +28,9 @@
 
         <ContentPresenter x:Name="SettingContent" Grid.Row="0" Content="{Binding SettingView, ValidatesOnExceptions=True, NotifyOnValidationError=True}" Margin="10,10,10,0"/>
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="10">
-            <Button Content="{gm:LanguageResource ResourceKey=Dialog_OK}" Width="75" Height="21" Command="{Binding OKCommand}">
+            <Button Content="{gm:LanguageResource ResourceKey=Dialog_OK}" Command="{Binding OKCommand}">
                 <Button.Style>
-                    <Style TargetType="{x:Type Button}">
+                    <Style TargetType="{x:Type Button}" BasedOn="{StaticResource DialogOKButton}">
                         <Setter Property="IsEnabled" Value="True"/>
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding HasErrors}" Value="True">
@@ -40,7 +40,7 @@
                     </Style>
                 </Button.Style>
             </Button>
-            <Button Content="{gm:LanguageResource ResourceKey=Dialog_Cancel}" Width="75" Height="21" Margin="5,0,0,0" IsCancel="True" IsDefault="True" Command="{Binding CancelCommand}"/>
+            <Button Content="{gm:LanguageResource ResourceKey=Dialog_Cancel}" Margin="5,0,0,0" Style="{StaticResource DialogCancelButton}" Command="{Binding CancelCommand}"/>
         </StackPanel>
     </Grid>
 

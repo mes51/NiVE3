@@ -2,9 +2,11 @@
 using NiVE3.Config;
 using NiVE3.Model;
 using NiVE3.View.Command;
+using NiVE3.View.Dialog;
 using Prism.Commands;
 using Prism.Mvvm;
 using Prism.Regions;
+using Prism.Services.Dialogs;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -48,11 +50,14 @@ namespace NiVE3.ViewModel
 
         ProjectModel ProjectModel { get; }
 
-        public MainWindowViewModel(IContainer container, IRegionManager region, ProjectModel projectModel)
+        IDialogService DialogService { get; }
+
+        public MainWindowViewModel(IContainer container, IRegionManager region, ProjectModel projectModel, IDialogService dialogService)
         {
             Container = container;
             Region = region;
             ProjectModel = projectModel;
+            DialogService = dialogService;
 
             ProjectModel.CompositionModels.CollectionChanged += CompositionModels_CollectionChanged;
 
@@ -62,7 +67,16 @@ namespace NiVE3.ViewModel
 
             ExitCommand = new DelegateCommand(() => System.Diagnostics.Debug.WriteLine("Exec Command: ExitCommand"));
 
-            NewCompositionCommand = new DelegateCommand(() => ProjectModel.CreateComposition());
+            NewCompositionCommand = new DelegateCommand(() =>
+            {
+                var param = new DialogParameters();
+                IDialogResult? result = null;
+                DialogService.ShowDialog(nameof(CompositionSettingView), param, r => result = r);
+                if (result?.Result == ButtonResult.OK)
+                {
+                    ProjectModel.CreateComposition();
+                }
+            });
 
             NewPreviewCommand = new DelegateCommand(() => ProjectModel.CreatePreview());
 

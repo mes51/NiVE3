@@ -106,6 +106,66 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("{0}アイテム選択中")]
         public static readonly string FootagePreviewView_SelectedItemCount = nameof(FootagePreviewView_SelectedItemCount);
 
+        [ShowInMarkup, DefaultValue("コンポ")]
+        public static readonly string CompositionSettingView_DefaultName = nameof(CompositionSettingView_DefaultName);
+
+        [ShowInMarkup, DefaultValue("コンポジション設定")]
+        public static readonly string CompositionSettingView_Title = nameof(CompositionSettingView_Title);
+
+        [ShowInMarkup, DefaultValue("コンポジション名:")]
+        public static readonly string CompositionSettingView_CompositionNameLabel = nameof(CompositionSettingView_CompositionNameLabel);
+
+        [ShowInMarkup, DefaultValue("プリセット名:")]
+        public static readonly string CompositionSettingView_PresetNameLabel = nameof(CompositionSettingView_PresetNameLabel);
+
+        [ShowInMarkup, DefaultValue("基本")]
+        public static readonly string CompositionSettingView_BasicTab = nameof(CompositionSettingView_BasicTab);
+
+        [ShowInMarkup, DefaultValue("高度")]
+        public static readonly string CompositionSettingView_AdvancedTab = nameof(CompositionSettingView_AdvancedTab);
+
+        [ShowInMarkup, DefaultValue("コンポジション設定")]
+        public static readonly string CompositionSettingView_CompositionSettingGroup = nameof(CompositionSettingView_CompositionSettingGroup);
+
+        [ShowInMarkup, DefaultValue("モーションブラー設定")]
+        public static readonly string CompositionSettingView_MotionBlurSettingGroup = nameof(CompositionSettingView_MotionBlurSettingGroup);
+
+        [ShowInMarkup, DefaultValue("幅:")]
+        public static readonly string CompositionSettingView_CompositionWidthLabel = nameof(CompositionSettingView_CompositionWidthLabel);
+
+        [ShowInMarkup, DefaultValue("高さ:")]
+        public static readonly string CompositionSettingView_CompositionHeightLabel = nameof(CompositionSettingView_CompositionHeightLabel);
+
+        [ShowInMarkup, DefaultValue("px")]
+        public static readonly string CompositionSettingView_SizeUnitLabel = nameof(CompositionSettingView_SizeUnitLabel);
+
+        [ShowInMarkup, DefaultValue("フレームレート:")]
+        public static readonly string CompositionSettingView_FrameRateLabel = nameof(CompositionSettingView_FrameRateLabel);
+
+        [ShowInMarkup, DefaultValue("フレーム/秒")]
+        public static readonly string CompositionSettingView_FrameRateUnitLabel = nameof(CompositionSettingView_FrameRateUnitLabel);
+
+        [ShowInMarkup, DefaultValue("デュレーション:")]
+        public static readonly string CompositionSettingView_DurationLabel = nameof(CompositionSettingView_DurationLabel);
+
+        [ShowInMarkup, DefaultValue("ネスト時にフレームレートを維持")]
+        public static readonly string CompositionSettingView_RetentionFrameRate = nameof(CompositionSettingView_RetentionFrameRate);
+
+        [ShowInMarkup, DefaultValue("シャッター角度:")]
+        public static readonly string CompositionSettingView_ShutterAngleLabel = nameof(CompositionSettingView_ShutterAngleLabel);
+
+        [ShowInMarkup, DefaultValue("シャッターフェーズ:")]
+        public static readonly string CompositionSettingView_ShutterPhaseLabel = nameof(CompositionSettingView_ShutterPhaseLabel);
+
+        [ShowInMarkup, DefaultValue("°")]
+        public static readonly string CompositionSettingView_DegreeUnitLabel = nameof(CompositionSettingView_DegreeUnitLabel);
+
+        [ShowInMarkup, DefaultValue("フレームあたりのサンプル数:")]
+        public static readonly string CompositionSettingView_MotionBlurSampleCountLabel = nameof(CompositionSettingView_MotionBlurSampleCountLabel);
+
+        [ShowInMarkup, DefaultValue("レンダラ:")]
+        public static readonly string CompositionSettingView_RendererLabel = nameof(CompositionSettingView_RendererLabel);
+
         [ShowInMarkup, DefaultValue("色の選択")]
         public static readonly string ColorPickerWindow_Title = nameof(ColorPickerWindow_Title);
 

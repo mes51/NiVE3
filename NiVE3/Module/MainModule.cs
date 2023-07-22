@@ -55,6 +55,7 @@ namespace NiVE3.Module
             Container.RegisterMapping<CommandOnlyViewModelBase, HistoryViewModel>();
 
             containerRegistry.RegisterDialog<InputSettingView, InputSettingViewModel>();
+            containerRegistry.RegisterDialog<CompositionSettingView, CompositionSettingViewModel>();
         }
     }
 }
