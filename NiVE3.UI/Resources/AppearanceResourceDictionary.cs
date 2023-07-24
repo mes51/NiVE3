@@ -24,6 +24,12 @@ namespace NiVE3.UI.Resources
         [ShowInMarkup, BrushColorRange("#FFFFFF", "#313131")]
         public static readonly string TextBrush = nameof(TextBrush);
 
+        [ShowInMarkup, BrushColorRange("#0000FF", "#3355FF")]
+        public static readonly string LinkTextBrush = nameof(LinkTextBrush);
+
+        [ShowInMarkup, BrushColorRange("#3355FF", "#6699FF")]
+        public static readonly string MouseOverLinkTextBrush = nameof(MouseOverLinkTextBrush);
+
         double appearance = 0.0;
         public double Appearance
         {

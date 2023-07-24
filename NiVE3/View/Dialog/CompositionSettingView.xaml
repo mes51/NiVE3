@@ -5,6 +5,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:NiVE3.View.Dialog"
              xmlns:pr="http://prismlibrary.com/"
+             xmlns:cv="clr-namespace:NiVE3.View.Converter"
+             xmlns:ui="clr-namespace:NiVE3.UI.Primitive;assembly=NiVE3.UI"
              xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
              mc:Ignorable="d"
              pr:ViewModelLocator.AutoWireViewModel="True"
@@ -22,6 +24,7 @@
     <UserControl.Resources>
         <Thickness x:Key="ItemMargin">5,0,0,0</Thickness>
         <Thickness x:Key="ItemRowMargin">0,5,0,0</Thickness>
+        <cv:DurationConverter x:Key="DurationConverter" FrameRate="{Binding FrameRate}"/>
 
         <Style x:Key="TabInnerGrid" TargetType="{x:Type Grid}">
             <Setter Property="Margin" Value="10,0,10,10"/>
@@ -55,14 +58,26 @@
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
 
-        <Style x:Key="SmallTextBox" TargetType="{x:Type TextBox}">
+        <Style x:Key="SmallSlidableNumerTextBox" TargetType="{x:Type ui:SlidableNumerTextBox}">
             <Setter Property="Width" Value="50"/>
             <Setter Property="Margin" Value="{StaticResource ItemMargin}"/>
         </Style>
 
-        <Style x:Key="LargeTextBox" TargetType="{x:Type TextBox}">
+        <Style x:Key="LargeSlidableNumerTextBox" TargetType="{x:Type ui:SlidableNumerTextBox}">
             <Setter Property="Width" Value="100"/>
             <Setter Property="Margin" Value="{StaticResource ItemMargin}"/>
+        </Style>
+
+        <Style x:Key="SizeSlidableNumerTextBox" TargetType="{x:Type ui:SlidableNumerTextBox}" BasedOn="{StaticResource SmallSlidableNumerTextBox}">
+            <Setter Property="Maximum" Value="23000"/> <!-- DODO: コンポジションの最大サイズ調整 -->
+            <Setter Property="Minimum" Value="4"/>
+            <Setter Property="Digit" Value="0"/>
+        </Style>
+
+        <Style x:Key="ShutterSlidableNumerTextBox" TargetType="{x:Type ui:SlidableNumerTextBox}" BasedOn="{StaticResource SmallSlidableNumerTextBox}">
+            <Setter Property="Maximum" Value="360"/>
+            <Setter Property="Minimum" Value="0"/>
+            <Setter Property="Digit" Value="0"/>
         </Style>
     </UserControl.Resources>
     <Grid>
@@ -119,7 +134,7 @@
                                     </Grid.ColumnDefinitions>
 
                                     <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=CompositionSettingView_CompositionWidthLabel}" Style="{StaticResource ItemLabel}"/>
-                                    <TextBox Grid.Column="1" Style="{StaticResource SmallTextBox}"/>
+                                    <ui:SlidableNumerTextBox Grid.Column="1" IntValue="{Binding Width}" Style="{StaticResource SizeSlidableNumerTextBox}"/>
                                     <TextBlock Grid.Column="2" Text="{gm:LanguageResource ResourceKey=CompositionSettingView_SizeUnitLabel}" Style="{StaticResource ItemUnitLabel}"/>
                                 </Grid>
                                 <Grid Style="{StaticResource ItemRowGrid}">
@@ -130,7 +145,7 @@
                                     </Grid.ColumnDefinitions>
 
                                     <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=CompositionSettingView_CompositionHeightLabel}" Style="{StaticResource ItemLabel}"/>
-                                    <TextBox Grid.Column="1" Style="{StaticResource SmallTextBox}"/>
+                                    <ui:SlidableNumerTextBox Grid.Column="1" IntValue="{Binding Height}" Style="{StaticResource SizeSlidableNumerTextBox}"/>
                                     <TextBlock Grid.Column="2" Text="{gm:LanguageResource ResourceKey=CompositionSettingView_SizeUnitLabel}" Style="{StaticResource ItemUnitLabel}"/>
                                 </Grid>
                                 <Grid Style="{StaticResource ItemRowGrid}">
@@ -141,7 +156,7 @@
                                     </Grid.ColumnDefinitions>
 
                                     <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=CompositionSettingView_FrameRateLabel}" Style="{StaticResource ItemLabel}"/>
-                                    <TextBox Grid.Column="1" Style="{StaticResource SmallTextBox}"/>
+                                    <ui:SlidableNumerTextBox Grid.Column="1" Value="{Binding FrameRate}" Maximum="999" Minimum="1" Digit="2" Style="{StaticResource SmallSlidableNumerTextBox}"/>
                                     <TextBlock Grid.Column="2" Text="{gm:LanguageResource ResourceKey=CompositionSettingView_FrameRateUnitLabel}" Style="{StaticResource ItemUnitLabel}"/>
                                 </Grid>
                                 <Grid Style="{StaticResource ItemRowGrid}">
@@ -151,10 +166,10 @@
                                     </Grid.ColumnDefinitions>
 
                                     <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=CompositionSettingView_DurationLabel}" Style="{StaticResource ItemLabel}"/>
-                                    <TextBox Grid.Column="1" Style="{StaticResource LargeTextBox}"/>
+                                    <ui:SlidableNumerTextBox Grid.Column="1" Value="{Binding Duration}" Maximum="35999" Minimum="{Binding FrameDuration}" SlideChangeValue="{Binding FrameDuration}" Converter="{StaticResource DurationConverter}" Style="{StaticResource LargeSlidableNumerTextBox}"/>
                                 </Grid>
                                 <Grid Style="{StaticResource ItemRowGrid}">
-                                    <CheckBox Content="{gm:LanguageResource ResourceKey=CompositionSettingView_RetentionFrameRate}"/>
+                                    <CheckBox Content="{gm:LanguageResource ResourceKey=CompositionSettingView_RetentionFrameRate}" IsChecked="{Binding IsRetentionFrameRate}"/>
                                 </Grid>
                             </StackPanel>
                         </GroupBox>
@@ -182,7 +197,7 @@
                                         </Grid.ColumnDefinitions>
 
                                         <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=CompositionSettingView_ShutterAngleLabel}" Style="{StaticResource ItemLabel}"/>
-                                        <TextBox Grid.Column="1" Style="{StaticResource SmallTextBox}"/>
+                                        <ui:SlidableNumerTextBox Grid.Column="1" IntValue="{Binding ShutterAngle}" Style="{StaticResource ShutterSlidableNumerTextBox}"/>
                                         <TextBlock Grid.Column="2" Text="{gm:LanguageResource ResourceKey=CompositionSettingView_DegreeUnitLabel}" Style="{StaticResource ItemUnitLabel}"/>
                                     </Grid>
                                     <Grid Style="{StaticResource ItemRowGrid}">
@@ -193,7 +208,7 @@
                                         </Grid.ColumnDefinitions>
 
                                         <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=CompositionSettingView_ShutterPhaseLabel}" Style="{StaticResource ItemLabel}"/>
-                                        <TextBox Grid.Column="1" Style="{StaticResource SmallTextBox}"/>
+                                        <ui:SlidableNumerTextBox Grid.Column="1" IntValue="{Binding ShutterPhase}" Style="{StaticResource ShutterSlidableNumerTextBox}"/>
                                         <TextBlock Grid.Column="2" Text="{gm:LanguageResource ResourceKey=CompositionSettingView_DegreeUnitLabel}" Style="{StaticResource ItemUnitLabel}"/>
                                     </Grid>
                                     <Grid Style="{StaticResource ItemRowGrid}">
@@ -203,7 +218,7 @@
                                         </Grid.ColumnDefinitions>
 
                                         <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=CompositionSettingView_MotionBlurSampleCountLabel}" Style="{StaticResource ItemLabel}"/>
-                                        <TextBox Grid.Column="1" Style="{StaticResource SmallTextBox}"/>
+                                        <ui:SlidableNumerTextBox Grid.Column="1" IntValue="{Binding MotionBlurSampleCount}" Maximum="128" Minimum="1" Style="{StaticResource SmallSlidableNumerTextBox}"/>
                                     </Grid>
                                 </StackPanel>
                             </GroupBox>

@@ -3,15 +3,16 @@ using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
 
-namespace NiVE3.View.Converter
+namespace NiVE3.UI.Converter
 {
     [ValueConversion(typeof(int), typeof(string))]
-    class CalcIntConverter : IValueConverter
+    public class CalcIntConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
@@ -44,9 +45,9 @@ namespace NiVE3.View.Converter
                         case ulong v:
                             return (int)v;
                         case float v:
-                            return (int)v;
+                            return (int)MathF.Round(v);
                         case double v:
-                            return (int)v;
+                            return (int)Math.Round(v);
                     }
                 }
                 catch { } // 例外発生時はすべてUnsetValue

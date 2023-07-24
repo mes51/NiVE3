@@ -1,0 +1,91 @@
+﻿<UserControl x:Class="NiVE3.UI.Primitive.SlidableNumerTextBox"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:NiVE3.UI.Primitive"
+             xmlns:gm="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup"
+             mc:Ignorable="d" 
+             x:Name="Root"
+             IsTabStop="True"
+             Focusable="True"
+             FocusManager.IsFocusScope="True"
+             GotFocus="Root_GotFocus"
+             d:DesignHeight="21" d:DesignWidth="100">
+    <UserControl.Resources>
+        <Pen x:Key="UnderlinePen" Thickness="1" Brush="{gm:AppearanceResource ResourceKey=LinkTextBrush}" DashCap="Round" EndLineCap="Round">
+            <Pen.DashStyle>
+                <DashStyle Dashes="2"/>
+            </Pen.DashStyle>
+        </Pen>
+        <Pen x:Key="MouseOverUnderlinePen" Thickness="1" Brush="{gm:AppearanceResource ResourceKey=MouseOverLinkTextBrush}" DashCap="Round" EndLineCap="Round">
+            <Pen.DashStyle>
+                <DashStyle Dashes="2"/>
+            </Pen.DashStyle>
+        </Pen>
+
+        <Style x:Key="ValueTextBoxStyle" TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
+            <Setter Property="Visibility" Value="Hidden"/>
+            <Setter Property="AcceptsReturn" Value="False"/>
+            <Setter Property="AcceptsTab" Value="False"/>
+
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ElementName=Root, Path=IsKeyboardFocusWithin}" Value="True">
+                    <Setter Property="Visibility" Value="Visible"/>
+                    <Setter Property="FocusManager.FocusedElement" Value="{Binding ElementName=ValueTextBox}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsKeyboardFocusWithin, RelativeSource={RelativeSource Self}}" Value="True">
+                    <Setter Property="Visibility" Value="Visible"/>
+                    <Setter Property="FocusManager.FocusedElement" Value="{Binding ElementName=ValueTextBox}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="ValueTextBlockStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
+            <Setter Property="Foreground" Value="{gm:AppearanceResource ResourceKey=LinkTextBrush, ReturnDynamicResource=True}"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Cursor" Value="SizeWE"/>
+            <Setter Property="TextDecorations">
+                <Setter.Value>
+                    <TextDecorationCollection>
+                        <TextDecoration PenThicknessUnit="FontRecommended" Location="Underline" Pen="{StaticResource UnderlinePen}"/>
+                    </TextDecorationCollection>
+                </Setter.Value>
+            </Setter>
+
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Foreground" Value="{gm:AppearanceResource ResourceKey=MouseOverLinkTextBrush, ReturnDynamicResource=True}"/>
+                    <Setter Property="TextDecorations">
+                        <Setter.Value>
+                            <TextDecorationCollection>
+                                <TextDecoration PenThicknessUnit="FontRecommended" Location="Underline" Pen="{StaticResource MouseOverUnderlinePen}"/>
+                            </TextDecorationCollection>
+                        </Setter.Value>
+                    </Setter>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="ValueTextBlockWrapper" TargetType="{x:Type Grid}">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Visibility" Value="Visible"/>
+
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ElementName=Root, Path=IsKeyboardFocusWithin}" Value="True">
+                    <Setter Property="Visibility" Value="Hidden"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsKeyboardFocusWithin, RelativeSource={RelativeSource Self}}" Value="True">
+                    <Setter Property="Visibility" Value="Hidden"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+    <Grid>
+        <TextBox x:Name="ValueTextBox" Style="{StaticResource ValueTextBoxStyle}" PreviewKeyDown="ValueTextBox_PreviewKeyDown"/>
+        <Grid Style="{StaticResource ValueTextBlockWrapper}">
+            <TextBlock x:Name="ValueTextBlock" Style="{StaticResource ValueTextBlockStyle}" MouseDown="ValueTextBlock_MouseDown" MouseMove="ValueTextBlock_MouseMove" MouseUp="ValueTextBlock_MouseUp"/>
+        </Grid>
+    </Grid>
+</UserControl>

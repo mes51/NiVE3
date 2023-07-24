@@ -4,9 +4,10 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:NiVE3.View.Input"
-             xmlns:cv="clr-namespace:NiVE3.View.Converter"
+             xmlns:cv="clr-namespace:NiVE3.UI.Converter;assembly=NiVE3.UI"
+             xmlns:ui="clr-namespace:NiVE3.UI.Primitive;assembly=NiVE3.UI"
              xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
-             xmlns:ui="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
+             xmlns:ugm="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
              mc:Ignorable="d"
              Width="500">
     <UserControl.Resources>
@@ -57,9 +58,9 @@
                     </Grid.ColumnDefinitions>
 
                     <TextBlock Grid.Row="0" Grid.Column="0" Text="{gm:LanguageResource ResourceKey=SolidInputSettingView_Width}" Margin="0,5,5,0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Width, Converter={StaticResource CalcIntConverter}, ValidatesOnExceptions=True, NotifyOnValidationError=True}" Margin="0,5,0,0"/>
+                    <ui:SlidableNumerTextBox Grid.Row="0" Grid.Column="1" Value="{Binding Width}" Maximum="23000" Minimum="4" Margin="0,5,0,0"/>
                     <TextBlock Grid.Row="1" Grid.Column="0" Text="{gm:LanguageResource ResourceKey=SolidInputSettingView_Height}" Margin="0,5,5,0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Height, Converter={StaticResource CalcIntConverter}, ValidatesOnExceptions=True, NotifyOnValidationError=True}" Margin="0,5,0,0"/>
+                    <ui:SlidableNumerTextBox Grid.Row="1" Grid.Column="1" Value="{Binding Height}" Maximum="23000" Minimum="4" Margin="0,5,0,0"/>
 
                     <CheckBox Grid.RowSpan="2" Grid.Column="2" Content="{gm:LanguageResource ResourceKey=SolidInputSettingView_IsFixRatio}" IsChecked="{Binding IsFixRatio}" Margin="10,0,0,0" VerticalAlignment="Center"/>
 
@@ -74,7 +75,7 @@
                         <ColumnDefinition />
                     </Grid.ColumnDefinitions>
 
-                    <Button Grid.Column="0" Width="48" Height="27" Margin="0,10,5,10" HorizontalAlignment="Right" BorderBrush="{ui:AppearanceResource ResourceKey=BorderBrush}" Style="{StaticResource ColorChangeButtonStyle}" Click="ColorChangeButton_Click"/>
+                    <Button Grid.Column="0" Width="48" Height="27" Margin="0,10,5,10" HorizontalAlignment="Right" BorderBrush="{ugm:AppearanceResource ResourceKey=BorderBrush}" Style="{StaticResource ColorChangeButtonStyle}" Click="ColorChangeButton_Click"/>
                     <Button Grid.Column="1" Width="24" Height="24" Margin="0,10" HorizontalAlignment="Left"/>
                 </Grid>
             </GroupBox>
