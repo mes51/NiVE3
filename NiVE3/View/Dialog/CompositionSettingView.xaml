@@ -225,7 +225,7 @@
 
                             <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="{StaticResource ItemRowMargin}" HorizontalAlignment="Center">
                                 <TextBlock Text="{gm:LanguageResource ResourceKey=CompositionSettingView_RendererLabel}" Style="{StaticResource ItemLabel}"/>
-                                <ComboBox Width="300" Margin="5,0,0,0"/>
+                                <ComboBox Width="300" Margin="5,0,0,0" ItemsSource="{Binding Renderers}" SelectedIndex="{Binding SelectedRenderer, Mode=TwoWay}"/>
                             </StackPanel>
                         </Grid>
                     </Grid>

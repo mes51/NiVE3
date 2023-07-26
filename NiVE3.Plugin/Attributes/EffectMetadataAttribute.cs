@@ -34,7 +34,7 @@ namespace NiVE3.Plugin.Attributes
 
         /// <summary>
         /// エフェクトの識別のためのGuid
-        /// この値は全てのエフェクトの中で一意で或必要があります
+        /// この値は全てのエフェクトの中で一意である必要があります
         /// </summary>
         string EffectUuid { get; }
 

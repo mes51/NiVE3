@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using NiVE3.Model;
 using NiVE3.View.Resource;
 using Prism.Commands;
 using Prism.Mvvm;
@@ -87,6 +88,15 @@ namespace NiVE3.ViewModel.Dialog
             set { SetProperty(ref motionBlurSampleCount, value); }
         }
 
+        private int selectedRenderer;
+        public int SelectedRenderer
+        {
+            get { return selectedRenderer; }
+            set { SetProperty(ref selectedRenderer, value); }
+        }
+
+        public string[] Renderers { get; }
+
         public string Title => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.CompositionSettingView_Title);
 
         public event Action<IDialogResult>? RequestClose;
@@ -99,8 +109,13 @@ namespace NiVE3.ViewModel.Dialog
 
         public ICommand DeletePresetCommand { get; }
 
-        public CompositionSettingViewModel()
+        RendererListModel RendererListModel { get; }
+
+        public CompositionSettingViewModel(RendererListModel rendererListModel)
         {
+            RendererListModel = rendererListModel;
+            Renderers = rendererListModel.RendererMetadatas.Select(r => r.Name).ToArray();
+
             OKCommand = new DelegateCommand(() => RequestClose?.Invoke(new DialogResult(ButtonResult.OK, null)));
 
             CancelCommand = new DelegateCommand(() => RequestClose?.Invoke(new DialogResult(ButtonResult.Cancel, null)));
