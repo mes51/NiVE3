@@ -4,6 +4,7 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NiVE3.Plugin.Resource;
 
 namespace NiVE3.Plugin.Attributes
 {
@@ -51,32 +52,44 @@ namespace NiVE3.Plugin.Attributes
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
     public class EffectMetadataAttribute : Attribute, IEffectMetadata
     {
-        public string Name { get; }
+        public string Name => LanguageResourceDictionaryBase.GetLanguageResourceDictionary(LanguageResourceDictionaryType)?.GetText(NameKey) ?? NameKey;
+
+        public string Description => LanguageResourceDictionaryBase.GetLanguageResourceDictionary(LanguageResourceDictionaryType)?.GetText(DescriptionKey) ?? DescriptionKey;
 
         public string Author { get; }
-
-        public string Description { get; }
 
         public string Category { get; }
 
         public string EffectUuid { get; }
 
+        /// <summary>
+        /// 何もしないエフェクトかどうか
+        /// </summary>
         public bool IsDummyEffect { get; set; } = false;
+
+        /// <summary>
+        /// 多言語化用のResourceDictionaryの型
+        /// </summary>
+        public Type? LanguageResourceDictionaryType { get; set; }
+
+        string NameKey { get; }
+
+        string DescriptionKey { get; }
 
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        /// <param name="name">エフェクトの表示名</param>
-        /// <param name="author">エフェクトの制作者</param>
+        /// <param name="name">エフェクトの表示名、またはResourceDictionaryのキー</param>
+        /// <param name="author">エフェクトの制作者、またはResourceDictionaryのキー</param>
         /// <param name="description">エフェクトの概要</param>
         /// <param name="effectUuid">エフェクトの識別のためのGuid</param>
         public EffectMetadataAttribute(string name, string author, string category, string description, string effectUuid)
         {
-            Name = name;
             Author = author;
             Category = category;
-            Description = description;
             EffectUuid = effectUuid;
+            NameKey = name;
+            DescriptionKey = description;
         }
     }
 }

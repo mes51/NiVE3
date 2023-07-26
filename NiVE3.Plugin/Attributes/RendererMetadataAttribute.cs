@@ -4,6 +4,7 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NiVE3.Plugin.Resource;
 
 namespace NiVE3.Plugin.Attributes
 {
@@ -38,26 +39,35 @@ namespace NiVE3.Plugin.Attributes
     [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
     public class RendererMetadataAttribute : Attribute, IRendererMetadata
     {
-        public string Name { get; }
+        public string Name => LanguageResourceDictionaryBase.GetLanguageResourceDictionary(LanguageResourceDictionaryType)?.GetText(NameKey) ?? NameKey;
+
+        public string Description => LanguageResourceDictionaryBase.GetLanguageResourceDictionary(LanguageResourceDictionaryType)?.GetText(DescriptionKey) ?? DescriptionKey;
 
         public string Author { get; }
-
-        public string Description { get; }
 
         public string RendererUuid { get; }
 
         /// <summary>
+        /// 多言語化用のResourceDictionaryの型
+        /// </summary>
+        public Type? LanguageResourceDictionaryType { get; set; }
+
+        string NameKey { get; }
+
+        string DescriptionKey { get; }
+
+        /// <summary>
         /// コンストラクタ
         /// </summary>
-        /// <param name="name">レンダラの表示名</param>
+        /// <param name="name">レンダラの表示名、またはResourceDictionaryのキー</param>
         /// <param name="author">レンダラの作成者</param>
-        /// <param name="description">レンダラの概要</param>
+        /// <param name="description">レンダラの概要、またはResourceDictionaryのキー</param>
         /// <param name="rendererUuid">レンダラの識別のためのGuid</param>
         public RendererMetadataAttribute(string name, string author, string description, string rendererUuid)
         {
-            Name = name;
+            NameKey = name;
+            DescriptionKey = description;
             Author = author;
-            Description = description;
             RendererUuid = rendererUuid;
         }
     }

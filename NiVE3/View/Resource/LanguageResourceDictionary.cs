@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using NiVE3.Plugin.Resource;
 using NiVE3.SourceGenerator.ResourceMarkupGenerator;
 
 namespace NiVE3.View.Resource
@@ -194,6 +195,7 @@ namespace NiVE3.View.Resource
                 if (selectedLanguage!= value)
                 {
                     selectedLanguage = value;
+                    LanguageResourceDictionaryBase.SelectedLanguage = value;
                     Reload();
                 }
             }

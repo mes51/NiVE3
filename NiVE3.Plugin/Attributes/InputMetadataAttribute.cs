@@ -4,6 +4,7 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NiVE3.Plugin.Resource;
 
 namespace NiVE3.Plugin.Attributes
 {
@@ -23,6 +24,11 @@ namespace NiVE3.Plugin.Attributes
         /// 入力プラグインの作成者
         /// </summary>
         string Author { get; }
+
+        /// <summary>
+        /// 入力プラグインの概要
+        /// </summary>
+        string Description { get; }
 
         /// <summary>
         /// 入力プラグインの識別のためのGuid
@@ -50,7 +56,9 @@ namespace NiVE3.Plugin.Attributes
     {
         public Type PluginType { get; }
 
-        public string Name { get; }
+        public string Name => LanguageResourceDictionaryBase.GetLanguageResourceDictionary(LanguageResourceDictionaryType)?.GetText(NameKey) ?? NameKey;
+
+        public string Description => LanguageResourceDictionaryBase.GetLanguageResourceDictionary(LanguageResourceDictionaryType)?.GetText(DescriptionKey) ?? DescriptionKey;
 
         public string Author { get; }
 
@@ -61,18 +69,29 @@ namespace NiVE3.Plugin.Attributes
         public bool HasSettingView { get; }
 
         /// <summary>
+        /// 多言語化用のResourceDictionaryの型
+        /// </summary>
+        public Type? LanguageResourceDictionaryType { get; set; }
+
+        string NameKey { get; }
+
+        string DescriptionKey { get; }
+
+        /// <summary>
         /// コンストラクタ
         /// </summary>
         /// <param name="pluginType">入力プラグインの型</param>
-        /// <param name="name">入力プラグインの名前</param>
+        /// <param name="name">入力プラグインの名前、またはResourceDictionaryのキー</param>
         /// <param name="author">入力プラグインの作成者</param>
+        /// <param name="description">入力プラグインの概要、またはResourceDictionaryのキー</param>
         /// <param name="inputUuid">入力プラグインの識別のためのGuid</param>
         /// <param name="supportedFileType">対応するファイルの拡張子</param>
         /// <param name="hasSettingView">読み込み時の設定画面が存在するかどうか</param>
-        public InputMetadataAttribute(Type pluginType, string name, string author, string inputUuid, string supportedFileType, bool hasSettingView = false)
+        public InputMetadataAttribute(Type pluginType, string name, string author, string description, string inputUuid, string supportedFileType, bool hasSettingView = false)
         {
             PluginType = pluginType;
-            Name = name;
+            NameKey = name;
+            DescriptionKey = description;
             Author = author;
             InputUuid = inputUuid;
             SupportedFileType = supportedFileType;

@@ -1,0 +1,46 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+
+namespace NiVE3.Plugin.Resource
+{
+    public abstract class LanguageResourceDictionaryBase : ResourceDictionary
+    {
+        public static string SelectedLanguage { get; internal set; } = "ja-jp";
+
+        static Dictionary<Type, LanguageResourceDictionaryBase> Cache { get; } = new Dictionary<Type, LanguageResourceDictionaryBase>();
+
+        protected abstract void Reload();
+
+        public string GetText(string key)
+        {
+            return (this[key] as string) ?? "";
+        }
+
+        internal static LanguageResourceDictionaryBase? GetLanguageResourceDictionary(Type? type)
+        {
+            if (type == null)
+            {
+                return null;
+            }
+
+            if (!Cache.ContainsKey(type))
+            {
+                var dictionary = Activator.CreateInstance(type) as LanguageResourceDictionaryBase;
+                if (dictionary != null)
+                {
+                    Cache[type] = dictionary;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
+            return Cache[type];
+        }
+    }
+}

@@ -119,7 +119,7 @@ namespace NiVE3.Test.Model
     }
 
     [Export(typeof(IInput))]
-    [InputMetadata(typeof(TestInput), "TestInput", "mes51", ID, "*.test1")]
+    [InputMetadata(typeof(TestInput), "TestInput", "", "mes51", ID, "*.test1")]
     public class TestInput : IInput
     {
         public const string ID = "D0D13BF8-2486-4452-840E-0AB4C5CC8745";
@@ -140,7 +140,7 @@ namespace NiVE3.Test.Model
     }
 
     [Export(typeof(IInput))]
-    [InputMetadata(typeof(TestInput2), "TestInput2", "mes51", ID, "*.test2")]
+    [InputMetadata(typeof(TestInput2), "TestInput2", "", "mes51", ID, "*.test2")]
     public class TestInput2 : IInput
     {
         public const string ID = "6F1D817C-CD8C-41B8-A6B1-58D987CFDD29";

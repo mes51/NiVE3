@@ -18,7 +18,7 @@ using NiVE3.PresetPlugin.Internal.MediaFoundation;
 namespace NiVE3.PresetPlugin.Input
 {
     [Export(typeof(IInput))]
-    [InputMetadata(typeof(MediaFoundationInput), "MediaFoundationInput", "mes51", ID, "*.avi,*.mp4", true)]
+    [InputMetadata(typeof(MediaFoundationInput), "MediaFoundationInput", "", "mes51", ID, "*.avi,*.mp4", true)]
     public class MediaFoundationInput : IInput
     {
         readonly Vector128<float> ByteToFloat128 = Vector128.Create(0.00392156862745098F);
