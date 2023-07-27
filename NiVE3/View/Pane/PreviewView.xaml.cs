@@ -84,7 +84,7 @@ namespace NiVE3.View.Pane
             {
                 Canvas.SetLeft(PreviewArea, (PreviewCanvas.ActualWidth - PreviewArea.ActualWidth) * 0.5);
                 Canvas.SetTop(PreviewArea, (PreviewCanvas.ActualHeight - PreviewArea.ActualHeight) * 0.5);
-                NeedPositionReset = false;
+                NeedPositionReset = PreviewArea.ActualWidth <= 0.0 || PreviewArea.ActualHeight <= 0.0;
             }
         }
 
@@ -94,7 +94,7 @@ namespace NiVE3.View.Pane
             {
                 Canvas.SetLeft(PreviewArea, (PreviewCanvas.ActualWidth - PreviewArea.ActualWidth) * 0.5);
                 Canvas.SetTop(PreviewArea, (PreviewCanvas.ActualHeight - PreviewArea.ActualHeight) * 0.5);
-                NeedPositionReset = false;
+                NeedPositionReset = PreviewArea.ActualWidth <= 0.0 || PreviewArea.ActualHeight <= 0.0;
             }
             else
             {

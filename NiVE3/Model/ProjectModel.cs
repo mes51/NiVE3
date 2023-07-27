@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -25,6 +26,8 @@ namespace NiVE3.Model
 
             FootageListModel.ShowFootagePreview += FootageListModel_ShowFootagePreview;
             FootageListModel.RemoveFootageByUndo += FootageListModel_RemoveFootageByUndo;
+
+            CompositionModels.CollectionChanged += CompositionModels_CollectionChanged;
         }
 
         public void CreateComposition(string name, int width, int height, double frameRate, double duration, bool isRetentionFrameRate, int shutterAngle, int shutterPhase, int motionBlurSampleCount, Type rendererType)
@@ -70,6 +73,22 @@ namespace NiVE3.Model
                 if (preview != null)
                 {
                     preview.Footage = null;
+                }
+            }
+        }
+
+        private void CompositionModels_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            if ((e.NewItems?.OfType<CompositionModel>() ?? Enumerable.Empty<CompositionModel>()).FirstOrDefault() is CompositionModel composition)
+            {
+                var preview = PreviewModels.OfType<CompositionPreviewModel>().FirstOrDefault();
+                if (preview != null)
+                {
+                    preview.Composition = composition;
+                }
+                else
+                {
+                    PreviewModels.Add(new CompositionPreviewModel { Composition = composition });
                 }
             }
         }

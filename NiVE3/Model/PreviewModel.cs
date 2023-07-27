@@ -112,4 +112,50 @@ namespace NiVE3.Model
             }
         }
     }
+
+    class CompositionPreviewModel : PreviewModelBase
+    {
+        public override bool IsFootage => false;
+
+        private CompositionModel? composition;
+        public CompositionModel? Composition
+        {
+            get { return composition; }
+            set { SetProperty(ref composition, value); }
+        }
+
+        public CompositionPreviewModel()
+        {
+            PropertyChanged += CompositionPreviewModel_PropertyChanged;
+        }
+
+        public override NImage? GetImage(double time)
+        {
+            return new NManagedImage(Width, Height, true);
+        }
+
+        private void CompositionPreviewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(Composition))
+            {
+                if (Composition != null)
+                {
+                    SourceType = SourceType.VideoAndAudio;
+                    Duration = Composition.Duration;
+                    Width = Composition.Width;
+                    Height = Composition.Height;
+                    Name = Composition.Name;
+                }
+                else
+                {
+                    SourceType = SourceType.None;
+                    Duration = 0.0;
+                    Width = 0;
+                    Height = 0;
+                    Name = "";
+                }
+                CurrentTime = 0.0;
+            }
+        }
+    }
 }
