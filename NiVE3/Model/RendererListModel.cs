@@ -34,5 +34,14 @@ namespace NiVE3.Model
                 RendererMetadatas = new List<IRendererMetadata>();
             }
         }
+
+        public IRenderer CreateRenderer(Type rendererType)
+        {
+            if (Renderers == null)
+            {
+                throw new Exception(); // bug
+            }
+            return Renderers.First(f => f.Metadata.PluginType == rendererType).CreateExport().Value;
+        }
     }
 }

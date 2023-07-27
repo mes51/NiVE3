@@ -3,6 +3,7 @@ using NiVE3.Config;
 using NiVE3.Model;
 using NiVE3.View.Command;
 using NiVE3.View.Dialog;
+using NiVE3.ViewModel.Dialog;
 using Prism.Commands;
 using Prism.Mvvm;
 using Prism.Regions;
@@ -72,9 +73,20 @@ namespace NiVE3.ViewModel
                 var param = new DialogParameters();
                 IDialogResult? result = null;
                 DialogService.ShowDialog(nameof(CompositionSettingView), param, r => result = r);
-                if (result?.Result == ButtonResult.OK)
+                if (result != null && result.Result == ButtonResult.OK)
                 {
-                    ProjectModel.CreateComposition();
+                    ProjectModel.CreateComposition(
+                        result.Parameters.GetValue<string>(nameof(CompositionSettingViewModel.Name)),
+                        result.Parameters.GetValue<int>(nameof(CompositionSettingViewModel.Width)),
+                        result.Parameters.GetValue<int>(nameof(CompositionSettingViewModel.Height)),
+                        result.Parameters.GetValue<double>(nameof(CompositionSettingViewModel.FrameRate)),
+                        result.Parameters.GetValue<double>(nameof(CompositionSettingViewModel.Duration)),
+                        result.Parameters.GetValue<bool>(nameof(CompositionSettingViewModel.IsRetentionFrameRate)),
+                        result.Parameters.GetValue<int>(nameof(CompositionSettingViewModel.ShutterAngle)),
+                        result.Parameters.GetValue<int>(nameof(CompositionSettingViewModel.ShutterPhase)),
+                        result.Parameters.GetValue<int>(nameof(CompositionSettingViewModel.MotionBlurSampleCount)),
+                        result.Parameters.GetValue<Type>(CompositionSettingViewModel.SelectedRendererType)
+                    );
                 }
             });
 

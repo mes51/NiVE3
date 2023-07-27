@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,6 +16,8 @@ namespace NiVE3.ViewModel.Dialog
 {
     class CompositionSettingViewModel : BindableBase, IDialogAware
     {
+        public const string SelectedRendererType = nameof(SelectedRendererType);
+
         // TODO: 要調整
         const int FrameTimeDigit = 7;
 
@@ -111,12 +114,32 @@ namespace NiVE3.ViewModel.Dialog
 
         RendererListModel RendererListModel { get; }
 
+        Type[] RendererTypes { get; }
+
         public CompositionSettingViewModel(RendererListModel rendererListModel)
         {
             RendererListModel = rendererListModel;
             Renderers = rendererListModel.RendererMetadatas.Select(r => r.Name).ToArray();
+            RendererTypes = rendererListModel.RendererMetadatas.Select(r => r.PluginType).ToArray();
 
-            OKCommand = new DelegateCommand(() => RequestClose?.Invoke(new DialogResult(ButtonResult.OK, null)));
+            OKCommand = new DelegateCommand(() =>
+            {
+                var result = new DialogParameters
+                {
+                    { nameof(Name), Name },
+                    { nameof(Width), Width },
+                    { nameof(Height), Height },
+                    { nameof(FrameRate), FrameRate },
+                    { nameof(Duration), Duration },
+                    { nameof(IsRetentionFrameRate), IsRetentionFrameRate },
+                    { nameof(ShutterAngle), ShutterAngle },
+                    { nameof(ShutterPhase), ShutterPhase },
+                    { nameof(MotionBlurSampleCount), MotionBlurSampleCount },
+                    { SelectedRendererType, RendererTypes[SelectedRenderer] }
+                };
+
+                RequestClose?.Invoke(new DialogResult(ButtonResult.OK, result));
+            });
 
             CancelCommand = new DelegateCommand(() => RequestClose?.Invoke(new DialogResult(ButtonResult.Cancel, null)));
 
@@ -132,11 +155,11 @@ namespace NiVE3.ViewModel.Dialog
             return true;
         }
 
-        public void OnDialogClosed() { }
-
         public void OnDialogOpened(IDialogParameters parameters)
         {
         }
+
+        public void OnDialogClosed() { }
 
         private void CompositionSettingViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {

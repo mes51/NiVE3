@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace NiVE3.Plugin.Interfaces
 {
-    public interface IRenderer
+    public interface IRenderer : IDisposable
     {
     }
 }

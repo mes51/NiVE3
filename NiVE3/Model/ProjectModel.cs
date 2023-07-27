@@ -16,17 +16,32 @@ namespace NiVE3.Model
 
         FootageListModel FootageListModel { get; }
 
-        public ProjectModel(FootageListModel footageListModel)
+        RendererListModel RendererListModel { get; }
+
+        public ProjectModel(FootageListModel footageListModel, RendererListModel rendererListModel)
         {
             FootageListModel= footageListModel;
+            RendererListModel= rendererListModel;
 
             FootageListModel.ShowFootagePreview += FootageListModel_ShowFootagePreview;
             FootageListModel.RemoveFootageByUndo += FootageListModel_RemoveFootageByUndo;
         }
 
-        public void CreateComposition()
+        public void CreateComposition(string name, int width, int height, double frameRate, double duration, bool isRetentionFrameRate, int shutterAngle, int shutterPhase, int motionBlurSampleCount, Type rendererType)
         {
-            CompositionModels.Add(new CompositionModel());
+            var renderer = RendererListModel.CreateRenderer(rendererType);
+            CompositionModels.Add(new CompositionModel(renderer)
+            {
+                Name = name,
+                Width = width,
+                Height = height,
+                FrameRate = frameRate,
+                Duration = duration,
+                IsRetentionFrameRate = isRetentionFrameRate,
+                ShutterAngle = shutterAngle,
+                ShutterPhase = shutterPhase,
+                MotionBlurSampleCount = motionBlurSampleCount
+            });
         }
 
         public void CreatePreview()
