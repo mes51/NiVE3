@@ -16,6 +16,8 @@ namespace NiVE3.SourceGenerator.ViewModelWireGenerator
 
         static readonly string NeedWireAttributeName = $"{Namespace}.NeedWireAttribute";
 
+        static readonly string BindWeakEventAttributeName = $"{Namespace}.BindWeakEventAttribute";
+
         static readonly string ViewModelWireableAttributeName = $"{Namespace}.ViewModelWireableAttribute";
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -63,6 +65,27 @@ sealed class NeedWireAttribute : Attribute
     }
 }
 """);
+
+                context.CancellationToken.ThrowIfCancellationRequested();
+
+                context.AddSource("BindWeakEventAttribute", $"namespace {Namespace};" + """
+
+using System;
+
+[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
+sealed class BindWeakEventAttribute : Attribute
+{
+    public string SourceName { get; }
+
+    public string EventName { get; }
+
+    public BindWeakEventAttribute(string sourceName, string eventName)
+    {
+        SourceName = sourceName;
+        EventName = eventName;
+    }
+}
+""");
             });
 
             var typeDefinitions = context.SyntaxProvider.ForAttributeWithMetadataName(
@@ -100,6 +123,12 @@ sealed class NeedWireAttribute : Attribute
                 throw new InvalidOperationException($"{NeedWireAttributeName} is not found");
             }
 
+            var bindWeakEventSymbol = compilation.GetTypeByMetadataName(BindWeakEventAttributeName);
+            if (bindWeakEventSymbol == null)
+            {
+                throw new InvalidOperationException($"{BindWeakEventAttributeName} is not found");
+            }
+
             var viewModelWireableSymbol = compilation.GetTypeByMetadataName(ViewModelWireableAttributeName);
             if (viewModelWireableSymbol == null)
             {
@@ -118,13 +147,25 @@ sealed class NeedWireAttribute : Attribute
                 return;
             }
 
-            var handlerPairs = GetHandlerPairs(context, compilation, typeSymbol, needWireSymbol);
-            if (handlerPairs == null)
+            var propertyHandlers = GetPropertyWireHandler(context, compilation, typeSymbol, needWireSymbol);
+            var bindEventHandlers = GetBindEventHandler(context, compilation, typeSymbol, bindWeakEventSymbol);
+            if (propertyHandlers == null && bindEventHandlers == null)
             {
                 return;
             }
 
-            var (binderClasses, bindingCodes) = GenerateBinderCode(typeSymbol, handlerPairs, withInitializeProperty);
+            propertyHandlers ??= new Dictionary<string, Handlers>();
+            bindEventHandlers ??= new Dictionary<string, Handlers>();
+            foreach (var key in propertyHandlers.Keys)
+            {
+                if (bindEventHandlers.TryGetValue(key, out var handler))
+                {
+                    propertyHandlers[key].BindEventHandlers.AddRange(handler.BindEventHandlers);
+                }
+            }
+            var allHandlers = propertyHandlers.Values.Concat(bindEventHandlers.Keys.Except(propertyHandlers.Keys).Select(k => bindEventHandlers[k])).ToList();
+
+            var (binderClasses, bindingCodes) = GenerateBinderCode(typeSymbol, allHandlers, withInitializeProperty);
 
             var fileName = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
                 .Replace("global::", "")
@@ -141,8 +182,10 @@ sealed class NeedWireAttribute : Attribute
 #pragma warning disable CS8604
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows;
+using System.Reflection;
 
 namespace {{typeSymbol.ContainingNamespace}};
 
@@ -217,7 +260,7 @@ partial class {{typeSymbol.Name}}
             return false;
         }
 
-        static Dictionary<string, (ITypeSymbol, List<(string propertyName, string sourcePropertyName, bool isOneWay)>)>? GetHandlerPairs(SourceProductionContext context, Compilation compilation, ITypeSymbol typeSymbol, INamedTypeSymbol needWireSymbol)
+        static Dictionary<string, Handlers>? GetPropertyWireHandler(SourceProductionContext context, Compilation compilation, ITypeSymbol typeSymbol, INamedTypeSymbol needWireSymbol)
         {
             var allProperties = typeSymbol.GetMembers()
                 .OfType<IPropertySymbol>()
@@ -226,7 +269,7 @@ partial class {{typeSymbol.Name}}
             var targetProperties = allProperties.Where(p => p.GetAttributes().Any(a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, needWireSymbol)));
 
             var checkedSource = new Dictionary<string, (IPropertySymbol[], HashSet<string>, HashSet<string>)>();
-            var handlerPair = new Dictionary<string, (ITypeSymbol, List<(string, string, bool)>)>();
+            var handlers = new Dictionary<string, Handlers>();
             foreach (var p in targetProperties)
             {
                 if (!IsCanAccessGetter(p) || !IsCanAccessSetter(p))
@@ -312,65 +355,171 @@ partial class {{typeSymbol.Name}}
                     checkedOneWaySourceProperties.Add(sourcePropertyName);
                 }
 
-                if (!handlerPair.ContainsKey(sourceName))
+                if (!handlers.ContainsKey(sourceName))
                 {
-                    handlerPair.Add(sourceName, (sourceProperty.Type, new List<(string, string, bool)>()));
+                    handlers.Add(sourceName, new Handlers(sourceName, sourceProperty.Type));
                 }
 
-                handlerPair[sourceName].Item2.Add((p.Name, sourcePropertyName, isOneWay));
+                handlers[sourceName].PropertyWires.Add(new PropertyWire(p.Name, sourcePropertyName, isOneWay));
 
                 context.CancellationToken.ThrowIfCancellationRequested();
             }
 
-            return handlerPair;
+            return handlers;
         }
 
-        static (string, string) GenerateBinderCode(INamedTypeSymbol typeSymbol, Dictionary<string, (ITypeSymbol, List<(string propertyName, string sourcePropertyName, bool isOneWay)>)> handlerPairs, bool withInitializeProperty)
+        static Dictionary<string, Handlers>? GetBindEventHandler(SourceProductionContext context, Compilation compilation, ITypeSymbol typeSymbol, INamedTypeSymbol bindWeakEventSymbol)
+        {
+            var allProperties = typeSymbol.GetMembers()
+                .OfType<IPropertySymbol>()
+                .Where(p => p is { IsStatic: false, IsImplicitlyDeclared: false, CanBeReferencedByName: true })
+                .ToArray();
+            var targetMethods = typeSymbol.GetMembers()
+                .OfType<IMethodSymbol>()
+                .Where(m => m is { IsStatic: false, IsImplicitlyDeclared: false, CanBeReferencedByName: true })
+                .Where(m => m.GetAttributes().Any(a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, bindWeakEventSymbol)))
+                .ToArray();
+
+            var checkedEvents = new Dictionary<string, HashSet<string>>();
+            var handlers = new Dictionary<string, Handlers>();
+            foreach(var m in targetMethods)
+            {
+                var attribute = m.GetAttributes().First(a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, bindWeakEventSymbol));
+
+                var sourceName = (attribute.ConstructorArguments[0].Value as string) ?? "";
+                var sourceProperty = allProperties.FirstOrDefault(p => p.Name == sourceName);
+                if (sourceProperty == null)
+                {
+                    context.ReportDiagnostic(
+                        Diagnostic.Create(DiagnosticDescriptors.SourcePropertyIsNotDefined, m.Locations.First(), sourceName)
+                    );
+                    return null;
+                }
+
+                var eventName = attribute.ConstructorArguments[1].Value as string;
+                if (eventName == null)
+                {
+                    context.ReportDiagnostic(
+                        Diagnostic.Create(DiagnosticDescriptors.EventNameIsEmpty, m.Locations.First())
+                    );
+                    return null;
+                }
+                if (!checkedEvents.TryGetValue(sourceName, out var checkedEventNames) || !checkedEventNames.Contains(eventName))
+                {
+                    if (!checkedEvents.ContainsKey(sourceName))
+                    {
+                        checkedEvents.Add(sourceName, new HashSet<string>());
+                    }
+
+                    var exists = sourceProperty.Type
+                        .GetMembers()
+                        .OfType<IEventSymbol>()
+                        .Any(p => p is { IsStatic: false, IsImplicitlyDeclared: false, CanBeReferencedByName: true } && p.Name == eventName);
+                    if (exists)
+                    {
+                        checkedEvents[sourceName].Add(eventName);
+                    }
+                    else
+                    {
+                        context.ReportDiagnostic(
+                            Diagnostic.Create(DiagnosticDescriptors.EventIsNotDefinedInSourceType, m.Locations.First(), eventName, sourceName)
+                        );
+                        return null;
+                    }
+                }
+
+                if (!handlers.ContainsKey(sourceName))
+                {
+                    handlers.Add(sourceName, new Handlers(sourceName, sourceProperty.Type));
+                }
+                handlers[sourceName].BindEventHandlers.Add(new BindEventHandler(eventName, m));
+            }
+
+            return handlers;
+        }
+
+        static (string, string) GenerateBinderCode(INamedTypeSymbol typeSymbol, List<Handlers> handlers, bool withInitializeProperty)
         {
             var binderClasses = new StringBuilder();
             var bindingCodes = new StringBuilder();
-            foreach (var (sourceName, (sourceType, properties)) in handlerPairs)
+            var addHandlerCodes = new StringBuilder();
+            foreach (var h in handlers)
             {
                 var modelHandler = new StringBuilder();
                 var viewModelHandler = new StringBuilder();
-                foreach (var (propertyName, sourcePropertyName, isOneWay) in properties)
+                foreach (var wire in h.PropertyWires)
                 {
                     modelHandler.AppendLine($$"""
-                case nameof({{sourceType}}.{{sourcePropertyName}}):
-                    viewModel.{{propertyName}} = model.{{sourcePropertyName}};
+                case nameof({{h.SourceType}}.{{wire.SourcePropertyName}}):
+                    viewModel.{{wire.PropertyName}} = model.{{wire.SourcePropertyName}};
                     break;
 """);
 
-                    if (!isOneWay)
+                    if (!wire.IsOneWay)
                     {
                         viewModelHandler.AppendLine($$"""
-                case nameof({{typeSymbol}}.{{propertyName}}):
-                    model.{{sourcePropertyName}} = viewModel.{{propertyName}};
+                case nameof({{typeSymbol}}.{{wire.PropertyName}}):
+                    model.{{wire.SourcePropertyName}} = viewModel.{{wire.PropertyName}};
                     break;
 """);
                     }
 
                     if (withInitializeProperty)
                     {
-                        bindingCodes.AppendLine($"        {propertyName} = {sourceName}.{sourcePropertyName};");
+                        bindingCodes.AppendLine($"        {wire.PropertyName} = {h.SourceName}.{wire.SourcePropertyName};");
                     }
                 }
 
-                var binderTypeName = $"{typeSymbol.Name}_{sourceName}Binder";
+                var bindEventHandlerToModel = new StringBuilder();
+                var handlerMethods = new StringBuilder();
+                var generatedHandlers = new HashSet<string>();
+                foreach (var bind in h.BindEventHandlers)
+                {
+                    if (!generatedHandlers.Contains(bind.EventName))
+                    {
+                        bindEventHandlerToModel.AppendLine($"        model.{bind.EventName} += Binder_{bind.EventName};");
+                        handlerMethods.AppendLine($$"""
+    void Binder_{{bind.EventName}}({{bind.HandlerSymbol.Parameters[0].Type}} sender, {{bind.HandlerSymbol.Parameters[1].Type}} e)
+    {
+        foreach (var l in EventListeners["{{bind.EventName}}"])
+        {
+            l.Invoke(sender, e);
+        }
+    }
+""");
+                        generatedHandlers.Add(bind.EventName);
+                    }
+
+                    addHandlerCodes.AppendLine($"            binder.AddWeakEventHandler(\"{bind.EventName}\", {bind.HandlerSymbol.Name});");
+                }
+
+                var binderTypeName = $"{typeSymbol.Name}_{h.SourceName}Binder";
                 binderClasses.AppendLine($$"""
 file class {{binderTypeName}}
 {
     WeakReference<{{typeSymbol}}> ViewModel { get; }
 
-    WeakReference<{{sourceType}}> Model { get; }
+    WeakReference<{{h.SourceType}}> Model { get; }
 
-    public {{binderTypeName}}({{typeSymbol.Name}} viewModel, {{sourceType}} model)
+    Dictionary<string, List<{{binderTypeName}}_WeakAction>> EventListeners { get; } = new Dictionary<string, List<{{binderTypeName}}_WeakAction>>();
+
+    public {{binderTypeName}}({{typeSymbol.Name}} viewModel, {{h.SourceType}} model)
     {
         ViewModel = new WeakReference<{{typeSymbol}}>(viewModel);
-        Model = new WeakReference<{{sourceType}}>(model);
+        Model = new WeakReference<{{h.SourceType}}>(model);
 
         viewModel.PropertyChanged += ViewModelPropertyChanged;
         model.PropertyChanged += ModelPropertyChanged;
+{{bindEventHandlerToModel}}
+    }
+
+    public void AddWeakEventHandler(string eventName, Delegate handler)
+    {
+        if (!EventListeners.ContainsKey(eventName))
+        {
+            EventListeners.Add(eventName, new List<{{binderTypeName}}_WeakAction>());
+        }
+        EventListeners[eventName].Add(new {{binderTypeName}}_WeakAction(handler));
     }
 
     private void ViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -414,9 +563,47 @@ file class {{binderTypeName}}
             model.PropertyChanged -= ModelPropertyChanged;
         }
     }
+
+{{handlerMethods}}
+}
+
+file class {{binderTypeName}}_WeakAction
+{
+    public MethodInfo Body { get; }
+
+    public object Target => WeakTarget.Target;
+
+    WeakReference WeakTarget { get; }
+
+    public {{binderTypeName}}_WeakAction(Delegate action)
+    {
+        Body = action.Method;
+        WeakTarget = new WeakReference(action.Target);
+    }
+
+    public void Invoke(object arg1, object arg2)
+    {
+        var target = WeakTarget.Target;
+        if (target != null)
+        {
+            Body.Invoke(target, new object[] { arg1, arg2 });
+        }
+    }
 }
 """);
-                bindingCodes.AppendLine($"        new {binderTypeName}(this, {sourceName});");
+                if (bindEventHandlerToModel.Length > 0)
+                {
+                    bindingCodes.AppendLine($$"""
+        {
+            var binder = new {{binderTypeName}}(this, {{h.SourceName}});
+{{addHandlerCodes}}
+        }
+""");
+                }
+                else
+                {
+                    bindingCodes.AppendLine($"        new {binderTypeName}(this, {h.SourceName});");
+                }
             }
 
             return (binderClasses.ToString(), bindingCodes.ToString());
@@ -430,31 +617,6 @@ file class {{binderTypeName}}
         static bool IsCanAccessSetter(IPropertySymbol property)
         {
             return property.SetMethod != null && property.SetMethod.DeclaredAccessibility == Accessibility.Public;
-        }
-    }
-
-    // https://github.com/Cysharp/MemoryPack/blob/0093aa8f9ae37f15c72afbd953fa702649e915f5/src/MemoryPack.Generator/MemoryPackGenerator.cs#L266
-    class Comparer : IEqualityComparer<(TypeDeclarationSyntax, Compilation)>
-    {
-        public static readonly Comparer Instance = new Comparer();
-
-        public bool Equals((TypeDeclarationSyntax, Compilation) x, (TypeDeclarationSyntax, Compilation) y)
-        {
-            return x.Item1.Equals(y.Item1);
-        }
-
-        public int GetHashCode((TypeDeclarationSyntax, Compilation) obj)
-        {
-            return obj.Item1.GetHashCode();
-        }
-    }
-
-    static class KeyValuePairDeconstructor
-    {
-        public static void Deconstruct<TKey, TValue>(this KeyValuePair<TKey, TValue> kv, out TKey key, out TValue value)
-        {
-            key = kv.Key;
-            value = kv.Value;
         }
     }
 }

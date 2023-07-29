@@ -98,6 +98,13 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref timeBarRangeStart, value); }
         }
 
+        private double scale = 100.0;
+        public double Scale
+        {
+            get { return scale; }
+            set { SetProperty(ref scale, value); }
+        }
+
         public WriteableBitmap CurrentFrame { get; set; }
 
         PreviewModelBase PreviewModel { get; }
@@ -163,6 +170,12 @@ namespace NiVE3.ViewModel
                     TimeBarRangeStart = 0.0;
                     break;
             }
+        }
+
+        [BindWeakEvent(nameof(PreviewModel), nameof(PreviewModelBase.SourceChanged))]
+        private void PreviewModel_SourceChanged(object? sender, EventArgs e)
+        {
+            Scale = 100.0;
         }
     }
 }

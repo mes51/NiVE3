@@ -65,6 +65,13 @@ namespace NiVE3.Model
         }
 
         public abstract NImage? GetImage(double time);
+
+        public event EventHandler? SourceChanged;
+
+        protected void OnSourceChanged()
+        {
+            SourceChanged?.Invoke(this, EventArgs.Empty);
+        }
     }
 
     class FootagePreviewModel : PreviewModelBase
@@ -109,6 +116,7 @@ namespace NiVE3.Model
                     Name = "";
                 }
                 CurrentTime = 0.0;
+                OnSourceChanged();
             }
         }
     }
@@ -155,6 +163,7 @@ namespace NiVE3.Model
                     Name = "";
                 }
                 CurrentTime = 0.0;
+                OnSourceChanged();
             }
         }
     }

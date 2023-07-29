@@ -98,5 +98,23 @@ namespace NiVE3.SourceGenerator.ViewModelWireGenerator
             defaultSeverity: DiagnosticSeverity.Error,
             isEnabledByDefault: true
         );
+
+        public static readonly DiagnosticDescriptor EventNameIsEmpty = new DiagnosticDescriptor(
+            id: "VMWG0011",
+            title: "bind target event name is empty",
+            messageFormat: "bind target event name is empty",
+            category: Category,
+            defaultSeverity: DiagnosticSeverity.Error,
+            isEnabledByDefault: true
+        );
+
+        public static readonly DiagnosticDescriptor EventIsNotDefinedInSourceType = new DiagnosticDescriptor(
+            id: "VMWG0012",
+            title: "Event is not defined in source type",
+            messageFormat: "'{0}' event is not defined in source '{1}' type",
+            category: Category,
+            defaultSeverity: DiagnosticSeverity.Error,
+            isEnabledByDefault: true
+        );
     }
 }
