@@ -3,14 +3,69 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:local="clr-namespace:NiVE3.View.Pane"
              xmlns:pt="clr-namespace:NiVE3.View.Part"
+             xmlns:r="clr-namespace:NiVE3.View.Resource"
              xmlns:pl="clr-namespace:NiVE3.Plugin.Interfaces;assembly=NiVE3.Plugin"
+             xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
+             xmlns:uig="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
              mc:Ignorable="d" 
              x:Name="Root"
              SizeChanged="Root_SizeChanged"
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
+        <r:ComboBoxDisplayChanger x:Key="ScaleComboBoxDisplayChanger">
+            <r:ComboBoxDisplayChanger.ItemsTemplate>
+                <DataTemplate>
+                    <TextBlock x:Name="ScaleNameTextBlock" Text="{Binding StringFormat={}{0:0.#}%}"/>
+
+                    <DataTemplate.Triggers>
+                        <DataTrigger Binding="{Binding}" Value="-2">
+                            <Setter TargetName="ScaleNameTextBlock" Property="Text" Value="{gm:LanguageResource ResourceKey=PreviewView_StretchPreviewScale, ReturnDynamicResource=True}"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding}" Value="-1">
+                            <Setter TargetName="ScaleNameTextBlock" Property="Text" Value="{gm:LanguageResource ResourceKey=PreviewView_StretchPreviewScaleMax100, ReturnDynamicResource=True}"/>
+                        </DataTrigger>
+                    </DataTemplate.Triggers>
+                </DataTemplate>
+            </r:ComboBoxDisplayChanger.ItemsTemplate>
+            <r:ComboBoxDisplayChanger.DisplayTemplate>
+                <DataTemplate>
+                    <TextBlock x:Name="ScaleTextBlock" Text="{Binding StringFormat={}{0:0.#}%}"/>
+
+                    <DataTemplate.Triggers>
+                        <DataTrigger Binding="{Binding ElementName=Root, Path=IsStretchPreview}" Value="True">
+                            <Setter TargetName="ScaleTextBlock" Property="Text" Value="{Binding ElementName=Root, Path=DataContext.Scale, StringFormat=({0:0.#}%)}"/>
+                        </DataTrigger>
+                    </DataTemplate.Triggers>
+                </DataTemplate>
+            </r:ComboBoxDisplayChanger.DisplayTemplate>
+        </r:ComboBoxDisplayChanger>
+
+        <Style x:Key="ScaleSelectComboBox" TargetType="{x:Type ComboBox}" BasedOn="{StaticResource {x:Type ComboBox}}">
+            <Setter Property="Width" Value="100"/>
+            <Setter Property="ItemTemplateSelector" Value="{StaticResource ScaleComboBoxDisplayChanger}"/>
+            <Setter Property="ItemContainerStyle">
+                <Setter.Value>
+                    <Style TargetType="{x:Type ComboBoxItem}" BasedOn="{StaticResource {x:Type ComboBoxItem}}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding}" Value="0">
+                                <Setter Property="IsEnabled" Value="False"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="{x:Type ComboBoxItem}">
+                                            <Separator HorizontalAlignment="Stretch"/>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <Style x:Key="PreviewAreaStyle" TargetType="{x:Type Grid}">
             <Setter Property="Visibility" Value="Visible"/>
 
@@ -41,10 +96,14 @@
         <Grid.RowDefinitions>
             <RowDefinition />
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <Canvas Grid.Row="0" x:Name="PreviewCanvas" MouseDown="PreviewCanvas_MouseDown" MouseMove="PreviewCanvas_MouseMove" MouseUp="PreviewCanvas_MouseUp" Background="Transparent" ClipToBounds="True">
-            <Grid x:Name="PreviewArea" Width="{Binding Width}" Height="{Binding Height}" Background="Black" Style="{StaticResource PreviewAreaStyle}" SizeChanged="PreviewArea_SizeChanged" ClipToBounds="True">
+        <Canvas Grid.Row="0" x:Name="PreviewCanvas" Background="Transparent" ClipToBounds="True" MouseDown="PreviewCanvas_MouseDown" MouseMove="PreviewCanvas_MouseMove" MouseUp="PreviewCanvas_MouseUp" MouseWheel="PreviewCanvas_MouseWheel">
+            <Grid x:Name="PreviewArea" Width="{Binding Width}" Height="{Binding Height}" Background="Black" Style="{StaticResource PreviewAreaStyle}" ClipToBounds="True" SizeChanged="PreviewArea_SizeChanged">
+                <Grid.LayoutTransform>
+                    <ScaleTransform ScaleX="{Binding ElementName=Root, Path=PreviewAreaScaleRate}" ScaleY="{Binding ElementName=Root, Path=PreviewAreaScaleRate}"/>
+                </Grid.LayoutTransform>
                 <Image Source="{Binding CurrentFrame}" Stretch="Uniform"/>
             </Grid>
         </Canvas>
@@ -62,5 +121,11 @@
                 </Style>
             </pt:TimeLocatorView.Style>
         </pt:TimeLocatorView>
+
+        <Border Grid.Row="2" BorderBrush="{uig:AppearanceResource ResourceKey=BorderBrush}" BorderThickness="0,1,0,0">
+            <StackPanel Orientation="Horizontal" Margin="5">
+                <ComboBox SelectedIndex="{Binding ElementName=Root, Path=SelectedScaleIndex}" ItemsSource="{x:Static local:PreviewView.ScaleList}" Style="{StaticResource ScaleSelectComboBox}"/>
+            </StackPanel>
+        </Border>
     </Grid>
 </UserControl>

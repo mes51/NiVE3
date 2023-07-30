@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
@@ -13,6 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using NiVE3.Extension;
 using NiVE3.ViewModel;
 
 namespace NiVE3.View.Pane
@@ -22,6 +24,72 @@ namespace NiVE3.View.Pane
     /// </summary>
     public partial class PreviewView : UserControl
     {
+        public const double StretchPreview = -2.0;
+
+        public const double StretchPreviewMax100 = -1.0;
+
+        public const double SeparatorScale = 0.0;
+
+        public static readonly double[] ScaleList = new double[]
+        {
+            StretchPreview,
+            StretchPreviewMax100,
+            SeparatorScale,
+            1.5625,
+            3.125,
+            6.25,
+            12.5,
+            25.0,
+            100 / 3.0,
+            50.0,
+            100.0,
+            200.0,
+            400.0,
+            800.0,
+            1600.0,
+            3200.0,
+            6400.0
+        };
+
+        public static readonly DependencyProperty IsStretchPreviewProperty = DependencyProperty.Register(
+            nameof(IsStretchPreview),
+            typeof(bool),
+            typeof(PreviewView),
+            new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        public static readonly DependencyProperty SelectedScaleIndexProperty = DependencyProperty.Register(
+            nameof(SelectedScaleIndex),
+            typeof(int),
+            typeof(PreviewView),
+            new FrameworkPropertyMetadata(10, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, SelectedScaleChanged)
+        );
+
+        public static readonly DependencyProperty PreviewAreaScaleRateProperty = DependencyProperty.Register(
+            nameof(PreviewAreaScaleRate),
+            typeof(double),
+            typeof(PreviewView),
+            new FrameworkPropertyMetadata(1.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, PreviewAreaScaleRateChanged)
+        );
+
+        public double PreviewAreaScaleRate
+        {
+            get { return (double)GetValue(PreviewAreaScaleRateProperty); }
+            set { SetValue(PreviewAreaScaleRateProperty, value); }
+        }
+
+        public int SelectedScaleIndex
+        {
+            get { return (int)GetValue(SelectedScaleIndexProperty); }
+            set { SetValue(SelectedScaleIndexProperty, value); }
+        }
+
+        public bool IsStretchPreview
+        {
+            get { return (bool)GetValue(IsStretchPreviewProperty); }
+            set { SetValue(IsStretchPreviewProperty, value); }
+        }
+
         public PreviewView()
         {
             InitializeComponent();
@@ -38,6 +106,60 @@ namespace NiVE3.View.Pane
         PreviewViewModel? ViewModel => DataContext as PreviewViewModel;
 
         bool NeedPositionReset { get; set; } = true;
+
+        void UpdateScale()
+        {
+            var scale = ScaleList[SelectedScaleIndex];
+            IsStretchPreview = scale < 0.0;
+            var viewModel = ViewModel;
+            if (viewModel != null)
+            {
+                if (viewModel.Width > 0 && viewModel.Height > 0)
+                {
+                    if (scale <= StretchPreview)
+                    {
+                        scale = Math.Min(Math.Min(PreviewCanvas.ActualWidth / viewModel.Width, PreviewCanvas.ActualHeight / viewModel.Height), 6.4) * 100.0;
+                    }
+                    else if (scale < SeparatorScale)
+                    {
+                        scale = Math.Min(Math.Min(PreviewCanvas.ActualWidth / viewModel.Width, PreviewCanvas.ActualHeight / viewModel.Height), 1.0) * 100.0;
+                    }
+                }
+                else
+                {
+                    scale = 100.0;
+                }
+                viewModel.Scale = scale;
+            }
+            else
+            {
+                scale = 100.0;
+            }
+            PreviewAreaScaleRate = scale * 0.01;
+        }
+
+        void LayoutCenterPreviewArea()
+        {
+            var realWidth = PreviewArea.ActualWidth * PreviewAreaScaleRate;
+            var realHeight = PreviewArea.ActualHeight * PreviewAreaScaleRate;
+            Canvas.SetLeft(PreviewArea, (PreviewCanvas.ActualWidth - realWidth) * 0.5);
+            Canvas.SetTop(PreviewArea, (PreviewCanvas.ActualHeight - realHeight) * 0.5);
+            NeedPositionReset = realWidth <= 0.0 || realHeight <= 0.0;
+        }
+
+        void MovePreviewArea(double x, double y, bool isAbsolute)
+        {
+            if (isAbsolute)
+            {
+                Canvas.SetLeft(PreviewArea, x);
+                Canvas.SetTop(PreviewArea, y);
+            }
+            else
+            {
+                Canvas.SetLeft(PreviewArea, Canvas.GetLeft(PreviewArea) + x);
+                Canvas.SetTop(PreviewArea, Canvas.GetTop(PreviewArea) + y);
+            }
+        }
 
         private void PreviewView_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
@@ -61,8 +183,7 @@ namespace NiVE3.View.Pane
             if (IsMouseDown)
             {
                 var newPoint = e.GetPosition(PreviewCanvas) - ClickPoint + PrevPoint;
-                Canvas.SetLeft(PreviewArea, newPoint.X);
-                Canvas.SetTop(PreviewArea, newPoint.Y);
+                MovePreviewArea(newPoint.X, newPoint.Y, true);
             }
         }
 
@@ -71,10 +192,49 @@ namespace NiVE3.View.Pane
             if (IsMouseDown)
             {
                 var newPoint = e.GetPosition(PreviewCanvas) - ClickPoint + PrevPoint;
-                Canvas.SetLeft(PreviewArea, newPoint.X);
-                Canvas.SetTop(PreviewArea, newPoint.Y);
+                MovePreviewArea(newPoint.X, newPoint.Y, true);
                 PreviewCanvas.ReleaseMouseCapture();
                 IsMouseDown = false;
+            }
+        }
+
+        private void PreviewCanvas_MouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            if (e.Delta > 0)
+            {
+                var maximumScaleIndex = ScaleList.Length - 1;
+                if (IsStretchPreview)
+                {
+                    var currentScale = PreviewAreaScaleRate * 100.0;
+                    var newIndex = ScaleList.IndexOf(v => v > currentScale);
+                    if (newIndex < 0)
+                    {
+                        newIndex = maximumScaleIndex;
+                    }
+                    SelectedScaleIndex = newIndex;
+                }
+                else
+                {
+                    SelectedScaleIndex = Math.Min(SelectedScaleIndex + 1, maximumScaleIndex);
+                }
+            }
+            else
+            {
+                var minimumScaleIndex = Array.IndexOf(ScaleList, SeparatorScale) + 1;
+                if (IsStretchPreview)
+                {
+                    var currentScale = PreviewAreaScaleRate * 100.0;
+                    var newIndex = ScaleList.IndexOfLast(v => v < currentScale);
+                    if (newIndex < 0)
+                    {
+                        newIndex = minimumScaleIndex;
+                    }
+                    SelectedScaleIndex = newIndex;
+                }
+                else
+                {
+                    SelectedScaleIndex = Math.Max(SelectedScaleIndex - 1, minimumScaleIndex);
+                }
             }
         }
 
@@ -82,25 +242,46 @@ namespace NiVE3.View.Pane
         {
             if ((ViewModel?.IsFootage ?? false) || NeedPositionReset)
             {
-                Canvas.SetLeft(PreviewArea, (PreviewCanvas.ActualWidth - PreviewArea.ActualWidth) * 0.5);
-                Canvas.SetTop(PreviewArea, (PreviewCanvas.ActualHeight - PreviewArea.ActualHeight) * 0.5);
-                NeedPositionReset = PreviewArea.ActualWidth <= 0.0 || PreviewArea.ActualHeight <= 0.0;
+                LayoutCenterPreviewArea();
             }
         }
 
         private void Root_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            if ((ViewModel?.IsFootage ?? false) || NeedPositionReset)
+            UpdateScale();
+            if ((ViewModel?.IsFootage ?? false) || NeedPositionReset || IsStretchPreview)
             {
-                Canvas.SetLeft(PreviewArea, (PreviewCanvas.ActualWidth - PreviewArea.ActualWidth) * 0.5);
-                Canvas.SetTop(PreviewArea, (PreviewCanvas.ActualHeight - PreviewArea.ActualHeight) * 0.5);
-                NeedPositionReset = PreviewArea.ActualWidth <= 0.0 || PreviewArea.ActualHeight <= 0.0;
+                LayoutCenterPreviewArea();
             }
             else
             {
                 var move = ((Point)e.NewSize - (Point)e.PreviousSize) * 0.5;
-                Canvas.SetLeft(PreviewArea, Canvas.GetLeft(PreviewArea) + move.X);
-                Canvas.SetTop(PreviewArea, Canvas.GetTop(PreviewArea) + move.Y);
+                MovePreviewArea(move.X, move.Y, false);
+            }
+        }
+
+        static void SelectedScaleChanged(DependencyObject d,  DependencyPropertyChangedEventArgs e)
+        {
+            if (d is PreviewView preview)
+            {
+                preview.UpdateScale();
+            }
+        }
+
+        static void PreviewAreaScaleRateChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is PreviewView preview)
+            {
+                if (preview.IsStretchPreview)
+                {
+                    preview.LayoutCenterPreviewArea();
+                }
+                else if (e.OldValue is double oldScale)
+                {
+                    var diffX = (preview.PreviewArea.ActualWidth * oldScale) - (preview.PreviewArea.ActualWidth * preview.PreviewAreaScaleRate);
+                    var diffY = (preview.PreviewArea.ActualHeight * oldScale) - (preview.PreviewArea.ActualHeight * preview.PreviewAreaScaleRate);
+                    preview.MovePreviewArea(diffX * 0.5, diffY * 0.5, false);
+                }
             }
         }
     }

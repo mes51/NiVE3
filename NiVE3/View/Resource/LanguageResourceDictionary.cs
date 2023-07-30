@@ -68,6 +68,12 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("(なし)")]
         public static readonly string PreviewView_Title_ItemEmpty = nameof(PreviewView_Title_ItemEmpty);
 
+        [ShowInMarkup, DefaultValue("全体表示")]
+        public static readonly string PreviewView_StretchPreviewScale = nameof(PreviewView_StretchPreviewScale);
+
+        [ShowInMarkup, DefaultValue("全体表示(最大100%)")]
+        public static readonly string PreviewView_StretchPreviewScaleMax100 = nameof(PreviewView_StretchPreviewScaleMax100);
+
         [ShowInMarkup, DefaultValue("タイムライン")]
         public static readonly string TimelineView_Title = nameof(TimelineView_Title);
 
