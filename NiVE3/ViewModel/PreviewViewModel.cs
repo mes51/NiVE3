@@ -105,9 +105,25 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref scale, value); }
         }
 
+        private bool isStretchPreview;
+        public bool IsStretchPreview
+        {
+            get { return isStretchPreview; }
+            set { SetProperty(ref isStretchPreview, value); }
+        }
+
+        private bool isStretchLimited;
+        public bool IsStretchLimited
+        {
+            get { return isStretchLimited; }
+            set { SetProperty(ref isStretchLimited, value); }
+        }
+
         public WriteableBitmap CurrentFrame { get; set; }
 
         PreviewModelBase PreviewModel { get; }
+
+        public event EventHandler? SourceChanged;
 
         public PreviewViewModel(PreviewModelBase previewModel)
         {
@@ -176,6 +192,9 @@ namespace NiVE3.ViewModel
         private void PreviewModel_SourceChanged(object? sender, EventArgs e)
         {
             Scale = 100.0;
+            IsStretchPreview = false;
+            IsStretchLimited = false;
+            SourceChanged?.Invoke(this, EventArgs.Empty);
         }
     }
 }

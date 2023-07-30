@@ -90,6 +90,8 @@ namespace NiVE3.View.Pane
             set { SetValue(IsStretchPreviewProperty, value); }
         }
 
+        bool IsStretchLimited { get; set; }
+
         public PreviewView()
         {
             InitializeComponent();
@@ -111,6 +113,7 @@ namespace NiVE3.View.Pane
         {
             var scale = ScaleList[SelectedScaleIndex];
             IsStretchPreview = scale < 0.0;
+            IsStretchLimited = Array.IndexOf(ScaleList, StretchPreviewMax100) > -1;
             var viewModel = ViewModel;
             if (viewModel != null)
             {
@@ -260,11 +263,46 @@ namespace NiVE3.View.Pane
             }
         }
 
+        private void Root_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (e.OldValue is PreviewViewModel oldViewModel)
+            {
+                oldViewModel.SourceChanged -= ViewModel_SourceChanged;
+            }
+            if (e.NewValue is PreviewViewModel newViewModel)
+            {
+                newViewModel.SourceChanged += ViewModel_SourceChanged;
+            }
+        }
+
+        private void ViewModel_SourceChanged(object? sender, EventArgs e)
+        {
+            var viewModel = ViewModel;
+            if (viewModel != null)
+            {
+                if (viewModel.IsStretchPreview)
+                {
+                    SelectedScaleIndex = Array.IndexOf(ScaleList, viewModel.IsStretchLimited ? StretchPreviewMax100 : StretchPreview);
+                }
+                else
+                {
+                    SelectedScaleIndex = ScaleList.IndexOf(s => s >= viewModel.Scale);
+                }
+                UpdateScale();
+            }
+        }
+
         static void SelectedScaleChanged(DependencyObject d,  DependencyPropertyChangedEventArgs e)
         {
             if (d is PreviewView preview)
             {
                 preview.UpdateScale();
+                var viewModel = preview.ViewModel;
+                if (viewModel != null)
+                {
+                    viewModel.IsStretchPreview = preview.IsStretchPreview;
+                    viewModel.IsStretchLimited = preview.IsStretchLimited;
+                }
             }
         }
 
