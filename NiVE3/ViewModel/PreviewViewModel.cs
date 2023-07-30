@@ -194,6 +194,7 @@ namespace NiVE3.ViewModel
             Scale = 100.0;
             IsStretchPreview = false;
             IsStretchLimited = false;
+            UpdateCurrentFrame();
             SourceChanged?.Invoke(this, EventArgs.Empty);
         }
     }
