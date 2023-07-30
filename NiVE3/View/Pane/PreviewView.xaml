@@ -49,6 +49,18 @@
             </Grid>
         </Canvas>
 
-        <pt:TimeLocatorView Grid.Row="1" Duration="{Binding Duration}" Range="{Binding TimeBarRange, Mode=TwoWay}" RangeStart="{Binding TimeBarRangeStart, Mode=TwoWay}" CurrentTime="{Binding CurrentTime, Mode=TwoWay}"/>
+        <pt:TimeLocatorView Grid.Row="1" Duration="{Binding Duration}" Range="{Binding TimeBarRange, Mode=TwoWay}" RangeStart="{Binding TimeBarRangeStart, Mode=TwoWay}" CurrentTime="{Binding CurrentTime, Mode=TwoWay}">
+            <pt:TimeLocatorView.Style>
+                <Style TargetType="{x:Type pt:TimeLocatorView}">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsFootage}" Value="True">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </pt:TimeLocatorView.Style>
+        </pt:TimeLocatorView>
     </Grid>
 </UserControl>
