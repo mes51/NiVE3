@@ -119,6 +119,13 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref isStretchLimited, value); }
         }
 
+        private int downScaleRate;
+        public int DownScaleRate
+        {
+            get { return downScaleRate; }
+            set { SetProperty(ref downScaleRate, value); }
+        }
+
         public WriteableBitmap CurrentFrame { get; set; }
 
         PreviewModelBase PreviewModel { get; }
@@ -194,6 +201,7 @@ namespace NiVE3.ViewModel
             Scale = 100.0;
             IsStretchPreview = false;
             IsStretchLimited = false;
+            DownScaleRate = 1;
             UpdateCurrentFrame();
             SourceChanged?.Invoke(this, EventArgs.Empty);
         }

@@ -7,6 +7,7 @@
              xmlns:local="clr-namespace:NiVE3.View.Pane"
              xmlns:pt="clr-namespace:NiVE3.View.Part"
              xmlns:r="clr-namespace:NiVE3.View.Resource"
+             xmlns:cv="clr-namespace:NiVE3.View.Converter"
              xmlns:pl="clr-namespace:NiVE3.Plugin.Interfaces;assembly=NiVE3.Plugin"
              xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
              xmlns:uig="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
@@ -16,6 +17,8 @@
              DataContextChanged="Root_DataContextChanged"
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
+        <cv:LocalizationConverter x:Key="DownScaleRateConverter" LocalizeFormat="{gm:LanguageResource ResourceKey=PreviewView_DownScaleRateFormat}"/>
+
         <r:ComboBoxDisplayChanger x:Key="ScaleComboBoxDisplayChanger">
             <r:ComboBoxDisplayChanger.ItemsTemplate>
                 <DataTemplate>
@@ -63,6 +66,24 @@
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="DownScaleSelectComboBox" TargetType="{x:Type ComboBox}" BasedOn="{StaticResource {x:Type ComboBox}}">
+            <Setter Property="Width" Value="100"/>
+            <Setter Property="Margin" Value="5,0,0,0"/>
+            <Setter Property="ItemTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+                        <TextBlock x:Name="DownScaleNameTextBlock" Text="{Binding Converter={StaticResource DownScaleRateConverter}}"/>
+
+                        <DataTemplate.Triggers>
+                            <DataTrigger Binding="{Binding}" Value="1">
+                                <Setter TargetName="DownScaleNameTextBlock" Property="Text" Value="{gm:LanguageResource ResourceKey=PreviewView_DownScaleRateFull, ReturnDynamicResource=True}"/>
+                            </DataTrigger>
+                        </DataTemplate.Triggers>
+                    </DataTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
@@ -126,6 +147,7 @@
         <Border Grid.Row="2" BorderBrush="{uig:AppearanceResource ResourceKey=BorderBrush}" BorderThickness="0,1,0,0">
             <StackPanel Orientation="Horizontal" Margin="5">
                 <ComboBox SelectedIndex="{Binding ElementName=Root, Path=SelectedScaleIndex}" ItemsSource="{x:Static local:PreviewView.ScaleList}" Style="{StaticResource ScaleSelectComboBox}"/>
+                <ComboBox SelectedIndex="{Binding ElementName=Root, Path=SelectedDownScaleRateIndex}" ItemsSource="{x:Static local:PreviewView.DownScaleList}" Style="{StaticResource DownScaleSelectComboBox}"/>
             </StackPanel>
         </Border>
     </Grid>

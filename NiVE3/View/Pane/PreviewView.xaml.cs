@@ -51,6 +51,14 @@ namespace NiVE3.View.Pane
             6400.0
         };
 
+        public static readonly int[] DownScaleList = new int[]
+        {
+            1,
+            2,
+            3,
+            4
+        };
+
         public static readonly DependencyProperty IsStretchPreviewProperty = DependencyProperty.Register(
             nameof(IsStretchPreview),
             typeof(bool),
@@ -71,6 +79,19 @@ namespace NiVE3.View.Pane
             typeof(PreviewView),
             new FrameworkPropertyMetadata(1.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, PreviewAreaScaleRateChanged)
         );
+
+        public static readonly DependencyProperty SelectedDownScaleRateIndexProperty = DependencyProperty.Register(
+            nameof(SelectedDownScaleRateIndex),
+            typeof(int),
+            typeof(PreviewView),
+            new FrameworkPropertyMetadata(0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, SelectedDownScaleRateChanged)
+        );
+
+        public int SelectedDownScaleRateIndex
+        {
+            get { return (int)GetValue(SelectedDownScaleRateIndexProperty); }
+            set { SetValue(SelectedDownScaleRateIndexProperty, value); }
+        }
 
         public double PreviewAreaScaleRate
         {
@@ -289,6 +310,8 @@ namespace NiVE3.View.Pane
                     SelectedScaleIndex = ScaleList.IndexOf(s => s >= viewModel.Scale);
                 }
                 UpdateScale();
+
+                SelectedDownScaleRateIndex = Array.IndexOf(DownScaleList, viewModel.DownScaleRate);
             }
         }
 
@@ -320,6 +343,14 @@ namespace NiVE3.View.Pane
                     var diffY = (preview.PreviewArea.ActualHeight * oldScale) - (preview.PreviewArea.ActualHeight * preview.PreviewAreaScaleRate);
                     preview.MovePreviewArea(diffX * 0.5, diffY * 0.5, false);
                 }
+            }
+        }
+
+        static void SelectedDownScaleRateChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is PreviewView preview && preview.ViewModel is PreviewViewModel viewModel)
+            {
+                viewModel.DownScaleRate = DownScaleList[preview.SelectedDownScaleRateIndex];
             }
         }
     }

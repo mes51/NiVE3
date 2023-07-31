@@ -74,6 +74,12 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("全体表示(最大100%)")]
         public static readonly string PreviewView_StretchPreviewScaleMax100 = nameof(PreviewView_StretchPreviewScaleMax100);
 
+        [ShowInMarkup, DefaultValue("フル画質")]
+        public static readonly string PreviewView_DownScaleRateFull = nameof(PreviewView_DownScaleRateFull);
+
+        [ShowInMarkup, DefaultValue("1/{0}画質")]
+        public static readonly string PreviewView_DownScaleRateFormat = nameof(PreviewView_DownScaleRateFormat);
+
         [ShowInMarkup, DefaultValue("タイムライン")]
         public static readonly string TimelineView_Title = nameof(TimelineView_Title);
 
