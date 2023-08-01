@@ -188,6 +188,26 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("キャンセル")]
         public static readonly string Dialog_Cancel = nameof(Dialog_Cancel);
 
+        // Enum
+
+        [ShowInMarkup, DefaultValue("RGB")]
+        public static readonly string PreviewColorChannel_Rgb = nameof(PreviewColorChannel_Rgb);
+
+        [ShowInMarkup, DefaultValue("赤")]
+        public static readonly string PreviewColorChannel_R = nameof(PreviewColorChannel_R);
+
+        [ShowInMarkup, DefaultValue("緑")]
+        public static readonly string PreviewColorChannel_G = nameof(PreviewColorChannel_G);
+
+        [ShowInMarkup, DefaultValue("青")]
+        public static readonly string PreviewColorChannel_B = nameof(PreviewColorChannel_B);
+
+        [ShowInMarkup, DefaultValue("アルファ")]
+        public static readonly string PreviewColorChannel_Alpha = nameof(PreviewColorChannel_Alpha);
+
+        [ShowInMarkup, DefaultValue("RGBストレート")]
+        public static readonly string PreviewColorChannel_RgbStraight = nameof(PreviewColorChannel_RgbStraight);
+
         static LanguageResourceDictionary()
         {
             LanguageKeys = typeof(LanguageResourceDictionary).GetFields(BindingFlags.Static | BindingFlags.Public)

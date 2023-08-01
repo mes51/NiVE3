@@ -1,0 +1,35 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Data;
+using NiVE3.View.Resource;
+
+namespace NiVE3.View.Converter
+{
+    [ValueConversion(typeof(Enum), typeof(string))]
+    class EnumToLocalizedNameConverter : IValueConverter
+    {
+        public Type? EnumType { get; set; }
+
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value != null && EnumType != null && EnumType.IsEnum && value.GetType().IsAssignableTo(EnumType) && Enum.GetName(EnumType, value) is string enumName)
+            {
+                return LanguageResourceDictionary.Dictionary.GetText($"{EnumType.Name}_{enumName}");
+            }
+            else
+            {
+                return DependencyProperty.UnsetValue;
+            }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+}

@@ -8,6 +8,8 @@
              xmlns:pt="clr-namespace:NiVE3.View.Part"
              xmlns:r="clr-namespace:NiVE3.View.Resource"
              xmlns:cv="clr-namespace:NiVE3.View.Converter"
+             xmlns:vm="clr-namespace:NiVE3.ViewModel"
+             xmlns:mk="clr-namespace:NiVE3.Wpf.Markup"
              xmlns:pl="clr-namespace:NiVE3.Plugin.Interfaces;assembly=NiVE3.Plugin"
              xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
              xmlns:uig="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
@@ -18,6 +20,7 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
         <cv:LocalizationConverter x:Key="DownScaleRateConverter" LocalizeFormat="{gm:LanguageResource ResourceKey=PreviewView_DownScaleRateFormat}"/>
+        <cv:EnumToLocalizedNameConverter x:Key="PreviewColorChannelNameConverter" EnumType="{x:Type vm:PreviewColorChannel}"/>
 
         <r:ComboBoxDisplayChanger x:Key="ScaleComboBoxDisplayChanger">
             <r:ComboBoxDisplayChanger.ItemsTemplate>
@@ -88,6 +91,41 @@
             </Setter>
         </Style>
 
+        <Style x:Key="PreviewColorChannelComboBox" TargetType="{x:Type ComboBox}" BasedOn="{StaticResource {x:Type ComboBox}}">
+            <Setter Property="Width" Value="100"/>
+            <Setter Property="Margin" Value="5,0,0,0"/>
+            <Setter Property="ItemTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Converter={StaticResource PreviewColorChannelNameConverter}}"/>
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="PreviewColorChannelBorder" TargetType="{x:Type Border}">
+            <Setter Property="BorderThickness" Value="0,3"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding PreviewColorChannel}" Value="{x:Static vm:PreviewColorChannel.R}">
+                    <Setter Property="BorderBrush" Value="Red"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding PreviewColorChannel}" Value="{x:Static vm:PreviewColorChannel.G}">
+                    <Setter Property="BorderBrush" Value="Lime"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding PreviewColorChannel}" Value="{x:Static vm:PreviewColorChannel.B}">
+                    <Setter Property="BorderBrush" Value="Blue"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding PreviewColorChannel}" Value="{x:Static vm:PreviewColorChannel.Alpha}">
+                    <Setter Property="BorderBrush" Value="White"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding PreviewColorChannel}" Value="{x:Static vm:PreviewColorChannel.RgbStraight}">
+                    <Setter Property="BorderBrush" Value="Yellow"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
         <Style x:Key="PreviewAreaStyle" TargetType="{x:Type Grid}">
             <Setter Property="Visibility" Value="Visible"/>
 
@@ -121,14 +159,16 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <Canvas Grid.Row="0" x:Name="PreviewCanvas" Background="Transparent" ClipToBounds="True" MouseDown="PreviewCanvas_MouseDown" MouseMove="PreviewCanvas_MouseMove" MouseUp="PreviewCanvas_MouseUp" MouseWheel="PreviewCanvas_MouseWheel">
-            <Grid x:Name="PreviewArea" Width="{Binding Width}" Height="{Binding Height}" Background="Black" Style="{StaticResource PreviewAreaStyle}" ClipToBounds="True" SizeChanged="PreviewArea_SizeChanged">
-                <Grid.LayoutTransform>
-                    <ScaleTransform ScaleX="{Binding ElementName=Root, Path=PreviewAreaScaleRate}" ScaleY="{Binding ElementName=Root, Path=PreviewAreaScaleRate}"/>
-                </Grid.LayoutTransform>
-                <Image Source="{Binding CurrentFrame}" Stretch="Uniform"/>
-            </Grid>
-        </Canvas>
+        <Border Grid.Row="0" Style="{StaticResource PreviewColorChannelBorder}">
+            <Canvas x:Name="PreviewCanvas" Background="Transparent" ClipToBounds="True" MouseDown="PreviewCanvas_MouseDown" MouseMove="PreviewCanvas_MouseMove" MouseUp="PreviewCanvas_MouseUp" MouseWheel="PreviewCanvas_MouseWheel">
+                <Grid x:Name="PreviewArea" Width="{Binding Width}" Height="{Binding Height}" Background="Black" Style="{StaticResource PreviewAreaStyle}" ClipToBounds="True" SizeChanged="PreviewArea_SizeChanged">
+                    <Grid.LayoutTransform>
+                        <ScaleTransform ScaleX="{Binding ElementName=Root, Path=PreviewAreaScaleRate}" ScaleY="{Binding ElementName=Root, Path=PreviewAreaScaleRate}"/>
+                    </Grid.LayoutTransform>
+                    <Image Source="{Binding CurrentFrame}" Stretch="Uniform"/>
+                </Grid>
+            </Canvas>
+        </Border>
 
         <pt:TimeLocatorView Grid.Row="1" Duration="{Binding Duration}" Range="{Binding TimeBarRange, Mode=TwoWay}" RangeStart="{Binding TimeBarRangeStart, Mode=TwoWay}" CurrentTime="{Binding CurrentTime, Mode=TwoWay}">
             <pt:TimeLocatorView.Style>
@@ -148,6 +188,7 @@
             <StackPanel Orientation="Horizontal" Margin="5">
                 <ComboBox SelectedIndex="{Binding ElementName=Root, Path=SelectedScaleIndex}" ItemsSource="{x:Static local:PreviewView.ScaleList}" Style="{StaticResource ScaleSelectComboBox}"/>
                 <ComboBox SelectedIndex="{Binding ElementName=Root, Path=SelectedDownScaleRateIndex}" ItemsSource="{x:Static local:PreviewView.DownScaleList}" Style="{StaticResource DownScaleSelectComboBox}"/>
+                <ComboBox SelectedValue="{Binding PreviewColorChannel}" ItemsSource="{mk:EnumValues {x:Type vm:PreviewColorChannel}}" Style="{StaticResource PreviewColorChannelComboBox}"/>
             </StackPanel>
         </Border>
     </Grid>

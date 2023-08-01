@@ -126,6 +126,13 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref downScaleRate, value); }
         }
 
+        private PreviewColorChannel previewColorChannel = PreviewColorChannel.Rgb;
+        public PreviewColorChannel PreviewColorChannel
+        {
+            get { return previewColorChannel; }
+            set { SetProperty(ref previewColorChannel, value); }
+        }
+
         public WriteableBitmap CurrentFrame { get; set; }
 
         PreviewModelBase PreviewModel { get; }
@@ -155,17 +162,69 @@ namespace NiVE3.ViewModel
                 var dataSize = image.DataLength;
                 var floatData = image.GetData();
                 var data = ArrayPool<byte>.Shared.Rent(dataSize);
-                for (var i = 0; i < dataSize; i++)
+
+                // TODO: SDR変換を入れるかどうか
+                switch (PreviewColorChannel)
                 {
-                    // TODO: SDR変換を入れるかどうか
-                    data[i] = (byte)MathF.Round(floatData[i] * 255.0F);
+                    case PreviewColorChannel.R:
+                        for (var i = 0; i < dataSize; i += 4)
+                        {
+                            data[i] = data[i + 1] = data[i + 2] = (byte)MathF.Round(floatData[i + 2] * 255.0F);
+                            data[i + 3] = 255;
+                        }
+                        break;
+                    case PreviewColorChannel.G:
+                        for (var i = 0; i < dataSize; i += 4)
+                        {
+                            data[i] = data[i + 1] = data[i + 2] = (byte)MathF.Round(floatData[i + 1] * 255.0F);
+                            data[i + 3] = 255;
+                        }
+                        break;
+                    case PreviewColorChannel.B:
+                        for (var i = 0; i < dataSize; i += 4)
+                        {
+                            data[i] = data[i + 1] = data[i + 2] = (byte)MathF.Round(floatData[i] * 255.0F);
+                            data[i + 3] = 255;
+                        }
+                        break;
+                    case PreviewColorChannel.Alpha:
+                        for (var i = 0; i < dataSize; i += 4)
+                        {
+                            data[i] = data[i + 1] = data[i + 2] = (byte)MathF.Round(floatData[i + 3] * 255.0F);
+                            data[i + 3] = 255;
+                        }
+                        break;
+                    case PreviewColorChannel.RgbStraight:
+                        for (var i = 0; i < dataSize; i += 4)
+                        {
+                            data[i] = (byte)MathF.Round(floatData[i] * 255.0F);
+                            data[i + 1] = (byte)MathF.Round(floatData[i + 1] * 255.0F);
+                            data[i + 2] = (byte)MathF.Round(floatData[i + 2] * 255.0F);
+                            data[i + 3] = 255;
+                        }
+                        break;
+                    default:
+                        for (var i = 0; i < dataSize; i++)
+                        {
+                            data[i] = (byte)MathF.Round(floatData[i] * 255.0F);
+                        }
+                        break;
                 }
+
                 CurrentFrame.WritePixels(new Int32Rect(0, 0, image.Width, image.Height), data, image.Width * 4, 0);
                 ArrayPool<byte>.Shared.Return(data);
             }
             else
             {
-                var data = ArrayPool<byte>.Shared.Rent(CurrentFrame.PixelWidth * CurrentFrame.PixelHeight * 4);
+                var length = CurrentFrame.PixelWidth * CurrentFrame.PixelHeight * 4;
+                var data = ArrayPool<byte>.Shared.Rent(length);
+                if (PreviewColorChannel != PreviewColorChannel.Rgb)
+                {
+                    for (var i = 3; i < length; i += 4)
+                    {
+                        data[i] = 255;
+                    }
+                }
                 CurrentFrame.WritePixels(new Int32Rect(0, 0, CurrentFrame.PixelWidth, CurrentFrame.PixelHeight), data, CurrentFrame.PixelWidth * 4, 0);
                 ArrayPool<byte>.Shared.Return(data);
             }
@@ -192,6 +251,9 @@ namespace NiVE3.ViewModel
                     TimeBarRange = Duration;
                     TimeBarRangeStart = 0.0;
                     break;
+                case nameof(PreviewColorChannel):
+                    UpdateCurrentFrame();
+                    break;
             }
         }
 
@@ -202,8 +264,19 @@ namespace NiVE3.ViewModel
             IsStretchPreview = false;
             IsStretchLimited = false;
             DownScaleRate = 1;
+            previewColorChannel = PreviewColorChannel.Rgb;
             UpdateCurrentFrame();
             SourceChanged?.Invoke(this, EventArgs.Empty);
         }
+    }
+
+    enum PreviewColorChannel
+    {
+        Rgb,
+        R,
+        G,
+        B,
+        Alpha,
+        RgbStraight
     }
 }
