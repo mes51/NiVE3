@@ -21,6 +21,7 @@
     <UserControl.Resources>
         <cv:LocalizationConverter x:Key="DownScaleRateConverter" LocalizeFormat="{gm:LanguageResource ResourceKey=PreviewView_DownScaleRateFormat}"/>
         <cv:EnumToLocalizedNameConverter x:Key="PreviewColorChannelNameConverter" EnumType="{x:Type vm:PreviewColorChannel}"/>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
 
         <r:ComboBoxDisplayChanger x:Key="ScaleComboBoxDisplayChanger">
             <r:ComboBoxDisplayChanger.ItemsTemplate>
@@ -165,6 +166,21 @@
                     <Grid.LayoutTransform>
                         <ScaleTransform ScaleX="{Binding ElementName=Root, Path=PreviewAreaScaleRate}" ScaleY="{Binding ElementName=Root, Path=PreviewAreaScaleRate}"/>
                     </Grid.LayoutTransform>
+                    <Rectangle Visibility="{Binding ElementName=ShowCheckerboradCheckBox, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Rectangle.Fill>
+                            <DrawingBrush Stretch="None" TileMode="Tile" Viewport="0,0,20,20" ViewportUnits="Absolute">
+                                <DrawingBrush.Drawing>
+                                    <DrawingGroup>
+                                        <GeometryDrawing Geometry="M0,0 20,0 20,20 0,20z" Brush="White"/>
+                                        <GeometryDrawing Geometry="M0,10 20,10 20,20 10,20 10,0 0,0z" Brush="LightGray"/>
+                                    </DrawingGroup>
+                                </DrawingBrush.Drawing>
+                                <DrawingBrush.RelativeTransform>
+                                    <ScaleTransform ScaleX="{Binding ElementName=Root, Path=PreviewAreaScaleRateInvert}" ScaleY="{Binding ElementName=Root, Path=PreviewAreaScaleRateInvert}"/>
+                                </DrawingBrush.RelativeTransform>
+                            </DrawingBrush>
+                        </Rectangle.Fill>
+                    </Rectangle>
                     <Image Source="{Binding CurrentFrame}" Stretch="Uniform"/>
                 </Grid>
             </Canvas>
@@ -189,6 +205,7 @@
                 <ComboBox SelectedIndex="{Binding ElementName=Root, Path=SelectedScaleIndex}" ItemsSource="{x:Static local:PreviewView.ScaleList}" Style="{StaticResource ScaleSelectComboBox}"/>
                 <ComboBox SelectedIndex="{Binding ElementName=Root, Path=SelectedDownScaleRateIndex}" ItemsSource="{x:Static local:PreviewView.DownScaleList}" Style="{StaticResource DownScaleSelectComboBox}"/>
                 <ComboBox SelectedValue="{Binding PreviewColorChannel}" ItemsSource="{mk:EnumValues {x:Type vm:PreviewColorChannel}}" Style="{StaticResource PreviewColorChannelComboBox}"/>
+                <CheckBox x:Name="ShowCheckerboradCheckBox" Content="チェッカーボード" Margin="5,0,0,0" VerticalAlignment="Center"/>
             </StackPanel>
         </Border>
     </Grid>

@@ -87,6 +87,21 @@ namespace NiVE3.View.Pane
             new FrameworkPropertyMetadata(0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, SelectedDownScaleRateChanged)
         );
 
+        private static readonly DependencyPropertyKey PreviewAreaScaleRateInvertPropertyKey = DependencyProperty.RegisterReadOnly(
+            nameof(PreviewAreaScaleRateInvert),
+            typeof(double),
+            typeof(PreviewView),
+            new FrameworkPropertyMetadata(1.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        public static readonly DependencyProperty PreviewAreaScaleRateInvertProperty = PreviewAreaScaleRateInvertPropertyKey.DependencyProperty;
+
+        public double PreviewAreaScaleRateInvert
+        {
+            get { return (double)GetValue(PreviewAreaScaleRateInvertProperty); }
+            private set { SetValue(PreviewAreaScaleRateInvertPropertyKey, value); }
+        }
+
         public int SelectedDownScaleRateIndex
         {
             get { return (int)GetValue(SelectedDownScaleRateIndexProperty); }
@@ -160,6 +175,7 @@ namespace NiVE3.View.Pane
                 scale = 100.0;
             }
             PreviewAreaScaleRate = scale * 0.01;
+            SetValue(PreviewAreaScaleRateInvertPropertyKey, 100.0 / scale);
         }
 
         void LayoutCenterPreviewArea()
