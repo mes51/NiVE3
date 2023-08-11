@@ -55,7 +55,7 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
 
             if (duration.ElementType == SharpGen.Runtime.Win32.VariantElementType.ULong)
             {
-                return unchecked((long)(ulong)duration.Value) / VideoSourceReaderBase.DurationRate;
+                return unchecked((long)(ulong)duration.Value) / DurationRate;
             }
             else
             {
@@ -82,15 +82,16 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
 
         protected IMFSample? ReadSample(double time)
         {
-            const int MaxSkipFrame = 10;
-            const long SeekTolerance = 10000000;
+            const int MaxSkipFrame = 100;
 
             if (Reader == null)
             {
                 return null;
             }
 
-            var timeLong = (long)(time * VideoSourceReaderBase.DurationRate);
+            long seekTolerance = (long)(5000000.0 / FrameRate);
+
+            var timeLong = (long)(time * DurationRate);
             var pos = new Variant { ElementType = VariantElementType.Long, Value = timeLong };
             Reader.SetCurrentPosition(Guid.Empty, pos);
 
@@ -98,7 +99,7 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
             int skipCount = 0;
             while (true)
             {
-                Reader.ReadSample(VideoSourceReaderBase.FirstVideoStreamId, 0, out int _, out int flags, out long _, out IMFSample? sampleTemp);
+                Reader.ReadSample(FirstVideoStreamId, 0, out int _, out int flags, out long _, out IMFSample? sampleTemp);
 
                 if ((flags & (int)SourceReaderFlag.FEndofstream) != 0)
                 {
@@ -122,7 +123,7 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
                 sample = sampleTemp;
 
                 var timestamp = sampleTemp.SampleTime;
-                if (skipCount < MaxSkipFrame && timestamp + SeekTolerance < timeLong)
+                if (skipCount < MaxSkipFrame && Math.Abs(timeLong - timestamp) > seekTolerance)
                 {
                     skipCount++;
                     continue;
