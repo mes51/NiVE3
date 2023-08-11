@@ -122,6 +122,13 @@ namespace NiVE3.ViewModel
             {
                 RaisePropertyChanged(nameof(SingletonViewModels));
             }
+            else if (e.OldItems?.Cast<PaneViewModelBase>() is IEnumerable<PaneViewModelBase> removedPane)
+            {
+                foreach (var vm in removedPane.OfType<PreviewViewModel>())
+                {
+                    ProjectModel.RemovePreview(vm.PreviewModel);
+                }
+            }
         }
     }
 }

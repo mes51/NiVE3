@@ -149,7 +149,7 @@ namespace NiVE3.ViewModel
 
         public WriteableBitmap CurrentFrame { get; set; }
 
-        PreviewModelBase PreviewModel { get; }
+        public PreviewModelBase PreviewModel { get; }
 
         public event EventHandler? SourceChanged;
 

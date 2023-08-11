@@ -52,6 +52,11 @@ namespace NiVE3.Model
             //PreviewModels.Add(new FootagePreviewModel());
         }
 
+        public void RemovePreview(PreviewModelBase previewModel)
+        {
+            PreviewModels.Remove(previewModel);
+        }
+
         private void FootageListModel_ShowFootagePreview(object? sender, ShowFootagePreviewEventArgs e)
         {
             var freePreviewModel = PreviewModels.OfType<FootagePreviewModel>().FirstOrDefault(p => !p.IsLock);
