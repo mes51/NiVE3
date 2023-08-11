@@ -128,6 +128,8 @@
         </Style>
 
         <Style x:Key="PreviewAreaStyle" TargetType="{x:Type Grid}">
+            <Setter Property="Background" Value="Black"/>
+            <Setter Property="ClipToBounds" Value="True"/>
             <Setter Property="Visibility" Value="Visible"/>
 
             <Style.Triggers>
@@ -162,7 +164,7 @@
 
         <Border Grid.Row="0" Style="{StaticResource PreviewColorChannelBorder}">
             <Canvas x:Name="PreviewCanvas" Background="Transparent" ClipToBounds="True" MouseDown="PreviewCanvas_MouseDown" MouseMove="PreviewCanvas_MouseMove" MouseUp="PreviewCanvas_MouseUp" MouseWheel="PreviewCanvas_MouseWheel">
-                <Grid x:Name="PreviewArea" Width="{Binding Width}" Height="{Binding Height}" Background="Black" Style="{StaticResource PreviewAreaStyle}" ClipToBounds="True" SizeChanged="PreviewArea_SizeChanged">
+                <Grid x:Name="PreviewArea" Width="{Binding Width}" Height="{Binding Height}" Style="{StaticResource PreviewAreaStyle}" SizeChanged="PreviewArea_SizeChanged">
                     <Grid.LayoutTransform>
                         <ScaleTransform ScaleX="{Binding ElementName=Root, Path=PreviewAreaScaleRate}" ScaleY="{Binding ElementName=Root, Path=PreviewAreaScaleRate}"/>
                     </Grid.LayoutTransform>

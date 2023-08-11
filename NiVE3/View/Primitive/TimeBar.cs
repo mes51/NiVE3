@@ -34,7 +34,7 @@ namespace NiVE3.View.Primitive
             nameof(Duration),
             typeof(double),
             typeof(TimeBar),
-            new FrameworkPropertyMetadata(1.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsRender)
+            new FrameworkPropertyMetadata(1.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsRender, DurationChanged)
         );
 
         public static readonly DependencyProperty RangeProperty = DependencyProperty.Register(
@@ -140,6 +140,8 @@ namespace NiVE3.View.Primitive
             var timePerPixel = Range / (ActualWidth - SideSpacerWidth * 2.0);
             if (timePerPixel <= 0.0)
             {
+                drawingContext.DrawRectangle(SideSpacerBrush, null, new Rect(0.0, 0.0, SideSpacerWidth, ActualHeight));
+                drawingContext.DrawRectangle(SideSpacerBrush, null, new Rect(ActualWidth - SideSpacerWidth, 0.0, SideSpacerWidth, ActualHeight));
                 return;
             }
 

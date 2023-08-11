@@ -166,7 +166,14 @@ namespace NiVE3.View.Part
             if (d is TimeLocatorView timeLocatorView)
             {
                 var timePerPixel = timeLocatorView.Range / (timeLocatorView.ActualWidth - SideSpacerWidth * 2.0);
-                timeLocatorView.IndicatorPosition = (timeLocatorView.CurrentTime - timeLocatorView.RangeStart) / timePerPixel + SideSpacerWidth;
+                if (timePerPixel > 0.0)
+                {
+                    timeLocatorView.IndicatorPosition = (timeLocatorView.CurrentTime - timeLocatorView.RangeStart) / timePerPixel + SideSpacerWidth;
+                }
+                else
+                {
+                    timeLocatorView.IndicatorPosition = SideSpacerWidth;
+                }
             }
         }
     }

@@ -147,7 +147,12 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref previewColorChannel, value); }
         }
 
-        public WriteableBitmap CurrentFrame { get; set; }
+        private WriteableBitmap currentFrame;
+        public WriteableBitmap CurrentFrame
+        {
+            get { return currentFrame; }
+            set { SetProperty(ref currentFrame, value); }
+        }
 
         public PreviewModelBase PreviewModel { get; }
 
