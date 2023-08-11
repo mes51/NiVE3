@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics;
+using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -189,6 +191,7 @@ namespace NiVE3.ViewModel
                     IsDirtyBuffer = false;
                     if (NeedUpdateFrameNextTick)
                     {
+                        NeedUpdateFrameNextTick = false;
                         FrameUpdateDebouncer.ResetAndStart();
                     }
                 }
@@ -218,44 +221,58 @@ namespace NiVE3.ViewModel
                     case PreviewColorChannel.R:
                         for (var i = 0; i < dataSize; i += 4)
                         {
-                            data[i] = data[i + 1] = data[i + 2] = (byte)MathF.Round(floatData[i + 2] * 255.0F);
+                            data[i] = data[i + 1] = data[i + 2] = (byte)Math.Clamp(MathF.Round(floatData[i + 2] * 255.0F), 0.0F, 255.0F);
                             data[i + 3] = 255;
                         }
                         break;
                     case PreviewColorChannel.G:
                         for (var i = 0; i < dataSize; i += 4)
                         {
-                            data[i] = data[i + 1] = data[i + 2] = (byte)MathF.Round(floatData[i + 1] * 255.0F);
+                            data[i] = data[i + 1] = data[i + 2] = (byte)Math.Clamp(MathF.Round(floatData[i + 1] * 255.0F), 0.0F, 255.0F);
                             data[i + 3] = 255;
                         }
                         break;
                     case PreviewColorChannel.B:
                         for (var i = 0; i < dataSize; i += 4)
                         {
-                            data[i] = data[i + 1] = data[i + 2] = (byte)MathF.Round(floatData[i] * 255.0F);
+                            data[i] = data[i + 1] = data[i + 2] = (byte)Math.Clamp(MathF.Round(floatData[i] * 255.0F), 0.0F, 255.0F);
                             data[i + 3] = 255;
                         }
                         break;
                     case PreviewColorChannel.Alpha:
                         for (var i = 0; i < dataSize; i += 4)
                         {
-                            data[i] = data[i + 1] = data[i + 2] = (byte)MathF.Round(floatData[i + 3] * 255.0F);
+                            data[i] = data[i + 1] = data[i + 2] = (byte)Math.Clamp(MathF.Round(floatData[i + 3] * 255.0F), 0.0F, 255.0F);
                             data[i + 3] = 255;
                         }
                         break;
                     case PreviewColorChannel.RgbStraight:
-                        for (var i = 0; i < dataSize; i += 4)
                         {
-                            data[i] = (byte)MathF.Round(floatData[i] * 255.0F);
-                            data[i + 1] = (byte)MathF.Round(floatData[i + 1] * 255.0F);
-                            data[i + 2] = (byte)MathF.Round(floatData[i + 2] * 255.0F);
-                            data[i + 3] = 255;
+                            var pixelVec = MemoryMarshal.Cast<float, Vector128<float>>(floatData);
+                            var intBuffer = MemoryMarshal.Cast<byte, int>(Buffer);
+                            for (var i = 0; i < intBuffer.Length; i++)
+                            {
+                                var p = Sse41.RoundCurrentDirection(pixelVec[i] * 255.0F);
+                                var p32 = Sse41.Insert(Sse2.ConvertToVector128Int32(p), 255, 3);
+                                p32 = Sse41.Min(Sse41.Max(p32, Vector128<int>.Zero), Vector128.Create(255));
+                                var p16 = Sse2.PackSignedSaturate(p32, Vector128<int>.Zero);
+                                var p8 = Sse2.PackUnsignedSaturate(p16, Vector128<short>.Zero);
+                                intBuffer[i] = Sse2.ConvertToInt32(p8.AsInt32());
+                            }
                         }
                         break;
                     default:
-                        for (var i = 0; i < dataSize; i++)
                         {
-                            data[i] = (byte)MathF.Round(floatData[i] * 255.0F);
+                            var pixelVec = MemoryMarshal.Cast<float, Vector128<float>>(floatData);
+                            var intBuffer = MemoryMarshal.Cast<byte, int>(Buffer);
+                            for (var i = 0; i < intBuffer.Length; i++)
+                            {
+                                var p = Sse41.RoundCurrentDirection(pixelVec[i] * 255.0F);
+                                var p32 = Sse41.Min(Sse41.Max(Sse2.ConvertToVector128Int32(p), Vector128<int>.Zero), Vector128.Create(255));
+                                var p16 = Sse2.PackSignedSaturate(p32, Vector128<int>.Zero);
+                                var p8 = Sse2.PackUnsignedSaturate(p16, Vector128<short>.Zero);
+                                intBuffer[i] = Sse2.ConvertToInt32(p8.AsInt32());
+                            }
                         }
                         break;
                 }
