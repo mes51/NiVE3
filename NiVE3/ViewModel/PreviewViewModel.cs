@@ -3,6 +3,7 @@ using System.Buffers;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -11,6 +12,7 @@ using System.Windows.Media.Imaging;
 using NiVE3.Model;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
+using NiVE3.Util;
 using NiVE3.View.Dock;
 using NiVE3.View.Resource;
 
@@ -20,6 +22,8 @@ namespace NiVE3.ViewModel
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
     partial class PreviewViewModel : PaneViewModelBase
     {
+        const int Black = 255 << 24;
+
         private string name = "";
         [NeedWire(nameof(PreviewModel), IsOneWay = true)]
         public string Name
@@ -139,6 +143,16 @@ namespace NiVE3.ViewModel
 
         public event EventHandler? SourceChanged;
 
+        byte[] Buffer { get; set; }
+
+        Int32Rect BufferImageSize { get; set; }
+
+        bool IsDirtyBuffer { get; set; }
+
+        bool NeedUpdateFrameNextTick { get; set; }
+
+        Debouncer FrameUpdateDebouncer { get; }
+
         public PreviewViewModel(PreviewModelBase previewModel)
         {
             PreviewModel = previewModel;
@@ -148,20 +162,47 @@ namespace NiVE3.ViewModel
             Title = $"{LanguageResourceDictionary.Dictionary.GetText(IsFootage ? LanguageResourceDictionary.PreviewView_FootageTitle : LanguageResourceDictionary.PreviewView_CompositionTitle)} {(SourceType != SourceType.None ? Name : LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.PreviewView_Title_ItemEmpty))}";
             TimeBarRange = previewModel.Duration;
 
-            CurrentFrame = new WriteableBitmap(Math.Max(Width, 1), Math.Max(Height, 1), 96.0, 96.0, PixelFormats.Bgra32, null);
+            BufferImageSize = new Int32Rect(0, 0, Math.Max(Width, 1), Math.Max(Height, 1));
+            CurrentFrame = new WriteableBitmap(BufferImageSize.Width, BufferImageSize.Height, 96.0, 96.0, PixelFormats.Bgra32, null);
             PropertyChanged += PreviewViewModel_PropertyChanged;
+
+            Buffer = new byte[BufferImageSize.Width * BufferImageSize.Height * 4];
+            FrameUpdateDebouncer = new Debouncer(1);
+            FrameUpdateDebouncer.Tick += (_, _) =>
+            {
+                UpdateCurrentFrame();
+            };
+
+            CompositionTarget.Rendering += (_, _) =>
+            {
+                if (IsDirtyBuffer)
+                {
+                    CurrentFrame.WritePixels(BufferImageSize, Buffer, BufferImageSize.Width * 4, 0);
+                    IsDirtyBuffer = false;
+                    if (NeedUpdateFrameNextTick)
+                    {
+                        FrameUpdateDebouncer.ResetAndStart();
+                    }
+                }
+            };
         }
 
         partial void WiringModel();
 
         void UpdateCurrentFrame()
         {
+            if (IsDirtyBuffer)
+            {
+                NeedUpdateFrameNextTick = true;
+                return;
+            }
+
             using var image = PreviewModel.GetImage(CurrentTime);
-            if (image != null && CurrentFrame.PixelWidth == image.Width && CurrentFrame.PixelHeight == image.Height)
+            if (image != null && BufferImageSize.Width == image.Width && BufferImageSize.Height == image.Height)
             {
                 var dataSize = image.DataLength;
                 var floatData = image.GetData();
-                var data = ArrayPool<byte>.Shared.Rent(dataSize);
+                var data = Buffer;
 
                 // TODO: SDR変換を入れるかどうか
                 switch (PreviewColorChannel)
@@ -210,25 +251,19 @@ namespace NiVE3.ViewModel
                         }
                         break;
                 }
-
-                CurrentFrame.WritePixels(new Int32Rect(0, 0, image.Width, image.Height), data, image.Width * 4, 0);
-                ArrayPool<byte>.Shared.Return(data);
             }
             else
             {
-                var length = CurrentFrame.PixelWidth * CurrentFrame.PixelHeight * 4;
-                var data = ArrayPool<byte>.Shared.Rent(length);
                 if (PreviewColorChannel != PreviewColorChannel.Rgb)
                 {
-                    for (var i = 3; i < length; i += 4)
-                    {
-                        data[i] = 255;
-                    }
+                    MemoryMarshal.Cast<byte, int>(Buffer).Fill(Black);
                 }
-                CurrentFrame.WritePixels(new Int32Rect(0, 0, CurrentFrame.PixelWidth, CurrentFrame.PixelHeight), data, CurrentFrame.PixelWidth * 4, 0);
-                ArrayPool<byte>.Shared.Return(data);
+                else
+                {
+                    Buffer.AsSpan(0).Fill(0);
+                }
             }
-            RaisePropertyChanged(nameof(CurrentFrame));
+            IsDirtyBuffer = true;
         }
 
         private void PreviewViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -241,7 +276,9 @@ namespace NiVE3.ViewModel
                     break;
                 case nameof(Width):
                 case nameof(Height):
-                    CurrentFrame = new WriteableBitmap(Math.Max(Width, 1), Math.Max(Height, 1), 96.0, 96.0, PixelFormats.Bgra32, null);
+                    BufferImageSize = new Int32Rect(0, 0, Math.Max(Width, 1), Math.Max(Height, 1));
+                    CurrentFrame = new WriteableBitmap(BufferImageSize.Width, BufferImageSize.Height, 96.0, 96.0, PixelFormats.Bgra32, null);
+                    Buffer = new byte[BufferImageSize.Width * BufferImageSize.Height * 4];
                     UpdateCurrentFrame();
                     break;
                 case nameof(CurrentTime):
