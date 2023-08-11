@@ -51,6 +51,13 @@ namespace NiVE3.View.Part
             new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, TimeChanged)
         );
 
+        public static readonly DependencyProperty FrameRateProperty = DependencyProperty.Register(
+            nameof(FrameRate),
+            typeof(double),
+            typeof(TimeLocatorView),
+            new FrameworkPropertyMetadata(30.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
         private static readonly DependencyPropertyKey IndicatorPositionPropertyKey = DependencyProperty.RegisterReadOnly(
             nameof(IndicatorPosition),
             typeof(double),
@@ -64,6 +71,12 @@ namespace NiVE3.View.Part
         {
             get { return (double)GetValue(CurrentTimeProperty); }
             set { SetValue(CurrentTimeProperty, value); }
+        }
+
+        public double FrameRate
+        {
+            get { return (double)GetValue(FrameRateProperty); }
+            set { SetValue(FrameRateProperty, value); }
         }
 
         public double Duration
@@ -108,7 +121,7 @@ namespace NiVE3.View.Part
             ScrubbingArea.CaptureMouse();
             IsScrubbing = true;
 
-            var time = CalcTimeFromPixel(e.GetPosition((IInputElement)sender).X - SideSpacerWidth);
+            var time = (int)Math.Round(CalcTimeFromPixel(e.GetPosition((IInputElement)sender).X - SideSpacerWidth) * FrameRate) / FrameRate;
             CurrentTime = time;
             if (time < RangeStart)
             {
@@ -127,7 +140,7 @@ namespace NiVE3.View.Part
                 return;
             }
 
-            var time = CalcTimeFromPixel(e.GetPosition((IInputElement)sender).X - SideSpacerWidth);
+            var time = (int)Math.Round(CalcTimeFromPixel(e.GetPosition((IInputElement)sender).X - SideSpacerWidth) * FrameRate) / FrameRate;
             CurrentTime = time;
             if (time < RangeStart)
             {

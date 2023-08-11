@@ -36,6 +36,13 @@ namespace NiVE3.Model
             set { SetProperty(ref duration, value); }
         }
 
+        private double frameRate;
+        public double FrameRate
+        {
+            get { return frameRate; }
+            set { SetProperty(ref frameRate, value); }
+        }
+
         private double currentTime;
         public double CurrentTime
         {
@@ -103,6 +110,7 @@ namespace NiVE3.Model
                 {
                     SourceType = Footage.InputType;
                     Duration = Footage.Duration;
+                    FrameRate = Footage.FrameRate;
                     Width = Footage.Width;
                     Height = Footage.Height;
                     Name = Footage.Name;
@@ -111,6 +119,7 @@ namespace NiVE3.Model
                 {
                     SourceType = SourceType.None;
                     Duration = 0.0;
+                    FrameRate = 30.0;
                     Width = 0;
                     Height = 0;
                     Name = "";
@@ -150,6 +159,7 @@ namespace NiVE3.Model
                 {
                     SourceType = SourceType.VideoAndAudio;
                     Duration = Composition.Duration;
+                    FrameRate = Composition.FrameRate;
                     Width = Composition.Width;
                     Height = Composition.Height;
                     Name = Composition.Name;
@@ -158,6 +168,7 @@ namespace NiVE3.Model
                 {
                     SourceType = SourceType.None;
                     Duration = 0.0;
+                    FrameRate = 30.0;
                     Width = 0;
                     Height = 0;
                     Name = "";

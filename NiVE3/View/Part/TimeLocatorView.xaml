@@ -16,7 +16,7 @@
         </Grid.RowDefinitions>
 
         <pr:RangeScrollBar Grid.Row="0" Height="10" Minimum="0" Maximum="{Binding ElementName=Root, Path=Duration}" Range="{Binding ElementName=Root, Path=Range, Mode=TwoWay}" RangeStart="{Binding ElementName=Root, Path=RangeStart, Mode=TwoWay}" MinimumRange="{Binding ElementName=TimeBar, Path=MinimumRange, Mode=OneWay}"/>
-        <pr:TimeBar Grid.Row="1" x:Name="TimeBar" Height="20" Duration="{Binding ElementName=Root, Path=Duration}" Range="{Binding ElementName=Root, Path=Range}" RangeStart="{Binding ElementName=Root, Path=RangeStart}" SideSpacerWidth="{x:Static local:TimeLocatorView.SideSpacerWidth}"/>
+        <pr:TimeBar Grid.Row="1" x:Name="TimeBar" Height="20" Duration="{Binding ElementName=Root, Path=Duration}" Range="{Binding ElementName=Root, Path=Range}" RangeStart="{Binding ElementName=Root, Path=RangeStart}" FrameRate="{Binding ElementName=Root, Path=FrameRate}" SideSpacerWidth="{x:Static local:TimeLocatorView.SideSpacerWidth}"/>
         <Canvas Grid.Row="1" Grid.RowSpan="2" x:Name="IndicatorContainer" ClipToBounds="True">
             <pr:IndicatorView Height="{Binding ElementName=IndicatorContainer, Path=ActualHeight}" SnapsToDevicePixels="True" Canvas.Left="{Binding ElementName=Root, Path=IndicatorPosition}" Canvas.Top="8"/>
         </Canvas>

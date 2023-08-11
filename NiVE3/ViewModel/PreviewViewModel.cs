@@ -56,6 +56,14 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref duration, value); }
         }
 
+        private double frameRate;
+        [NeedWire(nameof(PreviewModel), IsOneWay = true)]
+        public double FrameRate
+        {
+            get { return frameRate; }
+            set { SetProperty(ref frameRate, value); }
+        }
+
         private double currentTime;
         [NeedWire(nameof(PreviewModel))]
         public double CurrentTime
