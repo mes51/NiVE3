@@ -5,11 +5,12 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NiVE3.View.Resource;
 using Prism.Mvvm;
 
 namespace NiVE3.Model
 {
-    class ProjectModel : BindableBase
+    partial class ProjectModel : BindableBase
     {
         public ObservableCollection<CompositionModel> CompositionModels { get; } = new ObservableCollection<CompositionModel>();
 
@@ -19,21 +20,27 @@ namespace NiVE3.Model
 
         RendererListModel RendererListModel { get; }
 
-        public ProjectModel(FootageListModel footageListModel, RendererListModel rendererListModel)
+        HistoryModel HistoryModel { get; }
+
+        public event EventHandler<CompositionEventArgs>? OpenCompositionTimeline;
+
+        public event EventHandler<CompositionEventArgs>? CompositionRemoved;
+
+        public ProjectModel(FootageListModel footageListModel, RendererListModel rendererListModel, HistoryModel historyModel)
         {
-            FootageListModel= footageListModel;
-            RendererListModel= rendererListModel;
+            FootageListModel = footageListModel;
+            RendererListModel = rendererListModel;
+            HistoryModel = historyModel;
 
             FootageListModel.ShowFootagePreview += FootageListModel_ShowFootagePreview;
+            FootageListModel.ShowCompositionPreview += FootageListModel_ShowCompositionPreview;
             FootageListModel.RemoveFootageByUndo += FootageListModel_RemoveFootageByUndo;
-
-            CompositionModels.CollectionChanged += CompositionModels_CollectionChanged;
         }
 
         public void CreateComposition(string name, int width, int height, double frameRate, double duration, bool isRetentionFrameRate, int shutterAngle, int shutterPhase, int motionBlurSampleCount, Type rendererType)
         {
             var renderer = RendererListModel.CreateRenderer(rendererType);
-            CompositionModels.Add(new CompositionModel(renderer)
+            var composition = new CompositionModel(renderer)
             {
                 Name = name,
                 Width = width,
@@ -44,7 +51,23 @@ namespace NiVE3.Model
                 ShutterAngle = shutterAngle,
                 ShutterPhase = shutterPhase,
                 MotionBlurSampleCount = motionBlurSampleCount
-            });
+            };
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_AddComposition));
+            HistoryModel.Add(new AddCompositionCommand(this, composition));
+            CompositionModels.Add(composition);
+            FootageListModel.AddComposition(composition);
+            HistoryModel.EndGroup();
+            OnOpenCompositionTimeline(composition);
+
+            var preview = PreviewModels.OfType<CompositionPreviewModel>().FirstOrDefault();
+            if (preview != null)
+            {
+                preview.Composition = composition;
+            }
+            else
+            {
+                PreviewModels.Add(new CompositionPreviewModel { Composition = composition });
+            }
         }
 
         public void CreatePreview()
@@ -57,7 +80,33 @@ namespace NiVE3.Model
             PreviewModels.Remove(previewModel);
         }
 
-        private void FootageListModel_ShowFootagePreview(object? sender, ShowFootagePreviewEventArgs e)
+        void AddCompositionModel(CompositionModel composition)
+        {
+            CompositionModels.Add(composition);
+        }
+
+        void RemoveCompositionModel(CompositionModel composition)
+        {
+            CompositionModels.Remove(composition);
+            var preview = PreviewModels.OfType<CompositionPreviewModel>().FirstOrDefault();
+            if (preview != null)
+            {
+                preview.Composition = null;
+            }
+            OnCompositionRemoved(composition);
+        }
+
+        void OnOpenCompositionTimeline(CompositionModel composition)
+        {
+            OpenCompositionTimeline?.Invoke(this, new CompositionEventArgs(composition));
+        }
+
+        void OnCompositionRemoved(CompositionModel composition)
+        {
+            CompositionRemoved?.Invoke(this, new CompositionEventArgs(composition));
+        }
+
+        private void FootageListModel_ShowFootagePreview(object? sender, FootageModelEventArgs e)
         {
             var freePreviewModel = PreviewModels.OfType<FootagePreviewModel>().FirstOrDefault(p => !p.IsLock);
             if (freePreviewModel != null)
@@ -70,6 +119,20 @@ namespace NiVE3.Model
             }
         }
 
+        private void FootageListModel_ShowCompositionPreview(object? sender, CompositionEventArgs e)
+        {
+            var freePreviewModel = PreviewModels.OfType<CompositionPreviewModel>().FirstOrDefault(p => !p.IsLock);
+            if (freePreviewModel != null)
+            {
+                freePreviewModel.Composition = e.Composition;
+            }
+            else
+            {
+                PreviewModels.Add(new CompositionPreviewModel { Composition = e.Composition });
+            }
+            OnOpenCompositionTimeline(e.Composition);
+        }
+
         private void FootageListModel_RemoveFootageByUndo(object? sender, FootageEventArgs e)
         {
             foreach (var f in e.Footages)
@@ -78,22 +141,6 @@ namespace NiVE3.Model
                 if (preview != null)
                 {
                     preview.Footage = null;
-                }
-            }
-        }
-
-        private void CompositionModels_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
-        {
-            if ((e.NewItems?.OfType<CompositionModel>() ?? Enumerable.Empty<CompositionModel>()).FirstOrDefault() is CompositionModel composition)
-            {
-                var preview = PreviewModels.OfType<CompositionPreviewModel>().FirstOrDefault();
-                if (preview != null)
-                {
-                    preview.Composition = composition;
-                }
-                else
-                {
-                    PreviewModels.Add(new CompositionPreviewModel { Composition = composition });
                 }
             }
         }

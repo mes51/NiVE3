@@ -6,12 +6,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using NiVE3.Plugin.Image;
 using NiVE3.Plugin.Interfaces;
 using Prism.Mvvm;
 
 namespace NiVE3.Model
 {
-    class CompositionModel : BindableBase
+    class CompositionModel : BindableBase, IDisposable
     {
         string name = "";
         public string Name
@@ -83,6 +84,13 @@ namespace NiVE3.Model
             set { SetProperty(ref motionBlurSampleCount, value); }
         }
 
+        private bool hasAudio;
+        public bool HasAudio
+        {
+            get { return hasAudio; }
+            set { SetProperty(ref hasAudio, value); }
+        }
+
         private ObservableCollection<LayerModel> layers = new ObservableCollection<LayerModel>();
         public ObservableCollection<LayerModel> Layers
         {
@@ -106,8 +114,19 @@ namespace NiVE3.Model
             Layers = new ObservableCollection<LayerModel>();
         }
 
+        public NImage Render(double time, bool useGpu)
+        {
+            // TODO:
+            return new NManagedImage(Width, Height, true);
+        }
+
         private void Layers_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
+        }
+
+        public void Dispose()
+        {
+            Renderer.Dispose();
         }
     }
 }

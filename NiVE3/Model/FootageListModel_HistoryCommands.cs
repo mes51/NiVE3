@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NiVE3.View.Resource;
 
 namespace NiVE3.Model
 {
@@ -10,6 +11,8 @@ namespace NiVE3.Model
     {
         private class AddFolderHistoryCommand : IHistoryCommand
         {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_AddFolder);
+
             FootageListModel Model { get; }
 
             Guid FolderId { get; }
@@ -54,6 +57,8 @@ namespace NiVE3.Model
 
         private class LoadFileHistoryCommand : IHistoryCommand
         {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_LoadFootageFile);
+
             FootageListModel Model { get; }
 
             InputModel Input { get; }
@@ -104,7 +109,7 @@ namespace NiVE3.Model
                 Model.RemoveInput(Input);
                 Model.RemoveFootage(LoadedFootage);
 
-                Model.RemoveFootageByUndo?.Invoke(Model, new FootageEventArgs(LoadedSourceModels));
+                Model.OnRemoveFootageByUndo(LoadedSourceModels);
             }
 
             public void Dispose() { }
@@ -112,6 +117,8 @@ namespace NiVE3.Model
 
         private class MoveHistoryCommand : IHistoryCommand
         {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_MoveFootage);
+
             FootageListModel Model { get; }
 
             Guid TargetId { get; }

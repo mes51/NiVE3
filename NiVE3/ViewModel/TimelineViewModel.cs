@@ -12,12 +12,12 @@ namespace NiVE3.ViewModel
     [PaneLocation(PaneLocation.Bottom)]
     class TimelineViewModel : PaneViewModelBase
     {
-        CompositionModel CompositionModel { get; }
+        public CompositionModel CompositionModel { get; }
 
         public TimelineViewModel(CompositionModel compositionModel)
         {
             CompositionModel = compositionModel;
-            Title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.TimelineView_Title);
+            Title = compositionModel.Name;
         }
     }
 }

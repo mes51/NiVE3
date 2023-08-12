@@ -60,8 +60,8 @@ namespace NiVE3.ViewModel
             ProjectModel = projectModel;
             DialogService = dialogService;
 
-            ProjectModel.CompositionModels.CollectionChanged += CompositionModels_CollectionChanged;
-
+            ProjectModel.OpenCompositionTimeline += ProjectModel_OpenCompositionTimeline;
+            ProjectModel.CompositionRemoved += ProjectModel_CompositionRemoved;
             ProjectModel.PreviewModels.CollectionChanged += PreviewModels_CollectionChanged;
 
             OpenProjectCommand = new DelegateCommand(() => System.Diagnostics.Debug.WriteLine("Exec Command: OpenProjectCommand"));
@@ -97,12 +97,27 @@ namespace NiVE3.ViewModel
             MainRegion.Views.CollectionChanged += ViewModels_CollectionChanged;
         }
 
-        private void CompositionModels_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        private void ProjectModel_OpenCompositionTimeline(object? sender, CompositionEventArgs e)
         {
-            foreach (var newComposition in e.NewItems?.OfType<CompositionModel>() ?? Enumerable.Empty<CompositionModel>())
+            var timelineViewModel = ViewModels.OfType<TimelineViewModel>().FirstOrDefault(vm => vm.CompositionModel == e.Composition);
+            if (timelineViewModel != null)
             {
-                var viewModel = Container.Resolve<TimelineViewModel>(new object[] { newComposition });
+                timelineViewModel.IsSelected = true;
+                MainRegion.Activate(timelineViewModel);
+            }
+            else
+            {
+                var viewModel = Container.Resolve<TimelineViewModel>(new object[] { e.Composition });
                 MainRegion.Add(viewModel);
+            }
+        }
+
+        private void ProjectModel_CompositionRemoved(object? sender, CompositionEventArgs e)
+        {
+            var viewModel = ViewModels.OfType<TimelineViewModel>().FirstOrDefault(vm => vm.CompositionModel == e.Composition);
+            if (viewModel != null)
+            {
+                MainRegion.Remove(viewModel);
             }
         }
 

@@ -13,8 +13,16 @@ namespace NiVE3.Model
 
         Stack<IHistoryCommand> RedoCommands { get; } = new Stack<IHistoryCommand>();
 
+        GroupedHistoryCommand? CurrentGroup { get; set; }
+
         public void Undo()
         {
+            if (CurrentGroup != null)
+            {
+                // may be bug
+                throw new Exception();
+            }
+
             if (!CanUndo())
             {
                 return;
@@ -28,6 +36,12 @@ namespace NiVE3.Model
 
         public void Redo()
         {
+            if (CurrentGroup != null)
+            {
+                // may be bug
+                throw new Exception();
+            }
+
             if (!CanRedo())
             {
                 return;
@@ -39,15 +53,39 @@ namespace NiVE3.Model
             UndoCommands.Push(command);
         }
 
-        public void Add(IHistoryCommand command)
+        public void BeginGroup(string name)
         {
-            foreach (var c in RedoCommands)
+            if (CurrentGroup != null)
             {
-                c.Dispose();
+                // may be bug
+                throw new Exception();
             }
 
-            RedoCommands.Clear();
-            UndoCommands.Push(command);
+            CurrentGroup = new GroupedHistoryCommand(name);
+        }
+
+        public void EndGroup()
+        {
+            if (CurrentGroup == null)
+            {
+                // may be bug
+                throw new Exception();
+            }
+
+            AddInternal(CurrentGroup);
+            CurrentGroup = null;
+        }
+
+        public void Add(IHistoryCommand command)
+        {
+            if (CurrentGroup != null)
+            {
+                CurrentGroup.Add(command);
+            }
+            else
+            {
+                AddInternal(command);
+            }
         }
 
         public bool CanUndo()
@@ -59,10 +97,64 @@ namespace NiVE3.Model
         {
             return RedoCommands.Count > 0;
         }
+
+        void AddInternal(IHistoryCommand command)
+        {
+            foreach (var c in RedoCommands)
+            {
+                c.Dispose();
+            }
+
+            RedoCommands.Clear();
+            UndoCommands.Push(command);
+        }
+
+        private class GroupedHistoryCommand : IHistoryCommand
+        {
+            public string Name { get; }
+
+            List<IHistoryCommand> Commands { get; } = new List<IHistoryCommand>();
+
+            public GroupedHistoryCommand(string name)
+            {
+                Name = name;
+            }
+
+            public void Undo()
+            {
+                foreach (var c in Commands.Reverse<IHistoryCommand>())
+                {
+                    c.Undo();
+                }
+            }
+
+            public void Redo()
+            {
+                foreach (var c in Commands)
+                {
+                    c.Redo();
+                }
+            }
+
+            public void Add(IHistoryCommand command)
+            {
+                Commands.Add(command);
+            }
+
+            public void Dispose()
+            {
+                foreach (var c in Commands)
+                {
+                    c.Dispose();
+                }
+            }
+        }
     }
 
     interface IHistoryCommand : IDisposable
     {
+        string Name { get; }
+
         void Undo();
 
         void Redo();

@@ -126,7 +126,7 @@ namespace NiVE3.Model
 
         IFootageSource Source { get; }
 
-        InputModel InputModel { get; }
+        public InputModel InputModel { get; }
 
         public FootageModel(InputModel input, IFootageSource source) : this(input, source, null) { }
 

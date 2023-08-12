@@ -188,6 +188,18 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("キャンセル")]
         public static readonly string Dialog_Cancel = nameof(Dialog_Cancel);
 
+        [ShowInMarkup, DefaultValue("フォルダの追加")]
+        public static readonly string History_AddFolder = nameof(History_AddFolder);
+
+        [ShowInMarkup, DefaultValue("ファイルの読み込み")]
+        public static readonly string History_LoadFootageFile = nameof(History_LoadFootageFile);
+
+        [ShowInMarkup, DefaultValue("フッテージの移動")]
+        public static readonly string History_MoveFootage = nameof(History_MoveFootage);
+
+        [ShowInMarkup, DefaultValue("コンポジションの追加")]
+        public static readonly string History_AddComposition = nameof(History_AddComposition);
+
         // Enum
 
         [ShowInMarkup, DefaultValue("RGB")]

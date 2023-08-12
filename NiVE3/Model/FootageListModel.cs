@@ -57,7 +57,9 @@ namespace NiVE3.Model
 
         public event EventHandler<ShowLoadSettingEventArgs>? ShowLoadSetting;
 
-        public event EventHandler<ShowFootagePreviewEventArgs>? ShowFootagePreview;
+        public event EventHandler<FootageModelEventArgs>? ShowFootagePreview;
+
+        public event EventHandler<CompositionEventArgs>? ShowCompositionPreview;
 
         public event EventHandler<FootageEventArgs>? RemoveFootageByUndo;
 
@@ -83,6 +85,12 @@ namespace NiVE3.Model
         {
             var solidInput = new SolidInput();
             LoadFile(solidInput, "", null);
+        }
+
+        public void AddComposition(CompositionModel composition)
+        {
+            var compositionImput = new CompositionInput(composition);
+            LoadFile(compositionImput, "", null);
         }
 
         public void AddFolder()
@@ -177,7 +185,14 @@ namespace NiVE3.Model
                 return;
             }
 
-            ShowFootagePreview?.Invoke(this, new ShowFootagePreviewEventArgs(footage));
+            if (footage.InputModel.Input is CompositionInput compositionInput)
+            {
+                OnShowCompositionPreview(compositionInput.Composition);
+            }
+            else
+            {
+                OnShowFootagePreview(footage);
+            }
         }
 
         void AddInput(InputModel inputModel)
@@ -339,6 +354,21 @@ namespace NiVE3.Model
             SupportedFileTypes = InputMetadatas.ToDictionary(m => m.Key, m => m.Value.SupportedFileType.Split(",").Select(e => e.Trim('*', '.')).ToArray());
         }
 
+        void OnShowFootagePreview(FootageModel footage)
+        {
+            ShowFootagePreview?.Invoke(this, new FootageModelEventArgs(footage));
+        }
+
+        void OnShowCompositionPreview(CompositionModel composition)
+        {
+            ShowCompositionPreview?.Invoke(this, new CompositionEventArgs(composition));
+        }
+
+        void OnRemoveFootageByUndo(IFootageModel[] footages)
+        {
+            RemoveFootageByUndo?.Invoke(this, new FootageEventArgs(footages));
+        }
+
         static IFootageModel? FindModel(Guid targetId, IEnumerable<IFootageModel> list)
         {
             var model = list.FirstOrDefault(f => f.FootageId == targetId);
@@ -443,40 +473,6 @@ namespace NiVE3.Model
                     return x.Name.CompareTo(y.Name);
             }
         }
-    }
-
-    class ShowLoadSettingEventArgs : EventArgs
-    {
-        public ShowLoadSettingEventArgs(FrameworkElement view)
-        {
-            View = view;
-        }
-
-        public FrameworkElement View { get; }
-
-        public bool IsOK { get; set; }
-    }
-
-    class ShowFootagePreviewEventArgs : EventArgs
-    {
-        public ShowFootagePreviewEventArgs(FootageModel footage)
-        {
-            Footage = footage;
-        }
-
-        public FootageModel Footage { get; }
-    }
-
-    class FootageEventArgs : EventArgs
-    {
-        public FootageEventArgs(IFootageModel footage) : this(new IFootageModel[] { footage }) { }
-
-        public FootageEventArgs(IFootageModel[] footages)
-        {
-            Footages = footages;
-        }
-
-        public IFootageModel[] Footages { get; }
     }
 
     file static class FootageSourceGroupExtension
