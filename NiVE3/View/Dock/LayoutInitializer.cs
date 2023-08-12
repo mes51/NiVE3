@@ -15,7 +15,7 @@ namespace NiVE3.View.Dock
     // SEE: https://qiita.com/ugaya40/items/58e9e3c3340cc1f61b4f
     class LayoutInitializer : Freezable, ILayoutUpdateStrategy
     {
-        const int InitialSidePaneSize = 200;
+        const int InitialSidePaneSize = 300;
 
         public static readonly string PanelNamePrefix = "MainLayoutPanel_";
 

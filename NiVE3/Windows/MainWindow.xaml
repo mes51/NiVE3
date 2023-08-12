@@ -16,8 +16,9 @@
         xmlns:ui="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
         mc:Ignorable="d"
         x:Name="RootWindow"
+        WindowStartupLocation="CenterScreen"
         Closing="Window_Closing"
-        Title="{gm:LanguageResource ResourceKey=MainWindow_Title}" Height="800" Width="1600"
+        Title="{gm:LanguageResource ResourceKey=MainWindow_Title}" Height="1000" Width="1800"
         a:ShortcutKeyBindingProperty.InputBinding="True"
         pr:ViewModelLocator.AutoWireViewModel="False">
     <Window.Resources>
