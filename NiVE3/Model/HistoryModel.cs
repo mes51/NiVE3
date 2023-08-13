@@ -76,6 +76,13 @@ namespace NiVE3.Model
             CurrentGroup = null;
         }
 
+        public void AbortGroup()
+        {
+            CurrentGroup?.Undo();
+            CurrentGroup?.Dispose();
+            CurrentGroup = null;
+        }
+
         public void Add(IHistoryCommand command)
         {
             if (CurrentGroup != null)

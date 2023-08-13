@@ -12,11 +12,13 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media.Effects;
+using NiVE3.Config;
 using NiVE3.Extension;
 using NiVE3.Input;
 using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Util;
+using NiVE3.View.Resource;
 using Prism.Mvvm;
 
 namespace NiVE3.Model
@@ -84,7 +86,26 @@ namespace NiVE3.Model
         public void AddSolid()
         {
             var solidInput = new SolidInput();
-            LoadFile(solidInput, "", null);
+            var solidFolder = Footages.OfType<FootageFolderModel>().FirstOrDefault(f => f.Name == ApplicationSetting.Setting.SolidFolderName);
+            var createFolder = false;
+            if (solidFolder == null)
+            {
+                HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_LoadFootageFile));
+                solidFolder = AddFolderInternal(ApplicationSetting.Setting.SolidFolderName);
+                createFolder = true;
+            }
+            var loaded = LoadFile(solidInput, "", solidFolder.FootageId);
+            if (createFolder)
+            {
+                if (loaded)
+                {
+                    HistoryModel.EndGroup();
+                }
+                else
+                {
+                    HistoryModel.AbortGroup();
+                }
+            }
         }
 
         public void AddComposition(CompositionModel composition)
@@ -95,10 +116,7 @@ namespace NiVE3.Model
 
         public void AddFolder()
         {
-            var folder = new FootageFolderModel();
-            AddFootage(folder, null);
-
-            HistoryModel.Add(new AddFolderHistoryCommand(this, folder.FootageId, null));
+            AddFolderInternal(null);
         }
 
         public void MoveFootage(Guid sourceFootageId, Guid targetFolderId)
@@ -193,6 +211,20 @@ namespace NiVE3.Model
             {
                 OnShowFootagePreview(footage);
             }
+        }
+
+        FootageFolderModel AddFolderInternal(string? name)
+        {
+            var folder = new FootageFolderModel();
+            if (!string.IsNullOrEmpty(name))
+            {
+                folder.Name = name;
+            }
+            AddFootage(folder, null);
+
+            HistoryModel.Add(new AddFolderHistoryCommand(this, folder.FootageId, null));
+
+            return folder;
         }
 
         void AddInput(InputModel inputModel)

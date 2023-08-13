@@ -18,5 +18,7 @@ namespace NiVE3.Config
         private ApplicationSetting() { }
 
         public double Appearance { get; set; } = 1.0;
+
+        public string SolidFolderName { get; set; } = "Solid";
     }
 }
