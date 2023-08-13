@@ -48,6 +48,8 @@ namespace NiVE3.UI.Converter
                             return (int)MathF.Round(v);
                         case double v:
                             return (int)Math.Round(v);
+                        case decimal v:
+                            return (int)Math.Round(v);
                     }
                 }
                 catch { } // 例外発生時はすべてUnsetValue

@@ -15,11 +15,27 @@ namespace NiVE3.UI.Converter
     {
         public int Digit { get; set; } = -1;
 
+        public bool ForceDisplayDecimal { get; set; } = false;
+
         public object Convert(object value, Type targetType, object? parameter, CultureInfo culture)
         {
             if (value is double v)
             {
-                return Digit > -1 ? v.ToString($"F{Digit}") : v.ToString();
+                if (Digit > -1)
+                {
+                    if (Digit > 0 && !ForceDisplayDecimal)
+                    {
+                        return v.ToString($"#.{string.Join("", Enumerable.Repeat("#", Digit))}");
+                    }
+                    else
+                    {
+                        return v.ToString($"F{Digit}");
+                    }
+                }
+                else
+                {
+                    return v.ToString();
+                }
             }
             else
             {
@@ -53,6 +69,8 @@ namespace NiVE3.UI.Converter
                         case ulong v:
                             return (double)v;
                         case float v:
+                            return (double)v;
+                        case decimal v:
                             return (double)v;
                         case double v:
                             return v;
