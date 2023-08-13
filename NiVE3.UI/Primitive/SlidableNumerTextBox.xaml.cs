@@ -274,7 +274,7 @@ namespace NiVE3.UI.Primitive
 
         static void IntValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is SlidableNumerTextBox slider && slider.IntValue != (int)slider.Value)
+            if (d is SlidableNumerTextBox slider && slider.IntValue != (int)Math.Min(Math.Max(slider.Value, int.MinValue), int.MaxValue))
             {
                 slider.Value = slider.IntValue;
             }
@@ -284,7 +284,7 @@ namespace NiVE3.UI.Primitive
         {
             if (d is SlidableNumerTextBox slider)
             {
-                slider.IntValue = (int)slider.Value;
+                slider.IntValue = (int)Math.Min(Math.Max(slider.Value, int.MinValue), int.MaxValue);
             }
         }
 
@@ -292,7 +292,9 @@ namespace NiVE3.UI.Primitive
         {
             if (d is SlidableNumerTextBox slider && value is int v)
             {
-                return Math.Min(Math.Max(v, ((int)slider.Minimum)), ((int)slider.Maximum));
+                var max = Math.Min(slider.Maximum, int.MaxValue);
+                var min = Math.Max(slider.Minimum, int.MinValue);
+                return (int)Math.Min(Math.Max(v, min), max);
             }
             else
             {
