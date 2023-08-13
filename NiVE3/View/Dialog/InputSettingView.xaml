@@ -30,7 +30,7 @@
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="10">
             <Button Content="{gm:LanguageResource ResourceKey=Dialog_OK}" Command="{Binding OKCommand}">
                 <Button.Style>
-                    <Style TargetType="{x:Type Button}" BasedOn="{StaticResource DialogOKButton}">
+                    <Style TargetType="{x:Type Button}" BasedOn="{StaticResource DialogDefaultOKButton}">
                         <Setter Property="IsEnabled" Value="True"/>
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding HasErrors}" Value="True">

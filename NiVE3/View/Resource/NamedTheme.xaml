@@ -31,10 +31,17 @@
         <Setter Property="Height" Value="21"/>
     </Style>
 
+    <Style x:Key="DialogDefaultOKButton" TargetType="{x:Type Button}" BasedOn="{StaticResource DialogOKButton}">
+        <Setter Property="IsDefault" Value="True"/>
+    </Style>
+
     <Style x:Key="DialogCancelButton" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
         <Setter Property="Width" Value="75"/>
         <Setter Property="Height" Value="21"/>
         <Setter Property="IsCancel" Value="True"/>
+    </Style>
+
+    <Style x:Key="DialogDefaultCancelButton" TargetType="{x:Type Button}" BasedOn="{StaticResource DialogCancelButton}">
         <Setter Property="IsDefault" Value="True"/>
     </Style>
 

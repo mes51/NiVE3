@@ -21,7 +21,7 @@ namespace NiVE3.ViewModel.Dialog
         // TODO: 要調整
         const int FrameTimeDigit = 7;
 
-        private string name = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.CompositionSettingView_DefaultName);
+        private string name = "";
         public string Name
         {
             get { return name; }
@@ -157,6 +157,7 @@ namespace NiVE3.ViewModel.Dialog
 
         public void OnDialogOpened(IDialogParameters parameters)
         {
+            Name = parameters.GetValue<string>(nameof(Name));
         }
 
         public void OnDialogClosed() { }

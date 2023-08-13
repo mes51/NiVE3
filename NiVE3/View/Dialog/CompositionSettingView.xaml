@@ -234,7 +234,7 @@
         </Grid>
 
         <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="10" HorizontalAlignment="Right">
-            <Button Content="{gm:LanguageResource ResourceKey=Dialog_OK}" Style="{StaticResource DialogOKButton}" Command="{Binding OKCommand}"/>
+            <Button Content="{gm:LanguageResource ResourceKey=Dialog_OK}" Style="{StaticResource DialogDefaultCancelButton}" Command="{Binding OKCommand}"/>
             <Button Content="{gm:LanguageResource ResourceKey=Dialog_Cancel}" Margin="5,0,0,0" Style="{StaticResource DialogCancelButton}" Command="{Binding CancelCommand}"/>
         </StackPanel>
     </Grid>

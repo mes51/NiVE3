@@ -119,7 +119,7 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("{0}アイテム選択中")]
         public static readonly string FootagePreviewView_SelectedItemCount = nameof(FootagePreviewView_SelectedItemCount);
 
-        [ShowInMarkup, DefaultValue("コンポ")]
+        [ShowInMarkup, DefaultValue("コンポ {0}")]
         public static readonly string CompositionSettingView_DefaultName = nameof(CompositionSettingView_DefaultName);
 
         [ShowInMarkup, DefaultValue("コンポジション設定")]

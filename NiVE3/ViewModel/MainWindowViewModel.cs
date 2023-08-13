@@ -3,6 +3,7 @@ using NiVE3.Config;
 using NiVE3.Model;
 using NiVE3.View.Command;
 using NiVE3.View.Dialog;
+using NiVE3.View.Resource;
 using NiVE3.ViewModel.Dialog;
 using Prism.Commands;
 using Prism.Mvvm;
@@ -70,7 +71,21 @@ namespace NiVE3.ViewModel
 
             NewCompositionCommand = new DelegateCommand(() =>
             {
-                var param = new DialogParameters();
+                var format = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.CompositionSettingView_DefaultName);
+                var compNumber = 1;
+                while (true)
+                {
+                    var name = string.Format(format, compNumber);
+                    if (ProjectModel.CompositionModels.All(c => c.Name != name))
+                    {
+                        break;
+                    }
+                    compNumber++;
+                }
+                var param = new DialogParameters
+                {
+                    { nameof(CompositionSettingViewModel.Name), string.Format(format, compNumber) }
+                };
                 IDialogResult? result = null;
                 DialogService.ShowDialog(nameof(CompositionSettingView), param, r => result = r);
                 if (result != null && result.Result == ButtonResult.OK)
