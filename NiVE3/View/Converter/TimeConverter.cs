@@ -40,7 +40,7 @@ namespace NiVE3.View.Converter
             var second = (int)(time % 60);
             var frame = (int)((time % 1) * FrameRate);
 
-            return $"{hour}:{minute:D2}:{second:D2}:{frame:D2}";
+            return $"{hour}:{minute:D2}:{second:D2}:{frame.ToString("D" + Math.Max((int)Math.Ceiling(Math.Log10(FrameRate)), 2))}";
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
