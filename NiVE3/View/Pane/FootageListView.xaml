@@ -17,7 +17,7 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
         <cv:WidthHeightConverter x:Key="WidthHeightConverter"/>
-        <cv:TimeConverter x:Key="TimeConverter"/>
+        <cv:TimeMultiValueConverter x:Key="TimeMultiValueConverter"/>
 
         <r:DataTemplateCollection x:Key="SizeTemplate" DefaultIsEmpty="True">
             <DataTemplate DataType="{x:Type vm:FootageViewModel}">
@@ -42,7 +42,7 @@
             <DataTemplate DataType="{x:Type vm:FootageViewModel}">
                 <TextBlock>
                     <TextBlock.Text>
-                        <MultiBinding Mode="OneWay" Converter="{StaticResource TimeConverter}">
+                        <MultiBinding Mode="OneWay" Converter="{StaticResource TimeMultiValueConverter}">
                             <Binding Path="Duration"/>
                             <Binding Path="FrameRate"/>
                         </MultiBinding>

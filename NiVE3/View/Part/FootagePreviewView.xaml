@@ -16,10 +16,10 @@
              d:DesignWidth="800" ClipToBounds="True">
     <UserControl.Resources>
         <cv:WidthHeightConverter x:Key="WidthHeightConverter"/>
-        <cv:TimeConverter x:Key="TimeConverter"/>
-        <cv:LocalizationConverter x:Key="LocalizedTimeConverter" LocalizeFormat="{gm:LanguageResource ResourceKey=FootagePreviewView_TimeFormat}">
+        <cv:TimeMultiValueConverter x:Key="TimeMultiValueConverter"/>
+        <cv:LocalizationConverter x:Key="LocalizedTimeMultiValueConverter" LocalizeFormat="{gm:LanguageResource ResourceKey=FootagePreviewView_TimeFormat}">
             <cv:LocalizationConverter.MultiValueConverter>
-                <cv:TimeConverter />
+                <cv:TimeMultiValueConverter />
             </cv:LocalizationConverter.MultiValueConverter>
         </cv:LocalizationConverter>
         <cv:LocalizationConverter x:Key="FolderItemCountConverter" LocalizeFormat="{gm:LanguageResource ResourceKey=FootagePreviewView_FolderItemCount}"/>
@@ -94,7 +94,7 @@
                                         <DataTrigger Binding="{Binding InputType}" Value="{x:Static plg:SourceType.Audio}">
                                             <Setter Property="Text">
                                                 <Setter.Value>
-                                                    <MultiBinding Mode="OneWay" Converter="{StaticResource TimeConverter}">
+                                                    <MultiBinding Mode="OneWay" Converter="{StaticResource TimeMultiValueConverter}">
                                                         <Binding Path="Duration"/>
                                                         <Binding Path="FrameRate"/>
                                                     </MultiBinding>
@@ -104,7 +104,7 @@
                                         <DataTrigger Binding="{Binding InputType}" Value="{x:Static plg:SourceType.Video}">
                                             <Setter Property="Text">
                                                 <Setter.Value>
-                                                    <MultiBinding Mode="OneWay" Converter="{StaticResource LocalizedTimeConverter}">
+                                                    <MultiBinding Mode="OneWay" Converter="{StaticResource LocalizedTimeMultiValueConverter}">
                                                         <Binding Path="Duration"/>
                                                         <Binding Path="FrameRate"/>
                                                     </MultiBinding>
@@ -114,7 +114,7 @@
                                         <DataTrigger Binding="{Binding InputType}" Value="{x:Static plg:SourceType.VideoAndAudio}">
                                             <Setter Property="Text">
                                                 <Setter.Value>
-                                                    <MultiBinding Mode="OneWay" Converter="{StaticResource LocalizedTimeConverter}">
+                                                    <MultiBinding Mode="OneWay" Converter="{StaticResource LocalizedTimeMultiValueConverter}">
                                                         <Binding Path="Duration"/>
                                                         <Binding Path="FrameRate"/>
                                                     </MultiBinding>
