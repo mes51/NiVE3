@@ -4,9 +4,42 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:NiVE3.View.Pane"
+             xmlns:cv="clr-namespace:NiVE3.View.Converter"
+             xmlns:pr="clr-namespace:NiVE3.View.Primitive"
+             xmlns:ui="clr-namespace:NiVE3.UI.Primitive;assembly=NiVE3.UI"
              mc:Ignorable="d" 
+             x:Name="Root"
              d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <cv:TimeConverter x:Key="TimeConverter" FrameRate="{Binding FrameRate}"/>
+    </UserControl.Resources>
     <Grid>
-        <TextBlock Text="タイムライン"/>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+
+        <Grid Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition />
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <ui:SlidableNumerTextBox Value="{Binding CurrentTime}" Converter="{StaticResource TimeConverter}" SlideChangeValue="{Binding FrameDuration}" Margin="5"/>
+                <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <CheckBox Style="{StaticResource ShyCheckBox}" VerticalAlignment="Center"/>
+                    <CheckBox Style="{StaticResource FrameBlendCheckBox}" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                    <CheckBox Style="{StaticResource MotionBlurCheckBox}" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                </StackPanel>
+            </Grid>
+        </Grid>
     </Grid>
 </UserControl>

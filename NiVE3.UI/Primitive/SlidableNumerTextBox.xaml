@@ -13,17 +13,6 @@
              GotFocus="Root_GotFocus"
              d:DesignHeight="21" d:DesignWidth="100">
     <UserControl.Resources>
-        <Pen x:Key="UnderlinePen" Thickness="1" Brush="{gm:AppearanceResource ResourceKey=LinkTextBrush}" DashCap="Round" EndLineCap="Round">
-            <Pen.DashStyle>
-                <DashStyle Dashes="2"/>
-            </Pen.DashStyle>
-        </Pen>
-        <Pen x:Key="MouseOverUnderlinePen" Thickness="1" Brush="{gm:AppearanceResource ResourceKey=MouseOverLinkTextBrush}" DashCap="Round" EndLineCap="Round">
-            <Pen.DashStyle>
-                <DashStyle Dashes="2"/>
-            </Pen.DashStyle>
-        </Pen>
-
         <Style x:Key="ValueTextBoxStyle" TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
             <Setter Property="Visibility" Value="Hidden"/>
             <Setter Property="AcceptsReturn" Value="False"/>
@@ -41,31 +30,10 @@
             </Style.Triggers>
         </Style>
 
-        <Style x:Key="ValueTextBlockStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
-            <Setter Property="Foreground" Value="{gm:AppearanceResource ResourceKey=LinkTextBrush, ReturnDynamicResource=True}"/>
+        <Style x:Key="ValueTextBlockStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource ClickableTextBlock}">
             <Setter Property="HorizontalAlignment" Value="Left"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="Cursor" Value="SizeWE"/>
-            <Setter Property="TextDecorations">
-                <Setter.Value>
-                    <TextDecorationCollection>
-                        <TextDecoration PenThicknessUnit="FontRecommended" Location="Underline" Pen="{StaticResource UnderlinePen}"/>
-                    </TextDecorationCollection>
-                </Setter.Value>
-            </Setter>
-
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Foreground" Value="{gm:AppearanceResource ResourceKey=MouseOverLinkTextBrush, ReturnDynamicResource=True}"/>
-                    <Setter Property="TextDecorations">
-                        <Setter.Value>
-                            <TextDecorationCollection>
-                                <TextDecoration PenThicknessUnit="FontRecommended" Location="Underline" Pen="{StaticResource MouseOverUnderlinePen}"/>
-                            </TextDecorationCollection>
-                        </Setter.Value>
-                    </Setter>
-                </Trigger>
-            </Style.Triggers>
         </Style>
 
         <Style x:Key="ValueTextBlockWrapper" TargetType="{x:Type Grid}">

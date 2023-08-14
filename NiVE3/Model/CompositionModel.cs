@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -46,7 +47,7 @@ namespace NiVE3.Model
         public double FrameDuration
         {
             get { return frameDuration; }
-            set { SetProperty(ref frameDuration, value); }
+            private set { SetProperty(ref frameDuration, value); }
         }
 
         private double duration = 10.0;
@@ -112,12 +113,22 @@ namespace NiVE3.Model
         {
             Renderer = renderer;
             Layers = new ObservableCollection<LayerModel>();
+
+            PropertyChanged += CompositionModel_PropertyChanged;
         }
 
         public NImage Render(double time, bool useGpu)
         {
             // TODO:
             return new NManagedImage(Width, Height, true);
+        }
+
+        private void CompositionModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(FrameRate))
+            {
+                frameDuration = 1.0 / FrameRate;
+            }
         }
 
         private void Layers_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)

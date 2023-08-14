@@ -65,5 +65,15 @@ namespace NiVE3.Extension
 
             return -1;
         }
+
+        public static IEnumerable<(T, int)> ZipWithIndex<T>(this IEnumerable<T> source)
+        {
+            var index = 0;
+            foreach (var e in source)
+            {
+                yield return (e, index);
+                index++;
+            }
+        }
     }
 }

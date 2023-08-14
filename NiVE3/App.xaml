@@ -9,11 +9,14 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ui:AppearanceResourceDictionary x:Name="Appearance"/>
+                <r:FontawesomeResourceDictionary x:Name="FontawesomeIcon"/>
                 <x:StaticExtension Member="r:LanguageResourceDictionary.Dictionary" x:Name="Language"/>
+                <ResourceDictionary Source="/View/Resource/Icons.xaml"/>
                 <ResourceDictionary Source="/View/Resource/Theme.xaml"/>
                 <ResourceDictionary Source="/View/Resource/NamedTheme.xaml"/>
                 <ResourceDictionary Source="/View/Resource/ViewSelectorTemplate.xaml"/>
                 <ResourceDictionary Source="pack://application:,,,/NiVE3.UI;component/Resources/Theme.xaml"/>
+                <ResourceDictionary Source="pack://application:,,,/NiVE3.UI;component/Resources/NamedTheme.xaml"/>
             </ResourceDictionary.MergedDictionaries>
             <FontFamily x:Key="FontAwesome">/NiVE3;component/Resources/Font Awesome 6 Free-Solid-900.otf#Font Awesome 6 Free Solid</FontFamily>
         </ResourceDictionary>

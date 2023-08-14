@@ -1,0 +1,102 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Style x:Key="IconBase" TargetType="{x:Type Path}">
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+    </Style>
+
+    <Style x:Key="ShyIcon" TargetType="{x:Type Path}" BasedOn="{StaticResource IconBase}">
+        <Setter Property="Data">
+            <Setter.Value>
+                <GeometryGroup>
+                    <CombinedGeometry GeometryCombineMode="Exclude" Geometry1="{gm:FontawesomeResource ResourceKey=FaceMehBlank}">
+                        <CombinedGeometry.Geometry2>
+                            <RectangleGeometry Rect="0,9,16,7"/>
+                        </CombinedGeometry.Geometry2>
+                        <CombinedGeometry.Transform>
+                            <ScaleTransform ScaleX="0.8" ScaleY="0.8" CenterX="8" CenterY="4.5"/>
+                        </CombinedGeometry.Transform>
+                    </CombinedGeometry>
+                    <RectangleGeometry Rect="0,10,16,2"/>
+                </GeometryGroup>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="FrameBlendIcon" TargetType="{x:Type Path}" BasedOn="{StaticResource IconBase}">
+        <Setter Property="Data">
+            <Setter.Value>
+                <GeometryGroup>
+                    <CombinedGeometry GeometryCombineMode="Exclude" Geometry1="{gm:FontawesomeResource ResourceKey=Film}">
+                        <CombinedGeometry.Geometry2>
+                            <RectangleGeometry Rect="3,-3,16,16" RadiusX="2" RadiusY="2"/>
+                        </CombinedGeometry.Geometry2>
+                    </CombinedGeometry>
+                    <CombinedGeometry GeometryCombineMode="Union" Geometry1="{gm:FontawesomeResource ResourceKey=Film}">
+                        <CombinedGeometry.Transform>
+                            <TranslateTransform X="4" Y="-4"/>
+                        </CombinedGeometry.Transform>
+                    </CombinedGeometry>
+                    <GeometryGroup.Transform>
+                        <TransformGroup>
+                            <ScaleTransform ScaleX="0.8" ScaleY="0.8"/>
+                            <TranslateTransform Y="2"/>
+                        </TransformGroup>
+                    </GeometryGroup.Transform>
+                </GeometryGroup>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="MotionBlurIcon" TargetType="{x:Type Path}" BasedOn="{StaticResource IconBase}">
+        <Setter Property="Data">
+            <Setter.Value>
+                <GeometryGroup>
+                    <CombinedGeometry GeometryCombineMode="Exclude">
+                        <CombinedGeometry.Geometry1>
+                            <EllipseGeometry Center="6,6" RadiusX="6" RadiusY="6"/>
+                        </CombinedGeometry.Geometry1>
+                        <CombinedGeometry.Geometry2>
+                            <EllipseGeometry Center="6,6" RadiusX="6" RadiusY="6">
+                                <EllipseGeometry.Transform>
+                                    <TranslateTransform X="2" Y="-2"/>
+                                </EllipseGeometry.Transform>
+                            </EllipseGeometry>
+                        </CombinedGeometry.Geometry2>
+                        <CombinedGeometry.Transform>
+                            <TranslateTransform X="-6" Y="6"/>
+                        </CombinedGeometry.Transform>
+                    </CombinedGeometry>
+                    <CombinedGeometry GeometryCombineMode="Exclude">
+                        <CombinedGeometry.Geometry1>
+                            <EllipseGeometry Center="6,6" RadiusX="6" RadiusY="6"/>
+                        </CombinedGeometry.Geometry1>
+                        <CombinedGeometry.Geometry2>
+                            <EllipseGeometry Center="6,6" RadiusX="6" RadiusY="6">
+                                <EllipseGeometry.Transform>
+                                    <TranslateTransform X="2" Y="-2"/>
+                                </EllipseGeometry.Transform>
+                            </EllipseGeometry>
+                        </CombinedGeometry.Geometry2>
+                        <CombinedGeometry.Transform>
+                            <TranslateTransform X="-2" Y="2"/>
+                        </CombinedGeometry.Transform>
+                    </CombinedGeometry>
+                    <EllipseGeometry Center="6,6" RadiusX="6" RadiusY="6">
+                        <EllipseGeometry.Transform>
+                            <TranslateTransform X="2" Y="-2"/>
+                        </EllipseGeometry.Transform>
+                    </EllipseGeometry>
+                    <GeometryGroup.Transform>
+                        <TransformGroup>
+                            <ScaleTransform ScaleX="0.8" ScaleY="0.8"/>
+                            <TranslateTransform X="6" Y="0"/>
+                        </TransformGroup>
+                    </GeometryGroup.Transform>
+                </GeometryGroup>
+            </Setter.Value>
+        </Setter>
+    </Style>
+</ResourceDictionary>
