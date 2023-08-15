@@ -32,8 +32,42 @@ namespace NiVE3.View.Primitive
             "ItemSize",
             typeof(double),
             typeof(ItemResizableStackPanel),
-            new PropertyMetadata(100.0)
+            new PropertyMetadata(0.0)
         );
+
+        public static readonly DependencyProperty ItemMinSizeProperty = DependencyProperty.RegisterAttached(
+            "ItemMinSize",
+            typeof(double),
+            typeof(ItemResizableStackPanel),
+            new PropertyMetadata(0.0)
+        );
+
+        public static readonly DependencyProperty IsLockedProperty = DependencyProperty.RegisterAttached(
+            "IsLocked",
+            typeof(bool),
+            typeof(ItemResizableStackPanel),
+            new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        public static bool GetIsLocked(UIElement target)
+        {
+            return (bool)target.GetValue(IsLockedProperty);
+        }
+
+        public static void SetIsLocked(UIElement target, bool value)
+        {
+            target.SetValue(IsLockedProperty, value);
+        }
+
+        public static double GetItemMinSize(DependencyObject target)
+        {
+            return (double)target.GetValue(ItemMinSizeProperty);
+        }
+
+        public static void SetItemMinSize(DependencyObject target, double value)
+        {
+            target.SetValue(ItemMinSizeProperty, value);
+        }
 
         public static double GetItemSize(DependencyObject target)
         {
@@ -53,6 +87,10 @@ namespace NiVE3.View.Primitive
         );
 
         static readonly OffsetGridLengthConverter SizeConverter = new OffsetGridLengthConverter { SizeOffset = SplitterSize };
+
+        static readonly OffsetValueConverter MinSizeConverter = new OffsetValueConverter { Offset = SplitterSize };
+
+        static readonly BooleanInvertConverter IsLockedConverter = new BooleanInvertConverter();
 
         static readonly VisibilityToSwitchValueConverter ItemVisibilityConverter = new VisibilityToSwitchValueConverter
         {
@@ -95,6 +133,7 @@ namespace NiVE3.View.Primitive
         {
             var index = childIndex * 2;
             var splitter = new GridSplitter { Style = Resources["SplitterStyle"] as Style };
+            BindSplitterLocked(newChild, splitter);
             ContainerGrid.Children.Insert(index, newChild);
             ContainerGrid.Children.Insert(index + 1, splitter);
 
@@ -176,6 +215,7 @@ namespace NiVE3.View.Primitive
             }
 
             ContainerGrid.Children[index] = newChild;
+            BindSplitterLocked(newChild, (GridSplitter)ContainerGrid.Children[index + 1]);
             Grid.SetColumn(newChild, index);
             Grid.SetRow(newChild, index);
         }
@@ -272,6 +312,15 @@ namespace NiVE3.View.Primitive
             };
             BindingOperations.SetBinding(column, ColumnDefinition.WidthProperty, binding);
 
+            var minBinding = new Binding
+            {
+                Path = new PropertyPath(ItemMinSizeProperty),
+                Source = child,
+                Mode = BindingMode.OneWay,
+                Converter = MinSizeConverter
+            };
+            BindingOperations.SetBinding(column, ColumnDefinition.MinWidthProperty, minBinding);
+
             var visibilityBinding = new Binding
             {
                 Path = new PropertyPath(VisibilityProperty),
@@ -292,6 +341,15 @@ namespace NiVE3.View.Primitive
                 Converter = SizeConverter
             };
             BindingOperations.SetBinding(row, RowDefinition.HeightProperty, binding);
+
+            var minBinding = new Binding
+            {
+                Path = new PropertyPath(ItemMinSizeProperty),
+                Source = child,
+                Mode = BindingMode.OneWay,
+                Converter = MinSizeConverter
+            };
+            BindingOperations.SetBinding(row, RowDefinition.MinHeightProperty, minBinding);
 
             var visibilityBinding = new Binding
             {
@@ -325,6 +383,18 @@ namespace NiVE3.View.Primitive
                 Converter = SplitterWidthConverter
             };
             BindingOperations.SetBinding(row, RowDefinition.HeightProperty, binding);
+        }
+
+        void BindSplitterLocked(UIElement child, GridSplitter splitter)
+        {
+            var binding = new Binding
+            {
+                Path = new PropertyPath(IsLockedProperty),
+                Source = child,
+                Mode = BindingMode.OneWay,
+                Converter = IsLockedConverter
+            };
+            BindingOperations.SetBinding(splitter, IsEnabledProperty, binding);
         }
 
         private void Children_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)

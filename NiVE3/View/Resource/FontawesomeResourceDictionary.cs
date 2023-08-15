@@ -20,12 +20,40 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, Icon("")]
         public static readonly string Film = nameof(Film);
 
+        [ShowInMarkup, Icon("")]
+        public static readonly string Eye = nameof(Eye);
+
+        [ShowInMarkup, Icon("")]
+        public static readonly string VolumeHigh = nameof(VolumeHigh);
+
+        [ShowInMarkup, Icon("")]
+        public static readonly string Circle = nameof(Circle);
+
+        [ShowInMarkup, Icon("")]
+        public static readonly string Lock = nameof(Lock);
+
+        [ShowInMarkup, Icon("")]
+        public static readonly string Tag = nameof(Tag);
+
+        [ShowInMarkup, Icon("")]
+        public static readonly string Sun = nameof(Sun);
+
+        [ShowInMarkup, Icon("")]
+        public static readonly string FlorinSign = nameof(FlorinSign);
+
+        [ShowInMarkup, Icon("")]
+        public static readonly string CircleHalfStroke = nameof(CircleHalfStroke);
+
+        [ShowInMarkup, Icon("")]
+        public static readonly string Cube = nameof(Cube);
+
         public FontawesomeResourceDictionary()
         {
             var keys = typeof(FontawesomeResourceDictionary).GetFields(BindingFlags.Static | BindingFlags.Public)
                 .Select(f => ((string)f.GetValue(null)!, f.GetCustomAttribute<IconAttribute>()));
             var fontFamily = new FontFamily(new Uri("pack://application:,,,/NiVE3;component/Resources/Font Awesome 6 Free-Solid-900.otf"), "#Font Awesome 6 Free Solid");
             var typeface = new Typeface(fontFamily, FontStyles.Normal, FontWeights.Bold, FontStretches.Normal);
+            var dip = VisualTreeHelper.GetDpi(new FrameworkElement()).PixelsPerDip;
             foreach (var (key, attr) in keys)
             {
                 if (attr == null)
@@ -33,7 +61,12 @@ namespace NiVE3.View.Resource
                     continue;
                 }
 
-                var ft = new FormattedText(attr.Glyph, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, attr.Size, Brushes.Black, 96.0);
+                var size = attr.Size;
+                var ft = new FormattedText(attr.Glyph, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, attr.Size, Brushes.Black, dip);
+                if (size < ft.Width)
+                {
+                        ft = new FormattedText(attr.Glyph, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, size * (size / ft.Width), Brushes.Black, dip);
+                }
                 this[key] = ft.BuildGeometry(new Point());
             }
         }
@@ -43,7 +76,7 @@ namespace NiVE3.View.Resource
         {
             public string Glyph { get; }
 
-            public double Size { get; set; } = 16.0;
+            public double Size { get; set; } = 12.0;
 
             public IconAttribute(string glyph)
             {
