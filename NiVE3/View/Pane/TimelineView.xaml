@@ -6,6 +6,7 @@
              xmlns:local="clr-namespace:NiVE3.View.Pane"
              xmlns:cv="clr-namespace:NiVE3.View.Converter"
              xmlns:pr="clr-namespace:NiVE3.View.Primitive"
+             xmlns:pt="clr-namespace:NiVE3.View.Part"
              xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
              xmlns:ui="clr-namespace:NiVE3.UI.Primitive;assembly=NiVE3.UI"
              xmlns:ugm="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
@@ -13,9 +14,10 @@
              x:Name="Root"
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <cv:TimeConverter x:Key="TimeConverter" FrameRate="{Binding FrameRate}"/>
 
-        <Thickness x:Key="IconMargin">2,0,0,0</Thickness>
+        <Thickness x:Key="ColumnMargin">2,0,0,0</Thickness>
 
         <Style x:Key="HeaderIconPath" TargetType="{x:Type Path}">
             <Setter Property="Fill" Value="{ugm:AppearanceResource ResourceKey=TextBrush, ReturnDynamicResource=True}"/>
@@ -26,95 +28,127 @@
         <Style x:Key="IconContainer" TargetType="{x:Type Grid}">
             <Setter Property="Width" Value="12"/>
             <Setter Property="Height" Value="12"/>
+            <Setter Property="Margin" Value="{StaticResource ColumnMargin}"/>
         </Style>
 
         <Style x:Key="HeaderIconPanel" TargetType="{x:Type StackPanel}">
             <Setter Property="Orientation" Value="Horizontal"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
         </Style>
 
         <Style x:Key="HeaderTextBlock" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
             <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="Margin" Value="{StaticResource ColumnMargin}"/>
         </Style>
     </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition />
+            <ColumnDefinition MinWidth="100"/>
         </Grid.ColumnDefinitions>
+        
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition />
+        </Grid.RowDefinitions>
 
-        <Grid Grid.Column="0">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition />
-            </Grid.RowDefinitions>
+        <Grid Grid.Row="0" Grid.Column="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition />
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
 
-            <Grid Grid.Row="0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition />
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
+            <ui:SlidableNumerTextBox Value="{Binding CurrentTime}" Converter="{StaticResource TimeConverter}" SlideChangeValue="{Binding FrameDuration}" Margin="5"/>
+            <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                <CheckBox Style="{StaticResource ShyCheckBox}" VerticalAlignment="Center"/>
+                <CheckBox Style="{StaticResource FrameBlendCheckBox}" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                <CheckBox Style="{StaticResource MotionBlurCheckBox}" VerticalAlignment="Center" Margin="5,0,0,0"/>
+            </StackPanel>
+        </Grid>
+        
+        <pr:ItemResizableStackPanel Grid.Row="1" Grid.Column="0" Margin="2,0" Background="Transparent">
+            <StackPanel Style="{StaticResource HeaderIconPanel}" Visibility="{Binding IsAVSwitchColumnVisible, Converter={StaticResource BooleanToVisibilityConverter}}" pr:ItemResizableStackPanel.ItemSize="56" pr:ItemResizableStackPanel.IsLocked="True">
+                <Grid Style="{StaticResource IconContainer}">
+                    <Path Data="{gm:FontawesomeResource ResourceKey=Eye}" Style="{StaticResource HeaderIconPath}"/>
+                </Grid>
+                <Grid Style="{StaticResource IconContainer}">
+                    <Path Data="{gm:FontawesomeResource ResourceKey=VolumeHigh}" Style="{StaticResource HeaderIconPath}"/>
+                </Grid>
+                <Grid Style="{StaticResource IconContainer}">
+                    <Path Data="{gm:FontawesomeResource ResourceKey=Circle}" Style="{StaticResource HeaderIconPath}"/>
+                </Grid>
+                <Grid Style="{StaticResource IconContainer}">
+                    <Path Data="{gm:FontawesomeResource ResourceKey=Lock}" Style="{StaticResource HeaderIconPath}"/>
+                </Grid>
+            </StackPanel>
 
-                <ui:SlidableNumerTextBox Value="{Binding CurrentTime}" Converter="{StaticResource TimeConverter}" SlideChangeValue="{Binding FrameDuration}" Margin="5"/>
-                <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
-                    <CheckBox Style="{StaticResource ShyCheckBox}" VerticalAlignment="Center"/>
-                    <CheckBox Style="{StaticResource FrameBlendCheckBox}" VerticalAlignment="Center" Margin="5,0,0,0"/>
-                    <CheckBox Style="{StaticResource MotionBlurCheckBox}" VerticalAlignment="Center" Margin="5,0,0,0"/>
-                </StackPanel>
+            <Grid VerticalAlignment="Center" HorizontalAlignment="Left" Style="{StaticResource IconContainer}" Visibility="{Binding IsTagColumnVisible, Converter={StaticResource BooleanToVisibilityConverter}}" pr:ItemResizableStackPanel.ItemMinSize="16" pr:ItemResizableStackPanel.ItemSize="{Binding TagColumnWidth}">
+                <Path Data="{gm:FontawesomeResource ResourceKey=Tag}" Style="{StaticResource HeaderIconPath}"/>
             </Grid>
 
-            <pr:ItemResizableStackPanel Grid.Row="1" Margin="2,0">
-                <StackPanel Style="{StaticResource HeaderIconPanel}" pr:ItemResizableStackPanel.ItemSize="56" pr:ItemResizableStackPanel.IsLocked="True">
-                    <Grid Style="{StaticResource IconContainer}">
-                        <Path Data="{gm:FontawesomeResource ResourceKey=Eye}" Style="{StaticResource HeaderIconPath}"/>
-                    </Grid>
-                    <Grid Style="{StaticResource IconContainer}" Margin="{StaticResource IconMargin}">
-                        <Path Data="{gm:FontawesomeResource ResourceKey=VolumeHigh}" Style="{StaticResource HeaderIconPath}"/>
-                    </Grid>
-                    <Grid Style="{StaticResource IconContainer}" Margin="{StaticResource IconMargin}">
-                        <Path Data="{gm:FontawesomeResource ResourceKey=Circle}" Style="{StaticResource HeaderIconPath}"/>
-                    </Grid>
-                    <Grid Style="{StaticResource IconContainer}" Margin="{StaticResource IconMargin}">
-                        <Path Data="{gm:FontawesomeResource ResourceKey=Lock}" Style="{StaticResource HeaderIconPath}"/>
-                    </Grid>
-                </StackPanel>
-                <Path Data="{gm:FontawesomeResource ResourceKey=Tag}" Style="{StaticResource HeaderIconPath}" pr:ItemResizableStackPanel.ItemMinSize="18"/>
-                <TextBlock Text="#" Style="{StaticResource HeaderTextBlock}" pr:ItemResizableStackPanel.ItemMinSize="18"/>
-                <TextBlock Text="レイヤー名" Style="{StaticResource HeaderTextBlock}" pr:ItemResizableStackPanel.ItemMinSize="52"/>
-                <TextBlock Text="コメント" Style="{StaticResource HeaderTextBlock}" pr:ItemResizableStackPanel.ItemMinSize="50"/>
-                <StackPanel Style="{StaticResource HeaderIconPanel}" pr:ItemResizableStackPanel.ItemMinSize="114">
-                    <Grid Style="{StaticResource IconContainer}">
-                        <Path Data="{StaticResource ShyIcon}" Style="{StaticResource HeaderIconPath}"/>
-                    </Grid>
-                    <Grid Style="{StaticResource IconContainer}" Margin="{StaticResource IconMargin}">
-                        <Path Data="{gm:FontawesomeResource ResourceKey=Sun}" Style="{StaticResource HeaderIconPath}"/>
-                    </Grid>
-                    <Grid Style="{StaticResource IconContainer}" Margin="{StaticResource IconMargin}">
-                        <Path Data="{StaticResource NearestNeighborInterpolationIcon}" Style="{StaticResource HeaderIconPath}"/>
-                    </Grid>
-                    <Grid Style="{StaticResource IconContainer}" Margin="{StaticResource IconMargin}">
-                        <Path Data="{gm:FontawesomeResource ResourceKey=FlorinSign}" Style="{StaticResource HeaderIconPath}"/>
-                    </Grid>
-                    <Grid Style="{StaticResource IconContainer}" Margin="{StaticResource IconMargin}">
-                        <Path Data="{StaticResource FrameBlendIcon}" Style="{StaticResource HeaderIconPath}"/>
-                    </Grid>
-                    <Grid Style="{StaticResource IconContainer}" Margin="{StaticResource IconMargin}">
-                        <Path Data="{StaticResource MotionBlurIcon}" Style="{StaticResource HeaderIconPath}"/>
-                    </Grid>
-                    <Grid Style="{StaticResource IconContainer}" Margin="{StaticResource IconMargin}">
-                        <Path Data="{gm:FontawesomeResource ResourceKey=CircleHalfStroke}" Style="{StaticResource HeaderIconPath}"/>
-                    </Grid>
-                    <Grid Style="{StaticResource IconContainer}" Margin="{StaticResource IconMargin}">
-                        <Path Data="{gm:FontawesomeResource ResourceKey=Cube}" Style="{StaticResource HeaderIconPath}"/>
-                    </Grid>
-                </StackPanel>
-                <TextBlock Text="モード"/>
-                <TextBlock Text="親とリンク"/>
-            </pr:ItemResizableStackPanel>
-        </Grid>
+            <TextBlock Text="#" Style="{StaticResource HeaderTextBlock}" Visibility="{Binding IsLayerNumberColumnVisible, Converter={StaticResource BooleanToVisibilityConverter}}" pr:ItemResizableStackPanel.ItemMinSize="18" pr:ItemResizableStackPanel.ItemSize="{Binding LayerNumberColumnWidth}"/>
+
+            <TextBlock Text="{gm:LanguageResource ResourceKey=Timeline_LayerNameColumn}" Style="{StaticResource HeaderTextBlock}" pr:ItemResizableStackPanel.ItemMinSize="52" pr:ItemResizableStackPanel.ItemSize="{Binding LayerNameColumnWidth}"/>
+
+            <TextBlock Text="{gm:LanguageResource ResourceKey=Timeline_LayerCommentColumn}" Style="{StaticResource HeaderTextBlock}" Visibility="{Binding IsLayerCommentColumnVisible, Converter={StaticResource BooleanToVisibilityConverter}}" pr:ItemResizableStackPanel.ItemMinSize="50" pr:ItemResizableStackPanel.ItemSize="{Binding LayerCommentColumnWidth}"/>
+
+            <StackPanel Style="{StaticResource HeaderIconPanel}" Visibility="{Binding IsLayerSwitchColumnVisible, Converter={StaticResource BooleanToVisibilityConverter}}" pr:ItemResizableStackPanel.ItemMinSize="114" pr:ItemResizableStackPanel.ItemSize="{Binding LayerSwitchColumnWidth}">
+                <Grid Style="{StaticResource IconContainer}">
+                    <Path Data="{StaticResource ShyIcon}" Style="{StaticResource HeaderIconPath}"/>
+                </Grid>
+                <Grid Style="{StaticResource IconContainer}">
+                    <Path Data="{gm:FontawesomeResource ResourceKey=Sun}" Style="{StaticResource HeaderIconPath}"/>
+                </Grid>
+                <Grid Style="{StaticResource IconContainer}">
+                    <Path Data="{StaticResource NearestNeighborInterpolationIcon}" Style="{StaticResource HeaderIconPath}"/>
+                </Grid>
+                <Grid Style="{StaticResource IconContainer}">
+                    <Path Data="{gm:FontawesomeResource ResourceKey=FlorinSign}" Style="{StaticResource HeaderIconPath}"/>
+                </Grid>
+                <Grid Style="{StaticResource IconContainer}">
+                    <Path Data="{StaticResource FrameBlendIcon}" Style="{StaticResource HeaderIconPath}"/>
+                </Grid>
+                <Grid Style="{StaticResource IconContainer}">
+                    <Path Data="{StaticResource MotionBlurIcon}" Style="{StaticResource HeaderIconPath}"/>
+                </Grid>
+                <Grid Style="{StaticResource IconContainer}">
+                    <Path Data="{gm:FontawesomeResource ResourceKey=CircleHalfStroke}" Style="{StaticResource HeaderIconPath}"/>
+                </Grid>
+                <Grid Style="{StaticResource IconContainer}">
+                    <Path Data="{gm:FontawesomeResource ResourceKey=Cube}" Style="{StaticResource HeaderIconPath}"/>
+                </Grid>
+            </StackPanel>
+
+            <Grid VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="2,0" Visibility="{Binding IsModeColumnVisible, Converter={StaticResource BooleanToVisibilityConverter}}" pr:ItemResizableStackPanel.ItemMinSize="120" pr:ItemResizableStackPanel.ItemSize="{Binding ModeColumnWidth}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=Timeline_ModeColumn}" Style="{StaticResource HeaderTextBlock}"/>
+                <TextBlock Grid.Column="1" Text="{gm:LanguageResource ResourceKey=Timeline_TrackMatteColumn}" Style="{StaticResource HeaderTextBlock}"/>
+            </Grid>
+
+            <TextBlock Text="{gm:LanguageResource ResourceKey=Timeline_ParentLayerColumn}" Style="{StaticResource HeaderTextBlock}" Visibility="{Binding IsParentLayerColumnVisible, Converter={StaticResource BooleanToVisibilityConverter}}" pr:ItemResizableStackPanel.ItemMinSize="75" pr:ItemResizableStackPanel.ItemSize="{Binding ParentLayerColumnWidth}"/>
+
+            <pr:ItemResizableStackPanel.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_AVSwitchColumn}" IsCheckable="True" IsChecked="{Binding IsAVSwitchColumnVisible}"/>
+                    <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_TagColumn}" IsCheckable="True" IsChecked="{Binding IsTagColumnVisible}"/>
+                    <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_LayerNumberColumn}" IsCheckable="True" IsChecked="{Binding IsLayerNumberColumnVisible}"/>
+                    <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_LayerCommentColumn}" IsCheckable="True" IsChecked="{Binding IsLayerCommentColumnVisible}"/>
+                    <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_LayerSwitchColumn}" IsCheckable="True" IsChecked="{Binding IsLayerSwitchColumnVisible}"/>
+                    <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ModeColumn}" IsCheckable="True" IsChecked="{Binding IsModeColumnVisible}"/>
+                    <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ParentLayerColumn}" IsCheckable="True" IsChecked="{Binding IsParentLayerColumnVisible}"/>
+                </ContextMenu>
+            </pr:ItemResizableStackPanel.ContextMenu>
+        </pr:ItemResizableStackPanel>
+
+        <!-- NOTE: インジケーターを最前面に表示するため、TimeLocatorViewのXAMLの記述は一番最後にする -->
+        <pt:TimeLocatorView Grid.Row="0" Grid.Column="1" Grid.RowSpan="3" CurrentTime="{Binding CurrentTime}"/>
     </Grid>
 </UserControl>

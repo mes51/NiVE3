@@ -200,6 +200,33 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("コンポジションの追加")]
         public static readonly string History_AddComposition = nameof(History_AddComposition);
 
+        [ShowInMarkup, DefaultValue("A/V機能")]
+        public static readonly string Timeline_AVSwitchColumn = nameof(Timeline_AVSwitchColumn);
+
+        [ShowInMarkup, DefaultValue("タグ")]
+        public static readonly string Timeline_TagColumn = nameof(Timeline_TagColumn);
+
+        [ShowInMarkup, DefaultValue("レイヤー番号")]
+        public static readonly string Timeline_LayerNumberColumn = nameof(Timeline_LayerNumberColumn);
+
+        [ShowInMarkup, DefaultValue("レイヤー名")]
+        public static readonly string Timeline_LayerNameColumn = nameof(Timeline_LayerNameColumn);
+
+        [ShowInMarkup, DefaultValue("コメント")]
+        public static readonly string Timeline_LayerCommentColumn = nameof(Timeline_LayerCommentColumn);
+
+        [ShowInMarkup, DefaultValue("レイヤースイッチ")]
+        public static readonly string Timeline_LayerSwitchColumn = nameof(Timeline_LayerSwitchColumn);
+
+        [ShowInMarkup, DefaultValue("モード")]
+        public static readonly string Timeline_ModeColumn = nameof(Timeline_ModeColumn);
+
+        [ShowInMarkup, DefaultValue("トラックマット")]
+        public static readonly string Timeline_TrackMatteColumn = nameof(Timeline_TrackMatteColumn);
+
+        [ShowInMarkup, DefaultValue("親")]
+        public static readonly string Timeline_ParentLayerColumn = nameof(Timeline_ParentLayerColumn);
+
         // Enum
 
         [ShowInMarkup, DefaultValue("RGB")]

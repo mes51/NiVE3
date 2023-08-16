@@ -48,7 +48,7 @@ namespace NiVE3.View.Part
             nameof(CurrentTime),
             typeof(double),
             typeof(TimeLocatorView),
-            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, TimeChanged)
+            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, TimeChanged)
         );
 
         public static readonly DependencyProperty FrameRateProperty = DependencyProperty.Register(

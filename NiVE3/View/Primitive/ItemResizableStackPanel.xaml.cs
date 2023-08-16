@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.Data.Common;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -32,7 +34,7 @@ namespace NiVE3.View.Primitive
             "ItemSize",
             typeof(double),
             typeof(ItemResizableStackPanel),
-            new PropertyMetadata(0.0)
+            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.BindsTwoWayByDefault)
         );
 
         public static readonly DependencyProperty ItemMinSizeProperty = DependencyProperty.RegisterAttached(
@@ -79,6 +81,10 @@ namespace NiVE3.View.Primitive
             target.SetValue(ItemSizeProperty, value);
         }
 
+        static readonly OffsetGridLengthConverter SizeConverter = new OffsetGridLengthConverter { SizeOffset = SplitterSize };
+
+        static readonly BooleanInvertConverter IsLockedConverter = new BooleanInvertConverter();
+
         public static readonly DependencyProperty OrientationProperty = DependencyProperty.Register(
             nameof(Orientation),
             typeof(Orientation),
@@ -86,25 +92,18 @@ namespace NiVE3.View.Primitive
             new FrameworkPropertyMetadata(Orientation.Horizontal, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, OrientationChanged)
         );
 
-        static readonly OffsetGridLengthConverter SizeConverter = new OffsetGridLengthConverter { SizeOffset = SplitterSize };
+        public static readonly DependencyProperty ItemCollapseByHiddenProperty = DependencyProperty.Register(
+            nameof(ItemCollapseByHidden),
+            typeof(bool),
+            typeof(ItemResizableStackPanel),
+            new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, ItemCollapseByHiddenPropertyChanged)
+        );
 
-        static readonly OffsetValueConverter MinSizeConverter = new OffsetValueConverter { Offset = SplitterSize };
-
-        static readonly BooleanInvertConverter IsLockedConverter = new BooleanInvertConverter();
-
-        static readonly VisibilityToSwitchValueConverter ItemVisibilityConverter = new VisibilityToSwitchValueConverter
+        public bool ItemCollapseByHidden
         {
-            VisibleValue = double.PositiveInfinity,
-            HiddenValue = double.PositiveInfinity,
-            CollapsedValue = 0.0
-        };
-
-        static readonly VisibilityToSwitchValueConverter SplitterWidthConverter = new VisibilityToSwitchValueConverter
-        {
-            VisibleValue = new GridLength(SplitterSize),
-            HiddenValue = new GridLength(SplitterSize),
-            CollapsedValue = new GridLength()
-        };
+            get { return (bool)GetValue(ItemCollapseByHiddenProperty); }
+            set { SetValue(ItemCollapseByHiddenProperty, value); }
+        }
 
         public Orientation Orientation
         {
@@ -118,6 +117,22 @@ namespace NiVE3.View.Primitive
         ColumnDefinition ColumnStopper { get; }
 
         RowDefinition RowStopper { get; }
+
+        VisibilityToSwitchValueConverter ItemVisibilityConverter { get; } = new VisibilityToSwitchValueConverter
+        {
+            VisibleValue = double.PositiveInfinity,
+            HiddenValue = double.PositiveInfinity,
+            CollapsedValue = 0.0
+        };
+
+        VisibilityToSwitchValueConverter SplitterWidthConverter { get; } = new VisibilityToSwitchValueConverter
+        {
+            VisibleValue = new GridLength(SplitterSize),
+            HiddenValue = new GridLength(SplitterSize),
+            CollapsedValue = new GridLength()
+        };
+
+        MinSizeConverter MinSizeConverter { get; } = new MinSizeConverter { Offset = SplitterSize };
 
         public ItemResizableStackPanel()
         {
@@ -301,6 +316,28 @@ namespace NiVE3.View.Primitive
             }
         }
 
+        void UpdateCollapse()
+        {
+            if (Orientation == Orientation.Horizontal)
+            {
+                foreach (var c in ContainerGrid.ColumnDefinitions)
+                {
+                    c.GetBindingExpression(ColumnDefinition.WidthProperty)?.UpdateTarget();
+                    c.GetBindingExpression(ColumnDefinition.MinWidthProperty)?.UpdateTarget();
+                    c.GetBindingExpression(ColumnDefinition.MaxWidthProperty)?.UpdateTarget();
+                }
+            }
+            else
+            {
+                foreach (var c in ContainerGrid.RowDefinitions)
+                {
+                    c.GetBindingExpression(RowDefinition.HeightProperty)?.UpdateTarget();
+                    c.GetBindingExpression(RowDefinition.MinHeightProperty)?.UpdateTarget();
+                    c.GetBindingExpression(RowDefinition.MaxHeightProperty)?.UpdateTarget();
+                }
+            }
+        }
+
         void BindColumnWidth(UIElement child, ColumnDefinition column)
         {
             var binding = new Binding
@@ -312,13 +349,23 @@ namespace NiVE3.View.Primitive
             };
             BindingOperations.SetBinding(column, ColumnDefinition.WidthProperty, binding);
 
-            var minBinding = new Binding
+            var minBinding = new MultiBinding
             {
-                Path = new PropertyPath(ItemMinSizeProperty),
-                Source = child,
                 Mode = BindingMode.OneWay,
                 Converter = MinSizeConverter
             };
+            minBinding.Bindings.Add(new Binding
+            {
+                Path = new PropertyPath(ItemMinSizeProperty),
+                Source = child,
+                Mode = BindingMode.OneWay
+            });
+            minBinding.Bindings.Add(new Binding
+            {
+                Path = new PropertyPath(VisibilityProperty),
+                Source = child,
+                Mode = BindingMode.OneWay
+            });
             BindingOperations.SetBinding(column, ColumnDefinition.MinWidthProperty, minBinding);
 
             var visibilityBinding = new Binding
@@ -342,13 +389,23 @@ namespace NiVE3.View.Primitive
             };
             BindingOperations.SetBinding(row, RowDefinition.HeightProperty, binding);
 
-            var minBinding = new Binding
+            var minBinding = new MultiBinding
             {
-                Path = new PropertyPath(ItemMinSizeProperty),
-                Source = child,
                 Mode = BindingMode.OneWay,
                 Converter = MinSizeConverter
             };
+            minBinding.Bindings.Add(new Binding
+            {
+                Path = new PropertyPath(ItemMinSizeProperty),
+                Source = child,
+                Mode = BindingMode.OneWay
+            });
+            minBinding.Bindings.Add(new Binding
+            {
+                Path = new PropertyPath(VisibilityProperty),
+                Source = child,
+                Mode = BindingMode.OneWay
+            });
             BindingOperations.SetBinding(row, RowDefinition.MinHeightProperty, minBinding);
 
             var visibilityBinding = new Binding
@@ -436,6 +493,82 @@ namespace NiVE3.View.Primitive
         static void OrientationChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             (d as ItemResizableStackPanel)?.UpdateOrientation();
+        }
+
+        static void ItemCollapseByHiddenPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is ItemResizableStackPanel panel)
+            {
+                if (panel.ItemCollapseByHidden)
+                {
+                    panel.ItemVisibilityConverter.HiddenValue = 0.0;
+                    panel.SplitterWidthConverter.HiddenValue = new GridLength();
+                }
+                else
+                {
+                    panel.ItemVisibilityConverter.HiddenValue = double.PositiveInfinity;
+                    panel.SplitterWidthConverter.HiddenValue = new GridLength(SplitterSize);
+                }
+                panel.UpdateCollapse();
+            }
+        }
+    }
+
+    class MinSizeConverter : IMultiValueConverter
+    {
+        public double Offset { get; set; }
+
+        public bool ItemCollapseByHidden { get; set; }
+
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (values.Length > 1 && values[0] is double size && values[1] is Visibility visibility)
+            {
+                switch (visibility)
+                {
+                    case Visibility.Visible:
+                        return size + Offset;
+                    case Visibility.Hidden:
+                        return ItemCollapseByHidden ? 0.0 : size + Offset;
+                    case Visibility.Collapsed:
+                        return 0.0;
+                }
+            }
+            return DependencyProperty.UnsetValue;
+        }
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    class OffsetGridLengthConverter : IValueConverter
+    {
+        public double SizeOffset { get; set; }
+
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is double v)
+            {
+                return new GridLength(v + SizeOffset);
+            }
+            else
+            {
+                return DependencyProperty.UnsetValue;
+            }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is GridLength v)
+            {
+                return v.Value - SizeOffset;
+            }
+            else
+            {
+                return DependencyProperty.UnsetValue;
+            }
         }
     }
 }
