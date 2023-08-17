@@ -40,6 +40,30 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref duration, value); }
         }
 
+        private double timeBarRange;
+        [ManualWire(nameof(CompositionModel))]
+        public double TimeBarRange
+        {
+            get { return timeBarRange; }
+            set { SetProperty(ref timeBarRange, value); }
+        }
+
+        private double timeBarRangeStart;
+        [ManualWire(nameof(CompositionModel))]
+        public double TimeBarRangeStart
+        {
+            get { return timeBarRangeStart; }
+            set { SetProperty(ref timeBarRangeStart, value); }
+        }
+
+        private double currentTime;
+        [ManualWire(nameof(CompositionModel))]
+        public double CurrentTime
+        {
+            get { return currentTime; }
+            set { SetProperty(ref currentTime, value); }
+        }
+
         private double tagColumnWIdth;
         [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineTagColumnWidth))]
         public double TagColumnWidth
@@ -152,13 +176,6 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref isParentLayerColumnVisible, value); }
         }
 
-        private double currentTime;
-        public double CurrentTime
-        {
-            get { return currentTime; }
-            set { SetProperty(ref currentTime, value); }
-        }
-
         private CompositionModel? compositionModel;
         public CompositionModel? CompositionModel
         {
@@ -207,6 +224,9 @@ namespace NiVE3.ViewModel
                 if (CompositionModel == null)
                 {
                     Title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Timeline_EmptyTitle);
+                    Duration = 0.0;
+                    FrameRate = 30.0;
+                    FrameDuration = 1.0 / 30.0;
                 }
                 else
                 {

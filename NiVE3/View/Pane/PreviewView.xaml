@@ -188,7 +188,7 @@
             </Canvas>
         </Border>
 
-        <pt:TimeLocatorView Grid.Row="1" Duration="{Binding Duration}" Range="{Binding TimeBarRange, Mode=TwoWay}" RangeStart="{Binding TimeBarRangeStart, Mode=TwoWay}" CurrentTime="{Binding CurrentTime, Mode=TwoWay}" FrameRate="{Binding FrameRate}">
+        <pt:TimeLocatorView Grid.Row="1" Duration="{Binding Duration}" Range="{Binding TimeBarRange}" RangeStart="{Binding TimeBarRangeStart}" CurrentTime="{Binding CurrentTime}" FrameRate="{Binding FrameRate}">
             <pt:TimeLocatorView.Style>
                 <Style TargetType="{x:Type pt:TimeLocatorView}">
                     <Setter Property="Visibility" Value="Collapsed"/>

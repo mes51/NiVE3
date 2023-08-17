@@ -27,14 +27,14 @@ namespace NiVE3.View.Part
             nameof(Range),
             typeof(double),
             typeof(TimeLocatorView),
-            new FrameworkPropertyMetadata(1.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsRender, TimeChanged)
+            new FrameworkPropertyMetadata(1.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, TimeChanged)
         );
 
         public static readonly DependencyProperty RangeStartProperty = DependencyProperty.Register(
             nameof(RangeStart),
             typeof(double),
             typeof(TimeLocatorView),
-            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsRender, TimeChanged)
+            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, TimeChanged)
         );
 
         public static readonly DependencyProperty DurationProperty = DependencyProperty.Register(

@@ -149,6 +149,6 @@
         </pr:ItemResizableStackPanel>
 
         <!-- NOTE: インジケーターを最前面に表示するため、TimeLocatorViewのXAMLの記述は一番最後にする -->
-        <pt:TimeLocatorView Grid.Row="0" Grid.Column="1" Grid.RowSpan="3" CurrentTime="{Binding CurrentTime}"/>
+        <pt:TimeLocatorView Grid.Row="0" Grid.Column="1" Grid.RowSpan="3" Duration="{Binding Duration}" FrameRate="{Binding FrameRate}" CurrentTime="{Binding CurrentTime}" Range="{Binding TimeBarRange}" RangeStart="{Binding TimeBarRangeStart}"/>
     </Grid>
 </UserControl>

@@ -22,35 +22,35 @@ namespace NiVE3.Model
             set { SetProperty(ref name, value); }
         }
 
-        private int width = 1920;
+        private int width;
         public int Width
         {
             get { return width; }
             set { SetProperty(ref width, value); }
         }
 
-        private int height = 1080;
+        private int height;
         public int Height
         {
             get { return height; }
             set { SetProperty(ref height, value); }
         }
 
-        private double frameRate = 30.0;
+        private double frameRate;
         public double FrameRate
         {
             get { return frameRate; }
             set { SetProperty(ref frameRate, value); }
         }
 
-        private double frameDuration = 1.0 / 30.0;
+        private double frameDuration;
         public double FrameDuration
         {
             get { return frameDuration; }
             private set { SetProperty(ref frameDuration, value); }
         }
 
-        private double duration = 10.0;
+        private double duration;
         public double Duration
         {
             get { return duration; }
@@ -64,21 +64,21 @@ namespace NiVE3.Model
             set { SetProperty(ref isRetentionFrameRate, value); }
         }
 
-        private int shutterAngle = 180;
+        private int shutterAngle;
         public int ShutterAngle
         {
             get { return shutterAngle; }
             set { SetProperty(ref shutterAngle, value); }
         }
 
-        private int shutterPhase = 180;
+        private int shutterPhase;
         public int ShutterPhase
         {
             get { return shutterPhase; }
             set { SetProperty(ref shutterPhase, value); }
         }
 
-        private int motionBlurSampleCount = 16;
+        private int motionBlurSampleCount;
         public int MotionBlurSampleCount
         {
             get { return motionBlurSampleCount; }
@@ -90,6 +90,27 @@ namespace NiVE3.Model
         {
             get { return hasAudio; }
             set { SetProperty(ref hasAudio, value); }
+        }
+
+        private double timeBarRange;
+        public double TimeBarRange
+        {
+            get { return timeBarRange; }
+            set { SetProperty(ref timeBarRange, value); }
+        }
+
+        private double timeBarRangeStart;
+        public double TimeBarRangeStart
+        {
+            get { return timeBarRangeStart; }
+            set { SetProperty(ref timeBarRangeStart, value); }
+        }
+
+        private double currentTime;
+        public double CurrentTime
+        {
+            get { return currentTime; }
+            set { SetProperty(ref currentTime, value); }
         }
 
         private ObservableCollection<LayerModel> layers = new ObservableCollection<LayerModel>();
@@ -125,9 +146,21 @@ namespace NiVE3.Model
 
         private void CompositionModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(FrameRate))
+            switch (e.PropertyName)
             {
-                frameDuration = 1.0 / FrameRate;
+                case nameof(FrameRate):
+                    FrameDuration = 1.0 / FrameRate;
+                    break;
+                case nameof(Duration):
+                    if (TimeBarRange < Duration)
+                    {
+                        TimeBarRange = Duration;
+                    }
+                    if (TimeBarRangeStart + TimeBarRange > Duration)
+                    {
+                        TimeBarRangeStart = Math.Max(Duration - TimeBarRangeStart, 0.0);
+                    }
+                    break;
             }
         }
 

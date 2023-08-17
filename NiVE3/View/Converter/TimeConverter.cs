@@ -67,7 +67,7 @@ namespace NiVE3.View.Converter
             }
             if (part.Length > 3)
             {
-                time += ParseValue(part[2]) * 3600.0;
+                time += ParseValue(part[3]) * 3600.0;
             }
 
             if (double.IsNaN(time))
