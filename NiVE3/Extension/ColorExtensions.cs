@@ -12,7 +12,7 @@ namespace NiVE3.Extension
         public static Color FromHex(string hex)
         {
             var colorCode = hex.StartsWith("#") ? hex.Substring(1) : hex;
-            var colors = colorCode.Grouped(2).Select(c => (byte)Convert.ToInt32(new string(c.ToArray()), 16)).ToArray();
+            var colors = colorCode.Chunk(2).Select(c => (byte)Convert.ToInt32(new string(c.ToArray()), 16)).ToArray();
             if (colors.Length > 3)
             {
                 return Color.FromArgb(
