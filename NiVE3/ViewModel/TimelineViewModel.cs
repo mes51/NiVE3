@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,10 +13,11 @@ namespace NiVE3.ViewModel
 {
     [PaneLocation(PaneLocation.Bottom)]
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
+    [ManualViewModelWireable(nameof(CompositionModel), nameof(BindComposition), nameof(UnbindComposition), WithInitializeProperty = true)]
     partial class TimelineViewModel : PaneViewModelBase
     {
         private double frameRate;
-        [NeedWire(nameof(CompositionModel), IsOneWay = true)]
+        [ManualWire(nameof(CompositionModel), IsOneWay = true)]
         public double FrameRate
         {
             get { return frameRate; }
@@ -23,7 +25,7 @@ namespace NiVE3.ViewModel
         }
 
         private double frameDuration;
-        [NeedWire(nameof(CompositionModel), IsOneWay = true)]
+        [ManualWire(nameof(CompositionModel), IsOneWay = true)]
         public double FrameDuration
         {
             get { return frameDuration; }
@@ -31,7 +33,7 @@ namespace NiVE3.ViewModel
         }
 
         private double duration;
-        [NeedWire(nameof(CompositionModel), IsOneWay = true)]
+        [ManualWire(nameof(CompositionModel), IsOneWay = true)]
         public double Duration
         {
             get { return duration; }
@@ -157,19 +159,60 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref currentTime, value); }
         }
 
-        public CompositionModel CompositionModel { get; }
+        private CompositionModel? compositionModel;
+        public CompositionModel? CompositionModel
+        {
+            get { return compositionModel; }
+            set
+            {
+                if (compositionModel == value)
+                {
+                    return;
+                }
+
+                if (compositionModel != null)
+                {
+                    UnbindComposition();
+                }
+                SetProperty(ref compositionModel, value);
+                if (value != null)
+                {
+                    BindComposition();
+                }
+            }
+        }
 
         ViewStateModel ViewState { get; }
 
-        public TimelineViewModel(ViewStateModel viewState, CompositionModel compositionModel)
+        public TimelineViewModel(ViewStateModel viewState)
         {
             ViewState = viewState;
-            CompositionModel = compositionModel;
-            Title = compositionModel.Name;
+            Title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Timeline_EmptyTitle);
 
             WiringModel();
+
+            PropertyChanged += TimelineViewModel_PropertyChanged;
         }
 
         partial void WiringModel();
+
+        partial void BindComposition();
+
+        partial void UnbindComposition();
+
+        private void TimelineViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(CompositionModel))
+            {
+                if (CompositionModel == null)
+                {
+                    Title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Timeline_EmptyTitle);
+                }
+                else
+                {
+                    Title = CompositionModel.Name;
+                }
+            }
+        }
     }
 }

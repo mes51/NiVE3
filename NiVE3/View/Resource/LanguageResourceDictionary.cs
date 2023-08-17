@@ -227,6 +227,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("親")]
         public static readonly string Timeline_ParentLayerColumn = nameof(Timeline_ParentLayerColumn);
 
+        [ShowInMarkup, DefaultValue("(なし)")]
+        public static readonly string Timeline_EmptyTitle = nameof(Timeline_EmptyTitle);
+
         // Enum
 
         [ShowInMarkup, DefaultValue("RGB")]

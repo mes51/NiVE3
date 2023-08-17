@@ -76,4 +76,50 @@ namespace NiVE3.SourceGenerator.ViewModelWireGenerator
             value = kv.Value;
         }
     }
+
+    static class EmitterUtil
+    {
+        public static INamedTypeSymbol GetTypeSymbol(Compilation compilation, string symbolName)
+        {
+            var symbol = compilation.GetTypeByMetadataName(symbolName);
+            if (symbol == null)
+            {
+                throw new InvalidOperationException($"{symbolName} is not found");
+            }
+
+            return symbol;
+        }
+
+        public static AttributeData[] GetAttributeData(ITypeSymbol targetTypeSymbol, ITypeSymbol attributeTypeSymbol)
+        {
+            var attributeData = targetTypeSymbol
+                .GetAttributes()
+                .Where(a => SymbolEqualityComparer.Default.Equals(attributeTypeSymbol, a.AttributeClass))
+                .ToArray();
+            if (attributeData.Length < 1)
+            {
+                throw new InvalidOperationException($"processing class is not applied {attributeTypeSymbol.Name}");
+            }
+
+            return attributeData;
+        }
+
+        public static bool IsInheritINotifyPropertyChanged(Compilation compilation, ITypeSymbol? type)
+        {
+            var notifyPropertyChangedSymbol = compilation.GetTypeByMetadataName("System.ComponentModel.INotifyPropertyChanged");
+            while (type != null)
+            {
+                foreach (var i in type.Interfaces)
+                {
+                    if (SymbolEqualityComparer.Default.Equals(i, notifyPropertyChangedSymbol))
+                    {
+                        return true;
+                    }
+                }
+                type = type.BaseType;
+            }
+
+            return false;
+        }
+    }
 }

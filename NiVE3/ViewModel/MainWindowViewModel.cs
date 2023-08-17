@@ -110,29 +110,38 @@ namespace NiVE3.ViewModel
             RemoveViewModelCommand = new DelegateCommand<BindableBase>(MainRegion.Remove);
 
             MainRegion.Views.CollectionChanged += ViewModels_CollectionChanged;
+
+            MainRegion.Add(Container.Resolve<TimelineViewModel>());
         }
 
         private void ProjectModel_OpenCompositionTimeline(object? sender, CompositionEventArgs e)
         {
-            var timelineViewModel = ViewModels.OfType<TimelineViewModel>().FirstOrDefault(vm => vm.CompositionModel == e.Composition);
-            if (timelineViewModel != null)
+            var timelineViewModel = ViewModels.OfType<TimelineViewModel>().FirstOrDefault(vm => vm.CompositionModel == null || vm.CompositionModel == e.Composition);
+            if (timelineViewModel == null)
             {
-                timelineViewModel.IsSelected = true;
-                MainRegion.Activate(timelineViewModel);
+                timelineViewModel = Container.Resolve<TimelineViewModel>();
+                MainRegion.Add(timelineViewModel);
             }
-            else
-            {
-                var viewModel = Container.Resolve<TimelineViewModel>(new object[] { e.Composition });
-                MainRegion.Add(viewModel);
-            }
+
+            timelineViewModel.CompositionModel = e.Composition;
+            timelineViewModel.IsSelected = true;
+            MainRegion.Activate(timelineViewModel);
         }
 
         private void ProjectModel_CompositionRemoved(object? sender, CompositionEventArgs e)
         {
+            var viewModels = ViewModels.OfType<TimelineViewModel>().ToArray();
             var viewModel = ViewModels.OfType<TimelineViewModel>().FirstOrDefault(vm => vm.CompositionModel == e.Composition);
             if (viewModel != null)
             {
-                MainRegion.Remove(viewModel);
+                if (viewModels.Length > 1)
+                {
+                    MainRegion.Remove(viewModel);
+                }
+                else
+                {
+                    viewModel.CompositionModel = null;
+                }
             }
         }
 
