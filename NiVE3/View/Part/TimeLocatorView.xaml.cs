@@ -23,6 +23,8 @@ namespace NiVE3.View.Part
         // TODO: デザイン決定後調整
         public const double SideSpacerWidth = 10;
 
+        const double DisplayFrameRangeThreshold = 20.0;
+
         public static readonly DependencyProperty RangeProperty = DependencyProperty.Register(
             nameof(Range),
             typeof(double),
@@ -66,6 +68,51 @@ namespace NiVE3.View.Part
         );
 
         public static readonly DependencyProperty IndicatorPositionProperty = IndicatorPositionPropertyKey.DependencyProperty;
+
+        private static readonly DependencyPropertyKey FrameRangeWidthPropertyKey = DependencyProperty.RegisterReadOnly(
+            nameof(FrameRangeWidth),
+            typeof(double),
+            typeof(TimeLocatorView),
+            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        public static readonly DependencyProperty FrameRangeWidthProperty = FrameRangeWidthPropertyKey.DependencyProperty;
+
+        private static readonly DependencyPropertyKey FrameRangePositionPropertyKey = DependencyProperty.RegisterReadOnly(
+            nameof(FrameRangePosition),
+            typeof(double),
+            typeof(TimeLocatorView),
+            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        public static readonly DependencyProperty FrameRangePositionProperty = FrameRangePositionPropertyKey.DependencyProperty;
+
+        private static readonly DependencyPropertyKey LocatorAreaActualHeightPropertyKey = DependencyProperty.RegisterReadOnly(
+            nameof(LocatorAreaActualHeight),
+            typeof(double),
+            typeof(TimeLocatorView),
+            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        public static readonly DependencyProperty LocatorAreaActualHeightProperty = LocatorAreaActualHeightPropertyKey.DependencyProperty;
+
+        public double LocatorAreaActualHeight
+        {
+            get { return (double)GetValue(LocatorAreaActualHeightProperty); }
+            private set { SetValue(LocatorAreaActualHeightPropertyKey, value); }
+        }
+
+        public double FrameRangePosition
+        {
+            get { return (double)GetValue(FrameRangePositionProperty); }
+            private set { SetValue(FrameRangePositionPropertyKey, value); }
+        }
+
+        public double FrameRangeWidth
+        {
+            get { return (double)GetValue(FrameRangeWidthProperty); }
+            private set { SetValue(FrameRangeWidthPropertyKey, value); }
+        }
 
         public double CurrentTime
         {
@@ -161,6 +208,11 @@ namespace NiVE3.View.Part
             IsScrubbing = false;
         }
 
+        private void HeightMeasurementLocatorArea_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            LocatorAreaActualHeight = HeightMeasurementLocatorArea.ActualHeight;
+        }
+
         static void TimeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is TimeLocatorView timeLocatorView)
@@ -169,11 +221,23 @@ namespace NiVE3.View.Part
                 if (timePerPixel > 0.0)
                 {
                     timeLocatorView.IndicatorPosition = (timeLocatorView.CurrentTime - timeLocatorView.RangeStart) / timePerPixel + SideSpacerWidth;
+
+                    var frameRangeWidth = (1.0 / timeLocatorView.FrameRate) / timePerPixel;
+                    if (frameRangeWidth >= DisplayFrameRangeThreshold)
+                    {
+                        timeLocatorView.FrameRangeWidth = frameRangeWidth;
+                    }
+                    else
+                    {
+                        timeLocatorView.FrameRangeWidth = 0.0;
+                    }
                 }
                 else
                 {
                     timeLocatorView.IndicatorPosition = SideSpacerWidth;
                 }
+
+                timeLocatorView.FrameRangePosition = timeLocatorView.IndicatorPosition; // TODO: モーションブラー適用時の範囲に合わせる
             }
         }
     }

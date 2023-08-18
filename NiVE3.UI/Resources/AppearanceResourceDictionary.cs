@@ -33,6 +33,9 @@ namespace NiVE3.UI.Resources
         [ShowInMarkup, BrushColorRange("#3355FF", "#6699FF")]
         public static readonly string MouseOverLinkTextBrush = nameof(MouseOverLinkTextBrush);
 
+        [ShowInMarkup, BrushColorRange("#553366FF", "#2288EEFF")]
+        public static readonly string TimeIndicatorFrameRangeBrush = nameof(TimeIndicatorFrameRangeBrush);
+
         double appearance = 0.0;
         public double Appearance
         {

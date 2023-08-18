@@ -55,7 +55,7 @@
             <RowDefinition />
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0" Grid.Column="0">
+        <Grid Grid.Row="0" Grid.Column="0" Height="{Binding ElementName=TimeLocator, Path=LocatorAreaActualHeight}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition />
@@ -149,6 +149,6 @@
         </pr:ItemResizableStackPanel>
 
         <!-- NOTE: インジケーターを最前面に表示するため、TimeLocatorViewのXAMLの記述は一番最後にする -->
-        <pt:TimeLocatorView Grid.Row="0" Grid.Column="1" Grid.RowSpan="3" Duration="{Binding Duration}" FrameRate="{Binding FrameRate}" CurrentTime="{Binding CurrentTime}" Range="{Binding TimeBarRange}" RangeStart="{Binding TimeBarRangeStart}"/>
+        <pt:TimeLocatorView x:Name="TimeLocator" Grid.Row="0" Grid.Column="1" Grid.RowSpan="3" Duration="{Binding Duration}" FrameRate="{Binding FrameRate}" CurrentTime="{Binding CurrentTime}" Range="{Binding TimeBarRange}" RangeStart="{Binding TimeBarRangeStart}"/>
     </Grid>
 </UserControl>
