@@ -64,6 +64,22 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref currentTime, value); }
         }
 
+        private double workareaBegin;
+        [ManualWire(nameof(CompositionModel))]
+        public double WorkareaBegin
+        {
+            get { return workareaBegin; }
+            set { SetProperty(ref workareaBegin, value); }
+        }
+
+        private double workareaEnd;
+        [ManualWire(nameof(CompositionModel))]
+        public double WorkareaEnd
+        {
+            get { return workareaEnd; }
+            set { SetProperty(ref workareaEnd, value); }
+        }
+
         private double tagColumnWIdth;
         [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineTagColumnWidth))]
         public double TagColumnWidth

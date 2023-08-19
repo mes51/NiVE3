@@ -1,0 +1,333 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
+
+namespace NiVE3.View.Part
+{
+    /// <summary>
+    /// WorkareaBar.xaml の相互作用ロジック
+    /// </summary>
+    public partial class WorkareaBar : UserControl
+    {
+        // TODO: デザイン決定後調整
+        const double RangeThumbWidth = 20.0;
+
+        private static readonly DependencyProperty BeforeWorkareaStartWidthProperty = DependencyProperty.Register(
+            nameof(BeforeWorkareaStartWidth),
+            typeof(double),
+            typeof(WorkareaBar),
+            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        private static readonly DependencyProperty AfterWorkareaEndWidthProperty = DependencyProperty.Register(
+            nameof(AfterWorkareaEndWidth),
+            typeof(double),
+            typeof(WorkareaBar),
+            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        private static readonly DependencyProperty FrameRangeWidthProperty = DependencyProperty.Register(
+            nameof(FrameRangeWidth),
+            typeof(double),
+            typeof(WorkareaBar),
+            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        private static readonly DependencyProperty WorkareaLeftProperty = DependencyProperty.Register(
+            nameof(WorkareaLeft),
+            typeof(double),
+            typeof(WorkareaBar),
+            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        private static readonly DependencyProperty WorkareaGridWidthProperty = DependencyProperty.Register(
+            nameof(WorkareaGridWidth),
+            typeof(double),
+            typeof(WorkareaBar),
+            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        public static readonly DependencyProperty BarHeightProperty = DependencyProperty.Register(
+            nameof(BarHeight),
+            typeof(double),
+            typeof(WorkareaBar),
+            new FrameworkPropertyMetadata(10.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        public static readonly DependencyProperty DurationProperty = DependencyProperty.Register(
+            nameof(Duration),
+            typeof(double),
+            typeof(WorkareaBar),
+            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, TimeChanged)
+        );
+
+        public static readonly DependencyProperty FrameRateProperty = DependencyProperty.Register(
+            nameof(FrameRate),
+            typeof(double),
+            typeof(WorkareaBar),
+            new FrameworkPropertyMetadata(30.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, TimeChanged)
+        );
+
+        public static readonly DependencyProperty RangeProperty = DependencyProperty.Register(
+            nameof(Range),
+            typeof(double),
+            typeof(WorkareaBar),
+            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, TimeChanged)
+        );
+
+        public static readonly DependencyProperty RangeStartProperty = DependencyProperty.Register(
+            nameof(RangeStart),
+            typeof(double),
+            typeof(WorkareaBar),
+            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, TimeChanged)
+        );
+
+        public static readonly DependencyProperty WorkareaBeginProperty = DependencyProperty.Register(
+            nameof(WorkareaBegin),
+            typeof(double),
+            typeof(WorkareaBar),
+            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, TimeChanged, CoerceWorkareaBegin)
+        );
+
+        public static readonly DependencyProperty WorkareaEndProperty = DependencyProperty.Register(
+            nameof(WorkareaEnd),
+            typeof(double),
+            typeof(WorkareaBar),
+            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, TimeChanged, CoerceWorkareaEnd)
+        );
+
+        public double WorkareaEnd
+        {
+            get { return (double)GetValue(WorkareaEndProperty); }
+            set { SetValue(WorkareaEndProperty, value); }
+        }
+
+        public double WorkareaBegin
+        {
+            get { return (double)GetValue(WorkareaBeginProperty); }
+            set { SetValue(WorkareaBeginProperty, value); }
+        }
+
+        public double RangeStart
+        {
+            get { return (double)GetValue(RangeStartProperty); }
+            set { SetValue(RangeStartProperty, value); }
+        }
+
+        public double Range
+        {
+            get { return (double)GetValue(RangeProperty); }
+            set { SetValue(RangeProperty, value); }
+        }
+
+        public double FrameRate
+        {
+            get { return (double)GetValue(FrameRateProperty); }
+            set { SetValue(FrameRateProperty, value); }
+        }
+
+        public double Duration
+        {
+            get { return (double)GetValue(DurationProperty); }
+            set { SetValue(DurationProperty, value); }
+        }
+
+        public double BarHeight
+        {
+            get { return (double)GetValue(BarHeightProperty); }
+            set { SetValue(BarHeightProperty, value); }
+        }
+
+        private double WorkareaGridWidth
+        {
+            get { return (double)GetValue(WorkareaGridWidthProperty); }
+            set { SetValue(WorkareaGridWidthProperty, value); }
+        }
+
+        private double WorkareaLeft
+        {
+            get { return (double)GetValue(WorkareaLeftProperty); }
+            set { SetValue(WorkareaLeftProperty, value); }
+        }
+
+        private double FrameRangeWidth
+        {
+            get { return (double)GetValue(FrameRangeWidthProperty); }
+            set { SetValue(FrameRangeWidthProperty, value); }
+        }
+
+        private double AfterWorkareaEndWidth
+        {
+            get { return (double)GetValue(AfterWorkareaEndWidthProperty); }
+            set { SetValue(AfterWorkareaEndWidthProperty, value); }
+        }
+
+        private double BeforeWorkareaStartWidth
+        {
+            get { return (double)GetValue(BeforeWorkareaStartWidthProperty); }
+            set { SetValue(BeforeWorkareaStartWidthProperty, value); }
+        }
+
+        bool IsRangeStartThumbDragging { get; set; }
+
+        bool IsRangeThumbDragging { get; set; }
+
+        bool IsRangeEndThumbDragging { get; set; }
+
+        public WorkareaBar()
+        {
+            InitializeComponent();
+        }
+
+        private void RangeStartThumb_DragStarted(object sender, DragStartedEventArgs e)
+        {
+            if (!IsRangeThumbDragging && !IsRangeEndThumbDragging)
+            {
+                IsRangeStartThumbDragging = true;
+            }
+        }
+
+        private void RangeStartThumb_DragDelta(object sender, DragDeltaEventArgs e)
+        {
+            if (!IsRangeStartThumbDragging)
+            {
+                return;
+            }
+
+            var timePerPixel = Range / (ActualWidth - RangeThumbWidth);
+            var frameDuration = 1.0 / FrameRate;
+            var time = (int)Math.Round(Math.Clamp(WorkareaBegin + e.HorizontalChange * timePerPixel, 0.0, WorkareaEnd - frameDuration) * FrameRate) * frameDuration;
+            WorkareaBegin = time;
+        }
+
+        private void RangeStartThumb_DragCompleted(object sender, DragCompletedEventArgs e)
+        {
+            IsRangeStartThumbDragging = false;
+        }
+
+        private void RangeEndThumb_DragStarted(object sender, DragStartedEventArgs e)
+        {
+            if (!IsRangeStartThumbDragging && !IsRangeThumbDragging)
+            {
+                IsRangeEndThumbDragging = true;
+            }
+        }
+
+        private void RangeEndThumb_DragDelta(object sender, DragDeltaEventArgs e)
+        {
+            if (!IsRangeEndThumbDragging)
+            {
+                return;
+            }
+
+            var timePerPixel = Range / (ActualWidth - RangeThumbWidth);
+            var frameDuration = 1.0 / FrameRate;
+            var time = (int)Math.Round(Math.Clamp(WorkareaEnd + e.HorizontalChange * timePerPixel, WorkareaBegin + frameDuration, Duration) * FrameRate) * frameDuration;
+            WorkareaEnd = time;
+        }
+
+        private void RangeEndThumb_DragCompleted(object sender, DragCompletedEventArgs e)
+        {
+            IsRangeEndThumbDragging = false;
+        }
+
+        private void RangeThumb_DragStarted(object sender, DragStartedEventArgs e)
+        {
+            if (!IsRangeStartThumbDragging && !IsRangeEndThumbDragging)
+            {
+                IsRangeThumbDragging = true;
+            }
+        }
+
+        private void RangeThumb_DragDelta(object sender, DragDeltaEventArgs e)
+        {
+            if (!IsRangeThumbDragging)
+            {
+                return;
+            }
+
+            var timePerPixel = Range / (ActualWidth - RangeThumbWidth);
+            var frameDuration = 1.0 / FrameRate;
+            var diffTime = (int)Math.Round(Math.Clamp(e.HorizontalChange * timePerPixel, -WorkareaBegin, Duration - WorkareaEnd) * FrameRate) * frameDuration;
+            WorkareaBegin += diffTime;
+            WorkareaEnd += diffTime;
+        }
+
+        private void RangeThumb_DragCompleted(object sender, DragCompletedEventArgs e)
+        {
+            IsRangeThumbDragging = false;
+        }
+
+        static void TimeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is not WorkareaBar workareaBar)
+            {
+                return;
+            }
+
+            var pixelPerTime = (workareaBar.ActualWidth - RangeThumbWidth) / workareaBar.Range;
+            if (pixelPerTime < 0 || double.IsNaN(pixelPerTime) || double.IsInfinity(pixelPerTime))
+            {
+                workareaBar.WorkareaGridWidth = workareaBar.ActualWidth;
+                workareaBar.WorkareaLeft = 0;
+                return;
+            }
+
+            workareaBar.BeforeWorkareaStartWidth = workareaBar.WorkareaBegin * pixelPerTime;
+            workareaBar.AfterWorkareaEndWidth = (workareaBar.Duration - workareaBar.WorkareaEnd) * pixelPerTime;
+            workareaBar.FrameRangeWidth = (1.0 / workareaBar.FrameRate) * pixelPerTime;
+            workareaBar.WorkareaGridWidth = workareaBar.Duration * pixelPerTime + RangeThumbWidth;
+            workareaBar.WorkareaLeft = -workareaBar.RangeStart * pixelPerTime;
+        }
+
+        static object CoerceWorkareaBegin(DependencyObject d, object value)
+        {
+            if (d is WorkareaBar workareaBar)
+            {
+                if (workareaBar.FrameRate > 0.0 && workareaBar.Duration > 0.0)
+                {
+                    return Math.Clamp((double)value, 0.0, workareaBar.Duration - 1.0 / workareaBar.FrameRate);
+                }
+                else
+                {
+                    return 0.0;
+                }
+            }
+            else
+            {
+                return DependencyProperty.UnsetValue;
+            }
+        }
+
+        static object CoerceWorkareaEnd(DependencyObject d, object value)
+        {
+            if (d is WorkareaBar workareaBar)
+            {
+                if (workareaBar.FrameRate > 0.0 && workareaBar.Duration > 0.0)
+                {
+                    return Math.Clamp((double)value, 1.0 / workareaBar.FrameRate, workareaBar.Duration);
+                }
+                else
+                {
+                    return 0.0;
+                }
+            }
+            else
+            {
+                return DependencyProperty.UnsetValue;
+            }
+        }
+    }
+}

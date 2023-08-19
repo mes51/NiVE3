@@ -4,11 +4,16 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:NiVE3.View.Part"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:pr="clr-namespace:NiVE3.View.Primitive"
              xmlns:ugm="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
              mc:Ignorable="d" 
              x:Name="Root"
              d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <sys:Double x:Key="RangeBarHeight">10.0</sys:Double>
+    </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -21,12 +26,16 @@
         <Rectangle Grid.Row="2" x:Name="HeightMeasurementIndicatorLineArea" Fill="Transparent" IsHitTestVisible="False" Visibility="Hidden"/>
         <Rectangle Grid.Row="0" Grid.RowSpan="2" x:Name="HeightMeasurementLocatorArea" Fill="Transparent" IsHitTestVisible="False" Visibility="Hidden" SizeChanged="HeightMeasurementLocatorArea_SizeChanged"/>
 
-        <pr:RangeScrollBar Grid.Row="0" Height="10" Minimum="0" Maximum="{Binding ElementName=Root, Path=Duration}" Range="{Binding ElementName=Root, Path=Range, Mode=TwoWay}" RangeStart="{Binding ElementName=Root, Path=RangeStart, Mode=TwoWay}" MinimumRange="{Binding ElementName=TimeBar, Path=MinimumRange, Mode=OneWay}"/>
+        <pr:RangeScrollBar Grid.Row="0" Height="{StaticResource RangeBarHeight}" Minimum="0" Maximum="{Binding ElementName=Root, Path=Duration}" Range="{Binding ElementName=Root, Path=Range, Mode=TwoWay}" RangeStart="{Binding ElementName=Root, Path=RangeStart, Mode=TwoWay}" MinimumRange="{Binding ElementName=TimeBar, Path=MinimumRange, Mode=OneWay}"/>
         <pr:TimeBar Grid.Row="1" x:Name="TimeBar" Height="20" Duration="{Binding ElementName=Root, Path=Duration}" Range="{Binding ElementName=Root, Path=Range}" RangeStart="{Binding ElementName=Root, Path=RangeStart}" FrameRate="{Binding ElementName=Root, Path=FrameRate}" SideSpacerWidth="{x:Static local:TimeLocatorView.SideSpacerWidth}"/>
         <Canvas Grid.Row="1" Grid.RowSpan="2" x:Name="IndicatorContainer" ClipToBounds="True">
             <pr:IndicatorView Height="{Binding ElementName=IndicatorContainer, Path=ActualHeight}" SnapsToDevicePixels="True" Canvas.Left="{Binding ElementName=Root, Path=IndicatorPosition}" Canvas.Top="8"/>
             <Rectangle x:Name="FrameRangeRect" IsHitTestVisible="False" Width="{Binding ElementName=Root, Path=FrameRangeWidth}" Height="{Binding ElementName=HeightMeasurementIndicatorLineArea, Path=ActualHeight}" Fill="{ugm:AppearanceResource ResourceKey=TimeIndicatorFrameRangeBrush}" Canvas.Left="{Binding ElementName=Root, Path=FrameRangePosition}" Canvas.Top="{Binding ElementName=HeightMeasurementTimeBarArea, Path=ActualHeight}"/>
         </Canvas>
-        <Rectangle Grid.Row="1" x:Name="ScrubbingArea" Height="12" Fill="Transparent" VerticalAlignment="Bottom" MouseDown="ScrubbingArea_MouseDown"  MouseMove="ScrubbingArea_MouseMove"  MouseUp="ScrubbingArea_MouseUp"/>
+        <Rectangle Grid.Row="1" x:Name="ScrubbingArea" Fill="Transparent" MouseDown="ScrubbingArea_MouseDown"  MouseMove="ScrubbingArea_MouseMove"  MouseUp="ScrubbingArea_MouseUp"/>
+
+        <Canvas Grid.Row="0" Visibility="{Binding ElementName=Root, Path=ShowIndicatorLineInRangeBar, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Rectangle Width="1" Height="{StaticResource RangeBarHeight}" Fill="#E40000" Canvas.Left="{Binding ElementName=Root, Path=RangeBarIndicatorPosition}"/>
+        </Canvas>
     </Grid>
 </UserControl>

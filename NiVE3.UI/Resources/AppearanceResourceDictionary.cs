@@ -36,6 +36,9 @@ namespace NiVE3.UI.Resources
         [ShowInMarkup, BrushColorRange("#553366FF", "#2288EEFF")]
         public static readonly string TimeIndicatorFrameRangeBrush = nameof(TimeIndicatorFrameRangeBrush);
 
+        [ShowInMarkup, BrushColorRange("#11FFFFFF", "#11000000")]
+        public static readonly string OutOfWorkareaBrush = nameof(OutOfWorkareaBrush);
+
         double appearance = 0.0;
         public double Appearance
         {

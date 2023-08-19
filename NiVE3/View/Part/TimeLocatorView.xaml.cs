@@ -60,6 +60,20 @@ namespace NiVE3.View.Part
             new FrameworkPropertyMetadata(30.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
+        public static readonly DependencyProperty ShowIndicatorLineInRangeBarProperty = DependencyProperty.Register(
+            nameof(ShowIndicatorLineInRangeBar),
+            typeof(bool),
+            typeof(TimeLocatorView),
+            new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        private static readonly DependencyProperty RangeBarIndicatorPositionProperty = DependencyProperty.Register(
+            nameof(RangeBarIndicatorPosition),
+            typeof(double),
+            typeof(TimeLocatorView),
+            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
         private static readonly DependencyPropertyKey IndicatorPositionPropertyKey = DependencyProperty.RegisterReadOnly(
             nameof(IndicatorPosition),
             typeof(double),
@@ -114,6 +128,24 @@ namespace NiVE3.View.Part
             private set { SetValue(FrameRangeWidthPropertyKey, value); }
         }
 
+        public double IndicatorPosition
+        {
+            get { return (double)GetValue(IndicatorPositionProperty); }
+            private set { SetValue(IndicatorPositionPropertyKey, value); }
+        }
+
+        private double RangeBarIndicatorPosition
+        {
+            get { return (double)GetValue(RangeBarIndicatorPositionProperty); }
+            set { SetValue(RangeBarIndicatorPositionProperty, value); }
+        }
+
+        public bool ShowIndicatorLineInRangeBar
+        {
+            get { return (bool)GetValue(ShowIndicatorLineInRangeBarProperty); }
+            set { SetValue(ShowIndicatorLineInRangeBarProperty, value); }
+        }
+
         public double CurrentTime
         {
             get { return (double)GetValue(CurrentTimeProperty); }
@@ -142,12 +174,6 @@ namespace NiVE3.View.Part
         {
             get { return (double)GetValue(RangeProperty); }
             set { SetValue(RangeProperty, value); }
-        }
-
-        public double IndicatorPosition
-        {
-            get { return (double)GetValue(IndicatorPositionProperty); }
-            private set { SetValue(IndicatorPositionPropertyKey, value); }
         }
 
         bool IsScrubbing { get; set; }
@@ -215,30 +241,41 @@ namespace NiVE3.View.Part
 
         static void TimeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is TimeLocatorView timeLocatorView)
+            if (d is not TimeLocatorView timeLocatorView)
             {
-                var timePerPixel = timeLocatorView.Range / (timeLocatorView.ActualWidth - SideSpacerWidth * 2.0);
-                if (timePerPixel > 0.0)
-                {
-                    timeLocatorView.IndicatorPosition = (timeLocatorView.CurrentTime - timeLocatorView.RangeStart) / timePerPixel + SideSpacerWidth;
+                return;
+            }
 
-                    var frameRangeWidth = (1.0 / timeLocatorView.FrameRate) / timePerPixel;
-                    if (frameRangeWidth >= DisplayFrameRangeThreshold)
-                    {
-                        timeLocatorView.FrameRangeWidth = frameRangeWidth;
-                    }
-                    else
-                    {
-                        timeLocatorView.FrameRangeWidth = 0.0;
-                    }
+            var pixelPerTime = (timeLocatorView.ActualWidth - SideSpacerWidth * 2.0) / timeLocatorView.Range;
+            if (!double.IsNaN(pixelPerTime) && !double.IsInfinity(pixelPerTime) && pixelPerTime > 0.0)
+            {
+                timeLocatorView.IndicatorPosition = (timeLocatorView.CurrentTime - timeLocatorView.RangeStart) * pixelPerTime + SideSpacerWidth;
+
+                var frameRangeWidth = (1.0 / timeLocatorView.FrameRate) * pixelPerTime;
+                if (frameRangeWidth >= DisplayFrameRangeThreshold)
+                {
+                    timeLocatorView.FrameRangeWidth = frameRangeWidth;
                 }
                 else
                 {
-                    timeLocatorView.IndicatorPosition = SideSpacerWidth;
+                    timeLocatorView.FrameRangeWidth = 0.0;
                 }
-
-                timeLocatorView.FrameRangePosition = timeLocatorView.IndicatorPosition; // TODO: モーションブラー適用時の範囲に合わせる
             }
+            else
+            {
+                timeLocatorView.IndicatorPosition = SideSpacerWidth;
+            }
+
+            var globalPixelPerTime = (timeLocatorView.ActualWidth - SideSpacerWidth * 2.0) / timeLocatorView.Duration;
+            if (!double.IsNaN(globalPixelPerTime) && !double.IsInfinity(globalPixelPerTime) && globalPixelPerTime > 0.0)
+            {
+                timeLocatorView.RangeBarIndicatorPosition = timeLocatorView.CurrentTime * globalPixelPerTime + SideSpacerWidth;
+            }
+            else
+            {
+                timeLocatorView.RangeBarIndicatorPosition = SideSpacerWidth;
+            }
+            timeLocatorView.FrameRangePosition = timeLocatorView.IndicatorPosition; // TODO: モーションブラー適用時の範囲に合わせる
         }
     }
 }

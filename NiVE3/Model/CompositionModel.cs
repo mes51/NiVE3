@@ -113,6 +113,20 @@ namespace NiVE3.Model
             set { SetProperty(ref currentTime, value); }
         }
 
+        private double workareaBegin;
+        public double WorkareaBegin
+        {
+            get { return workareaBegin; }
+            set { SetProperty(ref workareaBegin, value); }
+        }
+
+        private double workareaEnd;
+        public double WorkareaEnd
+        {
+            get { return workareaEnd; }
+            set { SetProperty(ref workareaEnd, value); }
+        }
+
         private ObservableCollection<LayerModel> layers = new ObservableCollection<LayerModel>();
         public ObservableCollection<LayerModel> Layers
         {
@@ -160,6 +174,8 @@ namespace NiVE3.Model
                     {
                         TimeBarRangeStart = Math.Max(Duration - TimeBarRangeStart, 0.0);
                     }
+                    WorkareaBegin = 0.0;
+                    WorkareaEnd = Duration;
                     break;
             }
         }

@@ -12,15 +12,6 @@
              d:DesignHeight="20" d:DesignWidth="800">
     <UserControl.Resources>
         <sys:Double x:Key="RangeThumbWidth">10</sys:Double>
-        <Style x:Key="FocusVisual">
-            <Setter Property="Control.Template">
-                <Setter.Value>
-                    <ControlTemplate>
-                        <Rectangle Margin="2" StrokeDashArray="1 2" Stroke="{ui:AppearanceResource ResourceKey=TextBrush}" SnapsToDevicePixels="true" StrokeThickness="1"/>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
     </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
@@ -38,9 +29,9 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <Thumb Grid.Column="0" x:Name="RangeStartThumb" Width="{StaticResource RangeThumbWidth}" DragStarted="RangeStartThumb_DragStarted" DragDelta="RangeStartThumb_DragDelta" DragCompleted="RangeStartThumb_DragCompleted"/>
+            <Thumb Grid.Column="0" x:Name="RangeStartThumb" Width="{StaticResource RangeThumbWidth}" Cursor="SizeWE" DragStarted="RangeStartThumb_DragStarted" DragDelta="RangeStartThumb_DragDelta" DragCompleted="RangeStartThumb_DragCompleted"/>
             <Thumb Grid.Column="1" x:Name="RangeThumb" DragStarted="RangeThumb_DragStarted" DragDelta="RangeThumb_DragDelta" DragCompleted="RangeThumb_DragCompleted"/>
-            <Thumb Grid.Column="2" x:Name="RangeEndThumb" Width="{StaticResource RangeThumbWidth}" DragStarted="RangeEndThumb_DragStarted" DragDelta="RangeEndThumb_DragDelta" DragCompleted="RangeEndThumb_DragCompleted"/>
+            <Thumb Grid.Column="2" x:Name="RangeEndThumb" Width="{StaticResource RangeThumbWidth}" Cursor="SizeWE" DragStarted="RangeEndThumb_DragStarted" DragDelta="RangeEndThumb_DragDelta" DragCompleted="RangeEndThumb_DragCompleted"/>
         </Grid>
         <RepeatButton Grid.Column="2" x:Name="IncreaseButton" Width="0" Command="{Binding ElementName=Root, Path=IncreaseRangeStartCommand}"/>
     </Grid>
