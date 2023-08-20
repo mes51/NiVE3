@@ -191,6 +191,28 @@ namespace NiVE3.View.Part
             InitializeComponent();
         }
 
+        void UpdateBar()
+        {
+            var pixelPerTime = (ActualWidth - RangeThumbWidth) / Range;
+            if (pixelPerTime < 0 || double.IsNaN(pixelPerTime) || double.IsInfinity(pixelPerTime))
+            {
+                WorkareaGridWidth = ActualWidth;
+                WorkareaLeft = 0;
+                return;
+            }
+
+            BeforeWorkareaStartWidth = WorkareaBegin * pixelPerTime;
+            AfterWorkareaEndWidth = (Duration - WorkareaEnd) * pixelPerTime;
+            FrameRangeWidth = (1.0 / FrameRate) * pixelPerTime;
+            WorkareaGridWidth = Duration * pixelPerTime + RangeThumbWidth;
+            WorkareaLeft = -RangeStart * pixelPerTime;
+        }
+
+        private void Root_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            UpdateBar();
+        }
+
         private void RangeStartThumb_DragStarted(object sender, DragStartedEventArgs e)
         {
             if (!IsRangeThumbDragging && !IsRangeEndThumbDragging && FrameRate > 0.0)
@@ -272,24 +294,10 @@ namespace NiVE3.View.Part
 
         static void TimeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is not WorkareaBar workareaBar)
+            if (d is WorkareaBar workareaBar)
             {
-                return;
+                workareaBar.UpdateBar();
             }
-
-            var pixelPerTime = (workareaBar.ActualWidth - RangeThumbWidth) / workareaBar.Range;
-            if (pixelPerTime < 0 || double.IsNaN(pixelPerTime) || double.IsInfinity(pixelPerTime))
-            {
-                workareaBar.WorkareaGridWidth = workareaBar.ActualWidth;
-                workareaBar.WorkareaLeft = 0;
-                return;
-            }
-
-            workareaBar.BeforeWorkareaStartWidth = workareaBar.WorkareaBegin * pixelPerTime;
-            workareaBar.AfterWorkareaEndWidth = (workareaBar.Duration - workareaBar.WorkareaEnd) * pixelPerTime;
-            workareaBar.FrameRangeWidth = (1.0 / workareaBar.FrameRate) * pixelPerTime;
-            workareaBar.WorkareaGridWidth = workareaBar.Duration * pixelPerTime + RangeThumbWidth;
-            workareaBar.WorkareaLeft = -workareaBar.RangeStart * pixelPerTime;
         }
 
         static object CoerceWorkareaBegin(DependencyObject d, object value)
