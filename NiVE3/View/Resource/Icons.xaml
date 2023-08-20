@@ -110,4 +110,18 @@
         <RectangleGeometry Rect="8,8,2,2"/>
         <RectangleGeometry Rect="10,10,2,2"/>
     </GeometryGroup>
+
+    <GeometryGroup x:Key="SizeWOnly">
+        <CombinedGeometry GeometryCombineMode="Union" Geometry1="{gm:FontawesomeResource ResourceKey=LeftLong}"/>
+        <RectangleGeometry Rect="14,0,1,12"/>
+    </GeometryGroup>
+
+    <GeometryGroup x:Key="SizeEOnly">
+        <RectangleGeometry Rect="0,0,1,12"/>
+        <CombinedGeometry GeometryCombineMode="Union" Geometry1="{gm:FontawesomeResource ResourceKey=RightLong}">
+            <CombinedGeometry.Transform>
+                <TranslateTransform X="3"/>
+            </CombinedGeometry.Transform>
+        </CombinedGeometry>
+    </GeometryGroup>
 </ResourceDictionary>

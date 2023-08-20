@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:NiVE3.View.Part"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
              xmlns:ugm="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
              mc:Ignorable="d" 
              x:Name="Root"
@@ -28,9 +29,9 @@
                 <ColumnDefinition Width="{Binding ElementName=Root, Path=AfterWorkareaEndWidth}"/>
             </Grid.ColumnDefinitions>
 
-            <Thumb Grid.Row="0" Grid.Column="1" x:Name="RangeStartThumb" Width="{StaticResource RangeThumbWidth}" Cursor="SizeWE" DragStarted="RangeStartThumb_DragStarted" DragDelta="RangeStartThumb_DragDelta" DragCompleted="RangeStartThumb_DragCompleted"/>
-            <Thumb Grid.Row="0" Grid.Column="2" x:Name="RangeThumb" DragStarted="RangeThumb_DragStarted" DragDelta="RangeThumb_DragDelta" DragCompleted="RangeThumb_DragCompleted"/>
-            <Thumb Grid.Row="0" Grid.Column="3" x:Name="RangeEndThumb" Width="{StaticResource RangeThumbWidth}" Cursor="SizeWE" DragStarted="RangeEndThumb_DragStarted" DragDelta="RangeEndThumb_DragDelta" DragCompleted="RangeEndThumb_DragCompleted"/>
+            <Thumb Grid.Row="0" Grid.Column="1" x:Name="RangeStartThumb" Width="{StaticResource RangeThumbWidth}" Cursor="{gm:CursorIconResource ResourceKey=SizeWOnly}" DragStarted="RangeStartThumb_DragStarted" DragDelta="RangeStartThumb_DragDelta" DragCompleted="RangeStartThumb_DragCompleted"/>
+            <Thumb Grid.Row="0" Grid.Column="2" x:Name="RangeThumb" DragStarted="RangeThumb_DragStarted" Cursor="SizeWE" DragDelta="RangeThumb_DragDelta" DragCompleted="RangeThumb_DragCompleted"/>
+            <Thumb Grid.Row="0" Grid.Column="3" x:Name="RangeEndThumb" Width="{StaticResource RangeThumbWidth}" Cursor="{gm:CursorIconResource ResourceKey=SizeEOnly}" DragStarted="RangeEndThumb_DragStarted" DragDelta="RangeEndThumb_DragDelta" DragCompleted="RangeEndThumb_DragCompleted"/>
 
             <Rectangle Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Fill="{ugm:AppearanceResource ResourceKey=OutOfWorkareaBrush}"/>
             <Rectangle Grid.Row="1" Grid.Column="3" Grid.ColumnSpan="2" Fill="{ugm:AppearanceResource ResourceKey=OutOfWorkareaBrush}"/>

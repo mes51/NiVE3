@@ -53,6 +53,12 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, Icon("")]
         public static readonly string MountainSun = nameof(MountainSun);
 
+        [ShowInMarkup, Icon("")]
+        public static readonly string LeftLong = nameof(LeftLong);
+
+        [ShowInMarkup, Icon("")]
+        public static readonly string RightLong = nameof(RightLong);
+
         public FontawesomeResourceDictionary()
         {
             var keys = typeof(FontawesomeResourceDictionary).GetFields(BindingFlags.Static | BindingFlags.Public)

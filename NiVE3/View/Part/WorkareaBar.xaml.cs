@@ -193,7 +193,7 @@ namespace NiVE3.View.Part
 
         private void RangeStartThumb_DragStarted(object sender, DragStartedEventArgs e)
         {
-            if (!IsRangeThumbDragging && !IsRangeEndThumbDragging)
+            if (!IsRangeThumbDragging && !IsRangeEndThumbDragging && FrameRate > 0.0)
             {
                 IsRangeStartThumbDragging = true;
             }
@@ -219,7 +219,7 @@ namespace NiVE3.View.Part
 
         private void RangeEndThumb_DragStarted(object sender, DragStartedEventArgs e)
         {
-            if (!IsRangeStartThumbDragging && !IsRangeThumbDragging)
+            if (!IsRangeStartThumbDragging && !IsRangeThumbDragging && FrameRate > 0.0)
             {
                 IsRangeEndThumbDragging = true;
             }
@@ -245,7 +245,7 @@ namespace NiVE3.View.Part
 
         private void RangeThumb_DragStarted(object sender, DragStartedEventArgs e)
         {
-            if (!IsRangeStartThumbDragging && !IsRangeEndThumbDragging)
+            if (!IsRangeStartThumbDragging && !IsRangeEndThumbDragging && FrameRate > 0.0)
             {
                 IsRangeThumbDragging = true;
             }
