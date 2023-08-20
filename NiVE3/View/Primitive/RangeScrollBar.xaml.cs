@@ -13,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using NiVE3.View.Resource;
 using Prism.Commands;
 
 namespace NiVE3.View.Primitive
@@ -22,9 +23,6 @@ namespace NiVE3.View.Primitive
     /// </summary>
     public partial class RangeScrollBar : UserControl
     {
-        // TODO: デザイン決定後調整
-        const double RangeThumbWidth = 20.0;
-
         public static readonly DependencyProperty MinimumProperty = DependencyProperty.Register(
             nameof(Minimum),
             typeof(double),
@@ -107,7 +105,7 @@ namespace NiVE3.View.Primitive
             set { SetValue(MinimumProperty, value); }
         }
 
-        double RangeWidth => ActualWidth - RangeThumbWidth;
+        double RangeWidth => ActualWidth - UIParameters.TimelineRangeThumbTotalWidth;
 
         // NOTE: Bindingの値の更新タイミング的にRangeの更新よりも先にMaximumの更新が出来ない(っぽい?)ため、Coerceによる値の修正は行わず、使用時にClampする
         double ClampedRange => Math.Clamp(Range, MinimumRange, Maximum);
@@ -135,8 +133,8 @@ namespace NiVE3.View.Primitive
             base.ArrangeOverride(arrangeBounds);
 
             var totalRange = Maximum - Minimum;
-            var rangeBounds = arrangeBounds.Width - RangeThumbWidth;
-            var rangeGridWidth = (Range / totalRange) * rangeBounds + RangeThumbWidth;
+            var rangeBounds = arrangeBounds.Width - UIParameters.TimelineRangeThumbTotalWidth;
+            var rangeGridWidth = (Range / totalRange) * rangeBounds + UIParameters.TimelineRangeThumbTotalWidth;
             DecreaseButton.Width = (RangeStart / totalRange) * rangeBounds;
             IncreaseButton.Width = Math.Max(arrangeBounds.Width - (DecreaseButton.Width + rangeGridWidth), 0.0);
 

@@ -7,7 +7,7 @@
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
         xmlns:ugm="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
-        mc:Ignorable="d" 
+        mc:Ignorable="d"
         d:DesignHeight="450" d:DesignWidth="800">
     <Slider.Style>
         <Style TargetType="{x:Type Slider}">
@@ -15,6 +15,7 @@
                 <sys:Double x:Key="HorizontalTrackHeight">4.0</sys:Double>
                 <sys:Double x:Key="HorizontalThumbWidth">5.0</sys:Double>
                 <Style x:Key="HorizontalSliderTrackDecreaseButton" TargetType="{x:Type RepeatButton}" BasedOn="{StaticResource {x:Type RepeatButton}}">
+                    <Setter Property="IsTabStop" Value="False"/>
                     <Setter Property="Template">
                         <Setter.Value>
                             <ControlTemplate TargetType="{x:Type RepeatButton}">
@@ -26,6 +27,7 @@
                     </Setter>
                 </Style>
                 <Style x:Key="HorizontalSliderTrackIncreaseButton" TargetType="{x:Type RepeatButton}" BasedOn="{StaticResource {x:Type RepeatButton}}">
+                    <Setter Property="IsTabStop" Value="False"/>
                     <Setter Property="Template">
                         <Setter.Value>
                             <ControlTemplate TargetType="{x:Type RepeatButton}">
@@ -81,6 +83,7 @@
                             </ControlTemplate>
                         </Setter.Value>
                     </Setter>
+                    <Setter Property="IsTabStop" Value="False"/>
                     <Setter Property="Background" Value="Transparent"/>
                     <Setter Property="BorderBrush" Value="Transparent"/>
                     <Style.Triggers>
@@ -95,6 +98,7 @@
             </Style.Resources>
 
             <Setter Property="OverridesDefaultStyle" Value="True" />
+            <Setter Property="IsTabStop" Value="False"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type Slider}">

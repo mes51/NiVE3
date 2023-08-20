@@ -14,6 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using NiVE3.View.Primitive;
+using NiVE3.View.Resource;
 
 namespace NiVE3.View.Part
 {
@@ -22,9 +23,6 @@ namespace NiVE3.View.Part
     /// </summary>
     public partial class TimeLocatorView : UserControl
     {
-        // TODO: デザイン決定後調整
-        public const double SideSpacerWidth = 10;
-
         const double DisplayFrameRangeThreshold = 20.0;
 
         public static readonly DependencyProperty RangeProperty = DependencyProperty.Register(
@@ -80,7 +78,7 @@ namespace NiVE3.View.Part
             nameof(IndicatorPosition),
             typeof(double),
             typeof(TimeLocatorView),
-            new FrameworkPropertyMetadata(SideSpacerWidth, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+            new FrameworkPropertyMetadata(UIParameters.TimelineRangeThumbWidth, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
         public static readonly DependencyProperty IndicatorPositionProperty = IndicatorPositionPropertyKey.DependencyProperty;
@@ -202,7 +200,7 @@ namespace NiVE3.View.Part
 
         double CalcTimeFromPixel(double x)
         {
-            var timePerPixel = Range / (ActualWidth - SideSpacerWidth * 2.0);
+            var timePerPixel = Range / (ActualWidth - UIParameters.TimelineRangeThumbWidth * 2.0);
             return Math.Clamp(RangeStart + x * timePerPixel, 0.0, Duration);
         }
 
@@ -225,7 +223,7 @@ namespace NiVE3.View.Part
             ScrubbingArea.CaptureMouse();
             IsScrubbing = true;
 
-            var time = (int)Math.Round(CalcTimeFromPixel(e.GetPosition((IInputElement)sender).X - SideSpacerWidth) * FrameRate) / FrameRate;
+            var time = (int)Math.Round(CalcTimeFromPixel(e.GetPosition((IInputElement)sender).X - UIParameters.TimelineRangeThumbWidth) * FrameRate) / FrameRate;
             CurrentTime = time;
             if (time < RangeStart)
             {
@@ -244,7 +242,7 @@ namespace NiVE3.View.Part
                 return;
             }
 
-            var time = (int)Math.Round(CalcTimeFromPixel(e.GetPosition((IInputElement)sender).X - SideSpacerWidth) * FrameRate) / FrameRate;
+            var time = (int)Math.Round(CalcTimeFromPixel(e.GetPosition((IInputElement)sender).X - UIParameters.TimelineRangeThumbWidth) * FrameRate) / FrameRate;
             CurrentTime = time;
             if (time < RangeStart)
             {
@@ -282,10 +280,10 @@ namespace NiVE3.View.Part
                 return;
             }
 
-            var pixelPerTime = (timeLocatorView.ActualWidth - SideSpacerWidth * 2.0) / timeLocatorView.Range;
+            var pixelPerTime = (timeLocatorView.ActualWidth - UIParameters.TimelineRangeThumbWidth * 2.0) / timeLocatorView.Range;
             if (!double.IsNaN(pixelPerTime) && !double.IsInfinity(pixelPerTime) && pixelPerTime > 0.0)
             {
-                timeLocatorView.IndicatorPosition = (timeLocatorView.CurrentTime - timeLocatorView.RangeStart) * pixelPerTime + SideSpacerWidth;
+                timeLocatorView.IndicatorPosition = (timeLocatorView.CurrentTime - timeLocatorView.RangeStart) * pixelPerTime + UIParameters.TimelineRangeThumbWidth;
 
                 var frameRangeWidth = (1.0 / timeLocatorView.FrameRate) * pixelPerTime;
                 if (frameRangeWidth >= DisplayFrameRangeThreshold)
@@ -299,17 +297,17 @@ namespace NiVE3.View.Part
             }
             else
             {
-                timeLocatorView.IndicatorPosition = SideSpacerWidth;
+                timeLocatorView.IndicatorPosition = UIParameters.TimelineRangeThumbWidth;
             }
 
-            var globalPixelPerTime = (timeLocatorView.ActualWidth - SideSpacerWidth * 2.0) / timeLocatorView.Duration;
+            var globalPixelPerTime = (timeLocatorView.ActualWidth - UIParameters.TimelineRangeThumbWidth * 2.0) / timeLocatorView.Duration;
             if (!double.IsNaN(globalPixelPerTime) && !double.IsInfinity(globalPixelPerTime) && globalPixelPerTime > 0.0)
             {
-                timeLocatorView.RangeBarIndicatorPosition = timeLocatorView.CurrentTime * globalPixelPerTime + SideSpacerWidth;
+                timeLocatorView.RangeBarIndicatorPosition = timeLocatorView.CurrentTime * globalPixelPerTime + UIParameters.TimelineRangeThumbWidth;
             }
             else
             {
-                timeLocatorView.RangeBarIndicatorPosition = SideSpacerWidth;
+                timeLocatorView.RangeBarIndicatorPosition = UIParameters.TimelineRangeThumbWidth;
             }
             timeLocatorView.FrameRangePosition = timeLocatorView.IndicatorPosition; // TODO: モーションブラー適用時の範囲に合わせる
         }

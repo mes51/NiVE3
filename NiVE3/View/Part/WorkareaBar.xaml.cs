@@ -13,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using NiVE3.View.Resource;
 
 namespace NiVE3.View.Part
 {
@@ -21,9 +22,6 @@ namespace NiVE3.View.Part
     /// </summary>
     public partial class WorkareaBar : UserControl
     {
-        // TODO: デザイン決定後調整
-        const double RangeThumbWidth = 20.0;
-
         private static readonly DependencyProperty BeforeWorkareaStartWidthProperty = DependencyProperty.Register(
             nameof(BeforeWorkareaStartWidth),
             typeof(double),
@@ -193,7 +191,7 @@ namespace NiVE3.View.Part
 
         void UpdateBar()
         {
-            var pixelPerTime = (ActualWidth - RangeThumbWidth) / Range;
+            var pixelPerTime = (ActualWidth - UIParameters.TimelineRangeThumbTotalWidth) / Range;
             if (pixelPerTime < 0 || double.IsNaN(pixelPerTime) || double.IsInfinity(pixelPerTime))
             {
                 WorkareaGridWidth = ActualWidth;
@@ -204,7 +202,7 @@ namespace NiVE3.View.Part
             BeforeWorkareaStartWidth = WorkareaBegin * pixelPerTime;
             AfterWorkareaEndWidth = (Duration - WorkareaEnd) * pixelPerTime;
             FrameRangeWidth = (1.0 / FrameRate) * pixelPerTime;
-            WorkareaGridWidth = Duration * pixelPerTime + RangeThumbWidth;
+            WorkareaGridWidth = Duration * pixelPerTime + UIParameters.TimelineRangeThumbTotalWidth;
             WorkareaLeft = -RangeStart * pixelPerTime;
         }
 
@@ -228,7 +226,7 @@ namespace NiVE3.View.Part
                 return;
             }
 
-            var timePerPixel = Range / (ActualWidth - RangeThumbWidth);
+            var timePerPixel = Range / (ActualWidth - UIParameters.TimelineRangeThumbTotalWidth);
             var frameDuration = 1.0 / FrameRate;
             var time = (int)Math.Round(Math.Clamp(WorkareaBegin + e.HorizontalChange * timePerPixel, 0.0, WorkareaEnd - frameDuration) * FrameRate) * frameDuration;
             WorkareaBegin = time;
@@ -254,7 +252,7 @@ namespace NiVE3.View.Part
                 return;
             }
 
-            var timePerPixel = Range / (ActualWidth - RangeThumbWidth);
+            var timePerPixel = Range / (ActualWidth - UIParameters.TimelineRangeThumbTotalWidth);
             var frameDuration = 1.0 / FrameRate;
             var time = (int)Math.Round(Math.Clamp(WorkareaEnd + e.HorizontalChange * timePerPixel, WorkareaBegin + frameDuration, Duration) * FrameRate) * frameDuration;
             WorkareaEnd = time;
@@ -280,7 +278,7 @@ namespace NiVE3.View.Part
                 return;
             }
 
-            var timePerPixel = Range / (ActualWidth - RangeThumbWidth);
+            var timePerPixel = Range / (ActualWidth - UIParameters.TimelineRangeThumbTotalWidth);
             var frameDuration = 1.0 / FrameRate;
             var diffTime = (int)Math.Round(Math.Clamp(e.HorizontalChange * timePerPixel, -WorkareaBegin, Duration - WorkareaEnd) * FrameRate) * frameDuration;
             WorkareaBegin += diffTime;
