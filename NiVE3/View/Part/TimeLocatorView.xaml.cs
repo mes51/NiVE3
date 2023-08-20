@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using NiVE3.View.Primitive;
 
 namespace NiVE3.View.Part
 {
@@ -110,6 +112,21 @@ namespace NiVE3.View.Part
 
         public static readonly DependencyProperty LocatorAreaActualHeightProperty = LocatorAreaActualHeightPropertyKey.DependencyProperty;
 
+        private static readonly DependencyPropertyKey MinimumRangePropertyKey = DependencyProperty.RegisterReadOnly(
+            nameof(MinimumRange),
+            typeof(double),
+            typeof(TimeLocatorView),
+            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        public static readonly DependencyProperty MinimumRangeProperty = MinimumRangePropertyKey.DependencyProperty;
+
+        public double MinimumRange
+        {
+            get { return (double)GetValue(MinimumRangeProperty); }
+            private set { SetValue(MinimumRangePropertyKey, value); }
+        }
+
         public double LocatorAreaActualHeight
         {
             get { return (double)GetValue(LocatorAreaActualHeightProperty); }
@@ -189,6 +206,20 @@ namespace NiVE3.View.Part
             return Math.Clamp(RangeStart + x * timePerPixel, 0.0, Duration);
         }
 
+        private void Root_Loaded(object sender, RoutedEventArgs e)
+        {
+            MinimumRange = TimeBar.MinimumRange;
+            // TODO: Unloadedとセットなのでリークは大丈夫なはずだが、一応他の方法が見つかったら変更する
+            DependencyPropertyDescriptor.FromProperty(Primitive.TimeBar.MinimumRangeProperty, typeof(TimeBar))
+                .AddValueChanged(TimeBar, TimeBar_MinimumRangeChanged);
+        }
+
+        private void Root_Unloaded(object sender, RoutedEventArgs e)
+        {
+            DependencyPropertyDescriptor.FromProperty(Primitive.TimeBar.MinimumRangeProperty, typeof(TimeBar))
+                .RemoveValueChanged(TimeBar, TimeBar_MinimumRangeChanged);
+        }
+
         private void ScrubbingArea_MouseDown(object sender, MouseButtonEventArgs e)
         {
             ScrubbingArea.CaptureMouse();
@@ -237,6 +268,11 @@ namespace NiVE3.View.Part
         private void HeightMeasurementLocatorArea_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             LocatorAreaActualHeight = HeightMeasurementLocatorArea.ActualHeight;
+        }
+
+        private void TimeBar_MinimumRangeChanged(object? sender, EventArgs e)
+        {
+            MinimumRange = TimeBar.MinimumRange;
         }
 
         static void TimeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)

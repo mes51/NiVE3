@@ -215,6 +215,13 @@ namespace NiVE3.ViewModel
             }
         }
 
+        private double timelineScrollBarMax;
+        public double TimelineScrollBarMax
+        {
+            get { return timelineScrollBarMax; }
+            set { SetProperty(ref timelineScrollBarMax, value); }
+        }
+
         ViewStateModel ViewState { get; }
 
         public TimelineViewModel(ViewStateModel viewState)
@@ -235,19 +242,25 @@ namespace NiVE3.ViewModel
 
         private void TimelineViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(CompositionModel))
+            switch (e.PropertyName)
             {
-                if (CompositionModel == null)
-                {
-                    Title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Timeline_EmptyTitle);
-                    Duration = 0.0;
-                    FrameRate = 30.0;
-                    FrameDuration = 1.0 / 30.0;
-                }
-                else
-                {
-                    Title = CompositionModel.Name;
-                }
+                case nameof(CompositionModel):
+                    if (CompositionModel == null)
+                    {
+                        Title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Timeline_EmptyTitle);
+                        Duration = 0.0;
+                        FrameRate = 30.0;
+                        FrameDuration = 1.0 / 30.0;
+                    }
+                    else
+                    {
+                        Title = CompositionModel.Name;
+                    }
+                    break;
+                case nameof(Duration):
+                case nameof(TimeBarRange):
+                    TimelineScrollBarMax = Duration - TimeBarRange;
+                    break;
             }
         }
     }

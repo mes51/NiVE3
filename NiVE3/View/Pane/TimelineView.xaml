@@ -53,6 +53,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition />
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <!-- NOTE: 高さ計測用 -->
@@ -152,6 +153,16 @@
         </pr:ItemResizableStackPanel>
 
         <pt:WorkareaBar Grid.Row="1" Grid.Column="1" Grid.RowSpan="2" BarHeight="{Binding ElementName=HeightMeasurementHeader, Path=ActualHeight}" Duration="{Binding Duration}" FrameRate="{Binding FrameRate}" Range="{Binding TimeBarRange}" RangeStart="{Binding TimeBarRangeStart}" WorkareaBegin="{Binding WorkareaBegin}" WorkareaEnd="{Binding WorkareaEnd}"/>
+
+        <Grid Grid.Row="3" Grid.Column="1" >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+
+            <pt:TimeScaleSlider Grid.Column="0" Width="100" Value="{Binding TimeBarRange}" Minimum="{Binding ElementName=TimeLocator, Path=MinimumRange}" Maximum="{Binding Duration}"/>
+            <ScrollBar Grid.Column="1" Orientation="Horizontal" Value="{Binding TimeBarRangeStart}" Minimum="0.0" Maximum="{Binding TimelineScrollBarMax}" SmallChange="{Binding FrameDuration}" LargeChange="{Binding TimeBarRange}" ViewportSize="1"/>
+        </Grid>
 
         <!-- NOTE: インジケーターを最前面に表示するため、TimeLocatorViewのXAMLの記述は一番最後にする -->
         <pt:TimeLocatorView x:Name="TimeLocator" Grid.Row="0" Grid.Column="1" Grid.RowSpan="3" ShowIndicatorLineInRangeBar="True" Duration="{Binding Duration}" FrameRate="{Binding FrameRate}" CurrentTime="{Binding CurrentTime}" Range="{Binding TimeBarRange}" RangeStart="{Binding TimeBarRangeStart}"/>

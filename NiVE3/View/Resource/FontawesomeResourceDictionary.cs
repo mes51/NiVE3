@@ -47,6 +47,12 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, Icon("")]
         public static readonly string Cube = nameof(Cube);
 
+        [ShowInMarkup, Icon("")]
+        public static readonly string Mound = nameof(Mound);
+
+        [ShowInMarkup, Icon("")]
+        public static readonly string MountainSun = nameof(MountainSun);
+
         public FontawesomeResourceDictionary()
         {
             var keys = typeof(FontawesomeResourceDictionary).GetFields(BindingFlags.Static | BindingFlags.Public)

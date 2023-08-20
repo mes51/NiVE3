@@ -9,6 +9,8 @@
              xmlns:ugm="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
              mc:Ignorable="d" 
              x:Name="Root"
+             Loaded="Root_Loaded"
+             Unloaded="Root_Unloaded"
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>

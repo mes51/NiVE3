@@ -1,0 +1,146 @@
+﻿<Slider x:Class="NiVE3.View.Part.TimeScaleSlider"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+        xmlns:local="clr-namespace:NiVE3.View.Part"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
+        xmlns:ugm="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
+        mc:Ignorable="d" 
+        d:DesignHeight="450" d:DesignWidth="800">
+    <Slider.Style>
+        <Style TargetType="{x:Type Slider}">
+            <Style.Resources>
+                <sys:Double x:Key="HorizontalTrackHeight">4.0</sys:Double>
+                <sys:Double x:Key="HorizontalThumbWidth">5.0</sys:Double>
+                <Style x:Key="HorizontalSliderTrackDecreaseButton" TargetType="{x:Type RepeatButton}" BasedOn="{StaticResource {x:Type RepeatButton}}">
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="{x:Type RepeatButton}">
+                                <Grid Background="Transparent">
+                                    <Border x:Name="SliderTrackDecreaseButtonRect" Height="{StaticResource HorizontalTrackHeight}" BorderThickness="0 1 1 1" BorderBrush="{TemplateBinding BorderBrush}" Background="{TemplateBinding Background}" />
+                                </Grid>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+                <Style x:Key="HorizontalSliderTrackIncreaseButton" TargetType="{x:Type RepeatButton}" BasedOn="{StaticResource {x:Type RepeatButton}}">
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="{x:Type RepeatButton}">
+                                <Grid Background="Transparent">
+                                    <Border x:Name="SliderTrackIncreaseButtonRect" Height="{StaticResource HorizontalTrackHeight}" BorderThickness="1 1 0 1" BorderBrush="{TemplateBinding BorderBrush}" Background="{TemplateBinding Background}" />
+                                </Grid>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+                <Style x:Key="HorizontalSliderThumb" TargetType="{x:Type Thumb}">
+                    <Setter Property="OverridesDefaultStyle" Value="True" />
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="{x:Type Thumb}">
+                                <Grid Width="{StaticResource HorizontalThumbWidth}">
+                                    <Border x:Name="ThumbBorder" BorderThickness="1" BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" />
+                                    <VisualStateManager.VisualStateGroups>
+                                        <VisualStateGroup>
+                                            <VisualState Name="Normal" />
+                                            <VisualState Name="MouseOver">
+                                                <Storyboard>
+                                                    <ColorAnimation Storyboard.TargetName="ThumbBorder" Storyboard.TargetProperty="BorderBrush.(SolidColorBrush.Color)" Duration="00:00:00.1" To="#FF7EB4EA" />
+                                                    <ColorAnimation Storyboard.TargetName="ThumbBorder" Storyboard.TargetProperty="Background.(SolidColorBrush.Color)" Duration="00:00:00.1" To="#FFDCECFC" />
+                                                </Storyboard>
+                                            </VisualState>
+                                            <VisualState Name="Pressed">
+                                                <Storyboard>
+                                                    <ColorAnimation Storyboard.TargetName="ThumbBorder" Storyboard.TargetProperty="BorderBrush.(SolidColorBrush.Color)" Duration="00:00:00.1" To="#FF569DE5" />
+                                                    <ColorAnimation Storyboard.TargetName="ThumbBorder" Storyboard.TargetProperty="Background.(SolidColorBrush.Color)" Duration="00:00:00.1" To="#FFDCECFC" />
+                                                </Storyboard>
+                                            </VisualState>
+                                        </VisualStateGroup>
+                                    </VisualStateManager.VisualStateGroups>
+                                </Grid>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+                <Style x:Key="ScaleChangeButton" TargetType="{x:Type Button}">
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="{x:Type Button}">
+                                <Border x:Name="border" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
+                                    <ContentPresenter x:Name="contentPresenter"
+                                                                          Focusable="False"
+                                                                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                                          Margin="{TemplateBinding Padding}"
+                                                                          RecognizesAccessKey="True"
+                                                                          SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
+                                                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                                </Border>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                    <Setter Property="Background" Value="Transparent"/>
+                    <Setter Property="BorderBrush" Value="Transparent"/>
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="BorderBrush" Value="{ugm:AppearanceResource ResourceKey=MouseOverBorderBrush, ReturnDynamicResource=True}" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter Property="BorderBrush" Value="{ugm:AppearanceResource ResourceKey=FocusedBorderBrush, ReturnDynamicResource=True}" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Style.Resources>
+
+            <Setter Property="OverridesDefaultStyle" Value="True" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Slider}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="2" />
+                                <RowDefinition />
+                                <RowDefinition Height="2" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <Button Grid.Column="0" Grid.Row="1" Margin="2 0 3 0" Style="{StaticResource ScaleChangeButton}" Command="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=DecreaseScaleCommand}">
+                                <Button.Content>
+                                    <Path Fill="{ugm:AppearanceResource ResourceKey=TextBrush, ReturnDynamicResource=True}" Style="{StaticResource IconBase}" Data="{gm:FontawesomeResource ResourceKey=MountainSun, ReturnDynamicResource=True}"/>
+                                </Button.Content>
+                            </Button>
+                            <Button Grid.Column="2" Grid.Row="1" Margin="3 0 2 0" Style="{StaticResource ScaleChangeButton}" Command="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=IncreaseScaleCommand}">
+                                <Button.Content>
+                                    <Path Fill="{ugm:AppearanceResource ResourceKey=TextBrush, ReturnDynamicResource=True}" Style="{StaticResource IconBase}" Data="{gm:FontawesomeResource ResourceKey=Mound, ReturnDynamicResource=True}"/>
+                                </Button.Content>
+                            </Button>
+
+                            <Track Grid.Row="1" Grid.Column="1" Orientation="Horizontal" x:Name="PART_Track" IsDirectionReversed="True">
+                                <Track.DecreaseRepeatButton>
+                                    <RepeatButton Style="{StaticResource HorizontalSliderTrackDecreaseButton}" Command="Slider.DecreaseLarge"/>
+                                </Track.DecreaseRepeatButton>
+                                <Track.IncreaseRepeatButton>
+                                    <RepeatButton Style="{StaticResource HorizontalSliderTrackIncreaseButton}" Command="Slider.IncreaseLarge"/>
+                                </Track.IncreaseRepeatButton>
+                                <Track.Thumb>
+                                    <Thumb x:Name="Thumb" Style="{StaticResource HorizontalSliderThumb}" />
+                                </Track.Thumb>
+                            </Track>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter Property="Foreground" TargetName="Thumb" Value="Blue"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Slider.Style>
+</Slider>
