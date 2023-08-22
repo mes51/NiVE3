@@ -108,7 +108,17 @@
         </Grid.RowDefinitions>
 
         <pt:FootagePreviewView Grid.Row="0" SelectedFootages="{Binding ElementName=Root, Path=SelectedFootages}"/>
-        <pv:TreeListView Grid.Row="1" x:Name="FootageTreeListView" ItemsSource="{Binding Footages}" SelectedItems="{Binding ElementName=Root, Path=SelectedItems}" dd:DragDrop.IsDragSource="True" dd:DragDrop.IsDropTarget="True" dd:DragDrop.DropHandler="{Binding}" ItemContainerStyle="{StaticResource ItemContainerStyle}" Columns="{StaticResource ColumnHeaders}" a:GridViewColumnVisibility.Columns="{Binding Columns, RelativeSource={RelativeSource Self}}">
+        <pv:TreeListView Grid.Row="1"
+                         x:Name="FootageTreeListView"
+                         ItemsSource="{Binding Footages}"
+                         SelectedItems="{Binding ElementName=Root, Path=SelectedItems}"
+                         ItemContainerStyle="{StaticResource ItemContainerStyle}"
+                         Columns="{StaticResource ColumnHeaders}"
+                         dd:DragDrop.IsDragSource="True"
+                         dd:DragDrop.IsDropTarget="True"
+                         dd:DragDrop.DropHandler="{Binding}"
+                         dd:DragDrop.DragHandler="{Binding}"
+                         a:GridViewColumnVisibility.Columns="{Binding Columns, RelativeSource={RelativeSource Self}}">
             <pv:TreeListView.HeaderContextMenu>
                 <ContextMenu>
                     <MenuItem Header="{gm:LanguageResource ResourceKey=FootageListView_FootageFileExtension}" IsCheckable="True" IsChecked="{Binding ShowFileExtension}"/>

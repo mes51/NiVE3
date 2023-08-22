@@ -107,19 +107,28 @@ namespace NiVE3.View.Pane
         {
             ViewModel?.EndEditPropertyCommand?.Execute(null);
 
+            // NOTE: ReadOnlyなDependencyPropertyはBinding出来ないためここで直接ViewModelに反映する
+            // TODO: なんか良い方法探す
             switch (e.Action)
             {
                 case NotifyCollectionChangedAction.Reset:
                     SelectedFootages.Clear();
+                    ViewModel?.SelectedFootages?.Clear();
                     break;
                 case NotifyCollectionChangedAction.Add when e.NewItems?.OfType<IFootageViewModel>()?.FirstOrDefault() is IFootageViewModel newItem:
                     SelectedFootages.Add(newItem);
+                    ViewModel?.SelectedFootages?.Add(newItem);
                     break;
                 case NotifyCollectionChangedAction.Remove when e.OldItems?.OfType<IFootageViewModel>()?.FirstOrDefault() is IFootageViewModel oldItem:
                     SelectedFootages.Remove(oldItem);
+                    ViewModel?.SelectedFootages?.Remove(oldItem);
                     break;
                 case NotifyCollectionChangedAction.Replace when e.NewItems?.OfType<IFootageViewModel>()?.FirstOrDefault() is IFootageViewModel newItem:
                     SelectedFootages[e.NewStartingIndex] = newItem;
+                    if (ViewModel is FootageListViewModel footageListViewModel)
+                    {
+                        footageListViewModel.SelectedFootages[e.NewStartingIndex] = newItem;
+                    }
                     break;
             }
         }

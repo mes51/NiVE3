@@ -30,13 +30,20 @@ namespace NiVE3.ViewModel
     [CommandHandling(nameof(AddSolidCommand), nameof(ShortcutKeySetting.AddSolidGesture), IsGlobal = true)]
     [CommandHandling(nameof(AddFootageFolderCommand), nameof(ShortcutKeySetting.AddFootageFolderGesture), IsGlobal = true)]
     [CommandHandling(nameof(DeleteFootageCommand), nameof(ShortcutKeySetting.DeleteItemGesture))]
-    class FootageListViewModel : SingletonePaneViewModelBase, IFootageViewModelList, IDropTarget
+    class FootageListViewModel : SingletonePaneViewModelBase, IFootageViewModelList, IDropTarget, IDragSource
     {
         private ObservableCollectionView<IFootageModel, IFootageViewModel> footages;
         public ObservableCollectionView<IFootageModel, IFootageViewModel> Footages
         {
             get { return footages; }
             set { SetProperty(ref footages, value); }
+        }
+
+        private ObservableCollection<IFootageViewModel> selectedFootages = new ObservableCollection<IFootageViewModel>();
+        public ObservableCollection<IFootageViewModel> SelectedFootages
+        {
+            get { return selectedFootages; }
+            set { SetProperty(ref selectedFootages, value); }
         }
 
         private IFootageViewModel? editingFootage;
@@ -90,6 +97,8 @@ namespace NiVE3.ViewModel
 
         public ICommand MoveFootageCommand { get; }
 
+        public ICommand MoveFootageListCommand { get; }
+
         public ICommand OpenFileCommand { get; }
 
         public ICommand DeleteFootageCommand { get; }
@@ -133,6 +142,20 @@ namespace NiVE3.ViewModel
                 }
             });
 
+            MoveFootageListCommand = new DelegateCommand<Tuple<IEnumerable<IFootageViewModel>, IFootageViewModelList>>(t =>
+            {
+                var (sources, newParent) = t;
+                var ids = sources.Select(f => f.FootageId).ToArray();
+                if (newParent is IFootageViewModel targetFolder)
+                {
+                    FootageListModel.MoveFootages(ids, targetFolder.FootageId);
+                }
+                else
+                {
+                    FootageListModel.MoveFootagesToRoot(ids);
+                }
+            });
+
             OpenFileCommand = new DelegateCommand(() => System.Diagnostics.Debug.WriteLine("FootageViewModel.OpenFileCommand is not implemented"));
 
             DeleteFootageCommand = new DelegateCommand(() => System.Diagnostics.Debug.WriteLine("FootageViewModel.DeleteFootageCommand is not implemented"));
@@ -170,57 +193,130 @@ namespace NiVE3.ViewModel
 
         public void DragOver(IDropInfo dropInfo)
         {
-            var source = dropInfo.Data as IFootageViewModel;
             var target = dropInfo.TargetItem as IFootageViewModelList ?? this;
 
-            if (source == null)
+            switch (dropInfo.Data)
             {
-                if (dropInfo.Data is IDataObject dataObject && dataObject.GetData(DataFormats.FileDrop) is string[] files)
-                {
-                    if (files.Any(f => !FootageListModel.CheckSupportFile(f)))
+                case IFootageViewModel footageViewModel:
                     {
-                        return;
+                        if (target is not IFootageViewModel targetFootage || (targetFootage.IsFolder && footageViewModel.FootageId != targetFootage.FootageId))
+                        {
+                            if (footageViewModel is not FootageFolderViewModel sourceFolder || !IsContainsTree(sourceFolder.Footages, target))
+                            {
+                                dropInfo.Effects |= DragDropEffects.Move;
+                                dropInfo.DropTargetAdorner = DropTargetAdorners.Highlight;
+                            }
+                        }
                     }
+                    break;
+                case IFootageViewModel[] footageViewModels:
+                    {
+                        if (target is not IFootageViewModel targetFootage || (targetFootage.IsFolder && footageViewModels.All(f => f.FootageId != targetFootage.FootageId)))
+                        {
+                            if (footageViewModels.All(f => f is not FootageFolderViewModel sourceFolder || !IsContainsTree(sourceFolder.Footages, target)))
+                            {
+                                dropInfo.Effects |= DragDropEffects.Move;
+                                dropInfo.DropTargetAdorner = DropTargetAdorners.Highlight;
+                            }
+                        }
+                    }
+                    break;
+                case IDataObject dataObject:
+                    if (dataObject.GetData(DataFormats.FileDrop) is string[] files)
+                    {
+                        if (files.Any(f => !FootageListModel.CheckSupportFile(f)))
+                        {
+                            return;
+                        }
 
-                    dropInfo.Effects |= DragDropEffects.Copy;
-                    dropInfo.DropTargetAdorner = DropTargetAdorners.Highlight;
-                }
-            }
-            else if (target is not IFootageViewModel targetFootage || (source.FootageId != targetFootage.FootageId && targetFootage.IsFolder))
-            {
-                if (source is not FootageFolderViewModel sourceFolder || !IsContainsTree(sourceFolder.Footages, target))
-                {
-                    dropInfo.Effects |= DragDropEffects.Move;
-                    dropInfo.DropTargetAdorner = DropTargetAdorners.Highlight;
-                }
+                        dropInfo.Effects |= DragDropEffects.Copy;
+                        dropInfo.DropTargetAdorner = DropTargetAdorners.Highlight;
+                    }
+                    break;
             }
         }
 
         public void Drop(IDropInfo dropInfo)
         {
-            var source = dropInfo.Data as IFootageViewModel;
             var target = dropInfo.TargetItem as IFootageViewModelList ?? this;
 
-            if (source == null)
-            {
-                if (dropInfo.Data is IDataObject dataObject && dataObject.GetData(DataFormats.FileDrop) is string[] files)
-                {
-                    var targetFolderId = (target as IFootageViewModel)?.FootageId;
-                    foreach (var f in files)
-                    {
-                        LoadFileCommand.Execute(Tuple.Create(f, targetFolderId));
-                    }
-                }
-            }
-            else if (target is not IFootageViewModel targetFootage || (source.FootageId != targetFootage.FootageId && targetFootage.IsFolder))
-            {
-                if (source is FootageFolderViewModel sourceFolder && IsContainsTree(sourceFolder.Footages, target))
-                {
-                    return;
-                }
 
-                MoveFootageCommand.Execute(Tuple.Create(source, target));
+            switch (dropInfo.Data)
+            {
+                case IFootageViewModel footageViewModel:
+                    {
+                        if (target is not IFootageViewModel targetFootage || (targetFootage.IsFolder && footageViewModel.FootageId != targetFootage.FootageId))
+                        {
+                            if (footageViewModel is FootageFolderViewModel sourceFolder && IsContainsTree(sourceFolder.Footages, target))
+                            {
+                                return;
+                            }
+
+                            MoveFootageCommand.Execute(Tuple.Create(footageViewModel, target));
+                        }
+                    }
+                    break;
+                case IFootageViewModel[] footageViewModels:
+                    {
+                        if (target is not IFootageViewModel targetFootage || (targetFootage.IsFolder && footageViewModels.All(f => f.FootageId != targetFootage.FootageId)))
+                        {
+                            if (footageViewModels.Any(f => f is FootageFolderViewModel sourceFolder && IsContainsTree(sourceFolder.Footages, target)))
+                            {
+                                return;
+                            }
+
+                            MoveFootageListCommand.Execute(Tuple.Create(footageViewModels.AsEnumerable(), target));
+                        }
+                    }
+                    break;
+                case IDataObject dataObject:
+                    if (dataObject.GetData(DataFormats.FileDrop) is string[] files)
+                    {
+                        var targetFolderId = (target as IFootageViewModel)?.FootageId;
+                        foreach (var f in files)
+                        {
+                            LoadFileCommand.Execute(Tuple.Create(f, targetFolderId));
+                        }
+                    }
+                    break;
             }
+        }
+
+        public void StartDrag(IDragInfo dragInfo)
+        {
+            if (SelectedFootages.Count > 1)
+            {
+                dragInfo.Data = SelectedFootages.ToArray();
+            }
+            else
+            {
+                dragInfo.Data = SelectedFootages.FirstOrDefault();
+            }
+
+            if (dragInfo.Data != null)
+            {
+                dragInfo.Effects = DragDropEffects.Copy | DragDropEffects.Move;
+            }
+            else
+            {
+                dragInfo.Effects = DragDropEffects.None;
+            }
+        }
+
+        public bool CanStartDrag(IDragInfo dragInfo)
+        {
+            return true;
+        }
+
+        public void Dropped(IDropInfo dropInfo) { }
+
+        public void DragDropOperationFinished(DragDropEffects operationResult, IDragInfo dragInfo) { }
+
+        public void DragCancelled() { }
+
+        public bool TryCatchOccurredException(Exception exception)
+        {
+            return false;
         }
 
         static bool IsContainsTree(IEnumerable<IFootageViewModel> items, IFootageViewModelList target)

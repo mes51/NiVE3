@@ -144,6 +144,18 @@ namespace NiVE3.Model
             HistoryModel.Add(new MoveHistoryCommand(this, sourceFootageId, oldParent?.FootageId, targetFolderId));
         }
 
+        public void MoveFootages(Guid[] sourceFootageIds, Guid targetFolderId)
+        {
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_MoveFootage));
+
+            foreach (var id in  sourceFootageIds)
+            {
+                MoveFootage(id, targetFolderId);
+            }
+
+            HistoryModel.EndGroup();
+        }
+
         public void MoveFootageToRoot(Guid sourceFootageId)
         {
             var model = FindModel(sourceFootageId, Footages);
@@ -160,6 +172,18 @@ namespace NiVE3.Model
 
                 HistoryModel.Add(new MoveHistoryCommand(this, sourceFootageId, oldParent.FootageId, null));
             }
+        }
+
+        public void MoveFootagesToRoot(Guid[] sourceFootageIds)
+        {
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_MoveFootage));
+
+            foreach (var id in sourceFootageIds)
+            {
+                MoveFootageToRoot(id);
+            }
+
+            HistoryModel.EndGroup();
         }
 
         public bool CheckSupportFile(string filePath)

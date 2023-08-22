@@ -198,22 +198,7 @@ namespace NiVE3.View.Primitive
                     SelectedTreeListViewItems.Add(i);
                 }
             }
-            else if (SelectedItems.Contains(dataContext))
-            {
-                foreach (var i in SelectedTreeListViewItems.ToArray())
-                {
-                    if (i.DataContext != dataContext)
-                    {
-                        SetIsSelectedItem(i, false);
-                        SelectedItems.Remove(i.DataContext);
-                        SelectedTreeListViewItems.Remove(i);
-                    }
-                }
-
-                SetIsSelectedItem(item, true);
-                LastSelected = item;
-            }
-            else
+            else if (!SelectedItems.Contains(dataContext))
             {
                 foreach (var i in SelectedTreeListViewItems)
                 {
