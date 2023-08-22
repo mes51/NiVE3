@@ -31,7 +31,7 @@
             <Setter Property="Title" Value="{Binding Model.Title}"/>
             <Setter Property="ContentId" Value="{Binding Model.ContentId}"/>
         </Style>
-        
+
         <vd:LayoutItemContainerStyleSelector x:Key="LayoutItemContainerStyleSelector">
             <vd:LayoutItemContainerStyle ViewModelType="{x:Type vm:FootageListViewModel}">
                 <Style TargetType="{x:Type ad:LayoutAnchorableItem}" BasedOn="{StaticResource LayoutItemContainerStyleBase}">
@@ -55,6 +55,17 @@
             </vd:LayoutItemContainerStyle>
         </vd:LayoutItemContainerStyleSelector>
     </Window.Resources>
+    <!--
+    <Window.Style>
+        <Style TargetType="{x:Type Window}">
+            <Setter Property="WindowChrome.WindowChrome">
+                <Setter.Value>
+                    <WindowChrome CornerRadius="0" GlassFrameThickness="0" ResizeBorderThickness="5" UseAeroCaptionButtons="False" CaptionHeight="26"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Style>
+    -->
     <Grid Background="{ui:AppearanceResource ResourceKey=BackgroundFill}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -98,6 +109,9 @@
         </ad:DockingManager>
     </Grid>
     <i:Interaction.Behaviors>
-        <b:WindowGestureBehavior />
+        <b:WindowGestureBehavior/>
+        <!--
+        <b:BorderlessWindowChromeBehavior/>
+        -->
     </i:Interaction.Behaviors>
 </Window>
