@@ -13,7 +13,7 @@ using Prism.Mvvm;
 
 namespace NiVE3.Model
 {
-    class CompositionModel : BindableBase, IDisposable
+    partial class CompositionModel : BindableBase, IDisposable
     {
         string name = "";
         public string Name
@@ -144,12 +144,34 @@ namespace NiVE3.Model
 
         IRenderer Renderer { get; }
 
-        public CompositionModel(IRenderer renderer)
+        FootageListModel FootageListModel { get; }
+
+        HistoryModel HistoryModel { get; }
+
+        public CompositionModel(IRenderer renderer, FootageListModel footageListModel, HistoryModel historyModel)
         {
             Renderer = renderer;
+            FootageListModel = footageListModel;
+            HistoryModel = historyModel;
             Layers = new ObservableCollection<LayerModel>();
 
             PropertyChanged += CompositionModel_PropertyChanged;
+        }
+
+        public void InsertLayers(Guid footageId, int index)
+        {
+            var footages = FootageListModel.GetFootages(footageId);
+            var addedLayers = new List<LayerModel>();
+            var startIndex = index;
+            foreach (var f in footages)
+            {
+                var layer = new LayerModel(f);
+                Layers.Insert(index, layer);
+                addedLayers.Add(layer);
+                index++;
+            }
+
+            HistoryModel.Add(new AddLayersHistoryCommand(this, addedLayers.ToArray(), startIndex));
         }
 
         public NImage Render(double time, bool useGpu)

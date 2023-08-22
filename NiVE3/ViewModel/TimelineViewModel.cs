@@ -4,7 +4,10 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using GongSolutions.Wpf.DragDrop;
 using NiVE3.Model;
+using NiVE3.Mvvm;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
 using NiVE3.View.Dock;
 using NiVE3.View.Resource;
@@ -14,7 +17,7 @@ namespace NiVE3.ViewModel
     [PaneLocation(PaneLocation.Bottom)]
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
     [ManualViewModelWireable(nameof(CompositionModel), nameof(BindComposition), nameof(UnbindComposition), WithInitializeProperty = true)]
-    partial class TimelineViewModel : PaneViewModelBase
+    partial class TimelineViewModel : PaneViewModelBase, IDropTarget
     {
         private double frameRate;
         [ManualWire(nameof(CompositionModel), IsOneWay = true)]
@@ -206,11 +209,13 @@ namespace NiVE3.ViewModel
                 if (compositionModel != null)
                 {
                     UnbindComposition();
+                    Layers = null;
                 }
                 SetProperty(ref compositionModel, value);
                 if (value != null)
                 {
                     BindComposition();
+                    Layers = value.Layers.CreateViewCollection(m => new LayerViewModel(m));
                 }
             }
         }
@@ -220,6 +225,13 @@ namespace NiVE3.ViewModel
         {
             get { return timelineScrollBarMax; }
             set { SetProperty(ref timelineScrollBarMax, value); }
+        }
+
+        private ObservableCollectionView<LayerModel, LayerViewModel>? layers;
+        public ObservableCollectionView<LayerModel, LayerViewModel>? Layers
+        {
+            get { return layers; }
+            set { SetProperty(ref layers, value); }
         }
 
         ViewStateModel ViewState { get; }
@@ -232,6 +244,49 @@ namespace NiVE3.ViewModel
             WiringModel();
 
             PropertyChanged += TimelineViewModel_PropertyChanged;
+        }
+
+        public void DragOver(IDropInfo dropInfo)
+        {
+            if (Layers == null || CompositionModel == null)
+            {
+                return;
+            }
+
+            var source = dropInfo.Data;
+            var target = dropInfo.TargetItem as LayerViewModel;
+
+            switch (source)
+            {
+                case IFootageViewModel:
+                    dropInfo.Effects = DragDropEffects.Copy;
+                    if (target != null)
+                    {
+                        dropInfo.DropTargetAdorner = DropTargetAdorners.Insert;
+                    }
+                    break;
+                case LayerViewModel:
+                    dropInfo.Effects = DragDropEffects.Move;
+                    dropInfo.DropTargetAdorner = DropTargetAdorners.Insert;
+                    break;
+            }
+        }
+
+        public void Drop(IDropInfo dropInfo)
+        {
+            if (Layers == null || CompositionModel == null)
+            {
+                return;
+            }
+
+            var source = dropInfo.Data;
+
+            switch (source)
+            {
+                case IFootageViewModel footage:
+                    CompositionModel.InsertLayers(footage.FootageId, dropInfo.InsertIndex);
+                    break;
+            }
         }
 
         partial void WiringModel();

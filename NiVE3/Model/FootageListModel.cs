@@ -213,6 +213,26 @@ namespace NiVE3.Model
             }
         }
 
+        public FootageModel[] GetFootages(Guid footageId)
+        {
+            var footage = FindModel(footageId, Footages);
+            if (footage == null)
+            {
+                return Array.Empty<FootageModel>();
+            }
+
+            if (footage is FootageModel footageModel)
+            {
+                return new FootageModel[] { footageModel };
+            }
+            else if (footage is FootageFolderModel footageFolderModel)
+            {
+                return Flatten(footageFolderModel.Children).ToArray();
+            }
+
+            return Array.Empty<FootageModel>();
+        }
+
         FootageFolderModel AddFolderInternal(string? name)
         {
             var folder = new FootageFolderModel();
@@ -411,7 +431,7 @@ namespace NiVE3.Model
 
             return list.OfType<FootageFolderModel>()
                 .Select(l => FindModel(targetId, l.Children))
-                .SkipWhile(r => r == null).FirstOrDefault();
+                .FirstOrDefault(r => r != null);
         }
 
         static FootageFolderModel? FindParent(Guid targetId, FootageFolderModel parent)
@@ -425,6 +445,25 @@ namespace NiVE3.Model
                 ?.Select(f => FindParent(targetId, f))
                 ?.SkipWhile(p => p == null)
                 ?.FirstOrDefault();
+        }
+
+        static IEnumerable<FootageModel> Flatten(IEnumerable<IFootageModel> footages)
+        {
+            var result = new List<FootageModel>();
+
+            foreach (var f in footages)
+            {
+                if (f is FootageModel footageModel)
+                {
+                    result.Add(footageModel);
+                }
+                else if (f is FootageFolderModel footageFolderModel)
+                {
+                    result.AddRange(Flatten(footageFolderModel.Children));
+                }
+            }
+
+            return result;
         }
 
         private void FootageListModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)

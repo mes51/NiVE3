@@ -9,8 +9,17 @@ using Prism.Mvvm;
 
 namespace NiVE3.Model
 {
-    class LayerModel : BindableBase
+    class LayerModel : BindableBase, IDisposable
     {
+        private string name = "";
+        public string Name
+        {
+            get { return name; }
+            set { SetProperty(ref name, value); }
+        }
+
+        public string SourceName => FootageModel.Name;
+
         private ObservableCollection<EffectModel> effects = new ObservableCollection<EffectModel>();
         public ObservableCollection<EffectModel> Effects
         {
@@ -26,12 +35,20 @@ namespace NiVE3.Model
             }
         }
 
-        public LayerModel()
+        FootageModel FootageModel { get; set; }
+
+        public LayerModel(FootageModel footageModel)
         {
             Effects = new ObservableCollection<EffectModel>();
+            FootageModel = footageModel;
+            Name = footageModel.Name;
         }
 
         private void Effects_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+        }
+
+        public void Dispose()
         {
         }
     }

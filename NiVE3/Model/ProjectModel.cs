@@ -40,7 +40,7 @@ namespace NiVE3.Model
         public void CreateComposition(string name, int width, int height, double frameRate, double duration, bool isRetentionFrameRate, int shutterAngle, int shutterPhase, int motionBlurSampleCount, Type rendererType)
         {
             var renderer = RendererListModel.CreateRenderer(rendererType);
-            var composition = new CompositionModel(renderer)
+            var composition = new CompositionModel(renderer, FootageListModel, HistoryModel)
             {
                 Name = name,
                 Width = width,

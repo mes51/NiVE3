@@ -188,18 +188,6 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("キャンセル")]
         public static readonly string Dialog_Cancel = nameof(Dialog_Cancel);
 
-        [ShowInMarkup, DefaultValue("フォルダの追加")]
-        public static readonly string History_AddFolder = nameof(History_AddFolder);
-
-        [ShowInMarkup, DefaultValue("ファイルの読み込み")]
-        public static readonly string History_LoadFootageFile = nameof(History_LoadFootageFile);
-
-        [ShowInMarkup, DefaultValue("フッテージの移動")]
-        public static readonly string History_MoveFootage = nameof(History_MoveFootage);
-
-        [ShowInMarkup, DefaultValue("コンポジションの追加")]
-        public static readonly string History_AddComposition = nameof(History_AddComposition);
-
         [ShowInMarkup, DefaultValue("A/V機能")]
         public static readonly string Timeline_AVSwitchColumn = nameof(Timeline_AVSwitchColumn);
 
@@ -229,6 +217,23 @@ namespace NiVE3.View.Resource
 
         [ShowInMarkup, DefaultValue("(なし)")]
         public static readonly string Timeline_EmptyTitle = nameof(Timeline_EmptyTitle);
+
+        // History
+
+        [ShowInMarkup, DefaultValue("フォルダの追加")]
+        public static readonly string History_AddFolder = nameof(History_AddFolder);
+
+        [ShowInMarkup, DefaultValue("ファイルの読み込み")]
+        public static readonly string History_LoadFootageFile = nameof(History_LoadFootageFile);
+
+        [ShowInMarkup, DefaultValue("フッテージの移動")]
+        public static readonly string History_MoveFootage = nameof(History_MoveFootage);
+
+        [ShowInMarkup, DefaultValue("コンポジションの追加")]
+        public static readonly string History_AddComposition = nameof(History_AddComposition);
+
+        [ShowInMarkup, DefaultValue("レイヤーの追加")]
+        public static readonly string History_AddLayers = nameof(History_AddLayers);
 
         // Enum
 
