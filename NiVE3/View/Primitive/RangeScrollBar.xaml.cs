@@ -228,7 +228,7 @@ namespace NiVE3.View.Primitive
             if (d is RangeScrollBar scrollBar)
             {
                 var diff = (double)e.NewValue - (double)e.OldValue;
-                scrollBar.RangeStart = Math.Clamp(scrollBar.RangeStart - diff * 0.5, scrollBar.Minimum, scrollBar.Maximum - scrollBar.Range);
+                scrollBar.RangeStart = Math.Min(Math.Max(scrollBar.RangeStart - diff * 0.5, scrollBar.Minimum), scrollBar.Maximum - scrollBar.Range);
             }
         }
 
@@ -260,7 +260,7 @@ namespace NiVE3.View.Primitive
         {
             if (d is RangeScrollBar scrollBar)
             {
-                return Math.Clamp((double)value, scrollBar.Minimum, scrollBar.Maximum - scrollBar.Range);
+                return Math.Min(Math.Max((double)value, scrollBar.Minimum), scrollBar.Maximum - scrollBar.Range);
             }
             else
             {
