@@ -25,6 +25,15 @@ namespace NiVE3.Extension
             ArrayList.Adapter(collection).Sort(comparer);
         }
 
+        public static void SortBy<T>(this ObservableCollection<T> collection, Func<T, int> sortKey)
+        {
+            var sorted = collection.OrderBy(e => sortKey(e)).ToArray();
+            for (var i = 0; i < sorted.Length; i++)
+            {
+                collection.Move(collection.IndexOf(sorted[i]), i);
+            }
+        }
+
         private class ComparerWrapper<T> : IComparer where T : class
         {
             IComparer<T> Comparer { get; }
@@ -54,6 +63,37 @@ namespace NiVE3.Extension
                 var tx = x is T ? (T)x : (T?)null;
                 var ty = y is T ? (T)y : (T?)null;
                 return Comparer.Compare(tx, ty);
+            }
+        }
+
+        private class SortByComparerWrapper<T> : IComparer where T : notnull
+        {
+            Dictionary<T, int> SortKeys { get; }
+
+            public SortByComparerWrapper(Dictionary<T, int> sortKeys)
+            {
+                SortKeys = sortKeys;
+            }
+
+            public int Compare(object? x, object? y)
+            {
+                if (x == null)
+                {
+                    if (y != null)
+                    {
+                        return -1;
+                    }
+                    else
+                    {
+                        return 0;
+                    }
+                }
+                else if (y is null)
+                {
+                    return 1;
+                }
+
+                return SortKeys[(T)x].CompareTo(SortKeys[(T)y]);
             }
         }
     }

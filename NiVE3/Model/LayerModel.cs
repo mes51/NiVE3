@@ -18,6 +18,8 @@ namespace NiVE3.Model
             set { SetProperty(ref name, value); }
         }
 
+        public Guid LayerId { get; }
+
         public string SourceName => FootageModel.Name;
 
         private ObservableCollection<EffectModel> effects = new ObservableCollection<EffectModel>();
@@ -37,11 +39,14 @@ namespace NiVE3.Model
 
         FootageModel FootageModel { get; set; }
 
-        public LayerModel(FootageModel footageModel)
+        public LayerModel(FootageModel footageModel) : this(footageModel, null) { }
+
+        public LayerModel(FootageModel footageModel, Guid? layerId)
         {
             Effects = new ObservableCollection<EffectModel>();
             FootageModel = footageModel;
             Name = footageModel.Name;
+            LayerId = layerId ?? Guid.NewGuid();
         }
 
         private void Effects_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)

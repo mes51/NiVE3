@@ -18,6 +18,9 @@ namespace NiVE3.UI.Resources
         [ShowInMarkup, BrushColorRange("#313131", "#FFFFFF")]
         public static readonly string BackgroundFill = nameof(BackgroundFill);
 
+        [ShowInMarkup, BrushColorRange("#3399FF", "#3399FF")]
+        public static readonly string SelectedBackgroundFill = nameof(SelectedBackgroundFill);
+
         [ShowInMarkup, BrushColorRange("#FFFFFF", "#000000")]
         public static readonly string BorderBrush = nameof(BorderBrush);
 

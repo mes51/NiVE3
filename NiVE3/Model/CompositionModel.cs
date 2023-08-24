@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using NiVE3.Extension;
 using NiVE3.Plugin.Image;
 using NiVE3.Plugin.Interfaces;
 using Prism.Mvvm;
@@ -160,7 +161,12 @@ namespace NiVE3.Model
 
         public void InsertLayers(Guid footageId, int index)
         {
-            var footages = FootageListModel.GetFootages(footageId);
+            InsertLayers(new Guid[] { footageId }, index);
+        }
+
+        public void InsertLayers(Guid[] footageIds, int index)
+        {
+            var footages = footageIds.SelectMany(FootageListModel.GetFootages);
             var addedLayers = new List<LayerModel>();
             var startIndex = index;
             foreach (var f in footages)
@@ -172,6 +178,34 @@ namespace NiVE3.Model
             }
 
             HistoryModel.Add(new AddLayersHistoryCommand(this, addedLayers.ToArray(), startIndex));
+        }
+
+        public void MoveLayer(Guid layerId, int newIndex)
+        {
+            MoveLayers(new Guid[] { layerId }, layerId, newIndex);
+        }
+
+        public void MoveLayers(Guid[] layerIds, Guid referenceLayerId, int newIndex)
+        {
+            if (Layers.Count == layerIds.Length)
+            {
+                return;
+            }
+
+            var layers = Layers.Where(l => layerIds.Contains(l.LayerId)).OrderBy(Layers.IndexOf).ToArray();
+            var prevIndices = layers.Select(l => Layers.IndexOf(l)).ToArray();
+            var startIndex = newIndex - layers.IndexOf(l => l.LayerId == referenceLayerId);
+            var newOrderedLayers = new List<LayerModel>(Layers.Count);
+            newOrderedLayers.AddRange(Layers.Except(layers).Take(startIndex));
+            newOrderedLayers.AddRange(layers);
+            newOrderedLayers.AddRange(Layers.Except(newOrderedLayers.ToArray()));
+
+            Layers.SortBy(l => newOrderedLayers.IndexOf(l));
+
+            if (!prevIndices.SequenceEqual(layers.Select(l => Layers.IndexOf(l))))
+            {
+                HistoryModel.Add(new MoveLayersHistoryCommand(this, layers, prevIndices, newOrderedLayers.ToArray()));
+            }
         }
 
         public NImage Render(double time, bool useGpu)

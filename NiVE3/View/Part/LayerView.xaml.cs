@@ -20,9 +20,55 @@ namespace NiVE3.View.Part
     /// </summary>
     public partial class LayerView : UserControl
     {
+        public static readonly DependencyProperty LayerControlAreaWidthProperty = DependencyProperty.Register(
+            nameof(LayerControlAreaWidth),
+            typeof(double),
+            typeof(LayerView),
+            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        public static readonly DependencyProperty IsSelectedProperty = DependencyProperty.Register(
+            nameof(IsSelected),
+            typeof(bool),
+            typeof(LayerView),
+            new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        public static readonly DependencyProperty LayerNumberProperty = DependencyProperty.Register(
+            nameof(LayerNumber),
+            typeof(int),
+            typeof(LayerView),
+            new FrameworkPropertyMetadata(0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        public int LayerNumber
+        {
+            get { return (int)GetValue(LayerNumberProperty); }
+            set { SetValue(LayerNumberProperty, value); }
+        }
+
+        public bool IsSelected
+        {
+            get { return (bool)GetValue(IsSelectedProperty); }
+            set { SetValue(IsSelectedProperty, value); }
+        }
+
+        public double LayerControlAreaWidth
+        {
+            get { return (double)GetValue(LayerControlAreaWidthProperty); }
+            set { SetValue(LayerControlAreaWidthProperty, value); }
+        }
+
+        LayerCollection? ParentCollection => ItemsControl.ItemsControlFromItemContainer(this) as LayerCollection;
+
         public LayerView()
         {
             InitializeComponent();
+        }
+
+        private void Root_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            ParentCollection?.SelectLayer(this, Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift), Keyboard.IsKeyDown(Key.LeftCtrl) ||  Keyboard.IsKeyDown(Key.RightCtrl));
         }
     }
 }

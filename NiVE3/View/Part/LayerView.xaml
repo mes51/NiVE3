@@ -4,11 +4,53 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:NiVE3.View.Part"
+             xmlns:ugm="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
-    <Expander>
-        <Expander.Header>
-            <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
-        </Expander.Header>
-    </Expander>
+             x:Name="Root"
+             MouseLeftButtonDown="Root_MouseLeftButtonDown"
+             d:DesignHeight="200" d:DesignWidth="800">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+
+        <Style x:Key="HeaderGridStyle" TargetType="{x:Type Grid}">
+            <Setter Property="Background" Value="Transparent"/>
+
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ElementName=Root, Path=IsSelected}" Value="True">
+                    <Setter Property="Background" Value="{ugm:AppearanceResource ResourceKey=SelectedBackgroundFill, ReturnDynamicResource=True}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+    <Grid Grid.IsSharedSizeScope="True">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="{Binding ElementName=Root, Path=LayerControlAreaWidth}"/>
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+
+        <Grid Grid.Column="0" Grid.Row="0" Style="{StaticResource HeaderGridStyle}" ClipToBounds="True">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" SharedSizeGroup="Expander"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+
+            <ToggleButton Grid.Column="0" Grid.Row="0" x:Name="ExpandButton" IsChecked="{Binding IsExpanded}" Style="{StaticResource ArrowExpanderStyle}" Margin="0,0,5,0"/>
+            <TextBlock Grid.Column="1" Grid.Row="0" Text="{Binding ElementName=Root, Path=LayerNumber}" VerticalAlignment="Center"/>
+            <TextBlock Grid.Column="2" Grid.Row="0" Text="{Binding Name}" VerticalAlignment="Center"/>
+        </Grid>
+
+        <Grid Grid.Column="0" Grid.Row="1" Visibility="{Binding IsExpanded, Converter={StaticResource BooleanToVisibilityConverter}}" ClipToBounds="True">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" SharedSizeGroup="Expander"/>
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+        </Grid>
+
+        <Grid x:Name="DurationGrid" Grid.Column="1" Grid.Row="0" ClipToBounds="True"/>
+    </Grid>
 </UserControl>

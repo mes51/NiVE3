@@ -10,6 +10,7 @@ using NiVE3.Model;
 using NiVE3.Mvvm;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
 using NiVE3.View.Dock;
+using NiVE3.View.Part;
 using NiVE3.View.Resource;
 
 namespace NiVE3.ViewModel
@@ -253,12 +254,12 @@ namespace NiVE3.ViewModel
                 return;
             }
 
-            var source = dropInfo.Data;
             var target = dropInfo.TargetItem as LayerViewModel;
 
-            switch (source)
+            switch (dropInfo.Data)
             {
                 case IFootageViewModel:
+                case IFootageViewModel[]:
                     dropInfo.Effects = DragDropEffects.Copy;
                     if (target != null)
                     {
@@ -266,6 +267,7 @@ namespace NiVE3.ViewModel
                     }
                     break;
                 case LayerViewModel:
+                case LayerDragData:
                     dropInfo.Effects = DragDropEffects.Move;
                     dropInfo.DropTargetAdorner = DropTargetAdorners.Insert;
                     break;
@@ -279,12 +281,33 @@ namespace NiVE3.ViewModel
                 return;
             }
 
-            var source = dropInfo.Data;
-
-            switch (source)
+            switch (dropInfo.Data)
             {
                 case IFootageViewModel footage:
                     CompositionModel.InsertLayers(footage.FootageId, dropInfo.InsertIndex);
+                    break;
+                case IFootageViewModel[] footages:
+                    CompositionModel.InsertLayers(footages.Select(f => f.FootageId).ToArray(), dropInfo.InsertIndex);
+                    break;
+                case LayerViewModel layer:
+                    {
+                        var newIndex = dropInfo.InsertIndex;
+                        if (Layers.IndexOf(layer) < newIndex)
+                        {
+                            newIndex--;
+                        }
+                        CompositionModel.MoveLayer(layer.LayerId, newIndex);
+                    }
+                    break;
+                case LayerDragData layerDragData:
+                    {
+                        var newIndex = dropInfo.InsertIndex;
+                        if (Layers.IndexOf(layerDragData.DragLayer) < newIndex)
+                        {
+                            newIndex--;
+                        }
+                        CompositionModel.MoveLayers(layerDragData.SelectedLayers.Select(l => l.LayerId).ToArray(), layerDragData.DragLayer.LayerId, newIndex);
+                    }
                     break;
             }
         }

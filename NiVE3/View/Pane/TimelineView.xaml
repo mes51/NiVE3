@@ -21,10 +21,6 @@
 
         <Thickness x:Key="ColumnMargin">2,0,0,0</Thickness>
 
-        <DataTemplate x:Key="LayerTemplate" DataType="{x:Type vm:LayerViewModel}">
-            <pt:LayerView />
-        </DataTemplate>
-
         <Style x:Key="HeaderIconPath" TargetType="{x:Type Path}">
             <Setter Property="Fill" Value="{ugm:AppearanceResource ResourceKey=TextBrush, ReturnDynamicResource=True}"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
@@ -65,7 +61,7 @@
 
         <!-- NOTE: サイズ計測用 -->
         <Rectangle Grid.Row="1" Grid.Column="0" x:Name="HeightMeasurementHeader" Fill="Transparent" IsHitTestVisible="False" Visibility="Hidden"/>
-        <Rectangle Grid.Row="2" Grid.Column="0" x:Name="WidthMeasurementLayerParamters" Fill="Transparent" IsHitTestVisible="False" Visibility="Hidden"/>
+        <Rectangle Grid.Row="2" Grid.Column="0" x:Name="WidthMeasurementLayerControlArea" Fill="Transparent" IsHitTestVisible="False" Visibility="Hidden"/>
 
         <!-- NOTE: 縦スクロールバー用のスペーサー -->
         <Rectangle Grid.Row="0" Grid.Column="2" Width="{x:Static SystemParameters.VerticalScrollBarWidth}" Fill="Transparent" Visibility="Hidden"/>
@@ -178,7 +174,7 @@
         <ScrollViewer Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Visible" dd:DragDrop.IsDragSource="True" dd:DragDrop.IsDropTarget="True" dd:DragDrop.DropHandler="{Binding}">
         </ScrollViewer>
 
-        <pt:LayersControl Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" ItemsSource="{Binding Layers}" ItemTemplate="{StaticResource LayerTemplate}" dd:DragDrop.IsDragSource="True" dd:DragDrop.IsDropTarget="True" dd:DragDrop.DropHandler="{Binding}"/>
+        <pt:LayerCollection Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" ItemsSource="{Binding Layers}" LayerControlAreaWidth="{Binding ElementName=WidthMeasurementLayerControlArea, Path=ActualWidth}" dd:DragDrop.IsDragSource="True" dd:DragDrop.IsDropTarget="True" dd:DragDrop.DropHandler="{Binding}" dd:DragDrop.DragHandler="{Binding RelativeSource={RelativeSource Self}}"/>
 
         <!-- NOTE: インジケーターを最前面に表示するため、TimeLocatorViewのXAMLの記述は一番最後にする -->
         <pt:TimeLocatorView x:Name="TimeLocator" Grid.Row="0" Grid.Column="1" Grid.RowSpan="3" ShowIndicatorLineInRangeBar="True" Duration="{Binding Duration}" FrameRate="{Binding FrameRate}" CurrentTime="{Binding CurrentTime}" Range="{Binding TimeBarRange}" RangeStart="{Binding TimeBarRangeStart}"/>

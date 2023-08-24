@@ -92,7 +92,7 @@
         </DataTemplate>
 
         <GridViewColumnCollection x:Key="ColumnHeaders">
-            <pv:TreeListExpandableGridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageName}" CellContentTemplateSelector="{StaticResource FootageNameTemplateSelector}" Width="100" ExpanderStyle="{StaticResource TreeListViewItemExpanderStyle}"/>
+            <pv:TreeListExpandableGridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageName}" CellContentTemplateSelector="{StaticResource FootageNameTemplateSelector}" Width="100" ExpanderStyle="{StaticResource ArrowExpanderStyle}"/>
             <GridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageFileExtension}" CellTemplateSelector="{StaticResource FileExtensionTemplate}" Width="50" a:GridViewColumnVisibility.Visibility="{Binding ShowFileExtension}"/>
             <GridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageSize}" CellTemplateSelector="{StaticResource SizeTemplate}" Width="100" a:GridViewColumnVisibility.Visibility="{Binding ShowSize}"/>
             <GridViewColumn Header="{gm:LanguageResource ResourceKey=FootageListView_FootageFrameRate}" CellTemplateSelector="{StaticResource FrameRateTemplate}" Width="100" a:GridViewColumnVisibility.Visibility="{Binding ShowFrameRate}"/>

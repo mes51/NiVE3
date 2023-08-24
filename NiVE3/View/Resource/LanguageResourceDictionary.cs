@@ -235,6 +235,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("レイヤーの追加")]
         public static readonly string History_AddLayers = nameof(History_AddLayers);
 
+        [ShowInMarkup, DefaultValue("レイヤーの移動")]
+        public static readonly string History_MoveLayers = nameof(History_MoveLayers);
+
         // Enum
 
         [ShowInMarkup, DefaultValue("RGB")]

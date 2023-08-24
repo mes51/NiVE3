@@ -20,6 +20,21 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref name, value); }
         }
 
+        private Guid layerId;
+        [NeedWire(nameof(LayerModel), IsOneWay = true)]
+        public Guid LayerId
+        {
+            get { return layerId; }
+            set { SetProperty(ref layerId, value); }
+        }
+
+        private bool isExpanded;
+        public bool IsExpanded
+        {
+            get { return isExpanded; }
+            set { SetProperty(ref isExpanded, value); }
+        }
+
         LayerModel LayerModel { get; }
 
         public LayerViewModel(LayerModel layerModel)
