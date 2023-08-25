@@ -11,6 +11,7 @@ using NiVE3.Mvvm;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
 using NiVE3.View.Dock;
 using NiVE3.View.Part;
+using NiVE3.View.Primitive;
 using NiVE3.View.Resource;
 
 namespace NiVE3.ViewModel
@@ -267,7 +268,7 @@ namespace NiVE3.ViewModel
                     }
                     break;
                 case LayerViewModel:
-                case LayerDragData:
+                case ItemDragData<LayerViewModel>:
                     dropInfo.Effects = DragDropEffects.Move;
                     dropInfo.DropTargetAdorner = DropTargetAdorners.Insert;
                     break;
@@ -299,14 +300,14 @@ namespace NiVE3.ViewModel
                         CompositionModel.MoveLayer(layer.LayerId, newIndex);
                     }
                     break;
-                case LayerDragData layerDragData:
+                case ItemDragData<LayerViewModel> itemDragData:
                     {
                         var newIndex = dropInfo.InsertIndex;
-                        if (Layers.IndexOf(layerDragData.DragLayer) < newIndex)
+                        if (Layers.IndexOf(itemDragData.DragItem) < newIndex)
                         {
                             newIndex--;
                         }
-                        CompositionModel.MoveLayers(layerDragData.SelectedLayers.Select(l => l.LayerId).ToArray(), layerDragData.DragLayer.LayerId, newIndex);
+                        CompositionModel.MoveLayers(itemDragData.SelectedItems.Select(l => l.LayerId).ToArray(), itemDragData.DragItem.LayerId, newIndex);
                     }
                     break;
             }

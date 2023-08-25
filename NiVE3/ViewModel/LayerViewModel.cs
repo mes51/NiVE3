@@ -44,7 +44,6 @@ namespace NiVE3.ViewModel
             WiringModel();
         }
 
-
         partial void WiringModel();
     }
 }

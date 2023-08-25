@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:NiVE3.View.Part"
              xmlns:ugm="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
+             xmlns:pr="clr-namespace:NiVE3.View.Primitive"
              mc:Ignorable="d" 
              x:Name="Root"
              MouseLeftButtonDown="Root_MouseLeftButtonDown"
@@ -16,7 +17,7 @@
             <Setter Property="Background" Value="Transparent"/>
 
             <Style.Triggers>
-                <DataTrigger Binding="{Binding ElementName=Root, Path=IsSelected}" Value="True">
+                <DataTrigger Binding="{Binding ElementName=Root, Path=(pr:NestableItemsCollection.IsSelected)}" Value="True">
                     <Setter Property="Background" Value="{ugm:AppearanceResource ResourceKey=SelectedBackgroundFill, ReturnDynamicResource=True}"/>
                 </DataTrigger>
             </Style.Triggers>

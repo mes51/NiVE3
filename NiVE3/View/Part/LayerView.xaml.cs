@@ -27,13 +27,6 @@ namespace NiVE3.View.Part
             new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
-        public static readonly DependencyProperty IsSelectedProperty = DependencyProperty.Register(
-            nameof(IsSelected),
-            typeof(bool),
-            typeof(LayerView),
-            new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
-        );
-
         public static readonly DependencyProperty LayerNumberProperty = DependencyProperty.Register(
             nameof(LayerNumber),
             typeof(int),
@@ -45,12 +38,6 @@ namespace NiVE3.View.Part
         {
             get { return (int)GetValue(LayerNumberProperty); }
             set { SetValue(LayerNumberProperty, value); }
-        }
-
-        public bool IsSelected
-        {
-            get { return (bool)GetValue(IsSelectedProperty); }
-            set { SetValue(IsSelectedProperty, value); }
         }
 
         public double LayerControlAreaWidth
@@ -68,7 +55,7 @@ namespace NiVE3.View.Part
 
         private void Root_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            ParentCollection?.SelectLayer(this, Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift), Keyboard.IsKeyDown(Key.LeftCtrl) ||  Keyboard.IsKeyDown(Key.RightCtrl));
+            ParentCollection?.SelectItem(this, Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift), Keyboard.IsKeyDown(Key.LeftCtrl) ||  Keyboard.IsKeyDown(Key.RightCtrl));
         }
     }
 }
