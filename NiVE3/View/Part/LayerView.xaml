@@ -6,12 +6,19 @@
              xmlns:local="clr-namespace:NiVE3.View.Part"
              xmlns:ugm="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
              xmlns:pr="clr-namespace:NiVE3.View.Primitive"
+             xmlns:cv="clr-namespace:NiVE3.View.Converter"
              mc:Ignorable="d" 
              x:Name="Root"
              MouseLeftButtonDown="Root_MouseLeftButtonDown"
              d:DesignHeight="200" d:DesignWidth="800">
     <UserControl.Resources>
+        <GridLength x:Key="EmptyGrid">0</GridLength>
+
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <cv:OffsetGridLengthConverter x:Key="GridLengthConverter"/>
+        <cv:SwitchValueConverter x:Key="SwitchValueConverter" FalseValue="{StaticResource EmptyGrid}"/>
+
+        <cv:SwitchValueConverter x:Key="AVSwitchGridWidthSwitch" TrueValue="62"/> <!-- 60 + ceil(pr:ItemResizableStackPanel.SplitterSize / 2) -->
 
         <Style x:Key="HeaderGridStyle" TargetType="{x:Type Grid}">
             <Setter Property="Background" Value="Transparent"/>
@@ -22,8 +29,20 @@
                 </DataTrigger>
             </Style.Triggers>
         </Style>
+
+        <Style x:Key="ColumnGrid" TargetType="{x:Type Grid}">
+            <Setter Property="Margin" Value="0,0,1,0"/>
+            <Setter Property="ClipToBounds" Value="True"/>
+        </Style>
+
+        <Style x:Key="LayerText" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
+            <Setter Property="Margin" Value="2,0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+        </Style>
     </UserControl.Resources>
-    <Grid Grid.IsSharedSizeScope="True">
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -35,19 +54,93 @@
 
         <Grid Grid.Column="0" Grid.Row="0" Style="{StaticResource HeaderGridStyle}" ClipToBounds="True">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" SharedSizeGroup="Expander"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition />
+                <ColumnDefinition Width="{Binding IsAVSwitchColumnVisible, Converter={StaticResource AVSwitchGridWidthSwitch}}"/>
+
+                <ColumnDefinition Width="19"/>
+
+                <ColumnDefinition>
+                    <ColumnDefinition.Width>
+                        <MultiBinding Converter="{StaticResource SwitchValueConverter}">
+                            <Binding Path="IsTagColumnVisible"/>
+                            <Binding Path="TagColumnWidth" Converter="{StaticResource GridLengthConverter}"/>
+                        </MultiBinding>
+                    </ColumnDefinition.Width>
+                </ColumnDefinition>
+
+                <ColumnDefinition>
+                    <ColumnDefinition.Width>
+                        <MultiBinding Converter="{StaticResource SwitchValueConverter}">
+                            <Binding Path="IsLayerNumberColumnVisible"/>
+                            <Binding Path="LayerNumberColumnWidth" Converter="{StaticResource GridLengthConverter}"/>
+                        </MultiBinding>
+                    </ColumnDefinition.Width>
+                </ColumnDefinition>
+
+                <ColumnDefinition Width="{Binding LayerNameColumnWidth, Converter={StaticResource GridLengthConverter}}"/>
+
+                <ColumnDefinition>
+                    <ColumnDefinition.Width>
+                        <MultiBinding Converter="{StaticResource SwitchValueConverter}">
+                            <Binding Path="IsLayerCommentColumnVisible"/>
+                            <Binding Path="LayerCommentColumnWidth" Converter="{StaticResource GridLengthConverter}"/>
+                        </MultiBinding>
+                    </ColumnDefinition.Width>
+                </ColumnDefinition>
+
+                <ColumnDefinition>
+                    <ColumnDefinition.Width>
+                        <MultiBinding Converter="{StaticResource SwitchValueConverter}">
+                            <Binding Path="IsLayerSwitchColumnVisible"/>
+                            <Binding Path="LayerSwitchColumnWidth" Converter="{StaticResource GridLengthConverter}"/>
+                        </MultiBinding>
+                    </ColumnDefinition.Width>
+                </ColumnDefinition>
+
+                <ColumnDefinition>
+                    <ColumnDefinition.Width>
+                        <MultiBinding Converter="{StaticResource SwitchValueConverter}">
+                            <Binding Path="IsModeColumnVisible"/>
+                            <Binding Path="ModeColumnWidth" Converter="{StaticResource GridLengthConverter}"/>
+                        </MultiBinding>
+                    </ColumnDefinition.Width>
+                </ColumnDefinition>
+
+                <ColumnDefinition>
+                    <ColumnDefinition.Width>
+                        <MultiBinding Converter="{StaticResource SwitchValueConverter}">
+                            <Binding Path="IsParentLayerColumnVisible"/>
+                            <Binding Path="ParentLayerColumnWidth" Converter="{StaticResource GridLengthConverter}"/>
+                        </MultiBinding>
+                    </ColumnDefinition.Width>
+                </ColumnDefinition>
             </Grid.ColumnDefinitions>
 
-            <ToggleButton Grid.Column="0" Grid.Row="0" x:Name="ExpandButton" IsChecked="{Binding IsExpanded}" Style="{StaticResource ArrowExpanderStyle}" Margin="0,0,5,0"/>
-            <TextBlock Grid.Column="1" Grid.Row="0" Text="{Binding ElementName=Root, Path=LayerNumber}" VerticalAlignment="Center"/>
-            <TextBlock Grid.Column="2" Grid.Row="0" Text="{Binding Name}" VerticalAlignment="Center"/>
+            <Grid Grid.Column="0" Grid.Row="0" Style="{StaticResource ColumnGrid}"/>
+
+            <Grid Grid.Column="1" Grid.Row="0"  Style="{StaticResource ColumnGrid}">
+                <ToggleButton x:Name="ExpandButton" IsChecked="{Binding IsExpanded}" Style="{StaticResource ArrowExpanderStyle}"/>
+            </Grid>
+
+            <Grid Grid.Column="2" Grid.Row="0"  Style="{StaticResource ColumnGrid}">
+                <Rectangle Width="12" Height="12" Fill="Black" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="3,0,2,0"/>
+            </Grid>
+
+            <Grid Grid.Column="3" Grid.Row="0"  Style="{StaticResource ColumnGrid}">
+                <TextBlock Text="{Binding ElementName=Root, Path=LayerNumber}" Style="{StaticResource LayerText}"/>
+            </Grid>
+
+            <Grid Grid.Column="4" Grid.Row="0"  Style="{StaticResource ColumnGrid}">
+                <TextBlock Text="{Binding Name}" Style="{StaticResource LayerText}"/>
+            </Grid>
+
+            <Grid Grid.Column="5" Grid.Row="0"  Style="{StaticResource ColumnGrid}">
+                <TextBlock Text="{Binding Comment}" Style="{StaticResource LayerText}"/>
+            </Grid>
         </Grid>
 
         <Grid Grid.Column="0" Grid.Row="1" Visibility="{Binding IsExpanded, Converter={StaticResource BooleanToVisibilityConverter}}" ClipToBounds="True">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" SharedSizeGroup="Expander"/>
+                <ColumnDefinition Width="{x:Static pr:NestableItemsCollection.IndentGridWidth}"/>
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
         </Grid>

@@ -16,6 +16,10 @@ namespace NiVE3.View.Primitive
 {
     class NestableItemsCollection
     {
+        public const double IndentWidth = 19.0;
+
+        public static readonly GridLength IndentGridWidth = new GridLength(IndentWidth);
+
         public static readonly DependencyProperty IsSelectedProperty = DependencyProperty.RegisterAttached(
             "IsSelected",
             typeof(bool),
@@ -36,8 +40,6 @@ namespace NiVE3.View.Primitive
 
     class NestableItemsCollection<T> : ItemsControl, IDragSource where T : class
     {
-        const double IndentWidth = 19.0;
-
         public static readonly Style DefaultStyle;
 
         public static readonly DependencyProperty ControlAreaWidthProperty = DependencyProperty.Register(
@@ -258,7 +260,7 @@ namespace NiVE3.View.Primitive
         {
             if (d is NestableItemsCollection<T> collection)
             {
-                collection.CalculatedControlAreaWidth = collection.ControlAreaWidth - collection.IndentLevel * IndentWidth;
+                collection.CalculatedControlAreaWidth = collection.ControlAreaWidth - collection.IndentLevel * NestableItemsCollection.IndentWidth;
             }
         }
     }

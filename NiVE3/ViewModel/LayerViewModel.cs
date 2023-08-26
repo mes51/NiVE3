@@ -12,6 +12,14 @@ namespace NiVE3.ViewModel
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
     partial class LayerViewModel : BindableBase
     {
+        private Guid layerId;
+        [NeedWire(nameof(LayerModel), IsOneWay = true)]
+        public Guid LayerId
+        {
+            get { return layerId; }
+            set { SetProperty(ref layerId, value); }
+        }
+
         private string name = "";
         [NeedWire(nameof(LayerModel))]
         public string Name
@@ -20,12 +28,124 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref name, value); }
         }
 
-        private Guid layerId;
-        [NeedWire(nameof(LayerModel), IsOneWay = true)]
-        public Guid LayerId
+        private string comment = "";
+        [NeedWire(nameof(LayerModel))]
+        public string Comment
         {
-            get { return layerId; }
-            set { SetProperty(ref layerId, value); }
+            get { return comment; }
+            set { SetProperty(ref comment, value); }
+        }
+
+        private double tagColumnWIdth;
+        [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineTagColumnWidth), IsOneWay = true)]
+        public double TagColumnWidth
+        {
+            get { return tagColumnWIdth; }
+            set { SetProperty(ref tagColumnWIdth, value); }
+        }
+
+        private double layerNumberColumnWudth;
+        [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineLayerNumberColumnWidth), IsOneWay = true)]
+        public double LayerNumberColumnWidth
+        {
+            get { return layerNumberColumnWudth; }
+            set { SetProperty(ref layerNumberColumnWudth, value); }
+        }
+
+        private double layerNameColumnWidth;
+        [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineLayerNameColumnWidth), IsOneWay = true)]
+        public double LayerNameColumnWidth
+        {
+            get { return layerNameColumnWidth; }
+            set { SetProperty(ref layerNameColumnWidth, value); }
+        }
+
+        private double layerCommentColumnWidth;
+        [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineLayerCommentColumnWidth), IsOneWay = true)]
+        public double LayerCommentColumnWidth
+        {
+            get { return layerCommentColumnWidth; }
+            set { SetProperty(ref layerCommentColumnWidth, value); }
+        }
+
+        private double layerSwitchColumnWidth;
+        [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineLayerSwitchColumnWidth), IsOneWay = true)]
+        public double LayerSwitchColumnWidth
+        {
+            get { return layerSwitchColumnWidth; }
+            set { SetProperty(ref layerSwitchColumnWidth, value); }
+        }
+
+        private double modeColumnWidth;
+        [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineModeColumnWidth), IsOneWay = true)]
+        public double ModeColumnWidth
+        {
+            get { return modeColumnWidth; }
+            set { SetProperty(ref modeColumnWidth, value); }
+        }
+
+        private double parentLayerColumnWidth;
+        [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineParentLayerColumnWidth), IsOneWay = true)]
+        public double ParentLayerColumnWidth
+        {
+            get { return parentLayerColumnWidth; }
+            set { SetProperty(ref parentLayerColumnWidth, value); }
+        }
+
+        private bool isAVSwitchColumnVisible;
+        [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineAVSwitchColumnVisible), IsOneWay = true)]
+        public bool IsAVSwitchColumnVisible
+        {
+            get { return isAVSwitchColumnVisible; }
+            set { SetProperty(ref isAVSwitchColumnVisible, value); }
+        }
+
+        private bool isTagColumnVisible;
+        [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineTagColumnVisible), IsOneWay = true)]
+        public bool IsTagColumnVisible
+        {
+            get { return isTagColumnVisible; }
+            set { SetProperty(ref isTagColumnVisible, value); }
+        }
+
+        private bool isLayerNumberColumnVisible;
+        [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineLayerNumberColumnVisible), IsOneWay = true)]
+        public bool IsLayerNumberColumnVisible
+        {
+            get { return isLayerNumberColumnVisible; }
+            set { SetProperty(ref isLayerNumberColumnVisible, value); }
+        }
+
+        private bool isLayerCommentColumnVisible;
+        [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineLayerCommentColumnVisible), IsOneWay = true)]
+        public bool IsLayerCommentColumnVisible
+        {
+            get { return isLayerCommentColumnVisible; }
+            set { SetProperty(ref isLayerCommentColumnVisible, value); }
+        }
+
+        private bool isLayerSwitchColumnVisible;
+        [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineLayerSwitchColumnVisible), IsOneWay = true)]
+        public bool IsLayerSwitchColumnVisible
+        {
+            get { return isLayerSwitchColumnVisible; }
+            set { SetProperty(ref isLayerSwitchColumnVisible, value); }
+        }
+
+        private bool isModeColumnVisible;
+        [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineModeColumnVisible), IsOneWay = true)]
+        public bool IsModeColumnVisible
+        {
+            get { return isModeColumnVisible; }
+            set { SetProperty(ref isModeColumnVisible, value); }
+        }
+
+        private bool isParentLayerColumnVisible;
+        [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineParentLayerColumnVisible), IsOneWay = true)]
+        public bool IsParentLayerColumnVisible
+        {
+            get { return isParentLayerColumnVisible; }
+            set { SetProperty(ref isParentLayerColumnVisible, value); }
         }
 
         private bool isExpanded;
@@ -37,9 +157,12 @@ namespace NiVE3.ViewModel
 
         LayerModel LayerModel { get; }
 
-        public LayerViewModel(LayerModel layerModel)
+        ViewStateModel ViewState { get; }
+
+        public LayerViewModel(LayerModel layerModel, ViewStateModel viewState)
         {
             LayerModel = layerModel;
+            ViewState = viewState;
 
             WiringModel();
         }

@@ -217,7 +217,7 @@ namespace NiVE3.ViewModel
                 if (value != null)
                 {
                     BindComposition();
-                    Layers = value.Layers.CreateViewCollection(m => new LayerViewModel(m));
+                    Layers = value.Layers.CreateViewCollection(m => new LayerViewModel(m, ViewState));
                 }
             }
         }

@@ -9,49 +9,49 @@ namespace NiVE3.Model
 {
     class ViewStateModel : BindableBase
     {
-        private double timelineTagColumnWidth = 16.0;
+        private double timelineTagColumnWidth = 19.0;
         public double TimelineTagColumnWidth
         {
             get { return timelineTagColumnWidth; }
             set { SetProperty(ref timelineTagColumnWidth, value); }
         }
 
-        private double timelineLayerNumberColumnWidth = 18.0;
+        private double timelineLayerNumberColumnWidth = 21.0;
         public double TimelineLayerNumberColumnWidth
         {
             get { return timelineLayerNumberColumnWidth; }
             set { SetProperty(ref timelineLayerNumberColumnWidth, value); }
         }
 
-        private double timelineLayerNameColumnWidth = 150.0;
+        private double timelineLayerNameColumnWidth = 153.0;
         public double TimelineLayerNameColumnWidth
         {
             get { return timelineLayerNameColumnWidth; }
             set { SetProperty(ref timelineLayerNameColumnWidth, value); }
         }
 
-        private double timelineLayerCommentColumnWidth = 50.0;
+        private double timelineLayerCommentColumnWidth = 53.0;
         public double TimelineLayerCommentColumnWidth
         {
             get { return timelineLayerCommentColumnWidth; }
             set { SetProperty(ref timelineLayerCommentColumnWidth, value); }
         }
 
-        private double timelineLayerSwitchColumnWidth = 114.0;
+        private double timelineLayerSwitchColumnWidth = 119.0;
         public double TimelineLayerSwitchColumnWidth
         {
             get { return timelineLayerSwitchColumnWidth; }
             set { SetProperty(ref timelineLayerSwitchColumnWidth, value); }
         }
 
-        private double timelineModeColumnWidth = 120.0;
+        private double timelineModeColumnWidth = 133.0;
         public double TimelineModeColumnWidth
         {
             get { return timelineModeColumnWidth; }
             set { SetProperty(ref timelineModeColumnWidth, value); }
         }
 
-        private double timelineParentLayerColumnWidth = 75.0;
+        private double timelineParentLayerColumnWidth = 78.0;
         public double TimelineParentLayerColumnWidth
         {
             get { return timelineParentLayerColumnWidth; }

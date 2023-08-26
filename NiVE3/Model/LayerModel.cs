@@ -18,6 +18,13 @@ namespace NiVE3.Model
             set { SetProperty(ref name, value); }
         }
 
+        private string comment = "";
+        public string Comment
+        {
+            get { return comment; }
+            set { SetProperty(ref comment, value); }
+        }
+
         public Guid LayerId { get; }
 
         public string SourceName => FootageModel.Name;

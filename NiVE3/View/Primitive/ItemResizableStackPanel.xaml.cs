@@ -81,7 +81,7 @@ namespace NiVE3.View.Primitive
             target.SetValue(ItemSizeProperty, value);
         }
 
-        static readonly OffsetGridLengthConverter SizeConverter = new OffsetGridLengthConverter { SizeOffset = SplitterSize };
+        static readonly OffsetGridLengthConverter SizeConverter = new OffsetGridLengthConverter { SizeOffset = -SplitterSize };
 
         static readonly BooleanInvertConverter IsLockedConverter = new BooleanInvertConverter();
 
@@ -132,7 +132,7 @@ namespace NiVE3.View.Primitive
             CollapsedValue = new GridLength()
         };
 
-        MinSizeConverter MinSizeConverter { get; } = new MinSizeConverter { Offset = SplitterSize };
+        MinSizeConverter MinSizeConverter { get; } = new MinSizeConverter { Offset = -SplitterSize };
 
         public ItemResizableStackPanel()
         {
@@ -527,9 +527,9 @@ namespace NiVE3.View.Primitive
                 switch (visibility)
                 {
                     case Visibility.Visible:
-                        return size + Offset;
+                        return Math.Max(size + Offset, 0.0);
                     case Visibility.Hidden:
-                        return ItemCollapseByHidden ? 0.0 : size + Offset;
+                        return ItemCollapseByHidden ? 0.0 : Math.Max(size + Offset, 0.0);
                     case Visibility.Collapsed:
                         return 0.0;
                 }
@@ -540,35 +540,6 @@ namespace NiVE3.View.Primitive
         public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
         {
             throw new NotImplementedException();
-        }
-    }
-
-    class OffsetGridLengthConverter : IValueConverter
-    {
-        public double SizeOffset { get; set; }
-
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            if (value is double v)
-            {
-                return new GridLength(v + SizeOffset);
-            }
-            else
-            {
-                return DependencyProperty.UnsetValue;
-            }
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            if (value is GridLength v)
-            {
-                return v.Value - SizeOffset;
-            }
-            else
-            {
-                return DependencyProperty.UnsetValue;
-            }
         }
     }
 }
