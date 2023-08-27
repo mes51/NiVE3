@@ -16,6 +16,7 @@
         <GridLength x:Key="EmptyGrid">0</GridLength>
 
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <cv:ColorToBrushConverter x:Key="ColorToBrushConverter"/>
         <cv:OffsetGridLengthConverter x:Key="GridLengthConverter"/>
         <cv:SwitchValueConverter x:Key="SwitchValueConverter" FalseValue="{StaticResource EmptyGrid}"/>
         <cv:EnumToBoolConverter x:Key="EnumToBoolConverter" UseAndCompare="True"/>
@@ -124,7 +125,7 @@
             </Grid>
 
             <Grid Grid.Column="2" Grid.Row="0"  Style="{StaticResource ColumnGrid}">
-                <Rectangle Width="12" Height="12" Fill="Black" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="3,0,2,0"/>
+                <Rectangle Width="12" Height="12" Fill="{Binding TagColor, Converter={StaticResource ColorToBrushConverter}}" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="3,0,2,0"/>
             </Grid>
 
             <Grid Grid.Column="3" Grid.Row="0"  Style="{StaticResource ColumnGrid}">
