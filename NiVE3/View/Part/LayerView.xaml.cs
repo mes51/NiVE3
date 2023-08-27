@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using NiVE3.ViewModel;
 
 namespace NiVE3.View.Part
 {
@@ -20,6 +21,24 @@ namespace NiVE3.View.Part
     /// </summary>
     public partial class LayerView : UserControl
     {
+        public static RoutedEvent IsDurationEditingChangedEvent = EventManager.RegisterRoutedEvent(
+            nameof(IsDurationEditingChanged), RoutingStrategy.Direct, typeof(EventHandler), typeof(LayerView)
+        );
+
+        public static readonly DependencyProperty RangeProperty = DependencyProperty.Register(
+            nameof(Range),
+            typeof(double),
+            typeof(LayerView),
+            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        public static readonly DependencyProperty RangeStartProperty = DependencyProperty.Register(
+            nameof(RangeStart),
+            typeof(double),
+            typeof(LayerView),
+            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
         public static readonly DependencyProperty LayerControlAreaWidthProperty = DependencyProperty.Register(
             nameof(LayerControlAreaWidth),
             typeof(double),
@@ -34,6 +53,40 @@ namespace NiVE3.View.Part
             new FrameworkPropertyMetadata(0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
+        public static readonly DependencyProperty CompositionFrameRateProperty = DependencyProperty.Register(
+            nameof(CompositionFrameRate),
+            typeof(double),
+            typeof(LayerView),
+            new FrameworkPropertyMetadata(0.0)
+        );
+
+        private static readonly DependencyPropertyKey IsDurationEditingPropertyKey = DependencyProperty.RegisterReadOnly(
+            nameof(IsDurationEditing),
+            typeof(bool),
+            typeof(LayerView),
+            new FrameworkPropertyMetadata(false, IsDurationEditingChangedHandler)
+        );
+
+        public static readonly DependencyProperty IsDurationEditingProperty = IsDurationEditingPropertyKey.DependencyProperty;
+
+        public event EventHandler IsDurationEditingChanged
+        {
+            add { AddHandler(IsDurationEditingChangedEvent, value); }
+            remove { RemoveHandler(IsDurationEditingChangedEvent, value); }
+        }
+
+        public bool IsDurationEditing
+        {
+            get { return (bool)GetValue(IsDurationEditingProperty); }
+            private set { SetValue(IsDurationEditingPropertyKey, value); }
+        }
+
+        public double CompositionFrameRate
+        {
+            get { return (double)GetValue(CompositionFrameRateProperty); }
+            set { SetValue(CompositionFrameRateProperty, value); }
+        }
+
         public int LayerNumber
         {
             get { return (int)GetValue(LayerNumberProperty); }
@@ -46,7 +99,21 @@ namespace NiVE3.View.Part
             set { SetValue(LayerControlAreaWidthProperty, value); }
         }
 
+        public double RangeStart
+        {
+            get { return (double)GetValue(RangeStartProperty); }
+            set { SetValue(RangeStartProperty, value); }
+        }
+
+        public double Range
+        {
+            get { return (double)GetValue(RangeProperty); }
+            set { SetValue(RangeProperty, value); }
+        }
+
         LayerCollection? ParentCollection => ItemsControl.ItemsControlFromItemContainer(this) as LayerCollection;
+
+        LayerViewModel? ViewModel => DataContext as LayerViewModel;
 
         public LayerView()
         {
@@ -56,6 +123,27 @@ namespace NiVE3.View.Part
         private void Root_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             ParentCollection?.SelectItem(this, Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift), Keyboard.IsKeyDown(Key.LeftCtrl) ||  Keyboard.IsKeyDown(Key.RightCtrl));
+        }
+
+        private void DurationBar_IsClickedChanged(object sender, EventArgs e)
+        {
+            IsDurationEditing = DurationBar.IsClicked;
+            if (IsDurationEditing)
+            {
+                ViewModel?.BeginEditDurationCommand?.Execute(null);
+            }
+            else
+            {
+                ViewModel?.CommitEditDurationCommand?.Execute(null);
+            }
+        }
+
+        static void IsDurationEditingChangedHandler(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is LayerView layer)
+            {
+                layer.RaiseEvent(new RoutedEventArgs(IsDurationEditingChangedEvent, d));
+            }
         }
     }
 }

@@ -7,6 +7,7 @@
              xmlns:ugm="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
              xmlns:pr="clr-namespace:NiVE3.View.Primitive"
              xmlns:cv="clr-namespace:NiVE3.View.Converter"
+             xmlns:pi="clr-namespace:NiVE3.Plugin.Interfaces;assembly=NiVE3.Plugin"
              mc:Ignorable="d" 
              x:Name="Root"
              MouseLeftButtonDown="Root_MouseLeftButtonDown"
@@ -17,6 +18,7 @@
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <cv:OffsetGridLengthConverter x:Key="GridLengthConverter"/>
         <cv:SwitchValueConverter x:Key="SwitchValueConverter" FalseValue="{StaticResource EmptyGrid}"/>
+        <cv:EnumToBoolConverter x:Key="EnumToBoolConverter" UseAndCompare="True"/>
 
         <cv:SwitchValueConverter x:Key="AVSwitchGridWidthSwitch" TrueValue="62"/> <!-- 60 + ceil(pr:ItemResizableStackPanel.SplitterSize / 2) -->
 
@@ -145,6 +147,20 @@
             </Grid.ColumnDefinitions>
         </Grid>
 
-        <Grid x:Name="DurationGrid" Grid.Column="1" Grid.Row="0" ClipToBounds="True"/>
+
+        <local:DurationBar Grid.Column="1"
+                           Grid.Row="0"
+                           x:Name="DurationBar"
+                           Margin="0,1"
+                           Range="{Binding ElementName=Root, Path=Range}"
+                           RangeStart="{Binding ElementName=Root, Path=RangeStart}"
+                           Duration="{Binding Duration}"
+                           SourceStartPoint="{Binding SourceStartPoint}"
+                           InPoint="{Binding InPoint}"
+                           OutPoint="{Binding OutPoint}"
+                           CompositionFrameRate="{Binding ElementName=Root, Path=CompositionFrameRate}"
+                           HasDuration="{Binding SourceType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static pi:SourceType.VideoAndAudio}}"
+                           IsEnableTimeRemap="{Binding IsEnableTimeRemap}"
+                           IsClickedChanged="DurationBar_IsClickedChanged"/>
     </Grid>
 </UserControl>

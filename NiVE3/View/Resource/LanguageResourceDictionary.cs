@@ -238,6 +238,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("レイヤーの移動")]
         public static readonly string History_MoveLayers = nameof(History_MoveLayers);
 
+        [ShowInMarkup, DefaultValue("レイヤー時間変更")]
+        public static readonly string History_EditLayerDuration = nameof(History_EditLayerDuration);
+
         // Enum
 
         [ShowInMarkup, DefaultValue("RGB")]

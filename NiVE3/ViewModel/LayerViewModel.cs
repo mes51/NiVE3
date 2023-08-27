@@ -3,8 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
+using System.Windows.Media;
 using NiVE3.Model;
+using NiVE3.Plugin.Interfaces;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
+using Prism.Commands;
 using Prism.Mvvm;
 
 namespace NiVE3.ViewModel
@@ -34,6 +38,62 @@ namespace NiVE3.ViewModel
         {
             get { return comment; }
             set { SetProperty(ref comment, value); }
+        }
+
+        private double duration;
+        [NeedWire(nameof(LayerModel))]
+        public double Duration
+        {
+            get { return duration; }
+            set { SetProperty(ref duration, value); }
+        }
+
+        private double sourceStartPoint;
+        [NeedWire(nameof(LayerModel))]
+        public double SourceStartPoint
+        {
+            get { return sourceStartPoint; }
+            set { SetProperty(ref sourceStartPoint, value); }
+        }
+
+        private double inPoint;
+        [NeedWire(nameof(LayerModel))]
+        public double InPoint
+        {
+            get { return inPoint; }
+            set { SetProperty(ref inPoint, value); }
+        }
+
+        private double outPoint;
+        [NeedWire(nameof(LayerModel))]
+        public double OutPoint
+        {
+            get { return outPoint; }
+            set { SetProperty(ref outPoint, value); }
+        }
+
+        private bool isEnableTimeRemap;
+        [NeedWire(nameof(LayerModel))]
+        public bool IsEnableTimeRemap
+        {
+            get { return isEnableTimeRemap; }
+            set { SetProperty(ref isEnableTimeRemap, value); }
+        }
+
+        private SourceType sourceType;
+        [NeedWire(nameof(LayerModel), IsOneWay = true)]
+        public SourceType SourceType
+        {
+            get { return sourceType; }
+            set { SetProperty(ref sourceType, value); }
+        }
+
+        private Color tagColor;
+        [NeedWire(nameof(LayerModel))]
+        public Color TagColor
+        {
+            get { return tagColor; }
+            set { SetProperty(ref tagColor, value); }
         }
 
         private double tagColumnWIdth;
@@ -155,6 +215,10 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref isExpanded, value); }
         }
 
+        public ICommand BeginEditDurationCommand { get; }
+
+        public ICommand CommitEditDurationCommand { get; }
+
         LayerModel LayerModel { get; }
 
         ViewStateModel ViewState { get; }
@@ -165,6 +229,10 @@ namespace NiVE3.ViewModel
             ViewState = viewState;
 
             WiringModel();
+
+            BeginEditDurationCommand = new DelegateCommand(() => LayerModel.BeginEditDuration());
+
+            CommitEditDurationCommand = new DelegateCommand(() => LayerModel.CommitEditDuration());
         }
 
         partial void WiringModel();

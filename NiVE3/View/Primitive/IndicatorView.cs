@@ -30,6 +30,8 @@ namespace NiVE3.View.Primitive
                 new LineSegment(new Point(0.0, 7.0), false)
             };
             MarkerGeometry = new PathGeometry(new PathFigure[] { new PathFigure(new Point(0.0, 0.0), markerSegments, true) }).FreezeCurrentObject();
+
+            IsHitTestVisibleProperty.OverrideMetadata(typeof(IndicatorView), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.Inherits));
         }
 
         protected override void OnRender(DrawingContext drawingContext)

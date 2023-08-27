@@ -2,14 +2,16 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.Windows.Media;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NiVE3.Plugin.Interfaces;
 using Prism.Mvvm;
 
 namespace NiVE3.Model
 {
-    class LayerModel : BindableBase, IDisposable
+    partial class LayerModel : BindableBase, IDisposable
     {
         private string name = "";
         public string Name
@@ -23,6 +25,55 @@ namespace NiVE3.Model
         {
             get { return comment; }
             set { SetProperty(ref comment, value); }
+        }
+
+        private double duration;
+        public double Duration
+        {
+            get { return duration; }
+            set { SetProperty(ref duration, value); }
+        }
+
+        private double sourceStartPoint;
+        public double SourceStartPoint
+        {
+            get { return sourceStartPoint; }
+            set { SetProperty(ref sourceStartPoint, value); }
+        }
+
+        private double inPoint;
+        public double InPoint
+        {
+            get { return inPoint; }
+            set { SetProperty(ref inPoint, value); }
+        }
+
+        private double outPoint;
+        public double OutPoint
+        {
+            get { return outPoint; }
+            set { SetProperty(ref outPoint, value); }
+        }
+
+        private bool isEnableTimeRemap;
+        public bool IsEnableTimeRemap
+        {
+            get { return isEnableTimeRemap; }
+            set { SetProperty(ref isEnableTimeRemap, value); }
+        }
+
+        private SourceType sourceType;
+        public SourceType SourceType
+        {
+            get { return sourceType; }
+            set { SetProperty(ref sourceType, value); }
+        }
+
+        private Color tagColor = Colors.Red;
+        public Color TagColor
+        {
+            get { return tagColor; }
+            set { SetProperty(ref tagColor, value); }
         }
 
         public Guid LayerId { get; }
@@ -46,14 +97,41 @@ namespace NiVE3.Model
 
         FootageModel FootageModel { get; set; }
 
-        public LayerModel(FootageModel footageModel) : this(footageModel, null) { }
+        HistoryModel HistoryModel { get; set; }
 
-        public LayerModel(FootageModel footageModel, Guid? layerId)
+        double PrevInPoint { get; set; }
+
+        double PrevOutPoint { get; set; }
+
+        double PrevSourceStartPoint { get; set; }
+
+        public LayerModel(FootageModel footageModel, HistoryModel historyModel) : this(footageModel, historyModel,null) { }
+
+        public LayerModel(FootageModel footageModel, HistoryModel historyModel, Guid? layerId)
         {
             Effects = new ObservableCollection<EffectModel>();
             FootageModel = footageModel;
+            HistoryModel = historyModel;
             Name = footageModel.Name;
+            Duration = footageModel.Duration;
+            OutPoint = footageModel.Duration;
+            SourceType = footageModel.InputType;
             LayerId = layerId ?? Guid.NewGuid();
+        }
+
+        public void BeginEditDuration()
+        {
+            PrevInPoint = InPoint;
+            PrevOutPoint = OutPoint;
+            PrevSourceStartPoint = SourceStartPoint;
+        }
+
+        public void CommitEditDuration()
+        {
+            if (PrevInPoint != inPoint || PrevOutPoint != OutPoint || PrevSourceStartPoint != SourceStartPoint)
+            {
+                HistoryModel.Add(new EditDurationHistoryCommand(this, PrevInPoint, PrevOutPoint, PrevSourceStartPoint, InPoint, OutPoint, SourceStartPoint));
+            }
         }
 
         private void Effects_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)

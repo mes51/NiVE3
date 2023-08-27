@@ -171,7 +171,11 @@ namespace NiVE3.Model
             var startIndex = index;
             foreach (var f in footages)
             {
-                var layer = new LayerModel(f);
+                var layer = new LayerModel(f, HistoryModel);
+                if (f.InputType == SourceType.Image || f.InputType == SourceType.None)
+                {
+                    layer.OutPoint = Duration;
+                }
                 Layers.Insert(index, layer);
                 addedLayers.Add(layer);
                 index++;

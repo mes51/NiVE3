@@ -173,7 +173,16 @@
             <ScrollBar Grid.Column="1" Orientation="Horizontal" Value="{Binding TimeBarRangeStart}" Minimum="0.0" Maximum="{Binding TimelineScrollBarMax}" SmallChange="{Binding FrameDuration}" LargeChange="{Binding TimeBarRange}" ViewportSize="1"/>
         </Grid>
 
-        <pt:LayerCollection Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" ItemsSource="{Binding Layers}" ControlAreaWidth="{Binding ElementName=WidthMeasurementLayerControlArea, Path=ActualWidth}" dd:DragDrop.IsDragSource="True" dd:DragDrop.IsDropTarget="True" dd:DragDrop.DropHandler="{Binding}" dd:DragDrop.DragHandler="{Binding RelativeSource={RelativeSource Self}}">
+        <pt:LayerCollection Grid.Row="2"
+                            Grid.Column="0"
+                            Grid.ColumnSpan="3"
+                            ItemsSource="{Binding Layers}"
+                            ControlAreaWidth="{Binding ElementName=WidthMeasurementLayerControlArea, Path=ActualWidth}"
+                            CompositionFrameRate="{Binding FrameRate}"
+                            Range="{Binding TimeBarRange}"
+                            RangeStart="{Binding TimeBarRangeStart}"
+                            dd:DragDrop.DropHandler="{Binding}"
+                            dd:DragDrop.DragHandler="{Binding RelativeSource={RelativeSource Self}}">
             <pt:LayerCollection.Style>
                 <Style TargetType="{x:Type pt:LayerCollection}" BasedOn="{x:Static pt:LayerCollection.DefaultStyle}">
                     <Setter Property="Template">
