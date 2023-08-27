@@ -99,7 +99,7 @@
 
             <Grid pr:ItemResizableStackPanel.ItemSize="19" pr:ItemResizableStackPanel.IsLocked="True"/>
 
-            <Grid VerticalAlignment="Center" HorizontalAlignment="Left" Style="{StaticResource IconContainer}" Visibility="{Binding IsTagColumnVisible, Converter={StaticResource BooleanToVisibilityConverter}}" pr:ItemResizableStackPanel.ItemMinSize="19" pr:ItemResizableStackPanel.ItemSize="{Binding TagColumnWidth}">
+            <Grid VerticalAlignment="Center" HorizontalAlignment="Left" Style="{StaticResource IconContainer}" Visibility="{Binding IsTagColumnVisible, Converter={StaticResource BooleanToVisibilityConverter}}" pr:ItemResizableStackPanel.ItemSize="19" pr:ItemResizableStackPanel.IsLocked="True">
                 <Path Data="{gm:FontawesomeResource ResourceKey=Tag}" Style="{StaticResource HeaderIconPath}"/>
             </Grid>
 

@@ -95,7 +95,7 @@ namespace NiVE3.Model
             }
         }
 
-        FootageModel FootageModel { get; set; }
+        public FootageModel FootageModel { get; }
 
         HistoryModel HistoryModel { get; set; }
 

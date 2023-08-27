@@ -22,6 +22,7 @@
         <cv:EnumToBoolConverter x:Key="EnumToBoolConverter" UseAndCompare="True"/>
 
         <cv:SwitchValueConverter x:Key="AVSwitchGridWidthSwitch" TrueValue="62"/> <!-- 60 + ceil(pr:ItemResizableStackPanel.SplitterSize / 2) -->
+        <cv:SwitchValueConverter x:Key="TagGridWidthSwitch" TrueValue="21"/> <!-- 19 + ceil(pr:ItemResizableStackPanel.SplitterSize / 2) -->
 
         <Style x:Key="HeaderGridStyle" TargetType="{x:Type Grid}">
             <Setter Property="Background" Value="Transparent"/>
@@ -61,14 +62,7 @@
 
                 <ColumnDefinition Width="19"/>
 
-                <ColumnDefinition>
-                    <ColumnDefinition.Width>
-                        <MultiBinding Converter="{StaticResource SwitchValueConverter}">
-                            <Binding Path="IsTagColumnVisible"/>
-                            <Binding Path="TagColumnWidth" Converter="{StaticResource GridLengthConverter}"/>
-                        </MultiBinding>
-                    </ColumnDefinition.Width>
-                </ColumnDefinition>
+                <ColumnDefinition Width="{Binding IsTagColumnVisible, Converter={StaticResource TagGridWidthSwitch}}"/>
 
                 <ColumnDefinition>
                     <ColumnDefinition.Width>

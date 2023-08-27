@@ -106,6 +106,8 @@ namespace NiVE3.View.Primitive
                 TargetType = typeof(ItemsControl)
             };
             DefaultStyle.Setters.Add(new Setter(ItemsPanelProperty, itemsPanelTemplate));
+
+            IsTabStopProperty.OverrideMetadata(typeof(NestableItemsCollection<T>), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.Inherits));
         }
 
         public NestableItemsCollection()

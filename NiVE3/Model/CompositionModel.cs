@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using NiVE3.Extension;
+using NiVE3.Input;
 using NiVE3.Plugin.Image;
 using NiVE3.Plugin.Interfaces;
 using Prism.Mvvm;
@@ -171,6 +172,10 @@ namespace NiVE3.Model
             var startIndex = index;
             foreach (var f in footages)
             {
+                if (f.InputModel.Input is CompositionInput compositionInput && IsCycledComposition(this, compositionInput))
+                {
+                    continue;
+                }
                 var layer = new LayerModel(f, HistoryModel);
                 if (f.InputType == SourceType.Image || f.InputType == SourceType.None)
                 {
@@ -181,7 +186,10 @@ namespace NiVE3.Model
                 index++;
             }
 
-            HistoryModel.Add(new AddLayersHistoryCommand(this, addedLayers.ToArray(), startIndex));
+            if (addedLayers.Count > 0)
+            {
+                HistoryModel.Add(new AddLayersHistoryCommand(this, addedLayers.ToArray(), startIndex));
+            }
         }
 
         public void MoveLayer(Guid layerId, int newIndex)
@@ -216,6 +224,22 @@ namespace NiVE3.Model
         {
             // TODO:
             return new NManagedImage(Width, Height, true);
+        }
+
+        static bool IsCycledComposition(CompositionModel target, CompositionInput input)
+        {
+            if (input.Composition == target)
+            {
+                return true;
+            }
+            foreach (var i in input.Composition.Layers.Select(l => l.FootageModel.InputModel.Input).OfType<CompositionInput>())
+            {
+                if (IsCycledComposition(target, i))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         private void CompositionModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)

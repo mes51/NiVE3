@@ -9,13 +9,6 @@ namespace NiVE3.Model
 {
     class ViewStateModel : BindableBase
     {
-        private double timelineTagColumnWidth = 19.0;
-        public double TimelineTagColumnWidth
-        {
-            get { return timelineTagColumnWidth; }
-            set { SetProperty(ref timelineTagColumnWidth, value); }
-        }
-
         private double timelineLayerNumberColumnWidth = 21.0;
         public double TimelineLayerNumberColumnWidth
         {

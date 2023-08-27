@@ -85,14 +85,6 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref workareaEnd, value); }
         }
 
-        private double tagColumnWIdth;
-        [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineTagColumnWidth))]
-        public double TagColumnWidth
-        {
-            get { return tagColumnWIdth; }
-            set { SetProperty(ref tagColumnWIdth, value); }
-        }
-
         private double layerNumberColumnWudth;
         [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineLayerNumberColumnWidth))]
         public double LayerNumberColumnWidth
