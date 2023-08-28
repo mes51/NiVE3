@@ -30,7 +30,7 @@ namespace NiVE3.Model
             set { SetProperty(ref timelineLayerCommentColumnWidth, value); }
         }
 
-        private double timelineLayerSwitchColumnWidth = 119.0;
+        private double timelineLayerSwitchColumnWidth = 133.0;
         public double TimelineLayerSwitchColumnWidth
         {
             get { return timelineLayerSwitchColumnWidth; }

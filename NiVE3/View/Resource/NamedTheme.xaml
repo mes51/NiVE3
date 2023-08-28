@@ -10,7 +10,7 @@
                 <ControlTemplate TargetType="{x:Type ToggleButton}">
                     <Grid Background="Transparent">
                         <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <Path x:Name="ExpandPath" Margin="1,1,1,1" Fill="Black" Data="M 0,0 8.66025403784439,5 0,10"/>
+                            <Path x:Name="ExpandPath" Margin="1,1,1,1" Fill="{ugm:AppearanceResource ResourceKey=TextBrush, ReturnDynamicResource=True}" Data="M 0,0 8.66025403784439,5 0,10"/>
                         </Grid>
                     </Grid>
                     <ControlTemplate.Triggers>
@@ -133,6 +133,43 @@
                 -->
             </MultiTrigger>
         </Style.Triggers>
+    </Style>
+
+    <Style x:Key="LayerSwitchCheckBox" TargetType="{x:Type CheckBox}">
+        <Setter Property="Width" Value="15"/>
+        <Setter Property="Height" Value="15"/>
+        <Setter Property="Background" Value="{ugm:AppearanceResource ResourceKey=BackgroundFill, ReturnDynamicResource=True}"/>
+        <Setter Property="Foreground" Value="{ugm:AppearanceResource ResourceKey=TextBrush, ReturnDynamicResource=True}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type CheckBox}">
+                    <ControlTemplate.Resources>
+                        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+                    </ControlTemplate.Resources>
+                    <Grid Background="{TemplateBinding Background}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition />
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition />
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Path Grid.Column="1" Grid.Row="1" Fill="{TemplateBinding Foreground}" Style="{StaticResource IconBase}" Data="{TemplateBinding Content}" Visibility="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+
+                        <Rectangle Grid.Column="0" Grid.Row="0" Grid.RowSpan="2" Width="1" Fill="{ugm:AppearanceResource ResourceKey=BorderBrush, ReturnDynamicResource=True}"/>
+                        <Rectangle Grid.Column="1" Grid.Row="0" Height="1" Fill="{ugm:AppearanceResource ResourceKey=BorderBrush, ReturnDynamicResource=True}"/>
+                        <Rectangle Grid.Column="2" Grid.Row="0" Grid.RowSpan="3" Width="1" Fill="{ugm:AppearanceResource ResourceKey=BorderBrush, ReturnDynamicResource=True}"/>
+                        <Rectangle Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" Height="1" Fill="{ugm:AppearanceResource ResourceKey=BorderBrush, ReturnDynamicResource=True}"/>
+                        <Rectangle Grid.Column="2" Grid.Row="0" Grid.RowSpan="3" Width="1" Fill="White" Opacity="0.4"/>
+                        <Rectangle Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" Height="1" Fill="White" Opacity="0.4"/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
     <Style x:Key="ShyCheckBox" TargetType="{x:Type CheckBox}" BasedOn="{StaticResource IconCheckBoxBase}">

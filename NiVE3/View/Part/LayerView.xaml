@@ -5,9 +5,11 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:NiVE3.View.Part"
              xmlns:ugm="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:pr="clr-namespace:NiVE3.View.Primitive"
              xmlns:cv="clr-namespace:NiVE3.View.Converter"
              xmlns:pi="clr-namespace:NiVE3.Plugin.Interfaces;assembly=NiVE3.Plugin"
+             xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
              mc:Ignorable="d" 
              x:Name="Root"
              MouseLeftButtonDown="Root_MouseLeftButtonDown"
@@ -21,8 +23,15 @@
         <cv:SwitchValueConverter x:Key="SwitchValueConverter" FalseValue="{StaticResource EmptyGrid}"/>
         <cv:EnumToBoolConverter x:Key="EnumToBoolConverter" UseAndCompare="True"/>
 
-        <cv:SwitchValueConverter x:Key="AVSwitchGridWidthSwitch" TrueValue="62"/> <!-- 60 + ceil(pr:ItemResizableStackPanel.SplitterSize / 2) -->
-        <cv:SwitchValueConverter x:Key="TagGridWidthSwitch" TrueValue="21"/> <!-- 19 + ceil(pr:ItemResizableStackPanel.SplitterSize / 2) -->
+        <cv:ConverterCollection x:Key="AVSwitchVisibleConverter">
+            <cv:ConverterItem Converter="{StaticResource EnumToBoolConverter}" TargetType="{x:Type sys:Boolean}"/>
+            <cv:ConverterItem TargetType="{x:Type Visibility}">
+                <cv:BooleanToVisibilityHiddenConverter />
+            </cv:ConverterItem>
+        </cv:ConverterCollection>
+
+        <cv:SwitchValueConverter x:Key="AVSwitchGridWidthSwitch" TrueValue="68"/> <!-- 66 + ceil(pr:ItemResizableStackPanel.SplitterSize / 2) -->
+        <cv:SwitchValueConverter x:Key="TagGridWidthSwitch" TrueValue="19"/>
 
         <Style x:Key="HeaderGridStyle" TargetType="{x:Type Grid}">
             <Setter Property="Background" Value="Transparent"/>
@@ -45,10 +54,23 @@
             <Setter Property="HorizontalAlignment" Value="Left"/>
             <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
         </Style>
+
+        <Style x:Key="SoloSwitchStyle" TargetType="{x:Type CheckBox}" BasedOn="{StaticResource LayerSwitchCheckBox}">
+            <Setter Property="Visibility" Value="Hidden"/>
+
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsEnableVideo}" Value="True">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsEnableAudio}" Value="True">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="17"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
@@ -112,7 +134,14 @@
                 </ColumnDefinition>
             </Grid.ColumnDefinitions>
 
-            <Grid Grid.Column="0" Grid.Row="0" Style="{StaticResource ColumnGrid}"/>
+            <Grid Grid.Column="0" Grid.Row="0" Style="{StaticResource ColumnGrid}">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="1.5,0,0,0">
+                    <CheckBox Content="{gm:FontawesomeResource ResourceKey=Eye}" Style="{StaticResource LayerSwitchCheckBox}" IsChecked="{Binding IsEnableVideo}" Visibility="{Binding SourceType, Converter={StaticResource AVSwitchVisibleConverter}, ConverterParameter={x:Static  local:LayerView.CompositionDisplayableSourceType}}"/>
+                    <CheckBox Content="{gm:FontawesomeResource ResourceKey=VolumeHigh}" Style="{StaticResource LayerSwitchCheckBox}" Margin="1,0,0,0" IsChecked="{Binding IsEnableAudio}" Visibility="{Binding SourceType, Converter={StaticResource AVSwitchVisibleConverter}, ConverterParameter={x:Static pi:SourceType.Audio}}"/>
+                    <CheckBox Content="{gm:FontawesomeResource ResourceKey=Circle}" Style="{StaticResource SoloSwitchStyle}" Margin="1,0,0,0" IsChecked="{Binding IsEnableSolo}"/>
+                    <CheckBox Content="{gm:FontawesomeResource ResourceKey=Lock}" Style="{StaticResource LayerSwitchCheckBox}" Margin="1,0,0,0" IsChecked="{Binding IsLock}"/>
+                </StackPanel>
+            </Grid>
 
             <Grid Grid.Column="1" Grid.Row="0"  Style="{StaticResource ColumnGrid}">
                 <ToggleButton x:Name="ExpandButton" IsChecked="{Binding IsExpanded}" Style="{StaticResource ArrowExpanderStyle}"/>
@@ -135,7 +164,7 @@
             </Grid>
         </Grid>
 
-        <Grid Grid.Column="0" Grid.Row="1" Visibility="{Binding IsExpanded, Converter={StaticResource BooleanToVisibilityConverter}}" ClipToBounds="True">
+        <Grid Grid.Column="0" Grid.Row="1" Visibility="{Binding IsExpanded, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter={x:Static pi:SourceType.Audio}}" ClipToBounds="True">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="{x:Static pr:NestableItemsCollection.IndentGridWidth}"/>
                 <ColumnDefinition />

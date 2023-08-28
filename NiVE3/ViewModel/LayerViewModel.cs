@@ -96,6 +96,38 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref tagColor, value); }
         }
 
+        private bool isEnableVideo;
+        [NeedWire(nameof(LayerModel))]
+        public bool IsEnableVideo
+        {
+            get { return isEnableVideo; }
+            set { SetProperty(ref isEnableVideo, value); }
+        }
+
+        private bool isEnableAudio;
+        [NeedWire(nameof(LayerModel))]
+        public bool IsEnableAudio
+        {
+            get { return isEnableAudio; }
+            set { SetProperty(ref isEnableAudio, value); }
+        }
+
+        private bool isEnableSolo;
+        [NeedWire(nameof(LayerModel))]
+        public bool IsEnableSolo
+        {
+            get { return isEnableSolo; }
+            set { SetProperty(ref isEnableSolo, value); }
+        }
+
+        private bool isLock;
+        [NeedWire(nameof(LayerModel))]
+        public bool IsLock
+        {
+            get { return isLock; }
+            set { SetProperty(ref isLock, value); }
+        }
+
         private double layerNumberColumnWudth;
         [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineLayerNumberColumnWidth), IsOneWay = true)]
         public double LayerNumberColumnWidth

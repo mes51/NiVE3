@@ -76,6 +76,34 @@ namespace NiVE3.Model
             set { SetProperty(ref tagColor, value); }
         }
 
+        private bool isEnableVideo;
+        public bool IsEnableVideo
+        {
+            get { return isEnableVideo; }
+            set { SetProperty(ref isEnableVideo, value); }
+        }
+
+        private bool isEnableAudio;
+        public bool IsEnableAudio
+        {
+            get { return isEnableAudio; }
+            set { SetProperty(ref isEnableAudio, value); }
+        }
+
+        private bool isEnableSolo;
+        public bool IsEnableSolo
+        {
+            get { return isEnableSolo; }
+            set { SetProperty(ref isEnableSolo, value); }
+        }
+
+        private bool isLock;
+        public bool IsLock
+        {
+            get { return isLock; }
+            set { SetProperty(ref isLock, value); }
+        }
+
         public Guid LayerId { get; }
 
         public string SourceName => FootageModel.Name;
@@ -117,6 +145,9 @@ namespace NiVE3.Model
             OutPoint = footageModel.Duration;
             SourceType = footageModel.InputType;
             LayerId = layerId ?? Guid.NewGuid();
+
+            IsEnableVideo = SourceType.HasFlag(SourceType.Video) || SourceType.HasFlag(SourceType.Image);
+            IsEnableAudio = SourceType.HasFlag(SourceType.Audio);
         }
 
         public void BeginEditDuration()

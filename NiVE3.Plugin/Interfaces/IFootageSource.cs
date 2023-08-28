@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -52,6 +53,7 @@ namespace NiVE3.Plugin.Interfaces
     /// <summary>
     /// フッテージのメディアの形式を表します。
     /// </summary>
+    [Flags]
     public enum SourceType
     {
         /// <summary>

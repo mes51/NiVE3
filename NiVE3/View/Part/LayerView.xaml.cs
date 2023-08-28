@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using NiVE3.Plugin.Interfaces;
 using NiVE3.ViewModel;
 
 namespace NiVE3.View.Part
@@ -21,6 +22,9 @@ namespace NiVE3.View.Part
     /// </summary>
     public partial class LayerView : UserControl
     {
+        // NOTE: なぜかTypeConverterをSourceTypeにつけてもNREが出てXAML上でリソースとして定義出来ないため、定数として定義する
+        public static readonly SourceType CompositionDisplayableSourceType = SourceType.Image | SourceType.Video;
+
         public static RoutedEvent IsDurationEditingChangedEvent = EventManager.RegisterRoutedEvent(
             nameof(IsDurationEditingChanged), RoutingStrategy.Direct, typeof(EventHandler), typeof(LayerView)
         );

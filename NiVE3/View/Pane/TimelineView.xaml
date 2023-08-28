@@ -20,6 +20,7 @@
         <cv:TimeConverter x:Key="TimeConverter" FrameRate="{Binding FrameRate}"/>
 
         <Thickness x:Key="ColumnMargin">2,0,0,0</Thickness>
+        <Thickness x:Key="IconMargin">4,0,0,0</Thickness>
 
         <Style x:Key="HeaderIconPath" TargetType="{x:Type Path}">
             <Setter Property="Fill" Value="{ugm:AppearanceResource ResourceKey=TextBrush, ReturnDynamicResource=True}"/>
@@ -30,7 +31,7 @@
         <Style x:Key="IconContainer" TargetType="{x:Type Grid}">
             <Setter Property="Width" Value="12"/>
             <Setter Property="Height" Value="12"/>
-            <Setter Property="Margin" Value="{StaticResource ColumnMargin}"/>
+            <Setter Property="Margin" Value="{StaticResource IconMargin}"/>
         </Style>
 
         <Style x:Key="HeaderIconPanel" TargetType="{x:Type StackPanel}">
@@ -82,8 +83,8 @@
         </Grid>
         
         <pr:ItemResizableStackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,2,0" Background="Transparent">
-            <StackPanel Style="{StaticResource HeaderIconPanel}" Visibility="{Binding IsAVSwitchColumnVisible, Converter={StaticResource BooleanToVisibilityConverter}}" Margin="2,0,0,0" pr:ItemResizableStackPanel.ItemSize="63" pr:ItemResizableStackPanel.IsLocked="True">
-                <Grid Style="{StaticResource IconContainer}">
+            <StackPanel Style="{StaticResource HeaderIconPanel}" Visibility="{Binding IsAVSwitchColumnVisible, Converter={StaticResource BooleanToVisibilityConverter}}" pr:ItemResizableStackPanel.ItemSize="69" pr:ItemResizableStackPanel.IsLocked="True">
+                <Grid Style="{StaticResource IconContainer}" Margin="3,0,0,0">
                     <Path Data="{gm:FontawesomeResource ResourceKey=Eye}" Style="{StaticResource HeaderIconPath}"/>
                 </Grid>
                 <Grid Style="{StaticResource IconContainer}">
@@ -99,7 +100,7 @@
 
             <Grid pr:ItemResizableStackPanel.ItemSize="19" pr:ItemResizableStackPanel.IsLocked="True"/>
 
-            <Grid VerticalAlignment="Center" HorizontalAlignment="Left" Style="{StaticResource IconContainer}" Visibility="{Binding IsTagColumnVisible, Converter={StaticResource BooleanToVisibilityConverter}}" pr:ItemResizableStackPanel.ItemSize="19" pr:ItemResizableStackPanel.IsLocked="True">
+            <Grid VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="{Binding IsTagColumnVisible, Converter={StaticResource BooleanToVisibilityConverter}}" pr:ItemResizableStackPanel.ItemSize="19" pr:ItemResizableStackPanel.IsLocked="True">
                 <Path Data="{gm:FontawesomeResource ResourceKey=Tag}" Style="{StaticResource HeaderIconPath}"/>
             </Grid>
 
@@ -109,8 +110,8 @@
 
             <TextBlock Text="{gm:LanguageResource ResourceKey=Timeline_LayerCommentColumn}" Style="{StaticResource HeaderTextBlock}" Visibility="{Binding IsLayerCommentColumnVisible, Converter={StaticResource BooleanToVisibilityConverter}}" pr:ItemResizableStackPanel.ItemMinSize="53" pr:ItemResizableStackPanel.ItemSize="{Binding LayerCommentColumnWidth}"/>
 
-            <StackPanel Style="{StaticResource HeaderIconPanel}" Visibility="{Binding IsLayerSwitchColumnVisible, Converter={StaticResource BooleanToVisibilityConverter}}" pr:ItemResizableStackPanel.ItemMinSize="119" pr:ItemResizableStackPanel.ItemSize="{Binding LayerSwitchColumnWidth}">
-                <Grid Style="{StaticResource IconContainer}">
+            <StackPanel Style="{StaticResource HeaderIconPanel}" Visibility="{Binding IsLayerSwitchColumnVisible, Converter={StaticResource BooleanToVisibilityConverter}}" pr:ItemResizableStackPanel.ItemMinSize="133" pr:ItemResizableStackPanel.ItemSize="{Binding LayerSwitchColumnWidth}">
+                <Grid Style="{StaticResource IconContainer}" Margin="3,0,0,0">
                     <Path Data="{StaticResource ShyIcon}" Style="{StaticResource HeaderIconPath}"/>
                 </Grid>
                 <Grid Style="{StaticResource IconContainer}">

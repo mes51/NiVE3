@@ -8,10 +8,13 @@
                 <RectangleGeometry Rect="0,7,12,5"/>
             </CombinedGeometry.Geometry2>
             <CombinedGeometry.Transform>
-                <ScaleTransform ScaleX="0.8" ScaleY="0.8" CenterX="8" CenterY="4.5"/>
+                <TransformGroup>
+                    <ScaleTransform ScaleX="0.8" ScaleY="0.8"/>
+                    <TranslateTransform X="1.2"/>
+                </TransformGroup>
             </CombinedGeometry.Transform>
         </CombinedGeometry>
-        <RectangleGeometry Rect="1,7,11,1"/>
+        <RectangleGeometry Rect="0,7,12,1"/>
     </GeometryGroup>
 
 
