@@ -115,7 +115,7 @@ namespace NiVE3.View.Part
             set { SetValue(RangeProperty, value); }
         }
 
-        LayerCollection? ParentCollection => ItemsControl.ItemsControlFromItemContainer(this) as LayerCollection;
+        LayerCollectionView? ParentCollection => ItemsControl.ItemsControlFromItemContainer(this) as LayerCollectionView;
 
         LayerViewModel? ViewModel => DataContext as LayerViewModel;
 

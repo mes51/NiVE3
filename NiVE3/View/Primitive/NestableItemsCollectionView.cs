@@ -14,7 +14,7 @@ using System.Windows.Data;
 
 namespace NiVE3.View.Primitive
 {
-    abstract class NestableItemsCollection : ItemsControl, IDragSource
+    abstract class NestableItemsCollectionView : ItemsControl, IDragSource
     {
         public const double IndentWidth = 19.0;
 
@@ -23,14 +23,14 @@ namespace NiVE3.View.Primitive
         public static readonly DependencyProperty IsSelectedProperty = DependencyProperty.RegisterAttached(
             "IsSelected",
             typeof(bool),
-            typeof(NestableItemsCollection),
+            typeof(NestableItemsCollectionView),
             new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
         public static readonly DependencyProperty IsItemLockedProperty = DependencyProperty.RegisterAttached(
             "IsItemLocked",
             typeof(bool),
-            typeof(NestableItemsCollection),
+            typeof(NestableItemsCollectionView),
             new PropertyMetadata(false, IsItemLockedChanged)
         );
 
@@ -56,7 +56,7 @@ namespace NiVE3.View.Primitive
 
         static void IsItemLockedChanged(DependencyObject d,  DependencyPropertyChangedEventArgs e)
         {
-            if (d is FrameworkElement fe && ItemsControlFromItemContainer(fe) is NestableItemsCollection collection)
+            if (d is FrameworkElement fe && ItemsControlFromItemContainer(fe) is NestableItemsCollectionView collection)
             {
                 if (GetIsItemLocked(fe))
                 {
@@ -88,35 +88,35 @@ namespace NiVE3.View.Primitive
         }
     }
 
-    class NestableItemsCollection<T> : NestableItemsCollection where T : class
+    class NestableItemsCollectionView<T> : NestableItemsCollectionView where T : class
     {
         public static readonly Style DefaultStyle;
 
         public static readonly DependencyProperty ControlAreaWidthProperty = DependencyProperty.Register(
             nameof(ControlAreaWidth),
             typeof(double),
-            typeof(NestableItemsCollection<T>),
+            typeof(NestableItemsCollectionView<T>),
             new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, ControlAreaWidthChanged)
         );
 
         internal static readonly DependencyProperty SelectedItemsProperty = DependencyProperty.Register(
             nameof(SelectedItems),
             typeof(ObservableCollection<T>),
-            typeof(NestableItemsCollection<T>),
+            typeof(NestableItemsCollectionView<T>),
             new FrameworkPropertyMetadata(new ObservableCollection<T>(), FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
         public static readonly DependencyProperty CalculatedControlAreaWidthProperty = DependencyProperty.Register(
             nameof(CalculatedControlAreaWidth),
             typeof(double),
-            typeof(NestableItemsCollection<T>),
+            typeof(NestableItemsCollectionView<T>),
             new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
         public static readonly DependencyProperty IndentLevelProperty = DependencyProperty.Register(
             nameof(IndentLevel),
             typeof(int),
-            typeof(NestableItemsCollection<T>),
+            typeof(NestableItemsCollectionView<T>),
             new FrameworkPropertyMetadata(0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, ControlAreaWidthChanged)
         );
 
@@ -146,7 +146,7 @@ namespace NiVE3.View.Primitive
 
         protected T? LastSelected { get; set; }
 
-        static NestableItemsCollection()
+        static NestableItemsCollectionView()
         {
             var itemsPanelContainer = new FrameworkElementFactory(typeof(StackPanel));
             var itemsPanelTemplate = new ItemsPanelTemplate(itemsPanelContainer);
@@ -157,10 +157,10 @@ namespace NiVE3.View.Primitive
             };
             DefaultStyle.Setters.Add(new Setter(ItemsPanelProperty, itemsPanelTemplate));
 
-            IsTabStopProperty.OverrideMetadata(typeof(NestableItemsCollection<T>), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.Inherits));
+            IsTabStopProperty.OverrideMetadata(typeof(NestableItemsCollectionView<T>), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.Inherits));
         }
 
-        public NestableItemsCollection()
+        public NestableItemsCollectionView()
         {
             Style = DefaultStyle;
         }
@@ -329,7 +329,7 @@ namespace NiVE3.View.Primitive
 
         static void ControlAreaWidthChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is NestableItemsCollection<T> collection)
+            if (d is NestableItemsCollectionView<T> collection)
             {
                 collection.CalculatedControlAreaWidth = collection.ControlAreaWidth - collection.IndentLevel * IndentWidth;
             }

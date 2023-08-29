@@ -12,35 +12,35 @@ using NiVE3.ViewModel;
 
 namespace NiVE3.View.Part
 {
-    class LayerCollection : NestableItemsCollection<LayerViewModel>
+    class LayerCollectionView : NestableItemsCollectionView<LayerViewModel>
     {
         static readonly BooleanInvertConverter InvertConverter = new BooleanInvertConverter();
 
         public static readonly DependencyProperty RangeProperty = DependencyProperty.Register(
             nameof(Range),
             typeof(double),
-            typeof(LayerCollection),
+            typeof(LayerCollectionView),
             new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
         public static readonly DependencyProperty RangeStartProperty = DependencyProperty.Register(
             nameof(RangeStart),
             typeof(double),
-            typeof(LayerCollection),
+            typeof(LayerCollectionView),
             new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
         public static readonly DependencyProperty CompositionFrameRateProperty = DependencyProperty.Register(
             nameof(CompositionFrameRate),
             typeof(double),
-            typeof(LayerCollection),
+            typeof(LayerCollectionView),
             new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
         public static readonly DependencyProperty IsTimeAreaEditingProperty = DependencyProperty.Register(
             nameof(IsTimeAreaEditing),
             typeof(bool),
-            typeof(LayerCollection),
+            typeof(LayerCollectionView),
             new FrameworkPropertyMetadata(false)
         );
 
@@ -68,7 +68,7 @@ namespace NiVE3.View.Part
             set { SetValue(CompositionFrameRateProperty, value); }
         }
 
-        public LayerCollection()
+        public LayerCollectionView()
         {
             AlternationCount = 1000000;
 

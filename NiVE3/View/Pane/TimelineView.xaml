@@ -174,7 +174,7 @@
             <ScrollBar Grid.Column="1" Orientation="Horizontal" Value="{Binding TimeBarRangeStart}" Minimum="0.0" Maximum="{Binding TimelineScrollBarMax}" SmallChange="{Binding FrameDuration}" LargeChange="{Binding TimeBarRange}" ViewportSize="1"/>
         </Grid>
 
-        <pt:LayerCollection Grid.Row="2"
+        <pt:LayerCollectionView Grid.Row="2"
                             Grid.Column="0"
                             Grid.ColumnSpan="3"
                             ItemsSource="{Binding Layers}"
@@ -184,8 +184,8 @@
                             RangeStart="{Binding TimeBarRangeStart}"
                             dd:DragDrop.DropHandler="{Binding}"
                             dd:DragDrop.DragHandler="{Binding RelativeSource={RelativeSource Self}}">
-            <pt:LayerCollection.Style>
-                <Style TargetType="{x:Type pt:LayerCollection}" BasedOn="{x:Static pt:LayerCollection.DefaultStyle}">
+            <pt:LayerCollectionView.Style>
+                <Style TargetType="{x:Type pt:LayerCollectionView}" BasedOn="{x:Static pt:LayerCollectionView.DefaultStyle}">
                     <Setter Property="Template">
                         <Setter.Value>
                             <ControlTemplate TargetType="{x:Type ItemsControl}">
@@ -198,8 +198,8 @@
                         </Setter.Value>
                     </Setter>
                 </Style>
-            </pt:LayerCollection.Style>
-        </pt:LayerCollection>
+            </pt:LayerCollectionView.Style>
+        </pt:LayerCollectionView>
 
         <!-- NOTE: インジケーターを最前面に表示するため、TimeLocatorViewのXAMLの記述は一番最後にする -->
         <pt:TimeLocatorView x:Name="TimeLocator" Grid.Row="0" Grid.Column="1" Grid.RowSpan="3" ShowIndicatorLineInRangeBar="True" Duration="{Binding Duration}" FrameRate="{Binding FrameRate}" CurrentTime="{Binding CurrentTime}" Range="{Binding TimeBarRange}" RangeStart="{Binding TimeBarRangeStart}"/>

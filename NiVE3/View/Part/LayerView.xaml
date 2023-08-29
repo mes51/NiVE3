@@ -13,7 +13,7 @@
              mc:Ignorable="d" 
              x:Name="Root"
              MouseLeftButtonDown="Root_MouseLeftButtonDown"
-             pr:NestableItemsCollection.IsItemLocked="{Binding IsLock}"
+             pr:NestableItemsCollectionView.IsItemLocked="{Binding IsLock}"
              d:DesignHeight="200" d:DesignWidth="800">
     <UserControl.Resources>
         <GridLength x:Key="EmptyGrid">0</GridLength>
@@ -38,7 +38,7 @@
             <Setter Property="Background" Value="Transparent"/>
 
             <Style.Triggers>
-                <DataTrigger Binding="{Binding ElementName=Root, Path=(pr:NestableItemsCollection.IsSelected)}" Value="True">
+                <DataTrigger Binding="{Binding ElementName=Root, Path=(pr:NestableItemsCollectionView.IsSelected)}" Value="True">
                     <Setter Property="Background" Value="{ugm:AppearanceResource ResourceKey=SelectedBackgroundFill, ReturnDynamicResource=True}"/>
                 </DataTrigger>
             </Style.Triggers>
@@ -167,7 +167,7 @@
 
         <Grid Grid.Column="0" Grid.Row="1" Visibility="{Binding IsExpanded, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter={x:Static pi:SourceType.Audio}}" ClipToBounds="True">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="{x:Static pr:NestableItemsCollection.IndentGridWidth}"/>
+                <ColumnDefinition Width="{x:Static pr:NestableItemsCollectionView.IndentGridWidth}"/>
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
         </Grid>
