@@ -14,7 +14,7 @@ using System.Windows.Data;
 
 namespace NiVE3.View.Primitive
 {
-    class NestableItemsCollection
+    abstract class NestableItemsCollection : ItemsControl, IDragSource
     {
         public const double IndentWidth = 19.0;
 
@@ -27,6 +27,23 @@ namespace NiVE3.View.Primitive
             new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
+        public static readonly DependencyProperty IsItemLockedProperty = DependencyProperty.RegisterAttached(
+            "IsItemLocked",
+            typeof(bool),
+            typeof(NestableItemsCollection),
+            new PropertyMetadata(false, IsItemLockedChanged)
+        );
+
+        public static bool GetIsItemLocked(DependencyObject target)
+        {
+            return (bool)target.GetValue(IsItemLockedProperty);
+        }
+
+        public static void SetIsItemLocked(DependencyObject target, bool value)
+        {
+            target.SetValue(IsItemLockedProperty, value);
+        }
+
         public static bool GetIsSelected(DependencyObject target)
         {
             return (bool)target.GetValue(IsSelectedProperty);
@@ -36,9 +53,42 @@ namespace NiVE3.View.Primitive
         {
             target.SetValue(IsSelectedProperty, value);
         }
+
+        static void IsItemLockedChanged(DependencyObject d,  DependencyPropertyChangedEventArgs e)
+        {
+            if (d is FrameworkElement fe && ItemsControlFromItemContainer(fe) is NestableItemsCollection collection)
+            {
+                if (GetIsItemLocked(fe))
+                {
+                    collection.DeselectItem(fe);
+                }
+            }
+        }
+
+        public abstract void SelectItem(FrameworkElement item, bool selectRange, bool selectMultiple);
+
+        public abstract void DeselectItem(FrameworkElement item);
+
+        public abstract void StartDrag(IDragInfo dragInfo);
+
+        public virtual bool CanStartDrag(IDragInfo dragInfo)
+        {
+            return true;
+        }
+
+        public virtual void Dropped(IDropInfo dropInfo) { }
+
+        public virtual void DragDropOperationFinished(DragDropEffects operationResult, IDragInfo dragInfo) { }
+
+        public virtual void DragCancelled() { }
+
+        public virtual bool TryCatchOccurredException(Exception exception)
+        {
+            return false;
+        }
     }
 
-    class NestableItemsCollection<T> : ItemsControl, IDragSource where T : class
+    class NestableItemsCollection<T> : NestableItemsCollection where T : class
     {
         public static readonly Style DefaultStyle;
 
@@ -115,7 +165,7 @@ namespace NiVE3.View.Primitive
             Style = DefaultStyle;
         }
 
-        public void StartDrag(IDragInfo dragInfo)
+        public override void StartDrag(IDragInfo dragInfo)
         {
             if (dragInfo.VisualSourceItem is FrameworkElement fe && fe.DataContext is T viewModel)
             {
@@ -139,23 +189,7 @@ namespace NiVE3.View.Primitive
             }
         }
 
-        public bool CanStartDrag(IDragInfo dragInfo)
-        {
-            return true;
-        }
-
-        public void Dropped(IDropInfo dropInfo) { }
-
-        public void DragDropOperationFinished(DragDropEffects operationResult, IDragInfo dragInfo) { }
-
-        public void DragCancelled() { }
-
-        public bool TryCatchOccurredException(Exception exception)
-        {
-            return false;
-        }
-
-        internal void SelectItem(FrameworkElement item, bool selectRange, bool selectMultiple)
+        public override void SelectItem(FrameworkElement item, bool selectRange, bool selectMultiple)
         {
             var viewModel = item.DataContext as T;
             if (viewModel == null)
@@ -165,6 +199,19 @@ namespace NiVE3.View.Primitive
             var items = ItemsSource?.Cast<T>()?.ToArray();
             if (items == null || items.Length < 1 || !items.Contains(viewModel))
             {
+                return;
+            }
+
+            if (GetIsItemLocked(item))
+            {
+                if (!selectRange && !selectMultiple)
+                {
+                    foreach (var l in items)
+                    {
+                        SetSelected(l, false);
+                    }
+                    SelectedItems.Clear();
+                }
                 return;
             }
 
@@ -223,6 +270,10 @@ namespace NiVE3.View.Primitive
                 }
                 foreach (var l in targets.Except(oldSelectedItems))
                 {
+                    if (GetIsItemLocked(ItemContainerGenerator.ContainerFromItem(l)))
+                    {
+                        continue;
+                    }
                     SetSelected(l, true);
                     SelectedItems.Add(l);
                 }
@@ -244,6 +295,24 @@ namespace NiVE3.View.Primitive
             }
         }
 
+        public override void DeselectItem(FrameworkElement item)
+        {
+            var viewModel = item.DataContext as T;
+            if (viewModel == null)
+            {
+                return;
+            }
+            if (SelectedItems.Contains(viewModel))
+            {
+                SetSelected(viewModel, false);
+                SelectedItems.Remove(viewModel);
+                if (LastSelected == viewModel)
+                {
+                    LastSelected = SelectedItems.FirstOrDefault();
+                }
+            }
+        }
+
         protected override void OnItemsSourceChanged(IEnumerable oldValue, IEnumerable newValue)
         {
             base.OnItemsSourceChanged(oldValue, newValue);
@@ -255,14 +324,14 @@ namespace NiVE3.View.Primitive
         void SetSelected(object viewModel, bool selected)
         {
             var item = ItemContainerGenerator.ContainerFromItem(viewModel);
-            NestableItemsCollection.SetIsSelected(item, selected);
+            SetIsSelected(item, selected);
         }
 
         static void ControlAreaWidthChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is NestableItemsCollection<T> collection)
             {
-                collection.CalculatedControlAreaWidth = collection.ControlAreaWidth - collection.IndentLevel * NestableItemsCollection.IndentWidth;
+                collection.CalculatedControlAreaWidth = collection.ControlAreaWidth - collection.IndentLevel * IndentWidth;
             }
         }
     }
