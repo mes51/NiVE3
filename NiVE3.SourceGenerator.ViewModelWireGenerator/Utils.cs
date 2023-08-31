@@ -14,8 +14,6 @@ namespace NiVE3.SourceGenerator.ViewModelWireGenerator
 
         public List<PropertyWire> PropertyWires { get; } = new List<PropertyWire>();
 
-        public List<BindEventHandler> BindEventHandlers { get; } = new List<BindEventHandler>();
-
         public Handlers(string sourceName, ITypeSymbol sourceType)
         {
             SourceName = sourceName;
@@ -36,19 +34,6 @@ namespace NiVE3.SourceGenerator.ViewModelWireGenerator
             PropertyName = propertyName;
             SourcePropertyName = sourcePropertyName;
             IsOneWay = isOneWay;
-        }
-    }
-
-    public class BindEventHandler
-    {
-        public string EventName { get; }
-
-        public IMethodSymbol HandlerSymbol { get; }
-
-        public BindEventHandler(string eventName, IMethodSymbol handlerSymbol)
-        {
-            EventName = eventName;
-            HandlerSymbol = handlerSymbol;
         }
     }
 

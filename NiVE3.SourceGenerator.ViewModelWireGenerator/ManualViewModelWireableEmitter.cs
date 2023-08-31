@@ -15,8 +15,6 @@ namespace NiVE3.SourceGenerator.ViewModelWireGenerator
 
         static readonly string ManualWireAttributeName = $"{Namespace}.ManualWireAttribute";
 
-        static readonly string ManualBindWeakEventAttributeName = $"{Namespace}.ManualBindWeakEventAttribute";
-
         public static void RegisterAttributes(IncrementalGeneratorPostInitializationContext context)
         {
             context.CancellationToken.ThrowIfCancellationRequested();
@@ -66,27 +64,6 @@ sealed class ManualWireAttribute : Attribute
     }
 }
 """);
-
-            context.CancellationToken.ThrowIfCancellationRequested();
-
-            context.AddSource("ManualBindWeakEventAttribute", $"namespace {Namespace};" + """
-
-using System;
-
-[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
-sealed class ManualBindWeakEventAttribute : Attribute
-{
-    public string SourceName { get; }
-
-    public string EventName { get; }
-
-    public ManualBindWeakEventAttribute(string sourceName, string eventName)
-    {
-        SourceName = sourceName;
-        EventName = eventName;
-    }
-}
-""");
         }
 
         public static void RegisterEmit(IncrementalGeneratorInitializationContext context)
@@ -125,7 +102,6 @@ sealed class ManualBindWeakEventAttribute : Attribute
             context.CancellationToken.ThrowIfCancellationRequested();
 
             var manualWireSymbol = EmitterUtil.GetTypeSymbol(compilation, ManualWireAttributeName);
-            var manualBindWeakEventSymbol = EmitterUtil.GetTypeSymbol(compilation, ManualBindWeakEventAttributeName);
             var manualViewModelWireableSymbol = EmitterUtil.GetTypeSymbol(compilation, ManualViewModelWireableAttributeName);
 
             context.CancellationToken.ThrowIfCancellationRequested();
@@ -146,28 +122,10 @@ sealed class ManualBindWeakEventAttribute : Attribute
 
             context.CancellationToken.ThrowIfCancellationRequested();
 
-            var bindEventHandlers = GetBindEventHandler(context, compilation, typeSymbol, manualBindWeakEventSymbol, targetSources);
-
-            context.CancellationToken.ThrowIfCancellationRequested();
-
-            if (propertyHandlers == null && bindEventHandlers == null)
+            if (propertyHandlers == null)
             {
                 return;
             }
-
-            propertyHandlers ??= new Dictionary<string, Handlers>();
-            bindEventHandlers ??= new Dictionary<string, Handlers>();
-            foreach (var key in propertyHandlers.Keys)
-            {
-                if (bindEventHandlers.TryGetValue(key, out var handler))
-                {
-                    propertyHandlers[key].BindEventHandlers.AddRange(handler.BindEventHandlers);
-                }
-            }
-
-            context.CancellationToken.ThrowIfCancellationRequested();
-
-            var allHandlers = propertyHandlers.Values.Concat(bindEventHandlers.Keys.Except(propertyHandlers.Keys).Select(k => bindEventHandlers[k])).ToDictionary(h => h.SourceName);
 
             foreach (var a in wireableAttributes)
             {
@@ -177,7 +135,7 @@ sealed class ManualBindWeakEventAttribute : Attribute
                     continue; // may be bug
                 }
 
-                var handler = allHandlers[sourceName];
+                var handler = propertyHandlers[sourceName];
                 var withInitializeProperty = (bool?)a.NamedArguments.FirstOrDefault(a => a.Key == "WithInitializeProperty").Value.Value ?? false;
                 var (binderClass, bindMethodBody, unbindMethodBody) = GenerateBinderCode(typeSymbol, handler, withInitializeProperty);
 
@@ -434,76 +392,6 @@ partial class {{typeSymbol.Name}}
             return handlers;
         }
 
-        static Dictionary<string, Handlers>? GetBindEventHandler(SourceProductionContext context, Compilation compilation, ITypeSymbol typeSymbol, INamedTypeSymbol manualBindWeakEventSymbol, string[] targetSources)
-        {
-            var allProperties = typeSymbol.GetMembers()
-                .OfType<IPropertySymbol>()
-                .Where(p => p is { IsStatic: false, IsImplicitlyDeclared: false, CanBeReferencedByName: true })
-                .ToArray();
-            var targetMethods = typeSymbol.GetMembers()
-                .OfType<IMethodSymbol>()
-                .Where(m => m is { IsStatic: false, IsImplicitlyDeclared: false, CanBeReferencedByName: true })
-                .Where(m => m.GetAttributes().Any(a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, manualBindWeakEventSymbol)))
-                .ToArray();
-
-            var checkedEvents = new Dictionary<string, HashSet<string>>();
-            var handlers = new Dictionary<string, Handlers>();
-            foreach (var m in targetMethods)
-            {
-                var attribute = m.GetAttributes().First(a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, manualBindWeakEventSymbol));
-
-                var sourceName = (attribute.ConstructorArguments[0].Value as string) ?? "";
-                if (!targetSources.Contains(sourceName))
-                {
-                    context.ReportDiagnostic(
-                        Diagnostic.Create(ManualViewModelWireableDiagnosticDescriptors.DetectUntargetedSource, m.Locations.First(), sourceName)
-                    );
-                    return null;
-                }
-                var sourceProperty = allProperties.FirstOrDefault(p => p.Name == sourceName);
-
-                var eventName = attribute.ConstructorArguments[1].Value as string;
-                if (eventName == null)
-                {
-                    context.ReportDiagnostic(
-                        Diagnostic.Create(ManualViewModelWireableDiagnosticDescriptors.EventNameIsEmpty, m.Locations.First())
-                    );
-                    return null;
-                }
-                if (!checkedEvents.TryGetValue(sourceName, out var checkedEventNames) || !checkedEventNames.Contains(eventName))
-                {
-                    if (!checkedEvents.ContainsKey(sourceName))
-                    {
-                        checkedEvents.Add(sourceName, new HashSet<string>());
-                    }
-
-                    var exists = sourceProperty.Type
-                        .GetMembers()
-                        .OfType<IEventSymbol>()
-                        .Any(p => p is { IsStatic: false, IsImplicitlyDeclared: false, CanBeReferencedByName: true } && p.Name == eventName);
-                    if (exists)
-                    {
-                        checkedEvents[sourceName].Add(eventName);
-                    }
-                    else
-                    {
-                        context.ReportDiagnostic(
-                            Diagnostic.Create(ManualViewModelWireableDiagnosticDescriptors.EventIsNotDefinedInSourceType, m.Locations.First(), eventName, sourceName)
-                        );
-                        return null;
-                    }
-                }
-
-                if (!handlers.ContainsKey(sourceName))
-                {
-                    handlers.Add(sourceName, new Handlers(sourceName, sourceProperty.Type));
-                }
-                handlers[sourceName].BindEventHandlers.Add(new BindEventHandler(eventName, m));
-            }
-
-            return handlers;
-        }
-
         static (string binderClass, string bindMethodBody, string unbindMethodBody) GenerateBinderCode(INamedTypeSymbol typeSymbol, Handlers handlers, bool withInitializeProperty)
         {
             var modelHandler = new StringBuilder();
@@ -532,27 +420,6 @@ partial class {{typeSymbol.Name}}
                 }
             }
 
-            var bindEventHandlerToModel = new StringBuilder();
-            var handlerMethods = new StringBuilder();
-            var generatedHandlers = new HashSet<string>();
-            foreach (var bind in handlers.BindEventHandlers)
-            {
-                if (!generatedHandlers.Contains(bind.EventName))
-                {
-                    bindEventHandlerToModel.AppendLine($"        model.{bind.EventName} += Binder_{bind.EventName};");
-                    handlerMethods.AppendLine($$"""
-    void Binder_{{bind.EventName}}({{bind.HandlerSymbol.Parameters[0].Type}} sender, {{bind.HandlerSymbol.Parameters[1].Type}} e)
-    {
-        foreach (var l in EventListeners["{{bind.EventName}}"])
-        {
-            l.Invoke(sender, e);
-        }
-    }
-""");
-                    generatedHandlers.Add(bind.EventName);
-                }
-            }
-
             var binderTypeName = $"{typeSymbol.Name}_{handlers.SourceName}ManualBinder";
             var binderClass = $$"""
 file class {{binderTypeName}}
@@ -563,8 +430,6 @@ file class {{binderTypeName}}
 
     WeakReference<{{handlers.SourceType}}> Model { get; }
 
-    Dictionary<string, List<{{binderTypeName}}_WeakAction>> EventListeners { get; } = new Dictionary<string, List<{{binderTypeName}}_WeakAction>>();
-
     private {{binderTypeName}}({{typeSymbol.Name}} viewModel, {{handlers.SourceType}} model)
     {
         ViewModel = new WeakReference<{{typeSymbol}}>(viewModel);
@@ -572,16 +437,6 @@ file class {{binderTypeName}}
 
         viewModel.PropertyChanged += ViewModelPropertyChanged;
         model.PropertyChanged += ModelPropertyChanged;
-{{bindEventHandlerToModel}}
-    }
-
-    public void AddWeakEventHandler(string eventName, Delegate handler)
-    {
-        if (!EventListeners.ContainsKey(eventName))
-        {
-            EventListeners.Add(eventName, new List<{{binderTypeName}}_WeakAction>());
-        }
-        EventListeners[eventName].Add(new {{binderTypeName}}_WeakAction(handler));
     }
 
     public static void Bind({{typeSymbol.Name}} viewModel, {{handlers.SourceType}} model)
@@ -656,30 +511,6 @@ file class {{binderTypeName}}
         if (Model.TryGetTarget(out var model))
         {
             model.PropertyChanged -= ModelPropertyChanged;
-        }
-    }
-
-{{handlerMethods}}
-}
-
-file class {{binderTypeName}}_WeakAction
-{
-    public MethodInfo Body { get; }
-
-    WeakReference WeakTarget { get; }
-
-    public {{binderTypeName}}_WeakAction(Delegate action)
-    {
-        Body = action.Method;
-        WeakTarget = new WeakReference(action.Target);
-    }
-
-    public void Invoke(object arg1, object arg2)
-    {
-        var target = WeakTarget.Target;
-        if (target != null)
-        {
-            Body.Invoke(target, new object[] { arg1, arg2 });
         }
     }
 }

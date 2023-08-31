@@ -174,6 +174,8 @@ namespace NiVE3.ViewModel
 
             WiringModel();
 
+            PreviewModel.SourceChanged += PreviewModel_SourceChanged;
+
             Title = $"{LanguageResourceDictionary.Dictionary.GetText(IsFootage ? LanguageResourceDictionary.PreviewView_FootageTitle : LanguageResourceDictionary.PreviewView_CompositionTitle)} {(SourceType != SourceType.None ? Name : LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.PreviewView_Title_ItemEmpty))}";
             TimeBarRange = previewModel.Duration;
 
@@ -324,7 +326,6 @@ namespace NiVE3.ViewModel
             }
         }
 
-        [BindWeakEvent(nameof(PreviewModel), nameof(PreviewModelBase.SourceChanged))]
         private void PreviewModel_SourceChanged(object? sender, EventArgs e)
         {
             Scale = 100.0;

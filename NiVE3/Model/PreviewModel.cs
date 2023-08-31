@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using NiVE3.Mvvm;
 using NiVE3.Plugin.Image;
 using NiVE3.Plugin.Interfaces;
 using Prism.Mvvm;
@@ -73,11 +74,16 @@ namespace NiVE3.Model
 
         public abstract NImage? GetImage(double time);
 
-        public event EventHandler? SourceChanged;
+        WeakEventPublisher<EventArgs> SourceChangedPublisher { get; } = new WeakEventPublisher<EventArgs>();
+        public event EventHandler<EventArgs> SourceChanged
+        {
+            add { SourceChangedPublisher.Subscribe(value); }
+            remove { SourceChangedPublisher.Unsubscribe(value); }
+        }
 
         protected void OnSourceChanged()
         {
-            SourceChanged?.Invoke(this, EventArgs.Empty);
+            SourceChangedPublisher.Publish(this, EventArgs.Empty);
         }
     }
 
