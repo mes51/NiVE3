@@ -10,6 +10,8 @@
              xmlns:cv="clr-namespace:NiVE3.View.Converter"
              xmlns:pi="clr-namespace:NiVE3.Plugin.Interfaces;assembly=NiVE3.Plugin"
              xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
+             xmlns:mk="clr-namespace:NiVE3.Wpf.Markup"
+             xmlns:vm="clr-namespace:NiVE3.ViewModel"
              mc:Ignorable="d" 
              x:Name="Root"
              MouseLeftButtonDown="Root_MouseLeftButtonDown"
@@ -137,10 +139,31 @@
 
             <Grid Grid.Column="0" Grid.Row="0" Style="{StaticResource ColumnGrid}">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="1.5,0,0,0">
-                    <CheckBox Content="{gm:FontawesomeResource ResourceKey=Eye}" Style="{StaticResource LayerSwitchCheckBox}" IsChecked="{Binding IsEnableVideo}" Visibility="{Binding SourceType, Converter={StaticResource AVSwitchVisibleConverter}, ConverterParameter={x:Static  local:LayerView.CompositionDisplayableSourceType}}"/>
-                    <CheckBox Content="{gm:FontawesomeResource ResourceKey=VolumeHigh}" Style="{StaticResource LayerSwitchCheckBox}" Margin="1,0,0,0" IsChecked="{Binding IsEnableAudio}" Visibility="{Binding SourceType, Converter={StaticResource AVSwitchVisibleConverter}, ConverterParameter={x:Static pi:SourceType.Audio}}"/>
-                    <CheckBox Content="{gm:FontawesomeResource ResourceKey=Circle}" Style="{StaticResource SoloSwitchStyle}" Margin="1,0,0,0" IsChecked="{Binding IsEnableSolo}"/>
-                    <CheckBox Content="{gm:FontawesomeResource ResourceKey=Lock}" Style="{StaticResource LayerSwitchCheckBox}" Margin="1,0,0,0" IsChecked="{Binding IsLock}"/>
+                    <CheckBox Content="{gm:FontawesomeResource ResourceKey=Eye}"
+                              Style="{StaticResource LayerSwitchCheckBox}"
+                              IsChecked="{Binding IsEnableVideo, Mode=OneWay}"
+                              Visibility="{Binding SourceType, Converter={StaticResource AVSwitchVisibleConverter}, ConverterParameter={x:Static  local:LayerView.CompositionDisplayableSourceType}}"
+                              Command="{Binding ChangeLayerSwitchCommand}"
+                              CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableVideo}"/>
+                    <CheckBox Content="{gm:FontawesomeResource ResourceKey=VolumeHigh}"
+                              Style="{StaticResource LayerSwitchCheckBox}"
+                              Margin="1,0,0,0"
+                              IsChecked="{Binding IsEnableAudio, Mode=OneWay}"
+                              Visibility="{Binding SourceType, Converter={StaticResource AVSwitchVisibleConverter}, ConverterParameter={x:Static pi:SourceType.Audio}}"
+                              Command="{Binding ChangeLayerSwitchCommand}"
+                              CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableAudio}"/>
+                    <CheckBox Content="{gm:FontawesomeResource ResourceKey=Circle}"
+                              Style="{StaticResource SoloSwitchStyle}"
+                              Margin="1,0,0,0"
+                              IsChecked="{Binding IsEnableSolo, Mode=OneWay}"
+                              Command="{Binding ChangeLayerSwitchCommand}"
+                              CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableSolo}"/>
+                    <CheckBox Content="{gm:FontawesomeResource ResourceKey=Lock}"
+                              Style="{StaticResource LayerSwitchCheckBox}"
+                              Margin="1,0,0,0"
+                              IsChecked="{Binding IsLock, Mode=OneWay}"
+                              Command="{Binding ChangeLayerSwitchCommand}"
+                              CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsLock}"/>
                 </StackPanel>
             </Grid>
 

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Media;
 using NiVE3.Model;
+using NiVE3.Mvvm;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
 using Prism.Commands;
@@ -243,6 +244,15 @@ namespace NiVE3.ViewModel
 
         public ICommand CommitEditDurationCommand { get; }
 
+        public ICommand ChangeLayerSwitchCommand { get; }
+
+        WeakEventPublisher<LayerSwitchEventArgs> LayerSwitchChangeRequestPublisher { get; } = new WeakEventPublisher<LayerSwitchEventArgs>();
+        public event EventHandler<LayerSwitchEventArgs> LayerSwitchChangeRequest
+        {
+            add { LayerSwitchChangeRequestPublisher.Subscribe(value); }
+            remove { LayerSwitchChangeRequestPublisher.Unsubscribe(value); }
+        }
+
         LayerModel LayerModel { get; }
 
         ViewStateModel ViewState { get; }
@@ -257,6 +267,18 @@ namespace NiVE3.ViewModel
             BeginEditDurationCommand = new DelegateCommand(() => LayerModel.BeginEditDuration());
 
             CommitEditDurationCommand = new DelegateCommand(() => LayerModel.CommitEditDuration());
+
+            ChangeLayerSwitchCommand = new DelegateCommand<string>(name =>
+            {
+                var newValue = !(name switch {
+                    nameof(IsEnableVideo) => IsEnableVideo,
+                    nameof(IsEnableAudio) => IsEnableAudio,
+                    nameof(IsEnableSolo) => IsEnableSolo,
+                    nameof(IsLock) => IsLock,
+                    _ => false
+                });
+                LayerSwitchChangeRequestPublisher.Publish(this, new LayerSwitchEventArgs(name, newValue));
+            });
         }
 
         partial void WiringModel();

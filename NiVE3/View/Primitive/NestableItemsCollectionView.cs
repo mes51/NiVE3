@@ -73,7 +73,7 @@ namespace NiVE3.View.Primitive
 
         public virtual bool CanStartDrag(IDragInfo dragInfo)
         {
-            return true;
+            return !GetIsItemLocked(dragInfo.VisualSourceItem);
         }
 
         public virtual void Dropped(IDropInfo dropInfo) { }
@@ -99,7 +99,7 @@ namespace NiVE3.View.Primitive
             new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, ControlAreaWidthChanged)
         );
 
-        internal static readonly DependencyProperty SelectedItemsProperty = DependencyProperty.Register(
+        public static readonly DependencyProperty SelectedItemsProperty = DependencyProperty.Register(
             nameof(SelectedItems),
             typeof(ObservableCollection<T>),
             typeof(NestableItemsCollectionView<T>),
@@ -138,7 +138,10 @@ namespace NiVE3.View.Primitive
             set { SetValue(ControlAreaWidthProperty, value); }
         }
 
-        internal ObservableCollection<T> SelectedItems
+        /// <summary>
+        /// ReadOnly
+        /// </summary>
+        public ObservableCollection<T> SelectedItems
         {
             get { return (ObservableCollection<T>)GetValue(SelectedItemsProperty); }
             set { SetValue(SelectedItemsProperty, value); }
@@ -158,6 +161,7 @@ namespace NiVE3.View.Primitive
             DefaultStyle.Setters.Add(new Setter(ItemsPanelProperty, itemsPanelTemplate));
 
             IsTabStopProperty.OverrideMetadata(typeof(NestableItemsCollectionView<T>), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.Inherits));
+            ItemsSourceProperty.OverrideMetadata(typeof(NestableItemsCollectionView<T>), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.Inherits, ItemsSourceChanged));
         }
 
         public NestableItemsCollectionView()
@@ -332,6 +336,14 @@ namespace NiVE3.View.Primitive
             if (d is NestableItemsCollectionView<T> collection)
             {
                 collection.CalculatedControlAreaWidth = collection.ControlAreaWidth - collection.IndentLevel * IndentWidth;
+            }
+        }
+
+        static void ItemsSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is NestableItemsCollectionView<T> collection)
+            {
+                collection.SelectedItems.Clear();
             }
         }
     }

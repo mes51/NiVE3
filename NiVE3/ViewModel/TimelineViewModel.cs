@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
@@ -209,7 +210,12 @@ namespace NiVE3.ViewModel
                 if (value != null)
                 {
                     BindComposition();
-                    Layers = value.Layers.CreateViewCollection(m => new LayerViewModel(m, ViewState));
+                    Layers = value.Layers.CreateViewCollection(m =>
+                    {
+                        var vm = new LayerViewModel(m, ViewState);
+                        vm.LayerSwitchChangeRequest += LayerViewModel_LayerSwitchChangeRequest;
+                        return vm;
+                    });
                 }
             }
         }
@@ -226,6 +232,13 @@ namespace NiVE3.ViewModel
         {
             get { return layers; }
             set { SetProperty(ref layers, value); }
+        }
+
+        private ObservableCollection<LayerViewModel> selectedLayers = new ObservableCollection<LayerViewModel>();
+        public ObservableCollection<LayerViewModel> SelectedLayers
+        {
+            get { return selectedLayers; }
+            set { SetProperty(ref selectedLayers, value); }
         }
 
         ViewStateModel ViewState { get; }
@@ -333,6 +346,26 @@ namespace NiVE3.ViewModel
                     TimelineScrollBarMax = Duration - TimeBarRange;
                     break;
             }
+        }
+
+        private void LayerViewModel_LayerSwitchChangeRequest(object? sender, LayerSwitchEventArgs e)
+        {
+            if (sender is not LayerViewModel layerViewModel || CompositionModel == null || !(Layers?.Contains(layerViewModel) ?? false))
+            {
+                return;
+            }
+
+            var targetLayers = new List<LayerViewModel>();
+            if (SelectedLayers.Count == 0 || !SelectedLayers.Contains(layerViewModel))
+            {
+                targetLayers.Add(layerViewModel);
+            }
+            else
+            {
+                targetLayers.AddRange(SelectedLayers);
+            }
+
+            CompositionModel.ChangeLayerSwitches(targetLayers.Select(l => l.LayerId).ToArray(), e.SwitchName, e.Value);
         }
     }
 }

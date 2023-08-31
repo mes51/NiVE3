@@ -175,15 +175,16 @@
         </Grid>
 
         <pt:LayerCollectionView Grid.Row="2"
-                            Grid.Column="0"
-                            Grid.ColumnSpan="3"
-                            ItemsSource="{Binding Layers}"
-                            ControlAreaWidth="{Binding ElementName=WidthMeasurementLayerControlArea, Path=ActualWidth}"
-                            CompositionFrameRate="{Binding FrameRate}"
-                            Range="{Binding TimeBarRange}"
-                            RangeStart="{Binding TimeBarRangeStart}"
-                            dd:DragDrop.DropHandler="{Binding}"
-                            dd:DragDrop.DragHandler="{Binding RelativeSource={RelativeSource Self}}">
+                                Grid.Column="0"
+                                Grid.ColumnSpan="3"
+                                ItemsSource="{Binding Layers}"
+                                ControlAreaWidth="{Binding ElementName=WidthMeasurementLayerControlArea, Path=ActualWidth}"
+                                CompositionFrameRate="{Binding FrameRate}"
+                                Range="{Binding TimeBarRange}"
+                                RangeStart="{Binding TimeBarRangeStart}"
+                                SelectedItems="{Binding SelectedLayers}"
+                                dd:DragDrop.DropHandler="{Binding}"
+                                dd:DragDrop.DragHandler="{Binding RelativeSource={RelativeSource Self}}">
             <pt:LayerCollectionView.Style>
                 <Style TargetType="{x:Type pt:LayerCollectionView}" BasedOn="{x:Static pt:LayerCollectionView.DefaultStyle}">
                     <Setter Property="Template">

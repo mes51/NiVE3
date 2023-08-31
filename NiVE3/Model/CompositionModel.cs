@@ -220,6 +220,24 @@ namespace NiVE3.Model
             }
         }
 
+        public void ChangeLayerSwitches(Guid[] layerIds, string switchName, bool newValue)
+        {
+            var layers = Layers.Where(l => layerIds.Contains(l.LayerId)).OrderBy(Layers.IndexOf).ToArray();
+            var propertyInfo = typeof(LayerModel).GetProperty(switchName);
+            if (propertyInfo == null)
+            {
+                throw new Exception($"{switchName} Switch is not found"); // bug
+            }
+
+            var oldValue = layers.Select(l => (bool)(propertyInfo.GetValue(l) ?? false)).ToArray();
+            foreach (var l in layers)
+            {
+                propertyInfo.SetValue(l, newValue);
+            }
+
+            HistoryModel.Add(new ChangeLayerSwitchHistoryCommand(layers, propertyInfo, oldValue, newValue));
+        }
+
         public NImage Render(double time, bool useGpu)
         {
             // TODO:

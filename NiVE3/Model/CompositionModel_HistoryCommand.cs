@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Extension;
@@ -89,6 +90,45 @@ namespace NiVE3.Model
                 foreach (var (l, i) in Layers.Zip(PrevIndices))
                 {
                     CompositionModel.Layers.Insert(i, l);
+                }
+            }
+
+            public void Dispose() { }
+        }
+
+        private class ChangeLayerSwitchHistoryCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangeLayerSwitch);
+
+            LayerModel[] Layers { get; }
+
+            PropertyInfo SwitchInfo { get; }
+
+            bool[] OldValues { get; }
+
+            bool NewValue { get; }
+
+            public ChangeLayerSwitchHistoryCommand(LayerModel[] layers, PropertyInfo switchInfo, bool[] oldValues, bool newValue)
+            {
+                Layers = layers;
+                SwitchInfo = switchInfo;
+                OldValues = oldValues;
+                NewValue = newValue;
+            }
+
+            public void Redo()
+            {
+                foreach (var l in Layers)
+                {
+                    SwitchInfo.SetValue(l, NewValue);
+                }
+            }
+
+            public void Undo()
+            {
+                foreach (var (l, o) in Layers.Zip(OldValues))
+                {
+                    SwitchInfo.SetValue(l, o);
                 }
             }
 
