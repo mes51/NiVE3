@@ -244,6 +244,12 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("レイヤースイッチの切り替え")]
         public static readonly string History_ChangeLayerSwitch = nameof(History_ChangeLayerSwitch);
 
+        [ShowInMarkup, DefaultValue("レイヤーの名前変更")]
+        public static readonly string History_ChangeLayerName = nameof(History_ChangeLayerName);
+
+        [ShowInMarkup, DefaultValue("レイヤーのコメント変更")]
+        public static readonly string History_ChangeLayerComment = nameof(History_ChangeLayerComment);
+
         // Enum
 
         [ShowInMarkup, DefaultValue("RGB")]

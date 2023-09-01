@@ -88,6 +88,8 @@ namespace NiVE3.View.Part
                 Converter = InvertConverter
             };
             BindingOperations.SetBinding(this, GongSolutions.Wpf.DragDrop.DragDrop.IsDropTargetProperty, isDropTargetBinding);
+
+            PreviewKeyDown += (_, e) => System.Diagnostics.Debug.WriteLine(e.Handled);
         }
 
         protected override DependencyObject GetContainerForItemOverride()

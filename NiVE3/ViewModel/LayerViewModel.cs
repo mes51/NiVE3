@@ -9,6 +9,7 @@ using NiVE3.Model;
 using NiVE3.Mvvm;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
+using NiVE3.View.Command;
 using Prism.Commands;
 using Prism.Mvvm;
 
@@ -26,7 +27,7 @@ namespace NiVE3.ViewModel
         }
 
         private string name = "";
-        [NeedWire(nameof(LayerModel))]
+        [NeedWire(nameof(LayerModel), IsOneWay = true)]
         public string Name
         {
             get { return name; }
@@ -34,7 +35,7 @@ namespace NiVE3.ViewModel
         }
 
         private string comment = "";
-        [NeedWire(nameof(LayerModel))]
+        [NeedWire(nameof(LayerModel), IsOneWay = true)]
         public string Comment
         {
             get { return comment; }
@@ -240,11 +241,26 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref isExpanded, value); }
         }
 
+        private EditingLayerParameter editingParameter;
+        public EditingLayerParameter EditingParameter
+        {
+            get { return editingParameter; }
+            set { SetProperty(ref editingParameter, value); }
+        }
+
         public ICommand BeginEditDurationCommand { get; }
 
         public ICommand CommitEditDurationCommand { get; }
 
         public ICommand ChangeLayerSwitchCommand { get; }
+
+        public ICommand BeginEditNameCommand { get; }
+
+        public ICommand BeginEditCommentCommand { get; }
+
+        public ICommand EndEditNameCommand { get; }
+
+        public ICommand EndEditCommentCommand { get; }
 
         WeakEventPublisher<LayerSwitchEventArgs> LayerSwitchChangeRequestPublisher { get; } = new WeakEventPublisher<LayerSwitchEventArgs>();
         public event EventHandler<LayerSwitchEventArgs> LayerSwitchChangeRequest
@@ -257,6 +273,10 @@ namespace NiVE3.ViewModel
 
         ViewStateModel ViewState { get; }
 
+        string PrevName { get; set; } = "";
+
+        string PrevComment { get; set; } = "";
+
         public LayerViewModel(LayerModel layerModel, ViewStateModel viewState)
         {
             LayerModel = layerModel;
@@ -264,9 +284,17 @@ namespace NiVE3.ViewModel
 
             WiringModel();
 
-            BeginEditDurationCommand = new DelegateCommand(() => LayerModel.BeginEditDuration());
+            BeginEditDurationCommand = new RequerySuggestedCommand(() =>
+            {
+                LayerModel.BeginEditDuration();
+                EditingParameter = EditingLayerParameter.Duration;
+            }, () => EditingParameter == EditingLayerParameter.None);
 
-            CommitEditDurationCommand = new DelegateCommand(() => LayerModel.CommitEditDuration());
+            CommitEditDurationCommand = new RequerySuggestedCommand(() =>
+            {
+                LayerModel.CommitEditDuration();
+                EditingParameter = EditingLayerParameter.None;
+            }, () => EditingParameter == EditingLayerParameter.Duration);
 
             ChangeLayerSwitchCommand = new DelegateCommand<string>(name =>
             {
@@ -279,8 +307,54 @@ namespace NiVE3.ViewModel
                 });
                 LayerSwitchChangeRequestPublisher.Publish(this, new LayerSwitchEventArgs(name, newValue));
             });
+
+            BeginEditNameCommand = new RequerySuggestedCommand(() =>
+            {
+                PrevName = Name;
+                EditingParameter = EditingLayerParameter.Name;
+            }, () => EditingParameter == EditingLayerParameter.None);
+
+            BeginEditCommentCommand = new RequerySuggestedCommand(() =>
+            {
+                PrevComment = Comment;
+                EditingParameter = EditingLayerParameter.Comment;
+            }, () => EditingParameter == EditingLayerParameter.None);
+
+            EndEditNameCommand = new RequerySuggestedCommand<bool>(commit =>
+            {
+                if (commit)
+                {
+                    LayerModel.ChangeName(Name);
+                }
+                else
+                {
+                    Name = PrevName;
+                }
+                EditingParameter = EditingLayerParameter.None;
+            }, _ => EditingParameter == EditingLayerParameter.Name);
+
+            EndEditCommentCommand = new RequerySuggestedCommand<bool>(commit =>
+            {
+                if (commit)
+                {
+                    LayerModel.ChangeComment(Comment);
+                }
+                else
+                {
+                    Comment = PrevComment;
+                }
+                EditingParameter = EditingLayerParameter.None;
+            }, _ => EditingParameter == EditingLayerParameter.Comment);
         }
 
         partial void WiringModel();
+    }
+
+    enum EditingLayerParameter
+    {
+        None,
+        Name,
+        Comment,
+        Duration
     }
 }

@@ -165,6 +165,26 @@ namespace NiVE3.Model
             }
         }
 
+        public void ChangeName(string name)
+        {
+            if (Name != name)
+            {
+                var prevName = Name;
+                Name = name;
+                HistoryModel.Add(new ChangeNameHistoryCommand(this, prevName, name));
+            }
+        }
+
+        public void ChangeComment(string comment)
+        {
+            if (Comment != comment)
+            {
+                var prevComment = Comment;
+                Comment = comment;
+                HistoryModel.Add(new ChangeCommentHistoryCommand(this, prevComment, comment));
+            }
+        }
+
         private void Effects_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
         }

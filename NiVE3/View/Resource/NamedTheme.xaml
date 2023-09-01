@@ -138,6 +138,7 @@
     <Style x:Key="LayerSwitchCheckBox" TargetType="{x:Type CheckBox}">
         <Setter Property="Width" Value="15"/>
         <Setter Property="Height" Value="15"/>
+        <Setter Property="IsTabStop" Value="False"/>
         <Setter Property="Background" Value="{ugm:AppearanceResource ResourceKey=BackgroundFill, ReturnDynamicResource=True}"/>
         <Setter Property="Foreground" Value="{ugm:AppearanceResource ResourceKey=TextBrush, ReturnDynamicResource=True}"/>
         <Setter Property="Template">

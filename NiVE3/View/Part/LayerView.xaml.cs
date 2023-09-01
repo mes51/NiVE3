@@ -126,7 +126,108 @@ namespace NiVE3.View.Part
 
         private void Root_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
+            Focus();
             ParentCollection?.SelectItem(this, Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift), Keyboard.IsKeyDown(Key.LeftCtrl) ||  Keyboard.IsKeyDown(Key.RightCtrl));
+        }
+
+        private void Root_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            var viewModel = ViewModel;
+            if (viewModel != null && e.Key == Key.Enter && viewModel.BeginEditNameCommand.CanExecute(null))
+            {
+                viewModel.BeginEditNameCommand.Execute(null);
+                LayerNameTextBox.Focus();
+                LayerNameTextBox.SelectAll();
+                LayerNameTextBox.CaptureMouse();
+            }
+        }
+
+        private void LayerNameTextBox_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            var viewModel = ViewModel;
+            if (viewModel == null)
+            {
+                return;
+            }
+
+            if ((e.Key == Key.Tab || (e.Key == Key.Enter && e.ImeProcessedKey == Key.None)) && viewModel.EndEditNameCommand.CanExecute(true))
+            {
+                viewModel.EndEditNameCommand.Execute(true);
+            }
+            else if (e.Key == Key.Escape && viewModel.EndEditNameCommand.CanExecute(false))
+            {
+                viewModel.EndEditNameCommand.Execute(false);
+            }
+            LayerNameTextBox.ReleaseMouseCapture();
+        }
+
+        private void LayerNameTextBox_PreviewMouseDownOutsideCapturedElement(object sender, MouseButtonEventArgs e)
+        {
+            var viewModel = ViewModel;
+            if (viewModel != null && viewModel.EndEditNameCommand.CanExecute(true))
+            {
+                viewModel.EndEditNameCommand.Execute(true);
+                LayerNameTextBox.ReleaseMouseCapture();
+                e.Handled = true;
+            }
+        }
+
+        private void LayerCommentGrid_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.LeftButton != MouseButtonState.Pressed || e.ClickCount != 2)
+            {
+                return;
+            }
+
+            var viewModel = ViewModel;
+            if (viewModel != null && viewModel.BeginEditCommentCommand.CanExecute(null))
+            {
+                viewModel.BeginEditCommentCommand.Execute(null);
+                LayerCommentTextBox.Focus();
+                LayerCommentTextBox.SelectAll();
+                LayerCommentTextBox.CaptureMouse();
+                e.Handled = true;
+            }
+        }
+
+        private void LayerCommentTextBox_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            var viewModel = ViewModel;
+            if (viewModel == null)
+            {
+                return;
+            }
+
+            if ((e.Key == Key.Tab || (e.Key == Key.Enter && e.ImeProcessedKey == Key.None)) && viewModel.EndEditCommentCommand.CanExecute(true))
+            {
+                viewModel.EndEditCommentCommand.Execute(true);
+            }
+            else if (e.Key == Key.Escape && viewModel.EndEditCommentCommand.CanExecute(false))
+            {
+                viewModel.EndEditCommentCommand.Execute(false);
+            }
+            LayerCommentTextBox.ReleaseMouseCapture();
+        }
+
+        private void LayerCommentTextBox_PreviewMouseDownOutsideCapturedElement(object sender, MouseButtonEventArgs e)
+        {
+            var viewModel = ViewModel;
+            if (viewModel != null && viewModel.EndEditCommentCommand.CanExecute(true))
+            {
+                viewModel.EndEditCommentCommand.Execute(true);
+                LayerCommentTextBox.ReleaseMouseCapture();
+                e.Handled = true;
+            }
+        }
+
+        private void LayerCommentTextBox_LostMouseCapture(object sender, MouseEventArgs e)
+        {
+            // NOTE: なぜかCaptureMouse後にマウスキャプチャが外れるため再度キャプチャする
+            // TODO: キャプチャが外れる原因の調査
+            if (ViewModel?.EditingParameter == EditingLayerParameter.Comment)
+            {
+                LayerCommentTextBox.CaptureMouse();
+            }
         }
 
         private void DurationBar_IsClickedChanged(object sender, EventArgs e)

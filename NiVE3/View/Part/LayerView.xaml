@@ -14,7 +14,10 @@
              xmlns:vm="clr-namespace:NiVE3.ViewModel"
              mc:Ignorable="d" 
              x:Name="Root"
+             Focusable="True"
+             FocusVisualStyle="{x:Null}"
              MouseLeftButtonDown="Root_MouseLeftButtonDown"
+             PreviewKeyDown="Root_PreviewKeyDown"
              pr:NestableItemsCollectionView.IsItemLocked="{Binding IsLock}"
              d:DesignHeight="200" d:DesignWidth="800">
     <UserControl.Resources>
@@ -33,7 +36,8 @@
             </cv:ConverterItem>
         </cv:ConverterCollection>
 
-        <cv:SwitchValueConverter x:Key="AVSwitchGridWidthSwitch" TrueValue="68"/> <!-- 66 + ceil(pr:ItemResizableStackPanel.SplitterSize / 2) -->
+        <cv:SwitchValueConverter x:Key="AVSwitchGridWidthSwitch" TrueValue="68"/>
+        <!-- 66 + ceil(pr:ItemResizableStackPanel.SplitterSize / 2) -->
         <cv:SwitchValueConverter x:Key="TagGridWidthSwitch" TrueValue="19"/>
 
         <Style x:Key="HeaderGridStyle" TargetType="{x:Type Grid}">
@@ -56,6 +60,7 @@
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="HorizontalAlignment" Value="Left"/>
             <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+            <Setter Property="Visibility" Value="Visible"/>
         </Style>
 
         <Style x:Key="SoloSwitchStyle" TargetType="{x:Type CheckBox}" BasedOn="{StaticResource LayerSwitchCheckBox}">
@@ -180,11 +185,55 @@
             </Grid>
 
             <Grid Grid.Column="4" Grid.Row="0"  Style="{StaticResource ColumnGrid}">
-                <TextBlock Text="{Binding Name}" Style="{StaticResource LayerText}"/>
+                <TextBlock Text="{Binding Name}">
+                    <TextBlock.Style>
+                        <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource LayerText}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding EditingParameter}" Value="{x:Static vm:EditingLayerParameter.Name}">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+                <TextBox x:Name="LayerNameTextBox" Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AcceptsTab="False" PreviewKeyDown="LayerNameTextBox_PreviewKeyDown" Mouse.PreviewMouseDownOutsideCapturedElement="LayerNameTextBox_PreviewMouseDownOutsideCapturedElement">
+                    <TextBox.Style>
+                        <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
+                            <Setter Property="Visibility" Value="Hidden"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding EditingParameter}" Value="{x:Static vm:EditingLayerParameter.Name}">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBox.Style>
+                </TextBox>
             </Grid>
 
-            <Grid Grid.Column="5" Grid.Row="0"  Style="{StaticResource ColumnGrid}">
-                <TextBlock Text="{Binding Comment}" Style="{StaticResource LayerText}"/>
+            <Grid Grid.Column="5" Grid.Row="0"  Style="{StaticResource ColumnGrid}" Background="Transparent" PreviewMouseDown="LayerCommentGrid_PreviewMouseDown">
+                <TextBlock Text="{Binding Comment}">
+                    <TextBlock.Style>
+                        <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource LayerText}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding EditingParameter}" Value="{x:Static vm:EditingLayerParameter.Comment}">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+                <TextBox x:Name="LayerCommentTextBox" Text="{Binding Comment, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AcceptsTab="False" PreviewKeyDown="LayerCommentTextBox_PreviewKeyDown" Mouse.PreviewMouseDownOutsideCapturedElement="LayerCommentTextBox_PreviewMouseDownOutsideCapturedElement" Mouse.LostMouseCapture="LayerCommentTextBox_LostMouseCapture">
+                    <TextBox.Style>
+                        <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
+                            <Setter Property="Visibility" Value="Hidden"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding EditingParameter}" Value="{x:Static vm:EditingLayerParameter.Comment}">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBox.Style>
+                </TextBox>
             </Grid>
         </Grid>
 
