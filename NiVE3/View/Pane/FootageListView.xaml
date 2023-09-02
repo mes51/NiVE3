@@ -59,7 +59,6 @@
         
         <Style x:Key="ItemContainerStyle" TargetType="{x:Type pv:TreeListViewItem}">
             <Setter Property="ItemsSource" Value="{Binding Footages}"/>
-            <EventSetter Event="PreviewKeyDown" Handler="TreeListViewItem_PreviewKeyDown"/>
             <EventSetter Event="MouseDoubleClick" Handler="TreeListViewItem_MouseDoubleClick"/>
         </Style>
 
@@ -67,12 +66,12 @@
             <DataTemplate DataType="{x:Type vm:IFootageViewModel}">
                 <Grid>
                     <TextBlock x:Name="FootageNameDisplayText" Text="{Binding Name, Mode=OneWay}"/>
-                    <TextBox x:Name="FootageNameEditTextBox" Text="{Binding Name}" Visibility="Hidden" PreviewKeyDown="FootageEditTextBox_PreviewKeyDown" IsVisibleChanged="EditTextBox_IsVisibleChanged"/>
+                    <TextBox x:Name="FootageNameTextBox" Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Visibility="Hidden" PreviewKeyDown="FootageNameTextBox_PreviewKeyDown" IsVisibleChanged="FootageNameTextBox_IsVisibleChanged" Mouse.PreviewMouseDownOutsideCapturedElement="FootageNameTextBox_PreviewMouseDownOutsideCapturedElement" Mouse.LostMouseCapture="FootageNameTextBox_LostMouseCapture"/>
                 </Grid>
                 <DataTemplate.Triggers>
-                    <DataTrigger Binding="{Binding EditingPropertyName}" Value="Name">
+                    <DataTrigger Binding="{Binding EditingParameter}" Value="{x:Static vm:EditingFootageParameter.Name}">
                         <Setter TargetName="FootageNameDisplayText" Property="Visibility" Value="Hidden"/>
-                        <Setter TargetName="FootageNameEditTextBox" Property="Visibility" Value="Visible"/>
+                        <Setter TargetName="FootageNameTextBox" Property="Visibility" Value="Visible"/>
                     </DataTrigger>
                 </DataTemplate.Triggers>
             </DataTemplate>
@@ -81,12 +80,12 @@
         <DataTemplate x:Key="FootageCommentTemplate" DataType="{x:Type vm:IFootageViewModel}">
             <Grid>
                 <TextBlock x:Name="FootageCommentDisplayText" Text="{Binding Comment, Mode=OneWay}" PreviewMouseDown="FootageCommentDisplayText_PreviewMouseDown"/>
-                <TextBox x:Name="FootageCommentEditTextBox" Text="{Binding Comment}" Visibility="Hidden" PreviewKeyDown="FootageEditTextBox_PreviewKeyDown" IsVisibleChanged="EditTextBox_IsVisibleChanged"/>
+                <TextBox x:Name="FootageCommentTextBox" Text="{Binding Comment, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Visibility="Hidden" PreviewKeyDown="FootageCommentTextBox_PreviewKeyDown" IsVisibleChanged="FootageCommentTextBox_IsVisibleChanged" Mouse.PreviewMouseDownOutsideCapturedElement="FootageCommentTextBox_PreviewMouseDownOutsideCapturedElement" Mouse.LostMouseCapture="FootageCommentTextBox_LostMouseCapture"/>
             </Grid>
             <DataTemplate.Triggers>
-                <DataTrigger Binding="{Binding EditingPropertyName}" Value="Comment">
+                <DataTrigger Binding="{Binding EditingParameter}" Value="{x:Static vm:EditingFootageParameter.Comment}">
                     <Setter TargetName="FootageCommentDisplayText" Property="Visibility" Value="Hidden"/>
-                    <Setter TargetName="FootageCommentEditTextBox" Property="Visibility" Value="Visible"/>
+                    <Setter TargetName="FootageCommentTextBox" Property="Visibility" Value="Visible"/>
                 </DataTrigger>
             </DataTemplate.Triggers>
         </DataTemplate>

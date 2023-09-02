@@ -28,7 +28,7 @@ namespace NiVE3.Model
 
             public void Redo()
             {
-                var folder = new FootageFolderModel(FolderId);
+                var folder = new FootageFolderModel(Model.HistoryModel, FolderId);
                 Model.AddFootage(folder, ParentFootageId);
             }
 

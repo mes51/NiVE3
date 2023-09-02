@@ -13,7 +13,7 @@ using Prism.Mvvm;
 
 namespace NiVE3.Model
 {
-    interface IFootageModel : INotifyPropertyChanged
+    partial interface IFootageModel : INotifyPropertyChanged
     {
         Guid FootageId { get; }
 
@@ -44,6 +44,10 @@ namespace NiVE3.Model
         void AddFootage(IFootageModel footage);
 
         void RemoveFootage(IFootageModel footage);
+
+        void ChangeName(string name);
+
+        void ChangeComment(string name);
     }
 
     class FootageModel : BindableBase, IFootageModel
@@ -126,12 +130,15 @@ namespace NiVE3.Model
 
         IFootageSource Source { get; }
 
+        HistoryModel HistoryModel { get; }
+
         public InputModel InputModel { get; }
 
-        public FootageModel(InputModel input, IFootageSource source) : this(input, source, null) { }
+        public FootageModel(InputModel input, IFootageSource source, HistoryModel historyModel) : this(input, source, historyModel, null) { }
 
-        public FootageModel(InputModel input, IFootageSource source, Guid? footageId)
+        public FootageModel(InputModel input, IFootageSource source, HistoryModel historyModel, Guid? footageId)
         {
+            HistoryModel = historyModel;
             FootageId = footageId ?? Guid.NewGuid();
             InputModel = input;
             Source = source;
@@ -151,6 +158,26 @@ namespace NiVE3.Model
         public NImage ReadImage(double time, bool toGpu)
         {
             return Source.Read(time, toGpu);
+        }
+
+        public void ChangeName(string name)
+        {
+            if (Name != name)
+            {
+                var prevName = Name;
+                Name = name;
+                HistoryModel.Add(IFootageModel.CreateChangeNameHistory(this, prevName, name));
+            }
+        }
+
+        public void ChangeComment(string comment)
+        {
+            if (Comment != comment)
+            {
+                var prevComment = Comment;
+                Comment = comment;
+                HistoryModel.Add(IFootageModel.CreateChangeCommentHistoryCommand(this, prevComment, comment));
+            }
         }
     }
 
@@ -207,10 +234,13 @@ namespace NiVE3.Model
             set { SetProperty(ref children, value); }
         }
 
-        public FootageFolderModel() : this(null) { }
+        HistoryModel HistoryModel { get; }
 
-        public FootageFolderModel(Guid? footageId)
+        public FootageFolderModel(HistoryModel historyModel) : this(historyModel, null) { }
+
+        public FootageFolderModel(HistoryModel historyModel, Guid? footageId)
         {
+            HistoryModel = historyModel;
             FootageId = footageId ?? Guid.NewGuid();
             Name = "New Folder";
             PropertyChanged += FootageFolderModel_PropertyChanged;
@@ -250,6 +280,26 @@ namespace NiVE3.Model
             if (Enum.TryParse(typeof(FootageSortKey), e.PropertyName, out var changed) && SortKey == (FootageSortKey)changed)
             {
                 Children.Sort(new FootageComparer(SortKey, SortIsAscending));
+            }
+        }
+
+        public void ChangeName(string name)
+        {
+            if (Name != name)
+            {
+                var prevName = Name;
+                Name = name;
+                HistoryModel.Add(IFootageModel.CreateChangeNameHistory(this, prevName, name));
+            }
+        }
+
+        public void ChangeComment(string comment)
+        {
+            if (Comment != comment)
+            {
+                var prevComment = Comment;
+                Comment = comment;
+                HistoryModel.Add(IFootageModel.CreateChangeCommentHistoryCommand(this, prevComment, comment));
             }
         }
     }

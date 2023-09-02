@@ -229,6 +229,12 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("フッテージの移動")]
         public static readonly string History_MoveFootage = nameof(History_MoveFootage);
 
+        [ShowInMarkup, DefaultValue("フッテージの名前変更")]
+        public static readonly string History_ChangeFootageName = nameof(History_ChangeFootageName);
+
+        [ShowInMarkup, DefaultValue("フッテージのコメント変更")]
+        public static readonly string History_ChangeFootageComment = nameof(History_ChangeFootageComment);
+
         [ShowInMarkup, DefaultValue("コンポジションの追加")]
         public static readonly string History_AddComposition = nameof(History_AddComposition);
 

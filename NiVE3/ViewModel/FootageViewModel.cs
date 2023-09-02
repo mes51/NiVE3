@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using NiVE3.Model;
@@ -15,6 +16,7 @@ using NiVE3.Mvvm;
 using NiVE3.Plugin.Image;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
+using NiVE3.View.Command;
 using Prism.Commands;
 using Prism.Mvvm;
 
@@ -40,15 +42,19 @@ namespace NiVE3.ViewModel
 
         SourceType InputType { get; }
 
-        string? EditingPropertyName { get; }
-
         bool IsFolder { get; }
 
         BitmapSource? SampleImage { get; }
 
-        void BeginEditProperty(string propertyName);
+        EditingFootageParameter EditingParameter { get; set; }
 
-        void EndEditProperty();
+        ICommand BeginEditNameCommand { get; }
+
+        ICommand EndEditNameCommand { get; }
+
+        ICommand BeginEditCommentCommand { get; }
+
+        ICommand EndtEditCommentCommand { get; }
     }
 
     [ViewModelWireable(nameof(WiringModel))]
@@ -57,7 +63,7 @@ namespace NiVE3.ViewModel
         public Guid FootageId { get; private set; }
 
         private string name;
-        [NeedWire(nameof(Footage))]
+        [NeedWire(nameof(Footage), IsOneWay = true)]
         public string Name
         {
             get { return name; }
@@ -112,7 +118,7 @@ namespace NiVE3.ViewModel
         }
 
         private string comment = "";
-        [NeedWire(nameof(Footage))]
+        [NeedWire(nameof(Footage), IsOneWay = true)]
         public string Comment
         {
             get { return comment; }
@@ -127,13 +133,6 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref inputType, value); }
         }
 
-        private string? editingPropertyName;
-        public string? EditingPropertyName
-        {
-            get { return editingPropertyName; }
-            private set { SetProperty(ref editingPropertyName, value); }
-        }
-
         public bool IsFolder => false;
 
         private BitmapSource? sampleImage;
@@ -143,7 +142,26 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref sampleImage, value); }
         }
 
+        private EditingFootageParameter editingParameter;
+        public EditingFootageParameter EditingParameter
+        {
+            get { return editingParameter; }
+            set { SetProperty(ref editingParameter, value); }
+        }
+
         public ObservableCollectionView<IFootageModel, IFootageViewModel>? Footages => null;
+
+        public ICommand BeginEditNameCommand { get; }
+
+        public ICommand EndEditNameCommand { get; }
+
+        public ICommand BeginEditCommentCommand { get; }
+
+        public ICommand EndtEditCommentCommand { get; }
+
+        string PrevName { get; set; } = "";
+
+        string PrevComment { get; set; } = "";
 
         FootageModel Footage { get; }
 
@@ -168,6 +186,44 @@ namespace NiVE3.ViewModel
             WiringModel();
 
             PropertyChanged += FootageViewModel_PropertyChanged;
+
+            BeginEditNameCommand = new DelegateCommand(() =>
+            {
+                PrevName = Name;
+                EditingParameter = EditingFootageParameter.Name;
+            });
+
+            EndEditNameCommand = new RequerySuggestedCommand<bool>(commit =>
+            {
+                if (commit && !string.IsNullOrEmpty(Name))
+                {
+                    Footage.ChangeName(Name);
+                }
+                else
+                {
+                    Name = PrevName;
+                }
+                EditingParameter = EditingFootageParameter.None;
+            });
+
+            BeginEditCommentCommand = new DelegateCommand(() =>
+            {
+                PrevComment = Comment;
+                EditingParameter = EditingFootageParameter.Comment;
+            });
+
+            EndtEditCommentCommand = new RequerySuggestedCommand<bool>(commit =>
+            {
+                if (commit)
+                {
+                    Footage.ChangeComment(Comment);
+                }
+                else
+                {
+                    Comment = PrevComment;
+                }
+                EditingParameter = EditingFootageParameter.None;
+            });
         }
 
         private void FootageViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -180,18 +236,6 @@ namespace NiVE3.ViewModel
         }
 
         partial void WiringModel();
-
-        public void BeginEditProperty(string propertyName)
-        {
-            EditingPropertyName = propertyName;
-        }
-
-        public void EndEditProperty()
-        {
-            // TODO: ヒストリの確定
-
-            EditingPropertyName = null;
-        }
 
         void UpdateSampleImage()
         {
@@ -223,7 +267,7 @@ namespace NiVE3.ViewModel
         public Guid FootageId { get; private set; }
 
         private string name;
-        [NeedWire(nameof(Folder))]
+        [NeedWire(nameof(Folder), IsOneWay = true)]
         public string Name
         {
             get { return name; }
@@ -241,7 +285,7 @@ namespace NiVE3.ViewModel
         public string FilePath => "";
 
         private string comment;
-        [NeedWire(nameof(Folder))]
+        [NeedWire(nameof(Folder), IsOneWay = true)]
         public string Comment
         {
             get { return comment; }
@@ -257,16 +301,28 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref footages, value); }
         }
 
-        private string? editingPropertyName;
-        public string? EditingPropertyName
-        {
-            get { return editingPropertyName; }
-            private set { SetProperty(ref editingPropertyName, value); }
-        }
-
         public bool IsFolder => true;
 
         public BitmapSource? SampleImage => null;
+
+        private EditingFootageParameter editingParameter;
+        public EditingFootageParameter EditingParameter
+        {
+            get { return editingParameter; }
+            set { SetProperty(ref editingParameter, value); }
+        }
+
+        public ICommand BeginEditNameCommand { get; }
+
+        public ICommand EndEditNameCommand { get; }
+
+        public ICommand BeginEditCommentCommand { get; }
+
+        public ICommand EndtEditCommentCommand { get; }
+
+        string PrevName { get; set; } = "";
+
+        string PrevComment { get; set; } = "";
 
         FootageFolderModel Folder { get; }
 
@@ -281,20 +337,46 @@ namespace NiVE3.ViewModel
             Footages = folder.Children.CreateViewCollection<IFootageModel, IFootageViewModel>(m => m is FootageModel ? new FootageViewModel((FootageModel)m) : new FootageFolderViewModel((FootageFolderModel)m));
 
             WiringModel();
+
+            BeginEditNameCommand = new DelegateCommand(() =>
+            {
+                PrevName = Name;
+                EditingParameter = EditingFootageParameter.Name;
+            });
+
+            EndEditNameCommand = new RequerySuggestedCommand<bool>(commit =>
+            {
+                if (commit && !string.IsNullOrEmpty(Name))
+                {
+                    Folder.ChangeName(Name);
+                }
+                else
+                {
+                    Name = PrevName;
+                }
+                EditingParameter = EditingFootageParameter.None;
+            });
+
+            BeginEditCommentCommand = new DelegateCommand(() =>
+            {
+                PrevComment = Comment;
+                EditingParameter = EditingFootageParameter.Comment;
+            });
+
+            EndtEditCommentCommand = new RequerySuggestedCommand<bool>(commit =>
+            {
+                if (commit)
+                {
+                    Folder.ChangeComment(Comment);
+                }
+                else
+                {
+                    Comment = PrevComment;
+                }
+                EditingParameter = EditingFootageParameter.None;
+            });
         }
 
         partial void WiringModel();
-
-        public void BeginEditProperty(string propertyName)
-        {
-            EditingPropertyName = propertyName;
-        }
-
-        public void EndEditProperty()
-        {
-            // TODO: ヒストリの確定
-
-            EditingPropertyName = null;
-        }
     }
 }

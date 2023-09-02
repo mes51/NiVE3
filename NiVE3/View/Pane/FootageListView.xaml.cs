@@ -54,6 +54,8 @@ namespace NiVE3.View.Pane
             private set { SetValue(SelectedFootagesPropertyKey, value); }
         }
 
+        FootageListViewModel? ViewModel => DataContext as FootageListViewModel;
+
         public FootageListView()
         {
             InitializeComponent();
@@ -62,26 +64,19 @@ namespace NiVE3.View.Pane
             AddHandler(ButtonBase.ClickEvent, new RoutedEventHandler(GridViewColumnHeader_Clicked));
         }
 
-        FootageListViewModel? ViewModel => DataContext as FootageListViewModel;
-
-        private void TreeListViewItem_PreviewKeyDown(object sender, KeyEventArgs e)
+        static bool IsClickSameControl(FrameworkElement fe, MouseButtonEventArgs e)
         {
-            if (e.Key == Key.Enter && e.OriginalSource is TreeListViewItem targetItem)
-            {
-                if (sender is FrameworkElement fe && fe.DataContext is IFootageViewModel vm)
-                {
-                    ViewModel?.BeginEditPropertyCommand?.Execute(Tuple.Create(vm, nameof(IFootageViewModel.Name)));
-                }
-            }
+            return new Rect(0.0, 0.0, fe.ActualWidth, fe.ActualHeight).Contains(e.GetPosition(fe));
         }
 
         private void FootageCommentDisplayText_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.LeftButton == MouseButtonState.Pressed && e.ClickCount == 2)
             {
-                if (sender is FrameworkElement fe && fe.DataContext is IFootageViewModel vm)
+                var viewModel = ViewModel;
+                if (viewModel != null && sender is FrameworkElement fe && fe.DataContext is IFootageViewModel vm && viewModel.BeginEditCommentCommand.CanExecute(vm))
                 {
-                    ViewModel?.BeginEditPropertyCommand?.Execute(Tuple.Create(vm, nameof(IFootageViewModel.Comment)));
+                    viewModel.BeginEditCommentCommand.Execute(vm);
                 }
             }
         }
@@ -94,19 +89,118 @@ namespace NiVE3.View.Pane
             }
         }
 
-        private void FootageEditTextBox_PreviewKeyDown(object sender, KeyEventArgs e)
+        private void FootageNameTextBox_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            // TODO: Escによるキャンセル
-            if (e.Key == Key.Enter && e.ImeProcessedKey == Key.None)
+            var viewModel = ViewModel;
+            if (viewModel == null || sender is not TextBox textBox)
             {
-                ViewModel?.EndEditPropertyCommand?.Execute(null);
+                return;
+            }
+
+            if (e.Key == Key.Enter && e.ImeProcessedKey == Key.None && viewModel.EndEditNameCommand.CanExecute(true))
+            {
+                viewModel.EndEditNameCommand.Execute(true);
+                textBox.ReleaseMouseCapture();
+            }
+            else if (e.Key == Key.Escape && viewModel.EndEditNameCommand.CanExecute(false))
+            {
+                viewModel.EndEditNameCommand.Execute(false);
+                textBox.ReleaseMouseCapture();
+            }
+        }
+
+        private void FootageNameTextBox_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (ViewModel?.EditingParameter == EditingFootageParameter.Name && sender is TextBox textBox)
+            {
+                textBox.Focus();
+                textBox.SelectAll();
+                textBox.CaptureMouse();
+            }
+        }
+
+        private void FootageCommentTextBox_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            var viewModel = ViewModel;
+            if (viewModel == null || sender is not TextBox textBox)
+            {
+                return;
+            }
+
+            if (e.Key == Key.Enter && e.ImeProcessedKey == Key.None && viewModel.EndEditCommentCommand.CanExecute(true))
+            {
+                viewModel.EndEditCommentCommand.Execute(true);
+                textBox.ReleaseMouseCapture();
+            }
+            else if (e.Key == Key.Escape && viewModel.EndEditCommentCommand.CanExecute(false))
+            {
+                viewModel.EndEditCommentCommand.Execute(false);
+                textBox.ReleaseMouseCapture();
+            }
+        }
+
+        private void FootageCommentTextBox_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (ViewModel?.EditingParameter == EditingFootageParameter.Comment && sender is TextBox textBox)
+            {
+                textBox.Focus();
+                textBox.SelectAll();
+                textBox.CaptureMouse();
+            }
+        }
+
+        private void FootageNameTextBox_PreviewMouseDownOutsideCapturedElement(object sender, MouseButtonEventArgs e)
+        {
+            var viewModel = ViewModel;
+            if (viewModel == null || sender is not TextBox textBox)
+            {
+                return;
+            }
+
+            if (!IsClickSameControl(textBox, e) && viewModel.EndEditNameCommand.CanExecute(true))
+            {
+                viewModel.EndEditNameCommand.Execute(true);
+                textBox.ReleaseMouseCapture();
+            }
+        }
+
+        private void FootageNameTextBox_LostMouseCapture(object sender, MouseEventArgs e)
+        {
+            // NOTE: なぜかCaptureMouse後にマウスキャプチャが外れるため再度キャプチャする
+            // TODO: キャプチャが外れる原因の調査
+            if (ViewModel?.EditingParameter == EditingFootageParameter.Name && sender is TextBox textBox)
+            {
+                textBox.CaptureMouse();
+            }
+        }
+
+        private void FootageCommentTextBox_PreviewMouseDownOutsideCapturedElement(object sender, MouseButtonEventArgs e)
+        {
+            var viewModel = ViewModel;
+            if (viewModel == null || sender is not TextBox textBox)
+            {
+                return;
+            }
+
+            if (!IsClickSameControl(textBox, e) && viewModel.EndEditCommentCommand.CanExecute(true))
+            {
+                viewModel.EndEditCommentCommand.Execute(true);
+                textBox.ReleaseMouseCapture();
+            }
+        }
+
+        private void FootageCommentTextBox_LostMouseCapture(object sender, MouseEventArgs e)
+        {
+            // NOTE: なぜかCaptureMouse後にマウスキャプチャが外れるため再度キャプチャする
+            // TODO: キャプチャが外れる原因の調査
+            if (ViewModel?.EditingParameter == EditingFootageParameter.Comment && sender is TextBox textBox)
+            {
+                textBox.CaptureMouse();
             }
         }
 
         private void SelectedItems_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
-            ViewModel?.EndEditPropertyCommand?.Execute(null);
-
             // NOTE: ReadOnlyなDependencyPropertyはBinding出来ないためここで直接ViewModelに反映する
             // TODO: なんか良い方法探す
             switch (e.Action)
@@ -145,18 +239,6 @@ namespace NiVE3.View.Pane
                 {
                     newItems.CollectionChanged += footageListView.SelectedItems_CollectionChanged;
                 }
-            }
-        }
-
-        private void EditTextBox_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            if (sender is TextBox editTextBox)
-            {
-                Dispatcher.BeginInvoke(() =>
-                {
-                    editTextBox.CaretIndex = int.MaxValue;
-                    editTextBox.Focus();
-                }, DispatcherPriority.Render);
             }
         }
 

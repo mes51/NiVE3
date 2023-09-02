@@ -259,7 +259,7 @@ namespace NiVE3.Model
 
         FootageFolderModel AddFolderInternal(string? name)
         {
-            var folder = new FootageFolderModel();
+            var folder = new FootageFolderModel(HistoryModel);
             if (!string.IsNullOrEmpty(name))
             {
                 folder.Name = name;
@@ -338,7 +338,7 @@ namespace NiVE3.Model
             IFootageModel loadedFootage;
             if (group.ChildrenGroup.Length < 1 && group.Sources.Length < 2)
             {
-                loadedFootage = new FootageModel(inputModel, group.Sources[0]);
+                loadedFootage = new FootageModel(inputModel, group.Sources[0], HistoryModel);
                 AddFootage(loadedFootage, targetFolderId);
             }
             else
@@ -355,11 +355,11 @@ namespace NiVE3.Model
 
         IFootageModel AddFootageSourceGroup(InputModel inputModel, FootageSourceGroup group, Guid? targetFolderId)
         {
-            var folder = new FootageFolderModel { Name = group.Name };
+            var folder = new FootageFolderModel(HistoryModel) { Name = group.Name };
             AddFootage(folder, targetFolderId);
             foreach (var s in group.Sources)
             {
-                AddFootage(new FootageModel(inputModel, s), folder.FootageId);
+                AddFootage(new FootageModel(inputModel, s, HistoryModel), folder.FootageId);
             }
 
             foreach (var c in group.ChildrenGroup)

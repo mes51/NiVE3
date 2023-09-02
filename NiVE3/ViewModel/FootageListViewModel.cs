@@ -30,6 +30,7 @@ namespace NiVE3.ViewModel
     [CommandHandling(nameof(AddSolidCommand), nameof(ShortcutKeySetting.AddSolidGesture), IsGlobal = true)]
     [CommandHandling(nameof(AddFootageFolderCommand), nameof(ShortcutKeySetting.AddFootageFolderGesture), IsGlobal = true)]
     [CommandHandling(nameof(DeleteFootageCommand), nameof(ShortcutKeySetting.DeleteItemGesture))]
+    [CommandHandling(nameof(BeginEditNameCommand), nameof(ShortcutKeySetting.BeginEditNameGesture))]
     class FootageListViewModel : SingletonePaneViewModelBase, IFootageViewModelList, IDropTarget, IDragSource
     {
         private ObservableCollectionView<IFootageModel, IFootageViewModel> footages;
@@ -44,13 +45,6 @@ namespace NiVE3.ViewModel
         {
             get { return selectedFootages; }
             set { SetProperty(ref selectedFootages, value); }
-        }
-
-        private IFootageViewModel? editingFootage;
-        public IFootageViewModel? EditingFootage
-        {
-            get { return editingFootage; }
-            private set { SetProperty(ref editingFootage, value); }
         }
 
         private bool showFileExtension = true;
@@ -95,6 +89,20 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref showFilePath, value); }
         }
 
+        private EditingFootageParameter editingProperty;
+        public EditingFootageParameter EditingParameter
+        {
+            get { return editingProperty; }
+            set { SetProperty(ref editingProperty, value); }
+        }
+
+        private IFootageViewModel? editingFootage;
+        public IFootageViewModel? EditingFootage
+        {
+            get { return editingFootage; }
+            set { SetProperty(ref editingFootage, value); }
+        }
+
         public ICommand MoveFootageCommand { get; }
 
         public ICommand MoveFootageListCommand { get; }
@@ -107,13 +115,17 @@ namespace NiVE3.ViewModel
 
         public ICommand AddFootageFolderCommand { get; }
 
-        public ICommand BeginEditPropertyCommand { get; }
-
-        public ICommand EndEditPropertyCommand { get; }
-
         public ICommand LoadFileCommand { get; }
 
         public ICommand ShowPreviewCommand { get; }
+
+        public ICommand BeginEditNameCommand { get; }
+
+        public ICommand EndEditNameCommand { get; }
+
+        public ICommand BeginEditCommentCommand { get; }
+
+        public ICommand EndEditCommentCommand { get; }
 
         FootageListModel FootageListModel { get; }
 
@@ -164,29 +176,45 @@ namespace NiVE3.ViewModel
 
             AddFootageFolderCommand = new DelegateCommand(() => FootageListModel.AddFolder());
 
-            BeginEditPropertyCommand = new DelegateCommand<Tuple<IFootageViewModel, string>>(t =>
-            {
-                if (EditingFootage != null)
-                {
-                    EditingFootage.EndEditProperty();
-                }
-
-                EditingFootage = t.Item1;
-                EditingFootage.BeginEditProperty(t.Item2);
-            });
-
-            EndEditPropertyCommand = new DelegateCommand(() =>
-            {
-                if (EditingFootage != null)
-                {
-                    EditingFootage.EndEditProperty();
-                    EditingFootage = null;
-                }
-            });
-
             LoadFileCommand = new DelegateCommand<Tuple<string, Guid?>>(t => FootageListModel.LoadFile(t.Item1, t.Item2));
 
             ShowPreviewCommand = new DelegateCommand<FootageViewModel>(f => FootageListModel.ShowPreview(f.FootageId));
+
+            BeginEditNameCommand = new RequerySuggestedCommand(() =>
+            {
+                EditingParameter = EditingFootageParameter.Name;
+                EditingFootage = SelectedFootages.First();
+                EditingFootage.BeginEditNameCommand.Execute(null);
+            }, () => SelectedFootages.Count > 0 && EditingParameter == EditingFootageParameter.None);
+
+            EndEditNameCommand = new RequerySuggestedCommand<bool>(commit =>
+            {
+                if (EditingFootage == null)
+                {
+                    return;
+                }
+
+                EditingFootage.EndEditNameCommand.Execute(commit);
+                EditingParameter = EditingFootageParameter.None;
+            }, _ => EditingParameter == EditingFootageParameter.Name);
+
+            BeginEditCommentCommand = new RequerySuggestedCommand<IFootageViewModel>(viewModel =>
+            {
+                EditingParameter = EditingFootageParameter.Comment;
+                EditingFootage = viewModel;
+                EditingFootage.BeginEditCommentCommand.Execute(null);
+            }, _ => EditingParameter == EditingFootageParameter.None);
+
+            EndEditCommentCommand = new RequerySuggestedCommand<bool>(commit =>
+            {
+                if (EditingFootage == null)
+                {
+                    return;
+                }
+
+                EditingFootage.EndtEditCommentCommand.Execute(commit); ;
+                EditingParameter = EditingFootageParameter.None;
+            }, _ => EditingParameter == EditingFootageParameter.Comment);
 
             FootageListModel.ShowLoadSetting += FootageListModel_ShowLoadSetting;
         }
@@ -342,5 +370,12 @@ namespace NiVE3.ViewModel
             DialogService.ShowDialog(nameof(InputSettingView), param, r => result = r);
             e.IsOK = result?.Result == ButtonResult.OK;
         }
+    }
+
+    enum EditingFootageParameter
+    {
+        None,
+        Name,
+        Comment
     }
 }
