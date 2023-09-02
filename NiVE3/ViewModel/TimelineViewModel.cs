@@ -6,10 +6,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 using GongSolutions.Wpf.DragDrop;
+using NiVE3.Config;
 using NiVE3.Model;
 using NiVE3.Mvvm;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
+using NiVE3.View.Command;
 using NiVE3.View.Dock;
 using NiVE3.View.Part;
 using NiVE3.View.Primitive;
@@ -20,6 +23,7 @@ namespace NiVE3.ViewModel
     [PaneLocation(PaneLocation.Bottom)]
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
     [ManualViewModelWireable(nameof(CompositionModel), nameof(BindComposition), nameof(UnbindComposition), WithInitializeProperty = true)]
+    [CommandHandling(nameof(BeginEditNameCommand), nameof(ShortcutKeySetting.BeginEditNameGesture))]
     partial class TimelineViewModel : PaneViewModelBase, IDropTarget
     {
         private double frameRate;
@@ -241,6 +245,8 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref selectedLayers, value); }
         }
 
+        public ICommand BeginEditNameCommand { get; }
+
         ViewStateModel ViewState { get; }
 
         public TimelineViewModel(ViewStateModel viewState)
@@ -251,6 +257,8 @@ namespace NiVE3.ViewModel
             WiringModel();
 
             PropertyChanged += TimelineViewModel_PropertyChanged;
+
+            BeginEditNameCommand = new RequerySuggestedCommand(() => SelectedLayers.First().BeginEditNameCommand.Execute(null), () => SelectedLayers.Count > 0);
         }
 
         public void DragOver(IDropInfo dropInfo)

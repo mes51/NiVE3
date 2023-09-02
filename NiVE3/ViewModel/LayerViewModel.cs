@@ -322,7 +322,7 @@ namespace NiVE3.ViewModel
 
             EndEditNameCommand = new RequerySuggestedCommand<bool>(commit =>
             {
-                if (commit)
+                if (commit && !string.IsNullOrEmpty(Name))
                 {
                     LayerModel.ChangeName(Name);
                 }

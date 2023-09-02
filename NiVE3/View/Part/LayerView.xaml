@@ -17,7 +17,6 @@
              Focusable="True"
              FocusVisualStyle="{x:Null}"
              MouseLeftButtonDown="Root_MouseLeftButtonDown"
-             PreviewKeyDown="Root_PreviewKeyDown"
              pr:NestableItemsCollectionView.IsItemLocked="{Binding IsLock}"
              d:DesignHeight="200" d:DesignWidth="800">
     <UserControl.Resources>
@@ -36,8 +35,7 @@
             </cv:ConverterItem>
         </cv:ConverterCollection>
 
-        <cv:SwitchValueConverter x:Key="AVSwitchGridWidthSwitch" TrueValue="68"/>
-        <!-- 66 + ceil(pr:ItemResizableStackPanel.SplitterSize / 2) -->
+        <cv:SwitchValueConverter x:Key="AVSwitchGridWidthSwitch" TrueValue="68"/> <!-- 66 + ceil(pr:ItemResizableStackPanel.SplitterSize / 2) -->
         <cv:SwitchValueConverter x:Key="TagGridWidthSwitch" TrueValue="19"/>
 
         <Style x:Key="HeaderGridStyle" TargetType="{x:Type Grid}">
@@ -196,7 +194,7 @@
                         </Style>
                     </TextBlock.Style>
                 </TextBlock>
-                <TextBox x:Name="LayerNameTextBox" Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AcceptsTab="False" PreviewKeyDown="LayerNameTextBox_PreviewKeyDown" Mouse.PreviewMouseDownOutsideCapturedElement="LayerNameTextBox_PreviewMouseDownOutsideCapturedElement">
+                <TextBox x:Name="LayerNameTextBox" Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AcceptsTab="False" IsVisibleChanged="LayerNameTextBox_IsVisibleChanged" PreviewKeyDown="LayerNameTextBox_PreviewKeyDown" Mouse.PreviewMouseDownOutsideCapturedElement="LayerNameTextBox_PreviewMouseDownOutsideCapturedElement" Mouse.LostMouseCapture="LayerNameTextBox_LostMouseCapture">
                     <TextBox.Style>
                         <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
                             <Setter Property="Visibility" Value="Hidden"/>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -124,22 +125,15 @@ namespace NiVE3.View.Part
             InitializeComponent();
         }
 
+        static bool IsClickSameControl(FrameworkElement fe, MouseButtonEventArgs e)
+        {
+            return new Rect(0.0, 0.0, fe.ActualWidth, fe.ActualHeight).Contains(e.GetPosition(fe));
+        }
+
         private void Root_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             Focus();
             ParentCollection?.SelectItem(this, Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift), Keyboard.IsKeyDown(Key.LeftCtrl) ||  Keyboard.IsKeyDown(Key.RightCtrl));
-        }
-
-        private void Root_PreviewKeyDown(object sender, KeyEventArgs e)
-        {
-            var viewModel = ViewModel;
-            if (viewModel != null && e.Key == Key.Enter && viewModel.BeginEditNameCommand.CanExecute(null))
-            {
-                viewModel.BeginEditNameCommand.Execute(null);
-                LayerNameTextBox.Focus();
-                LayerNameTextBox.SelectAll();
-                LayerNameTextBox.CaptureMouse();
-            }
         }
 
         private void LayerNameTextBox_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -153,18 +147,21 @@ namespace NiVE3.View.Part
             if ((e.Key == Key.Tab || (e.Key == Key.Enter && e.ImeProcessedKey == Key.None)) && viewModel.EndEditNameCommand.CanExecute(true))
             {
                 viewModel.EndEditNameCommand.Execute(true);
+                LayerNameTextBox.ReleaseMouseCapture();
+                e.Handled = true;
             }
             else if (e.Key == Key.Escape && viewModel.EndEditNameCommand.CanExecute(false))
             {
                 viewModel.EndEditNameCommand.Execute(false);
+                LayerNameTextBox.ReleaseMouseCapture();
+                e.Handled = true;
             }
-            LayerNameTextBox.ReleaseMouseCapture();
         }
 
         private void LayerNameTextBox_PreviewMouseDownOutsideCapturedElement(object sender, MouseButtonEventArgs e)
         {
             var viewModel = ViewModel;
-            if (viewModel != null && viewModel.EndEditNameCommand.CanExecute(true))
+            if (!IsClickSameControl(LayerNameTextBox, e) && viewModel != null && viewModel.EndEditNameCommand.CanExecute(true))
             {
                 viewModel.EndEditNameCommand.Execute(true);
                 LayerNameTextBox.ReleaseMouseCapture();
@@ -201,22 +198,35 @@ namespace NiVE3.View.Part
             if ((e.Key == Key.Tab || (e.Key == Key.Enter && e.ImeProcessedKey == Key.None)) && viewModel.EndEditCommentCommand.CanExecute(true))
             {
                 viewModel.EndEditCommentCommand.Execute(true);
+                LayerCommentTextBox.ReleaseMouseCapture();
+                e.Handled = true;
             }
             else if (e.Key == Key.Escape && viewModel.EndEditCommentCommand.CanExecute(false))
             {
                 viewModel.EndEditCommentCommand.Execute(false);
+                LayerCommentTextBox.ReleaseMouseCapture();
+                e.Handled = true;
             }
-            LayerCommentTextBox.ReleaseMouseCapture();
         }
 
         private void LayerCommentTextBox_PreviewMouseDownOutsideCapturedElement(object sender, MouseButtonEventArgs e)
         {
             var viewModel = ViewModel;
-            if (viewModel != null && viewModel.EndEditCommentCommand.CanExecute(true))
+            if (!IsClickSameControl(LayerCommentTextBox, e) && viewModel != null && viewModel.EndEditCommentCommand.CanExecute(true))
             {
                 viewModel.EndEditCommentCommand.Execute(true);
                 LayerCommentTextBox.ReleaseMouseCapture();
                 e.Handled = true;
+            }
+        }
+
+        private void LayerNameTextBox_LostMouseCapture(object sender, MouseEventArgs e)
+        {
+            // NOTE: なぜかCaptureMouse後にマウスキャプチャが外れるため再度キャプチャする
+            // TODO: キャプチャが外れる原因の調査
+            if (ViewModel?.EditingParameter == EditingLayerParameter.Name)
+            {
+                LayerNameTextBox.CaptureMouse();
             }
         }
 
@@ -227,6 +237,16 @@ namespace NiVE3.View.Part
             if (ViewModel?.EditingParameter == EditingLayerParameter.Comment)
             {
                 LayerCommentTextBox.CaptureMouse();
+            }
+        }
+
+        private void LayerNameTextBox_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (ViewModel?.EditingParameter == EditingLayerParameter.Name)
+            {
+                LayerNameTextBox.Focus();
+                LayerNameTextBox.SelectAll();
+                LayerNameTextBox.CaptureMouse();
             }
         }
 

@@ -94,6 +94,19 @@ namespace NiVE3.Config
             new PropertyMetadata(new KeyGesture(Key.D3, ModifierKeys.Control))
         );
 
+        public static readonly DependencyProperty BeginEditNameGestureProperty = DependencyProperty.Register(
+            nameof(BeginEditNameGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new SingleKeyGesture(Key.Enter))
+        );
+
+        public InputGesture BeginEditNameGesture
+        {
+            get { return (InputGesture)GetValue(BeginEditNameGestureProperty); }
+            set { SetValue(BeginEditNameGestureProperty, value); }
+        }
+
         public InputGesture NewPreviewGesture
         {
             get { return (InputGesture)GetValue(NewPreviewGestureProperty); }
