@@ -15,13 +15,16 @@ namespace NiVE3.Model
 
             FootageListModel Model { get; }
 
+            string? FolderName { get; }
+
             Guid FolderId { get; }
 
             Guid? ParentFootageId { get; }
 
-            public AddFolderHistoryCommand(FootageListModel model, Guid folderId, Guid? parentFootageId)
+            public AddFolderHistoryCommand(FootageListModel model, string? folderName, Guid folderId, Guid? parentFootageId)
             {
                 Model = model;
+                FolderName = folderName;
                 FolderId = folderId;
                 ParentFootageId = parentFootageId;
             }
@@ -29,6 +32,10 @@ namespace NiVE3.Model
             public void Redo()
             {
                 var folder = new FootageFolderModel(Model.HistoryModel, FolderId);
+                if (FolderName != null)
+                {
+                    folder.Name = FolderName;
+                }
                 Model.AddFootage(folder, ParentFootageId);
             }
 

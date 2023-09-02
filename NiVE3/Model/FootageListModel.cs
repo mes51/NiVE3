@@ -266,7 +266,7 @@ namespace NiVE3.Model
             }
             AddFootage(folder, null);
 
-            HistoryModel.Add(new AddFolderHistoryCommand(this, folder.FootageId, null));
+            HistoryModel.Add(new AddFolderHistoryCommand(this, name, folder.FootageId, null));
 
             return folder;
         }
