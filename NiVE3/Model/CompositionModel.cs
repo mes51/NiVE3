@@ -11,6 +11,7 @@ using NiVE3.Extension;
 using NiVE3.Input;
 using NiVE3.Plugin.Image;
 using NiVE3.Plugin.Interfaces;
+using NiVE3.View.Resource;
 using Prism.Mvvm;
 
 namespace NiVE3.Model
@@ -236,6 +237,22 @@ namespace NiVE3.Model
             }
 
             HistoryModel.Add(new ChangeLayerSwitchHistoryCommand(layers, propertyInfo, oldValue, newValue));
+        }
+
+        public void AddSolid(int index)
+        {
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_AddSolid));
+            var solidId = FootageListModel.AddSolid();
+
+            if (solidId.HasValue)
+            {
+                InsertLayers(solidId.Value, index);
+                HistoryModel.EndGroup();
+            }
+            else
+            {
+                HistoryModel.AbortGroup();
+            }
         }
 
         public NImage Render(double time, bool useGpu)

@@ -15,12 +15,14 @@ namespace NiVE3.Model
 
         GroupedHistoryCommand? CurrentGroup { get; set; }
 
+        int GroupNestCount { get; set; }
+
         public void Undo()
         {
             if (CurrentGroup != null)
             {
                 // may be bug
-                throw new Exception();
+                throw new InvalidOperationException();
             }
 
             if (!CanUndo())
@@ -39,7 +41,7 @@ namespace NiVE3.Model
             if (CurrentGroup != null)
             {
                 // may be bug
-                throw new Exception();
+                throw new InvalidOperationException();
             }
 
             if (!CanRedo())
@@ -55,32 +57,38 @@ namespace NiVE3.Model
 
         public void BeginGroup(string name)
         {
-            if (CurrentGroup != null)
+            if (CurrentGroup == null)
             {
-                // may be bug
-                throw new Exception();
+                CurrentGroup = new GroupedHistoryCommand(name);
             }
-
-            CurrentGroup = new GroupedHistoryCommand(name);
+            GroupNestCount++;
         }
 
         public void EndGroup()
         {
-            if (CurrentGroup == null)
+            if (GroupNestCount < 1)
             {
                 // may be bug
-                throw new Exception();
+                throw new InvalidOperationException();
             }
 
-            AddInternal(CurrentGroup);
-            CurrentGroup = null;
+            GroupNestCount--;
+            if (GroupNestCount < 1 && CurrentGroup != null)
+            {
+                AddInternal(CurrentGroup);
+                CurrentGroup = null;
+            }
         }
 
         public void AbortGroup()
         {
-            CurrentGroup?.Undo();
-            CurrentGroup?.Dispose();
-            CurrentGroup = null;
+            GroupNestCount--;
+            if (GroupNestCount < 1)
+            {
+                CurrentGroup?.Undo();
+                CurrentGroup?.Dispose();
+                CurrentGroup = null;
+            }
         }
 
         public void Add(IHistoryCommand command)

@@ -83,7 +83,7 @@ namespace NiVE3.Model
             PropertyChanged += FootageListModel_PropertyChanged;
         }
 
-        public void AddSolid()
+        public Guid? AddSolid()
         {
             var solidInput = new SolidInput();
             var solidFolder = Footages.OfType<FootageFolderModel>().FirstOrDefault(f => f.Name == ApplicationSetting.Setting.SolidFolderName);
@@ -97,7 +97,7 @@ namespace NiVE3.Model
             var loaded = LoadFile(solidInput, "", solidFolder.FootageId);
             if (createFolder)
             {
-                if (loaded)
+                if (loaded != null)
                 {
                     HistoryModel.EndGroup();
                 }
@@ -105,6 +105,16 @@ namespace NiVE3.Model
                 {
                     HistoryModel.AbortGroup();
                 }
+            }
+
+            switch (loaded)
+            {
+                case FootageModel solid:
+                    return solid.FootageId;
+                case FootageFolderModel folder:
+                    return Flatten(folder.Children).First().FootageId;
+                default:
+                    return null;
             }
         }
 
@@ -208,7 +218,7 @@ namespace NiVE3.Model
                 }
 
                 var context = Inputs.First(i => i.Metadata.PluginType == t).CreateExport();
-                if (LoadFile(context.Value, filePath, targetFolderId))
+                if (LoadFile(context.Value, filePath, targetFolderId) != null)
                 {
                     break;
                 }
@@ -295,12 +305,12 @@ namespace NiVE3.Model
                 .FirstOrDefault();
         }
 
-        bool LoadFile(IInput plugin, string fileName, Guid? targetFolderId)
+        IFootageModel? LoadFile(IInput plugin, string fileName, Guid? targetFolderId)
         {
             if (!plugin.Load(fileName))
             {
                 plugin.Dispose();
-                return false;
+                return null;
             }
 
             if (InputMetadatas[plugin.GetType()].HasSettingView)
@@ -314,13 +324,13 @@ namespace NiVE3.Model
                     if (!e.IsOK)
                     {
                         plugin.Dispose();
-                        return false;
+                        return null;
                     }
 
                     if (!plugin.ApplyLoadSetting(view.DataContext))
                     {
                         plugin.Dispose();
-                        return false;
+                        return null;
                     }
                 }
             }
@@ -332,7 +342,7 @@ namespace NiVE3.Model
             {
                 // ソースが何もなかった
                 plugin.Dispose();
-                return false;
+                return null;
             }
 
             IFootageModel loadedFootage;
@@ -350,7 +360,7 @@ namespace NiVE3.Model
 
             HistoryModel.Add(new LoadFileHistoryCommand(this, inputModel, loadedFootage, targetFolderId));
 
-            return true;
+            return loadedFootage;
         }
 
         IFootageModel AddFootageSourceGroup(InputModel inputModel, FootageSourceGroup group, Guid? targetFolderId)

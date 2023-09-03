@@ -24,6 +24,7 @@ namespace NiVE3.ViewModel
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
     [ManualViewModelWireable(nameof(CompositionModel), nameof(BindComposition), nameof(UnbindComposition), WithInitializeProperty = true)]
     [CommandHandling(nameof(BeginEditNameCommand), nameof(ShortcutKeySetting.BeginEditNameGesture))]
+    [CommandHandling(nameof(AddSolidCommand), nameof(ShortcutKeySetting.AddSolidGesture), IsGlobal = true)]
     partial class TimelineViewModel : PaneViewModelBase, IDropTarget
     {
         private double frameRate;
@@ -247,6 +248,8 @@ namespace NiVE3.ViewModel
 
         public ICommand BeginEditNameCommand { get; }
 
+        public ICommand AddSolidCommand { get; }
+
         ViewStateModel ViewState { get; }
 
         public TimelineViewModel(ViewStateModel viewState)
@@ -259,6 +262,23 @@ namespace NiVE3.ViewModel
             PropertyChanged += TimelineViewModel_PropertyChanged;
 
             BeginEditNameCommand = new RequerySuggestedCommand(() => SelectedLayers.First().BeginEditNameCommand.Execute(null), () => SelectedLayers.Count > 0);
+
+            AddSolidCommand = new RequerySuggestedCommand(() =>
+            {
+                if (CompositionModel == null || Layers == null)
+                {
+                    return;
+                }
+
+                if (selectedLayers.Count > 0)
+                {
+                    CompositionModel.AddSolid(Layers.IndexOf(SelectedLayers.First()) + 1);
+                }
+                else
+                {
+                    CompositionModel.AddSolid(Layers.Count);
+                }
+            }, () => CompositionModel != null);
         }
 
         public void DragOver(IDropInfo dropInfo)
