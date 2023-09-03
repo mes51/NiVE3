@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Plugin.Interfaces;
 using Prism.Mvvm;
+using NiVE3.Input;
 
 namespace NiVE3.Model
 {
@@ -104,9 +105,74 @@ namespace NiVE3.Model
             set { SetProperty(ref isLock, value); }
         }
 
+        private bool isEnableShy;
+        public bool IsEnableShy
+        {
+            get { return isEnableShy; }
+            set { SetProperty(ref isEnableShy, value); }
+        }
+
+        private bool isEnableCollapse;
+        public bool IsEnableCollapse
+        {
+            get { return isEnableCollapse; }
+            set { SetProperty(ref isEnableCollapse, value); }
+        }
+
+        private bool isEnableEffect;
+        public bool IsEnableEffect
+        {
+            get { return isEnableEffect; }
+            set { SetProperty(ref isEnableEffect, value); }
+        }
+
+        private bool isEnableFrameBlend;
+        public bool IsEnableFrameBlend
+        {
+            get { return isEnableFrameBlend; }
+            set { SetProperty(ref isEnableFrameBlend, value); }
+        }
+
+        private bool isEnableMotionBlur;
+        public bool IsEnableMotionBlur
+        {
+            get { return isEnableMotionBlur; }
+            set { SetProperty(ref isEnableMotionBlur, value); }
+        }
+
+        private bool isEnableAdjustmentLayer;
+        public bool IsEnableAdjustmentLayer
+        {
+            get { return isEnableAdjustmentLayer; }
+            set { SetProperty(ref isEnableAdjustmentLayer, value); }
+        }
+
+        private bool isEnable3D;
+        public bool IsEnable3D
+        {
+            get { return isEnable3D; }
+            set { SetProperty(ref isEnable3D, value); }
+        }
+
+        private ImageInterpolationQuality interpolationQuality = ImageInterpolationQuality.Level2;
+        public ImageInterpolationQuality InterpolationQuality
+        {
+            get { return interpolationQuality; }
+            set { SetProperty(ref interpolationQuality, value); }
+        }
+
+        private bool hasEffect;
+        public bool HasEffect
+        {
+            get { return hasEffect; }
+            set { SetProperty(ref hasEffect, value); }
+        }
+
         public Guid LayerId { get; }
 
         public string SourceName => FootageModel.Name;
+
+        public bool IsComposition => FootageModel.InputModel.Input is CompositionInput;
 
         private ObservableCollection<EffectModel> effects = new ObservableCollection<EffectModel>();
         public ObservableCollection<EffectModel> Effects
@@ -187,6 +253,7 @@ namespace NiVE3.Model
 
         private void Effects_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
+            HasEffect = Effects.Count > 0;
         }
 
         public void Dispose()

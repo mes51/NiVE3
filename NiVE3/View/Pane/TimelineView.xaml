@@ -118,7 +118,7 @@
                     <Path Data="{gm:FontawesomeResource ResourceKey=Sun}" Style="{StaticResource HeaderIconPath}"/>
                 </Grid>
                 <Grid Style="{StaticResource IconContainer}">
-                    <Path Data="{StaticResource NearestNeighborInterpolationIcon}" Style="{StaticResource HeaderIconPath}"/>
+                    <Path Data="{StaticResource ImageInterpolationLevel1Icon}" Style="{StaticResource HeaderIconPath}"/>
                 </Grid>
                 <Grid Style="{StaticResource IconContainer}">
                     <Path Data="{gm:FontawesomeResource ResourceKey=FlorinSign}" Style="{StaticResource HeaderIconPath}"/>

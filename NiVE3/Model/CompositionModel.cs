@@ -221,7 +221,7 @@ namespace NiVE3.Model
             }
         }
 
-        public void ChangeLayerSwitches(Guid[] layerIds, string switchName, bool newValue)
+        public void ChangeLayerSwitches(Guid[] layerIds, string switchName, object newValue)
         {
             var layers = Layers.Where(l => layerIds.Contains(l.LayerId)).OrderBy(Layers.IndexOf).ToArray();
             var propertyInfo = typeof(LayerModel).GetProperty(switchName);
@@ -230,7 +230,7 @@ namespace NiVE3.Model
                 throw new Exception($"{switchName} Switch is not found"); // bug
             }
 
-            var oldValue = layers.Select(l => (bool)(propertyInfo.GetValue(l) ?? false)).ToArray();
+            var oldValue = layers.Select(propertyInfo.GetValue).ToArray();
             foreach (var l in layers)
             {
                 propertyInfo.SetValue(l, newValue);

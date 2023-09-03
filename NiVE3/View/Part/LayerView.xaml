@@ -7,6 +7,7 @@
              xmlns:ugm="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:pr="clr-namespace:NiVE3.View.Primitive"
+             xmlns:pt="clr-namespace:NiVE3.View.Part"
              xmlns:cv="clr-namespace:NiVE3.View.Converter"
              xmlns:pi="clr-namespace:NiVE3.Plugin.Interfaces;assembly=NiVE3.Plugin"
              xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
@@ -21,18 +22,18 @@
              d:DesignHeight="200" d:DesignWidth="800">
     <UserControl.Resources>
         <GridLength x:Key="EmptyGrid">0</GridLength>
+        <Thickness x:Key="LayerSwitchMargin">1,0,0,0</Thickness>
 
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <cv:BooleanToVisibilityHiddenConverter x:Key="BooleanToVisibilityHiddenConverter"/>
         <cv:ColorToBrushConverter x:Key="ColorToBrushConverter"/>
         <cv:OffsetGridLengthConverter x:Key="GridLengthConverter"/>
         <cv:SwitchValueConverter x:Key="SwitchValueConverter" FalseValue="{StaticResource EmptyGrid}"/>
         <cv:EnumToBoolConverter x:Key="EnumToBoolConverter" UseAndCompare="True"/>
 
-        <cv:ConverterCollection x:Key="AVSwitchVisibleConverter">
+        <cv:ConverterCollection x:Key="AVTypeVisibleConverter">
             <cv:ConverterItem Converter="{StaticResource EnumToBoolConverter}" TargetType="{x:Type sys:Boolean}"/>
-            <cv:ConverterItem TargetType="{x:Type Visibility}">
-                <cv:BooleanToVisibilityHiddenConverter />
-            </cv:ConverterItem>
+            <cv:ConverterItem Converter="{StaticResource BooleanToVisibilityHiddenConverter}" TargetType="{x:Type Visibility}"/>
         </cv:ConverterCollection>
 
         <cv:SwitchValueConverter x:Key="AVSwitchGridWidthSwitch" TrueValue="68"/> <!-- 66 + ceil(pr:ItemResizableStackPanel.SplitterSize / 2) -->
@@ -70,6 +71,21 @@
                 </DataTrigger>
                 <DataTrigger Binding="{Binding IsEnableAudio}" Value="True">
                     <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="LayerSwitch" TargetType="{x:Type CheckBox}" BasedOn="{StaticResource LayerSwitchCheckBox}">
+            <Setter Property="Margin" Value="{StaticResource LayerSwitchMargin}"/>
+        </Style>
+
+        <Style x:Key="ShyLayerSwitch" TargetType="{x:Type CheckBox}" BasedOn="{StaticResource AlwaysShowIconLayerSwitchCheckBox}">
+            <Setter Property="Margin" Value="{StaticResource LayerSwitchMargin}"/>
+            <Setter Property="Content" Value="{StaticResource ShyIcon}"/>
+
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsEnableShy}" Value="True">
+                    <Setter Property="Content" Value="{StaticResource EnableShyIcon}"/>
                 </DataTrigger>
             </Style.Triggers>
         </Style>
@@ -141,29 +157,29 @@
             </Grid.ColumnDefinitions>
 
             <Grid Grid.Column="0" Grid.Row="0" Style="{StaticResource ColumnGrid}">
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="1.5,0,0,0">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0.5,0,0,0">
                     <CheckBox Content="{gm:FontawesomeResource ResourceKey=Eye}"
-                              Style="{StaticResource LayerSwitchCheckBox}"
+                              Style="{StaticResource LayerSwitch}"
                               IsChecked="{Binding IsEnableVideo, Mode=OneWay}"
-                              Visibility="{Binding SourceType, Converter={StaticResource AVSwitchVisibleConverter}, ConverterParameter={x:Static  local:LayerView.CompositionDisplayableSourceType}}"
+                              Visibility="{Binding SourceType, Converter={StaticResource AVTypeVisibleConverter}, ConverterParameter={x:Static local:LayerView.CompositionDisplayableSourceType}}"
                               Command="{Binding ChangeLayerSwitchCommand}"
                               CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableVideo}"/>
+                    
                     <CheckBox Content="{gm:FontawesomeResource ResourceKey=VolumeHigh}"
-                              Style="{StaticResource LayerSwitchCheckBox}"
-                              Margin="1,0,0,0"
+                              Style="{StaticResource LayerSwitch}"
                               IsChecked="{Binding IsEnableAudio, Mode=OneWay}"
-                              Visibility="{Binding SourceType, Converter={StaticResource AVSwitchVisibleConverter}, ConverterParameter={x:Static pi:SourceType.Audio}}"
+                              Visibility="{Binding SourceType, Converter={StaticResource AVTypeVisibleConverter}, ConverterParameter={x:Static pi:SourceType.Audio}}"
                               Command="{Binding ChangeLayerSwitchCommand}"
                               CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableAudio}"/>
+                    
                     <CheckBox Content="{gm:FontawesomeResource ResourceKey=Circle}"
-                              Style="{StaticResource SoloSwitchStyle}"
-                              Margin="1,0,0,0"
+                              Style="{StaticResource LayerSwitch}"
                               IsChecked="{Binding IsEnableSolo, Mode=OneWay}"
                               Command="{Binding ChangeLayerSwitchCommand}"
                               CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableSolo}"/>
+                    
                     <CheckBox Content="{gm:FontawesomeResource ResourceKey=Lock}"
-                              Style="{StaticResource LayerSwitchCheckBox}"
-                              Margin="1,0,0,0"
+                              Style="{StaticResource LayerSwitch}"
                               IsChecked="{Binding IsLock, Mode=OneWay}"
                               Command="{Binding ChangeLayerSwitchCommand}"
                               CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsLock}"/>
@@ -232,6 +248,67 @@
                         </Style>
                     </TextBox.Style>
                 </TextBox>
+            </Grid>
+
+            <Grid Grid.Column="6" Grid.Row="0" Style="{StaticResource ColumnGrid}">
+                <StackPanel Orientation="Horizontal" Margin="1.5,0,0,0">
+                    <CheckBox IsChecked="{Binding IsEnableShy, Mode=OneWay}"
+                              Style="{StaticResource ShyLayerSwitch}"
+                              Command="{Binding ChangeLayerSwitchCommand}"
+                              CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableShy}"/>
+                    
+                    <CheckBox Content="{gm:FontawesomeResource ResourceKey=Sun}"
+                              Style="{StaticResource LayerSwitch}"
+                              IsChecked="{Binding IsEnableCollapse, Mode=OneWay}"
+                              Visibility="{Binding IsComposition, Converter={StaticResource BooleanToVisibilityHiddenConverter}}"
+                              Command="{Binding ChangeLayerSwitchCommand, Mode=OneWay}"
+                              CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableCollapse}"/>
+
+                    <pt:MultipleStateLayerSwitch State="{Binding InterpolationQuality, Mode=OneWay}"
+                                                 Width="15"
+                                                 Height="15"
+                                                 Margin="1,0,0,0"
+                                                 Visibility="{Binding SourceType, Converter={StaticResource AVTypeVisibleConverter}, ConverterParameter={x:Static local:LayerView.CompositionDisplayableSourceType}}"
+                                                 Command="{Binding ChangeInterpolationQualityCommand}">
+                        <pt:MultipleStateLayerSwitchItem State="{x:Static pi:ImageInterpolationQuality.Level1}" Icon="{StaticResource ImageInterpolationLevel1Icon}"/>
+                        <pt:MultipleStateLayerSwitchItem State="{x:Static pi:ImageInterpolationQuality.Level2}" Icon="{StaticResource ImageInterpolationLevel2Icon}"/>
+                    </pt:MultipleStateLayerSwitch>
+                    
+                    <CheckBox Content="{gm:FontawesomeResource ResourceKey=FlorinSign}"
+                              Style="{StaticResource LayerSwitch}"
+                              IsChecked="{Binding IsEnableEffect, Mode=OneWay}"
+                              Visibility="{Binding HasEffect, Converter={StaticResource BooleanToVisibilityHiddenConverter}}"
+                              Command="{Binding ChangeLayerSwitchCommand}"
+                              CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableEffect}"/>
+                    
+                    <CheckBox Content="{StaticResource FrameBlendIcon}"
+                              Style="{StaticResource LayerSwitch}"
+                              IsChecked="{Binding IsEnableFrameBlend, Mode=OneWay}"
+                              Visibility="{Binding SourceType, Converter={StaticResource AVTypeVisibleConverter}, ConverterParameter={x:Static pi:SourceType.Video}}"
+                              Command="{Binding ChangeLayerSwitchCommand}"
+                              CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableFrameBlend}"/>
+                    
+                    <CheckBox Content="{StaticResource MotionBlurIcon}"
+                              Style="{StaticResource LayerSwitch}"
+                              IsChecked="{Binding IsEnableMotionBlur, Mode=OneWay}"
+                              Visibility="{Binding SourceType, Converter={StaticResource AVTypeVisibleConverter}, ConverterParameter={x:Static local:LayerView.CompositionDisplayableSourceType}}"
+                              Command="{Binding ChangeLayerSwitchCommand}"
+                              CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableMotionBlur}"/>
+                    
+                    <CheckBox Content="{gm:FontawesomeResource ResourceKey=CircleHalfStroke}"
+                              Style="{StaticResource LayerSwitch}"
+                              IsChecked="{Binding IsEnableAdjustmentLayer, Mode=OneWay}"
+                              Visibility="{Binding SourceType, Converter={StaticResource AVTypeVisibleConverter}, ConverterParameter={x:Static local:LayerView.CompositionDisplayableSourceType}}"
+                              Command="{Binding ChangeLayerSwitchCommand}"
+                              CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableAdjustmentLayer}"/>
+                    
+                    <CheckBox Content="{gm:FontawesomeResource ResourceKey=Cube}"
+                              Style="{StaticResource LayerSwitch}"
+                              IsChecked="{Binding IsEnable3D, Mode=OneWay}"
+                              Visibility="{Binding SourceType, Converter={StaticResource AVTypeVisibleConverter}, ConverterParameter={x:Static local:LayerView.CompositionDisplayableSourceType}}"
+                              Command="{Binding ChangeLayerSwitchCommand}"
+                              CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnable3D}"/>
+                </StackPanel>
             </Grid>
         </Grid>
 

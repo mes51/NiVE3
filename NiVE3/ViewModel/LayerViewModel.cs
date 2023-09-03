@@ -130,6 +130,78 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref isLock, value); }
         }
 
+        private bool isEnableShy;
+        [NeedWire(nameof(LayerModel), IsOneWay = true)]
+        public bool IsEnableShy
+        {
+            get { return isEnableShy; }
+            set { SetProperty(ref isEnableShy, value); }
+        }
+
+        private bool isEnableCollapse;
+        [NeedWire(nameof(LayerModel), IsOneWay = true)]
+        public bool IsEnableCollapse
+        {
+            get { return isEnableCollapse; }
+            set { SetProperty(ref isEnableCollapse, value); }
+        }
+
+        private bool isEnableEffect;
+        [NeedWire(nameof(LayerModel), IsOneWay = true)]
+        public bool IsEnableEffect
+        {
+            get { return isEnableEffect; }
+            set { SetProperty(ref isEnableEffect, value); }
+        }
+
+        private bool isEnableFrameBlend;
+        [NeedWire(nameof(LayerModel), IsOneWay = true)]
+        public bool IsEnableFrameBlend
+        {
+            get { return isEnableFrameBlend; }
+            set { SetProperty(ref isEnableFrameBlend, value); }
+        }
+
+        private bool isEnableMotionBlur;
+        [NeedWire(nameof(LayerModel), IsOneWay = true)]
+        public bool IsEnableMotionBlur
+        {
+            get { return isEnableMotionBlur; }
+            set { SetProperty(ref isEnableMotionBlur, value); }
+        }
+
+        private bool isEnableAdjustmentLayer;
+        [NeedWire(nameof(LayerModel), IsOneWay = true)]
+        public bool IsEnableAdjustmentLayer
+        {
+            get { return isEnableAdjustmentLayer; }
+            set { SetProperty(ref isEnableAdjustmentLayer, value); }
+        }
+
+        private bool isEnable3D;
+        [NeedWire(nameof(LayerModel), IsOneWay = true)]
+        public bool IsEnable3D
+        {
+            get { return isEnable3D; }
+            set { SetProperty(ref isEnable3D, value); }
+        }
+
+        private ImageInterpolationQuality interpolationQuality;
+        [NeedWire(nameof(LayerModel), IsOneWay = true)]
+        public ImageInterpolationQuality InterpolationQuality
+        {
+            get { return interpolationQuality; }
+            set { SetProperty(ref interpolationQuality, value); }
+        }
+
+        private bool hasEffect;
+        [NeedWire(nameof(LayerModel), IsOneWay = true)]
+        public bool HasEffect
+        {
+            get { return hasEffect; }
+            set { SetProperty(ref hasEffect, value); }
+        }
+
         private double layerNumberColumnWudth;
         [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineLayerNumberColumnWidth), IsOneWay = true)]
         public double LayerNumberColumnWidth
@@ -248,11 +320,15 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref editingParameter, value); }
         }
 
+        public bool IsComposition { get; }
+
         public ICommand BeginEditDurationCommand { get; }
 
         public ICommand CommitEditDurationCommand { get; }
 
         public ICommand ChangeLayerSwitchCommand { get; }
+
+        public ICommand ChangeInterpolationQualityCommand { get; }
 
         public ICommand BeginEditNameCommand { get; }
 
@@ -284,6 +360,8 @@ namespace NiVE3.ViewModel
 
             WiringModel();
 
+            IsComposition = layerModel.IsComposition;
+
             BeginEditDurationCommand = new RequerySuggestedCommand(() =>
             {
                 LayerModel.BeginEditDuration();
@@ -303,9 +381,23 @@ namespace NiVE3.ViewModel
                     nameof(IsEnableAudio) => IsEnableAudio,
                     nameof(IsEnableSolo) => IsEnableSolo,
                     nameof(IsLock) => IsLock,
+                    nameof(IsEnableShy) => IsEnableShy,
+                    nameof(IsEnableCollapse) => IsEnableCollapse,
+                    nameof(IsEnableEffect) => IsEnableEffect,
+                    nameof(IsEnableFrameBlend) => IsEnableFrameBlend,
+                    nameof(IsEnableMotionBlur) => IsEnableMotionBlur,
+                    nameof(IsEnableAdjustmentLayer) => IsEnableAdjustmentLayer,
+                    nameof(IsEnable3D) => IsEnable3D,
                     _ => false
                 });
                 LayerSwitchChangeRequestPublisher.Publish(this, new LayerSwitchEventArgs(name, newValue));
+            });
+
+            ChangeInterpolationQualityCommand = new DelegateCommand(() =>
+            {
+                var values = Enum.GetValues<ImageInterpolationQuality>();
+                var newValue = values[(Array.IndexOf(values, InterpolationQuality) + 1) % values.Length];
+                LayerSwitchChangeRequestPublisher.Publish(this, new LayerSwitchEventArgs(nameof(InterpolationQuality), newValue));
             });
 
             BeginEditNameCommand = new RequerySuggestedCommand(() =>

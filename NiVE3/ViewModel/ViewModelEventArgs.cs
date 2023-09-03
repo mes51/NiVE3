@@ -10,9 +10,9 @@ namespace NiVE3.ViewModel
     {
         public string SwitchName { get; }
 
-        public bool Value { get; }
+        public object Value { get; }
 
-        public LayerSwitchEventArgs(string switchName, bool value)
+        public LayerSwitchEventArgs(string switchName, object value)
         {
             SwitchName = switchName;
             Value = value;

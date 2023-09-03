@@ -149,24 +149,55 @@
                     </ControlTemplate.Resources>
                     <Grid Background="{TemplateBinding Background}">
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="1"/>
                             <RowDefinition />
-                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="1"/>
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="1"/>
                             <ColumnDefinition />
-                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="1"/>
                         </Grid.ColumnDefinitions>
 
-                        <Path Grid.Column="1" Grid.Row="1" Fill="{TemplateBinding Foreground}" Style="{StaticResource IconBase}" Data="{TemplateBinding Content}" Visibility="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                        <Border Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="3" Grid.RowSpan="3" BorderThickness="1" BorderBrush="{ugm:AppearanceResource ResourceKey=BorderBrush, ReturnDynamicResource=True}">
+                            <Path Fill="{TemplateBinding Foreground}" Style="{StaticResource IconBase}" Data="{TemplateBinding Content}" Visibility="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                        </Border>
 
-                        <Rectangle Grid.Column="0" Grid.Row="0" Grid.RowSpan="2" Width="1" Fill="{ugm:AppearanceResource ResourceKey=BorderBrush, ReturnDynamicResource=True}"/>
-                        <Rectangle Grid.Column="1" Grid.Row="0" Height="1" Fill="{ugm:AppearanceResource ResourceKey=BorderBrush, ReturnDynamicResource=True}"/>
-                        <Rectangle Grid.Column="2" Grid.Row="0" Grid.RowSpan="3" Width="1" Fill="{ugm:AppearanceResource ResourceKey=BorderBrush, ReturnDynamicResource=True}"/>
-                        <Rectangle Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" Height="1" Fill="{ugm:AppearanceResource ResourceKey=BorderBrush, ReturnDynamicResource=True}"/>
-                        <Rectangle Grid.Column="2" Grid.Row="0" Grid.RowSpan="3" Width="1" Fill="White" Opacity="0.4"/>
-                        <Rectangle Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" Height="1" Fill="White" Opacity="0.4"/>
+                        <Rectangle Grid.Column="2" Grid.Row="0" Grid.RowSpan="3" Width="1" Fill="White" Opacity="0.5"/>
+                        <Rectangle Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" Height="1" Fill="White" Opacity="0.5"/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="AlwaysShowIconLayerSwitchCheckBox" TargetType="{x:Type CheckBox}">
+        <Setter Property="Width" Value="15"/>
+        <Setter Property="Height" Value="15"/>
+        <Setter Property="IsTabStop" Value="False"/>
+        <Setter Property="Background" Value="{ugm:AppearanceResource ResourceKey=BackgroundFill, ReturnDynamicResource=True}"/>
+        <Setter Property="Foreground" Value="{ugm:AppearanceResource ResourceKey=TextBrush, ReturnDynamicResource=True}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type CheckBox}">
+                    <Grid Background="{TemplateBinding Background}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="1"/>
+                            <RowDefinition />
+                            <RowDefinition Height="1"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1"/>
+                            <ColumnDefinition />
+                            <ColumnDefinition Width="1"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="3" Grid.RowSpan="3" BorderThickness="1" BorderBrush="{ugm:AppearanceResource ResourceKey=BorderBrush, ReturnDynamicResource=True}">
+                            <Path Fill="{TemplateBinding Foreground}" Style="{StaticResource IconBase}" Data="{TemplateBinding Content}"/>
+                        </Border>
+
+                        <Rectangle Grid.Column="2" Grid.Row="0" Grid.RowSpan="3" Width="1" Fill="White" Opacity="0.5"/>
+                        <Rectangle Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" Height="1" Fill="White" Opacity="0.5"/>
                     </Grid>
                 </ControlTemplate>
             </Setter.Value>

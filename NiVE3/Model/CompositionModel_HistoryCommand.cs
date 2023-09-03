@@ -104,11 +104,11 @@ namespace NiVE3.Model
 
             PropertyInfo SwitchInfo { get; }
 
-            bool[] OldValues { get; }
+            object?[] OldValues { get; }
 
-            bool NewValue { get; }
+            object NewValue { get; }
 
-            public ChangeLayerSwitchHistoryCommand(LayerModel[] layers, PropertyInfo switchInfo, bool[] oldValues, bool newValue)
+            public ChangeLayerSwitchHistoryCommand(LayerModel[] layers, PropertyInfo switchInfo, object?[] oldValues, object newValue)
             {
                 Layers = layers;
                 SwitchInfo = switchInfo;
