@@ -202,6 +202,14 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref hasEffect, value); }
         }
 
+        private BlendMode blendMode;
+        [NeedWire(nameof(LayerModel), IsOneWay = true)]
+        public BlendMode BlendMode
+        {
+            get { return blendMode; }
+            set { SetProperty(ref blendMode, value); }
+        }
+
         private double layerNumberColumnWudth;
         [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineLayerNumberColumnWidth), IsOneWay = true)]
         public double LayerNumberColumnWidth
@@ -330,6 +338,8 @@ namespace NiVE3.ViewModel
 
         public ICommand ChangeInterpolationQualityCommand { get; }
 
+        public ICommand ChangeBlendModeCommand { get; }
+
         public ICommand BeginEditNameCommand { get; }
 
         public ICommand BeginEditCommentCommand { get; }
@@ -343,6 +353,13 @@ namespace NiVE3.ViewModel
         {
             add { LayerSwitchChangeRequestPublisher.Subscribe(value); }
             remove { LayerSwitchChangeRequestPublisher.Unsubscribe(value); }
+        }
+
+        WeakEventPublisher<BlendModeEventArgs> BlendModeChangeRequestPublisher { get; } = new WeakEventPublisher<BlendModeEventArgs>();
+        public event EventHandler<BlendModeEventArgs> BlendModeChangeRequest
+        {
+            add { BlendModeChangeRequestPublisher.Subscribe(value); }
+            remove { BlendModeChangeRequestPublisher.Unsubscribe(value); }
         }
 
         LayerModel LayerModel { get; }
@@ -398,6 +415,15 @@ namespace NiVE3.ViewModel
                 var values = Enum.GetValues<ImageInterpolationQuality>();
                 var newValue = values[(Array.IndexOf(values, InterpolationQuality) + 1) % values.Length];
                 LayerSwitchChangeRequestPublisher.Publish(this, new LayerSwitchEventArgs(nameof(InterpolationQuality), newValue));
+            });
+
+            ChangeBlendModeCommand = new DelegateCommand<BlendMode?>(blendMode =>
+            {
+                if (!blendMode.HasValue)
+                {
+                    return;
+                }
+                BlendModeChangeRequestPublisher.Publish(this, new BlendModeEventArgs(blendMode.Value));
             });
 
             BeginEditNameCommand = new RequerySuggestedCommand(() =>

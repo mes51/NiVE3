@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NiVE3.Plugin.Interfaces;
 
 namespace NiVE3.ViewModel
 {
@@ -16,6 +17,16 @@ namespace NiVE3.ViewModel
         {
             SwitchName = switchName;
             Value = value;
+        }
+    }
+
+    class BlendModeEventArgs : EventArgs
+    {
+        public BlendMode BlendMode { get; }
+
+        public BlendModeEventArgs(BlendMode blendMode)
+        {
+            BlendMode = blendMode;
         }
     }
 }

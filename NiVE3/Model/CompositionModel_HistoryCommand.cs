@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Extension;
+using NiVE3.Plugin.Interfaces;
 using NiVE3.View.Resource;
 
 namespace NiVE3.Model
@@ -129,6 +130,42 @@ namespace NiVE3.Model
                 foreach (var (l, o) in Layers.Zip(OldValues))
                 {
                     SwitchInfo.SetValue(l, o);
+                }
+            }
+
+            public void Dispose() { }
+        }
+
+        private class ChangeBlendModeHistoryCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangeBlendMode);
+
+            LayerModel[] Layers { get; }
+
+            BlendMode[] OldValues { get; }
+
+            BlendMode NewValue { get; }
+
+            public ChangeBlendModeHistoryCommand(LayerModel[] layers, BlendMode[] oldValues, BlendMode newValue)
+            {
+                Layers = layers;
+                OldValues = oldValues;
+                NewValue = newValue;
+            }
+
+            public void Redo()
+            {
+                foreach (var l in Layers)
+                {
+                    l.BlendMode = NewValue;
+                }
+            }
+
+            public void Undo()
+            {
+                foreach (var (l, b) in Layers.Zip(OldValues))
+                {
+                    l.BlendMode = b;
                 }
             }
 

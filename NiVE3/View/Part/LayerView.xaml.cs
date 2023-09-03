@@ -250,6 +250,16 @@ namespace NiVE3.View.Part
             }
         }
 
+        private void BlendModeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            // NOTE: ユーザーが操作したのか、ViewModelから変更が伝播したのか判別できないため、IsDropDownOpenで判別する
+            // TODO: ComboBoxっぽいコントロールを作るかどうか考える
+            if (BlendModeComboBox.IsDropDownOpen)
+            {
+                ViewModel?.ChangeBlendModeCommand?.Execute(BlendModeComboBox.SelectedItem);
+            }
+        }
+
         private void DurationBar_IsClickedChanged(object sender, EventArgs e)
         {
             IsDurationEditing = DurationBar.IsClicked;

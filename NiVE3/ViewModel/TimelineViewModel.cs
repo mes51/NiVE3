@@ -219,6 +219,7 @@ namespace NiVE3.ViewModel
                     {
                         var vm = new LayerViewModel(m, ViewState);
                         vm.LayerSwitchChangeRequest += LayerViewModel_LayerSwitchChangeRequest;
+                        vm.BlendModeChangeRequest += Vm_BlendModeChangeRequest;
                         return vm;
                     });
                 }
@@ -394,6 +395,26 @@ namespace NiVE3.ViewModel
             }
 
             CompositionModel.ChangeLayerSwitches(targetLayers.Select(l => l.LayerId).ToArray(), e.SwitchName, e.Value);
+        }
+
+        private void Vm_BlendModeChangeRequest(object? sender, BlendModeEventArgs e)
+        {
+            if (sender is not LayerViewModel layerViewModel || CompositionModel == null || !(Layers?.Contains(layerViewModel) ?? false))
+            {
+                return;
+            }
+
+            var targetLayers = new List<LayerViewModel>();
+            if (SelectedLayers.Count == 0 || !SelectedLayers.Contains(layerViewModel))
+            {
+                targetLayers.Add(layerViewModel);
+            }
+            else
+            {
+                targetLayers.AddRange(SelectedLayers);
+            }
+
+            CompositionModel.ChangeBlendModes(targetLayers.Select(l => l.LayerId).ToArray(), e.BlendMode);
         }
     }
 }

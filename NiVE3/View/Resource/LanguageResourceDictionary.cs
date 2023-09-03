@@ -259,6 +259,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("レイヤーのコメント変更")]
         public static readonly string History_ChangeLayerComment = nameof(History_ChangeLayerComment);
 
+        [ShowInMarkup, DefaultValue("合成モードの変更")]
+        public static readonly string History_ChangeBlendMode = nameof(History_ChangeBlendMode);
+
         // Enum
 
         [ShowInMarkup, DefaultValue("RGB")]
@@ -278,6 +281,78 @@ namespace NiVE3.View.Resource
 
         [ShowInMarkup, DefaultValue("RGBストレート")]
         public static readonly string PreviewColorChannel_RgbStraight = nameof(PreviewColorChannel_RgbStraight);
+
+        [ShowInMarkup, DefaultValue("通常")]
+        public static readonly string BlendMode_Normal = nameof(BlendMode_Normal);
+
+        [ShowInMarkup, DefaultValue("置換")]
+        public static readonly string BlendMode_Replace = nameof(BlendMode_Replace);
+
+        [ShowInMarkup, DefaultValue("加算")]
+        public static readonly string BlendMode_Add = nameof(BlendMode_Add);
+
+        [ShowInMarkup, DefaultValue("減算")]
+        public static readonly string BlendMode_Subtract = nameof(BlendMode_Subtract);
+
+        [ShowInMarkup, DefaultValue("乗算")]
+        public static readonly string BlendMode_Multiply = nameof(BlendMode_Multiply);
+
+        [ShowInMarkup, DefaultValue("スクリーン")]
+        public static readonly string BlendMode_Screen = nameof(BlendMode_Screen);
+
+        [ShowInMarkup, DefaultValue("オーバーレイ")]
+        public static readonly string BlendMode_Overlay = nameof(BlendMode_Overlay);
+
+        [ShowInMarkup, DefaultValue("ハードライト")]
+        public static readonly string BlendMode_HardLight = nameof(BlendMode_HardLight);
+
+        [ShowInMarkup, DefaultValue("ソフトライト")]
+        public static readonly string BlendMode_SoftLight = nameof(BlendMode_SoftLight);
+
+        [ShowInMarkup, DefaultValue("ビビッドライト")]
+        public static readonly string BlendMode_VividLight = nameof(BlendMode_VividLight);
+
+        [ShowInMarkup, DefaultValue("リニアライト")]
+        public static readonly string BlendMode_LinearLight = nameof(BlendMode_LinearLight);
+
+        [ShowInMarkup, DefaultValue("ピンライト")]
+        public static readonly string BlendMode_PinLight = nameof(BlendMode_PinLight);
+
+        [ShowInMarkup, DefaultValue("覆い焼きカラー")]
+        public static readonly string BlendMode_ColorDodge = nameof(BlendMode_ColorDodge);
+
+        [ShowInMarkup, DefaultValue("覆い焼きリニア")]
+        public static readonly string BlendMode_LinearDodge = nameof(BlendMode_LinearDodge);
+
+        [ShowInMarkup, DefaultValue("焼き込みカラー")]
+        public static readonly string BlendMode_ColorBurn = nameof(BlendMode_ColorBurn);
+
+        [ShowInMarkup, DefaultValue("焼き込みリニア")]
+        public static readonly string BlendMode_LinearBurn = nameof(BlendMode_LinearBurn);
+
+        [ShowInMarkup, DefaultValue("比較(暗)")]
+        public static readonly string BlendMode_Darken = nameof(BlendMode_Darken);
+
+        [ShowInMarkup, DefaultValue("比較(明)")]
+        public static readonly string BlendMode_Lighten = nameof(BlendMode_Lighten);
+
+        [ShowInMarkup, DefaultValue("差")]
+        public static readonly string BlendMode_Difference = nameof(BlendMode_Difference);
+
+        [ShowInMarkup, DefaultValue("除外")]
+        public static readonly string BlendMode_Exclusion = nameof(BlendMode_Exclusion);
+
+        [ShowInMarkup, DefaultValue("色相")]
+        public static readonly string BlendMode_Hue = nameof(BlendMode_Hue);
+
+        [ShowInMarkup, DefaultValue("彩度")]
+        public static readonly string BlendMode_Saturation = nameof(BlendMode_Saturation);
+
+        [ShowInMarkup, DefaultValue("カラー")]
+        public static readonly string BlendMode_Color = nameof(BlendMode_Color);
+
+        [ShowInMarkup, DefaultValue("明度")]
+        public static readonly string BlendMode_Luminance = nameof(BlendMode_Luminance);
 
         static LanguageResourceDictionary()
         {

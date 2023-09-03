@@ -168,6 +168,13 @@ namespace NiVE3.Model
             set { SetProperty(ref hasEffect, value); }
         }
 
+        private BlendMode blendMode = BlendMode.Normal;
+        public BlendMode BlendMode
+        {
+            get { return blendMode; }
+            set { SetProperty(ref blendMode, value); }
+        }
+
         public Guid LayerId { get; }
 
         public string SourceName => FootageModel.Name;

@@ -30,6 +30,7 @@
         <cv:OffsetGridLengthConverter x:Key="GridLengthConverter"/>
         <cv:SwitchValueConverter x:Key="SwitchValueConverter" FalseValue="{StaticResource EmptyGrid}"/>
         <cv:EnumToBoolConverter x:Key="EnumToBoolConverter" UseAndCompare="True"/>
+        <cv:EnumToLocalizedNameConverter x:Key="BlendModeNameConverter" EnumType="{x:Type pi:BlendMode}"/>
 
         <cv:ConverterCollection x:Key="AVTypeVisibleConverter">
             <cv:ConverterItem Converter="{StaticResource EnumToBoolConverter}" TargetType="{x:Type sys:Boolean}"/>
@@ -88,6 +89,18 @@
                     <Setter Property="Content" Value="{StaticResource EnableShyIcon}"/>
                 </DataTrigger>
             </Style.Triggers>
+        </Style>
+
+        <Style x:Key="BlendModeComboBox" TargetType="{x:Type ComboBox}" BasedOn="{StaticResource {x:Type ComboBox}}">
+            <Setter Property="Margin" Value="2,0"/>
+            <Setter Property="IsTabStop" Value="False"/>
+            <Setter Property="ItemTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Converter={StaticResource BlendModeNameConverter}}"/>
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
     </UserControl.Resources>
     <Grid>
@@ -309,6 +322,10 @@
                               Command="{Binding ChangeLayerSwitchCommand}"
                               CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnable3D}"/>
                 </StackPanel>
+            </Grid>
+
+            <Grid Grid.Column="7" Grid.Row="0" Style="{StaticResource ColumnGrid}">
+                <ComboBox x:Name="BlendModeComboBox" SelectedItem="{Binding BlendMode, Mode=OneWay}" ItemsSource="{mk:EnumValues EnumType={x:Type pi:BlendMode}}" Style="{StaticResource BlendModeComboBox}" SelectionChanged="BlendModeComboBox_SelectionChanged"/>
             </Grid>
         </Grid>
 

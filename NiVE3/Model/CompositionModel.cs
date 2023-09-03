@@ -239,6 +239,18 @@ namespace NiVE3.Model
             HistoryModel.Add(new ChangeLayerSwitchHistoryCommand(layers, propertyInfo, oldValue, newValue));
         }
 
+        public void ChangeBlendModes(Guid[] layerIds, BlendMode blendMode)
+        {
+            var layers = Layers.Where(l => layerIds.Contains(l.LayerId)).OrderBy(Layers.IndexOf).ToArray();
+            var oldValues = layers.Select(l => l.BlendMode).ToArray();
+            foreach (var l in layers)
+            {
+                l.BlendMode = blendMode;
+            }
+
+            HistoryModel.Add(new ChangeBlendModeHistoryCommand(layers, oldValues, blendMode));
+        }
+
         public void AddSolid(int index)
         {
             HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_AddSolid));
