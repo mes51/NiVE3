@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:NiVE3.View.Part"
              xmlns:ugm="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
+             xmlns:upr="clr-namespace:NiVE3.UI.Primitive;assembly=NiVE3.UI"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:pr="clr-namespace:NiVE3.View.Primitive"
              xmlns:pt="clr-namespace:NiVE3.View.Part"
@@ -91,7 +92,7 @@
             </Style.Triggers>
         </Style>
 
-        <Style x:Key="BlendModeComboBox" TargetType="{x:Type ComboBox}" BasedOn="{StaticResource {x:Type ComboBox}}">
+        <Style x:Key="BlendModeComboBox" TargetType="{x:Type upr:ContextMenuSelectBox}" BasedOn="{StaticResource {x:Type upr:ContextMenuSelectBox}}">
             <Setter Property="Margin" Value="2,0"/>
             <Setter Property="IsTabStop" Value="False"/>
             <Setter Property="ItemTemplate">
@@ -325,7 +326,7 @@
             </Grid>
 
             <Grid Grid.Column="7" Grid.Row="0" Style="{StaticResource ColumnGrid}">
-                <ComboBox x:Name="BlendModeComboBox" SelectedItem="{Binding BlendMode, Mode=OneWay}" ItemsSource="{mk:EnumValues EnumType={x:Type pi:BlendMode}}" Style="{StaticResource BlendModeComboBox}" SelectionChanged="BlendModeComboBox_SelectionChanged"/>
+                <upr:ContextMenuSelectBox x:Name="BlendModeComboBox" SelectedItem="{Binding BlendMode, Mode=OneWay}" ItemsSource="{mk:EnumValues EnumType={x:Type pi:BlendMode}}" Style="{StaticResource BlendModeComboBox}" SelectItemChangedByUser="BlendModeComboBox_SelectItemChangedByUser"/>
             </Grid>
         </Grid>
 
