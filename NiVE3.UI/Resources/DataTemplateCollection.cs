@@ -1,29 +1,36 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Markup;
+using System.Windows;
 
-namespace NiVE3.View.Resource
+namespace NiVE3.UI.Resources
 {
     [ContentProperty(nameof(Templates))]
-    class DataTemplateCollection : DataTemplateSelector
+    public class DataTemplateCollection : DataTemplateSelector
     {
         static readonly DataTemplate EmptyTemplate;
 
         public List<DataTemplate> Templates { get; set; } = new List<DataTemplate>();
 
+        /// <summary>
+        /// テンプレートが存在しなかったとき、デフォルトではなく空のテンプレートを返すかどうか
+        /// </summary>
         public bool DefaultIsEmpty { get; set; }
 
         /// <summary>
-        /// DataTemplate使用時、DataContextが更新されない場合がある時用
-        /// SEE: https://stackoverflow.com/a/65750003
-        /// TODO: ラッパー側のContentPresenterのスタイルが邪魔になったときにStyleプロパティを用意する
+        /// Itemがnullの時のテンプレートがTemplatesに含まれているかどうか
         /// </summary>
+        public bool HasNullTypeTemplate { get; set; }
+
+        /// <summary>
+        /// DataTemplate使用時、DataContextが更新されない場合がある時用
+        /// </summary>
+        // SEE: https://stackoverflow.com/a/65750003
+        // TODO: ラッパー側のContentPresenterのスタイルが邪魔になったときにStyleプロパティを用意する
         public bool AlwaysWrapTemplate { get; set; }
 
         static DataTemplateCollection()
@@ -45,6 +52,11 @@ namespace NiVE3.View.Resource
             if (template == null && DefaultIsEmpty)
             {
                 return EmptyTemplate;
+            }
+
+            if (template == null && HasNullTypeTemplate)
+            {
+                template = Templates.FirstOrDefault(t => t.DataType == null);
             }
 
             template ??= base.SelectTemplate(item, container);
@@ -78,7 +90,8 @@ namespace NiVE3.View.Resource
                 }
             }
 
-            return null;
+            // all type or null
+            return Templates.FirstOrDefault(t => t.DataType == null);
         }
 
         DataTemplate WrapTemplate(DataTemplate inner)

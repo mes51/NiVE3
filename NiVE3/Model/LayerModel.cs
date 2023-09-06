@@ -175,6 +175,13 @@ namespace NiVE3.Model
             set { SetProperty(ref blendMode, value); }
         }
 
+        private Guid? trackMatteLayerId;
+        public Guid? TrackMatteLayerId
+        {
+            get { return trackMatteLayerId; }
+            set { SetProperty(ref trackMatteLayerId, value); }
+        }
+
         public Guid LayerId { get; }
 
         public string SourceName => FootageModel.Name;

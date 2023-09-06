@@ -55,6 +55,13 @@ namespace NiVE3.UI.Primitive
             new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
+        public static readonly DependencyProperty ItemContainerStyleProperty = DependencyProperty.Register(
+            nameof(ItemContainerStyle),
+            typeof(Style),
+            typeof(ContextMenuSelectBox),
+            new FrameworkPropertyMetadata(null)
+        );
+
         public static readonly DependencyProperty SelectedItemProperty = DependencyProperty.Register(
             nameof(SelectedItem),
             typeof(object),
@@ -69,6 +76,19 @@ namespace NiVE3.UI.Primitive
             new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
+        public static readonly DependencyProperty AlternationCountProperty = DependencyProperty.Register(
+            nameof(AlternationCount),
+            typeof(int),
+            typeof(ContextMenuSelectBox),
+            new FrameworkPropertyMetadata(0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        public int AlternationCount
+        {
+            get { return (int)GetValue(AlternationCountProperty); }
+            set { SetValue(AlternationCountProperty, value); }
+        }
+
         public IEnumerable? ItemsSource
         {
             get { return (IEnumerable)GetValue(ItemsSourceProperty); }
@@ -79,6 +99,12 @@ namespace NiVE3.UI.Primitive
         {
             get { return (object)GetValue(SelectedItemProperty); }
             set { SetValue(SelectedItemProperty, value); }
+        }
+
+        public Style? ItemContainerStyle
+        {
+            get { return (Style)GetValue(ItemContainerStyleProperty); }
+            set { SetValue(ItemContainerStyleProperty, value); }
         }
 
         public DataTemplateSelector? ItemTemplateSelector
@@ -105,8 +131,6 @@ namespace NiVE3.UI.Primitive
             set { SetValue(SelectedItemTemplateProperty, value); }
         }
 
-        ContextMenu? RightClickMenu { get; set; }
-
         ContextMenu SelectorMenu => (ContextMenu)Resources[ContextMenuSelectBoxConst.SelectorMenu];
 
         public static RoutedEvent SelectItemChangedByUserEvent = EventManager.RegisterRoutedEvent(
@@ -132,12 +156,16 @@ namespace NiVE3.UI.Primitive
         public ContextMenuSelectBox()
         {
             InitializeComponent();
+            SelectorMenu.PlacementTarget = this;
         }
 
-        private void Root_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private void Root_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
-            SelectorMenu.IsOpen = true;
-            e.Handled = true;
+            if (e.ButtonState == MouseButtonState.Pressed && (e.RightButton != MouseButtonState.Pressed || ContextMenu == null))
+            {
+                SelectorMenu.IsOpen = true;
+                e.Handled = true;
+            }
         }
 
         private void SelectorMenuItem_Click(object sender, RoutedEventArgs e)
@@ -153,6 +181,11 @@ namespace NiVE3.UI.Primitive
             }
         }
     }
+
+    /// <summary>
+    /// セパレーター用クラス
+    /// </summary>
+    public class ContextMenuSelectBoxSeparator { }
 
     // NOTE: publicにはしたくないが、x:Staticがpublicなフィールドにしかアクセスできない(クラスがpublicかどうかは問わない)ため、別クラスに定数を切り出す
     class ContextMenuSelectBoxConst

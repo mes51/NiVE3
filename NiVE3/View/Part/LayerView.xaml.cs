@@ -13,7 +13,9 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using NiVE3.Extension;
 using NiVE3.Plugin.Interfaces;
+using NiVE3.View.Converter;
 using NiVE3.ViewModel;
 
 namespace NiVE3.View.Part
@@ -250,9 +252,14 @@ namespace NiVE3.View.Part
             }
         }
 
-        private void BlendModeComboBox_SelectItemChangedByUser(object sender, RoutedEventArgs e)
+        private void BlendModeSelectBox_SelectItemChangedByUser(object sender, RoutedEventArgs e)
         {
-            ViewModel?.ChangeBlendModeCommand?.Execute(BlendModeComboBox.SelectedItem);
+            ViewModel?.ChangeBlendModeCommand?.Execute(BlendModeSelectBox.SelectedItem);
+        }
+
+        private void TrackMatteSelectBox_SelectItemChangedByUser(object sender, RoutedEventArgs e)
+        {
+            ViewModel?.ChangeTrackMatteCommand.Execute(TrackMatteSelectBox.SelectedItem);
         }
 
         private void DurationBar_IsClickedChanged(object sender, EventArgs e)

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Data;
 using System.Windows.Input;
 using GongSolutions.Wpf.DragDrop;
 using NiVE3.Config;
@@ -131,6 +132,14 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref modeColumnWidth, value); }
         }
 
+        private double trackMatteColumnWidth;
+        [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineTrackMatteColumnWidth))]
+        public double TrackMatteColumnWidth
+        {
+            get { return trackMatteColumnWidth; }
+            set { SetProperty(ref trackMatteColumnWidth, value); }
+        }
+
         private double parentLayerColumnWidth;
         [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineParentLayerColumnWidth))]
         public double ParentLayerColumnWidth
@@ -187,6 +196,14 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref isModeColumnVisible, value); }
         }
 
+        private bool isTrackMatteColumnVisible;
+        [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineTrackMatteColumnVisible))]
+        public bool IsTrackMatteColumnVisible
+        {
+            get { return isTrackMatteColumnVisible; }
+            set { SetProperty(ref isTrackMatteColumnVisible, value); }
+        }
+
         private bool isParentLayerColumnVisible;
         [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineParentLayerColumnVisible))]
         public bool IsParentLayerColumnVisible
@@ -215,11 +232,13 @@ namespace NiVE3.ViewModel
                 if (value != null)
                 {
                     BindComposition();
+                    var trackMatteCollectionView = value.Layers.CreateViewCollection(m => new LayerModelProxy(m));
                     Layers = value.Layers.CreateViewCollection(m =>
                     {
-                        var vm = new LayerViewModel(m, ViewState);
+                        var vm = new LayerViewModel(m, ViewState, trackMatteCollectionView, new CollectionViewSource { Source = value.Layers.CreateViewCollection(m => new LayerModelProxy(m)) });
                         vm.LayerSwitchChangeRequest += LayerViewModel_LayerSwitchChangeRequest;
-                        vm.BlendModeChangeRequest += Vm_BlendModeChangeRequest;
+                        vm.BlendModeChangeRequest += LayerViewModel_BlendModeChangeRequest;
+                        vm.TrackMatteLayerChanged += LayerViewModel_TrackMatteLayerChanged;
                         return vm;
                     });
                 }
@@ -397,7 +416,7 @@ namespace NiVE3.ViewModel
             CompositionModel.ChangeLayerSwitches(targetLayers.Select(l => l.LayerId).ToArray(), e.SwitchName, e.Value);
         }
 
-        private void Vm_BlendModeChangeRequest(object? sender, BlendModeEventArgs e)
+        private void LayerViewModel_BlendModeChangeRequest(object? sender, BlendModeEventArgs e)
         {
             if (sender is not LayerViewModel layerViewModel || CompositionModel == null || !(Layers?.Contains(layerViewModel) ?? false))
             {
@@ -415,6 +434,26 @@ namespace NiVE3.ViewModel
             }
 
             CompositionModel.ChangeBlendModes(targetLayers.Select(l => l.LayerId).ToArray(), e.BlendMode);
+        }
+
+        private void LayerViewModel_TrackMatteLayerChanged(object? sender, ReferenceLayerChangeEvent e)
+        {
+            if (sender is not LayerViewModel layerViewModel || CompositionModel == null || !(Layers?.Contains(layerViewModel) ?? false))
+            {
+                return;
+            }
+
+            var targetLayers = new List<LayerViewModel>();
+            if (SelectedLayers.Count == 0 || !SelectedLayers.Contains(layerViewModel))
+            {
+                targetLayers.Add(layerViewModel);
+            }
+            else
+            {
+                targetLayers.AddRange(SelectedLayers);
+            }
+
+            CompositionModel.ChangeTrackMatteLayers(targetLayers.Select(l => l.LayerId).ToArray(), e.LayerId);
         }
     }
 }

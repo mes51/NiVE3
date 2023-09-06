@@ -6,10 +6,12 @@
              xmlns:local="clr-namespace:NiVE3.View.Part"
              xmlns:ugm="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
              xmlns:upr="clr-namespace:NiVE3.UI.Primitive;assembly=NiVE3.UI"
+             xmlns:ucv="clr-namespace:NiVE3.UI.Converter;assembly=NiVE3.UI"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:pr="clr-namespace:NiVE3.View.Primitive"
              xmlns:pt="clr-namespace:NiVE3.View.Part"
              xmlns:cv="clr-namespace:NiVE3.View.Converter"
+             xmlns:r="clr-namespace:NiVE3.View.Resource"
              xmlns:pi="clr-namespace:NiVE3.Plugin.Interfaces;assembly=NiVE3.Plugin"
              xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
              xmlns:mk="clr-namespace:NiVE3.Wpf.Markup"
@@ -32,6 +34,8 @@
         <cv:SwitchValueConverter x:Key="SwitchValueConverter" FalseValue="{StaticResource EmptyGrid}"/>
         <cv:EnumToBoolConverter x:Key="EnumToBoolConverter" UseAndCompare="True"/>
         <cv:EnumToLocalizedNameConverter x:Key="BlendModeNameConverter" EnumType="{x:Type pi:BlendMode}"/>
+        <cv:CollectionIndexConverter x:Key="CollectionIndexConverter" Offset="1"/>
+        <ucv:EqualValueConverter x:Key="EqualValueConverter"/>
 
         <cv:ConverterCollection x:Key="AVTypeVisibleConverter">
             <cv:ConverterItem Converter="{StaticResource EnumToBoolConverter}" TargetType="{x:Type sys:Boolean}"/>
@@ -40,6 +44,16 @@
 
         <cv:SwitchValueConverter x:Key="AVSwitchGridWidthSwitch" TrueValue="68"/> <!-- 66 + ceil(pr:ItemResizableStackPanel.SplitterSize / 2) -->
         <cv:SwitchValueConverter x:Key="TagGridWidthSwitch" TrueValue="19"/>
+
+        <CollectionViewSource x:Key="TrackMatteCollectionViewSource" Source="{Binding TrackMatteViewSource}"/>
+        <CompositeCollection x:Key="TrackMatteLayerCollection">
+            <x:Null />
+            <upr:ContextMenuSelectBoxSeparator />
+            <CollectionContainer Collection="{Binding Source={StaticResource TrackMatteCollectionViewSource}}"/>
+        </CompositeCollection>
+        
+        <!-- NOTE: INotifyCollectionChangeの変更はBindingでは拾ってくれないため、無理矢理拾わせるためのクラスでラップする -->
+        <r:CollectionChangeNotifier x:Key="TrackMatteCollectionNotifier" Collection="{Binding TrackMatteViewSource}"/>
 
         <Style x:Key="HeaderGridStyle" TargetType="{x:Type Grid}">
             <Setter Property="Background" Value="Transparent"/>
@@ -92,13 +106,75 @@
             </Style.Triggers>
         </Style>
 
-        <Style x:Key="BlendModeComboBox" TargetType="{x:Type upr:ContextMenuSelectBox}" BasedOn="{StaticResource {x:Type upr:ContextMenuSelectBox}}">
+        <Style x:Key="BlendModeSelectBoxStyle" TargetType="{x:Type upr:ContextMenuSelectBox}" BasedOn="{StaticResource {x:Type upr:ContextMenuSelectBox}}">
             <Setter Property="Margin" Value="2,0"/>
             <Setter Property="IsTabStop" Value="False"/>
             <Setter Property="ItemTemplate">
                 <Setter.Value>
                     <DataTemplate>
                         <TextBlock Text="{Binding Converter={StaticResource BlendModeNameConverter}}"/>
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="TrackMatteSelectBoxStyle" TargetType="{x:Type upr:ContextMenuSelectBox}" BasedOn="{StaticResource {x:Type upr:ContextMenuSelectBox}}">
+            <Setter Property="Margin" Value="2,0"/>
+            <Setter Property="IsTabStop" Value="False"/>
+            <Setter Property="ItemContainerStyle">
+                <Setter.Value>
+                    <Style TargetType="{x:Type MenuItem}">
+                        <Setter Property="IsChecked" Value="False"/>
+                        <Setter Property="IsEnabled" Value="True"/>
+
+                        <Style.Triggers>
+                            <DataTrigger Value="True">
+                                <DataTrigger.Binding>
+                                    <MultiBinding Converter="{StaticResource EqualValueConverter}">
+                                        <Binding Path="DataContext" RelativeSource="{RelativeSource Self}"/>
+                                        <Binding Path="PlacementTarget.SelectedItem" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType={x:Type ContextMenu}}"/>
+                                    </MultiBinding>
+                                </DataTrigger.Binding>
+                                <Setter Property="IsChecked" Value="True"/>
+                            </DataTrigger>
+                            <DataTrigger Value="True">
+                                <DataTrigger.Binding>
+                                    <MultiBinding Converter="{StaticResource EqualValueConverter}">
+                                        <Binding Path="DataContext.LayerId" RelativeSource="{RelativeSource Self}"/>
+                                        <Binding Path="DataContext.LayerId" Source="{x:Reference Root}"/>
+                                    </MultiBinding>
+                                </DataTrigger.Binding>
+                                <Setter Property="IsEnabled" Value="False"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="ItemTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+                        <TextBlock x:Name="LayerName">
+                            <TextBlock.Tag>
+                                <MultiBinding Converter="{StaticResource CollectionIndexConverter}">
+                                    <Binding Path="Collection" Source="{StaticResource TrackMatteCollectionNotifier}"/>
+                                    <Binding />
+                                    <!-- NOTE: INotifyCollectionChange通知用 -->
+                                    <Binding Path="Update" Source="{StaticResource TrackMatteCollectionNotifier}"/>
+                                </MultiBinding>
+                            </TextBlock.Tag>
+                            <TextBlock.Text>
+                                <MultiBinding StringFormat="{}{0}: {1}">
+                                    <Binding Path="Tag" RelativeSource="{RelativeSource Self}"/>
+                                    <Binding Path="Name"/>
+                                </MultiBinding>
+                            </TextBlock.Text>
+                        </TextBlock>
+
+                        <DataTemplate.Triggers>
+                            <Trigger Property="DataContext" Value="{x:Null}">
+                                <Setter TargetName="LayerName" Property="Text" Value="{gm:LanguageResource ResourceKey=Layer_EmptyTrackMatte, ReturnDynamicResource=True}"/>
+                            </Trigger>
+                        </DataTemplate.Triggers>
                     </DataTemplate>
                 </Setter.Value>
             </Setter>
@@ -156,6 +232,15 @@
                         <MultiBinding Converter="{StaticResource SwitchValueConverter}">
                             <Binding Path="IsModeColumnVisible"/>
                             <Binding Path="ModeColumnWidth" Converter="{StaticResource GridLengthConverter}"/>
+                        </MultiBinding>
+                    </ColumnDefinition.Width>
+                </ColumnDefinition>
+
+                <ColumnDefinition>
+                    <ColumnDefinition.Width>
+                        <MultiBinding Converter="{StaticResource SwitchValueConverter}">
+                            <Binding Path="IsTrackMatteColumnVisible"/>
+                            <Binding Path="TrackMatteColumnWidth" Converter="{StaticResource GridLengthConverter}"/>
                         </MultiBinding>
                     </ColumnDefinition.Width>
                 </ColumnDefinition>
@@ -326,7 +411,11 @@
             </Grid>
 
             <Grid Grid.Column="7" Grid.Row="0" Style="{StaticResource ColumnGrid}">
-                <upr:ContextMenuSelectBox x:Name="BlendModeComboBox" SelectedItem="{Binding BlendMode, Mode=OneWay}" ItemsSource="{mk:EnumValues EnumType={x:Type pi:BlendMode}}" Style="{StaticResource BlendModeComboBox}" SelectItemChangedByUser="BlendModeComboBox_SelectItemChangedByUser"/>
+                <upr:ContextMenuSelectBox x:Name="BlendModeSelectBox" SelectedItem="{Binding BlendMode, Mode=OneWay}" ItemsSource="{mk:EnumValues EnumType={x:Type pi:BlendMode}}" Style="{StaticResource BlendModeSelectBoxStyle}" SelectItemChangedByUser="BlendModeSelectBox_SelectItemChangedByUser"/>
+            </Grid>
+
+            <Grid Grid.Column="8" Grid.Row="0" Style="{StaticResource ColumnGrid}">
+                <upr:ContextMenuSelectBox x:Name="TrackMatteSelectBox" SelectedItem="{Binding TrackMatteLayerProxy, Mode=OneWay}" ItemsSource="{StaticResource TrackMatteLayerCollection}" Style="{StaticResource TrackMatteSelectBoxStyle}" SelectItemChangedByUser="TrackMatteSelectBox_SelectItemChangedByUser"/>
             </Grid>
         </Grid>
 
@@ -336,7 +425,6 @@
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
         </Grid>
-
 
         <local:DurationBar Grid.Column="1"
                            Grid.Row="0"

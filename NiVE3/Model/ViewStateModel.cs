@@ -37,11 +37,18 @@ namespace NiVE3.Model
             set { SetProperty(ref timelineLayerSwitchColumnWidth, value); }
         }
 
-        private double timelineModeColumnWidth = 133.0;
+        private double timelineModeColumnWidth = 100.0;
         public double TimelineModeColumnWidth
         {
             get { return timelineModeColumnWidth; }
             set { SetProperty(ref timelineModeColumnWidth, value); }
+        }
+
+        private double timelineTrackMatteColumnWidth = 78.0;
+        public double TimelineTrackMatteColumnWidth
+        {
+            get { return timelineTrackMatteColumnWidth; }
+            set { SetProperty(ref timelineTrackMatteColumnWidth, value); }
         }
 
         private double timelineParentLayerColumnWidth = 78.0;
@@ -91,6 +98,13 @@ namespace NiVE3.Model
         {
             get { return timelineModeColumnVisible; }
             set { SetProperty(ref timelineModeColumnVisible, value); }
+        }
+
+        private bool timelineTrackMatteColumnVisible = true;
+        public bool TimelineTrackMatteColumnVisible
+        {
+            get { return timelineTrackMatteColumnVisible; }
+            set { SetProperty(ref timelineTrackMatteColumnVisible, value); }
         }
 
         private bool timelineParentLayerColumnVisible = true;

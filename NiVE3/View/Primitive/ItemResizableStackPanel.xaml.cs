@@ -132,7 +132,7 @@ namespace NiVE3.View.Primitive
             CollapsedValue = new GridLength()
         };
 
-        MinSizeConverter MinSizeConverter { get; } = new MinSizeConverter { Offset = -SplitterSize };
+        IMultiValueConverter MinSizeConverter { get; } = new MinSizeConverter { Offset = -SplitterSize };
 
         public ItemResizableStackPanel()
         {
@@ -514,7 +514,7 @@ namespace NiVE3.View.Primitive
         }
     }
 
-    class MinSizeConverter : IMultiValueConverter
+    file class MinSizeConverter : IMultiValueConverter
     {
         public double Offset { get; set; }
 

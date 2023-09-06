@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using NiVE3.Model;
@@ -210,6 +213,14 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref blendMode, value); }
         }
 
+        private Guid? trackMatteLayerId;
+        [NeedWire(nameof(LayerModel), IsOneWay = true)]
+        public Guid? TrackMatteLayerId
+        {
+            get { return trackMatteLayerId; }
+            set { SetProperty(ref trackMatteLayerId, value); }
+        }
+
         private double layerNumberColumnWudth;
         [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineLayerNumberColumnWidth), IsOneWay = true)]
         public double LayerNumberColumnWidth
@@ -248,6 +259,14 @@ namespace NiVE3.ViewModel
         {
             get { return modeColumnWidth; }
             set { SetProperty(ref modeColumnWidth, value); }
+        }
+
+        private double trackMatteColumnWidth;
+        [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineTrackMatteColumnWidth), IsOneWay = true)]
+        public double TrackMatteColumnWidth
+        {
+            get { return trackMatteColumnWidth; }
+            set { SetProperty(ref trackMatteColumnWidth, value); }
         }
 
         private double parentLayerColumnWidth;
@@ -306,12 +325,27 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref isModeColumnVisible, value); }
         }
 
+        private bool isTrackMatteColumnVisible;
+        [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineTrackMatteColumnVisible), IsOneWay = true)]
+        public bool IsTrackMatteColumnVisible
+        {
+            get { return isTrackMatteColumnVisible; }
+            set { SetProperty(ref isTrackMatteColumnVisible, value); }
+        }
+
         private bool isParentLayerColumnVisible;
         [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineParentLayerColumnVisible), IsOneWay = true)]
         public bool IsParentLayerColumnVisible
         {
             get { return isParentLayerColumnVisible; }
             set { SetProperty(ref isParentLayerColumnVisible, value); }
+        }
+
+        private LayerModelProxy? trackMatteLayerProxy;
+        public LayerModelProxy? TrackMatteLayerProxy
+        {
+            get { return trackMatteLayerProxy; }
+            set { SetProperty(ref trackMatteLayerProxy, value); }
         }
 
         private bool isExpanded;
@@ -330,6 +364,10 @@ namespace NiVE3.ViewModel
 
         public bool IsComposition { get; }
 
+        public IEnumerable<LayerModelProxy> TrackMatteViewSource { get; }
+
+        public CollectionViewSource ParentLayerViewSource { get; }
+
         public ICommand BeginEditDurationCommand { get; }
 
         public ICommand CommitEditDurationCommand { get; }
@@ -339,6 +377,8 @@ namespace NiVE3.ViewModel
         public ICommand ChangeInterpolationQualityCommand { get; }
 
         public ICommand ChangeBlendModeCommand { get; }
+
+        public ICommand ChangeTrackMatteCommand { get; }
 
         public ICommand BeginEditNameCommand { get; }
 
@@ -362,6 +402,13 @@ namespace NiVE3.ViewModel
             remove { BlendModeChangeRequestPublisher.Unsubscribe(value); }
         }
 
+        WeakEventPublisher<ReferenceLayerChangeEvent> TrackMatteLayerChangedPublisher { get; } = new WeakEventPublisher<ReferenceLayerChangeEvent>();
+        public event EventHandler<ReferenceLayerChangeEvent> TrackMatteLayerChanged
+        {
+            add { TrackMatteLayerChangedPublisher.Subscribe(value); }
+            remove { TrackMatteLayerChangedPublisher.Unsubscribe(value); }
+        }
+
         LayerModel LayerModel { get; }
 
         ViewStateModel ViewState { get; }
@@ -370,10 +417,12 @@ namespace NiVE3.ViewModel
 
         string PrevComment { get; set; } = "";
 
-        public LayerViewModel(LayerModel layerModel, ViewStateModel viewState)
+        public LayerViewModel(LayerModel layerModel, ViewStateModel viewState, IEnumerable<LayerModelProxy> trackMatteViewSource, CollectionViewSource parentLayerViewSource)
         {
             LayerModel = layerModel;
             ViewState = viewState;
+            TrackMatteViewSource = trackMatteViewSource;
+            ParentLayerViewSource = parentLayerViewSource;
 
             WiringModel();
 
@@ -393,7 +442,8 @@ namespace NiVE3.ViewModel
 
             ChangeLayerSwitchCommand = new DelegateCommand<string>(name =>
             {
-                var newValue = !(name switch {
+                var newValue = !(name switch
+                {
                     nameof(IsEnableVideo) => IsEnableVideo,
                     nameof(IsEnableAudio) => IsEnableAudio,
                     nameof(IsEnableSolo) => IsEnableSolo,
@@ -424,6 +474,11 @@ namespace NiVE3.ViewModel
                     return;
                 }
                 BlendModeChangeRequestPublisher.Publish(this, new BlendModeEventArgs(blendMode.Value));
+            });
+
+            ChangeTrackMatteCommand = new DelegateCommand<LayerModelProxy?>(trackMatteLayer =>
+            {
+                TrackMatteLayerChangedPublisher.Publish(this, new ReferenceLayerChangeEvent(trackMatteLayer?.LayerId));
             });
 
             BeginEditNameCommand = new RequerySuggestedCommand(() =>
@@ -463,6 +518,49 @@ namespace NiVE3.ViewModel
                 }
                 EditingParameter = EditingLayerParameter.None;
             }, _ => EditingParameter == EditingLayerParameter.Comment);
+
+            PropertyChanged += LayerViewModel_PropertyChanged;
+        }
+
+        private void LayerViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(TrackMatteLayerId):
+                    TrackMatteLayerProxy = TrackMatteViewSource.FirstOrDefault(l => l.LayerId == TrackMatteLayerId);
+                    break;
+            }
+        }
+
+        partial void WiringModel();
+    }
+
+    [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
+    partial class LayerModelProxy : BindableBase
+    {
+        private Guid layerId;
+        [NeedWire(nameof(LayerModel), IsOneWay = true)]
+        public Guid LayerId
+        {
+            get { return layerId; }
+            set { SetProperty(ref layerId, value); }
+        }
+
+        private string name = "";
+        [NeedWire(nameof(LayerModel), IsOneWay = true)]
+        public string Name
+        {
+            get { return name; }
+            set { SetProperty(ref name, value); }
+        }
+
+        LayerModel LayerModel { get; }
+
+        public LayerModelProxy(LayerModel layerModel)
+        {
+            LayerModel = layerModel;
+
+            WiringModel();
         }
 
         partial void WiringModel();

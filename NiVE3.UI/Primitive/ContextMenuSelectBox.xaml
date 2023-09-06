@@ -4,20 +4,53 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:NiVE3.UI.Primitive"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:cv="clr-namespace:NiVE3.UI.Converter"
              xmlns:mk="clr-namespace:NiVE3.UI.Wpf.Markup"
+             xmlns:r="clr-namespace:NiVE3.UI.Resources"
              mc:Ignorable="d" 
              x:Name="Root"
-             PreviewMouseLeftButtonDown="Root_PreviewMouseLeftButtonDown"
+             PreviewMouseDown="Root_PreviewMouseDown"
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
+        <cv:EqualValueConverter x:Key="EqualValueConverter"/>
+
         <Style x:Key="SelectorMenuItem" TargetType="{x:Type MenuItem}" BasedOn="{StaticResource {x:Type MenuItem}}">
-            <EventSetter Event="Click" Handler="SelectorMenuItem_Click"/>
+            <Setter Property="IsChecked" Value="False"/>
+
+            <Style.Triggers>
+                <DataTrigger Value="True">
+                    <DataTrigger.Binding>
+                        <MultiBinding Converter="{StaticResource EqualValueConverter}">
+                            <Binding Path="DataContext" RelativeSource="{RelativeSource Self}"/>
+                            <Binding Path="SelectedItem" Source="{x:Reference Root}"/>
+                        </MultiBinding>
+                    </DataTrigger.Binding>
+
+                    <Setter Property="IsChecked" Value="True"/>
+                </DataTrigger>
+            </Style.Triggers>
         </Style>
+
+        <r:ItemContainerTemplateCollection x:Key="SelectorMenuContainerTemplateSelector" HasNullTypeTemplate="True">
+            <DataTemplate DataType="{x:Type local:ContextMenuSelectBoxSeparator}">
+                <Separator />
+            </DataTemplate>
+            <!-- NOTE: XDG0006が出ているが動いているようなのでそのまま(デザイン時の問題?) -->
+            <!-- TODO: 解消方法を探す -->
+            <DataTemplate>
+                <MenuItem Style="{mk:NullishCoalescing Binding1={Binding ItemContainerStyle, Source={x:Reference Root}}, Fallback={StaticResource SelectorMenuItem}}" Click="SelectorMenuItem_Click"/>
+            </DataTemplate>
+        </r:ItemContainerTemplateCollection>
+
         <ContextMenu x:Key="{x:Static local:ContextMenuSelectBoxConst.SelectorMenu}"
-                     ItemContainerStyle="{StaticResource SelectorMenuItem}"
+                     Placement="Bottom"
+                     UsesItemContainerTemplate="True"
+                     ItemContainerTemplateSelector="{StaticResource SelectorMenuContainerTemplateSelector}"
                      ItemsSource="{Binding ItemsSource, Source={x:Reference Root}}"
                      ItemTemplate="{Binding ItemTemplate, Source={x:Reference Root}}"
-                     ItemTemplateSelector="{Binding ItemTemplateSelector, Source={x:Reference Root}}"/>
+                     ItemTemplateSelector="{Binding ItemTemplateSelector, Source={x:Reference Root}}"
+                     AlternationCount="{Binding AlternationCount, Source={x:Reference Root}}"/>
     </UserControl.Resources>
     <Grid Background="Transparent">
         <Grid.ColumnDefinitions>
@@ -26,14 +59,14 @@
         </Grid.ColumnDefinitions>
 
         <ContentPresenter Grid.Column="0"
-                              Content="{Binding ElementName=Root, Path=SelectedItem}"
-                              ContentTemplate="{mk:NullishCoalescing Binding1={Binding ElementName=Root, Path=SelectedItemTemplate}, Binding2={Binding ElementName=Root, Path=ItemTemplate}}"
-                              ContentTemplateSelector="{mk:NullishCoalescing Binding1={Binding ElementName=Root, Path=SelectedItemTemplateSelector}, Binding2={Binding ElementName=Root, Path=ItemTemplateSelector}}"
-                              HorizontalAlignment="{Binding ElementName=Root, Path=HorizontalContentAlignment}"
-                              VerticalAlignment="{Binding ElementName=Root, Path=VerticalContentAlignment}"
-                              IsHitTestVisible="False"
-                              Margin="{Binding ElementName=Root, Path=Padding}"
-                              SnapsToDevicePixels="{Binding ElementName=Root, Path=SnapsToDevicePixels}"/>
+                          Content="{Binding ElementName=Root, Path=SelectedItem}"
+                          ContentTemplate="{mk:NullishCoalescing Binding1={Binding ElementName=Root, Path=SelectedItemTemplate}, Binding2={Binding ElementName=Root, Path=ItemTemplate}}"
+                          ContentTemplateSelector="{mk:NullishCoalescing Binding1={Binding ElementName=Root, Path=SelectedItemTemplateSelector}, Binding2={Binding ElementName=Root, Path=ItemTemplateSelector}}"
+                          HorizontalAlignment="{Binding ElementName=Root, Path=HorizontalContentAlignment}"
+                          VerticalAlignment="{Binding ElementName=Root, Path=VerticalContentAlignment}"
+                          IsHitTestVisible="False"
+                          Margin="{Binding ElementName=Root, Path=Padding}"
+                          SnapsToDevicePixels="{Binding ElementName=Root, Path=SnapsToDevicePixels}"/>
         <Grid Grid.Column="1">
             <Path Data="M0,0 3,3 6,0" Width="{x:Static SystemParameters.ScrollWidth}" Stroke="{Binding ElementName=Root, Path=BorderBrush}" StrokeThickness="1" VerticalAlignment="Center" HorizontalAlignment="Center"/>
         </Grid>

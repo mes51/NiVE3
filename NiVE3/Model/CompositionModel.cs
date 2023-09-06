@@ -251,6 +251,18 @@ namespace NiVE3.Model
             HistoryModel.Add(new ChangeBlendModeHistoryCommand(layers, oldValues, blendMode));
         }
 
+        public void ChangeTrackMatteLayers(Guid[] layerIds, Guid? targetLayerId)
+        {
+            var layers = Layers.Where(l => layerIds.Where(id => id != targetLayerId).Contains(l.LayerId)).OrderBy(Layers.IndexOf).ToArray();
+            var oldValues = layers.Select(l => l.TrackMatteLayerId).ToArray();
+            foreach (var l in layers)
+            {
+                l.TrackMatteLayerId = targetLayerId;
+            }
+
+            HistoryModel.Add(new ChangeTrackMatteLayerHistoryCommand(layers, oldValues, targetLayerId));
+        }
+
         public void AddSolid(int index)
         {
             HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_AddSolid));

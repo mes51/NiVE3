@@ -218,6 +218,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("(なし)")]
         public static readonly string Timeline_EmptyTitle = nameof(Timeline_EmptyTitle);
 
+        [ShowInMarkup, DefaultValue("なし")]
+        public static readonly string Layer_EmptyTrackMatte = nameof(Layer_EmptyTrackMatte);
+
         // History
 
         [ShowInMarkup, DefaultValue("フォルダの追加")]
@@ -261,6 +264,9 @@ namespace NiVE3.View.Resource
 
         [ShowInMarkup, DefaultValue("合成モードの変更")]
         public static readonly string History_ChangeBlendMode = nameof(History_ChangeBlendMode);
+
+        [ShowInMarkup, DefaultValue("トラックマットの変更")]
+        public static readonly string History_ChangeTrackMatteLayer = nameof(History_ChangeTrackMatteLayer);
 
         // Enum
 

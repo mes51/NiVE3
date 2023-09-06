@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:NiVE3.View.Part"
              xmlns:vm="clr-namespace:NiVE3.ViewModel"
              xmlns:cv="clr-namespace:NiVE3.View.Converter"
-             xmlns:r="clr-namespace:NiVE3.View.Resource"
+             xmlns:ur="clr-namespace:NiVE3.UI.Resources;assembly=NiVE3.UI"
              xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
              xmlns:ui="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
              xmlns:plg="clr-namespace:NiVE3.Plugin.Interfaces;assembly=NiVE3.Plugin"
@@ -43,7 +43,7 @@
             </Style.Triggers>
         </Style>
 
-        <r:DataTemplateCollection x:Key="PreviewTemplateSelector">
+        <ur:DataTemplateCollection x:Key="PreviewTemplateSelector">
             <DataTemplate DataType="{x:Type vm:FootageViewModel}">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -150,7 +150,7 @@
                     </Grid>
                 </Grid>
             </DataTemplate>
-        </r:DataTemplateCollection>
+        </ur:DataTemplateCollection>
         
     </UserControl.Resources>
     <Grid Margin="10">

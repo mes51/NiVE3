@@ -29,4 +29,14 @@ namespace NiVE3.ViewModel
             BlendMode = blendMode;
         }
     }
+
+    class ReferenceLayerChangeEvent : EventArgs
+    {
+        public Guid? LayerId { get; }
+
+        public ReferenceLayerChangeEvent(Guid? layerId)
+        {
+            LayerId = layerId;
+        }
+    }
 }

@@ -9,7 +9,7 @@
              xmlns:pt="clr-namespace:NiVE3.View.Part"
              xmlns:cv="clr-namespace:NiVE3.View.Converter"
              xmlns:a="clr-namespace:NiVE3.Wpf.Attach"
-             xmlns:r="clr-namespace:NiVE3.View.Resource"
+             xmlns:ur="clr-namespace:NiVE3.UI.Resources;assembly=NiVE3.UI"
              xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
              xmlns:dd="urn:gong-wpf-dragdrop"
              mc:Ignorable="d"
@@ -19,7 +19,7 @@
         <cv:WidthHeightConverter x:Key="WidthHeightConverter"/>
         <cv:TimeMultiValueConverter x:Key="TimeMultiValueConverter"/>
 
-        <r:DataTemplateCollection x:Key="SizeTemplate" DefaultIsEmpty="True">
+        <ur:DataTemplateCollection x:Key="SizeTemplate" DefaultIsEmpty="True">
             <DataTemplate DataType="{x:Type vm:FootageViewModel}">
                 <TextBlock>
                     <TextBlock.Text>
@@ -30,15 +30,15 @@
                     </TextBlock.Text>
                 </TextBlock>
             </DataTemplate>
-        </r:DataTemplateCollection>
+        </ur:DataTemplateCollection>
 
-        <r:DataTemplateCollection x:Key="FrameRateTemplate" DefaultIsEmpty="True">
+        <ur:DataTemplateCollection x:Key="FrameRateTemplate" DefaultIsEmpty="True">
             <DataTemplate DataType="{x:Type vm:FootageViewModel}">
                 <TextBlock Text="{Binding FrameRate, StringFormat={}{0:F3}, Mode=OneWay}"/>
             </DataTemplate>
-        </r:DataTemplateCollection>
+        </ur:DataTemplateCollection>
 
-        <r:DataTemplateCollection x:Key="DurationTemplate" DefaultIsEmpty="True">
+        <ur:DataTemplateCollection x:Key="DurationTemplate" DefaultIsEmpty="True">
             <DataTemplate DataType="{x:Type vm:FootageViewModel}">
                 <TextBlock>
                     <TextBlock.Text>
@@ -49,20 +49,20 @@
                     </TextBlock.Text>
                 </TextBlock>
             </DataTemplate>
-        </r:DataTemplateCollection>
+        </ur:DataTemplateCollection>
 
-        <r:DataTemplateCollection x:Key="FileExtensionTemplate" DefaultIsEmpty="True">
+        <ur:DataTemplateCollection x:Key="FileExtensionTemplate" DefaultIsEmpty="True">
             <DataTemplate DataType="{x:Type vm:FootageViewModel}">
                 <TextBlock Text="{Binding FileExtension, Mode=OneWay}"/>
             </DataTemplate>
-        </r:DataTemplateCollection>
+        </ur:DataTemplateCollection>
         
         <Style x:Key="ItemContainerStyle" TargetType="{x:Type pv:TreeListViewItem}">
             <Setter Property="ItemsSource" Value="{Binding Footages}"/>
             <EventSetter Event="MouseDoubleClick" Handler="TreeListViewItem_MouseDoubleClick"/>
         </Style>
 
-        <r:DataTemplateCollection x:Key="FootageNameTemplateSelector">
+        <ur:DataTemplateCollection x:Key="FootageNameTemplateSelector">
             <DataTemplate DataType="{x:Type vm:IFootageViewModel}">
                 <Grid>
                     <TextBlock x:Name="FootageNameDisplayText" Text="{Binding Name, Mode=OneWay}"/>
@@ -75,7 +75,7 @@
                     </DataTrigger>
                 </DataTemplate.Triggers>
             </DataTemplate>
-        </r:DataTemplateCollection>
+        </ur:DataTemplateCollection>
 
         <DataTemplate x:Key="FootageCommentTemplate" DataType="{x:Type vm:IFootageViewModel}">
             <Grid>
