@@ -182,6 +182,13 @@ namespace NiVE3.Model
             set { SetProperty(ref trackMatteLayerId, value); }
         }
 
+        private TrackMatteMode trackMatteMode = TrackMatteMode.Alpha;
+        public TrackMatteMode TrackMatteMode
+        {
+            get { return trackMatteMode; }
+            set { SetProperty(ref trackMatteMode, value); }
+        }
+
         public Guid LayerId { get; }
 
         public string SourceName => FootageModel.Name;

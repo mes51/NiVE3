@@ -37,21 +37,21 @@ namespace NiVE3.Model
             set { SetProperty(ref timelineLayerSwitchColumnWidth, value); }
         }
 
-        private double timelineModeColumnWidth = 100.0;
+        private double timelineModeColumnWidth = 75.0;
         public double TimelineModeColumnWidth
         {
             get { return timelineModeColumnWidth; }
             set { SetProperty(ref timelineModeColumnWidth, value); }
         }
 
-        private double timelineTrackMatteColumnWidth = 78.0;
+        private double timelineTrackMatteColumnWidth = 125.0;
         public double TimelineTrackMatteColumnWidth
         {
             get { return timelineTrackMatteColumnWidth; }
             set { SetProperty(ref timelineTrackMatteColumnWidth, value); }
         }
 
-        private double timelineParentLayerColumnWidth = 78.0;
+        private double timelineParentLayerColumnWidth = 75.0;
         public double TimelineParentLayerColumnWidth
         {
             get { return timelineParentLayerColumnWidth; }

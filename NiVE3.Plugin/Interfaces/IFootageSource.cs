@@ -49,32 +49,4 @@ namespace NiVE3.Plugin.Interfaces
         // TODO: Acceleratorをラップしたものを渡す
         NImage Read(double time, bool toGpu);
     }
-
-    /// <summary>
-    /// フッテージのメディアの形式を表します。
-    /// </summary>
-    [Flags]
-    public enum SourceType
-    {
-        /// <summary>
-        /// なし
-        /// </summary>
-        None = 0b000,
-        /// <summary>
-        /// 画像
-        /// </summary>
-        Image = 0b001,
-        /// <summary>
-        /// 音声
-        /// </summary>
-        Audio = 0b010,
-        /// <summary>
-        /// ビデオ(音声なし)
-        /// </summary>
-        Video = 0b100,
-        /// <summary>
-        /// ビデオ+音声
-        /// </summary>
-        VideoAndAudio = Video | Audio
-    }
 }

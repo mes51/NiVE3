@@ -33,7 +33,7 @@
         <cv:OffsetGridLengthConverter x:Key="GridLengthConverter"/>
         <cv:SwitchValueConverter x:Key="SwitchValueConverter" FalseValue="{StaticResource EmptyGrid}"/>
         <cv:EnumToBoolConverter x:Key="EnumToBoolConverter" UseAndCompare="True"/>
-        <cv:EnumToLocalizedNameConverter x:Key="BlendModeNameConverter" EnumType="{x:Type pi:BlendMode}"/>
+        <cv:EnumToLocalizedNameConverter x:Key="EnumToLocalizedNameConverter"/>
         <cv:CollectionIndexConverter x:Key="CollectionIndexConverter" Offset="1"/>
         <ucv:EqualValueConverter x:Key="EqualValueConverter"/>
 
@@ -112,7 +112,7 @@
             <Setter Property="ItemTemplate">
                 <Setter.Value>
                     <DataTemplate>
-                        <TextBlock Text="{Binding Converter={StaticResource BlendModeNameConverter}}"/>
+                        <TextBlock Text="{Binding Converter={StaticResource EnumToLocalizedNameConverter}, ConverterParameter={x:Type pi:BlendMode}}"/>
                     </DataTemplate>
                 </Setter.Value>
             </Setter>
@@ -178,6 +178,25 @@
                     </DataTemplate>
                 </Setter.Value>
             </Setter>
+        </Style>
+
+        <Style x:Key="TrackMatteModeSelectBoxStyle" TargetType="{x:Type upr:ContextMenuSelectBox}" BasedOn="{StaticResource {x:Type upr:ContextMenuSelectBox}}">
+            <Setter Property="Margin" Value="2,0"/>
+            <Setter Property="IsTabStop" Value="False"/>
+            <Setter Property="Visibility" Value="Visible"/>
+            <Setter Property="ItemTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Converter={StaticResource EnumToLocalizedNameConverter}, ConverterParameter={x:Type pi:TrackMatteMode}}"/>
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding TrackMatteLayerProxy}" Value="{x:Null}">
+                    <Setter Property="Visibility" Value="Hidden"/>
+                </DataTrigger>
+            </Style.Triggers>
         </Style>
     </UserControl.Resources>
     <Grid>
@@ -415,7 +434,13 @@
             </Grid>
 
             <Grid Grid.Column="8" Grid.Row="0" Style="{StaticResource ColumnGrid}">
-                <upr:ContextMenuSelectBox x:Name="TrackMatteSelectBox" SelectedItem="{Binding TrackMatteLayerProxy, Mode=OneWay}" ItemsSource="{StaticResource TrackMatteLayerCollection}" Style="{StaticResource TrackMatteSelectBoxStyle}" SelectItemChangedByUser="TrackMatteSelectBox_SelectItemChangedByUser"/>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+
+                <upr:ContextMenuSelectBox Grid.Column="0" x:Name="TrackMatteSelectBox" SelectedItem="{Binding TrackMatteLayerProxy, Mode=OneWay}" ItemsSource="{StaticResource TrackMatteLayerCollection}" Style="{StaticResource TrackMatteSelectBoxStyle}" SelectItemChangedByUser="TrackMatteSelectBox_SelectItemChangedByUser"/>
+                <upr:ContextMenuSelectBox Grid.Column="1" x:Name="TrackMatteModeSelectBox" SelectedItem="{Binding TrackMatteMode, Mode=OneWay}" ItemsSource="{mk:EnumValues EnumType={x:Type pi:TrackMatteMode}}" Style="{StaticResource TrackMatteModeSelectBoxStyle}" SelectItemChangedByUser="TrackMatteModeSelectBox_SelectItemChangedByUser"/>
             </Grid>
         </Grid>
 

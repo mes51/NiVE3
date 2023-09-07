@@ -221,6 +221,14 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref trackMatteLayerId, value); }
         }
 
+        private TrackMatteMode trackMatteMode;
+        [NeedWire(nameof(LayerModel), IsOneWay = true)]
+        public TrackMatteMode TrackMatteMode
+        {
+            get { return trackMatteMode; }
+            set { SetProperty(ref trackMatteMode, value); }
+        }
+
         private double layerNumberColumnWudth;
         [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineLayerNumberColumnWidth), IsOneWay = true)]
         public double LayerNumberColumnWidth
@@ -380,6 +388,8 @@ namespace NiVE3.ViewModel
 
         public ICommand ChangeTrackMatteCommand { get; }
 
+        public ICommand ChangeTrackMatteModeCommand { get; }
+
         public ICommand BeginEditNameCommand { get; }
 
         public ICommand BeginEditCommentCommand { get; }
@@ -395,18 +405,25 @@ namespace NiVE3.ViewModel
             remove { LayerSwitchChangeRequestPublisher.Unsubscribe(value); }
         }
 
-        WeakEventPublisher<BlendModeEventArgs> BlendModeChangeRequestPublisher { get; } = new WeakEventPublisher<BlendModeEventArgs>();
-        public event EventHandler<BlendModeEventArgs> BlendModeChangeRequest
+        WeakEventPublisher<EnumEventArgs<BlendMode>> BlendModeChangeRequestPublisher { get; } = new WeakEventPublisher<EnumEventArgs<BlendMode>>();
+        public event EventHandler<EnumEventArgs<BlendMode>> BlendModeChangeRequest
         {
             add { BlendModeChangeRequestPublisher.Subscribe(value); }
             remove { BlendModeChangeRequestPublisher.Unsubscribe(value); }
         }
 
-        WeakEventPublisher<ReferenceLayerChangeEvent> TrackMatteLayerChangedPublisher { get; } = new WeakEventPublisher<ReferenceLayerChangeEvent>();
-        public event EventHandler<ReferenceLayerChangeEvent> TrackMatteLayerChanged
+        WeakEventPublisher<ReferenceLayerChangeEvent> TrackMatteLayerChangeRequestPublisher { get; } = new WeakEventPublisher<ReferenceLayerChangeEvent>();
+        public event EventHandler<ReferenceLayerChangeEvent> TrackMatteLayerChangeRequest
         {
-            add { TrackMatteLayerChangedPublisher.Subscribe(value); }
-            remove { TrackMatteLayerChangedPublisher.Unsubscribe(value); }
+            add { TrackMatteLayerChangeRequestPublisher.Subscribe(value); }
+            remove { TrackMatteLayerChangeRequestPublisher.Unsubscribe(value); }
+        }
+
+        WeakEventPublisher<EnumEventArgs<TrackMatteMode>> TrackMatteModeChangeRequestPublisher { get; } = new WeakEventPublisher<EnumEventArgs<TrackMatteMode>>();
+        public event EventHandler<EnumEventArgs<TrackMatteMode>> TrackMatteModeChangeRequest
+        {
+            add { TrackMatteModeChangeRequestPublisher.Subscribe(value); }
+            remove { TrackMatteModeChangeRequestPublisher.Unsubscribe(value); }
         }
 
         LayerModel LayerModel { get; }
@@ -473,12 +490,21 @@ namespace NiVE3.ViewModel
                 {
                     return;
                 }
-                BlendModeChangeRequestPublisher.Publish(this, new BlendModeEventArgs(blendMode.Value));
+                BlendModeChangeRequestPublisher.Publish(this, new EnumEventArgs<BlendMode>(blendMode.Value));
             });
 
             ChangeTrackMatteCommand = new DelegateCommand<LayerModelProxy?>(trackMatteLayer =>
             {
-                TrackMatteLayerChangedPublisher.Publish(this, new ReferenceLayerChangeEvent(trackMatteLayer?.LayerId));
+                TrackMatteLayerChangeRequestPublisher.Publish(this, new ReferenceLayerChangeEvent(trackMatteLayer?.LayerId));
+            });
+
+            ChangeTrackMatteModeCommand = new DelegateCommand<TrackMatteMode?>(trackMatteMode =>
+            {
+                if (!trackMatteMode.HasValue)
+                {
+                    return;
+                }
+                TrackMatteModeChangeRequestPublisher.Publish(this, new EnumEventArgs<TrackMatteMode>(trackMatteMode.Value));
             });
 
             BeginEditNameCommand = new RequerySuggestedCommand(() =>

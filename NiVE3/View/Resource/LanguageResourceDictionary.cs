@@ -268,6 +268,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("トラックマットの変更")]
         public static readonly string History_ChangeTrackMatteLayer = nameof(History_ChangeTrackMatteLayer);
 
+        [ShowInMarkup, DefaultValue("トラックマットのモード変更")]
+        public static readonly string History_ChangeTrackMatteMode = nameof(History_ChangeTrackMatteMode);
+
         // Enum
 
         [ShowInMarkup, DefaultValue("RGB")]
@@ -359,6 +362,18 @@ namespace NiVE3.View.Resource
 
         [ShowInMarkup, DefaultValue("明度")]
         public static readonly string BlendMode_Luminance = nameof(BlendMode_Luminance);
+
+        [ShowInMarkup, DefaultValue("アルファ")]
+        public static readonly string TrackMatteMode_Alpha = nameof(TrackMatteMode_Alpha);
+
+        [ShowInMarkup, DefaultValue("反転アルファ")]
+        public static readonly string TrackMatteMode_InvertAlpha = nameof(TrackMatteMode_InvertAlpha);
+
+        [ShowInMarkup, DefaultValue("明度")]
+        public static readonly string TrackMatteMode_Luminance = nameof(TrackMatteMode_Luminance);
+
+        [ShowInMarkup, DefaultValue("反転明度")]
+        public static readonly string TrackMatteMode_InvertLuminance = nameof(TrackMatteMode_InvertLuminance);
 
         static LanguageResourceDictionary()
         {

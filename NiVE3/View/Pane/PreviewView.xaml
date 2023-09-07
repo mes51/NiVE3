@@ -20,7 +20,7 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
         <cv:LocalizationConverter x:Key="DownScaleRateConverter" LocalizeFormat="{gm:LanguageResource ResourceKey=PreviewView_DownScaleRateFormat}"/>
-        <cv:EnumToLocalizedNameConverter x:Key="PreviewColorChannelNameConverter" EnumType="{x:Type vm:PreviewColorChannel}"/>
+        <cv:EnumToLocalizedNameConverter x:Key="PreviewColorChannelNameConverter"/>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
 
         <r:ComboBoxDisplayChanger x:Key="ScaleComboBoxDisplayChanger">
@@ -98,7 +98,7 @@
             <Setter Property="ItemTemplate">
                 <Setter.Value>
                     <DataTemplate>
-                        <TextBlock Text="{Binding Converter={StaticResource PreviewColorChannelNameConverter}}"/>
+                        <TextBlock Text="{Binding Converter={StaticResource PreviewColorChannelNameConverter}, ConverterParameter={x:Type vm:PreviewColorChannel}}"/>
                     </DataTemplate>
                 </Setter.Value>
             </Setter>

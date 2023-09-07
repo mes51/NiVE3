@@ -20,13 +20,13 @@ namespace NiVE3.ViewModel
         }
     }
 
-    class BlendModeEventArgs : EventArgs
+    class EnumEventArgs<T> : EventArgs where T : Enum
     {
-        public BlendMode BlendMode { get; }
+        public T NewValue { get; }
 
-        public BlendModeEventArgs(BlendMode blendMode)
+        public EnumEventArgs(T newValue)
         {
-            BlendMode = blendMode;
+            NewValue = newValue;
         }
     }
 

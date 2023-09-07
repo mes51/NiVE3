@@ -207,5 +207,41 @@ namespace NiVE3.Model
 
             public void Dispose() { }
         }
+
+        private class ChangeTrackMatteModeHistoryCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangeTrackMatteMode);
+
+            LayerModel[] Layers { get; }
+
+            TrackMatteMode[] OldValues { get; }
+
+            TrackMatteMode NewValue { get; }
+
+            public ChangeTrackMatteModeHistoryCommand(LayerModel[] layers, TrackMatteMode[] oldValues, TrackMatteMode newValue)
+            {
+                Layers = layers;
+                OldValues = oldValues;
+                NewValue = newValue;
+            }
+
+            public void Redo()
+            {
+                foreach (var l in Layers)
+                {
+                    l.TrackMatteMode = NewValue;
+                }
+            }
+
+            public void Undo()
+            {
+                foreach (var (l, m) in Layers.Zip(OldValues))
+                {
+                    l.TrackMatteMode = m;
+                }
+            }
+
+            public void Dispose() { }
+        }
     }
 }

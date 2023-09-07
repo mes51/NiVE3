@@ -259,7 +259,12 @@ namespace NiVE3.View.Part
 
         private void TrackMatteSelectBox_SelectItemChangedByUser(object sender, RoutedEventArgs e)
         {
-            ViewModel?.ChangeTrackMatteCommand.Execute(TrackMatteSelectBox.SelectedItem);
+            ViewModel?.ChangeTrackMatteCommand?.Execute(TrackMatteSelectBox.SelectedItem);
+        }
+
+        private void TrackMatteModeSelectBox_SelectItemChangedByUser(object sender, RoutedEventArgs e)
+        {
+            ViewModel?.ChangeTrackMatteModeCommand?.Execute(TrackMatteModeSelectBox.SelectedItem);
         }
 
         private void DurationBar_IsClickedChanged(object sender, EventArgs e)

@@ -13,13 +13,11 @@ namespace NiVE3.View.Converter
     [ValueConversion(typeof(Enum), typeof(string))]
     class EnumToLocalizedNameConverter : IValueConverter
     {
-        public Type? EnumType { get; set; }
-
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value != null && EnumType != null && EnumType.IsEnum && value.GetType().IsAssignableTo(EnumType) && Enum.GetName(EnumType, value) is string enumName)
+            if (value != null && parameter is Type enumType && enumType.IsEnum && value.GetType().IsAssignableTo(enumType) && Enum.GetName(enumType, value) is string enumName)
             {
-                return LanguageResourceDictionary.Dictionary.GetText($"{EnumType.Name}_{enumName}");
+                return LanguageResourceDictionary.Dictionary.GetText($"{enumType.Name}_{enumName}");
             }
             else
             {

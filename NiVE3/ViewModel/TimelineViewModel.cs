@@ -12,6 +12,7 @@ using GongSolutions.Wpf.DragDrop;
 using NiVE3.Config;
 using NiVE3.Model;
 using NiVE3.Mvvm;
+using NiVE3.Plugin.Interfaces;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
 using NiVE3.View.Command;
 using NiVE3.View.Dock;
@@ -238,7 +239,8 @@ namespace NiVE3.ViewModel
                         var vm = new LayerViewModel(m, ViewState, trackMatteCollectionView, new CollectionViewSource { Source = value.Layers.CreateViewCollection(m => new LayerModelProxy(m)) });
                         vm.LayerSwitchChangeRequest += LayerViewModel_LayerSwitchChangeRequest;
                         vm.BlendModeChangeRequest += LayerViewModel_BlendModeChangeRequest;
-                        vm.TrackMatteLayerChanged += LayerViewModel_TrackMatteLayerChanged;
+                        vm.TrackMatteLayerChangeRequest += LayerViewModel_TrackMatteLayerChangeRequest;
+                        vm.TrackMatteModeChangeRequest += ViewModel_TrackMatteModeChangeRequest;
                         return vm;
                     });
                 }
@@ -416,7 +418,7 @@ namespace NiVE3.ViewModel
             CompositionModel.ChangeLayerSwitches(targetLayers.Select(l => l.LayerId).ToArray(), e.SwitchName, e.Value);
         }
 
-        private void LayerViewModel_BlendModeChangeRequest(object? sender, BlendModeEventArgs e)
+        private void LayerViewModel_BlendModeChangeRequest(object? sender, EnumEventArgs<BlendMode> e)
         {
             if (sender is not LayerViewModel layerViewModel || CompositionModel == null || !(Layers?.Contains(layerViewModel) ?? false))
             {
@@ -433,10 +435,10 @@ namespace NiVE3.ViewModel
                 targetLayers.AddRange(SelectedLayers);
             }
 
-            CompositionModel.ChangeBlendModes(targetLayers.Select(l => l.LayerId).ToArray(), e.BlendMode);
+            CompositionModel.ChangeBlendModes(targetLayers.Select(l => l.LayerId).ToArray(), e.NewValue);
         }
 
-        private void LayerViewModel_TrackMatteLayerChanged(object? sender, ReferenceLayerChangeEvent e)
+        private void LayerViewModel_TrackMatteLayerChangeRequest(object? sender, ReferenceLayerChangeEvent e)
         {
             if (sender is not LayerViewModel layerViewModel || CompositionModel == null || !(Layers?.Contains(layerViewModel) ?? false))
             {
@@ -454,6 +456,26 @@ namespace NiVE3.ViewModel
             }
 
             CompositionModel.ChangeTrackMatteLayers(targetLayers.Select(l => l.LayerId).ToArray(), e.LayerId);
+        }
+
+        private void ViewModel_TrackMatteModeChangeRequest(object? sender, EnumEventArgs<TrackMatteMode> e)
+        {
+            if (sender is not LayerViewModel layerViewModel || CompositionModel == null || !(Layers?.Contains(layerViewModel) ?? false))
+            {
+                return;
+            }
+
+            var targetLayers = new List<LayerViewModel>();
+            if (SelectedLayers.Count == 0 || !SelectedLayers.Contains(layerViewModel))
+            {
+                targetLayers.Add(layerViewModel);
+            }
+            else
+            {
+                targetLayers.AddRange(SelectedLayers);
+            }
+
+            CompositionModel.ChangeTrackMatteModes(targetLayers.Select(l => l.LayerId).ToArray(), e.NewValue);
         }
     }
 }
