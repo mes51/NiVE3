@@ -51,9 +51,17 @@
             <upr:ContextMenuSelectBoxSeparator />
             <CollectionContainer Collection="{Binding Source={StaticResource TrackMatteCollectionViewSource}}"/>
         </CompositeCollection>
-        
+
+        <CollectionViewSource x:Key="ParentLayerCollectionViewSource" Source="{Binding ParentLayerViewSource}"/>
+        <CompositeCollection x:Key="ParentLayerCollection">
+            <x:Null />
+            <upr:ContextMenuSelectBoxSeparator />
+            <CollectionContainer Collection="{Binding Source={StaticResource ParentLayerCollectionViewSource}}"/>
+        </CompositeCollection>
+
         <!-- NOTE: INotifyCollectionChangeの変更はBindingでは拾ってくれないため、無理矢理拾わせるためのクラスでラップする -->
         <r:CollectionChangeNotifier x:Key="TrackMatteCollectionNotifier" Collection="{Binding TrackMatteViewSource}"/>
+        <r:CollectionChangeNotifier x:Key="ParentLayerCollectionNotifier" Collection="{Binding ParentLayerViewSource}"/>
 
         <Style x:Key="HeaderGridStyle" TargetType="{x:Type Grid}">
             <Setter Property="Background" Value="Transparent"/>
@@ -197,6 +205,68 @@
                     <Setter Property="Visibility" Value="Hidden"/>
                 </DataTrigger>
             </Style.Triggers>
+        </Style>
+
+        <Style x:Key="ParentLayerSelectBoxStyle" TargetType="{x:Type upr:ContextMenuSelectBox}" BasedOn="{StaticResource {x:Type upr:ContextMenuSelectBox}}">
+            <Setter Property="Margin" Value="2,0"/>
+            <Setter Property="IsTabStop" Value="False"/>
+            <Setter Property="ItemContainerStyle">
+                <Setter.Value>
+                    <Style TargetType="{x:Type MenuItem}">
+                        <Setter Property="IsChecked" Value="False"/>
+                        <Setter Property="IsEnabled" Value="True"/>
+
+                        <Style.Triggers>
+                            <DataTrigger Value="True">
+                                <DataTrigger.Binding>
+                                    <MultiBinding Converter="{StaticResource EqualValueConverter}">
+                                        <Binding Path="DataContext" RelativeSource="{RelativeSource Self}"/>
+                                        <Binding Path="PlacementTarget.SelectedItem" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType={x:Type ContextMenu}}"/>
+                                    </MultiBinding>
+                                </DataTrigger.Binding>
+                                <Setter Property="IsChecked" Value="True"/>
+                            </DataTrigger>
+                            <DataTrigger Value="True">
+                                <DataTrigger.Binding>
+                                    <MultiBinding Converter="{x:Static local:LayerView.CycledParentLayerConverter}">
+                                        <Binding Path="DataContext" Source="{x:Reference Root}"/>
+                                        <Binding Path="DataContext.LayerId" RelativeSource="{RelativeSource Self}"/>
+                                    </MultiBinding>
+                                </DataTrigger.Binding>
+                                <Setter Property="IsEnabled" Value="False"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="ItemTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+                        <TextBlock x:Name="LayerName">
+                            <TextBlock.Tag>
+                                <MultiBinding Converter="{StaticResource CollectionIndexConverter}">
+                                    <Binding Path="Collection" Source="{StaticResource ParentLayerCollectionNotifier}"/>
+                                    <Binding />
+                                    <!-- NOTE: INotifyCollectionChange通知用 -->
+                                    <Binding Path="Update" Source="{StaticResource ParentLayerCollectionNotifier}"/>
+                                </MultiBinding>
+                            </TextBlock.Tag>
+                            <TextBlock.Text>
+                                <MultiBinding StringFormat="{}{0}: {1}">
+                                    <Binding Path="Tag" RelativeSource="{RelativeSource Self}"/>
+                                    <Binding Path="Name"/>
+                                </MultiBinding>
+                            </TextBlock.Text>
+                        </TextBlock>
+
+                        <DataTemplate.Triggers>
+                            <Trigger Property="DataContext" Value="{x:Null}">
+                                <Setter TargetName="LayerName" Property="Text" Value="{gm:LanguageResource ResourceKey=Layer_EmptyParentLayer, ReturnDynamicResource=True}"/>
+                            </Trigger>
+                        </DataTemplate.Triggers>
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
     </UserControl.Resources>
     <Grid>
@@ -441,6 +511,10 @@
 
                 <upr:ContextMenuSelectBox Grid.Column="0" x:Name="TrackMatteSelectBox" SelectedItem="{Binding TrackMatteLayerProxy, Mode=OneWay}" ItemsSource="{StaticResource TrackMatteLayerCollection}" Style="{StaticResource TrackMatteSelectBoxStyle}" SelectItemChangedByUser="TrackMatteSelectBox_SelectItemChangedByUser"/>
                 <upr:ContextMenuSelectBox Grid.Column="1" x:Name="TrackMatteModeSelectBox" SelectedItem="{Binding TrackMatteMode, Mode=OneWay}" ItemsSource="{mk:EnumValues EnumType={x:Type pi:TrackMatteMode}}" Style="{StaticResource TrackMatteModeSelectBoxStyle}" SelectItemChangedByUser="TrackMatteModeSelectBox_SelectItemChangedByUser"/>
+            </Grid>
+
+            <Grid Grid.Column="9" Grid.Row="0" Style="{StaticResource ColumnGrid}">
+                <upr:ContextMenuSelectBox x:Name="ParentLayerSelectBox" SelectedItem="{Binding ParentLayerProxy, Mode=OneWay}" ItemsSource="{StaticResource ParentLayerCollection}" Style="{StaticResource ParentLayerSelectBoxStyle}" SelectItemChangedByUser="ParentLayerSelectBox_SelectItemChangedByUser"/>
             </Grid>
         </Grid>
 

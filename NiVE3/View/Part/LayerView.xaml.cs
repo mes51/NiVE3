@@ -28,6 +28,8 @@ namespace NiVE3.View.Part
         // NOTE: なぜかTypeConverterをSourceTypeにつけてもNREが出てXAML上でリソースとして定義出来ないため、定数として定義する
         public static readonly SourceType CompositionDisplayableSourceType = SourceType.Image | SourceType.Video;
 
+        public static IMultiValueConverter CycledParentLayerConverter = new DelegateMultiValueConverter<LayerViewModel, Guid?, bool>((vm, l) => vm.CheckParentLayerCycled(l));
+
         public static RoutedEvent IsDurationEditingChangedEvent = EventManager.RegisterRoutedEvent(
             nameof(IsDurationEditingChanged), RoutingStrategy.Direct, typeof(EventHandler), typeof(LayerView)
         );
@@ -265,6 +267,11 @@ namespace NiVE3.View.Part
         private void TrackMatteModeSelectBox_SelectItemChangedByUser(object sender, RoutedEventArgs e)
         {
             ViewModel?.ChangeTrackMatteModeCommand?.Execute(TrackMatteModeSelectBox.SelectedItem);
+        }
+
+        private void ParentLayerSelectBox_SelectItemChangedByUser(object sender, RoutedEventArgs e)
+        {
+            ViewModel?.ChangeParentLayerCommand?.Execute(ParentLayerSelectBox.SelectedItem);
         }
 
         private void DurationBar_IsClickedChanged(object sender, EventArgs e)

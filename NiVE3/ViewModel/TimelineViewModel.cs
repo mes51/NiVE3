@@ -234,13 +234,16 @@ namespace NiVE3.ViewModel
                 {
                     BindComposition();
                     var trackMatteCollectionView = value.Layers.CreateViewCollection(m => new LayerModelProxy(m));
+                    var parentLayerCollectionView = value.Layers.CreateViewCollection(m => new LayerModelProxy(m));
                     Layers = value.Layers.CreateViewCollection(m =>
                     {
-                        var vm = new LayerViewModel(m, ViewState, trackMatteCollectionView, new CollectionViewSource { Source = value.Layers.CreateViewCollection(m => new LayerModelProxy(m)) });
+                        var vm = new LayerViewModel(m, ViewState, trackMatteCollectionView, parentLayerCollectionView);
                         vm.LayerSwitchChangeRequest += LayerViewModel_LayerSwitchChangeRequest;
                         vm.BlendModeChangeRequest += LayerViewModel_BlendModeChangeRequest;
                         vm.TrackMatteLayerChangeRequest += LayerViewModel_TrackMatteLayerChangeRequest;
                         vm.TrackMatteModeChangeRequest += ViewModel_TrackMatteModeChangeRequest;
+                        vm.ParentLayerChangeRequest += ViewModel_ParentLayerChangeRequest;
+                        vm.CheckCycledParentLayerRequest += ViewModel_CheckCycledParentLayerRequest;
                         return vm;
                     });
                 }
@@ -476,6 +479,36 @@ namespace NiVE3.ViewModel
             }
 
             CompositionModel.ChangeTrackMatteModes(targetLayers.Select(l => l.LayerId).ToArray(), e.NewValue);
+        }
+
+        private void ViewModel_ParentLayerChangeRequest(object? sender, ReferenceLayerChangeEvent e)
+        {
+            if (sender is not LayerViewModel layerViewModel || CompositionModel == null || !(Layers?.Contains(layerViewModel) ?? false))
+            {
+                return;
+            }
+
+            var targetLayers = new List<LayerViewModel>();
+            if (SelectedLayers.Count == 0 || !SelectedLayers.Contains(layerViewModel))
+            {
+                targetLayers.Add(layerViewModel);
+            }
+            else
+            {
+                targetLayers.AddRange(SelectedLayers);
+            }
+
+            CompositionModel.ChangeParentLayer(targetLayers.Select(l => l.LayerId).ToArray(), e.LayerId);
+        }
+
+        private void ViewModel_CheckCycledParentLayerRequest(object? sender, CycledLayerEventArgs e)
+        {
+            if (sender is not LayerViewModel layerViewModel || CompositionModel == null || !(Layers?.Contains(layerViewModel) ?? false))
+            {
+                return;
+            }
+
+            e.Cycled = CompositionModel.CheckCycledParentLayer(layerViewModel.LayerId, e.LayerId);
         }
     }
 }

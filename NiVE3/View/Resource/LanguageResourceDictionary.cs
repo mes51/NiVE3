@@ -221,6 +221,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("なし")]
         public static readonly string Layer_EmptyTrackMatte = nameof(Layer_EmptyTrackMatte);
 
+        [ShowInMarkup, DefaultValue("なし")]
+        public static readonly string Layer_EmptyParentLayer = nameof(Layer_EmptyParentLayer);
+
         // History
 
         [ShowInMarkup, DefaultValue("フォルダの追加")]
@@ -270,6 +273,9 @@ namespace NiVE3.View.Resource
 
         [ShowInMarkup, DefaultValue("トラックマットのモード変更")]
         public static readonly string History_ChangeTrackMatteMode = nameof(History_ChangeTrackMatteMode);
+
+        [ShowInMarkup, DefaultValue("親レイヤーの変更")]
+        public static readonly string History_ChangeParentLayer = nameof(History_ChangeParentLayer);
 
         // Enum
 

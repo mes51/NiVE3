@@ -275,6 +275,66 @@ namespace NiVE3.Model
             HistoryModel.Add(new ChangeTrackMatteModeHistoryCommand(layers, oldValues, mode));
         }
 
+        public void ChangeParentLayer(Guid[] layerIds, Guid? targetLayerId)
+        {
+            if (targetLayerId.HasValue)
+            {
+                layerIds = layerIds.Except(new Guid[] { targetLayerId.Value }).ToArray();
+            }
+            var changed = layerIds.ToDictionary(id => id, _ => targetLayerId);
+            var layers = new List<LayerModel>();
+            if (targetLayerId.HasValue)
+            {
+                foreach (var l in Layers.Where(l => layerIds.Contains(l.LayerId)).OrderBy(Layers.IndexOf))
+                {
+                    if (CheckCycledSimulatedParentLayer(l.LayerId, changed))
+                    {
+                        changed.Remove(l.LayerId);
+                    }
+                    else
+                    {
+                        layers.Add(l);
+                    }
+                }
+            }
+            else
+            {
+                layers.AddRange(Layers.Where(l => layerIds.Contains(l.LayerId)).OrderBy(Layers.IndexOf));
+            }
+            var oldValues = layers.Select(l => l.ParentLayerId).ToArray();
+
+            // NOTE: プレビュー中の無限ループ回避用
+            foreach (var l in layers)
+            {
+                l.ParentLayerId = null;
+            }
+
+            foreach (var l in layers)
+            {
+                l.ParentLayerId = targetLayerId;
+            }
+
+            HistoryModel.Add(new ChangeParentLayerHistoryCommand(layers.ToArray(), oldValues, targetLayerId));
+        }
+
+        public bool CheckCycledParentLayer(Guid layerId, Guid targetLayerId)
+        {
+            if (layerId == targetLayerId)
+            {
+                return true;
+            }
+
+            var layer = Layers.FirstOrDefault(l => l.LayerId == layerId);
+            if (layer == null || !layer.ParentLayerId.HasValue)
+            {
+                return false;
+            }
+            else
+            {
+                return CheckCycledParentLayer(layer.ParentLayerId.Value, layerId);
+            }
+        }
+
         public void AddSolid(int index)
         {
             HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_AddSolid));
@@ -295,6 +355,35 @@ namespace NiVE3.Model
         {
             // TODO:
             return new NManagedImage(Width, Height, true);
+        }
+
+        bool CheckCycledSimulatedParentLayer(Guid layerId, Dictionary<Guid, Guid?> changed, HashSet<Guid>? checkedLayerIds = null)
+        {
+            if (checkedLayerIds == null)
+            {
+                checkedLayerIds = new HashSet<Guid>();
+            }
+
+            if (checkedLayerIds.Contains(layerId))
+            {
+                return true;
+            }
+
+            checkedLayerIds.Add(layerId);
+
+            var layer = Layers.FirstOrDefault(l => l.LayerId == layerId);
+            if (layer == null)
+            {
+                return false;
+            }
+
+            var parentLayerId = changed.ContainsKey(layerId) ? changed[layerId] : layer.ParentLayerId;
+            if (!parentLayerId.HasValue)
+            {
+                return false;
+            }
+
+            return CheckCycledSimulatedParentLayer(parentLayerId.Value, changed, checkedLayerIds);
         }
 
         static bool IsCycledComposition(CompositionModel target, CompositionInput input)

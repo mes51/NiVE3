@@ -243,5 +243,49 @@ namespace NiVE3.Model
 
             public void Dispose() { }
         }
+
+        private class ChangeParentLayerHistoryCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangeParentLayer);
+
+            LayerModel[] Layers { get; }
+
+            Guid?[] OldValues { get; }
+
+            Guid? NewValue { get; }
+
+            public ChangeParentLayerHistoryCommand(LayerModel[] layers, Guid?[] oldValues, Guid? newValue)
+            {
+                Layers = layers;
+                OldValues = oldValues;
+                NewValue = newValue;
+            }
+
+            public void Redo()
+            {
+                foreach (var l in Layers)
+                {
+                    l.ParentLayerId = null;
+                }
+                foreach (var l in Layers)
+                {
+                    l.ParentLayerId = NewValue;
+                }
+            }
+
+            public void Undo()
+            {
+                foreach (var l in Layers)
+                {
+                    l.ParentLayerId = null;
+                }
+                foreach (var (l, p) in Layers.Zip(OldValues))
+                {
+                    l.ParentLayerId = p;
+                }
+            }
+
+            public void Dispose() { }
+        }
     }
 }

@@ -39,4 +39,16 @@ namespace NiVE3.ViewModel
             LayerId = layerId;
         }
     }
+
+    class CycledLayerEventArgs : EventArgs
+    {
+        public Guid LayerId { get; }
+
+        public bool Cycled { get; set; }
+
+        public CycledLayerEventArgs(Guid layerId)
+        {
+            LayerId = layerId;
+        }
+    }
 }

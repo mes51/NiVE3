@@ -229,6 +229,14 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref trackMatteMode, value); }
         }
 
+        private Guid? parentLayerId;
+        [NeedWire(nameof(LayerModel), IsOneWay = true)]
+        public Guid? ParentLayerId
+        {
+            get { return parentLayerId; }
+            set { SetProperty(ref parentLayerId, value); }
+        }
+
         private double layerNumberColumnWudth;
         [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineLayerNumberColumnWidth), IsOneWay = true)]
         public double LayerNumberColumnWidth
@@ -356,6 +364,13 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref trackMatteLayerProxy, value); }
         }
 
+        private LayerModelProxy? parentLayerProxy;
+        public LayerModelProxy? ParentLayerProxy
+        {
+            get { return parentLayerProxy; }
+            set { SetProperty(ref parentLayerProxy, value); }
+        }
+
         private bool isExpanded;
         public bool IsExpanded
         {
@@ -374,7 +389,7 @@ namespace NiVE3.ViewModel
 
         public IEnumerable<LayerModelProxy> TrackMatteViewSource { get; }
 
-        public CollectionViewSource ParentLayerViewSource { get; }
+        public IEnumerable<LayerModelProxy> ParentLayerViewSource { get; }
 
         public ICommand BeginEditDurationCommand { get; }
 
@@ -389,6 +404,8 @@ namespace NiVE3.ViewModel
         public ICommand ChangeTrackMatteCommand { get; }
 
         public ICommand ChangeTrackMatteModeCommand { get; }
+
+        public ICommand ChangeParentLayerCommand { get; }
 
         public ICommand BeginEditNameCommand { get; }
 
@@ -426,6 +443,20 @@ namespace NiVE3.ViewModel
             remove { TrackMatteModeChangeRequestPublisher.Unsubscribe(value); }
         }
 
+        WeakEventPublisher<ReferenceLayerChangeEvent> ParentLayerChangeRequestPublisher { get; } = new WeakEventPublisher<ReferenceLayerChangeEvent>();
+        public event EventHandler<ReferenceLayerChangeEvent> ParentLayerChangeRequest
+        {
+            add { ParentLayerChangeRequestPublisher.Subscribe(value); }
+            remove { ParentLayerChangeRequestPublisher.Unsubscribe(value); }
+        }
+
+        WeakEventPublisher<CycledLayerEventArgs> CheckCycledParentLayerRequestPublisher { get; } = new WeakEventPublisher<CycledLayerEventArgs>();
+        public event EventHandler<CycledLayerEventArgs> CheckCycledParentLayerRequest
+        {
+            add { CheckCycledParentLayerRequestPublisher.Subscribe(value); }
+            remove { CheckCycledParentLayerRequestPublisher.Unsubscribe(value); }
+        }
+
         LayerModel LayerModel { get; }
 
         ViewStateModel ViewState { get; }
@@ -434,7 +465,7 @@ namespace NiVE3.ViewModel
 
         string PrevComment { get; set; } = "";
 
-        public LayerViewModel(LayerModel layerModel, ViewStateModel viewState, IEnumerable<LayerModelProxy> trackMatteViewSource, CollectionViewSource parentLayerViewSource)
+        public LayerViewModel(LayerModel layerModel, ViewStateModel viewState, IEnumerable<LayerModelProxy> trackMatteViewSource, IEnumerable<LayerModelProxy> parentLayerViewSource)
         {
             LayerModel = layerModel;
             ViewState = viewState;
@@ -507,6 +538,11 @@ namespace NiVE3.ViewModel
                 TrackMatteModeChangeRequestPublisher.Publish(this, new EnumEventArgs<TrackMatteMode>(trackMatteMode.Value));
             });
 
+            ChangeParentLayerCommand = new DelegateCommand<LayerModelProxy?>(parentLayer =>
+            {
+                ParentLayerChangeRequestPublisher.Publish(this, new ReferenceLayerChangeEvent(parentLayer?.LayerId));
+            });
+
             BeginEditNameCommand = new RequerySuggestedCommand(() =>
             {
                 PrevName = Name;
@@ -548,6 +584,20 @@ namespace NiVE3.ViewModel
             PropertyChanged += LayerViewModel_PropertyChanged;
         }
 
+        public bool CheckParentLayerCycled(Guid? layerId)
+        {
+            if (!layerId.HasValue)
+            {
+                return false;
+            }
+
+            var eventArgs = new CycledLayerEventArgs(layerId.Value);
+            CheckCycledParentLayerRequestPublisher.Publish(this, eventArgs);
+            return eventArgs.Cycled;
+        }
+
+        partial void WiringModel();
+
         private void LayerViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             switch (e.PropertyName)
@@ -555,10 +605,11 @@ namespace NiVE3.ViewModel
                 case nameof(TrackMatteLayerId):
                     TrackMatteLayerProxy = TrackMatteViewSource.FirstOrDefault(l => l.LayerId == TrackMatteLayerId);
                     break;
+                case nameof(ParentLayerId):
+                    ParentLayerProxy = ParentLayerViewSource.FirstOrDefault(l => l.LayerId == ParentLayerId);
+                    break;
             }
         }
-
-        partial void WiringModel();
     }
 
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
