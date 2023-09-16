@@ -94,13 +94,21 @@ sealed class ShowInMarkupAttribute : Attribute { }
 
             var isPublic = (bool?)markupableResourceDictionaryAttribute.NamedArguments.FirstOrDefault(a => a.Key == "IsPublic").Value.Value ?? false;
 
-            var resourceDictionarySymbol = compilation.GetTypeByMetadataName("System.Windows.ResourceDictionary");
-            if (!SymbolEqualityComparer.Default.Equals(typeSymbol.BaseType, resourceDictionarySymbol))
+            var baseType = typeSymbol.BaseType;
+            while (baseType != null)
             {
-                context.ReportDiagnostic(
-                    Diagnostic.Create(DiagnosticDescriptors.TypeIsNotResourceDictionary, syntax.Identifier.GetLocation(), typeSymbol.Name)
-                );
-                return;
+                if (baseType.ToString() == "System.Windows.ResourceDictionary")
+                {
+                    break;
+                }
+                baseType = baseType.BaseType;
+                if (baseType == null)
+                {
+                    context.ReportDiagnostic(
+                        Diagnostic.Create(DiagnosticDescriptors.TypeIsNotResourceDictionary, syntax.Identifier.GetLocation(), typeSymbol.Name)
+                    );
+                    return;
+                }
             }
 
             var ns = $"namespace {typeSymbol.ContainingNamespace}.Wpf.GeneratedMarkup;";

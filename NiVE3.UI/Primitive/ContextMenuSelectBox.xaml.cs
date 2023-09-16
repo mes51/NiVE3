@@ -18,7 +18,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using NiVE3.UI.Extension;
 
 namespace NiVE3.UI.Primitive
 {

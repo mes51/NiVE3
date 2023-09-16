@@ -8,4 +8,8 @@
         <Setter Property="BorderBrush" Value="{gm:AppearanceResource ResourceKey=BorderBrush, ReturnDynamicResource=True}"/>
         <Setter Property="BorderThickness" Value="1"/>
     </Style>
+
+    <Style TargetType="{x:Type pr:SlidableNumerTextBox}">
+        <!-- NOTE: BasedOn用 -->
+    </Style>
 </ResourceDictionary>

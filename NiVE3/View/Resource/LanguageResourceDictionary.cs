@@ -11,7 +11,7 @@ using NiVE3.SourceGenerator.ResourceMarkupGenerator;
 namespace NiVE3.View.Resource
 {
     [MarkupableResourceDictionary]
-    class LanguageResourceDictionary : ResourceDictionary
+    class LanguageResourceDictionary : LanguageResourceDictionaryBase
     {
         public static LanguageResourceDictionary Dictionary { get; }
 
@@ -224,6 +224,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("なし")]
         public static readonly string Layer_EmptyParentLayer = nameof(Layer_EmptyParentLayer);
 
+        [ShowInMarkup, DefaultValue("トランスフォーム")]
+        public static readonly string Layer_Transform = nameof(Layer_Transform);
+
         // History
 
         [ShowInMarkup, DefaultValue("フォルダの追加")]
@@ -276,6 +279,14 @@ namespace NiVE3.View.Resource
 
         [ShowInMarkup, DefaultValue("親レイヤーの変更")]
         public static readonly string History_ChangeParentLayer = nameof(History_ChangeParentLayer);
+
+        [ShowInMarkup, DefaultValue("プロパティの変更")]
+        public static readonly string History_ChangePropertyValue = nameof(History_ChangePropertyValue);
+
+        // Property
+
+        [ShowInMarkup, DefaultValue("不透明度")]
+        public static readonly string TransformProperty_Opacity = nameof(TransformProperty_Opacity);
 
         // Enum
 
@@ -391,44 +402,17 @@ namespace NiVE3.View.Resource
             Dictionary = new LanguageResourceDictionary();
         }
 
-        string selectedLanguage = "";
-        public string SelectedLanguage
-        {
-            get => selectedLanguage;
-            set
-            {
-                if (selectedLanguage!= value)
-                {
-                    selectedLanguage = value;
-                    LanguageResourceDictionaryBase.SelectedLanguage = value;
-                    Reload();
-                }
-            }
-        }
-
         public LanguageResourceDictionary()
         {
-            SelectedLanguage = "ja-jp";
+            Reload();
         }
 
-        public void Reload()
+        protected override void Reload()
         {
             // TODO: 言語情報読み込み&バージョン比較後適用
             foreach (var (key, (defaultValue, version)) in LanguageKeys)
             {
                 this[key] = defaultValue;
-            }
-        }
-
-        public string GetText(string key)
-        {
-            if (Contains(key))
-            {
-                return (string)this[key];
-            }
-            else
-            {
-                return "";
             }
         }
 

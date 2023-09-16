@@ -9,7 +9,19 @@ namespace NiVE3.Plugin.Resource
 {
     public abstract class LanguageResourceDictionaryBase : ResourceDictionary
     {
-        public static string SelectedLanguage { get; internal set; } = "ja-jp";
+        private static string selectedLanguage = "ja-jp";
+        public static string SelectedLanguage
+        {
+            get { return selectedLanguage; }
+            internal set
+            {
+                selectedLanguage = value;
+                foreach (var l in Cache.Values)
+                {
+                    l.Reload();
+                }
+            }
+        }
 
         static Dictionary<Type, LanguageResourceDictionaryBase> Cache { get; } = new Dictionary<Type, LanguageResourceDictionaryBase>();
 

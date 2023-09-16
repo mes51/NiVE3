@@ -3,7 +3,10 @@
                     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
                     xmlns:ad="https://github.com/Dirkster99/AvalonDock"
                     xmlns:a="clr-namespace:NiVE3.Wpf.Attach"
-                    xmlns:b="clr-namespace:NiVE3.Wpf.Behavior">
+                    xmlns:b="clr-namespace:NiVE3.Wpf.Behavior"
+                    xmlns:pt="clr-namespace:NiVE3.View.Part"
+                    xmlns:ugm="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
+                    xmlns:r="clr-namespace:NiVE3.View.Resource">
     <Style x:Key="{x:Type ad:LayoutDocumentFloatingWindowControl}" TargetType="{x:Type ad:LayoutDocumentFloatingWindowControl}">
         <Setter Property="a:ShortcutKeyBindingProperty.InputBinding" Value="True"/>
         <Setter Property="a:WindowGestureBehaviorAttachProperty.Attach" Value="True"/>
@@ -12,5 +15,64 @@
     <Style x:Key="{x:Type ad:LayoutAnchorableFloatingWindowControl}" TargetType="{x:Type ad:LayoutAnchorableFloatingWindowControl}">
         <Setter Property="a:ShortcutKeyBindingProperty.InputBinding" Value="True"/>
         <Setter Property="a:WindowGestureBehaviorAttachProperty.Attach" Value="True"/>
+    </Style>
+
+    <Style TargetType="{x:Type pt:LayerParameterExpander}">
+        <Style.Resources>
+            <Style x:Key="ArrowExpanderStyle" TargetType="{x:Type ToggleButton}">
+                <Setter Property="Focusable" Value="False"/>
+                <Setter Property="Width" Value="{x:Static r:UIParameters.ArrowWidth}"/>
+                <Setter Property="Height" Value="13"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type ToggleButton}">
+                            <Grid Background="Transparent">
+                                <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <Path x:Name="ExpandPath" Margin="1,1,1,1" Fill="{ugm:AppearanceResource ResourceKey=TextBrush, ReturnDynamicResource=True}" Data="M 0,0 8.66025403784439,5 0,10"/>
+                                </Grid>
+                            </Grid>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter Property="LayoutTransform" TargetName="ExpandPath">
+                                        <Setter.Value>
+                                            <RotateTransform Angle="90"/>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </Style.Resources>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Expander}">
+                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="3" SnapsToDevicePixels="true">
+                        <DockPanel>
+                            <Grid x:Name="HeaderSite" Margin="{TemplateBinding Padding}" DockPanel.Dock="Top">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=IndentMarginLeft}"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition />
+                                </Grid.ColumnDefinitions>
+
+                                <ToggleButton Grid.Column="1" IsChecked="{Binding IsExpanded, Mode=TwoWay, RelativeSource={RelativeSource Mode=TemplatedParent}}" Style="{StaticResource ArrowExpanderStyle}"/>
+                                <TextBlock Grid.Column="2" Text="{TemplateBinding Header}" FontFamily="{TemplateBinding FontFamily}" FontSize="{TemplateBinding FontSize}" FontStretch="{TemplateBinding FontStretch}" FontStyle="{TemplateBinding FontStyle}" FontWeight="{TemplateBinding FontWeight}" VerticalAlignment="Center"/>
+                            </Grid>
+                            <ContentPresenter x:Name="ExpandSite" DockPanel.Dock="Bottom" Focusable="False" Content="{TemplateBinding Content}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" Visibility="Collapsed"/>
+                        </DockPanel>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsExpanded" Value="True">
+                            <Setter Property="Visibility" TargetName="ExpandSite" Value="Visible"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 </ResourceDictionary>

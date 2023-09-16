@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NiVE3.UI.Extension
+namespace NiVE3.Shared.Extension
 {
-    // TODO: InternalsVisibleToをつけて別DLLにする?
-    static class EnumerableExtensions
+    public static class EnumerableExtensions
     {
         public static int IndexOf<T>(this IEnumerable<T> source, Predicate<T> predicate)
         {
@@ -37,6 +36,16 @@ namespace NiVE3.UI.Extension
             }
 
             return -1;
+        }
+
+        public static IEnumerable<(T, int)> ZipWithIndex<T>(this IEnumerable<T> source)
+        {
+            var index = 0;
+            foreach (var e in source)
+            {
+                yield return (e, index);
+                index++;
+            }
         }
     }
 }

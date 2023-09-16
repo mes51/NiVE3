@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Input;
 using NiVE3.View.Converter;
 using NiVE3.View.Primitive;
 using NiVE3.ViewModel;
@@ -14,7 +15,7 @@ namespace NiVE3.View.Part
 {
     class LayerCollectionView : NestableItemsCollectionView<LayerViewModel>
     {
-        static readonly BooleanInvertConverter InvertConverter = new BooleanInvertConverter();
+        static readonly DelegateMultiValueConverter<bool, bool, bool> CanDragConverter = new DelegateMultiValueConverter<bool, bool, bool>((v1, v2) => !(v1 || v2));
 
         public static readonly DependencyProperty RangeProperty = DependencyProperty.Register(
             nameof(Range),
@@ -44,6 +45,19 @@ namespace NiVE3.View.Part
             new FrameworkPropertyMetadata(false)
         );
 
+        public static readonly DependencyProperty IsLayerEditingProperty = DependencyProperty.Register(
+            nameof(IsLayerEditing),
+            typeof(bool),
+            typeof(LayerCollectionView),
+            new FrameworkPropertyMetadata(false)
+        );
+
+        public bool IsLayerEditing
+        {
+            get { return (bool)GetValue(IsLayerEditingProperty); }
+            set { SetValue(IsLayerEditingProperty, value); }
+        }
+
         public bool IsTimeAreaEditing
         {
             get { return (bool)GetValue(IsTimeAreaEditingProperty); }
@@ -72,24 +86,43 @@ namespace NiVE3.View.Part
         {
             AlternationCount = 1000000;
 
-            var isDragSourceBinding = new Binding
+            var isDragSourceBinding = new MultiBinding
+            {
+                Converter = CanDragConverter,
+                Mode = BindingMode.OneWay
+            };
+            isDragSourceBinding.Bindings.Add(new Binding
             {
                 Path = new PropertyPath(IsTimeAreaEditingProperty),
                 Source = this,
-                Mode = BindingMode.OneWay,
-                Converter = InvertConverter
-            };
+                Mode = BindingMode.OneWay
+            });
+            isDragSourceBinding.Bindings.Add(new Binding
+            {
+                Path = new PropertyPath(IsLayerEditingProperty),
+                Source = this,
+                Mode = BindingMode.OneWay
+            });
             BindingOperations.SetBinding(this, GongSolutions.Wpf.DragDrop.DragDrop.IsDragSourceProperty, isDragSourceBinding);
-            var isDropTargetBinding = new Binding
+
+            var isDropTargetBinding = new MultiBinding
+            {
+                Converter = CanDragConverter,
+                Mode = BindingMode.OneWay
+            };
+            isDropTargetBinding.Bindings.Add(new Binding
             {
                 Path = new PropertyPath(IsTimeAreaEditingProperty),
                 Source = this,
-                Mode = BindingMode.OneWay,
-                Converter = InvertConverter
-            };
+                Mode = BindingMode.OneWay
+            });
+            isDropTargetBinding.Bindings.Add(new Binding
+            {
+                Path = new PropertyPath(IsLayerEditingProperty),
+                Source = this,
+                Mode = BindingMode.OneWay
+            });
             BindingOperations.SetBinding(this, GongSolutions.Wpf.DragDrop.DragDrop.IsDropTargetProperty, isDropTargetBinding);
-
-            PreviewKeyDown += (_, e) => System.Diagnostics.Debug.WriteLine(e.Handled);
         }
 
         protected override DependencyObject GetContainerForItemOverride()
@@ -152,7 +185,19 @@ namespace NiVE3.View.Part
                 BindingOperations.SetBinding(layer, LayerView.CompositionFrameRateProperty, compositionFrameRateBinding);
 
                 layer.IsDurationEditingChanged += Layer_IsDurationEditingChanged;
+                Mouse.AddGotMouseCaptureHandler(layer, Layer_MouseCaptured);
+                Mouse.AddLostMouseCaptureHandler(layer, Layer_MouseCaptureReleased);
             }
+        }
+
+        private void Layer_MouseCaptured(object? sender, MouseEventArgs e)
+        {
+            IsLayerEditing = true;
+        }
+
+        private void Layer_MouseCaptureReleased(object? sender, MouseEventArgs e)
+        {
+            IsLayerEditing = false;
         }
 
         private void Layer_IsDurationEditingChanged(object? sender, EventArgs e)

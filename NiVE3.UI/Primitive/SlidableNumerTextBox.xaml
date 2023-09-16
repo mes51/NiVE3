@@ -11,6 +11,7 @@
              Focusable="True"
              FocusManager.IsFocusScope="True"
              GotFocus="Root_GotFocus"
+             PreviewKeyDown="Root_PreviewKeyDown"
              d:DesignHeight="21" d:DesignWidth="100">
     <UserControl.Resources>
         <Style x:Key="ValueTextBoxStyle" TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
@@ -19,14 +20,22 @@
             <Setter Property="AcceptsTab" Value="False"/>
 
             <Style.Triggers>
-                <DataTrigger Binding="{Binding ElementName=Root, Path=IsKeyboardFocusWithin}" Value="True">
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding ElementName=Root, Path=IsKeyboardFocusWithin}" Value="True"/>
+                        <Condition Binding="{Binding ElementName=Root, Path=IsClicked}" Value="False"/>
+                    </MultiDataTrigger.Conditions>
                     <Setter Property="Visibility" Value="Visible"/>
                     <Setter Property="FocusManager.FocusedElement" Value="{Binding ElementName=ValueTextBox}"/>
-                </DataTrigger>
-                <DataTrigger Binding="{Binding IsKeyboardFocusWithin, RelativeSource={RelativeSource Self}}" Value="True">
+                </MultiDataTrigger>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding IsKeyboardFocusWithin, RelativeSource={RelativeSource Self}}" Value="True"/>
+                        <Condition Binding="{Binding ElementName=Root, Path=IsClicked}" Value="False"/>
+                    </MultiDataTrigger.Conditions>
                     <Setter Property="Visibility" Value="Visible"/>
                     <Setter Property="FocusManager.FocusedElement" Value="{Binding ElementName=ValueTextBox}"/>
-                </DataTrigger>
+                </MultiDataTrigger>
             </Style.Triggers>
         </Style>
 
@@ -41,12 +50,20 @@
             <Setter Property="Visibility" Value="Visible"/>
 
             <Style.Triggers>
-                <DataTrigger Binding="{Binding ElementName=Root, Path=IsKeyboardFocusWithin}" Value="True">
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding ElementName=Root, Path=IsKeyboardFocusWithin}" Value="True"/>
+                        <Condition Binding="{Binding ElementName=Root, Path=IsClicked}" Value="False"/>
+                    </MultiDataTrigger.Conditions>
                     <Setter Property="Visibility" Value="Hidden"/>
-                </DataTrigger>
-                <DataTrigger Binding="{Binding IsKeyboardFocusWithin, RelativeSource={RelativeSource Self}}" Value="True">
+                </MultiDataTrigger>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding IsKeyboardFocusWithin, RelativeSource={RelativeSource Self}}" Value="True"/>
+                        <Condition Binding="{Binding ElementName=Root, Path=IsClicked}" Value="False"/>
+                    </MultiDataTrigger.Conditions>
                     <Setter Property="Visibility" Value="Hidden"/>
-                </DataTrigger>
+                </MultiDataTrigger>
             </Style.Triggers>
         </Style>
     </UserControl.Resources>

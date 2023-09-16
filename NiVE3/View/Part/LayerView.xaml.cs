@@ -16,6 +16,7 @@ using System.Windows.Shapes;
 using NiVE3.Extension;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.View.Converter;
+using NiVE3.View.Resource;
 using NiVE3.ViewModel;
 
 namespace NiVE3.View.Part
@@ -293,6 +294,48 @@ namespace NiVE3.View.Part
             {
                 layer.RaiseEvent(new RoutedEventArgs(IsDurationEditingChangedEvent, d));
             }
+        }
+    }
+
+    class R : Expander
+    {
+        public static readonly DependencyProperty IndentLevelProperty = DependencyProperty.Register(
+            nameof(IndentLevel),
+            typeof(int),
+            typeof(R),
+            new FrameworkPropertyMetadata(0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        public static readonly DependencyProperty IsShowAVSwitchAreaProperty = DependencyProperty.Register(
+            nameof(IsShowAVSwitchArea),
+            typeof(bool),
+            typeof(R),
+            new FrameworkPropertyMetadata(true, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        private static readonly DependencyProperty IndentMarginLeftProperty = DependencyProperty.Register(
+            nameof(IndentMarginLeft),
+            typeof(GridLength),
+            typeof(R),
+            new FrameworkPropertyMetadata(new GridLength(UIParameters.AVSwitchWidthWithHalfSplitter), FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        public int IndentLevel
+        {
+            get { return (int)GetValue(IndentLevelProperty); }
+            set { SetValue(IndentLevelProperty, value); }
+        }
+
+        public bool IsShowAVSwitchArea
+        {
+            get { return (bool)GetValue(IsShowAVSwitchAreaProperty); }
+            set { SetValue(IsShowAVSwitchAreaProperty, value); }
+        }
+
+        private GridLength IndentMarginLeft
+        {
+            get { return (GridLength)GetValue(IndentMarginLeftProperty); }
+            set { SetValue(IndentMarginLeftProperty, value); }
         }
     }
 }

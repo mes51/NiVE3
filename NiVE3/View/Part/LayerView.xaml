@@ -42,7 +42,7 @@
             <cv:ConverterItem Converter="{StaticResource BooleanToVisibilityHiddenConverter}" TargetType="{x:Type Visibility}"/>
         </cv:ConverterCollection>
 
-        <cv:SwitchValueConverter x:Key="AVSwitchGridWidthSwitch" TrueValue="68"/> <!-- 66 + ceil(pr:ItemResizableStackPanel.SplitterSize / 2) -->
+        <cv:SwitchValueConverter x:Key="AVSwitchGridWidthSwitch" TrueValue="{x:Static r:UIParameters.AVSwitchWidthWithHalfSplitter}"/>
         <cv:SwitchValueConverter x:Key="TagGridWidthSwitch" TrueValue="19"/>
 
         <CollectionViewSource x:Key="TrackMatteCollectionViewSource" Source="{Binding TrackMatteViewSource}"/>
@@ -271,7 +271,7 @@
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="17"/>
+            <RowDefinition Height="{x:Static r:UIParameters.LayerUIHeightGridLength}"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
@@ -283,7 +283,7 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="{Binding IsAVSwitchColumnVisible, Converter={StaticResource AVSwitchGridWidthSwitch}}"/>
 
-                <ColumnDefinition Width="19"/>
+                <ColumnDefinition Width="{x:Static r:UIParameters.ArrowWidthGridLength}"/>
 
                 <ColumnDefinition Width="{Binding IsTagColumnVisible, Converter={StaticResource TagGridWidthSwitch}}"/>
 
@@ -518,12 +518,13 @@
             </Grid>
         </Grid>
 
-        <Grid Grid.Column="0" Grid.Row="1" Visibility="{Binding IsExpanded, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter={x:Static pi:SourceType.Audio}}" ClipToBounds="True">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="{x:Static pr:NestableItemsCollectionView.IndentGridWidth}"/>
-                <ColumnDefinition />
-            </Grid.ColumnDefinitions>
-        </Grid>
+        <StackPanel Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" Visibility="{Binding IsExpanded, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Grid Visibility="{Binding SourceType, Converter={StaticResource AVTypeVisibleConverter}, ConverterParameter={x:Static local:LayerView.CompositionDisplayableSourceType}}" ClipToBounds="True">
+                <pt:LayerParameterExpander Header="{gm:LanguageResource ResourceKey=Layer_Transform}" IndentLevel="1" IsShowAVSwitchArea="{Binding IsAVSwitchColumnVisible}">
+                    <pt:PropertyCollectionView ItemsSource="{Binding TransformProperties}" IndentLevel="2" ControlAreaWidth="{Binding ElementName=Root, Path=LayerControlAreaWidth}" NameAreaWidth="{Binding PropertyNameAreaWidth}"/>
+                </pt:LayerParameterExpander>
+            </Grid>
+        </StackPanel>
 
         <local:DurationBar Grid.Column="1"
                            Grid.Row="0"

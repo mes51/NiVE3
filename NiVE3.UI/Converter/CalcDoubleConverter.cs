@@ -25,7 +25,7 @@ namespace NiVE3.UI.Converter
                 {
                     if (Digit > 0 && !ForceDisplayDecimal)
                     {
-                        return v.ToString($"#.{string.Join("", Enumerable.Repeat("#", Digit))}");
+                        return v.ToString($"0.{string.Join("", Enumerable.Repeat("#", Digit))}");
                     }
                     else
                     {

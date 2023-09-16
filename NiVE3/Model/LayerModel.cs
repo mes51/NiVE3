@@ -7,13 +7,19 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Plugin.Interfaces;
-using Prism.Mvvm;
 using NiVE3.Input;
+using NiVE3.Plugin.Property;
+using NiVE3.Plugin.Property.Properties;
+using Prism.Mvvm;
+using NiVE3.Plugin.Resource;
+using NiVE3.View.Resource;
 
 namespace NiVE3.Model
 {
-    partial class LayerModel : BindableBase, IDisposable
+    partial class LayerModel : BindableBase, IDisposable, ILayerObject
     {
+        const string TransformPropertyOpacityId = nameof(TransformPropertyOpacityId);
+
         private string name = "";
         public string Name
         {
@@ -219,6 +225,8 @@ namespace NiVE3.Model
 
         public FootageModel FootageModel { get; }
 
+        public PropertyModel[] TransformProperties { get; }
+
         HistoryModel HistoryModel { get; set; }
 
         double PrevInPoint { get; set; }
@@ -227,9 +235,9 @@ namespace NiVE3.Model
 
         double PrevSourceStartPoint { get; set; }
 
-        public LayerModel(FootageModel footageModel, HistoryModel historyModel) : this(footageModel, historyModel,null) { }
+        public LayerModel(CompositionModel compositionModel, FootageModel footageModel, HistoryModel historyModel) : this(compositionModel, footageModel, historyModel,null) { }
 
-        public LayerModel(FootageModel footageModel, HistoryModel historyModel, Guid? layerId)
+        public LayerModel(CompositionModel compositionModel, FootageModel footageModel, HistoryModel historyModel, Guid? layerId)
         {
             Effects = new ObservableCollection<EffectModel>();
             FootageModel = footageModel;
@@ -242,6 +250,11 @@ namespace NiVE3.Model
 
             IsEnableVideo = SourceType.HasFlag(SourceType.Video) || SourceType.HasFlag(SourceType.Image);
             IsEnableAudio = SourceType.HasFlag(SourceType.Audio);
+
+            TransformProperties = new PropertyModel[]
+            {
+                new PropertyModel(new DoubleProperty(TransformPropertyOpacityId, new LanguageResourceKey(typeof(LanguageResourceDictionary), LanguageResourceDictionary.TransformProperty_Opacity), 100.0, 0.0, 100.0, 1.0, 1), compositionModel, this, HistoryModel)
+            };
         }
 
         public void BeginEditDuration()

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace NiVE3.View.Resource
 {
@@ -12,5 +13,15 @@ namespace NiVE3.View.Resource
         public const double TimelineRangeThumbWidth = 10.0;
 
         public const double TimelineRangeThumbTotalWidth = TimelineRangeThumbWidth * 2.0;
+
+        public const double ArrowWidth = 19.0;
+
+        public const double AVSwitchWidthWithHalfSplitter = 68; // 66 + ceil(pr:ItemResizableStackPanel.SplitterSize / 2)
+
+        public const double LayerUIHeight = 17.0;
+
+        public static readonly GridLength ArrowWidthGridLength = new GridLength(ArrowWidth);
+
+        public static readonly GridLength LayerUIHeightGridLength = new GridLength(LayerUIHeight);
     }
 }

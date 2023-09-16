@@ -357,6 +357,13 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref isParentLayerColumnVisible, value); }
         }
 
+        private double propertyNameAreaWidth;
+        public double PropertyNameAreaWidth
+        {
+            get { return propertyNameAreaWidth; }
+            set { SetProperty(ref propertyNameAreaWidth, value); }
+        }
+
         private LayerModelProxy? trackMatteLayerProxy;
         public LayerModelProxy? TrackMatteLayerProxy
         {
@@ -384,6 +391,8 @@ namespace NiVE3.ViewModel
             get { return editingParameter; }
             set { SetProperty(ref editingParameter, value); }
         }
+
+        public PropertyViewModel[] TransformProperties { get; }
 
         public bool IsComposition { get; }
 
@@ -472,8 +481,11 @@ namespace NiVE3.ViewModel
             TrackMatteViewSource = trackMatteViewSource;
             ParentLayerViewSource = parentLayerViewSource;
 
+            TransformProperties = layerModel.TransformProperties.Select(p => new PropertyViewModel(p)).ToArray();
+
             WiringModel();
 
+            PropertyNameAreaWidth = (IsLayerNumberColumnVisible ? LayerNumberColumnWidth : 0.0) + LayerNameColumnWidth;
             IsComposition = layerModel.IsComposition;
 
             BeginEditDurationCommand = new RequerySuggestedCommand(() =>
@@ -607,6 +619,11 @@ namespace NiVE3.ViewModel
                     break;
                 case nameof(ParentLayerId):
                     ParentLayerProxy = ParentLayerViewSource.FirstOrDefault(l => l.LayerId == ParentLayerId);
+                    break;
+                case nameof(LayerNumberColumnWidth):
+                case nameof(LayerNameColumnWidth):
+                case nameof(IsLayerNumberColumnVisible):
+                    PropertyNameAreaWidth = (IsLayerNumberColumnVisible ? LayerNumberColumnWidth : 0.0) + LayerNameColumnWidth;
                     break;
             }
         }

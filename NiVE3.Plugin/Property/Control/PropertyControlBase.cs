@@ -4,11 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
+using NiVE3.Plugin.Interfaces;
 
 namespace NiVE3.Plugin.Property.Control
 {
     public abstract class PropertyControlBase : UserControl
     {
-        public abstract Type SupportedPropertyType { get; }
+        protected IPropertyViewModel? ViewModel => DataContext as IPropertyViewModel;
     }
 }

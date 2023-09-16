@@ -11,12 +11,13 @@ using NiVE3.Extension;
 using NiVE3.Input;
 using NiVE3.Plugin.Image;
 using NiVE3.Plugin.Interfaces;
+using NiVE3.Shared.Extension;
 using NiVE3.View.Resource;
 using Prism.Mvvm;
 
 namespace NiVE3.Model
 {
-    partial class CompositionModel : BindableBase, IDisposable
+    partial class CompositionModel : BindableBase, IDisposable, ICompositionObject
     {
         string name = "";
         public string Name
@@ -177,7 +178,7 @@ namespace NiVE3.Model
                 {
                     continue;
                 }
-                var layer = new LayerModel(f, HistoryModel);
+                var layer = new LayerModel(this, f, HistoryModel);
                 if (f.InputType == SourceType.Image || f.InputType == SourceType.None)
                 {
                     layer.OutPoint = Duration;

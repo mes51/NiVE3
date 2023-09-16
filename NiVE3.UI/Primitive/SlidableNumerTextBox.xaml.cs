@@ -73,6 +73,31 @@ namespace NiVE3.UI.Primitive
             new FrameworkPropertyMetadata(-1, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, DigitChanged)
         );
 
+        private static readonly DependencyProperty IsClickedProperty = DependencyProperty.Register(
+            nameof(IsClicked),
+            typeof(bool),
+            typeof(SlidableNumerTextBox),
+            new FrameworkPropertyMetadata(false)
+        );
+
+        public static RoutedEvent BeginSlideEditValueEvent = EventManager.RegisterRoutedEvent(
+            nameof(BeginSlideEditValue), RoutingStrategy.Bubble, typeof(EventHandler), typeof(SlidableNumerTextBox)
+        );
+
+        public static RoutedEvent EndSlideEditValueEvent = EventManager.RegisterRoutedEvent(
+            nameof(EndSlideEditValue), RoutingStrategy.Bubble, typeof(EventHandler), typeof(SlidableNumerTextBox)
+        );
+
+        public static RoutedEvent AbortSlideEditValueEvent = EventManager.RegisterRoutedEvent(
+            nameof(AbortSlideEditValue), RoutingStrategy.Direct, typeof(EventHandler), typeof(SlidableNumerTextBox)
+        );
+
+        private bool IsClicked
+        {
+            get { return (bool)GetValue(IsClickedProperty); }
+            set { SetValue(IsClickedProperty, value); }
+        }
+
         public int Digit
         {
             get { return (int)GetValue(DigitProperty); }
@@ -115,8 +140,6 @@ namespace NiVE3.UI.Primitive
             set { SetValue(ValueProperty, value); }
         }
 
-        bool IsClick { get; set; }
-
         bool IsMoved { get; set; }
 
         Point ClickPoint { get; set; }
@@ -124,6 +147,24 @@ namespace NiVE3.UI.Primitive
         double PrevValue { get; set; }
 
         CalcDoubleConverter DefaultConverter { get; } = new CalcDoubleConverter();
+
+        public event EventHandler AbortSlideEditValue
+        {
+            add { AddHandler(AbortSlideEditValueEvent, value); }
+            remove { RemoveHandler(AbortSlideEditValueEvent, value); }
+        }
+
+        public event EventHandler EndSlideEditValue
+        {
+            add { AddHandler(EndSlideEditValueEvent, value); }
+            remove { RemoveHandler(EndSlideEditValueEvent, value); }
+        }
+
+        public event EventHandler BeginSlideEditValue
+        {
+            add { AddHandler(BeginSlideEditValueEvent, value); }
+            remove { RemoveHandler(BeginSlideEditValueEvent, value); }
+        }
 
         public SlidableNumerTextBox()
         {
@@ -138,7 +179,7 @@ namespace NiVE3.UI.Primitive
             BindingOperations.ClearBinding(ValueTextBlock, TextBlock.TextProperty);
             BindingOperations.ClearBinding(ValueTextBox, TextBox.TextProperty);
 
-            BindingOperations.SetBinding(ValueTextBlock, TextBlock.TextProperty, new Binding(nameof(Value)) { Source = this,    Converter = Converter });
+            BindingOperations.SetBinding(ValueTextBlock, TextBlock.TextProperty, new Binding(nameof(Value)) { Source = this, Converter = Converter });
             BindingOperations.SetBinding(ValueTextBox, TextBox.TextProperty, new Binding(nameof(Value)) { Source = this, Converter = Converter });
         }
 
@@ -147,21 +188,39 @@ namespace NiVE3.UI.Primitive
             ValueTextBox.SelectAll();
         }
 
+        private void Root_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (IsClicked && e.Key == Key.Escape)
+            {
+                Mouse.Capture(null);
+                Keyboard.ClearFocus();
+                Value = PrevValue;
+                IsClicked = false;
+                e.Handled = true;
+
+                RaiseEvent(new RoutedEventArgs(AbortSlideEditValueEvent, this));
+            }
+        }
+
         private void ValueTextBlock_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ChangedButton == MouseButton.Left && e.LeftButton == MouseButtonState.Pressed)
             {
-                IsClick = true;
+                IsClicked = true;
                 IsMoved = false;
                 PrevValue = Value;
                 ClickPoint = e.GetPosition(this);
                 ((UIElement)sender).CaptureMouse();
+                Focus();
+                e.Handled = true;
+
+                RaiseEvent(new RoutedEventArgs(BeginSlideEditValueEvent, this));
             }
         }
 
         private void ValueTextBlock_MouseMove(object sender, MouseEventArgs e)
         {
-            if (!IsClick)
+            if (!IsClicked)
             {
                 return;
             }
@@ -189,6 +248,7 @@ namespace NiVE3.UI.Primitive
                 // NOTE: CoerceValueでClampされる前の値がBindingで伝播してしまうため、Clampした値をセットする
                 Value = Math.Clamp(Value + ((int)diff.X + (int)diff.Y) * SlideChangeValue * rate, Minimum, Maximum);
                 ClickPoint = newPos;
+                e.Handled = true;
             }
         }
 
@@ -196,7 +256,8 @@ namespace NiVE3.UI.Primitive
         {
             if (e.ChangedButton == MouseButton.Left && e.LeftButton == MouseButtonState.Released)
             {
-                IsClick = false;
+                Keyboard.ClearFocus();
+                IsClicked = false;
                 ((UIElement)sender).ReleaseMouseCapture();
 
                 if (IsMoved)
@@ -204,6 +265,8 @@ namespace NiVE3.UI.Primitive
                     var diff = e.GetPosition(this) - ClickPoint;
                     if (Math.Abs(diff.X) < 1.0 && Math.Abs(diff.Y) < 1.0)
                     {
+                        e.Handled = true;
+                        RaiseEvent(new RoutedEventArgs(EndSlideEditValueEvent, this));
                         return;
                     }
 
@@ -218,6 +281,9 @@ namespace NiVE3.UI.Primitive
                     }
                     // NOTE: CoerceValueでClampされる前の値がBindingで伝播してしまうため、Clampした値をセットする
                     Value = Math.Clamp(Value + ((int)diff.X + (int)diff.Y) * SlideChangeValue * rate, Minimum, Maximum);
+                    e.Handled = true;
+
+                    RaiseEvent(new RoutedEventArgs(EndSlideEditValueEvent, this));
                 }
                 else
                 {

@@ -96,7 +96,7 @@ namespace NiVE3.View.Primitive
             nameof(ControlAreaWidth),
             typeof(double),
             typeof(NestableItemsCollectionView<T>),
-            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, ControlAreaWidthChanged)
+            new FrameworkPropertyMetadata(0.0)
         );
 
         public static readonly DependencyProperty SelectedItemsProperty = DependencyProperty.Register(
@@ -106,30 +106,17 @@ namespace NiVE3.View.Primitive
             new FrameworkPropertyMetadata(new ObservableCollection<T>(), FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
-        public static readonly DependencyProperty CalculatedControlAreaWidthProperty = DependencyProperty.Register(
-            nameof(CalculatedControlAreaWidth),
-            typeof(double),
-            typeof(NestableItemsCollectionView<T>),
-            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
-        );
-
         public static readonly DependencyProperty IndentLevelProperty = DependencyProperty.Register(
             nameof(IndentLevel),
             typeof(int),
             typeof(NestableItemsCollectionView<T>),
-            new FrameworkPropertyMetadata(0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, ControlAreaWidthChanged)
+            new FrameworkPropertyMetadata(0)
         );
 
         public int IndentLevel
         {
             get { return (int)GetValue(IndentLevelProperty); }
             set { SetValue(IndentLevelProperty, value); }
-        }
-
-        public double CalculatedControlAreaWidth
-        {
-            get { return (double)GetValue(CalculatedControlAreaWidthProperty); }
-            set { SetValue(CalculatedControlAreaWidthProperty, value); }
         }
 
         public double ControlAreaWidth
@@ -329,14 +316,6 @@ namespace NiVE3.View.Primitive
         {
             var item = ItemContainerGenerator.ContainerFromItem(viewModel);
             SetIsSelected(item, selected);
-        }
-
-        static void ControlAreaWidthChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            if (d is NestableItemsCollectionView<T> collection)
-            {
-                collection.CalculatedControlAreaWidth = collection.ControlAreaWidth - collection.IndentLevel * IndentWidth;
-            }
         }
 
         static void ItemsSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)

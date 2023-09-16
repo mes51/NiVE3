@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
-using NiVE3.Extension;
+using NiVE3.Shared.Extension;
 
 namespace NiVE3.View.Converter
 {

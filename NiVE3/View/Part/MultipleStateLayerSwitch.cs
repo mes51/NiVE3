@@ -9,6 +9,7 @@ using System.Windows.Input;
 using System.Windows.Markup;
 using System.Windows.Media;
 using NiVE3.Extension;
+using NiVE3.Shared.Extension;
 
 namespace NiVE3.View.Part
 {

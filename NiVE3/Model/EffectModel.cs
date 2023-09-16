@@ -8,7 +8,7 @@ using Prism.Mvvm;
 
 namespace NiVE3.Model
 {
-    class EffectModel : BindableBase
+    class EffectModel : BindableBase, IDisposable, IEffectObject
     {
         public IEffect Effect { get; }
 
@@ -16,5 +16,7 @@ namespace NiVE3.Model
         {
             Effect = effect;
         }
+
+        public void Dispose() { }
     }
 }

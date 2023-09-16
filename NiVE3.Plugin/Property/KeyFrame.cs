@@ -6,12 +6,7 @@ using System.Threading.Tasks;
 
 namespace NiVE3.Plugin.Property
 {
-    [Flags]
-    public enum InterpolationType
+    public record KeyFrame(double Time, object Value, Ease EaseIn, Ease EaseOut, InterpolationType InterpolationType)
     {
-        None,
-        Linear = 0b001,
-        CatmullRom = 0b010,
-        Bezier = 0b100
     }
 }
