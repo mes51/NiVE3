@@ -183,7 +183,9 @@
                                 RangeStart="{Binding TimeBarRangeStart}"
                                 SelectedItems="{Binding SelectedLayers}"
                                 dd:DragDrop.DropHandler="{Binding}"
-                                dd:DragDrop.DragHandler="{Binding RelativeSource={RelativeSource Self}}">
+                                dd:DragDrop.DragHandler="{Binding RelativeSource={RelativeSource Self}}"
+                                dd:DragDrop.IsDragSource="True"
+                                dd:DragDrop.IsDropTarget="True">
             <pt:LayerCollectionView.Style>
                 <Style TargetType="{x:Type pt:LayerCollectionView}" BasedOn="{x:Static pt:LayerCollectionView.DefaultStyle}">
                     <Setter Property="Template">

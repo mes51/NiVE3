@@ -31,10 +31,6 @@ namespace NiVE3.View.Part
 
         public static IMultiValueConverter CycledParentLayerConverter = new DelegateMultiValueConverter<LayerViewModel, Guid?, bool>((vm, l) => vm.CheckParentLayerCycled(l));
 
-        public static RoutedEvent IsDurationEditingChangedEvent = EventManager.RegisterRoutedEvent(
-            nameof(IsDurationEditingChanged), RoutingStrategy.Direct, typeof(EventHandler), typeof(LayerView)
-        );
-
         public static readonly DependencyProperty RangeProperty = DependencyProperty.Register(
             nameof(Range),
             typeof(double),
@@ -69,27 +65,6 @@ namespace NiVE3.View.Part
             typeof(LayerView),
             new FrameworkPropertyMetadata(0.0)
         );
-
-        private static readonly DependencyPropertyKey IsDurationEditingPropertyKey = DependencyProperty.RegisterReadOnly(
-            nameof(IsDurationEditing),
-            typeof(bool),
-            typeof(LayerView),
-            new FrameworkPropertyMetadata(false, IsDurationEditingChangedHandler)
-        );
-
-        public static readonly DependencyProperty IsDurationEditingProperty = IsDurationEditingPropertyKey.DependencyProperty;
-
-        public event EventHandler IsDurationEditingChanged
-        {
-            add { AddHandler(IsDurationEditingChangedEvent, value); }
-            remove { RemoveHandler(IsDurationEditingChangedEvent, value); }
-        }
-
-        public bool IsDurationEditing
-        {
-            get { return (bool)GetValue(IsDurationEditingProperty); }
-            private set { SetValue(IsDurationEditingPropertyKey, value); }
-        }
 
         public double CompositionFrameRate
         {
@@ -138,7 +113,7 @@ namespace NiVE3.View.Part
         private void Root_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             Focus();
-            ParentCollection?.SelectItem(this, Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift), Keyboard.IsKeyDown(Key.LeftCtrl) ||  Keyboard.IsKeyDown(Key.RightCtrl));
+            ParentCollection?.SelectItem(this, Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift), Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl));
         }
 
         private void LayerNameTextBox_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -277,8 +252,7 @@ namespace NiVE3.View.Part
 
         private void DurationBar_IsClickedChanged(object sender, EventArgs e)
         {
-            IsDurationEditing = DurationBar.IsClicked;
-            if (IsDurationEditing)
+            if (DurationBar.IsClicked)
             {
                 ViewModel?.BeginEditDurationCommand?.Execute(null);
             }
@@ -286,56 +260,6 @@ namespace NiVE3.View.Part
             {
                 ViewModel?.CommitEditDurationCommand?.Execute(null);
             }
-        }
-
-        static void IsDurationEditingChangedHandler(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            if (d is LayerView layer)
-            {
-                layer.RaiseEvent(new RoutedEventArgs(IsDurationEditingChangedEvent, d));
-            }
-        }
-    }
-
-    class R : Expander
-    {
-        public static readonly DependencyProperty IndentLevelProperty = DependencyProperty.Register(
-            nameof(IndentLevel),
-            typeof(int),
-            typeof(R),
-            new FrameworkPropertyMetadata(0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
-        );
-
-        public static readonly DependencyProperty IsShowAVSwitchAreaProperty = DependencyProperty.Register(
-            nameof(IsShowAVSwitchArea),
-            typeof(bool),
-            typeof(R),
-            new FrameworkPropertyMetadata(true, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
-        );
-
-        private static readonly DependencyProperty IndentMarginLeftProperty = DependencyProperty.Register(
-            nameof(IndentMarginLeft),
-            typeof(GridLength),
-            typeof(R),
-            new FrameworkPropertyMetadata(new GridLength(UIParameters.AVSwitchWidthWithHalfSplitter), FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
-        );
-
-        public int IndentLevel
-        {
-            get { return (int)GetValue(IndentLevelProperty); }
-            set { SetValue(IndentLevelProperty, value); }
-        }
-
-        public bool IsShowAVSwitchArea
-        {
-            get { return (bool)GetValue(IsShowAVSwitchAreaProperty); }
-            set { SetValue(IsShowAVSwitchAreaProperty, value); }
-        }
-
-        private GridLength IndentMarginLeft
-        {
-            get { return (GridLength)GetValue(IndentMarginLeftProperty); }
-            set { SetValue(IndentMarginLeftProperty, value); }
         }
     }
 }
