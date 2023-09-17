@@ -18,6 +18,8 @@ namespace NiVE3.Model
 {
     partial class LayerModel : BindableBase, IDisposable, ILayerObject
     {
+        const string TransformGroupId = nameof(TransformGroupId);
+
         const string TransformPropertyOpacityId = nameof(TransformPropertyOpacityId);
 
         private string name = "";
@@ -225,7 +227,7 @@ namespace NiVE3.Model
 
         public FootageModel FootageModel { get; }
 
-        public PropertyModel[] TransformProperties { get; }
+        public PropertyGroupModel TransformProperties { get; }
 
         HistoryModel HistoryModel { get; set; }
 
@@ -251,10 +253,10 @@ namespace NiVE3.Model
             IsEnableVideo = SourceType.HasFlag(SourceType.Video) || SourceType.HasFlag(SourceType.Image);
             IsEnableAudio = SourceType.HasFlag(SourceType.Audio);
 
-            TransformProperties = new PropertyModel[]
+            TransformProperties = new PropertyGroupModel(new PropertyGroup(TransformGroupId, new LanguageResourceKey(typeof(LanguageResourceDictionary), LanguageResourceDictionary.Layer_Transform), new PropertyBase[]
             {
-                new PropertyModel(new DoubleProperty(TransformPropertyOpacityId, new LanguageResourceKey(typeof(LanguageResourceDictionary), LanguageResourceDictionary.TransformProperty_Opacity), 100.0, 0.0, 100.0, 1.0, 1), compositionModel, this, HistoryModel)
-            };
+                new DoubleProperty(TransformPropertyOpacityId, new LanguageResourceKey(typeof(LanguageResourceDictionary), LanguageResourceDictionary.TransformProperty_Opacity), 100.0, 0.0, 100.0, 1.0, 1)
+            }), compositionModel, this, historyModel);
         }
 
         public void BeginEditDuration()

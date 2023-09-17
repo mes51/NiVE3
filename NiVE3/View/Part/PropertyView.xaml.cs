@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using ILGPU.IR;
 using NiVE3.Plugin.Property.Control;
 using NiVE3.View.Resource;
 using NiVE3.ViewModel;
@@ -79,19 +80,6 @@ namespace NiVE3.View.Part
             new FrameworkPropertyMetadata(new GridLength(), FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
-        public PropertyControlBase? PropertyControl
-        {
-            get
-            {
-                return PropertyControlGrid.Children.OfType<PropertyControlBase>().FirstOrDefault();
-            }
-            set
-            {
-                PropertyControlGrid.Children.Clear();
-                PropertyControlGrid.Children.Add(value);
-            }
-        }
-
         public double NameAreaWidth
         {
             get { return (double)GetValue(NameAreaWidthProperty); }
@@ -143,6 +131,15 @@ namespace NiVE3.View.Part
         public PropertyView()
         {
             InitializeComponent();
+        }
+
+        private void Root_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (DataContext is PropertyViewModel vm)
+            {
+                PropertyControlGrid.Children.Clear();
+                PropertyControlGrid.Children.Add(vm.CreateControl());
+            }
         }
 
         static void IndentParameterChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)

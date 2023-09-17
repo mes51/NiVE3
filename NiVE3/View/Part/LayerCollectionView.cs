@@ -16,6 +16,8 @@ namespace NiVE3.View.Part
 {
     class LayerCollectionView : StackableItemsCollectionView<LayerViewModel>
     {
+        static readonly IValueConverter LayerNumberOffsetConverter = new DelegateConverter<int, int>(v => v + 1);
+
         public static readonly DependencyProperty RangeProperty = DependencyProperty.Register(
             nameof(Range),
             typeof(double),
@@ -91,7 +93,7 @@ namespace NiVE3.View.Part
                     Path = new PropertyPath(AlternationIndexProperty),
                     Source = layer,
                     Mode = BindingMode.OneWay,
-                    Converter = new DelegateConverter<int, int>(v => v + 1)
+                    Converter = LayerNumberOffsetConverter
                 };
                 BindingOperations.SetBinding(layer, LayerView.LayerNumberProperty, numberBinding);
 

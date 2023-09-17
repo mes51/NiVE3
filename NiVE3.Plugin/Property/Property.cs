@@ -104,9 +104,19 @@ namespace NiVE3.Plugin.Property
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        /// <param name="name">グループの名前</param>
+        /// <param name="displayName">グループの名前</param>
         /// <param name="children">グループに含まれるプロパティ</param>
-        public PropertyGroup(string id, string name, PropertyBase[] children) : base(id, name, PropertyGroupType.Instance, null)
+        public PropertyGroup(string id, string displayName, PropertyBase[] children) : base(id, displayName, PropertyGroupType.Instance, null)
+        {
+            Children = children;
+        }
+
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="displayName">グループの名前</param>
+        /// <param name="children">グループに含まれるプロパティ</param>
+        public PropertyGroup(string id, LanguageResourceKey displayName, PropertyBase[] children) : base(id, displayName, PropertyGroupType.Instance, null)
         {
             Children = children;
         }

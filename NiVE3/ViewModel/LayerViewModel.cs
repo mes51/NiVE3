@@ -392,7 +392,7 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref editingParameter, value); }
         }
 
-        public PropertyViewModel[] TransformProperties { get; }
+        public PropertyGroupViewModel TransformProperties { get; }
 
         public bool IsComposition { get; }
 
@@ -481,7 +481,7 @@ namespace NiVE3.ViewModel
             TrackMatteViewSource = trackMatteViewSource;
             ParentLayerViewSource = parentLayerViewSource;
 
-            TransformProperties = layerModel.TransformProperties.Select(p => new PropertyViewModel(p)).ToArray();
+            TransformProperties = new PropertyGroupViewModel(layerModel.TransformProperties);
 
             WiringModel();
 
