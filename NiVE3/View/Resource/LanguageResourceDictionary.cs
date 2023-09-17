@@ -285,8 +285,17 @@ namespace NiVE3.View.Resource
 
         // Property
 
+        [ShowInMarkup, DefaultValue("アンカーポイント")]
+        public static readonly string TransformProperty_AnchorPoint = nameof(TransformProperty_AnchorPoint);
+
+        [ShowInMarkup, DefaultValue("位置")]
+        public static readonly string TransformProperty_Translate = nameof(TransformProperty_Translate);
+
         [ShowInMarkup, DefaultValue("回転")]
         public static readonly string TransformProperty_ZAngle2D = nameof(TransformProperty_ZAngle2D);
+
+        [ShowInMarkup, DefaultValue("スケール")]
+        public static readonly string TransformProperty_Scale = nameof(TransformProperty_Scale);
 
         [ShowInMarkup, DefaultValue("不透明度")]
         public static readonly string TransformProperty_Opacity = nameof(TransformProperty_Opacity);

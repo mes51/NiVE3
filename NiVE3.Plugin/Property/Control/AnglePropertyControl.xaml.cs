@@ -65,6 +65,19 @@ namespace NiVE3.Plugin.Property.Control
             {
                 newViewModel.PropertyChanged += ViewModel_PropertyChanged;
             }
+
+            if (ViewModel?.Value is double angle)
+            {
+                var rotate = (int)(angle / 360.0);
+                angle = angle % 360.0;
+
+                IsValueChanging = true;
+
+                RotateCount = rotate;
+                Angle = angle;
+
+                IsValueChanging = false;
+            }
         }
 
         private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -79,8 +92,10 @@ namespace NiVE3.Plugin.Property.Control
             angle = angle % 360.0;
 
             IsValueChanging = true;
+
             RotateCount = rotate;
             Angle = angle;
+
             IsValueChanging = false;
         }
 

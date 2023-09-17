@@ -13,6 +13,7 @@ using NiVE3.Plugin.Property.Properties;
 using Prism.Mvvm;
 using NiVE3.Plugin.Resource;
 using NiVE3.View.Resource;
+using NiVE3.Plugin.Struct;
 
 namespace NiVE3.Model
 {
@@ -20,9 +21,15 @@ namespace NiVE3.Model
     {
         const string TransformGroupId = nameof(TransformGroupId);
 
-        const string TransformPropertyOpacityId = nameof(TransformPropertyOpacityId);
+        const string TransformAnchorPointId= nameof(TransformAnchorPointId);
+
+        const string TransformTranslateId = nameof(TransformTranslateId);
 
         const string TransformZAngleId = nameof(TransformZAngleId);
+
+        const string TransformScaleId = nameof(TransformScaleId);
+
+        const string TransformPropertyOpacityId = nameof(TransformPropertyOpacityId);
 
         private string name = "";
         public string Name
@@ -257,7 +264,10 @@ namespace NiVE3.Model
 
             TransformProperties = new PropertyGroupModel(new PropertyGroup(TransformGroupId, new LanguageResourceKey(typeof(LanguageResourceDictionary), LanguageResourceDictionary.Layer_Transform), new PropertyBase[]
             {
+                new Vector3dProperty(TransformAnchorPointId, new LanguageResourceKey(typeof(LanguageResourceDictionary), LanguageResourceDictionary.TransformProperty_AnchorPoint), new Vector3d(), int.MaxValue, true),
+                new Vector3dProperty(TransformTranslateId, new LanguageResourceKey(typeof(LanguageResourceDictionary), LanguageResourceDictionary.TransformProperty_Translate), new Vector3d(), int.MaxValue, true),
                 new AngleProperty(TransformZAngleId, new LanguageResourceKey(typeof(LanguageResourceDictionary), LanguageResourceDictionary.TransformProperty_ZAngle2D), 0.0),
+                new Vector3dProperty(TransformScaleId, new LanguageResourceKey(typeof(LanguageResourceDictionary), LanguageResourceDictionary.TransformProperty_Scale), new Vector3d(100.0, 100.0, 100.0), int.MaxValue, true),
                 new DoubleProperty(TransformPropertyOpacityId, new LanguageResourceKey(typeof(LanguageResourceDictionary), LanguageResourceDictionary.TransformProperty_Opacity), 100.0, 0.0, 100.0, 1.0, 1)
             }), compositionModel, this, historyModel);
         }
