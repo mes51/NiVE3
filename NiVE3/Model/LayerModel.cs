@@ -22,6 +22,8 @@ namespace NiVE3.Model
 
         const string TransformPropertyOpacityId = nameof(TransformPropertyOpacityId);
 
+        const string TransformZAngleId = nameof(TransformZAngleId);
+
         private string name = "";
         public string Name
         {
@@ -255,6 +257,7 @@ namespace NiVE3.Model
 
             TransformProperties = new PropertyGroupModel(new PropertyGroup(TransformGroupId, new LanguageResourceKey(typeof(LanguageResourceDictionary), LanguageResourceDictionary.Layer_Transform), new PropertyBase[]
             {
+                new AngleProperty(TransformZAngleId, new LanguageResourceKey(typeof(LanguageResourceDictionary), LanguageResourceDictionary.TransformProperty_ZAngle2D), 0.0),
                 new DoubleProperty(TransformPropertyOpacityId, new LanguageResourceKey(typeof(LanguageResourceDictionary), LanguageResourceDictionary.TransformProperty_Opacity), 100.0, 0.0, 100.0, 1.0, 1)
             }), compositionModel, this, historyModel);
         }

@@ -285,6 +285,9 @@ namespace NiVE3.View.Resource
 
         // Property
 
+        [ShowInMarkup, DefaultValue("回転")]
+        public static readonly string TransformProperty_ZAngle2D = nameof(TransformProperty_ZAngle2D);
+
         [ShowInMarkup, DefaultValue("不透明度")]
         public static readonly string TransformProperty_Opacity = nameof(TransformProperty_Opacity);
 

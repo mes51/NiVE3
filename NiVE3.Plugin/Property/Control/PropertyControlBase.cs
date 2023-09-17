@@ -8,7 +8,7 @@ using NiVE3.Plugin.Interfaces;
 
 namespace NiVE3.Plugin.Property.Control
 {
-    public abstract class PropertyControlBase : UserControl
+    public class PropertyControlBase : UserControl
     {
         protected IPropertyViewModel? ViewModel => DataContext as IPropertyViewModel;
     }
