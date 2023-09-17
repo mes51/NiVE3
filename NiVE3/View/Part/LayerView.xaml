@@ -21,7 +21,7 @@
              Focusable="True"
              FocusVisualStyle="{x:Null}"
              MouseLeftButtonDown="Root_MouseLeftButtonDown"
-             pr:NestableItemsCollectionView.IsItemLocked="{Binding IsLock}"
+             pr:StackableItemsCollectionView.IsItemLocked="{Binding IsLock}"
              d:DesignHeight="200" d:DesignWidth="800">
     <UserControl.Resources>
         <GridLength x:Key="EmptyGrid">0</GridLength>
@@ -67,7 +67,7 @@
             <Setter Property="Background" Value="Transparent"/>
 
             <Style.Triggers>
-                <DataTrigger Binding="{Binding ElementName=Root, Path=(pr:NestableItemsCollectionView.IsSelected)}" Value="True">
+                <DataTrigger Binding="{Binding ElementName=Root, Path=(pr:StackableItemsCollectionView.IsSelected)}" Value="True">
                     <Setter Property="Background" Value="{ugm:AppearanceResource ResourceKey=SelectedBackgroundFill, ReturnDynamicResource=True}"/>
                 </DataTrigger>
             </Style.Triggers>

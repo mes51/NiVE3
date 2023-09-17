@@ -10,7 +10,7 @@ using NiVE3.ViewModel;
 
 namespace NiVE3.View.Part
 {
-    class PropertyCollectionView : NestableItemsCollectionView<PropertyViewModel>
+    class PropertyCollectionView : StackableItemsCollectionView<PropertyViewModel>
     {
         public static readonly DependencyProperty NameAreaWidthProperty = DependencyProperty.Register(
             nameof(NameAreaWidth),

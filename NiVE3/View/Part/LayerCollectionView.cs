@@ -13,7 +13,7 @@ using NiVE3.ViewModel;
 
 namespace NiVE3.View.Part
 {
-    class LayerCollectionView : NestableItemsCollectionView<LayerViewModel>
+    class LayerCollectionView : StackableItemsCollectionView<LayerViewModel>
     {
         static readonly DelegateMultiValueConverter<bool, bool, bool> CanDragConverter = new DelegateMultiValueConverter<bool, bool, bool>((v1, v2) => !(v1 || v2));
 

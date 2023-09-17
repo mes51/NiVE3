@@ -14,7 +14,7 @@ using System.Windows.Data;
 
 namespace NiVE3.View.Primitive
 {
-    abstract class NestableItemsCollectionView : ItemsControl, IDragSource
+    abstract class StackableItemsCollectionView : ItemsControl, IDragSource
     {
         public const double IndentWidth = 19.0;
 
@@ -23,14 +23,14 @@ namespace NiVE3.View.Primitive
         public static readonly DependencyProperty IsSelectedProperty = DependencyProperty.RegisterAttached(
             "IsSelected",
             typeof(bool),
-            typeof(NestableItemsCollectionView),
+            typeof(StackableItemsCollectionView),
             new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
         public static readonly DependencyProperty IsItemLockedProperty = DependencyProperty.RegisterAttached(
             "IsItemLocked",
             typeof(bool),
-            typeof(NestableItemsCollectionView),
+            typeof(StackableItemsCollectionView),
             new PropertyMetadata(false, IsItemLockedChanged)
         );
 
@@ -56,7 +56,7 @@ namespace NiVE3.View.Primitive
 
         static void IsItemLockedChanged(DependencyObject d,  DependencyPropertyChangedEventArgs e)
         {
-            if (d is FrameworkElement fe && ItemsControlFromItemContainer(fe) is NestableItemsCollectionView collection)
+            if (d is FrameworkElement fe && ItemsControlFromItemContainer(fe) is StackableItemsCollectionView collection)
             {
                 if (GetIsItemLocked(fe))
                 {
@@ -88,28 +88,28 @@ namespace NiVE3.View.Primitive
         }
     }
 
-    class NestableItemsCollectionView<T> : NestableItemsCollectionView where T : class
+    class StackableItemsCollectionView<T> : StackableItemsCollectionView where T : class
     {
         public static readonly Style DefaultStyle;
 
         public static readonly DependencyProperty ControlAreaWidthProperty = DependencyProperty.Register(
             nameof(ControlAreaWidth),
             typeof(double),
-            typeof(NestableItemsCollectionView<T>),
+            typeof(StackableItemsCollectionView<T>),
             new FrameworkPropertyMetadata(0.0)
         );
 
         public static readonly DependencyProperty SelectedItemsProperty = DependencyProperty.Register(
             nameof(SelectedItems),
             typeof(ObservableCollection<T>),
-            typeof(NestableItemsCollectionView<T>),
+            typeof(StackableItemsCollectionView<T>),
             new FrameworkPropertyMetadata(new ObservableCollection<T>(), FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
         public static readonly DependencyProperty IndentLevelProperty = DependencyProperty.Register(
             nameof(IndentLevel),
             typeof(int),
-            typeof(NestableItemsCollectionView<T>),
+            typeof(StackableItemsCollectionView<T>),
             new FrameworkPropertyMetadata(0)
         );
 
@@ -136,7 +136,7 @@ namespace NiVE3.View.Primitive
 
         protected T? LastSelected { get; set; }
 
-        static NestableItemsCollectionView()
+        static StackableItemsCollectionView()
         {
             var itemsPanelContainer = new FrameworkElementFactory(typeof(StackPanel));
             var itemsPanelTemplate = new ItemsPanelTemplate(itemsPanelContainer);
@@ -147,11 +147,11 @@ namespace NiVE3.View.Primitive
             };
             DefaultStyle.Setters.Add(new Setter(ItemsPanelProperty, itemsPanelTemplate));
 
-            IsTabStopProperty.OverrideMetadata(typeof(NestableItemsCollectionView<T>), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.Inherits));
-            ItemsSourceProperty.OverrideMetadata(typeof(NestableItemsCollectionView<T>), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.Inherits, ItemsSourceChanged));
+            IsTabStopProperty.OverrideMetadata(typeof(StackableItemsCollectionView<T>), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.Inherits));
+            ItemsSourceProperty.OverrideMetadata(typeof(StackableItemsCollectionView<T>), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.Inherits, ItemsSourceChanged));
         }
 
-        public NestableItemsCollectionView()
+        public StackableItemsCollectionView()
         {
             Style = DefaultStyle;
         }
@@ -320,7 +320,7 @@ namespace NiVE3.View.Primitive
 
         static void ItemsSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is NestableItemsCollectionView<T> collection)
+            if (d is StackableItemsCollectionView<T> collection)
             {
                 collection.SelectedItems.Clear();
             }
