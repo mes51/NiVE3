@@ -16,6 +16,8 @@ namespace NiVE3.View.Resource
 
         public const double ArrowWidth = 19.0;
 
+        public const double TagAreaWidth = 19.0;
+
         public const double AVSwitchWidthWithHalfSplitter = 68; // 66 + ceil(pr:ItemResizableStackPanel.SplitterSize / 2)
 
         public const double LayerUIHeight = 17.0;

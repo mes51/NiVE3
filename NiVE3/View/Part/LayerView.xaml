@@ -43,7 +43,7 @@
         </cv:ConverterCollection>
 
         <cv:SwitchValueConverter x:Key="AVSwitchGridWidthSwitch" TrueValue="{x:Static r:UIParameters.AVSwitchWidthWithHalfSplitter}"/>
-        <cv:SwitchValueConverter x:Key="TagGridWidthSwitch" TrueValue="19"/>
+        <cv:SwitchValueConverter x:Key="TagGridWidthSwitch" TrueValue="{x:Static r:UIParameters.TagAreaWidth}"/>
 
         <CollectionViewSource x:Key="TrackMatteCollectionViewSource" Source="{Binding TrackMatteViewSource}"/>
         <CompositeCollection x:Key="TrackMatteLayerCollection">
@@ -521,7 +521,7 @@
         <StackPanel Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" Visibility="{Binding IsExpanded, Converter={StaticResource BooleanToVisibilityConverter}}">
             <Grid Visibility="{Binding SourceType, Converter={StaticResource AVTypeVisibleConverter}, ConverterParameter={x:Static local:LayerView.CompositionDisplayableSourceType}}" ClipToBounds="True">
                 <pt:LayerParameterExpander Header="{gm:LanguageResource ResourceKey=Layer_Transform}" IndentLevel="1" IsShowAVSwitchArea="{Binding IsAVSwitchColumnVisible}">
-                    <pt:PropertyCollectionView ItemsSource="{Binding TransformProperties}" IndentLevel="2" ControlAreaWidth="{Binding ElementName=Root, Path=LayerControlAreaWidth}" NameAreaWidth="{Binding PropertyNameAreaWidth}"/>
+                    <pt:PropertyCollectionView ItemsSource="{Binding TransformProperties}" IndentLevel="2" ControlAreaWidth="{Binding ElementName=Root, Path=LayerControlAreaWidth}" NameAreaWidth="{Binding PropertyNameAreaWidth}" IsAVSwitchColumnVisible="{Binding IsAVSwitchColumnVisible}" IsTagColumnVisible="{Binding IsTagColumnVisible}"/>
                 </pt:LayerParameterExpander>
             </Grid>
         </StackPanel>

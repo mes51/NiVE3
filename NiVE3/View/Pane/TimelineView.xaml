@@ -155,6 +155,7 @@
                     <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_LayerCommentColumn}" IsCheckable="True" IsChecked="{Binding IsLayerCommentColumnVisible}"/>
                     <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_LayerSwitchColumn}" IsCheckable="True" IsChecked="{Binding IsLayerSwitchColumnVisible}"/>
                     <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ModeColumn}" IsCheckable="True" IsChecked="{Binding IsModeColumnVisible}"/>
+                    <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_TrackMatteColumn}" IsCheckable="True" IsChecked="{Binding IsTrackMatteColumnVisible}"/>
                     <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ParentLayerColumn}" IsCheckable="True" IsChecked="{Binding IsParentLayerColumnVisible}"/>
                 </ContextMenu>
             </pr:ItemResizableStackPanel.ContextMenu>

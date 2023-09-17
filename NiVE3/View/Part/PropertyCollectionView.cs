@@ -12,6 +12,20 @@ namespace NiVE3.View.Part
 {
     class PropertyCollectionView : StackableItemsCollectionView<PropertyViewModel>
     {
+        public static readonly DependencyProperty IsAVSwitchColumnVisibleProperty = DependencyProperty.Register(
+            nameof(IsAVSwitchColumnVisible),
+            typeof(bool),
+            typeof(PropertyCollectionView),
+            new FrameworkPropertyMetadata(true, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        public static readonly DependencyProperty IsTagColumnVisibleProperty = DependencyProperty.Register(
+            nameof(IsTagColumnVisible),
+            typeof(bool),
+            typeof(PropertyCollectionView),
+            new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
         public static readonly DependencyProperty NameAreaWidthProperty = DependencyProperty.Register(
             nameof(NameAreaWidth),
             typeof(double),
@@ -23,6 +37,18 @@ namespace NiVE3.View.Part
         {
             get { return (double)GetValue(NameAreaWidthProperty); }
             set { SetValue(NameAreaWidthProperty, value); }
+        }
+
+        public bool IsTagColumnVisible
+        {
+            get { return (bool)GetValue(IsTagColumnVisibleProperty); }
+            set { SetValue(IsTagColumnVisibleProperty, value); }
+        }
+
+        public bool IsAVSwitchColumnVisible
+        {
+            get { return (bool)GetValue(IsAVSwitchColumnVisibleProperty); }
+            set { SetValue(IsAVSwitchColumnVisibleProperty, value); }
         }
 
         protected override DependencyObject GetContainerForItemOverride()
@@ -70,6 +96,22 @@ namespace NiVE3.View.Part
                 Mode = BindingMode.OneWay
             };
             BindingOperations.SetBinding(propertyView, PropertyView.IndentLevelProperty, indentLevelBinding);
+
+            var isAVSwitchColumnVisibleBinding = new Binding
+            {
+                Path = new PropertyPath(IsAVSwitchColumnVisibleProperty),
+                Source = this,
+                Mode = BindingMode.OneWay
+            };
+            BindingOperations.SetBinding(propertyView, PropertyView.IsAVSwitchColumnVisibleProperty, isAVSwitchColumnVisibleBinding);
+
+            var isTagColumnVisibleBinding = new Binding
+            {
+                Path = new PropertyPath(IsTagColumnVisibleProperty),
+                Source = this,
+                Mode = BindingMode.OneWay
+            };
+            BindingOperations.SetBinding(propertyView, PropertyView.IsTagColumnVisibleProperty, isTagColumnVisibleBinding);
         }
     }
 }

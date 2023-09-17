@@ -37,8 +37,15 @@ namespace NiVE3.View.Part
             new FrameworkPropertyMetadata(0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, IndentParameterChanged)
         );
 
-        public static readonly DependencyProperty IsShowAVSwitchAreaProperty = DependencyProperty.Register(
-            nameof(IsShowAVSwitchArea),
+        public static readonly DependencyProperty IsAVSwitchColumnVisibleProperty = DependencyProperty.Register(
+            nameof(IsAVSwitchColumnVisible),
+            typeof(bool),
+            typeof(PropertyView),
+            new FrameworkPropertyMetadata(true, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, IndentParameterChanged)
+        );
+
+        public static readonly DependencyProperty IsTagColumnVisibleProperty = DependencyProperty.Register(
+            nameof(IsTagColumnVisible),
             typeof(bool),
             typeof(PropertyView),
             new FrameworkPropertyMetadata(true, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, IndentParameterChanged)
@@ -91,10 +98,16 @@ namespace NiVE3.View.Part
             set { SetValue(NameAreaWidthProperty, value); }
         }
 
-        public bool IsShowAVSwitchArea
+        public bool IsTagColumnVisible
         {
-            get { return (bool)GetValue(IsShowAVSwitchAreaProperty); }
-            set { SetValue(IsShowAVSwitchAreaProperty, value); }
+            get { return (bool)GetValue(IsTagColumnVisibleProperty); }
+            set { SetValue(IsTagColumnVisibleProperty, value); }
+        }
+
+        public bool IsAVSwitchColumnVisible
+        {
+            get { return (bool)GetValue(IsAVSwitchColumnVisibleProperty); }
+            set { SetValue(IsAVSwitchColumnVisibleProperty, value); }
         }
 
         public int IndentLevel
@@ -137,14 +150,18 @@ namespace NiVE3.View.Part
             if (d is PropertyView propertyView)
             {
                 var indent = UIParameters.ArrowWidth * propertyView.IndentLevel;
-                if (propertyView.IsShowAVSwitchArea)
+                if (propertyView.IsAVSwitchColumnVisible)
                 {
                     indent += UIParameters.AVSwitchWidthWithHalfSplitter;
                 }
-                var nameAreaWidth = propertyView.NameAreaWidth - UIParameters.ArrowWidth * propertyView.IndentLevel;
+                var nameAreaWidth = propertyView.NameAreaWidth - UIParameters.ArrowWidth * propertyView.IndentLevel + UIParameters.ArrowWidth;
+                if (propertyView.IsTagColumnVisible)
+                {
+                    nameAreaWidth += UIParameters.TagAreaWidth;
+                }
                 propertyView.IndentMarginLeft = new GridLength(indent);
-                propertyView.CalculatedNameAreaWidth = new GridLength(nameAreaWidth);
-                propertyView.CalculatedControlAreaWidth = new GridLength(propertyView.ControlAreaWidth - indent - nameAreaWidth);
+                propertyView.CalculatedNameAreaWidth = new GridLength(Math.Max(nameAreaWidth, 0.0));
+                propertyView.CalculatedControlAreaWidth = new GridLength(Math.Max(propertyView.ControlAreaWidth - indent - nameAreaWidth, 0.0));
             }
         }
 
@@ -152,7 +169,7 @@ namespace NiVE3.View.Part
         {
             if (d is PropertyView propertyView)
             {
-                propertyView.CalculatedControlAreaWidth = new GridLength(propertyView.ControlAreaWidth - propertyView.IndentMarginLeft.Value - propertyView.CalculatedNameAreaWidth.Value);
+                propertyView.CalculatedControlAreaWidth = new GridLength(Math.Max(propertyView.ControlAreaWidth - propertyView.IndentMarginLeft.Value - propertyView.CalculatedNameAreaWidth.Value, 0.0));
             }
         }
 
@@ -160,9 +177,13 @@ namespace NiVE3.View.Part
         {
             if (d is PropertyView propertyView)
             {
-                var nameAreaWidth = propertyView.NameAreaWidth - UIParameters.ArrowWidth * propertyView.IndentLevel;
-                propertyView.CalculatedNameAreaWidth = new GridLength(nameAreaWidth);
-                propertyView.CalculatedControlAreaWidth = new GridLength(propertyView.ControlAreaWidth - propertyView.IndentMarginLeft.Value - nameAreaWidth);
+                var nameAreaWidth = propertyView.NameAreaWidth - UIParameters.ArrowWidth * propertyView.IndentLevel + UIParameters.ArrowWidth;
+                if (propertyView.IsTagColumnVisible)
+                {
+                    nameAreaWidth += UIParameters.TagAreaWidth;
+                }
+                propertyView.CalculatedNameAreaWidth = new GridLength(Math.Max(nameAreaWidth, 0.0));
+                propertyView.CalculatedControlAreaWidth = new GridLength(Math.Max(propertyView.ControlAreaWidth - propertyView.IndentMarginLeft.Value - nameAreaWidth, 0.0));
             }
         }
     }
