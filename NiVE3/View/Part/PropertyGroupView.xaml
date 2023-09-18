@@ -9,7 +9,7 @@
              mc:Ignorable="d" 
              x:Name="Root"
              d:DesignHeight="450" d:DesignWidth="800">
-    <pt:LayerParameterExpander Header="{Binding DisplayName}" IndentLevel="{Binding ElementName=Root, Path=IndentLevel}" IsShowAVSwitchArea="{Binding ElementName=Root, Path=IsAVSwitchColumnVisible}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}">
+    <pt:LayerParameterExpander Header="{Binding ViewState.DisplayName}" IndentLevel="{Binding ElementName=Root, Path=IndentLevel}" IsShowAVSwitchArea="{Binding ElementName=Root, Path=IsAVSwitchColumnVisible}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}">
         <pt:PropertyCollectionView ItemsSource="{Binding Children}"
                                    IndentLevel="{Binding ElementName=Root, Path=IndentLevel, Converter={x:Static local:PropertyGroupView.NextIndentConverter}}"
                                    ControlAreaWidth="{Binding ElementName=Root, Path=ControlAreaWidth}"

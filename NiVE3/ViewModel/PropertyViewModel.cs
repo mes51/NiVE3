@@ -19,7 +19,7 @@ namespace NiVE3.ViewModel
 {
     interface IInternalPropertyViewModel : IPropertyViewModel
     {
-        string DisplayName { get; }
+        PropertyViewState ViewState { get; }
 
         ObservableCollectionView<IPropertyModel, IInternalPropertyViewModel>? Children { get; }
 
@@ -29,13 +29,7 @@ namespace NiVE3.ViewModel
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
     partial class PropertyViewModel : BindableBase, IInternalPropertyViewModel
     {
-        private string displayName = "";
-        [NeedWire(nameof(PropertyModel), IsOneWay = true)]
-        public string DisplayName
-        {
-            get { return displayName; }
-            set { SetProperty(ref displayName, value); }
-        }
+        public PropertyViewState ViewState { get; }
 
         public ObservableCollectionView<IPropertyModel, IInternalPropertyViewModel>? Children => null;
 
@@ -65,6 +59,7 @@ namespace NiVE3.ViewModel
         {
             PropertyModel = propertyModel;
             Property = propertyModel.Property;
+            ViewState = propertyModel.CreateState(this);
 
             BeginEditCommand = new RequerySuggestedCommand(() =>
             {
@@ -98,13 +93,7 @@ namespace NiVE3.ViewModel
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
     partial class PropertyGroupViewModel : BindableBase, IInternalPropertyViewModel
     {
-        private string displayName = "";
-        [NeedWire(nameof(PropertyGroupModel), IsOneWay = true)]
-        public string DisplayName
-        {
-            get { return displayName; }
-            set { SetProperty(ref displayName, value); }
-        }
+        public PropertyViewState ViewState { get; }
 
         private ObservableCollectionView<IPropertyModel, IInternalPropertyViewModel> children;
         public ObservableCollectionView<IPropertyModel, IInternalPropertyViewModel> Children
@@ -151,6 +140,7 @@ namespace NiVE3.ViewModel
                     return new PropertyViewModel((PropertyModel)m);
                 }
             });
+            ViewState = propertyGroupModel.CreateState(this);
 
             WiringModel();
         }

@@ -4,7 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Data;
+using NiVE3.Plugin.Property;
 using NiVE3.UI.Resources;
 using NiVE3.View.Primitive;
 using NiVE3.ViewModel;
@@ -13,6 +15,8 @@ namespace NiVE3.View.Part
 {
     class PropertyCollectionView : StackableItemsCollectionView<PropertyViewModel>
     {
+        static IValueConverter VisibilityConverter = new BooleanToVisibilityConverter();
+
         public static readonly DependencyProperty IsAVSwitchColumnVisibleProperty = DependencyProperty.Register(
             nameof(IsAVSwitchColumnVisible),
             typeof(bool),
@@ -58,92 +62,18 @@ namespace NiVE3.View.Part
             templateSelector.Templates.Add(new DataTemplate
             {
                 DataType = typeof(PropertyViewModel),
-                VisualTree = CreateControlFactory(typeof(PropertyView), PropertyView.ControlAreaWidthProperty, PropertyView.NameAreaWidthProperty, PropertyView.IndentLevelProperty, PropertyView.IsAVSwitchColumnVisibleProperty, PropertyView.IsTagColumnVisibleProperty)
+                VisualTree = CreateControlFactory(typeof(PropertyView), PropertyView.ControlAreaWidthProperty, PropertyView.NameAreaWidthProperty, PropertyView.IndentLevelProperty, PropertyView.IsAVSwitchColumnVisibleProperty, PropertyView.IsTagColumnVisibleProperty, PropertyView.ViewStateProperty)
             });
             templateSelector.Templates.Add(new DataTemplate
             {
                 DataType = typeof(PropertyGroupViewModel),
-                VisualTree = CreateControlFactory(typeof(PropertyGroupView), PropertyGroupView.ControlAreaWidthProperty, PropertyGroupView.NameAreaWidthProperty, PropertyGroupView.IndentLevelProperty, PropertyGroupView.IsAVSwitchColumnVisibleProperty, PropertyGroupView.IsTagColumnVisibleProperty)
+                VisualTree = CreateControlFactory(typeof(PropertyGroupView), PropertyGroupView.ControlAreaWidthProperty, PropertyGroupView.NameAreaWidthProperty, PropertyGroupView.IndentLevelProperty, PropertyGroupView.IsAVSwitchColumnVisibleProperty, PropertyGroupView.IsTagColumnVisibleProperty, PropertyGroupView.ViewStateProperty)
             });
 
             ItemTemplateSelector = templateSelector;
         }
 
-        /*
-        protected override DependencyObject GetContainerForItemOverride()
-        {
-            return new PropertyView();
-        }
-
-        protected override bool IsItemItsOwnContainerOverride(object item)
-        {
-            return item is PropertyView;
-        }
-
-        protected override void PrepareContainerForItemOverride(DependencyObject element, object item)
-        {
-            base.PrepareContainerForItemOverride(element, item);
-
-            if (element is PropertyView propertyView && item is PropertyViewModel viewModel)
-            {
-                propertyView.DataContext = viewModel;
-                propertyView.PropertyControl = viewModel.CreateControl();
-
-                BindingProperty(propertyView, PropertyView.ControlAreaWidthProperty, PropertyView.NameAreaWidthProperty, PropertyView.IndentLevelProperty, PropertyView.IsAVSwitchColumnVisibleProperty, PropertyView.IsTagColumnVisibleProperty);
-            }
-            else if (element is PropertyGroupView propertyGroupView && item is PropertyGroupViewModel groupViewModel)
-            {
-                propertyGroupView.DataContext = groupViewModel;
-
-                BindingProperty(propertyGroupView, PropertyGroupView.ControlAreaWidthProperty, PropertyGroupView.NameAreaWidthProperty, PropertyGroupView.IndentLevelProperty, PropertyGroupView.IsAVSwitchColumnVisibleProperty, PropertyGroupView.IsTagColumnVisibleProperty);
-            }
-        }
-
-        void BindingProperty(DependencyObject target, DependencyProperty controlAreaWidthProperty, DependencyProperty nameAreaWidthProperty, DependencyProperty indentLevelProperty, DependencyProperty isAVSwitchColumnVisibleProperty, DependencyProperty isTagColumnVisibleProperty)
-        {
-            var controlAreaWidthBinding = new Binding
-            {
-                Path = new PropertyPath(nameof(ControlAreaWidth)),
-                Source = this,
-                Mode = BindingMode.OneWay
-            };
-            BindingOperations.SetBinding(target, controlAreaWidthProperty, controlAreaWidthBinding);
-
-            var nameAreaWidthBinding = new Binding
-            {
-                Path = new PropertyPath(nameof(NameAreaWidth)),
-                Source = this,
-                Mode = BindingMode.OneWay
-            };
-            BindingOperations.SetBinding(target, nameAreaWidthProperty, nameAreaWidthBinding);
-
-            var indentLevelBinding = new Binding
-            {
-                Path = new PropertyPath(nameof(IndentLevel)),
-                Source = this,
-                Mode = BindingMode.OneWay
-            };
-            BindingOperations.SetBinding(target, indentLevelProperty, indentLevelBinding);
-
-            var isAVSwitchColumnVisibleBinding = new Binding
-            {
-                Path = new PropertyPath(IsAVSwitchColumnVisibleProperty),
-                Source = this,
-                Mode = BindingMode.OneWay
-            };
-            BindingOperations.SetBinding(target, isAVSwitchColumnVisibleProperty, isAVSwitchColumnVisibleBinding);
-
-            var isTagColumnVisibleBinding = new Binding
-            {
-                Path = new PropertyPath(IsTagColumnVisibleProperty),
-                Source = this,
-                Mode = BindingMode.OneWay
-            };
-            BindingOperations.SetBinding(target, isTagColumnVisibleProperty, isTagColumnVisibleBinding);
-        }
-        */
-
-        FrameworkElementFactory CreateControlFactory(Type uiType, DependencyProperty controlAreaWidthProperty, DependencyProperty nameAreaWidthProperty, DependencyProperty indentLevelProperty, DependencyProperty isAVSwitchColumnVisibleProperty, DependencyProperty isTagColumnVisibleProperty)
+        FrameworkElementFactory CreateControlFactory(Type uiType, DependencyProperty controlAreaWidthProperty, DependencyProperty nameAreaWidthProperty, DependencyProperty indentLevelProperty, DependencyProperty isAVSwitchColumnVisibleProperty, DependencyProperty isTagColumnVisibleProperty, DependencyProperty viewStateProperty)
         {
             var factory = new FrameworkElementFactory(uiType);
             var controlAreaWidthBinding = new Binding
@@ -185,6 +115,28 @@ namespace NiVE3.View.Part
                 Mode = BindingMode.OneWay
             };
             factory.SetBinding(isTagColumnVisibleProperty, isTagColumnVisibleBinding);
+
+            var viewStateBinding = new Binding
+            {
+                Path = new PropertyPath(nameof(PropertyViewModel.ViewState)),
+                Mode = BindingMode.OneWay
+            };
+            factory.SetBinding(viewStateProperty, viewStateBinding);
+
+            var visibilityBinding = new Binding
+            {
+                Path = new PropertyPath($"{nameof(PropertyViewModel.ViewState)}.{nameof(PropertyViewState.IsVisible)}"),
+                Mode = BindingMode.OneWay,
+                Converter = VisibilityConverter
+            };
+            factory.SetBinding(VisibilityProperty, visibilityBinding);
+
+            var isEnabledBinding = new Binding
+            {
+                Path = new PropertyPath($"{nameof(PropertyViewModel.ViewState)}.{nameof(PropertyViewState.IsEnabled)}"),
+                Mode = BindingMode.OneWay,
+            };
+            factory.SetBinding(IsEnabledProperty, isEnabledBinding);
 
             return factory;
         }

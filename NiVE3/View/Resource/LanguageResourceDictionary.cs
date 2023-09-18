@@ -297,6 +297,15 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("回転")]
         public static readonly string TransformProperty_ZAngle2D = nameof(TransformProperty_ZAngle2D);
 
+        [ShowInMarkup, DefaultValue("X回転")]
+        public static readonly string TransformProperty_XAngle3D = nameof(TransformProperty_XAngle3D);
+
+        [ShowInMarkup, DefaultValue("Y回転")]
+        public static readonly string TransformProperty_YAngle3D = nameof(TransformProperty_YAngle3D);
+
+        [ShowInMarkup, DefaultValue("Z回転")]
+        public static readonly string TransformProperty_ZAngle3D = nameof(TransformProperty_ZAngle3D);
+
         [ShowInMarkup, DefaultValue("スケール")]
         public static readonly string TransformProperty_Scale = nameof(TransformProperty_Scale);
 

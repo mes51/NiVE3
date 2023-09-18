@@ -9,7 +9,7 @@ namespace NiVE3.Plugin.Resource
     /// <summary>
     /// LanguageResourceDictionaryからローカライズ済みのテキストを取得するためのキー
     /// </summary>
-    public class LanguageResourceKey
+    public class LanguageResourceKey : IEquatable<LanguageResourceKey>
     {
         /// <summary>
         /// 使用するLanguageResourceDictionaryBaseの型
@@ -39,6 +39,29 @@ namespace NiVE3.Plugin.Resource
         public string? GetText()
         {
             return LanguageResourceDictionaryBase.GetLanguageResourceDictionary(LanguageResourceDictionaryType)?.GetText(ResourceKey);
+        }
+
+        public override bool Equals(object? obj)
+        {
+            return Equals(obj as LanguageResourceKey);
+        }
+
+        public override int GetHashCode()
+        {
+            var hashCode = new HashCode();
+            hashCode.Add(LanguageResourceDictionaryType);
+            hashCode.Add(ResourceKey);
+            return hashCode.ToHashCode();
+        }
+
+        public override string ToString()
+        {
+            return GetText() ?? "";
+        }
+
+        public bool Equals(LanguageResourceKey? other)
+        {
+            return LanguageResourceDictionaryType == other?.LanguageResourceDictionaryType && ResourceKey == other?.ResourceKey;
         }
     }
 }

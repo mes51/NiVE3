@@ -21,11 +21,6 @@ namespace NiVE3.Plugin.Property
         public string Id { get; }
 
         /// <summary>
-        /// プロパティの名前
-        /// </summary>
-        public string DisplayName => DisplayNameKey?.GetText() ?? RawDisplayName ?? "";
-
-        /// <summary>
         /// 使用するPropertyType
         /// </summary>
         public IPropertyType PropertyType { get; }
@@ -34,6 +29,11 @@ namespace NiVE3.Plugin.Property
         /// プロパティの既定の値
         /// </summary>
         public object? DefaultValue { get; }
+
+        /// <summary>
+        /// プロパティの表示名
+        /// </summary>
+        protected string DisplayName => DisplayNameKey?.GetText() ?? RawDisplayName ?? "";
 
         string? RawDisplayName { get; }
 
@@ -92,6 +92,19 @@ namespace NiVE3.Plugin.Property
         /// <param name="value">変更対象の値</param>
         /// <returns>変更後の値</returns>
         public abstract object CoerceValue(object value);
+
+        /// <summary>
+        /// プロパティの表示管理用のステートを生成します
+        /// </summary>
+        /// <param name="composition">このプロパティが含まれるコンポジション</param>
+        /// <param name="layer">このプロパティが含まれるレイヤー。コンポジションのプロパティの場合はnull</param>
+        /// <param name="effect">このプロパティが含まれるエフェクト。レイヤーのプロパティやコンポジションのプロパティの場合はnull</param>
+        /// <param name="viewModel">このプロパティのViewModel</param>
+        /// <returns>ステートを管理するPropertyViewState</returns>
+        public virtual PropertyViewState CreateState(ICompositionObject composition, ILayerObject? layer, IEffectObject? effect, IPropertyViewModel viewModel)
+        {
+            return new PropertyViewState(DisplayName);
+        }
     }
 
     /// <summary>

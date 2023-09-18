@@ -16,7 +16,7 @@
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
 
-        <TextBlock Grid.Column="1" Text="{Binding DisplayName}"/>
+        <TextBlock Grid.Column="1" Text="{Binding ViewState.DisplayName}"/>
         <Grid Grid.Column="2" x:Name="PropertyControlGrid"/>
     </Grid>
 </UserControl>

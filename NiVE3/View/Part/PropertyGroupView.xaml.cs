@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using NiVE3.Plugin.Property;
 using NiVE3.View.Converter;
 
 namespace NiVE3.View.Part
@@ -57,6 +58,19 @@ namespace NiVE3.View.Part
             typeof(PropertyGroupView),
             new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
+
+        public static readonly DependencyProperty ViewStateProperty = DependencyProperty.Register(
+            nameof(ViewState),
+            typeof(PropertyViewState),
+            typeof(PropertyGroupView),
+            new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        public PropertyViewState? ViewState
+        {
+            get { return (PropertyViewState)GetValue(ViewStateProperty); }
+            set { SetValue(ViewStateProperty, value); }
+        }
 
         public double NameAreaWidth
         {

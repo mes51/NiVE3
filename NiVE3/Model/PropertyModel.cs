@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Property;
 using NiVE3.Plugin.Property.Control;
+using NiVE3.ViewModel;
 using Prism.Mvvm;
 
 namespace NiVE3.Model
@@ -14,8 +15,6 @@ namespace NiVE3.Model
     interface IPropertyModel
     {
         string Id { get; }
-
-        string DisplayName { get; }
 
         object? Value { get; }
 
@@ -26,18 +25,13 @@ namespace NiVE3.Model
         void CommitProperty(object? prevValue);
 
         PropertyControlBase CreateControl(IPropertyViewModel viewModel);
+
+        PropertyViewState CreateState(IPropertyViewModel propertyViewModel);
     }
 
     partial class PropertyModel : BindableBase, IPropertyModel
     {
         public string Id { get; }
-
-        private string displayName = "";
-        public string DisplayName
-        {
-            get { return displayName; }
-            set { SetProperty(ref displayName, value); }
-        }
 
         private object? _value = null; // valueキーワードと被るため仕方なしでアンダーバーをつける
         public object? Value
@@ -70,7 +64,6 @@ namespace NiVE3.Model
             EffectModel = effectModel;
             HistoryModel = historyModel;
             Id = property.Id;
-            DisplayName = property.DisplayName;
             Value = property.DefaultValue;
         }
 
@@ -86,18 +79,16 @@ namespace NiVE3.Model
         {
             return Property.CreateControl(CompositionModel, LayerModel, EffectModel, viewModel);
         }
+
+        public PropertyViewState CreateState(IPropertyViewModel viewModel)
+        {
+            return Property.CreateState(CompositionModel, LayerModel, EffectModel, viewModel);
+        }
     }
 
     class PropertyGroupModel : BindableBase, IPropertyModel
     {
         public string Id { get; }
-
-        private string displayName = "";
-        public string DisplayName
-        {
-            get { return displayName; }
-            set { SetProperty(ref displayName, value); }
-        }
 
         public object? Value => null;
 
@@ -130,7 +121,6 @@ namespace NiVE3.Model
             EffectModel = effectModel;
             HistoryModel = historyModel;
             Id = property.Id;
-            DisplayName = property.DisplayName;
 
             foreach (var c in ((PropertyGroup)property).Children)
             {
@@ -150,6 +140,11 @@ namespace NiVE3.Model
         public PropertyControlBase CreateControl(IPropertyViewModel viewModel)
         {
             throw new NotImplementedException();
+        }
+
+        public PropertyViewState CreateState(IPropertyViewModel viewModel)
+        {
+            return Property.CreateState(CompositionModel, LayerModel, EffectModel, viewModel);
         }
     }
 }

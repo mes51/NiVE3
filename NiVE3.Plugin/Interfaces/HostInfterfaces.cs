@@ -11,7 +11,10 @@ namespace NiVE3.Plugin.Interfaces
 {
     public interface ICompositionObject { }
 
-    public interface ILayerObject { }
+    public interface ILayerObject
+    {
+        bool IsEnable3D { get; }
+    }
 
     public interface IEffectObject { }
 

@@ -14,6 +14,8 @@ using Prism.Mvvm;
 using NiVE3.Plugin.Resource;
 using NiVE3.View.Resource;
 using NiVE3.Plugin.Struct;
+using NiVE3.Property;
+using System.ComponentModel;
 
 namespace NiVE3.Model
 {
@@ -26,6 +28,10 @@ namespace NiVE3.Model
         const string TransformTranslateId = nameof(TransformTranslateId);
 
         const string TransformDirectionId = nameof(TransformDirectionId);
+
+        const string TransformXAngleId = nameof(TransformXAngleId);
+
+        const string TransformYAngleId = nameof(TransformYAngleId);
 
         const string TransformZAngleId = nameof(TransformZAngleId);
 
@@ -266,10 +272,12 @@ namespace NiVE3.Model
 
             TransformProperties = new PropertyGroupModel(new PropertyGroup(TransformGroupId, CreateLanguageResourceKey(LanguageResourceDictionary.Layer_Transform), new PropertyBase[]
             {
-                new Vector3dProperty(TransformAnchorPointId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_AnchorPoint), new Vector3d(footageModel.Width * 0.5, footageModel.Height * 0.5, 0.0), 2, true),
-                new Vector3dProperty(TransformTranslateId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_Translate), new Vector3d(compositionModel.Width * 0.5, compositionModel.Height * 0.5, 0.0), 2, true),
-                new DirectionProperty(TransformDirectionId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_Direction), new Vector3d(), 2),
-                new AngleProperty(TransformZAngleId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_ZAngle2D), 0.0, 2),
+                new Vector2DOr3DProperty(TransformAnchorPointId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_AnchorPoint), new Vector3d(footageModel.Width * 0.5, footageModel.Height * 0.5, 0.0), 2, true),
+                new Vector2DOr3DProperty(TransformTranslateId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_Translate), new Vector3d(compositionModel.Width * 0.5, compositionModel.Height * 0.5, 0.0), 2, true),
+                new Direction3DProperty(TransformDirectionId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_Direction), new Vector3d(), 2),
+                new Angle3DElementProperty(TransformXAngleId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_XAngle3D), 0.0, 2),
+                new Angle3DElementProperty(TransformYAngleId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_YAngle3D), 0.0, 2),
+                new ZAngleProperty(TransformZAngleId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_ZAngle2D), CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_ZAngle3D), 0.0, 2),
                 new Vector3dProperty(TransformScaleId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_Scale), new Vector3d(100.0, 100.0, 100.0), 2, true),
                 new DoubleProperty(TransformPropertyOpacityId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_Opacity), 100.0, 0.0, 100.0, 1.0, 2)
             }), compositionModel, this, historyModel);
