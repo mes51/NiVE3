@@ -17,9 +17,9 @@ using NiVE3.UI.Converter;
 namespace NiVE3.UI.Primitive
 {
     /// <summary>
-    /// SlidableNumerTextBox.xaml の相互作用ロジック
+    /// SlidableNumberTextBox.xaml の相互作用ロジック
     /// </summary>
-    public partial class SlidableNumerTextBox : UserControl
+    public partial class SlidableNumberTextBox : UserControl
     {
         // TODO: 要調整
         const double SlideStartThreashold = 4.0;
@@ -27,88 +27,88 @@ namespace NiVE3.UI.Primitive
         public static readonly DependencyProperty ValueProperty = DependencyProperty.Register(
             nameof(Value),
             typeof(double),
-            typeof(SlidableNumerTextBox),
+            typeof(SlidableNumberTextBox),
             new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, ValueChanged, CoerceValue)
         );
 
         public static readonly DependencyProperty IntValueProperty = DependencyProperty.Register(
             nameof(IntValue),
             typeof(int),
-            typeof(SlidableNumerTextBox),
+            typeof(SlidableNumberTextBox),
             new FrameworkPropertyMetadata(0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, IntValueChanged, CoerceIntValue)
         );
 
         public static readonly DependencyProperty MaximumProperty = DependencyProperty.Register(
             nameof(Maximum),
             typeof(double),
-            typeof(SlidableNumerTextBox),
+            typeof(SlidableNumberTextBox),
             new FrameworkPropertyMetadata(double.MaxValue, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, LimitChanged)
         );
 
         public static readonly DependencyProperty MinimumProperty = DependencyProperty.Register(
             nameof(Minimum),
             typeof(double),
-            typeof(SlidableNumerTextBox),
+            typeof(SlidableNumberTextBox),
             new FrameworkPropertyMetadata(double.MinValue, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, LimitChanged)
         );
 
         public static readonly DependencyProperty SlideChangeValueProperty = DependencyProperty.Register(
             nameof(SlideChangeValue),
             typeof(double),
-            typeof(SlidableNumerTextBox),
+            typeof(SlidableNumberTextBox),
             new PropertyMetadata(1.0)
         );
 
         public static readonly DependencyProperty ConverterProperty = DependencyProperty.Register(
             nameof(Converter),
             typeof(IValueConverter),
-            typeof(SlidableNumerTextBox),
+            typeof(SlidableNumberTextBox),
             new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, ConverterChanged)
         );
 
         public static readonly DependencyProperty DigitProperty = DependencyProperty.Register(
             nameof(Digit),
             typeof(int),
-            typeof(SlidableNumerTextBox),
+            typeof(SlidableNumberTextBox),
             new FrameworkPropertyMetadata(-1, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, DigitChanged)
         );
 
         public static readonly DependencyProperty UnitTextProperty = DependencyProperty.Register(
             nameof(UnitText),
             typeof(string),
-            typeof(SlidableNumerTextBox),
+            typeof(SlidableNumberTextBox),
             new FrameworkPropertyMetadata("", FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, UnitTextChanged)
         );
 
         private static readonly DependencyProperty IsClickedProperty = DependencyProperty.Register(
             nameof(IsClicked),
             typeof(bool),
-            typeof(SlidableNumerTextBox),
+            typeof(SlidableNumberTextBox),
             new FrameworkPropertyMetadata(false)
         );
 
         public static RoutedEvent BeginSlideEditValueEvent = EventManager.RegisterRoutedEvent(
-            nameof(BeginSlideEditValue), RoutingStrategy.Bubble, typeof(EventHandler), typeof(SlidableNumerTextBox)
+            nameof(BeginSlideEditValue), RoutingStrategy.Bubble, typeof(EventHandler), typeof(SlidableNumberTextBox)
         );
 
         public static RoutedEvent EndSlideEditValueEvent = EventManager.RegisterRoutedEvent(
-            nameof(EndSlideEditValue), RoutingStrategy.Bubble, typeof(EventHandler), typeof(SlidableNumerTextBox)
+            nameof(EndSlideEditValue), RoutingStrategy.Bubble, typeof(EventHandler), typeof(SlidableNumberTextBox)
         );
 
         public static RoutedEvent AbortSlideEditValueEvent = EventManager.RegisterRoutedEvent(
-            nameof(AbortSlideEditValue), RoutingStrategy.Direct, typeof(EventHandler), typeof(SlidableNumerTextBox)
+            nameof(AbortSlideEditValue), RoutingStrategy.Direct, typeof(EventHandler), typeof(SlidableNumberTextBox)
         );
 
         public static RoutedEvent BeginTextEditValueEvent = EventManager.RegisterRoutedEvent(
-            nameof(BeginTextEditValue), RoutingStrategy.Direct, typeof(EventHandler), typeof(SlidableNumerTextBox)
+            nameof(BeginTextEditValue), RoutingStrategy.Direct, typeof(EventHandler), typeof(SlidableNumberTextBox)
         );
 
         public static RoutedEvent EndTextEditValueEvent = EventManager.RegisterRoutedEvent(
-            nameof(EndTextEditValue), RoutingStrategy.Direct, typeof(EventHandler), typeof(SlidableNumerTextBox)
+            nameof(EndTextEditValue), RoutingStrategy.Direct, typeof(EventHandler), typeof(SlidableNumberTextBox)
         );
 
         public static RoutedEvent AbortTextEditValueEvent = EventManager.RegisterRoutedEvent(
-            nameof(AbortTextEditValue), RoutingStrategy.Direct, typeof(EventHandler), typeof(SlidableNumerTextBox)
+            nameof(AbortTextEditValue), RoutingStrategy.Direct, typeof(EventHandler), typeof(SlidableNumberTextBox)
         );
 
         public event EventHandler AbortTextEditValue
@@ -209,7 +209,7 @@ namespace NiVE3.UI.Primitive
             remove { RemoveHandler(BeginSlideEditValueEvent, value); }
         }
 
-        public SlidableNumerTextBox()
+        public SlidableNumberTextBox()
         {
             InitializeComponent();
 
@@ -389,7 +389,7 @@ namespace NiVE3.UI.Primitive
 
         static void ConverterChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is SlidableNumerTextBox slider)
+            if (d is SlidableNumberTextBox slider)
             {
                 slider.UpdateBinding();
             }
@@ -397,7 +397,7 @@ namespace NiVE3.UI.Primitive
 
         static void DigitChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is SlidableNumerTextBox slider && slider.Converter == slider.DefaultConverter)
+            if (d is SlidableNumberTextBox slider && slider.Converter == slider.DefaultConverter)
             {
                 slider.DefaultConverter.Digit = slider.Digit;
                 slider.ValueTextBlock.GetBindingExpression(TextBlock.TextProperty).UpdateTarget();
@@ -407,7 +407,7 @@ namespace NiVE3.UI.Primitive
 
         static void LimitChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is SlidableNumerTextBox slider)
+            if (d is SlidableNumberTextBox slider)
             {
                 slider.Value = Math.Min(Math.Max(slider.Value, slider.Minimum), slider.Maximum);
             }
@@ -415,7 +415,7 @@ namespace NiVE3.UI.Primitive
 
         static void IntValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is SlidableNumerTextBox slider && slider.IntValue != (int)Math.Min(Math.Max(slider.Value, int.MinValue), int.MaxValue))
+            if (d is SlidableNumberTextBox slider && slider.IntValue != (int)Math.Min(Math.Max(slider.Value, int.MinValue), int.MaxValue))
             {
                 slider.Value = slider.IntValue;
             }
@@ -423,7 +423,7 @@ namespace NiVE3.UI.Primitive
 
         static void ValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is SlidableNumerTextBox slider)
+            if (d is SlidableNumberTextBox slider)
             {
                 slider.IntValue = (int)Math.Min(Math.Max(slider.Value, int.MinValue), int.MaxValue);
             }
@@ -431,7 +431,7 @@ namespace NiVE3.UI.Primitive
 
         static void UnitTextChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is SlidableNumerTextBox slider)
+            if (d is SlidableNumberTextBox slider)
             {
                 slider.UpdateBinding();
             }
@@ -439,7 +439,7 @@ namespace NiVE3.UI.Primitive
 
         static object CoerceIntValue(DependencyObject d, object value)
         {
-            if (d is SlidableNumerTextBox slider && value is int v)
+            if (d is SlidableNumberTextBox slider && value is int v)
             {
                 var max = Math.Min(slider.Maximum, int.MaxValue);
                 var min = Math.Max(slider.Minimum, int.MinValue);
@@ -453,7 +453,7 @@ namespace NiVE3.UI.Primitive
 
         static object CoerceValue(DependencyObject d, object value)
         {
-            if (d is SlidableNumerTextBox slider && value is double v)
+            if (d is SlidableNumberTextBox slider && value is double v)
             {
                 return Math.Min(Math.Max(v, slider.Minimum), slider.Maximum);
             }

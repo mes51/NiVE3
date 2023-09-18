@@ -26,7 +26,7 @@
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
 
-        <pr:SlidableNumerTextBox Grid.Column="0" x:Name="RotateCountSlider" Digit="0" Value="{Binding ElementName=Root, Path=RotateCount}" Margin="5,0,2,0" VerticalAlignment="Center">
+        <pr:SlidableNumberTextBox Grid.Column="0" x:Name="RotateCountSlider" Digit="0" Value="{Binding ElementName=Root, Path=RotateCount}" Margin="5,0,2,0" VerticalAlignment="Center">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="BeginSlideEditValue">
                     <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
@@ -47,9 +47,9 @@
                     <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
                 </i:EventTrigger>
             </i:Interaction.Triggers>
-        </pr:SlidableNumerTextBox>
+        </pr:SlidableNumberTextBox>
         <Path Grid.Column="1" Fill="{gm:AppearanceResource ResourceKey=TextBrush}" Data="{StaticResource CrossIcon}" VerticalAlignment="Center" Margin="0,4,0,0" />
-        <pr:SlidableNumerTextBox Grid.Column="2" x:Name="AngleSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=Angle}" Margin="5,0,0,0" UnitText="°" VerticalAlignment="Center">
+        <pr:SlidableNumberTextBox Grid.Column="2" x:Name="AngleSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=Angle}" Margin="5,0,0,0" UnitText="°" VerticalAlignment="Center">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="BeginSlideEditValue">
                     <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
@@ -70,6 +70,6 @@
                     <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
                 </i:EventTrigger>
             </i:Interaction.Triggers>
-        </pr:SlidableNumerTextBox>
+        </pr:SlidableNumberTextBox>
     </Grid>
 </local:PropertyControlBase>

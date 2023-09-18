@@ -9,7 +9,7 @@
                            mc:Ignorable="d" 
                            d:DesignHeight="450" d:DesignWidth="800">
     <Grid Margin="5,0">
-        <pr:SlidableNumerTextBox Value="{Binding Value}" Maximum="{Binding Property.MaxValue}" Minimum="{Binding Property.MinValue}" SlideChangeValue="{Binding Property.SlideChangeValue}" Digit="{Binding Property.Digit}" VerticalAlignment="Center" HorizontalAlignment="Left" MinWidth="25">
+        <pr:SlidableNumberTextBox Value="{Binding Value}" Maximum="{Binding Property.MaxValue}" Minimum="{Binding Property.MinValue}" SlideChangeValue="{Binding Property.SlideChangeValue}" Digit="{Binding Property.Digit}" VerticalAlignment="Center" HorizontalAlignment="Left" MinWidth="25">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="BeginSlideEditValue">
                     <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
@@ -30,6 +30,6 @@
                     <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
                 </i:EventTrigger>
             </i:Interaction.Triggers>
-        </pr:SlidableNumerTextBox>
+        </pr:SlidableNumberTextBox>
     </Grid>
 </local:PropertyControlBase>

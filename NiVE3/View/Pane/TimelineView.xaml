@@ -74,7 +74,7 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <ui:SlidableNumerTextBox Value="{Binding CurrentTime}" Converter="{StaticResource TimeConverter}" SlideChangeValue="{Binding FrameDuration}" Margin="5"/>
+            <ui:SlidableNumberTextBox Value="{Binding CurrentTime}" Converter="{StaticResource TimeConverter}" SlideChangeValue="{Binding FrameDuration}" Margin="5"/>
             <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
                 <CheckBox Style="{StaticResource ShyCheckBox}" VerticalAlignment="Center"/>
                 <CheckBox Style="{StaticResource FrameBlendCheckBox}" VerticalAlignment="Center" Margin="5,0,0,0"/>

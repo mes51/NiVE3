@@ -58,9 +58,9 @@
                     </Grid.ColumnDefinitions>
 
                     <TextBlock Grid.Row="0" Grid.Column="0" Text="{gm:LanguageResource ResourceKey=SolidInputSettingView_Width}" Margin="0,5,5,0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                    <ui:SlidableNumerTextBox Grid.Row="0" Grid.Column="1" Value="{Binding Width}" Maximum="23000" Minimum="4" Margin="0,5,0,0"/>
+                    <ui:SlidableNumberTextBox Grid.Row="0" Grid.Column="1" Value="{Binding Width}" Maximum="23000" Minimum="4" Margin="0,5,0,0"/>
                     <TextBlock Grid.Row="1" Grid.Column="0" Text="{gm:LanguageResource ResourceKey=SolidInputSettingView_Height}" Margin="0,5,5,0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                    <ui:SlidableNumerTextBox Grid.Row="1" Grid.Column="1" Value="{Binding Height}" Maximum="23000" Minimum="4" Margin="0,5,0,0"/>
+                    <ui:SlidableNumberTextBox Grid.Row="1" Grid.Column="1" Value="{Binding Height}" Maximum="23000" Minimum="4" Margin="0,5,0,0"/>
 
                     <CheckBox Grid.RowSpan="2" Grid.Column="2" Content="{gm:LanguageResource ResourceKey=SolidInputSettingView_IsFixRatio}" IsChecked="{Binding IsFixRatio}" Margin="10,0,0,0" VerticalAlignment="Center"/>
 
