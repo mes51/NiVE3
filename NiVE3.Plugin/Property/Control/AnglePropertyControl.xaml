@@ -37,6 +37,15 @@
                 <i:EventTrigger EventName="AbortSlideEditValue">
                     <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
                 </i:EventTrigger>
+                <i:EventTrigger EventName="BeginTextEditValue">
+                    <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
+                </i:EventTrigger>
+                <i:EventTrigger EventName="EndTextEditValue">
+                    <i:InvokeCommandAction Command="{Binding EndEditCommand}"/>
+                </i:EventTrigger>
+                <i:EventTrigger EventName="AbortTextEditValue">
+                    <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
+                </i:EventTrigger>
             </i:Interaction.Triggers>
         </pr:SlidableNumerTextBox>
         <Path Grid.Column="1" Fill="{gm:AppearanceResource ResourceKey=TextBrush}" Data="{StaticResource CrossIcon}" VerticalAlignment="Center" Margin="0,4,0,0" />
@@ -49,6 +58,15 @@
                     <i:InvokeCommandAction Command="{Binding EndEditCommand}"/>
                 </i:EventTrigger>
                 <i:EventTrigger EventName="AbortSlideEditValue">
+                    <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
+                </i:EventTrigger>
+                <i:EventTrigger EventName="BeginTextEditValue">
+                    <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
+                </i:EventTrigger>
+                <i:EventTrigger EventName="EndTextEditValue">
+                    <i:InvokeCommandAction Command="{Binding EndEditCommand}"/>
+                </i:EventTrigger>
+                <i:EventTrigger EventName="AbortTextEditValue">
                     <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
                 </i:EventTrigger>
             </i:Interaction.Triggers>

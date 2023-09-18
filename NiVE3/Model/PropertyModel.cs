@@ -76,7 +76,10 @@ namespace NiVE3.Model
 
         public void CommitProperty(object? prevValue)
         {
-            HistoryModel.Add(new ValueChangeHistoryCommand(this, prevValue, Value));
+            if (!Equals(Value, prevValue))
+            {
+                HistoryModel.Add(new ValueChangeHistoryCommand(this, prevValue, Value));
+            }
         }
 
         public PropertyControlBase CreateControl(IPropertyViewModel viewModel)

@@ -99,6 +99,36 @@ namespace NiVE3.UI.Primitive
             nameof(AbortSlideEditValue), RoutingStrategy.Direct, typeof(EventHandler), typeof(SlidableNumerTextBox)
         );
 
+        public static RoutedEvent BeginTextEditValueEvent = EventManager.RegisterRoutedEvent(
+            nameof(BeginTextEditValue), RoutingStrategy.Direct, typeof(EventHandler), typeof(SlidableNumerTextBox)
+        );
+
+        public static RoutedEvent EndTextEditValueEvent = EventManager.RegisterRoutedEvent(
+            nameof(EndTextEditValue), RoutingStrategy.Direct, typeof(EventHandler), typeof(SlidableNumerTextBox)
+        );
+
+        public static RoutedEvent AbortTextEditValueEvent = EventManager.RegisterRoutedEvent(
+            nameof(AbortTextEditValue), RoutingStrategy.Direct, typeof(EventHandler), typeof(SlidableNumerTextBox)
+        );
+
+        public event EventHandler AbortTextEditValue
+        {
+            add { AddHandler(AbortTextEditValueEvent, value); }
+            remove { RemoveHandler(AbortTextEditValueEvent, value); }
+        }
+
+        public event EventHandler EndTextEditValue
+        {
+            add { AddHandler(EndTextEditValueEvent, value); }
+            remove { RemoveHandler(EndTextEditValueEvent, value); }
+        }
+
+        public event EventHandler BeginTextEditValue
+        {
+            add { AddHandler(BeginTextEditValueEvent, value); }
+            remove { RemoveHandler(BeginTextEditValueEvent, value); }
+        }
+
         private bool IsClicked
         {
             get { return (bool)GetValue(IsClickedProperty); }
@@ -193,7 +223,7 @@ namespace NiVE3.UI.Primitive
             BindingOperations.ClearBinding(ValueTextBox, TextBox.TextProperty);
 
             BindingOperations.SetBinding(ValueTextBlock, TextBlock.TextProperty, new Binding(nameof(Value)) { Source = this, Converter = Converter, StringFormat = $"{{0}}{UnitText}" });
-            BindingOperations.SetBinding(ValueTextBox, TextBox.TextProperty, new Binding(nameof(Value)) { Source = this, Converter = Converter });
+            BindingOperations.SetBinding(ValueTextBox, TextBox.TextProperty, new Binding(nameof(Value)) { Source = this, Converter = Converter, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged });
         }
 
         private void Root_GotFocus(object sender, RoutedEventArgs e)
@@ -226,8 +256,6 @@ namespace NiVE3.UI.Primitive
                 ((UIElement)sender).CaptureMouse();
                 Focus();
                 e.Handled = true;
-
-                RaiseEvent(new RoutedEventArgs(BeginSlideEditValueEvent, this));
             }
         }
 
@@ -242,7 +270,11 @@ namespace NiVE3.UI.Primitive
             var diff = newPos - ClickPoint;
             if (IsMoved || diff.Length > SlideStartThreashold)
             {
-                IsMoved = true;
+                if (!IsMoved)
+                {
+                    IsMoved = true;
+                    RaiseEvent(new RoutedEventArgs(BeginSlideEditValueEvent, this));
+                }
 
                 if (Math.Abs(diff.X) < 1.0 && Math.Abs(diff.Y) < 1.0)
                 {
@@ -310,18 +342,48 @@ namespace NiVE3.UI.Primitive
             if (e.Key == Key.Enter && e.ImeProcessedKey == Key.None)
             {
                 Keyboard.ClearFocus();
+                e.Handled = true;
+
                 if (Validation.GetHasError(ValueTextBox))
                 {
                     Value = PrevValue;
                     ValueTextBlock.GetBindingExpression(TextBlock.TextProperty).UpdateTarget();
+
+                    RaiseEvent(new RoutedEventArgs(AbortTextEditValueEvent, this));
                 }
-                e.Handled = true;
+                else
+                {
+                    RaiseEvent(new RoutedEventArgs(EndTextEditValueEvent, this));
+                }
             }
             else if (e.Key == Key.Escape)
             {
                 Keyboard.ClearFocus();
                 Value = PrevValue;
                 e.Handled = true;
+
+                RaiseEvent(new RoutedEventArgs(AbortTextEditValueEvent, this));
+            }
+        }
+
+        private void ValueTextBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            PrevValue = Value;
+            RaiseEvent(new RoutedEventArgs(BeginTextEditValueEvent, this));
+        }
+
+        private void ValueTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (Validation.GetHasError(ValueTextBox))
+            {
+                Value = PrevValue;
+                ValueTextBlock.GetBindingExpression(TextBlock.TextProperty).UpdateTarget();
+
+                RaiseEvent(new RoutedEventArgs(AbortTextEditValueEvent, this));
+            }
+            else
+            {
+                RaiseEvent(new RoutedEventArgs(EndTextEditValueEvent, this));
             }
         }
 
