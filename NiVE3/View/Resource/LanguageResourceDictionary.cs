@@ -291,6 +291,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("位置")]
         public static readonly string TransformProperty_Translate = nameof(TransformProperty_Translate);
 
+        [ShowInMarkup, DefaultValue("方向")]
+        public static readonly string TransformProperty_Direction = nameof(TransformProperty_Direction);
+
         [ShowInMarkup, DefaultValue("回転")]
         public static readonly string TransformProperty_ZAngle2D = nameof(TransformProperty_ZAngle2D);
 

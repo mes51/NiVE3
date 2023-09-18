@@ -10,6 +10,7 @@
                            mc:Ignorable="d" 
                            x:Name="Root"
                            DataContextChanged="Root_DataContextChanged"
+                           Unloaded="Root_Unloaded"
                            d:DesignHeight="450" d:DesignWidth="800">
     <local:PropertyControlBase.Resources>
         <ResourceDictionary>
@@ -20,7 +21,6 @@
     </local:PropertyControlBase.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="Auto"/>
@@ -40,7 +40,7 @@
             </i:Interaction.Triggers>
         </pr:SlidableNumerTextBox>
         <Path Grid.Column="1" Fill="{gm:AppearanceResource ResourceKey=TextBrush}" Data="{StaticResource CrossIcon}" VerticalAlignment="Center" Margin="0,4,0,0" />
-        <pr:SlidableNumerTextBox Grid.Column="2" x:Name="AngleSlider" Digit="{Binding Digit}" Value="{Binding ElementName=Root, Path=Angle}" Margin="5,0,0,0" VerticalAlignment="Center">
+        <pr:SlidableNumerTextBox Grid.Column="2" x:Name="AngleSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=Angle}" Margin="5,0,0,0" UnitText="°" VerticalAlignment="Center">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="BeginSlideEditValue">
                     <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
@@ -53,6 +53,5 @@
                 </i:EventTrigger>
             </i:Interaction.Triggers>
         </pr:SlidableNumerTextBox>
-        <TextBlock Grid.Column="3" Text="°" VerticalAlignment="Center"/>
     </Grid>
 </local:PropertyControlBase>

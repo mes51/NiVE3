@@ -73,6 +73,13 @@ namespace NiVE3.UI.Primitive
             new FrameworkPropertyMetadata(-1, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, DigitChanged)
         );
 
+        public static readonly DependencyProperty UnitTextProperty = DependencyProperty.Register(
+            nameof(UnitText),
+            typeof(string),
+            typeof(SlidableNumerTextBox),
+            new FrameworkPropertyMetadata("", FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, UnitTextChanged)
+        );
+
         private static readonly DependencyProperty IsClickedProperty = DependencyProperty.Register(
             nameof(IsClicked),
             typeof(bool),
@@ -96,6 +103,12 @@ namespace NiVE3.UI.Primitive
         {
             get { return (bool)GetValue(IsClickedProperty); }
             set { SetValue(IsClickedProperty, value); }
+        }
+
+        public string UnitText
+        {
+            get { return (string)GetValue(UnitTextProperty); }
+            set { SetValue(UnitTextProperty, value); }
         }
 
         public int Digit
@@ -179,7 +192,7 @@ namespace NiVE3.UI.Primitive
             BindingOperations.ClearBinding(ValueTextBlock, TextBlock.TextProperty);
             BindingOperations.ClearBinding(ValueTextBox, TextBox.TextProperty);
 
-            BindingOperations.SetBinding(ValueTextBlock, TextBlock.TextProperty, new Binding(nameof(Value)) { Source = this, Converter = Converter });
+            BindingOperations.SetBinding(ValueTextBlock, TextBlock.TextProperty, new Binding(nameof(Value)) { Source = this, Converter = Converter, StringFormat = $"{{0}}{UnitText}" });
             BindingOperations.SetBinding(ValueTextBox, TextBox.TextProperty, new Binding(nameof(Value)) { Source = this, Converter = Converter });
         }
 
@@ -351,6 +364,14 @@ namespace NiVE3.UI.Primitive
             if (d is SlidableNumerTextBox slider)
             {
                 slider.IntValue = (int)Math.Min(Math.Max(slider.Value, int.MinValue), int.MaxValue);
+            }
+        }
+
+        static void UnitTextChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is SlidableNumerTextBox slider)
+            {
+                slider.UpdateBinding();
             }
         }
 

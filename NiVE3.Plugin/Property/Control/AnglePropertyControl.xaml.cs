@@ -80,6 +80,14 @@ namespace NiVE3.Plugin.Property.Control
             }
         }
 
+        private void Root_Unloaded(object sender, RoutedEventArgs e)
+        {
+            if (ViewModel is INotifyPropertyChanged viewModel)
+            {
+                viewModel.PropertyChanged -= ViewModel_PropertyChanged;
+            }
+        }
+
         private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             var viewModel = ViewModel;

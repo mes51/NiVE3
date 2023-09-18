@@ -17,13 +17,13 @@ namespace NiVE3.Plugin.Property.Properties
 
         public bool Is3D { get; }
 
-        public Vector3dProperty(string id, string displayName, Vector3d defaultValue, int digit = int.MaxValue, bool is3D = false) : base(id, displayName, DoublePropertyType.Instance, defaultValue)
+        public Vector3dProperty(string id, string displayName, Vector3d defaultValue, int digit = -1, bool is3D = false) : base(id, displayName, DoublePropertyType.Instance, defaultValue)
         {
             Digit = digit;
             Is3D = is3D;
         }
 
-        public Vector3dProperty(string id, LanguageResourceKey displayNameKey, Vector3d defaultValue, int digit = int.MaxValue, bool is3D = false) : base(id, displayNameKey, DoublePropertyType.Instance, defaultValue)
+        public Vector3dProperty(string id, LanguageResourceKey displayNameKey, Vector3d defaultValue, int digit = -1, bool is3D = false) : base(id, displayNameKey, DoublePropertyType.Instance, defaultValue)
         {
             Digit = digit;
             Is3D = is3D;

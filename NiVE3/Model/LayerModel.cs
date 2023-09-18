@@ -25,6 +25,8 @@ namespace NiVE3.Model
 
         const string TransformTranslateId = nameof(TransformTranslateId);
 
+        const string TransformDirectionId = nameof(TransformDirectionId);
+
         const string TransformZAngleId = nameof(TransformZAngleId);
 
         const string TransformScaleId = nameof(TransformScaleId);
@@ -262,13 +264,14 @@ namespace NiVE3.Model
             IsEnableVideo = SourceType.HasFlag(SourceType.Video) || SourceType.HasFlag(SourceType.Image);
             IsEnableAudio = SourceType.HasFlag(SourceType.Audio);
 
-            TransformProperties = new PropertyGroupModel(new PropertyGroup(TransformGroupId, new LanguageResourceKey(typeof(LanguageResourceDictionary), LanguageResourceDictionary.Layer_Transform), new PropertyBase[]
+            TransformProperties = new PropertyGroupModel(new PropertyGroup(TransformGroupId, CreateLanguageResourceKey(LanguageResourceDictionary.Layer_Transform), new PropertyBase[]
             {
-                new Vector3dProperty(TransformAnchorPointId, new LanguageResourceKey(typeof(LanguageResourceDictionary), LanguageResourceDictionary.TransformProperty_AnchorPoint), new Vector3d(), int.MaxValue, true),
-                new Vector3dProperty(TransformTranslateId, new LanguageResourceKey(typeof(LanguageResourceDictionary), LanguageResourceDictionary.TransformProperty_Translate), new Vector3d(), int.MaxValue, true),
-                new AngleProperty(TransformZAngleId, new LanguageResourceKey(typeof(LanguageResourceDictionary), LanguageResourceDictionary.TransformProperty_ZAngle2D), 0.0),
-                new Vector3dProperty(TransformScaleId, new LanguageResourceKey(typeof(LanguageResourceDictionary), LanguageResourceDictionary.TransformProperty_Scale), new Vector3d(100.0, 100.0, 100.0), int.MaxValue, true),
-                new DoubleProperty(TransformPropertyOpacityId, new LanguageResourceKey(typeof(LanguageResourceDictionary), LanguageResourceDictionary.TransformProperty_Opacity), 100.0, 0.0, 100.0, 1.0, 1)
+                new Vector3dProperty(TransformAnchorPointId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_AnchorPoint), new Vector3d(footageModel.Width * 0.5, footageModel.Height * 0.5, 0.0), 2, true),
+                new Vector3dProperty(TransformTranslateId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_Translate), new Vector3d(compositionModel.Width * 0.5, compositionModel.Height * 0.5, 0.0), 2, true),
+                new DirectionProperty(TransformDirectionId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_Direction), new Vector3d(), 2),
+                new AngleProperty(TransformZAngleId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_ZAngle2D), 0.0, 2),
+                new Vector3dProperty(TransformScaleId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_Scale), new Vector3d(100.0, 100.0, 100.0), 2, true),
+                new DoubleProperty(TransformPropertyOpacityId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_Opacity), 100.0, 0.0, 100.0, 1.0, 2)
             }), compositionModel, this, historyModel);
         }
 
@@ -314,6 +317,11 @@ namespace NiVE3.Model
 
         public void Dispose()
         {
+        }
+
+        static LanguageResourceKey CreateLanguageResourceKey(string key)
+        {
+            return new LanguageResourceKey(typeof(LanguageResourceDictionary), key);
         }
     }
 }

@@ -19,35 +19,28 @@ using NiVE3.Plugin.Struct;
 namespace NiVE3.Plugin.Property.Control
 {
     /// <summary>
-    /// VectorPropertyControl.xaml の相互作用ロジック
+    /// DirectionPropertyControl.xaml の相互作用ロジック
     /// </summary>
-    public partial class VectorPropertyControl : PropertyControlBase
+    public partial class DirectionPropertyControl : PropertyControlBase
     {
-        public static readonly DependencyProperty Is3DProperty = DependencyProperty.Register(
-            nameof(Is3D),
-            typeof(bool),
-            typeof(VectorPropertyControl),
-            new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
-        );
-
         public static readonly DependencyProperty ValueXProperty = DependencyProperty.Register(
             nameof(ValueX),
             typeof(double),
-            typeof(VectorPropertyControl),
+            typeof(DirectionPropertyControl),
             new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, VectorValueChanged)
         );
 
         public static readonly DependencyProperty ValueYProperty = DependencyProperty.Register(
             nameof(ValueY),
             typeof(double),
-            typeof(VectorPropertyControl),
+            typeof(DirectionPropertyControl),
             new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, VectorValueChanged)
         );
 
         public static readonly DependencyProperty ValueZProperty = DependencyProperty.Register(
             nameof(ValueZ),
             typeof(double),
-            typeof(VectorPropertyControl),
+            typeof(DirectionPropertyControl),
             new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, VectorValueChanged)
         );
 
@@ -69,15 +62,9 @@ namespace NiVE3.Plugin.Property.Control
             set { SetValue(ValueXProperty, value); }
         }
 
-        public bool Is3D
-        {
-            get { return (bool)GetValue(Is3DProperty); }
-            set { SetValue(Is3DProperty, value); }
-        }
-
         bool IsValueChanging { get; set; }
 
-        public VectorPropertyControl()
+        public DirectionPropertyControl()
         {
             InitializeComponent();
         }
@@ -97,9 +84,9 @@ namespace NiVE3.Plugin.Property.Control
             {
                 IsValueChanging = true;
 
-                ValueX = vector.X;
-                ValueY = vector.Y;
-                ValueZ = vector.Z;
+                ValueX = vector.X % 360.0;
+                ValueY = vector.Y % 360.0;
+                ValueZ = vector.Z % 360.0;
 
                 IsValueChanging = false;
             }
@@ -123,21 +110,21 @@ namespace NiVE3.Plugin.Property.Control
 
             IsValueChanging = true;
 
-            ValueX = vector.X;
-            ValueY = vector.Y;
-            ValueZ = vector.Z;
+            ValueX = vector.X % 360.0;
+            ValueY = vector.Y % 360.0;
+            ValueZ = vector.Z % 360.0;
 
             IsValueChanging = false;
         }
 
         static void VectorValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is not VectorPropertyControl control || control.ViewModel is not IPropertyViewModel viewModel || control.IsValueChanging)
+            if (d is not DirectionPropertyControl control || control.ViewModel is not IPropertyViewModel viewModel || control.IsValueChanging)
             {
                 return;
             }
 
-            viewModel.Value = new Vector3d(control.ValueX, control.ValueY, control.ValueZ);
+            viewModel.Value = new Vector3d(control.ValueX % 360.0, control.ValueY % 360.0, control.ValueZ % 360.0);
         }
     }
 }

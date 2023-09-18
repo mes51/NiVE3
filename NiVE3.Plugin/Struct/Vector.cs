@@ -111,6 +111,12 @@ namespace NiVE3.Plugin.Struct
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector2d operator %(Vector2d a, double s)
+        {
+            return new Vector2d(a.X % s, a.Y % s);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator Vector128<double> (Vector2d v)
         {
             return Vector128.Create(v.X, v.Y);
@@ -238,6 +244,12 @@ namespace NiVE3.Plugin.Struct
         public static Vector3d operator /(Vector3d a, Vector3d b)
         {
             return new Vector3d(a.X / b.X, a.Y / b.Y, a.Z / b.Z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector3d operator %(Vector3d a, double s)
+        {
+            return new Vector3d(a.X % s, a.Y % s, a.Z % s);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
