@@ -1,0 +1,132 @@
+﻿<local:PropertyControlBase x:Class="NiVE3.Plugin.Property.Control.ScalePropertyControl"
+                           xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                           xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                           xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                           xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                           xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+                           xmlns:local="clr-namespace:NiVE3.Plugin.Property.Control"
+                           xmlns:pr="clr-namespace:NiVE3.UI.Primitive;assembly=NiVE3.UI"
+                           xmlns:gm="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
+                           mc:Ignorable="d" 
+                           x:Name="Root"
+                           DataContextChanged="Root_DataContextChanged"
+                           Unloaded="Root_Unloaded"
+                           d:DesignHeight="450" d:DesignWidth="800">
+    <local:PropertyControlBase.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/NiVE3.Plugin;component/Property/Control/Resources/Icons.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+
+            <Style x:Key="LinkCheckBox" TargetType="{x:Type CheckBox}">
+                <Setter Property="IsTabStop" Value="False"/>
+                <Setter Property="Margin" Value="5,0,0,0"/>
+                <Setter Property="VerticalAlignment" Value="Center"/>
+                <Setter Property="Width" Value="16"/>
+                <Setter Property="Height" Value="16"/>
+                <Setter Property="Background" Value="White"/>
+                <Setter Property="Foreground" Value="{gm:AppearanceResource ResourceKey=TextBrush, ReturnDynamicResource=True}"/>
+
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type CheckBox}">
+                            <Grid x:Name="templateRoot" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
+                                <Border BorderThickness="1" BorderBrush="{gm:AppearanceResource ResourceKey=BorderBrush, ReturnDynamicResource=True}"/>
+                                <Border BorderThickness="0,0,1,1" BorderBrush="White" Opacity="0.5"/>
+
+                                <Path x:Name="CheckIcon" Fill="{TemplateBinding Foreground}" Data="{StaticResource LinkIcon}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                            </Grid>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsChecked" Value="False">
+                                    <Setter TargetName="CheckIcon" Property="Visibility" Value="Hidden"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </ResourceDictionary>
+    </local:PropertyControlBase.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+
+        <pr:SlidableNumberTextBox Grid.Column="0" x:Name="ValueXSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=ValueX}" UnitText="%" Margin="5,0,2,0" VerticalAlignment="Center">
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="BeginSlideEditValue">
+                    <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
+                </i:EventTrigger>
+                <i:EventTrigger EventName="EndSlideEditValue">
+                    <i:InvokeCommandAction Command="{Binding EndEditCommand}"/>
+                </i:EventTrigger>
+                <i:EventTrigger EventName="AbortSlideEditValue">
+                    <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
+                </i:EventTrigger>
+                <i:EventTrigger EventName="BeginTextEditValue">
+                    <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
+                </i:EventTrigger>
+                <i:EventTrigger EventName="EndTextEditValue">
+                    <i:InvokeCommandAction Command="{Binding EndEditCommand}"/>
+                </i:EventTrigger>
+                <i:EventTrigger EventName="AbortTextEditValue">
+                    <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+        </pr:SlidableNumberTextBox>
+        <TextBlock Grid.Column="1" Text="," VerticalAlignment="Center" Margin="0,4,0,0"/>
+        <pr:SlidableNumberTextBox Grid.Column="2" x:Name="ValueYSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=ValueY}" UnitText="%" Margin="5,0,2,0" VerticalAlignment="Center">
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="BeginSlideEditValue">
+                    <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
+                </i:EventTrigger>
+                <i:EventTrigger EventName="EndSlideEditValue">
+                    <i:InvokeCommandAction Command="{Binding EndEditCommand}"/>
+                </i:EventTrigger>
+                <i:EventTrigger EventName="AbortSlideEditValue">
+                    <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
+                </i:EventTrigger>
+                <i:EventTrigger EventName="BeginTextEditValue">
+                    <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
+                </i:EventTrigger>
+                <i:EventTrigger EventName="EndTextEditValue">
+                    <i:InvokeCommandAction Command="{Binding EndEditCommand}"/>
+                </i:EventTrigger>
+                <i:EventTrigger EventName="AbortTextEditValue">
+                    <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+        </pr:SlidableNumberTextBox>
+        <TextBlock Grid.Column="3" Text="," VerticalAlignment="Center" Margin="0,4,0,0" Visibility="{Binding ElementName=Root, Path=Is3D, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+        <pr:SlidableNumberTextBox Grid.Column="4" x:Name="ValueZSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=ValueZ}" UnitText="%" Margin="5,0,0,0" VerticalAlignment="Center" Visibility="{Binding ElementName=Root, Path=Is3D, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="BeginSlideEditValue">
+                    <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
+                </i:EventTrigger>
+                <i:EventTrigger EventName="EndSlideEditValue">
+                    <i:InvokeCommandAction Command="{Binding EndEditCommand}"/>
+                </i:EventTrigger>
+                <i:EventTrigger EventName="AbortSlideEditValue">
+                    <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
+                </i:EventTrigger>
+                <i:EventTrigger EventName="BeginTextEditValue">
+                    <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
+                </i:EventTrigger>
+                <i:EventTrigger EventName="EndTextEditValue">
+                    <i:InvokeCommandAction Command="{Binding EndEditCommand}"/>
+                </i:EventTrigger>
+                <i:EventTrigger EventName="AbortTextEditValue">
+                    <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+        </pr:SlidableNumberTextBox>
+        <CheckBox Grid.Column="5" IsChecked="{Binding ElementName=Root, Path=IsLinkRatio}" Style="{StaticResource LinkCheckBox}"/>
+    </Grid>
+</local:PropertyControlBase>
