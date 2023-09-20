@@ -26,6 +26,11 @@ namespace NiVE3.Plugin.Property
         public IPropertyType PropertyType { get; }
 
         /// <summary>
+        /// キーフレームによる値の補間が使用できるかどうか
+        /// </summary>
+        public bool IsSupportKeyFrame { get; }
+
+        /// <summary>
         /// プロパティの既定の値
         /// </summary>
         public object? DefaultValue { get; }
@@ -46,12 +51,13 @@ namespace NiVE3.Plugin.Property
         /// <param name="displayName">プロパティの名前</param>
         /// <param name="propertyType">使用するPropertyType</param>
         /// <param name="defaultValue">デフォルトの値</param>
-        public PropertyBase(string id, string displayName, IPropertyType propertyType, object? defaultValue)
+        public PropertyBase(string id, string displayName, IPropertyType propertyType, object? defaultValue, bool isSupportKeyFrame = true)
         {
             Id = id;
             RawDisplayName = displayName;
             PropertyType = propertyType;
             DefaultValue = defaultValue;
+            IsSupportKeyFrame = isSupportKeyFrame;
         }
 
         /// <summary>
@@ -61,12 +67,13 @@ namespace NiVE3.Plugin.Property
         /// <param name="displayNameKey">プロパティの名前のLanguageResourceKey</param>
         /// <param name="propertyType">使用するPropertyType</param>
         /// <param name="defaultValue">デフォルトの値</param>
-        public PropertyBase(string id, LanguageResourceKey displayNameKey, IPropertyType propertyType, object? defaultValue)
+        public PropertyBase(string id, LanguageResourceKey displayNameKey, IPropertyType propertyType, object? defaultValue, bool isSupportKeyFrame = true)
         {
             Id = id;
             DisplayNameKey = displayNameKey;
             PropertyType = propertyType;
             DefaultValue = defaultValue;
+            IsSupportKeyFrame = isSupportKeyFrame;
         }
 
         /// <summary>
@@ -119,7 +126,7 @@ namespace NiVE3.Plugin.Property
         /// </summary>
         /// <param name="displayName">グループの名前</param>
         /// <param name="children">グループに含まれるプロパティ</param>
-        public PropertyGroup(string id, string displayName, PropertyBase[] children) : base(id, displayName, PropertyGroupType.Instance, null)
+        public PropertyGroup(string id, string displayName, PropertyBase[] children) : base(id, displayName, PropertyGroupType.Instance, null, false)
         {
             Children = children;
         }
@@ -129,7 +136,7 @@ namespace NiVE3.Plugin.Property
         /// </summary>
         /// <param name="displayName">グループの名前</param>
         /// <param name="children">グループに含まれるプロパティ</param>
-        public PropertyGroup(string id, LanguageResourceKey displayName, PropertyBase[] children) : base(id, displayName, PropertyGroupType.Instance, null)
+        public PropertyGroup(string id, LanguageResourceKey displayName, PropertyBase[] children) : base(id, displayName, PropertyGroupType.Instance, null, false)
         {
             Children = children;
         }

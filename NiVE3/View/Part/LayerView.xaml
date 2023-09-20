@@ -527,7 +527,9 @@
                                       ControlAreaWidth="{Binding ElementName=Root, Path=LayerControlAreaWidth}"
                                       NameAreaWidth="{Binding ElementName=Root, Path=DataContext.PropertyNameAreaWidth}"
                                       IsAVSwitchColumnVisible="{Binding ElementName=Root, Path=DataContext.IsAVSwitchColumnVisible}"
-                                      IsTagColumnVisible="{Binding ElementName=Root, Path=DataContext.IsTagColumnVisible}"/>
+                                      IsTagColumnVisible="{Binding ElementName=Root, Path=DataContext.IsTagColumnVisible}"
+                                      Range="{Binding ElementName=Root, Path=Range}"
+                                      RangeStart="{Binding ElementName=Root, Path=RangeStart}"/>
             </Grid>
         </StackPanel>
 

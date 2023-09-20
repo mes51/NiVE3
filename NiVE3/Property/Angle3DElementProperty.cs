@@ -13,7 +13,7 @@ namespace NiVE3.Property
 {
     class Angle3DElementProperty : AngleProperty
     {
-        public Angle3DElementProperty(string id, LanguageResourceKey displayNameKey, double defaultValue, int digit = -1) : base(id, displayNameKey, defaultValue, digit) { }
+        public Angle3DElementProperty(string id, LanguageResourceKey displayNameKey, double defaultValue, bool isSupportKeyFrame = true, int digit = -1) : base(id, displayNameKey, defaultValue, isSupportKeyFrame, digit) { }
 
         public override PropertyViewState CreateState(ICompositionObject composition, ILayerObject? layer, IEffectObject? effect, IPropertyViewModel viewModel)
         {

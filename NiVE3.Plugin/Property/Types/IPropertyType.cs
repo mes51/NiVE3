@@ -23,7 +23,7 @@ namespace NiVE3.Plugin.Property.Types
         /// <param name="keyFrames">2つ以上の時間順でソートされたキーフレーム</param>
         /// <param name="t">現在時刻。0～1で表されます</param>
         /// <returns>補間された値</returns>
-        object Interpolate(KeyFrame[] keyFrames, double t);
+        object? Interpolate(IReadOnlyList<KeyFrame> keyFrames, double t);
 
         /// <summary>
         /// 他のプロパティの値から現在のプロパティの値に変更します。

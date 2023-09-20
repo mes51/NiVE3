@@ -66,7 +66,7 @@ namespace NiVE3.Plugin.Property.Control
                 newViewModel.PropertyChanged += ViewModel_PropertyChanged;
             }
 
-            if (ViewModel?.Value is double angle)
+            if (ViewModel?.CurrentTimeValue is double angle)
             {
                 var rotate = (int)(angle / 360.0);
                 angle = angle % 360.0;
@@ -91,7 +91,7 @@ namespace NiVE3.Plugin.Property.Control
         private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             var viewModel = ViewModel;
-            if (viewModel == null || viewModel.Value is not double angle)
+            if (viewModel == null || viewModel.CurrentTimeValue is not double angle)
             {
                 return;
             }
@@ -114,7 +114,7 @@ namespace NiVE3.Plugin.Property.Control
                 return;
             }
 
-            viewModel.Value = control.RotateCount * 360.0 + control.Angle;
+            viewModel.CurrentTimeValue = control.RotateCount * 360.0 + control.Angle;
         }
     }
 }

@@ -59,6 +59,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, Icon("")]
         public static readonly string RightLong = nameof(RightLong);
 
+        [ShowInMarkup, Icon("")]
+        public static readonly string Stopwatch = nameof(Stopwatch);
+
         public FontawesomeResourceDictionary()
         {
             var keys = typeof(FontawesomeResourceDictionary).GetFields(BindingFlags.Static | BindingFlags.Public)

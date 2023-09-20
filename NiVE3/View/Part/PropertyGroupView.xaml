@@ -15,6 +15,8 @@
                                    ControlAreaWidth="{Binding ElementName=Root, Path=ControlAreaWidth}"
                                    NameAreaWidth="{Binding ElementName=Root, Path=NameAreaWidth}"
                                    IsAVSwitchColumnVisible="{Binding ElementName=Root, Path=IsAVSwitchColumnVisible}"
-                                   IsTagColumnVisible="{Binding ElementName=Root, Path=IsTagColumnVisible}"/>
+                                   IsTagColumnVisible="{Binding ElementName=Root, Path=IsTagColumnVisible}"
+                                   Range="{Binding ElementName=Root, Path=Range}"
+                                   RangeStart="{Binding ElementName=Root, Path=RangeStart}"/>
     </pt:LayerParameterExpander>
 </UserControl>

@@ -22,7 +22,7 @@ namespace NiVE3.Plugin.Interfaces
     {
         PropertyBase Property { get; }
 
-        object? Value { get; set; }
+        object? CurrentTimeValue { get; set; }
 
         ICommand BeginEditCommand { get; }
 

@@ -25,6 +25,10 @@ namespace NiVE3.View.Part
     /// </summary>
     public partial class PropertyView : UserControl
     {
+        const double KeyFrameSwitchWidth = 22.0;
+
+        public static readonly GridLength KeyFrameSwitchGridLength = new GridLength(KeyFrameSwitchWidth);
+
         public static readonly DependencyProperty ControlAreaWidthProperty = DependencyProperty.Register(
             nameof(ControlAreaWidth),
             typeof(double),
@@ -87,6 +91,32 @@ namespace NiVE3.View.Part
             typeof(PropertyView),
             new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
+
+        public static readonly DependencyProperty RangeProperty = DependencyProperty.Register(
+            nameof(Range),
+            typeof(double),
+            typeof(PropertyView),
+            new FrameworkPropertyMetadata(0.0)
+        );
+
+        public static readonly DependencyProperty RangeStartProperty = DependencyProperty.Register(
+            nameof(RangeStart),
+            typeof(double),
+            typeof(PropertyView),
+            new FrameworkPropertyMetadata(0.0)
+        );
+
+        public double RangeStart
+        {
+            get { return (double)GetValue(RangeStartProperty); }
+            set { SetValue(RangeStartProperty, value); }
+        }
+
+        public double Range
+        {
+            get { return (double)GetValue(RangeProperty); }
+            set { SetValue(RangeProperty, value); }
+        }
 
         public PropertyViewState? ViewState
         {
@@ -165,14 +195,14 @@ namespace NiVE3.View.Part
                 {
                     indent += UIParameters.AVSwitchWidthWithHalfSplitter;
                 }
-                var nameAreaWidth = propertyView.NameAreaWidth - UIParameters.ArrowWidth * propertyView.IndentLevel + UIParameters.ArrowWidth;
+                var nameAreaWidth = propertyView.NameAreaWidth - UIParameters.ArrowWidth * propertyView.IndentLevel + UIParameters.ArrowWidth - KeyFrameSwitchWidth;
                 if (propertyView.IsTagColumnVisible)
                 {
                     nameAreaWidth += UIParameters.TagAreaWidth;
                 }
                 propertyView.IndentMarginLeft = new GridLength(indent);
                 propertyView.CalculatedNameAreaWidth = new GridLength(Math.Max(nameAreaWidth, 0.0));
-                propertyView.CalculatedControlAreaWidth = new GridLength(Math.Max(propertyView.ControlAreaWidth - indent - nameAreaWidth, 0.0));
+                propertyView.CalculatedControlAreaWidth = new GridLength(Math.Max(propertyView.ControlAreaWidth - indent - nameAreaWidth - KeyFrameSwitchWidth, 0.0));
             }
         }
 
@@ -180,7 +210,7 @@ namespace NiVE3.View.Part
         {
             if (d is PropertyView propertyView)
             {
-                propertyView.CalculatedControlAreaWidth = new GridLength(Math.Max(propertyView.ControlAreaWidth - propertyView.IndentMarginLeft.Value - propertyView.CalculatedNameAreaWidth.Value, 0.0));
+                propertyView.CalculatedControlAreaWidth = new GridLength(Math.Max(propertyView.ControlAreaWidth - propertyView.IndentMarginLeft.Value - propertyView.CalculatedNameAreaWidth.Value - KeyFrameSwitchWidth, 0.0));
             }
         }
 
@@ -188,13 +218,13 @@ namespace NiVE3.View.Part
         {
             if (d is PropertyView propertyView)
             {
-                var nameAreaWidth = propertyView.NameAreaWidth - UIParameters.ArrowWidth * propertyView.IndentLevel + UIParameters.ArrowWidth;
+                var nameAreaWidth = propertyView.NameAreaWidth - UIParameters.ArrowWidth * propertyView.IndentLevel + UIParameters.ArrowWidth - KeyFrameSwitchWidth;
                 if (propertyView.IsTagColumnVisible)
                 {
                     nameAreaWidth += UIParameters.TagAreaWidth;
                 }
                 propertyView.CalculatedNameAreaWidth = new GridLength(Math.Max(nameAreaWidth, 0.0));
-                propertyView.CalculatedControlAreaWidth = new GridLength(Math.Max(propertyView.ControlAreaWidth - propertyView.IndentMarginLeft.Value - nameAreaWidth, 0.0));
+                propertyView.CalculatedControlAreaWidth = new GridLength(Math.Max(propertyView.ControlAreaWidth - propertyView.IndentMarginLeft.Value - nameAreaWidth - KeyFrameSwitchWidth, 0.0));
             }
         }
     }

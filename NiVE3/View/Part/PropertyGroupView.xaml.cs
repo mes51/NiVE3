@@ -66,6 +66,32 @@ namespace NiVE3.View.Part
             new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
+        public static readonly DependencyProperty RangeProperty = DependencyProperty.Register(
+            nameof(Range),
+            typeof(double),
+            typeof(PropertyGroupView),
+            new FrameworkPropertyMetadata(0.0)
+        );
+
+        public static readonly DependencyProperty RangeStartProperty = DependencyProperty.Register(
+            nameof(RangeStart),
+            typeof(double),
+            typeof(PropertyGroupView),
+            new FrameworkPropertyMetadata(0.0)
+        );
+
+        public double RangeStart
+        {
+            get { return (double)GetValue(RangeStartProperty); }
+            set { SetValue(RangeStartProperty, value); }
+        }
+
+        public double Range
+        {
+            get { return (double)GetValue(RangeProperty); }
+            set { SetValue(RangeProperty, value); }
+        }
+
         public PropertyViewState? ViewState
         {
             get { return (PropertyViewState)GetValue(ViewStateProperty); }

@@ -11,12 +11,16 @@
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="{Binding ElementName=Root, Path=IndentMarginLeft}"/>
+            <ColumnDefinition Width="{x:Static local:PropertyView.KeyFrameSwitchGridLength}"/>
             <ColumnDefinition Width="{Binding ElementName=Root, Path=CalculatedNameAreaWidth}"/>
             <ColumnDefinition Width="{Binding ElementName=Root, Path=CalculatedControlAreaWidth}"/>
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
 
-        <TextBlock Grid.Column="1" Text="{Binding ViewState.DisplayName}"/>
-        <Grid Grid.Column="2" x:Name="PropertyControlGrid"/>
+        <CheckBox Grid.Column="1" IsChecked="{Binding HasKeyFrame, Mode=OneWay}" Style="{StaticResource KeyFrameSwitchCheckBox}" VerticalAlignment="Center" HorizontalAlignment="Center" Command="{Binding SwitchUseKeyFrameCommand}"/>
+        <TextBlock Grid.Column="2" Text="{Binding ViewState.DisplayName}"/>
+        <Grid Grid.Column="3" x:Name="PropertyControlGrid"/>
+
+        <local:KeyFrameCollectionView Grid.Column="4" KeyFrames="{Binding KeyFrames}" SourceStartPoint="{Binding SourceStartPoint}" Range="{Binding ElementName=Root, Path=Range}" RangeStart="{Binding ElementName=Root, Path=RangeStart}"/>
     </Grid>
 </UserControl>

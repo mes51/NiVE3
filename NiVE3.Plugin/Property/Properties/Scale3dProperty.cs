@@ -17,13 +17,13 @@ namespace NiVE3.Plugin.Property.Properties
 
         public bool Is3D { get; }
 
-        public Scale3dProperty(string id, string displayName, Vector3d defaultValue, int digit = -1, bool is3D = false) : base(id, displayName, DoublePropertyType.Instance, defaultValue)
+        public Scale3dProperty(string id, string displayName, Vector3d defaultValue, bool isSupportKeyFrame = true, int digit = -1, bool is3D = false) : base(id, displayName, Vector3dPropertyType.Instance, defaultValue, isSupportKeyFrame)
         {
             Digit = digit;
             Is3D = is3D;
         }
 
-        public Scale3dProperty(string id, LanguageResourceKey displayNameKey, Vector3d defaultValue, int digit = -1, bool is3D = false) : base(id, displayNameKey, DoublePropertyType.Instance, defaultValue)
+        public Scale3dProperty(string id, LanguageResourceKey displayNameKey, Vector3d defaultValue, bool isSupportKeyFrame = true, int digit = -1, bool is3D = false) : base(id, displayNameKey, Vector3dPropertyType.Instance, defaultValue, isSupportKeyFrame)
         {
             Digit = digit;
             Is3D = is3D;

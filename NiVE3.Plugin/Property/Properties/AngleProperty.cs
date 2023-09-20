@@ -14,12 +14,12 @@ namespace NiVE3.Plugin.Property.Properties
     {
         public int Digit { get; }
 
-        public AngleProperty(string id, string displayName, double defaultValue, int digit = -1) : base(id, displayName, DoublePropertyType.Instance, defaultValue)
+        public AngleProperty(string id, string displayName, double defaultValue, bool isSupportKeyFrame = true, int digit = -1) : base(id, displayName, DoublePropertyType.Instance, defaultValue, isSupportKeyFrame)
         {
             Digit = digit;
         }
 
-        public AngleProperty(string id, LanguageResourceKey displayNameKey, double defaultValue, int digit = -1) : base(id, displayNameKey, DoublePropertyType.Instance, defaultValue)
+        public AngleProperty(string id, LanguageResourceKey displayNameKey, double defaultValue, bool isSupportKeyFrame = true, int digit = -1) : base(id, displayNameKey, DoublePropertyType.Instance, defaultValue, isSupportKeyFrame)
         {
             Digit = digit;
         }

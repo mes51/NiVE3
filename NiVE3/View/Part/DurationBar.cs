@@ -378,19 +378,6 @@ namespace NiVE3.View.Part
             drawingContext.Pop();
         }
 
-        FormattedText DebugText(string text)
-        {
-            return new FormattedText(
-                text,
-                System.Globalization.CultureInfo.InvariantCulture,
-                FlowDirection.LeftToRight,
-                new Typeface(new FontFamily("Meiryo UI"), FontStyles.Normal, FontWeights.Normal, FontStretches.Normal),
-                12.0,
-                Brushes.Black,
-                96.0
-            );
-        }
-
         static void TagColorChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is DurationBar durationBar)

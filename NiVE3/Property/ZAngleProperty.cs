@@ -19,7 +19,7 @@ namespace NiVE3.Property
 
         LanguageResourceKey DisplayName3D { get; }
 
-        public ZAngleProperty(string id, LanguageResourceKey displayNameKey2D, LanguageResourceKey displayNameKey3D, double defaultValue, int digit = -1) : base(id, displayNameKey2D, defaultValue, digit)
+        public ZAngleProperty(string id, LanguageResourceKey displayNameKey2D, LanguageResourceKey displayNameKey3D, double defaultValue, bool isSupportKeyFrame = true, int digit = -1) : base(id, displayNameKey2D, defaultValue, isSupportKeyFrame, digit)
         {
             DisplayName2D = displayNameKey2D;
             DisplayName3D = displayNameKey3D;

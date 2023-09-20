@@ -20,7 +20,7 @@ namespace NiVE3.Plugin.Property.Properties
 
         public int Digit { get; }
 
-        public DoubleProperty(string id, string displayName, double defaultValue, double minValue, double maxValue, double slideChangeValue = 1.0, int digit = -1) : base(id, displayName, DoublePropertyType.Instance, defaultValue)
+        public DoubleProperty(string id, string displayName, double defaultValue, double minValue, double maxValue, bool isSupportKeyFrame = true, double slideChangeValue = 1.0, int digit = -1) : base(id, displayName, DoublePropertyType.Instance, defaultValue, isSupportKeyFrame)
         {
             if (minValue >= maxValue)
             {
@@ -33,7 +33,7 @@ namespace NiVE3.Plugin.Property.Properties
             Digit = digit;
         }
 
-        public DoubleProperty(string id, LanguageResourceKey displayNameKey, double defaultValue, double minValue, double maxValue, double slideChangeValue = 1.0, int digit = -1) : base(id, displayNameKey, DoublePropertyType.Instance, defaultValue)
+        public DoubleProperty(string id, LanguageResourceKey displayNameKey, double defaultValue, double minValue, double maxValue, bool isSupportKeyFrame = true, double slideChangeValue = 1.0, int digit = -1) : base(id, displayNameKey, DoublePropertyType.Instance, defaultValue, isSupportKeyFrame)
         {
             if (minValue >= maxValue)
             {

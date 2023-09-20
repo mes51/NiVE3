@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,6 +9,7 @@ using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Property;
 using NiVE3.Plugin.Property.Control;
 using NiVE3.ViewModel;
+using NiVE3.Shared.Extension;
 using Prism.Mvvm;
 
 namespace NiVE3.Model
@@ -18,11 +20,11 @@ namespace NiVE3.Model
 
         object? Value { get; }
 
+        ObservableCollection<KeyFrame>? KeyFrames { get; }
+
         ObservableCollection<IPropertyModel>? Children { get; }
 
         PropertyBase Property { get; }
-
-        void CommitProperty(object? prevValue);
 
         PropertyControlBase CreateControl(IPropertyViewModel viewModel);
 
@@ -38,6 +40,27 @@ namespace NiVE3.Model
         {
             get { return _value; }
             set { SetProperty(ref _value, value); }
+        }
+
+        private double sourceStartPoint;
+        public double SourceStartPoint
+        {
+            get { return sourceStartPoint; }
+            set { SetProperty(ref sourceStartPoint, value); }
+        }
+
+        private double currentTime;
+        public double CurrentTime
+        {
+            get { return currentTime; }
+            set { SetProperty(ref currentTime, value); }
+        }
+
+        private ObservableCollection<KeyFrame> keyFrames = new ObservableCollection<KeyFrame>();
+        public ObservableCollection<KeyFrame> KeyFrames
+        {
+            get { return keyFrames; }
+            set { SetProperty(ref keyFrames, value); }
         }
 
         public ObservableCollection<IPropertyModel>? Children => null;
@@ -65,13 +88,12 @@ namespace NiVE3.Model
             HistoryModel = historyModel;
             Id = property.Id;
             Value = property.DefaultValue;
-        }
 
-        public void CommitProperty(object? prevValue)
-        {
-            if (!Equals(Value, prevValue))
+            // NOTE: 本来はモデル側から設定してもらうものだが、引き回しの経路が複雑になりすぎる(レイヤーからだったり、エフェクトやマスクだったり)ため、自分から取りに行く
+            compositionModel.PropertyChanged += CompositionModel_PropertyChanged;
+            if (layerModel != null)
             {
-                HistoryModel.Add(new ValueChangeHistoryCommand(this, prevValue, Value));
+                layerModel.PropertyChanged += LayerModel_PropertyChanged;
             }
         }
 
@@ -84,6 +106,78 @@ namespace NiVE3.Model
         {
             return Property.CreateState(CompositionModel, LayerModel, EffectModel, viewModel);
         }
+
+        public void CommitProperty(object? newValue, object? prevValue)
+        {
+            if (Equals(newValue, prevValue))
+            {
+                if (KeyFrames.Count > 0)
+                {
+                    CreateKeyFrame(newValue);
+                }
+            }
+            else
+            {
+                if (KeyFrames.Count > 0)
+                {
+                    CreateKeyFrame(newValue);
+                }
+                else
+                {
+                    Value = newValue;
+                    HistoryModel.Add(new ValueChangeHistoryCommand(this, prevValue, newValue));
+                }
+            }
+        }
+
+        public void CreateKeyFrame(object? value)
+        {
+            var time = CurrentTime - SourceStartPoint;
+            var keyFrame = new KeyFrame(time, value, new Ease(0.0, 0.0), new Ease(0.0, 0.0), InterpolationType.Linear);
+            var index = KeyFrames.IndexOfLast(k => k.Time <= time) + 1;
+            if (index > 0 && KeyFrames[index - 1].Time == time)
+            {
+                var oldKeyFrame = KeyFrames[index - 1];
+                KeyFrames[index - 1] = keyFrame;
+                HistoryModel.Add(new ReplaceKeyFrameHistoryCommand(this, oldKeyFrame, keyFrame, index - 1));
+            }
+            else
+            {
+                var isFirstKeyFrame = KeyFrames.Count < 1;
+                KeyFrames.Insert(index, keyFrame);
+                if (isFirstKeyFrame)
+                {
+                    HistoryModel.Add(new AddFirstKeyFrameHistoryCommand(this, keyFrame, value));
+                }
+                else
+                {
+                    HistoryModel.Add(new AddKeyFrameHistoryCommand(this, keyFrame, index));
+                }
+            }
+        }
+
+        public void ClearKeyFrame()
+        {
+            var keyFrames = KeyFrames.ToArray();
+            KeyFrames.Clear();
+            HistoryModel.Add(new ClearKeyFramesHistoryCommand(this, keyFrames));
+        }
+
+        private void CompositionModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(CompositionModel.CurrentTime))
+            {
+                CurrentTime = CompositionModel.CurrentTime;
+            }
+        }
+
+        private void LayerModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(LayerModel.SourceStartPoint))
+            {
+                SourceStartPoint = LayerModel?.SourceStartPoint ?? 0.0;
+            }
+        }
     }
 
     class PropertyGroupModel : BindableBase, IPropertyModel
@@ -91,6 +185,8 @@ namespace NiVE3.Model
         public string Id { get; }
 
         public object? Value => null;
+
+        public ObservableCollection<KeyFrame>? KeyFrames => null;
 
         private ObservableCollection<IPropertyModel> children = new ObservableCollection<IPropertyModel>();
         public ObservableCollection<IPropertyModel> Children
@@ -134,8 +230,6 @@ namespace NiVE3.Model
                 }
             }
         }
-
-        public void CommitProperty(object? prevValue) { }
 
         public PropertyControlBase CreateControl(IPropertyViewModel viewModel)
         {

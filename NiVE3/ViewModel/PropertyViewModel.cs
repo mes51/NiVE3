@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,9 +23,9 @@ namespace NiVE3.ViewModel
     {
         PropertyViewState ViewState { get; }
 
-        ObservableCollectionView<IPropertyModel, IInternalPropertyViewModel>? Children { get; }
+        ObservableCollection<KeyFrame>? KeyFrames { get; }
 
-        PropertyControlBase CreateControl();
+        ObservableCollectionView<IPropertyModel, IInternalPropertyViewModel>? Children { get; }
     }
 
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
@@ -31,14 +33,60 @@ namespace NiVE3.ViewModel
     {
         public PropertyViewState ViewState { get; }
 
+        private double sourceStartPoint;
+        [NeedWire(nameof(PropertyModel), IsOneWay = true)]
+        public double SourceStartPoint
+        {
+            get { return sourceStartPoint; }
+            set { SetProperty(ref sourceStartPoint, value); }
+        }
+
+        private double currentTime;
+        [NeedWire(nameof(PropertyModel), IsOneWay = true)]
+        public double CurrentTime
+        {
+            get { return currentTime; }
+            set { SetProperty(ref currentTime, value); }
+        }
+
+        private ObservableCollection<KeyFrame> keyFrames = new ObservableCollection<KeyFrame>();
+        [NeedWire(nameof(PropertyModel), IsOneWay = true)]
+        public ObservableCollection<KeyFrame> KeyFrames
+        {
+            get { return keyFrames; }
+            set
+            {
+                if (keyFrames != value)
+                {
+                    keyFrames.CollectionChanged -= KeyFrames_CollectionChanged;
+                    value.CollectionChanged += KeyFrames_CollectionChanged;
+                }
+                SetProperty(ref keyFrames, value);
+            }
+        }
+
         public ObservableCollectionView<IPropertyModel, IInternalPropertyViewModel>? Children => null;
 
-        private object? _value; // valueキーワードと被るため仕方なしでアンダーバーをつける
+        private object? _value;
         [NeedWire(nameof(PropertyModel))]
         public object? Value
         {
             get { return _value; }
             set { SetProperty(ref _value, value); }
+        }
+
+        private object? currentTimeValue;
+        public object? CurrentTimeValue
+        {
+            get { return currentTimeValue; }
+            set { SetProperty(ref currentTimeValue, value); }
+        }
+
+        private bool hasKeyFrame;
+        public bool HasKeyFrame
+        {
+            get { return hasKeyFrame; }
+            set { SetProperty(ref hasKeyFrame, value); }
         }
 
         public PropertyBase Property { get; }
@@ -48,6 +96,8 @@ namespace NiVE3.ViewModel
         public ICommand EndEditCommand { get; }
 
         public ICommand AbortEditCommand { get; }
+
+        public ICommand SwitchUseKeyFrameCommand { get; }
 
         PropertyModel PropertyModel { get; }
 
@@ -63,23 +113,40 @@ namespace NiVE3.ViewModel
 
             BeginEditCommand = new RequerySuggestedCommand(() =>
             {
-                PrevValue = Value;
+                PrevValue = CurrentTimeValue;
                 IsEditing = true;
             }, () => !IsEditing);
 
             EndEditCommand = new RequerySuggestedCommand(() =>
             {
-                PropertyModel.CommitProperty(PrevValue);
+                PropertyModel.CommitProperty(CurrentTimeValue, PrevValue);
                 IsEditing = false;
             }, () => IsEditing);
 
             AbortEditCommand = new RequerySuggestedCommand(() =>
             {
-                Value = PrevValue;
+                CurrentTimeValue = PrevValue;
                 IsEditing = false;
             }, () => IsEditing);
 
+            SwitchUseKeyFrameCommand = new DelegateCommand(() =>
+            {
+                if (KeyFrames.Count > 0)
+                {
+                    PropertyModel.ClearKeyFrame();
+                }
+                else
+                {
+                    PropertyModel.CreateKeyFrame(CurrentTimeValue);
+                }
+            });
+
             WiringModel();
+
+            CurrentTimeValue = Value;
+            HasKeyFrame = KeyFrames.Count > 0;
+
+            PropertyChanged += PropertyViewModel_PropertyChanged;
         }
 
         public PropertyControlBase CreateControl()
@@ -87,13 +154,48 @@ namespace NiVE3.ViewModel
             return PropertyModel.CreateControl(this);
         }
 
+        object? CalculationValue()
+        {
+            if (KeyFrames.Count > 0)
+            {
+                return Property.PropertyType.Interpolate(KeyFrames, CurrentTime - SourceStartPoint);
+            }
+            else
+            {
+                return Value;
+            }
+        }
+
         partial void WiringModel();
+
+        private void PropertyViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(CurrentTimeValue) when IsEditing:
+                    Value = CurrentTimeValue;
+                    break;
+                case nameof(CurrentTime):
+                    CurrentTimeValue = CalculationValue();
+                    break;
+                case nameof(Value):
+                    CurrentTimeValue = Value;
+                    break;
+            }
+        }
+
+        private void KeyFrames_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            HasKeyFrame = KeyFrames.Count > 0;
+            CurrentTimeValue = CalculationValue();
+        }
     }
 
-    [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
     partial class PropertyGroupViewModel : BindableBase, IInternalPropertyViewModel
     {
         public PropertyViewState ViewState { get; }
+
+        public ObservableCollection<KeyFrame>? KeyFrames => null;
 
         private ObservableCollectionView<IPropertyModel, IInternalPropertyViewModel> children;
         public ObservableCollectionView<IPropertyModel, IInternalPropertyViewModel> Children
@@ -109,7 +211,7 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref isExpanded, value); }
         }
 
-        public object? Value
+        public object? CurrentTimeValue
         {
             get => null;
             set { }
@@ -141,15 +243,6 @@ namespace NiVE3.ViewModel
                 }
             });
             ViewState = propertyGroupModel.CreateState(this);
-
-            WiringModel();
         }
-
-        public PropertyControlBase CreateControl()
-        {
-            throw new NotImplementedException();
-        }
-
-        partial void WiringModel();
     }
 }

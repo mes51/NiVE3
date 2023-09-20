@@ -283,6 +283,12 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("プロパティの変更")]
         public static readonly string History_ChangePropertyValue = nameof(History_ChangePropertyValue);
 
+        [ShowInMarkup, DefaultValue("キーフレームの追加")]
+        public static readonly string History_AddKeyFrame = nameof(History_AddKeyFrame);
+
+        [ShowInMarkup, DefaultValue("キーフレームの削除")]
+        public static readonly string History_RemoveKeyFrame = nameof(History_RemoveKeyFrame);
+
         // Property
 
         [ShowInMarkup, DefaultValue("アンカーポイント")]

@@ -17,7 +17,7 @@ namespace NiVE3.Plugin.Property.Types
 
         public InterpolationType SupportedInterpolationTypes => throw new NotImplementedException();
 
-        public object Interpolate(KeyFrame[] keyFrames, double t)
+        public object Interpolate(IReadOnlyList<KeyFrame> keyFrames, double t)
         {
             throw new NotImplementedException();
         }

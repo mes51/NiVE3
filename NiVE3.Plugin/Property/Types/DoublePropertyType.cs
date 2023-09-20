@@ -15,14 +15,14 @@ namespace NiVE3.Plugin.Property.Types
 
         private DoublePropertyType() { }
 
-        public object Interpolate(KeyFrame[] keyFrames, double t)
+        public object? Interpolate(IReadOnlyList<KeyFrame> keyFrames, double t)
         {
-            var baseKeyFrameIndex = keyFrames.IndexOf(k => k.Time < t);
+            var baseKeyFrameIndex = keyFrames.IndexOfLast(k => k.Time <= t);
             if (baseKeyFrameIndex < 0)
             {
                 return keyFrames[0].Value;
             }
-            else if (baseKeyFrameIndex >= keyFrames.Length - 1)
+            else if (baseKeyFrameIndex >= keyFrames.Count - 1)
             {
                 return keyFrames[baseKeyFrameIndex].Value;
             }
@@ -31,12 +31,12 @@ namespace NiVE3.Plugin.Property.Types
             switch (keyFrames[baseKeyFrameIndex].InterpolationType)
             {
                 case InterpolationType.Linear:
-                    return Interpolation.Linear((double)keyFrame1.Value, (double)keyFrame2.Value, keyFrame1.Time, keyFrame2.Time, t);
+                    return Interpolation.Linear((double)keyFrame1.Value!, (double)keyFrame2.Value!, keyFrame1.Time, keyFrame2.Time, t);
                 case InterpolationType.CatmullRom:
                     {
                         var keyFrame0 = baseKeyFrameIndex > 0 ? keyFrames[baseKeyFrameIndex - 1] : keyFrame1;
-                        var keyFrame3 = baseKeyFrameIndex <= keyFrames.Length - 3 ? keyFrames[baseKeyFrameIndex + 2] : keyFrame2;
-                        return Interpolation.CatmullRom((double)keyFrame0.Value, (double)keyFrame1.Value, (double)keyFrame2.Value, (double)keyFrame3.Value, keyFrame1.Time, keyFrame2.Time, t);
+                        var keyFrame3 = baseKeyFrameIndex <= keyFrames.Count - 3 ? keyFrames[baseKeyFrameIndex + 2] : keyFrame2;
+                        return Interpolation.CatmullRom((double)keyFrame0.Value!, (double)keyFrame1.Value!, (double)keyFrame2.Value!, (double)keyFrame3.Value!, keyFrame1.Time, keyFrame2.Time, t);
                     }
                 default:
                     return keyFrame1.Value;

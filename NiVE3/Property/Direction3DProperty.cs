@@ -14,7 +14,7 @@ namespace NiVE3.Property
 {
     class Direction3DProperty : DirectionProperty
     {
-        public Direction3DProperty(string id, LanguageResourceKey displayNameKey, Vector3d defaultValue, int digit = -1) : base(id, displayNameKey, defaultValue, digit) { }
+        public Direction3DProperty(string id, LanguageResourceKey displayNameKey, Vector3d defaultValue, bool isSupportKeyFrame = true, int digit = -1) : base(id, displayNameKey, defaultValue, isSupportKeyFrame, digit) { }
 
         public override PropertyViewState CreateState(ICompositionObject composition, ILayerObject? layer, IEffectObject? effect, IPropertyViewModel viewModel)
         {

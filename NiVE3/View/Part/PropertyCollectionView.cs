@@ -38,6 +38,32 @@ namespace NiVE3.View.Part
             new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
+        public static readonly DependencyProperty RangeProperty = DependencyProperty.Register(
+            nameof(Range),
+            typeof(double),
+            typeof(PropertyCollectionView),
+            new FrameworkPropertyMetadata(0.0)
+        );
+
+        public static readonly DependencyProperty RangeStartProperty = DependencyProperty.Register(
+            nameof(RangeStart),
+            typeof(double),
+            typeof(PropertyCollectionView),
+            new FrameworkPropertyMetadata(0.0)
+        );
+
+        public double RangeStart
+        {
+            get { return (double)GetValue(RangeStartProperty); }
+            set { SetValue(RangeStartProperty, value); }
+        }
+
+        public double Range
+        {
+            get { return (double)GetValue(RangeProperty); }
+            set { SetValue(RangeProperty, value); }
+        }
+
         public double NameAreaWidth
         {
             get { return (double)GetValue(NameAreaWidthProperty); }
@@ -62,18 +88,48 @@ namespace NiVE3.View.Part
             templateSelector.Templates.Add(new DataTemplate
             {
                 DataType = typeof(PropertyViewModel),
-                VisualTree = CreateControlFactory(typeof(PropertyView), PropertyView.ControlAreaWidthProperty, PropertyView.NameAreaWidthProperty, PropertyView.IndentLevelProperty, PropertyView.IsAVSwitchColumnVisibleProperty, PropertyView.IsTagColumnVisibleProperty, PropertyView.ViewStateProperty)
+                VisualTree = CreateControlFactory(
+                    typeof(PropertyView),
+                    PropertyView.ControlAreaWidthProperty,
+                    PropertyView.NameAreaWidthProperty,
+                    PropertyView.IndentLevelProperty,
+                    PropertyView.IsAVSwitchColumnVisibleProperty,
+                    PropertyView.IsTagColumnVisibleProperty,
+                    PropertyView.ViewStateProperty,
+                    PropertyView.RangeProperty,
+                    PropertyView.RangeStartProperty
+                )
             });
             templateSelector.Templates.Add(new DataTemplate
             {
                 DataType = typeof(PropertyGroupViewModel),
-                VisualTree = CreateControlFactory(typeof(PropertyGroupView), PropertyGroupView.ControlAreaWidthProperty, PropertyGroupView.NameAreaWidthProperty, PropertyGroupView.IndentLevelProperty, PropertyGroupView.IsAVSwitchColumnVisibleProperty, PropertyGroupView.IsTagColumnVisibleProperty, PropertyGroupView.ViewStateProperty)
+                VisualTree = CreateControlFactory(
+                    typeof(PropertyGroupView),
+                    PropertyGroupView.ControlAreaWidthProperty,
+                    PropertyGroupView.NameAreaWidthProperty,
+                    PropertyGroupView.IndentLevelProperty,
+                    PropertyGroupView.IsAVSwitchColumnVisibleProperty,
+                    PropertyGroupView.IsTagColumnVisibleProperty,
+                    PropertyGroupView.ViewStateProperty,
+                    PropertyGroupView.RangeProperty,
+                    PropertyGroupView.RangeStartProperty
+                )
             });
 
             ItemTemplateSelector = templateSelector;
         }
 
-        FrameworkElementFactory CreateControlFactory(Type uiType, DependencyProperty controlAreaWidthProperty, DependencyProperty nameAreaWidthProperty, DependencyProperty indentLevelProperty, DependencyProperty isAVSwitchColumnVisibleProperty, DependencyProperty isTagColumnVisibleProperty, DependencyProperty viewStateProperty)
+        FrameworkElementFactory CreateControlFactory(
+            Type uiType,
+            DependencyProperty controlAreaWidthProperty,
+            DependencyProperty nameAreaWidthProperty,
+            DependencyProperty indentLevelProperty,
+            DependencyProperty isAVSwitchColumnVisibleProperty,
+            DependencyProperty isTagColumnVisibleProperty,
+            DependencyProperty viewStateProperty,
+            DependencyProperty rangeProperty,
+            DependencyProperty rangeStartProperty
+        )
         {
             var factory = new FrameworkElementFactory(uiType);
             var controlAreaWidthBinding = new Binding
@@ -134,9 +190,25 @@ namespace NiVE3.View.Part
             var isEnabledBinding = new Binding
             {
                 Path = new PropertyPath($"{nameof(PropertyViewModel.ViewState)}.{nameof(PropertyViewState.IsEnabled)}"),
-                Mode = BindingMode.OneWay,
+                Mode = BindingMode.OneWay
             };
             factory.SetBinding(IsEnabledProperty, isEnabledBinding);
+
+            var rangeBinding = new Binding
+            {
+                Path = new PropertyPath(nameof(Range)),
+                Source = this,
+                Mode = BindingMode.OneWay
+            };
+            factory.SetBinding(rangeProperty, rangeBinding);
+
+            var rangeStartBinding = new Binding
+            {
+                Path = new PropertyPath(nameof(RangeStart)),
+                Source = this,
+                Mode = BindingMode.OneWay
+            };
+            factory.SetBinding(rangeStartProperty, rangeStartBinding);
 
             return factory;
         }

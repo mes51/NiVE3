@@ -15,7 +15,7 @@ namespace NiVE3.Property
 {
     class Vector2DOr3DProperty : Vector3dProperty
     {
-        public Vector2DOr3DProperty(string id, LanguageResourceKey displayNameKey, Vector3d defaultValue, int digit = -1) : base(id, displayNameKey, defaultValue, digit, true) { }
+        public Vector2DOr3DProperty(string id, LanguageResourceKey displayNameKey, Vector3d defaultValue, bool isSupportKeyFrame = true, int digit = -1) : base(id, displayNameKey, defaultValue, isSupportKeyFrame, digit, true) { }
 
         public override PropertyControlBase CreateControl(ICompositionObject composition, ILayerObject? layer, IEffectObject? effect, IPropertyViewModel viewModel)
         {
