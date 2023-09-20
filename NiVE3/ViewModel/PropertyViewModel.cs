@@ -176,6 +176,7 @@ namespace NiVE3.ViewModel
                     Value = CurrentTimeValue;
                     break;
                 case nameof(CurrentTime):
+                case nameof(SourceStartPoint):
                     CurrentTimeValue = CalculationValue();
                     break;
                 case nameof(Value):

@@ -185,6 +185,8 @@ namespace NiVE3.UI.Primitive
 
         bool IsMoved { get; set; }
 
+        bool IsEditingText { get; set; }
+
         Point ClickPoint { get; set; }
 
         double PrevValue { get; set; }
@@ -223,7 +225,7 @@ namespace NiVE3.UI.Primitive
             BindingOperations.ClearBinding(ValueTextBox, TextBox.TextProperty);
 
             BindingOperations.SetBinding(ValueTextBlock, TextBlock.TextProperty, new Binding(nameof(Value)) { Source = this, Converter = Converter, StringFormat = $"{{0}}{UnitText}" });
-            BindingOperations.SetBinding(ValueTextBox, TextBox.TextProperty, new Binding(nameof(Value)) { Source = this, Converter = Converter, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged });
+            BindingOperations.SetBinding(ValueTextBox, TextBox.TextProperty, new Binding(nameof(Value)) { Source = this, Converter = Converter, UpdateSourceTrigger = UpdateSourceTrigger.LostFocus, NotifyOnSourceUpdated = true });
         }
 
         private void Root_GotFocus(object sender, RoutedEventArgs e)
@@ -349,11 +351,8 @@ namespace NiVE3.UI.Primitive
                     Value = PrevValue;
                     ValueTextBlock.GetBindingExpression(TextBlock.TextProperty).UpdateTarget();
 
+                    IsEditingText = false;
                     RaiseEvent(new RoutedEventArgs(AbortTextEditValueEvent, this));
-                }
-                else
-                {
-                    RaiseEvent(new RoutedEventArgs(EndTextEditValueEvent, this));
                 }
             }
             else if (e.Key == Key.Escape)
@@ -362,6 +361,7 @@ namespace NiVE3.UI.Primitive
                 Value = PrevValue;
                 e.Handled = true;
 
+                IsEditingText = false;
                 RaiseEvent(new RoutedEventArgs(AbortTextEditValueEvent, this));
             }
         }
@@ -369,6 +369,7 @@ namespace NiVE3.UI.Primitive
         private void ValueTextBox_GotFocus(object sender, RoutedEventArgs e)
         {
             PrevValue = Value;
+            IsEditingText = true;
             RaiseEvent(new RoutedEventArgs(BeginTextEditValueEvent, this));
         }
 
@@ -379,10 +380,16 @@ namespace NiVE3.UI.Primitive
                 Value = PrevValue;
                 ValueTextBlock.GetBindingExpression(TextBlock.TextProperty).UpdateTarget();
 
+                IsEditingText = false;
                 RaiseEvent(new RoutedEventArgs(AbortTextEditValueEvent, this));
             }
-            else
+        }
+
+        private void ValueTextBox_SourceUpdated(object sender, DataTransferEventArgs e)
+        {
+            if (IsEditingText && !ValueTextBox.IsFocused)
             {
+                IsEditingText = false;
                 RaiseEvent(new RoutedEventArgs(EndTextEditValueEvent, this));
             }
         }

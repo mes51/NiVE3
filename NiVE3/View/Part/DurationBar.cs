@@ -206,7 +206,7 @@ namespace NiVE3.View.Part
                 var timePerPixel = Range / (ActualWidth - UIParameters.TimelineRangeThumbTotalWidth);
                 var frameDuration = 1.0 / CompositionFrameRate;
                 var posX = e.GetPosition(this).X;
-                var diffTime = (int)(((posX - ClickX) * timePerPixel + RangeStart) * CompositionFrameRate) * frameDuration;
+                var diffTime = (int)(((posX - ClickX) * timePerPixel) * CompositionFrameRate) * frameDuration;
                 if (diffTime != 0.0)
                 {
                     var changed = false;
