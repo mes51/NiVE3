@@ -89,6 +89,16 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref hasKeyFrame, value); }
         }
 
+        private ObservableCollection<KeyFrame> selectedKeyFrames = new ObservableCollection<KeyFrame>();
+        /// <summary>
+        /// Read only
+        /// </summary>
+        public ObservableCollection<KeyFrame> SelectedKeyFrames
+        {
+            get { return selectedKeyFrames; }
+            set { SetProperty(ref selectedKeyFrames, value); }
+        }
+
         public PropertyBase Property { get; }
 
         public ICommand BeginEditCommand { get; }

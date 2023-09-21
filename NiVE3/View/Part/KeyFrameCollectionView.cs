@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Media;
 using ImTools;
 using NiVE3.Plugin.Property;
@@ -20,11 +21,18 @@ namespace NiVE3.View.Part
 
         static readonly ReadOnlyDictionary<(InterpolationType, InterpolationType), Geometry> KeyFrameIcons;
 
-        public static readonly DependencyProperty ForegroundProperty = DependencyProperty.Register(
-            nameof(Foreground),
+        public static readonly DependencyProperty KeyFrameBrushProperty = DependencyProperty.Register(
+            nameof(KeyFrameBrush),
             typeof(Brush),
             typeof(KeyFrameCollectionView),
             new FrameworkPropertyMetadata(Brushes.Gray, FrameworkPropertyMetadataOptions.AffectsRender)
+        );
+
+        public static readonly DependencyProperty SelectedKeyFrameBrushProperty = DependencyProperty.Register(
+            nameof(SelectedKeyFrameBrush),
+            typeof(Brush),
+            typeof(KeyFrameCollectionView),
+            new FrameworkPropertyMetadata(Brushes.CornflowerBlue, FrameworkPropertyMetadataOptions.AffectsRender)
         );
 
         public static readonly DependencyProperty RangeProperty = DependencyProperty.Register(
@@ -55,6 +63,19 @@ namespace NiVE3.View.Part
             new FrameworkPropertyMetadata(new ObservableCollection<KeyFrame>(), FrameworkPropertyMetadataOptions.AffectsRender, KeyFramesChanged)
         );
 
+        public static readonly DependencyProperty SelectedKeyFramesProperty = DependencyProperty.Register(
+            nameof(SelectedKeyFrames),
+            typeof(ObservableCollection<KeyFrame>),
+            typeof(KeyFrameCollectionView),
+            new FrameworkPropertyMetadata(new ObservableCollection<KeyFrame>(), FrameworkPropertyMetadataOptions.AffectsRender)
+        );
+
+        public ObservableCollection<KeyFrame> SelectedKeyFrames
+        {
+            get { return (ObservableCollection<KeyFrame>)GetValue(SelectedKeyFramesProperty); }
+            set { SetValue(SelectedKeyFramesProperty, value); }
+        }
+
         public ObservableCollection<KeyFrame> KeyFrames
         {
             get { return (ObservableCollection<KeyFrame>)GetValue(KeyFramesProperty); }
@@ -79,11 +100,19 @@ namespace NiVE3.View.Part
             set { SetValue(RangeStartProperty, value); }
         }
 
-        public Brush Foreground
+        public Brush SelectedKeyFrameBrush
         {
-            get { return (Brush)GetValue(ForegroundProperty); }
-            set { SetValue(ForegroundProperty, value); }
+            get { return (Brush)GetValue(SelectedKeyFrameBrushProperty); }
+            set { SetValue(SelectedKeyFrameBrushProperty, value); }
         }
+
+        public Brush KeyFrameBrush
+        {
+            get { return (Brush)GetValue(KeyFrameBrushProperty); }
+            set { SetValue(KeyFrameBrushProperty, value); }
+        }
+
+        KeyFrame? LastSelected { get; set; }
 
         static KeyFrameCollectionView()
         {
@@ -146,6 +175,12 @@ namespace NiVE3.View.Part
             KeyFrameIcons = new ReadOnlyDictionary<(InterpolationType, InterpolationType), Geometry>(keyFrameGeometries);
         }
 
+        public KeyFrameCollectionView()
+        {
+            Unloaded += KeyFrameCollectionView_Unloaded;
+            MouseDown += KeyFrameCollectionView_MouseDown;
+        }
+
         protected override void OnRender(DrawingContext drawingContext)
         {
             base.OnRender(drawingContext);
@@ -162,8 +197,10 @@ namespace NiVE3.View.Part
 
             drawingContext.PushTransform(new TranslateTransform(UIParameters.TimelineRangeThumbWidth - KeyFrameIconSize * 0.5 - 1.0, (ActualHeight - KeyFrameIconSize) * 0.5));
 
-            var brush = Foreground;
+            var brush = KeyFrameBrush;
+            var selectedBrush = SelectedKeyFrameBrush;
             var timeOffset = SourceStartPoint - RangeStart;
+            var selected = SelectedKeyFrames;
             foreach (var (k, kn) in KeyFrames.Zip(KeyFrames.Skip(1).Append(KeyFrames.Last())))
             {
                 var icon = KeyFrameIcons[(k.InterpolationType, kn.InterpolationType)];
@@ -172,13 +209,128 @@ namespace NiVE3.View.Part
                 if (x > -KeyFrameIconSize && x < actualWidth)
                 {
                     drawingContext.PushTransform(new TranslateTransform(x, 0.0));
-                    drawingContext.DrawGeometry(brush, null, icon);
+                    drawingContext.DrawGeometry(selected.Contains(k) ? selectedBrush : brush, null, icon);
                     drawingContext.Pop();
                 }
             }
 
             drawingContext.Pop();
             drawingContext.Pop();
+        }
+
+        void SelectKeyFrame(KeyFrame keyFrame, bool selectRange, bool selectMultiple)
+        {
+            if (KeyFrames.Count < 1)
+            {
+                return;
+            }
+
+            var keyFrames = KeyFrames.ToArray();
+            if (selectMultiple)
+            {
+                if (SelectedKeyFrames.Contains(keyFrame))
+                {
+                    SelectedKeyFrames.Remove(keyFrame);
+                }
+                else
+                {
+                    SelectedKeyFrames.Add(keyFrame);
+                }
+                LastSelected = keyFrame;
+            }
+            else if (selectRange && SelectedKeyFrames.Count > 0)
+            {
+                var oldSelectedKeyFrames = SelectedKeyFrames.ToArray();
+                if (LastSelected == null)
+                {
+                    LastSelected = keyFrames[0];
+                }
+                var startIndex = Array.IndexOf(keyFrames, LastSelected);
+                var endIndex = Array.IndexOf(keyFrames, keyFrame);
+                if (startIndex == endIndex)
+                {
+                    foreach (var k in oldSelectedKeyFrames)
+                    {
+                        if (k != keyFrame)
+                        {
+                            SelectedKeyFrames.Remove(k);
+                        }
+                    }
+                    if (!SelectedKeyFrames.Contains(keyFrame))
+                    {
+                        SelectedKeyFrames.Add(keyFrame);
+                    }
+                    return;
+                }
+                else if (startIndex > endIndex)
+                {
+                    var temp = endIndex;
+                    endIndex = startIndex;
+                    startIndex = temp;
+                }
+
+                var targets = keyFrames.Skip(startIndex).Take(endIndex - startIndex + 1).ToArray();
+                foreach (var k in oldSelectedKeyFrames.Except(targets))
+                {
+                    SelectedKeyFrames.Remove(k);
+                }
+                foreach (var k in targets.Except(oldSelectedKeyFrames))
+                {
+                    SelectedKeyFrames.Add(k);
+                }
+            }
+            else if (!SelectedKeyFrames.Contains(keyFrame))
+            {
+                SelectedKeyFrames.Clear();
+                SelectedKeyFrames.Add(keyFrame);
+                LastSelected = keyFrame;
+            }
+        }
+
+        private void KeyFrameCollectionView_Unloaded(object sender, RoutedEventArgs e)
+        {
+            if (KeyFrames != null)
+            {
+                KeyFrames.CollectionChanged -= KeyFrames_CollectionChanged;
+            }
+        }
+
+        private void KeyFrameCollectionView_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            e.Handled = true;
+
+            var pixelPerTime = (ActualWidth - UIParameters.TimelineRangeThumbTotalWidth) / Range;
+            if (pixelPerTime < 0 || double.IsNaN(pixelPerTime) || double.IsInfinity(pixelPerTime) || KeyFrames.Count < 1)
+            {
+                return;
+            }
+
+            var isSelectRange = Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift);
+            var isSelectMultiple = Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl);
+            var pos = e.GetPosition(this);
+            var hitHeight = (ActualHeight - KeyFrameIconSize) * 0.5;
+            if (pos.Y < hitHeight || (pos.Y - hitHeight) > KeyFrameIconSize)
+            {
+                if (!isSelectRange && !isSelectMultiple)
+                {
+                    SelectedKeyFrames.Clear();
+                    InvalidateVisual();
+                }
+                return;
+            }
+
+            var timeOffset = SourceStartPoint - RangeStart;
+            var x = pos.X - UIParameters.TimelineRangeThumbWidth;
+            var clickedKeyFrame = KeyFrames.LastOrDefault(k => Math.Abs((k.Time + timeOffset) * pixelPerTime - x) < KeyFrameIconSize * 0.5);
+            if (clickedKeyFrame != null)
+            {
+                SelectKeyFrame(clickedKeyFrame, isSelectRange, isSelectMultiple);
+            }
+            else if (!isSelectRange && !isSelectMultiple)
+            {
+                SelectedKeyFrames.Clear();
+            }
+            InvalidateVisual();
         }
 
         private void KeyFrames_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)

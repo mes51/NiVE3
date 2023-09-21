@@ -21,6 +21,6 @@
         <TextBlock Grid.Column="2" Text="{Binding ViewState.DisplayName}"/>
         <Grid Grid.Column="3" x:Name="PropertyControlGrid"/>
 
-        <local:KeyFrameCollectionView Grid.Column="4" KeyFrames="{Binding KeyFrames}" SourceStartPoint="{Binding SourceStartPoint}" Range="{Binding ElementName=Root, Path=Range}" RangeStart="{Binding ElementName=Root, Path=RangeStart}"/>
+        <local:KeyFrameCollectionView Grid.Column="4" KeyFrames="{Binding KeyFrames}" SourceStartPoint="{Binding SourceStartPoint}" Range="{Binding ElementName=Root, Path=Range}" RangeStart="{Binding ElementName=Root, Path=RangeStart}" SelectedKeyFrames="{Binding SelectedKeyFrames}"/>
     </Grid>
 </UserControl>
