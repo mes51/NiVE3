@@ -80,6 +80,19 @@ namespace NiVE3.View.Part
             new FrameworkPropertyMetadata(0.0)
         );
 
+        public static readonly DependencyProperty CompositionFrameRateProperty = DependencyProperty.Register(
+            nameof(CompositionFrameRate),
+            typeof(double),
+            typeof(PropertyGroupView),
+            new FrameworkPropertyMetadata(0.0)
+        );
+
+        public double CompositionFrameRate
+        {
+            get { return (double)GetValue(CompositionFrameRateProperty); }
+            set { SetValue(CompositionFrameRateProperty, value); }
+        }
+
         public double RangeStart
         {
             get { return (double)GetValue(RangeStartProperty); }

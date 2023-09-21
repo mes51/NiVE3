@@ -109,6 +109,8 @@ namespace NiVE3.ViewModel
 
         public ICommand SwitchUseKeyFrameCommand { get; }
 
+        public ICommand MoveTimeKeyFramesCommand { get; }
+
         PropertyModel PropertyModel { get; }
 
         object? PrevValue { get; set; }
@@ -149,6 +151,11 @@ namespace NiVE3.ViewModel
                 {
                     PropertyModel.CreateKeyFrame(CurrentTimeValue);
                 }
+            });
+
+            MoveTimeKeyFramesCommand = new DelegateCommand<Tuple<KeyFrame[], double[]>>(t =>
+            {
+                PropertyModel.MoveTimeKeyFrames(t.Item1, t.Item2);
             });
 
             WiringModel();

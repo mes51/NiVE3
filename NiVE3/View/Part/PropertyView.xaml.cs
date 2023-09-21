@@ -106,6 +106,19 @@ namespace NiVE3.View.Part
             new FrameworkPropertyMetadata(0.0)
         );
 
+        public static readonly DependencyProperty CompositionFrameRateProperty = DependencyProperty.Register(
+            nameof(CompositionFrameRate),
+            typeof(double),
+            typeof(PropertyView),
+            new FrameworkPropertyMetadata(0.0)
+        );
+
+        public double CompositionFrameRate
+        {
+            get { return (double)GetValue(CompositionFrameRateProperty); }
+            set { SetValue(CompositionFrameRateProperty, value); }
+        }
+
         public double RangeStart
         {
             get { return (double)GetValue(RangeStartProperty); }
@@ -172,6 +185,8 @@ namespace NiVE3.View.Part
             set { SetValue(CalculatedNameAreaWidthProperty, value); }
         }
 
+        PropertyViewModel? ViewModel => DataContext as PropertyViewModel;
+
         public PropertyView()
         {
             InitializeComponent();
@@ -179,11 +194,23 @@ namespace NiVE3.View.Part
 
         private void Root_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            if (DataContext is PropertyViewModel vm)
+            var viewModel = ViewModel;
+            if (viewModel != null)
             {
                 PropertyControlGrid.Children.Clear();
-                PropertyControlGrid.Children.Add(vm.CreateControl());
+                PropertyControlGrid.Children.Add(viewModel.CreateControl());
             }
+        }
+
+        private void KeyFrameCollectionView_KeyFrameMoveRequest(object sender, KeyFrameMoveEventArgs e)
+        {
+            var viewModel = ViewModel;
+            if (viewModel == null)
+            {
+                return;
+            }
+
+            viewModel.MoveTimeKeyFramesCommand.Execute(Tuple.Create(e.KeyFrames, e.NewTimes));
         }
 
         static void IndentParameterChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)

@@ -52,6 +52,19 @@ namespace NiVE3.View.Part
             new FrameworkPropertyMetadata(0.0)
         );
 
+        public static readonly DependencyProperty CompositionFrameRateProperty = DependencyProperty.Register(
+            nameof(CompositionFrameRate),
+            typeof(double),
+            typeof(PropertyCollectionView),
+            new FrameworkPropertyMetadata(0.0)
+        );
+
+        public double CompositionFrameRate
+        {
+            get { return (double)GetValue(CompositionFrameRateProperty); }
+            set { SetValue(CompositionFrameRateProperty, value); }
+        }
+
         public double RangeStart
         {
             get { return (double)GetValue(RangeStartProperty); }
@@ -97,7 +110,8 @@ namespace NiVE3.View.Part
                     PropertyView.IsTagColumnVisibleProperty,
                     PropertyView.ViewStateProperty,
                     PropertyView.RangeProperty,
-                    PropertyView.RangeStartProperty
+                    PropertyView.RangeStartProperty,
+                    PropertyView.CompositionFrameRateProperty
                 )
             });
             templateSelector.Templates.Add(new DataTemplate
@@ -112,7 +126,8 @@ namespace NiVE3.View.Part
                     PropertyGroupView.IsTagColumnVisibleProperty,
                     PropertyGroupView.ViewStateProperty,
                     PropertyGroupView.RangeProperty,
-                    PropertyGroupView.RangeStartProperty
+                    PropertyGroupView.RangeStartProperty,
+                    PropertyGroupView.CompositionFrameRateProperty
                 )
             });
 
@@ -128,7 +143,8 @@ namespace NiVE3.View.Part
             DependencyProperty isTagColumnVisibleProperty,
             DependencyProperty viewStateProperty,
             DependencyProperty rangeProperty,
-            DependencyProperty rangeStartProperty
+            DependencyProperty rangeStartProperty,
+            DependencyProperty compositionFrameRateProperty
         )
         {
             var factory = new FrameworkElementFactory(uiType);
@@ -209,6 +225,14 @@ namespace NiVE3.View.Part
                 Mode = BindingMode.OneWay
             };
             factory.SetBinding(rangeStartProperty, rangeStartBinding);
+
+            var compositionFrameRateBinding = new Binding
+            {
+                Path = new PropertyPath(nameof(CompositionFrameRate)),
+                Source = this,
+                Mode = BindingMode.OneWay
+            };
+            factory.SetBinding(compositionFrameRateProperty, compositionFrameRateBinding);
 
             return factory;
         }

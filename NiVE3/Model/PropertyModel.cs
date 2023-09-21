@@ -163,6 +163,34 @@ namespace NiVE3.Model
             HistoryModel.Add(new ClearKeyFramesHistoryCommand(this, keyFrames));
         }
 
+        public void MoveTimeKeyFrames(KeyFrame[] targetKeyFrames, double[] newTime)
+        {
+            var newKeyFrames = targetKeyFrames.Zip(newTime, (k, nt) => new KeyFrame(nt, k.Value, k.EaseIn, k.EaseOut, k.InterpolationType, k.Id)).OrderBy(k => k.Time).ToArray();
+            foreach (var k in targetKeyFrames)
+            {
+                KeyFrames.Remove(k);
+            }
+
+            var oldKeyFrames = new List<KeyFrame>();
+            oldKeyFrames.AddRange(targetKeyFrames);
+            foreach (var nk in newKeyFrames)
+            {
+                var index = KeyFrames.IndexOfLast(k => k.Time <= nk.Time) + 1;
+                if (index > 0 && KeyFrames[index - 1].Time == nk.Time)
+                {
+                    oldKeyFrames.Add(KeyFrames[index - 1]);
+                    KeyFrames[index - 1] = nk;
+                }
+                else
+                {
+                    KeyFrames.Insert(index, nk);
+                }
+            }
+
+            oldKeyFrames.Sort((a, b) => a.Time.CompareTo(b.Time));
+            HistoryModel.Add(new MoveKeyFrameHistoryCommand(this, oldKeyFrames.ToArray(), newKeyFrames));
+        }
+
         private void CompositionModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(CompositionModel.CurrentTime))

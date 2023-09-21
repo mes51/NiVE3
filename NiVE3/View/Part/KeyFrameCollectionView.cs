@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
-using ImTools;
 using NiVE3.Plugin.Property;
 using NiVE3.Shared.Extension;
 using NiVE3.View.Resource;
@@ -56,6 +55,13 @@ namespace NiVE3.View.Part
             new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsRender)
         );
 
+        public static readonly DependencyProperty CompositionFrameRateProperty = DependencyProperty.Register(
+            nameof(CompositionFrameRate),
+            typeof(double),
+            typeof(KeyFrameCollectionView),
+            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
         public static readonly DependencyProperty KeyFramesProperty = DependencyProperty.Register(
             nameof(KeyFrames),
             typeof(ObservableCollection<KeyFrame>),
@@ -70,6 +76,10 @@ namespace NiVE3.View.Part
             new FrameworkPropertyMetadata(new ObservableCollection<KeyFrame>(), FrameworkPropertyMetadataOptions.AffectsRender)
         );
 
+        public static RoutedEvent KeyFrameMoveRequestEvent = EventManager.RegisterRoutedEvent(
+            nameof(KeyFrameMoveRequest), RoutingStrategy.Direct, typeof(EventHandler<KeyFrameMoveEventArgs>), typeof(KeyFrameCollectionView)
+        );
+
         public ObservableCollection<KeyFrame> SelectedKeyFrames
         {
             get { return (ObservableCollection<KeyFrame>)GetValue(SelectedKeyFramesProperty); }
@@ -80,6 +90,12 @@ namespace NiVE3.View.Part
         {
             get { return (ObservableCollection<KeyFrame>)GetValue(KeyFramesProperty); }
             set { SetValue(KeyFramesProperty, value); }
+        }
+
+        public double CompositionFrameRate
+        {
+            get { return (double)GetValue(CompositionFrameRateProperty); }
+            set { SetValue(CompositionFrameRateProperty, value); }
         }
 
         public double SourceStartPoint
@@ -113,6 +129,18 @@ namespace NiVE3.View.Part
         }
 
         KeyFrame? LastSelected { get; set; }
+
+        bool IsClicked { get; set; }
+
+        double ClickX { get; set; }
+
+        double KeyFrameMoveingTime { get; set; }
+
+        public event EventHandler<KeyFrameMoveEventArgs> KeyFrameMoveRequest
+        {
+            add { AddHandler(KeyFrameMoveRequestEvent, value); }
+            remove { RemoveHandler(KeyFrameMoveRequestEvent, value); }
+        }
 
         static KeyFrameCollectionView()
         {
@@ -179,6 +207,8 @@ namespace NiVE3.View.Part
         {
             Unloaded += KeyFrameCollectionView_Unloaded;
             MouseDown += KeyFrameCollectionView_MouseDown;
+            MouseMove += KeyFrameCollectionView_MouseMove;
+            MouseUp += KeyFrameCollectionView_MouseUp;
         }
 
         protected override void OnRender(DrawingContext drawingContext)
@@ -201,15 +231,18 @@ namespace NiVE3.View.Part
             var selectedBrush = SelectedKeyFrameBrush;
             var timeOffset = SourceStartPoint - RangeStart;
             var selected = SelectedKeyFrames;
+            var frameDuration = 1.0 / CompositionFrameRate;
             foreach (var (k, kn) in KeyFrames.Zip(KeyFrames.Skip(1).Append(KeyFrames.Last())))
             {
                 var icon = KeyFrameIcons[(k.InterpolationType, kn.InterpolationType)];
 
-                var x = (k.Time + timeOffset) * pixelPerTime;
+                var isSelected = selected.Contains(k);
+                var keyFrameTime = isSelected && IsClicked ? (int)Math.Round((KeyFrameMoveingTime + k.Time) * CompositionFrameRate) * frameDuration : k.Time;
+                var x = (timeOffset + keyFrameTime) * pixelPerTime;
                 if (x > -KeyFrameIconSize && x < actualWidth)
                 {
                     drawingContext.PushTransform(new TranslateTransform(x, 0.0));
-                    drawingContext.DrawGeometry(selected.Contains(k) ? selectedBrush : brush, null, icon);
+                    drawingContext.DrawGeometry(isSelected ? selectedBrush : brush, null, icon);
                     drawingContext.Pop();
                 }
             }
@@ -295,6 +328,53 @@ namespace NiVE3.View.Part
             }
         }
 
+        private void KeyFrameCollectionView_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if (IsClicked)
+            {
+                var timePerPixel = Range / (ActualWidth - UIParameters.TimelineRangeThumbTotalWidth);
+                var frameDuration = 1.0 / CompositionFrameRate;
+                var posX = e.GetPosition(this).X;
+                var diffTime = (posX - ClickX) * timePerPixel;
+
+                IsClicked = false;
+                ReleaseMouseCapture();
+
+                var oldSelectedKeyFrame = SelectedKeyFrames.ToArray();
+                var newTimes = oldSelectedKeyFrame.Select(k => (int)Math.Round((diffTime + k.Time) * CompositionFrameRate) * frameDuration).ToArray();
+
+                if (oldSelectedKeyFrame.Select((k, i) => k.Time == newTimes[i]).All(b => b))
+                {
+                    return;
+                }
+
+                var eventArgs = new KeyFrameMoveEventArgs(oldSelectedKeyFrame, newTimes, KeyFrameMoveRequestEvent, this);
+                RaiseEvent(eventArgs);
+
+                SelectedKeyFrames.Clear();
+                foreach (var k in KeyFrames.Where(k => oldSelectedKeyFrame.Any(ok => k.Id == ok.Id)))
+                {
+                    SelectedKeyFrames.Add(k);
+                }
+
+                InvalidateVisual();
+            }
+        }
+
+        private void KeyFrameCollectionView_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (!IsClicked)
+            {
+                return;
+            }
+
+            var timePerPixel = Range / (ActualWidth - UIParameters.TimelineRangeThumbTotalWidth);
+            var posX = e.GetPosition(this).X;
+            KeyFrameMoveingTime = (posX - ClickX) * timePerPixel;
+
+            InvalidateVisual();
+        }
+
         private void KeyFrameCollectionView_MouseDown(object sender, MouseButtonEventArgs e)
         {
             e.Handled = true;
@@ -325,6 +405,13 @@ namespace NiVE3.View.Part
             if (clickedKeyFrame != null)
             {
                 SelectKeyFrame(clickedKeyFrame, isSelectRange, isSelectMultiple);
+                if (SelectedKeyFrames.Contains(clickedKeyFrame))
+                {
+                    IsClicked = true;
+                    ClickX = pos.X;
+                    KeyFrameMoveingTime = 0.0;
+                    CaptureMouse();
+                }
             }
             else if (!isSelectRange && !isSelectMultiple)
             {

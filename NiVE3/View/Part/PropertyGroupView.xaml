@@ -17,6 +17,7 @@
                                    IsAVSwitchColumnVisible="{Binding ElementName=Root, Path=IsAVSwitchColumnVisible}"
                                    IsTagColumnVisible="{Binding ElementName=Root, Path=IsTagColumnVisible}"
                                    Range="{Binding ElementName=Root, Path=Range}"
-                                   RangeStart="{Binding ElementName=Root, Path=RangeStart}"/>
+                                   RangeStart="{Binding ElementName=Root, Path=RangeStart}"
+                                   CompositionFrameRate="{Binding ElementName=Root, Path=CompositionFrameRate}"/>
     </pt:LayerParameterExpander>
 </UserControl>

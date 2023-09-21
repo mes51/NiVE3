@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Plugin.Property;
+using NiVE3.Shared.Extension;
 using NiVE3.View.Resource;
 
 namespace NiVE3.Model
@@ -162,6 +163,57 @@ namespace NiVE3.Model
             }
 
             public void Dispose() { }
+        }
+
+        private class MoveKeyFrameHistoryCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_MoveKeyFrame);
+
+            PropertyModel Model { get; }
+
+            KeyFrame[] OldKeyFrames { get; }
+
+            KeyFrame[] NewKeyFrames { get; }
+
+            public MoveKeyFrameHistoryCommand(PropertyModel model, KeyFrame[] oldKeyFrames, KeyFrame[] newKeyFrames)
+            {
+                Model = model;
+                OldKeyFrames = oldKeyFrames;
+                NewKeyFrames = newKeyFrames;
+            }
+
+            public void Redo()
+            {
+                ReplaceKeyFrames(OldKeyFrames, NewKeyFrames);
+            }
+
+            public void Undo()
+            {
+                ReplaceKeyFrames(NewKeyFrames, OldKeyFrames);
+            }
+
+            public void Dispose() { }
+
+            void ReplaceKeyFrames(KeyFrame[] oldKeyFrames, KeyFrame[] newKeyFrames)
+            {
+                foreach (var k in oldKeyFrames)
+                {
+                    Model.KeyFrames.Remove(k);
+                }
+
+                foreach (var k in newKeyFrames)
+                {
+                    var index = Model.KeyFrames.IndexOfLast(k => k.Time <= k.Time) + 1;
+                    if (index > 0 && Model.KeyFrames[index - 1].Time == k.Time)
+                    {
+                        Model.KeyFrames[index - 1] = k;
+                    }
+                    else
+                    {
+                        Model.KeyFrames.Insert(index, k);
+                    }
+                }
+            }
         }
     }
 }
