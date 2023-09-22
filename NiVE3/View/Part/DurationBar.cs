@@ -18,6 +18,12 @@ namespace NiVE3.View.Part
 
         const double EdgeCursorChangeWidth = 3.0;
 
+        const double BeforeZeroHatchSize = 7.0;
+
+        const double BeforeZeroHatchWidth = 2.0;
+
+        static readonly DrawingBrush BeforeZeroBrush;
+
         public static readonly DependencyProperty RangeProperty = DependencyProperty.Register(
             nameof(Range),
             typeof(double),
@@ -181,6 +187,47 @@ namespace NiVE3.View.Part
 
         Brush EnableAreaBrush { get; set; } = new SolidColorBrush(Colors.Red).FreezeCurrentObject();
 
+        static DurationBar()
+        {
+            var lineFigure = new PathFigure { IsClosed = true, StartPoint = new Point(BeforeZeroHatchSize - BeforeZeroHatchWidth, 0.0) };
+            lineFigure.Segments.Add(new PolyLineSegment(new Point[]
+            {
+                new Point(BeforeZeroHatchSize, 0.0),
+                new Point(BeforeZeroHatchSize, BeforeZeroHatchWidth),
+                new Point(BeforeZeroHatchWidth, BeforeZeroHatchSize),
+                new Point(0.0, BeforeZeroHatchSize),
+                new Point(0.0, BeforeZeroHatchSize - BeforeZeroHatchWidth)
+            }, false));
+            var topCornerFigure = new PathFigure { IsClosed = true, StartPoint = new Point() };
+            topCornerFigure.Segments.Add(new PolyLineSegment(new Point[]
+            {
+                new Point(),
+                new Point(BeforeZeroHatchWidth, 0.0),
+                new Point(0.0, BeforeZeroHatchWidth)
+            }, false));
+            var bottomCornerFigure = new PathFigure { IsClosed = true, StartPoint = new Point(BeforeZeroHatchSize, BeforeZeroHatchSize) };
+            bottomCornerFigure.Segments.Add(new PolyLineSegment(new Point[]
+            {
+                new Point(BeforeZeroHatchSize, BeforeZeroHatchSize),
+                new Point(BeforeZeroHatchSize - BeforeZeroHatchWidth, BeforeZeroHatchSize),
+                new Point(BeforeZeroHatchSize, BeforeZeroHatchSize - BeforeZeroHatchWidth)
+            }, false));
+
+            BeforeZeroBrush = new DrawingBrush
+            {
+                Drawing = new GeometryDrawing
+                {
+                    Geometry = new PathGeometry(new PathFigure[] { topCornerFigure, lineFigure, bottomCornerFigure }),
+                    Brush = new SolidColorBrush(Color.FromArgb(192, 255, 255, 255))
+                },
+                Viewport = new Rect(0.0, 0.0, BeforeZeroHatchSize, BeforeZeroHatchSize),
+                Viewbox = new Rect(0.0, 0.0, BeforeZeroHatchSize, BeforeZeroHatchSize),
+                ViewportUnits = BrushMappingMode.Absolute,
+                ViewboxUnits = BrushMappingMode.Absolute,
+                TileMode = TileMode.Tile,
+            }.FreezeCurrentObject();
+        }
+
         public DurationBar()
         {
             MouseDown += DurationBar_MouseDown;
@@ -215,7 +262,14 @@ namespace NiVE3.View.Part
                         case DurationEditMode.InPoint:
                             {
                                 var prev = InPoint;
-                                InPoint = Math.Clamp(InPoint + diffTime, 0.0, OutPoint - frameDuration);
+                                if (HasDuration && !IsEnableTimeRemap)
+                                {
+                                    InPoint = Math.Clamp(InPoint + diffTime, 0.0, OutPoint - frameDuration);
+                                }
+                                else
+                                {
+                                    InPoint = Math.Min(InPoint + diffTime, OutPoint - frameDuration);
+                                }
                                 changed = prev != InPoint;
                             }
                             break;
@@ -374,6 +428,10 @@ namespace NiVE3.View.Part
                 drawingContext.DrawRectangle(DurationBrush, null, new Rect((SourceStartPoint - RangeStart) * pixelPerTime + UIParameters.TimelineRangeThumbWidth, 0.0, Duration * pixelPerTime, ActualHeight));
             }
             drawingContext.DrawRectangle(EnableAreaBrush, null, new Rect((InPoint + SourceStartPoint - RangeStart) * pixelPerTime + UIParameters.TimelineRangeThumbWidth, 0.0, (OutPoint - InPoint) * pixelPerTime, ActualHeight));
+            if ((!HasDuration || IsEnableTimeRemap) && InPoint < 0.0)
+            {
+                drawingContext.DrawRectangle(BeforeZeroBrush, null, new Rect((InPoint + SourceStartPoint - RangeStart) * pixelPerTime + UIParameters.TimelineRangeThumbWidth, 0.0, -InPoint * pixelPerTime, ActualHeight));
+            }
 
             drawingContext.Pop();
         }
