@@ -28,6 +28,8 @@
                                       RangeStart="{Binding ElementName=Root, Path=RangeStart}"
                                       CompositionFrameRate="{Binding ElementName=Root, Path=CompositionFrameRate}"
                                       SelectedKeyFrames="{Binding SelectedKeyFrames}"
-                                      KeyFrameMoveRequest="KeyFrameCollectionView_KeyFrameMoveRequest"/>
+                                      SupportedInterpolationTypes="{Binding Property.PropertyType.SupportedInterpolationTypes}"
+                                      KeyFrameMoveRequest="KeyFrameCollectionView_KeyFrameMoveRequest"
+                                      KeyFrameInterpolationTypeChangeRequest="KeyFrameCollectionView_KeyFrameInterpolationTypeChangeRequest"/>
     </Grid>
 </UserControl>

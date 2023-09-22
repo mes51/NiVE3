@@ -292,6 +292,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("キーフレームの移動")]
         public static readonly string History_MoveKeyFrame = nameof(History_MoveKeyFrame);
 
+        [ShowInMarkup, DefaultValue("キーフレームの補間法の変更")]
+        public static readonly string History_ChangeKeyFrameInterpolationType = nameof(History_ChangeKeyFrameInterpolationType);
+
         // Property
 
         [ShowInMarkup, DefaultValue("アンカーポイント")]

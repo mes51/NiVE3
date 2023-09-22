@@ -80,6 +80,23 @@ namespace NiVE3.View.Part
             nameof(KeyFrameMoveRequest), RoutingStrategy.Direct, typeof(EventHandler<KeyFrameMoveEventArgs>), typeof(KeyFrameCollectionView)
         );
 
+        public static RoutedEvent KeyFrameInterpolationTypeChangeRequestEvent = EventManager.RegisterRoutedEvent(
+            nameof(KeyFrameInterpolationTypeChangeRequest), RoutingStrategy.Direct, typeof(EventHandler<ChangeKeyFrameInterpolationTypeEventArgs>), typeof(KeyFrameCollectionView)
+        );
+
+        public static readonly DependencyProperty SupportedInterpolationTypesProperty = DependencyProperty.Register(
+            nameof(SupportedInterpolationTypes),
+            typeof(InterpolationType),
+            typeof(KeyFrameCollectionView),
+            new FrameworkPropertyMetadata(InterpolationType.None | InterpolationType.Linear | InterpolationType.CatmullRom | InterpolationType.Bezier, SupportedInterpolationTypesChanged)
+        );
+
+        public InterpolationType SupportedInterpolationTypes
+        {
+            get { return (InterpolationType)GetValue(SupportedInterpolationTypesProperty); }
+            set { SetValue(SupportedInterpolationTypesProperty, value); }
+        }
+
         public ObservableCollection<KeyFrame> SelectedKeyFrames
         {
             get { return (ObservableCollection<KeyFrame>)GetValue(SelectedKeyFramesProperty); }
@@ -135,6 +152,14 @@ namespace NiVE3.View.Part
         double ClickX { get; set; }
 
         double KeyFrameMoveingTime { get; set; }
+
+        InterpolationType[]? SupportedInterpolationTypeList { get; set; } = Enum.GetValues<InterpolationType>();
+
+        public event EventHandler<ChangeKeyFrameInterpolationTypeEventArgs> KeyFrameInterpolationTypeChangeRequest
+        {
+            add { AddHandler(KeyFrameInterpolationTypeChangeRequestEvent, value); }
+            remove { RemoveHandler(KeyFrameInterpolationTypeChangeRequestEvent, value); }
+        }
 
         public event EventHandler<KeyFrameMoveEventArgs> KeyFrameMoveRequest
         {
@@ -258,6 +283,26 @@ namespace NiVE3.View.Part
                 return;
             }
 
+            foreach (var (k, i) in SelectedKeyFrames.ZipWithIndex().ToArray())
+            {
+                var newKeyFrame = KeyFrames.FirstOrDefault(nk => k.Id == nk.Id);
+                if (newKeyFrame != null)
+                {
+                    if (!ReferenceEquals(newKeyFrame, k))
+                    {
+                        SelectedKeyFrames[i] = newKeyFrame;
+                    }
+                }
+                else
+                {
+                    SelectedKeyFrames.Remove(k);
+                }
+            }
+            if (LastSelected != null && !KeyFrames.Contains(LastSelected))
+            {
+                LastSelected = null;
+            }
+
             var keyFrames = KeyFrames.ToArray();
             if (selectMultiple)
             {
@@ -377,8 +422,12 @@ namespace NiVE3.View.Part
 
         private void KeyFrameCollectionView_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            e.Handled = true;
+            if (e.LeftButton != MouseButtonState.Pressed)
+            {
+                return;
+            }
 
+            e.Handled = true;
             var pixelPerTime = (ActualWidth - UIParameters.TimelineRangeThumbTotalWidth) / Range;
             if (pixelPerTime < 0 || double.IsNaN(pixelPerTime) || double.IsInfinity(pixelPerTime) || KeyFrames.Count < 1)
             {
@@ -404,13 +453,24 @@ namespace NiVE3.View.Part
             var clickedKeyFrame = KeyFrames.LastOrDefault(k => Math.Abs((k.Time + timeOffset) * pixelPerTime - x) < KeyFrameIconSize * 0.5);
             if (clickedKeyFrame != null)
             {
-                SelectKeyFrame(clickedKeyFrame, isSelectRange, isSelectMultiple);
-                if (SelectedKeyFrames.Contains(clickedKeyFrame))
+                if (e.ClickCount == 2)
                 {
-                    IsClicked = true;
-                    ClickX = pos.X;
-                    KeyFrameMoveingTime = 0.0;
-                    CaptureMouse();
+                    if (SupportedInterpolationTypeList != null)
+                    {
+                        var nextInterpolationType = SupportedInterpolationTypeList[(Array.IndexOf(SupportedInterpolationTypeList, clickedKeyFrame.InterpolationType) + 1) % SupportedInterpolationTypeList.Length];
+                        RaiseEvent(new ChangeKeyFrameInterpolationTypeEventArgs(SelectedKeyFrames.ToArray(), nextInterpolationType, KeyFrameInterpolationTypeChangeRequestEvent, this));
+                    }
+                }
+                else
+                {
+                    SelectKeyFrame(clickedKeyFrame, isSelectRange, isSelectMultiple);
+                    if (SelectedKeyFrames.Contains(clickedKeyFrame))
+                    {
+                        IsClicked = true;
+                        ClickX = pos.X;
+                        KeyFrameMoveingTime = 0.0;
+                        CaptureMouse();
+                    }
                 }
             }
             else if (!isSelectRange && !isSelectMultiple)
@@ -422,6 +482,14 @@ namespace NiVE3.View.Part
 
         private void KeyFrames_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
+            foreach (var (k, i) in SelectedKeyFrames.ZipWithIndex().ToArray())
+            {
+                var newKeyFrame = KeyFrames.FirstOrDefault(nk => k.Id == nk.Id && !ReferenceEquals(nk, k));
+                if (newKeyFrame != null)
+                {
+                    SelectedKeyFrames[i] = newKeyFrame;
+                }
+            }
             InvalidateVisual();
         }
 
@@ -439,6 +507,14 @@ namespace NiVE3.View.Part
             if (e.NewValue is ObservableCollection<KeyFrame> newValue)
             {
                 newValue.CollectionChanged += collectionView.KeyFrames_CollectionChanged;
+            }
+        }
+
+        static void SupportedInterpolationTypesChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is KeyFrameCollectionView collection)
+            {
+                collection.SupportedInterpolationTypeList = Enum.GetValues<InterpolationType>().Where(i => collection.SupportedInterpolationTypes.HasFlag(i)).Order().ToArray();
             }
         }
     }

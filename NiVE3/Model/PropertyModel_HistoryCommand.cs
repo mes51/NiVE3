@@ -102,7 +102,7 @@ namespace NiVE3.Model
             public void Dispose() { }
         }
 
-        private class ReplaceKeyFrameHistoryCommand : IHistoryCommand
+        private class ReplaceSingleKeyFrameHistoryCommand : IHistoryCommand
         {
             public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangePropertyValue);
 
@@ -114,7 +114,7 @@ namespace NiVE3.Model
 
             int Index { get; }
 
-            public ReplaceKeyFrameHistoryCommand(PropertyModel model, KeyFrame oldKeyFrame, KeyFrame newKeyFrame, int index)
+            public ReplaceSingleKeyFrameHistoryCommand(PropertyModel model, KeyFrame oldKeyFrame, KeyFrame newKeyFrame, int index)
             {
                 Model = model;
                 OldKeyFrame = oldKeyFrame;
@@ -165,9 +165,9 @@ namespace NiVE3.Model
             public void Dispose() { }
         }
 
-        private class MoveKeyFrameHistoryCommand : IHistoryCommand
+        private class ReplaceKeyFramesHistoryCommand : IHistoryCommand
         {
-            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_MoveKeyFrame);
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(NameKey);
 
             PropertyModel Model { get; }
 
@@ -175,11 +175,14 @@ namespace NiVE3.Model
 
             KeyFrame[] NewKeyFrames { get; }
 
-            public MoveKeyFrameHistoryCommand(PropertyModel model, KeyFrame[] oldKeyFrames, KeyFrame[] newKeyFrames)
+            string NameKey { get; }
+
+            public ReplaceKeyFramesHistoryCommand(PropertyModel model, KeyFrame[] oldKeyFrames, KeyFrame[] newKeyFrames, string nameKey)
             {
                 Model = model;
                 OldKeyFrames = oldKeyFrames;
                 NewKeyFrames = newKeyFrames;
+                NameKey = nameKey;
             }
 
             public void Redo()

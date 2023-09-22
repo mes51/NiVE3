@@ -11,6 +11,8 @@ using NiVE3.Plugin.Property.Control;
 using NiVE3.ViewModel;
 using NiVE3.Shared.Extension;
 using Prism.Mvvm;
+using NiVE3.View.Resource;
+using System.Windows.Media.Animation;
 
 namespace NiVE3.Model
 {
@@ -139,7 +141,7 @@ namespace NiVE3.Model
             {
                 var oldKeyFrame = KeyFrames[index - 1];
                 KeyFrames[index - 1] = keyFrame;
-                HistoryModel.Add(new ReplaceKeyFrameHistoryCommand(this, oldKeyFrame, keyFrame, index - 1));
+                HistoryModel.Add(new ReplaceSingleKeyFrameHistoryCommand(this, oldKeyFrame, keyFrame, index - 1));
             }
             else
             {
@@ -166,6 +168,17 @@ namespace NiVE3.Model
         public void MoveTimeKeyFrames(KeyFrame[] targetKeyFrames, double[] newTime)
         {
             var newKeyFrames = targetKeyFrames.Zip(newTime, (k, nt) => new KeyFrame(nt, k.Value, k.EaseIn, k.EaseOut, k.InterpolationType, k.Id)).OrderBy(k => k.Time).ToArray();
+            ReplaceKeyFrames(targetKeyFrames, newKeyFrames, LanguageResourceDictionary.History_MoveKeyFrame);
+        }
+
+        public void ChangeKeyFramesInterpolationType(KeyFrame[] targetKeyFrames, InterpolationType interpolationType)
+        {
+            var newKeyFrames = targetKeyFrames.Select(k => new KeyFrame(k.Time, k.Value, k.EaseIn, k.EaseOut, interpolationType, k.Id)).OrderBy(k => k.Time).ToArray();
+            ReplaceKeyFrames(targetKeyFrames, newKeyFrames, LanguageResourceDictionary.History_ChangeKeyFrameInterpolationType);
+        }
+
+        void ReplaceKeyFrames(KeyFrame[] targetKeyFrames, KeyFrame[] newKeyFrames, string historyNameKey)
+        {
             foreach (var k in targetKeyFrames)
             {
                 KeyFrames.Remove(k);
@@ -188,7 +201,7 @@ namespace NiVE3.Model
             }
 
             oldKeyFrames.Sort((a, b) => a.Time.CompareTo(b.Time));
-            HistoryModel.Add(new MoveKeyFrameHistoryCommand(this, oldKeyFrames.ToArray(), newKeyFrames));
+            HistoryModel.Add(new ReplaceKeyFramesHistoryCommand(this, oldKeyFrames.ToArray(), newKeyFrames, historyNameKey));
         }
 
         private void CompositionModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)

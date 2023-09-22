@@ -111,6 +111,8 @@ namespace NiVE3.ViewModel
 
         public ICommand MoveTimeKeyFramesCommand { get; }
 
+        public ICommand ChangeKeyFramesInterpolationTypeCommand { get; }
+
         PropertyModel PropertyModel { get; }
 
         object? PrevValue { get; set; }
@@ -156,6 +158,11 @@ namespace NiVE3.ViewModel
             MoveTimeKeyFramesCommand = new DelegateCommand<Tuple<KeyFrame[], double[]>>(t =>
             {
                 PropertyModel.MoveTimeKeyFrames(t.Item1, t.Item2);
+            });
+
+            ChangeKeyFramesInterpolationTypeCommand = new DelegateCommand<Tuple<KeyFrame[], InterpolationType>>(t =>
+            {
+                PropertyModel.ChangeKeyFramesInterpolationType(t.Item1, t.Item2);
             });
 
             WiringModel();

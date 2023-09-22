@@ -213,6 +213,17 @@ namespace NiVE3.View.Part
             viewModel.MoveTimeKeyFramesCommand.Execute(Tuple.Create(e.KeyFrames, e.NewTimes));
         }
 
+        private void KeyFrameCollectionView_KeyFrameInterpolationTypeChangeRequest(object sender, ChangeKeyFrameInterpolationTypeEventArgs e)
+        {
+            var viewModel = ViewModel;
+            if (viewModel == null)
+            {
+                return;
+            }
+
+            viewModel.ChangeKeyFramesInterpolationTypeCommand.Execute(Tuple.Create(e.KeyFrames, e.InterpolationType));
+        }
+
         static void IndentParameterChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is PropertyView propertyView)
