@@ -27,7 +27,7 @@
                                       Range="{Binding ElementName=Root, Path=Range}"
                                       RangeStart="{Binding ElementName=Root, Path=RangeStart}"
                                       CompositionFrameRate="{Binding ElementName=Root, Path=CompositionFrameRate}"
-                                      SelectedKeyFrames="{Binding SelectedKeyFrames}"
+                                      SelectedKeyFrameIds="{Binding SelectedKeyFrameIds}"
                                       SupportedInterpolationTypes="{Binding Property.PropertyType.SupportedInterpolationTypes}"
                                       KeyFrameMoveRequest="KeyFrameCollectionView_KeyFrameMoveRequest"
                                       KeyFrameInterpolationTypeChangeRequest="KeyFrameCollectionView_KeyFrameInterpolationTypeChangeRequest"/>

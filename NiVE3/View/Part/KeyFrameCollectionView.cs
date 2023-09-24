@@ -69,11 +69,18 @@ namespace NiVE3.View.Part
             new FrameworkPropertyMetadata(new ObservableCollection<KeyFrame>(), FrameworkPropertyMetadataOptions.AffectsRender, KeyFramesChanged)
         );
 
-        public static readonly DependencyProperty SelectedKeyFramesProperty = DependencyProperty.Register(
-            nameof(SelectedKeyFrames),
-            typeof(ObservableCollection<KeyFrame>),
+        public static readonly DependencyProperty SelectedKeyFrameIdsProperty = DependencyProperty.Register(
+            nameof(SelectedKeyFrameIds),
+            typeof(ObservableCollection<int>),
             typeof(KeyFrameCollectionView),
-            new FrameworkPropertyMetadata(new ObservableCollection<KeyFrame>(), FrameworkPropertyMetadataOptions.AffectsRender)
+            new FrameworkPropertyMetadata(new ObservableCollection<int>(), FrameworkPropertyMetadataOptions.AffectsRender)
+        );
+
+        public static readonly DependencyProperty SupportedInterpolationTypesProperty = DependencyProperty.Register(
+            nameof(SupportedInterpolationTypes),
+            typeof(InterpolationType),
+            typeof(KeyFrameCollectionView),
+            new FrameworkPropertyMetadata(InterpolationType.None | InterpolationType.Linear | InterpolationType.CatmullRom | InterpolationType.Bezier, SupportedInterpolationTypesChanged)
         );
 
         public static RoutedEvent KeyFrameMoveRequestEvent = EventManager.RegisterRoutedEvent(
@@ -84,23 +91,16 @@ namespace NiVE3.View.Part
             nameof(KeyFrameInterpolationTypeChangeRequest), RoutingStrategy.Direct, typeof(EventHandler<ChangeKeyFrameInterpolationTypeEventArgs>), typeof(KeyFrameCollectionView)
         );
 
-        public static readonly DependencyProperty SupportedInterpolationTypesProperty = DependencyProperty.Register(
-            nameof(SupportedInterpolationTypes),
-            typeof(InterpolationType),
-            typeof(KeyFrameCollectionView),
-            new FrameworkPropertyMetadata(InterpolationType.None | InterpolationType.Linear | InterpolationType.CatmullRom | InterpolationType.Bezier, SupportedInterpolationTypesChanged)
-        );
-
         public InterpolationType SupportedInterpolationTypes
         {
             get { return (InterpolationType)GetValue(SupportedInterpolationTypesProperty); }
             set { SetValue(SupportedInterpolationTypesProperty, value); }
         }
 
-        public ObservableCollection<KeyFrame> SelectedKeyFrames
+        public ObservableCollection<int> SelectedKeyFrameIds
         {
-            get { return (ObservableCollection<KeyFrame>)GetValue(SelectedKeyFramesProperty); }
-            set { SetValue(SelectedKeyFramesProperty, value); }
+            get { return (ObservableCollection<int>)GetValue(SelectedKeyFrameIdsProperty); }
+            set { SetValue(SelectedKeyFrameIdsProperty, value); }
         }
 
         public ObservableCollection<KeyFrame> KeyFrames
@@ -255,13 +255,13 @@ namespace NiVE3.View.Part
             var brush = KeyFrameBrush;
             var selectedBrush = SelectedKeyFrameBrush;
             var timeOffset = SourceStartPoint - RangeStart;
-            var selected = SelectedKeyFrames;
+            var selected = SelectedKeyFrameIds;
             var frameDuration = 1.0 / CompositionFrameRate;
             foreach (var (k, kn) in KeyFrames.Zip(KeyFrames.Skip(1).Append(KeyFrames.Last())))
             {
                 var icon = KeyFrameIcons[(k.InterpolationType, kn.InterpolationType)];
 
-                var isSelected = selected.Contains(k);
+                var isSelected = selected.Contains(k.Id);
                 var keyFrameTime = isSelected && IsClicked ? (int)Math.Round((KeyFrameMoveingTime + k.Time) * CompositionFrameRate) * frameDuration : k.Time;
                 var x = (timeOffset + keyFrameTime) * pixelPerTime;
                 if (x > -KeyFrameIconSize && x < actualWidth)
@@ -283,19 +283,11 @@ namespace NiVE3.View.Part
                 return;
             }
 
-            foreach (var (k, i) in SelectedKeyFrames.ZipWithIndex().ToArray())
+            foreach (var (k, i) in SelectedKeyFrameIds.ZipWithIndex().ToArray())
             {
-                var newKeyFrame = KeyFrames.FirstOrDefault(nk => k.Id == nk.Id);
-                if (newKeyFrame != null)
+                if (KeyFrames.All(nk => k != nk.Id))
                 {
-                    if (!ReferenceEquals(newKeyFrame, k))
-                    {
-                        SelectedKeyFrames[i] = newKeyFrame;
-                    }
-                }
-                else
-                {
-                    SelectedKeyFrames.Remove(k);
+                    SelectedKeyFrameIds.Remove(k);
                 }
             }
             if (LastSelected != null && !KeyFrames.Contains(LastSelected))
@@ -306,19 +298,19 @@ namespace NiVE3.View.Part
             var keyFrames = KeyFrames.ToArray();
             if (selectMultiple)
             {
-                if (SelectedKeyFrames.Contains(keyFrame))
+                if (SelectedKeyFrameIds.Contains(keyFrame.Id))
                 {
-                    SelectedKeyFrames.Remove(keyFrame);
+                    SelectedKeyFrameIds.Remove(keyFrame.Id);
                 }
                 else
                 {
-                    SelectedKeyFrames.Add(keyFrame);
+                    SelectedKeyFrameIds.Add(keyFrame.Id);
                 }
                 LastSelected = keyFrame;
             }
-            else if (selectRange && SelectedKeyFrames.Count > 0)
+            else if (selectRange && SelectedKeyFrameIds.Count > 0)
             {
-                var oldSelectedKeyFrames = SelectedKeyFrames.ToArray();
+                var oldSelectedKeyFrames = SelectedKeyFrameIds.ToArray();
                 if (LastSelected == null)
                 {
                     LastSelected = keyFrames[0];
@@ -329,14 +321,14 @@ namespace NiVE3.View.Part
                 {
                     foreach (var k in oldSelectedKeyFrames)
                     {
-                        if (k != keyFrame)
+                        if (k != keyFrame.Id)
                         {
-                            SelectedKeyFrames.Remove(k);
+                            SelectedKeyFrameIds.Remove(k);
                         }
                     }
-                    if (!SelectedKeyFrames.Contains(keyFrame))
+                    if (!SelectedKeyFrameIds.Contains(keyFrame.Id))
                     {
-                        SelectedKeyFrames.Add(keyFrame);
+                        SelectedKeyFrameIds.Add(keyFrame.Id);
                     }
                     return;
                 }
@@ -347,20 +339,20 @@ namespace NiVE3.View.Part
                     startIndex = temp;
                 }
 
-                var targets = keyFrames.Skip(startIndex).Take(endIndex - startIndex + 1).ToArray();
+                var targets = keyFrames.Skip(startIndex).Take(endIndex - startIndex + 1).Select(k => k.Id).ToArray();
                 foreach (var k in oldSelectedKeyFrames.Except(targets))
                 {
-                    SelectedKeyFrames.Remove(k);
+                    SelectedKeyFrameIds.Remove(k);
                 }
                 foreach (var k in targets.Except(oldSelectedKeyFrames))
                 {
-                    SelectedKeyFrames.Add(k);
+                    SelectedKeyFrameIds.Add(k);
                 }
             }
-            else if (!SelectedKeyFrames.Contains(keyFrame))
+            else if (!SelectedKeyFrameIds.Contains(keyFrame.Id))
             {
-                SelectedKeyFrames.Clear();
-                SelectedKeyFrames.Add(keyFrame);
+                SelectedKeyFrameIds.Clear();
+                SelectedKeyFrameIds.Add(keyFrame.Id);
                 LastSelected = keyFrame;
             }
         }
@@ -385,7 +377,7 @@ namespace NiVE3.View.Part
                 IsClicked = false;
                 ReleaseMouseCapture();
 
-                var oldSelectedKeyFrame = SelectedKeyFrames.ToArray();
+                var oldSelectedKeyFrame = SelectedKeyFrameIds.Where(id => KeyFrames.Any(k => k.Id == id)).Select(id => KeyFrames.First(k => k.Id == id)).ToArray();
                 var newTimes = oldSelectedKeyFrame.Select(k => (int)Math.Round((diffTime + k.Time) * CompositionFrameRate) * frameDuration).ToArray();
 
                 if (oldSelectedKeyFrame.Select((k, i) => k.Time == newTimes[i]).All(b => b))
@@ -396,10 +388,10 @@ namespace NiVE3.View.Part
                 var eventArgs = new KeyFrameMoveEventArgs(oldSelectedKeyFrame, newTimes, KeyFrameMoveRequestEvent, this);
                 RaiseEvent(eventArgs);
 
-                SelectedKeyFrames.Clear();
-                foreach (var k in KeyFrames.Where(k => oldSelectedKeyFrame.Any(ok => k.Id == ok.Id)))
+                SelectedKeyFrameIds.Clear();
+                foreach (var k in oldSelectedKeyFrame)
                 {
-                    SelectedKeyFrames.Add(k);
+                    SelectedKeyFrameIds.Add(k.Id);
                 }
 
                 InvalidateVisual();
@@ -442,7 +434,7 @@ namespace NiVE3.View.Part
             {
                 if (!isSelectRange && !isSelectMultiple)
                 {
-                    SelectedKeyFrames.Clear();
+                    SelectedKeyFrameIds.Clear();
                     InvalidateVisual();
                 }
                 return;
@@ -458,13 +450,15 @@ namespace NiVE3.View.Part
                     if (SupportedInterpolationTypeList != null)
                     {
                         var nextInterpolationType = SupportedInterpolationTypeList[(Array.IndexOf(SupportedInterpolationTypeList, clickedKeyFrame.InterpolationType) + 1) % SupportedInterpolationTypeList.Length];
-                        RaiseEvent(new ChangeKeyFrameInterpolationTypeEventArgs(SelectedKeyFrames.ToArray(), nextInterpolationType, KeyFrameInterpolationTypeChangeRequestEvent, this));
+                        var selectedKeyFrameIds = SelectedKeyFrameIds;
+                        var targetKeyFrames = KeyFrames.Where(k => selectedKeyFrameIds.Contains(k.Id)).ToArray();
+                        RaiseEvent(new ChangeKeyFrameInterpolationTypeEventArgs(targetKeyFrames, nextInterpolationType, KeyFrameInterpolationTypeChangeRequestEvent, this));
                     }
                 }
                 else
                 {
                     SelectKeyFrame(clickedKeyFrame, isSelectRange, isSelectMultiple);
-                    if (SelectedKeyFrames.Contains(clickedKeyFrame))
+                    if (SelectedKeyFrameIds.Contains(clickedKeyFrame.Id))
                     {
                         IsClicked = true;
                         ClickX = pos.X;
@@ -475,21 +469,13 @@ namespace NiVE3.View.Part
             }
             else if (!isSelectRange && !isSelectMultiple)
             {
-                SelectedKeyFrames.Clear();
+                SelectedKeyFrameIds.Clear();
             }
             InvalidateVisual();
         }
 
         private void KeyFrames_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
-            foreach (var (k, i) in SelectedKeyFrames.ZipWithIndex().ToArray())
-            {
-                var newKeyFrame = KeyFrames.FirstOrDefault(nk => k.Id == nk.Id && !ReferenceEquals(nk, k));
-                if (newKeyFrame != null)
-                {
-                    SelectedKeyFrames[i] = newKeyFrame;
-                }
-            }
             InvalidateVisual();
         }
 

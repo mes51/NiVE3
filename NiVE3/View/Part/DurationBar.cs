@@ -91,7 +91,7 @@ namespace NiVE3.View.Part
             nameof(TagColor),
             typeof(Color),
             typeof(DurationBar),
-            new FrameworkPropertyMetadata(Colors.Red, FrameworkPropertyMetadataOptions.AffectsRender)
+            new FrameworkPropertyMetadata(Colors.Red, FrameworkPropertyMetadataOptions.AffectsRender, TagColorChanged)
         );
 
         private static readonly DependencyPropertyKey IsClickedPropertyKey = DependencyProperty.RegisterReadOnly(
