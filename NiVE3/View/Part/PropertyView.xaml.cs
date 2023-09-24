@@ -187,6 +187,8 @@ namespace NiVE3.View.Part
 
         PropertyViewModel? ViewModel => DataContext as PropertyViewModel;
 
+        PropertyCollectionView? ParentCollection => ItemsControl.ItemsControlFromItemContainer(VisualTreeHelper.GetParent(this)) as PropertyCollectionView;
+
         public PropertyView()
         {
             InitializeComponent();
@@ -200,6 +202,11 @@ namespace NiVE3.View.Part
                 PropertyControlGrid.Children.Clear();
                 PropertyControlGrid.Children.Add(viewModel.CreateControl());
             }
+        }
+
+        private void PropertyNameTextBlock_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            KeyFrameCollectionView.SelectAllKeyFrames();
         }
 
         private void KeyFrameCollectionView_KeyFrameMoveRequest(object sender, KeyFrameMoveEventArgs e)

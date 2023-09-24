@@ -236,6 +236,16 @@ namespace NiVE3.View.Part
             MouseUp += KeyFrameCollectionView_MouseUp;
         }
 
+        public void SelectAllKeyFrames()
+        {
+            SelectedKeyFrameIds.Clear();
+            foreach (var k in KeyFrames)
+            {
+                SelectedKeyFrameIds.Add(k.Id);
+            }
+            InvalidateVisual();
+        }
+
         protected override void OnRender(DrawingContext drawingContext)
         {
             base.OnRender(drawingContext);

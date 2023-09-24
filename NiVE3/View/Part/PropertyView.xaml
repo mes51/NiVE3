@@ -4,10 +4,24 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:NiVE3.View.Part"
+             xmlns:pr="clr-namespace:NiVE3.View.Primitive"
+             xmlns:ugm="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
              mc:Ignorable="d" 
              x:Name="Root"
              DataContextChanged="Root_DataContextChanged"
              d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <Style x:Key="PropertyNameTextBlockStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding (pr:StackableItemsCollectionView.IsSelected), RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ContentPresenter}, AncestorLevel=2}}" Value="True">
+                    <Setter Property="Background" Value="{ugm:AppearanceResource ResourceKey=SelectedBackgroundFill, ReturnDynamicResource=True}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="{Binding ElementName=Root, Path=IndentMarginLeft}"/>
@@ -18,10 +32,11 @@
         </Grid.ColumnDefinitions>
 
         <CheckBox Grid.Column="1" IsChecked="{Binding HasKeyFrame, Mode=OneWay}" Style="{StaticResource KeyFrameSwitchCheckBox}" VerticalAlignment="Center" HorizontalAlignment="Center" Command="{Binding SwitchUseKeyFrameCommand}"/>
-        <TextBlock Grid.Column="2" Text="{Binding ViewState.DisplayName}"/>
+        <TextBlock Grid.Column="2" Text="{Binding ViewState.DisplayName}" Style="{StaticResource PropertyNameTextBlockStyle}" MouseLeftButtonDown="PropertyNameTextBlock_MouseLeftButtonDown"/>
         <Grid Grid.Column="3" x:Name="PropertyControlGrid"/>
 
         <local:KeyFrameCollectionView Grid.Column="4"
+                                      x:Name="KeyFrameCollectionView"
                                       KeyFrames="{Binding KeyFrames}"
                                       SourceStartPoint="{Binding SourceStartPoint}"
                                       Range="{Binding ElementName=Root, Path=Range}"
