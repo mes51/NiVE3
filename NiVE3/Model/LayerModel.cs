@@ -144,7 +144,7 @@ namespace NiVE3.Model
             set { SetProperty(ref isEnableCollapse, value); }
         }
 
-        private bool isEnableEffect;
+        private bool isEnableEffect = true;
         public bool IsEnableEffect
         {
             get { return isEnableEffect; }
@@ -246,6 +246,10 @@ namespace NiVE3.Model
 
         public PropertyGroupModel TransformProperties { get; }
 
+        EffectListModel EffectListModel { get; }
+
+        CompositionModel CompositionModel { get; }
+
         HistoryModel HistoryModel { get; set; }
 
         double PrevInPoint { get; set; }
@@ -254,12 +258,14 @@ namespace NiVE3.Model
 
         double PrevSourceStartPoint { get; set; }
 
-        public LayerModel(CompositionModel compositionModel, FootageModel footageModel, HistoryModel historyModel) : this(compositionModel, footageModel, historyModel,null) { }
+        public LayerModel(CompositionModel compositionModel, FootageModel footageModel, EffectListModel effectListModel, HistoryModel historyModel) : this(compositionModel, footageModel, effectListModel, historyModel, null) { }
 
-        public LayerModel(CompositionModel compositionModel, FootageModel footageModel, HistoryModel historyModel, Guid? layerId)
+        public LayerModel(CompositionModel compositionModel, FootageModel footageModel, EffectListModel effectListModel, HistoryModel historyModel, Guid? layerId)
         {
             Effects = new ObservableCollection<EffectModel>();
             FootageModel = footageModel;
+            EffectListModel = effectListModel;
+            CompositionModel = compositionModel;
             HistoryModel = historyModel;
             Name = footageModel.Name;
             Duration = footageModel.Duration;
@@ -316,6 +322,18 @@ namespace NiVE3.Model
                 Comment = comment;
                 HistoryModel.Add(new ChangeCommentHistoryCommand(this, prevComment, comment));
             }
+        }
+
+        public void AddEffects(Guid[] effectIds)
+        {
+            var effectModels = effectIds.Select(id => EffectListModel.CreateEffect(id, CompositionModel, HistoryModel)).OfType<EffectModel>().ToArray();
+
+            foreach (var e in effectModels)
+            {
+                Effects.Add(e);
+            }
+
+            HistoryModel.Add(new AddEffectsHistoryCommand(this, effectModels));
         }
 
         private void Effects_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)

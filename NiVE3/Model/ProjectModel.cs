@@ -20,16 +20,19 @@ namespace NiVE3.Model
 
         RendererListModel RendererListModel { get; }
 
+        EffectListModel EffectListModel { get; }
+
         HistoryModel HistoryModel { get; }
 
         public event EventHandler<CompositionEventArgs>? OpenCompositionTimeline;
 
         public event EventHandler<CompositionEventArgs>? CompositionRemoved;
 
-        public ProjectModel(FootageListModel footageListModel, RendererListModel rendererListModel, HistoryModel historyModel)
+        public ProjectModel(FootageListModel footageListModel, RendererListModel rendererListModel, EffectListModel effectListModel, HistoryModel historyModel)
         {
             FootageListModel = footageListModel;
             RendererListModel = rendererListModel;
+            EffectListModel = effectListModel;
             HistoryModel = historyModel;
 
             FootageListModel.ShowFootagePreview += FootageListModel_ShowFootagePreview;
@@ -40,7 +43,7 @@ namespace NiVE3.Model
         public void CreateComposition(string name, int width, int height, double frameRate, double duration, bool isRetentionFrameRate, int shutterAngle, int shutterPhase, int motionBlurSampleCount, Type rendererType)
         {
             var renderer = RendererListModel.CreateRenderer(rendererType);
-            var composition = new CompositionModel(renderer, FootageListModel, HistoryModel)
+            var composition = new CompositionModel(renderer, FootageListModel, EffectListModel, HistoryModel)
             {
                 Name = name,
                 Width = width,

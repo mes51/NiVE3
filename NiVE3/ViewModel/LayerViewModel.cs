@@ -5,9 +5,11 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
+using GongSolutions.Wpf.DragDrop;
 using NiVE3.Model;
 using NiVE3.Mvvm;
 using NiVE3.Plugin.Interfaces;
@@ -19,7 +21,7 @@ using Prism.Mvvm;
 namespace NiVE3.ViewModel
 {
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
-    partial class LayerViewModel : BindableBase
+    partial class LayerViewModel : BindableBase, IDropTarget
     {
         private Guid layerId;
         [NeedWire(nameof(LayerModel), IsOneWay = true)]
@@ -392,6 +394,13 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref editingParameter, value); }
         }
 
+        private ObservableCollectionView<EffectModel, EffectViewModel> effects;
+        public ObservableCollectionView<EffectModel, EffectViewModel> Effects
+        {
+            get { return effects; }
+            set { SetProperty(ref effects, value); }
+        }
+
         public PropertyGroupViewModel TransformProperties { get; }
 
         public bool IsComposition { get; }
@@ -474,13 +483,16 @@ namespace NiVE3.ViewModel
 
         string PrevComment { get; set; } = "";
 
+#pragma warning disable CS8618 // 各フィールドには初期化時に必ず値を代入するため無視
         public LayerViewModel(LayerModel layerModel, ViewStateModel viewState, IEnumerable<LayerModelProxy> trackMatteViewSource, IEnumerable<LayerModelProxy> parentLayerViewSource)
+#pragma warning restore CS8618
         {
             LayerModel = layerModel;
             ViewState = viewState;
             TrackMatteViewSource = trackMatteViewSource;
             ParentLayerViewSource = parentLayerViewSource;
 
+            Effects = layerModel.Effects.CreateViewCollection(e => new EffectViewModel(e));
             TransformProperties = new PropertyGroupViewModel(layerModel.TransformProperties);
 
             WiringModel();
@@ -606,6 +618,29 @@ namespace NiVE3.ViewModel
             var eventArgs = new CycledLayerEventArgs(layerId.Value);
             CheckCycledParentLayerRequestPublisher.Publish(this, eventArgs);
             return eventArgs.Cycled;
+        }
+
+        public void DragOver(IDropInfo dropInfo)
+        {
+            if (dropInfo.Data is EffectListDragData)
+            {
+                dropInfo.Effects = DragDropEffects.Copy;
+                dropInfo.DropTargetAdorner = DropTargetAdorners.Highlight;
+            }
+            else
+            {
+                dropInfo.Effects = DragDropEffects.None;
+            }
+        }
+
+        public void Drop(IDropInfo dropInfo)
+        {
+            if (dropInfo.Data is not EffectListDragData effectListData)
+            {
+                return;
+            }
+
+            LayerModel.AddEffects(effectListData.Effects);
         }
 
         partial void WiringModel();

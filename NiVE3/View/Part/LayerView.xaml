@@ -44,8 +44,8 @@
             <cv:ConverterItem Converter="{StaticResource BooleanToVisibilityHiddenConverter}" TargetType="{x:Type Visibility}"/>
         </cv:ConverterCollection>
 
-        <cv:SwitchValueConverter x:Key="AVSwitchGridWidthSwitch" TrueValue="{x:Static r:UIParameters.AVSwitchWidthWithHalfSplitter}"/>
-        <cv:SwitchValueConverter x:Key="TagGridWidthSwitch" TrueValue="{x:Static r:UIParameters.TagAreaWidth}"/>
+        <cv:SwitchValueConverter x:Key="AVSwitchGridWidthSwitch" TrueValue="{x:Static r:UIParameters.AVSwitchWidthWithHalfSplitter}" FalseValue="{StaticResource EmptyGrid}"/>
+        <cv:SwitchValueConverter x:Key="TagGridWidthSwitch" TrueValue="{x:Static r:UIParameters.TagAreaWidth}" FalseValue="{StaticResource EmptyGrid}"/>
 
         <CollectionViewSource x:Key="TrackMatteCollectionViewSource" Source="{Binding TrackMatteViewSource}"/>
         <CompositeCollection x:Key="TrackMatteLayerCollection">
@@ -521,6 +521,22 @@
         </Grid>
 
         <StackPanel Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" Visibility="{Binding IsExpanded, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <pt:LayerParameterExpander Header="エフェクト"
+                                       IndentLevel="1"
+                                       IsAVSwitchColumnVisible="{Binding ElementName=Root, Path=DataContext.IsAVSwitchColumnVisible}"
+                                       IsTagColumnVisible="{Binding ElementName=Root, Path=DataContext.IsTagColumnVisible}"
+                                       NameAreaWidth="{Binding ElementName=Root, Path=DataContext.PropertyNameAreaWidth}"
+                                       Visibility="{Binding HasEffect, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <pt:EffectCollectionView ItemsSource="{Binding Effects}"
+                                         IndentLevel="2"
+                                         ControlAreaWidth="{Binding ElementName=Root, Path=LayerControlAreaWidth}"
+                                         NameAreaWidth="{Binding ElementName=Root, Path=DataContext.PropertyNameAreaWidth}"
+                                         IsAVSwitchColumnVisible="{Binding ElementName=Root, Path=DataContext.IsAVSwitchColumnVisible}"
+                                         IsTagColumnVisible="{Binding ElementName=Root, Path=DataContext.IsTagColumnVisible}"
+                                         Range="{Binding ElementName=Root, Path=Range}"
+                                         RangeStart="{Binding ElementName=Root, Path=RangeStart}"
+                                         CompositionFrameRate="{Binding ElementName=Root, Path=CompositionFrameRate}"/>
+            </pt:LayerParameterExpander>
             <Grid Visibility="{Binding SourceType, Converter={StaticResource AVTypeVisibleConverter}, ConverterParameter={x:Static local:LayerView.CompositionDisplayableSourceType}}" ClipToBounds="True">
                 <pt:PropertyGroupView DataContext="{Binding TransformProperties}"
                                       IndentLevel="1"

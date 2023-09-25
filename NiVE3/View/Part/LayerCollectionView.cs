@@ -120,6 +120,9 @@ namespace NiVE3.View.Part
                     Mode = BindingMode.OneWay
                 };
                 BindingOperations.SetBinding(layer, LayerView.CompositionFrameRateProperty, compositionFrameRateBinding);
+
+                GongSolutions.Wpf.DragDrop.DragDrop.SetIsDropTarget(layer, true);
+                GongSolutions.Wpf.DragDrop.DragDrop.SetDropHandler(layer, viewModel);
             }
         }
     }

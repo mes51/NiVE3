@@ -35,12 +35,12 @@ namespace NiVE3.Model
             }
         }
 
-        public EffectModel? CreateEffect(Guid effectUuid)
+        public EffectModel? CreateEffect(Guid effectUuid, CompositionModel compositionModel, HistoryModel historyModel)
         {
             var factory = Effects?.FirstOrDefault(f => Guid.Parse(f.Metadata.EffectUuid) == effectUuid);
             if (factory != null)
             {
-                return new EffectModel(factory.CreateExport().Value);
+                return new EffectModel(factory.CreateExport().Value, factory.Metadata.Name, compositionModel, historyModel);
             }
             else
             {

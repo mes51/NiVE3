@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using NiVE3.Model;
 using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Interfaces;
+using NiVE3.Plugin.Property;
 
 namespace NiVE3.Test.Model
 {
@@ -21,7 +22,9 @@ namespace NiVE3.Test.Model
             var container = new CompositionContainer(catalog);
             container.ComposeParts(model);
 
-            var effectModel = model.CreateEffect(Guid.Parse(TestEffect.ID));
+            // TODO: モックライブラリを探す
+            //       候補: https://github.com/telerik/JustMockLite
+            var effectModel = model.CreateEffect(Guid.Parse(TestEffect.ID), null!, null!);
 
             Assert.NotNull(effectModel);
         }
@@ -32,5 +35,10 @@ namespace NiVE3.Test.Model
     public class TestEffect : IEffect
     {
         public const string ID = "ED0374C9-2227-445A-9C4A-DE8A4A9DFAE5";
+
+        public PropertyBase[] GetProperties()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

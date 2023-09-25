@@ -327,16 +327,5 @@ namespace NiVE3.View.Primitive
         }
     }
 
-    class ItemDragData<T>
-    {
-        public T[] SelectedItems;
-
-        public T DragItem;
-
-        public ItemDragData(T[] selectedItems, T dragItem)
-        {
-            SelectedItems = selectedItems;
-            DragItem = dragItem;
-        }
-    }
+    record ItemDragData<T>(T[] SelectedItems, T DragItem) { }
 }

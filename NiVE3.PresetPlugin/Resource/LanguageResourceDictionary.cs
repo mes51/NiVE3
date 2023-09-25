@@ -15,11 +15,17 @@ namespace NiVE3.PresetPlugin.Resource
         [DefaultValue("ポイント制御")]
         public const string ExpressionControl_PointControl_Name = nameof(ExpressionControl_PointControl_Name);
 
+        [DefaultValue("ポイント")]
+        public const string ExpressionControl_PointControl_PropertyName = nameof(ExpressionControl_PointControl_PropertyName);
+
         [DefaultValue("エクスプレッションで使用するポイント制御")]
         public const string ExpressionControl_PointControl_Description = nameof(ExpressionControl_PointControl_Description);
 
         [DefaultValue("スライダー制御")]
         public const string ExpressionControl_SliderControl_Name = nameof(ExpressionControl_SliderControl_Name);
+
+        [DefaultValue("スライダー")]
+        public const string ExpressionControl_SliderControl_PropertyName = nameof(ExpressionControl_SliderControl_PropertyName);
 
         [DefaultValue("エクスプレッションで使用するスライダー制御")]
         public const string ExpressionControl_SliderControl_Description = nameof(ExpressionControl_SliderControl_Description);

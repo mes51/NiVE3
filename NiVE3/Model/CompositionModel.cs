@@ -150,12 +150,15 @@ namespace NiVE3.Model
 
         FootageListModel FootageListModel { get; }
 
+        EffectListModel EffectListModel { get; }
+
         HistoryModel HistoryModel { get; }
 
-        public CompositionModel(IRenderer renderer, FootageListModel footageListModel, HistoryModel historyModel)
+        public CompositionModel(IRenderer renderer, FootageListModel footageListModel, EffectListModel effectListModel, HistoryModel historyModel)
         {
             Renderer = renderer;
             FootageListModel = footageListModel;
+            EffectListModel = effectListModel;
             HistoryModel = historyModel;
             Layers = new ObservableCollection<LayerModel>();
 
@@ -178,7 +181,7 @@ namespace NiVE3.Model
                 {
                     continue;
                 }
-                var layer = new LayerModel(this, f, HistoryModel);
+                var layer = new LayerModel(this, f, EffectListModel, HistoryModel);
                 if (f.InputType == SourceType.Image || f.InputType == SourceType.None)
                 {
                     layer.OutPoint = Duration;

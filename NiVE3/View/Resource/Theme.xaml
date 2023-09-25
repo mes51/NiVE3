@@ -45,18 +45,23 @@
                 </Setter>
             </Style>
         </Style.Resources>
+        <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Expander}">
+                    <ControlTemplate.Resources>
+                        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+                    </ControlTemplate.Resources>
                     <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="3" SnapsToDevicePixels="true">
                         <DockPanel>
                             <Grid x:Name="HeaderSite" Margin="{TemplateBinding Padding}" DockPanel.Dock="Top">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=IndentMarginLeft}"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition />
+                                    <ColumnDefinition Width="{x:Static r:UIParameters.ArrowWidthGridLength}"/>
+                                    <ColumnDefinition Width="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=CalculatedNameAreaWidth}"/>
                                 </Grid.ColumnDefinitions>
 
+                                <ContentPresenter Grid.Column="0" Content="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Switches}" Visibility="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=IsTagColumnVisible, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                                 <ToggleButton Grid.Column="1" IsChecked="{Binding IsExpanded, Mode=TwoWay, RelativeSource={RelativeSource Mode=TemplatedParent}}" Style="{StaticResource ArrowExpanderStyle}"/>
                                 <TextBlock Grid.Column="2" Text="{TemplateBinding Header}" FontFamily="{TemplateBinding FontFamily}" FontSize="{TemplateBinding FontSize}" FontStretch="{TemplateBinding FontStretch}" FontStyle="{TemplateBinding FontStyle}" FontWeight="{TemplateBinding FontWeight}" VerticalAlignment="Center"/>
                             </Grid>
@@ -68,7 +73,7 @@
                             <Setter Property="Visibility" TargetName="ExpandSite" Value="Visible"/>
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
-
+                            <!-- TODO: 無効化時のスタイル -->
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

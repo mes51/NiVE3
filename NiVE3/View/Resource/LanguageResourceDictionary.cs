@@ -295,6 +295,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("キーフレームの補間法の変更")]
         public static readonly string History_ChangeKeyFrameInterpolationType = nameof(History_ChangeKeyFrameInterpolationType);
 
+        [ShowInMarkup, DefaultValue("エフェクトの追加")]
+        public static readonly string History_AddEffects = nameof(History_AddEffects);
+
         // Property
 
         [ShowInMarkup, DefaultValue("アンカーポイント")]
