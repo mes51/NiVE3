@@ -32,19 +32,24 @@ namespace NiVE3.Model
             set { SetProperty(ref properties, value); }
         }
 
+        public Guid EffectId { get; }
+
         IEffect Effect { get; }
 
         HistoryModel HistoryModel { get; }
 
-        public EffectModel(IEffect effect, string name, CompositionModel compositionModel, HistoryModel historyModel)
+        public EffectModel(IEffect effect, string name, CompositionModel compositionModel, LayerModel layerModel, HistoryModel historyModel) : this(effect, name, compositionModel, layerModel, historyModel, null) { }
+
+        public EffectModel(IEffect effect, string name, CompositionModel compositionModel, LayerModel layerModel, HistoryModel historyModel, Guid? effectId)
         {
             Effect = effect;
             Name = name;
             HistoryModel = historyModel;
+            EffectId = effectId ?? Guid.NewGuid();
 
             foreach (var p in effect.GetProperties())
             {
-                Properties.Add(new PropertyModel(p, compositionModel, historyModel));
+                Properties.Add(new PropertyModel(p, compositionModel, layerModel, this, historyModel));
             }
         }
 

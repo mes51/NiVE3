@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
@@ -401,6 +402,16 @@ namespace NiVE3.ViewModel
         {
             get { return effects; }
             set { SetProperty(ref effects, value); }
+        }
+
+        private ObservableCollection<EffectViewModel> selectedEffects = new ObservableCollection<EffectViewModel>();
+        /// <summary>
+        /// Read only
+        /// </summary>
+        public ObservableCollection<EffectViewModel> SelectedEffects
+        {
+            get { return selectedEffects; }
+            set { SetProperty(ref selectedEffects, value); }
         }
 
         public PropertyGroupViewModel TransformProperties { get; }

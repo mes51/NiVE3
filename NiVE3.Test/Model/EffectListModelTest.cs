@@ -24,7 +24,7 @@ namespace NiVE3.Test.Model
 
             // TODO: モックライブラリを探す
             //       候補: https://github.com/telerik/JustMockLite
-            var effectModel = model.CreateEffect(Guid.Parse(TestEffect.ID), null!, null!);
+            var effectModel = model.CreateEffect(Guid.Parse(TestEffect.ID), null!, null!, null!);
 
             Assert.NotNull(effectModel);
         }

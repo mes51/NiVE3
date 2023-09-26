@@ -265,6 +265,9 @@ namespace NiVE3.ViewModel
         }
 
         private ObservableCollection<LayerViewModel> selectedLayers = new ObservableCollection<LayerViewModel>();
+        /// <summary>
+        /// Read only
+        /// </summary>
         public ObservableCollection<LayerViewModel> SelectedLayers
         {
             get { return selectedLayers; }
