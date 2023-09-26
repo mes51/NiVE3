@@ -46,6 +46,13 @@ namespace NiVE3.View.Part
             new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
+        public static readonly DependencyProperty NameDragSourceIgnoreProperty = DependencyProperty.Register(
+            nameof(NameDragSourceIgnore),
+            typeof(bool),
+            typeof(LayerParameterExpander),
+            new FrameworkPropertyMetadata(true)
+        );
+
         private static readonly DependencyProperty IndentMarginLeftProperty = DependencyProperty.Register(
             nameof(IndentMarginLeft),
             typeof(GridLength),
@@ -59,6 +66,12 @@ namespace NiVE3.View.Part
             typeof(LayerParameterExpander),
             new FrameworkPropertyMetadata(new GridLength(0.0), FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
+
+        public bool NameDragSourceIgnore
+        {
+            get { return (bool)GetValue(NameDragSourceIgnoreProperty); }
+            set { SetValue(NameDragSourceIgnoreProperty, value); }
+        }
 
         public UIElement? Switches
         {

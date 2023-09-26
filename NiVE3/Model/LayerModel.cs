@@ -324,16 +324,18 @@ namespace NiVE3.Model
             }
         }
 
-        public void AddEffects(Guid[] effectIds)
+        public void InsertEffect(Guid[] effectIds, int index)
         {
             var effectModels = effectIds.Select(id => EffectListModel.CreateEffect(id, CompositionModel, HistoryModel)).OfType<EffectModel>().ToArray();
 
+            var i = index;
             foreach (var e in effectModels)
             {
-                Effects.Add(e);
+                Effects.Insert(i, e);
+                i++;
             }
 
-            HistoryModel.Add(new AddEffectsHistoryCommand(this, effectModels));
+            HistoryModel.Add(new InsertEffectsHistoryCommand(this, effectModels, index));
         }
 
         private void Effects_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)

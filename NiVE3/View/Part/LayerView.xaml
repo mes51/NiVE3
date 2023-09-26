@@ -535,7 +535,12 @@
                                          IsTagColumnVisible="{Binding ElementName=Root, Path=DataContext.IsTagColumnVisible}"
                                          Range="{Binding ElementName=Root, Path=Range}"
                                          RangeStart="{Binding ElementName=Root, Path=RangeStart}"
-                                         CompositionFrameRate="{Binding ElementName=Root, Path=CompositionFrameRate}"/>
+                                         CompositionFrameRate="{Binding ElementName=Root, Path=CompositionFrameRate}"
+                                         dd:DragDrop.DropHandler="{Binding}"
+                                         dd:DragDrop.DragHandler="{Binding RelativeSource={RelativeSource Self}}"
+                                         dd:DragDrop.IsDragSource="True"
+                                         dd:DragDrop.IsDropTarget="True"
+                                         dd:DragDrop.DragSourceIgnore="False"/>
             </pt:LayerParameterExpander>
             <Grid Visibility="{Binding SourceType, Converter={StaticResource AVTypeVisibleConverter}, ConverterParameter={x:Static local:LayerView.CompositionDisplayableSourceType}}" ClipToBounds="True">
                 <pt:PropertyGroupView DataContext="{Binding TransformProperties}"

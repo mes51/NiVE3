@@ -15,6 +15,8 @@ using NiVE3.Mvvm;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
 using NiVE3.View.Command;
+using NiVE3.View.Part;
+using NiVE3.View.Primitive;
 using Prism.Commands;
 using Prism.Mvvm;
 
@@ -622,25 +624,44 @@ namespace NiVE3.ViewModel
 
         public void DragOver(IDropInfo dropInfo)
         {
-            if (dropInfo.Data is EffectListDragData)
+            switch (dropInfo.Data)
             {
-                dropInfo.Effects = DragDropEffects.Copy;
-                dropInfo.DropTargetAdorner = DropTargetAdorners.Highlight;
-            }
-            else
-            {
-                dropInfo.Effects = DragDropEffects.None;
+                case EffectListDragData when dropInfo.VisualTarget is EffectCollectionView:
+                    dropInfo.Effects = DragDropEffects.Copy;
+                    dropInfo.DropTargetAdorner = DropTargetAdorners.Insert;
+                    break;
+                case EffectListDragData:
+                    dropInfo.Effects = DragDropEffects.Copy;
+                    dropInfo.DropTargetAdorner = DropTargetAdorners.Highlight;
+                    break;
+                case EffectViewModel:
+                case ItemDragData<EffectViewModel>:
+                    dropInfo.Effects = DragDropEffects.Move;
+                    dropInfo.DropTargetAdorner = DropTargetAdorners.Insert;
+                    break;
+                default:
+                    dropInfo.NotHandled = true;
+                    break;
             }
         }
 
         public void Drop(IDropInfo dropInfo)
         {
-            if (dropInfo.Data is not EffectListDragData effectListData)
+            switch (dropInfo.Data)
             {
-                return;
+                case EffectListDragData effectListData when dropInfo.VisualTarget is EffectCollectionView:
+                    LayerModel.InsertEffect(effectListData.Effects, dropInfo.InsertIndex);
+                    break;
+                case EffectListDragData effectListData:
+                    LayerModel.InsertEffect(effectListData.Effects, Effects.Count);
+                    break;
+                case EffectViewModel:
+                case ItemDragData<EffectViewModel>:
+                    break;
+                default:
+                    dropInfo.NotHandled = true;
+                    break;
             }
-
-            LayerModel.AddEffects(effectListData.Effects);
         }
 
         partial void WiringModel();

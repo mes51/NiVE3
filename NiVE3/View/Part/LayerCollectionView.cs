@@ -122,6 +122,7 @@ namespace NiVE3.View.Part
                 BindingOperations.SetBinding(layer, LayerView.CompositionFrameRateProperty, compositionFrameRateBinding);
 
                 GongSolutions.Wpf.DragDrop.DragDrop.SetIsDropTarget(layer, true);
+                GongSolutions.Wpf.DragDrop.DragDrop.SetDropEventType(layer, EventType.Bubbled);
                 GongSolutions.Wpf.DragDrop.DragDrop.SetDropHandler(layer, viewModel);
             }
         }

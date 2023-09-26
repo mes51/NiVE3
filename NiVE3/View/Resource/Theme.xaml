@@ -2,6 +2,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
                     xmlns:ad="https://github.com/Dirkster99/AvalonDock"
+                    xmlns:dd="urn:gong-wpf-dragdrop"
                     xmlns:a="clr-namespace:NiVE3.Wpf.Attach"
                     xmlns:b="clr-namespace:NiVE3.Wpf.Behavior"
                     xmlns:pt="clr-namespace:NiVE3.View.Part"
@@ -18,39 +19,37 @@
     </Style>
 
     <Style TargetType="{x:Type pt:LayerParameterExpander}">
-        <Style.Resources>
-            <Style x:Key="ArrowExpanderStyle" TargetType="{x:Type ToggleButton}">
-                <Setter Property="Focusable" Value="False"/>
-                <Setter Property="Width" Value="{x:Static r:UIParameters.ArrowWidth}"/>
-                <Setter Property="Height" Value="13"/>
-                <Setter Property="Template">
-                    <Setter.Value>
-                        <ControlTemplate TargetType="{x:Type ToggleButton}">
-                            <Grid Background="Transparent">
-                                <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
-                                    <Path x:Name="ExpandPath" Margin="1,1,1,1" Fill="{ugm:AppearanceResource ResourceKey=TextBrush, ReturnDynamicResource=True}" Data="M 0,0 8.66025403784439,5 0,10"/>
-                                </Grid>
-                            </Grid>
-                            <ControlTemplate.Triggers>
-                                <Trigger Property="IsChecked" Value="True">
-                                    <Setter Property="LayoutTransform" TargetName="ExpandPath">
-                                        <Setter.Value>
-                                            <RotateTransform Angle="90"/>
-                                        </Setter.Value>
-                                    </Setter>
-                                </Trigger>
-                            </ControlTemplate.Triggers>
-                        </ControlTemplate>
-                    </Setter.Value>
-                </Setter>
-            </Style>
-        </Style.Resources>
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Expander}">
                     <ControlTemplate.Resources>
                         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+                        <Style x:Key="ArrowExpanderStyle" TargetType="{x:Type ToggleButton}">
+                            <Setter Property="Focusable" Value="False"/>
+                            <Setter Property="Width" Value="{x:Static r:UIParameters.ArrowWidth}"/>
+                            <Setter Property="Height" Value="13"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type ToggleButton}">
+                                        <Grid Background="Transparent">
+                                            <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                <Path x:Name="ExpandPath" Margin="1,1,1,1" Fill="{ugm:AppearanceResource ResourceKey=TextBrush, ReturnDynamicResource=True}" Data="M 0,0 8.66025403784439,5 0,10"/>
+                                            </Grid>
+                                        </Grid>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsChecked" Value="True">
+                                                <Setter Property="LayoutTransform" TargetName="ExpandPath">
+                                                    <Setter.Value>
+                                                        <RotateTransform Angle="90"/>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
                     </ControlTemplate.Resources>
                     <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="3" SnapsToDevicePixels="true">
                         <DockPanel>
@@ -63,7 +62,22 @@
 
                                 <ContentPresenter Grid.Column="0" Content="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Switches}" Visibility="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=IsTagColumnVisible, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                                 <ToggleButton Grid.Column="1" IsChecked="{Binding IsExpanded, Mode=TwoWay, RelativeSource={RelativeSource Mode=TemplatedParent}}" Style="{StaticResource ArrowExpanderStyle}"/>
-                                <TextBlock Grid.Column="2" Text="{TemplateBinding Header}" FontFamily="{TemplateBinding FontFamily}" FontSize="{TemplateBinding FontSize}" FontStretch="{TemplateBinding FontStretch}" FontStyle="{TemplateBinding FontStyle}" FontWeight="{TemplateBinding FontWeight}" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="2"
+                                           Text="{TemplateBinding Header}"
+                                           FontFamily="{TemplateBinding FontFamily}"
+                                           FontSize="{TemplateBinding FontSize}"
+                                           FontStretch="{TemplateBinding FontStretch}"
+                                           FontStyle="{TemplateBinding FontStyle}"
+                                           FontWeight="{TemplateBinding FontWeight}"
+                                           Background="Transparent"
+                                           VerticalAlignment="Center">
+                                    <TextBlock.Style>
+                                        <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
+                                            <!-- NOTE: なぜか普通に属性としてつけると反映されないためStyleで適用する -->
+                                            <Setter Property="dd:DragDrop.DragSourceIgnore" Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=NameDragSourceIgnore}"/>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
                             </Grid>
                             <ContentPresenter x:Name="ExpandSite" DockPanel.Dock="Bottom" Focusable="False" Content="{TemplateBinding Content}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" Visibility="Collapsed"/>
                         </DockPanel>

@@ -115,7 +115,7 @@ namespace NiVE3.Model
             public void Dispose() { }
         }
 
-        private class AddEffectsHistoryCommand : IHistoryCommand
+        private class InsertEffectsHistoryCommand : IHistoryCommand
         {
             public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_AddEffects);
 
@@ -123,17 +123,22 @@ namespace NiVE3.Model
 
             EffectModel[] Effects { get; }
 
-            public AddEffectsHistoryCommand(LayerModel model, EffectModel[] effects)
+            int StartIndex { get; }
+
+            public InsertEffectsHistoryCommand(LayerModel model, EffectModel[] effects, int startIndex)
             {
                 Model = model;
                 Effects = effects;
+                StartIndex = startIndex;
             }
 
             public void Redo()
             {
+                var i = StartIndex;
                 foreach (var e in Effects)
                 {
-                    Model.Effects.Add(e);
+                    Model.Effects.Insert(i, e);
+                    i++;
                 }
             }
 
