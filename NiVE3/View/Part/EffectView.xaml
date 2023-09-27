@@ -7,23 +7,26 @@
              xmlns:dd="urn:gong-wpf-dragdrop"
              xmlns:vm="clr-namespace:NiVE3.ViewModel"
              xmlns:pt="clr-namespace:NiVE3.View.Part"
+             xmlns:pr="clr-namespace:NiVE3.View.Primitive"
              xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
              mc:Ignorable="d" 
              x:Name="Root"
              dd:DragDrop.DragSourceIgnore="True"
+             MouseLeftButtonDown="Root_MouseLeftButtonDown"
              d:DesignHeight="450" d:DesignWidth="800">
-    <pt:LayerParameterExpander Header="{Binding Name}"
-                               IndentLevel="{Binding ElementName=Root, Path=IndentLevel}"
-                               IsAVSwitchColumnVisible="{Binding ElementName=Root, Path=IsAVSwitchColumnVisible}"
-                               IsTagColumnVisible="{Binding ElementName=Root, Path=IsTagColumnVisible}"
-                               IsExpanded="{Binding IsExpanded, Mode=TwoWay}"
-                               NameAreaWidth="{Binding ElementName=Root, Path=NameAreaWidth}"
-                               NameDragSourceIgnore="False">
-        <pt:LayerParameterExpander.Switches>
+    <pt:LayerItemExpander HeaderText="{Binding Name}"
+                          IndentLevel="{Binding ElementName=Root, Path=IndentLevel}"
+                          IsAVSwitchColumnVisible="{Binding ElementName=Root, Path=IsAVSwitchColumnVisible}"
+                          IsTagColumnVisible="{Binding ElementName=Root, Path=IsTagColumnVisible}"
+                          IsExpanded="{Binding IsExpanded, Mode=TwoWay}"
+                          NameAreaWidth="{Binding ElementName=Root, Path=NameAreaWidth}"
+                          NameDragSourceIgnore="False"
+                          IsHighlightHeader="{Binding ElementName=Root, Path=(pr:StackableItemsCollectionView.IsSelected)}">
+        <pt:LayerItemExpander.Switches>
             <Grid Margin="1.5,0,0,0">
                 <CheckBox Content="{gm:FontawesomeResource ResourceKey=FlorinSign}" Style="{StaticResource LayerSwitchCheckBox}" IsChecked="{Binding IsEnable, Mode=TwoWay}" HorizontalAlignment="Left" Command="{Binding ChangeIsEnableCommand}"/>
             </Grid>
-        </pt:LayerParameterExpander.Switches>
+        </pt:LayerItemExpander.Switches>
         <pt:PropertyCollectionView ItemsSource="{Binding Properties}"
                                    IndentLevel="{Binding ElementName=Root, Path=IndentLevel, Converter={x:Static local:EffectView.NextIndentConverter}}"
                                    ControlAreaWidth="{Binding ElementName=Root, Path=ControlAreaWidth}"
@@ -33,5 +36,5 @@
                                    Range="{Binding ElementName=Root, Path=Range}"
                                    RangeStart="{Binding ElementName=Root, Path=RangeStart}"
                                    CompositionFrameRate="{Binding ElementName=Root, Path=CompositionFrameRate}"/>
-    </pt:LayerParameterExpander>
+    </pt:LayerItemExpander>
 </UserControl>

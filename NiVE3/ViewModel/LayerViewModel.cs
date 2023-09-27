@@ -666,8 +666,25 @@ namespace NiVE3.ViewModel
                 case EffectListDragData effectListData:
                     LayerModel.InsertEffect(effectListData.Effects, Effects.Count);
                     break;
-                case EffectViewModel:
-                case ItemDragData<EffectViewModel>:
+                case EffectViewModel effect:
+                    {
+                        var newIndex = dropInfo.InsertIndex;
+                        if (Effects.IndexOf(effect) < newIndex)
+                        {
+                            newIndex--;
+                        }
+                        LayerModel.MoveEffect(effect.EffectId, newIndex);
+                    }
+                    break;
+                case ItemDragData<EffectViewModel> itemDragData:
+                    {
+                        var newIndex = dropInfo.InsertIndex;
+                        if (Effects.IndexOf(itemDragData.DragItem) < newIndex)
+                        {
+                            newIndex--;
+                        }
+                        LayerModel.MoveEffects(itemDragData.SelectedItems.Select(l => l.EffectId).ToArray(), itemDragData.DragItem.EffectId, newIndex);
+                    }
                     break;
                 default:
                     dropInfo.NotHandled = true;

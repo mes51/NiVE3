@@ -9,12 +9,12 @@
              mc:Ignorable="d" 
              x:Name="Root"
              d:DesignHeight="450" d:DesignWidth="800">
-    <pt:LayerParameterExpander Header="{Binding ViewState.DisplayName}"
-                               IndentLevel="{Binding ElementName=Root, Path=IndentLevel}"
-                               IsAVSwitchColumnVisible="{Binding ElementName=Root, Path=IsAVSwitchColumnVisible}"
-                               IsTagColumnVisible="{Binding ElementName=Root, Path=IsTagColumnVisible}"
-                               IsExpanded="{Binding IsExpanded, Mode=TwoWay}"
-                               NameAreaWidth="{Binding ElementName=Root, Path=NameAreaWidth}">
+    <pt:LayerItemExpander HeaderText="{Binding ViewState.DisplayName}"
+                          IndentLevel="{Binding ElementName=Root, Path=IndentLevel}"
+                          IsAVSwitchColumnVisible="{Binding ElementName=Root, Path=IsAVSwitchColumnVisible}"
+                          IsTagColumnVisible="{Binding ElementName=Root, Path=IsTagColumnVisible}"
+                          IsExpanded="{Binding IsExpanded, Mode=TwoWay}"
+                          NameAreaWidth="{Binding ElementName=Root, Path=NameAreaWidth}">
         <pt:PropertyCollectionView ItemsSource="{Binding Children}"
                                    IndentLevel="{Binding ElementName=Root, Path=IndentLevel, Converter={x:Static local:PropertyGroupView.NextIndentConverter}}"
                                    ControlAreaWidth="{Binding ElementName=Root, Path=ControlAreaWidth}"
@@ -24,5 +24,5 @@
                                    Range="{Binding ElementName=Root, Path=Range}"
                                    RangeStart="{Binding ElementName=Root, Path=RangeStart}"
                                    CompositionFrameRate="{Binding ElementName=Root, Path=CompositionFrameRate}"/>
-    </pt:LayerParameterExpander>
+    </pt:LayerItemExpander>
 </UserControl>

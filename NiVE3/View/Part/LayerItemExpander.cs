@@ -9,63 +9,105 @@ using System.Windows;
 
 namespace NiVE3.View.Part
 {
-    class LayerParameterExpander : Expander
+    // NOTE: 子要素を持つコントロールはXAMLで作るとBindingが上手くいかなくなる
+    // SEE: https://shuntaro3.hatenablog.com/entry/2018/10/01/002603
+    class LayerItemExpander : ContentControl
     {
+        public static readonly DependencyProperty IsExpandedProperty = DependencyProperty.Register(
+            nameof(IsExpanded),
+            typeof(bool),
+            typeof(LayerItemExpander),
+            new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.BindsTwoWayByDefault)
+        );
+
+        public static readonly DependencyProperty HeaderTextProperty = DependencyProperty.Register(
+            nameof(HeaderText),
+            typeof(string),
+            typeof(LayerItemExpander),
+            new FrameworkPropertyMetadata("")
+        );
+
         public static readonly DependencyProperty IndentLevelProperty = DependencyProperty.Register(
             nameof(IndentLevel),
             typeof(int),
-            typeof(LayerParameterExpander),
+            typeof(LayerItemExpander),
             new FrameworkPropertyMetadata(0, IndentParameterChanged)
         );
 
         public static readonly DependencyProperty IsAVSwitchColumnVisibleProperty = DependencyProperty.Register(
             nameof(IsAVSwitchColumnVisible),
             typeof(bool),
-            typeof(LayerParameterExpander),
+            typeof(LayerItemExpander),
             new FrameworkPropertyMetadata(true, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, IndentParameterChanged)
         );
 
         public static readonly DependencyProperty IsTagColumnVisibleProperty = DependencyProperty.Register(
             nameof(IsTagColumnVisible),
             typeof(bool),
-            typeof(LayerParameterExpander),
+            typeof(LayerItemExpander),
             new FrameworkPropertyMetadata(true, NameAreaWidthChanged)
         );
 
         public static readonly DependencyProperty NameAreaWidthProperty = DependencyProperty.Register(
             nameof(NameAreaWidth),
             typeof(double),
-            typeof(LayerParameterExpander),
+            typeof(LayerItemExpander),
             new FrameworkPropertyMetadata(0.0, NameAreaWidthChanged)
         );
 
         public static readonly DependencyProperty SwitchesProperty = DependencyProperty.Register(
             nameof(Switches),
             typeof(UIElement),
-            typeof(LayerParameterExpander),
+            typeof(LayerItemExpander),
             new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
         public static readonly DependencyProperty NameDragSourceIgnoreProperty = DependencyProperty.Register(
             nameof(NameDragSourceIgnore),
             typeof(bool),
-            typeof(LayerParameterExpander),
+            typeof(LayerItemExpander),
             new FrameworkPropertyMetadata(true)
+        );
+
+        public static readonly DependencyProperty IsHighlightHeaderProperty = DependencyProperty.Register(
+            nameof(IsHighlightHeader),
+            typeof(bool),
+            typeof(LayerItemExpander),
+            new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        public static readonly DependencyProperty IsHeaderTextEditableProperty = DependencyProperty.Register(
+            nameof(IsHeaderTextEditable),
+            typeof(bool),
+            typeof(LayerItemExpander),
+            new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
         private static readonly DependencyProperty IndentMarginLeftProperty = DependencyProperty.Register(
             nameof(IndentMarginLeft),
             typeof(GridLength),
-            typeof(LayerParameterExpander),
+            typeof(LayerItemExpander),
             new FrameworkPropertyMetadata(new GridLength(UIParameters.AVSwitchWidthWithHalfSplitter), FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
         private static readonly DependencyProperty CalculatedNameAreaWidthProperty = DependencyProperty.Register(
             nameof(CalculatedNameAreaWidth),
             typeof(GridLength),
-            typeof(LayerParameterExpander),
+            typeof(LayerItemExpander),
             new FrameworkPropertyMetadata(new GridLength(0.0), FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
+
+        public bool IsHeaderTextEditable
+        {
+            get { return (bool)GetValue(IsHeaderTextEditableProperty); }
+            set { SetValue(IsHeaderTextEditableProperty, value); }
+        }
+
+        public bool IsHighlightHeader
+        {
+            get { return (bool)GetValue(IsHighlightHeaderProperty); }
+            set { SetValue(IsHighlightHeaderProperty, value); }
+        }
 
         public bool NameDragSourceIgnore
         {
@@ -103,6 +145,18 @@ namespace NiVE3.View.Part
             set { SetValue(IndentLevelProperty, value); }
         }
 
+        public string HeaderText
+        {
+            get { return (string)GetValue(HeaderTextProperty); }
+            set { SetValue(HeaderTextProperty, value); }
+        }
+
+        public bool IsExpanded
+        {
+            get { return (bool)GetValue(IsExpandedProperty); }
+            set { SetValue(IsExpandedProperty, value); }
+        }
+
         private GridLength IndentMarginLeft
         {
             get { return (GridLength)GetValue(IndentMarginLeftProperty); }
@@ -117,7 +171,7 @@ namespace NiVE3.View.Part
 
         static void IndentParameterChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is LayerParameterExpander expander)
+            if (d is LayerItemExpander expander)
             {
                 var indent = UIParameters.ArrowWidth * expander.IndentLevel;
                 if (expander.IsAVSwitchColumnVisible)
@@ -137,7 +191,7 @@ namespace NiVE3.View.Part
 
         static void NameAreaWidthChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is LayerParameterExpander expander)
+            if (d is LayerItemExpander expander)
             {
                 var nameAreaWidth = Math.Max(expander.NameAreaWidth - UIParameters.ArrowWidth * (expander.IndentLevel + 1) + UIParameters.ArrowWidth, 0.0);
                 if (expander.IsTagColumnVisible)

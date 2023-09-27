@@ -224,6 +224,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("なし")]
         public static readonly string Layer_EmptyParentLayer = nameof(Layer_EmptyParentLayer);
 
+        [ShowInMarkup, DefaultValue("エフェクト")]
+        public static readonly string Layer_Effects = nameof(Layer_Effects);
+
         [ShowInMarkup, DefaultValue("トランスフォーム")]
         public static readonly string Layer_Transform = nameof(Layer_Transform);
 
@@ -297,6 +300,9 @@ namespace NiVE3.View.Resource
 
         [ShowInMarkup, DefaultValue("エフェクトの追加")]
         public static readonly string History_AddEffects = nameof(History_AddEffects);
+
+        [ShowInMarkup, DefaultValue("エフェクトの移動")]
+        public static readonly string History_MoveEffects = nameof(History_MoveEffects);
 
         // Property
 

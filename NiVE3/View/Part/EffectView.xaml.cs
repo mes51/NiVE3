@@ -80,6 +80,8 @@ namespace NiVE3.View.Part
             new FrameworkPropertyMetadata(0.0)
         );
 
+        EffectCollectionView? ParentCollection => ItemsControl.ItemsControlFromItemContainer(this) as EffectCollectionView;
+
         public double CompositionFrameRate
         {
             get { return (double)GetValue(CompositionFrameRateProperty); }
@@ -131,6 +133,12 @@ namespace NiVE3.View.Part
         public EffectView()
         {
             InitializeComponent();
+        }
+
+        private void Root_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            Focus();
+            ParentCollection?.SelectItem(this, Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift), Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl));
         }
     }
 }

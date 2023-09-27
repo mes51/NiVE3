@@ -521,12 +521,12 @@
         </Grid>
 
         <StackPanel Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" Visibility="{Binding IsExpanded, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <pt:LayerParameterExpander Header="エフェクト"
-                                       IndentLevel="1"
-                                       IsAVSwitchColumnVisible="{Binding ElementName=Root, Path=DataContext.IsAVSwitchColumnVisible}"
-                                       IsTagColumnVisible="{Binding ElementName=Root, Path=DataContext.IsTagColumnVisible}"
-                                       NameAreaWidth="{Binding ElementName=Root, Path=DataContext.PropertyNameAreaWidth}"
-                                       Visibility="{Binding HasEffect, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <pt:LayerItemExpander HeaderText="{gm:LanguageResource ResourceKey=Layer_Effects}"
+                                  IndentLevel="1"
+                                  IsAVSwitchColumnVisible="{Binding ElementName=Root, Path=DataContext.IsAVSwitchColumnVisible}"
+                                  IsTagColumnVisible="{Binding ElementName=Root, Path=DataContext.IsTagColumnVisible}"
+                                  NameAreaWidth="{Binding ElementName=Root, Path=DataContext.PropertyNameAreaWidth}"
+                                  Visibility="{Binding HasEffect, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <pt:EffectCollectionView ItemsSource="{Binding Effects}"
                                          IndentLevel="2"
                                          ControlAreaWidth="{Binding ElementName=Root, Path=LayerControlAreaWidth}"
@@ -541,7 +541,7 @@
                                          dd:DragDrop.IsDragSource="True"
                                          dd:DragDrop.IsDropTarget="True"
                                          dd:DragDrop.DragSourceIgnore="False"/>
-            </pt:LayerParameterExpander>
+            </pt:LayerItemExpander>
             <Grid Visibility="{Binding SourceType, Converter={StaticResource AVTypeVisibleConverter}, ConverterParameter={x:Static local:LayerView.CompositionDisplayableSourceType}}" ClipToBounds="True">
                 <pt:PropertyGroupView DataContext="{Binding TransformProperties}"
                                       IndentLevel="1"

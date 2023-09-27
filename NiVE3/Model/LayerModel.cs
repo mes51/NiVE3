@@ -16,6 +16,8 @@ using NiVE3.View.Resource;
 using NiVE3.Plugin.Struct;
 using NiVE3.Property;
 using System.ComponentModel;
+using NiVE3.Shared.Extension;
+using NiVE3.Extension;
 
 namespace NiVE3.Model
 {
@@ -336,6 +338,34 @@ namespace NiVE3.Model
             }
 
             HistoryModel.Add(new InsertEffectsHistoryCommand(this, effectModels, index));
+        }
+
+        public void MoveEffect(Guid effectId, int newIndex)
+        {
+            MoveEffects(new Guid[] { effectId }, effectId, newIndex);
+        }
+
+        public void MoveEffects(Guid[] effectIds, Guid referenceEffectId, int newIndex)
+        {
+            if (Effects.Count == effectIds.Length)
+            {
+                return;
+            }
+
+            var effects = Effects.Where(l => effectIds.Contains(l.EffectId)).OrderBy(Effects.IndexOf).ToArray();
+            var prevIndices = effects.Select(l => Effects.IndexOf(l)).ToArray();
+            var startIndex = newIndex - effects.IndexOf(l => l.EffectId == referenceEffectId);
+            var newOrderedEffects = new List<EffectModel>(Effects.Count);
+            newOrderedEffects.AddRange(Effects.Except(effects).Take(startIndex));
+            newOrderedEffects.AddRange(effects);
+            newOrderedEffects.AddRange(Effects.Except(newOrderedEffects.ToArray()));
+
+            Effects.SortBy(l => newOrderedEffects.IndexOf(l));
+
+            if (!prevIndices.SequenceEqual(effects.Select(l => Effects.IndexOf(l))))
+            {
+                HistoryModel.Add(new MoveEffectsHistoryCommand(this, effects, prevIndices, newOrderedEffects.ToArray()));
+            }
         }
 
         private void Effects_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)

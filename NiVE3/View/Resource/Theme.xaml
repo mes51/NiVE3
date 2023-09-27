@@ -18,11 +18,11 @@
         <Setter Property="a:WindowGestureBehaviorAttachProperty.Attach" Value="True"/>
     </Style>
 
-    <Style TargetType="{x:Type pt:LayerParameterExpander}">
+    <Style TargetType="{x:Type pt:LayerItemExpander}">
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Template">
             <Setter.Value>
-                <ControlTemplate TargetType="{x:Type Expander}">
+                <ControlTemplate TargetType="{x:Type ContentControl}">
                     <ControlTemplate.Resources>
                         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
                         <Style x:Key="ArrowExpanderStyle" TargetType="{x:Type ToggleButton}">
@@ -53,7 +53,7 @@
                     </ControlTemplate.Resources>
                     <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="3" SnapsToDevicePixels="true">
                         <DockPanel>
-                            <Grid x:Name="HeaderSite" Margin="{TemplateBinding Padding}" DockPanel.Dock="Top">
+                            <Grid Margin="{TemplateBinding Padding}" DockPanel.Dock="Top">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=IndentMarginLeft}"/>
                                     <ColumnDefinition Width="{x:Static r:UIParameters.ArrowWidthGridLength}"/>
@@ -63,29 +63,40 @@
                                 <ContentPresenter Grid.Column="0" Content="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Switches}" Visibility="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=IsTagColumnVisible, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                                 <ToggleButton Grid.Column="1" IsChecked="{Binding IsExpanded, Mode=TwoWay, RelativeSource={RelativeSource Mode=TemplatedParent}}" Style="{StaticResource ArrowExpanderStyle}"/>
                                 <TextBlock Grid.Column="2"
-                                           Text="{TemplateBinding Header}"
+                                           x:Name="HeaderTextBlock"
+                                           Text="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=HeaderText}"
                                            FontFamily="{TemplateBinding FontFamily}"
                                            FontSize="{TemplateBinding FontSize}"
                                            FontStretch="{TemplateBinding FontStretch}"
                                            FontStyle="{TemplateBinding FontStyle}"
                                            FontWeight="{TemplateBinding FontWeight}"
-                                           Background="Transparent"
                                            VerticalAlignment="Center">
                                     <TextBlock.Style>
                                         <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
+                                            <Setter Property="Background" Value="Transparent"/>
                                             <!-- NOTE: なぜか普通に属性としてつけると反映されないためStyleで適用する -->
                                             <Setter Property="dd:DragDrop.DragSourceIgnore" Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=NameDragSourceIgnore}"/>
+
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=IsHighlightHeader}" Value="True">
+                                                    <Setter Property="Background" Value="{ugm:AppearanceResource ResourceKey=SelectedBackgroundFill, ReturnDynamicResource=True}"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
                                         </Style>
                                     </TextBlock.Style>
                                 </TextBlock>
                             </Grid>
-                            <ContentPresenter x:Name="ExpandSite" DockPanel.Dock="Bottom" Focusable="False" Content="{TemplateBinding Content}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" Visibility="Collapsed"/>
+                            <ContentPresenter x:Name="ExpandSite"
+                                              DockPanel.Dock="Bottom"
+                                              Focusable="False"
+                                              Content="{TemplateBinding Content}"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              Margin="{TemplateBinding Padding}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              Visibility="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=IsExpanded, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                         </DockPanel>
                     </Border>
                     <ControlTemplate.Triggers>
-                        <Trigger Property="IsExpanded" Value="True">
-                            <Setter Property="Visibility" TargetName="ExpandSite" Value="Visible"/>
-                        </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <!-- TODO: 無効化時のスタイル -->
                         </Trigger>

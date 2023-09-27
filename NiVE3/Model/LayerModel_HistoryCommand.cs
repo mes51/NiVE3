@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NiVE3.Extension;
 using NiVE3.View.Resource;
 
 namespace NiVE3.Model
@@ -157,6 +158,47 @@ namespace NiVE3.Model
                     e.Dispose();
                 }
             }
+        }
+
+        private class MoveEffectsHistoryCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_MoveEffects);
+
+            LayerModel LayerModel { get; }
+
+            EffectModel[] Effects { get; }
+
+            int[] PrevIndices { get; }
+
+            EffectModel[] NewOrderedEffects { get; }
+
+            public MoveEffectsHistoryCommand(LayerModel compositionModel, EffectModel[] effects, int[] prevIndices, EffectModel[] newOrderedEffects)
+            {
+                LayerModel = compositionModel;
+                Effects = effects;
+                PrevIndices = prevIndices;
+                NewOrderedEffects = newOrderedEffects;
+            }
+
+            public void Redo()
+            {
+                LayerModel.Effects.SortBy(l => Array.IndexOf(NewOrderedEffects, l));
+            }
+
+            public void Undo()
+            {
+                foreach (var l in Effects)
+                {
+                    LayerModel.Effects.Remove(l);
+                }
+
+                foreach (var (l, i) in Effects.Zip(PrevIndices))
+                {
+                    LayerModel.Effects.Insert(i, l);
+                }
+            }
+
+            public void Dispose() { }
         }
     }
 }

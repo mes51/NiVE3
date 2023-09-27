@@ -15,6 +15,14 @@ namespace NiVE3.ViewModel
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
     partial class EffectViewModel : BindableBase
     {
+        private Guid effectId;
+        [NeedWire(nameof(EffectModel), IsOneWay = true)]
+        public Guid EffectId
+        {
+            get { return effectId; }
+            set { SetProperty(ref effectId, value); }
+        }
+
         private string name = "";
         [NeedWire(nameof(EffectModel))]
         public string Name
