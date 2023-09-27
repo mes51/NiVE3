@@ -368,6 +368,19 @@ namespace NiVE3.Model
             }
         }
 
+        public void ChangeEffectEnable(Guid[] effectIds, bool isEnable)
+        {
+            var effects = Effects.Where(e => effectIds.Contains(e.EffectId)).OrderBy(Effects.IndexOf).ToArray();
+            var oldValues = effects.Select(e => e.IsEnable).ToArray();
+
+            foreach (var e in effects)
+            {
+                e.IsEnable = isEnable;
+            }
+
+            HistoryModel.Add(new ChangeEffectEnableHistoryCommand(effects, oldValues, isEnable));
+        }
+
         private void Effects_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             HasEffect = Effects.Count > 0;

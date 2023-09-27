@@ -304,6 +304,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("エフェクトの移動")]
         public static readonly string History_MoveEffects = nameof(History_MoveEffects);
 
+        [ShowInMarkup, DefaultValue("エフェクトの有効・無効切り替え")]
+        public static readonly string History_ChangeEffectsEnable = nameof(History_ChangeEffectsEnable);
+
         // Property
 
         [ShowInMarkup, DefaultValue("アンカーポイント")]

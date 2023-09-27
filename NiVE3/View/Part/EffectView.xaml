@@ -24,7 +24,7 @@
                           IsHighlightHeader="{Binding ElementName=Root, Path=(pr:StackableItemsCollectionView.IsSelected)}">
         <pt:LayerItemExpander.Switches>
             <Grid Margin="1.5,0,0,0">
-                <CheckBox Content="{gm:FontawesomeResource ResourceKey=FlorinSign}" Style="{StaticResource LayerSwitchCheckBox}" IsChecked="{Binding IsEnable, Mode=TwoWay}" HorizontalAlignment="Left" Command="{Binding ChangeIsEnableCommand}"/>
+                <CheckBox Content="{gm:FontawesomeResource ResourceKey=FlorinSign}" Style="{StaticResource LayerSwitchCheckBox}" IsChecked="{Binding IsEnable, Mode=OneWay}" HorizontalAlignment="Left" Command="{Binding ChangeIsEnableCommand}"/>
             </Grid>
         </pt:LayerItemExpander.Switches>
         <pt:PropertyCollectionView ItemsSource="{Binding Properties}"

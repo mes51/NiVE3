@@ -51,4 +51,14 @@ namespace NiVE3.ViewModel
             LayerId = layerId;
         }
     }
+
+    class EffectEnableChangeEventArgs : EventArgs
+    {
+        public bool IsEnabled { get; }
+
+        public EffectEnableChangeEventArgs(bool isEnabled)
+        {
+            IsEnabled = isEnabled;
+        }
+    }
 }

@@ -536,6 +536,7 @@
                                          Range="{Binding ElementName=Root, Path=Range}"
                                          RangeStart="{Binding ElementName=Root, Path=RangeStart}"
                                          CompositionFrameRate="{Binding ElementName=Root, Path=CompositionFrameRate}"
+                                         SelectedItems="{Binding SelectedEffects}"
                                          dd:DragDrop.DropHandler="{Binding}"
                                          dd:DragDrop.DragHandler="{Binding RelativeSource={RelativeSource Self}}"
                                          dd:DragDrop.IsDragSource="True"

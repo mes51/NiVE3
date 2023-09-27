@@ -200,5 +200,41 @@ namespace NiVE3.Model
 
             public void Dispose() { }
         }
+
+        private class ChangeEffectEnableHistoryCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangeEffectsEnable);
+
+            EffectModel[] Effects { get; }
+
+            bool[] OldValues { get; }
+
+            bool NewValue { get; }
+
+            public ChangeEffectEnableHistoryCommand(EffectModel[] effects, bool[] oldValues, bool newValue)
+            {
+                Effects = effects;
+                OldValues = oldValues;
+                NewValue = newValue;
+            }
+
+            public void Redo()
+            {
+                foreach (var e in Effects)
+                {
+                    e.IsEnable = NewValue;
+                }
+            }
+
+            public void Undo()
+            {
+                foreach (var (e, enable) in Effects.Zip(OldValues))
+                {
+                    e.IsEnable = enable;
+                }
+            }
+
+            public void Dispose() { }
+        }
     }
 }

@@ -505,7 +505,12 @@ namespace NiVE3.ViewModel
             TrackMatteViewSource = trackMatteViewSource;
             ParentLayerViewSource = parentLayerViewSource;
 
-            Effects = layerModel.Effects.CreateViewCollection(e => new EffectViewModel(e));
+            Effects = layerModel.Effects.CreateViewCollection(e =>
+            {
+                var vm = new EffectViewModel(e);
+                vm.EffectEnableChangeRequest += Effect_EffectEnableChangeRequest;
+                return vm;
+            });
             TransformProperties = new PropertyGroupViewModel(layerModel.TransformProperties);
 
             WiringModel();
@@ -710,6 +715,26 @@ namespace NiVE3.ViewModel
                     PropertyNameAreaWidth = (IsLayerNumberColumnVisible ? LayerNumberColumnWidth : 0.0) + LayerNameColumnWidth;
                     break;
             }
+        }
+
+        private void Effect_EffectEnableChangeRequest(object? sender, EffectEnableChangeEventArgs e)
+        {
+            if (sender is not EffectViewModel effect)
+            {
+                return;
+            }
+
+            var targetEffects = new List<EffectViewModel>();
+            if (SelectedEffects.Count < 1 || !SelectedEffects.Contains(effect))
+            {
+                targetEffects.Add(effect);
+            }
+            else
+            {
+                targetEffects.AddRange(SelectedEffects);
+            }
+
+            LayerModel.ChangeEffectEnable(targetEffects.Select(e => e.EffectId).ToArray(), e.IsEnabled);
         }
     }
 

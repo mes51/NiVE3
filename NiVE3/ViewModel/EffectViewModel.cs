@@ -24,7 +24,7 @@ namespace NiVE3.ViewModel
         }
 
         private string name = "";
-        [NeedWire(nameof(EffectModel))]
+        [NeedWire(nameof(EffectModel), IsOneWay = true)]
         public string Name
         {
             get { return name; }
@@ -32,7 +32,7 @@ namespace NiVE3.ViewModel
         }
 
         private bool isEnable;
-        [NeedWire(nameof(EffectModel))]
+        [NeedWire(nameof(EffectModel), IsOneWay = true)]
         public bool IsEnable
         {
             get { return isEnable; }
@@ -53,6 +53,13 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref isExpanded, value); }
         }
 
+        WeakEventPublisher<EffectEnableChangeEventArgs> EffectEnableChangeRequestPublisher { get; } = new WeakEventPublisher<EffectEnableChangeEventArgs>();
+        public event EventHandler<EffectEnableChangeEventArgs> EffectEnableChangeRequest
+        {
+            add { EffectEnableChangeRequestPublisher.Subscribe(value); }
+            remove { EffectEnableChangeRequestPublisher.Unsubscribe(value); }
+        }
+
         public ICommand ChangeIsEnableCommand { get; }
 
         EffectModel EffectModel { get; }
@@ -63,7 +70,10 @@ namespace NiVE3.ViewModel
         {
             EffectModel = effectModel;
 
-            ChangeIsEnableCommand = new DelegateCommand(() => IsEnable = !IsEnable);
+            ChangeIsEnableCommand = new DelegateCommand(() =>
+            {
+                EffectEnableChangeRequestPublisher.Publish(this, new EffectEnableChangeEventArgs(!IsEnable));
+            });
 
             WiringModel();
 
