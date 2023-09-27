@@ -26,7 +26,7 @@ namespace NiVE3.ViewModel
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
     [ManualViewModelWireable(nameof(CompositionModel), nameof(BindComposition), nameof(UnbindComposition), WithInitializeProperty = true)]
     [CommandHandling(nameof(BeginEditNameCommand), nameof(ShortcutKeySetting.BeginEditNameGesture))]
-    [CommandHandling(nameof(AddSolidCommand), nameof(ShortcutKeySetting.AddSolidGesture), IsGlobal = true)]
+    [CommandHandling(nameof(AddSolidCommand), nameof(ShortcutKeySetting.AddSolidGesture))]
     partial class TimelineViewModel : PaneViewModelBase, IDropTarget
     {
         private double frameRate;

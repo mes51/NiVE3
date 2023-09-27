@@ -125,6 +125,7 @@ namespace NiVE3.ViewModel
 
             timelineViewModel.CompositionModel = e.Composition;
             timelineViewModel.IsSelected = true;
+            timelineViewModel.IsActive = true;
             MainRegion.Activate(timelineViewModel);
         }
 

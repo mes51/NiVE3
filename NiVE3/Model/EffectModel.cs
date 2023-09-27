@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Interfaces;
 using Prism.Mvvm;
 
@@ -32,18 +33,25 @@ namespace NiVE3.Model
             set { SetProperty(ref properties, value); }
         }
 
+        public string EffectName => Metadata.Name;
+
+        public bool IsDummyEffect => Metadata.IsDummyEffect;
+
         public Guid EffectId { get; }
 
         IEffect Effect { get; }
 
+        IEffectMetadata Metadata { get; }
+
         HistoryModel HistoryModel { get; }
 
-        public EffectModel(IEffect effect, string name, CompositionModel compositionModel, LayerModel layerModel, HistoryModel historyModel) : this(effect, name, compositionModel, layerModel, historyModel, null) { }
+        public EffectModel(IEffect effect, IEffectMetadata metadata, CompositionModel compositionModel, LayerModel layerModel, HistoryModel historyModel) : this(effect, metadata, compositionModel, layerModel, historyModel, null) { }
 
-        public EffectModel(IEffect effect, string name, CompositionModel compositionModel, LayerModel layerModel, HistoryModel historyModel, Guid? effectId)
+        public EffectModel(IEffect effect, IEffectMetadata metadata, CompositionModel compositionModel, LayerModel layerModel, HistoryModel historyModel, Guid? effectId)
         {
             Effect = effect;
-            Name = name;
+            Metadata = metadata;
+            Name = metadata.Name;
             HistoryModel = historyModel;
             EffectId = effectId ?? Guid.NewGuid();
 

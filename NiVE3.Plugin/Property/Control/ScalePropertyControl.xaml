@@ -59,7 +59,8 @@
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
 
-        <pr:SlidableNumberTextBox Grid.Column="0" x:Name="ValueXSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=ValueX}" UnitText="%" Margin="5,0,2,0" VerticalAlignment="Center">
+        <CheckBox Grid.Column="0" IsChecked="{Binding ElementName=Root, Path=IsLinkRatio}" Style="{StaticResource LinkCheckBox}"/>
+        <pr:SlidableNumberTextBox Grid.Column="1" x:Name="ValueXSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=ValueX}" UnitText="%" Margin="5,0,2,0" VerticalAlignment="Center">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="BeginSlideEditValue">
                     <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
@@ -81,8 +82,8 @@
                 </i:EventTrigger>
             </i:Interaction.Triggers>
         </pr:SlidableNumberTextBox>
-        <TextBlock Grid.Column="1" Text="," VerticalAlignment="Center" Margin="0,4,0,0"/>
-        <pr:SlidableNumberTextBox Grid.Column="2" x:Name="ValueYSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=ValueY}" UnitText="%" Margin="5,0,2,0" VerticalAlignment="Center">
+        <TextBlock Grid.Column="2" Text="," VerticalAlignment="Center" Margin="0,4,0,0"/>
+        <pr:SlidableNumberTextBox Grid.Column="3" x:Name="ValueYSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=ValueY}" UnitText="%" Margin="5,0,2,0" VerticalAlignment="Center">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="BeginSlideEditValue">
                     <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
@@ -104,8 +105,8 @@
                 </i:EventTrigger>
             </i:Interaction.Triggers>
         </pr:SlidableNumberTextBox>
-        <TextBlock Grid.Column="3" Text="," VerticalAlignment="Center" Margin="0,4,0,0" Visibility="{Binding ElementName=Root, Path=Is3D, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-        <pr:SlidableNumberTextBox Grid.Column="4" x:Name="ValueZSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=ValueZ}" UnitText="%" Margin="5,0,0,0" VerticalAlignment="Center" Visibility="{Binding ElementName=Root, Path=Is3D, Converter={StaticResource BooleanToVisibilityConverter}}">
+        <TextBlock Grid.Column="4" Text="," VerticalAlignment="Center" Margin="0,4,0,0" Visibility="{Binding ElementName=Root, Path=Is3D, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+        <pr:SlidableNumberTextBox Grid.Column="5" x:Name="ValueZSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=ValueZ}" UnitText="%" Margin="5,0,0,0" VerticalAlignment="Center" Visibility="{Binding ElementName=Root, Path=Is3D, Converter={StaticResource BooleanToVisibilityConverter}}">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="BeginSlideEditValue">
                     <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
@@ -127,6 +128,5 @@
                 </i:EventTrigger>
             </i:Interaction.Triggers>
         </pr:SlidableNumberTextBox>
-        <CheckBox Grid.Column="5" IsChecked="{Binding ElementName=Root, Path=IsLinkRatio}" Style="{StaticResource LinkCheckBox}"/>
     </Grid>
 </local:PropertyControlBase>

@@ -40,7 +40,7 @@ namespace NiVE3.Model
             var factory = Effects?.FirstOrDefault(f => Guid.Parse(f.Metadata.EffectUuid) == effectUuid);
             if (factory != null)
             {
-                return new EffectModel(factory.CreateExport().Value, factory.Metadata.Name, compositionModel, layerModel, historyModel);
+                return new EffectModel(factory.CreateExport().Value, factory.Metadata, compositionModel, layerModel, historyModel);
             }
             else
             {

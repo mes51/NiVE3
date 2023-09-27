@@ -60,7 +60,6 @@ namespace NiVE3.Model
             CompositionModels.Add(composition);
             FootageListModel.AddComposition(composition);
             HistoryModel.EndGroup();
-            OnOpenCompositionTimeline(composition);
 
             var preview = PreviewModels.OfType<CompositionPreviewModel>().FirstOrDefault();
             if (preview != null)
@@ -71,6 +70,8 @@ namespace NiVE3.Model
             {
                 PreviewModels.Add(new CompositionPreviewModel { Composition = composition });
             }
+
+            OnOpenCompositionTimeline(composition);
         }
 
         public void CreatePreview()

@@ -169,6 +169,11 @@ namespace NiVE3.View.Part
             set { SetValue(CalculatedNameAreaWidthProperty, value); }
         }
 
+        static LayerItemExpander()
+        {
+            HorizontalContentAlignmentProperty.OverrideMetadata(typeof(LayerItemExpander), new FrameworkPropertyMetadata(HorizontalAlignment.Stretch, FrameworkPropertyMetadataOptions.Inherits));
+        }
+
         static void IndentParameterChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is LayerItemExpander expander)
