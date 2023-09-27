@@ -650,8 +650,8 @@ namespace NiVE3.ViewModel
                     dropInfo.Effects = DragDropEffects.Copy;
                     dropInfo.DropTargetAdorner = DropTargetAdorners.Highlight;
                     break;
-                case EffectViewModel:
-                case ItemDragData<EffectViewModel>:
+                case EffectViewModel effect when Effects.Contains(effect):
+                case ItemDragData<EffectViewModel> itemDragData when itemDragData.SelectedItems.All(Effects.Contains):
                     dropInfo.Effects = DragDropEffects.Move;
                     dropInfo.DropTargetAdorner = DropTargetAdorners.Insert;
                     break;

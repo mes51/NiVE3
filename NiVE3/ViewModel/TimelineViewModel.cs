@@ -328,8 +328,8 @@ namespace NiVE3.ViewModel
                         dropInfo.DropTargetAdorner = DropTargetAdorners.Insert;
                     }
                     break;
-                case LayerViewModel:
-                case ItemDragData<LayerViewModel>:
+                case LayerViewModel layer when Layers.Contains(layer):
+                case ItemDragData<LayerViewModel> itemDragData when itemDragData.SelectedItems.All(Layers.Contains):
                     dropInfo.Effects = DragDropEffects.Move;
                     dropInfo.DropTargetAdorner = DropTargetAdorners.Insert;
                     break;
