@@ -38,12 +38,13 @@ namespace NiVE3.Plugin.Property
         /// <returns>補間後の値</returns>
         public static double CatmullRom(double value0, double value1, double value2, double value3, double time1, double time2, double time)
         {
-            double t = 1.0 / (time2 - time1) * (time - time1);
-            double v0 = (value2 - value0) / 2.0;
-            double v1 = (value3 - value1) / 2.0;
-            double t2 = t * t;
-            double t3 = t2 * t;
-            return (2.0 * (value1 - value2) + v0 + v1) * t3 + (-3.0 * (value1 + value2) - 2.0 * v0 - v1) * t2 + v0 * t + value1;
+            var t = (time - time1) / (time2 - time1);
+            var t2 = t * t;
+            var t3 = t2 * t;
+            var a3 = (value2 - value0) * 0.5;
+            var a1 = (value3 - value1) * 0.5 - value2 * 2.0 + a3 + value1 * 2.0;
+            var a2 = value2 * 3.0 - (value3 - value1) * 0.5 - a3 * 2.0 - value1 * 3.0;
+            return a1 * t3 + a2 * t2 + a3 * t + value1;
         }
     }
 }

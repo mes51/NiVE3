@@ -35,6 +35,8 @@ namespace NiVE3.Model
 
     partial class PropertyModel : BindableBase, IPropertyModel
     {
+        const double KeyFrameEpsilon = 1E-10;
+
         public string Id { get; }
 
         private object? _value = null; // valueキーワードと被るため仕方なしでアンダーバーをつける
@@ -135,9 +137,10 @@ namespace NiVE3.Model
         public void CreateKeyFrame(object? value)
         {
             var time = CurrentTime - SourceStartPoint;
-            var keyFrame = new KeyFrame(time, value, new Ease(0.0, 0.0), new Ease(0.0, 0.0), InterpolationType.Linear);
-            var index = KeyFrames.IndexOfLast(k => k.Time <= time) + 1;
-            if (index > 0 && KeyFrames[index - 1].Time == time)
+            var interpolationType = KeyFrames.LastOrDefault(k => k.Time <= time)?.InterpolationType ?? InterpolationType.Linear;
+            var keyFrame = new KeyFrame(time, value, new Ease(0.0, 0.0), new Ease(0.0, 0.0), interpolationType);
+            var index = KeyFrames.IndexOfLast(k => Math.Abs(k.Time - time) < KeyFrameEpsilon || k.Time <= time) + 1;
+            if (index > 0 && Math.Abs(KeyFrames[index - 1].Time - time) < KeyFrameEpsilon)
             {
                 var oldKeyFrame = KeyFrames[index - 1];
                 KeyFrames[index - 1] = keyFrame;
@@ -188,8 +191,8 @@ namespace NiVE3.Model
             oldKeyFrames.AddRange(targetKeyFrames);
             foreach (var nk in newKeyFrames)
             {
-                var index = KeyFrames.IndexOfLast(k => k.Time <= nk.Time) + 1;
-                if (index > 0 && KeyFrames[index - 1].Time == nk.Time)
+                var index = KeyFrames.IndexOfLast(k => Math.Abs(k.Time - nk.Time) < KeyFrameEpsilon || k.Time <= nk.Time) + 1;
+                if (index > 0 && Math.Abs(KeyFrames[index - 1].Time - nk.Time) < KeyFrameEpsilon)
                 {
                     oldKeyFrames.Add(KeyFrames[index - 1]);
                     KeyFrames[index - 1] = nk;

@@ -10,6 +10,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using NiVE3.Plugin.Property;
 using NiVE3.Shared.Extension;
+using NiVE3.Util;
 using NiVE3.View.Resource;
 
 namespace NiVE3.View.Part
@@ -267,9 +268,9 @@ namespace NiVE3.View.Part
             var timeOffset = SourceStartPoint - RangeStart;
             var selected = SelectedKeyFrameIds;
             var frameDuration = 1.0 / CompositionFrameRate;
-            foreach (var (k, kn) in KeyFrames.Zip(KeyFrames.Skip(1).Append(KeyFrames.Last())))
+            foreach (var (k, kp) in KeyFrames.Zip(KeyFrames.Prepend(KeyFrames.First())))
             {
-                var icon = KeyFrameIcons[(k.InterpolationType, kn.InterpolationType)];
+                var icon = KeyFrameIcons[(kp.InterpolationType, k.InterpolationType)];
 
                 var isSelected = selected.Contains(k.Id);
                 var keyFrameTime = isSelected && IsClicked ? (int)Math.Round((KeyFrameMoveingTime + k.Time) * CompositionFrameRate) * frameDuration : k.Time;
@@ -379,10 +380,8 @@ namespace NiVE3.View.Part
         {
             if (IsClicked)
             {
-                var timePerPixel = Range / (ActualWidth - UIParameters.TimelineRangeThumbTotalWidth);
                 var frameDuration = 1.0 / CompositionFrameRate;
-                var posX = e.GetPosition(this).X;
-                var diffTime = (posX - ClickX) * timePerPixel;
+                var diffTime = TimeCalc.CalcTimeFromPixel(e.GetPosition(this).X - ClickX, ActualWidth, Range, 0.0);
 
                 IsClicked = false;
                 ReleaseMouseCapture();
@@ -415,9 +414,7 @@ namespace NiVE3.View.Part
                 return;
             }
 
-            var timePerPixel = Range / (ActualWidth - UIParameters.TimelineRangeThumbTotalWidth);
-            var posX = e.GetPosition(this).X;
-            KeyFrameMoveingTime = (posX - ClickX) * timePerPixel;
+            KeyFrameMoveingTime = TimeCalc.CalcTimeFromPixel(e.GetPosition(this).X - ClickX, ActualWidth, Range, 0.0);
 
             InvalidateVisual();
         }

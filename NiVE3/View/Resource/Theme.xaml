@@ -26,7 +26,7 @@
                     <ControlTemplate.Resources>
                         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
                         <Style x:Key="ArrowExpanderStyle" TargetType="{x:Type ToggleButton}">
-                            <Setter Property="Focusable" Value="False"/>
+                            <Setter Property="IsTabStop" Value="False"/>
                             <Setter Property="Width" Value="{x:Static r:UIParameters.ArrowWidth}"/>
                             <Setter Property="Height" Value="13"/>
                             <Setter Property="Template">

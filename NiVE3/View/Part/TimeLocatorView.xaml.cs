@@ -13,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using NiVE3.Util;
 using NiVE3.View.Primitive;
 using NiVE3.View.Resource;
 
@@ -198,12 +199,6 @@ namespace NiVE3.View.Part
             InitializeComponent();
         }
 
-        double CalcTimeFromPixel(double x)
-        {
-            var timePerPixel = Range / (ActualWidth - UIParameters.TimelineRangeThumbWidth * 2.0);
-            return Math.Clamp(RangeStart + x * timePerPixel, 0.0, Duration);
-        }
-
         private void Root_Loaded(object sender, RoutedEventArgs e)
         {
             MinimumRange = TimeBar.MinimumRange;
@@ -223,8 +218,8 @@ namespace NiVE3.View.Part
             ScrubbingArea.CaptureMouse();
             IsScrubbing = true;
 
-            var time = (int)Math.Round(CalcTimeFromPixel(e.GetPosition((IInputElement)sender).X - UIParameters.TimelineRangeThumbWidth) * FrameRate) / FrameRate;
-            CurrentTime = time;
+            var time = TimeCalc.CalcTimeFromPixelAligned(e.GetPosition((IInputElement)sender).X - UIParameters.TimelineRangeThumbWidth, ActualWidth, Range, RangeStart, FrameRate, 0.0, Duration);
+            SetCurrentValue(CurrentTimeProperty, time);
             if (time < RangeStart)
             {
                 RangeStart = time;
@@ -242,8 +237,8 @@ namespace NiVE3.View.Part
                 return;
             }
 
-            var time = (int)Math.Round(CalcTimeFromPixel(e.GetPosition((IInputElement)sender).X - UIParameters.TimelineRangeThumbWidth) * FrameRate) / FrameRate;
-            CurrentTime = time;
+            var time = TimeCalc.CalcTimeFromPixelAligned(e.GetPosition((IInputElement)sender).X - UIParameters.TimelineRangeThumbWidth, ActualWidth, Range, RangeStart, FrameRate, 0.0, Duration);
+            SetCurrentValue(CurrentTimeProperty, time);
             if (time < RangeStart)
             {
                 RangeStart = time;

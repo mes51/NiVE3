@@ -8,6 +8,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using NiVE3.Extension;
+using NiVE3.Util;
 using NiVE3.View.Resource;
 
 namespace NiVE3.View.Part
@@ -250,10 +251,10 @@ namespace NiVE3.View.Part
         {
             if (IsClicked)
             {
-                var timePerPixel = Range / (ActualWidth - UIParameters.TimelineRangeThumbTotalWidth);
-                var frameDuration = 1.0 / CompositionFrameRate;
-                var posX = e.GetPosition(this).X;
-                var diffTime = (int)(((posX - ClickX) * timePerPixel) * CompositionFrameRate) * frameDuration;
+                var frameRate = CompositionFrameRate;
+                var frameDuration = 1.0 / frameRate;
+                var diffTime = TimeCalc.CalcTimeFromPixel(e.GetPosition(this).X - ClickX, ActualWidth, Range, 0.0);
+                var globalTime = TimeCalc.CalcTimeFromPixelAligned(e.GetPosition(this).X, ActualWidth, Range, RangeStart, frameRate);
                 if (diffTime != 0.0)
                 {
                     var changed = false;
@@ -262,50 +263,62 @@ namespace NiVE3.View.Part
                         case DurationEditMode.InPoint:
                             {
                                 var prev = InPoint;
+                                var newTime = TimeCalc.AlignRound(globalTime, frameRate) - SourceStartPoint;
+                                var max = Math.Max(TimeCalc.AlignFloor(OutPoint - frameDuration, frameRate), TimeCalc.AlignFloor(OutPoint, frameRate));
                                 if (HasDuration && !IsEnableTimeRemap)
                                 {
-                                    InPoint = Math.Clamp(InPoint + diffTime, 0.0, OutPoint - frameDuration);
+                                    InPoint = Math.Clamp(newTime, 0.0, max);
                                 }
                                 else
                                 {
-                                    InPoint = Math.Min(InPoint + diffTime, OutPoint - frameDuration);
+                                    InPoint = Math.Min(newTime, max);
                                 }
                                 changed = prev != InPoint;
+                                diffTime = InPoint - prev;
                             }
                             break;
                         case DurationEditMode.OutPoint:
                             {
                                 var prev = OutPoint;
+                                var newTime = TimeCalc.AlignRound(globalTime, frameRate) - SourceStartPoint;
+                                var min = Math.Min(TimeCalc.AlignFloor(InPoint + frameDuration, frameRate), TimeCalc.AlignFloor(InPoint, frameRate));
                                 if (HasDuration && !IsEnableTimeRemap)
                                 {
-                                    OutPoint = Math.Clamp(OutPoint + diffTime, InPoint + frameDuration, Duration);
+                                    OutPoint = Math.Clamp(newTime, min, Duration);
                                 }
                                 else
                                 {
-                                    OutPoint = Math.Max(OutPoint + diffTime, InPoint + frameDuration);
+                                    OutPoint = Math.Max(newTime, min);
                                 }
                                 changed = prev != OutPoint;
+                                diffTime = OutPoint - prev;
                             }
                             break;
                         case DurationEditMode.SourceStartPoint:
-                            SourceStartPoint += diffTime;
-                            changed = true;
+                            {
+                                var subFrameTime = SourceStartPoint - TimeCalc.AlignFloor(SourceStartPoint, frameRate);
+                                var prev = SourceStartPoint;
+                                SourceStartPoint = TimeCalc.AlignFloor(SourceStartPoint + diffTime, frameRate) + subFrameTime;
+                                diffTime = SourceStartPoint - prev;
+                                changed = prev != SourceStartPoint;
+                            }
                             break;
                         case DurationEditMode.Slip:
                             {
+                                diffTime = TimeCalc.AlignRound(diffTime, frameRate);
                                 var newInPoint = 0.0;
                                 var newOutPoint = 0.0;
                                 if (diffTime > 0.0)
                                 {
-                                    newInPoint = Math.Clamp(InPoint - diffTime, 0.0, Math.Max(OutPoint - diffTime, 0.0));
+                                    newInPoint = Math.Max(InPoint - diffTime, 0.0);
                                     diffTime = InPoint - newInPoint;
-                                    newOutPoint = Math.Clamp(OutPoint - diffTime, newInPoint + frameDuration, Duration);
+                                    newOutPoint = Math.Max(OutPoint - diffTime, newInPoint + frameDuration);
                                 }
                                 else
                                 {
-                                    newOutPoint = Math.Clamp(OutPoint - diffTime, Math.Min(InPoint - diffTime + frameDuration, Duration), Duration);
+                                    newOutPoint = Math.Min(OutPoint - diffTime, Duration);
                                     diffTime = OutPoint - newOutPoint;
-                                    newInPoint = Math.Clamp(InPoint - diffTime, 0.0, newOutPoint - frameDuration);
+                                    newInPoint = Math.Max(InPoint - diffTime, 0.0);
                                 }
                                 if (InPoint != newInPoint && OutPoint != newOutPoint)
                                 {
@@ -319,6 +332,7 @@ namespace NiVE3.View.Part
                     }
                     if (changed)
                     {
+                        var timePerPixel = Range / (ActualWidth - UIParameters.TimelineRangeThumbTotalWidth);
                         ClickX += diffTime / timePerPixel;
                     }
                 }
