@@ -90,9 +90,6 @@ namespace NiVE3.ViewModel
         }
 
         private ObservableCollection<int> selectedKeyFrames = new ObservableCollection<int>();
-        /// <summary>
-        /// Read only
-        /// </summary>
         public ObservableCollection<int> SelectedKeyFrameIds
         {
             get { return selectedKeyFrames; }

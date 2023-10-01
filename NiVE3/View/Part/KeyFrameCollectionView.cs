@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using NiVE3.Plugin.Property;
@@ -74,7 +75,7 @@ namespace NiVE3.View.Part
             nameof(SelectedKeyFrameIds),
             typeof(ObservableCollection<int>),
             typeof(KeyFrameCollectionView),
-            new FrameworkPropertyMetadata(new ObservableCollection<int>(), FrameworkPropertyMetadataOptions.AffectsRender)
+            new FrameworkPropertyMetadata(new ObservableCollection<int>(), FrameworkPropertyMetadataOptions.AffectsRender, SelectedKeyFrameIdsChanged)
         );
 
         public static readonly DependencyProperty SupportedInterpolationTypesProperty = DependencyProperty.Register(
@@ -372,7 +373,11 @@ namespace NiVE3.View.Part
         {
             if (KeyFrames != null)
             {
-                KeyFrames.CollectionChanged -= KeyFrames_CollectionChanged;
+                CollectionChangedEventManager.RemoveHandler(KeyFrames, KeyFrameCollection_CollectionChanged);
+            }
+            if (SelectedKeyFrameIds != null)
+            {
+                CollectionChangedEventManager.RemoveHandler(SelectedKeyFrameIds, KeyFrameCollection_CollectionChanged);
             }
         }
 
@@ -481,7 +486,7 @@ namespace NiVE3.View.Part
             InvalidateVisual();
         }
 
-        private void KeyFrames_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        private void KeyFrameCollection_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             InvalidateVisual();
         }
@@ -495,11 +500,28 @@ namespace NiVE3.View.Part
 
             if (e.OldValue is ObservableCollection<KeyFrame> oldValue)
             {
-                oldValue.CollectionChanged -= collectionView.KeyFrames_CollectionChanged;
+                CollectionChangedEventManager.RemoveHandler(oldValue, collectionView.KeyFrameCollection_CollectionChanged);
             }
             if (e.NewValue is ObservableCollection<KeyFrame> newValue)
             {
-                newValue.CollectionChanged += collectionView.KeyFrames_CollectionChanged;
+                CollectionChangedEventManager.AddHandler(newValue, collectionView.KeyFrameCollection_CollectionChanged);
+            }
+        }
+
+        static void SelectedKeyFrameIdsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is not KeyFrameCollectionView collectionView)
+            {
+                return;
+            }
+
+            if (e.OldValue is ObservableCollection<KeyFrame> oldValue)
+            {
+                CollectionChangedEventManager.RemoveHandler(oldValue, collectionView.KeyFrameCollection_CollectionChanged);
+            }
+            if (e.NewValue is ObservableCollection<KeyFrame> newValue)
+            {
+                CollectionChangedEventManager.AddHandler(newValue, collectionView.KeyFrameCollection_CollectionChanged);
             }
         }
 

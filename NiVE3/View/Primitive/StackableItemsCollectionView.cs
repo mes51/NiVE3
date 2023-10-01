@@ -11,6 +11,9 @@ using NiVE3.ViewModel;
 using System.Windows.Controls;
 using System.Windows;
 using System.Windows.Data;
+using NiVE3.View.Converter;
+using System.Collections.Specialized;
+using System.ComponentModel;
 
 namespace NiVE3.View.Primitive
 {
@@ -92,6 +95,8 @@ namespace NiVE3.View.Primitive
     {
         public static readonly Style DefaultStyle;
 
+        protected static readonly IValueConverter IsSelectedConverter = new DelegateConverter<IEnumerable<T>, bool, T>((collection, target) => collection.Contains(target));
+
         public static readonly DependencyProperty ControlAreaWidthProperty = DependencyProperty.Register(
             nameof(ControlAreaWidth),
             typeof(double),
@@ -103,7 +108,7 @@ namespace NiVE3.View.Primitive
             nameof(SelectedItems),
             typeof(ObservableCollection<T>),
             typeof(StackableItemsCollectionView<T>),
-            new FrameworkPropertyMetadata(new ObservableCollection<T>(), FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+            new FrameworkPropertyMetadata(new ObservableCollection<T>(), SelectedItemsChanged)
         );
 
         public static readonly DependencyProperty IndentLevelProperty = DependencyProperty.Register(
@@ -112,6 +117,19 @@ namespace NiVE3.View.Primitive
             typeof(StackableItemsCollectionView<T>),
             new FrameworkPropertyMetadata(0)
         );
+
+        private static readonly DependencyProperty SelectedItemsViewProperty = DependencyProperty.Register(
+            nameof(SelectedItemsView),
+            typeof(ObservableCollectionView<T>),
+            typeof(StackableItemsCollectionView<T>),
+            new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        private ObservableCollectionView<T>? SelectedItemsView
+        {
+            get { return (ObservableCollectionView<T>)GetValue(SelectedItemsViewProperty); }
+            set { SetValue(SelectedItemsViewProperty, value); }
+        }
 
         public int IndentLevel
         {
@@ -125,9 +143,6 @@ namespace NiVE3.View.Primitive
             set { SetValue(ControlAreaWidthProperty, value); }
         }
 
-        /// <summary>
-        /// ReadOnly
-        /// </summary>
         public ObservableCollection<T> SelectedItems
         {
             get { return (ObservableCollection<T>)GetValue(SelectedItemsProperty); }
@@ -197,10 +212,6 @@ namespace NiVE3.View.Primitive
             {
                 if (!selectRange && !selectMultiple)
                 {
-                    foreach (var l in items)
-                    {
-                        SetSelected(l, false);
-                    }
                     SelectedItems.Clear();
                 }
                 return;
@@ -210,12 +221,10 @@ namespace NiVE3.View.Primitive
             {
                 if (SelectedItems.Contains(viewModel))
                 {
-                    SetSelected(viewModel, false);
                     SelectedItems.Remove(viewModel);
                 }
                 else
                 {
-                    SetSelected(viewModel, true);
                     SelectedItems.Add(viewModel);
                 }
                 LastSelected = viewModel;
@@ -235,13 +244,11 @@ namespace NiVE3.View.Primitive
                     {
                         if (l != viewModel)
                         {
-                            SetSelected(l, false);
                             SelectedItems.Remove(l);
                         }
                     }
                     if (!SelectedItems.Contains(viewModel))
                     {
-                        SetSelected(viewModel, true);
                         SelectedItems.Add(viewModel);
                     }
                     return;
@@ -256,7 +263,6 @@ namespace NiVE3.View.Primitive
                 var targets = items.Skip(startIndex).Take(endIndex - startIndex + 1).ToArray();
                 foreach (var l in oldSelectedItems.Except(targets))
                 {
-                    SetSelected(l, false);
                     SelectedItems.Remove(l);
                 }
                 foreach (var l in targets.Except(oldSelectedItems))
@@ -265,22 +271,13 @@ namespace NiVE3.View.Primitive
                     {
                         continue;
                     }
-                    SetSelected(l, true);
                     SelectedItems.Add(l);
                 }
             }
             else if (!SelectedItems.Contains(viewModel))
             {
-                foreach (var l in items)
-                {
-                    if (l != viewModel)
-                    {
-                        SetSelected(l, false);
-                    }
-                }
                 SelectedItems.Clear();
 
-                SetSelected(viewModel, true);
                 SelectedItems.Add(viewModel);
                 LastSelected = viewModel;
             }
@@ -295,13 +292,27 @@ namespace NiVE3.View.Primitive
             }
             if (SelectedItems.Contains(viewModel))
             {
-                SetSelected(viewModel, false);
                 SelectedItems.Remove(viewModel);
                 if (LastSelected == viewModel)
                 {
                     LastSelected = SelectedItems.FirstOrDefault();
                 }
             }
+        }
+
+        protected override void PrepareContainerForItemOverride(DependencyObject element, object item)
+        {
+            base.PrepareContainerForItemOverride(element, item);
+
+            var isSelectedBinding = new Binding
+            {
+                Path = new PropertyPath($"{nameof(SelectedItemsView)}.{nameof(ObservableCollectionView<T>.Collection)}"),
+                Source = this,
+                Mode = BindingMode.OneWay,
+                Converter = IsSelectedConverter,
+                ConverterParameter = item
+            };
+            BindingOperations.SetBinding(element, IsSelectedProperty, isSelectedBinding);
         }
 
         protected override void OnItemsSourceChanged(IEnumerable oldValue, IEnumerable newValue)
@@ -312,12 +323,6 @@ namespace NiVE3.View.Primitive
             LastSelected = null;
         }
 
-        void SetSelected(object viewModel, bool selected)
-        {
-            var item = ItemContainerGenerator.ContainerFromItem(viewModel);
-            SetIsSelected(item, selected);
-        }
-
         static void ItemsSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is StackableItemsCollectionView<T> collection)
@@ -325,7 +330,34 @@ namespace NiVE3.View.Primitive
                 collection.SelectedItems.Clear();
             }
         }
+
+        static void SelectedItemsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is StackableItemsCollectionView<T> collection)
+            {
+                collection.SelectedItemsView = new ObservableCollectionView<T>(collection.SelectedItems);
+            }
+        }
     }
 
     record ItemDragData<T>(T[] SelectedItems, T DragItem) { }
+
+    // CollectionViewSourceでどうにかならんか?
+    class ObservableCollectionView<T> : INotifyPropertyChanged
+    {
+        public ObservableCollection<T> Collection { get; }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        public ObservableCollectionView(ObservableCollection<T> collection)
+        {
+            Collection = collection;
+            collection.CollectionChanged += Collection_CollectionChanged;
+        }
+
+        private void Collection_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Collection)));
+        }
+    }
 }

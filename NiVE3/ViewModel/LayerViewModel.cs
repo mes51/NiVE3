@@ -405,9 +405,6 @@ namespace NiVE3.ViewModel
         }
 
         private ObservableCollection<EffectViewModel> selectedEffects = new ObservableCollection<EffectViewModel>();
-        /// <summary>
-        /// Read only
-        /// </summary>
         public ObservableCollection<EffectViewModel> SelectedEffects
         {
             get { return selectedEffects; }
