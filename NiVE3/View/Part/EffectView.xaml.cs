@@ -14,6 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using NiVE3.Plugin.Property;
 using NiVE3.View.Converter;
+using NiVE3.ViewModel;
 
 namespace NiVE3.View.Part
 {
@@ -80,6 +81,8 @@ namespace NiVE3.View.Part
             new FrameworkPropertyMetadata(0.0)
         );
 
+        EffectViewModel? ViewModel => DataContext as EffectViewModel;
+
         EffectCollectionView? ParentCollection => ItemsControl.ItemsControlFromItemContainer(this) as EffectCollectionView;
 
         public double CompositionFrameRate
@@ -139,6 +142,7 @@ namespace NiVE3.View.Part
         {
             Focus();
             ParentCollection?.SelectItem(this, Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift), Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl));
+            ViewModel?.SelectItemCommand?.Execute(null);
             e.Handled = true;
         }
     }

@@ -21,6 +21,7 @@ using NiVE3.View.Dock;
 using NiVE3.View.Part;
 using NiVE3.View.Primitive;
 using NiVE3.View.Resource;
+using Prism.Commands;
 
 namespace NiVE3.ViewModel
 {
@@ -290,6 +291,8 @@ namespace NiVE3.ViewModel
 
         SelectItemType SelectedItemType { get; set; } = SelectItemType.None;
 
+        object? SelectTarget { get; set; }
+
         public TimelineViewModel(ViewStateModel viewState)
         {
             ViewState = viewState;
@@ -438,10 +441,6 @@ namespace NiVE3.ViewModel
                         vm.DeSelect();
                     }
                 }
-                if (SelectedItemType < SelectItemType.Layer)
-                {
-                    SelectedItemType = SelectItemType.Layer;
-                }
             }
         }
 
@@ -557,20 +556,34 @@ namespace NiVE3.ViewModel
 
         private void ViewModel_SelectItemChanged(object? sender, SelectItemEventArgs e)
         {
-            if (SelectedItemType < e.SelectItemType)
+            if (e.IsUserAction)
             {
                 SelectedItemType = e.SelectItemType;
-            }
-            if (e.Layer!= null)
-            {
-                foreach (var vm in SelectedLayers.ToArray())
+                switch (e.SelectItemType)
                 {
-                    if (vm != e.Layer)
-                    {
-                        SelectedLayers.Remove(vm);
-                    }
+                    case SelectItemType.Layer:
+                        SelectTarget = e.Layer;
+                        break;
+                    case SelectItemType.Effect:
+                        SelectTarget = e.Layer;
+                        break;
+                    case SelectItemType.Property:
+                    case SelectItemType.KeyFrame:
+                        SelectTarget = e.Property;
+                        break;
+                    default:
+                        SelectTarget = null;
+                        break;
                 }
-                if (!SelectedLayers.Contains(e.Layer))
+            }
+            if (e.SelectItemType != SelectItemType.Layer)
+            {
+                foreach (var layer in SelectedLayers.Where(v => v != e.Layer).ToArray())
+                {
+                    layer.DeSelect();
+                    SelectedLayers.Remove(layer);
+                }
+                if (e.Layer != null && !SelectedLayers.Contains(e.Layer))
                 {
                     SelectedLayers.Add(e.Layer);
                 }
@@ -578,15 +591,12 @@ namespace NiVE3.ViewModel
         }
     }
 
-    enum SelectItemType : int
+    enum SelectItemType
     {
-        None = 0,
-        Layer = 1,
-        Effect = 2,
-        // Mask = 3,
-        // ShapeContent = 4,
-        // TextAnimator = 5,
-        Property = 100,
-        KeyFrame = 1000,
+        None,
+        Layer,
+        Effect,
+        Property,
+        KeyFrame,
     }
 }

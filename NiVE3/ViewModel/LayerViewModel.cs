@@ -408,15 +408,7 @@ namespace NiVE3.ViewModel
         public ObservableCollection<EffectViewModel> SelectedEffects
         {
             get { return selectedEffects; }
-            set
-            {
-                if (selectedEffects != value)
-                {
-                    selectedEffects.CollectionChanged -= SelectedEffects_CollectionChanged;
-                    value.CollectionChanged += SelectedEffects_CollectionChanged;
-                }
-                SetProperty(ref selectedEffects, value);
-            }
+            set { SetProperty(ref selectedEffects, value); }
         }
 
         public PropertyGroupViewModel TransformProperties { get; }
@@ -450,6 +442,8 @@ namespace NiVE3.ViewModel
         public ICommand EndEditNameCommand { get; }
 
         public ICommand EndEditCommentCommand { get; }
+
+        public ICommand SelectItemCommand { get; }
 
         WeakEventPublisher<LayerSwitchEventArgs> LayerSwitchChangeRequestPublisher { get; } = new WeakEventPublisher<LayerSwitchEventArgs>();
         public event EventHandler<LayerSwitchEventArgs> LayerSwitchChangeRequest
@@ -636,6 +630,8 @@ namespace NiVE3.ViewModel
                 EditingParameter = EditingLayerParameter.None;
             }, _ => EditingParameter == EditingLayerParameter.Comment);
 
+            SelectItemCommand = new DelegateCommand(() => SelectItemChangedPublisher.Publish(this, new SelectItemEventArgs(SelectItemType.Layer, true, layer: this)));
+
             PropertyChanged += LayerViewModel_PropertyChanged;
         }
 
@@ -763,50 +759,32 @@ namespace NiVE3.ViewModel
         private void Effect_SelectItemChanged(object? sender, SelectItemEventArgs e)
         {
             SelectItemChangedPublisher.Publish(sender, new SelectItemEventArgs(e, layer: this));
-            if (e.Effect != null)
+            if (e.SelectItemType != SelectItemType.Effect)
             {
-                foreach (var vm in SelectedEffects.ToArray())
+                foreach (var effect in SelectedEffects.Where(v => v != e.Effect).ToArray())
                 {
-                    if (vm != e.Effect)
-                    {
-                        SelectedEffects.Remove(vm);
-                    }
+                    effect.DeSelect();
+                    SelectedEffects.Remove(effect);
                 }
-                if (!SelectedEffects.Contains(e.Effect))
+                if (e.Effect != null && !SelectedEffects.Contains(e.Effect))
                 {
                     SelectedEffects.Add(e.Effect);
                 }
             }
-        }
-
-        private void SelectedEffects_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
-        {
-            if (e.Action == NotifyCollectionChangedAction.Reset)
-            {
-                foreach (var vm in Effects)
-                {
-                    vm.DeSelect();
-                }
-            }
             else
             {
-                if (e.OldItems != null)
-                {
-                    foreach (var vm in e.OldItems.OfType<EffectViewModel>())
-                    {
-                        vm.DeSelect();
-                    }
-                }
-                if (e.NewItems != null)
-                {
-                    SelectItemChangedPublisher.Publish(this, new SelectItemEventArgs(SelectItemType.Effect, effect: e.NewItems.OfType<EffectViewModel>().FirstOrDefault(), layer: this));
-                }
+                TransformProperties.DeSelect();
             }
         }
 
         private void TransformProperties_SelectItemChanged(object? sender, SelectItemEventArgs e)
         {
             SelectItemChangedPublisher.Publish(sender, new SelectItemEventArgs(e, layer: this));
+            foreach (var effect in SelectedEffects)
+            {
+                effect.DeSelect();
+            }
+            SelectedEffects.Clear();
         }
     }
 

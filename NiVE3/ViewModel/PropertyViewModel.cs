@@ -127,6 +127,8 @@ namespace NiVE3.ViewModel
 
         public ICommand MoveTimeKeyFramesCommand { get; }
 
+        public ICommand SelectItemCommand { get; }
+
         public ICommand ChangeKeyFramesInterpolationTypeCommand { get; }
 
         PropertyModel PropertyModel { get; }
@@ -181,6 +183,8 @@ namespace NiVE3.ViewModel
             {
                 PropertyModel.ChangeKeyFramesInterpolationType(t.Item1, t.Item2);
             });
+
+            SelectItemCommand = new DelegateCommand(() => SelectItemChangedPublisher.Publish(this, new SelectItemEventArgs(SelectItemType.KeyFrame, true, this)));
 
             WiringModel();
 
@@ -241,7 +245,7 @@ namespace NiVE3.ViewModel
         {
             if (e.NewItems != null)
             {
-                SelectItemChangedPublisher.Publish(this, new SelectItemEventArgs(SelectItemType.KeyFrame, e.NewItems.OfType<KeyFrame>().FirstOrDefault(), this));
+                SelectItemChangedPublisher.Publish(this, new SelectItemEventArgs(SelectItemType.KeyFrame, false, this));
             }
         }
     }

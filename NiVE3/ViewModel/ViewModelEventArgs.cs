@@ -67,7 +67,7 @@ namespace NiVE3.ViewModel
     {
         public SelectItemType SelectItemType { get; }
 
-        public KeyFrame? KeyFrame { get; }
+        public bool IsUserAction { get; }
 
         public PropertyViewModel? Property { get; }
 
@@ -75,19 +75,19 @@ namespace NiVE3.ViewModel
 
         public LayerViewModel? Layer { get; }
 
-        public SelectItemEventArgs(SelectItemType selectItemType, KeyFrame? keyFrame = null, PropertyViewModel? property = null, EffectViewModel? effect = null, LayerViewModel? layer = null)
+        public SelectItemEventArgs(SelectItemType selectItemType, bool isUserAction, PropertyViewModel? property = null, EffectViewModel? effect = null, LayerViewModel? layer = null)
         {
             SelectItemType = selectItemType;
-            KeyFrame = keyFrame;
+            IsUserAction = isUserAction;
             Property = property;
             Effect = effect;
             Layer = layer;
         }
 
-        public SelectItemEventArgs(SelectItemEventArgs prev, KeyFrame? keyFrame = null, PropertyViewModel? property = null, EffectViewModel? effect = null, LayerViewModel? layer = null)
+        public SelectItemEventArgs(SelectItemEventArgs prev, PropertyViewModel? property = null, EffectViewModel? effect = null, LayerViewModel? layer = null)
         {
             SelectItemType = prev.SelectItemType;
-            KeyFrame = keyFrame ?? prev.KeyFrame;
+            IsUserAction = prev.IsUserAction;
             Property = property ?? prev.Property;
             Effect = effect ?? prev.Effect;
             Layer = layer ?? prev.Layer;

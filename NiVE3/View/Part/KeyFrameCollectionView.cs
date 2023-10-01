@@ -85,6 +85,13 @@ namespace NiVE3.View.Part
             new FrameworkPropertyMetadata(InterpolationType.None | InterpolationType.Linear | InterpolationType.CatmullRom | InterpolationType.Bezier, SupportedInterpolationTypesChanged)
         );
 
+        public static readonly DependencyProperty SelectItemCommandProperty = DependencyProperty.Register(
+            nameof(SelectItemCommand),
+            typeof(ICommand),
+            typeof(KeyFrameCollectionView),
+            new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
         public static RoutedEvent KeyFrameMoveRequestEvent = EventManager.RegisterRoutedEvent(
             nameof(KeyFrameMoveRequest), RoutingStrategy.Direct, typeof(EventHandler<KeyFrameMoveEventArgs>), typeof(KeyFrameCollectionView)
         );
@@ -92,6 +99,12 @@ namespace NiVE3.View.Part
         public static RoutedEvent KeyFrameInterpolationTypeChangeRequestEvent = EventManager.RegisterRoutedEvent(
             nameof(KeyFrameInterpolationTypeChangeRequest), RoutingStrategy.Direct, typeof(EventHandler<ChangeKeyFrameInterpolationTypeEventArgs>), typeof(KeyFrameCollectionView)
         );
+
+        public ICommand? SelectItemCommand
+        {
+            get { return (ICommand)GetValue(SelectItemCommandProperty); }
+            set { SetValue(SelectItemCommandProperty, value); }
+        }
 
         public InterpolationType SupportedInterpolationTypes
         {
@@ -448,6 +461,7 @@ namespace NiVE3.View.Part
                 {
                     SelectedKeyFrameIds.Clear();
                     InvalidateVisual();
+                    SelectItemCommand?.Execute(null);
                 }
                 return;
             }
@@ -470,6 +484,7 @@ namespace NiVE3.View.Part
                 else
                 {
                     SelectKeyFrame(clickedKeyFrame, isSelectRange, isSelectMultiple);
+                    SelectItemCommand?.Execute(null);
                     if (SelectedKeyFrameIds.Contains(clickedKeyFrame.Id))
                     {
                         IsClicked = true;
@@ -482,6 +497,7 @@ namespace NiVE3.View.Part
             else if (!isSelectRange && !isSelectMultiple)
             {
                 SelectedKeyFrameIds.Clear();
+                SelectItemCommand?.Execute(null);
             }
             InvalidateVisual();
         }

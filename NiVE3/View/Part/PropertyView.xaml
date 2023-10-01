@@ -44,6 +44,7 @@
                                       CompositionFrameRate="{Binding ElementName=Root, Path=CompositionFrameRate}"
                                       SelectedKeyFrameIds="{Binding SelectedKeyFrameIds}"
                                       SupportedInterpolationTypes="{Binding Property.PropertyType.SupportedInterpolationTypes}"
+                                      SelectItemCommand="{Binding SelectItemCommand}"
                                       KeyFrameMoveRequest="KeyFrameCollectionView_KeyFrameMoveRequest"
                                       KeyFrameInterpolationTypeChangeRequest="KeyFrameCollectionView_KeyFrameInterpolationTypeChangeRequest"/>
     </Grid>

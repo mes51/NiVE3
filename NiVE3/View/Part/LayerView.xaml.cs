@@ -114,6 +114,7 @@ namespace NiVE3.View.Part
         {
             Focus();
             ParentCollection?.SelectItem(this, Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift), Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl));
+            ViewModel?.SelectItemCommand?.Execute(null);
             e.Handled = true;
         }
 

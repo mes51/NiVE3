@@ -69,6 +69,8 @@ namespace NiVE3.ViewModel
 
         public ICommand ChangeIsEnableCommand { get; }
 
+        public ICommand SelectItemCommand { get; }
+
         EffectModel EffectModel { get; }
 
 #pragma warning disable CS8618 // 各フィールドには初期化時に必ず値を代入するため無視
@@ -81,6 +83,8 @@ namespace NiVE3.ViewModel
             {
                 EffectEnableChangeRequestPublisher.Publish(this, new EffectEnableChangeEventArgs(!IsEnable));
             });
+
+            SelectItemCommand = new DelegateCommand(() => SelectItemChangedPublisher.Publish(this, new SelectItemEventArgs(SelectItemType.Effect, true, effect: this)));
 
             WiringModel();
 
