@@ -60,6 +60,13 @@ namespace NiVE3.ViewModel
             remove { EffectEnableChangeRequestPublisher.Unsubscribe(value); }
         }
 
+        WeakEventPublisher<SelectItemEventArgs> SelectItemChangedPublisher { get; } = new WeakEventPublisher<SelectItemEventArgs>();
+        public event EventHandler<SelectItemEventArgs> SelectItemChanged
+        {
+            add { SelectItemChangedPublisher.Subscribe(value); }
+            remove { SelectItemChangedPublisher.Unsubscribe(value); }
+        }
+
         public ICommand ChangeIsEnableCommand { get; }
 
         EffectModel EffectModel { get; }
@@ -77,9 +84,27 @@ namespace NiVE3.ViewModel
 
             WiringModel();
 
-            Properties = effectModel.Properties.CreateViewCollection(m => new PropertyViewModel(m));
+            Properties = effectModel.Properties.CreateViewCollection(m =>
+            {
+                var vm = new PropertyViewModel(m);
+                vm.SelectItemChanged += Property_SelectItemChanged;
+                return vm;
+            });
+        }
+
+        public void DeSelect()
+        {
+            foreach (var p in Properties)
+            {
+                p.DeSelect();
+            }
         }
 
         partial void WiringModel();
+
+        private void Property_SelectItemChanged(object? sender, SelectItemEventArgs e)
+        {
+            SelectItemChangedPublisher.Publish(sender, new SelectItemEventArgs(e, effect: this));
+        }
     }
 }

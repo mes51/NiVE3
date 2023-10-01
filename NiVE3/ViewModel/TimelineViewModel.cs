@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
@@ -13,6 +14,7 @@ using NiVE3.Config;
 using NiVE3.Model;
 using NiVE3.Mvvm;
 using NiVE3.Plugin.Interfaces;
+using NiVE3.Plugin.Property;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
 using NiVE3.View.Command;
 using NiVE3.View.Dock;
@@ -244,6 +246,7 @@ namespace NiVE3.ViewModel
                         vm.TrackMatteModeChangeRequest += ViewModel_TrackMatteModeChangeRequest;
                         vm.ParentLayerChangeRequest += ViewModel_ParentLayerChangeRequest;
                         vm.CheckCycledParentLayerRequest += ViewModel_CheckCycledParentLayerRequest;
+                        vm.SelectItemChanged += ViewModel_SelectItemChanged;
                         return vm;
                     });
                 }
@@ -268,7 +271,15 @@ namespace NiVE3.ViewModel
         public ObservableCollection<LayerViewModel> SelectedLayers
         {
             get { return selectedLayers; }
-            set { SetProperty(ref selectedLayers, value); }
+            set
+            {
+                if (selectedLayers != value)
+                {
+                    selectedLayers.CollectionChanged -= SelectedLayers_CollectionChanged;
+                    value.CollectionChanged += SelectedLayers_CollectionChanged;
+                }
+                SetProperty(ref selectedLayers, value);
+            }
         }
 
         public ICommand BeginEditNameCommand { get; }
@@ -277,10 +288,13 @@ namespace NiVE3.ViewModel
 
         ViewStateModel ViewState { get; }
 
+        SelectItemType SelectedItemType { get; set; } = SelectItemType.None;
+
         public TimelineViewModel(ViewStateModel viewState)
         {
             ViewState = viewState;
             Title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Timeline_EmptyTitle);
+            SelectedLayers = new ObservableCollection<LayerViewModel>();
 
             WiringModel();
 
@@ -295,7 +309,7 @@ namespace NiVE3.ViewModel
                     return;
                 }
 
-                if (selectedLayers.Count > 0)
+                if (SelectedLayers.Count > 0)
                 {
                     CompositionModel.AddSolid(Layers.IndexOf(SelectedLayers.First()) + 1);
                 }
@@ -393,11 +407,41 @@ namespace NiVE3.ViewModel
                     {
                         Title = CompositionModel.Name;
                     }
+                    SelectedItemType = SelectItemType.None;
                     break;
                 case nameof(Duration):
                 case nameof(TimeBarRange):
                     TimelineScrollBarMax = Duration - TimeBarRange;
                     break;
+            }
+        }
+
+        private void SelectedLayers_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Reset)
+            {
+                if (Layers != null)
+                {
+                    foreach (var vm in Layers)
+                    {
+                        vm.DeSelect();
+                    }
+                }
+                SelectedItemType = SelectItemType.None;
+            }
+            else
+            {
+                if (e.OldItems != null)
+                {
+                    foreach (var vm in e.OldItems.OfType<LayerViewModel>())
+                    {
+                        vm.DeSelect();
+                    }
+                }
+                if (SelectedItemType < SelectItemType.Layer)
+                {
+                    SelectedItemType = SelectItemType.Layer;
+                }
             }
         }
 
@@ -510,5 +554,39 @@ namespace NiVE3.ViewModel
 
             e.Cycled = CompositionModel.CheckCycledParentLayer(layerViewModel.LayerId, e.LayerId);
         }
+
+        private void ViewModel_SelectItemChanged(object? sender, SelectItemEventArgs e)
+        {
+            if (SelectedItemType < e.SelectItemType)
+            {
+                SelectedItemType = e.SelectItemType;
+            }
+            if (e.Layer!= null)
+            {
+                foreach (var vm in SelectedLayers.ToArray())
+                {
+                    if (vm != e.Layer)
+                    {
+                        SelectedLayers.Remove(vm);
+                    }
+                }
+                if (!SelectedLayers.Contains(e.Layer))
+                {
+                    SelectedLayers.Add(e.Layer);
+                }
+            }
+        }
+    }
+
+    enum SelectItemType : int
+    {
+        None = 0,
+        Layer = 1,
+        Effect = 2,
+        // Mask = 3,
+        // ShapeContent = 4,
+        // TextAnimator = 5,
+        Property = 100,
+        KeyFrame = 1000,
     }
 }

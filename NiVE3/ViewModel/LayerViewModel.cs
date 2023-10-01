@@ -408,7 +408,15 @@ namespace NiVE3.ViewModel
         public ObservableCollection<EffectViewModel> SelectedEffects
         {
             get { return selectedEffects; }
-            set { SetProperty(ref selectedEffects, value); }
+            set
+            {
+                if (selectedEffects != value)
+                {
+                    selectedEffects.CollectionChanged -= SelectedEffects_CollectionChanged;
+                    value.CollectionChanged += SelectedEffects_CollectionChanged;
+                }
+                SetProperty(ref selectedEffects, value);
+            }
         }
 
         public PropertyGroupViewModel TransformProperties { get; }
@@ -485,6 +493,13 @@ namespace NiVE3.ViewModel
             remove { CheckCycledParentLayerRequestPublisher.Unsubscribe(value); }
         }
 
+        WeakEventPublisher<SelectItemEventArgs> SelectItemChangedPublisher { get; } = new WeakEventPublisher<SelectItemEventArgs>();
+        public event EventHandler<SelectItemEventArgs> SelectItemChanged
+        {
+            add { SelectItemChangedPublisher.Subscribe(value); }
+            remove { SelectItemChangedPublisher.Unsubscribe(value); }
+        }
+
         LayerModel LayerModel { get; }
 
         ViewStateModel ViewState { get; }
@@ -493,22 +508,23 @@ namespace NiVE3.ViewModel
 
         string PrevComment { get; set; } = "";
 
-#pragma warning disable CS8618 // 各フィールドには初期化時に必ず値を代入するため無視
         public LayerViewModel(LayerModel layerModel, ViewStateModel viewState, IEnumerable<LayerModelProxy> trackMatteViewSource, IEnumerable<LayerModelProxy> parentLayerViewSource)
-#pragma warning restore CS8618
         {
             LayerModel = layerModel;
             ViewState = viewState;
             TrackMatteViewSource = trackMatteViewSource;
             ParentLayerViewSource = parentLayerViewSource;
+            SelectedEffects = new ObservableCollection<EffectViewModel>();
 
             Effects = layerModel.Effects.CreateViewCollection(e =>
             {
                 var vm = new EffectViewModel(e);
                 vm.EffectEnableChangeRequest += Effect_EffectEnableChangeRequest;
+                vm.SelectItemChanged += Effect_SelectItemChanged;
                 return vm;
             });
             TransformProperties = new PropertyGroupViewModel(layerModel.TransformProperties);
+            TransformProperties.SelectItemChanged += TransformProperties_SelectItemChanged;
 
             WiringModel();
 
@@ -694,6 +710,16 @@ namespace NiVE3.ViewModel
             }
         }
 
+        public void DeSelect()
+        {
+            TransformProperties.DeSelect();
+            foreach (var e in SelectedEffects)
+            {
+                e.DeSelect();
+            }
+            SelectedEffects.Clear();
+        }
+
         partial void WiringModel();
 
         private void LayerViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -732,6 +758,55 @@ namespace NiVE3.ViewModel
             }
 
             LayerModel.ChangeEffectEnable(targetEffects.Select(e => e.EffectId).ToArray(), e.IsEnabled);
+        }
+
+        private void Effect_SelectItemChanged(object? sender, SelectItemEventArgs e)
+        {
+            SelectItemChangedPublisher.Publish(sender, new SelectItemEventArgs(e, layer: this));
+            if (e.Effect != null)
+            {
+                foreach (var vm in SelectedEffects.ToArray())
+                {
+                    if (vm != e.Effect)
+                    {
+                        SelectedEffects.Remove(vm);
+                    }
+                }
+                if (!SelectedEffects.Contains(e.Effect))
+                {
+                    SelectedEffects.Add(e.Effect);
+                }
+            }
+        }
+
+        private void SelectedEffects_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Reset)
+            {
+                foreach (var vm in Effects)
+                {
+                    vm.DeSelect();
+                }
+            }
+            else
+            {
+                if (e.OldItems != null)
+                {
+                    foreach (var vm in e.OldItems.OfType<EffectViewModel>())
+                    {
+                        vm.DeSelect();
+                    }
+                }
+                if (e.NewItems != null)
+                {
+                    SelectItemChangedPublisher.Publish(this, new SelectItemEventArgs(SelectItemType.Effect, effect: e.NewItems.OfType<EffectViewModel>().FirstOrDefault(), layer: this));
+                }
+            }
+        }
+
+        private void TransformProperties_SelectItemChanged(object? sender, SelectItemEventArgs e)
+        {
+            SelectItemChangedPublisher.Publish(sender, new SelectItemEventArgs(e, layer: this));
         }
     }
 

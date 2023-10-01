@@ -27,7 +27,7 @@ namespace NiVE3.Mvvm
             }
         }
 
-        public void Publish(object sender, T args)
+        public void Publish(object? sender, T args)
         {
             foreach (var h in Handlers)
             {

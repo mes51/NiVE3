@@ -207,6 +207,7 @@ namespace NiVE3.View.Part
         private void PropertyNameTextBlock_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             KeyFrameCollectionView.SelectAllKeyFrames();
+            e.Handled = true;
         }
 
         private void KeyFrameCollectionView_KeyFrameMoveRequest(object sender, KeyFrameMoveEventArgs e)

@@ -515,11 +515,11 @@ namespace NiVE3.View.Part
                 return;
             }
 
-            if (e.OldValue is ObservableCollection<KeyFrame> oldValue)
+            if (e.OldValue is ObservableCollection<int> oldValue)
             {
                 CollectionChangedEventManager.RemoveHandler(oldValue, collectionView.KeyFrameCollection_CollectionChanged);
             }
-            if (e.NewValue is ObservableCollection<KeyFrame> newValue)
+            if (e.NewValue is ObservableCollection<int> newValue)
             {
                 CollectionChangedEventManager.AddHandler(newValue, collectionView.KeyFrameCollection_CollectionChanged);
             }

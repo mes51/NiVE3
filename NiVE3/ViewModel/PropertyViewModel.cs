@@ -23,9 +23,13 @@ namespace NiVE3.ViewModel
     {
         PropertyViewState ViewState { get; }
 
+        event EventHandler<SelectItemEventArgs> SelectItemChanged;
+
         ObservableCollection<KeyFrame>? KeyFrames { get; }
 
         ObservableCollectionView<IPropertyModel, IInternalPropertyViewModel>? Children { get; }
+
+        void DeSelect();
     }
 
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
@@ -93,7 +97,22 @@ namespace NiVE3.ViewModel
         public ObservableCollection<int> SelectedKeyFrameIds
         {
             get { return selectedKeyFrames; }
-            set { SetProperty(ref selectedKeyFrames, value); }
+            set
+            {
+                if (selectedKeyFrames != value)
+                {
+                    selectedKeyFrames.CollectionChanged -= SelectedKeyFrames_CollectionChanged;
+                    value.CollectionChanged += SelectedKeyFrames_CollectionChanged;
+                }
+                SetProperty(ref selectedKeyFrames, value);
+            }
+        }
+
+        WeakEventPublisher<SelectItemEventArgs> SelectItemChangedPublisher { get; } = new WeakEventPublisher<SelectItemEventArgs>();
+        public event EventHandler<SelectItemEventArgs> SelectItemChanged
+        {
+            add { SelectItemChangedPublisher.Subscribe(value); }
+            remove { SelectItemChangedPublisher.Unsubscribe(value); }
         }
 
         public PropertyBase Property { get; }
@@ -121,6 +140,7 @@ namespace NiVE3.ViewModel
             PropertyModel = propertyModel;
             Property = propertyModel.Property;
             ViewState = propertyModel.CreateState(this);
+            SelectedKeyFrameIds = new ObservableCollection<int>();
 
             BeginEditCommand = new RequerySuggestedCommand(() =>
             {
@@ -175,6 +195,11 @@ namespace NiVE3.ViewModel
             return PropertyModel.CreateControl(this);
         }
 
+        public void DeSelect()
+        {
+            SelectedKeyFrameIds.Clear();
+        }
+
         object? CalculationValue()
         {
             if (KeyFrames.Count > 0)
@@ -211,6 +236,14 @@ namespace NiVE3.ViewModel
             HasKeyFrame = KeyFrames.Count > 0;
             CurrentTimeValue = CalculationValue();
         }
+
+        private void SelectedKeyFrames_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.NewItems != null)
+            {
+                SelectItemChangedPublisher.Publish(this, new SelectItemEventArgs(SelectItemType.KeyFrame, e.NewItems.OfType<KeyFrame>().FirstOrDefault(), this));
+            }
+        }
     }
 
     partial class PropertyGroupViewModel : BindableBase, IInternalPropertyViewModel
@@ -241,6 +274,13 @@ namespace NiVE3.ViewModel
 
         public PropertyBase Property { get; }
 
+        WeakEventPublisher<SelectItemEventArgs> SelectItemChangedPublisher { get; } = new WeakEventPublisher<SelectItemEventArgs>();
+        public event EventHandler<SelectItemEventArgs> SelectItemChanged
+        {
+            add { SelectItemChangedPublisher.Subscribe(value); }
+            remove { SelectItemChangedPublisher.Unsubscribe(value); }
+        }
+
         public ICommand BeginEditCommand => throw new NotImplementedException();
 
         public ICommand EndEditCommand => throw new NotImplementedException();
@@ -255,16 +295,32 @@ namespace NiVE3.ViewModel
             Property = propertyGroupModel.Property;
             children = propertyGroupModel.Children.CreateViewCollection<IPropertyModel, IInternalPropertyViewModel>(m =>
             {
+                IInternalPropertyViewModel vm; 
                 if (m is PropertyGroupModel pg)
                 {
-                    return new PropertyGroupViewModel(pg);
+                    vm = new PropertyGroupViewModel(pg);
                 }
                 else
                 {
-                    return new PropertyViewModel((PropertyModel)m);
+                    vm = new PropertyViewModel((PropertyModel)m);
                 }
+                vm.SelectItemChanged += Property_SelectItemChanged;
+                return vm;
             });
             ViewState = propertyGroupModel.CreateState(this);
+        }
+
+        public void DeSelect()
+        {
+            foreach (var p in Children)
+            {
+                p.DeSelect();
+            }
+        }
+
+        private void Property_SelectItemChanged(object? sender, SelectItemEventArgs e)
+        {
+            SelectItemChangedPublisher.Publish(sender, e);
         }
     }
 }

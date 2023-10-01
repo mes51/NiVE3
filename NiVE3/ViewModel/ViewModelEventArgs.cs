@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Plugin.Interfaces;
+using NiVE3.Plugin.Property;
 
 namespace NiVE3.ViewModel
 {
@@ -59,6 +60,37 @@ namespace NiVE3.ViewModel
         public EffectEnableChangeEventArgs(bool isEnabled)
         {
             IsEnabled = isEnabled;
+        }
+    }
+
+    class SelectItemEventArgs : EventArgs
+    {
+        public SelectItemType SelectItemType { get; }
+
+        public KeyFrame? KeyFrame { get; }
+
+        public PropertyViewModel? Property { get; }
+
+        public EffectViewModel? Effect { get; }
+
+        public LayerViewModel? Layer { get; }
+
+        public SelectItemEventArgs(SelectItemType selectItemType, KeyFrame? keyFrame = null, PropertyViewModel? property = null, EffectViewModel? effect = null, LayerViewModel? layer = null)
+        {
+            SelectItemType = selectItemType;
+            KeyFrame = keyFrame;
+            Property = property;
+            Effect = effect;
+            Layer = layer;
+        }
+
+        public SelectItemEventArgs(SelectItemEventArgs prev, KeyFrame? keyFrame = null, PropertyViewModel? property = null, EffectViewModel? effect = null, LayerViewModel? layer = null)
+        {
+            SelectItemType = prev.SelectItemType;
+            KeyFrame = keyFrame ?? prev.KeyFrame;
+            Property = property ?? prev.Property;
+            Effect = effect ?? prev.Effect;
+            Layer = layer ?? prev.Layer;
         }
     }
 }
