@@ -287,5 +287,41 @@ namespace NiVE3.Model
 
             public void Dispose() { }
         }
+
+        private class DeleteLayersHistoryCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_DeleteLayers);
+
+            CompositionModel CompositionModel { get; }
+
+            LayerModel[] Layers { get; }
+
+            int[] Indices { get; }
+
+            public DeleteLayersHistoryCommand(CompositionModel compositionModel, LayerModel[] layers, int[] indices)
+            {
+                CompositionModel = compositionModel;
+                Layers = layers;
+                Indices = indices;
+            }
+
+            public void Redo()
+            {
+                foreach (var l in Layers)
+                {
+                    CompositionModel.Layers.Remove(l);
+                }
+            }
+
+            public void Undo()
+            {
+                foreach (var (l, i) in Layers.Zip(Indices))
+                {
+                    CompositionModel.Layers.Insert(i, l);
+                }
+            }
+
+            public void Dispose() { }
+        }
     }
 }

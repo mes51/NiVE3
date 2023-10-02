@@ -180,6 +180,19 @@ namespace NiVE3.Model
             ReplaceKeyFrames(targetKeyFrames, newKeyFrames, LanguageResourceDictionary.History_ChangeKeyFrameInterpolationType);
         }
 
+        public void DeleteKeyFrames(KeyFrame[] targetKeyframes)
+        {
+            targetKeyframes = targetKeyframes.OrderBy(KeyFrames.IndexOf).ToArray();
+            var oldIndices = targetKeyframes.Select(KeyFrames.IndexOf).ToArray();
+
+            foreach (var k in targetKeyframes)
+            {
+                KeyFrames.Remove(k);
+            }
+
+            HistoryModel.Add(new DeleteKeyFramesHistoryCommand(this, targetKeyframes, oldIndices));
+        }
+
         void ReplaceKeyFrames(KeyFrame[] targetKeyFrames, KeyFrame[] newKeyFrames, string historyNameKey)
         {
             foreach (var k in targetKeyFrames)

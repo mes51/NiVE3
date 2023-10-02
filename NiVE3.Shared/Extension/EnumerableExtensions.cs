@@ -47,5 +47,16 @@ namespace NiVE3.Shared.Extension
                 index++;
             }
         }
+
+        public static IEnumerable<T> NonNull<T>(this IEnumerable<T?> source)
+        {
+            foreach (var v in source)
+            {
+                if (v != null)
+                {
+                    yield return v;
+                }
+            }
+        }
     }
 }

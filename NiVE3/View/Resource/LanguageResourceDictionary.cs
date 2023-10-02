@@ -256,6 +256,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("レイヤーの移動")]
         public static readonly string History_MoveLayers = nameof(History_MoveLayers);
 
+        [ShowInMarkup, DefaultValue("レイヤーの削除")]
+        public static readonly string History_DeleteLayers = nameof(History_DeleteLayers);
+
         [ShowInMarkup, DefaultValue("平面の追加")]
         public static readonly string History_AddSolid = nameof(History_AddSolid);
 
@@ -306,6 +309,9 @@ namespace NiVE3.View.Resource
 
         [ShowInMarkup, DefaultValue("エフェクトの有効・無効切り替え")]
         public static readonly string History_ChangeEffectsEnable = nameof(History_ChangeEffectsEnable);
+
+        [ShowInMarkup, DefaultValue("エフェクトの削除")]
+        public static readonly string History_DeleteEffects = nameof(History_DeleteEffects);
 
         // Property
 

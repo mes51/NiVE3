@@ -30,6 +30,7 @@ namespace NiVE3.ViewModel
     [ManualViewModelWireable(nameof(CompositionModel), nameof(BindComposition), nameof(UnbindComposition), WithInitializeProperty = true)]
     [CommandHandling(nameof(BeginEditNameCommand), nameof(ShortcutKeySetting.BeginEditNameGesture))]
     [CommandHandling(nameof(AddSolidCommand), nameof(ShortcutKeySetting.AddSolidGesture))]
+    [CommandHandling(nameof(DeleteCommand), nameof(ShortcutKeySetting.DeleteItemGesture))]
     partial class TimelineViewModel : PaneViewModelBase, IDropTarget
     {
         private double frameRate;
@@ -287,11 +288,13 @@ namespace NiVE3.ViewModel
 
         public ICommand AddSolidCommand { get; }
 
+        public ICommand DeleteCommand { get; }
+
         ViewStateModel ViewState { get; }
 
         SelectItemType SelectedItemType { get; set; } = SelectItemType.None;
 
-        object? SelectTarget { get; set; }
+        IViewModelShortcutCommand? SelectTarget { get; set; }
 
         public TimelineViewModel(ViewStateModel viewState)
         {
@@ -321,6 +324,22 @@ namespace NiVE3.ViewModel
                     CompositionModel.AddSolid(Layers.Count);
                 }
             }, () => CompositionModel != null);
+
+            DeleteCommand = new RequerySuggestedCommand(() =>
+            {
+                if (SelectTarget != null)
+                {
+                    SelectTarget.DeleteCommand.Execute(SelectedItemType);
+                }
+                else
+                {
+                    if (SelectedLayers.Count > 0 && SelectedLayers.All(l => l.EditingParameter == EditingLayerParameter.None))
+                    {
+                        var ids = SelectedLayers.Select(l => l.LayerId).ToArray();
+                        CompositionModel?.DeleteLayers(ids);
+                    }
+                }
+            }, () => CompositionModel != null && SelectedItemType != SelectItemType.None);
         }
 
         public void DragOver(IDropInfo dropInfo)
@@ -561,9 +580,6 @@ namespace NiVE3.ViewModel
                 SelectedItemType = e.SelectItemType;
                 switch (e.SelectItemType)
                 {
-                    case SelectItemType.Layer:
-                        SelectTarget = e.Layer;
-                        break;
                     case SelectItemType.Effect:
                         SelectTarget = e.Layer;
                         break;

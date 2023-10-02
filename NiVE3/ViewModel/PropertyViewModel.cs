@@ -12,6 +12,7 @@ using NiVE3.Mvvm;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Property;
 using NiVE3.Plugin.Property.Control;
+using NiVE3.Shared.Extension;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
 using NiVE3.View.Command;
 using Prism.Commands;
@@ -33,7 +34,7 @@ namespace NiVE3.ViewModel
     }
 
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
-    partial class PropertyViewModel : BindableBase, IInternalPropertyViewModel
+    partial class PropertyViewModel : BindableBase, IInternalPropertyViewModel, IViewModelShortcutCommand
     {
         public PropertyViewState ViewState { get; }
 
@@ -131,6 +132,8 @@ namespace NiVE3.ViewModel
 
         public ICommand ChangeKeyFramesInterpolationTypeCommand { get; }
 
+        public DelegateCommand<SelectItemType?> DeleteCommand { get; }
+
         PropertyModel PropertyModel { get; }
 
         object? PrevValue { get; set; }
@@ -185,6 +188,15 @@ namespace NiVE3.ViewModel
             });
 
             SelectItemCommand = new DelegateCommand(() => SelectItemChangedPublisher.Publish(this, new SelectItemEventArgs(SelectItemType.KeyFrame, true, this)));
+
+            DeleteCommand = new DelegateCommand<SelectItemType?>(type =>
+            {
+                var keyFrames = SelectedKeyFrameIds.Select(id => KeyFrames.FirstOrDefault(k => k.Id == id)).NonNull().ToArray();
+                if (keyFrames.Length > 0)
+                {
+                    PropertyModel.DeleteKeyFrames(keyFrames);
+                }
+            });
 
             WiringModel();
 

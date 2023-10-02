@@ -355,6 +355,19 @@ namespace NiVE3.Model
             }
         }
 
+        public void DeleteLayers(Guid[] layerIds)
+        {
+            var layers = Layers.Where(l => layerIds.Contains(l.LayerId)).OrderBy(Layers.IndexOf).ToArray();
+            var oldIndices = layers.Select(l => Layers.IndexOf(l)).ToArray();
+
+            foreach (var l in layers)
+            {
+                Layers.Remove(l);
+            }
+
+            HistoryModel.Add(new DeleteLayersHistoryCommand(this, layers, oldIndices));
+        }
+
         public NImage Render(double time, bool useGpu)
         {
             // TODO:

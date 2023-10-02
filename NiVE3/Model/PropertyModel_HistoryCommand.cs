@@ -218,5 +218,41 @@ namespace NiVE3.Model
                 }
             }
         }
+
+        private class DeleteKeyFramesHistoryCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_RemoveKeyFrame);
+
+            PropertyModel Model { get; }
+
+            KeyFrame[] KeyFrames { get; }
+
+            int[] Indices { get; }
+
+            public DeleteKeyFramesHistoryCommand(PropertyModel model, KeyFrame[] keyFrames, int[] indices)
+            {
+                Model = model;
+                KeyFrames = keyFrames;
+                Indices = indices;
+            }
+
+            public void Redo()
+            {
+                foreach (var k in KeyFrames)
+                {
+                    Model.KeyFrames.Remove(k);
+                }
+            }
+
+            public void Undo()
+            {
+                foreach (var (k, i) in KeyFrames.Zip(Indices))
+                {
+                    Model.KeyFrames.Insert(i, k);
+                }
+            }
+
+            public void Dispose() { }
+        }
     }
 }

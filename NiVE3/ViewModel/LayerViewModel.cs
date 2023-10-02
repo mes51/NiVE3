@@ -24,7 +24,7 @@ using Prism.Mvvm;
 namespace NiVE3.ViewModel
 {
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
-    partial class LayerViewModel : BindableBase, IDropTarget
+    partial class LayerViewModel : BindableBase, IDropTarget, IViewModelShortcutCommand
     {
         private Guid layerId;
         [NeedWire(nameof(LayerModel), IsOneWay = true)]
@@ -445,6 +445,8 @@ namespace NiVE3.ViewModel
 
         public ICommand SelectItemCommand { get; }
 
+        public DelegateCommand<SelectItemType?> DeleteCommand { get; }
+
         WeakEventPublisher<LayerSwitchEventArgs> LayerSwitchChangeRequestPublisher { get; } = new WeakEventPublisher<LayerSwitchEventArgs>();
         public event EventHandler<LayerSwitchEventArgs> LayerSwitchChangeRequest
         {
@@ -631,6 +633,14 @@ namespace NiVE3.ViewModel
             }, _ => EditingParameter == EditingLayerParameter.Comment);
 
             SelectItemCommand = new DelegateCommand(() => SelectItemChangedPublisher.Publish(this, new SelectItemEventArgs(SelectItemType.Layer, true, layer: this)));
+
+            DeleteCommand = new DelegateCommand<SelectItemType?>(type =>
+            {
+                if (EditingParameter == EditingLayerParameter.None && SelectedEffects.Count > 0)
+                {
+                    LayerModel.DeleteEffect(SelectedEffects.Select(e => e.EffectId).ToArray());
+                }
+            });
 
             PropertyChanged += LayerViewModel_PropertyChanged;
         }

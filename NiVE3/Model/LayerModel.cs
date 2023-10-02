@@ -381,6 +381,19 @@ namespace NiVE3.Model
             HistoryModel.Add(new ChangeEffectEnableHistoryCommand(effects, oldValues, isEnable));
         }
 
+        public void DeleteEffect(Guid[] effectIds)
+        {
+            var effects = Effects.Where(l => effectIds.Contains(l.EffectId)).OrderBy(Effects.IndexOf).ToArray();
+            var oldIndices = effects.Select(l => Effects.IndexOf(l)).ToArray();
+
+            foreach (var e in effects)
+            {
+                Effects.Remove(e);
+            }
+
+            HistoryModel.Add(new DeleteEffectEnableHistoryCommand(this, effects, oldIndices));
+        }
+
         private void Effects_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             HasEffect = Effects.Count > 0;

@@ -236,5 +236,41 @@ namespace NiVE3.Model
 
             public void Dispose() { }
         }
+
+        private class DeleteEffectEnableHistoryCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_DeleteEffects);
+
+            LayerModel Model { get; }
+
+            EffectModel[] Effects { get; }
+
+            int[] Indices { get; }
+
+            public DeleteEffectEnableHistoryCommand(LayerModel model, EffectModel[] effects, int[] indices)
+            {
+                Model = model;
+                Effects = effects;
+                Indices = indices;
+            }
+
+            public void Redo()
+            {
+                foreach (var e in Effects)
+                {
+                    Model.Effects.Remove(e);
+                }
+            }
+
+            public void Undo()
+            {
+                foreach (var (e, i) in Effects.Zip(Indices))
+                {
+                    Model.Effects.Insert(i, e);
+                }
+            }
+
+            public void Dispose() { }
+        }
     }
 }
