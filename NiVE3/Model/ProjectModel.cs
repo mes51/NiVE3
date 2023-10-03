@@ -5,6 +5,7 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NiVE3.Input;
 using NiVE3.View.Resource;
 using Prism.Mvvm;
 
@@ -37,7 +38,8 @@ namespace NiVE3.Model
 
             FootageListModel.ShowFootagePreview += FootageListModel_ShowFootagePreview;
             FootageListModel.ShowCompositionPreview += FootageListModel_ShowCompositionPreview;
-            FootageListModel.RemoveFootageByUndo += FootageListModel_RemoveFootageByUndo;
+            FootageListModel.FootageDeleted += FootageListModel_FootageDeleted;
+            FootageListModel.DeleteFootageByUndo += FootageListModel_DeleteFootageByUndo;
         }
 
         public void CreateComposition(string name, int width, int height, double frameRate, double duration, bool isRetentionFrameRate, int shutterAngle, int shutterPhase, int motionBlurSampleCount, Type rendererType)
@@ -137,7 +139,30 @@ namespace NiVE3.Model
             OnOpenCompositionTimeline(e.Composition);
         }
 
-        private void FootageListModel_RemoveFootageByUndo(object? sender, FootageEventArgs e)
+        private void FootageListModel_FootageDeleted(object? sender, FootageEventArgs e)
+        {
+            foreach (var f in e.Footages.OfType<FootageModel>())
+            {
+                foreach (var c in CompositionModels)
+                {
+                    c.DeleteLayersByFootage(f);
+                }
+
+                if (f.InputModel.Input is CompositionInput input)
+                {
+                    RemoveCompositionModel(input.Composition);
+                    HistoryModel.Add(new DeleteCompositionCommand(this, input.Composition));
+                }
+
+                var preview = PreviewModels.OfType<FootagePreviewModel>().FirstOrDefault(p => p.Footage == f);
+                if (preview != null)
+                {
+                    preview.Footage = null;
+                }
+            }
+        }
+
+        private void FootageListModel_DeleteFootageByUndo(object? sender, FootageEventArgs e)
         {
             foreach (var f in e.Footages)
             {

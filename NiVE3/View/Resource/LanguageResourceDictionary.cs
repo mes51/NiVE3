@@ -247,8 +247,14 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("フッテージのコメント変更")]
         public static readonly string History_ChangeFootageComment = nameof(History_ChangeFootageComment);
 
+        [ShowInMarkup, DefaultValue("フッテージの削除")]
+        public static readonly string History_DeleteFootages = nameof(History_DeleteFootages);
+
         [ShowInMarkup, DefaultValue("コンポジションの追加")]
         public static readonly string History_AddComposition = nameof(History_AddComposition);
+
+        [ShowInMarkup, DefaultValue("コンポジションの削除")]
+        public static readonly string History_RemoveComposition = nameof(History_RemoveComposition);
 
         [ShowInMarkup, DefaultValue("レイヤーの追加")]
         public static readonly string History_AddLayers = nameof(History_AddLayers);
@@ -312,6 +318,17 @@ namespace NiVE3.View.Resource
 
         [ShowInMarkup, DefaultValue("エフェクトの削除")]
         public static readonly string History_DeleteEffects = nameof(History_DeleteEffects);
+
+        // Dialog
+
+        [ShowInMarkup, DefaultValue("フッテージの削除")]
+        public static readonly string Dialog_ConfirmDeleteFootage_Title = nameof(Dialog_ConfirmDeleteFootage_Title);
+
+        [ShowInMarkup, DefaultValue("フッテージを削除すると、各コンポジションからこのフッテージを使用しているレイヤーが削除されます。このフッテージを削除しますか?")]
+        public static readonly string Dialog_ConfirmDeleteFootage_Text = nameof(Dialog_ConfirmDeleteFootage_Text);
+
+        [ShowInMarkup, DefaultValue("フォルダを削除すると、中に含まれているフッテージも一緒に削除され、各コンポジションからも含まれているフッテージを使用しているレイヤーが削除されます。このフォルダを削除しますか?")]
+        public static readonly string Dialog_ConfirmDeleteFootageFolder_Text = nameof(Dialog_ConfirmDeleteFootageFolder_Text);
 
         // Property
 

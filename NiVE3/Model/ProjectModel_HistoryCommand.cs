@@ -38,5 +38,31 @@ namespace NiVE3.Model
                 Composition.Dispose();
             }
         }
+        private class DeleteCompositionCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_RemoveComposition);
+
+            ProjectModel ProjectModel { get; set; }
+
+            CompositionModel Composition { get; set; }
+
+            public DeleteCompositionCommand(ProjectModel projectModel, CompositionModel composition)
+            {
+                ProjectModel = projectModel;
+                Composition = composition;
+            }
+
+            public void Redo()
+            {
+                ProjectModel.RemoveCompositionModel(Composition);
+            }
+
+            public void Undo()
+            {
+                ProjectModel.AddCompositionModel(Composition);
+            }
+
+            public void Dispose() { }
+        }
     }
 }

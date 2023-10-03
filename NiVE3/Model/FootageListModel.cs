@@ -17,6 +17,7 @@ using NiVE3.Extension;
 using NiVE3.Input;
 using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Interfaces;
+using NiVE3.Shared.Extension;
 using NiVE3.Util;
 using NiVE3.View.Resource;
 using Prism.Mvvm;
@@ -63,7 +64,9 @@ namespace NiVE3.Model
 
         public event EventHandler<CompositionEventArgs>? ShowCompositionPreview;
 
-        public event EventHandler<FootageEventArgs>? RemoveFootageByUndo;
+        public event EventHandler<FootageEventArgs>? FootageDeleted;
+
+        public event EventHandler<FootageEventArgs>? DeleteFootageByUndo;
 
         public FootageListModel(HistoryModel historyModel)
         {
@@ -143,7 +146,7 @@ namespace NiVE3.Model
             if (oldParent == null)
             {
                 // root
-                RemoveFootageFromRoot(model);
+                DeleteFootageFromRootInternal(model);
             }
             else
             {
@@ -192,6 +195,49 @@ namespace NiVE3.Model
             {
                 MoveFootageToRoot(id);
             }
+
+            HistoryModel.EndGroup();
+        }
+
+        public void DeleteFootages(Guid[] footageIds)
+        {
+            var targetIds = new List<Guid>(footageIds);
+            foreach (var id in footageIds)
+            {
+                var parent = FindParent(id);
+                while(parent != null)
+                {
+                    if (targetIds.Contains(parent.FootageId))
+                    {
+                        targetIds.Remove(id);
+                        break;
+                    }
+                    parent = FindParent(parent.FootageId);
+                }
+            }
+
+            var footages = targetIds.Select(id => FindModel(id, Footages)).NonNull().ToArray();
+            var parents = footages.Select(f => FindParent(f.FootageId)).ToArray();
+            var allTargetFootages = Flatten(footages).ToArray();
+            var allFootages = Flatten(Footages);
+            var inputs = allTargetFootages.Select(m => m.InputModel)
+                .Distinct()
+                .Where(i =>
+                {
+                    var fs = allFootages.Where(m => m.InputModel == i).ToArray();
+                    return allTargetFootages.Intersect(fs).Count() == fs.Length;
+                })
+                .ToArray();
+
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_DeleteFootages));
+
+            foreach (var f in footages)
+            {
+                DeleteFootageInternal(f);
+            }
+            HistoryModel.Add(new DeleteFootageHistoryCommand(this, footages, parents, inputs));
+
+            OnFootageDeleted(allTargetFootages);
 
             HistoryModel.EndGroup();
         }
@@ -286,7 +332,7 @@ namespace NiVE3.Model
             LoadedInputs.Add(inputModel);
         }
 
-        void RemoveInput(InputModel inputModel)
+        void DeleteInput(InputModel inputModel)
         {
             LoadedInputs.Remove(inputModel);
         }
@@ -401,7 +447,7 @@ namespace NiVE3.Model
             Footages.Sort(new FootageComparer(SortKey, SortIsAscending));
         }
 
-        void RemoveFootage(IFootageModel footage)
+        void DeleteFootageInternal(IFootageModel footage)
         {
             var folder = FindParent(footage.FootageId);
             if (folder != null)
@@ -410,11 +456,11 @@ namespace NiVE3.Model
             }
             else
             {
-                RemoveFootageFromRoot(footage);
+                DeleteFootageFromRootInternal(footage);
             }
         }
 
-        void RemoveFootageFromRoot(IFootageModel footage)
+        void DeleteFootageFromRootInternal(IFootageModel footage)
         {
             if (Footages.Contains(footage))
             {
@@ -450,9 +496,14 @@ namespace NiVE3.Model
             ShowCompositionPreview?.Invoke(this, new CompositionEventArgs(composition));
         }
 
-        void OnRemoveFootageByUndo(IFootageModel[] footages)
+        void OnDeleteFootageByUndo(IFootageModel[] footages)
         {
-            RemoveFootageByUndo?.Invoke(this, new FootageEventArgs(footages));
+            DeleteFootageByUndo?.Invoke(this, new FootageEventArgs(footages));
+        }
+
+        void OnFootageDeleted(IFootageModel[] footages)
+        {
+            FootageDeleted?.Invoke(this, new FootageEventArgs(footages));
         }
 
         static IFootageModel? FindModel(Guid targetId, IEnumerable<IFootageModel> list)

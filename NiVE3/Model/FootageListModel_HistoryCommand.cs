@@ -55,7 +55,7 @@ namespace NiVE3.Model
                 }
                 else
                 {
-                    Model.RemoveFootageFromRoot(folder);
+                    Model.DeleteFootageFromRootInternal(folder);
                 }
             }
 
@@ -113,10 +113,10 @@ namespace NiVE3.Model
 
             public void Undo()
             {
-                Model.RemoveInput(Input);
-                Model.RemoveFootage(LoadedFootage);
+                Model.DeleteInput(Input);
+                Model.DeleteFootageInternal(LoadedFootage);
 
-                Model.OnRemoveFootageByUndo(LoadedSourceModels);
+                Model.OnDeleteFootageByUndo(LoadedSourceModels);
             }
 
             public void Dispose() { }
@@ -159,7 +159,7 @@ namespace NiVE3.Model
                 }
                 else
                 {
-                    Model.RemoveFootageFromRoot(target);
+                    Model.DeleteFootageFromRootInternal(target);
                 }
 
                 if (newParent != null)
@@ -189,7 +189,7 @@ namespace NiVE3.Model
                 }
                 else
                 {
-                    Model.RemoveFootageFromRoot(target);
+                    Model.DeleteFootageFromRootInternal(target);
                 }
 
                 if (oldParent != null)
@@ -199,6 +199,54 @@ namespace NiVE3.Model
                 else
                 {
                     Model.AddFootageToRoot(target);
+                }
+            }
+
+            public void Dispose() { }
+        }
+
+        private class DeleteFootageHistoryCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_DeleteFootages);
+
+            FootageListModel Model { get; }
+
+            IFootageModel[] Footages { get; }
+
+            IFootageModel?[] Parents { get; }
+
+            InputModel[] InputModels { get; }
+
+            public DeleteFootageHistoryCommand(FootageListModel model, IFootageModel[] footages, IFootageModel?[] parents, InputModel[] inputModels)
+            {
+                Model = model;
+                Footages = footages;
+                Parents = parents;
+                InputModels = inputModels;
+            }
+
+            public void Redo()
+            {
+                foreach (var f in Footages)
+                {
+                    Model.DeleteFootageInternal(f);
+                }
+                foreach (var i in InputModels)
+                {
+                    Model.DeleteInput(i);
+                }
+            }
+
+            public void Undo()
+            {
+                foreach (var (f, p) in Footages.Zip(Parents))
+                {
+                    Model.AddFootage(f, p?.FootageId);
+                }
+
+                foreach (var i in InputModels)
+                {
+                    Model.AddInput(i);
                 }
             }
 

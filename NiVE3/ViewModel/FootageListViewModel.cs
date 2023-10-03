@@ -14,6 +14,7 @@ using NiVE3.Mvvm;
 using NiVE3.View.Command;
 using NiVE3.View.Dialog;
 using NiVE3.View.Dock;
+using NiVE3.View.Resource;
 using NiVE3.ViewModel.Dialog;
 using Prism.Commands;
 using Prism.Services.Dialogs;
@@ -169,7 +170,33 @@ namespace NiVE3.ViewModel
 
             OpenFileCommand = new DelegateCommand(() => System.Diagnostics.Debug.WriteLine("FootageViewModel.OpenFileCommand is not implemented"));
 
-            DeleteFootageCommand = new DelegateCommand(() => System.Diagnostics.Debug.WriteLine("FootageViewModel.DeleteFootageCommand is not implemented"));
+            DeleteFootageCommand = new RequerySuggestedCommand(() =>
+            {
+                if (SelectedFootages.Count < 1)
+                {
+                    return;
+                }
+
+                var rd = LanguageResourceDictionary.Dictionary;
+                var title = rd.GetText(LanguageResourceDictionary.Dialog_ConfirmDeleteFootage_Title);
+                var text = "";
+
+                if (SelectedFootages.Any(f => f.IsFolder))
+                {
+                    text = rd.GetText(LanguageResourceDictionary.Dialog_ConfirmDeleteFootageFolder_Text);
+                }
+                else
+                {
+                    text = rd.GetText(LanguageResourceDictionary.Dialog_ConfirmDeleteFootage_Text);
+                }
+
+                if (MessageBox.Show(text, title, MessageBoxButton.OKCancel, MessageBoxImage.Warning) != MessageBoxResult.OK)
+                {
+                    return;
+                }
+
+                FootageListModel.DeleteFootages(SelectedFootages.Select(f => f.FootageId).ToArray());
+            }, () => SelectedFootages.Count > 0);
 
             AddSolidCommand = new DelegateCommand(() => FootageListModel.AddSolid());
 

@@ -368,6 +368,12 @@ namespace NiVE3.Model
             HistoryModel.Add(new DeleteLayersHistoryCommand(this, layers, oldIndices));
         }
 
+        public void DeleteLayersByFootage(FootageModel footage)
+        {
+            var layerIds = Layers.Where(l => l.FootageModel == footage).Select(l => l.LayerId).ToArray();
+            DeleteLayers(layerIds);
+        }
+
         public NImage Render(double time, bool useGpu)
         {
             // TODO:
