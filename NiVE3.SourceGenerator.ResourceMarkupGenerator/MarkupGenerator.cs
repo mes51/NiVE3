@@ -185,7 +185,7 @@ using System.Windows.Markup;
                 .Where(f => f.GetAttributes().Any(a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, showInMarkup)))
                 .ToArray();
 
-            code.AppendLine(string.Join("," + Environment.NewLine, fields.Select(f => $"    {f.Name}")));
+            code.AppendLine(string.Join(",\r\n", fields.Select(f => $"    {f.Name}")));
 
             code.AppendLine("}");
 
