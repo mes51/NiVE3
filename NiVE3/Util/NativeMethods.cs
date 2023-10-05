@@ -33,7 +33,19 @@ namespace NiVE3.Util
         public static extern nint SHAppBarMessage(ABM dwMessage, [In] ref APPBARDATA pData);
 
         #endregion shell32.dll
+
+        #region winmm.dl
+
+        [DllImport("winmm.dll", EntryPoint = "timeSetEvent")]
+        public static extern uint TimeSetEvent(uint uDelay, uint uResolution, TimeProc lpTimeProc, nint dwUser, FuEvent fuEvent);
+
+        [DllImport("winmm.dll", EntryPoint = "timeKillEvent")]
+        public static extern uint TimeKillEvent(uint uTimerID);
+
+        #endregion winmm.dl
     }
+
+    delegate void TimeProc(uint uTimerID, uint uMsg, nint dwUser, nint dw1, nint dw2);
 
     enum WM : uint
     {
@@ -75,6 +87,16 @@ namespace NiVE3.Util
     {
         MONITOR_DEFAULTTOPRIMARY = 0x1,
         MONITOR_DEFAULTTONEAREST = 0x2
+    }
+
+    [Flags]
+    enum FuEvent : uint
+    {
+        TIME_ONESHOT = 0x00,
+        TIME_PERIODIC = 0x01,
+        TIME_CALLBACK_FUNCTION = 0x00,
+        TIME_CALLBACK_EVENT_SET = 0x10,
+        TIME_CALLBACK_EVENT_PULSE = 0x20
     }
 
     [StructLayout(LayoutKind.Sequential)]

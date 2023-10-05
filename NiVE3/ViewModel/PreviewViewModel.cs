@@ -12,6 +12,7 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using NiVE3.Model;
+using NiVE3.Mvvm;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
 using NiVE3.Util;
@@ -156,8 +157,6 @@ namespace NiVE3.ViewModel
 
         public PreviewModelBase PreviewModel { get; }
 
-        public event EventHandler? SourceChanged;
-
         byte[] Buffer { get; set; }
 
         Int32Rect BufferImageSize { get; set; }
@@ -167,6 +166,13 @@ namespace NiVE3.ViewModel
         bool NeedUpdateFrameNextTick { get; set; }
 
         Debouncer FrameUpdateDebouncer { get; }
+
+        WeakEventPublisher<EventArgs> SourceChangedPublisher { get; } = new WeakEventPublisher<EventArgs>();
+        public event EventHandler<EventArgs> SourceChanged
+        {
+            add { SourceChangedPublisher.Subscribe(value); }
+            remove { SourceChangedPublisher.Unsubscribe(value); }
+        }
 
         public PreviewViewModel(PreviewModelBase previewModel)
         {
@@ -334,7 +340,7 @@ namespace NiVE3.ViewModel
             DownScaleRate = 1;
             previewColorChannel = PreviewColorChannel.Rgb;
             UpdateCurrentFrame();
-            SourceChanged?.Invoke(this, EventArgs.Empty);
+            SourceChangedPublisher.Publish(this, EventArgs.Empty);
         }
     }
 

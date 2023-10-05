@@ -76,11 +76,6 @@ namespace NiVE3.Model
             OnOpenCompositionTimeline(composition);
         }
 
-        public void CreatePreview()
-        {
-            //PreviewModels.Add(new FootagePreviewModel());
-        }
-
         public void RemovePreview(PreviewModelBase previewModel)
         {
             PreviewModels.Remove(previewModel);

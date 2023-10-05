@@ -23,7 +23,6 @@ namespace NiVE3.ViewModel
     [CommandHandling(nameof(OpenProjectCommand), nameof(ShortcutKeySetting.OpenProjectGesture))]
     [CommandHandling(nameof(ExitCommand), nameof(ShortcutKeySetting.ExitGesture))]
     [CommandHandling(nameof(NewCompositionCommand), nameof(ShortcutKeySetting.NewCompositionGesture))]
-    [CommandHandling(nameof(NewPreviewCommand), nameof(ShortcutKeySetting.NewPreviewGesture))]
     class MainWindowViewModel : BindableBase
     {
         public static string RegionName = "MainWindow";
@@ -46,20 +45,21 @@ namespace NiVE3.ViewModel
 
         public ICommand NewCompositionCommand { get; }
 
-        public ICommand NewPreviewCommand { get; }
-
         public ICommand RemoveViewModelCommand { get; }
 
         ProjectModel ProjectModel { get; }
 
         IDialogService DialogService { get; }
 
-        public MainWindowViewModel(IContainer container, IRegionManager region, ProjectModel projectModel, IDialogService dialogService)
+        PlayControlViewModel PlayControlViewModel { get; }
+
+        public MainWindowViewModel(IContainer container, IRegionManager region, ProjectModel projectModel, IDialogService dialogService, PlayControlViewModel playControlViewModel)
         {
             Container = container;
             Region = region;
             ProjectModel = projectModel;
             DialogService = dialogService;
+            PlayControlViewModel = playControlViewModel;
 
             ProjectModel.OpenCompositionTimeline += ProjectModel_OpenCompositionTimeline;
             ProjectModel.CompositionRemoved += ProjectModel_CompositionRemoved;
@@ -105,8 +105,6 @@ namespace NiVE3.ViewModel
                 }
             });
 
-            NewPreviewCommand = new DelegateCommand(() => ProjectModel.CreatePreview());
-
             RemoveViewModelCommand = new DelegateCommand<BindableBase>(MainRegion.Remove);
 
             MainRegion.Views.CollectionChanged += ViewModels_CollectionChanged;
@@ -151,6 +149,8 @@ namespace NiVE3.ViewModel
             foreach (var newPreview in e.NewItems?.OfType<PreviewModelBase>() ?? Enumerable.Empty<PreviewModelBase>())
             {
                 var viewModel = Container.Resolve<PreviewViewModel>(new object[] { newPreview });
+                viewModel.PaneSelected += PreviewViewModel_PaneSelected;
+                viewModel.SourceChanged += PreviewViewModel_SourceChanged;
                 MainRegion.Add(viewModel);
             }
         }
@@ -166,8 +166,30 @@ namespace NiVE3.ViewModel
             {
                 foreach (var vm in removedPane.OfType<PreviewViewModel>())
                 {
+                    vm.PaneSelected -= PreviewViewModel_PaneSelected;
+                    vm.SourceChanged -= PreviewViewModel_SourceChanged;
                     ProjectModel.RemovePreview(vm.PreviewModel);
                 }
+            }
+        }
+
+        private void PreviewViewModel_PaneSelected(object? sender, EventArgs e)
+        {
+            if (sender is PreviewViewModel vm)
+            {
+                PlayControlViewModel.CanPreview = vm.SourceType.HasFlag(Plugin.Interfaces.SourceType.Video);
+                PlayControlViewModel.Duration = vm.Duration;
+                PlayControlViewModel.FrameRate = vm.FrameRate;
+            }
+        }
+
+        private void PreviewViewModel_SourceChanged(object? sender, EventArgs e)
+        {
+            if (sender is PreviewViewModel vm && vm.IsSelected)
+            {
+                PlayControlViewModel.CanPreview = vm.SourceType.HasFlag(Plugin.Interfaces.SourceType.Video);
+                PlayControlViewModel.Duration = vm.Duration;
+                PlayControlViewModel.FrameRate = vm.FrameRate;
             }
         }
     }

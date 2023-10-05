@@ -32,6 +32,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("表示(_V)")]
         public static readonly string MainWindow_Menu_View = nameof(MainWindow_Menu_View);
 
+        [ShowInMarkup, DefaultValue("再生コントロール")]
+        public static readonly string PlayControlView_Title = nameof(PlayControlView_Title);
+
         [ShowInMarkup, DefaultValue("フッテージ")]
         public static readonly string FootageListView_Title = nameof(FootageListView_Title);
 

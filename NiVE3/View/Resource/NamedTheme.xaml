@@ -59,6 +59,11 @@
         <Setter Property="Height" Value="16"/>
     </Style>
 
+    <Style x:Key="LargeIconButton" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
+        <Setter Property="Width" Value="24"/>
+        <Setter Property="Height" Value="24"/>
+    </Style>
+
     <Style x:Key="IconCheckBoxBase" TargetType="{x:Type CheckBox}">
         <Setter Property="Width" Value="24"/>
         <Setter Property="Height" Value="24"/>
@@ -251,6 +256,66 @@
                 <ControlTemplate TargetType="{x:Type CheckBox}">
                     <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="1">
                         <Path Data="{gm:FontawesomeResource ResourceKey=Stopwatch, ReturnDynamicResource=True}" Style="{StaticResource IconBase}"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="PlayButton" TargetType="{x:Type Button}" BasedOn="{StaticResource LargeIconButton}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="1">
+                        <Path Style="{StaticResource IconBase}" Data="{StaticResource PlayIcon}"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="StopButton" TargetType="{x:Type Button}" BasedOn="{StaticResource LargeIconButton}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="1">
+                        <Path Style="{StaticResource IconBase}" Data="{StaticResource StopIcon}"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="PauseButton" TargetType="{x:Type Button}" BasedOn="{StaticResource LargeIconButton}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="1">
+                        <Path Style="{StaticResource IconBase}" Data="{StaticResource PauseIcon}"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="NextFrameButton" TargetType="{x:Type Button}" BasedOn="{StaticResource LargeIconButton}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="1">
+                        <Path Style="{StaticResource IconBase}" Data="{StaticResource NextFrameIcon}"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="PrevFrameButton" TargetType="{x:Type Button}" BasedOn="{StaticResource LargeIconButton}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="1">
+                        <Path Style="{StaticResource IconBase}" Data="{StaticResource PrevFrameIcon}"/>
                     </Border>
                 </ControlTemplate>
             </Setter.Value>

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using NiVE3.Mvvm;
 using Prism.Mvvm;
 
 namespace NiVE3.ViewModel
@@ -30,7 +31,21 @@ namespace NiVE3.ViewModel
         public bool IsSelected
         {
             get { return isSelected; }
-            set { SetProperty(ref isSelected, value); }
+            set
+            {
+                SetProperty(ref isSelected, value);
+                if (value)
+                {
+                    PaneSelectedPublisher.Publish(this, EventArgs.Empty);
+                }
+            }
+        }
+
+        WeakEventPublisher<EventArgs> PaneSelectedPublisher { get; } = new WeakEventPublisher<EventArgs>();
+        public event EventHandler<EventArgs> PaneSelected
+        {
+            add { PaneSelectedPublisher.Subscribe(value); }
+            remove { PaneSelectedPublisher.Unsubscribe(value); }
         }
     }
 

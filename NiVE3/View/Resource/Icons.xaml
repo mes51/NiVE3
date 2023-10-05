@@ -133,4 +133,14 @@
             </CombinedGeometry.Transform>
         </CombinedGeometry>
     </GeometryGroup>
+
+    <PathGeometry x:Key="PlayIcon" Figures="M0,0 0,16 16,8z"/>
+
+    <RectangleGeometry x:Key="StopIcon" Rect="0,0,16,16"/>
+
+    <PathGeometry x:Key="PauseIcon" Figures="M0,0 0,16 3,16 3,0z M6,0 6,16 9,16 9,0"/>
+
+    <PathGeometry x:Key="NextFrameIcon" Figures="M0,0 0,16 14,8z M14,0 14,16 16,16 16,0z"/>
+
+    <PathGeometry x:Key="PrevFrameIcon" Figures="M0,0 0,16 2,16, 2,0z M2,8 16,16 16,0z"/>
 </ResourceDictionary>

@@ -13,7 +13,7 @@ using Prism.Mvvm;
 
 namespace NiVE3.ViewModel
 {
-    [PaneLocation(PaneLocation.Right)]
+    [PaneLocation(PaneLocation.RightCenter)]
     class EffectListViewModel : SingletonePaneViewModelBase, IDragSource
     {
         private ObservableCollection<Tuple<string, string, Guid>> effects = new ObservableCollection<Tuple<string, string, Guid>>();

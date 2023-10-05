@@ -8,6 +8,7 @@ using NiVE3.ViewModel;
 using System.Windows.Controls;
 using System.Windows;
 using NiVE3.Extension;
+using System.Numerics;
 
 namespace NiVE3.View.Dock
 {
@@ -15,7 +16,9 @@ namespace NiVE3.View.Dock
     // SEE: https://qiita.com/ugaya40/items/58e9e3c3340cc1f61b4f
     class LayoutInitializer : Freezable, ILayoutUpdateStrategy
     {
-        const int InitialSidePaneSize = 300;
+        static readonly GridLength InitialSidePaneSize = new GridLength(300);
+
+        static readonly GridLength PanelSize = new GridLength(1.0, GridUnitType.Star);
 
         public static readonly string PanelNamePrefix = "MainLayoutPanel_";
 
@@ -64,18 +67,18 @@ namespace NiVE3.View.Dock
             };
 
             anchorableShown.Closed += closed;
-
         }
 
         public bool BeforeInsertAnchorable(LayoutRoot layout, LayoutAnchorable anchorableToShow, ILayoutContainer destinationContainer)
         {
-            var location = anchorableToShow.Content.GetType().GetCustomAttributes(typeof(PaneLocationAttribute), true).OfType<PaneLocationAttribute>().FirstOrDefault()?.Layout;
-            if (location != null)
+            var attr = anchorableToShow.Content.GetType().GetCustomAttributes(typeof(PaneLocationAttribute), true).OfType<PaneLocationAttribute>().FirstOrDefault();
+            if (attr != null)
             {
+                var location = attr.Layout;
                 var pane = layout.Descendents().OfType<LayoutAnchorablePane>().FirstOrDefault(p => p.Name == location.ToString());
                 if (pane == null)
                 {
-                    pane = CreateAnchorablePane(layout, location.Value);
+                    pane = CreateAnchorablePane(layout, location, attr.Size);
                 }
 
                 pane.Children.Add(anchorableToShow);
@@ -94,28 +97,34 @@ namespace NiVE3.View.Dock
             return new LayoutInitializer();
         }
 
-        LayoutAnchorablePane CreateAnchorablePane(LayoutRoot layout, PaneLocation location)
+        LayoutAnchorablePane CreateAnchorablePane(LayoutRoot layout, PaneLocation location, int size)
         {
-            var orientation = location == PaneLocation.Top || location == PaneLocation.Bottom ? Orientation.Vertical : Orientation.Horizontal;
-            var parent = (LayoutPanel)layout.Manager.FindName(PanelNamePrefix + orientation.ToString());
-            var pane = new LayoutAnchorablePane { Name = location.ToString() };
-
-            if (location == PaneLocation.Top || location == PaneLocation.Bottom)
+            var paneName = location switch
             {
-                pane.DockHeight = new GridLength(InitialSidePaneSize);
-            }
-            else
+                _ when location.HasFlag(PaneLocation.Vertical) && location.HasFlag(PaneLocation.TopArea) => $"{Orientation.Vertical}_Top",
+                _ when location.HasFlag(PaneLocation.Vertical) && location.HasFlag(PaneLocation.Bottom) => $"{Orientation.Vertical}_Bottom",
+                _ when location.HasFlag(PaneLocation.Horizontal) && location.HasFlag(PaneLocation.LeftArea) => $"{Orientation.Horizontal}_Left",
+                _ when location.HasFlag(PaneLocation.Horizontal) && location.HasFlag(PaneLocation.RightArea) => $"{Orientation.Horizontal}_Right",
+                _ => $"{Orientation.Vertical}_Top"
+            };
+            var parent = (LayoutAnchorablePaneGroup)layout.Manager.FindName(PanelNamePrefix + paneName);
+            if (parent == null)
             {
-                pane.DockWidth = new GridLength(InitialSidePaneSize);
+                parent = CreatePaneGroup(layout, location);
             }
+            var pane = new LayoutAnchorablePane
+            {
+                Name = location.ToString(),
+                DockHeight = size != 0 ? new GridLength(size) : PanelSize
+            };
 
-            if (location == PaneLocation.Top || location == PaneLocation.Left)
+            if (location.HasFlag(PaneLocation.TopArea))
             {
                 parent.InsertChildAt(0, pane);
             }
-            else if (location == PaneLocation.Document)
+            else if (location == PaneLocation.Document || location.HasFlag(PaneLocation.CenterArea))
             {
-                var prev = parent.Descendents().OfType<LayoutAnchorablePane>().FirstOrDefault(p => p.Name == PaneLocation.Left.ToString());
+                var prev = parent.Descendents().OfType<LayoutAnchorablePane>().FirstOrDefault(p => p.Name.Contains("Left"));
                 if (prev != null)
                 {
                     parent.InsertChildAt(1, pane);
@@ -130,6 +139,44 @@ namespace NiVE3.View.Dock
                 parent.Children.Add(pane);
             }
 
+            return pane;
+        }
+
+        // NOTE: (多分LayoutRoot.CollectGarbageが呼ばれるせいで)XAML上でLayoutAnchorablePaneGroupを定義してもいなくなってしまうため、必要になったら生成する
+        LayoutAnchorablePaneGroup CreatePaneGroup(LayoutRoot layout, PaneLocation location)
+        {
+            var name = PanelNamePrefix;
+            var pane = new LayoutAnchorablePaneGroup { Orientation = Orientation.Vertical };
+            if (location.HasFlag(PaneLocation.Vertical))
+            {
+                name += $"{Orientation.Vertical}_{(location.HasFlag(PaneLocation.TopArea) ? "Top" : "Bottom")}";
+                var panel = (LayoutPanel)layout.Manager.FindName(PanelNamePrefix + Orientation.Vertical.ToString());
+                pane.DockHeight = InitialSidePaneSize;
+                if (location.HasFlag(PaneLocation.TopArea))
+                {
+                    panel.InsertChildAt(0, pane);
+                }
+                else
+                {
+                    panel.Children.Add(pane);
+                }
+            }
+            else
+            {
+                name += $"{Orientation.Horizontal}_{(location.HasFlag(PaneLocation.LeftArea) ? "Left" : "Right")}";
+                var panel = (LayoutPanel)layout.Manager.FindName(PanelNamePrefix + Orientation.Horizontal.ToString());
+                pane.DockWidth = InitialSidePaneSize;
+                if (location.HasFlag(PaneLocation.LeftArea))
+                {
+                    panel.InsertChildAt(0, pane);
+                }
+                else
+                {
+                    panel.Children.Add(pane);
+                }
+            }
+
+            layout.Manager.RegisterName(name, pane);
             return pane;
         }
     }
