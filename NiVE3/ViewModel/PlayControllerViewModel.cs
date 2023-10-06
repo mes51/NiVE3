@@ -14,6 +14,7 @@ using NiVE3.SourceGenerator.ViewModelWireGenerator;
 using Prism.Commands;
 using Prism.Mvvm;
 using System.ComponentModel;
+using NiVE3.Mvvm;
 
 namespace NiVE3.ViewModel
 {
@@ -80,7 +81,12 @@ namespace NiVE3.ViewModel
 
         PlayControllerModel PlayControllerModel { get; }
 
-        public event EventHandler<EventArgs>? ChangeFrameRequest;
+        WeakEventPublisher<EventArgs> ChangeFrameRequestPublisher { get; } = new WeakEventPublisher<EventArgs>();
+        public event EventHandler<EventArgs> ChangeFrameRequest
+        {
+            add { ChangeFrameRequestPublisher.Subscribe(value); }
+            remove { ChangeFrameRequestPublisher.Unsubscribe(value); }
+        }
 
         public PlayControllerViewModel(PlayControllerModel playControllerModel)
         {
@@ -128,7 +134,7 @@ namespace NiVE3.ViewModel
             Application.Current.Dispatcher.Invoke(() =>
             {
                 CurrentTime = ((int)Math.Round(CurrentTime * FrameRate + 1) / FrameRate) % Duration;
-                ChangeFrameRequest?.Invoke(this, EventArgs.Empty);
+                ChangeFrameRequestPublisher.Publish(this, EventArgs.Empty);
             });
         }
 

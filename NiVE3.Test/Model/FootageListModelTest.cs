@@ -100,7 +100,7 @@ namespace NiVE3.Test.Model
         FootageListModel CreateModel()
         {
             // TODO: Mock化
-            var model = new FootageListModel(new HistoryModel());
+            var model = new FootageListModel(new HistoryModel(new PlayControllerModel()));
             var testCatalog = new AssemblyCatalog(GetType().Assembly);
             var selfCatalog = new AssemblyCatalog(typeof(FootageListModel).Assembly);
             var catalog = new AggregateCatalog(selfCatalog, testCatalog);

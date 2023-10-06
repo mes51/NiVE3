@@ -107,6 +107,8 @@ namespace NiVE3.ViewModel
 
             RemoveViewModelCommand = new DelegateCommand<BindableBase>(MainRegion.Remove);
 
+            PlayControllerViewModel.ChangeFrameRequest += PlayControllerViewModel_ChangeFrameRequest;
+
             MainRegion.Views.CollectionChanged += ViewModels_CollectionChanged;
 
             MainRegion.Add(Container.Resolve<TimelineViewModel>());
@@ -194,6 +196,15 @@ namespace NiVE3.ViewModel
                 PlayControllerViewModel.CanPreview = vm.SourceType.HasFlag(Plugin.Interfaces.SourceType.Video);
                 PlayControllerViewModel.Duration = vm.Duration;
                 PlayControllerViewModel.FrameRate = vm.FrameRate;
+            }
+        }
+
+        private void PlayControllerViewModel_ChangeFrameRequest(object? sender, EventArgs e)
+        {
+            var vm = ViewModels.OfType<PreviewViewModel>().FirstOrDefault(v => v.IsSelected);
+            if (vm != null)
+            {
+                vm.CurrentTime = PlayControllerViewModel.CurrentTime;
             }
         }
     }

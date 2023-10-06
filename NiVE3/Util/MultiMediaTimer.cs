@@ -77,12 +77,12 @@ namespace NiVE3.Util
                     spinWait = WaitingTime * 1000.0 - waitedTime.TotalMicroseconds;
                 }
 
-                var sw = new Stopwatch();
+                var processStart = Stopwatch.GetTimestamp();
                 Tick?.Invoke(this, EventArgs.Empty);
-                sw.Stop();
+                var processTime = Stopwatch.GetElapsedTime(processStart);
                 if (Started)
                 {
-                    Start(Math.Max(Interval - sw.Elapsed.Microseconds * 0.001, 1.0));
+                    Start(Math.Max(Interval - processTime.TotalMicroseconds * 0.001, 1.0));
                 }
             }
         }
