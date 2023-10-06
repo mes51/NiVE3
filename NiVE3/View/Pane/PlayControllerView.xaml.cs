@@ -16,11 +16,11 @@ using System.Windows.Shapes;
 namespace NiVE3.View.Pane
 {
     /// <summary>
-    /// PlayControlView.xaml の相互作用ロジック
+    /// PlayControllerView.xaml の相互作用ロジック
     /// </summary>
-    public partial class PlayControlView : UserControl
+    public partial class PlayControllerView : UserControl
     {
-        public PlayControlView()
+        public PlayControllerView()
         {
             InitializeComponent();
         }

@@ -5,17 +5,21 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using NiVE3.Model;
 using NiVE3.Util;
 using NiVE3.View.Command;
 using NiVE3.View.Dock;
 using NiVE3.View.Resource;
+using NiVE3.SourceGenerator.ViewModelWireGenerator;
 using Prism.Commands;
 using Prism.Mvvm;
+using System.ComponentModel;
 
 namespace NiVE3.ViewModel
 {
     [PaneLocation(PaneLocation.LeftBottom, Size = 75)]
-    class PlayControlViewModel : SingletonePaneViewModelBase, IDisposable
+    [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
+    partial class PlayControllerViewModel : SingletonePaneViewModelBase, IDisposable
     {
         private double frameRate;
         public double FrameRate
@@ -25,6 +29,7 @@ namespace NiVE3.ViewModel
         }
 
         private double currentTime;
+        [NeedWire(nameof(PlayControllerModel))]
         public double CurrentTime
         {
             get { return currentTime; }
@@ -39,6 +44,7 @@ namespace NiVE3.ViewModel
         }
 
         private bool isPlaying;
+        [NeedWire(nameof(PlayControllerModel))]
         public bool IsPlaying
         {
             get { return isPlaying; }
@@ -46,6 +52,7 @@ namespace NiVE3.ViewModel
         }
 
         private bool isPaused;
+        [NeedWire(nameof(PlayControllerModel))]
         public bool IsPaused
         {
             get { return isPaused; }
@@ -71,38 +78,30 @@ namespace NiVE3.ViewModel
 
         MultiMediaTimer Timer { get; }
 
+        PlayControllerModel PlayControllerModel { get; }
+
         public event EventHandler<EventArgs>? ChangeFrameRequest;
 
-        public PlayControlViewModel()
+        public PlayControllerViewModel(PlayControllerModel playControllerModel)
         {
             Title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.PlayControlView_Title);
             Timer = new MultiMediaTimer();
+            PlayControllerModel = playControllerModel;
             Timer.Tick += Timer_Tick;
 
             PlayCommand = new RequerySuggestedCommand(() =>
             {
-                Timer.Interval = 1.0 / FrameRate * 1000.0;
-                Timer.Start();
                 IsPlaying = true;
                 IsPaused = false;
             }, () => CanPreview &&(!IsPlaying || IsPaused));
 
             PauseCommand = new RequerySuggestedCommand(() =>
             {
-                if (!IsPaused)
-                {
-                    Timer.Stop();
-                }
-                else
-                {
-                    Timer.Start();
-                }
                 IsPaused = !IsPaused;
             }, () => CanPreview && IsPlaying);
 
             StopCommand = new RequerySuggestedCommand(() =>
             {
-                Timer.Stop();
                 IsPlaying = false;
                 IsPaused = false;
             }, () => CanPreview && IsPlaying);
@@ -116,7 +115,13 @@ namespace NiVE3.ViewModel
             {
                 CurrentTime = (int)(CurrentTime * FrameRate - 1) / FrameRate;
             }, () => CanPreview && !IsPlaying);
+
+            WiringModel();
+
+            PropertyChanged += PlayControllerViewModel_PropertyChanged;
         }
+
+        partial void WiringModel();
 
         private void Timer_Tick(object? sender, EventArgs e)
         {
@@ -125,6 +130,41 @@ namespace NiVE3.ViewModel
                 CurrentTime = ((int)Math.Round(CurrentTime * FrameRate + 1) / FrameRate) % Duration;
                 ChangeFrameRequest?.Invoke(this, EventArgs.Empty);
             });
+        }
+
+        private void PlayControllerViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(IsPlaying):
+                    if (IsPlaying)
+                    {
+                        Timer.Interval = 1.0 / FrameRate * 1000.0;
+                        Timer.Start();
+                    }
+                    else
+                    {
+                        Timer.Stop();
+                    }
+                    break;
+                case nameof(IsPaused) when IsPlaying:
+                    if (IsPaused)
+                    {
+                        Timer.Start();
+                    }
+                    else
+                    {
+                        Timer.Stop();
+                    }
+                    break;
+                case nameof(CanPreview) when !CanPreview:
+                    IsPlaying = false;
+                    IsPaused = false;
+                    Duration = 0.0;
+                    FrameRate = 1.0;
+                    CurrentTime = 0.0;
+                    break;
+            }
         }
 
         public void Dispose()

@@ -51,15 +51,15 @@ namespace NiVE3.ViewModel
 
         IDialogService DialogService { get; }
 
-        PlayControlViewModel PlayControlViewModel { get; }
+        PlayControllerViewModel PlayControllerViewModel { get; }
 
-        public MainWindowViewModel(IContainer container, IRegionManager region, ProjectModel projectModel, IDialogService dialogService, PlayControlViewModel playControlViewModel)
+        public MainWindowViewModel(IContainer container, IRegionManager region, ProjectModel projectModel, IDialogService dialogService, PlayControllerViewModel playControlViewModel)
         {
             Container = container;
             Region = region;
             ProjectModel = projectModel;
             DialogService = dialogService;
-            PlayControlViewModel = playControlViewModel;
+            PlayControllerViewModel = playControlViewModel;
 
             ProjectModel.OpenCompositionTimeline += ProjectModel_OpenCompositionTimeline;
             ProjectModel.CompositionRemoved += ProjectModel_CompositionRemoved;
@@ -170,6 +170,10 @@ namespace NiVE3.ViewModel
                     vm.SourceChanged -= PreviewViewModel_SourceChanged;
                     ProjectModel.RemovePreview(vm.PreviewModel);
                 }
+                if (ViewModels.OfType<PreviewViewModel>().Count() < 1)
+                {
+                    PlayControllerViewModel.CanPreview = false;
+                }
             }
         }
 
@@ -177,9 +181,9 @@ namespace NiVE3.ViewModel
         {
             if (sender is PreviewViewModel vm)
             {
-                PlayControlViewModel.CanPreview = vm.SourceType.HasFlag(Plugin.Interfaces.SourceType.Video);
-                PlayControlViewModel.Duration = vm.Duration;
-                PlayControlViewModel.FrameRate = vm.FrameRate;
+                PlayControllerViewModel.CanPreview = vm.SourceType.HasFlag(Plugin.Interfaces.SourceType.Video);
+                PlayControllerViewModel.Duration = vm.Duration;
+                PlayControllerViewModel.FrameRate = vm.FrameRate;
             }
         }
 
@@ -187,9 +191,9 @@ namespace NiVE3.ViewModel
         {
             if (sender is PreviewViewModel vm && vm.IsSelected)
             {
-                PlayControlViewModel.CanPreview = vm.SourceType.HasFlag(Plugin.Interfaces.SourceType.Video);
-                PlayControlViewModel.Duration = vm.Duration;
-                PlayControlViewModel.FrameRate = vm.FrameRate;
+                PlayControllerViewModel.CanPreview = vm.SourceType.HasFlag(Plugin.Interfaces.SourceType.Video);
+                PlayControllerViewModel.Duration = vm.Duration;
+                PlayControllerViewModel.FrameRate = vm.FrameRate;
             }
         }
     }

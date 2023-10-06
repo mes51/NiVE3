@@ -17,6 +17,13 @@ namespace NiVE3.Model
 
         int GroupNestCount { get; set; }
 
+        PlayControllerModel PlayControllerModel { get; }
+
+        public HistoryModel(PlayControllerModel playControllerModel)
+        {
+            PlayControllerModel = playControllerModel;
+        }
+
         public void Undo()
         {
             if (CurrentGroup != null)
@@ -30,6 +37,7 @@ namespace NiVE3.Model
                 return;
             }
 
+            PlayControllerModel.Stop();
             var command = UndoCommands.Pop();
             command.Undo();
 
@@ -49,6 +57,7 @@ namespace NiVE3.Model
                 return;
             }
 
+            PlayControllerModel.Stop();
             var command = RedoCommands.Pop();
             command.Redo();
 

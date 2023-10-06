@@ -14,7 +14,7 @@
     <DataTemplate DataType="{x:Type vm:EffectListViewModel}">
         <v:EffectListView />
     </DataTemplate>
-    <DataTemplate DataType="{x:Type vm:PlayControlViewModel}">
-        <v:PlayControlView />
+    <DataTemplate DataType="{x:Type vm:PlayControllerViewModel}">
+        <v:PlayControllerView />
     </DataTemplate>
 </ResourceDictionary>
