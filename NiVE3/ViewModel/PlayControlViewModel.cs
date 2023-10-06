@@ -81,7 +81,7 @@ namespace NiVE3.ViewModel
 
             PlayCommand = new RequerySuggestedCommand(() =>
             {
-                Timer.Interval = (int)(1.0 / FrameRate * 1000.0);
+                Timer.Interval = 1.0 / FrameRate * 1000.0;
                 Timer.Start();
                 IsPlaying = true;
                 IsPaused = false;
@@ -120,7 +120,7 @@ namespace NiVE3.ViewModel
 
         private void Timer_Tick(object? sender, EventArgs e)
         {
-            Application.Current.Dispatcher.BeginInvoke(() =>
+            Application.Current.Dispatcher.Invoke(() =>
             {
                 CurrentTime = ((int)Math.Round(CurrentTime * FrameRate + 1) / FrameRate) % Duration;
                 ChangeFrameRequest?.Invoke(this, EventArgs.Empty);

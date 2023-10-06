@@ -38,7 +38,7 @@ namespace NiVE3.View.Converter
             var hour = (int)(time / 3600);
             var minute = (int)((time % 3600) / 60);
             var second = (int)(time % 60);
-            var frame = (int)((time % 1) * FrameRate);
+            var frame = (int)Math.Round((time % 1) * FrameRate);
 
             return $"{hour}:{minute:D2}:{second:D2}:{frame.ToString("D" + Math.Max((int)Math.Ceiling(Math.Log10(FrameRate)), 2))}";
         }

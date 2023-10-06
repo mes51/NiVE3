@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace NiVE3.Util
@@ -12,7 +13,7 @@ namespace NiVE3.Util
         /// <summary>
         /// ms
         /// </summary>
-        public int Interval { get; set; }
+        public double Interval { get; set; }
 
         uint TimerId { get; set; }
 
@@ -21,6 +22,10 @@ namespace NiVE3.Util
         public event EventHandler<EventArgs>? Tick;
 
         TimeProc Proc { get; }
+
+        long StartTime { get; set; }
+
+        double WaitingTime { get; set; }
 
         public MultiMediaTimer()
         {
@@ -37,11 +42,16 @@ namespace NiVE3.Util
             KillTimer();
         }
 
-        void Start(int interval)
+        void Start(double interval)
         {
             KillTimer();
+            WaitingTime = interval;
             TimerId = NativeMethods.TimeSetEvent((uint)Interval, 0, Proc, nint.Zero, FuEvent.TIME_ONESHOT | FuEvent.TIME_CALLBACK_FUNCTION);
             Started = TimerId != 0;
+            if (Started)
+            {
+                StartTime = Stopwatch.GetTimestamp();
+            }
         }
 
         void KillTimer()
@@ -58,12 +68,21 @@ namespace NiVE3.Util
         {
             if (Started)
             {
+                var waitedTime = Stopwatch.GetElapsedTime(StartTime);
+                var spinWait = WaitingTime * 1000.0 - waitedTime.TotalMicroseconds;
+                while (spinWait > 0.0)
+                {
+                    SpinWait.SpinUntil(() => true);
+                    waitedTime = Stopwatch.GetElapsedTime(StartTime);
+                    spinWait = WaitingTime * 1000.0 - waitedTime.TotalMicroseconds;
+                }
+
                 var sw = new Stopwatch();
                 Tick?.Invoke(this, EventArgs.Empty);
                 sw.Stop();
                 if (Started)
                 {
-                    Start(Math.Max(Interval - sw.Elapsed.Milliseconds, 0));
+                    Start(Math.Max(Interval - sw.Elapsed.Microseconds * 0.001, 1.0));
                 }
             }
         }
