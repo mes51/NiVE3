@@ -68,6 +68,13 @@ namespace NiVE3.View.Part
             new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
+        public static readonly DependencyProperty RangeScrollBarVisibilityProperty = DependencyProperty.Register(
+            nameof(RangeScrollBarVisibility),
+            typeof(Visibility),
+            typeof(TimeLocatorView),
+            new FrameworkPropertyMetadata(Visibility.Visible, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
         private static readonly DependencyProperty RangeBarIndicatorPositionProperty = DependencyProperty.Register(
             nameof(RangeBarIndicatorPosition),
             typeof(double),
@@ -154,6 +161,12 @@ namespace NiVE3.View.Part
         {
             get { return (double)GetValue(RangeBarIndicatorPositionProperty); }
             set { SetValue(RangeBarIndicatorPositionProperty, value); }
+        }
+
+        public Visibility RangeScrollBarVisibility
+        {
+            get { return (Visibility)GetValue(RangeScrollBarVisibilityProperty); }
+            set { SetValue(RangeScrollBarVisibilityProperty, value); }
         }
 
         public bool ShowIndicatorLineInRangeBar

@@ -14,6 +14,8 @@ namespace NiVE3.View.Resource
 
         public const double TimelineRangeThumbTotalWidth = TimelineRangeThumbWidth * 2.0;
 
+        public const double TimeLocatorTimeBarHeight = 20.0;
+
         public const double ArrowWidth = 19.0;
 
         public const double TagAreaWidth = 19.0;
@@ -25,5 +27,9 @@ namespace NiVE3.View.Resource
         public static readonly GridLength ArrowWidthGridLength = new GridLength(ArrowWidth);
 
         public static readonly GridLength LayerUIHeightGridLength = new GridLength(LayerUIHeight);
+
+        public static readonly GridLength TimeLocatorTimeBarHeightGridLength = new GridLength(TimeLocatorTimeBarHeight);
+
+        public static readonly GridLength VerticalScrollBarWidthGridLength = new GridLength(SystemParameters.VerticalScrollBarWidth);
     }
 }

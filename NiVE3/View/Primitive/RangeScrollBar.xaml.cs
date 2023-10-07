@@ -50,7 +50,7 @@ namespace NiVE3.View.Primitive
             nameof(Range),
             typeof(double),
             typeof(RangeScrollBar),
-            new FrameworkPropertyMetadata(1.0, FrameworkPropertyMetadataOptions.AffectsArrange, RangeChanged),
+            new FrameworkPropertyMetadata(1.0, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault | FrameworkPropertyMetadataOptions.AffectsArrange, RangeChanged),
             IsValidDouble
         );
 
