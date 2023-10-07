@@ -107,19 +107,10 @@ namespace NiVE3.PresetPlugin.Input
             }
             else
             {
-                var pixelCount = Width * Height;
-                var data = Reader.GetFrame(time);
-                var dataSpan = MemoryMarshal.Cast<byte, int>(data.AsSpan(0, pixelCount * 4));
-
                 var result = new NManagedImage(Width, Height, false);
-                var imageData = MemoryMarshal.Cast<float, Vector128<float>>(result.Data.AsSpan(0, result.DataLength));
-                for (var i = 0; i < pixelCount; i++)
-                {
-                    var c = Sse2.ConvertScalarToVector128Int32(dataSpan[i]).AsByte();
-                    var cv = Sse2.UnpackLow(Sse2.UnpackLow(c, Vector128<byte>.Zero), Vector128<byte>.Zero).AsInt32();
-
-                    imageData[i] = Sse.Multiply(Sse2.ConvertToVector128Single(cv), ByteToFloat128);
-                }
+                var data = Reader.GetFrame(time);
+                var pixelCount = Width * Height;
+                ImageConversion.ConvertToBGRA128(data, result.Data, pixelCount);
 
                 ArrayPool<byte>.Shared.Return(data);
 
