@@ -11,7 +11,7 @@ namespace NiVE3.View.Dock
     {
         public PaneLocation Layout { get; }
 
-        public int Size { get; set; }
+        public double Size { get; set; }
 
         public PaneLocationAttribute(PaneLocation layout)
         {
