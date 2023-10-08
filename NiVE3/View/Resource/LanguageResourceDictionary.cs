@@ -233,6 +233,12 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("トランスフォーム")]
         public static readonly string Layer_Transform = nameof(Layer_Transform);
 
+        [ShowInMarkup, DefaultValue("名前")]
+        public static readonly string EffectList_Name = nameof(EffectList_Name);
+
+        [ShowInMarkup, DefaultValue("カテゴリ")]
+        public static readonly string EffectList_Category = nameof(EffectList_Category);
+
         // History
 
         [ShowInMarkup, DefaultValue("フォルダの追加")]
