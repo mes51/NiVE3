@@ -36,6 +36,7 @@ namespace NiVE3.Module
             ViewRegistry.RegisterViewWithRegion(MainWindowViewModel.RegionName, typeof(FootageListViewModel));
             ViewRegistry.RegisterViewWithRegion(MainWindowViewModel.RegionName, typeof(EffectListViewModel));
             ViewRegistry.RegisterViewWithRegion(MainWindowViewModel.RegionName, typeof(PlayControllerViewModel));
+            ViewRegistry.RegisterViewWithRegion(MainWindowViewModel.RegionName, typeof(HistoryViewModel));
         }
 
         public void RegisterTypes(IContainerRegistry containerRegistry)
@@ -57,7 +58,8 @@ namespace NiVE3.Module
             Container.Register<PreviewViewModel>(Reuse.Transient, FactoryMethod.ConstructorWithResolvableArguments);
             Container.Register<TimelineViewModel>(Reuse.Transient, FactoryMethod.ConstructorWithResolvableArguments);
 
-            Container.RegisterMapping<CommandOnlyViewModelBase, HistoryViewModel>();
+            // MEMO: ViewなしショートカットのみのViewModelの場合
+            // Container.RegisterMapping<CommandOnlyViewModelBase, ViewModelType>();
 
             containerRegistry.RegisterDialog<InputSettingView, InputSettingViewModel>();
             containerRegistry.RegisterDialog<CompositionSettingView, CompositionSettingViewModel>();

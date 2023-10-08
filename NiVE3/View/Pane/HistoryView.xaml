@@ -1,0 +1,45 @@
+﻿<UserControl x:Class="NiVE3.View.Pane.HistoryView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:local="clr-namespace:NiVE3.View.Pane"
+             xmlns:m="clr-namespace:NiVE3.Model"
+             xmlns:cv="clr-namespace:NiVE3.View.Converter"
+             xmlns:ucv="clr-namespace:NiVE3.UI.Converter;assembly=NiVE3.UI"
+             xmlns:cm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
+             mc:Ignorable="d" 
+             x:Name="Root"
+             d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <ucv:EqualValueConverter x:Key="EqualValueConverter"/>
+        <cv:ContainsCollectionConverter x:Key="RedoCommandConverter" Collection="{Binding RedoCommands}"/>
+
+        <CompositeCollection x:Key="HistoryCollection">
+            <CollectionContainer Collection="{Binding DataContext.FirstHistoryCommand, Source={x:Reference Root}}"/>
+            <CollectionContainer Collection="{Binding DataContext.UndoCommands, Source={x:Reference Root}}"/>
+            <CollectionContainer Collection="{Binding DataContext.ReversedRedoCommands, Source={x:Reference Root}}"/>
+        </CompositeCollection>
+
+        <Style x:Key="HistoryItemContainer" TargetType="{x:Type ListViewItem}">
+            <Style.Triggers>
+                <DataTrigger Value="True">
+                    <DataTrigger.Binding>
+                        <MultiBinding Converter="{StaticResource EqualValueConverter}">
+                            <Binding Path="(ListView.AlternationIndex)" RelativeSource="{RelativeSource Self}"/>
+                            <Binding Path="DataContext.UndoCommands.Count" Source="{x:Reference Root}"/>
+                        </MultiBinding>
+                    </DataTrigger.Binding>
+                    <Setter Property="Background" Value="Gray"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Converter={StaticResource RedoCommandConverter}}" Value="True">
+                    <Setter Property="Opacity" Value="0.5"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+    <Grid>
+        <ListView x:Name="HistoryListView" ItemsSource="{StaticResource HistoryCollection}" DisplayMemberPath="Name" SelectionMode="Single" ItemContainerStyle="{StaticResource HistoryItemContainer}" AlternationCount="{x:Static sys:Int32.MaxValue}" SelectionChanged="HistoryListView_SelectionChanged"/>
+    </Grid>
+</UserControl>

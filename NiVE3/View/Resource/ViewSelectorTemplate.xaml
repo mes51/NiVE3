@@ -17,4 +17,7 @@
     <DataTemplate DataType="{x:Type vm:PlayControllerViewModel}">
         <v:PlayControllerView />
     </DataTemplate>
+    <DataTemplate DataType="{x:Type vm:HistoryViewModel}">
+        <v:HistoryView />
+    </DataTemplate>
 </ResourceDictionary>

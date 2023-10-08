@@ -239,7 +239,13 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("カテゴリ")]
         public static readonly string EffectList_Category = nameof(EffectList_Category);
 
-        // History
+        [ShowInMarkup, DefaultValue("ヒストリ")]
+        public static readonly string HistoryList_Title = nameof(HistoryList_Title);
+
+        // History Command
+
+        [ShowInMarkup, DefaultValue("プロジェクトの新規作成/開く")]
+        public static readonly string History_NewProject = nameof(History_NewProject);
 
         [ShowInMarkup, DefaultValue("フォルダの追加")]
         public static readonly string History_AddFolder = nameof(History_AddFolder);

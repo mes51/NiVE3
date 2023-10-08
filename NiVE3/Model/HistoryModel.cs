@@ -3,15 +3,26 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NiVE3.Mvvm;
 using Prism.Mvvm;
 
 namespace NiVE3.Model
 {
     class HistoryModel : BindableBase
     {
-        Stack<IHistoryCommand> UndoCommands { get; } = new Stack<IHistoryCommand>();
+        private ObservableStack<IHistoryCommand> undoCommands = new ObservableStack<IHistoryCommand>();
+        public ObservableStack<IHistoryCommand> UndoCommands
+        {
+            get { return undoCommands; }
+            set { SetProperty(ref undoCommands, value); }
+        }
 
-        Stack<IHistoryCommand> RedoCommands { get; } = new Stack<IHistoryCommand>();
+        private ObservableStack<IHistoryCommand> redoCommands = new ObservableStack<IHistoryCommand>();
+        public ObservableStack<IHistoryCommand> RedoCommands
+        {
+            get { return redoCommands; }
+            set { SetProperty(ref redoCommands, value); }
+        }
 
         GroupedHistoryCommand? CurrentGroup { get; set; }
 

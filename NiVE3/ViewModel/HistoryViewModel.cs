@@ -7,28 +7,110 @@ using System.Windows.Input;
 using NiVE3.Config;
 using NiVE3.Model;
 using NiVE3.View.Command;
+using NiVE3.View.Dock;
+using NiVE3.View.Resource;
+using NiVE3.SourceGenerator.ViewModelWireGenerator;
 using Prism.Commands;
 using Prism.Mvvm;
+using NiVE3.Mvvm;
+using System.Collections.Specialized;
 
 namespace NiVE3.ViewModel
 {
     [CommandHandling(nameof(UndoCommand), nameof(ShortcutKeySetting.UndoGesture), IsGlobal = true)]
     [CommandHandling(nameof(RedoCommand), nameof(ShortcutKeySetting.RedoGesture), IsGlobal = true)]
-    class HistoryViewModel : CommandOnlyViewModelBase
+    [PaneLocation(PaneLocation.RightBottom)]
+    [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
+    partial class HistoryViewModel : SingletonePaneViewModelBase
     {
+        public IEnumerable<IHistoryCommand> FirstHistoryCommand { get; } = new List<IHistoryCommand> { NewProjectHistoryCommand.Instance };
+
+        private ObservableStack<IHistoryCommand> undoCommands = new ObservableStack<IHistoryCommand>();
+        [NeedWire(nameof(HistoryModel), IsOneWay = true)]
+        public ObservableStack<IHistoryCommand> UndoCommands
+        {
+            get { return undoCommands; }
+            set { SetProperty(ref undoCommands, value); }
+        }
+
+        private ObservableStack<IHistoryCommand> redoCommands = new ObservableStack<IHistoryCommand>();
+        [NeedWire(nameof(HistoryModel), IsOneWay = true)]
+        public ObservableStack<IHistoryCommand> RedoCommands
+        {
+            get { return redoCommands; }
+            set { SetProperty(ref redoCommands, value); }
+        }
+
+        // NOTE: なぜかStackをそのままCollectionContainer等に渡すと順番がひっくり返るため、順序を固定する
+        public IEnumerable<IHistoryCommand> ReversedRedoCommands => RedoCommands.ToArray();
+
         public ICommand UndoCommand { get; }
 
         public ICommand RedoCommand { get; }
 
-        HistoryModel Model { get; }
+        public ICommand ReproduceToTargetHistoryCommand { get; }
+
+        HistoryModel HistoryModel { get; }
 
         public HistoryViewModel(HistoryModel model)
         {
-            Model = model;
+            Title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.HistoryList_Title);
+            HistoryModel = model;
 
-            UndoCommand = new DelegateCommand(() => Model.Undo(), () => Model.CanUndo());
+            UndoCommand = new DelegateCommand(() => HistoryModel.Undo(), () => HistoryModel.CanUndo());
 
-            RedoCommand = new DelegateCommand(() => Model.Redo(), () => Model.CanRedo());
+            RedoCommand = new DelegateCommand(() => HistoryModel.Redo(), () => HistoryModel.CanRedo());
+
+            ReproduceToTargetHistoryCommand = new DelegateCommand<IHistoryCommand>(targetHistory =>
+            {
+                if (targetHistory is NewProjectHistoryCommand)
+                {
+                    while (HistoryModel.CanUndo())
+                    {
+                        HistoryModel.Undo();
+                    }
+                }
+                else if (UndoCommands.Contains(targetHistory))
+                {
+                    while (HistoryModel.CanUndo() && UndoCommands.Peek() != targetHistory)
+                    {
+                        HistoryModel.Undo();
+                    }
+                }
+                else
+                {
+                    while (HistoryModel.CanRedo() && (UndoCommands.Count < 1 || UndoCommands.Peek() != targetHistory))
+                    {
+                        HistoryModel.Redo();
+                    }
+                }
+            });
+
+            WiringModel();
+
+            RedoCommands.CollectionChanged += RedoCommands_CollectionChanged;
         }
+
+        partial void WiringModel();
+
+        private void RedoCommands_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            RaisePropertyChanged(nameof(ReversedRedoCommands));
+        }
+    }
+
+    class NewProjectHistoryCommand : IHistoryCommand
+    {
+        public static readonly IHistoryCommand Instance = new NewProjectHistoryCommand();
+
+        public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_NewProject);
+
+        private NewProjectHistoryCommand() { }
+
+        public void Redo() { }
+
+        public void Undo() { }
+
+        public void Dispose() { }
     }
 }
