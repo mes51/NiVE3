@@ -290,6 +290,15 @@ namespace NiVE3.ViewModel
 
         public ICommand DeleteCommand { get; }
 
+        public ICommand ChangeCurrentTimeCommand { get; }
+
+        WeakEventPublisher<EventArgs> CurrentTimeChangeByUserPublisher { get; } = new WeakEventPublisher<EventArgs>();
+        public event EventHandler<EventArgs> CurrentTimeChangeByUser
+        {
+            add { CurrentTimeChangeByUserPublisher.Subscribe(value); }
+            remove { CurrentTimeChangeByUserPublisher.Unsubscribe(value); }
+        }
+
         ViewStateModel ViewState { get; }
 
         SelectItemType SelectedItemType { get; set; } = SelectItemType.None;
@@ -340,6 +349,8 @@ namespace NiVE3.ViewModel
                     }
                 }
             }, () => CompositionModel != null && SelectedItemType != SelectItemType.None);
+
+            ChangeCurrentTimeCommand = new DelegateCommand(() => CurrentTimeChangeByUserPublisher.Publish(this, EventArgs.Empty));
         }
 
         public void DragOver(IDropInfo dropInfo)

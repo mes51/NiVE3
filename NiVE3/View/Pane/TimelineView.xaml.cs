@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using NiVE3.ViewModel;
 
 namespace NiVE3.View.Pane
 {
@@ -23,6 +24,13 @@ namespace NiVE3.View.Pane
         public TimelineView()
         {
             InitializeComponent();
+        }
+
+        TimelineViewModel? ViewModel => DataContext as TimelineViewModel;
+
+        private void TimeLocator_CurrentTimeChangeByUser(object sender, RoutedEventArgs e)
+        {
+            ViewModel?.ChangeCurrentTimeCommand?.Execute(null);
         }
     }
 }

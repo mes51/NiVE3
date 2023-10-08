@@ -369,5 +369,10 @@ namespace NiVE3.View.Pane
                 viewModel.DownScaleRate = DownScaleList[preview.SelectedDownScaleRateIndex];
             }
         }
+
+        private void TimeLocatorView_CurrentTimeChangeByUser(object sender, RoutedEventArgs e)
+        {
+            ViewModel?.ChangeCurrentTimeCommand?.Execute(null);
+        }
     }
 }

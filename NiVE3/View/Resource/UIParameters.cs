@@ -31,5 +31,7 @@ namespace NiVE3.View.Resource
         public static readonly GridLength TimeLocatorTimeBarHeightGridLength = new GridLength(TimeLocatorTimeBarHeight);
 
         public static readonly GridLength VerticalScrollBarWidthGridLength = new GridLength(SystemParameters.VerticalScrollBarWidth);
+
+        public static readonly GridLength HorizontalScrollBarWidthGridLength = new GridLength(SystemParameters.HorizontalScrollBarHeight);
     }
 }

@@ -111,7 +111,9 @@ namespace NiVE3.ViewModel
 
             MainRegion.Views.CollectionChanged += ViewModels_CollectionChanged;
 
-            MainRegion.Add(Container.Resolve<TimelineViewModel>());
+            var timelineViewModel = Container.Resolve<TimelineViewModel>();
+            timelineViewModel.CurrentTimeChangeByUser += TimelineViewModel_CurrentTimeChangeByUser;
+            MainRegion.Add(timelineViewModel);
         }
 
         private void ProjectModel_OpenCompositionTimeline(object? sender, CompositionEventArgs e)
@@ -120,6 +122,7 @@ namespace NiVE3.ViewModel
             if (timelineViewModel == null)
             {
                 timelineViewModel = Container.Resolve<TimelineViewModel>();
+                timelineViewModel.CurrentTimeChangeByUser += TimelineViewModel_CurrentTimeChangeByUser;
                 MainRegion.Add(timelineViewModel);
             }
 
@@ -153,6 +156,7 @@ namespace NiVE3.ViewModel
                 var viewModel = Container.Resolve<PreviewViewModel>(new object[] { newPreview });
                 viewModel.PaneSelected += PreviewViewModel_PaneSelected;
                 viewModel.SourceChanged += PreviewViewModel_SourceChanged;
+                viewModel.CurrentTimeChangeByUser += PreviewViewModel_CurrentTimeChangeByUser;
                 MainRegion.Add(viewModel);
             }
         }
@@ -170,11 +174,17 @@ namespace NiVE3.ViewModel
                 {
                     vm.PaneSelected -= PreviewViewModel_PaneSelected;
                     vm.SourceChanged -= PreviewViewModel_SourceChanged;
+                    vm.SourceChanged -= PreviewViewModel_CurrentTimeChangeByUser;
                     ProjectModel.RemovePreview(vm.PreviewModel);
                 }
-                if (ViewModels.OfType<PreviewViewModel>().Count() < 1)
+                if (!ViewModels.OfType<PreviewViewModel>().Any())
                 {
                     PlayControllerViewModel.CanPreview = false;
+                }
+
+                foreach (var vm in removedPane.OfType<TimelineViewModel>())
+                {
+                    vm.CurrentTimeChangeByUser -= TimelineViewModel_CurrentTimeChangeByUser;
                 }
             }
         }
@@ -186,6 +196,7 @@ namespace NiVE3.ViewModel
                 PlayControllerViewModel.CanPreview = vm.SourceType.HasFlag(Plugin.Interfaces.SourceType.Video);
                 PlayControllerViewModel.Duration = vm.Duration;
                 PlayControllerViewModel.FrameRate = vm.FrameRate;
+                PlayControllerViewModel.CurrentTime = vm.CurrentTime;
             }
         }
 
@@ -196,6 +207,32 @@ namespace NiVE3.ViewModel
                 PlayControllerViewModel.CanPreview = vm.SourceType.HasFlag(Plugin.Interfaces.SourceType.Video);
                 PlayControllerViewModel.Duration = vm.Duration;
                 PlayControllerViewModel.FrameRate = vm.FrameRate;
+                PlayControllerViewModel.CurrentTime = vm.CurrentTime;
+            }
+        }
+
+        private void PreviewViewModel_CurrentTimeChangeByUser(object? sender, EventArgs e)
+        {
+            if (sender is PreviewViewModel vm && vm.IsSelected)
+            {
+                PlayControllerViewModel.StopCommand.Execute(null);
+                PlayControllerViewModel.CurrentTime = vm.CurrentTime;
+            }
+        }
+
+        private void TimelineViewModel_CurrentTimeChangeByUser(object? sender, EventArgs e)
+        {
+            if (sender is not TimelineViewModel vm)
+            {
+                return;
+            }
+
+            var previewModel = ViewModels.OfType<PreviewViewModel>().FirstOrDefault(p => p.IsSelected && p.PreviewModel is CompositionPreviewModel cpm && cpm.Composition == vm.CompositionModel);
+            if (previewModel != null)
+            {
+                PlayControllerViewModel.StopCommand.Execute(null);
+                previewModel.CurrentTime = vm.CurrentTime;
+                PlayControllerViewModel.CurrentTime = vm.CurrentTime;
             }
         }
 

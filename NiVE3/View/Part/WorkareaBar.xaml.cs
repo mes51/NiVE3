@@ -26,84 +26,84 @@ namespace NiVE3.View.Part
             nameof(BeforeWorkareaStartWidth),
             typeof(double),
             typeof(WorkareaBar),
-            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange)
         );
 
         private static readonly DependencyProperty AfterWorkareaEndWidthProperty = DependencyProperty.Register(
             nameof(AfterWorkareaEndWidth),
             typeof(double),
             typeof(WorkareaBar),
-            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange)
         );
 
         private static readonly DependencyProperty FrameRangeWidthProperty = DependencyProperty.Register(
             nameof(FrameRangeWidth),
             typeof(double),
             typeof(WorkareaBar),
-            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange)
         );
 
         private static readonly DependencyProperty WorkareaLeftProperty = DependencyProperty.Register(
             nameof(WorkareaLeft),
             typeof(double),
             typeof(WorkareaBar),
-            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange)
         );
 
         private static readonly DependencyProperty WorkareaGridWidthProperty = DependencyProperty.Register(
             nameof(WorkareaGridWidth),
             typeof(double),
             typeof(WorkareaBar),
-            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange)
         );
 
         public static readonly DependencyProperty BarHeightProperty = DependencyProperty.Register(
             nameof(BarHeight),
             typeof(double),
             typeof(WorkareaBar),
-            new FrameworkPropertyMetadata(10.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+            new FrameworkPropertyMetadata(10.0, FrameworkPropertyMetadataOptions.AffectsArrange)
         );
 
         public static readonly DependencyProperty DurationProperty = DependencyProperty.Register(
             nameof(Duration),
             typeof(double),
             typeof(WorkareaBar),
-            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, TimeChanged)
+            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange, TimeChanged)
         );
 
         public static readonly DependencyProperty FrameRateProperty = DependencyProperty.Register(
             nameof(FrameRate),
             typeof(double),
             typeof(WorkareaBar),
-            new FrameworkPropertyMetadata(30.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, TimeChanged)
+            new FrameworkPropertyMetadata(30.0, FrameworkPropertyMetadataOptions.AffectsArrange, TimeChanged)
         );
 
         public static readonly DependencyProperty RangeProperty = DependencyProperty.Register(
             nameof(Range),
             typeof(double),
             typeof(WorkareaBar),
-            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, TimeChanged)
+            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange, TimeChanged)
         );
 
         public static readonly DependencyProperty RangeStartProperty = DependencyProperty.Register(
             nameof(RangeStart),
             typeof(double),
             typeof(WorkareaBar),
-            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, TimeChanged)
+            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange, TimeChanged)
         );
 
         public static readonly DependencyProperty WorkareaBeginProperty = DependencyProperty.Register(
             nameof(WorkareaBegin),
             typeof(double),
             typeof(WorkareaBar),
-            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, TimeChanged, CoerceWorkareaBegin)
+            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, TimeChanged, CoerceWorkareaBegin)
         );
 
         public static readonly DependencyProperty WorkareaEndProperty = DependencyProperty.Register(
             nameof(WorkareaEnd),
             typeof(double),
             typeof(WorkareaBar),
-            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, TimeChanged, CoerceWorkareaEnd)
+            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, TimeChanged, CoerceWorkareaEnd)
         );
 
         public double WorkareaEnd
@@ -200,7 +200,7 @@ namespace NiVE3.View.Part
             }
 
             BeforeWorkareaStartWidth = WorkareaBegin * pixelPerTime;
-            AfterWorkareaEndWidth = (Duration - WorkareaEnd) * pixelPerTime;
+            AfterWorkareaEndWidth = Math.Max(Duration - WorkareaEnd, 0.0) * pixelPerTime;
             FrameRangeWidth = (1.0 / FrameRate) * pixelPerTime;
             WorkareaGridWidth = Duration * pixelPerTime + UIParameters.TimelineRangeThumbTotalWidth;
             WorkareaLeft = -RangeStart * pixelPerTime;

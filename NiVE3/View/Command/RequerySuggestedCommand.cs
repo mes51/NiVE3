@@ -63,9 +63,9 @@ namespace NiVE3.View.Command
             remove { CommandManager.RequerySuggested -= value; }
         }
 
-        Action<object> Func { get; }
+        Action<object?> Func { get; }
 
-        Func<object, bool> CanExecuteFunc { get; }
+        Func<object?, bool> CanExecuteFunc { get; }
 
         public bool CanExecute(object? parameter)
         {

@@ -159,28 +159,33 @@ namespace NiVE3.Model
 
         private void CompositionPreviewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(Composition))
+            switch (e.PropertyName)
             {
-                if (Composition != null)
-                {
-                    SourceType = SourceType.VideoAndAudio;
-                    Duration = Composition.Duration;
-                    FrameRate = Composition.FrameRate;
-                    Width = Composition.Width;
-                    Height = Composition.Height;
-                    Name = Composition.Name;
-                }
-                else
-                {
-                    SourceType = SourceType.None;
-                    Duration = 0.0;
-                    FrameRate = 30.0;
-                    Width = 0;
-                    Height = 0;
-                    Name = "";
-                }
-                CurrentTime = 0.0;
-                OnSourceChanged();
+                case nameof(Composition):
+                    if (Composition != null)
+                    {
+                        SourceType = SourceType.VideoAndAudio;
+                        Duration = Composition.Duration;
+                        FrameRate = Composition.FrameRate;
+                        Width = Composition.Width;
+                        Height = Composition.Height;
+                        Name = Composition.Name;
+                    }
+                    else
+                    {
+                        SourceType = SourceType.None;
+                        Duration = 0.0;
+                        FrameRate = 30.0;
+                        Width = 0;
+                        Height = 0;
+                        Name = "";
+                    }
+                    CurrentTime = 0.0;
+                    OnSourceChanged();
+                    break;
+                case nameof(CurrentTime) when Composition != null:
+                    Composition.CurrentTime = CurrentTime;
+                    break;
             }
         }
     }

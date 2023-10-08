@@ -127,6 +127,16 @@ namespace NiVE3.View.Part
 
         public static readonly DependencyProperty MinimumRangeProperty = MinimumRangePropertyKey.DependencyProperty;
 
+        public static RoutedEvent CurrentTimeChangeByUserEvent = EventManager.RegisterRoutedEvent(
+            nameof(CurrentTimeChangeByUser), RoutingStrategy.Direct, typeof(EventHandler<RoutedEventArgs>), typeof(TimeLocatorView)
+        );
+
+        public event EventHandler<RoutedEventArgs> CurrentTimeChangeByUser
+        {
+            add { AddHandler(CurrentTimeChangeByUserEvent, value); }
+            remove { RemoveHandler(CurrentTimeChangeByUserEvent, value); }
+        }
+
         public double MinimumRange
         {
             get { return (double)GetValue(MinimumRangeProperty); }
@@ -233,6 +243,7 @@ namespace NiVE3.View.Part
 
             var time = TimeCalc.CalcTimeFromPixelAligned(e.GetPosition((IInputElement)sender).X - UIParameters.TimelineRangeThumbWidth, ActualWidth, Range, RangeStart, FrameRate, 0.0, Duration);
             SetCurrentValue(CurrentTimeProperty, time);
+            RaiseEvent(new RoutedEventArgs(CurrentTimeChangeByUserEvent, this));
             if (time < RangeStart)
             {
                 RangeStart = time;
@@ -252,6 +263,7 @@ namespace NiVE3.View.Part
 
             var time = TimeCalc.CalcTimeFromPixelAligned(e.GetPosition((IInputElement)sender).X - UIParameters.TimelineRangeThumbWidth, ActualWidth, Range, RangeStart, FrameRate, 0.0, Duration);
             SetCurrentValue(CurrentTimeProperty, time);
+            RaiseEvent(new RoutedEventArgs(CurrentTimeChangeByUserEvent, this));
             if (time < RangeStart)
             {
                 RangeStart = time;

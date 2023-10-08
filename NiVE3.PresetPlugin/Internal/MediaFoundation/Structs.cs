@@ -53,13 +53,13 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
             {
                 stride = mediaType.Get<int>(MediaTypeAttributeKeys.DefaultStride);
             }
-            catch (Exception ex) { }
+            catch { }
             var (aspectRatioNumerator, aspectRatioDenominator) = (1, 1);
             try
             {
                 (aspectRatioNumerator, aspectRatioDenominator) = Util.GetDoubleInt32(mediaType, MediaTypeAttributeKeys.PixelAspectRatio);
             }
-            catch (Exception ex) { }
+            catch { }
 
             var (correctedWidth, correctedHeight) = CorrectAspectRatio(width, height, aspectRatioNumerator, aspectRatioDenominator);
 

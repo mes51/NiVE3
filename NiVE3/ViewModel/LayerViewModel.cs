@@ -504,7 +504,9 @@ namespace NiVE3.ViewModel
 
         string PrevComment { get; set; } = "";
 
+#pragma warning disable CS8618 // 各フィールドには初期化時に必ず値を代入するため無視
         public LayerViewModel(LayerModel layerModel, ViewStateModel viewState, IEnumerable<LayerModelProxy> trackMatteViewSource, IEnumerable<LayerModelProxy> parentLayerViewSource)
+#pragma warning restore CS8618
         {
             LayerModel = layerModel;
             ViewState = viewState;

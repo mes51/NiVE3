@@ -118,21 +118,25 @@ namespace NiVE3.View.Primitive
 
         static void ValuePropertyChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs e)
         {
-            var numericUpDown = dependencyObject as NumericUpDown;
-            numericUpDown.UpButton.IsEnabled = numericUpDown.Value != numericUpDown.MaxValue;
-            numericUpDown.DownButton.IsEnabled = numericUpDown.Value != numericUpDown.MinValue;
-            numericUpDown.UpdateText();
-            numericUpDown.RaiseEvent(new RoutedEventArgs(ValueChangedEvent));
+            if (dependencyObject is NumericUpDown numericUpDown)
+            {
+                numericUpDown.UpButton.IsEnabled = numericUpDown.Value != numericUpDown.MaxValue;
+                numericUpDown.DownButton.IsEnabled = numericUpDown.Value != numericUpDown.MinValue;
+                numericUpDown.UpdateText();
+                numericUpDown.RaiseEvent(new RoutedEventArgs(ValueChangedEvent));
+            }
         }
 
         static void ValueTextChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs e)
         {
-            var numericUpDown = dependencyObject as NumericUpDown;
-            var numberText = DoubleRegex.Match(e.NewValue as string ?? "");
-            double result;
-            if (numberText.Success && double.TryParse(numberText.Value, out result) && numericUpDown.Value != result)
+            if (dependencyObject is NumericUpDown numericUpDown)
             {
-                numericUpDown.Value = result;
+                var numberText = DoubleRegex.Match(e.NewValue as string ?? "");
+                double result;
+                if (numberText.Success && double.TryParse(numberText.Value, out result) && numericUpDown.Value != result)
+                {
+                    numericUpDown.Value = result;
+                }
             }
         }
     }

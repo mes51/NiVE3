@@ -11,6 +11,7 @@ using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using NiVE3.Model;
@@ -21,6 +22,7 @@ using NiVE3.SourceGenerator.ViewModelWireGenerator;
 using NiVE3.Util;
 using NiVE3.View.Dock;
 using NiVE3.View.Resource;
+using Prism.Commands;
 
 namespace NiVE3.ViewModel
 {
@@ -28,6 +30,8 @@ namespace NiVE3.ViewModel
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
     partial class PreviewViewModel : PaneViewModelBase
     {
+        static readonly WriteableBitmap EmptyImage = new WriteableBitmap(1, 1, 96.0, 96.0, PixelFormats.Bgra32, null);
+
         const int Black = 255 << 24;
 
         private string name = "";
@@ -151,7 +155,7 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref previewColorChannel, value); }
         }
 
-        private WriteableBitmap currentFrame;
+        private WriteableBitmap currentFrame = EmptyImage;
         public WriteableBitmap CurrentFrame
         {
             get { return currentFrame; }
@@ -159,6 +163,8 @@ namespace NiVE3.ViewModel
         }
 
         public PreviewModelBase PreviewModel { get; }
+
+        public ICommand ChangeCurrentTimeCommand { get; }
 
         byte[] Buffer { get; set; }
 
@@ -177,9 +183,18 @@ namespace NiVE3.ViewModel
             remove { SourceChangedPublisher.Unsubscribe(value); }
         }
 
+        WeakEventPublisher<EventArgs> CurrentTimeChangeByUserPublisher { get; } = new WeakEventPublisher<EventArgs>();
+        public event EventHandler<EventArgs> CurrentTimeChangeByUser
+        {
+            add { CurrentTimeChangeByUserPublisher.Subscribe(value); }
+            remove { CurrentTimeChangeByUserPublisher.Unsubscribe(value); }
+        }
+
         public PreviewViewModel(PreviewModelBase previewModel)
         {
             PreviewModel = previewModel;
+
+            ChangeCurrentTimeCommand = new DelegateCommand(() => CurrentTimeChangeByUserPublisher.Publish(this, EventArgs.Empty));
 
             WiringModel();
 

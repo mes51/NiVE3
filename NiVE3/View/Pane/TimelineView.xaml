@@ -55,7 +55,8 @@
         </Grid.ColumnDefinitions>
 
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
+            <!-- NOTE: なぜがAutoだと下の行まで高さがおかしくなる(指定サイズ以上になる)ため、明示的に高さを指定する -->
+            <RowDefinition Height="{x:Static r:UIParameters.HorizontalScrollBarWidthGridLength}"/>
             <RowDefinition Height="{x:Static r:UIParameters.TimeLocatorTimeBarHeightGridLength}"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition />
@@ -81,7 +82,7 @@
                 <CheckBox Style="{StaticResource MotionBlurCheckBox}" Margin="5,0,0,0"/>
             </StackPanel>
         </Grid>
-        
+
         <pr:ItemResizableStackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,2,0" Background="Transparent">
             <StackPanel Style="{StaticResource HeaderIconPanel}" Visibility="{Binding IsAVSwitchColumnVisible, Converter={StaticResource BooleanToVisibilityConverter}}" pr:ItemResizableStackPanel.ItemSize="69" pr:ItemResizableStackPanel.IsLocked="True">
                 <Grid Style="{StaticResource IconContainer}" Margin="3,0,0,0">
@@ -194,7 +195,18 @@
         </pt:LayerCollectionView>
 
         <!-- NOTE: インジケーターを最前面に表示するため、TimeLocatorViewのXAMLの記述は下にする -->
-        <pt:TimeLocatorView x:Name="TimeLocator" Grid.Row="1" Grid.Column="1" Grid.RowSpan="3" ShowIndicatorLineInRangeBar="True" Duration="{Binding Duration}" FrameRate="{Binding FrameRate}" CurrentTime="{Binding CurrentTime}" Range="{Binding TimeBarRange}" RangeStart="{Binding TimeBarRangeStart}" RangeScrollBarVisibility="Collapsed"/>
+        <pt:TimeLocatorView x:Name="TimeLocator"
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            Grid.RowSpan="3"
+                            ShowIndicatorLineInRangeBar="True"
+                            Duration="{Binding Duration}"
+                            FrameRate="{Binding FrameRate}"
+                            CurrentTime="{Binding CurrentTime}"
+                            Range="{Binding TimeBarRange}"
+                            RangeStart="{Binding TimeBarRangeStart}"
+                            RangeScrollBarVisibility="Collapsed"
+                            CurrentTimeChangeByUser="TimeLocator_CurrentTimeChangeByUser"/>
         <!-- NOTE: MinimumRangeの計算の都合上、TimeLocatorViewよりも下に置く -->
         <Grid Grid.Row="0" Grid.Column="1">
             <Grid.ColumnDefinitions>
