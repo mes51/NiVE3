@@ -59,6 +59,19 @@ namespace NiVE3.View.Part
             new FrameworkPropertyMetadata(0.0)
         );
 
+        public static readonly DependencyProperty ParentHasExpanderArrowProperty = DependencyProperty.Register(
+            nameof(ParentHasExpanderArrow),
+            typeof(bool),
+            typeof(PropertyCollectionView),
+            new FrameworkPropertyMetadata(true, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        public bool ParentHasExpanderArrow
+        {
+            get { return (bool)GetValue(ParentHasExpanderArrowProperty); }
+            set { SetValue(ParentHasExpanderArrowProperty, value); }
+        }
+
         public double CompositionFrameRate
         {
             get { return (double)GetValue(CompositionFrameRateProperty); }
@@ -111,7 +124,8 @@ namespace NiVE3.View.Part
                     PropertyView.ViewStateProperty,
                     PropertyView.RangeProperty,
                     PropertyView.RangeStartProperty,
-                    PropertyView.CompositionFrameRateProperty
+                    PropertyView.CompositionFrameRateProperty,
+                    PropertyView.ParentHasExpanderArrowProperty
                 )
             });
             templateSelector.Templates.Add(new DataTemplate
@@ -127,7 +141,8 @@ namespace NiVE3.View.Part
                     PropertyGroupView.ViewStateProperty,
                     PropertyGroupView.RangeProperty,
                     PropertyGroupView.RangeStartProperty,
-                    PropertyGroupView.CompositionFrameRateProperty
+                    PropertyGroupView.CompositionFrameRateProperty,
+                    PropertyGroupView.ParentHasExpanderArrowProperty
                 )
             });
 
@@ -144,7 +159,8 @@ namespace NiVE3.View.Part
             DependencyProperty viewStateProperty,
             DependencyProperty rangeProperty,
             DependencyProperty rangeStartProperty,
-            DependencyProperty compositionFrameRateProperty
+            DependencyProperty compositionFrameRateProperty,
+            DependencyProperty parentHasExpanderArrowProperty
         )
         {
             var factory = new FrameworkElementFactory(uiType);
@@ -233,6 +249,14 @@ namespace NiVE3.View.Part
                 Mode = BindingMode.OneWay
             };
             factory.SetBinding(compositionFrameRateProperty, compositionFrameRateBinding);
+
+            var parentHasExpanderArrowBinding = new Binding
+            {
+                Path = new PropertyPath(nameof(ParentHasExpanderArrow)),
+                Source = this,
+                Mode = BindingMode.OneWay
+            };
+            factory.SetBinding(parentHasExpanderArrowProperty, parentHasExpanderArrowBinding);
 
             return factory;
         }

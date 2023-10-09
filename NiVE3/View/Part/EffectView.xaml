@@ -21,6 +21,7 @@
                           IsExpanded="{Binding IsExpanded, Mode=TwoWay}"
                           NameAreaWidth="{Binding ElementName=Root, Path=NameAreaWidth}"
                           NameDragSourceIgnore="False"
+                          ParentHasExpanderArrow="{Binding ElementName=Root, Path=ParentHasExpanderArrow}"
                           IsHighlightHeader="{Binding ElementName=Root, Path=(pr:StackableItemsCollectionView.IsSelected)}">
         <pt:LayerItemExpander.Switches>
             <Grid Margin="1.5,0,0,0">
@@ -35,6 +36,7 @@
                                    IsTagColumnVisible="{Binding ElementName=Root, Path=IsTagColumnVisible}"
                                    Range="{Binding ElementName=Root, Path=Range}"
                                    RangeStart="{Binding ElementName=Root, Path=RangeStart}"
-                                   CompositionFrameRate="{Binding ElementName=Root, Path=CompositionFrameRate}"/>
+                                   CompositionFrameRate="{Binding ElementName=Root, Path=CompositionFrameRate}"
+                                   ParentHasExpanderArrow="{Binding ElementName=Root, Path=ParentHasExpanderArrow}"/>
     </pt:LayerItemExpander>
 </UserControl>

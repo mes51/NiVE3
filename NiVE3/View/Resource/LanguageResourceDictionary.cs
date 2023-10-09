@@ -242,6 +242,15 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("ヒストリ")]
         public static readonly string HistoryList_Title = nameof(HistoryList_Title);
 
+        [ShowInMarkup, DefaultValue("プロパティコントロール - {0}")]
+        public static readonly string LayerPropertyControllerView_Title = nameof(LayerPropertyControllerView_Title);
+
+        [ShowInMarkup, DefaultValue("プロパティコントロール - なし")]
+        public static readonly string LayerPropertyControllerView_Title_Empty = nameof(LayerPropertyControllerView_Title_Empty);
+
+        [ShowInMarkup, DefaultValue("エフェクト")]
+        public static readonly string LayerPropertyControllerView_Effects = nameof(LayerPropertyControllerView_Effects);
+
         // History Command
 
         [ShowInMarkup, DefaultValue("プロジェクトの新規作成/開く")]

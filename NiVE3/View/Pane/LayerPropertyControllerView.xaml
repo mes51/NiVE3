@@ -1,0 +1,269 @@
+﻿<UserControl x:Class="NiVE3.View.Pane.LayerPropertyControllerView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:NiVE3.View.Pane"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:pi="clr-namespace:NiVE3.Plugin.Interfaces;assembly=NiVE3.Plugin"
+             xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
+             xmlns:ugm="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
+             xmlns:mk="clr-namespace:NiVE3.Wpf.Markup"
+             xmlns:r="clr-namespace:NiVE3.View.Resource"
+             xmlns:ur="clr-namespace:NiVE3.UI.Resources;assembly=NiVE3.UI"
+             xmlns:cv="clr-namespace:NiVE3.View.Converter"
+             xmlns:vm="clr-namespace:NiVE3.ViewModel"
+             xmlns:pr="clr-namespace:NiVE3.View.Primitive"
+             xmlns:pt="clr-namespace:NiVE3.View.Part"
+             xmlns:dd="urn:gong-wpf-dragdrop"
+             mc:Ignorable="d" 
+             x:Name="Root"
+             d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <Thickness x:Key="ColumnMargin">2,0,0,0</Thickness>
+        <Thickness x:Key="IconMargin">4,0,0,0</Thickness>
+        <Thickness x:Key="LayerSwitchMargin">1,0,0,0</Thickness>
+        <sys:Boolean x:Key="TrueValue">True</sys:Boolean>
+
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <cv:IsNullConverter x:Key="IsNullConverter"/>
+        <cv:BooleanToVisibilityHiddenConverter x:Key="BooleanToVisibilityHiddenConverter"/>
+        <cv:EnumToBoolConverter x:Key="EnumToBoolConverter" UseAndCompare="True"/>
+        <cv:OffsetGridLengthConverter x:Key="GridLengthConverter"/>
+        <cv:ColorToBrushConverter x:Key="ColorToBrushConverter"/>
+
+        <cv:ConverterCollection x:Key="AVTypeVisibleConverter">
+            <cv:ConverterItem Converter="{StaticResource EnumToBoolConverter}" TargetType="{x:Type sys:Boolean}"/>
+            <cv:ConverterItem Converter="{StaticResource BooleanToVisibilityHiddenConverter}" TargetType="{x:Type Visibility}"/>
+        </cv:ConverterCollection>
+
+        <Style x:Key="IconContainer" TargetType="{x:Type Grid}">
+            <Setter Property="Width" Value="12"/>
+            <Setter Property="Height" Value="12"/>
+            <Setter Property="Margin" Value="{StaticResource IconMargin}"/>
+        </Style>
+
+        <Style x:Key="HeaderIconPanel" TargetType="{x:Type StackPanel}">
+            <Setter Property="Orientation" Value="Horizontal"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+        </Style>
+
+        <Style x:Key="HeaderIconPath" TargetType="{x:Type Path}">
+            <Setter Property="Fill" Value="{ugm:AppearanceResource ResourceKey=TextBrush, ReturnDynamicResource=True}"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="HeaderTextBlock" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="Margin" Value="{StaticResource ColumnMargin}"/>
+        </Style>
+
+        <Style x:Key="ColumnGrid" TargetType="{x:Type Grid}">
+            <Setter Property="Margin" Value="0,0,1,0"/>
+            <Setter Property="ClipToBounds" Value="True"/>
+        </Style>
+
+        <Style x:Key="LayerSwitch" TargetType="{x:Type CheckBox}" BasedOn="{StaticResource LayerSwitchCheckBox}">
+            <Setter Property="Margin" Value="{StaticResource LayerSwitchMargin}"/>
+        </Style>
+
+        <Style x:Key="LayerText" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
+            <Setter Property="Margin" Value="2,0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+            <Setter Property="Visibility" Value="Visible"/>
+        </Style>
+
+        <Style x:Key="ShyLayerSwitch" TargetType="{x:Type CheckBox}" BasedOn="{StaticResource AlwaysShowIconLayerSwitchCheckBox}">
+            <Setter Property="Margin" Value="{StaticResource LayerSwitchMargin}"/>
+            <Setter Property="Content" Value="{StaticResource ShyIcon}"/>
+
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsEnableShy}" Value="True">
+                    <Setter Property="Content" Value="{StaticResource EnableShyIcon}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <ur:DataTemplateCollection x:Key="LayerPropertyControllerInner" DefaultIsEmpty="True">
+            <DataTemplate DataType="{x:Type vm:LayerViewModel}">
+                <Grid x:Name="InnerRoot" Margin="0,2" ClipToBounds="True">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="{x:Static r:UIParameters.TagAreaWidthGridLength}"/>
+                            <ColumnDefinition Width="{Binding ElementName=Root, Path=DataContext.LayerNameColumnWidth, Converter={StaticResource GridLengthConverter}}"/>
+                            <ColumnDefinition Width="{Binding ElementName=Root, Path=DataContext.LayerSwitchColumnWidth, Converter={StaticResource GridLengthConverter}}"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Grid Grid.Column="0" Style="{StaticResource ColumnGrid}">
+                            <Rectangle Width="12" Height="12" Fill="{Binding TagColor, Converter={StaticResource ColorToBrushConverter}}" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="3,0,2,0"/>
+                        </Grid>
+
+                        <Grid Grid.Column="1" Style="{StaticResource ColumnGrid}">
+                            <TextBlock Text="{Binding Name}" Style="{StaticResource LayerText}"/>
+                        </Grid>
+
+                        <Grid Grid.Column="2" Style="{StaticResource ColumnGrid}">
+                            <StackPanel Orientation="Horizontal" Margin="1.5,0,0,0">
+                                <CheckBox IsChecked="{Binding IsEnableShy, Mode=OneWay}"
+                                          Style="{StaticResource ShyLayerSwitch}"
+                                          Command="{Binding ChangeLayerSwitchCommand}"
+                                          CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableShy}"/>
+
+                                <CheckBox Content="{gm:FontawesomeResource ResourceKey=Sun, ReturnDynamicResource=True}"
+                                          Style="{StaticResource LayerSwitch}"
+                                          IsChecked="{Binding IsEnableCollapse, Mode=OneWay}"
+                                          Visibility="{Binding IsComposition, Converter={StaticResource BooleanToVisibilityHiddenConverter}}"
+                                          Command="{Binding ChangeLayerSwitchCommand, Mode=OneWay}"
+                                          CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableCollapse}"/>
+
+                                <pt:MultipleStateLayerSwitch State="{Binding InterpolationQuality, Mode=OneWay}"
+                                                             Width="15"
+                                                             Height="15"
+                                                             Margin="1,0,0,0"
+                                                             Visibility="{Binding SourceType, Converter={StaticResource AVTypeVisibleConverter}, ConverterParameter={x:Static local:LayerPropertyControllerView.CompositionDisplayableSourceType}}"
+                                                             Command="{Binding ChangeInterpolationQualityCommand}">
+                                    <pt:MultipleStateLayerSwitchItem State="{x:Static pi:ImageInterpolationQuality.Level1}" Icon="{StaticResource ImageInterpolationLevel1Icon}"/>
+                                    <pt:MultipleStateLayerSwitchItem State="{x:Static pi:ImageInterpolationQuality.Level2}" Icon="{StaticResource ImageInterpolationLevel2Icon}"/>
+                                </pt:MultipleStateLayerSwitch>
+
+                                <CheckBox Content="{gm:FontawesomeResource ResourceKey=FlorinSign, ReturnDynamicResource=True}"
+                                          Style="{StaticResource LayerSwitch}"
+                                          IsChecked="{Binding IsEnableEffect, Mode=OneWay}"
+                                          Visibility="{Binding HasEffect, Converter={StaticResource BooleanToVisibilityHiddenConverter}}"
+                                          Command="{Binding ChangeLayerSwitchCommand}"
+                                          CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableEffect}"/>
+
+                                <CheckBox Content="{StaticResource FrameBlendIcon}"
+                                          Style="{StaticResource LayerSwitch}"
+                                          IsChecked="{Binding IsEnableFrameBlend, Mode=OneWay}"
+                                          Visibility="{Binding SourceType, Converter={StaticResource AVTypeVisibleConverter}, ConverterParameter={x:Static pi:SourceType.Video}}"
+                                          Command="{Binding ChangeLayerSwitchCommand}"
+                                          CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableFrameBlend}"/>
+
+                                <CheckBox Content="{StaticResource MotionBlurIcon}"
+                                          Style="{StaticResource LayerSwitch}"
+                                          IsChecked="{Binding IsEnableMotionBlur, Mode=OneWay}"
+                                          Visibility="{Binding SourceType, Converter={StaticResource AVTypeVisibleConverter}, ConverterParameter={x:Static local:LayerPropertyControllerView.CompositionDisplayableSourceType}}"
+                                          Command="{Binding ChangeLayerSwitchCommand}"
+                                          CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableMotionBlur}"/>
+
+                                <CheckBox Content="{gm:FontawesomeResource ResourceKey=CircleHalfStroke, ReturnDynamicResource=True}"
+                                          Style="{StaticResource LayerSwitch}"
+                                          IsChecked="{Binding IsEnableAdjustmentLayer, Mode=OneWay}"
+                                          Visibility="{Binding SourceType, Converter={StaticResource AVTypeVisibleConverter}, ConverterParameter={x:Static local:LayerPropertyControllerView.CompositionDisplayableSourceType}}"
+                                          Command="{Binding ChangeLayerSwitchCommand}"
+                                          CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableAdjustmentLayer}"/>
+
+                                <CheckBox Content="{gm:FontawesomeResource ResourceKey=Cube, ReturnDynamicResource=True}"
+                                          Style="{StaticResource LayerSwitch}"
+                                          IsChecked="{Binding IsEnable3D, Mode=OneWay}"
+                                          Visibility="{Binding SourceType, Converter={StaticResource AVTypeVisibleConverter}, ConverterParameter={x:Static local:LayerPropertyControllerView.CompositionDisplayableSourceType}}"
+                                          Command="{Binding ChangeLayerSwitchCommand}"
+                                          CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnable3D}"/>
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
+
+                    <StackPanel Grid.Row="1" VerticalAlignment="Top">
+                        <pt:LayerItemExpander HeaderText="{gm:LanguageResource ResourceKey=LayerPropertyControllerView_Effects, ReturnDynamicResource=True}"
+                                              IndentLevel="1"
+                                              IsAVSwitchColumnVisible="False"
+                                              IsTagColumnVisible="True"
+                                              NameAreaWidth="{Binding ElementName=Root, Path=DataContext.LayerNameColumnWidth}"
+                                              ParentHasExpanderArrow="False"
+                                              Visibility="{Binding HasEffect, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <pt:EffectCollectionView ItemsSource="{Binding Effects}"
+                                                     IndentLevel="2"
+                                                     ControlAreaWidth="{Binding ElementName=InnerRoot, Path=ActualWidth}"
+                                                     NameAreaWidth="{Binding ElementName=Root, Path=DataContext.LayerNameColumnWidth}"
+                                                     IsAVSwitchColumnVisible="False"
+                                                     IsTagColumnVisible="True"
+                                                     Range="{Binding ElementName=Root, Path=DataContext.TimeBarRange}"
+                                                     RangeStart="{Binding ElementName=Root, Path=DataContext.TimeBarRangeStart}"
+                                                     CompositionFrameRate="{Binding ElementName=Root, Path=DataContext.CompositionFrameRate}"
+                                                     ParentHasExpanderArrow="False"
+                                                     SelectedItems="{Binding SelectedEffects}"
+                                                     dd:DragDrop.DropHandler="{Binding}"
+                                                     dd:DragDrop.DragHandler="{Binding RelativeSource={RelativeSource Self}}"
+                                                     dd:DragDrop.IsDragSource="True"
+                                                     dd:DragDrop.IsDropTarget="True"
+                                                     dd:DragDrop.DragSourceIgnore="False"/>
+                        </pt:LayerItemExpander>
+                        <Grid Visibility="{Binding SourceType, Converter={StaticResource AVTypeVisibleConverter}, ConverterParameter={x:Static local:LayerPropertyControllerView.CompositionDisplayableSourceType}}" ClipToBounds="True">
+                            <pt:PropertyGroupView DataContext="{Binding TransformProperties}"
+                                                  IndentLevel="1"
+                                                  ControlAreaWidth="{Binding ElementName=InnerRoot, Path=ActualWidth}"
+                                                  NameAreaWidth="{Binding ElementName=Root, Path=DataContext.LayerNameColumnWidth}"
+                                                  IsAVSwitchColumnVisible="False"
+                                                  IsTagColumnVisible="True"
+                                                  Range="{Binding ElementName=Root, Path=DataContext.TimeBarRange}"
+                                                  RangeStart="{Binding ElementName=Root, Path=DataContext.TimeBarRangeStart}"
+                                                  CompositionFrameRate="{Binding ElementName=Root, Path=DataContext.CompositionFrameRate}"
+                                                  ParentHasExpanderArrow="False"/>
+                        </Grid>
+                    </StackPanel>
+                </Grid>
+            </DataTemplate>
+        </ur:DataTemplateCollection>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition />
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition Width="{x:Static r:UIParameters.VerticalScrollBarWidthGridLength}"/>
+        </Grid.ColumnDefinitions>
+
+        <pr:ItemResizableStackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,2,0" Background="Transparent">
+            <Grid VerticalAlignment="Center" HorizontalAlignment="Center" pr:ItemResizableStackPanel.ItemSize="{x:Static r:UIParameters.TagAreaWidth}" pr:ItemResizableStackPanel.IsLocked="True">
+                <Path Data="{gm:FontawesomeResource ResourceKey=Tag}" Style="{StaticResource HeaderIconPath}"/>
+            </Grid>
+
+            <TextBlock Text="{gm:LanguageResource ResourceKey=Timeline_LayerNameColumn}" Style="{StaticResource HeaderTextBlock}" pr:ItemResizableStackPanel.ItemMinSize="55" pr:ItemResizableStackPanel.ItemSize="{Binding LayerNameColumnWidth}"/>
+
+            <StackPanel Style="{StaticResource HeaderIconPanel}" pr:ItemResizableStackPanel.ItemMinSize="133" pr:ItemResizableStackPanel.ItemSize="{Binding LayerSwitchColumnWidth}">
+                <Grid Style="{StaticResource IconContainer}" Margin="3,0,0,0">
+                    <Path Data="{StaticResource ShyIcon}" Style="{StaticResource HeaderIconPath}"/>
+                </Grid>
+                <Grid Style="{StaticResource IconContainer}">
+                    <Path Data="{gm:FontawesomeResource ResourceKey=Sun}" Style="{StaticResource HeaderIconPath}"/>
+                </Grid>
+                <Grid Style="{StaticResource IconContainer}">
+                    <Path Data="{StaticResource ImageInterpolationLevel1Icon}" Style="{StaticResource HeaderIconPath}"/>
+                </Grid>
+                <Grid Style="{StaticResource IconContainer}">
+                    <Path Data="{gm:FontawesomeResource ResourceKey=FlorinSign}" Style="{StaticResource HeaderIconPath}"/>
+                </Grid>
+                <Grid Style="{StaticResource IconContainer}">
+                    <Path Data="{StaticResource FrameBlendIcon}" Style="{StaticResource HeaderIconPath}"/>
+                </Grid>
+                <Grid Style="{StaticResource IconContainer}">
+                    <Path Data="{StaticResource MotionBlurIcon}" Style="{StaticResource HeaderIconPath}"/>
+                </Grid>
+                <Grid Style="{StaticResource IconContainer}">
+                    <Path Data="{gm:FontawesomeResource ResourceKey=CircleHalfStroke}" Style="{StaticResource HeaderIconPath}"/>
+                </Grid>
+                <Grid Style="{StaticResource IconContainer}">
+                    <Path Data="{gm:FontawesomeResource ResourceKey=Cube}" Style="{StaticResource HeaderIconPath}"/>
+                </Grid>
+            </StackPanel>
+        </pr:ItemResizableStackPanel>
+
+        <ScrollViewer Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Visible" Focusable="False" dd:DragDrop.IsDropTarget="{Binding TargetLayer, Converter={StaticResource IsNullConverter}, ConverterParameter={StaticResource TrueValue}}" dd:DragDrop.DropHandler="{Binding TargetLayer}">
+            <ContentPresenter Content="{Binding TargetLayer}" ContentTemplateSelector="{StaticResource LayerPropertyControllerInner}" VerticalAlignment="Top"/>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

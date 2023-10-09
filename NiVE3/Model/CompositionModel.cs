@@ -19,6 +19,8 @@ namespace NiVE3.Model
 {
     partial class CompositionModel : BindableBase, IDisposable, ICompositionObject
     {
+        public Guid CompositionId { get; }
+
         string name = "";
         public string Name
         {
@@ -154,8 +156,15 @@ namespace NiVE3.Model
 
         HistoryModel HistoryModel { get; }
 
-        public CompositionModel(IRenderer renderer, FootageListModel footageListModel, EffectListModel effectListModel, HistoryModel historyModel)
+        public CompositionModel(IRenderer renderer, FootageListModel footageListModel, EffectListModel effectListModel, HistoryModel historyModel) : this(renderer, footageListModel, effectListModel, historyModel, null) { }
+
+        public CompositionModel(IRenderer renderer, FootageListModel footageListModel, EffectListModel effectListModel, HistoryModel historyModel, Guid? compositionId)
         {
+            if (compositionId == null)
+            {
+                compositionId = Guid.NewGuid();
+            }
+            CompositionId = compositionId.Value;
             Renderer = renderer;
             FootageListModel = footageListModel;
             EffectListModel = effectListModel;

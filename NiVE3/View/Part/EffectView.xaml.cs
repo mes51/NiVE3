@@ -81,9 +81,18 @@ namespace NiVE3.View.Part
             new FrameworkPropertyMetadata(0.0)
         );
 
-        EffectViewModel? ViewModel => DataContext as EffectViewModel;
+        public static readonly DependencyProperty ParentHasExpanderArrowProperty = DependencyProperty.Register(
+            nameof(ParentHasExpanderArrow),
+            typeof(bool),
+            typeof(EffectView),
+            new FrameworkPropertyMetadata(true, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
 
-        EffectCollectionView? ParentCollection => ItemsControl.ItemsControlFromItemContainer(this) as EffectCollectionView;
+        public bool ParentHasExpanderArrow
+        {
+            get { return (bool)GetValue(ParentHasExpanderArrowProperty); }
+            set { SetValue(ParentHasExpanderArrowProperty, value); }
+        }
 
         public double CompositionFrameRate
         {
@@ -132,6 +141,10 @@ namespace NiVE3.View.Part
             get { return (int)GetValue(IndentLevelProperty); }
             set { SetValue(IndentLevelProperty, value); }
         }
+
+        EffectViewModel? ViewModel => DataContext as EffectViewModel;
+
+        EffectCollectionView? ParentCollection => ItemsControl.ItemsControlFromItemContainer(this) as EffectCollectionView;
 
         public EffectView()
         {

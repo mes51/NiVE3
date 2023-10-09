@@ -11,7 +11,6 @@
              xmlns:pr="clr-namespace:NiVE3.View.Primitive"
              xmlns:pt="clr-namespace:NiVE3.View.Part"
              xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
-             xmlns:ui="clr-namespace:NiVE3.UI.Primitive;assembly=NiVE3.UI"
              xmlns:ugm="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
              mc:Ignorable="d" 
              x:Name="Root"
@@ -99,9 +98,9 @@
                 </Grid>
             </StackPanel>
 
-            <Grid pr:ItemResizableStackPanel.ItemSize="19" pr:ItemResizableStackPanel.IsLocked="True"/>
+            <Grid pr:ItemResizableStackPanel.ItemSize="{x:Static r:UIParameters.ArrowWidth}" pr:ItemResizableStackPanel.IsLocked="True"/>
 
-            <Grid VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="{Binding IsTagColumnVisible, Converter={StaticResource BooleanToVisibilityConverter}}" pr:ItemResizableStackPanel.ItemSize="19" pr:ItemResizableStackPanel.IsLocked="True">
+            <Grid VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="{Binding IsTagColumnVisible, Converter={StaticResource BooleanToVisibilityConverter}}" pr:ItemResizableStackPanel.ItemSize="{x:Static r:UIParameters.TagAreaWidth}" pr:ItemResizableStackPanel.IsLocked="True">
                 <Path Data="{gm:FontawesomeResource ResourceKey=Tag}" Style="{StaticResource HeaderIconPath}"/>
             </Grid>
 
@@ -176,23 +175,7 @@
                                 dd:DragDrop.DropHandler="{Binding}"
                                 dd:DragDrop.DragHandler="{Binding RelativeSource={RelativeSource Self}}"
                                 dd:DragDrop.IsDragSource="True"
-                                dd:DragDrop.IsDropTarget="True">
-            <pt:LayerCollectionView.Style>
-                <Style TargetType="{x:Type pt:LayerCollectionView}" BasedOn="{x:Static pt:LayerCollectionView.DefaultStyle}">
-                    <Setter Property="Template">
-                        <Setter.Value>
-                            <ControlTemplate TargetType="{x:Type ItemsControl}">
-                                <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="true">
-                                    <ScrollViewer HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Visible" Focusable="False">
-                                        <ItemsPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
-                                    </ScrollViewer>
-                                </Border>
-                            </ControlTemplate>
-                        </Setter.Value>
-                    </Setter>
-                </Style>
-            </pt:LayerCollectionView.Style>
-        </pt:LayerCollectionView>
+                                dd:DragDrop.IsDropTarget="True"/>
 
         <!-- NOTE: インジケーターを最前面に表示するため、TimeLocatorViewのXAMLの記述は下にする -->
         <pt:TimeLocatorView x:Name="TimeLocator"

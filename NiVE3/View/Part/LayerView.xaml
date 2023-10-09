@@ -363,7 +363,7 @@
                               CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableAudio}"/>
                     
                     <CheckBox Content="{gm:FontawesomeResource ResourceKey=Circle}"
-                              Style="{StaticResource LayerSwitch}"
+                              Style="{StaticResource SoloSwitchStyle}"
                               IsChecked="{Binding IsEnableSolo, Mode=OneWay}"
                               Command="{Binding ChangeLayerSwitchCommand}"
                               CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableSolo}"/>

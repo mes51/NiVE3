@@ -92,6 +92,13 @@ namespace NiVE3.View.Part
             new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
+        public static readonly DependencyProperty ParentHasExpanderArrowProperty = DependencyProperty.Register(
+            nameof(ParentHasExpanderArrow),
+            typeof(bool),
+            typeof(PropertyView),
+            new FrameworkPropertyMetadata(true, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
         public static readonly DependencyProperty RangeProperty = DependencyProperty.Register(
             nameof(Range),
             typeof(double),
@@ -129,6 +136,12 @@ namespace NiVE3.View.Part
         {
             get { return (double)GetValue(RangeProperty); }
             set { SetValue(RangeProperty, value); }
+        }
+
+        public bool ParentHasExpanderArrow
+        {
+            get { return (bool)GetValue(ParentHasExpanderArrowProperty); }
+            set { SetValue(ParentHasExpanderArrowProperty, value); }
         }
 
         public PropertyViewState? ViewState
@@ -242,6 +255,10 @@ namespace NiVE3.View.Part
                     indent += UIParameters.AVSwitchWidthWithHalfSplitter;
                 }
                 var nameAreaWidth = propertyView.NameAreaWidth - UIParameters.ArrowWidth * propertyView.IndentLevel + UIParameters.ArrowWidth - KeyFrameSwitchWidth;
+                if (!propertyView.ParentHasExpanderArrow)
+                {
+                    nameAreaWidth -= UIParameters.ArrowWidth;
+                }
                 if (propertyView.IsTagColumnVisible)
                 {
                     nameAreaWidth += UIParameters.TagAreaWidth;
@@ -265,6 +282,10 @@ namespace NiVE3.View.Part
             if (d is PropertyView propertyView)
             {
                 var nameAreaWidth = propertyView.NameAreaWidth - UIParameters.ArrowWidth * propertyView.IndentLevel + UIParameters.ArrowWidth - KeyFrameSwitchWidth;
+                if (!propertyView.ParentHasExpanderArrow)
+                {
+                    nameAreaWidth -= UIParameters.ArrowWidth;
+                }
                 if (propertyView.IsTagColumnVisible)
                 {
                     nameAreaWidth += UIParameters.TagAreaWidth;

@@ -55,6 +55,19 @@ namespace NiVE3.View.Part
             new FrameworkPropertyMetadata(0.0)
         );
 
+        public static readonly DependencyProperty ParentHasExpanderArrowProperty = DependencyProperty.Register(
+            nameof(ParentHasExpanderArrow),
+            typeof(bool),
+            typeof(EffectCollectionView),
+            new FrameworkPropertyMetadata(true, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        public bool ParentHasExpanderArrow
+        {
+            get { return (bool)GetValue(ParentHasExpanderArrowProperty); }
+            set { SetValue(ParentHasExpanderArrowProperty, value); }
+        }
+
         public double CompositionFrameRate
         {
             get { return (double)GetValue(CompositionFrameRateProperty); }
@@ -172,6 +185,14 @@ namespace NiVE3.View.Part
                     Mode = BindingMode.OneWay
                 };
                 BindingOperations.SetBinding(effect, EffectView.CompositionFrameRateProperty, compositionFrameRateBinding);
+
+                var parentHasExpanderArrowBinding = new Binding
+                {
+                    Path = new PropertyPath(nameof(ParentHasExpanderArrow)),
+                    Source = this,
+                    Mode = BindingMode.OneWay
+                };
+                BindingOperations.SetBinding(effect, EffectView.ParentHasExpanderArrowProperty, parentHasExpanderArrowBinding);
             }
         }
     }

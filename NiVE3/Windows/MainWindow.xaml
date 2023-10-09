@@ -63,6 +63,11 @@
                     <Setter Property="Visibility" Value="{Binding Model.Visibility, Mode=TwoWay}"/>
                 </Style>
             </vd:LayoutItemContainerStyle>
+            <vd:LayoutItemContainerStyle ViewModelType="{x:Type vm:LayerPropertyControllerViewModel}">
+                <Style TargetType="{x:Type ad:LayoutAnchorableItem}" BasedOn="{StaticResource LayoutItemContainerStyleBase}">
+                    <Setter Property="Visibility" Value="{Binding Model.Visibility, Mode=TwoWay}"/>
+                </Style>
+            </vd:LayoutItemContainerStyle>
         </vd:LayoutItemContainerStyleSelector>
     </Window.Resources>
     <!--

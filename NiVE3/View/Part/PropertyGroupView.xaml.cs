@@ -66,6 +66,13 @@ namespace NiVE3.View.Part
             new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
+        public static readonly DependencyProperty ParentHasExpanderArrowProperty = DependencyProperty.Register(
+            nameof(ParentHasExpanderArrow),
+            typeof(bool),
+            typeof(PropertyGroupView),
+            new FrameworkPropertyMetadata(true, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
         public static readonly DependencyProperty RangeProperty = DependencyProperty.Register(
             nameof(Range),
             typeof(double),
@@ -103,6 +110,12 @@ namespace NiVE3.View.Part
         {
             get { return (double)GetValue(RangeProperty); }
             set { SetValue(RangeProperty, value); }
+        }
+
+        public bool ParentHasExpanderArrow
+        {
+            get { return (bool)GetValue(ParentHasExpanderArrowProperty); }
+            set { SetValue(ParentHasExpanderArrowProperty, value); }
         }
 
         public PropertyViewState? ViewState

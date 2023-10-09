@@ -83,6 +83,13 @@ namespace NiVE3.View.Part
             new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
+        public static readonly DependencyProperty ParentHasExpanderArrowProperty = DependencyProperty.Register(
+            nameof(ParentHasExpanderArrow),
+            typeof(bool),
+            typeof(LayerItemExpander),
+            new FrameworkPropertyMetadata(true, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
         private static readonly DependencyProperty IndentMarginLeftProperty = DependencyProperty.Register(
             nameof(IndentMarginLeft),
             typeof(GridLength),
@@ -157,6 +164,12 @@ namespace NiVE3.View.Part
             set { SetValue(IsExpandedProperty, value); }
         }
 
+        public bool ParentHasExpanderArrow
+        {
+            get { return (bool)GetValue(ParentHasExpanderArrowProperty); }
+            set { SetValue(ParentHasExpanderArrowProperty, value); }
+        }
+
         private GridLength IndentMarginLeft
         {
             get { return (GridLength)GetValue(IndentMarginLeftProperty); }
@@ -186,12 +199,16 @@ namespace NiVE3.View.Part
                 }
                 expander.IndentMarginLeft = new GridLength(indent);
 
-                var nameAreaWidth = Math.Max(expander.NameAreaWidth - UIParameters.ArrowWidth * (expander.IndentLevel + 1) + UIParameters.ArrowWidth, 0.0);
+                var nameAreaWidth = expander.NameAreaWidth - UIParameters.ArrowWidth * (expander.IndentLevel + 1) + UIParameters.ArrowWidth;
+                if (!expander.ParentHasExpanderArrow)
+                {
+                    nameAreaWidth -= UIParameters.ArrowWidth;
+                }
                 if (expander.IsTagColumnVisible)
                 {
                     nameAreaWidth += UIParameters.TagAreaWidth;
                 }
-                expander.CalculatedNameAreaWidth = new GridLength(nameAreaWidth);
+                expander.CalculatedNameAreaWidth = new GridLength(Math.Max(nameAreaWidth, 0.0));
             }
         }
 
@@ -199,12 +216,16 @@ namespace NiVE3.View.Part
         {
             if (d is LayerItemExpander expander)
             {
-                var nameAreaWidth = Math.Max(expander.NameAreaWidth - UIParameters.ArrowWidth * (expander.IndentLevel + 1) + UIParameters.ArrowWidth, 0.0);
+                var nameAreaWidth = expander.NameAreaWidth - UIParameters.ArrowWidth * (expander.IndentLevel + 1) + UIParameters.ArrowWidth;
+                if (!expander.ParentHasExpanderArrow)
+                {
+                    nameAreaWidth -= UIParameters.ArrowWidth;
+                }
                 if (expander.IsTagColumnVisible)
                 {
                     nameAreaWidth += UIParameters.TagAreaWidth;
                 }
-                expander.CalculatedNameAreaWidth = new GridLength(nameAreaWidth);
+                expander.CalculatedNameAreaWidth = new GridLength(Math.Max(nameAreaWidth, 0.0));
             }
         }
     }

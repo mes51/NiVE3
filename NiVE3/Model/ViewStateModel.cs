@@ -113,5 +113,33 @@ namespace NiVE3.Model
             get { return timelineParentLayerColumnVisible; }
             set { SetProperty(ref timelineParentLayerColumnVisible, value); }
         }
+
+        private double propertyControllerLayerNameColumnWidth = 153.0;
+        public double PropertyControllerLayerNameColumnWidth
+        {
+            get { return propertyControllerLayerNameColumnWidth; }
+            set { SetProperty(ref propertyControllerLayerNameColumnWidth, value); }
+        }
+
+        private double propertyControllerLayerSwitchColumnWidth = 133.0;
+        public double PropertyControllerLayerSwitchColumnWidth
+        {
+            get { return propertyControllerLayerSwitchColumnWidth; }
+            set { SetProperty(ref propertyControllerLayerSwitchColumnWidth, value); }
+        }
+
+        private Guid? lastSelectedLayerId;
+        public Guid? LastSelectedLayerId
+        {
+            get { return lastSelectedLayerId; }
+            set { SetProperty(ref lastSelectedLayerId, value); }
+        }
+
+        private Guid? currentEditingCompositionId;
+        public Guid? CurrentEditingCompositionId
+        {
+            get { return currentEditingCompositionId; }
+            set { SetProperty(ref currentEditingCompositionId, value); }
+        }
     }
 }

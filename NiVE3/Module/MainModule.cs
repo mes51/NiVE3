@@ -37,6 +37,7 @@ namespace NiVE3.Module
             ViewRegistry.RegisterViewWithRegion(MainWindowViewModel.RegionName, typeof(EffectListViewModel));
             ViewRegistry.RegisterViewWithRegion(MainWindowViewModel.RegionName, typeof(PlayControllerViewModel));
             ViewRegistry.RegisterViewWithRegion(MainWindowViewModel.RegionName, typeof(HistoryViewModel));
+            ViewRegistry.RegisterViewWithRegion(MainWindowViewModel.RegionName, typeof(LayerPropertyControllerViewModel));
         }
 
         public void RegisterTypes(IContainerRegistry containerRegistry)
@@ -54,6 +55,7 @@ namespace NiVE3.Module
             Container.Register<FootageListViewModel>(Reuse.Singleton, FactoryMethod.ConstructorWithResolvableArguments);
             Container.Register<EffectListViewModel>(Reuse.Singleton, FactoryMethod.ConstructorWithResolvableArguments);
             Container.Register<PlayControllerViewModel>(Reuse.Singleton, FactoryMethod.ConstructorWithResolvableArguments);
+            Container.Register<LayerPropertyControllerViewModel>(Reuse.Singleton, FactoryMethod.ConstructorWithResolvableArguments);
 
             Container.Register<PreviewViewModel>(Reuse.Transient, FactoryMethod.ConstructorWithResolvableArguments);
             Container.Register<TimelineViewModel>(Reuse.Transient, FactoryMethod.ConstructorWithResolvableArguments);

@@ -33,5 +33,9 @@ namespace NiVE3.View.Resource
         public static readonly GridLength VerticalScrollBarWidthGridLength = new GridLength(SystemParameters.VerticalScrollBarWidth);
 
         public static readonly GridLength HorizontalScrollBarWidthGridLength = new GridLength(SystemParameters.HorizontalScrollBarHeight);
+
+        public static readonly GridLength AVSwitchWidthWithHalfSplitterGridLength = new GridLength(AVSwitchWidthWithHalfSplitter);
+
+        public static readonly GridLength TagAreaWidthGridLength = new GridLength(TagAreaWidth);
     }
 }

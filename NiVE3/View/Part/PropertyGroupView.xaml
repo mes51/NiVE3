@@ -14,7 +14,8 @@
                           IsAVSwitchColumnVisible="{Binding ElementName=Root, Path=IsAVSwitchColumnVisible}"
                           IsTagColumnVisible="{Binding ElementName=Root, Path=IsTagColumnVisible}"
                           IsExpanded="{Binding IsExpanded, Mode=TwoWay}"
-                          NameAreaWidth="{Binding ElementName=Root, Path=NameAreaWidth}">
+                          NameAreaWidth="{Binding ElementName=Root, Path=NameAreaWidth}"
+                          ParentHasExpanderArrow="{Binding ElementName=Root, Path=ParentHasExpanderArrow}">
         <pt:PropertyCollectionView ItemsSource="{Binding Children}"
                                    IndentLevel="{Binding ElementName=Root, Path=IndentLevel, Converter={x:Static local:PropertyGroupView.NextIndentConverter}}"
                                    ControlAreaWidth="{Binding ElementName=Root, Path=ControlAreaWidth}"
@@ -23,6 +24,7 @@
                                    IsTagColumnVisible="{Binding ElementName=Root, Path=IsTagColumnVisible}"
                                    Range="{Binding ElementName=Root, Path=Range}"
                                    RangeStart="{Binding ElementName=Root, Path=RangeStart}"
-                                   CompositionFrameRate="{Binding ElementName=Root, Path=CompositionFrameRate}"/>
+                                   CompositionFrameRate="{Binding ElementName=Root, Path=CompositionFrameRate}"
+                                   ParentHasExpanderArrow="{Binding ElementName=Root, Path=ParentHasExpanderArrow}"/>
     </pt:LayerItemExpander>
 </UserControl>

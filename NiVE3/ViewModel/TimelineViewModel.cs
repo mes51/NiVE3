@@ -217,6 +217,22 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref isParentLayerColumnVisible, value); }
         }
 
+        private Guid? lastSelectedLayerId;
+        [NeedWire(nameof(ViewState))]
+        public Guid? LastSelectedLayerId
+        {
+            get { return lastSelectedLayerId; }
+            set { SetProperty(ref lastSelectedLayerId, value); }
+        }
+
+        private Guid? currentEditingCompositionId;
+        [NeedWire(nameof(ViewState))]
+        public Guid? CurrentEditingCompositionId
+        {
+            get { return currentEditingCompositionId; }
+            set { SetProperty(ref currentEditingCompositionId, value); }
+        }
+
         private CompositionModel? compositionModel;
         public CompositionModel? CompositionModel
         {
@@ -232,6 +248,10 @@ namespace NiVE3.ViewModel
                 {
                     UnbindComposition();
                     Layers = null;
+                    if (CurrentEditingCompositionId == compositionModel.CompositionId)
+                    {
+                        CurrentEditingCompositionId = null;
+                    }
                 }
                 SetProperty(ref compositionModel, value);
                 if (value != null)
@@ -614,6 +634,19 @@ namespace NiVE3.ViewModel
                 {
                     SelectedLayers.Add(e.Layer);
                 }
+            }
+            if (SelectTarget != null || (e.SelectItemType == SelectItemType.Layer && e.Layer != null && SelectedLayers.Contains(e.Layer)))
+            {
+                CurrentEditingCompositionId = CompositionModel?.CompositionId;
+                LastSelectedLayerId = e.Layer?.LayerId;
+            }
+            else
+            {
+                if (CurrentEditingCompositionId == CompositionModel?.CompositionId)
+                {
+                    CurrentEditingCompositionId = null;
+                }
+                LastSelectedLayerId = null;
             }
         }
     }
