@@ -254,7 +254,7 @@ namespace NiVE3.View.Part
                 var frameRate = CompositionFrameRate;
                 var frameDuration = 1.0 / frameRate;
                 var diffTime = TimeCalc.CalcTimeFromPixel(e.GetPosition(this).X - ClickX, ActualWidth, Range, 0.0);
-                var globalTime = TimeCalc.CalcTimeFromPixelAligned(e.GetPosition(this).X, ActualWidth, Range, RangeStart, frameRate);
+                var globalTime = TimeCalc.CalcTimeFromPixelAligned(e.GetPosition(this).X - UIParameters.TimelineRangeThumbWidth, ActualWidth, Range, RangeStart, frameRate);
                 if (diffTime != 0.0)
                 {
                     var changed = false;
@@ -264,10 +264,11 @@ namespace NiVE3.View.Part
                             {
                                 var prev = InPoint;
                                 var newTime = TimeCalc.AlignRound(globalTime, frameRate) - SourceStartPoint;
-                                var max = Math.Max(TimeCalc.AlignFloor(OutPoint - frameDuration, frameRate), TimeCalc.AlignFloor(OutPoint, frameRate));
+                                var max = TimeCalc.AlignFloor(OutPoint - frameDuration, frameRate);
                                 if (HasDuration && !IsEnableTimeRemap)
                                 {
-                                    InPoint = Math.Clamp(newTime, 0.0, max);
+                                    max = Math.Max(max, 0.0);
+                                    InPoint = Math.Min(Math.Max(newTime, 0.0), max);
                                 }
                                 else
                                 {
@@ -281,10 +282,11 @@ namespace NiVE3.View.Part
                             {
                                 var prev = OutPoint;
                                 var newTime = TimeCalc.AlignRound(globalTime, frameRate) - SourceStartPoint;
-                                var min = Math.Min(TimeCalc.AlignFloor(InPoint + frameDuration, frameRate), TimeCalc.AlignFloor(InPoint, frameRate));
+                                var min = TimeCalc.AlignFloor(InPoint + frameDuration, frameRate);
                                 if (HasDuration && !IsEnableTimeRemap)
                                 {
-                                    OutPoint = Math.Clamp(newTime, min, Duration);
+                                    min = Math.Min(min, Duration);
+                                    OutPoint = Math.Min(Math.Max(newTime, min), Duration);
                                 }
                                 else
                                 {

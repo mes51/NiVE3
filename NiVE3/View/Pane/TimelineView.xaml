@@ -175,7 +175,23 @@
                                 dd:DragDrop.DropHandler="{Binding}"
                                 dd:DragDrop.DragHandler="{Binding RelativeSource={RelativeSource Self}}"
                                 dd:DragDrop.IsDragSource="True"
-                                dd:DragDrop.IsDropTarget="True"/>
+                                dd:DragDrop.IsDropTarget="True">
+            <pt:LayerCollectionView.Style>
+                <Style TargetType="{x:Type pt:LayerCollectionView}" BasedOn="{x:Static pt:LayerCollectionView.DefaultStyle}">
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="{x:Type ItemsControl}">
+                                <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="true">
+                                    <ScrollViewer HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Visible" Focusable="False">
+                                        <ItemsPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                                    </ScrollViewer>
+                                </Border>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </pt:LayerCollectionView.Style>
+        </pt:LayerCollectionView>
 
         <!-- NOTE: インジケーターを最前面に表示するため、TimeLocatorViewのXAMLの記述は下にする -->
         <pt:TimeLocatorView x:Name="TimeLocator"
