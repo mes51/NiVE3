@@ -18,7 +18,7 @@ using NiVE3.Mvvm;
 
 namespace NiVE3.ViewModel
 {
-    [PaneLocation(PaneLocation.LeftBottom, Size = 75)]
+    [PaneLocation(PaneLocation.Left1Bottom, Size = 75)]
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
     partial class PlayControllerViewModel : SingletonePaneViewModelBase, IDisposable
     {

@@ -19,7 +19,7 @@ namespace NiVE3.ViewModel
 {
     [CommandHandling(nameof(UndoCommand), nameof(ShortcutKeySetting.UndoGesture), IsGlobal = true)]
     [CommandHandling(nameof(RedoCommand), nameof(ShortcutKeySetting.RedoGesture), IsGlobal = true)]
-    [PaneLocation(PaneLocation.RightBottom)]
+    [PaneLocation(PaneLocation.Right1Bottom)]
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
     partial class HistoryViewModel : SingletonePaneViewModelBase
     {

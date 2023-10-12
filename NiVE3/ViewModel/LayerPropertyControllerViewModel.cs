@@ -16,7 +16,7 @@ namespace NiVE3.ViewModel
 {
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
     [ManualViewModelWireable(nameof(Composition), nameof(BindComposition), nameof(UnbindComposition), WithInitializeProperty = true)]
-    [PaneLocation(PaneLocation.LeftCenter)]
+    [PaneLocation(PaneLocation.Left2Center)]
     partial class LayerPropertyControllerViewModel : SingletonePaneViewModelBase
     {
         private double layerNameColumnWidth;

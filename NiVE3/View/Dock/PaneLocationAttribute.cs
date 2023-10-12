@@ -24,21 +24,30 @@ namespace NiVE3.View.Dock
     {
         Document = 0,
 
-        Vertical   = 0b0100000,
-        Horizontal = 0b1000000,
-        CenterArea = 0b0000001,
-        TopArea    = 0b0000010,
-        BottomArea = 0b0000100,
-        LeftArea   = 0b0001000,
-        RightArea  = 0b0010000,
+        // Orientation_Index_Position
+        Vertical    = 0b01_00_00000,
+        Horizontal  = 0b10_00_00000,
+        CenterArea  = 0b00_00_00001,
+        TopArea     = 0b00_00_00010,
+        BottomArea  = 0b00_00_00100,
+        LeftArea    = 0b00_00_01000,
+        RightArea   = 0b00_00_10000,
+        FirstPanel  = 0b00_00_00000,
+        SecondPanel = 0b00_01_00000,
 
         Top = Vertical | TopArea,
         Bottom = Vertical | BottomArea,
-        LeftTop = Horizontal | LeftArea | TopArea,
-        LeftCenter = Horizontal | LeftArea | CenterArea,
-        LeftBottom = Horizontal | LeftArea | BottomArea,
-        RightTop = Horizontal | RightArea | TopArea,
-        RightCenter = Horizontal | RightArea | CenterArea,
-        RightBottom = Horizontal | RightArea | BottomArea
+        Left1Top = Horizontal | LeftArea | TopArea,
+        Left1Center = Horizontal | LeftArea | CenterArea,
+        Left1Bottom = Horizontal | LeftArea | BottomArea,
+        Left2Top = Horizontal | LeftArea | TopArea | SecondPanel,
+        Left2Center = Horizontal | LeftArea | CenterArea | SecondPanel,
+        Left2Bottom = Horizontal | LeftArea | BottomArea | SecondPanel,
+        Right1Top = Horizontal | RightArea | TopArea,
+        Right1Center = Horizontal | RightArea | CenterArea,
+        Right1Bottom = Horizontal | RightArea | BottomArea,
+        Right2Top = Horizontal | RightArea | TopArea | SecondPanel,
+        Right2Center = Horizontal | RightArea | CenterArea | SecondPanel,
+        Right2Bottom = Horizontal | RightArea | BottomArea | SecondPanel
     }
 }

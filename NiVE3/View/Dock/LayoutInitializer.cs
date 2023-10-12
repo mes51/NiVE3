@@ -112,15 +112,7 @@ namespace NiVE3.View.Dock
 
         LayoutAnchorablePane CreateAnchorablePane(LayoutRoot layout, PaneLocation location, double size)
         {
-            var paneName = location switch
-            {
-                _ when location.HasFlag(PaneLocation.Vertical) && location.HasFlag(PaneLocation.TopArea) => $"{Orientation.Vertical}_Top",
-                _ when location.HasFlag(PaneLocation.Vertical) && location.HasFlag(PaneLocation.Bottom) => $"{Orientation.Vertical}_Bottom",
-                _ when location.HasFlag(PaneLocation.Horizontal) && location.HasFlag(PaneLocation.LeftArea) => $"{Orientation.Horizontal}_Left",
-                _ when location.HasFlag(PaneLocation.Horizontal) && location.HasFlag(PaneLocation.RightArea) => $"{Orientation.Horizontal}_Right",
-                _ => $"{Orientation.Vertical}_Top"
-            };
-            var parent = (LayoutAnchorablePaneGroup)layout.Manager.FindName(PanelNamePrefix + paneName);
+            var parent = (LayoutAnchorablePaneGroup)layout.Manager.FindName(GetPaneName(location));
             if (parent == null)
             {
                 parent = CreatePaneGroup(layout, location);
@@ -163,11 +155,10 @@ namespace NiVE3.View.Dock
         // NOTE: (多分LayoutRoot.CollectGarbageが呼ばれるせいで)XAML上でLayoutAnchorablePaneGroupを定義してもいなくなってしまうため、必要になったら生成する
         LayoutAnchorablePaneGroup CreatePaneGroup(LayoutRoot layout, PaneLocation location)
         {
-            var name = PanelNamePrefix;
+            var name = GetPaneName(location);
             var pane = new LayoutAnchorablePaneGroup { Orientation = Orientation.Vertical };
             if (location.HasFlag(PaneLocation.Vertical))
             {
-                name += $"{Orientation.Vertical}_{(location.HasFlag(PaneLocation.TopArea) ? "Top" : "Bottom")}";
                 var panel = (LayoutPanel)layout.Manager.FindName(PanelNamePrefix + Orientation.Vertical.ToString());
                 pane.DockHeight = InitialSidePaneSize;
                 if (location.HasFlag(PaneLocation.TopArea))
@@ -181,17 +172,28 @@ namespace NiVE3.View.Dock
             }
             else
             {
-                name += $"{Orientation.Horizontal}_{(location.HasFlag(PaneLocation.LeftArea) ? "Left" : "Right")}";
                 var panel = (LayoutPanel)layout.Manager.FindName(PanelNamePrefix + Orientation.Horizontal.ToString());
                 pane.DockWidth = InitialSidePaneSize;
+                var index = 0;
                 if (location.HasFlag(PaneLocation.LeftArea))
                 {
-                    panel.InsertChildAt(0, pane);
+                    if (location.HasFlag(PaneLocation.SecondPanel) && layout.Manager.FindName(GetPaneName(PaneLocation.Horizontal | PaneLocation.LeftArea | PaneLocation.FirstPanel)) != null)
+                    {
+                        index = 1;
+                    }
                 }
                 else
                 {
-                    panel.Children.Add(pane);
+                    if (location.HasFlag(PaneLocation.SecondPanel) && layout.Manager.FindName(GetPaneName(PaneLocation.Horizontal | PaneLocation.RightArea | PaneLocation.FirstPanel)) != null)
+                    {
+                        index = panel.Children.Count - 1;
+                    }
+                    else
+                    {
+                        index = panel.Children.Count;
+                    }
                 }
+                panel.InsertChildAt(index, pane);
             }
 
             layout.Manager.RegisterName(name, pane);
@@ -210,6 +212,22 @@ namespace NiVE3.View.Dock
                 }
                 pane.PropertyChanged -= Pane_PropertyChanged;
             }
+        }
+
+        static string GetPaneName(PaneLocation location)
+        {
+            return PanelNamePrefix + location switch
+            {
+                _ when location.HasFlag(PaneLocation.Vertical) && location.HasFlag(PaneLocation.TopArea) => $"{Orientation.Vertical}_Top",
+                _ when location.HasFlag(PaneLocation.Vertical) && location.HasFlag(PaneLocation.Bottom) => $"{Orientation.Vertical}_Bottom",
+                _ when location.HasFlag(PaneLocation.Horizontal) && location.HasFlag(PaneLocation.LeftArea) => $"{Orientation.Horizontal}_Left",
+                _ when location.HasFlag(PaneLocation.Horizontal) && location.HasFlag(PaneLocation.RightArea) => $"{Orientation.Horizontal}_Right",
+                _ => $"{Orientation.Vertical}_Top"
+            } + "_" + location switch
+            {
+                _ when location.HasFlag(PaneLocation.SecondPanel) => "Second",
+                _ => "First"
+            };
         }
     }
 }

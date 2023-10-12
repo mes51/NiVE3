@@ -26,7 +26,7 @@ namespace NiVE3.ViewModel
         ObservableCollectionView<IFootageModel, IFootageViewModel>? Footages { get; }
     }
 
-    [PaneLocation(PaneLocation.LeftCenter)]
+    [PaneLocation(PaneLocation.Left1Center)]
     [CommandHandling(nameof(OpenFileCommand), nameof(ShortcutKeySetting.OpenFileGesture), IsGlobal = true)]
     [CommandHandling(nameof(AddFootageFolderCommand), nameof(ShortcutKeySetting.AddFootageFolderGesture), IsGlobal = true)]
     [CommandHandling(nameof(DeleteFootageCommand), nameof(ShortcutKeySetting.DeleteItemGesture))]

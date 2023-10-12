@@ -16,7 +16,7 @@ using System.Text.RegularExpressions;
 
 namespace NiVE3.ViewModel
 {
-    [PaneLocation(PaneLocation.RightCenter)]
+    [PaneLocation(PaneLocation.Right1Center)]
     class EffectListViewModel : SingletonePaneViewModelBase, IDragSource
     {
         static readonly Regex FilterSeparatorRegex = new Regex("\\s+", RegexOptions.Compiled);
