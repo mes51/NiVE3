@@ -100,7 +100,7 @@ namespace NiVE3.Test.Model
         FootageListModel CreateModel()
         {
             // TODO: Mock化
-            var model = new FootageListModel(new HistoryModel(new PlayControllerModel()));
+            var model = new FootageListModel(null!, new HistoryModel(new PlayControllerModel()));
             var testCatalog = new AssemblyCatalog(GetType().Assembly);
             var selfCatalog = new AssemblyCatalog(typeof(FootageListModel).Assembly);
             var catalog = new AggregateCatalog(selfCatalog, testCatalog);
@@ -126,6 +126,8 @@ namespace NiVE3.Test.Model
 
         public string FilePath => "";
 
+        public void SetupAccelerator(Accelerator? accelerator) { }
+
         public void Dispose() { }
 
         public FootageSourceGroup GetGroup()
@@ -146,6 +148,8 @@ namespace NiVE3.Test.Model
         public const string ID = "6F1D817C-CD8C-41B8-A6B1-58D987CFDD29";
 
         public string FilePath => "";
+
+        public void SetupAccelerator(Accelerator? accelerator) { }
 
         public void Dispose() { }
 

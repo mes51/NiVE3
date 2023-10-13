@@ -4,6 +4,7 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ILGPU.Runtime;
 using NiVE3.Model;
 using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Image;
@@ -21,6 +22,8 @@ namespace NiVE3.Input
         public string FilePath => Composition.Name;
 
         public CompositionModel Composition { get; }
+
+        public void SetupAccelerator(Accelerator? accelerator) { }
 
         public CompositionInput(CompositionModel composition)
         {

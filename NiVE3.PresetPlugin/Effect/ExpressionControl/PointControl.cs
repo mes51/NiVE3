@@ -4,6 +4,7 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ILGPU.Runtime;
 using NiVE3.Plugin;
 using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Interfaces;
@@ -26,5 +27,9 @@ namespace NiVE3.PresetPlugin.Effect.ExpressionControl
                 new Vector3dProperty("point", new LanguageResourceKey(typeof(LanguageResourceDictionary), LanguageResourceDictionary.ExpressionControl_PointControl_PropertyName), new Vector3d(), true, 2)
             };
         }
+
+        public void SetupAccelerator(Accelerator? accelerator) { }
+
+        public void Dispose() { }
     }
 }

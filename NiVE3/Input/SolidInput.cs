@@ -29,6 +29,8 @@ namespace NiVE3.Input
 
         SolidFootageSource Source { get; } = new SolidFootageSource();
 
+        public void SetupAccelerator(Accelerator? accelerator) { }
+
         public bool Load(string filePath)
         {
             // TODO

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -39,15 +40,15 @@ namespace NiVE3.Model
 
         public Guid EffectId { get; }
 
-        IEffect Effect { get; }
+        ExportLifetimeContext<IEffect> Effect { get; }
 
         IEffectMetadata Metadata { get; }
 
         HistoryModel HistoryModel { get; }
 
-        public EffectModel(IEffect effect, IEffectMetadata metadata, CompositionModel compositionModel, LayerModel layerModel, HistoryModel historyModel) : this(effect, metadata, compositionModel, layerModel, historyModel, null) { }
+        public EffectModel(ExportLifetimeContext<IEffect> effect, IEffectMetadata metadata, CompositionModel compositionModel, LayerModel layerModel, HistoryModel historyModel) : this(effect, metadata, compositionModel, layerModel, historyModel, null) { }
 
-        public EffectModel(IEffect effect, IEffectMetadata metadata, CompositionModel compositionModel, LayerModel layerModel, HistoryModel historyModel, Guid? effectId)
+        public EffectModel(ExportLifetimeContext<IEffect> effect, IEffectMetadata metadata, CompositionModel compositionModel, LayerModel layerModel, HistoryModel historyModel, Guid? effectId)
         {
             Effect = effect;
             Metadata = metadata;
@@ -55,12 +56,16 @@ namespace NiVE3.Model
             HistoryModel = historyModel;
             EffectId = effectId ?? Guid.NewGuid();
 
-            foreach (var p in effect.GetProperties())
+            foreach (var p in effect.Value.GetProperties())
             {
                 Properties.Add(new PropertyModel(p, compositionModel, layerModel, this, historyModel));
             }
         }
 
-        public void Dispose() { }
+        public void Dispose()
+        {
+            Effect.Value.Dispose();
+            Effect.Dispose();
+        }
     }
 }

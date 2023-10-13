@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Documents;
 using System.Windows.Input;
+using ILGPU.Runtime;
 using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Image;
 using NiVE3.Plugin.Interfaces;
@@ -28,6 +29,8 @@ namespace NiVE3.PresetPlugin.Input
         VideoSourceReaderBase? Reader { get; set; }
 
         public string FilePath { get; private set; } = "";
+
+        public void SetupAccelerator(Accelerator? accelerator) { }
 
         public void Dispose()
         {

@@ -119,7 +119,10 @@ namespace NiVE3.Model
                 Model.OnDeleteFootageByUndo(LoadedSourceModels);
             }
 
-            public void Dispose() { }
+            public void Dispose()
+            {
+                Input.Dispose();
+            }
         }
 
         private class MoveHistoryCommand : IHistoryCommand

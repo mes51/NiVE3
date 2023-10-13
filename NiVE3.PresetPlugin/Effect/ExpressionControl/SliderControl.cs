@@ -4,6 +4,7 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ILGPU.Runtime;
 using NiVE3.Plugin;
 using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Interfaces;
@@ -25,5 +26,9 @@ namespace NiVE3.PresetPlugin.Effect.ExpressionControl
                 new DoubleProperty("slider", new LanguageResourceKey(typeof(LanguageResourceDictionary), LanguageResourceDictionary.ExpressionControl_SliderControl_PropertyName), 0.0, double.MinValue, double.MaxValue, true, 2)
             };
         }
+
+        public void SetupAccelerator(Accelerator? accelerator) { }
+
+        public void Dispose() { }
     }
 }

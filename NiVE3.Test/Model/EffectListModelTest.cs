@@ -5,6 +5,7 @@ using System.ComponentModel.Composition.Hosting;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ILGPU.Runtime;
 using NiVE3.Model;
 using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Interfaces;
@@ -17,7 +18,8 @@ namespace NiVE3.Test.Model
         [Test]
         public void TestCreateEffect()
         {
-            var model = new EffectListModel();
+            // TODO: モックライブラリを探す
+            var model = new EffectListModel(null!);
             var catalog = new AssemblyCatalog(GetType().Assembly);
             var container = new CompositionContainer(catalog);
             container.ComposeParts(model);
@@ -36,7 +38,14 @@ namespace NiVE3.Test.Model
     {
         public const string ID = "ED0374C9-2227-445A-9C4A-DE8A4A9DFAE5";
 
+        public void SetupAccelerator(Accelerator? accelerator) { }
+
         public PropertyBase[] GetProperties()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Dispose()
         {
             throw new NotImplementedException();
         }

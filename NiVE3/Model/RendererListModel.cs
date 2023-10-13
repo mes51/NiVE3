@@ -19,11 +19,15 @@ namespace NiVE3.Model
         [ImportMany]
         List<ExportFactory<IRenderer, IRendererMetadata>>? Renderers { get; set; }
 
-        public RendererListModel()
+        AcceleratorModel AcceleratorModel { get; }
+
+        public RendererListModel(AcceleratorModel acceleratorModel)
         {
             var catalog = new DirectoryCatalog(Paths.PluginDirectory);
             var container = new CompositionContainer(catalog);
             container.ComposeParts(this);
+
+            AcceleratorModel = acceleratorModel;
 
             if (Renderers != null)
             {
@@ -35,13 +39,15 @@ namespace NiVE3.Model
             }
         }
 
-        public IRenderer CreateRenderer(Type rendererType)
+        public ExportLifetimeContext<IRenderer> CreateRenderer(Type rendererType)
         {
             if (Renderers == null)
             {
                 throw new Exception(); // bug
             }
-            return Renderers.First(f => f.Metadata.PluginType == rendererType).CreateExport().Value;
+            var result = Renderers.First(f => f.Metadata.PluginType == rendererType).CreateExport();
+            result.Value.SetupAccelerator(AcceleratorModel.Accelerator); // TODO: Acceleratorの更新
+            return result;
         }
     }
 }

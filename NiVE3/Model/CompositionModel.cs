@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -148,7 +149,7 @@ namespace NiVE3.Model
             }
         }
 
-        IRenderer Renderer { get; }
+        ExportLifetimeContext<IRenderer> Renderer { get; }
 
         FootageListModel FootageListModel { get; }
 
@@ -156,9 +157,9 @@ namespace NiVE3.Model
 
         HistoryModel HistoryModel { get; }
 
-        public CompositionModel(IRenderer renderer, FootageListModel footageListModel, EffectListModel effectListModel, HistoryModel historyModel) : this(renderer, footageListModel, effectListModel, historyModel, null) { }
+        public CompositionModel(ExportLifetimeContext<IRenderer> renderer, FootageListModel footageListModel, EffectListModel effectListModel, HistoryModel historyModel) : this(renderer, footageListModel, effectListModel, historyModel, null) { }
 
-        public CompositionModel(IRenderer renderer, FootageListModel footageListModel, EffectListModel effectListModel, HistoryModel historyModel, Guid? compositionId)
+        public CompositionModel(ExportLifetimeContext<IRenderer> renderer, FootageListModel footageListModel, EffectListModel effectListModel, HistoryModel historyModel, Guid? compositionId)
         {
             if (compositionId == null)
             {
@@ -462,6 +463,7 @@ namespace NiVE3.Model
 
         public void Dispose()
         {
+            Renderer.Value.Dispose();
             Renderer.Dispose();
         }
     }

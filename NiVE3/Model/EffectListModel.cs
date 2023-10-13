@@ -19,11 +19,15 @@ namespace NiVE3.Model
         [ImportMany]
         List<ExportFactory<IEffect, IEffectMetadata>>? Effects { get; set; }
 
-        public EffectListModel()
+        AcceleratorModel AcceleratorModel { get; set; }
+
+        public EffectListModel(AcceleratorModel acceleratorModel)
         {
             var catalog = new DirectoryCatalog(Paths.PluginDirectory);
             var container = new CompositionContainer(catalog);
             container.ComposeParts(this);
+
+            AcceleratorModel = acceleratorModel;
 
             if (Effects != null)
             {
@@ -40,7 +44,9 @@ namespace NiVE3.Model
             var factory = Effects?.FirstOrDefault(f => Guid.Parse(f.Metadata.EffectUuid) == effectUuid);
             if (factory != null)
             {
-                return new EffectModel(factory.CreateExport().Value, factory.Metadata, compositionModel, layerModel, historyModel);
+                var effect = factory.CreateExport();
+                effect.Value.SetupAccelerator(AcceleratorModel.Accelerator); // TODO: Acceleratorの更新
+                return new EffectModel(effect, factory.Metadata, compositionModel, layerModel, historyModel);
             }
             else
             {

@@ -20,6 +20,13 @@ namespace NiVE3.Plugin.Interfaces
         string FilePath { get; }
 
         /// <summary>
+        /// 入力プラグインのセットアップを行います。Acceleratorが更新される度に呼ばれます。
+        /// ただし、ファイルの再読み込みは行いません。
+        /// </summary>
+        /// <param name="accelerator">CUDAを実行するデバイスを表すAccelerator。使用できるデバイスがない場合はnull</param>
+        public void SetupAccelerator(Accelerator? accelerator);
+
+        /// <summary>
         /// ファイルを読み込みます
         /// </summary>
         /// <param name="filePath">読み込むファイルのパス。ファイルはすでに存在チェック済みになります。</param>

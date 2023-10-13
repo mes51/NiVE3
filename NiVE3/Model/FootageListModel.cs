@@ -58,6 +58,8 @@ namespace NiVE3.Model
 
         HistoryModel HistoryModel { get; }
 
+        AcceleratorModel AcceleratorModel { get; }
+
         public event EventHandler<ShowLoadSettingEventArgs>? ShowLoadSetting;
 
         public event EventHandler<FootageModelEventArgs>? ShowFootagePreview;
@@ -68,7 +70,7 @@ namespace NiVE3.Model
 
         public event EventHandler<FootageEventArgs>? DeleteFootageByUndo;
 
-        public FootageListModel(HistoryModel historyModel)
+        public FootageListModel(AcceleratorModel acceleratorModel, HistoryModel historyModel)
         {
             var pluginCatalog = new DirectoryCatalog(Paths.PluginDirectory);
             var selfCatalog = new AssemblyCatalog(typeof(FootageListModel).Assembly);
@@ -78,6 +80,7 @@ namespace NiVE3.Model
 
             InitializePlugin();
 
+            AcceleratorModel = acceleratorModel;
             HistoryModel = historyModel;
 
             //TODO: イベントの追加方法をfieldに対し行うか、nullableにした上でコンストラクタでインスタンスをセットするのが良いか
@@ -97,7 +100,7 @@ namespace NiVE3.Model
                 solidFolder = AddFolderInternal(ApplicationSetting.Setting.SolidFolderName);
                 createFolder = true;
             }
-            var loaded = LoadFile(solidInput, "", solidFolder.FootageId);
+            var loaded = LoadFile(solidInput, "", solidFolder.FootageId, null);
             if (createFolder)
             {
                 if (loaded != null)
@@ -123,8 +126,8 @@ namespace NiVE3.Model
 
         public void AddComposition(CompositionModel composition)
         {
-            var compositionImput = new CompositionInput(composition);
-            LoadFile(compositionImput, "", null);
+            var compositionInput = new CompositionInput(composition);
+            LoadFile(compositionInput, "", null, null);
         }
 
         public void AddFolder()
@@ -264,7 +267,7 @@ namespace NiVE3.Model
                 }
 
                 var context = Inputs.First(i => i.Metadata.PluginType == t).CreateExport();
-                if (LoadFile(context.Value, filePath, targetFolderId) != null)
+                if (LoadFile(context.Value, filePath, targetFolderId, context) != null)
                 {
                     break;
                 }
@@ -351,8 +354,9 @@ namespace NiVE3.Model
                 .FirstOrDefault();
         }
 
-        IFootageModel? LoadFile(IInput plugin, string fileName, Guid? targetFolderId)
+        IFootageModel? LoadFile(IInput plugin, string fileName, Guid? targetFolderId, ExportLifetimeContext<IInput>? pluginContext)
         {
+            plugin.SetupAccelerator(AcceleratorModel.Accelerator);
             if (!plugin.Load(fileName))
             {
                 plugin.Dispose();
@@ -381,7 +385,7 @@ namespace NiVE3.Model
                 }
             }
 
-            var inputModel = new InputModel(plugin);
+            var inputModel = pluginContext != null ? new InputModel(pluginContext) : new InputModel(plugin);
 
             var group = plugin.GetGroup();
             if (!group.Flatten().Any())
