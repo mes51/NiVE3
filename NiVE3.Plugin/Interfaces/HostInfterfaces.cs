@@ -9,6 +9,8 @@ using NiVE3.Plugin.Property;
 
 namespace NiVE3.Plugin.Interfaces
 {
+    public interface IAcceleratorObject { }
+
     public interface ICompositionObject { }
 
     public interface ILayerObject

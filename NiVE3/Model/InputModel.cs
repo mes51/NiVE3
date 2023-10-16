@@ -15,16 +15,19 @@ namespace NiVE3.Model
 
         public IInput Input { get; }
 
+        public bool IsSupportLoadToGpu { get; }
+
         public string FilePath => Input.FilePath;
 
         ExportLifetimeContext<IInput>? InputContext { get; }
 
-        public InputModel(IInput input)
+        public InputModel(IInput input, bool isSupportLoadToGpu)
         {
             Input = input;
+            IsSupportLoadToGpu = isSupportLoadToGpu;
         }
 
-        public InputModel(ExportLifetimeContext<IInput> inputContext) : this(inputContext.Value)
+        public InputModel(ExportLifetimeContext<IInput> inputContext, bool isSupportLoadToGpu) : this(inputContext.Value, isSupportLoadToGpu)
         {
             InputContext = inputContext;
         }

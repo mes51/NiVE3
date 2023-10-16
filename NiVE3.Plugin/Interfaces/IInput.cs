@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using ILGPU.Runtime;
 using NiVE3.Plugin.Image;
 
 namespace NiVE3.Plugin.Interfaces
@@ -20,11 +19,10 @@ namespace NiVE3.Plugin.Interfaces
         string FilePath { get; }
 
         /// <summary>
-        /// 入力プラグインのセットアップを行います。Acceleratorが更新される度に呼ばれます。
-        /// ただし、ファイルの再読み込みは行いません。
+        /// 入力プラグインのセットアップを行います。使用するGPUや設定が変更される度に呼び出されます。
         /// </summary>
-        /// <param name="accelerator">CUDAを実行するデバイスを表すAccelerator。使用できるデバイスがない場合はnull</param>
-        public void SetupAccelerator(Accelerator? accelerator);
+        /// <param name="accelerator">実行するデバイスを表すオブジェクトを含むIAcceleratorObject。</param>
+        public void SetupAccelerator(IAcceleratorObject accelerator);
 
         /// <summary>
         /// ファイルを読み込みます

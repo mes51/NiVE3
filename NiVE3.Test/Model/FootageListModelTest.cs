@@ -9,7 +9,6 @@ using NiVE3.Model;
 using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Image;
-using ILGPU.Runtime;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
@@ -126,7 +125,7 @@ namespace NiVE3.Test.Model
 
         public string FilePath => "";
 
-        public void SetupAccelerator(Accelerator? accelerator) { }
+        public void SetupAccelerator(IAcceleratorObject accelerator) { }
 
         public void Dispose() { }
 
@@ -149,7 +148,7 @@ namespace NiVE3.Test.Model
 
         public string FilePath => "";
 
-        public void SetupAccelerator(Accelerator? accelerator) { }
+        public void SetupAccelerator(IAcceleratorObject accelerator) { }
 
         public void Dispose() { }
 

@@ -35,6 +35,11 @@ namespace NiVE3.Plugin.Attributes
         /// この値はすべてのレンダラの中で一意である必要があります
         /// </summary>
         string RendererUuid { get; }
+
+        /// <summary>
+        /// GPUによるアクセラレーションに対応しているかどうかを表します
+        /// </summary>
+        bool IsSupportGpu { get; }
     }
 
     /// <summary>
@@ -53,6 +58,11 @@ namespace NiVE3.Plugin.Attributes
         public string Author { get; }
 
         public string RendererUuid { get; }
+
+        /// <summary>
+        /// GPUによるアクセラレーションに対応しているかどうか
+        /// </summary>
+        public bool IsSupportGpu { get; set; }
 
         /// <summary>
         /// 多言語化用のResourceDictionaryの型

@@ -43,6 +43,11 @@ namespace NiVE3.Plugin.Attributes
         /// 何もしないエフェクトであることを表します
         /// </summary>
         bool IsDummyEffect { get; }
+
+        /// <summary>
+        /// GPUによるアクセラレーションに対応しているかどうかを表します
+        /// </summary>
+        bool IsSupportGpu { get; }
     }
 
     /// <summary>
@@ -66,6 +71,11 @@ namespace NiVE3.Plugin.Attributes
         /// 何もしないエフェクトかどうか
         /// </summary>
         public bool IsDummyEffect { get; set; } = false;
+
+        /// <summary>
+        /// GPUによるアクセラレーションに対応しているかどうか
+        /// </summary>
+        public bool IsSupportGpu { get; set; }
 
         /// <summary>
         /// 多言語化用のResourceDictionaryの型

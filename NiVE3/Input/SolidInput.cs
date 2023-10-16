@@ -8,7 +8,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media.Media3D;
-using ILGPU.Runtime;
 using NiVE3.Data;
 using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Image;
@@ -29,7 +28,7 @@ namespace NiVE3.Input
 
         SolidFootageSource Source { get; } = new SolidFootageSource();
 
-        public void SetupAccelerator(Accelerator? accelerator) { }
+        public void SetupAccelerator(IAcceleratorObject accelerator) { }
 
         public bool Load(string filePath)
         {

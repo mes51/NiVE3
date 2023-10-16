@@ -4,7 +4,6 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ILGPU.Runtime;
 using NiVE3.Plugin;
 using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Interfaces;
@@ -28,7 +27,7 @@ namespace NiVE3.PresetPlugin.Effect.ExpressionControl
             };
         }
 
-        public void SetupAccelerator(Accelerator? accelerator) { }
+        public void SetupAccelerator(IAcceleratorObject accelerator) { }
 
         public void Dispose() { }
     }

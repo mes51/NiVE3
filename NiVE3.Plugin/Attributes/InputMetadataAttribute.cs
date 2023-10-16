@@ -37,7 +37,7 @@ namespace NiVE3.Plugin.Attributes
         string InputUuid { get; }
 
         /// <summary>
-        /// 対応するファイルの拡張子。複数ある場合はカンマ(,)で区切ります。
+        /// 対応するファイルの拡張子。複数ある場合はカンマ(,)で区切ります
         /// </summary>
         string SupportedFileType { get; }
 
@@ -45,6 +45,11 @@ namespace NiVE3.Plugin.Attributes
         /// 読み込み時の設定画面が存在するかどうか
         /// </summary>
         bool HasSettingView { get; }
+
+        /// <summary>
+        /// GPUが参照可能な領域への読み込みに対応しているかどうかを表します
+        /// </summary>
+        bool IsSupportLoadToGpu { get; }
     }
 
     /// <summary>
@@ -67,6 +72,11 @@ namespace NiVE3.Plugin.Attributes
         public string SupportedFileType { get; }
 
         public bool HasSettingView { get; }
+
+        /// <summary>
+        /// GPUが参照可能な領域への読み込みに対応しているかどうか
+        /// </summary>
+        public bool IsSupportLoadToGpu { get; set; }
 
         /// <summary>
         /// 多言語化用のResourceDictionaryの型

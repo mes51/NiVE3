@@ -5,7 +5,6 @@ using System.ComponentModel.Composition.Hosting;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ILGPU.Runtime;
 using NiVE3.Model;
 using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Interfaces;
@@ -38,7 +37,7 @@ namespace NiVE3.Test.Model
     {
         public const string ID = "ED0374C9-2227-445A-9C4A-DE8A4A9DFAE5";
 
-        public void SetupAccelerator(Accelerator? accelerator) { }
+        public void SetupAccelerator(IAcceleratorObject accelerator) { }
 
         public PropertyBase[] GetProperties()
         {

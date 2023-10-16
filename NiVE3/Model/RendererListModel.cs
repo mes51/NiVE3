@@ -45,8 +45,12 @@ namespace NiVE3.Model
             {
                 throw new Exception(); // bug
             }
-            var result = Renderers.First(f => f.Metadata.PluginType == rendererType).CreateExport();
-            result.Value.SetupAccelerator(AcceleratorModel.Accelerator); // TODO: Acceleratorの更新
+            var factory = Renderers.First(f => f.Metadata.PluginType == rendererType);
+            var result = factory.CreateExport();
+            if (factory.Metadata.IsSupportGpu)
+            {
+                result.Value.SetupAccelerator(AcceleratorModel); // TODO: Acceleratorの更新
+            }
             return result;
         }
     }

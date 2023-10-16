@@ -100,7 +100,7 @@ namespace NiVE3.Model
                 solidFolder = AddFolderInternal(ApplicationSetting.Setting.SolidFolderName);
                 createFolder = true;
             }
-            var loaded = LoadFile(solidInput, "", solidFolder.FootageId, null);
+            var loaded = LoadFile(solidInput, "", solidFolder.FootageId, null, true);
             if (createFolder)
             {
                 if (loaded != null)
@@ -127,7 +127,7 @@ namespace NiVE3.Model
         public void AddComposition(CompositionModel composition)
         {
             var compositionInput = new CompositionInput(composition);
-            LoadFile(compositionInput, "", null, null);
+            LoadFile(compositionInput, "", null, null, true);
         }
 
         public void AddFolder()
@@ -266,8 +266,9 @@ namespace NiVE3.Model
                     continue;
                 }
 
-                var context = Inputs.First(i => i.Metadata.PluginType == t).CreateExport();
-                if (LoadFile(context.Value, filePath, targetFolderId, context) != null)
+                var factory = Inputs.First(i => i.Metadata.PluginType == t);
+                var context = factory.CreateExport();
+                if (LoadFile(context.Value, filePath, targetFolderId, context, factory.Metadata.IsSupportLoadToGpu) != null)
                 {
                     break;
                 }
@@ -354,9 +355,12 @@ namespace NiVE3.Model
                 .FirstOrDefault();
         }
 
-        IFootageModel? LoadFile(IInput plugin, string fileName, Guid? targetFolderId, ExportLifetimeContext<IInput>? pluginContext)
+        IFootageModel? LoadFile(IInput plugin, string fileName, Guid? targetFolderId, ExportLifetimeContext<IInput>? pluginContext, bool isSupportLoadToGpu)
         {
-            plugin.SetupAccelerator(AcceleratorModel.Accelerator);
+            if (isSupportLoadToGpu)
+            {
+                plugin.SetupAccelerator(AcceleratorModel);
+            }
             if (!plugin.Load(fileName))
             {
                 plugin.Dispose();
@@ -385,7 +389,7 @@ namespace NiVE3.Model
                 }
             }
 
-            var inputModel = pluginContext != null ? new InputModel(pluginContext) : new InputModel(plugin);
+            var inputModel = pluginContext != null ? new InputModel(pluginContext, isSupportLoadToGpu) : new InputModel(plugin, isSupportLoadToGpu);
 
             var group = plugin.GetGroup();
             if (!group.Flatten().Any())

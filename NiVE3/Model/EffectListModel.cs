@@ -45,7 +45,10 @@ namespace NiVE3.Model
             if (factory != null)
             {
                 var effect = factory.CreateExport();
-                effect.Value.SetupAccelerator(AcceleratorModel.Accelerator); // TODO: Acceleratorの更新
+                if (factory.Metadata.IsSupportGpu)
+                {
+                    effect.Value.SetupAccelerator(AcceleratorModel); // TODO: Acceleratorの更新
+                }
                 return new EffectModel(effect, factory.Metadata, compositionModel, layerModel, historyModel);
             }
             else
