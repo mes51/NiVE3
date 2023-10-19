@@ -81,6 +81,13 @@ namespace NiVE3.Model
             remove { SourceChangedPublisher.Unsubscribe(value); }
         }
 
+        protected WeakEventPublisher<EventArgs> FrameUpdateRequestPublisher { get; } = new WeakEventPublisher<EventArgs>();
+        public event EventHandler<EventArgs> FrameUpdateRequest
+        {
+            add { FrameUpdateRequestPublisher.Subscribe(value); }
+            remove { FrameUpdateRequestPublisher.Unsubscribe(value); }
+        }
+
         protected void OnSourceChanged()
         {
             SourceChangedPublisher.Publish(this, EventArgs.Empty);
@@ -144,7 +151,21 @@ namespace NiVE3.Model
         public CompositionModel? Composition
         {
             get { return composition; }
-            set { SetProperty(ref composition, value); }
+            set
+            {
+                if (composition != value)
+                {
+                    if (composition != null)
+                    {
+                        composition.CompositionUpdated -= Composition_CompositionUpdated;
+                    }
+                    if (value != null)
+                    {
+                        value.CompositionUpdated += Composition_CompositionUpdated;
+                    }
+                }
+                SetProperty(ref composition, value);
+            }
         }
 
         public CompositionPreviewModel()
@@ -155,6 +176,11 @@ namespace NiVE3.Model
         public override NImage? GetImage(double time)
         {
             return Composition?.Render(time, 1.0, false);
+        }
+
+        private void Composition_CompositionUpdated(object? sender, EventArgs e)
+        {
+            FrameUpdateRequestPublisher.Publish(this, EventArgs.Empty);
         }
 
         private void CompositionPreviewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)

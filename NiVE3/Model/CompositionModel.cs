@@ -149,6 +149,8 @@ namespace NiVE3.Model
             }
         }
 
+        public event EventHandler<EventArgs>? CompositionUpdated;
+
         ExportLifetimeContext<IRenderer> RendererContext { get; }
 
         FootageListModel FootageListModel { get; }
@@ -508,10 +510,27 @@ namespace NiVE3.Model
                     }
                     break;
             }
+
+            CompositionUpdated?.Invoke(this, EventArgs.Empty);
         }
 
         private void Layers_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
+            foreach (var oldLayer in (e.OldItems?.Cast<LayerModel>() ?? Enumerable.Empty<LayerModel>()))
+            {
+                oldLayer.LayerUpdated -= ayer_LayerUpdated;
+            }
+            foreach (var newLayer in (e.NewItems?.Cast<LayerModel>() ?? Enumerable.Empty<LayerModel>()))
+            {
+                newLayer.LayerUpdated += ayer_LayerUpdated; ;
+            }
+
+            CompositionUpdated?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void ayer_LayerUpdated(object? sender, EventArgs e)
+        {
+            CompositionUpdated?.Invoke(this, EventArgs.Empty);
         }
 
         public void Dispose()

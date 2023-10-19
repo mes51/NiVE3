@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
@@ -40,6 +41,8 @@ namespace NiVE3.Model
 
         public Guid EffectId { get; }
 
+        public event EventHandler<EventArgs>? EffectUpdated;
+
         ExportLifetimeContext<IEffect> Effect { get; }
 
         IEffectMetadata Metadata { get; }
@@ -60,6 +63,23 @@ namespace NiVE3.Model
             {
                 Properties.Add(new PropertyModel(p, compositionModel, layerModel, this, historyModel));
             }
+
+            foreach (var p in Properties)
+            {
+                p.ValueUpdated += Property_ValueUpdated;
+            }
+
+            PropertyChanged += EffectModel_PropertyChanged;
+        }
+
+        private void Property_ValueUpdated(object? sender, EventArgs e)
+        {
+            EffectUpdated?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void EffectModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            EffectUpdated?.Invoke(this, EventArgs.Empty);
         }
 
         public void Dispose()

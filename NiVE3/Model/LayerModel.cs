@@ -236,6 +236,8 @@ namespace NiVE3.Model
 
         public PropertyGroupModel TransformProperties { get; }
 
+        public event EventHandler<EventArgs>? LayerUpdated;
+
         EffectListModel EffectListModel { get; }
 
         CompositionModel CompositionModel { get; }
@@ -277,6 +279,9 @@ namespace NiVE3.Model
                 new Scale2DOr3DProperty(ILayerObject.TransformScaleId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_Scale), new Vector3d(100.0, 100.0, 100.0), true, 2),
                 new DoubleProperty(ILayerObject.TransformPropertyOpacityId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_Opacity), 100.0, 0.0, 100.0, true, 1.0, 2)
             }), compositionModel, this, historyModel);
+
+            TransformProperties.ValueUpdated += TransformProperties_ValueUpdated;
+            PropertyChanged += LayerModel_PropertyChanged;
         }
 
         public RenderableImage GetImage(double time, double downSamplingRate, bool useGpu)
@@ -409,6 +414,32 @@ namespace NiVE3.Model
         private void Effects_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             HasEffect = Effects.Count > 0;
+
+            foreach (var oldEffect in (e.OldItems?.Cast<EffectModel>() ?? Enumerable.Empty<EffectModel>()))
+            {
+                oldEffect.EffectUpdated -= Effect_EffectUpdated;
+            }
+            foreach (var newEffect in (e.NewItems?.Cast<EffectModel>() ?? Enumerable.Empty<EffectModel>()))
+            {
+                newEffect.EffectUpdated += Effect_EffectUpdated;
+            }
+
+            LayerUpdated?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void TransformProperties_ValueUpdated(object? sender, EventArgs e)
+        {
+            LayerUpdated?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void LayerModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            LayerUpdated?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void Effect_EffectUpdated(object? sender, EventArgs e)
+        {
+            LayerUpdated?.Invoke(this, EventArgs.Empty);
         }
 
         public void Dispose()

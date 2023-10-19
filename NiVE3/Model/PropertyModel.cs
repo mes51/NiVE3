@@ -28,6 +28,8 @@ namespace NiVE3.Model
 
         PropertyBase Property { get; }
 
+        event EventHandler<EventArgs>? ValueUpdated;
+
         PropertyControlBase CreateControl(IPropertyViewModel viewModel);
 
         PropertyViewState CreateState(IPropertyViewModel propertyViewModel);
@@ -71,6 +73,8 @@ namespace NiVE3.Model
 
         public PropertyBase Property { get; }
 
+        public event EventHandler<EventArgs>? ValueUpdated;
+
         CompositionModel CompositionModel { get; }
 
         LayerModel? LayerModel { get; }
@@ -99,6 +103,8 @@ namespace NiVE3.Model
             {
                 layerModel.PropertyChanged += LayerModel_PropertyChanged;
             }
+
+            PropertyChanged += PropertyModel_PropertyChanged;
         }
 
         public PropertyControlBase CreateControl(IPropertyViewModel viewModel)
@@ -247,6 +253,14 @@ namespace NiVE3.Model
                 SourceStartPoint = LayerModel?.SourceStartPoint ?? 0.0;
             }
         }
+
+        private void PropertyModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(Value))
+            {
+                ValueUpdated?.Invoke(this, EventArgs.Empty);
+            }
+        }
     }
 
     class PropertyGroupModel : BindableBase, IPropertyModel
@@ -265,6 +279,8 @@ namespace NiVE3.Model
         }
 
         public PropertyBase Property { get; }
+
+        public event EventHandler<EventArgs>? ValueUpdated;
 
         CompositionModel CompositionModel { get; }
 
@@ -298,6 +314,11 @@ namespace NiVE3.Model
                     Children.Add(new PropertyModel(c, compositionModel, layerModel, effectModel, historyModel));
                 }
             }
+
+            foreach (var c in Children)
+            {
+                c.ValueUpdated += Child_ValueUpdated;
+            }
         }
 
         public PropertyControlBase CreateControl(IPropertyViewModel viewModel)
@@ -327,6 +348,11 @@ namespace NiVE3.Model
             }
 
             return new PropertyValueGroup(result);
+        }
+
+        private void Child_ValueUpdated(object? sender, EventArgs e)
+        {
+            ValueUpdated?.Invoke(sender, e);
         }
     }
 }

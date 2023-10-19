@@ -205,6 +205,7 @@ namespace NiVE3.ViewModel
 
             BufferImageSize = new Int32Rect(0, 0, Math.Max(Width, 1), Math.Max(Height, 1));
             CurrentFrame = new WriteableBitmap(BufferImageSize.Width, BufferImageSize.Height, 96.0, 96.0, PixelFormats.Bgra32, null);
+            PreviewModel.FrameUpdateRequest += PreviewModel_FrameUpdateRequest;
             PropertyChanged += PreviewViewModel_PropertyChanged;
 
             Buffer = new byte[BufferImageSize.Width * BufferImageSize.Height * 4];
@@ -302,6 +303,11 @@ namespace NiVE3.ViewModel
                 }
             }
             IsDirtyBuffer = true;
+        }
+
+        private void PreviewModel_FrameUpdateRequest(object? sender, EventArgs e)
+        {
+            UpdateCurrentFrame();
         }
 
         private void PreviewViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
