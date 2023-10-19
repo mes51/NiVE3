@@ -42,6 +42,17 @@ namespace NiVE3.Plugin.Image
             return Data;
         }
 
+        /// <summary>
+        /// 画像を複製します
+        /// </summary>
+        /// <returns>複製された画像</returns>
+        public override NImage Copy()
+        {
+            var result = new NManagedImage(Width, Height, false);
+            Data.AsSpan(0, DataLength).CopyTo(result.Data);
+            return result;
+        }
+
         protected override void Dispose(bool disposing)
         {
             if (disposing)

@@ -149,13 +149,15 @@ namespace NiVE3.Model
             }
         }
 
-        ExportLifetimeContext<IRenderer> Renderer { get; }
+        ExportLifetimeContext<IRenderer> RendererContext { get; }
 
         FootageListModel FootageListModel { get; }
 
         EffectListModel EffectListModel { get; }
 
         HistoryModel HistoryModel { get; }
+
+        IRenderer Renderer => RendererContext.Value;
 
         public CompositionModel(ExportLifetimeContext<IRenderer> renderer, FootageListModel footageListModel, EffectListModel effectListModel, HistoryModel historyModel) : this(renderer, footageListModel, effectListModel, historyModel, null) { }
 
@@ -166,7 +168,7 @@ namespace NiVE3.Model
                 compositionId = Guid.NewGuid();
             }
             CompositionId = compositionId.Value;
-            Renderer = renderer;
+            RendererContext = renderer;
             FootageListModel = footageListModel;
             EffectListModel = effectListModel;
             HistoryModel = historyModel;
@@ -384,10 +386,54 @@ namespace NiVE3.Model
             DeleteLayers(layerIds);
         }
 
-        public NImage Render(double time, bool useGpu)
+        public NImage Render(double time, double downSamplingRate, bool useGpu)
         {
-            // TODO:
-            return new NManagedImage(Width, Height, true);
+            var allImages = new List<RenderableImage>();
+
+            //var globalPropertyLayers = カメラ/ライト
+
+            Renderer.BeginRendering(downSamplingRate, useGpu);
+
+            var images = new List<RenderableImage>();
+            var hasSolo = Layers.Any(l => l.IsEnableSolo);
+            foreach (var l in Layers.Where(l => l.HasImage && l.IsEnableVideo && (!hasSolo || l.IsEnableSolo)).Reverse())
+            {
+                var layerTime = time - l.SourceStartPoint;
+                if (layerTime < l.InPoint || layerTime > l.OutPoint)
+                {
+                    continue;
+                }
+
+                if (l.IsEnableAdjustmentLayer)
+                {
+                    if (images.Count > 0)
+                    {
+                        Renderer.Render(images.ToArray());
+                    }
+                    images.Clear();
+
+                    // TODO: 調整レイヤーの適用
+                }
+                else
+                {
+                    var image = l.GetImage(layerTime, downSamplingRate, useGpu);
+                    images.Add(image);
+                    allImages.Add(image);
+                }
+            }
+            if (images.Count > 0)
+            {
+                Renderer.Render(images.ToArray());
+            }
+
+            var result = Renderer.FinishRendering();
+
+            foreach (var i in allImages)
+            {
+                i.Dispose();
+            }
+
+            return result;
         }
 
         bool CheckCycledSimulatedParentLayer(Guid layerId, Dictionary<Guid, Guid?> changed, HashSet<Guid>? checkedLayerIds = null)
@@ -454,6 +500,13 @@ namespace NiVE3.Model
                     WorkareaBegin = 0.0;
                     WorkareaEnd = Duration;
                     break;
+                case nameof(Width):
+                case nameof(Height):
+                    if (Width > 0 && Height > 0)
+                    {
+                        Renderer.SetSize(Width, Height);
+                    }
+                    break;
             }
         }
 
@@ -463,8 +516,8 @@ namespace NiVE3.Model
 
         public void Dispose()
         {
-            Renderer.Value.Dispose();
-            Renderer.Dispose();
+            RendererContext.Value.Dispose();
+            RendererContext.Dispose();
         }
     }
 }

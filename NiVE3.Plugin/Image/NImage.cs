@@ -55,6 +55,12 @@ namespace NiVE3.Plugin.Image
         public abstract float[] GetData();
 
         /// <summary>
+        /// 画像を複製します
+        /// </summary>
+        /// <returns>複製された画像</returns>
+        public abstract NImage Copy();
+
+        /// <summary>
         /// アンマネージ リソースの解放またはリセットに関連付けられているアプリケーション定義のタスクを実行します
         /// </summary>
         public void Dispose()

@@ -58,5 +58,28 @@ namespace NiVE3.Shared.Extension
                 }
             }
         }
+
+        public static IEnumerable<IEnumerable<T>> GroupByPrev<T, TKey>(this IEnumerable<T> source, Func<T, TKey> keySelector) where T : notnull where TKey : IEquatable<TKey>
+        {
+            var key = default(TKey);
+            var group = new List<T>();
+            foreach (var e in source)
+            {
+                var currentKey = keySelector(e);
+                if (group.Count > 0 && !currentKey.Equals(key))
+                {
+                    yield return group;
+                    group = new List<T>();
+                }
+
+                group.Add(e);
+                key = currentKey;
+            }
+
+            if (group.Count > 0)
+            {
+                yield return group;
+            }
+        }
     }
 }

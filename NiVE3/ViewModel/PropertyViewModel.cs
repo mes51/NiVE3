@@ -218,14 +218,7 @@ namespace NiVE3.ViewModel
 
         object? CalculationValue()
         {
-            if (KeyFrames.Count > 0)
-            {
-                return Property.PropertyType.Interpolate(KeyFrames, CurrentTime - SourceStartPoint);
-            }
-            else
-            {
-                return Value;
-            }
+            return PropertyModel.GetValue(CurrentTime - SourceStartPoint);
         }
 
         partial void WiringModel();

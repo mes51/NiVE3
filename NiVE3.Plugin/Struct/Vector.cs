@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics;
 using System.Text;
@@ -19,6 +20,12 @@ namespace NiVE3.Plugin.Struct
         {
             X = x;
             Y = y;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Vector3d AsVector3d()
+        {
+            return new Vector3d(X, Y, 0.0);
         }
 
         public override bool Equals([NotNullWhen(true)] object? obj)
@@ -63,6 +70,7 @@ namespace NiVE3.Plugin.Struct
             return new Vector2d(a.X + b.X, a.Y + b.Y);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector2d operator -(Vector2d a)
         {
             return new Vector2d(-a.X, -a.Y);
@@ -139,6 +147,18 @@ namespace NiVE3.Plugin.Struct
         {
             return new Vector2d(v.GetElement(0), v.GetElement(1));
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator Vector2(Vector2d v)
+        {
+            return new Vector2((float)v.X, (float)v.Y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator Vector2d(Vector2 v)
+        {
+            return new Vector2d(v.X, v.Y);
+        }
     }
 
     public readonly struct Vector3d : IEquatable<Vector3d>
@@ -154,6 +174,12 @@ namespace NiVE3.Plugin.Struct
             X = x;
             Y = y;
             Z = z;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Vector2d AsVector2d()
+        {
+            return new Vector2d(X, Y);
         }
 
         public override bool Equals([NotNullWhen(true)] object? obj)
@@ -199,6 +225,7 @@ namespace NiVE3.Plugin.Struct
             return new Vector3d(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3d operator -(Vector3d a)
         {
             return new Vector3d(-a.X, -a.Y, -a.Z);

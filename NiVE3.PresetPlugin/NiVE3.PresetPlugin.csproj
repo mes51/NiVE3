@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\NiVE3.Plugin\NiVE3.Plugin.csproj" />
+    <ProjectReference Include="..\NiVE3.Shared\NiVE3.Shared.csproj" />
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">

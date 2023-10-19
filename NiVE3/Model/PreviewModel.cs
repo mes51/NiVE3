@@ -154,7 +154,7 @@ namespace NiVE3.Model
 
         public override NImage? GetImage(double time)
         {
-            return new NManagedImage(Width, Height, true);
+            return Composition?.Render(time, 1.0, false);
         }
 
         private void CompositionPreviewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)

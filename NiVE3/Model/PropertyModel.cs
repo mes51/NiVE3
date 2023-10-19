@@ -193,6 +193,18 @@ namespace NiVE3.Model
             HistoryModel.Add(new DeleteKeyFramesHistoryCommand(this, targetKeyframes, oldIndices));
         }
 
+        public object? GetValue(double time)
+        {
+            if (KeyFrames.Count > 0)
+            {
+                return Property.PropertyType.Interpolate(KeyFrames, time);
+            }
+            else
+            {
+                return Value;
+            }
+        }
+
         void ReplaceKeyFrames(KeyFrame[] targetKeyFrames, KeyFrame[] newKeyFrames, string historyNameKey)
         {
             foreach (var k in targetKeyFrames)
@@ -296,6 +308,25 @@ namespace NiVE3.Model
         public PropertyViewState CreateState(IPropertyViewModel viewModel)
         {
             return Property.CreateState(CompositionModel, LayerModel, EffectModel, viewModel);
+        }
+
+        public PropertyValueGroup GetPropertyValueGroup(double time)
+        {
+            var result = new Dictionary<string, object?>();
+
+            foreach (var p in Children)
+            {
+                if (p is PropertyGroupModel pg)
+                {
+                    result.Add(pg.Id, pg.GetPropertyValueGroup(time));
+                }
+                else if (p is PropertyModel pp)
+                {
+                    result.Add(pp.Id, pp.GetValue(time));
+                }
+            }
+
+            return new PropertyValueGroup(result);
         }
     }
 }

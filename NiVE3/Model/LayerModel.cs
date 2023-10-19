@@ -18,28 +18,14 @@ using NiVE3.Property;
 using System.ComponentModel;
 using NiVE3.Shared.Extension;
 using NiVE3.Extension;
+using NiVE3.Plugin.Image;
+using System.Windows;
 
 namespace NiVE3.Model
 {
     partial class LayerModel : BindableBase, IDisposable, ILayerObject
     {
         const string TransformGroupId = nameof(TransformGroupId);
-
-        const string TransformAnchorPointId= nameof(TransformAnchorPointId);
-
-        const string TransformTranslateId = nameof(TransformTranslateId);
-
-        const string TransformDirectionId = nameof(TransformDirectionId);
-
-        const string TransformXAngleId = nameof(TransformXAngleId);
-
-        const string TransformYAngleId = nameof(TransformYAngleId);
-
-        const string TransformZAngleId = nameof(TransformZAngleId);
-
-        const string TransformScaleId = nameof(TransformScaleId);
-
-        const string TransformPropertyOpacityId = nameof(TransformPropertyOpacityId);
 
         private string name = "";
         public string Name
@@ -229,6 +215,8 @@ namespace NiVE3.Model
 
         public bool IsComposition => FootageModel.InputModel.Input is CompositionInput;
 
+        public bool HasImage => SourceType.HasFlag(SourceType.Image) || SourceType.HasFlag(SourceType.Video);
+
         private ObservableCollection<EffectModel> effects = new ObservableCollection<EffectModel>();
         public ObservableCollection<EffectModel> Effects
         {
@@ -280,15 +268,39 @@ namespace NiVE3.Model
 
             TransformProperties = new PropertyGroupModel(new PropertyGroup(TransformGroupId, CreateLanguageResourceKey(LanguageResourceDictionary.Layer_Transform), new PropertyBase[]
             {
-                new Vector2DOr3DProperty(TransformAnchorPointId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_AnchorPoint), new Vector3d(footageModel.Width * 0.5, footageModel.Height * 0.5, 0.0), true, 2),
-                new Vector2DOr3DProperty(TransformTranslateId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_Translate), new Vector3d(compositionModel.Width * 0.5, compositionModel.Height * 0.5, 0.0), true, 2),
-                new Direction3DProperty(TransformDirectionId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_Direction), new Vector3d(), true, 2),
-                new Angle3DElementProperty(TransformXAngleId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_XAngle3D), 0.0, true, 2),
-                new Angle3DElementProperty(TransformYAngleId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_YAngle3D), 0.0, true, 2),
-                new ZAngleProperty(TransformZAngleId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_ZAngle2D), CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_ZAngle3D), 0.0, true, 2),
-                new Scale2DOr3DProperty(TransformScaleId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_Scale), new Vector3d(100.0, 100.0, 100.0), true, 2),
-                new DoubleProperty(TransformPropertyOpacityId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_Opacity), 100.0, 0.0, 100.0, true, 1.0, 2)
+                new Vector2DOr3DProperty(ILayerObject.TransformAnchorPointId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_AnchorPoint), new Vector3d(footageModel.Width * 0.5, footageModel.Height * 0.5, 0.0), true, 2),
+                new Vector2DOr3DProperty(ILayerObject.TransformTranslateId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_Translate), new Vector3d(compositionModel.Width * 0.5, compositionModel.Height * 0.5, 0.0), true, 2),
+                new Direction3DProperty(ILayerObject.TransformDirectionId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_Direction), new Vector3d(), true, 2),
+                new Angle3DElementProperty(ILayerObject.TransformXAngleId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_XAngle3D), 0.0, true, 2),
+                new Angle3DElementProperty(ILayerObject.TransformYAngleId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_YAngle3D), 0.0, true, 2),
+                new ZAngleProperty(ILayerObject.TransformZAngleId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_ZAngle2D), CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_ZAngle3D), 0.0, true, 2),
+                new Scale2DOr3DProperty(ILayerObject.TransformScaleId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_Scale), new Vector3d(100.0, 100.0, 100.0), true, 2),
+                new DoubleProperty(ILayerObject.TransformPropertyOpacityId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_Opacity), 100.0, 0.0, 100.0, true, 1.0, 2)
             }), compositionModel, this, historyModel);
+        }
+
+        public RenderableImage GetImage(double time, double downSamplingRate, bool useGpu)
+        {
+            if (!HasImage)
+            {
+                throw new InvalidOperationException("this source type is does not return images");
+            }
+
+            // TODO: タイムリマップ反映
+            var sourceTime = time;
+
+            var image = FootageModel.ReadImage(sourceTime, useGpu);
+            var roi = new Int32Rect(0, 0, image.Width, image.Height);
+
+            if (IsEnableEffect)
+            {
+                foreach (var e in Effects)
+                {
+                    // TODO: エフェクト反映
+                }
+            }
+
+            return new RenderableImage(image, roi, new Int32Point(), downSamplingRate, IsEnableMotionBlur, IsEnable3D, InterpolationQuality, BlendMode, TransformProperties.GetPropertyValueGroup(time));
         }
 
         public void BeginEditDuration()
@@ -401,6 +413,10 @@ namespace NiVE3.Model
 
         public void Dispose()
         {
+            foreach (var e in Effects)
+            {
+                e.Dispose();
+            }
         }
 
         static LanguageResourceKey CreateLanguageResourceKey(string key)

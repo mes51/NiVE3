@@ -45,6 +45,17 @@ namespace NiVE3.Plugin.Image
         }
 
         /// <summary>
+        /// 画像を複製します
+        /// </summary>
+        /// <returns>複製した画像</returns>
+        public override NImage Copy()
+        {
+            var result = new NCudaImage(Width, Height, Accelerator);
+            Data.CopyTo(result.Data);
+            return result;
+        }
+
+        /// <summary>
         /// CPU側にコピーした画像データを取得します
         /// </summary>
         /// <param name="rentFromArrayPool">配列をArrayPoolから取得するかどうか</param>

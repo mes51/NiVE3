@@ -65,7 +65,8 @@ namespace NiVE3.Input
 
         public NImage Read(double time, bool toGpu)
         {
-            return Composition.Render(time, toGpu);
+            // TODO: 親のコンポジションのダウンサンプリングの反映
+            return Composition.Render(time, 1.0, toGpu);
         }
     }
 }
