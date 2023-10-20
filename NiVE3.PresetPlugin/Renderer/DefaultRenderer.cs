@@ -69,12 +69,13 @@ namespace NiVE3.PresetPlugin.Renderer
 
                     foreach (var i in group)
                     {
-                        var anchorPoint = (Vector3d)(i.Transform[ILayerObject.TransformAnchorPointId] ?? new Vector3d());
-                        var scale = (Vector3d)(i.Transform[ILayerObject.TransformScaleId] ?? new Vector3d()) * 0.01;
-                        var angle = (double)(i.Transform[ILayerObject.TransformZAngleId] ?? 0.0);
-                        var translate = (Vector3d)(i.Transform[ILayerObject.TransformTranslateId] ?? new Vector3d());
                         var opacity = (double)(i.Transform[ILayerObject.TransformPropertyOpacityId] ?? 0.0) * 0.01;
-                        var matrix = Matrix3x3.AffineTransform((Vector2)anchorPoint.AsVector2d(), (Vector2)scale.AsVector2d(), (float)angle, (Vector2)translate.AsVector2d()); 
+                        var matrix = GetTransform2D(i.Transform);
+
+                        foreach (var (type, parentTransform) in i.ParentTransforms)
+                        {
+                            matrix = GetTransform2D(parentTransform) * matrix;
+                        }
 
                         renderer.Draw(i.Image, (float)opacity, matrix, i.InterpolationQuality, i.BlendMode);
                     }
@@ -102,6 +103,15 @@ namespace NiVE3.PresetPlugin.Renderer
             var result = CurrentFrame;
             CurrentFrame = null;
             return result;
+        }
+
+        Matrix3x3 GetTransform2D(PropertyValueGroup transformProperties)
+        {
+            var anchorPoint = (Vector3d)(transformProperties[ILayerObject.TransformAnchorPointId] ?? new Vector3d());
+            var scale = (Vector3d)(transformProperties[ILayerObject.TransformScaleId] ?? new Vector3d()) * 0.01;
+            var angle = (double)(transformProperties[ILayerObject.TransformZAngleId] ?? 0.0);
+            var translate = (Vector3d)(transformProperties[ILayerObject.TransformTranslateId] ?? new Vector3d());
+            return Matrix3x3.AffineTransform((Vector2)anchorPoint.AsVector2d(), (Vector2)scale.AsVector2d(), (float)angle, (Vector2)translate.AsVector2d());
         }
 
         public void Dispose()

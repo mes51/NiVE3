@@ -418,7 +418,7 @@ namespace NiVE3.Model
                 }
                 else
                 {
-                    var image = l.GetImage(layerTime, downSamplingRate, useGpu);
+                    var image = l.GetImage(time, downSamplingRate, useGpu);
                     images.Add(image);
                     allImages.Add(image);
                 }

@@ -291,8 +291,9 @@ namespace NiVE3.Model
                 throw new InvalidOperationException("this source type is does not return images");
             }
 
+            var layerTime = time - SourceStartPoint;
             // TODO: タイムリマップ反映
-            var sourceTime = time;
+            var sourceTime = layerTime;
 
             var image = FootageModel.ReadImage(sourceTime, useGpu);
             var roi = new Int32Rect(0, 0, image.Width, image.Height);
@@ -305,7 +306,22 @@ namespace NiVE3.Model
                 }
             }
 
-            return new RenderableImage(image, roi, new Int32Point(), downSamplingRate, IsEnableMotionBlur, IsEnable3D, InterpolationQuality, BlendMode, TransformProperties.GetPropertyValueGroup(time));
+            var parentTransforms = new List<Tuple<ParentType, PropertyValueGroup>>();
+            var parentId = ParentLayerId;
+            while (parentId != null)
+            {
+                var parent = CompositionModel.Layers.FirstOrDefault(l => l.LayerId == parentId.Value);
+                if (parent == null)
+                {
+                    break;
+                }
+
+                // TODO: カメラ・ライトレイヤーの判別
+                parentTransforms.Add(Tuple.Create(ParentType.Normal, parent.TransformProperties.GetPropertyValueGroup(time - parent.SourceStartPoint)));
+                parentId = parent.ParentLayerId;
+            }
+
+            return new RenderableImage(image, roi, new Int32Point(), downSamplingRate, IsEnableMotionBlur, IsEnable3D, InterpolationQuality, BlendMode, TransformProperties.GetPropertyValueGroup(layerTime), parentTransforms.ToArray());
         }
 
         public void BeginEditDuration()
