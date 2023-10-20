@@ -284,7 +284,7 @@ namespace NiVE3.Model
             PropertyChanged += LayerModel_PropertyChanged;
         }
 
-        public RenderableImage GetImage(double time, double downSamplingRate, bool useGpu)
+        public RenderableImage? GetImage(double time, double downSamplingRate, bool useGpu)
         {
             if (!HasImage)
             {
@@ -292,6 +292,13 @@ namespace NiVE3.Model
             }
 
             var layerTime = time - SourceStartPoint;
+            var transform = TransformProperties.GetPropertyValueGroup(layerTime);
+
+            if ((double)(transform[ILayerObject.TransformPropertyOpacityId] ?? 0.0) <= 0.0)
+            {
+                return null;
+            }
+
             // TODO: タイムリマップ反映
             var sourceTime = layerTime;
 
@@ -321,7 +328,7 @@ namespace NiVE3.Model
                 parentId = parent.ParentLayerId;
             }
 
-            return new RenderableImage(image, roi, new Int32Point(), downSamplingRate, IsEnableMotionBlur, IsEnable3D, InterpolationQuality, BlendMode, TransformProperties.GetPropertyValueGroup(layerTime), parentTransforms.ToArray());
+            return new RenderableImage(image, roi, new Int32Point(), downSamplingRate, IsEnableMotionBlur, IsEnable3D, InterpolationQuality, BlendMode, transform, parentTransforms.ToArray());
         }
 
         public void BeginEditDuration()

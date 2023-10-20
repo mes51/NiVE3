@@ -419,8 +419,11 @@ namespace NiVE3.Model
                 else
                 {
                     var image = l.GetImage(time, downSamplingRate, useGpu);
-                    images.Add(image);
-                    allImages.Add(image);
+                    if (image != null)
+                    {
+                        images.Add(image);
+                        allImages.Add(image);
+                    }
                 }
             }
             if (images.Count > 0)

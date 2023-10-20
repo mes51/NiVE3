@@ -162,6 +162,10 @@ namespace NiVE3.PresetPlugin.Renderer
                     };
 
                     p.W *= opacity;
+                    if (p.W <= 0.0F)
+                    {
+                        continue;
+                    }
 
                     switch (blendMode)
                     {
