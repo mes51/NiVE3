@@ -69,6 +69,13 @@ namespace NiVE3.Model
             set { SetProperty(ref keyFrames, value); }
         }
 
+        private bool useEditingValue;
+        public bool UseEditingValue
+        {
+            get { return useEditingValue; }
+            set { SetProperty(ref useEditingValue, value); }
+        }
+
         public ObservableCollection<IPropertyModel>? Children => null;
 
         public PropertyBase Property { get; }
@@ -201,13 +208,13 @@ namespace NiVE3.Model
 
         public object? GetValue(double time)
         {
-            if (KeyFrames.Count > 0)
+            if (UseEditingValue || KeyFrames.Count < 1)
             {
-                return Property.PropertyType.Interpolate(KeyFrames, time);
+                return Value;
             }
             else
             {
-                return Value;
+                return Property.PropertyType.Interpolate(KeyFrames, time);
             }
         }
 

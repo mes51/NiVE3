@@ -80,6 +80,14 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref _value, value); }
         }
 
+        private bool useEditingValue;
+        [NeedWire(nameof(PropertyModel))]
+        public bool UseEditingValue
+        {
+            get { return useEditingValue; }
+            set { SetProperty(ref useEditingValue, value); }
+        }
+
         private object? currentTimeValue;
         public object? CurrentTimeValue
         {
@@ -151,18 +159,21 @@ namespace NiVE3.ViewModel
             {
                 PrevValue = CurrentTimeValue;
                 IsEditing = true;
+                UseEditingValue = true;
             }, () => !IsEditing);
 
             EndEditCommand = new RequerySuggestedCommand(() =>
             {
                 PropertyModel.CommitProperty(CurrentTimeValue, PrevValue);
                 IsEditing = false;
+                UseEditingValue = false;
             }, () => IsEditing);
 
             AbortEditCommand = new RequerySuggestedCommand(() =>
             {
                 CurrentTimeValue = PrevValue;
                 IsEditing = false;
+                UseEditingValue = false;
             }, () => IsEditing);
 
             SwitchUseKeyFrameCommand = new DelegateCommand(() =>
