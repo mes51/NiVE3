@@ -41,6 +41,14 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref redoCommands, value); }
         }
 
+        private bool isIgnoreUpdatePreview;
+        [NeedWire(nameof(ViewState))]
+        public bool IsIgnoreUpdatePreview
+        {
+            get { return isIgnoreUpdatePreview; }
+            set { SetProperty(ref isIgnoreUpdatePreview, value); }
+        }
+
         // NOTE: なぜかStackをそのままCollectionContainer等に渡すと順番がひっくり返るため、順序を固定する
         public IEnumerable<IHistoryCommand> ReversedRedoCommands => RedoCommands.ToArray();
 
@@ -52,10 +60,13 @@ namespace NiVE3.ViewModel
 
         HistoryModel HistoryModel { get; }
 
-        public HistoryViewModel(HistoryModel model)
+        ViewStateModel ViewState { get; }
+
+        public HistoryViewModel(HistoryModel model, ViewStateModel viewState)
         {
             Title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.HistoryList_Title);
             HistoryModel = model;
+            ViewState = viewState;
 
             UndoCommand = new DelegateCommand(() => HistoryModel.Undo(), () => HistoryModel.CanUndo());
 
@@ -63,6 +74,7 @@ namespace NiVE3.ViewModel
 
             ReproduceToTargetHistoryCommand = new DelegateCommand<IHistoryCommand>(targetHistory =>
             {
+                IsIgnoreUpdatePreview = true;
                 if (targetHistory is NewProjectHistoryCommand)
                 {
                     while (HistoryModel.CanUndo())
@@ -84,6 +96,7 @@ namespace NiVE3.ViewModel
                         HistoryModel.Redo();
                     }
                 }
+                IsIgnoreUpdatePreview = false;
             });
 
             WiringModel();

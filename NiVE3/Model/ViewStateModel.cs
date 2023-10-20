@@ -141,5 +141,12 @@ namespace NiVE3.Model
             get { return currentEditingCompositionId; }
             set { SetProperty(ref currentEditingCompositionId, value); }
         }
+
+        private bool isIgnoreUpdatePreview;
+        public bool IsIgnoreUpdatePreview
+        {
+            get { return isIgnoreUpdatePreview; }
+            set { SetProperty(ref isIgnoreUpdatePreview, value); }
+        }
     }
 }

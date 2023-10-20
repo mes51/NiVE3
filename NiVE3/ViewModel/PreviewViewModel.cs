@@ -106,6 +106,14 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref isLock, value); }
         }
 
+        private bool isIgnoreUpdatePreview;
+        [NeedWire(nameof(ViewState), IsOneWay = true)]
+        public bool IsIgnoreUpdatePreview
+        {
+            get { return isIgnoreUpdatePreview; }
+            set { SetProperty(ref isIgnoreUpdatePreview, value); }
+        }
+
         private double timeBarRange;
         public double TimeBarRange
         {
@@ -176,6 +184,8 @@ namespace NiVE3.ViewModel
 
         Debouncer FrameUpdateDebouncer { get; }
 
+        ViewStateModel ViewState { get; }
+
         WeakEventPublisher<EventArgs> SourceChangedPublisher { get; } = new WeakEventPublisher<EventArgs>();
         public event EventHandler<EventArgs> SourceChanged
         {
@@ -190,9 +200,10 @@ namespace NiVE3.ViewModel
             remove { CurrentTimeChangeByUserPublisher.Unsubscribe(value); }
         }
 
-        public PreviewViewModel(PreviewModelBase previewModel)
+        public PreviewViewModel(PreviewModelBase previewModel, ViewStateModel viewState)
         {
             PreviewModel = previewModel;
+            ViewState = viewState;
 
             ChangeCurrentTimeCommand = new DelegateCommand(() => CurrentTimeChangeByUserPublisher.Publish(this, EventArgs.Empty));
 
@@ -222,11 +233,11 @@ namespace NiVE3.ViewModel
                 {
                     CurrentFrame.WritePixels(BufferImageSize, Buffer, BufferImageSize.Width * 4, 0);
                     IsDirtyBuffer = false;
-                    if (NeedUpdateFrameNextTick)
-                    {
-                        NeedUpdateFrameNextTick = false;
-                        FrameUpdateDebouncer.ResetAndStart();
-                    }
+                }
+                if (NeedUpdateFrameNextTick)
+                {
+                    NeedUpdateFrameNextTick = false;
+                    FrameUpdateDebouncer.ResetAndStart();
                 }
             };
         }
@@ -235,7 +246,7 @@ namespace NiVE3.ViewModel
 
         void UpdateCurrentFrame()
         {
-            if (IsDirtyBuffer)
+            if (IsDirtyBuffer || IsIgnoreUpdatePreview)
             {
                 NeedUpdateFrameNextTick = true;
                 return;
