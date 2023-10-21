@@ -1,0 +1,127 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Numerics;
+using System.Runtime.CompilerServices;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace NiVE3.PresetPlugin.Internal.Drawing
+{
+    static class ImageInterpolation
+    {
+        static readonly Vector4 EmptyPixel = new Vector4(255.0F, 255.0F, 255.0F, 0.0F);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector4 NearestNeighbor(Span<Vector4> texture, int width, int height, float x, float y)
+        {
+            var ix = (int)Math.Floor(x);
+            var iy = (int)Math.Floor(y);
+
+            if (ix > -1 && iy > -1 && ix < width && iy < height)
+            {
+                return texture[iy * width + ix];
+            }
+            else
+            {
+                return EmptyPixel;
+            }
+        }
+
+        public static Vector4 Bilinear(Span<Vector4> texture, int width, int height, float x, float y)
+        {
+            var ix = (int)Math.Floor(x);
+            var iy = (int)Math.Floor(y);
+
+            if (ix == x && iy == y)
+            {
+                if (ix > -1 && iy > -1 && ix < width && iy < height)
+                {
+                    return texture[iy * width + ix];
+                }
+                else
+                {
+                    return EmptyPixel;
+                }
+            }
+            else if (ix < -1 || iy < -1 || ix >= width || iy >= height)
+            {
+                return EmptyPixel;
+            }
+
+            var pp = x - ix;
+            var qq = y - iy;
+            var ip = 1.0F - pp;
+            var iq = 1.0F - qq;
+            var mw = width - 1;
+            var mh = height - 1;
+
+            var c1 = EmptyPixel;
+            var c2 = EmptyPixel;
+            var c3 = EmptyPixel;
+            var c4 = EmptyPixel;
+            var pos = iy * width + ix;
+
+            if (ix > -1)
+            {
+                if (ix < mw)
+                {
+                    if (iy > -1)
+                    {
+                        c1 = texture[pos];
+                        c2 = texture[pos + 1];
+                        if (iy < mh)
+                        {
+                            pos += width;
+                            c3 = texture[pos];
+                            c4 = texture[pos + 1];
+                        }
+                    }
+                    else
+                    {
+                        pos += width;
+                        c3 = texture[pos];
+                        c4 = texture[pos + 1];
+                    }
+                }
+                else
+                {
+                    if (iy > -1)
+                    {
+                        c1 = texture[pos];
+                        if (iy < mh)
+                        {
+                            c3 = texture[pos + width];
+                        }
+                    }
+                    else
+                    {
+                        c3 = texture[pos + width];
+                    }
+                }
+            }
+            else
+            {
+                pos++;
+                if (iy > -1)
+                {
+                    c2 = texture[pos];
+                    if (iy < mh)
+                    {
+                        c4 = texture[pos + width];
+                    }
+                }
+                else
+                {
+                    c4 = texture[pos + width];
+                }
+            }
+
+            var ta = Vector4.Lerp(Vector4.Lerp(c1, c3, qq), Vector4.Lerp(c2, c4, qq), pp).W;
+            var t = Vector4.Lerp(Vector4.Lerp(c1 * c1.W, c3 * c3.W, qq), Vector4.Lerp(c2 * c2.W, c4 * c4.W, qq), pp) / ta;
+            t.W = ta;
+
+            return t;
+        }
+    }
+}

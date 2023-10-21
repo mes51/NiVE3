@@ -43,6 +43,15 @@ namespace NiVE3.Plugin.Image
         }
 
         /// <summary>
+        /// 画像のデータを取得します。長さはDataLengthでスライスされます
+        /// </summary>
+        /// <returns>取得した画像データ</returns>
+        public Span<float> GetDataSpan()
+        {
+            return Data.AsSpan(0, DataLength);
+        }
+
+        /// <summary>
         /// 画像を複製します
         /// </summary>
         /// <returns>複製された画像</returns>

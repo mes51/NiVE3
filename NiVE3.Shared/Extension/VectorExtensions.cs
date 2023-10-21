@@ -157,4 +157,184 @@ namespace NiVE3.Shared.Extension
             return Sse.Multiply(y, x.Log()).Exp();
         }
     }
+
+    public static class Vector256Extension
+    {
+        const byte MmInsert0To3 = 3 << 4;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector256<double> Abs(this in Vector256<double> v)
+        {
+            return Avx.AndNot(Vector256.Create(-0.0), v);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector256<double> HorizontalAdd(this in Vector256<double> v)
+        {
+            if (Avx2.IsSupported)
+            {
+                var a = Avx.HorizontalAdd(v, v);
+                a = Avx2.Permute4x64(a, 0b00100010);
+                return Avx.HorizontalAdd(a, a);
+            }
+            else
+            {
+                var rv = Vector256.Create(Avx.ExtractVector128(v, 1), Avx.ExtractVector128(v, 0));
+                var a = Avx.HorizontalAdd(v, rv);
+                return Avx.HorizontalAdd(a, a);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector256<double> DotProduct(this in Vector256<double> a, in Vector256<double> b)
+        {
+            var v = Avx.Multiply(a, b);
+            if (Avx2.IsSupported)
+            {
+                v = Avx.HorizontalAdd(v, v);
+                v = Avx2.Permute4x64(v, 0b00100010);
+                return Avx.HorizontalAdd(v, v);
+            }
+            else
+            {
+                var rv = Vector256.Create(Avx.ExtractVector128(v, 1), Avx.ExtractVector128(v, 0));
+                v = Avx.HorizontalAdd(v, rv);
+                return Avx.HorizontalAdd(v, v);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector256<double> DotProduct(this in Vector256<double> a, in Vector256<double> b, int control)
+        {
+            var v = Avx.Multiply(a, b);
+            var addMask = Vector256.Create(
+                ((control & 0b00010000) != 0) ? 0xFFFFFFFFFFFFFFFFUL : 0,
+                ((control & 0b00100000) != 0) ? 0xFFFFFFFFFFFFFFFFUL : 0,
+                ((control & 0b01000000) != 0) ? 0xFFFFFFFFFFFFFFFFUL : 0,
+                ((control & 0b10000000) != 0) ? 0xFFFFFFFFFFFFFFFFUL : 0
+            ).AsDouble();
+            v = Avx.And(v, addMask);
+
+            Vector256<double> result;
+            if (Avx2.IsSupported)
+            {
+                v = Avx.HorizontalAdd(v, v);
+                v = Avx2.Permute4x64(v, 0b00100010);
+                result = Avx.HorizontalAdd(v, v);
+            }
+            else
+            {
+                var rv = Vector256.Create(Avx.ExtractVector128(v, 1), Avx.ExtractVector128(v, 0));
+                v = Avx.HorizontalAdd(v, rv);
+                result = Avx.HorizontalAdd(v, v);
+            }
+
+            var resultMask = Vector256.Create(
+                ((control & 0b0001) != 0) ? 0xFFFFFFFFFFFFFFFFUL : 0,
+                ((control & 0b0010) != 0) ? 0xFFFFFFFFFFFFFFFFUL : 0,
+                ((control & 0b0100) != 0) ? 0xFFFFFFFFFFFFFFFFUL : 0,
+                ((control & 0b1000) != 0) ? 0xFFFFFFFFFFFFFFFFUL : 0
+            ).AsDouble();
+            return Avx.And(result, resultMask);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector256<double> Normalize(this in Vector256<double> v)
+        {
+            var length = Avx.Sqrt(v.DotProduct(v));
+            return Avx.Divide(v, length);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector256<double> Invert(this in Vector256<double> v)
+        {
+            return Avx.Subtract(Vector256<double>.Zero, v);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector4 AsVector4(this in Vector256<double> v)
+        {
+            return Avx.ConvertToVector128Single(v).AsVector4();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector3 AsVector3(this in Vector256<double> v)
+        {
+            return Avx.ConvertToVector128Single(v).AsVector3();
+        }
+
+        // https://geometrian.com/programming/tutorials/cross-product/index.php
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector256<double> CrossProduct(this in Vector256<double> a, in Vector256<double> b)
+        {
+            var resultMask = Vector256.Create(0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0).AsDouble();
+            Vector256<double> result;
+            if (Avx.IsSupported)
+            {
+                var tmp0 = Avx2.Permute4x64(a, 0b11001001);
+                var tmp1 = Avx2.Permute4x64(b, 0b11010010);
+                var tmp2 = Avx.Multiply(tmp0, b);
+                var tmp3 = Avx.Multiply(tmp0, tmp1);
+                var tmp4 = Avx2.Permute4x64(tmp2, 0b11001001);
+                result = Avx.Subtract(tmp3, tmp4);
+            }
+            else
+            {
+                var aLow = Avx.ExtractVector128(a, 0);
+                var aHigh = Avx.ExtractVector128(a, 1);
+                var bLow = Avx.ExtractVector128(b, 0);
+                var bHigh = Avx.ExtractVector128(b, 1);
+
+                var tmp0 = Vector256.Create(Sse2.Shuffle(aHigh, aLow, 0b10), Sse2.Shuffle(aHigh, aLow, 0b01));
+                var tmp1 = Vector256.Create(Sse2.Shuffle(bHigh, bLow, 0b11), Sse2.Shuffle(bLow, bHigh, 0b00));
+                var tmp2 = Avx.Multiply(tmp0, b);
+                var tmp3 = Avx.Multiply(tmp0, tmp1);
+
+                var tmp2Low = Avx.ExtractVector128(tmp2, 0);
+                var tmp2High = Avx.ExtractVector128(tmp2, 1);
+                var tmp4 = Vector256.Create(Sse2.Shuffle(tmp2High, tmp2Low, 0b10), Sse2.Shuffle(tmp2High, tmp2Low, 0b01));
+                result = Avx.Subtract(tmp3, tmp4);
+            }
+
+            return Avx.And(result, resultMask);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector256<double> Shuffle4x64(this in Vector256<double> a, in Vector256<double> b, int control)
+        {
+            var en1 = (control & 0b00000011);
+            var en2 = (control & 0b00001100) >> 2;
+            var en3 = (control & 0b00110000) >> 4;
+            var en4 = (control & 0b11000000) >> 6;
+
+            var aLow = Avx.ExtractVector128(a, 0);
+            var aHigh = Avx.ExtractVector128(a, 1);
+            var bLow = Avx.ExtractVector128(b, 0);
+            var bHigh = Avx.ExtractVector128(b, 1);
+
+            var lo1 = en1 > 1 ? aHigh : aLow;
+            var lo2 = en2 > 1 ? aHigh : aLow;
+            var hi1 = en3 > 1 ? bHigh : bLow;
+            var hi2 = en4 > 1 ? bHigh : bLow;
+
+            var low = (en1, en2) switch
+            {
+                (_, _) when ((en1 & 1) == 0 && ((en2 & 1) == 0)) => Sse2.Shuffle(lo1, lo2, 0b00),
+                (_, _) when ((en1 & 1) != 0 && ((en2 & 1) == 0)) => Sse2.Shuffle(lo1, lo2, 0b01),
+                (_, _) when ((en1 & 1) == 0 && ((en2 & 1) != 0)) => Sse2.Shuffle(lo1, lo2, 0b10),
+                (_, _) when ((en1 & 1) != 0 && ((en2 & 1) != 0)) => Sse2.Shuffle(lo1, lo2, 0b11),
+                _ => throw new InvalidOperationException()
+            };
+            var high = (en3, en4) switch
+            {
+                (_, _) when ((en3 & 1) == 0 && ((en4 & 1) == 0)) => Sse2.Shuffle(hi1, hi2, 0b00),
+                (_, _) when ((en3 & 1) != 0 && ((en4 & 1) == 0)) => Sse2.Shuffle(hi1, hi2, 0b01),
+                (_, _) when ((en3 & 1) == 0 && ((en4 & 1) != 0)) => Sse2.Shuffle(hi1, hi2, 0b10),
+                (_, _) when ((en3 & 1) != 0 && ((en4 & 1) != 0)) => Sse2.Shuffle(hi1, hi2, 0b11),
+                _ => throw new InvalidOperationException()
+            };
+
+            return Vector256.Create(low, high);
+        }
+    }
 }

@@ -84,8 +84,8 @@ namespace NiVE3.Plugin.Image
         /// 画像データをCPU側にコピーしたNImageを新たに生成します
         /// </summary>
         /// <param name="needClear">ArrayPoolから取得した配列の0クリアが必要かどうか</param>
-        /// <returns>生成されたNImage</returns>
-        public NImage CopyToCpu(bool needClear = false)
+        /// <returns>生成されたNManagedImage</returns>
+        public NManagedImage CopyToCpu(bool needClear = false)
         {
             var result = new NManagedImage(Width, Height, needClear);
             var handle = GCHandle.Alloc(result.Data, GCHandleType.Pinned);

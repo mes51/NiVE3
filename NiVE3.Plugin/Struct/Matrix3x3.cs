@@ -16,6 +16,7 @@ namespace NiVE3.Plugin.Struct
     /// <summary>
     /// 3x3の行列
     /// </summary>
+    // TODO: 行列の向き直す?
     public struct Matrix3x3 : IEquatable<Matrix3x3>
     {
         static readonly Matrix3x3 _Identity = new Matrix3x3(
@@ -213,9 +214,9 @@ namespace NiVE3.Plugin.Struct
             }
         }
 
-        public static Matrix3x3 AffineTransform(Vector2 anchorPoint, Vector2 scale, float angle, Vector2 position)
+        public static Matrix3x3 AffineTransform(Vector2 anchorPoint, Vector2 scale, float angle, Vector2 translate)
         {
-            return Identity.Translate(position.X, position.Y)
+            return Identity.Translate(translate.X, translate.Y)
                 .Rotate(angle)
                 .Scale(scale.X, scale.Y)
                 .Translate(-anchorPoint.X, -anchorPoint.Y);
