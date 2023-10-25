@@ -43,7 +43,7 @@ namespace NiVE3.Plugin.Struct
         public float M32 => Z.Y;
         public float M33 => Z.Z;
 
-        public Matrix3x3(float m11, float m12, float m13, float m21, float m22, float m23) : this(m11, m12, m13, m21, m22, m23, 0.0F, 0.0F, 1.0F) { }
+        public Matrix3x3(float m11, float m12, float m21, float m22, float m31, float m32) : this(m11, m12, 0.0F, m21, m22, 0.0F, m31, m32, 1.0F) { }
 
         public Matrix3x3(
             float m11, float m12, float m13,
@@ -105,7 +105,7 @@ namespace NiVE3.Plugin.Struct
         /// <returns>計算後の行列</returns>
         public Matrix3x3 Translate(float x, float y)
         {
-            return this * new Matrix3x3(1.0F, 0.0F, x, 0.0F, 1.0F, y);
+            return this * new Matrix3x3(1.0F, 0.0F, 0.0F, 1.0F, x, y);
         }
 
         /// <summary>
@@ -119,23 +119,7 @@ namespace NiVE3.Plugin.Struct
             var cos = MathF.Cos(rad);
             var sin = MathF.Sin(rad);
 
-            return this * new Matrix3x3(cos, -sin, 0, sin, cos, 0.0F);
-        }
-
-        /// <summary>
-        /// 指定した点で回転します
-        /// </summary>
-        /// <param name="x">点のX座標</param>
-        /// <param name="y">点のY座標</param>
-        /// <param name="angle">回転角度</param>
-        /// <returns>計算後の行列</returns>
-        public Matrix3x3 RotateAt(float x, float y, float angle)
-        {
-            var rad = (float)(Math.PI / 180.0 * angle);
-            var cos = MathF.Cos(rad);
-            var sin = MathF.Sin(rad);
-
-            return this * new Matrix3x3(cos, -sin, x - x * cos + y * sin, sin, cos, y - x * sin - y * cos);
+            return this * new Matrix3x3(cos, sin, -sin, cos, 0.0F, 0.0F);
         }
 
         /// <summary>
@@ -146,7 +130,7 @@ namespace NiVE3.Plugin.Struct
         /// <returns>計算後の行列</returns>
         public Matrix3x3 Scale(float w, float h)
         {
-            return this * new Matrix3x3(w, 0.0F, 0.0F, 0.0F, h, 0.0F);
+            return this * new Matrix3x3(w, 0.0F, 0.0F, h, 0.0F, 0.0F);
         }
 
         /// <summary>
@@ -158,7 +142,8 @@ namespace NiVE3.Plugin.Struct
         public (float x, float y) Transform(float x, float y)
         {
             var p = new Vector3(x, y, 1.0F);
-            return ((p * X).HorizontalAdd(), (p * Y).HorizontalAdd());
+            var result = (p.X * X) + (p.Y * Y) + Z;
+            return (result.X, result.Y);
         }
 
         /// <summary>
@@ -169,7 +154,7 @@ namespace NiVE3.Plugin.Struct
         public Vector2 Transform(Vector2 v)
         {
             var p = new Vector3(v, 1.0F);
-            return new Vector2((p * X).HorizontalAdd(), (p * Y).HorizontalAdd());
+            return ((p.X * X) + (p.Y * Y) + Z).AsVector128().AsVector2();
         }
 
         float Determinant()
@@ -216,25 +201,25 @@ namespace NiVE3.Plugin.Struct
 
         public static Matrix3x3 AffineTransform(Vector2 anchorPoint, Vector2 scale, float angle, Vector2 translate)
         {
-            return Identity.Translate(translate.X, translate.Y)
-                .Rotate(angle)
+            return Identity.Translate(-anchorPoint.X, -anchorPoint.Y)
                 .Scale(scale.X, scale.Y)
-                .Translate(-anchorPoint.X, -anchorPoint.Y);
+                .Rotate(angle)
+                .Translate(translate.X, translate.Y);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe static bool operator ==(Matrix3x3 a, Matrix3x3 b)
+        public unsafe static bool operator ==(in Matrix3x3 a, in Matrix3x3 b)
         {
             return a.Equals(b);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe static bool operator !=(Matrix3x3 a, Matrix3x3 b)
+        public unsafe static bool operator !=(in Matrix3x3 a, in Matrix3x3 b)
         {
             return !a.Equals(b);
         }
 
-        public unsafe static Matrix3x3 operator +(Matrix3x3 a, Matrix3x3 b)
+        public unsafe static Matrix3x3 operator +(Matrix3x3 a, in Matrix3x3 b)
         {
             a.X += b.X;
             a.Y += b.Y;
@@ -242,7 +227,7 @@ namespace NiVE3.Plugin.Struct
             return a;
         }
 
-        public unsafe static Matrix3x3 operator -(Matrix3x3 a, Matrix3x3 b)
+        public unsafe static Matrix3x3 operator -(Matrix3x3 a, in Matrix3x3 b)
         {
             a.X -= b.X;
             a.Y -= b.Y;
@@ -258,7 +243,7 @@ namespace NiVE3.Plugin.Struct
             return a;
         }
 
-        public unsafe static Matrix3x3 operator *(Matrix3x3 a, Matrix3x3 b)
+        public unsafe static Matrix3x3 operator *(Matrix3x3 a, in Matrix3x3 b)
         {
             a.X = a.X.X * b.X + a.X.Y * b.Y + a.X.Z * b.Z;
             a.Y = a.Y.X * b.X + a.Y.Y * b.Y + a.Y.Z * b.Z;
