@@ -18,7 +18,7 @@ namespace NiVE3.Plugin.Interfaces
     {
         public const string TransformAnchorPointId = nameof(TransformAnchorPointId);
 
-        public const string TransformTranslateId = nameof(TransformTranslateId);
+        public const string TransformPositionId = nameof(TransformPositionId);
 
         public const string TransformDirectionId = nameof(TransformDirectionId);
 
@@ -31,6 +31,12 @@ namespace NiVE3.Plugin.Interfaces
         public const string TransformScaleId = nameof(TransformScaleId);
 
         public const string TransformPropertyOpacityId = nameof(TransformPropertyOpacityId);
+
+        public const string CameraTransformPointOfInterestId = nameof(CameraTransformPointOfInterestId);
+
+        public const string CameraTransformOrientationId = nameof(CameraTransformOrientationId);
+
+        public const string CameraLayerOptionZoomId = nameof(CameraLayerOptionZoomId);
 
         bool IsEnable3D { get; }
     }

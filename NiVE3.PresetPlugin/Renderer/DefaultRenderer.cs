@@ -14,6 +14,9 @@ using NiVE3.PresetPlugin.Resource;
 using NiVE3.Shared.Extension;
 using NiVE3.PresetPlugin.Internal.Drawing;
 using System.Runtime.Intrinsics;
+using NiVE3.Plugin.Interfaces.RendererParams;
+using System.Windows.Media.Media3D;
+using System.Runtime.Intrinsics.X86;
 
 namespace NiVE3.PresetPlugin.Renderer
 {
@@ -21,6 +24,8 @@ namespace NiVE3.PresetPlugin.Renderer
     [RendererMetadata(typeof(DefaultRenderer), LanguageResourceDictionary.Renderer_DefaultRenderer_Name, LanguageResourceDictionary.Renderer_DefaultRenderer_Description, "mes51", "D67AC3F-A137-45B1-99F7-3E68A0B910E6", LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
     public class DefaultRenderer : IRenderer
     {
+        const double DefaultFov = 0.691111986546211; // 39.5978 / 180.0 * Math.PI
+
         int Width { get; set; }
 
         int Height { get; set; }
@@ -29,12 +34,36 @@ namespace NiVE3.PresetPlugin.Renderer
 
         bool UseGpu { get; set; }
 
+        Matrix4x4d ViewMatrix { get; set; }
+
+        Matrix4x4d ProjectionMatrix { get; set; }
+
         public void SetupAccelerator(IAcceleratorObject accelerator) { }
 
         public void SetSize(int width, int height)
         {
             Width = width;
             Height = height;
+        }
+
+        public void SetCamera(CameraSetting cameraSetting)
+        {
+            var size = (double)Math.Max(Width, Height);
+
+            var pos = Avx.Divide(cameraSetting.Position.AsVector256(), Vector256.Create(size, size, -size, size));
+            var poi = Avx.Divide(cameraSetting.PointOfInterest.AsVector256(), Vector256.Create(size, size, -size, size));
+            var fov = Math.Atan((Width / cameraSetting.Zoom) * 0.5) * 2.0;
+            var viewMatrix = Matrix4x4d.CreateLookAt(pos, poi, Vector256.Create(0.0, 1.0, 0.0, 0.0))
+                .RotateX(cameraSetting.Orientation.X)
+                .RotateY(cameraSetting.Orientation.Y)
+                .RotateZ(cameraSetting.Orientation.Z)
+                .RotateX(cameraSetting.AngleX)
+                .RotateY(cameraSetting.AngleY)
+                .RotateZ(cameraSetting.AngleZ)
+                .Translate(-(size - Width) * 0.5 / size, -(size - Height) * 0.5 / size, 0.0);
+
+            ViewMatrix = viewMatrix;
+            ProjectionMatrix = Matrix4x4d.CreatePerspectiveFieldOfView(fov, 1.0, double.Epsilon, double.PositiveInfinity);
         }
 
         public void BeginRendering(double downSamplingRate, bool useGpu)
@@ -46,6 +75,10 @@ namespace NiVE3.PresetPlugin.Renderer
 
             CurrentFrame = new NManagedImage(Width, Height, true);
             UseGpu = useGpu;
+
+            var zoom = Width / Math.Tan(DefaultFov * 0.5) * 0.5;
+            ViewMatrix = Matrix4x4d.CreateLookAt(Vector256.Create(0.5, 0.5, zoom / Width, 0.0), Vector256.Create(0.5, 0.5, 0.0, 0.0), Vector256.Create(0.0, 1.0, 0.0, 0.0));
+            ProjectionMatrix = Matrix4x4d.CreatePerspectiveFieldOfView(DefaultFov, 1.0, double.Epsilon, double.PositiveInfinity);
         }
 
         public void Render(RenderableImage[] images)
@@ -61,11 +94,8 @@ namespace NiVE3.PresetPlugin.Renderer
                 {
                     var renderer = new Renderer3D(CurrentFrame);
 
-                    // TODO: カメラ
-                    const double Fov = 39.5978 / 180.0 * Math.PI;
-                    var zoom = CurrentFrame.Width / Math.Tan(Fov * 0.5) * 0.5;
-                    renderer.ViewMatrix = Matrix4x4d.CreateLookAt(Vector256.Create(0.5, 0.5, (zoom / CurrentFrame.Width), 0.0), Vector256.Create(0.5, 0.5, 0.0, 0.0), Vector256.Create(0.0, 1.0, 0.0, 0.0));
-                    renderer.ProjectionMatrix = Matrix4x4d.CreatePerspectiveFieldOfView(Fov, 1.0, double.Epsilon, double.PositiveInfinity);
+                    renderer.ViewMatrix = ViewMatrix;
+                    renderer.ProjectionMatrix = ProjectionMatrix;
 
                     foreach (var i in group)
                     {
@@ -74,7 +104,14 @@ namespace NiVE3.PresetPlugin.Renderer
 
                         foreach (var (type, parentTransform) in i.ParentTransforms)
                         {
-                            model = model * GetTransform3D(parentTransform, renderer.Size);
+                            switch (type)
+                            {
+                                case ParentType.Camera:
+                                    break;
+                                default:
+                                    model = model * GetTransform3D(parentTransform, renderer.Size);
+                                    break;
+                            }
                         }
 
                         renderer.ModelMatrix = model;
@@ -130,7 +167,7 @@ namespace NiVE3.PresetPlugin.Renderer
             var anchorPoint = (Vector3d)(transformProperties[ILayerObject.TransformAnchorPointId] ?? new Vector3d());
             var scale = (Vector3d)(transformProperties[ILayerObject.TransformScaleId] ?? new Vector3d()) * 0.01;
             var angle = (double)(transformProperties[ILayerObject.TransformZAngleId] ?? 0.0);
-            var translate = (Vector3d)(transformProperties[ILayerObject.TransformTranslateId] ?? new Vector3d());
+            var translate = (Vector3d)(transformProperties[ILayerObject.TransformPositionId] ?? new Vector3d());
             return Matrix3x3.AffineTransform((Vector2)anchorPoint.AsVector2d(), (Vector2)scale.AsVector2d(), (float)angle, (Vector2)translate.AsVector2d());
         }
 
@@ -142,7 +179,7 @@ namespace NiVE3.PresetPlugin.Renderer
             var angleX = (double)(transformProperties[ILayerObject.TransformXAngleId] ?? 0.0);
             var angleY = (double)(transformProperties[ILayerObject.TransformYAngleId] ?? 0.0);
             var angleZ = (double)(transformProperties[ILayerObject.TransformZAngleId] ?? 0.0);
-            var translate = (Vector3d)(transformProperties[ILayerObject.TransformTranslateId] ?? new Vector3d()) / rendererSize;
+            var translate = (Vector3d)(transformProperties[ILayerObject.TransformPositionId] ?? new Vector3d()) / rendererSize;
 
             return Matrix4x4d.AffineTransform(anchorPoint, scale, direction, angleX, angleY, angleZ, translate);
         }

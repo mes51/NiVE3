@@ -126,13 +126,13 @@ namespace NiVE3.Model
 
         public string FileName => Path.GetFileName(InputModel.FilePath);
 
+        public InputModel InputModel { get; }
+
         public ObservableCollection<IFootageModel>? Children => null;
 
         IFootageSource Source { get; }
 
         HistoryModel HistoryModel { get; }
-
-        public InputModel InputModel { get; }
 
         public FootageModel(InputModel input, IFootageSource source, HistoryModel historyModel) : this(input, source, historyModel, null) { }
 

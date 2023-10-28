@@ -28,6 +28,12 @@ namespace NiVE3.Plugin.Struct
             return new Vector3d(X, Y, 0.0);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Vector256<double> AsVector256()
+        {
+            return Vector256.Create(X, Y, 0.0, 0.0);
+        }
+
         public override bool Equals([NotNullWhen(true)] object? obj)
         {
             if (obj is Vector2d v)
@@ -180,6 +186,12 @@ namespace NiVE3.Plugin.Struct
         public Vector2d AsVector2d()
         {
             return new Vector2d(X, Y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Vector256<double> AsVector256()
+        {
+            return Vector256.Create(X, Y, Z, 0.0);
         }
 
         public override bool Equals([NotNullWhen(true)] object? obj)

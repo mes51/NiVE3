@@ -221,6 +221,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("(なし)")]
         public static readonly string Timeline_EmptyTitle = nameof(Timeline_EmptyTitle);
 
+        [ShowInMarkup, DefaultValue("カメラの追加(_C)")]
+        public static readonly string Timeline_ContextMenu_AddCamera = nameof(Timeline_ContextMenu_AddCamera);
+
         [ShowInMarkup, DefaultValue("なし")]
         public static readonly string Layer_EmptyTrackMatte = nameof(Layer_EmptyTrackMatte);
 
@@ -232,6 +235,9 @@ namespace NiVE3.View.Resource
 
         [ShowInMarkup, DefaultValue("トランスフォーム")]
         public static readonly string Layer_Transform = nameof(Layer_Transform);
+
+        [ShowInMarkup, DefaultValue("カメラオプション")]
+        public static readonly string Layer_LayerOptions_Camera = nameof(Layer_LayerOptions_Camera);
 
         [ShowInMarkup, DefaultValue("名前")]
         public static readonly string EffectList_Name = nameof(EffectList_Name);
@@ -382,6 +388,12 @@ namespace NiVE3.View.Resource
 
         [ShowInMarkup, DefaultValue("不透明度")]
         public static readonly string TransformProperty_Opacity = nameof(TransformProperty_Opacity);
+
+        [ShowInMarkup, DefaultValue("目標点")]
+        public static readonly string TransformProperty_CameraPointOfInterest = nameof(TransformProperty_CameraPointOfInterest);
+
+        [ShowInMarkup, DefaultValue("ズーム")]
+        public static readonly string LayerOptionsProperty_CameraZoom = nameof(LayerOptionsProperty_CameraZoom);
 
         // Enum
 

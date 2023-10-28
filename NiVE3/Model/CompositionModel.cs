@@ -211,6 +211,15 @@ namespace NiVE3.Model
             }
         }
 
+        public void AddCamera()
+        {
+            var layer = new LayerModel(this, FootageListModel.CameraFootage, EffectListModel, HistoryModel);
+            layer.OutPoint = Duration;
+            Layers.Insert(0, layer);
+
+            HistoryModel.Add(new AddLayersHistoryCommand(this, new LayerModel[] { layer }, 0));
+        }
+
         public void MoveLayer(Guid layerId, int newIndex)
         {
             MoveLayers(new Guid[] { layerId }, layerId, newIndex);
@@ -392,16 +401,19 @@ namespace NiVE3.Model
         {
             var allImages = new List<RenderableImage>();
 
-            //var globalPropertyLayers = カメラ/ライト
-
             Renderer.BeginRendering(downSamplingRate, useGpu);
+
+            var cameraSetting = Layers.FirstOrDefault(l => l.IsEnableVideo && l.IsCamera && l.IsContainsTime(time))?.GetCameraSetting(time);
+            if (cameraSetting != null)
+            {
+                Renderer.SetCamera(cameraSetting);
+            }
 
             var images = new List<RenderableImage>();
             var hasSolo = Layers.Any(l => l.IsEnableSolo);
             foreach (var l in Layers.Where(l => l.HasImage && l.IsEnableVideo && (!hasSolo || l.IsEnableSolo)).Reverse())
             {
-                var layerTime = time - l.SourceStartPoint;
-                if (layerTime < l.InPoint || layerTime > l.OutPoint)
+                if (!l.IsContainsTime(time))
                 {
                     continue;
                 }

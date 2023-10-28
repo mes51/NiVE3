@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Plugin.Image;
+using NiVE3.Plugin.Interfaces.RendererParams;
 using NiVE3.Plugin.Property;
 
 namespace NiVE3.Plugin.Interfaces
@@ -22,6 +23,12 @@ namespace NiVE3.Plugin.Interfaces
         /// <param name="width">コンポジションの幅</param>
         /// <param name="height">コンポジションの高さ</param>
         void SetSize(int width, int height);
+
+        /// <summary>
+        /// 3D用のカメラを設定します。レンダリングする度に呼ばれますが、カメラがコンポジション内に存在しない場合は呼ばれません
+        /// </summary>
+        /// <param name="cameraSetting">カメラの設定</param>
+        void SetCamera(CameraSetting cameraSetting);
 
         /// <summary>
         /// レンダリングを開始します

@@ -15,6 +15,7 @@ using System.Windows.Media.Effects;
 using NiVE3.Config;
 using NiVE3.Extension;
 using NiVE3.Input;
+using NiVE3.Input.Special;
 using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Shared.Extension;
@@ -52,6 +53,8 @@ namespace NiVE3.Model
             set { SetProperty(ref sortIsAscending, value); }
         }
 
+        public FootageModel CameraFootage { get; }
+
         Dictionary<Type, string[]> SupportedFileTypes { get; set; } = new Dictionary<Type, string[]>();
 
         List<InputModel> LoadedInputs { get; } = new List<InputModel>();
@@ -87,6 +90,8 @@ namespace NiVE3.Model
             Footages = new ObservableCollection<IFootageModel>();
 
             PropertyChanged += FootageListModel_PropertyChanged;
+
+            CameraFootage = new FootageModel(new InputModel(CameraInput.Instance, false), EmptyFootageSource.Instance, HistoryModel);
         }
 
         public Guid? AddSolid()

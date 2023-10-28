@@ -20,12 +20,18 @@ using NiVE3.Shared.Extension;
 using NiVE3.Extension;
 using NiVE3.Plugin.Image;
 using System.Windows;
+using NiVE3.Input.Special;
+using NiVE3.Plugin.Interfaces.RendererParams;
 
 namespace NiVE3.Model
 {
     partial class LayerModel : BindableBase, IDisposable, ILayerObject
     {
         const string TransformGroupId = nameof(TransformGroupId);
+
+        const string LayerOptionGroupId = nameof(LayerOptionGroupId);
+
+        const double DefaultCameraFov = 0.360000466176267;// Math.Tan(39.5978 * 0.5 * (Math.PI / 180.0))
 
         private string name = "";
         public string Name
@@ -215,6 +221,10 @@ namespace NiVE3.Model
 
         public bool IsComposition => FootageModel.InputModel.Input is CompositionInput;
 
+        public bool IsSpecial => FootageModel.InputModel.IsSpecial;
+
+        public bool IsCamera => FootageModel.InputModel.Input is CameraInput;
+
         public bool HasImage => SourceType.HasFlag(SourceType.Image) || SourceType.HasFlag(SourceType.Video);
 
         private ObservableCollection<EffectModel> effects = new ObservableCollection<EffectModel>();
@@ -235,6 +245,8 @@ namespace NiVE3.Model
         public FootageModel FootageModel { get; }
 
         public PropertyGroupModel TransformProperties { get; }
+
+        public PropertyGroupModel? LayerOptionProperties { get; }
 
         public event EventHandler<EventArgs>? LayerUpdated;
 
@@ -268,17 +280,39 @@ namespace NiVE3.Model
             IsEnableVideo = SourceType.HasFlag(SourceType.Video) || SourceType.HasFlag(SourceType.Image);
             IsEnableAudio = SourceType.HasFlag(SourceType.Audio);
 
-            TransformProperties = new PropertyGroupModel(new PropertyGroup(TransformGroupId, CreateLanguageResourceKey(LanguageResourceDictionary.Layer_Transform), new PropertyBase[]
+            switch (footageModel.InputModel.Input)
             {
-                new Vector2DOr3DProperty(ILayerObject.TransformAnchorPointId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_AnchorPoint), new Vector3d(footageModel.Width * 0.5, footageModel.Height * 0.5, 0.0), true, 2),
-                new Vector2DOr3DProperty(ILayerObject.TransformTranslateId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_Translate), new Vector3d(compositionModel.Width * 0.5, compositionModel.Height * 0.5, 0.0), true, 2),
-                new Direction3DProperty(ILayerObject.TransformDirectionId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_Direction), new Vector3d(), true, 2),
-                new Angle3DElementProperty(ILayerObject.TransformXAngleId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_XAngle3D), 0.0, true, 2),
-                new Angle3DElementProperty(ILayerObject.TransformYAngleId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_YAngle3D), 0.0, true, 2),
-                new ZAngleProperty(ILayerObject.TransformZAngleId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_ZAngle2D), CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_ZAngle3D), 0.0, true, 2),
-                new Scale2DOr3DProperty(ILayerObject.TransformScaleId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_Scale), new Vector3d(100.0, 100.0, 100.0), true, 2),
-                new DoubleProperty(ILayerObject.TransformPropertyOpacityId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_Opacity), 100.0, 0.0, 100.0, true, 1.0, 2)
-            }), compositionModel, this, historyModel);
+                case CameraInput:
+                    var zoom = compositionModel.Width / DefaultCameraFov * 0.5;
+                    IsEnableVideo = true;
+                    TransformProperties = new PropertyGroupModel(new PropertyGroup(TransformGroupId, CreateLanguageResourceKey(LanguageResourceDictionary.Layer_Transform), new PropertyBase[]
+                    {
+                        new Vector3dProperty(ILayerObject.CameraTransformPointOfInterestId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_CameraPointOfInterest), new Vector3d(compositionModel.Width * 0.5, compositionModel.Height * 0.5, 0.0), true, 2, true),
+                        new Vector3dProperty(ILayerObject.TransformPositionId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_Translate), new Vector3d(compositionModel.Width * 0.5, compositionModel.Height * 0.5, -zoom), true, 2, true),
+                        new DirectionProperty(ILayerObject.CameraTransformOrientationId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_Direction), new Vector3d(), true, 2),
+                        new AngleProperty(ILayerObject.TransformXAngleId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_XAngle3D), 0.0, true, 2),
+                        new AngleProperty(ILayerObject.TransformYAngleId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_YAngle3D), 0.0, true, 2),
+                        new AngleProperty(ILayerObject.TransformZAngleId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_ZAngle3D), 0.0, true, 2),
+                    }), compositionModel, this, historyModel);
+                    LayerOptionProperties = new PropertyGroupModel(new PropertyGroup(LayerOptionGroupId, CreateLanguageResourceKey(LanguageResourceDictionary.Layer_LayerOptions_Camera), new PropertyBase[]
+                    {
+                        new DoubleProperty(ILayerObject.CameraLayerOptionZoomId, CreateLanguageResourceKey(LanguageResourceDictionary.LayerOptionsProperty_CameraZoom), zoom, 0.01, double.MaxValue, digit: 2)
+                    }), compositionModel, this, historyModel);
+                    break;
+                default:
+                    TransformProperties = new PropertyGroupModel(new PropertyGroup(TransformGroupId, CreateLanguageResourceKey(LanguageResourceDictionary.Layer_Transform), new PropertyBase[]
+                    {
+                        new Vector2DOr3DProperty(ILayerObject.TransformAnchorPointId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_AnchorPoint), new Vector3d(footageModel.Width * 0.5, footageModel.Height * 0.5, 0.0), true, 2),
+                        new Vector2DOr3DProperty(ILayerObject.TransformPositionId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_Translate), new Vector3d(compositionModel.Width * 0.5, compositionModel.Height * 0.5, 0.0), true, 2),
+                        new Direction3DProperty(ILayerObject.TransformDirectionId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_Direction), new Vector3d(), true, 2),
+                        new Angle3DElementProperty(ILayerObject.TransformXAngleId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_XAngle3D), 0.0, true, 2),
+                        new Angle3DElementProperty(ILayerObject.TransformYAngleId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_YAngle3D), 0.0, true, 2),
+                        new ZAngleProperty(ILayerObject.TransformZAngleId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_ZAngle2D), CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_ZAngle3D), 0.0, true, 2),
+                        new Scale2DOr3DProperty(ILayerObject.TransformScaleId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_Scale), new Vector3d(100.0, 100.0, 100.0), true, 2),
+                        new DoubleProperty(ILayerObject.TransformPropertyOpacityId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_Opacity), 100.0, 0.0, 100.0, true, 1.0, 2)
+                    }), compositionModel, this, historyModel);
+                    break;
+            }
 
             TransformProperties.ValueUpdated += TransformProperties_ValueUpdated;
             PropertyChanged += LayerModel_PropertyChanged;
@@ -323,12 +357,59 @@ namespace NiVE3.Model
                     break;
                 }
 
-                // TODO: カメラ・ライトレイヤーの判別
-                parentTransforms.Add(Tuple.Create(ParentType.Normal, parent.TransformProperties.GetPropertyValueGroup(time - parent.SourceStartPoint)));
+                // TODO: ライトレイヤーの判別
+                if (IsCamera)
+                {
+                    parentTransforms.Add(Tuple.Create(ParentType.Camera, parent.TransformProperties.GetPropertyValueGroup(time - parent.SourceStartPoint)));
+                }
+                else
+                {
+                    parentTransforms.Add(Tuple.Create(ParentType.Normal, parent.TransformProperties.GetPropertyValueGroup(time - parent.SourceStartPoint)));
+                }
                 parentId = parent.ParentLayerId;
             }
 
-            return new RenderableImage(image, roi, new Int32Point(), downSamplingRate, IsEnableMotionBlur, IsEnable3D, InterpolationQuality, BlendMode, transform, parentTransforms.ToArray());
+            return new RenderableImage(
+                image,
+                roi,
+                new Int32Point(),
+                downSamplingRate,
+                IsEnableMotionBlur,
+                IsEnable3D,
+                InterpolationQuality,
+                BlendMode,
+                transform,
+                parentTransforms.ToArray(),
+                LayerOptionProperties?.GetPropertyValueGroup(layerTime)
+            );
+        }
+
+        public bool IsContainsTime(double time)
+        {
+            var layerTime = time - SourceStartPoint;
+            return layerTime >= inPoint && layerTime < OutPoint;
+        }
+
+        public CameraSetting? GetCameraSetting(double time)
+        {
+            if (!IsCamera || !IsContainsTime(time))
+            {
+                return null;
+            }
+
+            var layerTime = time - SourceStartPoint;
+            var transform = TransformProperties.GetPropertyValueGroup(layerTime);
+            var options = LayerOptionProperties?.GetPropertyValueGroup(layerTime);
+
+            return new CameraSetting(
+                (Vector3d)(transform[ILayerObject.CameraTransformPointOfInterestId] ?? new Vector3d()),
+                (Vector3d)(transform[ILayerObject.TransformPositionId] ?? new Vector3d()),
+                (Vector3d)(transform[ILayerObject.CameraTransformOrientationId] ?? new Vector3d()),
+                (double)(transform[ILayerObject.TransformXAngleId] ?? 0.0),
+                (double)(transform[ILayerObject.TransformYAngleId] ?? 0.0),
+                (double)(transform[ILayerObject.TransformZAngleId] ?? 0.0),
+                (double)(options?[ILayerObject.CameraLayerOptionZoomId] ?? 0.0)
+            );
         }
 
         public void BeginEditDuration()

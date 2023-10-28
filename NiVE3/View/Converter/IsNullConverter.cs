@@ -12,7 +12,17 @@ namespace NiVE3.View.Converter
     {
         public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
-            return (parameter is bool invert && invert) ? (value != null) : (value == null);
+            var invert = false;
+            switch (parameter)
+            {
+                case string s:
+                    invert = s.ToLowerInvariant().Trim() == "true";
+                    break;
+                case bool v:
+                    invert = v;
+                    break;
+            }
+            return invert ? (value != null) : (value == null);
         }
 
         public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)

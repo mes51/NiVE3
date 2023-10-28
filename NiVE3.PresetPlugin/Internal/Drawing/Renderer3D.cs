@@ -84,8 +84,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
         {
             var width = texture.Width;
             var height = texture.Height;
-            var offsetX = (Size - width) * 0.5 / Size;
-            var offsetY = (Size - height) * 0.5 / Size;
+            var offsetX = (Size - RenderImage.Width) * 0.5 / Size;
+            var offsetY = (Size - RenderImage.Height) * 0.5 / Size;
             var v1 = Avx.Divide(Vector256.Create(0.0, 0.0, 0.0, Size), Vector256.Create((double)Size));
             var v2 = Avx.Divide(Vector256.Create(0.0, height, 0.0, Size), Vector256.Create((double)Size));
             var v3 = Avx.Divide(Vector256.Create(width, height, 0.0, Size), Vector256.Create((double)Size));

@@ -312,6 +312,8 @@ namespace NiVE3.ViewModel
 
         public ICommand ChangeCurrentTimeCommand { get; }
 
+        public ICommand AddCameraCommand { get; }
+
         WeakEventPublisher<EventArgs> CurrentTimeChangeByUserPublisher { get; } = new WeakEventPublisher<EventArgs>();
         public event EventHandler<EventArgs> CurrentTimeChangeByUser
         {
@@ -371,6 +373,8 @@ namespace NiVE3.ViewModel
             }, () => CompositionModel != null && SelectedItemType != SelectItemType.None);
 
             ChangeCurrentTimeCommand = new DelegateCommand(() => CurrentTimeChangeByUserPublisher.Publish(this, EventArgs.Empty));
+
+            AddCameraCommand = new RequerySuggestedCommand(() => CompositionModel?.AddCamera(), () => CompositionModel != null);
         }
 
         public void DragOver(IDropInfo dropInfo)

@@ -18,6 +18,7 @@
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <cv:TimeConverter x:Key="TimeConverter" FrameRate="{Binding FrameRate}"/>
+        <cv:IsNullConverter x:Key="IsNullConverter"/>
 
         <Thickness x:Key="ColumnMargin">2,0,0,0</Thickness>
         <Thickness x:Key="IconMargin">4,0,0,0</Thickness>
@@ -44,6 +45,31 @@
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="HorizontalAlignment" Value="Left"/>
             <Setter Property="Margin" Value="{StaticResource ColumnMargin}"/>
+        </Style>
+
+        <Style x:Key="LayerCollectionStyle" TargetType="{x:Type pt:LayerCollectionView}" BasedOn="{x:Static pt:LayerCollectionView.DefaultStyle}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ItemsControl}">
+                        <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="true">
+                            <ScrollViewer HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Visible" Focusable="False">
+                                <ItemsPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                            </ScrollViewer>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding CompositionModel, Converter={StaticResource IsNullConverter}, ConverterParameter=True}" Value="True">
+                    <Setter Property="ContextMenu">
+                        <Setter.Value>
+                            <ContextMenu>
+                                <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddCamera}" Command="{Binding AddCameraCommand}"/>
+                            </ContextMenu>
+                        </Setter.Value>
+                    </Setter>
+                </DataTrigger>
+            </Style.Triggers>
         </Style>
     </UserControl.Resources>
     <Grid>
@@ -172,26 +198,11 @@
                                 Range="{Binding TimeBarRange}"
                                 RangeStart="{Binding TimeBarRangeStart}"
                                 SelectedItems="{Binding SelectedLayers}"
+                                Style="{StaticResource LayerCollectionStyle}"
                                 dd:DragDrop.DropHandler="{Binding}"
                                 dd:DragDrop.DragHandler="{Binding RelativeSource={RelativeSource Self}}"
                                 dd:DragDrop.IsDragSource="True"
-                                dd:DragDrop.IsDropTarget="True">
-            <pt:LayerCollectionView.Style>
-                <Style TargetType="{x:Type pt:LayerCollectionView}" BasedOn="{x:Static pt:LayerCollectionView.DefaultStyle}">
-                    <Setter Property="Template">
-                        <Setter.Value>
-                            <ControlTemplate TargetType="{x:Type ItemsControl}">
-                                <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="true">
-                                    <ScrollViewer HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Visible" Focusable="False">
-                                        <ItemsPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
-                                    </ScrollViewer>
-                                </Border>
-                            </ControlTemplate>
-                        </Setter.Value>
-                    </Setter>
-                </Style>
-            </pt:LayerCollectionView.Style>
-        </pt:LayerCollectionView>
+                                dd:DragDrop.IsDropTarget="True"/>
 
         <!-- NOTE: インジケーターを最前面に表示するため、TimeLocatorViewのXAMLの記述は下にする -->
         <pt:TimeLocatorView x:Name="TimeLocator"

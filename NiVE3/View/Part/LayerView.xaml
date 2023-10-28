@@ -88,21 +88,39 @@
             <Setter Property="Visibility" Value="Visible"/>
         </Style>
 
-        <Style x:Key="SoloSwitchStyle" TargetType="{x:Type CheckBox}" BasedOn="{StaticResource LayerSwitchCheckBox}">
+        <Style x:Key="LayerSwitch" TargetType="{x:Type CheckBox}" BasedOn="{StaticResource LayerSwitchCheckBox}">
+            <Setter Property="Margin" Value="{StaticResource LayerSwitchMargin}"/>
+        </Style>
+
+        <Style x:Key="SoloSwitchStyle" TargetType="{x:Type CheckBox}" BasedOn="{StaticResource LayerSwitch}">
             <Setter Property="Visibility" Value="Hidden"/>
 
             <Style.Triggers>
-                <DataTrigger Binding="{Binding IsEnableVideo}" Value="True">
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding IsEnableVideo}" Value="True"/>
+                        <Condition Binding="{Binding IsCamera}" Value="False"/>
+                    </MultiDataTrigger.Conditions>
+
                     <Setter Property="Visibility" Value="Visible"/>
-                </DataTrigger>
+                </MultiDataTrigger>
                 <DataTrigger Binding="{Binding IsEnableAudio}" Value="True">
                     <Setter Property="Visibility" Value="Visible"/>
                 </DataTrigger>
             </Style.Triggers>
         </Style>
 
-        <Style x:Key="LayerSwitch" TargetType="{x:Type CheckBox}" BasedOn="{StaticResource LayerSwitchCheckBox}">
-            <Setter Property="Margin" Value="{StaticResource LayerSwitchMargin}"/>
+        <Style x:Key="IsEnableSwitchStyle" TargetType="{x:Type CheckBox}" BasedOn="{StaticResource LayerSwitch}">
+            <Setter Property="Visibility" Value="Hidden"/>
+
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding SourceType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static local:LayerView.CompositionDisplayableSourceType}}" Value="True">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsCamera}" Value="True">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+            </Style.Triggers>
         </Style>
 
         <Style x:Key="ShyLayerSwitch" TargetType="{x:Type CheckBox}" BasedOn="{StaticResource AlwaysShowIconLayerSwitchCheckBox}">
@@ -126,6 +144,12 @@
                     </DataTemplate>
                 </Setter.Value>
             </Setter>
+
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsSpecial}" Value="True">
+                    <Setter Property="Visibility" Value="Hidden"/>
+                </DataTrigger>
+            </Style.Triggers>
         </Style>
 
         <Style x:Key="TrackMatteSelectBoxStyle" TargetType="{x:Type upr:ContextMenuSelectBox}" BasedOn="{StaticResource {x:Type upr:ContextMenuSelectBox}}">
@@ -155,6 +179,9 @@
                                     </MultiBinding>
                                 </DataTrigger.Binding>
                                 <Setter Property="IsEnabled" Value="False"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding SourceType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static local:LayerView.CompositionDisplayableSourceType}}" Value="False">
+                                <Setter Property="Visibility" Value="Collapsed"/>
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
@@ -188,6 +215,12 @@
                     </DataTemplate>
                 </Setter.Value>
             </Setter>
+
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsSpecial}" Value="True">
+                    <Setter Property="Visibility" Value="Hidden"/>
+                </DataTrigger>
+            </Style.Triggers>
         </Style>
 
         <Style x:Key="TrackMatteModeSelectBoxStyle" TargetType="{x:Type upr:ContextMenuSelectBox}" BasedOn="{StaticResource {x:Type upr:ContextMenuSelectBox}}">
@@ -203,6 +236,9 @@
             </Setter>
 
             <Style.Triggers>
+                <DataTrigger Binding="{Binding IsSpecial}" Value="True">
+                    <Setter Property="Visibility" Value="Hidden"/>
+                </DataTrigger>
                 <DataTrigger Binding="{Binding TrackMatteLayerProxy}" Value="{x:Null}">
                     <Setter Property="Visibility" Value="Hidden"/>
                 </DataTrigger>
@@ -269,6 +305,17 @@
                     </DataTemplate>
                 </Setter.Value>
             </Setter>
+        </Style>
+
+        <Style x:Key="TransformGridStyle" TargetType="{x:Type Grid}">
+            <Setter Property="ClipToBounds" Value="True"/>
+            <Setter Property="Visibility" Value="Visible"/>
+
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding SourceType}" Value="{x:Static pi:SourceType.Audio}">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
+            </Style.Triggers>
         </Style>
     </UserControl.Resources>
     <Grid>
@@ -349,9 +396,8 @@
             <Grid Grid.Column="0" Grid.Row="0" Style="{StaticResource ColumnGrid}">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0.5,0,0,0">
                     <CheckBox Content="{gm:FontawesomeResource ResourceKey=Eye}"
-                              Style="{StaticResource LayerSwitch}"
+                              Style="{StaticResource IsEnableSwitchStyle}"
                               IsChecked="{Binding IsEnableVideo, Mode=OneWay}"
-                              Visibility="{Binding SourceType, Converter={StaticResource AVTypeVisibleConverter}, ConverterParameter={x:Static local:LayerView.CompositionDisplayableSourceType}}"
                               Command="{Binding ChangeLayerSwitchCommand}"
                               CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableVideo}"/>
                     
@@ -543,7 +589,7 @@
                                          dd:DragDrop.IsDropTarget="True"
                                          dd:DragDrop.DragSourceIgnore="False"/>
             </pt:LayerItemExpander>
-            <Grid Visibility="{Binding SourceType, Converter={StaticResource AVTypeVisibleConverter}, ConverterParameter={x:Static local:LayerView.CompositionDisplayableSourceType}}" ClipToBounds="True">
+            <Grid Style="{StaticResource TransformGridStyle}">
                 <pt:PropertyGroupView DataContext="{Binding TransformProperties}"
                                       IndentLevel="1"
                                       ControlAreaWidth="{Binding ElementName=Root, Path=LayerControlAreaWidth}"

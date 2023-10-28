@@ -242,6 +242,22 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref parentLayerId, value); }
         }
 
+        private bool isSpecial;
+        [NeedWire(nameof(LayerModel), IsOneWay = true)]
+        public bool IsSpecial
+        {
+            get { return isSpecial; }
+            set { SetProperty(ref isSpecial, value); }
+        }
+
+        private bool isCamera;
+        [NeedWire(nameof(LayerModel), IsOneWay = true)]
+        public bool IsCamera
+        {
+            get { return isCamera; }
+            set { SetProperty(ref isCamera, value); }
+        }
+
         private double layerNumberColumnWudth;
         [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineLayerNumberColumnWidth), IsOneWay = true)]
         public double LayerNumberColumnWidth
@@ -661,6 +677,12 @@ namespace NiVE3.ViewModel
 
         public void DragOver(IDropInfo dropInfo)
         {
+            if (IsSpecial)
+            {
+                dropInfo.NotHandled = true;
+                return;
+            }
+
             switch (dropInfo.Data)
             {
                 case EffectListDragData when dropInfo.VisualTarget is EffectCollectionView:
@@ -684,6 +706,11 @@ namespace NiVE3.ViewModel
 
         public void Drop(IDropInfo dropInfo)
         {
+            if (IsSpecial)
+            {
+                return;
+            }
+
             switch (dropInfo.Data)
             {
                 case EffectListDragData effectListData when dropInfo.VisualTarget is EffectCollectionView:
@@ -817,6 +844,14 @@ namespace NiVE3.ViewModel
         {
             get { return name; }
             set { SetProperty(ref name, value); }
+        }
+
+        private SourceType sourceType;
+        [NeedWire(nameof(LayerModel), IsOneWay = true)]
+        public SourceType SourceType
+        {
+            get { return sourceType; }
+            set { SetProperty(ref sourceType, value); }
         }
 
         LayerModel LayerModel { get; }
