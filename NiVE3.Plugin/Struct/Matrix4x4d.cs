@@ -151,7 +151,10 @@ namespace NiVE3.Plugin.Struct
 
         public static Matrix4x4d CreateLookAt(in Vector256<double> pos, in Vector256<double> target, in Vector256<double> up)
         {
-            var z = Avx.Subtract(pos, target).Normalize();
+            var posInvZ = Avx.Multiply(pos, Vector256.Create(1.0, 1.0, -1.0, 1.0));
+            var targetInvZ = Avx.Multiply(target, Vector256.Create(1.0, 1.0, -1.0, 1.0));
+
+            var z = Avx.Subtract(posInvZ, targetInvZ).Normalize();
             var x = up.CrossProduct(z).Normalize();
             var y = z.CrossProduct(x);
 
@@ -166,9 +169,9 @@ namespace NiVE3.Plugin.Struct
             result.M32 = y.GetElement(2);
             result.M33 = z.GetElement(2);
 
-            result.M41 = -x.DotProduct(pos).GetElement(0);
-            result.M42 = -y.DotProduct(pos).GetElement(0);
-            result.M43 = -z.DotProduct(pos).GetElement(0);
+            result.M41 = -x.DotProduct(posInvZ).GetElement(0);
+            result.M42 = -y.DotProduct(posInvZ).GetElement(0);
+            result.M43 = -z.DotProduct(posInvZ).GetElement(0);
 
             return result;
         }

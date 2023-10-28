@@ -281,7 +281,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
         IEnumerable<Triangle> GetClipAndDividedTriangles()
         {
-            return ClipAndDivideTriangle(Triangles.Where(t => !t.IsDegenerate()).ToArray());
+            return ClipAndDivideTriangle(Triangles.Where(t => !t.IsInvalidNormal && !t.IsDegenerate()).ToArray());
         }
 
         IEnumerable<Triangle> ClipAndDivideTriangle(Triangle[] triangles)

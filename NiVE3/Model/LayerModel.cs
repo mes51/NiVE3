@@ -347,7 +347,7 @@ namespace NiVE3.Model
                 }
             }
 
-            var parentTransforms = new List<Tuple<ParentType, PropertyValueGroup>>();
+            var parentTransforms = new List<Tuple<ParentType, PropertyValueGroup, PropertyValueGroup?>>();
             var parentId = ParentLayerId;
             while (parentId != null)
             {
@@ -358,13 +358,14 @@ namespace NiVE3.Model
                 }
 
                 // TODO: ライトレイヤーの判別
-                if (IsCamera)
+                var parentLayerTime = time - parent.SourceStartPoint;
+                if (parent.IsCamera)
                 {
-                    parentTransforms.Add(Tuple.Create(ParentType.Camera, parent.TransformProperties.GetPropertyValueGroup(time - parent.SourceStartPoint)));
+                    parentTransforms.Add(Tuple.Create(ParentType.Camera, parent.TransformProperties.GetPropertyValueGroup(parentLayerTime), parent.LayerOptionProperties?.GetPropertyValueGroup(parentLayerTime)));
                 }
                 else
                 {
-                    parentTransforms.Add(Tuple.Create(ParentType.Normal, parent.TransformProperties.GetPropertyValueGroup(time - parent.SourceStartPoint)));
+                    parentTransforms.Add(Tuple.Create(ParentType.Normal, parent.TransformProperties.GetPropertyValueGroup(parentLayerTime), (PropertyValueGroup?)null));
                 }
                 parentId = parent.ParentLayerId;
             }

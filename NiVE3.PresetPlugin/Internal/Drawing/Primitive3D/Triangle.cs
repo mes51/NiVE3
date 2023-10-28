@@ -45,6 +45,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
 
         public readonly bool SignIsDifferent;
 
+        public readonly bool IsInvalidNormal;
+
         readonly Vector256<double> FarPoint;
 
         readonly Matrix4x4d InvertMatrix;
@@ -66,11 +68,19 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
             InvertMatrix = invertMatrix;
 
             Normal = Avx.Subtract(v2.Vertex, v1.Vertex).CrossProduct(Avx.Subtract(v3.Vertex, v1.Vertex)).Normalize();
-            var invertedNormal = InvertMatrix.Transform(Vector256.Create(0.0, 0.0, -1.0, 0.0));
-            InvertNormal = -Avx.Subtract(invertedNormal, Vector256.Create(0.0, 0.0, 0.0, invertedNormal.GetElement(3))).Normalize().AsVector3();
-            PlaneD = -Normal.DotProduct(v1.Vertex).GetElement(0);
+            if (!double.IsNaN(Normal.GetElement(0)) && !double.IsNaN(Normal.GetElement(1)) && !double.IsNaN(Normal.GetElement(2)))
+            {
+                var invertedNormal = InvertMatrix.Transform(Vector256.Create(0.0, 0.0, -1.0, 0.0));
+                InvertNormal = -Avx.Subtract(invertedNormal, Vector256.Create(0.0, 0.0, 0.0, invertedNormal.GetElement(3))).Normalize().AsVector3();
+                PlaneD = -Normal.DotProduct(v1.Vertex).GetElement(0);
 
-            SignIsDifferent = Math.Sign(PlaneD) != Math.Sign(Normal.DotProduct(farPoint).GetElement(0) - PlaneD);
+                SignIsDifferent = Math.Sign(PlaneD) != Math.Sign(Normal.DotProduct(farPoint).GetElement(0) - PlaneD);
+                IsInvalidNormal = false;
+            }
+            else
+            {
+                IsInvalidNormal = true;
+            }
         }
 
         public Triangle(in Triangle baseTriangle, in UVVertex v1, in UVVertex v2, in UVVertex v3)
