@@ -84,4 +84,23 @@ namespace NiVE3.Plugin.Interfaces
         Luminance,
         InvertLuminance
     }
+
+    /// <summary>
+    /// 親レイヤーの種類を表します
+    /// </summary>
+    public enum ParentType
+    {
+        /// <summary>
+        /// 通常のレイヤー
+        /// </summary>
+        Normal,
+        /// <summary>
+        /// カメラレイヤー
+        /// </summary>
+        Camera,
+        /// <summary>
+        /// ライトレイヤー
+        /// </summary>
+        Light
+    }
 }

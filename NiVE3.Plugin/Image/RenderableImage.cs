@@ -63,14 +63,14 @@ namespace NiVE3.Plugin.Image
         /// <summary>
         /// 親レイヤーりトランスフォームの値。
         /// </summary>
-        public Tuple<ParentType, PropertyValueGroup, PropertyValueGroup?>[] ParentTransforms { get; }
+        public Tuple<ParentType, PropertyValueGroup>[] ParentTransforms { get; }
 
         /// <summary>
         /// レイヤーのオプション
         /// </summary>
         public PropertyValueGroup? LayerOptions { get; }
 
-        internal RenderableImage(NImage image, Int32Rect roi, Int32Point origimalImagePosition, double downSampleRate, bool isEnableMotionBlur, bool isEnable3D, ImageInterpolationQuality interpolationQuality, BlendMode blendMode, PropertyValueGroup transform, Tuple<ParentType, PropertyValueGroup, PropertyValueGroup?>[] parentTransforms, PropertyValueGroup? layerOptions)
+        internal RenderableImage(NImage image, Int32Rect roi, Int32Point origimalImagePosition, double downSampleRate, bool isEnableMotionBlur, bool isEnable3D, ImageInterpolationQuality interpolationQuality, BlendMode blendMode, PropertyValueGroup transform, Tuple<ParentType, PropertyValueGroup>[] parentTransforms, PropertyValueGroup? layerOptions)
         {
             Image = image;
             ROI = roi;
@@ -89,24 +89,5 @@ namespace NiVE3.Plugin.Image
         {
             Image.Dispose();
         }
-    }
-
-    /// <summary>
-    /// 親レイヤーの種類を表します
-    /// </summary>
-    public enum ParentType
-    {
-        /// <summary>
-        /// 通常のレイヤー
-        /// </summary>
-        Normal,
-        /// <summary>
-        /// カメラレイヤー
-        /// </summary>
-        Camera,
-        /// <summary>
-        /// ライトレイヤー
-        /// </summary>
-        Light
     }
 }

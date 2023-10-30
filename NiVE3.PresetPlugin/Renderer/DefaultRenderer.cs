@@ -52,8 +52,24 @@ namespace NiVE3.PresetPlugin.Renderer
             var size = Math.Max(Width, Height);
             var fov = Math.Atan((Width / cameraSetting.Zoom) * 0.5) * 2.0;
 
-            ViewMatrix = GetCameraMatrix(cameraSetting, Width, Height)
-                .Translate(-(size - Width) * 0.5 / size, -(size - Height) * 0.5 / size, 0.0);
+            var view = GetCameraMatrix(cameraSetting, Width, Height);
+            foreach (var (type, parentTransform) in cameraSetting.ParentTransforms)
+            {
+                switch (type)
+                {
+                    case ParentType.Camera:
+                        view = GetInvertedCameraMatrix(parentTransform, Width, Height) * view;
+                        break;
+                    default:
+                        if (Matrix4x4d.Invert(GetTransform3D(parentTransform, size), out var inverted))
+                        {
+                            view = inverted * view;
+                        }
+                        break;
+                }
+            }
+
+            ViewMatrix = view.Translate(-(size - Width) * 0.5 / size, -(size - Height) * 0.5 / size, 0.0);
             ProjectionMatrix = Matrix4x4d.CreatePerspectiveFieldOfView(fov, 1.0, double.Epsilon, double.PositiveInfinity);
         }
 
@@ -93,23 +109,12 @@ namespace NiVE3.PresetPlugin.Renderer
                         var opacity = (double)(i.Transform[ILayerObject.TransformPropertyOpacityId] ?? 0.0) * 0.01;
                         var model = GetTransform3D(i.Transform, renderer.Size);
 
-                        foreach (var (type, parentTransform, parentLayerOptions) in i.ParentTransforms)
+                        foreach (var (type, parentTransform) in i.ParentTransforms)
                         {
                             switch (type)
                             {
                                 case ParentType.Camera:
-                                    {
-                                        var cameraSetting = new CameraSetting(
-                                            (Vector3d)(parentTransform[ILayerObject.CameraTransformPointOfInterestId] ?? new Vector3d()),
-                                            (Vector3d)(parentTransform[ILayerObject.TransformPositionId] ?? new Vector3d()),
-                                            (Vector3d)(parentTransform[ILayerObject.CameraTransformOrientationId] ?? new Vector3d()),
-                                            (double)(parentTransform[ILayerObject.TransformXAngleId] ?? 0.0),
-                                            (double)(parentTransform[ILayerObject.TransformYAngleId] ?? 0.0),
-                                            (double)(parentTransform[ILayerObject.TransformZAngleId] ?? 0.0),
-                                            (double)(parentLayerOptions?[ILayerObject.CameraLayerOptionZoomId] ?? 0.0)
-                                        );
-                                        model *= GetInvertedCameraMatrix(cameraSetting, Width, Height);
-                                    }
+                                    model *= GetInvertedCameraMatrix(parentTransform, Width, Height);
                                     break;
                                 default:
                                     model *= GetTransform3D(parentTransform, renderer.Size);
@@ -132,7 +137,7 @@ namespace NiVE3.PresetPlugin.Renderer
                         var opacity = (double)(i.Transform[ILayerObject.TransformPropertyOpacityId] ?? 0.0) * 0.01;
                         var matrix = GetTransform2D(i.Transform);
 
-                        foreach (var (type, parentTransform, _) in i.ParentTransforms)
+                        foreach (var (type, parentTransform) in i.ParentTransforms)
                         {
                             matrix = GetTransform2D(parentTransform) * matrix;
                         }
@@ -214,28 +219,34 @@ namespace NiVE3.PresetPlugin.Renderer
                 .RotateZ(cameraSetting.AngleZ);
         }
 
-        static Matrix4x4d GetInvertedCameraMatrix(CameraSetting cameraSetting, double renderWidth, double renderHeight)
+        static Matrix4x4d GetInvertedCameraMatrix(PropertyValueGroup transformProperties, double renderWidth, double renderHeight)
         {
-            var size = Math.Max(renderWidth, renderHeight);
-            var pos = Avx.Divide(cameraSetting.Position.AsVector256(), Vector256.Create(size));
-            var poi = Avx.Divide(cameraSetting.PointOfInterest.AsVector256(), Vector256.Create(size));
-            var fov = Math.Atan((renderWidth / cameraSetting.Zoom) * 0.5) * 2.0;
+            var pos = (Vector3d)(transformProperties[ILayerObject.CameraTransformPointOfInterestId] ?? new Vector3d());
+            var poi = (Vector3d)(transformProperties[ILayerObject.TransformPositionId] ?? new Vector3d());
+            var orientation = (Vector3d)(transformProperties[ILayerObject.CameraTransformOrientationId] ?? new Vector3d());
+            var angleX = (double)(transformProperties[ILayerObject.TransformXAngleId] ?? 0.0);
+            var angleY = (double)(transformProperties[ILayerObject.TransformYAngleId] ?? 0.0);
+            var angleZ = (double)(transformProperties[ILayerObject.TransformZAngleId] ?? 0.0);
 
-            var diff = Avx.Subtract(poi, pos);
+            var size = Math.Max(renderWidth, renderHeight);
+            var pos256 = Avx.Divide(pos.AsVector256(), Vector256.Create(size));
+            var poi256 = Avx.Divide(poi.AsVector256(), Vector256.Create(size));
+
+            var diff = Avx.Subtract(poi256, pos256);
             var x = diff.GetElement(0);
             var y = diff.GetElement(1);
             var z = diff.GetElement(2);
 
             return Matrix4x4d.Identity
-                .RotateZ(-cameraSetting.AngleZ)
-                .RotateY(-cameraSetting.AngleY)
-                .RotateX(-cameraSetting.AngleX)
-                .RotateZ(-cameraSetting.Orientation.Z)
-                .RotateY(-cameraSetting.Orientation.Y)
-                .RotateX(-cameraSetting.Orientation.X)
+                .RotateZ(-angleZ)
+                .RotateY(-angleY)
+                .RotateX(-angleX)
+                .RotateZ(-orientation.Z)
+                .RotateY(-orientation.Y)
+                .RotateX(-orientation.X)
                 .RotateX(Math.Atan2(y, Math.Sqrt(x * x + z * z)) / Math.PI * 180.0)
                 .RotateY(-Math.Atan2(x, z) / Math.PI * 180.0)
-                .Translate(pos.GetElement(0), pos.GetElement(1), -pos.GetElement(2))
+                .Translate(pos256.GetElement(0), pos256.GetElement(1), -pos256.GetElement(2))
                 .Scale(1.0, 1.0, -1.0);
         }
 

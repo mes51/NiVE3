@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NiVE3.Plugin.Property;
 using NiVE3.Plugin.Struct;
 
 namespace NiVE3.Plugin.Interfaces.RendererParams
@@ -47,6 +48,8 @@ namespace NiVE3.Plugin.Interfaces.RendererParams
         /// </summary>
         public double Zoom { get; }
 
+        public Tuple<ParentType, PropertyValueGroup>[] ParentTransforms { get; }
+
         /// <summary>
         /// コンストラクタ
         /// </summary>
@@ -57,7 +60,8 @@ namespace NiVE3.Plugin.Interfaces.RendererParams
         /// <param name="angleY">カメラのY回転    </param>
         /// <param name="angleZ">カメラのZ回転</param>
         /// <param name="zoom">カメラのズーム(視野角)</param>
-        public CameraSetting(Vector3d pointOfInterest, Vector3d position, Vector3d orientation, double angleX, double angleY, double angleZ, double zoom)
+        /// <param name="parentTransforms">カメラの親のトランスフォームの値</param>
+        public CameraSetting(Vector3d pointOfInterest, Vector3d position, Vector3d orientation, double angleX, double angleY, double angleZ, double zoom, Tuple<ParentType, PropertyValueGroup>[] parentTransforms)
         {
             PointOfInterest = pointOfInterest;
             Position = position;
@@ -66,6 +70,7 @@ namespace NiVE3.Plugin.Interfaces.RendererParams
             AngleY = angleY;
             AngleZ = angleZ;
             Zoom = zoom;
+            ParentTransforms = parentTransforms;
         }
     }
 }
