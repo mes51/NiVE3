@@ -25,16 +25,19 @@ namespace NiVE3.Model
 
         HistoryModel HistoryModel { get; }
 
+        ApplicationModel ApplicationModel { get; }
+
         public event EventHandler<CompositionEventArgs>? OpenCompositionTimeline;
 
         public event EventHandler<CompositionEventArgs>? CompositionRemoved;
 
-        public ProjectModel(FootageListModel footageListModel, RendererListModel rendererListModel, EffectListModel effectListModel, HistoryModel historyModel)
+        public ProjectModel(FootageListModel footageListModel, RendererListModel rendererListModel, EffectListModel effectListModel, HistoryModel historyModel, ApplicationModel applicationModel)
         {
             FootageListModel = footageListModel;
             RendererListModel = rendererListModel;
             EffectListModel = effectListModel;
             HistoryModel = historyModel;
+            ApplicationModel = applicationModel;
 
             FootageListModel.ShowFootagePreview += FootageListModel_ShowFootagePreview;
             FootageListModel.ShowCompositionPreview += FootageListModel_ShowCompositionPreview;
@@ -70,7 +73,7 @@ namespace NiVE3.Model
             }
             else
             {
-                PreviewModels.Add(new CompositionPreviewModel { Composition = composition });
+                PreviewModels.Add(new CompositionPreviewModel(ApplicationModel) { Composition = composition });
             }
 
             OnOpenCompositionTimeline(composition);
@@ -116,7 +119,7 @@ namespace NiVE3.Model
             }
             else
             {
-                PreviewModels.Add(new FootagePreviewModel { Footage = e.Footage });
+                PreviewModels.Add(new FootagePreviewModel(ApplicationModel) { Footage = e.Footage });
             }
         }
 
@@ -129,7 +132,7 @@ namespace NiVE3.Model
             }
             else
             {
-                PreviewModels.Add(new CompositionPreviewModel { Composition = e.Composition });
+                PreviewModels.Add(new CompositionPreviewModel(ApplicationModel) { Composition = e.Composition });
             }
             OnOpenCompositionTimeline(e.Composition);
         }

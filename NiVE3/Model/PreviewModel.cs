@@ -72,6 +72,13 @@ namespace NiVE3.Model
             set { SetProperty(ref isLock, value); }
         }
 
+        protected ApplicationModel ApplicationModel { get; }
+
+        protected PreviewModelBase(ApplicationModel applicationModel)
+        {
+            ApplicationModel = applicationModel;
+        }
+
         public abstract NImage? GetImage(double time);
 
         WeakEventPublisher<EventArgs> SourceChangedPublisher { get; } = new WeakEventPublisher<EventArgs>();
@@ -105,7 +112,7 @@ namespace NiVE3.Model
             set { SetProperty(ref footage, value); }
         }
 
-        public FootagePreviewModel()
+        public FootagePreviewModel(ApplicationModel applicationModel) : base(applicationModel)
         {
             PropertyChanged += FootagePreviewModel_PropertyChanged;
         }
@@ -168,14 +175,14 @@ namespace NiVE3.Model
             }
         }
 
-        public CompositionPreviewModel()
+        public CompositionPreviewModel(ApplicationModel applicationModel) : base(applicationModel)
         {
             PropertyChanged += CompositionPreviewModel_PropertyChanged;
         }
 
         public override NImage? GetImage(double time)
         {
-            return Composition?.Render(time, 1.0, false);
+            return Composition?.Render(time, 1.0, ApplicationModel.UseGpu);
         }
 
         private void Composition_CompositionUpdated(object? sender, EventArgs e)

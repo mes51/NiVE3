@@ -13,5 +13,11 @@ namespace NiVE3.Model
         public AcceleratorModel() { }
 
         public void Dispose() { }
+
+        public static bool CanUseGpu()
+        {
+            // TODO: 実装
+            return false;
+        }
     }
 }
