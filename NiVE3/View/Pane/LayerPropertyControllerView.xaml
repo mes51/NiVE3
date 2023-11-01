@@ -89,6 +89,17 @@
             </Style.Triggers>
         </Style>
 
+        <Style x:Key="TransformGridStyle" TargetType="{x:Type Grid}">
+            <Setter Property="ClipToBounds" Value="True"/>
+            <Setter Property="Visibility" Value="Visible"/>
+
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding SourceType}" Value="{x:Static pi:SourceType.Audio}">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
         <ur:DataTemplateCollection x:Key="LayerPropertyControllerInner" DefaultIsEmpty="True">
             <DataTemplate DataType="{x:Type vm:LayerViewModel}">
                 <Grid x:Name="InnerRoot" Margin="0,2" ClipToBounds="True">
@@ -199,7 +210,7 @@
                                                      dd:DragDrop.IsDropTarget="True"
                                                      dd:DragDrop.DragSourceIgnore="False"/>
                         </pt:LayerItemExpander>
-                        <Grid Visibility="{Binding SourceType, Converter={StaticResource AVTypeVisibleConverter}, ConverterParameter={x:Static local:LayerPropertyControllerView.CompositionDisplayableSourceType}}" ClipToBounds="True">
+                        <Grid Style="{StaticResource TransformGridStyle}">
                             <pt:PropertyGroupView DataContext="{Binding TransformProperties}"
                                                   IndentLevel="1"
                                                   ControlAreaWidth="{Binding ElementName=InnerRoot, Path=ActualWidth}"
