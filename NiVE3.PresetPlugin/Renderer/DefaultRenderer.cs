@@ -58,7 +58,7 @@ namespace NiVE3.PresetPlugin.Renderer
                 switch (type)
                 {
                     case ParentType.Camera:
-                        view = GetInvertedCameraMatrix(parentTransform, Width, Height) * view;
+                        view = GetCameraMatrix(parentTransform, Width, Height) * view;
                         break;
                     default:
                         if (Matrix4x4d.Invert(GetTransform3D(parentTransform, size), out var inverted))
@@ -194,12 +194,31 @@ namespace NiVE3.PresetPlugin.Renderer
 
         static Matrix4x4d GetCameraMatrix(CameraSetting cameraSetting, double renderWidth, double renderHeight)
         {
+            return GetCameraMatrix(cameraSetting.Position, cameraSetting.PointOfInterest, cameraSetting.Orientation, cameraSetting.AngleX, cameraSetting.AngleY, cameraSetting.AngleZ, renderWidth, renderHeight);
+        }
+
+        static Matrix4x4d GetCameraMatrix(PropertyValueGroup transformProperties, double renderWidth, double renderHeight)
+        {
+            return GetCameraMatrix(
+                (Vector3d)(transformProperties[ILayerObject.TransformPositionId] ?? new Vector3d()),
+                (Vector3d)(transformProperties[ILayerObject.CameraTransformPointOfInterestId] ?? new Vector3d()),
+                (Vector3d)(transformProperties[ILayerObject.CameraTransformOrientationId] ?? new Vector3d()),
+                (double)(transformProperties[ILayerObject.TransformXAngleId] ?? 0.0),
+                (double)(transformProperties[ILayerObject.TransformXAngleId] ?? 0.0),
+                (double)(transformProperties[ILayerObject.TransformXAngleId] ?? 0.0),
+                renderWidth,
+                renderHeight
+            );
+        }
+
+        static Matrix4x4d GetCameraMatrix(in Vector3d pos, in Vector3d poi, in Vector3d orientation, double angleX, double angleY, double angleZ, double renderWidth, double renderHeight)
+        {
             var size = Math.Max(renderWidth, renderHeight);
-            var pos = Avx.Divide(cameraSetting.Position.AsVector256(), Vector256.Create(size));
-            var poi = Avx.Divide(cameraSetting.PointOfInterest.AsVector256(), Vector256.Create(size));
+            var pos256 = Avx.Divide(pos.AsVector256(), Vector256.Create(size));
+            var poi256 = Avx.Divide(poi.AsVector256(), Vector256.Create(size));
             //var viewMatrix = Matrix4x4d.CreateLookAt(pos, poi, Vector256.Create(0.0, 1.0, 0.0, 0.0));
 
-            var diff = Avx.Subtract(poi, pos);
+            var diff = Avx.Subtract(poi256, pos256);
             var x = diff.GetElement(0);
             var y = diff.GetElement(1);
             var z = diff.GetElement(2);
@@ -207,16 +226,16 @@ namespace NiVE3.PresetPlugin.Renderer
             // flipZ: true
             var viewMatrix = Matrix4x4d.Identity
                 .Scale(1.0, 1.0, -1.0)
-                .Translate(-pos.GetElement(0), -pos.GetElement(1), pos.GetElement(2))
+                .Translate(-pos256.GetElement(0), -pos256.GetElement(1), pos256.GetElement(2))
                 .RotateY(Math.Atan2(x, z) / Math.PI * 180.0)
                 .RotateX(-Math.Atan2(y, Math.Sqrt(x * x + z * z)) / Math.PI * 180.0);
 
-            return viewMatrix.RotateX(cameraSetting.Orientation.X)
-                .RotateY(cameraSetting.Orientation.Y)
-                .RotateZ(cameraSetting.Orientation.Z)
-                .RotateX(cameraSetting.AngleX)
-                .RotateY(cameraSetting.AngleY)
-                .RotateZ(cameraSetting.AngleZ);
+            return viewMatrix.RotateX(orientation.X)
+                .RotateY(orientation.Y)
+                .RotateZ(orientation.Z)
+                .RotateX(angleX)
+                .RotateY(angleY)
+                .RotateZ(angleZ);
         }
 
         static Matrix4x4d GetInvertedCameraMatrix(PropertyValueGroup transformProperties, double renderWidth, double renderHeight)
