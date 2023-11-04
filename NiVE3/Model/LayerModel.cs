@@ -314,7 +314,11 @@ namespace NiVE3.Model
                     break;
             }
 
-            TransformProperties.ValueUpdated += TransformProperties_ValueUpdated;
+            TransformProperties.ValueUpdated += Properties_ValueUpdated;
+            if (LayerOptionProperties != null)
+            {
+                LayerOptionProperties.ValueUpdated += Properties_ValueUpdated;
+            }
             PropertyChanged += LayerModel_PropertyChanged;
         }
 
@@ -538,7 +542,7 @@ namespace NiVE3.Model
             LayerUpdated?.Invoke(this, EventArgs.Empty);
         }
 
-        private void TransformProperties_ValueUpdated(object? sender, EventArgs e)
+        private void Properties_ValueUpdated(object? sender, EventArgs e)
         {
             LayerUpdated?.Invoke(this, EventArgs.Empty);
         }

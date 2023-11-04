@@ -429,6 +429,8 @@ namespace NiVE3.ViewModel
 
         public PropertyGroupViewModel TransformProperties { get; }
 
+        public PropertyGroupViewModel? LayerOptionProperties { get; }
+
         public bool IsComposition { get; }
 
         public IEnumerable<LayerModelProxy> TrackMatteViewSource { get; }
@@ -538,7 +540,13 @@ namespace NiVE3.ViewModel
                 return vm;
             });
             TransformProperties = new PropertyGroupViewModel(layerModel.TransformProperties);
-            TransformProperties.SelectItemChanged += TransformProperties_SelectItemChanged;
+            TransformProperties.SelectItemChanged += PropertyGroupViewModel_SelectItemChanged;
+
+            if (layerModel.LayerOptionProperties != null)
+            {
+                LayerOptionProperties = new PropertyGroupViewModel(layerModel.LayerOptionProperties);
+                LayerOptionProperties.SelectItemChanged += PropertyGroupViewModel_SelectItemChanged;
+            }
 
             WiringModel();
 
@@ -816,7 +824,7 @@ namespace NiVE3.ViewModel
             }
         }
 
-        private void TransformProperties_SelectItemChanged(object? sender, SelectItemEventArgs e)
+        private void PropertyGroupViewModel_SelectItemChanged(object? sender, SelectItemEventArgs e)
         {
             SelectItemChangedPublisher.Publish(sender, new SelectItemEventArgs(e, layer: this));
             foreach (var effect in SelectedEffects)
