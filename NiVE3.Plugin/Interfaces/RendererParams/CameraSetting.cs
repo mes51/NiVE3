@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NiVE3.Plugin.Numerics;
 using NiVE3.Plugin.Property;
-using NiVE3.Plugin.Struct;
 
 namespace NiVE3.Plugin.Interfaces.RendererParams
 {

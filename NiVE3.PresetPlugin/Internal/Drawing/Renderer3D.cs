@@ -7,12 +7,12 @@ using System.Runtime.Intrinsics;
 using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Plugin.Image;
-using NiVE3.Plugin.Struct;
 using NiVE3.PresetPlugin.Internal.Drawing.Primitive3D;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Shared.Extension;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
+using NiVE3.Plugin.Numerics;
 
 namespace NiVE3.PresetPlugin.Internal.Drawing
 {

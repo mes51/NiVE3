@@ -9,7 +9,6 @@ using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Image;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Property;
-using NiVE3.Plugin.Struct;
 using NiVE3.PresetPlugin.Resource;
 using NiVE3.Shared.Extension;
 using NiVE3.PresetPlugin.Internal.Drawing;
@@ -18,6 +17,7 @@ using NiVE3.Plugin.Interfaces.RendererParams;
 using System.Windows.Media.Media3D;
 using System.Runtime.Intrinsics.X86;
 using System.Security.Principal;
+using NiVE3.Plugin.Numerics;
 
 namespace NiVE3.PresetPlugin.Renderer
 {

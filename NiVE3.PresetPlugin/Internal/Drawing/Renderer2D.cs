@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Plugin.Image;
 using NiVE3.Plugin.Interfaces;
-using NiVE3.Plugin.Struct;
+using NiVE3.Plugin.Numerics;
 
 namespace NiVE3.PresetPlugin.Internal.Drawing
 {

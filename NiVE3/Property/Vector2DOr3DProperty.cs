@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
 using NiVE3.Plugin.Interfaces;
+using NiVE3.Plugin.Numerics;
 using NiVE3.Plugin.Property.Control;
 using NiVE3.Plugin.Property.Properties;
 using NiVE3.Plugin.Resource;
-using NiVE3.Plugin.Struct;
 
 namespace NiVE3.Property
 {

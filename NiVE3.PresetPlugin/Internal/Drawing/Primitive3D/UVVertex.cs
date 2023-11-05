@@ -5,7 +5,7 @@ using System.Runtime.Intrinsics.X86;
 using System.Runtime.Intrinsics;
 using System.Text;
 using System.Threading.Tasks;
-using NiVE3.Plugin.Struct;
+using NiVE3.Plugin.Numerics;
 
 namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
 {

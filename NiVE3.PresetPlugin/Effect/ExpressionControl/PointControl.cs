@@ -10,7 +10,7 @@ using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Property;
 using NiVE3.Plugin.Property.Properties;
 using NiVE3.Plugin.Resource;
-using NiVE3.Plugin.Struct;
+using NiVE3.Plugin.Numerics;
 using NiVE3.PresetPlugin.Resource;
 
 namespace NiVE3.PresetPlugin.Effect.ExpressionControl

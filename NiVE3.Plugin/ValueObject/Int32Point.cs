@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NiVE3.Plugin.Struct
+namespace NiVE3.Plugin.ValueObject
 {
     public readonly struct Int32Point : IEquatable<Int32Point>
     {

@@ -8,7 +8,7 @@ using System.Runtime.Intrinsics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NiVE3.Plugin.Struct
+namespace NiVE3.Plugin.Numerics
 {
     public readonly struct Vector2d : IEquatable<Vector2d>
     {
@@ -131,25 +131,25 @@ namespace NiVE3.Plugin.Struct
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static explicit operator Vector128<double> (Vector2d v)
+        public static explicit operator Vector128<double>(Vector2d v)
         {
             return Vector128.Create(v.X, v.Y);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static explicit operator Vector256<double> (Vector2d v)
+        public static explicit operator Vector256<double>(Vector2d v)
         {
             return Vector256.Create(v.X, v.Y, 0.0, 0.0);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static explicit operator Vector2d (Vector128<double> v)
+        public static explicit operator Vector2d(Vector128<double> v)
         {
             return new Vector2d(v.GetElement(0), v.GetElement(1));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static explicit operator Vector2d (Vector256<double> v)
+        public static explicit operator Vector2d(Vector256<double> v)
         {
             return new Vector2d(v.GetElement(0), v.GetElement(1));
         }

@@ -9,7 +9,7 @@ using System.Windows.Data;
 using System.Windows;
 using NiVE3.Plugin.Property.Properties;
 using NiVE3.Plugin.Resource;
-using NiVE3.Plugin.Struct;
+using NiVE3.Plugin.Numerics;
 
 namespace NiVE3.Property
 {

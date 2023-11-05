@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Property;
-using NiVE3.Plugin.Struct;
+using NiVE3.Plugin.ValueObject;
 
 namespace NiVE3.Plugin.Image
 {

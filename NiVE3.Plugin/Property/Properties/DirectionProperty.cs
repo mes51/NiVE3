@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Plugin.Interfaces;
+using NiVE3.Plugin.Numerics;
 using NiVE3.Plugin.Property.Control;
 using NiVE3.Plugin.Property.Types;
 using NiVE3.Plugin.Resource;
-using NiVE3.Plugin.Struct;
 
 namespace NiVE3.Plugin.Property.Properties
 {

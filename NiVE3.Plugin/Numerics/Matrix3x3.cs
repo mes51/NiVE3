@@ -11,7 +11,7 @@ using System.Runtime.CompilerServices;
 using ILGPU.IR.Values;
 using NiVE3.Shared.Extension;
 
-namespace NiVE3.Plugin.Struct
+namespace NiVE3.Plugin.Numerics
 {
     /// <summary>
     /// 3x3の行列
@@ -142,7 +142,7 @@ namespace NiVE3.Plugin.Struct
         public (float x, float y) Transform(float x, float y)
         {
             var p = new Vector3(x, y, 1.0F);
-            var result = (p.X * X) + (p.Y * Y) + Z;
+            var result = p.X * X + p.Y * Y + Z;
             return (result.X, result.Y);
         }
 
@@ -154,12 +154,12 @@ namespace NiVE3.Plugin.Struct
         public Vector2 Transform(Vector2 v)
         {
             var p = new Vector3(v, 1.0F);
-            return ((p.X * X) + (p.Y * Y) + Z).AsVector128().AsVector2();
+            return (p.X * X + p.Y * Y + Z).AsVector128().AsVector2();
         }
 
         float Determinant()
         {
-            return (M11 * M22 * M33 + M12 * M23 * M31 + M13 * M21 * M32) - (M13 * M22 * M31 + M32 * M23 * M11 + M33 * M21 * M12);
+            return M11 * M22 * M33 + M12 * M23 * M31 + M13 * M21 * M32 - (M13 * M22 * M31 + M32 * M23 * M11 + M33 * M21 * M12);
         }
 
         /// <summary>
@@ -177,13 +177,13 @@ namespace NiVE3.Plugin.Struct
             {
                 result.X = new Vector3(
                     matrix.M22 * matrix.M33 - matrix.M23 * matrix.M32,
-                    - (matrix.M12 * matrix.M33 - matrix.M13 * matrix.M32),
+                    -(matrix.M12 * matrix.M33 - matrix.M13 * matrix.M32),
                     matrix.M12 * matrix.M23 - matrix.M13 * matrix.M22
                 ) / det;
                 result.Y = new Vector3(
                     -(matrix.M21 * matrix.M33 - matrix.M23 * matrix.M31),
                     matrix.M11 * matrix.M33 - matrix.M13 * matrix.M31,
-                    - (matrix.M11 * matrix.M23 - matrix.M13 * matrix.M21)
+                    -(matrix.M11 * matrix.M23 - matrix.M13 * matrix.M21)
                 ) / det;
                 result.Z = new Vector3(
                     matrix.M21 * matrix.M32 - matrix.M22 * matrix.M31,

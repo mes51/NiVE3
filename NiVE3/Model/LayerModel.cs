@@ -13,7 +13,7 @@ using NiVE3.Plugin.Property.Properties;
 using Prism.Mvvm;
 using NiVE3.Plugin.Resource;
 using NiVE3.View.Resource;
-using NiVE3.Plugin.Struct;
+using NiVE3.Plugin.ValueObject;
 using NiVE3.Property;
 using System.ComponentModel;
 using NiVE3.Shared.Extension;
@@ -22,6 +22,7 @@ using NiVE3.Plugin.Image;
 using System.Windows;
 using NiVE3.Input.Special;
 using NiVE3.Plugin.Interfaces.RendererParams;
+using NiVE3.Plugin.Numerics;
 
 namespace NiVE3.Model
 {
