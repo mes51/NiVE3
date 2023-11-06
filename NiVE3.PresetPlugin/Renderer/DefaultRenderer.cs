@@ -137,7 +137,7 @@ namespace NiVE3.PresetPlugin.Renderer
                         var opacity = (double)(i.Transform[ILayerObject.TransformPropertyOpacityId] ?? 0.0) * 0.01;
                         var matrix = GetTransform2D(i.Transform);
 
-                        foreach (var (type, parentTransform) in i.ParentTransforms)
+                        foreach (var(_, parentTransform) in i.ParentTransforms)
                         {
                             matrix = GetTransform2D(parentTransform) * matrix;
                         }
@@ -172,8 +172,8 @@ namespace NiVE3.PresetPlugin.Renderer
 
         static Matrix3x3 GetTransform2D(PropertyValueGroup transformProperties)
         {
-            var anchorPoint = (Vector3d)(transformProperties[ILayerObject.TransformAnchorPointId] ?? new Vector3d());
-            var scale = (Vector3d)(transformProperties[ILayerObject.TransformScaleId] ?? new Vector3d()) * 0.01;
+            var anchorPoint = (Vector3d)(transformProperties[ILayerObject.TransformAnchorPointId] ?? transformProperties[ILayerObject.CameraTransformPointOfInterestId] ?? new Vector3d());
+            var scale = (Vector3d)(transformProperties[ILayerObject.TransformScaleId] ?? new Vector3d(100.0, 100.0, 100.0)) * 0.01;
             var angle = (double)(transformProperties[ILayerObject.TransformZAngleId] ?? 0.0);
             var translate = (Vector3d)(transformProperties[ILayerObject.TransformPositionId] ?? new Vector3d());
             return Matrix3x3.AffineTransform((Vector2)anchorPoint.AsVector2d(), (Vector2)scale.AsVector2d(), (float)angle, (Vector2)translate.AsVector2d());

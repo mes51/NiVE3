@@ -499,9 +499,9 @@ namespace NiVE3.Model
             HistoryModel.Add(new DeleteEffectEnableHistoryCommand(this, effects, oldIndices));
         }
 
-        Tuple<ParentType, PropertyValueGroup>[] GetParentTransforms(double time)
+        ParentTransform[] GetParentTransforms(double time)
         {
-            var parentTransforms = new List<Tuple<ParentType, PropertyValueGroup>>();
+            var parentTransforms = new List<ParentTransform>();
             var parentId = ParentLayerId;
             while (parentId != null)
             {
@@ -515,11 +515,11 @@ namespace NiVE3.Model
                 var parentLayerTime = time - parent.SourceStartPoint;
                 if (parent.IsCamera)
                 {
-                    parentTransforms.Add(Tuple.Create(ParentType.Camera, parent.TransformProperties.GetPropertyValueGroup(parentLayerTime)));
+                    parentTransforms.Add(new ParentTransform(ParentType.Camera, parent.TransformProperties.GetPropertyValueGroup(parentLayerTime)));
                 }
                 else
                 {
-                    parentTransforms.Add(Tuple.Create(ParentType.Normal, parent.TransformProperties.GetPropertyValueGroup(parentLayerTime)));
+                    parentTransforms.Add(new ParentTransform(ParentType.Normal, parent.TransformProperties.GetPropertyValueGroup(parentLayerTime)));
                 }
                 parentId = parent.ParentLayerId;
             }

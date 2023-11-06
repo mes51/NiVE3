@@ -50,7 +50,7 @@ namespace NiVE3.Plugin.Interfaces
         NImage GetCurrentRenderedImage();
 
         /// <summary>
-        /// レンダリングを完了し、最終的な画像を取得します。
+        /// レンダリングを完了し、最終的な画像を取得します
         /// </summary>
         /// <returns>レンダリングされた画像</returns>
         NImage FinishRendering();

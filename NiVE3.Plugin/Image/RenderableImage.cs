@@ -63,14 +63,14 @@ namespace NiVE3.Plugin.Image
         /// <summary>
         /// 親レイヤーりトランスフォームの値。
         /// </summary>
-        public Tuple<ParentType, PropertyValueGroup>[] ParentTransforms { get; }
+        public ParentTransform[] ParentTransforms { get; }
 
         /// <summary>
         /// レイヤーのオプション
         /// </summary>
         public PropertyValueGroup? LayerOptions { get; }
 
-        internal RenderableImage(NImage image, Int32Rect roi, Int32Point origimalImagePosition, double downSampleRate, bool isEnableMotionBlur, bool isEnable3D, ImageInterpolationQuality interpolationQuality, BlendMode blendMode, PropertyValueGroup transform, Tuple<ParentType, PropertyValueGroup>[] parentTransforms, PropertyValueGroup? layerOptions)
+        internal RenderableImage(NImage image, Int32Rect roi, Int32Point origimalImagePosition, double downSampleRate, bool isEnableMotionBlur, bool isEnable3D, ImageInterpolationQuality interpolationQuality, BlendMode blendMode, PropertyValueGroup transform, ParentTransform[] parentTransforms, PropertyValueGroup? layerOptions)
         {
             Image = image;
             ROI = roi;
