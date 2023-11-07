@@ -139,7 +139,7 @@ namespace NiVE3.PresetPlugin.Renderer
 
                         foreach (var(_, parentTransform) in i.ParentTransforms)
                         {
-                            matrix = GetTransform2D(parentTransform) * matrix;
+                            matrix *= GetTransform2D(parentTransform);
                         }
 
                         renderer.Draw(i.Image, (float)opacity, matrix, i.InterpolationQuality, i.BlendMode);
