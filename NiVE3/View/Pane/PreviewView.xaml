@@ -11,6 +11,7 @@
              xmlns:vm="clr-namespace:NiVE3.ViewModel"
              xmlns:mk="clr-namespace:NiVE3.Wpf.Markup"
              xmlns:pl="clr-namespace:NiVE3.Plugin.Interfaces;assembly=NiVE3.Plugin"
+             xmlns:pvo="clr-namespace:NiVE3.Plugin.ValueObject;assembly=NiVE3.Plugin"
              xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
              xmlns:uig="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
              mc:Ignorable="d" 
@@ -154,6 +155,10 @@
                 </DataTrigger>
             </Style.Triggers>
         </Style>
+
+        <DataTemplate x:Key="BoundingBoxTemplate" DataType="{x:Type pvo:PreviewBoundingBox}">
+            <pt:BoundingBoxView BoundingBoxRect="{Binding BoundingBox}" BorderColor="{Binding Color}" BorderThicknessRate="{Binding ElementName=Root, Path=BoundingBoxBorderThicknessRate}"/>
+        </DataTemplate>
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -164,26 +169,37 @@
 
         <Border Grid.Row="0" Style="{StaticResource PreviewColorChannelBorder}">
             <Canvas x:Name="PreviewCanvas" Background="Transparent" ClipToBounds="True" MouseDown="PreviewCanvas_MouseDown" MouseMove="PreviewCanvas_MouseMove" MouseUp="PreviewCanvas_MouseUp" MouseWheel="PreviewCanvas_MouseWheel">
-                <Grid x:Name="PreviewArea" Width="{Binding Width}" Height="{Binding Height}" Style="{StaticResource PreviewAreaStyle}" SizeChanged="PreviewArea_SizeChanged">
+                <Grid x:Name="PreviewAnchorGrid" Width="{Binding Width}" Height="{Binding Height}">
                     <Grid.LayoutTransform>
                         <ScaleTransform ScaleX="{Binding ElementName=Root, Path=PreviewAreaScaleRate}" ScaleY="{Binding ElementName=Root, Path=PreviewAreaScaleRate}"/>
                     </Grid.LayoutTransform>
-                    <Rectangle Visibility="{Binding ElementName=ShowCheckerboradCheckBox, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <Rectangle.Fill>
-                            <DrawingBrush Stretch="None" TileMode="Tile" Viewport="0,0,20,20" ViewportUnits="Absolute">
-                                <DrawingBrush.Drawing>
-                                    <DrawingGroup>
-                                        <GeometryDrawing Geometry="M0,0 20,0 20,20 0,20z" Brush="White"/>
-                                        <GeometryDrawing Geometry="M0,10 20,10 20,20 10,20 10,0 0,0z" Brush="LightGray"/>
-                                    </DrawingGroup>
-                                </DrawingBrush.Drawing>
-                                <DrawingBrush.RelativeTransform>
-                                    <ScaleTransform ScaleX="{Binding ElementName=Root, Path=PreviewAreaScaleRateInvert}" ScaleY="{Binding ElementName=Root, Path=PreviewAreaScaleRateInvert}"/>
-                                </DrawingBrush.RelativeTransform>
-                            </DrawingBrush>
-                        </Rectangle.Fill>
-                    </Rectangle>
-                    <Image Source="{Binding CurrentFrame}" Stretch="Uniform"/>
+                    <Grid Width="{Binding Width}" Height="{Binding Height}" Style="{StaticResource PreviewAreaStyle}" SizeChanged="PreviewArea_SizeChanged">
+                        <Rectangle Visibility="{Binding ElementName=ShowCheckerboradCheckBox, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <Rectangle.Fill>
+                                <DrawingBrush Stretch="None" TileMode="Tile" Viewport="0,0,20,20" ViewportUnits="Absolute">
+                                    <DrawingBrush.Drawing>
+                                        <DrawingGroup>
+                                            <GeometryDrawing Geometry="M0,0 20,0 20,20 0,20z" Brush="White"/>
+                                            <GeometryDrawing Geometry="M0,10 20,10 20,20 10,20 10,0 0,0z" Brush="LightGray"/>
+                                        </DrawingGroup>
+                                    </DrawingBrush.Drawing>
+                                    <DrawingBrush.RelativeTransform>
+                                        <ScaleTransform ScaleX="{Binding ElementName=Root, Path=PreviewAreaScaleRateInvert}" ScaleY="{Binding ElementName=Root, Path=PreviewAreaScaleRateInvert}"/>
+                                    </DrawingBrush.RelativeTransform>
+                                </DrawingBrush>
+                            </Rectangle.Fill>
+                        </Rectangle>
+                        <Image Source="{Binding CurrentFrame}" Stretch="Uniform"/>
+                    </Grid>
+                    <Grid IsHitTestVisible="False">
+                        <ItemsControl ItemsSource="{Binding BoundingBoxes}" ItemTemplate="{StaticResource BoundingBoxTemplate}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <Grid />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                        </ItemsControl>
+                    </Grid>
                 </Grid>
             </Canvas>
         </Border>

@@ -330,14 +330,13 @@ namespace NiVE3.Model
                 throw new InvalidOperationException("this source type is does not return images");
             }
 
-            var layerTime = time - SourceStartPoint;
-            var transform = TransformProperties.GetPropertyValueGroup(layerTime);
-
+            var transform = GetTransform(time);
             if ((double)(transform[ILayerObject.TransformPropertyOpacityId] ?? 0.0) <= 0.0)
             {
                 return null;
             }
 
+            var layerTime = time - SourceStartPoint;
             // TODO: タイムリマップ反映
             var sourceTime = layerTime;
 
@@ -394,6 +393,40 @@ namespace NiVE3.Model
                 (double)(options?[ILayerObject.CameraLayerOptionZoomId] ?? 0.0),
                 GetParentTransforms(time)
             );
+        }
+
+        public PropertyValueGroup GetTransform(double time)
+        {
+            var layerTime = time - SourceStartPoint;
+            return TransformProperties.GetPropertyValueGroup(layerTime);
+        }
+
+        public ParentTransform[] GetParentTransforms(double time)
+        {
+            var parentTransforms = new List<ParentTransform>();
+            var parentId = ParentLayerId;
+            while (parentId != null)
+            {
+                var parent = CompositionModel.Layers.FirstOrDefault(l => l.LayerId == parentId.Value);
+                if (parent == null)
+                {
+                    break;
+                }
+
+                // TODO: ライトレイヤーの判別
+                var parentLayerTime = time - parent.SourceStartPoint;
+                if (parent.IsCamera)
+                {
+                    parentTransforms.Add(new ParentTransform(ParentType.Camera, parent.TransformProperties.GetPropertyValueGroup(parentLayerTime)));
+                }
+                else
+                {
+                    parentTransforms.Add(new ParentTransform(ParentType.Normal, parent.TransformProperties.GetPropertyValueGroup(parentLayerTime)));
+                }
+                parentId = parent.ParentLayerId;
+            }
+
+            return parentTransforms.ToArray();
         }
 
         public void BeginEditDuration()
@@ -497,34 +530,6 @@ namespace NiVE3.Model
             }
 
             HistoryModel.Add(new DeleteEffectEnableHistoryCommand(this, effects, oldIndices));
-        }
-
-        ParentTransform[] GetParentTransforms(double time)
-        {
-            var parentTransforms = new List<ParentTransform>();
-            var parentId = ParentLayerId;
-            while (parentId != null)
-            {
-                var parent = CompositionModel.Layers.FirstOrDefault(l => l.LayerId == parentId.Value);
-                if (parent == null)
-                {
-                    break;
-                }
-
-                // TODO: ライトレイヤーの判別
-                var parentLayerTime = time - parent.SourceStartPoint;
-                if (parent.IsCamera)
-                {
-                    parentTransforms.Add(new ParentTransform(ParentType.Camera, parent.TransformProperties.GetPropertyValueGroup(parentLayerTime)));
-                }
-                else
-                {
-                    parentTransforms.Add(new ParentTransform(ParentType.Normal, parent.TransformProperties.GetPropertyValueGroup(parentLayerTime)));
-                }
-                parentId = parent.ParentLayerId;
-            }
-
-            return parentTransforms.ToArray();
         }
 
         private void Effects_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)

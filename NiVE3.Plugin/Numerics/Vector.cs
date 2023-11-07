@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace NiVE3.Plugin.Numerics
 {
@@ -15,6 +16,8 @@ namespace NiVE3.Plugin.Numerics
         public readonly double X;
 
         public readonly double Y;
+
+        public bool IsZero => X == 0 && Y == 0;
 
         public Vector2d(double x, double y)
         {
@@ -162,6 +165,18 @@ namespace NiVE3.Plugin.Numerics
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator Vector2d(Vector2 v)
+        {
+            return new Vector2d(v.X, v.Y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator Point(Vector2d v)
+        {
+            return new Point(v.X, v.Y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator Vector2d(Point v)
         {
             return new Vector2d(v.X, v.Y);
         }

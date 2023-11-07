@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -133,6 +134,13 @@ namespace NiVE3.Model
         {
             get { return lastSelectedLayerId; }
             set { SetProperty(ref lastSelectedLayerId, value); }
+        }
+
+        private ObservableCollection<Guid>? selectedLayerIds;
+        public ObservableCollection<Guid>? SelectedLayerIds
+        {
+            get { return selectedLayerIds; }
+            set { SetProperty(ref selectedLayerIds, value); }
         }
 
         private Guid? currentEditingCompositionId;

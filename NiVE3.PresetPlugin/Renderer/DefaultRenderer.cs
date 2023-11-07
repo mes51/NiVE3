@@ -18,6 +18,7 @@ using System.Windows.Media.Media3D;
 using System.Runtime.Intrinsics.X86;
 using System.Security.Principal;
 using NiVE3.Plugin.Numerics;
+using NiVE3.Plugin.ValueObject;
 
 namespace NiVE3.PresetPlugin.Renderer
 {
@@ -170,24 +171,119 @@ namespace NiVE3.PresetPlugin.Renderer
             return result;
         }
 
-        static Matrix3x3 GetTransform2D(PropertyValueGroup transformProperties)
+        public PreviewBoundingBox CalcBoundingBox2D(int width, int height, int compositionWidth, int compositionHeight, PropertyValueGroup transform, ParentTransform[] parentTransforms)
         {
-            var anchorPoint = (Vector3d)(transformProperties[ILayerObject.TransformAnchorPointId] ?? transformProperties[ILayerObject.CameraTransformPointOfInterestId] ?? new Vector3d());
-            var scale = (Vector3d)(transformProperties[ILayerObject.TransformScaleId] ?? new Vector3d(100.0, 100.0, 100.0)) * 0.01;
-            var angle = (double)(transformProperties[ILayerObject.TransformZAngleId] ?? 0.0);
-            var translate = (Vector3d)(transformProperties[ILayerObject.TransformPositionId] ?? new Vector3d());
+            var matrix = GetTransform2D(transform);
+            var anchorPoint = (Vector3d)(transform[ILayerObject.TransformAnchorPointId] ?? new Vector3d());
+            foreach (var (_, parentTransform) in parentTransforms)
+            {
+                matrix *= GetTransform2D(parentTransform);
+            }
+
+            return new PreviewBoundingBox(
+                (Vector2d)matrix.Transform(new Vector2(0.0F, 0.0F)),
+                (Vector2d)matrix.Transform(new Vector2(width, 0.0F)),
+                (Vector2d)matrix.Transform(new Vector2(0.0F, height)),
+                (Vector2d)matrix.Transform(new Vector2(width, height)),
+                (Vector2d)matrix.Transform((Vector2)anchorPoint.AsVector2d())
+            );
+        }
+
+        public PreviewBoundingBox CalcBoundingBox3D(int width, int height, int compositionWidth, int compositionHeight, PropertyValueGroup transform, ParentTransform[] parentTransforms, CameraSetting cameraSetting)
+        {
+            var size = Math.Max(compositionWidth, compositionHeight);
+            var fov = Math.Atan((compositionWidth / cameraSetting.Zoom) * 0.5) * 2.0;
+            var anchorPoint = (Vector3d)(transform[ILayerObject.TransformAnchorPointId] ?? new Vector3d());
+
+            var projectionMatrix = Matrix4x4d.CreatePerspectiveFieldOfView(fov, 1.0, double.Epsilon, double.PositiveInfinity);
+            var modelMatrix = GetTransform3D(transform, size);
+
+            var view = GetCameraMatrix(cameraSetting, compositionWidth, compositionHeight);
+            foreach (var (type, parentTransform) in cameraSetting.ParentTransforms)
+            {
+                switch (type)
+                {
+                    case ParentType.Camera:
+                        view = GetCameraMatrix(parentTransform, compositionWidth, compositionHeight) * view;
+                        break;
+                    default:
+                        if (Matrix4x4d.Invert(GetTransform3D(parentTransform, size), out var inverted))
+                        {
+                            view = inverted * view;
+                        }
+                        break;
+                }
+            }
+            var viewMatrix = view.Translate(-(size - compositionWidth) * 0.5 / size, -(size - compositionHeight) * 0.5 / size, 0.0);
+
+            foreach (var (type, parentTransform) in parentTransforms)
+            {
+                switch (type)
+                {
+                    case ParentType.Camera:
+                        modelMatrix *= GetInvertedCameraMatrix(parentTransform, Width, Height);
+                        break;
+                    default:
+                        modelMatrix *= GetTransform3D(parentTransform, size);
+                        break;
+                }
+            }
+
+            var mv = modelMatrix * viewMatrix * Matrix4x4d.CreateTranslate((size - compositionWidth) * 0.5 / size, (size - compositionHeight) * 0.5 / size, 0.0);
+
+            var v1 = mv.Transform(Avx.Divide(Vector256.Create(0.0, 0.0, 0.0, size), Vector256.Create((double)size)));
+            var v2 = mv.Transform(Avx.Divide(Vector256.Create(0.0, height, 0.0, size), Vector256.Create((double)size)));
+            var v3 = mv.Transform(Avx.Divide(Vector256.Create(width, height, 0.0, size), Vector256.Create((double)size)));
+            var v4 = mv.Transform(Avx.Divide(Vector256.Create(width, 0.0, 0.0, size), Vector256.Create((double)size)));
+
+            var t1Normal = Avx.Subtract(v2, v1).CrossProduct(Avx.Subtract(v3, v1)).Normalize();
+            var t2Normal = Avx.Subtract(v3, v1).CrossProduct(Avx.Subtract(v4, v1)).Normalize();
+            if (!Avx.TestZ(Avx.CompareNotEqual(t1Normal, t1Normal), Vector256.Create(double.NaN)) || !Avx.TestZ(Avx.CompareNotEqual(t2Normal, t2Normal), Vector256.Create(double.NaN)))
+            {
+                return PreviewBoundingBox.Empty;
+            }
+
+            v1 = projectionMatrix.Transform(v1);
+            v2 = projectionMatrix.Transform(v2);
+            v3 = projectionMatrix.Transform(v3);
+            v4 = projectionMatrix.Transform(v4);
+            var av = projectionMatrix.Transform(mv.Transform(Avx.Divide(Avx.Add(anchorPoint.AsVector256(), Vector256.Create(0.0, 0.0, 0.0, size)), Vector256.Create((double)size))));
+
+            v1 = Avx.Divide(v1, Vector256.Create(v1.GetElement(3)));
+            v2 = Avx.Divide(v2, Vector256.Create(v2.GetElement(3)));
+            v3 = Avx.Divide(v3, Vector256.Create(v3.GetElement(3)));
+            v4 = Avx.Divide(v4, Vector256.Create(v4.GetElement(3)));
+            av = Avx.Divide(av, Vector256.Create(av.GetElement(3)));
+            var s = new Vector2d(size, size) * 0.5;
+            var offset = new Vector2d(compositionWidth, compositionHeight) * 0.5;
+
+            return new PreviewBoundingBox(
+                ((Vector2d)v1) * s + offset,
+                ((Vector2d)v4) * s + offset,
+                ((Vector2d)v2) * s + offset,
+                ((Vector2d)v3) * s + offset,
+                ((Vector2d)av) * s + offset
+            );
+        }
+
+        static Matrix3x3 GetTransform2D(PropertyValueGroup transform)
+        {
+            var anchorPoint = (Vector3d)(transform[ILayerObject.TransformAnchorPointId] ?? transform[ILayerObject.CameraTransformPointOfInterestId] ?? new Vector3d());
+            var scale = (Vector3d)(transform[ILayerObject.TransformScaleId] ?? new Vector3d(100.0, 100.0, 100.0)) * 0.01;
+            var angle = (double)(transform[ILayerObject.TransformZAngleId] ?? 0.0);
+            var translate = (Vector3d)(transform[ILayerObject.TransformPositionId] ?? new Vector3d());
             return Matrix3x3.AffineTransform((Vector2)anchorPoint.AsVector2d(), (Vector2)scale.AsVector2d(), (float)angle, (Vector2)translate.AsVector2d());
         }
 
-        static Matrix4x4d GetTransform3D(PropertyValueGroup transformProperties, double rendererSize)
+        static Matrix4x4d GetTransform3D(PropertyValueGroup transform, double rendererSize)
         {
-            var anchorPoint = (Vector3d)(transformProperties[ILayerObject.TransformAnchorPointId] ?? new Vector3d()) / rendererSize;
-            var scale = (Vector3d)(transformProperties[ILayerObject.TransformScaleId] ?? new Vector3d()) * 0.01;
-            var direction = (Vector3d)(transformProperties[ILayerObject.TransformDirectionId] ?? new Vector3d());
-            var angleX = (double)(transformProperties[ILayerObject.TransformXAngleId] ?? 0.0);
-            var angleY = (double)(transformProperties[ILayerObject.TransformYAngleId] ?? 0.0);
-            var angleZ = (double)(transformProperties[ILayerObject.TransformZAngleId] ?? 0.0);
-            var translate = (Vector3d)(transformProperties[ILayerObject.TransformPositionId] ?? new Vector3d()) / rendererSize;
+            var anchorPoint = (Vector3d)(transform[ILayerObject.TransformAnchorPointId] ?? new Vector3d()) / rendererSize;
+            var scale = (Vector3d)(transform[ILayerObject.TransformScaleId] ?? new Vector3d()) * 0.01;
+            var direction = (Vector3d)(transform[ILayerObject.TransformDirectionId] ?? new Vector3d());
+            var angleX = (double)(transform[ILayerObject.TransformXAngleId] ?? 0.0);
+            var angleY = (double)(transform[ILayerObject.TransformYAngleId] ?? 0.0);
+            var angleZ = (double)(transform[ILayerObject.TransformZAngleId] ?? 0.0);
+            var translate = (Vector3d)(transform[ILayerObject.TransformPositionId] ?? new Vector3d()) / rendererSize;
 
             return Matrix4x4d.AffineTransform(anchorPoint, scale, direction, angleX, angleY, angleZ, translate);
         }
@@ -197,15 +293,15 @@ namespace NiVE3.PresetPlugin.Renderer
             return GetCameraMatrix(cameraSetting.Position, cameraSetting.PointOfInterest, cameraSetting.Orientation, cameraSetting.AngleX, cameraSetting.AngleY, cameraSetting.AngleZ, renderWidth, renderHeight);
         }
 
-        static Matrix4x4d GetCameraMatrix(PropertyValueGroup transformProperties, double renderWidth, double renderHeight)
+        static Matrix4x4d GetCameraMatrix(PropertyValueGroup transform, double renderWidth, double renderHeight)
         {
             return GetCameraMatrix(
-                (Vector3d)(transformProperties[ILayerObject.TransformPositionId] ?? new Vector3d()),
-                (Vector3d)(transformProperties[ILayerObject.CameraTransformPointOfInterestId] ?? new Vector3d()),
-                (Vector3d)(transformProperties[ILayerObject.CameraTransformOrientationId] ?? new Vector3d()),
-                (double)(transformProperties[ILayerObject.TransformXAngleId] ?? 0.0),
-                (double)(transformProperties[ILayerObject.TransformXAngleId] ?? 0.0),
-                (double)(transformProperties[ILayerObject.TransformXAngleId] ?? 0.0),
+                (Vector3d)(transform[ILayerObject.TransformPositionId] ?? new Vector3d()),
+                (Vector3d)(transform[ILayerObject.CameraTransformPointOfInterestId] ?? new Vector3d()),
+                (Vector3d)(transform[ILayerObject.CameraTransformOrientationId] ?? new Vector3d()),
+                (double)(transform[ILayerObject.TransformXAngleId] ?? 0.0),
+                (double)(transform[ILayerObject.TransformXAngleId] ?? 0.0),
+                (double)(transform[ILayerObject.TransformXAngleId] ?? 0.0),
                 renderWidth,
                 renderHeight
             );
@@ -238,14 +334,14 @@ namespace NiVE3.PresetPlugin.Renderer
                 .RotateZ(angleZ);
         }
 
-        static Matrix4x4d GetInvertedCameraMatrix(PropertyValueGroup transformProperties, double renderWidth, double renderHeight)
+        static Matrix4x4d GetInvertedCameraMatrix(PropertyValueGroup transform, double renderWidth, double renderHeight)
         {
-            var pos = (Vector3d)(transformProperties[ILayerObject.CameraTransformPointOfInterestId] ?? new Vector3d());
-            var poi = (Vector3d)(transformProperties[ILayerObject.TransformPositionId] ?? new Vector3d());
-            var orientation = (Vector3d)(transformProperties[ILayerObject.CameraTransformOrientationId] ?? new Vector3d());
-            var angleX = (double)(transformProperties[ILayerObject.TransformXAngleId] ?? 0.0);
-            var angleY = (double)(transformProperties[ILayerObject.TransformYAngleId] ?? 0.0);
-            var angleZ = (double)(transformProperties[ILayerObject.TransformZAngleId] ?? 0.0);
+            var pos = (Vector3d)(transform[ILayerObject.CameraTransformPointOfInterestId] ?? new Vector3d());
+            var poi = (Vector3d)(transform[ILayerObject.TransformPositionId] ?? new Vector3d());
+            var orientation = (Vector3d)(transform[ILayerObject.CameraTransformOrientationId] ?? new Vector3d());
+            var angleX = (double)(transform[ILayerObject.TransformXAngleId] ?? 0.0);
+            var angleY = (double)(transform[ILayerObject.TransformYAngleId] ?? 0.0);
+            var angleZ = (double)(transform[ILayerObject.TransformZAngleId] ?? 0.0);
 
             var size = Math.Max(renderWidth, renderHeight);
             var pos256 = Avx.Divide(pos.AsVector256(), Vector256.Create(size));

@@ -80,6 +80,13 @@ namespace NiVE3.View.Pane
             new FrameworkPropertyMetadata(1.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, PreviewAreaScaleRateChanged)
         );
 
+        public static readonly DependencyProperty BoundingBoxBorderThicknessRateProperty = DependencyProperty.Register(
+            nameof(BoundingBoxBorderThicknessRate),
+            typeof(double),
+            typeof(PreviewView),
+            new FrameworkPropertyMetadata(1.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
         public static readonly DependencyProperty SelectedDownScaleRateIndexProperty = DependencyProperty.Register(
             nameof(SelectedDownScaleRateIndex),
             typeof(int),
@@ -112,6 +119,12 @@ namespace NiVE3.View.Pane
         {
             get { return (double)GetValue(PreviewAreaScaleRateProperty); }
             set { SetValue(PreviewAreaScaleRateProperty, value); }
+        }
+
+        public double BoundingBoxBorderThicknessRate
+        {
+            get { return (double)GetValue(BoundingBoxBorderThicknessRateProperty); }
+            set { SetValue(BoundingBoxBorderThicknessRateProperty, value); }
         }
 
         public int SelectedScaleIndex
@@ -175,15 +188,16 @@ namespace NiVE3.View.Pane
                 scale = 100.0;
             }
             PreviewAreaScaleRate = scale * 0.01;
+            BoundingBoxBorderThicknessRate = 1.0 / (scale * 0.01);
             SetValue(PreviewAreaScaleRateInvertPropertyKey, 100.0 / scale);
         }
 
         void LayoutCenterPreviewArea()
         {
-            var realWidth = PreviewArea.ActualWidth * PreviewAreaScaleRate;
-            var realHeight = PreviewArea.ActualHeight * PreviewAreaScaleRate;
-            Canvas.SetLeft(PreviewArea, (PreviewCanvas.ActualWidth - realWidth) * 0.5);
-            Canvas.SetTop(PreviewArea, (PreviewCanvas.ActualHeight - realHeight) * 0.5);
+            var realWidth = PreviewAnchorGrid.ActualWidth * PreviewAreaScaleRate;
+            var realHeight = PreviewAnchorGrid.ActualHeight * PreviewAreaScaleRate;
+            Canvas.SetLeft(PreviewAnchorGrid, (PreviewCanvas.ActualWidth - realWidth) * 0.5);
+            Canvas.SetTop(PreviewAnchorGrid, (PreviewCanvas.ActualHeight - realHeight) * 0.5);
             NeedPositionReset = realWidth <= 0.0 || realHeight <= 0.0;
         }
 
@@ -191,13 +205,13 @@ namespace NiVE3.View.Pane
         {
             if (isAbsolute)
             {
-                Canvas.SetLeft(PreviewArea, x);
-                Canvas.SetTop(PreviewArea, y);
+                Canvas.SetLeft(PreviewAnchorGrid, x);
+                Canvas.SetTop(PreviewAnchorGrid, y);
             }
             else
             {
-                Canvas.SetLeft(PreviewArea, Canvas.GetLeft(PreviewArea) + x);
-                Canvas.SetTop(PreviewArea, Canvas.GetTop(PreviewArea) + y);
+                Canvas.SetLeft(PreviewAnchorGrid, Canvas.GetLeft(PreviewAnchorGrid) + x);
+                Canvas.SetTop(PreviewAnchorGrid, Canvas.GetTop(PreviewAnchorGrid) + y);
             }
         }
 
@@ -213,7 +227,7 @@ namespace NiVE3.View.Pane
             {
                 IsMouseDown = true;
                 ClickPoint = e.GetPosition(PreviewCanvas);
-                PrevPoint = new Point(Canvas.GetLeft(PreviewArea), Canvas.GetTop(PreviewArea));
+                PrevPoint = new Point(Canvas.GetLeft(PreviewAnchorGrid), Canvas.GetTop(PreviewAnchorGrid));
                 PreviewCanvas.CaptureMouse();
             }
         }
@@ -355,8 +369,8 @@ namespace NiVE3.View.Pane
                 }
                 else if (e.OldValue is double oldScale)
                 {
-                    var diffX = (preview.PreviewArea.ActualWidth * oldScale) - (preview.PreviewArea.ActualWidth * preview.PreviewAreaScaleRate);
-                    var diffY = (preview.PreviewArea.ActualHeight * oldScale) - (preview.PreviewArea.ActualHeight * preview.PreviewAreaScaleRate);
+                    var diffX = (preview.PreviewAnchorGrid.ActualWidth * oldScale) - (preview.PreviewAnchorGrid.ActualWidth * preview.PreviewAreaScaleRate);
+                    var diffY = (preview.PreviewAnchorGrid.ActualHeight * oldScale) - (preview.PreviewAnchorGrid.ActualHeight * preview.PreviewAreaScaleRate);
                     preview.MovePreviewArea(diffX * 0.5, diffY * 0.5, false);
                 }
             }

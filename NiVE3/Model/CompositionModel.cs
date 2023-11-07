@@ -12,7 +12,11 @@ using NiVE3.Extension;
 using NiVE3.Input;
 using NiVE3.Plugin.Image;
 using NiVE3.Plugin.Interfaces;
+using NiVE3.Plugin.Interfaces.RendererParams;
+using NiVE3.Plugin.Numerics;
+using NiVE3.Plugin.ValueObject;
 using NiVE3.Shared.Extension;
+using NiVE3.ValueObject;
 using NiVE3.View.Resource;
 using Prism.Mvvm;
 
@@ -408,6 +412,10 @@ namespace NiVE3.Model
             {
                 Renderer.SetCamera(cameraSetting);
             }
+            else
+            {
+                Renderer.SetCamera(CreateDefaultCameraSetting(Width, Height));
+            }
 
             var images = new List<RenderableImage>();
             var hasSolo = Layers.Any(l => l.IsEnableSolo);
@@ -453,6 +461,35 @@ namespace NiVE3.Model
             return result;
         }
 
+        public ColoredPreviewBoundingBox[] GetBoundingBoxes(Guid[] layerIds, double time)
+        {
+            var layers = Layers.Where(l => layerIds.Contains(l.LayerId)).OrderBy(Layers.IndexOf);
+            var result = new List<ColoredPreviewBoundingBox>();
+
+            var cameraSetting = Layers.FirstOrDefault(l => l.IsEnableVideo && l.IsCamera && l.IsContainsTime(time))?.GetCameraSetting(time);
+            if (cameraSetting == null)
+            {
+                cameraSetting = CreateDefaultCameraSetting(Width, Height);
+            }
+
+            foreach (var layer in layers)
+            {
+                // TODO: テキストレイヤーやシェイプレイヤー等のサイズが可変な入力への対応
+                var width = layer.FootageModel.Width;
+                var height = layer.FootageModel.Height;
+                if (layer.IsEnable3D)
+                {
+                    result.Add(new ColoredPreviewBoundingBox(Renderer.CalcBoundingBox3D(width, height, Width, Height, layer.GetTransform(time), layer.GetParentTransforms(time), cameraSetting), layer.TagColor));
+                }
+                else
+                {
+                    result.Add(new ColoredPreviewBoundingBox(Renderer.CalcBoundingBox2D(width, height, Width, Height, layer.GetTransform(time), layer.GetParentTransforms(time)), layer.TagColor));
+                }
+            }
+
+            return result.ToArray();
+        }
+
         bool CheckCycledSimulatedParentLayer(Guid layerId, Dictionary<Guid, Guid?> changed, HashSet<Guid>? checkedLayerIds = null)
         {
             if (checkedLayerIds == null)
@@ -480,6 +517,22 @@ namespace NiVE3.Model
             }
 
             return CheckCycledSimulatedParentLayer(parentLayerId.Value, changed, checkedLayerIds);
+        }
+
+        static CameraSetting CreateDefaultCameraSetting(int width, int height)
+        {
+            // TODO: LayerModelの方と合わせてどこかに定義する
+            const double DefaultCameraFov = 0.360000466176267;// Math.Tan(39.5978 * 0.5 * (Math.PI / 180.0))
+            var zoom = width / DefaultCameraFov * 0.5;
+
+            return new CameraSetting(
+                new Vector3d(width * 0.5, height * 0.5, 0),
+                new Vector3d(width * 0.5, height * 0.5, -zoom),
+                new Vector3d(),
+                0.0, 0.0, 0.0,
+                zoom,
+                Array.Empty<ParentTransform>()
+            );
         }
 
         static bool IsCycledComposition(CompositionModel target, CompositionInput input)

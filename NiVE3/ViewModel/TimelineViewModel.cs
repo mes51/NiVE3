@@ -225,6 +225,14 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref lastSelectedLayerId, value); }
         }
 
+        private ObservableCollection<Guid>? selectedLayerIdsForPreview;
+        [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.SelectedLayerIds))]
+        public ObservableCollection<Guid>? SelectedLayerIdsForPreview
+        {
+            get { return selectedLayerIdsForPreview; }
+            set { SetProperty(ref selectedLayerIdsForPreview, value); }
+        }
+
         private Guid? currentEditingCompositionId;
         [NeedWire(nameof(ViewState))]
         public Guid? CurrentEditingCompositionId
@@ -248,9 +256,12 @@ namespace NiVE3.ViewModel
                 {
                     UnbindComposition();
                     Layers = null;
+                    SelectedLayers = null;
                     if (CurrentEditingCompositionId == compositionModel.CompositionId)
                     {
                         CurrentEditingCompositionId = null;
+                        LastSelectedLayerId = null;
+                        SelectedLayerIdsForPreview = null;
                     }
                 }
                 SetProperty(ref compositionModel, value);
@@ -271,6 +282,7 @@ namespace NiVE3.ViewModel
                         vm.SelectItemChanged += ViewModel_SelectItemChanged;
                         return vm;
                     });
+                    SelectedLayers = new ObservableCollection<LayerViewModel>();
                 }
             }
         }
@@ -289,15 +301,18 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref layers, value); }
         }
 
-        private ObservableCollection<LayerViewModel> selectedLayers = new ObservableCollection<LayerViewModel>();
-        public ObservableCollection<LayerViewModel> SelectedLayers
+        private ObservableCollection<LayerViewModel>? selectedLayers;
+        public ObservableCollection<LayerViewModel>? SelectedLayers
         {
             get { return selectedLayers; }
             set
             {
-                if (selectedLayers != value)
+                if (selectedLayers != null)
                 {
                     selectedLayers.CollectionChanged -= SelectedLayers_CollectionChanged;
+                }
+                if (value != null)
+                {
                     value.CollectionChanged += SelectedLayers_CollectionChanged;
                 }
                 SetProperty(ref selectedLayers, value);
@@ -470,6 +485,9 @@ namespace NiVE3.ViewModel
                 case nameof(TimeBarRange):
                     TimelineScrollBarMax = Duration - TimeBarRange;
                     break;
+                case nameof(CurrentEditingCompositionId) when CurrentEditingCompositionId == CompositionModel?.CompositionId && SelectedLayers != null:
+                    SelectedLayerIdsForPreview = new ObservableCollection<Guid>(SelectedLayers.Select(l => l.LayerId));
+                    break;
             }
         }
 
@@ -484,6 +502,7 @@ namespace NiVE3.ViewModel
                         vm.DeSelect();
                     }
                 }
+                SelectedLayerIdsForPreview?.Clear();
                 SelectedItemType = SelectItemType.None;
             }
             else
@@ -493,6 +512,30 @@ namespace NiVE3.ViewModel
                     foreach (var vm in e.OldItems.OfType<LayerViewModel>())
                     {
                         vm.DeSelect();
+                        SelectedLayerIdsForPreview?.Remove(vm.LayerId);
+                    }
+                    if (CurrentEditingCompositionId == CompositionModel?.CompositionId)
+                    {
+                        foreach (var vm in e.OldItems.OfType<LayerViewModel>())
+                        {
+                            if (SelectedLayerIdsForPreview?.Contains(vm.LayerId) ?? false)
+                            {
+                                SelectedLayerIdsForPreview?.Remove(vm.LayerId);
+                            }
+                        }
+                    }
+                }
+                if (e.NewItems != null)
+                {
+                    if (CurrentEditingCompositionId == CompositionModel?.CompositionId)
+                    {
+                        foreach (var vm in e.NewItems.OfType<LayerViewModel>())
+                        {
+                            if (!(SelectedLayerIdsForPreview?.Contains(vm.LayerId) ?? true))
+                            {
+                                SelectedLayerIdsForPreview?.Add(vm.LayerId);
+                            }
+                        }
                     }
                 }
             }
@@ -500,7 +543,7 @@ namespace NiVE3.ViewModel
 
         private void LayerViewModel_LayerSwitchChangeRequest(object? sender, LayerSwitchEventArgs e)
         {
-            if (sender is not LayerViewModel layerViewModel || CompositionModel == null || !(Layers?.Contains(layerViewModel) ?? false))
+            if (sender is not LayerViewModel layerViewModel || CompositionModel == null || SelectedLayers == null || !(Layers?.Contains(layerViewModel) ?? false))
             {
                 return;
             }
@@ -520,7 +563,7 @@ namespace NiVE3.ViewModel
 
         private void LayerViewModel_BlendModeChangeRequest(object? sender, EnumEventArgs<BlendMode> e)
         {
-            if (sender is not LayerViewModel layerViewModel || CompositionModel == null || !(Layers?.Contains(layerViewModel) ?? false))
+            if (sender is not LayerViewModel layerViewModel || CompositionModel == null || SelectedLayers ==  null || !(Layers?.Contains(layerViewModel) ?? false))
             {
                 return;
             }
@@ -540,7 +583,7 @@ namespace NiVE3.ViewModel
 
         private void LayerViewModel_TrackMatteLayerChangeRequest(object? sender, ReferenceLayerChangeEvent e)
         {
-            if (sender is not LayerViewModel layerViewModel || CompositionModel == null || !(Layers?.Contains(layerViewModel) ?? false))
+            if (sender is not LayerViewModel layerViewModel || CompositionModel == null || SelectedLayers == null || !(Layers?.Contains(layerViewModel) ?? false))
             {
                 return;
             }
@@ -560,7 +603,7 @@ namespace NiVE3.ViewModel
 
         private void ViewModel_TrackMatteModeChangeRequest(object? sender, EnumEventArgs<TrackMatteMode> e)
         {
-            if (sender is not LayerViewModel layerViewModel || CompositionModel == null || !(Layers?.Contains(layerViewModel) ?? false))
+            if (sender is not LayerViewModel layerViewModel || CompositionModel == null || SelectedLayers == null || !(Layers?.Contains(layerViewModel) ?? false))
             {
                 return;
             }
@@ -580,7 +623,7 @@ namespace NiVE3.ViewModel
 
         private void ViewModel_ParentLayerChangeRequest(object? sender, ReferenceLayerChangeEvent e)
         {
-            if (sender is not LayerViewModel layerViewModel || CompositionModel == null || !(Layers?.Contains(layerViewModel) ?? false))
+            if (sender is not LayerViewModel layerViewModel || CompositionModel == null || SelectedLayers == null || !(Layers?.Contains(layerViewModel) ?? false))
             {
                 return;
             }
@@ -627,7 +670,7 @@ namespace NiVE3.ViewModel
                         break;
                 }
             }
-            if (e.SelectItemType != SelectItemType.Layer)
+            if (e.SelectItemType != SelectItemType.Layer && SelectedLayers != null)
             {
                 foreach (var layer in SelectedLayers.Where(v => v != e.Layer).ToArray())
                 {
@@ -639,17 +682,13 @@ namespace NiVE3.ViewModel
                     SelectedLayers.Add(e.Layer);
                 }
             }
-            if (SelectTarget != null || (e.SelectItemType == SelectItemType.Layer && e.Layer != null && SelectedLayers.Contains(e.Layer)))
+            if (SelectTarget != null || (e.SelectItemType == SelectItemType.Layer && e.Layer != null && (SelectedLayers?.Contains(e.Layer) ?? false)))
             {
                 CurrentEditingCompositionId = CompositionModel?.CompositionId;
                 LastSelectedLayerId = e.Layer?.LayerId;
             }
             else
             {
-                if (CurrentEditingCompositionId == CompositionModel?.CompositionId)
-                {
-                    CurrentEditingCompositionId = null;
-                }
                 LastSelectedLayerId = null;
             }
         }

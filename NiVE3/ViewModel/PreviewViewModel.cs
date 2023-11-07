@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Buffers;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using System.Numerics;
@@ -18,8 +20,10 @@ using NiVE3.Model;
 using NiVE3.Mvvm;
 using NiVE3.Plugin.Image;
 using NiVE3.Plugin.Interfaces;
+using NiVE3.Plugin.ValueObject;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
 using NiVE3.Util;
+using NiVE3.ValueObject;
 using NiVE3.View.Dock;
 using NiVE3.View.Resource;
 using Prism.Commands;
@@ -114,6 +118,33 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref isIgnoreUpdatePreview, value); }
         }
 
+        private ObservableCollection<Guid>? selectedLayerIds;
+        [NeedWire(nameof(ViewState), IsOneWay = true)]
+        public ObservableCollection<Guid>? SelectedLayerIds
+        {
+            get { return selectedLayerIds; }
+            set
+            {
+                if (selectedLayerIds != null)
+                {
+                    selectedLayerIds.CollectionChanged -= SelectedLayerIds_CollectionChanged;
+                }
+                if (value != null)
+                {
+                    value.CollectionChanged += SelectedLayerIds_CollectionChanged;
+                }
+                SetProperty(ref selectedLayerIds, value);
+            }
+        }
+
+        private Guid? currentEditingCompositionId;
+        [NeedWire(nameof(ViewState), IsOneWay = true)]
+        public Guid? CurrentEditingCompositionId
+        {
+            get { return currentEditingCompositionId; }
+            set { SetProperty(ref currentEditingCompositionId, value); }
+        }
+
         private double timeBarRange;
         public double TimeBarRange
         {
@@ -170,21 +201,32 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref currentFrame, value); }
         }
 
+        private ObservableCollection<ColoredPreviewBoundingBox> boundingBoxes = new ObservableCollection<ColoredPreviewBoundingBox>();
+        public ObservableCollection<ColoredPreviewBoundingBox> BoundingBoxes
+        {
+            get { return boundingBoxes; }
+            set { SetProperty(ref boundingBoxes, value); }
+        }
+
         public PreviewModelBase PreviewModel { get; }
 
         public ICommand ChangeCurrentTimeCommand { get; }
 
-        byte[] Buffer { get; set; }
+        byte[] ImageBuffer { get; set; }
 
         Int32Rect BufferImageSize { get; set; }
 
-        bool IsDirtyBuffer { get; set; }
+        bool IsDirtyImageBuffer { get; set; }
+
+        bool IsDirtyBoundingBoxesBuffer { get; set; }
 
         bool NeedUpdateFrameNextTick { get; set; }
 
         Debouncer FrameUpdateDebouncer { get; }
 
         ViewStateModel ViewState { get; }
+
+        ColoredPreviewBoundingBox[]? BoundingBoxesBuffer { get; set; }
 
         WeakEventPublisher<EventArgs> SourceChangedPublisher { get; } = new WeakEventPublisher<EventArgs>();
         public event EventHandler<EventArgs> SourceChanged
@@ -219,7 +261,7 @@ namespace NiVE3.ViewModel
             PreviewModel.FrameUpdateRequest += PreviewModel_FrameUpdateRequest;
             PropertyChanged += PreviewViewModel_PropertyChanged;
 
-            Buffer = new byte[BufferImageSize.Width * BufferImageSize.Height * 4];
+            ImageBuffer = new byte[BufferImageSize.Width * BufferImageSize.Height * 4];
             FrameUpdateDebouncer = new Debouncer(1);
             FrameUpdateDebouncer.Tick += (_, _) =>
             {
@@ -229,10 +271,22 @@ namespace NiVE3.ViewModel
 
             CompositionTarget.Rendering += (_, _) =>
             {
-                if (IsDirtyBuffer)
+                if (IsDirtyImageBuffer)
                 {
-                    CurrentFrame.WritePixels(BufferImageSize, Buffer, BufferImageSize.Width * 4, 0);
-                    IsDirtyBuffer = false;
+                    CurrentFrame.WritePixels(BufferImageSize, ImageBuffer, BufferImageSize.Width * 4, 0);
+                    IsDirtyImageBuffer = false;
+                }
+                if (IsDirtyBoundingBoxesBuffer)
+                {
+                    BoundingBoxes.Clear();
+                    if (BoundingBoxesBuffer != null)
+                    {
+                        foreach (var bb in BoundingBoxesBuffer)
+                        {
+                            BoundingBoxes.Add(bb);
+                        }
+                    }
+                    IsDirtyBoundingBoxesBuffer = false;
                 }
                 if (NeedUpdateFrameNextTick)
                 {
@@ -246,7 +300,7 @@ namespace NiVE3.ViewModel
 
         void UpdateCurrentFrame()
         {
-            if (IsDirtyBuffer || IsIgnoreUpdatePreview)
+            if (IsDirtyImageBuffer || IsIgnoreUpdatePreview)
             {
                 NeedUpdateFrameNextTick = true;
                 return;
@@ -257,7 +311,7 @@ namespace NiVE3.ViewModel
             {
                 var dataSize = image.DataLength;
                 var floatData = image.GetData();
-                var data = Buffer;
+                var data = ImageBuffer;
 
                 // TODO: SDR変換を入れるかどうか
                 switch (PreviewColorChannel)
@@ -295,10 +349,10 @@ namespace NiVE3.ViewModel
                         });
                         break;
                     case PreviewColorChannel.RgbStraight:
-                        ImageConversion.ConvertToBGR32(floatData, Buffer, dataSize / 4);
+                        ImageConversion.ConvertToBGR32(floatData, ImageBuffer, dataSize / 4);
                         break;
                     default:
-                        ImageConversion.ConvertToBGRA32(floatData, Buffer, dataSize / 4);
+                        ImageConversion.ConvertToBGRA32(floatData, ImageBuffer, dataSize / 4);
                         break;
                 }
             }
@@ -306,14 +360,29 @@ namespace NiVE3.ViewModel
             {
                 if (PreviewColorChannel != PreviewColorChannel.Rgb)
                 {
-                    MemoryMarshal.Cast<byte, int>(Buffer).Fill(Black);
+                    MemoryMarshal.Cast<byte, int>(ImageBuffer).Fill(Black);
                 }
                 else
                 {
-                    Buffer.AsSpan(0).Fill(0);
+                    ImageBuffer.AsSpan(0).Fill(0);
                 }
             }
-            IsDirtyBuffer = true;
+            IsDirtyImageBuffer = true;
+            UpdateBoundingBox();
+        }
+
+        void UpdateBoundingBox()
+        {
+            if (PreviewModel is not CompositionPreviewModel compositionPreviewModel || compositionPreviewModel.Composition == null || compositionPreviewModel.Composition.CompositionId != CurrentEditingCompositionId || SelectedLayerIds == null)
+            {
+                BoundingBoxesBuffer = null;
+                return;
+            }
+            else
+            {
+                BoundingBoxesBuffer = compositionPreviewModel.Composition.GetBoundingBoxes(SelectedLayerIds.ToArray(), CurrentTime);
+            }
+            IsDirtyBoundingBoxesBuffer = true;
         }
 
         private void PreviewModel_FrameUpdateRequest(object? sender, EventArgs e)
@@ -333,7 +402,7 @@ namespace NiVE3.ViewModel
                 case nameof(Height):
                     BufferImageSize = new Int32Rect(0, 0, Math.Max(Width, 1), Math.Max(Height, 1));
                     CurrentFrame = new WriteableBitmap(BufferImageSize.Width, BufferImageSize.Height, 96.0, 96.0, PixelFormats.Bgra32, null);
-                    Buffer = new byte[BufferImageSize.Width * BufferImageSize.Height * 4];
+                    ImageBuffer = new byte[BufferImageSize.Width * BufferImageSize.Height * 4];
                     UpdateCurrentFrame();
                     break;
                 case nameof(CurrentTime):
@@ -345,6 +414,9 @@ namespace NiVE3.ViewModel
                     break;
                 case nameof(PreviewColorChannel):
                     UpdateCurrentFrame();
+                    break;
+                case nameof(SelectedLayerIds):
+                    UpdateBoundingBox();
                     break;
             }
         }
@@ -359,6 +431,11 @@ namespace NiVE3.ViewModel
             CurrentTime = 1.0;
             UpdateCurrentFrame();
             SourceChangedPublisher.Publish(this, EventArgs.Empty);
+        }
+
+        private void SelectedLayerIds_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            UpdateBoundingBox();
         }
     }
 

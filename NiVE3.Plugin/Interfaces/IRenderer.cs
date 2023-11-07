@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using NiVE3.Plugin.Image;
 using NiVE3.Plugin.Interfaces.RendererParams;
 using NiVE3.Plugin.Property;
+using NiVE3.Plugin.ValueObject;
 
 namespace NiVE3.Plugin.Interfaces
 {
@@ -54,5 +55,30 @@ namespace NiVE3.Plugin.Interfaces
         /// </summary>
         /// <returns>レンダリングされた画像</returns>
         NImage FinishRendering();
+
+        /// <summary>
+        /// 2Dレイヤーのバウンディングボックスを計算します
+        /// </summary>
+        /// <param name="width">レイヤーの幅</param>
+        /// <param name="height">レイヤーの高さ</param>
+        /// <param name="compositionWidth">コンポジションの幅</param>
+        /// <param name="compositionHeight">コンポジションの高さ</param>
+        /// <param name="transform">レイヤーのトランスフォームの値</param>
+        /// <param name="parentTransforms">親のレイヤーのトランスフォームの値</param>
+        /// <returns>プレビューで表示するバウンディングボックス</returns>
+        PreviewBoundingBox CalcBoundingBox2D(int width, int height, int compositionWidth, int compositionHeight, PropertyValueGroup transform, ParentTransform[] parentTransforms);
+
+        /// <summary>
+        /// 3Dレイヤーのバウンディングボックスを計算します
+        /// </summary>
+        /// <param name="width">レイヤーの幅</param>
+        /// <param name="height">レイヤーの高さ</param>
+        /// <param name="compositionWidth">コンポジションの幅</param>
+        /// <param name="compositionHeight">コンポジションの高さ</param>
+        /// <param name="transform">レイヤーのトランスフォームの値</param>
+        /// <param name="parentTransforms">親のレイヤーのトランスフォームの値</param>
+        /// <param name="cameraSetting">カメラの設定</param>
+        /// <returns>プレビューで表示するバウンディングボックス</returns>
+        PreviewBoundingBox CalcBoundingBox3D(int width, int height, int compositionWidth, int compositionHeight, PropertyValueGroup transform, ParentTransform[] parentTransforms, CameraSetting cameraSetting);
     }
 }
