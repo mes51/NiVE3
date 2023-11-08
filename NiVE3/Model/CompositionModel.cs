@@ -479,11 +479,11 @@ namespace NiVE3.Model
                 var height = layer.FootageModel.Height;
                 if (layer.IsEnable3D)
                 {
-                    result.Add(new ColoredPreviewBoundingBox(Renderer.CalcBoundingBox3D(width, height, Width, Height, layer.GetTransform(time), layer.GetParentTransforms(time), cameraSetting), layer.TagColor));
+                    result.Add(new ColoredPreviewBoundingBox(Renderer.CalcBoundingBox3D(width, height, layer.GetTransform(time), layer.GetParentTransforms(time), cameraSetting), layer.TagColor));
                 }
                 else
                 {
-                    result.Add(new ColoredPreviewBoundingBox(Renderer.CalcBoundingBox2D(width, height, Width, Height, layer.GetTransform(time), layer.GetParentTransforms(time)), layer.TagColor));
+                    result.Add(new ColoredPreviewBoundingBox(Renderer.CalcBoundingBox2D(width, height, layer.GetTransform(time), layer.GetParentTransforms(time)), layer.TagColor));
                 }
             }
 

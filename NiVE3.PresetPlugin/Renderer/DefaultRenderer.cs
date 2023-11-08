@@ -171,7 +171,7 @@ namespace NiVE3.PresetPlugin.Renderer
             return result;
         }
 
-        public PreviewBoundingBox CalcBoundingBox2D(int width, int height, int compositionWidth, int compositionHeight, PropertyValueGroup transform, ParentTransform[] parentTransforms)
+        public PreviewBoundingBox CalcBoundingBox2D(int width, int height, PropertyValueGroup transform, ParentTransform[] parentTransforms)
         {
             var matrix = GetTransform2D(transform);
             var anchorPoint = (Vector3d)(transform[ILayerObject.TransformAnchorPointId] ?? new Vector3d());
@@ -189,22 +189,22 @@ namespace NiVE3.PresetPlugin.Renderer
             );
         }
 
-        public PreviewBoundingBox CalcBoundingBox3D(int width, int height, int compositionWidth, int compositionHeight, PropertyValueGroup transform, ParentTransform[] parentTransforms, CameraSetting cameraSetting)
+        public PreviewBoundingBox CalcBoundingBox3D(int width, int height, PropertyValueGroup transform, ParentTransform[] parentTransforms, CameraSetting cameraSetting)
         {
-            var size = Math.Max(compositionWidth, compositionHeight);
-            var fov = Math.Atan((compositionWidth / cameraSetting.Zoom) * 0.5) * 2.0;
+            var size = Math.Max(Width, Height);
+            var fov = Math.Atan((Width / cameraSetting.Zoom) * 0.5) * 2.0;
             var anchorPoint = (Vector3d)(transform[ILayerObject.TransformAnchorPointId] ?? new Vector3d());
 
             var projectionMatrix = Matrix4x4d.CreatePerspectiveFieldOfView(fov, 1.0, double.Epsilon, double.PositiveInfinity);
             var modelMatrix = GetTransform3D(transform, size);
 
-            var view = GetCameraMatrix(cameraSetting, compositionWidth, compositionHeight);
+            var view = GetCameraMatrix(cameraSetting, Width, Height);
             foreach (var (type, parentTransform) in cameraSetting.ParentTransforms)
             {
                 switch (type)
                 {
                     case ParentType.Camera:
-                        view = GetCameraMatrix(parentTransform, compositionWidth, compositionHeight) * view;
+                        view = GetCameraMatrix(parentTransform, Width, Height) * view;
                         break;
                     default:
                         if (Matrix4x4d.Invert(GetTransform3D(parentTransform, size), out var inverted))
@@ -214,7 +214,7 @@ namespace NiVE3.PresetPlugin.Renderer
                         break;
                 }
             }
-            var viewMatrix = view.Translate(-(size - compositionWidth) * 0.5 / size, -(size - compositionHeight) * 0.5 / size, 0.0);
+            var viewMatrix = view.Translate(-(size - Width) * 0.5 / size, -(size - Height) * 0.5 / size, 0.0);
 
             foreach (var (type, parentTransform) in parentTransforms)
             {
@@ -229,7 +229,7 @@ namespace NiVE3.PresetPlugin.Renderer
                 }
             }
 
-            var mv = modelMatrix * viewMatrix * Matrix4x4d.CreateTranslate((size - compositionWidth) * 0.5 / size, (size - compositionHeight) * 0.5 / size, 0.0);
+            var mv = modelMatrix * viewMatrix * Matrix4x4d.CreateTranslate((size - Width) * 0.5 / size, (size - Height) * 0.5 / size, 0.0);
 
             var v1 = mv.Transform(Avx.Divide(Vector256.Create(0.0, 0.0, 0.0, size), Vector256.Create((double)size)));
             var v2 = mv.Transform(Avx.Divide(Vector256.Create(0.0, height, 0.0, size), Vector256.Create((double)size)));
@@ -247,23 +247,41 @@ namespace NiVE3.PresetPlugin.Renderer
             v2 = projectionMatrix.Transform(v2);
             v3 = projectionMatrix.Transform(v3);
             v4 = projectionMatrix.Transform(v4);
-            var av = projectionMatrix.Transform(mv.Transform(Avx.Divide(Avx.Add(anchorPoint.AsVector256(), Vector256.Create(0.0, 0.0, 0.0, size)), Vector256.Create((double)size))));
 
             v1 = Avx.Divide(v1, Vector256.Create(v1.GetElement(3)));
             v2 = Avx.Divide(v2, Vector256.Create(v2.GetElement(3)));
             v3 = Avx.Divide(v3, Vector256.Create(v3.GetElement(3)));
             v4 = Avx.Divide(v4, Vector256.Create(v4.GetElement(3)));
+            var av = projectionMatrix.Transform(mv.Transform(Avx.Divide(Avx.Add(anchorPoint.AsVector256(), Vector256.Create(0.0, 0.0, 0.0, size)), Vector256.Create((double)size))));
             av = Avx.Divide(av, Vector256.Create(av.GetElement(3)));
-            var s = new Vector2d(size, size) * 0.5;
-            var offset = new Vector2d(compositionWidth, compositionHeight) * 0.5;
 
-            return new PreviewBoundingBox(
-                ((Vector2d)v1) * s + offset,
-                ((Vector2d)v4) * s + offset,
-                ((Vector2d)v2) * s + offset,
-                ((Vector2d)v3) * s + offset,
-                ((Vector2d)av) * s + offset
-            );
+            var s = new Vector2d(size, size) * 0.5;
+            var offset = new Vector2d(Width, Height) * 0.5;
+            var bbAnchorPoint = ((Vector2d)av) * s + offset;
+
+            if (IntersectLine((Vector2d)v1, (Vector2d)v4, (Vector2d)v2, (Vector2d)v3) ||
+                IntersectLine((Vector2d)v1, (Vector2d)v4, (Vector2d)v1, (Vector2d)v3) ||
+                IntersectLine((Vector2d)v1, (Vector2d)v4, (Vector2d)v4, (Vector2d)v3))
+            {
+                // バウンディングボックスがクロスしているためアンカーポイントのみ表示
+                return new PreviewBoundingBox(
+                    new Vector2d(),
+                    new Vector2d(),
+                    new Vector2d(),
+                    new Vector2d(),
+                    bbAnchorPoint
+                );
+            }
+            else
+            {
+                return new PreviewBoundingBox(
+                    ((Vector2d)v1) * s + offset,
+                    ((Vector2d)v4) * s + offset,
+                    ((Vector2d)v2) * s + offset,
+                    ((Vector2d)v3) * s + offset,
+                    bbAnchorPoint
+                );
+            }
         }
 
         static Matrix3x3 GetTransform2D(PropertyValueGroup transform)
@@ -363,6 +381,27 @@ namespace NiVE3.PresetPlugin.Renderer
                 .RotateY(-Math.Atan2(x, z) / Math.PI * 180.0)
                 .Translate(pos256.GetElement(0), pos256.GetElement(1), -pos256.GetElement(2))
                 .Scale(1.0, 1.0, -1.0);
+        }
+
+        static bool IntersectLine(in Vector2d v1, in Vector2d v2, in Vector2d v3, in Vector2d v4)
+        {
+            var ab = v2 - v1;
+            var ac = v3 - v1;
+            var ad = v4 - v1;
+            if (((ab.X * ac.Y) - (ab.Y * ac.X)) * ((ab.X * ad.Y) - (ab.Y * ad.X)) >= 0.0)
+            {
+                return false;
+            }
+
+            var cd = v4 - v3;
+            var ca = v1 - v3;
+            var cb = v2 - v3;
+            if (((cd.X * ca.Y) - (cd.Y * ca.X)) * ((cd.X * cb.Y) - (cd.Y * cb.X)) >= 0.0)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         public void Dispose()
