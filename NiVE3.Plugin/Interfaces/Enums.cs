@@ -99,8 +99,16 @@ namespace NiVE3.Plugin.Interfaces
         /// </summary>
         Camera,
         /// <summary>
-        /// ライトレイヤー
+        /// スポット/平行ライトレイヤー
         /// </summary>
-        Light
+        SpotOrParallelLight,
+        /// <summary>
+        /// ポイントライトレイヤー
+        /// </summary>
+        PointLight,
+        /// <summary>
+        /// アンビエントライトレイヤー
+        /// </summary>
+        AmbientLight
     }
 }

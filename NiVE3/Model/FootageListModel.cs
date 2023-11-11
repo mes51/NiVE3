@@ -55,6 +55,8 @@ namespace NiVE3.Model
 
         public FootageModel CameraFootage { get; }
 
+        public FootageModel LightFootage { get; }
+
         Dictionary<Type, string[]> SupportedFileTypes { get; set; } = new Dictionary<Type, string[]>();
 
         List<InputModel> LoadedInputs { get; } = new List<InputModel>();
@@ -92,6 +94,7 @@ namespace NiVE3.Model
             PropertyChanged += FootageListModel_PropertyChanged;
 
             CameraFootage = new FootageModel(new InputModel(CameraInput.Instance, false), EmptyFootageSource.Instance, HistoryModel);
+            LightFootage = new FootageModel(new InputModel(LightInput.Instance, false), EmptyFootageSource.Instance, HistoryModel);
         }
 
         public Guid? AddSolid()

@@ -5,9 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
 
-namespace NiVE3.Util
+namespace NiVE3.UI.Internal
 {
-    //TODO: Plugin名前空間に移動
     class HSV
     {
         const double ByteToDouble = 1.0 / 255.0;

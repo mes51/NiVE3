@@ -13,6 +13,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using NiVE3.Data;
+using NiVE3.UI.Dialog;
+using NiVE3.View.Resource;
 using NiVE3.ViewModel.Input;
 using NiVE3.Windows;
 
@@ -32,8 +34,11 @@ namespace NiVE3.View.Input
         {
             if (DataContext is SolidSettingViewModel vm)
             {
-                var dialog = new ColorPickerWindow(vm.Color.ToByteColor());
+                var dialog = new ColorPickerDialog(vm.Color.ToByteColor());
                 dialog.Owner = Application.Current.MainWindow;
+                dialog.Title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.ColorPickerDialog_Title);
+                dialog.OKButtonText = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_OK);
+                dialog.CancelButtonText = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_Cancel);
                 if (dialog.ShowDialog() ?? false)
                 {
                     vm.Color = FloatColor.FromColor(dialog.Color);

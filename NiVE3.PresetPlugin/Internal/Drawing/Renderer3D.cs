@@ -13,6 +13,7 @@ using NiVE3.Shared.Extension;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 using NiVE3.Plugin.Numerics;
+using NiVE3.Plugin.Interfaces.RendererParams;
 
 namespace NiVE3.PresetPlugin.Internal.Drawing
 {
@@ -224,8 +225,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                 var lightColor = l.Color;
                                 var lightDiff = Sse.Subtract(l.FloatPosition, position).AsVector3();
                                 var light = Vector3.Normalize(lightDiff);
-                                var falloff = CalcFalloff(lightDiff, l.FalloffType);
-                                diffuse += lightColor * color * Math.Max(Vector3.Dot(light, n), 0.0F) / falloff;
+                                var falloff = CalcFalloff(lightDiff, l.FalloffType, l.FalloffStart, l.FalloffLength);
+                                diffuse += lightColor * color * Math.Max(Vector3.Dot(light, n), 0.0F) * falloff;
 
                                 var view = -Vector3.Normalize(position.AsVector3());
                                 var reflect = Vector3.Reflect(-light, -n);
@@ -249,7 +250,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                         attenuation = (float)(1.0 - Math.Clamp(Math.Max(spotCone - l.InnerCone, 0.0) / l.ConeAttenuationRate, 0.0, 1.0));
                                     }
 
-                                    var falloff = CalcFalloff(lightDiff, l.FalloffType);
+                                    var falloff = CalcFalloff(lightDiff, l.FalloffType, l.FalloffStart, l.FalloffLength);
                                     diffuse += lightColor * color * Math.Max(Vector3.Dot(light, n), 0.0F) / falloff * attenuation;
 
                                     var view = -Vector3.Normalize(position.AsVector3());
@@ -522,12 +523,18 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static float CalcFalloff(in Vector3 diff, LightFalloffType type)
+        static float CalcFalloff(in Vector3 diff, LightFalloffType type, float falloffStart, float falloffLength)
         {
+            var length = diff.Length();
+            if (length <= falloffStart)
+            {
+                return 1.0F;
+            }
+            length -= falloffStart;
             return type switch
             {
-                LightFalloffType.Linear => diff.Length(),
-                LightFalloffType.Exponential => Math.Min(MathF.Pow(diff.Length(), 2.0F), 1.0F),
+                LightFalloffType.Linear => Math.Max((falloffLength - length) / falloffLength, 0.0F),
+                LightFalloffType.Exponential => 1.0F / Math.Min(MathF.Pow(length, 2.0F), 1.0F),
                 _ => 1.0F
             };
         }

@@ -32,11 +32,33 @@ namespace NiVE3.Plugin.Interfaces
 
         public const string TransformPropertyOpacityId = nameof(TransformPropertyOpacityId);
 
-        public const string CameraTransformPointOfInterestId = nameof(CameraTransformPointOfInterestId);
+        public const string TransformPointOfInterestId = nameof(TransformPointOfInterestId);
 
-        public const string CameraTransformOrientationId = nameof(CameraTransformOrientationId);
+        public const string TransformOrientationId = nameof(TransformOrientationId);
 
         public const string CameraLayerOptionZoomId = nameof(CameraLayerOptionZoomId);
+
+        public const string LightLayerOptionLightTypeId = nameof(LightLayerOptionLightTypeId);
+
+        public const string LightLayerOptionColorId = nameof(LightLayerOptionColorId);
+
+        public const string LightLayerOptionIntensityId = nameof(LightLayerOptionIntensityId);
+
+        public const string LightLayerOptionConeAngleId = nameof(LightLayerOptionConeAngleId);
+
+        public const string LightLayerOptionConeAttenuationId = nameof(LightLayerOptionConeAttenuationId);
+
+        public const string LightLayerOptionFalloffTypeId = nameof(LightLayerOptionFalloffTypeId);
+
+        public const string LightLayerOptionFalloffStartId = nameof(LightLayerOptionFalloffStartId);
+
+        public const string LightLayerOptionFalloffLengthId = nameof(LightLayerOptionFalloffLengthId);
+
+        public const string LightLayerOptionEnableShadowId = nameof(LightLayerOptionEnableShadowId);
+
+        public const string LightLayerOptionShadowStrengthId = nameof(LightLayerOptionShadowStrengthId);
+
+        public const string LightLayerOptionShadowScatterSizeId = nameof(LightLayerOptionShadowScatterSizeId);
 
         bool IsEnable3D { get; }
     }

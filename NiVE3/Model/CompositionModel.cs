@@ -224,6 +224,15 @@ namespace NiVE3.Model
             HistoryModel.Add(new AddLayersHistoryCommand(this, new LayerModel[] { layer }, 0));
         }
 
+        public void AddLight()
+        {
+            var layer = new LayerModel(this, FootageListModel.LightFootage, EffectListModel, HistoryModel);
+            layer.OutPoint = Duration;
+            Layers.Insert(0, layer);
+
+            HistoryModel.Add(new AddLayersHistoryCommand(this, new LayerModel[] { layer }, 0));
+        }
+
         public void MoveLayer(Guid layerId, int newIndex)
         {
             MoveLayers(new Guid[] { layerId }, layerId, newIndex);
@@ -415,6 +424,11 @@ namespace NiVE3.Model
             else
             {
                 Renderer.SetCamera(CreateDefaultCameraSetting(Width, Height));
+            }
+
+            foreach (var light in Layers.Select(l => l.GetLightSetting(time)).NonNull())
+            {
+                Renderer.AddLight(light);
             }
 
             var images = new List<RenderableImage>();

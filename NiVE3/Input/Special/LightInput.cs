@@ -10,18 +10,18 @@ using NiVE3.Plugin.Interfaces;
 namespace NiVE3.Input.Special
 {
     [Export(typeof(IInput))]
-    [InputMetadata(typeof(CameraInput), nameof(CameraInput), "", "mes51", ID, "", true)]
+    [InputMetadata(typeof(LightInput), nameof(LightInput), "", "mes51", ID, "", true)]
     [InternalInput]
     [SpecialInput]
-    class CameraInput : IInput
+    class LightInput : IInput
     {
-        public static CameraInput Instance { get; } = new CameraInput();
+        public static LightInput Instance { get; } = new LightInput();
 
-        const string ID = "69EEC338-926A-413D-BE13-7900F711F21C";
+        public string FilePath => "ライト";
 
-        public string FilePath => "カメラ";
+        const string ID = "C425AFBF-95C8-4D6C-AD4F-0B0A2526EDEB";
 
-        private CameraInput() { }
+        private LightInput() { }
 
         public FootageSourceGroup GetGroup()
         {

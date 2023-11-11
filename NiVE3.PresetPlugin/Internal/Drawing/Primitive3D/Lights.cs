@@ -6,17 +6,11 @@ using System.Runtime.Intrinsics.X86;
 using System.Runtime.Intrinsics;
 using System.Text;
 using System.Threading.Tasks;
+using NiVE3.Plugin.Interfaces.RendererParams;
 
 namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
 {
-    enum LightFalloffType : int
-    {
-        None,
-        Linear,
-        Exponential
-    }
-
-    readonly struct PointLight
+    class PointLight
     {
         public readonly Vector256<double> Position;
 
@@ -26,19 +20,31 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
 
         public readonly LightFalloffType FalloffType;
 
-        public readonly bool CastShadow;
+        public readonly float FalloffStart;
 
-        public PointLight(in Vector256<double> position, in Vector4 color, float power, LightFalloffType falloffType, bool castShadow)
+        public readonly float FalloffLength;
+
+        public readonly bool IsEnableShadow;
+
+        public readonly double ShadowStrength;
+
+        public readonly double ShadowScatterSize;
+
+        public PointLight(in Vector256<double> position, in Vector4 color, double intensity, LightFalloffType falloffType, double falloffStart, double falloffLength, bool isEnableShadow, double shadowStrength, double shadowScatterSize)
         {
             Position = position;
             FloatPosition = Avx.ConvertToVector128Single(position);
-            Color = color * power;
+            Color = color * (float)intensity;
             FalloffType = falloffType;
-            CastShadow = castShadow;
+            FalloffStart = (float)falloffStart;
+            FalloffLength = (float)falloffLength;
+            IsEnableShadow = isEnableShadow;
+            ShadowStrength = shadowStrength;
+            ShadowScatterSize = shadowScatterSize;
         }
     }
 
-    readonly struct SpotLight
+    class SpotLight
     {
         public readonly Vector256<double> Position;
 
@@ -58,11 +64,19 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
 
         public readonly LightFalloffType FalloffType;
 
-        public readonly bool CastShadow;
+        public readonly float FalloffStart;
+
+        public readonly float FalloffLength;
+
+        public readonly bool IsEnableShadow;
 
         public readonly bool IsParallel;
 
-        public SpotLight(Vector256<double> position, Vector256<double> target, double coneRadians, double coneAttenuation, Vector4 color, float power, LightFalloffType falloffType, bool castShadow)
+        public readonly double ShadowStrength;
+
+        public readonly double ShadowScatterSize;
+
+        public SpotLight(Vector256<double> position, Vector256<double> target, double coneRadians, double coneAttenuation, Vector4 color, double intensity, LightFalloffType falloffType, double falloffStart, double falloffLength, bool isEnableShadow, double shadowStrength, double shadowScatterSize)
         {
             Position = position;
             Target = target;
@@ -82,19 +96,23 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
                 ConeAttenuationRate = OuterCone * coneAttenuation;
                 IsParallel = false;
             }
-            Color = color * power;
+            Color = color * (float)intensity;
             FalloffType = falloffType;
-            CastShadow = castShadow;
+            FalloffStart = (float)falloffStart;
+            FalloffLength = (float)falloffLength;
+            IsEnableShadow = isEnableShadow;
+            ShadowStrength = shadowStrength;
+            ShadowScatterSize = shadowScatterSize;
         }
     }
 
-    readonly struct AmbientLight
+    class AmbientLight
     {
         public readonly Vector4 Color;
 
-        public AmbientLight(Vector4 color, float power)
+        public AmbientLight(Vector4 color, double intensity)
         {
-            Color = color * power;
+            Color = color * (float)intensity;
         }
     }
 }

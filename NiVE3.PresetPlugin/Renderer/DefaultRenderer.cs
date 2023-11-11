@@ -40,12 +40,36 @@ namespace NiVE3.PresetPlugin.Renderer
 
         Matrix4x4d ProjectionMatrix { get; set; }
 
+        List<PointLight> PointLights { get; } = new List<PointLight>();
+
+        List<SpotLight> SpotLights { get; } = new List<SpotLight>();
+
+        List<AmbientLight> AmbientLights { get; } = new List<AmbientLight>();
+
         public void SetupAccelerator(IAcceleratorObject accelerator) { }
 
         public void SetSize(int width, int height)
         {
             Width = width;
             Height = height;
+        }
+
+        public void BeginRendering(double downSamplingRate, bool useGpu)
+        {
+            if (CurrentFrame != null)
+            {
+                throw new InvalidOperationException("rendering is already started"); // bug
+            }
+
+            CurrentFrame = new NManagedImage(Width, Height, true);
+            UseGpu = useGpu;
+
+            var zoom = Width / Math.Tan(DefaultFov * 0.5) * 0.5;
+            ViewMatrix = Matrix4x4d.CreateLookAt(Vector256.Create(0.5, 0.5, -zoom / Width, 0.0), Vector256.Create(0.5, 0.5, 0.0, 0.0), Vector256.Create(0.0, 1.0, 0.0, 0.0));
+            ProjectionMatrix = Matrix4x4d.CreatePerspectiveFieldOfView(DefaultFov, 1.0, double.Epsilon, double.PositiveInfinity);
+            PointLights.Clear();
+            SpotLights.Clear();
+            AmbientLights.Clear();
         }
 
         public void SetCamera(CameraSetting cameraSetting)
@@ -74,19 +98,8 @@ namespace NiVE3.PresetPlugin.Renderer
             ProjectionMatrix = Matrix4x4d.CreatePerspectiveFieldOfView(fov, 1.0, double.Epsilon, double.PositiveInfinity);
         }
 
-        public void BeginRendering(double downSamplingRate, bool useGpu)
+        public void AddLight(LightSetting lightSetting)
         {
-            if (CurrentFrame != null)
-            {
-                throw new InvalidOperationException("rendering is already started"); // bug
-            }
-
-            CurrentFrame = new NManagedImage(Width, Height, true);
-            UseGpu = useGpu;
-
-            var zoom = Width / Math.Tan(DefaultFov * 0.5) * 0.5;
-            ViewMatrix = Matrix4x4d.CreateLookAt(Vector256.Create(0.5, 0.5, -zoom / Width, 0.0), Vector256.Create(0.5, 0.5, 0.0, 0.0), Vector256.Create(0.0, 1.0, 0.0, 0.0));
-            ProjectionMatrix = Matrix4x4d.CreatePerspectiveFieldOfView(DefaultFov, 1.0, double.Epsilon, double.PositiveInfinity);
         }
 
         public void Render(RenderableImage[] images)
@@ -286,7 +299,7 @@ namespace NiVE3.PresetPlugin.Renderer
 
         static Matrix3x3 GetTransform2D(PropertyValueGroup transform)
         {
-            var anchorPoint = (Vector3d)(transform[ILayerObject.TransformAnchorPointId] ?? transform[ILayerObject.CameraTransformPointOfInterestId] ?? new Vector3d());
+            var anchorPoint = (Vector3d)(transform[ILayerObject.TransformAnchorPointId] ?? transform[ILayerObject.TransformPointOfInterestId] ?? new Vector3d());
             var scale = (Vector3d)(transform[ILayerObject.TransformScaleId] ?? new Vector3d(100.0, 100.0, 100.0)) * 0.01;
             var angle = (double)(transform[ILayerObject.TransformZAngleId] ?? 0.0);
             var translate = (Vector3d)(transform[ILayerObject.TransformPositionId] ?? new Vector3d());
@@ -315,8 +328,8 @@ namespace NiVE3.PresetPlugin.Renderer
         {
             return GetCameraMatrix(
                 (Vector3d)(transform[ILayerObject.TransformPositionId] ?? new Vector3d()),
-                (Vector3d)(transform[ILayerObject.CameraTransformPointOfInterestId] ?? new Vector3d()),
-                (Vector3d)(transform[ILayerObject.CameraTransformOrientationId] ?? new Vector3d()),
+                (Vector3d)(transform[ILayerObject.TransformPointOfInterestId] ?? new Vector3d()),
+                (Vector3d)(transform[ILayerObject.TransformOrientationId] ?? new Vector3d()),
                 (double)(transform[ILayerObject.TransformXAngleId] ?? 0.0),
                 (double)(transform[ILayerObject.TransformXAngleId] ?? 0.0),
                 (double)(transform[ILayerObject.TransformXAngleId] ?? 0.0),
@@ -354,9 +367,9 @@ namespace NiVE3.PresetPlugin.Renderer
 
         static Matrix4x4d GetInvertedCameraMatrix(PropertyValueGroup transform, double renderWidth, double renderHeight)
         {
-            var pos = (Vector3d)(transform[ILayerObject.CameraTransformPointOfInterestId] ?? new Vector3d());
+            var pos = (Vector3d)(transform[ILayerObject.TransformPointOfInterestId] ?? new Vector3d());
             var poi = (Vector3d)(transform[ILayerObject.TransformPositionId] ?? new Vector3d());
-            var orientation = (Vector3d)(transform[ILayerObject.CameraTransformOrientationId] ?? new Vector3d());
+            var orientation = (Vector3d)(transform[ILayerObject.TransformOrientationId] ?? new Vector3d());
             var angleX = (double)(transform[ILayerObject.TransformXAngleId] ?? 0.0);
             var angleY = (double)(transform[ILayerObject.TransformYAngleId] ?? 0.0);
             var angleZ = (double)(transform[ILayerObject.TransformZAngleId] ?? 0.0);

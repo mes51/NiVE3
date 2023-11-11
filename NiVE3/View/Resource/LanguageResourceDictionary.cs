@@ -183,7 +183,7 @@ namespace NiVE3.View.Resource
         public static readonly string CompositionSettingView_RendererLabel = nameof(CompositionSettingView_RendererLabel);
 
         [ShowInMarkup, DefaultValue("色の選択")]
-        public static readonly string ColorPickerWindow_Title = nameof(ColorPickerWindow_Title);
+        public static readonly string ColorPickerDialog_Title = nameof(ColorPickerDialog_Title);
 
         [ShowInMarkup, DefaultValue("OK")]
         public static readonly string Dialog_OK = nameof(Dialog_OK);
@@ -224,6 +224,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("カメラの追加(_C)")]
         public static readonly string Timeline_ContextMenu_AddCamera = nameof(Timeline_ContextMenu_AddCamera);
 
+        [ShowInMarkup, DefaultValue("ライトの追加(_L)")]
+        public static readonly string Timeline_ContextMenu_AddLight = nameof(Timeline_ContextMenu_AddLight);
+
         [ShowInMarkup, DefaultValue("なし")]
         public static readonly string Layer_EmptyTrackMatte = nameof(Layer_EmptyTrackMatte);
 
@@ -238,6 +241,9 @@ namespace NiVE3.View.Resource
 
         [ShowInMarkup, DefaultValue("カメラオプション")]
         public static readonly string Layer_LayerOptions_Camera = nameof(Layer_LayerOptions_Camera);
+
+        [ShowInMarkup, DefaultValue("ライトオプション")]
+        public static readonly string Layer_LayerOptions_Light = nameof(Layer_LayerOptions_Light);
 
         [ShowInMarkup, DefaultValue("名前")]
         public static readonly string EffectList_Name = nameof(EffectList_Name);
@@ -395,6 +401,39 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("ズーム")]
         public static readonly string LayerOptionsProperty_CameraZoom = nameof(LayerOptionsProperty_CameraZoom);
 
+        [ShowInMarkup, DefaultValue("ライトの種類")]
+        public static readonly string LayerOptionsProperty_LightType = nameof(LayerOptionsProperty_LightType);
+
+        [ShowInMarkup, DefaultValue("色")]
+        public static readonly string LayerOptionsProperty_Color = nameof(LayerOptionsProperty_Color);
+
+        [ShowInMarkup, DefaultValue("強度")]
+        public static readonly string LayerOptionsProperty_Intensity = nameof(LayerOptionsProperty_Intensity);
+
+        [ShowInMarkup, DefaultValue("円錐頂角")]
+        public static readonly string LayerOptionsProperty_ConeAngle = nameof(LayerOptionsProperty_ConeAngle);
+
+        [ShowInMarkup, DefaultValue("円錐ぼかし")]
+        public static readonly string LayerOptionsProperty_ConeAttenuation = nameof(LayerOptionsProperty_ConeAttenuation);
+
+        [ShowInMarkup, DefaultValue("フォールオフの種類")]
+        public static readonly string LayerOptionsProperty_FalloffType = nameof(LayerOptionsProperty_FalloffType);
+
+        [ShowInMarkup, DefaultValue("フォールオフの開始")]
+        public static readonly string LayerOptionsProperty_FalloffStart = nameof(LayerOptionsProperty_FalloffStart);
+
+        [ShowInMarkup, DefaultValue("フォールオフの距離")]
+        public static readonly string LayerOptionsProperty_FalloffLength = nameof(LayerOptionsProperty_FalloffLength);
+
+        [ShowInMarkup, DefaultValue("影を落とす")]
+        public static readonly string LayerOptionsProperty_EnableShadow = nameof(LayerOptionsProperty_EnableShadow);
+
+        [ShowInMarkup, DefaultValue("影の濃さ")]
+        public static readonly string LayerOptionsProperty_ShadowStrength = nameof(LayerOptionsProperty_ShadowStrength);
+
+        [ShowInMarkup, DefaultValue("影のぼかし")]
+        public static readonly string LayerOptionsProperty_ShadowScatterSize = nameof(LayerOptionsProperty_ShadowScatterSize);
+
         // Enum
 
         [ShowInMarkup, DefaultValue("RGB")]
@@ -498,6 +537,27 @@ namespace NiVE3.View.Resource
 
         [ShowInMarkup, DefaultValue("反転明度")]
         public static readonly string TrackMatteMode_InvertLuminance = nameof(TrackMatteMode_InvertLuminance);
+
+        [ShowInMarkup, DefaultValue("ポイント")]
+        public static readonly string LightType_Point = nameof(LightType_Point);
+
+        [ShowInMarkup, DefaultValue("スポット")]
+        public static readonly string LightType_Spot = nameof(LightType_Spot);
+
+        [ShowInMarkup, DefaultValue("平行")]
+        public static readonly string LightType_Parallel = nameof(LightType_Parallel);
+
+        [ShowInMarkup, DefaultValue("アンビエント")]
+        public static readonly string LightType_Ambient = nameof(LightType_Ambient);
+
+        [ShowInMarkup, DefaultValue("なし")]
+        public static readonly string LightFalloffType_None = nameof(LightFalloffType_None);
+
+        [ShowInMarkup, DefaultValue("リニア")]
+        public static readonly string LightFalloffType_Linear = nameof(LightFalloffType_Linear);
+
+        [ShowInMarkup, DefaultValue("逆二乗クランプ")]
+        public static readonly string LightFalloffType_Exponential = nameof(LightFalloffType_Exponential);
 
         static LanguageResourceDictionary()
         {

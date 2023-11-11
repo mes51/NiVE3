@@ -5,13 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
 
-namespace NiVE3.Extension
+namespace NiVE3.Shared.Extension
 {
-    static class ColorExtensions
+    public static class ColorExtensions
     {
         public static Color FromHex(string hex)
         {
-            var colorCode = hex.StartsWith("#") ? hex.Substring(1) : hex;
+            var colorCode = hex.StartsWith("#") ? hex[1..] : hex;
             var colors = colorCode.Chunk(2).Select(c => (byte)Convert.ToInt32(new string(c.ToArray()), 16)).ToArray();
             if (colors.Length > 3)
             {

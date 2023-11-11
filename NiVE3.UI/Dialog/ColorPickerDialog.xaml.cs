@@ -11,30 +11,65 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using NiVE3.Extension;
-using NiVE3.Util;
-using Prism.Commands;
+using NiVE3.UI.Internal;
+using NiVE3.UI.Resources;
+using NiVE3.Shared.Extension;
+using NiVE3.UI.Command;
+using System.Numerics;
 
-namespace NiVE3.Windows
+namespace NiVE3.UI.Dialog
 {
     /// <summary>
-    /// ColorPickerWindow.xaml の相互作用ロジック
+    /// ColorPickerDialog.xaml の相互作用ロジック
     /// </summary>
-    public partial class ColorPickerWindow : Window
+    public partial class ColorPickerDialog : Window
     {
+        public static readonly DependencyProperty OKButtonTextProperty = DependencyProperty.Register(
+            nameof(OKButtonText),
+            typeof(string),
+            typeof(ColorPickerDialog),
+            new FrameworkPropertyMetadata("OK")
+        );
+
+        public static readonly DependencyProperty CancelButtonTextProperty = DependencyProperty.Register(
+            nameof(CancelButtonText),
+            typeof(string),
+            typeof(ColorPickerDialog),
+            new FrameworkPropertyMetadata("キャンセル")
+        );
+
         public static readonly DependencyProperty ColorProperty = DependencyProperty.Register(
             nameof(Color),
             typeof(Color),
-            typeof(ColorPickerWindow),
-            new FrameworkPropertyMetadata(Colors.Black, FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsRender, ColorChanged)
+            typeof(ColorPickerDialog),
+            new FrameworkPropertyMetadata(Colors.Black, ColorChanged)
         );
 
-        public static readonly DependencyProperty ColorPickTypeProperty = DependencyProperty.Register(
+        public static readonly DependencyProperty VectorColorProperty = DependencyProperty.Register(
+            nameof(VectorColor),
+            typeof(Vector4),
+            typeof(ColorPickerDialog),
+            new FrameworkPropertyMetadata(Vector4.UnitW, VectorColorChanged)
+        );
+
+        internal static readonly DependencyProperty ColorPickTypeProperty = DependencyProperty.Register(
             nameof(ColorPickType),
             typeof(ColorPickType),
-            typeof(ColorPickerWindow),
-            new FrameworkPropertyMetadata(ColorPickType.H, FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsRender, ColorPickTypeChanged)
+            typeof(ColorPickerDialog),
+            new FrameworkPropertyMetadata(ColorPickType.H, ColorPickTypeChanged)
         );
+
+        internal ColorPickType ColorPickType
+        {
+            get { return (ColorPickType)GetValue(ColorPickTypeProperty); }
+            set { SetValue(ColorPickTypeProperty, value); }
+        }
+
+        public Vector4 VectorColor
+        {
+            get { return (Vector4)GetValue(VectorColorProperty); }
+            set { SetValue(VectorColorProperty, value); }
+        }
 
         public Color Color
         {
@@ -42,15 +77,21 @@ namespace NiVE3.Windows
             set { SetValue(ColorProperty, value); }
         }
 
+        public string CancelButtonText
+        {
+            get { return (string)GetValue(CancelButtonTextProperty); }
+            set { SetValue(CancelButtonTextProperty, value); }
+        }
+
+        public string OKButtonText
+        {
+            get { return (string)GetValue(OKButtonTextProperty); }
+            set { SetValue(OKButtonTextProperty, value); }
+        }
+
         public WriteableBitmap ColorPickAreaImage { get; } = new WriteableBitmap(256, 256, 96.0, 96.0, PixelFormats.Bgra32, null);
 
         public WriteableBitmap ColorBarImage { get; } = new WriteableBitmap(24, 256, 96.0, 96.0, PixelFormats.Bgra32, null);
-
-        internal ColorPickType ColorPickType
-        {
-            get { return (ColorPickType)GetValue(ColorPickTypeProperty); }
-            set { SetValue(ColorPickTypeProperty, value); }
-        }
 
         bool IsClickPickerArea { get; set; }
 
@@ -66,9 +107,9 @@ namespace NiVE3.Windows
 
         public ICommand OKCommand { get; }
 
-        public ColorPickerWindow(Color oldColor)
+        public ColorPickerDialog(Color oldColor)
         {
-            OKCommand = new DelegateCommand(() =>
+            OKCommand = new ActionCommand(() =>
             {
                 DialogResult = true;
                 Close();
@@ -505,15 +546,45 @@ namespace NiVE3.Windows
             }
         }
 
-        static void ColorChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        static void ColorChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            ((ColorPickerWindow)sender).NewColor.Fill = new SolidColorBrush((Color)e.NewValue);
+            const float ColorDiffEpsilon = 1.0F / 255.0F;
+
+            if (d is not ColorPickerDialog dialog)
+            {
+                return;
+            }
+
+            var newColor = dialog.Color;
+            dialog.NewColor.Fill = new SolidColorBrush(newColor);
+
+            var newVectorColor = new Vector4(newColor.B, newColor.G, newColor.R, newColor.A) / 255.0F;
+            var vectorDiff = Vector4.Abs(newVectorColor - dialog.VectorColor);
+            if (vectorDiff.X >= ColorDiffEpsilon || vectorDiff.Y >= ColorDiffEpsilon || vectorDiff.Z >= ColorDiffEpsilon || vectorDiff.W >= ColorDiffEpsilon)
+            {
+                dialog.VectorColor = newVectorColor;
+            }
+        }
+
+        static void VectorColorChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is not ColorPickerDialog dialog)
+            {
+                return;
+            }
+
+            var newVectorColor = Vector4.Max(Vector4.Min(dialog.VectorColor, Vector4.One), Vector4.Zero) * 255.0F;
+            var newColor = Color.FromArgb((byte)newVectorColor.W, (byte)newVectorColor.Z, (byte)newVectorColor.Y, (byte)newVectorColor.X);
+            if (dialog.Color != newColor)
+            {
+                dialog.Color = newColor;
+            }
         }
 
         static void ColorPickTypeChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
-            ((ColorPickerWindow)sender).UpdateColorImage();
-            ((ColorPickerWindow)sender).SetSelectedPosition();
+            ((ColorPickerDialog)sender).UpdateColorImage();
+            ((ColorPickerDialog)sender).SetSelectedPosition();
         }
     }
 

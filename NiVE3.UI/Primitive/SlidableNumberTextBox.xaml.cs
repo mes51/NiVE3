@@ -88,46 +88,28 @@ namespace NiVE3.UI.Primitive
         );
 
         public static RoutedEvent BeginSlideEditValueEvent = EventManager.RegisterRoutedEvent(
-            nameof(BeginSlideEditValue), RoutingStrategy.Bubble, typeof(EventHandler), typeof(SlidableNumberTextBox)
+            nameof(BeginSlideEditValue), RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(SlidableNumberTextBox)
         );
 
         public static RoutedEvent EndSlideEditValueEvent = EventManager.RegisterRoutedEvent(
-            nameof(EndSlideEditValue), RoutingStrategy.Bubble, typeof(EventHandler), typeof(SlidableNumberTextBox)
+            nameof(EndSlideEditValue), RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(SlidableNumberTextBox)
         );
 
         public static RoutedEvent AbortSlideEditValueEvent = EventManager.RegisterRoutedEvent(
-            nameof(AbortSlideEditValue), RoutingStrategy.Direct, typeof(EventHandler), typeof(SlidableNumberTextBox)
+            nameof(AbortSlideEditValue), RoutingStrategy.Direct, typeof(RoutedEventHandler), typeof(SlidableNumberTextBox)
         );
 
         public static RoutedEvent BeginTextEditValueEvent = EventManager.RegisterRoutedEvent(
-            nameof(BeginTextEditValue), RoutingStrategy.Direct, typeof(EventHandler), typeof(SlidableNumberTextBox)
+            nameof(BeginTextEditValue), RoutingStrategy.Direct, typeof(RoutedEventHandler), typeof(SlidableNumberTextBox)
         );
 
         public static RoutedEvent EndTextEditValueEvent = EventManager.RegisterRoutedEvent(
-            nameof(EndTextEditValue), RoutingStrategy.Direct, typeof(EventHandler), typeof(SlidableNumberTextBox)
+            nameof(EndTextEditValue), RoutingStrategy.Direct, typeof(RoutedEventHandler), typeof(SlidableNumberTextBox)
         );
 
         public static RoutedEvent AbortTextEditValueEvent = EventManager.RegisterRoutedEvent(
-            nameof(AbortTextEditValue), RoutingStrategy.Direct, typeof(EventHandler), typeof(SlidableNumberTextBox)
+            nameof(AbortTextEditValue), RoutingStrategy.Direct, typeof(RoutedEventHandler), typeof(SlidableNumberTextBox)
         );
-
-        public event EventHandler AbortTextEditValue
-        {
-            add { AddHandler(AbortTextEditValueEvent, value); }
-            remove { RemoveHandler(AbortTextEditValueEvent, value); }
-        }
-
-        public event EventHandler EndTextEditValue
-        {
-            add { AddHandler(EndTextEditValueEvent, value); }
-            remove { RemoveHandler(EndTextEditValueEvent, value); }
-        }
-
-        public event EventHandler BeginTextEditValue
-        {
-            add { AddHandler(BeginTextEditValueEvent, value); }
-            remove { RemoveHandler(BeginTextEditValueEvent, value); }
-        }
 
         private bool IsClicked
         {
@@ -193,19 +175,37 @@ namespace NiVE3.UI.Primitive
 
         CalcDoubleConverter DefaultConverter { get; } = new CalcDoubleConverter();
 
-        public event EventHandler AbortSlideEditValue
+        public event RoutedEventHandler AbortTextEditValue
+        {
+            add { AddHandler(AbortTextEditValueEvent, value); }
+            remove { RemoveHandler(AbortTextEditValueEvent, value); }
+        }
+
+        public event RoutedEventHandler EndTextEditValue
+        {
+            add { AddHandler(EndTextEditValueEvent, value); }
+            remove { RemoveHandler(EndTextEditValueEvent, value); }
+        }
+
+        public event RoutedEventHandler BeginTextEditValue
+        {
+            add { AddHandler(BeginTextEditValueEvent, value); }
+            remove { RemoveHandler(BeginTextEditValueEvent, value); }
+        }
+
+        public event RoutedEventHandler AbortSlideEditValue
         {
             add { AddHandler(AbortSlideEditValueEvent, value); }
             remove { RemoveHandler(AbortSlideEditValueEvent, value); }
         }
 
-        public event EventHandler EndSlideEditValue
+        public event RoutedEventHandler EndSlideEditValue
         {
             add { AddHandler(EndSlideEditValueEvent, value); }
             remove { RemoveHandler(EndSlideEditValueEvent, value); }
         }
 
-        public event EventHandler BeginSlideEditValue
+        public event RoutedEventHandler BeginSlideEditValue
         {
             add { AddHandler(BeginSlideEditValueEvent, value); }
             remove { RemoveHandler(BeginSlideEditValueEvent, value); }

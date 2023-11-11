@@ -26,10 +26,16 @@ namespace NiVE3.Plugin.Interfaces
         void SetSize(int width, int height);
 
         /// <summary>
-        /// 3D用のカメラを設定します。レンダリングする度に呼ばれますが、カメラがコンポジション内に存在しない場合は呼ばれません
+        /// 3D用のカメラを設定します。レンダリングする度に呼ばれます。
         /// </summary>
         /// <param name="cameraSetting">カメラの設定</param>
         void SetCamera(CameraSetting cameraSetting);
+
+        /// <summary>
+        /// 3D用のライトを追加します。有効なライトが複数個ある場合はその数だけ呼ばれます。
+        /// </summary>
+        /// <param name="lightSetting">追加するライトの設定</param>
+        void AddLight(LightSetting lightSetting);
 
         /// <summary>
         /// レンダリングを開始します
