@@ -357,7 +357,7 @@ namespace NiVE3.PresetPlugin.Renderer
                         break;
                     case ParentType.SpotOrParallelLight:
                     case ParentType.PointLight:
-                        matrix *= GetInvertedLightMatrix(type == ParentType.SpotOrParallelLight ? LightType.Spot : LightType.Point, parentTransform, renderWidth, renderHeight);
+                        matrix *= GetLightMatrix(type == ParentType.SpotOrParallelLight ? LightType.Spot : LightType.Point, parentTransform, renderWidth, renderHeight);
                         break;
                     case ParentType.AmbientLight:
                         break;
@@ -574,49 +574,6 @@ namespace NiVE3.PresetPlugin.Renderer
                             .RotateX(Math.Atan2(y, Math.Sqrt(x * x + z * z)) / Math.PI * 180.0)
                             .RotateY(-Math.Atan2(x, z) / Math.PI * 180.0)
                             .Translate(pos256.GetElement(0), pos256.GetElement(1), -pos256.GetElement(2))
-                            .Scale(1.0, 1.0, -1.0);
-                    }
-                default:
-                    return Matrix4x4d.Identity;
-            }
-        }
-
-        static Matrix4x4d GetInvertedLightMatrix(LightType lightType, PropertyValueGroup transform, double renderWidth, double renderHeight)
-        {
-            var pos = (Vector3d)(transform[ILayerObject.TransformPositionId] ?? new Vector3d());
-
-            var size = Math.Max(renderWidth, renderHeight);
-            var pos256 = Avx.Divide(pos.AsVector256(), Vector256.Create(size));
-            switch (lightType)
-            {
-                case LightType.Point:
-                    return Matrix4x4d.CreateTranslate(-pos256.GetElement(0), -pos256.GetElement(1), pos256.GetElement(2));
-                case LightType.Spot:
-                case LightType.Parallel:
-                    {
-                        var poi = (Vector3d)(transform[ILayerObject.TransformPointOfInterestId] ?? new Vector3d());
-                        var orientation = (Vector3d)(transform[ILayerObject.TransformOrientationId] ?? new Vector3d());
-                        var angleX = (double)(transform[ILayerObject.TransformXAngleId] ?? 0.0);
-                        var angleY = (double)(transform[ILayerObject.TransformYAngleId] ?? 0.0);
-                        var angleZ = (double)(transform[ILayerObject.TransformZAngleId] ?? 0.0);
-
-                        var poi256 = Avx.Divide(poi.AsVector256(), Vector256.Create(size));
-
-                        var diff = Avx.Subtract(poi256, pos256);
-                        var x = diff.GetElement(0);
-                        var y = diff.GetElement(1);
-                        var z = diff.GetElement(2);
-
-                        return Matrix4x4d.Identity
-                            .RotateZ(-angleZ)
-                            .RotateY(-angleY)
-                            .RotateX(-angleX)
-                            .RotateZ(-orientation.Z)
-                            .RotateY(-orientation.Y)
-                            .RotateX(-orientation.X)
-                            .RotateX(Math.Atan2(y, Math.Sqrt(x * x + z * z)) / Math.PI * 180.0)
-                            .RotateY(-Math.Atan2(x, z) / Math.PI * 180.0)
-                            .Translate(-pos256.GetElement(0), -pos256.GetElement(1), pos256.GetElement(2))
                             .Scale(1.0, 1.0, -1.0);
                     }
                 default:
