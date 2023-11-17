@@ -21,41 +21,19 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
     {
         const float NearZ = -5E-5F; //1.0F;
 
-        Matrix4x4d modelMatrix;
-        public Matrix4x4d ModelMatrix
-        {
-            get => modelMatrix;
-            set
-            {
-                modelMatrix = value;
-                ModelViewMatrix = value * viewMatrix;
-                Matrix4x4d invertedModelViewMatrix;
-                Matrix4x4d.Invert(ModelViewMatrix, out invertedModelViewMatrix);
-                InvertedModelViewMatrix = Matrix4x4d.Transpose(invertedModelViewMatrix);
-            }
-        }
-
-        Matrix4x4d viewMatrix;
-        public Matrix4x4d ViewMatrix
-        {
-            get => viewMatrix;
-            set
-            {
-                viewMatrix = value;
-                ModelViewMatrix = modelMatrix * value;
-                Matrix4x4d invertedModelViewMatrix;
-                Matrix4x4d.Invert(ModelViewMatrix, out invertedModelViewMatrix);
-                InvertedModelViewMatrix = Matrix4x4d.Transpose(invertedModelViewMatrix);
-            }
-        }
+        public Matrix4x4d ViewMatrix { get; set; }
 
         public Matrix4x4d ProjectionMatrix { get; set; } = Matrix4x4.Identity;
 
+        public List<PointLight> PointLights { get; set; } = new List<PointLight>();
+
+        public List<SpotLight> SpotLights { get; set; } = new List<SpotLight>();
+
+        public List<ParallelLight> ParallelLights { get; set; } = new List<ParallelLight>();
+
+        public List<AmbientLight> AmbientLights { get; set; } = new List<AmbientLight>();
+
         public int Size { get; }
-
-        Matrix4x4d ModelViewMatrix { get; set; }
-
-        Matrix4x4d InvertedModelViewMatrix { get; set; }
 
         int OffsetX { get; }
 
@@ -67,12 +45,6 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
         List<Triangle> Triangles { get; } = new List<Triangle>();
 
-        List<PointLight> PointLights { get; } = new List<PointLight>();
-
-        List<SpotLight> SpotLights { get; } = new List<SpotLight>();
-
-        List<AmbientLight> AmbientLights { get; } = new List<AmbientLight>();
-
         public Renderer3D(NManagedImage renderImage)
         {
             Size = Math.Max(renderImage.Width, renderImage.Height);
@@ -81,7 +53,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             RenderImage = renderImage;
         }
 
-        public void AddRect(NImage texture, BlendMode blendType, float diffuse = 1.0F, float ambient = 1.0F, float mirror = 1.0F, float specular = 0.15F, float metal = 0.0F)
+        public void AddRect(NImage texture, BlendMode blendType, in Matrix4x4d modelMatrix, float diffuse = 1.0F, float ambient = 1.0F, float mirror = 1.0F, float specular = 0.15F, float metal = 0.0F, float lightTransmission = 0.5F)
         {
             var width = texture.Width;
             var height = texture.Height;
@@ -92,7 +64,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             var v3 = Avx.Divide(Vector256.Create(width, height, 0.0, Size), Vector256.Create((double)Size));
             var v4 = Avx.Divide(Vector256.Create(width, 0.0, 0.0, Size), Vector256.Create((double)Size));
 
-            var mvt = ModelViewMatrix * Matrix4x4d.CreateTranslate(offsetX, offsetY, 0.0);
+            var mv = modelMatrix * ViewMatrix;
+            var mvt = mv * Matrix4x4d.CreateTranslate(offsetX, offsetY, 0.0);
             v1 = mvt.Transform(v1);
             v2 = mvt.Transform(v2);
             v3 = mvt.Transform(v3);
@@ -103,9 +76,12 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             var uv3 = new UVVertex(v3, 1.0F, 1.0F);
             var uv4 = new UVVertex(v4, 1.0F, 0.0F);
 
-            var farPoint = Avx.And(ModelViewMatrix.Transform(Vector256.Create(0.0, 0.0, -10000.0, 1.0)), Vector256.Create(0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0).AsDouble());
-            Triangles.Add(new Triangle(uv1, uv2, uv3, farPoint, InvertedModelViewMatrix, texture, blendType, diffuse, ambient, mirror, specular, metal, LastId));
-            Triangles.Add(new Triangle(uv1, uv3, uv4, farPoint, InvertedModelViewMatrix, texture, blendType, diffuse, ambient, mirror, specular, metal, LastId));
+            Matrix4x4d.Invert(mv, out var invertedModelViewMatrix);
+            invertedModelViewMatrix = Matrix4x4d.Transpose(invertedModelViewMatrix);
+
+            var farPoint = Avx.And(mv.Transform(Vector256.Create(0.0, 0.0, -10000.0, 1.0)), Vector256.Create(0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0).AsDouble());
+            Triangles.Add(new Triangle(uv1, uv2, uv3, farPoint, invertedModelViewMatrix, texture, blendType, diffuse, ambient, mirror, specular, metal, lightTransmission, LastId));
+            Triangles.Add(new Triangle(uv1, uv3, uv4, farPoint, invertedModelViewMatrix, texture, blendType, diffuse, ambient, mirror, specular, metal, lightTransmission, LastId));
             LastId++;
         }
 
@@ -154,7 +130,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 var isFrontFace = triangle.Normal.DotProduct(Vector256.Create(0.0, 0.0, 1.0, 0.0)).GetElement(0) <= 0.0;
                 var vvEX = Vector128.Create((float)dvv2.GetElement(0), (float)dvv3.GetElement(0), (float)dvv1.GetElement(0), 0.0F);
                 var vvEY = Vector128.Create((float)dvv2.GetElement(1), (float)dvv3.GetElement(1), (float)dvv1.GetElement(1), 0.0F);
-                var hasLight = PointLights.Count > 0 || SpotLights.Count > 0 || AmbientLights.Count > 0;
+                var hasLight = PointLights.Count > 0 || SpotLights.Count > 0 || ParallelLights.Count > 0 || AmbientLights.Count > 0;
 
                 NManagedImage managedTexture;
                 if (triangle.Texture is NCudaImage cudaImage)
@@ -182,6 +158,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
                     var pointLights = CollectionsMarshal.AsSpan(PointLights);
                     var spotLights = CollectionsMarshal.AsSpan(SpotLights);
+                    var parallelLights = CollectionsMarshal.AsSpan(ParallelLights);
                     var ambientLights = CollectionsMarshal.AsSpan(AmbientLights);
 
                     for (int x = minX; x < maxX; x++, p++, eX = Sse.Add(eX, addX))
@@ -223,40 +200,87 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                             {
                                 var l = pointLights[i];
                                 var lightColor = l.Color;
-                                var lightDiff = Sse.Subtract(l.FloatPosition, position).AsVector3();
+                                var lightDiff = Sse.Subtract(position, l.Position).AsVector3();
                                 var light = Vector3.Normalize(lightDiff);
                                 var falloff = CalcFalloff(lightDiff, l.FalloffType, l.FalloffStart, l.FalloffLength);
-                                diffuse += lightColor * color * Math.Max(Vector3.Dot(light, n), 0.0F) * falloff;
+
+                                var diffuseFactor = Vector3.Dot(light, n);
+                                var isBack = diffuseFactor < 0.0F;
+                                if (isBack)
+                                {
+                                    diffuseFactor *= -triangle.LightTransmission;
+                                }
+                                diffuse += lightColor * color * diffuseFactor * falloff;
 
                                 var view = -Vector3.Normalize(position.AsVector3());
-                                var reflect = Vector3.Reflect(-light, -n);
-                                specular += Vector4.Lerp(lightColor, color, triangle.Metal) * MathF.Pow(Math.Max(Vector3.Dot(view, reflect), 0.0F), 1200.0F * triangle.Specular) * triangle.Mirror / falloff;
+                                var reflect = Vector3.Reflect(light, -n);
+                                var specularFactor = Math.Max(Vector3.Dot(view, reflect), 0.0F);
+                                if (isBack)
+                                {
+                                    specularFactor *= -triangle.LightTransmission;
+                                }
+                                specular += Vector4.Lerp(lightColor, color, triangle.Metal) * MathF.Pow(specularFactor, 1200.0F * triangle.Specular) * triangle.Mirror * falloff;
                             }
 
                             for (var i = 0; i < SpotLights.Count; i++)
                             {
                                 var l = spotLights[i];
                                 var lightColor = l.Color;
-                                var lightDiff = Sse.Subtract(l.FloatPosition, position).AsVector3();
+                                var lightDiff = Sse.Subtract(position, l.Position).AsVector3();
                                 var light = Vector3.Normalize(lightDiff);
-                                var spot = Vector3.Normalize(Sse.Subtract(l.FloatTarget, l.FloatPosition).AsVector3());
-                                var spotCone = Math.Acos(Vector3.Dot(spot, -light));
+                                var spotCone = MathF.Acos(Vector3.Dot(l.Direction, light));
 
                                 if (spotCone <= l.OuterCone)
                                 {
                                     var attenuation = 1.0F;
-                                    if (!l.IsParallel && l.ConeAttenuationRate > 0.0)
+                                    if (l.ConeAttenuationRate > 0.0)
                                     {
-                                        attenuation = (float)(1.0 - Math.Clamp(Math.Max(spotCone - l.InnerCone, 0.0) / l.ConeAttenuationRate, 0.0, 1.0));
+                                        attenuation = Math.Min((MathF.Cos(spotCone) - l.OuterConeCos) * l.InvertInnerConeCos, 1.0F);
                                     }
 
                                     var falloff = CalcFalloff(lightDiff, l.FalloffType, l.FalloffStart, l.FalloffLength);
-                                    diffuse += lightColor * color * Math.Max(Vector3.Dot(light, n), 0.0F) / falloff * attenuation;
+                                    var diffuseFactor = Vector3.Dot(light, n);
+                                    var isBack = diffuseFactor < 0.0F;
+                                    if (isBack)
+                                    {
+                                        diffuseFactor *= -triangle.LightTransmission;
+                                    }
+                                    diffuse += lightColor * color * diffuseFactor * falloff * attenuation;
 
                                     var view = -Vector3.Normalize(position.AsVector3());
-                                    var reflect = Vector3.Reflect(-light, -n);
-                                    specular += Vector4.Lerp(lightColor, color, triangle.Metal) * MathF.Pow(Math.Max(Vector3.Dot(view, reflect), 0.0F), 1200.0F * triangle.Specular) * triangle.Mirror / falloff * attenuation;
+                                    var reflect = Vector3.Reflect(light, -n);
+                                    var specularFactor = Math.Max(Vector3.Dot(view, reflect), 0.0F);
+                                    if (isBack)
+                                    {
+                                        specularFactor *= -triangle.LightTransmission;
+                                    }
+                                    specular += Vector4.Lerp(lightColor, color, triangle.Metal) * MathF.Pow(specularFactor, 1200.0F * triangle.Specular) * triangle.Mirror * falloff * attenuation;
                                 }
+                            }
+
+                            for (var i = 0; i < ParallelLights.Count; i++)
+                            {
+                                var l = parallelLights[i];
+                                var lightColor = l.Color;
+                                var lightDiff = Sse.Subtract(position, l.Position).AsVector3();
+                                var falloff = CalcFalloff(lightDiff, l.FalloffType, l.FalloffStart, l.FalloffLength);
+
+                                var diffuseFactor = Vector3.Dot(l.Direction, n);
+                                var isBack = diffuseFactor < 0.0F;
+                                if (isBack)
+                                {
+                                    diffuseFactor *= -triangle.LightTransmission;
+                                }
+                                diffuse += lightColor * color * diffuseFactor * falloff;
+
+                                var view = -Vector3.Normalize(position.AsVector3());
+                                var reflect = Vector3.Reflect(l.Direction, -n);
+                                var specularFactor = Math.Max(Vector3.Dot(view, reflect), 0.0F);
+                                if (isBack)
+                                {
+                                    specularFactor *= -triangle.LightTransmission;
+                                }
+                                specular += Vector4.Lerp(lightColor, color, triangle.Metal) * MathF.Pow(specularFactor, 1200.0F * triangle.Specular) * triangle.Mirror * falloff;
                             }
 
                             for (var i = 0; i < AmbientLights.Count; i++)
@@ -534,7 +558,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             return type switch
             {
                 LightFalloffType.Linear => Math.Max((falloffLength - length) / falloffLength, 0.0F),
-                LightFalloffType.Exponential => 1.0F / Math.Min(MathF.Pow(length, 2.0F), 1.0F),
+                LightFalloffType.Exponential => Math.Min(1.0F / MathF.Pow(1.0F + length, 2.0F), 1.0F),
                 _ => 1.0F
             };
         }

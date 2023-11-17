@@ -41,6 +41,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
 
         public readonly float Metal;
 
+        public readonly float LightTransmission;
+
         public readonly int Id;
 
         public readonly bool SignIsDifferent;
@@ -51,7 +53,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
 
         readonly Matrix4x4d InvertMatrix;
 
-        public Triangle(in UVVertex v1, in UVVertex v2, in UVVertex v3, in Vector256<double> farPoint, in Matrix4x4d invertMatrix, NImage texture, BlendMode blendMode, float diffuse, float ambient, float mirror, float specular, float metal, int id)
+        public Triangle(in UVVertex v1, in UVVertex v2, in UVVertex v3, in Vector256<double> farPoint, in Matrix4x4d invertMatrix, NImage texture, BlendMode blendMode, float diffuse, float ambient, float mirror, float specular, float metal, float lightTransmission, int id)
         {
             V1 = v1;
             V2 = v2;
@@ -63,6 +65,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
             Mirror = mirror;
             Specular = specular;
             Metal = metal;
+            LightTransmission = lightTransmission;
             Id = id;
             FarPoint = farPoint;
             InvertMatrix = invertMatrix;

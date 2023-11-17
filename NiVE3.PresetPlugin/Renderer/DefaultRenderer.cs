@@ -14,11 +14,11 @@ using NiVE3.Shared.Extension;
 using NiVE3.PresetPlugin.Internal.Drawing;
 using System.Runtime.Intrinsics;
 using NiVE3.Plugin.Interfaces.RendererParams;
-using System.Windows.Media.Media3D;
 using System.Runtime.Intrinsics.X86;
 using System.Security.Principal;
 using NiVE3.Plugin.Numerics;
 using NiVE3.Plugin.ValueObject;
+using NiVE3.PresetPlugin.Internal.Drawing.Primitive3D;
 
 namespace NiVE3.PresetPlugin.Renderer
 {
@@ -43,6 +43,8 @@ namespace NiVE3.PresetPlugin.Renderer
         List<PointLight> PointLights { get; } = new List<PointLight>();
 
         List<SpotLight> SpotLights { get; } = new List<SpotLight>();
+
+        List<ParallelLight> ParallelLights { get; } = new List<ParallelLight>();
 
         List<AmbientLight> AmbientLights { get; } = new List<AmbientLight>();
 
@@ -69,12 +71,12 @@ namespace NiVE3.PresetPlugin.Renderer
             ProjectionMatrix = Matrix4x4d.CreatePerspectiveFieldOfView(DefaultFov, 1.0, double.Epsilon, double.PositiveInfinity);
             PointLights.Clear();
             SpotLights.Clear();
+            ParallelLights.Clear();
             AmbientLights.Clear();
         }
 
         public void SetCamera(CameraSetting cameraSetting)
         {
-            var size = Math.Max(Width, Height);
             var fov = Math.Atan((Width / cameraSetting.Zoom) * 0.5) * 2.0;
 
             ViewMatrix = Calc3DViewMatrix(cameraSetting, Width, Height);
@@ -83,6 +85,86 @@ namespace NiVE3.PresetPlugin.Renderer
 
         public void AddLight(LightSetting lightSetting)
         {
+            var size = Math.Max(Width, Height);
+            var mv = CalcLightMatrix(lightSetting, Width, Height) * ViewMatrix * Matrix4x4d.CreateTranslate((size - Width) * 0.5 / size, (size - Height) * 0.5 / size, 0.0);
+            var pos = mv.Transform(Vector256.Create(0.0, 0.0, 0.0, 1.0));
+
+            switch (lightSetting.LightType)
+            {
+                case LightType.Point:
+                    {
+                        var light = new PointLight(
+                            pos,
+                            lightSetting.Color,
+                            lightSetting.Intensity * 0.01,
+                            lightSetting.FalloffType,
+                            lightSetting.FalloffStart / size,
+                            lightSetting.FalloffLength / size,
+                            lightSetting.IsEnableShadow,
+                            lightSetting.ShadowStrength,
+                            lightSetting.ShadowScatterSize
+                        );
+                        if (light.Color != Vector4.Zero)
+                        {
+                            PointLights.Add(light);
+                        }
+                    }
+                    break;
+                case LightType.Spot:
+                    {
+                        var poi = mv.Transform(Vector256.Create(0.0, 0.0, -1.0, 1.0));
+                        var coneRadian = lightSetting.ConeAngle / 180.0 * Math.PI;
+                        var light = new SpotLight(
+                            pos,
+                            poi,
+                            coneRadian,
+                            lightSetting.ConeAttenuation * 0.01,
+                            lightSetting.Color,
+                            lightSetting.Intensity * 0.01,
+                            lightSetting.FalloffType,
+                            lightSetting.FalloffStart / size,
+                            lightSetting.FalloffLength / size,
+                            lightSetting.IsEnableShadow,
+                            lightSetting.ShadowStrength,
+                            lightSetting.ShadowScatterSize
+                        );
+                        if (light.Color != Vector4.Zero)
+                        {
+                            SpotLights.Add(light);
+                        }
+                    }
+                    break;
+                case LightType.Parallel:
+                    {
+                        var poi = mv.Transform(Vector256.Create(0.0, 0.0, -1.0, 1.0));
+                        var light = new ParallelLight(
+                            pos,
+                            poi,
+                            lightSetting.Color,
+                            lightSetting.Intensity * 0.01,
+                            lightSetting.FalloffType,
+                            lightSetting.FalloffStart / size,
+                            lightSetting.FalloffLength / size,
+                            lightSetting.IsEnableShadow,
+                            lightSetting.ShadowStrength,
+                            lightSetting.ShadowScatterSize
+                        );
+                        if (light.Color != Vector4.Zero)
+                        {
+                            ParallelLights.Add(light);
+                        }
+                    }
+                    break;
+                case LightType.Ambient:
+                    {
+                        var light = new AmbientLight(lightSetting.Color, lightSetting.Intensity * 0.01);
+                        if (light.Color != Vector4.Zero)
+                        {
+                            AmbientLights.Add(light);
+                        }
+                    }
+                    break;
+            }
         }
 
         public void Render(RenderableImage[] images)
@@ -100,13 +182,16 @@ namespace NiVE3.PresetPlugin.Renderer
 
                     renderer.ViewMatrix = ViewMatrix;
                     renderer.ProjectionMatrix = ProjectionMatrix;
+                    renderer.PointLights = PointLights;
+                    renderer.SpotLights = SpotLights;
+                    renderer.ParallelLights = ParallelLights;
+                    renderer.AmbientLights = AmbientLights;
 
                     foreach (var i in group)
                     {
                         var opacity = (double)(i.Transform[ILayerObject.TransformPropertyOpacityId] ?? 0.0) * 0.01;
 
-                        renderer.ModelMatrix = Calc3DModelMatrix(i.Transform, i.ParentTransforms, Width, Height);
-                        renderer.AddRect(i.Image, i.BlendMode);
+                        renderer.AddRect(i.Image, i.BlendMode, Calc3DModelMatrix(i.Transform, i.ParentTransforms, Width, Height));
                     }
 
                     renderer.Render();
@@ -148,12 +233,12 @@ namespace NiVE3.PresetPlugin.Renderer
             return result;
         }
 
-        public PreviewBoundingBox CalcBoundingBox2D(int width, int height, PropertyValueGroup transform, ParentTransform[] parentTransforms)
+        public PreviewImageBoundingBox CalcBoundingBox2D(int width, int height, PropertyValueGroup transform, ParentTransform[] parentTransforms)
         {
             var matrix = CalcTransform2D(transform, parentTransforms);
             var anchorPoint = (Vector3d)(transform[ILayerObject.TransformAnchorPointId] ?? new Vector3d());
 
-            return new PreviewBoundingBox(
+            return new PreviewImageBoundingBox(
                 (Vector2d)matrix.Transform(new Vector2(0.0F, 0.0F)),
                 (Vector2d)matrix.Transform(new Vector2(width, 0.0F)),
                 (Vector2d)matrix.Transform(new Vector2(0.0F, height)),
@@ -162,7 +247,7 @@ namespace NiVE3.PresetPlugin.Renderer
             );
         }
 
-        public PreviewBoundingBox CalcBoundingBox3D(int width, int height, PropertyValueGroup transform, ParentTransform[] parentTransforms, CameraSetting cameraSetting)
+        public PreviewImageBoundingBox CalcBoundingBox3D(int width, int height, PropertyValueGroup transform, ParentTransform[] parentTransforms, CameraSetting cameraSetting)
         {
             var size = Math.Max(Width, Height);
             var fov = Math.Atan((Width / cameraSetting.Zoom) * 0.5) * 2.0;
@@ -183,7 +268,7 @@ namespace NiVE3.PresetPlugin.Renderer
             var t2Normal = Avx.Subtract(v3, v1).CrossProduct(Avx.Subtract(v4, v1)).Normalize();
             if (!Avx.TestZ(Avx.CompareNotEqual(t1Normal, t1Normal), Vector256.Create(double.NaN)) || !Avx.TestZ(Avx.CompareNotEqual(t2Normal, t2Normal), Vector256.Create(double.NaN)))
             {
-                return PreviewBoundingBox.Empty;
+                return PreviewImageBoundingBox.Empty;
             }
 
             v1 = projectionMatrix.Transform(v1);
@@ -207,7 +292,7 @@ namespace NiVE3.PresetPlugin.Renderer
                 IntersectLine((Vector2d)v1, (Vector2d)v4, (Vector2d)v4, (Vector2d)v3))
             {
                 // バウンディングボックスがクロスしているためアンカーポイントのみ表示
-                return new PreviewBoundingBox(
+                return new PreviewImageBoundingBox(
                     new Vector2d(),
                     new Vector2d(),
                     new Vector2d(),
@@ -217,7 +302,7 @@ namespace NiVE3.PresetPlugin.Renderer
             }
             else
             {
-                return new PreviewBoundingBox(
+                return new PreviewImageBoundingBox(
                     ((Vector2d)v1) * s + offset,
                     ((Vector2d)v4) * s + offset,
                     ((Vector2d)v2) * s + offset,
@@ -225,6 +310,26 @@ namespace NiVE3.PresetPlugin.Renderer
                     bbAnchorPoint
                 );
             }
+        }
+
+        public PreviewLightBoundingBox CalcLightBoundingBox(LightSetting lightSetting, CameraSetting cameraSetting)
+        {
+            var size = Math.Max(Width, Height);
+            var fov = Math.Atan((Width / cameraSetting.Zoom) * 0.5) * 2.0;
+
+            var projectionMatrix = Matrix4x4d.CreatePerspectiveFieldOfView(fov, 1.0, double.Epsilon, double.PositiveInfinity);
+            var modelMatrix = CalcLightMatrix(lightSetting, Width, Height);
+            var viewMatrix = Calc3DViewMatrix(cameraSetting, Width, Height);
+
+            var mv = modelMatrix * viewMatrix * Matrix4x4d.CreateTranslate((size - Width) * 0.5 / size, (size - Height) * 0.5 / size, 0.0);
+
+            var offset = new Vector2d(Width, Height) * 0.5;
+            var s = new Vector2d(size, size) * 0.5;
+            var length = (lightSetting.PointOfInterest - lightSetting.Position).Length() / size;
+            var pos = (Vector2d)projectionMatrix.Transform(mv.Transform(Vector256.Create(0.0, 0.0, 0.0, 1.0))) * s + offset;
+            var poi = (Vector2d)projectionMatrix.Transform(mv.Transform(Vector256.Create(0.0, 0.0, -length, 1.0))) * s + offset;
+
+            return new PreviewLightBoundingBox(lightSetting.LightType, pos, poi, lightSetting.ConeAngle);
         }
 
         static Matrix3x3 CalcTransform2D(PropertyValueGroup transform, ParentTransform[] parentTransforms)
@@ -291,6 +396,35 @@ namespace NiVE3.PresetPlugin.Renderer
                 }
             }
             return view.Translate(-(size - renderWidth) * 0.5 / size, -(size - renderHeight) * 0.5 / size, 0.0);
+        }
+
+        static Matrix4x4d CalcLightMatrix(LightSetting lightSetting, float renderWidth, float renderHeight)
+        {
+            var size = Math.Max(renderWidth, renderHeight);
+            var lightModelMatrix = GetLightMatrix(lightSetting, renderWidth, renderHeight);
+            foreach (var (type, parentTransform) in lightSetting.ParentTransforms)
+            {
+                switch (type)
+                {
+                    case ParentType.Camera:
+                        lightModelMatrix = GetCameraMatrix(parentTransform, renderWidth, renderHeight) * lightModelMatrix;
+                        break;
+                    case ParentType.SpotOrParallelLight:
+                    case ParentType.PointLight:
+                        lightModelMatrix = GetLightMatrix(type == ParentType.SpotOrParallelLight ? LightType.Spot : LightType.Point, parentTransform, renderWidth, renderHeight) * lightModelMatrix;
+                        break;
+                    case ParentType.AmbientLight:
+                        break;
+                    default:
+                        if (Matrix4x4d.Invert(GetTransform3D(parentTransform, size), out var inverted))
+                        {
+                            lightModelMatrix = inverted * lightModelMatrix;
+                        }
+                        break;
+                }
+            }
+
+            return lightModelMatrix;
         }
 
         static Matrix3x3 GetTransform2D(PropertyValueGroup transform)
@@ -418,6 +552,8 @@ namespace NiVE3.PresetPlugin.Renderer
             var pos256 = Avx.Divide(pos.AsVector256(), Vector256.Create(size));
             switch (lightType)
             {
+                case LightType.Point:
+                    return Matrix4x4d.CreateTranslate(pos256.GetElement(0), pos256.GetElement(1), pos256.GetElement(2));
                 case LightType.Spot:
                 case LightType.Parallel:
                     {
@@ -428,21 +564,18 @@ namespace NiVE3.PresetPlugin.Renderer
                         var y = diff.GetElement(1);
                         var z = diff.GetElement(2);
 
-                        var viewMatrix = Matrix4x4d.Identity
-                            .Scale(1.0, 1.0, -1.0)
-                            .Translate(-pos256.GetElement(0), -pos256.GetElement(1), pos256.GetElement(2))
-                            .RotateY(Math.Atan2(x, z) / Math.PI * 180.0)
-                            .RotateX(-Math.Atan2(y, Math.Sqrt(x * x + z * z)) / Math.PI * 180.0);
-
-                        return viewMatrix.RotateX(orientation.X)
-                            .RotateY(orientation.Y)
-                            .RotateZ(orientation.Z)
-                            .RotateX(angleX)
-                            .RotateY(angleY)
-                            .RotateZ(angleZ);
+                        return Matrix4x4d.Identity
+                            .RotateZ(-angleZ)
+                            .RotateY(-angleY)
+                            .RotateX(-angleX)
+                            .RotateZ(-orientation.Z)
+                            .RotateY(-orientation.Y)
+                            .RotateX(-orientation.X)
+                            .RotateX(Math.Atan2(y, Math.Sqrt(x * x + z * z)) / Math.PI * 180.0)
+                            .RotateY(-Math.Atan2(x, z) / Math.PI * 180.0)
+                            .Translate(pos256.GetElement(0), pos256.GetElement(1), -pos256.GetElement(2))
+                            .Scale(1.0, 1.0, -1.0);
                     }
-                case LightType.Point:
-                    return Matrix4x4d.CreateTranslate(-pos256.GetElement(0), -pos256.GetElement(1), -pos256.GetElement(2));
                 default:
                     return Matrix4x4d.Identity;
             }
@@ -456,6 +589,8 @@ namespace NiVE3.PresetPlugin.Renderer
             var pos256 = Avx.Divide(pos.AsVector256(), Vector256.Create(size));
             switch (lightType)
             {
+                case LightType.Point:
+                    return Matrix4x4d.CreateTranslate(-pos256.GetElement(0), -pos256.GetElement(1), pos256.GetElement(2));
                 case LightType.Spot:
                 case LightType.Parallel:
                     {
@@ -481,11 +616,9 @@ namespace NiVE3.PresetPlugin.Renderer
                             .RotateX(-orientation.X)
                             .RotateX(Math.Atan2(y, Math.Sqrt(x * x + z * z)) / Math.PI * 180.0)
                             .RotateY(-Math.Atan2(x, z) / Math.PI * 180.0)
-                            .Translate(pos256.GetElement(0), pos256.GetElement(1), -pos256.GetElement(2))
+                            .Translate(-pos256.GetElement(0), -pos256.GetElement(1), pos256.GetElement(2))
                             .Scale(1.0, 1.0, -1.0);
                     }
-                case LightType.Point:
-                    return Matrix4x4d.CreateTranslate(pos256.GetElement(0), pos256.GetElement(1), pos256.GetElement(2));
                 default:
                     return Matrix4x4d.Identity;
             }

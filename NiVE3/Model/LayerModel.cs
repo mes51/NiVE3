@@ -428,7 +428,7 @@ namespace NiVE3.Model
 
         public LightSetting? GetLightSetting(double time)
         {
-            if (!IsCamera || !IsContainsTime(time))
+            if (!IsLight || !IsContainsTime(time))
             {
                 return null;
             }
@@ -452,7 +452,7 @@ namespace NiVE3.Model
                 (double)(options[ILayerObject.LightLayerOptionIntensityId] ?? 0.0),
                 (double)(options[ILayerObject.LightLayerOptionConeAngleId] ?? 0.0),
                 (double)(options[ILayerObject.LightLayerOptionConeAttenuationId] ?? 0.0),
-                (LightFalloffType)(options[ILayerObject.LightLayerOptionConeAttenuationId] ?? LightFalloffType.None),
+                (LightFalloffType)(options[ILayerObject.LightLayerOptionFalloffTypeId] ?? LightFalloffType.None),
                 (double)(options[ILayerObject.LightLayerOptionFalloffStartId] ?? 0.0),
                 (double)(options[ILayerObject.LightLayerOptionFalloffLengthId] ?? 0.0),
                 (bool)(options[ILayerObject.LightLayerOptionEnableShadowId] ?? false),

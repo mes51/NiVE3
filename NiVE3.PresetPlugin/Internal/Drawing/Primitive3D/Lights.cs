@@ -7,14 +7,13 @@ using System.Runtime.Intrinsics;
 using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Plugin.Interfaces.RendererParams;
+using NiVE3.Shared.Extension;
 
 namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
 {
     class PointLight
     {
-        public readonly Vector256<double> Position;
-
-        public readonly Vector128<float> FloatPosition;
+        public readonly Vector128<float> Position;
 
         public readonly Vector4 Color;
 
@@ -30,11 +29,10 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
 
         public readonly double ShadowScatterSize;
 
-        public PointLight(in Vector256<double> position, in Vector4 color, double intensity, LightFalloffType falloffType, double falloffStart, double falloffLength, bool isEnableShadow, double shadowStrength, double shadowScatterSize)
+        public PointLight(in Vector256<double> position, in Vector3 color, double intensity, LightFalloffType falloffType, double falloffStart, double falloffLength, bool isEnableShadow, double shadowStrength, double shadowScatterSize)
         {
-            Position = position;
-            FloatPosition = Avx.ConvertToVector128Single(position);
-            Color = color * (float)intensity;
+            Position = Avx.ConvertToVector128Single(position);
+            Color = new Vector4(color * (float)intensity, 1.0F);
             FalloffType = falloffType;
             FalloffStart = (float)falloffStart;
             FalloffLength = (float)falloffLength;
@@ -46,19 +44,60 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
 
     class SpotLight
     {
-        public readonly Vector256<double> Position;
+        public readonly Vector128<float> Position;
 
-        public readonly Vector128<float> FloatPosition;
-
-        public readonly Vector256<double> Target;
-
-        public readonly Vector128<float> FloatTarget;
+        public readonly Vector3 Direction;
 
         public readonly double ConeAttenuationRate;
 
-        public readonly double InnerCone;
+        public readonly float InnerCone;
 
-        public readonly double OuterCone;
+        public readonly float OuterCone;
+
+        public readonly float OuterConeCos;
+
+        public readonly float InvertInnerConeCos;
+
+        public readonly Vector4 Color;
+
+        public readonly LightFalloffType FalloffType;
+
+        public readonly float FalloffStart;
+
+        public readonly float FalloffLength;
+
+        public readonly bool IsEnableShadow;
+
+        public readonly double ShadowStrength;
+
+        public readonly double ShadowScatterSize;
+
+        public SpotLight(Vector256<double> position, Vector256<double> target, double coneRadian, double coneAttenuation, Vector3 color, double intensity, LightFalloffType falloffType, double falloffStart, double falloffLength, bool isEnableShadow, double shadowStrength, double shadowScatterSize)
+        {
+            Position = Avx.ConvertToVector128Single(position);
+            Direction = Vector3.Normalize(Avx.Subtract(target, position).AsVector3());
+            var innerCone = coneRadian * (1.0 - coneAttenuation) * 0.5;
+            var outerCone = coneRadian * 0.5;
+            InnerCone = (float)innerCone;
+            OuterCone = (float)outerCone;
+            OuterConeCos = (float)Math.Cos(outerCone);
+            ConeAttenuationRate = outerCone * coneAttenuation;
+            InvertInnerConeCos = (float)(1.0 / (Math.Cos(innerCone) - Math.Cos(outerCone)));
+            Color = new Vector4(color * (float)intensity, 1.0F);
+            FalloffType = falloffType;
+            FalloffStart = (float)falloffStart;
+            FalloffLength = (float)falloffLength;
+            IsEnableShadow = isEnableShadow;
+            ShadowStrength = shadowStrength;
+            ShadowScatterSize = shadowScatterSize;
+        }
+    }
+
+    class ParallelLight
+    {
+        public readonly Vector128<float> Position;
+
+        public readonly Vector3 Direction;
 
         public readonly Vector4 Color;
 
@@ -76,27 +115,11 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
 
         public readonly double ShadowScatterSize;
 
-        public SpotLight(Vector256<double> position, Vector256<double> target, double coneRadians, double coneAttenuation, Vector4 color, double intensity, LightFalloffType falloffType, double falloffStart, double falloffLength, bool isEnableShadow, double shadowStrength, double shadowScatterSize)
+        public ParallelLight(Vector256<double> position, Vector256<double> target, Vector3 color, double intensity, LightFalloffType falloffType, double falloffStart, double falloffLength, bool isEnableShadow, double shadowStrength, double shadowScatterSize)
         {
-            Position = position;
-            Target = target;
-            FloatPosition = Avx.ConvertToVector128Single(position);
-            FloatTarget = Avx.ConvertToVector128Single(target);
-            if (coneRadians >= Math.PI)
-            {
-                InnerCone = 0.0;
-                OuterCone = Math.PI;
-                ConeAttenuationRate = 0.0;
-                IsParallel = true;
-            }
-            else
-            {
-                InnerCone = coneRadians * (1.0 - coneAttenuation) * 0.5;
-                OuterCone = coneRadians * 0.5;
-                ConeAttenuationRate = OuterCone * coneAttenuation;
-                IsParallel = false;
-            }
-            Color = color * (float)intensity;
+            Position = Avx.ConvertToVector128Single(position);
+            Direction = Vector3.Normalize(Avx.Subtract(target, position).AsVector3());
+            Color = new Vector4(color * (float)intensity, 1.0F);
             FalloffType = falloffType;
             FalloffStart = (float)falloffStart;
             FalloffLength = (float)falloffLength;
@@ -110,9 +133,9 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
     {
         public readonly Vector4 Color;
 
-        public AmbientLight(Vector4 color, double intensity)
+        public AmbientLight(Vector3 color, double intensity)
         {
-            Color = color * (float)intensity;
+            Color = new Vector4(color * (float)intensity, 1.0F);
         }
     }
 }

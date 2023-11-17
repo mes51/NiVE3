@@ -70,7 +70,7 @@ namespace NiVE3.Plugin.Interfaces
         /// <param name="transform">レイヤーのトランスフォームの値</param>
         /// <param name="parentTransforms">親のレイヤーのトランスフォームの値</param>
         /// <returns>プレビューで表示するバウンディングボックス</returns>
-        PreviewBoundingBox CalcBoundingBox2D(int width, int height, PropertyValueGroup transform, ParentTransform[] parentTransforms);
+        PreviewImageBoundingBox CalcBoundingBox2D(int width, int height, PropertyValueGroup transform, ParentTransform[] parentTransforms);
 
         /// <summary>
         /// 3Dレイヤーのバウンディングボックスを計算します
@@ -81,6 +81,14 @@ namespace NiVE3.Plugin.Interfaces
         /// <param name="parentTransforms">親のレイヤーのトランスフォームの値</param>
         /// <param name="cameraSetting">カメラの設定</param>
         /// <returns>プレビューで表示するバウンディングボックス</returns>
-        PreviewBoundingBox CalcBoundingBox3D(int width, int height, PropertyValueGroup transform, ParentTransform[] parentTransforms, CameraSetting cameraSetting);
+        PreviewImageBoundingBox CalcBoundingBox3D(int width, int height, PropertyValueGroup transform, ParentTransform[] parentTransforms, CameraSetting cameraSetting);
+
+        /// <summary>
+        /// ライトのバウンディングボックスを計算します
+        /// </summary>
+        /// <param name="lightSetting">バウンディングボックスを算出するライトの設定</param>
+        /// <param name="cameraSetting">カメラの設定</param>
+        /// <returns>プレビューで表示するバウンディングボックス</returns>
+        PreviewLightBoundingBox CalcLightBoundingBox(LightSetting lightSetting, CameraSetting cameraSetting);
     }
 }

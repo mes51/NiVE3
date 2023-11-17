@@ -426,7 +426,7 @@ namespace NiVE3.Model
                 Renderer.SetCamera(CreateDefaultCameraSetting(Width, Height));
             }
 
-            foreach (var light in Layers.Select(l => l.GetLightSetting(time)).NonNull())
+            foreach (var light in Layers.Where(l => l.IsEnableVideo).Select(l => l.GetLightSetting(time)).NonNull())
             {
                 Renderer.AddLight(light);
             }
@@ -488,16 +488,27 @@ namespace NiVE3.Model
 
             foreach (var layer in layers)
             {
-                // TODO: テキストレイヤーやシェイプレイヤー等のサイズが可変な入力への対応
-                var width = layer.FootageModel.Width;
-                var height = layer.FootageModel.Height;
-                if (layer.IsEnable3D)
+                if (layer.IsLight)
                 {
-                    result.Add(new ColoredPreviewBoundingBox(Renderer.CalcBoundingBox3D(width, height, layer.GetTransform(time), layer.GetParentTransforms(time), cameraSetting), layer.TagColor));
+                    var lightSetting = layer.GetLightSetting(time);
+                    if (lightSetting != null)
+                    {
+                        result.Add(new ColoredPreviewBoundingBox(Renderer.CalcLightBoundingBox(lightSetting, cameraSetting), layer.TagColor));
+                    }
                 }
                 else
                 {
-                    result.Add(new ColoredPreviewBoundingBox(Renderer.CalcBoundingBox2D(width, height, layer.GetTransform(time), layer.GetParentTransforms(time)), layer.TagColor));
+                    // TODO: テキストレイヤーやシェイプレイヤー等のサイズが可変な入力への対応
+                    var width = layer.FootageModel.Width;
+                    var height = layer.FootageModel.Height;
+                    if (layer.IsEnable3D)
+                    {
+                        result.Add(new ColoredPreviewBoundingBox(Renderer.CalcBoundingBox3D(width, height, layer.GetTransform(time), layer.GetParentTransforms(time), cameraSetting), layer.TagColor));
+                    }
+                    else
+                    {
+                        result.Add(new ColoredPreviewBoundingBox(Renderer.CalcBoundingBox2D(width, height, layer.GetTransform(time), layer.GetParentTransforms(time)), layer.TagColor));
+                    }
                 }
             }
 

@@ -156,7 +156,7 @@
             </Style.Triggers>
         </Style>
 
-        <DataTemplate x:Key="BoundingBoxTemplate" DataType="{x:Type pvo:PreviewBoundingBox}">
+        <DataTemplate x:Key="BoundingBoxTemplate" DataType="{x:Type pvo:PreviewImageBoundingBox}">
             <pt:BoundingBoxView BoundingBoxRect="{Binding BoundingBox}" BorderColor="{Binding Color}" BorderThicknessRate="{Binding ElementName=Root, Path=BoundingBoxBorderThicknessRate}"/>
         </DataTemplate>
     </UserControl.Resources>

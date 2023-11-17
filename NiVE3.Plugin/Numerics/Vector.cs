@@ -209,6 +209,12 @@ namespace NiVE3.Plugin.Numerics
             return Vector256.Create(X, Y, Z, 0.0);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public double Length()
+        {
+            return Math.Sqrt(X * X + Y * Y + Z * Z);
+        }
+
         public override bool Equals([NotNullWhen(true)] object? obj)
         {
             if (obj is Vector3d v)

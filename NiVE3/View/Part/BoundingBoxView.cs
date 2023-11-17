@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using NiVE3.Extension;
+using NiVE3.Plugin.Interfaces.RendererParams;
 using NiVE3.Plugin.ValueObject;
 
 namespace NiVE3.View.Part
@@ -16,13 +17,15 @@ namespace NiVE3.View.Part
 
         static readonly Geometry AnchorPointGeometry;
 
+        static readonly Geometry LightPointGeometry;
+
         static readonly Pen AnchorPointBorderPen = new Pen(Brushes.White, BorderThickness);
 
         public static readonly DependencyProperty BoundingBoxRectProperty = DependencyProperty.Register(
             nameof(BoundingBoxRect),
-            typeof(PreviewBoundingBox),
+            typeof(IPreviewBoundingBox),
             typeof(BoundingBoxView),
-            new FrameworkPropertyMetadata(PreviewBoundingBox.Empty, FrameworkPropertyMetadataOptions.AffectsRender)
+            new FrameworkPropertyMetadata(PreviewImageBoundingBox.Empty, FrameworkPropertyMetadataOptions.AffectsRender)
         );
 
         public static readonly DependencyProperty BorderThicknessRateProperty = DependencyProperty.Register(
@@ -51,9 +54,9 @@ namespace NiVE3.View.Part
             set { SetValue(BorderThicknessRateProperty, value); }
         }
 
-        public PreviewBoundingBox BoundingBoxRect
+        public IPreviewBoundingBox BoundingBoxRect
         {
-            get { return (PreviewBoundingBox)GetValue(BoundingBoxRectProperty); }
+            get { return (IPreviewBoundingBox)GetValue(BoundingBoxRectProperty); }
             set { SetValue(BoundingBoxRectProperty, value); }
         }
 
@@ -86,6 +89,13 @@ namespace NiVE3.View.Part
             });
 
             AnchorPointGeometry = anchorPointGeometry.FreezeCurrentObject();
+
+            LightPointGeometry = new CombinedGeometry
+            {
+                GeometryCombineMode = GeometryCombineMode.Exclude,
+                Geometry1 = new EllipseGeometry(new Point(), 5.0, 5.0),
+                Geometry2 = new EllipseGeometry(new Point(), 4.0, 4.0)
+            }.FreezeCurrentObject();
         }
 
         protected override void OnRender(DrawingContext drawingContext)
@@ -99,28 +109,64 @@ namespace NiVE3.View.Part
             }
 
             var penBrush = new SolidColorBrush(BorderColor);
+            var pen = new Pen(penBrush, BorderThickness * BorderThicknessRate);
 
-            if (!boundingBox.IsEmpty)
+            var thicknessRateTransform = new ScaleTransform(BorderThicknessRate, BorderThicknessRate);
+
+            switch (boundingBox)
             {
-                var boxLines = new StreamGeometry();
-                using (var context = boxLines.Open())
-                {
-                    context.BeginFigure((Point)boundingBox.LeftTop, false, true);
-                    context.LineTo((Point)boundingBox.RightTop, true, false);
-                    context.LineTo((Point)boundingBox.RightBottom, true, false);
-                    context.LineTo((Point)boundingBox.LeftBottom, true, false);
-                }
-                drawingContext.DrawGeometry(null, new Pen(penBrush, BorderThickness * BorderThicknessRate), boxLines);
+                case PreviewImageBoundingBox image:
+                    {
+                        if (!image.IsEmpty)
+                        {
+                            var boxLines = new StreamGeometry();
+                            using (var context = boxLines.Open())
+                            {
+                                context.BeginFigure((Point)image.LeftTop, false, true);
+                                context.LineTo((Point)image.RightTop, true, false);
+                                context.LineTo((Point)image.RightBottom, true, false);
+                                context.LineTo((Point)image.LeftBottom, true, false);
+                            }
+                            drawingContext.DrawGeometry(null, pen, boxLines);
+                        }
+
+                        var transform = new TransformGroup();
+                        transform.Children.Add(thicknessRateTransform);
+                        transform.Children.Add(new TranslateTransform(image.AnchorPoint.X, image.AnchorPoint.Y));
+
+                        drawingContext.PushTransform(transform);
+                        drawingContext.DrawGeometry(null, AnchorPointBorderPen, AnchorPointGeometry);
+                        drawingContext.DrawGeometry(penBrush, null, AnchorPointGeometry);
+                        drawingContext.Pop();
+                    }
+                    break;
+                case PreviewLightBoundingBox light:
+                    {
+                        TransformGroup transform;
+
+                        if (light.LightType == LightType.Spot || light.LightType == LightType.Parallel)
+                        {
+                            drawingContext.DrawLine(pen, (Point)light.Position, (Point)light.PointOfInterest);
+
+                            transform = new TransformGroup();
+                            transform.Children.Add(thicknessRateTransform);
+                            transform.Children.Add(new TranslateTransform(light.PointOfInterest.X, light.PointOfInterest.Y));
+                            drawingContext.PushTransform(transform);
+                            drawingContext.DrawGeometry(null, AnchorPointBorderPen, LightPointGeometry);
+                            drawingContext.DrawGeometry(penBrush, null, LightPointGeometry);
+                            drawingContext.Pop();
+                        }
+
+                        transform = new TransformGroup();
+                        transform.Children.Add(thicknessRateTransform);
+                        transform.Children.Add(new TranslateTransform(light.Position.X, light.Position.Y));
+                        drawingContext.PushTransform(transform);
+                        drawingContext.DrawGeometry(null, AnchorPointBorderPen, AnchorPointGeometry);
+                        drawingContext.DrawGeometry(penBrush, null, AnchorPointGeometry);
+                        drawingContext.Pop();
+                    }
+                    break;
             }
-
-            var transform = new TransformGroup();
-            transform.Children.Add(new ScaleTransform(BorderThicknessRate, BorderThicknessRate));
-            transform.Children.Add(new TranslateTransform(boundingBox.AnchorPoint.X, boundingBox.AnchorPoint.Y));
-
-            drawingContext.PushTransform(transform);
-            drawingContext.DrawGeometry(null, AnchorPointBorderPen, AnchorPointGeometry);
-            drawingContext.DrawGeometry(penBrush, null, AnchorPointGeometry);
-            drawingContext.Pop();
         }
     }
 }

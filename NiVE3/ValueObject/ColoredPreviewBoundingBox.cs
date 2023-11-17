@@ -8,7 +8,7 @@ using NiVE3.Plugin.ValueObject;
 
 namespace NiVE3.ValueObject
 {
-    record ColoredPreviewBoundingBox(PreviewBoundingBox BoundingBox, Color Color)
+    record ColoredPreviewBoundingBox(IPreviewBoundingBox BoundingBox, Color Color)
     {
     }
 }
