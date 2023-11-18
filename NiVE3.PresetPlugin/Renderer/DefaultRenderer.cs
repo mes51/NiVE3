@@ -112,7 +112,7 @@ namespace NiVE3.PresetPlugin.Renderer
                     break;
                 case LightType.Spot:
                     {
-                        var poi = mv.Transform(Vector256.Create(0.0, 0.0, -1.0, 1.0));
+                        var poi = mv.Transform(Vector256.Create(0.0, 0.0, 1.0, 1.0));
                         var coneRadian = lightSetting.ConeAngle / 180.0 * Math.PI;
                         var light = new SpotLight(
                             pos,
@@ -136,7 +136,7 @@ namespace NiVE3.PresetPlugin.Renderer
                     break;
                 case LightType.Parallel:
                     {
-                        var poi = mv.Transform(Vector256.Create(0.0, 0.0, -1.0, 1.0));
+                        var poi = mv.Transform(Vector256.Create(0.0, 0.0, 1.0, 1.0));
                         var light = new ParallelLight(
                             pos,
                             poi,
@@ -327,7 +327,7 @@ namespace NiVE3.PresetPlugin.Renderer
             var s = new Vector2d(size, size) * 0.5;
             var length = (lightSetting.PointOfInterest - lightSetting.Position).Length() / size;
             var pos = (Vector2d)projectionMatrix.Transform(mv.Transform(Vector256.Create(0.0, 0.0, 0.0, 1.0))) * s + offset;
-            var poi = (Vector2d)projectionMatrix.Transform(mv.Transform(Vector256.Create(0.0, 0.0, -length, 1.0))) * s + offset;
+            var poi = (Vector2d)projectionMatrix.Transform(mv.Transform(Vector256.Create(0.0, 0.0, length, 1.0))) * s + offset;
 
             return new PreviewLightBoundingBox(lightSetting.LightType, pos, poi, lightSetting.ConeAngle);
         }
@@ -480,14 +480,11 @@ namespace NiVE3.PresetPlugin.Renderer
             var y = diff.GetElement(1);
             var z = diff.GetElement(2);
 
-            // flipZ: true
-            var viewMatrix = Matrix4x4d.Identity
-                .Scale(1.0, 1.0, -1.0)
-                .Translate(-pos256.GetElement(0), -pos256.GetElement(1), pos256.GetElement(2))
-                .RotateY(Math.Atan2(x, z) / Math.PI * 180.0)
-                .RotateX(-Math.Atan2(y, Math.Sqrt(x * x + z * z)) / Math.PI * 180.0);
-
-            return viewMatrix.RotateX(orientation.X)
+            return Matrix4x4d.Identity
+                .Translate(-pos256.GetElement(0), -pos256.GetElement(1), -pos256.GetElement(2))
+                .RotateY(-Math.Atan2(x, z) / Math.PI * 180.0)
+                .RotateX(Math.Atan2(y, Math.Sqrt(x * x + z * z)) / Math.PI * 180.0)
+                .RotateX(orientation.X)
                 .RotateY(orientation.Y)
                 .RotateZ(orientation.Z)
                 .RotateX(angleX)
@@ -520,10 +517,9 @@ namespace NiVE3.PresetPlugin.Renderer
                 .RotateZ(-orientation.Z)
                 .RotateY(-orientation.Y)
                 .RotateX(-orientation.X)
-                .RotateX(Math.Atan2(y, Math.Sqrt(x * x + z * z)) / Math.PI * 180.0)
-                .RotateY(-Math.Atan2(x, z) / Math.PI * 180.0)
-                .Translate(pos256.GetElement(0), pos256.GetElement(1), -pos256.GetElement(2))
-                .Scale(1.0, 1.0, -1.0);
+                .RotateX(-Math.Atan2(y, Math.Sqrt(x * x + z * z)) / Math.PI * 180.0)
+                .RotateY(Math.Atan2(x, z) / Math.PI * 180.0)
+                .Translate(pos256.GetElement(0), pos256.GetElement(1), pos256.GetElement(2));
         }
 
         static Matrix4x4d GetLightMatrix(LightSetting lightSetting, double renderWidth, double renderHeight)
@@ -571,10 +567,9 @@ namespace NiVE3.PresetPlugin.Renderer
                             .RotateZ(-orientation.Z)
                             .RotateY(-orientation.Y)
                             .RotateX(-orientation.X)
-                            .RotateX(Math.Atan2(y, Math.Sqrt(x * x + z * z)) / Math.PI * 180.0)
-                            .RotateY(-Math.Atan2(x, z) / Math.PI * 180.0)
-                            .Translate(pos256.GetElement(0), pos256.GetElement(1), -pos256.GetElement(2))
-                            .Scale(1.0, 1.0, -1.0);
+                            .RotateX(-Math.Atan2(y, Math.Sqrt(x * x + z * z)) / Math.PI * 180.0)
+                            .RotateY(Math.Atan2(x, z) / Math.PI * 180.0)
+                            .Translate(pos256.GetElement(0), pos256.GetElement(1), pos256.GetElement(2));
                     }
                 default:
                     return Matrix4x4d.Identity;

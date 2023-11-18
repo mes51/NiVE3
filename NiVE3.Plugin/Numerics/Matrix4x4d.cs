@@ -185,7 +185,7 @@ namespace NiVE3.Plugin.Numerics
             result.M11 = scale / aspect;
             result.M22 = scale;
             result.M33 = farRange;
-            result.M34 = -1.0;
+            result.M34 = 1.0;
             result.M43 = near * farRange;
 
             return result;

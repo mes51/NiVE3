@@ -93,7 +93,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             var convertedTexture = new Dictionary<NImage, NManagedImage>();
             foreach (var triangle in triangles)
             {
-                if (triangle.V1.Vertex.GetElement(2) > 0.0F || triangle.V2.Vertex.GetElement(2) > 0.0F || triangle.V3.Vertex.GetElement(2) > 0.0F)
+                if (triangle.V1.Vertex.GetElement(2) < 0.0F || triangle.V2.Vertex.GetElement(2) < 0.0F || triangle.V3.Vertex.GetElement(2) < 0.0F)
                 {
                     continue;
                 }
