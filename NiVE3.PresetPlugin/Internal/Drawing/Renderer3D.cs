@@ -178,6 +178,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
                         if (useLight)
                         {
+                            const float ShininessStrength = 120.0F;
+
                             var diffuse = Vector4.Zero;
                             var specular = Vector4.Zero;
                             var ambient = Vector4.Zero;
@@ -214,13 +216,13 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                 diffuse += lightColor * color * diffuseFactor * falloff;
 
                                 var view = -Vector3.Normalize(position.AsVector3());
-                                var reflect = Vector3.Reflect(light, -n);
-                                var specularFactor = Math.Max(Vector3.Dot(view, reflect), 0.0F);
+                                var halfLE = Vector3.Normalize(view - light);
+                                var specularFactor = Math.Max(Vector3.Dot(-n, halfLE), 0.0F);
                                 if (isBack)
                                 {
                                     specularFactor *= -triangle.LightTransmission;
                                 }
-                                specular += Vector4.Lerp(lightColor, color, triangle.Metal) * MathF.Pow(specularFactor, 1200.0F * triangle.SpecularShininess) * triangle.SpecularIntensity * falloff;
+                                specular += Vector4.Lerp(lightColor, color, triangle.Metal) * MathF.Pow(specularFactor, ShininessStrength * triangle.SpecularShininess) * triangle.SpecularIntensity * falloff;
                             }
 
                             for (var i = 0; i < SpotLights.Count; i++)
@@ -236,7 +238,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                     var attenuation = 1.0F;
                                     if (l.ConeAttenuationRate > 0.0)
                                     {
-                                        attenuation = Math.Min((MathF.Cos(spotCone) - l.OuterConeCos) * l.InvertInnerConeCos, 1.0F);
+                                        attenuation = MathF.Cos((1.0F - Math.Min((MathF.Cos(spotCone) - l.OuterConeCos) * l.InvertInnerConeCos, 1.0F)) * MathF.PI * 0.5F);
                                     }
 
                                     var falloff = CalcFalloff(lightDiff, l.FalloffType, l.FalloffStart, l.FalloffLength);
@@ -249,13 +251,13 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                     diffuse += lightColor * color * diffuseFactor * falloff * attenuation;
 
                                     var view = -Vector3.Normalize(position.AsVector3());
-                                    var reflect = Vector3.Reflect(light, -n);
-                                    var specularFactor = Math.Max(Vector3.Dot(view, reflect), 0.0F);
+                                    var halfLE = Vector3.Normalize(view - light);
+                                    var specularFactor = Math.Max(Vector3.Dot(-n, halfLE), 0.0F);
                                     if (isBack)
                                     {
                                         specularFactor *= -triangle.LightTransmission;
                                     }
-                                    specular += Vector4.Lerp(lightColor, color, triangle.Metal) * MathF.Pow(specularFactor, 1200.0F * triangle.SpecularShininess) * triangle.SpecularIntensity * falloff * attenuation;
+                                    specular += Vector4.Lerp(lightColor, color, triangle.Metal) * MathF.Pow(specularFactor, ShininessStrength * triangle.SpecularShininess) * triangle.SpecularIntensity * falloff * attenuation;
                                 }
                             }
 
@@ -275,13 +277,13 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                 diffuse += lightColor * color * diffuseFactor * falloff;
 
                                 var view = -Vector3.Normalize(position.AsVector3());
-                                var reflect = Vector3.Reflect(l.Direction, -n);
-                                var specularFactor = Math.Max(Vector3.Dot(view, reflect), 0.0F);
+                                var halfLE = Vector3.Normalize(view - l.Direction);
+                                var specularFactor = Math.Max(Vector3.Dot(-n, halfLE), 0.0F);
                                 if (isBack)
                                 {
                                     specularFactor *= -triangle.LightTransmission;
                                 }
-                                specular += Vector4.Lerp(lightColor, color, triangle.Metal) * MathF.Pow(specularFactor, 1200.0F * triangle.SpecularShininess) * triangle.SpecularIntensity * falloff;
+                                specular += Vector4.Lerp(lightColor, color, triangle.Metal) * MathF.Pow(specularFactor, ShininessStrength * triangle.SpecularShininess) * triangle.SpecularIntensity * falloff;
                             }
 
                             for (var i = 0; i < AmbientLights.Count; i++)
