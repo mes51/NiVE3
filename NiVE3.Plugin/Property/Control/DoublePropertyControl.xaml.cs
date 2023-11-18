@@ -20,6 +20,19 @@ namespace NiVE3.Plugin.Property.Control
     /// </summary>
     public partial class DoublePropertyControl : PropertyControlBase
     {
+        public static readonly DependencyProperty UnitProperty = DependencyProperty.Register(
+            nameof(Unit),
+            typeof(string),
+            typeof(DoublePropertyControl),
+            new FrameworkPropertyMetadata("", FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        public string Unit
+        {
+            get { return (string)GetValue(UnitProperty); }
+            set { SetValue(UnitProperty, value); }
+        }
+
         public DoublePropertyControl()
         {
             InitializeComponent();

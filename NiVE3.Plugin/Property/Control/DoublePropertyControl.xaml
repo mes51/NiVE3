@@ -7,9 +7,10 @@
                            xmlns:pr="clr-namespace:NiVE3.UI.Primitive;assembly=NiVE3.UI"
                            xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
                            mc:Ignorable="d" 
+                           x:Name="Root"
                            d:DesignHeight="450" d:DesignWidth="800">
     <Grid Margin="5,0">
-        <pr:SlidableNumberTextBox Value="{Binding CurrentTimeValue}" Maximum="{Binding Property.MaxValue}" Minimum="{Binding Property.MinValue}" SlideChangeValue="{Binding Property.SlideChangeValue}" Digit="{Binding Property.Digit}" VerticalAlignment="Center" HorizontalAlignment="Left" MinWidth="25">
+        <pr:SlidableNumberTextBox Value="{Binding CurrentTimeValue}" Maximum="{Binding Property.MaxValue}" Minimum="{Binding Property.MinValue}" SlideChangeValue="{Binding Property.SlideChangeValue}" Digit="{Binding Property.Digit}" VerticalAlignment="Center" HorizontalAlignment="Left" MinWidth="25" UnitText="{Binding ElementName=Root, Path=Unit}">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="BeginSlideEditValue">
                     <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>

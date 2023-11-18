@@ -20,7 +20,9 @@ namespace NiVE3.Plugin.Property.Properties
 
         public int Digit { get; }
 
-        public DoubleProperty(string id, string displayName, double defaultValue, double minValue, double maxValue, bool isSupportKeyFrame = true, double slideChangeValue = 1.0, int digit = -1) : base(id, displayName, DoublePropertyType.Instance, defaultValue, isSupportKeyFrame)
+        public string Unit { get; }
+
+        public DoubleProperty(string id, string displayName, double defaultValue, double minValue, double maxValue, bool isSupportKeyFrame = true, double slideChangeValue = 1.0, int digit = -1, string unit = "") : base(id, displayName, DoublePropertyType.Instance, defaultValue, isSupportKeyFrame)
         {
             if (minValue >= maxValue)
             {
@@ -31,9 +33,10 @@ namespace NiVE3.Plugin.Property.Properties
             MaxValue = maxValue;
             SlideChangeValue = slideChangeValue;
             Digit = digit;
+            Unit = unit;
         }
 
-        public DoubleProperty(string id, LanguageResourceKey displayNameKey, double defaultValue, double minValue, double maxValue, bool isSupportKeyFrame = true, double slideChangeValue = 1.0, int digit = -1) : base(id, displayNameKey, DoublePropertyType.Instance, defaultValue, isSupportKeyFrame)
+        public DoubleProperty(string id, LanguageResourceKey displayNameKey, double defaultValue, double minValue, double maxValue, bool isSupportKeyFrame = true, double slideChangeValue = 1.0, int digit = -1, LanguageResourceKey? unitKey = null) : base(id, displayNameKey, DoublePropertyType.Instance, defaultValue, isSupportKeyFrame)
         {
             if (minValue >= maxValue)
             {
@@ -44,6 +47,7 @@ namespace NiVE3.Plugin.Property.Properties
             MaxValue = maxValue;
             SlideChangeValue = slideChangeValue;
             Digit = digit;
+            Unit = unitKey?.GetText() ?? "";
         }
 
         public override object CoerceValue(object value)
@@ -55,6 +59,7 @@ namespace NiVE3.Plugin.Property.Properties
         {
             var control = new DoublePropertyControl();
             control.DataContext = viewModel;
+            control.Unit = Unit;
             return control;
         }
 

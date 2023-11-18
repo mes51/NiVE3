@@ -36,6 +36,24 @@ namespace NiVE3.Plugin.Interfaces
 
         public const string TransformOrientationId = nameof(TransformOrientationId);
 
+        public const string ImageLayerOptionIsCastShadowId = nameof(ImageLayerOptionIsCastShadowId);
+
+        public const string ImageLayerOptionLightTransmissionId = nameof(ImageLayerOptionLightTransmissionId);
+
+        public const string ImageLayerOptionIsAcceptShadowId = nameof(ImageLayerOptionIsAcceptShadowId);
+
+        public const string ImageLayerOptionIsAcceptLightId = nameof(ImageLayerOptionIsAcceptLightId);
+
+        public const string ImageLayerOptionAmbientId = nameof(ImageLayerOptionAmbientId);
+
+        public const string ImageLayerOptionDiffuseId = nameof(ImageLayerOptionDiffuseId);
+
+        public const string ImageLayerOptionSpecularIntensityId = nameof(ImageLayerOptionSpecularIntensityId);
+
+        public const string ImageLayerOptionSpecularShininessId = nameof(ImageLayerOptionSpecularShininessId);
+
+        public const string ImageLayerOptionMetalId = nameof(ImageLayerOptionMetalId);
+
         public const string CameraLayerOptionZoomId = nameof(CameraLayerOptionZoomId);
 
         public const string LightLayerOptionLightTypeId = nameof(LightLayerOptionLightTypeId);

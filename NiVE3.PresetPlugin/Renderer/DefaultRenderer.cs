@@ -191,7 +191,20 @@ namespace NiVE3.PresetPlugin.Renderer
                     {
                         var opacity = (double)(i.Transform[ILayerObject.TransformPropertyOpacityId] ?? 0.0) * 0.01;
 
-                        renderer.AddRect(i.Image, i.BlendMode, Calc3DModelMatrix(i.Transform, i.ParentTransforms, Width, Height));
+                        renderer.AddRect(
+                            i.Image,
+                            i.BlendMode,
+                            Calc3DModelMatrix(i.Transform, i.ParentTransforms, Width, Height),
+                            (bool)(i.LayerOptions?[ILayerObject.ImageLayerOptionIsCastShadowId] ?? false),
+                            (float)((double)(i.LayerOptions?[ILayerObject.ImageLayerOptionLightTransmissionId] ?? 0.0) * 0.01),
+                            (bool)(i.LayerOptions?[ILayerObject.ImageLayerOptionIsAcceptShadowId] ?? false),
+                            (bool)(i.LayerOptions?[ILayerObject.ImageLayerOptionIsAcceptLightId] ?? false),
+                            (float)((double)(i.LayerOptions?[ILayerObject.ImageLayerOptionAmbientId] ?? 0.0) * 0.01),
+                            (float)((double)(i.LayerOptions?[ILayerObject.ImageLayerOptionDiffuseId] ?? 0.0) * 0.01),
+                            (float)((double)(i.LayerOptions?[ILayerObject.ImageLayerOptionSpecularIntensityId] ?? 0.0) * 0.01),
+                            (float)((double)(i.LayerOptions?[ILayerObject.ImageLayerOptionSpecularShininessId] ?? 0.0) * 0.01),
+                            (float)((double)(i.LayerOptions?[ILayerObject.ImageLayerOptionMetalId] ?? 0.0) * 0.01)
+                        );
                     }
 
                     renderer.Render();

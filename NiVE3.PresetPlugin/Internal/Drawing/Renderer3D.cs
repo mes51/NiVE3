@@ -53,7 +53,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             RenderImage = renderImage;
         }
 
-        public void AddRect(NImage texture, BlendMode blendType, in Matrix4x4d modelMatrix, float diffuse = 1.0F, float ambient = 1.0F, float mirror = 1.0F, float specular = 0.15F, float metal = 0.0F, float lightTransmission = 0.5F)
+        public void AddRect(NImage texture, BlendMode blendType, in Matrix4x4d modelMatrix, bool isCastShadow, float lightTransmission, bool IsAcceptShadow, bool isAcceptLight, float ambient, float diffuse, float specularIntensity, float specularShininess, float metal)
         {
             var width = texture.Width;
             var height = texture.Height;
@@ -80,8 +80,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             invertedModelViewMatrix = Matrix4x4d.Transpose(invertedModelViewMatrix);
 
             var farPoint = Avx.And(mv.Transform(Vector256.Create(0.0, 0.0, -10000.0, 1.0)), Vector256.Create(0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0).AsDouble());
-            Triangles.Add(new Triangle(uv1, uv2, uv3, farPoint, invertedModelViewMatrix, texture, blendType, diffuse, ambient, mirror, specular, metal, lightTransmission, LastId));
-            Triangles.Add(new Triangle(uv1, uv3, uv4, farPoint, invertedModelViewMatrix, texture, blendType, diffuse, ambient, mirror, specular, metal, lightTransmission, LastId));
+            Triangles.Add(new Triangle(uv1, uv2, uv3, farPoint, invertedModelViewMatrix, texture, blendType, isCastShadow, lightTransmission, IsAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, LastId));
+            Triangles.Add(new Triangle(uv1, uv3, uv4, farPoint, invertedModelViewMatrix, texture, blendType, isCastShadow, lightTransmission, IsAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, LastId));
             LastId++;
         }
 
@@ -91,6 +91,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             var triangles = GetClipAndDividedTriangles();
 
             var convertedTexture = new Dictionary<NImage, NManagedImage>();
+            var hasLight = PointLights.Count > 0 || SpotLights.Count > 0 || ParallelLights.Count > 0 || AmbientLights.Count > 0;
             foreach (var triangle in triangles)
             {
                 if (triangle.V1.Vertex.GetElement(2) < 0.0F || triangle.V2.Vertex.GetElement(2) < 0.0F || triangle.V3.Vertex.GetElement(2) < 0.0F)
@@ -130,7 +131,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 var isFrontFace = triangle.Normal.DotProduct(Vector256.Create(0.0, 0.0, 1.0, 0.0)).GetElement(0) <= 0.0;
                 var vvEX = Vector128.Create((float)dvv2.GetElement(0), (float)dvv3.GetElement(0), (float)dvv1.GetElement(0), 0.0F);
                 var vvEY = Vector128.Create((float)dvv2.GetElement(1), (float)dvv3.GetElement(1), (float)dvv1.GetElement(1), 0.0F);
-                var hasLight = PointLights.Count > 0 || SpotLights.Count > 0 || ParallelLights.Count > 0 || AmbientLights.Count > 0;
+                var useLight = hasLight && triangle.IsAcceptLight;
 
                 NManagedImage managedTexture;
                 if (triangle.Texture is NCudaImage cudaImage)
@@ -175,7 +176,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
                         var color = ImageInterpolation.Bilinear(texture, textureWidth, textureHeight, tx, ty);
 
-                        if (hasLight)
+                        if (useLight)
                         {
                             var diffuse = Vector4.Zero;
                             var specular = Vector4.Zero;
@@ -219,7 +220,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                 {
                                     specularFactor *= -triangle.LightTransmission;
                                 }
-                                specular += Vector4.Lerp(lightColor, color, triangle.Metal) * MathF.Pow(specularFactor, 1200.0F * triangle.Specular) * triangle.Mirror * falloff;
+                                specular += Vector4.Lerp(lightColor, color, triangle.Metal) * MathF.Pow(specularFactor, 1200.0F * triangle.SpecularShininess) * triangle.SpecularIntensity * falloff;
                             }
 
                             for (var i = 0; i < SpotLights.Count; i++)
@@ -254,7 +255,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                     {
                                         specularFactor *= -triangle.LightTransmission;
                                     }
-                                    specular += Vector4.Lerp(lightColor, color, triangle.Metal) * MathF.Pow(specularFactor, 1200.0F * triangle.Specular) * triangle.Mirror * falloff * attenuation;
+                                    specular += Vector4.Lerp(lightColor, color, triangle.Metal) * MathF.Pow(specularFactor, 1200.0F * triangle.SpecularShininess) * triangle.SpecularIntensity * falloff * attenuation;
                                 }
                             }
 
@@ -280,7 +281,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                 {
                                     specularFactor *= -triangle.LightTransmission;
                                 }
-                                specular += Vector4.Lerp(lightColor, color, triangle.Metal) * MathF.Pow(specularFactor, 1200.0F * triangle.Specular) * triangle.Mirror * falloff;
+                                specular += Vector4.Lerp(lightColor, color, triangle.Metal) * MathF.Pow(specularFactor, 1200.0F * triangle.SpecularShininess) * triangle.SpecularIntensity * falloff;
                             }
 
                             for (var i = 0; i < AmbientLights.Count; i++)

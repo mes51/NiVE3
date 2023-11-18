@@ -239,6 +239,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("トランスフォーム")]
         public static readonly string Layer_Transform = nameof(Layer_Transform);
 
+        [ShowInMarkup, DefaultValue("マテリアルオプション")]
+        public static readonly string Layer_LayerOptions_Layer = nameof(Layer_LayerOptions_Layer);
+
         [ShowInMarkup, DefaultValue("カメラオプション")]
         public static readonly string Layer_LayerOptions_Camera = nameof(Layer_LayerOptions_Camera);
 
@@ -395,6 +398,33 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("不透明度")]
         public static readonly string TransformProperty_Opacity = nameof(TransformProperty_Opacity);
 
+        [ShowInMarkup, DefaultValue("影を落とす")]
+        public static readonly string LayerOptionsProperty_IsCastShadow = nameof(LayerOptionsProperty_IsCastShadow);
+
+        [ShowInMarkup, DefaultValue("ライトを透過")]
+        public static readonly string LayerOptionsProperty_LightTransmission = nameof(LayerOptionsProperty_LightTransmission);
+
+        [ShowInMarkup, DefaultValue("影を受ける")]
+        public static readonly string LayerOptionsProperty_IsAcceptShadow = nameof(LayerOptionsProperty_IsAcceptShadow);
+
+        [ShowInMarkup, DefaultValue("ライトを受ける")]
+        public static readonly string LayerOptionsProperty_IsAcceptLight = nameof(LayerOptionsProperty_IsAcceptLight);
+
+        [ShowInMarkup, DefaultValue("アンビエント")]
+        public static readonly string LayerOptionsProperty_Ambient = nameof(LayerOptionsProperty_Ambient);
+
+        [ShowInMarkup, DefaultValue("拡散")]
+        public static readonly string LayerOptionsProperty_Diffuse = nameof(LayerOptionsProperty_Diffuse);
+
+        [ShowInMarkup, DefaultValue("鏡面強度")]
+        public static readonly string LayerOptionsProperty_SpecularIntensity = nameof(LayerOptionsProperty_SpecularIntensity);
+
+        [ShowInMarkup, DefaultValue("鏡面光沢")]
+        public static readonly string LayerOptionsProperty_SpecularShininess = nameof(LayerOptionsProperty_SpecularShininess);
+
+        [ShowInMarkup, DefaultValue("金属")]
+        public static readonly string LayerOptionsProperty_Metal = nameof(LayerOptionsProperty_Metal);
+
         [ShowInMarkup, DefaultValue("目標点")]
         public static readonly string TransformProperty_CameraPointOfInterest = nameof(TransformProperty_CameraPointOfInterest);
 
@@ -433,6 +463,17 @@ namespace NiVE3.View.Resource
 
         [ShowInMarkup, DefaultValue("影のぼかし")]
         public static readonly string LayerOptionsProperty_ShadowScatterSize = nameof(LayerOptionsProperty_ShadowScatterSize);
+
+        // Unit
+
+        [ShowInMarkup, DefaultValue("%")]
+        public static readonly string Unit_Percent = nameof(Unit_Percent);
+
+        [ShowInMarkup, DefaultValue("°")]
+        public static readonly string Unit_Angle = nameof(Unit_Angle);
+
+        [ShowInMarkup, DefaultValue("px")]
+        public static readonly string Unit_Pixel = nameof(Unit_Pixel);
 
         // Enum
 

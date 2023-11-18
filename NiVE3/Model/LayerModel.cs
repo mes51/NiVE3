@@ -301,7 +301,7 @@ namespace NiVE3.Model
                     }), compositionModel, this, historyModel);
                     LayerOptionProperties = new PropertyGroupModel(new PropertyGroup(LayerOptionGroupId, CreateLanguageResourceKey(LanguageResourceDictionary.Layer_LayerOptions_Camera), new PropertyBase[]
                     {
-                        new DoubleProperty(ILayerObject.CameraLayerOptionZoomId, CreateLanguageResourceKey(LanguageResourceDictionary.LayerOptionsProperty_CameraZoom), zoom, 0.01, double.MaxValue, digit: 2)
+                        new DoubleProperty(ILayerObject.CameraLayerOptionZoomId, CreateLanguageResourceKey(LanguageResourceDictionary.LayerOptionsProperty_CameraZoom), zoom, 0.01, double.MaxValue, digit: 2, unitKey: CreateLanguageResourceKey(LanguageResourceDictionary.Unit_Pixel))
                     }), compositionModel, this, historyModel);
                     break;
                 case LightInput:
@@ -321,15 +321,15 @@ namespace NiVE3.Model
                     {
                         new EnumProperty(ILayerObject.LightLayerOptionLightTypeId, CreateLanguageResourceKey(LanguageResourceDictionary.LayerOptionsProperty_LightType), typeof(LightType), typeof(LanguageResourceDictionary), LightType.Spot, false),
                         new ColorProperty(ILayerObject.LightLayerOptionColorId, CreateLanguageResourceKey(LanguageResourceDictionary.LayerOptionsProperty_Color), CreateLanguageResourceKey(LanguageResourceDictionary.ColorPickerDialog_Title), CreateLanguageResourceKey(LanguageResourceDictionary.Dialog_OK), CreateLanguageResourceKey(LanguageResourceDictionary.Dialog_Cancel), Vector4.One),
-                        new DoubleProperty(ILayerObject.LightLayerOptionIntensityId, CreateLanguageResourceKey(LanguageResourceDictionary.LayerOptionsProperty_Intensity), 100.0, double.MinValue, double.MaxValue, digit: 2),
-                        new DoubleProperty(ILayerObject.LightLayerOptionConeAngleId, CreateLanguageResourceKey(LanguageResourceDictionary.LayerOptionsProperty_ConeAngle), 90.0, 0.0, 180.0, digit: 2),
-                        new DoubleProperty(ILayerObject.LightLayerOptionConeAttenuationId, CreateLanguageResourceKey(LanguageResourceDictionary.LayerOptionsProperty_ConeAttenuation), 50.0, 0.0, 100.0, digit: 2),
+                        new DoubleProperty(ILayerObject.LightLayerOptionIntensityId, CreateLanguageResourceKey(LanguageResourceDictionary.LayerOptionsProperty_Intensity), 100.0, double.MinValue, double.MaxValue, digit: 2, unitKey: CreateLanguageResourceKey(LanguageResourceDictionary.Unit_Percent)),
+                        new DoubleProperty(ILayerObject.LightLayerOptionConeAngleId, CreateLanguageResourceKey(LanguageResourceDictionary.LayerOptionsProperty_ConeAngle), 90.0, 0.0, 180.0, digit: 2, unitKey: CreateLanguageResourceKey(LanguageResourceDictionary.Unit_Angle)),
+                        new DoubleProperty(ILayerObject.LightLayerOptionConeAttenuationId, CreateLanguageResourceKey(LanguageResourceDictionary.LayerOptionsProperty_ConeAttenuation), 50.0, 0.0, 100.0, digit: 2, unitKey: CreateLanguageResourceKey(LanguageResourceDictionary.Unit_Percent)),
                         new EnumProperty(ILayerObject.LightLayerOptionFalloffTypeId, CreateLanguageResourceKey(LanguageResourceDictionary.LayerOptionsProperty_FalloffType), typeof(LightFalloffType), typeof(LanguageResourceDictionary), LightFalloffType.None, selectBoxWidth: 100.0),
                         new DoubleProperty(ILayerObject.LightLayerOptionFalloffStartId, CreateLanguageResourceKey(LanguageResourceDictionary.LayerOptionsProperty_FalloffStart), 500.0, 0.0, double.MaxValue, digit: 2),
                         new DoubleProperty(ILayerObject.LightLayerOptionFalloffLengthId, CreateLanguageResourceKey(LanguageResourceDictionary.LayerOptionsProperty_FalloffLength), 500.0, 0.0, double.MaxValue, digit: 2),
                         new CheckBoxProperty(ILayerObject.LightLayerOptionEnableShadowId, CreateLanguageResourceKey(LanguageResourceDictionary.LayerOptionsProperty_EnableShadow), true),
-                        new DoubleProperty(ILayerObject.LightLayerOptionShadowStrengthId, CreateLanguageResourceKey(LanguageResourceDictionary.LayerOptionsProperty_ShadowStrength), 100.0, 0.0, double.MaxValue, digit: 2),
-                        new DoubleProperty(ILayerObject.LightLayerOptionShadowScatterSizeId, CreateLanguageResourceKey(LanguageResourceDictionary.LayerOptionsProperty_ShadowScatterSize), 0.0, 0.0, double.MaxValue, digit: 2)
+                        new DoubleProperty(ILayerObject.LightLayerOptionShadowStrengthId, CreateLanguageResourceKey(LanguageResourceDictionary.LayerOptionsProperty_ShadowStrength), 100.0, 0.0, double.MaxValue, digit: 2, unitKey: CreateLanguageResourceKey(LanguageResourceDictionary.Unit_Percent)),
+                        new DoubleProperty(ILayerObject.LightLayerOptionShadowScatterSizeId, CreateLanguageResourceKey(LanguageResourceDictionary.LayerOptionsProperty_ShadowScatterSize), 0.0, 0.0, double.MaxValue, digit: 2, unitKey: CreateLanguageResourceKey(LanguageResourceDictionary.Unit_Pixel))
                     }), compositionModel, this, historyModel);
                     break;
                 default:
@@ -342,7 +342,19 @@ namespace NiVE3.Model
                         new Angle3DElementProperty(ILayerObject.TransformYAngleId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_YAngle3D), 0.0, digit: 2),
                         new ZAngleProperty(ILayerObject.TransformZAngleId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_ZAngle2D), CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_ZAngle3D), 0.0, digit: 2),
                         new Scale2DOr3DProperty(ILayerObject.TransformScaleId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_Scale), new Vector3d(100.0, 100.0, 100.0), digit: 2),
-                        new DoubleProperty(ILayerObject.TransformPropertyOpacityId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_Opacity), 100.0, 0.0, 100.0, digit: 2)
+                        new DoubleProperty(ILayerObject.TransformPropertyOpacityId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_Opacity), 100.0, 0.0, 100.0, digit: 2, unitKey: CreateLanguageResourceKey(LanguageResourceDictionary.Unit_Percent))
+                    }), compositionModel, this, historyModel);
+                    LayerOptionProperties = new PropertyGroupModel(new PropertyGroup(LayerOptionGroupId, CreateLanguageResourceKey(LanguageResourceDictionary.Layer_LayerOptions_Layer), new PropertyBase[]
+                    {
+                        new CheckBoxProperty(ILayerObject.ImageLayerOptionIsCastShadowId, CreateLanguageResourceKey(LanguageResourceDictionary.LayerOptionsProperty_IsCastShadow), false),
+                        new DoubleProperty(ILayerObject.ImageLayerOptionLightTransmissionId, CreateLanguageResourceKey(LanguageResourceDictionary.LayerOptionsProperty_LightTransmission), 0.0, 0.0, 100.0, digit: 2, unitKey: CreateLanguageResourceKey(LanguageResourceDictionary.Unit_Percent)),
+                        new CheckBoxProperty(ILayerObject.ImageLayerOptionIsAcceptShadowId, CreateLanguageResourceKey(LanguageResourceDictionary.LayerOptionsProperty_IsAcceptShadow), true),
+                        new CheckBoxProperty(ILayerObject.ImageLayerOptionIsAcceptLightId, CreateLanguageResourceKey(LanguageResourceDictionary.LayerOptionsProperty_IsAcceptLight), true),
+                        new DoubleProperty(ILayerObject.ImageLayerOptionAmbientId, CreateLanguageResourceKey(LanguageResourceDictionary.LayerOptionsProperty_Ambient), 100.0, 0.0, 100.0, digit: 2, unitKey: CreateLanguageResourceKey(LanguageResourceDictionary.Unit_Percent)),
+                        new DoubleProperty(ILayerObject.ImageLayerOptionDiffuseId, CreateLanguageResourceKey(LanguageResourceDictionary.LayerOptionsProperty_Diffuse), 50.0, 0.0, 100.0, digit: 2, unitKey: CreateLanguageResourceKey(LanguageResourceDictionary.Unit_Percent)),
+                        new DoubleProperty(ILayerObject.ImageLayerOptionSpecularIntensityId, CreateLanguageResourceKey(LanguageResourceDictionary.LayerOptionsProperty_SpecularIntensity), 50.0, 0.0, 100.0, digit: 2, unitKey: CreateLanguageResourceKey(LanguageResourceDictionary.Unit_Percent)),
+                        new DoubleProperty(ILayerObject.ImageLayerOptionSpecularShininessId, CreateLanguageResourceKey(LanguageResourceDictionary.LayerOptionsProperty_SpecularShininess), 5.0, 0.0, 100.0, digit: 2, unitKey: CreateLanguageResourceKey(LanguageResourceDictionary.Unit_Percent)),
+                        new DoubleProperty(ILayerObject.ImageLayerOptionMetalId, CreateLanguageResourceKey(LanguageResourceDictionary.LayerOptionsProperty_Metal), 100.0, 0.0, 100.0, digit: 2, unitKey: CreateLanguageResourceKey(LanguageResourceDictionary.Unit_Percent)),
                     }), compositionModel, this, historyModel);
                     break;
             }

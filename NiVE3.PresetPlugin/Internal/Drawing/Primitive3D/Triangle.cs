@@ -31,17 +31,23 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
 
         public readonly BlendMode BlendMode;
 
-        public readonly float Diffuse;
+        public readonly bool IsCastShadow;
+
+        public readonly float LightTransmission;
+
+        public readonly bool IsAcceptShadow;
+
+        public readonly bool IsAcceptLight;
 
         public readonly float Ambient;
 
-        public readonly float Mirror;
+        public readonly float Diffuse;
 
-        public readonly float Specular;
+        public readonly float SpecularIntensity;
+
+        public readonly float SpecularShininess;
 
         public readonly float Metal;
-
-        public readonly float LightTransmission;
 
         public readonly int Id;
 
@@ -53,19 +59,22 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
 
         readonly Matrix4x4d InvertMatrix;
 
-        public Triangle(in UVVertex v1, in UVVertex v2, in UVVertex v3, in Vector256<double> farPoint, in Matrix4x4d invertMatrix, NImage texture, BlendMode blendMode, float diffuse, float ambient, float mirror, float specular, float metal, float lightTransmission, int id)
+        public Triangle(in UVVertex v1, in UVVertex v2, in UVVertex v3, in Vector256<double> farPoint, in Matrix4x4d invertMatrix, NImage texture, BlendMode blendMode, bool isCastShadow, float lightTransmission, bool isAcceptShadow, bool isAcceptLight, float ambient, float diffuse, float specularIntensity, float specularShininess, float metal, int id)
         {
             V1 = v1;
             V2 = v2;
             V3 = v3;
             Texture = texture;
             BlendMode = blendMode;
-            Diffuse = diffuse;
-            Ambient = ambient;
-            Mirror = mirror;
-            Specular = specular;
-            Metal = metal;
+            IsCastShadow = isCastShadow;
             LightTransmission = lightTransmission;
+            IsAcceptShadow = isAcceptShadow;
+            IsAcceptLight = isAcceptLight;
+            Ambient = ambient;
+            Diffuse = diffuse;
+            SpecularIntensity = specularIntensity;
+            SpecularShininess = specularShininess;
+            Metal = metal;
             Id = id;
             FarPoint = farPoint;
             InvertMatrix = invertMatrix;
@@ -95,8 +104,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
             BlendMode = baseTriangle.BlendMode;
             Diffuse = baseTriangle.Diffuse;
             Ambient = baseTriangle.Ambient;
-            Mirror = baseTriangle.Mirror;
-            Specular = baseTriangle.Specular;
+            SpecularIntensity = baseTriangle.SpecularIntensity;
+            SpecularShininess = baseTriangle.SpecularShininess;
             Metal = baseTriangle.Metal;
             Id = baseTriangle.Id;
             FarPoint = baseTriangle.FarPoint;

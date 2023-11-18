@@ -108,6 +108,14 @@
                 <DataTrigger Binding="{Binding LayerOptionProperties}" Value="{x:Null}">
                     <Setter Property="Visibility" Value="Collapsed"/>
                 </DataTrigger>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding SourceType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static local:LayerPropertyControllerView.CompositionDisplayableSourceType}}" Value="True"/>
+                        <Condition Binding="{Binding IsEnable3D}" Value="False"/>
+                    </MultiDataTrigger.Conditions>
+
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                </MultiDataTrigger>
             </Style.Triggers>
         </Style>
 
