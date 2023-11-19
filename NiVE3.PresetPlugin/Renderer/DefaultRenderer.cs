@@ -420,19 +420,16 @@ namespace NiVE3.PresetPlugin.Renderer
                 switch (type)
                 {
                     case ParentType.Camera:
-                        lightModelMatrix = GetCameraMatrix(parentTransform, renderWidth, renderHeight) * lightModelMatrix;
+                        lightModelMatrix *= GetInvertedCameraMatrix(parentTransform, renderWidth, renderHeight);
                         break;
                     case ParentType.SpotOrParallelLight:
                     case ParentType.PointLight:
-                        lightModelMatrix = GetLightMatrix(type == ParentType.SpotOrParallelLight ? LightType.Spot : LightType.Point, parentTransform, renderWidth, renderHeight) * lightModelMatrix;
+                        lightModelMatrix *= GetLightMatrix(type == ParentType.SpotOrParallelLight ? LightType.Spot : LightType.Point, parentTransform, renderWidth, renderHeight);
                         break;
                     case ParentType.AmbientLight:
                         break;
                     default:
-                        if (Matrix4x4d.Invert(GetTransform3D(parentTransform, size), out var inverted))
-                        {
-                            lightModelMatrix = inverted * lightModelMatrix;
-                        }
+                        lightModelMatrix *= GetTransform3D(parentTransform, size);
                         break;
                 }
             }
