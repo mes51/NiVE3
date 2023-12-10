@@ -123,30 +123,6 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
         public void Render()
         {
-            float[]? depth = null;
-            int[]? depthIds = null;
-            var lightProjectionMatrix = Matrix4x4.Identity;
-            if (SpotLights.Count > 0 && SpotLights[0].IsEnableShadow && LightTriangles[SpotLights[0]].Count > 0)
-            {
-                (depth, depthIds, lightProjectionMatrix, var diff) = RenderShadow(SpotLights[0], Size);
-
-                //var maxDepth = depth.Where(d => !float.IsPositiveInfinity(d)).Max();
-                //var minDepth = depth.Where(d => !float.IsPositiveInfinity(d)).Min();
-                //System.Diagnostics.Debug.WriteLine("{0}, {1}", maxDepth, minDepth);
-
-                //var imageSpan = MemoryMarshal.Cast<float, Vector4>(RenderImage.GetDataSpan());
-                //for (var y = 0; y < RenderImage.Height; y++)
-                //{
-                //    var depthSpan = depth.AsSpan((y + OffsetY) * Size + OffsetX, RenderImage.Width);
-                //    var diffSpan = diff.AsSpan((y + OffsetY) * Size + OffsetX, RenderImage.Width);
-                //    for (int x = 0, p = y * RenderImage.Width; x < RenderImage.Width; x++, p++)
-                //    {
-                //        imageSpan[p] = new Vector4(diffSpan[x], -depthSpan[x], 1.0F);
-                //    }
-                //}
-                //return;
-            }
-
             var renderImageWidth = RenderImage.Width;
             var renderImageHeight = RenderImage.Height;
             var triangles = GetClipAndDividedTriangles(Triangles).ToArray();
@@ -162,6 +138,9 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             var floatInvtededViewMatrix = (Matrix4x4)(invertedProjectionMatrix * Matrix4x4d.CreateTranslate(-offsetX, -offsetY, 0.0) * invtededViewMatrix);
             var convertedTexture = new Dictionary<NImage, NManagedImage>();
             var hasLight = PointLights.Count > 0 || SpotLights.Count > 0 || ParallelLights.Count > 0 || AmbientLights.Count > 0;
+
+            var spotLightShadows = SpotLights.Where(l => l.IsEnableShadow && LightTriangles[l].Count > 0).ToDictionary(l => l, l => RenderShadow(l, Size, (float)offsetX, (float)offsetY));
+
             foreach (var triangle in triangles)
             {
                 if (triangle.V1.Vertex.GetElement(2) < 0.0F || triangle.V2.Vertex.GetElement(2) < 0.0F || triangle.V3.Vertex.GetElement(2) < 0.0F)
@@ -275,6 +254,23 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                             {
                                 n = -n;
                             }
+                            var shadowProjectionPos = Vector4.Zero;
+                            if (spotLightShadows.Count > 0)
+                            {
+                                shadowProjectionPos = Sse.Shuffle(
+                                    Sse41.Blend(
+                                        Sse.Multiply(pvvX, e).HorizontalAdd(),
+                                        Sse.Multiply(pvvY, e).HorizontalAdd(),
+                                        0b1010
+                                    ),
+                                    Sse41.Blend(
+                                        Sse.Multiply(pvvZ, e).HorizontalAdd(),
+                                        Vector128.Create(1.0F),
+                                        0b1010
+                                    ),
+                                    0b01000100
+                                ).AsVector4();
+                            }
 
                             for (var i = 0; i < PointLights.Count; i++)
                             {
@@ -312,22 +308,10 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
                                 if (spotCone <= l.OuterCone)
                                 {
-                                    if (depth != null && depthIds != null)
+                                    if (spotLightShadows.TryGetValue(l, out var shadow))
                                     {
-                                        var vpPos = Sse.Shuffle(
-                                            Sse41.Blend(
-                                                Sse.Multiply(pvvX, e).HorizontalAdd(),
-                                                Sse.Multiply(pvvY, e).HorizontalAdd(),
-                                                0b1010
-                                            ),
-                                            Sse41.Blend(
-                                                Sse.Multiply(pvvZ, e).HorizontalAdd(),
-                                                Vector128.Create(1.0F),
-                                                0b1010
-                                            ),
-                                            0b01000100
-                                        ).AsVector4();
-                                        var shadowPos = Vector4.Transform(Vector4.Transform(Vector4.Transform(vpPos, floatInvtededViewMatrix), l.FloatLightViewMatrix * Matrix4x4.CreateTranslation((float)offsetX, (float)offsetY, 0.0F)), lightProjectionMatrix);
+                                        var (depth, depthIds, lightViewProjectionMatrix) = shadow;
+                                        var shadowPos = Vector4.Transform(Vector4.Transform(shadowProjectionPos, floatInvtededViewMatrix), lightViewProjectionMatrix);
                                         shadowPos /= shadowPos.W;
                                         var shadowTexPos = shadowPos * 0.5F + new Vector4(0.5F, 0.5F, 0.0F, 0.0F);
 
@@ -415,73 +399,13 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 i.Dispose();
             }
 
-            if (depth != null)
+            foreach (var s in spotLightShadows.Values)
             {
-                /*
-                var imageSpan = MemoryMarshal.Cast<float, Vector4>(RenderImage.GetDataSpan());
-                for (int y = 0, yLimit = Math.Min(Size / 4, renderImageHeight), xLimit = Math.Min(Size / 4, renderImageWidth); y < yLimit; y++)
-                {
-                    var line = y * renderImageWidth;
-                    for (var x = 0; x < xLimit; x++)
-                    {
-                        var d = 0.0F;
-                        var di = 0;
-                        for (int yi = 0, shadowLine = line * 4; yi < 4 && (y * 4 + yi) < Size; yi++, shadowLine += Size)
-                        {
-                            for (int xi = 0; xi < 4 && (x * 4 + xi) < Size; xi++)
-                            {
-                                if (!float.IsPositiveInfinity(depth[shadowLine + x * 4 + xi]))
-                                {
-                                    d += depth[shadowLine + x * 4 + xi];
-                                }
-                                di++;
-                            }
-                        }
-
-                        imageSpan[line + x] = new Vector4(Vector3.One - new Vector3(d / di) * 0.25F, 1.0F);
-                    }
-                }
-                //*/
-                ArrayPool<float>.Shared.Return(depth);
-            }
-            if (depthIds != null)
-            {
-                /*
-                var imageSpan = MemoryMarshal.Cast<float, Vector4>(RenderImage.GetDataSpan());
-                for (int y = 0, yLimit = Math.Min(Size / 4, renderImageHeight), xLimit = Math.Min(Size / 4, renderImageWidth); y < yLimit; y++)
-                {
-                    var line = y * renderImageWidth;
-                    for (var x = 0; x < xLimit; x++)
-                    {
-                        var d = Vector3.Zero;
-                        var di = 0;
-                        for (int yi = 0, shadowLine = line * 4; yi < 4 && (y * 4 + yi) < Size; yi++, shadowLine += Size)
-                        {
-                            for (int xi = 0; xi < 4 && (x * 4 + xi) < Size; xi++)
-                            {
-                                if (depthIds[shadowLine + x * 4 + xi] != 0)
-                                {
-                                    d += (depthIds[shadowLine + x * 4 + xi] % 3) switch
-                                    {
-                                        1 => Vector3.UnitX,
-                                        2 => Vector3.UnitY,
-                                        0 => Vector3.UnitZ,
-                                        _ => Vector3.Zero
-                                    };
-                                }
-                                di++;
-                            }
-                        }
-
-                        imageSpan[line + x] = new Vector4(d / di, 1.0F);
-                    }
-                }
-                //*/
-                ArrayPool<int>.Shared.Return(depthIds, true);
+                s.Dispose();
             }
         }
 
-        DepthMap RenderShadow(SpotLight spotLight, int size)
+        DepthMap RenderShadow(SpotLight spotLight, int size, float offsetX, float offsetY)
         {
             var triangles = GetClipAndDividedTriangles(LightTriangles[spotLight]).ToArray();
             var convertedTexture = new Dictionary<NImage, NManagedImage>();
@@ -494,7 +418,6 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             var lightProjectionMatrix = Matrix4x4d.CreatePerspectiveFieldOfView(spotLight.ConeRadian, 1.0, minZ, maxZ);
             var floatLightProjectionMatrix = (Matrix4x4)lightProjectionMatrix;
 
-            var diff = new Vector2[size * size];
             foreach (var triangle in triangles)
             {
                 if (triangle.V1.Vertex.GetElement(2) < 0.0F || triangle.V2.Vertex.GetElement(2) < 0.0F || triangle.V3.Vertex.GetElement(2) < 0.0F)
@@ -517,9 +440,6 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 var dvv1 = Avx.Multiply(Avx.Add(uv1.Vertex, Vector256.Create(1.0, 1.0, 0.0, 0.0)), Vector256.Create(Size * 0.5, Size * 0.5, 1.0, 1.0));
                 var dvv2 = Avx.Multiply(Avx.Add(uv2.Vertex, Vector256.Create(1.0, 1.0, 0.0, 0.0)), Vector256.Create(Size * 0.5, Size * 0.5, 1.0, 1.0));
                 var dvv3 = Avx.Multiply(Avx.Add(uv3.Vertex, Vector256.Create(1.0, 1.0, 0.0, 0.0)), Vector256.Create(Size * 0.5, Size * 0.5, 1.0, 1.0));
-                //var vvX = Vector128.Create((float)triangle.V1.Vertex.GetElement(0), (float)triangle.V2.Vertex.GetElement(0), (float)triangle.V3.Vertex.GetElement(0), 0.0F);
-                //var vvY = Vector128.Create((float)triangle.V1.Vertex.GetElement(1), (float)triangle.V2.Vertex.GetElement(1), (float)triangle.V3.Vertex.GetElement(1), 0.0F);
-                //var vvZ = Vector128.Create((float)triangle.V1.Vertex.GetElement(2), (float)triangle.V2.Vertex.GetElement(2), (float)triangle.V3.Vertex.GetElement(2), 0.0F);
                 var vvX = Vector128.Create((float)uv1.Vertex.GetElement(0), (float)uv2.Vertex.GetElement(0), (float)uv3.Vertex.GetElement(0), 0.0F);
                 var vvY = Vector128.Create((float)uv1.Vertex.GetElement(1), (float)uv2.Vertex.GetElement(1), (float)uv3.Vertex.GetElement(1), 0.0F);
                 var vvZ = Vector128.Create((float)uv1.Vertex.GetElement(2), (float)uv2.Vertex.GetElement(2), (float)uv3.Vertex.GetElement(2), 0.0F);
@@ -562,7 +482,6 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
                     var depthSpan = depth.AsSpan(offset, size);
                     var idSpan = renderedTriangleIds.AsSpan(offset, size);
-                    var diffSpan = diff.AsSpan(offset, size);
 
                     for (int x = minX; x < maxX; x++, eX = Sse.Add(eX, addX))
                     {
@@ -599,7 +518,6 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
                         depthSpan[x] = d.Z;
                         idSpan[x] = triangle.Id;
-                        diffSpan[x] = Vector2.Abs(new Vector2(x - (d.X * 0.5F + 0.5F) * Size, y - (d.Y * 0.5F + 0.5F) * Size));
                     }
                 });
             }
@@ -609,7 +527,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 i.Dispose();
             }
 
-            return new DepthMap(depth, renderedTriangleIds, floatLightProjectionMatrix, diff);
+            return new DepthMap(depth, renderedTriangleIds, spotLight.FloatLightViewMatrix * Matrix4x4.CreateTranslation(offsetX, offsetY, 0.0F) * floatLightProjectionMatrix);
         }
 
         IEnumerable<T> GetClipAndDividedTriangles<T>(IEnumerable<T> triangles) where T : TriangleBase<T>
@@ -872,14 +790,18 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
         }
     }
 
-    record DepthMap(float[] Depth, int[] DepthId, Matrix4x4 LightProjectionMatrix, Vector2[] Diff)
+    record DepthMap(float[] Depth, int[] DepthId, Matrix4x4 LightViewProjectionMatrix) : IDisposable
     {
         public readonly float[] Depth = Depth;
 
         public readonly int[] DepthId = DepthId;
 
-        public readonly Matrix4x4 LightProjectionMatrix = LightProjectionMatrix;
+        public readonly Matrix4x4 LightViewProjectionMatrix = LightViewProjectionMatrix;
 
-        public readonly Vector2[] Diff = Diff;
+        public void Dispose()
+        {
+            ArrayPool<float>.Shared.Return(Depth);
+            ArrayPool<int>.Shared.Return(DepthId);
+        }
     }
 }
