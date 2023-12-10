@@ -8,6 +8,8 @@ using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Plugin.Interfaces.RendererParams;
 using NiVE3.Shared.Extension;
+using NiVE3.Plugin.Numerics;
+using System.Windows.Media.Media3D;
 
 namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
 {
@@ -48,6 +50,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
 
         public readonly Vector3 Direction;
 
+        public readonly double ConeRadian;
+
         public readonly double ConeAttenuationRate;
 
         public readonly float InnerCone;
@@ -72,10 +76,15 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
 
         public readonly double ShadowScatterSize;
 
-        public SpotLight(Vector256<double> position, Vector256<double> target, double coneRadian, double coneAttenuation, Vector3 color, double intensity, LightFalloffType falloffType, double falloffStart, double falloffLength, bool isEnableShadow, double shadowStrength, double shadowScatterSize)
+        public readonly Matrix4x4d LightViewMatrix;
+
+        public readonly Matrix4x4 FloatLightViewMatrix;
+
+        public SpotLight(Vector256<double> position, Vector256<double> target, double coneRadian, double coneAttenuation, Vector3 color, double intensity, LightFalloffType falloffType, double falloffStart, double falloffLength, bool isEnableShadow, double shadowStrength, double shadowScatterSize, in Matrix4x4d lightViewMartrix)
         {
             Position = Avx.ConvertToVector128Single(position);
             Direction = Vector3.Normalize(Avx.Subtract(target, position).AsVector3());
+            ConeRadian = coneRadian;
             var innerCone = coneRadian * (1.0 - coneAttenuation) * 0.5;
             var outerCone = coneRadian * 0.5;
             InnerCone = (float)innerCone;
@@ -90,6 +99,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
             IsEnableShadow = isEnableShadow;
             ShadowStrength = shadowStrength;
             ShadowScatterSize = shadowScatterSize;
+            LightViewMatrix = lightViewMartrix;
+            FloatLightViewMatrix = (Matrix4x4)lightViewMartrix;
         }
     }
 

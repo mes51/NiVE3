@@ -179,14 +179,14 @@ namespace NiVE3.Plugin.Numerics
         public static Matrix4x4d CreatePerspectiveFieldOfView(double fov, double aspect, double near, double far)
         {
             var result = Zero;
-            var farRange = double.IsPositiveInfinity(far) ? -1.0 : far / (near - far);
+            var farRange = (double.IsPositiveInfinity(far) || near == far) ? 1.0 : far / (near - far);
             var scale = 1.0 / Math.Tan(fov * 0.5);
 
             result.M11 = scale / aspect;
             result.M22 = scale;
             result.M33 = farRange;
             result.M34 = 1.0;
-            result.M43 = near * farRange;
+            result.M43 = farRange * -near;
 
             return result;
         }
@@ -571,7 +571,7 @@ namespace NiVE3.Plugin.Numerics
             return a;
         }
 
-        public unsafe static implicit operator Matrix4x4d(Matrix4x4 m)
+        public unsafe static explicit operator Matrix4x4d(Matrix4x4 m)
         {
             var result = Zero;
 
@@ -579,6 +579,18 @@ namespace NiVE3.Plugin.Numerics
             Avx.Store(&result.M21, Avx.ConvertToVector256Double(Sse.LoadVector128(&m.M21)));
             Avx.Store(&result.M31, Avx.ConvertToVector256Double(Sse.LoadVector128(&m.M31)));
             Avx.Store(&result.M41, Avx.ConvertToVector256Double(Sse.LoadVector128(&m.M41)));
+
+            return result;
+        }
+
+        public unsafe static explicit operator Matrix4x4(Matrix4x4d m)
+        {
+            var result = Matrix4x4.Identity;
+
+            Sse.Store(&result.M11, Avx.ConvertToVector128Single(Avx.LoadVector256(&m.M11)));
+            Sse.Store(&result.M21, Avx.ConvertToVector128Single(Avx.LoadVector256(&m.M21)));
+            Sse.Store(&result.M31, Avx.ConvertToVector128Single(Avx.LoadVector256(&m.M31)));
+            Sse.Store(&result.M41, Avx.ConvertToVector128Single(Avx.LoadVector256(&m.M41)));
 
             return result;
         }

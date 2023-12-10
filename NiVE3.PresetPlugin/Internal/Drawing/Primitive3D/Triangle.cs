@@ -13,7 +13,7 @@ using NiVE3.Plugin.Numerics;
 
 namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
 {
-    class Triangle
+    abstract class TriangleBase<T> where T : TriangleBase<T>
     {
         public readonly UVVertex V1;
 
@@ -21,33 +21,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
 
         public readonly UVVertex V3;
 
-        public readonly Vector256<double> Normal;
-
-        public readonly Vector3 InvertNormal;
-
-        public readonly double PlaneD;
-
         public readonly NImage Texture;
-
-        public readonly BlendMode BlendMode;
-
-        public readonly bool IsCastShadow;
-
-        public readonly float LightTransmission;
-
-        public readonly bool IsAcceptShadow;
-
-        public readonly bool IsAcceptLight;
-
-        public readonly float Ambient;
-
-        public readonly float Diffuse;
-
-        public readonly float SpecularIntensity;
-
-        public readonly float SpecularShininess;
-
-        public readonly float Metal;
 
         public readonly int Id;
 
@@ -55,26 +29,25 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
 
         public readonly bool IsInvalidNormal;
 
+        public readonly float LightTransmission;
+
+        public readonly Vector256<double> Normal;
+
+        public readonly Vector3 InvertNormal;
+
+        public readonly double PlaneD;
+
         readonly Vector256<double> FarPoint;
 
         readonly Matrix4x4d InvertMatrix;
 
-        public Triangle(in UVVertex v1, in UVVertex v2, in UVVertex v3, in Vector256<double> farPoint, in Matrix4x4d invertMatrix, NImage texture, BlendMode blendMode, bool isCastShadow, float lightTransmission, bool isAcceptShadow, bool isAcceptLight, float ambient, float diffuse, float specularIntensity, float specularShininess, float metal, int id)
+        protected TriangleBase(in UVVertex v1, in UVVertex v2, in UVVertex v3, in Vector256<double> farPoint, Matrix4x4d invertMatrix, NImage texture, float lightTransmission, int id)
         {
             V1 = v1;
             V2 = v2;
             V3 = v3;
             Texture = texture;
-            BlendMode = blendMode;
-            IsCastShadow = isCastShadow;
             LightTransmission = lightTransmission;
-            IsAcceptShadow = isAcceptShadow;
-            IsAcceptLight = isAcceptLight;
-            Ambient = ambient;
-            Diffuse = diffuse;
-            SpecularIntensity = specularIntensity;
-            SpecularShininess = specularShininess;
-            Metal = metal;
             Id = id;
             FarPoint = farPoint;
             InvertMatrix = invertMatrix;
@@ -82,7 +55,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
             Normal = Avx.Subtract(v2.Vertex, v1.Vertex).CrossProduct(Avx.Subtract(v3.Vertex, v1.Vertex)).Normalize();
             if (!double.IsNaN(Normal.GetElement(0)) && !double.IsNaN(Normal.GetElement(1)) && !double.IsNaN(Normal.GetElement(2)))
             {
-                var invertedNormal = InvertMatrix.Transform(Vector256.Create(0.0, 0.0, -1.0, 0.0));
+                var invertedNormal = invertMatrix.Transform(Vector256.Create(0.0, 0.0, -1.0, 0.0));
                 InvertNormal = -Avx.Subtract(invertedNormal, Vector256.Create(0.0, 0.0, 0.0, invertedNormal.GetElement(3))).Normalize().AsVector3();
                 PlaneD = -Normal.DotProduct(v1.Vertex).GetElement(0);
 
@@ -95,18 +68,13 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
             }
         }
 
-        public Triangle(in Triangle baseTriangle, in UVVertex v1, in UVVertex v2, in UVVertex v3)
+        protected TriangleBase(TriangleBase<T> baseTriangle, in UVVertex v1, in UVVertex v2, in UVVertex v3)
         {
             V1 = v1;
             V2 = v2;
             V3 = v3;
             Texture = baseTriangle.Texture;
-            BlendMode = baseTriangle.BlendMode;
-            Diffuse = baseTriangle.Diffuse;
-            Ambient = baseTriangle.Ambient;
-            SpecularIntensity = baseTriangle.SpecularIntensity;
-            SpecularShininess = baseTriangle.SpecularShininess;
-            Metal = baseTriangle.Metal;
+            LightTransmission = baseTriangle.LightTransmission;
             Id = baseTriangle.Id;
             FarPoint = baseTriangle.FarPoint;
             InvertMatrix = baseTriangle.InvertMatrix;
@@ -135,6 +103,75 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
         public bool IsClipped()
         {
             return V1.Vertex.GetElement(3) <= 0.0 || V2.Vertex.GetElement(3) <= 0.0 || V3.Vertex.GetElement(3) <= 0.0;
+        }
+
+        public abstract T CreateByNewVertex(in UVVertex v1, in UVVertex v2, in UVVertex v3);
+    }
+
+    class Triangle : TriangleBase<Triangle>
+    {
+        public readonly BlendMode BlendMode;
+
+        public readonly bool IsCastShadow;
+
+        public readonly bool IsAcceptShadow;
+
+        public readonly bool IsAcceptLight;
+
+        public readonly float Ambient;
+
+        public readonly float Diffuse;
+
+        public readonly float SpecularIntensity;
+
+        public readonly float SpecularShininess;
+
+        public readonly float Metal;
+
+        public Triangle(in UVVertex v1, in UVVertex v2, in UVVertex v3, in Vector256<double> farPoint, in Matrix4x4d invertMatrix, NImage texture, BlendMode blendMode, bool isCastShadow, float lightTransmission, bool isAcceptShadow, bool isAcceptLight, float ambient, float diffuse, float specularIntensity, float specularShininess, float metal, int id)
+            : base(v1, v2, v3, farPoint, invertMatrix, texture, lightTransmission, id)
+        {
+            BlendMode = blendMode;
+            IsCastShadow = isCastShadow;
+            IsAcceptShadow = isAcceptShadow;
+            IsAcceptLight = isAcceptLight;
+            Ambient = ambient;
+            Diffuse = diffuse;
+            SpecularIntensity = specularIntensity;
+            SpecularShininess = specularShininess;
+            Metal = metal;
+        }
+
+        public Triangle(in Triangle baseTriangle, in UVVertex v1, in UVVertex v2, in UVVertex v3) : base(baseTriangle, v1, v2, v3)
+        {
+            BlendMode = baseTriangle.BlendMode;
+            IsCastShadow = baseTriangle.IsCastShadow;
+            IsAcceptShadow = baseTriangle.IsAcceptShadow;
+            IsAcceptLight = baseTriangle.IsAcceptLight;
+            Ambient = baseTriangle.Ambient;
+            Diffuse = baseTriangle.Diffuse;
+            SpecularIntensity = baseTriangle.SpecularIntensity;
+            SpecularShininess = baseTriangle.SpecularShininess;
+            Metal = baseTriangle.Metal;
+        }
+
+        public override Triangle CreateByNewVertex(in UVVertex v1, in UVVertex v2, in UVVertex v3)
+        {
+            return new Triangle(this, v1, v2, v3);
+        }
+    }
+
+    class LightTriangle : TriangleBase<LightTriangle>
+    {
+        public LightTriangle(in UVVertex v1, in UVVertex v2, in UVVertex v3, in Vector256<double> farPoint, in Matrix4x4d invertMatrix, NImage texture, float lightTransmission, int id)
+            : base(v1, v2, v3, farPoint, invertMatrix, texture, lightTransmission, id) { }
+
+        public LightTriangle(LightTriangle baseTriangle, in UVVertex v1, in UVVertex v2, in UVVertex v3)
+            : base(baseTriangle, v1, v2, v3) { }
+
+        public override LightTriangle CreateByNewVertex(in UVVertex v1, in UVVertex v2, in UVVertex v3)
+        {
+            return new LightTriangle(this, v1, v2, v3);
         }
     }
 }
