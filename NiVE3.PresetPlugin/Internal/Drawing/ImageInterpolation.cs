@@ -10,7 +10,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 {
     static class ImageInterpolation
     {
-        static readonly Vector4 EmptyPixel = new Vector4(255.0F, 255.0F, 255.0F, 0.0F);
+        static readonly Vector4 EmptyPixel = new Vector4(1.0F, 1.0F, 1.0F, 0.0F);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector4 NearestNeighbor(Span<Vector4> texture, int width, int height, float x, float y)
@@ -118,6 +118,10 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             }
 
             var ta = Vector4.Lerp(Vector4.Lerp(c1, c3, qq), Vector4.Lerp(c2, c4, qq), pp).W;
+            if (ta <= 0.0F)
+            {
+                return EmptyPixel;
+            }
             var t = Vector4.Lerp(Vector4.Lerp(c1 * c1.W, c3 * c3.W, qq), Vector4.Lerp(c2 * c2.W, c4 * c4.W, qq), pp) / ta;
             t.W = ta;
 

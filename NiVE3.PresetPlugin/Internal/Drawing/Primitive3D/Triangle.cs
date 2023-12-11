@@ -25,6 +25,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
 
         public readonly int Id;
 
+        public readonly float Opacity;
+
         public readonly bool SignIsDifferent;
 
         public readonly bool IsInvalidNormal;
@@ -41,12 +43,13 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
 
         readonly Matrix4x4d InvertMatrix;
 
-        protected TriangleBase(in UVVertex v1, in UVVertex v2, in UVVertex v3, in Vector256<double> farPoint, Matrix4x4d invertMatrix, NImage texture, float lightTransmission, int id)
+        protected TriangleBase(in UVVertex v1, in UVVertex v2, in UVVertex v3, in Vector256<double> farPoint, Matrix4x4d invertMatrix, NImage texture, float opacity, float lightTransmission, int id)
         {
             V1 = v1;
             V2 = v2;
             V3 = v3;
             Texture = texture;
+            Opacity = opacity;
             LightTransmission = lightTransmission;
             Id = id;
             FarPoint = farPoint;
@@ -74,6 +77,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
             V2 = v2;
             V3 = v3;
             Texture = baseTriangle.Texture;
+            Opacity = baseTriangle.Opacity;
             LightTransmission = baseTriangle.LightTransmission;
             Id = baseTriangle.Id;
             FarPoint = baseTriangle.FarPoint;
@@ -128,8 +132,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
 
         public readonly float Metal;
 
-        public Triangle(in UVVertex v1, in UVVertex v2, in UVVertex v3, in Vector256<double> farPoint, in Matrix4x4d invertMatrix, NImage texture, BlendMode blendMode, bool isCastShadow, float lightTransmission, bool isAcceptShadow, bool isAcceptLight, float ambient, float diffuse, float specularIntensity, float specularShininess, float metal, int id)
-            : base(v1, v2, v3, farPoint, invertMatrix, texture, lightTransmission, id)
+        public Triangle(in UVVertex v1, in UVVertex v2, in UVVertex v3, in Vector256<double> farPoint, in Matrix4x4d invertMatrix, NImage texture, float opacity, BlendMode blendMode, bool isCastShadow, float lightTransmission, bool isAcceptShadow, bool isAcceptLight, float ambient, float diffuse, float specularIntensity, float specularShininess, float metal, int id)
+            : base(v1, v2, v3, farPoint, invertMatrix, texture, opacity, lightTransmission, id)
         {
             BlendMode = blendMode;
             IsCastShadow = isCastShadow;
@@ -163,8 +167,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
 
     class LightTriangle : TriangleBase<LightTriangle>
     {
-        public LightTriangle(in UVVertex v1, in UVVertex v2, in UVVertex v3, in Vector256<double> farPoint, in Matrix4x4d invertMatrix, NImage texture, float lightTransmission, int id)
-            : base(v1, v2, v3, farPoint, invertMatrix, texture, lightTransmission, id) { }
+        public LightTriangle(in UVVertex v1, in UVVertex v2, in UVVertex v3, in Vector256<double> farPoint, in Matrix4x4d invertMatrix, NImage texture, float opacity, float lightTransmission, int id)
+            : base(v1, v2, v3, farPoint, invertMatrix, texture, opacity, lightTransmission, id) { }
 
         public LightTriangle(LightTriangle baseTriangle, in UVVertex v1, in UVVertex v2, in UVVertex v3)
             : base(baseTriangle, v1, v2, v3) { }

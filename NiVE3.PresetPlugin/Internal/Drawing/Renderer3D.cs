@@ -62,7 +62,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             LightTriangles = pointLights.Cast<object>().Concat(spotLights).Concat(parallelLights).ToDictionary(k => k, _ => new List<LightTriangle>());
         }
 
-        public void AddRect(NImage texture, BlendMode blendType, in Matrix4x4d modelMatrix, bool isCastShadow, float lightTransmission, bool isAcceptShadow, bool isAcceptLight, float ambient, float diffuse, float specularIntensity, float specularShininess, float metal)
+        public void AddRect(NImage texture, float opacity, BlendMode blendType, in Matrix4x4d modelMatrix, bool isCastShadow, float lightTransmission, bool isAcceptShadow, bool isAcceptLight, float ambient, float diffuse, float specularIntensity, float specularShininess, float metal)
         {
             var width = texture.Width;
             var height = texture.Height;
@@ -89,8 +89,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             invertedModelViewMatrix = Matrix4x4d.Transpose(invertedModelViewMatrix);
 
             var farPoint = Avx.And(mv.Transform(Vector256.Create(0.0, 0.0, -10000.0, 1.0)), Vector256.Create(0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0).AsDouble());
-            Triangles.Add(new Triangle(uv1, uv2, uv3, farPoint, invertedModelViewMatrix, texture, blendType, isCastShadow, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, LastId));
-            Triangles.Add(new Triangle(uv1, uv3, uv4, farPoint, invertedModelViewMatrix, texture, blendType, isCastShadow, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, LastId));
+            Triangles.Add(new Triangle(uv1, uv2, uv3, farPoint, invertedModelViewMatrix, texture, opacity, blendType, isCastShadow, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, LastId));
+            Triangles.Add(new Triangle(uv1, uv3, uv4, farPoint, invertedModelViewMatrix, texture, opacity, blendType, isCastShadow, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, LastId));
 
             if (isCastShadow)
             {
@@ -113,8 +113,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
                     var triangles = LightTriangles[spotLight];
                     var lfarPoint = Avx.And(lmv.Transform(Vector256.Create(0.0, 0.0, -10000.0, 1.0)), Vector256.Create(0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0).AsDouble());
-                    triangles.Add(new LightTriangle(luv1, luv2, luv3, lfarPoint, invertedLightModelViewMatrix, texture, lightTransmission, LastId));
-                    triangles.Add(new LightTriangle(luv1, luv3, luv4, lfarPoint, invertedLightModelViewMatrix, texture, lightTransmission, LastId));
+                    triangles.Add(new LightTriangle(luv1, luv2, luv3, lfarPoint, invertedLightModelViewMatrix, texture, opacity, lightTransmission, LastId));
+                    triangles.Add(new LightTriangle(luv1, luv3, luv4, lfarPoint, invertedLightModelViewMatrix, texture, opacity, lightTransmission, LastId));
                 }
             }
 
@@ -227,6 +227,11 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                         var ty = Sse.Divide(Sse.Multiply(v, e), tw).HorizontalAdd().GetElement(0) * textureHeight;
 
                         var color = ImageInterpolation.Bilinear(texture, textureWidth, textureHeight, tx, ty);
+                        color.W *= triangle.Opacity;
+                        if (color.W <= 0.0F)
+                        {
+                            continue;
+                        }
 
                         if (useLight)
                         {
@@ -321,6 +326,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                         if (shadowTextureX > -1 && shadowTextureX < Size && shadowTextureY > -1 && shadowTextureY < Size)
                                         {
                                             var si = shadowTextureY * Size + shadowTextureX;
+                                            // NOTE: ポリゴンが無かったかどうかを判定する必要がある場合は depthIds[si] != 0 で判定する
                                             if (depthIds[si] != triangle.Id && depth[si] > shadowPos.Z)
                                             {
                                                 continue;
@@ -411,7 +417,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             var convertedTexture = new Dictionary<NImage, NManagedImage>();
             var renderedTriangleIds = ArrayPool<int>.Shared.Rent(size * size);
             var depth = ArrayPool<float>.Shared.Rent(size * size);
-            depth.AsSpan().Fill(float.PositiveInfinity);
+            depth.AsSpan().Fill(float.NegativeInfinity);
 
             var minZ = triangles.Select(t => Math.Min(Math.Min(t.V1.Vertex.GetElement(2), t.V2.Vertex.GetElement(2)), t.V3.Vertex.GetElement(2))).Min();
             var maxZ = triangles.Select(t => Math.Max(Math.Max(t.V1.Vertex.GetElement(2), t.V2.Vertex.GetElement(2)), t.V3.Vertex.GetElement(2))).Max();
@@ -801,7 +807,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
         public void Dispose()
         {
             ArrayPool<float>.Shared.Return(Depth);
-            ArrayPool<int>.Shared.Return(DepthId);
+            ArrayPool<int>.Shared.Return(DepthId, true);
         }
     }
 }

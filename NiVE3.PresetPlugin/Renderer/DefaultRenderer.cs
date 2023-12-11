@@ -189,6 +189,7 @@ namespace NiVE3.PresetPlugin.Renderer
 
                         renderer.AddRect(
                             i.Image,
+                            (float)opacity,
                             i.BlendMode,
                             Calc3DModelMatrix(i.Transform, i.ParentTransforms, Width, Height),
                             (bool)(i.LayerOptions?[ILayerObject.ImageLayerOptionIsCastShadowId] ?? false),
