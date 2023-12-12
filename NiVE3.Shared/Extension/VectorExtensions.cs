@@ -156,6 +156,12 @@ namespace NiVE3.Shared.Extension
         {
             return Sse.Multiply(y, x.Log()).Exp();
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector128<float> Abs(this in Vector128<float> v)
+        {
+            return Sse.AndNot(Vector128.Create(-0.0F), v);
+        }
     }
 
     public static class Vector256Extension

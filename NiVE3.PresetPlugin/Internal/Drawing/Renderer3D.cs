@@ -22,6 +22,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
     {
         const float NearZ = -5E-5F; //1.0F;
 
+        const float Epsilon = 1E-7F;
+
         public Matrix4x4d ViewMatrix { get; set; }
 
         public double FieldOfView { get; set; }
@@ -210,18 +212,19 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
                     var offset = (y - OffsetY) * renderImageWidth;
                     var p = offset + (minX - OffsetX);
-                    var eX = Sse.Subtract(Vector128.Create(minX, minX, minX, 0.0F), vvEX);
-                    var addX = Vector128.Create(1.0F, 1.0F, 1.0F, 0.0F);
 
                     var pointLights = CollectionsMarshal.AsSpan(PointLights);
                     var spotLights = CollectionsMarshal.AsSpan(SpotLights);
                     var parallelLights = CollectionsMarshal.AsSpan(ParallelLights);
                     var ambientLights = CollectionsMarshal.AsSpan(AmbientLights);
 
-                    for (int x = minX; x < maxX; x++, p++, eX = Sse.Add(eX, addX))
+                    for (int x = minX; x < maxX; x++, p++)
                     {
+                        var eX = Sse.Subtract(Vector128.Create(x, x, x, 0.0F), vvEX);
                         var e = Sse.Multiply(Fma.IsSupported ? Fma.MultiplyAddNegated(edgeY, eX, eY) : Sse.Subtract(eY, Sse.Multiply(edgeY, eX)), denom);
-                        if (!Avx.TestZ(Sse.CompareLessThan(e, Vector128<float>.Zero), Vector128.Create(float.NaN)))
+
+                        var ae = Sse.And(e, Sse.CompareGreaterThanOrEqual(e.Abs(), Vector128.Create(Epsilon)));
+                        if (!Avx.TestZ(Sse.CompareLessThan(ae, Vector128<float>.Zero), Vector128.Create(float.NaN)))
                         {
                             continue;
                         }
@@ -486,18 +489,15 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 {
                     var texture = MemoryMarshal.Cast<float, Vector4>(managedTexture.GetDataSpan());
                     var eY = Sse.Multiply(edgeX, Sse.Subtract(Vector128.Create(y, y, y, 0.0F), vvEY));
-
                     var offset = y * size;
-                    var eX = Sse.Subtract(Vector128.Create(minX, minX, minX, 0.0F), vvEX);
-                    var addX = Vector128.Create(1.0F, 1.0F, 1.0F, 0.0F);
-
                     var depthSpan = depth.AsSpan(offset, size);
                     var idSpan = renderedTriangleIds.AsSpan(offset, size);
-
-                    for (int x = minX; x < maxX; x++, eX = Sse.Add(eX, addX))
+                    for (int x = minX; x < maxX; x++)
                     {
+                        var eX = Sse.Subtract(Vector128.Create(x, x, x, 0.0F), vvEX);
                         var e = Sse.Multiply(Fma.IsSupported ? Fma.MultiplyAddNegated(edgeY, eX, eY) : Sse.Subtract(eY, Sse.Multiply(edgeY, eX)), denom);
-                        if (!Avx.TestZ(Sse.CompareLessThan(e, Vector128<float>.Zero), Vector128.Create(float.NaN)))
+                        var ae = Sse.And(e, Sse.CompareGreaterThanOrEqual(e.Abs(), Vector128.Create(Epsilon)));
+                        if (!Avx.TestZ(Sse.CompareLessThan(ae, Vector128<float>.Zero), Vector128.Create(float.NaN)))
                         {
                             continue;
                         }
