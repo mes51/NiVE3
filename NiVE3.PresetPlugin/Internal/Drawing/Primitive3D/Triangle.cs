@@ -35,6 +35,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
 
         public readonly Vector256<double> Normal;
 
+        public readonly Vector3 FloatNormal;
+
         public readonly Vector3 InvertNormal;
 
         public readonly double PlaneD;
@@ -56,6 +58,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
             InvertMatrix = invertMatrix;
 
             Normal = Avx.Subtract(v2.Vertex, v1.Vertex).CrossProduct(Avx.Subtract(v3.Vertex, v1.Vertex)).Normalize();
+            FloatNormal = Normal.AsVector3();
             if (!double.IsNaN(Normal.GetElement(0)) && !double.IsNaN(Normal.GetElement(1)) && !double.IsNaN(Normal.GetElement(2)))
             {
                 var invertedNormal = invertMatrix.Transform(Vector256.Create(0.0, 0.0, -1.0, 0.0));
@@ -84,6 +87,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
             InvertMatrix = baseTriangle.InvertMatrix;
 
             Normal = Avx.Subtract(v2.Vertex, v1.Vertex).CrossProduct(Avx.Subtract(v3.Vertex, v1.Vertex)).Normalize();
+            FloatNormal = Normal.AsVector3();
             var invertedNormal = InvertMatrix.Transform(Vector256.Create(0.0, 0.0, -1.0, 0.0));
             InvertNormal = -Avx.Subtract(invertedNormal, Vector256.Create(0.0, 0.0, 0.0, invertedNormal.GetElement(3))).Normalize().AsVector3();
             PlaneD = -Normal.DotProduct(v1.Vertex).GetElement(0);

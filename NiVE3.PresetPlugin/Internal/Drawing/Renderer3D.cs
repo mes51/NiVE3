@@ -126,6 +126,10 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             var renderImageWidth = RenderImage.Width;
             var renderImageHeight = RenderImage.Height;
             var triangles = GetClipAndDividedTriangles(Triangles).ToArray();
+            if (triangles.Length < 1)
+            {
+                return;
+            }
 
             var minZ = triangles.Select(t => Math.Min(Math.Min(t.V1.Vertex.GetElement(2), t.V2.Vertex.GetElement(2)), t.V3.Vertex.GetElement(2))).Min();
             var maxZ = triangles.Select(t => Math.Max(Math.Max(t.V1.Vertex.GetElement(2), t.V2.Vertex.GetElement(2)), t.V3.Vertex.GetElement(2))).Max();
@@ -254,7 +258,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                 ),
                                 0b01000100
                             );
-                            var n = triangle.InvertNormal;
+                            var n = -triangle.FloatNormal;
                             if (!isFrontFace)
                             {
                                 n = -n;
