@@ -187,7 +187,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 var isFrontFace = triangle.Normal.DotProduct(Vector256.Create(0.0, 0.0, 1.0, 0.0)).GetElement(0) <= 0.0;
                 var vvEX = Vector128.Create((float)dvv2.GetElement(0), (float)dvv3.GetElement(0), (float)dvv1.GetElement(0), 0.0F);
                 var vvEY = Vector128.Create((float)dvv2.GetElement(1), (float)dvv3.GetElement(1), (float)dvv1.GetElement(1), 0.0F);
-                var useLight = hasLight && triangle.IsAcceptLight;
+                var useLight = hasLight && (triangle.IsAcceptLight || triangle.IsAcceptShadow);
 
                 NManagedImage managedTexture;
                 if (triangle.Texture is NCudaImage cudaImage)
@@ -241,6 +241,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                         {
                             const float ShininessStrength = 120.0F;
 
+                            // TODO: IsAcceptLight == false && IsCastShadow == trueの時の処理
                             var diffuse = Vector4.Zero;
                             var specular = Vector4.Zero;
                             var ambient = Vector4.Zero;
@@ -317,7 +318,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
                                 if (spotCone <= l.OuterCone)
                                 {
-                                    if (spotLightShadows.TryGetValue(l, out var shadow))
+                                    if (triangle.IsAcceptShadow && spotLightShadows.TryGetValue(l, out var shadow))
                                     {
                                         var (depth, depthIds, lightViewProjectionMatrix) = shadow;
                                         var shadowPos = Vector4.Transform(Vector4.Transform(shadowProjectionPos, floatInvtededViewMatrix), lightViewProjectionMatrix);
