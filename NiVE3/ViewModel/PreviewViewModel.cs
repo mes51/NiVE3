@@ -220,6 +220,8 @@ namespace NiVE3.ViewModel
 
         bool IsDirtyBoundingBoxesBuffer { get; set; }
 
+        bool IsCurrentFrameUpdating { get; set; } // フラグでは無く何かしらのロック機構を用意した方が良い?
+
         bool NeedUpdateFrameNextTick { get; set; }
 
         Debouncer FrameUpdateDebouncer { get; }
@@ -300,11 +302,13 @@ namespace NiVE3.ViewModel
 
         void UpdateCurrentFrame()
         {
-            if (IsDirtyImageBuffer || IsIgnoreUpdatePreview)
+            if (IsDirtyImageBuffer || IsIgnoreUpdatePreview || IsCurrentFrameUpdating)
             {
                 NeedUpdateFrameNextTick = true;
                 return;
             }
+
+            IsCurrentFrameUpdating = true;
 
             using var image = PreviewModel.GetImage(CurrentTime);
             if (image != null && BufferImageSize.Width == image.Width && BufferImageSize.Height == image.Height)
@@ -369,6 +373,7 @@ namespace NiVE3.ViewModel
             }
             IsDirtyImageBuffer = true;
             UpdateBoundingBox();
+            IsCurrentFrameUpdating = false;
         }
 
         void UpdateBoundingBox()
