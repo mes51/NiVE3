@@ -269,6 +269,22 @@ namespace NiVE3.PresetPlugin.Renderer
 
             var mv = modelMatrix * viewMatrix * Matrix4x4d.CreateTranslate((size - Width) * 0.5 / size, (size - Height) * 0.5 / size, 0.0);
 
+            // ヌルオブジェクト
+            if (width == 0 && height == 0)
+            {
+                var nav = projectionMatrix.Transform(mv.Transform(Avx.Divide(Avx.Add(anchorPoint.AsVector256(), Vector256.Create(0.0, 0.0, 0.0, size)), Vector256.Create((double)size))));
+                nav = Avx.Divide(nav, Vector256.Create(nav.GetElement(3)));
+
+                var nullObjectAnchorPoint = ((Vector2d)nav) * (new Vector2d(size, size) * 0.5) + (new Vector2d(Width, Height) * 0.5);
+                return new PreviewImageBoundingBox(
+                    new Vector2d(),
+                    new Vector2d(),
+                    new Vector2d(),
+                    new Vector2d(),
+                    nullObjectAnchorPoint
+                );
+            }
+
             var v1 = mv.Transform(Avx.Divide(Vector256.Create(0.0, 0.0, 0.0, size), Vector256.Create((double)size)));
             var v2 = mv.Transform(Avx.Divide(Vector256.Create(0.0, height, 0.0, size), Vector256.Create((double)size)));
             var v3 = mv.Transform(Avx.Divide(Vector256.Create(width, height, 0.0, size), Vector256.Create((double)size)));

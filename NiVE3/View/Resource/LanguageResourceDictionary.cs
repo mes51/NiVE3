@@ -227,6 +227,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("ライトの追加(_L)")]
         public static readonly string Timeline_ContextMenu_AddLight = nameof(Timeline_ContextMenu_AddLight);
 
+        [ShowInMarkup, DefaultValue("ヌルオブジェクトの追加(_N)")]
+        public static readonly string Timeline_ContextMenu_AddNullObject = nameof(Timeline_ContextMenu_AddNullObject);
+
         [ShowInMarkup, DefaultValue("なし")]
         public static readonly string Layer_EmptyTrackMatte = nameof(Layer_EmptyTrackMatte);
 

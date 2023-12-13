@@ -266,6 +266,14 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref isLight, value); }
         }
 
+        private bool isNullObject;
+        [NeedWire(nameof(LayerModel), IsOneWay = true)]
+        public bool IsNullObject
+        {
+            get { return isNullObject; }
+            set { SetProperty(ref isNullObject, value); }
+        }
+
         private double layerNumberColumnWudth;
         [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineLayerNumberColumnWidth), IsOneWay = true)]
         public double LayerNumberColumnWidth

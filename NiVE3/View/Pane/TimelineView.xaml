@@ -66,6 +66,7 @@
                             <ContextMenu>
                                 <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddCamera}" Command="{Binding AddCameraCommand}"/>
                                 <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddLight}" Command="{Binding AddLightCommand}"/>
+                                <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddNullObject}" Command="{Binding AddNullObjectCommand}"/>
                             </ContextMenu>
                         </Setter.Value>
                     </Setter>

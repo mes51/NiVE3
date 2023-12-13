@@ -111,6 +111,19 @@
             </Style.Triggers>
         </Style>
 
+        <Style x:Key="Enable3DSwitchStyle" TargetType="{x:Type CheckBox}" BasedOn="{StaticResource LayerSwitch}">
+            <Setter Property="Visibility" Value="Hidden"/>
+
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding SourceType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static local:LayerView.CompositionDisplayableSourceType}}" Value="True">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsNullObject}" Value="True">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
         <Style x:Key="IsEnableSwitchStyle" TargetType="{x:Type CheckBox}" BasedOn="{StaticResource LayerSwitch}">
             <Setter Property="Visibility" Value="Hidden"/>
 
@@ -338,6 +351,9 @@
 
                     <Setter Property="Visibility" Value="Collapsed"/>
                 </MultiDataTrigger>
+                <DataTrigger Binding="{Binding IsNullObject}" Value="True">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
             </Style.Triggers>
         </Style>
     </UserControl.Resources>
@@ -562,9 +578,8 @@
                               CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableAdjustmentLayer}"/>
                     
                     <CheckBox Content="{gm:FontawesomeResource ResourceKey=Cube}"
-                              Style="{StaticResource LayerSwitch}"
+                              Style="{StaticResource Enable3DSwitchStyle}"
                               IsChecked="{Binding IsEnable3D, Mode=OneWay}"
-                              Visibility="{Binding SourceType, Converter={StaticResource AVTypeVisibleConverter}, ConverterParameter={x:Static local:LayerView.CompositionDisplayableSourceType}}"
                               Command="{Binding ChangeLayerSwitchCommand}"
                               CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnable3D}"/>
                 </StackPanel>

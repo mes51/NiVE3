@@ -331,6 +331,8 @@ namespace NiVE3.ViewModel
 
         public ICommand AddLightCommand { get; }
 
+        public ICommand AddNullObjectCommand { get; }
+
         WeakEventPublisher<EventArgs> CurrentTimeChangeByUserPublisher { get; } = new WeakEventPublisher<EventArgs>();
         public event EventHandler<EventArgs> CurrentTimeChangeByUser
         {
@@ -394,6 +396,8 @@ namespace NiVE3.ViewModel
             AddCameraCommand = new RequerySuggestedCommand(() => CompositionModel?.AddCamera(), () => CompositionModel != null);
 
             AddLightCommand = new RequerySuggestedCommand(() => CompositionModel?.AddLight(), () => CompositionModel != null);
+
+            AddNullObjectCommand = new RequerySuggestedCommand(() => CompositionModel?.AddNullObject(), () => CompositionModel != null);
         }
 
         public void DragOver(IDropInfo dropInfo)

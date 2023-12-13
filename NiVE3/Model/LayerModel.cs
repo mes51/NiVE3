@@ -230,6 +230,8 @@ namespace NiVE3.Model
 
         public bool IsLight => FootageModel.InputModel.Input is LightInput;
 
+        public bool IsNullObject => FootageModel.InputModel.Input is NullObjectInput;
+
         public bool HasImage => SourceType.HasFlag(SourceType.Image) || SourceType.HasFlag(SourceType.Video);
 
         private ObservableCollection<EffectModel> effects = new ObservableCollection<EffectModel>();
@@ -287,6 +289,19 @@ namespace NiVE3.Model
 
             switch (footageModel.InputModel.Input)
             {
+                case NullObjectInput:
+                    TransformProperties = new PropertyGroupModel(new PropertyGroup(TransformGroupId, CreateLanguageResourceKey(LanguageResourceDictionary.Layer_Transform), new PropertyBase[]
+                    {
+                        new Vector2DOr3DProperty(ILayerObject.TransformAnchorPointId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_AnchorPoint), new Vector3d(compositionModel.Width * 0.5, compositionModel.Height * 0.5, 0.0), digit: 2),
+                        new Vector2DOr3DProperty(ILayerObject.TransformPositionId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_Translate), new Vector3d(compositionModel.Width * 0.5, compositionModel.Height * 0.5, 0.0), digit: 2),
+                        new Direction3DProperty(ILayerObject.TransformDirectionId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_Direction), new Vector3d(), digit: 2),
+                        new Angle3DElementProperty(ILayerObject.TransformXAngleId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_XAngle3D), 0.0, digit: 2),
+                        new Angle3DElementProperty(ILayerObject.TransformYAngleId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_YAngle3D), 0.0, digit: 2),
+                        new ZAngleProperty(ILayerObject.TransformZAngleId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_ZAngle2D), CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_ZAngle3D), 0.0, digit: 2),
+                        new Scale2DOr3DProperty(ILayerObject.TransformScaleId, CreateLanguageResourceKey(LanguageResourceDictionary.TransformProperty_Scale), new Vector3d(100.0, 100.0, 100.0), digit: 2)
+                    }), compositionModel, this, historyModel);
+                    LayerOptionProperties = new PropertyGroupModel(new PropertyGroup(LayerOptionGroupId, CreateLanguageResourceKey(LanguageResourceDictionary.Layer_LayerOptions_Layer), new PropertyBase[0]), compositionModel, this, historyModel);
+                    break;
                 case CameraInput:
                     var zoom = compositionModel.Width / DefaultCameraFov * 0.5;
                     IsEnableVideo = true;
@@ -516,6 +531,10 @@ namespace NiVE3.Model
                         _ => ParentType.SpotOrParallelLight
                     };
                     parentTransforms.Add(new ParentTransform(parentType, parent.GetTransform(time)));
+                }
+                else if (parent.IsNullObject)
+                {
+                    parentTransforms.Add(new ParentTransform(ParentType.NullObject, parent.GetTransform(time)));
                 }
                 else
                 {

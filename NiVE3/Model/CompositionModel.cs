@@ -233,6 +233,15 @@ namespace NiVE3.Model
             HistoryModel.Add(new AddLayersHistoryCommand(this, new LayerModel[] { layer }, 0));
         }
 
+        public void AddNullObject()
+        {
+            var layer = new LayerModel(this, FootageListModel.NullObjectFootage, EffectListModel, HistoryModel);
+            layer.OutPoint = Duration;
+            Layers.Insert(0, layer);
+
+            HistoryModel.Add(new AddLayersHistoryCommand(this, new LayerModel[] { layer }, 0));
+        }
+
         public void MoveLayer(Guid layerId, int newIndex)
         {
             MoveLayers(new Guid[] { layerId }, layerId, newIndex);

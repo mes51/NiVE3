@@ -99,6 +99,10 @@ namespace NiVE3.Plugin.Interfaces
         /// </summary>
         Camera,
         /// <summary>
+        /// ヌルオブジェクト
+        /// </summary>
+        NullObject,
+        /// <summary>
         /// スポット/平行ライトレイヤー
         /// </summary>
         SpotOrParallelLight,
