@@ -12,6 +12,8 @@ using NiVE3.Plugin.Property.Properties;
 using NiVE3.Plugin.Resource;
 using NiVE3.Plugin.Numerics;
 using NiVE3.PresetPlugin.Resource;
+using NiVE3.Plugin.Image;
+using NiVE3.Plugin.ValueObject;
 
 namespace NiVE3.PresetPlugin.Effect.ExpressionControl
 {
@@ -30,5 +32,10 @@ namespace NiVE3.PresetPlugin.Effect.ExpressionControl
         public void SetupAccelerator(IAcceleratorObject accelerator) { }
 
         public void Dispose() { }
+
+        public NImage Process(NImage image, ROI roi, double layerTime, PropertyValueGroup properties)
+        {
+            return image;
+        }
     }
 }

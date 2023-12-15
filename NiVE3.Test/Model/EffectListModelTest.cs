@@ -7,8 +7,10 @@ using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Model;
 using NiVE3.Plugin.Attributes;
+using NiVE3.Plugin.Image;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Property;
+using NiVE3.Plugin.ValueObject;
 
 namespace NiVE3.Test.Model
 {
@@ -45,6 +47,11 @@ namespace NiVE3.Test.Model
         }
 
         public void Dispose()
+        {
+            throw new NotImplementedException();
+        }
+
+        public NImage Process(NImage image, ROI roi, double layerTime, PropertyValueGroup properties)
         {
             throw new NotImplementedException();
         }

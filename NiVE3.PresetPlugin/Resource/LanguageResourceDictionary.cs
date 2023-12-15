@@ -30,11 +30,37 @@ namespace NiVE3.PresetPlugin.Resource
         [DefaultValue("エクスプレッションで使用するスライダー制御")]
         public const string ExpressionControl_SliderControl_Description = nameof(ExpressionControl_SliderControl_Description);
 
+        [DefaultValue("ボックスブラー")]
+        public const string Blur_BoxBlur_Name = nameof(Blur_BoxBlur_Name);
+
+        [DefaultValue("ボックスブラーを適用します")]
+        public const string Blur_BoxBlur_Description = nameof(Blur_BoxBlur_Description);
+
+        [DefaultValue("半径")]
+        public const string Blur_BoxBlur_Amount = nameof(Blur_BoxBlur_Amount);
+
+        [DefaultValue("繰り返し")]
+        public const string Blur_BoxBlur_Repeat = nameof(Blur_BoxBlur_Repeat);
+
+        [DefaultValue("方向")]
+        public const string Blur_BoxBlur_Direction = nameof(Blur_BoxBlur_Direction);
+
         [DefaultValue("デフォルトレンダラ")]
         public const string Renderer_DefaultRenderer_Name = nameof(Renderer_DefaultRenderer_Name);
 
         [DefaultValue("NiVE標準のレンダラ")]
         public const string Renderer_DefaultRenderer_Description = nameof(Renderer_DefaultRenderer_Description);
+
+        // enum
+
+        [DefaultValue("水平&垂直")]
+        public const string BlurDirection_HorizontalAndVertical = nameof(BlurDirection_HorizontalAndVertical);
+
+        [DefaultValue("水平")]
+        public const string BlurDirection_Horizontal = nameof(BlurDirection_Horizontal);
+
+        [DefaultValue("垂直")]
+        public const string BlurDirection_Vertical = nameof(BlurDirection_Vertical);
 
         static LanguageResourceDictionary()
         {

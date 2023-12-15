@@ -6,10 +6,12 @@ using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Plugin;
 using NiVE3.Plugin.Attributes;
+using NiVE3.Plugin.Image;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Property;
 using NiVE3.Plugin.Property.Properties;
 using NiVE3.Plugin.Resource;
+using NiVE3.Plugin.ValueObject;
 using NiVE3.PresetPlugin.Resource;
 
 namespace NiVE3.PresetPlugin.Effect.ExpressionControl
@@ -29,5 +31,10 @@ namespace NiVE3.PresetPlugin.Effect.ExpressionControl
         public void SetupAccelerator(IAcceleratorObject accelerator) { }
 
         public void Dispose() { }
+
+        public NImage Process(NImage image, ROI roi, double layerTime, PropertyValueGroup properties)
+        {
+            return image;
+        }
     }
 }

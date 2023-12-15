@@ -7,7 +7,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Plugin.Attributes;
+using NiVE3.Plugin.Image;
 using NiVE3.Plugin.Interfaces;
+using NiVE3.Plugin.Property;
+using NiVE3.Plugin.ValueObject;
 using Prism.Mvvm;
 
 namespace NiVE3.Model
@@ -28,8 +31,8 @@ namespace NiVE3.Model
             set { SetProperty(ref isEnable, value); }
         }
 
-        private ObservableCollection<PropertyModel> properties = new ObservableCollection<PropertyModel>();
-        public ObservableCollection<PropertyModel> Properties
+        private ObservableCollection<IPropertyModel> properties = new ObservableCollection<IPropertyModel>();
+        public ObservableCollection<IPropertyModel> Properties
         {
             get { return properties; }
             set { SetProperty(ref properties, value); }
@@ -61,7 +64,14 @@ namespace NiVE3.Model
 
             foreach (var p in effect.Value.GetProperties())
             {
-                Properties.Add(new PropertyModel(p, compositionModel, layerModel, this, historyModel));
+                if (p is PropertyGroup)
+                {
+                    Properties.Add(new PropertyGroupModel(p, compositionModel, layerModel, this, historyModel));
+                }
+                else
+                {
+                    Properties.Add(new PropertyModel(p, compositionModel, layerModel, this, historyModel));
+                }
             }
 
             foreach (var p in Properties)
@@ -70,6 +80,24 @@ namespace NiVE3.Model
             }
 
             PropertyChanged += EffectModel_PropertyChanged;
+        }
+
+        public NImage Process(NImage image, ROI roi, double layerTime)
+        {
+            var propertyValues = new Dictionary<string, object?>();
+            foreach (var p in Properties)
+            {
+                if (p is PropertyGroupModel pg)
+                {
+                    propertyValues.Add(pg.Id, pg.GetPropertyValueGroup(layerTime));
+                }
+                else if (p is PropertyModel pp)
+                {
+                    propertyValues.Add(pp.Id, pp.GetValue(layerTime));
+                }
+            }
+
+            return Effect.Value.Process(image, roi, layerTime, new PropertyValueGroup(propertyValues));
         }
 
         private void Property_ValueUpdated(object? sender, EventArgs e)

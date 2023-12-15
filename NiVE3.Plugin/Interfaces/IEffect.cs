@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NiVE3.Plugin.Image;
 using NiVE3.Plugin.Property;
+using NiVE3.Plugin.ValueObject;
 
 namespace NiVE3.Plugin.Interfaces
 {
@@ -20,5 +22,15 @@ namespace NiVE3.Plugin.Interfaces
         /// </summary>
         /// <returns>PropertyBaseの配列</returns>
         PropertyBase[] GetProperties();
+
+        /// <summary>
+        /// エフェクトを適用します
+        /// </summary>
+        /// <param name="image">適用先の画像</param>
+        /// <param name="roi">エフェクトの適用範囲</param>
+        /// <param name="layerTime">現在のレイヤーの時間</param>
+        /// <param name="properties">プロパティ</param>
+        /// <returns></returns>
+        NImage Process(NImage image, ROI roi, double layerTime, PropertyValueGroup properties);
     }
 }

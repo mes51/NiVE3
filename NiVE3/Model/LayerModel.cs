@@ -400,20 +400,20 @@ namespace NiVE3.Model
             var sourceTime = layerTime;
 
             var image = FootageModel.ReadImage(sourceTime, useGpu);
-            var roi = new Int32Rect(0, 0, image.Width, image.Height);
+            var roi = new ROI(new Int32Point(), new Int32Size(image.Width, image.Height), 0, 0, image.Width, image.Height);
 
             if (IsEnableEffect)
             {
-                foreach (var e in Effects)
+                // TODO: モジュラーエフェクト&ROI反映
+                foreach (var e in Effects.Where(e => !e.IsDummyEffect && e.IsEnable))
                 {
-                    // TODO: エフェクト反映
+                    image = e.Process(image, roi, layerTime);
                 }
             }
 
             return new RenderableImage(
                 image,
                 roi,
-                new Int32Point(),
                 downSamplingRate,
                 IsEnableMotionBlur,
                 IsEnable3D,

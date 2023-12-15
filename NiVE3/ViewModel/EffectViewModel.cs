@@ -39,8 +39,8 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref isEnable, value); }
         }
 
-        private ObservableCollectionView<PropertyModel, PropertyViewModel> properties;
-        public ObservableCollectionView<PropertyModel, PropertyViewModel> Properties
+        private ObservableCollectionView<IPropertyModel, IInternalPropertyViewModel> properties;
+        public ObservableCollectionView<IPropertyModel, IInternalPropertyViewModel> Properties
         {
             get { return properties; }
             set { SetProperty(ref properties, value); }
@@ -90,7 +90,15 @@ namespace NiVE3.ViewModel
 
             Properties = effectModel.Properties.CreateViewCollection(m =>
             {
-                var vm = new PropertyViewModel(m);
+                IInternalPropertyViewModel vm;
+                if (m is PropertyGroupModel pg)
+                {
+                    vm = new PropertyGroupViewModel(pg);
+                }
+                else
+                {
+                    vm = new PropertyViewModel((PropertyModel)m);
+                }
                 vm.SelectItemChanged += Property_SelectItemChanged;
                 return vm;
             });

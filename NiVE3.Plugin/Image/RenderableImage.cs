@@ -23,12 +23,7 @@ namespace NiVE3.Plugin.Image
         /// <summary>
         /// 画像の最終的なROI
         /// </summary>
-        public Int32Rect ROI { get; }
-
-        /// <summary>
-        /// レンダリングする画像の中のオリジナルの画像の位置
-        /// </summary>
-        public Int32Point OrigimalImagePosition { get; }
+        public ROI ROI { get; }
 
         /// <summary>
         /// ダウンサンプリングの倍率
@@ -70,11 +65,10 @@ namespace NiVE3.Plugin.Image
         /// </summary>
         public PropertyValueGroup? LayerOptions { get; }
 
-        internal RenderableImage(NImage image, Int32Rect roi, Int32Point origimalImagePosition, double downSampleRate, bool isEnableMotionBlur, bool isEnable3D, ImageInterpolationQuality interpolationQuality, BlendMode blendMode, PropertyValueGroup transform, ParentTransform[] parentTransforms, PropertyValueGroup? layerOptions)
+        internal RenderableImage(NImage image, ROI roi, double downSampleRate, bool isEnableMotionBlur, bool isEnable3D, ImageInterpolationQuality interpolationQuality, BlendMode blendMode, PropertyValueGroup transform, ParentTransform[] parentTransforms, PropertyValueGroup? layerOptions)
         {
             Image = image;
             ROI = roi;
-            OrigimalImagePosition = origimalImagePosition;
             DownSampleRate = downSampleRate;
             IsEnableMotionBlur = isEnableMotionBlur;
             IsEnable3D = isEnable3D;
