@@ -613,7 +613,14 @@ namespace NiVE3.Model
                     break;
             }
 
-            CompositionUpdated?.Invoke(this, EventArgs.Empty);
+            if (e.PropertyName != nameof(TimeBarRange) &&
+                e.PropertyName != nameof(TimeBarRangeStart) &&
+                e.PropertyName != nameof(WorkareaBegin) &&
+                e.PropertyName != nameof(WorkareaEnd) &&
+                e.PropertyName != nameof(CurrentTime))
+            {
+                CompositionUpdated?.Invoke(this, EventArgs.Empty);
+            }
         }
 
         private void Layers_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
