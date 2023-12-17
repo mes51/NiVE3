@@ -30,6 +30,20 @@ namespace NiVE3.Model
             set { SetProperty(ref sourceType, value); }
         }
 
+        private double workareaBegin;
+        public double WorkareaBegin
+        {
+            get { return workareaBegin; }
+            set { SetProperty(ref workareaBegin, value); }
+        }
+
+        private double workareaEnd;
+        public double WorkareaEnd
+        {
+            get { return workareaEnd; }
+            set { SetProperty(ref workareaEnd, value); }
+        }
+
         private double duration;
         public double Duration
         {
@@ -129,6 +143,8 @@ namespace NiVE3.Model
                 if (Footage != null)
                 {
                     SourceType = Footage.InputType;
+                    WorkareaBegin = 0.0;
+                    WorkareaEnd = Footage.Duration;
                     Duration = Footage.Duration;
                     FrameRate = Footage.FrameRate;
                     Width = Footage.Width;
@@ -138,6 +154,8 @@ namespace NiVE3.Model
                 else
                 {
                     SourceType = SourceType.None;
+                    WorkareaBegin = 0.0;
+                    WorkareaEnd = 0.0;
                     Duration = 0.0;
                     FrameRate = 30.0;
                     Width = 0;
@@ -165,10 +183,12 @@ namespace NiVE3.Model
                     if (composition != null)
                     {
                         composition.CompositionUpdated -= Composition_CompositionUpdated;
+                        composition.PropertyChanged -= Composition_PropertyChanged;
                     }
                     if (value != null)
                     {
                         value.CompositionUpdated += Composition_CompositionUpdated;
+                        value.PropertyChanged += Composition_PropertyChanged;
                     }
                 }
                 SetProperty(ref composition, value);
@@ -198,6 +218,8 @@ namespace NiVE3.Model
                     if (Composition != null)
                     {
                         SourceType = SourceType.VideoAndAudio;
+                        WorkareaBegin = Composition.WorkareaBegin;
+                        WorkareaEnd = Composition.WorkareaEnd;
                         Duration = Composition.Duration;
                         FrameRate = Composition.FrameRate;
                         Width = Composition.Width;
@@ -207,6 +229,8 @@ namespace NiVE3.Model
                     else
                     {
                         SourceType = SourceType.None;
+                        WorkareaBegin = 0.0;
+                        WorkareaEnd = 0.0;
                         Duration = 0.0;
                         FrameRate = 30.0;
                         Width = 0;
@@ -218,6 +242,27 @@ namespace NiVE3.Model
                     break;
                 case nameof(CurrentTime) when Composition != null:
                     Composition.CurrentTime = CurrentTime;
+                    break;
+            }
+        }
+
+        private void Composition_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (Composition == null)
+            {
+                return;
+            }
+
+            switch (e.PropertyName)
+            {
+                case nameof(CompositionModel.WorkareaBegin):
+                    WorkareaBegin = Composition.WorkareaBegin;
+                    break;
+                case nameof(CompositionModel.WorkareaEnd):
+                    WorkareaEnd = Composition.WorkareaEnd;
+                    break;
+                case nameof(CompositionModel.Duration):
+                    Duration = Composition.Duration;
                     break;
             }
         }

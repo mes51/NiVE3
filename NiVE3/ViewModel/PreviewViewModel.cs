@@ -62,6 +62,22 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref sourceType, value); }
         }
 
+        private double workareaBegin;
+        [NeedWire(nameof(PreviewModel), IsOneWay = true)]
+        public double WorkareaBegin
+        {
+            get { return workareaBegin; }
+            set { SetProperty(ref workareaBegin, value); }
+        }
+
+        private double workareaEnd;
+        [NeedWire(nameof(PreviewModel), IsOneWay = true)]
+        public double WorkareaEnd
+        {
+            get { return workareaEnd; }
+            set { SetProperty(ref workareaEnd, value); }
+        }
+
         private double duration;
         [NeedWire(nameof(PreviewModel), IsOneWay = true)]
         public double Duration
@@ -237,6 +253,13 @@ namespace NiVE3.ViewModel
             remove { SourceChangedPublisher.Unsubscribe(value); }
         }
 
+        WeakEventPublisher<EventArgs> WorkareaChangedPublisher { get; } = new WeakEventPublisher<EventArgs>();
+        public event EventHandler<EventArgs> WorkareaChanged
+        {
+            add { WorkareaChangedPublisher.Subscribe(value); }
+            remove { WorkareaChangedPublisher.Unsubscribe(value); }
+        }
+
         WeakEventPublisher<EventArgs> CurrentTimeChangeByUserPublisher { get; } = new WeakEventPublisher<EventArgs>();
         public event EventHandler<EventArgs> CurrentTimeChangeByUser
         {
@@ -390,6 +413,11 @@ namespace NiVE3.ViewModel
             IsDirtyBoundingBoxesBuffer = true;
         }
 
+        void OnWorkareaChanged()
+        {
+            WorkareaChangedPublisher.Publish(this, EventArgs.Empty);
+        }
+
         private void PreviewModel_FrameUpdateRequest(object? sender, EventArgs e)
         {
             UpdateCurrentFrame();
@@ -416,6 +444,11 @@ namespace NiVE3.ViewModel
                 case nameof(Duration):
                     TimeBarRange = Duration;
                     TimeBarRangeStart = 0.0;
+                    OnWorkareaChanged();
+                    break;
+                case nameof(WorkareaBegin):
+                case nameof(WorkareaEnd):
+                    OnWorkareaChanged();
                     break;
                 case nameof(PreviewColorChannel):
                     UpdateCurrentFrame();

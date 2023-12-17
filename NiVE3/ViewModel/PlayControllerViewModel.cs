@@ -37,6 +37,20 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref currentTime, value); }
         }
 
+        private double workareaBegin;
+        public double WorkareaBegin
+        {
+            get { return workareaBegin; }
+            set { SetProperty(ref workareaBegin, value); }
+        }
+
+        private double workareaEnd;
+        public double WorkareaEnd
+        {
+            get { return workareaEnd; }
+            set { SetProperty(ref workareaEnd, value); }
+        }
+
         private double duration;
         public double Duration
         {
@@ -81,6 +95,8 @@ namespace NiVE3.ViewModel
 
         PlayControllerModel PlayControllerModel { get; }
 
+        bool CanPlay => ((int)(WorkareaEnd - WorkareaBegin) * FrameRate) > 1;
+
         WeakEventPublisher<EventArgs> ChangeFrameRequestPublisher { get; } = new WeakEventPublisher<EventArgs>();
         public event EventHandler<EventArgs> ChangeFrameRequest
         {
@@ -99,12 +115,12 @@ namespace NiVE3.ViewModel
             {
                 IsPlaying = true;
                 IsPaused = false;
-            }, () => CanPreview &&(!IsPlaying || IsPaused));
+            }, () => CanPreview && CanPlay && (!IsPlaying || IsPaused));
 
             PauseCommand = new RequerySuggestedCommand(() =>
             {
                 IsPaused = !IsPaused;
-            }, () => CanPreview && IsPlaying);
+            }, () => CanPreview && CanPlay && IsPlaying);
 
             StopCommand = new RequerySuggestedCommand(() =>
             {
@@ -133,7 +149,16 @@ namespace NiVE3.ViewModel
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
-                CurrentTime = ((int)Math.Round(CurrentTime * FrameRate + 1) / FrameRate) % Duration;
+                var time = CurrentTime;
+                if (time < WorkareaBegin || time > WorkareaEnd)
+                {
+                    CurrentTime = ((int)Math.Round(CurrentTime * FrameRate + 1) / FrameRate) % Duration;
+                }
+                else
+                {
+                    var workarea = WorkareaEnd - WorkareaBegin;
+                    CurrentTime = (((int)Math.Round((CurrentTime - WorkareaBegin) * FrameRate + 1) / FrameRate) % workarea) + WorkareaBegin;
+                }
                 ChangeFrameRequestPublisher.Publish(this, EventArgs.Empty);
             });
         }
@@ -166,6 +191,8 @@ namespace NiVE3.ViewModel
                 case nameof(CanPreview) when !CanPreview:
                     IsPlaying = false;
                     IsPaused = false;
+                    WorkareaBegin = 0.0;
+                    WorkareaEnd = 0.0;
                     Duration = 0.0;
                     FrameRate = 1.0;
                     CurrentTime = 0.0;

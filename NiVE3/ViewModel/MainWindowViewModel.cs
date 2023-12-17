@@ -156,6 +156,7 @@ namespace NiVE3.ViewModel
                 var viewModel = Container.Resolve<PreviewViewModel>(new object[] { newPreview });
                 viewModel.PaneSelected += PreviewViewModel_PaneSelected;
                 viewModel.SourceChanged += PreviewViewModel_SourceChanged;
+                viewModel.WorkareaChanged += PreviewViewModel_WorkareaChanged;
                 viewModel.CurrentTimeChangeByUser += PreviewViewModel_CurrentTimeChangeByUser;
                 MainRegion.Add(viewModel);
             }
@@ -174,7 +175,8 @@ namespace NiVE3.ViewModel
                 {
                     vm.PaneSelected -= PreviewViewModel_PaneSelected;
                     vm.SourceChanged -= PreviewViewModel_SourceChanged;
-                    vm.SourceChanged -= PreviewViewModel_CurrentTimeChangeByUser;
+                    vm.WorkareaChanged -= PreviewViewModel_WorkareaChanged;
+                    vm.CurrentTimeChangeByUser -= PreviewViewModel_CurrentTimeChangeByUser;
                     ProjectModel.RemovePreview(vm.PreviewModel);
                 }
                 if (!ViewModels.OfType<PreviewViewModel>().Any())
@@ -194,6 +196,8 @@ namespace NiVE3.ViewModel
             if (sender is PreviewViewModel vm)
             {
                 PlayControllerViewModel.CanPreview = vm.SourceType.HasFlag(Plugin.Interfaces.SourceType.Video);
+                PlayControllerViewModel.WorkareaBegin = vm.WorkareaBegin;
+                PlayControllerViewModel.WorkareaEnd = vm.WorkareaEnd;
                 PlayControllerViewModel.Duration = vm.Duration;
                 PlayControllerViewModel.FrameRate = vm.FrameRate;
                 PlayControllerViewModel.CurrentTime = vm.CurrentTime;
@@ -205,9 +209,21 @@ namespace NiVE3.ViewModel
             if (sender is PreviewViewModel vm && vm.IsSelected)
             {
                 PlayControllerViewModel.CanPreview = vm.SourceType.HasFlag(Plugin.Interfaces.SourceType.Video);
+                PlayControllerViewModel.WorkareaBegin = vm.WorkareaBegin;
+                PlayControllerViewModel.WorkareaEnd = vm.WorkareaEnd;
                 PlayControllerViewModel.Duration = vm.Duration;
                 PlayControllerViewModel.FrameRate = vm.FrameRate;
                 PlayControllerViewModel.CurrentTime = vm.CurrentTime;
+            }
+        }
+
+        private void PreviewViewModel_WorkareaChanged(object? sender, EventArgs e)
+        {
+            if (sender is PreviewViewModel vm && vm.IsSelected)
+            {
+                PlayControllerViewModel.WorkareaBegin = vm.WorkareaBegin;
+                PlayControllerViewModel.WorkareaEnd = vm.WorkareaEnd;
+                PlayControllerViewModel.Duration = vm.Duration;
             }
         }
 

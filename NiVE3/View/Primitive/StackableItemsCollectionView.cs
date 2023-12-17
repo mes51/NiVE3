@@ -335,7 +335,14 @@ namespace NiVE3.View.Primitive
         {
             if (d is StackableItemsCollectionView<T> collection)
             {
-                collection.SelectedItemsView = new ObservableCollectionView<T>(collection.SelectedItems);
+                if (collection.SelectedItems != null)
+                {
+                    collection.SelectedItemsView = new ObservableCollectionView<T>(collection.SelectedItems);
+                }
+                else
+                {
+                    collection.SelectedItemsView = null;
+                }
             }
         }
     }
