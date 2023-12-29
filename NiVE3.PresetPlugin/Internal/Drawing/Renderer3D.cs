@@ -321,12 +321,14 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
                                 if (spotCone <= l.OuterCone)
                                 {
+                                    var transmissionColor = Vector4.One;
                                     if (triangle.IsAcceptShadow && spotLightShadows.TryGetValue(l, out var shadow))
                                     {
-                                        var (depth, depthIds, lightViewProjectionMatrix) = shadow;
+                                        var lightViewProjectionMatrix = shadow.LightViewProjectionMatrix;
                                         var shadowPos = Vector4.Transform(Vector4.Transform(shadowProjectionPos, floatInvtededViewMatrix), lightViewProjectionMatrix);
                                         shadowPos /= shadowPos.W;
                                         var shadowTexPos = shadowPos * 0.5F + new Vector4(0.5F, 0.5F, 0.0F, 0.0F);
+                                        var depth = shadowPos.Z;
 
                                         var shadowTextureX = (int)(shadowTexPos.X * Size);
                                         var shadowTextureY = (int)(shadowTexPos.Y * Size);
@@ -334,12 +336,28 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                         if (shadowTextureX > -1 && shadowTextureX < Size && shadowTextureY > -1 && shadowTextureY < Size)
                                         {
                                             var si = shadowTextureY * Size + shadowTextureX;
-                                            // NOTE: ポリゴンが無かったかどうかを判定する必要がある場合は depthIds[si] != 0 で判定する
-                                            if (depthIds[si] != triangle.Id && depth[si] > shadowPos.Z)
+                                            var index = shadow.Indices[si];
+                                            var bankIndex = shadow.BankIndices[si];
+                                            while (index >= 0 && transmissionColor.CompareGreaterThanBy3Element(Vector3.Zero))
                                             {
-                                                continue;
+                                                var sp = shadow.Buffers[bankIndex][index];
+                                                if (sp.TriangleId == triangle.Id || sp.Depth <= depth)
+                                                {
+                                                    break;
+                                                }
+
+                                                transmissionColor *= sp.Color;
+                                                index = sp.NextIndex;
+                                                bankIndex = sp.NextBank;
                                             }
                                         }
+
+                                        lightColor *= transmissionColor;
+                                    }
+
+                                    if (!transmissionColor.CompareGreaterThanBy3Element(Vector3.Zero))
+                                    {
+                                        continue;
                                     }
 
                                     var attenuation = 1.0F;
@@ -419,18 +437,17 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             }
         }
 
-        DepthMap RenderShadow(SpotLight spotLight, int size, float offsetX, float offsetY)
+        ShadowMap RenderShadow(SpotLight spotLight, int size, float offsetX, float offsetY)
         {
             var triangles = GetClipAndDividedTriangles(LightTriangles[spotLight]).ToArray();
             var convertedTexture = new Dictionary<NImage, NManagedImage>();
-            var renderedTriangleIds = ArrayPool<int>.Shared.Rent(size * size);
-            var depth = ArrayPool<float>.Shared.Rent(size * size);
-            depth.AsSpan().Fill(float.NegativeInfinity);
 
             var minZ = triangles.Select(t => Math.Min(Math.Min(t.V1.Vertex.GetElement(2), t.V2.Vertex.GetElement(2)), t.V3.Vertex.GetElement(2))).Min();
             var maxZ = triangles.Select(t => Math.Max(Math.Max(t.V1.Vertex.GetElement(2), t.V2.Vertex.GetElement(2)), t.V3.Vertex.GetElement(2))).Max();
             var lightProjectionMatrix = Matrix4x4d.CreatePerspectiveFieldOfView(spotLight.ConeRadian, 1.0, minZ, maxZ);
             var floatLightProjectionMatrix = (Matrix4x4)lightProjectionMatrix;
+
+            var shadowMap = new ShadowMap(size, spotLight.FloatLightViewMatrix * Matrix4x4.CreateTranslation(offsetX, offsetY, 0.0F) * floatLightProjectionMatrix);
 
             foreach (var triangle in triangles)
             {
@@ -485,13 +502,14 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 {
                     managedTexture = (NManagedImage)triangle.Texture;
                 }
+
                 Parallel.For(minY, maxY, y =>
                 {
                     var texture = MemoryMarshal.Cast<float, Vector4>(managedTexture.GetDataSpan());
                     var eY = Sse.Multiply(edgeX, Sse.Subtract(Vector128.Create(y, y, y, 0.0F), vvEY));
                     var offset = y * size;
-                    var depthSpan = depth.AsSpan(offset, size);
-                    var idSpan = renderedTriangleIds.AsSpan(offset, size);
+                    var indicesSpan = shadowMap.Indices.AsSpan(offset, size);
+                    var bankIndicesSpan = shadowMap.BankIndices.AsSpan(offset, size);
                     for (int x = minX; x < maxX; x++)
                     {
                         var eX = Sse.Subtract(Vector128.Create(x, x, x, 0.0F), vvEX);
@@ -508,7 +526,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
                         var color = ImageInterpolation.Bilinear(texture, textureWidth, textureHeight, tx, ty);
 
-                        if (color.W <= 0.0F)
+                        // α == 0 もしくはライト透過100%の白
+                        if (color.W <= 0.0F || (triangle.LightTransmission >= 1.0F && color.X >= 1.0F && color.Y >= 1.0F && color.Z >= 1.0F))
                         {
                             continue;
                         }
@@ -527,8 +546,12 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                             0b01000100
                         ).AsVector4();
 
-                        depthSpan[x] = d.Z;
-                        idSpan[x] = triangle.Id;
+                        var shadowColor = Vector4.Lerp(Vector4.One, Vector4.Lerp(Vector4.UnitW, Vector4.Clamp(color, Vector4.Zero, Vector4.One), triangle.LightTransmission), Math.Min(color.W, 1.0F) * triangle.Opacity);
+                        shadowColor.W = 1.0F;
+                        var (bankIndex, index) = shadowMap.GetEmptyIndex();
+                        shadowMap.Buffers[bankIndex][index] = new ShadowPixel(shadowColor, d.Z, triangle.Id, indicesSpan[x], bankIndicesSpan[x]);
+                        indicesSpan[x] = index;
+                        bankIndicesSpan[x] = bankIndex;
                     }
                 });
             }
@@ -538,7 +561,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 i.Dispose();
             }
 
-            return new DepthMap(depth, renderedTriangleIds, spotLight.FloatLightViewMatrix * Matrix4x4.CreateTranslation(offsetX, offsetY, 0.0F) * floatLightProjectionMatrix);
+            return shadowMap;
         }
 
         IEnumerable<T> GetClipAndDividedTriangles<T>(IEnumerable<T> triangles) where T : TriangleBase<T>
@@ -798,21 +821,6 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 LightFalloffType.Exponential => Math.Min(1.0F / MathF.Pow(1.0F + length, 2.0F), 1.0F),
                 _ => 1.0F
             };
-        }
-    }
-
-    record DepthMap(float[] Depth, int[] DepthId, Matrix4x4 LightViewProjectionMatrix) : IDisposable
-    {
-        public readonly float[] Depth = Depth;
-
-        public readonly int[] DepthId = DepthId;
-
-        public readonly Matrix4x4 LightViewProjectionMatrix = LightViewProjectionMatrix;
-
-        public void Dispose()
-        {
-            ArrayPool<float>.Shared.Return(Depth);
-            ArrayPool<int>.Shared.Return(DepthId, true);
         }
     }
 }

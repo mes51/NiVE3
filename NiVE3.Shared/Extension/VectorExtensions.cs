@@ -38,6 +38,12 @@ namespace NiVE3.Shared.Extension
         {
             return v.AsVector128().HorizontalMinBy3Element().GetElement(0);
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool CompareGreaterThanBy3Element(this in Vector4 a, in Vector3 b)
+        {
+            return !Avx.TestZ(Sse.CompareGreaterThan(a.AsVector128().AsVector3().AsVector128(), b.AsVector128()), Vector128.Create(float.NaN));
+        }
     }
 
     public static class Vector128Extensions
