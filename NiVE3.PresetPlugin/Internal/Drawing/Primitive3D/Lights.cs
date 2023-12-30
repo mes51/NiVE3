@@ -72,7 +72,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
 
         public readonly bool IsEnableShadow;
 
-        public readonly double ShadowStrength;
+        public readonly float ShadowStrength;
 
         public readonly double ShadowScatterSize;
 
@@ -97,7 +97,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
             FalloffStart = (float)falloffStart;
             FalloffLength = (float)falloffLength;
             IsEnableShadow = isEnableShadow;
-            ShadowStrength = shadowStrength;
+            ShadowStrength = (float)shadowStrength;
             ShadowScatterSize = shadowScatterSize;
             LightViewMatrix = lightViewMartrix;
             FloatLightViewMatrix = (Matrix4x4)lightViewMartrix;

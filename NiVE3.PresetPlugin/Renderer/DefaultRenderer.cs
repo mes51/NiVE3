@@ -101,7 +101,7 @@ namespace NiVE3.PresetPlugin.Renderer
                             lightSetting.FalloffStart / size,
                             lightSetting.FalloffLength / size,
                             lightSetting.IsEnableShadow,
-                            lightSetting.ShadowStrength,
+                            lightSetting.ShadowStrength * 0.01,
                             lightSetting.ShadowScatterSize
                         );
                         if (light.Color != Vector4.Zero)
@@ -125,7 +125,7 @@ namespace NiVE3.PresetPlugin.Renderer
                             lightSetting.FalloffStart / size,
                             lightSetting.FalloffLength / size,
                             lightSetting.IsEnableShadow,
-                            lightSetting.ShadowStrength,
+                            lightSetting.ShadowStrength * 0.01,
                             lightSetting.ShadowScatterSize,
                             CalcLightViewMatrix(lightSetting, Width, Height)
                         );
@@ -147,7 +147,7 @@ namespace NiVE3.PresetPlugin.Renderer
                             lightSetting.FalloffStart / size,
                             lightSetting.FalloffLength / size,
                             lightSetting.IsEnableShadow,
-                            lightSetting.ShadowStrength,
+                            lightSetting.ShadowStrength * 0.01,
                             lightSetting.ShadowScatterSize
                         );
                         if (light.Color != Vector4.Zero)

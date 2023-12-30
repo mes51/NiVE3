@@ -546,7 +546,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                             0b01000100
                         ).AsVector4();
 
-                        var shadowColor = Vector4.Lerp(Vector4.One, Vector4.Lerp(Vector4.UnitW, Vector4.Clamp(color, Vector4.Zero, Vector4.One), triangle.LightTransmission), Math.Min(color.W, 1.0F) * triangle.Opacity);
+                        var shadowColor = Vector4.One - Vector4.Lerp(Vector4.One, Vector4.Lerp(Vector4.UnitW, Vector4.Clamp(color, Vector4.Zero, Vector4.One), triangle.LightTransmission), Math.Min(color.W, 1.0F) * triangle.Opacity);
+                        shadowColor = Vector4.One - Vector4.Clamp(shadowColor * spotLight.ShadowStrength, Vector4.Zero, Vector4.One);
                         shadowColor.W = 1.0F;
                         var (bankIndex, index) = shadowMap.GetEmptyIndex();
                         shadowMap.Buffers[bankIndex][index] = new ShadowPixel(shadowColor, d.Z, triangle.Id, indicesSpan[x], bankIndicesSpan[x]);
