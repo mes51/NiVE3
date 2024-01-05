@@ -344,7 +344,7 @@ namespace NiVE3.Model
                         new DoubleProperty(ILayerObject.LightLayerOptionFalloffLengthId, CreateLanguageResourceKey(LanguageResourceDictionary.LayerOptionsProperty_FalloffLength), 500.0, 0.0, double.MaxValue, digit: 2),
                         new CheckBoxProperty(ILayerObject.LightLayerOptionEnableShadowId, CreateLanguageResourceKey(LanguageResourceDictionary.LayerOptionsProperty_EnableShadow), true),
                         new DoubleProperty(ILayerObject.LightLayerOptionShadowStrengthId, CreateLanguageResourceKey(LanguageResourceDictionary.LayerOptionsProperty_ShadowStrength), 100.0, 0.0, double.MaxValue, digit: 2, unitKey: CreateLanguageResourceKey(LanguageResourceDictionary.Unit_Percent)),
-                        new DoubleProperty(ILayerObject.LightLayerOptionShadowScatterSizeId, CreateLanguageResourceKey(LanguageResourceDictionary.LayerOptionsProperty_ShadowScatterSize), 0.0, 0.0, double.MaxValue, digit: 2, unitKey: CreateLanguageResourceKey(LanguageResourceDictionary.Unit_Pixel))
+                        new DoubleProperty(ILayerObject.LightLayerOptionShadowScatterSizeId, CreateLanguageResourceKey(LanguageResourceDictionary.LayerOptionsProperty_ShadowScatterSize), 0.0, 0.0, double.MaxValue, slideChangeValue: 0.1, digit: 2, unitKey: CreateLanguageResourceKey(LanguageResourceDictionary.Unit_Pixel))
                     }), compositionModel, this, historyModel);
                     break;
                 default:

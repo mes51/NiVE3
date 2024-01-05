@@ -324,6 +324,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                     var transmissionColor = Vector4.One;
                                     if (triangle.IsAcceptShadow && spotLightShadows.TryGetValue(l, out var shadow))
                                     {
+                                        transmissionColor = Vector4.Zero;
                                         var lightViewProjectionMatrix = shadow.LightViewProjectionMatrix;
                                         var shadowPos = Vector4.Transform(Vector4.Transform(shadowProjectionPos, floatInvtededViewMatrix), lightViewProjectionMatrix);
                                         shadowPos /= shadowPos.W;
@@ -333,26 +334,52 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                         var shadowTextureX = (int)(shadowTexPos.X * Size);
                                         var shadowTextureY = (int)(shadowTexPos.Y * Size);
 
-                                        if (shadowTextureX > -1 && shadowTextureX < Size && shadowTextureY > -1 && shadowTextureY < Size)
+                                        // TODO: ちゃんと距離に応じてぼけるようにする
+                                        //        Deep Shadow Mapsと相性が悪いのであれば他のShadow Mappingアルゴリズムに切り替えることも検討する
+                                        var samplingRange = (int)MathF.Ceiling(l.ShadowScatterSize) * 2 + 1;
+                                        var edgeRate = l.ShadowScatterSize % 1.0F;
+                                        if (edgeRate <= 0.0F)
                                         {
-                                            var si = shadowTextureY * Size + shadowTextureX;
-                                            var index = shadow.Indices[si];
-                                            var bankIndex = shadow.BankIndices[si];
-                                            while (index >= 0 && transmissionColor.CompareGreaterThanBy3Element(Vector3.Zero))
+                                            edgeRate = 1.0F;
+                                        }
+                                        for (int stsy = shadowTextureY - samplingRange / 2, cy = 0; cy < samplingRange; stsy++, cy++)
+                                        {
+                                            var yRate = (cy == 0 || cy == samplingRange - 1 ? edgeRate : 1.0F);
+                                            if (stsy < 0 || stsy >= Size)
                                             {
-                                                var sp = shadow.Buffers[bankIndex][index];
-                                                if (sp.TriangleId == triangle.Id || sp.Depth <= depth)
+                                                transmissionColor += Vector4.One * ((samplingRange - 2) + edgeRate * 2.0F) * yRate;
+                                                continue;
+                                            }
+                                            for (int stsx = shadowTextureX - samplingRange / 2, cx = 0; cx < samplingRange; stsx++, cx++)
+                                            {
+                                                var rate = (cx == 0 || cx == samplingRange - 1 ? edgeRate : 1.0F) * yRate;
+                                                if (stsx < 0 || stsx >= Size)
                                                 {
-                                                    break;
+                                                    transmissionColor += Vector4.One * rate;
+                                                    continue;
                                                 }
 
-                                                transmissionColor *= sp.Color;
-                                                index = sp.NextIndex;
-                                                bankIndex = sp.NextBank;
+                                                var tc = Vector4.One;
+                                                var si = stsy * Size + stsx;
+                                                var index = shadow.Indices[si];
+                                                var bankIndex = shadow.BankIndices[si];
+                                                while (index >= 0 && tc.CompareGreaterThanBy3Element(Vector3.Zero))
+                                                {
+                                                    var sp = shadow.Buffers[bankIndex][index];
+                                                    if (sp.TriangleId == triangle.Id)
+                                                    {
+                                                        break;
+                                                    }
+
+                                                    tc *= sp.Color;
+                                                    index = sp.NextIndex;
+                                                    bankIndex = sp.NextBank;
+                                                }
+                                                transmissionColor += tc * rate;
                                             }
                                         }
 
-                                        lightColor *= transmissionColor;
+                                        lightColor *= transmissionColor / ((l.ShadowScatterSize * 2.0F + 1.0F) * (l.ShadowScatterSize * 2.0F + 1.0F));
                                     }
 
                                     if (!transmissionColor.CompareGreaterThanBy3Element(Vector3.Zero))

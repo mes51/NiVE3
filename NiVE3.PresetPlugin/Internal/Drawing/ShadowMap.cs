@@ -21,10 +21,13 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
         public readonly int[] BankIndices;
 
+        public int ShadowMapSize;
+
         int CurrentHeadIndex = -1;
 
         public ShadowMap(int size, Matrix4x4 lightViewProjectionMatrix)
         {
+            ShadowMapSize = size;
             LightViewProjectionMatrix = lightViewProjectionMatrix;
             Indices = ArrayPool<int>.Shared.Rent(size * size);
             Indices.AsSpan(0, size * size).Fill(-1);
