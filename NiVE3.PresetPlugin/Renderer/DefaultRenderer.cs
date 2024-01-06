@@ -148,7 +148,8 @@ namespace NiVE3.PresetPlugin.Renderer
                             lightSetting.FalloffLength / size,
                             lightSetting.IsEnableShadow,
                             lightSetting.ShadowStrength * 0.01,
-                            lightSetting.ShadowScatterSize
+                            lightSetting.ShadowScatterSize,
+                            CalcLightViewMatrix(lightSetting, Width, Height)
                         );
                         if (light.Color != Vector4.Zero)
                         {

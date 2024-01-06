@@ -118,6 +118,28 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                     triangles.Add(new LightTriangle(luv1, luv2, luv3, lfarPoint, invertedLightModelViewMatrix, texture, opacity, lightTransmission, LastId));
                     triangles.Add(new LightTriangle(luv1, luv3, luv4, lfarPoint, invertedLightModelViewMatrix, texture, opacity, lightTransmission, LastId));
                 }
+                foreach (var parallelLight in ParallelLights)
+                {
+                    var lmv = modelMatrix * parallelLight.LightViewMatrix;
+                    var lmvt = lmv * Matrix4x4d.CreateTranslate(offsetX, offsetY, 0.0);
+                    var lv1 = lmvt.Transform(sv1);
+                    var lv2 = lmvt.Transform(sv2);
+                    var lv3 = lmvt.Transform(sv3);
+                    var lv4 = lmvt.Transform(sv4);
+
+                    var luv1 = new UVVertex(lv1, 0.0F, 0.0F);
+                    var luv2 = new UVVertex(lv2, 0.0F, 1.0F);
+                    var luv3 = new UVVertex(lv3, 1.0F, 1.0F);
+                    var luv4 = new UVVertex(lv4, 1.0F, 0.0F);
+
+                    Matrix4x4d.Invert(mv, out var invertedLightModelViewMatrix);
+                    invertedLightModelViewMatrix = Matrix4x4d.Transpose(invertedLightModelViewMatrix);
+
+                    var triangles = LightTriangles[parallelLight];
+                    var lfarPoint = Avx.And(lmv.Transform(Vector256.Create(0.0, 0.0, -10000.0, 1.0)), Vector256.Create(0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0).AsDouble());
+                    triangles.Add(new LightTriangle(luv1, luv2, luv3, lfarPoint, invertedLightModelViewMatrix, texture, opacity, lightTransmission, LastId));
+                    triangles.Add(new LightTriangle(luv1, luv3, luv4, lfarPoint, invertedLightModelViewMatrix, texture, opacity, lightTransmission, LastId));
+                }
             }
 
             LastId++;
@@ -145,7 +167,9 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             var convertedTexture = new Dictionary<NImage, NManagedImage>();
             var hasLight = PointLights.Count > 0 || SpotLights.Count > 0 || ParallelLights.Count > 0 || AmbientLights.Count > 0;
 
-            var spotLightShadows = SpotLights.Where(l => l.IsEnableShadow && LightTriangles[l].Count > 0).ToDictionary(l => l, l => RenderShadow(l, Size, (float)offsetX, (float)offsetY));
+            var spotLightShadows = SpotLights.Select(l => l.IsEnableShadow && LightTriangles[l].Count > 0 ? RenderSpotLightShadow(l, Size, (float)offsetX, (float)offsetY) : null).ToArray();
+            var parallelLightShadows = ParallelLights.Select(l => l.IsEnableShadow && LightTriangles[l].Count > 0 ? RenderParallelLightShadow(l, Size, (float)offsetX, (float)offsetY) : null).ToArray();
+            var hasShadow = spotLightShadows.Any(s => s != null) || parallelLightShadows.Any(s => s != null);
 
             foreach (var triangle in triangles)
             {
@@ -249,40 +273,16 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                             var specular = Vector4.Zero;
                             var ambient = Vector4.Zero;
                             var alpha = color.W;
-                            var position = Sse.Shuffle(
-                                Sse41.Blend(
-                                    Sse.Multiply(vvX, e).HorizontalAdd(),
-                                    Sse.Multiply(vvY, e).HorizontalAdd(),
-                                    0b1010
-                                ),
-                                Sse41.Blend(
-                                    Sse.Multiply(vvZ, e).HorizontalAdd(),
-                                    Vector128.Create(1.0F),
-                                    0b1010
-                                ),
-                                0b01000100
-                            );
+                            var position = CalcBarycentricCoord(vvX, vvY, vvZ, e);
                             var n = -triangle.FloatNormal;
                             if (!isFrontFace)
                             {
                                 n = -n;
                             }
                             var shadowProjectionPos = Vector4.Zero;
-                            if (spotLightShadows.Count > 0)
+                            if (hasShadow)
                             {
-                                shadowProjectionPos = Sse.Shuffle(
-                                    Sse41.Blend(
-                                        Sse.Multiply(pvvX, e).HorizontalAdd(),
-                                        Sse.Multiply(pvvY, e).HorizontalAdd(),
-                                        0b1010
-                                    ),
-                                    Sse41.Blend(
-                                        Sse.Multiply(pvvZ, e).HorizontalAdd(),
-                                        Vector128.Create(1.0F),
-                                        0b1010
-                                    ),
-                                    0b01000100
-                                ).AsVector4();
+                                shadowProjectionPos = CalcBarycentricCoord(pvvX, pvvY, pvvZ, e).AsVector4();
                             }
 
                             for (var i = 0; i < PointLights.Count; i++)
@@ -321,70 +321,15 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
                                 if (spotCone <= l.OuterCone)
                                 {
-                                    var transmissionColor = Vector4.One;
-                                    if (triangle.IsAcceptShadow && spotLightShadows.TryGetValue(l, out var shadow))
+                                    var shadow = spotLightShadows[i];
+                                    if (triangle.IsAcceptShadow && shadow != null)
                                     {
-                                        transmissionColor = Vector4.Zero;
-                                        var lightViewProjectionMatrix = shadow.LightViewProjectionMatrix;
-                                        var shadowPos = Vector4.Transform(Vector4.Transform(shadowProjectionPos, floatInvtededViewMatrix), lightViewProjectionMatrix);
-                                        shadowPos /= shadowPos.W;
-                                        var shadowTexPos = shadowPos * 0.5F + new Vector4(0.5F, 0.5F, 0.0F, 0.0F);
-                                        var depth = shadowPos.Z;
-
-                                        var shadowTextureX = (int)(shadowTexPos.X * Size);
-                                        var shadowTextureY = (int)(shadowTexPos.Y * Size);
-
-                                        // TODO: ちゃんと距離に応じてぼけるようにする
-                                        //        Deep Shadow Mapsと相性が悪いのであれば他のShadow Mappingアルゴリズムに切り替えることも検討する
-                                        var samplingRange = (int)MathF.Ceiling(l.ShadowScatterSize) * 2 + 1;
-                                        var edgeRate = l.ShadowScatterSize % 1.0F;
-                                        if (edgeRate <= 0.0F)
+                                        var transmissionColor = GetShadowColor(triangle.Id, shadow, l.ShadowScatterSize, shadowProjectionPos, floatInvtededViewMatrix, shadow.LightViewProjectionMatrix);
+                                        if (!transmissionColor.CompareGreaterThanBy3Element(Vector3.Zero))
                                         {
-                                            edgeRate = 1.0F;
+                                            continue;
                                         }
-                                        for (int stsy = shadowTextureY - samplingRange / 2, cy = 0; cy < samplingRange; stsy++, cy++)
-                                        {
-                                            var yRate = (cy == 0 || cy == samplingRange - 1 ? edgeRate : 1.0F);
-                                            if (stsy < 0 || stsy >= Size)
-                                            {
-                                                transmissionColor += Vector4.One * ((samplingRange - 2) + edgeRate * 2.0F) * yRate;
-                                                continue;
-                                            }
-                                            for (int stsx = shadowTextureX - samplingRange / 2, cx = 0; cx < samplingRange; stsx++, cx++)
-                                            {
-                                                var rate = (cx == 0 || cx == samplingRange - 1 ? edgeRate : 1.0F) * yRate;
-                                                if (stsx < 0 || stsx >= Size)
-                                                {
-                                                    transmissionColor += Vector4.One * rate;
-                                                    continue;
-                                                }
-
-                                                var tc = Vector4.One;
-                                                var si = stsy * Size + stsx;
-                                                var index = shadow.Indices[si];
-                                                var bankIndex = shadow.BankIndices[si];
-                                                while (index >= 0 && tc.CompareGreaterThanBy3Element(Vector3.Zero))
-                                                {
-                                                    var sp = shadow.Buffers[bankIndex][index];
-                                                    if (sp.TriangleId == triangle.Id)
-                                                    {
-                                                        break;
-                                                    }
-
-                                                    tc *= sp.Color;
-                                                    index = sp.NextIndex;
-                                                    bankIndex = sp.NextBank;
-                                                }
-                                                transmissionColor += tc * rate;
-                                            }
-                                        }
-
-                                        lightColor *= transmissionColor / ((l.ShadowScatterSize * 2.0F + 1.0F) * (l.ShadowScatterSize * 2.0F + 1.0F));
-                                    }
-
-                                    if (!transmissionColor.CompareGreaterThanBy3Element(Vector3.Zero))
-                                    {
-                                        continue;
+                                        lightColor *= transmissionColor;
                                     }
 
                                     var attenuation = 1.0F;
@@ -419,6 +364,17 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                 var lightColor = l.Color;
                                 var lightDiff = Sse.Subtract(position, l.Position).AsVector3();
                                 var falloff = CalcFalloff(lightDiff, l.FalloffType, l.FalloffStart, l.FalloffLength);
+
+                                var shadow = parallelLightShadows[i];
+                                if (triangle.IsAcceptShadow && shadow != null)
+                                {
+                                    var transmissionColor = GetShadowColor(triangle.Id, shadow, l.ShadowScatterSize, shadowProjectionPos, floatInvtededViewMatrix, shadow.LightViewProjectionMatrix);
+                                    if (!transmissionColor.CompareGreaterThanBy3Element(Vector3.Zero))
+                                    {
+                                        continue;
+                                    }
+                                    lightColor *= transmissionColor;
+                                }
 
                                 var diffuseFactor = Vector3.Dot(l.Direction, n);
                                 var isBack = diffuseFactor < 0.0F;
@@ -458,138 +414,42 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 i.Dispose();
             }
 
-            foreach (var s in spotLightShadows.Values)
+            foreach (var s in spotLightShadows)
             {
-                s.Dispose();
+                s?.Dispose();
+            }
+            foreach (var s in parallelLightShadows)
+            {
+                s?.Dispose();
             }
         }
 
-        ShadowMap RenderShadow(SpotLight spotLight, int size, float offsetX, float offsetY)
+        ShadowMap RenderSpotLightShadow(SpotLight spotLight, int size, float offsetX, float offsetY)
         {
             var triangles = GetClipAndDividedTriangles(LightTriangles[spotLight]).ToArray();
-            var convertedTexture = new Dictionary<NImage, NManagedImage>();
 
             var minZ = triangles.Select(t => Math.Min(Math.Min(t.V1.Vertex.GetElement(2), t.V2.Vertex.GetElement(2)), t.V3.Vertex.GetElement(2))).Min();
             var maxZ = triangles.Select(t => Math.Max(Math.Max(t.V1.Vertex.GetElement(2), t.V2.Vertex.GetElement(2)), t.V3.Vertex.GetElement(2))).Max();
             var lightProjectionMatrix = Matrix4x4d.CreatePerspectiveFieldOfView(spotLight.ConeRadian, 1.0, minZ, maxZ);
-            var floatLightProjectionMatrix = (Matrix4x4)lightProjectionMatrix;
 
-            var shadowMap = new ShadowMap(size, spotLight.FloatLightViewMatrix * Matrix4x4.CreateTranslation(offsetX, offsetY, 0.0F) * floatLightProjectionMatrix);
+            return RenderShadow(size, offsetX, offsetY, triangles, spotLight.ShadowStrength, spotLight.FloatLightViewMatrix, (Matrix4x4)lightProjectionMatrix);
+        }
 
-            foreach (var triangle in triangles)
+        ShadowMap? RenderParallelLightShadow(ParallelLight parallelLight, int size, float offsetX, float offsetY)
+        {
+            var triangles = GetClipAndDividedTriangles(LightTriangles[parallelLight]).ToArray();
+
+            var min = triangles.Select(t => Avx.Min(Avx.Min(t.V1.Vertex, t.V2.Vertex), t.V3.Vertex)).Aggregate(Avx.Min);
+            var max = triangles.Select(t => Avx.Max(Avx.Max(t.V1.Vertex, t.V2.Vertex), t.V3.Vertex)).Aggregate(Avx.Max);
+
+            if (min.GetElement(0) == max.GetElement(0) || min.GetElement(1) == max.GetElement(1))
             {
-                if (triangle.V1.Vertex.GetElement(2) < 0.0F || triangle.V2.Vertex.GetElement(2) < 0.0F || triangle.V3.Vertex.GetElement(2) < 0.0F)
-                {
-                    continue;
-                }
-
-                var uv1 = triangle.V1.Transform(lightProjectionMatrix);
-                var uv2 = triangle.V2.Transform(lightProjectionMatrix);
-                var uv3 = triangle.V3.Transform(lightProjectionMatrix);
-                var textureWidth = triangle.Texture.Width;
-                var textureHeight = triangle.Texture.Height;
-
-                var w1 = 1.0 / Math.Abs(uv1.Vertex.GetElement(3));
-                var w2 = 1.0 / Math.Abs(uv2.Vertex.GetElement(3));
-                var w3 = 1.0 / Math.Abs(uv3.Vertex.GetElement(3));
-                uv1 *= w1;
-                uv2 *= w2;
-                uv3 *= w3;
-                var dvv1 = Avx.Multiply(Avx.Add(uv1.Vertex, Vector256.Create(1.0, 1.0, 0.0, 0.0)), Vector256.Create(Size * 0.5, Size * 0.5, 1.0, 1.0));
-                var dvv2 = Avx.Multiply(Avx.Add(uv2.Vertex, Vector256.Create(1.0, 1.0, 0.0, 0.0)), Vector256.Create(Size * 0.5, Size * 0.5, 1.0, 1.0));
-                var dvv3 = Avx.Multiply(Avx.Add(uv3.Vertex, Vector256.Create(1.0, 1.0, 0.0, 0.0)), Vector256.Create(Size * 0.5, Size * 0.5, 1.0, 1.0));
-                var vvX = Vector128.Create((float)uv1.Vertex.GetElement(0), (float)uv2.Vertex.GetElement(0), (float)uv3.Vertex.GetElement(0), 0.0F);
-                var vvY = Vector128.Create((float)uv1.Vertex.GetElement(1), (float)uv2.Vertex.GetElement(1), (float)uv3.Vertex.GetElement(1), 0.0F);
-                var vvZ = Vector128.Create((float)uv1.Vertex.GetElement(2), (float)uv2.Vertex.GetElement(2), (float)uv3.Vertex.GetElement(2), 0.0F);
-                var minX = MaxClampedSize((int)(Math.Min(Math.Min(dvv1.GetElement(0), dvv2.GetElement(0)), dvv3.GetElement(0))), 0);
-                var maxX = MinClampedSize((int)Math.Ceiling(Math.Max(Math.Max(dvv1.GetElement(0), dvv2.GetElement(0)), dvv3.GetElement(0))), size);
-                var minY = MaxClampedSize((int)(Math.Min(Math.Min(dvv1.GetElement(1), dvv2.GetElement(1)), dvv3.GetElement(1))), 0);
-                var maxY = MinClampedSize((int)Math.Ceiling(Math.Max(Math.Max(dvv1.GetElement(1), dvv2.GetElement(1)), dvv3.GetElement(1))), size);
-                var u = Vector128.Create((float)uv1.U, (float)uv2.U, (float)uv3.U, 0.0F);
-                var v = Vector128.Create((float)uv1.V, (float)uv2.V, (float)uv3.V, 0.0F);
-                var w = Vector128.Create((float)w1, (float)w2, (float)w3, 0.0F);
-
-                var denom = Vector128.Create((float)(1.0 / (((dvv2.GetElement(0) - dvv1.GetElement(0)) * (dvv3.GetElement(1) - dvv1.GetElement(1))) - ((dvv2.GetElement(1) - dvv1.GetElement(1)) * (dvv3.GetElement(0) - dvv1.GetElement(0))))));
-                var edgeX = Sse.Subtract(Vector128.Create((float)dvv3.GetElement(0), (float)dvv1.GetElement(0), (float)dvv2.GetElement(0), 0.0F), Vector128.Create((float)dvv2.GetElement(0), (float)dvv3.GetElement(0), (float)dvv1.GetElement(0), 0.0F));
-                var edgeY = Sse.Subtract(Vector128.Create((float)dvv3.GetElement(1), (float)dvv1.GetElement(1), (float)dvv2.GetElement(1), 0.0F), Vector128.Create((float)dvv2.GetElement(1), (float)dvv3.GetElement(1), (float)dvv1.GetElement(1), 0.0F));
-                var isFrontFace = triangle.Normal.DotProduct(Vector256.Create(0.0, 0.0, 1.0, 0.0)).GetElement(0) <= 0.0;
-                var vvEX = Vector128.Create((float)dvv2.GetElement(0), (float)dvv3.GetElement(0), (float)dvv1.GetElement(0), 0.0F);
-                var vvEY = Vector128.Create((float)dvv2.GetElement(1), (float)dvv3.GetElement(1), (float)dvv1.GetElement(1), 0.0F);
-
-                NManagedImage managedTexture;
-                if (triangle.Texture is NCudaImage cudaImage)
-                {
-                    if (!convertedTexture.ContainsKey(cudaImage))
-                    {
-                        convertedTexture.Add(cudaImage, cudaImage.CopyToCpu());
-                    }
-                    managedTexture = convertedTexture[triangle.Texture];
-                }
-                else
-                {
-                    managedTexture = (NManagedImage)triangle.Texture;
-                }
-
-                Parallel.For(minY, maxY, y =>
-                {
-                    var texture = MemoryMarshal.Cast<float, Vector4>(managedTexture.GetDataSpan());
-                    var eY = Sse.Multiply(edgeX, Sse.Subtract(Vector128.Create(y, y, y, 0.0F), vvEY));
-                    var offset = y * size;
-                    var indicesSpan = shadowMap.Indices.AsSpan(offset, size);
-                    var bankIndicesSpan = shadowMap.BankIndices.AsSpan(offset, size);
-                    for (int x = minX; x < maxX; x++)
-                    {
-                        var eX = Sse.Subtract(Vector128.Create(x, x, x, 0.0F), vvEX);
-                        var e = Sse.Multiply(Fma.IsSupported ? Fma.MultiplyAddNegated(edgeY, eX, eY) : Sse.Subtract(eY, Sse.Multiply(edgeY, eX)), denom);
-                        var ae = Sse.And(e, Sse.CompareGreaterThanOrEqual(e.Abs(), Vector128.Create(Epsilon)));
-                        if (!Avx.TestZ(Sse.CompareLessThan(ae, Vector128<float>.Zero), Vector128.Create(float.NaN)))
-                        {
-                            continue;
-                        }
-
-                        var tw = Sse.Multiply(w, e).HorizontalAdd();
-                        var tx = Sse.Divide(Sse.Multiply(u, e), tw).HorizontalAdd().GetElement(0) * textureWidth;
-                        var ty = Sse.Divide(Sse.Multiply(v, e), tw).HorizontalAdd().GetElement(0) * textureHeight;
-
-                        var color = ImageInterpolation.Bilinear(texture, textureWidth, textureHeight, tx, ty);
-
-                        // α == 0 もしくはライト透過100%の白
-                        if (color.W <= 0.0F || (triangle.LightTransmission >= 1.0F && color.X >= 1.0F && color.Y >= 1.0F && color.Z >= 1.0F))
-                        {
-                            continue;
-                        }
-
-                        var d = Sse.Shuffle(
-                            Sse41.Blend(
-                                Sse.Multiply(vvX, e).HorizontalAdd(),
-                                Sse.Multiply(vvY, e).HorizontalAdd(),
-                                0b1010
-                            ),
-                            Sse41.Blend(
-                                Sse.Multiply(vvZ, e).HorizontalAdd(),
-                                Vector128.Create(1.0F),
-                                0b1010
-                            ),
-                            0b01000100
-                        ).AsVector4();
-
-                        var shadowColor = Vector4.One - Vector4.Lerp(Vector4.One, Vector4.Lerp(Vector4.UnitW, Vector4.Clamp(color, Vector4.Zero, Vector4.One), triangle.LightTransmission), Math.Min(color.W, 1.0F) * triangle.Opacity);
-                        shadowColor = Vector4.One - Vector4.Clamp(shadowColor * spotLight.ShadowStrength, Vector4.Zero, Vector4.One);
-                        shadowColor.W = 1.0F;
-                        var (bankIndex, index) = shadowMap.GetEmptyIndex();
-                        shadowMap.Buffers[bankIndex][index] = new ShadowPixel(shadowColor, d.Z, triangle.Id, indicesSpan[x], bankIndicesSpan[x]);
-                        indicesSpan[x] = index;
-                        bankIndicesSpan[x] = bankIndex;
-                    }
-                });
+                return null;
             }
 
-            foreach (var (_, i) in convertedTexture)
-            {
-                i.Dispose();
-            }
+            var lightProjectionMatrix = Matrix4x4d.CreateOrthographic(min.GetElement(0), max.GetElement(0), min.GetElement(1), max.GetElement(1), min.GetElement(2), max.GetElement(2));
 
-            return shadowMap;
+            return RenderShadow(size, offsetX, offsetY, triangles, parallelLight.ShadowStrength, parallelLight.FloatLightViewMatrix, (Matrix4x4)lightProjectionMatrix);
         }
 
         IEnumerable<T> GetClipAndDividedTriangles<T>(IEnumerable<T> triangles) where T : TriangleBase<T>
@@ -784,7 +644,180 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             }
         }
 
-        Vector256<double> MaxByAbs(in Vector256<double> a, in Vector256<double> b)
+        static ShadowMap RenderShadow(int size, float offsetX, float offsetY, LightTriangle[] dividedLightTriangles, float shadowStrength, in Matrix4x4 lightViewMatrix, in Matrix4x4 lightProjectionMatrix)
+        {
+            var convertedTexture = new Dictionary<NImage, NManagedImage>();
+            var doubleLightProjectionMatrix = (Matrix4x4d)lightProjectionMatrix;
+
+            var shadowMap = new ShadowMap(size, lightViewMatrix * Matrix4x4.CreateTranslation(offsetX, offsetY, 0.0F) * lightProjectionMatrix);
+
+            foreach (var triangle in dividedLightTriangles)
+            {
+                if (triangle.V1.Vertex.GetElement(2) < 0.0F || triangle.V2.Vertex.GetElement(2) < 0.0F || triangle.V3.Vertex.GetElement(2) < 0.0F)
+                {
+                    continue;
+                }
+
+                var uv1 = triangle.V1.Transform(doubleLightProjectionMatrix);
+                var uv2 = triangle.V2.Transform(doubleLightProjectionMatrix);
+                var uv3 = triangle.V3.Transform(doubleLightProjectionMatrix);
+                var textureWidth = triangle.Texture.Width;
+                var textureHeight = triangle.Texture.Height;
+
+                var w1 = 1.0 / Math.Abs(uv1.Vertex.GetElement(3));
+                var w2 = 1.0 / Math.Abs(uv2.Vertex.GetElement(3));
+                var w3 = 1.0 / Math.Abs(uv3.Vertex.GetElement(3));
+                uv1 *= w1;
+                uv2 *= w2;
+                uv3 *= w3;
+                var dvv1 = Avx.Multiply(Avx.Add(uv1.Vertex, Vector256.Create(1.0, 1.0, 0.0, 0.0)), Vector256.Create(size * 0.5, size * 0.5, 1.0, 1.0));
+                var dvv2 = Avx.Multiply(Avx.Add(uv2.Vertex, Vector256.Create(1.0, 1.0, 0.0, 0.0)), Vector256.Create(size * 0.5, size * 0.5, 1.0, 1.0));
+                var dvv3 = Avx.Multiply(Avx.Add(uv3.Vertex, Vector256.Create(1.0, 1.0, 0.0, 0.0)), Vector256.Create(size * 0.5, size * 0.5, 1.0, 1.0));
+                var vvX = Vector128.Create((float)uv1.Vertex.GetElement(0), (float)uv2.Vertex.GetElement(0), (float)uv3.Vertex.GetElement(0), 0.0F);
+                var vvY = Vector128.Create((float)uv1.Vertex.GetElement(1), (float)uv2.Vertex.GetElement(1), (float)uv3.Vertex.GetElement(1), 0.0F);
+                var vvZ = Vector128.Create((float)uv1.Vertex.GetElement(2), (float)uv2.Vertex.GetElement(2), (float)uv3.Vertex.GetElement(2), 0.0F);
+                var minX = MaxClampedSize((int)(Math.Min(Math.Min(dvv1.GetElement(0), dvv2.GetElement(0)), dvv3.GetElement(0))), 0);
+                var maxX = MinClampedSize((int)Math.Ceiling(Math.Max(Math.Max(dvv1.GetElement(0), dvv2.GetElement(0)), dvv3.GetElement(0))), size);
+                var minY = MaxClampedSize((int)(Math.Min(Math.Min(dvv1.GetElement(1), dvv2.GetElement(1)), dvv3.GetElement(1))), 0);
+                var maxY = MinClampedSize((int)Math.Ceiling(Math.Max(Math.Max(dvv1.GetElement(1), dvv2.GetElement(1)), dvv3.GetElement(1))), size);
+                var u = Vector128.Create((float)uv1.U, (float)uv2.U, (float)uv3.U, 0.0F);
+                var v = Vector128.Create((float)uv1.V, (float)uv2.V, (float)uv3.V, 0.0F);
+                var w = Vector128.Create((float)w1, (float)w2, (float)w3, 0.0F);
+
+                var denom = Vector128.Create((float)(1.0 / (((dvv2.GetElement(0) - dvv1.GetElement(0)) * (dvv3.GetElement(1) - dvv1.GetElement(1))) - ((dvv2.GetElement(1) - dvv1.GetElement(1)) * (dvv3.GetElement(0) - dvv1.GetElement(0))))));
+                var edgeX = Sse.Subtract(Vector128.Create((float)dvv3.GetElement(0), (float)dvv1.GetElement(0), (float)dvv2.GetElement(0), 0.0F), Vector128.Create((float)dvv2.GetElement(0), (float)dvv3.GetElement(0), (float)dvv1.GetElement(0), 0.0F));
+                var edgeY = Sse.Subtract(Vector128.Create((float)dvv3.GetElement(1), (float)dvv1.GetElement(1), (float)dvv2.GetElement(1), 0.0F), Vector128.Create((float)dvv2.GetElement(1), (float)dvv3.GetElement(1), (float)dvv1.GetElement(1), 0.0F));
+                var isFrontFace = triangle.Normal.DotProduct(Vector256.Create(0.0, 0.0, 1.0, 0.0)).GetElement(0) <= 0.0;
+                var vvEX = Vector128.Create((float)dvv2.GetElement(0), (float)dvv3.GetElement(0), (float)dvv1.GetElement(0), 0.0F);
+                var vvEY = Vector128.Create((float)dvv2.GetElement(1), (float)dvv3.GetElement(1), (float)dvv1.GetElement(1), 0.0F);
+
+                NManagedImage managedTexture;
+                if (triangle.Texture is NCudaImage cudaImage)
+                {
+                    if (!convertedTexture.ContainsKey(cudaImage))
+                    {
+                        convertedTexture.Add(cudaImage, cudaImage.CopyToCpu());
+                    }
+                    managedTexture = convertedTexture[triangle.Texture];
+                }
+                else
+                {
+                    managedTexture = (NManagedImage)triangle.Texture;
+                }
+
+                Parallel.For(minY, maxY, y =>
+                {
+                    var texture = MemoryMarshal.Cast<float, Vector4>(managedTexture.GetDataSpan());
+                    var eY = Sse.Multiply(edgeX, Sse.Subtract(Vector128.Create(y, y, y, 0.0F), vvEY));
+                    var offset = y * size;
+                    var indicesSpan = shadowMap.Indices.AsSpan(offset, size);
+                    var bankIndicesSpan = shadowMap.BankIndices.AsSpan(offset, size);
+                    for (int x = minX; x < maxX; x++)
+                    {
+                        var eX = Sse.Subtract(Vector128.Create(x, x, x, 0.0F), vvEX);
+                        var e = Sse.Multiply(Fma.IsSupported ? Fma.MultiplyAddNegated(edgeY, eX, eY) : Sse.Subtract(eY, Sse.Multiply(edgeY, eX)), denom);
+                        var ae = Sse.And(e, Sse.CompareGreaterThanOrEqual(e.Abs(), Vector128.Create(Epsilon)));
+                        if (!Avx.TestZ(Sse.CompareLessThan(ae, Vector128<float>.Zero), Vector128.Create(float.NaN)))
+                        {
+                            continue;
+                        }
+
+                        var tw = Sse.Multiply(w, e).HorizontalAdd();
+                        var tx = Sse.Divide(Sse.Multiply(u, e), tw).HorizontalAdd().GetElement(0) * textureWidth;
+                        var ty = Sse.Divide(Sse.Multiply(v, e), tw).HorizontalAdd().GetElement(0) * textureHeight;
+
+                        var color = ImageInterpolation.Bilinear(texture, textureWidth, textureHeight, tx, ty);
+
+                        // α == 0 もしくはライト透過100%の白
+                        if (color.W <= 0.0F || (triangle.LightTransmission >= 1.0F && color.X >= 1.0F && color.Y >= 1.0F && color.Z >= 1.0F))
+                        {
+                            continue;
+                        }
+
+                        var d = CalcBarycentricCoord(vvX, vvY, vvZ, e).AsVector4();
+
+                        var shadowColor = Vector4.One - Vector4.Lerp(Vector4.One, Vector4.Lerp(Vector4.UnitW, Vector4.Clamp(color, Vector4.Zero, Vector4.One), triangle.LightTransmission), Math.Min(color.W, 1.0F) * triangle.Opacity);
+                        shadowColor = Vector4.One - Vector4.Clamp(shadowColor * shadowStrength, Vector4.Zero, Vector4.One);
+                        shadowColor.W = 1.0F;
+                        var (bankIndex, index) = shadowMap.GetEmptyIndex();
+                        shadowMap.Buffers[bankIndex][index] = new ShadowPixel(shadowColor, d.Z, triangle.Id, indicesSpan[x], bankIndicesSpan[x]);
+                        indicesSpan[x] = index;
+                        bankIndicesSpan[x] = bankIndex;
+                    }
+                });
+            }
+
+            foreach (var (_, i) in convertedTexture)
+            {
+                i.Dispose();
+            }
+
+            return shadowMap;
+        }
+
+        static Vector4 GetShadowColor(int triangleId, ShadowMap shadow, float shadowScatterSize, in Vector4 shadowProjectionPos, in Matrix4x4 invtededViewMatrix, in Matrix4x4 lightViewProjectionMatrix)
+        {
+            var transmissionColor = Vector4.Zero;
+
+            var shadowPos = Vector4.Transform(Vector4.Transform(shadowProjectionPos, invtededViewMatrix), lightViewProjectionMatrix);
+            shadowPos /= shadowPos.W;
+            var shadowTexPos = shadowPos * 0.5F + new Vector4(0.5F, 0.5F, 0.0F, 0.0F);
+            var depth = shadowPos.Z;
+            var size = shadow.ShadowMapSize;
+
+            var shadowTextureX = (int)(shadowTexPos.X * size);
+            var shadowTextureY = (int)(shadowTexPos.Y * size);
+
+            // TODO: ちゃんと距離に応じてぼけるようにする
+            //        Deep Shadow Mapsと相性が悪いのであれば他のShadow Mappingアルゴリズムに切り替えることも検討する
+            var samplingRange = (int)MathF.Ceiling(shadowScatterSize) * 2 + 1;
+            var edgeRate = shadowScatterSize % 1.0F;
+            if (edgeRate <= 0.0F)
+            {
+                edgeRate = 1.0F;
+            }
+            for (int stsy = shadowTextureY - samplingRange / 2, cy = 0; cy < samplingRange; stsy++, cy++)
+            {
+                var yRate = (cy == 0 || cy == samplingRange - 1 ? edgeRate : 1.0F);
+                if (stsy < 0 || stsy >= size)
+                {
+                    transmissionColor += Vector4.One * ((samplingRange - 2) + edgeRate * 2.0F) * yRate;
+                    continue;
+                }
+                for (int stsx = shadowTextureX - samplingRange / 2, cx = 0; cx < samplingRange; stsx++, cx++)
+                {
+                    var rate = (cx == 0 || cx == samplingRange - 1 ? edgeRate : 1.0F) * yRate;
+                    if (stsx < 0 || stsx >= size)
+                    {
+                        transmissionColor += Vector4.One * rate;
+                        continue;
+                    }
+
+                    var tc = Vector4.One;
+                    var si = stsy * size + stsx;
+                    var index = shadow.Indices[si];
+                    var bankIndex = shadow.BankIndices[si];
+                    while (index >= 0 && tc.CompareGreaterThanBy3Element(Vector3.Zero))
+                    {
+                        var sp = shadow.Buffers[bankIndex][index];
+                        if (sp.TriangleId == triangleId)
+                        {
+                            break;
+                        }
+
+                        tc *= sp.Color;
+                        index = sp.NextIndex;
+                        bankIndex = sp.NextBank;
+                    }
+                    transmissionColor += tc * rate;
+                }
+            }
+
+            return transmissionColor / ((shadowScatterSize * 2.0F + 1.0F) * (shadowScatterSize * 2.0F + 1.0F));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static Vector256<double> MaxByAbs(in Vector256<double> a, in Vector256<double> b)
         {
             if (Sse2.MoveMask(Sse2.CompareGreaterThanOrEqual(Avx.ExtractVector128(a.Abs(), 0), Avx.ExtractVector128(b.Abs(), 0))) != 0)
             {
@@ -796,6 +829,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static int MinClampedSize(int a, int max)
         {
             if (float.IsPositiveInfinity(a))
@@ -812,6 +846,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static int MaxClampedSize(int a, int min)
         {
             if (float.IsPositiveInfinity(a))
@@ -828,6 +863,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static Vector256<double> RoundCurrentDirection(in Vector256<double> v, int decimals)
         {
             var pow = Vector256.Create(Math.Pow(10.0, decimals));
@@ -849,6 +885,24 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 LightFalloffType.Exponential => Math.Min(1.0F / MathF.Pow(1.0F + length, 2.0F), 1.0F),
                 _ => 1.0F
             };
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static Vector128<float> CalcBarycentricCoord(in Vector128<float> x, in Vector128<float> y, in Vector128<float> z, in Vector128<float> e)
+        {
+            return Sse.Shuffle(
+                Sse41.Blend(
+                    Sse.Multiply(x, e).HorizontalAdd(),
+                    Sse.Multiply(y, e).HorizontalAdd(),
+                    0b1010
+                ),
+                Sse41.Blend(
+                    Sse.Multiply(z, e).HorizontalAdd(),
+                    Vector128.Create(1.0F),
+                    0b1010
+                ),
+                0b01000100
+            );
         }
     }
 }

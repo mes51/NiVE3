@@ -126,7 +126,11 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
 
         public readonly float ShadowScatterSize;
 
-        public ParallelLight(Vector256<double> position, Vector256<double> target, Vector3 color, double intensity, LightFalloffType falloffType, double falloffStart, double falloffLength, bool isEnableShadow, double shadowStrength, double shadowScatterSize)
+        public readonly Matrix4x4d LightViewMatrix;
+
+        public readonly Matrix4x4 FloatLightViewMatrix;
+
+        public ParallelLight(Vector256<double> position, Vector256<double> target, Vector3 color, double intensity, LightFalloffType falloffType, double falloffStart, double falloffLength, bool isEnableShadow, double shadowStrength, double shadowScatterSize, in Matrix4x4d lightViewMartrix)
         {
             Position = Avx.ConvertToVector128Single(position);
             Direction = Vector3.Normalize(Avx.Subtract(target, position).AsVector3());
@@ -137,6 +141,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
             IsEnableShadow = isEnableShadow;
             ShadowStrength = (float)shadowStrength;
             ShadowScatterSize = (float)shadowScatterSize;
+            LightViewMatrix = lightViewMartrix;
+            FloatLightViewMatrix = (Matrix4x4)lightViewMartrix;
         }
     }
 

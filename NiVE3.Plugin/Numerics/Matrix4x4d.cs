@@ -191,6 +191,25 @@ namespace NiVE3.Plugin.Numerics
             return result;
         }
 
+        public static Matrix4x4d CreateOrthographic(double left, double right, double top, double bottom, double near, double far)
+        {
+            var result = Zero;
+
+            var width = 1.0 / (right - left);
+            var height = 1.0 / (bottom - top);
+            var farRange = (double.IsPositiveInfinity(far) || near == far) ? 1.0 : far / (near - far);
+
+            result.M11 = width * 2.0;
+            result.M22 = height * 2.0;
+            result.M33 = farRange;
+            result.M41 = (left + right) * -width;
+            result.M42 = (top + bottom) * -height;
+            result.M43 = farRange * -near;
+            result.M44 = 1.0;
+
+            return result;
+        }
+
         public static Matrix4x4d CreateTranslate(double x, double y, double z)
         {
             var result = Identity;
