@@ -424,9 +424,13 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             }
         }
 
-        ShadowMap RenderSpotLightShadow(SpotLight spotLight, int size, float offsetX, float offsetY)
+        ShadowMap? RenderSpotLightShadow(SpotLight spotLight, int size, float offsetX, float offsetY)
         {
             var triangles = GetClipAndDividedTriangles(LightTriangles[spotLight]).ToArray();
+            if (triangles.Length < 0)
+            {
+                return null;
+            }
 
             var minZ = triangles.Select(t => Math.Min(Math.Min(t.V1.Vertex.GetElement(2), t.V2.Vertex.GetElement(2)), t.V3.Vertex.GetElement(2))).Min();
             var maxZ = triangles.Select(t => Math.Max(Math.Max(t.V1.Vertex.GetElement(2), t.V2.Vertex.GetElement(2)), t.V3.Vertex.GetElement(2))).Max();
@@ -438,10 +442,13 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
         ShadowMap? RenderParallelLightShadow(ParallelLight parallelLight, int size, float offsetX, float offsetY)
         {
             var triangles = GetClipAndDividedTriangles(LightTriangles[parallelLight]).ToArray();
+            if (triangles.Length < 0)
+            {
+                return null;
+            }
 
             var min = triangles.Select(t => Avx.Min(Avx.Min(t.V1.Vertex, t.V2.Vertex), t.V3.Vertex)).Aggregate(Avx.Min);
             var max = triangles.Select(t => Avx.Max(Avx.Max(t.V1.Vertex, t.V2.Vertex), t.V3.Vertex)).Aggregate(Avx.Max);
-
             if (min.GetElement(0) == max.GetElement(0) || min.GetElement(1) == max.GetElement(1))
             {
                 return null;
