@@ -21,7 +21,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
         public readonly int[] BankIndices;
 
-        public int ShadowMapSize;
+        public readonly int ShadowMapSize;
 
         int CurrentHeadIndex = -1;
 

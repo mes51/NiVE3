@@ -20,9 +20,14 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 {
     class Renderer3D
     {
-        const float NearZ = -5E-5F; //1.0F;
+        // ビュー空間に持って行った後のカメラよりも後ろの部分のトリミング用ニアクリップ面
+        //NOTE: 影用にカメラよりも前にニアクリップ面を持ってきているが、他含め描画上問題が
+        //      あったら調整する(現状、カメラのZ -2666.66に対し、レイヤーのZ -2666.57で消える)
+        const float NearZ = 5E-5F;
 
         const float Epsilon = 1E-7F;
+
+        const float ShadowBias = 5E-4F; // TODO: 要調整
 
         public Matrix4x4d ViewMatrix { get; set; }
 
@@ -94,52 +99,27 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             Triangles.Add(new Triangle(uv1, uv2, uv3, farPoint, invertedModelViewMatrix, texture, opacity, blendType, isCastShadow, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, LastId));
             Triangles.Add(new Triangle(uv1, uv3, uv4, farPoint, invertedModelViewMatrix, texture, opacity, blendType, isCastShadow, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, LastId));
 
-            if (isCastShadow)
+            foreach (var spotLight in SpotLights)
             {
-                foreach (var spotLight in SpotLights)
+                if (!spotLight.IsEnableShadow)
                 {
-                    var lmv = modelMatrix * spotLight.LightViewMatrix;
-                    var lmvt = lmv * Matrix4x4d.CreateTranslate(offsetX, offsetY, 0.0);
-                    var lv1 = lmvt.Transform(sv1);
-                    var lv2 = lmvt.Transform(sv2);
-                    var lv3 = lmvt.Transform(sv3);
-                    var lv4 = lmvt.Transform(sv4);
-
-                    var luv1 = new UVVertex(lv1, 0.0F, 0.0F);
-                    var luv2 = new UVVertex(lv2, 0.0F, 1.0F);
-                    var luv3 = new UVVertex(lv3, 1.0F, 1.0F);
-                    var luv4 = new UVVertex(lv4, 1.0F, 0.0F);
-
-                    Matrix4x4d.Invert(mv, out var invertedLightModelViewMatrix);
-                    invertedLightModelViewMatrix = Matrix4x4d.Transpose(invertedLightModelViewMatrix);
-
-                    var triangles = LightTriangles[spotLight];
-                    var lfarPoint = Avx.And(lmv.Transform(Vector256.Create(0.0, 0.0, -10000.0, 1.0)), Vector256.Create(0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0).AsDouble());
-                    triangles.Add(new LightTriangle(luv1, luv2, luv3, lfarPoint, invertedLightModelViewMatrix, texture, opacity, lightTransmission, LastId));
-                    triangles.Add(new LightTriangle(luv1, luv3, luv4, lfarPoint, invertedLightModelViewMatrix, texture, opacity, lightTransmission, LastId));
+                    continue;
                 }
-                foreach (var parallelLight in ParallelLights)
+                var (lt1, lt2) = CreateLightTriangle(LastId, texture, opacity, isCastShadow, lightTransmission, sv1, sv2, sv3, sv4, modelMatrix, mv, spotLight.LightViewMatrix, offsetX, offsetY);
+                var triangles = LightTriangles[spotLight];
+                triangles.Add(lt1);
+                triangles.Add(lt2);
+            }
+            foreach (var parallelLight in ParallelLights)
+            {
+                if (!parallelLight.IsEnableShadow)
                 {
-                    var lmv = modelMatrix * parallelLight.LightViewMatrix;
-                    var lmvt = lmv * Matrix4x4d.CreateTranslate(offsetX, offsetY, 0.0);
-                    var lv1 = lmvt.Transform(sv1);
-                    var lv2 = lmvt.Transform(sv2);
-                    var lv3 = lmvt.Transform(sv3);
-                    var lv4 = lmvt.Transform(sv4);
-
-                    var luv1 = new UVVertex(lv1, 0.0F, 0.0F);
-                    var luv2 = new UVVertex(lv2, 0.0F, 1.0F);
-                    var luv3 = new UVVertex(lv3, 1.0F, 1.0F);
-                    var luv4 = new UVVertex(lv4, 1.0F, 0.0F);
-
-                    Matrix4x4d.Invert(mv, out var invertedLightModelViewMatrix);
-                    invertedLightModelViewMatrix = Matrix4x4d.Transpose(invertedLightModelViewMatrix);
-
-                    var triangles = LightTriangles[parallelLight];
-                    var lfarPoint = Avx.And(lmv.Transform(Vector256.Create(0.0, 0.0, -10000.0, 1.0)), Vector256.Create(0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0).AsDouble());
-                    triangles.Add(new LightTriangle(luv1, luv2, luv3, lfarPoint, invertedLightModelViewMatrix, texture, opacity, lightTransmission, LastId));
-                    triangles.Add(new LightTriangle(luv1, luv3, luv4, lfarPoint, invertedLightModelViewMatrix, texture, opacity, lightTransmission, LastId));
+                    continue;
                 }
+                var (lt1, lt2) = CreateLightTriangle(LastId, texture, opacity, isCastShadow, lightTransmission, sv1, sv2, sv3, sv4, modelMatrix, mv, parallelLight.LightViewMatrix, offsetX, offsetY);
+                var triangles = LightTriangles[parallelLight];
+                triangles.Add(lt1);
+                triangles.Add(lt2);
             }
 
             LastId++;
@@ -173,11 +153,6 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
             foreach (var triangle in triangles)
             {
-                if (triangle.V1.Vertex.GetElement(2) < 0.0F || triangle.V2.Vertex.GetElement(2) < 0.0F || triangle.V3.Vertex.GetElement(2) < 0.0F)
-                {
-                    continue;
-                }
-
                 var uv1 = triangle.V1.Transform(projectionMatrix);
                 var uv2 = triangle.V2.Transform(projectionMatrix);
                 var uv3 = triangle.V3.Transform(projectionMatrix);
@@ -196,9 +171,9 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 var vvX = Vector128.Create((float)triangle.V1.Vertex.GetElement(0), (float)triangle.V2.Vertex.GetElement(0), (float)triangle.V3.Vertex.GetElement(0), 0.0F);
                 var vvY = Vector128.Create((float)triangle.V1.Vertex.GetElement(1), (float)triangle.V2.Vertex.GetElement(1), (float)triangle.V3.Vertex.GetElement(1), 0.0F);
                 var vvZ = Vector128.Create((float)triangle.V1.Vertex.GetElement(2), (float)triangle.V2.Vertex.GetElement(2), (float)triangle.V3.Vertex.GetElement(2), 0.0F);
-                var pvvX = Vector128.Create((float)uv1.Vertex.GetElement(0), (float)uv2.Vertex.GetElement(0), (float)uv3.Vertex.GetElement(0), 0.0F);
-                var pvvY = Vector128.Create((float)uv1.Vertex.GetElement(1), (float)uv2.Vertex.GetElement(1), (float)uv3.Vertex.GetElement(1), 0.0F);
-                var pvvZ = Vector128.Create((float)uv1.Vertex.GetElement(2), (float)uv2.Vertex.GetElement(2), (float)uv3.Vertex.GetElement(2), 0.0F);
+                var svvX = Vector128.Create((float)uv1.Vertex.GetElement(0), (float)uv2.Vertex.GetElement(0), (float)uv3.Vertex.GetElement(0), 0.0F);
+                var svvY = Vector128.Create((float)uv1.Vertex.GetElement(1), (float)uv2.Vertex.GetElement(1), (float)uv3.Vertex.GetElement(1), 0.0F);
+                var svvZ = Vector128.Create((float)uv1.Vertex.GetElement(2), (float)uv2.Vertex.GetElement(2), (float)uv3.Vertex.GetElement(2), 0.0F);
                 var minX = MaxClampedSize((int)(Math.Min(Math.Min(dvv1.GetElement(0), dvv2.GetElement(0)), dvv3.GetElement(0))), OffsetX);
                 var maxX = MinClampedSize((int)Math.Ceiling(Math.Max(Math.Max(dvv1.GetElement(0), dvv2.GetElement(0)), dvv3.GetElement(0))), renderImageWidth + OffsetX);
                 var minY = MaxClampedSize((int)(Math.Min(Math.Min(dvv1.GetElement(1), dvv2.GetElement(1)), dvv3.GetElement(1))), OffsetY);
@@ -282,7 +257,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                             var shadowProjectionPos = Vector4.Zero;
                             if (hasShadow)
                             {
-                                shadowProjectionPos = CalcBarycentricCoord(pvvX, pvvY, pvvZ, e).AsVector4();
+                                shadowProjectionPos = CalcBarycentricCoord(svvX, svvY, svvZ, e).AsVector4();
                             }
 
                             for (var i = 0; i < PointLights.Count; i++)
@@ -324,7 +299,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                     var shadow = spotLightShadows[i];
                                     if (triangle.IsAcceptShadow && shadow != null)
                                     {
-                                        var transmissionColor = GetShadowColor(triangle.Id, shadow, l.ShadowScatterSize, shadowProjectionPos, floatInvtededViewMatrix, shadow.LightViewProjectionMatrix);
+                                        var transmissionColor = GetShadowColor(triangle.Id, shadow, l.ShadowScatterSize, shadowProjectionPos, floatInvtededViewMatrix, shadow.LightViewProjectionMatrix, out _);
                                         if (!transmissionColor.CompareGreaterThanBy3Element(Vector3.Zero))
                                         {
                                             continue;
@@ -368,7 +343,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                 var shadow = parallelLightShadows[i];
                                 if (triangle.IsAcceptShadow && shadow != null)
                                 {
-                                    var transmissionColor = GetShadowColor(triangle.Id, shadow, l.ShadowScatterSize, shadowProjectionPos, floatInvtededViewMatrix, shadow.LightViewProjectionMatrix);
+                                    var transmissionColor = GetShadowColor(triangle.Id, shadow, l.ShadowScatterSize, shadowProjectionPos, floatInvtededViewMatrix, shadow.LightViewProjectionMatrix, out _);
                                     if (!transmissionColor.CompareGreaterThanBy3Element(Vector3.Zero))
                                     {
                                         continue;
@@ -427,7 +402,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
         ShadowMap? RenderSpotLightShadow(SpotLight spotLight, int size, float offsetX, float offsetY)
         {
             var triangles = GetClipAndDividedTriangles(LightTriangles[spotLight]).ToArray();
-            if (triangles.Length < 0)
+            if (triangles.Length < 1)
             {
                 return null;
             }
@@ -436,13 +411,13 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             var maxZ = triangles.Select(t => Math.Max(Math.Max(t.V1.Vertex.GetElement(2), t.V2.Vertex.GetElement(2)), t.V3.Vertex.GetElement(2))).Max();
             var lightProjectionMatrix = Matrix4x4d.CreatePerspectiveFieldOfView(spotLight.ConeRadian, 1.0, minZ, maxZ);
 
-            return RenderShadow(size, offsetX, offsetY, triangles, spotLight.ShadowStrength, spotLight.FloatLightViewMatrix, (Matrix4x4)lightProjectionMatrix);
+            return RenderShadow(size, offsetX, offsetY, triangles, spotLight.ShadowStrength, spotLight.FloatLightViewMatrix, lightProjectionMatrix);
         }
 
         ShadowMap? RenderParallelLightShadow(ParallelLight parallelLight, int size, float offsetX, float offsetY)
         {
             var triangles = GetClipAndDividedTriangles(LightTriangles[parallelLight]).ToArray();
-            if (triangles.Length < 0)
+            if (triangles.Length < 1)
             {
                 return null;
             }
@@ -456,12 +431,14 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
             var lightProjectionMatrix = Matrix4x4d.CreateOrthographic(min.GetElement(0), max.GetElement(0), min.GetElement(1), max.GetElement(1), min.GetElement(2), max.GetElement(2));
 
-            return RenderShadow(size, offsetX, offsetY, triangles, parallelLight.ShadowStrength, parallelLight.FloatLightViewMatrix, (Matrix4x4)lightProjectionMatrix);
+            return RenderShadow(size, offsetX, offsetY, triangles, parallelLight.ShadowStrength, parallelLight.FloatLightViewMatrix, lightProjectionMatrix);
         }
 
         IEnumerable<T> GetClipAndDividedTriangles<T>(IEnumerable<T> triangles) where T : TriangleBase<T>
         {
-            return ClipAndDivideTriangle(triangles.Where(t => !t.IsInvalidNormal && !t.IsDegenerate()).ToArray());
+            return ClipAndDivideTriangle(triangles.Where(t => !t.IsInvalidNormal && !t.IsDegenerate()).ToArray())
+                // NOTE: ポリゴンの欠けが出たら消す事を検討する
+                .Where(t => t.V1.Vertex.GetElement(2) > NearZ - Epsilon && t.V2.Vertex.GetElement(2) > NearZ - Epsilon && t.V3.Vertex.GetElement(2) > NearZ - Epsilon);
         }
 
         IEnumerable<T> ClipAndDivideTriangle<T>(T[] triangles) where  T : TriangleBase<T>
@@ -469,7 +446,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             var dividedTriangles = new List<T>(DivideTriangles(triangles));
 
             var p = Vector256.Create(0.0, 0.0, NearZ, 0.0);
-            var n = Vector256.Create(0.0, 0.0, -1.0, 0.0);
+            var n = Vector256.Create(0.0, 0.0, Math.Sign(NearZ), 0.0);
             foreach (var triangle in dividedTriangles)
             {
                 var (t1, t2, t3) = DivideTriangleByPlane(triangle, p, n);
@@ -549,6 +526,11 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             {
                 foreach (var t in new[] { t1, t2, t3 })
                 {
+                    if (t.IsInvalidNormal)
+                    {
+                        continue;
+                    }
+
                     var td1 = Avx.And(Avx.Add(t.V1.Vertex.DotProduct(n), planeD), wClearMask);
                     var td2 = Avx.And(Avx.Add(t.V2.Vertex.DotProduct(n), planeD), wClearMask);
                     var td3 = Avx.And(Avx.Add(t.V3.Vertex.DotProduct(n), planeD), wClearMask);
@@ -567,7 +549,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
         (T, T?, T?) DivideTriangleByPlane<T>(T triangle, in Vector256<double> p, in Vector256<double> n) where T : TriangleBase<T>
         {
-            var Epsilon = -1E-10;
+            const double Epsilon = -1E-10;
             var One = Vector256.Create(1.0);
 
             var p1 = triangle.V1.Vertex;
@@ -651,23 +633,43 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             }
         }
 
-        static ShadowMap RenderShadow(int size, float offsetX, float offsetY, LightTriangle[] dividedLightTriangles, float shadowStrength, in Matrix4x4 lightViewMatrix, in Matrix4x4 lightProjectionMatrix)
+        static (LightTriangle, LightTriangle) CreateLightTriangle(int triangleId, NImage texture, float opacity, bool isCastShadow, float lightTransmission, in Vector256<double> sv1, in Vector256<double> sv2, in Vector256<double> sv3, in Vector256<double> sv4, in Matrix4x4d modelMatrix, in Matrix4x4d modelViewMatrix, in Matrix4x4d lightViewMatrix, double offsetX, double offsetY)
+        {
+            var lmv = modelMatrix * lightViewMatrix;
+            var lmvt = lmv * Matrix4x4d.CreateTranslate(offsetX, offsetY, 0.0);
+            var lv1 = lmvt.Transform(sv1);
+            var lv2 = lmvt.Transform(sv2);
+            var lv3 = lmvt.Transform(sv3);
+            var lv4 = lmvt.Transform(sv4);
+
+            var luv1 = new UVVertex(lv1, 0.0F, 0.0F);
+            var luv2 = new UVVertex(lv2, 0.0F, 1.0F);
+            var luv3 = new UVVertex(lv3, 1.0F, 1.0F);
+            var luv4 = new UVVertex(lv4, 1.0F, 0.0F);
+
+            Matrix4x4d.Invert(modelViewMatrix, out var invertedLightModelViewMatrix);
+            invertedLightModelViewMatrix = Matrix4x4d.Transpose(invertedLightModelViewMatrix);
+
+            var lfarPoint = Avx.And(lmv.Transform(Vector256.Create(0.0, 0.0, -10000.0, 1.0)), Vector256.Create(0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0).AsDouble());
+            return (new LightTriangle(luv1, luv2, luv3, lfarPoint, invertedLightModelViewMatrix, texture, opacity, isCastShadow, lightTransmission, triangleId), new LightTriangle(luv1, luv3, luv4, lfarPoint, invertedLightModelViewMatrix, texture, opacity, isCastShadow, lightTransmission, triangleId));
+        }
+
+        static ShadowMap RenderShadow(int size, float offsetX, float offsetY, LightTriangle[] dividedLightTriangles, float shadowStrength, in Matrix4x4 lightViewMatrix, in Matrix4x4d lightProjectionMatrix)
         {
             var convertedTexture = new Dictionary<NImage, NManagedImage>();
-            var doubleLightProjectionMatrix = (Matrix4x4d)lightProjectionMatrix;
 
-            var shadowMap = new ShadowMap(size, lightViewMatrix * Matrix4x4.CreateTranslation(offsetX, offsetY, 0.0F) * lightProjectionMatrix);
+            var shadowMap = new ShadowMap(size, lightViewMatrix * Matrix4x4.CreateTranslation(offsetX, offsetY, 0.0F) * (Matrix4x4)lightProjectionMatrix);
 
             foreach (var triangle in dividedLightTriangles)
             {
-                if (triangle.V1.Vertex.GetElement(2) < 0.0F || triangle.V2.Vertex.GetElement(2) < 0.0F || triangle.V3.Vertex.GetElement(2) < 0.0F)
+                if (!triangle.IsCastShadow)
                 {
                     continue;
                 }
 
-                var uv1 = triangle.V1.Transform(doubleLightProjectionMatrix);
-                var uv2 = triangle.V2.Transform(doubleLightProjectionMatrix);
-                var uv3 = triangle.V3.Transform(doubleLightProjectionMatrix);
+                var uv1 = triangle.V1.Transform(lightProjectionMatrix);
+                var uv2 = triangle.V2.Transform(lightProjectionMatrix);
+                var uv3 = triangle.V3.Transform(lightProjectionMatrix);
                 var textureWidth = triangle.Texture.Width;
                 var textureHeight = triangle.Texture.Height;
 
@@ -747,7 +749,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                         shadowColor = Vector4.One - Vector4.Clamp(shadowColor * shadowStrength, Vector4.Zero, Vector4.One);
                         shadowColor.W = 1.0F;
                         var (bankIndex, index) = shadowMap.GetEmptyIndex();
-                        shadowMap.Buffers[bankIndex][index] = new ShadowPixel(shadowColor, d.Z, triangle.Id, indicesSpan[x], bankIndicesSpan[x]);
+                        shadowMap.Buffers[bankIndex][index] = new ShadowPixel(shadowColor, d.Z - ShadowBias, triangle.Id, indicesSpan[x], bankIndicesSpan[x]);
                         indicesSpan[x] = index;
                         bankIndicesSpan[x] = bankIndex;
                     }
@@ -762,9 +764,9 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             return shadowMap;
         }
 
-        static Vector4 GetShadowColor(int triangleId, ShadowMap shadow, float shadowScatterSize, in Vector4 shadowProjectionPos, in Matrix4x4 invtededViewMatrix, in Matrix4x4 lightViewProjectionMatrix)
+        static Vector4 GetShadowColor(int triangleId, ShadowMap shadow, float shadowScatterSize, in Vector4 shadowProjectionPos, in Matrix4x4 invtededViewMatrix, in Matrix4x4 lightViewProjectionMatrix, out bool IsHitInToMap)
         {
-            var transmissionColor = Vector4.Zero;
+            IsHitInToMap = false;
 
             var shadowPos = Vector4.Transform(Vector4.Transform(shadowProjectionPos, invtededViewMatrix), lightViewProjectionMatrix);
             shadowPos /= shadowPos.W;
@@ -775,39 +777,23 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             var shadowTextureX = (int)(shadowTexPos.X * size);
             var shadowTextureY = (int)(shadowTexPos.Y * size);
 
-            // TODO: ちゃんと距離に応じてぼけるようにする
-            //        Deep Shadow Mapsと相性が悪いのであれば他のShadow Mappingアルゴリズムに切り替えることも検討する
-            var samplingRange = (int)MathF.Ceiling(shadowScatterSize) * 2 + 1;
-            var edgeRate = shadowScatterSize % 1.0F;
-            if (edgeRate <= 0.0F)
+            // TODO: 重くならないならfor文の方とまとめる
+            if (shadowScatterSize <= 0.0F)
             {
-                edgeRate = 1.0F;
-            }
-            for (int stsy = shadowTextureY - samplingRange / 2, cy = 0; cy < samplingRange; stsy++, cy++)
-            {
-                var yRate = (cy == 0 || cy == samplingRange - 1 ? edgeRate : 1.0F);
-                if (stsy < 0 || stsy >= size)
+                if (shadowTextureX < 0 || shadowTextureX >= size || shadowTextureY < 0 || shadowTextureY >= size)
                 {
-                    transmissionColor += Vector4.One * ((samplingRange - 2) + edgeRate * 2.0F) * yRate;
-                    continue;
+                    return Vector4.One;
                 }
-                for (int stsx = shadowTextureX - samplingRange / 2, cx = 0; cx < samplingRange; stsx++, cx++)
+                else
                 {
-                    var rate = (cx == 0 || cx == samplingRange - 1 ? edgeRate : 1.0F) * yRate;
-                    if (stsx < 0 || stsx >= size)
-                    {
-                        transmissionColor += Vector4.One * rate;
-                        continue;
-                    }
-
                     var tc = Vector4.One;
-                    var si = stsy * size + stsx;
+                    var si = shadowTextureY * size + shadowTextureX;
                     var index = shadow.Indices[si];
                     var bankIndex = shadow.BankIndices[si];
                     while (index >= 0 && tc.CompareGreaterThanBy3Element(Vector3.Zero))
                     {
                         var sp = shadow.Buffers[bankIndex][index];
-                        if (sp.TriangleId == triangleId)
+                        if (sp.TriangleId == triangleId || depth < sp.Depth)
                         {
                             break;
                         }
@@ -816,11 +802,61 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                         index = sp.NextIndex;
                         bankIndex = sp.NextBank;
                     }
-                    transmissionColor += tc * rate;
+                    IsHitInToMap = true;
+                    return tc;
                 }
             }
+            else
+            {
+                var transmissionColor = Vector4.Zero;
+                // TODO: ちゃんと距離に応じてぼけるようにする
+                //        Deep Shadow Mapsと相性が悪いのであれば他のShadow Mappingアルゴリズムに切り替えることも検討する
+                var samplingRange = (int)MathF.Ceiling(shadowScatterSize) * 2 + 1;
+                var edgeRate = shadowScatterSize % 1.0F;
+                if (edgeRate <= 0.0F)
+                {
+                    edgeRate = 1.0F;
+                }
+                for (int stsy = shadowTextureY - samplingRange / 2, cy = 0; cy < samplingRange; stsy++, cy++)
+                {
+                    var yRate = (cy == 0 || cy == samplingRange - 1 ? edgeRate : 1.0F);
+                    if (stsy < 0 || stsy >= size)
+                    {
+                        transmissionColor += Vector4.One * ((samplingRange - 2) + edgeRate * 2.0F) * yRate;
+                        continue;
+                    }
+                    for (int stsx = shadowTextureX - samplingRange / 2, cx = 0; cx < samplingRange; stsx++, cx++)
+                    {
+                        var rate = (cx == 0 || cx == samplingRange - 1 ? edgeRate : 1.0F) * yRate;
+                        if (stsx < 0 || stsx >= size)
+                        {
+                            transmissionColor += Vector4.One * rate;
+                            continue;
+                        }
 
-            return transmissionColor / ((shadowScatterSize * 2.0F + 1.0F) * (shadowScatterSize * 2.0F + 1.0F));
+                        var tc = Vector4.One;
+                        var si = stsy * size + stsx;
+                        var index = shadow.Indices[si];
+                        var bankIndex = shadow.BankIndices[si];
+                        while (index >= 0 && tc.CompareGreaterThanBy3Element(Vector3.Zero))
+                        {
+                            var sp = shadow.Buffers[bankIndex][index];
+                            if (sp.TriangleId == triangleId || depth >= sp.Depth)
+                            {
+                                break;
+                            }
+
+                            tc *= sp.Color;
+                            index = sp.NextIndex;
+                            bankIndex = sp.NextBank;
+                        }
+                        transmissionColor += tc * rate;
+                        IsHitInToMap = true;
+                    }
+                }
+
+                return transmissionColor / ((shadowScatterSize * 2.0F + 1.0F) * (shadowScatterSize * 2.0F + 1.0F));
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -911,5 +947,43 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 0b01000100
             );
         }
+
+        #region Debug functions
+        #if DEBUG
+        void DisplayShadowMapForDebug(ShadowMap? shadowMap)
+        {
+            if (shadowMap == null)
+            {
+                return;
+            }
+
+            var size = shadowMap.ShadowMapSize / 4;
+            var image = MemoryMarshal.Cast<float, Vector4>(RenderImage.GetDataSpan());
+            for (var y = 0; y < size; y++)
+            {
+                for (var x = 0; x < size; x++)
+                {
+                    var color = Vector4.Zero;
+                    for (int sy = y * 4, cy = 0; cy < 4; sy++, cy++)
+                    {
+                        for (int sx = x * 4, cx = 0; cx < 4; sx++, cx++)
+                        {
+                            var spi = sy * shadowMap.ShadowMapSize + sx;
+                            if (shadowMap.Indices[spi] < 0)
+                            {
+                                color += Vector4.One;
+                                continue;
+                            }
+
+                            var sp = shadowMap.Buffers[shadowMap.BankIndices[spi]][shadowMap.Indices[spi]];
+                            color += sp.Color;
+                        }
+                    }
+                    image[y * RenderImage.Width + x] = color / 16;
+                }
+            }
+        }
+        #endif
+        #endregion
     }
 }

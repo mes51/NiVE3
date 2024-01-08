@@ -179,7 +179,8 @@ namespace NiVE3.Plugin.Numerics
         public static Matrix4x4d CreatePerspectiveFieldOfView(double fov, double aspect, double near, double far)
         {
             var result = Zero;
-            var farRange = (double.IsPositiveInfinity(far) || near == far) ? 1.0 : far / (near - far);
+            //var farRange = (double.IsPositiveInfinity(far) || near == far) ? 1.0 : far / (near - far);
+            var farRange = (double.IsPositiveInfinity(far) || near == far) ? 1.0 : far / (far - near);
             var scale = 1.0 / Math.Tan(fov * 0.5);
 
             result.M11 = scale / aspect;
@@ -197,7 +198,8 @@ namespace NiVE3.Plugin.Numerics
 
             var width = 1.0 / (right - left);
             var height = 1.0 / (bottom - top);
-            var farRange = (double.IsPositiveInfinity(far) || near == far) ? 1.0 : far / (near - far);
+            //var farRange = (double.IsPositiveInfinity(far) || near == far) ? 1.0 : far / (near - far);
+            var farRange = (double.IsPositiveInfinity(far) || near == far) ? 1.0 : far / (far - near);
 
             result.M11 = width * 2.0;
             result.M22 = height * 2.0;
