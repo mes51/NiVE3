@@ -27,7 +27,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
         const float Epsilon = 1E-7F;
 
-        const float ShadowBias = 5E-4F; // TODO: 要調整
+        const float LinearShadowBias = 1E-6F; // TODO: 要調整
 
         public Matrix4x4d ViewMatrix { get; set; }
 
@@ -406,9 +406,10 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
             var minZ = triangles.Select(t => Math.Min(Math.Min(t.V1.Vertex.GetElement(2), t.V2.Vertex.GetElement(2)), t.V3.Vertex.GetElement(2))).Min();
             var maxZ = triangles.Select(t => Math.Max(Math.Max(t.V1.Vertex.GetElement(2), t.V2.Vertex.GetElement(2)), t.V3.Vertex.GetElement(2))).Max();
+            var shadowBias = (float)(LinearShadowBias * (maxZ - minZ));
             var lightProjectionMatrix = Matrix4x4d.CreatePerspectiveFieldOfView(spotLight.ConeRadian, 1.0, minZ, maxZ);
 
-            return RenderShadow(size, offsetX, offsetY, triangles, spotLight.ShadowStrength, spotLight.FloatLightViewMatrix, lightProjectionMatrix);
+            return RenderShadow(size, offsetX, offsetY, shadowBias, triangles, spotLight.ShadowStrength, spotLight.FloatLightViewMatrix, lightProjectionMatrix);
         }
 
         ShadowMap? RenderParallelLightShadow(ParallelLight parallelLight, int size, float offsetX, float offsetY)
@@ -425,10 +426,11 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             {
                 return null;
             }
+            var shadowBias = (float)(LinearShadowBias * (max.GetElement(2) - min.GetElement(2)));
 
             var lightProjectionMatrix = Matrix4x4d.CreateOrthographic(min.GetElement(0), max.GetElement(0), min.GetElement(1), max.GetElement(1), min.GetElement(2), max.GetElement(2));
 
-            return RenderShadow(size, offsetX, offsetY, triangles, parallelLight.ShadowStrength, parallelLight.FloatLightViewMatrix, lightProjectionMatrix);
+            return RenderShadow(size, offsetX, offsetY, shadowBias, triangles, parallelLight.ShadowStrength, parallelLight.FloatLightViewMatrix, lightProjectionMatrix);
         }
 
         IEnumerable<T> GetClipAndDividedTriangles<T>(IEnumerable<T> triangles) where T : TriangleBase<T>
@@ -651,7 +653,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             return (new LightTriangle(luv1, luv2, luv3, lfarPoint, invertedLightModelViewMatrix, texture, opacity, isCastShadow, lightTransmission, triangleId), new LightTriangle(luv1, luv3, luv4, lfarPoint, invertedLightModelViewMatrix, texture, opacity, isCastShadow, lightTransmission, triangleId));
         }
 
-        static ShadowMap RenderShadow(int size, float offsetX, float offsetY, LightTriangle[] dividedLightTriangles, float shadowStrength, in Matrix4x4 lightViewMatrix, in Matrix4x4d lightProjectionMatrix)
+        static ShadowMap RenderShadow(int size, float offsetX, float offsetY, float shadowBias, LightTriangle[] dividedLightTriangles, float shadowStrength, in Matrix4x4 lightViewMatrix, in Matrix4x4d lightProjectionMatrix)
         {
             var convertedTexture = new Dictionary<NImage, NManagedImage>();
 
@@ -745,7 +747,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                         shadowColor = Vector4.One - Vector4.Clamp(shadowColor * shadowStrength, Vector4.Zero, Vector4.One);
                         shadowColor.W = 1.0F;
                         var (bankIndex, index) = shadowMap.GetEmptyIndex();
-                        shadowMap.Buffers[bankIndex][index] = new ShadowPixel(shadowColor, d.Z - ShadowBias, triangle.Id, indicesSpan[x], bankIndicesSpan[x]);
+                        shadowMap.Buffers[bankIndex][index] = new ShadowPixel(shadowColor, d.Z - shadowBias, triangle.Id, indicesSpan[x], bankIndicesSpan[x]);
                         indicesSpan[x] = index;
                         bankIndicesSpan[x] = bankIndex;
                     }
