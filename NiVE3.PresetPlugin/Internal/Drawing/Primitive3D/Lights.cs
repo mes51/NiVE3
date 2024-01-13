@@ -22,6 +22,13 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
         static readonly Vector256<double> UnitNegY = Vector256.Create(0.0, -1.0, 0.0, 0.0);
         static readonly Vector256<double> UnitNegZ = Vector256.Create(0.0, 0.0, -1.0, 0.0);
 
+        static readonly Matrix4x4d LookAtFront = Matrix4x4d.CreateLookAt(Vector256<double>.Zero, UnitZ, UnitY);
+        static readonly Matrix4x4d LookAtBack = Matrix4x4d.CreateLookAt(Vector256<double>.Zero, UnitNegZ, UnitY);
+        static readonly Matrix4x4d LookAtLeft = Matrix4x4d.CreateLookAt(Vector256<double>.Zero, UnitNegX, UnitY);
+        static readonly Matrix4x4d LookAtRight = Matrix4x4d.CreateLookAt(Vector256<double>.Zero, UnitX, UnitY);
+        static readonly Matrix4x4d LookAtTop = Matrix4x4d.CreateLookAt(Vector256<double>.Zero, UnitY, UnitZ);
+        static readonly Matrix4x4d LookAtBottom = Matrix4x4d.CreateLookAt(Vector256<double>.Zero, UnitNegY, UnitNegZ);
+
         public readonly Vector128<float> Position;
 
         public readonly Vector4 Color;
@@ -75,19 +82,19 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
             ShadowStrength = (float)shadowStrength;
             ShadowScatterSize = (float)shadowScatterSize;
 
-            FrontLightViewMatrix = baseLightViewMartrix * Matrix4x4d.CreateLookAt(Vector256<double>.Zero, UnitZ, UnitY) * viewOffsetMatrix;
-            BackLightViewMatrix = baseLightViewMartrix * Matrix4x4d.CreateLookAt(Vector256<double>.Zero, UnitNegZ, UnitY) * viewOffsetMatrix;
-            LeftLightViewMatrix = baseLightViewMartrix * Matrix4x4d.CreateLookAt(Vector256<double>.Zero, UnitNegX, UnitY) * viewOffsetMatrix;
-            RightLightViewMatrix = baseLightViewMartrix * Matrix4x4d.CreateLookAt(Vector256<double>.Zero, UnitX, UnitY) * viewOffsetMatrix;
-            TopLightViewMatrix = baseLightViewMartrix * Matrix4x4d.CreateLookAt(Vector256<double>.Zero, UnitY, UnitZ) * viewOffsetMatrix;
-            BottomLightViewMatrix = baseLightViewMartrix * Matrix4x4d.CreateLookAt(Vector256<double>.Zero, UnitNegY, UnitNegZ) * viewOffsetMatrix;
+            FrontLightViewMatrix = baseLightViewMartrix * LookAtFront * viewOffsetMatrix;
+            BackLightViewMatrix = baseLightViewMartrix * LookAtBack * viewOffsetMatrix;
+            LeftLightViewMatrix = baseLightViewMartrix * LookAtLeft * viewOffsetMatrix;
+            RightLightViewMatrix = baseLightViewMartrix * LookAtRight * viewOffsetMatrix;
+            TopLightViewMatrix = baseLightViewMartrix * LookAtTop * viewOffsetMatrix;
+            BottomLightViewMatrix = baseLightViewMartrix * LookAtBottom * viewOffsetMatrix;
             FloatFrontLightViewMatrix = (Matrix4x4)FrontLightViewMatrix;
             FloatBackLightViewMatrix = (Matrix4x4)BackLightViewMatrix;
             FloatLeftLightViewMatrix = (Matrix4x4)LeftLightViewMatrix;
             FloatRightLightViewMatrix = (Matrix4x4)RightLightViewMatrix;
             FloatTopLightViewMatrix = (Matrix4x4)TopLightViewMatrix;
             FloatBottomLightViewMatrix = (Matrix4x4)BottomLightViewMatrix;
-            FaceDetectionMatrix = (Matrix4x4)(baseLightViewMartrix * Matrix4x4d.CreateLookAt(Vector256<double>.Zero, UnitZ, UnitY));
+            FaceDetectionMatrix = (Matrix4x4)(baseLightViewMartrix * LookAtFront);
         }
     }
 
