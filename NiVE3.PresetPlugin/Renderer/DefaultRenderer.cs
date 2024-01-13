@@ -102,12 +102,11 @@ namespace NiVE3.PresetPlugin.Renderer
                             lightSetting.FalloffLength / size,
                             lightSetting.IsEnableShadow,
                             lightSetting.ShadowStrength * 0.01,
-                            lightSetting.ShadowScatterSize
+                            lightSetting.ShadowScatterSize,
+                            CalcLightViewMatrixWithoutOffset(lightSetting, Width, Height),
+                            Matrix4x4d.CreateTranslate(-(size - Width) * 0.5 / size, -(size - Height) * 0.5 / size, 0.0)
                         );
-                        if (light.Color != Vector4.Zero)
-                        {
-                            PointLights.Add(light);
-                        }
+                        PointLights.Add(light);
                     }
                     break;
                 case LightType.Spot:
@@ -127,12 +126,9 @@ namespace NiVE3.PresetPlugin.Renderer
                             lightSetting.IsEnableShadow,
                             lightSetting.ShadowStrength * 0.01,
                             lightSetting.ShadowScatterSize,
-                            CalcLightViewMatrix(lightSetting, Width, Height)
+                            CalcLightViewMatrixWithoutOffset(lightSetting, Width, Height).Translate(-(size - Width) * 0.5 / size, -(size - Height) * 0.5 / size, 0.0)
                         );
-                        if (light.Color != Vector4.Zero)
-                        {
-                            SpotLights.Add(light);
-                        }
+                        SpotLights.Add(light);
                     }
                     break;
                 case LightType.Parallel:
@@ -149,21 +145,15 @@ namespace NiVE3.PresetPlugin.Renderer
                             lightSetting.IsEnableShadow,
                             lightSetting.ShadowStrength * 0.01,
                             lightSetting.ShadowScatterSize,
-                            CalcLightViewMatrix(lightSetting, Width, Height)
+                            CalcLightViewMatrixWithoutOffset(lightSetting, Width, Height).Translate(-(size - Width) * 0.5 / size, -(size - Height) * 0.5 / size, 0.0)
                         );
-                        if (light.Color != Vector4.Zero)
-                        {
-                            ParallelLights.Add(light);
-                        }
+                        ParallelLights.Add(light);
                     }
                     break;
                 case LightType.Ambient:
                     {
                         var light = new AmbientLight(lightSetting.Color, lightSetting.Intensity * 0.01);
-                        if (light.Color != Vector4.Zero)
-                        {
-                            AmbientLights.Add(light);
-                        }
+                        AmbientLights.Add(light);
                     }
                     break;
             }
@@ -451,7 +441,7 @@ namespace NiVE3.PresetPlugin.Renderer
             return lightModelMatrix;
         }
 
-        static Matrix4x4d CalcLightViewMatrix(LightSetting lightSetting, double renderWidth, double renderHeight)
+        static Matrix4x4d CalcLightViewMatrixWithoutOffset(LightSetting lightSetting, double renderWidth, double renderHeight)
         {
             var size = Math.Max(renderWidth, renderHeight);
             var view = GetLightViewMatrix(lightSetting.LightType, lightSetting.Position, lightSetting.PointOfInterest, lightSetting.Orientation, lightSetting.AngleX, lightSetting.AngleY, lightSetting.AngleZ, renderWidth, renderHeight);
@@ -476,7 +466,7 @@ namespace NiVE3.PresetPlugin.Renderer
                         break;
                 }
             }
-            return view.Translate(-(size - renderWidth) * 0.5 / size, -(size - renderHeight) * 0.5 / size, 0.0);
+            return view;
         }
 
         static Matrix3x3 GetTransform2D(PropertyValueGroup transform)

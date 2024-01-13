@@ -67,6 +67,15 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             AmbientLights = ambientLights;
 
             LightTriangles = pointLights.Cast<object>().Concat(spotLights).Concat(parallelLights).ToDictionary(k => k, _ => new List<LightTriangle>());
+            foreach (var pointLight in pointLights)
+            {
+                LightTriangles.Add(new PointLightHolder(pointLight, PointLightShadowDirection.Front), new List<LightTriangle>());
+                LightTriangles.Add(new PointLightHolder(pointLight, PointLightShadowDirection.Back), new List<LightTriangle>());
+                LightTriangles.Add(new PointLightHolder(pointLight, PointLightShadowDirection.Left), new List<LightTriangle>());
+                LightTriangles.Add(new PointLightHolder(pointLight, PointLightShadowDirection.Right), new List<LightTriangle>());
+                LightTriangles.Add(new PointLightHolder(pointLight, PointLightShadowDirection.Top), new List<LightTriangle>());
+                LightTriangles.Add(new PointLightHolder(pointLight, PointLightShadowDirection.Bottom), new List<LightTriangle>());
+            }
         }
 
         public void AddRect(NImage texture, float opacity, BlendMode blendType, in Matrix4x4d modelMatrix, bool isCastShadow, float lightTransmission, bool isAcceptShadow, bool isAcceptLight, float ambient, float diffuse, float specularIntensity, float specularShininess, float metal)
@@ -121,6 +130,37 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 triangles.Add(lt1);
                 triangles.Add(lt2);
             }
+            foreach (var pointLight in PointLights)
+            {
+                if (!pointLight.IsEnableShadow)
+                {
+                    continue;
+                }
+                var (lt1, lt2) = CreateLightTriangle(LastId, texture, opacity, isCastShadow, lightTransmission, sv1, sv2, sv3, sv4, modelMatrix, mv, pointLight.FrontLightViewMatrix, offsetX, offsetY);
+                var triangles = LightTriangles[new PointLightHolder(pointLight, PointLightShadowDirection.Front)];
+                triangles.Add(lt1);
+                triangles.Add(lt2);
+                (lt1, lt2) = CreateLightTriangle(LastId, texture, opacity, isCastShadow, lightTransmission, sv1, sv2, sv3, sv4, modelMatrix, mv, pointLight.BackLightViewMatrix, offsetX, offsetY);
+                triangles = LightTriangles[new PointLightHolder(pointLight, PointLightShadowDirection.Back)];
+                triangles.Add(lt1);
+                triangles.Add(lt2);
+                (lt1, lt2) = CreateLightTriangle(LastId, texture, opacity, isCastShadow, lightTransmission, sv1, sv2, sv3, sv4, modelMatrix, mv, pointLight.LeftLightViewMatrix, offsetX, offsetY);
+                triangles = LightTriangles[new PointLightHolder(pointLight, PointLightShadowDirection.Left)];
+                triangles.Add(lt1);
+                triangles.Add(lt2);
+                (lt1, lt2) = CreateLightTriangle(LastId, texture, opacity, isCastShadow, lightTransmission, sv1, sv2, sv3, sv4, modelMatrix, mv, pointLight.RightLightViewMatrix, offsetX, offsetY);
+                triangles = LightTriangles[new PointLightHolder(pointLight, PointLightShadowDirection.Right)];
+                triangles.Add(lt1);
+                triangles.Add(lt2);
+                (lt1, lt2) = CreateLightTriangle(LastId, texture, opacity, isCastShadow, lightTransmission, sv1, sv2, sv3, sv4, modelMatrix, mv, pointLight.TopLightViewMatrix, offsetX, offsetY);
+                triangles = LightTriangles[new PointLightHolder(pointLight, PointLightShadowDirection.Top)];
+                triangles.Add(lt1);
+                triangles.Add(lt2);
+                (lt1, lt2) = CreateLightTriangle(LastId, texture, opacity, isCastShadow, lightTransmission, sv1, sv2, sv3, sv4, modelMatrix, mv, pointLight.BottomLightViewMatrix, offsetX, offsetY);
+                triangles = LightTriangles[new PointLightHolder(pointLight, PointLightShadowDirection.Bottom)];
+                triangles.Add(lt1);
+                triangles.Add(lt2);
+            }
 
             LastId++;
         }
@@ -147,9 +187,10 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             var convertedTexture = new Dictionary<NImage, NManagedImage>();
             var hasLight = PointLights.Count > 0 || SpotLights.Count > 0 || ParallelLights.Count > 0 || AmbientLights.Count > 0;
 
+            var pointLightShadows = PointLights.Select(l => l.IsEnableShadow ? RenderPointLightShadow(l, Size, (float)offsetX, (float)offsetY) : null).ToArray();
             var spotLightShadows = SpotLights.Select(l => l.IsEnableShadow && LightTriangles[l].Count > 0 ? RenderSpotLightShadow(l, Size, (float)offsetX, (float)offsetY) : null).ToArray();
             var parallelLightShadows = ParallelLights.Select(l => l.IsEnableShadow && LightTriangles[l].Count > 0 ? RenderParallelLightShadow(l, Size, (float)offsetX, (float)offsetY) : null).ToArray();
-            var hasShadow = spotLightShadows.Any(s => s != null) || parallelLightShadows.Any(s => s != null);
+            var hasShadow = pointLightShadows.Any(ss => ss != null && ss.Any(s => s != null)) || spotLightShadows.Any(s => s != null) || parallelLightShadows.Any(s => s != null);
 
             foreach (var triangle in triangles)
             {
@@ -185,7 +226,6 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 var denom = Vector128.Create((float)(1.0 / (((dvv2.GetElement(0) - dvv1.GetElement(0)) * (dvv3.GetElement(1) - dvv1.GetElement(1))) - ((dvv2.GetElement(1) - dvv1.GetElement(1)) * (dvv3.GetElement(0) - dvv1.GetElement(0))))));
                 var edgeX = Sse.Subtract(Vector128.Create((float)dvv3.GetElement(0), (float)dvv1.GetElement(0), (float)dvv2.GetElement(0), 0.0F), Vector128.Create((float)dvv2.GetElement(0), (float)dvv3.GetElement(0), (float)dvv1.GetElement(0), 0.0F));
                 var edgeY = Sse.Subtract(Vector128.Create((float)dvv3.GetElement(1), (float)dvv1.GetElement(1), (float)dvv2.GetElement(1), 0.0F), Vector128.Create((float)dvv2.GetElement(1), (float)dvv3.GetElement(1), (float)dvv1.GetElement(1), 0.0F));
-                //var isFrontFace = triangle.Normal.DotProduct(Vector256.Create(0.0, 0.0, 1.0, 0.0)).GetElement(0) <= 0.0;
                 var isFrontFace = triangle.Normal.DotProduct(Avx.Divide(Avx.Add(Avx.Add(triangle.V1.Vertex, triangle.V2.Vertex), triangle.V3.Vertex), Vector256.Create(3.0))).GetElement(0) <= 0.0;
                 var vvEX = Vector128.Create((float)dvv2.GetElement(0), (float)dvv3.GetElement(0), (float)dvv1.GetElement(0), 0.0F);
                 var vvEY = Vector128.Create((float)dvv2.GetElement(1), (float)dvv3.GetElement(1), (float)dvv1.GetElement(1), 0.0F);
@@ -264,6 +304,36 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                 var lightDiff = Sse.Subtract(position, l.Position).AsVector3();
                                 var light = Vector3.Normalize(lightDiff);
                                 var falloff = CalcFalloff(lightDiff, l.FalloffType, l.FalloffStart, l.FalloffLength);
+                                var shadows = pointLightShadows[i];
+                                if (triangle.IsAcceptShadow && shadows != null)
+                                {
+                                    var face = PointLightShadowDirection.Front;
+                                    var faceDir = Vector4.Transform(Vector4.Transform(shadowProjectionPos, floatInvtededViewMatrix), l.FaceDetectionMatrix);
+                                    var absDir = Vector4.Abs(faceDir);
+                                    if (absDir.Z >= absDir.X && absDir.Z >= absDir.Y)
+                                    {
+                                        face = faceDir.Z < 0.0F ? PointLightShadowDirection.Back : PointLightShadowDirection.Front;
+                                    }
+                                    else if (absDir.Y >= absDir.X)
+                                    {
+                                        face = faceDir.Y < 0.0F ? PointLightShadowDirection.Top : PointLightShadowDirection.Bottom;
+                                    }
+                                    else
+                                    {
+                                        face = faceDir.X < 0.0F ? PointLightShadowDirection.Right : PointLightShadowDirection.Left;
+                                    }
+
+                                    var shadow = shadows[(int)face];
+                                    if (shadow != null)
+                                    {
+                                        var transmissionColor = GetShadowColor(triangle.Id, shadow, l.ShadowScatterSize, shadowProjectionPos, floatInvtededViewMatrix, shadow.LightViewProjectionMatrix, out _);
+                                        if (!lightColor.CompareGreaterThanBy3Element(Vector3.Zero))
+                                        {
+                                            continue;
+                                        }
+                                        lightColor *= transmissionColor;
+                                    }
+                                }
 
                                 var diffuseFactor = Vector3.Dot(light, n);
                                 var isBack = diffuseFactor < 0.0F;
@@ -386,6 +456,16 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 i.Dispose();
             }
 
+            foreach (var ss in pointLightShadows)
+            {
+                if (ss != null)
+                {
+                    foreach (var s in ss)
+                    {
+                        s?.Dispose();
+                    }
+                }
+            }
             foreach (var s in spotLightShadows)
             {
                 s?.Dispose();
@@ -431,6 +511,38 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             var lightProjectionMatrix = Matrix4x4d.CreateOrthographic(min.GetElement(0), max.GetElement(0), min.GetElement(1), max.GetElement(1), min.GetElement(2), max.GetElement(2));
 
             return RenderShadow(size, offsetX, offsetY, shadowBias, triangles, parallelLight.ShadowStrength, parallelLight.FloatLightViewMatrix, lightProjectionMatrix);
+        }
+
+        ShadowMap?[] RenderPointLightShadow(PointLight pointLight, int size, float offsetX, float offsetY)
+        {
+            var result = new ShadowMap?[6];
+            var lv = new Matrix4x4[]
+            {
+                pointLight.FloatFrontLightViewMatrix,
+                pointLight.FloatBackLightViewMatrix,
+                pointLight.FloatLeftLightViewMatrix,
+                pointLight.FloatRightLightViewMatrix,
+                pointLight.FloatTopLightViewMatrix,
+                pointLight.FloatBottomLightViewMatrix
+            };
+
+            foreach (var (i, holder) in PointLightHolder.Directions.Select((d, i) => (i, new PointLightHolder(pointLight, d))))
+            {
+                var triangles = GetClipAndDividedTriangles(LightTriangles[holder]).ToArray();
+                if (triangles.Length < 1)
+                {
+                    continue;
+                }
+
+                var minZ = triangles.Select(t => Math.Min(Math.Min(t.V1.Vertex.GetElement(2), t.V2.Vertex.GetElement(2)), t.V3.Vertex.GetElement(2))).Min();
+                var maxZ = triangles.Select(t => Math.Max(Math.Max(t.V1.Vertex.GetElement(2), t.V2.Vertex.GetElement(2)), t.V3.Vertex.GetElement(2))).Max();
+                var shadowBias = (float)(LinearShadowBias * (maxZ - minZ));
+                var lightProjectionMatrix = Matrix4x4d.CreatePerspectiveFieldOfView(Math.PI * 0.5, 1.0, minZ, maxZ);
+
+                result[i] = RenderShadow(size, offsetX, offsetY, shadowBias, triangles, pointLight.ShadowStrength, lv[i], lightProjectionMatrix);
+            }
+
+            return result;
         }
 
         IEnumerable<T> GetClipAndDividedTriangles<T>(IEnumerable<T> triangles) where T : TriangleBase<T>
@@ -839,7 +951,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                         while (index >= 0 && tc.CompareGreaterThanBy3Element(Vector3.Zero))
                         {
                             var sp = shadow.Buffers[bankIndex][index];
-                            if (sp.TriangleId == triangleId || depth >= sp.Depth)
+                            if (sp.TriangleId == triangleId || depth < sp.Depth)
                             {
                                 break;
                             }
@@ -983,5 +1095,20 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
         }
         #endif
         #endregion
+    }
+
+    file enum PointLightShadowDirection : int
+    {
+        Front = 0,
+        Back,
+        Left,
+        Right,
+        Top,
+        Bottom
+    }
+
+    file record PointLightHolder(PointLight Light, PointLightShadowDirection direction)
+    {
+        public static readonly PointLightShadowDirection[] Directions = Enum.GetValues(typeof(PointLightShadowDirection)).Cast<PointLightShadowDirection>().ToArray();
     }
 }

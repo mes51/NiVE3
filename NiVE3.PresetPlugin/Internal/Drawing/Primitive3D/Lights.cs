@@ -15,6 +15,13 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
 {
     class PointLight
     {
+        static readonly Vector256<double> UnitX = Vector256.Create(1.0, 0.0, 0.0, 0.0);
+        static readonly Vector256<double> UnitY = Vector256.Create(0.0, 1.0, 0.0, 0.0);
+        static readonly Vector256<double> UnitZ = Vector256.Create(0.0, 0.0, 1.0, 0.0);
+        static readonly Vector256<double> UnitNegX = Vector256.Create(-1.0, 0.0, 0.0, 0.0);
+        static readonly Vector256<double> UnitNegY = Vector256.Create(0.0, -1.0, 0.0, 0.0);
+        static readonly Vector256<double> UnitNegZ = Vector256.Create(0.0, 0.0, -1.0, 0.0);
+
         public readonly Vector128<float> Position;
 
         public readonly Vector4 Color;
@@ -31,7 +38,33 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
 
         public readonly float ShadowScatterSize;
 
-        public PointLight(in Vector256<double> position, in Vector3 color, double intensity, LightFalloffType falloffType, double falloffStart, double falloffLength, bool isEnableShadow, double shadowStrength, double shadowScatterSize)
+        public readonly Matrix4x4d FrontLightViewMatrix;
+
+        public readonly Matrix4x4d BackLightViewMatrix;
+
+        public readonly Matrix4x4d LeftLightViewMatrix;
+
+        public readonly Matrix4x4d RightLightViewMatrix;
+
+        public readonly Matrix4x4d TopLightViewMatrix;
+
+        public readonly Matrix4x4d BottomLightViewMatrix;
+
+        public readonly Matrix4x4 FloatFrontLightViewMatrix;
+
+        public readonly Matrix4x4 FloatBackLightViewMatrix;
+
+        public readonly Matrix4x4 FloatLeftLightViewMatrix;
+
+        public readonly Matrix4x4 FloatRightLightViewMatrix;
+
+        public readonly Matrix4x4 FloatTopLightViewMatrix;
+
+        public readonly Matrix4x4 FloatBottomLightViewMatrix;
+
+        public readonly Matrix4x4 FaceDetectionMatrix;
+
+        public PointLight(in Vector256<double> position, in Vector3 color, double intensity, LightFalloffType falloffType, double falloffStart, double falloffLength, bool isEnableShadow, double shadowStrength, double shadowScatterSize, in Matrix4x4d baseLightViewMartrix, in Matrix4x4d viewOffsetMatrix)
         {
             Position = Avx.ConvertToVector128Single(position);
             Color = new Vector4(color * (float)intensity, 1.0F);
@@ -41,6 +74,20 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
             IsEnableShadow = isEnableShadow;
             ShadowStrength = (float)shadowStrength;
             ShadowScatterSize = (float)shadowScatterSize;
+
+            FrontLightViewMatrix = baseLightViewMartrix * Matrix4x4d.CreateLookAt(Vector256<double>.Zero, UnitZ, UnitY) * viewOffsetMatrix;
+            BackLightViewMatrix = baseLightViewMartrix * Matrix4x4d.CreateLookAt(Vector256<double>.Zero, UnitNegZ, UnitY) * viewOffsetMatrix;
+            LeftLightViewMatrix = baseLightViewMartrix * Matrix4x4d.CreateLookAt(Vector256<double>.Zero, UnitNegX, UnitY) * viewOffsetMatrix;
+            RightLightViewMatrix = baseLightViewMartrix * Matrix4x4d.CreateLookAt(Vector256<double>.Zero, UnitX, UnitY) * viewOffsetMatrix;
+            TopLightViewMatrix = baseLightViewMartrix * Matrix4x4d.CreateLookAt(Vector256<double>.Zero, UnitY, UnitZ) * viewOffsetMatrix;
+            BottomLightViewMatrix = baseLightViewMartrix * Matrix4x4d.CreateLookAt(Vector256<double>.Zero, UnitNegY, UnitNegZ) * viewOffsetMatrix;
+            FloatFrontLightViewMatrix = (Matrix4x4)FrontLightViewMatrix;
+            FloatBackLightViewMatrix = (Matrix4x4)BackLightViewMatrix;
+            FloatLeftLightViewMatrix = (Matrix4x4)LeftLightViewMatrix;
+            FloatRightLightViewMatrix = (Matrix4x4)RightLightViewMatrix;
+            FloatTopLightViewMatrix = (Matrix4x4)TopLightViewMatrix;
+            FloatBottomLightViewMatrix = (Matrix4x4)BottomLightViewMatrix;
+            FaceDetectionMatrix = (Matrix4x4)(baseLightViewMartrix * Matrix4x4d.CreateLookAt(Vector256<double>.Zero, UnitZ, UnitY));
         }
     }
 
