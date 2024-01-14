@@ -29,6 +29,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
         const int DepthRoundingDigit = 5; // TODO: 要調整
 
+        const float ShininessStrength = 120.0F;
+
         public Matrix4x4d ViewMatrix { get; set; }
 
         public double FieldOfView { get; set; }
@@ -282,12 +284,6 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
                         if (useLight)
                         {
-                            const float ShininessStrength = 120.0F;
-
-                            // TODO: IsAcceptLight == false && IsCastShadow == trueの時の処理
-                            var diffuse = Vector4.Zero;
-                            var specular = Vector4.Zero;
-                            var ambient = Vector4.Zero;
                             var alpha = color.W;
                             var position = CalcBarycentricCoord(vvX, vvY, vvZ, e);
                             var n = isFrontFace  ? -triangle.FloatNormal : triangle.FloatNormal;
@@ -297,16 +293,17 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                 shadowProjectionPos = CalcBarycentricCoord(svvX, svvY, svvZ, e).AsVector4();
                             }
 
-                            for (var i = 0; i < PointLights.Count; i++)
+                            if (hasShadow && !triangle.IsAcceptLight && triangle.IsAcceptShadow)
                             {
-                                var l = pointLights[i];
-                                var lightColor = l.Color;
-                                var lightDiff = Sse.Subtract(position, l.Position).AsVector3();
-                                var light = Vector3.Normalize(lightDiff);
-                                var falloff = CalcFalloff(lightDiff, l.FalloffType, l.FalloffStart, l.FalloffLength);
-                                var shadows = pointLightShadows[i];
-                                if (triangle.IsAcceptShadow && shadows != null)
+                                for (var i = 0; i < PointLights.Count; i++)
                                 {
+                                    var l = pointLights[i];
+                                    var shadows = pointLightShadows[i];
+                                    if (shadows == null)
+                                    {
+                                        continue;
+                                    }
+
                                     var face = PointLightShadowDirection.Front;
                                     var faceDir = Vector4.Transform(Vector4.Transform(shadowProjectionPos, floatInvtededViewMatrix), l.FaceDetectionMatrix);
                                     var absDir = Vector4.Abs(faceDir);
@@ -326,68 +323,102 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                     var shadow = shadows[(int)face];
                                     if (shadow != null)
                                     {
-                                        var transmissionColor = GetShadowColor(triangle.Id, shadow, l.ShadowScatterSize, shadowProjectionPos, floatInvtededViewMatrix, shadow.LightViewProjectionMatrix, out _);
-                                        if (!lightColor.CompareGreaterThanBy3Element(Vector3.Zero))
-                                        {
-                                            continue;
-                                        }
-                                        lightColor *= transmissionColor;
+                                        var transmissionColor = GetShadowColor(triangle.Id, shadow, l.ShadowScatterSize, shadowProjectionPos, floatInvtededViewMatrix, shadow.LightViewProjectionMatrix);
+                                        color *= transmissionColor;
                                     }
                                 }
 
-                                var diffuseFactor = Vector3.Dot(light, n);
-                                var isBack = diffuseFactor < 0.0F;
-                                if (isBack)
+                                for (var i = 0; i < SpotLights.Count; i++)
                                 {
-                                    diffuseFactor *= -triangle.LightTransmission;
-                                }
-                                diffuse += lightColor * color * diffuseFactor * falloff;
+                                    var l = spotLights[i];
+                                    var lightDiff = Sse.Subtract(position, l.Position).AsVector3();
+                                    var light = Vector3.Normalize(lightDiff);
+                                    var spotCone = MathF.Acos(Vector3.Dot(l.Direction, light));
 
-                                var view = -Vector3.Normalize(position.AsVector3());
-                                var halfLE = Vector3.Normalize(view - light);
-                                var specularFactor = Math.Max(Vector3.Dot(-n, halfLE), 0.0F);
-                                if (isBack)
-                                {
-                                    specularFactor *= -triangle.LightTransmission;
+                                    if (spotCone <= l.OuterCone)
+                                    {
+                                        var shadow = spotLightShadows[i];
+                                        if (shadow == null)
+                                        {
+                                            continue;
+                                        }
+
+                                        var attenuation = 1.0F;
+                                        if (l.ConeAttenuationRate > 0.0)
+                                        {
+                                            attenuation = MathF.Cos((1.0F - Math.Min((MathF.Cos(spotCone) - l.OuterConeCos) * l.InvertInnerConeCos, 1.0F)) * MathF.PI * 0.5F);
+                                        }
+                                        var transmissionColor = GetShadowColor(triangle.Id, shadow, l.ShadowScatterSize, shadowProjectionPos, floatInvtededViewMatrix, shadow.LightViewProjectionMatrix);
+                                        color *= Vector4.Lerp(Vector4.One, transmissionColor, attenuation);
+                                    }
                                 }
-                                specular += Vector4.Lerp(lightColor, color * lightColor, triangle.Metal) * MathF.Pow(specularFactor, ShininessStrength * triangle.SpecularShininess) * triangle.SpecularIntensity * falloff;
+
+                                for (var i = 0; i < ParallelLights.Count; i++)
+                                {
+                                    var l = parallelLights[i];
+                                    var shadow = parallelLightShadows[i];
+                                    if (shadow == null)
+                                    {
+                                        continue;
+                                    }
+
+                                    var transmissionColor = GetShadowColor(triangle.Id, shadow, l.ShadowScatterSize, shadowProjectionPos, floatInvtededViewMatrix, shadow.LightViewProjectionMatrix);
+                                    color *= transmissionColor;
+                                }
+
+                                color.W = alpha;
                             }
-
-                            for (var i = 0; i < SpotLights.Count; i++)
+                            else if (triangle.IsAcceptLight)
                             {
-                                var l = spotLights[i];
-                                var lightColor = l.Color;
-                                var lightDiff = Sse.Subtract(position, l.Position).AsVector3();
-                                var light = Vector3.Normalize(lightDiff);
-                                var spotCone = MathF.Acos(Vector3.Dot(l.Direction, light));
+                                var diffuse = Vector4.Zero;
+                                var specular = Vector4.Zero;
+                                var ambient = Vector4.Zero;
 
-                                if (spotCone <= l.OuterCone)
+                                for (var i = 0; i < PointLights.Count; i++)
                                 {
-                                    var shadow = spotLightShadows[i];
-                                    if (triangle.IsAcceptShadow && shadow != null)
-                                    {
-                                        var transmissionColor = GetShadowColor(triangle.Id, shadow, l.ShadowScatterSize, shadowProjectionPos, floatInvtededViewMatrix, shadow.LightViewProjectionMatrix, out _);
-                                        if (!transmissionColor.CompareGreaterThanBy3Element(Vector3.Zero))
-                                        {
-                                            continue;
-                                        }
-                                        lightColor *= transmissionColor;
-                                    }
-
-                                    var attenuation = 1.0F;
-                                    if (l.ConeAttenuationRate > 0.0)
-                                    {
-                                        attenuation = MathF.Cos((1.0F - Math.Min((MathF.Cos(spotCone) - l.OuterConeCos) * l.InvertInnerConeCos, 1.0F)) * MathF.PI * 0.5F);
-                                    }
-
+                                    var l = pointLights[i];
+                                    var lightColor = l.Color;
+                                    var lightDiff = Sse.Subtract(position, l.Position).AsVector3();
+                                    var light = Vector3.Normalize(lightDiff);
                                     var falloff = CalcFalloff(lightDiff, l.FalloffType, l.FalloffStart, l.FalloffLength);
+                                    var shadows = pointLightShadows[i];
+                                    if (triangle.IsAcceptShadow && shadows != null)
+                                    {
+                                        var face = PointLightShadowDirection.Front;
+                                        var faceDir = Vector4.Transform(Vector4.Transform(shadowProjectionPos, floatInvtededViewMatrix), l.FaceDetectionMatrix);
+                                        var absDir = Vector4.Abs(faceDir);
+                                        if (absDir.Z >= absDir.X && absDir.Z >= absDir.Y)
+                                        {
+                                            face = faceDir.Z < 0.0F ? PointLightShadowDirection.Back : PointLightShadowDirection.Front;
+                                        }
+                                        else if (absDir.Y >= absDir.X)
+                                        {
+                                            face = faceDir.Y < 0.0F ? PointLightShadowDirection.Top : PointLightShadowDirection.Bottom;
+                                        }
+                                        else
+                                        {
+                                            face = faceDir.X < 0.0F ? PointLightShadowDirection.Right : PointLightShadowDirection.Left;
+                                        }
+
+                                        var shadow = shadows[(int)face];
+                                        if (shadow != null)
+                                        {
+                                            var transmissionColor = GetShadowColor(triangle.Id, shadow, l.ShadowScatterSize, shadowProjectionPos, floatInvtededViewMatrix, shadow.LightViewProjectionMatrix);
+                                            if (!lightColor.CompareGreaterThanBy3Element(Vector3.Zero))
+                                            {
+                                                continue;
+                                            }
+                                            lightColor *= transmissionColor;
+                                        }
+                                    }
+
                                     var diffuseFactor = Vector3.Dot(light, n);
                                     var isBack = diffuseFactor < 0.0F;
                                     if (isBack)
                                     {
                                         diffuseFactor *= -triangle.LightTransmission;
                                     }
-                                    diffuse += lightColor * color * diffuseFactor * falloff * attenuation;
+                                    diffuse += lightColor * color * diffuseFactor * falloff;
 
                                     var view = -Vector3.Normalize(position.AsVector3());
                                     var halfLE = Vector3.Normalize(view - light);
@@ -396,54 +427,101 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                     {
                                         specularFactor *= -triangle.LightTransmission;
                                     }
-                                    specular += Vector4.Lerp(lightColor, color * lightColor, triangle.Metal) * MathF.Pow(specularFactor, ShininessStrength * triangle.SpecularShininess) * triangle.SpecularIntensity * falloff * attenuation;
+                                    specular += Vector4.Lerp(lightColor, color * lightColor, triangle.Metal) * MathF.Pow(specularFactor, ShininessStrength * triangle.SpecularShininess) * triangle.SpecularIntensity * falloff;
                                 }
-                            }
 
-                            for (var i = 0; i < ParallelLights.Count; i++)
-                            {
-                                var l = parallelLights[i];
-                                var lightColor = l.Color;
-                                var lightDiff = Sse.Subtract(position, l.Position).AsVector3();
-                                var falloff = CalcFalloff(lightDiff, l.FalloffType, l.FalloffStart, l.FalloffLength);
-
-                                var shadow = parallelLightShadows[i];
-                                if (triangle.IsAcceptShadow && shadow != null)
+                                for (var i = 0; i < SpotLights.Count; i++)
                                 {
-                                    var transmissionColor = GetShadowColor(triangle.Id, shadow, l.ShadowScatterSize, shadowProjectionPos, floatInvtededViewMatrix, shadow.LightViewProjectionMatrix, out _);
-                                    if (!transmissionColor.CompareGreaterThanBy3Element(Vector3.Zero))
+                                    var l = spotLights[i];
+                                    var lightColor = l.Color;
+                                    var lightDiff = Sse.Subtract(position, l.Position).AsVector3();
+                                    var light = Vector3.Normalize(lightDiff);
+                                    var spotCone = MathF.Acos(Vector3.Dot(l.Direction, light));
+
+                                    if (spotCone <= l.OuterCone)
                                     {
-                                        continue;
+                                        var shadow = spotLightShadows[i];
+                                        if (triangle.IsAcceptShadow && shadow != null)
+                                        {
+                                            var transmissionColor = GetShadowColor(triangle.Id, shadow, l.ShadowScatterSize, shadowProjectionPos, floatInvtededViewMatrix, shadow.LightViewProjectionMatrix);
+                                            if (!transmissionColor.CompareGreaterThanBy3Element(Vector3.Zero))
+                                            {
+                                                continue;
+                                            }
+                                            lightColor *= transmissionColor;
+                                        }
+
+                                        var attenuation = 1.0F;
+                                        if (l.ConeAttenuationRate > 0.0)
+                                        {
+                                            attenuation = MathF.Cos((1.0F - Math.Min((MathF.Cos(spotCone) - l.OuterConeCos) * l.InvertInnerConeCos, 1.0F)) * MathF.PI * 0.5F);
+                                        }
+
+                                        var falloff = CalcFalloff(lightDiff, l.FalloffType, l.FalloffStart, l.FalloffLength);
+                                        var diffuseFactor = Vector3.Dot(light, n);
+                                        var isBack = diffuseFactor < 0.0F;
+                                        if (isBack)
+                                        {
+                                            diffuseFactor *= -triangle.LightTransmission;
+                                        }
+                                        diffuse += lightColor * color * diffuseFactor * falloff * attenuation;
+
+                                        var view = -Vector3.Normalize(position.AsVector3());
+                                        var halfLE = Vector3.Normalize(view - light);
+                                        var specularFactor = Math.Max(Vector3.Dot(-n, halfLE), 0.0F);
+                                        if (isBack)
+                                        {
+                                            specularFactor *= -triangle.LightTransmission;
+                                        }
+                                        specular += Vector4.Lerp(lightColor, color * lightColor, triangle.Metal) * MathF.Pow(specularFactor, ShininessStrength * triangle.SpecularShininess) * triangle.SpecularIntensity * falloff * attenuation;
                                     }
-                                    lightColor *= transmissionColor;
                                 }
 
-                                var diffuseFactor = Vector3.Dot(l.Direction, n);
-                                var isBack = diffuseFactor < 0.0F;
-                                if (isBack)
+                                for (var i = 0; i < ParallelLights.Count; i++)
                                 {
-                                    diffuseFactor *= -triangle.LightTransmission;
-                                }
-                                diffuse += lightColor * color * diffuseFactor * falloff;
+                                    var l = parallelLights[i];
+                                    var lightColor = l.Color;
+                                    var lightDiff = Sse.Subtract(position, l.Position).AsVector3();
+                                    var falloff = CalcFalloff(lightDiff, l.FalloffType, l.FalloffStart, l.FalloffLength);
 
-                                var view = -Vector3.Normalize(position.AsVector3());
-                                var halfLE = Vector3.Normalize(view - l.Direction);
-                                var specularFactor = Math.Max(Vector3.Dot(-n, halfLE), 0.0F);
-                                if (isBack)
+                                    var shadow = parallelLightShadows[i];
+                                    if (triangle.IsAcceptShadow && shadow != null)
+                                    {
+                                        var transmissionColor = GetShadowColor(triangle.Id, shadow, l.ShadowScatterSize, shadowProjectionPos, floatInvtededViewMatrix, shadow.LightViewProjectionMatrix);
+                                        if (!transmissionColor.CompareGreaterThanBy3Element(Vector3.Zero))
+                                        {
+                                            continue;
+                                        }
+                                        lightColor *= transmissionColor;
+                                    }
+
+                                    var diffuseFactor = Vector3.Dot(l.Direction, n);
+                                    var isBack = diffuseFactor < 0.0F;
+                                    if (isBack)
+                                    {
+                                        diffuseFactor *= -triangle.LightTransmission;
+                                    }
+                                    diffuse += lightColor * color * diffuseFactor * falloff;
+
+                                    var view = -Vector3.Normalize(position.AsVector3());
+                                    var halfLE = Vector3.Normalize(view - l.Direction);
+                                    var specularFactor = Math.Max(Vector3.Dot(-n, halfLE), 0.0F);
+                                    if (isBack)
+                                    {
+                                        specularFactor *= -triangle.LightTransmission;
+                                    }
+                                    specular += Vector4.Lerp(lightColor, color * lightColor, triangle.Metal) * MathF.Pow(specularFactor, ShininessStrength * triangle.SpecularShininess) * triangle.SpecularIntensity * falloff;
+                                }
+
+                                for (var i = 0; i < AmbientLights.Count; i++)
                                 {
-                                    specularFactor *= -triangle.LightTransmission;
+                                    ambient += ambientLights[i].Color * color;
                                 }
-                                specular += Vector4.Lerp(lightColor, color * lightColor, triangle.Metal) * MathF.Pow(specularFactor, ShininessStrength * triangle.SpecularShininess) * triangle.SpecularIntensity * falloff;
-                            }
 
-                            for (var i = 0; i < AmbientLights.Count; i++)
-                            {
-                                ambient += ambientLights[i].Color * color;
+                                color = diffuse * triangle.Diffuse + specular + ambient * triangle.Ambient;
+                                color.W = alpha;
+                                color = Vector4.Max(Vector4.Min(color, Vector4.One), Vector4.Zero);
                             }
-
-                            color = diffuse * triangle.Diffuse + specular + ambient * triangle.Ambient;
-                            color.W = alpha;
-                            color = Vector4.Max(Vector4.Min(color, Vector4.One), Vector4.Zero);
                         }
 
                         Blend.Process(triangle.BlendMode, renderImageSpan, color, p);
@@ -871,10 +949,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             return shadowMap;
         }
 
-        static Vector4 GetShadowColor(int triangleId, ShadowMap shadow, float shadowScatterSize, in Vector4 shadowProjectionPos, in Matrix4x4 invtededViewMatrix, in Matrix4x4 lightViewProjectionMatrix, out bool IsHitInToMap)
+        static Vector4 GetShadowColor(int triangleId, ShadowMap shadow, float shadowScatterSize, in Vector4 shadowProjectionPos, in Matrix4x4 invtededViewMatrix, in Matrix4x4 lightViewProjectionMatrix)
         {
-            IsHitInToMap = false;
-
             var shadowPos = Vector4.Transform(Vector4.Transform(shadowProjectionPos, invtededViewMatrix), lightViewProjectionMatrix);
             shadowPos /= shadowPos.W;
             var shadowTexPos = shadowPos * 0.5F + new Vector4(0.5F, 0.5F, 0.0F, 0.0F);
@@ -909,7 +985,6 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                         index = sp.NextIndex;
                         bankIndex = sp.NextBank;
                     }
-                    IsHitInToMap = true;
                     return tc;
                 }
             }
@@ -958,7 +1033,6 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                             bankIndex = sp.NextBank;
                         }
                         transmissionColor += tc * rate;
-                        IsHitInToMap = true;
                     }
                 }
 
