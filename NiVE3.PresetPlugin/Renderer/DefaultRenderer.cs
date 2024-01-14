@@ -168,6 +168,7 @@ namespace NiVE3.PresetPlugin.Renderer
 
             foreach (var group in images.GroupByPrev(i => i.IsEnable3D))
             {
+                // TODO: ダウンサンプリング・ROIの反映
                 if (group.First().IsEnable3D)
                 {
                     var renderer = new Renderer3D(CurrentFrame, PointLights, SpotLights, ParallelLights, AmbientLights);
@@ -212,6 +213,19 @@ namespace NiVE3.PresetPlugin.Renderer
             }
         }
 
+        public void RenderAdjustmentLayer(NImage image, ROI roi, double downSamplingRate, ImageInterpolationQuality interpolationQuality, BlendMode blendMode)
+        {
+            if (CurrentFrame == null)
+            {
+                return;
+            }
+
+            // TODO: ダウンサンプリング・ROIの反映
+            var renderer = new Renderer2D(CurrentFrame);
+            var matrix = Matrix3x3.Identity.Translate((Width - roi.OriginalImageSize.Width) * 0.5F + roi.OriginalImagePosition.X, (Height - roi.OriginalImageSize.Height) * 0.5F + roi.OriginalImagePosition.Y);
+            renderer.Draw(image, 1.0F, matrix, interpolationQuality, blendMode);
+        }
+
         public NImage GetCurrentRenderedImage()
         {
             if (CurrentFrame == null)
@@ -231,6 +245,50 @@ namespace NiVE3.PresetPlugin.Renderer
 
             var result = CurrentFrame;
             CurrentFrame = null;
+            return result;
+        }
+
+        public NImage RenderAdjustmentMask(RenderableImage image)
+        {
+            var result = new NManagedImage(Width, Height);
+            var opacity = (double)(image.Transform[ILayerObject.TransformPropertyOpacityId] ?? 0.0) * 0.01;
+
+            if (opacity > 0.0)
+            {
+                return result;
+            }
+
+            if (image.IsEnable3D)
+            {
+                var renderer = new Renderer3D(result, new List<PointLight>(), new List<SpotLight>(), new List<ParallelLight>(), new List<AmbientLight>());
+                renderer.ViewMatrix = ViewMatrix;
+                renderer.FieldOfView = FieldOfView;
+
+                renderer.AddRect(
+                    image.Image,
+                    (float)opacity,
+                    image.BlendMode,
+                    Calc3DModelMatrix(image.Transform, image.ParentTransforms, Width, Height),
+                    (bool)(image.LayerOptions?[ILayerObject.ImageLayerOptionIsCastShadowId] ?? false),
+                    (float)((double)(image.LayerOptions?[ILayerObject.ImageLayerOptionLightTransmissionId] ?? 0.0) * 0.01),
+                    (bool)(image.LayerOptions?[ILayerObject.ImageLayerOptionIsAcceptShadowId] ?? false),
+                    (bool)(image.LayerOptions?[ILayerObject.ImageLayerOptionIsAcceptLightId] ?? false),
+                    (float)((double)(image.LayerOptions?[ILayerObject.ImageLayerOptionAmbientId] ?? 0.0) * 0.01),
+                    (float)((double)(image.LayerOptions?[ILayerObject.ImageLayerOptionDiffuseId] ?? 0.0) * 0.01),
+                    (float)((double)(image.LayerOptions?[ILayerObject.ImageLayerOptionSpecularIntensityId] ?? 0.0) * 0.01),
+                    (float)((double)(image.LayerOptions?[ILayerObject.ImageLayerOptionSpecularShininessId] ?? 0.0) * 0.01),
+                    (float)((double)(image.LayerOptions?[ILayerObject.ImageLayerOptionMetalId] ?? 0.0) * 0.01)
+                );
+
+                renderer.Render();
+            }
+            else
+            {
+                var renderer = new Renderer2D(result);
+                var matrix = CalcTransform2D(image.Transform, image.ParentTransforms);
+                renderer.Draw(image.Image, (float)opacity, matrix, image.InterpolationQuality, image.BlendMode);
+            }
+
             return result;
         }
 

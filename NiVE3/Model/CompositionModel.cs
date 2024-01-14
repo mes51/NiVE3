@@ -421,7 +421,7 @@ namespace NiVE3.Model
 
         public NImage Render(double time, double downSamplingRate, bool useGpu)
         {
-            var allImages = new List<RenderableImage>();
+            var allImages = new List<IDisposable>();
 
             Renderer.BeginRendering(downSamplingRate, useGpu);
 
@@ -457,16 +457,18 @@ namespace NiVE3.Model
                     }
                     images.Clear();
 
-                    // TODO: 調整レイヤーの適用
+                    using var adjustmentMaskImage = l.GetRawImage(time, downSamplingRate, useGpu);
+                    var mask = Renderer.RenderAdjustmentMask(adjustmentMaskImage);
+                    var (roi, currentFrame) = l.ProcessAdjustment(time, downSamplingRate, Renderer.GetCurrentRenderedImage());
+                    Renderer.RenderAdjustmentLayer(currentFrame, roi, downSamplingRate, l.InterpolationQuality, l.BlendMode);
+
+                    allImages.Add(currentFrame);
                 }
                 else
                 {
                     var image = l.GetImage(time, downSamplingRate, useGpu);
-                    if (image != null)
-                    {
-                        images.Add(image);
-                        allImages.Add(image);
-                    }
+                    images.Add(image);
+                    allImages.Add(image);
                 }
             }
             if (images.Count > 0)

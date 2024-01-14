@@ -25,6 +25,7 @@ using NiVE3.Plugin.Interfaces.RendererParams;
 using NiVE3.Plugin.Numerics;
 using System.Numerics;
 using System.Runtime.Intrinsics;
+using System.Security.Cryptography.Xml;
 
 namespace NiVE3.Model
 {
@@ -382,7 +383,7 @@ namespace NiVE3.Model
             PropertyChanged += LayerModel_PropertyChanged;
         }
 
-        public RenderableImage? GetImage(double time, double downSamplingRate, bool useGpu)
+        public RenderableImage GetImage(double time, double downSamplingRate, bool useGpu)
         {
             if (!HasImage)
             {
@@ -390,11 +391,6 @@ namespace NiVE3.Model
             }
 
             var transform = GetTransform(time);
-            if ((double)(transform[ILayerObject.TransformPropertyOpacityId] ?? 0.0) <= 0.0)
-            {
-                return null;
-            }
-
             var layerTime = time - SourceStartPoint;
             // TODO: タイムリマップ反映
             var sourceTime = layerTime;
@@ -423,6 +419,52 @@ namespace NiVE3.Model
                 GetParentTransforms(time),
                 LayerOptionProperties?.GetPropertyValueGroup(layerTime)
             );
+        }
+
+        public RenderableImage GetRawImage(double time, double downSamplingRate, bool useGpu)
+        {
+            if (!HasImage)
+            {
+                throw new InvalidOperationException("this source type is does not return images");
+            }
+
+            var transform = GetTransform(time);
+            var layerTime = time - SourceStartPoint;
+            // TODO: タイムリマップ反映
+            var sourceTime = layerTime;
+
+            var image = FootageModel.ReadImage(sourceTime, useGpu);
+            var roi = new ROI(new Int32Point(), new Int32Size(image.Width, image.Height), 0, 0, image.Width, image.Height);
+
+            return new RenderableImage(
+                image,
+                roi,
+                downSamplingRate,
+                IsEnableMotionBlur,
+                IsEnable3D,
+                InterpolationQuality,
+                BlendMode,
+                transform,
+                GetParentTransforms(time),
+                LayerOptionProperties?.GetPropertyValueGroup(layerTime)
+            );
+        }
+
+        public (ROI, NImage) ProcessAdjustment(double time, double downSamplingRate, NImage currentFrame)
+        {
+            var layerTime = time - SourceStartPoint;
+            var roi = new ROI(new Int32Point(), new Int32Size(currentFrame.Width, currentFrame.Height), 0, 0, currentFrame.Width, currentFrame.Height);
+
+            if (IsEnableEffect)
+            {
+                // TODO: モジュラーエフェクト&ROI反映
+                foreach (var e in Effects.Where(e => !e.IsDummyEffect && e.IsEnable))
+                {
+                    currentFrame = e.Process(currentFrame, roi, layerTime);
+                }
+            }
+
+            return (roi, currentFrame);
         }
 
         public bool IsContainsTime(double time)

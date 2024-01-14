@@ -51,6 +51,16 @@ namespace NiVE3.Plugin.Interfaces
         void Render(RenderableImage[] images);
 
         /// <summary>
+        /// 調整レイヤーをコンポジションの中心に描画します
+        /// </summary>
+        /// <param name="image">描画する画像</param>
+        /// <param name="roi">画像のROI</param>
+        /// <param name="downSamplingRate">ダウンサンプリングの比率</param>
+        /// <param name="interpolationQuality">画像のレンダリング時の補間方法</param>
+        /// <param name="blendMode">画像のブレンドモード</param>
+        void RenderAdjustmentLayer(NImage image, ROI roi, double downSamplingRate, ImageInterpolationQuality interpolationQuality, BlendMode blendMode);
+
+        /// <summary>
         /// 調整レイヤーなど、ここまでにレンダリングされた画像を必要とする機能のためにレンダリングの途中結果を取得します。レンダリング処理は継続されます
         /// </summary>
         /// <returns>レンダリングされた画像</returns>
@@ -61,6 +71,13 @@ namespace NiVE3.Plugin.Interfaces
         /// </summary>
         /// <returns>レンダリングされた画像</returns>
         NImage FinishRendering();
+
+        /// <summary>
+        /// 調整レイヤーのマスクを描画します
+        /// </summary>
+        /// <param name="image">描画するレイヤー</param>
+        /// <returns>描画された調整レイヤーのマスク</returns>
+        NImage RenderAdjustmentMask(RenderableImage image);
 
         /// <summary>
         /// 2Dレイヤーのバウンディングボックスを計算します
