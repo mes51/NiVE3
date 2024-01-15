@@ -460,6 +460,30 @@ namespace NiVE3.Model
                     using var adjustmentMaskImage = l.GetRawImage(time, downSamplingRate, useGpu);
                     var mask = Renderer.RenderAdjustmentMask(adjustmentMaskImage);
                     var (roi, currentFrame) = l.ProcessAdjustment(time, downSamplingRate, Renderer.GetCurrentRenderedImage());
+
+                    // TODO: GPU対応
+                    if (mask is NCudaImage cudaMaskImage)
+                    {
+                        var managedImage = cudaMaskImage.CopyToCpu();
+                        mask.Dispose();
+                        mask = managedImage;
+                    }
+                    if (currentFrame is NCudaImage cudaCurrentFrame)
+                    {
+                        var managedImage = cudaCurrentFrame.CopyToCpu();
+                        currentFrame.Dispose();
+                        currentFrame = managedImage;
+                    }
+                    Parallel.For(roi.OriginalImagePosition.Y, roi.OriginalImagePosition.Y + roi.OriginalImageSize.Height, y =>
+                    {
+                        var maskSpan = ((NManagedImage)mask).GetDataSpan().Slice((y - roi.OriginalImagePosition.Y) * mask.Width * 4, mask.Width * 4);
+                        var currentFrameSpan = ((NManagedImage)currentFrame).GetDataSpan().Slice(y * currentFrame.Width * 4, currentFrame.Width * 4);
+                        for (int x = roi.OriginalImagePosition.X, limit = x + roi.OriginalImageSize.Width, maskPos = 3, framePos = x * 4 + 3; x < limit; x++,  maskPos += 4, framePos += 4)
+                        {
+                            currentFrameSpan[framePos] = maskSpan[maskPos];
+                        }
+                    });
+
                     Renderer.RenderAdjustmentLayer(currentFrame, roi, downSamplingRate, l.InterpolationQuality, l.BlendMode);
 
                     allImages.Add(currentFrame);

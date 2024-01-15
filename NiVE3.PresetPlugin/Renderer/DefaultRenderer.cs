@@ -253,7 +253,7 @@ namespace NiVE3.PresetPlugin.Renderer
             var result = new NManagedImage(Width, Height);
             var opacity = (double)(image.Transform[ILayerObject.TransformPropertyOpacityId] ?? 0.0) * 0.01;
 
-            if (opacity > 0.0)
+            if (opacity <= 0.0)
             {
                 return result;
             }
