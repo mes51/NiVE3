@@ -383,7 +383,7 @@ namespace NiVE3.Model
             PropertyChanged += LayerModel_PropertyChanged;
         }
 
-        public RenderableImage GetImage(double time, double downSamplingRate, bool useGpu)
+        public RenderableImage? GetImage(double time, double downSamplingRate, bool useGpu)
         {
             if (!HasImage)
             {
@@ -391,6 +391,11 @@ namespace NiVE3.Model
             }
 
             var transform = GetTransform(time);
+            if ((double)(transform[ILayerObject.TransformPropertyOpacityId] ?? 0.0) <= 0.0)
+            {
+                return null;
+            }
+
             var layerTime = time - SourceStartPoint;
             // TODO: タイムリマップ反映
             var sourceTime = layerTime;
@@ -421,7 +426,7 @@ namespace NiVE3.Model
             );
         }
 
-        public RenderableImage GetRawImage(double time, double downSamplingRate, bool useGpu)
+        public RenderableImage? GetRawImage(double time, double downSamplingRate, bool useGpu)
         {
             if (!HasImage)
             {
@@ -429,6 +434,11 @@ namespace NiVE3.Model
             }
 
             var transform = GetTransform(time);
+            if ((double)(transform[ILayerObject.TransformPropertyOpacityId] ?? 0.0) <= 0.0)
+            {
+                return null;
+            }
+
             var layerTime = time - SourceStartPoint;
             // TODO: タイムリマップ反映
             var sourceTime = layerTime;

@@ -458,6 +458,11 @@ namespace NiVE3.Model
                     images.Clear();
 
                     using var adjustmentMaskImage = l.GetRawImage(time, downSamplingRate, useGpu);
+                    if (adjustmentMaskImage == null)
+                    {
+                        continue;
+                    }
+
                     var mask = Renderer.RenderAdjustmentMask(adjustmentMaskImage);
                     var (roi, currentFrame) = l.ProcessAdjustment(time, downSamplingRate, Renderer.GetCurrentRenderedImage());
 
@@ -491,8 +496,11 @@ namespace NiVE3.Model
                 else
                 {
                     var image = l.GetImage(time, downSamplingRate, useGpu);
-                    images.Add(image);
-                    allImages.Add(image);
+                    if (image != null)
+                    {
+                        images.Add(image);
+                        allImages.Add(image);
+                    }
                 }
             }
             if (images.Count > 0)
