@@ -391,21 +391,25 @@ namespace NiVE3.PresetPlugin.Renderer
             return result;
         }
 
-        public PreviewImageBoundingBox CalcBoundingBox2D(int width, int height, PropertyValueGroup transform, ParentTransform[] parentTransforms)
+        public PreviewBoundingBox CalcBoundingBox2D(int width, int height, PropertyValueGroup transform, ParentTransform[] parentTransforms)
         {
             var matrix = CalcTransform2D(transform, parentTransforms);
             var anchorPoint = (Vector3d)(transform[ILayerObject.TransformAnchorPointId] ?? new Vector3d());
 
-            return new PreviewImageBoundingBox(
-                (Vector2d)matrix.Transform(new Vector2(0.0F, 0.0F)),
-                (Vector2d)matrix.Transform(new Vector2(width, 0.0F)),
-                (Vector2d)matrix.Transform(new Vector2(0.0F, height)),
-                (Vector2d)matrix.Transform(new Vector2(width, height)),
-                (Vector2d)matrix.Transform((Vector2)anchorPoint.AsVector2d())
+            var transformedAnchorPoint = (Vector2d)matrix.Transform((Vector2)anchorPoint.AsVector2d());
+            var leftTop = (Vector2d)matrix.Transform(new Vector2(0.0F, 0.0F));
+            var rightTop = (Vector2d)matrix.Transform(new Vector2(width, 0.0F));
+            var leftBottom = (Vector2d)matrix.Transform(new Vector2(0.0F, height));
+            var rightBottom = (Vector2d)matrix.Transform(new Vector2(width, height));
+            return new PreviewBoundingBox(
+                transformedAnchorPoint,
+                new BoundingBoxShape[] { new BoundingBoxShape(new Vector2d[] { leftTop, rightTop, rightBottom, leftBottom }, false) },
+                (leftTop - rightTop).IsZero && (leftTop - leftBottom).IsZero && (rightTop - rightBottom).IsZero && (leftBottom - rightBottom).IsZero,
+                transformedAnchorPoint.IsNaN() || transformedAnchorPoint.IsInfinty()
             );
         }
 
-        public PreviewImageBoundingBox CalcBoundingBox3D(int width, int height, PropertyValueGroup transform, ParentTransform[] parentTransforms, CameraSetting cameraSetting)
+        public PreviewBoundingBox CalcBoundingBox3D(int width, int height, PropertyValueGroup transform, ParentTransform[] parentTransforms, CameraSetting cameraSetting)
         {
             var size = Math.Max(Width, Height);
             var fov = Math.Atan((Width / cameraSetting.Zoom) * 0.5) * 2.0;
@@ -424,13 +428,7 @@ namespace NiVE3.PresetPlugin.Renderer
                 nav = Avx.Divide(nav, Vector256.Create(nav.GetElement(3)));
 
                 var nullObjectAnchorPoint = ((Vector2d)nav) * (new Vector2d(size, size) * 0.5) + (new Vector2d(Width, Height) * 0.5);
-                return new PreviewImageBoundingBox(
-                    new Vector2d(),
-                    new Vector2d(),
-                    new Vector2d(),
-                    new Vector2d(),
-                    nullObjectAnchorPoint
-                );
+                return new PreviewBoundingBox(nullObjectAnchorPoint, Array.Empty<BoundingBoxShape>(), true, nullObjectAnchorPoint.IsNaN() || nullObjectAnchorPoint.IsInfinty());
             }
 
             var v1 = mv.Transform(Avx.Divide(Vector256.Create(0.0, 0.0, 0.0, size), Vector256.Create((double)size)));
@@ -442,7 +440,7 @@ namespace NiVE3.PresetPlugin.Renderer
             var t2Normal = Avx.Subtract(v3, v1).CrossProduct(Avx.Subtract(v4, v1)).Normalize();
             if (!Avx.TestZ(Avx.CompareNotEqual(t1Normal, t1Normal), Vector256.Create(double.NaN)) || !Avx.TestZ(Avx.CompareNotEqual(t2Normal, t2Normal), Vector256.Create(double.NaN)))
             {
-                return PreviewImageBoundingBox.Empty;
+                return PreviewBoundingBox.Empty;
             }
 
             v1 = projectionMatrix.Transform(v1);
@@ -466,27 +464,24 @@ namespace NiVE3.PresetPlugin.Renderer
                 IntersectLine((Vector2d)v1, (Vector2d)v4, (Vector2d)v4, (Vector2d)v3))
             {
                 // バウンディングボックスがクロスしているためアンカーポイントのみ表示
-                return new PreviewImageBoundingBox(
-                    new Vector2d(),
-                    new Vector2d(),
-                    new Vector2d(),
-                    new Vector2d(),
-                    bbAnchorPoint
-                );
+                return new PreviewBoundingBox(bbAnchorPoint, Array.Empty<BoundingBoxShape>(), true, bbAnchorPoint.IsNaN() || bbAnchorPoint.IsInfinty());
             }
             else
             {
-                return new PreviewImageBoundingBox(
-                    ((Vector2d)v1) * s + offset,
-                    ((Vector2d)v4) * s + offset,
-                    ((Vector2d)v2) * s + offset,
-                    ((Vector2d)v3) * s + offset,
-                    bbAnchorPoint
+                var leftTop = ((Vector2d)v1) * s + offset;
+                var rightTop = ((Vector2d)v4) * s + offset;
+                var leftBottom = ((Vector2d)v2) * s + offset;
+                var rightBottom = ((Vector2d)v3) * s + offset;
+                return new PreviewBoundingBox(
+                    bbAnchorPoint,
+                    new BoundingBoxShape[] { new BoundingBoxShape(new Vector2d[] { leftTop, rightTop, rightBottom, leftBottom }, false) },
+                    (leftTop - rightTop).IsZero && (leftTop - leftBottom).IsZero && (rightTop - rightBottom).IsZero && (leftBottom - rightBottom).IsZero,
+                    bbAnchorPoint.IsNaN() || bbAnchorPoint.IsInfinty()
                 );
             }
         }
 
-        public PreviewLightBoundingBox CalcLightBoundingBox(LightSetting lightSetting, CameraSetting cameraSetting)
+        public PreviewBoundingBox CalcLightBoundingBox(LightSetting lightSetting, CameraSetting cameraSetting)
         {
             var size = Math.Max(Width, Height);
             var fov = Math.Atan((Width / cameraSetting.Zoom) * 0.5) * 2.0;
@@ -503,7 +498,17 @@ namespace NiVE3.PresetPlugin.Renderer
             var pos = (Vector2d)projectionMatrix.Transform(mv.Transform(Vector256.Create(0.0, 0.0, 0.0, 1.0))) * s + offset;
             var poi = (Vector2d)projectionMatrix.Transform(mv.Transform(Vector256.Create(0.0, 0.0, length, 1.0))) * s + offset;
 
-            return new PreviewLightBoundingBox(lightSetting.LightType, pos, poi, lightSetting.ConeAngle);
+            const double PositionMarkSize = 5.0;
+            const int PositionMarkStepCount = 8;
+            const double PositionMarkStep = Math.PI * 2.0 / PositionMarkStepCount;
+            var positionMark = Enumerable.Range(0, PositionMarkStepCount).Select(i => new Vector2d(Math.Cos(PositionMarkStep * i) + 0.5, Math.Sin(PositionMarkStep * i) - 0.5) * PositionMarkSize + pos).ToArray();
+
+            return new PreviewBoundingBox(
+                lightSetting.LightType == LightType.Point ? pos : poi,
+                new BoundingBoxShape[] { new BoundingBoxShape(new Vector2d[] { pos, poi }, false), new BoundingBoxShape(positionMark, true, pos) },
+                lightSetting.LightType == LightType.Point,
+                lightSetting.LightType == LightType.Ambient || double.IsNaN(lightSetting.ConeAngle) || double.IsInfinity(lightSetting.ConeAngle)
+            );
         }
 
         static Matrix3x3 CalcTransform2D(PropertyValueGroup transform, ParentTransform[] parentTransforms)

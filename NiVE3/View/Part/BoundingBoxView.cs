@@ -4,7 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Documents;
 using System.Windows.Media;
+using System.Windows.Media.Media3D;
 using NiVE3.Extension;
 using NiVE3.Plugin.Interfaces.RendererParams;
 using NiVE3.Plugin.ValueObject;
@@ -17,15 +19,13 @@ namespace NiVE3.View.Part
 
         static readonly Geometry AnchorPointGeometry;
 
-        static readonly Geometry LightPointGeometry;
-
         static readonly Pen AnchorPointBorderPen = new Pen(Brushes.White, BorderThickness);
 
-        public static readonly DependencyProperty BoundingBoxRectProperty = DependencyProperty.Register(
-            nameof(BoundingBoxRect),
-            typeof(IPreviewBoundingBox),
+        public static readonly DependencyProperty BoundingBoxProperty = DependencyProperty.Register(
+            nameof(BoundingBox),
+            typeof(PreviewBoundingBox),
             typeof(BoundingBoxView),
-            new FrameworkPropertyMetadata(PreviewImageBoundingBox.Empty, FrameworkPropertyMetadataOptions.AffectsRender)
+            new FrameworkPropertyMetadata(PreviewBoundingBox.Empty, FrameworkPropertyMetadataOptions.AffectsRender)
         );
 
         public static readonly DependencyProperty BorderThicknessRateProperty = DependencyProperty.Register(
@@ -54,10 +54,10 @@ namespace NiVE3.View.Part
             set { SetValue(BorderThicknessRateProperty, value); }
         }
 
-        public IPreviewBoundingBox BoundingBoxRect
+        public PreviewBoundingBox BoundingBox
         {
-            get { return (IPreviewBoundingBox)GetValue(BoundingBoxRectProperty); }
-            set { SetValue(BoundingBoxRectProperty, value); }
+            get { return (PreviewBoundingBox)GetValue(BoundingBoxProperty); }
+            set { SetValue(BoundingBoxProperty, value); }
         }
 
         static BoundingBoxView()
@@ -89,20 +89,13 @@ namespace NiVE3.View.Part
             });
 
             AnchorPointGeometry = anchorPointGeometry.FreezeCurrentObject();
-
-            LightPointGeometry = new CombinedGeometry
-            {
-                GeometryCombineMode = GeometryCombineMode.Exclude,
-                Geometry1 = new EllipseGeometry(new Point(), 5.0, 5.0),
-                Geometry2 = new EllipseGeometry(new Point(), 4.0, 4.0)
-            }.FreezeCurrentObject();
         }
 
         protected override void OnRender(DrawingContext drawingContext)
         {
             base.OnRender(drawingContext);
 
-            var boundingBox = BoundingBoxRect;
+            var boundingBox = BoundingBox;
             if (boundingBox.IsInvalid)
             {
                 return;
@@ -110,63 +103,53 @@ namespace NiVE3.View.Part
 
             var penBrush = new SolidColorBrush(BorderColor);
             var pen = new Pen(penBrush, BorderThickness * BorderThicknessRate);
+            var holdSizePen = new Pen(penBrush, BorderThickness);
 
             var thicknessRateTransform = new ScaleTransform(BorderThicknessRate, BorderThicknessRate);
 
-            switch (boundingBox)
+            if (!boundingBox.IsEmpty)
             {
-                case PreviewImageBoundingBox image:
+                foreach (var shape in boundingBox.BoundingBoxies)
+                {
+                    if (shape.Path.Length < 2)
                     {
-                        if (!image.IsEmpty)
+                        continue;
+                    }
+
+                    var boxLines = new StreamGeometry();
+                    using (var context = boxLines.Open())
+                    {
+                        context.BeginFigure((Point)shape.Path[0], false, true);
+                        foreach (var p in shape.Path.Skip(1))
                         {
-                            var boxLines = new StreamGeometry();
-                            using (var context = boxLines.Open())
-                            {
-                                context.BeginFigure((Point)image.LeftTop, false, true);
-                                context.LineTo((Point)image.RightTop, true, false);
-                                context.LineTo((Point)image.RightBottom, true, false);
-                                context.LineTo((Point)image.LeftBottom, true, false);
-                            }
-                            drawingContext.DrawGeometry(null, pen, boxLines);
+                            context.LineTo((Point)p, true, false);
                         }
+                    }
 
-                        var transform = new TransformGroup();
-                        transform.Children.Add(thicknessRateTransform);
-                        transform.Children.Add(new TranslateTransform(image.AnchorPoint.X, image.AnchorPoint.Y));
-
-                        drawingContext.PushTransform(transform);
-                        drawingContext.DrawGeometry(null, AnchorPointBorderPen, AnchorPointGeometry);
-                        drawingContext.DrawGeometry(penBrush, null, AnchorPointGeometry);
+                    if (shape.IsHoldSize && shape.Center.HasValue)
+                    {
+                        var shapeTransform = new TransformGroup();
+                        shapeTransform.Children.Add(new TranslateTransform(-shape.Center.Value.X, -shape.Center.Value.Y));
+                        shapeTransform.Children.Add(thicknessRateTransform);
+                        shapeTransform.Children.Add(new TranslateTransform(shape.Center.Value.X, shape.Center.Value.Y));
+                        drawingContext.PushTransform(shapeTransform);
+                        drawingContext.DrawGeometry(null, holdSizePen, boxLines);
                         drawingContext.Pop();
                     }
-                    break;
-                case PreviewLightBoundingBox light:
+                    else
                     {
-                        TransformGroup transform;
-
-                        if (light.LightType == LightType.Spot || light.LightType == LightType.Parallel)
-                        {
-                            drawingContext.DrawLine(pen, (Point)light.Position, (Point)light.PointOfInterest);
-
-                            transform = new TransformGroup();
-                            transform.Children.Add(thicknessRateTransform);
-                            transform.Children.Add(new TranslateTransform(light.PointOfInterest.X, light.PointOfInterest.Y));
-                            drawingContext.PushTransform(transform);
-                            drawingContext.DrawGeometry(null, AnchorPointBorderPen, LightPointGeometry);
-                            drawingContext.DrawGeometry(penBrush, null, LightPointGeometry);
-                            drawingContext.Pop();
-                        }
-
-                        transform = new TransformGroup();
-                        transform.Children.Add(thicknessRateTransform);
-                        transform.Children.Add(new TranslateTransform(light.Position.X, light.Position.Y));
-                        drawingContext.PushTransform(transform);
-                        drawingContext.DrawGeometry(null, AnchorPointBorderPen, AnchorPointGeometry);
-                        drawingContext.DrawGeometry(penBrush, null, AnchorPointGeometry);
-                        drawingContext.Pop();
+                        drawingContext.DrawGeometry(null, pen, boxLines);
                     }
-                    break;
+                }
             }
+            var transform = new TransformGroup();
+            transform.Children.Add(thicknessRateTransform);
+            transform.Children.Add(new TranslateTransform(boundingBox.Center.X, boundingBox.Center.Y));
+
+            drawingContext.PushTransform(transform);
+            drawingContext.DrawGeometry(null, AnchorPointBorderPen, AnchorPointGeometry);
+            drawingContext.DrawGeometry(penBrush, null, AnchorPointGeometry);
+            drawingContext.Pop();
         }
     }
 }

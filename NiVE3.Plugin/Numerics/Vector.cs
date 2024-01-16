@@ -13,6 +13,10 @@ namespace NiVE3.Plugin.Numerics
 {
     public readonly struct Vector2d : IEquatable<Vector2d>
     {
+        public static readonly Vector2d Zero = new Vector2d();
+
+        public static readonly Vector2d One = new Vector2d(1.0, 1.0);
+
         public readonly double X;
 
         public readonly double Y;
@@ -35,6 +39,18 @@ namespace NiVE3.Plugin.Numerics
         public Vector256<double> AsVector256()
         {
             return Vector256.Create(X, Y, 0.0, 0.0);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool IsNaN()
+        {
+            return double.IsNaN(X) || double.IsNaN(Y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool IsInfinty()
+        {
+            return double.IsInfinity(X) || double.IsInfinity(Y);
         }
 
         public override bool Equals([NotNullWhen(true)] object? obj)
