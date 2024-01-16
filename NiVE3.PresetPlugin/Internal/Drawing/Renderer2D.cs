@@ -23,7 +23,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             Target = target;
         }
 
-        public void Draw(NImage image, float opacity, Matrix3x3 transform, ImageInterpolationQuality interpolationQuality, BlendMode blendMode)
+        public void Draw(NImage image, float opacity, Matrix3x3 transform, ImageInterpolationQuality interpolationQuality, BlendMode blendMode, RasterizedMaskImage? trackMatte)
         {
             if (!Matrix3x3.Invert(transform, out var inverted))
             {
@@ -34,6 +34,11 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             {
                 NGPUImage gpuImage => gpuImage.CopyToCpu(),
                 _ => (NManagedImage)image
+            };
+            var managedTrackMatte = trackMatte switch
+            {
+                GPURasterizedMaskImage gpuTrackMatte => gpuTrackMatte.CopyToCpu(),
+                _ => (ManagedRasterizedMaskImage?)trackMatte
             };
 
             var p1 = transform.Transform(new Vector2());
@@ -46,32 +51,65 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             var maxY = Math.Min((int)Math.Ceiling(Math.Max(Math.Max(Math.Max(p1.Y, p2.Y), p3.Y), p4.Y)), Target.Height);
 
             var width = Target.Width;
-            Parallel.For(minY, maxY, y =>
+            if (managedTrackMatte != null)
             {
-                var targetData = MemoryMarshal.Cast<float, Vector4>(Target.GetDataSpan());
-                var imageData = MemoryMarshal.Cast<float, Vector4>(managedImage.GetDataSpan());
-                for (int x = minX, pos = y * Target.Width + minX; x < maxX; x++, pos++)
+                Parallel.For(minY, maxY, y =>
                 {
-                    var (imageX, imageY) = inverted.Transform(x, y);
-                    var p = interpolationQuality switch
+                    var targetData = MemoryMarshal.Cast<float, Vector4>(Target.GetDataSpan());
+                    var imageData = MemoryMarshal.Cast<float, Vector4>(managedImage.GetDataSpan());
+                    var trackMatteData = managedTrackMatte.GetDataSpan();
+                    for (int x = minX, pos = y * Target.Width + minX; x < maxX; x++, pos++)
                     {
-                        ImageInterpolationQuality.Level2 => ImageInterpolation.Bilinear(imageData, image.Width, image.Height, imageX, imageY),
-                        _ => ImageInterpolation.NearestNeighbor(imageData, image.Width, image.Height, imageX, imageY)
-                    };
+                        var (imageX, imageY) = inverted.Transform(x, y);
+                        var p = interpolationQuality switch
+                        {
+                            ImageInterpolationQuality.Level2 => ImageInterpolation.Bilinear(imageData, image.Width, image.Height, imageX, imageY),
+                            _ => ImageInterpolation.NearestNeighbor(imageData, image.Width, image.Height, imageX, imageY)
+                        };
 
-                    p.W *= opacity;
-                    if (p.W <= 0.0F)
-                    {
-                        continue;
+                        p.W *= opacity * trackMatteData[pos];
+                        if (p.W <= 0.0F)
+                        {
+                            continue;
+                        }
+
+                        Blend.Process(blendMode, targetData, p, pos);
                     }
+                });
+            }
+            else
+            {
+                Parallel.For(minY, maxY, y =>
+                {
+                    var targetData = MemoryMarshal.Cast<float, Vector4>(Target.GetDataSpan());
+                    var imageData = MemoryMarshal.Cast<float, Vector4>(managedImage.GetDataSpan());
+                    for (int x = minX, pos = y * Target.Width + minX; x < maxX; x++, pos++)
+                    {
+                        var (imageX, imageY) = inverted.Transform(x, y);
+                        var p = interpolationQuality switch
+                        {
+                            ImageInterpolationQuality.Level2 => ImageInterpolation.Bilinear(imageData, image.Width, image.Height, imageX, imageY),
+                            _ => ImageInterpolation.NearestNeighbor(imageData, image.Width, image.Height, imageX, imageY)
+                        };
 
-                    Blend.Process(blendMode, targetData, p, pos);
-                }
-            });
+                        p.W *= opacity;
+                        if (p.W <= 0.0F)
+                        {
+                            continue;
+                        }
+
+                        Blend.Process(blendMode, targetData, p, pos);
+                    }
+                });
+            }
 
             if (managedImage != image)
             {
                 managedImage.Dispose();
+            }
+            if (managedTrackMatte != trackMatte)
+            {
+                managedTrackMatte?.Dispose();
             }
         }
     }
@@ -87,7 +125,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             Target = target;
         }
 
-        public void Draw(NImage image, float opacity, Matrix3x3 transform, ImageInterpolationQuality interpolationQuality, TrackMatteMode trackMatteMode)
+        public void Draw(NImage image, float opacity, Matrix3x3 transform, ImageInterpolationQuality interpolationQuality, RasterizedMaskImage? trackMatte, TrackMatteMode trackMatteMode)
         {
             if (!Matrix3x3.Invert(transform, out var inverted))
             {
@@ -98,6 +136,11 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             {
                 NGPUImage gpuImage => gpuImage.CopyToCpu(),
                 _ => (NManagedImage)image
+            };
+            var managedTrackMatte = trackMatte switch
+            {
+                GPURasterizedMaskImage gpuTrackMatte => gpuTrackMatte.CopyToCpu(),
+                _ => (ManagedRasterizedMaskImage?)trackMatte
             };
 
             var p1 = transform.Transform(new Vector2());
@@ -115,33 +158,67 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             }
 
             var width = Target.Width;
-            Parallel.For(minY, maxY, y =>
+            if (managedTrackMatte != null)
             {
-                var targetData = Target.GetDataSpan();
-                var imageData = MemoryMarshal.Cast<float, Vector4>(managedImage.GetDataSpan());
-                for (int x = minX, pos = y * Target.Width + minX; x < maxX; x++, pos++)
+                Parallel.For(minY, maxY, y =>
                 {
-                    var (imageX, imageY) = inverted.Transform(x, y);
-                    var p = interpolationQuality switch
+                    var targetData = Target.GetDataSpan();
+                    var trackMatteData = managedTrackMatte.GetDataSpan();
+                    var imageData = MemoryMarshal.Cast<float, Vector4>(managedImage.GetDataSpan());
+                    for (int x = minX, pos = y * Target.Width + minX; x < maxX; x++, pos++)
                     {
-                        ImageInterpolationQuality.Level2 => ImageInterpolation.Bilinear(imageData, image.Width, image.Height, imageX, imageY),
-                        _ => ImageInterpolation.NearestNeighbor(imageData, image.Width, image.Height, imageX, imageY)
-                    };
+                        var (imageX, imageY) = inverted.Transform(x, y);
+                        var p = interpolationQuality switch
+                        {
+                            ImageInterpolationQuality.Level2 => ImageInterpolation.Bilinear(imageData, image.Width, image.Height, imageX, imageY),
+                            _ => ImageInterpolation.NearestNeighbor(imageData, image.Width, image.Height, imageX, imageY)
+                        };
 
-                    targetData[pos] = trackMatteMode switch
+                        targetData[pos] = trackMatteMode switch
+                        {
+                            TrackMatteMode.Alpha => p.W,
+                            TrackMatteMode.Luminance => (p * ToGrayScale).HorizontalAdd() * p.W,
+                            TrackMatteMode.InvertAlpha => 1.0F - p.W,
+                            TrackMatteMode.InvertLuminance => 1.0F - (p * ToGrayScale).HorizontalAdd() * p.W,
+                            _ => 0.0F
+                        } * opacity * trackMatteData[pos];
+                    }
+                });
+            }
+            else
+            {
+                Parallel.For(minY, maxY, y =>
+                {
+                    var targetData = Target.GetDataSpan();
+                    var imageData = MemoryMarshal.Cast<float, Vector4>(managedImage.GetDataSpan());
+                    for (int x = minX, pos = y * Target.Width + minX; x < maxX; x++, pos++)
                     {
-                        TrackMatteMode.Alpha => p.W,
-                        TrackMatteMode.Luminance => (p * ToGrayScale).HorizontalAdd(),
-                        TrackMatteMode.InvertAlpha => 1.0F - p.W,
-                        TrackMatteMode.InvertLuminance => 1.0F - (p * ToGrayScale).HorizontalAdd(),
-                        _ => 0.0F
-                    } * opacity;
-                }
-            });
+                        var (imageX, imageY) = inverted.Transform(x, y);
+                        var p = interpolationQuality switch
+                        {
+                            ImageInterpolationQuality.Level2 => ImageInterpolation.Bilinear(imageData, image.Width, image.Height, imageX, imageY),
+                            _ => ImageInterpolation.NearestNeighbor(imageData, image.Width, image.Height, imageX, imageY)
+                        };
+
+                        targetData[pos] = trackMatteMode switch
+                        {
+                            TrackMatteMode.Alpha => p.W,
+                            TrackMatteMode.Luminance => (p * ToGrayScale).HorizontalAdd() * p.W,
+                            TrackMatteMode.InvertAlpha => 1.0F - p.W,
+                            TrackMatteMode.InvertLuminance => 1.0F - (p * ToGrayScale).HorizontalAdd() * p.W,
+                            _ => 0.0F
+                        } * opacity;
+                    }
+                });
+            }
 
             if (managedImage != image)
             {
                 managedImage.Dispose();
+            }
+            if (managedTrackMatte != trackMatte)
+            {
+                managedTrackMatte?.Dispose();
             }
         }
     }

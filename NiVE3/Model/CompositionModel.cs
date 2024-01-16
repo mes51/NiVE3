@@ -457,7 +457,7 @@ namespace NiVE3.Model
                     }
                     images.Clear();
 
-                    using var adjustmentMaskImage = l.GetRawImage(time, downSamplingRate, useGpu);
+                    using var adjustmentMaskImage = l.GetRawImage(time, downSamplingRate, true, useGpu);
                     if (adjustmentMaskImage == null)
                     {
                         continue;
@@ -495,7 +495,7 @@ namespace NiVE3.Model
                 }
                 else
                 {
-                    var image = l.GetImage(time, downSamplingRate, useGpu);
+                    var image = l.GetImage(time, downSamplingRate, true, useGpu);
                     if (image != null)
                     {
                         images.Add(image);

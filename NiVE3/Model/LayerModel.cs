@@ -383,7 +383,7 @@ namespace NiVE3.Model
             PropertyChanged += LayerModel_PropertyChanged;
         }
 
-        public RenderableImage? GetImage(double time, double downSamplingRate, bool useGpu)
+        public RenderableImage? GetImage(double time, double downSamplingRate, bool withTrackMatte, bool useGpu)
         {
             if (!HasImage)
             {
@@ -412,6 +412,13 @@ namespace NiVE3.Model
                 }
             }
 
+            RenderableImage? trackMatteImage = null;
+            if (withTrackMatte && TrackMatteLayerId.HasValue)
+            {
+                var trackMatteLayer = CompositionModel.Layers.First(l => l.LayerId == TrackMatteLayerId);
+                trackMatteImage = trackMatteLayer.GetImage(time, downSamplingRate, false, useGpu);
+            }
+
             return new RenderableImage(
                 image,
                 roi,
@@ -422,11 +429,13 @@ namespace NiVE3.Model
                 BlendMode,
                 transform,
                 GetParentTransforms(time),
-                LayerOptionProperties?.GetPropertyValueGroup(layerTime)
+                LayerOptionProperties?.GetPropertyValueGroup(layerTime),
+                trackMatteImage,
+                TrackMatteLayerId.HasValue ? TrackMatteMode : null
             );
         }
 
-        public RenderableImage? GetRawImage(double time, double downSamplingRate, bool useGpu)
+        public RenderableImage? GetRawImage(double time, double downSamplingRate, bool withTrackMatte, bool useGpu)
         {
             if (!HasImage)
             {
@@ -446,6 +455,13 @@ namespace NiVE3.Model
             var image = FootageModel.ReadImage(sourceTime, useGpu);
             var roi = new ROI(new Int32Point(), new Int32Size(image.Width, image.Height), 0, 0, image.Width, image.Height);
 
+            RenderableImage? trackMatteImage = null;
+            if (withTrackMatte && TrackMatteLayerId.HasValue)
+            {
+                var trackMatteLayer = CompositionModel.Layers.First(l => l.LayerId == TrackMatteLayerId);
+                trackMatteImage = trackMatteLayer.GetImage(time, downSamplingRate, false, useGpu);
+            }
+
             return new RenderableImage(
                 image,
                 roi,
@@ -456,7 +472,9 @@ namespace NiVE3.Model
                 BlendMode,
                 transform,
                 GetParentTransforms(time),
-                LayerOptionProperties?.GetPropertyValueGroup(layerTime)
+                LayerOptionProperties?.GetPropertyValueGroup(layerTime),
+                trackMatteImage,
+                TrackMatteLayerId.HasValue ? TrackMatteMode : null
             );
         }
 

@@ -146,7 +146,9 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
 
         public readonly float Metal;
 
-        public Triangle(in UVVertex v1, in UVVertex v2, in UVVertex v3, in Vector256<double> farPoint, in Matrix4x4d invertMatrix, NImage texture, float opacity, BlendMode blendMode, bool isCastShadow, float lightTransmission, bool isAcceptShadow, bool isAcceptLight, float ambient, float diffuse, float specularIntensity, float specularShininess, float metal, int id)
+        public readonly RasterizedMaskImage? TrackMatte;
+
+        public Triangle(in UVVertex v1, in UVVertex v2, in UVVertex v3, in Vector256<double> farPoint, in Matrix4x4d invertMatrix, NImage texture, float opacity, BlendMode blendMode, bool isCastShadow, float lightTransmission, bool isAcceptShadow, bool isAcceptLight, float ambient, float diffuse, float specularIntensity, float specularShininess, float metal, RasterizedMaskImage? trackMatte, int id)
             : base(v1, v2, v3, farPoint, invertMatrix, texture, opacity, isCastShadow, lightTransmission, id)
         {
             BlendMode = blendMode;
@@ -157,6 +159,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
             SpecularIntensity = specularIntensity;
             SpecularShininess = specularShininess;
             Metal = metal;
+            TrackMatte = trackMatte;
         }
 
         public Triangle(in Triangle baseTriangle, in UVVertex v1, in UVVertex v2, in UVVertex v3) : base(baseTriangle, v1, v2, v3)
@@ -169,6 +172,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
             SpecularIntensity = baseTriangle.SpecularIntensity;
             SpecularShininess = baseTriangle.SpecularShininess;
             Metal = baseTriangle.Metal;
+            TrackMatte = baseTriangle.TrackMatte;
         }
 
         public override Triangle CreateByNewVertex(in UVVertex v1, in UVVertex v2, in UVVertex v3)

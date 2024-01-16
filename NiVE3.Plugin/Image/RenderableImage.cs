@@ -13,75 +13,35 @@ namespace NiVE3.Plugin.Image
     /// <summary>
     /// レンダリング可能な画像を表します
     /// </summary>
-    public class RenderableImage : IDisposable
+    /// <param name="Image">レンダリングを行う画像</param>
+    /// <param name="ROI">画像の最終的なROI</param>
+    /// <param name="DownSampleRate">ダウンサンプリングの倍率</param>
+    /// <param name="IsEnableMotionBlur">モーションブラーが有効かどうか</param>
+    /// <param name="IsEnable3D">3Dが有効かどうか</param>
+    /// <param name="InterpolationQuality">画像のレンダリング時の補間方法</param>
+    /// <param name="BlendMode">画像のブレンドモード</param>
+    /// <param name="Transform">画像のトランスフォームの値</param>
+    /// <param name="ParentTransforms">親レイヤーりトランスフォームの値</param>
+    /// <param name="LayerOptions">レイヤーのオプション</param>
+    public record RenderableImage(
+        NImage Image,
+        ROI ROI,
+        double DownSampleRate,
+        bool IsEnableMotionBlur,
+        bool IsEnable3D,
+        ImageInterpolationQuality InterpolationQuality,
+        BlendMode BlendMode,
+        PropertyValueGroup Transform,
+        ParentTransform[] ParentTransforms,
+        PropertyValueGroup? LayerOptions,
+        RenderableImage? TrackMatteImage,
+        TrackMatteMode? TrackMatteMode
+    ) : IDisposable
     {
-        /// <summary>
-        /// レンダリングを行う画像
-        /// </summary>
-        public NImage Image { get; }
-
-        /// <summary>
-        /// 画像の最終的なROI
-        /// </summary>
-        public ROI ROI { get; }
-
-        /// <summary>
-        /// ダウンサンプリングの倍率
-        /// </summary>
-        public double DownSampleRate { get; }
-
-        /// <summary>
-        /// モーションブラーが有効かどうか
-        /// </summary>
-        public bool IsEnableMotionBlur { get; }
-
-        /// <summary>
-        /// 3Dが有効かどうか
-        /// </summary>
-        public bool IsEnable3D { get; }
-
-        /// <summary>
-        /// 画像のレンダリング時の補間方法
-        /// </summary>
-        public ImageInterpolationQuality InterpolationQuality { get; }
-
-        /// <summary>
-        /// 画像のブレンドモード
-        /// </summary>
-        public BlendMode BlendMode { get; }
-
-        /// <summary>
-        /// 画像のトランスフォームの値
-        /// </summary>
-        public PropertyValueGroup Transform { get; }
-
-        /// <summary>
-        /// 親レイヤーりトランスフォームの値。
-        /// </summary>
-        public ParentTransform[] ParentTransforms { get; }
-
-        /// <summary>
-        /// レイヤーのオプション
-        /// </summary>
-        public PropertyValueGroup? LayerOptions { get; }
-
-        internal RenderableImage(NImage image, ROI roi, double downSampleRate, bool isEnableMotionBlur, bool isEnable3D, ImageInterpolationQuality interpolationQuality, BlendMode blendMode, PropertyValueGroup transform, ParentTransform[] parentTransforms, PropertyValueGroup? layerOptions)
-        {
-            Image = image;
-            ROI = roi;
-            DownSampleRate = downSampleRate;
-            IsEnableMotionBlur = isEnableMotionBlur;
-            IsEnable3D = isEnable3D;
-            InterpolationQuality = interpolationQuality;
-            BlendMode = blendMode;
-            Transform = transform;
-            ParentTransforms = parentTransforms;
-            LayerOptions = layerOptions;
-        }
-
         public void Dispose()
         {
             Image.Dispose();
+            TrackMatteImage?.Dispose();
         }
     }
 }

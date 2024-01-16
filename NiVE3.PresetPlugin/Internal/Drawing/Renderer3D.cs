@@ -29,6 +29,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
         protected const float ShininessStrength = 120.0F;
 
+        protected static readonly float[] EmptyTrackMatte = new float[1] { 1.0F };
+
         public Matrix4x4d ViewMatrix { get; set; }
 
         public double FieldOfView { get; set; }
@@ -81,7 +83,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             }
         }
 
-        public void AddRect(NImage texture, float opacity, BlendMode blendType, in Matrix4x4d modelMatrix, bool isCastShadow, float lightTransmission, bool isAcceptShadow, bool isAcceptLight, float ambient, float diffuse, float specularIntensity, float specularShininess, float metal)
+        public void AddRect(NImage texture, float opacity, BlendMode blendType, in Matrix4x4d modelMatrix, bool isCastShadow, float lightTransmission, bool isAcceptShadow, bool isAcceptLight, float ambient, float diffuse, float specularIntensity, float specularShininess, float metal, RasterizedMaskImage? trackMatte)
         {
             var width = texture.Width;
             var height = texture.Height;
@@ -108,8 +110,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             invertedModelViewMatrix = Matrix4x4d.Transpose(invertedModelViewMatrix);
 
             var farPoint = Avx.And(mv.Transform(Vector256.Create(0.0, 0.0, -10000.0, 1.0)), Vector256.Create(0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0).AsDouble());
-            Triangles.Add(new Triangle(uv1, uv2, uv3, farPoint, invertedModelViewMatrix, texture, opacity, blendType, isCastShadow, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, LastId));
-            Triangles.Add(new Triangle(uv1, uv3, uv4, farPoint, invertedModelViewMatrix, texture, opacity, blendType, isCastShadow, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, LastId));
+            Triangles.Add(new Triangle(uv1, uv2, uv3, farPoint, invertedModelViewMatrix, texture, opacity, blendType, isCastShadow, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte, LastId));
+            Triangles.Add(new Triangle(uv1, uv3, uv4, farPoint, invertedModelViewMatrix, texture, opacity, blendType, isCastShadow, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte, LastId));
 
             foreach (var spotLight in SpotLights)
             {
@@ -510,6 +512,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             Matrix4x4d.Invert(projectionMatrix, out var invertedProjectionMatrix);
             var floatInvtededViewMatrix = (Matrix4x4)(invertedProjectionMatrix * Matrix4x4d.CreateTranslate(-offsetX, -offsetY, 0.0) * invtededViewMatrix);
             var convertedTexture = new Dictionary<NImage, NManagedImage>();
+            var convertedTrackMatte = new Dictionary<RasterizedMaskImage, ManagedRasterizedMaskImage>();
             var hasLight = PointLights.Count > 0 || SpotLights.Count > 0 || ParallelLights.Count > 0 || AmbientLights.Count > 0;
 
             var pointLightShadows = PointLights.Select(l => l.IsEnableShadow ? RenderPointLightShadow(l, Size, (float)offsetX, (float)offsetY) : null).ToArray();
@@ -569,9 +572,25 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 {
                     managedTexture = (NManagedImage)triangle.Texture;
                 }
+
+                ManagedRasterizedMaskImage? managedTrackMatte;
+                if (triangle.TrackMatte is GPURasterizedMaskImage gpuRasterizedMask)
+                {
+                    if (!convertedTrackMatte.ContainsKey(gpuRasterizedMask))
+                    {
+                        convertedTrackMatte.Add(gpuRasterizedMask, gpuRasterizedMask.CopyToCpu());
+                    }
+                    managedTrackMatte = convertedTrackMatte[gpuRasterizedMask];
+                }
+                else
+                {
+                    managedTrackMatte = (ManagedRasterizedMaskImage?)triangle.TrackMatte;
+                }
+
                 Parallel.For(minY, maxY, y =>
                 {
                     var renderImageSpan = MemoryMarshal.Cast<float, Vector4>(RenderImage.GetDataSpan());
+                    var trackMatteSpan = (managedTrackMatte?.Data ?? EmptyTrackMatte).AsSpan();
                     var texture = MemoryMarshal.Cast<float, Vector4>(managedTexture.GetDataSpan());
                     var eY = Sse.Multiply(edgeX, Sse.Subtract(Vector128.Create(y, y, y, 0.0F), vvEY));
 
@@ -599,7 +618,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                         var ty = Sse.Divide(Sse.Multiply(v, e), tw).HorizontalAdd().GetElement(0) * textureHeight;
 
                         var color = ImageInterpolation.Bilinear(texture, textureWidth, textureHeight, tx, ty);
-                        color.W *= triangle.Opacity;
+                        color.W *= triangle.Opacity * trackMatteSpan[p % trackMatteSpan.Length];
                         if (color.W <= 0.0F)
                         {
                             continue;
@@ -853,6 +872,10 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             }
 
             foreach (var (_, i) in convertedTexture)
+            {
+                i.Dispose();
+            }
+            foreach (var (_, i) in convertedTrackMatte)
             {
                 i.Dispose();
             }
@@ -1219,6 +1242,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             Matrix4x4d.Invert(projectionMatrix, out var invertedProjectionMatrix);
             var floatInvtededViewMatrix = (Matrix4x4)(invertedProjectionMatrix * Matrix4x4d.CreateTranslate(-offsetX, -offsetY, 0.0) * invtededViewMatrix);
             var convertedTexture = new Dictionary<NImage, NManagedImage>();
+            var convertedTrackMatte = new Dictionary<RasterizedMaskImage, ManagedRasterizedMaskImage>();
             var hasLight = PointLights.Count > 0 || SpotLights.Count > 0 || ParallelLights.Count > 0 || AmbientLights.Count > 0;
 
             foreach (var triangle in triangles)
@@ -1273,9 +1297,25 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 {
                     managedTexture = (NManagedImage)triangle.Texture;
                 }
+
+                ManagedRasterizedMaskImage? managedTrackMatte;
+                if (triangle.TrackMatte is GPURasterizedMaskImage gpuRasterizedMask)
+                {
+                    if (!convertedTrackMatte.ContainsKey(gpuRasterizedMask))
+                    {
+                        convertedTrackMatte.Add(gpuRasterizedMask, gpuRasterizedMask.CopyToCpu());
+                    }
+                    managedTrackMatte = convertedTrackMatte[gpuRasterizedMask];
+                }
+                else
+                {
+                    managedTrackMatte = (ManagedRasterizedMaskImage?)triangle.TrackMatte;
+                }
+
                 Parallel.For(minY, maxY, y =>
                 {
                     var renderImageSpan = RenderImage.GetDataSpan();
+                    var trackMatteSpan = (managedTrackMatte?.Data ?? EmptyTrackMatte).AsSpan();
                     var texture = MemoryMarshal.Cast<float, Vector4>(managedTexture.GetDataSpan());
                     var eY = Sse.Multiply(edgeX, Sse.Subtract(Vector128.Create(y, y, y, 0.0F), vvEY));
 
@@ -1303,6 +1343,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                         var ty = Sse.Divide(Sse.Multiply(v, e), tw).HorizontalAdd().GetElement(0) * textureHeight;
 
                         var color = ImageInterpolation.Bilinear(texture, textureWidth, textureHeight, tx, ty);
+                        color.W *= trackMatteSpan[p % trackMatteSpan.Length];
                         if (color.W <= 0.0F)
                         {
                             continue;
@@ -1431,6 +1472,10 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             }
 
             foreach (var (_, i) in convertedTexture)
+            {
+                i.Dispose();
+            }
+            foreach (var (_, i) in convertedTrackMatte)
             {
                 i.Dispose();
             }
