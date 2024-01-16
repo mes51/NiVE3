@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using NiVE3.Plugin.Image;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Numerics;
+using NiVE3.Shared.Extension;
 
 namespace NiVE3.PresetPlugin.Internal.Drawing
 {
@@ -31,7 +32,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
             var managedImage = image switch
             {
-                NCudaImage cudaImage => cudaImage.CopyToCpu(),
+                NGPUImage gpuImage => gpuImage.CopyToCpu(),
                 _ => (NManagedImage)image
             };
 
@@ -65,6 +66,76 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                     }
 
                     Blend.Process(blendMode, targetData, p, pos);
+                }
+            });
+
+            if (managedImage != image)
+            {
+                managedImage.Dispose();
+            }
+        }
+    }
+
+    class MaskRender2D
+    {
+        static readonly Vector4 ToGrayScale = new Vector4(0.114478F, 0.586611F, 0.298912F, 0.0F);
+
+        ManagedRasterizedMaskImage Target { get; }
+
+        public MaskRender2D(ManagedRasterizedMaskImage target)
+        {
+            Target = target;
+        }
+
+        public void Draw(NImage image, float opacity, Matrix3x3 transform, ImageInterpolationQuality interpolationQuality, TrackMatteMode trackMatteMode)
+        {
+            if (!Matrix3x3.Invert(transform, out var inverted))
+            {
+                return;
+            }
+
+            var managedImage = image switch
+            {
+                NGPUImage gpuImage => gpuImage.CopyToCpu(),
+                _ => (NManagedImage)image
+            };
+
+            var p1 = transform.Transform(new Vector2());
+            var p2 = transform.Transform(new Vector2(image.Width, 0.0F));
+            var p3 = transform.Transform(new Vector2(image.Width, image.Height));
+            var p4 = transform.Transform(new Vector2(0.0F, image.Height));
+            var minX = Math.Max((int)Math.Floor(Math.Min(Math.Min(Math.Min(p1.X, p2.X), p3.X), p4.X)), 0);
+            var minY = Math.Max((int)Math.Floor(Math.Min(Math.Min(Math.Min(p1.Y, p2.Y), p3.Y), p4.Y)), 0);
+            var maxX = Math.Min((int)Math.Ceiling(Math.Max(Math.Max(Math.Max(p1.X, p2.X), p3.X), p4.X)), Target.Width);
+            var maxY = Math.Min((int)Math.Ceiling(Math.Max(Math.Max(Math.Max(p1.Y, p2.Y), p3.Y), p4.Y)), Target.Height);
+
+            if (trackMatteMode == TrackMatteMode.InvertAlpha || trackMatteMode == TrackMatteMode.InvertLuminance)
+            {
+                Target.GetDataSpan().Fill(1.0F);
+            }
+
+            var width = Target.Width;
+            Parallel.For(minY, maxY, y =>
+            {
+                var targetData = Target.GetDataSpan();
+                var imageData = MemoryMarshal.Cast<float, Vector4>(managedImage.GetDataSpan());
+                for (int x = minX, pos = y * Target.Width + minX; x < maxX; x++, pos++)
+                {
+                    var (imageX, imageY) = inverted.Transform(x, y);
+                    var p = interpolationQuality switch
+                    {
+                        ImageInterpolationQuality.Level2 => ImageInterpolation.Bilinear(imageData, image.Width, image.Height, imageX, imageY),
+                        _ => ImageInterpolation.NearestNeighbor(imageData, image.Width, image.Height, imageX, imageY)
+                    };
+
+                    targetData[pos] = trackMatteMode switch
+                    {
+                        TrackMatteMode.Alpha => p.W,
+                        TrackMatteMode.Luminance => (p * ToGrayScale).HorizontalAdd(),
+                        TrackMatteMode.InvertAlpha => 1.0F - p.W,
+                        TrackMatteMode.InvertLuminance => 1.0F - (p * ToGrayScale).HorizontalAdd(),
+                        _ => 0.0F
+                    } * opacity;
                 }
             });
 

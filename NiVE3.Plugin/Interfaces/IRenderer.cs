@@ -77,7 +77,7 @@ namespace NiVE3.Plugin.Interfaces
         /// </summary>
         /// <param name="image">描画するレイヤー</param>
         /// <returns>描画された調整レイヤーのマスク</returns>
-        NImage RenderAdjustmentMask(RenderableImage image);
+        RasterizedMaskImage RenderAdjustmentMask(RenderableImage image);
 
         /// <summary>
         /// 2Dレイヤーのバウンディングボックスを計算します

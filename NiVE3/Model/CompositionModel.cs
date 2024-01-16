@@ -467,23 +467,23 @@ namespace NiVE3.Model
                     var (roi, currentFrame) = l.ProcessAdjustment(time, downSamplingRate, Renderer.GetCurrentRenderedImage());
 
                     // TODO: GPU対応
-                    if (mask is NCudaImage cudaMaskImage)
+                    if (mask is GPURasterizedMaskImage gpuMaskImage)
                     {
-                        var managedImage = cudaMaskImage.CopyToCpu();
+                        var managedImage = gpuMaskImage.CopyToCpu();
                         mask.Dispose();
                         mask = managedImage;
                     }
-                    if (currentFrame is NCudaImage cudaCurrentFrame)
+                    if (currentFrame is NGPUImage gpuCurrentFrame)
                     {
-                        var managedImage = cudaCurrentFrame.CopyToCpu();
+                        var managedImage = gpuCurrentFrame.CopyToCpu();
                         currentFrame.Dispose();
                         currentFrame = managedImage;
                     }
                     Parallel.For(roi.OriginalImagePosition.Y, roi.OriginalImagePosition.Y + roi.OriginalImageSize.Height, y =>
                     {
-                        var maskSpan = ((NManagedImage)mask).GetDataSpan().Slice((y - roi.OriginalImagePosition.Y) * mask.Width * 4, mask.Width * 4);
+                        var maskSpan = ((ManagedRasterizedMaskImage)mask).GetDataSpan().Slice((y - roi.OriginalImagePosition.Y) * mask.Width, mask.Width);
                         var currentFrameSpan = ((NManagedImage)currentFrame).GetDataSpan().Slice(y * currentFrame.Width * 4, currentFrame.Width * 4);
-                        for (int x = roi.OriginalImagePosition.X, limit = x + roi.OriginalImageSize.Width, maskPos = 3, framePos = x * 4 + 3; x < limit; x++,  maskPos += 4, framePos += 4)
+                        for (int x = roi.OriginalImagePosition.X, limit = x + roi.OriginalImageSize.Width, maskPos = 0, framePos = x * 4 + 3; x < limit; x++,  maskPos++, framePos += 4)
                         {
                             currentFrameSpan[framePos] = maskSpan[maskPos];
                         }
