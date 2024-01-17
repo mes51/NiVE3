@@ -119,7 +119,7 @@ namespace NiVE3.View.Part
                     var boxLines = new StreamGeometry();
                     using (var context = boxLines.Open())
                     {
-                        context.BeginFigure((Point)shape.Path[0], false, true);
+                        context.BeginFigure((Point)shape.Path[0], false, shape.IsClosed);
                         foreach (var p in shape.Path.Skip(1))
                         {
                             context.LineTo((Point)p, true, false);

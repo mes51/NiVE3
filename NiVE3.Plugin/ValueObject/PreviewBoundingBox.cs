@@ -28,7 +28,8 @@ namespace NiVE3.Plugin.ValueObject
     /// バウンディングボックスのシェイプを表します
     /// </summary>
     /// <param name="Path">シェイプのパス</param>
+    /// <param name="IsClosed">シェイプが閉じているかどうか</param>
     /// <param name="IsHoldSize">シェイプがプレビューの拡大率の影響を受けず、一定のサイズで表示するかどうか</param>
     /// <param name="Center">IsHoldSizeがtrueの時の拡大・縮小の中心位置</param>
-    public record BoundingBoxShape(Vector2d[] Path, bool IsHoldSize, Vector2d? Center = null) { }
+    public record BoundingBoxShape(Vector2d[] Path, bool IsClosed, bool IsHoldSize, Vector2d? Center = null) { }
 }

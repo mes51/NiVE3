@@ -80,17 +80,17 @@ namespace NiVE3.Plugin.Interfaces
         RasterizedMaskImage RenderAdjustmentMask(RenderableImage image);
 
         /// <summary>
-        /// 2Dレイヤーのバウンディングボックスを計算します
+        /// 2Dレイヤーのバウンディングボックスを取得します
         /// </summary>
         /// <param name="width">レイヤーの幅</param>
         /// <param name="height">レイヤーの高さ</param>
         /// <param name="transform">レイヤーのトランスフォームの値</param>
         /// <param name="parentTransforms">親のレイヤーのトランスフォームの値</param>
         /// <returns>プレビューで表示するバウンディングボックス</returns>
-        PreviewBoundingBox CalcBoundingBox2D(int width, int height, PropertyValueGroup transform, ParentTransform[] parentTransforms);
+        PreviewBoundingBox GetBoundingBox2D(int width, int height, PropertyValueGroup transform, ParentTransform[] parentTransforms);
 
         /// <summary>
-        /// 3Dレイヤーのバウンディングボックスを計算します
+        /// 3Dレイヤーのバウンディングボックスを取得します
         /// </summary>
         /// <param name="width">レイヤーの幅</param>
         /// <param name="height">レイヤーの高さ</param>
@@ -98,14 +98,21 @@ namespace NiVE3.Plugin.Interfaces
         /// <param name="parentTransforms">親のレイヤーのトランスフォームの値</param>
         /// <param name="cameraSetting">カメラの設定</param>
         /// <returns>プレビューで表示するバウンディングボックス</returns>
-        PreviewBoundingBox CalcBoundingBox3D(int width, int height, PropertyValueGroup transform, ParentTransform[] parentTransforms, CameraSetting cameraSetting);
+        PreviewBoundingBox GetBoundingBox3D(int width, int height, PropertyValueGroup transform, ParentTransform[] parentTransforms, CameraSetting cameraSetting);
 
         /// <summary>
-        /// ライトのバウンディングボックスを計算します
+        /// カメラのバウンディングボックスを取得します
+        /// </summary>
+        /// <param name="cameraSetting">カメラの設定</param>
+        /// <returns>プレビューで表示するバウンディングボックス</returns>
+        PreviewBoundingBox GetCameraBoundingBox(CameraSetting targetCameraSetting, CameraSetting cameraSetting);
+
+        /// <summary>
+        /// ライトのバウンディングボックスを取得します
         /// </summary>
         /// <param name="lightSetting">バウンディングボックスを算出するライトの設定</param>
         /// <param name="cameraSetting">カメラの設定</param>
         /// <returns>プレビューで表示するバウンディングボックス</returns>
-        PreviewBoundingBox CalcLightBoundingBox(LightSetting lightSetting, CameraSetting cameraSetting);
+        PreviewBoundingBox GetLightBoundingBox(LightSetting lightSetting, CameraSetting cameraSetting);
     }
 }

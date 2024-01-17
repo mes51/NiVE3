@@ -296,10 +296,10 @@ namespace NiVE3.Plugin.Numerics
             row3 = vTemp3.Shuffle4x64(vTemp4, 0x88); //_MM_SHUFFLE(2, 0, 2, 0)
             row4 = vTemp3.Shuffle4x64(vTemp4, 0xDD); //_MM_SHUFFLE(3, 1, 3, 1)
 
-            var V00 = Permute(row3, 0x50);           //_MM_SHUFFLE(1, 1, 0, 0)
-            var V10 = Permute(row4, 0xEE);           //_MM_SHUFFLE(3, 2, 3, 2)
-            var V01 = Permute(row1, 0x50);           //_MM_SHUFFLE(1, 1, 0, 0)
-            var V11 = Permute(row2, 0xEE);           //_MM_SHUFFLE(3, 2, 3, 2)
+            var V00 = row3.Permute4x64(0x50);           //_MM_SHUFFLE(1, 1, 0, 0)
+            var V10 = row4.Permute4x64(0xEE);           //_MM_SHUFFLE(3, 2, 3, 2)
+            var V01 = row1.Permute4x64(0x50);           //_MM_SHUFFLE(1, 1, 0, 0)
+            var V11 = row2.Permute4x64(0xEE);           //_MM_SHUFFLE(3, 2, 3, 2)
             var V02 = row3.Shuffle4x64(row1, 0x88);  //_MM_SHUFFLE(2, 0, 2, 0)
             var V12 = row4.Shuffle4x64(row2, 0xDD);  //_MM_SHUFFLE(3, 1, 3, 1)
 
@@ -307,10 +307,10 @@ namespace NiVE3.Plugin.Numerics
             var D1 = Avx.Multiply(V01, V11);
             var D2 = Avx.Multiply(V02, V12);
 
-            V00 = Permute(row3, 0xEE);           //_MM_SHUFFLE(3, 2, 3, 2)
-            V10 = Permute(row4, 0x50);           //_MM_SHUFFLE(1, 1, 0, 0)
-            V01 = Permute(row1, 0xEE);           //_MM_SHUFFLE(3, 2, 3, 2)
-            V11 = Permute(row2, 0x50);           //_MM_SHUFFLE(1, 1, 0, 0)
+            V00 = row3.Permute4x64(0xEE);           //_MM_SHUFFLE(3, 2, 3, 2)
+            V10 = row4.Permute4x64(0x50);           //_MM_SHUFFLE(1, 1, 0, 0)
+            V01 = row1.Permute4x64(0xEE);           //_MM_SHUFFLE(3, 2, 3, 2)
+            V11 = row2.Permute4x64(0x50);           //_MM_SHUFFLE(1, 1, 0, 0)
             V02 = row3.Shuffle4x64(row1, 0xDD);  //_MM_SHUFFLE(3, 1, 3, 1)
             V12 = row4.Shuffle4x64(row2, 0x88);  //_MM_SHUFFLE(2, 0, 2, 0)
 
@@ -322,16 +322,16 @@ namespace NiVE3.Plugin.Numerics
 
             // V11 = D0Y,D0W,D2Y,D2Y
             V11 = D0.Shuffle4x64(D2, 0x5D);   //_MM_SHUFFLE(1, 1, 3, 1)
-            V00 = Permute(row2, 0x49);        //_MM_SHUFFLE(1, 0, 2, 1)
+            V00 = row2.Permute4x64(0x49);        //_MM_SHUFFLE(1, 0, 2, 1)
             V10 = V11.Shuffle4x64(D0, 0x32);  //_MM_SHUFFLE(0, 3, 0, 2)
-            V01 = Permute(row1, 0x12);        //_MM_SHUFFLE(0, 1, 0, 2)
+            V01 = row1.Permute4x64(0x12);        //_MM_SHUFFLE(0, 1, 0, 2)
             V11 = V11.Shuffle4x64(D0, 0x99);  //_MM_SHUFFLE(2, 1, 2, 1)
 
             // V13 = D1Y,D1W,D2W,D2W
             var V13 = D1.Shuffle4x64(D2, 0xFD);               //_MM_SHUFFLE(3, 3, 3, 1)
-            V02 = Permute(row4, 0x49);                        //_MM_SHUFFLE(1, 0, 2, 1)
+            V02 = row4.Permute4x64(0x49);                        //_MM_SHUFFLE(1, 0, 2, 1)
             V12 = V13.Shuffle4x64(D1, 0x32);                  //_MM_SHUFFLE(0, 3, 0, 2)
-            var V03 = Permute(row3, 0x12);                    //_MM_SHUFFLE(0, 1, 0, 2)
+            var V03 = row3.Permute4x64(0x12);                    //_MM_SHUFFLE(0, 1, 0, 2)
             V13 = V13.Shuffle4x64(D1, 0x99);                  //_MM_SHUFFLE(2, 1, 2, 1)
 
             var C0 = Avx.Multiply(V00, V10);
@@ -341,16 +341,16 @@ namespace NiVE3.Plugin.Numerics
 
             // V11 = D0X,D0Y,D2X,D2X
             V11 = D0.Shuffle4x64(D2, 0x4);     //_MM_SHUFFLE(0, 0, 1, 0)
-            V00 = Permute(row2, 0x9e);         //_MM_SHUFFLE(2, 1, 3, 2)
+            V00 = row2.Permute4x64(0x9e);         //_MM_SHUFFLE(2, 1, 3, 2)
             V10 = D0.Shuffle4x64(V11, 0x93);   //_MM_SHUFFLE(2, 1, 0, 3)
-            V01 = Permute(row1, 0x7b);         //_MM_SHUFFLE(1, 3, 2, 3)
+            V01 = row1.Permute4x64(0x7b);         //_MM_SHUFFLE(1, 3, 2, 3)
             V11 = D0.Shuffle4x64(V11, 0x26);   //_MM_SHUFFLE(0, 2, 1, 2)
 
             // V13 = D1X,D1Y,D2Z,D2Z
             V13 = D1.Shuffle4x64(D2, 0xa4);    //_MM_SHUFFLE(2, 2, 1, 0)
-            V02 = Permute(row4, 0x9e);         //_MM_SHUFFLE(2, 1, 3, 2)
+            V02 = row4.Permute4x64(0x9e);         //_MM_SHUFFLE(2, 1, 3, 2)
             V12 = D1.Shuffle4x64(V13, 0x93);   //_MM_SHUFFLE(2, 1, 0, 3)
-            V03 = Permute(row3, 0x7b);         //_MM_SHUFFLE(1, 3, 2, 3)
+            V03 = row3.Permute4x64(0x7b);         //_MM_SHUFFLE(1, 3, 2, 3)
             V13 = D1.Shuffle4x64(V13, 0x26);   //_MM_SHUFFLE(0, 2, 1, 2)
 
             C0 = Avx.Subtract(C0, Avx.Multiply(V00, V10));
@@ -358,26 +358,26 @@ namespace NiVE3.Plugin.Numerics
             C4 = Avx.Subtract(C4, Avx.Multiply(V02, V12));
             C6 = Avx.Subtract(C6, Avx.Multiply(V03, V13));
 
-            V00 = Permute(row2, 0x33); //_MM_SHUFFLE(0, 3, 0, 3)
+            V00 = row2.Permute4x64(0x33); //_MM_SHUFFLE(0, 3, 0, 3)
 
             // V10 = D0Z,D0Z,D2X,D2Y
             V10 = D0.Shuffle4x64(D2, 0x4A);  //_MM_SHUFFLE(1, 0, 2, 2)
-            V10 = Permute(V10, 0x2C);        //_MM_SHUFFLE(0, 2, 3, 0)
-            V01 = Permute(row1, 0x8D);       //_MM_SHUFFLE(2, 0, 3, 1)
+            V10 = V10.Permute4x64(0x2C);        //_MM_SHUFFLE(0, 2, 3, 0)
+            V01 = row1.Permute4x64(0x8D);       //_MM_SHUFFLE(2, 0, 3, 1)
 
             // V11 = D0X,D0W,D2X,D2Y
             V11 = D0.Shuffle4x64(D2, 0x4C);  //_MM_SHUFFLE(1, 0, 3, 0)
-            V11 = Permute(V11, 0x93);        //_MM_SHUFFLE(2, 1, 0, 3)
-            V02 = Permute(row4, 0x33);       //_MM_SHUFFLE(0, 3, 0, 3)
+            V11 = V11.Permute4x64(0x93);        //_MM_SHUFFLE(2, 1, 0, 3)
+            V02 = row4.Permute4x64(0x33);       //_MM_SHUFFLE(0, 3, 0, 3)
 
             // V12 = D1Z,D1Z,D2Z,D2W
             V12 = D1.Shuffle4x64(D2, 0xEA);  //_MM_SHUFFLE(3, 2, 2, 2)
-            V12 = Permute(V12, 0x2C);        //_MM_SHUFFLE(0, 2, 3, 0)
-            V03 = Permute(row3, 0x8D);       //_MM_SHUFFLE(2, 0, 3, 1)
+            V12 = V12.Permute4x64(0x2C);        //_MM_SHUFFLE(0, 2, 3, 0)
+            V03 = row3.Permute4x64(0x8D);       //_MM_SHUFFLE(2, 0, 3, 1)
 
             // V13 = D1X,D1W,D2Z,D2W
             V13 = D1.Shuffle4x64(D2, 0xEC);  //_MM_SHUFFLE(3, 2, 3, 0)
-            V13 = Permute(V13, 0x93);        //_MM_SHUFFLE(2, 1, 0, 3)
+            V13 = V13.Permute4x64(0x93);        //_MM_SHUFFLE(2, 1, 0, 3)
 
             V00 = Avx.Multiply(V00, V10);
             V01 = Avx.Multiply(V01, V11);
@@ -398,10 +398,10 @@ namespace NiVE3.Plugin.Numerics
             C4 = C4.Shuffle4x64(C5, 0xD8); //_MM_SHUFFLE(3, 1, 2, 0)
             C6 = C6.Shuffle4x64(C7, 0xD8); //_MM_SHUFFLE(3, 1, 2, 0)
 
-            C0 = Permute(C0, 0xD8); //_MM_SHUFFLE(3, 1, 2, 0)
-            C2 = Permute(C2, 0xD8); //_MM_SHUFFLE(3, 1, 2, 0)
-            C4 = Permute(C4, 0xD8); //_MM_SHUFFLE(3, 1, 2, 0)
-            C6 = Permute(C6, 0xD8); //_MM_SHUFFLE(3, 1, 2, 0)
+            C0 = C0.Permute4x64(0xD8); //_MM_SHUFFLE(3, 1, 2, 0)
+            C2 = C2.Permute4x64(0xD8); //_MM_SHUFFLE(3, 1, 2, 0)
+            C4 = C4.Permute4x64(0xD8); //_MM_SHUFFLE(3, 1, 2, 0)
+            C6 = C6.Permute4x64(0xD8); //_MM_SHUFFLE(3, 1, 2, 0)
 
             // Get the determinant
             vTemp2 = row1;
@@ -612,19 +612,6 @@ namespace NiVE3.Plugin.Numerics
             Sse.Store(&result.M41, Avx.ConvertToVector128Single(Avx.LoadVector256(&m.M41)));
 
             return result;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static Vector256<double> Permute(Vector256<double> v, byte control)
-        {
-            if (Avx2.IsSupported)
-            {
-                return Avx2.Permute4x64(v, control);
-            }
-            else
-            {
-                return v.Shuffle4x64(v, control);
-            }
         }
     }
 

@@ -391,7 +391,7 @@ namespace NiVE3.PresetPlugin.Renderer
             return result;
         }
 
-        public PreviewBoundingBox CalcBoundingBox2D(int width, int height, PropertyValueGroup transform, ParentTransform[] parentTransforms)
+        public PreviewBoundingBox GetBoundingBox2D(int width, int height, PropertyValueGroup transform, ParentTransform[] parentTransforms)
         {
             var matrix = CalcTransform2D(transform, parentTransforms);
             var anchorPoint = (Vector3d)(transform[ILayerObject.TransformAnchorPointId] ?? new Vector3d());
@@ -403,13 +403,13 @@ namespace NiVE3.PresetPlugin.Renderer
             var rightBottom = (Vector2d)matrix.Transform(new Vector2(width, height));
             return new PreviewBoundingBox(
                 transformedAnchorPoint,
-                new BoundingBoxShape[] { new BoundingBoxShape(new Vector2d[] { leftTop, rightTop, rightBottom, leftBottom }, false) },
+                new BoundingBoxShape[] { new BoundingBoxShape(new Vector2d[] { leftTop, rightTop, rightBottom, leftBottom }, true, false) },
                 (leftTop - rightTop).IsZero && (leftTop - leftBottom).IsZero && (rightTop - rightBottom).IsZero && (leftBottom - rightBottom).IsZero,
                 transformedAnchorPoint.IsNaN() || transformedAnchorPoint.IsInfinty()
             );
         }
 
-        public PreviewBoundingBox CalcBoundingBox3D(int width, int height, PropertyValueGroup transform, ParentTransform[] parentTransforms, CameraSetting cameraSetting)
+        public PreviewBoundingBox GetBoundingBox3D(int width, int height, PropertyValueGroup transform, ParentTransform[] parentTransforms, CameraSetting cameraSetting)
         {
             var size = Math.Max(Width, Height);
             var fov = Math.Atan((Width / cameraSetting.Zoom) * 0.5) * 2.0;
@@ -474,14 +474,64 @@ namespace NiVE3.PresetPlugin.Renderer
                 var rightBottom = ((Vector2d)v3) * s + offset;
                 return new PreviewBoundingBox(
                     bbAnchorPoint,
-                    new BoundingBoxShape[] { new BoundingBoxShape(new Vector2d[] { leftTop, rightTop, rightBottom, leftBottom }, false) },
+                    new BoundingBoxShape[] { new BoundingBoxShape(new Vector2d[] { leftTop, rightTop, rightBottom, leftBottom }, true, false) },
                     (leftTop - rightTop).IsZero && (leftTop - leftBottom).IsZero && (rightTop - rightBottom).IsZero && (leftBottom - rightBottom).IsZero,
                     bbAnchorPoint.IsNaN() || bbAnchorPoint.IsInfinty()
                 );
             }
         }
 
-        public PreviewBoundingBox CalcLightBoundingBox(LightSetting lightSetting, CameraSetting cameraSetting)
+        public PreviewBoundingBox GetCameraBoundingBox(CameraSetting targetCameraSetting, CameraSetting cameraSetting)
+        {
+            var size = Math.Max(Width, Height);
+            var fov = Math.Atan((Width / cameraSetting.Zoom) * 0.5) * 2.0;
+
+            var projectionMatrix = Matrix4x4d.CreatePerspectiveFieldOfView(fov, 1.0, double.Epsilon, double.PositiveInfinity);
+            var viewMatrix = Calc3DViewMatrix(cameraSetting, Width, Height);
+            var modelMatrix = GetInvertedCameraMatrix(targetCameraSetting, Width, Height);
+            foreach (var (type, parentTransform) in targetCameraSetting.ParentTransforms)
+            {
+                switch (type)
+                {
+                    case ParentType.Camera:
+                        modelMatrix *= GetInvertedCameraMatrix(parentTransform, Width, Height);
+                        break;
+                    case ParentType.SpotOrParallelLight:
+                    case ParentType.PointLight:
+                        modelMatrix *= GetLightMatrix(type == ParentType.SpotOrParallelLight ? LightType.Spot : LightType.Point, parentTransform, Width, Height);
+                        break;
+                    case ParentType.AmbientLight:
+                        break;
+                    default:
+                        modelMatrix *= GetTransform3D(parentTransform, size);
+                        break;
+                }
+            }
+
+            var mv = modelMatrix * viewMatrix * Matrix4x4d.CreateTranslate((size - Width) * 0.5 / size, (size - Height) * 0.5 / size, 0.0);
+
+            var offset = new Vector2d(Width, Height) * 0.5;
+            var s = new Vector2d(size, size) * 0.5;
+            var length = (targetCameraSetting.PointOfInterest - targetCameraSetting.Position).Length() / size;
+            var pos = (Vector2d)projectionMatrix.Transform(mv.Transform(Vector256.Create(0.0, 0.0, length, 1.0))) * s + offset;
+            var poi = (Vector2d)projectionMatrix.Transform(mv.Transform(Vector256.Create(0.0, 0.0, 0.0, 1.0))) * s + offset;
+            var zoomLength = targetCameraSetting.Zoom / size;
+            var frustumSize = new Vector2d(Width, Height) / s * zoomLength * Math.Tan(fov * 0.5) * 0.5;
+
+            var frustum = new Vector256<double>[][]
+            {
+                new Vector256<double>[]{ Vector256.Create(-frustumSize.X, -frustumSize.Y, length - zoomLength, 1.0), Vector256.Create(frustumSize.X, -frustumSize.Y, length - zoomLength, 1.0) },
+                new Vector256<double>[]{ Vector256.Create(-frustumSize.X, -frustumSize.Y, length - zoomLength, 1.0), Vector256.Create(-frustumSize.X, frustumSize.Y, length - zoomLength, 1.0) },
+                new Vector256<double>[]{ Vector256.Create(frustumSize.X, -frustumSize.Y, length - zoomLength, 1.0), Vector256.Create(frustumSize.X, frustumSize.Y, length - zoomLength, 1.0) },
+                new Vector256<double>[]{ Vector256.Create(-frustumSize.X, frustumSize.Y, length - zoomLength, 1.0), Vector256.Create(frustumSize.X, frustumSize.Y, length - zoomLength, 1.0) }
+            }.Select(shape => new BoundingBoxShape(shape.Select(v => projectionMatrix.Transform(mv.Transform(v))).Select(v => (Vector2d)Avx.Divide(v, v.Permute4x64(0b11_11_11_11)) * s + offset).Prepend(pos).ToArray(), true, false))
+            .Prepend(new BoundingBoxShape(new Vector2d[] { poi, pos }, false, false))
+            .ToArray();
+
+            return new PreviewBoundingBox(poi, frustum, false, double.IsNaN(fov) || double.IsInfinity(fov) || fov >= 180.0);
+        }
+
+        public PreviewBoundingBox GetLightBoundingBox(LightSetting lightSetting, CameraSetting cameraSetting)
         {
             var size = Math.Max(Width, Height);
             var fov = Math.Atan((Width / cameraSetting.Zoom) * 0.5) * 2.0;
@@ -501,11 +551,11 @@ namespace NiVE3.PresetPlugin.Renderer
             const double PositionMarkSize = 5.0;
             const int PositionMarkStepCount = 8;
             const double PositionMarkStep = Math.PI * 2.0 / PositionMarkStepCount;
-            var positionMark = Enumerable.Range(0, PositionMarkStepCount).Select(i => new Vector2d(Math.Cos(PositionMarkStep * i) + 0.5, Math.Sin(PositionMarkStep * i) - 0.5) * PositionMarkSize + pos).ToArray();
+            var positionMark = Enumerable.Range(0, PositionMarkStepCount).Select(i => new Vector2d(Math.Cos(PositionMarkStep * i), Math.Sin(PositionMarkStep * i)) * PositionMarkSize + pos).ToArray();
 
             return new PreviewBoundingBox(
                 lightSetting.LightType == LightType.Point ? pos : poi,
-                new BoundingBoxShape[] { new BoundingBoxShape(new Vector2d[] { pos, poi }, false), new BoundingBoxShape(positionMark, true, pos) },
+                new BoundingBoxShape[] { new BoundingBoxShape(new Vector2d[] { pos, poi }, false, false), new BoundingBoxShape(positionMark, true, true, pos) },
                 lightSetting.LightType == LightType.Point,
                 lightSetting.LightType == LightType.Ambient || double.IsNaN(lightSetting.ConeAngle) || double.IsInfinity(lightSetting.ConeAngle)
             );
@@ -677,7 +727,6 @@ namespace NiVE3.PresetPlugin.Renderer
             var size = Math.Max(renderWidth, renderHeight);
             var pos256 = Avx.Divide(pos.AsVector256(), Vector256.Create(size));
             var poi256 = Avx.Divide(poi.AsVector256(), Vector256.Create(size));
-            //var viewMatrix = Matrix4x4d.CreateLookAt(pos, poi, Vector256.Create(0.0, 1.0, 0.0, 0.0));
 
             var diff = Avx.Subtract(poi256, pos256);
             var x = diff.GetElement(0);
@@ -696,15 +745,27 @@ namespace NiVE3.PresetPlugin.Renderer
                 .RotateZ(angleZ);
         }
 
+        static Matrix4x4d GetInvertedCameraMatrix(CameraSetting cameraSetting, double renderWidth, double renderHeight)
+        {
+            return GetInvertedCameraMatrix(cameraSetting.PointOfInterest, cameraSetting.Position, cameraSetting.Orientation, cameraSetting.AngleX, cameraSetting.AngleY, cameraSetting.AngleZ, renderWidth, renderHeight);
+        }
+
         static Matrix4x4d GetInvertedCameraMatrix(PropertyValueGroup transform, double renderWidth, double renderHeight)
         {
-            var poi = (Vector3d)(transform[ILayerObject.TransformPointOfInterestId] ?? new Vector3d());
-            var pos = (Vector3d)(transform[ILayerObject.TransformPositionId] ?? new Vector3d());
-            var orientation = (Vector3d)(transform[ILayerObject.TransformOrientationId] ?? new Vector3d());
-            var angleX = (double)(transform[ILayerObject.TransformXAngleId] ?? 0.0);
-            var angleY = (double)(transform[ILayerObject.TransformYAngleId] ?? 0.0);
-            var angleZ = (double)(transform[ILayerObject.TransformZAngleId] ?? 0.0);
+            return GetInvertedCameraMatrix(
+                (Vector3d)(transform[ILayerObject.TransformPositionId] ?? new Vector3d()),
+                (Vector3d)(transform[ILayerObject.TransformPointOfInterestId] ?? new Vector3d()),
+                (Vector3d)(transform[ILayerObject.TransformOrientationId] ?? new Vector3d()),
+                (double)(transform[ILayerObject.TransformXAngleId] ?? 0.0),
+                (double)(transform[ILayerObject.TransformYAngleId] ?? 0.0),
+                (double)(transform[ILayerObject.TransformZAngleId] ?? 0.0),
+                renderWidth,
+                renderHeight
+            );
+        }
 
+        static Matrix4x4d GetInvertedCameraMatrix(in Vector3d pos, in Vector3d poi, in Vector3d orientation, double angleX, double angleY, double angleZ, double renderWidth, double renderHeight)
+        {
             var size = Math.Max(renderWidth, renderHeight);
             var pos256 = Avx.Divide(pos.AsVector256(), Vector256.Create(size));
             var poi256 = Avx.Divide(poi.AsVector256(), Vector256.Create(size));

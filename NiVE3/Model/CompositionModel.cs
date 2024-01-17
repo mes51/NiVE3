@@ -523,20 +523,29 @@ namespace NiVE3.Model
             var layers = Layers.Where(l => layerIds.Contains(l.LayerId)).OrderBy(Layers.IndexOf);
             var result = new List<ColoredPreviewBoundingBox>();
 
-            var cameraSetting = Layers.FirstOrDefault(l => l.IsEnableVideo && l.IsCamera && l.IsContainsTime(time))?.GetCameraSetting(time);
-            if (cameraSetting == null)
-            {
-                cameraSetting = CreateDefaultCameraSetting(Width, Height);
-            }
+            var activeCamera = Layers.FirstOrDefault(l => l.IsEnableVideo && l.IsCamera && l.IsContainsTime(time));
+            var activeCameraSetting = activeCamera?.GetCameraSetting(time) ?? CreateDefaultCameraSetting(Width, Height);
 
             foreach (var layer in layers)
             {
-                if (layer.IsLight)
+                if (layer.IsCamera)
+                {
+                    if (layer == activeCamera)
+                    {
+                        continue;
+                    }
+                    var cameraSetting = layer.GetCameraSetting(time);
+                    if (cameraSetting != null)
+                    {
+                        result.Add(new ColoredPreviewBoundingBox(Renderer.GetCameraBoundingBox(cameraSetting, activeCameraSetting), layer.TagColor));
+                    }
+                }
+                else if (layer.IsLight)
                 {
                     var lightSetting = layer.GetLightSetting(time);
                     if (lightSetting != null)
                     {
-                        result.Add(new ColoredPreviewBoundingBox(Renderer.CalcLightBoundingBox(lightSetting, cameraSetting), layer.TagColor));
+                        result.Add(new ColoredPreviewBoundingBox(Renderer.GetLightBoundingBox(lightSetting, activeCameraSetting), layer.TagColor));
                     }
                 }
                 else
@@ -546,11 +555,11 @@ namespace NiVE3.Model
                     var height = layer.FootageModel.Height;
                     if (layer.IsEnable3D)
                     {
-                        result.Add(new ColoredPreviewBoundingBox(Renderer.CalcBoundingBox3D(width, height, layer.GetTransform(time), layer.GetParentTransforms(time), cameraSetting), layer.TagColor));
+                        result.Add(new ColoredPreviewBoundingBox(Renderer.GetBoundingBox3D(width, height, layer.GetTransform(time), layer.GetParentTransforms(time), activeCameraSetting), layer.TagColor));
                     }
                     else
                     {
-                        result.Add(new ColoredPreviewBoundingBox(Renderer.CalcBoundingBox2D(width, height, layer.GetTransform(time), layer.GetParentTransforms(time)), layer.TagColor));
+                        result.Add(new ColoredPreviewBoundingBox(Renderer.GetBoundingBox2D(width, height, layer.GetTransform(time), layer.GetParentTransforms(time)), layer.TagColor));
                     }
                 }
             }

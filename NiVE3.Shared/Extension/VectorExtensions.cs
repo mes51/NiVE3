@@ -348,5 +348,18 @@ namespace NiVE3.Shared.Extension
 
             return Vector256.Create(low, high);
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector256<double> Permute4x64(this in Vector256<double> v, byte control)
+        {
+            if (Avx2.IsSupported)
+            {
+                return Avx2.Permute4x64(v, control);
+            }
+            else
+            {
+                return v.Shuffle4x64(v, control);
+            }
+        }
     }
 }
