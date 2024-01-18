@@ -405,12 +405,28 @@ namespace NiVE3.Model
             var layers = Layers.Where(l => layerIds.Contains(l.LayerId)).OrderBy(Layers.IndexOf).ToArray();
             var oldIndices = layers.Select(l => Layers.IndexOf(l)).ToArray();
 
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_DeleteLayers));
+
+            var childLayers = layers.SelectMany(p => Layers.Where(c => c.ParentLayerId == p.LayerId)).Select(l => l.LayerId).ToArray();
+            if (childLayers.Length > 0)
+            {
+                ChangeParentLayer(childLayers, null);
+            }
+
+            var trackMatteChildLayers = layers.SelectMany(p => Layers.Where(c => c.TrackMatteLayerId == p.LayerId)).Select(l => l.LayerId).ToArray();
+            if (trackMatteChildLayers.Length > 0)
+            {
+                ChangeTrackMatteLayers(trackMatteChildLayers, null);
+            }
+
             foreach (var l in layers)
             {
                 Layers.Remove(l);
             }
 
             HistoryModel.Add(new DeleteLayersHistoryCommand(this, layers, oldIndices));
+
+            HistoryModel.EndGroup();
         }
 
         public void DeleteLayersByFootage(FootageModel footage)
