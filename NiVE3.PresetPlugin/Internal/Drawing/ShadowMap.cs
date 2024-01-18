@@ -11,31 +11,48 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 {
     class ShadowMap : IDisposable
     {
-        const int BufferSize = 1024 * 1024 * 8; // 512MB
-
         public readonly Matrix4x4 LightViewProjectionMatrix;
-
-        public readonly List<ShadowPixel[]> Buffers = new List<ShadowPixel[]>();
 
         public readonly int[] Indices;
 
-        public readonly int[] BankIndices;
+        public readonly int[] BufferIndices;
 
         public readonly int ShadowMapSize;
 
-        int CurrentHeadIndex = -1;
+        ShadowBuffer ShadowBuffer { get; }
 
-        public ShadowMap(int size, Matrix4x4 lightViewProjectionMatrix)
+        public ShadowMap(ShadowBuffer shadowBuffer, int shadowMapSize, Matrix4x4 lightViewProjectionMatrix)
         {
-            ShadowMapSize = size;
+            ShadowMapSize = shadowMapSize;
             LightViewProjectionMatrix = lightViewProjectionMatrix;
-            Indices = ArrayPool<int>.Shared.Rent(size * size);
-            Indices.AsSpan(0, size * size).Fill(-1);
-            BankIndices = ArrayPool<int>.Shared.Rent(size * size);
-            BankIndices.AsSpan(0, size * size).Fill(-1);
+            ShadowBuffer = shadowBuffer;
+            Indices = ArrayPool<int>.Shared.Rent(shadowMapSize * shadowMapSize);
+            Indices.AsSpan(0, shadowMapSize * shadowMapSize).Fill(-1);
+            BufferIndices = ArrayPool<int>.Shared.Rent(shadowMapSize * shadowMapSize);
+            BufferIndices.AsSpan(0, shadowMapSize * shadowMapSize).Fill(-1);
 
-            AllocBuffer(size * size * 2);
+            shadowBuffer.AllocBuffer(shadowMapSize * shadowMapSize * 2);
         }
+
+        public void AllocBuffer()
+        {
+            ShadowBuffer.AllocBuffer(ShadowMapSize * ShadowMapSize);
+        }
+
+        public void Dispose()
+        {
+            ArrayPool<int>.Shared.Return(Indices);
+            ArrayPool<int>.Shared.Return(BufferIndices);
+        }
+    }
+
+    class ShadowBuffer : IDisposable
+    {
+        const int BufferSize = 1024 * 1024; // 32MB
+
+        public readonly List<ShadowPixel[]> Buffers = new List<ShadowPixel[]>();
+
+        int CurrentHeadIndex = -1;
 
         public void AllocBuffer(int length)
         {
@@ -62,12 +79,10 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             {
                 ArrayPool<ShadowPixel>.Shared.Return(b);
             }
-            ArrayPool<int>.Shared.Return(Indices);
-            ArrayPool<int>.Shared.Return(BankIndices);
         }
     }
 
-    record struct ShadowPixel(Vector4 Color, float Depth, int TriangleId, int NextIndex = -1, int NextBank = -1)
+    record struct ShadowPixel(Vector4 Color, float Depth, int TriangleId, int NextIndex = -1, int NextBuffer = -1)
     {
         public static readonly ShadowPixel Empty = new ShadowPixel(Vector4.Zero, float.NegativeInfinity, -1);
 
@@ -79,6 +94,6 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
         public int NextIndex = NextIndex;
 
-        public int NextBank = NextBank;
+        public int NextBuffer = NextBuffer;
     }
 }
