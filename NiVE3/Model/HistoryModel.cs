@@ -28,11 +28,18 @@ namespace NiVE3.Model
 
         int GroupNestCount { get; set; }
 
-        PlayControllerModel PlayControllerModel { get; }
-
-        public HistoryModel(PlayControllerModel playControllerModel)
+        WeakEventPublisher<EventArgs> HistoryChangedPublisher { get; } = new WeakEventPublisher<EventArgs>();
+        public event EventHandler<EventArgs> HistoryChanged
         {
-            PlayControllerModel = playControllerModel;
+            add { HistoryChangedPublisher.Subscribe(value); }
+            remove { HistoryChangedPublisher.Unsubscribe(value); }
+        }
+
+        WeakEventPublisher<EventArgs> HistoryGroupChangingPublisher { get; } = new WeakEventPublisher<EventArgs>();
+        public event EventHandler<EventArgs> HistoryGroupChanging
+        {
+            add { HistoryGroupChangingPublisher.Subscribe(value); }
+            remove { HistoryGroupChangingPublisher.Unsubscribe(value); }
         }
 
         public void Undo()
@@ -48,11 +55,12 @@ namespace NiVE3.Model
                 return;
             }
 
-            PlayControllerModel.Stop();
             var command = UndoCommands.Pop();
             command.Undo();
 
             RedoCommands.Push(command);
+
+            HistoryChangedPublisher.Publish(this, EventArgs.Empty);
         }
 
         public void Redo()
@@ -68,11 +76,12 @@ namespace NiVE3.Model
                 return;
             }
 
-            PlayControllerModel.Stop();
             var command = RedoCommands.Pop();
             command.Redo();
 
             UndoCommands.Push(command);
+
+            HistoryChangedPublisher.Publish(this, EventArgs.Empty);
         }
 
         public void BeginGroup(string name)
@@ -82,6 +91,8 @@ namespace NiVE3.Model
                 CurrentGroup = new GroupedHistoryCommand(name);
             }
             GroupNestCount++;
+
+            HistoryGroupChangingPublisher.Publish(this, EventArgs.Empty);
         }
 
         public void EndGroup()
@@ -98,6 +109,10 @@ namespace NiVE3.Model
                 AddInternal(CurrentGroup);
                 CurrentGroup = null;
             }
+            else
+            {
+                HistoryGroupChangingPublisher.Publish(this, EventArgs.Empty);
+            }
         }
 
         public void AbortGroup()
@@ -109,6 +124,8 @@ namespace NiVE3.Model
                 CurrentGroup?.Dispose();
                 CurrentGroup = null;
             }
+
+            HistoryGroupChangingPublisher.Publish(this, EventArgs.Empty);
         }
 
         public void Add(IHistoryCommand command)
@@ -116,6 +133,8 @@ namespace NiVE3.Model
             if (CurrentGroup != null)
             {
                 CurrentGroup.Add(command);
+
+                HistoryGroupChangingPublisher.Publish(this, EventArgs.Empty);
             }
             else
             {
@@ -142,6 +161,8 @@ namespace NiVE3.Model
 
             RedoCommands.Clear();
             UndoCommands.Push(command);
+
+            HistoryChangedPublisher.Publish(this, EventArgs.Empty);
         }
 
         private class GroupedHistoryCommand : IHistoryCommand

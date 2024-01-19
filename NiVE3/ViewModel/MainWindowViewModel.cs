@@ -1,10 +1,12 @@
 ﻿using DryIoc;
+using Microsoft.Win32;
 using NiVE3.Config;
 using NiVE3.Model;
 using NiVE3.View.Command;
 using NiVE3.View.Dialog;
 using NiVE3.View.Resource;
 using NiVE3.ViewModel.Dialog;
+using NiVE3.SourceGenerator.ViewModelWireGenerator;
 using Prism.Commands;
 using Prism.Mvvm;
 using Prism.Regions;
@@ -21,9 +23,11 @@ using System.Windows.Input;
 namespace NiVE3.ViewModel
 {
     [CommandHandling(nameof(OpenProjectCommand), nameof(ShortcutKeySetting.OpenProjectGesture))]
+    [CommandHandling(nameof(SaveProjectCommand), nameof(ShortcutKeySetting.SaveProjectGesture))]
     [CommandHandling(nameof(ExitCommand), nameof(ShortcutKeySetting.ExitGesture))]
     [CommandHandling(nameof(NewCompositionCommand), nameof(ShortcutKeySetting.NewCompositionGesture))]
-    class MainWindowViewModel : BindableBase
+    [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
+    partial class MainWindowViewModel : BindableBase
     {
         public static string RegionName = "MainWindow";
 
@@ -33,6 +37,30 @@ namespace NiVE3.ViewModel
 
         IRegion MainRegion => Region.Regions[RegionName];
 
+        private string projectPath = "";
+        [NeedWire(nameof(ProjectModel))]
+        public string ProjectPath
+        {
+            get { return projectPath; }
+            set { SetProperty(ref projectPath, value); }
+        }
+
+        private string projectName = "";
+        [NeedWire(nameof(ProjectModel), IsOneWay = true)]
+        public string ProjectName
+        {
+            get { return projectName; }
+            set { SetProperty(ref projectName, value); }
+        }
+
+        private bool isEdited;
+        [NeedWire(nameof(ProjectModel), IsOneWay = true)]
+        public bool IsEdited
+        {
+            get { return isEdited; }
+            set { SetProperty(ref isEdited, value); }
+        }
+
         public object[] ViewModels => MainRegion.Views.ToArray();
 
         public object[] SingletonViewModels => MainRegion.Views.OfType<SingletonePaneViewModelBase>().ToArray();
@@ -40,6 +68,8 @@ namespace NiVE3.ViewModel
         public CommandOnlyViewModelBase[] CommandOnlyViewModels => Container.ResolveMany<CommandOnlyViewModelBase>().ToArray();
 
         public ICommand OpenProjectCommand { get; }
+
+        public ICommand SaveProjectCommand { get; }
 
         public ICommand ExitCommand { get; }
 
@@ -66,6 +96,22 @@ namespace NiVE3.ViewModel
             ProjectModel.PreviewModels.CollectionChanged += PreviewModels_CollectionChanged;
 
             OpenProjectCommand = new DelegateCommand(() => System.Diagnostics.Debug.WriteLine("Exec Command: OpenProjectCommand"));
+
+            SaveProjectCommand = new DelegateCommand(() =>
+            {
+                if (string.IsNullOrEmpty(ProjectModel.ProjectPath))
+                {
+                    var save = new SaveFileDialog();
+                    save.Filter = $"{LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_OpenSaveProject_Filter_Project)}(*.nvp3)|*.nvp3";
+                    if (!(save.ShowDialog() ?? false))
+                    {
+                        return;
+                    }
+                    ProjectPath = save.FileName;
+                }
+
+                ProjectModel.SaveProject();
+            });
 
             ExitCommand = new DelegateCommand(() => System.Diagnostics.Debug.WriteLine("Exec Command: ExitCommand"));
 
@@ -114,7 +160,11 @@ namespace NiVE3.ViewModel
             var timelineViewModel = Container.Resolve<TimelineViewModel>();
             timelineViewModel.CurrentTimeChangeByUser += TimelineViewModel_CurrentTimeChangeByUser;
             MainRegion.Add(timelineViewModel);
+
+            WiringModel();
         }
+
+        partial void WiringModel();
 
         private void ProjectModel_OpenCompositionTimeline(object? sender, CompositionEventArgs e)
         {

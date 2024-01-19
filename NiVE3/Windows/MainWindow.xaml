@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:NiVE3.Windows"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:pr="http://prismlibrary.com/"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:ad="https://github.com/Dirkster99/AvalonDock"
@@ -18,12 +19,22 @@
         x:Name="RootWindow"
         WindowStartupLocation="CenterScreen"
         Closing="Window_Closing"
-        Title="{gm:LanguageResource ResourceKey=MainWindow_Title}" Height="1000" Width="1800"
+        Height="1000" Width="1800"
         a:ShortcutKeyBindingProperty.InputBinding="True"
         pr:ViewModelLocator.AutoWireViewModel="False">
     <Window.Resources>
         <cv:VisibilityToBoolConverter x:Key="VisibilityToBoolConverter"/>
         <vd:LayoutInitializer x:Key="LayoutInitializer" ViewModel="{Binding Source={x:Reference RootWindow}, Path=DataContext}"/>
+        <cv:SwitchValueConverter x:Key="IsEditingConverter" TrueValue=" *"/>
+        <cv:LocalizationConverter x:Key="MainWindowTitleWithPathConverter" LocalizeFormat="{gm:LanguageResource ResourceKey=MainWindow_TitleWithPath}"/>
+        <cv:ConverterCollection x:Key="MainWindowTitleConverter">
+            <cv:ConverterItem Converter="{StaticResource IsEditingConverter}" TargetType="{x:Type sys:Boolean}"/>
+            <cv:ConverterItem TargetType="{x:Type sys:String}">
+                <cv:ConverterItem.Converter>
+                    <cv:LocalizationConverter LocalizeFormat="{gm:LanguageResource ResourceKey=MainWindow_Title}"/>
+                </cv:ConverterItem.Converter>
+            </cv:ConverterItem>
+        </cv:ConverterCollection>
 
         <Style x:Key="LayoutItemContainerStyleBase" TargetType="{x:Type ad:LayoutItem}">
             <Setter Property="IsActive" Value="{Binding Model.IsActive, Mode=TwoWay}"/>
@@ -70,17 +81,30 @@
             </vd:LayoutItemContainerStyle>
         </vd:LayoutItemContainerStyleSelector>
     </Window.Resources>
-    <!--
     <Window.Style>
         <Style TargetType="{x:Type Window}">
+            <Setter Property="Title">
+                <Setter.Value>
+                    <MultiBinding Converter="{StaticResource MainWindowTitleWithPathConverter}">
+                        <Binding Path="ProjectName"/>
+                        <Binding Path="IsEdited" Converter="{StaticResource IsEditingConverter}"/>
+                    </MultiBinding>
+                </Setter.Value>
+            </Setter>
+            <!--
             <Setter Property="WindowChrome.WindowChrome">
                 <Setter.Value>
                     <WindowChrome CornerRadius="0" GlassFrameThickness="0" ResizeBorderThickness="5" UseAeroCaptionButtons="False" CaptionHeight="26"/>
                 </Setter.Value>
             </Setter>
+            -->
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ProjectName.Length, FallbackValue=0, TargetNullValue=0}" Value="0">
+                    <Setter Property="Title" Value="{Binding IsEdited, Converter={StaticResource MainWindowTitleConverter}}"/>
+                </DataTrigger>
+            </Style.Triggers>
         </Style>
     </Window.Style>
-    -->
     <Grid Background="{ui:AppearanceResource ResourceKey=BackgroundFill}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>

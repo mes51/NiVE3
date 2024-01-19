@@ -17,8 +17,11 @@ namespace NiVE3.View.Resource
 
         static Dictionary<string, Tuple<string, Version>> LanguageKeys { get; }
 
-        [ShowInMarkup, DefaultValue("NicoVisualEffects 3")]
+        [ShowInMarkup, DefaultValue("NicoVisualEffects 3{0}")]
         public static readonly string MainWindow_Title = nameof(MainWindow_Title);
+
+        [ShowInMarkup, DefaultValue("{0} - NicoVisualEffects 3{1}")]
+        public static readonly string MainWindow_TitleWithPath = nameof(MainWindow_TitleWithPath);
 
         [ShowInMarkup, DefaultValue("ファイル(_F)")]
         public static readonly string MainWindow_Menu_File = nameof(MainWindow_Menu_File);
@@ -371,6 +374,9 @@ namespace NiVE3.View.Resource
 
         [ShowInMarkup, DefaultValue("フォルダを削除すると、中に含まれているフッテージも一緒に削除され、各コンポジションからも含まれているフッテージを使用しているレイヤーが削除されます。このフォルダを削除しますか?")]
         public static readonly string Dialog_ConfirmDeleteFootageFolder_Text = nameof(Dialog_ConfirmDeleteFootageFolder_Text);
+
+        [ShowInMarkup, DefaultValue("プロジェクトファイル")]
+        public static readonly string Dialog_OpenSaveProject_Filter_Project = nameof(Dialog_OpenSaveProject_Filter_Project);
 
         // Property
 

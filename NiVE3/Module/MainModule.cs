@@ -43,8 +43,8 @@ namespace NiVE3.Module
         public void RegisterTypes(IContainerRegistry containerRegistry)
         {
             Container.Register<AcceleratorModel>(Reuse.Singleton, FactoryMethod.ConstructorWithResolvableArguments);
-            Container.Register<PlayControllerModel>(Reuse.Singleton, FactoryMethod.ConstructorWithResolvableArguments);
             Container.Register<HistoryModel>(Reuse.Singleton, FactoryMethod.ConstructorWithResolvableArguments);
+            Container.Register<PlayControllerModel>(Reuse.Singleton, FactoryMethod.ConstructorWithResolvableArguments);
             Container.Register<FootageListModel>(Reuse.Singleton, FactoryMethod.ConstructorWithResolvableArguments);
             Container.Register<EffectListModel>(Reuse.Singleton, FactoryMethod.ConstructorWithResolvableArguments);
             Container.Register<RendererListModel>(Reuse.Singleton, FactoryMethod.ConstructorWithResolvableArguments);

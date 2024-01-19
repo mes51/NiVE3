@@ -30,10 +30,30 @@ namespace NiVE3.Model
             set { SetProperty(ref isPaused, value); }
         }
 
+        HistoryModel HistoryModel { get; }
+
+        public PlayControllerModel(HistoryModel historyModel)
+        {
+            HistoryModel = historyModel;
+
+            historyModel.HistoryChanged += HistoryModel_HistoryChanged;
+            historyModel.HistoryGroupChanging += HistoryModel_HistoryGroupChanging;
+        }
+
         public void Stop()
         {
             IsPlaying = false;
             IsPaused = false;
+        }
+
+        private void HistoryModel_HistoryChanged(object? sender, EventArgs e)
+        {
+            Stop();
+        }
+
+        private void HistoryModel_HistoryGroupChanging(object? sender, EventArgs e)
+        {
+            Stop();
         }
     }
 }

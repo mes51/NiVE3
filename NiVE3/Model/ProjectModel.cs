@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,6 +18,27 @@ namespace NiVE3.Model
         public ObservableCollection<CompositionModel> CompositionModels { get; } = new ObservableCollection<CompositionModel>();
 
         public ObservableCollection<PreviewModelBase> PreviewModels { get; } = new ObservableCollection<PreviewModelBase>();
+
+        private string projectPath = "";
+        public string ProjectPath
+        {
+            get { return projectPath; }
+            set { SetProperty(ref projectPath, value); }
+        }
+
+        private string projectName = "";
+        public string ProjectName
+        {
+            get { return projectName; }
+            set { SetProperty(ref projectName, value); }
+        }
+
+        private bool isEdited;
+        public bool IsEdited
+        {
+            get { return isEdited; }
+            set { SetProperty(ref isEdited, value); }
+        }
 
         FootageListModel FootageListModel { get; }
 
@@ -43,6 +66,10 @@ namespace NiVE3.Model
             FootageListModel.ShowCompositionPreview += FootageListModel_ShowCompositionPreview;
             FootageListModel.FootageDeleted += FootageListModel_FootageDeleted;
             FootageListModel.DeleteFootageByUndo += FootageListModel_DeleteFootageByUndo;
+
+            historyModel.HistoryChanged += HistoryModel_HistoryChanged;
+
+            PropertyChanged += ProjectModel_PropertyChanged;
         }
 
         public void CreateComposition(string name, int width, int height, double frameRate, double duration, bool isRetentionFrameRate, int shutterAngle, int shutterPhase, int motionBlurSampleCount, Type rendererType)
@@ -82,6 +109,11 @@ namespace NiVE3.Model
         public void RemovePreview(PreviewModelBase previewModel)
         {
             PreviewModels.Remove(previewModel);
+        }
+
+        public void SaveProject()
+        {
+            IsEdited = false;
         }
 
         void AddCompositionModel(CompositionModel composition)
@@ -169,6 +201,19 @@ namespace NiVE3.Model
                 {
                     preview.Footage = null;
                 }
+            }
+        }
+
+        private void HistoryModel_HistoryChanged(object? sender, EventArgs e)
+        {
+            IsEdited = true;
+        }
+
+        private void ProjectModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(ProjectPath))
+            {
+                ProjectName = Path.GetFileName(ProjectPath);
             }
         }
     }
