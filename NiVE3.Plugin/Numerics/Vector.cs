@@ -8,6 +8,7 @@ using System.Runtime.Intrinsics;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using SpanJson;
 
 namespace NiVE3.Plugin.Numerics
 {
@@ -23,6 +24,7 @@ namespace NiVE3.Plugin.Numerics
 
         public bool IsZero => X == 0 && Y == 0;
 
+        [JsonConstructor]
         public Vector2d(double x, double y)
         {
             X = x;
@@ -206,6 +208,7 @@ namespace NiVE3.Plugin.Numerics
 
         public readonly double Z;
 
+        [JsonConstructor]
         public Vector3d(double x, double y, double z)
         {
             X = x;

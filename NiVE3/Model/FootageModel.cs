@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NiVE3.Data.Project;
 using NiVE3.Extension;
 using NiVE3.Plugin.Image;
 using NiVE3.Plugin.Interfaces;
@@ -48,6 +49,8 @@ namespace NiVE3.Model
         void ChangeName(string name);
 
         void ChangeComment(string name);
+
+        FootageData SaveData();
     }
 
     class FootageModel : BindableBase, IFootageModel
@@ -179,6 +182,25 @@ namespace NiVE3.Model
                 HistoryModel.Add(IFootageModel.CreateChangeCommentHistoryCommand(this, prevComment, comment));
             }
         }
+
+        public FootageData SaveData()
+        {
+            return new FootageData
+            {
+                DataType = FootageDataType.Source,
+                FootageId = FootageId,
+                Name = Name,
+                Width = Width,
+                Height = Height,
+                FrameRate = FrameRate,
+                Duration = Duration,
+                FilePath = FilePath,
+                Comment = Comment,
+                InputType = InputType,
+                InputId = InputModel.InputId,
+                SourceId = Source.SourceId
+            };
+        }
     }
 
     class FootageFolderModel : BindableBase, IFootageModel
@@ -301,6 +323,18 @@ namespace NiVE3.Model
                 Comment = comment;
                 HistoryModel.Add(IFootageModel.CreateChangeCommentHistoryCommand(this, prevComment, comment));
             }
+        }
+
+        public FootageData SaveData()
+        {
+            return new FootageData
+            {
+                DataType = FootageDataType.Folder,
+                FootageId = FootageId,
+                Name = Name,
+                Comment = Comment,
+                Children = Children.Select(m => m.SaveData()).ToArray()
+            };
         }
     }
 }

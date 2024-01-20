@@ -18,6 +18,8 @@ namespace NiVE3.Input
     {
         const string ID = "4F4E8A0C-9E79-40F1-B76C-04D4B90AF53B";
 
+        public static readonly Guid PluginId = Guid.Parse(ID);
+
         public string FilePath => Composition.Name;
 
         public CompositionModel Composition { get; }
@@ -32,6 +34,16 @@ namespace NiVE3.Input
         public bool Load(string filePath)
         {
             return true;
+        }
+
+        public object? SaveData()
+        {
+            return Composition.CompositionId;
+        }
+
+        public void Load(object? data)
+        {
+
         }
 
         public FootageSourceGroup GetGroup()

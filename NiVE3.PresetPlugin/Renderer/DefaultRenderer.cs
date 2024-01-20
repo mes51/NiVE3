@@ -26,7 +26,7 @@ using static System.Net.Mime.MediaTypeNames;
 namespace NiVE3.PresetPlugin.Renderer
 {
     [Export(typeof(IRenderer))]
-    [RendererMetadata(typeof(DefaultRenderer), LanguageResourceDictionary.Renderer_DefaultRenderer_Name, LanguageResourceDictionary.Renderer_DefaultRenderer_Description, "mes51", "D67AC3F-A137-45B1-99F7-3E68A0B910E6", LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
+    [RendererMetadata(typeof(DefaultRenderer), LanguageResourceDictionary.Renderer_DefaultRenderer_Name, LanguageResourceDictionary.Renderer_DefaultRenderer_Description, "mes51", "0D30B1E6-3DF3-4A8E-85BB-DCD93BEC7BE0", LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
     public class DefaultRenderer : IRenderer
     {
         const double DefaultFov = 0.691111986546211; // 39.5978 / 180.0 * Math.PI

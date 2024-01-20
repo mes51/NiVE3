@@ -15,9 +15,11 @@ namespace NiVE3.Input.Special
     [SpecialInput]
     class CameraInput : IInput
     {
-        public static CameraInput Instance { get; } = new CameraInput();
-
         const string ID = "69EEC338-926A-413D-BE13-7900F711F21C";
+
+        public static readonly Guid PluginId = Guid.Parse(ID);
+
+        public static CameraInput Instance { get; } = new CameraInput();
 
         public string FilePath => "カメラ";
 

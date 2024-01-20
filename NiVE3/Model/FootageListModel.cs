@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media.Effects;
 using NiVE3.Config;
+using NiVE3.Data.Project;
 using NiVE3.Extension;
 using NiVE3.Input;
 using NiVE3.Input.Special;
@@ -95,9 +96,9 @@ namespace NiVE3.Model
 
             PropertyChanged += FootageListModel_PropertyChanged;
 
-            CameraFootage = new FootageModel(new InputModel(CameraInput.Instance, false), EmptyFootageSource.Instance, HistoryModel);
-            LightFootage = new FootageModel(new InputModel(LightInput.Instance, false), EmptyFootageSource.Instance, HistoryModel);
-            NullObjectFootage = new FootageModel(new InputModel(NullObjectInput.Instance, false), EmptyFootageSource.Instance, HistoryModel);
+            CameraFootage = new FootageModel(new InputModel(CameraInput.Instance, CameraInput.PluginId, false), EmptyFootageSource.Instance, HistoryModel);
+            LightFootage = new FootageModel(new InputModel(LightInput.Instance, LightInput.PluginId, false), EmptyFootageSource.Instance, HistoryModel);
+            NullObjectFootage = new FootageModel(new InputModel(NullObjectInput.Instance, NullObjectInput.PluginId, false), EmptyFootageSource.Instance, HistoryModel);
         }
 
         public Guid? AddSolid()
@@ -111,7 +112,7 @@ namespace NiVE3.Model
                 solidFolder = AddFolderInternal(ApplicationSetting.Setting.SolidFolderName);
                 createFolder = true;
             }
-            var loaded = LoadFile(solidInput, "", solidFolder.FootageId, null, true);
+            var loaded = LoadFile(solidInput, "", solidFolder.FootageId, null, SolidInput.PluginId, true);
             if (createFolder)
             {
                 if (loaded != null)
@@ -138,7 +139,7 @@ namespace NiVE3.Model
         public void AddComposition(CompositionModel composition)
         {
             var compositionInput = new CompositionInput(composition);
-            LoadFile(compositionInput, "", null, null, true);
+            LoadFile(compositionInput, "", null, null, CompositionInput.PluginId, true);
         }
 
         public void AddFolder()
@@ -279,7 +280,7 @@ namespace NiVE3.Model
 
                 var factory = Inputs.First(i => i.Metadata.PluginType == t);
                 var context = factory.CreateExport();
-                if (LoadFile(context.Value, filePath, targetFolderId, context, factory.Metadata.IsSupportLoadToGpu) != null)
+                if (LoadFile(context.Value, filePath, targetFolderId, context, Guid.Parse(factory.Metadata.InputUuid), factory.Metadata.IsSupportLoadToGpu) != null)
                 {
                     break;
                 }
@@ -328,6 +329,17 @@ namespace NiVE3.Model
             return Array.Empty<FootageModel>();
         }
 
+        public FootageListData SaveData()
+        {
+            return new FootageListData
+            {
+                SortKey = (FootageSortKeyData)SortKey,
+                SortIsAscending = SortIsAscending,
+                Inputs = LoadedInputs.Select(m => m.SaveData()).ToArray(),
+                Footages = Footages.Select(m => m.SaveData()).ToArray()
+            };
+        }
+
         FootageFolderModel AddFolderInternal(string? name)
         {
             var folder = new FootageFolderModel(HistoryModel);
@@ -366,7 +378,7 @@ namespace NiVE3.Model
                 .FirstOrDefault();
         }
 
-        IFootageModel? LoadFile(IInput plugin, string fileName, Guid? targetFolderId, ExportLifetimeContext<IInput>? pluginContext, bool isSupportLoadToGpu)
+        IFootageModel? LoadFile(IInput plugin, string fileName, Guid? targetFolderId, ExportLifetimeContext<IInput>? pluginContext, Guid pluginId, bool isSupportLoadToGpu)
         {
             if (isSupportLoadToGpu)
             {
@@ -400,7 +412,7 @@ namespace NiVE3.Model
                 }
             }
 
-            var inputModel = pluginContext != null ? new InputModel(pluginContext, isSupportLoadToGpu) : new InputModel(plugin, isSupportLoadToGpu);
+            var inputModel = pluginContext != null ? new InputModel(pluginContext, pluginId, isSupportLoadToGpu) : new InputModel(plugin, pluginId, isSupportLoadToGpu);
 
             var group = plugin.GetGroup();
             if (!group.Flatten().Any())
@@ -592,7 +604,7 @@ namespace NiVE3.Model
         }
     }
 
-    enum FootageSortKey
+    enum FootageSortKey : int
     {
         Name,
         Width,

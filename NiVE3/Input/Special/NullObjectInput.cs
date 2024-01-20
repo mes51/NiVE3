@@ -15,9 +15,11 @@ namespace NiVE3.Input.Special
     [SpecialInput]
     class NullObjectInput : IInput
     {
-        public static NullObjectInput Instance { get; } = new NullObjectInput();
-
         const string ID = "6F491207-1430-4E92-8D09-08BA2BCBD557";
+
+        public static readonly Guid PluginId = Guid.Parse(ID);
+
+        public static NullObjectInput Instance { get; } = new NullObjectInput();
 
         public string FilePath => "ヌルオブジェクト";
 

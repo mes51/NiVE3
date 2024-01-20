@@ -15,11 +15,13 @@ namespace NiVE3.Input.Special
     [SpecialInput]
     class LightInput : IInput
     {
+        const string ID = "C425AFBF-95C8-4D6C-AD4F-0B0A2526EDEB";
+
+        public static readonly Guid PluginId = Guid.Parse(ID);
+
         public static LightInput Instance { get; } = new LightInput();
 
         public string FilePath => "ライト";
-
-        const string ID = "C425AFBF-95C8-4D6C-AD4F-0B0A2526EDEB";
 
         private LightInput() { }
 

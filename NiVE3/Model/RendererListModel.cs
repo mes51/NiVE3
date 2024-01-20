@@ -39,6 +39,15 @@ namespace NiVE3.Model
             }
         }
 
+        public Guid GetPluginId(Type rendererType)
+        {
+            if (Renderers == null)
+            {
+                throw new Exception(); // bug
+            }
+            return Guid.Parse(Renderers.First(f => f.Metadata.PluginType == rendererType).Metadata.RendererUuid);
+        }
+
         public ExportLifetimeContext<IRenderer> CreateRenderer(Type rendererType)
         {
             if (Renderers == null)

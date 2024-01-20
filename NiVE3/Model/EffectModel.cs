@@ -6,6 +6,7 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NiVE3.Data.Project;
 using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Image;
 using NiVE3.Plugin.Interfaces;
@@ -98,6 +99,18 @@ namespace NiVE3.Model
             }
 
             return Effect.Value.Process(image, roi, layerTime, new PropertyValueGroup(propertyValues));
+        }
+
+        public EffectData SaveData()
+        {
+            return new EffectData
+            {
+                EffectId = EffectId,
+                EffectPluginId = Guid.Parse(Metadata.EffectUuid),
+                Name = Name,
+                IsEnable = IsEnable,
+                Properties = Properties.Select(p => p.SaveData()).ToArray()
+            };
         }
 
         private void Property_ValueUpdated(object? sender, EventArgs e)

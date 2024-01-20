@@ -24,6 +24,8 @@ namespace NiVE3.Input
     {
         const string ID = "08FE7B2F-4FC5-419B-8CE0-A9262348D630";
 
+        public static readonly Guid PluginId = Guid.Parse(ID);
+
         public string FilePath { get; private set; } = "平面";
 
         SolidFootageSource Source { get; } = new SolidFootageSource();
@@ -40,6 +42,21 @@ namespace NiVE3.Input
         }
 
         public void Dispose() { }
+
+        public object? SaveData()
+        {
+            return new SoldData
+            {
+                Color = Source.Color,
+                Width = Source.Width,
+                Height = Source.Height
+            };
+        }
+
+        public void Load(object? data)
+        {
+
+        }
 
         public FrameworkElement? GetLoadSetting(Size? compositionSize)
         {
@@ -99,5 +116,14 @@ namespace NiVE3.Input
                 return image;
             }
         }
+    }
+
+    file class SoldData
+    {
+        public FloatColor Color { get; set; }
+
+        public int Width { get; set; }
+
+        public int Height { get; set; }
     }
 }

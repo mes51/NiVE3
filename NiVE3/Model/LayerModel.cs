@@ -26,6 +26,7 @@ using NiVE3.Plugin.Numerics;
 using System.Numerics;
 using System.Runtime.Intrinsics;
 using System.Security.Cryptography.Xml;
+using NiVE3.Data.Project;
 
 namespace NiVE3.Model
 {
@@ -717,6 +718,40 @@ namespace NiVE3.Model
             }
 
             HistoryModel.Add(new DeleteEffectEnableHistoryCommand(this, effects, oldIndices));
+        }
+
+        public LayerData SaveData()
+        {
+            return new LayerData
+            {
+                LayerId = LayerId,
+                Name = Name,
+                Comment = Comment,
+                SourceStartPoint = SourceStartPoint,
+                InPoint = InPoint,
+                OutPoint = OutPoint,
+                IsEnableTimeRemap = IsEnableTimeRemap,
+                TagColor = TagColor,
+                IsEnableVideo = IsEnableVideo,
+                IsEnableAudio = IsEnableAudio,
+                IsEnableSolo = IsEnableSolo,
+                IsLock = IsLock,
+                IsEnableShy = IsEnableShy,
+                IsEnableExplodeLayers = IsEnableCollapse,
+                IsEnableEffect = IsEnableEffect,
+                IsEnableFrameBlend = IsEnableFrameBlend,
+                IsEnableMotionBlur = IsEnableMotionBlur,
+                IsEnableAdjustmentLayer = IsEnableAdjustmentLayer,
+                IsEnable3D = IsEnable3D,
+                InterpolationQuality = InterpolationQuality,
+                BlendMode = BlendMode,
+                TrackMatteLayerId = TrackMatteLayerId,
+                TrackMatteMode = TrackMatteMode,
+                ParentLayerId = ParentLayerId,
+                Effects = Effects.Select(e => e.SaveData()).ToArray(),
+                TransformProperties = TransformProperties.SaveData(),
+                LayerOptionProperties = LayerOptionProperties?.SaveData()
+            };
         }
 
         private void Effects_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)

@@ -9,6 +9,10 @@ namespace NiVE3.Plugin.Property.Types
 {
     public class EnumPropertyType : IPropertyType
     {
+        const string SerializedKeyType = "Type";
+
+        const string SerializedKeyValue = "Value";
+
         public static readonly EnumPropertyType Instance = new EnumPropertyType();
 
         public InterpolationType SupportedInterpolationTypes => InterpolationType.None;
@@ -61,6 +65,36 @@ namespace NiVE3.Plugin.Property.Types
                     convertedValue = 0.0;
                     return false;
             }
+        }
+
+        public object? SerializeValue(object? value)
+        {
+            if (value != null)
+            {
+                return new Dictionary<string, object?>
+                {
+                    { SerializedKeyType, value.GetType().FullName },
+                    { SerializedKeyValue, value.ToString() }
+                };
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public object? DeserializeValue(object? serializedValue)
+        {
+            if (serializedValue is IDictionary<string, object> dictionary)
+            {
+                var type = Type.GetType((string)dictionary[SerializedKeyType]);
+                if (type != null)
+                {
+                    return Enum.Parse(type, (string)dictionary[SerializedKeyValue]);
+                }
+            }
+
+            return null;
         }
     }
 }

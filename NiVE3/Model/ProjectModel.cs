@@ -7,9 +7,11 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NiVE3.Data.Project;
 using NiVE3.Input;
 using NiVE3.View.Resource;
 using Prism.Mvvm;
+using SpanJson;
 
 namespace NiVE3.Model
 {
@@ -75,7 +77,8 @@ namespace NiVE3.Model
         public void CreateComposition(string name, int width, int height, double frameRate, double duration, bool isRetentionFrameRate, int shutterAngle, int shutterPhase, int motionBlurSampleCount, Type rendererType)
         {
             var renderer = RendererListModel.CreateRenderer(rendererType);
-            var composition = new CompositionModel(renderer, FootageListModel, EffectListModel, HistoryModel)
+            var rendererPluginId = RendererListModel.GetPluginId(rendererType);
+            var composition = new CompositionModel(renderer, rendererPluginId, FootageListModel, EffectListModel, HistoryModel)
             {
                 Name = name,
                 Width = width,
@@ -113,6 +116,16 @@ namespace NiVE3.Model
 
         public void SaveProject()
         {
+            var data = new ProjectData(
+                FootageListModel.SaveData(),
+                CompositionModels.Select(c => c.SaveData()).ToArray()
+            );
+
+            var json = JsonSerializer.Generic.Utf8.Serialize(data);
+            using var fs = new FileStream(ProjectPath, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite);
+            fs.Write(json);
+            fs.Close();
+
             IsEdited = false;
         }
 

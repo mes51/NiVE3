@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using NiVE3.Data.Project;
 using NiVE3.Extension;
 using NiVE3.Input;
 using NiVE3.Plugin.Image;
@@ -157,6 +158,8 @@ namespace NiVE3.Model
 
         ExportLifetimeContext<IRenderer> RendererContext { get; }
 
+        Guid RendererPluginId { get; }
+
         FootageListModel FootageListModel { get; }
 
         EffectListModel EffectListModel { get; }
@@ -165,9 +168,9 @@ namespace NiVE3.Model
 
         IRenderer Renderer => RendererContext.Value;
 
-        public CompositionModel(ExportLifetimeContext<IRenderer> renderer, FootageListModel footageListModel, EffectListModel effectListModel, HistoryModel historyModel) : this(renderer, footageListModel, effectListModel, historyModel, null) { }
+        public CompositionModel(ExportLifetimeContext<IRenderer> renderer, Guid rendererPluginId, FootageListModel footageListModel, EffectListModel effectListModel, HistoryModel historyModel) : this(renderer, rendererPluginId, footageListModel, effectListModel, historyModel, null) { }
 
-        public CompositionModel(ExportLifetimeContext<IRenderer> renderer, FootageListModel footageListModel, EffectListModel effectListModel, HistoryModel historyModel, Guid? compositionId)
+        public CompositionModel(ExportLifetimeContext<IRenderer> renderer, Guid rendererPluginId, FootageListModel footageListModel, EffectListModel effectListModel, HistoryModel historyModel, Guid? compositionId)
         {
             if (compositionId == null)
             {
@@ -175,6 +178,7 @@ namespace NiVE3.Model
             }
             CompositionId = compositionId.Value;
             RendererContext = renderer;
+            RendererPluginId = rendererPluginId;
             FootageListModel = footageListModel;
             EffectListModel = effectListModel;
             HistoryModel = historyModel;
@@ -581,6 +585,30 @@ namespace NiVE3.Model
             }
 
             return result.ToArray();
+        }
+
+        public CompositionData SaveData()
+        {
+            return new CompositionData
+            {
+                CompositionId = CompositionId,
+                Name = Name,
+                Width = Width,
+                Height = Height,
+                FrameRate = FrameRate,
+                Duration = Duration,
+                IsRetentionFrameRate = IsRetentionFrameRate,
+                ShutterAngle = ShutterAngle,
+                ShutterPhase = ShutterPhase,
+                MotionBlurSampleCount = MotionBlurSampleCount,
+                WorkareaBegin = WorkareaBegin,
+                WorkareaEnd = WorkareaEnd,
+                RendererPluginId = RendererPluginId,
+                TimeBarRange = TimeBarRange,
+                TimeBarRangeStart = TimeBarRangeStart,
+                CurrentTime = CurrentTime,
+                Layers = Layers.Select(l => l.SaveData()).ToArray()
+            };
         }
 
         bool CheckCycledSimulatedParentLayer(Guid layerId, Dictionary<Guid, Guid?> changed, HashSet<Guid>? checkedLayerIds = null)

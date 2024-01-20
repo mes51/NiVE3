@@ -91,5 +91,23 @@ namespace NiVE3.Plugin.Property.Types
                     return false;
             }
         }
+
+        public object? SerializeValue(object? value)
+        {
+            return value;
+        }
+
+        public object? DeserializeValue(object? serializedValue)
+        {
+            switch (serializedValue)
+            {
+                case IDictionary<string, object> dictionary:
+                    return new Vector4((float)dictionary[nameof(Vector4.X)], (float)dictionary[nameof(Vector4.Y)], (float)dictionary[nameof(Vector4.Z)], (float)dictionary[nameof(Vector4.W)]);
+                case Vector4 vector4:
+                    return vector4;
+                default:
+                    return null;
+            }
+        }
     }
 }

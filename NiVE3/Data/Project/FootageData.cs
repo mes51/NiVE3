@@ -1,0 +1,67 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using NiVE3.Plugin.Interfaces;
+
+namespace NiVE3.Data.Project
+{
+    public class FootageListData
+    {
+        public FootageSortKeyData SortKey { get; set; }
+
+        public bool SortIsAscending { get; set; }
+
+        public InputData[] Inputs { get; set; } = Array.Empty<InputData>();
+
+        public FootageData[] Footages { get; set; } = Array.Empty<FootageData>();
+    }
+
+    public class FootageData
+    {
+        public FootageDataType DataType { get; set; }
+
+        public Guid FootageId { get; set; }
+
+        public string Name { get; set; } = "";
+
+        public int Width { get; set; }
+
+        public int Height { get; set; }
+
+        public double FrameRate { get; set; }
+
+        public double Duration { get; set; }
+
+        public string FilePath { get; set; } = "";
+
+        public string Comment { get; set; } = "";
+
+        public SourceType InputType { get; set; } = SourceType.None;
+
+        public FootageData[]? Children { get; set; }
+
+        // for FootageModel
+
+        public Guid? InputId { get; set; }
+
+        public string? SourceId { get; set; }
+    }
+
+    public enum FootageSortKeyData : int
+    {
+        Name,
+        Width,
+        FrameRate,
+        Duration,
+        Comment,
+        FilePath
+    }
+
+    public enum FootageDataType
+    {
+        Source,
+        Folder
+    }
+}

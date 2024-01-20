@@ -13,6 +13,7 @@ using NiVE3.Shared.Extension;
 using Prism.Mvvm;
 using NiVE3.View.Resource;
 using System.Windows.Media.Animation;
+using NiVE3.Data.Project;
 
 namespace NiVE3.Model
 {
@@ -33,6 +34,8 @@ namespace NiVE3.Model
         PropertyControlBase CreateControl(IPropertyViewModel viewModel);
 
         PropertyViewState CreateState(IPropertyViewModel propertyViewModel);
+
+        PropertyData SaveData();
     }
 
     partial class PropertyModel : BindableBase, IPropertyModel
@@ -218,6 +221,27 @@ namespace NiVE3.Model
             }
         }
 
+        public PropertyData SaveData()
+        {
+            var keyFramesData = KeyFrames.Select(k =>
+            {
+                return new KeyFrameData
+                {
+                    Time = k.Time,
+                    Value = Property.PropertyType.SerializeValue(k.Value),
+                    EaseIn = k.EaseIn,
+                    EaseOut = k.EaseOut,
+                    Id = k.Id
+                };
+            }).ToArray();
+            return new PropertyData
+            {
+                Id = Id,
+                Value = Property.PropertyType.SerializeValue(Value),
+                KeyFrames = keyFramesData
+            };
+        }
+
         void ReplaceKeyFrames(KeyFrame[] targetKeyFrames, KeyFrame[] newKeyFrames, string historyNameKey)
         {
             foreach (var k in targetKeyFrames)
@@ -355,6 +379,15 @@ namespace NiVE3.Model
             }
 
             return new PropertyValueGroup(result);
+        }
+
+        public PropertyData SaveData()
+        {
+            return new PropertyData
+            {
+                Id = Id,
+                Children = Children.Select(p => p.SaveData()).ToArray()
+            };
         }
 
         private void Child_ValueUpdated(object? sender, EventArgs e)

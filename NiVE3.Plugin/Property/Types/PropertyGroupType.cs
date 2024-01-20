@@ -17,7 +17,17 @@ namespace NiVE3.Plugin.Property.Types
 
         public InterpolationType SupportedInterpolationTypes => throw new NotImplementedException();
 
+        public object? DeserializeValue(object? serializedValue)
+        {
+            throw new NotImplementedException();
+        }
+
         public object Interpolate(IReadOnlyList<KeyFrame> keyFrames, double t)
+        {
+            throw new NotImplementedException();
+        }
+
+        public object? SerializeValue(object? value)
         {
             throw new NotImplementedException();
         }

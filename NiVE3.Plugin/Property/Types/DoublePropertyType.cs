@@ -94,5 +94,15 @@ namespace NiVE3.Plugin.Property.Types
                     return false;
             }
         }
+
+        public object? SerializeValue(object? value)
+        {
+            return value;
+        }
+
+        public object? DeserializeValue(object? serializedValue)
+        {
+            return serializedValue;
+        }
     }
 }
