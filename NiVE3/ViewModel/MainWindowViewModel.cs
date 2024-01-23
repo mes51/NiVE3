@@ -95,7 +95,17 @@ namespace NiVE3.ViewModel
             ProjectModel.CompositionRemoved += ProjectModel_CompositionRemoved;
             ProjectModel.PreviewModels.CollectionChanged += PreviewModels_CollectionChanged;
 
-            OpenProjectCommand = new DelegateCommand(() => System.Diagnostics.Debug.WriteLine("Exec Command: OpenProjectCommand"));
+            OpenProjectCommand = new DelegateCommand(() =>
+            {
+                var open = new OpenFileDialog();
+                open.Filter = $"{LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_OpenSaveProject_Filter_Project)}(*.nvp3)|*.nvp3";
+                if (!(open.ShowDialog() ?? false))
+                {
+                    return;
+                }
+
+                ProjectModel.LoadProject(open.FileName);
+            });
 
             SaveProjectCommand = new DelegateCommand(() =>
             {

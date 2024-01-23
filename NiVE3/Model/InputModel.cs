@@ -14,7 +14,7 @@ namespace NiVE3.Model
 {
     class InputModel : BindableBase, IDisposable
     {
-        public Guid InputId { get; } = Guid.NewGuid();
+        public Guid InputId { get; }
 
         public IInput Input { get; }
 
@@ -26,17 +26,20 @@ namespace NiVE3.Model
 
         public string FilePath => Input.FilePath;
 
+        public bool IsPlaceholder => Input is PlaceholderInput;
+
         ExportLifetimeContext<IInput>? InputContext { get; }
 
-        public InputModel(IInput input, Guid pluginId, bool isSupportLoadToGpu)
+        public InputModel(IInput input, Guid pluginId, bool isSupportLoadToGpu, Guid? inputId = null)
         {
             Input = input;
             PluginId = pluginId;
             IsSupportLoadToGpu = isSupportLoadToGpu;
             IsSpecial = input.IsApplied<SpecialInputAttribute>();
+            InputId = inputId ?? Guid.NewGuid();
         }
 
-        public InputModel(ExportLifetimeContext<IInput> inputContext, Guid pluginId, bool isSupportLoadToGpu) : this(inputContext.Value, pluginId, isSupportLoadToGpu)
+        public InputModel(ExportLifetimeContext<IInput> inputContext, Guid pluginId, bool isSupportLoadToGpu, Guid? inputId = null) : this(inputContext.Value, pluginId, isSupportLoadToGpu, inputId)
         {
             InputContext = inputContext;
         }
@@ -48,7 +51,8 @@ namespace NiVE3.Model
                 InputId = InputId,
                 PluginId = PluginId,
                 FilePath = FilePath,
-                InputOption = Input.SaveData()
+                InputOption = Input.SaveData(),
+                Sources = Input.GetGroup().Flatten().Select(s => new SourceData { SourceId = s.SourceId, SourceType = s.SourceType, Width = s.Width, Height = s.Height, Duration = s.Duration, FrameRate = s.FrameRate }).ToArray()
             };
         }
 

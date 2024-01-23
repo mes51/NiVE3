@@ -172,11 +172,7 @@ namespace NiVE3.Model
 
         public CompositionModel(ExportLifetimeContext<IRenderer> renderer, Guid rendererPluginId, FootageListModel footageListModel, EffectListModel effectListModel, HistoryModel historyModel, Guid? compositionId)
         {
-            if (compositionId == null)
-            {
-                compositionId = Guid.NewGuid();
-            }
-            CompositionId = compositionId.Value;
+            CompositionId = compositionId ?? Guid.NewGuid();
             RendererContext = renderer;
             RendererPluginId = rendererPluginId;
             FootageListModel = footageListModel;
@@ -609,6 +605,57 @@ namespace NiVE3.Model
                 CurrentTime = CurrentTime,
                 Layers = Layers.Select(l => l.SaveData()).ToArray()
             };
+        }
+
+        public void LoadData(CompositionData data)
+        {
+            Name = data.Name;
+            Width = data.Width;
+            Height = data.Height;
+            FrameRate = data.FrameRate;
+            Duration = data.Duration;
+            IsRetentionFrameRate = data.IsRetentionFrameRate;
+            ShutterAngle = data.ShutterAngle;
+            ShutterPhase = data.ShutterPhase;
+            MotionBlurSampleCount = data.MotionBlurSampleCount;
+            WorkareaBegin = data.WorkareaBegin;
+            WorkareaEnd = data.WorkareaEnd;
+            TimeBarRange = data.TimeBarRange;
+            TimeBarRangeStart = data.TimeBarRangeStart;
+            CurrentTime = data.CurrentTime;
+
+            foreach (var layerData in data.Layers)
+            {
+                var footageModels = FootageListModel.GetFootages(layerData.FootageId);
+                if (footageModels.Length < 1)
+                {
+                    continue;
+                }
+
+                var layer = new LayerModel(this, footageModels.First(), EffectListModel, HistoryModel, layerData.LayerId);
+                layer.LoadData(layerData);
+                Layers.Add(layer);
+            }
+
+            foreach (var layer in Layers)
+            {
+                if (Layers.All(l => l.LayerId != layer.TrackMatteLayerId))
+                {
+                    layer.TrackMatteLayerId = null;
+                }
+                if (Layers.All(l => l.LayerId != layer.ParentLayerId))
+                {
+                    layer.ParentLayerId = null;
+                }
+            }
+        }
+
+        public void ReplacePlaceholder(FootageModel newFootageModel)
+        {
+            foreach (var layer in Layers.Where(l => l.FootageModel.IsPlaceholder && l.FootageModel.FootageId == newFootageModel.FootageId))
+            {
+                layer.ReplaceFootage(newFootageModel);
+            }
         }
 
         bool CheckCycledSimulatedParentLayer(Guid layerId, Dictionary<Guid, Guid?> changed, HashSet<Guid>? checkedLayerIds = null)

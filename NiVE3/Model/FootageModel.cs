@@ -129,6 +129,8 @@ namespace NiVE3.Model
 
         public string FileName => Path.GetFileName(InputModel.FilePath);
 
+        public bool IsPlaceholder => InputModel.IsPlaceholder;
+
         public InputModel InputModel { get; }
 
         public ObservableCollection<IFootageModel>? Children => null;
@@ -198,6 +200,8 @@ namespace NiVE3.Model
                 Comment = Comment,
                 InputType = InputType,
                 InputId = InputModel.InputId,
+                InputPluginId = InputModel.PluginId,
+                InputOption = InputModel.Input.SaveData(),
                 SourceId = Source.SourceId
             };
         }

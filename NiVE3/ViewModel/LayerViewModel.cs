@@ -565,6 +565,7 @@ namespace NiVE3.ViewModel
             }
 
             WiringModel();
+            RefreshLayerProxies();
 
             PropertyNameAreaWidth = (IsLayerNumberColumnVisible ? LayerNumberColumnWidth : 0.0) + LayerNameColumnWidth;
             IsComposition = layerModel.IsComposition;
@@ -780,6 +781,12 @@ namespace NiVE3.ViewModel
         }
 
         partial void WiringModel();
+
+        void RefreshLayerProxies()
+        {
+            TrackMatteLayerProxy = TrackMatteViewSource.FirstOrDefault(l => l.LayerId == TrackMatteLayerId);
+            ParentLayerProxy = ParentLayerViewSource.FirstOrDefault(l => l.LayerId == ParentLayerId);
+        }
 
         private void LayerViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {

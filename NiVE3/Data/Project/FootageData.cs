@@ -15,6 +15,8 @@ namespace NiVE3.Data.Project
 
         public InputData[] Inputs { get; set; } = Array.Empty<InputData>();
 
+        public InputData[] Placeholders { get; set; } = Array.Empty<InputData>();
+
         public FootageData[] Footages { get; set; } = Array.Empty<FootageData>();
     }
 
@@ -45,6 +47,11 @@ namespace NiVE3.Data.Project
         // for FootageModel
 
         public Guid? InputId { get; set; }
+
+        // Placeholder用
+        public Guid? InputPluginId {  get; set; }
+
+        public object? InputOption { get; set; }
 
         public string? SourceId { get; set; }
     }

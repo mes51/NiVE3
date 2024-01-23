@@ -121,10 +121,69 @@ namespace NiVE3.Model
                 CompositionModels.Select(c => c.SaveData()).ToArray()
             );
 
-            var json = JsonSerializer.Generic.Utf8.Serialize(data);
-            using var fs = new FileStream(ProjectPath, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite);
-            fs.Write(json);
-            fs.Close();
+            var json = JsonSerializer.Generic.Utf16.Serialize(data);
+            File.WriteAllText(ProjectPath, json);
+
+            IsEdited = false;
+        }
+
+        public void LoadProject(string filePath)
+        {
+            var json = File.ReadAllText(filePath);
+            var projectData = JsonSerializer.Generic.Utf16.Deserialize<ProjectData>(json);
+
+            foreach (var c in CompositionModels)
+            {
+                OnCompositionRemoved(c);
+                c.Dispose();
+            }
+            FootageListModel.Clear();
+            HistoryModel.Clear();
+            CompositionModels.Clear();
+
+            foreach (var p in PreviewModels)
+            {
+                switch (p)
+                {
+                    case FootagePreviewModel fp:
+                        fp.Footage = null;
+                        break;
+                    case CompositionPreviewModel cp:
+                        cp.Composition = null;
+                        break;
+                }
+            }
+
+            HistoryModel.BeginLoadProject();
+            try
+            {
+                FootageListModel.LoadData(projectData.FootageList);
+                foreach (var compositionData in projectData.Compositions)
+                {
+                    var renderer = RendererListModel.CreateRenderer(compositionData.RendererPluginId);
+                    var composition = new CompositionModel(renderer, compositionData.RendererPluginId, FootageListModel, EffectListModel, HistoryModel, compositionData.CompositionId);
+                    composition.LoadData(compositionData);
+                    CompositionModels.Add(composition);
+                }
+                
+                var compositionFootages = FootageListModel.LoadCompositionFootageFromData(projectData.FootageList, CompositionModels.ToArray());
+                foreach (var composition in CompositionModels)
+                {
+                    foreach (var footage in compositionFootages)
+                    {
+                        composition.ReplacePlaceholder(footage);
+                    }
+                }
+            }
+            //catch (Exception)
+            //{
+            //    FootageListModel.Clear();
+            //    CompositionModels.Clear();
+            //}
+            finally
+            {
+                HistoryModel.EndLoadProject();
+            }
 
             IsEdited = false;
         }

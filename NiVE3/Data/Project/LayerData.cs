@@ -16,6 +16,14 @@ namespace NiVE3.Data.Project
 
         public string Comment { get; set; } = "";
 
+        public Guid FootageId { get; set; }
+
+        public bool IsCamera { get; set; }
+
+        public bool IsLight { get; set; }
+
+        public bool IsNullObject { get; set; }
+
         public double SourceStartPoint { get; set; }
 
         public double InPoint { get; set; }

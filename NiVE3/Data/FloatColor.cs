@@ -10,6 +10,10 @@ namespace NiVE3.Data
 {
     readonly record struct FloatColor(float R, float G, float B, float A)
     {
+        public static readonly FloatColor White = new FloatColor(1.0F, 1.0F, 1.0F, 1.0F);
+
+        public static readonly FloatColor Black = new FloatColor(0.0F, 0.0F, 0.0F, 1.0F);
+
         public Color ToByteColor()
         {
             return Color.FromArgb(

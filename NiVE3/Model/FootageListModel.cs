@@ -64,6 +64,8 @@ namespace NiVE3.Model
 
         List<InputModel> LoadedInputs { get; } = new List<InputModel>();
 
+        List<InputModel> PlaceholderInputs { get; } = new List<InputModel>();
+
         HistoryModel HistoryModel { get; }
 
         AcceleratorModel AcceleratorModel { get; }
@@ -96,9 +98,9 @@ namespace NiVE3.Model
 
             PropertyChanged += FootageListModel_PropertyChanged;
 
-            CameraFootage = new FootageModel(new InputModel(CameraInput.Instance, CameraInput.PluginId, false), EmptyFootageSource.Instance, HistoryModel);
-            LightFootage = new FootageModel(new InputModel(LightInput.Instance, LightInput.PluginId, false), EmptyFootageSource.Instance, HistoryModel);
-            NullObjectFootage = new FootageModel(new InputModel(NullObjectInput.Instance, NullObjectInput.PluginId, false), EmptyFootageSource.Instance, HistoryModel);
+            CameraFootage = new FootageModel(new InputModel(CameraInput.Instance, CameraInput.PluginId, false, CameraInput.PluginId), EmptyFootageSource.Instance, HistoryModel, CameraInput.PluginId);
+            LightFootage = new FootageModel(new InputModel(LightInput.Instance, LightInput.PluginId, false, LightInput.PluginId), EmptyFootageSource.Instance, HistoryModel, LightInput.PluginId);
+            NullObjectFootage = new FootageModel(new InputModel(NullObjectInput.Instance, NullObjectInput.PluginId, false, NullObjectInput.PluginId), EmptyFootageSource.Instance, HistoryModel, NullObjectInput.PluginId);
         }
 
         public Guid? AddSolid()
@@ -311,6 +313,19 @@ namespace NiVE3.Model
 
         public FootageModel[] GetFootages(Guid footageId)
         {
+            if (CameraFootage.FootageId == footageId)
+            {
+                return new FootageModel[] { CameraFootage };
+            }
+            else if (LightFootage.FootageId == footageId)
+            {
+                return new FootageModel[] { LightFootage };
+            }
+            else if (NullObjectFootage.FootageId == footageId)
+            {
+                return new FootageModel[] { NullObjectFootage };
+            }
+
             var footage = FindModel(footageId, Footages);
             if (footage == null)
             {
@@ -329,6 +344,19 @@ namespace NiVE3.Model
             return Array.Empty<FootageModel>();
         }
 
+        public void Clear()
+        {
+            Footages.Clear();
+
+            foreach (var i in LoadedInputs.Concat(PlaceholderInputs))
+            {
+                i.Dispose();
+            }
+
+            LoadedInputs.Clear();
+            PlaceholderInputs.Clear();
+        }
+
         public FootageListData SaveData()
         {
             return new FootageListData
@@ -336,8 +364,174 @@ namespace NiVE3.Model
                 SortKey = (FootageSortKeyData)SortKey,
                 SortIsAscending = SortIsAscending,
                 Inputs = LoadedInputs.Select(m => m.SaveData()).ToArray(),
+                Placeholders = PlaceholderInputs.Select(m => m.SaveData()).ToArray(),
                 Footages = Footages.Select(m => m.SaveData()).ToArray()
             };
+        }
+
+        public void LoadData(FootageListData data)
+        {
+            SortKey = (FootageSortKey)data.SortKey;
+            SortIsAscending = data.SortIsAscending;
+
+            var inputSources = new Dictionary<(Guid, string), (InputModel, IFootageSource)>();
+            foreach (var inputData in data.Inputs.Concat(data.Placeholders))
+            {
+                var inputPlugin = Inputs?.FirstOrDefault(i => Guid.Parse(i.Metadata.InputUuid) == inputData.PluginId);
+                // NOTE: コンポジションは一旦プレースホルダーとして読み込んで、コンポジションのロードが終わったらCompositionInputに置き換える
+                if (inputPlugin == null || inputData.PluginId == PlaceholderInput.PluginId || inputData.PluginId == CompositionInput.PluginId)
+                {
+                    foreach (var sourceData in inputData.Sources)
+                    {
+                        var placeholderInput = new PlaceholderInput(sourceData.SourceType, sourceData.Width, sourceData.Height, sourceData.FrameRate, sourceData.Duration, inputData.InputOption, sourceData.SourceId);
+                        placeholderInput.Load(inputData.FilePath);
+                        var placeholderInputModel = new InputModel(placeholderInput, inputData.PluginId, false, inputData.InputId);
+                        PlaceholderInputs.Add(placeholderInputModel);
+                        inputSources.Add((inputData.InputId, sourceData.SourceId), (placeholderInputModel, placeholderInput.GetGroup().Sources.First()));
+                    }
+                    continue;
+                }
+
+                InputModel inputModel;
+                var input = inputPlugin.CreateExport();
+                if (inputPlugin.Metadata.IsSupportLoadToGpu)
+                {
+                    input.Value.SetupAccelerator(AcceleratorModel);
+                }
+                if (input.Value.Load(inputData.FilePath) && input.Value.LoadData(inputData.InputOption))
+                {
+                    inputModel = new InputModel(input, inputData.PluginId, inputPlugin.Metadata.IsSupportLoadToGpu, inputData.InputId);
+
+                    AddInput(inputModel);
+                    foreach (var source in input.Value.GetGroup().Flatten())
+                    {
+                        if (inputSources.TryGetValue((inputData.InputId, source.SourceId), out var alreadyLoaded))
+                        {
+                            if (alreadyLoaded.Item1.IsPlaceholder)
+                            {
+                                alreadyLoaded.Item1.Dispose();
+                                inputSources[(inputData.InputId, source.SourceId)] = (inputModel, source);
+                            }
+                            else
+                            {
+                                // NOTE: プレースホルダーでないのに被った場合は入力プラグイン側のbug(SourceIdの重複は許されないため)
+                                // TODO: 読み込み時の処理と合わせて専用の例外クラスを用意する
+                                throw new Exception(string.Format("duplicate source id. plugin id: {0}", inputData.PluginId));
+                            }
+                        }
+                        else
+                        {
+                            inputSources.Add((inputData.InputId, source.SourceId), (inputModel, source));
+                        }
+                    }
+                }
+                else
+                {
+                    input.Value.Dispose();
+                    input.Dispose();
+
+                    foreach (var sourceData in inputData.Sources)
+                    {
+                        var placeholderInput = new PlaceholderInput(sourceData.SourceType, sourceData.Width, sourceData.Height, sourceData.FrameRate, sourceData.Duration, inputData.InputOption, sourceData.SourceId);
+                        placeholderInput.Load(inputData.FilePath);
+                        var placeholderInputModel = new InputModel(placeholderInput, inputData.PluginId, false, inputData.InputId);
+                        PlaceholderInputs.Add(placeholderInputModel);
+                        inputSources.Add((inputData.InputId, sourceData.SourceId), (placeholderInputModel, placeholderInput.GetGroup().Sources.First()));
+                    }
+                }
+            }
+
+            var footageDataQueue = new Queue<(Guid?, FootageData)>(data.Footages.Select(f => ((Guid?)null, f)));
+            while (footageDataQueue.Count > 0)
+            {
+                var (parentFolderId, footageData) = footageDataQueue.Dequeue();
+                if (footageData.DataType == FootageDataType.Source)
+                {
+                    if (!footageData.InputId.HasValue || footageData.SourceId == null || !footageData.InputPluginId.HasValue)
+                    {
+                        // NOTE: 本来はあり得ないはずなので、プロジェクトファイルが破損している
+                        continue;
+                    }
+
+                    InputModel inputModel;
+                    IFootageSource source;
+                    if (inputSources.TryGetValue((footageData.InputId.Value, footageData.SourceId), out var input))
+                    {
+                        (inputModel, source) = input;
+                    }
+                    else
+                    {
+                        var placeholderInput = new PlaceholderInput(footageData.InputType, footageData.Width, footageData.Height, footageData.FrameRate, footageData.Duration, footageData.InputOption, footageData.SourceId);
+                        placeholderInput.Load(footageData.FilePath);
+                        inputModel = new InputModel(placeholderInput, footageData.InputPluginId.Value, false, footageData.InputId);
+                        source = placeholderInput.GetGroup().Sources.First();
+                    }
+
+                    var footageModel = new FootageModel(inputModel, source, HistoryModel, footageData.FootageId);
+                    AddFootage(footageModel, parentFolderId);
+                }
+                else
+                {
+                    var folder = new FootageFolderModel(HistoryModel, footageData.FootageId);
+                    folder.Name = footageData.Name;
+                    AddFootage(folder, parentFolderId);
+
+                    foreach (var child in (footageData.Children ?? Array.Empty<FootageData>()))
+                    {
+                        footageDataQueue.Enqueue((footageData.FootageId, child));
+                    }
+                }
+            }
+        }
+
+        public FootageModel[] LoadCompositionFootageFromData(FootageListData data, CompositionModel[] compositions)
+        {
+            var inputSources = new Dictionary<Guid, InputModel>();
+            foreach (var inputData in data.Inputs.Where(i => i.PluginId == CompositionInput.PluginId))
+            {
+                var inputModel = new InputModel(new CompositionInput(inputData.InputOption, compositions), CompositionInput.PluginId, true, inputData.InputId);
+                AddInput(inputModel);
+                PlaceholderInputs.Remove(PlaceholderInputs.First(p => p.InputId == inputData.InputId));
+                inputSources.Add(inputData.InputId, inputModel);
+            }
+
+            var footageDataQueue = new Queue<(Guid?, FootageData)>(data.Footages.Select(f => ((Guid?)null, f)));
+            var result = new List<FootageModel>();
+            while (footageDataQueue.Count > 0)
+            {
+                var (parentFolderId, footageData) = footageDataQueue.Dequeue();
+                if (footageData.DataType == FootageDataType.Source)
+                {
+                    if (!footageData.InputId.HasValue || footageData.SourceId == null || !footageData.InputPluginId.HasValue)
+                    {
+                        // NOTE: 本来はあり得ないはずなので、プロジェクトファイルが破損している
+                        continue;
+                    }
+
+                    if (inputSources.TryGetValue(footageData.InputId.Value, out var inputModel))
+                    {
+                        var source = inputModel.Input.GetGroup().Sources.First();
+                        var footageModel = new FootageModel(inputModel, source, HistoryModel, footageData.FootageId);
+                        result.Add(footageModel);
+
+                        var placeholderFootage = FindModel(footageData.FootageId, Footages);
+                        if (placeholderFootage != null)
+                        {
+                            DeleteFootageInternal(placeholderFootage);
+                        }
+                        AddFootage(footageModel, parentFolderId);
+                    }
+                }
+                else
+                {
+                    foreach (var child in (footageData.Children ?? Array.Empty<FootageData>()))
+                    {
+                        footageDataQueue.Enqueue((footageData.FootageId, child));
+                    }
+                }
+            }
+
+            return result.ToArray();
         }
 
         FootageFolderModel AddFolderInternal(string? name)
@@ -659,14 +853,6 @@ namespace NiVE3.Model
                 default:
                     return x.Name.CompareTo(y.Name);
             }
-        }
-    }
-
-    file static class FootageSourceGroupExtension
-    {
-        public static IEnumerable<IFootageSource> Flatten(this FootageSourceGroup group)
-        {
-            return group.Sources.Concat(group.ChildrenGroup.SelectMany(c => c.Flatten()));
         }
     }
 }

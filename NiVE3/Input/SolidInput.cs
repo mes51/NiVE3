@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Dynamic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics;
@@ -45,7 +46,7 @@ namespace NiVE3.Input
 
         public object? SaveData()
         {
-            return new SoldData
+            return new SolidData
             {
                 Color = Source.Color,
                 Width = Source.Width,
@@ -53,9 +54,19 @@ namespace NiVE3.Input
             };
         }
 
-        public void Load(object? data)
+        public bool LoadData(object? data)
         {
+            if (data == null)
+            {
+                return false;
+            }
 
+            var solidData = (dynamic)data;
+            var colorData = (dynamic)solidData.Color;
+            Source.Color = new FloatColor((float)colorData.R, (float)colorData.G, (float)colorData.B, (float)colorData.A);
+            Source.Width = (int)solidData.Width;
+            Source.Height = (int)solidData.Height;
+            return true;
         }
 
         public FrameworkElement? GetLoadSetting(Size? compositionSize)
@@ -118,7 +129,7 @@ namespace NiVE3.Input
         }
     }
 
-    file class SoldData
+    file class SolidData
     {
         public FloatColor Color { get; set; }
 

@@ -251,7 +251,7 @@ namespace NiVE3.Model
             }
         }
 
-        public FootageModel FootageModel { get; }
+        public FootageModel FootageModel { get; set; }
 
         public PropertyGroupModel TransformProperties { get; }
 
@@ -720,6 +720,11 @@ namespace NiVE3.Model
             HistoryModel.Add(new DeleteEffectEnableHistoryCommand(this, effects, oldIndices));
         }
 
+        public void ReplaceFootage(FootageModel footageModel)
+        {
+            FootageModel = footageModel;
+        }
+
         public LayerData SaveData()
         {
             return new LayerData
@@ -727,6 +732,10 @@ namespace NiVE3.Model
                 LayerId = LayerId,
                 Name = Name,
                 Comment = Comment,
+                FootageId = FootageModel.FootageId,
+                IsCamera = IsCamera,
+                IsLight = IsLight,
+                IsNullObject = IsNullObject,
                 SourceStartPoint = SourceStartPoint,
                 InPoint = InPoint,
                 OutPoint = OutPoint,
@@ -752,6 +761,33 @@ namespace NiVE3.Model
                 TransformProperties = TransformProperties.SaveData(),
                 LayerOptionProperties = LayerOptionProperties?.SaveData()
             };
+        }
+
+        public void LoadData(LayerData data)
+        {
+            Name = data.Name;
+            Comment = data.Comment;
+            SourceStartPoint = data.SourceStartPoint;
+            InPoint = data.InPoint;
+            OutPoint = data.OutPoint;
+            IsEnableTimeRemap = data.IsEnableTimeRemap;
+            TagColor = data.TagColor;
+            IsEnableVideo = data.IsEnableVideo;
+            IsEnableAudio = data.IsEnableAudio;
+            IsEnableSolo = data.IsEnableSolo;
+            IsLock = data.IsLock;
+            IsEnableShy = data.IsEnableShy;
+            IsEnableCollapse = data.IsEnableExplodeLayers;
+            IsEnableEffect = data.IsEnableEffect;
+            IsEnableFrameBlend = data.IsEnableFrameBlend;
+            IsEnableMotionBlur = data.IsEnableMotionBlur;
+            IsEnableAdjustmentLayer = data.IsEnableAdjustmentLayer;
+            IsEnable3D = data.IsEnable3D;
+            InterpolationQuality = data.InterpolationQuality;
+            BlendMode = data.BlendMode;
+            TrackMatteLayerId = data.TrackMatteLayerId;
+            TrackMatteMode = data.TrackMatteMode;
+            ParentLayerId = data.ParentLayerId;
         }
 
         private void Effects_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)

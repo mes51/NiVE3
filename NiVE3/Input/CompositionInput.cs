@@ -31,6 +31,18 @@ namespace NiVE3.Input
             Composition = composition;
         }
 
+        public CompositionInput(object? inputOption, CompositionModel[] compositions)
+        {
+            var compositionIdString = inputOption?.ToString();
+            if (compositionIdString == null)
+            {
+                throw new Exception();
+            }
+
+            var compositionId = Guid.Parse(compositionIdString);
+            Composition = compositions.First(c => c.CompositionId == compositionId);
+        }
+
         public bool Load(string filePath)
         {
             return true;
@@ -39,11 +51,6 @@ namespace NiVE3.Input
         public object? SaveData()
         {
             return Composition.CompositionId;
-        }
-
-        public void Load(object? data)
-        {
-
         }
 
         public FootageSourceGroup GetGroup()

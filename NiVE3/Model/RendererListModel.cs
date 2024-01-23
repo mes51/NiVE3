@@ -62,5 +62,20 @@ namespace NiVE3.Model
             }
             return result;
         }
+
+        public ExportLifetimeContext<IRenderer> CreateRenderer(Guid rendererPluginId)
+        {
+            if (Renderers == null)
+            {
+                throw new Exception(); // bug
+            }
+            var factory = Renderers.First(f => Guid.Parse(f.Metadata.RendererUuid) == rendererPluginId);
+            var result = factory.CreateExport();
+            if (factory.Metadata.IsSupportGpu)
+            {
+                result.Value.SetupAccelerator(AcceleratorModel); // TODO: Acceleratorの更新
+            }
+            return result;
+        }
     }
 }

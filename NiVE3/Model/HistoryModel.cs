@@ -28,6 +28,8 @@ namespace NiVE3.Model
 
         int GroupNestCount { get; set; }
 
+        bool IsLoadingProject { get; set; }
+
         WeakEventPublisher<EventArgs> HistoryChangedPublisher { get; } = new WeakEventPublisher<EventArgs>();
         public event EventHandler<EventArgs> HistoryChanged
         {
@@ -84,8 +86,23 @@ namespace NiVE3.Model
             HistoryChangedPublisher.Publish(this, EventArgs.Empty);
         }
 
+        public void BeginLoadProject()
+        {
+            IsLoadingProject = true;
+        }
+
+        public void EndLoadProject()
+        {
+            IsLoadingProject = false;
+        }
+
         public void BeginGroup(string name)
         {
+            if (IsLoadingProject)
+            {
+                return;
+            }
+
             if (CurrentGroup == null)
             {
                 CurrentGroup = new GroupedHistoryCommand(name);
@@ -97,6 +114,11 @@ namespace NiVE3.Model
 
         public void EndGroup()
         {
+            if (IsLoadingProject)
+            {
+                return;
+            }
+
             if (GroupNestCount < 1)
             {
                 // may be bug
@@ -117,6 +139,11 @@ namespace NiVE3.Model
 
         public void AbortGroup()
         {
+            if (IsLoadingProject)
+            {
+                return;
+            }
+
             GroupNestCount--;
             if (GroupNestCount < 1)
             {
@@ -130,6 +157,11 @@ namespace NiVE3.Model
 
         public void Add(IHistoryCommand command)
         {
+            if (IsLoadingProject)
+            {
+                return;
+            }
+
             if (CurrentGroup != null)
             {
                 CurrentGroup.Add(command);
@@ -150,6 +182,23 @@ namespace NiVE3.Model
         public bool CanRedo()
         {
             return RedoCommands.Count > 0;
+        }
+
+        public void Clear()
+        {
+            foreach (var c in RedoCommands)
+            {
+                c.Dispose();
+            }
+            foreach (var c in UndoCommands)
+            {
+                c.Dispose();
+            }
+
+            RedoCommands.Clear();
+            UndoCommands.Clear();
+
+            IsLoadingProject = false;
         }
 
         void AddInternal(IHistoryCommand command)
