@@ -788,6 +788,12 @@ namespace NiVE3.Model
             TrackMatteLayerId = data.TrackMatteLayerId;
             TrackMatteMode = data.TrackMatteMode;
             ParentLayerId = data.ParentLayerId;
+
+            TransformProperties.LoadData(data.TransformProperties);
+            if (LayerOptionProperties != null && data.LayerOptionProperties != null)
+            {
+                LayerOptionProperties.LoadData(data.LayerOptionProperties);
+            }
         }
 
         private void Effects_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)

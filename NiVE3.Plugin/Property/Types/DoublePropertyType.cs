@@ -102,7 +102,7 @@ namespace NiVE3.Plugin.Property.Types
 
         public object? DeserializeValue(object? serializedValue)
         {
-            return serializedValue;
+            return Convert.ToDouble(serializedValue);
         }
     }
 }

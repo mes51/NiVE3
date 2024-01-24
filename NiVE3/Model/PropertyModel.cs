@@ -36,6 +36,8 @@ namespace NiVE3.Model
         PropertyViewState CreateState(IPropertyViewModel propertyViewModel);
 
         PropertyData SaveData();
+
+        void LoadData(PropertyData data);
     }
 
     partial class PropertyModel : BindableBase, IPropertyModel
@@ -243,6 +245,22 @@ namespace NiVE3.Model
             };
         }
 
+        public void LoadData(PropertyData data)
+        {
+            Value = Property.PropertyType.DeserializeValue(data.Value);
+
+            if (data.KeyFrames == null)
+            {
+                return;
+            }
+
+            KeyFrames.Clear();
+            foreach (var k in data.KeyFrames.Select(k => new KeyFrame(k.Time, Property.PropertyType.DeserializeValue(k.Value), k.EaseIn, k.EaseOut, k.InterpolationType)))
+            {
+                KeyFrames.Add(k);
+            }
+        }
+
         void ReplaceKeyFrames(KeyFrame[] targetKeyFrames, KeyFrame[] newKeyFrames, string historyNameKey)
         {
             foreach (var k in targetKeyFrames)
@@ -389,6 +407,19 @@ namespace NiVE3.Model
                 Id = Id,
                 Children = Children.Select(p => p.SaveData()).ToArray()
             };
+        }
+
+        public void LoadData(PropertyData data)
+        {
+            if (data.Children == null)
+            {
+                return;
+            }
+
+            foreach (var childData in data.Children)
+            {
+                Children.FirstOrDefault(c => c.Id == childData.Id)?.LoadData(childData);
+            }
         }
 
         private void Child_ValueUpdated(object? sender, EventArgs e)
