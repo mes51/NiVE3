@@ -15,12 +15,12 @@ namespace NiVE3.Plugin.Property.Properties
     {
         public int Digit { get; }
 
-        public DirectionProperty(string id, string displayName, Vector3d defaultValue, bool isSupportKeyFrame = true, int digit = -1) : base(id, displayName, DoublePropertyType.Instance, defaultValue, isSupportKeyFrame)
+        public DirectionProperty(string id, string displayName, Vector3d defaultValue, bool isSupportKeyFrame = true, int digit = -1) : base(id, displayName, Vector3dPropertyType.Instance, defaultValue, isSupportKeyFrame)
         {
             Digit = digit;
         }
 
-        public DirectionProperty(string id, LanguageResourceKey displayNameKey, Vector3d defaultValue, bool isSupportKeyFrame = true, int digit = -1) : base(id, displayNameKey, DoublePropertyType.Instance, defaultValue, isSupportKeyFrame)
+        public DirectionProperty(string id, LanguageResourceKey displayNameKey, Vector3d defaultValue, bool isSupportKeyFrame = true, int digit = -1) : base(id, displayNameKey, Vector3dPropertyType.Instance, defaultValue, isSupportKeyFrame)
         {
             Digit = digit;
         }
