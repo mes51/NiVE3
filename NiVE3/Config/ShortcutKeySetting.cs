@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -11,8 +12,6 @@ using NiVE3.Data.Config;
 using NiVE3.Extension;
 using NiVE3.Util;
 using NiVE3.Wpf.Input;
-using SpanJson;
-using SpanJson.Resolvers;
 
 namespace NiVE3.Config
 {
@@ -213,9 +212,8 @@ namespace NiVE3.Config
                 }
             }).ToArray();
 
-            var json = JsonSerializer.Generic.Utf8.Serialize<ShortcutKeyData[], IncludeNullsCamelCaseResolver<byte>>(data);
-            using var fs = new FileStream(FilePath, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite);
-            fs.Write(json);
+            var json = JsonSerializer.Serialize(data);
+            File.WriteAllText(FilePath, json);
         }
 
         void Load()
@@ -227,7 +225,7 @@ namespace NiVE3.Config
 
             try
             {
-                var shortcutKeyData = JsonSerializer.Generic.Utf8.Deserialize<ShortcutKeyData[], IncludeNullsCamelCaseResolver<byte>>(File.ReadAllBytes(FilePath)) ?? Array.Empty<ShortcutKeyData>();
+                var shortcutKeyData = JsonSerializer.Deserialize<ShortcutKeyData[]>(File.ReadAllBytes(FilePath)) ?? Array.Empty<ShortcutKeyData>();
                 foreach (var data in shortcutKeyData)
                 {
                     data.CorrectData();
