@@ -9,6 +9,8 @@ namespace NiVE3.Plugin.Property.Types
 {
     public class EnumPropertyType : IPropertyType
     {
+        const string SerializedKeyAssemblyName = "Assembly";
+
         const string SerializedKeyType = "Type";
 
         const string SerializedKeyValue = "Value";
@@ -73,6 +75,7 @@ namespace NiVE3.Plugin.Property.Types
             {
                 return new Dictionary<string, object?>
                 {
+                    { SerializedKeyAssemblyName, value.GetType().Assembly.FullName },
                     { SerializedKeyType, value.GetType().FullName },
                     { SerializedKeyValue, value.ToString() }
                 };
@@ -87,8 +90,14 @@ namespace NiVE3.Plugin.Property.Types
         {
             if (serializedValue is IDictionary<string, object> dictionary)
             {
-                var type = Type.GetType((string)dictionary[SerializedKeyType]);
-                if (type != null)
+                var assemblyName = (string)dictionary[SerializedKeyAssemblyName];
+                var assembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.FullName == assemblyName);
+                if (assembly == null)
+                {
+                    return null;
+                }
+                var type = assembly.GetType((string)dictionary[SerializedKeyType]);
+                if (type != null && type.IsEnum)
                 {
                     return Enum.Parse(type, (string)dictionary[SerializedKeyValue]);
                 }

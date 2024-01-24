@@ -94,25 +94,29 @@ namespace NiVE3.Plugin.Property.Types
 
         public object? SerializeValue(object? value)
         {
-            return value;
+            if (value is not Vector4 v)
+            {
+                return null;
+            }
+
+            return new SerializedColor(v.X, v.Y, v.Z, v.W);
         }
 
         public object? DeserializeValue(object? serializedValue)
         {
-            switch (serializedValue)
+            if (serializedValue is not IDictionary<string, object> dictionary)
             {
-                case IDictionary<string, object> dictionary:
-                    return new Vector4(
-                        Convert.ToSingle(dictionary[nameof(Vector4.X)]),
-                        Convert.ToSingle(dictionary[nameof(Vector4.Y)]),
-                        Convert.ToSingle(dictionary[nameof(Vector4.Z)]),
-                        Convert.ToSingle(dictionary[nameof(Vector4.W)])
-                    );
-                case Vector4 vector4:
-                    return vector4;
-                default:
-                    return null;
+                return null;
             }
+
+            return new Vector4(
+                Convert.ToSingle(dictionary[nameof(SerializedColor.B)]),
+                Convert.ToSingle(dictionary[nameof(SerializedColor.G)]),
+                Convert.ToSingle(dictionary[nameof(SerializedColor.R)]),
+                Convert.ToSingle(dictionary[nameof(SerializedColor.A)])
+            );
         }
     }
+
+    file record SerializedColor(float B, float G, float R, float A);
 }

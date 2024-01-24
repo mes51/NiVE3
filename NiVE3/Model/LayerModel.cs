@@ -794,6 +794,18 @@ namespace NiVE3.Model
             {
                 LayerOptionProperties.LoadData(data.LayerOptionProperties);
             }
+
+            foreach (var effectData in data.Effects)
+            {
+                var effectModel = EffectListModel.CreateEffect(effectData.EffectPluginId, CompositionModel, this, HistoryModel, effectData.EffectId);
+                if (effectModel == null)
+                {
+                    continue;
+                }
+
+                effectModel.LoadData(effectData);
+                Effects.Add(effectModel);
+            }
         }
 
         private void Effects_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)

@@ -113,6 +113,16 @@ namespace NiVE3.Model
             };
         }
 
+        public void LoadData(EffectData data)
+        {
+            Name = data.Name;
+            IsEnable = data.IsEnable;
+            foreach (var propertyData in data.Properties)
+            {
+                Properties.FirstOrDefault(p => p.Id == propertyData.Id)?.LoadData(propertyData);
+            }
+        }
+
         private void Property_ValueUpdated(object? sender, EventArgs e)
         {
             EffectUpdated?.Invoke(this, EventArgs.Empty);
