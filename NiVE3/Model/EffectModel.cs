@@ -6,7 +6,7 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using NiVE3.Data.Project;
+using NiVE3.Data.Json.Project;
 using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Image;
 using NiVE3.Plugin.Interfaces;

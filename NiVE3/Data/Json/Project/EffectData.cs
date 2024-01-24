@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NiVE3.Data.Project
+namespace NiVE3.Data.Json.Project
 {
     public class EffectData
     {

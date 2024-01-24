@@ -89,7 +89,11 @@ namespace NiVE3.Plugin.Property.Types
             switch (serializedValue)
             {
                 case IDictionary<string, object> dictionary:
-                    return new Vector3d((double)dictionary[nameof(Vector3d.X)], (double)dictionary[nameof(Vector3d.Y)], (double)dictionary[nameof(Vector3d.Z)]);
+                    return new Vector3d(
+                        Convert.ToDouble(dictionary[nameof(Vector3d.X)]),
+                        Convert.ToDouble(dictionary[nameof(Vector3d.Y)]),
+                        Convert.ToDouble(dictionary[nameof(Vector3d.Z)])
+                    );
                 case Vector3d vector:
                     return vector;
                 default:

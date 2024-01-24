@@ -6,9 +6,9 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Windows;
-using SpanJson;
 
 namespace NiVE3.Plugin.Numerics
 {
@@ -18,8 +18,10 @@ namespace NiVE3.Plugin.Numerics
 
         public static readonly Vector2d One = new Vector2d(1.0, 1.0);
 
+        [JsonInclude]
         public readonly double X;
 
+        [JsonInclude]
         public readonly double Y;
 
         public bool IsZero => X == 0 && Y == 0;
@@ -202,10 +204,13 @@ namespace NiVE3.Plugin.Numerics
 
     public readonly struct Vector3d : IEquatable<Vector3d>
     {
+        [JsonInclude]
         public readonly double X;
 
+        [JsonInclude]
         public readonly double Y;
 
+        [JsonInclude]
         public readonly double Z;
 
         [JsonConstructor]

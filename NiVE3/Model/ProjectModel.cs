@@ -6,12 +6,12 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
-using NiVE3.Data.Project;
+using NiVE3.Data.Json.Project;
 using NiVE3.Input;
 using NiVE3.View.Resource;
 using Prism.Mvvm;
-using SpanJson;
 
 namespace NiVE3.Model
 {
@@ -121,7 +121,7 @@ namespace NiVE3.Model
                 CompositionModels.Select(c => c.SaveData()).ToArray()
             );
 
-            var json = JsonSerializer.Generic.Utf16.Serialize(data);
+            var json = JsonSerializer.Serialize(data);
             File.WriteAllText(ProjectPath, json);
 
             IsEdited = false;
@@ -130,7 +130,7 @@ namespace NiVE3.Model
         public void LoadProject(string filePath)
         {
             var json = File.ReadAllText(filePath);
-            var projectData = JsonSerializer.Generic.Utf16.Deserialize<ProjectData>(json);
+            var projectData = JsonSerializer.Deserialize<ProjectData>(json);
 
             foreach (var c in CompositionModels)
             {

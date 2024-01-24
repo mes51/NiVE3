@@ -56,16 +56,20 @@ namespace NiVE3.Input
 
         public bool LoadData(object? data)
         {
-            if (data == null)
+            if (data is not IDictionary<string, object> solidData)
             {
                 return false;
             }
 
-            var solidData = (dynamic)data;
-            var colorData = (dynamic)solidData.Color;
-            Source.Color = new FloatColor((float)colorData.R, (float)colorData.G, (float)colorData.B, (float)colorData.A);
-            Source.Width = (int)solidData.Width;
-            Source.Height = (int)solidData.Height;
+            var colorData = (IDictionary<string, object>)solidData[nameof(SolidData.Color)];
+            Source.Color = new FloatColor(
+                Convert.ToSingle(colorData[nameof(FloatColor.R)]),
+                Convert.ToSingle(colorData[nameof(FloatColor.G)]),
+                Convert.ToSingle(colorData[nameof(FloatColor.B)]),
+                Convert.ToSingle(colorData[nameof(FloatColor.A)])
+            );
+            Source.Width = Convert.ToInt32(solidData[nameof(SolidData.Width)]);
+            Source.Height = Convert.ToInt32(solidData[nameof(SolidData.Height)]);
             return true;
         }
 

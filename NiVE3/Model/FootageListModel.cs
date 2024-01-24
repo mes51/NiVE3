@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media.Effects;
 using NiVE3.Config;
-using NiVE3.Data.Project;
+using NiVE3.Data.Json.Project;
 using NiVE3.Extension;
 using NiVE3.Input;
 using NiVE3.Input.Special;

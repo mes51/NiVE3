@@ -13,7 +13,7 @@ using NiVE3.Shared.Extension;
 using Prism.Mvvm;
 using NiVE3.View.Resource;
 using System.Windows.Media.Animation;
-using NiVE3.Data.Project;
+using NiVE3.Data.Json.Project;
 
 namespace NiVE3.Model
 {
@@ -231,6 +231,7 @@ namespace NiVE3.Model
                     Value = Property.PropertyType.SerializeValue(k.Value),
                     EaseIn = k.EaseIn,
                     EaseOut = k.EaseOut,
+                    InterpolationType = k.InterpolationType,
                     Id = k.Id
                 };
             }).ToArray();

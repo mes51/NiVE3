@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Windows.Media;
 using NiVE3.Plugin.Interfaces;
 
-namespace NiVE3.Data.Project
+namespace NiVE3.Data.Json.Project
 {
     public class LayerData
     {

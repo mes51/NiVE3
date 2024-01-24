@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using NiVE3.Data.Json.Converter;
 using NiVE3.Plugin.Interfaces;
 
-namespace NiVE3.Data.Project
+namespace NiVE3.Data.Json.Project
 {
     public class FootageListData
     {
@@ -49,8 +51,9 @@ namespace NiVE3.Data.Project
         public Guid? InputId { get; set; }
 
         // Placeholder用
-        public Guid? InputPluginId {  get; set; }
+        public Guid? InputPluginId { get; set; }
 
+        [JsonConverter(typeof(PluginOptionValueObjectConverter))]
         public object? InputOption { get; set; }
 
         public string? SourceId { get; set; }

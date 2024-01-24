@@ -102,7 +102,12 @@ namespace NiVE3.Plugin.Property.Types
             switch (serializedValue)
             {
                 case IDictionary<string, object> dictionary:
-                    return new Vector4((float)dictionary[nameof(Vector4.X)], (float)dictionary[nameof(Vector4.Y)], (float)dictionary[nameof(Vector4.Z)], (float)dictionary[nameof(Vector4.W)]);
+                    return new Vector4(
+                        Convert.ToSingle(dictionary[nameof(Vector4.X)]),
+                        Convert.ToSingle(dictionary[nameof(Vector4.Y)]),
+                        Convert.ToSingle(dictionary[nameof(Vector4.Z)]),
+                        Convert.ToSingle(dictionary[nameof(Vector4.W)])
+                    );
                 case Vector4 vector4:
                     return vector4;
                 default:

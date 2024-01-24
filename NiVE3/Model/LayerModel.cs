@@ -26,7 +26,7 @@ using NiVE3.Plugin.Numerics;
 using System.Numerics;
 using System.Runtime.Intrinsics;
 using System.Security.Cryptography.Xml;
-using NiVE3.Data.Project;
+using NiVE3.Data.Json.Project;
 
 namespace NiVE3.Model
 {

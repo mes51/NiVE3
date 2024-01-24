@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using SpanJson;
 
-namespace NiVE3.Data.Project
+namespace NiVE3.Data.Json.Project
 {
     public class ProjectData
     {

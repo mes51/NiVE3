@@ -4,7 +4,7 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using NiVE3.Data.Project;
+using NiVE3.Data.Json.Project;
 using NiVE3.Extension;
 using NiVE3.Input.Special;
 using NiVE3.Plugin.Interfaces;
