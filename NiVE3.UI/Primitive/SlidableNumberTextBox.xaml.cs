@@ -228,6 +228,27 @@ namespace NiVE3.UI.Primitive
             BindingOperations.SetBinding(ValueTextBox, TextBox.TextProperty, new Binding(nameof(Value)) { Source = this, Converter = Converter, UpdateSourceTrigger = UpdateSourceTrigger.Explicit, NotifyOnSourceUpdated = true });
         }
 
+        void ClearFocus()
+        {
+            var currentFocused = Keyboard.FocusedElement as DependencyObject;
+            Keyboard.ClearFocus();
+            if (currentFocused == null)
+            {
+                return;
+            }
+
+            var parent = VisualTreeHelper.GetParent(this);
+            while (parent != null)
+            {
+                if (parent is UIElement ui && ui.Focusable)
+                {
+                    ui.Focus();
+                    return;
+                }
+                parent = VisualTreeHelper.GetParent(parent);
+            }
+        }
+
         private void Root_GotFocus(object sender, RoutedEventArgs e)
         {
             ValueTextBox.SelectAll();
@@ -238,7 +259,7 @@ namespace NiVE3.UI.Primitive
             if (IsClicked && e.Key == Key.Escape)
             {
                 Mouse.Capture(null);
-                Keyboard.ClearFocus();
+                ClearFocus();
                 Value = PrevValue;
                 IsClicked = false;
                 e.Handled = true;
@@ -303,7 +324,7 @@ namespace NiVE3.UI.Primitive
         {
             if (e.ChangedButton == MouseButton.Left && e.LeftButton == MouseButtonState.Released)
             {
-                Keyboard.ClearFocus();
+                ClearFocus();
                 IsClicked = false;
                 ((UIElement)sender).ReleaseMouseCapture();
 
@@ -343,12 +364,12 @@ namespace NiVE3.UI.Primitive
         {
             if (e.Key == Key.Enter && e.ImeProcessedKey == Key.None)
             {
-                Keyboard.ClearFocus();
+                ClearFocus();
                 e.Handled = true;
             }
             else if (e.Key == Key.Escape)
             {
-                Keyboard.ClearFocus();
+                ClearFocus();
                 Value = PrevValue;
                 e.Handled = true;
 

@@ -37,6 +37,12 @@ namespace NiVE3.View.Primitive
             new PropertyMetadata(false, IsItemLockedChanged)
         );
 
+        static StackableItemsCollectionView()
+        {
+            IsTabStopProperty.OverrideMetadata(typeof(StackableItemsCollectionView), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.Inherits));
+            FocusableProperty.OverrideMetadata(typeof(StackableItemsCollectionView), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.Inherits));
+        }
+
         public static bool GetIsItemLocked(DependencyObject target)
         {
             return (bool)target.GetValue(IsItemLockedProperty);

@@ -186,6 +186,7 @@ namespace NiVE3.View.Part
         {
             HorizontalContentAlignmentProperty.OverrideMetadata(typeof(LayerItemExpander), new FrameworkPropertyMetadata(HorizontalAlignment.Stretch, FrameworkPropertyMetadataOptions.Inherits));
             IsTabStopProperty.OverrideMetadata(typeof(LayerItemExpander), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.Inherits));
+            FocusableProperty.OverrideMetadata(typeof(LayerItemExpander), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.Inherits));
         }
 
         static void IndentParameterChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
