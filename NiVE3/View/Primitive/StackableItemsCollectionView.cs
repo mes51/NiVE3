@@ -149,7 +149,7 @@ namespace NiVE3.View.Primitive
             set { SetValue(ControlAreaWidthProperty, value); }
         }
 
-        public ObservableCollection<T> SelectedItems
+        public ObservableCollection<T>? SelectedItems
         {
             get { return (ObservableCollection<T>)GetValue(SelectedItemsProperty); }
             set { SetValue(SelectedItemsProperty, value); }
@@ -181,7 +181,7 @@ namespace NiVE3.View.Primitive
         {
             if (dragInfo.VisualSourceItem is FrameworkElement fe && fe.DataContext is T viewModel)
             {
-                if (SelectedItems.Count > 1 && SelectedItems.Contains(viewModel))
+                if (SelectedItems != null && SelectedItems.Count > 1 && SelectedItems.Contains(viewModel))
                 {
                     dragInfo.Data = new ItemDragData<T>(SelectedItems.ToArray(), viewModel);
                 }
@@ -218,24 +218,27 @@ namespace NiVE3.View.Primitive
             {
                 if (!selectRange && !selectMultiple)
                 {
-                    SelectedItems.Clear();
+                    SelectedItems?.Clear();
                 }
                 return;
             }
 
             if (selectMultiple)
             {
-                if (SelectedItems.Contains(viewModel))
+                if (SelectedItems != null)
                 {
-                    SelectedItems.Remove(viewModel);
+                    if (SelectedItems.Contains(viewModel))
+                    {
+                        SelectedItems.Remove(viewModel);
+                    }
+                    else
+                    {
+                        SelectedItems.Add(viewModel);
+                    }
+                    LastSelected = viewModel;
                 }
-                else
-                {
-                    SelectedItems.Add(viewModel);
-                }
-                LastSelected = viewModel;
             }
-            else if (selectRange && SelectedItems.Count > 0)
+            else if (selectRange && SelectedItems != null && SelectedItems.Count > 0)
             {
                 var oldSelectedItems = SelectedItems.ToArray();
                 if (LastSelected == null)
@@ -280,7 +283,7 @@ namespace NiVE3.View.Primitive
                     SelectedItems.Add(l);
                 }
             }
-            else if (!SelectedItems.Contains(viewModel))
+            else if (!(SelectedItems?.Contains(viewModel) ?? true))
             {
                 SelectedItems.Clear();
 
@@ -296,7 +299,7 @@ namespace NiVE3.View.Primitive
             {
                 return;
             }
-            if (SelectedItems.Contains(viewModel))
+            if (SelectedItems?.Contains(viewModel) ?? false)
             {
                 SelectedItems.Remove(viewModel);
                 if (LastSelected == viewModel)
@@ -325,7 +328,7 @@ namespace NiVE3.View.Primitive
         {
             base.OnItemsSourceChanged(oldValue, newValue);
 
-            SelectedItems.Clear();
+            SelectedItems?.Clear();
             LastSelected = null;
         }
 
@@ -333,7 +336,7 @@ namespace NiVE3.View.Primitive
         {
             if (d is StackableItemsCollectionView<T> collection)
             {
-                collection.SelectedItems.Clear();
+                collection.SelectedItems?.Clear();
             }
         }
 
