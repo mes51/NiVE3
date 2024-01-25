@@ -225,7 +225,7 @@ namespace NiVE3.UI.Primitive
             BindingOperations.ClearBinding(ValueTextBox, TextBox.TextProperty);
 
             BindingOperations.SetBinding(ValueTextBlock, TextBlock.TextProperty, new Binding(nameof(Value)) { Source = this, Converter = Converter, StringFormat = $"{{0}}{UnitText}" });
-            BindingOperations.SetBinding(ValueTextBox, TextBox.TextProperty, new Binding(nameof(Value)) { Source = this, Converter = Converter, UpdateSourceTrigger = UpdateSourceTrigger.LostFocus, NotifyOnSourceUpdated = true });
+            BindingOperations.SetBinding(ValueTextBox, TextBox.TextProperty, new Binding(nameof(Value)) { Source = this, Converter = Converter, UpdateSourceTrigger = UpdateSourceTrigger.Explicit, NotifyOnSourceUpdated = true });
         }
 
         private void Root_GotFocus(object sender, RoutedEventArgs e)
@@ -345,15 +345,6 @@ namespace NiVE3.UI.Primitive
             {
                 Keyboard.ClearFocus();
                 e.Handled = true;
-
-                if (Validation.GetHasError(ValueTextBox))
-                {
-                    Value = PrevValue;
-                    ValueTextBlock.GetBindingExpression(TextBlock.TextProperty).UpdateTarget();
-
-                    IsEditingText = false;
-                    RaiseEvent(new RoutedEventArgs(AbortTextEditValueEvent, this));
-                }
             }
             else if (e.Key == Key.Escape)
             {
@@ -375,6 +366,8 @@ namespace NiVE3.UI.Primitive
 
         private void ValueTextBox_LostFocus(object sender, RoutedEventArgs e)
         {
+            ((TextBox)sender).GetBindingExpression(TextBox.TextProperty).UpdateSource();
+
             if (Validation.GetHasError(ValueTextBox))
             {
                 Value = PrevValue;
