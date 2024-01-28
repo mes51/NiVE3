@@ -38,6 +38,7 @@ namespace NiVE3.Module
             ViewRegistry.RegisterViewWithRegion(MainWindowViewModel.RegionName, typeof(PlayControllerViewModel));
             ViewRegistry.RegisterViewWithRegion(MainWindowViewModel.RegionName, typeof(HistoryViewModel));
             ViewRegistry.RegisterViewWithRegion(MainWindowViewModel.RegionName, typeof(LayerPropertyControllerViewModel));
+            ViewRegistry.RegisterViewWithRegion(MainWindowViewModel.RegionName, typeof(TextPropertyViewModel));
         }
 
         public void RegisterTypes(IContainerRegistry containerRegistry)
@@ -49,6 +50,7 @@ namespace NiVE3.Module
             Container.Register<EffectListModel>(Reuse.Singleton, FactoryMethod.ConstructorWithResolvableArguments);
             Container.Register<RendererListModel>(Reuse.Singleton, FactoryMethod.ConstructorWithResolvableArguments);
             Container.Register<ProjectModel>(Reuse.Singleton, FactoryMethod.ConstructorWithResolvableArguments);
+            Container.Register<TextPropertyModel>(Reuse.Singleton, FactoryMethod.ConstructorWithResolvableArguments);
             Container.Register<ViewStateModel>(Reuse.Singleton, FactoryMethod.ConstructorWithResolvableArguments);
 
             Container.Register<MainWindowViewModel>(Reuse.Singleton, FactoryMethod.ConstructorWithResolvableArguments);
@@ -57,6 +59,7 @@ namespace NiVE3.Module
             Container.Register<EffectListViewModel>(Reuse.Singleton, FactoryMethod.ConstructorWithResolvableArguments);
             Container.Register<PlayControllerViewModel>(Reuse.Singleton, FactoryMethod.ConstructorWithResolvableArguments);
             Container.Register<LayerPropertyControllerViewModel>(Reuse.Singleton, FactoryMethod.ConstructorWithResolvableArguments);
+            Container.Register<TextPropertyViewModel>(Reuse.Singleton, FactoryMethod.ConstructorWithResolvableArguments);
 
             Container.Register<PreviewViewModel>(Reuse.Transient, FactoryMethod.ConstructorWithResolvableArguments);
             Container.Register<TimelineViewModel>(Reuse.Transient, FactoryMethod.ConstructorWithResolvableArguments);

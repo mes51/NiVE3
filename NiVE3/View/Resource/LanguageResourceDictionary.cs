@@ -272,6 +272,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("エフェクト")]
         public static readonly string LayerPropertyControllerView_Effects = nameof(LayerPropertyControllerView_Effects);
 
+        [ShowInMarkup, DefaultValue("テキスト")]
+        public static readonly string TextPropertyView_Title = nameof(TextPropertyView_Title);
+
         // History Command
 
         [ShowInMarkup, DefaultValue("プロジェクトの新規作成/開く")]

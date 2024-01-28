@@ -23,4 +23,7 @@
     <DataTemplate DataType="{x:Type vm:LayerPropertyControllerViewModel}">
         <v:LayerPropertyControllerView />
     </DataTemplate>
+    <DataTemplate DataType="{x:Type vm:TextPropertyViewModel}">
+        <v:TextPropertyView />
+    </DataTemplate>
 </ResourceDictionary>
