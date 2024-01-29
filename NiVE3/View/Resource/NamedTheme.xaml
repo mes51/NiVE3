@@ -262,6 +262,30 @@
         </Setter>
     </Style>
 
+    <Style x:Key="TextStyleBoldCheckBox" TargetType="{x:Type CheckBox}" BasedOn="{StaticResource IconCheckBoxBase}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type CheckBox}">
+                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="1">
+                        <Path Data="{gm:FontawesomeResource ResourceKey=Bold, ReturnDynamicResource=True}" Style="{StaticResource IconBase}"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="TextStyleItalicCheckBox" TargetType="{x:Type CheckBox}" BasedOn="{StaticResource IconCheckBoxBase}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type CheckBox}">
+                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="1">
+                        <Path Data="{gm:FontawesomeResource ResourceKey=Italic, ReturnDynamicResource=True}" Style="{StaticResource IconBase}"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style x:Key="PlayButton" TargetType="{x:Type Button}" BasedOn="{StaticResource LargeIconButton}">
         <Setter Property="Template">
             <Setter.Value>
@@ -316,6 +340,120 @@
                 <ControlTemplate TargetType="{x:Type Button}">
                     <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="1">
                         <Path Style="{StaticResource IconBase}" Data="{StaticResource PrevFrameIcon}"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="IconRadioButtonBase" TargetType="{x:Type RadioButton}">
+        <Setter Property="Width" Value="24"/>
+        <Setter Property="Height" Value="24"/>
+        <Setter Property="Foreground" Value="{ugm:AppearanceResource ResourceKey=TextBrush, ReturnDynamicResource=True}" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Content, RelativeSource={RelativeSource Self}}" Value="{x:Null}">
+                <Setter Property="ToolTip" Value="{x:Null}" />
+            </DataTrigger>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Foreground" Value="{ugm:AppearanceResource ResourceKey=DisableTextBrush, ReturnDynamicResource=True}" />
+            </Trigger>
+            <MultiTrigger>
+                <MultiTrigger.Conditions>
+                    <Condition Property="IsMouseOver" Value="True" />
+                    <Condition Property="IsEnabled" Value="True" />
+                </MultiTrigger.Conditions>
+                <Setter Property="BorderThickness" Value="1" />
+                <!--
+                <Setter Property="BorderBrush" Value="{DynamicResource ResourceKey=MouseOverBorderBrush}" />
+                -->
+            </MultiTrigger>
+            <MultiTrigger>
+                <MultiTrigger.Conditions>
+                    <Condition Property="IsPressed" Value="True" />
+                    <Condition Property="IsEnabled" Value="True" />
+                </MultiTrigger.Conditions>
+                <!--
+                <Setter Property="Background" Value="{DynamicResource ResourceKey=IconButtonPressedBackgroundFill}" />
+                -->
+            </MultiTrigger>
+            <MultiTrigger>
+                <MultiTrigger.Conditions>
+                    <Condition Property="IsMouseOver" Value="True" />
+                    <Condition Property="IsPressed" Value="False" />
+                    <Condition Property="IsEnabled" Value="True" />
+                </MultiTrigger.Conditions>
+                <!--
+                <Setter Property="Background" Value="{DynamicResource ResourceKey=IconButtonMouseOverBackgroundFill}" />
+                -->
+            </MultiTrigger>
+
+            <MultiTrigger>
+                <MultiTrigger.Conditions>
+                    <Condition Property="IsMouseOver" Value="False" />
+                    <Condition Property="IsChecked" Value="True" />
+                    <Condition Property="IsEnabled" Value="True" />
+                </MultiTrigger.Conditions>
+                <Setter Property="BorderThickness" Value="1" />
+                <!--
+                <Setter Property="BorderBrush" Value="{DynamicResource ResourceKey=IconToggleButtonCheckedBorderBrush}" />
+                -->
+            </MultiTrigger>
+            <MultiTrigger>
+                <MultiTrigger.Conditions>
+                    <Condition Property="IsPressed" Value="False" />
+                    <Condition Property="IsChecked" Value="True" />
+                    <Condition Property="IsEnabled" Value="True" />
+                </MultiTrigger.Conditions>
+                <!--
+                <Setter Property="Foreground" Value="{DynamicResource ResourceKey=IconToggleButtonCheckedIconFill}" />
+                -->
+            </MultiTrigger>
+            <MultiTrigger>
+                <MultiTrigger.Conditions>
+                    <Condition Property="IsMouseOver" Value="False" />
+                    <Condition Property="IsPressed" Value="False" />
+                    <Condition Property="IsChecked" Value="True" />
+                    <Condition Property="IsEnabled" Value="True" />
+                </MultiTrigger.Conditions>
+                <!--
+                <Setter Property="Background" Value="{DynamicResource ResourceKey=IconToggleButtonCheckedBackgroundFill}" />
+                -->
+            </MultiTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="TextAlignLeftRadioButton" TargetType="{x:Type RadioButton}" BasedOn="{StaticResource IconRadioButtonBase}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type RadioButton}">
+                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="1">
+                        <Path Data="{gm:FontawesomeResource ResourceKey=AlignLeft, ReturnDynamicResource=True}" Style="{StaticResource IconBase}"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="TextAlignCenterRadioButton" TargetType="{x:Type RadioButton}" BasedOn="{StaticResource IconRadioButtonBase}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type RadioButton}">
+                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="1">
+                        <Path Data="{gm:FontawesomeResource ResourceKey=AlignCenter, ReturnDynamicResource=True}" Style="{StaticResource IconBase}"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="TextAlignRightRadioButton" TargetType="{x:Type RadioButton}" BasedOn="{StaticResource IconRadioButtonBase}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type RadioButton}">
+                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="1">
+                        <Path Data="{gm:FontawesomeResource ResourceKey=AlignRight, ReturnDynamicResource=True}" Style="{StaticResource IconBase}"/>
                     </Border>
                 </ControlTemplate>
             </Setter.Value>

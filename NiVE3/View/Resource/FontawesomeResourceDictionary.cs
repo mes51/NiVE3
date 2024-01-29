@@ -65,6 +65,21 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, Icon("")]
         public static readonly string Spinner = nameof(Spinner);
 
+        [ShowInMarkup, Icon("")]
+        public static readonly string Bold = nameof(Bold);
+
+        [ShowInMarkup, Icon("")]
+        public static readonly string Italic = nameof(Italic);
+
+        [ShowInMarkup, Icon("")]
+        public static readonly string AlignLeft = nameof(AlignLeft);
+
+        [ShowInMarkup, Icon("")]
+        public static readonly string AlignCenter = nameof(AlignCenter);
+
+        [ShowInMarkup, Icon("")]
+        public static readonly string AlignRight = nameof(AlignRight);
+
         public FontawesomeResourceDictionary()
         {
             var keys = typeof(FontawesomeResourceDictionary).GetFields(BindingFlags.Static | BindingFlags.Public)

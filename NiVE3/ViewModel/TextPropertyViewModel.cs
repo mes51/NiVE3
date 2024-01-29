@@ -35,6 +35,76 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref selectedFontSubFamilyIndex, value); }
         }
 
+        private double fontSize = 20.0;
+        public double FontSize
+        {
+            get { return fontSize; }
+            set { SetProperty(ref fontSize, value); }
+        }
+
+        private double lineHeight = 1.0;
+        public double LineHeight
+        {
+            get { return lineHeight; }
+            set { SetProperty(ref lineHeight, value); }
+        }
+
+        private double verticalScale = 100.0;
+        public double VerticalScale
+        {
+            get { return verticalScale; }
+            set { SetProperty(ref verticalScale, value); }
+        }
+
+        private double horizontalScale = 100.0;
+        public double HorizontalScale
+        {
+            get { return horizontalScale; }
+            set { SetProperty(ref horizontalScale, value); }
+        }
+
+        private double letterSpacing;
+        public double LetterSpacing
+        {
+            get { return letterSpacing; }
+            set { SetProperty(ref letterSpacing, value); }
+        }
+
+        private double textLineWidth;
+        public double TextLineWidth
+        {
+            get { return textLineWidth; }
+            set { SetProperty(ref textLineWidth, value); }
+        }
+
+        private TextLineDrawOrder textLineDrawOrder;
+        public TextLineDrawOrder TextLineDrawOrder
+        {
+            get { return textLineDrawOrder; }
+            set { SetProperty(ref textLineDrawOrder, value); }
+        }
+
+        private bool isEnableBold;
+        public bool IsEnableBold
+        {
+            get { return isEnableBold; }
+            set { SetProperty(ref isEnableBold, value); }
+        }
+
+        private bool isEnableItalic;
+        public bool IsEnableItalic
+        {
+            get { return isEnableItalic; }
+            set { SetProperty(ref isEnableItalic, value); }
+        }
+
+        private TextAlign textAlign;
+        public TextAlign TextAlign
+        {
+            get { return textAlign; }
+            set { SetProperty(ref textAlign, value); }
+        }
+
         public FontGroupViewModel SelectedFontGroup => Fonts[SelectedFontGroupIndex];
 
         public List<FontGroupViewModel> Fonts { get; set; } = new List<FontGroupViewModel>();
@@ -219,5 +289,19 @@ namespace NiVE3.ViewModel
                 }
             });
         }
+    }
+
+    enum TextLineDrawOrder
+    {
+        None,
+        BeforeFill,
+        AfterFill
+    }
+
+    enum TextAlign
+    {
+        Left,
+        Center,
+        Right
     }
 }

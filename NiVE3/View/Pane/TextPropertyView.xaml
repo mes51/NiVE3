@@ -7,9 +7,16 @@
              xmlns:vm="clr-namespace:NiVE3.ViewModel"
              xmlns:r="clr-namespace:NiVE3.View.Resource"
              xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
+             xmlns:upr="clr-namespace:NiVE3.UI.Primitive;assembly=NiVE3.UI"
+             xmlns:cv="clr-namespace:NiVE3.View.Converter"
+             xmlns:mk="clr-namespace:NiVE3.Wpf.Markup"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
+        <Thickness x:Key="VerticalStackMargin">10,5,10,0</Thickness>
+        <cv:EnumToLocalizedNameConverter x:Key="EnumToLocalizedNameConverter"/>
+        <cv:EnumToBoolConverter x:Key="EnumToBoolConverter"/>
+
         <Storyboard x:Key="LoadingAnimation" RepeatBehavior="Forever">
             <DoubleAnimationUsingKeyFrames BeginTime="00:00:00" 
                                            Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(RotateTransform.Angle)">
@@ -138,9 +145,116 @@
 
         <r:ComboBoxTemplateSelector x:Key="FontTemplateSelector" SelectedItemTemplate="{StaticResource SelectedFontItem}" DropdownItemsTemplate="{StaticResource FontItem}"/>
         <r:ComboBoxTemplateSelector x:Key="FontSubFamilyTemplateSelector" SelectedItemTemplate="{StaticResource SelectedFontSubFamilyItem}" DropdownItemsTemplate="{StaticResource SubFamilyItem}"/>
+
+        <Style x:Key="ParameterLeftGridStyle" TargetType="{x:Type Grid}">
+            <Setter Property="Margin" Value="0,5,20,5"/>
+        </Style>
+        <Style x:Key="ParameterRightGridStyle" TargetType="{x:Type Grid}">
+            <Setter Property="Margin" Value="20,5,0,5"/>
+        </Style>
+
+        <Style x:Key="TextLineOrderComboBoxStyle" TargetType="{x:Type ComboBox}" BasedOn="{StaticResource {x:Type ComboBox}}">
+            <Setter Property="Margin" Value="20,5,0,5"/>
+            <Setter Property="ItemTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Converter={StaticResource EnumToLocalizedNameConverter}, ConverterParameter={x:Type vm:TextLineDrawOrder}}"/>
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </UserControl.Resources>
-    <StackPanel Orientation="Vertical">
-        <ComboBox Margin="5,5,5,0" ItemsSource="{Binding Fonts}" ItemTemplateSelector="{StaticResource FontTemplateSelector}" SelectedIndex="{Binding SelectedFontGroupIndex}" Grid.IsSharedSizeScope="True"/>
-        <ComboBox Margin="5,5,5,0" ItemsSource="{Binding SelectedFontGroup.SubFamiles}" ItemTemplateSelector="{StaticResource FontSubFamilyTemplateSelector}" SelectedIndex="{Binding SelectedFontSubFamilyIndex}"/>
-    </StackPanel>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <ComboBox Grid.Row="0" Margin="{StaticResource VerticalStackMargin}" ItemsSource="{Binding Fonts}" ItemTemplateSelector="{StaticResource FontTemplateSelector}" SelectedIndex="{Binding SelectedFontGroupIndex}" Grid.IsSharedSizeScope="True"/>
+        
+        <ComboBox Grid.Row="1" Margin="{StaticResource VerticalStackMargin}" ItemsSource="{Binding SelectedFontGroup.SubFamiles}" ItemTemplateSelector="{StaticResource FontSubFamilyTemplateSelector}" SelectedIndex="{Binding SelectedFontSubFamilyIndex}"/>
+        
+        <UniformGrid Grid.Row="2" Columns="2" Margin="{StaticResource VerticalStackMargin}">
+            <Grid Style="{StaticResource ParameterLeftGridStyle}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=TextPropertyView_Property_Size}" VerticalAlignment="Center"/>
+                <upr:SlidableNumberTextBox Grid.Column="1" Value="{Binding FontSize}" UnitText="px" Digit="2" Minimum="0" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+            </Grid>
+            <Grid Style="{StaticResource ParameterRightGridStyle}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=TextPropertyView_Property_LineHeight}" VerticalAlignment="Center"/>
+                <upr:SlidableNumberTextBox Grid.Column="1" Value="{Binding LineHeight}" Digit="2" Minimum="0" SlideChangeValue="0.1" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+            </Grid>
+            <Grid Style="{StaticResource ParameterLeftGridStyle}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=TextPropertyView_Property_VerticalScale}" VerticalAlignment="Center"/>
+                <upr:SlidableNumberTextBox Grid.Column="1" Value="{Binding VerticalScale}" UnitText="%" Digit="2" Minimum="0" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+            </Grid>
+            <Grid Style="{StaticResource ParameterRightGridStyle}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=TextPropertyView_Property_HorizontalScale}" VerticalAlignment="Center"/>
+                <upr:SlidableNumberTextBox Grid.Column="1" Value="{Binding HorizontalScale}" UnitText="%" Digit="2" Minimum="0" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+            </Grid>
+            <Grid Style="{StaticResource ParameterLeftGridStyle}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=TextPropertyView_Property_LetterSpacing}" VerticalAlignment="Center"/>
+                <upr:SlidableNumberTextBox Grid.Column="1" Value="{Binding LetterSpacing}" UnitText="px" Digit="2" Minimum="0" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+            </Grid>
+        </UniformGrid>
+        <Rectangle Grid.Row="2" Margin="{StaticResource VerticalStackMargin}" Fill="Gray" Width="1" HorizontalAlignment="Center"/>
+
+        <Rectangle Grid.Row="3" Margin="{StaticResource VerticalStackMargin}"/>
+
+        <Grid Grid.Row="4" Margin="{StaticResource VerticalStackMargin}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+
+            <Grid Grid.Column="0" Style="{StaticResource ParameterLeftGridStyle}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=TextPropertyView_Property_LineWidth}" VerticalAlignment="Center"/>
+                <upr:SlidableNumberTextBox Grid.Column="1" Value="{Binding TextLineWidth}" UnitText="px" Digit="2" Minimum="0" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+            </Grid>
+            <ComboBox Grid.Column="1" Style="{StaticResource TextLineOrderComboBoxStyle}" SelectedValue="{Binding TextLineDrawOrder}" ItemsSource="{mk:EnumValues EnumType={x:Type vm:TextLineDrawOrder}}"/>
+        </Grid>
+
+        <Rectangle Grid.Row="5" Margin="{StaticResource VerticalStackMargin}"/>
+
+        <StackPanel Grid.Row="6" Orientation="Horizontal" Margin="{StaticResource VerticalStackMargin}">
+            <CheckBox Margin="0,5" IsChecked="{Binding IsEnableBold}" Style="{StaticResource TextStyleBoldCheckBox}"/>
+            <CheckBox Margin="5,5,0,5" IsChecked="{Binding IsEnableItalic}" Style="{StaticResource TextStyleItalicCheckBox}"/>
+            <RadioButton Margin="5,5,0,5" IsChecked="{Binding TextAlign, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static vm:TextAlign.Left}}" Style="{StaticResource TextAlignLeftRadioButton}"/>
+            <RadioButton Margin="5,5,0,5" IsChecked="{Binding TextAlign, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static vm:TextAlign.Center}}" Style="{StaticResource TextAlignCenterRadioButton}"/>
+            <RadioButton Margin="5,5,0,5" IsChecked="{Binding TextAlign, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static vm:TextAlign.Right}}" Style="{StaticResource TextAlignRightRadioButton}"/>
+        </StackPanel>
+    </Grid>
 </UserControl>

@@ -275,6 +275,24 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("テキスト")]
         public static readonly string TextPropertyView_Title = nameof(TextPropertyView_Title);
 
+        [ShowInMarkup, DefaultValue("サイズ")]
+        public static readonly string TextPropertyView_Property_Size = nameof(TextPropertyView_Property_Size);
+
+        [ShowInMarkup, DefaultValue("行送り")]
+        public static readonly string TextPropertyView_Property_LineHeight = nameof(TextPropertyView_Property_LineHeight);
+
+        [ShowInMarkup, DefaultValue("垂直比率")]
+        public static readonly string TextPropertyView_Property_VerticalScale = nameof(TextPropertyView_Property_VerticalScale);
+
+        [ShowInMarkup, DefaultValue("水平比率")]
+        public static readonly string TextPropertyView_Property_HorizontalScale = nameof(TextPropertyView_Property_HorizontalScale);
+
+        [ShowInMarkup, DefaultValue("字間")]
+        public static readonly string TextPropertyView_Property_LetterSpacing = nameof(TextPropertyView_Property_LetterSpacing);
+
+        [ShowInMarkup, DefaultValue("線の太さ")]
+        public static readonly string TextPropertyView_Property_LineWidth = nameof(TextPropertyView_Property_LineWidth);
+
         // History Command
 
         [ShowInMarkup, DefaultValue("プロジェクトの新規作成/開く")]
@@ -611,6 +629,15 @@ namespace NiVE3.View.Resource
 
         [ShowInMarkup, DefaultValue("逆二乗クランプ")]
         public static readonly string LightFalloffType_Exponential = nameof(LightFalloffType_Exponential);
+
+        [ShowInMarkup, DefaultValue("なし")]
+        public static readonly string TextLineDrawOrder_None = nameof(TextLineDrawOrder_None);
+
+        [ShowInMarkup, DefaultValue("線の上に塗り")]
+        public static readonly string TextLineDrawOrder_BeforeFill = nameof(TextLineDrawOrder_BeforeFill);
+
+        [ShowInMarkup, DefaultValue("塗りの上に線")]
+        public static readonly string TextLineDrawOrder_AfterFill = nameof(TextLineDrawOrder_AfterFill);
 
         static LanguageResourceDictionary()
         {
