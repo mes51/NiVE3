@@ -75,5 +75,7 @@ namespace NiVE3.Data.Json.Project
         public PropertyData? LayerOptionProperties { get; set; }
 
         public PropertyData? TextProperties { get; set; }
+
+        public PropertyData? SourceOptionProperties { get; set; }
     }
 }

@@ -790,7 +790,8 @@ namespace NiVE3.Model
                 Effects = Effects.Select(e => e.SaveData()).ToArray(),
                 TransformProperties = TransformProperties.SaveData(),
                 LayerOptionProperties = LayerOptionProperties?.SaveData(),
-                TextProperties = TextProperties?.SaveData()
+                TextProperties = TextProperties?.SaveData(),
+                SourceOptionProperties = SourceOptionProperties?.SaveData()
             };
         }
 
@@ -825,10 +826,13 @@ namespace NiVE3.Model
             {
                 LayerOptionProperties.LoadData(data.LayerOptionProperties);
             }
-
             if (TextProperties != null && data.TextProperties != null)
             {
                 TextProperties.LoadData(data.TextProperties);
+            }
+            if (SourceOptionProperties != null && data.SourceOptionProperties != null)
+            {
+                SourceOptionProperties.LoadData(data.SourceOptionProperties);
             }
 
             foreach (var effectData in data.Effects)
