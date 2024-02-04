@@ -25,6 +25,7 @@ namespace NiVE3.Property.ViewState
             DisplayName3D = displayName3D;
             LayerObject = layerObject;
 
+            // TODO: PropertyViewModel = LayerViewModelと寿命は同じため大丈夫たとは思うが、リークする可能性を考慮した方が良いかも?
             ((INotifyPropertyChanged)layerObject).PropertyChanged += Layer_PropertyChanged;
         }
 

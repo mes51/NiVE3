@@ -503,6 +503,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("影のぼかし")]
         public static readonly string LayerOptionsProperty_ShadowScatterSize = nameof(LayerOptionsProperty_ShadowScatterSize);
 
+        [ShowInMarkup, DefaultValue("ソーステキスト")]
+        public static readonly string TextProperty_SourceText = nameof(TextProperty_SourceText);
+
         [ShowInMarkup, DefaultValue("詳細")]
         public static readonly string TextProperty_TextMoreOptions = nameof(TextProperty_TextMoreOptions);
 
@@ -511,6 +514,11 @@ namespace NiVE3.View.Resource
 
         [ShowInMarkup, DefaultValue("文字間のブレンドモード")]
         public static readonly string TextProperty_TextMoreOptions_InterCharacterBlendMode = nameof(TextProperty_TextMoreOptions_InterCharacterBlendMode);
+
+        // Property Control
+
+        [ShowInMarkup, DefaultValue("編集")]
+        public static readonly string SourceTextPropertyControl_Edit = nameof(SourceTextPropertyControl_Edit);
 
         // Unit
 

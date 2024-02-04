@@ -10,6 +10,8 @@ using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Numerics;
 using NiVE3.Plugin.Property;
 using NiVE3.Plugin.Property.Properties;
+using NiVE3.Property;
+using NiVE3.Property.Types;
 using NiVE3.View.Resource;
 
 namespace NiVE3.Input.Special
@@ -47,6 +49,8 @@ namespace NiVE3.Input.Special
 
     class TextFootageSource : ICustomizableFootageSource
     {
+        const string SourceTextId = nameof(SourceTextId);
+
         const string TextMoreOptionsGroupId = nameof(TextMoreOptionsGroupId);
 
         const string TextBoxSizeId = nameof(TextBoxSizeId);
@@ -73,6 +77,7 @@ namespace NiVE3.Input.Special
         {
             return new PropertyBase[]
             {
+                new SourceTextProperty(SourceTextId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_SourceText), DecoratedText.Empty),
                 new PropertyGroup(TextMoreOptionsGroupId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextMoreOptions), new PropertyBase[]
                 {
                     new Vector3dProperty(TextBoxSizeId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextMoreOptions_TextBoxSize), new Vector3d(), digit: 2),
@@ -83,9 +88,7 @@ namespace NiVE3.Input.Special
 
         public NImage Read(double time, bool toGpu)
         {
-            var image = new NManagedImage(10, 10);
-            image.GetDataSpan().Fill(1.0F);
-
+            var image = new NManagedImage(1, 1);
             return image;
         }
 

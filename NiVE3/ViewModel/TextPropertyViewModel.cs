@@ -9,6 +9,7 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
 using NiVE3.Model;
+using NiVE3.Property.Types;
 using NiVE3.View.Dock;
 using NiVE3.View.Resource;
 using Prism.Mvvm;
@@ -296,19 +297,5 @@ namespace NiVE3.ViewModel
                 }
             });
         }
-    }
-
-    enum TextLineDrawOrder
-    {
-        None,
-        BeforeFill,
-        AfterFill
-    }
-
-    enum TextAlign
-    {
-        Left,
-        Center,
-        Right
     }
 }
