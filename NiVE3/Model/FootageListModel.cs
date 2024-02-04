@@ -60,6 +60,8 @@ namespace NiVE3.Model
 
         public FootageModel NullObjectFootage { get; }
 
+        public FootageModel TextFootage { get; }
+
         Dictionary<Type, string[]> SupportedFileTypes { get; set; } = new Dictionary<Type, string[]>();
 
         List<InputModel> LoadedInputs { get; } = new List<InputModel>();
@@ -101,6 +103,7 @@ namespace NiVE3.Model
             CameraFootage = new FootageModel(new InputModel(CameraInput.Instance, CameraInput.PluginId, false, CameraInput.PluginId), EmptyFootageSource.Instance, HistoryModel, CameraInput.PluginId);
             LightFootage = new FootageModel(new InputModel(LightInput.Instance, LightInput.PluginId, false, LightInput.PluginId), EmptyFootageSource.Instance, HistoryModel, LightInput.PluginId);
             NullObjectFootage = new FootageModel(new InputModel(NullObjectInput.Instance, NullObjectInput.PluginId, false, NullObjectInput.PluginId), EmptyFootageSource.Instance, HistoryModel, NullObjectInput.PluginId);
+            TextFootage = new FootageModel(new InputModel(TextInput.Instance, TextInput.PluginId, false, TextInput.PluginId), TextFootageSource.Instance, HistoryModel, TextInput.PluginId);
         }
 
         public Guid? AddSolid()
@@ -324,6 +327,10 @@ namespace NiVE3.Model
             else if (NullObjectFootage.FootageId == footageId)
             {
                 return new FootageModel[] { NullObjectFootage };
+            }
+            else if (TextFootage.FootageId == footageId)
+            {
+                return new FootageModel[] { TextFootage };
             }
 
             var footage = FindModel(footageId, Footages);

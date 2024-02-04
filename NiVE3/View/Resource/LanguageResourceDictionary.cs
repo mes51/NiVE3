@@ -233,6 +233,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("ヌルオブジェクトの追加(_N)")]
         public static readonly string Timeline_ContextMenu_AddNullObject = nameof(Timeline_ContextMenu_AddNullObject);
 
+        [ShowInMarkup, DefaultValue("テキストの追加(_T)")]
+        public static readonly string Timeline_ContextMenu_AddText = nameof(Timeline_ContextMenu_AddText);
+
         [ShowInMarkup, DefaultValue("なし")]
         public static readonly string Layer_EmptyTrackMatte = nameof(Layer_EmptyTrackMatte);
 
@@ -253,6 +256,12 @@ namespace NiVE3.View.Resource
 
         [ShowInMarkup, DefaultValue("ライトオプション")]
         public static readonly string Layer_LayerOptions_Light = nameof(Layer_LayerOptions_Light);
+
+        [ShowInMarkup, DefaultValue("テキスト")]
+        public static readonly string Layer_TextOption = nameof(Layer_TextOption);
+
+        [ShowInMarkup, DefaultValue("ソースのオプション")]
+        public static readonly string Layer_SourceOption = nameof(Layer_SourceOption);
 
         [ShowInMarkup, DefaultValue("名前")]
         public static readonly string EffectList_Name = nameof(EffectList_Name);
@@ -494,6 +503,15 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("影のぼかし")]
         public static readonly string LayerOptionsProperty_ShadowScatterSize = nameof(LayerOptionsProperty_ShadowScatterSize);
 
+        [ShowInMarkup, DefaultValue("詳細")]
+        public static readonly string TextProperty_TextMoreOptions = nameof(TextProperty_TextMoreOptions);
+
+        [ShowInMarkup, DefaultValue("テキストボックスのサイズ")]
+        public static readonly string TextProperty_TextMoreOptions_TextBoxSize = nameof(TextProperty_TextMoreOptions_TextBoxSize);
+
+        [ShowInMarkup, DefaultValue("文字間のブレンドモード")]
+        public static readonly string TextProperty_TextMoreOptions_InterCharacterBlendMode = nameof(TextProperty_TextMoreOptions_InterCharacterBlendMode);
+
         // Unit
 
         [ShowInMarkup, DefaultValue("%")]
@@ -661,6 +679,11 @@ namespace NiVE3.View.Resource
             {
                 this[key] = defaultValue;
             }
+        }
+
+        public static LanguageResourceKey CreateLanguageResourceKey(string key)
+        {
+            return new LanguageResourceKey(typeof(LanguageResourceDictionary), key);
         }
 
         [AttributeUsage(AttributeTargets.Field, Inherited = false, AllowMultiple = false)]

@@ -252,6 +252,7 @@
         <StackPanel Grid.Row="6" Orientation="Horizontal" Margin="{StaticResource VerticalStackMargin}">
             <CheckBox Margin="0,5" IsChecked="{Binding IsEnableBold}" Style="{StaticResource TextStyleBoldCheckBox}"/>
             <CheckBox Margin="5,5,0,5" IsChecked="{Binding IsEnableItalic}" Style="{StaticResource TextStyleItalicCheckBox}"/>
+            <CheckBox Margin="5,5,0,5" Content="合字" IsChecked="{Binding IsEnableLigature}" VerticalAlignment="Center"/>
             <RadioButton Margin="5,5,0,5" IsChecked="{Binding TextAlign, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static vm:TextAlign.Left}}" Style="{StaticResource TextAlignLeftRadioButton}"/>
             <RadioButton Margin="5,5,0,5" IsChecked="{Binding TextAlign, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static vm:TextAlign.Center}}" Style="{StaticResource TextAlignCenterRadioButton}"/>
             <RadioButton Margin="5,5,0,5" IsChecked="{Binding TextAlign, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static vm:TextAlign.Right}}" Style="{StaticResource TextAlignRightRadioButton}"/>

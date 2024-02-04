@@ -24,6 +24,8 @@ namespace NiVE3.Data.Json.Project
 
         public bool IsNullObject { get; set; }
 
+        public bool IsText { get; set; }
+
         public double SourceStartPoint { get; set; }
 
         public double InPoint { get; set; }
@@ -71,5 +73,7 @@ namespace NiVE3.Data.Json.Project
         public PropertyData TransformProperties { get; set; } = new PropertyData();
 
         public PropertyData? LayerOptionProperties { get; set; }
+
+        public PropertyData? TextProperties { get; set; }
     }
 }

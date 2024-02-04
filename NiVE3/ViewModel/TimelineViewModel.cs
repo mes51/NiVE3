@@ -333,6 +333,8 @@ namespace NiVE3.ViewModel
 
         public ICommand AddNullObjectCommand { get; }
 
+        public ICommand AddTextCommand { get; }
+
         WeakEventPublisher<EventArgs> CurrentTimeChangeByUserPublisher { get; } = new WeakEventPublisher<EventArgs>();
         public event EventHandler<EventArgs> CurrentTimeChangeByUser
         {
@@ -398,6 +400,8 @@ namespace NiVE3.ViewModel
             AddLightCommand = new RequerySuggestedCommand(() => CompositionModel?.AddLight(), () => CompositionModel != null);
 
             AddNullObjectCommand = new RequerySuggestedCommand(() => CompositionModel?.AddNullObject(), () => CompositionModel != null);
+
+            AddTextCommand = new RequerySuggestedCommand(() => CompositionModel?.AddText(), () => CompositionModel != null);
         }
 
         public void DragOver(IDropInfo dropInfo)

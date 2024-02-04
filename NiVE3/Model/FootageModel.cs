@@ -10,6 +10,7 @@ using NiVE3.Data.Json.Project;
 using NiVE3.Extension;
 using NiVE3.Plugin.Image;
 using NiVE3.Plugin.Interfaces;
+using NiVE3.Plugin.Property;
 using Prism.Mvvm;
 
 namespace NiVE3.Model
@@ -131,6 +132,8 @@ namespace NiVE3.Model
 
         public bool IsPlaceholder => InputModel.IsPlaceholder;
 
+        public bool IsCustomizableFootageSource => Source is ICustomizableFootageSource;
+
         public InputModel InputModel { get; }
 
         public ObservableCollection<IFootageModel>? Children => null;
@@ -160,9 +163,28 @@ namespace NiVE3.Model
 
         public void RemoveFootage(IFootageModel footage) { }
 
-        public NImage ReadImage(double time, bool toGpu)
+        public PropertyBase[] GetOptionProperties()
         {
-            return Source.Read(time, toGpu);
+            if (Source is ICustomizableFootageSource customizableFootageSource)
+            {
+                return customizableFootageSource.GetOptionProperties();
+            }
+            else
+            {
+                throw new Exception();
+            }
+        }
+
+        public NImage ReadImage(double time, PropertyValueGroup? properties, bool toGpu)
+        {
+            if (properties != null && Source is ICustomizableFootageSource customizableFootageSource)
+            {
+                return customizableFootageSource.Read(time, properties, toGpu);
+            }
+            else
+            {
+                return Source.Read(time, toGpu);
+            }
         }
 
         public void ChangeName(string name)

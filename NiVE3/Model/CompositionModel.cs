@@ -242,6 +242,15 @@ namespace NiVE3.Model
             HistoryModel.Add(new AddLayersHistoryCommand(this, new LayerModel[] { layer }, 0));
         }
 
+        public void AddText()
+        {
+            var layer = new LayerModel(this, FootageListModel.TextFootage, EffectListModel, HistoryModel);
+            layer.OutPoint = Duration;
+            Layers.Insert(0, layer);
+
+            HistoryModel.Add(new AddLayersHistoryCommand(this, new LayerModel[] { layer }, 0)); // TODO: 選択位置の上に挿入
+        }
+
         public void MoveLayer(Guid layerId, int newIndex)
         {
             MoveLayers(new Guid[] { layerId }, layerId, newIndex);

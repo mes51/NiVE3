@@ -274,6 +274,22 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref isNullObject, value); }
         }
 
+        private bool isText;
+        [NeedWire(nameof(LayerModel), IsOneWay = true)]
+        public bool IsText
+        {
+            get { return isText; }
+            set { SetProperty(ref isText, value); }
+        }
+
+        private bool isNotRenderable;
+        [NeedWire(nameof(LayerModel), IsOneWay = true)]
+        public bool IsNotRenderable
+        {
+            get { return isNotRenderable; }
+            set { SetProperty(ref isNotRenderable, value); }
+        }
+
         private double layerNumberColumnWudth;
         [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineLayerNumberColumnWidth), IsOneWay = true)]
         public double LayerNumberColumnWidth
@@ -447,6 +463,10 @@ namespace NiVE3.ViewModel
 
         public PropertyGroupViewModel? LayerOptionProperties { get; }
 
+        public PropertyGroupViewModel? TextProperties { get; }
+
+        public PropertyGroupViewModel? SourceOptionProperties { get; }
+
         public bool IsComposition { get; }
 
         public IEnumerable<LayerModelProxy> TrackMatteViewSource { get; }
@@ -562,6 +582,16 @@ namespace NiVE3.ViewModel
             {
                 LayerOptionProperties = new PropertyGroupViewModel(layerModel.LayerOptionProperties);
                 LayerOptionProperties.SelectItemChanged += PropertyGroupViewModel_SelectItemChanged;
+            }
+            if (layerModel.TextProperties != null)
+            {
+                TextProperties = new PropertyGroupViewModel(layerModel.TextProperties);
+                TextProperties.SelectItemChanged += PropertyGroupViewModel_SelectItemChanged;
+            }
+            if (layerModel.SourceOptionProperties != null)
+            {
+                SourceOptionProperties = new PropertyGroupViewModel(layerModel.SourceOptionProperties);
+                SourceOptionProperties.SelectItemChanged += PropertyGroupViewModel_SelectItemChanged;
             }
 
             WiringModel();

@@ -135,6 +135,28 @@
             </Style.Triggers>
         </Style>
 
+        <Style x:Key="TextGridStyle" TargetType="{x:Type Grid}">
+            <Setter Property="ClipToBounds" Value="True"/>
+            <Setter Property="Visibility" Value="Visible"/>
+
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding TextProperties}" Value="{x:Null}">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="SourceOptionGridStyle" TargetType="{x:Type Grid}">
+            <Setter Property="ClipToBounds" Value="True"/>
+            <Setter Property="Visibility" Value="Visible"/>
+
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding SourceOptionProperties}" Value="{x:Null}">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
         <ur:DataTemplateCollection x:Key="LayerPropertyControllerInner" DefaultIsEmpty="True">
             <DataTemplate DataType="{x:Type vm:LayerViewModel}">
                 <Grid x:Name="InnerRoot" Margin="0,2" ClipToBounds="True">
@@ -244,6 +266,18 @@
                                                      dd:DragDrop.IsDropTarget="True"
                                                      dd:DragDrop.DragSourceIgnore="False"/>
                         </pt:LayerItemExpander>
+                        <Grid Style="{StaticResource TextGridStyle}">
+                            <pt:PropertyGroupView DataContext="{Binding TextProperties}"
+                                                  IndentLevel="1"
+                                                  ControlAreaWidth="{Binding ElementName=InnerRoot, Path=ActualWidth}"
+                                                  NameAreaWidth="{Binding ElementName=Root, Path=DataContext.LayerNameColumnWidth}"
+                                                  IsAVSwitchColumnVisible="False"
+                                                  IsTagColumnVisible="True"
+                                                  Range="{Binding ElementName=Root, Path=DataContext.TimeBarRange}"
+                                                  RangeStart="{Binding ElementName=Root, Path=DataContext.TimeBarRangeStart}"
+                                                  CompositionFrameRate="{Binding ElementName=Root, Path=DataContext.CompositionFrameRate}"
+                                                  ParentHasExpanderArrow="False"/>
+                        </Grid>
                         <Grid Style="{StaticResource TransformGridStyle}">
                             <pt:PropertyGroupView DataContext="{Binding TransformProperties}"
                                                   IndentLevel="1"
@@ -258,6 +292,18 @@
                         </Grid>
                         <Grid Style="{StaticResource LayerOptionGridStyle}">
                             <pt:PropertyGroupView DataContext="{Binding LayerOptionProperties}"
+                                                  IndentLevel="1"
+                                                  ControlAreaWidth="{Binding ElementName=InnerRoot, Path=ActualWidth}"
+                                                  NameAreaWidth="{Binding ElementName=Root, Path=DataContext.LayerNameColumnWidth}"
+                                                  IsAVSwitchColumnVisible="False"
+                                                  IsTagColumnVisible="True"
+                                                  Range="{Binding ElementName=Root, Path=DataContext.TimeBarRange}"
+                                                  RangeStart="{Binding ElementName=Root, Path=DataContext.TimeBarRangeStart}"
+                                                  CompositionFrameRate="{Binding ElementName=Root, Path=DataContext.CompositionFrameRate}"
+                                                  ParentHasExpanderArrow="False"/>
+                        </Grid>
+                        <Grid Style="{StaticResource SourceOptionGridStyle}">
+                            <pt:PropertyGroupView DataContext="{Binding SourceOptionProperties}"
                                                   IndentLevel="1"
                                                   ControlAreaWidth="{Binding ElementName=InnerRoot, Path=ActualWidth}"
                                                   NameAreaWidth="{Binding ElementName=Root, Path=DataContext.LayerNameColumnWidth}"
