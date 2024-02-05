@@ -99,13 +99,6 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref isEnableItalic, value); }
         }
 
-        private bool isEnableLigature;
-        public bool IsEnableLigature
-        {
-            get { return isEnableLigature; }
-            set { SetProperty(ref isEnableLigature, value); }
-        }
-
         private TextAlign textAlign;
         public TextAlign TextAlign
         {

@@ -127,11 +127,10 @@ namespace NiVE3.Property.Types
         TextLineDrawOrder TextLineDrawOrder,
         bool IsEnableBold,
         bool IsEnableItalic,
-        bool IsEnableLigature,
         TextAlign TextAlign
     )
     {
-        public static TextStyle Empty = new TextStyle("", 0.0, 0.0, 0.0, 0.0, 0.0, TextLineDrawOrder.None, false, false, false, TextAlign.Left);
+        public static TextStyle Empty = new TextStyle("", 0.0, 0.0, 0.0, 0.0, 0.0, TextLineDrawOrder.None, false, false, TextAlign.Left);
 
         public static TextStyle Deserialize(IDictionary<string, object?> dic)
         {
@@ -145,7 +144,6 @@ namespace NiVE3.Property.Types
                 (TextLineDrawOrder)Enum.Parse(typeof(TextLineDrawOrder), (string)(dic[nameof(TextAlign)] ?? TextLineDrawOrder.None.ToString())),
                 (bool)(dic[nameof(IsEnableBold)] ?? false),
                 (bool)(dic[nameof(IsEnableItalic)] ?? false),
-                (bool)(dic[nameof(IsEnableLigature)] ?? false),
                 (TextAlign)Enum.Parse(typeof(TextAlign), (string)(dic[nameof(TextAlign)] ?? TextAlign.Left.ToString()))
             );
         }
