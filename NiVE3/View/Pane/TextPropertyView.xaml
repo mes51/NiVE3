@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:NiVE3.View.Pane"
              xmlns:vm="clr-namespace:NiVE3.ViewModel"
-             xmlns:tpt="clr-namespace:NiVE3.Property.Types"
+             xmlns:t="clr-namespace:NiVE3.Text"
              xmlns:r="clr-namespace:NiVE3.View.Resource"
              xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
              xmlns:upr="clr-namespace:NiVE3.UI.Primitive;assembly=NiVE3.UI"
@@ -159,7 +159,7 @@
             <Setter Property="ItemTemplate">
                 <Setter.Value>
                     <DataTemplate>
-                        <TextBlock Text="{Binding Converter={StaticResource EnumToLocalizedNameConverter}, ConverterParameter={x:Type tpt:TextLineDrawOrder}}"/>
+                        <TextBlock Text="{Binding Converter={StaticResource EnumToLocalizedNameConverter}, ConverterParameter={x:Type t:TextLineDrawOrder}}"/>
                     </DataTemplate>
                 </Setter.Value>
             </Setter>
@@ -245,7 +245,7 @@
                 <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=TextPropertyView_Property_LineWidth}" VerticalAlignment="Center"/>
                 <upr:SlidableNumberTextBox Grid.Column="1" Value="{Binding TextLineWidth}" UnitText="px" Digit="2" Minimum="0" VerticalAlignment="Center" HorizontalAlignment="Right"/>
             </Grid>
-            <ComboBox Grid.Column="1" Style="{StaticResource TextLineOrderComboBoxStyle}" SelectedValue="{Binding TextLineDrawOrder}" ItemsSource="{mk:EnumValues EnumType={x:Type tpt:TextLineDrawOrder}}"/>
+            <ComboBox Grid.Column="1" Style="{StaticResource TextLineOrderComboBoxStyle}" SelectedValue="{Binding TextLineDrawOrder}" ItemsSource="{mk:EnumValues EnumType={x:Type t:TextLineDrawOrder}}"/>
         </Grid>
 
         <Rectangle Grid.Row="5" Margin="{StaticResource VerticalStackMargin}"/>
@@ -253,9 +253,9 @@
         <StackPanel Grid.Row="6" Orientation="Horizontal" Margin="{StaticResource VerticalStackMargin}">
             <CheckBox Margin="0,5" IsChecked="{Binding IsEnableBold}" Style="{StaticResource TextStyleBoldCheckBox}"/>
             <CheckBox Margin="5,5,0,5" IsChecked="{Binding IsEnableItalic}" Style="{StaticResource TextStyleItalicCheckBox}"/>
-            <RadioButton Margin="5,5,0,5" IsChecked="{Binding TextAlign, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static tpt:TextAlign.Left}}" Style="{StaticResource TextAlignLeftRadioButton}"/>
-            <RadioButton Margin="5,5,0,5" IsChecked="{Binding TextAlign, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static tpt:TextAlign.Center}}" Style="{StaticResource TextAlignCenterRadioButton}"/>
-            <RadioButton Margin="5,5,0,5" IsChecked="{Binding TextAlign, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static tpt:TextAlign.Right}}" Style="{StaticResource TextAlignRightRadioButton}"/>
+            <RadioButton Margin="5,5,0,5" IsChecked="{Binding TextAlign, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static t:TextAlign.Left}}" Style="{StaticResource TextAlignLeftRadioButton}"/>
+            <RadioButton Margin="5,5,0,5" IsChecked="{Binding TextAlign, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static t:TextAlign.Center}}" Style="{StaticResource TextAlignCenterRadioButton}"/>
+            <RadioButton Margin="5,5,0,5" IsChecked="{Binding TextAlign, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static t:TextAlign.Right}}" Style="{StaticResource TextAlignRightRadioButton}"/>
         </StackPanel>
     </Grid>
 </UserControl>

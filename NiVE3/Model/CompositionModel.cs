@@ -164,19 +164,22 @@ namespace NiVE3.Model
 
         EffectListModel EffectListModel { get; }
 
+        TextPropertyModel TextPropertyModel { get; }
+
         HistoryModel HistoryModel { get; }
 
         IRenderer Renderer => RendererContext.Value;
 
-        public CompositionModel(ExportLifetimeContext<IRenderer> renderer, Guid rendererPluginId, FootageListModel footageListModel, EffectListModel effectListModel, HistoryModel historyModel) : this(renderer, rendererPluginId, footageListModel, effectListModel, historyModel, null) { }
+        public CompositionModel(ExportLifetimeContext<IRenderer> renderer, Guid rendererPluginId, FootageListModel footageListModel, EffectListModel effectListModel, TextPropertyModel textPropertyModel, HistoryModel historyModel) : this(renderer, rendererPluginId, footageListModel, effectListModel, textPropertyModel, historyModel, null) { }
 
-        public CompositionModel(ExportLifetimeContext<IRenderer> renderer, Guid rendererPluginId, FootageListModel footageListModel, EffectListModel effectListModel, HistoryModel historyModel, Guid? compositionId)
+        public CompositionModel(ExportLifetimeContext<IRenderer> renderer, Guid rendererPluginId, FootageListModel footageListModel, EffectListModel effectListModel, TextPropertyModel textPropertyModel, HistoryModel historyModel, Guid? compositionId)
         {
             CompositionId = compositionId ?? Guid.NewGuid();
             RendererContext = renderer;
             RendererPluginId = rendererPluginId;
             FootageListModel = footageListModel;
             EffectListModel = effectListModel;
+            TextPropertyModel = textPropertyModel;
             HistoryModel = historyModel;
             Layers = new ObservableCollection<LayerModel>();
 
@@ -246,9 +249,14 @@ namespace NiVE3.Model
         {
             var layer = new LayerModel(this, FootageListModel.TextFootage, EffectListModel, HistoryModel);
             layer.OutPoint = Duration;
-            Layers.Insert(0, layer);
 
-            HistoryModel.Add(new AddLayersHistoryCommand(this, new LayerModel[] { layer }, 0)); // TODO: 選択位置の上に挿入
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_AddLayers));
+
+            TextPropertyModel.UpdateTextProperty(layer, 0.0);
+            Layers.Insert(0, layer); // TODO: 選択位置の上に挿入
+            HistoryModel.Add(new AddLayersHistoryCommand(this, new LayerModel[] { layer }, 0));
+
+            HistoryModel.EndGroup();
         }
 
         public void MoveLayer(Guid layerId, int newIndex)

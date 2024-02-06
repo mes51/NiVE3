@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Globalization;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Plugin.Attributes;
@@ -12,7 +14,10 @@ using NiVE3.Plugin.Property;
 using NiVE3.Plugin.Property.Properties;
 using NiVE3.Property;
 using NiVE3.Property.Types;
+using NiVE3.Shape;
+using NiVE3.Text;
 using NiVE3.View.Resource;
+using SixLabors.Fonts;
 
 namespace NiVE3.Input.Special
 {
@@ -49,7 +54,7 @@ namespace NiVE3.Input.Special
 
     class TextFootageSource : ICustomizableFootageSource
     {
-        const string SourceTextId = nameof(SourceTextId);
+        public const string SourceTextId = nameof(SourceTextId);
 
         const string TextMoreOptionsGroupId = nameof(TextMoreOptionsGroupId);
 
@@ -77,7 +82,7 @@ namespace NiVE3.Input.Special
         {
             return new PropertyBase[]
             {
-                new SourceTextProperty(SourceTextId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_SourceText), DecoratedText.Empty),
+                new SourceTextProperty(SourceTextId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_SourceText), StyledText.Empty),
                 new PropertyGroup(TextMoreOptionsGroupId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextMoreOptions), new PropertyBase[]
                 {
                     new Vector3dProperty(TextBoxSizeId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextMoreOptions_TextBoxSize), new Vector3d(), digit: 2),
@@ -88,14 +93,48 @@ namespace NiVE3.Input.Special
 
         public NImage Read(double time, bool toGpu)
         {
-            var image = new NManagedImage(1, 1);
-            return image;
+            return new NManagedImage(1, 1);
         }
 
-        public NImage Read(double time, PropertyValueGroup properties, bool toGpu)
+        public NImage Read(double time, int compositionWidth, int compositionHeight, PropertyValueGroup properties, bool toGpu)
         {
-            var image = new NManagedImage(10, 10);
-            image.GetDataSpan().Fill(1.0F);
+            var sourceText = properties[SourceTextId] as StyledText ?? StyledText.Empty;
+            if (string.IsNullOrEmpty(sourceText.Text))
+            {
+                return new NManagedImage(1, 1);
+            }
+
+            var textCount = StringInfo.GetNextTextElementLength(sourceText.Text);
+            var filledStyles = new List<TextStyleRun>();
+            foreach (var s in sourceText.Styles)
+            {
+                var prevGapStart = filledStyles.LastOrDefault()?.End ?? 0;
+                var prevGatEnd = s.Start;
+                if (prevGapStart < prevGatEnd)
+                {
+                    filledStyles.Add(new TextStyleRun(prevGapStart, prevGatEnd, sourceText.DefaultStyle));
+                }
+                filledStyles.Add(s);
+            }
+            var lastStyleRunEnd = filledStyles.LastOrDefault()?.End ?? 0;
+            if (lastStyleRunEnd < textCount)
+            {
+                filledStyles.Add(new TextStyleRun(lastStyleRunEnd, textCount, sourceText.DefaultStyle));
+            }
+
+            var fontInfo = FontInfo.FindByUniqueId(sourceText.DefaultStyle.FontUniqueId) ?? FontInfo.FallbackFont;
+            var font = new Font(fontInfo.FontFamily, (float)sourceText.DefaultStyle.FontSize);
+            var textOption = new TextOptions(font);
+            textOption.TextRuns = filledStyles.Select(s => s.ToTextRun()).ToArray();
+
+            var glyphPaths = SixLabors.ImageSharp.Drawing.TextBuilder.GenerateGlyphs(sourceText.Text, textOption);
+            var glyphPolygons = glyphPaths.Select(g => g.Flatten().Select(p => new Polygon(p.Points.Span)).ToArray()).ToArray();
+
+            var image = new NManagedImage(compositionWidth, compositionHeight);
+            foreach (var p in glyphPolygons)
+            {
+                ShapeRender.FillPolygonNonzero(p, image, Vector4.One);
+            }
 
             return image;
         }

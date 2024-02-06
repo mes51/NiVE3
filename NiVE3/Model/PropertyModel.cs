@@ -400,6 +400,26 @@ namespace NiVE3.Model
             return new PropertyValueGroup(result);
         }
 
+        public IPropertyModel? FindProperty(string propertyId)
+        {
+            var child = Children.FirstOrDefault(c => c.Id == propertyId);
+            if (child != null)
+            {
+                return child;
+            }
+
+            foreach (var childGroup in Children.OfType<PropertyGroupModel>())
+            {
+                var grandChild = childGroup.FindProperty(propertyId);
+                if (grandChild != null)
+                {
+                    return grandChild;
+                }
+            }
+
+            return null;
+        }
+
         public PropertyData SaveData()
         {
             return new PropertyData

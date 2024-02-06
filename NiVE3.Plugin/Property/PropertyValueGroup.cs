@@ -33,6 +33,32 @@ namespace NiVE3.Plugin.Property
 
         Dictionary<string, object?> Values { get; }
 
+        /// <summary>
+        /// 指定したプロパティ、またはグループのIDをグループ内から検索して取得します
+        /// </summary>
+        /// <param name="propertyId">検索するプロパティ、またはグループのID</param>
+        /// <param name="value">取得した値</param>
+        /// <returns>値を取得できた場合はtrue、なかった場合はfalse</returns>
+        public bool TryGetValueInTree(string propertyId, out object? value)
+        {
+            if (Values.TryGetValue(propertyId, out var result))
+            {
+                value = result;
+                return true;
+            }
+
+            foreach (var child in Values.Values.OfType<PropertyValueGroup>())
+            {
+                if (child.TryGetValueInTree(propertyId, out value))
+                {
+                    return true;
+                }
+            }
+
+            value = null;
+            return false;
+        }
+
         internal PropertyValueGroup(Dictionary<string, object?> values)
         {
             Values = values;

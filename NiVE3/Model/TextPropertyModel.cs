@@ -1,135 +1,128 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NiVE3.Input.Special;
+using NiVE3.Property.Types;
+using NiVE3.Text;
 using Prism.Mvvm;
 using SixLabors.Fonts;
-using SixLabors.Fonts.WellKnownIds;
 
 namespace NiVE3.Model
 {
     class TextPropertyModel : BindableBase
     {
-        static readonly string[] FontExtensions = new string[] { "*.ttf", "*.ttc", "*.otf" };
+        const string DefaultFontName = "游ゴシック";
 
-        static readonly string UserFontFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Microsoft\\Windows\\Fonts");
+        const string DefaultFontSubFamilyName = "Regular";
 
-        static readonly string AdobeFontsFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Adobe\\CoreSync\\plugins\\livetype\\r");
+        private FontInfo selectedFont;
+        public FontInfo SelectedFont
+        {
+            get { return selectedFont; }
+            set { SetProperty(ref selectedFont, value); }
+        }
 
-        public FontInfo[] Fonts { get; }
+        private double fontSize = 20.0;
+        public double FontSize
+        {
+            get { return fontSize; }
+            set { SetProperty(ref fontSize, value); }
+        }
+
+        private double lineHeight = 1.0;
+        public double LineHeight
+        {
+            get { return lineHeight; }
+            set { SetProperty(ref lineHeight, value); }
+        }
+
+        private double verticalScale = 100.0;
+        public double VerticalScale
+        {
+            get { return verticalScale; }
+            set { SetProperty(ref verticalScale, value); }
+        }
+
+        private double horizontalScale = 100.0;
+        public double HorizontalScale
+        {
+            get { return horizontalScale; }
+            set { SetProperty(ref horizontalScale, value); }
+        }
+
+        private double letterSpacing;
+        public double LetterSpacing
+        {
+            get { return letterSpacing; }
+            set { SetProperty(ref letterSpacing, value); }
+        }
+
+        private double textLineWidth;
+        public double TextLineWidth
+        {
+            get { return textLineWidth; }
+            set { SetProperty(ref textLineWidth, value); }
+        }
+
+        private TextLineDrawOrder textLineDrawOrder;
+        public TextLineDrawOrder TextLineDrawOrder
+        {
+            get { return textLineDrawOrder; }
+            set { SetProperty(ref textLineDrawOrder, value); }
+        }
+
+        private bool isEnableBold;
+        public bool IsEnableBold
+        {
+            get { return isEnableBold; }
+            set { SetProperty(ref isEnableBold, value); }
+        }
+
+        private bool isEnableItalic;
+        public bool IsEnableItalic
+        {
+            get { return isEnableItalic; }
+            set { SetProperty(ref isEnableItalic, value); }
+        }
+
+        private TextAlign textAlign;
+        public TextAlign TextAlign
+        {
+            get { return textAlign; }
+            set { SetProperty(ref textAlign, value); }
+        }
 
         public FontGroup[] FontGroups { get; }
 
         FontCollection FontCollection { get; } = new FontCollection();
 
+#pragma warning disable CS8618 // 各フィールドには初期化時に必ず値を代入するため無視
         public TextPropertyModel()
+#pragma warning restore CS8618
         {
-            var fontFolder = Environment.GetFolderPath(Environment.SpecialFolder.Fonts);
-            var fontFiles = GetFontPaths(fontFolder);
-
-            if (Directory.Exists(UserFontFolder))
-            {
-                fontFiles = fontFiles.Concat(GetFontPaths(UserFontFolder));
-            }
-            if (Directory.Exists(AdobeFontsFolder))
-            {
-                fontFiles = fontFiles.Concat(Directory.GetFiles(AdobeFontsFolder));
-            }
-
-            var fontInfo = new List<FontInfo>();
-            foreach (var f in fontFiles)
-            {
-                var ext = Path.GetExtension(f);
-
-                if (ext == "")
-                {
-                    var loadedFontInfos = LoadFonts(f);
-                    if (loadedFontInfos != null)
-                    {
-                        fontInfo.AddRange(loadedFontInfos);
-                        continue;
-                    }
-
-                    var loadedFontInfo = LoadFont(f);
-                    if (loadedFontInfo != null)
-                    {
-                        fontInfo.Add(loadedFontInfo);
-                    }
-                }
-                else if (ext == ".ttc")
-                {
-                    var loadedFontInfos = LoadFonts(f);
-                    if (loadedFontInfos != null)
-                    {
-                        fontInfo.AddRange(loadedFontInfos);
-                    }
-                }
-                else
-                {
-                    var loadedFontInfo = LoadFont(f);
-                    if (loadedFontInfo != null)
-                    {
-                        fontInfo.Add(loadedFontInfo);
-                    }
-                }
-            }
-
-            Fonts = fontInfo.ToArray();
-            FontGroups = fontInfo.GroupBy(f => f.Name).Select(g => new FontGroup(g.ToArray())).ToArray();
+            FontGroups = FontInfo.LoadedFonts.GroupBy(f => f.Name).Select(g => new FontGroup(g.ToArray())).OrderBy(g => g.FontName).ToArray();
+            SelectedFont = (FontGroups.FirstOrDefault(g => g.FontName == DefaultFontName)?.SubFamiles?.TryGetValue(DefaultFontSubFamilyName, out var defaultFont) ?? false) ? defaultFont : FontInfo.FallbackFont;
         }
 
-        FontInfo[]? LoadFonts(string path)
+        public void UpdateTextProperty(LayerModel targetLayer, double time)
         {
-            try
-            {
-                var loadedFontFamilies = FontCollection.AddCollection(path, out var descriptions).ToArray();
-
-                var result = new List<FontInfo>();
-                foreach (var d in descriptions)
-                {
-                    try
-                    {
-                        var fontFamily = loadedFontFamilies.First(f => d.FontFamilyInvariantCulture == f.Name);
-                        result.Add(new FontInfo(fontFamily, d));
-                    }
-                    catch { }
-                }
-
-                return result.ToArray();
-            }
-            catch { }
-
-            return null;
+            var currentText = (targetLayer.GetTextProperties(time)?.TryGetValueInTree(TextFootageSource.SourceTextId, out var styledText) ?? false) ? (styledText as StyledText) ?? StyledText.Empty : StyledText.Empty;
+            var newStyle = new TextStyle(
+                SelectedFont.UniqueId,
+                (float)FontSize,
+                (float)LineHeight,
+                (float)LetterSpacing,
+                (float)VerticalScale,
+                (float)HorizontalScale,
+                TextLineDrawOrder,
+                IsEnableBold,
+                IsEnableItalic,
+                TextAlign
+            );
+            targetLayer.UpdateTextProperty(TextFootageSource.SourceTextId, new StyledText(currentText.Text, newStyle, currentText.Styles));
         }
-
-        FontInfo? LoadFont(string path)
-        {
-            try
-            {
-                var loadedFontFamily = FontCollection.Add(path, out var description);
-                return new FontInfo(loadedFontFamily, description);
-            }
-            catch { }
-
-            return null;
-        }
-
-        static IEnumerable<string> GetFontPaths(string dir)
-        {
-            return FontExtensions.SelectMany(ext => Directory.GetFiles(dir, ext));
-        }
-    }
-
-    record FontInfo(FontFamily FontFamily, FontDescription Description)
-    {
-        public string Name { get; } = string.IsNullOrEmpty(Description.GetNameById(CultureInfo.CurrentCulture, KnownNameIds.TypographicFamilyName)) ?
-            Description.FontFamily(CultureInfo.CurrentCulture) :
-            Description.GetNameById(CultureInfo.CurrentCulture, KnownNameIds.TypographicFamilyName);
-
-        public string UniqueId = Description.GetNameById(CultureInfo.InvariantCulture, KnownNameIds.UniqueFontID);
     }
 
     record FontGroup(FontInfo[] FontInfos)
@@ -138,16 +131,13 @@ namespace NiVE3.Model
 
         public Dictionary<string, FontInfo> SubFamiles { get; } = FontInfos.ToDictionary(i =>
         {
-            var typographic = i.Description.GetNameById(CultureInfo.CurrentCulture, KnownNameIds.TypographicSubfamilyName);
-            var sub = i.Description.FontSubFamilyName(CultureInfo.CurrentCulture);
-
-            if (string.IsNullOrEmpty(typographic))
+            if (string.IsNullOrEmpty(i.TypographicSubFamilyName))
             {
-                return sub;
+                return i.SubFamilyName;
             }
             else
             {
-                return typographic;
+                return i.TypographicSubFamilyName;
             }
         });
     }

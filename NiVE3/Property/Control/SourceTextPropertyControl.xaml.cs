@@ -15,7 +15,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Property.Control;
-using NiVE3.Property.Types;
+using NiVE3.Text;
 
 namespace NiVE3.Property.Control
 {
@@ -56,7 +56,7 @@ namespace NiVE3.Property.Control
             if (e.NewValue is IPropertyViewModel newViewModel)
             {
                 newViewModel.PropertyChanged += ViewModel_PropertyChanged;
-                if (newViewModel.CurrentTimeValue is DecoratedText d)
+                if (newViewModel.CurrentTimeValue is StyledText d)
                 {
                     SetCurrentValue(SourceTextProperty, d.Text);
                 }
@@ -71,7 +71,7 @@ namespace NiVE3.Property.Control
         private void EditCancelButton_Click(object sender, RoutedEventArgs e)
         {
             EditPopup.IsOpen = false;
-            if (ViewModel?.CurrentTimeValue is DecoratedText d)
+            if (ViewModel?.CurrentTimeValue is StyledText d)
             {
                 SetCurrentValue(SourceTextProperty, d.Text);
             }
@@ -82,7 +82,7 @@ namespace NiVE3.Property.Control
             EditPopup.IsOpen = false;
 
             var viewModel = ViewModel;
-            if (viewModel == null || viewModel.CurrentTimeValue is not DecoratedText d)
+            if (viewModel == null || viewModel.CurrentTimeValue is not StyledText d)
             {
                 return;
             }
@@ -96,7 +96,7 @@ namespace NiVE3.Property.Control
 
         private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(IPropertyViewModel.CurrentTimeValue) && ViewModel?.CurrentTimeValue is DecoratedText d)
+            if (e.PropertyName == nameof(IPropertyViewModel.CurrentTimeValue) && ViewModel?.CurrentTimeValue is StyledText d)
             {
                 SetCurrentValue(SourceTextProperty, d.Text);
             }

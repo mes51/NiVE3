@@ -63,10 +63,12 @@ namespace NiVE3.Plugin.Interfaces
         /// 画像を読み込みます
         /// </summary>
         /// <param name="time">読み込むタイミングの時間</param>
+        /// <param name="compositionWidth">コンポジションの幅</param>
+        /// <param name="compositionHeight">コンポジションの高さ</param>
         /// <param name="properties">オプションの値</param>
         /// <param name="toGpu">GPU上に直接読み込む場合はtrue、CPU上に読み込む場合はfalse</param>
         /// <returns>読み込んだ画像を表すNImage</returns>
         // TODO: Acceleratorをラップしたものを渡す
-        NImage Read(double time, PropertyValueGroup properties, bool toGpu);
+        NImage Read(double time, int compositionWidth, int compositionHeight, PropertyValueGroup properties, bool toGpu);
     }
 }

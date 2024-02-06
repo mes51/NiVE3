@@ -8,6 +8,7 @@ using ILGPU.IR.Values;
 using NiVE3.Plugin.Property;
 using NiVE3.Plugin.Property.Types;
 using NiVE3.Shared.Extension;
+using NiVE3.Text;
 
 namespace NiVE3.Property.Types
 {
@@ -35,19 +36,19 @@ namespace NiVE3.Property.Types
 
         public bool TryConvertFrom(object otherValue, out object convertedValue)
         {
-            if (otherValue is DecoratedText)
+            if (otherValue is StyledText)
             {
                 convertedValue = otherValue;
                 return true;
             }
             else if (otherValue is string s)
             {
-                convertedValue = new DecoratedText(s, TextStyle.Empty, Array.Empty<TextStyleRun>());
+                convertedValue = new StyledText(s, TextStyle.Empty, Array.Empty<TextStyleRun>());
                 return true;
             }
             else
             {
-                convertedValue = DecoratedText.Empty;
+                convertedValue = StyledText.Empty;
                 return false;
             }
         }
@@ -64,102 +65,7 @@ namespace NiVE3.Property.Types
                 return null;
             }
 
-            return DecoratedText.Deserialize(dictionary);
+            return StyledText.Deserialize(dictionary);
         }
-    }
-
-    record DecoratedText(string Text, TextStyle DefaultStyle, TextStyleRun[] Styles)
-    {
-        public static DecoratedText Empty = new DecoratedText("", TextStyle.Empty, Array.Empty<TextStyleRun>());
-
-        public DecoratedText ChangeText(string newText)
-        {
-            var newLength = StringInfo.GetNextTextElementLength(newText);
-            var newStyles = new List<TextStyleRun>();
-            foreach (var s in Styles)
-            {
-                if (s.Start >= newLength)
-                {
-                    break;
-                }
-
-                if (s.End >= newLength)
-                {
-                    newStyles.Add(new TextStyleRun(s.Start, newLength, DefaultStyle));
-                }
-                else
-                {
-                    newStyles.Add(s);
-                }
-            }
-            return new DecoratedText(newText, DefaultStyle, newStyles.ToArray());
-        }
-
-        public static DecoratedText Deserialize(IDictionary<string, object?> dic)
-        {
-            return new DecoratedText(
-                (string)(dic[nameof(Text)]  ?? ""),
-                dic[nameof(DefaultStyle)] is IDictionary<string, object?> defaultStyle ? TextStyle.Deserialize(defaultStyle) : TextStyle.Empty,
-                dic[nameof(Styles)] is Array styles ? styles.Cast<IDictionary<string, object?>>().Select(TextStyleRun.Deserialize).ToArray() : Array.Empty<TextStyleRun>()
-            );
-        }
-    }
-
-    record TextStyleRun(int Start, int End, TextStyle Style)
-    {
-        public static TextStyleRun Deserialize(IDictionary<string, object?> dic)
-        {
-            return new TextStyleRun(
-                (int)(dic[nameof(Start)] ?? 0),
-                (int)(dic[nameof(End)] ?? 0),
-                dic[nameof(Style)] is IDictionary<string, object?> style ? TextStyle.Deserialize(style) : TextStyle.Empty
-            );
-        }
-    }
-
-    record TextStyle(
-        string FontUniqueId,
-        double FontSize,
-        double LineHeight,
-        double LetterSpacing,
-        double VerticalScale,
-        double HorizontalScale,
-        TextLineDrawOrder TextLineDrawOrder,
-        bool IsEnableBold,
-        bool IsEnableItalic,
-        TextAlign TextAlign
-    )
-    {
-        public static TextStyle Empty = new TextStyle("", 0.0, 0.0, 0.0, 0.0, 0.0, TextLineDrawOrder.None, false, false, TextAlign.Left);
-
-        public static TextStyle Deserialize(IDictionary<string, object?> dic)
-        {
-            return new TextStyle(
-                (string)(dic[nameof(FontUniqueId)] ?? ""),
-                (double)(dic[nameof(FontSize)] ?? 0.0),
-                (double)(dic[nameof(LineHeight)] ?? 0.0),
-                (double)(dic[nameof(LetterSpacing)] ?? 0.0),
-                (double)(dic[nameof(VerticalScale)] ?? 100.0),
-                (double)(dic[nameof(HorizontalScale)] ?? 100.0),
-                (TextLineDrawOrder)Enum.Parse(typeof(TextLineDrawOrder), (string)(dic[nameof(TextAlign)] ?? TextLineDrawOrder.None.ToString())),
-                (bool)(dic[nameof(IsEnableBold)] ?? false),
-                (bool)(dic[nameof(IsEnableItalic)] ?? false),
-                (TextAlign)Enum.Parse(typeof(TextAlign), (string)(dic[nameof(TextAlign)] ?? TextAlign.Left.ToString()))
-            );
-        }
-    }
-
-    enum TextLineDrawOrder
-    {
-        None,
-        BeforeFill,
-        AfterFill
-    }
-
-    enum TextAlign
-    {
-        Left,
-        Center,
-        Right
     }
 }

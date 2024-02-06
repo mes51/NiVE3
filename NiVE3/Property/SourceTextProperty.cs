@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Property;
 using NiVE3.Plugin.Property.Control;
-using NiVE3.Plugin.Property.Types;
 using NiVE3.Plugin.Resource;
 using NiVE3.Property.Control;
 using NiVE3.Property.Types;
+using NiVE3.Text;
 
 namespace NiVE3.Property
 {
@@ -23,9 +23,9 @@ namespace NiVE3.Property
         {
             return value switch
             {
-                string s => new DecoratedText(s, TextStyle.Empty, Array.Empty<TextStyleRun>()),
-                DecoratedText d => d,
-                _ => DecoratedText.Empty
+                string s => new StyledText(s, TextStyle.Empty, Array.Empty<TextStyleRun>()),
+                StyledText d => d,
+                _ => StyledText.Empty
             };
         }
 
@@ -36,7 +36,7 @@ namespace NiVE3.Property
 
         public override bool ValidateValue(object value)
         {
-            return value is DecoratedText decoratedText || value is string;
+            return value is StyledText || value is string;
         }
     }
 }

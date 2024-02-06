@@ -48,6 +48,8 @@ namespace NiVE3.Model
 
         EffectListModel EffectListModel { get; }
 
+        TextPropertyModel TextPropertyModel { get; }
+
         HistoryModel HistoryModel { get; }
 
         ApplicationModel ApplicationModel { get; }
@@ -56,11 +58,12 @@ namespace NiVE3.Model
 
         public event EventHandler<CompositionEventArgs>? CompositionRemoved;
 
-        public ProjectModel(FootageListModel footageListModel, RendererListModel rendererListModel, EffectListModel effectListModel, HistoryModel historyModel, ApplicationModel applicationModel)
+        public ProjectModel(FootageListModel footageListModel, RendererListModel rendererListModel, EffectListModel effectListModel, TextPropertyModel textPropertyModel, HistoryModel historyModel, ApplicationModel applicationModel)
         {
             FootageListModel = footageListModel;
             RendererListModel = rendererListModel;
             EffectListModel = effectListModel;
+            TextPropertyModel = textPropertyModel;
             HistoryModel = historyModel;
             ApplicationModel = applicationModel;
 
@@ -78,7 +81,7 @@ namespace NiVE3.Model
         {
             var renderer = RendererListModel.CreateRenderer(rendererType);
             var rendererPluginId = RendererListModel.GetPluginId(rendererType);
-            var composition = new CompositionModel(renderer, rendererPluginId, FootageListModel, EffectListModel, HistoryModel)
+            var composition = new CompositionModel(renderer, rendererPluginId, FootageListModel, EffectListModel, TextPropertyModel, HistoryModel)
             {
                 Name = name,
                 Width = width,
@@ -161,7 +164,7 @@ namespace NiVE3.Model
                 foreach (var compositionData in projectData.Compositions)
                 {
                     var renderer = RendererListModel.CreateRenderer(compositionData.RendererPluginId);
-                    var composition = new CompositionModel(renderer, compositionData.RendererPluginId, FootageListModel, EffectListModel, HistoryModel, compositionData.CompositionId);
+                    var composition = new CompositionModel(renderer, compositionData.RendererPluginId, FootageListModel, EffectListModel, TextPropertyModel, HistoryModel, compositionData.CompositionId);
                     composition.LoadData(compositionData);
                     CompositionModels.Add(composition);
                 }

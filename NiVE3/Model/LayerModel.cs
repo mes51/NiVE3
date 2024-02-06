@@ -408,6 +408,14 @@ namespace NiVE3.Model
             {
                 LayerOptionProperties.ValueUpdated += Properties_ValueUpdated;
             }
+            if (TextProperties != null)
+            {
+                TextProperties.ValueUpdated += Properties_ValueUpdated;
+            }
+            if (SourceOptionProperties != null)
+            {
+                SourceOptionProperties.ValueUpdated += Properties_ValueUpdated;
+            }
             PropertyChanged += LayerModel_PropertyChanged;
         }
 
@@ -429,7 +437,7 @@ namespace NiVE3.Model
             var sourceTime = layerTime;
 
             var sourceOptionProperties = (TextProperties ?? SourceOptionProperties)?.GetPropertyValueGroup(sourceTime);
-            var image = FootageModel.ReadImage(sourceTime, sourceOptionProperties, useGpu);
+            var image = FootageModel.ReadImage(sourceTime, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties, useGpu);
             var roi = new ROI(new Int32Point(), new Int32Size(image.Width, image.Height), 0, 0, image.Width, image.Height);
 
             if (IsEnableEffect)
@@ -482,7 +490,7 @@ namespace NiVE3.Model
             var sourceTime = layerTime;
 
             var sourceOptionProperties = (TextProperties ?? SourceOptionProperties)?.GetPropertyValueGroup(sourceTime);
-            var image = FootageModel.ReadImage(sourceTime, sourceOptionProperties, useGpu);
+            var image = FootageModel.ReadImage(sourceTime, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties, useGpu);
             var roi = new ROI(new Int32Point(), new Int32Size(image.Width, image.Height), 0, 0, image.Width, image.Height);
 
             RenderableImage? trackMatteImage = null;
@@ -599,6 +607,12 @@ namespace NiVE3.Model
         {
             var layerTime = time - SourceStartPoint;
             return LayerOptionProperties?.GetPropertyValueGroup(layerTime);
+        }
+
+        public PropertyValueGroup? GetTextProperties(double time)
+        {
+            var layerTime = time - SourceStartPoint;
+            return TextProperties?.GetPropertyValueGroup(layerTime);
         }
 
         public ParentTransform[] GetParentTransforms(double time)
@@ -752,6 +766,12 @@ namespace NiVE3.Model
         public void ReplaceFootage(FootageModel footageModel)
         {
             FootageModel = footageModel;
+        }
+
+        public void UpdateTextProperty(string propertyId, object? value)
+        {
+            var property = TextProperties?.FindProperty(propertyId) as PropertyModel;
+            property?.CommitProperty(value, property?.Value);
         }
 
         public LayerData SaveData()

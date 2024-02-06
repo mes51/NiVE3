@@ -9,18 +9,21 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
 using NiVE3.Model;
-using NiVE3.Property.Types;
+using NiVE3.Shared.Extension;
 using NiVE3.View.Dock;
 using NiVE3.View.Resource;
+using NiVE3.SourceGenerator.ViewModelWireGenerator;
 using Prism.Mvvm;
 using SixLabors.ImageSharp.Drawing;
 using FontFamily = SixLabors.Fonts.FontFamily;
 using TextOptions = SixLabors.Fonts.TextOptions;
+using NiVE3.Text;
 
 namespace NiVE3.ViewModel
 {
     [PaneLocation(PaneLocation.Right1Center)]
-    class TextPropertyViewModel : SingletonePaneViewModelBase
+    [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
+    partial class TextPropertyViewModel : SingletonePaneViewModelBase
     {
         private int selectedFontGroupIndex;
         public int SelectedFontGroupIndex
@@ -37,6 +40,7 @@ namespace NiVE3.ViewModel
         }
 
         private double fontSize = 20.0;
+        [NeedWire(nameof(TextPropertyModel))]
         public double FontSize
         {
             get { return fontSize; }
@@ -44,6 +48,7 @@ namespace NiVE3.ViewModel
         }
 
         private double lineHeight = 1.0;
+        [NeedWire(nameof(TextPropertyModel))]
         public double LineHeight
         {
             get { return lineHeight; }
@@ -51,6 +56,7 @@ namespace NiVE3.ViewModel
         }
 
         private double verticalScale = 100.0;
+        [NeedWire(nameof(TextPropertyModel))]
         public double VerticalScale
         {
             get { return verticalScale; }
@@ -58,6 +64,7 @@ namespace NiVE3.ViewModel
         }
 
         private double horizontalScale = 100.0;
+        [NeedWire(nameof(TextPropertyModel))]
         public double HorizontalScale
         {
             get { return horizontalScale; }
@@ -65,6 +72,7 @@ namespace NiVE3.ViewModel
         }
 
         private double letterSpacing;
+        [NeedWire(nameof(TextPropertyModel))]
         public double LetterSpacing
         {
             get { return letterSpacing; }
@@ -72,6 +80,7 @@ namespace NiVE3.ViewModel
         }
 
         private double textLineWidth;
+        [NeedWire(nameof(TextPropertyModel))]
         public double TextLineWidth
         {
             get { return textLineWidth; }
@@ -79,6 +88,7 @@ namespace NiVE3.ViewModel
         }
 
         private TextLineDrawOrder textLineDrawOrder;
+        [NeedWire(nameof(TextPropertyModel))]
         public TextLineDrawOrder TextLineDrawOrder
         {
             get { return textLineDrawOrder; }
@@ -86,6 +96,7 @@ namespace NiVE3.ViewModel
         }
 
         private bool isEnableBold;
+        [NeedWire(nameof(TextPropertyModel))]
         public bool IsEnableBold
         {
             get { return isEnableBold; }
@@ -93,6 +104,7 @@ namespace NiVE3.ViewModel
         }
 
         private bool isEnableItalic;
+        [NeedWire(nameof(TextPropertyModel))]
         public bool IsEnableItalic
         {
             get { return isEnableItalic; }
@@ -100,6 +112,7 @@ namespace NiVE3.ViewModel
         }
 
         private TextAlign textAlign;
+        [NeedWire(nameof(TextPropertyModel))]
         public TextAlign TextAlign
         {
             get { return textAlign; }
@@ -112,6 +125,8 @@ namespace NiVE3.ViewModel
 
         TextPropertyModel TextPropertyModel { get; }
 
+        bool IsFontChanging { get; set; }
+
         public TextPropertyViewModel(TextPropertyModel textPropertyModel)
         {
             TextPropertyModel = textPropertyModel;
@@ -119,16 +134,54 @@ namespace NiVE3.ViewModel
 
             Title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.TextPropertyView_Title);
 
+            WiringModel();
+
+            UpdateSelectedFontFromModel();
+
             PropertyChanged += TextPropertyViewModel_PropertyChanged;
+            textPropertyModel.PropertyChanged += TextPropertyModel_PropertyChanged;
+        }
+
+        partial void WiringModel();
+
+        void UpdateSelectedFontFromModel()
+        {
+            if (IsFontChanging)
+            {
+                return;
+            }
+
+            IsFontChanging = true;
+
+            var newSelectedFont = TextPropertyModel.SelectedFont;
+            var groupIndex = Fonts.FindIndex(f => f.SubFamiles.Any(sf => sf.FontInfo.UniqueId == newSelectedFont.UniqueId));
+            var subFamilyIndex = Fonts[groupIndex].SubFamiles.IndexOf(sf => sf.FontInfo.UniqueId == newSelectedFont.UniqueId);
+            SelectedFontGroupIndex = groupIndex;
+            SelectedFontSubFamilyIndex = subFamilyIndex;
+
+            IsFontChanging = false;
+        }
+
+        private void TextPropertyModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(TextPropertyModel.SelectedFont))
+            {
+                UpdateSelectedFontFromModel();
+            }
         }
 
         private void TextPropertyViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             switch (e.PropertyName)
             {
-                case nameof(SelectedFontGroupIndex):
+                case nameof(SelectedFontGroupIndex) when !IsFontChanging:
                     RaisePropertyChanged(nameof(SelectedFontGroup));
                     SelectedFontSubFamilyIndex = 0;
+                    break;
+                case nameof(SelectedFontSubFamilyIndex) when !IsFontChanging:
+                    IsFontChanging = true;
+                    TextPropertyModel.SelectedFont = SelectedFontGroup.SubFamiles[SelectedFontSubFamilyIndex].FontInfo;
+                    IsFontChanging = false;
                     break;
             }
         }
