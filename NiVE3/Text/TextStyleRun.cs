@@ -27,11 +27,11 @@ namespace NiVE3.Text
                 Font = new Font(
                     (FontInfo.FindByUniqueId(Style.FontUniqueId) ?? FontInfo.FallbackFont).FontFamily,
                     Style.FontSize,
-                    (Style.IsEnableBold, Style.IsEnableBold) switch
+                    (Style.IsEnableBold, Style.IsEnableItalic) switch
                     {
                         (true, true) => FontStyle.BoldItalic,
                         (true, false) => FontStyle.Bold,
-                        (false, false) => FontStyle.Italic,
+                        (false, true) => FontStyle.Italic,
                         _ => FontStyle.Regular
                     }
                 ),

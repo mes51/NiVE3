@@ -104,7 +104,7 @@ namespace NiVE3.Input.Special
                 return new NManagedImage(1, 1);
             }
 
-            var textCount = StringInfo.GetNextTextElementLength(sourceText.Text);
+            var textCount = new StringInfo(sourceText.Text).LengthInTextElements;
             var filledStyles = new List<TextStyleRun>();
             foreach (var s in sourceText.Styles)
             {
@@ -123,7 +123,7 @@ namespace NiVE3.Input.Special
             }
 
             var fontInfo = FontInfo.FindByUniqueId(sourceText.DefaultStyle.FontUniqueId) ?? FontInfo.FallbackFont;
-            var font = new Font(fontInfo.FontFamily, (float)sourceText.DefaultStyle.FontSize);
+            var font = fontInfo.FontFamily.CreateFont((float)sourceText.DefaultStyle.FontSize);
             var textOption = new TextOptions(font);
             textOption.TextRuns = filledStyles.Select(s => s.ToTextRun()).ToArray();
 

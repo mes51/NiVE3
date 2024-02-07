@@ -216,7 +216,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type CheckBox}">
                     <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="1">
-                        <Path Data="{StaticResource LargeShyIcon}" Style="{StaticResource IconBase}"/>
+                        <Path Fill="{TemplateBinding Foreground}" Data="{StaticResource LargeShyIcon}" Style="{StaticResource IconBase}"/>
                     </Border>
                 </ControlTemplate>
             </Setter.Value>
@@ -228,7 +228,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type CheckBox}">
                     <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="1">
-                        <Path Data="{StaticResource LargeFrameBlendIcon}" Style="{StaticResource IconBase}"/>
+                        <Path Fill="{TemplateBinding Foreground}" Data="{StaticResource LargeFrameBlendIcon}" Style="{StaticResource IconBase}"/>
                     </Border>
                 </ControlTemplate>
             </Setter.Value>
@@ -240,7 +240,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type CheckBox}">
                     <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="1">
-                        <Path Data="{StaticResource LargeMotionBlurIcon}" Style="{StaticResource IconBase}"/>
+                        <Path Fill="{TemplateBinding Foreground}" Data="{StaticResource LargeMotionBlurIcon}" Style="{StaticResource IconBase}"/>
                     </Border>
                 </ControlTemplate>
             </Setter.Value>
@@ -255,7 +255,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type CheckBox}">
                     <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="1">
-                        <Path Data="{gm:FontawesomeResource ResourceKey=Stopwatch, ReturnDynamicResource=True}" Style="{StaticResource IconBase}"/>
+                        <Path Fill="{TemplateBinding Foreground}" Data="{gm:FontawesomeResource ResourceKey=Stopwatch, ReturnDynamicResource=True}" Style="{StaticResource IconBase}"/>
                     </Border>
                 </ControlTemplate>
             </Setter.Value>
@@ -267,7 +267,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type CheckBox}">
                     <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="1">
-                        <Path Data="{gm:FontawesomeResource ResourceKey=Bold, ReturnDynamicResource=True}" Style="{StaticResource IconBase}"/>
+                        <Path Fill="{TemplateBinding Foreground}" Data="{gm:FontawesomeResource ResourceKey=Bold, ReturnDynamicResource=True}" Style="{StaticResource IconBase}"/>
                     </Border>
                 </ControlTemplate>
             </Setter.Value>
@@ -279,7 +279,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type CheckBox}">
                     <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="1">
-                        <Path Data="{gm:FontawesomeResource ResourceKey=Italic, ReturnDynamicResource=True}" Style="{StaticResource IconBase}"/>
+                        <Path Fill="{TemplateBinding Foreground}" Data="{gm:FontawesomeResource ResourceKey=Italic, ReturnDynamicResource=True}" Style="{StaticResource IconBase}"/>
                     </Border>
                 </ControlTemplate>
             </Setter.Value>
@@ -291,7 +291,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Button}">
                     <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="1">
-                        <Path Style="{StaticResource IconBase}" Data="{StaticResource PlayIcon}"/>
+                        <Path Fill="{TemplateBinding Foreground}" Style="{StaticResource IconBase}" Data="{StaticResource PlayIcon}"/>
                     </Border>
                 </ControlTemplate>
             </Setter.Value>
@@ -303,7 +303,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Button}">
                     <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="1">
-                        <Path Style="{StaticResource IconBase}" Data="{StaticResource StopIcon}"/>
+                        <Path Fill="{TemplateBinding Foreground}" Style="{StaticResource IconBase}" Data="{StaticResource StopIcon}"/>
                     </Border>
                 </ControlTemplate>
             </Setter.Value>
@@ -315,7 +315,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Button}">
                     <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="1">
-                        <Path Style="{StaticResource IconBase}" Data="{StaticResource PauseIcon}"/>
+                        <Path Fill="{TemplateBinding Foreground}" Style="{StaticResource IconBase}" Data="{StaticResource PauseIcon}"/>
                     </Border>
                 </ControlTemplate>
             </Setter.Value>
@@ -327,7 +327,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Button}">
                     <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="1">
-                        <Path Style="{StaticResource IconBase}" Data="{StaticResource NextFrameIcon}"/>
+                        <Path Fill="{TemplateBinding Foreground}" Style="{StaticResource IconBase}" Data="{StaticResource NextFrameIcon}"/>
                     </Border>
                 </ControlTemplate>
             </Setter.Value>
@@ -339,7 +339,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Button}">
                     <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="1">
-                        <Path Style="{StaticResource IconBase}" Data="{StaticResource PrevFrameIcon}"/>
+                        <Path Fill="{TemplateBinding Foreground}" Style="{StaticResource IconBase}" Data="{StaticResource PrevFrameIcon}"/>
                     </Border>
                 </ControlTemplate>
             </Setter.Value>
@@ -429,7 +429,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type RadioButton}">
                     <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="1">
-                        <Path Data="{gm:FontawesomeResource ResourceKey=AlignLeft, ReturnDynamicResource=True}" Style="{StaticResource IconBase}"/>
+                        <Path Fill="{TemplateBinding Foreground}" Data="{gm:FontawesomeResource ResourceKey=AlignLeft, ReturnDynamicResource=True}" Style="{StaticResource IconBase}"/>
                     </Border>
                 </ControlTemplate>
             </Setter.Value>
@@ -441,7 +441,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type RadioButton}">
                     <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="1">
-                        <Path Data="{gm:FontawesomeResource ResourceKey=AlignCenter, ReturnDynamicResource=True}" Style="{StaticResource IconBase}"/>
+                        <Path Fill="{TemplateBinding Foreground}" Data="{gm:FontawesomeResource ResourceKey=AlignCenter, ReturnDynamicResource=True}" Style="{StaticResource IconBase}"/>
                     </Border>
                 </ControlTemplate>
             </Setter.Value>
@@ -453,7 +453,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type RadioButton}">
                     <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="1">
-                        <Path Data="{gm:FontawesomeResource ResourceKey=AlignRight, ReturnDynamicResource=True}" Style="{StaticResource IconBase}"/>
+                        <Path Fill="{TemplateBinding Foreground}" Data="{gm:FontawesomeResource ResourceKey=AlignRight, ReturnDynamicResource=True}" Style="{StaticResource IconBase}"/>
                     </Border>
                 </ControlTemplate>
             </Setter.Value>

@@ -251,8 +251,8 @@
         <Rectangle Grid.Row="5" Margin="{StaticResource VerticalStackMargin}"/>
 
         <StackPanel Grid.Row="6" Orientation="Horizontal" Margin="{StaticResource VerticalStackMargin}">
-            <CheckBox Margin="0,5" IsChecked="{Binding IsEnableBold}" Style="{StaticResource TextStyleBoldCheckBox}"/>
-            <CheckBox Margin="5,5,0,5" IsChecked="{Binding IsEnableItalic}" Style="{StaticResource TextStyleItalicCheckBox}"/>
+            <CheckBox Margin="0,5" IsChecked="{Binding IsEnableBold}" Style="{StaticResource TextStyleBoldCheckBox}" IsEnabled="{Binding IsSupportBold}"/>
+            <CheckBox Margin="5,5,0,5" IsChecked="{Binding IsEnableItalic}" Style="{StaticResource TextStyleItalicCheckBox}" IsEnabled="{Binding IsSupportItalic}"/>
             <RadioButton Margin="5,5,0,5" IsChecked="{Binding TextAlign, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static t:TextAlign.Left}}" Style="{StaticResource TextAlignLeftRadioButton}"/>
             <RadioButton Margin="5,5,0,5" IsChecked="{Binding TextAlign, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static t:TextAlign.Center}}" Style="{StaticResource TextAlignCenterRadioButton}"/>
             <RadioButton Margin="5,5,0,5" IsChecked="{Binding TextAlign, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static t:TextAlign.Right}}" Style="{StaticResource TextAlignRightRadioButton}"/>

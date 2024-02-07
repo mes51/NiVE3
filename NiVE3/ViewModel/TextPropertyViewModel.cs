@@ -12,12 +12,13 @@ using NiVE3.Model;
 using NiVE3.Shared.Extension;
 using NiVE3.View.Dock;
 using NiVE3.View.Resource;
+using NiVE3.Text;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
 using Prism.Mvvm;
 using SixLabors.ImageSharp.Drawing;
 using FontFamily = SixLabors.Fonts.FontFamily;
 using TextOptions = SixLabors.Fonts.TextOptions;
-using NiVE3.Text;
+using FontStyle = SixLabors.Fonts.FontStyle;
 
 namespace NiVE3.ViewModel
 {
@@ -121,6 +122,10 @@ namespace NiVE3.ViewModel
 
         public FontGroupViewModel SelectedFontGroup => Fonts[SelectedFontGroupIndex];
 
+        public bool IsSupportBold => SelectedFontGroup.SubFamiles[selectedFontSubFamilyIndex].IsSupportBold;
+
+        public bool IsSupportItalic => SelectedFontGroup.SubFamiles[selectedFontSubFamilyIndex].IsSupportItalic;
+
         public List<FontGroupViewModel> Fonts { get; set; } = new List<FontGroupViewModel>();
 
         TextPropertyModel TextPropertyModel { get; }
@@ -179,9 +184,14 @@ namespace NiVE3.ViewModel
                     SelectedFontSubFamilyIndex = 0;
                     break;
                 case nameof(SelectedFontSubFamilyIndex) when !IsFontChanging:
-                    IsFontChanging = true;
-                    TextPropertyModel.SelectedFont = SelectedFontGroup.SubFamiles[SelectedFontSubFamilyIndex].FontInfo;
-                    IsFontChanging = false;
+                    if (SelectedFontSubFamilyIndex > -1)
+                    {
+                        IsFontChanging = true;
+                        TextPropertyModel.SelectedFont = SelectedFontGroup.SubFamiles[SelectedFontSubFamilyIndex].FontInfo;
+                        IsFontChanging = false;
+                    }
+                    RaisePropertyChanged(nameof(IsSupportBold));
+                    RaisePropertyChanged(nameof(IsSupportItalic));
                     break;
             }
         }
@@ -273,6 +283,10 @@ namespace NiVE3.ViewModel
 
         public FontInfo FontInfo { get; }
 
+        public bool IsSupportBold { get; }
+
+        public bool IsSupportItalic { get; }
+
         public string SubFamilyName { get; }
 
         private GeometryCollection? sample;
@@ -292,6 +306,8 @@ namespace NiVE3.ViewModel
         public FontSubFamilyViewModel(FontInfo fontInfo, string subFamilyName)
         {
             FontInfo = fontInfo;
+            IsSupportBold = fontInfo.FontFamily.GetAvailableStyles().Contains(FontStyle.Bold);
+            IsSupportItalic = fontInfo.FontFamily.GetAvailableStyles().Contains(FontStyle.Italic);
             SubFamilyName = subFamilyName;
         }
 
