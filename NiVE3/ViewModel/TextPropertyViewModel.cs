@@ -19,11 +19,17 @@ using SixLabors.ImageSharp.Drawing;
 using FontFamily = SixLabors.Fonts.FontFamily;
 using TextOptions = SixLabors.Fonts.TextOptions;
 using FontStyle = SixLabors.Fonts.FontStyle;
+using NiVE3.Mvvm;
+using System.Windows.Input;
+using Prism.Commands;
+using NiVE3.Input.Special;
+using NiVE3.Property.Types;
 
 namespace NiVE3.ViewModel
 {
     [PaneLocation(PaneLocation.Right1Center)]
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
+    [ManualViewModelWireable(nameof(Composition), nameof(BindComposition), nameof(UnbindComposition), WithInitializeProperty = true)]
     partial class TextPropertyViewModel : SingletonePaneViewModelBase
     {
         private int selectedFontGroupIndex;
@@ -120,21 +126,88 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref textAlign, value); }
         }
 
+        private Guid? currentEditingCompositionId;
+        [NeedWire(nameof(ViewState), IsOneWay = true)]
+        public Guid? CurrentEditingCompositionId
+        {
+            get { return currentEditingCompositionId; }
+            set { SetProperty(ref currentEditingCompositionId, value); }
+        }
+
+        private Guid? lastSelectedLayerId;
+        [NeedWire(nameof(ViewState), IsOneWay = true)]
+        public Guid? LastSelectedLayerId
+        {
+            get { return lastSelectedLayerId; }
+            set { SetProperty(ref lastSelectedLayerId, value); }
+        }
+
+        private double currentTime;
+        [ManualWire(nameof(Composition), IsOneWay = true)]
+        public double CurrentTime
+        {
+            get { return currentTime; }
+            set { SetProperty(ref currentTime, value); }
+        }
+
+        private CompositionModel? compositionModel;
+        public CompositionModel? Composition
+        {
+            get { return compositionModel; }
+            set
+            {
+                if (compositionModel == value)
+                {
+                    return;
+                }
+
+                if (compositionModel != null)
+                {
+                    UnbindComposition();
+                }
+                SetProperty(ref compositionModel, value);
+                if (value != null)
+                {
+                    BindComposition();
+                }
+            }
+        }
+
+        LayerModel? TargetLayer { get; set; }
+
+        PropertyModel? SourceTextPropertyModel { get; set; }
+
         public FontGroupViewModel SelectedFontGroup => Fonts[SelectedFontGroupIndex];
 
-        public bool IsSupportBold => SelectedFontGroup.SubFamiles[selectedFontSubFamilyIndex].IsSupportBold;
+        public bool IsSupportBold => SelectedFontGroup.SubFamiles.ElementAtOrDefault(selectedFontSubFamilyIndex)?.IsSupportBold ?? false;
 
-        public bool IsSupportItalic => SelectedFontGroup.SubFamiles[selectedFontSubFamilyIndex].IsSupportItalic;
+        public bool IsSupportItalic => SelectedFontGroup.SubFamiles.ElementAtOrDefault(selectedFontSubFamilyIndex)?.IsSupportItalic ?? false;
 
         public List<FontGroupViewModel> Fonts { get; set; } = new List<FontGroupViewModel>();
 
         TextPropertyModel TextPropertyModel { get; }
 
+        ProjectModel ProjectModel { get; }
+
+        ViewStateModel ViewState { get; }
+
         bool IsFontChanging { get; set; }
 
-        public TextPropertyViewModel(TextPropertyModel textPropertyModel)
+        bool IsPropertyEditing { get; set; }
+
+        public ICommand BeginEditCommand { get; }
+
+        public ICommand EndEditCommand { get; }
+
+        public ICommand AbortEditCommand { get; }
+
+        object? PrevValue { get; set; }
+
+        public TextPropertyViewModel(TextPropertyModel textPropertyModel, ProjectModel projectModel, ViewStateModel viewStateModel)
         {
             TextPropertyModel = textPropertyModel;
+            ProjectModel = projectModel;
+            ViewState = viewStateModel;
             Fonts.AddRange(textPropertyModel.FontGroups.Select(f => new FontGroupViewModel(f)));
 
             Title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.TextPropertyView_Title);
@@ -145,9 +218,46 @@ namespace NiVE3.ViewModel
 
             PropertyChanged += TextPropertyViewModel_PropertyChanged;
             textPropertyModel.PropertyChanged += TextPropertyModel_PropertyChanged;
+
+            BeginEditCommand = new DelegateCommand(() =>
+            {
+                IsPropertyEditing = true;
+                if (SourceTextPropertyModel != null)
+                {
+                    SourceTextPropertyModel.UseEditingValue = true;
+                    PrevValue = SourceTextPropertyModel.Value;
+                }
+            });
+
+            EndEditCommand = new DelegateCommand(() =>
+            {
+                IsPropertyEditing = false;
+                if (SourceTextPropertyModel != null && TargetLayer != null)
+                {
+                    SourceTextPropertyModel.UseEditingValue = false;
+                    var newStyle = TextPropertyModel.GetStyle();
+                    SourceTextPropertyModel.CurrentTime = CurrentTime;
+                    SourceTextPropertyModel.SourceStartPoint = TargetLayer.SourceStartPoint;
+                    SourceTextPropertyModel.CommitProperty(SourceTextPropertyType.ReplaceDefaultStyle(PrevValue, newStyle), PrevValue);
+                }
+            });
+
+            AbortEditCommand = new DelegateCommand(() =>
+            {
+                IsPropertyEditing = false;
+                if (SourceTextPropertyModel != null)
+                {
+                    SourceTextPropertyModel.UseEditingValue = false;
+                    SourceTextPropertyModel.Value = PrevValue;
+                }
+            });
         }
 
         partial void WiringModel();
+
+        partial void BindComposition();
+
+        partial void UnbindComposition();
 
         void UpdateSelectedFontFromModel()
         {
@@ -165,6 +275,54 @@ namespace NiVE3.ViewModel
             SelectedFontSubFamilyIndex = subFamilyIndex;
 
             IsFontChanging = false;
+        }
+
+        void UpdateTargetLayer()
+        {
+            TargetLayer = Composition?.Layers?.FirstOrDefault(l => l.LayerId == LastSelectedLayerId);
+            SourceTextPropertyModel = TargetLayer?.TextProperties?.FindProperty(TextFootageSource.SourceTextId) as PropertyModel;
+            UpdateTextPropertyFromLayer();
+        }
+
+        void UpdateTextPropertyFromLayer()
+        {
+            if (SourceTextPropertyModel == null || TargetLayer == null)
+            {
+                return;
+            }
+
+            IsFontChanging = true;
+
+            var style = SourceTextPropertyType.GetDefaultStyle(SourceTextPropertyModel.GetValue(CurrentTime - TargetLayer.SourceStartPoint));
+            if (style != null)
+            {
+                TextPropertyModel.SetStyle(style);
+            }
+
+            IsFontChanging = false;
+
+            UpdateSelectedFontFromModel();
+        }
+
+        void ChangeTextLayerProperty()
+        {
+            if (IsFontChanging || SourceTextPropertyModel == null || TargetLayer == null)
+            {
+                return;
+            }
+
+            var newStyle = TextPropertyModel.GetStyle();
+            if (IsPropertyEditing)
+            {
+                SourceTextPropertyModel.Value = SourceTextPropertyType.ReplaceDefaultStyle(PrevValue, newStyle);
+            }
+            else
+            {
+                var prevValue = SourceTextPropertyModel.Value;
+                SourceTextPropertyModel.CurrentTime = CurrentTime;
+                SourceTextPropertyModel.SourceStartPoint = TargetLayer.SourceStartPoint;
+                SourceTextPropertyModel.CommitProperty(SourceTextPropertyType.ReplaceDefaultStyle(prevValue, newStyle), prevValue);
+            }
         }
 
         private void TextPropertyModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -190,8 +348,34 @@ namespace NiVE3.ViewModel
                         TextPropertyModel.SelectedFont = SelectedFontGroup.SubFamiles[SelectedFontSubFamilyIndex].FontInfo;
                         IsFontChanging = false;
                     }
+                    ChangeTextLayerProperty();
                     RaisePropertyChanged(nameof(IsSupportBold));
                     RaisePropertyChanged(nameof(IsSupportItalic));
+                    break;
+                case nameof(CurrentEditingCompositionId):
+                    if (CurrentEditingCompositionId != Composition?.CompositionId)
+                    {
+                        Composition = ProjectModel.CompositionModels.FirstOrDefault(c => c.CompositionId == CurrentEditingCompositionId);
+                        UpdateTargetLayer();
+                    }
+                    break;
+                case nameof(LastSelectedLayerId):
+                    UpdateTargetLayer();
+                    break;
+                case nameof(FontSize):
+                case nameof(LineHeight):
+                case nameof(VerticalScale):
+                case nameof(HorizontalScale):
+                case nameof(LetterSpacing):
+                case nameof(TextLineWidth):
+                case nameof(TextLineDrawOrder):
+                case nameof(IsEnableBold):
+                case nameof(IsEnableItalic):
+                case nameof(TextAlign):
+                    ChangeTextLayerProperty();
+                    break;
+                case nameof(CurrentTime):
+                    UpdateTextPropertyFromLayer();
                     break;
             }
         }
@@ -199,7 +383,7 @@ namespace NiVE3.ViewModel
 
     class FontGroupViewModel : BindableBase
     {
-        static readonly SemaphoreSlim SampleCreationSemaphoe = new SemaphoreSlim(1);
+        static readonly object LockObject = new object();
 
         public FontGroup FontFamily { get; }
 
@@ -233,17 +417,16 @@ namespace NiVE3.ViewModel
 
             Task.Factory.StartNew(() =>
             {
-                SampleCreationSemaphoe.Wait();
-                try
+                if (sample != null)
                 {
-                    if (sample != null)
-                    {
-                        return;
-                    }
+                    return;
+                }
 
+                var collection = new GeometryCollection();
+                lock (LockObject)
+                {
                     var font = FontFamily.FontInfos[0].FontFamily;
                     var paths = TextBuilder.GenerateGlyphs("参麩靇 サンプル Sample", new TextOptions(font.CreateFont(FontSize)));
-                    var collection = new GeometryCollection();
                     foreach (var path in paths)
                     {
                         foreach (var simplePath in path.Flatten())
@@ -262,24 +445,21 @@ namespace NiVE3.ViewModel
                             collection.Add(geometry);
                         }
                     }
-                    collection.Freeze();
 
-                    Application.Current.Dispatcher.Invoke(new Action(() =>
-                    {
-                        Sample = collection;
-                    }));
+                    collection.Freeze();
                 }
-                finally
+
+                Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                 {
-                    SampleCreationSemaphoe.Release();
-                }
+                    Sample = collection;
+                }), DispatcherPriority.ApplicationIdle);
             });
         }
     }
 
     class FontSubFamilyViewModel : BindableBase
     {
-        static readonly SemaphoreSlim SampleCreationSemaphoe = new SemaphoreSlim(1);
+        static readonly object LockObject = new object();
 
         public FontInfo FontInfo { get; }
 
@@ -317,17 +497,16 @@ namespace NiVE3.ViewModel
 
             Task.Factory.StartNew(() =>
             {
-                SampleCreationSemaphoe.Wait();
-                try
+                if (sample != null)
                 {
-                    if (sample != null)
-                    {
-                        return;
-                    }
+                    return;
+                }
 
+                var collection = new GeometryCollection();
+                lock (LockObject)
+                {
                     var font = FontInfo.FontFamily;
                     var paths = TextBuilder.GenerateGlyphs("参麩靇 サンプル Sample", new TextOptions(font.CreateFont(FontSize)));
-                    var collection = new GeometryCollection();
                     foreach (var path in paths)
                     {
                         foreach (var simplePath in path.Flatten())
@@ -347,16 +526,12 @@ namespace NiVE3.ViewModel
                         }
                     }
                     collection.Freeze();
+                }
 
-                    Application.Current.Dispatcher.Invoke(new Action(() =>
-                    {
-                        Sample = collection;
-                    }));
-                }
-                finally
+                Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                 {
-                    SampleCreationSemaphoe.Release();
-                }
+                    Sample = collection;
+                }), DispatcherPriority.ApplicationIdle);
             });
         }
     }

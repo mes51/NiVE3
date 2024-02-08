@@ -67,5 +67,25 @@ namespace NiVE3.Property.Types
 
             return StyledText.Deserialize(dictionary);
         }
+
+        public static object? ReplaceDefaultStyle(object? value, TextStyle newStyle)
+        {
+            if (value is not StyledText styledText)
+            {
+                return null;
+            }
+
+            return new StyledText(styledText.Text, newStyle, styledText.Styles);
+        }
+
+        public static TextStyle? GetDefaultStyle(object? value)
+        {
+            if (value is not StyledText styledText)
+            {
+                return null;
+            }
+
+            return styledText.DefaultStyle;
+        }
     }
 }

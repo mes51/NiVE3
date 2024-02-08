@@ -11,6 +11,7 @@
              xmlns:upr="clr-namespace:NiVE3.UI.Primitive;assembly=NiVE3.UI"
              xmlns:cv="clr-namespace:NiVE3.View.Converter"
              xmlns:mk="clr-namespace:NiVE3.Wpf.Markup"
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
@@ -187,7 +188,28 @@
                 </Grid.ColumnDefinitions>
 
                 <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=TextPropertyView_Property_Size}" VerticalAlignment="Center"/>
-                <upr:SlidableNumberTextBox Grid.Column="1" Value="{Binding FontSize}" UnitText="px" Digit="2" Minimum="0" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                <upr:SlidableNumberTextBox Grid.Column="1" Value="{Binding FontSize}" UnitText="px" Digit="2" Minimum="0" VerticalAlignment="Center" HorizontalAlignment="Right">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="BeginSlideEditValue">
+                            <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="EndSlideEditValue">
+                            <i:InvokeCommandAction Command="{Binding EndEditCommand}"/>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="AbortSlideEditValue">
+                            <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="BeginTextEditValue">
+                            <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="EndTextEditValue">
+                            <i:InvokeCommandAction Command="{Binding EndEditCommand}"/>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="AbortTextEditValue">
+                            <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </upr:SlidableNumberTextBox>
             </Grid>
             <Grid Style="{StaticResource ParameterRightGridStyle}">
                 <Grid.ColumnDefinitions>
@@ -196,7 +218,28 @@
                 </Grid.ColumnDefinitions>
 
                 <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=TextPropertyView_Property_LineHeight}" VerticalAlignment="Center"/>
-                <upr:SlidableNumberTextBox Grid.Column="1" Value="{Binding LineHeight}" Digit="2" Minimum="0" SlideChangeValue="0.1" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                <upr:SlidableNumberTextBox Grid.Column="1" Value="{Binding LineHeight}" Digit="2" Minimum="0" SlideChangeValue="0.1" VerticalAlignment="Center" HorizontalAlignment="Right">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="BeginSlideEditValue">
+                            <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="EndSlideEditValue">
+                            <i:InvokeCommandAction Command="{Binding EndEditCommand}"/>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="AbortSlideEditValue">
+                            <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="BeginTextEditValue">
+                            <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="EndTextEditValue">
+                            <i:InvokeCommandAction Command="{Binding EndEditCommand}"/>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="AbortTextEditValue">
+                            <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </upr:SlidableNumberTextBox>
             </Grid>
             <Grid Style="{StaticResource ParameterLeftGridStyle}">
                 <Grid.ColumnDefinitions>
@@ -205,7 +248,28 @@
                 </Grid.ColumnDefinitions>
 
                 <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=TextPropertyView_Property_VerticalScale}" VerticalAlignment="Center"/>
-                <upr:SlidableNumberTextBox Grid.Column="1" Value="{Binding VerticalScale}" UnitText="%" Digit="2" Minimum="0" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                <upr:SlidableNumberTextBox Grid.Column="1" Value="{Binding VerticalScale}" UnitText="%" Digit="2" Minimum="0" VerticalAlignment="Center" HorizontalAlignment="Right">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="BeginSlideEditValue">
+                            <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="EndSlideEditValue">
+                            <i:InvokeCommandAction Command="{Binding EndEditCommand}"/>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="AbortSlideEditValue">
+                            <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="BeginTextEditValue">
+                            <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="EndTextEditValue">
+                            <i:InvokeCommandAction Command="{Binding EndEditCommand}"/>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="AbortTextEditValue">
+                            <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </upr:SlidableNumberTextBox>
             </Grid>
             <Grid Style="{StaticResource ParameterRightGridStyle}">
                 <Grid.ColumnDefinitions>
@@ -214,7 +278,28 @@
                 </Grid.ColumnDefinitions>
 
                 <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=TextPropertyView_Property_HorizontalScale}" VerticalAlignment="Center"/>
-                <upr:SlidableNumberTextBox Grid.Column="1" Value="{Binding HorizontalScale}" UnitText="%" Digit="2" Minimum="0" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                <upr:SlidableNumberTextBox Grid.Column="1" Value="{Binding HorizontalScale}" UnitText="%" Digit="2" Minimum="0" VerticalAlignment="Center" HorizontalAlignment="Right">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="BeginSlideEditValue">
+                            <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="EndSlideEditValue">
+                            <i:InvokeCommandAction Command="{Binding EndEditCommand}"/>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="AbortSlideEditValue">
+                            <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="BeginTextEditValue">
+                            <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="EndTextEditValue">
+                            <i:InvokeCommandAction Command="{Binding EndEditCommand}"/>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="AbortTextEditValue">
+                            <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </upr:SlidableNumberTextBox>
             </Grid>
             <Grid Style="{StaticResource ParameterLeftGridStyle}">
                 <Grid.ColumnDefinitions>
@@ -223,7 +308,28 @@
                 </Grid.ColumnDefinitions>
 
                 <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=TextPropertyView_Property_LetterSpacing}" VerticalAlignment="Center"/>
-                <upr:SlidableNumberTextBox Grid.Column="1" Value="{Binding LetterSpacing}" UnitText="px" Digit="2" Minimum="0" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                <upr:SlidableNumberTextBox Grid.Column="1" Value="{Binding LetterSpacing}" UnitText="px" Digit="2" Minimum="0" VerticalAlignment="Center" HorizontalAlignment="Right">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="BeginSlideEditValue">
+                            <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="EndSlideEditValue">
+                            <i:InvokeCommandAction Command="{Binding EndEditCommand}"/>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="AbortSlideEditValue">
+                            <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="BeginTextEditValue">
+                            <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="EndTextEditValue">
+                            <i:InvokeCommandAction Command="{Binding EndEditCommand}"/>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="AbortTextEditValue">
+                            <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </upr:SlidableNumberTextBox>
             </Grid>
         </UniformGrid>
         <Rectangle Grid.Row="2" Margin="{StaticResource VerticalStackMargin}" Fill="Gray" Width="1" HorizontalAlignment="Center"/>
@@ -243,7 +349,28 @@
                 </Grid.ColumnDefinitions>
 
                 <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=TextPropertyView_Property_LineWidth}" VerticalAlignment="Center"/>
-                <upr:SlidableNumberTextBox Grid.Column="1" Value="{Binding TextLineWidth}" UnitText="px" Digit="2" Minimum="0" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                <upr:SlidableNumberTextBox Grid.Column="1" Value="{Binding TextLineWidth}" UnitText="px" Digit="2" Minimum="0" VerticalAlignment="Center" HorizontalAlignment="Right">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="BeginSlideEditValue">
+                            <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="EndSlideEditValue">
+                            <i:InvokeCommandAction Command="{Binding EndEditCommand}"/>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="AbortSlideEditValue">
+                            <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="BeginTextEditValue">
+                            <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="EndTextEditValue">
+                            <i:InvokeCommandAction Command="{Binding EndEditCommand}"/>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="AbortTextEditValue">
+                            <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </upr:SlidableNumberTextBox>
             </Grid>
             <ComboBox Grid.Column="1" Style="{StaticResource TextLineOrderComboBoxStyle}" SelectedValue="{Binding TextLineDrawOrder}" ItemsSource="{mk:EnumValues EnumType={x:Type t:TextLineDrawOrder}}"/>
         </Grid>

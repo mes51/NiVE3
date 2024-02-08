@@ -106,10 +106,9 @@ namespace NiVE3.Model
             SelectedFont = (FontGroups.FirstOrDefault(g => g.FontName == DefaultFontName)?.SubFamiles?.TryGetValue(DefaultFontSubFamilyName, out var defaultFont) ?? false) ? defaultFont : FontInfo.FallbackFont;
         }
 
-        public void UpdateTextProperty(LayerModel targetLayer, double time)
+        public TextStyle GetStyle()
         {
-            var currentText = (targetLayer.GetTextProperties(time)?.TryGetValueInTree(TextFootageSource.SourceTextId, out var styledText) ?? false) ? (styledText as StyledText) ?? StyledText.Empty : StyledText.Empty;
-            var newStyle = new TextStyle(
+            return new TextStyle(
                 SelectedFont.UniqueId,
                 (float)FontSize,
                 (float)LineHeight,
@@ -121,7 +120,27 @@ namespace NiVE3.Model
                 IsEnableItalic,
                 TextAlign
             );
-            targetLayer.UpdateTextProperty(TextFootageSource.SourceTextId, new StyledText(currentText.Text, newStyle, currentText.Styles));
+        }
+
+        public void SetStyle(TextStyle style)
+        {
+            SelectedFont = FontInfo.FindByUniqueId(style.FontUniqueId) ?? FontInfo.FallbackFont;
+            FontSize = style.FontSize;
+            LineHeight = style.LineHeight;
+            LetterSpacing = style.LetterSpacing;
+            VerticalScale = style.VerticalScale;
+            HorizontalScale = style.HorizontalScale;
+            TextLineDrawOrder = style.TextLineDrawOrder;
+            IsEnableBold = style.IsEnableBold;
+            IsEnableItalic = style.IsEnableItalic;
+            TextAlign = style.TextAlign;
+        }
+
+        public void UpdateTextProperty(LayerModel targetLayer, double time)
+        {
+            var currentText = (targetLayer.GetTextProperties(time)?.TryGetValueInTree(TextFootageSource.SourceTextId, out var styledText) ?? false) ? (styledText as StyledText) ?? StyledText.Empty : StyledText.Empty;
+            var newStyle = GetStyle();
+            targetLayer.UpdateTextProperty(TextFootageSource.SourceTextId, SourceTextPropertyType.ReplaceDefaultStyle(currentText, newStyle));
         }
     }
 
