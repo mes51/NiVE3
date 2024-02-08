@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NiVE3.Plugin.Image
+namespace NiVE3.Image
 {
     /// <summary>
     /// NiVE上での画像データを表します

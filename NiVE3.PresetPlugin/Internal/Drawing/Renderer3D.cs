@@ -6,13 +6,13 @@ using System.Runtime.Intrinsics.X86;
 using System.Runtime.Intrinsics;
 using System.Text;
 using System.Threading.Tasks;
-using NiVE3.Plugin.Image;
+using NiVE3.Image;
+using NiVE3.Numerics;
 using NiVE3.PresetPlugin.Internal.Drawing.Primitive3D;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Shared.Extension;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
-using NiVE3.Plugin.Numerics;
 using NiVE3.Plugin.Interfaces.RendererParams;
 using System.Buffers;
 

@@ -4,8 +4,8 @@ using System.Linq;
 using System.Runtime.Intrinsics;
 using System.Text;
 using System.Threading.Tasks;
-using NiVE3.Plugin.Numerics;
 using NiVE3.Shared.Extension;
+using NiVE3.Numerics;
 
 namespace NiVE3.Plugin.Property.Types
 {

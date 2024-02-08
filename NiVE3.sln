@@ -20,7 +20,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NiVE3.SourceGenerator.ViewM
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NiVE3.UI", "NiVE3.UI\NiVE3.UI.csproj", "{466B8ED7-B9BE-41AF-BD1E-2EA80CE9BDEC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NiVE3.Shared", "NiVE3.Shared\NiVE3.Shared.csproj", "{3844E4A6-4D9C-4B48-9D79-01D73BBC6066}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NiVE3.Shared", "NiVE3.Shared\NiVE3.Shared.csproj", "{3844E4A6-4D9C-4B48-9D79-01D73BBC6066}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NiVE3.Image", "NiVE3.Image\NiVE3.Image.csproj", "{B9730145-313D-4776-A144-382390AAF1A9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NiVE3.Numerics", "NiVE3.Numerics\NiVE3.Numerics.csproj", "{17704CD2-803E-4F65-8469-B31C2518D452}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -60,6 +64,14 @@ Global
 		{3844E4A6-4D9C-4B48-9D79-01D73BBC6066}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3844E4A6-4D9C-4B48-9D79-01D73BBC6066}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3844E4A6-4D9C-4B48-9D79-01D73BBC6066}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B9730145-313D-4776-A144-382390AAF1A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B9730145-313D-4776-A144-382390AAF1A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B9730145-313D-4776-A144-382390AAF1A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B9730145-313D-4776-A144-382390AAF1A9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{17704CD2-803E-4F65-8469-B31C2518D452}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{17704CD2-803E-4F65-8469-B31C2518D452}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{17704CD2-803E-4F65-8469-B31C2518D452}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{17704CD2-803E-4F65-8469-B31C2518D452}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

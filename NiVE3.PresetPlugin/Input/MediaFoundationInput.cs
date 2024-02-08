@@ -10,8 +10,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Documents;
 using System.Windows.Input;
+using NiVE3.Image;
 using NiVE3.Plugin.Attributes;
-using NiVE3.Plugin.Image;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.PresetPlugin.Internal.MediaFoundation;
 

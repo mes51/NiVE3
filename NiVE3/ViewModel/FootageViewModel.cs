@@ -13,7 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using NiVE3.Model;
 using NiVE3.Mvvm;
-using NiVE3.Plugin.Image;
+using NiVE3.Image;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
 using NiVE3.View.Command;

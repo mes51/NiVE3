@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using NiVE3.Plugin.Image;
+using NiVE3.Image;
 using NiVE3.Plugin.Property;
 
 namespace NiVE3.Plugin.Interfaces

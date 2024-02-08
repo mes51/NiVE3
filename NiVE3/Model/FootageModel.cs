@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Data.Json.Project;
 using NiVE3.Extension;
-using NiVE3.Plugin.Image;
+using NiVE3.Image;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Property;
 using Prism.Mvvm;

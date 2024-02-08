@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using NiVE3.Mvvm;
-using NiVE3.Plugin.Image;
+using NiVE3.Image;
 using NiVE3.Plugin.Interfaces;
 using Prism.Mvvm;
 

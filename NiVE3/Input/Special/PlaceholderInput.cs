@@ -7,9 +7,8 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
-using NiVE3.Data.Json;
+using NiVE3.Image;
 using NiVE3.Plugin.Attributes;
-using NiVE3.Plugin.Image;
 using NiVE3.Plugin.Interfaces;
 
 namespace NiVE3.Input.Special

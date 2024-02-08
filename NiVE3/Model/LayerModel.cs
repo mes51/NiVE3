@@ -6,12 +6,13 @@ using System.Windows.Media;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NiVE3.Image;
+using NiVE3.Numerics;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Input;
 using NiVE3.Plugin.Property;
 using NiVE3.Plugin.Property.Properties;
 using Prism.Mvvm;
-using NiVE3.Plugin.Resource;
 using NiVE3.View.Resource;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.Property;
@@ -19,13 +20,10 @@ using System.ComponentModel;
 using NiVE3.Shared.Extension;
 using NiVE3.Extension;
 using NiVE3.Plugin.Image;
-using System.Windows;
 using NiVE3.Input.Special;
 using NiVE3.Plugin.Interfaces.RendererParams;
-using NiVE3.Plugin.Numerics;
 using System.Numerics;
 using System.Runtime.Intrinsics;
-using System.Security.Cryptography.Xml;
 using NiVE3.Data.Json.Project;
 
 namespace NiVE3.Model

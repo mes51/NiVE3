@@ -4,8 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
-using NiVE3.Plugin.Interfaces.RendererParams;
-using NiVE3.Plugin.Numerics;
+using NiVE3.Numerics;
 
 namespace NiVE3.Plugin.ValueObject
 {

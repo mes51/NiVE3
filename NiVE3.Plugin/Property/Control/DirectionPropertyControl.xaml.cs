@@ -14,7 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using NiVE3.Plugin.Interfaces;
-using NiVE3.Plugin.Numerics;
+using NiVE3.Numerics;
 
 namespace NiVE3.Plugin.Property.Control
 {

@@ -5,6 +5,8 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using NiVE3.Numerics;
+using NiVE3.Image;
 using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Image;
 using NiVE3.Plugin.Interfaces;
@@ -15,13 +17,8 @@ using NiVE3.PresetPlugin.Internal.Drawing;
 using System.Runtime.Intrinsics;
 using NiVE3.Plugin.Interfaces.RendererParams;
 using System.Runtime.Intrinsics.X86;
-using System.Security.Principal;
-using NiVE3.Plugin.Numerics;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.PresetPlugin.Internal.Drawing.Primitive3D;
-using System.Security.Cryptography;
-using System.Windows.Controls;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace NiVE3.PresetPlugin.Renderer
 {

@@ -10,7 +10,7 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace NiVE3.Plugin.Numerics
+namespace NiVE3.Numerics
 {
     public readonly struct Vector2d : IEquatable<Vector2d>
     {

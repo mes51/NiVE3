@@ -8,10 +8,9 @@ using System.Runtime.Intrinsics;
 using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
-using ILGPU.IR.Values;
 using NiVE3.Shared.Extension;
 
-namespace NiVE3.Plugin.Numerics
+namespace NiVE3.Numerics
 {
     /// <summary>
     /// 3x3の行列

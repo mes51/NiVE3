@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using NiVE3.Plugin.Property.Control;
 
 namespace NiVE3.Plugin.Property.Types
 {

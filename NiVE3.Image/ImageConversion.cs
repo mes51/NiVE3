@@ -8,7 +8,7 @@ using System.Runtime.Intrinsics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NiVE3.Plugin.Image
+namespace NiVE3.Image
 {
     public static unsafe class ImageConversion
     {

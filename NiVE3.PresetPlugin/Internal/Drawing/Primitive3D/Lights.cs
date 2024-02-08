@@ -6,10 +6,9 @@ using System.Runtime.Intrinsics.X86;
 using System.Runtime.Intrinsics;
 using System.Text;
 using System.Threading.Tasks;
+using NiVE3.Numerics;
 using NiVE3.Plugin.Interfaces.RendererParams;
 using NiVE3.Shared.Extension;
-using NiVE3.Plugin.Numerics;
-using System.Windows.Media.Media3D;
 
 namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
 {

@@ -9,9 +9,8 @@ using System.Runtime.Intrinsics;
 using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Shared.Extension;
-using System.Reflection.Metadata;
 
-namespace NiVE3.Plugin.Numerics
+namespace NiVE3.Numerics
 {
     // copy from Matrix4x4
     public struct Matrix4x4d

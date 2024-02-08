@@ -5,12 +5,11 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NiVE3.Image;
 using NiVE3.Model;
 using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Interfaces;
-using NiVE3.Plugin.Image;
 using System.Reflection;
-using System.Runtime.InteropServices;
 
 namespace NiVE3.Test.Model
 {

@@ -2,14 +2,8 @@
 using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
-using SharpGen.Runtime.Win32;
-using Vortice.Direct3D;
-using Vortice.Direct3D11;
-using Vortice.DXGI;
 using Vortice.MediaFoundation;
 
 namespace NiVE3.PresetPlugin.Internal.MediaFoundation
