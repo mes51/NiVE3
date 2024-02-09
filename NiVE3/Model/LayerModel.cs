@@ -25,6 +25,7 @@ using NiVE3.Plugin.Interfaces.RendererParams;
 using System.Numerics;
 using System.Runtime.Intrinsics;
 using NiVE3.Data.Json.Project;
+using NiVE3.Image.Drawing;
 
 namespace NiVE3.Model
 {

@@ -12,6 +12,7 @@
              xmlns:pt="clr-namespace:NiVE3.View.Part"
              xmlns:cv="clr-namespace:NiVE3.View.Converter"
              xmlns:r="clr-namespace:NiVE3.View.Resource"
+             xmlns:dr="clr-namespace:NiVE3.Image.Drawing;assembly=NiVE3.Image"
              xmlns:pi="clr-namespace:NiVE3.Plugin.Interfaces;assembly=NiVE3.Plugin"
              xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
              xmlns:mk="clr-namespace:NiVE3.Wpf.Markup"
@@ -157,7 +158,7 @@
             <Setter Property="ItemTemplate">
                 <Setter.Value>
                     <DataTemplate>
-                        <TextBlock Text="{Binding Converter={StaticResource EnumToLocalizedNameConverter}, ConverterParameter={x:Type pi:BlendMode}}"/>
+                        <TextBlock Text="{Binding Converter={StaticResource EnumToLocalizedNameConverter}, ConverterParameter={x:Type dr:BlendMode}}"/>
                     </DataTemplate>
                 </Setter.Value>
             </Setter>
@@ -608,7 +609,7 @@
             </Grid>
 
             <Grid Grid.Column="7" Grid.Row="0" Style="{StaticResource ColumnGrid}">
-                <upr:ContextMenuSelectBox x:Name="BlendModeSelectBox" SelectedItem="{Binding BlendMode, Mode=OneWay}" ItemsSource="{mk:EnumValues EnumType={x:Type pi:BlendMode}}" Style="{StaticResource BlendModeSelectBoxStyle}" SelectItemChangedByUser="BlendModeSelectBox_SelectItemChangedByUser" dd:DragDrop.DragSourceIgnore="True"/>
+                <upr:ContextMenuSelectBox x:Name="BlendModeSelectBox" SelectedItem="{Binding BlendMode, Mode=OneWay}" ItemsSource="{mk:EnumValues EnumType={x:Type dr:BlendMode}}" Style="{StaticResource BlendModeSelectBoxStyle}" SelectItemChangedByUser="BlendModeSelectBox_SelectItemChangedByUser" dd:DragDrop.DragSourceIgnore="True"/>
             </Grid>
 
             <Grid Grid.Column="8" Grid.Row="0" Style="{StaticResource ColumnGrid}">

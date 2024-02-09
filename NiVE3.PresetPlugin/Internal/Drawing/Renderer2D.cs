@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Image;
+using NiVE3.Image.Drawing;
 using NiVE3.Numerics;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Shared.Extension;
@@ -73,7 +74,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                             continue;
                         }
 
-                        Blend.Process(blendMode, targetData, p, pos);
+                        targetData[pos] = Blend.Process(blendMode, targetData[pos], p);
                     }
                 });
             }
@@ -98,7 +99,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                             continue;
                         }
 
-                        Blend.Process(blendMode, targetData, p, pos);
+                        targetData[pos] = Blend.Process(blendMode, targetData[pos], p);
                     }
                 });
             }

@@ -21,6 +21,7 @@ using NiVE3.Shared.Extension;
 using NiVE3.ValueObject;
 using NiVE3.View.Resource;
 using Prism.Mvvm;
+using NiVE3.Image.Drawing;
 
 namespace NiVE3.Model
 {

@@ -10,6 +10,7 @@ using NiVE3.Image;
 using NiVE3.Numerics;
 using NiVE3.Shared.Extension;
 using NiVE3.Plugin.Interfaces;
+using NiVE3.Image.Drawing;
 
 namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
 {

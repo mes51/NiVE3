@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
+using NiVE3.Image.Drawing;
 using NiVE3.Plugin.Interfaces;
 
 namespace NiVE3.Data.Json.Project

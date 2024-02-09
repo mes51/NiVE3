@@ -15,6 +15,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 using NiVE3.Plugin.Interfaces.RendererParams;
 using System.Buffers;
+using NiVE3.Image.Drawing;
 
 namespace NiVE3.PresetPlugin.Internal.Drawing
 {
@@ -867,7 +868,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                             }
                         }
 
-                        Blend.Process(triangle.BlendMode, renderImageSpan, color, p);
+                        renderImageSpan[p] = Blend.Process(triangle.BlendMode, renderImageSpan[p], color);
                     }
                 });
             }

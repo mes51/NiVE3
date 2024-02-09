@@ -19,6 +19,7 @@ using NiVE3.Plugin.Interfaces.RendererParams;
 using System.Runtime.Intrinsics.X86;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.PresetPlugin.Internal.Drawing.Primitive3D;
+using NiVE3.Image.Drawing;
 
 namespace NiVE3.PresetPlugin.Renderer
 {

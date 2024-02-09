@@ -8,11 +8,13 @@ using System.Runtime.Intrinsics;
 using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Shared.Extension;
-using NiVE3.Plugin.Interfaces;
 
-namespace NiVE3.PresetPlugin.Internal.Drawing
+namespace NiVE3.Image.Drawing
 {
-    static class Blend
+    /// <summary>
+    /// ブレンド処理を提供します
+    /// </summary>
+    public static class Blend
     {
         static readonly Vector128<float> Half128 = Vector128.Create(0.5F);
 
@@ -22,96 +24,78 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
         static readonly Vector4 Two = new Vector4(2.0F, 2.0F, 2.0F, 2.0F);
 
+        /// <summary>
+        /// 指定したブレンドモードで色を合成します
+        /// </summary>
+        /// <param name="blendMode">使用するブレンドモード</param>
+        /// <param name="back">背景色</param>
+        /// <param name="front">合成する色</param>
+        /// <returns>合成後の色</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Process(BlendMode blendMode, Span<Vector4> back, in Vector4 front, int pos)
+        public static Vector4 Process(BlendMode blendMode, in Vector4 back, in Vector4 front)
         {
             switch (blendMode)
             {
                 case BlendMode.Replace:
-                    back[pos] = front;
-                    break;
+                    return front;
                 case BlendMode.Add:
-                    Blend.Add(back, front, pos);
-                    break;
+                    return Add(back, front);
                 case BlendMode.Subtract:
-                    Blend.Subtract(back, front, pos);
-                    break;
+                    return Subtract(back, front);
                 case BlendMode.Multiply:
-                    Blend.Multiply(back, front, pos);
-                    break;
+                    return Multiply(back, front);
                 case BlendMode.Screen:
-                    Blend.Screen(back, front, pos);
-                    break;
+                    return Screen(back, front);
                 case BlendMode.Overlay:
-                    Blend.Overlay(back, front, pos);
-                    break;
+                    return Overlay(back, front);
                 case BlendMode.HardLight:
-                    Blend.HardLight(back, front, pos);
-                    break;
+                    return HardLight(back, front);
                 case BlendMode.SoftLight:
-                    Blend.SoftLight(back, front, pos);
-                    break;
+                    return SoftLight(back, front);
                 case BlendMode.VividLight:
-                    Blend.VividLight(back, front, pos);
-                    break;
+                    return VividLight(back, front);
                 case BlendMode.LinearLight:
-                    Blend.LinearLight(back, front, pos);
-                    break;
+                    return LinearLight(back, front);
                 case BlendMode.PinLight:
-                    Blend.PinLight(back, front, pos);
-                    break;
+                    return PinLight(back, front);
                 case BlendMode.ColorDodge:
-                    Blend.ColorDodge(back, front, pos);
-                    break;
+                    return ColorDodge(back, front);
                 case BlendMode.LinearDodge:
-                    Blend.LinearDodge(back, front, pos);
-                    break;
+                    return LinearDodge(back, front);
                 case BlendMode.ColorBurn:
-                    Blend.ColorBurn(back, front, pos);
-                    break;
+                    return ColorBurn(back, front);
                 case BlendMode.LinearBurn:
-                    Blend.LinearBurn(back, front, pos);
-                    break;
+                    return LinearBurn(back, front);
                 case BlendMode.Darken:
-                    Blend.Darken(back, front, pos);
-                    break;
+                    return Darken(back, front);
                 case BlendMode.Lighten:
-                    Blend.Lighten(back, front, pos);
-                    break;
+                    return Lighten(back, front);
                 case BlendMode.Difference:
-                    Blend.Difference(back, front, pos);
-                    break;
+                    return Difference(back, front);
                 case BlendMode.Exclusion:
-                    Blend.Exclusion(back, front, pos);
-                    break;
+                    return Exclusion(back, front);
                 case BlendMode.Hue:
-                    Blend.Hue(back, front, pos);
-                    break;
+                    return Hue(back, front);
                 case BlendMode.Saturation:
-                    Blend.Saturation(back, front, pos);
-                    break;
+                    return Saturation(back, front);
                 case BlendMode.Color:
-                    Blend.Color(back, front, pos);
-                    break;
+                    return Color(back, front);
                 case BlendMode.Luminance:
-                    Blend.Luminance(back, front, pos);
-                    break;
+                    return Luminance(back, front);
                 default:
-                    Blend.Normal(back, front, pos);
-                    break;
+                    return Normal(back, front);
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void Normal(Span<Vector4> back, in Vector4 front, int pos)
+        static Vector4 Normal(in Vector4 back, in Vector4 front)
         {
-            var bv = back[pos];
-            var ra = bv.W + front.W - bv.W * front.W;
+            var ra = back.W + front.W - back.W * front.W;
             var invRa = 1.0F / ra;
-            var result = (front * front.W + (1.0F - front.W) * bv * bv.W) * invRa;
+            var result = (front * front.W + (1.0F - front.W) * back * back.W) * invRa;
             result.W = ra;
 
-            back[pos] = result;
+            return result;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -127,80 +111,67 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void Add(Span<Vector4> back, in Vector4 front, int pos)
+        static Vector4 Add(in Vector4 back, in Vector4 front)
         {
-            var bv = back[pos];
-            var c = Vector4.Min(front + bv, Vector4.One);
-
-            back[pos] = Composite(bv, front, c);
+            var c = Vector4.Min(front + back, Vector4.One);
+            return Composite(back, front, c);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void Subtract(Span<Vector4> back, in Vector4 front, int pos)
+        static Vector4 Subtract(in Vector4 back, in Vector4 front)
         {
-            var bv = back[pos];
-            var c = Vector4.Max(front + bv, Vector4.Zero);
-
-            back[pos] = Composite(bv, front, c);
+            var c = Vector4.Max(front - back, Vector4.Zero);
+            return Composite(back, front, c);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void Multiply(Span<Vector4> back, in Vector4 front, int pos)
+        static Vector4 Multiply(in Vector4 back, in Vector4 front)
         {
-            var bv = back[pos];
-
-            back[pos] = Composite(bv, front, front * bv);
+            return Composite(back, front, front * back);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void Screen(Span<Vector4> back, in Vector4 front, int pos)
+        static Vector4 Screen(in Vector4 back, in Vector4 front)
         {
-            var bv = back[pos];
-            var c = Vector4.One - (Vector4.One - bv) * (Vector4.One - front);
-
-            back[pos] = Composite(bv, front, c);
+            var c = Vector4.One - (Vector4.One - back) * (Vector4.One - front);
+            return Composite(back, front, c);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void Overlay(Span<Vector4> back, in Vector4 front, int pos)
+        static Vector4 Overlay(in Vector4 back, in Vector4 front)
         {
-            var bv = back[pos];
-
-            var mask = Sse.CompareLessThan(bv.AsVector128(), Half128);
-            var lt = 2.0F * bv * front;
-            var gte = Vector4.One - 2.0F * (Vector4.One - bv) * (Vector4.One - front);
+            var mask = Sse.CompareLessThan(back.AsVector128(), Half128);
+            var lt = 2.0F * back * front;
+            var gte = Vector4.One - 2.0F * (Vector4.One - back) * (Vector4.One - front);
 
             var c = Sse.Add(
                 Sse.And(mask, lt.AsVector128()),
                 Sse.AndNot(mask, gte.AsVector128())
             ).AsVector4();
 
-            back[pos] = Composite(bv, front, c);
+            return Composite(back, front, c);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void HardLight(Span<Vector4> back, in Vector4 front, int pos)
+        static Vector4 HardLight(in Vector4 back, in Vector4 front)
         {
-            var bv = back[pos];
-
             var mask = Sse.CompareLessThan(front.AsVector128(), Half128);
-            var lt = 2.0F * bv * front;
-            var gte = Vector4.One - 2.0F * (Vector4.One - bv) * (Vector4.One - front);
+            var lt = 2.0F * back * front;
+            var gte = Vector4.One - 2.0F * (Vector4.One - back) * (Vector4.One - front);
 
             var c = Sse.Add(
                 Sse.And(mask, lt.AsVector128()),
                 Sse.AndNot(mask, gte.AsVector128())
             ).AsVector4();
 
-            back[pos] = Composite(bv, front, c);
+            return Composite(back, front, c);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void SoftLight(Span<Vector4> back, in Vector4 front, int pos)
+        static Vector4 SoftLight(in Vector4 back, in Vector4 front)
         {
-            var bv = back[pos];
             var fv128 = front.AsVector128();
-            var bv128 = bv.AsVector128();
+            var bv128 = back.AsVector128();
 
             var mask = Sse.CompareLessThan(fv128, Half128);
             var lt = bv128.Pow((2.0F * (Vector4.One - front)).AsVector128());
@@ -211,23 +182,22 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 Sse.AndNot(mask, gte)
             ).AsVector4();
 
-            back[pos] = Composite(bv, front, c);
+            return Composite(back, front, c);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void VividLight(Span<Vector4> back, in Vector4 front, int pos)
+        static Vector4 VividLight(in Vector4 back, in Vector4 front)
         {
-            var bv = back[pos];
-            var bv128 = bv.AsVector128();
+            var bv128 = back.AsVector128();
 
             var mask = Sse.CompareLessThan(front.AsVector128(), Half128);
 
             var fv = front * 2.0F;
             var ltMask = Sse.CompareLessThanOrEqual(bv128, (Vector4.One - fv).AsVector128());
             var gteMask = Sse.CompareLessThan(bv128, (Two - fv).AsVector128());
-            var lt = Sse.And(ltMask, (bv - (Vector4.One - fv) / fv).AsVector128());
+            var lt = Sse.And(ltMask, (back - (Vector4.One - fv) / fv).AsVector128());
             var gte = Sse.Add(
-                Sse.And(gteMask, (bv / (Two - fv)).AsVector128()),
+                Sse.And(gteMask, (back / (Two - fv)).AsVector128()),
                 Sse.AndNot(gteMask, Vector128.Create(1.0F))
             );
 
@@ -236,21 +206,20 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 Sse.AndNot(mask, gte)
             ).AsVector4();
 
-            back[pos] = Composite(bv, fv, c);
+            return Composite(back, fv, c);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void LinearLight(Span<Vector4> back, in Vector4 front, int pos)
+        static Vector4 LinearLight(in Vector4 back, in Vector4 front)
         {
-            var bv = back[pos];
-            var bv128 = bv.AsVector128();
+            var bv128 = back.AsVector128();
 
             var mask = Sse.CompareLessThan(front.AsVector128(), Half128);
 
             var fv = front * 2.0F;
             var ltMask = Sse.CompareLessThan(bv128, (Vector4.One - fv).AsVector128());
             var gteMask = Sse.CompareLessThan(bv128, (Two - fv).AsVector128());
-            var tmp = (fv + bv - Vector4.One).AsVector128();
+            var tmp = (fv + back - Vector4.One).AsVector128();
             var lt = Sse.And(ltMask, tmp);
             var gte = Sse.Add(
                 Sse.And(gteMask, tmp),
@@ -262,14 +231,13 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 Sse.AndNot(mask, gte)
             ).AsVector4();
 
-            back[pos] = Composite(bv, fv, c);
+            return Composite(back, fv, c);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void PinLight(Span<Vector4> back, in Vector4 front, int pos)
+        static Vector4 PinLight(in Vector4 back, in Vector4 front)
         {
-            var bv = back[pos];
-            var bv128 = bv.AsVector128();
+            var bv128 = back.AsVector128();
 
             var mask = Sse.CompareLessThan(front.AsVector128(), Half128);
 
@@ -293,40 +261,32 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 Sse.AndNot(mask, gte)
             ).AsVector4();
 
-            back[pos] = Composite(bv, fv, c);
+            return Composite(back, fv, c);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void ColorDodge(Span<Vector4> back, in Vector4 front, int pos)
+        static Vector4 ColorDodge(in Vector4 back, in Vector4 front)
         {
-            var bv = back[pos];
             var c256 = new Vector4(1.00392156862745F);
-
-            var c = Vector4.Min((c256 * bv) / (c256 - front), Vector4.One);
-
-            back[pos] = Composite(bv, front, c);
+            var c = Vector4.Min((c256 * back) / (c256 - front), Vector4.One);
+            return Composite(back, front, c);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void LinearDodge(Span<Vector4> back, in Vector4 front, int pos)
+        static Vector4 LinearDodge(in Vector4 back, in Vector4 front)
         {
-            var bv = back[pos];
-
-            var c = Vector4.Min(front + bv, Vector4.One);
-
-            back[pos] = Composite(bv, front, c);
+            var c = Vector4.Min(front + back, Vector4.One);
+            return Composite(back, front, c);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void ColorBurn(Span<Vector4> back, in Vector4 front, int pos)
+        static Vector4 ColorBurn(in Vector4 back, in Vector4 front)
         {
-            var bv = back[pos];
-
-            var mask = Sse.CompareLessThan((front + bv).AsVector128(), One128);
+            var mask = Sse.CompareLessThan((front + back).AsVector128(), One128);
 
             var lteInnerMask = Sse.CompareLessThan(front.AsVector128(), Vector128<float>.Zero);
 
-            var lteInner = (Vector4.One - (Vector4.One - bv) / front).AsVector128();
+            var lteInner = (Vector4.One - (Vector4.One - back) / front).AsVector128();
 
             var c = Sse.AndNot(
                 mask,
@@ -336,103 +296,78 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 )
             ).AsVector4();
 
-            back[pos] = Composite(bv, front, c);
+            return Composite(back, front, c);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void LinearBurn(Span<Vector4> back, in Vector4 front, int pos)
+        static Vector4 LinearBurn(in Vector4 back, in Vector4 front)
         {
-            var bv = back[pos];
-
-            var mask = Sse.CompareLessThan((front + bv).AsVector128(), One128);
+            var mask = Sse.CompareLessThan((front + back).AsVector128(), One128);
 
             var c = Sse.AndNot(
                 mask,
-                (front + bv - Vector4.One).AsVector128()
+                (front + back - Vector4.One).AsVector128()
             ).AsVector4();
 
-            back[pos] = Composite(bv, front, c);
+            return Composite(back, front, c);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void Darken(Span<Vector4> back, in Vector4 front, int pos)
+        static Vector4 Darken(in Vector4 back, in Vector4 front)
         {
-            var bv = back[pos];
-
-            var c = Vector4.Min(front, bv);
-
-            back[pos] = Composite(bv, front, c);
+            var c = Vector4.Min(front, back);
+            return Composite(back, front, c);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void Lighten(Span<Vector4> back, in Vector4 front, int pos)
+        static Vector4 Lighten(in Vector4 back, in Vector4 front)
         {
-            var bv = back[pos];
-
-            var c = Vector4.Max(front, bv);
-
-            back[pos] = Composite(bv, front, c);
+            var c = Vector4.Max(front, back);
+            return Composite(back, front, c);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void Difference(Span<Vector4> back, in Vector4 front, int pos)
+        static Vector4 Difference(in Vector4 back, in Vector4 front)
         {
-            var bv = back[pos];
-
-            var c = Vector4.Abs(front - bv);
-
-            back[pos] = Composite(bv, front, c);
+            var c = Vector4.Abs(front - back);
+            return Composite(back, front, c);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void Exclusion(Span<Vector4> back, in Vector4 front, int pos)
+        static Vector4 Exclusion(in Vector4 back, in Vector4 front)
         {
-            var bv = back[pos];
-
-            var c = ((Vector4.One - front) * bv + (Vector4.One - bv) * front);
-
-            back[pos] = Composite(bv, front, c);
+            var c = ((Vector4.One - front) * back + (Vector4.One - back) * front);
+            return Composite(back, front, c);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void Hue(Span<Vector4> back, in Vector4 front, int pos)
+        static Vector4 Hue(in Vector4 back, in Vector4 front)
         {
-            var bv = back[pos];
-
-            var luminance = GetLuminance(bv);
+            var luminance = GetLuminance(back);
             var c = SetLuminance(SetSaturation(front, luminance), luminance);
 
-            back[pos] = Composite(bv, front, c);
+            return Composite(back, front, c);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void Saturation(Span<Vector4> back, in Vector4 front, int pos)
+        static Vector4 Saturation(in Vector4 back, in Vector4 front)
         {
-            var bv = back[pos];
-
-            var c = SetLuminance(SetSaturation(bv, GetSaturation(front)), GetLuminance(bv));
-
-            back[pos] = Composite(bv, front, c);
+            var c = SetLuminance(SetSaturation(back, GetSaturation(front)), GetLuminance(back));
+            return Composite(back, front, c);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void Color(Span<Vector4> back, in Vector4 front, int pos)
+        static Vector4 Color(in Vector4 back, in Vector4 front)
         {
-            var bv = back[pos];
-
-            var c = SetLuminance(front, GetLuminance(bv));
-
-            back[pos] = Composite(bv, front, c);
+            var c = SetLuminance(front, GetLuminance(back));
+            return Composite(back, front, c);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void Luminance(Span<Vector4> back, in Vector4 front, int pos)
+        static Vector4 Luminance(in Vector4 back, in Vector4 front)
         {
-            var bv = back[pos];
-
-            var c = SetLuminance(bv, GetLuminance(front));
-
-            back[pos] = Composite(bv, front, c);
+            var c = SetLuminance(back, GetLuminance(front));
+            return Composite(back, front, c);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -529,5 +464,36 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             var c128 = c.AsVector128();
             return Sse.Subtract(c128.HorizontalMaxBy3Element(), c128.HorizontalMinBy3Element()).GetElement(0);
         }
+    }
+
+    /// <summary>
+    /// ブレンドモードを表します。
+    /// </summary>
+    public enum BlendMode
+    {
+        Normal,
+        Replace,
+        Add,
+        Subtract,
+        Multiply,
+        Screen,
+        Overlay,
+        HardLight,
+        SoftLight,
+        VividLight,
+        LinearLight,
+        PinLight,
+        ColorDodge,
+        LinearDodge,
+        ColorBurn,
+        LinearBurn,
+        Darken,
+        Lighten,
+        Difference,
+        Exclusion,
+        Hue,
+        Saturation,
+        Color,
+        Luminance
     }
 }
