@@ -12,6 +12,11 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using NiVE3.Data;
+using NiVE3.UI.Dialog;
+using NiVE3.View.Resource;
+using NiVE3.ViewModel;
+using NiVE3.ViewModel.Input;
 
 namespace NiVE3.View.Pane
 {
@@ -23,6 +28,38 @@ namespace NiVE3.View.Pane
         public TextPropertyView()
         {
             InitializeComponent();
+        }
+
+        private void FillColorChangeButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is TextPropertyViewModel vm)
+            {
+                var dialog = new ColorPickerDialog(vm.FillColor.ToByteColor());
+                dialog.Owner = Application.Current.MainWindow;
+                dialog.Title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.ColorPickerDialog_Title);
+                dialog.OKButtonText = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_OK);
+                dialog.CancelButtonText = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_Cancel);
+                if (dialog.ShowDialog() ?? false)
+                {
+                    vm.FillColor = FloatColor.FromColor(dialog.Color);
+                }
+            }
+        }
+
+        private void OutlineColorChangeButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is TextPropertyViewModel vm)
+            {
+                var dialog = new ColorPickerDialog(vm.OutlineColor.ToByteColor());
+                dialog.Owner = Application.Current.MainWindow;
+                dialog.Title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.ColorPickerDialog_Title);
+                dialog.OKButtonText = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_OK);
+                dialog.CancelButtonText = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_Cancel);
+                if (dialog.ShowDialog() ?? false)
+                {
+                    vm.OutlineColor = FloatColor.FromColor(dialog.Color);
+                }
+            }
         }
     }
 }

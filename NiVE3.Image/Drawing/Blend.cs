@@ -34,6 +34,11 @@ namespace NiVE3.Image.Drawing
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector4 Process(BlendMode blendMode, in Vector4 back, in Vector4 front)
         {
+            if (back.W <= 0.0F)
+            {
+                return front;
+            }
+
             switch (blendMode)
             {
                 case BlendMode.Replace:

@@ -127,7 +127,7 @@ namespace NiVE3.Input
             {
                 var image = new NManagedImage(Width, Height, true);
                 var span = image.Data.AsSpan(0, image.DataLength);
-                MemoryMarshal.Cast<float, Vector128<float>>(span).Fill(Color);
+                MemoryMarshal.Cast<float, Vector128<float>>(span).Fill((Vector128<float>)Color);
                 return image;
             }
         }

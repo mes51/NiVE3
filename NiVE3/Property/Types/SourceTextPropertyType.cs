@@ -55,7 +55,12 @@ namespace NiVE3.Property.Types
 
         public object? SerializeValue(object? value)
         {
-            return value;
+            if (value is not StyledText styledText)
+            {
+                return null;
+            }
+
+            return styledText.Serialize();
         }
 
         public object? DeserializeValue(object? serializedValue)

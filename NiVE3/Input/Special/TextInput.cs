@@ -4,8 +4,14 @@ using System.ComponentModel.Composition;
 using System.Globalization;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics;
+using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media.TextFormatting;
+using ImTools;
 using NiVE3.Image;
 using NiVE3.Image.Drawing;
 using NiVE3.Numerics;
@@ -16,9 +22,12 @@ using NiVE3.Plugin.Property.Properties;
 using NiVE3.Property;
 using NiVE3.Property.Types;
 using NiVE3.Shape;
+using NiVE3.Shared.Extension;
 using NiVE3.Text;
 using NiVE3.View.Resource;
 using SixLabors.Fonts;
+using SixLabors.ImageSharp.Drawing;
+using Polygon = NiVE3.Shape.Polygon;
 
 namespace NiVE3.Input.Special
 {
@@ -128,16 +137,96 @@ namespace NiVE3.Input.Special
             var textOption = new TextOptions(font);
             textOption.TextRuns = filledStyles.Select(s => s.ToTextRun()).ToArray();
 
-            var glyphPaths = SixLabors.ImageSharp.Drawing.TextBuilder.GenerateGlyphs(sourceText.Text, textOption);
-            var glyphPolygons = glyphPaths.Select(g => g.Flatten().Select(p => new Polygon(p.Points.Span)).ToArray()).ToArray();
-
-            var image = new NManagedImage(compositionWidth, compositionHeight);
-            foreach (var p in glyphPolygons)
+            var glyphPaths = TextBuilder.GenerateGlyphs(sourceText.Text, textOption);
+            var glyphPolygons = new List<(Polygon[] fillPolygins, Polygon[] outlinePolygons, ExtendedTextRun textRun, Vector128<int> rect)>();
+            foreach (var (path, i) in glyphPaths.ZipWithIndex())
             {
-                ShapeRender.FillPolygonNonzero(p, image, Vector4.One);
+                if (path.Bounds.Width <= 0.0F || path.Bounds.Height <= 0.0F)
+                {
+                    continue;
+                }
+
+                var styleRun = filledStyles.Find(s => s.Start >= i && s.End < i) ?? new TextStyleRun(0, int.MaxValue, sourceText.DefaultStyle);
+                var fillPolygons = path.Flatten().Where(p => p.Points.Length > 1).Select(p => new Polygon(p.Points.Span)).ToArray();
+                var outlinePolygons = Array.Empty<Polygon>();
+                if (styleRun.Style.TextLineDrawOrder != TextLineDrawOrder.None && styleRun.Style.TextLineWidth > 0.0F)
+                {
+                    outlinePolygons = path.GenerateOutline(styleRun.Style.TextLineWidth).Flatten().Where(p => p.Points.Length > 1).Select(p => new Polygon(p.Points.Span)).ToArray();
+                }
+
+                glyphPolygons.Add((fillPolygons, outlinePolygons, styleRun.ToTextRun(), GetPolygonRect(fillPolygons.Concat(outlinePolygons))));
+            }
+
+            var min = Vector128.Create(int.MaxValue);
+            var max = Vector128.Create(int.MinValue);
+            foreach (var (_, _, _, r) in glyphPolygons)
+            {
+                min = Sse41.Min(min, r);
+                max = Sse41.Max(max, r);
+            }
+
+            var image = new NManagedImage(max.GetElement(2) - min.GetElement(0), max.GetElement(3) - min.GetElement(1));
+            image.Origin = new Vector2d(min.GetElement(0), min.GetElement(1));
+            foreach (var (fillPolygins, outlinePolygons, textRun, rect) in glyphPolygons)
+            {
+                var intLeft = rect.GetElement(0);
+                var intTop = rect.GetElement(1);
+                using var glyphImage = new NManagedImage(rect.GetElement(2) - intLeft, rect.GetElement(3) - intTop);
+                if (outlinePolygons.Length > 0)
+                {
+                    switch (textRun.TextLineDrawOrder)
+                    {
+                        case TextLineDrawOrder.AfterFill:
+                            ShapeRender.FillPolygonNonzero(fillPolygins, glyphImage, textRun.FillColor, intLeft, intTop);
+                            ShapeRender.FillPolygonNonzero(outlinePolygons, glyphImage, textRun.OutlineColor, intLeft, intTop);
+                            break;
+                        case TextLineDrawOrder.BeforeFill:
+                            ShapeRender.FillPolygonNonzero(outlinePolygons, glyphImage, textRun.OutlineColor, intLeft, intTop);
+                            ShapeRender.FillPolygonNonzero(fillPolygins, glyphImage, textRun.FillColor, intLeft, intTop);
+                            break;
+                        default:
+                            ShapeRender.FillPolygonNonzero(fillPolygins, glyphImage, textRun.FillColor, intLeft, intTop);
+                            break;
+                    }
+                }
+                else
+                {
+                    ShapeRender.FillPolygonNonzero(fillPolygins, glyphImage, textRun.FillColor, intLeft, intTop);
+                }
+
+                DrawImage(image, glyphImage, intLeft - min.GetElement(0), intTop - min.GetElement(1));
             }
 
             return image;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static Vector128<int> GetPolygonRect(IEnumerable<Polygon> polygons)
+        {
+            var min = Vector128.Create(int.MaxValue);
+            var max = Vector128.Create(int.MinValue);
+            foreach (var r in polygons.Select(g => Vector128.Create((int)MathF.Floor(g.MinX), (int)MathF.Floor(g.MinY), (int)MathF.Ceiling(g.MaxX), (int)MathF.Ceiling(g.MaxY))))
+            {
+                min = Sse41.Min(min, r);
+                max = Sse41.Max(max, r);
+            }
+
+            return Avx2.Blend(min, max, 0b1100);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void DrawImage(NManagedImage back, NManagedImage front, int offsetX, int offsetY)
+        {
+            Parallel.For(0, front.Height, y =>
+            {
+                var backSpan = MemoryMarshal.Cast<float, Vector4>(back.GetDataSpan()).Slice((offsetY + y) * back.Width + offsetX);
+                var frontSpan = MemoryMarshal.Cast<float, Vector4>(front.GetDataSpan()).Slice(y * front.Width);
+
+                for (var x = 0; x < front.Width; x++)
+                {
+                    backSpan[x] = Blend.Process(BlendMode.Normal, backSpan[x], frontSpan[x]);
+                }
+            });
         }
     }
 }

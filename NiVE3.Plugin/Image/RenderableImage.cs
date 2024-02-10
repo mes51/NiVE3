@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using NiVE3.Image;
+using NiVE3.Image.Drawing;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Property;
 using NiVE3.Plugin.ValueObject;

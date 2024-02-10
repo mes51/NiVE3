@@ -24,6 +24,8 @@ using System.Windows.Input;
 using Prism.Commands;
 using NiVE3.Input.Special;
 using NiVE3.Property.Types;
+using System.Numerics;
+using NiVE3.Data;
 
 namespace NiVE3.ViewModel
 {
@@ -126,6 +128,22 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref textAlign, value); }
         }
 
+        private FloatColor fillColor;
+        [NeedWire(nameof(TextPropertyModel))]
+        public FloatColor FillColor
+        {
+            get { return fillColor; }
+            set { SetProperty(ref fillColor, value); }
+        }
+
+        private FloatColor outlineColor;
+        [NeedWire(nameof(TextPropertyModel))]
+        public FloatColor OutlineColor
+        {
+            get { return outlineColor; }
+            set { SetProperty(ref outlineColor, value); }
+        }
+
         private Guid? currentEditingCompositionId;
         [NeedWire(nameof(ViewState), IsOneWay = true)]
         public Guid? CurrentEditingCompositionId
@@ -148,6 +166,20 @@ namespace NiVE3.ViewModel
         {
             get { return currentTime; }
             set { SetProperty(ref currentTime, value); }
+        }
+
+        private SolidColorBrush fillColorBrush = Brushes.White;
+        public SolidColorBrush FillColorBrush
+        {
+            get { return fillColorBrush; }
+            set { SetProperty(ref fillColorBrush, value); }
+        }
+
+        private SolidColorBrush outlineColorBrush = Brushes.Red;
+        public SolidColorBrush OutlineColorBrush
+        {
+            get { return outlineColorBrush; }
+            set { SetProperty(ref outlineColorBrush, value); }
         }
 
         private CompositionModel? compositionModel;
@@ -372,6 +404,14 @@ namespace NiVE3.ViewModel
                 case nameof(IsEnableBold):
                 case nameof(IsEnableItalic):
                 case nameof(TextAlign):
+                    ChangeTextLayerProperty();
+                    break;
+                case nameof(FillColor):
+                    ChangeTextLayerProperty();
+                    FillColorBrush = new SolidColorBrush(FillColor.ToByteColor());
+                    break;
+                case nameof(OutlineColor):
+                    OutlineColorBrush = new SolidColorBrush(OutlineColor.ToByteColor());
                     ChangeTextLayerProperty();
                     break;
                 case nameof(CurrentTime):

@@ -9,6 +9,7 @@
              xmlns:r="clr-namespace:NiVE3.View.Resource"
              xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
              xmlns:upr="clr-namespace:NiVE3.UI.Primitive;assembly=NiVE3.UI"
+             xmlns:ugm="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
              xmlns:cv="clr-namespace:NiVE3.View.Converter"
              xmlns:mk="clr-namespace:NiVE3.Wpf.Markup"
              xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
@@ -165,9 +166,27 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <Style x:Key="ColorChangeButtonStyle" TargetType="{x:Type Button}">
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Width" Value="48"/>
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+                            <Rectangle Fill="{TemplateBinding Background}"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -384,5 +403,28 @@
             <RadioButton Margin="5,5,0,5" IsChecked="{Binding TextAlign, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static t:TextAlign.Center}}" Style="{StaticResource TextAlignCenterRadioButton}"/>
             <RadioButton Margin="5,5,0,5" IsChecked="{Binding TextAlign, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static t:TextAlign.Right}}" Style="{StaticResource TextAlignRightRadioButton}"/>
         </StackPanel>
+
+        <Rectangle Grid.Row="7" Margin="{StaticResource VerticalStackMargin}"/>
+
+        <UniformGrid Grid.Row="8" Columns="2" Margin="{StaticResource VerticalStackMargin}">
+            <Grid Style="{StaticResource ParameterLeftGridStyle}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Text="塗りの色"/>
+                <Button Style="{StaticResource ColorChangeButtonStyle}" Background="{Binding FillColorBrush}" BorderBrush="{ugm:AppearanceResource ResourceKey=BorderBrush}" Click="FillColorChangeButton_Click"/>
+            </Grid>
+            <Grid Style="{StaticResource ParameterRightGridStyle}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Text="線の色"/>
+                <Button Style="{StaticResource ColorChangeButtonStyle}" Background="{Binding OutlineColorBrush}" BorderBrush="{ugm:AppearanceResource ResourceKey=BorderBrush}" Click="OutlineColorChangeButton_Click"/>
+            </Grid>
+        </UniformGrid>
     </Grid>
 </UserControl>

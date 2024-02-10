@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using NiVE3.Data;
 using NiVE3.Input.Special;
 using NiVE3.Property.Types;
 using NiVE3.Text;
@@ -94,6 +96,20 @@ namespace NiVE3.Model
             set { SetProperty(ref textAlign, value); }
         }
 
+        private FloatColor fillColor = FloatColor.White;
+        public FloatColor FillColor
+        {
+            get { return fillColor; }
+            set { SetProperty(ref fillColor, value); }
+        }
+
+        private FloatColor outlineColor = new FloatColor(1.0F, 0.0F, 0.0F, 1.0F);
+        public FloatColor OutlineColor
+        {
+            get { return outlineColor; }
+            set { SetProperty(ref outlineColor, value); }
+        }
+
         public FontGroup[] FontGroups { get; }
 
         FontCollection FontCollection { get; } = new FontCollection();
@@ -116,9 +132,12 @@ namespace NiVE3.Model
                 (float)VerticalScale,
                 (float)HorizontalScale,
                 TextLineDrawOrder,
+                (float)TextLineWidth,
                 IsEnableBold,
                 IsEnableItalic,
-                TextAlign
+                TextAlign,
+                (Vector4)FillColor,
+                (Vector4)OutlineColor
             );
         }
 
@@ -131,9 +150,12 @@ namespace NiVE3.Model
             VerticalScale = style.VerticalScale;
             HorizontalScale = style.HorizontalScale;
             TextLineDrawOrder = style.TextLineDrawOrder;
+            TextLineWidth = style.TextLineWidth;
             IsEnableBold = style.IsEnableBold;
             IsEnableItalic = style.IsEnableItalic;
             TextAlign = style.TextAlign;
+            FillColor = (FloatColor)style.FillColor;
+            OutlineColor = (FloatColor)style.OutlineColor;
         }
 
         public void UpdateTextProperty(LayerModel targetLayer, double time)

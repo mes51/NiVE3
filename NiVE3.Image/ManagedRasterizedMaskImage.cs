@@ -54,6 +54,7 @@ namespace NiVE3.Image
         {
             var result = new ManagedRasterizedMaskImage(Width, Height, false);
             Data.AsSpan(0, DataLength).CopyTo(result.GetDataSpan().Slice(0, DataLength));
+            result.Origin = Origin;
             return result;
         }
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NiVE3.Numerics;
 
 namespace NiVE3.Image
 {
@@ -26,6 +27,11 @@ namespace NiVE3.Image
         /// 画像の高さ
         /// </summary>
         public int Height { get; }
+
+        /// <summary>
+        /// 画像の(0, 0)となる位置を表す値
+        /// </summary>
+        public Vector2d Origin { get; set; }
 
         /// <summary>
         /// 画像データの最小サイズ。GetDataで取得するデータの長さはこれ以上であることが保証されます

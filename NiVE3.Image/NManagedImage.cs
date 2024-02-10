@@ -59,6 +59,7 @@ namespace NiVE3.Image
         {
             var result = new NManagedImage(Width, Height, false);
             Data.AsSpan(0, DataLength).CopyTo(result.Data);
+            result.Origin = Origin;
             return result;
         }
 

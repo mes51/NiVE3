@@ -34,6 +34,16 @@ namespace NiVE3.Text
             return new StyledText(newText, DefaultStyle, newStyles.ToArray());
         }
 
+        public IDictionary<string, object?> Serialize()
+        {
+            return new Dictionary<string, object?>
+            {
+                { nameof(Text), Text },
+                { nameof(DefaultStyle), DefaultStyle.Serialize() },
+                { nameof(Styles), Styles.Select(s => s.Serialize()) },
+            };
+        }
+
         public static StyledText Deserialize(IDictionary<string, object?> dic)
         {
             return new StyledText(

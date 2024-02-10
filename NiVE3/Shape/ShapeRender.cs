@@ -7,14 +7,24 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Image;
+using NiVE3.Image.Drawing;
 
 namespace NiVE3.Shape
 {
     static class ShapeRender
     {
-        public static void FillPolygonNonzero(Polygon[] polygons, NManagedImage image, Vector4 color)
+        public static void FillPolygonNonzero(Polygon[] polygons, NManagedImage image, Vector4 color, float offsetX = 0.0F, float offsetY = 0.0F)
         {
-            Parallel.For(0, image.Height, h =>
+            if (polygons.Length < 1)
+            {
+                return;
+            }
+
+            var minY = Math.Max((int)Math.Floor(polygons.Min(p => p.MinY) - offsetY), 0);
+            var maxY = Math.Min((int)Math.Ceiling(polygons.Max(p => p.MaxY) - offsetY), image.Height);
+            var minX = Math.Max((int)Math.Floor(polygons.Min(p => p.MinX) - offsetX), 0);
+            var maxX = Math.Min((int)Math.Ceiling(polygons.Max(p => p.MaxX) - offsetX), image.Width);
+            Parallel.For(minY, maxY, h =>
             {
                 var width = image.Width;
                 var data = MemoryMarshal.Cast<float, Vector4>(image.GetDataSpan());
@@ -27,7 +37,7 @@ namespace NiVE3.Shape
                     var hitLine = new List<Hit>();
                     for (var i = 0; i < polygons.Length; i++)
                     {
-                        var y = h + 0.25F * s;
+                        var y = h + 0.25F * s + offsetY;
                         if (polygons[i].MinY <= y && polygons[i].MaxY >= y)
                         {
                             var ls = polygons[i].Lines;
@@ -51,9 +61,10 @@ namespace NiVE3.Shape
                         var depth = 0;
                         var inout = false;
                         var area = 0.0F;
-                        for (var w = 0; w < width; w++)
+                        for (var w = minX; w < maxX; w++)
                         {
-                            if (hp <= w)
+                            var x = w + offsetX;
+                            if (hp <= x)
                             {
                                 var prev = inout;
                                 if (depth > 0)
@@ -72,7 +83,7 @@ namespace NiVE3.Shape
                                     dir = hitLine[hi].IsDown;
                                     depth++;
                                 }
-                                if (hp < w && prev != depth > 0)
+                                if (hp < x && prev != depth > 0)
                                 {
                                     if (prev)
                                     {
@@ -89,8 +100,8 @@ namespace NiVE3.Shape
                                 for (hi++; hi < hitLine.Count; hi++)
                                 {
                                     hp = hitLine[hi].Value;
-                                    var d = w - hp;
-                                    if (hp > w)
+                                    var d = x - hp;
+                                    if (hp > x)
                                     {
                                         break;
                                     }
@@ -128,6 +139,7 @@ namespace NiVE3.Shape
                                 }
                                 inout = depth > 0;
                             }
+
                             temp[w] += area;
                             if (inout)
                             {
@@ -148,7 +160,7 @@ namespace NiVE3.Shape
                 {
                     if (temp[w] > 0.0F)
                     {
-                        data[pos] = color * new Vector4(1.0F, 1.0F, 1.0F, temp[w] * 0.25F);
+                        data[pos] = Blend.Process(BlendMode.Normal, data[pos], color * new Vector4(1.0F, 1.0F, 1.0F, temp[w] * 0.25F));
                     }
                 }
 
