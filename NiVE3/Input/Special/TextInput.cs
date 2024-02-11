@@ -137,24 +137,16 @@ namespace NiVE3.Input.Special
             var textOption = new TextOptions(font);
             textOption.TextRuns = filledStyles.Select(s => s.ToTextRun()).ToArray();
 
-            var glyphPaths = TextBuilder.GenerateGlyphs(sourceText.Text, textOption);
+            var glyphBuilder = new StyledGlyphBuilder();
+            var textRenderer = new TextRenderer(glyphBuilder);
+            textRenderer.RenderText(sourceText.Text, textOption);
             var glyphPolygons = new List<(Polygon[] fillPolygins, Polygon[] outlinePolygons, ExtendedTextRun textRun, Vector128<int> rect)>();
-            foreach (var (path, i) in glyphPaths.ZipWithIndex())
+            foreach (var glyph in glyphBuilder.GetRenderableGlyhps())
             {
-                if (path.Bounds.Width <= 0.0F || path.Bounds.Height <= 0.0F)
-                {
-                    continue;
-                }
+                var fillPolygons = glyph.FlattenedPath.Select(p => new Polygon(p.Points.Span)).ToArray();
+                var outlinePolygons = glyph.FlattenedOutlinePath.Select(p => new Polygon(p.Points.Span)).ToArray();
 
-                var styleRun = filledStyles.Find(s => s.Start >= i && s.End < i) ?? new TextStyleRun(0, int.MaxValue, sourceText.DefaultStyle);
-                var fillPolygons = path.Flatten().Where(p => p.Points.Length > 1).Select(p => new Polygon(p.Points.Span)).ToArray();
-                var outlinePolygons = Array.Empty<Polygon>();
-                if (styleRun.Style.TextLineDrawOrder != TextLineDrawOrder.None && styleRun.Style.TextLineWidth > 0.0F)
-                {
-                    outlinePolygons = path.GenerateOutline(styleRun.Style.TextLineWidth).Flatten().Where(p => p.Points.Length > 1).Select(p => new Polygon(p.Points.Span)).ToArray();
-                }
-
-                glyphPolygons.Add((fillPolygons, outlinePolygons, styleRun.ToTextRun(), GetPolygonRect(fillPolygons.Concat(outlinePolygons))));
+                glyphPolygons.Add((fillPolygons, outlinePolygons, glyph.TextRun, GetPolygonRect(fillPolygons.Concat(outlinePolygons))));
             }
 
             var min = Vector128.Create(int.MaxValue);
