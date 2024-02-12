@@ -38,6 +38,10 @@ namespace NiVE3.Image.Drawing
             {
                 return front;
             }
+            else if (front.W <= 0.0F)
+            {
+                return back;
+            }
 
             switch (blendMode)
             {

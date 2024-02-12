@@ -174,6 +174,7 @@ namespace NiVE3.Input.Special
                 max = Sse41.Max(max, r);
             }
 
+            var interCharBlendMode = (BlendMode)((properties[TextMoreOptionsGroupId] as PropertyValueGroup)?[TextMoreOptionInterCharacterBlendModeId] ?? BlendMode.Normal);
             var image = new NManagedImage(max.GetElement(2) - min.GetElement(0), max.GetElement(3) - min.GetElement(1));
             image.Origin = (Vector2d)glyphPolygons[0].origin + new Vector2d(glyphPolygons[0].rect.GetElement(0) - min.GetElement(0), glyphPolygons[0].rect.GetElement(1) - min.GetElement(1));
             foreach (var (fillPolygins, outlinePolygons, textRun, rect, _) in glyphPolygons)
@@ -203,7 +204,7 @@ namespace NiVE3.Input.Special
                     ShapeRender.FillPolygonNonzero(fillPolygins, glyphImage, textRun.FillColor, intLeft, intTop);
                 }
 
-                DrawImage(image, glyphImage, intLeft - min.GetElement(0), intTop - min.GetElement(1));
+                DrawImage(interCharBlendMode, image, glyphImage, intLeft - min.GetElement(0), intTop - min.GetElement(1));
             }
 
             return image;
@@ -224,7 +225,7 @@ namespace NiVE3.Input.Special
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void DrawImage(NManagedImage back, NManagedImage front, int offsetX, int offsetY)
+        static void DrawImage(BlendMode blendMode, NManagedImage back, NManagedImage front, int offsetX, int offsetY)
         {
             Parallel.For(0, front.Height, y =>
             {
@@ -233,7 +234,7 @@ namespace NiVE3.Input.Special
 
                 for (var x = 0; x < front.Width; x++)
                 {
-                    backSpan[x] = Blend.Process(BlendMode.Normal, backSpan[x], frontSpan[x]);
+                    backSpan[x] = Blend.Process(blendMode, backSpan[x], frontSpan[x]);
                 }
             });
         }
