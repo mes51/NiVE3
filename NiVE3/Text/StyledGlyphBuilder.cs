@@ -58,6 +58,15 @@ namespace NiVE3.Text
             Builder.Clear();
 
             var transform = Matrix3x2.Identity;
+
+            var textRun = CurrentParameters.TextRun as ExtendedTextRun;
+            if (textRun != null)
+            {
+                transform = Matrix3x2.CreateTranslation(-bounds.X, -bounds.Y - bounds.Height) *
+                    Matrix3x2.CreateScale(textRun.HorizontalScale * 0.01F, textRun.VerticalScale * 0.01F) *
+                    Matrix3x2.CreateTranslation(bounds.X, bounds.Y + bounds.Height);
+            }
+
             if (TextPathPoints != null)
             {
                 var centerX = bounds.Width * 0.5F;
@@ -79,7 +88,7 @@ namespace NiVE3.Text
                         var rad = MathF.Atan2(diff.Y, diff.X);
                         var location = new Vector2(bounds.X, bounds.Y);
 
-                        transform = Matrix3x2.CreateTranslation(pos - location + new Vector2(-centerX, bounds.Top)) * Matrix3x2.CreateRotation(rad - MathF.PI, pos);
+                        transform *= Matrix3x2.CreateTranslation(pos - location + new Vector2(-centerX, bounds.Top)) * Matrix3x2.CreateRotation(rad - MathF.PI, pos);
 
                         hit = true;
                     }
@@ -87,7 +96,7 @@ namespace NiVE3.Text
             }
             else
             {
-                transform = Matrix3x2.CreateTranslation(ShiftedLetterSpacing, 0.0F);
+                transform *= Matrix3x2.CreateTranslation(ShiftedLetterSpacing, 0.0F);
             }
 
             Builder.SetTransform(transform);
