@@ -27,7 +27,7 @@ namespace NiVE3.Shape
             Parallel.For(minY, maxY, h =>
             {
                 var width = image.Width;
-                var data = MemoryMarshal.Cast<float, Vector4>(image.GetDataSpan());
+                var data = MemoryMarshal.Cast<float, Vector4>(image.GetDataSpan()).Slice(h * width, width);
                 var temp = ArrayPool<float>.Shared.Rent(width);
                 temp.AsSpan(0, width).Clear();
 
@@ -52,7 +52,7 @@ namespace NiVE3.Shape
                             }
                         }
                     }
-                    if (hitLine.Count > 0 && max > -2.0F)
+                    if (hitLine.Count > 0 && max > offsetX - 2.0F)
                     {
                         hitLine.Sort();
                         var hi = 0;
@@ -156,11 +156,11 @@ namespace NiVE3.Shape
                         }
                     }
                 }
-                for (int w = 0, pos = h * width; w < width; w++, pos++)
+                for (var w = 0; w < width; w++)
                 {
                     if (temp[w] > 0.0F)
                     {
-                        data[pos] = Blend.Process(BlendMode.Normal, data[pos], color * new Vector4(1.0F, 1.0F, 1.0F, temp[w] * 0.25F));
+                        data[w] = Blend.Process(BlendMode.Normal, data[w], color * new Vector4(1.0F, 1.0F, 1.0F, temp[w] * 0.25F));
                     }
                 }
 
