@@ -135,7 +135,10 @@ namespace NiVE3.Input.Special
             var fontInfo = FontInfo.FindByUniqueId(sourceText.DefaultStyle.FontUniqueId) ?? FontInfo.FallbackFont;
             var font = fontInfo.FontFamily.CreateFont((float)sourceText.DefaultStyle.FontSize);
             var textOption = new TextOptions(font);
+            var wrappingSize = (Vector3d)((properties[TextMoreOptionsGroupId] as PropertyValueGroup)?[TextBoxSizeId] ?? new Vector3d());
             textOption.TextRuns = filledStyles.Select(s => s.ToTextRun()).ToArray();
+            textOption.WrappingLength = wrappingSize.X > 0.0 ? (float)wrappingSize.X : -1.0F;
+            textOption.WordBreaking = wrappingSize.X > 0.0 ? WordBreaking.BreakAll : WordBreaking.Standard;
 
             var glyphBuilder = new StyledGlyphBuilder();
             TextRenderer.RenderTextTo(glyphBuilder, sourceText.Text, textOption);

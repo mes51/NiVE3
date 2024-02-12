@@ -296,7 +296,7 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("水平比率")]
         public static readonly string TextPropertyView_Property_HorizontalScale = nameof(TextPropertyView_Property_HorizontalScale);
 
-        [ShowInMarkup, DefaultValue("字間")]
+        [ShowInMarkup, DefaultValue("字間(未実装)")]
         public static readonly string TextPropertyView_Property_LetterSpacing = nameof(TextPropertyView_Property_LetterSpacing);
 
         [ShowInMarkup, DefaultValue("線の太さ")]

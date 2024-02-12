@@ -23,6 +23,8 @@ namespace NiVE3.Text
 
         (Vector2 first, Vector2 second, float length)[]? TextPathPoints { get; }
 
+        float ShiftedLetterSpacing { get; set; }
+
         public StyledGlyphBuilder() : this(Matrix3x2.Identity) { }
 
         public StyledGlyphBuilder(in Matrix3x2 matrix, ISimplePath? textPath = null)
@@ -55,12 +57,11 @@ namespace NiVE3.Text
             CurrentParameters = parameters;
             Builder.Clear();
 
-            var letterSpacing = (parameters.TextRun as ExtendedTextRun)?.LetterSpacing * Glyphs.Count ?? 0.0F;
             var transform = Matrix3x2.Identity;
             if (TextPathPoints != null)
             {
                 var centerX = bounds.Width * 0.5F;
-                var posX = bounds.X + centerX + letterSpacing;
+                var posX = bounds.X + centerX + ShiftedLetterSpacing;
                 var hit = false;
 
                 while (!hit)
@@ -86,15 +87,21 @@ namespace NiVE3.Text
             }
             else
             {
-                transform = Matrix3x2.CreateTranslation(letterSpacing, 0.0F);
+                transform = Matrix3x2.CreateTranslation(ShiftedLetterSpacing, 0.0F);
             }
 
             Builder.SetTransform(transform);
 
+            // NOTE: 現状行頭かどうかを完全に判定する手段が無いため、LetterSpacingはしばらく無効化
+            //ShiftedLetterSpacing += (parameters.TextRun as ExtendedTextRun)?.LetterSpacing ?? 0.0F;
+
             return true;
         }
 
-        public void BeginText(in FontRectangle bounds) { }
+        public void BeginText(in FontRectangle bounds)
+        {
+            ShiftedLetterSpacing = 0.0F;
+        }
 
         public void CubicBezierTo(Vector2 secondControlPoint, Vector2 thirdControlPoint, Vector2 point)
         {
