@@ -13,7 +13,7 @@ namespace NiVE3.Text
 {
     class StyledGlyphBuilder : IGlyphRenderer
     {
-        List<BuildedGlyph> Glyphs { get; } = new List<BuildedGlyph>();
+        List<GlyphPath> Glyphs { get; } = new List<GlyphPath>();
 
         Vector2 CurrentPoint { get; set; }
 
@@ -55,11 +55,10 @@ namespace NiVE3.Text
             CurrentParameters = parameters;
             Builder.Clear();
 
-            var letterSpacing = (parameters.TextRun as ExtendedTextRun)?.LetterSpacing ?? 0.0F;
+            var letterSpacing = (parameters.TextRun as ExtendedTextRun)?.LetterSpacing * Glyphs.Count ?? 0.0F;
             var transform = Matrix3x2.Identity;
             if (TextPathPoints != null)
             {
-
                 var centerX = bounds.Width * 0.5F;
                 var posX = bounds.X + centerX + letterSpacing;
                 var hit = false;
@@ -131,7 +130,7 @@ namespace NiVE3.Text
                     FillColor = Vector4.One
                 };
             }
-            Glyphs.Add(new BuildedGlyph(Builder.Build(), textRun));
+            Glyphs.Add(new GlyphPath(Builder.Build(), textRun));
         }
 
         public void EndText() { }
@@ -160,18 +159,18 @@ namespace NiVE3.Text
             //       対応するのであればTextRunごとに分割して適用する(多分Glyphsに混ぜると困るので別にする必要も有)
         }
 
-        public BuildedGlyph[] GetGlyphs()
+        public GlyphPath[] GetGlyphs()
         {
             return Glyphs.ToArray();
         }
 
-        public BuildedGlyph[] GetRenderableGlyhps()
+        public GlyphPath[] GetRenderableGlyhps()
         {
             return Glyphs.Where(g => g.Path.Bounds.Width > 0.0F && g.Path.Bounds.Height > 0.0F && (g.FlattenedPath.Length > 0 || g.FlattenedOutlinePath.Length > 0)).ToArray();
         }
     }
 
-    record BuildedGlyph(IPath Path, ExtendedTextRun TextRun)
+    record GlyphPath(IPath Path, ExtendedTextRun TextRun)
     {
         public ISimplePath[] FlattenedPath { get; } = Path.Flatten().Where(p => p.Points.Length > 1).ToArray();
 

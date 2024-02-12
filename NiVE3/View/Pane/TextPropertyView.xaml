@@ -327,7 +327,7 @@
                 </Grid.ColumnDefinitions>
 
                 <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=TextPropertyView_Property_LetterSpacing}" VerticalAlignment="Center"/>
-                <upr:SlidableNumberTextBox Grid.Column="1" Value="{Binding LetterSpacing}" UnitText="px" Digit="2" Minimum="0" VerticalAlignment="Center" HorizontalAlignment="Right">
+                <upr:SlidableNumberTextBox Grid.Column="1" Value="{Binding LetterSpacing}" UnitText="px" Digit="2" VerticalAlignment="Center" HorizontalAlignment="Right">
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="BeginSlideEditValue">
                             <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>

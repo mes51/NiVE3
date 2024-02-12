@@ -84,7 +84,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             }
         }
 
-        public void AddRect(NImage texture, float opacity, BlendMode blendType, in Matrix4x4d modelMatrix, bool isCastShadow, float lightTransmission, bool isAcceptShadow, bool isAcceptLight, float ambient, float diffuse, float specularIntensity, float specularShininess, float metal, RasterizedMaskImage? trackMatte)
+        public void AddRect(NImage texture, float opacity, BlendMode blendType, Matrix4x4d modelMatrix, bool isCastShadow, float lightTransmission, bool isAcceptShadow, bool isAcceptLight, float ambient, float diffuse, float specularIntensity, float specularShininess, float metal, RasterizedMaskImage? trackMatte)
         {
             var width = texture.Width;
             var height = texture.Height;
@@ -95,6 +95,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             var sv3 = Avx.Divide(Vector256.Create(width, height, 0.0, Size), Vector256.Create((double)Size));
             var sv4 = Avx.Divide(Vector256.Create(width, 0.0, 0.0, Size), Vector256.Create((double)Size));
 
+            modelMatrix = Matrix4x4d.CreateTranslate(-texture.Origin.X / Size, -texture.Origin.Y / Size, 0.0) * modelMatrix;
             var mv = modelMatrix * ViewMatrix;
             var mvt = mv * Matrix4x4d.CreateTranslate(offsetX, offsetY, 0.0);
             var v1 = mvt.Transform(sv1);

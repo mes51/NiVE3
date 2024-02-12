@@ -138,28 +138,42 @@ namespace NiVE3.Input.Special
             textOption.TextRuns = filledStyles.Select(s => s.ToTextRun()).ToArray();
 
             var glyphBuilder = new StyledGlyphBuilder();
-            var textRenderer = new TextRenderer(glyphBuilder);
-            textRenderer.RenderText(sourceText.Text, textOption);
-            var glyphPolygons = new List<(Polygon[] fillPolygins, Polygon[] outlinePolygons, ExtendedTextRun textRun, Vector128<int> rect)>();
+            TextRenderer.RenderTextTo(glyphBuilder, sourceText.Text, textOption);
+            var glyphPolygons = new List<(Polygon[] fillPolygins, Polygon[] outlinePolygons, ExtendedTextRun textRun, Vector128<int> rect, Vector2 origin)>();
             foreach (var glyph in glyphBuilder.GetRenderableGlyhps())
             {
                 var fillPolygons = glyph.FlattenedPath.Select(p => new Polygon(p.Points.Span)).ToArray();
                 var outlinePolygons = glyph.FlattenedOutlinePath.Select(p => new Polygon(p.Points.Span)).ToArray();
 
-                glyphPolygons.Add((fillPolygons, outlinePolygons, glyph.TextRun, GetPolygonRect(fillPolygons.Concat(outlinePolygons))));
+                var fillRect = GetPolygonRect(fillPolygons);
+                var outlineRect = GetPolygonRect(outlinePolygons);
+                var rect = Vector128.Create(
+                    Math.Min(fillRect.GetElement(0), outlineRect.GetElement(0)),
+                    Math.Min(fillRect.GetElement(1), outlineRect.GetElement(1)),
+                    Math.Max(fillRect.GetElement(2), outlineRect.GetElement(2)),
+                    Math.Max(fillRect.GetElement(3), outlineRect.GetElement(3))
+                );
+                var fillOrigin = new Vector2(fillRect.GetElement(0), fillRect.GetElement(1)); //fillPolygons.Select(p => new Vector2(p.MinX, p.MinY)).Aggregate(new Vector2(float.MaxValue), Vector2.Min);
+                var origin = -fillOrigin + (outlinePolygons.Length > 0 ? fillOrigin - new Vector2(outlineRect.GetElement(0), outlineRect.GetElement(1)) : Vector2.Zero);
+                glyphPolygons.Add((fillPolygons, outlinePolygons, glyph.TextRun, rect, origin));
+            }
+
+            if (glyphPolygons.Count < 1)
+            {
+                return new NManagedImage(1, 1);
             }
 
             var min = Vector128.Create(int.MaxValue);
             var max = Vector128.Create(int.MinValue);
-            foreach (var (_, _, _, r) in glyphPolygons)
+            foreach (var (_, _, _, r, _) in glyphPolygons)
             {
                 min = Sse41.Min(min, r);
                 max = Sse41.Max(max, r);
             }
 
             var image = new NManagedImage(max.GetElement(2) - min.GetElement(0), max.GetElement(3) - min.GetElement(1));
-            image.Origin = new Vector2d(min.GetElement(0), min.GetElement(1));
-            foreach (var (fillPolygins, outlinePolygons, textRun, rect) in glyphPolygons)
+            image.Origin = (Vector2d)glyphPolygons[0].origin + new Vector2d(glyphPolygons[0].rect.GetElement(0) - min.GetElement(0), glyphPolygons[0].rect.GetElement(1) - min.GetElement(1));
+            foreach (var (fillPolygins, outlinePolygons, textRun, rect, _) in glyphPolygons)
             {
                 var intLeft = rect.GetElement(0);
                 var intTop = rect.GetElement(1);
