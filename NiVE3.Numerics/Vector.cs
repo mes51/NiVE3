@@ -26,6 +26,8 @@ namespace NiVE3.Numerics
 
         public bool IsZero => X == 0 && Y == 0;
 
+        public Vector2d(double value) : this(value, value) { }
+
         [JsonConstructor]
         public Vector2d(double x, double y)
         {
@@ -212,6 +214,8 @@ namespace NiVE3.Numerics
 
         [JsonInclude]
         public readonly double Z;
+
+        public Vector3d(double value) : this(value, value, value) { }
 
         [JsonConstructor]
         public Vector3d(double x, double y, double z)

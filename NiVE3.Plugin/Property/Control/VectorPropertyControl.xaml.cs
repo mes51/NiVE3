@@ -51,6 +51,84 @@ namespace NiVE3.Plugin.Property.Control
             new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, VectorValueChanged)
         );
 
+        public static readonly DependencyProperty MinimumXProperty = DependencyProperty.Register(
+            nameof(MinimumX),
+            typeof(double),
+            typeof(VectorPropertyControl),
+            new FrameworkPropertyMetadata(double.MinValue, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        public static readonly DependencyProperty MinimumYProperty = DependencyProperty.Register(
+            nameof(MinimumY),
+            typeof(double),
+            typeof(VectorPropertyControl),
+            new FrameworkPropertyMetadata(double.MinValue, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        public static readonly DependencyProperty MinimumZProperty = DependencyProperty.Register(
+            nameof(MinimumZ),
+            typeof(double),
+            typeof(VectorPropertyControl),
+            new FrameworkPropertyMetadata(double.MinValue, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        public static readonly DependencyProperty MaximumXProperty = DependencyProperty.Register(
+            nameof(MaximumX),
+            typeof(double),
+            typeof(VectorPropertyControl),
+            new FrameworkPropertyMetadata(double.MaxValue, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        public static readonly DependencyProperty MaximumYProperty = DependencyProperty.Register(
+            nameof(MaximumY),
+            typeof(double),
+            typeof(VectorPropertyControl),
+            new FrameworkPropertyMetadata(double.MaxValue, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        public static readonly DependencyProperty MaximumZProperty = DependencyProperty.Register(
+            nameof(MaximumZ),
+            typeof(double),
+            typeof(VectorPropertyControl),
+            new FrameworkPropertyMetadata(double.MaxValue, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        public double MaximumZ
+        {
+            get { return (double)GetValue(MaximumZProperty); }
+            set { SetValue(MaximumZProperty, value); }
+        }
+
+        public double MaximumY
+        {
+            get { return (double)GetValue(MaximumYProperty); }
+            set { SetValue(MaximumYProperty, value); }
+        }
+
+        public double MaximumX
+        {
+            get { return (double)GetValue(MaximumXProperty); }
+            set { SetValue(MaximumXProperty, value); }
+        }
+
+        public double MinimumZ
+        {
+            get { return (double)GetValue(MinimumZProperty); }
+            set { SetValue(MinimumZProperty, value); }
+        }
+
+        public double MinimumY
+        {
+            get { return (double)GetValue(MinimumYProperty); }
+            set { SetValue(MinimumYProperty, value); }
+        }
+
+        public double MinimumX
+        {
+            get { return (double)GetValue(MinimumXProperty); }
+            set { SetValue(MinimumXProperty, value); }
+        }
+
         public double ValueZ
         {
             get { return (double)GetValue(ValueZProperty); }

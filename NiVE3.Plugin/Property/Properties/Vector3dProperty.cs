@@ -17,10 +17,29 @@ namespace NiVE3.Plugin.Property.Properties
 
         public bool Is3D { get; }
 
+        public Vector3d MinValue { get; } = new Vector3d(double.MinValue);
+
+        public Vector3d MaxValue { get; } = new Vector3d(double.MaxValue);
+
         public Vector3dProperty(string id, string displayName, Vector3d defaultValue, bool isSupportKeyFrame = true, int digit = -1, bool is3D = false) : base(id, displayName, Vector3dPropertyType.Instance, defaultValue, isSupportKeyFrame)
         {
             Digit = digit;
             Is3D = is3D;
+        }
+
+        public Vector3dProperty(string id, string displayName, Vector3d defaultValue, Vector3d minValue, bool isSupportKeyFrame = true, int digit = -1, bool is3D = false) : base(id, displayName, Vector3dPropertyType.Instance, defaultValue, isSupportKeyFrame)
+        {
+            Digit = digit;
+            Is3D = is3D;
+            MinValue = minValue;
+        }
+
+        public Vector3dProperty(string id, string displayName, Vector3d defaultValue, Vector3d minValue, Vector3d maxValue, bool isSupportKeyFrame = true, int digit = -1, bool is3D = false) : base(id, displayName, Vector3dPropertyType.Instance, defaultValue, isSupportKeyFrame)
+        {
+            Digit = digit;
+            Is3D = is3D;
+            MinValue = minValue;
+            MaxValue = maxValue;
         }
 
         public Vector3dProperty(string id, LanguageResourceKey displayNameKey, Vector3d defaultValue, bool isSupportKeyFrame = true, int digit = -1, bool is3D = false) : base(id, displayNameKey, Vector3dPropertyType.Instance, defaultValue, isSupportKeyFrame)
@@ -29,11 +48,32 @@ namespace NiVE3.Plugin.Property.Properties
             Is3D = is3D;
         }
 
+        public Vector3dProperty(string id, LanguageResourceKey displayNameKey, Vector3d defaultValue, Vector3d minValue, bool isSupportKeyFrame = true, int digit = -1, bool is3D = false) : base(id, displayNameKey, Vector3dPropertyType.Instance, defaultValue, isSupportKeyFrame)
+        {
+            Digit = digit;
+            Is3D = is3D;
+            MinValue = minValue;
+        }
+
+        public Vector3dProperty(string id, LanguageResourceKey displayNameKey, Vector3d defaultValue, Vector3d minValue, Vector3d maxValue, bool isSupportKeyFrame = true, int digit = -1, bool is3D = false) : base(id, displayNameKey, Vector3dPropertyType.Instance, defaultValue, isSupportKeyFrame)
+        {
+            Digit = digit;
+            Is3D = is3D;
+            MinValue = minValue;
+            MaxValue = maxValue;
+        }
+
         public override PropertyControlBase CreateControl(ICompositionObject composition, ILayerObject? layer, IEffectObject? effect, IPropertyViewModel viewModel)
         {
             var control = new VectorPropertyControl();
             control.DataContext = viewModel;
             control.Is3D = Is3D;
+            control.MinimumX = MinValue.X;
+            control.MinimumY = MinValue.Y;
+            control.MinimumZ = MinValue.Z;
+            control.MaximumX = MaxValue.X;
+            control.MaximumY = MaxValue.Y;
+            control.MaximumZ = MaxValue.Z;
             return control;
         }
 
