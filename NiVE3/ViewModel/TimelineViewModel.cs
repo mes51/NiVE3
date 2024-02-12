@@ -299,7 +299,18 @@ namespace NiVE3.ViewModel
         public ObservableCollectionView<LayerModel, LayerViewModel>? Layers
         {
             get { return layers; }
-            set { SetProperty(ref layers, value); }
+            set
+            {
+                if (layers != null)
+                {
+                    layers.CollectionChanged -= Layers_CollectionChanged;
+                }
+                SetProperty(ref layers, value);
+                if (value != null)
+                {
+                    value.CollectionChanged += Layers_CollectionChanged;
+                }
+            }
         }
 
         private ObservableCollection<LayerViewModel>? selectedLayers;
@@ -501,6 +512,14 @@ namespace NiVE3.ViewModel
                 case nameof(CurrentEditingCompositionId) when CurrentEditingCompositionId == CompositionModel?.CompositionId && SelectedLayers != null:
                     SelectedLayerIdsForPreview = new ObservableCollection<Guid>(SelectedLayers.Select(l => l.LayerId));
                     break;
+            }
+        }
+
+        private void Layers_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (Layers?.All(l => l.LayerId != LastSelectedLayerId) ?? false)
+            {
+                LastSelectedLayerId = null;
             }
         }
 

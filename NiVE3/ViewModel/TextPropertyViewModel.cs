@@ -311,9 +311,19 @@ namespace NiVE3.ViewModel
 
         void UpdateTargetLayer()
         {
+            if (SourceTextPropertyModel != null)
+            {
+                SourceTextPropertyModel.ValueUpdated -= SourceTextPropertyModel_ValueUpdated;
+            }
+
             TargetLayer = Composition?.Layers?.FirstOrDefault(l => l.LayerId == LastSelectedLayerId);
             SourceTextPropertyModel = TargetLayer?.TextProperties?.FindProperty(TextFootageSource.SourceTextId) as PropertyModel;
             UpdateTextPropertyFromLayer();
+
+            if (SourceTextPropertyModel != null)
+            {
+                SourceTextPropertyModel.ValueUpdated += SourceTextPropertyModel_ValueUpdated;
+            }
         }
 
         void UpdateTextPropertyFromLayer()
@@ -418,6 +428,11 @@ namespace NiVE3.ViewModel
                     UpdateTextPropertyFromLayer();
                     break;
             }
+        }
+
+        private void SourceTextPropertyModel_ValueUpdated(object? sender, EventArgs e)
+        {
+            UpdateTextPropertyFromLayer();
         }
     }
 
