@@ -25,11 +25,9 @@ namespace NiVE3.Text
 
         float ShiftedLetterSpacing { get; set; }
 
-        public StyledGlyphBuilder() : this(Matrix3x2.Identity) { }
-
-        public StyledGlyphBuilder(in Matrix3x2 matrix, ISimplePath? textPath = null)
+        public StyledGlyphBuilder(ISimplePath? textPath = null)
         {
-            Builder = new PathBuilder(matrix);
+            Builder = new PathBuilder();
             if (textPath != null && textPath.Points.Length > 1)
             {
                 var points = textPath.Points.ToArray();
@@ -91,6 +89,7 @@ namespace NiVE3.Text
                         transform *= Matrix3x2.CreateTranslation(pos - location + new Vector2(-centerX, bounds.Top)) * Matrix3x2.CreateRotation(rad - MathF.PI, pos);
 
                         hit = true;
+                        break;
                     }
                 }
             }
