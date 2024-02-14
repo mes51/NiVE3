@@ -23,10 +23,15 @@ namespace NiVE3.Text
 
         (Vector2 first, Vector2 second, float length)[]? TextPathPoints { get; }
 
+        float TextBoxHeight { get; }
+
         float ShiftedLetterSpacing { get; set; }
 
-        public StyledGlyphBuilder(ISimplePath? textPath = null)
+        bool CurrentIsDiscardGlyph { get; set; }
+
+        public StyledGlyphBuilder(float textBoxHeight, ISimplePath? textPath = null)
         {
+            TextBoxHeight = textBoxHeight;
             Builder = new PathBuilder();
             if (textPath != null && textPath.Points.Length > 1)
             {
@@ -47,6 +52,10 @@ namespace NiVE3.Text
 
         public void BeginFigure()
         {
+            if (CurrentIsDiscardGlyph)
+            {
+                return;
+            }
             Builder.StartFigure();
         }
 
@@ -54,6 +63,16 @@ namespace NiVE3.Text
         {
             CurrentParameters = parameters;
             Builder.Clear();
+
+            if (TextBoxHeight > 0.0F && bounds.Y + bounds.Height > TextBoxHeight)
+            {
+                CurrentIsDiscardGlyph = true;
+                return true;
+            }
+            else
+            {
+                CurrentIsDiscardGlyph = false;
+            }
 
             var transform = Matrix3x2.Identity;
 
@@ -113,6 +132,11 @@ namespace NiVE3.Text
 
         public void CubicBezierTo(Vector2 secondControlPoint, Vector2 thirdControlPoint, Vector2 point)
         {
+            if (CurrentIsDiscardGlyph)
+            {
+                return;
+            }
+
             Builder.AddCubicBezier(CurrentPoint, secondControlPoint, thirdControlPoint, point);
             CurrentPoint = point;
         }
@@ -124,11 +148,21 @@ namespace NiVE3.Text
 
         public void EndFigure()
         {
+            if (CurrentIsDiscardGlyph)
+            {
+                return;
+            }
+
             Builder.CloseFigure();
         }
 
         public void EndGlyph()
         {
+            if (CurrentIsDiscardGlyph)
+            {
+                return;
+            }
+
             var textRun = CurrentParameters.TextRun as ExtendedTextRun;
             if (textRun == null)
             {
@@ -152,24 +186,44 @@ namespace NiVE3.Text
 
         public void LineTo(Vector2 point)
         {
+            if (CurrentIsDiscardGlyph)
+            {
+                return;
+            }
+
             Builder.AddLine(CurrentPoint, point);
             CurrentPoint = point;
         }
 
         public void MoveTo(Vector2 point)
         {
+            if (CurrentIsDiscardGlyph)
+            {
+                return;
+            }
+
             Builder.StartFigure();
             CurrentPoint = point;
         }
 
         public void QuadraticBezierTo(Vector2 secondControlPoint, Vector2 point)
         {
+            if (CurrentIsDiscardGlyph)
+            {
+                return;
+            }
+
             Builder.AddQuadraticBezier(CurrentPoint, secondControlPoint, point);
             CurrentPoint = point;
         }
 
         public void SetDecoration(TextDecorations textDecorations, Vector2 start, Vector2 end, float thickness)
         {
+            if (CurrentIsDiscardGlyph)
+            {
+                return;
+            }
+
             // NOTE: 今のところ非対応
             //       対応するのであればTextRunごとに分割して適用する(多分Glyphsに混ぜると困るので別にする必要も有)
         }
