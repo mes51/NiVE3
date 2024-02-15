@@ -66,10 +66,7 @@
                             </EventTrigger>
                         </Path.Triggers>
                     </Path>
-                    <Path Fill="Black" Stretch="Uniform">
-                        <Path.Data>
-                            <GeometryGroup Children="{Binding Sample}" FillRule="Nonzero"/>
-                        </Path.Data>
+                    <Path Fill="Black" Stretch="Uniform" Data="{Binding Sample}">
                         <Path.Style>
                             <Style TargetType="{x:Type Path}">
                                 <Setter Property="Visibility" Value="Visible"/>
@@ -122,10 +119,7 @@
                             </EventTrigger>
                         </Path.Triggers>
                     </Path>
-                    <Path Fill="Black" Stretch="Uniform">
-                        <Path.Data>
-                            <GeometryGroup Children="{Binding Sample}" FillRule="Nonzero"/>
-                        </Path.Data>
+                    <Path Fill="Black" Stretch="Uniform" Data="{Binding Sample}">
                         <Path.Style>
                             <Style TargetType="{x:Type Path}">
                                 <Setter Property="Visibility" Value="Visible"/>

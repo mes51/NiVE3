@@ -26,6 +26,7 @@ using NiVE3.Input.Special;
 using NiVE3.Property.Types;
 using System.Numerics;
 using NiVE3.Data;
+using System.Windows.Media.Imaging;
 
 namespace NiVE3.ViewModel
 {
@@ -446,8 +447,8 @@ namespace NiVE3.ViewModel
 
         public string FontName => FontFamily.FontName;
 
-        private GeometryCollection? sample;
-        public GeometryCollection? Sample
+        private GeometryGroup? sample;
+        public GeometryGroup? Sample
         {
             get
             {
@@ -477,11 +478,11 @@ namespace NiVE3.ViewModel
                     return;
                 }
 
-                var collection = new GeometryCollection();
+                var group = new GeometryGroup();
                 lock (LockObject)
                 {
                     var font = FontFamily.FontInfos[0].FontFamily;
-                    var paths = TextBuilder.GenerateGlyphs("参麩靇 サンプル Sample", new TextOptions(font.CreateFont(FontSize)));
+                    var paths = TextBuilder.GenerateGlyphs("参麩靇 さんぷる サンプル Sample", new TextOptions(font.CreateFont(FontSize)));
                     foreach (var path in paths)
                     {
                         foreach (var simplePath in path.Flatten())
@@ -497,16 +498,16 @@ namespace NiVE3.ViewModel
                                     context.LineTo(new System.Windows.Point(span[i].X, span[i].Y), false, false);
                                 }
                             }
-                            collection.Add(geometry);
+                            group.Children.Add(geometry);
                         }
                     }
 
-                    collection.Freeze();
+                    group.Freeze();
                 }
 
                 Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                 {
-                    Sample = collection;
+                    Sample = group;
                 }), DispatcherPriority.ApplicationIdle);
             });
         }
@@ -524,8 +525,8 @@ namespace NiVE3.ViewModel
 
         public string SubFamilyName { get; }
 
-        private GeometryCollection? sample;
-        public GeometryCollection? Sample
+        private GeometryGroup? sample;
+        public GeometryGroup? Sample
         {
             get
             {
@@ -557,11 +558,11 @@ namespace NiVE3.ViewModel
                     return;
                 }
 
-                var collection = new GeometryCollection();
+                var group = new GeometryGroup();
                 lock (LockObject)
                 {
                     var font = FontInfo.FontFamily;
-                    var paths = TextBuilder.GenerateGlyphs("参麩靇 サンプル Sample", new TextOptions(font.CreateFont(FontSize)));
+                    var paths = TextBuilder.GenerateGlyphs("参麩靇 さんぷる サンプル Sample", new TextOptions(font.CreateFont(FontSize)));
                     foreach (var path in paths)
                     {
                         foreach (var simplePath in path.Flatten())
@@ -577,15 +578,15 @@ namespace NiVE3.ViewModel
                                     context.LineTo(new System.Windows.Point(span[i].X, span[i].Y), false, false);
                                 }
                             }
-                            collection.Add(geometry);
+                            group.Children.Add(geometry);
                         }
                     }
-                    collection.Freeze();
+                    group.Freeze();
                 }
 
                 Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                 {
-                    Sample = collection;
+                    Sample = group;
                 }), DispatcherPriority.ApplicationIdle);
             });
         }
