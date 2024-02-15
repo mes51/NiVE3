@@ -23,14 +23,17 @@ namespace NiVE3.Text
 
         (Vector2 first, Vector2 second, float length)[]? TextPathPoints { get; }
 
+        float TextBoxWidth { get; }
+
         float TextBoxHeight { get; }
 
         float ShiftedLetterSpacing { get; set; }
 
         bool CurrentIsDiscardGlyph { get; set; }
 
-        public StyledGlyphBuilder(float textBoxHeight, ISimplePath? textPath = null)
+        public StyledGlyphBuilder(float textBoxWidth, float textBoxHeight, ISimplePath? textPath = null)
         {
+            TextBoxWidth = textBoxWidth;
             TextBoxHeight = textBoxHeight;
             Builder = new PathBuilder();
             if (textPath != null && textPath.Points.Length > 1)
@@ -64,7 +67,7 @@ namespace NiVE3.Text
             CurrentParameters = parameters;
             Builder.Clear();
 
-            if (TextBoxHeight > 0.0F && bounds.Y + bounds.Height > TextBoxHeight)
+            if ((TextBoxWidth > 0.0F && bounds.X + bounds.Width > TextBoxWidth) || (TextBoxHeight > 0.0F && bounds.Y + bounds.Height > TextBoxHeight))
             {
                 CurrentIsDiscardGlyph = true;
                 return true;

@@ -140,16 +140,8 @@ namespace NiVE3.Input.Special
             textOption.WrappingLength = wrappingSize.X > 0.0 ? (float)wrappingSize.X : -1.0F;
             textOption.WordBreaking = wrappingSize.X > 0.0 ? WordBreaking.BreakAll : WordBreaking.Standard;
 
-            var glyphBuilder = new StyledGlyphBuilder((float)wrappingSize.Y);
-            try
-            {
-                TextRenderer.RenderTextTo(glyphBuilder, sourceText.Text, textOption);
-            }
-            catch (ArgumentOutOfRangeException)
-            {
-                // NOTE: WrappingLengthが1文字よりも小さい時にライブラリ側でArgumentOutOfRangeExceptionで落ちるため、そのときは空の画像を返す
-                return new NManagedImage(1, 1);
-            }
+            var glyphBuilder = new StyledGlyphBuilder((float)wrappingSize.X, (float)wrappingSize.Y);
+            TextRenderer.RenderTextTo(glyphBuilder, sourceText.Text, textOption);
             var glyphPolygons = new List<(Polygon[] fillPolygins, Polygon[] outlinePolygons, ExtendedTextRun textRun, Vector128<int> rect, Vector2 origin)>();
             foreach (var glyph in glyphBuilder.GetRenderableGlyhps())
             {
