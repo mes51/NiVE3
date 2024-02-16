@@ -92,6 +92,10 @@ namespace NiVE3.Model
                 {
                     propertyValues.Add(pg.Id, pg.GetPropertyValueGroup(layerTime));
                 }
+                else if (p is AppendablePropertyModel ap)
+                {
+                    propertyValues.Add(ap.Id, ap.GetChildPropertyValues(layerTime));
+                }
                 else if (p is PropertyModel pp)
                 {
                     propertyValues.Add(pp.Id, pp.GetValue(layerTime));

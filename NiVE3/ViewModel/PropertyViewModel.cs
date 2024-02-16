@@ -33,6 +33,25 @@ namespace NiVE3.ViewModel
         void DeSelect();
     }
 
+    static class InternalPropertyViewModel
+    {
+        public static IInternalPropertyViewModel CreateViewModel(IPropertyModel model)
+        {
+            if (model is PropertyGroupModel pg)
+            {
+                return new PropertyGroupViewModel(pg);
+            }
+            else if (model is AppendablePropertyModel ap)
+            {
+                return new AppendablePropertyViewModel(ap);
+            }
+            else
+            {
+                return new PropertyViewModel((PropertyModel)model);
+            }
+        }
+    }
+
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
     partial class PropertyViewModel : BindableBase, IInternalPropertyViewModel, IViewModelShortcutCommand
     {
@@ -266,7 +285,7 @@ namespace NiVE3.ViewModel
         }
     }
 
-    partial class PropertyGroupViewModel : BindableBase, IInternalPropertyViewModel
+    class PropertyGroupViewModel : BindableBase, IInternalPropertyViewModel
     {
         public PropertyViewState ViewState { get; }
 
@@ -313,21 +332,74 @@ namespace NiVE3.ViewModel
         {
             PropertyGroupModel = propertyGroupModel;
             Property = propertyGroupModel.Property;
-            children = propertyGroupModel.Children.CreateViewCollection<IPropertyModel, IInternalPropertyViewModel>(m =>
+            children = propertyGroupModel.Children.CreateViewCollection(m =>
             {
-                IInternalPropertyViewModel vm; 
-                if (m is PropertyGroupModel pg)
-                {
-                    vm = new PropertyGroupViewModel(pg);
-                }
-                else
-                {
-                    vm = new PropertyViewModel((PropertyModel)m);
-                }
+                var vm = InternalPropertyViewModel.CreateViewModel(m);
                 vm.SelectItemChanged += Property_SelectItemChanged;
                 return vm;
             });
             ViewState = propertyGroupModel.CreateState(this);
+        }
+
+        public void DeSelect()
+        {
+            foreach (var p in Children)
+            {
+                p.DeSelect();
+            }
+        }
+
+        private void Property_SelectItemChanged(object? sender, SelectItemEventArgs e)
+        {
+            SelectItemChangedPublisher.Publish(sender, e);
+        }
+    }
+
+    partial class AppendablePropertyViewModel : BindableBase, IInternalPropertyViewModel
+    {
+        public PropertyViewState ViewState { get; }
+
+        public ObservableCollection<KeyFrame>? KeyFrames => throw new NotImplementedException();
+
+        private ObservableCollectionView<IPropertyModel, IInternalPropertyViewModel> children;
+        public ObservableCollectionView<IPropertyModel, IInternalPropertyViewModel> Children
+        {
+            get { return children; }
+            set { SetProperty(ref children, value); }
+        }
+
+        public PropertyBase Property { get; }
+
+        public object? CurrentTimeValue { get; set; }
+
+        public ICommand BeginEditCommand => throw new NotImplementedException();
+
+        public ICommand EndEditCommand => throw new NotImplementedException();
+
+        public ICommand AbortEditCommand => throw new NotImplementedException();
+
+        WeakEventPublisher<SelectItemEventArgs> SelectItemChangedPublisher { get; } = new WeakEventPublisher<SelectItemEventArgs>();
+        public event EventHandler<SelectItemEventArgs> SelectItemChanged
+        {
+            add { SelectItemChangedPublisher.Subscribe(value); }
+            remove { SelectItemChangedPublisher.Unsubscribe(value); }
+        }
+
+        public AppendablePropertyItem[] Items => ((AppendableProperty)Property).Items;
+
+        AppendablePropertyModel AppendablePropertyModel { get; }
+
+        public AppendablePropertyViewModel(AppendablePropertyModel appendablePropertyModel)
+        {
+            AppendablePropertyModel = appendablePropertyModel;
+            Property = appendablePropertyModel.Property;
+            children = appendablePropertyModel.Children.CreateViewCollection(m =>
+            {
+                var vm = new PropertyGroupViewModel((PropertyGroupModel)m);
+                vm.SelectItemChanged += Property_SelectItemChanged;
+                return (IInternalPropertyViewModel)vm;
+            });
+            ViewState = appendablePropertyModel.CreateState(this);
         }
 
         public void DeSelect()

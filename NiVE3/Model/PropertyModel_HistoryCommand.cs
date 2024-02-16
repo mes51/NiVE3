@@ -255,4 +255,67 @@ namespace NiVE3.Model
             public void Dispose() { }
         }
     }
+
+    partial class AppendablePropertyModel
+    {
+        private class AddAppendablePropertyChildHistoryCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangePropertyValue);
+
+            AppendablePropertyModel Model { get; }
+
+            PropertyGroupModel Child { get; }
+
+            int Index { get; }
+
+            public AddAppendablePropertyChildHistoryCommand(AppendablePropertyModel model, PropertyGroupModel child, int index)
+            {
+                Model = model;
+                Child = child;
+                Index = index;
+            }
+
+            public void Redo()
+            {
+                Model.Children.Insert(Index, Child);
+            }
+
+            public void Undo()
+            {
+                Model.Children.Remove(Child);
+            }
+
+            public void Dispose() { }
+        }
+
+        private class RemoveAppendablePropertyChildHistoryCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangePropertyValue);
+
+            AppendablePropertyModel Model { get; }
+
+            PropertyGroupModel Child { get; }
+
+            int Index { get; }
+
+            public RemoveAppendablePropertyChildHistoryCommand(AppendablePropertyModel model, PropertyGroupModel child, int index)
+            {
+                Model = model;
+                Child = child;
+                Index = index;
+            }
+
+            public void Redo()
+            {
+                Model.Children.Remove(Child);
+            }
+
+            public void Undo()
+            {
+                Model.Children.Insert(Index, Child);
+            }
+
+            public void Dispose() { }
+        }
+    }
 }

@@ -90,15 +90,7 @@ namespace NiVE3.ViewModel
 
             Properties = effectModel.Properties.CreateViewCollection(m =>
             {
-                IInternalPropertyViewModel vm;
-                if (m is PropertyGroupModel pg)
-                {
-                    vm = new PropertyGroupViewModel(pg);
-                }
-                else
-                {
-                    vm = new PropertyViewModel((PropertyModel)m);
-                }
+                var vm = InternalPropertyViewModel.CreateViewModel(m);
                 vm.SelectItemChanged += Property_SelectItemChanged;
                 return vm;
             });

@@ -124,6 +124,7 @@ namespace NiVE3.Plugin.Property
         /// <summary>
         /// コンストラクタ
         /// </summary>
+        /// <param name="id">プロパティのID</param>
         /// <param name="displayName">グループの名前</param>
         /// <param name="children">グループに含まれるプロパティ</param>
         public PropertyGroup(string id, string displayName, PropertyBase[] children) : base(id, displayName, PropertyGroupType.Instance, null, false)
@@ -134,6 +135,7 @@ namespace NiVE3.Plugin.Property
         /// <summary>
         /// コンストラクタ
         /// </summary>
+        /// <param name="id">プロパティのID</param>
         /// <param name="displayName">グループの名前</param>
         /// <param name="children">グループに含まれるプロパティ</param>
         public PropertyGroup(string id, LanguageResourceKey displayName, PropertyBase[] children) : base(id, displayName, PropertyGroupType.Instance, null, false)
@@ -174,6 +176,93 @@ namespace NiVE3.Plugin.Property
         public override object CoerceValue(object value)
         {
             throw new NotImplementedException();
+        }
+    }
+
+    /// <summary>
+    /// ユーザーが指定した子プロパティを追加できるプロパティを表します
+    /// </summary>
+    public class AppendableProperty : PropertyBase
+    {
+        public AppendablePropertyItem[] Items { get; }
+
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="id">プロパティのID</param>
+        /// <param name="displayNameKey">親プロパティの名前</param>
+        /// <param name="items">このプロパティに追加可能な子プロパティの生成メソッド</param>
+        public AppendableProperty(string id, string displayName, AppendablePropertyItem[] items) : base(id, displayName, AppendablePropertyType.Instance, null, false)
+        {
+            Items = items;
+        }
+
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="id">プロパティのID</param>
+        /// <param name="displayNameKey">親プロパティの名前のLanguageResourceKey</param>
+        /// <param name="items">このプロパティに追加可能な子プロパティの生成メソッド</param>
+        public AppendableProperty(string id, LanguageResourceKey displayNameKey, AppendablePropertyItem[] items) : base(id, displayNameKey, AppendablePropertyType.Instance, null, false)
+        {
+            Items = items;
+        }
+
+        public override object CoerceValue(object value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override PropertyControlBase CreateControl(ICompositionObject composition, ILayerObject? layer, IEffectObject? effect, IPropertyViewModel viewModel)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override bool ValidateValue(object value)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    /// <summary>
+    /// 追加可能なプロパティの名前と生成処理を表すクラス
+    /// </summary>
+    public class AppendablePropertyItem
+    {
+        public string Id { get; }
+
+        public Func<PropertyGroup> CreateFunc { get; }
+
+        public string DisplayName => DisplayNameKey?.GetText() ?? RawDisplayName ?? "";
+
+        string? RawDisplayName { get; }
+
+        LanguageResourceKey? DisplayNameKey { get; }
+
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="id">子プロパティのルートグループのID。他AppendablePropertyItemと被らないようユニークである必要があります</param>
+        /// <param name="name">プロパティの名前</param>
+        /// <param name="createFunc">プロパティを生成するメソッド</param>
+        public AppendablePropertyItem(string id, string name, Func<PropertyGroup> createFunc)
+        {
+            Id = id;
+            RawDisplayName = name;
+            CreateFunc = createFunc;
+        }
+
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="id">子プロパティのルートグループのID</param>
+        /// <param name="nameKey">プロパティの名前のLanguageResourceKey</param>
+        /// <param name="createFunc">プロパティを生成するメソッド</param>
+        public AppendablePropertyItem(string id, LanguageResourceKey nameKey, Func<PropertyGroup> createFunc)
+        {
+            Id = id;
+            DisplayNameKey = nameKey;
+            CreateFunc = createFunc;
         }
     }
 }

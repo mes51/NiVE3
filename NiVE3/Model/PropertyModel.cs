@@ -338,8 +338,6 @@ namespace NiVE3.Model
 
         EffectModel? EffectModel { get; }
 
-        HistoryModel HistoryModel { get; }
-
         public PropertyGroupModel(PropertyBase property, CompositionModel compositionModel, HistoryModel historyModel) : this(property, compositionModel, null, null, historyModel) { }
 
         public PropertyGroupModel(PropertyBase property, CompositionModel compositionModel, LayerModel? layerModel, HistoryModel historyModel) : this(property, compositionModel, layerModel, null, historyModel) { }
@@ -350,7 +348,6 @@ namespace NiVE3.Model
             CompositionModel = compositionModel;
             LayerModel = layerModel;
             EffectModel = effectModel;
-            HistoryModel = historyModel;
             Id = property.Id;
 
             foreach (var c in ((PropertyGroup)property).Children)
@@ -358,6 +355,10 @@ namespace NiVE3.Model
                 if (c is PropertyGroup)
                 {
                     Children.Add(new PropertyGroupModel(c, compositionModel, layerModel, effectModel, historyModel));
+                }
+                else if (c is AppendableProperty)
+                {
+                    Children.Add(new AppendablePropertyModel(c, compositionModel, layerModel, effectModel, historyModel));
                 }
                 else
                 {
@@ -390,6 +391,10 @@ namespace NiVE3.Model
                 if (p is PropertyGroupModel pg)
                 {
                     result.Add(pg.Id, pg.GetPropertyValueGroup(time));
+                }
+                else if (p is AppendablePropertyModel ap)
+                {
+                    result.Add(ap.Id, ap.GetChildPropertyValues(time));
                 }
                 else if (p is PropertyModel pp)
                 {
@@ -440,6 +445,130 @@ namespace NiVE3.Model
             {
                 Children.FirstOrDefault(c => c.Id == childData.Id)?.LoadData(childData);
             }
+        }
+
+        private void Child_ValueUpdated(object? sender, EventArgs e)
+        {
+            ValueUpdated?.Invoke(sender, e);
+        }
+    }
+
+    partial class AppendablePropertyModel : BindableBase, IPropertyModel
+    {
+        public string Id { get; }
+
+        public object? Value => null;
+
+        public ObservableCollection<KeyFrame>? KeyFrames => null;
+
+        private ObservableCollection<IPropertyModel> children = new ObservableCollection<IPropertyModel>();
+        public ObservableCollection<IPropertyModel> Children
+        {
+            get { return children; }
+            set { SetProperty(ref children, value); }
+        }
+
+        public PropertyBase Property { get; }
+
+        public AppendablePropertyItem[] Items { get; }
+
+        public event EventHandler<EventArgs>? ValueUpdated;
+
+        CompositionModel CompositionModel { get; }
+
+        LayerModel? LayerModel { get; }
+
+        EffectModel? EffectModel { get; }
+
+        HistoryModel HistoryModel { get; }
+
+        public AppendablePropertyModel(PropertyBase property, CompositionModel compositionModel, HistoryModel historyModel) : this(property, compositionModel, null, null, historyModel) { }
+
+        public AppendablePropertyModel(PropertyBase property, CompositionModel compositionModel, LayerModel? layerModel, HistoryModel historyModel) : this(property, compositionModel, layerModel, null, historyModel) { }
+
+        public AppendablePropertyModel(PropertyBase property, CompositionModel compositionModel, LayerModel? layerModel, EffectModel? effectModel, HistoryModel historyModel)
+        {
+            Property = property;
+            CompositionModel = compositionModel;
+            LayerModel = layerModel;
+            EffectModel = effectModel;
+            Id = property.Id;
+            HistoryModel = historyModel;
+
+            Items = ((AppendableProperty)property).Items;
+        }
+
+        public PropertyControlBase CreateControl(IPropertyViewModel viewModel)
+        {
+            throw new NotImplementedException();
+        }
+
+        public PropertyViewState CreateState(IPropertyViewModel viewModel)
+        {
+            return Property.CreateState(CompositionModel, LayerModel, EffectModel, viewModel);
+        }
+
+        public void AddChild(AppendablePropertyItem item)
+        {
+            var child = AddChildInternal(item);
+
+            HistoryModel.Add(new AddAppendablePropertyChildHistoryCommand(this, child, Children.IndexOf(child)));
+        }
+
+        public void RemoveChild(PropertyGroupModel child)
+        {
+            var index = Children.IndexOf(child);
+            if (index < 0)
+            {
+                return;
+            }
+
+            Children.Remove(child);
+
+            HistoryModel.Add(new RemoveAppendablePropertyChildHistoryCommand(this, child, index));
+        }
+
+        public PropertyValueGroup[] GetChildPropertyValues(double time)
+        {
+            return Children.OfType<PropertyGroupModel>().Select(m => m.GetPropertyValueGroup(time)).ToArray();
+        }
+
+        public PropertyData SaveData()
+        {
+            return new PropertyData
+            {
+                Id = Id,
+                Children = Children.Select(p => p.SaveData()).ToArray()
+            };
+        }
+
+        public void LoadData(PropertyData data)
+        {
+            if (data.Children == null)
+            {
+                return;
+            }
+
+            foreach (var childData in data.Children)
+            {
+                var item = Items.FirstOrDefault(i => i.Id == childData.Id);
+                if (item == null)
+                {
+                    continue;
+                }
+
+                // TODO: 追加&LoadData
+            }
+        }
+
+        PropertyGroupModel AddChildInternal(AppendablePropertyItem item)
+        {
+            var group = item.CreateFunc();
+            var groupModel = new PropertyGroupModel(group, CompositionModel, LayerModel, EffectModel, HistoryModel);
+
+            Children.Add(groupModel);
+
+            return groupModel;
         }
 
         private void Child_ValueUpdated(object? sender, EventArgs e)
