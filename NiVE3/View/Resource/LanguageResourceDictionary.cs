@@ -515,6 +515,75 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("文字間のブレンドモード")]
         public static readonly string TextProperty_TextMoreOptions_InterCharacterBlendMode = nameof(TextProperty_TextMoreOptions_InterCharacterBlendMode);
 
+        [ShowInMarkup, DefaultValue("テキストアニメータ")]
+        public static readonly string TextProperty_TextAnimator = nameof(TextProperty_TextAnimator);
+
+        [ShowInMarkup, DefaultValue("アニメータ")]
+        public static readonly string TextProperty_TextAnimator_Animator = nameof(TextProperty_TextAnimator_Animator);
+
+        [ShowInMarkup, DefaultValue("範囲セレクタ")]
+        public static readonly string TextProperty_TextAnimator_Animator_Selector = nameof(TextProperty_TextAnimator_Animator_Selector);
+
+        [ShowInMarkup, DefaultValue("セレクタ")]
+        public static readonly string TextProperty_TextAnimator_Animator_Selector_Selector = nameof(TextProperty_TextAnimator_Animator_Selector_Selector);
+
+        [ShowInMarkup, DefaultValue("開始")]
+        public static readonly string TextProperty_TextAnimator_Animator_Selector_Begin = nameof(TextProperty_TextAnimator_Animator_Selector_Begin);
+
+        [ShowInMarkup, DefaultValue("終了")]
+        public static readonly string TextProperty_TextAnimator_Animator_Selector_End = nameof(TextProperty_TextAnimator_Animator_Selector_End);
+
+        [ShowInMarkup, DefaultValue("オフセット")]
+        public static readonly string TextProperty_TextAnimator_Animator_Selector_Offset = nameof(TextProperty_TextAnimator_Animator_Selector_Offset);
+
+        [ShowInMarkup, DefaultValue("詳細")]
+        public static readonly string TextProperty_TextAnimator_Animator_Selector_MoreOption = nameof(TextProperty_TextAnimator_Animator_Selector_MoreOption);
+
+        [ShowInMarkup, DefaultValue("基準")]
+        public static readonly string TextProperty_TextAnimator_Animator_Selector_Criteria = nameof(TextProperty_TextAnimator_Animator_Selector_Criteria);
+
+        [ShowInMarkup, DefaultValue("モード")]
+        public static readonly string TextProperty_TextAnimator_Animator_Selector_BlendMode = nameof(TextProperty_TextAnimator_Animator_Selector_BlendMode);
+
+        [ShowInMarkup, DefaultValue("量")]
+        public static readonly string TextProperty_TextAnimator_Animator_Selector_Amount = nameof(TextProperty_TextAnimator_Animator_Selector_Amount);
+
+        [ShowInMarkup, DefaultValue("シェイプ")]
+        public static readonly string TextProperty_TextAnimator_Animator_Selector_Shape = nameof(TextProperty_TextAnimator_Animator_Selector_Shape);
+
+        [ShowInMarkup, DefaultValue("ランダム")]
+        public static readonly string TextProperty_TextAnimator_Animator_Selector_EnableRandom = nameof(TextProperty_TextAnimator_Animator_Selector_EnableRandom);
+
+        [ShowInMarkup, DefaultValue("ランダムシード")]
+        public static readonly string TextProperty_TextAnimator_Animator_Selector_RandomSeed = nameof(TextProperty_TextAnimator_Animator_Selector_RandomSeed);
+
+        [ShowInMarkup, DefaultValue("値")]
+        public static readonly string TextProperty_TextAnimator_Animator_Value = nameof(TextProperty_TextAnimator_Animator_Value);
+
+        [ShowInMarkup, DefaultValue("アンカーポイント")]
+        public static readonly string TextProperty_TextAnimator_Animator_Value_AnchorPoint = nameof(TextProperty_TextAnimator_Animator_Value_AnchorPoint);
+
+        [ShowInMarkup, DefaultValue("位置")]
+        public static readonly string TextProperty_TextAnimator_Animator_Value_Position = nameof(TextProperty_TextAnimator_Animator_Value_Position);
+
+        [ShowInMarkup, DefaultValue("スケール")]
+        public static readonly string TextProperty_TextAnimator_Animator_Value_Scale = nameof(TextProperty_TextAnimator_Animator_Value_Scale);
+
+        [ShowInMarkup, DefaultValue("回転")]
+        public static readonly string TextProperty_TextAnimator_Animator_Value_Rotate = nameof(TextProperty_TextAnimator_Animator_Value_Rotate);
+
+        [ShowInMarkup, DefaultValue("歪曲")]
+        public static readonly string TextProperty_TextAnimator_Animator_Value_Skew = nameof(TextProperty_TextAnimator_Animator_Value_Skew);
+
+        [ShowInMarkup, DefaultValue("歪曲軸")]
+        public static readonly string TextProperty_TextAnimator_Animator_Value_SkewAxis = nameof(TextProperty_TextAnimator_Animator_Value_SkewAxis);
+
+        [ShowInMarkup, DefaultValue("不透明度")]
+        public static readonly string TextProperty_TextAnimator_Animator_Value_Opacity = nameof(TextProperty_TextAnimator_Animator_Value_Opacity);
+
+        [ShowInMarkup, DefaultValue("フォントサイズ")]
+        public static readonly string TextProperty_TextAnimator_Animator_Value_FontSize = nameof(TextProperty_TextAnimator_Animator_Value_FontSize);
+
         // Property Control
 
         [ShowInMarkup, DefaultValue("編集")]
@@ -664,6 +733,51 @@ namespace NiVE3.View.Resource
 
         [ShowInMarkup, DefaultValue("塗りの上に線")]
         public static readonly string TextLineDrawOrder_AfterFill = nameof(TextLineDrawOrder_AfterFill);
+
+        [ShowInMarkup, DefaultValue("文字")]
+        public static readonly string SelectorCriteria_Charactor = nameof(SelectorCriteria_Charactor);
+
+        [ShowInMarkup, DefaultValue("空白を除いた文字")]
+        public static readonly string SelectorCriteria_CharactorWithoutSpace = nameof(SelectorCriteria_CharactorWithoutSpace);
+
+        [ShowInMarkup, DefaultValue("単語")]
+        public static readonly string SelectorCriteria_Word = nameof(SelectorCriteria_Word);
+
+        [ShowInMarkup, DefaultValue("行")]
+        public static readonly string SelectorCriteria_Line = nameof(SelectorCriteria_Line);
+
+        [ShowInMarkup, DefaultValue("加算")]
+        public static readonly string SelectorBlendMode_Add = nameof(SelectorBlendMode_Add);
+
+        [ShowInMarkup, DefaultValue("減算")]
+        public static readonly string SelectorBlendMode_Subtract = nameof(SelectorBlendMode_Subtract);
+
+        [ShowInMarkup, DefaultValue("乗算")]
+        public static readonly string SelectorBlendMode_Multiply = nameof(SelectorBlendMode_Multiply);
+
+        [ShowInMarkup, DefaultValue("最小")]
+        public static readonly string SelectorBlendMode_Min = nameof(SelectorBlendMode_Min);
+
+        [ShowInMarkup, DefaultValue("最大")]
+        public static readonly string SelectorBlendMode_Max = nameof(SelectorBlendMode_Max);
+
+        [ShowInMarkup, DefaultValue("差")]
+        public static readonly string SelectorBlendMode_Difference = nameof(SelectorBlendMode_Difference);
+
+        [ShowInMarkup, DefaultValue("四角")]
+        public static readonly string SelectorShape_Rectangle = nameof(SelectorShape_Rectangle);
+
+        [ShowInMarkup, DefaultValue("上へ傾斜")]
+        public static readonly string SelectorShape_RampUp = nameof(SelectorShape_RampUp);
+
+        [ShowInMarkup, DefaultValue("下へ傾斜")]
+        public static readonly string SelectorShape_RampDown = nameof(SelectorShape_RampDown);
+
+        [ShowInMarkup, DefaultValue("三角形")]
+        public static readonly string SelectorShape_Triangle = nameof(SelectorShape_Triangle);
+
+        [ShowInMarkup, DefaultValue("円")]
+        public static readonly string SelectorShape_Circle = nameof(SelectorShape_Circle);
 
         static LanguageResourceDictionary()
         {

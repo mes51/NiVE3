@@ -80,6 +80,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, Icon("")]
         public static readonly string AlignRight = nameof(AlignRight);
 
+        [ShowInMarkup, Icon("+", Size = 8)]
+        public static readonly string SmallPlus = nameof(SmallPlus);
+
         public FontawesomeResourceDictionary()
         {
             var keys = typeof(FontawesomeResourceDictionary).GetFields(BindingFlags.Static | BindingFlags.Public)

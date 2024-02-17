@@ -104,6 +104,32 @@ namespace NiVE3.View.Part
             new FrameworkPropertyMetadata(new GridLength(0.0), FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
+        public static readonly DependencyProperty ControlAreaWidthProperty = DependencyProperty.Register(
+            nameof(ControlAreaWidth),
+            typeof(GridLength),
+            typeof(LayerItemExpander),
+            new FrameworkPropertyMetadata(new GridLength(0.0), FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        public static readonly DependencyProperty HeaderSubItemProperty = DependencyProperty.Register(
+            nameof(HeaderSubItem),
+            typeof(UIElement),
+            typeof(LayerItemExpander),
+            new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        public UIElement? HeaderSubItem
+        {
+            get { return (UIElement)GetValue(HeaderSubItemProperty); }
+            set { SetValue(HeaderSubItemProperty, value); }
+        }
+
+        public GridLength ControlAreaWidth
+        {
+            get { return (GridLength)GetValue(ControlAreaWidthProperty); }
+            set { SetValue(ControlAreaWidthProperty, value); }
+        }
+
         public bool IsHeaderTextEditable
         {
             get { return (bool)GetValue(IsHeaderTextEditableProperty); }

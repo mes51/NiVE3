@@ -225,7 +225,7 @@ namespace NiVE3.Plugin.Property
     }
 
     /// <summary>
-    /// 追加可能なプロパティの名前と生成処理を表すクラス
+    /// 追加可能なプロパティの名前と生成処理を表します
     /// </summary>
     public class AppendablePropertyItem
     {
@@ -234,6 +234,8 @@ namespace NiVE3.Plugin.Property
         public Func<PropertyGroup> CreateFunc { get; }
 
         public string DisplayName => DisplayNameKey?.GetText() ?? RawDisplayName ?? "";
+
+        public bool IsSeparator { get; protected init; }
 
         string? RawDisplayName { get; }
 
@@ -263,6 +265,19 @@ namespace NiVE3.Plugin.Property
             Id = id;
             DisplayNameKey = nameKey;
             CreateFunc = createFunc;
+        }
+    }
+
+    /// <summary>
+    /// 追加可能なプロパティの一覧に表示するセパレーターを表します
+    /// </summary>
+    public class AppendablePropertyItemSeparator : AppendablePropertyItem
+    {
+        public static readonly AppendablePropertyItemSeparator Instance = new AppendablePropertyItemSeparator();
+
+        private AppendablePropertyItemSeparator() : base("", "", () => new PropertyGroup("", "", Array.Empty<PropertyBase>()))
+        {
+            IsSeparator = true;
         }
     }
 }

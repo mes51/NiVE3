@@ -58,6 +58,7 @@
                                     <ColumnDefinition Width="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=IndentMarginLeft}"/>
                                     <ColumnDefinition Width="{x:Static r:UIParameters.ArrowWidthGridLength}"/>
                                     <ColumnDefinition Width="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=CalculatedNameAreaWidth}"/>
+                                    <ColumnDefinition Width="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=ControlAreaWidth}"/>
                                 </Grid.ColumnDefinitions>
 
                                 <ContentPresenter Grid.Column="0" Content="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Switches}" Visibility="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=IsTagColumnVisible, Converter={StaticResource BooleanToVisibilityConverter}}"/>
@@ -85,6 +86,19 @@
                                         </Style>
                                     </TextBlock.Style>
                                 </TextBlock>
+                                <ContentPresenter Grid.Column="3" Content="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=HeaderSubItem}">
+                                    <ContentPresenter.Style>
+                                        <Style TargetType="{x:Type ContentPresenter}">
+                                            <Setter Property="Visibility" Value="Visible"/>
+
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=HeaderSubItem}" Value="{x:Null}">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </ContentPresenter.Style>
+                                </ContentPresenter>
                             </Grid>
                             <ContentPresenter x:Name="ExpandSite"
                                               DockPanel.Dock="Bottom"

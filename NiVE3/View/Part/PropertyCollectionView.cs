@@ -114,54 +114,23 @@ namespace NiVE3.View.Part
             templateSelector.Templates.Add(new DataTemplate
             {
                 DataType = typeof(PropertyViewModel),
-                VisualTree = CreateControlFactory(
-                    typeof(PropertyView),
-                    PropertyView.ControlAreaWidthProperty,
-                    PropertyView.NameAreaWidthProperty,
-                    PropertyView.IndentLevelProperty,
-                    PropertyView.IsAVSwitchColumnVisibleProperty,
-                    PropertyView.IsTagColumnVisibleProperty,
-                    PropertyView.ViewStateProperty,
-                    PropertyView.RangeProperty,
-                    PropertyView.RangeStartProperty,
-                    PropertyView.CompositionFrameRateProperty,
-                    PropertyView.ParentHasExpanderArrowProperty
-                )
+                VisualTree = CreateControlFactory(typeof(PropertyView))
+            });
+            templateSelector.Templates.Add(new DataTemplate
+            {
+                DataType = typeof(AppendablePropertyViewModel),
+                VisualTree = CreateControlFactory(typeof(AppendablePropertyView))
             });
             templateSelector.Templates.Add(new DataTemplate
             {
                 DataType = typeof(PropertyGroupViewModel),
-                VisualTree = CreateControlFactory(
-                    typeof(PropertyGroupView),
-                    PropertyGroupView.ControlAreaWidthProperty,
-                    PropertyGroupView.NameAreaWidthProperty,
-                    PropertyGroupView.IndentLevelProperty,
-                    PropertyGroupView.IsAVSwitchColumnVisibleProperty,
-                    PropertyGroupView.IsTagColumnVisibleProperty,
-                    PropertyGroupView.ViewStateProperty,
-                    PropertyGroupView.RangeProperty,
-                    PropertyGroupView.RangeStartProperty,
-                    PropertyGroupView.CompositionFrameRateProperty,
-                    PropertyGroupView.ParentHasExpanderArrowProperty
-                )
+                VisualTree = CreateControlFactory(typeof(PropertyGroupView))
             });
 
             ItemTemplateSelector = templateSelector;
         }
 
-        FrameworkElementFactory CreateControlFactory(
-            Type uiType,
-            DependencyProperty controlAreaWidthProperty,
-            DependencyProperty nameAreaWidthProperty,
-            DependencyProperty indentLevelProperty,
-            DependencyProperty isAVSwitchColumnVisibleProperty,
-            DependencyProperty isTagColumnVisibleProperty,
-            DependencyProperty viewStateProperty,
-            DependencyProperty rangeProperty,
-            DependencyProperty rangeStartProperty,
-            DependencyProperty compositionFrameRateProperty,
-            DependencyProperty parentHasExpanderArrowProperty
-        )
+        FrameworkElementFactory CreateControlFactory(Type uiType)
         {
             var factory = new FrameworkElementFactory(uiType);
             var controlAreaWidthBinding = new Binding
@@ -170,7 +139,7 @@ namespace NiVE3.View.Part
                 Source = this,
                 Mode = BindingMode.OneWay
             };
-            factory.SetBinding(controlAreaWidthProperty, controlAreaWidthBinding);
+            factory.SetBinding(PropertyViewBase.ControlAreaWidthProperty, controlAreaWidthBinding);
 
             var nameAreaWidthBinding = new Binding
             {
@@ -178,7 +147,7 @@ namespace NiVE3.View.Part
                 Source = this,
                 Mode = BindingMode.OneWay
             };
-            factory.SetBinding(nameAreaWidthProperty, nameAreaWidthBinding);
+            factory.SetBinding(PropertyViewBase.NameAreaWidthProperty, nameAreaWidthBinding);
 
             var indentLevelBinding = new Binding
             {
@@ -186,7 +155,7 @@ namespace NiVE3.View.Part
                 Source = this,
                 Mode = BindingMode.OneWay
             };
-            factory.SetBinding(indentLevelProperty, indentLevelBinding);
+            factory.SetBinding(PropertyViewBase.IndentLevelProperty, indentLevelBinding);
 
             var isAVSwitchColumnVisibleBinding = new Binding
             {
@@ -194,7 +163,7 @@ namespace NiVE3.View.Part
                 Source = this,
                 Mode = BindingMode.OneWay
             };
-            factory.SetBinding(isAVSwitchColumnVisibleProperty, isAVSwitchColumnVisibleBinding);
+            factory.SetBinding(PropertyViewBase.IsAVSwitchColumnVisibleProperty, isAVSwitchColumnVisibleBinding);
 
             var isTagColumnVisibleBinding = new Binding
             {
@@ -202,14 +171,14 @@ namespace NiVE3.View.Part
                 Source = this,
                 Mode = BindingMode.OneWay
             };
-            factory.SetBinding(isTagColumnVisibleProperty, isTagColumnVisibleBinding);
+            factory.SetBinding(PropertyViewBase.IsTagColumnVisibleProperty, isTagColumnVisibleBinding);
 
             var viewStateBinding = new Binding
             {
                 Path = new PropertyPath(nameof(PropertyViewModel.ViewState)),
                 Mode = BindingMode.OneWay
             };
-            factory.SetBinding(viewStateProperty, viewStateBinding);
+            factory.SetBinding(PropertyViewBase.ViewStateProperty, viewStateBinding);
 
             var visibilityBinding = new Binding
             {
@@ -232,7 +201,7 @@ namespace NiVE3.View.Part
                 Source = this,
                 Mode = BindingMode.OneWay
             };
-            factory.SetBinding(rangeProperty, rangeBinding);
+            factory.SetBinding(PropertyViewBase.RangeProperty, rangeBinding);
 
             var rangeStartBinding = new Binding
             {
@@ -240,7 +209,7 @@ namespace NiVE3.View.Part
                 Source = this,
                 Mode = BindingMode.OneWay
             };
-            factory.SetBinding(rangeStartProperty, rangeStartBinding);
+            factory.SetBinding(PropertyViewBase.RangeStartProperty, rangeStartBinding);
 
             var compositionFrameRateBinding = new Binding
             {
@@ -248,7 +217,7 @@ namespace NiVE3.View.Part
                 Source = this,
                 Mode = BindingMode.OneWay
             };
-            factory.SetBinding(compositionFrameRateProperty, compositionFrameRateBinding);
+            factory.SetBinding(PropertyViewBase.CompositionFrameRateProperty, compositionFrameRateBinding);
 
             var parentHasExpanderArrowBinding = new Binding
             {
@@ -256,7 +225,7 @@ namespace NiVE3.View.Part
                 Source = this,
                 Mode = BindingMode.OneWay
             };
-            factory.SetBinding(parentHasExpanderArrowProperty, parentHasExpanderArrowBinding);
+            factory.SetBinding(PropertyViewBase.ParentHasExpanderArrowProperty, parentHasExpanderArrowBinding);
 
             return factory;
         }

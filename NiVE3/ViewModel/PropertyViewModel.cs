@@ -368,15 +368,20 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref children, value); }
         }
 
+        private bool isExpanded;
+        public bool IsExpanded
+        {
+            get { return isExpanded; }
+            set { SetProperty(ref isExpanded, value); }
+        }
+
+        public object? CurrentTimeValue
+        {
+            get => null;
+            set { }
+        }
+
         public PropertyBase Property { get; }
-
-        public object? CurrentTimeValue { get; set; }
-
-        public ICommand BeginEditCommand => throw new NotImplementedException();
-
-        public ICommand EndEditCommand => throw new NotImplementedException();
-
-        public ICommand AbortEditCommand => throw new NotImplementedException();
 
         WeakEventPublisher<SelectItemEventArgs> SelectItemChangedPublisher { get; } = new WeakEventPublisher<SelectItemEventArgs>();
         public event EventHandler<SelectItemEventArgs> SelectItemChanged
@@ -384,6 +389,14 @@ namespace NiVE3.ViewModel
             add { SelectItemChangedPublisher.Subscribe(value); }
             remove { SelectItemChangedPublisher.Unsubscribe(value); }
         }
+
+        public ICommand BeginEditCommand => throw new NotImplementedException();
+
+        public ICommand EndEditCommand => throw new NotImplementedException();
+
+        public ICommand AbortEditCommand => throw new NotImplementedException();
+
+        public ICommand AppendItemCommand { get; }
 
         public AppendablePropertyItem[] Items => ((AppendableProperty)Property).Items;
 
@@ -400,6 +413,8 @@ namespace NiVE3.ViewModel
                 return (IInternalPropertyViewModel)vm;
             });
             ViewState = appendablePropertyModel.CreateState(this);
+
+            AppendItemCommand = new DelegateCommand<AppendablePropertyItem>(i => AppendablePropertyModel.AddChild(i));
         }
 
         public void DeSelect()

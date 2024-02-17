@@ -1,30 +1,28 @@
-﻿<UserControl x:Class="NiVE3.View.Part.PropertyGroupView"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:NiVE3.View.Part"
-             xmlns:cv="clr-namespace:NiVE3.View.Converter"
-             xmlns:pt="clr-namespace:NiVE3.View.Part"
-             mc:Ignorable="d" 
-             x:Name="Root"
-             d:DesignHeight="450" d:DesignWidth="800">
-    <pt:LayerItemExpander HeaderText="{Binding ViewState.DisplayName}"
-                          IndentLevel="{Binding ElementName=Root, Path=IndentLevel}"
-                          IsAVSwitchColumnVisible="{Binding ElementName=Root, Path=IsAVSwitchColumnVisible}"
-                          IsTagColumnVisible="{Binding ElementName=Root, Path=IsTagColumnVisible}"
-                          IsExpanded="{Binding IsExpanded, Mode=TwoWay}"
-                          NameAreaWidth="{Binding ElementName=Root, Path=NameAreaWidth}"
-                          ParentHasExpanderArrow="{Binding ElementName=Root, Path=ParentHasExpanderArrow}">
-        <pt:PropertyCollectionView ItemsSource="{Binding Children}"
-                                   IndentLevel="{Binding ElementName=Root, Path=IndentLevel, Converter={x:Static local:PropertyGroupView.NextIndentConverter}}"
-                                   ControlAreaWidth="{Binding ElementName=Root, Path=ControlAreaWidth}"
-                                   NameAreaWidth="{Binding ElementName=Root, Path=NameAreaWidth}"
-                                   IsAVSwitchColumnVisible="{Binding ElementName=Root, Path=IsAVSwitchColumnVisible}"
-                                   IsTagColumnVisible="{Binding ElementName=Root, Path=IsTagColumnVisible}"
-                                   Range="{Binding ElementName=Root, Path=Range}"
-                                   RangeStart="{Binding ElementName=Root, Path=RangeStart}"
-                                   CompositionFrameRate="{Binding ElementName=Root, Path=CompositionFrameRate}"
-                                   ParentHasExpanderArrow="{Binding ElementName=Root, Path=ParentHasExpanderArrow}"/>
-    </pt:LayerItemExpander>
-</UserControl>
+﻿<local:PropertyViewBase x:Class="NiVE3.View.Part.PropertyGroupView"
+                        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                        xmlns:local="clr-namespace:NiVE3.View.Part"
+                        mc:Ignorable="d" 
+                        x:Name="Root"
+                        d:DesignHeight="450" d:DesignWidth="800">
+    <local:LayerItemExpander HeaderText="{Binding ViewState.DisplayName}"
+                             IndentLevel="{Binding ElementName=Root, Path=IndentLevel}"
+                             IsAVSwitchColumnVisible="{Binding ElementName=Root, Path=IsAVSwitchColumnVisible}"
+                             IsTagColumnVisible="{Binding ElementName=Root, Path=IsTagColumnVisible}"
+                             IsExpanded="{Binding IsExpanded, Mode=TwoWay}"
+                             NameAreaWidth="{Binding ElementName=Root, Path=NameAreaWidth}"
+                             ParentHasExpanderArrow="{Binding ElementName=Root, Path=ParentHasExpanderArrow}">
+        <local:PropertyCollectionView ItemsSource="{Binding Children}"
+                                      IndentLevel="{Binding ElementName=Root, Path=IndentLevel, Converter={x:Static local:PropertyGroupView.NextIndentConverter}}"
+                                      ControlAreaWidth="{Binding ElementName=Root, Path=ControlAreaWidth}"
+                                      NameAreaWidth="{Binding ElementName=Root, Path=NameAreaWidth}"
+                                      IsAVSwitchColumnVisible="{Binding ElementName=Root, Path=IsAVSwitchColumnVisible}"
+                                      IsTagColumnVisible="{Binding ElementName=Root, Path=IsTagColumnVisible}"
+                                      Range="{Binding ElementName=Root, Path=Range}"
+                                      RangeStart="{Binding ElementName=Root, Path=RangeStart}"
+                                      CompositionFrameRate="{Binding ElementName=Root, Path=CompositionFrameRate}"
+                                      ParentHasExpanderArrow="{Binding ElementName=Root, Path=ParentHasExpanderArrow}"/>
+    </local:LayerItemExpander>
+</local:PropertyViewBase>

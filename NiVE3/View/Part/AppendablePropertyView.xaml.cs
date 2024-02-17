@@ -12,21 +12,27 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using NiVE3.Plugin.Property;
 using NiVE3.View.Converter;
 
 namespace NiVE3.View.Part
 {
     /// <summary>
-    /// PropertyGroupView.xaml の相互作用ロジック
+    /// AppendablePropertyView.xaml の相互作用ロジック
     /// </summary>
-    public partial class PropertyGroupView : PropertyViewBase
+    public partial class AppendablePropertyView : PropertyViewBase
     {
         public static readonly IValueConverter NextIndentConverter = new DelegateConverter<int, int>(v => v + 1);
 
-        public PropertyGroupView()
+        public AppendablePropertyView()
         {
             InitializeComponent();
+        }
+
+        private void OpenAppendItemMenuButton_Click(object sender, RoutedEventArgs e)
+        {
+            OpenAppendItemMenuButton.ContextMenu.Visibility = Visibility.Visible;
+            OpenAppendItemMenuButton.ContextMenu.PlacementTarget = OpenAppendItemMenuButton;
+            OpenAppendItemMenuButton.ContextMenu.IsOpen = true;
         }
     }
 }
