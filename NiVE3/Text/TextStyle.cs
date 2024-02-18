@@ -20,7 +20,7 @@ namespace NiVE3.Text
         bool IsEnableItalic,
         TextAlign TextAlign,
         Vector4 FillColor,
-        Vector4 OutlineColor
+        Vector4 TextLineColor
     )
     {
         public static TextStyle Empty = new TextStyle("", 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, TextLineDrawOrder.None, 0.0F, false, false, TextAlign.Left, Vector4.Zero, Vector4.Zero);
@@ -44,10 +44,10 @@ namespace NiVE3.Text
             };
             var outlineColorDic = new Dictionary<string, object?>
             {
-                { nameof(Vector4.X), OutlineColor.X },
-                { nameof(Vector4.Y), OutlineColor.Y },
-                { nameof(Vector4.Z), OutlineColor.Z },
-                { nameof(Vector4.W), OutlineColor.W }
+                { nameof(Vector4.X), TextLineColor.X },
+                { nameof(Vector4.Y), TextLineColor.Y },
+                { nameof(Vector4.Z), TextLineColor.Z },
+                { nameof(Vector4.W), TextLineColor.W }
             };
             var result = new Dictionary<string, object?>
             {
@@ -63,7 +63,7 @@ namespace NiVE3.Text
                 { nameof(IsEnableItalic), IsEnableItalic },
                 { nameof(TextAlign), TextAlign },
                 { nameof(FillColor), fillColorDic },
-                { nameof(OutlineColor), outlineColorDic }
+                { nameof(TextLineColor), outlineColorDic }
             };
 
             return result;
@@ -72,7 +72,7 @@ namespace NiVE3.Text
         public static TextStyle Deserialize(IDictionary<string, object?> dic)
         {
             var fillColorDic = dic[nameof(FillColor)] as IDictionary<string, object?> ?? DeserializedTransparentColor;
-            var outlineColorDic = dic[nameof(OutlineColor)] as IDictionary<string, object?> ?? DeserializedTransparentColor;
+            var outlineColorDic = dic[nameof(TextLineColor)] as IDictionary<string, object?> ?? DeserializedTransparentColor;
             return new TextStyle(
                 (string)(dic[nameof(FontUniqueId)] ?? ""),
                 (float)Convert.ToDouble(dic[nameof(FontSize)] ?? 0.0),

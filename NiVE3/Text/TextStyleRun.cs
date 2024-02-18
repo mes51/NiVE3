@@ -52,7 +52,7 @@ namespace NiVE3.Text
                 TextLineDrawOrder = Style.TextLineDrawOrder,
                 TextLineWidth = Style.TextLineWidth,
                 FillColor = Style.FillColor,
-                OutlineColor = Style.OutlineColor
+                TextLineColor = Style.TextLineColor
             };
         }
     }
@@ -71,6 +71,6 @@ namespace NiVE3.Text
 
         public Vector4 FillColor { get; set; }
 
-        public Vector4 OutlineColor { get; set; }
+        public Vector4 TextLineColor { get; set; }
     }
 }

@@ -103,11 +103,11 @@ namespace NiVE3.Model
             set { SetProperty(ref fillColor, value); }
         }
 
-        private FloatColor outlineColor = new FloatColor(1.0F, 0.0F, 0.0F, 1.0F);
-        public FloatColor OutlineColor
+        private FloatColor textLineColor = new FloatColor(1.0F, 0.0F, 0.0F, 1.0F);
+        public FloatColor TextLineColor
         {
-            get { return outlineColor; }
-            set { SetProperty(ref outlineColor, value); }
+            get { return textLineColor; }
+            set { SetProperty(ref textLineColor, value); }
         }
 
         public FontGroup[] FontGroups { get; }
@@ -137,7 +137,7 @@ namespace NiVE3.Model
                 IsEnableItalic,
                 TextAlign,
                 (Vector4)FillColor,
-                (Vector4)OutlineColor
+                (Vector4)TextLineColor
             );
         }
 
@@ -155,7 +155,7 @@ namespace NiVE3.Model
             IsEnableItalic = style.IsEnableItalic;
             TextAlign = style.TextAlign;
             FillColor = (FloatColor)style.FillColor;
-            OutlineColor = (FloatColor)style.OutlineColor;
+            TextLineColor = (FloatColor)style.TextLineColor;
         }
 
         public void UpdateTextProperty(LayerModel targetLayer, double time)

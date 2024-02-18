@@ -495,7 +495,12 @@ namespace NiVE3.Model
             Id = property.Id;
             HistoryModel = historyModel;
 
-            Items = ((AppendableProperty)property).Items;
+            var ap = (AppendableProperty)property;
+            Items = ap.Items;
+            if (ap.DefaultAppendedItem != null)
+            {
+                AddChildInternal(ap.DefaultAppendedItem);
+            }
         }
 
         public PropertyControlBase CreateControl(IPropertyViewModel viewModel)

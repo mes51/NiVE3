@@ -186,15 +186,22 @@ namespace NiVE3.Plugin.Property
     {
         public AppendablePropertyItem[] Items { get; }
 
+        public AppendablePropertyItem? DefaultAppendedItem { get; }
+
         /// <summary>
         /// コンストラクタ
         /// </summary>
         /// <param name="id">プロパティのID</param>
         /// <param name="displayNameKey">親プロパティの名前</param>
         /// <param name="items">このプロパティに追加可能な子プロパティの生成メソッド</param>
-        public AppendableProperty(string id, string displayName, AppendablePropertyItem[] items) : base(id, displayName, AppendablePropertyType.Instance, null, false)
+        /// <param name="defaultAppendedItemIndex">初期状態で追加されている子プロパティのインデックス</param>
+        public AppendableProperty(string id, string displayName, AppendablePropertyItem[] items, int? defaultAppendedItemIndex = null) : base(id, displayName, AppendablePropertyType.Instance, null, false)
         {
             Items = items;
+            if (defaultAppendedItemIndex != null)
+            {
+                DefaultAppendedItem = items[defaultAppendedItemIndex.Value];
+            }
         }
 
         /// <summary>
@@ -203,9 +210,14 @@ namespace NiVE3.Plugin.Property
         /// <param name="id">プロパティのID</param>
         /// <param name="displayNameKey">親プロパティの名前のLanguageResourceKey</param>
         /// <param name="items">このプロパティに追加可能な子プロパティの生成メソッド</param>
-        public AppendableProperty(string id, LanguageResourceKey displayNameKey, AppendablePropertyItem[] items) : base(id, displayNameKey, AppendablePropertyType.Instance, null, false)
+        /// <param name="defaultAppendedItemIndex">初期状態で追加されている子プロパティのインデックス</param>
+        public AppendableProperty(string id, LanguageResourceKey displayNameKey, AppendablePropertyItem[] items, int? defaultAppendedItemIndex = null) : base(id, displayNameKey, AppendablePropertyType.Instance, null, false)
         {
             Items = items;
+            if (defaultAppendedItemIndex != null)
+            {
+                DefaultAppendedItem = items[defaultAppendedItemIndex.Value];
+            }
         }
 
         public override object CoerceValue(object value)

@@ -417,7 +417,7 @@
                 </Grid.ColumnDefinitions>
 
                 <TextBlock Text="線の色"/>
-                <Button Style="{StaticResource ColorChangeButtonStyle}" Background="{Binding OutlineColorBrush}" BorderBrush="{ugm:AppearanceResource ResourceKey=BorderBrush}" Click="OutlineColorChangeButton_Click"/>
+                <Button Style="{StaticResource ColorChangeButtonStyle}" Background="{Binding TextLineColorBrush}" BorderBrush="{ugm:AppearanceResource ResourceKey=BorderBrush}" Click="TextLineColorChangeButton_Click"/>
             </Grid>
         </UniformGrid>
     </Grid>

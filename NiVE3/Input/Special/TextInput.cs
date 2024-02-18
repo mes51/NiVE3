@@ -118,6 +118,16 @@ namespace NiVE3.Input.Special
 
         const string TextAnimatorValueFontSizeId = nameof(TextAnimatorValueFontSizeId);
 
+        const string TextAnimatorValueFillColorId = nameof(TextAnimatorValueFillColorId);
+
+        const string TextAnimatorValueTextLineColorId = nameof(TextAnimatorValueTextLineColorId);
+
+        const string TextAnimatorValueTextLineWidthId = nameof(TextAnimatorValueTextLineWidthId);
+
+        const string TextAnimatorValueCharacterOffsetId = nameof(TextAnimatorValueCharacterOffsetId);
+
+        const string TextAnimatorValueBlurId = nameof(TextAnimatorValueBlurId);
+
         public static readonly TextFootageSource Instance = new TextFootageSource();
 
         private TextFootageSource() { }
@@ -167,7 +177,7 @@ namespace NiVE3.Input.Special
                                             new DoubleProperty(TextAnimatorSelectorRandomSeedId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Selector_RandomSeed), 0, double.MinValue, double.MaxValue, digit: 0)
                                         })
                                     }))
-                            }),
+                            }, 0),
                             new AppendableProperty(TextAnimatorValueId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value), new AppendablePropertyItem[]
                             {
                                 new AppendablePropertyItem(TextAnimatorValueAnchorPointId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_AnchorPoint), () =>
@@ -206,6 +216,46 @@ namespace NiVE3.Input.Special
                                     new PropertyGroup(TextAnimatorValueFontSizeId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_FontSize), new PropertyBase[]
                                     {
                                         new DoubleProperty(TextAnimatorValueFontSizeId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_FontSize), 20.0, 0.0, double.MaxValue, digit: 2)
+                                    })),
+                                new AppendablePropertyItem(TextAnimatorValueFillColorId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_FillColor), () =>
+                                    new PropertyGroup(TextAnimatorValueFillColorId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_FillColor), new PropertyBase[]
+                                    {
+                                        new ColorProperty(
+                                            TextAnimatorValueFillColorId,
+                                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_FillColor),
+                                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_FillColor),
+                                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Dialog_OK),
+                                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Dialog_Cancel),
+                                            Vector4.One
+                                        )
+                                    })),
+                                new AppendablePropertyItem(TextAnimatorValueTextLineColorId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_TextLineColor), () =>
+                                    new PropertyGroup(TextAnimatorValueTextLineColorId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_TextLineColor), new PropertyBase[]
+                                    {
+                                        new ColorProperty(
+                                            TextAnimatorValueTextLineColorId,
+                                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_TextLineColor),
+                                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_TextLineColor),
+                                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Dialog_OK),
+                                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Dialog_Cancel),
+                                            new Vector4(0.0F, 0.0F, 1.0F, 1.0F)
+                                        )
+                                    })),
+                                new AppendablePropertyItem(TextAnimatorValueTextLineWidthId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_TextLineWidth), () =>
+                                    new PropertyGroup(TextAnimatorValueTextLineWidthId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_TextLineWidth), new PropertyBase[]
+                                    {
+                                        new DoubleProperty(TextAnimatorValueTextLineWidthId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_TextLineWidth), 3.0, 0.0, double.MaxValue, digit: 2)
+                                    })),
+                                AppendablePropertyItemSeparator.Instance,
+                                new AppendablePropertyItem(TextAnimatorValueCharacterOffsetId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_CharacterOffset), () =>
+                                    new PropertyGroup(TextAnimatorValueCharacterOffsetId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_CharacterOffset), new PropertyBase[]
+                                    {
+                                        new DoubleProperty(TextAnimatorValueCharacterOffsetId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_CharacterOffset), 0.0, 0.0, ushort.MaxValue, digit: 0)
+                                    })),
+                                new AppendablePropertyItem(TextAnimatorValueBlurId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_Blur), () =>
+                                    new PropertyGroup(TextAnimatorValueBlurId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_Blur), new PropertyBase[]
+                                    {
+                                        new Vector3dProperty(TextAnimatorValueBlurId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_Blur), new Vector3d(), new Vector3d(), digit: 2, is3D: false)
                                     })),
                             })
                         }))
@@ -300,10 +350,10 @@ namespace NiVE3.Input.Special
                     {
                         case TextLineDrawOrder.AfterFill:
                             ShapeRender.FillPolygonNonzero(fillPolygins, glyphImage, textRun.FillColor, intLeft, intTop);
-                            ShapeRender.FillPolygonNonzero(outlinePolygons, glyphImage, textRun.OutlineColor, intLeft, intTop);
+                            ShapeRender.FillPolygonNonzero(outlinePolygons, glyphImage, textRun.TextLineColor, intLeft, intTop);
                             break;
                         case TextLineDrawOrder.BeforeFill:
-                            ShapeRender.FillPolygonNonzero(outlinePolygons, glyphImage, textRun.OutlineColor, intLeft, intTop);
+                            ShapeRender.FillPolygonNonzero(outlinePolygons, glyphImage, textRun.TextLineColor, intLeft, intTop);
                             ShapeRender.FillPolygonNonzero(fillPolygins, glyphImage, textRun.FillColor, intLeft, intTop);
                             break;
                         default:

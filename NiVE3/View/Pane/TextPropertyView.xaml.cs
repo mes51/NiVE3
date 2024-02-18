@@ -46,18 +46,18 @@ namespace NiVE3.View.Pane
             }
         }
 
-        private void OutlineColorChangeButton_Click(object sender, RoutedEventArgs e)
+        private void TextLineColorChangeButton_Click(object sender, RoutedEventArgs e)
         {
             if (DataContext is TextPropertyViewModel vm)
             {
-                var dialog = new ColorPickerDialog(vm.OutlineColor.ToByteColor());
+                var dialog = new ColorPickerDialog(vm.TextLineColor.ToByteColor());
                 dialog.Owner = Application.Current.MainWindow;
                 dialog.Title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.ColorPickerDialog_Title);
                 dialog.OKButtonText = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_OK);
                 dialog.CancelButtonText = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_Cancel);
                 if (dialog.ShowDialog() ?? false)
                 {
-                    vm.OutlineColor = FloatColor.FromColor(dialog.Color);
+                    vm.TextLineColor = FloatColor.FromColor(dialog.Color);
                 }
             }
         }

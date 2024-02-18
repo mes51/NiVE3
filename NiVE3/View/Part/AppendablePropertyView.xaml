@@ -4,7 +4,6 @@
                         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
                         xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
                         xmlns:local="clr-namespace:NiVE3.View.Part"
-                        xmlns:pp="clr-namespace:NiVE3.Plugin.Property;assembly=NiVE3.Plugin"
                         xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
                         mc:Ignorable="d" 
                         x:Name="Root"
@@ -21,7 +20,15 @@
                     <Setter Property="Template">
                         <Setter.Value>
                             <ControlTemplate TargetType="{x:Type MenuItem}">
-                                <Separator />
+                                <Separator HorizontalAlignment="Stretch">
+                                    <Separator.Template>
+                                        <ControlTemplate TargetType="{x:Type Separator}">
+                                            <StackPanel>
+                                                <Separator />
+                                            </StackPanel>
+                                        </ControlTemplate>
+                                    </Separator.Template>
+                                </Separator>
                             </ControlTemplate>
                         </Setter.Value>
                     </Setter>

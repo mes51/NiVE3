@@ -584,6 +584,21 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("フォントサイズ")]
         public static readonly string TextProperty_TextAnimator_Animator_Value_FontSize = nameof(TextProperty_TextAnimator_Animator_Value_FontSize);
 
+        [ShowInMarkup, DefaultValue("塗りの色")]
+        public static readonly string TextProperty_TextAnimator_Animator_Value_FillColor = nameof(TextProperty_TextAnimator_Animator_Value_FillColor);
+
+        [ShowInMarkup, DefaultValue("線の色")]
+        public static readonly string TextProperty_TextAnimator_Animator_Value_TextLineColor = nameof(TextProperty_TextAnimator_Animator_Value_TextLineColor);
+
+        [ShowInMarkup, DefaultValue("線の太さ")]
+        public static readonly string TextProperty_TextAnimator_Animator_Value_TextLineWidth = nameof(TextProperty_TextAnimator_Animator_Value_TextLineWidth);
+
+        [ShowInMarkup, DefaultValue("文字のオフセット")]
+        public static readonly string TextProperty_TextAnimator_Animator_Value_CharacterOffset = nameof(TextProperty_TextAnimator_Animator_Value_CharacterOffset);
+
+        [ShowInMarkup, DefaultValue("ブラー")]
+        public static readonly string TextProperty_TextAnimator_Animator_Value_Blur = nameof(TextProperty_TextAnimator_Animator_Value_Blur);
+
         // Property Control
 
         [ShowInMarkup, DefaultValue("編集")]

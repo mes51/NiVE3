@@ -137,12 +137,12 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref fillColor, value); }
         }
 
-        private FloatColor outlineColor;
+        private FloatColor textLineColor;
         [NeedWire(nameof(TextPropertyModel))]
-        public FloatColor OutlineColor
+        public FloatColor TextLineColor
         {
-            get { return outlineColor; }
-            set { SetProperty(ref outlineColor, value); }
+            get { return textLineColor; }
+            set { SetProperty(ref textLineColor, value); }
         }
 
         private Guid? currentEditingCompositionId;
@@ -176,11 +176,11 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref fillColorBrush, value); }
         }
 
-        private SolidColorBrush outlineColorBrush = Brushes.Red;
-        public SolidColorBrush OutlineColorBrush
+        private SolidColorBrush textLineColorBrush = Brushes.Red;
+        public SolidColorBrush TextLineColorBrush
         {
-            get { return outlineColorBrush; }
-            set { SetProperty(ref outlineColorBrush, value); }
+            get { return textLineColorBrush; }
+            set { SetProperty(ref textLineColorBrush, value); }
         }
 
         private CompositionModel? compositionModel;
@@ -421,8 +421,8 @@ namespace NiVE3.ViewModel
                     ChangeTextLayerProperty();
                     FillColorBrush = new SolidColorBrush(FillColor.ToByteColor());
                     break;
-                case nameof(OutlineColor):
-                    OutlineColorBrush = new SolidColorBrush(OutlineColor.ToByteColor());
+                case nameof(TextLineColor):
+                    TextLineColorBrush = new SolidColorBrush(TextLineColor.ToByteColor());
                     ChangeTextLayerProperty();
                     break;
                 case nameof(CurrentTime):
