@@ -554,6 +554,8 @@ namespace NiVE3.Model
                 return;
             }
 
+            Children.Clear();
+
             foreach (var childData in data.Children)
             {
                 var item = Items.FirstOrDefault(i => i.Id == childData.Id);
@@ -562,7 +564,7 @@ namespace NiVE3.Model
                     continue;
                 }
 
-                // TODO: 追加&LoadData
+                AddChildInternal(item).LoadData(childData);
             }
         }
 
