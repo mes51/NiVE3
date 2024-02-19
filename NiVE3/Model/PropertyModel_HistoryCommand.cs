@@ -277,12 +277,12 @@ namespace NiVE3.Model
 
             public void Redo()
             {
-                Model.Children.Insert(Index, Child);
+                Model.InsertInternal(Index, Child);
             }
 
             public void Undo()
             {
-                Model.Children.Remove(Child);
+                Model.RemoveInternal(Child);
             }
 
             public void Dispose() { }
@@ -307,12 +307,12 @@ namespace NiVE3.Model
 
             public void Redo()
             {
-                Model.Children.Remove(Child);
+                Model.RemoveInternal(Child);
             }
 
             public void Undo()
             {
-                Model.Children.Insert(Index, Child);
+                Model.InsertInternal(Index, Child);
             }
 
             public void Dispose() { }

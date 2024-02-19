@@ -528,7 +528,7 @@ namespace NiVE3.Model
                 return;
             }
 
-            Children.Remove(child);
+            RemoveInternal(child);
 
             HistoryModel.Add(new RemoveAppendablePropertyChildHistoryCommand(this, child, index));
         }
@@ -572,10 +572,30 @@ namespace NiVE3.Model
         {
             var group = item.CreateFunc();
             var groupModel = new PropertyGroupModel(group, CompositionModel, LayerModel, EffectModel, HistoryModel);
+            groupModel.ValueUpdated += Child_ValueUpdated;
 
             Children.Add(groupModel);
 
             return groupModel;
+        }
+
+        void InsertInternal(int index, PropertyGroupModel child)
+        {
+            if (Items.All(i => i.Id != child.Id))
+            {
+                return;
+            }
+
+            child.ValueUpdated += Child_ValueUpdated;
+            Children.Insert(index, child);
+        }
+
+        void RemoveInternal(PropertyGroupModel child)
+        {
+            if (Children.Remove(child))
+            {
+                child.ValueUpdated -= Child_ValueUpdated;
+            }
         }
 
         private void Child_ValueUpdated(object? sender, EventArgs e)
