@@ -570,7 +570,7 @@ namespace NiVE3.View.Resource
         public static readonly string TextProperty_TextAnimator_Animator_Value_Scale = nameof(TextProperty_TextAnimator_Animator_Value_Scale);
 
         [ShowInMarkup, DefaultValue("回転")]
-        public static readonly string TextProperty_TextAnimator_Animator_Value_Rotate = nameof(TextProperty_TextAnimator_Animator_Value_Rotate);
+        public static readonly string TextProperty_TextAnimator_Animator_Value_Angle = nameof(TextProperty_TextAnimator_Animator_Value_Angle);
 
         [ShowInMarkup, DefaultValue("歪曲")]
         public static readonly string TextProperty_TextAnimator_Animator_Value_Skew = nameof(TextProperty_TextAnimator_Animator_Value_Skew);
@@ -587,14 +587,20 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("塗りの色")]
         public static readonly string TextProperty_TextAnimator_Animator_Value_FillColor = nameof(TextProperty_TextAnimator_Animator_Value_FillColor);
 
+        [ShowInMarkup, DefaultValue("塗りの不透明度")]
+        public static readonly string TextProperty_TextAnimator_Animator_Value_FillColorOpacity = nameof(TextProperty_TextAnimator_Animator_Value_FillColorOpacity);
+
         [ShowInMarkup, DefaultValue("線の色")]
         public static readonly string TextProperty_TextAnimator_Animator_Value_TextLineColor = nameof(TextProperty_TextAnimator_Animator_Value_TextLineColor);
+
+        [ShowInMarkup, DefaultValue("線の不透明度")]
+        public static readonly string TextProperty_TextAnimator_Animator_Value_TextLineColorOpacity = nameof(TextProperty_TextAnimator_Animator_Value_TextLineColorOpacity);
 
         [ShowInMarkup, DefaultValue("線の太さ")]
         public static readonly string TextProperty_TextAnimator_Animator_Value_TextLineWidth = nameof(TextProperty_TextAnimator_Animator_Value_TextLineWidth);
 
-        [ShowInMarkup, DefaultValue("文字のオフセット")]
-        public static readonly string TextProperty_TextAnimator_Animator_Value_CharacterOffset = nameof(TextProperty_TextAnimator_Animator_Value_CharacterOffset);
+        //[ShowInMarkup, DefaultValue("文字のオフセット")]
+        //public static readonly string TextProperty_TextAnimator_Animator_Value_CharacterOffset = nameof(TextProperty_TextAnimator_Animator_Value_CharacterOffset);
 
         [ShowInMarkup, DefaultValue("ブラー")]
         public static readonly string TextProperty_TextAnimator_Animator_Value_Blur = nameof(TextProperty_TextAnimator_Animator_Value_Blur);
@@ -739,9 +745,6 @@ namespace NiVE3.View.Resource
 
         [ShowInMarkup, DefaultValue("逆二乗クランプ")]
         public static readonly string LightFalloffType_Exponential = nameof(LightFalloffType_Exponential);
-
-        [ShowInMarkup, DefaultValue("なし")]
-        public static readonly string TextLineDrawOrder_None = nameof(TextLineDrawOrder_None);
 
         [ShowInMarkup, DefaultValue("線の上に塗り")]
         public static readonly string TextLineDrawOrder_BeforeFill = nameof(TextLineDrawOrder_BeforeFill);

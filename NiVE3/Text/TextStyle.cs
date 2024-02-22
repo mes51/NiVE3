@@ -23,7 +23,7 @@ namespace NiVE3.Text
         Vector4 TextLineColor
     )
     {
-        public static TextStyle Empty = new TextStyle("", 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, TextLineDrawOrder.None, 0.0F, false, false, TextAlign.Left, Vector4.Zero, Vector4.Zero);
+        public static TextStyle Empty = new TextStyle("", 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, TextLineDrawOrder.BeforeFill, 0.0F, false, false, TextAlign.Left, Vector4.Zero, Vector4.Zero);
 
         static readonly IDictionary<string, object?> DeserializedTransparentColor = new Dictionary<string, object?>
         {
@@ -103,7 +103,6 @@ namespace NiVE3.Text
 
     enum TextLineDrawOrder
     {
-        None,
         BeforeFill,
         AfterFill
     }

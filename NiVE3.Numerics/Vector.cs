@@ -351,5 +351,29 @@ namespace NiVE3.Numerics
         {
             return new Vector3d(v.GetElement(0), v.GetElement(1), v.GetElement(2));
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator Vector3(Vector3d v)
+        {
+            return new Vector3((float)v.X, (float)v.Y, (float)v.Z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator Vector3d(Vector3 v)
+        {
+            return new Vector3d(v.X, v.Y, v.Z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator Vector2(Vector3d v)
+        {
+            return new Vector2((float)v.X, (float)v.Y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator Vector3d(Vector2 v)
+        {
+            return new Vector3d(v.X, v.Y, 0.0);
+        }
     }
 }

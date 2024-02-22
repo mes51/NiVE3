@@ -56,21 +56,4 @@ namespace NiVE3.Text
             };
         }
     }
-
-    class ExtendedTextRun : TextRun
-    {
-        public float LetterSpacing { get; set; }
-
-        public float VerticalScale { get; set; }
-
-        public float HorizontalScale { get; set; }
-
-        public TextLineDrawOrder TextLineDrawOrder { get; set; }
-
-        public float TextLineWidth { get; set; }
-
-        public Vector4 FillColor { get; set; }
-
-        public Vector4 TextLineColor { get; set; }
-    }
 }

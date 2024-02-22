@@ -4,6 +4,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using NiVE3.Numerics;
 using NiVE3.Shared.Extension;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
@@ -82,9 +83,18 @@ namespace NiVE3.Text
             var textRun = CurrentParameters.TextRun as ExtendedTextRun;
             if (textRun != null)
             {
+                var baseAnchorPointX = bounds.X + bounds.Width * 0.5F * textRun.HorizontalScale * 0.01F;
+                var baseAnchorPointY = bounds.Y + bounds.Height * 0.5F * textRun.VerticalScale * 0.01F;
+                var skewRad = textRun.SkewAxis / 180.0F * MathF.PI;
                 transform = Matrix3x2.CreateTranslation(-bounds.X, -bounds.Y - bounds.Height) *
                     Matrix3x2.CreateScale(textRun.HorizontalScale * 0.01F, textRun.VerticalScale * 0.01F) *
                     Matrix3x2.CreateTranslation(bounds.X, bounds.Y + bounds.Height);
+                var affine = Matrix3x2.CreateTranslation(-baseAnchorPointX - textRun.AnchorPoint.X, -baseAnchorPointY - textRun.AnchorPoint.Y) *
+                    Matrix3x2.CreateScale(textRun.Scale.X, textRun.Scale.Y) *
+                    Matrix3x2.CreateSkew(MathF.Cos(skewRad) * textRun.Skew, MathF.Sin(skewRad) * textRun.Skew) *
+                    Matrix3x2.CreateRotation(textRun.Angle / 180.0F * MathF.PI) *
+                    Matrix3x2.CreateTranslation(baseAnchorPointX + textRun.Position.X, baseAnchorPointY + textRun.Position.Y);
+                transform *= affine;
             }
 
             if (TextPathPoints != null)
@@ -178,7 +188,7 @@ namespace NiVE3.Text
                     TextDecorations = CurrentParameters.TextRun.TextDecorations,
                     VerticalScale = 100.0F,
                     HorizontalScale = 100.0F,
-                    TextLineDrawOrder = TextLineDrawOrder.None,
+                    TextLineDrawOrder = TextLineDrawOrder.BeforeFill,
                     FillColor = Vector4.One
                 };
             }
@@ -246,7 +256,7 @@ namespace NiVE3.Text
     {
         public ISimplePath[] FlattenedPath { get; } = Path.Flatten().Where(p => p.Points.Length > 1).ToArray();
 
-        public ISimplePath[] FlattenedOutlinePath { get; } = TextRun.TextLineDrawOrder != TextLineDrawOrder.None && TextRun.TextLineWidth > 0.0F ?
+        public ISimplePath[] FlattenedOutlinePath { get; } = TextRun.TextLineWidth > 0.0F ?
             Path.GenerateOutline(TextRun.TextLineWidth).Flatten().Where(p => p.Points.Length > 1).ToArray() :
             Array.Empty<ISimplePath>();
     }

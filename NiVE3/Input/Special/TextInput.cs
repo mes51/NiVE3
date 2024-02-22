@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Globalization;
@@ -12,6 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media.TextFormatting;
 using ImTools;
+using NiVE3.Extension;
 using NiVE3.Image;
 using NiVE3.Image.Drawing;
 using NiVE3.Numerics;
@@ -23,6 +25,7 @@ using NiVE3.Property;
 using NiVE3.Property.Types;
 using NiVE3.Shape;
 using NiVE3.Shared.Extension;
+using NiVE3.Shared.Util;
 using NiVE3.Text;
 using NiVE3.View.Resource;
 using SixLabors.Fonts;
@@ -108,7 +111,7 @@ namespace NiVE3.Input.Special
 
         const string TextAnimatorValueScaleId = nameof(TextAnimatorValueScaleId);
 
-        const string TextAnimatorValueRotateId = nameof(TextAnimatorValueRotateId);
+        const string TextAnimatorValueAngleId = nameof(TextAnimatorValueAngleId);
 
         const string TextAnimatorValueSkewId = nameof(TextAnimatorValueSkewId);
 
@@ -120,11 +123,16 @@ namespace NiVE3.Input.Special
 
         const string TextAnimatorValueFillColorId = nameof(TextAnimatorValueFillColorId);
 
+        const string TextAnimatorValueFillColorOpacityId = nameof(TextAnimatorValueFillColorOpacityId);
+
         const string TextAnimatorValueTextLineColorId = nameof(TextAnimatorValueTextLineColorId);
+
+        const string TextAnimatorValueTextLineColorOpacityId = nameof(TextAnimatorValueTextLineColorOpacityId );
 
         const string TextAnimatorValueTextLineWidthId = nameof(TextAnimatorValueTextLineWidthId);
 
-        const string TextAnimatorValueCharacterOffsetId = nameof(TextAnimatorValueCharacterOffsetId);
+        // NOTE: 混ざるとレイアウトシステムが例外を吐くものがあるが、どれが混ざるとNGなのか判定する術が無いため一旦omit
+        //const string TextAnimatorValueCharacterOffsetId = nameof(TextAnimatorValueCharacterOffsetId);
 
         const string TextAnimatorValueBlurId = nameof(TextAnimatorValueBlurId);
 
@@ -195,10 +203,10 @@ namespace NiVE3.Input.Special
                                     {
                                         new Scale3dProperty(TextAnimatorValueScaleId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_Scale), new Vector3d(100.0), digit: 2, is3D: false)
                                     })),
-                                new AppendablePropertyItem(TextAnimatorValueRotateId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_Rotate), () =>
-                                    new PropertyGroup(TextAnimatorValueRotateId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_Rotate), new PropertyBase[]
+                                new AppendablePropertyItem(TextAnimatorValueAngleId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_Angle), () =>
+                                    new PropertyGroup(TextAnimatorValueAngleId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_Angle), new PropertyBase[]
                                     {
-                                        new AngleProperty(TextAnimatorValueRotateId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_Rotate), 0.0, digit: 2)
+                                        new AngleProperty(TextAnimatorValueAngleId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_Angle), 0.0, digit: 2)
                                     })),
                                 new AppendablePropertyItem(TextAnimatorValueSkewId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_Skew), () =>
                                     new PropertyGroup(TextAnimatorValueSkewId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_Skew), new PropertyBase[]
@@ -209,13 +217,21 @@ namespace NiVE3.Input.Special
                                 new AppendablePropertyItem(TextAnimatorValueOpacityId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_Opacity), () =>
                                     new PropertyGroup(TextAnimatorValueOpacityId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_Opacity), new PropertyBase[]
                                     {
-                                        new DoubleProperty(TextAnimatorValueOpacityId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_Opacity), 0.0, 0.0, 100.0, digit: 2)
+                                        new DoubleProperty(TextAnimatorValueOpacityId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_Opacity), 100.0, 0.0, 100.0, digit: 2)
                                     })),
                                 AppendablePropertyItemSeparator.Instance,
                                 new AppendablePropertyItem(TextAnimatorValueFontSizeId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_FontSize), () =>
                                     new PropertyGroup(TextAnimatorValueFontSizeId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_FontSize), new PropertyBase[]
                                     {
-                                        new DoubleProperty(TextAnimatorValueFontSizeId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_FontSize), 20.0, 0.0, double.MaxValue, digit: 2)
+                                        new DoubleProperty(
+                                            TextAnimatorValueFontSizeId,
+                                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_FontSize),
+                                            0.0,
+                                            double.MinValue,
+                                            double.MaxValue,
+                                            digit: 2,
+                                            unitKey: LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Unit_Pixel)
+                                        )
                                     })),
                                 new AppendablePropertyItem(TextAnimatorValueFillColorId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_FillColor), () =>
                                     new PropertyGroup(TextAnimatorValueFillColorId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_FillColor), new PropertyBase[]
@@ -227,7 +243,8 @@ namespace NiVE3.Input.Special
                                             LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Dialog_OK),
                                             LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Dialog_Cancel),
                                             Vector4.One
-                                        )
+                                        ),
+                                        new DoubleProperty(TextAnimatorValueFillColorOpacityId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_FillColorOpacity), 100.0, 0.0, 100.0, digit: 2)
                                     })),
                                 new AppendablePropertyItem(TextAnimatorValueTextLineColorId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_TextLineColor), () =>
                                     new PropertyGroup(TextAnimatorValueTextLineColorId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_TextLineColor), new PropertyBase[]
@@ -239,23 +256,32 @@ namespace NiVE3.Input.Special
                                             LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Dialog_OK),
                                             LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Dialog_Cancel),
                                             new Vector4(0.0F, 0.0F, 1.0F, 1.0F)
-                                        )
+                                        ),
+                                        new DoubleProperty(TextAnimatorValueTextLineColorOpacityId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_TextLineColorOpacity), 100.0, 0.0, 100.0, digit: 2)
                                     })),
                                 new AppendablePropertyItem(TextAnimatorValueTextLineWidthId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_TextLineWidth), () =>
                                     new PropertyGroup(TextAnimatorValueTextLineWidthId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_TextLineWidth), new PropertyBase[]
                                     {
-                                        new DoubleProperty(TextAnimatorValueTextLineWidthId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_TextLineWidth), 3.0, 0.0, double.MaxValue, digit: 2)
+                                        new DoubleProperty(
+                                            TextAnimatorValueTextLineWidthId,
+                                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_TextLineWidth),
+                                            3.0,
+                                            double.MinValue,
+                                            double.MaxValue,
+                                            digit: 2,
+                                            unitKey: LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Unit_Pixel)
+                                        )
                                     })),
                                 AppendablePropertyItemSeparator.Instance,
-                                new AppendablePropertyItem(TextAnimatorValueCharacterOffsetId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_CharacterOffset), () =>
-                                    new PropertyGroup(TextAnimatorValueCharacterOffsetId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_CharacterOffset), new PropertyBase[]
-                                    {
-                                        new DoubleProperty(TextAnimatorValueCharacterOffsetId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_CharacterOffset), 0.0, 0.0, ushort.MaxValue, digit: 0)
-                                    })),
+                                //new AppendablePropertyItem(TextAnimatorValueCharacterOffsetId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_CharacterOffset), () =>
+                                //    new PropertyGroup(TextAnimatorValueCharacterOffsetId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_CharacterOffset), new PropertyBase[]
+                                //    {
+                                //        new DoubleProperty(TextAnimatorValueCharacterOffsetId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_CharacterOffset), 0.0, 0.0, ushort.MaxValue, digit: 0)
+                                //    })),
                                 new AppendablePropertyItem(TextAnimatorValueBlurId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_Blur), () =>
                                     new PropertyGroup(TextAnimatorValueBlurId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_Blur), new PropertyBase[]
                                     {
-                                        new Vector3dProperty(TextAnimatorValueBlurId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_Blur), new Vector3d(), new Vector3d(), digit: 2, is3D: false)
+                                        new Vector3dProperty(TextAnimatorValueBlurId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_Blur), new Vector3d(), digit: 2, is3D: false)
                                     })),
                             })
                         }))
@@ -277,34 +303,23 @@ namespace NiVE3.Input.Special
             }
 
             var textCount = new StringInfo(sourceText.Text).LengthInTextElements;
-            var filledStyles = new List<TextStyleRun>();
-            foreach (var s in sourceText.Styles)
+            var structuredExtendedTextRun = new StructuredExtendedTextRun(sourceText.Text, sourceText.DefaultStyle, sourceText.Styles);
+            foreach (var animator in ((PropertyValueGroup[])(properties[TextAnimatorsId] ?? Array.Empty<PropertyValueGroup>())))
             {
-                var prevGapStart = filledStyles.LastOrDefault()?.End ?? 0;
-                var prevGatEnd = s.Start;
-                if (prevGapStart < prevGatEnd)
-                {
-                    filledStyles.Add(new TextStyleRun(prevGapStart, prevGatEnd, sourceText.DefaultStyle));
-                }
-                filledStyles.Add(s);
-            }
-            var lastStyleRunEnd = filledStyles.LastOrDefault()?.End ?? 0;
-            if (lastStyleRunEnd < textCount)
-            {
-                filledStyles.Add(new TextStyleRun(lastStyleRunEnd, textCount, sourceText.DefaultStyle));
+                ApplyAnimator(structuredExtendedTextRun, animator);
             }
 
             var fontInfo = FontInfo.FindByUniqueId(sourceText.DefaultStyle.FontUniqueId) ?? FontInfo.FallbackFont;
             var font = fontInfo.FontFamily.CreateFont((float)sourceText.DefaultStyle.FontSize);
             var textOption = new TextOptions(font);
             var wrappingSize = (Vector3d)((properties[TextMoreOptionsGroupId] as PropertyValueGroup)?[TextBoxSizeId] ?? new Vector3d());
-            textOption.TextRuns = filledStyles.Select(s => s.ToTextRun()).ToArray();
             textOption.WrappingLength = wrappingSize.X > 0.0 ? (float)wrappingSize.X : -1.0F;
             textOption.WordBreaking = wrappingSize.X > 0.0 ? WordBreaking.BreakAll : WordBreaking.Standard;
+            textOption.TextRuns = structuredExtendedTextRun.Flatten();
 
             var glyphBuilder = new StyledGlyphBuilder((float)wrappingSize.X, (float)wrappingSize.Y);
             TextRenderer.RenderTextTo(glyphBuilder, sourceText.Text, textOption);
-            var glyphPolygons = new List<(Polygon[] fillPolygins, Polygon[] outlinePolygons, ExtendedTextRun textRun, Vector128<int> rect, Vector2 origin)>();
+            var glyphPolygons = new List<(Polygon[] fillPolygins, Polygon[] outlinePolygons, ExtendedTextRun textRun, Vector128<int> rect, Vector128<int> blurMargin, Vector2 origin)>();
             foreach (var glyph in glyphBuilder.GetRenderableGlyhps())
             {
                 var fillPolygons = glyph.FlattenedPath.Select(p => new Polygon(p.Points.Span)).ToArray();
@@ -318,9 +333,15 @@ namespace NiVE3.Input.Special
                     Math.Max(fillRect.GetElement(2), outlineRect.GetElement(2)),
                     Math.Max(fillRect.GetElement(3), outlineRect.GetElement(3))
                 );
+                var blurMargin = Vector128.Create(
+                    (int)Math.Ceiling(glyph.TextRun.Blur.X),
+                    (int)Math.Ceiling(glyph.TextRun.Blur.Y),
+                    (int)Math.Ceiling(glyph.TextRun.Blur.X),
+                    (int)Math.Ceiling(glyph.TextRun.Blur.Y)
+                );
                 var fillOrigin = new Vector2(fillRect.GetElement(0), fillRect.GetElement(1)); //fillPolygons.Select(p => new Vector2(p.MinX, p.MinY)).Aggregate(new Vector2(float.MaxValue), Vector2.Min);
                 var origin = -fillOrigin + (outlinePolygons.Length > 0 ? fillOrigin - new Vector2(outlineRect.GetElement(0), outlineRect.GetElement(1)) : Vector2.Zero);
-                glyphPolygons.Add((fillPolygons, outlinePolygons, glyph.TextRun, rect, origin));
+                glyphPolygons.Add((fillPolygons, outlinePolygons, glyph.TextRun, rect, blurMargin, origin));
             }
 
             if (glyphPolygons.Count < 1)
@@ -330,46 +351,244 @@ namespace NiVE3.Input.Special
 
             var min = Vector128.Create(int.MaxValue);
             var max = Vector128.Create(int.MinValue);
-            foreach (var (_, _, _, r, _) in glyphPolygons)
+            foreach (var (_, _, _, r, blurMargin, _) in glyphPolygons)
             {
-                min = Sse41.Min(min, r);
-                max = Sse41.Max(max, r);
+                min = Sse41.Min(min, Sse2.Subtract(r, blurMargin));
+                max = Sse41.Max(max, Sse2.Add(r, blurMargin));
             }
 
             var interCharBlendMode = (BlendMode)((properties[TextMoreOptionsGroupId] as PropertyValueGroup)?[TextMoreOptionInterCharacterBlendModeId] ?? BlendMode.Normal);
             var image = new NManagedImage(max.GetElement(2) - min.GetElement(0), max.GetElement(3) - min.GetElement(1));
             image.Origin = (Vector2d)glyphPolygons[0].origin + new Vector2d(glyphPolygons[0].rect.GetElement(0) - min.GetElement(0), glyphPolygons[0].rect.GetElement(1) - min.GetElement(1));
-            foreach (var (fillPolygins, outlinePolygons, textRun, rect, _) in glyphPolygons)
+            foreach (var (fillPolygins, outlinePolygons, textRun, rect, blurMargin, _) in glyphPolygons)
             {
+                var fillColor = textRun.FillColor;
+                var textLineColor = textRun.TextLineColor;
+                if (textRun.Opacity <= 0.0F || (fillColor.W <= 0.0F && (outlinePolygons.Length < 1 || textLineColor.W <= 0.0F)))
+                {
+                    continue;
+                }
+
                 var intLeft = rect.GetElement(0);
                 var intTop = rect.GetElement(1);
-                using var glyphImage = new NManagedImage(rect.GetElement(2) - intLeft, rect.GetElement(3) - intTop);
-                if (outlinePolygons.Length > 0)
+                using var glyphImage = new NManagedImage(rect.GetElement(2) - intLeft + blurMargin.GetElement(0) * 2, rect.GetElement(3) - intTop + blurMargin.GetElement(1) * 2);
+                var glyphLeft = intLeft - blurMargin.GetElement(0);
+                var glyphTop = intTop - blurMargin.GetElement(1);
+                if (outlinePolygons.Length > 0 && textLineColor.W > 0.0F)
                 {
                     switch (textRun.TextLineDrawOrder)
                     {
                         case TextLineDrawOrder.AfterFill:
-                            ShapeRender.FillPolygonNonzero(fillPolygins, glyphImage, textRun.FillColor, intLeft, intTop);
-                            ShapeRender.FillPolygonNonzero(outlinePolygons, glyphImage, textRun.TextLineColor, intLeft, intTop);
-                            break;
-                        case TextLineDrawOrder.BeforeFill:
-                            ShapeRender.FillPolygonNonzero(outlinePolygons, glyphImage, textRun.TextLineColor, intLeft, intTop);
-                            ShapeRender.FillPolygonNonzero(fillPolygins, glyphImage, textRun.FillColor, intLeft, intTop);
+                            if (fillColor.W > 0.0F)
+                            {
+                                ShapeRender.FillPolygonNonzero(fillPolygins, glyphImage, fillColor, glyphLeft, glyphTop);
+                            }
+                            ShapeRender.FillPolygonNonzero(outlinePolygons, glyphImage, textLineColor, glyphLeft, glyphTop);
                             break;
                         default:
-                            ShapeRender.FillPolygonNonzero(fillPolygins, glyphImage, textRun.FillColor, intLeft, intTop);
+                            ShapeRender.FillPolygonNonzero(outlinePolygons, glyphImage, textLineColor, glyphLeft, glyphTop);
+                            if (fillColor.W > 0.0F)
+                            {
+                                ShapeRender.FillPolygonNonzero(fillPolygins, glyphImage, fillColor, glyphLeft, glyphTop);
+                            }
                             break;
                     }
                 }
                 else
                 {
-                    ShapeRender.FillPolygonNonzero(fillPolygins, glyphImage, textRun.FillColor, intLeft, intTop);
+                    ShapeRender.FillPolygonNonzero(fillPolygins, glyphImage, fillColor, glyphLeft, glyphTop);
                 }
 
-                DrawImage(interCharBlendMode, image, glyphImage, intLeft - min.GetElement(0), intTop - min.GetElement(1));
+                if (textRun.Blur != Vector2.Zero)
+                {
+                    Blur.BoxBlur(glyphImage, textRun.Blur.X, textRun.Blur.Y);
+                }
+                DrawImage(interCharBlendMode, image, glyphImage, textRun.Opacity, intLeft - min.GetElement(0) - blurMargin.GetElement(0), intTop - min.GetElement(1) - blurMargin.GetElement(1));
             }
 
             return image;
+        }
+
+        static void ApplyAnimator(StructuredExtendedTextRun structuredExtendedTextRun, PropertyValueGroup animatorPropertyValue)
+        {
+            var selected = ArrayPool<double>.Shared.Rent(structuredExtendedTextRun.TotalElementCount);
+            var currentSelection = ArrayPool<double>.Shared.Rent(structuredExtendedTextRun.TotalElementCount);
+            var selectedSpan = selected.AsSpan(0, structuredExtendedTextRun.TotalElementCount);
+            var currentSelectionSpan = currentSelection.AsSpan(0, structuredExtendedTextRun.TotalElementCount);
+            selectedSpan.Clear();
+
+            foreach (var selector in (PropertyValueGroup[])(animatorPropertyValue[TextAnimatorSelectorId] ?? Array.Empty<PropertyValueGroup>()))
+            {
+                var moreOption = (PropertyValueGroup)(selector[TextAnimatorSelectorMoreOptionId] ?? PropertyValueGroup.Empty);
+                Func<double, double, double, double, double> shapeGenerator = (SelectorShape)(moreOption[TextAnimatorSelectorShapeId] ?? SelectorShape.Rectangle) switch
+                {
+                    SelectorShape.RampUp => GetSelectShapeRampUp,
+                    SelectorShape.RampDown => GetSelectShapeRampDown,
+                    SelectorShape.Triangle => GetSelectShapeTriangle,
+                    SelectorShape.Circle => GetSelectShapeCircle,
+                    _ => GetSelectShapeRectangle,
+                };
+
+                var begin = (double)(selector[TextAnimatorSelectorBeginId] ?? 0.0);
+                var end = (double)(selector[TextAnimatorSelectorEndId] ?? 0.0);
+                var offset = (double)(selector[TextAnimatorSelectorOffsetId] ?? 0.0);
+                if (begin > end)
+                {
+                    var t = begin;
+                    begin = end;
+                    end = begin;
+                }
+                begin = (begin + offset) * 0.01;
+                end = (end + offset) * 0.01;
+
+                var useRandom = (bool)(moreOption[TextAnimatorSelectorEnableRandomId] ?? false);
+                var randomSeed = (int)(double)(moreOption[TextAnimatorSelectorRandomSeedId] ?? 0.0);
+                var amount = (double)(moreOption[TextAnimatorSelectorAmountId] ?? 100.0) * 0.01;
+                currentSelectionSpan.Clear();
+                switch ((SelectorCriteria)(moreOption[TextAnimatorSelectorCriteriaId] ?? SelectorCriteria.Charactor))
+                {
+                    default:
+                        SelectCharacter(currentSelectionSpan, begin, end, useRandom, randomSeed, amount, shapeGenerator);
+                        break;
+                }
+
+                switch ((SelectorBlendMode)(moreOption[TextAnimatorSelectorBlendModeId] ?? SelectorBlendMode.Add))
+                {
+                    case SelectorBlendMode.Subtract:
+                        SelectionBlendSubtract(selectedSpan, currentSelectionSpan);
+                        break;
+                    case SelectorBlendMode.Multiply:
+                        SelectionBlendMultiply(selectedSpan, currentSelectionSpan);
+                        break;
+                    case SelectorBlendMode.Min:
+                        SelectionBlendMin(selectedSpan, currentSelectionSpan);
+                        break;
+                    case SelectorBlendMode.Max:
+                        SelectionBlendMax(selectedSpan, currentSelectionSpan);
+                        break;
+                    case SelectorBlendMode.Difference:
+                        SelectionBlendDifference(selectedSpan, currentSelectionSpan);
+                        break;
+                    default:
+                        SelectionBlendAdd(selectedSpan, currentSelectionSpan);
+                        break;
+                }
+            }
+
+            var textRuns = structuredExtendedTextRun.GetAllRuns();
+            foreach (var animator in (PropertyValueGroup[])(animatorPropertyValue[TextAnimatorValueId] ?? Array.Empty<PropertyValueGroup>()))
+            {
+                if (animator.TryGetValue<Vector3d>(TextAnimatorValueAnchorPointId, out var anchorPoint))
+                {
+                    for (var i = 0; i < textRuns.Length; i++)
+                    {
+                        textRuns[i].AnchorPoint += (Vector2)(anchorPoint * selectedSpan[i]);
+                    }
+                }
+                else if (animator.TryGetValue<Vector3d>(TextAnimatorValuePositionId, out var position))
+                {
+                    for (var i = 0; i < textRuns.Length; i++)
+                    {
+                        textRuns[i].Position += (Vector2)(position * selectedSpan[i]);
+                    }
+                }
+                else if (animator.TryGetValue<Vector3d>(TextAnimatorValueScaleId, out var scale))
+                {
+                    for (var i = 0; i < textRuns.Length; i++)
+                    {
+                        var run = textRuns[i];
+                        run.Scale = Vector2.Lerp(run.Scale, (Vector2)scale * 0.01F * run.Scale, (float)selectedSpan[i]);
+                    }
+                }
+                else if (animator.TryGetValue<double>(TextAnimatorValueAngleId, out var angle))
+                {
+                    for (var i = 0; i < textRuns.Length; i++)
+                    {
+                        textRuns[i].Angle += (float)(angle * selectedSpan[i]);
+                    }
+                }
+                else if (animator.TryGetValue<double>(TextAnimatorValueSkewId, out var skew))
+                {
+                    var skewAxis = (float)(double)(animator[TextAnimatorValueSkewAxisId] ?? 0.0);
+                    for (var i = 0; i < textRuns.Length; i++)
+                    {
+                        var run = textRuns[i];
+                        run.Skew += (float)(skew * selectedSpan[i] * 0.01);
+                        run.SkewAxis += (float)(skewAxis * selectedSpan[i]);
+                    }
+                }
+                else if (animator.TryGetValue<double>(TextAnimatorValueOpacityId, out var opacity))
+                {
+                    for (var i = 0; i < textRuns.Length; i++)
+                    {
+                        var run = textRuns[i];
+                        run.Opacity = run.Opacity.Lerp((float)opacity * 0.01F, (float)selectedSpan[i]);
+                    }
+                }
+                else if (animator.TryGetValue<double>(TextAnimatorValueFontSizeId, out var fontSize))
+                {
+                    for (var i = 0; i < textRuns.Length; i++)
+                    {
+                        var run = textRuns[i];
+                        if (run.Font != null)
+                        {
+                            var baseFont = run.Font;
+                            var style = (baseFont.IsBold, baseFont.IsItalic) switch
+                            {
+                                (true, true) => FontStyle.BoldItalic,
+                                (true, false) => FontStyle.Bold,
+                                (false, true) => FontStyle.Italic,
+                                _ => FontStyle.Regular
+                            };
+                            run.Font = baseFont.Family.CreateFont(Math.Max(baseFont.Size + (float)(fontSize * selectedSpan[i]), 0.0F), style);
+                        }
+                    }
+                }
+                else if (animator.TryGetValue<Vector4>(TextAnimatorValueFillColorId, out var fillColor))
+                {
+                    fillColor.W = (float)(double)(animator[TextAnimatorValueFillColorOpacityId] ?? 0.0) * 0.01F;
+                    for (var i = 0; i < textRuns.Length; i++)
+                    {
+                        var run = textRuns[i];
+                        run.FillColor = Vector4.Lerp(run.FillColor, fillColor, (float)selectedSpan[i]);
+                    }
+                }
+                else if (animator.TryGetValue<Vector4>(TextAnimatorValueTextLineColorId, out var lineColor))
+                {
+                    lineColor.W = (float)(double)(animator[TextAnimatorValueTextLineColorOpacityId] ?? 0.0) * 0.01F;
+                    for (var i = 0; i < textRuns.Length; i++)
+                    {
+                        var run = textRuns[i];
+                        run.TextLineColor = Vector4.Lerp(run.TextLineColor, lineColor, (float)selectedSpan[i]);
+                    }
+                }
+                else if (animator.TryGetValue<double>(TextAnimatorValueTextLineWidthId, out var textLineWidth))
+                {
+                    for (var i = 0; i < textRuns.Length; i++)
+                    {
+                        var run = textRuns[i];
+                        run.TextLineWidth = Math.Max(run.TextLineWidth + (float)(textLineWidth * selectedSpan[i]), 0.0F);
+                    }
+                }
+                //else if (animator.TryGetValue<double>(TextAnimatorValueCharacterOffsetId, out var characterOffset))
+                //{
+                //    for (var i = 0; i < textRuns.Length; i++)
+                //    {
+                //        textRuns[i].CharacterOffset += (int)(characterOffset * selectedSpan[i]);
+                //    }
+                //}
+                else if (animator.TryGetValue<Vector3d>(TextAnimatorValueBlurId, out var blur))
+                {
+                    for (var i = 0; i < textRuns.Length; i++)
+                    {
+                        var run = textRuns[i];
+                        run.Blur = Vector2.Max(run.Blur + (Vector2)(blur * selectedSpan[i]), Vector2.Zero);
+                    }
+                }
+            }
+
+            ArrayPool<double>.Shared.Return(currentSelection);
+            ArrayPool<double>.Shared.Return(selected);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -387,7 +606,7 @@ namespace NiVE3.Input.Special
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void DrawImage(BlendMode blendMode, NManagedImage back, NManagedImage front, int offsetX, int offsetY)
+        static void DrawImage(BlendMode blendMode, NManagedImage back, NManagedImage front, float opacity, int offsetX, int offsetY)
         {
             Parallel.For(0, front.Height, y =>
             {
@@ -396,9 +615,99 @@ namespace NiVE3.Input.Special
 
                 for (var x = 0; x < front.Width; x++)
                 {
-                    backSpan[x] = Blend.Process(blendMode, backSpan[x], frontSpan[x]);
+                    backSpan[x] = Blend.Process(blendMode, backSpan[x], frontSpan[x] * new Vector4(1.0F, 1.0F, 1.0F, opacity));
                 }
             });
+        }
+
+        static double GetSelectShapeRampUp(double value, double begin, double end, double align)
+        {
+            return Math.Clamp((value + align * 0.5 - begin) / (end - begin), 0.0, 1.0);
+        }
+
+        static double GetSelectShapeRampDown(double value, double begin, double end, double align)
+        {
+            return 1.0 - GetSelectShapeRampUp(value, begin, end, align);
+        }
+
+        static double GetSelectShapeTriangle(double value, double begin, double end, double align)
+        {
+            return Math.Clamp(1.0 - Math.Abs((value + align * 0.5 - begin) * 2.0 / (end - begin) - 1.0), 0.0, 1.0);
+        }
+
+        static double GetSelectShapeCircle(double value, double begin, double end, double align)
+        {
+            var t = Math.Clamp((value + align * 0.5 - begin) / (end - begin) * 2.0 - 1.0, -1.0, 1.0);
+            return Math.Clamp(Math.Sqrt(1.0 - t * t), 0.0, 1.0);
+        }
+
+        static double GetSelectShapeRectangle(double value, double begin, double end, double align)
+        {
+            return (Math.Clamp(value - begin, -align, 0.0) + Math.Clamp(end - value, 0.0, align)) / align;
+        }
+
+        static void SelectCharacter(Span<double> selection, double begin, double end, bool useRandom, int seed, double amount, Func<double, double, double, double, double> shapeGenerator)
+        {
+            var charRange = 1.0 / selection.Length;
+            var indices = Enumerable.Range(0, selection.Length).ToArray();
+            if (useRandom)
+            {
+                new Xoroshiro(seed).Shuffle(indices);
+            }
+
+            var value = 0.0;
+            for (var i = 0; i < indices.Length; i++, value += charRange)
+            {
+                selection[indices[i]] = shapeGenerator(value, begin, end, charRange) * amount;
+            }
+        }
+
+        static void SelectionBlendAdd(Span<double> back, ReadOnlySpan<double> front)
+        {
+            for (var i = 0; i < back.Length; i++)
+            {
+                back[i] = Math.Clamp(back[i] + front[i], 0.0, 1.0);
+            }
+        }
+
+        static void SelectionBlendSubtract(Span<double> back, ReadOnlySpan<double> front)
+        {
+            for (var i = 0; i < back.Length; i++)
+            {
+                back[i] = Math.Clamp(back[i] - front[i], 0.0, 1.0);
+            }
+        }
+
+        static void SelectionBlendMultiply(Span<double> back, ReadOnlySpan<double> front)
+        {
+            for (var i = 0; i < back.Length; i++)
+            {
+                back[i] = back[i] * front[i];
+            }
+        }
+
+        static void SelectionBlendMin(Span<double> back, ReadOnlySpan<double> front)
+        {
+            for (var i = 0; i < back.Length; i++)
+            {
+                back[i] = Math.Min(back[i], front[i]);
+            }
+        }
+
+        static void SelectionBlendMax(Span<double> back, ReadOnlySpan<double> front)
+        {
+            for (var i = 0; i < back.Length; i++)
+            {
+                back[i] = Math.Max(back[i], front[i]);
+            }
+        }
+
+        static void SelectionBlendDifference(Span<double> back, ReadOnlySpan<double> front)
+        {
+            for (var i = 0; i < back.Length; i++)
+            {
+                back[i] = Math.Clamp(Math.Abs(back[i] - front[i]), 0.0, 1.0);
+            }
         }
     }
 
