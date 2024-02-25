@@ -11,7 +11,11 @@ namespace NiVE3.Text
     {
         public string SourceText { get; }
 
+        public string[] TextElements { get; }
+
         public int TotalElementCount { get; }
+
+        public int TotalElementCountWithoutNewLine { get; }
 
         TextStyle DefaultStyle { get; }
 
@@ -22,6 +26,18 @@ namespace NiVE3.Text
             SourceText = sourceText;
             DefaultStyle = defaultStyle;
             TotalElementCount = new StringInfo(sourceText).LengthInTextElements;
+
+            var elements = new List<string>();
+            var stringInfoEnumerator = StringInfo.GetTextElementEnumerator(sourceText);
+            while (stringInfoEnumerator.MoveNext())
+            {
+                var s = stringInfoEnumerator.Current.ToString();
+                if (s != null)
+                {
+                    elements.Add(s);
+                }
+            }
+            TextElements = elements.ToArray();
 
             var count = 0;
             var lines = new List<LineExtendedTextRun>();
@@ -37,38 +53,40 @@ namespace NiVE3.Text
             }
 
             Lines = lines.ToArray();
+            TotalElementCountWithoutNewLine = TotalElementCount - Lines.Length + 1;
         }
 
         public ExtendedTextRun[] Flatten()
         {
             var currentTextRun = new TextStyleRun(0, TotalElementCount, DefaultStyle).ToTextRun();
             var result = new List<ExtendedTextRun>();
-            var start = 0;
-            var end = 0;
 
             foreach (var line in Lines)
             {
                 foreach (var textRun in line.TextRuns)
                 {
-                    end++;
                     if (!currentTextRun.EqualsWithoutRun(textRun))
                     {
-                        var newTextRun = textRun.Copy();
-                        newTextRun.Start = start;
-                        newTextRun.End = end;
-                        result.Add(newTextRun);
-                        start = end;
+                        if (result.Count == 0)
+                        {
+                            result.Add(textRun);
+                        }
+                        else
+                        {
+                            result.Last().End = textRun.Start;
+                            result.Add(textRun.Copy());
+                        }
+                        currentTextRun = result.Last();
                     }
                 }
-
-                end++;
             }
-            if (start != end - 1)
+            if (currentTextRun.End != TotalElementCount)
             {
-                var newRun = currentTextRun.Copy();
-                newRun.Start = start;
-                newRun.End = end - 1;
-                result.Add(newRun);
+                currentTextRun.End = TotalElementCount;
+            }
+            else if (result.Count < 1)
+            {
+                result.Add(currentTextRun);
             }
 
             return result.ToArray();

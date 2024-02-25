@@ -123,7 +123,7 @@ namespace NiVE3.Shared.Util
         {
             for (int i = 0, limit = span.Length - 1; i < limit; i++)
             {
-                var j = Next(i, span.Length);
+                var j = Next(span.Length, i);
                 if (i != j)
                 {
                     var temp = span[i];

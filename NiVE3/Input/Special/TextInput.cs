@@ -411,10 +411,10 @@ namespace NiVE3.Input.Special
 
         static void ApplyAnimator(StructuredExtendedTextRun structuredExtendedTextRun, PropertyValueGroup animatorPropertyValue)
         {
-            var selected = ArrayPool<double>.Shared.Rent(structuredExtendedTextRun.TotalElementCount);
-            var currentSelection = ArrayPool<double>.Shared.Rent(structuredExtendedTextRun.TotalElementCount);
-            var selectedSpan = selected.AsSpan(0, structuredExtendedTextRun.TotalElementCount);
-            var currentSelectionSpan = currentSelection.AsSpan(0, structuredExtendedTextRun.TotalElementCount);
+            var selected = ArrayPool<double>.Shared.Rent(structuredExtendedTextRun.TotalElementCountWithoutNewLine);
+            var currentSelection = ArrayPool<double>.Shared.Rent(structuredExtendedTextRun.TotalElementCountWithoutNewLine);
+            var selectedSpan = selected.AsSpan(0, structuredExtendedTextRun.TotalElementCountWithoutNewLine);
+            var currentSelectionSpan = currentSelection.AsSpan(0, structuredExtendedTextRun.TotalElementCountWithoutNewLine);
             selectedSpan.Clear();
 
             foreach (var selector in (PropertyValueGroup[])(animatorPropertyValue[TextAnimatorSelectorId] ?? Array.Empty<PropertyValueGroup>()))
@@ -445,10 +445,25 @@ namespace NiVE3.Input.Special
                 var randomSeed = (int)(double)(moreOption[TextAnimatorSelectorRandomSeedId] ?? 0.0);
                 var amount = (double)(moreOption[TextAnimatorSelectorAmountId] ?? 100.0) * 0.01;
                 currentSelectionSpan.Clear();
+
+                var indices = Enumerable.Range(0, structuredExtendedTextRun.TotalElementCountWithoutNewLine).ToArray();
+                if (useRandom)
+                {
+                    new Xoroshiro(randomSeed).Shuffle(indices);
+                }
                 switch ((SelectorCriteria)(moreOption[TextAnimatorSelectorCriteriaId] ?? SelectorCriteria.Charactor))
                 {
+                    case SelectorCriteria.CharactorWithoutSpace:
+                        SelectCharacterWithoutSpace(structuredExtendedTextRun.TextElements, currentSelectionSpan, begin, end, indices, amount, shapeGenerator);
+                        break;
+                    case SelectorCriteria.Word:
+                        SelectWord(structuredExtendedTextRun.TextElements, currentSelectionSpan, begin, end, indices, amount, shapeGenerator);
+                        break;
+                    case SelectorCriteria.Line:
+                        SelectLine(structuredExtendedTextRun.TextElements, currentSelectionSpan, begin, end, indices, amount, shapeGenerator);
+                        break;
                     default:
-                        SelectCharacter(currentSelectionSpan, begin, end, useRandom, randomSeed, amount, shapeGenerator);
+                        SelectCharacter(structuredExtendedTextRun.TextElements, currentSelectionSpan, begin, end, indices, amount, shapeGenerator);
                         break;
                 }
 
@@ -646,19 +661,119 @@ namespace NiVE3.Input.Special
             return (Math.Clamp(value - begin, -align, 0.0) + Math.Clamp(end - value, 0.0, align)) / align;
         }
 
-        static void SelectCharacter(Span<double> selection, double begin, double end, bool useRandom, int seed, double amount, Func<double, double, double, double, double> shapeGenerator)
+        static void SelectCharacter(string[] elements, Span<double> selection, double begin, double end, int[] indices, double amount, Func<double, double, double, double, double> shapeGenerator)
         {
+            elements = elements.Where(c => !c.Contains('\n')).ToArray();
             var charRange = 1.0 / selection.Length;
-            var indices = Enumerable.Range(0, selection.Length).ToArray();
-            if (useRandom)
+            if (double.IsNaN(charRange))
             {
-                new Xoroshiro(seed).Shuffle(indices);
+                return;
             }
 
             var value = 0.0;
             for (var i = 0; i < indices.Length; i++, value += charRange)
             {
                 selection[indices[i]] = shapeGenerator(value, begin, end, charRange) * amount;
+            }
+        }
+
+        static void SelectCharacterWithoutSpace(string[] elements, Span<double> selection, double begin, double end, int[] indices, double amount, Func<double, double, double, double, double> shapeGenerator)
+        {
+            elements = elements.Where(c => !c.Contains('\n')).ToArray();
+            var charRange = 1.0 / (selection.Length - elements.Count(c => c.Contains(' ') || c.Contains('　')));
+            if (double.IsNaN(charRange))
+            {
+                return;
+            }
+
+            var value = 0.0;
+            for (var i = 0; i < indices.Length; i++, value += charRange)
+            {
+                if (elements[i][0] == ' ' || elements[i][0] == '　')
+                {
+                    if (i > 0)
+                    {
+                        selection[indices[i]] = selection[indices[i - 1]];
+                    }
+                    value -= charRange;
+                }
+                else
+                {
+                    selection[indices[i]] = shapeGenerator(value, begin, end, charRange) * amount;
+                }
+            }
+        }
+
+        static void SelectWord(string[] elements, Span<double> selection, double begin, double end, int[] indices, double amount, Func<double, double, double, double, double> shapeGenerator)
+        {
+            var words = new List<List<int>>();
+            var index = 0;
+            var currentWord = new List<int>();
+            foreach (var line in elements.GroupWhile(c => !c.Contains('\n')))
+            {
+                foreach (var c in line)
+                {
+                    currentWord.Add(index);
+                    if (c[0] == ' ' || c[0] == '　')
+                    {
+                        words.Add(currentWord);
+                        currentWord = new List<int>();
+                    }
+                    index++;
+                }
+
+                words.Add(currentWord);
+                currentWord = new List<int>();
+            }
+
+            var charRange = 1.0 / words.Count;
+            if (double.IsNaN(charRange))
+            {
+                return;
+            }
+
+            var value = 0.0;
+            for (var i = 0; i < words.Count; i++, value += charRange)
+            {
+                var selectValue = shapeGenerator(value, begin, end, charRange) * amount;
+                foreach (var ci in words[i])
+                {
+                    selection[indices[ci]] = selectValue;
+                }
+            }
+        }
+
+        static void SelectLine(string[] elements, Span<double> selection, double begin, double end, int[] indices, double amount, Func<double, double, double, double, double> shapeGenerator)
+        {
+            var lines = new List<List<int>>();
+            var index = 0;
+            var currentLine = new List<int>();
+            foreach (var line in elements.GroupWhile(c => !c.Contains('\n')))
+            {
+                foreach (var c in line)
+                {
+                    currentLine.Add(index);
+                    index++;
+                }
+
+                lines.Add(currentLine);
+                currentLine = new List<int>();
+            }
+
+            var charRange = 1.0 / lines.Count;
+            if (double.IsNaN(charRange))
+            {
+                return;
+            }
+
+            var value = 0.0;
+            for (var i = 0; i < lines.Count; i++, value += charRange)
+            {
+                var selectValue = shapeGenerator(value, begin, end, charRange) * amount;
+                foreach (var ci in lines[i])
+                {
+                    selection[indices[ci]] = selectValue;
+                }
             }
         }
 

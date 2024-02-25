@@ -30,5 +30,27 @@ namespace NiVE3.Extension
             };
             return view;
         }
+
+        public static IEnumerable<IEnumerable<T>> GroupWhile<T>(this IEnumerable<T> source, Func<T, bool> predicate)
+        {
+            var group = new List<T>();
+            foreach (var e in source)
+            {
+                if (predicate(e))
+                {
+                    group.Add(e);
+                }
+                else if (group.Count > 0)
+                {
+                    yield return group;
+                    group = new List<T>();
+                }
+            }
+
+            if (group.Count > 0)
+            {
+                yield return group;
+            }
+        }
     }
 }
