@@ -33,6 +33,11 @@ namespace NiVE3.Extension
 
         public static IEnumerable<IEnumerable<T>> GroupWhile<T>(this IEnumerable<T> source, Func<T, bool> predicate)
         {
+            return source.GroupWhile(predicate, true);
+        }
+
+        public static IEnumerable<IEnumerable<T>> GroupWhile<T>(this IEnumerable<T> source, Func<T, bool> predicate, bool excludeEmptyGroup)
+        {
             var group = new List<T>();
             foreach (var e in source)
             {
@@ -40,14 +45,14 @@ namespace NiVE3.Extension
                 {
                     group.Add(e);
                 }
-                else if (group.Count > 0)
+                else if (group.Count > 0 || !excludeEmptyGroup)
                 {
                     yield return group;
                     group = new List<T>();
                 }
             }
 
-            if (group.Count > 0)
+            if (group.Count > 0 || !excludeEmptyGroup)
             {
                 yield return group;
             }

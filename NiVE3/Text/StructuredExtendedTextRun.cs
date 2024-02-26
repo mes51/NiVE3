@@ -65,17 +65,15 @@ namespace NiVE3.Text
             {
                 foreach (var textRun in line.TextRuns)
                 {
-                    if (!currentTextRun.EqualsWithoutRun(textRun))
+                    if (result.Count < 1)
                     {
-                        if (result.Count == 0)
-                        {
-                            result.Add(textRun);
-                        }
-                        else
-                        {
-                            result.Last().End = textRun.Start;
-                            result.Add(textRun.Copy());
-                        }
+                        result.Add(textRun.Copy());
+                        currentTextRun = result.Last();
+                    }
+                    else if (!currentTextRun.EqualsWithoutRun(textRun))
+                    {
+                        result.Last().End = textRun.Start;
+                        result.Add(textRun.Copy());
                         currentTextRun = result.Last();
                     }
                 }
