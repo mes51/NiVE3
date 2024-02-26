@@ -71,6 +71,8 @@ namespace NiVE3.Input.Special
 
         const string TextMoreOptionsGroupId = nameof(TextMoreOptionsGroupId);
 
+        const string TextBaseAnchorPointRateId = nameof(TextBaseAnchorPointRateId);
+
         const string TextBoxSizeId = nameof(TextBoxSizeId);
 
         const string TextMoreOptionInterCharacterBlendModeId = nameof(TextMoreOptionInterCharacterBlendModeId);
@@ -159,6 +161,7 @@ namespace NiVE3.Input.Special
                 new SourceTextProperty(SourceTextId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_SourceText), StyledText.Empty),
                 new PropertyGroup(TextMoreOptionsGroupId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextMoreOptions), new PropertyBase[]
                 {
+                    new Vector3dProperty(TextBaseAnchorPointRateId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextMoreOptions_BaseAnchorPointRate), new Vector3d(50.0), digit: 2, unitKey: LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Unit_Percent)),
                     new Vector3dProperty(TextBoxSizeId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextMoreOptions_TextBoxSize), new Vector3d(), new Vector3d(), digit: 2),
                     new EnumProperty(TextMoreOptionInterCharacterBlendModeId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextMoreOptions_InterCharacterBlendMode), typeof(BlendMode), typeof(LanguageResourceDictionary), BlendMode.Normal)
                 }),
@@ -201,7 +204,7 @@ namespace NiVE3.Input.Special
                                 new AppendablePropertyItem(TextAnimatorValueScaleId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_Scale), () =>
                                     new PropertyGroup(TextAnimatorValueScaleId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_Scale), new PropertyBase[]
                                     {
-                                        new Scale3dProperty(TextAnimatorValueScaleId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_Scale), new Vector3d(100.0), digit: 2, is3D: false)
+                                        new Scale3dProperty(TextAnimatorValueScaleId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_Scale), new Vector3d(100.0), digit: 2)
                                     })),
                                 new AppendablePropertyItem(TextAnimatorValueAngleId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_Angle), () =>
                                     new PropertyGroup(TextAnimatorValueAngleId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_Angle), new PropertyBase[]
@@ -281,7 +284,13 @@ namespace NiVE3.Input.Special
                                 new AppendablePropertyItem(TextAnimatorValueBlurId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_Blur), () =>
                                     new PropertyGroup(TextAnimatorValueBlurId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_Blur), new PropertyBase[]
                                     {
-                                        new Vector3dProperty(TextAnimatorValueBlurId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_Blur), new Vector3d(), digit: 2, is3D: false)
+                                        new Vector3dProperty(
+                                            TextAnimatorValueBlurId,
+                                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_Blur),
+                                            new Vector3d(),
+                                            digit: 2,
+                                            unitKey: LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Unit_Pixel)
+                                        )
                                     })),
                             })
                         }))
@@ -309,15 +318,17 @@ namespace NiVE3.Input.Special
                 ApplyAnimator(structuredExtendedTextRun, animator);
             }
 
+            var moreOptions = (PropertyValueGroup)(properties[TextMoreOptionsGroupId] ?? PropertyValueGroup.Empty);
             var fontInfo = FontInfo.FindByUniqueId(sourceText.DefaultStyle.FontUniqueId) ?? FontInfo.FallbackFont;
             var font = fontInfo.FontFamily.CreateFont((float)sourceText.DefaultStyle.FontSize);
             var textOption = new TextOptions(font);
-            var wrappingSize = (Vector3d)((properties[TextMoreOptionsGroupId] as PropertyValueGroup)?[TextBoxSizeId] ?? new Vector3d());
+            var wrappingSize = (Vector3d)(moreOptions[TextBoxSizeId] ?? new Vector3d());
             textOption.WrappingLength = wrappingSize.X > 0.0 ? (float)wrappingSize.X : -1.0F;
             textOption.WordBreaking = wrappingSize.X > 0.0 ? WordBreaking.BreakAll : WordBreaking.Standard;
             textOption.TextRuns = structuredExtendedTextRun.Flatten();
 
-            var glyphBuilder = new StyledGlyphBuilder((float)wrappingSize.X, (float)wrappingSize.Y);
+            var baseAnchorPointRate = (Vector2)(Vector3d)(moreOptions[TextBaseAnchorPointRateId] ?? new Vector3d(50.0)) * 0.01F;
+            var glyphBuilder = new StyledGlyphBuilder((float)wrappingSize.X, (float)wrappingSize.Y, baseAnchorPointRate);
             TextRenderer.RenderTextTo(glyphBuilder, sourceText.Text, textOption);
             var glyphPolygons = new List<(Polygon[] fillPolygins, Polygon[] outlinePolygons, ExtendedTextRun textRun, Vector128<int> rect, Vector128<int> blurMargin, Vector2 origin)>();
             foreach (var glyph in glyphBuilder.GetRenderableGlyhps())

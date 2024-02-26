@@ -18,6 +18,8 @@ namespace NiVE3.Text
 
         Vector2 CurrentPoint { get; set; }
 
+        Vector2 BaseAnchorPointRate { get; }
+
         GlyphRendererParameters CurrentParameters { get; set; }
 
         PathBuilder Builder { get; }
@@ -32,10 +34,11 @@ namespace NiVE3.Text
 
         bool CurrentIsDiscardGlyph { get; set; }
 
-        public StyledGlyphBuilder(float textBoxWidth, float textBoxHeight, ISimplePath? textPath = null)
+        public StyledGlyphBuilder(float textBoxWidth, float textBoxHeight, Vector2 baseAnchorPointRate, ISimplePath? textPath = null)
         {
             TextBoxWidth = textBoxWidth;
             TextBoxHeight = textBoxHeight;
+            BaseAnchorPointRate = baseAnchorPointRate;
             Builder = new PathBuilder();
             if (textPath != null && textPath.Points.Length > 1)
             {
@@ -83,8 +86,8 @@ namespace NiVE3.Text
             var textRun = CurrentParameters.TextRun as ExtendedTextRun;
             if (textRun != null)
             {
-                var baseAnchorPointX = bounds.X + bounds.Width * 0.5F * textRun.HorizontalScale * 0.01F;
-                var baseAnchorPointY = bounds.Y + bounds.Height * 0.5F * textRun.VerticalScale * 0.01F;
+                var baseAnchorPointX = bounds.X + bounds.Width * BaseAnchorPointRate.X * textRun.HorizontalScale * 0.01F;
+                var baseAnchorPointY = bounds.Y + bounds.Height * BaseAnchorPointRate.Y * textRun.VerticalScale * 0.01F;
                 var skewRad = textRun.SkewAxis / 180.0F * MathF.PI;
                 transform = Matrix3x2.CreateTranslation(-bounds.X, -bounds.Y - bounds.Height) *
                     Matrix3x2.CreateScale(textRun.HorizontalScale * 0.01F, textRun.VerticalScale * 0.01F) *

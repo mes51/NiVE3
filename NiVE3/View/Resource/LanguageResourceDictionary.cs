@@ -509,6 +509,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("詳細")]
         public static readonly string TextProperty_TextMoreOptions = nameof(TextProperty_TextMoreOptions);
 
+        [ShowInMarkup, DefaultValue("アンカーポイントの基準")]
+        public static readonly string TextProperty_TextMoreOptions_BaseAnchorPointRate = nameof(TextProperty_TextMoreOptions_BaseAnchorPointRate);
+
         [ShowInMarkup, DefaultValue("テキストボックスのサイズ")]
         public static readonly string TextProperty_TextMoreOptions_TextBoxSize = nameof(TextProperty_TextMoreOptions_TextBoxSize);
 

@@ -30,7 +30,7 @@
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
 
-        <pr:SlidableNumberTextBox Grid.Column="0" x:Name="ValueXSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=ValueX}" Minimum="{Binding ElementName=Root, Path=MinimumX}" Maximum="{Binding ElementName=Root, Path=MaximumX}" Margin="5,0,2,0" VerticalAlignment="Center">
+        <pr:SlidableNumberTextBox Grid.Column="0" x:Name="ValueXSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=ValueX}" Minimum="{Binding ElementName=Root, Path=MinimumX}" Maximum="{Binding ElementName=Root, Path=MaximumX}" UnitText="{Binding ElementName=Root, Path=Unit}" Margin="5,0,2,0" VerticalAlignment="Center">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="BeginSlideEditValue">
                     <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
@@ -53,7 +53,7 @@
             </i:Interaction.Triggers>
         </pr:SlidableNumberTextBox>
         <Path Grid.Column="1" Fill="{gm:AppearanceResource ResourceKey=TextBrush}" Data="{StaticResource CrossIcon}" VerticalAlignment="Center" Margin="0,4,0,0" />
-        <pr:SlidableNumberTextBox Grid.Column="2" x:Name="ValueYSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=ValueY}" Minimum="{Binding ElementName=Root, Path=MinimumY}" Maximum="{Binding ElementName=Root, Path=MaximumY}" Margin="5,0,2,0" VerticalAlignment="Center">
+        <pr:SlidableNumberTextBox Grid.Column="2" x:Name="ValueYSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=ValueY}" Minimum="{Binding ElementName=Root, Path=MinimumY}" Maximum="{Binding ElementName=Root, Path=MaximumY}" UnitText="{Binding ElementName=Root, Path=Unit}" Margin="5,0,2,0" VerticalAlignment="Center">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="BeginSlideEditValue">
                     <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
@@ -76,7 +76,7 @@
             </i:Interaction.Triggers>
         </pr:SlidableNumberTextBox>
         <Path Grid.Column="3" Fill="{gm:AppearanceResource ResourceKey=TextBrush}" Data="{StaticResource CrossIcon}" VerticalAlignment="Center" Margin="0,4,0,0" Visibility="{Binding ElementName=Root, Path=Is3D, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-        <pr:SlidableNumberTextBox Grid.Column="4" x:Name="ValueZSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=ValueZ}" Minimum="{Binding ElementName=Root, Path=MinimumZ}" Maximum="{Binding ElementName=Root, Path=MaximumZ}" Margin="5,0,0,0" VerticalAlignment="Center" Visibility="{Binding ElementName=Root, Path=Is3D, Converter={StaticResource BooleanToVisibilityConverter}}">
+        <pr:SlidableNumberTextBox Grid.Column="4" x:Name="ValueZSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=ValueZ}" Minimum="{Binding ElementName=Root, Path=MinimumZ}" Maximum="{Binding ElementName=Root, Path=MaximumZ}" UnitText="{Binding ElementName=Root, Path=Unit}" Margin="5,0,0,0" VerticalAlignment="Center" Visibility="{Binding ElementName=Root, Path=Is3D, Converter={StaticResource BooleanToVisibilityConverter}}">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="BeginSlideEditValue">
                     <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>

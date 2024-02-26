@@ -93,6 +93,19 @@ namespace NiVE3.Plugin.Property.Control
             new FrameworkPropertyMetadata(double.MaxValue, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
+        public static readonly DependencyProperty UnitProperty = DependencyProperty.Register(
+            nameof(Unit),
+            typeof(string),
+            typeof(VectorPropertyControl),
+            new FrameworkPropertyMetadata("", FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        public string Unit
+        {
+            get { return (string)GetValue(UnitProperty); }
+            set { SetValue(UnitProperty, value); }
+        }
+
         public double MaximumZ
         {
             get { return (double)GetValue(MaximumZProperty); }
