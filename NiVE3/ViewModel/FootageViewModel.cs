@@ -241,7 +241,7 @@ namespace NiVE3.ViewModel
         {
             if (Footage.InputType == SourceType.Image || (Footage.InputType & SourceType.Video) != SourceType.None)
             {
-                using var image = Footage.ReadImage(Duration * 0.5, 0, 0, null, false) as NManagedImage;
+                using var image = Footage.ReadImage(Duration * 0.5, 0, 0, null, ImageInterpolationQuality.Level2, false) as NManagedImage;
                 if (image != null)
                 {
                     var dataSize = image.DataLength;

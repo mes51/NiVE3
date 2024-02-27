@@ -133,7 +133,7 @@ namespace NiVE3.Model
 
         public override NImage? GetImage(double time)
         {
-            return Footage?.ReadImage(time, 0, 0, null, false);
+            return Footage?.ReadImage(time, 0, 0, null, ImageInterpolationQuality.Level2, false);
         }
 
         private void FootagePreviewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)

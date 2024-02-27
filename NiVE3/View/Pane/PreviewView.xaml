@@ -143,6 +143,17 @@
             </Style.Triggers>
         </Style>
 
+        <Style x:Key="PreviewImageStyle" TargetType="{x:Type Image}">
+            <Setter Property="Stretch" Value="Uniform"/>
+            <Setter Property="RenderOptions.BitmapScalingMode" Value="HighQuality"/>
+
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ElementName=Root, Path=IsZoomIn}" Value="True">
+                    <Setter Property="RenderOptions.BitmapScalingMode" Value="NearestNeighbor"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
         <Style x:Key="TimelineAreaStyle" TargetType="{x:Type StackPanel}">
             <Setter Property="Visibility" Value="Visible"/>
 
@@ -189,7 +200,7 @@
                                 </DrawingBrush>
                             </Rectangle.Fill>
                         </Rectangle>
-                        <Image Source="{Binding CurrentFrame}" Stretch="Uniform"/>
+                        <Image Source="{Binding CurrentFrame}" Style="{StaticResource PreviewImageStyle}"/>
                     </Grid>
                     <Grid IsHitTestVisible="False">
                         <ItemsControl ItemsSource="{Binding BoundingBoxes}" ItemTemplate="{StaticResource BoundingBoxTemplate}">

@@ -175,11 +175,11 @@ namespace NiVE3.Model
             }
         }
 
-        public NImage ReadImage(double time, int compositionWidth, int compositionHeight, PropertyValueGroup? properties, bool toGpu)
+        public NImage ReadImage(double time, int compositionWidth, int compositionHeight, PropertyValueGroup? properties, ImageInterpolationQuality imageInterpolationQuality, bool toGpu)
         {
             if (properties != null && Source is ICustomizableFootageSource customizableFootageSource)
             {
-                return customizableFootageSource.Read(time, compositionWidth, compositionHeight, properties, toGpu);
+                return customizableFootageSource.Read(time, compositionWidth, compositionHeight, properties, imageInterpolationQuality, toGpu);
             }
             else
             {

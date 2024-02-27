@@ -167,5 +167,122 @@ namespace NiVE3.Shape
                 ArrayPool<float>.Shared.Return(temp);
             });
         }
+
+        public static void FillPolygonNonzeroAiliased(Polygon[] polygons, NManagedImage image, Vector4 color, float offsetX = 0.0F, float offsetY = 0.0F)
+        {
+            if (polygons.Length < 1)
+            {
+                return;
+            }
+
+            var minY = Math.Max((int)Math.Floor(polygons.Min(p => p.MinY) - offsetY), 0);
+            var maxY = Math.Min((int)Math.Ceiling(polygons.Max(p => p.MaxY) - offsetY), image.Height);
+            var minX = Math.Max((int)Math.Floor(polygons.Min(p => p.MinX) - offsetX), 0);
+            var maxX = Math.Min((int)Math.Ceiling(polygons.Max(p => p.MaxX) - offsetX), image.Width);
+            Parallel.For(minY, maxY, h =>
+            {
+                var width = image.Width;
+                var data = MemoryMarshal.Cast<float, Vector4>(image.GetDataSpan()).Slice(h * width, width);
+
+                var max = float.MinValue;
+                var hitLine = new List<Hit>();
+                for (var i = 0; i < polygons.Length; i++)
+                {
+                    var y = h + offsetY;
+                    if (polygons[i].MinY <= y && polygons[i].MaxY >= y)
+                    {
+                        var ls = polygons[i].Lines;
+                        for (var n = 0; n < ls.Length; n++)
+                        {
+                            var p = ls[n].GetCrossHorizonalPositionAndDirection(y);
+                            if (p.Value > float.MinValue)
+                            {
+                                max = Math.Max(max, p.Value);
+                                hitLine.Add(p);
+                            }
+                        }
+                    }
+                }
+                if (hitLine.Count > 0 && max > offsetX - 2.0F)
+                {
+                    hitLine.Sort();
+                    var hi = 0;
+                    var hp = hitLine[0].Value;
+                    var dir = false;
+                    var depth = 0;
+                    var inout = false;
+                    for (var w = minX; w < maxX; w++)
+                    {
+                        var x = w + offsetX;
+                        if (hp <= x)
+                        {
+                            var prev = inout;
+                            if (depth > 0)
+                            {
+                                if (dir != hitLine[hi].IsDown)
+                                {
+                                    depth--;
+                                }
+                                else
+                                {
+                                    depth++;
+                                }
+                            }
+                            else
+                            {
+                                dir = hitLine[hi].IsDown;
+                                depth++;
+                            }
+                            if (hp < x && prev != depth > 0)
+                            {
+                                prev = depth > 0;
+                            }
+                            for (hi++; hi < hitLine.Count; hi++)
+                            {
+                                hp = hitLine[hi].Value;
+                                var d = x - hp;
+                                if (hp > x)
+                                {
+                                    break;
+                                }
+                                else
+                                {
+                                    if (depth > 0)
+                                    {
+                                        if (dir != hitLine[hi].IsDown)
+                                        {
+                                            depth--;
+                                        }
+                                        else
+                                        {
+                                            depth++;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        dir = hitLine[hi].IsDown;
+                                        depth++;
+                                    }
+                                    if (prev != depth > 0 && d < 1.0F && d > 0.0F)
+                                    {
+                                        prev = depth > 0;
+                                    }
+                                }
+                            }
+                            inout = depth > 0;
+                        }
+
+                        if (inout)
+                        {
+                            data[w] = Blend.Process(BlendMode.Normal, data[w], color);
+                        }
+                        if (hi >= hitLine.Count)
+                        {
+                            break;
+                        }
+                    }
+                }
+            });
+        }
     }
 }

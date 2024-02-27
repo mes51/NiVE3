@@ -436,7 +436,7 @@ namespace NiVE3.Model
             var sourceTime = layerTime;
 
             var sourceOptionProperties = (TextProperties ?? SourceOptionProperties)?.GetPropertyValueGroup(sourceTime);
-            var image = FootageModel.ReadImage(sourceTime, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties, useGpu);
+            var image = FootageModel.ReadImage(sourceTime, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties, InterpolationQuality, useGpu);
             var roi = new ROI(new Int32Point(), new Int32Size(image.Width, image.Height), 0, 0, image.Width, image.Height);
 
             if (IsEnableEffect)
@@ -489,7 +489,7 @@ namespace NiVE3.Model
             var sourceTime = layerTime;
 
             var sourceOptionProperties = (TextProperties ?? SourceOptionProperties)?.GetPropertyValueGroup(sourceTime);
-            var image = FootageModel.ReadImage(sourceTime, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties, useGpu);
+            var image = FootageModel.ReadImage(sourceTime, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties, InterpolationQuality, useGpu);
             var roi = new ROI(new Int32Point(), new Int32Size(image.Width, image.Height), 0, 0, image.Width, image.Height);
 
             RenderableImage? trackMatteImage = null;

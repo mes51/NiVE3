@@ -101,12 +101,25 @@ namespace NiVE3.View.Pane
             new FrameworkPropertyMetadata(1.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
+        public static readonly DependencyProperty IsZoomInProperty = DependencyProperty.Register(
+            nameof(IsZoomIn),
+            typeof(bool),
+            typeof(PreviewView),
+            new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
         public static readonly DependencyProperty PreviewAreaScaleRateInvertProperty = PreviewAreaScaleRateInvertPropertyKey.DependencyProperty;
 
         public double PreviewAreaScaleRateInvert
         {
             get { return (double)GetValue(PreviewAreaScaleRateInvertProperty); }
             private set { SetValue(PreviewAreaScaleRateInvertPropertyKey, value); }
+        }
+
+        public bool IsZoomIn
+        {
+            get { return (bool)GetValue(IsZoomInProperty); }
+            set { SetValue(IsZoomInProperty, value); }
         }
 
         public int SelectedDownScaleRateIndex
@@ -188,6 +201,7 @@ namespace NiVE3.View.Pane
                 scale = 100.0;
             }
             PreviewAreaScaleRate = scale * 0.01;
+            IsZoomIn = scale >= 100.0;
             BoundingBoxBorderThicknessRate = 1.0 / (scale * 0.01);
             SetValue(PreviewAreaScaleRateInvertPropertyKey, 100.0 / scale);
         }
