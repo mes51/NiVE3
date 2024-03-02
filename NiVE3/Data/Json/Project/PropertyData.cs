@@ -11,7 +11,9 @@ namespace NiVE3.Data.Json.Project
 {
     public class PropertyData
     {
-        public string Id { get; set; } = "";
+        public string PropertyId { get; set; } = "";
+
+        public Guid InstanceId { get; set; }
 
         [JsonConverter(typeof(PluginOptionValueObjectConverter))]
         public object? Value { get; set; }

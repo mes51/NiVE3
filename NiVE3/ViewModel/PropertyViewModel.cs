@@ -6,7 +6,9 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
+using GongSolutions.Wpf.DragDrop;
 using NiVE3.Model;
 using NiVE3.Mvvm;
 using NiVE3.Plugin.Interfaces;
@@ -15,12 +17,13 @@ using NiVE3.Plugin.Property.Control;
 using NiVE3.Shared.Extension;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
 using NiVE3.View.Command;
+using NiVE3.View.Primitive;
 using Prism.Commands;
 using Prism.Mvvm;
 
 namespace NiVE3.ViewModel
 {
-    interface IInternalPropertyViewModel : IPropertyViewModel
+    interface IInternalPropertyViewModel : IPropertyViewModel, IViewModelShortcutCommand
     {
         PropertyViewState ViewState { get; }
 
@@ -29,6 +32,8 @@ namespace NiVE3.ViewModel
         ObservableCollection<KeyFrame>? KeyFrames { get; }
 
         ObservableCollectionView<IPropertyModel, IInternalPropertyViewModel>? Children { get; }
+
+        ICommand SelectItemCommand { get; }
 
         void DeSelect();
     }
@@ -53,7 +58,7 @@ namespace NiVE3.ViewModel
     }
 
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
-    partial class PropertyViewModel : BindableBase, IInternalPropertyViewModel, IViewModelShortcutCommand
+    partial class PropertyViewModel : BindableBase, IInternalPropertyViewModel
     {
         public PropertyViewState ViewState { get; }
 
@@ -285,7 +290,8 @@ namespace NiVE3.ViewModel
         }
     }
 
-    class PropertyGroupViewModel : BindableBase, IInternalPropertyViewModel
+    [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
+    partial class PropertyGroupViewModel : BindableBase, IInternalPropertyViewModel
     {
         public PropertyViewState ViewState { get; }
 
@@ -326,11 +332,19 @@ namespace NiVE3.ViewModel
 
         public ICommand AbortEditCommand => throw new NotImplementedException();
 
+        public DelegateCommand<SelectItemType?> DeleteCommand { get; }
+
+        public ICommand SelectItemCommand { get; }
+
+        [NeedWire(nameof(PropertyGroupModel), IsOneWay = true)]
+        public Guid InstanceId { get; set; }
+
         PropertyGroupModel PropertyGroupModel { get; }
 
         public PropertyGroupViewModel(PropertyGroupModel propertyGroupModel)
         {
             PropertyGroupModel = propertyGroupModel;
+            InstanceId = propertyGroupModel.InstanceId;
             Property = propertyGroupModel.Property;
             children = propertyGroupModel.Children.CreateViewCollection(m =>
             {
@@ -339,6 +353,14 @@ namespace NiVE3.ViewModel
                 return vm;
             });
             ViewState = propertyGroupModel.CreateState(this);
+
+            DeleteCommand = new DelegateCommand<SelectItemType?>(_ => { });
+
+            SelectItemCommand = new DelegateCommand(() =>
+            {
+                DeSelect();
+                SelectItemChangedPublisher.Publish(this, new SelectItemEventArgs(SelectItemType.PropertyGroup, true, this));
+            });
         }
 
         public void DeSelect()
@@ -349,13 +371,15 @@ namespace NiVE3.ViewModel
             }
         }
 
+        partial void WiringModel();
+
         private void Property_SelectItemChanged(object? sender, SelectItemEventArgs e)
         {
-            SelectItemChangedPublisher.Publish(sender, e);
+            SelectItemChangedPublisher.Publish(sender, new SelectItemEventArgs(e, this));
         }
     }
 
-    partial class AppendablePropertyViewModel : BindableBase, IInternalPropertyViewModel
+    partial class AppendablePropertyViewModel : BindableBase, IInternalPropertyViewModel, IDropTarget
     {
         public PropertyViewState ViewState { get; }
 
@@ -396,9 +420,20 @@ namespace NiVE3.ViewModel
 
         public ICommand AbortEditCommand => throw new NotImplementedException();
 
+        public ICommand SelectItemCommand { get; }
+
+        public DelegateCommand<SelectItemType?> DeleteCommand { get; }
+
         public ICommand AppendItemCommand { get; }
 
         public AppendablePropertyItem[] Items => ((AppendableProperty)Property).Items;
+
+        private ObservableCollection<IInternalPropertyViewModel> selectedChildren = new ObservableCollection<IInternalPropertyViewModel>();
+        public ObservableCollection<IInternalPropertyViewModel> SelectedChildren
+        {
+            get { return selectedChildren; }
+            set { SetProperty(ref selectedChildren, value); }
+        }
 
         AppendablePropertyModel AppendablePropertyModel { get; }
 
@@ -414,6 +449,16 @@ namespace NiVE3.ViewModel
             });
             ViewState = appendablePropertyModel.CreateState(this);
 
+            SelectItemCommand = new DelegateCommand(() => { });
+
+            DeleteCommand = new DelegateCommand<SelectItemType?>(type =>
+            {
+                if (SelectedChildren.Count > 0)
+                {
+                    AppendablePropertyModel.DeleteChildren(SelectedChildren.OfType<PropertyGroupViewModel>().Select(c => c.InstanceId).ToArray());
+                }
+            });
+
             AppendItemCommand = new DelegateCommand<AppendablePropertyItem>(i => AppendablePropertyModel.AddChild(i));
         }
 
@@ -423,11 +468,72 @@ namespace NiVE3.ViewModel
             {
                 p.DeSelect();
             }
+            SelectedChildren.Clear();
         }
 
         private void Property_SelectItemChanged(object? sender, SelectItemEventArgs e)
         {
-            SelectItemChangedPublisher.Publish(sender, e);
+            SelectItemChangedPublisher.Publish(sender, new SelectItemEventArgs(e, this));
+            if (e.OriginalSender is not PropertyGroupViewModel group || Children.Contains(group))
+            {
+                foreach (var child in Children)
+                {
+                    child.DeSelect();
+                }
+            }
+            else
+            {
+                var exclude = e.ObjectHierarchy.OfType<IInternalPropertyViewModel>().FirstOrDefault(Children.Contains);
+                foreach (var notSelected in Children.Where(c => c != exclude))
+                {
+                    notSelected.DeSelect();
+                    SelectedChildren.Remove(notSelected);
+                }
+                if (exclude != null && !SelectedChildren.Contains(exclude))
+                {
+                    SelectedChildren.Add(exclude);
+                }
+            }
+        }
+
+        public void DragOver(IDropInfo dropInfo)
+        {
+            switch (dropInfo.Data)
+            {
+                case PropertyGroupViewModel group when Children.Contains(group):
+                case ItemDragData<IInternalPropertyViewModel> groups when groups.SelectedItems.OfType<PropertyGroupViewModel>().All(Children.Contains):
+                    dropInfo.Effects = DragDropEffects.Move;
+                    dropInfo.DropTargetAdorner = DropTargetAdorners.Insert;
+                    break;
+            }
+        }
+
+        public void Drop(IDropInfo dropInfo)
+        {
+            switch (dropInfo.Data)
+            {
+                case PropertyGroupModel group when Children.Contains(group):
+                    {
+                        var newIndex = dropInfo.InsertIndex;
+                        if (Children.IndexOf(group) < newIndex)
+                        {
+                            newIndex--;
+                        }
+                        AppendablePropertyModel.MoveChild(group.InstanceId, newIndex);
+                    }
+                    break;
+                case ItemDragData<IInternalPropertyViewModel> groups when groups.SelectedItems.OfType<PropertyGroupViewModel>().All(Children.Contains):
+                    {
+                        var newIndex = dropInfo.InsertIndex;
+                        if (Children.IndexOf(groups.DragItem) < newIndex)
+                        {
+                            newIndex--;
+                        }
+                        var referencePropertyGroup = (PropertyGroupViewModel)groups.DragItem;
+                        AppendablePropertyModel.MoveChildren(groups.SelectedItems.OfType<PropertyGroupViewModel>().Select(g => g.InstanceId).ToArray(), referencePropertyGroup.InstanceId, newIndex);
+                    }
+                    break;
+            }
         }
     }
 }

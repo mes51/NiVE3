@@ -4,16 +4,34 @@
                         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
                         xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
                         xmlns:local="clr-namespace:NiVE3.View.Part"
+                        xmlns:dd="urn:gong-wpf-dragdrop"
+                        xmlns:pr="clr-namespace:NiVE3.View.Primitive"
+                        xmlns:cv="clr-namespace:NiVE3.View.Converter"
                         mc:Ignorable="d" 
                         x:Name="Root"
+                        MouseLeftButtonDown="Root_MouseLeftButtonDown"
+                        dd:DragDrop.DragSourceIgnore="True"
                         d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <cv:HasAncestorConverter x:Key="HasAncestorConverter"/>
+    </UserControl.Resources>
     <local:LayerItemExpander HeaderText="{Binding ViewState.DisplayName}"
                              IndentLevel="{Binding ElementName=Root, Path=IndentLevel}"
                              IsAVSwitchColumnVisible="{Binding ElementName=Root, Path=IsAVSwitchColumnVisible}"
                              IsTagColumnVisible="{Binding ElementName=Root, Path=IsTagColumnVisible}"
                              IsExpanded="{Binding IsExpanded, Mode=TwoWay}"
                              NameAreaWidth="{Binding ElementName=Root, Path=NameAreaWidth}"
+                             NameDragSourceIgnore="False"
                              ParentHasExpanderArrow="{Binding ElementName=Root, Path=ParentHasExpanderArrow}">
+        <local:LayerItemExpander.Style>
+            <Style TargetType="{x:Type local:LayerItemExpander}" BasedOn="{StaticResource {x:Type local:LayerItemExpander}}">
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type DependencyObject}}, Converter={StaticResource HasAncestorConverter}, ConverterParameter={x:Type local:PropertyContentPresenter}}" Value="True">
+                        <Setter Property="IsHighlightHeader" Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:PropertyContentPresenter}}, Path=(pr:StackableItemsCollectionView.IsSelected)}"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </local:LayerItemExpander.Style>
         <local:PropertyCollectionView ItemsSource="{Binding Children}"
                                       IndentLevel="{Binding ElementName=Root, Path=IndentLevel, Converter={x:Static local:PropertyGroupView.NextIndentConverter}}"
                                       ControlAreaWidth="{Binding ElementName=Root, Path=ControlAreaWidth}"

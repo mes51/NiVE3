@@ -732,6 +732,7 @@ namespace NiVE3.Model
 
             if (!prevIndices.SequenceEqual(effects.Select(l => Effects.IndexOf(l))))
             {
+                // TODO: 古いインデックスを保持するのでは無く、古いEffectsを配列にしたものを渡す
                 HistoryModel.Add(new MoveEffectsHistoryCommand(this, effects, prevIndices, newOrderedEffects.ToArray()));
             }
         }

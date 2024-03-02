@@ -4,9 +4,12 @@
                         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
                         xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
                         xmlns:local="clr-namespace:NiVE3.View.Part"
+                        xmlns:dd="urn:gong-wpf-dragdrop"
+                        xmlns:pr="clr-namespace:NiVE3.View.Primitive"
                         xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
                         mc:Ignorable="d" 
                         x:Name="Root"
+                        dd:DragDrop.DragSourceIgnore="True"
                         d:DesignHeight="450" d:DesignWidth="800">
     <local:PropertyViewBase.Resources>
         <Style x:Key="AppendItemMenuItemContainerStyle" TargetType="{x:Type MenuItem}">
@@ -43,7 +46,8 @@
                              IsExpanded="{Binding IsExpanded, Mode=TwoWay}"
                              NameAreaWidth="{Binding ElementName=Root, Path=NameAreaWidth}"
                              ParentHasExpanderArrow="{Binding ElementName=Root, Path=ParentHasExpanderArrow}"
-                             ControlAreaWidth="{Binding ElementName=Root, Path=CalculatedControlAreaWidth}">
+                             ControlAreaWidth="{Binding ElementName=Root, Path=CalculatedControlAreaWidth}"
+                             IsHighlightHeader="{Binding ElementName=Root, Path=(pr:StackableItemsCollectionView.IsSelected)}">
         <local:LayerItemExpander.HeaderSubItem>
             <Button x:Name="OpenAppendItemMenuButton" Height="13" Width="13" HorizontalAlignment="Left" VerticalAlignment="Center" Click="OpenAppendItemMenuButton_Click" ContextMenuService.IsEnabled="False">
                 <Button.ContextMenu>
@@ -67,6 +71,12 @@
                                       Range="{Binding ElementName=Root, Path=Range}"
                                       RangeStart="{Binding ElementName=Root, Path=RangeStart}"
                                       CompositionFrameRate="{Binding ElementName=Root, Path=CompositionFrameRate}"
-                                      ParentHasExpanderArrow="{Binding ElementName=Root, Path=ParentHasExpanderArrow}"/>
+                                      ParentHasExpanderArrow="{Binding ElementName=Root, Path=ParentHasExpanderArrow}"
+                                      SelectedItems="{Binding SelectedChildren}"
+                                      dd:DragDrop.DropHandler="{Binding}"
+                                      dd:DragDrop.DragHandler="{Binding RelativeSource={RelativeSource Self}}"
+                                      dd:DragDrop.IsDragSource="True"
+                                      dd:DragDrop.IsDropTarget="True"
+                                      dd:DragDrop.DragSourceIgnore="False"/>
     </local:LayerItemExpander>
 </local:PropertyViewBase>

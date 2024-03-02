@@ -90,15 +90,15 @@ namespace NiVE3.Model
             {
                 if (p is PropertyGroupModel pg)
                 {
-                    propertyValues.Add(pg.Id, pg.GetPropertyValueGroup(layerTime));
+                    propertyValues.Add(pg.PropertyId, pg.GetPropertyValueGroup(layerTime));
                 }
                 else if (p is AppendablePropertyModel ap)
                 {
-                    propertyValues.Add(ap.Id, ap.GetChildPropertyValues(layerTime));
+                    propertyValues.Add(ap.PropertyId, ap.GetChildPropertyValues(layerTime));
                 }
                 else if (p is PropertyModel pp)
                 {
-                    propertyValues.Add(pp.Id, pp.GetValue(layerTime));
+                    propertyValues.Add(pp.PropertyId, pp.GetValue(layerTime));
                 }
             }
 
@@ -123,7 +123,7 @@ namespace NiVE3.Model
             IsEnable = data.IsEnable;
             foreach (var propertyData in data.Properties)
             {
-                Properties.FirstOrDefault(p => p.Id == propertyData.Id)?.LoadData(propertyData);
+                Properties.FirstOrDefault(p => p.PropertyId == propertyData.PropertyId)?.LoadData(propertyData);
             }
         }
 

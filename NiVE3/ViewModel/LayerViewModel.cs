@@ -706,7 +706,7 @@ namespace NiVE3.ViewModel
                 EditingParameter = EditingLayerParameter.None;
             }, _ => EditingParameter == EditingLayerParameter.Comment);
 
-            SelectItemCommand = new DelegateCommand(() => SelectItemChangedPublisher.Publish(this, new SelectItemEventArgs(SelectItemType.Layer, true, layer: this)));
+            SelectItemCommand = new DelegateCommand(() => SelectItemChangedPublisher.Publish(this, new SelectItemEventArgs(SelectItemType.Layer, true, this)));
 
             DeleteCommand = new DelegateCommand<SelectItemType?>(type =>
             {
@@ -809,6 +809,10 @@ namespace NiVE3.ViewModel
                 e.DeSelect();
             }
             SelectedEffects.Clear();
+            TransformProperties.DeSelect();
+            LayerOptionProperties?.DeSelect();
+            TextProperties?.DeSelect();
+            SourceOptionProperties?.DeSelect();
         }
 
         partial void WiringModel();
@@ -859,7 +863,7 @@ namespace NiVE3.ViewModel
 
         private void Effect_SelectItemChanged(object? sender, SelectItemEventArgs e)
         {
-            SelectItemChangedPublisher.Publish(sender, new SelectItemEventArgs(e, layer: this));
+            SelectItemChangedPublisher.Publish(sender, new SelectItemEventArgs(e, this));
             if (e.SelectItemType != SelectItemType.Effect)
             {
                 foreach (var effect in SelectedEffects.Where(v => v != e.Effect).ToArray())
@@ -875,12 +879,15 @@ namespace NiVE3.ViewModel
             else
             {
                 TransformProperties.DeSelect();
+                LayerOptionProperties?.DeSelect();
+                TextProperties?.DeSelect();
+                SourceOptionProperties?.DeSelect();
             }
         }
 
         private void PropertyGroupViewModel_SelectItemChanged(object? sender, SelectItemEventArgs e)
         {
-            SelectItemChangedPublisher.Publish(sender, new SelectItemEventArgs(e, layer: this));
+            SelectItemChangedPublisher.Publish(sender, new SelectItemEventArgs(e, this));
             foreach (var effect in SelectedEffects)
             {
                 effect.DeSelect();

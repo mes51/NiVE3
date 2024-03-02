@@ -13,7 +13,7 @@ using NiVE3.ViewModel;
 
 namespace NiVE3.View.Part
 {
-    class PropertyCollectionView : StackableItemsCollectionView<PropertyViewModel>
+    class PropertyCollectionView : StackableItemsCollectionView<IInternalPropertyViewModel>
     {
         static IValueConverter VisibilityConverter = new BooleanToVisibilityConverter();
 
@@ -130,6 +130,11 @@ namespace NiVE3.View.Part
             ItemTemplateSelector = templateSelector;
         }
 
+        protected override DependencyObject GetContainerForItemOverride()
+        {
+            return new PropertyContentPresenter();
+        }
+
         FrameworkElementFactory CreateControlFactory(Type uiType)
         {
             var factory = new FrameworkElementFactory(uiType);
@@ -230,4 +235,6 @@ namespace NiVE3.View.Part
             return factory;
         }
     }
+
+    class PropertyContentPresenter : ContentPresenter { }
 }

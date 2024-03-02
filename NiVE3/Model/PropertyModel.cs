@@ -14,12 +14,13 @@ using Prism.Mvvm;
 using NiVE3.View.Resource;
 using System.Windows.Media.Animation;
 using NiVE3.Data.Json.Project;
+using NiVE3.Extension;
 
 namespace NiVE3.Model
 {
     interface IPropertyModel
     {
-        string Id { get; }
+        string PropertyId { get; }
 
         object? Value { get; }
 
@@ -44,7 +45,7 @@ namespace NiVE3.Model
     {
         const double KeyFrameEpsilon = 1E-10;
 
-        public string Id { get; }
+        public string PropertyId { get; }
 
         private object? _value = null; // valueキーワードと被るため仕方なしでアンダーバーをつける
         public object? Value
@@ -106,7 +107,7 @@ namespace NiVE3.Model
             LayerModel = layerModel;
             EffectModel = effectModel;
             HistoryModel = historyModel;
-            Id = property.Id;
+            PropertyId = property.Id;
             Value = property.DefaultValue;
 
             // NOTE: 本来はモデル側から設定してもらうものだが、引き回しの経路が複雑になりすぎる(レイヤーからだったり、エフェクトやマスクだったり)ため、自分から取りに行く
@@ -239,7 +240,7 @@ namespace NiVE3.Model
             }).ToArray();
             return new PropertyData
             {
-                Id = Id,
+                PropertyId = PropertyId,
                 Value = Property.PropertyType.SerializeValue(Value),
                 KeyFrames = keyFramesData
             };
@@ -315,7 +316,9 @@ namespace NiVE3.Model
 
     class PropertyGroupModel : BindableBase, IPropertyModel
     {
-        public string Id { get; }
+        public string PropertyId { get; }
+
+        public Guid InstanceId { get; }
 
         public object? Value => null;
 
@@ -338,17 +341,18 @@ namespace NiVE3.Model
 
         EffectModel? EffectModel { get; }
 
-        public PropertyGroupModel(PropertyBase property, CompositionModel compositionModel, HistoryModel historyModel) : this(property, compositionModel, null, null, historyModel) { }
+        public PropertyGroupModel(PropertyBase property, CompositionModel compositionModel, HistoryModel historyModel, Guid? instanceId = null) : this(property, compositionModel, null, null, historyModel, instanceId) { }
 
-        public PropertyGroupModel(PropertyBase property, CompositionModel compositionModel, LayerModel? layerModel, HistoryModel historyModel) : this(property, compositionModel, layerModel, null, historyModel) { }
+        public PropertyGroupModel(PropertyBase property, CompositionModel compositionModel, LayerModel? layerModel, HistoryModel historyModel, Guid? instanceId = null) : this(property, compositionModel, layerModel, null, historyModel, instanceId) { }
 
-        public PropertyGroupModel(PropertyBase property, CompositionModel compositionModel, LayerModel? layerModel, EffectModel? effectModel, HistoryModel historyModel)
+        public PropertyGroupModel(PropertyBase property, CompositionModel compositionModel, LayerModel? layerModel, EffectModel? effectModel, HistoryModel historyModel, Guid? instanceId = null)
         {
             Property = property;
             CompositionModel = compositionModel;
             LayerModel = layerModel;
             EffectModel = effectModel;
-            Id = property.Id;
+            PropertyId = property.Id;
+            InstanceId = instanceId ?? Guid.NewGuid();
 
             foreach (var c in ((PropertyGroup)property).Children)
             {
@@ -390,15 +394,15 @@ namespace NiVE3.Model
             {
                 if (p is PropertyGroupModel pg)
                 {
-                    result.Add(pg.Id, pg.GetPropertyValueGroup(time));
+                    result.Add(pg.PropertyId, pg.GetPropertyValueGroup(time));
                 }
                 else if (p is AppendablePropertyModel ap)
                 {
-                    result.Add(ap.Id, ap.GetChildPropertyValues(time));
+                    result.Add(ap.PropertyId, ap.GetChildPropertyValues(time));
                 }
                 else if (p is PropertyModel pp)
                 {
-                    result.Add(pp.Id, pp.GetValue(time));
+                    result.Add(pp.PropertyId, pp.GetValue(time));
                 }
             }
 
@@ -407,7 +411,7 @@ namespace NiVE3.Model
 
         public IPropertyModel? FindProperty(string propertyId)
         {
-            var child = Children.FirstOrDefault(c => c.Id == propertyId);
+            var child = Children.FirstOrDefault(c => c.PropertyId == propertyId);
             if (child != null)
             {
                 return child;
@@ -429,7 +433,8 @@ namespace NiVE3.Model
         {
             return new PropertyData
             {
-                Id = Id,
+                PropertyId = PropertyId,
+                InstanceId = InstanceId,
                 Children = Children.Select(p => p.SaveData()).ToArray()
             };
         }
@@ -443,7 +448,7 @@ namespace NiVE3.Model
 
             foreach (var childData in data.Children)
             {
-                Children.FirstOrDefault(c => c.Id == childData.Id)?.LoadData(childData);
+                Children.FirstOrDefault(c => c.PropertyId == childData.PropertyId)?.LoadData(childData);
             }
         }
 
@@ -455,7 +460,7 @@ namespace NiVE3.Model
 
     partial class AppendablePropertyModel : BindableBase, IPropertyModel
     {
-        public string Id { get; }
+        public string PropertyId { get; }
 
         public object? Value => null;
 
@@ -492,14 +497,14 @@ namespace NiVE3.Model
             CompositionModel = compositionModel;
             LayerModel = layerModel;
             EffectModel = effectModel;
-            Id = property.Id;
+            PropertyId = property.Id;
             HistoryModel = historyModel;
 
             var ap = (AppendableProperty)property;
             Items = ap.Items;
             if (ap.DefaultAppendedItem != null)
             {
-                AddChildInternal(ap.DefaultAppendedItem);
+                AddChildInternal(ap.DefaultAppendedItem, null);
             }
         }
 
@@ -515,22 +520,51 @@ namespace NiVE3.Model
 
         public void AddChild(AppendablePropertyItem item)
         {
-            var child = AddChildInternal(item);
+            var child = AddChildInternal(item, null);
 
             HistoryModel.Add(new AddAppendablePropertyChildHistoryCommand(this, child, Children.IndexOf(child)));
         }
 
-        public void RemoveChild(PropertyGroupModel child)
+        public void DeleteChildren(Guid[] propertyInstanceIds)
         {
-            var index = Children.IndexOf(child);
-            if (index < 0)
+            var children = Children.OfType<PropertyGroupModel>().Where(c => propertyInstanceIds.Contains(c.InstanceId)).ToArray();
+            var indices = children.Select(Children.IndexOf).ToArray();
+
+            foreach (var c in children)
+            {
+                RemoveInternal(c);
+            }
+
+            HistoryModel.Add(new DeleteAppendablePropertyChildHistoryCommand(this, children, indices));
+        }
+
+        public void MoveChild(Guid propertyInstanceId, int newIndex)
+        {
+            MoveChildren(new Guid[] { propertyInstanceId }, propertyInstanceId, newIndex);
+        }
+
+        public void MoveChildren(Guid[] propertyInstanceIds, Guid referencePropertyInstanceId, int newIndex)
+        {
+            if (Children.Count == propertyInstanceIds.Length)
             {
                 return;
             }
 
-            RemoveInternal(child);
+            var prevOrderedChildren = Children.OfType<PropertyGroupModel>().ToArray();
+            var targetGroups = prevOrderedChildren.Where(g => propertyInstanceIds.Contains(g.InstanceId)).ToArray();
+            var prevIndices = targetGroups.Select(Children.IndexOf).ToArray();
+            var startIndex = newIndex - targetGroups.IndexOf(c => c.InstanceId == referencePropertyInstanceId);
+            var newOrderedChildren = new List<IPropertyModel>(prevOrderedChildren.Length);
+            newOrderedChildren.AddRange(prevOrderedChildren.Except(targetGroups).Take(startIndex));
+            newOrderedChildren.AddRange(targetGroups);
+            newOrderedChildren.AddRange(prevOrderedChildren.Except(newOrderedChildren.ToArray()));
 
-            HistoryModel.Add(new RemoveAppendablePropertyChildHistoryCommand(this, child, index));
+            Children.SortBy(newOrderedChildren.IndexOf);
+
+            if (!prevOrderedChildren.SequenceEqual(Children))
+            {
+                HistoryModel.Add(new MoveAppendablePropertyChildrenHistoryCommand(this, prevOrderedChildren, Children.ToArray()));
+            }
         }
 
         public PropertyValueGroup[] GetChildPropertyValues(double time)
@@ -542,7 +576,7 @@ namespace NiVE3.Model
         {
             return new PropertyData
             {
-                Id = Id,
+                PropertyId = PropertyId,
                 Children = Children.Select(p => p.SaveData()).ToArray()
             };
         }
@@ -558,20 +592,20 @@ namespace NiVE3.Model
 
             foreach (var childData in data.Children)
             {
-                var item = Items.FirstOrDefault(i => i.Id == childData.Id);
+                var item = Items.FirstOrDefault(i => i.Id == childData.PropertyId);
                 if (item == null)
                 {
                     continue;
                 }
 
-                AddChildInternal(item).LoadData(childData);
+                AddChildInternal(item, childData.InstanceId).LoadData(childData);
             }
         }
 
-        PropertyGroupModel AddChildInternal(AppendablePropertyItem item)
+        PropertyGroupModel AddChildInternal(AppendablePropertyItem item, Guid? instanceId)
         {
             var group = item.CreateFunc();
-            var groupModel = new PropertyGroupModel(group, CompositionModel, LayerModel, EffectModel, HistoryModel);
+            var groupModel = new PropertyGroupModel(group, CompositionModel, LayerModel, EffectModel, HistoryModel, instanceId);
             groupModel.ValueUpdated += Child_ValueUpdated;
 
             Children.Add(groupModel);
@@ -581,7 +615,7 @@ namespace NiVE3.Model
 
         void InsertInternal(int index, PropertyGroupModel child)
         {
-            if (Items.All(i => i.Id != child.Id))
+            if (Items.All(i => i.Id != child.PropertyId))
             {
                 return;
             }

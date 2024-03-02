@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NiVE3.Extension;
 using NiVE3.Plugin.Property;
 using NiVE3.Shared.Extension;
 using NiVE3.View.Resource;
@@ -288,31 +289,67 @@ namespace NiVE3.Model
             public void Dispose() { }
         }
 
-        private class RemoveAppendablePropertyChildHistoryCommand : IHistoryCommand
+        private class DeleteAppendablePropertyChildHistoryCommand : IHistoryCommand
         {
             public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangePropertyValue);
 
             AppendablePropertyModel Model { get; }
 
-            PropertyGroupModel Child { get; }
+            PropertyGroupModel[] Children { get; }
 
-            int Index { get; }
+            int[] Indices { get; }
 
-            public RemoveAppendablePropertyChildHistoryCommand(AppendablePropertyModel model, PropertyGroupModel child, int index)
+            public DeleteAppendablePropertyChildHistoryCommand(AppendablePropertyModel model, PropertyGroupModel[] children, int[] indices)
             {
                 Model = model;
-                Child = child;
-                Index = index;
+                Children = children;
+                Indices = indices;
             }
 
             public void Redo()
             {
-                Model.RemoveInternal(Child);
+                foreach (var c in Children)
+                {
+                    Model.RemoveInternal(c);
+                }
             }
 
             public void Undo()
             {
-                Model.InsertInternal(Index, Child);
+                foreach (var (c, i) in Children.Zip(Indices))
+                {
+                    Model.InsertInternal(i, c);
+                }
+            }
+
+            public void Dispose() { }
+        }
+
+        private class MoveAppendablePropertyChildrenHistoryCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangePropertyValue);
+
+            AppendablePropertyModel Model { get; }
+
+            IPropertyModel[] PrevOrderedChildren { get; }
+
+            IPropertyModel[] NewOrderedChildren { get; }
+
+            public MoveAppendablePropertyChildrenHistoryCommand(AppendablePropertyModel model, IPropertyModel[] prevOrderedChildren, IPropertyModel[] newOrderedChildren)
+            {
+                Model = model;
+                PrevOrderedChildren = prevOrderedChildren;
+                NewOrderedChildren = newOrderedChildren;
+            }
+
+            public void Redo()
+            {
+                Model.Children.SortBy(c => Array.IndexOf(NewOrderedChildren, c));
+            }
+
+            public void Undo()
+            {
+                Model.Children.SortBy(c => Array.IndexOf(PrevOrderedChildren, c));
             }
 
             public void Dispose() { }

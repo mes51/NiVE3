@@ -12,7 +12,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using NiVE3.View.Converter;
 
 namespace NiVE3.View.Part
 {
@@ -21,8 +20,6 @@ namespace NiVE3.View.Part
     /// </summary>
     public partial class AppendablePropertyView : PropertyViewBase
     {
-        public static readonly IValueConverter NextIndentConverter = new DelegateConverter<int, int>(v => v + 1);
-
         public AppendablePropertyView()
         {
             InitializeComponent();

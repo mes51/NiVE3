@@ -69,28 +69,30 @@ namespace NiVE3.ViewModel
 
         public bool IsUserAction { get; }
 
-        public PropertyViewModel? Property { get; }
+        public object OriginalSender { get; }
 
-        public EffectViewModel? Effect { get; }
+        public object[] ObjectHierarchy { get; }
 
-        public LayerViewModel? Layer { get; }
+        public IViewModelShortcutCommand? CommandableOriginalParent => ObjectHierarchy.Skip(1).FirstOrDefault() as IViewModelShortcutCommand;
 
-        public SelectItemEventArgs(SelectItemType selectItemType, bool isUserAction, PropertyViewModel? property = null, EffectViewModel? effect = null, LayerViewModel? layer = null)
+        public EffectViewModel? Effect => ObjectHierarchy.FirstOrDefault(o => o is EffectViewModel) as EffectViewModel;
+
+        public LayerViewModel? Layer => ObjectHierarchy.FirstOrDefault(o => o is LayerViewModel) as LayerViewModel;
+
+        public SelectItemEventArgs(SelectItemType selectItemType, bool isUserAction, object sender)
         {
             SelectItemType = selectItemType;
             IsUserAction = isUserAction;
-            Property = property;
-            Effect = effect;
-            Layer = layer;
+            OriginalSender = sender;
+            ObjectHierarchy = new object[] { sender };
         }
 
-        public SelectItemEventArgs(SelectItemEventArgs prev, PropertyViewModel? property = null, EffectViewModel? effect = null, LayerViewModel? layer = null)
+        public SelectItemEventArgs(SelectItemEventArgs prev, object parent)
         {
             SelectItemType = prev.SelectItemType;
             IsUserAction = prev.IsUserAction;
-            Property = property ?? prev.Property;
-            Effect = effect ?? prev.Effect;
-            Layer = layer ?? prev.Layer;
+            OriginalSender = prev.OriginalSender;
+            ObjectHierarchy = prev.ObjectHierarchy.Append(parent).ToArray();
         }
     }
 }

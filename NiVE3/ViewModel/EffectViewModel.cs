@@ -84,7 +84,7 @@ namespace NiVE3.ViewModel
                 EffectEnableChangeRequestPublisher.Publish(this, new EffectEnableChangeEventArgs(!IsEnable));
             });
 
-            SelectItemCommand = new DelegateCommand(() => SelectItemChangedPublisher.Publish(this, new SelectItemEventArgs(SelectItemType.Effect, true, effect: this)));
+            SelectItemCommand = new DelegateCommand(() => SelectItemChangedPublisher.Publish(this, new SelectItemEventArgs(SelectItemType.Effect, true, this)));
 
             WiringModel();
 
@@ -108,7 +108,7 @@ namespace NiVE3.ViewModel
 
         private void Property_SelectItemChanged(object? sender, SelectItemEventArgs e)
         {
-            SelectItemChangedPublisher.Publish(sender, new SelectItemEventArgs(e, effect: this));
+            SelectItemChangedPublisher.Publish(sender, new SelectItemEventArgs(e, this));
         }
     }
 }

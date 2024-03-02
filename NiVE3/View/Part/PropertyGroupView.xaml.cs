@@ -14,6 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using NiVE3.Plugin.Property;
 using NiVE3.View.Converter;
+using NiVE3.ViewModel;
 
 namespace NiVE3.View.Part
 {
@@ -22,11 +23,19 @@ namespace NiVE3.View.Part
     /// </summary>
     public partial class PropertyGroupView : PropertyViewBase
     {
-        public static readonly IValueConverter NextIndentConverter = new DelegateConverter<int, int>(v => v + 1);
+        PropertyGroupViewModel? ViewModel => DataContext as PropertyGroupViewModel;
 
         public PropertyGroupView()
         {
             InitializeComponent();
+        }
+
+        private void Root_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            Focus();
+            ParentCollection?.SelectItem(ParentContainer, Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift), Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl));
+            ViewModel?.SelectItemCommand?.Execute(null);
+            e.Handled = true;
         }
     }
 }

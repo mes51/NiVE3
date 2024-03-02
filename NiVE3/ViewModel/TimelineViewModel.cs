@@ -691,11 +691,9 @@ namespace NiVE3.ViewModel
                 switch (e.SelectItemType)
                 {
                     case SelectItemType.Effect:
-                        SelectTarget = e.Layer;
-                        break;
-                    case SelectItemType.Property:
+                    case SelectItemType.PropertyGroup:
                     case SelectItemType.KeyFrame:
-                        SelectTarget = e.Property;
+                        SelectTarget = e.CommandableOriginalParent;
                         break;
                     default:
                         SelectTarget = null;
@@ -731,7 +729,7 @@ namespace NiVE3.ViewModel
         None,
         Layer,
         Effect,
-        Property,
+        PropertyGroup,
         KeyFrame,
     }
 }

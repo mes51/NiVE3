@@ -285,6 +285,7 @@ namespace NiVE3.Model
 
             if (!prevIndices.SequenceEqual(layers.Select(l => Layers.IndexOf(l))))
             {
+                // TODO: 古いインデックスを保持するのでは無く、古いLayersを配列にしたものを渡す
                 HistoryModel.Add(new MoveLayersHistoryCommand(this, layers, prevIndices, newOrderedLayers.ToArray()));
             }
         }

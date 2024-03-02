@@ -5,13 +5,18 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Media;
 using NiVE3.Plugin.Property;
+using NiVE3.View.Converter;
 using NiVE3.View.Resource;
 
 namespace NiVE3.View.Part
 {
     public class PropertyViewBase : UserControl
     {
+        public static readonly IValueConverter NextIndentConverter = new DelegateConverter<int, int>(v => v + 1);
+
         public static readonly DependencyProperty ControlAreaWidthProperty = DependencyProperty.Register(
             nameof(ControlAreaWidth),
             typeof(double),
@@ -193,6 +198,10 @@ namespace NiVE3.View.Part
             get { return (GridLength)GetValue(CalculatedNameAreaWidthProperty); }
             set { SetValue(CalculatedNameAreaWidthProperty, value); }
         }
+
+        internal PropertyCollectionView? ParentCollection => ItemsControl.ItemsControlFromItemContainer(ParentContainer) as PropertyCollectionView;
+
+        internal FrameworkElement ParentContainer => (FrameworkElement)VisualTreeHelper.GetParent(this);
 
         static void IndentParameterChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
