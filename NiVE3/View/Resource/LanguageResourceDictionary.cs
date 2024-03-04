@@ -394,6 +394,12 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("エフェクトの削除")]
         public static readonly string History_DeleteEffects = nameof(History_DeleteEffects);
 
+        [ShowInMarkup, DefaultValue("エフェクトの名前変更")]
+        public static readonly string History_ChangeEffectName = nameof(History_ChangeEffectName);
+
+        [ShowInMarkup, DefaultValue("エフェクトのコメント変更")]
+        public static readonly string History_ChangeEffectComment = nameof(History_ChangeEffectComment);
+
         // Dialog
 
         [ShowInMarkup, DefaultValue("フッテージの削除")]

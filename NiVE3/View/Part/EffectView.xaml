@@ -11,10 +11,12 @@
              xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
              mc:Ignorable="d" 
              x:Name="Root"
+             Focusable="True"
+             FocusVisualStyle="{x:Null}"
              dd:DragDrop.DragSourceIgnore="True"
              MouseLeftButtonDown="Root_MouseLeftButtonDown"
              d:DesignHeight="450" d:DesignWidth="800">
-    <pt:LayerItemExpander HeaderText="{Binding Name}"
+    <pt:LayerItemExpander HeaderText="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                           IndentLevel="{Binding ElementName=Root, Path=IndentLevel}"
                           IsAVSwitchColumnVisible="{Binding ElementName=Root, Path=IsAVSwitchColumnVisible}"
                           IsTagColumnVisible="{Binding ElementName=Root, Path=IsTagColumnVisible}"
@@ -22,7 +24,8 @@
                           NameAreaWidth="{Binding ElementName=Root, Path=NameAreaWidth}"
                           NameDragSourceIgnore="False"
                           ParentHasExpanderArrow="{Binding ElementName=Root, Path=ParentHasExpanderArrow}"
-                          IsHighlightHeader="{Binding ElementName=Root, Path=(pr:StackableItemsCollectionView.IsSelected)}">
+                          IsHighlightHeader="{Binding ElementName=Root, Path=(pr:StackableItemsCollectionView.IsSelected)}"
+                          IsNameEditing="{Binding IsNameEditing}">
         <pt:LayerItemExpander.Switches>
             <Grid Margin="1.5,0,0,0">
                 <CheckBox Content="{gm:FontawesomeResource ResourceKey=FlorinSign}" Style="{StaticResource LayerSwitchCheckBox}" IsChecked="{Binding IsEnable, Mode=OneWay}" HorizontalAlignment="Left" Command="{Binding ChangeIsEnableCommand}"/>

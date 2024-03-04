@@ -370,7 +370,20 @@ namespace NiVE3.ViewModel
 
             PropertyChanged += TimelineViewModel_PropertyChanged;
 
-            BeginEditNameCommand = new RequerySuggestedCommand(() => SelectedLayers.First().BeginEditNameCommand.Execute(null), () => SelectedLayers.Count > 0);
+            BeginEditNameCommand = new RequerySuggestedCommand(() =>
+            {
+                switch (SelectedItemType)
+                {
+                    case SelectItemType.PropertyGroup:
+                        break;
+                    case SelectItemType.Effect when SelectTarget is LayerViewModel layer && layer.SelectedEffects.Count > 0:
+                        layer.SelectedEffects.First().BeginEditNameCommand.Execute(null);
+                        break;
+                    case SelectItemType.Layer when SelectedLayers.Count > 0:
+                        SelectedLayers.First().BeginEditNameCommand.Execute(null);
+                        break;
+                }
+            }, () => SelectTarget != null || SelectedLayers.Count > 0);
 
             AddSolidCommand = new RequerySuggestedCommand(() =>
             {

@@ -16,13 +16,20 @@ using Prism.Mvvm;
 
 namespace NiVE3.Model
 {
-    class EffectModel : BindableBase, IDisposable, IEffectObject
+    partial class EffectModel : BindableBase, IDisposable, IEffectObject
     {
         private string name = "";
         public string Name
         {
             get { return name; }
             set { SetProperty(ref name, value); }
+        }
+
+        private string comment = "";
+        public string Comment
+        {
+            get { return comment; }
+            set { SetProperty(ref comment, value); }
         }
 
         private bool isEnable = true;
@@ -81,6 +88,28 @@ namespace NiVE3.Model
             }
 
             PropertyChanged += EffectModel_PropertyChanged;
+        }
+
+        public void ChangeName(string name)
+        {
+            if (name != Name)
+            {
+                var oldNeme = Name;
+                Name = name;
+
+                HistoryModel.Add(new ChangeNameHistoryCommand(this, oldNeme, name));
+            }
+        }
+
+        public void ChangeComment(string comment)
+        {
+            if (comment != Comment)
+            {
+                var oldComment = Comment;
+                Comment = comment;
+
+                HistoryModel.Add(new ChangeCommentHistoryCommand(this, oldComment, comment));
+            }
         }
 
         public NImage Process(NImage image, ROI roi, double layerTime)

@@ -9,11 +9,12 @@ using NiVE3.Model;
 using NiVE3.Mvvm;
 using System.Windows.Input;
 using Prism.Commands;
+using NiVE3.View.Command;
 
 namespace NiVE3.ViewModel
 {
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
-    partial class EffectViewModel : BindableBase
+    partial class EffectViewModel : BindableBase, INameEditableViewModel
     {
         private Guid effectId;
         [NeedWire(nameof(EffectModel), IsOneWay = true)]
@@ -29,6 +30,14 @@ namespace NiVE3.ViewModel
         {
             get { return name; }
             set { SetProperty(ref name, value); }
+        }
+
+        private string comment = "";
+        [NeedWire(nameof(EffectModel), IsOneWay = true)]
+        public string Comment
+        {
+            get { return comment; }
+            set { SetProperty(ref comment, value); }
         }
 
         private bool isEnable;
@@ -67,11 +76,32 @@ namespace NiVE3.ViewModel
             remove { SelectItemChangedPublisher.Unsubscribe(value); }
         }
 
+        private bool isNameEditing;
+        public bool IsNameEditing
+        {
+            get { return isNameEditing; }
+            private set { SetProperty(ref isNameEditing, value); }
+        }
+
         public ICommand ChangeIsEnableCommand { get; }
 
         public ICommand SelectItemCommand { get; }
 
+        public ICommand BeginEditNameCommand { get; }
+
+        public ICommand EndEditNameCommand { get; }
+
+        public ICommand BeginEditCommentCommand { get; }
+
+        public ICommand EndEditCommentCommand { get; }
+
         EffectModel EffectModel { get; }
+
+        bool IsCommentEditing { get; set; }
+
+        string PrevName { get; set; } = "";
+
+        string PrevComment { get; set; } = "";
 
 #pragma warning disable CS8618 // 各フィールドには初期化時に必ず値を代入するため無視
         public EffectViewModel(EffectModel effectModel)
@@ -85,6 +115,44 @@ namespace NiVE3.ViewModel
             });
 
             SelectItemCommand = new DelegateCommand(() => SelectItemChangedPublisher.Publish(this, new SelectItemEventArgs(SelectItemType.Effect, true, this)));
+
+            BeginEditNameCommand = new RequerySuggestedCommand(() =>
+            {
+                IsNameEditing = true;
+                PrevName = Name;
+            }, () => !IsNameEditing && !IsCommentEditing);
+
+            BeginEditCommentCommand = new RequerySuggestedCommand(() =>
+            {
+                IsCommentEditing = true;
+                PrevComment = Comment;
+            }, () => !IsNameEditing && !IsCommentEditing);
+
+            EndEditNameCommand = new RequerySuggestedCommand<bool>(commit =>
+            {
+                if (commit && !string.IsNullOrEmpty(Name))
+                {
+                    EffectModel.ChangeName(Name);
+                }
+                else
+                {
+                    Name = PrevName;
+                }
+                IsNameEditing = false;
+            }, _ => IsNameEditing);
+
+            EndEditCommentCommand = new RequerySuggestedCommand<bool>(commit =>
+            {
+                if (commit)
+                {
+                    EffectModel.ChangeComment(Comment);
+                }
+                else
+                {
+                    Comment = PrevComment;
+                }
+                IsCommentEditing = false;
+            }, _ => IsCommentEditing);
 
             WiringModel();
 

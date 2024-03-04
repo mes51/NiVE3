@@ -25,7 +25,7 @@ using Prism.Mvvm;
 namespace NiVE3.ViewModel
 {
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
-    partial class LayerViewModel : BindableBase, IDropTarget, IViewModelShortcutCommand
+    partial class LayerViewModel : BindableBase, IDropTarget, IViewModelShortcutCommand, INameEditableViewModel
     {
         private Guid layerId;
         [NeedWire(nameof(LayerModel), IsOneWay = true)]
@@ -473,6 +473,8 @@ namespace NiVE3.ViewModel
         public IEnumerable<LayerModelProxy> TrackMatteViewSource { get; }
 
         public IEnumerable<LayerModelProxy> ParentLayerViewSource { get; }
+
+        public bool IsNameEditing => EditingParameter == EditingLayerParameter.Name;
 
         public ICommand BeginEditDurationCommand { get; }
 
