@@ -18,6 +18,7 @@
     <UserControl.Resources>
         <cv:WidthHeightConverter x:Key="WidthHeightConverter"/>
         <cv:TimeMultiValueConverter x:Key="TimeMultiValueConverter"/>
+        <cv:EnumToBoolConverter x:Key="EnumToBoolConverter"/>
 
         <ur:DataTemplateCollection x:Key="SizeTemplate" DefaultIsEmpty="True">
             <DataTemplate DataType="{x:Type vm:FootageViewModel}">
@@ -64,30 +65,14 @@
 
         <ur:DataTemplateCollection x:Key="FootageNameTemplateSelector">
             <DataTemplate DataType="{x:Type vm:IFootageViewModel}">
-                <Grid>
-                    <TextBlock x:Name="FootageNameDisplayText" Text="{Binding Name, Mode=OneWay}"/>
-                    <TextBox x:Name="FootageNameTextBox" Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Visibility="Hidden" PreviewKeyDown="FootageNameTextBox_PreviewKeyDown" IsVisibleChanged="FootageNameTextBox_IsVisibleChanged" Mouse.PreviewMouseDownOutsideCapturedElement="FootageNameTextBox_PreviewMouseDownOutsideCapturedElement" Mouse.LostMouseCapture="FootageNameTextBox_LostMouseCapture"/>
-                </Grid>
-                <DataTemplate.Triggers>
-                    <DataTrigger Binding="{Binding EditingParameter}" Value="{x:Static vm:EditingFootageParameter.Name}">
-                        <Setter TargetName="FootageNameDisplayText" Property="Visibility" Value="Hidden"/>
-                        <Setter TargetName="FootageNameTextBox" Property="Visibility" Value="Visible"/>
-                    </DataTrigger>
-                </DataTemplate.Triggers>
+                <pv:EditableTextBlock Text="{Binding Name}" IsEditing="{Binding EditingParameter, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static vm:EditingFootageParameter.Name}}" EndEditCommand="{Binding Source={x:Reference Root}, Path=DataContext.EndEditNameCommand}"/>
             </DataTemplate>
         </ur:DataTemplateCollection>
 
         <DataTemplate x:Key="FootageCommentTemplate" DataType="{x:Type vm:IFootageViewModel}">
-            <Grid>
-                <TextBlock x:Name="FootageCommentDisplayText" Text="{Binding Comment, Mode=OneWay}" PreviewMouseDown="FootageCommentDisplayText_PreviewMouseDown"/>
-                <TextBox x:Name="FootageCommentTextBox" Text="{Binding Comment, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Visibility="Hidden" PreviewKeyDown="FootageCommentTextBox_PreviewKeyDown" IsVisibleChanged="FootageCommentTextBox_IsVisibleChanged" Mouse.PreviewMouseDownOutsideCapturedElement="FootageCommentTextBox_PreviewMouseDownOutsideCapturedElement" Mouse.LostMouseCapture="FootageCommentTextBox_LostMouseCapture"/>
+            <Grid PreviewMouseDown="FootageCommentGrid_PreviewMouseDown">
+                <pv:EditableTextBlock Text="{Binding Comment}" IsEditing="{Binding EditingParameter, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static vm:EditingFootageParameter.Comment}}" EndEditCommand="{Binding Source={x:Reference Root}, Path=DataContext.EndEditCommentCommand}"/>
             </Grid>
-            <DataTemplate.Triggers>
-                <DataTrigger Binding="{Binding EditingParameter}" Value="{x:Static vm:EditingFootageParameter.Comment}">
-                    <Setter TargetName="FootageCommentDisplayText" Property="Visibility" Value="Hidden"/>
-                    <Setter TargetName="FootageCommentTextBox" Property="Visibility" Value="Visible"/>
-                </DataTrigger>
-            </DataTemplate.Triggers>
         </DataTemplate>
 
         <GridViewColumnCollection x:Key="ColumnHeaders">

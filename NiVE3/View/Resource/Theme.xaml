@@ -6,6 +6,7 @@
                     xmlns:a="clr-namespace:NiVE3.Wpf.Attach"
                     xmlns:b="clr-namespace:NiVE3.Wpf.Behavior"
                     xmlns:pt="clr-namespace:NiVE3.View.Part"
+                    xmlns:pr="clr-namespace:NiVE3.View.Primitive"
                     xmlns:ugm="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
                     xmlns:r="clr-namespace:NiVE3.View.Resource">
     <Style x:Key="{x:Type ad:LayoutDocumentFloatingWindowControl}" TargetType="{x:Type ad:LayoutDocumentFloatingWindowControl}">
@@ -16,6 +17,10 @@
     <Style x:Key="{x:Type ad:LayoutAnchorableFloatingWindowControl}" TargetType="{x:Type ad:LayoutAnchorableFloatingWindowControl}">
         <Setter Property="a:ShortcutKeyBindingProperty.InputBinding" Value="True"/>
         <Setter Property="a:WindowGestureBehaviorAttachProperty.Attach" Value="True"/>
+    </Style>
+
+    <Style TargetType="{x:Type pr:EditableTextBlock}" >
+        <!-- NOTE: BasedOn用 -->
     </Style>
 
     <Style TargetType="{x:Type pt:LayerItemExpander}">
@@ -64,46 +69,31 @@
 
                                 <ContentPresenter Grid.Column="0" Content="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Switches}" Visibility="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=IsTagColumnVisible, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                                 <ToggleButton Grid.Column="1" IsChecked="{Binding IsExpanded, Mode=TwoWay, RelativeSource={RelativeSource Mode=TemplatedParent}}" Style="{StaticResource ArrowExpanderStyle}"/>
-                                <TextBlock Grid.Column="2"
-                                           x:Name="HeaderTextBlock"
-                                           Text="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=HeaderText}"
-                                           FontFamily="{TemplateBinding FontFamily}"
-                                           FontSize="{TemplateBinding FontSize}"
-                                           FontStretch="{TemplateBinding FontStretch}"
-                                           FontStyle="{TemplateBinding FontStyle}"
-                                           FontWeight="{TemplateBinding FontWeight}"
-                                           VerticalAlignment="Center">
-                                    <TextBlock.Style>
-                                        <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
-                                            <Setter Property="Background" Value="Transparent"/>
+                                <pr:EditableTextBlock Grid.Column="2"
+                                                      Height="17"
+                                                      Text="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=HeaderText}"
+                                                      FontFamily="{TemplateBinding FontFamily}"
+                                                      FontSize="{TemplateBinding FontSize}"
+                                                      FontStretch="{TemplateBinding FontStretch}"
+                                                      FontStyle="{TemplateBinding FontStyle}"
+                                                      FontWeight="{TemplateBinding FontWeight}"
+                                                      VerticalAlignment="Center"
+                                                      IsEditing="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=IsNameEditing}"
+                                                      EndEditCommand="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=EndEditNameCommand}">
+                                    <pr:EditableTextBlock.Style>
+                                        <Style TargetType="{x:Type pr:EditableTextBlock}" BasedOn="{StaticResource {x:Type pr:EditableTextBlock}}">
                                             <!-- NOTE: なぜか普通に属性としてつけると反映されないためStyleで適用する -->
                                             <Setter Property="dd:DragDrop.DragSourceIgnore" Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=NameDragSourceIgnore}"/>
+                                            <Setter Property="Background" Value="Transparent"/>
 
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=IsHighlightHeader}" Value="True">
                                                     <Setter Property="Background" Value="{ugm:AppearanceResource ResourceKey=SelectedBackgroundFill, ReturnDynamicResource=True}"/>
                                                 </DataTrigger>
-                                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=IsNameEditing}" Value="True">
-                                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                                </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
-                                <TextBox x:Name="NameTextBox" Grid.Column="2" Text="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=HeaderText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                                    <TextBox.Style>
-                                        <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
-                                            <Setter Property="AcceptsTab" Value="False"/>
-                                            <Setter Property="Visibility" Value="Collapsed"/>
-
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=IsNameEditing}" Value="True">
-                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBox.Style>
-                                </TextBox>
+                                    </pr:EditableTextBlock.Style>
+                                </pr:EditableTextBlock>
                                 <ContentPresenter Grid.Column="3" Content="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=HeaderSubItem}">
                                     <ContentPresenter.Style>
                                         <Style TargetType="{x:Type ContentPresenter}">

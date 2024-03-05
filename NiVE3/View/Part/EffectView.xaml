@@ -25,7 +25,8 @@
                           NameDragSourceIgnore="False"
                           ParentHasExpanderArrow="{Binding ElementName=Root, Path=ParentHasExpanderArrow}"
                           IsHighlightHeader="{Binding ElementName=Root, Path=(pr:StackableItemsCollectionView.IsSelected)}"
-                          IsNameEditing="{Binding IsNameEditing}">
+                          IsNameEditing="{Binding IsNameEditing}"
+                          EndEditNameCommand="{Binding EndEditNameCommand}">
         <pt:LayerItemExpander.Switches>
             <Grid Margin="1.5,0,0,0">
                 <CheckBox Content="{gm:FontawesomeResource ResourceKey=FlorinSign}" Style="{StaticResource LayerSwitchCheckBox}" IsChecked="{Binding IsEnable, Mode=OneWay}" HorizontalAlignment="Left" Command="{Binding ChangeIsEnableCommand}"/>

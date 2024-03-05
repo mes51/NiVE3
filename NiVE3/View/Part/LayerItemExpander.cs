@@ -120,6 +120,19 @@ namespace NiVE3.View.Part
             new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
+        public static readonly DependencyProperty EndEditNameCommandProperty = DependencyProperty.Register(
+            nameof(EndEditNameCommand),
+            typeof(ICommand),
+            typeof(LayerItemExpander),
+            new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        public ICommand? EndEditNameCommand
+        {
+            get { return (ICommand)GetValue(EndEditNameCommandProperty); }
+            set { SetValue(EndEditNameCommandProperty, value); }
+        }
+
         public bool IsNameEditing
         {
             get { return (bool)GetValue(IsNameEditingProperty); }
@@ -210,96 +223,14 @@ namespace NiVE3.View.Part
             set { SetValue(CalculatedNameAreaWidthProperty, value); }
         }
 
-        TextBox NameTextBox
-        {
-            get
-            {
-                var result = GetTemplateChild(nameof(NameTextBox)) as TextBox;
-                if (result == null)
-                {
-                    throw new InvalidOperationException(nameof(NameTextBox) + " is not found");
-                }
-                return result;
-            }
-        }
-
-        INameEditableViewModel? NameEditableViewModel => DataContext as INameEditableViewModel;
-
         static LayerItemExpander()
         {
             HorizontalContentAlignmentProperty.OverrideMetadata(typeof(LayerItemExpander), new FrameworkPropertyMetadata(HorizontalAlignment.Stretch, FrameworkPropertyMetadataOptions.Inherits));
             IsTabStopProperty.OverrideMetadata(typeof(LayerItemExpander), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.Inherits));
-            FocusVisualStyleProperty.OverrideMetadata(typeof(LayerItemExpander), new FrameworkPropertyMetadata(null, (d, e) => System.Diagnostics.Debug.WriteLine("{0}, {1}", d, e)));
-            //FocusableProperty.OverrideMetadata(typeof(LayerItemExpander), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.Inherits));
-        }
 
-        public override void OnApplyTemplate()
-        {
-            base.OnApplyTemplate();
-
-            var nameTextBox = NameTextBox;
-            nameTextBox.IsVisibleChanged += NameTextBox_IsVisibleChanged;
-            nameTextBox.PreviewKeyDown += NameTextBox_PreviewKeyDown;
-            Mouse.AddPreviewMouseDownOutsideCapturedElementHandler(nameTextBox, NameTextBox_PreviewMouseDownOutsideCapturedElement);
-            Mouse.AddLostMouseCaptureHandler(nameTextBox, NameTextBox_LostMouseCapture);
-        }
-
-        static bool IsClickSameControl(FrameworkElement fe, MouseButtonEventArgs e)
-        {
-            return new Rect(0.0, 0.0, fe.ActualWidth, fe.ActualHeight).Contains(e.GetPosition(fe));
-        }
-
-        private void NameTextBox_LostMouseCapture(object sender, MouseEventArgs e)
-        {
-            // NOTE: なぜかCaptureMouse後にマウスキャプチャが外れるため再度キャプチャする
-            // TODO: キャプチャが外れる原因の調査
-            if (NameEditableViewModel?.IsNameEditing ?? false)
-            {
-                NameTextBox.CaptureMouse();
-            }
-        }
-
-        private void NameTextBox_PreviewMouseDownOutsideCapturedElement(object sender, MouseButtonEventArgs e)
-        {
-            var viewModel = NameEditableViewModel;
-            if (!IsClickSameControl(NameTextBox, e) && viewModel != null && viewModel.EndEditNameCommand.CanExecute(true))
-            {
-                viewModel.EndEditNameCommand.Execute(true);
-                NameTextBox.ReleaseMouseCapture();
-                e.Handled = true;
-            }
-        }
-
-        private void NameTextBox_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
-        {
-            var viewModel = NameEditableViewModel;
-            if (viewModel == null)
-            {
-                return;
-            }
-
-            if ((e.Key == Key.Tab || (e.Key == Key.Enter && e.ImeProcessedKey == Key.None)) && viewModel.EndEditNameCommand.CanExecute(true))
-            {
-                viewModel.EndEditNameCommand.Execute(true);
-                NameTextBox.ReleaseMouseCapture();
-                e.Handled = true;
-            }
-            else if (e.Key == Key.Escape && viewModel.EndEditNameCommand.CanExecute(false))
-            {
-                viewModel.EndEditNameCommand.Execute(false);
-                NameTextBox.ReleaseMouseCapture();
-                e.Handled = true;
-            }
-        }
-
-        private void NameTextBox_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            if (NameEditableViewModel?.IsNameEditing ?? false)
-            {
-                NameTextBox.Focus();
-                NameTextBox.SelectAll();
-                NameTextBox.CaptureMouse();
-            }
+            // NOTE: なぜか何かイベントハンドラを渡さないとFocusVisualStyleがnullにならない
+            // TODO: 原因の調査
+            FocusVisualStyleProperty.OverrideMetadata(typeof(LayerItemExpander), new FrameworkPropertyMetadata(null, (_, _) => { }));
         }
 
         static void IndentParameterChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)

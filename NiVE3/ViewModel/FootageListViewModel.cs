@@ -238,7 +238,7 @@ namespace NiVE3.ViewModel
                     return;
                 }
 
-                EditingFootage.EndtEditCommentCommand.Execute(commit); ;
+                EditingFootage.EndEditCommentCommand.Execute(commit); ;
                 EditingParameter = EditingFootageParameter.None;
             }, _ => EditingParameter == EditingFootageParameter.Comment);
 

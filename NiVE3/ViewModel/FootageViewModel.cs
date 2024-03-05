@@ -54,7 +54,7 @@ namespace NiVE3.ViewModel
 
         ICommand BeginEditCommentCommand { get; }
 
-        ICommand EndtEditCommentCommand { get; }
+        ICommand EndEditCommentCommand { get; }
     }
 
     [ViewModelWireable(nameof(WiringModel))]
@@ -157,7 +157,7 @@ namespace NiVE3.ViewModel
 
         public ICommand BeginEditCommentCommand { get; }
 
-        public ICommand EndtEditCommentCommand { get; }
+        public ICommand EndEditCommentCommand { get; }
 
         string PrevName { get; set; } = "";
 
@@ -212,7 +212,7 @@ namespace NiVE3.ViewModel
                 EditingParameter = EditingFootageParameter.Comment;
             });
 
-            EndtEditCommentCommand = new RequerySuggestedCommand<bool>(commit =>
+            EndEditCommentCommand = new RequerySuggestedCommand<bool>(commit =>
             {
                 if (commit)
                 {
@@ -318,7 +318,7 @@ namespace NiVE3.ViewModel
 
         public ICommand BeginEditCommentCommand { get; }
 
-        public ICommand EndtEditCommentCommand { get; }
+        public ICommand EndEditCommentCommand { get; }
 
         string PrevName { get; set; } = "";
 
@@ -363,7 +363,7 @@ namespace NiVE3.ViewModel
                 EditingParameter = EditingFootageParameter.Comment;
             });
 
-            EndtEditCommentCommand = new RequerySuggestedCommand<bool>(commit =>
+            EndEditCommentCommand = new RequerySuggestedCommand<bool>(commit =>
             {
                 if (commit)
                 {
