@@ -58,12 +58,12 @@ namespace NiVE3.Model
 
             public void Redo()
             {
-                Model.Name = NewComment;
+                Model.Comment = NewComment;
             }
 
             public void Undo()
             {
-                Model.Name = OldComment;
+                Model.Comment = OldComment;
             }
 
             public void Dispose() { }

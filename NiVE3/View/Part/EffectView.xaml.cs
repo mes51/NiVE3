@@ -14,6 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using NiVE3.Plugin.Property;
 using NiVE3.View.Converter;
+using NiVE3.View.Resource;
 using NiVE3.ViewModel;
 
 namespace NiVE3.View.Part
@@ -29,18 +30,25 @@ namespace NiVE3.View.Part
             nameof(IndentLevel),
             typeof(int),
             typeof(EffectView),
-            new FrameworkPropertyMetadata(0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+            new FrameworkPropertyMetadata(0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, ControlAreaWidthChanged)
         );
 
         public static readonly DependencyProperty IsAVSwitchColumnVisibleProperty = DependencyProperty.Register(
             nameof(IsAVSwitchColumnVisible),
             typeof(bool),
             typeof(EffectView),
-            new FrameworkPropertyMetadata(true, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+            new FrameworkPropertyMetadata(true, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, ControlAreaWidthChanged)
         );
 
         public static readonly DependencyProperty IsTagColumnVisibleProperty = DependencyProperty.Register(
             nameof(IsTagColumnVisible),
+            typeof(bool),
+            typeof(EffectView),
+            new FrameworkPropertyMetadata(true, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, ControlAreaWidthChanged)
+        );
+
+        public static readonly DependencyProperty IsCommentColumnVisibleProperty = DependencyProperty.Register(
+            nameof(IsCommentColumnVisible),
             typeof(bool),
             typeof(EffectView),
             new FrameworkPropertyMetadata(true, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
@@ -50,6 +58,13 @@ namespace NiVE3.View.Part
             nameof(ControlAreaWidth),
             typeof(double),
             typeof(EffectView),
+            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, ControlAreaWidthChanged)
+        );
+
+        public static readonly DependencyProperty CommentAreaWidthProperty = DependencyProperty.Register(
+            nameof(CommentAreaWidth),
+            typeof(double),
+            typeof(EffectView),
             new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
@@ -57,7 +72,7 @@ namespace NiVE3.View.Part
             nameof(NameAreaWidth),
             typeof(double),
             typeof(EffectView),
-            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, ControlAreaWidthChanged)
         );
 
         public static readonly DependencyProperty RangeProperty = DependencyProperty.Register(
@@ -86,6 +101,13 @@ namespace NiVE3.View.Part
             typeof(bool),
             typeof(EffectView),
             new FrameworkPropertyMetadata(true, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        private static readonly DependencyProperty CalculatedControlAreaWidthProperty = DependencyProperty.Register(
+            nameof(CalculatedControlAreaWidth),
+            typeof(GridLength),
+            typeof(EffectView),
+            new FrameworkPropertyMetadata(new GridLength(0.0), FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
         public bool ParentHasExpanderArrow
@@ -118,10 +140,22 @@ namespace NiVE3.View.Part
             set { SetValue(NameAreaWidthProperty, value); }
         }
 
+        public double CommentAreaWidth
+        {
+            get { return (double)GetValue(CommentAreaWidthProperty); }
+            set { SetValue(CommentAreaWidthProperty, value); }
+        }
+
         public double ControlAreaWidth
         {
             get { return (double)GetValue(ControlAreaWidthProperty); }
             set { SetValue(ControlAreaWidthProperty, value); }
+        }
+
+        public bool IsCommentColumnVisible
+        {
+            get { return (bool)GetValue(IsCommentColumnVisibleProperty); }
+            set { SetValue(IsCommentColumnVisibleProperty, value); }
         }
 
         public bool IsTagColumnVisible
@@ -142,6 +176,12 @@ namespace NiVE3.View.Part
             set { SetValue(IndentLevelProperty, value); }
         }
 
+        private GridLength CalculatedControlAreaWidth
+        {
+            get { return (GridLength)GetValue(CalculatedControlAreaWidthProperty); }
+            set { SetValue(CalculatedControlAreaWidthProperty, value); }
+        }
+
         EffectViewModel? ViewModel => DataContext as EffectViewModel;
 
         EffectCollectionView? ParentCollection => ItemsControl.ItemsControlFromItemContainer(this) as EffectCollectionView;
@@ -157,6 +197,43 @@ namespace NiVE3.View.Part
             ParentCollection?.SelectItem(this, Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift), Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl));
             ViewModel?.SelectItemCommand?.Execute(null);
             e.Handled = true;
+        }
+
+        private void CommentGrid_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.LeftButton != MouseButtonState.Pressed || e.ClickCount != 2)
+            {
+                return;
+            }
+
+            var viewModel = ViewModel;
+            if (viewModel != null && viewModel.BeginEditCommentCommand.CanExecute(null))
+            {
+                viewModel.BeginEditCommentCommand.Execute(null);
+                e.Handled = true;
+            }
+        }
+
+        static void ControlAreaWidthChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is EffectView effectView)
+            {
+                var indent = UIParameters.ArrowWidth * effectView.IndentLevel;
+                if (effectView.IsAVSwitchColumnVisible)
+                {
+                    indent += UIParameters.AVSwitchWidthWithHalfSplitter;
+                }
+                var nameAreaWidth = effectView.NameAreaWidth - UIParameters.ArrowWidth * effectView.IndentLevel + UIParameters.ArrowWidth;
+                if (!effectView.ParentHasExpanderArrow)
+                {
+                    nameAreaWidth -= UIParameters.ArrowWidth;
+                }
+                if (effectView.IsTagColumnVisible)
+                {
+                    nameAreaWidth += UIParameters.TagAreaWidth;
+                }
+                effectView.CalculatedControlAreaWidth = new GridLength(Math.Max(effectView.ControlAreaWidth - indent - nameAreaWidth, 0.0));
+            }
         }
     }
 }

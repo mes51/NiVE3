@@ -83,6 +83,13 @@ namespace NiVE3.ViewModel
             private set { SetProperty(ref isNameEditing, value); }
         }
 
+        private bool isCommentEditing;
+        public bool IsCommentEditing
+        {
+            get { return isCommentEditing; }
+            set { SetProperty(ref isCommentEditing, value); }
+        }
+
         public ICommand ChangeIsEnableCommand { get; }
 
         public ICommand SelectItemCommand { get; }
@@ -96,8 +103,6 @@ namespace NiVE3.ViewModel
         public ICommand EndEditCommentCommand { get; }
 
         EffectModel EffectModel { get; }
-
-        bool IsCommentEditing { get; set; }
 
         string PrevName { get; set; } = "";
 

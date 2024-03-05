@@ -29,6 +29,7 @@
             <Setter Property="FontStretch" Value="{Binding ElementName=Root, Path=FontStretch}"/>
             <Setter Property="FontWeight" Value="{Binding ElementName=Root, Path=FontWeight}"/>
             <Setter Property="FontStyle" Value="{Binding ElementName=Root, Path=FontStyle}"/>
+            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
             <Setter Property="dd:DragDrop.DragSourceIgnore" Value="{Binding ElementName=Root, Path=(dd:DragDrop.DragSourceIgnore)}"/>
         </Style>
 

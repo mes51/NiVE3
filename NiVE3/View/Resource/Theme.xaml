@@ -67,7 +67,7 @@
                                     <ColumnDefinition Width="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=ControlAreaWidth}"/>
                                 </Grid.ColumnDefinitions>
 
-                                <ContentPresenter Grid.Column="0" Content="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Switches}" Visibility="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=IsTagColumnVisible, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                <ContentPresenter Grid.Column="0" Content="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Switches}" Visibility="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=IsAVSwitchColumnVisible, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                                 <ToggleButton Grid.Column="1" IsChecked="{Binding IsExpanded, Mode=TwoWay, RelativeSource={RelativeSource Mode=TemplatedParent}}" Style="{StaticResource ArrowExpanderStyle}"/>
                                 <pr:EditableTextBlock Grid.Column="2"
                                                       Height="17"

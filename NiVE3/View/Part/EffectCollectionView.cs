@@ -27,6 +27,20 @@ namespace NiVE3.View.Part
             new FrameworkPropertyMetadata(true)
         );
 
+        public static readonly DependencyProperty IsCommentColumnVisibleProperty = DependencyProperty.Register(
+            nameof(IsCommentColumnVisible),
+            typeof(bool),
+            typeof(EffectCollectionView),
+            new FrameworkPropertyMetadata(true)
+        );
+
+        public static readonly DependencyProperty CommentAreaWidthProperty = DependencyProperty.Register(
+            nameof(CommentAreaWidth),
+            typeof(double),
+            typeof(EffectCollectionView),
+            new FrameworkPropertyMetadata(0.0)
+        );
+
         public static readonly DependencyProperty NameAreaWidthProperty = DependencyProperty.Register(
             nameof(NameAreaWidth),
             typeof(double),
@@ -92,6 +106,18 @@ namespace NiVE3.View.Part
             set { SetValue(NameAreaWidthProperty, value); }
         }
 
+        public double CommentAreaWidth
+        {
+            get { return (double)GetValue(CommentAreaWidthProperty); }
+            set { SetValue(CommentAreaWidthProperty, value); }
+        }
+
+        public bool IsCommentColumnVisible
+        {
+            get { return (bool)GetValue(IsCommentColumnVisibleProperty); }
+            set { SetValue(IsCommentColumnVisibleProperty, value); }
+        }
+
         public bool IsTagColumnVisible
         {
             get { return (bool)GetValue(IsTagColumnVisibleProperty); }
@@ -146,6 +172,14 @@ namespace NiVE3.View.Part
                 };
                 BindingOperations.SetBinding(effect, EffectView.IsTagColumnVisibleProperty, isTagColumnVisibleBinding);
 
+                var isCommentColumnVisibleBinding = new Binding
+                {
+                    Path = new PropertyPath(nameof(IsCommentColumnVisible)),
+                    Source = this,
+                    Mode = BindingMode.OneWay
+                };
+                BindingOperations.SetBinding(effect, EffectView.IsCommentColumnVisibleProperty, isCommentColumnVisibleBinding);
+
                 var controlAreaWidthBinding = new Binding
                 {
                     Path = new PropertyPath(nameof(ControlAreaWidth)),
@@ -153,6 +187,14 @@ namespace NiVE3.View.Part
                     Mode = BindingMode.OneWay
                 };
                 BindingOperations.SetBinding(effect, EffectView.ControlAreaWidthProperty, controlAreaWidthBinding);
+
+                var commentAreaWidthBinding = new Binding
+                {
+                    Path = new PropertyPath(nameof(CommentAreaWidth)),
+                    Source = this,
+                    Mode = BindingMode.OneWay
+                };
+                BindingOperations.SetBinding(effect, EffectView.CommentAreaWidthProperty, commentAreaWidthBinding);
 
                 var nameAreaWidthBinding = new Binding
                 {
