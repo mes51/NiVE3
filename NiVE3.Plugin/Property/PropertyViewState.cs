@@ -13,14 +13,14 @@ namespace NiVE3.Plugin.Property
     /// </summary>
     public class PropertyViewState : INotifyPropertyChanged
     {
-        private string? displayName;
+        private string sourceDisplayName = "";
         /// <summary>
-        /// プロパティの表示名
+        /// プロパティの元の表示名
         /// </summary>
-        public string? DisplayName
+        public string SourceDisplayName
         {
-            get { return displayName; }
-            set { SetProperty(ref displayName, value); }
+            get { return sourceDisplayName; }
+            set { SetProperty(ref sourceDisplayName, value); }
         }
 
         private bool isEnabled;
@@ -46,13 +46,12 @@ namespace NiVE3.Plugin.Property
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        /// <param name="id">プロパティのID</param>
-        /// <param name="displayName">プロパティの表示名</param>
+        /// <param name="sourceDisplayName">プロパティの元の表示名</param>
         /// <param name="isEnabled">プロパティが操作可能かどうか</param>
         /// <param name="isVisible">プロパティを表示するかどうか</param>
-        public PropertyViewState(string displayName, bool isEnabled = true, bool isVisible = true)
+        public PropertyViewState(string sourceDisplayName, bool isEnabled = true, bool isVisible = true)
         {
-            DisplayName = displayName;
+            SourceDisplayName = sourceDisplayName;
             IsEnabled = isEnabled;
             IsVisible = isVisible;
         }

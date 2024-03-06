@@ -32,7 +32,7 @@
         </Grid.ColumnDefinitions>
 
         <CheckBox Grid.Column="1" IsChecked="{Binding HasKeyFrame, Mode=OneWay}" Style="{StaticResource KeyFrameSwitchCheckBox}" VerticalAlignment="Center" HorizontalAlignment="Center" Command="{Binding SwitchUseKeyFrameCommand}"/>
-        <TextBlock Grid.Column="2" Text="{Binding ViewState.DisplayName}" Style="{StaticResource PropertyNameTextBlockStyle}" MouseLeftButtonDown="PropertyNameTextBlock_MouseLeftButtonDown"/>
+        <TextBlock Grid.Column="2" Text="{Binding ViewState.SourceDisplayName}" Style="{StaticResource PropertyNameTextBlockStyle}" MouseLeftButtonDown="PropertyNameTextBlock_MouseLeftButtonDown"/>
         <Grid Grid.Column="3" x:Name="PropertyControlGrid"/>
 
         <local:KeyFrameCollectionView Grid.Column="4"

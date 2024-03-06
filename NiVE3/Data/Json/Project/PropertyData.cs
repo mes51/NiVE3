@@ -15,6 +15,8 @@ namespace NiVE3.Data.Json.Project
 
         public Guid InstanceId { get; set; }
 
+        public string Name { get; set; } = "";
+
         [JsonConverter(typeof(PluginOptionValueObjectConverter))]
         public object? Value { get; set; }
 

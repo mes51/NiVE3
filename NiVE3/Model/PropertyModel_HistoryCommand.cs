@@ -257,6 +257,39 @@ namespace NiVE3.Model
         }
     }
 
+    partial class PropertyGroupModel
+    {
+        private class ChangeNameHistoryCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangePropertyValue);
+
+            PropertyGroupModel Model { get; }
+
+            string OldName { get; }
+
+            string NewName { get; }
+
+            public ChangeNameHistoryCommand(PropertyGroupModel model, string oldName, string newName)
+            {
+                Model = model;
+                OldName = oldName;
+                NewName = newName;
+            }
+
+            public void Redo()
+            {
+                Model.Name = NewName;
+            }
+
+            public void Undo()
+            {
+                Model.Name = OldName;
+            }
+
+            public void Dispose() { }
+        }
+    }
+
     partial class AppendablePropertyModel
     {
         private class AddAppendablePropertyChildHistoryCommand : IHistoryCommand

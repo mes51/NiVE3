@@ -13,7 +13,7 @@ namespace NiVE3.Property.ViewState
     {
         ILayerObject LayerObject { get; }
 
-        public DimensionDependVisibilityPropertyViewState(string displayName, ILayerObject layerObject) : base(displayName, true, layerObject.IsEnable3D)
+        public DimensionDependVisibilityPropertyViewState(string sourceDisplayName, ILayerObject layerObject) : base(sourceDisplayName, true, layerObject.IsEnable3D)
         {
             LayerObject = layerObject;
 

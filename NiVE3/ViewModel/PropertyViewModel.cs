@@ -25,6 +25,8 @@ namespace NiVE3.ViewModel
 {
     interface IInternalPropertyViewModel : IPropertyViewModel, IViewModelShortcutCommand
     {
+        string Name { get; }
+
         PropertyViewState ViewState { get; }
 
         event EventHandler<SelectItemEventArgs> SelectItemChanged;
@@ -61,6 +63,14 @@ namespace NiVE3.ViewModel
     partial class PropertyViewModel : BindableBase, IInternalPropertyViewModel
     {
         public PropertyViewState ViewState { get; }
+
+        private string name = "";
+        [NeedWire(nameof(PropertyModel), IsOneWay = true)]
+        public string Name
+        {
+            get { return name; }
+            set { SetProperty(ref name, value); }
+        }
 
         private double sourceStartPoint;
         [NeedWire(nameof(PropertyModel), IsOneWay = true)]
@@ -291,8 +301,16 @@ namespace NiVE3.ViewModel
     }
 
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
-    partial class PropertyGroupViewModel : BindableBase, IInternalPropertyViewModel
+    partial class PropertyGroupViewModel : BindableBase, IInternalPropertyViewModel, INameEditableViewModel
     {
+        private string name = "";
+        [NeedWire(nameof(PropertyGroupModel), IsOneWay = true)]
+        public string Name
+        {
+            get { return name; }
+            set { SetProperty(ref name, value); }
+        }
+
         public PropertyViewState ViewState { get; }
 
         public ObservableCollection<KeyFrame>? KeyFrames => null;
@@ -317,6 +335,13 @@ namespace NiVE3.ViewModel
             set { }
         }
 
+        private bool isNameEditing;
+        public bool IsNameEditing
+        {
+            get { return isNameEditing; }
+            set { SetProperty(ref isNameEditing, value); }
+        }
+
         public PropertyBase Property { get; }
 
         WeakEventPublisher<SelectItemEventArgs> SelectItemChangedPublisher { get; } = new WeakEventPublisher<SelectItemEventArgs>();
@@ -334,14 +359,24 @@ namespace NiVE3.ViewModel
 
         public DelegateCommand<SelectItemType?> DeleteCommand { get; }
 
+        public ICommand BeginEditNameCommand { get; }
+
+        public ICommand EndEditNameCommand { get; }
+
         public ICommand SelectItemCommand { get; }
 
         [NeedWire(nameof(PropertyGroupModel), IsOneWay = true)]
         public Guid InstanceId { get; set; }
 
+        public bool IsRenameable { get; }
+
         PropertyGroupModel PropertyGroupModel { get; }
 
-        public PropertyGroupViewModel(PropertyGroupModel propertyGroupModel)
+        string PrevName { get; set; } = "";
+
+        public PropertyGroupViewModel(PropertyGroupModel propertyGroupModel) : this(propertyGroupModel, false) { }
+
+        public PropertyGroupViewModel(PropertyGroupModel propertyGroupModel, bool isRenameable)
         {
             PropertyGroupModel = propertyGroupModel;
             InstanceId = propertyGroupModel.InstanceId;
@@ -353,14 +388,36 @@ namespace NiVE3.ViewModel
                 return vm;
             });
             ViewState = propertyGroupModel.CreateState(this);
+            IsRenameable = isRenameable;
 
             DeleteCommand = new DelegateCommand<SelectItemType?>(_ => { });
+
+            BeginEditNameCommand = new RequerySuggestedCommand(() =>
+            {
+                PrevName = Name;
+                IsNameEditing = true;
+            }, () => IsRenameable && !IsNameEditing);
+
+            EndEditNameCommand = new RequerySuggestedCommand<bool>(commit =>
+            {
+                if (commit)
+                {
+                    PropertyGroupModel.ChangeName(Name);
+                }
+                else
+                {
+                    Name = PrevName;
+                }
+                IsNameEditing = false;
+            }, _ => IsRenameable && IsNameEditing);
 
             SelectItemCommand = new DelegateCommand(() =>
             {
                 DeSelect();
                 SelectItemChangedPublisher.Publish(this, new SelectItemEventArgs(SelectItemType.PropertyGroup, true, this));
             });
+
+            WiringModel();
         }
 
         public void DeSelect()
@@ -379,8 +436,10 @@ namespace NiVE3.ViewModel
         }
     }
 
-    partial class AppendablePropertyViewModel : BindableBase, IInternalPropertyViewModel, IDropTarget
+    partial class AppendablePropertyViewModel : BindableBase, IInternalPropertyViewModel, IDropTarget, INameEditableParentViewModel
     {
+        public string Name { get; }
+
         public PropertyViewState ViewState { get; }
 
         public ObservableCollection<KeyFrame>? KeyFrames => throw new NotImplementedException();
@@ -435,6 +494,8 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref selectedChildren, value); }
         }
 
+        public INameEditableViewModel? TargetChild => SelectedChildren.FirstOrDefault() as INameEditableViewModel;
+
         AppendablePropertyModel AppendablePropertyModel { get; }
 
         public AppendablePropertyViewModel(AppendablePropertyModel appendablePropertyModel)
@@ -443,10 +504,11 @@ namespace NiVE3.ViewModel
             Property = appendablePropertyModel.Property;
             children = appendablePropertyModel.Children.CreateViewCollection(m =>
             {
-                var vm = new PropertyGroupViewModel((PropertyGroupModel)m);
+                var vm = new PropertyGroupViewModel((PropertyGroupModel)m, true);
                 vm.SelectItemChanged += Property_SelectItemChanged;
                 return (IInternalPropertyViewModel)vm;
             });
+            Name = appendablePropertyModel.Name;
             ViewState = appendablePropertyModel.CreateState(this);
 
             SelectItemCommand = new DelegateCommand(() => { });

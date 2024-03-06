@@ -372,16 +372,17 @@ namespace NiVE3.ViewModel
 
             BeginEditNameCommand = new RequerySuggestedCommand(() =>
             {
-                switch (SelectedItemType)
+                if (SelectTarget == null && SelectedLayers.Count > 0 && SelectedLayers.First().BeginEditNameCommand.CanExecute(null))
                 {
-                    case SelectItemType.PropertyGroup:
-                        break;
-                    case SelectItemType.Effect when SelectTarget is LayerViewModel layer && layer.SelectedEffects.Count > 0:
-                        layer.SelectedEffects.First().BeginEditNameCommand.Execute(null);
-                        break;
-                    case SelectItemType.Layer when SelectedLayers.Count > 0:
-                        SelectedLayers.First().BeginEditNameCommand.Execute(null);
-                        break;
+                    SelectedLayers.First().BeginEditNameCommand.Execute(null);
+                }
+                else
+                {
+                    var targetChild = (SelectTarget as INameEditableParentViewModel)?.TargetChild;
+                    if (targetChild?.BeginEditNameCommand?.CanExecute(null) ?? false)
+                    {
+                        targetChild.BeginEditNameCommand.Execute(null);
+                    }
                 }
             }, () => SelectTarget != null || SelectedLayers.Count > 0);
 

@@ -22,6 +22,8 @@ namespace NiVE3.Model
     {
         string PropertyId { get; }
 
+        string Name { get; }
+
         object? Value { get; }
 
         ObservableCollection<KeyFrame>? KeyFrames { get; }
@@ -44,6 +46,8 @@ namespace NiVE3.Model
     partial class PropertyModel : BindableBase, IPropertyModel
     {
         const double KeyFrameEpsilon = 1E-10;
+
+        public string Name { get; }
 
         public string PropertyId { get; }
 
@@ -107,6 +111,7 @@ namespace NiVE3.Model
             LayerModel = layerModel;
             EffectModel = effectModel;
             HistoryModel = historyModel;
+            Name = property.DisplayName;
             PropertyId = property.Id;
             Value = property.DefaultValue;
 
@@ -241,6 +246,7 @@ namespace NiVE3.Model
             return new PropertyData
             {
                 PropertyId = PropertyId,
+                Name = Name,
                 Value = Property.PropertyType.SerializeValue(Value),
                 KeyFrames = keyFramesData
             };
@@ -314,9 +320,16 @@ namespace NiVE3.Model
         }
     }
 
-    class PropertyGroupModel : BindableBase, IPropertyModel
+    partial class PropertyGroupModel : BindableBase, IPropertyModel
     {
         public string PropertyId { get; }
+
+        private string name = "";
+        public string Name
+        {
+            get { return name; }
+            set { SetProperty(ref name, value); }
+        }
 
         public Guid InstanceId { get; }
 
@@ -341,6 +354,8 @@ namespace NiVE3.Model
 
         EffectModel? EffectModel { get; }
 
+        HistoryModel HistoryModel { get; }
+
         public PropertyGroupModel(PropertyBase property, CompositionModel compositionModel, HistoryModel historyModel, Guid? instanceId = null) : this(property, compositionModel, null, null, historyModel, instanceId) { }
 
         public PropertyGroupModel(PropertyBase property, CompositionModel compositionModel, LayerModel? layerModel, HistoryModel historyModel, Guid? instanceId = null) : this(property, compositionModel, layerModel, null, historyModel, instanceId) { }
@@ -351,6 +366,8 @@ namespace NiVE3.Model
             CompositionModel = compositionModel;
             LayerModel = layerModel;
             EffectModel = effectModel;
+            HistoryModel = historyModel;
+            Name = property.DisplayName;
             PropertyId = property.Id;
             InstanceId = instanceId ?? Guid.NewGuid();
 
@@ -409,6 +426,17 @@ namespace NiVE3.Model
             return new PropertyValueGroup(result);
         }
 
+        public void ChangeName(string name)
+        {
+            if (name != Name)
+            {
+                var oldNeme = Name;
+                Name = name;
+
+                HistoryModel.Add(new ChangeNameHistoryCommand(this, oldNeme, name));
+            }
+        }
+
         public IPropertyModel? FindProperty(string propertyId)
         {
             var child = Children.FirstOrDefault(c => c.PropertyId == propertyId);
@@ -435,12 +463,14 @@ namespace NiVE3.Model
             {
                 PropertyId = PropertyId,
                 InstanceId = InstanceId,
+                Name = Name,
                 Children = Children.Select(p => p.SaveData()).ToArray()
             };
         }
 
         public void LoadData(PropertyData data)
         {
+            Name = data.Name;
             if (data.Children == null)
             {
                 return;
@@ -461,6 +491,8 @@ namespace NiVE3.Model
     partial class AppendablePropertyModel : BindableBase, IPropertyModel
     {
         public string PropertyId { get; }
+
+        public string Name { get; }
 
         public object? Value => null;
 
@@ -497,8 +529,9 @@ namespace NiVE3.Model
             CompositionModel = compositionModel;
             LayerModel = layerModel;
             EffectModel = effectModel;
-            PropertyId = property.Id;
             HistoryModel = historyModel;
+            PropertyId = property.Id;
+            Name = property.DisplayName;
 
             var ap = (AppendableProperty)property;
             Items = ap.Items;
@@ -577,6 +610,7 @@ namespace NiVE3.Model
             return new PropertyData
             {
                 PropertyId = PropertyId,
+                Name = Name,
                 Children = Children.Select(p => p.SaveData()).ToArray()
             };
         }
@@ -607,6 +641,19 @@ namespace NiVE3.Model
             var group = item.CreateFunc();
             var groupModel = new PropertyGroupModel(group, CompositionModel, LayerModel, EffectModel, HistoryModel, instanceId);
             groupModel.ValueUpdated += Child_ValueUpdated;
+
+            var newChildNumber = 1;
+            var newName = "";
+            while (true)
+            {
+                newName = $"{groupModel.Name} {newChildNumber}";
+                if (Children.All(c => c.Name != newName))
+                {
+                    break;
+                }
+                newChildNumber++;
+            }
+            groupModel.Name = newName;
 
             Children.Add(groupModel);
 

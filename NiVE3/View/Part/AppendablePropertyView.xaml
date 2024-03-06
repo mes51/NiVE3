@@ -39,7 +39,7 @@
             </Style.Triggers>
         </Style>
     </local:PropertyViewBase.Resources>
-    <local:LayerItemExpander HeaderText="{Binding ViewState.DisplayName}"
+    <local:LayerItemExpander HeaderText="{Binding Name}"
                              IndentLevel="{Binding ElementName=Root, Path=IndentLevel}"
                              IsAVSwitchColumnVisible="{Binding ElementName=Root, Path=IsAVSwitchColumnVisible}"
                              IsTagColumnVisible="{Binding ElementName=Root, Path=IsTagColumnVisible}"

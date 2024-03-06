@@ -35,11 +35,11 @@ namespace NiVE3.Property.ViewState
             {
                 if (LayerObject.IsEnable3D)
                 {
-                    DisplayName = DisplayName3D.GetText() ?? "";
+                    SourceDisplayName = DisplayName3D.GetText() ?? "";
                 }
                 else
                 {
-                    DisplayName = DisplayName2D.GetText() ?? "";
+                    SourceDisplayName = DisplayName2D.GetText() ?? "";
                 }
             }
         }

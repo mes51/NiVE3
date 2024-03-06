@@ -9,10 +9,11 @@ namespace NiVE3.ViewModel
 {
     interface INameEditableViewModel
     {
-        bool IsNameEditing { get; }
-
         ICommand BeginEditNameCommand { get; }
+    }
 
-        ICommand EndEditNameCommand { get; }
+    interface INameEditableParentViewModel
+    {
+        INameEditableViewModel? TargetChild { get; }
     }
 }

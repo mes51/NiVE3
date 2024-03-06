@@ -9,18 +9,22 @@
                         xmlns:cv="clr-namespace:NiVE3.View.Converter"
                         mc:Ignorable="d" 
                         x:Name="Root"
+                        Focusable="{Binding IsRenameable}"
+                        FocusVisualStyle="{x:Null}"
                         MouseLeftButtonDown="Root_MouseLeftButtonDown"
                         dd:DragDrop.DragSourceIgnore="True"
                         d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
         <cv:HasAncestorConverter x:Key="HasAncestorConverter"/>
     </UserControl.Resources>
-    <local:LayerItemExpander HeaderText="{Binding ViewState.DisplayName}"
+    <local:LayerItemExpander HeaderText="{Binding Name, Mode=TwoWay}"
                              IndentLevel="{Binding ElementName=Root, Path=IndentLevel}"
                              IsAVSwitchColumnVisible="{Binding ElementName=Root, Path=IsAVSwitchColumnVisible}"
                              IsTagColumnVisible="{Binding ElementName=Root, Path=IsTagColumnVisible}"
                              IsExpanded="{Binding IsExpanded, Mode=TwoWay}"
                              NameAreaWidth="{Binding ElementName=Root, Path=NameAreaWidth}"
+                             IsNameEditing="{Binding IsNameEditing}"
+                             EndEditNameCommand="{Binding EndEditNameCommand}"
                              NameDragSourceIgnore="False"
                              ParentHasExpanderArrow="{Binding ElementName=Root, Path=ParentHasExpanderArrow}">
         <local:LayerItemExpander.Style>

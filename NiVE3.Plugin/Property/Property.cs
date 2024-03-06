@@ -38,7 +38,7 @@ namespace NiVE3.Plugin.Property
         /// <summary>
         /// プロパティの表示名
         /// </summary>
-        protected string DisplayName => DisplayNameKey?.GetText() ?? RawDisplayName ?? "";
+        public string DisplayName => DisplayNameKey?.GetText() ?? RawDisplayName ?? "";
 
         string? RawDisplayName { get; }
 
