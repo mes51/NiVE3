@@ -19,14 +19,11 @@ using SixLabors.ImageSharp.Drawing;
 using FontFamily = SixLabors.Fonts.FontFamily;
 using TextOptions = SixLabors.Fonts.TextOptions;
 using FontStyle = SixLabors.Fonts.FontStyle;
-using NiVE3.Mvvm;
 using System.Windows.Input;
 using Prism.Commands;
-using NiVE3.Input.Special;
+using NiVE3.Input;
 using NiVE3.Property.Types;
-using System.Numerics;
 using NiVE3.Data;
-using System.Windows.Media.Imaging;
 
 namespace NiVE3.ViewModel
 {

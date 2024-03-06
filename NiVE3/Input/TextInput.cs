@@ -32,12 +32,11 @@ using SixLabors.Fonts;
 using SixLabors.ImageSharp.Drawing;
 using Polygon = NiVE3.Shape.Polygon;
 
-namespace NiVE3.Input.Special
+namespace NiVE3.Input
 {
     [Export(typeof(IInput))]
     [InputMetadata(typeof(TextInput), nameof(TextInput), "", "mes51", ID, "", false)]
     [InternalInput]
-    [SpecialInput]
     class TextInput : IInput
     {
         const string ID = "0B859790-FA6E-4685-AAE2-D80F854B2B9B";

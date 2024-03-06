@@ -5,7 +5,7 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Data;
-using NiVE3.Input.Special;
+using NiVE3.Input;
 using NiVE3.Property.Types;
 using NiVE3.Text;
 using Prism.Mvvm;
