@@ -148,7 +148,7 @@
             <Setter Property="RenderOptions.BitmapScalingMode" Value="HighQuality"/>
 
             <Style.Triggers>
-                <DataTrigger Binding="{Binding ElementName=Root, Path=IsZoomIn}" Value="True">
+                <DataTrigger Binding="{Binding ElementName=Root, Path=UseImageInterpolation}" Value="False">
                     <Setter Property="RenderOptions.BitmapScalingMode" Value="NearestNeighbor"/>
                 </DataTrigger>
             </Style.Triggers>

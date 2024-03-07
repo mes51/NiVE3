@@ -30,6 +30,8 @@ namespace NiVE3.View.Pane
 
         public const double SeparatorScale = 0.0;
 
+        public const double UseImageInterpolationThreshold = 200.0;
+
         public static readonly double[] ScaleList = new double[]
         {
             StretchPreview,
@@ -101,8 +103,8 @@ namespace NiVE3.View.Pane
             new FrameworkPropertyMetadata(1.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
-        public static readonly DependencyProperty IsZoomInProperty = DependencyProperty.Register(
-            nameof(IsZoomIn),
+        public static readonly DependencyProperty UseImageInterpolationProperty = DependencyProperty.Register(
+            nameof(UseImageInterpolation),
             typeof(bool),
             typeof(PreviewView),
             new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
@@ -116,10 +118,10 @@ namespace NiVE3.View.Pane
             private set { SetValue(PreviewAreaScaleRateInvertPropertyKey, value); }
         }
 
-        public bool IsZoomIn
+        public bool UseImageInterpolation
         {
-            get { return (bool)GetValue(IsZoomInProperty); }
-            set { SetValue(IsZoomInProperty, value); }
+            get { return (bool)GetValue(UseImageInterpolationProperty); }
+            set { SetValue(UseImageInterpolationProperty, value); }
         }
 
         public int SelectedDownScaleRateIndex
@@ -201,7 +203,7 @@ namespace NiVE3.View.Pane
                 scale = 100.0;
             }
             PreviewAreaScaleRate = scale * 0.01;
-            IsZoomIn = scale >= 100.0;
+            UseImageInterpolation = scale < UseImageInterpolationThreshold;
             BoundingBoxBorderThicknessRate = 1.0 / (scale * 0.01);
             SetValue(PreviewAreaScaleRateInvertPropertyKey, 100.0 / scale);
         }
