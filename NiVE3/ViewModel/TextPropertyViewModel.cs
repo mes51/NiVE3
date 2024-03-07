@@ -281,6 +281,8 @@ namespace NiVE3.ViewModel
                     SourceTextPropertyModel.Value = PrevValue;
                 }
             });
+
+            FontViewModelBase.CreateSampleGeometry(Fonts);
         }
 
         partial void WiringModel();
@@ -387,6 +389,8 @@ namespace NiVE3.ViewModel
                         IsFontChanging = true;
                         TextPropertyModel.SelectedFont = SelectedFontGroup.SubFamiles[SelectedFontSubFamilyIndex].FontInfo;
                         IsFontChanging = false;
+
+                        FontViewModelBase.CreateSampleGeometry(Fonts[SelectedFontGroupIndex].SubFamiles);
                     }
                     ChangeTextLayerProperty();
                     RaisePropertyChanged(nameof(IsSupportBold));
@@ -434,9 +438,68 @@ namespace NiVE3.ViewModel
         }
     }
 
-    class FontGroupViewModel : BindableBase
+    abstract class FontViewModelBase : BindableBase
     {
-        static readonly object LockObject = new object();
+        private GeometryGroup? sample;
+        public GeometryGroup? Sample
+        {
+            get { return sample; }
+            private set { SetProperty(ref sample, value); }
+        }
+
+        protected abstract FontFamily SampleFontFamily { get; }
+
+        public static void CreateSampleGeometry(IEnumerable<FontViewModelBase> viewModels)
+        {
+            const float FontSize = 20.0F;
+
+            Task.Factory.StartNew(() =>
+            {
+                foreach (var vm in viewModels)
+                {
+                    lock (vm)
+                    {
+                        if (vm.Sample != null)
+                        {
+                            continue;
+                        }
+
+                        var group = new GeometryGroup();
+                        var paths = TextBuilder.GenerateGlyphs("参麩靇 さんぷる サンプル Sample", new TextOptions(vm.SampleFontFamily.CreateFont(FontSize)));
+                        foreach (var path in paths)
+                        {
+                            foreach (var simplePath in path.Flatten())
+                            {
+                                var geometry = new StreamGeometry();
+                                geometry.FillRule = FillRule.Nonzero;
+                                using (var context = geometry.Open())
+                                {
+                                    var span = simplePath.Points.Span;
+                                    context.BeginFigure(new System.Windows.Point(span[0].X, span[0].Y), true, simplePath.IsClosed);
+                                    for (var i = 1; i < span.Length; i++)
+                                    {
+                                        context.LineTo(new System.Windows.Point(span[i].X, span[i].Y), false, false);
+                                    }
+                                }
+                                group.Children.Add(geometry);
+                            }
+                        }
+
+                        group.Freeze();
+
+                        Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+                        {
+                            vm.Sample = group;
+                        }), DispatcherPriority.Background);
+                    }
+                }
+            });
+        }
+    }
+
+    class FontGroupViewModel : FontViewModelBase
+    {
+        protected override FontFamily SampleFontFamily => FontFamily.FontInfos[0].FontFamily;
 
         public FontGroup FontFamily { get; }
 
@@ -444,75 +507,16 @@ namespace NiVE3.ViewModel
 
         public string FontName => FontFamily.FontName;
 
-        private GeometryGroup? sample;
-        public GeometryGroup? Sample
-        {
-            get
-            {
-                if (sample == null)
-                {
-                    CreateSampleGeometry();
-                }
-                return sample;
-            }
-            private set { SetProperty(ref sample, value); }
-        }
-
         public FontGroupViewModel(FontGroup fontFamily)
         {
             FontFamily = fontFamily;
             SubFamiles = fontFamily.SubFamiles.Select(kv => new FontSubFamilyViewModel(kv.Value, kv.Key)).ToArray();
         }
-
-        void CreateSampleGeometry()
-        {
-            const float FontSize = 20.0F;
-
-            Task.Factory.StartNew(() =>
-            {
-                if (sample != null)
-                {
-                    return;
-                }
-
-                var group = new GeometryGroup();
-                lock (LockObject)
-                {
-                    var font = FontFamily.FontInfos[0].FontFamily;
-                    var paths = TextBuilder.GenerateGlyphs("参麩靇 さんぷる サンプル Sample", new TextOptions(font.CreateFont(FontSize)));
-                    foreach (var path in paths)
-                    {
-                        foreach (var simplePath in path.Flatten())
-                        {
-                            var geometry = new StreamGeometry();
-                            geometry.FillRule = FillRule.Nonzero;
-                            using (var context = geometry.Open())
-                            {
-                                var span = simplePath.Points.Span;
-                                context.BeginFigure(new System.Windows.Point(span[0].X, span[0].Y), true, simplePath.IsClosed);
-                                for (var i = 1; i < span.Length; i++)
-                                {
-                                    context.LineTo(new System.Windows.Point(span[i].X, span[i].Y), false, false);
-                                }
-                            }
-                            group.Children.Add(geometry);
-                        }
-                    }
-
-                    group.Freeze();
-                }
-
-                Application.Current.Dispatcher.BeginInvoke(new Action(() =>
-                {
-                    Sample = group;
-                }), DispatcherPriority.ApplicationIdle);
-            });
-        }
     }
 
-    class FontSubFamilyViewModel : BindableBase
+    class FontSubFamilyViewModel : FontViewModelBase
     {
-        static readonly object LockObject = new object();
+        protected override FontFamily SampleFontFamily => FontInfo.FontFamily;
 
         public FontInfo FontInfo { get; }
 
@@ -522,70 +526,12 @@ namespace NiVE3.ViewModel
 
         public string SubFamilyName { get; }
 
-        private GeometryGroup? sample;
-        public GeometryGroup? Sample
-        {
-            get
-            {
-                if (sample == null)
-                {
-                    CreateSampleGeometry();
-                }
-                return sample;
-            }
-            private set { SetProperty(ref sample, value); }
-        }
-
         public FontSubFamilyViewModel(FontInfo fontInfo, string subFamilyName)
         {
             FontInfo = fontInfo;
             IsSupportBold = fontInfo.FontFamily.GetAvailableStyles().Contains(FontStyle.Bold);
             IsSupportItalic = fontInfo.FontFamily.GetAvailableStyles().Contains(FontStyle.Italic);
             SubFamilyName = subFamilyName;
-        }
-
-        void CreateSampleGeometry()
-        {
-            const float FontSize = 20.0F;
-
-            Task.Factory.StartNew(() =>
-            {
-                if (sample != null)
-                {
-                    return;
-                }
-
-                var group = new GeometryGroup();
-                lock (LockObject)
-                {
-                    var font = FontInfo.FontFamily;
-                    var paths = TextBuilder.GenerateGlyphs("参麩靇 さんぷる サンプル Sample", new TextOptions(font.CreateFont(FontSize)));
-                    foreach (var path in paths)
-                    {
-                        foreach (var simplePath in path.Flatten())
-                        {
-                            var geometry = new StreamGeometry();
-                            geometry.FillRule = FillRule.Nonzero;
-                            using (var context = geometry.Open())
-                            {
-                                var span = simplePath.Points.Span;
-                                context.BeginFigure(new System.Windows.Point(span[0].X, span[0].Y), true, simplePath.IsClosed);
-                                for (var i = 1; i < span.Length; i++)
-                                {
-                                    context.LineTo(new System.Windows.Point(span[i].X, span[i].Y), false, false);
-                                }
-                            }
-                            group.Children.Add(geometry);
-                        }
-                    }
-                    group.Freeze();
-                }
-
-                Application.Current.Dispatcher.BeginInvoke(new Action(() =>
-                {
-                    Sample = group;
-                }), DispatcherPriority.ApplicationIdle);
-            });
         }
     }
 }
