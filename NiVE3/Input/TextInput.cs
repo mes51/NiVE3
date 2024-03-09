@@ -325,6 +325,18 @@ namespace NiVE3.Input
             textOption.WrappingLength = wrappingSize.X > 0.0 ? (float)wrappingSize.X : -1.0F;
             textOption.WordBreaking = wrappingSize.X > 0.0 ? WordBreaking.BreakAll : WordBreaking.Standard;
             textOption.TextRuns = structuredExtendedTextRun.Flatten();
+            switch (sourceText.DefaultStyle.TextAlign)
+            {
+                case TextAlign.Center:
+                    textOption.TextAlignment = TextAlignment.Center;
+                    break;
+                case TextAlign.Right:
+                    textOption.TextAlignment = TextAlignment.End;
+                    break;
+                default:
+                    textOption.TextAlignment = TextAlignment.Start;
+                    break;
+            }
 
             var baseAnchorPointRate = (Vector2)(Vector3d)(moreOptions[TextBaseAnchorPointRateId] ?? new Vector3d(50.0)) * 0.01F;
             var glyphBuilder = new StyledGlyphBuilder((float)wrappingSize.X, (float)wrappingSize.Y, baseAnchorPointRate);
@@ -369,7 +381,23 @@ namespace NiVE3.Input
 
             var interCharBlendMode = (BlendMode)((properties[TextMoreOptionsGroupId] as PropertyValueGroup)?[TextMoreOptionInterCharacterBlendModeId] ?? BlendMode.Normal);
             var image = new NManagedImage(max.GetElement(2) - min.GetElement(0), max.GetElement(3) - min.GetElement(1));
-            image.Origin = (Vector2d)glyphPolygons[0].origin + new Vector2d(glyphPolygons[0].rect.GetElement(0) - min.GetElement(0), glyphPolygons[0].rect.GetElement(1) - min.GetElement(1));
+            var imageOrigin = (Vector2d)glyphPolygons[0].origin + new Vector2d(glyphPolygons[0].rect.GetElement(0) - min.GetElement(0), glyphPolygons[0].rect.GetElement(1) - min.GetElement(1));
+            switch (sourceText.DefaultStyle.TextAlign)
+            {
+                case TextAlign.Center:
+                    {
+                        var measure = TextMeasurer.MeasureBounds(sourceText.Text, textOption);
+                        imageOrigin += new Vector2d(measure.Width * 0.5, 0.0);
+                    }
+                    break;
+                case TextAlign.Right:
+                    {
+                        var measure = TextMeasurer.MeasureBounds(sourceText.Text, textOption);
+                        imageOrigin += new Vector2d(measure.Width, 0.0);
+                    }
+                    break;
+            }
+            image.Origin = imageOrigin;
             foreach (var (fillPolygins, outlinePolygons, textRun, rect, blurMargin, _) in glyphPolygons)
             {
                 var fillColor = textRun.FillColor;
