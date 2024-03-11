@@ -18,14 +18,16 @@ using NiVE3.PresetPlugin.Internal.MediaFoundation;
 namespace NiVE3.PresetPlugin.Input
 {
     [Export(typeof(IInput))]
-    [InputMetadata(typeof(MediaFoundationInput), "MediaFoundationInput", "", "mes51", ID, "*.avi,*.mp4", true)]
+    [InputMetadata(typeof(MediaFoundationInput), "MediaFoundationInput", "", "mes51", ID, "*.avi,*.mp4,*.m4a,*.wav,*.mp3,*.wma,*.aac", true)]
     public class MediaFoundationInput : IInput
     {
         readonly Vector128<float> ByteToFloat128 = Vector128.Create(0.00392156862745098F);
 
         const string ID = "3BB12986-32DF-4C41-8D36-46C5E402C6AC";
 
-        VideoSourceReaderBase? Reader { get; set; }
+        VideoSourceReaderBase? VideoReader { get; set; }
+
+        AudioSourceReader? AudioReader { get; set; }
 
         public string FilePath { get; private set; } = "";
 
@@ -33,23 +35,50 @@ namespace NiVE3.PresetPlugin.Input
 
         public void Dispose()
         {
-            Reader?.Dispose();
+            VideoReader?.Dispose();
         }
 
         public bool Load(string filePath)
         {
             FilePath = filePath;
 
-            Reader = new AcceleratedVideoSourceReader(filePath);
-            if (!Reader.Succeeded)
+            try
             {
-                Reader = new SoftwareVideoSourceReader(filePath);
+                VideoReader = new AcceleratedVideoSourceReader(filePath);
+            }
+            catch { }
+            if (!VideoReader?.Succeeded ?? false)
+            {
+                try
+                {
+                    VideoReader = new SoftwareVideoSourceReader(filePath);
+                }
+                catch { }
             }
 
-            if (Reader.Succeeded)
+            try
             {
-                // NOTE: 読み込み時にサイズが変わる可能性があるため1フレームだけ読み込む
-                Reader.GetFrame(0.0);
+                AudioReader = new AudioSourceReader(filePath);
+            }
+            catch { }
+
+            if ((VideoReader?.Succeeded ?? false) || (AudioReader?.Success ?? false))
+            {
+                if (VideoReader?.Succeeded ?? false)
+                {
+                    // NOTE: 読み込み時にサイズが変わる可能性があるため1フレームだけ読み込む
+                    VideoReader.GetFrame(0.0);
+                }
+                else
+                {
+                    VideoReader?.Dispose();
+                    VideoReader = null;
+                }
+                if (!(AudioReader?.Success ?? false))
+                {
+                    AudioReader?.Dispose();
+                    AudioReader = null;
+                }
                 return true;
             }
             else
@@ -60,9 +89,20 @@ namespace NiVE3.PresetPlugin.Input
 
         public FootageSourceGroup GetGroup()
         {
-            if (Reader != null)
+            IFootageSource? footageSource = null;
+            if (VideoReader != null)
             {
-                return new FootageSourceGroup(new IFootageSource[] { new MediaFoundationFootageSource(Reader) });
+                footageSource = new MediaFoundationFootageSource(VideoReader, AudioReader);
+            }
+            else if (AudioReader != null)
+            {
+                footageSource = new MediaFoundationAudioFootageSource(AudioReader);
+            }
+
+
+            if (footageSource != null)
+            {
+                return new FootageSourceGroup(new IFootageSource[] { footageSource });
             }
             else
             {
@@ -88,19 +128,22 @@ namespace NiVE3.PresetPlugin.Input
 
         public SourceType SourceType { get; }
 
-        VideoSourceReaderBase Reader { get; set; }
+        VideoSourceReaderBase VideoReader { get; }
 
-        public MediaFoundationFootageSource(VideoSourceReaderBase reader)
+        AudioSourceReader? AudioReader { get; }
+
+        public MediaFoundationFootageSource(VideoSourceReaderBase reader, AudioSourceReader? audio)
         {
-            Reader = reader;
+            VideoReader = reader;
+            AudioReader = audio;
             Width = reader.Width;
             Height = reader.Height;
             FrameRate = reader.FrameRate;
             Duration = reader.Duration;
-            SourceType = SourceType.Video;
+            SourceType = audio != null ? SourceType.VideoAndAudio : SourceType.Video;
         }
 
-        public NImage Read(double time, bool toGpu)
+        public NImage ReadFrame(double time, bool toGpu)
         {
             if (toGpu)
             {
@@ -110,7 +153,7 @@ namespace NiVE3.PresetPlugin.Input
             else
             {
                 var result = new NManagedImage(Width, Height, false);
-                var data = Reader.GetFrame(time);
+                var data = VideoReader.GetFrame(time);
                 var pixelCount = Width * Height;
                 ImageConversion.ConvertToBGRA128(data, result.Data, pixelCount);
 
@@ -118,6 +161,50 @@ namespace NiVE3.PresetPlugin.Input
 
                 return result;
             }
+        }
+
+        public float[] ReadAudio(double time, double length)
+        {
+            if (AudioReader != null)
+            {
+                return AudioReader.Read(time, length);
+            }
+            else
+            {
+                throw new InvalidOperationException();
+            }
+        }
+    }
+
+    class MediaFoundationAudioFootageSource : IFootageSource
+    {
+        public string SourceId => "0"; // TODO
+
+        public double FrameRate => throw new NotImplementedException();
+
+        public int Width => throw new NotImplementedException();
+
+        public int Height => throw new NotImplementedException();
+
+        public double Duration => Reader.Duration;
+
+        public SourceType SourceType => SourceType.Audio;
+
+        AudioSourceReader Reader { get; }
+
+        public MediaFoundationAudioFootageSource(AudioSourceReader reader)
+        {
+            Reader = reader;
+        }
+
+        public float[] ReadAudio(double time, double length)
+        {
+            return Reader.Read(time, length);
+        }
+
+        public NImage ReadFrame(double time, bool toGpu)
+        {
+            throw new NotImplementedException();
         }
     }
 }

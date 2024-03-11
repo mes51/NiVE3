@@ -145,7 +145,7 @@ namespace NiVE3.Input.Special
             SourceId = sourceId;
         }
 
-        public NImage Read(double time, bool toGpu)
+        public NImage ReadFrame(double time, bool toGpu)
         {
             var result = new NManagedImage(Width, Height);
 
@@ -198,6 +198,11 @@ namespace NiVE3.Input.Special
 
             return result;
         }
+
+        public float[] ReadAudio(double time, double length)
+        {
+            return PlaceholderAudioFootageSource.GenerateTone(time, length);
+        }
     }
 
     file class PlaceholderAudioFootageSource : IFootageSource
@@ -220,9 +225,30 @@ namespace NiVE3.Input.Special
             Duration = duration;
         }
 
-        public NImage Read(double time, bool toGpu)
+        public NImage ReadFrame(double time, bool toGpu)
         {
             throw new NotImplementedException();
+        }
+
+        public float[] ReadAudio(double time, double length)
+        {
+            return GenerateTone(time, length);
+        }
+
+        public static float[] GenerateTone(double time, double length)
+        {
+            const int SamplingRate = 48000;
+            const double PI1kHz2 = 1000.0 / SamplingRate * Math.PI * 2.0;
+
+            var result = new float[(int)(length * SamplingRate) * 2];
+            for (int i = 0, phase = (int)(time * SamplingRate); i < result.Length; i += 2)
+            {
+                var sample = (float)Math.Sin(phase + i * PI1kHz2);
+                result[i] = sample;
+                result[i + 1] = sample;
+            }
+
+            return result;
         }
     }
 
@@ -245,7 +271,12 @@ namespace NiVE3.Input.Special
             SourceId = sourceId;
         }
 
-        public NImage Read(double time, bool toGpu)
+        public NImage ReadFrame(double time, bool toGpu)
+        {
+            throw new NotImplementedException();
+        }
+
+        public float[] ReadAudio(double time, double length)
         {
             throw new NotImplementedException();
         }

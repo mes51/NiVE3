@@ -26,6 +26,8 @@ using System.Numerics;
 using System.Runtime.Intrinsics;
 using NiVE3.Data.Json.Project;
 using NiVE3.Image.Drawing;
+using NiVE3.Util;
+using System.Buffers;
 
 namespace NiVE3.Model
 {
@@ -242,6 +244,8 @@ namespace NiVE3.Model
         public bool IsText => FootageModel.InputModel.Input is TextInput;
 
         public bool HasImage => SourceType.HasFlag(SourceType.Image) || SourceType.HasFlag(SourceType.Video);
+
+        public bool HasAudio => SourceType.HasFlag(SourceType.Audio);
 
         private ObservableCollection<EffectModel> effects = new ObservableCollection<EffectModel>();
         public ObservableCollection<EffectModel> Effects
@@ -532,10 +536,40 @@ namespace NiVE3.Model
             return (roi, currentFrame);
         }
 
+        public float[] GetAudio(double time, double length)
+        {
+            // TODO: エフェクトの適用
+            return GetRawAudio(time, length);
+        }
+
+        public float[] GetRawAudio(double time, double length)
+        {
+            var layerTime = time - SourceStartPoint;
+
+            // TODO: タイムリマップ反映
+            var sourceTime = Math.Max(layerTime, 0.0);
+            var sourceLength = Math.Max(length - (layerTime - sourceTime), 0.0);
+
+            var result = ArrayPool<float>.Shared.Rent((int)(length * Const.AudioSamplingRate) * 2);
+            var audio = FootageModel.ReadAudio(sourceTime, sourceLength);
+            var startPos = (int)(Math.Max(SourceStartPoint - time, 0.0) * Const.AudioSamplingRate) * 2;
+            audio.AsSpan(0, Math.Min(audio.Length, result.Length - startPos)).CopyTo(result);
+
+            return result;
+        }
+
         public bool IsContainsTime(double time)
         {
             var layerTime = time - SourceStartPoint;
             return layerTime >= inPoint && layerTime < OutPoint;
+        }
+
+        public bool IsContainsTimeRange(double begin, double end)
+        {
+            var layerBeginTime = begin - SourceStartPoint;
+            var layerEndTime = end - SourceStartPoint;
+
+            return (layerBeginTime < outPoint && layerEndTime > inPoint);
         }
 
         public CameraSetting? GetCameraSetting(double time)

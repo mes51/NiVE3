@@ -202,7 +202,7 @@ namespace NiVE3.Model
 
         public override NImage? GetImage(double time)
         {
-            return Composition?.Render(time, 1.0, ApplicationModel.UseGpu);
+            return Composition?.RenderFrame(time, 1.0, ApplicationModel.UseGpu);
         }
 
         private void Composition_CompositionUpdated(object? sender, EventArgs e)

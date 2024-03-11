@@ -297,12 +297,17 @@ namespace NiVE3.Input
             };
         }
 
-        public NImage Read(double time, bool toGpu)
+        public float[] ReadAudio(double time, double length)
+        {
+            throw new NotImplementedException();
+        }
+
+        public NImage ReadFrame(double time, bool toGpu)
         {
             return new NManagedImage(1, 1);
         }
 
-        public NImage Read(double time, int compositionWidth, int compositionHeight, PropertyValueGroup properties, ImageInterpolationQuality imageInterpolationQuality, bool toGpu)
+        public NImage ReadFrame(double time, int compositionWidth, int compositionHeight, PropertyValueGroup properties, ImageInterpolationQuality imageInterpolationQuality, bool toGpu)
         {
             var sourceText = properties[SourceTextId] as StyledText ?? StyledText.Empty;
             if (string.IsNullOrEmpty(sourceText.Text))

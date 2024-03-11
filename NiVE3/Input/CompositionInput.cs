@@ -73,7 +73,7 @@ namespace NiVE3.Input
 
         public double Duration => Composition.Duration;
 
-        public SourceType SourceType => Composition.HasAudio ? SourceType.VideoAndAudio : SourceType.Video;
+        public SourceType SourceType => SourceType.VideoAndAudio;
 
         CompositionModel Composition { get; }
 
@@ -82,10 +82,15 @@ namespace NiVE3.Input
             Composition = composition;
         }
 
-        public NImage Read(double time, bool toGpu)
+        public NImage ReadFrame(double time, bool toGpu)
         {
             // TODO: 親のコンポジションのダウンサンプリングの反映
-            return Composition.Render(time, 1.0, toGpu);
+            return Composition.RenderFrame(time, 1.0, toGpu);
+        }
+
+        public float[] ReadAudio(double time, double length)
+        {
+            throw new NotImplementedException();
         }
     }
 }

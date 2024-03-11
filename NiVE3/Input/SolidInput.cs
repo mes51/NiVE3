@@ -116,7 +116,7 @@ namespace NiVE3.Input
 
         internal FloatColor Color { get; set; } = new FloatColor(0.0F, 0.0F, 1.0F, 1.0F);
 
-        public NImage Read(double time, bool toGpu)
+        public NImage ReadFrame(double time, bool toGpu)
         {
             if (toGpu)
             {
@@ -130,6 +130,11 @@ namespace NiVE3.Input
                 MemoryMarshal.Cast<float, Vector128<float>>(span).Fill((Vector128<float>)Color);
                 return image;
             }
+        }
+
+        public float[] ReadAudio(double time, double length)
+        {
+            throw new NotImplementedException();
         }
     }
 

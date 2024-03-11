@@ -91,8 +91,8 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
 
             long seekTolerance = (long)(5000000.0 / FrameRate);
 
-            var timeLong = (long)(time * DurationRate);
-            var pos = new Variant { ElementType = VariantElementType.Long, Value = timeLong };
+            var longTime = (long)(time * DurationRate);
+            var pos = new Variant { ElementType = VariantElementType.Long, Value = longTime };
             Reader.SetCurrentPosition(Guid.Empty, pos);
 
             IMFSample? sample = null;
@@ -123,7 +123,7 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
                 sample = sampleTemp;
 
                 var timestamp = sampleTemp.SampleTime;
-                if (skipCount < MaxSkipFrame && Math.Abs(timeLong - timestamp) > seekTolerance)
+                if (skipCount < MaxSkipFrame && Math.Abs(longTime - timestamp) > seekTolerance)
                 {
                     skipCount++;
                     continue;

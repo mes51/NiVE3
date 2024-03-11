@@ -26,7 +26,12 @@ namespace NiVE3.Input.Special
 
         private EmptyFootageSource() { }
 
-        public NImage Read(double time, bool toGpu)
+        public NImage ReadFrame(double time, bool toGpu)
+        {
+            throw new NotImplementedException();
+        }
+
+        public float[] ReadAudio(double time, double length)
         {
             throw new NotImplementedException();
         }

@@ -22,6 +22,10 @@ using NiVE3.ValueObject;
 using NiVE3.View.Resource;
 using Prism.Mvvm;
 using NiVE3.Image.Drawing;
+using System.Runtime.InteropServices;
+using System.Numerics;
+using System.Buffers;
+using NiVE3.Util;
 
 namespace NiVE3.Model
 {
@@ -99,13 +103,6 @@ namespace NiVE3.Model
             set { SetProperty(ref motionBlurSampleCount, value); }
         }
 
-        private bool hasAudio;
-        public bool HasAudio
-        {
-            get { return hasAudio; }
-            set { SetProperty(ref hasAudio, value); }
-        }
-
         private double timeBarRange;
         public double TimeBarRange
         {
@@ -155,6 +152,8 @@ namespace NiVE3.Model
                 SetProperty(ref layers, value);
             }
         }
+
+        public bool HasAudio => Layers.Any(l => l.IsEnableSolo) ? Layers.Any(l => l.HasAudio && l.IsEnableAudio && l.IsEnableSolo) : Layers.Any(l => l.HasAudio && l.IsEnableAudio);
 
         public event EventHandler<EventArgs>? CompositionUpdated;
 
@@ -455,7 +454,7 @@ namespace NiVE3.Model
             DeleteLayers(layerIds);
         }
 
-        public NImage Render(double time, double downSamplingRate, bool useGpu)
+        public NImage RenderFrame(double time, double downSamplingRate, bool useGpu)
         {
             var allImages = new List<IDisposable>();
 
@@ -549,6 +548,40 @@ namespace NiVE3.Model
             foreach (var i in allImages)
             {
                 i.Dispose();
+            }
+
+            return result;
+        }
+
+        public float[] RenderAudio(double time, double length)
+        {
+            var vectorLength = Vector<float>.Count;
+
+            var result = new float[(int)(length * Const.AudioSamplingRate) * 2];
+            var resultVectorSpan = MemoryMarshal.Cast<float, Vector<float>>(result.AsSpan(0, (result.Length / vectorLength) * vectorLength));
+
+            var hasSolo = Layers.Any(l => l.IsEnableSolo);
+            foreach (var l in Layers.Where(l => l.HasAudio && l.IsEnableAudio && (!hasSolo || l.IsEnableSolo)))
+            {
+                if (!l.IsContainsTimeRange(time, length))
+                {
+                    continue;
+                }
+
+                var layerAudio = l.GetAudio(time, length);
+                var layerAudioVectorSpan = MemoryMarshal.Cast<float, Vector<float>>(layerAudio.AsSpan(0, (layerAudio.Length / vectorLength) * vectorLength));
+                var minVectorLength = Math.Min(resultVectorSpan.Length, layerAudioVectorSpan.Length);
+                for (var i = 0; i < minVectorLength; i++)
+                {
+                    resultVectorSpan[i] += layerAudioVectorSpan[i];
+                }
+                var minLength = Math.Min(result.Length, layerAudio.Length);
+                for (var i = minVectorLength * vectorLength; i < minLength; i++)
+                {
+                    result[i] += layerAudio[i];
+                }
+
+                ArrayPool<float>.Shared.Return(layerAudio);
             }
 
             return result;

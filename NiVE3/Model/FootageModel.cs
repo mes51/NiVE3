@@ -151,10 +151,22 @@ namespace NiVE3.Model
             InputModel = input;
             Source = source;
             Name = Path.GetFileName(input.FilePath);
-            Width = source.Width;
-            Height = source.Height;
-            FrameRate = source.FrameRate;
-            Duration = source.Duration;
+            if (source.SourceType.HasFlag(SourceType.Video))
+            {
+                Width = source.Width;
+                Height = source.Height;
+                FrameRate = source.FrameRate;
+                Duration = source.Duration;
+            }
+            else if (source.SourceType.HasFlag(SourceType.Image))
+            {
+                Width = source.Width;
+                Height = source.Height;
+            }
+            else if (source.SourceType.HasFlag(SourceType.Audio))
+            {
+                Duration = source.Duration;
+            }
             FilePath = input.FilePath;
             InputType = source.SourceType;
         }
@@ -179,12 +191,17 @@ namespace NiVE3.Model
         {
             if (properties != null && Source is ICustomizableFootageSource customizableFootageSource)
             {
-                return customizableFootageSource.Read(time, compositionWidth, compositionHeight, properties, imageInterpolationQuality, toGpu);
+                return customizableFootageSource.ReadFrame(time, compositionWidth, compositionHeight, properties, imageInterpolationQuality, toGpu);
             }
             else
             {
-                return Source.Read(time, toGpu);
+                return Source.ReadFrame(time, toGpu);
             }
+        }
+
+        public float[] ReadAudio(double time, double length)
+        {
+            return Source.ReadAudio(time, length);
         }
 
         public void ChangeName(string name)
