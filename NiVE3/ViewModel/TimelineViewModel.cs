@@ -331,6 +331,13 @@ namespace NiVE3.ViewModel
             }
         }
 
+        private bool isScrubbing;
+        public bool IsScrubbing
+        {
+            get { return isScrubbing; }
+            set { SetProperty(ref isScrubbing, value); }
+        }
+
         public ICommand BeginEditNameCommand { get; }
 
         public ICommand AddSolidCommand { get; }
@@ -356,13 +363,16 @@ namespace NiVE3.ViewModel
 
         ViewStateModel ViewState { get; }
 
+        AudioPlayerModel AudioPlayerModel { get; }
+
         SelectItemType SelectedItemType { get; set; } = SelectItemType.None;
 
         IViewModelShortcutCommand? SelectTarget { get; set; }
 
-        public TimelineViewModel(ViewStateModel viewState)
+        public TimelineViewModel(ViewStateModel viewState, AudioPlayerModel audioPlayerModel)
         {
             ViewState = viewState;
+            AudioPlayerModel = audioPlayerModel;
             Title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Timeline_EmptyTitle);
             SelectedLayers = new ObservableCollection<LayerViewModel>();
 
@@ -428,6 +438,7 @@ namespace NiVE3.ViewModel
             AddNullObjectCommand = new RequerySuggestedCommand(() => CompositionModel?.AddNullObject(), () => CompositionModel != null);
 
             AddTextCommand = new RequerySuggestedCommand(() => CompositionModel?.AddText(), () => CompositionModel != null);
+            AudioPlayerModel = audioPlayerModel;
         }
 
         public void DragOver(IDropInfo dropInfo)
@@ -525,6 +536,19 @@ namespace NiVE3.ViewModel
                     break;
                 case nameof(CurrentEditingCompositionId) when CurrentEditingCompositionId == CompositionModel?.CompositionId && SelectedLayers != null:
                     SelectedLayerIdsForPreview = new ObservableCollection<Guid>(SelectedLayers.Select(l => l.LayerId));
+                    break;
+                case nameof(IsScrubbing) when CompositionModel != null:
+                    if (IsScrubbing)
+                    {
+                        AudioPlayerModel.PlayScrub();
+                    }
+                    else
+                    {
+                        AudioPlayerModel.StopScrub();
+                    }
+                    break;
+                case nameof(CurrentTime) when CompositionModel != null && IsScrubbing && Keyboard.IsKeyDown(Key.LeftCtrl):
+                    AudioPlayerModel.AddScrubSample(CompositionModel.RenderAudio(CurrentTime, CompositionModel.FrameDuration));
                     break;
             }
         }

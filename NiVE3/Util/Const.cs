@@ -9,5 +9,7 @@ namespace NiVE3.Util
     public static class Const
     {
         public const int AudioSamplingRate = 48000;
+
+        public const int AudioChannelCount = 2;
     }
 }

@@ -82,6 +82,15 @@ namespace NiVE3.View.Part
             new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
+        private static readonly DependencyPropertyKey IsScrubbingPropertyKey = DependencyProperty.RegisterReadOnly(
+            nameof(IsScrubbing),
+            typeof(bool),
+            typeof(TimeLocatorView),
+            new FrameworkPropertyMetadata(false)
+        );
+
+        public static readonly DependencyProperty IsScrubbingProperty = IsScrubbingPropertyKey.DependencyProperty;
+
         private static readonly DependencyPropertyKey IndicatorPositionPropertyKey = DependencyProperty.RegisterReadOnly(
             nameof(IndicatorPosition),
             typeof(double),
@@ -167,6 +176,12 @@ namespace NiVE3.View.Part
             private set { SetValue(IndicatorPositionPropertyKey, value); }
         }
 
+        public bool IsScrubbing
+        {
+            get { return (bool)GetValue(IsScrubbingProperty); }
+            private set { SetValue(IsScrubbingPropertyKey, value); }
+        }
+
         private double RangeBarIndicatorPosition
         {
             get { return (double)GetValue(RangeBarIndicatorPositionProperty); }
@@ -214,8 +229,6 @@ namespace NiVE3.View.Part
             get { return (double)GetValue(RangeProperty); }
             set { SetValue(RangeProperty, value); }
         }
-
-        bool IsScrubbing { get; set; }
 
         public TimeLocatorView()
         {

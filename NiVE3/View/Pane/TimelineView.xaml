@@ -220,6 +220,8 @@
                             RangeStart="{Binding TimeBarRangeStart}"
                             RangeScrollBarVisibility="Collapsed"
                             CurrentTimeChangeByUser="TimeLocator_CurrentTimeChangeByUser"/>
+        <r:ReadOnlyPropertyWire Reciever="{Binding ElementName=TimeLocator, Path=IsScrubbing}" Sender="{Binding IsScrubbing}"/>
+
         <!-- NOTE: MinimumRangeの計算の都合上、TimeLocatorViewよりも下に置く -->
         <Grid Grid.Row="0" Grid.Column="1">
             <Grid.ColumnDefinitions>

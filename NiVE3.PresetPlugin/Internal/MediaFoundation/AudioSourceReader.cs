@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -86,6 +87,8 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
 
         public float[] Read(double time, double length)
         {
+            const int RewindLimit = 100;
+
             if (Reader == null)
             {
                 return Array.Empty<float>();
@@ -97,6 +100,8 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
             var result = new float[(int)(length * IFootageSource.SupportAudioSamplingRate) * 2];
 
             var writeCount = 0;
+            var rewindCount = 0;
+            var isFirst = true;
             while (writeCount < result.Length)
             {
                 Reader.ReadSample(FirstAudioStreamId, 0, out int _, out int flags, out long _, out IMFSample? sample);
@@ -112,7 +117,18 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
                 }
 
                 var timestamp = sample.SampleTime;
-                if (timestamp + sample.SampleDuration < longTime)
+                if (isFirst && timestamp > longTime)
+                {
+                    sample.Dispose();
+                    if (rewindCount > RewindLimit)
+                    {
+                        break;
+                    }
+                    Reader.SetCurrentPosition(Guid.Empty, pos);
+                    rewindCount++;
+                    continue;
+                }
+                else if (timestamp + sample.SampleDuration < longTime)
                 {
                     sample.Dispose();
                     continue;
@@ -121,17 +137,18 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
                 using var buffer = sample.ConvertToContiguousBuffer();
                 buffer.Lock(out nint ptr, out int _, out int bufferLength);
 
-                if (timestamp < longTime)
+                if (isFirst && timestamp < longTime)
                 {
                     var skipSamples = (int)((longTime - timestamp) / DurationRate * IFootageSource.SupportAudioSamplingRate) * 2;
                     ptr += skipSamples * sizeof(float);
                     bufferLength -= skipSamples * sizeof(float);
                 }
-                var needWrite = Math.Min(bufferLength, result.Length - writeCount);
+                var needWrite = Math.Min(bufferLength / sizeof(float), result.Length - writeCount);
                 Marshal.Copy(ptr, result, writeCount, needWrite);
                 writeCount += needWrite;
 
                 buffer.Unlock();
+                isFirst = false;
             }
 
             return result;
