@@ -20,9 +20,10 @@ namespace NiVE3.ViewModel
 {
     [PaneLocation(PaneLocation.Left1Bottom, Size = 75)]
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
-    partial class PlayControllerViewModel : SingletonePaneViewModelBase, IDisposable
+    partial class PlayControllerViewModel : SingletonePaneViewModelBase
     {
         private double frameRate;
+        [NeedWire(nameof(PlayControllerModel))]
         public double FrameRate
         {
             get { return frameRate; }
@@ -38,6 +39,7 @@ namespace NiVE3.ViewModel
         }
 
         private double workareaBegin;
+        [NeedWire(nameof(PlayControllerModel))]
         public double WorkareaBegin
         {
             get { return workareaBegin; }
@@ -45,6 +47,7 @@ namespace NiVE3.ViewModel
         }
 
         private double workareaEnd;
+        [NeedWire(nameof(PlayControllerModel))]
         public double WorkareaEnd
         {
             get { return workareaEnd; }
@@ -52,6 +55,7 @@ namespace NiVE3.ViewModel
         }
 
         private double duration;
+        [NeedWire(nameof(PlayControllerModel))]
         public double Duration
         {
             get { return duration; }
@@ -74,13 +78,6 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref isPaused, value); }
         }
 
-        private bool canPreview;
-        public bool CanPreview
-        {
-            get { return canPreview; }
-            set { SetProperty(ref canPreview, value); }
-        }
-
         public ICommand PlayCommand { get; }
 
         public ICommand PauseCommand { get; }
@@ -91,118 +88,43 @@ namespace NiVE3.ViewModel
 
         public ICommand PrevFrameCommand { get; }
 
-        MultiMediaTimer Timer { get; }
-
         PlayControllerModel PlayControllerModel { get; }
 
         bool CanPlay => ((int)(WorkareaEnd - WorkareaBegin) * FrameRate) > 1;
 
-        WeakEventPublisher<EventArgs> ChangeFrameRequestPublisher { get; } = new WeakEventPublisher<EventArgs>();
-        public event EventHandler<EventArgs> ChangeFrameRequest
-        {
-            add { ChangeFrameRequestPublisher.Subscribe(value); }
-            remove { ChangeFrameRequestPublisher.Unsubscribe(value); }
-        }
-
         public PlayControllerViewModel(PlayControllerModel playControllerModel)
         {
             Title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.PlayControlView_Title);
-            Timer = new MultiMediaTimer();
             PlayControllerModel = playControllerModel;
-            Timer.Tick += Timer_Tick;
 
             PlayCommand = new RequerySuggestedCommand(() =>
             {
-                IsPlaying = true;
-                IsPaused = false;
-            }, () => CanPreview && CanPlay && (!IsPlaying || IsPaused));
+                PlayControllerModel.Play();
+            }, () => PlayControllerModel.CanPreview && (!IsPlaying || IsPaused));
 
             PauseCommand = new RequerySuggestedCommand(() =>
             {
-                IsPaused = !IsPaused;
-            }, () => CanPreview && CanPlay && IsPlaying);
+                PlayControllerModel.Pause();
+            }, () => PlayControllerModel.CanPreview && IsPlaying);
 
             StopCommand = new RequerySuggestedCommand(() =>
             {
-                IsPlaying = false;
-                IsPaused = false;
-            }, () => CanPreview && IsPlaying);
+                PlayControllerModel.Stop();
+            }, () => PlayControllerModel.CanPreview && IsPlaying);
 
             NextFrameCommand = new RequerySuggestedCommand(() =>
             {
                 CurrentTime = (int)(CurrentTime * FrameRate + 1) / FrameRate;
-            }, () => CanPreview && !IsPlaying);
+            }, () => PlayControllerModel.CanPreview && !IsPlaying);
 
             PrevFrameCommand = new RequerySuggestedCommand(() =>
             {
                 CurrentTime = (int)(CurrentTime * FrameRate - 1) / FrameRate;
-            }, () => CanPreview && !IsPlaying);
+            }, () => PlayControllerModel.CanPreview && !IsPlaying);
 
             WiringModel();
-
-            PropertyChanged += PlayControllerViewModel_PropertyChanged;
         }
 
         partial void WiringModel();
-
-        private void Timer_Tick(object? sender, EventArgs e)
-        {
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                var time = CurrentTime;
-                if (time < WorkareaBegin || time > WorkareaEnd)
-                {
-                    CurrentTime = ((int)Math.Round(CurrentTime * FrameRate + 1) / FrameRate) % Duration;
-                }
-                else
-                {
-                    var workarea = WorkareaEnd - WorkareaBegin;
-                    CurrentTime = (((int)Math.Round((CurrentTime - WorkareaBegin) * FrameRate + 1) / FrameRate) % workarea) + WorkareaBegin;
-                }
-                ChangeFrameRequestPublisher.Publish(this, EventArgs.Empty);
-            });
-        }
-
-        private void PlayControllerViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
-        {
-            switch (e.PropertyName)
-            {
-                case nameof(IsPlaying):
-                    if (IsPlaying)
-                    {
-                        Timer.Interval = 1.0 / FrameRate * 1000.0;
-                        Timer.Start();
-                    }
-                    else
-                    {
-                        Timer.Stop();
-                    }
-                    break;
-                case nameof(IsPaused) when IsPlaying:
-                    if (IsPaused)
-                    {
-                        Timer.Start();
-                    }
-                    else
-                    {
-                        Timer.Stop();
-                    }
-                    break;
-                case nameof(CanPreview) when !CanPreview:
-                    IsPlaying = false;
-                    IsPaused = false;
-                    WorkareaBegin = 0.0;
-                    WorkareaEnd = 0.0;
-                    Duration = 0.0;
-                    FrameRate = 1.0;
-                    CurrentTime = 0.0;
-                    break;
-            }
-        }
-
-        public void Dispose()
-        {
-            Timer.Dispose();
-        }
     }
 }

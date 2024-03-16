@@ -230,12 +230,30 @@
         </pt:TimeLocatorView>
 
         <Border Grid.Row="2" BorderBrush="{uig:AppearanceResource ResourceKey=BorderBrush}" BorderThickness="0,1,0,0">
-            <StackPanel Orientation="Horizontal" Margin="5">
-                <ComboBox SelectedIndex="{Binding ElementName=Root, Path=SelectedScaleIndex}" ItemsSource="{x:Static local:PreviewView.ScaleList}" Style="{StaticResource ScaleSelectComboBox}"/>
-                <ComboBox SelectedIndex="{Binding ElementName=Root, Path=SelectedDownScaleRateIndex}" ItemsSource="{x:Static local:PreviewView.DownScaleList}" Style="{StaticResource DownScaleSelectComboBox}"/>
-                <ComboBox SelectedValue="{Binding PreviewColorChannel}" ItemsSource="{mk:EnumValues {x:Type vm:PreviewColorChannel}}" Style="{StaticResource PreviewColorChannelComboBox}"/>
-                <CheckBox x:Name="ShowCheckerboradCheckBox" Content="チェッカーボード" Margin="5,0,0,0" VerticalAlignment="Center"/>
-            </StackPanel>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="5">
+                    <ComboBox SelectedIndex="{Binding ElementName=Root, Path=SelectedScaleIndex}" ItemsSource="{x:Static local:PreviewView.ScaleList}" Style="{StaticResource ScaleSelectComboBox}"/>
+                    <ComboBox SelectedIndex="{Binding ElementName=Root, Path=SelectedDownScaleRateIndex}" ItemsSource="{x:Static local:PreviewView.DownScaleList}" Style="{StaticResource DownScaleSelectComboBox}"/>
+                    <ComboBox SelectedValue="{Binding PreviewColorChannel}" ItemsSource="{mk:EnumValues {x:Type vm:PreviewColorChannel}}" Style="{StaticResource PreviewColorChannelComboBox}"/>
+                    <CheckBox x:Name="ShowCheckerboradCheckBox" Content="チェッカーボード" Margin="5,0,0,0" VerticalAlignment="Center"/>
+                </StackPanel>
+                <Grid Grid.Column="1" Visibility="{Binding RealFrameRateIsUpdated, Converter={StaticResource BooleanToVisibilityConverter}}" VerticalAlignment="Center" HorizontalAlignment="Right">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0" Text="{Binding RealFrameRate, StringFormat={}{0:F2}}"/>
+                    <TextBlock Grid.Column="1" Text="/" Margin="5,0"/>
+                    <TextBlock Grid.Column="2" Text="{Binding FrameRate, StringFormat={}{0:F2} FPS}"/>
+                </Grid>
+            </Grid>
         </Border>
     </Grid>
 </UserControl>

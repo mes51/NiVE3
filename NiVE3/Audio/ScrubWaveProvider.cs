@@ -10,7 +10,7 @@ using NiVE3.Util;
 
 namespace NiVE3.Audio
 {
-    class SampleBufferedWaveProvider : IWaveProvider
+    class ScrubWaveProvider : IWaveProvider
     {
         const int BytePerSample = sizeof(float) * Const.AudioChannelCount;
 

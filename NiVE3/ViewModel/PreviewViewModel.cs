@@ -26,6 +26,7 @@ using NiVE3.ValueObject;
 using NiVE3.View.Dock;
 using NiVE3.View.Resource;
 using Prism.Commands;
+using System.Windows.Threading;
 
 namespace NiVE3.ViewModel
 {
@@ -33,9 +34,13 @@ namespace NiVE3.ViewModel
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
     partial class PreviewViewModel : PaneViewModelBase
     {
-        static readonly WriteableBitmap EmptyImage = new WriteableBitmap(1, 1, 96.0, 96.0, PixelFormats.Bgra32, null);
-
         const int Black = 255 << 24;
+
+        const double AudioShiftToleranceRate = 0.5;
+
+        static readonly TimeSpan AudioSpeedChangeInterval = TimeSpan.FromSeconds(2.0);
+
+        static readonly WriteableBitmap EmptyImage = new WriteableBitmap(1, 1, 96.0, 96.0, PixelFormats.Bgra32, null);
 
         private string name = "";
         [NeedWire(nameof(PreviewModel), IsOneWay = true)]
@@ -160,6 +165,20 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref currentEditingCompositionId, value); }
         }
 
+        private double realFrameRate;
+        public double RealFrameRate
+        {
+            get { return realFrameRate; }
+            set { SetProperty(ref realFrameRate, value); }
+        }
+
+        private bool realFrameRateIsUpdated;
+        public bool RealFrameRateIsUpdated
+        {
+            get { return realFrameRateIsUpdated; }
+            set { SetProperty(ref realFrameRateIsUpdated, value); }
+        }
+
         private double timeBarRange;
         public double TimeBarRange
         {
@@ -243,7 +262,13 @@ namespace NiVE3.ViewModel
 
         ViewStateModel ViewState { get; }
 
+        PlayControllerModel PlayControllerModel { get; }
+
+        AudioPlayerModel AudioPlayerModel { get; }
+
         ColoredPreviewBoundingBox[]? BoundingBoxesBuffer { get; set; }
+
+        DispatcherTimer RealFrameRateUpdateTimer { get; }
 
         WeakEventPublisher<EventArgs> SourceChangedPublisher { get; } = new WeakEventPublisher<EventArgs>();
         public event EventHandler<EventArgs> SourceChanged
@@ -266,10 +291,15 @@ namespace NiVE3.ViewModel
             remove { CurrentTimeChangeByUserPublisher.Unsubscribe(value); }
         }
 
-        public PreviewViewModel(PreviewModelBase previewModel, ViewStateModel viewState)
+        public PreviewViewModel(PreviewModelBase previewModel, ViewStateModel viewState, PlayControllerModel playControllerModel, AudioPlayerModel audioPlayerModel)
         {
             PreviewModel = previewModel;
             ViewState = viewState;
+            PlayControllerModel = playControllerModel;
+            AudioPlayerModel = audioPlayerModel;
+
+            RealFrameRateUpdateTimer = new DispatcherTimer { Interval = AudioSpeedChangeInterval };
+            RealFrameRateUpdateTimer.Tick += RealFrameRateUpdateTimer_Tick;
 
             ChangeCurrentTimeCommand = new DelegateCommand(() => CurrentTimeChangeByUserPublisher.Publish(this, EventArgs.Empty));
 
@@ -292,6 +322,10 @@ namespace NiVE3.ViewModel
                 UpdateCurrentFrame();
             };
             FrameUpdateDebouncer.ResetAndStart();
+
+            PlayControllerModel.PreviewPlay += PlayControllerModel_PreviewPlay;
+            PlayControllerModel.Stopped += PlayControllerModel_Stopped;
+            PlayControllerModel.PauseChanged += PlayControllerModel_PauseChanged;
 
             CompositionTarget.Rendering += (_, _) =>
             {
@@ -417,6 +451,22 @@ namespace NiVE3.ViewModel
             WorkareaChangedPublisher.Publish(this, EventArgs.Empty);
         }
 
+        private void RealFrameRateUpdateTimer_Tick(object? sender, EventArgs e)
+        {
+            RealFrameRate = Math.Min(PlayControllerModel.RealFrameRate, FrameRate);
+            if (RealFrameRate > 0.0)
+            {
+                var tolerance = 1.0 / FrameRate * AudioShiftToleranceRate;
+                var audioPosition = AudioPlayerModel.GetPlayingPosition();
+                if (Math.Abs(CurrentTime - audioPosition) > tolerance)
+                {
+                    AudioPlayerModel.SetPlayingPosition(CurrentTime);
+                    AudioPlayerModel.PreviewSpeed = RealFrameRate / FrameRate;
+                }
+                RealFrameRateIsUpdated = true;
+            }
+        }
+
         private void PreviewModel_FrameUpdateRequest(object? sender, EventArgs e)
         {
             UpdateCurrentFrame();
@@ -473,6 +523,53 @@ namespace NiVE3.ViewModel
         private void SelectedLayerIds_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             UpdateBoundingBox();
+        }
+
+        private void PlayControllerModel_PreviewPlay(object? sender, EventArgs e)
+        {
+            var audio = Array.Empty<float>();
+            var start = Math.Min(CurrentTime, WorkareaBegin);
+            var length = Math.Max(WorkareaEnd - start, Duration);
+            if (PreviewModel is CompositionPreviewModel compositionPreviewModel && compositionPreviewModel.Composition != null)
+            {
+                audio = compositionPreviewModel.Composition.RenderAudio(start, length);
+            }
+            else if (PreviewModel is FootagePreviewModel footagePreviewModel && footagePreviewModel.Footage != null && footagePreviewModel.SourceType.HasFlag(SourceType.Audio))
+            {
+                audio = footagePreviewModel.Footage.ReadAudio(start, length);
+            }
+            AudioPlayerModel.SetPreviewAudio(audio, WorkareaBegin, WorkareaEnd);
+            AudioPlayerModel.PreviewSpeed = 1.0;
+            AudioPlayerModel.SetPlayingPosition(CurrentTime);
+            RealFrameRateIsUpdated = false;
+            RealFrameRate = -1.0;
+            AudioPlayerModel.PlayPreview();
+            RealFrameRateUpdateTimer.Start();
+        }
+
+        private void PlayControllerModel_Stopped(object? sender, EventArgs e)
+        {
+            AudioPlayerModel.StopPreview();
+            RealFrameRateUpdateTimer.Stop();
+            RealFrameRateIsUpdated = false;
+            RealFrameRate = -1.0;
+        }
+
+        private void PlayControllerModel_PauseChanged(object? sender, EventArgs e)
+        {
+            RealFrameRateIsUpdated = false;
+            RealFrameRate = -1.0;
+            if (PlayControllerModel.IsPaused)
+            {
+                AudioPlayerModel.StopPreview();
+                RealFrameRateUpdateTimer.Stop();
+            }
+            else
+            {
+                AudioPlayerModel.PreviewSpeed = 1.0;
+                AudioPlayerModel.PlayPreview();
+                RealFrameRateUpdateTimer.Start();
+            }
         }
     }
 

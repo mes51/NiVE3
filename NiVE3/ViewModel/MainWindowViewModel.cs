@@ -81,15 +81,15 @@ namespace NiVE3.ViewModel
 
         IDialogService DialogService { get; }
 
-        PlayControllerViewModel PlayControllerViewModel { get; }
+        PlayControllerModel PlayControllerModel { get; }
 
-        public MainWindowViewModel(IContainer container, IRegionManager region, ProjectModel projectModel, IDialogService dialogService, PlayControllerViewModel playControlViewModel)
+        public MainWindowViewModel(IContainer container, IRegionManager region, ProjectModel projectModel, IDialogService dialogService, PlayControllerModel playControlModel)
         {
             Container = container;
             Region = region;
             ProjectModel = projectModel;
             DialogService = dialogService;
-            PlayControllerViewModel = playControlViewModel;
+            PlayControllerModel = playControlModel;
 
             ProjectModel.OpenCompositionTimeline += ProjectModel_OpenCompositionTimeline;
             ProjectModel.CompositionRemoved += ProjectModel_CompositionRemoved;
@@ -163,7 +163,7 @@ namespace NiVE3.ViewModel
 
             RemoveViewModelCommand = new DelegateCommand<BindableBase>(MainRegion.Remove);
 
-            PlayControllerViewModel.ChangeFrameRequest += PlayControllerViewModel_ChangeFrameRequest;
+            PlayControllerModel.ChangeFrameRequest += PlayControllerModel_ChangeFrameRequest;
 
             MainRegion.Views.CollectionChanged += ViewModels_CollectionChanged;
 
@@ -241,7 +241,7 @@ namespace NiVE3.ViewModel
                 }
                 if (!ViewModels.OfType<PreviewViewModel>().Any())
                 {
-                    PlayControllerViewModel.CanPreview = false;
+                    PlayControllerModel.Duration = 0.0;
                 }
 
                 foreach (var vm in removedPane.OfType<TimelineViewModel>())
@@ -255,12 +255,11 @@ namespace NiVE3.ViewModel
         {
             if (sender is PreviewViewModel vm)
             {
-                PlayControllerViewModel.CanPreview = vm.SourceType.HasFlag(Plugin.Interfaces.SourceType.Video);
-                PlayControllerViewModel.WorkareaBegin = vm.WorkareaBegin;
-                PlayControllerViewModel.WorkareaEnd = vm.WorkareaEnd;
-                PlayControllerViewModel.Duration = vm.Duration;
-                PlayControllerViewModel.FrameRate = vm.FrameRate;
-                PlayControllerViewModel.CurrentTime = vm.CurrentTime;
+                PlayControllerModel.WorkareaBegin = vm.WorkareaBegin;
+                PlayControllerModel.WorkareaEnd = vm.WorkareaEnd;
+                PlayControllerModel.Duration = vm.Duration;
+                PlayControllerModel.FrameRate = vm.FrameRate;
+                PlayControllerModel.CurrentTime = vm.CurrentTime;
             }
         }
 
@@ -268,12 +267,11 @@ namespace NiVE3.ViewModel
         {
             if (sender is PreviewViewModel vm && vm.IsSelected)
             {
-                PlayControllerViewModel.CanPreview = vm.SourceType.HasFlag(Plugin.Interfaces.SourceType.Video);
-                PlayControllerViewModel.WorkareaBegin = vm.WorkareaBegin;
-                PlayControllerViewModel.WorkareaEnd = vm.WorkareaEnd;
-                PlayControllerViewModel.Duration = vm.Duration;
-                PlayControllerViewModel.FrameRate = vm.FrameRate;
-                PlayControllerViewModel.CurrentTime = vm.CurrentTime;
+                PlayControllerModel.WorkareaBegin = vm.WorkareaBegin;
+                PlayControllerModel.WorkareaEnd = vm.WorkareaEnd;
+                PlayControllerModel.Duration = vm.Duration;
+                PlayControllerModel.FrameRate = vm.FrameRate;
+                PlayControllerModel.CurrentTime = vm.CurrentTime;
             }
         }
 
@@ -281,9 +279,9 @@ namespace NiVE3.ViewModel
         {
             if (sender is PreviewViewModel vm && vm.IsSelected)
             {
-                PlayControllerViewModel.WorkareaBegin = vm.WorkareaBegin;
-                PlayControllerViewModel.WorkareaEnd = vm.WorkareaEnd;
-                PlayControllerViewModel.Duration = vm.Duration;
+                PlayControllerModel.WorkareaBegin = vm.WorkareaBegin;
+                PlayControllerModel.WorkareaEnd = vm.WorkareaEnd;
+                PlayControllerModel.Duration = vm.Duration;
             }
         }
 
@@ -291,8 +289,8 @@ namespace NiVE3.ViewModel
         {
             if (sender is PreviewViewModel vm && vm.IsSelected)
             {
-                PlayControllerViewModel.StopCommand.Execute(null);
-                PlayControllerViewModel.CurrentTime = vm.CurrentTime;
+                PlayControllerModel.Stop();
+                PlayControllerModel.CurrentTime = vm.CurrentTime;
             }
         }
 
@@ -306,18 +304,18 @@ namespace NiVE3.ViewModel
             var previewModel = ViewModels.OfType<PreviewViewModel>().FirstOrDefault(p => p.IsSelected && p.PreviewModel is CompositionPreviewModel cpm && cpm.Composition == vm.CompositionModel);
             if (previewModel != null)
             {
-                PlayControllerViewModel.StopCommand.Execute(null);
+                PlayControllerModel.Stop();
                 previewModel.CurrentTime = vm.CurrentTime;
-                PlayControllerViewModel.CurrentTime = vm.CurrentTime;
+                PlayControllerModel.CurrentTime = vm.CurrentTime;
             }
         }
 
-        private void PlayControllerViewModel_ChangeFrameRequest(object? sender, EventArgs e)
+        private void PlayControllerModel_ChangeFrameRequest(object? sender, EventArgs e)
         {
             var vm = ViewModels.OfType<PreviewViewModel>().FirstOrDefault(v => v.IsSelected);
             if (vm != null)
             {
-                vm.CurrentTime = PlayControllerViewModel.CurrentTime;
+                vm.CurrentTime = PlayControllerModel.CurrentTime;
             }
         }
     }

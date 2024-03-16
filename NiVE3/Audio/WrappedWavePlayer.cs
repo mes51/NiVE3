@@ -8,7 +8,7 @@ using NAudio.Wave;
 
 namespace NiVE3.Audio
 {
-    class ScrubWavePlayer : IWavePlayer
+    class WrappedWavePlayer : IWavePlayer
     {
         public float Volume
         {
@@ -28,20 +28,16 @@ namespace NiVE3.Audio
 
         public event EventHandler<StoppedEventArgs>? PlaybackStopped;
 
-        SampleBufferedWaveProvider Provider { get; }
-
         WasapiOut Player { get; }
 
-        public ScrubWavePlayer(MMDevice device, int latency)
+        public WrappedWavePlayer(MMDevice device, int latency)
         {
-            Provider = new SampleBufferedWaveProvider();
             Player = new WasapiOut(device, AudioClientShareMode.Shared, true, latency);
-            Player.Init(Provider);
         }
 
         public void Init(IWaveProvider waveProvider)
         {
-            throw new InvalidOperationException("already initialized");
+            Player.Init(waveProvider);
         }
 
         public void Pause()
@@ -57,7 +53,6 @@ namespace NiVE3.Audio
         public void Stop()
         {
             Player.Stop();
-            Provider.ClearBuffer();
         }
 
         public bool IsDeviceAlive()
@@ -73,10 +68,9 @@ namespace NiVE3.Audio
             }
         }
 
-        public void AddSample(float[] sample)
+        public long GetPosition()
         {
-            Provider.ClearBuffer();
-            Provider.AddSample(sample);
+            return Player.GetPosition();
         }
 
         public void Dispose()

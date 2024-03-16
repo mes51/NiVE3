@@ -5,11 +5,17 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Threading;
 
 namespace NiVE3.Util
 {
     class MultiMediaTimer : IDisposable
     {
+        const int InputProcessSkipCountThreshold = 10;
+
+        const double InputProcessIntervalThreshold = 10.0;
+
         /// <summary>
         /// ms
         /// </summary>
@@ -17,7 +23,7 @@ namespace NiVE3.Util
 
         uint TimerId { get; set; }
 
-        bool Started { get; set; }
+        bool TimerStarted { get; set; }
 
         public event EventHandler<EventArgs>? Tick;
 
@@ -27,6 +33,8 @@ namespace NiVE3.Util
 
         double WaitingTime { get; set; }
 
+        int InputProcessSkipCount { get; set; }
+
         public MultiMediaTimer()
         {
             Proc = this.TimerProc;
@@ -34,23 +42,41 @@ namespace NiVE3.Util
 
         public void Start()
         {
+            TimerStarted = true;
             Start(Interval);
         }
 
         public void Stop()
         {
+            TimerStarted = false;
             KillTimer();
         }
 
         void Start(double interval)
         {
+            var startTime = Stopwatch.GetTimestamp();
             KillTimer();
-            WaitingTime = interval;
-            TimerId = NativeMethods.TimeSetEvent((uint)Interval, 0, Proc, nint.Zero, FuEvent.TIME_ONESHOT | FuEvent.TIME_CALLBACK_FUNCTION);
-            Started = TimerId != 0;
-            if (Started)
+            if (InputProcessSkipCount >= InputProcessSkipCountThreshold)
             {
-                StartTime = Stopwatch.GetTimestamp();
+                // あまりにもintervalが短いと入力を受け付けずUIスレッドが止まったように見えるため、入力を処理できるようにする
+                var yieldTime = Stopwatch.GetTimestamp();
+                Application.Current.Dispatcher.Invoke(() => { }, DispatcherPriority.Input);
+                InputProcessSkipCount = 0;
+                interval = Math.Max(interval - Stopwatch.GetElapsedTime(yieldTime).TotalMilliseconds, 1.0);
+            }
+            WaitingTime = interval;
+            TimerId = NativeMethods.TimeSetEvent((uint)WaitingTime, 0, Proc, nint.Zero, FuEvent.TIME_ONESHOT | FuEvent.TIME_CALLBACK_FUNCTION);
+            if (TimerStarted && TimerId != 0)
+            {
+                StartTime = startTime;
+            }
+            if (interval < InputProcessIntervalThreshold)
+            {
+                InputProcessSkipCount++;
+            }
+            else
+            {
+                InputProcessSkipCount = 0;
             }
         }
 
@@ -61,35 +87,34 @@ namespace NiVE3.Util
                 NativeMethods.TimeKillEvent(TimerId);
                 TimerId = 0;
             }
-            Started = false;
         }
 
         void TimerProc(uint uTimerID, uint uMsg, nint dwUser, nint dw1, nint dw2)
         {
-            if (Started)
+            if (TimerStarted)
             {
                 var waitedTime = Stopwatch.GetElapsedTime(StartTime);
-                var spinWait = WaitingTime * 1000.0 - waitedTime.TotalMicroseconds;
+                var spinWait = WaitingTime - waitedTime.TotalMilliseconds;
                 while (spinWait > 0.0)
                 {
                     SpinWait.SpinUntil(() => true);
                     waitedTime = Stopwatch.GetElapsedTime(StartTime);
-                    spinWait = WaitingTime * 1000.0 - waitedTime.TotalMicroseconds;
+                    spinWait = WaitingTime - waitedTime.TotalMilliseconds;
                 }
 
                 var processStart = Stopwatch.GetTimestamp();
                 Tick?.Invoke(this, EventArgs.Empty);
                 var processTime = Stopwatch.GetElapsedTime(processStart);
-                if (Started)
+                if (TimerStarted)
                 {
-                    Start(Math.Max(Interval - processTime.TotalMicroseconds * 0.001, 1.0));
+                    Start(Math.Max(Interval - processTime.TotalMilliseconds + Math.Min(spinWait, 0.0), 1.0));
                 }
             }
         }
 
         public void Dispose()
         {
-            KillTimer();
+            Stop();
         }
 
         ~MultiMediaTimer()
