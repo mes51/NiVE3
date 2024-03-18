@@ -19,9 +19,29 @@
             </ResourceDictionary.MergedDictionaries>
 
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+
+            <Style x:Key="CrossSeparatorGridStyle" TargetType="{x:Type Grid}">
+                <Setter Property="Visibility" Value="Collapsed"/>
+
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding ElementName=Root, Path=Separator}" Value="{x:Null}">
+                        <Setter Property="Visibility" Value="Visible"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style x:Key="SeparatorGridStyle" TargetType="{x:Type Grid}">
+                <Setter Property="Visibility" Value="Visible"/>
+
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding ElementName=Root, Path=Separator}" Value="{x:Null}">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
         </ResourceDictionary>
     </local:PropertyControlBase.Resources>
-    <Grid>
+    <Grid VerticalAlignment="Center">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="Auto"/>
@@ -52,7 +72,12 @@
                 </i:EventTrigger>
             </i:Interaction.Triggers>
         </pr:SlidableNumberTextBox>
-        <Path Grid.Column="1" Fill="{gm:AppearanceResource ResourceKey=TextBrush}" Data="{StaticResource CrossIcon}" VerticalAlignment="Center" Margin="0,4,0,0" />
+        <Grid  Grid.Column="1" Style="{StaticResource CrossSeparatorGridStyle}">
+            <Path Fill="{gm:AppearanceResource ResourceKey=TextBrush}" Data="{StaticResource CrossIcon}" VerticalAlignment="Center" Margin="0,4,0,0"/>
+        </Grid>
+        <Grid Grid.Column="1" Style="{StaticResource SeparatorGridStyle}">
+            <TextBlock Text="{Binding ElementName=Root, Path=Separator}" VerticalAlignment="Bottom"/>
+        </Grid>
         <pr:SlidableNumberTextBox Grid.Column="2" x:Name="ValueYSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=ValueY}" Minimum="{Binding ElementName=Root, Path=MinimumY}" Maximum="{Binding ElementName=Root, Path=MaximumY}" UnitText="{Binding ElementName=Root, Path=Unit}" Margin="5,0,2,0" VerticalAlignment="Center">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="BeginSlideEditValue">
@@ -75,7 +100,12 @@
                 </i:EventTrigger>
             </i:Interaction.Triggers>
         </pr:SlidableNumberTextBox>
-        <Path Grid.Column="3" Fill="{gm:AppearanceResource ResourceKey=TextBrush}" Data="{StaticResource CrossIcon}" VerticalAlignment="Center" Margin="0,4,0,0" Visibility="{Binding ElementName=Root, Path=Is3D, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+        <Grid Grid.Column="3" Style="{StaticResource CrossSeparatorGridStyle}">
+            <Path Fill="{gm:AppearanceResource ResourceKey=TextBrush}" Data="{StaticResource CrossIcon}" VerticalAlignment="Center" Margin="0,4,0,0" Visibility="{Binding ElementName=Root, Path=Is3D, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+        </Grid>
+        <Grid Grid.Column="3" Style="{StaticResource SeparatorGridStyle}">
+            <TextBlock Text="{Binding ElementName=Root, Path=Separator}" VerticalAlignment="Bottom" Visibility="{Binding ElementName=Root, Path=Is3D, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+        </Grid>
         <pr:SlidableNumberTextBox Grid.Column="4" x:Name="ValueZSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=ValueZ}" Minimum="{Binding ElementName=Root, Path=MinimumZ}" Maximum="{Binding ElementName=Root, Path=MaximumZ}" UnitText="{Binding ElementName=Root, Path=Unit}" Margin="5,0,0,0" VerticalAlignment="Center" Visibility="{Binding ElementName=Root, Path=Is3D, Converter={StaticResource BooleanToVisibilityConverter}}">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="BeginSlideEditValue">

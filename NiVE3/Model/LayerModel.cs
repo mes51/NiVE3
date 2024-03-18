@@ -389,7 +389,7 @@ namespace NiVE3.Model
                     {
                         AudioOptionProperties = new PropertyGroupModel(new PropertyGroup(AudioOptionGroupId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Layer_AudioOption), new PropertyBase[]
                         {
-                            new Vector3dProperty(ILayerObject.AudioLevelId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Layer_AudioOption_AudioLevel), new Vector3d(), new Vector3d(-192.0), new Vector3d(24.0), digit: 2, unitKey: LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Unit_Decibel))
+                            new Vector3dProperty(ILayerObject.AudioLevelId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Layer_AudioOption_AudioLevel), new Vector3d(), new Vector3d(-192.0), new Vector3d(24.0), digit: 2, unitKey: LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Unit_Decibel), separator: ",")
                         }), compositionModel, this, historyModel);
                     }
                     if (footageModel.InputType.HasFlag(SourceType.Video) || footageModel.InputType.HasFlag(SourceType.Image))

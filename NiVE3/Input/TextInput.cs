@@ -288,7 +288,8 @@ namespace NiVE3.Input
                                             LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_Blur),
                                             new Vector3d(),
                                             digit: 2,
-                                            unitKey: LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Unit_Pixel)
+                                            unitKey: LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Unit_Pixel),
+                                            separator: ","
                                         )
                                     })),
                             })

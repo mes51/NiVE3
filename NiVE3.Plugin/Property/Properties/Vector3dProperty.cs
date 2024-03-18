@@ -27,52 +27,60 @@ namespace NiVE3.Plugin.Property.Properties
 
         LanguageResourceKey? UnitKey { get; }
 
-        public Vector3dProperty(string id, string displayName, Vector3d defaultValue, bool isSupportKeyFrame = true, int digit = -1, bool is3D = false, string? unit = null) : base(id, displayName, Vector3dPropertyType.Instance, defaultValue, isSupportKeyFrame)
+        string? Separator { get; }
+
+        public Vector3dProperty(string id, string displayName, Vector3d defaultValue, bool isSupportKeyFrame = true, int digit = -1, bool is3D = false, string? unit = null, string? separator = null) : base(id, displayName, Vector3dPropertyType.Instance, defaultValue, isSupportKeyFrame)
         {
             Digit = digit;
             Is3D = is3D;
             RawUnit = unit;
+            Separator = separator;
         }
 
-        public Vector3dProperty(string id, string displayName, Vector3d defaultValue, Vector3d minValue, bool isSupportKeyFrame = true, int digit = -1, bool is3D = false, string? unit = null) : base(id, displayName, Vector3dPropertyType.Instance, defaultValue, isSupportKeyFrame)
+        public Vector3dProperty(string id, string displayName, Vector3d defaultValue, Vector3d minValue, bool isSupportKeyFrame = true, int digit = -1, bool is3D = false, string? unit = null, string? separator = null) : base(id, displayName, Vector3dPropertyType.Instance, defaultValue, isSupportKeyFrame)
         {
             Digit = digit;
             Is3D = is3D;
             RawUnit = unit;
             MinValue = minValue;
+            Separator = separator;
         }
 
-        public Vector3dProperty(string id, string displayName, Vector3d defaultValue, Vector3d minValue, Vector3d maxValue, bool isSupportKeyFrame = true, int digit = -1, bool is3D = false, string? unit = null) : base(id, displayName, Vector3dPropertyType.Instance, defaultValue, isSupportKeyFrame)
+        public Vector3dProperty(string id, string displayName, Vector3d defaultValue, Vector3d minValue, Vector3d maxValue, bool isSupportKeyFrame = true, int digit = -1, bool is3D = false, string? unit = null, string? separator = null) : base(id, displayName, Vector3dPropertyType.Instance, defaultValue, isSupportKeyFrame)
         {
             Digit = digit;
             Is3D = is3D;
             RawUnit = unit;
             MinValue = minValue;
             MaxValue = maxValue;
+            Separator = separator;
         }
 
-        public Vector3dProperty(string id, LanguageResourceKey displayNameKey, Vector3d defaultValue, bool isSupportKeyFrame = true, int digit = -1, bool is3D = false, LanguageResourceKey? unitKey = null) : base(id, displayNameKey, Vector3dPropertyType.Instance, defaultValue, isSupportKeyFrame)
+        public Vector3dProperty(string id, LanguageResourceKey displayNameKey, Vector3d defaultValue, bool isSupportKeyFrame = true, int digit = -1, bool is3D = false, LanguageResourceKey? unitKey = null, string? separator = null) : base(id, displayNameKey, Vector3dPropertyType.Instance, defaultValue, isSupportKeyFrame)
         {
             Digit = digit;
             Is3D = is3D;
             UnitKey = unitKey;
+            Separator = separator;
         }
 
-        public Vector3dProperty(string id, LanguageResourceKey displayNameKey, Vector3d defaultValue, Vector3d minValue, bool isSupportKeyFrame = true, int digit = -1, bool is3D = false, LanguageResourceKey? unitKey = null) : base(id, displayNameKey, Vector3dPropertyType.Instance, defaultValue, isSupportKeyFrame)
+        public Vector3dProperty(string id, LanguageResourceKey displayNameKey, Vector3d defaultValue, Vector3d minValue, bool isSupportKeyFrame = true, int digit = -1, bool is3D = false, LanguageResourceKey? unitKey = null, string? separator = null) : base(id, displayNameKey, Vector3dPropertyType.Instance, defaultValue, isSupportKeyFrame)
         {
             Digit = digit;
             Is3D = is3D;
             UnitKey = unitKey;
             MinValue = minValue;
+            Separator = separator;
         }
 
-        public Vector3dProperty(string id, LanguageResourceKey displayNameKey, Vector3d defaultValue, Vector3d minValue, Vector3d maxValue, bool isSupportKeyFrame = true, int digit = -1, bool is3D = false, LanguageResourceKey? unitKey = null) : base(id, displayNameKey, Vector3dPropertyType.Instance, defaultValue, isSupportKeyFrame)
+        public Vector3dProperty(string id, LanguageResourceKey displayNameKey, Vector3d defaultValue, Vector3d minValue, Vector3d maxValue, bool isSupportKeyFrame = true, int digit = -1, bool is3D = false, LanguageResourceKey? unitKey = null, string? separator = null) : base(id, displayNameKey, Vector3dPropertyType.Instance, defaultValue, isSupportKeyFrame)
         {
             Digit = digit;
             Is3D = is3D;
             UnitKey = unitKey;
             MinValue = minValue;
             MaxValue = maxValue;
+            Separator = separator;
         }
 
         public override PropertyControlBase CreateControl(ICompositionObject composition, ILayerObject? layer, IEffectObject? effect, IPropertyViewModel viewModel)
@@ -87,6 +95,7 @@ namespace NiVE3.Plugin.Property.Properties
             control.MaximumX = MaxValue.X;
             control.MaximumY = MaxValue.Y;
             control.MaximumZ = MaxValue.Z;
+            control.Separator = Separator;
             return control;
         }
 

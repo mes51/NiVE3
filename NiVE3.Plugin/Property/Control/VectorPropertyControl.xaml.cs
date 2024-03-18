@@ -100,6 +100,19 @@ namespace NiVE3.Plugin.Property.Control
             new FrameworkPropertyMetadata("", FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
+        public static readonly DependencyProperty SeparatorProperty = DependencyProperty.Register(
+            nameof(Separator),
+            typeof(string),
+            typeof(VectorPropertyControl),
+            new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        public string? Separator
+        {
+            get { return (string)GetValue(SeparatorProperty); }
+            set { SetValue(SeparatorProperty, value); }
+        }
+
         public string Unit
         {
             get { return (string)GetValue(UnitProperty); }
