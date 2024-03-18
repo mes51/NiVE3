@@ -266,6 +266,8 @@ namespace NiVE3.ViewModel
 
         AudioPlayerModel AudioPlayerModel { get; }
 
+        AudioInformationModel AudioInformationModel { get; }
+
         ColoredPreviewBoundingBox[]? BoundingBoxesBuffer { get; set; }
 
         DispatcherTimer RealFrameRateUpdateTimer { get; }
@@ -291,12 +293,13 @@ namespace NiVE3.ViewModel
             remove { CurrentTimeChangeByUserPublisher.Unsubscribe(value); }
         }
 
-        public PreviewViewModel(PreviewModelBase previewModel, ViewStateModel viewState, PlayControllerModel playControllerModel, AudioPlayerModel audioPlayerModel)
+        public PreviewViewModel(PreviewModelBase previewModel, ViewStateModel viewState, PlayControllerModel playControllerModel, AudioPlayerModel audioPlayerModel, AudioInformationModel audioInformationModel)
         {
             PreviewModel = previewModel;
             ViewState = viewState;
             PlayControllerModel = playControllerModel;
             AudioPlayerModel = audioPlayerModel;
+            AudioInformationModel = audioInformationModel;
 
             RealFrameRateUpdateTimer = new DispatcherTimer { Interval = AudioSpeedChangeInterval };
             RealFrameRateUpdateTimer.Tick += RealFrameRateUpdateTimer_Tick;
@@ -489,6 +492,12 @@ namespace NiVE3.ViewModel
                     break;
                 case nameof(CurrentTime):
                     UpdateCurrentFrame();
+                    if (PlayControllerModel.IsPlaying && !PlayControllerModel.IsPaused)
+                    {
+                        var startSample = (int)(CurrentTime * Const.AudioSamplingRate) * Const.AudioChannelCount;
+                        var length = (int)((CurrentTime + 1.0 / FrameRate) * Const.AudioSamplingRate) * Const.AudioChannelCount - startSample;
+                        AudioInformationModel.CalcAudioLevel(AudioPlayerModel.Audio.AsSpan(startSample, length));
+                    }
                     break;
                 case nameof(Duration):
                     TimeBarRange = Duration;
@@ -553,6 +562,7 @@ namespace NiVE3.ViewModel
             RealFrameRateUpdateTimer.Stop();
             RealFrameRateIsUpdated = false;
             RealFrameRate = -1.0;
+            AudioInformationModel.ClearLevel();
         }
 
         private void PlayControllerModel_PauseChanged(object? sender, EventArgs e)

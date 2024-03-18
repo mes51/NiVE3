@@ -10,7 +10,7 @@ using NiVE3.Extension;
 
 namespace NiVE3.View.Primitive
 {
-    class TimeBar : Control
+    class TimeBar : TextRenderableElement
     {
         const double MinGap = 75.0;
 
@@ -129,7 +129,6 @@ namespace NiVE3.View.Primitive
             FontSizeProperty.OverrideMetadata(typeof(TimeBar), new FrameworkPropertyMetadata(10.0, FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.Inherits));
             ClipToBoundsProperty.OverrideMetadata(typeof(TimeBar), new FrameworkPropertyMetadata(true, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsRender));
             ForegroundProperty.OverrideMetadata(typeof(TimeBar), new FrameworkPropertyMetadata(SystemColors.ControlTextBrush, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsRender, MeasureLinePropertyChanged));
-            IsTabStopProperty.OverrideMetadata(typeof(TimeBar), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.Inherits));
 
             EventManager.RegisterClassHandler(typeof(TimeBar), SizeChangedEvent, new SizeChangedEventHandler(SizeChangedEventHandler));
         }

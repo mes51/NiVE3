@@ -26,4 +26,7 @@
     <DataTemplate DataType="{x:Type vm:TextPropertyViewModel}">
         <v:TextPropertyView />
     </DataTemplate>
+    <DataTemplate DataType="{x:Type vm:AudioInformationViewModel}">
+        <v:AudioInformationView />
+    </DataTemplate>
 </ResourceDictionary>

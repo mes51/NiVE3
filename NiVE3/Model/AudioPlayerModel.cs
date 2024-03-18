@@ -17,6 +17,8 @@ namespace NiVE3.Model
             set => PreviewWaveProvider.Speed = value;
         }
 
+        public float[] Audio => PreviewWaveProvider.Audio;
+
         WrappedWavePlayer? ScrubPlayer { get; set; }
 
         WrappedWavePlayer? PreviewPlayer { get; set; }
