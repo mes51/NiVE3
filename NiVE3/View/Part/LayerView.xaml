@@ -331,7 +331,7 @@
             <Setter Property="Visibility" Value="Visible"/>
 
             <Style.Triggers>
-                <DataTrigger Binding="{Binding SourceType}" Value="{x:Static pi:SourceType.Audio}">
+                <DataTrigger Binding="{Binding TransformProperties}" Value="{x:Null}">
                     <Setter Property="Visibility" Value="Collapsed"/>
                 </DataTrigger>
             </Style.Triggers>
@@ -376,6 +376,17 @@
 
             <Style.Triggers>
                 <DataTrigger Binding="{Binding SourceOptionProperties}" Value="{x:Null}">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="AudioOptionGridStyle" TargetType="{x:Type Grid}">
+            <Setter Property="ClipToBounds" Value="True"/>
+            <Setter Property="Visibility" Value="Visible"/>
+
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding AudioOptionProperties}" Value="{x:Null}">
                     <Setter Property="Visibility" Value="Collapsed"/>
                 </DataTrigger>
             </Style.Triggers>
@@ -644,6 +655,17 @@
             </Grid>
             <Grid Style="{StaticResource SourceOptionGridStyle}">
                 <pt:PropertyGroupView DataContext="{Binding SourceOptionProperties}"
+                                      IndentLevel="1"
+                                      ControlAreaWidth="{Binding ElementName=Root, Path=LayerControlAreaWidth}"
+                                      NameAreaWidth="{Binding ElementName=Root, Path=DataContext.PropertyNameAreaWidth}"
+                                      IsAVSwitchColumnVisible="{Binding ElementName=Root, Path=DataContext.IsAVSwitchColumnVisible}"
+                                      IsTagColumnVisible="{Binding ElementName=Root, Path=DataContext.IsTagColumnVisible}"
+                                      Range="{Binding ElementName=Root, Path=Range}"
+                                      RangeStart="{Binding ElementName=Root, Path=RangeStart}"
+                                      CompositionFrameRate="{Binding ElementName=Root, Path=CompositionFrameRate}"/>
+            </Grid>
+            <Grid Style="{StaticResource AudioOptionGridStyle}">
+                <pt:PropertyGroupView DataContext="{Binding AudioOptionProperties}"
                                       IndentLevel="1"
                                       ControlAreaWidth="{Binding ElementName=Root, Path=LayerControlAreaWidth}"
                                       NameAreaWidth="{Binding ElementName=Root, Path=DataContext.PropertyNameAreaWidth}"

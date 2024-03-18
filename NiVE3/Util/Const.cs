@@ -11,5 +11,7 @@ namespace NiVE3.Util
         public const int AudioSamplingRate = 48000;
 
         public const int AudioChannelCount = 2;
+
+        public const double AudioSampleTime = 1.0 / AudioSamplingRate;
     }
 }

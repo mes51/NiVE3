@@ -206,6 +206,8 @@ namespace NiVE3.Numerics
 
     public readonly struct Vector3d : IEquatable<Vector3d>
     {
+        public static readonly Vector3d Zero = new Vector3d();
+
         [JsonInclude]
         public readonly double X;
 
@@ -338,6 +340,18 @@ namespace NiVE3.Numerics
         public static Vector3d operator %(Vector3d a, double s)
         {
             return new Vector3d(a.X % s, a.Y % s, a.Z % s);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(Vector3d a, Vector3d b)
+        {
+            return a.Equals(b);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator !=(Vector3d a, Vector3d b)
+        {
+            return !a.Equals(b);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

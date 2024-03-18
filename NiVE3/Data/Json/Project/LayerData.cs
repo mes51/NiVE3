@@ -71,12 +71,14 @@ namespace NiVE3.Data.Json.Project
 
         public EffectData[] Effects { get; set; } = Array.Empty<EffectData>();
 
-        public PropertyData TransformProperties { get; set; } = new PropertyData();
+        public PropertyData? TransformProperties { get; set; }
 
         public PropertyData? LayerOptionProperties { get; set; }
 
         public PropertyData? TextProperties { get; set; }
 
         public PropertyData? SourceOptionProperties { get; set; }
+
+        public PropertyData? AudioOptionProperties { get; set; }
     }
 }

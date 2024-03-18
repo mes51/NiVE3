@@ -263,6 +263,12 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("ソースのオプション")]
         public static readonly string Layer_SourceOption = nameof(Layer_SourceOption);
 
+        [ShowInMarkup, DefaultValue("オーディオ")]
+        public static readonly string Layer_AudioOption = nameof(Layer_AudioOption);
+
+        [ShowInMarkup, DefaultValue("音声レベル")]
+        public static readonly string Layer_AudioOption_AudioLevel = nameof(Layer_AudioOption_AudioLevel);
+
         [ShowInMarkup, DefaultValue("名前")]
         public static readonly string EffectList_Name = nameof(EffectList_Name);
 
@@ -301,6 +307,9 @@ namespace NiVE3.View.Resource
 
         [ShowInMarkup, DefaultValue("線の太さ")]
         public static readonly string TextPropertyView_Property_LineWidth = nameof(TextPropertyView_Property_LineWidth);
+
+        [ShowInMarkup, DefaultValue("音声")]
+        public static readonly string AudioInformationView_Title = nameof(AudioInformationView_Title);
 
         // History Command
 
@@ -629,6 +638,9 @@ namespace NiVE3.View.Resource
 
         [ShowInMarkup, DefaultValue("px")]
         public static readonly string Unit_Pixel = nameof(Unit_Pixel);
+
+        [ShowInMarkup, DefaultValue("dB")]
+        public static readonly string Unit_Decibel = nameof(Unit_Decibel);
 
         // Enum
 

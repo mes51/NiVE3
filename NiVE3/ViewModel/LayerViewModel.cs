@@ -468,6 +468,8 @@ namespace NiVE3.ViewModel
 
         public PropertyGroupViewModel? SourceOptionProperties { get; }
 
+        public PropertyGroupViewModel? AudioOptionProperties { get; }
+
         public bool IsComposition { get; }
 
         public IEnumerable<LayerModelProxy> TrackMatteViewSource { get; }
@@ -580,9 +582,12 @@ namespace NiVE3.ViewModel
                 vm.SelectItemChanged += Effect_SelectItemChanged;
                 return vm;
             });
-            TransformProperties = new PropertyGroupViewModel(layerModel.TransformProperties);
-            TransformProperties.SelectItemChanged += PropertyGroupViewModel_SelectItemChanged;
 
+            if (layerModel.TransformProperties != null)
+            {
+                TransformProperties = new PropertyGroupViewModel(layerModel.TransformProperties);
+                TransformProperties.SelectItemChanged += PropertyGroupViewModel_SelectItemChanged;
+            }
             if (layerModel.LayerOptionProperties != null)
             {
                 LayerOptionProperties = new PropertyGroupViewModel(layerModel.LayerOptionProperties);
@@ -597,6 +602,11 @@ namespace NiVE3.ViewModel
             {
                 SourceOptionProperties = new PropertyGroupViewModel(layerModel.SourceOptionProperties);
                 SourceOptionProperties.SelectItemChanged += PropertyGroupViewModel_SelectItemChanged;
+            }
+            if (layerModel.AudioOptionProperties != null)
+            {
+                AudioOptionProperties = new PropertyGroupViewModel(layerModel.AudioOptionProperties);
+                AudioOptionProperties.SelectItemChanged += PropertyGroupViewModel_SelectItemChanged;
             }
 
             WiringModel();
@@ -807,16 +817,16 @@ namespace NiVE3.ViewModel
 
         public void DeSelect()
         {
-            TransformProperties.DeSelect();
             foreach (var e in SelectedEffects)
             {
                 e.DeSelect();
             }
             SelectedEffects.Clear();
-            TransformProperties.DeSelect();
+            TransformProperties?.DeSelect();
             LayerOptionProperties?.DeSelect();
             TextProperties?.DeSelect();
             SourceOptionProperties?.DeSelect();
+            AudioOptionProperties?.DeSelect();
         }
 
         partial void WiringModel();
@@ -882,10 +892,11 @@ namespace NiVE3.ViewModel
             }
             else
             {
-                TransformProperties.DeSelect();
+                TransformProperties?.DeSelect();
                 LayerOptionProperties?.DeSelect();
                 TextProperties?.DeSelect();
                 SourceOptionProperties?.DeSelect();
+                AudioOptionProperties?.DeSelect();
             }
         }
 

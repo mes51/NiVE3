@@ -78,6 +78,8 @@ namespace NiVE3.Plugin.Interfaces
 
         public const string LightLayerOptionShadowScatterSizeId = nameof(LightLayerOptionShadowScatterSizeId);
 
+        public const string AudioLevelId = nameof(AudioLevelId);
+
         bool IsEnable3D { get; }
     }
 

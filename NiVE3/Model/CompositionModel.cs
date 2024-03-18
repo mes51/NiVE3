@@ -589,7 +589,7 @@ namespace NiVE3.Model
 
         public ColoredPreviewBoundingBox[] GetBoundingBoxes(Guid[] layerIds, double time)
         {
-            var layers = Layers.Where(l => layerIds.Contains(l.LayerId)).OrderBy(Layers.IndexOf);
+            var layers = Layers.Where(l => l.HasImage && layerIds.Contains(l.LayerId)).OrderBy(Layers.IndexOf);
             var result = new List<ColoredPreviewBoundingBox>();
 
             var activeCamera = Layers.FirstOrDefault(l => l.IsEnableVideo && l.IsCamera && l.IsContainsTime(time));
