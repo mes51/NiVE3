@@ -29,7 +29,7 @@ namespace NiVE3.Property
                     Source = layer,
                     Mode = BindingMode.OneWay
                 };
-                BindingOperations.SetBinding(control, ScalePropertyControl.Is3DProperty, is3DBinding);
+                BindingOperations.SetBinding(control, VectorPropertyControl.Is3DProperty, is3DBinding);
             }
 
             return control;

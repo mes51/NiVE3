@@ -289,7 +289,8 @@ namespace NiVE3.Input
                                             new Vector3d(),
                                             digit: 2,
                                             unitKey: LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Unit_Pixel),
-                                            separator: ","
+                                            separator: ",",
+                                            useLinkRatio: true
                                         )
                                     })),
                             })

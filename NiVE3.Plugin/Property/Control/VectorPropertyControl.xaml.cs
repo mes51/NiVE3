@@ -15,6 +15,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Numerics;
+using NiVE3.UI.Command;
 
 namespace NiVE3.Plugin.Property.Control
 {
@@ -107,6 +108,32 @@ namespace NiVE3.Plugin.Property.Control
             new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
+        public static readonly DependencyProperty IsLinkRatioProperty = DependencyProperty.Register(
+            nameof(IsLinkRatio),
+            typeof(bool),
+            typeof(VectorPropertyControl),
+            new FrameworkPropertyMetadata(true, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, IsLinkRatioChanged)
+        );
+
+        public static readonly DependencyProperty UseLinkRatioProperty = DependencyProperty.Register(
+            nameof(UseLinkRatio),
+            typeof(bool),
+            typeof(VectorPropertyControl),
+            new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        public bool UseLinkRatio
+        {
+            get { return (bool)GetValue(UseLinkRatioProperty); }
+            set { SetValue(UseLinkRatioProperty, value); }
+        }
+
+        public bool IsLinkRatio
+        {
+            get { return (bool)GetValue(IsLinkRatioProperty); }
+            set { SetValue(IsLinkRatioProperty, value); }
+        }
+
         public string? Separator
         {
             get { return (string)GetValue(SeparatorProperty); }
@@ -179,10 +206,46 @@ namespace NiVE3.Plugin.Property.Control
             set { SetValue(Is3DProperty, value); }
         }
 
+        public ICommand BeginEditCommand { get; }
+
+        public ICommand EndEditCommand { get; }
+
+        public ICommand AbortEditCommand { get; }
+
         bool IsValueChanging { get; set; }
+
+        bool IsEditingProperty { get; set; }
+
+        Vector3d ScaleRatio { get; set; } = new Vector3d(1.0, 1.0, 1.0);
 
         public VectorPropertyControl()
         {
+            BeginEditCommand = new ActionCommand(() => IsEditingProperty = true);
+
+            EndEditCommand = new ActionCommand(() =>
+            {
+                if (UseLinkRatio && IsLinkRatio)
+                {
+                    var baseValue = 1.0;
+                    if (ValueX != 0.0)
+                    {
+                        baseValue = ValueX;
+                    }
+                    else if (ValueY != 0.0)
+                    {
+                        baseValue = ValueY;
+                    }
+                    else if (ValueZ != 0.0)
+                    {
+                        baseValue = ValueZ;
+                    }
+                    ScaleRatio = new Vector3d(ValueX, ValueY, ValueZ) / baseValue;
+                }
+                IsEditingProperty = false;
+            });
+
+            AbortEditCommand = new ActionCommand(() => IsEditingProperty = false);
+
             InitializeComponent();
         }
 
@@ -197,15 +260,35 @@ namespace NiVE3.Plugin.Property.Control
                 newViewModel.PropertyChanged += ViewModel_PropertyChanged;
             }
 
-            if (ViewModel?.CurrentTimeValue is Vector3d vector)
+            if (ViewModel?.CurrentTimeValue is not Vector3d vector)
             {
-                IsValueChanging = true;
+                return;
+            }
 
-                ValueX = vector.X;
-                ValueY = vector.Y;
-                ValueZ = vector.Z;
+            IsValueChanging = true;
 
-                IsValueChanging = false;
+            ValueX = vector.X;
+            ValueY = vector.Y;
+            ValueZ = vector.Z;
+
+            IsValueChanging = false;
+
+            if (UseLinkRatio && IsLinkRatio && !IsEditingProperty)
+            {
+                var baseValue = 1.0;
+                if (ValueX != 0.0)
+                {
+                    baseValue = ValueX;
+                }
+                else if (ValueY != 0.0)
+                {
+                    baseValue = ValueY;
+                }
+                else if (ValueZ != 0.0)
+                {
+                    baseValue = ValueZ;
+                }
+                ScaleRatio = new Vector3d(ValueX, ValueY, ValueZ) / baseValue;
             }
         }
 
@@ -232,6 +315,24 @@ namespace NiVE3.Plugin.Property.Control
             ValueZ = vector.Z;
 
             IsValueChanging = false;
+
+            if (UseLinkRatio && IsLinkRatio && !IsEditingProperty)
+            {
+                var baseValue = 1.0;
+                if (ValueX != 0.0)
+                {
+                    baseValue = ValueX;
+                }
+                else if (ValueY != 0.0)
+                {
+                    baseValue = ValueY;
+                }
+                else if (ValueZ != 0.0)
+                {
+                    baseValue = ValueZ;
+                }
+                ScaleRatio = new Vector3d(ValueX, ValueY, ValueZ) / baseValue;
+            }
         }
 
         static void VectorValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -241,7 +342,59 @@ namespace NiVE3.Plugin.Property.Control
                 return;
             }
 
-            viewModel.CurrentTimeValue = new Vector3d(control.ValueX, control.ValueY, control.ValueZ);
+            if (control.UseLinkRatio && control.IsLinkRatio)
+            {
+                var scale = control.ScaleRatio;
+                if ((e.Property == ValueXProperty && scale.X == 0.0) ||
+                    (e.Property == ValueYProperty && scale.Y == 0.0) ||
+                    (e.Property == ValueZProperty && scale.Z == 0.0))
+                {
+                    scale = new Vector3d(1.0, 1.0, 1.0);
+                    control.ScaleRatio = scale;
+                }
+                else if (e.Property == ValueXProperty)
+                {
+                    scale /= scale.X; ;
+                }
+                else if (e.Property == ValueYProperty)
+                {
+                    scale /= scale.Y;
+                }
+                else if (e.Property == ValueZProperty)
+                {
+                    scale /= scale.Z;
+                }
+
+                viewModel.CurrentTimeValue = scale * (double)e.NewValue;
+            }
+            else
+            {
+                viewModel.CurrentTimeValue = new Vector3d(control.ValueX, control.ValueY, control.ValueZ);
+            }
+        }
+
+        static void IsLinkRatioChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is VectorPropertyControl control)
+            {
+                if (control.UseLinkRatio && control.IsLinkRatio)
+                {
+                    var baseValue = 1.0;
+                    if (control.ValueX != 0.0)
+                    {
+                        baseValue = control.ValueX;
+                    }
+                    else if (control.ValueY != 0.0)
+                    {
+                        baseValue = control.ValueY;
+                    }
+                    else if (control.ValueZ != 0.0)
+                    {
+                        baseValue = control.ValueZ;
+                    }
+                    control.ScaleRatio = new Vector3d(control.ValueX, control.ValueY, control.ValueZ) / baseValue;
+                }
+            }
         }
     }
 }

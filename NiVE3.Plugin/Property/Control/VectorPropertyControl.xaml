@@ -20,6 +20,34 @@
 
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
 
+            <Style x:Key="LinkCheckBox" TargetType="{x:Type CheckBox}">
+                <Setter Property="IsTabStop" Value="False"/>
+                <Setter Property="Margin" Value="5,0,0,0"/>
+                <Setter Property="VerticalAlignment" Value="Center"/>
+                <Setter Property="Width" Value="16"/>
+                <Setter Property="Height" Value="16"/>
+                <Setter Property="Background" Value="White"/>
+                <Setter Property="Foreground" Value="{gm:AppearanceResource ResourceKey=TextBrush, ReturnDynamicResource=True}"/>
+
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type CheckBox}">
+                            <Grid x:Name="templateRoot" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
+                                <Border BorderThickness="1" BorderBrush="{gm:AppearanceResource ResourceKey=BorderBrush, ReturnDynamicResource=True}"/>
+                                <Border BorderThickness="0,0,1,1" BorderBrush="White" Opacity="0.5"/>
+
+                                <Path x:Name="CheckIcon" Fill="{TemplateBinding Foreground}" Data="{StaticResource LinkIcon}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                            </Grid>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsChecked" Value="False">
+                                    <Setter TargetName="CheckIcon" Property="Visibility" Value="Hidden"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
             <Style x:Key="CrossSeparatorGridStyle" TargetType="{x:Type Grid}">
                 <Setter Property="Visibility" Value="Collapsed"/>
 
@@ -48,9 +76,11 @@
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
 
-        <pr:SlidableNumberTextBox Grid.Column="0" x:Name="ValueXSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=ValueX}" Minimum="{Binding ElementName=Root, Path=MinimumX}" Maximum="{Binding ElementName=Root, Path=MaximumX}" UnitText="{Binding ElementName=Root, Path=Unit}" Margin="5,0,2,0" VerticalAlignment="Center">
+        <CheckBox Grid.Column="0" IsChecked="{Binding ElementName=Root, Path=IsLinkRatio}" Visibility="{Binding ElementName=Root, Path=UseLinkRatio, Converter={StaticResource BooleanToVisibilityConverter}}" Style="{StaticResource LinkCheckBox}"/>
+        <pr:SlidableNumberTextBox Grid.Column="1" x:Name="ValueXSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=ValueX}" Minimum="{Binding ElementName=Root, Path=MinimumX}" Maximum="{Binding ElementName=Root, Path=MaximumX}" UnitText="{Binding ElementName=Root, Path=Unit}" Margin="5,0,2,0" VerticalAlignment="Center">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="BeginSlideEditValue">
                     <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
@@ -61,6 +91,15 @@
                 <i:EventTrigger EventName="AbortSlideEditValue">
                     <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
                 </i:EventTrigger>
+                <i:EventTrigger EventName="BeginSlideEditValue">
+                    <i:InvokeCommandAction Command="{Binding ElementName=Root, Path=BeginEditCommand}"/>
+                </i:EventTrigger>
+                <i:EventTrigger EventName="EndSlideEditValue">
+                    <i:InvokeCommandAction Command="{Binding ElementName=Root, Path=EndEditCommand}"/>
+                </i:EventTrigger>
+                <i:EventTrigger EventName="AbortSlideEditValue">
+                    <i:InvokeCommandAction Command="{Binding ElementName=Root, Path=AbortEditCommand}"/>
+                </i:EventTrigger>
                 <i:EventTrigger EventName="BeginTextEditValue">
                     <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
                 </i:EventTrigger>
@@ -70,15 +109,24 @@
                 <i:EventTrigger EventName="AbortTextEditValue">
                     <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
                 </i:EventTrigger>
+                <i:EventTrigger EventName="BeginTextEditValue">
+                    <i:InvokeCommandAction Command="{Binding ElementName=Root, Path=BeginEditCommand}"/>
+                </i:EventTrigger>
+                <i:EventTrigger EventName="EndTextEditValue">
+                    <i:InvokeCommandAction Command="{Binding ElementName=Root, Path=EndEditCommand}"/>
+                </i:EventTrigger>
+                <i:EventTrigger EventName="AbortTextEditValue">
+                    <i:InvokeCommandAction Command="{Binding ElementName=Root, Path=AbortEditCommand}"/>
+                </i:EventTrigger>
             </i:Interaction.Triggers>
         </pr:SlidableNumberTextBox>
-        <Grid  Grid.Column="1" Style="{StaticResource CrossSeparatorGridStyle}">
+        <Grid  Grid.Column="2" Style="{StaticResource CrossSeparatorGridStyle}">
             <Path Fill="{gm:AppearanceResource ResourceKey=TextBrush}" Data="{StaticResource CrossIcon}" VerticalAlignment="Center" Margin="0,4,0,0"/>
         </Grid>
-        <Grid Grid.Column="1" Style="{StaticResource SeparatorGridStyle}">
+        <Grid Grid.Column="2" Style="{StaticResource SeparatorGridStyle}">
             <TextBlock Text="{Binding ElementName=Root, Path=Separator}" VerticalAlignment="Bottom"/>
         </Grid>
-        <pr:SlidableNumberTextBox Grid.Column="2" x:Name="ValueYSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=ValueY}" Minimum="{Binding ElementName=Root, Path=MinimumY}" Maximum="{Binding ElementName=Root, Path=MaximumY}" UnitText="{Binding ElementName=Root, Path=Unit}" Margin="5,0,2,0" VerticalAlignment="Center">
+        <pr:SlidableNumberTextBox Grid.Column="3" x:Name="ValueYSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=ValueY}" Minimum="{Binding ElementName=Root, Path=MinimumY}" Maximum="{Binding ElementName=Root, Path=MaximumY}" UnitText="{Binding ElementName=Root, Path=Unit}" Margin="5,0,2,0" VerticalAlignment="Center">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="BeginSlideEditValue">
                     <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
@@ -89,6 +137,15 @@
                 <i:EventTrigger EventName="AbortSlideEditValue">
                     <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
                 </i:EventTrigger>
+                <i:EventTrigger EventName="BeginSlideEditValue">
+                    <i:InvokeCommandAction Command="{Binding ElementName=Root, Path=BeginEditCommand}"/>
+                </i:EventTrigger>
+                <i:EventTrigger EventName="EndSlideEditValue">
+                    <i:InvokeCommandAction Command="{Binding ElementName=Root, Path=EndEditCommand}"/>
+                </i:EventTrigger>
+                <i:EventTrigger EventName="AbortSlideEditValue">
+                    <i:InvokeCommandAction Command="{Binding ElementName=Root, Path=AbortEditCommand}"/>
+                </i:EventTrigger>
                 <i:EventTrigger EventName="BeginTextEditValue">
                     <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
                 </i:EventTrigger>
@@ -97,16 +154,25 @@
                 </i:EventTrigger>
                 <i:EventTrigger EventName="AbortTextEditValue">
                     <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
+                </i:EventTrigger>
+                <i:EventTrigger EventName="BeginTextEditValue">
+                    <i:InvokeCommandAction Command="{Binding ElementName=Root, Path=BeginEditCommand}"/>
+                </i:EventTrigger>
+                <i:EventTrigger EventName="EndTextEditValue">
+                    <i:InvokeCommandAction Command="{Binding ElementName=Root, Path=EndEditCommand}"/>
+                </i:EventTrigger>
+                <i:EventTrigger EventName="AbortTextEditValue">
+                    <i:InvokeCommandAction Command="{Binding ElementName=Root, Path=AbortEditCommand}"/>
                 </i:EventTrigger>
             </i:Interaction.Triggers>
         </pr:SlidableNumberTextBox>
-        <Grid Grid.Column="3" Style="{StaticResource CrossSeparatorGridStyle}">
+        <Grid Grid.Column="4" Style="{StaticResource CrossSeparatorGridStyle}">
             <Path Fill="{gm:AppearanceResource ResourceKey=TextBrush}" Data="{StaticResource CrossIcon}" VerticalAlignment="Center" Margin="0,4,0,0" Visibility="{Binding ElementName=Root, Path=Is3D, Converter={StaticResource BooleanToVisibilityConverter}}"/>
         </Grid>
-        <Grid Grid.Column="3" Style="{StaticResource SeparatorGridStyle}">
+        <Grid Grid.Column="4" Style="{StaticResource SeparatorGridStyle}">
             <TextBlock Text="{Binding ElementName=Root, Path=Separator}" VerticalAlignment="Bottom" Visibility="{Binding ElementName=Root, Path=Is3D, Converter={StaticResource BooleanToVisibilityConverter}}"/>
         </Grid>
-        <pr:SlidableNumberTextBox Grid.Column="4" x:Name="ValueZSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=ValueZ}" Minimum="{Binding ElementName=Root, Path=MinimumZ}" Maximum="{Binding ElementName=Root, Path=MaximumZ}" UnitText="{Binding ElementName=Root, Path=Unit}" Margin="5,0,0,0" VerticalAlignment="Center" Visibility="{Binding ElementName=Root, Path=Is3D, Converter={StaticResource BooleanToVisibilityConverter}}">
+        <pr:SlidableNumberTextBox Grid.Column="5" x:Name="ValueZSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=ValueZ}" Minimum="{Binding ElementName=Root, Path=MinimumZ}" Maximum="{Binding ElementName=Root, Path=MaximumZ}" UnitText="{Binding ElementName=Root, Path=Unit}" Margin="5,0,0,0" VerticalAlignment="Center" Visibility="{Binding ElementName=Root, Path=Is3D, Converter={StaticResource BooleanToVisibilityConverter}}">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="BeginSlideEditValue">
                     <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
@@ -117,6 +183,15 @@
                 <i:EventTrigger EventName="AbortSlideEditValue">
                     <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
                 </i:EventTrigger>
+                <i:EventTrigger EventName="BeginSlideEditValue">
+                    <i:InvokeCommandAction Command="{Binding ElementName=Root, Path=BeginEditCommand}"/>
+                </i:EventTrigger>
+                <i:EventTrigger EventName="EndSlideEditValue">
+                    <i:InvokeCommandAction Command="{Binding ElementName=Root, Path=EndEditCommand}"/>
+                </i:EventTrigger>
+                <i:EventTrigger EventName="AbortSlideEditValue">
+                    <i:InvokeCommandAction Command="{Binding ElementName=Root, Path=AbortEditCommand}"/>
+                </i:EventTrigger>
                 <i:EventTrigger EventName="BeginTextEditValue">
                     <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
                 </i:EventTrigger>
@@ -125,6 +200,15 @@
                 </i:EventTrigger>
                 <i:EventTrigger EventName="AbortTextEditValue">
                     <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
+                </i:EventTrigger>
+                <i:EventTrigger EventName="BeginTextEditValue">
+                    <i:InvokeCommandAction Command="{Binding ElementName=Root, Path=BeginEditCommand}"/>
+                </i:EventTrigger>
+                <i:EventTrigger EventName="EndTextEditValue">
+                    <i:InvokeCommandAction Command="{Binding ElementName=Root, Path=EndEditCommand}"/>
+                </i:EventTrigger>
+                <i:EventTrigger EventName="AbortTextEditValue">
+                    <i:InvokeCommandAction Command="{Binding ElementName=Root, Path=AbortEditCommand}"/>
                 </i:EventTrigger>
             </i:Interaction.Triggers>
         </pr:SlidableNumberTextBox>

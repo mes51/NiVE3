@@ -31,9 +31,12 @@ namespace NiVE3.Plugin.Property.Properties
 
         public override PropertyControlBase CreateControl(ICompositionObject composition, ILayerObject? layer, IEffectObject? effect, IPropertyViewModel viewModel)
         {
-            var control = new ScalePropertyControl();
+            var control = new VectorPropertyControl();
             control.DataContext = viewModel;
             control.Is3D = Is3D;
+            control.Separator = ",";
+            control.Unit = "%";
+            control.UseLinkRatio = true;
             return control;
         }
 
