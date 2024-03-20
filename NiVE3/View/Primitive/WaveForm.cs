@@ -263,7 +263,7 @@ namespace NiVE3.View.Primitive
                         {
                             geometryContext.BeginFigure(new Point(x - pixelPerLevel, height), true, true);
                         }
-                        geometryContext.LineTo(new Point(x, Math.Max(-db / MinimumLevel, 0.0) * height), false, false);
+                        geometryContext.LineTo(new Point(x, Math.Pow(Math.Max(-db / MinimumLevel, 0.0), 1.0 / 3.0) * height), false, false);
                         isPointAdded = true;
                     }
                 }
