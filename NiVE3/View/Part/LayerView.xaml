@@ -665,15 +665,39 @@
                                       CompositionFrameRate="{Binding ElementName=Root, Path=CompositionFrameRate}"/>
             </Grid>
             <Grid Style="{StaticResource AudioOptionGridStyle}">
-                <pt:PropertyGroupView DataContext="{Binding AudioOptionProperties}"
+                <pt:LayerItemExpander HeaderText="{gm:LanguageResource ResourceKey=Layer_Audio}"
                                       IndentLevel="1"
-                                      ControlAreaWidth="{Binding ElementName=Root, Path=LayerControlAreaWidth}"
                                       NameAreaWidth="{Binding ElementName=Root, Path=DataContext.PropertyNameAreaWidth}"
                                       IsAVSwitchColumnVisible="{Binding ElementName=Root, Path=DataContext.IsAVSwitchColumnVisible}"
-                                      IsTagColumnVisible="{Binding ElementName=Root, Path=DataContext.IsTagColumnVisible}"
-                                      Range="{Binding ElementName=Root, Path=Range}"
-                                      RangeStart="{Binding ElementName=Root, Path=RangeStart}"
-                                      CompositionFrameRate="{Binding ElementName=Root, Path=CompositionFrameRate}"/>
+                                      IsTagColumnVisible="{Binding ElementName=Root, Path=DataContext.IsTagColumnVisible}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <pt:PropertyGroupView Grid.Row="0"
+                                              DataContext="{Binding AudioOptionProperties}"
+                                              IndentLevel="2"
+                                              ControlAreaWidth="{Binding ElementName=Root, Path=LayerControlAreaWidth}"
+                                              NameAreaWidth="{Binding ElementName=Root, Path=DataContext.PropertyNameAreaWidth}"
+                                              IsAVSwitchColumnVisible="{Binding ElementName=Root, Path=DataContext.IsAVSwitchColumnVisible}"
+                                              IsTagColumnVisible="{Binding ElementName=Root, Path=DataContext.IsTagColumnVisible}"
+                                              Range="{Binding ElementName=Root, Path=Range}"
+                                              RangeStart="{Binding ElementName=Root, Path=RangeStart}"
+                                              CompositionFrameRate="{Binding ElementName=Root, Path=CompositionFrameRate}"/>
+                        <pt:AudioWaveFormView Grid.Row="1"
+                                              DataContext="{Binding}"
+                                              Text="{gm:LanguageResource ResourceKey=Layer_Audio_WaveForm}"
+                                              IndentLevel="2"
+                                              ControlAreaWidth="{Binding ElementName=Root, Path=LayerControlAreaWidth}"
+                                              NameAreaWidth="{Binding ElementName=Root, Path=DataContext.PropertyNameAreaWidth}"
+                                              IsAVSwitchColumnVisible="{Binding ElementName=Root, Path=DataContext.IsAVSwitchColumnVisible}"
+                                              IsTagColumnVisible="{Binding ElementName=Root, Path=DataContext.IsTagColumnVisible}"
+                                              Range="{Binding ElementName=Root, Path=Range}"
+                                              RangeStart="{Binding ElementName=Root, Path=RangeStart}"
+                                              WaveBrush="{Binding TagColor, Converter={StaticResource ColorToBrushConverter}}"/>
+                    </Grid>
+                </pt:LayerItemExpander>
             </Grid>
         </StackPanel>
 

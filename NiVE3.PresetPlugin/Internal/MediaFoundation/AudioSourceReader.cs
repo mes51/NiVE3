@@ -17,6 +17,8 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
 
         const double DurationRate = 1E7;
 
+        const long RewindRetrySpan = 1000;
+
         public double Duration { get; }
 
         public bool Success { get; }
@@ -124,6 +126,7 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
                     {
                         break;
                     }
+                    pos = new Variant { ElementType = VariantElementType.Long, Value = longTime - RewindRetrySpan * (rewindCount + 1) };
                     Reader.SetCurrentPosition(Guid.Empty, pos);
                     rewindCount++;
                     continue;

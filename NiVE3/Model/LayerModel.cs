@@ -576,15 +576,16 @@ namespace NiVE3.Model
 
         public float[] GetRawAudio(double time, double length)
         {
-            var layerTime = time - SourceStartPoint;
+            var layerTime = Math.Max(time - SourceStartPoint, InPoint);
+            var layerLength = Math.Min(length, OutPoint - layerTime);
 
             // TODO: タイムリマップ反映
             var sourceTime = Math.Max(layerTime, 0.0);
-            var sourceLength = Math.Max(length - (layerTime - sourceTime), 0.0);
+            var sourceLength = Math.Max(layerLength - (layerTime - sourceTime), 0.0);
 
-            var result = ArrayPool<float>.Shared.Rent((int)(length * Const.AudioSamplingRate) * 2);
+            var result = new float[(int)(length * Const.AudioSamplingRate) * 2];
             var audio = FootageModel.ReadAudio(sourceTime, sourceLength);
-            var startPos = (int)(Math.Max(SourceStartPoint - time, 0.0) * Const.AudioSamplingRate) * 2;
+            var startPos = (int)(Math.Max((InPoint + SourceStartPoint) - time, 0.0) * Const.AudioSamplingRate) * 2;
 
             if (AudioOptionProperties != null && AudioOptionProperties.Children.First(p => p.PropertyId == ILayerObject.AudioLevelId) is PropertyModel level && (level.KeyFrames.Count > 0 || ((Vector3d)(level.Value ?? Vector3d.Zero)) != Vector3d.Zero))
             {
@@ -641,7 +642,7 @@ namespace NiVE3.Model
             }
             else
             {
-                audio.AsSpan(0, Math.Min(audio.Length, result.Length - startPos)).CopyTo(result);
+                audio.AsSpan(0, Math.Min(audio.Length, result.Length - startPos)).CopyTo(result.AsSpan(startPos));
             }
 
             return result;
@@ -658,7 +659,7 @@ namespace NiVE3.Model
             var layerBeginTime = begin - SourceStartPoint;
             var layerEndTime = end - SourceStartPoint;
 
-            return (layerBeginTime < outPoint && layerEndTime > inPoint);
+            return (layerBeginTime < OutPoint && layerEndTime > InPoint);
         }
 
         public CameraSetting? GetCameraSetting(double time)

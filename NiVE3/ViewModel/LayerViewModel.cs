@@ -745,6 +745,11 @@ namespace NiVE3.ViewModel
             return eventArgs.Cycled;
         }
 
+        public float[] GetAudio(double time, double length)
+        {
+            return LayerModel.GetAudio(time, length);
+        }
+
         public void DragOver(IDropInfo dropInfo)
         {
             if (IsSpecial)

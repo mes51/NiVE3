@@ -537,15 +537,13 @@ namespace NiVE3.ViewModel
         private void PlayControllerModel_PreviewPlay(object? sender, EventArgs e)
         {
             var audio = Array.Empty<float>();
-            var start = Math.Min(CurrentTime, WorkareaBegin);
-            var length = Math.Max(WorkareaEnd - start, Duration);
             if (PreviewModel is CompositionPreviewModel compositionPreviewModel && compositionPreviewModel.Composition != null)
             {
-                audio = compositionPreviewModel.Composition.RenderAudio(start, length);
+                audio = compositionPreviewModel.Composition.RenderAudio(0.0, Duration);
             }
             else if (PreviewModel is FootagePreviewModel footagePreviewModel && footagePreviewModel.Footage != null && footagePreviewModel.SourceType.HasFlag(SourceType.Audio))
             {
-                audio = footagePreviewModel.Footage.ReadAudio(start, length);
+                audio = footagePreviewModel.Footage.ReadAudio(0.0, Duration);
             }
             AudioPlayerModel.SetPreviewAudio(audio, WorkareaBegin, WorkareaEnd);
             AudioPlayerModel.PreviewSpeed = 1.0;

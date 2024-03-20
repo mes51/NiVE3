@@ -563,7 +563,7 @@ namespace NiVE3.Model
             var hasSolo = Layers.Any(l => l.IsEnableSolo);
             foreach (var l in Layers.Where(l => l.HasAudio && l.IsEnableAudio && (!hasSolo || l.IsEnableSolo)))
             {
-                if (!l.IsContainsTimeRange(time, length))
+                if (!l.IsContainsTimeRange(time, time + length))
                 {
                     continue;
                 }
@@ -580,8 +580,6 @@ namespace NiVE3.Model
                 {
                     result[i] += layerAudio[i];
                 }
-
-                ArrayPool<float>.Shared.Return(layerAudio);
             }
 
             return result;

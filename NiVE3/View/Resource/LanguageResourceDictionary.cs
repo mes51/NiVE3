@@ -245,6 +245,12 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("エフェクト")]
         public static readonly string Layer_Effects = nameof(Layer_Effects);
 
+        [ShowInMarkup, DefaultValue("オーディオ")]
+        public static readonly string Layer_Audio = nameof(Layer_Audio);
+
+        [ShowInMarkup, DefaultValue("ウェーブフォーム")]
+        public static readonly string Layer_Audio_WaveForm = nameof(Layer_Audio_WaveForm);
+
         [ShowInMarkup, DefaultValue("トランスフォーム")]
         public static readonly string Layer_Transform = nameof(Layer_Transform);
 
@@ -263,7 +269,7 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("ソースのオプション")]
         public static readonly string Layer_SourceOption = nameof(Layer_SourceOption);
 
-        [ShowInMarkup, DefaultValue("オーディオ")]
+        [ShowInMarkup, DefaultValue("オーディオ設定")]
         public static readonly string Layer_AudioOption = nameof(Layer_AudioOption);
 
         [ShowInMarkup, DefaultValue("音声レベル")]
