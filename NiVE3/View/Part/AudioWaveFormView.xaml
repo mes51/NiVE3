@@ -16,7 +16,8 @@
     <UserControl.Resources>
         <cv:EnumToLocalizedNameConverter x:Key="EnumToLocalizedNameConverter"/>
         <ucv:EqualValueConverter x:Key="EqualValueConverter"/>
-
+        <!-- NOTE: なぜか一番上に持って行くとXamlReaderがエラーを吐く -->
+        <BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
 
         <Style x:Key="SelectorMenuItem" TargetType="{x:Type MenuItem}" BasedOn="{StaticResource {x:Type MenuItem}}">
             <Setter Property="IsChecked" Value="False"/>
@@ -38,7 +39,8 @@
         </Style>
     </UserControl.Resources>
     <Grid>
-        <pt:LayerItemExpander HeaderText="{Binding ElementName=Root, Path=Text}"
+        <pt:LayerItemExpander x:Name="Expander"
+                              HeaderText="{Binding ElementName=Root, Path=Text}"
                               IndentLevel="{Binding ElementName=Root, Path=IndentLevel}"
                               NameAreaWidth="{Binding ElementName=Root, Path=DataContext.PropertyNameAreaWidth}"
                               IsAVSwitchColumnVisible="{Binding ElementName=Root, Path=DataContext.IsAVSwitchColumnVisible}"
@@ -54,7 +56,15 @@
                         <ContextMenu ItemsSource="{mk:EnumValues EnumType={x:Type pr:WaveFormType}}" ItemContainerStyle="{StaticResource SelectorMenuItem}"/>
                     </Grid.ContextMenu>
                 </Grid>
-                <pr:WaveForm Grid.Column="1" DataContext="{Binding}" Height="50" ThumbSize="{x:Static r:UIParameters.TimelineRangeThumbWidth}" Range="{Binding ElementName=Root, Path=Range}" RangeStart="{Binding ElementName=Root, Path=RangeStart}" Foreground="{Binding ElementName=Root, Path=WaveBrush}" WaveFormType="{Binding AudioWaveFormType}"/>
+                <pr:WaveForm Grid.Column="1"
+                             DataContext="{Binding}"
+                             Height="50"
+                             ThumbSize="{x:Static r:UIParameters.TimelineRangeThumbWidth}"
+                             Range="{Binding ElementName=Root, Path=Range}"
+                             RangeStart="{Binding ElementName=Root, Path=RangeStart}"
+                             Foreground="{Binding ElementName=Root, Path=WaveBrush}"
+                             WaveFormType="{Binding AudioWaveFormType}"
+                             Visibility="{Binding ElementName=Expander, Path=IsExpanded, Converter={StaticResource BoolToVisibilityConverter}}"/>
             </Grid>
         </pt:LayerItemExpander>
     </Grid>
