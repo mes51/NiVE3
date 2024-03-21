@@ -31,6 +31,8 @@ namespace NiVE3.ViewModel
 
         event EventHandler<SelectItemEventArgs> SelectItemChanged;
 
+        event EventHandler<PropertyValueCommitedEventArgs> PropertyValueCommited;
+
         ObservableCollection<KeyFrame>? KeyFrames { get; }
 
         ObservableCollectionView<IPropertyModel, IInternalPropertyViewModel>? Children { get; }
@@ -158,6 +160,13 @@ namespace NiVE3.ViewModel
             remove { SelectItemChangedPublisher.Unsubscribe(value); }
         }
 
+        WeakEventPublisher<PropertyValueCommitedEventArgs> PropertyValueUpdatePublisher { get; } = new WeakEventPublisher<PropertyValueCommitedEventArgs>();
+        public event EventHandler<PropertyValueCommitedEventArgs> PropertyValueCommited
+        {
+            add { PropertyValueUpdatePublisher.Subscribe(value); }
+            remove { PropertyValueUpdatePublisher.Unsubscribe(value); }
+        }
+
         public PropertyBase Property { get; }
 
         public ICommand BeginEditCommand { get; }
@@ -248,6 +257,7 @@ namespace NiVE3.ViewModel
             CurrentTimeValue = Value;
             HasKeyFrame = KeyFrames.Count > 0;
 
+            PropertyModel.ValueCommited += PropertyModel_ValueCommited;
             PropertyChanged += PropertyViewModel_PropertyChanged;
         }
 
@@ -267,6 +277,11 @@ namespace NiVE3.ViewModel
         }
 
         partial void WiringModel();
+
+        private void PropertyModel_ValueCommited(object? sender, EventArgs e)
+        {
+            PropertyValueUpdatePublisher.Publish(this, new PropertyValueCommitedEventArgs(PropertyModel.Value, this));
+        }
 
         private void PropertyViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
@@ -351,6 +366,13 @@ namespace NiVE3.ViewModel
             remove { SelectItemChangedPublisher.Unsubscribe(value); }
         }
 
+        WeakEventPublisher<PropertyValueCommitedEventArgs> PropertyValueUpdatePublisher { get; } = new WeakEventPublisher<PropertyValueCommitedEventArgs>();
+        public event EventHandler<PropertyValueCommitedEventArgs> PropertyValueCommited
+        {
+            add { PropertyValueUpdatePublisher.Subscribe(value); }
+            remove { PropertyValueUpdatePublisher.Unsubscribe(value); }
+        }
+
         public ICommand BeginEditCommand => throw new NotImplementedException();
 
         public ICommand EndEditCommand => throw new NotImplementedException();
@@ -385,6 +407,7 @@ namespace NiVE3.ViewModel
             {
                 var vm = InternalPropertyViewModel.CreateViewModel(m);
                 vm.SelectItemChanged += Property_SelectItemChanged;
+                vm.PropertyValueCommited += Property_PropertyValueCommited;
                 return vm;
             });
             ViewState = propertyGroupModel.CreateState(this);
@@ -434,6 +457,11 @@ namespace NiVE3.ViewModel
         {
             SelectItemChangedPublisher.Publish(sender, new SelectItemEventArgs(e, this));
         }
+
+        private void Property_PropertyValueCommited(object? sender, PropertyValueCommitedEventArgs e)
+        {
+            PropertyValueUpdatePublisher.Publish(sender, new PropertyValueCommitedEventArgs(e, this));
+        }
     }
 
     partial class AppendablePropertyViewModel : BindableBase, IInternalPropertyViewModel, IDropTarget, INameEditableParentViewModel
@@ -473,6 +501,13 @@ namespace NiVE3.ViewModel
             remove { SelectItemChangedPublisher.Unsubscribe(value); }
         }
 
+        WeakEventPublisher<PropertyValueCommitedEventArgs> PropertyValueUpdatePublisher { get; } = new WeakEventPublisher<PropertyValueCommitedEventArgs>();
+        public event EventHandler<PropertyValueCommitedEventArgs> PropertyValueCommited
+        {
+            add { PropertyValueUpdatePublisher.Subscribe(value); }
+            remove { PropertyValueUpdatePublisher.Unsubscribe(value); }
+        }
+
         public ICommand BeginEditCommand => throw new NotImplementedException();
 
         public ICommand EndEditCommand => throw new NotImplementedException();
@@ -506,6 +541,7 @@ namespace NiVE3.ViewModel
             {
                 var vm = new PropertyGroupViewModel((PropertyGroupModel)m, true);
                 vm.SelectItemChanged += Property_SelectItemChanged;
+                vm.PropertyValueCommited += Property_PropertyValueCommited;
                 return (IInternalPropertyViewModel)vm;
             });
             Name = appendablePropertyModel.Name;
@@ -556,6 +592,11 @@ namespace NiVE3.ViewModel
                     SelectedChildren.Add(exclude);
                 }
             }
+        }
+
+        private void Property_PropertyValueCommited(object? sender, PropertyValueCommitedEventArgs e)
+        {
+            PropertyValueUpdatePublisher.Publish(sender, new PropertyValueCommitedEventArgs(e, this));
         }
 
         public void DragOver(IDropInfo dropInfo)

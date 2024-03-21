@@ -12,7 +12,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using NiVE3.View.Primitive;
 using NiVE3.View.Resource;
 using NiVE3.ViewModel;
 

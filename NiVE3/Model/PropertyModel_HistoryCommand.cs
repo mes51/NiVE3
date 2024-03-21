@@ -32,11 +32,13 @@ namespace NiVE3.Model
             public void Redo()
             {
                 Model.Value = NewValue;
+                Model.ValueCommited?.Invoke(Model, EventArgs.Empty);
             }
 
             public void Undo()
             {
                 Model.Value = OldValue;
+                Model.ValueCommited?.Invoke(Model, EventArgs.Empty);
             }
 
             public void Dispose() { }
@@ -62,12 +64,14 @@ namespace NiVE3.Model
             public void Redo()
             {
                 Model.KeyFrames.Add(KeyFrame);
+                Model.ValueCommited?.Invoke(Model, EventArgs.Empty);
             }
 
             public void Undo()
             {
                 Model.KeyFrames.Remove(KeyFrame);
                 Model.Value = OldValue;
+                Model.ValueCommited?.Invoke(Model, EventArgs.Empty);
             }
 
             public void Dispose() { }
@@ -93,11 +97,13 @@ namespace NiVE3.Model
             public void Redo()
             {
                 Model.KeyFrames.Insert(InsertIndex, KeyFrame);
+                Model.ValueCommited?.Invoke(Model, EventArgs.Empty);
             }
 
             public void Undo()
             {
                 Model.KeyFrames.Remove(KeyFrame);
+                Model.ValueCommited?.Invoke(Model, EventArgs.Empty);
             }
 
             public void Dispose() { }
@@ -126,11 +132,13 @@ namespace NiVE3.Model
             public void Redo()
             {
                 Model.KeyFrames[Index] = NewKeyFrame;
+                Model.ValueCommited?.Invoke(Model, EventArgs.Empty);
             }
 
             public void Undo()
             {
                 Model.KeyFrames[Index] = OldKeyFrame;
+                Model.ValueCommited?.Invoke(Model, EventArgs.Empty);
             }
 
             public void Dispose() { }
@@ -153,6 +161,7 @@ namespace NiVE3.Model
             public void Redo()
             {
                 Model.KeyFrames.Clear();
+                Model.ValueCommited?.Invoke(Model, EventArgs.Empty);
             }
 
             public void Undo()
@@ -161,6 +170,7 @@ namespace NiVE3.Model
                 {
                     Model.KeyFrames.Add(k);
                 }
+                Model.ValueCommited?.Invoke(Model, EventArgs.Empty);
             }
 
             public void Dispose() { }
@@ -189,11 +199,13 @@ namespace NiVE3.Model
             public void Redo()
             {
                 ReplaceKeyFrames(OldKeyFrames, NewKeyFrames);
+                Model.ValueCommited?.Invoke(Model, EventArgs.Empty);
             }
 
             public void Undo()
             {
                 ReplaceKeyFrames(NewKeyFrames, OldKeyFrames);
+                Model.ValueCommited?.Invoke(Model, EventArgs.Empty);
             }
 
             public void Dispose() { }
@@ -243,6 +255,7 @@ namespace NiVE3.Model
                 {
                     Model.KeyFrames.Remove(k);
                 }
+                Model.ValueCommited?.Invoke(Model, EventArgs.Empty);
             }
 
             public void Undo()
@@ -251,6 +264,7 @@ namespace NiVE3.Model
                 {
                     Model.KeyFrames.Insert(i, k);
                 }
+                Model.ValueCommited?.Invoke(Model, EventArgs.Empty);
             }
 
             public void Dispose() { }
@@ -312,11 +326,13 @@ namespace NiVE3.Model
             public void Redo()
             {
                 Model.InsertInternal(Index, Child);
+                Model.ValueCommited?.Invoke(Model, EventArgs.Empty);
             }
 
             public void Undo()
             {
                 Model.RemoveInternal(Child);
+                Model.ValueCommited?.Invoke(Model, EventArgs.Empty);
             }
 
             public void Dispose() { }
@@ -345,6 +361,7 @@ namespace NiVE3.Model
                 {
                     Model.RemoveInternal(c);
                 }
+                Model.ValueCommited?.Invoke(Model, EventArgs.Empty);
             }
 
             public void Undo()
@@ -353,6 +370,7 @@ namespace NiVE3.Model
                 {
                     Model.InsertInternal(i, c);
                 }
+                Model.ValueCommited?.Invoke(Model, EventArgs.Empty);
             }
 
             public void Dispose() { }
@@ -378,11 +396,13 @@ namespace NiVE3.Model
             public void Redo()
             {
                 Model.Children.SortBy(c => Array.IndexOf(NewOrderedChildren, c));
+                Model.ValueCommited?.Invoke(Model, EventArgs.Empty);
             }
 
             public void Undo()
             {
                 Model.Children.SortBy(c => Array.IndexOf(PrevOrderedChildren, c));
+                Model.ValueCommited?.Invoke(Model, EventArgs.Empty);
             }
 
             public void Dispose() { }

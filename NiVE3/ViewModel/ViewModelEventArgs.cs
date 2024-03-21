@@ -95,4 +95,23 @@ namespace NiVE3.ViewModel
             ObjectHierarchy = prev.ObjectHierarchy.Append(parent).ToArray();
         }
     }
+
+    class PropertyValueCommitedEventArgs : EventArgs
+    {
+        public object? Value { get; }
+
+        public IInternalPropertyViewModel[] PropertyHierarchy { get; }
+
+        public PropertyValueCommitedEventArgs(object? value, IInternalPropertyViewModel sender)
+        {
+            Value = value;
+            PropertyHierarchy = new IInternalPropertyViewModel[] { sender };
+        }
+
+        public PropertyValueCommitedEventArgs(PropertyValueCommitedEventArgs e, IInternalPropertyViewModel parent)
+        {
+            Value = e.Value;
+            PropertyHierarchy = e.PropertyHierarchy.Append(parent).ToArray();
+        }
+    }
 }

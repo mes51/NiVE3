@@ -4,7 +4,6 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:NiVE3.View.Part"
-             xmlns:pr="clr-namespace:NiVE3.View.Primitive"
              xmlns:pt="clr-namespace:NiVE3.View.Part"
              xmlns:r="clr-namespace:NiVE3.View.Resource"
              xmlns:cv="clr-namespace:NiVE3.View.Converter"
@@ -21,7 +20,7 @@
 
         <Style x:Key="SelectorMenuItem" TargetType="{x:Type MenuItem}" BasedOn="{StaticResource {x:Type MenuItem}}">
             <Setter Property="IsChecked" Value="False"/>
-            <Setter Property="Header" Value="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource EnumToLocalizedNameConverter}, ConverterParameter={x:Type pr:WaveFormType}}"/>
+            <Setter Property="Header" Value="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource EnumToLocalizedNameConverter}, ConverterParameter={x:Type pt:WaveFormType}}"/>
             <EventSetter Event="Click" Handler="MenuItem_Click"/>
 
             <Style.Triggers>
@@ -53,10 +52,10 @@
 
                 <Grid Grid.Column="0" Background="Transparent">
                     <Grid.ContextMenu>
-                        <ContextMenu ItemsSource="{mk:EnumValues EnumType={x:Type pr:WaveFormType}}" ItemContainerStyle="{StaticResource SelectorMenuItem}"/>
+                        <ContextMenu ItemsSource="{mk:EnumValues EnumType={x:Type pt:WaveFormType}}" ItemContainerStyle="{StaticResource SelectorMenuItem}"/>
                     </Grid.ContextMenu>
                 </Grid>
-                <pr:WaveForm Grid.Column="1"
+                <pt:WaveForm Grid.Column="1"
                              DataContext="{Binding}"
                              Height="50"
                              ThumbSize="{x:Static r:UIParameters.TimelineRangeThumbWidth}"

@@ -34,6 +34,8 @@ namespace NiVE3.Model
 
         event EventHandler<EventArgs>? ValueUpdated;
 
+        event EventHandler<EventArgs>? ValueCommited;
+
         PropertyControlBase CreateControl(IPropertyViewModel viewModel);
 
         PropertyViewState CreateState(IPropertyViewModel propertyViewModel);
@@ -91,6 +93,8 @@ namespace NiVE3.Model
         public PropertyBase Property { get; }
 
         public event EventHandler<EventArgs>? ValueUpdated;
+
+        public event EventHandler<EventArgs>? ValueCommited;
 
         CompositionModel CompositionModel { get; }
 
@@ -154,6 +158,7 @@ namespace NiVE3.Model
                 {
                     Value = newValue;
                     HistoryModel.Add(new ValueChangeHistoryCommand(this, prevValue, newValue));
+                    ValueCommited?.Invoke(this, EventArgs.Empty);
                 }
             }
         }
@@ -183,6 +188,7 @@ namespace NiVE3.Model
                     HistoryModel.Add(new AddKeyFrameHistoryCommand(this, keyFrame, index));
                 }
             }
+            ValueCommited?.Invoke(this, EventArgs.Empty);
         }
 
         public void ClearKeyFrame()
@@ -190,6 +196,7 @@ namespace NiVE3.Model
             var keyFrames = KeyFrames.ToArray();
             KeyFrames.Clear();
             HistoryModel.Add(new ClearKeyFramesHistoryCommand(this, keyFrames));
+            ValueCommited?.Invoke(this, EventArgs.Empty);
         }
 
         public void MoveTimeKeyFrames(KeyFrame[] targetKeyFrames, double[] newTime)
@@ -215,6 +222,7 @@ namespace NiVE3.Model
             }
 
             HistoryModel.Add(new DeleteKeyFramesHistoryCommand(this, targetKeyframes, oldIndices));
+            ValueCommited?.Invoke(this, EventArgs.Empty);
         }
 
         public object? GetValue(double time)
@@ -293,6 +301,7 @@ namespace NiVE3.Model
 
             oldKeyFrames.Sort((a, b) => a.Time.CompareTo(b.Time));
             HistoryModel.Add(new ReplaceKeyFramesHistoryCommand(this, oldKeyFrames.ToArray(), newKeyFrames, historyNameKey));
+            ValueCommited?.Invoke(this, EventArgs.Empty);
         }
 
         private void CompositionModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -348,6 +357,8 @@ namespace NiVE3.Model
 
         public event EventHandler<EventArgs>? ValueUpdated;
 
+        public event EventHandler<EventArgs>? ValueCommited;
+
         CompositionModel CompositionModel { get; }
 
         LayerModel? LayerModel { get; }
@@ -390,6 +401,7 @@ namespace NiVE3.Model
             foreach (var c in Children)
             {
                 c.ValueUpdated += Child_ValueUpdated;
+                c.ValueCommited += Child_ValueCommited;
             }
         }
 
@@ -486,6 +498,11 @@ namespace NiVE3.Model
         {
             ValueUpdated?.Invoke(sender, e);
         }
+
+        private void Child_ValueCommited(object? sender, EventArgs e)
+        {
+            ValueCommited?.Invoke(sender, e);
+        }
     }
 
     partial class AppendablePropertyModel : BindableBase, IPropertyModel
@@ -510,6 +527,8 @@ namespace NiVE3.Model
         public AppendablePropertyItem[] Items { get; }
 
         public event EventHandler<EventArgs>? ValueUpdated;
+
+        public event EventHandler<EventArgs>? ValueCommited;
 
         CompositionModel CompositionModel { get; }
 
@@ -641,6 +660,7 @@ namespace NiVE3.Model
             var group = item.CreateFunc();
             var groupModel = new PropertyGroupModel(group, CompositionModel, LayerModel, EffectModel, HistoryModel, instanceId);
             groupModel.ValueUpdated += Child_ValueUpdated;
+            groupModel.ValueCommited += Child_ValueCommited;
 
             var newChildNumber = 1;
             var newName = "";
@@ -668,6 +688,7 @@ namespace NiVE3.Model
             }
 
             child.ValueUpdated += Child_ValueUpdated;
+            child.ValueCommited += Child_ValueCommited;
             Children.Insert(index, child);
         }
 
@@ -676,12 +697,18 @@ namespace NiVE3.Model
             if (Children.Remove(child))
             {
                 child.ValueUpdated -= Child_ValueUpdated;
+                child.ValueCommited -= Child_ValueCommited;
             }
         }
 
         private void Child_ValueUpdated(object? sender, EventArgs e)
         {
             ValueUpdated?.Invoke(sender, e);
+        }
+
+        private void Child_ValueCommited(object? sender, EventArgs e)
+        {
+            ValueCommited?.Invoke(sender, e);
         }
     }
 }

@@ -11,11 +11,12 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
+using NiVE3.Plugin.Interfaces;
 using NiVE3.Shared.Extension;
 using NiVE3.Util;
 using NiVE3.ViewModel;
 
-namespace NiVE3.View.Primitive
+namespace NiVE3.View.Part
 {
     class WaveForm : FrameworkElement
     {
@@ -146,10 +147,20 @@ namespace NiVE3.View.Primitive
             if (e.OldValue is LayerViewModel oldLayer)
             {
                 oldLayer.PropertyChanged -= LayerViewModel_PropertyChanged;
+                oldLayer.LayerPropertyUpdate -= LayerViewModel_LayerPropertyCommited;
             }
             if (e.NewValue is LayerViewModel newLayer)
             {
                 newLayer.PropertyChanged += LayerViewModel_PropertyChanged;
+                newLayer.LayerPropertyUpdate += LayerViewModel_LayerPropertyCommited;
+            }
+        }
+
+        private void LayerViewModel_LayerPropertyCommited(object? sender, PropertyValueCommitedEventArgs e)
+        {
+            if (e.PropertyHierarchy.Any(p => p.Property.Id == ILayerObject.AudioLevelId))
+            {
+                InvalidateVisual();
             }
         }
 
@@ -169,9 +180,9 @@ namespace NiVE3.View.Primitive
             var rightChannel = ArrayPool<float>.Shared.Rent(channelLength);
 
             var audioSpan = audio.AsSpan();
-            var audioVectorSpan = MemoryMarshal.Cast<float, Vector128<float>>(audioSpan[..((audio.Length / Vector128<float>.Count / 2) * Vector128<float>.Count * 2)]);
-            var leftChannelVectorSpan = MemoryMarshal.Cast<float, Vector4>(leftChannel.AsSpan(0, (channelLength / 4) * 4));
-            var rightChannelVectorSpan = MemoryMarshal.Cast<float, Vector4>(rightChannel.AsSpan(0, (channelLength / 4) * 4));
+            var audioVectorSpan = MemoryMarshal.Cast<float, Vector128<float>>(audioSpan[..(audio.Length / Vector128<float>.Count / 2 * Vector128<float>.Count * 2)]);
+            var leftChannelVectorSpan = MemoryMarshal.Cast<float, Vector4>(leftChannel.AsSpan(0, channelLength / 4 * 4));
+            var rightChannelVectorSpan = MemoryMarshal.Cast<float, Vector4>(rightChannel.AsSpan(0, channelLength / 4 * 4));
             for (int vi = 0, cvi = 0; vi < audioVectorSpan.Length; vi += 2, cvi++)
             {
                 var a1 = audioVectorSpan[vi];
@@ -264,8 +275,8 @@ namespace NiVE3.View.Primitive
             var mono = ArrayPool<float>.Shared.Rent(channelLength);
 
             var audioSpan = audio.AsSpan();
-            var audioVectorSpan = MemoryMarshal.Cast<float, Vector128<float>>(audioSpan[..((audio.Length / Vector128<float>.Count / 2) * Vector128<float>.Count * 2)]);
-            var monoVectorSpan = MemoryMarshal.Cast<float, Vector4>(mono.AsSpan(0, (channelLength / 4) * 4));
+            var audioVectorSpan = MemoryMarshal.Cast<float, Vector128<float>>(audioSpan[..(audio.Length / Vector128<float>.Count / 2 * Vector128<float>.Count * 2)]);
+            var monoVectorSpan = MemoryMarshal.Cast<float, Vector4>(mono.AsSpan(0, channelLength / 4 * 4));
             for (int vi = 0, cvi = 0; vi < audioVectorSpan.Length; vi += 2, cvi++)
             {
                 var a1 = audioVectorSpan[vi];
@@ -342,8 +353,8 @@ namespace NiVE3.View.Primitive
             var leftChannel = ArrayPool<float>.Shared.Rent(channelLength);
 
             var audioSpan = audio.AsSpan();
-            var audioVectorSpan = MemoryMarshal.Cast<float, Vector128<float>>(audioSpan[..((audio.Length / Vector128<float>.Count / 2) * Vector128<float>.Count * 2)]);
-            var leftChannelVectorSpan = MemoryMarshal.Cast<float, Vector4>(leftChannel.AsSpan(0, (channelLength / 4) * 4));
+            var audioVectorSpan = MemoryMarshal.Cast<float, Vector128<float>>(audioSpan[..(audio.Length / Vector128<float>.Count / 2 * Vector128<float>.Count * 2)]);
+            var leftChannelVectorSpan = MemoryMarshal.Cast<float, Vector4>(leftChannel.AsSpan(0, channelLength / 4 * 4));
             for (int vi = 0, cvi = 0; vi < audioVectorSpan.Length; vi += 2, cvi++)
             {
                 var a1 = audioVectorSpan[vi];
@@ -419,8 +430,8 @@ namespace NiVE3.View.Primitive
             var rightChannel = ArrayPool<float>.Shared.Rent(channelLength);
 
             var audioSpan = audio.AsSpan();
-            var audioVectorSpan = MemoryMarshal.Cast<float, Vector128<float>>(audioSpan[..((audio.Length / Vector128<float>.Count / 2) * Vector128<float>.Count * 2)]);
-            var rightChannelVectorSpan = MemoryMarshal.Cast<float, Vector4>(rightChannel.AsSpan(0, (channelLength / 4) * 4));
+            var audioVectorSpan = MemoryMarshal.Cast<float, Vector128<float>>(audioSpan[..(audio.Length / Vector128<float>.Count / 2 * Vector128<float>.Count * 2)]);
+            var rightChannelVectorSpan = MemoryMarshal.Cast<float, Vector4>(rightChannel.AsSpan(0, channelLength / 4 * 4));
             for (int vi = 0, cvi = 0; vi < audioVectorSpan.Length; vi += 2, cvi++)
             {
                 var a1 = audioVectorSpan[vi];
@@ -491,7 +502,7 @@ namespace NiVE3.View.Primitive
 
         static Geometry CreateWaveFormGeometry(float[] levels, bool isSampleTime, double width, double height, double range)
         {
-            var pixelPerLevel = width / (isSampleTime ? (range / Const.AudioSampleTime) : width);
+            var pixelPerLevel = width / (isSampleTime ? range / Const.AudioSampleTime : width);
 
             var geometry = new StreamGeometry();
             using (var geometryContext = geometry.Open())
