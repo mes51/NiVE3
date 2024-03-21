@@ -587,9 +587,10 @@ namespace NiVE3.Model
             var audio = FootageModel.ReadAudio(sourceTime, sourceLength);
             var startPos = (int)(Math.Max((InPoint + SourceStartPoint) - time, 0.0) * Const.AudioSamplingRate) * 2;
 
+            var audioSpan = audio.AsSpan(0, Math.Min(audio.Length, result.Length - startPos));
             if (AudioOptionProperties != null && AudioOptionProperties.Children.First(p => p.PropertyId == ILayerObject.AudioLevelId) is PropertyModel level && (level.KeyFrames.Count > 0 || ((Vector3d)(level.Value ?? Vector3d.Zero)) != Vector3d.Zero))
             {
-                var audioSpan = audio.AsSpan(0, Math.Min(audio.Length, result.Length - startPos));
+                var resultSpan = result.AsSpan(startPos);
                 if (level.KeyFrames.Count > 1)
                 {
                     var lLevel = MathF.Pow(10.0F, (float)(((Vector3d)(level.KeyFrames.First().Value ?? Vector3d.Zero)).X * 0.05));
@@ -601,8 +602,8 @@ namespace NiVE3.Model
                         var sampleTime = layerTime + Const.AudioSampleTime * si;
                         if (sampleTime < prevTime || sampleTime > lastTime)
                         {
-                            result[i] = audioSpan[i] * lLevel;
-                            result[i + 1] = audioSpan[i] * rLevel;
+                            resultSpan[i] = audioSpan[i] * lLevel;
+                            resultSpan[i + 1] = audioSpan[i + 1] * rLevel;
                         }
                         else
                         {
@@ -610,8 +611,8 @@ namespace NiVE3.Model
                             lLevel = MathF.Pow(10.0F, (float)(audioLevel.X * 0.05));
                             rLevel = MathF.Pow(10.0F, (float)(audioLevel.Y * 0.05));
 
-                            result[i] = audioSpan[i] * lLevel;
-                            result[i + 1] = audioSpan[i] * rLevel;
+                            resultSpan[i] = audioSpan[i] * lLevel;
+                            resultSpan[i + 1] = audioSpan[i + 1] * rLevel;
                         }
                     }
                 }
@@ -625,7 +626,7 @@ namespace NiVE3.Model
                     if (Vector<float>.IsSupported)
                     {
                         var audioVectorSpan = MemoryMarshal.Cast<float, Vector<float>>(audioSpan.Slice(0, (audioSpan.Length / Vector<float>.Count) * Vector<float>.Count));
-                        var resultVectorSpan = MemoryMarshal.Cast<float, Vector<float>>(result.AsSpan(0, audioVectorSpan.Length * Vector<float>.Count));
+                        var resultVectorSpan = MemoryMarshal.Cast<float, Vector<float>>(resultSpan.Slice(0, audioVectorSpan.Length * Vector<float>.Count));
                         var levelVector = new Vector<float>(Enumerable.Range(0, Vector<float>.Count / 2).SelectMany(_ => new float[] { lLevel, rLevel }).ToArray());
                         for (var vi = 0; vi < audioVectorSpan.Length; vi++)
                         {
@@ -635,14 +636,14 @@ namespace NiVE3.Model
                     }
                     for (; i < audioSpan.Length; i += 2)
                     {
-                        result[i] = audioSpan[i] * lLevel;
-                        result[i + 1] = audioSpan[i] * rLevel;
+                        resultSpan[i] = audioSpan[i] * lLevel;
+                        resultSpan[i + 1] = audioSpan[i + 1] * rLevel;
                     }
                 }
             }
             else
             {
-                audio.AsSpan(0, Math.Min(audio.Length, result.Length - startPos)).CopyTo(result.AsSpan(startPos));
+                audioSpan.CopyTo(result.AsSpan(startPos));
             }
 
             return result;
