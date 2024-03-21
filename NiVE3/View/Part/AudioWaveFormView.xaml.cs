@@ -12,7 +12,9 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using NiVE3.View.Primitive;
 using NiVE3.View.Resource;
+using NiVE3.ViewModel;
 
 namespace NiVE3.View.Part
 {
@@ -154,6 +156,14 @@ namespace NiVE3.View.Part
         public AudioWaveFormView()
         {
             InitializeComponent();
+        }
+
+        private void MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is LayerViewModel viewModel && sender is MenuItem menuItem && menuItem.DataContext is WaveFormType type)
+            {
+                viewModel.AudioWaveFormType = type;
+            }
         }
 
         static void ContrlAreaParameterChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)

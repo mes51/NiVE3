@@ -439,6 +439,13 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref isExpanded, value); }
         }
 
+        private WaveFormType audioWaveFormType = WaveFormType.Stereo;
+        public WaveFormType AudioWaveFormType
+        {
+            get { return audioWaveFormType; }
+            set { SetProperty(ref audioWaveFormType, value); }
+        }
+
         private EditingLayerParameter editingParameter;
         public EditingLayerParameter EditingParameter
         {

@@ -824,6 +824,18 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("円")]
         public static readonly string SelectorShape_Circle = nameof(SelectorShape_Circle);
 
+        [ShowInMarkup, DefaultValue("ステレオ")]
+        public static readonly string WaveFormType_Stereo = nameof(WaveFormType_Stereo);
+
+        [ShowInMarkup, DefaultValue("モノラル")]
+        public static readonly string WaveFormType_Monaural = nameof(WaveFormType_Monaural);
+
+        [ShowInMarkup, DefaultValue("左チャンネル")]
+        public static readonly string WaveFormType_Left = nameof(WaveFormType_Left);
+
+        [ShowInMarkup, DefaultValue("右チャンネル")]
+        public static readonly string WaveFormType_Right = nameof(WaveFormType_Right);
+
         static LanguageResourceDictionary()
         {
             LanguageKeys = typeof(LanguageResourceDictionary).GetFields(BindingFlags.Static | BindingFlags.Public)
