@@ -146,7 +146,7 @@ namespace NiVE3.Model
                     WorkareaBegin = 0.0;
                     WorkareaEnd = Footage.Duration;
                     Duration = Footage.Duration;
-                    FrameRate = Footage.FrameRate;
+                    FrameRate = Footage.InputType == SourceType.Audio ? 30.0 : Footage.FrameRate;
                     Width = Footage.Width;
                     Height = Footage.Height;
                     Name = Footage.Name;

@@ -366,6 +366,10 @@ namespace NiVE3.ViewModel
                 NeedUpdateFrameNextTick = true;
                 return;
             }
+            else if (SourceType == SourceType.Audio)
+            {
+                return;
+            }
 
             IsCurrentFrameUpdating = true;
 
@@ -524,7 +528,7 @@ namespace NiVE3.ViewModel
             IsStretchLimited = false;
             DownScaleRate = 1;
             previewColorChannel = PreviewColorChannel.Rgb;
-            CurrentTime = 1.0;
+            CurrentTime = 0.0;
             UpdateCurrentFrame();
             SourceChangedPublisher.Publish(this, EventArgs.Empty);
         }
