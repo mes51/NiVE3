@@ -314,7 +314,7 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("線の太さ")]
         public static readonly string TextPropertyView_Property_LineWidth = nameof(TextPropertyView_Property_LineWidth);
 
-        [ShowInMarkup, DefaultValue("音声")]
+        [ShowInMarkup, DefaultValue("レベルメーター")]
         public static readonly string AudioInformationView_Title = nameof(AudioInformationView_Title);
 
         // History Command

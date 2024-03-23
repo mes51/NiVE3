@@ -45,7 +45,7 @@
             </Grid.ColumnDefinitions>
 
             <Rectangle x:Name="LabelWidthMeasurementArea" Grid.Column="0" Grid.ColumnSpan="2" Fill="Transparent" IsHitTestVisible="False" Visibility="Hidden"/>
-            <pt:AudioLevelGauge Grid.ColumnSpan="3" Height="22" GaugeLeftPadding="{Binding ElementName=LabelWidthMeasurementArea, Path=ActualWidth}" GaugeRightPadding="13"/>
+            <pt:AudioLevelGauge Grid.ColumnSpan="3" Height="22" GaugeLeftPadding="{Binding ElementName=LabelWidthMeasurementArea, Path=ActualWidth}" GaugeRightPadding="12"/>
         </Grid>
     </Grid>
 </UserControl>
