@@ -460,6 +460,12 @@ namespace NiVE3.ViewModel
 
         private void RealFrameRateUpdateTimer_Tick(object? sender, EventArgs e)
         {
+            if (SourceType == SourceType.Audio)
+            {
+                CurrentTime = TimeCalc.AlignRound(AudioPlayerModel.GetPlayingPosition(), FrameRate);
+                return;
+            }
+
             RealFrameRate = Math.Min(PlayControllerModel.RealFrameRate, FrameRate);
             if (RealFrameRate > 0.0)
             {
