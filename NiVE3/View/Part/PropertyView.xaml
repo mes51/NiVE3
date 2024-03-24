@@ -11,8 +11,11 @@
                         DataContextChanged="Root_DataContextChanged"
                         d:DesignHeight="450" d:DesignWidth="800">
     <local:PropertyViewBase.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        
         <Style x:Key="PropertyNameTextBlockStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
             <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
 
             <Style.Triggers>
@@ -31,7 +34,7 @@
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
 
-        <CheckBox Grid.Column="1" IsChecked="{Binding HasKeyFrame, Mode=OneWay}" Style="{StaticResource KeyFrameSwitchCheckBox}" VerticalAlignment="Center" HorizontalAlignment="Center" Command="{Binding SwitchUseKeyFrameCommand}"/>
+        <CheckBox Grid.Column="1" IsChecked="{Binding HasKeyFrame, Mode=OneWay}" Style="{StaticResource KeyFrameSwitchCheckBox}" VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="{Binding Property.IsSupportKeyFrame, Converter={StaticResource BooleanToVisibilityConverter}}" Command="{Binding SwitchUseKeyFrameCommand}"/>
         <TextBlock Grid.Column="2" Text="{Binding ViewState.SourceDisplayName}" Style="{StaticResource PropertyNameTextBlockStyle}" MouseLeftButtonDown="PropertyNameTextBlock_MouseLeftButtonDown"/>
         <Grid Grid.Column="3" x:Name="PropertyControlGrid"/>
 
