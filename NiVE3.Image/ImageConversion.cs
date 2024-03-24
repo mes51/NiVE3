@@ -21,11 +21,23 @@ namespace NiVE3.Image
         /// <param name="fromImage">元となる8bpcの画像データ</param>
         /// <param name="toImage">変換先の32bpcの画像データ</param>
         /// <param name="pixelCount">ピクセルの数</param>
-        public static unsafe void ConvertToBGRA128(Span<byte> fromImage, Span<Vector4> toImage, int pixelCount)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void ConvertToBGRA128(ReadOnlySpan<byte> fromImage, Span<Vector4> toImage, int pixelCount)
         {
-            ref byte pixelDataRef = ref MemoryMarshal.GetReference(fromImage);
+            ConvertToBGRA128(MemoryMarshal.Cast<byte, int>(fromImage.Slice(0, pixelCount * 4)), toImage, pixelCount);
+        }
+
+        /// <summary>
+        /// 8bpcから32bpcに変換します
+        /// </summary>
+        /// <param name="fromImage">元となる8bpcの画像データ</param>
+        /// <param name="toImage">変換先の32bpcの画像データ</param>
+        /// <param name="pixelCount">ピクセルの数</param>
+        public static unsafe void ConvertToBGRA128(ReadOnlySpan<int> fromImage, Span<Vector4> toImage, int pixelCount)
+        {
+            ref int pixelDataRef = ref MemoryMarshal.GetReference(fromImage);
             ref Vector4 resultDataRef = ref MemoryMarshal.GetReference(toImage);
-            fixed (int* fixedPixelData = &Unsafe.As<byte, int>(ref pixelDataRef))
+            fixed (int* fixedPixelData = &pixelDataRef)
             fixed (Vector128<float>* fixedResultData = &Unsafe.As<Vector4, Vector128<float>>(ref resultDataRef))
             {
                 int* pixelData = fixedPixelData;
@@ -46,12 +58,24 @@ namespace NiVE3.Image
         /// <param name="fromImage">元となる32bpcの画像データ</param>
         /// <param name="toImage">変換先の8bpcの画像データ</param>
         /// <param name="pixelCount">ピクセルの数</param>
-        public static unsafe void ConvertToBGRA32(Span<Vector4> fromImage, Span<byte> toImage, int pixelCount)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void ConvertToBGRA32(ReadOnlySpan<Vector4> fromImage, Span<byte> toImage, int pixelCount)
+        {
+            ConvertToBGRA32(fromImage, MemoryMarshal.Cast<byte, int>(toImage.Slice(0, pixelCount * 4)), pixelCount);
+        }
+
+        /// <summary>
+        /// 32bpcから8bpcに変換します
+        /// </summary>
+        /// <param name="fromImage">元となる32bpcの画像データ</param>
+        /// <param name="toImage">変換先の8bpcの画像データ</param>
+        /// <param name="pixelCount">ピクセルの数</param>
+        public static unsafe void ConvertToBGRA32(ReadOnlySpan<Vector4> fromImage, Span<int> toImage, int pixelCount)
         {
             ref Vector4 pixelDataRef = ref MemoryMarshal.GetReference(fromImage);
-            ref byte resultDataRef = ref MemoryMarshal.GetReference(toImage);
+            ref int resultDataRef = ref MemoryMarshal.GetReference(toImage);
             fixed (Vector128<float>* fixedPixelData = &Unsafe.As<Vector4, Vector128<float>>(ref pixelDataRef))
-            fixed (int* fixedResultData = &Unsafe.As<byte, int>(ref resultDataRef))
+            fixed (int* fixedResultData = &resultDataRef)
             {
                 Vector128<float>* pixelData = fixedPixelData;
                 int* resultData = fixedResultData;
@@ -72,12 +96,23 @@ namespace NiVE3.Image
         /// <param name="fromImage">元となる32bpcの画像データ</param>
         /// <param name="toImage">変換先の8bpcの画像データ</param>
         /// <param name="pixelCount">ピクセルの数</param>
-        public static unsafe void ConvertToBGR32(Span<Vector4> fromImage, Span<byte> toImage, int pixelCount)
+        public static void ConvertToBGR32(ReadOnlySpan<Vector4> fromImage, Span<byte> toImage, int pixelCount)
+        {
+            ConvertToBGR32(fromImage, MemoryMarshal.Cast<byte, int>(toImage.Slice(0, pixelCount * 4)), pixelCount);
+        }
+
+        /// <summary>
+        /// 32bpcからBGR32に変換します
+        /// </summary>
+        /// <param name="fromImage">元となる32bpcの画像データ</param>
+        /// <param name="toImage">変換先の8bpcの画像データ</param>
+        /// <param name="pixelCount">ピクセルの数</param>
+        public static unsafe void ConvertToBGR32(ReadOnlySpan<Vector4> fromImage, Span<int> toImage, int pixelCount)
         {
             ref Vector4 pixelDataRef = ref MemoryMarshal.GetReference(fromImage);
-            ref byte resultDataRef = ref MemoryMarshal.GetReference(toImage);
+            ref int resultDataRef = ref MemoryMarshal.GetReference(toImage);
             fixed (Vector128<float>* fixedPixelData = &Unsafe.As<Vector4, Vector128<float>>(ref pixelDataRef))
-            fixed (int* fixedResultData = &Unsafe.As<byte, int>(ref resultDataRef))
+            fixed (int* fixedResultData = &resultDataRef)
             {
                 Vector128<float>* pixelData = fixedPixelData;
                 int* resultData = fixedResultData;

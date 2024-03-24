@@ -27,6 +27,7 @@ using NiVE3.View.Dock;
 using NiVE3.View.Resource;
 using Prism.Commands;
 using System.Windows.Threading;
+using ImTools;
 
 namespace NiVE3.ViewModel
 {
@@ -253,7 +254,7 @@ namespace NiVE3.ViewModel
 
         public ICommand ChangeCurrentTimeCommand { get; }
 
-        byte[] ImageBuffer { get; set; }
+        int[] ImageBuffer { get; set; }
 
         Int32Rect BufferImageSize { get; set; }
 
@@ -325,7 +326,7 @@ namespace NiVE3.ViewModel
             PreviewModel.FrameUpdateRequest += PreviewModel_FrameUpdateRequest;
             PropertyChanged += PreviewViewModel_PropertyChanged;
 
-            ImageBuffer = new byte[BufferImageSize.Width * BufferImageSize.Height * 4];
+            ImageBuffer = new int[BufferImageSize.Width * BufferImageSize.Height];
             FrameUpdateDebouncer = new Debouncer(1);
             FrameUpdateDebouncer.Tick += (_, _) =>
             {
@@ -384,49 +385,57 @@ namespace NiVE3.ViewModel
             if (image != null && BufferImageSize.Width == image.Width && BufferImageSize.Height == image.Height)
             {
                 var dataSize = image.DataLength;
-                var floatData = image.GetData();
+                var imageData = image.GetData();
                 var data = ImageBuffer;
 
                 // TODO: SDR変換を入れるかどうか
                 switch (PreviewColorChannel)
                 {
                     case PreviewColorChannel.R:
-                        Parallel.For(0, dataSize, pi =>
+                        Parallel.For(0, dataSize, i =>
                         {
-                            var i = pi * 4;
-                            data[i] = data[i + 1] = data[i + 2] = (byte)Math.Clamp(MathF.Round(floatData[pi].Z * 255.0F), 0.0F, 255.0F);
-                            data[i + 3] = 255;
+                            var p = Avx.Permute(Sse41.RoundCurrentDirection(imageData[i].AsVector128() * 255.0F), 0b10101010);
+                            var p32 = Sse41.Min(Sse41.Max(Sse2.ConvertToVector128Int32(p), Vector128<int>.Zero), Vector128.Create(255));
+                            var p16 = Sse2.PackSignedSaturate(p32, Vector128<int>.Zero);
+                            var p8 = Sse2.PackUnsignedSaturate(p16, Vector128<short>.Zero);
+                            data[i] = Sse2.ConvertToInt32(p8.AsInt32()) | Black;
                         });
                         break;
                     case PreviewColorChannel.G:
-                        Parallel.For(0, dataSize, pi =>
+                        Parallel.For(0, dataSize, i =>
                         {
-                            var i = pi * 4;
-                            data[i] = data[i + 1] = data[i + 2] = (byte)Math.Clamp(MathF.Round(floatData[pi].Y * 255.0F), 0.0F, 255.0F);
-                            data[i + 3] = 255;
+                            var p = Avx.Permute(Sse41.RoundCurrentDirection(imageData[i].AsVector128() * 255.0F), 0b01010101);
+                            var p32 = Sse41.Min(Sse41.Max(Sse2.ConvertToVector128Int32(p), Vector128<int>.Zero), Vector128.Create(255));
+                            var p16 = Sse2.PackSignedSaturate(p32, Vector128<int>.Zero);
+                            var p8 = Sse2.PackUnsignedSaturate(p16, Vector128<short>.Zero);
+                            data[i] = Sse2.ConvertToInt32(p8.AsInt32()) | Black;
                         });
                         break;
                     case PreviewColorChannel.B:
-                        Parallel.For(0, dataSize, pi =>
+                        Parallel.For(0, dataSize, i =>
                         {
-                            var i = pi * 4;
-                            data[i] = data[i + 1] = data[i + 2] = (byte)Math.Clamp(MathF.Round(floatData[pi].X * 255.0F), 0.0F, 255.0F);
-                            data[i + 3] = 255;
+                            var p = Avx.Permute(Sse41.RoundCurrentDirection(imageData[i].AsVector128() * 255.0F), 0b00000000);
+                            var p32 = Sse41.Min(Sse41.Max(Sse2.ConvertToVector128Int32(p), Vector128<int>.Zero), Vector128.Create(255));
+                            var p16 = Sse2.PackSignedSaturate(p32, Vector128<int>.Zero);
+                            var p8 = Sse2.PackUnsignedSaturate(p16, Vector128<short>.Zero);
+                            data[i] = Sse2.ConvertToInt32(p8.AsInt32()) | Black;
                         });
                         break;
                     case PreviewColorChannel.Alpha:
-                        Parallel.For(0, dataSize, pi =>
+                        Parallel.For(0, dataSize, i =>
                         {
-                            var i = pi * 4;
-                            data[i] = data[i + 1] = data[i + 2] = (byte)Math.Clamp(MathF.Round(floatData[pi].W * 255.0F), 0.0F, 255.0F);
-                            data[i + 3] = 255;
+                            var p = Avx.Permute(Sse41.RoundCurrentDirection(imageData[i].AsVector128() * 255.0F), 0b11111111);
+                            var p32 = Sse41.Min(Sse41.Max(Sse2.ConvertToVector128Int32(p), Vector128<int>.Zero), Vector128.Create(255));
+                            var p16 = Sse2.PackSignedSaturate(p32, Vector128<int>.Zero);
+                            var p8 = Sse2.PackUnsignedSaturate(p16, Vector128<short>.Zero);
+                            data[i] = Sse2.ConvertToInt32(p8.AsInt32()) | Black;
                         });
                         break;
                     case PreviewColorChannel.RgbStraight:
-                        ImageConversion.ConvertToBGR32(floatData, ImageBuffer, dataSize);
+                        ImageConversion.ConvertToBGR32(imageData, ImageBuffer, dataSize);
                         break;
                     default:
-                        ImageConversion.ConvertToBGRA32(floatData, ImageBuffer, dataSize);
+                        ImageConversion.ConvertToBGRA32(imageData, ImageBuffer, dataSize);
                         break;
                 }
             }
@@ -434,7 +443,7 @@ namespace NiVE3.ViewModel
             {
                 if (PreviewColorChannel != PreviewColorChannel.Rgb)
                 {
-                    MemoryMarshal.Cast<byte, int>(ImageBuffer).Fill(Black);
+                    ImageBuffer.AsSpan().Fill(Black);
                 }
                 else
                 {
@@ -504,7 +513,7 @@ namespace NiVE3.ViewModel
                 case nameof(Height):
                     BufferImageSize = new Int32Rect(0, 0, Math.Max(Width, 1), Math.Max(Height, 1));
                     CurrentFrame = new WriteableBitmap(BufferImageSize.Width, BufferImageSize.Height, 96.0, 96.0, PixelFormats.Bgra32, null);
-                    ImageBuffer = new byte[BufferImageSize.Width * BufferImageSize.Height * 4];
+                    ImageBuffer = new int[BufferImageSize.Width * BufferImageSize.Height];
                     UpdateCurrentFrame();
                     break;
                 case nameof(CurrentTime):
