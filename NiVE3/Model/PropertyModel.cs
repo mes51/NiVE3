@@ -18,7 +18,7 @@ using NiVE3.Extension;
 
 namespace NiVE3.Model
 {
-    interface IPropertyModel
+    interface IPropertyModel : IPropertyObject
     {
         string PropertyId { get; }
 
@@ -91,6 +91,8 @@ namespace NiVE3.Model
         public ObservableCollection<IPropertyModel>? Children => null;
 
         public PropertyBase Property { get; }
+
+        public string Id => Property.Id;
 
         public event EventHandler<EventArgs>? ValueUpdated;
 
@@ -225,6 +227,11 @@ namespace NiVE3.Model
             ValueCommited?.Invoke(this, EventArgs.Empty);
         }
 
+        public IReadOnlyCollection<IPropertyObject>? GetChildren()
+        {
+            return Children;
+        }
+
         public object? GetValue(double time)
         {
             if (UseEditingValue || KeyFrames.Count < 1)
@@ -235,6 +242,11 @@ namespace NiVE3.Model
             {
                 return Property.PropertyType.Interpolate(KeyFrames, time);
             }
+        }
+
+        public PropertyValueGroup? GetValues(double time)
+        {
+            return null;
         }
 
         public PropertyData SaveData()
@@ -355,6 +367,8 @@ namespace NiVE3.Model
 
         public PropertyBase Property { get; }
 
+        public string Id => Property.Id;
+
         public event EventHandler<EventArgs>? ValueUpdated;
 
         public event EventHandler<EventArgs>? ValueCommited;
@@ -415,7 +429,17 @@ namespace NiVE3.Model
             return Property.CreateState(CompositionModel, LayerModel, EffectModel, viewModel);
         }
 
-        public PropertyValueGroup GetPropertyValueGroup(double time)
+        public IReadOnlyCollection<IPropertyObject>? GetChildren()
+        {
+            return Children;
+        }
+
+        public object? GetValue(double time)
+        {
+            return null;
+        }
+
+        public PropertyValueGroup GetValues(double time)
         {
             var result = new Dictionary<string, object?>();
 
@@ -423,7 +447,7 @@ namespace NiVE3.Model
             {
                 if (p is PropertyGroupModel pg)
                 {
-                    result.Add(pg.PropertyId, pg.GetPropertyValueGroup(time));
+                    result.Add(pg.PropertyId, pg.GetValues(time));
                 }
                 else if (p is AppendablePropertyModel ap)
                 {
@@ -524,6 +548,8 @@ namespace NiVE3.Model
 
         public PropertyBase Property { get; }
 
+        public string Id => Property.Id;
+
         public AppendablePropertyItem[] Items { get; }
 
         public event EventHandler<EventArgs>? ValueUpdated;
@@ -568,6 +594,21 @@ namespace NiVE3.Model
         public PropertyViewState CreateState(IPropertyViewModel viewModel)
         {
             return Property.CreateState(CompositionModel, LayerModel, EffectModel, viewModel);
+        }
+
+        public IReadOnlyCollection<IPropertyObject>? GetChildren()
+        {
+            return Children;
+        }
+
+        public object? GetValue(double time)
+        {
+            return GetChildPropertyValues(time);
+        }
+
+        public PropertyValueGroup? GetValues(double time)
+        {
+            return null;
         }
 
         public void AddChild(AppendablePropertyItem item)
@@ -621,7 +662,7 @@ namespace NiVE3.Model
 
         public PropertyValueGroup[] GetChildPropertyValues(double time)
         {
-            return Children.OfType<PropertyGroupModel>().Select(m => m.GetPropertyValueGroup(time)).ToArray();
+            return Children.OfType<PropertyGroupModel>().Select(m => m.GetValues(time)).ToArray();
         }
 
         public PropertyData SaveData()

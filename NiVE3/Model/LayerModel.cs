@@ -29,6 +29,7 @@ using NiVE3.Image.Drawing;
 using NiVE3.Util;
 using System.Buffers;
 using System.Runtime.InteropServices;
+using NiVE3.Plugin.Attributes;
 
 namespace NiVE3.Model
 {
@@ -471,16 +472,16 @@ namespace NiVE3.Model
             // TODO: タイムリマップ反映
             var sourceTime = layerTime;
 
-            var sourceOptionProperties = (TextProperties ?? SourceOptionProperties)?.GetPropertyValueGroup(sourceTime);
+            var sourceOptionProperties = (TextProperties ?? SourceOptionProperties)?.GetValues(sourceTime);
             var image = FootageModel.ReadImage(sourceTime, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties, InterpolationQuality, useGpu);
             var roi = new ROI(new Int32Point(), new Int32Size(image.Width, image.Height), 0, 0, image.Width, image.Height);
 
             if (IsEnableEffect)
             {
                 // TODO: モジュラーエフェクト&ROI反映
-                foreach (var e in Effects.Where(e => !e.IsDummyEffect && e.IsEnable))
+                foreach (var e in Effects.Where(e => !e.IsDummyEffect && e.IsEnable && e.SupportedSource.IsSupportedSource(SourceType)))
                 {
-                    image = e.Process(image, roi, layerTime);
+                    image = e.ProcessImage(image, roi, layerTime);
                 }
             }
 
@@ -501,7 +502,7 @@ namespace NiVE3.Model
                 BlendMode,
                 transform,
                 GetParentTransforms(time),
-                LayerOptionProperties?.GetPropertyValueGroup(layerTime),
+                LayerOptionProperties?.GetValues(layerTime),
                 trackMatteImage,
                 TrackMatteLayerId.HasValue ? TrackMatteMode : null
             );
@@ -524,7 +525,7 @@ namespace NiVE3.Model
             // TODO: タイムリマップ反映
             var sourceTime = layerTime;
 
-            var sourceOptionProperties = (TextProperties ?? SourceOptionProperties)?.GetPropertyValueGroup(sourceTime);
+            var sourceOptionProperties = (TextProperties ?? SourceOptionProperties)?.GetValues(sourceTime);
             var image = FootageModel.ReadImage(sourceTime, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties, InterpolationQuality, useGpu);
             var roi = new ROI(new Int32Point(), new Int32Size(image.Width, image.Height), 0, 0, image.Width, image.Height);
 
@@ -545,7 +546,7 @@ namespace NiVE3.Model
                 BlendMode,
                 transform,
                 GetParentTransforms(time),
-                LayerOptionProperties?.GetPropertyValueGroup(layerTime),
+                LayerOptionProperties?.GetValues(layerTime),
                 trackMatteImage,
                 TrackMatteLayerId.HasValue ? TrackMatteMode : null
             );
@@ -561,7 +562,7 @@ namespace NiVE3.Model
                 // TODO: モジュラーエフェクト&ROI反映
                 foreach (var e in Effects.Where(e => !e.IsDummyEffect && e.IsEnable))
                 {
-                    currentFrame = e.Process(currentFrame, roi, layerTime);
+                    currentFrame = e.ProcessImage(currentFrame, roi, layerTime);
                 }
             }
 
@@ -570,8 +571,68 @@ namespace NiVE3.Model
 
         public float[] GetAudio(double time, double length)
         {
-            // TODO: エフェクトの適用
-            return GetRawAudio(time, length);
+            var layerTime = Math.Max(time - SourceStartPoint, InPoint);
+            var audio = GetRawAudio(time, length);
+
+            foreach (var effect in Effects.Where(e => !e.IsDummyEffect && e.IsEnable && e.SupportedSource.IsSupportedSource(SourceType)))
+            {
+                audio = effect.ProcessAudio(audio, layerTime);
+            }
+
+            if (AudioOptionProperties != null && AudioOptionProperties.Children.First(p => p.PropertyId == ILayerObject.AudioLevelId) is PropertyModel level && (level.KeyFrames.Count > 0 || ((Vector3d)(level.Value ?? Vector3d.Zero)) != Vector3d.Zero))
+            {
+                var audioSpan = audio.AsSpan();
+                if (level.KeyFrames.Count > 1)
+                {
+                    var lLevel = MathF.Pow(10.0F, (float)(((Vector3d)(level.KeyFrames.First().Value ?? Vector3d.Zero)).X * 0.05));
+                    var rLevel = MathF.Pow(10.0F, (float)(((Vector3d)(level.KeyFrames.First().Value ?? Vector3d.Zero)).Y * 0.05));
+                    var prevTime = level.KeyFrames.First().Time;
+                    var lastTime = level.KeyFrames.Last().Time;
+                    for (int i = 0, si = 0; i < audioSpan.Length; i += 2, si++)
+                    {
+                        var sampleTime = layerTime + Const.AudioSampleTime * si;
+                        if (sampleTime < prevTime || sampleTime > lastTime)
+                        {
+                            audioSpan[i] = audioSpan[i] * lLevel;
+                            audioSpan[i + 1] = audioSpan[i + 1] * rLevel;
+                        }
+                        else
+                        {
+                            var audioLevel = ((Vector3d)(level.GetValue(sampleTime) ?? Vector3d.Zero));
+                            lLevel = MathF.Pow(10.0F, (float)(audioLevel.X * 0.05));
+                            rLevel = MathF.Pow(10.0F, (float)(audioLevel.Y * 0.05));
+
+                            audioSpan[i] = audioSpan[i] * lLevel;
+                            audioSpan[i + 1] = audioSpan[i + 1] * rLevel;
+                        }
+                    }
+                }
+                else
+                {
+                    var audioLevel = ((Vector3d)(level.KeyFrames.FirstOrDefault()?.Value ?? level.Value ?? Vector3d.Zero));
+                    var lLevel = MathF.Pow(10.0F, (float)(audioLevel.X * 0.05));
+                    var rLevel = MathF.Pow(10.0F, (float)(audioLevel.Y * 0.05));
+
+                    var i = 0;
+                    if (Vector<float>.IsSupported)
+                    {
+                        var audioVectorSpan = MemoryMarshal.Cast<float, Vector<float>>(audioSpan.Slice(0, (audioSpan.Length / Vector<float>.Count) * Vector<float>.Count));
+                        var levelVector = new Vector<float>(Enumerable.Range(0, Vector<float>.Count / 2).SelectMany(_ => new float[] { lLevel, rLevel }).ToArray());
+                        for (var vi = 0; vi < audioVectorSpan.Length; vi++)
+                        {
+                            audioVectorSpan[vi] = Vector.Multiply(audioVectorSpan[vi], levelVector);
+                        }
+                        i = audioVectorSpan.Length * Vector<float>.Count;
+                    }
+                    for (; i < audioSpan.Length; i += 2)
+                    {
+                        audioSpan[i] = audioSpan[i] * lLevel;
+                        audioSpan[i + 1] = audioSpan[i + 1] * rLevel;
+                    }
+                }
+            }
+
+            return audio;
         }
 
         public float[] GetRawAudio(double time, double length)
@@ -586,65 +647,7 @@ namespace NiVE3.Model
             var result = new float[(int)(length * Const.AudioSamplingRate) * 2];
             var audio = FootageModel.ReadAudio(sourceTime, sourceLength);
             var startPos = (int)(Math.Max((InPoint + SourceStartPoint) - time, 0.0) * Const.AudioSamplingRate) * 2;
-
-            var audioSpan = audio.AsSpan(0, Math.Min(audio.Length, result.Length - startPos));
-            if (AudioOptionProperties != null && AudioOptionProperties.Children.First(p => p.PropertyId == ILayerObject.AudioLevelId) is PropertyModel level && (level.KeyFrames.Count > 0 || ((Vector3d)(level.Value ?? Vector3d.Zero)) != Vector3d.Zero))
-            {
-                var resultSpan = result.AsSpan(startPos);
-                if (level.KeyFrames.Count > 1)
-                {
-                    var lLevel = MathF.Pow(10.0F, (float)(((Vector3d)(level.KeyFrames.First().Value ?? Vector3d.Zero)).X * 0.05));
-                    var rLevel = MathF.Pow(10.0F, (float)(((Vector3d)(level.KeyFrames.First().Value ?? Vector3d.Zero)).Y * 0.05));
-                    var prevTime = level.KeyFrames.First().Time;
-                    var lastTime = level.KeyFrames.Last().Time;
-                    for (int i = 0, si = 0; i < audioSpan.Length; i += 2, si++)
-                    {
-                        var sampleTime = layerTime + Const.AudioSampleTime * si;
-                        if (sampleTime < prevTime || sampleTime > lastTime)
-                        {
-                            resultSpan[i] = audioSpan[i] * lLevel;
-                            resultSpan[i + 1] = audioSpan[i + 1] * rLevel;
-                        }
-                        else
-                        {
-                            var audioLevel = ((Vector3d)(level.GetValue(sampleTime) ?? Vector3d.Zero));
-                            lLevel = MathF.Pow(10.0F, (float)(audioLevel.X * 0.05));
-                            rLevel = MathF.Pow(10.0F, (float)(audioLevel.Y * 0.05));
-
-                            resultSpan[i] = audioSpan[i] * lLevel;
-                            resultSpan[i + 1] = audioSpan[i + 1] * rLevel;
-                        }
-                    }
-                }
-                else
-                {
-                    var audioLevel = ((Vector3d)(level.KeyFrames.FirstOrDefault()?.Value ?? level.Value ?? Vector3d.Zero));
-                    var lLevel = MathF.Pow(10.0F, (float)(audioLevel.X * 0.05));
-                    var rLevel = MathF.Pow(10.0F, (float)(audioLevel.Y * 0.05));
-
-                    var i = 0;
-                    if (Vector<float>.IsSupported)
-                    {
-                        var audioVectorSpan = MemoryMarshal.Cast<float, Vector<float>>(audioSpan.Slice(0, (audioSpan.Length / Vector<float>.Count) * Vector<float>.Count));
-                        var resultVectorSpan = MemoryMarshal.Cast<float, Vector<float>>(resultSpan.Slice(0, audioVectorSpan.Length * Vector<float>.Count));
-                        var levelVector = new Vector<float>(Enumerable.Range(0, Vector<float>.Count / 2).SelectMany(_ => new float[] { lLevel, rLevel }).ToArray());
-                        for (var vi = 0; vi < audioVectorSpan.Length; vi++)
-                        {
-                            resultVectorSpan[vi] = Vector.Multiply(audioVectorSpan[vi], levelVector);
-                        }
-                        i = audioVectorSpan.Length * Vector<float>.Count;
-                    }
-                    for (; i < audioSpan.Length; i += 2)
-                    {
-                        resultSpan[i] = audioSpan[i] * lLevel;
-                        resultSpan[i + 1] = audioSpan[i + 1] * rLevel;
-                    }
-                }
-            }
-            else
-            {
-                audioSpan.CopyTo(result.AsSpan(startPos));
-            }
+            audio.AsSpan(0, Math.Min(audio.Length, result.Length - startPos)).CopyTo(result.AsSpan(startPos));
 
             return result;
         }
@@ -671,7 +674,7 @@ namespace NiVE3.Model
             }
 
             var transform = GetTransform(time);
-            var options = LayerOptionProperties?.GetPropertyValueGroup(time - SourceStartPoint);
+            var options = LayerOptionProperties?.GetValues(time - SourceStartPoint);
 
             return new CameraSetting(
                 (Vector3d)(transform[ILayerObject.TransformPointOfInterestId] ?? new Vector3d()),
@@ -693,7 +696,7 @@ namespace NiVE3.Model
             }
 
             var transform = GetTransform(time);
-            var options = LayerOptionProperties?.GetPropertyValueGroup(time - SourceStartPoint);
+            var options = LayerOptionProperties?.GetValues(time - SourceStartPoint);
             if (options == null)
             {
                 return null;
@@ -728,19 +731,19 @@ namespace NiVE3.Model
                 throw new InvalidOperationException();
             }
             var layerTime = time - SourceStartPoint;
-            return TransformProperties.GetPropertyValueGroup(layerTime);
+            return TransformProperties.GetValues(layerTime);
         }
 
         public PropertyValueGroup? GetLayerOptions(double time)
         {
             var layerTime = time - SourceStartPoint;
-            return LayerOptionProperties?.GetPropertyValueGroup(layerTime);
+            return LayerOptionProperties?.GetValues(layerTime);
         }
 
         public PropertyValueGroup? GetTextProperties(double time)
         {
             var layerTime = time - SourceStartPoint;
-            return TextProperties?.GetPropertyValueGroup(layerTime);
+            return TextProperties?.GetValues(layerTime);
         }
 
         public ParentTransform[] GetParentTransforms(double time)
@@ -1042,6 +1045,15 @@ namespace NiVE3.Model
             {
                 e.Dispose();
             }
+        }
+    }
+
+    file static class EffectSupportedSourceExtensions
+    {
+        public static bool IsSupportedSource(this EffectSupportedSource supported, SourceType sourceType)
+        {
+            return (supported.HasFlag(EffectSupportedSource.Image) && (sourceType.HasFlag(SourceType.Image) || sourceType.HasFlag(SourceType.Video))) ||
+                (supported.HasFlag(EffectSupportedSource.Audio) && sourceType.HasFlag(SourceType.Audio));
         }
     }
 }

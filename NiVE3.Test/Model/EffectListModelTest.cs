@@ -55,5 +55,10 @@ namespace NiVE3.Test.Model
         {
             throw new NotImplementedException();
         }
+
+        public float[] Process(float[] audio, double startTime, IPropertyObject[] properties)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

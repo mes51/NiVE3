@@ -45,6 +45,30 @@ namespace NiVE3.PresetPlugin.Resource
         [DefaultValue("方向")]
         public const string Blur_BoxBlur_Direction = nameof(Blur_BoxBlur_Direction);
 
+        [DefaultValue("ダイナミクス")]
+        public const string Audio_Dynamics_Name = nameof(Audio_Dynamics_Name);
+
+        [DefaultValue("音声のダイナミクスを操作します")]
+        public const string Audio_Dynamics_Description = nameof(Audio_Dynamics_Description);
+
+        [DefaultValue("タイプ")]
+        public const string Audio_Dynamics_DynamicsProcessorType = nameof(Audio_Dynamics_DynamicsProcessorType);
+
+        [DefaultValue("スレッシュホールド")]
+        public const string Audio_Dynamics_Threshold = nameof(Audio_Dynamics_Threshold);
+
+        [DefaultValue("レシオ")]
+        public const string Audio_Dynamics_Ratio = nameof(Audio_Dynamics_Ratio);
+
+        [DefaultValue("ゲイン")]
+        public const string Audio_Dynamics_Gain = nameof(Audio_Dynamics_Gain);
+
+        [DefaultValue("アタック")]
+        public const string Audio_Dynamics_Attack = nameof(Audio_Dynamics_Attack);
+
+        [DefaultValue("リリース")]
+        public const string Audio_Dynamics_Release = nameof(Audio_Dynamics_Release);
+
         [DefaultValue("デフォルトレンダラ")]
         public const string Renderer_DefaultRenderer_Name = nameof(Renderer_DefaultRenderer_Name);
 
@@ -61,6 +85,26 @@ namespace NiVE3.PresetPlugin.Resource
 
         [DefaultValue("垂直")]
         public const string BlurDirection_Vertical = nameof(BlurDirection_Vertical);
+
+        [DefaultValue("コンプレッサー")]
+        public const string DynamicsMode_Compressor = nameof(DynamicsMode_Compressor);
+
+        [DefaultValue("リミッター")]
+        public const string DynamicsMode_Limiter = nameof(DynamicsMode_Limiter);
+
+        [DefaultValue("エクスパンダー")]
+        public const string DynamicsMode_Expander = nameof(DynamicsMode_Expander);
+
+        [DefaultValue("ノイズゲート")]
+        public const string DynamicsMode_NoiseGate = nameof(DynamicsMode_NoiseGate);
+
+        // unit
+
+        [DefaultValue("ms")]
+        public const string Unit_MilliSecond = nameof(Unit_MilliSecond);
+
+        [DefaultValue("dB")]
+        public const string Unit_Decibel = nameof(Unit_Decibel);
 
         static LanguageResourceDictionary()
         {
@@ -83,6 +127,11 @@ namespace NiVE3.PresetPlugin.Resource
             {
                 this[key] = defaultValue;
             }
+        }
+
+        public static LanguageResourceKey CreateResourceKey(string name)
+        {
+            return new LanguageResourceKey(typeof(LanguageResourceDictionary), name);
         }
 
         [AttributeUsage(AttributeTargets.Field, Inherited = false, AllowMultiple = false)]

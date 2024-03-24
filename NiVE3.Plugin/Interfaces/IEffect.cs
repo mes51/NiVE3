@@ -24,7 +24,7 @@ namespace NiVE3.Plugin.Interfaces
         PropertyBase[] GetProperties();
 
         /// <summary>
-        /// エフェクトを適用します
+        /// 音声にエフェクトを適用します
         /// </summary>
         /// <param name="image">適用先の画像</param>
         /// <param name="roi">エフェクトの適用範囲</param>
@@ -32,5 +32,14 @@ namespace NiVE3.Plugin.Interfaces
         /// <param name="properties">プロパティ</param>
         /// <returns></returns>
         NImage Process(NImage image, ROI roi, double layerTime, PropertyValueGroup properties);
+
+        /// <summary>
+        /// 音声にエフェクトを適用します
+        /// </summary>
+        /// <param name="audio">音声</param>
+        /// <param name="startTime">音声の開始時間</param>
+        /// <param name="properties">プロパティ</param>
+        /// <returns></returns>
+        float[] Process(float[] audio, double startTime, IPropertyObject[] properties);
     }
 }

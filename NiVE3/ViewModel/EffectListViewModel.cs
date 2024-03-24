@@ -13,6 +13,7 @@ using NiVE3.View.Resource;
 using NiVE3.Extension;
 using Prism.Mvvm;
 using System.Text.RegularExpressions;
+using NiVE3.Plugin.Attributes;
 
 namespace NiVE3.ViewModel
 {

@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="HG.NWaves" Version="0.9.6" />
     <PackageReference Include="Vortice.Direct3D11" Version="3.2.0" />
     <PackageReference Include="Vortice.MediaFoundation" Version="3.2.0" />
   </ItemGroup>
@@ -21,7 +22,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="mkdir &quot;$(ProjectDir)..\NiVE3\bin\Debug\net7.0-windows\Plugins\&quot;&#xD;&#xA;copy &quot;$(TargetPath)&quot; &quot;$(ProjectDir)..\NiVE3\bin\Debug\net7.0-windows\Plugins\&quot;" />
+    <Exec Command="mkdir &quot;$(ProjectDir)..\NiVE3\bin\Debug\net7.0-windows\Plugins\&quot;&#xD;&#xA;copy &quot;$(TargetDir)\*.*&quot; &quot;$(ProjectDir)..\NiVE3\bin\Debug\net7.0-windows\Plugins\&quot;" />
   </Target>
 
 </Project>

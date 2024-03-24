@@ -36,9 +36,9 @@ namespace NiVE3.PresetPlugin.Effect.Blur
         {
             return new PropertyBase[]
             {
-                new DoubleProperty(PropertyAmountId, CreateResourceKey(LanguageResourceDictionary.Blur_BoxBlur_Amount), 0.0, 0.0, 10000.0, digit: 2),
-                new DoubleProperty(PropertyRepeatId, CreateResourceKey(LanguageResourceDictionary.Blur_BoxBlur_Repeat), 3, 1, 50, digit: 0),
-                new EnumProperty(PropertyDirectionId, CreateResourceKey(LanguageResourceDictionary.Blur_BoxBlur_Direction), typeof(BlurDirection), typeof(LanguageResourceDictionary), BlurDirection.HorizontalAndVertical, selectBoxWidth: 90.0)
+                new DoubleProperty(PropertyAmountId, LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Blur_BoxBlur_Amount), 0.0, 0.0, 10000.0, digit: 2),
+                new DoubleProperty(PropertyRepeatId, LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Blur_BoxBlur_Repeat), 3, 1, 50, digit: 0),
+                new EnumProperty(PropertyDirectionId, LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Blur_BoxBlur_Direction), typeof(BlurDirection), typeof(LanguageResourceDictionary), BlurDirection.HorizontalAndVertical, selectBoxWidth: 90.0)
             };
         }
 
@@ -72,14 +72,14 @@ namespace NiVE3.PresetPlugin.Effect.Blur
             return image;
         }
 
+        public float[] Process(float[] audio, double startTime, IPropertyObject[] properties)
+        {
+            throw new NotImplementedException();
+        }
+
         public void SetupAccelerator(IAcceleratorObject accelerator) { }
 
         public void Dispose() { }
-
-        static LanguageResourceKey CreateResourceKey(string name)
-        {
-            return new LanguageResourceKey(typeof(LanguageResourceDictionary), name);
-        }
 
         static void Blur(NImage image, ROI roi, float amount)
         {

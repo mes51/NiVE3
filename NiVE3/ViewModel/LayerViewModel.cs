@@ -14,6 +14,7 @@ using GongSolutions.Wpf.DragDrop;
 using NiVE3.Image.Drawing;
 using NiVE3.Model;
 using NiVE3.Mvvm;
+using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
 using NiVE3.View.Command;
@@ -779,11 +780,11 @@ namespace NiVE3.ViewModel
 
             switch (dropInfo.Data)
             {
-                case EffectListDragData when dropInfo.VisualTarget is EffectCollectionView:
+                case EffectListDragData effectListData when dropInfo.VisualTarget is EffectCollectionView:
                     dropInfo.Effects = DragDropEffects.Copy;
                     dropInfo.DropTargetAdorner = DropTargetAdorners.Insert;
                     break;
-                case EffectListDragData:
+                case EffectListDragData effectListData:
                     dropInfo.Effects = DragDropEffects.Copy;
                     dropInfo.DropTargetAdorner = DropTargetAdorners.Highlight;
                     break;

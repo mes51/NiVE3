@@ -85,6 +85,17 @@ namespace NiVE3.Plugin.Interfaces
 
     public interface IEffectObject { }
 
+    public interface IPropertyObject
+    {
+        string Id { get; }
+
+        IReadOnlyCollection<IPropertyObject>? GetChildren();
+
+        public object? GetValue(double tme);
+
+        public PropertyValueGroup? GetValues(double time);
+    }
+
     public interface IPropertyViewModel : INotifyPropertyChanged
     {
         PropertyBase Property { get; }

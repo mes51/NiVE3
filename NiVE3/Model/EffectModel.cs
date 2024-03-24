@@ -50,6 +50,8 @@ namespace NiVE3.Model
 
         public bool IsDummyEffect => Metadata.IsDummyEffect;
 
+        public EffectSupportedSource SupportedSource => Metadata.SupportedSource;
+
         public Guid EffectId { get; }
 
         public event EventHandler<EventArgs>? EffectUpdated;
@@ -112,14 +114,14 @@ namespace NiVE3.Model
             }
         }
 
-        public NImage Process(NImage image, ROI roi, double layerTime)
+        public NImage ProcessImage(NImage image, ROI roi, double layerTime)
         {
             var propertyValues = new Dictionary<string, object?>();
             foreach (var p in Properties)
             {
                 if (p is PropertyGroupModel pg)
                 {
-                    propertyValues.Add(pg.PropertyId, pg.GetPropertyValueGroup(layerTime));
+                    propertyValues.Add(pg.PropertyId, pg.GetValues(layerTime));
                 }
                 else if (p is AppendablePropertyModel ap)
                 {
@@ -132,6 +134,11 @@ namespace NiVE3.Model
             }
 
             return Effect.Value.Process(image, roi, layerTime, new PropertyValueGroup(propertyValues));
+        }
+
+        public float[] ProcessAudio(float[] audio, double startTime)
+        {
+            return Effect.Value.Process(audio, startTime, Properties.ToArray());
         }
 
         public EffectData SaveData()

@@ -35,5 +35,10 @@ namespace NiVE3.PresetPlugin.Effect.ExpressionControl
         {
             return image;
         }
+
+        public float[] Process(float[] audio, double startTime, IPropertyObject[] properties)
+        {
+            return audio;
+        }
     }
 }

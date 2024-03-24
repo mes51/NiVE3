@@ -9,6 +9,26 @@ using NiVE3.Plugin.Resource;
 namespace NiVE3.Plugin.Attributes
 {
     /// <summary>
+    /// エフェクトが処理できるソースを表します
+    /// </summary>
+    [Flags]
+    public enum EffectSupportedSource
+    {
+        /// <summary>
+        /// なし
+        /// </summary>
+        None = 0,
+        /// <summary>
+        /// 画像とビデオ
+        /// </summary>
+        Image = 0x1,
+        /// <summary>
+        /// 音声
+        /// </summary>
+        Audio = 0x2
+    }
+
+    /// <summary>
     /// エフェクトの概要
     /// </summary>
     public interface IEffectMetadata
@@ -48,6 +68,11 @@ namespace NiVE3.Plugin.Attributes
         /// GPUによるアクセラレーションに対応しているかどうかを表します
         /// </summary>
         bool IsSupportGpu { get; }
+
+        /// <summary>
+        /// エフェクトが処理できるソースを表します
+        /// </summary>
+        EffectSupportedSource SupportedSource { get; }
     }
 
     /// <summary>
@@ -76,6 +101,11 @@ namespace NiVE3.Plugin.Attributes
         /// GPUによるアクセラレーションに対応しているかどうか
         /// </summary>
         public bool IsSupportGpu { get; set; }
+
+        /// <summary>
+        /// エフェクトが処理できるソース
+        /// </summary>
+        public EffectSupportedSource SupportedSource { get; set; } = EffectSupportedSource.Image;
 
         /// <summary>
         /// 多言語化用のResourceDictionaryの型
