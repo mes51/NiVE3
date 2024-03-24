@@ -49,7 +49,7 @@ namespace NiVE3.PresetPlugin.Effect.Audio
             };
         }
 
-        public NImage Process(NImage image, ROI roi, double layerTime, PropertyValueGroup properties)
+        public NImage Process(NImage image, ROI roi, double layerTime, IPropertyObject[] properties)
         {
             throw new NotImplementedException();
         }

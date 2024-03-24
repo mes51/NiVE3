@@ -51,7 +51,7 @@ namespace NiVE3.Test.Model
             throw new NotImplementedException();
         }
 
-        public NImage Process(NImage image, ROI roi, double layerTime, PropertyValueGroup properties)
+        public NImage Process(NImage image, ROI roi, double layerTime, IPropertyObject[] properties)
         {
             throw new NotImplementedException();
         }

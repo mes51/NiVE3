@@ -31,7 +31,7 @@ namespace NiVE3.Plugin.Interfaces
         /// <param name="layerTime">現在のレイヤーの時間</param>
         /// <param name="properties">プロパティ</param>
         /// <returns></returns>
-        NImage Process(NImage image, ROI roi, double layerTime, PropertyValueGroup properties);
+        NImage Process(NImage image, ROI roi, double layerTime, IPropertyObject[] properties);
 
         /// <summary>
         /// 音声にエフェクトを適用します

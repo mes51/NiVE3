@@ -120,24 +120,7 @@ namespace NiVE3.Model
 
         public NImage ProcessImage(NImage image, ROI roi, double layerTime)
         {
-            var propertyValues = new Dictionary<string, object?>();
-            foreach (var p in Properties)
-            {
-                if (p is PropertyGroupModel pg)
-                {
-                    propertyValues.Add(pg.PropertyId, pg.GetValues(layerTime));
-                }
-                else if (p is AppendablePropertyModel ap)
-                {
-                    propertyValues.Add(ap.PropertyId, ap.GetChildPropertyValues(layerTime));
-                }
-                else if (p is PropertyModel pp)
-                {
-                    propertyValues.Add(pp.PropertyId, pp.GetValue(layerTime));
-                }
-            }
-
-            return Effect.Value.Process(image, roi, layerTime, new PropertyValueGroup("", propertyValues));
+            return Effect.Value.Process(image, roi, layerTime, Properties.ToArray());
         }
 
         public float[] ProcessAudio(float[] audio, double startTime)

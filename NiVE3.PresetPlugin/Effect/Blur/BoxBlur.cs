@@ -42,11 +42,11 @@ namespace NiVE3.PresetPlugin.Effect.Blur
             };
         }
 
-        public NImage Process(NImage image, ROI roi, double layerTime, PropertyValueGroup properties)
+        public NImage Process(NImage image, ROI roi, double layerTime, IPropertyObject[] properties)
         {
-            var amount = (float)(double)(properties[PropertyAmountId] ?? 0.0);
-            var repeat = (int)(double)(properties[PropertyRepeatId] ?? 1.0);
-            var direction  = (BlurDirection)(properties[PropertyDirectionId] ?? BlurDirection.HorizontalAndVertical);
+            var amount = (float)(double)(properties.First(p => p.Id == PropertyAmountId).GetValue(layerTime) ?? 0.0);
+            var repeat = (int)(double)(properties.First(p => p.Id == PropertyRepeatId).GetValue(layerTime) ?? 1.0);
+            var direction  = (BlurDirection)(properties.First(p => p.Id == PropertyDirectionId).GetValue(layerTime) ?? BlurDirection.HorizontalAndVertical);
 
             if (amount <= 0.0F)
             {
