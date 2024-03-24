@@ -76,6 +76,13 @@ namespace NiVE3.ViewModel
             remove { SelectItemChangedPublisher.Unsubscribe(value); }
         }
 
+        WeakEventPublisher<PropertyValueCommitedEventArgs> PropertyValueCommitedPublisher { get; } = new WeakEventPublisher<PropertyValueCommitedEventArgs>();
+        public event EventHandler<PropertyValueCommitedEventArgs> PropertyValueCommited
+        {
+            add { PropertyValueCommitedPublisher.Subscribe(value); }
+            remove { PropertyValueCommitedPublisher.Unsubscribe(value); }
+        }
+
         private bool isNameEditing;
         public bool IsNameEditing
         {
@@ -165,6 +172,7 @@ namespace NiVE3.ViewModel
             {
                 var vm = InternalPropertyViewModel.CreateViewModel(m);
                 vm.SelectItemChanged += Property_SelectItemChanged;
+                vm.PropertyValueCommited += Property_PropertyValueCommited;
                 return vm;
             });
         }
@@ -182,6 +190,11 @@ namespace NiVE3.ViewModel
         private void Property_SelectItemChanged(object? sender, SelectItemEventArgs e)
         {
             SelectItemChangedPublisher.Publish(sender, new SelectItemEventArgs(e, this));
+        }
+
+        private void Property_PropertyValueCommited(object? sender, PropertyValueCommitedEventArgs e)
+        {
+            PropertyValueCommitedPublisher.Publish(this, e);
         }
     }
 }

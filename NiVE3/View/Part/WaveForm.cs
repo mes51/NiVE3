@@ -147,21 +147,18 @@ namespace NiVE3.View.Part
             if (e.OldValue is LayerViewModel oldLayer)
             {
                 oldLayer.PropertyChanged -= LayerViewModel_PropertyChanged;
-                oldLayer.LayerPropertyUpdate -= LayerViewModel_LayerPropertyCommited;
+                oldLayer.PropertyValueCommited -= LayerViewModel_PropertyValueCommited;
             }
             if (e.NewValue is LayerViewModel newLayer)
             {
                 newLayer.PropertyChanged += LayerViewModel_PropertyChanged;
-                newLayer.LayerPropertyUpdate += LayerViewModel_LayerPropertyCommited;
+                newLayer.PropertyValueCommited += LayerViewModel_PropertyValueCommited;
             }
         }
 
-        private void LayerViewModel_LayerPropertyCommited(object? sender, PropertyValueCommitedEventArgs e)
+        private void LayerViewModel_PropertyValueCommited(object? sender, PropertyValueCommitedEventArgs e)
         {
-            if (e.PropertyHierarchy.Any(p => p.Property.Id == ILayerObject.AudioLevelId))
-            {
-                InvalidateVisual();
-            }
+            InvalidateVisual();
         }
 
         private void LayerViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)

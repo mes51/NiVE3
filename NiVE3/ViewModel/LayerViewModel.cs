@@ -565,11 +565,11 @@ namespace NiVE3.ViewModel
             remove { SelectItemChangedPublisher.Unsubscribe(value); }
         }
 
-        WeakEventPublisher<PropertyValueCommitedEventArgs> LayerPropertyUpdatePublisher { get; } = new WeakEventPublisher<PropertyValueCommitedEventArgs>();
-        public event EventHandler<PropertyValueCommitedEventArgs> LayerPropertyUpdate
+        WeakEventPublisher<PropertyValueCommitedEventArgs> PropertyValueCommitedPublisher { get; } = new WeakEventPublisher<PropertyValueCommitedEventArgs>();
+        public event EventHandler<PropertyValueCommitedEventArgs> PropertyValueCommited
         {
-            add { LayerPropertyUpdatePublisher.Subscribe(value); }
-            remove { LayerPropertyUpdatePublisher.Unsubscribe(value); }
+            add { PropertyValueCommitedPublisher.Subscribe(value); }
+            remove { PropertyValueCommitedPublisher.Unsubscribe(value); }
         }
 
         LayerModel LayerModel { get; }
@@ -595,6 +595,7 @@ namespace NiVE3.ViewModel
                 var vm = new EffectViewModel(e);
                 vm.EffectEnableChangeRequest += Effect_EffectEnableChangeRequest;
                 vm.SelectItemChanged += Effect_SelectItemChanged;
+                vm.PropertyValueCommited += Effect_PropertyValueCommited;
                 return vm;
             });
 
@@ -602,31 +603,31 @@ namespace NiVE3.ViewModel
             {
                 TransformProperties = new PropertyGroupViewModel(layerModel.TransformProperties);
                 TransformProperties.SelectItemChanged += PropertyGroupViewModel_SelectItemChanged;
-                TransformProperties.PropertyValueCommited += PropertyGroupViewModel_PropertyValueUpdate;
+                TransformProperties.PropertyValueCommited += PropertyGroupViewModel_PropertyValueCommited;
             }
             if (layerModel.LayerOptionProperties != null)
             {
                 LayerOptionProperties = new PropertyGroupViewModel(layerModel.LayerOptionProperties);
                 LayerOptionProperties.SelectItemChanged += PropertyGroupViewModel_SelectItemChanged;
-                LayerOptionProperties.PropertyValueCommited += PropertyGroupViewModel_PropertyValueUpdate;
+                LayerOptionProperties.PropertyValueCommited += PropertyGroupViewModel_PropertyValueCommited;
             }
             if (layerModel.TextProperties != null)
             {
                 TextProperties = new PropertyGroupViewModel(layerModel.TextProperties);
                 TextProperties.SelectItemChanged += PropertyGroupViewModel_SelectItemChanged;
-                TextProperties.PropertyValueCommited += PropertyGroupViewModel_PropertyValueUpdate;
+                TextProperties.PropertyValueCommited += PropertyGroupViewModel_PropertyValueCommited;
             }
             if (layerModel.SourceOptionProperties != null)
             {
                 SourceOptionProperties = new PropertyGroupViewModel(layerModel.SourceOptionProperties);
                 SourceOptionProperties.SelectItemChanged += PropertyGroupViewModel_SelectItemChanged;
-                SourceOptionProperties.PropertyValueCommited += PropertyGroupViewModel_PropertyValueUpdate;
+                SourceOptionProperties.PropertyValueCommited += PropertyGroupViewModel_PropertyValueCommited;
             }
             if (layerModel.AudioOptionProperties != null)
             {
                 AudioOptionProperties = new PropertyGroupViewModel(layerModel.AudioOptionProperties);
                 AudioOptionProperties.SelectItemChanged += PropertyGroupViewModel_SelectItemChanged;
-                AudioOptionProperties.PropertyValueCommited += PropertyGroupViewModel_PropertyValueUpdate;
+                AudioOptionProperties.PropertyValueCommited += PropertyGroupViewModel_PropertyValueCommited;
             }
 
             WiringModel();
@@ -925,6 +926,11 @@ namespace NiVE3.ViewModel
             }
         }
 
+        private void Effect_PropertyValueCommited(object? sender, PropertyValueCommitedEventArgs e)
+        {
+            PropertyValueCommitedPublisher.Publish(this, e);
+        }
+
         private void PropertyGroupViewModel_SelectItemChanged(object? sender, SelectItemEventArgs e)
         {
             SelectItemChangedPublisher.Publish(sender, new SelectItemEventArgs(e, this));
@@ -935,9 +941,9 @@ namespace NiVE3.ViewModel
             SelectedEffects.Clear();
         }
 
-        private void PropertyGroupViewModel_PropertyValueUpdate(object? sender, PropertyValueCommitedEventArgs e)
+        private void PropertyGroupViewModel_PropertyValueCommited(object? sender, PropertyValueCommitedEventArgs e)
         {
-            LayerPropertyUpdatePublisher.Publish(this, e);
+            PropertyValueCommitedPublisher.Publish(this, e);
         }
     }
 
