@@ -215,7 +215,7 @@
             </Canvas>
         </Border>
 
-        <pt:TimeLocatorView Grid.Row="1" Duration="{Binding Duration}" Range="{Binding TimeBarRange}" RangeStart="{Binding TimeBarRangeStart}" CurrentTime="{Binding CurrentTime}" FrameRate="{Binding FrameRate}" CurrentTimeChangeByUser="TimeLocatorView_CurrentTimeChangeByUser">
+        <pt:TimeLocatorView x:Name="TimeLocator" Grid.Row="1" Duration="{Binding Duration}" Range="{Binding TimeBarRange}" RangeStart="{Binding TimeBarRangeStart}" CurrentTime="{Binding CurrentTime}" FrameRate="{Binding FrameRate}" CurrentTimeChangeByUser="TimeLocatorView_CurrentTimeChangeByUser">
             <pt:TimeLocatorView.Style>
                 <Style TargetType="{x:Type pt:TimeLocatorView}">
                     <Setter Property="Visibility" Value="Collapsed"/>
@@ -228,6 +228,7 @@
                 </Style>
             </pt:TimeLocatorView.Style>
         </pt:TimeLocatorView>
+        <r:ReadOnlyPropertyWire Reciever="{Binding ElementName=TimeLocator, Path=IsScrubbing}" Sender="{Binding IsScrubbing}"/>
 
         <Border Grid.Row="2" BorderBrush="{uig:AppearanceResource ResourceKey=BorderBrush}" BorderThickness="0,1,0,0">
             <Grid>

@@ -95,6 +95,8 @@ namespace NiVE3.Model
 
         public abstract NImage? GetImage(double time);
 
+        public abstract float[]? GetAudio(double time, double length);
+
         WeakEventPublisher<EventArgs> SourceChangedPublisher { get; } = new WeakEventPublisher<EventArgs>();
         public event EventHandler<EventArgs> SourceChanged
         {
@@ -133,7 +135,26 @@ namespace NiVE3.Model
 
         public override NImage? GetImage(double time)
         {
-            return Footage?.ReadImage(time, 0, 0, null, ImageInterpolationQuality.Level2, false);
+            if (Footage != null && (Footage.InputType.HasFlag(SourceType.Image) || Footage.InputType.HasFlag(SourceType.Video)))
+            {
+                return Footage.ReadImage(time, 0, 0, null, ImageInterpolationQuality.Level2, false);
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public override float[]? GetAudio(double time, double length)
+        {
+            if (Footage != null && Footage.InputType.HasFlag(SourceType.Audio))
+            {
+                return Footage.ReadAudio(time, length);
+            }
+            else
+            {
+                return null;
+            }
         }
 
         private void FootagePreviewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -203,6 +224,11 @@ namespace NiVE3.Model
         public override NImage? GetImage(double time)
         {
             return Composition?.RenderFrame(time, 1.0, ApplicationModel.UseGpu);
+        }
+
+        public override float[]? GetAudio(double time, double length)
+        {
+            return Composition?.RenderAudio(time, length);
         }
 
         private void Composition_CompositionUpdated(object? sender, EventArgs e)

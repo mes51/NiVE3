@@ -221,6 +221,13 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref downScaleRate, value); }
         }
 
+        private bool isScrubbing;
+        public bool IsScrubbing
+        {
+            get { return isScrubbing; }
+            set { SetProperty(ref isScrubbing, value); }
+        }
+
         private PreviewColorChannel previewColorChannel = PreviewColorChannel.Rgb;
         public PreviewColorChannel PreviewColorChannel
         {
@@ -502,6 +509,14 @@ namespace NiVE3.ViewModel
                     break;
                 case nameof(CurrentTime):
                     UpdateCurrentFrame();
+                    if (PreviewModel.IsFootage && !PlayControllerModel.IsPlaying && Keyboard.IsKeyDown(Key.LeftCtrl))
+                    {
+                        var audio = PreviewModel.GetAudio(CurrentTime, 1.0 / FrameRate);
+                        if (audio != null)
+                        {
+                            AudioPlayerModel.AddScrubSample(audio);
+                        }
+                    }
                     if (PlayControllerModel.IsPlaying && !PlayControllerModel.IsPaused)
                     {
                         var startSample = (int)(CurrentTime * Const.AudioSamplingRate) * Const.AudioChannelCount;
@@ -523,6 +538,16 @@ namespace NiVE3.ViewModel
                     break;
                 case nameof(SelectedLayerIds):
                     UpdateBoundingBox();
+                    break;
+                case nameof(IsScrubbing) when PreviewModel.IsFootage && !PlayControllerModel.IsPlaying:
+                    if (IsScrubbing)
+                    {
+                        AudioPlayerModel.PlayScrub();
+                    }
+                    else
+                    {
+                        AudioPlayerModel.StopScrub();
+                    }
                     break;
             }
         }
