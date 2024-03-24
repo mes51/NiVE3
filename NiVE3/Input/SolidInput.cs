@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Dynamic;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics;
 using System.Text;
@@ -126,8 +127,7 @@ namespace NiVE3.Input
             else
             {
                 var image = new NManagedImage(Width, Height, true);
-                var span = image.Data.AsSpan(0, image.DataLength);
-                MemoryMarshal.Cast<float, Vector128<float>>(span).Fill((Vector128<float>)Color);
+                image.GetDataSpan().Fill((Vector4)Color);
                 return image;
             }
         }

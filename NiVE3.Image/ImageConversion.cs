@@ -7,6 +7,7 @@ using System.Runtime.Intrinsics.X86;
 using System.Runtime.Intrinsics;
 using System.Text;
 using System.Threading.Tasks;
+using System.Numerics;
 
 namespace NiVE3.Image
 {
@@ -20,12 +21,12 @@ namespace NiVE3.Image
         /// <param name="fromImage">元となる8bpcの画像データ</param>
         /// <param name="toImage">変換先の32bpcの画像データ</param>
         /// <param name="pixelCount">ピクセルの数</param>
-        public static unsafe void ConvertToBGRA128(Span<byte> fromImage, Span<float> toImage, int pixelCount)
+        public static unsafe void ConvertToBGRA128(Span<byte> fromImage, Span<Vector4> toImage, int pixelCount)
         {
             ref byte pixelDataRef = ref MemoryMarshal.GetReference(fromImage);
-            ref float resultDataRef = ref MemoryMarshal.GetReference(toImage);
+            ref Vector4 resultDataRef = ref MemoryMarshal.GetReference(toImage);
             fixed (int* fixedPixelData = &Unsafe.As<byte, int>(ref pixelDataRef))
-            fixed (Vector128<float>* fixedResultData = &Unsafe.As<float, Vector128<float>>(ref resultDataRef))
+            fixed (Vector128<float>* fixedResultData = &Unsafe.As<Vector4, Vector128<float>>(ref resultDataRef))
             {
                 int* pixelData = fixedPixelData;
                 Vector128<float>* resultData = fixedResultData;
@@ -45,11 +46,11 @@ namespace NiVE3.Image
         /// <param name="fromImage">元となる32bpcの画像データ</param>
         /// <param name="toImage">変換先の8bpcの画像データ</param>
         /// <param name="pixelCount">ピクセルの数</param>
-        public static unsafe void ConvertToBGRA32(Span<float> fromImage, Span<byte> toImage, int pixelCount)
+        public static unsafe void ConvertToBGRA32(Span<Vector4> fromImage, Span<byte> toImage, int pixelCount)
         {
-            ref float pixelDataRef = ref MemoryMarshal.GetReference(fromImage);
+            ref Vector4 pixelDataRef = ref MemoryMarshal.GetReference(fromImage);
             ref byte resultDataRef = ref MemoryMarshal.GetReference(toImage);
-            fixed (Vector128<float>* fixedPixelData = &Unsafe.As<float, Vector128<float>>(ref pixelDataRef))
+            fixed (Vector128<float>* fixedPixelData = &Unsafe.As<Vector4, Vector128<float>>(ref pixelDataRef))
             fixed (int* fixedResultData = &Unsafe.As<byte, int>(ref resultDataRef))
             {
                 Vector128<float>* pixelData = fixedPixelData;
@@ -71,11 +72,11 @@ namespace NiVE3.Image
         /// <param name="fromImage">元となる32bpcの画像データ</param>
         /// <param name="toImage">変換先の8bpcの画像データ</param>
         /// <param name="pixelCount">ピクセルの数</param>
-        public static unsafe void ConvertToBGR32(Span<float> fromImage, Span<byte> toImage, int pixelCount)
+        public static unsafe void ConvertToBGR32(Span<Vector4> fromImage, Span<byte> toImage, int pixelCount)
         {
-            ref float pixelDataRef = ref MemoryMarshal.GetReference(fromImage);
+            ref Vector4 pixelDataRef = ref MemoryMarshal.GetReference(fromImage);
             ref byte resultDataRef = ref MemoryMarshal.GetReference(toImage);
-            fixed (Vector128<float>* fixedPixelData = &Unsafe.As<float, Vector128<float>>(ref pixelDataRef))
+            fixed (Vector128<float>* fixedPixelData = &Unsafe.As<Vector4, Vector128<float>>(ref pixelDataRef))
             fixed (int* fixedResultData = &Unsafe.As<byte, int>(ref resultDataRef))
             {
                 Vector128<float>* pixelData = fixedPixelData;

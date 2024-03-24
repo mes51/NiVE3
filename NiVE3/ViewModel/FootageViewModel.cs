@@ -244,14 +244,8 @@ namespace NiVE3.ViewModel
                 using var image = Footage.ReadImage(Duration * 0.5, 0, 0, null, ImageInterpolationQuality.Level2, false) as NManagedImage;
                 if (image != null)
                 {
-                    var dataSize = image.DataLength;
-                    var floatData = image.GetData();
-                    var data = ArrayPool<byte>.Shared.Rent(dataSize);
-                    for (var i = 0; i < dataSize; i++)
-                    {
-                        // TODO: SDR変換を入れるかどうか
-                        data[i] = (byte)MathF.Round(floatData[i] * 255.0F);
-                    }
+                    var data = ArrayPool<byte>.Shared.Rent(image.DataLength * 4);
+                    ImageConversion.ConvertToBGRA32(image.GetDataSpan(), data, image.DataLength);
                     var writable = new WriteableBitmap(image.Width, image.Height, 96.0, 96.0, PixelFormats.Bgra32, null);
                     writable.WritePixels(new Int32Rect(0, 0, image.Width, image.Height), data, image.Width * 4, 0);
                     SampleImage = writable;

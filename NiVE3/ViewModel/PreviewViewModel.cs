@@ -391,42 +391,42 @@ namespace NiVE3.ViewModel
                 switch (PreviewColorChannel)
                 {
                     case PreviewColorChannel.R:
-                        Parallel.For(0, dataSize / 4, pi =>
+                        Parallel.For(0, dataSize, pi =>
                         {
                             var i = pi * 4;
-                            data[i] = data[i + 1] = data[i + 2] = (byte)Math.Clamp(MathF.Round(floatData[i + 2] * 255.0F), 0.0F, 255.0F);
+                            data[i] = data[i + 1] = data[i + 2] = (byte)Math.Clamp(MathF.Round(floatData[pi].Z * 255.0F), 0.0F, 255.0F);
                             data[i + 3] = 255;
                         });
                         break;
                     case PreviewColorChannel.G:
-                        Parallel.For(0, dataSize / 4, pi =>
+                        Parallel.For(0, dataSize, pi =>
                         {
                             var i = pi * 4;
-                            data[i] = data[i + 1] = data[i + 2] = (byte)Math.Clamp(MathF.Round(floatData[i + 1] * 255.0F), 0.0F, 255.0F);
+                            data[i] = data[i + 1] = data[i + 2] = (byte)Math.Clamp(MathF.Round(floatData[pi].Y * 255.0F), 0.0F, 255.0F);
                             data[i + 3] = 255;
                         });
                         break;
                     case PreviewColorChannel.B:
-                        Parallel.For(0, dataSize / 4, pi =>
+                        Parallel.For(0, dataSize, pi =>
                         {
                             var i = pi * 4;
-                            data[i] = data[i + 1] = data[i + 2] = (byte)Math.Clamp(MathF.Round(floatData[i] * 255.0F), 0.0F, 255.0F);
+                            data[i] = data[i + 1] = data[i + 2] = (byte)Math.Clamp(MathF.Round(floatData[pi].X * 255.0F), 0.0F, 255.0F);
                             data[i + 3] = 255;
                         });
                         break;
                     case PreviewColorChannel.Alpha:
-                        Parallel.For(0, dataSize / 4, pi =>
+                        Parallel.For(0, dataSize, pi =>
                         {
                             var i = pi * 4;
-                            data[i] = data[i + 1] = data[i + 2] = (byte)Math.Clamp(MathF.Round(floatData[i + 3] * 255.0F), 0.0F, 255.0F);
+                            data[i] = data[i + 1] = data[i + 2] = (byte)Math.Clamp(MathF.Round(floatData[pi].W * 255.0F), 0.0F, 255.0F);
                             data[i + 3] = 255;
                         });
                         break;
                     case PreviewColorChannel.RgbStraight:
-                        ImageConversion.ConvertToBGR32(floatData, ImageBuffer, dataSize / 4);
+                        ImageConversion.ConvertToBGR32(floatData, ImageBuffer, dataSize);
                         break;
                     default:
-                        ImageConversion.ConvertToBGRA32(floatData, ImageBuffer, dataSize / 4);
+                        ImageConversion.ConvertToBGRA32(floatData, ImageBuffer, dataSize);
                         break;
                 }
             }

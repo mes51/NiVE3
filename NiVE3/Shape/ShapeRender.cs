@@ -27,7 +27,7 @@ namespace NiVE3.Shape
             Parallel.For(minY, maxY, h =>
             {
                 var width = image.Width;
-                var data = MemoryMarshal.Cast<float, Vector4>(image.GetDataSpan()).Slice(h * width, width);
+                var data = image.GetDataSpan().Slice(h * width, width);
                 var temp = ArrayPool<float>.Shared.Rent(width);
                 temp.AsSpan(0, width).Clear();
 
@@ -182,7 +182,7 @@ namespace NiVE3.Shape
             Parallel.For(minY, maxY, h =>
             {
                 var width = image.Width;
-                var data = MemoryMarshal.Cast<float, Vector4>(image.GetDataSpan()).Slice(h * width, width);
+                var data = image.GetDataSpan().Slice(h * width, width);
 
                 var max = float.MinValue;
                 var hitLine = new List<Hit>();

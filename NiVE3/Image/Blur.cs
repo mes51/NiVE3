@@ -19,8 +19,8 @@ namespace NiVE3.Image
             var fz = 1.0F - fmz;
             var imageWidth = image.Width;
             var imageHeight = image.Height;
-            var temp = ArrayPool<Vector4>.Shared.Rent(image.DataLength / 4);
-            temp.AsSpan(0, image.DataLength / 4).Clear();
+            var temp = ArrayPool<Vector4>.Shared.Rent(image.DataLength);
+            temp.AsSpan(0, image.DataLength).Clear();
 
             if (vertical > 0.0F)
             {
@@ -29,7 +29,7 @@ namespace NiVE3.Image
                     var count = 0.0F;
                     var rgb = Vector4.Zero;
                     var a = 0.0F;
-                    var data = MemoryMarshal.Cast<float, Vector4>(image.GetDataSpan());
+                    var data = image.GetDataSpan();
                     var tempSpan = temp.AsSpan();
                     for (int h = -pz; h < imageHeight; h++)
                     {
@@ -80,7 +80,7 @@ namespace NiVE3.Image
             }
             else
             {
-                MemoryMarshal.Cast<float, Vector4>(image.GetDataSpan()).CopyTo(temp);
+                image.GetDataSpan().CopyTo(temp);
             }
 
             if (horizontal > 0.0F)
@@ -93,7 +93,7 @@ namespace NiVE3.Image
                     var count = 0.0F;
                     var rgb = Vector4.Zero;
                     var a = 0.0F;
-                    var data = MemoryMarshal.Cast<float, Vector4>(image.GetDataSpan());
+                    var data = image.GetDataSpan();
                     var tempSpan = temp.AsSpan();
                     for (int w = -pz; w < imageWidth; w++)
                     {
@@ -144,7 +144,7 @@ namespace NiVE3.Image
             }
             else
             {
-                temp.AsSpan(0, image.DataLength / 4).CopyTo(MemoryMarshal.Cast<float, Vector4>(image.GetDataSpan()));
+                temp.AsSpan(0, image.DataLength).CopyTo(image.GetDataSpan());
             }
 
             ArrayPool<Vector4>.Shared.Return(temp, true);

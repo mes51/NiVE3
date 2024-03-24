@@ -592,9 +592,9 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
                 Parallel.For(minY, maxY, y =>
                 {
-                    var renderImageSpan = MemoryMarshal.Cast<float, Vector4>(RenderImage.GetDataSpan());
+                    var renderImageSpan = RenderImage.GetDataSpan();
                     var trackMatteSpan = (managedTrackMatte?.Data ?? EmptyTrackMatte).AsSpan();
-                    var texture = MemoryMarshal.Cast<float, Vector4>(managedTexture.GetDataSpan());
+                    var texture = managedTexture.GetDataSpan();
                     var eY = Sse.Multiply(edgeX, Sse.Subtract(Vector128.Create(y, y, y, 0.0F), vvEY));
 
                     var offset = (y - OffsetY) * renderImageWidth;
@@ -1031,7 +1031,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 shadowMap.AllocBuffer();
                 Parallel.For(minY, maxY, y =>
                 {
-                    var texture = MemoryMarshal.Cast<float, Vector4>(managedTexture.GetDataSpan());
+                    var texture = managedTexture.GetDataSpan();
                     var eY = Sse.Multiply(edgeX, Sse.Subtract(Vector128.Create(y, y, y, 0.0F), vvEY));
                     var offset = y * size;
                     var indicesSpan = shadowMap.Indices.AsSpan(offset, size);
@@ -1180,7 +1180,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             }
 
             var size = shadowMap.ShadowMapSize / 4;
-            var image = MemoryMarshal.Cast<float, Vector4>(RenderImage.GetDataSpan());
+            var image = RenderImage.GetDataSpan();
             for (var y = 0; y < size; y++)
             {
                 for (var x = 0; x < size; x++)
@@ -1320,7 +1320,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 {
                     var renderImageSpan = RenderImage.GetDataSpan();
                     var trackMatteSpan = (managedTrackMatte?.Data ?? EmptyTrackMatte).AsSpan();
-                    var texture = MemoryMarshal.Cast<float, Vector4>(managedTexture.GetDataSpan());
+                    var texture = managedTexture.GetDataSpan();
                     var eY = Sse.Multiply(edgeX, Sse.Subtract(Vector128.Create(y, y, y, 0.0F), vvEY));
 
                     var offset = (y - OffsetY) * renderImageWidth;

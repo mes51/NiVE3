@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Numerics;
@@ -14,9 +15,9 @@ namespace NiVE3.Image
     {
         /// <summary>
         /// NiVEで扱うことが可能な最大ピクセル数
-        /// Array.MaxLength / 4チャンネル によって制限されています
+        /// Array.MaxLength によって制限されています
         /// </summary>
-        public const int MaxPixelCount = 23000 * 23000; // < Array.MaxLength / 4
+        public const int MaxPixelCount = 46340 * 46340; // ≈ Math.Sqrt(Array.MaxLength)
 
         /// <summary>
         /// 画像の幅
@@ -36,7 +37,7 @@ namespace NiVE3.Image
         /// <summary>
         /// 画像データの最小サイズ。GetDataで取得するデータの長さはこれ以上であることが保証されます
         /// </summary>
-        public virtual int DataLength => Width * Height * 4;
+        public virtual int DataLength => Width * Height;
 
         /// <summary>
         /// このインスタンスが破棄済みかどうか
@@ -58,7 +59,7 @@ namespace NiVE3.Image
         /// 画像のデータを取得します。必要な場合は配列への変換処理が実行されます
         /// </summary>
         /// <returns>取得した画像データ</returns>
-        public abstract float[] GetData();
+        public abstract Vector4[] GetData();
 
         /// <summary>
         /// 画像を複製します

@@ -93,13 +93,13 @@ namespace NiVE3.PresetPlugin.Effect.Blur
             var imageWidth = image.Width;
             var imageHeight = image.Height;
             var imageData = image.GetData();
-            var temp = ArrayPool<Vector4>.Shared.Rent(image.DataLength / 4);
+            var temp = ArrayPool<Vector4>.Shared.Rent(image.DataLength);
             Parallel.For(x, width, delegate (int w)
             {
                 var count = 0.0F;
                 var rgb = Vector4.Zero;
                 var a = 0.0F;
-                var data = MemoryMarshal.Cast<float, Vector4>(imageData.AsSpan(0, image.DataLength));
+                var data = imageData.AsSpan(0, image.DataLength);
                 for (int h = y - pz; h < height; h++)
                 {
                     int t = h - pz;
@@ -154,7 +154,7 @@ namespace NiVE3.PresetPlugin.Effect.Blur
                 var count = 0.0F;
                 var rgb = Vector4.Zero;
                 var a = 0.0F;
-                var data = MemoryMarshal.Cast<float, Vector4>(imageData.AsSpan(0, image.DataLength));
+                var data = imageData.AsSpan(0, image.DataLength);
                 for (int w = x - pz; w < width; w++)
                 {
                     int l = w - pz;
@@ -215,14 +215,14 @@ namespace NiVE3.PresetPlugin.Effect.Blur
             var imageWidth = image.Width;
             var imageHeight = image.Height;
             var imageData = image.GetData();
-            var temp = ArrayPool<Vector4>.Shared.Rent(image.DataLength / 4);
+            var temp = ArrayPool<Vector4>.Shared.Rent(image.DataLength);
 
             Parallel.For(roi.Top, roi.Bottom, delegate (int h)
             {
                 var count = 0.0F;
                 var rgb = Vector4.Zero;
                 var a = 0.0F;
-                var data = MemoryMarshal.Cast<float, Vector4>(imageData.AsSpan(0, image.DataLength));
+                var data = imageData.AsSpan(0, image.DataLength);
                 for (int w = x - pz; w < width; w++)
                 {
                     int l = w - pz;
@@ -270,7 +270,7 @@ namespace NiVE3.PresetPlugin.Effect.Blur
                 }
             });
 
-            temp.AsSpan(0, image.DataLength / 4).CopyTo(MemoryMarshal.Cast<float, Vector4>(imageData.AsSpan(0, image.DataLength)));
+            temp.AsSpan(0, image.DataLength).CopyTo(imageData.AsSpan(0, image.DataLength));
 
             ArrayPool<Vector4>.Shared.Return(temp, true);
         }
@@ -285,13 +285,13 @@ namespace NiVE3.PresetPlugin.Effect.Blur
             var imageWidth = image.Width;
             var imageHeight = image.Height;
             var imageData = image.GetData();
-            var temp = ArrayPool<Vector4>.Shared.Rent(image.DataLength / 4);
+            var temp = ArrayPool<Vector4>.Shared.Rent(image.DataLength);
             Parallel.For(roi.Left, roi.Right, delegate (int w)
             {
                 var count = 0.0F;
                 var rgb = Vector4.Zero;
                 var a = 0.0F;
-                var data = MemoryMarshal.Cast<float, Vector4>(imageData.AsSpan(0, image.DataLength));
+                var data = imageData.AsSpan(0, image.DataLength);
                 for (int h = y - pz; h < height; h++)
                 {
                     int t = h - pz;
@@ -339,7 +339,7 @@ namespace NiVE3.PresetPlugin.Effect.Blur
                 }
             });
 
-            temp.AsSpan(0, image.DataLength / 4).CopyTo(MemoryMarshal.Cast<float, Vector4>(imageData.AsSpan(0, image.DataLength)));
+            temp.AsSpan(0, image.DataLength).CopyTo(imageData.AsSpan(0, image.DataLength));
 
             ArrayPool<Vector4>.Shared.Return(temp, true);
         }

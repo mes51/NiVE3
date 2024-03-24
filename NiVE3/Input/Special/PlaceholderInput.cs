@@ -156,7 +156,7 @@ namespace NiVE3.Input.Special
 
             Parallel.For(0, Height, y =>
             {
-                var dataSpan = MemoryMarshal.Cast<float, Vector4>(result.GetDataSpan()).Slice(y * Width);
+                var dataSpan = result.GetDataSpan().Slice(y * Width);
 
                 if (y <= height12 * 8.0)
                 {

@@ -2,6 +2,7 @@
 using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -15,7 +16,7 @@ namespace NiVE3.Image
         /// <summary>
         /// 画像データ。ArrayPoolから取得した配列のため、画像サイズ以上の長さの可能性があります。
         /// </summary>
-        public float[] Data { get; }
+        public Vector4[] Data { get; }
 
         /// <summary>
         /// NManagedImageの新しいインスタンスを生成します。配列はArrayPoolから取得します
@@ -25,11 +26,11 @@ namespace NiVE3.Image
         /// <param name="needClear">ArrayPoolから取得した配列の0クリアが必要かどうか</param>
         public NManagedImage(int width, int height, bool needClear = true) : base(width, height)
         {
-            var length = width * height * 4;
-            Data = ArrayPool<float>.Shared.Rent(length);
+            var length = width * height;
+            Data = ArrayPool<Vector4>.Shared.Rent(length);
             if (needClear)
             {
-                Data.AsSpan().Fill(0.0F);
+                Data.AsSpan(0, length).Clear();
             }
         }
 
@@ -37,7 +38,7 @@ namespace NiVE3.Image
         /// 画像データを取得します
         /// </summary>
         /// <returns>取得した画像データ。ArrayPoolから取得した配列のため、画像サイズ以上の長さの可能性があります。</returns>
-        public override float[] GetData()
+        public override Vector4[] GetData()
         {
             return Data;
         }
@@ -46,7 +47,7 @@ namespace NiVE3.Image
         /// 画像のデータを取得します。長さはDataLengthでスライスされます
         /// </summary>
         /// <returns>取得した画像データ</returns>
-        public Span<float> GetDataSpan()
+        public Span<Vector4> GetDataSpan()
         {
             return Data.AsSpan(0, DataLength);
         }
@@ -67,7 +68,7 @@ namespace NiVE3.Image
         {
             if (disposing)
             {
-                ArrayPool<float>.Shared.Return(Data);
+                ArrayPool<Vector4>.Shared.Return(Data);
             }
             base.Dispose(disposing);
         }

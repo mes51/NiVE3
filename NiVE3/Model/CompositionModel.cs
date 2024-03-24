@@ -517,10 +517,10 @@ namespace NiVE3.Model
                     Parallel.For(roi.OriginalImagePosition.Y, roi.OriginalImagePosition.Y + roi.OriginalImageSize.Height, y =>
                     {
                         var maskSpan = ((ManagedRasterizedMaskImage)mask).GetDataSpan().Slice((y - roi.OriginalImagePosition.Y) * mask.Width, mask.Width);
-                        var currentFrameSpan = ((NManagedImage)currentFrame).GetDataSpan().Slice(y * currentFrame.Width * 4, currentFrame.Width * 4);
-                        for (int x = roi.OriginalImagePosition.X, limit = x + roi.OriginalImageSize.Width, maskPos = 0, framePos = x * 4 + 3; x < limit; x++,  maskPos++, framePos += 4)
+                        var currentFrameSpan = ((NManagedImage)currentFrame).GetDataSpan().Slice(y * currentFrame.Width, currentFrame.Width);
+                        for (int x = roi.OriginalImagePosition.X, limit = x + roi.OriginalImageSize.Width, maskPos = 0, framePos = x; x < limit; x++,  maskPos++, framePos++)
                         {
-                            currentFrameSpan[framePos] = maskSpan[maskPos];
+                            currentFrameSpan[framePos].W = maskSpan[maskPos];
                         }
                     });
 

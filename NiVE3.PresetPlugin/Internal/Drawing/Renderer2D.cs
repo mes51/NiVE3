@@ -57,8 +57,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             {
                 Parallel.For(minY, maxY, y =>
                 {
-                    var targetData = MemoryMarshal.Cast<float, Vector4>(Target.GetDataSpan());
-                    var imageData = MemoryMarshal.Cast<float, Vector4>(managedImage.GetDataSpan());
+                    var targetData = Target.GetDataSpan();
+                    var imageData = managedImage.GetDataSpan();
                     var trackMatteData = managedTrackMatte.GetDataSpan();
                     for (int x = minX, pos = y * Target.Width + minX; x < maxX; x++, pos++)
                     {
@@ -83,8 +83,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             {
                 Parallel.For(minY, maxY, y =>
                 {
-                    var targetData = MemoryMarshal.Cast<float, Vector4>(Target.GetDataSpan());
-                    var imageData = MemoryMarshal.Cast<float, Vector4>(managedImage.GetDataSpan());
+                    var targetData = Target.GetDataSpan();
+                    var imageData = managedImage.GetDataSpan();
                     for (int x = minX, pos = y * Target.Width + minX; x < maxX; x++, pos++)
                     {
                         var (imageX, imageY) = inverted.Transform(x, y);
@@ -166,7 +166,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 {
                     var targetData = Target.GetDataSpan();
                     var trackMatteData = managedTrackMatte.GetDataSpan();
-                    var imageData = MemoryMarshal.Cast<float, Vector4>(managedImage.GetDataSpan());
+                    var imageData = managedImage.GetDataSpan();
                     for (int x = minX, pos = y * Target.Width + minX; x < maxX; x++, pos++)
                     {
                         var (imageX, imageY) = inverted.Transform(x, y);
@@ -192,7 +192,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 Parallel.For(minY, maxY, y =>
                 {
                     var targetData = Target.GetDataSpan();
-                    var imageData = MemoryMarshal.Cast<float, Vector4>(managedImage.GetDataSpan());
+                    var imageData = managedImage.GetDataSpan();
                     for (int x = minX, pos = y * Target.Width + minX; x < maxX; x++, pos++)
                     {
                         var (imageX, imageY) = inverted.Transform(x, y);

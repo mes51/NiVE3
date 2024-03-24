@@ -695,8 +695,8 @@ namespace NiVE3.Input
         {
             Parallel.For(0, front.Height, y =>
             {
-                var backSpan = MemoryMarshal.Cast<float, Vector4>(back.GetDataSpan()).Slice((offsetY + y) * back.Width + offsetX);
-                var frontSpan = MemoryMarshal.Cast<float, Vector4>(front.GetDataSpan()).Slice(y * front.Width);
+                var backSpan = back.GetDataSpan().Slice((offsetY + y) * back.Width + offsetX);
+                var frontSpan = front.GetDataSpan().Slice(y * front.Width);
 
                 for (var x = 0; x < front.Width; x++)
                 {
