@@ -75,6 +75,39 @@ namespace NiVE3.PresetPlugin.Resource
         [DefaultValue("NiVE標準のレンダラ")]
         public const string Renderer_DefaultRenderer_Description = nameof(Renderer_DefaultRenderer_Description);
 
+        [DefaultValue("パラメトリックイコライザ")]
+        public const string Audio_ParametricEqualizer_Name = nameof(Audio_ParametricEqualizer_Name);
+
+        [DefaultValue("音声にイコライザを適用します")]
+        public const string Audio_ParametricEqualizer_Description = nameof(Audio_ParametricEqualizer_Description);
+
+        [DefaultValue("バンド")]
+        public const string Audio_ParametricEqualizer_BandPoints = nameof(Audio_ParametricEqualizer_BandPoints);
+
+        [DefaultValue("ピーク")]
+        public const string Audio_ParametricEqualizer_BandPoint_Peak = nameof(Audio_ParametricEqualizer_BandPoint_Peak);
+
+        [DefaultValue("ハイパス")]
+        public const string Audio_ParametricEqualizer_BandPoint_HighPass = nameof(Audio_ParametricEqualizer_BandPoint_HighPass);
+
+        [DefaultValue("ローパス")]
+        public const string Audio_ParametricEqualizer_BandPoint_LowPass = nameof(Audio_ParametricEqualizer_BandPoint_LowPass);
+
+        [DefaultValue("ハイシェルフ")]
+        public const string Audio_ParametricEqualizer_BandPoint_HighShelf = nameof(Audio_ParametricEqualizer_BandPoint_HighShelf);
+
+        [DefaultValue("ローシェルフ")]
+        public const string Audio_ParametricEqualizer_BandPoint_LowShelf = nameof(Audio_ParametricEqualizer_BandPoint_LowShelf);
+
+        [DefaultValue("周波数")]
+        public const string Audio_ParametricEqualizer_Frequency = nameof(Audio_ParametricEqualizer_Frequency);
+
+        [DefaultValue("Q")]
+        public const string Audio_ParametricEqualizer_Q = nameof(Audio_ParametricEqualizer_Q);
+
+        [DefaultValue("ゲイン")]
+        public const string Audio_ParametricEqualizer_Gain = nameof(Audio_ParametricEqualizer_Gain);
+
         // enum
 
         [DefaultValue("水平&垂直")]
@@ -105,6 +138,9 @@ namespace NiVE3.PresetPlugin.Resource
 
         [DefaultValue("dB")]
         public const string Unit_Decibel = nameof(Unit_Decibel);
+
+        [DefaultValue("Hz")]
+        public const string Unit_Hertz = nameof(Unit_Hertz);
 
         static LanguageResourceDictionary()
         {

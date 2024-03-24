@@ -78,6 +78,10 @@ namespace NiVE3.Model
                 {
                     Properties.Add(new PropertyGroupModel(p, compositionModel, layerModel, this, historyModel));
                 }
+                else if (p is AppendableProperty)
+                {
+                    Properties.Add(new AppendablePropertyModel(p, compositionModel, layerModel, this, historyModel));
+                }
                 else
                 {
                     Properties.Add(new PropertyModel(p, compositionModel, layerModel, this, historyModel));
@@ -133,7 +137,7 @@ namespace NiVE3.Model
                 }
             }
 
-            return Effect.Value.Process(image, roi, layerTime, new PropertyValueGroup(propertyValues));
+            return Effect.Value.Process(image, roi, layerTime, new PropertyValueGroup("", propertyValues));
         }
 
         public float[] ProcessAudio(float[] audio, double startTime)

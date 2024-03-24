@@ -11,7 +11,12 @@ namespace NiVE3.Plugin.Property
     /// </summary>
     public class PropertyValueGroup
     {
-        public static readonly PropertyValueGroup Empty = new PropertyValueGroup(new Dictionary<string, object?>());
+        public static readonly PropertyValueGroup Empty = new PropertyValueGroup("", new Dictionary<string, object?>());
+
+        /// <summary>
+        /// このプロパティグループのIDを取得します
+        /// </summary>
+        public string PropertyGroupId { get; }
 
         /// <summary>
         /// プロパティの値を取得します
@@ -126,8 +131,9 @@ namespace NiVE3.Plugin.Property
             }
         }
 
-        internal PropertyValueGroup(Dictionary<string, object?> values)
+        internal PropertyValueGroup(string propertyGroupId, Dictionary<string, object?> values)
         {
+            PropertyGroupId = propertyGroupId;
             Values = values;
         }
     }

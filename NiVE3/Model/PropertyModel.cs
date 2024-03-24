@@ -459,7 +459,7 @@ namespace NiVE3.Model
                 }
             }
 
-            return new PropertyValueGroup(result);
+            return new PropertyValueGroup(Property.Id, result);
         }
 
         public void ChangeName(string name)
