@@ -93,12 +93,6 @@ namespace NiVE3.View.Part
                 var disableBrush = AppearanceResourceDictionary.Dictionary.GetBrush(disableBrushKey);
                 var enableBrush = AppearanceResourceDictionary.Dictionary.GetBrush(enableBrushKey);
                 drawingContext.DrawRectangle(i < enableSegmentCount ? enableBrush : disableBrush, null, new Rect(x, 0.0, segmentWidth, ActualHeight));
-                if (interSegmentLevel > 0.0 && interSegmentLevel < 1.0)
-                {
-                    disableBrush = disableBrush.CloneCurrentValue();
-                    disableBrush.Opacity = interSegmentLevel;
-                    drawingContext.DrawRectangle(disableBrush, null, new Rect(x, 0.0, segmentWidth, ActualHeight));
-                }
             }
 
             drawingContext.DrawRectangle(
