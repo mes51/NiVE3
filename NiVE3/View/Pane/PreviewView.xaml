@@ -11,7 +11,7 @@
              xmlns:vm="clr-namespace:NiVE3.ViewModel"
              xmlns:mk="clr-namespace:NiVE3.Wpf.Markup"
              xmlns:pl="clr-namespace:NiVE3.Plugin.Interfaces;assembly=NiVE3.Plugin"
-             xmlns:pvo="clr-namespace:NiVE3.Plugin.ValueObject;assembly=NiVE3.Plugin"
+             xmlns:vo="clr-namespace:NiVE3.ValueObject"
              xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
              xmlns:uig="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
              mc:Ignorable="d" 
@@ -22,6 +22,7 @@
     <UserControl.Resources>
         <cv:LocalizationConverter x:Key="DownScaleRateConverter" LocalizeFormat="{gm:LanguageResource ResourceKey=PreviewView_DownScaleRateFormat}"/>
         <cv:EnumToLocalizedNameConverter x:Key="PreviewColorChannelNameConverter"/>
+        <cv:ColorToBrushConverter x:Key="ColorToBrushConverter"/>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
 
         <r:ComboBoxDisplayChanger x:Key="ScaleComboBoxDisplayChanger">
@@ -167,9 +168,12 @@
             </Style.Triggers>
         </Style>
 
-        <DataTemplate x:Key="BoundingBoxTemplate" DataType="{x:Type pvo:PreviewBoundingBox}">
-            <pt:BoundingBoxView BoundingBox="{Binding BoundingBox}" BorderColor="{Binding Color}" BorderThicknessRate="{Binding ElementName=Root, Path=BoundingBoxBorderThicknessRate}"/>
+        <!--
+        NOTE: ビルドや実行時には特に問題は無いが、なぜかここで定義するとクラスを改めて定義し直そうが場所を変えようがエラーが出るため、同じものをコードで定義して使用する
+        <DataTemplate x:Key="BoundingBoxTemplate" DataType="{x:Type vo:ColoredPreviewBoundingBox}">
+            <pt:BoundingBoxView BoundingBox="{Binding BoundingBox}" BorderBrush="{Binding Color, Converter={StaticResource ColorToBrushConverter}}" BorderThicknessRate="{Binding ElementName=Root, Path=BoundingBoxBorderThicknessRate}"/>
         </DataTemplate>
+        -->
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -203,7 +207,7 @@
                         <Image Source="{Binding CurrentFrame}" Style="{StaticResource PreviewImageStyle}"/>
                     </Grid>
                     <Grid IsHitTestVisible="False">
-                        <ItemsControl ItemsSource="{Binding BoundingBoxes}" ItemTemplate="{StaticResource BoundingBoxTemplate}">
+                        <ItemsControl ItemsSource="{Binding BoundingBoxes}" ItemTemplate="{Binding ElementName=Root, Path=BoundingBoxTemplate}">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <Grid />

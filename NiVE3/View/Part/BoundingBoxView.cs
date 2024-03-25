@@ -35,17 +35,17 @@ namespace NiVE3.View.Part
             new FrameworkPropertyMetadata(1.0, FrameworkPropertyMetadataOptions.AffectsRender)
         );
 
-        public static readonly DependencyProperty BorderColorProperty = DependencyProperty.Register(
-            nameof(BorderColor),
-            typeof(Color),
+        public static readonly DependencyProperty BorderBrushProperty = DependencyProperty.Register(
+            nameof(BorderBrush),
+            typeof(Brush),
             typeof(BoundingBoxView),
-            new FrameworkPropertyMetadata(Colors.Red) // NOTE: BoundingBoxRectが変わる前提で何もしない
+            new FrameworkPropertyMetadata(Brushes.Red, FrameworkPropertyMetadataOptions.AffectsRender)
         );
 
-        public Color BorderColor
+        public Brush BorderBrush
         {
-            get { return (Color)GetValue(BorderColorProperty); }
-            set { SetValue(BorderColorProperty, value); }
+            get { return (Brush)GetValue(BorderBrushProperty); }
+            set { SetValue(BorderBrushProperty, value); }
         }
 
         public double BorderThicknessRate
@@ -101,9 +101,9 @@ namespace NiVE3.View.Part
                 return;
             }
 
-            var penBrush = new SolidColorBrush(BorderColor);
-            var pen = new Pen(penBrush, BorderThickness * BorderThicknessRate);
-            var holdSizePen = new Pen(penBrush, BorderThickness);
+            var strokeBrush = BorderBrush;
+            var pen = new Pen(strokeBrush, BorderThickness * BorderThicknessRate);
+            var holdSizePen = new Pen(strokeBrush, BorderThickness);
 
             var thicknessRateTransform = new ScaleTransform(BorderThicknessRate, BorderThicknessRate);
 
@@ -148,7 +148,7 @@ namespace NiVE3.View.Part
 
             drawingContext.PushTransform(transform);
             drawingContext.DrawGeometry(null, AnchorPointBorderPen, AnchorPointGeometry);
-            drawingContext.DrawGeometry(penBrush, null, AnchorPointGeometry);
+            drawingContext.DrawGeometry(strokeBrush, null, AnchorPointGeometry);
             drawingContext.Pop();
         }
     }

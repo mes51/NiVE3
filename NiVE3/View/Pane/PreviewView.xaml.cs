@@ -15,6 +15,9 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using NiVE3.Shared.Extension;
+using NiVE3.ValueObject;
+using NiVE3.View.Converter;
+using NiVE3.View.Part;
 using NiVE3.ViewModel;
 
 namespace NiVE3.View.Pane
@@ -154,10 +157,41 @@ namespace NiVE3.View.Pane
             set { SetValue(IsStretchPreviewProperty, value); }
         }
 
+        public DataTemplate BoundingBoxTemplate { get; }
+
         bool IsStretchLimited { get; set; }
 
         public PreviewView()
         {
+            // NOTE: なぜかXAML上で定義するとエラーが出るため、コードで定義する
+            var factory = new FrameworkElementFactory(typeof(BoundingBoxView));
+
+            var boundingBoxBinding = new Binding
+            {
+                Path = new PropertyPath(nameof(ColoredPreviewBoundingBox.BoundingBox))
+            };
+            factory.SetBinding(BoundingBoxView.BoundingBoxProperty, boundingBoxBinding);
+
+            var colorBinding = new Binding
+            {
+                Path = new PropertyPath(nameof(ColoredPreviewBoundingBox.Color)),
+                Converter = new ColorToBrushConverter()
+            };
+            factory.SetBinding(BoundingBoxView.BorderBrushProperty, colorBinding);
+
+            var borderThicknessRateBinding = new Binding
+            {
+                Path = new PropertyPath(nameof(BoundingBoxBorderThicknessRate)),
+                Source = this
+            };
+            factory.SetBinding(BoundingBoxView.BorderThicknessRateProperty, borderThicknessRateBinding);
+
+            BoundingBoxTemplate = new DataTemplate
+            {
+                DataType = typeof(ColoredPreviewBoundingBox),
+                VisualTree = factory
+            };
+
             InitializeComponent();
 
             DataContextChanged += PreviewView_DataContextChanged;
