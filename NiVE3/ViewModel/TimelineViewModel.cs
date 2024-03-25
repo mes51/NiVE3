@@ -425,6 +425,7 @@ namespace NiVE3.ViewModel
                     {
                         var ids = SelectedLayers.Select(l => l.LayerId).ToArray();
                         CompositionModel?.DeleteLayers(ids);
+                        SelectedLayers.Clear();
                     }
                 }
             }, () => CompositionModel != null && SelectedItemType != SelectItemType.None);

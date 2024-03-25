@@ -250,6 +250,7 @@ namespace NiVE3.ViewModel
                 {
                     PropertyModel.DeleteKeyFrames(keyFrames);
                 }
+                SelectedKeyFrameIds.Clear();
             });
 
             WiringModel();

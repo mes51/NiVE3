@@ -749,6 +749,7 @@ namespace NiVE3.ViewModel
                 {
                     LayerModel.DeleteEffect(SelectedEffects.Select(e => e.EffectId).ToArray());
                 }
+                SelectedEffects.Clear();
             });
 
             PropertyChanged += LayerViewModel_PropertyChanged;
