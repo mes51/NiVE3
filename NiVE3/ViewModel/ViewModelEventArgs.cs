@@ -79,12 +79,12 @@ namespace NiVE3.ViewModel
 
         public LayerViewModel? Layer => ObjectHierarchy.FirstOrDefault(o => o is LayerViewModel) as LayerViewModel;
 
-        public SelectItemEventArgs(SelectItemType selectItemType, bool isUserAction, object sender)
+        public SelectItemEventArgs(SelectItemType selectItemType, bool isUserAction, object sender, object? commandableParent = null)
         {
             SelectItemType = selectItemType;
             IsUserAction = isUserAction;
             OriginalSender = sender;
-            ObjectHierarchy = new object[] { sender };
+            ObjectHierarchy = commandableParent != null ? new object[] { sender, commandableParent } : new object[] { sender };
         }
 
         public SelectItemEventArgs(SelectItemEventArgs prev, object parent)

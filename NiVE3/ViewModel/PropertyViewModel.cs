@@ -241,7 +241,13 @@ namespace NiVE3.ViewModel
                 PropertyModel.ChangeKeyFramesInterpolationType(t.Item1, t.Item2);
             });
 
-            SelectItemCommand = new DelegateCommand(() => SelectItemChangedPublisher.Publish(this, new SelectItemEventArgs(SelectItemType.KeyFrame, true, this)));
+            SelectItemCommand = new DelegateCommand(() =>
+            {
+                if (SelectedKeyFrameIds.Count > 0)
+                {
+                    SelectItemChangedPublisher.Publish(this, new SelectItemEventArgs(SelectItemType.KeyFrame, true, SelectedKeyFrameIds.ToArray(), this));
+                }
+            });
 
             DeleteCommand = new DelegateCommand<SelectItemType?>(type =>
             {
@@ -309,9 +315,9 @@ namespace NiVE3.ViewModel
 
         private void SelectedKeyFrames_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
-            if (e.NewItems != null)
+            if (e.NewItems != null && e.NewItems.Count > 0)
             {
-                SelectItemChangedPublisher.Publish(this, new SelectItemEventArgs(SelectItemType.KeyFrame, false, this));
+                SelectItemChangedPublisher.Publish(this, new SelectItemEventArgs(SelectItemType.KeyFrame, false, e.NewItems.OfType<KeyFrame>().ToArray(), this));
             }
         }
     }
