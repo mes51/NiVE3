@@ -61,7 +61,7 @@ namespace NiVE3.View.Part
             nameof(CompositionFrameRate),
             typeof(double),
             typeof(KeyFrameCollectionView),
-            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsRender)
         );
 
         public static readonly DependencyProperty KeyFramesProperty = DependencyProperty.Register(
@@ -89,8 +89,21 @@ namespace NiVE3.View.Part
             nameof(SelectItemCommand),
             typeof(ICommand),
             typeof(KeyFrameCollectionView),
-            new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+            new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender)
         );
+
+        public static readonly DependencyProperty RangeDragAreaBrushProperty = DependencyProperty.Register(
+            nameof(RangeDragAreaBrush),
+            typeof(Brush),
+            typeof(KeyFrameCollectionView),
+            new FrameworkPropertyMetadata(Brushes.AliceBlue, FrameworkPropertyMetadataOptions.AffectsRender)
+        );
+
+        public Brush RangeDragAreaBrush
+        {
+            get { return (Brush)GetValue(RangeDragAreaBrushProperty); }
+            set { SetValue(RangeDragAreaBrushProperty, value); }
+        }
 
         public static RoutedEvent KeyFrameMoveRequestEvent = EventManager.RegisterRoutedEvent(
             nameof(KeyFrameMoveRequest), RoutingStrategy.Direct, typeof(EventHandler<KeyFrameMoveEventArgs>), typeof(KeyFrameCollectionView)
@@ -162,9 +175,13 @@ namespace NiVE3.View.Part
 
         KeyFrame? LastSelected { get; set; }
 
-        bool IsClicked { get; set; }
+        bool IsKeyFrameClicked { get; set; }
+
+        bool IsRangeDragging { get; set; }
 
         double ClickX { get; set; }
+
+        double SelectRangeEndX { get; set; }
 
         double KeyFrameMoveingTime { get; set; }
 
@@ -273,6 +290,13 @@ namespace NiVE3.View.Part
                 return;
             }
 
+            if (IsRangeDragging)
+            {
+                var startX = Math.Min(ClickX, SelectRangeEndX);
+                var endX = Math.Max(ClickX, SelectRangeEndX);
+                drawingContext.DrawRectangle(RangeDragAreaBrush, null, new Rect(startX, 0.0, endX - startX, ActualHeight));
+            }
+
             drawingContext.PushClip(new RectangleGeometry(new Rect(0.0, 0.0, actualWidth, ActualHeight)));
 
             drawingContext.PushTransform(new TranslateTransform(UIParameters.TimelineRangeThumbWidth - KeyFrameIconSize * 0.5 - 1.0, (ActualHeight - KeyFrameIconSize) * 0.5));
@@ -287,7 +311,7 @@ namespace NiVE3.View.Part
                 var icon = KeyFrameIcons[(kp.InterpolationType, k.InterpolationType)];
 
                 var isSelected = selected.Contains(k.Id);
-                var keyFrameTime = isSelected && IsClicked ? (int)Math.Round((KeyFrameMoveingTime + k.Time) * CompositionFrameRate) * frameDuration : k.Time;
+                var keyFrameTime = isSelected && IsKeyFrameClicked ? (int)Math.Round((KeyFrameMoveingTime + k.Time) * CompositionFrameRate) * frameDuration : k.Time;
                 var x = (timeOffset + keyFrameTime) * pixelPerTime;
                 if (x > -KeyFrameIconSize && x < actualWidth)
                 {
@@ -396,12 +420,12 @@ namespace NiVE3.View.Part
 
         private void KeyFrameCollectionView_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (IsClicked)
+            if (IsKeyFrameClicked)
             {
                 var frameDuration = 1.0 / CompositionFrameRate;
                 var diffTime = TimeCalc.CalcTimeFromPixel(e.GetPosition(this).X - ClickX, ActualWidth, Range, 0.0);
 
-                IsClicked = false;
+                IsKeyFrameClicked = false;
                 ReleaseMouseCapture();
 
                 var oldSelectedKeyFrame = SelectedKeyFrameIds.Where(id => KeyFrames.Any(k => k.Id == id)).Select(id => KeyFrames.First(k => k.Id == id)).ToArray();
@@ -423,18 +447,92 @@ namespace NiVE3.View.Part
 
                 InvalidateVisual();
             }
+            else if (IsRangeDragging)
+            {
+                IsRangeDragging = false;
+                ReleaseMouseCapture();
+
+                var pixelPerTime = (ActualWidth - UIParameters.TimelineRangeThumbTotalWidth) / Range;
+                if (pixelPerTime < 0 || double.IsNaN(pixelPerTime) || double.IsInfinity(pixelPerTime) || KeyFrames.Count < 1)
+                {
+                    return;
+                }
+
+                var isSelectRange = Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift);
+                var isSelectMultiple = Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl);
+                var frameDuration = 1.0 / CompositionFrameRate;
+                var timeOffset = SourceStartPoint - RangeStart;
+                var startX = Math.Min(ClickX, SelectRangeEndX) - UIParameters.TimelineRangeThumbWidth;
+                var endX = Math.Max(ClickX, SelectRangeEndX) - UIParameters.TimelineRangeThumbWidth;
+                var targetKeyFrames = KeyFrames.Where(k =>
+                {
+                    var keyFrameStartX = (k.Time + timeOffset) * pixelPerTime - KeyFrameIconSize * 0.5;
+                    return (keyFrameStartX + KeyFrameIconSize) > startX && keyFrameStartX < endX;
+                }).ToArray();
+
+                if (targetKeyFrames.Length > 0)
+                {
+                    if (isSelectRange && LastSelected != null)
+                    {
+                        var maxKeyFrame = targetKeyFrames.MaxBy(k => k.Time) ?? targetKeyFrames.First();
+                        var minKeyFrame = targetKeyFrames.MinBy(k => k.Time) ?? targetKeyFrames.First();
+                        if (minKeyFrame.Time < LastSelected.Time && maxKeyFrame.Time > LastSelected.Time)
+                        {
+                            foreach (var k in targetKeyFrames)
+                            {
+                                if (k.Id != LastSelected.Id)
+                                {
+                                    SelectKeyFrame(k, false, true);
+                                }
+                            }
+                        }
+                        else if (LastSelected.Time < minKeyFrame.Time)
+                        {
+                            SelectKeyFrame(maxKeyFrame, true, false);
+                        }
+                        else
+                        {
+                            SelectKeyFrame(minKeyFrame, true, false);
+                        }
+                    }
+                    else
+                    {
+                        if (!isSelectMultiple)
+                        {
+                            SelectedKeyFrameIds.Clear();
+                        }
+                        foreach (var k in targetKeyFrames)
+                        {
+                            SelectKeyFrame(k, false, true);
+                        }
+                    }
+                    SelectItemCommand?.Execute(null);
+                }
+
+                InvalidateVisual();
+            }
         }
 
         private void KeyFrameCollectionView_MouseMove(object sender, MouseEventArgs e)
         {
-            if (!IsClicked)
+            if (IsKeyFrameClicked)
             {
-                return;
+                KeyFrameMoveingTime = TimeCalc.CalcTimeFromPixel(e.GetPosition(this).X - ClickX, ActualWidth, Range, 0.0);
+                InvalidateVisual();
             }
-
-            KeyFrameMoveingTime = TimeCalc.CalcTimeFromPixel(e.GetPosition(this).X - ClickX, ActualWidth, Range, 0.0);
-
-            InvalidateVisual();
+            else if (IsRangeDragging)
+            {
+                if (KeyFrames.Count > 0)
+                {
+                    SelectRangeEndX = e.GetPosition(this).X;
+                }
+                else
+                {
+                    IsRangeDragging = false;
+                    ReleaseMouseCapture();
+                }
+                InvalidateVisual();
+            }
         }
 
         private void KeyFrameCollectionView_MouseDown(object sender, MouseButtonEventArgs e)
@@ -487,17 +585,25 @@ namespace NiVE3.View.Part
                     SelectItemCommand?.Execute(null);
                     if (SelectedKeyFrameIds.Contains(clickedKeyFrame.Id))
                     {
-                        IsClicked = true;
+                        IsKeyFrameClicked = true;
                         ClickX = pos.X;
                         KeyFrameMoveingTime = 0.0;
                         CaptureMouse();
                     }
                 }
             }
-            else if (!isSelectRange && !isSelectMultiple)
+            else
             {
-                SelectedKeyFrameIds.Clear();
-                SelectItemCommand?.Execute(null);
+                if (!isSelectRange && !isSelectMultiple)
+                {
+                    SelectedKeyFrameIds.Clear();
+                    LastSelected = null;
+                    SelectItemCommand?.Execute(null);
+                }
+                ClickX = pos.X;
+                SelectRangeEndX = pos.X;
+                IsRangeDragging = true;
+                CaptureMouse();
             }
             InvalidateVisual();
         }
