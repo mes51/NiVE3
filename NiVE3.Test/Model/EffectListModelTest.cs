@@ -29,7 +29,7 @@ namespace NiVE3.Test.Model
             //       候補: https://github.com/telerik/JustMockLite
             var effectModel = model.CreateEffect(Guid.Parse(TestEffect.ID), null!, null!, null!);
 
-            Assert.NotNull(effectModel);
+            Assert.That(effectModel, Is.Not.Null);
         }
     }
 
@@ -43,13 +43,10 @@ namespace NiVE3.Test.Model
 
         public PropertyBase[] GetProperties()
         {
-            throw new NotImplementedException();
+            return Array.Empty<PropertyBase>();
         }
 
-        public void Dispose()
-        {
-            throw new NotImplementedException();
-        }
+        public void Dispose() { }
 
         public NImage Process(NImage image, ROI roi, double layerTime, IPropertyObject[] properties)
         {

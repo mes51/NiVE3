@@ -23,7 +23,7 @@ namespace NiVE3.Test.Util
             }
 
             Assert.That(ringBuffer.Count, Is.EqualTo(AddCount));
-            Assert.IsTrue(ringBuffer.ToArray().SequenceEqual(Enumerable.Range(0, AddCount)));
+            Assert.That(ringBuffer.ToArray().SequenceEqual(Enumerable.Range(0, AddCount)), Is.True);
         }
 
         [Test]
@@ -40,7 +40,7 @@ namespace NiVE3.Test.Util
             }
 
             Assert.That(ringBuffer.Count, Is.EqualTo(Capacity));
-            Assert.IsTrue(ringBuffer.ToArray().SequenceEqual(Enumerable.Range(AddCount - Capacity, Capacity)));
+            Assert.That(ringBuffer.ToArray().SequenceEqual(Enumerable.Range(AddCount - Capacity, Capacity)), Is.True);
         }
 
         [Test]
@@ -57,7 +57,7 @@ namespace NiVE3.Test.Util
             }
 
             Assert.That(ringBuffer.Count, Is.EqualTo(AddCount));
-            Assert.IsTrue(ringBuffer.ToArray().SequenceEqual(Enumerable.Range(0, AddCount).Reverse()));
+            Assert.That(ringBuffer.ToArray().SequenceEqual(Enumerable.Range(0, AddCount).Reverse()), Is.True);
         }
 
         [Test]
@@ -74,7 +74,7 @@ namespace NiVE3.Test.Util
             }
 
             Assert.That(ringBuffer.Count, Is.EqualTo(Capacity));
-            Assert.IsTrue(ringBuffer.ToArray().SequenceEqual(Enumerable.Range(AddCount - Capacity, Capacity).Reverse()));
+            Assert.That(ringBuffer.ToArray().SequenceEqual(Enumerable.Range(AddCount - Capacity, Capacity).Reverse()), Is.True);
         }
 
         [Test]
@@ -96,7 +96,7 @@ namespace NiVE3.Test.Util
             }
 
             Assert.That(ringBuffer.Count, Is.EqualTo(Capacity - RemoveCount));
-            Assert.IsTrue(ringBuffer.ToArray().SequenceEqual(Enumerable.Range(AddCount - Capacity, Capacity - RemoveCount)));
+            Assert.That(ringBuffer.ToArray().SequenceEqual(Enumerable.Range(AddCount - Capacity, Capacity - RemoveCount)), Is.True);
         }
 
         [Test]
@@ -118,7 +118,7 @@ namespace NiVE3.Test.Util
             }
 
             Assert.That(ringBuffer.Count, Is.EqualTo(Capacity - RemoveCount));
-            Assert.IsTrue(ringBuffer.ToArray().SequenceEqual(Enumerable.Range(AddCount - Capacity + RemoveCount, Capacity - RemoveCount)));
+            Assert.That(ringBuffer.ToArray().SequenceEqual(Enumerable.Range(AddCount - Capacity + RemoveCount, Capacity - RemoveCount)), Is.True);
         }
     }
 }
