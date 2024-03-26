@@ -11,6 +11,10 @@ namespace NiVE3.Util
 {
     static class TimeCalc
     {
+        public const double KeyFrameTimeEpsilon = 1E-10;
+
+        public const int KeyFrameTimeDigit = 10;
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double CalcTimeFromPixel(double x, double uiWidth, double range, double rangeStart, double min = double.MinValue, double max = double.MaxValue)
         {

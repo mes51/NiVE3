@@ -175,6 +175,8 @@ namespace NiVE3.View.Part
 
         KeyFrame? LastSelected { get; set; }
 
+        KeyFrame? MoveTarget { get; set; }
+
         bool IsKeyFrameClicked { get; set; }
 
         bool IsRangeDragging { get; set; }
@@ -305,13 +307,13 @@ namespace NiVE3.View.Part
             var selectedBrush = SelectedKeyFrameBrush;
             var timeOffset = SourceStartPoint - RangeStart;
             var selected = SelectedKeyFrameIds;
-            var frameDuration = 1.0 / CompositionFrameRate;
+            var diffTime = MoveTarget != null ? TimeCalc.AlignRound(KeyFrameMoveingTime + MoveTarget.Time, CompositionFrameRate) - MoveTarget.Time : 0.0;
             foreach (var (k, kp) in KeyFrames.Zip(KeyFrames.Prepend(KeyFrames.First())))
             {
                 var icon = KeyFrameIcons[(kp.InterpolationType, k.InterpolationType)];
 
                 var isSelected = selected.Contains(k.Id);
-                var keyFrameTime = isSelected && IsKeyFrameClicked ? (int)Math.Round((KeyFrameMoveingTime + k.Time) * CompositionFrameRate) * frameDuration : k.Time;
+                var keyFrameTime = k.Time + (isSelected && IsKeyFrameClicked ? diffTime : 0.0);
                 var x = (timeOffset + keyFrameTime) * pixelPerTime;
                 if (x > -KeyFrameIconSize && x < actualWidth)
                 {
@@ -420,16 +422,15 @@ namespace NiVE3.View.Part
 
         private void KeyFrameCollectionView_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (IsKeyFrameClicked)
+            if (IsKeyFrameClicked && MoveTarget != null)
             {
-                var frameDuration = 1.0 / CompositionFrameRate;
-                var diffTime = TimeCalc.CalcTimeFromPixel(e.GetPosition(this).X - ClickX, ActualWidth, Range, 0.0);
+                var diffTime = TimeCalc.AlignRound(MoveTarget.Time + TimeCalc.CalcTimeFromPixel(e.GetPosition(this).X - ClickX, ActualWidth, Range, 0.0), CompositionFrameRate) - MoveTarget.Time;
 
                 IsKeyFrameClicked = false;
                 ReleaseMouseCapture();
 
                 var oldSelectedKeyFrame = SelectedKeyFrameIds.Where(id => KeyFrames.Any(k => k.Id == id)).Select(id => KeyFrames.First(k => k.Id == id)).ToArray();
-                var newTimes = oldSelectedKeyFrame.Select(k => (int)Math.Round((diffTime + k.Time) * CompositionFrameRate) * frameDuration).ToArray();
+                var newTimes = oldSelectedKeyFrame.Select(k => Math.Round(diffTime + k.Time, TimeCalc.KeyFrameTimeDigit)).ToArray();
 
                 if (oldSelectedKeyFrame.Select((k, i) => k.Time == newTimes[i]).All(b => b))
                 {
@@ -445,6 +446,7 @@ namespace NiVE3.View.Part
                     SelectedKeyFrameIds.Add(k.Id);
                 }
 
+                MoveTarget = null;
                 InvalidateVisual();
             }
             else if (IsRangeDragging)
@@ -460,7 +462,6 @@ namespace NiVE3.View.Part
 
                 var isSelectRange = Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift);
                 var isSelectMultiple = Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl);
-                var frameDuration = 1.0 / CompositionFrameRate;
                 var timeOffset = SourceStartPoint - RangeStart;
                 var startX = Math.Min(ClickX, SelectRangeEndX) - UIParameters.TimelineRangeThumbWidth;
                 var endX = Math.Max(ClickX, SelectRangeEndX) - UIParameters.TimelineRangeThumbWidth;
@@ -586,6 +587,7 @@ namespace NiVE3.View.Part
                     if (SelectedKeyFrameIds.Contains(clickedKeyFrame.Id))
                     {
                         IsKeyFrameClicked = true;
+                        MoveTarget = clickedKeyFrame;
                         ClickX = pos.X;
                         KeyFrameMoveingTime = 0.0;
                         CaptureMouse();
@@ -600,6 +602,7 @@ namespace NiVE3.View.Part
                     LastSelected = null;
                     SelectItemCommand?.Execute(null);
                 }
+                MoveTarget = null;
                 ClickX = pos.X;
                 SelectRangeEndX = pos.X;
                 IsRangeDragging = true;

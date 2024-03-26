@@ -15,6 +15,7 @@ using NiVE3.View.Resource;
 using System.Windows.Media.Animation;
 using NiVE3.Data.Json.Project;
 using NiVE3.Extension;
+using NiVE3.Util;
 
 namespace NiVE3.Model
 {
@@ -47,8 +48,6 @@ namespace NiVE3.Model
 
     partial class PropertyModel : BindableBase, IPropertyModel
     {
-        const double KeyFrameEpsilon = 1E-10;
-
         public string Name { get; }
 
         public string PropertyId { get; }
@@ -169,9 +168,9 @@ namespace NiVE3.Model
         {
             var time = CurrentTime - SourceStartPoint;
             var interpolationType = KeyFrames.LastOrDefault(k => k.Time <= time)?.InterpolationType ?? InterpolationType.Linear;
-            var keyFrame = new KeyFrame(time, value, new Ease(0.0, 0.0), new Ease(0.0, 0.0), interpolationType);
-            var index = KeyFrames.IndexOfLast(k => Math.Abs(k.Time - time) < KeyFrameEpsilon || k.Time <= time) + 1;
-            if (index > 0 && Math.Abs(KeyFrames[index - 1].Time - time) < KeyFrameEpsilon)
+            var keyFrame = new KeyFrame(Math.Round(time, TimeCalc.KeyFrameTimeDigit), value, new Ease(0.0, 0.0), new Ease(0.0, 0.0), interpolationType);
+            var index = KeyFrames.IndexOfLast(k => Math.Abs(k.Time - time) < TimeCalc.KeyFrameTimeEpsilon || k.Time <= time) + 1;
+            if (index > 0 && Math.Abs(KeyFrames[index - 1].Time - time) < TimeCalc.KeyFrameTimeEpsilon)
             {
                 var oldKeyFrame = KeyFrames[index - 1];
                 KeyFrames[index - 1] = keyFrame;
@@ -299,8 +298,8 @@ namespace NiVE3.Model
             oldKeyFrames.AddRange(targetKeyFrames);
             foreach (var nk in newKeyFrames)
             {
-                var index = KeyFrames.IndexOfLast(k => Math.Abs(k.Time - nk.Time) < KeyFrameEpsilon || k.Time <= nk.Time) + 1;
-                if (index > 0 && Math.Abs(KeyFrames[index - 1].Time - nk.Time) < KeyFrameEpsilon)
+                var index = KeyFrames.IndexOfLast(k => Math.Abs(k.Time - nk.Time) < TimeCalc.KeyFrameTimeEpsilon || k.Time <= nk.Time) + 1;
+                if (index > 0 && Math.Abs(KeyFrames[index - 1].Time - nk.Time) < TimeCalc.KeyFrameTimeEpsilon)
                 {
                     oldKeyFrames.Add(KeyFrames[index - 1]);
                     KeyFrames[index - 1] = nk;
