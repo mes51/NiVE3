@@ -85,15 +85,8 @@ namespace NiVE3.View.Part
             new FrameworkPropertyMetadata(true, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
-        private static readonly DependencyProperty IndentMarginLeftProperty = DependencyProperty.Register(
-            nameof(IndentMarginLeft),
-            typeof(GridLength),
-            typeof(LayerItemExpander),
-            new FrameworkPropertyMetadata(new GridLength(UIParameters.AVSwitchWidthWithHalfSplitter), FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
-        );
-
-        private static readonly DependencyProperty CalculatedNameAreaWidthProperty = DependencyProperty.Register(
-            nameof(CalculatedNameAreaWidth),
+        public static readonly DependencyProperty HeaderSubItemAreaWidthProperty = DependencyProperty.Register(
+            nameof(HeaderSubItemAreaWidth),
             typeof(GridLength),
             typeof(LayerItemExpander),
             new FrameworkPropertyMetadata(new GridLength(0.0), FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
@@ -101,9 +94,9 @@ namespace NiVE3.View.Part
 
         public static readonly DependencyProperty ControlAreaWidthProperty = DependencyProperty.Register(
             nameof(ControlAreaWidth),
-            typeof(GridLength),
+            typeof(double),
             typeof(LayerItemExpander),
-            new FrameworkPropertyMetadata(new GridLength(0.0), FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
         public static readonly DependencyProperty HeaderSubItemProperty = DependencyProperty.Register(
@@ -127,6 +120,20 @@ namespace NiVE3.View.Part
             new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
+        private static readonly DependencyProperty IndentMarginLeftProperty = DependencyProperty.Register(
+            nameof(IndentMarginLeft),
+            typeof(GridLength),
+            typeof(LayerItemExpander),
+            new FrameworkPropertyMetadata(new GridLength(UIParameters.AVSwitchWidthWithHalfSplitter), FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        private static readonly DependencyProperty CalculatedNameAreaWidthProperty = DependencyProperty.Register(
+            nameof(CalculatedNameAreaWidth),
+            typeof(GridLength),
+            typeof(LayerItemExpander),
+            new FrameworkPropertyMetadata(new GridLength(0.0), FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
         public ICommand? EndEditNameCommand
         {
             get { return (ICommand)GetValue(EndEditNameCommandProperty); }
@@ -145,10 +152,16 @@ namespace NiVE3.View.Part
             set { SetValue(HeaderSubItemProperty, value); }
         }
 
-        public GridLength ControlAreaWidth
+        public double ControlAreaWidth
         {
-            get { return (GridLength)GetValue(ControlAreaWidthProperty); }
+            get { return (double)GetValue(ControlAreaWidthProperty); }
             set { SetValue(ControlAreaWidthProperty, value); }
+        }
+
+        public GridLength HeaderSubItemAreaWidth
+        {
+            get { return (GridLength)GetValue(HeaderSubItemAreaWidthProperty); }
+            set { SetValue(HeaderSubItemAreaWidthProperty, value); }
         }
 
         public bool IsHighlightHeader

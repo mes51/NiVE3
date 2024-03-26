@@ -59,12 +59,12 @@
                     </ControlTemplate.Resources>
                     <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="3" SnapsToDevicePixels="true">
                         <DockPanel>
-                            <Grid Margin="{TemplateBinding Padding}" DockPanel.Dock="Top">
+                            <Grid Margin="{TemplateBinding Padding}" DockPanel.Dock="Top" Width="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=ControlAreaWidth}" HorizontalAlignment="Left" ClipToBounds="True">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=IndentMarginLeft}"/>
                                     <ColumnDefinition Width="{x:Static r:UIParameters.ArrowWidthGridLength}"/>
                                     <ColumnDefinition Width="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=CalculatedNameAreaWidth}"/>
-                                    <ColumnDefinition Width="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=ControlAreaWidth}"/>
+                                    <ColumnDefinition Width="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=HeaderSubItemAreaWidth}"/>
                                 </Grid.ColumnDefinitions>
 
                                 <ContentPresenter Grid.Column="0" Content="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Switches}" Visibility="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=IsAVSwitchColumnVisible, Converter={StaticResource BooleanToVisibilityConverter}}"/>

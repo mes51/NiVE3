@@ -258,6 +258,7 @@
                                               IsAVSwitchColumnVisible="False"
                                               IsTagColumnVisible="True"
                                               NameAreaWidth="{Binding ElementName=Root, Path=DataContext.LayerNameColumnWidth}"
+                                              ControlAreaWidth="{Binding ElementName=InnerRoot, Path=ActualWidth}"
                                               ParentHasExpanderArrow="False"
                                               Visibility="{Binding HasEffect, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <pt:EffectCollectionView ItemsSource="{Binding Effects}"

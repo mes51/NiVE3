@@ -23,6 +23,7 @@
                              IsTagColumnVisible="{Binding ElementName=Root, Path=IsTagColumnVisible}"
                              IsExpanded="{Binding IsExpanded, Mode=TwoWay}"
                              NameAreaWidth="{Binding ElementName=Root, Path=NameAreaWidth}"
+                             ControlAreaWidth="{Binding ElementName=Root, Path=ControlAreaWidth}"
                              IsNameEditing="{Binding IsNameEditing}"
                              EndEditNameCommand="{Binding EndEditNameCommand}"
                              NameDragSourceIgnore="False"

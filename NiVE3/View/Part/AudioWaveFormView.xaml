@@ -42,6 +42,7 @@
                               HeaderText="{Binding ElementName=Root, Path=Text}"
                               IndentLevel="{Binding ElementName=Root, Path=IndentLevel}"
                               NameAreaWidth="{Binding ElementName=Root, Path=DataContext.PropertyNameAreaWidth}"
+                              ControlAreaWidth="{Binding ElementName=Root, Path=ControlAreaWidth}"
                               IsAVSwitchColumnVisible="{Binding ElementName=Root, Path=DataContext.IsAVSwitchColumnVisible}"
                               IsTagColumnVisible="{Binding ElementName=Root, Path=DataContext.IsTagColumnVisible}">
             <Grid>

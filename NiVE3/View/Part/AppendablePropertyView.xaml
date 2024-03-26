@@ -46,7 +46,8 @@
                              IsExpanded="{Binding IsExpanded, Mode=TwoWay}"
                              NameAreaWidth="{Binding ElementName=Root, Path=NameAreaWidth}"
                              ParentHasExpanderArrow="{Binding ElementName=Root, Path=ParentHasExpanderArrow}"
-                             ControlAreaWidth="{Binding ElementName=Root, Path=CalculatedControlAreaWidth}"
+                             HeaderSubItemAreaWidth="{Binding ElementName=Root, Path=CalculatedControlAreaWidth}"
+                             ControlAreaWidth="{Binding ElementName=Root, Path=ControlAreaWidth}"
                              IsHighlightHeader="{Binding ElementName=Root, Path=(pr:StackableItemsCollectionView.IsSelected)}">
         <local:LayerItemExpander.HeaderSubItem>
             <Button x:Name="OpenAppendItemMenuButton" Height="13" Width="13" HorizontalAlignment="Left" VerticalAlignment="Center" Click="OpenAppendItemMenuButton_Click" ContextMenuService.IsEnabled="False">

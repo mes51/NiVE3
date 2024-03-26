@@ -601,6 +601,7 @@
                                   IsAVSwitchColumnVisible="{Binding ElementName=Root, Path=DataContext.IsAVSwitchColumnVisible}"
                                   IsTagColumnVisible="{Binding ElementName=Root, Path=DataContext.IsTagColumnVisible}"
                                   NameAreaWidth="{Binding ElementName=Root, Path=DataContext.PropertyNameAreaWidth}"
+                                  ControlAreaWidth="{Binding ElementName=Root, Path=LayerControlAreaWidth}"
                                   Visibility="{Binding HasEffect, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <pt:EffectCollectionView ItemsSource="{Binding Effects}"
                                          IndentLevel="2"
@@ -668,6 +669,7 @@
                 <pt:LayerItemExpander HeaderText="{gm:LanguageResource ResourceKey=Layer_Audio}"
                                       IndentLevel="1"
                                       NameAreaWidth="{Binding ElementName=Root, Path=DataContext.PropertyNameAreaWidth}"
+                                      ControlAreaWidth="{Binding ElementName=Root, Path=LayerControlAreaWidth}"
                                       IsAVSwitchColumnVisible="{Binding ElementName=Root, Path=DataContext.IsAVSwitchColumnVisible}"
                                       IsTagColumnVisible="{Binding ElementName=Root, Path=DataContext.IsTagColumnVisible}">
                     <Grid>
