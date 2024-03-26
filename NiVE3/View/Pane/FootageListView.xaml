@@ -4,13 +4,16 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:NiVE3.View.Pane"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:vm="clr-namespace:NiVE3.ViewModel"
              xmlns:pv="clr-namespace:NiVE3.View.Primitive"
              xmlns:pt="clr-namespace:NiVE3.View.Part"
              xmlns:cv="clr-namespace:NiVE3.View.Converter"
+             xmlns:r="clr-namespace:NiVE3.View.Resource"
              xmlns:a="clr-namespace:NiVE3.Wpf.Attach"
              xmlns:ur="clr-namespace:NiVE3.UI.Resources;assembly=NiVE3.UI"
              xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
+             xmlns:pi="clr-namespace:NiVE3.Plugin.Interfaces;assembly=NiVE3.Plugin"
              xmlns:dd="urn:gong-wpf-dragdrop"
              mc:Ignorable="d"
              x:Name="Root"
@@ -19,10 +22,23 @@
         <cv:WidthHeightConverter x:Key="WidthHeightConverter"/>
         <cv:TimeMultiValueConverter x:Key="TimeMultiValueConverter"/>
         <cv:EnumToBoolConverter x:Key="EnumToBoolConverter"/>
+        <cv:ConverterCollection x:Key="FootageColumnVisibilityConverter">
+            <cv:ConverterItem TargetType="{x:Type sys:Boolean}">
+                <cv:ConverterItem.Converter>
+                    <cv:EnumToBoolConverter UseAndCompare="True"/>
+                </cv:ConverterItem.Converter>
+            </cv:ConverterItem>
+            <cv:ConverterItem TargetType="{x:Type Visibility}">
+                <cv:BooleanToVisibilityHiddenConverter />
+            </cv:ConverterItem>
+        </cv:ConverterCollection>
+        <cv:EnumToBoolConverter x:Key="FlagEnumToBoolConverter" UseAndCompare="True"/>
+
+        <r:BindingProxy x:Key="RootProxy" Data="{Binding ElementName=Root}"/>
 
         <ur:DataTemplateCollection x:Key="SizeTemplate" DefaultIsEmpty="True">
             <DataTemplate DataType="{x:Type vm:FootageViewModel}">
-                <TextBlock>
+                <TextBlock Visibility="{Binding InputType, Converter={StaticResource FootageColumnVisibilityConverter}, ConverterParameter={x:Static local:FootageListView.HasImageSourceType}}">
                     <TextBlock.Text>
                         <MultiBinding Mode="OneWay" Converter="{StaticResource WidthHeightConverter}">
                             <Binding Path="Width"/>
@@ -35,13 +51,13 @@
 
         <ur:DataTemplateCollection x:Key="FrameRateTemplate" DefaultIsEmpty="True">
             <DataTemplate DataType="{x:Type vm:FootageViewModel}">
-                <TextBlock Text="{Binding FrameRate, StringFormat={}{0:F3}, Mode=OneWay}"/>
+                <TextBlock Text="{Binding FrameRate, StringFormat={}{0:F3}, Mode=OneWay}" Visibility="{Binding InputType, Converter={StaticResource FootageColumnVisibilityConverter}, ConverterParameter={x:Static pi:SourceType.Video}}"/>
             </DataTemplate>
         </ur:DataTemplateCollection>
 
         <ur:DataTemplateCollection x:Key="DurationTemplate" DefaultIsEmpty="True">
             <DataTemplate DataType="{x:Type vm:FootageViewModel}">
-                <TextBlock>
+                <TextBlock Visibility="{Binding InputType, Converter={StaticResource FootageColumnVisibilityConverter}, ConverterParameter={x:Static local:FootageListView.HasDurationSourceType}}">
                     <TextBlock.Text>
                         <MultiBinding Mode="OneWay" Converter="{StaticResource TimeMultiValueConverter}">
                             <Binding Path="Duration"/>
@@ -65,13 +81,13 @@
 
         <ur:DataTemplateCollection x:Key="FootageNameTemplateSelector">
             <DataTemplate DataType="{x:Type vm:IFootageViewModel}">
-                <pv:EditableTextBlock Text="{Binding Name}" IsEditing="{Binding EditingParameter, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static vm:EditingFootageParameter.Name}}" EndEditCommand="{Binding Source={x:Reference Root}, Path=DataContext.EndEditNameCommand}"/>
+                <pv:EditableTextBlock Text="{Binding Name}" IsEditing="{Binding EditingParameter, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static vm:EditingFootageParameter.Name}}" EndEditCommand="{Binding Source={StaticResource RootProxy}, Path=Data.DataContext.EndEditNameCommand}"/>
             </DataTemplate>
         </ur:DataTemplateCollection>
 
         <DataTemplate x:Key="FootageCommentTemplate" DataType="{x:Type vm:IFootageViewModel}">
             <Grid PreviewMouseDown="FootageCommentGrid_PreviewMouseDown">
-                <pv:EditableTextBlock Text="{Binding Comment}" IsEditing="{Binding EditingParameter, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static vm:EditingFootageParameter.Comment}}" EndEditCommand="{Binding Source={x:Reference Root}, Path=DataContext.EndEditCommentCommand}"/>
+                <pv:EditableTextBlock Text="{Binding Comment}" IsEditing="{Binding EditingParameter, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static vm:EditingFootageParameter.Comment}}" EndEditCommand="{Binding Source={StaticResource RootProxy}, Path=Data.DataContext.EndEditCommentCommand}"/>
             </Grid>
         </DataTemplate>
 

@@ -16,6 +16,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using NiVE3.Plugin.Interfaces;
 using NiVE3.View.Primitive;
 using NiVE3.ViewModel;
 
@@ -26,6 +27,11 @@ namespace NiVE3.View.Pane
     /// </summary>
     public partial class FootageListView : UserControl
     {
+        // NOTE: なぜかTypeConverterをSourceTypeにつけてもNREが出てXAML上でリソースとして定義出来ないため、定数として定義する
+        public static readonly SourceType HasImageSourceType = SourceType.Image | SourceType.Video;
+
+        public static readonly SourceType HasDurationSourceType = SourceType.Audio | SourceType.Video;
+
         public static readonly DependencyProperty SelectedItemsProperty = DependencyProperty.Register(
             nameof(SelectedItems),
             typeof(ObservableCollection<object>),
