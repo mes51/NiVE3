@@ -895,6 +895,17 @@ namespace NiVE3.Model
             HistoryModel.Add(new DeleteEffectEnableHistoryCommand(this, effects, oldIndices));
         }
 
+        public void ChangeTagColor(Color color)
+        {
+            if (TagColor != color)
+            {
+                var oldColor = TagColor;
+                TagColor = color;
+
+                HistoryModel.Add(new ChangeTagColorHistoryCommand(this, oldColor, color));
+            }
+        }
+
         public void ReplaceFootage(FootageModel footageModel)
         {
             FootageModel = footageModel;

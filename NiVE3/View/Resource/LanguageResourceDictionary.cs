@@ -382,6 +382,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("親レイヤーの変更")]
         public static readonly string History_ChangeParentLayer = nameof(History_ChangeParentLayer);
 
+        [ShowInMarkup, DefaultValue("レイヤーのタグの変更")]
+        public static readonly string History_ChangeTagColor = nameof(History_ChangeTagColor);
+
         [ShowInMarkup, DefaultValue("プロパティの変更")]
         public static readonly string History_ChangePropertyValue = nameof(History_ChangePropertyValue);
 

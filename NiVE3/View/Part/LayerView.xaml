@@ -82,6 +82,27 @@
             <Setter Property="ClipToBounds" Value="True"/>
         </Style>
 
+        <Style x:Key="TagColorButton" TargetType="{x:Type Button}">
+            <Setter Property="Margin" Value="3,0,2,0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="Width" Value="12"/>
+            <Setter Property="Height" Value="12"/>
+            <Setter Property="Background" Value="{Binding TagColor, Converter={StaticResource ColorToBrushConverter}}"/>
+            <Setter Property="IsTabStop" Value="False"/>
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Command" Value="{Binding ChangeTagColorCommand}"/>
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Rectangle Fill="{TemplateBinding Background}"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <Style x:Key="LayerText" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
             <Setter Property="Margin" Value="2,0"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
@@ -501,7 +522,7 @@
             </Grid>
 
             <Grid Grid.Column="2" Grid.Row="0"  Style="{StaticResource ColumnGrid}" dd:DragDrop.DragSourceIgnore="True">
-                <Rectangle Width="12" Height="12" Fill="{Binding TagColor, Converter={StaticResource ColorToBrushConverter}}" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="3,0,2,0"/>
+                <Button Style="{StaticResource TagColorButton}"/>
             </Grid>
 
             <Grid Grid.Column="3" Grid.Row="0"  Style="{StaticResource ColumnGrid}">
@@ -716,6 +737,7 @@
                            CompositionFrameRate="{Binding ElementName=Root, Path=CompositionFrameRate}"
                            HasDuration="{Binding SourceType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static pi:SourceType.VideoAndAudio}}"
                            IsEnableTimeRemap="{Binding IsEnableTimeRemap}"
+                           TagColor="{Binding TagColor}"
                            IsClickedChanged="DurationBar_IsClickedChanged"/>
     </Grid>
 </UserControl>

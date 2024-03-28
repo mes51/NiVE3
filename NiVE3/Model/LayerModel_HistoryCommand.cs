@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media;
 using NiVE3.Extension;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.View.Resource;
@@ -269,6 +270,36 @@ namespace NiVE3.Model
                 {
                     Model.Effects.Insert(i, e);
                 }
+            }
+
+            public void Dispose() { }
+        }
+
+        private class ChangeTagColorHistoryCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangeTagColor);
+
+            LayerModel Model { get; }
+
+            Color OldColor { get; }
+
+            Color NewColor { get; }
+
+            public ChangeTagColorHistoryCommand(LayerModel model, Color oldColor, Color newColor)
+            {
+                Model = model;
+                OldColor = oldColor;
+                NewColor = newColor;
+            }
+
+            public void Redo()
+            {
+                Model.TagColor = NewColor;
+            }
+
+            public void Undo()
+            {
+                Model.TagColor = OldColor;
             }
 
             public void Dispose() { }

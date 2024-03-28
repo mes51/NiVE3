@@ -17,6 +17,7 @@ using NiVE3.Mvvm;
 using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
+using NiVE3.UI.Dialog;
 using NiVE3.View.Command;
 using NiVE3.View.Part;
 using NiVE3.View.Primitive;
@@ -101,7 +102,7 @@ namespace NiVE3.ViewModel
         }
 
         private Color tagColor;
-        [NeedWire(nameof(LayerModel))]
+        [NeedWire(nameof(LayerModel), IsOneWay = true)]
         public Color TagColor
         {
             get { return tagColor; }
@@ -514,6 +515,8 @@ namespace NiVE3.ViewModel
 
         public ICommand SelectItemCommand { get; }
 
+        public ICommand ChangeTagColorCommand { get; }
+
         public DelegateCommand<SelectItemType?> DeleteCommand { get; }
 
         WeakEventPublisher<LayerSwitchEventArgs> LayerSwitchChangeRequestPublisher { get; } = new WeakEventPublisher<LayerSwitchEventArgs>();
@@ -750,6 +753,15 @@ namespace NiVE3.ViewModel
                     LayerModel.DeleteEffect(SelectedEffects.Select(e => e.EffectId).ToArray());
                 }
                 SelectedEffects.Clear();
+            });
+
+            ChangeTagColorCommand = new DelegateCommand(() =>
+            {
+                var colorDialog = new ColorPickerDialog(TagColor);
+                if (colorDialog.ShowDialog() ?? false)
+                {
+                    LayerModel.ChangeTagColor(colorDialog.Color);
+                }
             });
 
             PropertyChanged += LayerViewModel_PropertyChanged;
