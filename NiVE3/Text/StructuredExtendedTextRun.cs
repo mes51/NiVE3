@@ -131,11 +131,14 @@ namespace NiVE3.Text
                             if (rune.IsAscii && style.RestrictAscii)
                             {
                                 var asciiRune = new Rune((int)(unchecked((uint)newCode) % 128));
-                                while (Rune.IsControl(asciiRune))
+                                if (Rune.IsControl(asciiRune))
                                 {
-                                    asciiRune = new Rune((asciiRune.Value + 1) % 128);
+                                    sb.Append(" ");
                                 }
-                                sb.Append(asciiRune);
+                                else
+                                {
+                                    sb.Append(asciiRune);
+                                }
                             }
                             else
                             {
