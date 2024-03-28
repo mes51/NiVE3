@@ -41,8 +41,7 @@ namespace NiVE3.Plugin.Property.Control
                     return;
                 }
 
-                var dialog = new ColorPickerDialog(Colors.Black);
-                dialog.VectorColor = (Vector4)(viewModel.CurrentTimeValue ?? Vector4.Zero);
+                var dialog = new ColorPickerDialog((Vector4)(viewModel.CurrentTimeValue ?? Vector4.Zero));
                 dialog.Owner = Application.Current.MainWindow;
                 dialog.Title = DialogTitle;
                 dialog.OKButtonText = OKButtonText;

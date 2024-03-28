@@ -107,6 +107,8 @@ namespace NiVE3.UI.Dialog
 
         public ICommand OKCommand { get; }
 
+        public ColorPickerDialog(Vector4 oldColor) : this(ConvertColorFromVector4(oldColor)) { }
+
         public ColorPickerDialog(Color oldColor)
         {
             OKCommand = new ActionCommand(() =>
@@ -454,6 +456,12 @@ namespace NiVE3.UI.Dialog
             return t;
         }
 
+        static Color ConvertColorFromVector4(Vector4 vectorColor)
+        {
+            var byteVector = Vector4.Max(Vector4.Min(vectorColor, Vector4.One), Vector4.Zero) * 255.0F;
+            return Color.FromArgb((byte)byteVector.W, (byte)byteVector.Z, (byte)byteVector.Y, (byte)byteVector.X);
+        }
+
         private void RootWindow_ContentRendered(object sender, EventArgs e)
         {
             UpdateColorImage();
@@ -573,8 +581,7 @@ namespace NiVE3.UI.Dialog
                 return;
             }
 
-            var newVectorColor = Vector4.Max(Vector4.Min(dialog.VectorColor, Vector4.One), Vector4.Zero) * 255.0F;
-            var newColor = Color.FromArgb((byte)newVectorColor.W, (byte)newVectorColor.Z, (byte)newVectorColor.Y, (byte)newVectorColor.X);
+            var newColor = ConvertColorFromVector4(dialog.VectorColor);
             if (dialog.Color != newColor)
             {
                 dialog.Color = newColor;
