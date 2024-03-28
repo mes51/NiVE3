@@ -365,6 +365,13 @@ namespace NiVE3.ViewModel
             };
         }
 
+        public void Unbind()
+        {
+            PlayControllerModel.PreviewPlay -= PlayControllerModel_PreviewPlay;
+            PlayControllerModel.Stopped -= PlayControllerModel_Stopped;
+            PlayControllerModel.PauseChanged -= PlayControllerModel_PauseChanged;
+        }
+
         partial void WiringModel();
 
         void UpdateCurrentFrame()
@@ -580,6 +587,11 @@ namespace NiVE3.ViewModel
 
         private void PlayControllerModel_PreviewPlay(object? sender, EventArgs e)
         {
+            if (!IsSelected)
+            {
+                return;
+            }
+
             var audio = Array.Empty<float>();
             if (PreviewModel is CompositionPreviewModel compositionPreviewModel && compositionPreviewModel.Composition != null)
             {

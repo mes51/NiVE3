@@ -237,6 +237,7 @@ namespace NiVE3.ViewModel
                     vm.SourceChanged -= PreviewViewModel_SourceChanged;
                     vm.WorkareaChanged -= PreviewViewModel_WorkareaChanged;
                     vm.CurrentTimeChangeByUser -= PreviewViewModel_CurrentTimeChangeByUser;
+                    vm.Unbind();
                     ProjectModel.RemovePreview(vm.PreviewModel);
                 }
                 if (!ViewModels.OfType<PreviewViewModel>().Any())
