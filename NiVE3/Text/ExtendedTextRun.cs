@@ -41,6 +41,10 @@ namespace NiVE3.Text
 
         public int CharacterOffset { get; set; }
 
+        public bool WhiteSpaceReplacementChar { get; set; }
+
+        public bool RestrictAscii { get; set; }
+
         public Vector2 Blur { get; set; }
 
         public ExtendedTextRun Copy()
@@ -67,6 +71,8 @@ namespace NiVE3.Text
                 SkewAxis = SkewAxis,
                 Opacity = Opacity,
                 CharacterOffset = CharacterOffset,
+                WhiteSpaceReplacementChar = WhiteSpaceReplacementChar,
+                RestrictAscii = RestrictAscii,
                 Blur = Blur,
             };
         }
@@ -95,6 +101,8 @@ namespace NiVE3.Text
                 SkewAxis == other.SkewAxis &&
                 Opacity == other.Opacity &&
                 CharacterOffset == other.CharacterOffset &&
+                WhiteSpaceReplacementChar == other.WhiteSpaceReplacementChar &&
+                RestrictAscii == other.RestrictAscii &&
                 Blur == other.Blur;
         }
 
@@ -125,6 +133,8 @@ namespace NiVE3.Text
                 SkewAxis == other.SkewAxis &&
                 Opacity == other.Opacity &&
                 CharacterOffset == other.CharacterOffset &&
+                WhiteSpaceReplacementChar == other.WhiteSpaceReplacementChar &&
+                RestrictAscii == other.RestrictAscii &&
                 Blur == other.Blur;
         }
 
@@ -160,6 +170,8 @@ namespace NiVE3.Text
             hashCode.Add(SkewAxis);
             hashCode.Add(Opacity);
             hashCode.Add(CharacterOffset);
+            hashCode.Add(WhiteSpaceReplacementChar);
+            hashCode.Add(RestrictAscii);
             hashCode.Add(Blur);
 
             return hashCode.ToHashCode();

@@ -132,8 +132,11 @@ namespace NiVE3.Input
 
         const string TextAnimatorValueTextLineWidthId = nameof(TextAnimatorValueTextLineWidthId);
 
-        // NOTE: 混ざるとレイアウトシステムが例外を吐くものがあるが、どれが混ざるとNGなのか判定する術が無いため一旦omit
-        //const string TextAnimatorValueCharacterOffsetId = nameof(TextAnimatorValueCharacterOffsetId);
+        const string TextAnimatorValueCharacterOffsetId = nameof(TextAnimatorValueCharacterOffsetId);
+
+        const string TextAnimatorValueCharacterOffsetWhiteSpaceReplacementCharId = nameof(TextAnimatorValueCharacterOffsetWhiteSpaceReplacementCharId);
+
+        const string TextAnimatorValueCharacterOffsetRestrictAsciiCharId = nameof(TextAnimatorValueCharacterOffsetRestrictAsciiCharId);
 
         const string TextAnimatorValueBlurId = nameof(TextAnimatorValueBlurId);
 
@@ -275,11 +278,13 @@ namespace NiVE3.Input
                                         )
                                     })),
                                 AppendablePropertyItemSeparator.Instance,
-                                //new AppendablePropertyItem(TextAnimatorValueCharacterOffsetId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_CharacterOffset), () =>
-                                //    new PropertyGroup(TextAnimatorValueCharacterOffsetId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_CharacterOffset), new PropertyBase[]
-                                //    {
-                                //        new DoubleProperty(TextAnimatorValueCharacterOffsetId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_CharacterOffset), 0.0, 0.0, ushort.MaxValue, digit: 0)
-                                //    })),
+                                new AppendablePropertyItem(TextAnimatorValueCharacterOffsetId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_CharacterOffset), () =>
+                                    new PropertyGroup(TextAnimatorValueCharacterOffsetId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_CharacterOffset), new PropertyBase[]
+                                    {
+                                        new DoubleProperty(TextAnimatorValueCharacterOffsetId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_CharacterOffset), 0.0, -ushort.MaxValue, ushort.MaxValue, digit: 0),
+                                        new CheckBoxProperty(TextAnimatorValueCharacterOffsetWhiteSpaceReplacementCharId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_CharacterOffset_WhiteSpaceReplacementChar), false),
+                                        new CheckBoxProperty(TextAnimatorValueCharacterOffsetRestrictAsciiCharId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_CharacterOffset_RestrictAscii), false)
+                                    })),
                                 new AppendablePropertyItem(TextAnimatorValueBlurId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_Blur), () =>
                                     new PropertyGroup(TextAnimatorValueBlurId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_Blur), new PropertyBase[]
                                     {
@@ -317,12 +322,12 @@ namespace NiVE3.Input
                 return new NManagedImage(1, 1);
             }
 
-            var textCount = new StringInfo(sourceText.Text).LengthInTextElements;
             var structuredExtendedTextRun = new StructuredExtendedTextRun(sourceText.Text, sourceText.DefaultStyle, sourceText.Styles);
             foreach (var animator in ((PropertyValueGroup[])(properties[TextAnimatorsId] ?? Array.Empty<PropertyValueGroup>())))
             {
                 ApplyAnimator(structuredExtendedTextRun, animator);
             }
+            structuredExtendedTextRun = structuredExtendedTextRun.ReconstructTextRunWithOffset();
 
             var moreOptions = (PropertyValueGroup)(properties[TextMoreOptionsGroupId] ?? PropertyValueGroup.Empty);
             var fontInfo = FontInfo.FindByUniqueId(sourceText.DefaultStyle.FontUniqueId) ?? FontInfo.FallbackFont;
@@ -347,7 +352,7 @@ namespace NiVE3.Input
 
             var baseAnchorPointRate = (Vector2)(Vector3d)(moreOptions[TextBaseAnchorPointRateId] ?? new Vector3d(50.0)) * 0.01F;
             var glyphBuilder = new StyledGlyphBuilder((float)wrappingSize.X, (float)wrappingSize.Y, baseAnchorPointRate);
-            TextRenderer.RenderTextTo(glyphBuilder, sourceText.Text, textOption);
+            TextRenderer.RenderTextTo(glyphBuilder, structuredExtendedTextRun.SourceText, textOption);
             var glyphPolygons = new List<(Polygon[] fillPolygins, Polygon[] outlinePolygons, ExtendedTextRun textRun, Vector128<int> rect, Vector128<int> blurMargin, Vector2 origin)>();
             foreach (var glyph in glyphBuilder.GetRenderableGlyhps())
             {
@@ -655,13 +660,17 @@ namespace NiVE3.Input
                         run.TextLineWidth = Math.Max(run.TextLineWidth + (float)(textLineWidth * selectedSpan[i]), 0.0F);
                     }
                 }
-                //else if (animator.TryGetValue<double>(TextAnimatorValueCharacterOffsetId, out var characterOffset))
-                //{
-                //    for (var i = 0; i < textRuns.Length; i++)
-                //    {
-                //        textRuns[i].CharacterOffset += (int)(characterOffset * selectedSpan[i]);
-                //    }
-                //}
+                else if (animator.TryGetValue<double>(TextAnimatorValueCharacterOffsetId, out var characterOffset))
+                {
+                    var skipReplacementChar = (bool)(animator[TextAnimatorValueCharacterOffsetWhiteSpaceReplacementCharId] ?? false);
+                    var restrictAscii = (bool)(animator[TextAnimatorValueCharacterOffsetRestrictAsciiCharId] ?? false);
+                    for (var i = 0; i < textRuns.Length; i++)
+                    {
+                        textRuns[i].CharacterOffset += (int)(characterOffset * selectedSpan[i]);
+                        textRuns[i].WhiteSpaceReplacementChar = selectedSpan[i] >= 0.5 ? skipReplacementChar : textRuns[i].WhiteSpaceReplacementChar;
+                        textRuns[i].RestrictAscii = selectedSpan[i] >= 0.5 ? restrictAscii : textRuns[i].RestrictAscii;
+                    }
+                }
                 else if (animator.TryGetValue<Vector3d>(TextAnimatorValueBlurId, out var blur))
                 {
                     for (var i = 0; i < textRuns.Length; i++)

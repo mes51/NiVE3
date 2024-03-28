@@ -626,8 +626,14 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("線の太さ")]
         public static readonly string TextProperty_TextAnimator_Animator_Value_TextLineWidth = nameof(TextProperty_TextAnimator_Animator_Value_TextLineWidth);
 
-        //[ShowInMarkup, DefaultValue("文字のオフセット")]
-        //public static readonly string TextProperty_TextAnimator_Animator_Value_CharacterOffset = nameof(TextProperty_TextAnimator_Animator_Value_CharacterOffset);
+        [ShowInMarkup, DefaultValue("文字のオフセット")]
+        public static readonly string TextProperty_TextAnimator_Animator_Value_CharacterOffset = nameof(TextProperty_TextAnimator_Animator_Value_CharacterOffset);
+
+        [ShowInMarkup, DefaultValue("存在しない文字は空白にする")]
+        public static readonly string TextProperty_TextAnimator_Animator_Value_CharacterOffset_WhiteSpaceReplacementChar = nameof(TextProperty_TextAnimator_Animator_Value_CharacterOffset_WhiteSpaceReplacementChar);
+
+        [ShowInMarkup, DefaultValue("ASCIIの範囲内に収める")]
+        public static readonly string TextProperty_TextAnimator_Animator_Value_CharacterOffset_RestrictAscii = nameof(TextProperty_TextAnimator_Animator_Value_CharacterOffset_RestrictAscii);
 
         [ShowInMarkup, DefaultValue("ブラー")]
         public static readonly string TextProperty_TextAnimator_Animator_Value_Blur = nameof(TextProperty_TextAnimator_Animator_Value_Blur);
