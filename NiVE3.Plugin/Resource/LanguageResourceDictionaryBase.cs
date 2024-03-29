@@ -23,7 +23,7 @@ namespace NiVE3.Plugin.Resource
             }
         }
 
-        static Dictionary<Type, LanguageResourceDictionaryBase> Cache { get; } = new Dictionary<Type, LanguageResourceDictionaryBase>();
+        static Dictionary<Type, LanguageResourceDictionaryBase> Cache { get; } = [];
 
         protected abstract void Reload();
 
@@ -41,8 +41,7 @@ namespace NiVE3.Plugin.Resource
 
             if (!Cache.ContainsKey(type))
             {
-                var dictionary = Activator.CreateInstance(type) as LanguageResourceDictionaryBase;
-                if (dictionary != null)
+                if (Activator.CreateInstance(type) is LanguageResourceDictionaryBase dictionary)
                 {
                     Cache[type] = dictionary;
                 }

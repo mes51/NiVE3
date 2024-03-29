@@ -11,7 +11,7 @@ namespace NiVE3.Plugin.Property
     /// </summary>
     public class PropertyValueGroup
     {
-        public static readonly PropertyValueGroup Empty = new PropertyValueGroup("", new Dictionary<string, object?>());
+        public static readonly PropertyValueGroup Empty = new PropertyValueGroup("", []);
 
         /// <summary>
         /// このプロパティグループのIDを取得します

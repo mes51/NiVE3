@@ -243,7 +243,7 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref currentFrame, value); }
         }
 
-        private ObservableCollection<ColoredPreviewBoundingBox> boundingBoxes = new ObservableCollection<ColoredPreviewBoundingBox>();
+        private ObservableCollection<ColoredPreviewBoundingBox> boundingBoxes = [];
         public ObservableCollection<ColoredPreviewBoundingBox> BoundingBoxes
         {
             get { return boundingBoxes; }
@@ -454,7 +454,7 @@ namespace NiVE3.ViewModel
                 }
                 else
                 {
-                    ImageBuffer.AsSpan(0).Fill(0);
+                    ImageBuffer.AsSpan().Clear();
                 }
             }
             IsDirtyImageBuffer = true;
@@ -471,7 +471,7 @@ namespace NiVE3.ViewModel
             }
             else
             {
-                BoundingBoxesBuffer = compositionPreviewModel.Composition.GetBoundingBoxes(SelectedLayerIds.ToArray(), CurrentTime);
+                BoundingBoxesBuffer = compositionPreviewModel.Composition.GetBoundingBoxes([..SelectedLayerIds], CurrentTime);
             }
             IsDirtyBoundingBoxesBuffer = true;
         }

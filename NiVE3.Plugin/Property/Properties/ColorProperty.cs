@@ -47,11 +47,13 @@ namespace NiVE3.Plugin.Property.Properties
 
         public override PropertyControlBase CreateControl(ICompositionObject composition, ILayerObject? layer, IEffectObject? effect, IPropertyViewModel viewModel)
         {
-            var control = new ColorPropertyControl();
-            control.DataContext = viewModel;
-            control.DialogTitle = DialogTitle;
-            control.OKButtonText = OKButtonText;
-            control.CancelButtonText = CancelButtonText;
+            var control = new ColorPropertyControl
+            {
+                DataContext = viewModel,
+                DialogTitle = DialogTitle,
+                OKButtonText = OKButtonText,
+                CancelButtonText = CancelButtonText
+            };
             return control;
         }
 

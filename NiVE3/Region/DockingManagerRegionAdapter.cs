@@ -20,11 +20,11 @@ namespace NiVE3.Region
         {
             if (region == null)
             {
-                throw new ArgumentException(nameof(region));
+                throw new ArgumentException(null, nameof(region));
             }
             if (regionTarget == null)
             {
-                throw new ArgumentException(nameof(regionTarget));
+                throw new ArgumentException(null, nameof(regionTarget));
             }
 
             Region = region;
@@ -33,8 +33,10 @@ namespace NiVE3.Region
 
         protected override IRegion CreateRegion()
         {
-            var region = new Prism.Regions.Region();
-            region.SortComparison = null;
+            var region = new Prism.Regions.Region
+            {
+                SortComparison = null
+            };
             return region;
         }
 
@@ -42,11 +44,11 @@ namespace NiVE3.Region
         {
             if (region == null)
             {
-                throw new ArgumentException(nameof(region));
+                throw new ArgumentException(null, nameof(region));
             }
             if (regionTarget == null)
             {
-                throw new ArgumentException(nameof(regionTarget));
+                throw new ArgumentException(null, nameof(regionTarget));
             }
 
             region.Behaviors.Add(DockingManagerRegionBehavior.BehaviorName, new DockingManagerRegionBehavior { RegionTarget = regionTarget });

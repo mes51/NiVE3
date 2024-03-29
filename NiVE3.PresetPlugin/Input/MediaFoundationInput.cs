@@ -21,8 +21,6 @@ namespace NiVE3.PresetPlugin.Input
     [InputMetadata(typeof(MediaFoundationInput), "MediaFoundationInput", "", "mes51", ID, "*.avi,*.mp4,*.m4a,*.wav,*.mp3,*.wma,*.aac", true)]
     public class MediaFoundationInput : IInput
     {
-        readonly Vector128<float> ByteToFloat128 = Vector128.Create(0.00392156862745098F);
-
         const string ID = "3BB12986-32DF-4C41-8D36-46C5E402C6AC";
 
         VideoSourceReaderBase? VideoReader { get; set; }
@@ -102,7 +100,7 @@ namespace NiVE3.PresetPlugin.Input
 
             if (footageSource != null)
             {
-                return new FootageSourceGroup(new IFootageSource[] { footageSource });
+                return new FootageSourceGroup([footageSource]);
             }
             else
             {
@@ -114,8 +112,6 @@ namespace NiVE3.PresetPlugin.Input
 
     class MediaFoundationFootageSource : IFootageSource
     {
-        readonly Vector128<float> ByteToFloat128 = Vector128.Create(0.00392156862745098F);
-
         public string SourceId => "0"; // TODO
 
         public double FrameRate { get; }

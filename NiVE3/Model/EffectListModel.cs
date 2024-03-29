@@ -35,7 +35,7 @@ namespace NiVE3.Model
             }
             else
             {
-                EffectMetadatas = new List<IEffectMetadata>();
+                EffectMetadatas = [];
             }
         }
 

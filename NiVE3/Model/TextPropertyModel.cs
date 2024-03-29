@@ -118,7 +118,7 @@ namespace NiVE3.Model
         public TextPropertyModel()
 #pragma warning restore CS8618
         {
-            FontGroups = FontInfo.LoadedFonts.GroupBy(f => f.Name).Select(g => new FontGroup(g.ToArray())).OrderBy(g => g.FontName).ToArray();
+            FontGroups = [..FontInfo.LoadedFonts.GroupBy(f => f.Name).Select(g => new FontGroup([..g])).OrderBy(g => g.FontName)];
             SelectedFont = (FontGroups.FirstOrDefault(g => g.FontName == DefaultFontName)?.SubFamiles?.TryGetValue(DefaultFontSubFamilyName, out var defaultFont) ?? false) ? defaultFont : FontInfo.FallbackFont;
         }
 

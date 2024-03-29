@@ -73,7 +73,7 @@ namespace NiVE3.Model
             set { SetProperty(ref currentTime, value); }
         }
 
-        private ObservableCollection<KeyFrame> keyFrames = new ObservableCollection<KeyFrame>();
+        private ObservableCollection<KeyFrame> keyFrames = [];
         public ObservableCollection<KeyFrame> KeyFrames
         {
             get { return keyFrames; }
@@ -214,7 +214,7 @@ namespace NiVE3.Model
 
         public void DeleteKeyFrames(KeyFrame[] targetKeyframes)
         {
-            targetKeyframes = targetKeyframes.OrderBy(KeyFrames.IndexOf).ToArray();
+            targetKeyframes = [..targetKeyframes.OrderBy(KeyFrames.IndexOf)];
             var oldIndices = targetKeyframes.Select(KeyFrames.IndexOf).ToArray();
 
             foreach (var k in targetKeyframes)
@@ -311,7 +311,7 @@ namespace NiVE3.Model
             }
 
             oldKeyFrames.Sort((a, b) => a.Time.CompareTo(b.Time));
-            HistoryModel.Add(new ReplaceKeyFramesHistoryCommand(this, oldKeyFrames.ToArray(), newKeyFrames, historyNameKey));
+            HistoryModel.Add(new ReplaceKeyFramesHistoryCommand(this, [..oldKeyFrames], newKeyFrames, historyNameKey));
             ValueCommited?.Invoke(this, EventArgs.Empty);
         }
 
@@ -357,7 +357,7 @@ namespace NiVE3.Model
 
         public ObservableCollection<KeyFrame>? KeyFrames => null;
 
-        private ObservableCollection<IPropertyModel> children = new ObservableCollection<IPropertyModel>();
+        private ObservableCollection<IPropertyModel> children = [];
         public ObservableCollection<IPropertyModel> Children
         {
             get { return children; }
@@ -538,7 +538,7 @@ namespace NiVE3.Model
 
         public ObservableCollection<KeyFrame>? KeyFrames => null;
 
-        private ObservableCollection<IPropertyModel> children = new ObservableCollection<IPropertyModel>();
+        private ObservableCollection<IPropertyModel> children = [];
         public ObservableCollection<IPropertyModel> Children
         {
             get { return children; }
@@ -632,7 +632,7 @@ namespace NiVE3.Model
 
         public void MoveChild(Guid propertyInstanceId, int newIndex)
         {
-            MoveChildren(new Guid[] { propertyInstanceId }, propertyInstanceId, newIndex);
+            MoveChildren([propertyInstanceId], propertyInstanceId, newIndex);
         }
 
         public void MoveChildren(Guid[] propertyInstanceIds, Guid referencePropertyInstanceId, int newIndex)
@@ -655,7 +655,7 @@ namespace NiVE3.Model
 
             if (!prevOrderedChildren.SequenceEqual(Children))
             {
-                HistoryModel.Add(new MoveAppendablePropertyChildrenHistoryCommand(this, prevOrderedChildren, Children.ToArray()));
+                HistoryModel.Add(new MoveAppendablePropertyChildrenHistoryCommand(this, prevOrderedChildren, [..Children]));
             }
         }
 

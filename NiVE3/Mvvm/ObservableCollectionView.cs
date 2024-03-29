@@ -191,7 +191,7 @@ namespace NiVE3.Mvvm
         {
             if (action != NotifyCollectionChangedAction.Reset)
             {
-                throw new ArgumentException(nameof(action));
+                throw new ArgumentException(null, nameof(action));
             }
             Action = action;
         }
@@ -210,7 +210,7 @@ namespace NiVE3.Mvvm
             }
             else
             {
-                throw new ArgumentException(nameof(action));
+                throw new ArgumentException(null, nameof(action));
             }
             Action = action;
         }
@@ -229,7 +229,7 @@ namespace NiVE3.Mvvm
             }
             else
             {
-                throw new ArgumentException(nameof(action));
+                throw new ArgumentException(null, nameof(action));
             }
             Action = action;
         }
@@ -254,10 +254,7 @@ namespace NiVE3.Mvvm
 
         public NotifyCollectionViewChangedEventArgs((T Model, TView View) item, int newIndex, int oldIndex = -1)
         {
-            if (newIndex < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(newIndex));
-            }
+            ArgumentOutOfRangeException.ThrowIfNegative(newIndex);
             Action = NotifyCollectionChangedAction.Move;
             Added = new List<(T Model, TView View)> { item }.AsReadOnly();
             Removed = new List<(T Model, TView View)> { item }.AsReadOnly();
@@ -267,10 +264,7 @@ namespace NiVE3.Mvvm
 
         public NotifyCollectionViewChangedEventArgs(IList<(T Model, TView View)> items, int newIndex, int oldIndex = -1)
         {
-            if (newIndex < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(newIndex));
-            }
+            ArgumentOutOfRangeException.ThrowIfNegative(newIndex);
             Action = NotifyCollectionChangedAction.Move;
             Added = items.AsReadOnly();
             Removed = items.AsReadOnly();

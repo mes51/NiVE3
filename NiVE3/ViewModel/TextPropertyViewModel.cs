@@ -213,7 +213,7 @@ namespace NiVE3.ViewModel
 
         public bool IsSupportItalic => SelectedFontGroup.SubFamiles.ElementAtOrDefault(selectedFontSubFamilyIndex)?.IsSupportItalic ?? false;
 
-        public List<FontGroupViewModel> Fonts { get; set; } = new List<FontGroupViewModel>();
+        public List<FontGroupViewModel> Fonts { get; set; } = [];
 
         TextPropertyModel TextPropertyModel { get; }
 
@@ -470,8 +470,10 @@ namespace NiVE3.ViewModel
                         {
                             foreach (var simplePath in path.Flatten())
                             {
-                                var geometry = new StreamGeometry();
-                                geometry.FillRule = FillRule.Nonzero;
+                                var geometry = new StreamGeometry
+                                {
+                                    FillRule = FillRule.Nonzero
+                                };
                                 using (var context = geometry.Open())
                                 {
                                     var span = simplePath.Points.Span;

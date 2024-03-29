@@ -18,12 +18,9 @@ namespace NiVE3.Wpf.Markup
 
         public override object ProvideValue(IServiceProvider? serviceProvider)
         {
-            if (serviceProvider == null)
-            {
-                throw new ArgumentNullException(nameof(serviceProvider));
-            }
+            ArgumentNullException.ThrowIfNull(serviceProvider);
 
-            if (Type == null || string.IsNullOrEmpty(Member) || Member.Contains("."))
+            if (Type == null || string.IsNullOrEmpty(Member) || Member.Contains('.'))
             {
                 throw new ArgumentException("Syntax for x:NameOf is Type={x:Type [className]} Member=[propertyName]");
             }

@@ -183,7 +183,7 @@ namespace NiVE3.ViewModel
                 return;
             }
 
-            Composition.ChangeLayerSwitches(new Guid[] { layerViewModel.LayerId }, e.SwitchName, e.Value);
+            Composition.ChangeLayerSwitches([layerViewModel.LayerId], e.SwitchName, e.Value);
         }
     }
 }

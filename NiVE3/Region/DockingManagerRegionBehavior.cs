@@ -26,9 +26,9 @@ namespace NiVE3.Region
             set { RegionTarget = value as DockingManager; }
         }
 
-        ObservableCollection<object> Documents { get; } = new ObservableCollection<object>();
+        ObservableCollection<object> Documents { get; } = [];
 
-        ObservableCollection<object> Anchorable { get; } = new ObservableCollection<object>();
+        ObservableCollection<object> Anchorable { get; } = [];
 
         protected override void OnAttach()
         {

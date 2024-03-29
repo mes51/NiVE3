@@ -22,10 +22,10 @@ namespace NiVE3.PresetPlugin.Effect.ExpressionControl
     {
         public PropertyBase[] GetProperties()
         {
-            return new PropertyBase[]
-            {
+            return
+            [
                 new Vector3dProperty("point", new LanguageResourceKey(typeof(LanguageResourceDictionary), LanguageResourceDictionary.ExpressionControl_PointControl_PropertyName), new Vector3d(), true, 2)
-            };
+            ];
         }
 
         public void SetupAccelerator(IAcceleratorObject accelerator) { }

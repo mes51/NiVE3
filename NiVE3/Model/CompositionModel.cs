@@ -138,7 +138,7 @@ namespace NiVE3.Model
             set { SetProperty(ref workareaEnd, value); }
         }
 
-        private ObservableCollection<LayerModel> layers = new ObservableCollection<LayerModel>();
+        private ObservableCollection<LayerModel> layers = [];
         public ObservableCollection<LayerModel> Layers
         {
             get { return layers; }
@@ -182,14 +182,14 @@ namespace NiVE3.Model
             EffectListModel = effectListModel;
             TextPropertyModel = textPropertyModel;
             HistoryModel = historyModel;
-            Layers = new ObservableCollection<LayerModel>();
+            Layers = [];
 
             PropertyChanged += CompositionModel_PropertyChanged;
         }
 
         public void InsertLayers(Guid footageId, int index)
         {
-            InsertLayers(new Guid[] { footageId }, index);
+            InsertLayers([footageId], index);
         }
 
         public void InsertLayers(Guid[] footageIds, int index)
@@ -215,54 +215,62 @@ namespace NiVE3.Model
 
             if (addedLayers.Count > 0)
             {
-                HistoryModel.Add(new AddLayersHistoryCommand(this, addedLayers.ToArray(), startIndex));
+                HistoryModel.Add(new AddLayersHistoryCommand(this, [..addedLayers], startIndex));
             }
         }
 
         public void AddCamera()
         {
-            var layer = new LayerModel(this, FootageListModel.CameraFootage, EffectListModel, HistoryModel);
-            layer.OutPoint = Duration;
+            var layer = new LayerModel(this, FootageListModel.CameraFootage, EffectListModel, HistoryModel)
+            {
+                OutPoint = Duration
+            };
             Layers.Insert(0, layer);
 
-            HistoryModel.Add(new AddLayersHistoryCommand(this, new LayerModel[] { layer }, 0));
+            HistoryModel.Add(new AddLayersHistoryCommand(this, [layer], 0));
         }
 
         public void AddLight()
         {
-            var layer = new LayerModel(this, FootageListModel.LightFootage, EffectListModel, HistoryModel);
-            layer.OutPoint = Duration;
+            var layer = new LayerModel(this, FootageListModel.LightFootage, EffectListModel, HistoryModel)
+            {
+                OutPoint = Duration
+            };
             Layers.Insert(0, layer);
 
-            HistoryModel.Add(new AddLayersHistoryCommand(this, new LayerModel[] { layer }, 0));
+            HistoryModel.Add(new AddLayersHistoryCommand(this, [layer], 0));
         }
 
         public void AddNullObject()
         {
-            var layer = new LayerModel(this, FootageListModel.NullObjectFootage, EffectListModel, HistoryModel);
-            layer.OutPoint = Duration;
+            var layer = new LayerModel(this, FootageListModel.NullObjectFootage, EffectListModel, HistoryModel)
+            {
+                OutPoint = Duration
+            };
             Layers.Insert(0, layer);
 
-            HistoryModel.Add(new AddLayersHistoryCommand(this, new LayerModel[] { layer }, 0));
+            HistoryModel.Add(new AddLayersHistoryCommand(this, [layer], 0));
         }
 
         public void AddText()
         {
-            var layer = new LayerModel(this, FootageListModel.TextFootage, EffectListModel, HistoryModel);
-            layer.OutPoint = Duration;
+            var layer = new LayerModel(this, FootageListModel.TextFootage, EffectListModel, HistoryModel)
+            {
+                OutPoint = Duration
+            };
 
             HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_AddLayers));
 
             TextPropertyModel.UpdateTextProperty(layer, 0.0);
             Layers.Insert(0, layer); // TODO: 選択位置の上に挿入
-            HistoryModel.Add(new AddLayersHistoryCommand(this, new LayerModel[] { layer }, 0));
+            HistoryModel.Add(new AddLayersHistoryCommand(this, [layer], 0));
 
             HistoryModel.EndGroup();
         }
 
         public void MoveLayer(Guid layerId, int newIndex)
         {
-            MoveLayers(new Guid[] { layerId }, layerId, newIndex);
+            MoveLayers([layerId], layerId, newIndex);
         }
 
         public void MoveLayers(Guid[] layerIds, Guid referenceLayerId, int newIndex)
@@ -278,14 +286,14 @@ namespace NiVE3.Model
             var newOrderedLayers = new List<LayerModel>(Layers.Count);
             newOrderedLayers.AddRange(Layers.Except(layers).Take(startIndex));
             newOrderedLayers.AddRange(layers);
-            newOrderedLayers.AddRange(Layers.Except(newOrderedLayers.ToArray()));
+            newOrderedLayers.AddRange(Layers.Except([..newOrderedLayers]));
 
             Layers.SortBy(l => newOrderedLayers.IndexOf(l));
 
             if (!prevIndices.SequenceEqual(layers.Select(l => Layers.IndexOf(l))))
             {
                 // TODO: 古いインデックスを保持するのでは無く、古いLayersを配列にしたものを渡す
-                HistoryModel.Add(new MoveLayersHistoryCommand(this, layers, prevIndices, newOrderedLayers.ToArray()));
+                HistoryModel.Add(new MoveLayersHistoryCommand(this, layers, prevIndices, [..newOrderedLayers]));
             }
         }
 
@@ -347,7 +355,7 @@ namespace NiVE3.Model
         {
             if (targetLayerId.HasValue)
             {
-                layerIds = layerIds.Except(new Guid[] { targetLayerId.Value }).ToArray();
+                layerIds = layerIds.Except([targetLayerId.Value]).ToArray();
             }
             var changed = layerIds.ToDictionary(id => id, _ => targetLayerId);
             var layers = new List<LayerModel>();
@@ -382,7 +390,7 @@ namespace NiVE3.Model
                 l.ParentLayerId = targetLayerId;
             }
 
-            HistoryModel.Add(new ChangeParentLayerHistoryCommand(layers.ToArray(), oldValues, targetLayerId));
+            HistoryModel.Add(new ChangeParentLayerHistoryCommand([..layers], oldValues, targetLayerId));
         }
 
         public bool CheckCycledParentLayer(Guid layerId, Guid targetLayerId)
@@ -488,7 +496,7 @@ namespace NiVE3.Model
                 {
                     if (images.Count > 0)
                     {
-                        Renderer.Render(images.ToArray());
+                        Renderer.Render([..images]);
                     }
                     images.Clear();
 
@@ -540,7 +548,7 @@ namespace NiVE3.Model
             }
             if (images.Count > 0)
             {
-                Renderer.Render(images.ToArray());
+                Renderer.Render([..images]);
             }
 
             var result = Renderer.FinishRendering();
@@ -631,7 +639,7 @@ namespace NiVE3.Model
                 }
             }
 
-            return result.ToArray();
+            return [..result];
         }
 
         public CompositionData SaveData()
@@ -711,10 +719,7 @@ namespace NiVE3.Model
 
         bool CheckCycledSimulatedParentLayer(Guid layerId, Dictionary<Guid, Guid?> changed, HashSet<Guid>? checkedLayerIds = null)
         {
-            if (checkedLayerIds == null)
-            {
-                checkedLayerIds = new HashSet<Guid>();
-            }
+            checkedLayerIds ??= [];
 
             if (checkedLayerIds.Contains(layerId))
             {
@@ -729,7 +734,7 @@ namespace NiVE3.Model
                 return false;
             }
 
-            var parentLayerId = changed.ContainsKey(layerId) ? changed[layerId] : layer.ParentLayerId;
+            var parentLayerId = changed.TryGetValue(layerId, out var value) ? value : layer.ParentLayerId;
             if (!parentLayerId.HasValue)
             {
                 return false;
@@ -750,7 +755,7 @@ namespace NiVE3.Model
                 new Vector3d(),
                 0.0, 0.0, 0.0,
                 zoom,
-                Array.Empty<ParentTransform>()
+                []
             );
         }
 
@@ -810,19 +815,19 @@ namespace NiVE3.Model
 
         private void Layers_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
-            foreach (var oldLayer in (e.OldItems?.Cast<LayerModel>() ?? Enumerable.Empty<LayerModel>()))
+            foreach (var oldLayer in (e.OldItems?.Cast<LayerModel>() ?? []))
             {
-                oldLayer.LayerUpdated -= ayer_LayerUpdated;
+                oldLayer.LayerUpdated -= Layer_LayerUpdated;
             }
-            foreach (var newLayer in (e.NewItems?.Cast<LayerModel>() ?? Enumerable.Empty<LayerModel>()))
+            foreach (var newLayer in (e.NewItems?.Cast<LayerModel>() ?? []))
             {
-                newLayer.LayerUpdated += ayer_LayerUpdated; ;
+                newLayer.LayerUpdated += Layer_LayerUpdated; ;
             }
 
             CompositionUpdated?.Invoke(this, EventArgs.Empty);
         }
 
-        private void ayer_LayerUpdated(object? sender, EventArgs e)
+        private void Layer_LayerUpdated(object? sender, EventArgs e)
         {
             CompositionUpdated?.Invoke(this, EventArgs.Empty);
         }

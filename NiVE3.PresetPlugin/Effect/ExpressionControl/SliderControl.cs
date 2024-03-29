@@ -21,10 +21,10 @@ namespace NiVE3.PresetPlugin.Effect.ExpressionControl
     {
         public PropertyBase[] GetProperties()
         {
-            return new PropertyBase[]
-            {
+            return
+            [
                 new DoubleProperty("slider", new LanguageResourceKey(typeof(LanguageResourceDictionary), LanguageResourceDictionary.ExpressionControl_SliderControl_PropertyName), 0.0, double.MinValue, double.MaxValue, true, 2)
-            };
+            ];
         }
 
         public void SetupAccelerator(IAcceleratorObject accelerator) { }

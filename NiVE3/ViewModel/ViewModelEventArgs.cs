@@ -84,7 +84,7 @@ namespace NiVE3.ViewModel
             SelectItemType = selectItemType;
             IsUserAction = isUserAction;
             OriginalSender = sender;
-            ObjectHierarchy = commandableParent != null ? new object[] { sender, commandableParent } : new object[] { sender };
+            ObjectHierarchy = commandableParent != null ? [sender, commandableParent] : [sender];
         }
 
         public SelectItemEventArgs(SelectItemEventArgs prev, object parent)
@@ -92,7 +92,7 @@ namespace NiVE3.ViewModel
             SelectItemType = prev.SelectItemType;
             IsUserAction = prev.IsUserAction;
             OriginalSender = prev.OriginalSender;
-            ObjectHierarchy = prev.ObjectHierarchy.Append(parent).ToArray();
+            ObjectHierarchy = [..prev.ObjectHierarchy, parent];
         }
     }
 
@@ -105,13 +105,13 @@ namespace NiVE3.ViewModel
         public PropertyValueCommitedEventArgs(object? value, IInternalPropertyViewModel sender)
         {
             Value = value;
-            PropertyHierarchy = new IInternalPropertyViewModel[] { sender };
+            PropertyHierarchy = [sender];
         }
 
         public PropertyValueCommitedEventArgs(PropertyValueCommitedEventArgs e, IInternalPropertyViewModel parent)
         {
             Value = e.Value;
-            PropertyHierarchy = e.PropertyHierarchy.Append(parent).ToArray();
+            PropertyHierarchy = [..e.PropertyHierarchy, parent];
         }
     }
 }

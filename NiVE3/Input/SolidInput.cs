@@ -97,7 +97,7 @@ namespace NiVE3.Input
 
         public FootageSourceGroup GetGroup()
         {
-            return new FootageSourceGroup(new IFootageSource[] { Source });
+            return new FootageSourceGroup([Source]);
         }
     }
 

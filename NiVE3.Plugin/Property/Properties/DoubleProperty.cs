@@ -26,7 +26,7 @@ namespace NiVE3.Plugin.Property.Properties
         {
             if (minValue >= maxValue)
             {
-                throw new ArgumentException(nameof(minValue));
+                throw new ArgumentException(null, nameof(minValue));
             }
 
             MinValue = minValue;
@@ -40,7 +40,7 @@ namespace NiVE3.Plugin.Property.Properties
         {
             if (minValue >= maxValue)
             {
-                throw new ArgumentException(nameof(minValue));
+                throw new ArgumentException(null, nameof(minValue));
             }
 
             MinValue = minValue;
@@ -57,9 +57,11 @@ namespace NiVE3.Plugin.Property.Properties
 
         public override PropertyControlBase CreateControl(ICompositionObject composition, ILayerObject? layer, IEffectObject? effect, IPropertyViewModel viewModel)
         {
-            var control = new DoublePropertyControl();
-            control.DataContext = viewModel;
-            control.Unit = Unit;
+            var control = new DoublePropertyControl
+            {
+                DataContext = viewModel,
+                Unit = Unit
+            };
             return control;
         }
 

@@ -81,7 +81,7 @@ namespace NiVE3.View.Primitive
 
         TreeListViewItem? LastSelected { get; set; }
 
-        List<TreeListViewItem> SelectedTreeListViewItems { get; } = new List<TreeListViewItem>();
+        List<TreeListViewItem> SelectedTreeListViewItems { get; } = [];
 
         static TreeListView()
         {
@@ -107,8 +107,7 @@ namespace NiVE3.View.Primitive
         {
             base.OnPreviewMouseDown(e);
 
-            var source = e.OriginalSource as DependencyObject;
-            if (source == null)
+            if (e.OriginalSource is not DependencyObject source)
             {
                 return;
             }
@@ -178,9 +177,7 @@ namespace NiVE3.View.Primitive
                 }
                 else if (startIndex > endIndex)
                 {
-                    var temp = startIndex;
-                    startIndex = endIndex;
-                    endIndex = temp;
+                    (endIndex, startIndex) = (startIndex, endIndex);
                 }
 
                 var targets = items.Skip(startIndex).Take(endIndex - startIndex + 1).ToArray();
@@ -219,12 +216,11 @@ namespace NiVE3.View.Primitive
 
         private static List<TreeListViewItem> GetTreeListViewItems(ItemsControl parent, bool includeCollapsedItems, List<TreeListViewItem>? items = null)
         {
-            items ??= new List<TreeListViewItem>();
+            items ??= [];
 
             for (int i = 0, limit = parent.Items.Count; i < limit; i++)
             {
-                var item = parent.ItemContainerGenerator.ContainerFromIndex(i) as TreeListViewItem;
-                if (item == null)
+                if (parent.ItemContainerGenerator.ContainerFromIndex(i) is not TreeListViewItem item)
                 {
                     continue;
                 }
@@ -297,12 +293,9 @@ namespace NiVE3.View.Primitive
             }
         }
 
-        IEnumerable<TreeListViewItem> GetAllItems(Visual? parent = null)
+        List<TreeListViewItem> GetAllItems(Visual? parent = null)
         {
-            if (parent == null)
-            {
-                parent = this;
-            }
+            parent ??= this;
 
             var result = new List<TreeListViewItem>();
 

@@ -118,8 +118,10 @@ namespace NiVE3.View.Primitive
             };
             expanderVisibility.Setters.Add(new Setter(UIElement.VisibilityProperty, Visibility.Hidden, expander.Name));
 
-            var result = new DataTemplate();
-            result.VisualTree = container;
+            var result = new DataTemplate
+            {
+                VisualTree = container
+            };
             result.Triggers.Add(expanderVisibility);
 
             return result;
@@ -212,8 +214,10 @@ namespace NiVE3.View.Primitive
             };
             expanderVisibility.Setters.Add(new Setter(UIElement.VisibilityProperty, Visibility.Hidden, expander.Name));
 
-            var result = new DataTemplate();
-            result.VisualTree = container;
+            var result = new DataTemplate
+            {
+                VisualTree = container
+            };
             result.Triggers.Add(expanderVisibility);
 
             return result;

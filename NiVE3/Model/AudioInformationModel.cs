@@ -33,7 +33,7 @@ namespace NiVE3.Model
             var startPos = 0;
             if (Vector<float>.IsSupported)
             {
-                var audioVector = MemoryMarshal.Cast<float, Vector<float>>(audio.Slice(0, (audio.Length / Vector<float>.Count) * Vector<float>.Count));
+                var audioVector = MemoryMarshal.Cast<float, Vector<float>>(audio[..((audio.Length / Vector<float>.Count) * Vector<float>.Count)]);
                 var maxVector = new Vector<float>(float.NegativeInfinity);
 
                 for (var i = 0; i < audioVector.Length; i++)

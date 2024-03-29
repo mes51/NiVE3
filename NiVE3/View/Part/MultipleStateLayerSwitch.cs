@@ -67,7 +67,7 @@ namespace NiVE3.View.Part
             new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.BindsTwoWayByDefault)
         );
 
-        public List<MultipleStateLayerSwitchItem> StateItems { get; set; } = new List<MultipleStateLayerSwitchItem>();
+        public List<MultipleStateLayerSwitchItem> StateItems { get; set; } = [];
 
         public object? State
         {

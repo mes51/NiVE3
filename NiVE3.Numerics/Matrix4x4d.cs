@@ -74,32 +74,32 @@ namespace NiVE3.Numerics
             M31 == 0.0 && M32 == 0.0 && M34 == 0.0 &&
             M41 == 0.0 && M42 == 0.0 && M43 == 0.0;
 
-        public Matrix4x4d Translate(double x, double y, double z)
+        public readonly Matrix4x4d Translate(double x, double y, double z)
         {
             return this * CreateTranslate(x, y, z);
         }
 
-        public Matrix4x4d Scale(double x, double y, double z)
+        public readonly Matrix4x4d Scale(double x, double y, double z)
         {
             return this * CreateScale(x, y, z);
         }
 
-        public Matrix4x4d RotateX(double angle)
+        public readonly Matrix4x4d RotateX(double angle)
         {
             return this * CreateRotateX(angle);
         }
 
-        public Matrix4x4d RotateY(double angle)
+        public readonly Matrix4x4d RotateY(double angle)
         {
             return this * CreateRotateY(angle);
         }
 
-        public Matrix4x4d RotateZ(double angle)
+        public readonly Matrix4x4d RotateZ(double angle)
         {
             return this * CreateRotateZ(angle);
         }
 
-        public override bool Equals([NotNullWhen(true)] object? obj)
+        public override readonly bool Equals([NotNullWhen(true)] object? obj)
         {
             if (obj is Matrix4x4d m)
             {
@@ -111,7 +111,7 @@ namespace NiVE3.Numerics
             }
         }
 
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
             var hashCode = new HashCode();
 
@@ -138,7 +138,7 @@ namespace NiVE3.Numerics
             return hashCode.ToHashCode();
         }
 
-        public override string ToString()
+        public override readonly string ToString()
         {
             return $@"{{
     {{ M11: {M11}, M12: {M12}, M13: {M13}, M14: {M14} }}

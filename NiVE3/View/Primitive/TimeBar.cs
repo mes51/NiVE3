@@ -14,7 +14,7 @@ namespace NiVE3.View.Primitive
     {
         const double MinGap = 75.0;
 
-        static readonly int[] CountScale = new int[] { 1, 2, 5, 10, 20, 50, 60, 120, 240, 480, 960, 1920 };
+        static readonly int[] CountScale = [1, 2, 5, 10, 20, 50, 60, 120, 240, 480, 960, 1920];
 
         public static readonly DependencyProperty SideSpacerWidthProperty = DependencyProperty.Register(
             nameof(SideSpacerWidth),

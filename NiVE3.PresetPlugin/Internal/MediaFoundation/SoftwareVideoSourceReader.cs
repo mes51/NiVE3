@@ -62,7 +62,7 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
             using var sample = ReadSample(time);
             if (sample == null)
             {
-                return Array.Empty<byte>();
+                return [];
             }
 
             return ConvertSampleToByteArray(sample);

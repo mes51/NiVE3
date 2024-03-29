@@ -129,8 +129,7 @@ sealed class ManualWireAttribute : Attribute
 
             foreach (var a in wireableAttributes)
             {
-                var sourceName = a.ConstructorArguments[0].Value as string;
-                if (sourceName == null)
+                if (a.ConstructorArguments[0].Value is not string sourceName)
                 {
                     continue; // may be bug
                 }

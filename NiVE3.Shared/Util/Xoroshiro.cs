@@ -62,7 +62,7 @@ namespace NiVE3.Shared.Util
         {
             if (maxValue < 0)
             {
-                throw new ArgumentException(nameof(maxValue));
+                throw new ArgumentException(null, nameof(maxValue));
             }
 
             return (int)(NextUInt64() % (ulong)maxValue);
@@ -72,7 +72,7 @@ namespace NiVE3.Shared.Util
         {
             if (minValue >= maxValue)
             {
-                throw new ArgumentException(nameof(minValue));
+                throw new ArgumentException(null, nameof(minValue));
             }
 
             return (int)(NextUInt64() % (ulong)(maxValue - minValue)) + minValue;
@@ -87,7 +87,7 @@ namespace NiVE3.Shared.Util
         {
             if (maxValue < 0)
             {
-                throw new ArgumentException(nameof(maxValue));
+                throw new ArgumentException(null, nameof(maxValue));
             }
 
             return (long)(NextUInt64() % (ulong)maxValue);
@@ -97,7 +97,7 @@ namespace NiVE3.Shared.Util
         {
             if (minValue >= maxValue)
             {
-                throw new ArgumentException(nameof(minValue));
+                throw new ArgumentException(null, nameof(minValue));
             }
 
             return (long)(NextUInt64() % (ulong)(maxValue - minValue)) + minValue;
@@ -126,9 +126,7 @@ namespace NiVE3.Shared.Util
                 var j = Next(span.Length, i);
                 if (i != j)
                 {
-                    var temp = span[i];
-                    span[i] = span[j];
-                    span[j] = temp;
+                    (span[j], span[i]) = (span[i], span[j]);
                 }
             }
         }

@@ -50,13 +50,14 @@ dotnet_style_null_propagation = true
 dotnet_style_object_initializer = true
 dotnet_style_operator_placement_when_wrapping = beginning_of_line
 dotnet_style_prefer_auto_properties = true
+dotnet_style_prefer_collection_expression = when_types_loosely_match
 dotnet_style_prefer_compound_assignment = true
 dotnet_style_prefer_conditional_expression_over_assignment = true
-dotnet_style_prefer_conditional_expression_over_return = true
+dotnet_style_prefer_conditional_expression_over_return = false
 dotnet_style_prefer_foreach_explicit_cast_in_source = when_strongly_typed
 dotnet_style_prefer_inferred_anonymous_type_member_names = true
 dotnet_style_prefer_inferred_tuple_names = true
-dotnet_style_prefer_is_null_check_over_reference_equality_method = true
+dotnet_style_prefer_is_null_check_over_reference_equality_method = false
 dotnet_style_prefer_simplified_boolean_expressions = true
 dotnet_style_prefer_simplified_interpolation = true
 
@@ -64,21 +65,21 @@ dotnet_style_prefer_simplified_interpolation = true
 dotnet_style_readonly_field = true
 
 # パラメーターの設定
-dotnet_code_quality_unused_parameters = all
+dotnet_code_quality_unused_parameters = non_public
 
 # 抑制の設定
 dotnet_remove_unnecessary_suppression_exclusions = none
 
 # 改行設定
-dotnet_style_allow_multiple_blank_lines_experimental = true
+dotnet_style_allow_multiple_blank_lines_experimental = false
 dotnet_style_allow_statement_immediately_after_block_experimental = true
 
 #### C# コーディング規則 ####
 
 # var を優先
-csharp_style_var_elsewhere = true
-csharp_style_var_for_built_in_types = true
-csharp_style_var_when_type_is_apparent = true
+csharp_style_var_elsewhere = true:suggestion
+csharp_style_var_for_built_in_types = true:suggestion
+csharp_style_var_when_type_is_apparent = true:suggestion
 
 # 式のようなメンバー
 csharp_style_expression_bodied_accessors = true
@@ -105,18 +106,20 @@ csharp_style_conditional_delegate_call = true
 csharp_prefer_static_local_function = true
 csharp_preferred_modifier_order = public,private,protected,internal,file,static,extern,new,virtual,abstract,sealed,override,readonly,unsafe,required,volatile,async
 csharp_style_prefer_readonly_struct = true
+csharp_style_prefer_readonly_struct_member = true
 
 # コード ブロックの設定
-csharp_prefer_braces = true:suggestion
+csharp_prefer_braces = true
 csharp_prefer_simple_using_statement = true
 csharp_style_namespace_declarations = block_scoped
 csharp_style_prefer_method_group_conversion = true
-csharp_style_prefer_top_level_statements = true
+csharp_style_prefer_primary_constructors = true
+csharp_style_prefer_top_level_statements = false
 
 # 式レベルの設定
 csharp_prefer_simple_default_expression = true
 csharp_style_deconstructed_variable_declaration = true
-csharp_style_implicit_object_creation_when_type_is_apparent = true
+csharp_style_implicit_object_creation_when_type_is_apparent = false
 csharp_style_inlined_variable_declaration = true
 csharp_style_prefer_index_operator = true
 csharp_style_prefer_local_over_anonymous_function = true
@@ -124,7 +127,7 @@ csharp_style_prefer_null_check_over_type_check = true
 csharp_style_prefer_range_operator = true
 csharp_style_prefer_tuple_swap = true
 csharp_style_prefer_utf8_string_literals = true
-csharp_style_throw_expression = true
+csharp_style_throw_expression = false
 csharp_style_unused_value_assignment_preference = discard_variable
 csharp_style_unused_value_expression_statement_preference = discard_variable
 
@@ -132,9 +135,11 @@ csharp_style_unused_value_expression_statement_preference = discard_variable
 csharp_using_directive_placement = outside_namespace
 
 # 改行設定
-csharp_style_allow_blank_line_after_colon_in_constructor_initializer_experimental = true
-csharp_style_allow_blank_lines_between_consecutive_braces_experimental = true
-csharp_style_allow_embedded_statements_on_same_line_experimental = true
+csharp_style_allow_blank_line_after_colon_in_constructor_initializer_experimental = false
+csharp_style_allow_blank_line_after_token_in_arrow_expression_clause_experimental = true
+csharp_style_allow_blank_line_after_token_in_conditional_expression_experimental = true
+csharp_style_allow_blank_lines_between_consecutive_braces_experimental = false
+csharp_style_allow_embedded_statements_on_same_line_experimental = false
 
 #### C# 書式ルール ####
 
@@ -227,3 +232,14 @@ dotnet_naming_style.begins_with_i.capitalization = pascal_case
 
 # Default severity for analyzer diagnostics with category 'MicrosoftCodeAnalysisReleaseTracking'
 dotnet_analyzer_diagnostic.category-MicrosoftCodeAnalysisReleaseTracking.severity = silent
+
+# IDE0290: プライマリ コンストラクターの使用
+csharp_style_prefer_primary_constructors = false
+# IDE0051: 使用されていないプライベート メンバーを削除する(XAMLで使用しているイベントハンドラが使用していない判定を受けるため)
+dotnet_diagnostic.IDE0051.severity = silent
+# IDE0059: 値の不必要な代入
+dotnet_diagnostic.IDE0059.severity = none
+# IDE0060: 未使用のパラメーターを削除します
+dotnet_diagnostic.IDE0060.severity = silent
+# IDE0079: 不要な抑制を削除します
+dotnet_diagnostic.IDE0079.severity = silent

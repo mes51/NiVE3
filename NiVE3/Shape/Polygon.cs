@@ -26,7 +26,7 @@ namespace NiVE3.Shape
 
         public Polygon(ReadOnlySpan<PointF> points)
         {
-            var isOpen = points[points.Length - 1].X != points[0].X || points[points.Length - 1].Y != points[0].Y;
+            var isOpen = points[^1].X != points[0].X || points[^1].Y != points[0].Y;
             Lines = new Line[points.Length - (isOpen ? 0 : 1)];
             for (var i = 1; i < points.Length; i++)
             {
@@ -34,7 +34,7 @@ namespace NiVE3.Shape
             }
             if (isOpen)
             {
-                Lines[Lines.Length - 1] = new Line(points[points.Length - 1], points[0]);
+                Lines[^1] = new Line(points[^1], points[0]);
             }
 
             var min = Vector128.Create(float.MaxValue);

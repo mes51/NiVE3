@@ -69,7 +69,7 @@ namespace NiVE3.Data.Json.Project
 
         public Guid? ParentLayerId { get; set; }
 
-        public EffectData[] Effects { get; set; } = Array.Empty<EffectData>();
+        public EffectData[] Effects { get; set; } = [];
 
         public PropertyData? TransformProperties { get; set; }
 

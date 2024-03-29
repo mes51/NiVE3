@@ -40,7 +40,7 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref footages, value); }
         }
 
-        private ObservableCollection<IFootageViewModel> selectedFootages = new ObservableCollection<IFootageViewModel>();
+        private ObservableCollection<IFootageViewModel> selectedFootages = [];
         public ObservableCollection<IFootageViewModel> SelectedFootages
         {
             get { return selectedFootages; }
@@ -137,7 +137,7 @@ namespace NiVE3.ViewModel
         {
             FootageListModel = footageListModel;
             DialogService = dialogService;
-            Footages = footageListModel.Footages.CreateViewCollection<IFootageModel, IFootageViewModel>(m => m is FootageModel ? new FootageViewModel((FootageModel)m) : new FootageFolderViewModel((FootageFolderModel)m));
+            Footages = footageListModel.Footages.CreateViewCollection<IFootageModel, IFootageViewModel>(m => m is FootageModel footage ? new FootageViewModel(footage) : new FootageFolderViewModel((FootageFolderModel)m));
 
             Title = "フッテージ";
 

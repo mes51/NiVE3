@@ -30,7 +30,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
         protected const float ShininessStrength = 120.0F;
 
-        protected static readonly float[] EmptyTrackMatte = new float[1] { 1.0F };
+        protected static readonly float[] EmptyTrackMatte = [1.0F];
 
         public Matrix4x4d ViewMatrix { get; set; }
 
@@ -56,7 +56,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
         protected List<AmbientLight> AmbientLights { get; }
 
-        protected List<Triangle> Triangles { get; } = new List<Triangle>();
+        protected List<Triangle> Triangles { get; } = [];
 
         protected Dictionary<object, List<LightTriangle>> LightTriangles { get; }
 
@@ -75,12 +75,12 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             LightTriangles = pointLights.Cast<object>().Concat(spotLights).Concat(parallelLights).ToDictionary(k => k, _ => new List<LightTriangle>());
             foreach (var pointLight in pointLights)
             {
-                LightTriangles.Add(new PointLightHolder(pointLight, PointLightShadowDirection.Front), new List<LightTriangle>());
-                LightTriangles.Add(new PointLightHolder(pointLight, PointLightShadowDirection.Back), new List<LightTriangle>());
-                LightTriangles.Add(new PointLightHolder(pointLight, PointLightShadowDirection.Left), new List<LightTriangle>());
-                LightTriangles.Add(new PointLightHolder(pointLight, PointLightShadowDirection.Right), new List<LightTriangle>());
-                LightTriangles.Add(new PointLightHolder(pointLight, PointLightShadowDirection.Top), new List<LightTriangle>());
-                LightTriangles.Add(new PointLightHolder(pointLight, PointLightShadowDirection.Bottom), new List<LightTriangle>());
+                LightTriangles.Add(new PointLightHolder(pointLight, PointLightShadowDirection.Front), []);
+                LightTriangles.Add(new PointLightHolder(pointLight, PointLightShadowDirection.Back), []);
+                LightTriangles.Add(new PointLightHolder(pointLight, PointLightShadowDirection.Left), []);
+                LightTriangles.Add(new PointLightHolder(pointLight, PointLightShadowDirection.Right), []);
+                LightTriangles.Add(new PointLightHolder(pointLight, PointLightShadowDirection.Top), []);
+                LightTriangles.Add(new PointLightHolder(pointLight, PointLightShadowDirection.Bottom), []);
             }
         }
 
@@ -222,7 +222,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
         }
 
         // from Javie
-        void DivideTriangleByTriangle<T>(T triangle, T divider, List<T> near, List<T> far) where T : TriangleBase<T>
+        static void DivideTriangleByTriangle<T>(T triangle, T divider, List<T> near, List<T> far) where T : TriangleBase<T>
         {
             const double Epsilon = 1E-10;
             var wClearMask = Vector256.Create(0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0).AsDouble();
@@ -285,7 +285,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             }
         }
 
-        (T, T?, T?) DivideTriangleByPlane<T>(T triangle, in Vector256<double> p, in Vector256<double> n) where T : TriangleBase<T>
+        static (T, T?, T?) DivideTriangleByPlane<T>(T triangle, in Vector256<double> p, in Vector256<double> n) where T : TriangleBase<T>
         {
             const double Epsilon = -1E-10;
             var One = Vector256.Create(1.0);
@@ -1172,7 +1172,9 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
         #region Debug functions
 #if DEBUG
+#pragma warning disable IDE0051 // 使用されていないプライベート メンバーを削除する
         void DisplayShadowMapForDebug(ShadowMap? shadowMap, ShadowBuffer shadowBuffer)
+#pragma warning restore IDE0051 // 使用されていないプライベート メンバーを削除する
         {
             if (shadowMap == null)
             {
@@ -1496,7 +1498,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
         Bottom
     }
 
-    file record PointLightHolder(PointLight Light, PointLightShadowDirection direction)
+    file record PointLightHolder(PointLight Light, PointLightShadowDirection Direction)
     {
         public static readonly PointLightShadowDirection[] Directions = Enum.GetValues(typeof(PointLightShadowDirection)).Cast<PointLightShadowDirection>().ToArray();
     }

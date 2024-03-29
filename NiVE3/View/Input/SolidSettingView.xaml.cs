@@ -34,11 +34,13 @@ namespace NiVE3.View.Input
         {
             if (DataContext is SolidSettingViewModel vm)
             {
-                var dialog = new ColorPickerDialog(vm.Color.ToByteColor());
-                dialog.Owner = Application.Current.MainWindow;
-                dialog.Title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.ColorPickerDialog_Title);
-                dialog.OKButtonText = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_OK);
-                dialog.CancelButtonText = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_Cancel);
+                var dialog = new ColorPickerDialog(vm.Color.ToByteColor())
+                {
+                    Owner = Application.Current.MainWindow,
+                    Title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.ColorPickerDialog_Title),
+                    OKButtonText = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_OK),
+                    CancelButtonText = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_Cancel)
+                };
                 if (dialog.ShowDialog() ?? false)
                 {
                     vm.Color = FloatColor.FromColor(dialog.Color);

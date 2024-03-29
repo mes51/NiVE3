@@ -11,7 +11,7 @@ namespace NiVE3.Plugin.Property.Types
 {
     public class Vector3dPropertyType : IPropertyType
     {
-        public static Vector3dPropertyType Instance = new Vector3dPropertyType();
+        public static Vector3dPropertyType Instance { get; } = new Vector3dPropertyType();
 
         public InterpolationType SupportedInterpolationTypes => InterpolationType.None | InterpolationType.Linear | InterpolationType.CatmullRom;
 
@@ -86,19 +86,16 @@ namespace NiVE3.Plugin.Property.Types
 
         public object? DeserializeValue(object? serializedValue)
         {
-            switch (serializedValue)
+            return serializedValue switch
             {
-                case IDictionary<string, object> dictionary:
-                    return new Vector3d(
-                        Convert.ToDouble(dictionary[nameof(Vector3d.X)]),
-                        Convert.ToDouble(dictionary[nameof(Vector3d.Y)]),
-                        Convert.ToDouble(dictionary[nameof(Vector3d.Z)])
-                    );
-                case Vector3d vector:
-                    return vector;
-                default:
-                    return null;
-            }
+                IDictionary<string, object> dictionary => new Vector3d(
+                                        Convert.ToDouble(dictionary[nameof(Vector3d.X)]),
+                                        Convert.ToDouble(dictionary[nameof(Vector3d.Y)]),
+                                        Convert.ToDouble(dictionary[nameof(Vector3d.Z)])
+                                    ),
+                Vector3d vector => vector,
+                _ => null,
+            };
         }
     }
 }

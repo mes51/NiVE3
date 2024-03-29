@@ -497,7 +497,7 @@ namespace NiVE3.View.Part
             return (rightLevel, null, false);
         }
 
-        static Geometry CreateWaveFormGeometry(float[] levels, bool isSampleTime, double width, double height, double range)
+        static StreamGeometry CreateWaveFormGeometry(float[] levels, bool isSampleTime, double width, double height, double range)
         {
             var pixelPerLevel = width / (isSampleTime ? range / Const.AudioSampleTime : width);
 

@@ -13,11 +13,9 @@ namespace NiVE3.Audio
         {
             try
             {
-                using (var devices = new MMDeviceEnumerator())
-                using (var device = devices.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia))
-                {
-                    return device.ID;
-                }
+                using var devices = new MMDeviceEnumerator();
+                using var device = devices.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
+                return device.ID;
             }
             catch
             {
@@ -44,10 +42,8 @@ namespace NiVE3.Audio
 
             try
             {
-                using (var devices = new MMDeviceEnumerator())
-                {
-                    return devices.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
-                }
+                using var devices = new MMDeviceEnumerator();
+                return devices.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
             }
             catch
             {

@@ -35,7 +35,7 @@ namespace NiVE3.Model
             }
             else
             {
-                RendererMetadatas = new List<IRendererMetadata>();
+                RendererMetadatas = [];
             }
         }
 

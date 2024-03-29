@@ -205,46 +205,58 @@ namespace NiVE3.View.Part
         {
             ClipToBoundsProperty.OverrideMetadata(typeof(KeyFrameCollectionView), new FrameworkPropertyMetadata(true, FrameworkPropertyMetadataOptions.Inherits));
 
-            var keyFrameLinearLeftFigure = new PathFigure();
-            keyFrameLinearLeftFigure.StartPoint = new Point(0.5, 0.0);
-            keyFrameLinearLeftFigure.Segments.Add(new PolyLineSegment(new Point[] { new Point(0.0, 0.5), new Point(0.5, 1.0) }, false));
+            var keyFrameLinearLeftFigure = new PathFigure
+            {
+                StartPoint = new Point(0.5, 0.0)
+            };
+            keyFrameLinearLeftFigure.Segments.Add(new PolyLineSegment([new Point(0.0, 0.5), new Point(0.5, 1.0)], false));
             keyFrameLinearLeftFigure.IsClosed = true;
-            var keyFrameLinearRightFigure = new PathFigure();
-            keyFrameLinearRightFigure.StartPoint = new Point(0.5, 0.0);
-            keyFrameLinearRightFigure.Segments.Add(new PolyLineSegment(new Point[] { new Point(1.0, 0.5), new Point(0.5, 1.0) }, false));
+            var keyFrameLinearRightFigure = new PathFigure
+            {
+                StartPoint = new Point(0.5, 0.0)
+            };
+            keyFrameLinearRightFigure.Segments.Add(new PolyLineSegment([new Point(1.0, 0.5), new Point(0.5, 1.0)], false));
             keyFrameLinearRightFigure.IsClosed = true;
 
-            var keyFrameCatmullRomLeftFigure = new PathFigure();
-            keyFrameCatmullRomLeftFigure.StartPoint = new Point(0.5, 0.0);
+            var keyFrameCatmullRomLeftFigure = new PathFigure
+            {
+                StartPoint = new Point(0.5, 0.0)
+            };
             keyFrameCatmullRomLeftFigure.Segments.Add(new ArcSegment(new Point(0.5, 1.0), new Size(0.5, 0.5), 0.0, false, SweepDirection.Counterclockwise, false));
             keyFrameCatmullRomLeftFigure.IsClosed = true;
-            var keyFrameCatmullRomRightFigure = new PathFigure();
-            keyFrameCatmullRomRightFigure.StartPoint = new Point(0.5, 0.0);
+            var keyFrameCatmullRomRightFigure = new PathFigure
+            {
+                StartPoint = new Point(0.5, 0.0)
+            };
             keyFrameCatmullRomRightFigure.Segments.Add(new ArcSegment(new Point(0.5, 1.0), new Size(0.5, 0.5), 0.0, false, SweepDirection.Clockwise, false));
             keyFrameCatmullRomRightFigure.IsClosed = true;
 
-            var keyFrameBezierLeftFigure = new PathFigure();
-            keyFrameBezierLeftFigure.StartPoint = new Point(0.5, 0.0);
-            keyFrameBezierLeftFigure.Segments.Add(new PolyLineSegment(new Point[] { new Point(0.0, 0.0), new Point(0.25, 0.5), new Point(0.0, 1.0), new Point(0.5, 1.0) }, false));
+            var keyFrameBezierLeftFigure = new PathFigure
+            {
+                StartPoint = new Point(0.5, 0.0)
+            };
+            keyFrameBezierLeftFigure.Segments.Add(new PolyLineSegment([new Point(0.0, 0.0), new Point(0.25, 0.5), new Point(0.0, 1.0), new Point(0.5, 1.0)], false));
             keyFrameBezierLeftFigure.IsClosed = true;
-            var keyFrameBezierRightFigure = new PathFigure();
-            keyFrameBezierRightFigure.StartPoint = new Point(0.5, 0.0);
-            keyFrameBezierRightFigure.Segments.Add(new PolyLineSegment(new Point[] { new Point(1.0, 0.0), new Point(0.75, 0.5), new Point(1.0, 1.0), new Point(0.5, 1.0) }, false));
+            var keyFrameBezierRightFigure = new PathFigure
+            {
+                StartPoint = new Point(0.5, 0.0)
+            };
+            keyFrameBezierRightFigure.Segments.Add(new PolyLineSegment([new Point(1.0, 0.0), new Point(0.75, 0.5), new Point(1.0, 1.0), new Point(0.5, 1.0)], false));
             keyFrameBezierRightFigure.IsClosed = true;
 
             var leftShapes = new Dictionary<InterpolationType, Geometry>
             {
                 { InterpolationType.None, new RectangleGeometry(new Rect(0.0, 0.0, 0.5, 1.0)) },
-                { InterpolationType.Linear, new PathGeometry(new PathFigure[] { keyFrameLinearLeftFigure }) },
-                { InterpolationType.CatmullRom, new PathGeometry(new PathFigure[] { keyFrameCatmullRomLeftFigure }) },
-                { InterpolationType.Bezier, new PathGeometry(new PathFigure[] { keyFrameBezierLeftFigure }) }
+                { InterpolationType.Linear, new PathGeometry([keyFrameLinearLeftFigure]) },
+                { InterpolationType.CatmullRom, new PathGeometry([keyFrameCatmullRomLeftFigure]) },
+                { InterpolationType.Bezier, new PathGeometry([keyFrameBezierLeftFigure]) }
             };
             var rightShapes = new Dictionary<InterpolationType, Geometry>
             {
                 { InterpolationType.None, new RectangleGeometry(new Rect(0.5, 0.0, 0.5, 1.0)) },
-                { InterpolationType.Linear, new PathGeometry(new PathFigure[] { keyFrameLinearRightFigure }) },
-                { InterpolationType.CatmullRom, new PathGeometry(new PathFigure[] { keyFrameCatmullRomRightFigure }) },
-                { InterpolationType.Bezier, new PathGeometry(new PathFigure[] { keyFrameBezierRightFigure }) }
+                { InterpolationType.Linear, new PathGeometry([keyFrameLinearRightFigure]) },
+                { InterpolationType.CatmullRom, new PathGeometry([keyFrameCatmullRomRightFigure]) },
+                { InterpolationType.Bezier, new PathGeometry([keyFrameBezierRightFigure]) }
             };
 
             var interpolationTypes = Enum.GetValues<InterpolationType>();
@@ -253,8 +265,10 @@ namespace NiVE3.View.Part
             {
                 foreach (var er in interpolationTypes)
                 {
-                    var geometry = new CombinedGeometry(GeometryCombineMode.Union, leftShapes[el], rightShapes[er]);
-                    geometry.Transform = new ScaleTransform(KeyFrameIconSize, KeyFrameIconSize);
+                    var geometry = new CombinedGeometry(GeometryCombineMode.Union, leftShapes[el], rightShapes[er])
+                    {
+                        Transform = new ScaleTransform(KeyFrameIconSize, KeyFrameIconSize)
+                    };
                     geometry.Freeze();
                     keyFrameGeometries.Add((el, er), geometry);
                 }
@@ -385,9 +399,7 @@ namespace NiVE3.View.Part
                 }
                 else if (startIndex > endIndex)
                 {
-                    var temp = endIndex;
-                    endIndex = startIndex;
-                    startIndex = temp;
+                    (startIndex, endIndex) = (endIndex, startIndex);
                 }
 
                 var targets = keyFrames.Skip(startIndex).Take(endIndex - startIndex + 1).Select(k => k.Id).ToArray();
@@ -654,7 +666,7 @@ namespace NiVE3.View.Part
         {
             if (d is KeyFrameCollectionView collection)
             {
-                collection.SupportedInterpolationTypeList = Enum.GetValues<InterpolationType>().Where(i => collection.SupportedInterpolationTypes.HasFlag(i)).Order().ToArray();
+                collection.SupportedInterpolationTypeList = [..Enum.GetValues<InterpolationType>().Where(i => collection.SupportedInterpolationTypes.HasFlag(i)).Order()];
             }
         }
     }

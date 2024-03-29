@@ -23,14 +23,10 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
 
         public bool Success { get; }
 
-        string FilePath { get; }
-
         IMFSourceReader? Reader { get; }
 
         public AudioSourceReader(string filePath)
         {
-            FilePath = filePath;
-
             MFInitializer.Initialize();
 
             using var mediaType = MediaFactory.MFCreateMediaType();
@@ -93,7 +89,7 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
 
             if (Reader == null)
             {
-                return Array.Empty<float>();
+                return [];
             }
 
             var longTime = (long)(time * DurationRate);

@@ -68,7 +68,7 @@ namespace NiVE3.View.Resource
                 .Where(t => t.Item2 != null)
                 .ToDictionary(t => t.Item1, t => t.Item2!);
 
-            Dictionary = new AppearanceResourceDictionary();
+            Dictionary = [];
         }
 
         public AppearanceResourceDictionary()
@@ -122,7 +122,7 @@ namespace NiVE3.View.Resource
     {
         public static Color FromHex(string hex)
         {
-            var colorCode = hex.StartsWith("#") ? hex.Substring(1) : hex;
+            var colorCode = hex.StartsWith('#') ? hex[1..] : hex;
             var colors = new List<byte>();
             for (var i = 0; i < colorCode.Length; i += 2)
             {

@@ -50,7 +50,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
     {
         const int BufferSize = 1024 * 1024; // 32MB
 
-        public readonly List<ShadowPixel[]> Buffers = new List<ShadowPixel[]>();
+        public readonly List<ShadowPixel[]> Buffers = [];
 
         int CurrentHeadIndex = -1;
 

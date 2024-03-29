@@ -11,7 +11,7 @@ namespace NiVE3.View.Command
     [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = true)]
     sealed class CommandHandlingAttribute : Attribute
     {
-        static Dictionary<Type, ILookup<string, Tuple<CommandHandlingAttribute, PropertyInfo>>> Cache { get; } = new Dictionary<Type, ILookup<string, Tuple<CommandHandlingAttribute, PropertyInfo>>>();
+        static Dictionary<Type, ILookup<string, Tuple<CommandHandlingAttribute, PropertyInfo>>> Cache { get; } = [];
 
         public string TargetGesture { get; }
 
@@ -28,10 +28,12 @@ namespace NiVE3.View.Command
         public static ICommand? GetCommand(object target, string targetGesture, bool isGlobal)
         {
             var type = target.GetType();
+#pragma warning disable CA1854 // リファクタを実行した結果の方が変になるため無視する
             if (!Cache.ContainsKey(type))
             {
                 Cache.Add(type, CreateCache(type));
             }
+#pragma warning restore CA1854 // 'IDictionary.TryGetValue(TKey, out TValue)' メソッドを優先します
 
             var commandInfo = Cache[type][targetGesture].FirstOrDefault();
             if (commandInfo != null && (!isGlobal || commandInfo.Item1.IsGlobal))

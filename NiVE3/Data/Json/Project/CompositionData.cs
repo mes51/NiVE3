@@ -32,7 +32,7 @@ namespace NiVE3.Data.Json.Project
 
         public double WorkareaEnd { get; set; }
 
-        public LayerData[] Layers { get; set; } = Array.Empty<LayerData>();
+        public LayerData[] Layers { get; set; } = [];
 
         public Guid RendererPluginId { get; set; }
 

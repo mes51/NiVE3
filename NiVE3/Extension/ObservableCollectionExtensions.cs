@@ -60,8 +60,8 @@ namespace NiVE3.Extension
 
             public int Compare(object? x, object? y)
             {
-                var tx = x is T ? (T)x : (T?)null;
-                var ty = y is T ? (T)y : (T?)null;
+                var tx = x is T tcx ? tcx : (T?)null;
+                var ty = y is T tcy ? tcy : (T?)null;
                 return Comparer.Compare(tx, ty);
             }
         }

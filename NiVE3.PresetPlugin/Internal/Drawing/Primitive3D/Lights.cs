@@ -173,8 +173,6 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
 
         public readonly bool IsEnableShadow;
 
-        public readonly bool IsParallel;
-
         public readonly float ShadowStrength;
 
         public readonly float ShadowScatterSize;

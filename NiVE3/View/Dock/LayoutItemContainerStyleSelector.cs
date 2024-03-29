@@ -12,7 +12,7 @@ namespace NiVE3.View.Dock
     [ContentProperty(nameof(Styles))]
     class LayoutItemContainerStyleSelector : StyleSelector
     {
-        public List<LayoutItemContainerStyle> Styles { get; set; } = new List<LayoutItemContainerStyle>();
+        public List<LayoutItemContainerStyle> Styles { get; set; } = [];
 
         public override Style SelectStyle(object item, DependencyObject container)
         {

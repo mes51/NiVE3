@@ -60,8 +60,10 @@ namespace NiVE3.Plugin.Property.Properties
 
         public override PropertyControlBase CreateControl(ICompositionObject composition, ILayerObject? layer, IEffectObject? effect, IPropertyViewModel viewModel)
         {
-            var control = new EnumPropertyControl();
-            control.DataContext = viewModel;
+            var control = new EnumPropertyControl
+            {
+                DataContext = viewModel
+            };
             return control;
         }
 

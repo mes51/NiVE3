@@ -41,13 +41,13 @@ namespace NiVE3.PresetPlugin.Renderer
 
         Matrix4x4d ViewMatrix { get; set; }
 
-        List<PointLight> PointLights { get; } = new List<PointLight>();
+        List<PointLight> PointLights { get; } = [];
 
-        List<SpotLight> SpotLights { get; } = new List<SpotLight>();
+        List<SpotLight> SpotLights { get; } = [];
 
-        List<ParallelLight> ParallelLights { get; } = new List<ParallelLight>();
+        List<ParallelLight> ParallelLights { get; } = [];
 
-        List<AmbientLight> AmbientLights { get; } = new List<AmbientLight>();
+        List<AmbientLight> AmbientLights { get; } = [];
 
         public void SetupAccelerator(IAcceleratorObject accelerator) { }
 
@@ -182,9 +182,11 @@ namespace NiVE3.PresetPlugin.Renderer
 
                     if (trackMatteImage.IsEnable3D)
                     {
-                        var renderer = new MaskRenderer3D(result, PointLights, SpotLights, ParallelLights, AmbientLights);
-                        renderer.ViewMatrix = ViewMatrix;
-                        renderer.FieldOfView = FieldOfView;
+                        var renderer = new MaskRenderer3D(result, PointLights, SpotLights, ParallelLights, AmbientLights)
+                        {
+                            ViewMatrix = ViewMatrix,
+                            FieldOfView = FieldOfView
+                        };
 
                         renderer.AddRect(
                             trackMatteImage.Image,
@@ -223,9 +225,11 @@ namespace NiVE3.PresetPlugin.Renderer
             {
                 if (group.First().IsEnable3D)
                 {
-                    var renderer = new Renderer3D(CurrentFrame, PointLights, SpotLights, ParallelLights, AmbientLights);
-                    renderer.ViewMatrix = ViewMatrix;
-                    renderer.FieldOfView = FieldOfView;
+                    var renderer = new Renderer3D(CurrentFrame, PointLights, SpotLights, ParallelLights, AmbientLights)
+                    {
+                        ViewMatrix = ViewMatrix,
+                        FieldOfView = FieldOfView
+                    };
 
                     foreach (var i in group)
                     {
@@ -323,9 +327,11 @@ namespace NiVE3.PresetPlugin.Renderer
 
                 if (trackMatteImage.IsEnable3D)
                 {
-                    var renderer = new MaskRenderer3D(trackMatte, PointLights, SpotLights, ParallelLights, AmbientLights);
-                    renderer.ViewMatrix = ViewMatrix;
-                    renderer.FieldOfView = FieldOfView;
+                    var renderer = new MaskRenderer3D(trackMatte, PointLights, SpotLights, ParallelLights, AmbientLights)
+                    {
+                        ViewMatrix = ViewMatrix,
+                        FieldOfView = FieldOfView
+                    };
 
                     renderer.AddRect(
                         trackMatteImage.Image,
@@ -356,9 +362,11 @@ namespace NiVE3.PresetPlugin.Renderer
 
             if (image.IsEnable3D)
             {
-                var renderer = new MaskRenderer3D(result, new List<PointLight>(), new List<SpotLight>(), new List<ParallelLight>(), new List<AmbientLight>());
-                renderer.ViewMatrix = ViewMatrix;
-                renderer.FieldOfView = FieldOfView;
+                var renderer = new MaskRenderer3D(result, [], [], [], [])
+                {
+                    ViewMatrix = ViewMatrix,
+                    FieldOfView = FieldOfView
+                };
 
                 renderer.AddRect(
                     image.Image,
@@ -401,7 +409,7 @@ namespace NiVE3.PresetPlugin.Renderer
             var rightBottom = (Vector2d)matrix.Transform(new Vector2(width, height));
             return new PreviewBoundingBox(
                 transformedAnchorPoint,
-                new BoundingBoxShape[] { new BoundingBoxShape(new Vector2d[] { leftTop, rightTop, rightBottom, leftBottom }, true, false) },
+                [new BoundingBoxShape([leftTop, rightTop, rightBottom, leftBottom], true, false)],
                 (leftTop - rightTop).IsZero && (leftTop - leftBottom).IsZero && (rightTop - rightBottom).IsZero && (leftBottom - rightBottom).IsZero,
                 transformedAnchorPoint.IsNaN() || transformedAnchorPoint.IsInfinty()
             );
@@ -426,7 +434,7 @@ namespace NiVE3.PresetPlugin.Renderer
                 nav = Avx.Divide(nav, Vector256.Create(nav.GetElement(3)));
 
                 var nullObjectAnchorPoint = ((Vector2d)nav) * (new Vector2d(size, size) * 0.5) + (new Vector2d(Width, Height) * 0.5);
-                return new PreviewBoundingBox(nullObjectAnchorPoint, Array.Empty<BoundingBoxShape>(), true, nullObjectAnchorPoint.IsNaN() || nullObjectAnchorPoint.IsInfinty());
+                return new PreviewBoundingBox(nullObjectAnchorPoint, [], true, nullObjectAnchorPoint.IsNaN() || nullObjectAnchorPoint.IsInfinty());
             }
 
             var v1 = mv.Transform(Avx.Divide(Vector256.Create(0.0, 0.0, 0.0, size), Vector256.Create((double)size)));
@@ -462,7 +470,7 @@ namespace NiVE3.PresetPlugin.Renderer
                 IntersectLine((Vector2d)v1, (Vector2d)v4, (Vector2d)v4, (Vector2d)v3))
             {
                 // バウンディングボックスがクロスしているためアンカーポイントのみ表示
-                return new PreviewBoundingBox(bbAnchorPoint, Array.Empty<BoundingBoxShape>(), true, bbAnchorPoint.IsNaN() || bbAnchorPoint.IsInfinty());
+                return new PreviewBoundingBox(bbAnchorPoint, [], true, bbAnchorPoint.IsNaN() || bbAnchorPoint.IsInfinty());
             }
             else
             {
@@ -472,7 +480,7 @@ namespace NiVE3.PresetPlugin.Renderer
                 var rightBottom = ((Vector2d)v3) * s + offset;
                 return new PreviewBoundingBox(
                     bbAnchorPoint,
-                    new BoundingBoxShape[] { new BoundingBoxShape(new Vector2d[] { leftTop, rightTop, rightBottom, leftBottom }, true, false) },
+                    [new BoundingBoxShape([leftTop, rightTop, rightBottom, leftBottom], true, false)],
                     (leftTop - rightTop).IsZero && (leftTop - leftBottom).IsZero && (rightTop - rightBottom).IsZero && (leftBottom - rightBottom).IsZero,
                     bbAnchorPoint.IsNaN() || bbAnchorPoint.IsInfinty()
                 );
@@ -518,12 +526,12 @@ namespace NiVE3.PresetPlugin.Renderer
 
             var frustum = new Vector256<double>[][]
             {
-                new Vector256<double>[]{ Vector256.Create(-frustumSize.X, -frustumSize.Y, length - zoomLength, 1.0), Vector256.Create(frustumSize.X, -frustumSize.Y, length - zoomLength, 1.0) },
-                new Vector256<double>[]{ Vector256.Create(-frustumSize.X, -frustumSize.Y, length - zoomLength, 1.0), Vector256.Create(-frustumSize.X, frustumSize.Y, length - zoomLength, 1.0) },
-                new Vector256<double>[]{ Vector256.Create(frustumSize.X, -frustumSize.Y, length - zoomLength, 1.0), Vector256.Create(frustumSize.X, frustumSize.Y, length - zoomLength, 1.0) },
-                new Vector256<double>[]{ Vector256.Create(-frustumSize.X, frustumSize.Y, length - zoomLength, 1.0), Vector256.Create(frustumSize.X, frustumSize.Y, length - zoomLength, 1.0) }
+                [Vector256.Create(-frustumSize.X, -frustumSize.Y, length - zoomLength, 1.0), Vector256.Create(frustumSize.X, -frustumSize.Y, length - zoomLength, 1.0)],
+                [Vector256.Create(-frustumSize.X, -frustumSize.Y, length - zoomLength, 1.0), Vector256.Create(-frustumSize.X, frustumSize.Y, length - zoomLength, 1.0)],
+                [Vector256.Create(frustumSize.X, -frustumSize.Y, length - zoomLength, 1.0), Vector256.Create(frustumSize.X, frustumSize.Y, length - zoomLength, 1.0)],
+                [Vector256.Create(-frustumSize.X, frustumSize.Y, length - zoomLength, 1.0), Vector256.Create(frustumSize.X, frustumSize.Y, length - zoomLength, 1.0)]
             }.Select(shape => new BoundingBoxShape(shape.Select(v => projectionMatrix.Transform(mv.Transform(v))).Select(v => (Vector2d)Avx.Divide(v, v.Permute4x64(0b11_11_11_11)) * s + offset).Prepend(pos).ToArray(), true, false))
-            .Prepend(new BoundingBoxShape(new Vector2d[] { poi, pos }, false, false))
+            .Prepend(new BoundingBoxShape([poi, pos], false, false))
             .ToArray();
 
             return new PreviewBoundingBox(poi, frustum, false, double.IsNaN(fov) || double.IsInfinity(fov) || fov >= 180.0);
@@ -553,7 +561,7 @@ namespace NiVE3.PresetPlugin.Renderer
 
             return new PreviewBoundingBox(
                 lightSetting.LightType == LightType.Point ? pos : poi,
-                new BoundingBoxShape[] { new BoundingBoxShape(new Vector2d[] { pos, poi }, false, false), new BoundingBoxShape(positionMark, true, true, pos) },
+                [new BoundingBoxShape([pos, poi], false, false), new BoundingBoxShape(positionMark, true, true, pos)],
                 lightSetting.LightType == LightType.Point,
                 lightSetting.LightType == LightType.Ambient || double.IsNaN(lightSetting.ConeAngle) || double.IsInfinity(lightSetting.ConeAngle)
             );

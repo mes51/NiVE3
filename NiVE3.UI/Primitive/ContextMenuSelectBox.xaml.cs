@@ -132,11 +132,11 @@ namespace NiVE3.UI.Primitive
 
         ContextMenu SelectorMenu => (ContextMenu)Resources[ContextMenuSelectBoxConst.SelectorMenu];
 
-        public static RoutedEvent SelectItemChangedByUserEvent = EventManager.RegisterRoutedEvent(
+        public static readonly RoutedEvent SelectItemChangedByUserEvent = EventManager.RegisterRoutedEvent(
             nameof(SelectItemChangedByUser), RoutingStrategy.Direct, typeof(RoutedEventHandler), typeof(ContextMenuSelectBox)
         );
 
-        public static RoutedEvent SelectItemChangedEvent = EventManager.RegisterRoutedEvent(
+        public static readonly RoutedEvent SelectItemChangedEvent = EventManager.RegisterRoutedEvent(
             nameof(SelectItemChanged), RoutingStrategy.Direct, typeof(RoutedEventHandler), typeof(ContextMenuSelectBox)
         );
 

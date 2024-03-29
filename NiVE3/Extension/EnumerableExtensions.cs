@@ -48,7 +48,7 @@ namespace NiVE3.Extension
                 else if (group.Count > 0 || !excludeEmptyGroup)
                 {
                     yield return group;
-                    group = new List<T>();
+                    group = [];
                 }
             }
 

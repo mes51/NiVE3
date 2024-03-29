@@ -183,7 +183,7 @@ namespace NiVE3.View.Primitive
             {
                 if (SelectedItems != null && SelectedItems.Count > 1 && SelectedItems.Contains(viewModel))
                 {
-                    dragInfo.Data = new ItemDragData<T>(SelectedItems.ToArray(), viewModel);
+                    dragInfo.Data = new ItemDragData<T>([..SelectedItems], viewModel);
                 }
                 else
                 {
@@ -203,8 +203,7 @@ namespace NiVE3.View.Primitive
 
         public override void SelectItem(FrameworkElement item, bool selectRange, bool selectMultiple)
         {
-            var viewModel = item.DataContext as T;
-            if (viewModel == null)
+            if (item.DataContext is not T viewModel)
             {
                 return;
             }
@@ -227,11 +226,7 @@ namespace NiVE3.View.Primitive
             {
                 if (SelectedItems != null)
                 {
-                    if (SelectedItems.Contains(viewModel))
-                    {
-                        SelectedItems.Remove(viewModel);
-                    }
-                    else
+                    if (!SelectedItems.Remove(viewModel))
                     {
                         SelectedItems.Add(viewModel);
                     }
@@ -241,10 +236,7 @@ namespace NiVE3.View.Primitive
             else if (selectRange && SelectedItems != null && SelectedItems.Count > 0)
             {
                 var oldSelectedItems = SelectedItems.ToArray();
-                if (LastSelected == null)
-                {
-                    LastSelected = items[0];
-                }
+                LastSelected ??= items[0];
                 var startIndex = Array.IndexOf(items, LastSelected);
                 var endIndex = Array.IndexOf(items, viewModel);
                 if (startIndex == endIndex)
@@ -264,9 +256,7 @@ namespace NiVE3.View.Primitive
                 }
                 else if (startIndex > endIndex)
                 {
-                    var temp = endIndex;
-                    endIndex = startIndex;
-                    startIndex = temp;
+                    (startIndex, endIndex) = (endIndex, startIndex);
                 }
 
                 var targets = items.Skip(startIndex).Take(endIndex - startIndex + 1).ToArray();
@@ -294,8 +284,7 @@ namespace NiVE3.View.Primitive
 
         public override void DeselectItem(FrameworkElement item)
         {
-            var viewModel = item.DataContext as T;
-            if (viewModel == null)
+            if (item.DataContext is not T viewModel)
             {
                 return;
             }

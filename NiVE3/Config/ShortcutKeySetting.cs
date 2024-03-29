@@ -183,33 +183,30 @@ namespace NiVE3.Config
         {
             var data = DependencyProperties.Values.Select(dp =>
             {
-                switch (Setting.GetValue(dp))
+                return Setting.GetValue(dp) switch
                 {
-                    case KeyGesture keyGesture:
-                        return new ShortcutKeyData
-                        {
-                            Name = dp.Name,
-                            Type = nameof(KeyGesture),
-                            GestureKey = keyGesture.Key,
-                            Modifier = keyGesture.Modifiers
-                        };
-                    case SingleKeyGesture singleKeyGesture:
-                        return new ShortcutKeyData
-                        {
-                            Name = dp.Name,
-                            Type = nameof(SingleKeyGesture),
-                            GestureKey = singleKeyGesture.Key,
-                            Modifier = singleKeyGesture.IsUseShift ? ModifierKeys.Shift : ModifierKeys.None
-                        };
-                    default:
-                        return new ShortcutKeyData
-                        {
-                            Name = dp.Name,
-                            Type = nameof(KeyGesture),
-                            GestureKey = Key.None,
-                            Modifier = ModifierKeys.None
-                        };
-                }
+                    KeyGesture keyGesture => new ShortcutKeyData
+                    {
+                        Name = dp.Name,
+                        Type = nameof(KeyGesture),
+                        GestureKey = keyGesture.Key,
+                        Modifier = keyGesture.Modifiers
+                    },
+                    SingleKeyGesture singleKeyGesture => new ShortcutKeyData
+                    {
+                        Name = dp.Name,
+                        Type = nameof(SingleKeyGesture),
+                        GestureKey = singleKeyGesture.Key,
+                        Modifier = singleKeyGesture.IsUseShift ? ModifierKeys.Shift : ModifierKeys.None
+                    },
+                    _ => new ShortcutKeyData
+                    {
+                        Name = dp.Name,
+                        Type = nameof(KeyGesture),
+                        GestureKey = Key.None,
+                        Modifier = ModifierKeys.None
+                    },
+                };
             }).ToArray();
 
             var json = JsonSerializer.Serialize(data);
@@ -225,7 +222,7 @@ namespace NiVE3.Config
 
             try
             {
-                var shortcutKeyData = JsonSerializer.Deserialize<ShortcutKeyData[]>(File.ReadAllBytes(FilePath)) ?? Array.Empty<ShortcutKeyData>();
+                var shortcutKeyData = JsonSerializer.Deserialize<ShortcutKeyData[]>(File.ReadAllBytes(FilePath)) ?? [];
                 foreach (var data in shortcutKeyData)
                 {
                     data.CorrectData();

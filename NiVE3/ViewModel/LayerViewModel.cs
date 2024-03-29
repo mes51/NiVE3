@@ -462,7 +462,7 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref effects, value); }
         }
 
-        private ObservableCollection<EffectViewModel> selectedEffects = new ObservableCollection<EffectViewModel>();
+        private ObservableCollection<EffectViewModel> selectedEffects = [];
         public ObservableCollection<EffectViewModel> SelectedEffects
         {
             get { return selectedEffects; }
@@ -591,7 +591,7 @@ namespace NiVE3.ViewModel
             ViewState = viewState;
             TrackMatteViewSource = trackMatteViewSource;
             ParentLayerViewSource = parentLayerViewSource;
-            SelectedEffects = new ObservableCollection<EffectViewModel>();
+            SelectedEffects = [];
 
             Effects = layerModel.Effects.CreateViewCollection(e =>
             {

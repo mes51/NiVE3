@@ -136,7 +136,7 @@ namespace NiVE3.View.Part
 
         public static readonly DependencyProperty MinimumRangeProperty = MinimumRangePropertyKey.DependencyProperty;
 
-        public static RoutedEvent CurrentTimeChangeByUserEvent = EventManager.RegisterRoutedEvent(
+        public static readonly RoutedEvent CurrentTimeChangeByUserEvent = EventManager.RegisterRoutedEvent(
             nameof(CurrentTimeChangeByUser), RoutingStrategy.Direct, typeof(EventHandler<RoutedEventArgs>), typeof(TimeLocatorView)
         );
 

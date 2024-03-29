@@ -33,7 +33,7 @@ namespace NiVE3.Model
         [ImportMany]
         List<ExportFactory<IInput, IInputMetadata>>? Inputs { get; set; }
 
-        private ObservableCollection<IFootageModel> footages = new ObservableCollection<IFootageModel>();
+        private ObservableCollection<IFootageModel> footages = [];
         public ObservableCollection<IFootageModel> Footages
         {
             get { return footages; }
@@ -62,11 +62,11 @@ namespace NiVE3.Model
 
         public FootageModel TextFootage { get; }
 
-        Dictionary<Type, string[]> SupportedFileTypes { get; set; } = new Dictionary<Type, string[]>();
+        Dictionary<Type, string[]> SupportedFileTypes { get; set; } = [];
 
-        List<InputModel> LoadedInputs { get; } = new List<InputModel>();
+        List<InputModel> LoadedInputs { get; } = [];
 
-        List<InputModel> PlaceholderInputs { get; } = new List<InputModel>();
+        List<InputModel> PlaceholderInputs { get; } = [];
 
         HistoryModel HistoryModel { get; }
 
@@ -96,7 +96,7 @@ namespace NiVE3.Model
             HistoryModel = historyModel;
 
             //TODO: イベントの追加方法をfieldに対し行うか、nullableにした上でコンストラクタでインスタンスをセットするのが良いか
-            Footages = new ObservableCollection<IFootageModel>();
+            Footages = [];
 
             PropertyChanged += FootageListModel_PropertyChanged;
 
@@ -130,15 +130,12 @@ namespace NiVE3.Model
                 }
             }
 
-            switch (loaded)
+            return loaded switch
             {
-                case FootageModel solid:
-                    return solid.FootageId;
-                case FootageFolderModel folder:
-                    return Flatten(folder.Children).First().FootageId;
-                default:
-                    return null;
-            }
+                FootageModel solid => (Guid?)solid.FootageId,
+                FootageFolderModel folder => (Guid?)Flatten(folder.Children).First().FootageId,
+                _ => null,
+            };
         }
 
         public void AddComposition(CompositionModel composition)
@@ -155,9 +152,7 @@ namespace NiVE3.Model
         public void MoveFootage(Guid sourceFootageId, Guid targetFolderId)
         {
             var model = FindModel(sourceFootageId, Footages);
-            var targetFolder = FindModel(targetFolderId, Footages) as FootageFolderModel;
-
-            if (model == null || targetFolder == null)
+            if (model == null || FindModel(targetFolderId, Footages) is not FootageFolderModel targetFolder)
             {
                 return;
             }
@@ -298,8 +293,7 @@ namespace NiVE3.Model
 
         public void ShowPreview(Guid footageId)
         {
-            var footage = FindModel(footageId, Footages) as FootageModel;
-            if (footage == null)
+            if (FindModel(footageId, Footages) is not FootageModel footage)
             {
                 return;
             }
@@ -318,37 +312,37 @@ namespace NiVE3.Model
         {
             if (CameraFootage.FootageId == footageId)
             {
-                return new FootageModel[] { CameraFootage };
+                return [CameraFootage];
             }
             else if (LightFootage.FootageId == footageId)
             {
-                return new FootageModel[] { LightFootage };
+                return [LightFootage];
             }
             else if (NullObjectFootage.FootageId == footageId)
             {
-                return new FootageModel[] { NullObjectFootage };
+                return [NullObjectFootage];
             }
             else if (TextFootage.FootageId == footageId)
             {
-                return new FootageModel[] { TextFootage };
+                return [TextFootage];
             }
 
             var footage = FindModel(footageId, Footages);
             if (footage == null)
             {
-                return Array.Empty<FootageModel>();
+                return [];
             }
 
             if (footage is FootageModel footageModel)
             {
-                return new FootageModel[] { footageModel };
+                return [footageModel];
             }
             else if (footage is FootageFolderModel footageFolderModel)
             {
-                return Flatten(footageFolderModel.Children).ToArray();
+                return [..Flatten(footageFolderModel.Children)];
             }
 
-            return Array.Empty<FootageModel>();
+            return [];
         }
 
         public void Clear()
@@ -479,11 +473,13 @@ namespace NiVE3.Model
                 }
                 else
                 {
-                    var folder = new FootageFolderModel(HistoryModel, footageData.FootageId);
-                    folder.Name = footageData.Name;
+                    var folder = new FootageFolderModel(HistoryModel, footageData.FootageId)
+                    {
+                        Name = footageData.Name
+                    };
                     AddFootage(folder, parentFolderId);
 
-                    foreach (var child in (footageData.Children ?? Array.Empty<FootageData>()))
+                    foreach (var child in (footageData.Children ?? []))
                     {
                         footageDataQueue.Enqueue((footageData.FootageId, child));
                     }
@@ -531,14 +527,14 @@ namespace NiVE3.Model
                 }
                 else
                 {
-                    foreach (var child in (footageData.Children ?? Array.Empty<FootageData>()))
+                    foreach (var child in (footageData.Children ?? []))
                     {
                         footageDataQueue.Enqueue((footageData.FootageId, child));
                     }
                 }
             }
 
-            return result.ToArray();
+            return [..result];
         }
 
         FootageFolderModel AddFolderInternal(string? name)
@@ -641,7 +637,7 @@ namespace NiVE3.Model
             return loadedFootage;
         }
 
-        IFootageModel AddFootageSourceGroup(InputModel inputModel, FootageSourceGroup group, Guid? targetFolderId)
+        FootageFolderModel AddFootageSourceGroup(InputModel inputModel, FootageSourceGroup group, Guid? targetFolderId)
         {
             var folder = new FootageFolderModel(HistoryModel) { Name = group.Name };
             AddFootage(folder, targetFolderId);
@@ -764,7 +760,7 @@ namespace NiVE3.Model
                 ?.FirstOrDefault();
         }
 
-        static IEnumerable<FootageModel> Flatten(IEnumerable<IFootageModel> footages)
+        static List<FootageModel> Flatten(IEnumerable<IFootageModel> footages)
         {
             var result = new List<FootageModel>();
 
@@ -845,21 +841,15 @@ namespace NiVE3.Model
                 return 1;
             }
 
-            switch (Key)
+            return Key switch
             {
-                case FootageSortKey.Width:
-                    return x.Width.CompareTo(y.Width);
-                case FootageSortKey.FrameRate:
-                    return x.FrameRate.CompareTo(y.FrameRate);
-                case FootageSortKey.Duration:
-                    return x.Duration.CompareTo(y.Duration);
-                case FootageSortKey.Comment:
-                    return x.Comment.CompareTo(y.Comment);
-                case FootageSortKey.FilePath:
-                    return x.FilePath.CompareTo(y.FilePath);
-                default:
-                    return x.Name.CompareTo(y.Name);
-            }
+                FootageSortKey.Width => x.Width.CompareTo(y.Width),
+                FootageSortKey.FrameRate => x.FrameRate.CompareTo(y.FrameRate),
+                FootageSortKey.Duration => x.Duration.CompareTo(y.Duration),
+                FootageSortKey.Comment => x.Comment.CompareTo(y.Comment),
+                FootageSortKey.FilePath => x.FilePath.CompareTo(y.FilePath),
+                _ => x.Name.CompareTo(y.Name),
+            };
         }
     }
 }

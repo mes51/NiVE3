@@ -328,7 +328,7 @@ namespace NiVE3.ViewModel
             FootageId = folder.FootageId;
             Name = folder.Name;
             Comment = folder.Comment;
-            Footages = folder.Children.CreateViewCollection<IFootageModel, IFootageViewModel>(m => m is FootageModel ? new FootageViewModel((FootageModel)m) : new FootageFolderViewModel((FootageFolderModel)m));
+            Footages = folder.Children.CreateViewCollection<IFootageModel, IFootageViewModel>(m => m is FootageModel model ? new FootageViewModel(model) : new FootageFolderViewModel((FootageFolderModel)m));
 
             WiringModel();
 

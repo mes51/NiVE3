@@ -15,8 +15,6 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 {
     class Renderer2D
     {
-        static readonly Vector4 EmptyPixel = new Vector4(255.0F, 255.0F, 255.0F, 0.0F);
-
         NManagedImage Target { get; }
 
         public Renderer2D(NManagedImage target)

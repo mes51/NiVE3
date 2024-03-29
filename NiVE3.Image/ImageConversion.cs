@@ -24,7 +24,7 @@ namespace NiVE3.Image
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ConvertToBGRA128(ReadOnlySpan<byte> fromImage, Span<Vector4> toImage, int pixelCount)
         {
-            ConvertToBGRA128(MemoryMarshal.Cast<byte, int>(fromImage.Slice(0, pixelCount * 4)), toImage, pixelCount);
+            ConvertToBGRA128(MemoryMarshal.Cast<byte, int>(fromImage[..(pixelCount * 4)]), toImage, pixelCount);
         }
 
         /// <summary>
@@ -61,7 +61,7 @@ namespace NiVE3.Image
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ConvertToBGRA32(ReadOnlySpan<Vector4> fromImage, Span<byte> toImage, int pixelCount)
         {
-            ConvertToBGRA32(fromImage, MemoryMarshal.Cast<byte, int>(toImage.Slice(0, pixelCount * 4)), pixelCount);
+            ConvertToBGRA32(fromImage, MemoryMarshal.Cast<byte, int>(toImage[..(pixelCount * 4)]), pixelCount);
         }
 
         /// <summary>
@@ -98,7 +98,7 @@ namespace NiVE3.Image
         /// <param name="pixelCount">ピクセルの数</param>
         public static void ConvertToBGR32(ReadOnlySpan<Vector4> fromImage, Span<byte> toImage, int pixelCount)
         {
-            ConvertToBGR32(fromImage, MemoryMarshal.Cast<byte, int>(toImage.Slice(0, pixelCount * 4)), pixelCount);
+            ConvertToBGR32(fromImage, MemoryMarshal.Cast<byte, int>(toImage[..(pixelCount * 4)]), pixelCount);
         }
 
         /// <summary>

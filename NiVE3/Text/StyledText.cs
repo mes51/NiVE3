@@ -9,7 +9,7 @@ namespace NiVE3.Text
 {
     record StyledText(string Text, TextStyle DefaultStyle, TextStyleRun[] Styles)
     {
-        public static StyledText Empty = new StyledText("", TextStyle.Empty, Array.Empty<TextStyleRun>());
+        public static StyledText Empty = new StyledText("", TextStyle.Empty, []);
 
         public StyledText ChangeText(string newText)
         {
@@ -31,7 +31,7 @@ namespace NiVE3.Text
                     newStyles.Add(s);
                 }
             }
-            return new StyledText(newText, DefaultStyle, newStyles.ToArray());
+            return new StyledText(newText, DefaultStyle, [..newStyles]);
         }
 
         public IDictionary<string, object?> Serialize()
@@ -49,7 +49,7 @@ namespace NiVE3.Text
             return new StyledText(
                 (string)(dic[nameof(Text)] ?? ""),
                 dic[nameof(DefaultStyle)] is IDictionary<string, object?> defaultStyle ? TextStyle.Deserialize(defaultStyle) : TextStyle.Empty,
-                dic[nameof(Styles)] is Array styles ? styles.Cast<IDictionary<string, object?>>().Select(TextStyleRun.Deserialize).ToArray() : Array.Empty<TextStyleRun>()
+                dic[nameof(Styles)] is Array styles ? styles.Cast<IDictionary<string, object?>>().Select(TextStyleRun.Deserialize).ToArray() : []
             );
         }
     }

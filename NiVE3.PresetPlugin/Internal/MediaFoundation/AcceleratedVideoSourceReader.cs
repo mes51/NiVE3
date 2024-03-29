@@ -34,7 +34,7 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
             attributes.Set(SourceReaderAttributeKeys.DisableDxva, false);
             attributes.Set(SourceReaderAttributeKeys.EnableAdvancedVideoProcessing, true);
 
-            if (D3D11.D3D11CreateDevice(null, DriverType.Hardware, DeviceCreationFlags.VideoSupport, new FeatureLevel[] { FeatureLevel.Level_11_1 }, out var device).Failure || device == null)
+            if (D3D11.D3D11CreateDevice(null, DriverType.Hardware, DeviceCreationFlags.VideoSupport, [FeatureLevel.Level_11_1], out var device).Failure || device == null)
             {
                 return;
             }
@@ -101,13 +101,13 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
         {
             if (Transform == null || Sample == null)
             {
-                return Array.Empty<byte>();
+                return [];
             }
 
             using var sample = ReadSample(time);
             if (sample == null)
             {
-                return Array.Empty<byte>();
+                return [];
             }
 
             Transform.ProcessInput(0, sample, 0);

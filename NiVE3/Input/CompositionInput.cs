@@ -55,7 +55,7 @@ namespace NiVE3.Input
 
         public FootageSourceGroup GetGroup()
         {
-            return new FootageSourceGroup(new IFootageSource[] { new CompositionFootageSource(Composition) });
+            return new FootageSourceGroup([new CompositionFootageSource(Composition)]);
         }
 
         public void Dispose() { }

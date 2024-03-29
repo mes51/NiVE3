@@ -23,7 +23,7 @@ namespace NiVE3.Property
         {
             return value switch
             {
-                string s => new StyledText(s, TextStyle.Empty, Array.Empty<TextStyleRun>()),
+                string s => new StyledText(s, TextStyle.Empty, []),
                 StyledText d => d,
                 _ => StyledText.Empty
             };

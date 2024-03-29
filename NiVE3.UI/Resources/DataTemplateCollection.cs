@@ -14,7 +14,7 @@ namespace NiVE3.UI.Resources
     {
         static readonly DataTemplate EmptyTemplate;
 
-        public List<DataTemplate> Templates { get; set; } = new List<DataTemplate>();
+        public List<DataTemplate> Templates { get; set; } = [];
 
         /// <summary>
         /// テンプレートが存在しなかったとき、デフォルトではなく空のテンプレートを返すかどうか
@@ -94,7 +94,7 @@ namespace NiVE3.UI.Resources
             return Templates.FirstOrDefault(t => t.DataType == null);
         }
 
-        DataTemplate WrapTemplate(DataTemplate inner)
+        static DataTemplate WrapTemplate(DataTemplate inner)
         {
             var wrapperContentPresenterFactory = new FrameworkElementFactory(typeof(ContentPresenter));
             wrapperContentPresenterFactory.SetValue(ContentPresenter.ContentTemplateProperty, inner);

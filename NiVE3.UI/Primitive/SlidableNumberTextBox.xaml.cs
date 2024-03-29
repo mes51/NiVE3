@@ -87,27 +87,27 @@ namespace NiVE3.UI.Primitive
             new FrameworkPropertyMetadata(false)
         );
 
-        public static RoutedEvent BeginSlideEditValueEvent = EventManager.RegisterRoutedEvent(
+        public static readonly RoutedEvent BeginSlideEditValueEvent = EventManager.RegisterRoutedEvent(
             nameof(BeginSlideEditValue), RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(SlidableNumberTextBox)
         );
 
-        public static RoutedEvent EndSlideEditValueEvent = EventManager.RegisterRoutedEvent(
+        public static readonly RoutedEvent EndSlideEditValueEvent = EventManager.RegisterRoutedEvent(
             nameof(EndSlideEditValue), RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(SlidableNumberTextBox)
         );
 
-        public static RoutedEvent AbortSlideEditValueEvent = EventManager.RegisterRoutedEvent(
+        public static readonly RoutedEvent AbortSlideEditValueEvent = EventManager.RegisterRoutedEvent(
             nameof(AbortSlideEditValue), RoutingStrategy.Direct, typeof(RoutedEventHandler), typeof(SlidableNumberTextBox)
         );
 
-        public static RoutedEvent BeginTextEditValueEvent = EventManager.RegisterRoutedEvent(
+        public static readonly RoutedEvent BeginTextEditValueEvent = EventManager.RegisterRoutedEvent(
             nameof(BeginTextEditValue), RoutingStrategy.Direct, typeof(RoutedEventHandler), typeof(SlidableNumberTextBox)
         );
 
-        public static RoutedEvent EndTextEditValueEvent = EventManager.RegisterRoutedEvent(
+        public static readonly RoutedEvent EndTextEditValueEvent = EventManager.RegisterRoutedEvent(
             nameof(EndTextEditValue), RoutingStrategy.Direct, typeof(RoutedEventHandler), typeof(SlidableNumberTextBox)
         );
 
-        public static RoutedEvent AbortTextEditValueEvent = EventManager.RegisterRoutedEvent(
+        public static readonly RoutedEvent AbortTextEditValueEvent = EventManager.RegisterRoutedEvent(
             nameof(AbortTextEditValue), RoutingStrategy.Direct, typeof(RoutedEventHandler), typeof(SlidableNumberTextBox)
         );
 
@@ -230,7 +230,9 @@ namespace NiVE3.UI.Primitive
 
         void ClearFocus()
         {
+#pragma warning disable IDE0019 // なぜかひっくり返してはダメなパターンもInfoが出るので無効化
             var currentFocused = Keyboard.FocusedElement as DependencyObject;
+#pragma warning restore IDE0019 // パターン マッチングを使用します
             Keyboard.ClearFocus();
             if (currentFocused == null)
             {

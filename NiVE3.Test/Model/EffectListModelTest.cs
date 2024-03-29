@@ -35,7 +35,7 @@ namespace NiVE3.Test.Model
 
     [Export(typeof(IEffect))]
     [EffectMetadata("Test", "mes51", "Test", "Test effect", ID)]
-    public class TestEffect : IEffect
+    public sealed class TestEffect : IEffect
     {
         public const string ID = "ED0374C9-2227-445A-9C4A-DE8A4A9DFAE5";
 
@@ -43,7 +43,7 @@ namespace NiVE3.Test.Model
 
         public PropertyBase[] GetProperties()
         {
-            return Array.Empty<PropertyBase>();
+            return [];
         }
 
         public void Dispose() { }

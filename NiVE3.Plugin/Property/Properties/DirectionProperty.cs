@@ -32,8 +32,10 @@ namespace NiVE3.Plugin.Property.Properties
 
         public override PropertyControlBase CreateControl(ICompositionObject composition, ILayerObject? layer, IEffectObject? effect, IPropertyViewModel viewModel)
         {
-            var control = new DirectionPropertyControl();
-            control.DataContext = viewModel;
+            var control = new DirectionPropertyControl
+            {
+                DataContext = viewModel
+            };
             return control;
         }
 

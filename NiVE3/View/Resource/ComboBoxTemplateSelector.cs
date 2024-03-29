@@ -26,7 +26,9 @@ namespace NiVE3.View.Resource
             while (itemToCheck is not null
             and not ComboBox
             and not ComboBoxItem)
+            {
                 itemToCheck = VisualTreeHelper.GetParent(itemToCheck);
+            }
 
             // If you stopped at a ComboBoxItem, you're in the dropdown
             var inDropDown = itemToCheck is ComboBoxItem;

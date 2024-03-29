@@ -116,7 +116,7 @@ namespace NiVE3.UI.Resources
     {
         public static Color FromHex(string hex)
         {
-            var colorCode = hex.StartsWith("#") ? hex.Substring(1) : hex;
+            var colorCode = hex.StartsWith('#') ? hex[1..] : hex;
             var colors = new List<byte>();
             for (var i = 0; i < colorCode.Length; i += 2)
             {

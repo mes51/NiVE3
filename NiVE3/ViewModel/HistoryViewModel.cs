@@ -23,7 +23,7 @@ namespace NiVE3.ViewModel
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
     partial class HistoryViewModel : SingletonePaneViewModelBase
     {
-        public IEnumerable<IHistoryCommand> FirstHistoryCommand { get; } = new List<IHistoryCommand> { NewProjectHistoryCommand.Instance };
+        public IEnumerable<IHistoryCommand> FirstHistoryCommand { get; } = [NewProjectHistoryCommand.Instance];
 
         private ObservableStack<IHistoryCommand> undoCommands = new ObservableStack<IHistoryCommand>();
         [NeedWire(nameof(HistoryModel), IsOneWay = true)]
@@ -50,7 +50,7 @@ namespace NiVE3.ViewModel
         }
 
         // NOTE: なぜかStackをそのままCollectionContainer等に渡すと順番がひっくり返るため、順序を固定する
-        public IEnumerable<IHistoryCommand> ReversedRedoCommands => RedoCommands.ToArray();
+        public IEnumerable<IHistoryCommand> ReversedRedoCommands => [..RedoCommands];
 
         public ICommand UndoCommand { get; }
 

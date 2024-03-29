@@ -45,55 +45,55 @@ namespace NiVE3.PresetPlugin.Effect.Audio
 
         public PropertyBase[] GetProperties()
         {
-            return new PropertyBase[]
-            {
-                new AppendableProperty(PropertyBandPointsId, LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Audio_ParametricEqualizer_BandPoints), new AppendablePropertyItem[]
-                {
+            return
+            [
+                new AppendableProperty(PropertyBandPointsId, LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Audio_ParametricEqualizer_BandPoints),
+                [
                     new AppendablePropertyItem(PropertyBandPointPeakId, LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Audio_ParametricEqualizer_BandPoint_Peak), () =>
                     {
-                        return new PropertyGroup(PropertyBandPointPeakId, LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Audio_ParametricEqualizer_BandPoint_Peak), new PropertyBase[]
-                        {
+                        return new PropertyGroup(PropertyBandPointPeakId, LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Audio_ParametricEqualizer_BandPoint_Peak),
+                        [
                             new DoubleProperty(PropertyBandPointFrequencyId, LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Audio_ParametricEqualizer_Frequency), 800.0, 20.0, 24000.0, digit: 2, unitKey: LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Unit_Hertz)),
                             new DoubleProperty(PropertyBandPointQId, LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Audio_ParametricEqualizer_Q), 1.0, 0.1, 50.0, digit: 2),
                             new DoubleProperty(PropertyBandPointGainId, LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Audio_ParametricEqualizer_Gain), 0.0, -30.0, 30.0, digit: 2, unitKey: LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Unit_Decibel))
-                        });
+                        ]);
                     }),
                     new AppendablePropertyItem(PropertyBandPointHighPassId, LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Audio_ParametricEqualizer_BandPoint_HighPass), () =>
                     {
-                        return new PropertyGroup(PropertyBandPointHighPassId, LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Audio_ParametricEqualizer_BandPoint_HighPass), new PropertyBase[]
-                        {
+                        return new PropertyGroup(PropertyBandPointHighPassId, LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Audio_ParametricEqualizer_BandPoint_HighPass),
+                        [
                             new DoubleProperty(PropertyBandPointFrequencyId, LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Audio_ParametricEqualizer_Frequency), 100.0, 20.0, 24000.0, digit: 2, unitKey: LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Unit_Hertz)),
                             new DoubleProperty(PropertyBandPointQId, LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Audio_ParametricEqualizer_Q), 1.0, 0.1, 50.0, digit: 2)
-                        });
+                        ]);
                     }),
                     new AppendablePropertyItem(PropertyBandPointLowPassId, LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Audio_ParametricEqualizer_BandPoint_LowPass), () =>
                     {
-                        return new PropertyGroup(PropertyBandPointLowPassId, LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Audio_ParametricEqualizer_BandPoint_LowPass), new PropertyBase[]
-                        {
+                        return new PropertyGroup(PropertyBandPointLowPassId, LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Audio_ParametricEqualizer_BandPoint_LowPass),
+                        [
                             new DoubleProperty(PropertyBandPointFrequencyId, LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Audio_ParametricEqualizer_Frequency), 16000.0, 20.0, 24000.0, digit: 2, unitKey: LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Unit_Hertz)),
                             new DoubleProperty(PropertyBandPointQId, LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Audio_ParametricEqualizer_Q), 1.0, 0.1, 50.0, digit: 2)
-                        });
+                        ]);
                     }),
                     new AppendablePropertyItem(PropertyBandPointHighShelfId, LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Audio_ParametricEqualizer_BandPoint_HighShelf), () =>
                     {
-                        return new PropertyGroup(PropertyBandPointHighShelfId, LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Audio_ParametricEqualizer_BandPoint_HighShelf), new PropertyBase[]
-                        {
+                        return new PropertyGroup(PropertyBandPointHighShelfId, LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Audio_ParametricEqualizer_BandPoint_HighShelf),
+                        [
                             new DoubleProperty(PropertyBandPointFrequencyId, LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Audio_ParametricEqualizer_Frequency), 100.0, 20.0, 24000.0, digit: 2, unitKey: LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Unit_Hertz)),
                             new DoubleProperty(PropertyBandPointQId, LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Audio_ParametricEqualizer_Q), 1.0, 0.1, 50.0, digit: 2),
                             new DoubleProperty(PropertyBandPointGainId, LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Audio_ParametricEqualizer_Gain), 0.0, -30.0, 30.0, digit: 2, unitKey: LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Unit_Decibel))
-                        });
+                        ]);
                     }),
                     new AppendablePropertyItem(PropertyBandPointLowShelfId, LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Audio_ParametricEqualizer_BandPoint_LowShelf), () =>
                     {
-                        return new PropertyGroup(PropertyBandPointLowShelfId, LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Audio_ParametricEqualizer_BandPoint_LowShelf), new PropertyBase[]
-                        {
+                        return new PropertyGroup(PropertyBandPointLowShelfId, LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Audio_ParametricEqualizer_BandPoint_LowShelf),
+                        [
                             new DoubleProperty(PropertyBandPointFrequencyId, LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Audio_ParametricEqualizer_Frequency), 16000.0, 20.0, 24000.0, digit: 2, unitKey: LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Unit_Hertz)),
                             new DoubleProperty(PropertyBandPointQId, LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Audio_ParametricEqualizer_Q), 1.0, 0.1, 50.0, digit: 2),
                             new DoubleProperty(PropertyBandPointGainId, LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Audio_ParametricEqualizer_Gain), 0.0, -30.0, 30.0, digit: 2, unitKey: LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Unit_Decibel))
-                        });
+                        ]);
                     })
-                })
-            };
+                ])
+            ];
         }
 
         public NImage Process(NImage image, ROI roi, double layerTime, IPropertyObject[] properties)

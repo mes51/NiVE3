@@ -91,14 +91,14 @@ namespace NiVE3.Plugin.Interfaces
         /// コンストラクタ。最上位のグループ、かつ子グループ、が存在しない場合に使用します。
         /// </summary>
         /// <param name="sources">このグループに属するソース</param>
-        public FootageSourceGroup(IFootageSource[] sources) : this("Root", Array.Empty<FootageSourceGroup>(), sources) { }
+        public FootageSourceGroup(IFootageSource[] sources) : this("Root", [], sources) { }
 
         /// <summary>
         /// コンストラクタ。子グループ、が存在しない場合に使用します。
         /// </summary>
         /// <param name="name">グループの名前</param>
         /// <param name="sources">このグループに属するソース</param>
-        public FootageSourceGroup(string name, IFootageSource[] sources) : this(name, Array.Empty<FootageSourceGroup>(), sources) { }
+        public FootageSourceGroup(string name, IFootageSource[] sources) : this(name, [], sources) { }
 
         /// <summary>
         /// コンストラクタ

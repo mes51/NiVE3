@@ -69,7 +69,7 @@ namespace NiVE3.Plugin.Property.Control
             if (ViewModel?.CurrentTimeValue is double angle)
             {
                 var rotate = (int)(angle / 360.0);
-                angle = angle % 360.0;
+                angle %= 360.0;
 
                 IsValueChanging = true;
 
@@ -97,7 +97,7 @@ namespace NiVE3.Plugin.Property.Control
             }
 
             var rotate = (int)(angle / 360.0);
-            angle = angle % 360.0;
+            angle %= 360.0;
 
             IsValueChanging = true;
 

@@ -10,7 +10,7 @@ namespace NiVE3.UI.Resources
 {
     public class StyleCollection : StyleSelector
     {
-        public List<Style> Styles { get; set; } = new List<Style>();
+        public List<Style> Styles { get; set; } = [];
 
         public Style? DefaultStyle { get; set; }
 

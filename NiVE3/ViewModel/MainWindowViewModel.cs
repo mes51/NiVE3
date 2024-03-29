@@ -61,7 +61,7 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref isEdited, value); }
         }
 
-        public object[] ViewModels => MainRegion.Views.ToArray();
+        public object[] ViewModels => [..MainRegion.Views];
 
         public object[] SingletonViewModels => MainRegion.Views.OfType<SingletonePaneViewModelBase>().ToArray();
 
@@ -97,8 +97,10 @@ namespace NiVE3.ViewModel
 
             OpenProjectCommand = new DelegateCommand(() =>
             {
-                var open = new OpenFileDialog();
-                open.Filter = $"{LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_OpenSaveProject_Filter_Project)}(*.nvp3)|*.nvp3";
+                var open = new OpenFileDialog
+                {
+                    Filter = $"{LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_OpenSaveProject_Filter_Project)}(*.nvp3)|*.nvp3"
+                };
                 if (!(open.ShowDialog() ?? false))
                 {
                     return;
@@ -111,8 +113,10 @@ namespace NiVE3.ViewModel
             {
                 if (string.IsNullOrEmpty(ProjectModel.ProjectPath))
                 {
-                    var save = new SaveFileDialog();
-                    save.Filter = $"{LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_OpenSaveProject_Filter_Project)}(*.nvp3)|*.nvp3";
+                    var save = new SaveFileDialog
+                    {
+                        Filter = $"{LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_OpenSaveProject_Filter_Project)}(*.nvp3)|*.nvp3"
+                    };
                     if (!(save.ShowDialog() ?? false))
                     {
                         return;
@@ -211,9 +215,9 @@ namespace NiVE3.ViewModel
 
         private void PreviewModels_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
-            foreach (var newPreview in e.NewItems?.OfType<PreviewModelBase>() ?? Enumerable.Empty<PreviewModelBase>())
+            foreach (var newPreview in e.NewItems?.OfType<PreviewModelBase>() ?? [])
             {
-                var viewModel = Container.Resolve<PreviewViewModel>(new object[] { newPreview });
+                var viewModel = Container.Resolve<PreviewViewModel>([newPreview]);
                 viewModel.PaneSelected += PreviewViewModel_PaneSelected;
                 viewModel.SourceChanged += PreviewViewModel_SourceChanged;
                 viewModel.WorkareaChanged += PreviewViewModel_WorkareaChanged;

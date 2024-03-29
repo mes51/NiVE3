@@ -41,7 +41,7 @@ namespace NiVE3.Model
 
     class FootageEventArgs : EventArgs
     {
-        public FootageEventArgs(IFootageModel footage) : this(new IFootageModel[] { footage }) { }
+        public FootageEventArgs(IFootageModel footage) : this([footage]) { }
 
         public FootageEventArgs(IFootageModel[] footages)
         {

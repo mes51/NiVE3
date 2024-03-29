@@ -27,7 +27,7 @@ namespace NiVE3.Input.Special
 
         public FootageSourceGroup GetGroup()
         {
-            return new FootageSourceGroup(new IFootageSource[] { EmptyFootageSource.Instance });
+            return new FootageSourceGroup([EmptyFootageSource.Instance]);
         }
 
         public bool Load(string filePath)

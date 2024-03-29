@@ -17,9 +17,9 @@ namespace NiVE3.Model
 {
     partial class ProjectModel : BindableBase
     {
-        public ObservableCollection<CompositionModel> CompositionModels { get; } = new ObservableCollection<CompositionModel>();
+        public ObservableCollection<CompositionModel> CompositionModels { get; } = [];
 
-        public ObservableCollection<PreviewModelBase> PreviewModels { get; } = new ObservableCollection<PreviewModelBase>();
+        public ObservableCollection<PreviewModelBase> PreviewModels { get; } = [];
 
         private string projectPath = "";
         public string ProjectPath
@@ -135,6 +135,12 @@ namespace NiVE3.Model
             var json = File.ReadAllText(filePath);
             var projectData = JsonSerializer.Deserialize<ProjectData>(json);
 
+            if (projectData == null)
+            {
+                // TODO: エラー表示
+                return;
+            }
+
             foreach (var c in CompositionModels)
             {
                 OnCompositionRemoved(c);
@@ -169,7 +175,7 @@ namespace NiVE3.Model
                     CompositionModels.Add(composition);
                 }
                 
-                var compositionFootages = FootageListModel.LoadCompositionFootageFromData(projectData.FootageList, CompositionModels.ToArray());
+                var compositionFootages = FootageListModel.LoadCompositionFootageFromData(projectData.FootageList, [..CompositionModels]);
                 foreach (var composition in CompositionModels)
                 {
                     foreach (var footage in compositionFootages)

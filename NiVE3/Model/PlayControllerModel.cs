@@ -106,15 +106,12 @@ namespace NiVE3.Model
 
         RingBuffer<TimeSpan> FrameRenderingTimes { get; } = new RingBuffer<TimeSpan>(RealFrameRateAvgCount);
 
-        HistoryModel HistoryModel { get; }
-
         MultiMediaTimer Timer { get; }
 
         long? LastUpdateCurrentTime { get; set; }
 
         public PlayControllerModel(HistoryModel historyModel)
         {
-            HistoryModel = historyModel;
             Timer = new MultiMediaTimer();
             Timer.Tick += Timer_Tick;
 

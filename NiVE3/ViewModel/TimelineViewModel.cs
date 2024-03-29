@@ -283,7 +283,7 @@ namespace NiVE3.ViewModel
                         vm.SelectItemChanged += ViewModel_SelectItemChanged;
                         return vm;
                     });
-                    SelectedLayers = new ObservableCollection<LayerViewModel>();
+                    SelectedLayers = [];
                 }
             }
         }
@@ -374,7 +374,7 @@ namespace NiVE3.ViewModel
             ViewState = viewState;
             AudioPlayerModel = audioPlayerModel;
             Title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Timeline_EmptyTitle);
-            SelectedLayers = new ObservableCollection<LayerViewModel>();
+            SelectedLayers = [];
 
             WiringModel();
 
@@ -449,14 +449,13 @@ namespace NiVE3.ViewModel
                 return;
             }
 
-            var target = dropInfo.TargetItem as LayerViewModel;
 
             switch (dropInfo.Data)
             {
                 case IFootageViewModel:
                 case IFootageViewModel[]:
                     dropInfo.Effects = DragDropEffects.Copy;
-                    if (target != null)
+                    if (dropInfo.TargetItem is LayerViewModel)
                     {
                         dropInfo.DropTargetAdorner = DropTargetAdorners.Insert;
                     }
@@ -727,17 +726,11 @@ namespace NiVE3.ViewModel
             if (e.IsUserAction)
             {
                 SelectedItemType = e.SelectItemType;
-                switch (e.SelectItemType)
+                SelectTarget = e.SelectItemType switch
                 {
-                    case SelectItemType.Effect:
-                    case SelectItemType.PropertyGroup:
-                    case SelectItemType.KeyFrame:
-                        SelectTarget = e.CommandableOriginalParent;
-                        break;
-                    default:
-                        SelectTarget = null;
-                        break;
-                }
+                    SelectItemType.Effect or SelectItemType.PropertyGroup or SelectItemType.KeyFrame => e.CommandableOriginalParent,
+                    _ => null,
+                };
             }
             if (e.SelectItemType != SelectItemType.Layer && SelectedLayers != null)
             {

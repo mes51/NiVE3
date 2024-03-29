@@ -30,7 +30,7 @@ namespace NiVE3.View.Part
             InitializeComponent();
 
             DecreaseScaleCommand = new DelegateCommand(() => Value += (Maximum - Value) * 0.5);
-            IncreaseScaleCommand = new DelegateCommand(() => Value = Value * 0.5);
+            IncreaseScaleCommand = new DelegateCommand(() => Value *= 0.5);
 
             Orientation = Orientation.Horizontal;
         }

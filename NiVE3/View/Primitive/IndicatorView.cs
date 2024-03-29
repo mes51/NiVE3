@@ -29,7 +29,7 @@ namespace NiVE3.View.Primitive
                 new LineSegment(new Point(4.5, 12.0), false),
                 new LineSegment(new Point(0.0, 7.0), false)
             };
-            MarkerGeometry = new PathGeometry(new PathFigure[] { new PathFigure(new Point(0.0, 0.0), markerSegments, true) }).FreezeCurrentObject();
+            MarkerGeometry = new PathGeometry([new PathFigure(new Point(0.0, 0.0), markerSegments, true)]).FreezeCurrentObject();
 
             IsHitTestVisibleProperty.OverrideMetadata(typeof(IndicatorView), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.Inherits));
         }

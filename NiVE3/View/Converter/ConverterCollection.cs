@@ -12,7 +12,7 @@ namespace NiVE3.View.Converter
     [ContentProperty(nameof(Converters))]
     class ConverterCollection : IValueConverter
     {
-        public List<ConverterItem> Converters { get; set; } = new List<ConverterItem>();
+        public List<ConverterItem> Converters { get; set; } = [];
 
         public object? Convert(object? value, Type? targetType, object? parameter, CultureInfo culture)
         {

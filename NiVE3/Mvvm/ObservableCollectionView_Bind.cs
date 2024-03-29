@@ -53,7 +53,7 @@ namespace NiVE3.Mvvm
                         }
 
                         OnPropertyChanged(IndexerName);
-                        ViewsCollectionChanged?.Invoke(this, new NotifyCollectionViewChangedEventArgs<T, TView>(items.ToList(), e.NewStartingIndex, oldStartIndex));
+                        ViewsCollectionChanged?.Invoke(this, new NotifyCollectionViewChangedEventArgs<T, TView>([..items], e.NewStartingIndex, oldStartIndex));
                         CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Move, items.Select(t => t.View).ToList(), e.NewStartingIndex, oldStartIndex));
                     }
                     break;
@@ -97,7 +97,7 @@ namespace NiVE3.Mvvm
                     break;
                 case NotifyCollectionChangedAction.Add:
                     {
-                        var newItems = (e.NewItems?.OfType<T>() ?? Enumerable.Empty<T>()).Select<T, (T Model, TView View)>(m => (m, Transform(m))).ToList();
+                        var newItems = (e.NewItems?.OfType<T>() ?? []).Select<T, (T Model, TView View)>(m => (m, Transform(m))).ToList();
                         var newIndex = e.NewStartingIndex > -1 ? e.NewStartingIndex : Views.Count;
                         foreach (var i in newItems)
                         {
@@ -113,7 +113,7 @@ namespace NiVE3.Mvvm
                     break;
                 case NotifyCollectionChangedAction.Remove:
                     {
-                        var oldItems = (e.OldItems?.OfType<T>() ?? Enumerable.Empty<T>()).Select(m => Views.Find(t => m!.Equals(t.Model))).ToList();
+                        var oldItems = (e.OldItems?.OfType<T>() ?? []).Select(m => Views.Find(t => m!.Equals(t.Model))).ToList();
                         var oldIndex = oldItems.Count > 0 ? Views.IndexOf(oldItems[0]) : -1;
                         foreach (var i in oldItems)
                         {

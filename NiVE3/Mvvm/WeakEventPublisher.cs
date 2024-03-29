@@ -9,7 +9,7 @@ namespace NiVE3.Mvvm
 {
     class WeakEventPublisher<T> where T : EventArgs
     {
-        List<WeakEventHandler> Handlers { get; } = new List<WeakEventHandler>();
+        List<WeakEventHandler> Handlers { get; } = [];
 
         public void Subscribe(EventHandler<T> handler)
         {

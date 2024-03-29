@@ -93,18 +93,20 @@ namespace NiVE3.Plugin.Property.Properties
 
         public override PropertyControlBase CreateControl(ICompositionObject composition, ILayerObject? layer, IEffectObject? effect, IPropertyViewModel viewModel)
         {
-            var control = new VectorPropertyControl();
-            control.DataContext = viewModel;
-            control.Is3D = Is3D;
-            control.Unit = DisplayUnit;
-            control.MinimumX = MinValue.X;
-            control.MinimumY = MinValue.Y;
-            control.MinimumZ = MinValue.Z;
-            control.MaximumX = MaxValue.X;
-            control.MaximumY = MaxValue.Y;
-            control.MaximumZ = MaxValue.Z;
-            control.Separator = Separator;
-            control.UseLinkRatio = UseLinkRatio;
+            var control = new VectorPropertyControl
+            {
+                DataContext = viewModel,
+                Is3D = Is3D,
+                Unit = DisplayUnit,
+                MinimumX = MinValue.X,
+                MinimumY = MinValue.Y,
+                MinimumZ = MinValue.Z,
+                MaximumX = MaxValue.X,
+                MaximumY = MaxValue.Y,
+                MaximumZ = MaxValue.Z,
+                Separator = Separator,
+                UseLinkRatio = UseLinkRatio
+            };
             return control;
         }
 

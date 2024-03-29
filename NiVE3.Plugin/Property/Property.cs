@@ -287,7 +287,7 @@ namespace NiVE3.Plugin.Property
     {
         public static readonly AppendablePropertyItemSeparator Instance = new AppendablePropertyItemSeparator();
 
-        private AppendablePropertyItemSeparator() : base("", "", () => new PropertyGroup("", "", Array.Empty<PropertyBase>()))
+        private AppendablePropertyItemSeparator() : base("", "", () => new PropertyGroup("", "", []))
         {
             IsSeparator = true;
         }

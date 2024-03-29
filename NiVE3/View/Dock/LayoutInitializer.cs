@@ -55,12 +55,11 @@ namespace NiVE3.View.Dock
                 return;
             }
 
-            EventHandler? closed = null;
-            closed = (object? sender, EventArgs e) =>
+            void closed(object? sender, EventArgs e)
             {
                 ViewModel?.RemoveViewModelCommand?.Execute(anchorableShown.Content);
                 anchorableShown.Closed -= closed;
-            };
+            }
 
             anchorableShown.Closed += closed;
         }
@@ -88,12 +87,7 @@ namespace NiVE3.View.Dock
             if (attr != null)
             {
                 var location = attr.Layout;
-                var pane = layout.Descendents().OfType<LayoutAnchorablePane>().FirstOrDefault(p => p.Name == location.ToString());
-                if (pane == null)
-                {
-                    pane = CreateAnchorablePane(layout, location, attr.Size);
-                }
-
+                var pane = layout.Descendents().OfType<LayoutAnchorablePane>().FirstOrDefault(p => p.Name == location.ToString()) ?? CreateAnchorablePane(layout, location, attr.Size);
                 pane.Children.Add(anchorableToShow);
                 return true;
             }
@@ -112,11 +106,7 @@ namespace NiVE3.View.Dock
 
         LayoutAnchorablePane CreateAnchorablePane(LayoutRoot layout, PaneLocation location, double size)
         {
-            var parent = (LayoutAnchorablePaneGroup)layout.Manager.FindName(GetPaneName(location));
-            if (parent == null)
-            {
-                parent = CreatePaneGroup(layout, location);
-            }
+            var parent = (LayoutAnchorablePaneGroup)layout.Manager.FindName(GetPaneName(location)) ?? CreatePaneGroup(layout, location);
             var pane = new LayoutAnchorablePane
             {
                 Name = location.ToString(),
@@ -153,7 +143,7 @@ namespace NiVE3.View.Dock
         }
 
         // NOTE: (多分LayoutRoot.CollectGarbageが呼ばれるせいで)XAML上でLayoutAnchorablePaneGroupを定義してもいなくなってしまうため、必要になったら生成する
-        LayoutAnchorablePaneGroup CreatePaneGroup(LayoutRoot layout, PaneLocation location)
+        static LayoutAnchorablePaneGroup CreatePaneGroup(LayoutRoot layout, PaneLocation location)
         {
             var name = GetPaneName(location);
             var pane = new LayoutAnchorablePaneGroup { Orientation = Orientation.Vertical };

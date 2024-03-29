@@ -34,12 +34,12 @@ namespace NiVE3.PresetPlugin.Effect.Blur
 
         public PropertyBase[] GetProperties()
         {
-            return new PropertyBase[]
-            {
+            return
+            [
                 new DoubleProperty(PropertyAmountId, LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Blur_BoxBlur_Amount), 0.0, 0.0, 10000.0, digit: 2),
                 new DoubleProperty(PropertyRepeatId, LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Blur_BoxBlur_Repeat), 3, 1, 50, digit: 0),
                 new EnumProperty(PropertyDirectionId, LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Blur_BoxBlur_Direction), typeof(BlurDirection), typeof(LanguageResourceDictionary), BlurDirection.HorizontalAndVertical, selectBoxWidth: 90.0)
-            };
+            ];
         }
 
         public NImage Process(NImage image, ROI roi, double layerTime, IPropertyObject[] properties)

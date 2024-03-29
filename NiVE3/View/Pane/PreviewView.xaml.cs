@@ -35,8 +35,8 @@ namespace NiVE3.View.Pane
 
         public const double UseImageInterpolationThreshold = 200.0;
 
-        public static readonly double[] ScaleList = new double[]
-        {
+        public static readonly double[] ScaleList =
+        [
             StretchPreview,
             StretchPreviewMax100,
             SeparatorScale,
@@ -54,15 +54,15 @@ namespace NiVE3.View.Pane
             1600.0,
             3200.0,
             6400.0
-        };
+        ];
 
-        public static readonly int[] DownScaleList = new int[]
-        {
+        public static readonly int[] DownScaleList =
+        [
             1,
             2,
             3,
             4
-        };
+        ];
 
         public static readonly DependencyProperty IsStretchPreviewProperty = DependencyProperty.Register(
             nameof(IsStretchPreview),

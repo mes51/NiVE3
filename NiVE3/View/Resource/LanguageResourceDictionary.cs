@@ -852,7 +852,7 @@ namespace NiVE3.View.Resource
                 .Where(t => t.Item2 != null)
                 .ToDictionary(t => t.Name, t => Tuple.Create(t.Item2!.DefaultValue, Version.Parse(t.Item2!.FromVersion)));
 
-            Dictionary = new LanguageResourceDictionary();
+            Dictionary = [];
         }
 
         public LanguageResourceDictionary()

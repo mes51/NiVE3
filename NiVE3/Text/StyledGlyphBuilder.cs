@@ -14,7 +14,7 @@ namespace NiVE3.Text
 {
     class StyledGlyphBuilder : IGlyphRenderer
     {
-        List<GlyphPath> Glyphs { get; } = new List<GlyphPath>();
+        List<GlyphPath> Glyphs { get; } = [];
 
         Vector2 CurrentPoint { get; set; }
 
@@ -83,8 +83,7 @@ namespace NiVE3.Text
 
             var transform = Matrix3x2.Identity;
 
-            var textRun = CurrentParameters.TextRun as ExtendedTextRun;
-            if (textRun != null)
+            if (CurrentParameters.TextRun is ExtendedTextRun textRun)
             {
                 var baseAnchorPointX = bounds.X + bounds.Width * BaseAnchorPointRate.X * textRun.HorizontalScale * 0.01F;
                 var baseAnchorPointY = bounds.Y + bounds.Height * BaseAnchorPointRate.Y * textRun.VerticalScale * 0.01F;
@@ -180,21 +179,18 @@ namespace NiVE3.Text
             }
 
             var textRun = CurrentParameters.TextRun as ExtendedTextRun;
-            if (textRun == null)
+            textRun ??= new ExtendedTextRun
             {
-                textRun = new ExtendedTextRun
-                {
-                    Start = CurrentParameters.TextRun.Start,
-                    End = CurrentParameters.TextRun.End,
-                    Font = CurrentParameters.TextRun.Font,
-                    TextAttributes = CurrentParameters.TextRun.TextAttributes,
-                    TextDecorations = CurrentParameters.TextRun.TextDecorations,
-                    VerticalScale = 100.0F,
-                    HorizontalScale = 100.0F,
-                    TextLineDrawOrder = TextLineDrawOrder.BeforeFill,
-                    FillColor = Vector4.One
-                };
-            }
+                Start = CurrentParameters.TextRun.Start,
+                End = CurrentParameters.TextRun.End,
+                Font = CurrentParameters.TextRun.Font,
+                TextAttributes = CurrentParameters.TextRun.TextAttributes,
+                TextDecorations = CurrentParameters.TextRun.TextDecorations,
+                VerticalScale = 100.0F,
+                HorizontalScale = 100.0F,
+                TextLineDrawOrder = TextLineDrawOrder.BeforeFill,
+                FillColor = Vector4.One
+            };
             Glyphs.Add(new GlyphPath(Builder.Build(), textRun));
         }
 
@@ -246,7 +242,7 @@ namespace NiVE3.Text
 
         public GlyphPath[] GetGlyphs()
         {
-            return Glyphs.ToArray();
+            return [..Glyphs];
         }
 
         public GlyphPath[] GetRenderableGlyhps()
@@ -261,6 +257,6 @@ namespace NiVE3.Text
 
         public ISimplePath[] FlattenedOutlinePath { get; } = TextRun.TextLineWidth > 0.0F ?
             Path.GenerateOutline(TextRun.TextLineWidth).Flatten().Where(p => p.Points.Length > 1).ToArray() :
-            Array.Empty<ISimplePath>();
+            [];
     }
 }

@@ -43,7 +43,7 @@ namespace NiVE3.Property.Types
             }
             else if (otherValue is string s)
             {
-                convertedValue = new StyledText(s, TextStyle.Empty, Array.Empty<TextStyleRun>());
+                convertedValue = new StyledText(s, TextStyle.Empty, []);
                 return true;
             }
             else

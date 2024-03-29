@@ -103,10 +103,7 @@ namespace NiVE3.Model
                 return;
             }
 
-            if (CurrentGroup == null)
-            {
-                CurrentGroup = new GroupedHistoryCommand(name);
-            }
+            CurrentGroup ??= new GroupedHistoryCommand(name);
             GroupNestCount++;
 
             HistoryGroupChangingPublisher.Publish(this, EventArgs.Empty);
@@ -218,7 +215,7 @@ namespace NiVE3.Model
         {
             public string Name { get; }
 
-            List<IHistoryCommand> Commands { get; } = new List<IHistoryCommand>();
+            List<IHistoryCommand> Commands { get; } = [];
 
             public GroupedHistoryCommand(string name)
             {

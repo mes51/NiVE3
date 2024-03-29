@@ -40,7 +40,7 @@ namespace NiVE3.Text
                     elements.Add(s);
                 }
             }
-            TextElements = elements.ToArray();
+            TextElements = [..elements];
 
             var count = 0;
             var lines = new List<LineExtendedTextRun>();
@@ -55,7 +55,7 @@ namespace NiVE3.Text
                 count += lineElementCount + 1;
             }
 
-            Lines = lines.ToArray();
+            Lines = [..lines];
             TotalElementCountWithoutNewLine = TotalElementCount - Lines.Length + 1;
         }
 
@@ -75,7 +75,7 @@ namespace NiVE3.Text
                     elements.Add(s);
                 }
             }
-            TextElements = elements.ToArray();
+            TextElements = [..elements];
 
             var count = 0;
             var lines = new List<LineExtendedTextRun>();
@@ -90,7 +90,7 @@ namespace NiVE3.Text
                 count += lineElementCount + 1;
             }
 
-            Lines = lines.ToArray();
+            Lines = [..lines];
             TotalElementCountWithoutNewLine = TotalElementCount - Lines.Length + 1;
         }
 
@@ -133,7 +133,7 @@ namespace NiVE3.Text
                                 var asciiRune = new Rune((int)(unchecked((uint)newCode) % 128));
                                 if (Rune.IsControl(asciiRune))
                                 {
-                                    sb.Append(" ");
+                                    sb.Append(' ');
                                 }
                                 else
                                 {
@@ -219,7 +219,7 @@ namespace NiVE3.Text
                 result.Add(currentTextRun);
             }
 
-            return result.ToArray();
+            return [..result];
         }
 
         public ExtendedTextRun[] GetAllRuns()
@@ -241,44 +241,30 @@ namespace NiVE3.Text
     {
         public ExtendedTextRun[] TextRuns { get; }
 
-        string LineText { get; }
-
         public LineExtendedTextRun(string lineText, int startIndex, TextStyle defaultStyle, TextStyleRun[] styles)
         {
-            LineText = lineText;
-
             var elementCount = new StringInfo(lineText).LengthInTextElements;
             var textRuns = new List<ExtendedTextRun>();
             for (var i = 0; i < elementCount; i++)
             {
-                var style = styles.FirstOrDefault(s => s.Start <= i && s.End > i);
-                if (style == null)
-                {
-                    style = new TextStyleRun(i + startIndex, i + startIndex + 1, defaultStyle);
-                }
+                var style = styles.FirstOrDefault(s => s.Start <= i && s.End > i) ?? new TextStyleRun(i + startIndex, i + startIndex + 1, defaultStyle);
                 textRuns.Add(style.ToTextRun());
             }
 
-            TextRuns = textRuns.ToArray();
+            TextRuns = [..textRuns];
         }
 
         public LineExtendedTextRun(string lineText, int startIndex, TextStyle defaultStyle, ExtendedTextRun[] styles)
         {
-            LineText = lineText;
-
             var elementCount = new StringInfo(lineText).LengthInTextElements;
             var textRuns = new List<ExtendedTextRun>();
             for (var i = 0; i < elementCount; i++)
             {
-                var style = styles.FirstOrDefault(s => s.Start <= i && s.End > i);
-                if (style == null)
-                {
-                    style = new TextStyleRun(i + startIndex, i + startIndex + 1, defaultStyle).ToTextRun();
-                }
+                var style = styles.FirstOrDefault(s => s.Start <= i && s.End > i) ?? new TextStyleRun(i + startIndex, i + startIndex + 1, defaultStyle).ToTextRun();
                 textRuns.Add(style);
             }
 
-            TextRuns = textRuns.ToArray();
+            TextRuns = [..textRuns];
         }
     }
 }

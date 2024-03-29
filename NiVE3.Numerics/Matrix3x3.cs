@@ -32,15 +32,15 @@ namespace NiVE3.Numerics
         Vector3 Y;
         Vector3 Z;
 
-        public float M11 => X.X;
-        public float M12 => X.Y;
-        public float M13 => X.Z;
-        public float M21 => Y.X;
-        public float M22 => Y.Y;
-        public float M23 => Y.Z;
-        public float M31 => Z.X;
-        public float M32 => Z.Y;
-        public float M33 => Z.Z;
+        public readonly float M11 => X.X;
+        public readonly float M12 => X.Y;
+        public readonly float M13 => X.Z;
+        public readonly float M21 => Y.X;
+        public readonly float M22 => Y.Y;
+        public readonly float M23 => Y.Z;
+        public readonly float M31 => Z.X;
+        public readonly float M32 => Z.Y;
+        public readonly float M33 => Z.Z;
 
         public Matrix3x3(float m11, float m12, float m21, float m22, float m31, float m32) : this(m11, m12, 0.0F, m21, m22, 0.0F, m31, m32, 1.0F) { }
 
@@ -55,14 +55,14 @@ namespace NiVE3.Numerics
             Z = new Vector3(m31, m32, m33);
         }
 
-        public bool IsIdentity => Equals(Identity);
+        public readonly bool IsIdentity => Equals(Identity);
 
-        public bool Equals(Matrix3x3 other)
+        public readonly bool Equals(Matrix3x3 other)
         {
             return X == other.X && Y == other.Y && Z == other.Z;
         }
 
-        public override bool Equals([NotNullWhen(true)] object? obj)
+        public override readonly bool Equals([NotNullWhen(true)] object? obj)
         {
             if (obj is Matrix3x3 m)
             {
@@ -74,7 +74,7 @@ namespace NiVE3.Numerics
             }
         }
 
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
             var hashCode = new HashCode();
 
@@ -85,7 +85,7 @@ namespace NiVE3.Numerics
             return hashCode.ToHashCode();
         }
 
-        public override string ToString()
+        public override readonly string ToString()
         {
             return $@"{{
     {{ M11: {M11}, M12: {M12}, M13: {M13} }}
@@ -102,7 +102,7 @@ namespace NiVE3.Numerics
         /// <param name="x">Xの移動距離</param>
         /// <param name="y">Yの移動距離</param>
         /// <returns>計算後の行列</returns>
-        public Matrix3x3 Translate(float x, float y)
+        public readonly Matrix3x3 Translate(float x, float y)
         {
             return this * new Matrix3x3(1.0F, 0.0F, 0.0F, 1.0F, x, y);
         }
@@ -112,7 +112,7 @@ namespace NiVE3.Numerics
         /// </summary>
         /// <param name="angle">回転角度</param>
         /// <returns>計算後の行列</returns>
-        public Matrix3x3 Rotate(float angle)
+        public readonly Matrix3x3 Rotate(float angle)
         {
             var rad = (float)(Math.PI / 180.0 * angle);
             var cos = MathF.Cos(rad);
@@ -127,7 +127,7 @@ namespace NiVE3.Numerics
         /// <param name="w">Xの比</param>
         /// <param name="h">Yの比</param>
         /// <returns>計算後の行列</returns>
-        public Matrix3x3 Scale(float w, float h)
+        public readonly Matrix3x3 Scale(float w, float h)
         {
             return this * new Matrix3x3(w, 0.0F, 0.0F, h, 0.0F, 0.0F);
         }
@@ -138,7 +138,7 @@ namespace NiVE3.Numerics
         /// <param name="x">変換する点のX座標</param>
         /// <param name="y">変換する点のY座標</param>
         /// <returns>変換後の点</returns>
-        public (float x, float y) Transform(float x, float y)
+        public readonly (float x, float y) Transform(float x, float y)
         {
             var p = new Vector3(x, y, 1.0F);
             var result = p.X * X + p.Y * Y + Z;
@@ -150,13 +150,13 @@ namespace NiVE3.Numerics
         /// </summary>
         /// <param name="v">変換する点</param>
         /// <returns>変換後の点</returns>
-        public Vector2 Transform(Vector2 v)
+        public readonly Vector2 Transform(Vector2 v)
         {
             var p = new Vector3(v, 1.0F);
             return (p.X * X + p.Y * Y + Z).AsVector128().AsVector2();
         }
 
-        float Determinant()
+        readonly float Determinant()
         {
             return M11 * M22 * M33 + M12 * M23 * M31 + M13 * M21 * M32 - (M13 * M22 * M31 + M32 * M23 * M11 + M33 * M21 * M12);
         }

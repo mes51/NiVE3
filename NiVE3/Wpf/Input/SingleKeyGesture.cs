@@ -29,7 +29,7 @@ namespace NiVE3.Wpf.Input
         {
             if (inputEventArgs is KeyEventArgs e)
             {
-                if (!(e.OriginalSource is TextBoxBase))
+                if (e.OriginalSource is not TextBoxBase)
                 {
                     return (int)Key == (int)e.Key &&
                         !Keyboard.IsKeyDown(Key.LeftCtrl) &&

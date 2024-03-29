@@ -110,7 +110,6 @@ namespace NiVE3.Wpf.Behavior
         ~WindowGestureBehavior()
         {
             Unload();
-            GC.SuppressFinalize(this);
         }
     }
 }

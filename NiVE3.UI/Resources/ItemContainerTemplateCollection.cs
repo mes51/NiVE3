@@ -15,7 +15,7 @@ namespace NiVE3.UI.Resources
     {
         static readonly DataTemplate EmptyTemplate;
 
-        public List<DataTemplate> Templates { get; set; } = new List<DataTemplate>();
+        public List<DataTemplate> Templates { get; set; } = [];
 
         /// <summary>
         /// テンプレートが存在しなかったとき、デフォルトではなく空のテンプレートを返すかどうか

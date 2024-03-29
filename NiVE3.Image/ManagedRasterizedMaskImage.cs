@@ -24,7 +24,7 @@ namespace NiVE3.Image
             Data = ArrayPool<float>.Shared.Rent(length);
             if (needClear)
             {
-                Data.AsSpan().Fill(0.0F);
+                Data.AsSpan().Clear();
             }
         }
 
@@ -53,7 +53,7 @@ namespace NiVE3.Image
         public override RasterizedMaskImage Copy()
         {
             var result = new ManagedRasterizedMaskImage(Width, Height, false);
-            Data.AsSpan(0, DataLength).CopyTo(result.GetDataSpan().Slice(0, DataLength));
+            Data.AsSpan(0, DataLength).CopyTo(result.GetDataSpan()[..DataLength]);
             result.Origin = Origin;
             return result;
         }

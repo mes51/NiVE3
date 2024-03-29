@@ -90,7 +90,7 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref currentTime, value); }
         }
 
-        private ObservableCollection<KeyFrame> keyFrames = new ObservableCollection<KeyFrame>();
+        private ObservableCollection<KeyFrame> keyFrames = [];
         [NeedWire(nameof(PropertyModel), IsOneWay = true)]
         public ObservableCollection<KeyFrame> KeyFrames
         {
@@ -138,7 +138,7 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref hasKeyFrame, value); }
         }
 
-        private ObservableCollection<int> selectedKeyFrames = new ObservableCollection<int>();
+        private ObservableCollection<int> selectedKeyFrames = [];
         public ObservableCollection<int> SelectedKeyFrameIds
         {
             get { return selectedKeyFrames; }
@@ -196,7 +196,7 @@ namespace NiVE3.ViewModel
             PropertyModel = propertyModel;
             Property = propertyModel.Property;
             ViewState = propertyModel.CreateState(this);
-            SelectedKeyFrameIds = new ObservableCollection<int>();
+            SelectedKeyFrameIds = [];
 
             BeginEditCommand = new RequerySuggestedCommand(() =>
             {
@@ -529,7 +529,7 @@ namespace NiVE3.ViewModel
 
         public AppendablePropertyItem[] Items => ((AppendableProperty)Property).Items;
 
-        private ObservableCollection<IInternalPropertyViewModel> selectedChildren = new ObservableCollection<IInternalPropertyViewModel>();
+        private ObservableCollection<IInternalPropertyViewModel> selectedChildren = [];
         public ObservableCollection<IInternalPropertyViewModel> SelectedChildren
         {
             get { return selectedChildren; }

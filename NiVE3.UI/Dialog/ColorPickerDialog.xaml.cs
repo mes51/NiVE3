@@ -212,8 +212,10 @@ namespace NiVE3.UI.Dialog
                         };
                         barFunc = y =>
                         {
-                            var hsv = new HSV(Colors.Red);
-                            hsv.H = 360.0 - (y / ColorBar.ActualHeight) * 360.0;
+                            var hsv = new HSV(Colors.Red)
+                            {
+                                H = 360.0 - (y / ColorBar.ActualHeight) * 360.0
+                            };
                             return hsv.ToRgb();
                         };
                     }

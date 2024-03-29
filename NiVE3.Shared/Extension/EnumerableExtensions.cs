@@ -69,7 +69,7 @@ namespace NiVE3.Shared.Extension
                 if (group.Count > 0 && !currentKey.Equals(key))
                 {
                     yield return group;
-                    group = new List<T>();
+                    group = [];
                 }
 
                 group.Add(e);

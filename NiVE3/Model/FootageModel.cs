@@ -292,7 +292,7 @@ namespace NiVE3.Model
             set { SetProperty(ref sortIsAscending, value); }
         }
 
-        private ObservableCollection<IFootageModel> children = new ObservableCollection<IFootageModel>();
+        private ObservableCollection<IFootageModel> children = [];
         public ObservableCollection<IFootageModel> Children
         {
             get { return children; }

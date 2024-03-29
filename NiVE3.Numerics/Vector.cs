@@ -202,6 +202,18 @@ namespace NiVE3.Numerics
         {
             return new Vector2d(v.X, v.Y);
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(Vector2d a, Vector2d b)
+        {
+            return a.Equals(b);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator !=(Vector2d a, Vector2d b)
+        {
+            return !a.Equals(b);
+        }
     }
 
     public readonly struct Vector3d : IEquatable<Vector3d>

@@ -43,57 +43,33 @@ namespace NiVE3.Image.Drawing
                 return back;
             }
 
-            switch (blendMode)
+            return blendMode switch
             {
-                case BlendMode.Replace:
-                    return front;
-                case BlendMode.Add:
-                    return Add(back, front);
-                case BlendMode.Subtract:
-                    return Subtract(back, front);
-                case BlendMode.Multiply:
-                    return Multiply(back, front);
-                case BlendMode.Screen:
-                    return Screen(back, front);
-                case BlendMode.Overlay:
-                    return Overlay(back, front);
-                case BlendMode.HardLight:
-                    return HardLight(back, front);
-                case BlendMode.SoftLight:
-                    return SoftLight(back, front);
-                case BlendMode.VividLight:
-                    return VividLight(back, front);
-                case BlendMode.LinearLight:
-                    return LinearLight(back, front);
-                case BlendMode.PinLight:
-                    return PinLight(back, front);
-                case BlendMode.ColorDodge:
-                    return ColorDodge(back, front);
-                case BlendMode.LinearDodge:
-                    return LinearDodge(back, front);
-                case BlendMode.ColorBurn:
-                    return ColorBurn(back, front);
-                case BlendMode.LinearBurn:
-                    return LinearBurn(back, front);
-                case BlendMode.Darken:
-                    return Darken(back, front);
-                case BlendMode.Lighten:
-                    return Lighten(back, front);
-                case BlendMode.Difference:
-                    return Difference(back, front);
-                case BlendMode.Exclusion:
-                    return Exclusion(back, front);
-                case BlendMode.Hue:
-                    return Hue(back, front);
-                case BlendMode.Saturation:
-                    return Saturation(back, front);
-                case BlendMode.Color:
-                    return Color(back, front);
-                case BlendMode.Luminance:
-                    return Luminance(back, front);
-                default:
-                    return Normal(back, front);
-            }
+                BlendMode.Replace => front,
+                BlendMode.Add => Add(back, front),
+                BlendMode.Subtract => Subtract(back, front),
+                BlendMode.Multiply => Multiply(back, front),
+                BlendMode.Screen => Screen(back, front),
+                BlendMode.Overlay => Overlay(back, front),
+                BlendMode.HardLight => HardLight(back, front),
+                BlendMode.SoftLight => SoftLight(back, front),
+                BlendMode.VividLight => VividLight(back, front),
+                BlendMode.LinearLight => LinearLight(back, front),
+                BlendMode.PinLight => PinLight(back, front),
+                BlendMode.ColorDodge => ColorDodge(back, front),
+                BlendMode.LinearDodge => LinearDodge(back, front),
+                BlendMode.ColorBurn => ColorBurn(back, front),
+                BlendMode.LinearBurn => LinearBurn(back, front),
+                BlendMode.Darken => Darken(back, front),
+                BlendMode.Lighten => Lighten(back, front),
+                BlendMode.Difference => Difference(back, front),
+                BlendMode.Exclusion => Exclusion(back, front),
+                BlendMode.Hue => Hue(back, front),
+                BlendMode.Saturation => Saturation(back, front),
+                BlendMode.Color => Color(back, front),
+                BlendMode.Luminance => Luminance(back, front),
+                _ => Normal(back, front),
+            };
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -191,34 +191,34 @@ namespace NiVE3.View.Part
         static DurationBar()
         {
             var lineFigure = new PathFigure { IsClosed = true, StartPoint = new Point(BeforeZeroHatchSize - BeforeZeroHatchWidth, 0.0) };
-            lineFigure.Segments.Add(new PolyLineSegment(new Point[]
-            {
+            lineFigure.Segments.Add(new PolyLineSegment(
+            [
                 new Point(BeforeZeroHatchSize, 0.0),
                 new Point(BeforeZeroHatchSize, BeforeZeroHatchWidth),
                 new Point(BeforeZeroHatchWidth, BeforeZeroHatchSize),
                 new Point(0.0, BeforeZeroHatchSize),
                 new Point(0.0, BeforeZeroHatchSize - BeforeZeroHatchWidth)
-            }, false));
+            ], false));
             var topCornerFigure = new PathFigure { IsClosed = true, StartPoint = new Point() };
-            topCornerFigure.Segments.Add(new PolyLineSegment(new Point[]
-            {
+            topCornerFigure.Segments.Add(new PolyLineSegment(
+            [
                 new Point(),
                 new Point(BeforeZeroHatchWidth, 0.0),
                 new Point(0.0, BeforeZeroHatchWidth)
-            }, false));
+            ], false));
             var bottomCornerFigure = new PathFigure { IsClosed = true, StartPoint = new Point(BeforeZeroHatchSize, BeforeZeroHatchSize) };
-            bottomCornerFigure.Segments.Add(new PolyLineSegment(new Point[]
-            {
+            bottomCornerFigure.Segments.Add(new PolyLineSegment(
+            [
                 new Point(BeforeZeroHatchSize, BeforeZeroHatchSize),
                 new Point(BeforeZeroHatchSize - BeforeZeroHatchWidth, BeforeZeroHatchSize),
                 new Point(BeforeZeroHatchSize, BeforeZeroHatchSize - BeforeZeroHatchWidth)
-            }, false));
+            ], false));
 
             BeforeZeroBrush = new DrawingBrush
             {
                 Drawing = new GeometryDrawing
                 {
-                    Geometry = new PathGeometry(new PathFigure[] { topCornerFigure, lineFigure, bottomCornerFigure }),
+                    Geometry = new PathGeometry([topCornerFigure, lineFigure, bottomCornerFigure]),
                     Brush = new SolidColorBrush(Color.FromArgb(192, 255, 255, 255))
                 },
                 Viewport = new Rect(0.0, 0.0, BeforeZeroHatchSize, BeforeZeroHatchSize),

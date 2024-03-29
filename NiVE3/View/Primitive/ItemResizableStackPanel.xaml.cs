@@ -140,7 +140,7 @@ namespace NiVE3.View.Primitive
 
             ColumnStopper = new ColumnDefinition();
             RowStopper = new RowDefinition();
-            Children = new ObservableCollection<UIElement>();
+            Children = [];
             Children.CollectionChanged += Children_CollectionChanged;
         }
 
@@ -442,7 +442,7 @@ namespace NiVE3.View.Primitive
             BindingOperations.SetBinding(row, RowDefinition.HeightProperty, binding);
         }
 
-        void BindSplitterLocked(UIElement child, GridSplitter splitter)
+        static void BindSplitterLocked(UIElement child, GridSplitter splitter)
         {
             var binding = new Binding
             {
@@ -459,7 +459,7 @@ namespace NiVE3.View.Primitive
             switch (e.Action)
             {
                 case NotifyCollectionChangedAction.Add:
-                    foreach (var (c, i) in (e.NewItems?.Cast<UIElement>() ?? Enumerable.Empty<UIElement>()).ZipWithIndex())
+                    foreach (var (c, i) in (e.NewItems?.Cast<UIElement>() ?? []).ZipWithIndex())
                     {
                         InsertChild(c, e.NewStartingIndex + i);
                     }
@@ -471,7 +471,7 @@ namespace NiVE3.View.Primitive
                     }
                     break;
                 case NotifyCollectionChangedAction.Remove:
-                    foreach (var c in (e.OldItems?.Cast<UIElement>() ?? Enumerable.Empty<UIElement>()))
+                    foreach (var c in (e.OldItems?.Cast<UIElement>() ?? []))
                     {
                         RemoveChild(c);
                     }

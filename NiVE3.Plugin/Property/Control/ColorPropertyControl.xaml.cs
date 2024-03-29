@@ -41,11 +41,13 @@ namespace NiVE3.Plugin.Property.Control
                     return;
                 }
 
-                var dialog = new ColorPickerDialog((Vector4)(viewModel.CurrentTimeValue ?? Vector4.Zero));
-                dialog.Owner = Application.Current.MainWindow;
-                dialog.Title = DialogTitle;
-                dialog.OKButtonText = OKButtonText;
-                dialog.CancelButtonText = CancelButtonText;
+                var dialog = new ColorPickerDialog((Vector4)(viewModel.CurrentTimeValue ?? Vector4.Zero))
+                {
+                    Owner = Application.Current.MainWindow,
+                    Title = DialogTitle,
+                    OKButtonText = OKButtonText,
+                    CancelButtonText = CancelButtonText
+                };
                 if (dialog.ShowDialog() ?? false)
                 {
                     viewModel.BeginEditCommand.Execute(null);

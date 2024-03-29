@@ -20,7 +20,7 @@ namespace NiVE3.Data.Json.Project
         [JsonConverter(typeof(PluginOptionValueObjectConverter))]
         public object? InputOption { get; set; }
 
-        public SourceData[] Sources { get; set; } = Array.Empty<SourceData>();
+        public SourceData[] Sources { get; set; } = [];
     }
 
     public class SourceData

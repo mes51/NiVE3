@@ -317,7 +317,6 @@ partial class {{typeSymbol.Name}}
         {
             var binderClasses = new StringBuilder();
             var bindingCodes = new StringBuilder();
-            var addHandlerCodes = new StringBuilder();
             foreach (var h in handlers)
             {
                 var modelHandler = new StringBuilder();

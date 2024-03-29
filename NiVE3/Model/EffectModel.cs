@@ -39,7 +39,7 @@ namespace NiVE3.Model
             set { SetProperty(ref isEnable, value); }
         }
 
-        private ObservableCollection<IPropertyModel> properties = new ObservableCollection<IPropertyModel>();
+        private ObservableCollection<IPropertyModel> properties = [];
         public ObservableCollection<IPropertyModel> Properties
         {
             get { return properties; }

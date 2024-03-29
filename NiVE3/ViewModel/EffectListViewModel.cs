@@ -18,9 +18,11 @@ using NiVE3.Plugin.Attributes;
 namespace NiVE3.ViewModel
 {
     [PaneLocation(PaneLocation.Left2Top)]
-    class EffectListViewModel : SingletonePaneViewModelBase, IDragSource
+    partial class EffectListViewModel : SingletonePaneViewModelBase, IDragSource
     {
-        static readonly Regex FilterSeparatorRegex = new Regex("\\s+", RegexOptions.Compiled);
+        [GeneratedRegex("\\s+", RegexOptions.Compiled)]
+        private static partial Regex GenerateFilterSeparatorRegex();
+        static readonly Regex FilterSeparatorRegex = GenerateFilterSeparatorRegex();
 
         private string filterText = "";
         public string FilterText
@@ -29,7 +31,7 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref filterText, value); }
         }
 
-        private ObservableCollection<Tuple<string, string, Guid>> effects = new ObservableCollection<Tuple<string, string, Guid>>();
+        private ObservableCollection<Tuple<string, string, Guid>> effects = [];
         public ObservableCollection<Tuple<string, string, Guid>> Effects
         {
             get { return effects; }

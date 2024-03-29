@@ -102,7 +102,7 @@ namespace NiVE3.Model
                     }
                 }
 
-                LoadedSourceModels = sources.ToArray();
+                LoadedSourceModels = [..sources];
             }
 
             public void Redo()

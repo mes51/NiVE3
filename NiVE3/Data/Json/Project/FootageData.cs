@@ -15,11 +15,11 @@ namespace NiVE3.Data.Json.Project
 
         public bool SortIsAscending { get; set; }
 
-        public InputData[] Inputs { get; set; } = Array.Empty<InputData>();
+        public InputData[] Inputs { get; set; } = [];
 
-        public InputData[] Placeholders { get; set; } = Array.Empty<InputData>();
+        public InputData[] Placeholders { get; set; } = [];
 
-        public FootageData[] Footages { get; set; } = Array.Empty<FootageData>();
+        public FootageData[] Footages { get; set; } = [];
     }
 
     public class FootageData

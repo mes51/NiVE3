@@ -22,7 +22,7 @@ namespace NiVE3.Test.Model
 
             var filePath = GenerateFilePath("not_found_file.test1");
             model.LoadFile(filePath, null);
-            Assert.That(model.Footages.Count, Is.Zero);
+            Assert.That(model.Footages, Is.Empty);
         }
 
         [Test]
@@ -35,7 +35,7 @@ namespace NiVE3.Test.Model
             {
                 File.Create(filePath);
                 model.LoadFile(filePath, null);
-                Assert.That(model.Footages.Count, Is.Zero);
+                Assert.That(model.Footages, Is.Empty);
             }
             finally
             {
@@ -58,7 +58,7 @@ namespace NiVE3.Test.Model
             {
                 File.Create(filePath);
                 model.LoadFile(filePath, null);
-                Assert.That(model.Footages.Count, Is.EqualTo(1));
+                Assert.That(model.Footages, Has.Count.EqualTo(1));
             }
             finally
             {
@@ -81,7 +81,7 @@ namespace NiVE3.Test.Model
             {
                 File.Create(filePath);
                 model.LoadFile(filePath, null);
-                Assert.That(model.Footages.Count, Is.EqualTo(1));
+                Assert.That(model.Footages, Has.Count.EqualTo(1));
                 Assert.That(model.Footages.FirstOrDefault(f => f is FootageFolderModel)?.Children?.Count, Is.EqualTo(3));
                 Assert.That(model.Footages.FirstOrDefault(f => f is FootageFolderModel)?.Children?.FirstOrDefault(c => c is FootageFolderModel)?.Children?.Count, Is.EqualTo(1));
             }
@@ -130,7 +130,7 @@ namespace NiVE3.Test.Model
 
         public FootageSourceGroup GetGroup()
         {
-            return new FootageSourceGroup(new IFootageSource[] { new TestFootageSource("") });
+            return new FootageSourceGroup([new TestFootageSource("")]);
         }
 
         public bool Load(string filePath)
@@ -153,7 +153,7 @@ namespace NiVE3.Test.Model
 
         public FootageSourceGroup GetGroup()
         {
-            return new FootageSourceGroup("Root", new FootageSourceGroup[] { new FootageSourceGroup("Child", new IFootageSource[] { new TestFootageSource("3") }) }, new IFootageSource[] { new TestFootageSource("1"), new TestFootageSource("2") });
+            return new FootageSourceGroup("Root", [new FootageSourceGroup("Child", [new TestFootageSource("3")])], [new TestFootageSource("1"), new TestFootageSource("2")]);
         }
 
         public bool Load(string filePath)

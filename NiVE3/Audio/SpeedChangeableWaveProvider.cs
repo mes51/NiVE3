@@ -43,7 +43,7 @@ namespace NiVE3.Audio
             }
         }
 
-        public float[] Audio { get; private set; } = Array.Empty<float>();
+        public float[] Audio { get; private set; } = [];
 
         WdlResampler Resampler { get; }
 

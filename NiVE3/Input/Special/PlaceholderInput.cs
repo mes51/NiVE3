@@ -65,7 +65,7 @@ namespace NiVE3.Input.Special
             {
                 source = new PlaceholderOtherFootageSource(SourceId);
             }
-            return new FootageSourceGroup(new IFootageSource[] { source});
+            return new FootageSourceGroup([source]);
         }
 
         public bool Load(string filePath)
@@ -94,8 +94,8 @@ namespace NiVE3.Input.Special
     {
         static readonly Vector4 Black0 = new Vector4(0.0627450980392157F, 0.0627450980392157F, 0.0627450980392157F, 1.0F);
 
-        static readonly Vector4[] Top7BarColors = new Vector4[]
-        {
+        static readonly Vector4[] Top7BarColors =
+        [
             new Vector4(0.705882352941177F, 0.705882352941177F, 0.705882352941177F, 1.0F),
             new Vector4(0.0627450980392157F, 0.705882352941177F, 0.705882352941177F, 1.0F),
             new Vector4(0.705882352941177F, 0.705882352941177F, 0.0627450980392157F, 1.0F),
@@ -103,22 +103,22 @@ namespace NiVE3.Input.Special
             new Vector4(0.705882352941177F, 0.0627450980392157F, 0.705882352941177F, 1.0F),
             new Vector4(0.0627450980392157F, 0.0627450980392157F, 0.705882352941177F, 1.0F),
             new Vector4(0.705882352941177F, 0.0627450980392157F, 0.0627450980392157F, 1.0F),
-        };
+        ];
 
-        static readonly Vector4[] Bottom4BarColors = new Vector4[]
-        {
+        static readonly Vector4[] Bottom4BarColors =
+        [
             new Vector4(0.415686274509804F, 0.274509803921569F, 0.0627450980392157F, 1.0F),
             new Vector4(0.92156862745098F, 0.92156862745098F, 0.92156862745098F, 1.0F),
             new Vector4(0.462745098039216F, 0.0627450980392157F, 0.282352941176471F, 1.0F),
             Black0
-        };
+        ];
 
-        static readonly Vector4[] BlackBarColors = new Vector4[]
-        {
+        static readonly Vector4[] BlackBarColors =
+        [
             new Vector4(0.0274509803921569F, 0.0274509803921569F, 0.0274509803921569F, 1.0F),
             Black0,
             new Vector4(0.0941176470588235F, 0.0941176470588235F, 0.0941176470588235F, 1.0F)
-        };
+        ];
 
         public string SourceId { get; }
 
@@ -156,7 +156,7 @@ namespace NiVE3.Input.Special
 
             Parallel.For(0, Height, y =>
             {
-                var dataSpan = result.GetDataSpan().Slice(y * Width);
+                var dataSpan = result.GetDataSpan()[(y * Width)..];
 
                 if (y <= height12 * 8.0)
                 {

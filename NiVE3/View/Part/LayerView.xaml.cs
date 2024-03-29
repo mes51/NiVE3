@@ -29,7 +29,7 @@ namespace NiVE3.View.Part
         // NOTE: なぜかTypeConverterをSourceTypeにつけてもNREが出てXAML上でリソースとして定義出来ないため、定数として定義する
         public static readonly SourceType CompositionDisplayableSourceType = SourceType.Image | SourceType.Video;
 
-        public static IMultiValueConverter CycledParentLayerConverter = new DelegateMultiValueConverter<LayerViewModel, Guid?, bool>((vm, l) => vm.CheckParentLayerCycled(l));
+        public static readonly IMultiValueConverter CycledParentLayerConverter = new DelegateMultiValueConverter<LayerViewModel, Guid?, bool>((vm, l) => vm.CheckParentLayerCycled(l));
 
         public static readonly DependencyProperty RangeProperty = DependencyProperty.Register(
             nameof(Range),

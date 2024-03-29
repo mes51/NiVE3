@@ -44,22 +44,20 @@ namespace NiVE3.View.Resource
 
         static Cursor CreateCursor(string iconName, Point hotSpot)
         {
-            using (var pngStream = CreatePng(iconName))
+            using var pngStream = CreatePng(iconName);
+            var cursorStream = new MemoryStream();
+            using (var writer = new BinaryWriter(cursorStream, Encoding.Default, true))
             {
-                var cursorStream = new MemoryStream();
-                using (var writer = new BinaryWriter(cursorStream, Encoding.Default, true))
-                {
-                    writer.WriteStruct(new ICONDIR(2, 1));
-                    writer.WriteStruct(new ICONDIRENTRY(CursorInfoAttribute.CursorSize, CursorInfoAttribute.CursorSize, hotSpot, pngStream.Length));
-                }
-                pngStream.CopyTo(cursorStream);
-
-                cursorStream.Seek(0, SeekOrigin.Begin);
-                return new Cursor(cursorStream);
+                writer.WriteStruct(new ICONDIR(2, 1));
+                writer.WriteStruct(new ICONDIRENTRY(CursorInfoAttribute.CursorSize, CursorInfoAttribute.CursorSize, hotSpot, pngStream.Length));
             }
+            pngStream.CopyTo(cursorStream);
+
+            cursorStream.Seek(0, SeekOrigin.Begin);
+            return new Cursor(cursorStream);
         }
 
-        static Stream CreatePng(string iconName)
+        static MemoryStream CreatePng(string iconName)
         {
             const string PathName = "IconPath";
 

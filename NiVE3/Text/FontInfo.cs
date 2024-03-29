@@ -12,7 +12,7 @@ namespace NiVE3.Text
 {
     class FontInfo
     {
-        static readonly string[] FontExtensions = new string[] { "*.ttf", "*.ttc", "*.otf" };
+        static readonly string[] FontExtensions = ["*.ttf", "*.ttc", "*.otf"];
 
         static readonly string UserFontFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Microsoft\\Windows\\Fonts");
 
@@ -88,7 +88,7 @@ namespace NiVE3.Text
                 }
             }
 
-            LoadedFonts = fontInfo.ToArray();
+            LoadedFonts = [..fontInfo];
         }
 
         private FontInfo(FontFamily fontFamily, FontDescription description)
@@ -126,7 +126,7 @@ namespace NiVE3.Text
                     catch { }
                 }
 
-                return result.ToArray();
+                return [..result];
             }
             catch { }
 

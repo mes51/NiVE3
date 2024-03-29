@@ -20,7 +20,7 @@ namespace NiVE3.Plugin.ValueObject
         /// <summary>
         /// 空のバウンディングボックスを表します
         /// </summary>
-        public static readonly PreviewBoundingBox Empty = new PreviewBoundingBox(Vector2d.Zero, Array.Empty<BoundingBoxShape>(), true, true);
+        public static readonly PreviewBoundingBox Empty = new PreviewBoundingBox(Vector2d.Zero, [], true, true);
     }
 
     /// <summary>

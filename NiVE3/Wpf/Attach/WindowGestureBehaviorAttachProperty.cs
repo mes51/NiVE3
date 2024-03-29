@@ -44,11 +44,7 @@ namespace NiVE3.Wpf.Attach
 
             if (e.NewValue is bool enable && enable)
             {
-                if (behavior == null)
-                {
-                    behavior = new WindowGestureBehavior();
-                }
-                behaviors.Add(behavior);
+                behaviors.Add(behavior ?? new WindowGestureBehavior());
             }
         }
     }

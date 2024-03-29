@@ -15,7 +15,7 @@ namespace NiVE3.View.Part
 {
     class PropertyCollectionView : StackableItemsCollectionView<IInternalPropertyViewModel>
     {
-        static IValueConverter VisibilityConverter = new BooleanToVisibilityConverter();
+        static readonly IValueConverter VisibilityConverter = new BooleanToVisibilityConverter();
 
         public static readonly DependencyProperty IsAVSwitchColumnVisibleProperty = DependencyProperty.Register(
             nameof(IsAVSwitchColumnVisible),
