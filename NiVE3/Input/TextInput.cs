@@ -385,7 +385,7 @@ namespace NiVE3.Input
             }
 
             var interCharBlendMode = (BlendMode)((properties[TextMoreOptionsGroupId] as PropertyValueGroup)?[TextMoreOptionInterCharacterBlendModeId] ?? BlendMode.Normal);
-            var image = new NManagedImage(max.GetElement(2) - min.GetElement(0), max.GetElement(3) - min.GetElement(1));
+            var image = new NManagedImage(max.GetElement(2) - min.GetElement(0) + 1, max.GetElement(3) - min.GetElement(1));
             var imageOrigin = (Vector2d)glyphPolygons[0].origin + new Vector2d(glyphPolygons[0].rect.GetElement(0) - min.GetElement(0), glyphPolygons[0].rect.GetElement(1) - min.GetElement(1));
             switch (sourceText.DefaultStyle.TextAlign)
             {
@@ -414,7 +414,7 @@ namespace NiVE3.Input
 
                 var intLeft = rect.GetElement(0);
                 var intTop = rect.GetElement(1);
-                using var glyphImage = new NManagedImage(rect.GetElement(2) - intLeft + blurMargin.GetElement(0) * 2, rect.GetElement(3) - intTop + blurMargin.GetElement(1) * 2);
+                using var glyphImage = new NManagedImage(rect.GetElement(2) - intLeft + blurMargin.GetElement(0) * 2 + 1, rect.GetElement(3) - intTop + blurMargin.GetElement(1) * 2);
                 var glyphLeft = intLeft - blurMargin.GetElement(0);
                 var glyphTop = intTop - blurMargin.GetElement(1);
                 if (imageInterpolationQuality == ImageInterpolationQuality.Level1)

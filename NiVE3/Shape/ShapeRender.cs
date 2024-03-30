@@ -13,6 +13,10 @@ namespace NiVE3.Shape
 {
     static class ShapeRender
     {
+        const int SuperSamplingCount = 8;
+
+        const float SamplingRate = 1.0F / SuperSamplingCount;
+
         public static void FillPolygonNonzero(Polygon[] polygons, NManagedImage image, Vector4 color, float offsetX = 0.0F, float offsetY = 0.0F)
         {
             if (polygons.Length < 1)
@@ -23,7 +27,7 @@ namespace NiVE3.Shape
             var minY = Math.Max((int)Math.Floor(polygons.Min(p => p.MinY) - offsetY), 0);
             var maxY = Math.Min((int)Math.Ceiling(polygons.Max(p => p.MaxY) - offsetY), image.Height);
             var minX = Math.Max((int)Math.Floor(polygons.Min(p => p.MinX) - offsetX), 0);
-            var maxX = Math.Min((int)Math.Ceiling(polygons.Max(p => p.MaxX) - offsetX), image.Width);
+            var maxX = Math.Min((int)Math.Ceiling(polygons.Max(p => p.MaxX) - offsetX) + 1, image.Width);
             Parallel.For(minY, maxY, h =>
             {
                 var width = image.Width;
@@ -31,13 +35,13 @@ namespace NiVE3.Shape
                 var temp = ArrayPool<float>.Shared.Rent(width);
                 temp.AsSpan(0, width).Clear();
 
-                for (var s = 0; s < 4; s++)
+                for (var s = 0; s < SuperSamplingCount; s++)
                 {
                     var max = float.MinValue;
                     var hitLine = new List<Hit>();
                     for (var i = 0; i < polygons.Length; i++)
                     {
-                        var y = h + 0.25F * s + offsetY;
+                        var y = h + SamplingRate * s + offsetY;
                         if (polygons[i].MinY <= y && polygons[i].MaxY >= y)
                         {
                             var ls = polygons[i].Lines;
@@ -160,7 +164,7 @@ namespace NiVE3.Shape
                 {
                     if (temp[w] > 0.0F)
                     {
-                        data[w] = Blend.Process(BlendMode.Normal, data[w], color * new Vector4(1.0F, 1.0F, 1.0F, temp[w] * 0.25F));
+                        data[w] = Blend.Process(BlendMode.Normal, data[w], color * new Vector4(1.0F, 1.0F, 1.0F, temp[w] * SamplingRate));
                     }
                 }
 
