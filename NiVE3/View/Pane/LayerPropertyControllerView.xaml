@@ -146,6 +146,17 @@
             </Style.Triggers>
         </Style>
 
+        <Style x:Key="ShapeGridStyle" TargetType="{x:Type Grid}">
+            <Setter Property="ClipToBounds" Value="True"/>
+            <Setter Property="Visibility" Value="Visible"/>
+
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ShapeProperties}" Value="{x:Null}">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
         <Style x:Key="SourceOptionGridStyle" TargetType="{x:Type Grid}">
             <Setter Property="ClipToBounds" Value="True"/>
             <Setter Property="Visibility" Value="Visible"/>
@@ -280,6 +291,18 @@
                         </pt:LayerItemExpander>
                         <Grid Style="{StaticResource TextGridStyle}">
                             <pt:PropertyGroupView DataContext="{Binding TextProperties}"
+                                                  IndentLevel="1"
+                                                  ControlAreaWidth="{Binding ElementName=InnerRoot, Path=ActualWidth}"
+                                                  NameAreaWidth="{Binding ElementName=Root, Path=DataContext.LayerNameColumnWidth}"
+                                                  IsAVSwitchColumnVisible="False"
+                                                  IsTagColumnVisible="True"
+                                                  Range="{Binding ElementName=Root, Path=DataContext.TimeBarRange}"
+                                                  RangeStart="{Binding ElementName=Root, Path=DataContext.TimeBarRangeStart}"
+                                                  CompositionFrameRate="{Binding ElementName=Root, Path=DataContext.CompositionFrameRate}"
+                                                  ParentHasExpanderArrow="False"/>
+                        </Grid>
+                        <Grid Style="{StaticResource ShapeGridStyle}">
+                            <pt:PropertyGroupView DataContext="{Binding ShapeProperties}"
                                                   IndentLevel="1"
                                                   ControlAreaWidth="{Binding ElementName=InnerRoot, Path=ActualWidth}"
                                                   NameAreaWidth="{Binding ElementName=Root, Path=DataContext.LayerNameColumnWidth}"

@@ -268,6 +268,17 @@ namespace NiVE3.Model
             HistoryModel.EndGroup();
         }
 
+        public void AddShape()
+        {
+            var layer = new LayerModel(this, FootageListModel.ShapeFootage, EffectListModel, HistoryModel)
+            {
+                OutPoint = Duration
+            };
+            Layers.Insert(0, layer); // TODO: 選択位置の上に挿入
+
+            HistoryModel.Add(new AddLayersHistoryCommand(this, [layer], 0));
+        }
+
         public void MoveLayer(Guid layerId, int newIndex)
         {
             MoveLayers([layerId], layerId, newIndex);

@@ -391,6 +391,17 @@
             </Style.Triggers>
         </Style>
 
+        <Style x:Key="ShapeGridStyle" TargetType="{x:Type Grid}">
+            <Setter Property="ClipToBounds" Value="True"/>
+            <Setter Property="Visibility" Value="Visible"/>
+
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ShapeProperties}" Value="{x:Null}">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
         <Style x:Key="SourceOptionGridStyle" TargetType="{x:Type Grid}">
             <Setter Property="ClipToBounds" Value="True"/>
             <Setter Property="Visibility" Value="Visible"/>
@@ -644,6 +655,17 @@
             </pt:LayerItemExpander>
             <Grid Style="{StaticResource TextGridStyle}">
                 <pt:PropertyGroupView DataContext="{Binding TextProperties}"
+                                      IndentLevel="1"
+                                      ControlAreaWidth="{Binding ElementName=Root, Path=LayerControlAreaWidth}"
+                                      NameAreaWidth="{Binding ElementName=Root, Path=DataContext.PropertyNameAreaWidth}"
+                                      IsAVSwitchColumnVisible="{Binding ElementName=Root, Path=DataContext.IsAVSwitchColumnVisible}"
+                                      IsTagColumnVisible="{Binding ElementName=Root, Path=DataContext.IsTagColumnVisible}"
+                                      Range="{Binding ElementName=Root, Path=Range}"
+                                      RangeStart="{Binding ElementName=Root, Path=RangeStart}"
+                                      CompositionFrameRate="{Binding ElementName=Root, Path=CompositionFrameRate}"/>
+            </Grid>
+            <Grid Style="{StaticResource ShapeGridStyle}">
+                <pt:PropertyGroupView DataContext="{Binding ShapeProperties}"
                                       IndentLevel="1"
                                       ControlAreaWidth="{Binding ElementName=Root, Path=LayerControlAreaWidth}"
                                       NameAreaWidth="{Binding ElementName=Root, Path=DataContext.PropertyNameAreaWidth}"

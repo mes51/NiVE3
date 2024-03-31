@@ -475,6 +475,8 @@ namespace NiVE3.ViewModel
 
         public PropertyGroupViewModel? TextProperties { get; }
 
+        public PropertyGroupViewModel? ShapeProperties { get; }
+
         public PropertyGroupViewModel? SourceOptionProperties { get; }
 
         public PropertyGroupViewModel? AudioOptionProperties { get; }
@@ -619,6 +621,12 @@ namespace NiVE3.ViewModel
                 TextProperties = new PropertyGroupViewModel(layerModel.TextProperties);
                 TextProperties.SelectItemChanged += PropertyGroupViewModel_SelectItemChanged;
                 TextProperties.PropertyValueCommited += PropertyGroupViewModel_PropertyValueCommited;
+            }
+            if (layerModel.ShapeProperties != null)
+            {
+                ShapeProperties = new PropertyGroupViewModel(layerModel.ShapeProperties);
+                ShapeProperties.SelectItemChanged += PropertyGroupViewModel_SelectItemChanged;
+                ShapeProperties.PropertyValueCommited += PropertyGroupViewModel_PropertyValueCommited;
             }
             if (layerModel.SourceOptionProperties != null)
             {
@@ -864,6 +872,7 @@ namespace NiVE3.ViewModel
             TransformProperties?.DeSelect();
             LayerOptionProperties?.DeSelect();
             TextProperties?.DeSelect();
+            ShapeProperties?.DeSelect();
             SourceOptionProperties?.DeSelect();
             AudioOptionProperties?.DeSelect();
         }
@@ -934,6 +943,7 @@ namespace NiVE3.ViewModel
                 TransformProperties?.DeSelect();
                 LayerOptionProperties?.DeSelect();
                 TextProperties?.DeSelect();
+                ShapeProperties?.DeSelect();
                 SourceOptionProperties?.DeSelect();
                 AudioOptionProperties?.DeSelect();
             }

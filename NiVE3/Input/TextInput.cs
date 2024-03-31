@@ -426,22 +426,22 @@ namespace NiVE3.Input
                             case TextLineDrawOrder.AfterFill:
                                 if (fillColor.W > 0.0F)
                                 {
-                                    ShapeRender.FillPolygonNonzeroAiliased(fillPolygins, glyphImage, fillColor, glyphLeft, glyphTop);
+                                    ShapeRender.FillPolygonNonZeroAiliased(fillPolygins, glyphImage, fillColor, glyphLeft, glyphTop);
                                 }
-                                ShapeRender.FillPolygonNonzeroAiliased(outlinePolygons, glyphImage, textLineColor, glyphLeft, glyphTop);
+                                ShapeRender.FillPolygonNonZeroAiliased(outlinePolygons, glyphImage, textLineColor, glyphLeft, glyphTop);
                                 break;
                             default:
-                                ShapeRender.FillPolygonNonzeroAiliased(outlinePolygons, glyphImage, textLineColor, glyphLeft, glyphTop);
+                                ShapeRender.FillPolygonNonZeroAiliased(outlinePolygons, glyphImage, textLineColor, glyphLeft, glyphTop);
                                 if (fillColor.W > 0.0F)
                                 {
-                                    ShapeRender.FillPolygonNonzeroAiliased(fillPolygins, glyphImage, fillColor, glyphLeft, glyphTop);
+                                    ShapeRender.FillPolygonNonZeroAiliased(fillPolygins, glyphImage, fillColor, glyphLeft, glyphTop);
                                 }
                                 break;
                         }
                     }
                     else
                     {
-                        ShapeRender.FillPolygonNonzeroAiliased(fillPolygins, glyphImage, fillColor, glyphLeft, glyphTop);
+                        ShapeRender.FillPolygonNonZeroAiliased(fillPolygins, glyphImage, fillColor, glyphLeft, glyphTop);
                     }
                 }
                 else
@@ -453,22 +453,22 @@ namespace NiVE3.Input
                             case TextLineDrawOrder.AfterFill:
                                 if (fillColor.W > 0.0F)
                                 {
-                                    ShapeRender.FillPolygonNonzero(fillPolygins, glyphImage, fillColor, glyphLeft, glyphTop);
+                                    ShapeRender.FillPolygonNonZero(fillPolygins, glyphImage, fillColor, glyphLeft, glyphTop);
                                 }
-                                ShapeRender.FillPolygonNonzero(outlinePolygons, glyphImage, textLineColor, glyphLeft, glyphTop);
+                                ShapeRender.FillPolygonNonZero(outlinePolygons, glyphImage, textLineColor, glyphLeft, glyphTop);
                                 break;
                             default:
-                                ShapeRender.FillPolygonNonzero(outlinePolygons, glyphImage, textLineColor, glyphLeft, glyphTop);
+                                ShapeRender.FillPolygonNonZero(outlinePolygons, glyphImage, textLineColor, glyphLeft, glyphTop);
                                 if (fillColor.W > 0.0F)
                                 {
-                                    ShapeRender.FillPolygonNonzero(fillPolygins, glyphImage, fillColor, glyphLeft, glyphTop);
+                                    ShapeRender.FillPolygonNonZero(fillPolygins, glyphImage, fillColor, glyphLeft, glyphTop);
                                 }
                                 break;
                         }
                     }
                     else
                     {
-                        ShapeRender.FillPolygonNonzero(fillPolygins, glyphImage, fillColor, glyphLeft, glyphTop);
+                        ShapeRender.FillPolygonNonZero(fillPolygins, glyphImage, fillColor, glyphLeft, glyphTop);
                     }
                 }
 

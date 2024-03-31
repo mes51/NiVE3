@@ -41,6 +41,8 @@ namespace NiVE3.Model
 
         const string TextGroupId = nameof(TextGroupId);
 
+        const string ShapeGroupId = nameof(ShapeGroupId);
+
         const string SourceOptionGroupId = nameof(SourceOptionGroupId);
 
         const string AudioOptionGroupId = nameof(AudioOptionGroupId);
@@ -274,6 +276,8 @@ namespace NiVE3.Model
 
         public PropertyGroupModel? TextProperties { get; }
 
+        public PropertyGroupModel? ShapeProperties { get; }
+
         public PropertyGroupModel? SourceOptionProperties { get; }
 
         public PropertyGroupModel? AudioOptionProperties { get; }
@@ -382,6 +386,10 @@ namespace NiVE3.Model
                     {
                         TextProperties = new PropertyGroupModel(new PropertyGroup(TextGroupId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Layer_TextOption), footageModel.GetOptionProperties()), compositionModel, this, historyModel);
                     }
+                    else if (footageModel.InputModel.Input is ShapeInput)
+                    {
+                        ShapeProperties = new PropertyGroupModel(new PropertyGroup(ShapeGroupId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Layer_ShapeOption), footageModel.GetOptionProperties()), compositionModel, this, historyModel);
+                    }
                     else if (footageModel.IsCustomizableFootageSource)
                     {
                         SourceOptionProperties = new PropertyGroupModel(new PropertyGroup(SourceOptionGroupId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Layer_SourceOption), footageModel.GetOptionProperties()), compositionModel, this, historyModel);
@@ -444,6 +452,10 @@ namespace NiVE3.Model
             {
                 TextProperties.ValueUpdated += Properties_ValueUpdated;
             }
+            if (ShapeProperties != null)
+            {
+                ShapeProperties.ValueUpdated += Properties_ValueUpdated;
+            }
             if (SourceOptionProperties != null)
             {
                 SourceOptionProperties.ValueUpdated += Properties_ValueUpdated;
@@ -472,7 +484,7 @@ namespace NiVE3.Model
             // TODO: タイムリマップ反映
             var sourceTime = layerTime;
 
-            var sourceOptionProperties = (TextProperties ?? SourceOptionProperties)?.GetValues(sourceTime);
+            var sourceOptionProperties = (TextProperties ?? ShapeProperties ?? SourceOptionProperties)?.GetValues(sourceTime);
             var image = FootageModel.ReadImage(sourceTime, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties, InterpolationQuality, useGpu);
             var roi = new ROI(new Int32Point(), new Int32Size(image.Width, image.Height), 0, 0, image.Width, image.Height);
 
@@ -525,7 +537,7 @@ namespace NiVE3.Model
             // TODO: タイムリマップ反映
             var sourceTime = layerTime;
 
-            var sourceOptionProperties = (TextProperties ?? SourceOptionProperties)?.GetValues(sourceTime);
+            var sourceOptionProperties = (TextProperties ?? ShapeProperties ?? SourceOptionProperties)?.GetValues(sourceTime);
             var image = FootageModel.ReadImage(sourceTime, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties, InterpolationQuality, useGpu);
             var roi = new ROI(new Int32Point(), new Int32Size(image.Width, image.Height), 0, 0, image.Width, image.Height);
 
@@ -954,6 +966,7 @@ namespace NiVE3.Model
                 TransformProperties = TransformProperties?.SaveData(),
                 LayerOptionProperties = LayerOptionProperties?.SaveData(),
                 TextProperties = TextProperties?.SaveData(),
+                ShapeProperties = ShapeProperties?.SaveData(),
                 SourceOptionProperties = SourceOptionProperties?.SaveData(),
                 AudioOptionProperties = AudioOptionProperties?.SaveData()
             };
@@ -996,6 +1009,10 @@ namespace NiVE3.Model
             if (TextProperties != null && data.TextProperties != null)
             {
                 TextProperties.LoadData(data.TextProperties);
+            }
+            if (ShapeProperties != null && data.ShapeProperties != null)
+            {
+                ShapeProperties.LoadData(data.ShapeProperties);
             }
             if (SourceOptionProperties != null && data.SourceOptionProperties != null)
             {

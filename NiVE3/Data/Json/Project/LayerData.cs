@@ -77,6 +77,8 @@ namespace NiVE3.Data.Json.Project
 
         public PropertyData? TextProperties { get; set; }
 
+        public PropertyData? ShapeProperties { get; set; }
+
         public PropertyData? SourceOptionProperties { get; set; }
 
         public PropertyData? AudioOptionProperties { get; set; }

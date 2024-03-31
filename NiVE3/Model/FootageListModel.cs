@@ -62,6 +62,8 @@ namespace NiVE3.Model
 
         public FootageModel TextFootage { get; }
 
+        public FootageModel ShapeFootage { get; }
+
         Dictionary<Type, string[]> SupportedFileTypes { get; set; } = [];
 
         List<InputModel> LoadedInputs { get; } = [];
@@ -104,6 +106,7 @@ namespace NiVE3.Model
             LightFootage = new FootageModel(new InputModel(LightInput.Instance, LightInput.PluginId, false, LightInput.PluginId), EmptyFootageSource.Instance, HistoryModel, LightInput.PluginId);
             NullObjectFootage = new FootageModel(new InputModel(NullObjectInput.Instance, NullObjectInput.PluginId, false, NullObjectInput.PluginId), EmptyFootageSource.Instance, HistoryModel, NullObjectInput.PluginId);
             TextFootage = new FootageModel(new InputModel(TextInput.Instance, TextInput.PluginId, false, TextInput.PluginId), TextFootageSource.Instance, HistoryModel, TextInput.PluginId);
+            ShapeFootage = new FootageModel(new InputModel(ShapeInput.Instance, ShapeInput.PluginId, false, ShapeInput.PluginId), ShapeFootageSource.Instance, HistoryModel, ShapeInput.PluginId);
         }
 
         public Guid? AddSolid()

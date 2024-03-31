@@ -346,6 +346,8 @@ namespace NiVE3.ViewModel
 
         public ICommand ChangeCurrentTimeCommand { get; }
 
+        public ICommand AddShapeCommand { get; }
+
         public ICommand AddCameraCommand { get; }
 
         public ICommand AddLightCommand { get; }
@@ -432,6 +434,8 @@ namespace NiVE3.ViewModel
 
             ChangeCurrentTimeCommand = new DelegateCommand(() => CurrentTimeChangeByUserPublisher.Publish(this, EventArgs.Empty));
 
+            AddShapeCommand = new RequerySuggestedCommand(() => CompositionModel?.AddShape(), () => CompositionModel != null);
+
             AddCameraCommand = new RequerySuggestedCommand(() => CompositionModel?.AddCamera(), () => CompositionModel != null);
 
             AddLightCommand = new RequerySuggestedCommand(() => CompositionModel?.AddLight(), () => CompositionModel != null);
@@ -439,6 +443,7 @@ namespace NiVE3.ViewModel
             AddNullObjectCommand = new RequerySuggestedCommand(() => CompositionModel?.AddNullObject(), () => CompositionModel != null);
 
             AddTextCommand = new RequerySuggestedCommand(() => CompositionModel?.AddText(), () => CompositionModel != null);
+
             AudioPlayerModel = audioPlayerModel;
         }
 

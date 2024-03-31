@@ -224,6 +224,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("(なし)")]
         public static readonly string Timeline_EmptyTitle = nameof(Timeline_EmptyTitle);
 
+        [ShowInMarkup, DefaultValue("シェイプの追加(_S)")]
+        public static readonly string Timeline_ContextMenu_AddShape = nameof(Timeline_ContextMenu_AddShape);
+
         [ShowInMarkup, DefaultValue("カメラの追加(_C)")]
         public static readonly string Timeline_ContextMenu_AddCamera = nameof(Timeline_ContextMenu_AddCamera);
 
@@ -265,6 +268,9 @@ namespace NiVE3.View.Resource
 
         [ShowInMarkup, DefaultValue("テキスト")]
         public static readonly string Layer_TextOption = nameof(Layer_TextOption);
+
+        [ShowInMarkup, DefaultValue("シェイプ")]
+        public static readonly string Layer_ShapeOption = nameof(Layer_ShapeOption);
 
         [ShowInMarkup, DefaultValue("ソースのオプション")]
         public static readonly string Layer_SourceOption = nameof(Layer_SourceOption);
@@ -638,6 +644,120 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("ブラー")]
         public static readonly string TextProperty_TextAnimator_Animator_Value_Blur = nameof(TextProperty_TextAnimator_Animator_Value_Blur);
 
+        [ShowInMarkup, DefaultValue("コンテンツ")]
+        public static readonly string ShapeProperty_Content = nameof(ShapeProperty_Content);
+
+        [ShowInMarkup, DefaultValue("グループ")]
+        public static readonly string ShapeProperty_Group = nameof(ShapeProperty_Group);
+
+        [ShowInMarkup, DefaultValue("コンテンツ")]
+        public static readonly string ShapeProperty_Group_Content = nameof(ShapeProperty_Group_Content);
+
+        [ShowInMarkup, DefaultValue("トランスフォーム")]
+        public static readonly string ShapeProperty_Transform = nameof(ShapeProperty_Transform);
+
+        [ShowInMarkup, DefaultValue("アンカーポイント")]
+        public static readonly string ShapeProperty_Transform_AnchorPoint = nameof(ShapeProperty_Transform_AnchorPoint);
+
+        [ShowInMarkup, DefaultValue("位置")]
+        public static readonly string ShapeProperty_Transform_Position = nameof(ShapeProperty_Transform_Position);
+
+        [ShowInMarkup, DefaultValue("スケール")]
+        public static readonly string ShapeProperty_Transform_Scale = nameof(ShapeProperty_Transform_Scale);
+
+        [ShowInMarkup, DefaultValue("回転")]
+        public static readonly string ShapeProperty_Transform_Angle = nameof(ShapeProperty_Transform_Angle);
+
+        [ShowInMarkup, DefaultValue("歪曲")]
+        public static readonly string ShapeProperty_Transform_Skew = nameof(ShapeProperty_Transform_Skew);
+
+        [ShowInMarkup, DefaultValue("歪曲軸")]
+        public static readonly string ShapeProperty_Transform_SkewAxis = nameof(ShapeProperty_Transform_SkewAxis);
+
+        [ShowInMarkup, DefaultValue("不透明度")]
+        public static readonly string ShapeProperty_Transform_Opacity = nameof(ShapeProperty_Transform_Opacity);
+
+        [ShowInMarkup, DefaultValue("長方形")]
+        public static readonly string ShapeProperty_RectangleGroup = nameof(ShapeProperty_RectangleGroup);
+
+        [ShowInMarkup, DefaultValue("円")]
+        public static readonly string ShapeProperty_CircleGroup = nameof(ShapeProperty_CircleGroup);
+
+        [ShowInMarkup, DefaultValue("多角形")]
+        public static readonly string ShapeProperty_RegularPolygonGroup = nameof(ShapeProperty_RegularPolygonGroup);
+
+        [ShowInMarkup, DefaultValue("半径")]
+        public static readonly string ShapeProperty_RegularPolygonGroup_Radius = nameof(ShapeProperty_RegularPolygonGroup_Radius);
+
+        [ShowInMarkup, DefaultValue("角の丸み")]
+        public static readonly string ShapeProperty_RegularPolygonGroup_Rounded = nameof(ShapeProperty_RegularPolygonGroup_Rounded);
+
+        [ShowInMarkup, DefaultValue("星")]
+        public static readonly string ShapeProperty_StarGroup = nameof(ShapeProperty_StarGroup);
+
+        [ShowInMarkup, DefaultValue("内半径")]
+        public static readonly string ShapeProperty_StarGroup_InnerRadius = nameof(ShapeProperty_StarGroup_InnerRadius);
+
+        [ShowInMarkup, DefaultValue("外半径")]
+        public static readonly string ShapeProperty_StarGroup_OuterRadius = nameof(ShapeProperty_StarGroup_OuterRadius);
+
+        [ShowInMarkup, DefaultValue("内側の丸み")]
+        public static readonly string ShapeProperty_StarGroup_InnerRounded = nameof(ShapeProperty_StarGroup_InnerRounded);
+
+        [ShowInMarkup, DefaultValue("外側の丸み")]
+        public static readonly string ShapeProperty_StarGroup_OuterRounded = nameof(ShapeProperty_StarGroup_OuterRounded);
+
+        [ShowInMarkup, DefaultValue("頂点数")]
+        public static readonly string ShapeProperty_PolygonGroup_Points = nameof(ShapeProperty_PolygonGroup_Points);
+
+        [ShowInMarkup, DefaultValue("サイズ")]
+        public static readonly string ShapeProperty_ShapeObjectGroup_Size = nameof(ShapeProperty_ShapeObjectGroup_Size);
+
+        [ShowInMarkup, DefaultValue("位置")]
+        public static readonly string ShapeProperty_ShapeObjectGroup_Position = nameof(ShapeProperty_ShapeObjectGroup_Position);
+
+        [ShowInMarkup, DefaultValue("回転")]
+        public static readonly string ShapeProperty_ShapeObjectGroup_Angle = nameof(ShapeProperty_ShapeObjectGroup_Angle);
+
+        [ShowInMarkup, DefaultValue("塗り")]
+        public static readonly string ShapeProperty_SolidFillGroup = nameof(ShapeProperty_SolidFillGroup);
+
+        [ShowInMarkup, DefaultValue("規則")]
+        public static readonly string ShapeProperty_SolidFillGroup_FillRule = nameof(ShapeProperty_SolidFillGroup_FillRule);
+
+        [ShowInMarkup, DefaultValue("線")]
+        public static readonly string ShapeProperty_SolidStrokeGroup = nameof(ShapeProperty_SolidStrokeGroup);
+
+        [ShowInMarkup, DefaultValue("線幅")]
+        public static readonly string ShapeProperty_SolidStrokeGroup_Width = nameof(ShapeProperty_SolidStrokeGroup_Width);
+
+        [ShowInMarkup, DefaultValue("線端")]
+        public static readonly string ShapeProperty_SolidStrokeGroup_EndCapType = nameof(ShapeProperty_SolidStrokeGroup_EndCapType);
+
+        [ShowInMarkup, DefaultValue("線の結合")]
+        public static readonly string ShapeProperty_SolidStrokeGroup_JoinStyleType = nameof(ShapeProperty_SolidStrokeGroup_JoinStyleType);
+
+        [ShowInMarkup, DefaultValue("色")]
+        public static readonly string ShapeProperty_SolidBrushGroup_Color = nameof(ShapeProperty_SolidBrushGroup_Color);
+
+        [ShowInMarkup, DefaultValue("不透明度")]
+        public static readonly string ShapeProperty_SolidBrushGroup_Opacity = nameof(ShapeProperty_SolidBrushGroup_Opacity);
+
+        [ShowInMarkup, DefaultValue("リピータ")]
+        public static readonly string ShapeProperty_RepeaterGroup = nameof(ShapeProperty_RepeaterGroup);
+
+        [ShowInMarkup, DefaultValue("数")]
+        public static readonly string ShapeProperty_RepeaterGroup_Count = nameof(ShapeProperty_RepeaterGroup_Count);
+
+        [ShowInMarkup, DefaultValue("オフセット")]
+        public static readonly string ShapeProperty_RepeaterGroup_Offset = nameof(ShapeProperty_RepeaterGroup_Offset);
+
+        [ShowInMarkup, DefaultValue("開始点の不透明度")]
+        public static readonly string ShapeProperty_RepeaterGroup_Transform_BeginPointOpacity = nameof(ShapeProperty_RepeaterGroup_Transform_BeginPointOpacity);
+
+        [ShowInMarkup, DefaultValue("終了点の不透明度")]
+        public static readonly string ShapeProperty_RepeaterGroup_Transform_EndPointOpacity = nameof(ShapeProperty_RepeaterGroup_Transform_EndPointOpacity);
+
         // Property Control
 
         [ShowInMarkup, DefaultValue("編集")]
@@ -832,6 +952,36 @@ namespace NiVE3.View.Resource
 
         [ShowInMarkup, DefaultValue("円")]
         public static readonly string SelectorShape_Circle = nameof(SelectorShape_Circle);
+
+        [ShowInMarkup, DefaultValue("非ゼロ規則")]
+        public static readonly string ShapeFillRule_NonZero = nameof(ShapeFillRule_NonZero);
+
+        [ShowInMarkup, DefaultValue("奇偶規則")]
+        public static readonly string ShapeFillRule_EvenOdd = nameof(ShapeFillRule_EvenOdd);
+
+        [ShowInMarkup, DefaultValue("バット")]
+        public static readonly string EndCapStyle_Butt = nameof(EndCapStyle_Butt);
+
+        [ShowInMarkup, DefaultValue("丸型")]
+        public static readonly string EndCapStyle_Round = nameof(EndCapStyle_Round);
+
+        [ShowInMarkup, DefaultValue("四角")]
+        public static readonly string EndCapStyle_Square = nameof(EndCapStyle_Square);
+
+        [ShowInMarkup, DefaultValue("ポリゴン")]
+        public static readonly string EndCapStyle_Polygon = nameof(EndCapStyle_Polygon);
+
+        [ShowInMarkup, DefaultValue("結合")]
+        public static readonly string EndCapStyle_Joined = nameof(EndCapStyle_Joined);
+
+        [ShowInMarkup, DefaultValue("四角")]
+        public static readonly string JointStyle_Square = nameof(JointStyle_Square);
+
+        [ShowInMarkup, DefaultValue("丸型")]
+        public static readonly string JointStyle_Round = nameof(JointStyle_Round);
+
+        [ShowInMarkup, DefaultValue("マイター")]
+        public static readonly string JointStyle_Miter = nameof(JointStyle_Miter);
 
         [ShowInMarkup, DefaultValue("ステレオ")]
         public static readonly string WaveFormType_Stereo = nameof(WaveFormType_Stereo);
