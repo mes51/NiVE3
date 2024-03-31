@@ -613,6 +613,7 @@ namespace NiVE3.Model
         public void AddChild(AppendablePropertyItem item)
         {
             var child = AddChildInternal(item, null);
+            ValueCommited?.Invoke(this, EventArgs.Empty);
 
             HistoryModel.Add(new AddAppendablePropertyChildHistoryCommand(this, child, Children.IndexOf(child)));
         }
@@ -626,6 +627,7 @@ namespace NiVE3.Model
             {
                 RemoveInternal(c);
             }
+            ValueCommited?.Invoke(this, EventArgs.Empty);
 
             HistoryModel.Add(new DeleteAppendablePropertyChildHistoryCommand(this, children, indices));
         }
@@ -652,6 +654,7 @@ namespace NiVE3.Model
             newOrderedChildren.AddRange(prevOrderedChildren.Except(newOrderedChildren.ToArray()));
 
             Children.SortBy(newOrderedChildren.IndexOf);
+            ValueCommited?.Invoke(this, EventArgs.Empty);
 
             if (!prevOrderedChildren.SequenceEqual(Children))
             {

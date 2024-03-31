@@ -443,26 +443,32 @@ namespace NiVE3.Model
             if (TransformProperties != null)
             {
                 TransformProperties.ValueUpdated += Properties_ValueUpdated;
+                TransformProperties.ValueCommited += Properties_ValueCommited;
             }
             if (LayerOptionProperties != null)
             {
                 LayerOptionProperties.ValueUpdated += Properties_ValueUpdated;
+                LayerOptionProperties.ValueCommited += Properties_ValueCommited;
             }
             if (TextProperties != null)
             {
                 TextProperties.ValueUpdated += Properties_ValueUpdated;
+                TextProperties.ValueCommited += Properties_ValueCommited;
             }
             if (ShapeProperties != null)
             {
                 ShapeProperties.ValueUpdated += Properties_ValueUpdated;
+                ShapeProperties.ValueCommited += Properties_ValueCommited;
             }
             if (SourceOptionProperties != null)
             {
                 SourceOptionProperties.ValueUpdated += Properties_ValueUpdated;
+                SourceOptionProperties.ValueCommited += Properties_ValueCommited;
             }
             if (AudioOptionProperties != null)
             {
                 AudioOptionProperties.ValueUpdated += Properties_ValueUpdated;
+                AudioOptionProperties.ValueCommited += Properties_ValueCommited;
             }
             PropertyChanged += LayerModel_PropertyChanged;
         }
@@ -1053,6 +1059,11 @@ namespace NiVE3.Model
         }
 
         private void Properties_ValueUpdated(object? sender, EventArgs e)
+        {
+            LayerUpdated?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void Properties_ValueCommited(object? sender, EventArgs e)
         {
             LayerUpdated?.Invoke(this, EventArgs.Empty);
         }
