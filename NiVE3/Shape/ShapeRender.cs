@@ -29,10 +29,10 @@ namespace NiVE3.Shape
                 return;
             }
 
-            var minY = Math.Max((int)Math.Floor(polygons.Min(p => p.MinY) - offsetY), 0);
-            var maxY = Math.Min((int)Math.Ceiling(polygons.Max(p => p.MaxY) - offsetY), image.Height);
-            var minX = Math.Max((int)Math.Floor(polygons.Min(p => p.MinX) - offsetX), 0);
-            var maxX = Math.Min((int)Math.Ceiling(polygons.Max(p => p.MaxX) - offsetX) + 1, image.Width);
+            var minY = Math.Max((int)MathF.Floor(polygons.Min(p => p.MinY) - offsetY), 0);
+            var maxY = Math.Min((int)MathF.Ceiling(polygons.Max(p => p.MaxY) - offsetY), image.Height);
+            var minX = Math.Max((int)MathF.Floor(polygons.Min(p => p.MinX) - offsetX), 0);
+            var maxX = Math.Min((int)MathF.Ceiling(polygons.Max(p => p.MaxX) - offsetX) + 1, image.Width);
             Parallel.For(minY, maxY, h =>
             {
                 var width = image.Width;
@@ -189,10 +189,10 @@ namespace NiVE3.Shape
                 return;
             }
 
-            var minY = Math.Max((int)Math.Floor(polygons.Min(p => p.MinY) - offsetY), 0);
-            var maxY = Math.Min((int)Math.Ceiling(polygons.Max(p => p.MaxY) - offsetY), image.Height);
-            var minX = Math.Max((int)Math.Floor(polygons.Min(p => p.MinX) - offsetX), 0);
-            var maxX = Math.Min((int)Math.Ceiling(polygons.Max(p => p.MaxX) - offsetX), image.Width);
+            var minY = Math.Max((int)MathF.Floor(polygons.Min(p => p.MinY) - offsetY), 0);
+            var maxY = Math.Min((int)MathF.Ceiling(polygons.Max(p => p.MaxY) - offsetY), image.Height);
+            var minX = Math.Max((int)MathF.Floor(polygons.Min(p => p.MinX) - offsetX), 0);
+            var maxX = Math.Min((int)MathF.Ceiling(polygons.Max(p => p.MaxX) - offsetX), image.Width);
             Parallel.For(minY, maxY, h =>
             {
                 var width = image.Width;
@@ -311,10 +311,10 @@ namespace NiVE3.Shape
                 return;
             }
 
-            var minY = Math.Max((int)Math.Floor(polygons.Min(p => p.MinY) - offsetY), 0);
-            var maxY = Math.Min((int)Math.Ceiling(polygons.Max(p => p.MaxY) - offsetY), image.Height);
-            var minX = Math.Max((int)Math.Floor(polygons.Min(p => p.MinX) - offsetX), 0);
-            var maxX = Math.Min((int)Math.Ceiling(polygons.Max(p => p.MaxX) - offsetX) + 1, image.Width);
+            var minY = Math.Max((int)MathF.Floor(polygons.Min(p => p.MinY) - offsetY), 0);
+            var maxY = Math.Min((int)MathF.Ceiling(polygons.Max(p => p.MaxY) - offsetY), image.Height);
+            var minX = Math.Max((int)MathF.Floor(polygons.Min(p => p.MinX) - offsetX), 0);
+            var maxX = Math.Min((int)MathF.Ceiling(polygons.Max(p => p.MaxX) - offsetX) + 1, image.Width);
             Parallel.For(minY, maxY, h =>
             {
                 var width = image.Width;
@@ -322,7 +322,7 @@ namespace NiVE3.Shape
                 var temp = ArrayPool<float>.Shared.Rent(width);
                 temp.AsSpan(0, width).Clear();
 
-                for (int s = 0; s < SuperSamplingCount; s++)
+                for (var s = 0; s < SuperSamplingCount; s++)
                 {
                     var max = float.MinValue;
                     var hitLine = new List<Hit>();
@@ -350,7 +350,7 @@ namespace NiVE3.Shape
                         var hp = hitLine[hi].Value;
                         var inout = false;
                         var area = 0.0F;
-                        for (int w = 0; w < width; w++)
+                        for (var w = 0; w < width; w++)
                         {
                             if (hp <= w)
                             {
@@ -370,7 +370,7 @@ namespace NiVE3.Shape
                                 for (hi++; hi < hitLine.Count; hi++)
                                 {
                                     hp = hitLine[hi].Value;
-                                    float d = w - hp;
+                                    var d = w - hp;
                                     if (hp > w)
                                     {
                                         break;
@@ -429,10 +429,10 @@ namespace NiVE3.Shape
                 return;
             }
 
-            var minY = Math.Max((int)Math.Floor(polygons.Min(p => p.MinY) - offsetY), 0);
-            var maxY = Math.Min((int)Math.Ceiling(polygons.Max(p => p.MaxY) - offsetY), image.Height);
-            var minX = Math.Max((int)Math.Floor(polygons.Min(p => p.MinX) - offsetX), 0);
-            var maxX = Math.Min((int)Math.Ceiling(polygons.Max(p => p.MaxX) - offsetX) + 1, image.Width);
+            var minY = Math.Max((int)MathF.Floor(polygons.Min(p => p.MinY) - offsetY), 0);
+            var maxY = Math.Min((int)MathF.Ceiling(polygons.Max(p => p.MaxY) - offsetY), image.Height);
+            var minX = Math.Max((int)MathF.Floor(polygons.Min(p => p.MinX) - offsetX), 0);
+            var maxX = Math.Min((int)MathF.Ceiling(polygons.Max(p => p.MaxX) - offsetX) + 1, image.Width);
             Parallel.For(minY, maxY, h =>
             {
                 var width = image.Width;
@@ -463,7 +463,7 @@ namespace NiVE3.Shape
                     var hi = hitLine.FindIndex(p => p.Value >= -1.0F);
                     var hp = hitLine[hi].Value;
                     var inout = false;
-                    for (int w = 0; w < width; w++)
+                    for (var w = 0; w < width; w++)
                     {
                         if (hp <= w)
                         {
@@ -498,10 +498,10 @@ namespace NiVE3.Shape
                 return;
             }
 
-            var minY = Math.Max((int)Math.Floor(polygons.Min(p => p.MinY) - offsetY), 0);
-            var maxY = Math.Min((int)Math.Ceiling(polygons.Max(p => p.MaxY) - offsetY), image.Height);
-            var minX = Math.Max((int)Math.Floor(polygons.Min(p => p.MinX) - offsetX), 0);
-            var maxX = Math.Min((int)Math.Ceiling(polygons.Max(p => p.MaxX) - offsetX) + 1, image.Width);
+            var minY = Math.Max((int)MathF.Floor(polygons.Min(p => p.MinY) - offsetY), 0);
+            var maxY = Math.Min((int)MathF.Ceiling(polygons.Max(p => p.MaxY) - offsetY), image.Height);
+            var minX = Math.Max((int)MathF.Floor(polygons.Min(p => p.MinX) - offsetX), 0);
+            var maxX = Math.Min((int)MathF.Ceiling(polygons.Max(p => p.MaxX) - offsetX) + 1, image.Width);
             Parallel.For(minY, maxY, h =>
             {
                 var width = image.Width;
@@ -566,12 +566,12 @@ namespace NiVE3.Shape
                                     if (prev)
                                     {
                                         area = 1.0F;
-                                        area -= 1.0F - (hp - (int)hp);
+                                        area -= 1.0F - (hp - (int)Math.Floor(hp));
                                     }
                                     else
                                     {
                                         area = 0.0F;
-                                        area += 1.0F - (hp - (int)hp);
+                                        area += 1.0F - (hp - (int)Math.Floor(hp));
                                     }
                                     prev = depth > 0;
                                 }
@@ -605,11 +605,11 @@ namespace NiVE3.Shape
                                         {
                                             if (prev)
                                             {
-                                                area -= 1.0F - (hp - (int)hp);
+                                                area -= 1.0F - (hp - (int)Math.Floor(hp));
                                             }
                                             else
                                             {
-                                                area += 1.0F - (hp - (int)hp);
+                                                area += 1.0F - (hp - (int)Math.Floor(hp));
                                             }
                                             prev = depth > 0;
                                         }
@@ -653,10 +653,10 @@ namespace NiVE3.Shape
                 return;
             }
 
-            var minY = Math.Max((int)Math.Floor(polygons.Min(p => p.MinY) - offsetY), 0);
-            var maxY = Math.Min((int)Math.Ceiling(polygons.Max(p => p.MaxY) - offsetY), image.Height);
-            var minX = Math.Max((int)Math.Floor(polygons.Min(p => p.MinX) - offsetX), 0);
-            var maxX = Math.Min((int)Math.Ceiling(polygons.Max(p => p.MaxX) - offsetX), image.Width);
+            var minY = Math.Max((int)MathF.Floor(polygons.Min(p => p.MinY) - offsetY), 0);
+            var maxY = Math.Min((int)MathF.Ceiling(polygons.Max(p => p.MaxY) - offsetY), image.Height);
+            var minX = Math.Max((int)MathF.Floor(polygons.Min(p => p.MinX) - offsetX), 0);
+            var maxX = Math.Min((int)MathF.Ceiling(polygons.Max(p => p.MaxX) - offsetX), image.Width);
             Parallel.For(minY, maxY, h =>
             {
                 var width = image.Width;
@@ -770,10 +770,10 @@ namespace NiVE3.Shape
                 return;
             }
 
-            var minY = Math.Max((int)Math.Floor(polygons.Min(p => p.MinY) - offsetY), 0);
-            var maxY = Math.Min((int)Math.Ceiling(polygons.Max(p => p.MaxY) - offsetY), image.Height);
-            var minX = Math.Max((int)Math.Floor(polygons.Min(p => p.MinX) - offsetX), 0);
-            var maxX = Math.Min((int)Math.Ceiling(polygons.Max(p => p.MaxX) - offsetX) + 1, image.Width);
+            var minY = Math.Max((int)MathF.Floor(polygons.Min(p => p.MinY) - offsetY), 0);
+            var maxY = Math.Min((int)MathF.Ceiling(polygons.Max(p => p.MaxY) - offsetY), image.Height);
+            var minX = Math.Max((int)MathF.Floor(polygons.Min(p => p.MinX) - offsetX), 0);
+            var maxX = Math.Min((int)MathF.Ceiling(polygons.Max(p => p.MaxX) - offsetX) + 1, image.Width);
             Parallel.For(minY, maxY, h =>
             {
                 var width = image.Width;
@@ -781,7 +781,7 @@ namespace NiVE3.Shape
                 var temp = ArrayPool<float>.Shared.Rent(width);
                 temp.AsSpan(0, width).Clear();
 
-                for (int s = 0; s < SuperSamplingCount; s++)
+                for (var s = 0; s < SuperSamplingCount; s++)
                 {
                     var max = float.MinValue;
                     var hitLine = new List<Hit>();
@@ -809,7 +809,7 @@ namespace NiVE3.Shape
                         var hp = hitLine[hi].Value;
                         var inout = false;
                         var area = 0.0F;
-                        for (int w = 0; w < width; w++)
+                        for (var w = 0; w < width; w++)
                         {
                             if (hp <= w)
                             {
@@ -829,7 +829,7 @@ namespace NiVE3.Shape
                                 for (hi++; hi < hitLine.Count; hi++)
                                 {
                                     hp = hitLine[hi].Value;
-                                    float d = w - hp;
+                                    var d = w - hp;
                                     if (hp > w)
                                     {
                                         break;
@@ -883,10 +883,10 @@ namespace NiVE3.Shape
                 return;
             }
 
-            var minY = Math.Max((int)Math.Floor(polygons.Min(p => p.MinY) - offsetY), 0);
-            var maxY = Math.Min((int)Math.Ceiling(polygons.Max(p => p.MaxY) - offsetY), image.Height);
-            var minX = Math.Max((int)Math.Floor(polygons.Min(p => p.MinX) - offsetX), 0);
-            var maxX = Math.Min((int)Math.Ceiling(polygons.Max(p => p.MaxX) - offsetX) + 1, image.Width);
+            var minY = Math.Max((int)MathF.Floor(polygons.Min(p => p.MinY) - offsetY), 0);
+            var maxY = Math.Min((int)MathF.Ceiling(polygons.Max(p => p.MaxY) - offsetY), image.Height);
+            var minX = Math.Max((int)MathF.Floor(polygons.Min(p => p.MinX) - offsetX), 0);
+            var maxX = Math.Min((int)MathF.Ceiling(polygons.Max(p => p.MaxX) - offsetX) + 1, image.Width);
             Parallel.For(minY, maxY, h =>
             {
                 var width = image.Width;
@@ -917,7 +917,7 @@ namespace NiVE3.Shape
                     var hi = hitLine.FindIndex(p => p.Value >= -1.0F);
                     var hp = hitLine[hi].Value;
                     var inout = false;
-                    for (int w = 0; w < width; w++)
+                    for (var w = 0; w < width; w++)
                     {
                         if (hp <= w)
                         {

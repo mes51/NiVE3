@@ -346,7 +346,7 @@ namespace NiVE3.Input
             var baseAnchorPointRate = (Vector2)(Vector3d)(moreOptions[TextBaseAnchorPointRateId] ?? new Vector3d(50.0)) * 0.01F;
             var glyphBuilder = new StyledGlyphBuilder((float)wrappingSize.X, (float)wrappingSize.Y, baseAnchorPointRate);
             TextRenderer.RenderTextTo(glyphBuilder, structuredExtendedTextRun.SourceText, textOption);
-            var glyphPolygons = new List<(Polygon[] fillPolygins, Polygon[] outlinePolygons, ExtendedTextRun textRun, Vector128<int> rect, Vector128<int> blurMargin, Vector2 origin)>();
+            var glyphPolygons = new List<(Polygon[] fillPolygons, Polygon[] outlinePolygons, ExtendedTextRun textRun, Vector128<int> rect, Vector128<int> blurMargin, Vector2 origin)>();
             foreach (var glyph in glyphBuilder.GetRenderableGlyhps())
             {
                 var fillPolygons = glyph.FlattenedPath.Select(p => new Polygon(p.Points.Span)).ToArray();
@@ -403,7 +403,7 @@ namespace NiVE3.Input
                     break;
             }
             image.Origin = imageOrigin;
-            foreach (var (fillPolygins, outlinePolygons, textRun, rect, blurMargin, _) in glyphPolygons)
+            foreach (var (fillPolygons, outlinePolygons, textRun, rect, blurMargin, _) in glyphPolygons)
             {
                 var fillColor = textRun.FillColor;
                 var textLineColor = textRun.TextLineColor;
@@ -426,7 +426,7 @@ namespace NiVE3.Input
                             case TextLineDrawOrder.AfterFill:
                                 if (fillColor.W > 0.0F)
                                 {
-                                    ShapeRender.FillPolygonNonZeroAiliased(fillPolygins, glyphImage, fillColor, glyphLeft, glyphTop);
+                                    ShapeRender.FillPolygonNonZeroAiliased(fillPolygons, glyphImage, fillColor, glyphLeft, glyphTop);
                                 }
                                 ShapeRender.FillPolygonNonZeroAiliased(outlinePolygons, glyphImage, textLineColor, glyphLeft, glyphTop);
                                 break;
@@ -434,14 +434,14 @@ namespace NiVE3.Input
                                 ShapeRender.FillPolygonNonZeroAiliased(outlinePolygons, glyphImage, textLineColor, glyphLeft, glyphTop);
                                 if (fillColor.W > 0.0F)
                                 {
-                                    ShapeRender.FillPolygonNonZeroAiliased(fillPolygins, glyphImage, fillColor, glyphLeft, glyphTop);
+                                    ShapeRender.FillPolygonNonZeroAiliased(fillPolygons, glyphImage, fillColor, glyphLeft, glyphTop);
                                 }
                                 break;
                         }
                     }
                     else
                     {
-                        ShapeRender.FillPolygonNonZeroAiliased(fillPolygins, glyphImage, fillColor, glyphLeft, glyphTop);
+                        ShapeRender.FillPolygonNonZeroAiliased(fillPolygons, glyphImage, fillColor, glyphLeft, glyphTop);
                     }
                 }
                 else
@@ -453,7 +453,7 @@ namespace NiVE3.Input
                             case TextLineDrawOrder.AfterFill:
                                 if (fillColor.W > 0.0F)
                                 {
-                                    ShapeRender.FillPolygonNonZero(fillPolygins, glyphImage, fillColor, glyphLeft, glyphTop);
+                                    ShapeRender.FillPolygonNonZero(fillPolygons, glyphImage, fillColor, glyphLeft, glyphTop);
                                 }
                                 ShapeRender.FillPolygonNonZero(outlinePolygons, glyphImage, textLineColor, glyphLeft, glyphTop);
                                 break;
@@ -461,14 +461,14 @@ namespace NiVE3.Input
                                 ShapeRender.FillPolygonNonZero(outlinePolygons, glyphImage, textLineColor, glyphLeft, glyphTop);
                                 if (fillColor.W > 0.0F)
                                 {
-                                    ShapeRender.FillPolygonNonZero(fillPolygins, glyphImage, fillColor, glyphLeft, glyphTop);
+                                    ShapeRender.FillPolygonNonZero(fillPolygons, glyphImage, fillColor, glyphLeft, glyphTop);
                                 }
                                 break;
                         }
                     }
                     else
                     {
-                        ShapeRender.FillPolygonNonZero(fillPolygins, glyphImage, fillColor, glyphLeft, glyphTop);
+                        ShapeRender.FillPolygonNonZero(fillPolygons, glyphImage, fillColor, glyphLeft, glyphTop);
                     }
                 }
 

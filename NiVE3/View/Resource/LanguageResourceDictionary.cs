@@ -680,6 +680,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("長方形")]
         public static readonly string ShapeProperty_RectangleGroup = nameof(ShapeProperty_RectangleGroup);
 
+        [ShowInMarkup, DefaultValue("角丸")]
+        public static readonly string ShapeProperty_RectangleGroup_CornerRounded = nameof(ShapeProperty_RectangleGroup_CornerRounded);
+
         [ShowInMarkup, DefaultValue("円")]
         public static readonly string ShapeProperty_CircleGroup = nameof(ShapeProperty_CircleGroup);
 
@@ -732,7 +735,7 @@ namespace NiVE3.View.Resource
         public static readonly string ShapeProperty_SolidStrokeGroup_Width = nameof(ShapeProperty_SolidStrokeGroup_Width);
 
         [ShowInMarkup, DefaultValue("線端")]
-        public static readonly string ShapeProperty_SolidStrokeGroup_EndCapType = nameof(ShapeProperty_SolidStrokeGroup_EndCapType);
+        public static readonly string ShapeProperty_SolidStrokeGroup_EndCapStyleType = nameof(ShapeProperty_SolidStrokeGroup_EndCapStyleType);
 
         [ShowInMarkup, DefaultValue("線の結合")]
         public static readonly string ShapeProperty_SolidStrokeGroup_JoinStyleType = nameof(ShapeProperty_SolidStrokeGroup_JoinStyleType);
@@ -742,6 +745,9 @@ namespace NiVE3.View.Resource
 
         [ShowInMarkup, DefaultValue("不透明度")]
         public static readonly string ShapeProperty_SolidBrushGroup_Opacity = nameof(ShapeProperty_SolidBrushGroup_Opacity);
+
+        [ShowInMarkup, DefaultValue("ブレンドモード")]
+        public static readonly string ShapeProperty_Drawing_BlendMode = nameof(ShapeProperty_Drawing_BlendMode);
 
         [ShowInMarkup, DefaultValue("リピータ")]
         public static readonly string ShapeProperty_RepeaterGroup = nameof(ShapeProperty_RepeaterGroup);
