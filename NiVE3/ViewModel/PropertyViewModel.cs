@@ -622,7 +622,7 @@ namespace NiVE3.ViewModel
         {
             switch (dropInfo.Data)
             {
-                case PropertyGroupModel group when Children.Contains(group):
+                case PropertyGroupViewModel group when Children.Contains(group):
                     {
                         var newIndex = dropInfo.InsertIndex;
                         if (Children.IndexOf(group) < newIndex)
