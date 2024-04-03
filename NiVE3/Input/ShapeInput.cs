@@ -333,16 +333,16 @@ namespace NiVE3.Input
                 switch (fillRule, imageInterpolationQuality)
                 {
                     case (ShapeFillRule.NonZero, ImageInterpolationQuality.Level1):
-                        ShapeRender.FillPolygonNonZeroAiliased(ToPolygons(path.Translate(-left, -top)), canvas, brush);
+                        ShapeRender.FillPolygonNonZeroAiliased(ToPolygons(path), canvas, brush, left, top);
                         break;
                     case (ShapeFillRule.NonZero, _):
-                        ShapeRender.FillPolygonNonZero(ToPolygons(path.Translate(-left, -top)), canvas, brush);
+                        ShapeRender.FillPolygonNonZero(ToPolygons(path), canvas, brush, left, top);
                         break;
                     case (ShapeFillRule.EvenOdd, ImageInterpolationQuality.Level1):
-                        ShapeRender.FillPolygonEvenOddAiliased(ToPolygons(path.Translate(-left, -top)), canvas, brush);
+                        ShapeRender.FillPolygonEvenOddAiliased(ToPolygons(path), canvas, brush, left, top);
                         break;
                     case (ShapeFillRule.EvenOdd, _):
-                        ShapeRender.FillPolygonEvenOdd(ToPolygons(path.Translate(-left, -top)), canvas, brush);
+                        ShapeRender.FillPolygonEvenOdd(ToPolygons(path), canvas, brush, left, top);
                         break;
                 }
 

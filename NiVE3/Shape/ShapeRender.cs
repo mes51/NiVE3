@@ -22,6 +22,7 @@ namespace NiVE3.Shape
             if (brush is SolidBrush solidBrush)
             {
                 FillPolygonNonZero(polygons, image, solidBrush.Color, offsetX, offsetY);
+                return;
             }
 
             if (polygons.Length < 1)
@@ -97,12 +98,12 @@ namespace NiVE3.Shape
                                     if (prev)
                                     {
                                         area = 1.0F;
-                                        area -= 1.0F - (hp - (int)hp);
+                                        area -= 1.0F - (hp - (int)Math.Floor(hp));
                                     }
                                     else
                                     {
                                         area = 0.0F;
-                                        area += 1.0F - (hp - (int)hp);
+                                        area += 1.0F - (hp - (int)Math.Floor(hp));
                                     }
                                     prev = depth > 0;
                                 }
@@ -136,11 +137,11 @@ namespace NiVE3.Shape
                                         {
                                             if (prev)
                                             {
-                                                area -= 1.0F - (hp - (int)hp);
+                                                area -= 1.0F - (hp - (int)Math.Floor(hp));
                                             }
                                             else
                                             {
-                                                area += 1.0F - (hp - (int)hp);
+                                                area += 1.0F - (hp - (int)Math.Floor(hp));
                                             }
                                             prev = depth > 0;
                                         }
@@ -182,6 +183,7 @@ namespace NiVE3.Shape
             if (brush is SolidBrush solidBrush)
             {
                 FillPolygonNonZeroAiliased(polygons, image, solidBrush.Color, offsetX, offsetY);
+                return;
             }
 
             if (polygons.Length < 1)
@@ -304,6 +306,7 @@ namespace NiVE3.Shape
             if (brush is SolidBrush solidBrush)
             {
                 FillPolygonEvenOdd(polygons, image, solidBrush.Color, offsetX, offsetY);
+                return;
             }
 
             if (polygons.Length < 1)
@@ -359,12 +362,12 @@ namespace NiVE3.Shape
                                     if (inout)
                                     {
                                         area = 1.0F;
-                                        area -= 1.0F - (hp - (int)hp);
+                                        area -= 1.0F - (hp - (int)Math.Floor(hp));
                                     }
                                     else
                                     {
                                         area = 0.0F;
-                                        area += 1.0F - (hp - (int)hp);
+                                        area += 1.0F - (hp - (int)Math.Floor(hp));
                                     }
                                 }
                                 for (hi++; hi < hitLine.Count; hi++)
@@ -379,11 +382,11 @@ namespace NiVE3.Shape
                                     {
                                         if ((hi & 1) == 1)
                                         {
-                                            area -= 1.0F - (hp - (int)hp);
+                                            area -= 1.0F - (hp - (int)Math.Floor(hp));
                                         }
                                         else
                                         {
-                                            area += 1.0F - (hp - (int)hp);
+                                            area += 1.0F - (hp - (int)Math.Floor(hp));
                                         }
                                     }
                                 }
@@ -422,6 +425,7 @@ namespace NiVE3.Shape
             if (brush is SolidBrush solidBrush)
             {
                 FillPolygonEvenOddAiliased(polygons, image, solidBrush.Color, offsetX, offsetY);
+                return;
             }
 
             if (polygons.Length < 1)
@@ -818,12 +822,12 @@ namespace NiVE3.Shape
                                     if (inout)
                                     {
                                         area = 1.0F;
-                                        area -= 1.0F - (hp - (int)hp);
+                                        area -= 1.0F - (hp - (int)Math.Floor(hp));
                                     }
                                     else
                                     {
                                         area = 0.0F;
-                                        area += 1.0F - (hp - (int)hp);
+                                        area += 1.0F - (hp - (int)Math.Floor(hp));
                                     }
                                 }
                                 for (hi++; hi < hitLine.Count; hi++)
@@ -838,11 +842,11 @@ namespace NiVE3.Shape
                                     {
                                         if ((hi & 1) == 1)
                                         {
-                                            area -= 1.0F - (hp - (int)hp);
+                                            area -= 1.0F - (hp - (int)Math.Floor(hp));
                                         }
                                         else
                                         {
-                                            area += 1.0F - (hp - (int)hp);
+                                            area += 1.0F - (hp - (int)Math.Floor(hp));
                                         }
                                     }
                                 }
