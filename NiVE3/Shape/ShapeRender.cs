@@ -170,7 +170,7 @@ namespace NiVE3.Shape
                 {
                     if (temp[w] > 0.0F)
                     {
-                        data[w] = Blend.Process(BlendMode.Normal, data[w], brush.GetColor(w, h) * new Vector4(1.0F, 1.0F, 1.0F, temp[w] * SamplingRate));
+                        data[w] = Blend.Process(BlendMode.Normal, data[w], brush.GetColor(w + offsetX, h + offsetY) * new Vector4(1.0F, 1.0F, 1.0F, temp[w] * SamplingRate));
                     }
                 }
 
@@ -290,7 +290,7 @@ namespace NiVE3.Shape
 
                         if (inout)
                         {
-                            data[w] = Blend.Process(BlendMode.Normal, data[w], brush.GetColor(w, h));
+                            data[w] = Blend.Process(BlendMode.Normal, data[w], brush.GetColor(w + offsetX, h + offsetY));
                         }
                         if (hi >= hitLine.Count)
                         {
@@ -412,7 +412,7 @@ namespace NiVE3.Shape
                 {
                     if (temp[w] > 0.0F)
                     {
-                        data[w] = Blend.Process(BlendMode.Normal, data[w], brush.GetColor(w, h) * new Vector4(1.0F, 1.0F, 1.0F, temp[w] * SamplingRate));
+                        data[w] = Blend.Process(BlendMode.Normal, data[w], brush.GetColor(w + offsetX, h + offsetY) * new Vector4(1.0F, 1.0F, 1.0F, temp[w] * SamplingRate));
                     }
                 }
 
@@ -484,7 +484,7 @@ namespace NiVE3.Shape
                         }
                         if (inout)
                         {
-                            data[w] = Blend.Process(BlendMode.Normal, data[w], brush.GetColor(w, h));
+                            data[w] = Blend.Process(BlendMode.Normal, data[w], brush.GetColor(w + offsetX, h + offsetY));
                         }
                         if (hi >= hitLine.Count)
                         {
