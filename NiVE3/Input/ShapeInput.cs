@@ -476,6 +476,11 @@ namespace NiVE3.Input
                 {
                     var position = (Vector3)(Vector3d)(property[RectanglePositionId] ?? Vector3d.Zero);
                     var size = (Vector3)(Vector3d)(rectSize ?? Vector3d.Zero);
+                    if (size.X <= 0.0F || size.Y <= 0.0F)
+                    {
+                        continue;
+                    }
+
                     position -= size * 0.5F;
                     var cornerRounded = Math.Min((float)(double)(property[RectangleCornerRoundedId] ?? 0.0), Math.Min(size.X, size.Y) * 0.5F);
                     if (cornerRounded <= 0.0F)
@@ -508,12 +513,20 @@ namespace NiVE3.Input
                     var position = (Vector3)(Vector3d)(property[CirclePositionId] ?? Vector3d.Zero);
                     var size = (Vector3)(Vector3d)(circleSize ?? Vector3d.Zero);
 
-                    tree.AddNode(new ShapePath(new EllipsePolygon(position.X, position.Y, size.X, size.Y)));
+                    if (size.X > 0.0F && size.Y > 0.0F)
+                    {
+                        tree.AddNode(new ShapePath(new EllipsePolygon(position.X, position.Y, size.X, size.Y)));
+                    }
                 }
                 else if (property.TryGetValue(RegularPolygonPointCountId, out var regularPolygonPointCount))
                 {
                     var count = (int)(double)(regularPolygonPointCount ?? 0.0);
                     var radius = (float)(double)(property[RegularPolygonRadiusId] ?? 0.0);
+                    if (radius <= 0.0F)
+                    {
+                        continue;
+                    }
+
                     var rounded = (float)(double)(property[RegularPolygonRoundedId] ?? 0.0);
                     var position = (Vector3)(Vector3d)(property[RegularPolygonPositionId] ?? Vector3d.Zero);
                     var angle = (float)(double)(property[RegularPolygonAngleId] ?? 0.0);
@@ -554,6 +567,11 @@ namespace NiVE3.Input
                     var count = (int)(double)(starPointCount ?? 0.0) * 2;
                     var outerRadius = (float)(double)(property[StarOuterRadiusId] ?? 0.0);
                     var innerRadius = (float)(double)(property[StarInnerRadiusId] ?? 0.0);
+                    if (outerRadius <= 0.0F && innerRadius <= 0.0F)
+                    {
+                        continue;
+                    }
+
                     var outerRounded = (float)(double)(property[StarOuterRoundedId] ?? 0.0);
                     var innerRounded = (float)(double)(property[StarInnerRoundedId] ?? 0.0);
                     var position = (Vector3)(Vector3d)(property[StarPositionId] ?? Vector3d.Zero);
