@@ -785,6 +785,12 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("終了点の不透明度")]
         public static readonly string ShapeProperty_RepeaterGroup_Transform_EndPointOpacity = nameof(ShapeProperty_RepeaterGroup_Transform_EndPointOpacity);
 
+        [ShowInMarkup, DefaultValue("パスの結合")]
+        public static readonly string ShapeProperty_CombineGroup = nameof(ShapeProperty_CombineGroup);
+
+        [ShowInMarkup, DefaultValue("種類")]
+        public static readonly string ShapeProperty_CombineGroup_CombineType = nameof(ShapeProperty_CombineGroup_CombineType);
+
         // Property Control
 
         [ShowInMarkup, DefaultValue("編集")]
@@ -1015,6 +1021,21 @@ namespace NiVE3.View.Resource
 
         [ShowInMarkup, DefaultValue("マイター")]
         public static readonly string JointStyle_Miter = nameof(JointStyle_Miter);
+
+        [ShowInMarkup, DefaultValue("結合")]
+        public static readonly string ClippingOperation_None = nameof(ClippingOperation_None);
+
+        [ShowInMarkup, DefaultValue("交差")]
+        public static readonly string ClippingOperation_Intersection = nameof(ClippingOperation_Intersection);
+
+        [ShowInMarkup, DefaultValue("追加")]
+        public static readonly string ClippingOperation_Union = nameof(ClippingOperation_Union);
+
+        [ShowInMarkup, DefaultValue("差")]
+        public static readonly string ClippingOperation_Difference = nameof(ClippingOperation_Difference);
+
+        [ShowInMarkup, DefaultValue("中マド")]
+        public static readonly string ClippingOperation_Xor = nameof(ClippingOperation_Xor);
 
         [ShowInMarkup, DefaultValue("ステレオ")]
         public static readonly string WaveFormType_Stereo = nameof(WaveFormType_Stereo);

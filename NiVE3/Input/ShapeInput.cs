@@ -21,7 +21,12 @@ using NiVE3.Shared.Extension;
 using NiVE3.View.Resource;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing;
+using SixLabors.ImageSharp.Drawing.Processing;
 using Polygon = NiVE3.Shape.Polygon;
+using Brush = NiVE3.Shape.Brush;
+using SolidBrush = NiVE3.Shape.SolidBrush;
+using LinearGradientBrush = NiVE3.Shape.LinearGradientBrush;
+using RadialGradientBrush = NiVE3.Shape.RadialGradientBrush;
 
 namespace NiVE3.Input
 {
@@ -207,6 +212,10 @@ namespace NiVE3.Input
 
         const string RepeaterTransformEndPointOpacityId = nameof(RepeaterTransformEndPointOpacityId);
 
+        const string CombineGroupId = nameof(CombineGroupId);
+
+        const string CombineTypeId = nameof(CombineTypeId);
+
         public static ShapeFootageSource Instance { get; } = new ShapeFootageSource();
 
         public string SourceId => "shape";
@@ -349,6 +358,11 @@ namespace NiVE3.Input
                             new DoubleProperty(RepeaterTransformBeginPointOpacityId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_RepeaterGroup_Transform_BeginPointOpacity), 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Unit_Percent)),
                             new DoubleProperty(RepeaterTransformEndPointOpacityId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_RepeaterGroup_Transform_EndPointOpacity), 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Unit_Percent))
                         ])
+                    ])),
+                new AppendablePropertyItem(CombineGroupId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_CombineGroup), () =>
+                    new PropertyGroup(CombineGroupId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_CombineGroup),
+                    [
+                        new EnumProperty(CombineTypeId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_CombineGroup_CombineType), typeof(ClippingOperation), typeof(LanguageResourceDictionary), ClippingOperation.Union, selectBoxWidth: 100)
                     ]))
             ];
             groupItems[0] = new AppendablePropertyItem(GroupPropertyId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_Group), () =>
@@ -655,6 +669,30 @@ namespace NiVE3.Input
 
                     tree.ApplyRepeater(count, offset, anchorPoint, position, scale, angle, beginPointOpacity, endPointOpacity);
                 }
+                else if (property.TryGetValue(CombineTypeId, out var combineType))
+                {
+                    var operation = (ClippingOperation)(combineType ?? ClippingOperation.None);
+                    var paths = tree.GetAllPaths();
+                    ShapePath newShape;
+                    if (operation != ClippingOperation.None)
+                    {
+                        var path = paths.First();
+                        var option = new ShapeOptions
+                        {
+                            IntersectionRule = IntersectionRule.NonZero,
+                            ClippingOperation = operation
+                        };
+
+                        newShape = new ShapePath(path.Clip(option, paths.Skip(1)));
+                    }
+                    else
+                    {
+                        newShape = new ShapePath(new PathCollection(paths));
+                    }
+
+                    tree = new ShapeGroupTree();
+                    tree.AddNode(newShape);
+                }
             }
 
             return tree;
@@ -720,6 +758,7 @@ namespace NiVE3.Input
                     {
                         yield return drawable;
                     }
+                    continue;
                 }
 
                 switch (node)
@@ -730,6 +769,27 @@ namespace NiVE3.Input
                     case ShapeStrokeBase stroke:
                         yield return (stroke.GetBrush(), ShapeFillRule.NonZero, stroke.BlendMode, new PathCollection(TraversePath(stroke).Select(p => p.GenerateOutline(stroke.Width))));
                         break;
+                }
+            }
+        }
+
+        public IEnumerable<IPath> GetAllPaths()
+        {
+            foreach (var node in Nodes.AsEnumerable().Reverse())
+            {
+                if (node is ShapeGroupTree childGroup)
+                {
+                    foreach (var path in  childGroup.GetAllPaths())
+                    {
+                        yield return path;
+                    }
+                }
+                else if (node is ShapePath shape)
+                {
+                    foreach (var path in shape.Paths)
+                    {
+                        yield return path;
+                    }
                 }
             }
         }
