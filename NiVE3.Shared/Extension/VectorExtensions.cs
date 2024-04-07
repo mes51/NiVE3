@@ -284,6 +284,15 @@ namespace NiVE3.Shared.Extension
         {
             return Sse.AndNot(Vector128.Create(-0.0F), v);
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector128<float> SignWithoutZero(this in Vector128<float> v)
+        {
+            var gteMask = Sse.CompareGreaterThanOrEqual(v, Vector128<float>.Zero);
+            var ltMask = Sse.CompareLessThan(v, Vector128<float>.Zero);
+
+            return Sse.Or(Sse.And(Vector128<float>.One, gteMask), Sse.And(Vector128.Create(-1.0F), ltMask));
+        }
     }
 
     public static class Vector256Extension

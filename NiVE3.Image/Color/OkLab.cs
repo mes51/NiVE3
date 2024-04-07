@@ -59,8 +59,9 @@ namespace NiVE3.Image.Color
 
             var mask = Sse.CompareGreaterThanOrEqual(linear, Vector128.Create(0.0031308F));
             return Sse.Or(
-                Sse.And((linear * Vector128.Create(1.055F)).Pow(Vector128.Create(1.0F / 2.4F - 0.055F)), mask),
-                Sse.And(linear * Vector128.Create(12.92F), mask.Not())
+                Sse.And(linear.SignWithoutZero() * (linear.Pow(Vector128.Create(1.0F / 2.4F)) * 1.055F - Vector128.Create(0.055F)), mask),
+                //Sse.And((linear * Vector128.Create(1.055F)).Pow(Vector128.Create(1.0F / 2.4F - 0.055F)), mask),
+                Sse.And(linear * 12.92F, mask.Not())
             ).AsVector4() + new Vector4(0.0F, 0.0F, 0.0F, 1.0F);
         }
 
@@ -71,8 +72,8 @@ namespace NiVE3.Image.Color
             var vColor = color.AsVector128();
             var mask = Sse.CompareGreaterThanOrEqual(vColor, Vector128.Create(0.04045F));
             var linear = Sse.Or(
-                Sse.And(((vColor + Vector128.Create(0.055F)) / Vector128.Create(1.055F)).Pow(Vector128.Create(2.4F)), mask),
-                Sse.And(vColor / Vector128.Create(12.92F), mask.Not())
+                Sse.And(((vColor + Vector128.Create(0.055F)) / 1.055F).Pow(Vector128.Create(2.4F)), mask),
+                Sse.And(vColor / 12.92F, mask.Not())
             );
 
             var lmsRow1 = Vector128.Create(0.0514459929F, 0.5363325363F, 0.4122214708F, 0.0F);
