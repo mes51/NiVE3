@@ -329,6 +329,10 @@ namespace NiVE3.Model
             {
                 return [TextFootage];
             }
+            else if (ShapeFootage.FootageId == footageId)
+            {
+                return [ShapeFootage];
+            }
 
             var footage = FindModel(footageId, Footages);
             if (footage == null)
