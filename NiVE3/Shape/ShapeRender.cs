@@ -346,18 +346,19 @@ namespace NiVE3.Shape
                             }
                         }
                     }
-                    if (hitLine.Count > 0 && max > -2.0F)
+                    if (hitLine.Count > 0 && max > offsetX - 2.0F)
                     {
                         hitLine.Sort();
-                        var hi = hitLine.FindIndex(p => p.Value >= -1.0F);
+                        var hi = hitLine.FindIndex(p => p.Value >= offsetX - 1.0F);
                         var hp = hitLine[hi].Value;
                         var inout = false;
                         var area = 0.0F;
-                        for (var w = 0; w < width; w++)
+                        for (var w = minX; w < maxX; w++)
                         {
-                            if (hp <= w)
+                            var x = w + offsetX;
+                            if (hp <= x)
                             {
-                                if (hp < w)
+                                if (hp < x)
                                 {
                                     if (inout)
                                     {
@@ -373,8 +374,8 @@ namespace NiVE3.Shape
                                 for (hi++; hi < hitLine.Count; hi++)
                                 {
                                     hp = hitLine[hi].Value;
-                                    var d = w - hp;
-                                    if (hp > w)
+                                    var d = x - hp;
+                                    if (hp > x)
                                     {
                                         break;
                                     }
@@ -461,21 +462,22 @@ namespace NiVE3.Shape
                         }
                     }
                 }
-                if (hitLine.Count > 0 && max > -2.0F)
+                if (hitLine.Count > 0 && max > offsetX - 2.0F)
                 {
                     hitLine.Sort();
-                    var hi = hitLine.FindIndex(p => p.Value >= -1.0F);
+                    var hi = hitLine.FindIndex(p => p.Value >= offsetX - 1.0F);
                     var hp = hitLine[hi].Value;
                     var inout = false;
-                    for (var w = 0; w < width; w++)
+                    for (var w = minX; w < maxX; w++)
                     {
-                        if (hp <= w)
+                        var x = w + offsetX;
+                        if (hp <= x)
                         {
                             for (hi++; hi < hitLine.Count; hi++)
                             {
                                 hp = hitLine[hi].Value;
-                                var d = w - hp;
-                                if (hp > w)
+                                var d = x - hp;
+                                if (hp > x)
                                 {
                                     break;
                                 }
@@ -484,7 +486,7 @@ namespace NiVE3.Shape
                         }
                         if (inout)
                         {
-                            data[w] = Blend.Process(BlendMode.Normal, data[w], brush.GetColor(w + offsetX, h + offsetY));
+                            data[w] = Blend.Process(BlendMode.Normal, data[w], brush.GetColor(x + offsetX, h + offsetY));
                         }
                         if (hi >= hitLine.Count)
                         {
@@ -806,18 +808,19 @@ namespace NiVE3.Shape
                             }
                         }
                     }
-                    if (hitLine.Count > 0 && max > -2.0F)
+                    if (hitLine.Count > 0 && max > offsetX - 2.0F)
                     {
                         hitLine.Sort();
-                        var hi = hitLine.FindIndex(p => p.Value >= -1.0F);
+                        var hi = hitLine.FindIndex(p => p.Value >= offsetX - 1.0F);
                         var hp = hitLine[hi].Value;
                         var inout = false;
                         var area = 0.0F;
-                        for (var w = 0; w < width; w++)
+                        for (var w = minX; w < maxX; w++)
                         {
-                            if (hp <= w)
+                            var x = w + offsetX;
+                            if (hp <= x)
                             {
-                                if (hp < w)
+                                if (hp < x)
                                 {
                                     if (inout)
                                     {
@@ -833,8 +836,8 @@ namespace NiVE3.Shape
                                 for (hi++; hi < hitLine.Count; hi++)
                                 {
                                     hp = hitLine[hi].Value;
-                                    var d = w - hp;
-                                    if (hp > w)
+                                    var d = x - hp;
+                                    if (hp > x)
                                     {
                                         break;
                                     }
@@ -915,21 +918,22 @@ namespace NiVE3.Shape
                         }
                     }
                 }
-                if (hitLine.Count > 0 && max > -2.0F)
+                if (hitLine.Count > 0 && max > offsetX - 2.0F)
                 {
                     hitLine.Sort();
                     var hi = hitLine.FindIndex(p => p.Value >= -1.0F);
                     var hp = hitLine[hi].Value;
                     var inout = false;
-                    for (var w = 0; w < width; w++)
+                    for (var w = minX; w < maxX; w++)
                     {
-                        if (hp <= w)
+                        var x = w + offsetX;
+                        if (hp <= x)
                         {
                             for (hi++; hi < hitLine.Count; hi++)
                             {
                                 hp = hitLine[hi].Value;
-                                var d = w - hp;
-                                if (hp > w)
+                                var d = x - hp;
+                                if (hp > x)
                                 {
                                     break;
                                 }
