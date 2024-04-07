@@ -7,10 +7,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Data.Json.Project;
-using NiVE3.Extension;
 using NiVE3.Image;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Property;
+using NiVE3.Shared.Extension;
 using Prism.Mvvm;
 
 namespace NiVE3.Model

@@ -725,26 +725,47 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("塗り")]
         public static readonly string ShapeProperty_SolidFillGroup = nameof(ShapeProperty_SolidFillGroup);
 
+        [ShowInMarkup, DefaultValue("グラデーションの塗り")]
+        public static readonly string ShapeProperty_GradientFillGroup = nameof(ShapeProperty_GradientFillGroup);
+
         [ShowInMarkup, DefaultValue("規則")]
-        public static readonly string ShapeProperty_SolidFillGroup_FillRule = nameof(ShapeProperty_SolidFillGroup_FillRule);
+        public static readonly string ShapeProperty_FillGroup_FillRule = nameof(ShapeProperty_FillGroup_FillRule);
 
         [ShowInMarkup, DefaultValue("線")]
         public static readonly string ShapeProperty_SolidStrokeGroup = nameof(ShapeProperty_SolidStrokeGroup);
 
+        [ShowInMarkup, DefaultValue("グラデーションの線")]
+        public static readonly string ShapeProperty_GradientStrokeGroup = nameof(ShapeProperty_GradientStrokeGroup);
+
         [ShowInMarkup, DefaultValue("線幅")]
-        public static readonly string ShapeProperty_SolidStrokeGroup_Width = nameof(ShapeProperty_SolidStrokeGroup_Width);
+        public static readonly string ShapeProperty_StrokeGroup_Width = nameof(ShapeProperty_StrokeGroup_Width);
 
         [ShowInMarkup, DefaultValue("線端")]
-        public static readonly string ShapeProperty_SolidStrokeGroup_EndCapStyleType = nameof(ShapeProperty_SolidStrokeGroup_EndCapStyleType);
+        public static readonly string ShapeProperty_StrokeGroup_EndCapStyleType = nameof(ShapeProperty_StrokeGroup_EndCapStyleType);
 
         [ShowInMarkup, DefaultValue("線の結合")]
-        public static readonly string ShapeProperty_SolidStrokeGroup_JoinStyleType = nameof(ShapeProperty_SolidStrokeGroup_JoinStyleType);
+        public static readonly string ShapeProperty_StrokeGroup_JoinStyleType = nameof(ShapeProperty_StrokeGroup_JoinStyleType);
+
+        [ShowInMarkup, DefaultValue("グラデーションの種類")]
+        public static readonly string ShapeProperty_GradientGroup_Type = nameof(ShapeProperty_GradientGroup_Type);
+
+        [ShowInMarkup, DefaultValue("グラデーションの編集")]
+        public static readonly string ShapeProperty_GradientGroup_Color_Edit = nameof(ShapeProperty_GradientGroup_Color_Edit);
+
+        [ShowInMarkup, DefaultValue("OKLab色空間で補間する")]
+        public static readonly string ShapeProperty_GradientGroup_UseOkLabInterpolation = nameof(ShapeProperty_GradientGroup_UseOkLabInterpolation);
+
+        [ShowInMarkup, DefaultValue("開始点")]
+        public static readonly string ShapeProperty_GradientGroup_BeginPosition = nameof(ShapeProperty_GradientGroup_BeginPosition);
+
+        [ShowInMarkup, DefaultValue("終了点")]
+        public static readonly string ShapeProperty_GradientGroup_EndPosition = nameof(ShapeProperty_GradientGroup_EndPosition);
 
         [ShowInMarkup, DefaultValue("色")]
-        public static readonly string ShapeProperty_SolidBrushGroup_Color = nameof(ShapeProperty_SolidBrushGroup_Color);
+        public static readonly string ShapeProperty_Drawing_Color = nameof(ShapeProperty_Drawing_Color);
 
         [ShowInMarkup, DefaultValue("不透明度")]
-        public static readonly string ShapeProperty_SolidBrushGroup_Opacity = nameof(ShapeProperty_SolidBrushGroup_Opacity);
+        public static readonly string ShapeProperty_Drawing_Opacity = nameof(ShapeProperty_Drawing_Opacity);
 
         [ShowInMarkup, DefaultValue("ブレンドモード")]
         public static readonly string ShapeProperty_Drawing_BlendMode = nameof(ShapeProperty_Drawing_BlendMode);
@@ -964,6 +985,12 @@ namespace NiVE3.View.Resource
 
         [ShowInMarkup, DefaultValue("奇偶規則")]
         public static readonly string ShapeFillRule_EvenOdd = nameof(ShapeFillRule_EvenOdd);
+
+        [ShowInMarkup, DefaultValue("線形")]
+        public static readonly string GradientType_Linear = nameof(GradientType_Linear);
+
+        [ShowInMarkup, DefaultValue("円形")]
+        public static readonly string GradientType_Radial = nameof(GradientType_Radial);
 
         [ShowInMarkup, DefaultValue("バット")]
         public static readonly string EndCapStyle_Butt = nameof(EndCapStyle_Butt);

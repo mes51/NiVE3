@@ -7,6 +7,7 @@ using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media;
 
 namespace NiVE3.Shared.Extension
 {
@@ -16,6 +17,18 @@ namespace NiVE3.Shared.Extension
         public static float HorizontalAdd(this in Vector3 v)
         {
             return v.X + v.Y + v.Z;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector2 AsVector2(this in Vector3 v)
+        {
+            return v.AsVector128().AsVector2();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector4 AsVector4(this in Vector3 v)
+        {
+            return v.AsVector128().AsVector4();
         }
     }
 
@@ -44,6 +57,34 @@ namespace NiVE3.Shared.Extension
         {
             return !Avx.TestZ(Sse.CompareGreaterThan(a.AsVector128().AsVector3().AsVector128(), b.AsVector128()), Vector128.Create(float.NaN));
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector2 AsVector2(this in Vector4 v)
+        {
+            return v.AsVector128().AsVector2();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector3 AsVector3(this in Vector4 v)
+        {
+            return v.AsVector128().AsVector3();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Color ToColor(this in Vector4 v)
+        {
+            var converted = Vector4.Clamp(v, Vector4.Zero, Vector4.One) * 255.0F;
+            return Color.FromArgb((byte)converted.W, (byte)converted.Z, (byte)converted.Y, (byte)converted.X);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int ToIntColor(this in Vector4 v)
+        {
+            var p32 = Sse2.ConvertToVector128Int32(Vector4.Clamp(v, Vector4.Zero, Vector4.One).AsVector128() * 255.0F);
+            var p16 = Sse2.PackSignedSaturate(p32, Vector128<int>.Zero);
+            var p8 = Sse2.PackUnsignedSaturate(p16, Vector128<short>.Zero);
+            return Sse2.ConvertToInt32(p8.AsInt32());
+        }
     }
 
     public static class Vector128Extensions
@@ -56,6 +97,12 @@ namespace NiVE3.Shared.Extension
         const byte MmPermuteAAAB = 0x01;
         const byte MmPermuteAADC = 0x0E;
         const byte MmInsert0To3 = 3 << 4;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector128<float> Not(this in Vector128<float> v)
+        {
+            return Sse2.Xor(v.AsInt32(), Sse2.CompareEqual(v.AsInt32(), v.AsInt32())).AsSingle();
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector128<float> HorizontalAdd(this in Vector128<float> v)
@@ -86,81 +133,150 @@ namespace NiVE3.Shared.Extension
             return Avx.Permute(min4, MmPermuteAAAA);
         }
 
+        // https://stackoverflow.com/a/76302863
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector128<float> Exp(this in Vector128<float> x)
         {
-            // https://stackoverflow.com/a/47025627
-            var l2e = Vector128.Create(1.44269504088896F);
-            var cvt = Vector128.Create(12582912.0F);
-            var c0 = Vector128.Create(0.238428936F);
-            var c1 = Vector128.Create(0.703448006F);
-            var c2 = Vector128.Create(1.000443142F);
+            var xd = Avx.ConvertToVector256Double(x) * Vector256.Create(1.442695040888963387);
+            var a = Vector256.Create(0.000217549227054);
+            var b = Vector256.Create(0.00124218531444);
+            var c = Vector256.Create(0.00968102455999);
+            var d = Vector256.Create(0.0554821818101);
+            var e = Vector256.Create(0.240230073528);
+            var f = Vector256.Create(0.693146979806);
+            var fx = Vector256.Floor(xd);
+            var X = xd - fx;
 
-            var t = Sse.Multiply(x, l2e);
-            var e = Sse41.Floor(t);
-            var i = Sse2.ConvertToVector128Int32(e);
-            var f = Sse.Subtract(t, e);
-            var j = Sse2.ShiftLeftLogical(i, 23);
-
-            Vector128<float> p;
+            var result = Vector256<double>.Zero;
             if (Fma.IsSupported)
             {
-                p = Fma.MultiplyAdd(c0, f, c1);
-                p = Fma.MultiplyAdd(p, f, c2);
+                var y = Fma.MultiplyAdd(a, X, b);
+                y = Fma.MultiplyAdd(y, X, c);
+                y = Fma.MultiplyAdd(y, X, d);
+                y = Fma.MultiplyAdd(y, X, e);
+                y = Fma.MultiplyAdd(y, X, f);
+                result = Fma.MultiplyAdd(y, X, Vector256<double>.One);
             }
             else
             {
-                p = Sse.Multiply(c0, f);
-                p = Sse.Add(p, c1);
-                p = Sse.Multiply(p, f);
-                p = Sse.Add(p, c2);
+                var y = a * X + b;
+                y = y * X + c;
+                y = y * X + d;
+                y = y * X + e;
+                y = y * X + f;
+                result = y * X + Vector256<double>.One;
             }
-            return Sse2.Add(j, p.AsInt32()).AsSingle();
+
+            if (Avx512F.VL.IsSupported)
+            {
+                result = Avx512F.VL.Scale(result, fx);
+            }
+            else if (Avx2.IsSupported)
+            {
+                var scale = Avx.ConvertToVector256Double(
+                    Avx2.ShiftLeftLogicalVariable(Vector128<int>.One,
+                    Avx.ConvertToVector128Int32(fx.Abs()).AsUInt32())
+                );
+                var divMask = Avx.CompareLessThan(fx, Vector256<double>.Zero);
+
+                result = Avx.Or(
+                    Avx.And(result * scale, divMask.Not()),
+                    Avx.And(result / scale, divMask)
+                );
+            }
+            else
+            {
+                var count = Avx.ConvertToVector128Int32(fx.Abs());
+                var countHigh = Sse2.UnpackHigh(count, count);
+                var shiftLow = Sse2.ShiftLeftLogical(Vector128<long>.One, Sse41.ConvertToVector128Int64(count)).AsInt32();
+                var shiftHigh = Sse2.ShiftLeftLogical(Vector128<long>.One, Sse41.ConvertToVector128Int64(countHigh)).AsInt32();
+                var scale = Avx.ConvertToVector256Double(
+                    Sse.Shuffle(shiftLow.AsSingle(), shiftHigh.AsSingle(), 0b10001000).AsInt32()
+                );
+                var divMask = Avx.CompareLessThan(fx, Vector256<double>.Zero);
+
+                result = Avx.Or(
+                    Avx.And(result * scale, divMask.Not()),
+                    Avx.And(result / scale, divMask)
+                );
+            }
+
+            return Avx.ConvertToVector128Single(result);
         }
 
+        // https://stackoverflow.com/questions/39821367/very-fast-approximate-logarithm-natural-log-function-in-c
         // Memo: 他の方法 https://codingforspeed.com/using-faster-exponential-approximation/
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector128<float> Log(this in Vector128<float> v)
         {
-            var aInt = v.AsInt32();
-            var e = Sse2.Subtract(aInt, Vector128.Create(0x3F2AAAAB));
-            e = Sse2.And(e, Vector128.Create(0xFF800000).AsInt32());
-
-            var subtr = Sse2.Subtract(aInt, e);
-            var m = subtr.AsSingle();
-
-            var i = Sse.Multiply(Sse2.ConvertToVector128Single(e), Vector128.Create(1.19209290E-7F));
-            var f = Sse.Subtract(m, Vector128.Create(1.0F));
-            var s = Sse.Multiply(f, f);
-
-            Vector128<float> r;
+            var minMask = Sse.CompareLessThan(v, Vector128.Create(1.175494351E-38F));
+            var i = Sse.And(Vector128.Create(-23.0F), minMask);
+            var a = Sse.Or(Sse.And(v, minMask.Not()), Sse.And(v, minMask) * 8388608.0F);
+            var e = Sse2.And(a.AsInt32() - Vector128.Create(0.666666667F).AsInt32(), Vector128.Create(0xff800000).AsInt32());
+            var m = (a.AsInt32() - e).AsSingle();
 
             if (Fma.IsSupported)
             {
-                r = Fma.MultiplyAdd(Vector128.Create(0.230836749F), f, Vector128.Create(-0.279208571F));
-                var t = Fma.MultiplyAdd(Vector128.Create(0.331826031F), f, Vector128.Create(-0.498910338F));
+                i = Fma.MultiplyAdd(Sse2.ConvertToVector128Single(e), Vector128.Create(1.19209290E-7F), i);
 
-                r = Fma.MultiplyAdd(r, s, t);
-                r = Fma.MultiplyAdd(r, s, t);
+            }
+            else
+            {
+                i = Sse2.ConvertToVector128Single(e) * Vector128.Create(1.19209290E-7F) + i;
+            }
+
+            m -= Vector128<float>.One;
+            var s = m * m;
+
+            var r = Vector128<float>.Zero;
+            if (Fma.IsSupported)
+            {
+                r = Fma.MultiplyAdd(Vector128.Create(-0.130310059F), s, Vector128.Create(-0.121483512F));
+                var t = Fma.MultiplyAdd(Vector128.Create(0.140869141F), s, Vector128.Create(0.139814854F));
+                r = Fma.MultiplyAdd(r, s, Vector128.Create(-0.166846126F));
+                t = Fma.MultiplyAdd(t, s, Vector128.Create(0.200120345F));
+                r = Fma.MultiplyAdd(r, s, Vector128.Create(-0.249996200F));
+                r = Fma.MultiplyAdd(t, m, r);
+                r = Fma.MultiplyAdd(r, m, Vector128.Create(0.333331972F));
+                r = Fma.MultiplyAdd(r, m, Vector128.Create(-0.5F));
+                r = Fma.MultiplyAdd(r, s, m);
                 r = Fma.MultiplyAdd(i, Vector128.Create(0.693147182F), r);
             }
             else
             {
-                r = Sse.Add(Sse.Multiply(Vector128.Create(0.230836749F), f), Vector128.Create(-0.279208571F));
-                var t = Sse.Add(Sse.Multiply(Vector128.Create(0.331826031F), f), Vector128.Create(-0.498910338F));
-
-                r = Sse.Add(Sse.Multiply(r, s), t);
-                r = Sse.Add(Sse.Multiply(r, s), t);
-                r = Sse.Add(Sse.Multiply(i, Vector128.Create(0.693147182F)), r);
+                r = Vector128.Create(-0.130310059F) * s + Vector128.Create(-0.121483512F);
+                var t = Vector128.Create(0.140869141F) * s * Vector128.Create(0.139814854F);
+                r = r * s + Vector128.Create(-0.166846126F);
+                t = t * s + Vector128.Create(0.200120345F);
+                r = r * s + Vector128.Create(-0.249996200F);
+                r = t * m + r;
+                r = r * m + Vector128.Create(0.333331972F);
+                r = r * m + Vector128.Create(-0.5F);
+                r = r * s + m;
+                r = i * Vector128.Create(0.693147182F) + r;
             }
 
-            return r;
+            var resultMask = Sse.And(
+                Sse.CompareGreaterThan(a, Vector128<float>.Zero),
+                Sse.CompareLessThan(a, Vector128.Create(float.PositiveInfinity))
+            );
+
+            var nan = Sse.And(Vector128.Create(float.NaN), Sse.CompareLessThan(a, Vector128<float>.Zero));
+            var negativeInf = Sse.And(Vector128.Create(float.NegativeInfinity), Sse.CompareEqual(a, Vector128<float>.Zero));
+
+            return Sse.Or(Sse.Or(Sse.And(r, resultMask), nan), negativeInf);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector128<float> Pow(this in Vector128<float> x, in Vector128<float> y)
         {
-            return Sse.Multiply(y, x.Log()).Exp();
+            return Sse.And(Sse.Multiply(y, x.Log()).Exp(), Sse.CompareNotEqual(x, Vector128<float>.Zero));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector128<float> Cbrt(this in Vector128<float> x)
+        {
+            return x.Pow(Vector128.Create(1.0F / 3.0F));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -178,6 +294,15 @@ namespace NiVE3.Shared.Extension
         public static Vector256<double> Abs(this in Vector256<double> v)
         {
             return Avx.AndNot(Vector256.Create(-0.0), v);
+        }
+
+        public static Vector256<double> Not(this in Vector256<double> v)
+        {
+            var high = Avx.ExtractVector128(v, 1).AsInt32();
+            var low = Avx.ExtractVector128(v, 0).AsInt32();
+            high = Sse2.Xor(high, Sse2.CompareEqual(high, high));
+            low = Sse2.Xor(low, Sse2.CompareEqual(low, low));
+            return Vector256.Create(low, high).AsDouble();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

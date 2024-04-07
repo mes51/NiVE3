@@ -3,123 +3,25 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:cv="clr-namespace:NiVE3.UI.Converter"
-        xmlns:pr="clr-namespace:NiVE3.UI.Primitive"
-        xmlns:gm="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup"
         xmlns:local="clr-namespace:NiVE3.UI.Dialog"
+        xmlns:pr="clr-namespace:NiVE3.UI.Primitive"
         mc:Ignorable="d"
         ResizeMode="NoResize"
         ShowInTaskbar="False"
         SizeToContent="WidthAndHeight"
         WindowStartupLocation="CenterOwner"
-        WindowStyle="ToolWindow"
-        ContentRendered="RootWindow_ContentRendered"
-        x:Name="RootWindow"
-        d:DesignWidth="434"
-        d:DesignHeight="336">
-    <Window.Resources>
-        <Thickness x:Key="ValueMargin">0,8,0,0</Thickness>
-        <Style x:Key="PickTypeRadioButton" TargetType="{x:Type RadioButton}" BasedOn="{StaticResource {x:Type RadioButton}}">
-            <Setter Property="Margin" Value="0,0,10,0"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="Grid.Column" Value="0"/>
-            <Setter Property="GroupName" Value="PickType"/>
-        </Style>
-        <cv:EnumToBoolConverter x:Key="EnumToBoolConverter"/>
-    </Window.Resources>
-    <StackPanel>
-        <Grid Margin="10">
-            <StackPanel Orientation="Horizontal">
-                <Border Width="258" Height="258" VerticalAlignment="Top" HorizontalAlignment="Left" BorderBrush="{gm:AppearanceResource ResourceKey=BorderBrush}" BorderThickness="1">
-                    <Grid>
-                        <Image x:Name="ColorPickArea" Source="{Binding ElementName=RootWindow, Path=ColorPickAreaImage}" MouseDown="ColorPickArea_MouseDown" MouseMove="ColorPickArea_MouseMove" MouseUp="ColorPickArea_MouseUp"/>
-                        <Canvas IsHitTestVisible="False">
-                            <Grid x:Name="SelectedColorCircle" Canvas.Left="-6" Canvas.Top="-6">
-                                <Ellipse Stroke="Black" StrokeThickness="1" Width="12" Height="12"/>
-                                <Ellipse Stroke="White" StrokeThickness="1" Width="10" Height="10" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                            </Grid>
-                        </Canvas>
-                    </Grid>
-                </Border>
-                <Grid Margin="4,0,0,0">
-                    <Border Width="26" Height="258" VerticalAlignment="Top" HorizontalAlignment="Center" BorderBrush="{gm:AppearanceResource ResourceKey=BorderBrush}" BorderThickness="1">
-                        <Image x:Name="ColorBar" Source="{Binding ElementName=RootWindow, Path=ColorBarImage}" MouseDown="ColorBar_MouseDown" MouseMove="ColorBar_MouseMove" MouseUp="ColorBar_MouseUp"/>
-                    </Border>
-                    <Canvas Width="42" IsHitTestVisible="False">
-                        <Grid x:Name="SelectedColorBarArrow" Width="42" Canvas.Top="-2">
-                            <Path Data="M0,0 3,3 0,6 M39.5,0 36.5,3 39.5,6" Stroke="{gm:AppearanceResource ResourceKey=BorderBrush}" StrokeThickness="2" HorizontalAlignment="Center"/>
-                        </Grid>
-                    </Canvas>
-                </Grid>
-                <StackPanel Margin="4,0,0,0" Grid.IsSharedSizeScope="True">
-                    <Border BorderBrush="{gm:AppearanceResource ResourceKey=BorderBrush}" BorderThickness="1">
-                        <StackPanel>
-                            <Rectangle x:Name="NewColor" Height="30"/>
-                            <Rectangle x:Name="OldColor" Height="30"/>
-                        </StackPanel>
-                    </Border>
-                    <Grid Margin="0,12,0,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" SharedSizeGroup="ColorLabel"/>
-                            <ColumnDefinition />
-                        </Grid.ColumnDefinitions>
-                        <RadioButton x:Name="HColorMap" Content="H:" IsChecked="{Binding ElementName=RootWindow, Path=ColorPickType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static local:ColorPickType.H}, Mode=TwoWay}" Style="{StaticResource PickTypeRadioButton}"/>
-                        <pr:SlidableNumberTextBox x:Name="HValue" Grid.Column="1" Width="60" Value="0" Maximum="360" Minimum="0" Digit="0" EndSlideEditValue="HSV_ValueChanged"/>
-                    </Grid>
-                    <Grid Margin="{StaticResource ValueMargin}">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" SharedSizeGroup="ColorLabel"/>
-                            <ColumnDefinition />
-                        </Grid.ColumnDefinitions>
-                        <RadioButton x:Name="SColorMap" Content="S:" IsChecked="{Binding ElementName=RootWindow, Path=ColorPickType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static local:ColorPickType.S}, Mode=TwoWay}" Style="{StaticResource PickTypeRadioButton}"/>
-                        <pr:SlidableNumberTextBox x:Name="SValue" Grid.Column="1" Width="60" Value="100" Maximum="100" Minimum="0" Digit="0" EndSlideEditValue="HSV_ValueChanged"/>
-                    </Grid>
-                    <Grid Margin="{StaticResource ValueMargin}">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" SharedSizeGroup="ColorLabel"/>
-                            <ColumnDefinition />
-                        </Grid.ColumnDefinitions>
-                        <RadioButton x:Name="VColorMap" Content="B:" IsChecked="{Binding ElementName=RootWindow, Path=ColorPickType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static local:ColorPickType.V}, Mode=TwoWay}" Style="{StaticResource PickTypeRadioButton}"/>
-                        <pr:SlidableNumberTextBox x:Name="VValue" Grid.Column="1" Width="60" Value="100" Maximum="100" Minimum="0" Digit="0" EndSlideEditValue="HSV_ValueChanged"/>
-                    </Grid>
-                    <Grid Margin="0,12,0,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" SharedSizeGroup="ColorLabel"/>
-                            <ColumnDefinition />
-                        </Grid.ColumnDefinitions>
-                        <RadioButton x:Name="RColorMap" Content="R:" IsChecked="{Binding ElementName=RootWindow, Path=ColorPickType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static local:ColorPickType.R}, Mode=TwoWay}" Style="{StaticResource PickTypeRadioButton}"/>
-                        <pr:SlidableNumberTextBox x:Name="RValue" Grid.Column="1" Width="60" Value="255" Maximum="255" Minimum="0" Digit="0" EndSlideEditValue="RGB_ValueChanged"/>
-                    </Grid>
-                    <Grid Margin="{StaticResource ValueMargin}">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" SharedSizeGroup="ColorLabel"/>
-                            <ColumnDefinition />
-                        </Grid.ColumnDefinitions>
-                        <RadioButton x:Name="GColorMap" Content="G:" IsChecked="{Binding ElementName=RootWindow, Path=ColorPickType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static local:ColorPickType.G}, Mode=TwoWay}" Style="{StaticResource PickTypeRadioButton}"/>
-                        <pr:SlidableNumberTextBox x:Name="GValue" Grid.Column="1" Width="60" Value="255" Maximum="255" Minimum="0" Digit="0" EndSlideEditValue="RGB_ValueChanged"/>
-                    </Grid>
-                    <Grid Margin="{StaticResource ValueMargin}">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" SharedSizeGroup="ColorLabel"/>
-                            <ColumnDefinition />
-                        </Grid.ColumnDefinitions>
-                        <RadioButton x:Name="BColorMap" Content="B:" IsChecked="{Binding ElementName=RootWindow, Path=ColorPickType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static local:ColorPickType.B}, Mode=TwoWay}" Style="{StaticResource PickTypeRadioButton}"/>
-                        <pr:SlidableNumberTextBox x:Name="BValue" Grid.Column="1" Width="60" Value="255" Maximum="255" Minimum="0" Digit="0" EndSlideEditValue="RGB_ValueChanged"/>
-                    </Grid>
-                    <Grid Margin="0,12,0,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="#" Margin="0,0,4,0" VerticalAlignment="Center"/>
-                        <TextBox x:Name="ColorCode" Grid.Column="1" Text="FFFFFF" TextChanged="ColorCode_TextChanged"/>
-                    </Grid>
-                </StackPanel>
-            </StackPanel>
-        </Grid>
-        <StackPanel Margin="0,0,10,10" Orientation="Horizontal" HorizontalAlignment="Right">
+        WindowStyle="SingleBorderWindow"
+        x:Name="RootWindow">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <pr:ColorPicker Grid.Row="0" Margin="10" OldColor="{Binding ElementName=RootWindow, Path=OldColor}" Color="{Binding ElementName=RootWindow, Path=Color}" VectorColor="{Binding ElementName=RootWindow, Path=VectorColor}"/>
+        <StackPanel Grid.Row="1" Margin="0,0,10,10" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Content="{Binding ElementName=RootWindow, Path=OKButtonText}" HorizontalAlignment="Left" Margin="0,0,10,0" Width="75" Height="21" VerticalAlignment="Top" Command="{Binding ElementName=RootWindow, Path=OKCommand}" IsDefault="True"/>
             <Button Content="{Binding ElementName=RootWindow, Path=CancelButtonText}" HorizontalAlignment="Left" Width="75" Height="21" VerticalAlignment="Top" IsCancel="True"/>
         </StackPanel>
-    </StackPanel>
+    </Grid>
 </Window>

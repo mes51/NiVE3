@@ -6,9 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NiVE3.Extension
+namespace NiVE3.Shared.Extension
 {
-    static class ObservableCollectionExtensions
+    public static class ObservableCollectionExtensions
     {
         public static void Sort<T>(this ObservableCollection<T> collection, IComparer<T> comparer) where T : class
         {
@@ -31,6 +31,15 @@ namespace NiVE3.Extension
             for (var i = 0; i < sorted.Length; i++)
             {
                 collection.Move(collection.IndexOf(sorted[i]), i);
+            }
+        }
+
+        public static void SortBy<T, TKey>(this ObservableCollection<T> collection, Func<T, TKey> sortKey)
+        {
+            var keys = collection.Select(v => (v,  sortKey(v))).OrderBy(t => t.Item2).ToArray();
+            for (var i = 0; i < keys.Length; i++)
+            {
+                collection.Move(collection.IndexOf(keys[i].v), i);
             }
         }
 

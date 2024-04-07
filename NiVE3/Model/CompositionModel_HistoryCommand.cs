@@ -4,9 +4,9 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using NiVE3.Extension;
 using NiVE3.Image.Drawing;
 using NiVE3.Plugin.Interfaces;
+using NiVE3.Shared.Extension;
 using NiVE3.View.Resource;
 
 namespace NiVE3.Model

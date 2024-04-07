@@ -34,6 +34,8 @@ namespace NiVE3.Shape
     {
         ColorGradient ColorGradient { get; }
 
+        bool UseOkLabInterpolation { get; }
+
         Vector2 Begin { get; }
 
         float Length { get; }
@@ -44,9 +46,10 @@ namespace NiVE3.Shape
 
         float Cos { get; }
 
-        public LinearGradientBrush(ColorGradient colorGradient, Vector2 begin, Vector2 end)
+        public LinearGradientBrush(ColorGradient colorGradient, bool useOkLabInterpolation, Vector2 begin, Vector2 end)
         {
             ColorGradient = colorGradient;
+            UseOkLabInterpolation = useOkLabInterpolation;
             Begin = begin;
 
             // 逆算のためXが先
@@ -74,7 +77,7 @@ namespace NiVE3.Shape
                 p = Length - p;
             }
             var pos = (Reversed ? Length - p : p) / Length;
-            return ColorGradient.GetrColor(pos);
+            return ColorGradient.GetrColor(pos, UseOkLabInterpolation);
         }
     }
 
@@ -82,13 +85,16 @@ namespace NiVE3.Shape
     {
         ColorGradient ColorGradient { get; }
 
+        bool UseOkLabInterpolation { get; }
+
         Vector2 Begin { get; }
 
         float Length { get; }
 
-        public RadialGradientBrush(ColorGradient colorGradient, Vector2 begin, Vector2 end)
+        public RadialGradientBrush(ColorGradient colorGradient, bool useOkLabInterpolation, Vector2 begin, Vector2 end)
         {
             ColorGradient = colorGradient;
+            UseOkLabInterpolation = useOkLabInterpolation;
             Begin = begin;
             Length = Vector2.Distance(begin, end);
         }
@@ -96,7 +102,7 @@ namespace NiVE3.Shape
         public override Vector4 GetColor(float x, float y)
         {
             var pos = Vector2.Distance(new Vector2(x, y), Begin) / Length;
-            return ColorGradient.GetrColor(pos);
+            return ColorGradient.GetrColor(pos, UseOkLabInterpolation);
         }
     }
 }

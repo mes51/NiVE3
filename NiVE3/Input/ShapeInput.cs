@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ILGPU.IR;
 using NiVE3.Image;
+using NiVE3.Image.Color;
 using NiVE3.Image.Drawing;
 using NiVE3.Numerics;
 using NiVE3.Plugin.Attributes;
@@ -16,6 +17,7 @@ using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Property;
 using NiVE3.Plugin.Property.Properties;
 using NiVE3.Shape;
+using NiVE3.Shared.Extension;
 using NiVE3.View.Resource;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing;
@@ -129,11 +131,29 @@ namespace NiVE3.Input
 
         const string SolidFillBlendModeId = nameof(SolidFillBlendModeId);
 
+        const string GradientFillGroupId = nameof(GradientFillGroupId);
+
+        const string GradientFillRuleId = nameof(GradientFillRuleId);
+
+        const string GradientFillTypeId = nameof(GradientFillTypeId);
+
+        const string GradientFillColorId = nameof(GradientFillColorId);
+
+        const string GradientFillUseOkLabInterpolationId = nameof(GradientFillUseOkLabInterpolationId);
+
+        const string GradientFillBeginPositionId = nameof(GradientFillBeginPositionId);
+
+        const string GradientFillEndPositionId = nameof(GradientFillEndPositionId);
+
+        const string GradientFillOpacityId = nameof(GradientFillOpacityId);
+
+        const string GradientFillBlendModeId = nameof(GradientFillBlendModeId);
+
         const string SolidStrokeGroupId = nameof(SolidStrokeGroupId);
 
         const string SolidStrokeColorId = nameof(SolidStrokeColorId);
 
-        const string SolidStrokeOpacity = nameof(SolidStrokeOpacity);
+        const string SolidStrokeOpacityId = nameof(SolidStrokeOpacityId);
 
         const string SolidStrokeWidthId = nameof(SolidStrokeWidthId);
 
@@ -142,6 +162,30 @@ namespace NiVE3.Input
         const string SolidStrokeJoinStyleTypeId = nameof(SolidStrokeJoinStyleTypeId);
 
         const string SolidStrokeBlendModeId = nameof(SolidStrokeBlendModeId);
+
+        const string GradientStrokeGroupId = nameof(GradientStrokeGroupId);
+
+        const string GradientStrokeRuleId = nameof(GradientStrokeRuleId);
+
+        const string GradientStrokeTypeId = nameof(GradientStrokeTypeId);
+
+        const string GradientStrokeColorId = nameof(GradientStrokeColorId);
+
+        const string GradientStrokeUseOkLabInterpolationId = nameof(GradientStrokeUseOkLabInterpolationId);
+
+        const string GradientStrokeBeginPositionId = nameof(GradientStrokeBeginPositionId);
+
+        const string GradientStrokeEndPositionId = nameof(GradientStrokeEndPositionId);
+
+        const string GradientStrokeOpacityId = nameof(GradientStrokeOpacityId);
+
+        const string GradientStrokeWidthId = nameof(GradientStrokeWidthId);
+
+        const string GradientStrokeEndCapStyleTypeId = nameof(GradientStrokeEndCapStyleTypeId);
+
+        const string GradientStrokeJoinStyleTypeId = nameof(GradientStrokeJoinStyleTypeId);
+
+        const string GradientStrokeBlendModeId = nameof(GradientStrokeBlendModeId);
 
         const string RepeaterGroupId = nameof(RepeaterGroupId);
 
@@ -221,34 +265,74 @@ namespace NiVE3.Input
                 new AppendablePropertyItem(SolidFillGroupId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_SolidFillGroup), () =>
                     new PropertyGroup(SolidFillGroupId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_SolidFillGroup),
                     [
-                        new EnumProperty(SolidFillRuleId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_SolidFillGroup_FillRule), typeof(ShapeFillRule), typeof(LanguageResourceDictionary), ShapeFillRule.NonZero, selectBoxWidth: 100.0),
+                        new EnumProperty(SolidFillRuleId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_FillGroup_FillRule), typeof(ShapeFillRule), typeof(LanguageResourceDictionary), ShapeFillRule.NonZero, selectBoxWidth: 100.0),
                         new ColorProperty(
                             SolidFillColorId,
-                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_SolidBrushGroup_Color),
-                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_SolidBrushGroup_Color),
+                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_Drawing_Color),
+                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_Drawing_Color),
                             LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Dialog_OK),
                             LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Dialog_Cancel),
                             Vector4.One
                         ),
-                        new DoubleProperty(SolidFillOpacityId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_SolidBrushGroup_Opacity), 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Unit_Percent)),
+                        new DoubleProperty(SolidFillOpacityId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_Drawing_Opacity), 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Unit_Percent)),
                         new EnumProperty(SolidFillBlendModeId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_Drawing_BlendMode), typeof(BlendMode), typeof(LanguageResourceDictionary), BlendMode.Normal, selectBoxWidth: 100.0)
+                    ])),
+                new AppendablePropertyItem(GradientFillGroupId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_GradientFillGroup), () =>
+                    new PropertyGroup(GradientFillGroupId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_GradientFillGroup),
+                    [
+                        new EnumProperty(GradientFillRuleId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_FillGroup_FillRule), typeof(ShapeFillRule), typeof(LanguageResourceDictionary), ShapeFillRule.NonZero, selectBoxWidth: 100.0),
+                        new EnumProperty(GradientFillTypeId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_GradientGroup_Type), typeof(GradientType), typeof(LanguageResourceDictionary), GradientType.Linear, selectBoxWidth: 100.0),
+                        new Vector3dProperty(GradientFillBeginPositionId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_GradientGroup_BeginPosition), Vector3d.Zero, digit: 2),
+                        new Vector3dProperty(GradientFillEndPositionId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_GradientGroup_EndPosition), new Vector3d(100.0, 0.0, 0.0), digit: 2),
+                        new ColorGradientProperty(
+                            GradientFillColorId,
+                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_Drawing_Color),
+                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_GradientGroup_Color_Edit),
+                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Dialog_OK),
+                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Dialog_Cancel),
+                            showPreviewOKLabInterpolation: true
+                        ),
+                        new CheckBoxProperty(GradientFillUseOkLabInterpolationId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_GradientGroup_UseOkLabInterpolation), false),
+                        new DoubleProperty(GradientFillOpacityId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_Drawing_Opacity), 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Unit_Percent)),
+                        new EnumProperty(GradientFillBlendModeId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_Drawing_BlendMode), typeof(BlendMode), typeof(LanguageResourceDictionary), BlendMode.Normal, selectBoxWidth: 100.0)
                     ])),
                 new AppendablePropertyItem(SolidStrokeGroupId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_SolidStrokeGroup), () =>
                     new PropertyGroup(SolidStrokeGroupId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_SolidStrokeGroup),
                     [
                         new ColorProperty(
                             SolidStrokeColorId,
-                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_SolidBrushGroup_Color),
-                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_SolidBrushGroup_Color),
+                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_Drawing_Color),
+                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_Drawing_Color),
                             LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Dialog_OK),
                             LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Dialog_Cancel),
                             new Vector4(0.0F, 0.0F, 1.0F, 1.0F)
                         ),
-                        new DoubleProperty(SolidStrokeOpacity, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_SolidBrushGroup_Opacity), 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Unit_Percent)),
-                        new DoubleProperty(SolidStrokeWidthId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_SolidStrokeGroup_Width), 4.0, 0.0, double.MaxValue, digit: 2),
-                        new EnumProperty(SolidStrokeEndCapStyleTypeId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_SolidStrokeGroup_EndCapStyleType), typeof(EndCapStyle), typeof(LanguageResourceDictionary), EndCapStyle.Butt, selectBoxWidth: 100.0),
-                        new EnumProperty(SolidStrokeJoinStyleTypeId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_SolidStrokeGroup_JoinStyleType), typeof(JointStyle), typeof(LanguageResourceDictionary), JointStyle.Square, selectBoxWidth: 100.0),
+                        new DoubleProperty(SolidStrokeOpacityId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_Drawing_Opacity), 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Unit_Percent)),
+                        new DoubleProperty(SolidStrokeWidthId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_StrokeGroup_Width), 4.0, 0.0, double.MaxValue, digit: 2),
+                        new EnumProperty(SolidStrokeEndCapStyleTypeId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_StrokeGroup_EndCapStyleType), typeof(EndCapStyle), typeof(LanguageResourceDictionary), EndCapStyle.Butt, selectBoxWidth: 100.0),
+                        new EnumProperty(SolidStrokeJoinStyleTypeId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_StrokeGroup_JoinStyleType), typeof(JointStyle), typeof(LanguageResourceDictionary), JointStyle.Square, selectBoxWidth: 100.0),
                         new EnumProperty(SolidStrokeBlendModeId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_Drawing_BlendMode), typeof(BlendMode), typeof(LanguageResourceDictionary), BlendMode.Normal, selectBoxWidth: 100.0)
+                    ])),
+                new AppendablePropertyItem(GradientStrokeGroupId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_GradientStrokeGroup), () =>
+                    new PropertyGroup(GradientStrokeGroupId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_GradientStrokeGroup),
+                    [
+                        new EnumProperty(GradientStrokeTypeId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_GradientGroup_Type), typeof(GradientType), typeof(LanguageResourceDictionary), GradientType.Linear, selectBoxWidth: 100.0),
+                        new Vector3dProperty(GradientStrokeBeginPositionId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_GradientGroup_BeginPosition), Vector3d.Zero, digit: 2),
+                        new Vector3dProperty(GradientStrokeEndPositionId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_GradientGroup_EndPosition), new Vector3d(100.0, 0.0, 0.0), digit: 2),
+                        new ColorGradientProperty(
+                            GradientStrokeColorId,
+                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_Drawing_Color),
+                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_GradientGroup_Color_Edit),
+                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Dialog_OK),
+                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Dialog_Cancel),
+                            showPreviewOKLabInterpolation: true
+                        ),
+                        new CheckBoxProperty(GradientStrokeUseOkLabInterpolationId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_GradientGroup_UseOkLabInterpolation), false),
+                        new DoubleProperty(GradientStrokeOpacityId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_Drawing_Opacity), 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Unit_Percent)),
+                        new DoubleProperty(GradientStrokeWidthId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_StrokeGroup_Width), 4.0, 0.0, double.MaxValue, digit: 2),
+                        new EnumProperty(GradientStrokeEndCapStyleTypeId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_StrokeGroup_EndCapStyleType), typeof(EndCapStyle), typeof(LanguageResourceDictionary), EndCapStyle.Butt, selectBoxWidth: 100.0),
+                        new EnumProperty(GradientStrokeJoinStyleTypeId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_StrokeGroup_JoinStyleType), typeof(JointStyle), typeof(LanguageResourceDictionary), JointStyle.Square, selectBoxWidth: 100.0),
+                        new EnumProperty(GradientStrokeBlendModeId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_Drawing_BlendMode), typeof(BlendMode), typeof(LanguageResourceDictionary), BlendMode.Normal, selectBoxWidth: 100.0)
                     ])),
                 AppendablePropertyItemSeparator.Instance,
                 new AppendablePropertyItem(RepeaterGroupId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_RepeaterGroup), () =>
@@ -518,16 +602,44 @@ namespace NiVE3.Input
 
                     tree.AddNode(new ShapeSolidFill(color, fillRule, blendModel) { Opacity = opacity });
                 }
+                else if (property.TryGetValue(GradientFillColorId, out var gradientFillColor))
+                {
+                    var color = (ColorGradient)(gradientFillColor ?? ColorGradient.Empty);
+                    var useOkLabInterpolation = (bool)(property[GradientFillUseOkLabInterpolationId] ?? false);
+                    var type = (GradientType)(property[GradientFillTypeId] ?? GradientType.Linear);
+                    var begin = (Vector3)(Vector3d)(property[GradientFillBeginPositionId] ?? Vector3d.Zero);
+                    var end = (Vector3)(Vector3d)(property[GradientFillEndPositionId] ?? Vector3d.Zero);
+                    var opacity = (float)(double)(property[GradientFillOpacityId] ?? 0.0);
+                    var fillRule = (ShapeFillRule)(property[GradientFillRuleId] ?? ShapeFillRule.NonZero);
+                    var blendModel = (BlendMode)(property[GradientFillBlendModeId] ?? BlendMode.Normal);
+
+                    tree.AddNode(new ShapeGradientFill(color, useOkLabInterpolation, type, begin.AsVector2(), end.AsVector2(), fillRule, blendModel));
+                }
                 else if (property.TryGetValue(SolidStrokeColorId, out var solifStrokeColor))
                 {
                     var color = (Vector4)(solifStrokeColor ?? Vector4.Zero);
-                    var opacity = (float)(double)(property[SolidStrokeOpacity] ?? 0.0) * 0.01F;
+                    var opacity = (float)(double)(property[SolidStrokeOpacityId] ?? 0.0) * 0.01F;
                     var width = (float)(double)(property[SolidStrokeWidthId] ?? ShapeFillRule.NonZero);
                     var endCapStyle = (EndCapStyle)(property[SolidStrokeEndCapStyleTypeId] ?? EndCapStyle.Butt);
                     var joinStyle = (JointStyle)(property[SolidStrokeJoinStyleTypeId] ?? JointStyle.Square);
                     var blendModel = (BlendMode)(property[SolidStrokeBlendModeId] ?? BlendMode.Normal);
 
                     tree.AddNode(new ShapeSolidStroke(color, width, endCapStyle, joinStyle, blendModel) { Opacity = opacity });
+                }
+                else if (property.TryGetValue(GradientStrokeColorId, out var gradientStrokeColor))
+                {
+                    var color = (ColorGradient)(gradientStrokeColor ?? ColorGradient.Empty);
+                    var useOkLabInterpolation = (bool)(property[GradientStrokeUseOkLabInterpolationId] ?? false);
+                    var type = (GradientType)(property[GradientStrokeTypeId] ?? GradientType.Linear);
+                    var begin = (Vector3)(Vector3d)(property[GradientStrokeBeginPositionId] ?? Vector3d.Zero);
+                    var end = (Vector3)(Vector3d)(property[GradientStrokeEndPositionId] ?? Vector3d.Zero);
+                    var opacity = (float)(double)(property[GradientStrokeOpacityId] ?? 0.0) * 0.01F;
+                    var width = (float)(double)(property[GradientStrokeWidthId] ?? ShapeFillRule.NonZero);
+                    var endCapStyle = (EndCapStyle)(property[GradientStrokeEndCapStyleTypeId] ?? EndCapStyle.Butt);
+                    var joinStyle = (JointStyle)(property[GradientStrokeJoinStyleTypeId] ?? JointStyle.Square);
+                    var blendModel = (BlendMode)(property[GradientStrokeBlendModeId] ?? BlendMode.Normal);
+
+                    tree.AddNode(new ShapeGradientStroke(color, useOkLabInterpolation, type, begin.AsVector2(), end.AsVector2(), width, endCapStyle, joinStyle, blendModel) { Opacity = opacity });
                 }
                 else if (property.TryGetValue(RepeaterCountId, out var repeaterCount))
                 {
@@ -574,6 +686,12 @@ namespace NiVE3.Input
     {
         NonZero,
         EvenOdd
+    }
+
+    enum GradientType
+    {
+        Linear,
+        Radial
     }
 
     abstract class ShapeTreeBase
@@ -694,7 +812,7 @@ namespace NiVE3.Input
         }
     }
 
-    class ShapePath : ShapeTreeBase
+    file class ShapePath : ShapeTreeBase
     {
         public IPathCollection Paths { get; private set; }
 
@@ -719,7 +837,7 @@ namespace NiVE3.Input
         }
     }
 
-    abstract class ShapeFillBase : ShapeTreeBase
+    file abstract class ShapeFillBase : ShapeTreeBase
     {
         public ShapeFillRule FillRule { get; }
 
@@ -741,7 +859,7 @@ namespace NiVE3.Input
         }
     }
 
-    abstract class ShapeStrokeBase : ShapeTreeBase
+    file abstract class ShapeStrokeBase : ShapeTreeBase
     {
         public float Width { get; }
 
@@ -769,7 +887,7 @@ namespace NiVE3.Input
         }
     }
 
-    class ShapeSolidFill : ShapeFillBase
+    file class ShapeSolidFill : ShapeFillBase
     {
         public Vector4 Color { get; }
 
@@ -791,7 +909,53 @@ namespace NiVE3.Input
         }
     }
 
-    class ShapeSolidStroke : ShapeStrokeBase
+    file class ShapeGradientFill : ShapeFillBase
+    {
+        public ColorGradient Color { get; }
+
+        public bool UseOkLabInterpolation { get; }
+
+        public GradientType Type { get; }
+
+        public Vector2 BeginPosition { get; set; }
+
+        public Vector2 EndPosition { get; set; }
+
+        public ShapeGradientFill(ColorGradient color, bool useOkLabInterpolation, GradientType type, Vector2 beginPosition, Vector2 endPosition, ShapeFillRule fillRule, BlendMode blendMode) : base(fillRule, blendMode)
+        {
+            Color = color;
+            UseOkLabInterpolation = useOkLabInterpolation;
+            Type = type;
+            BeginPosition = beginPosition;
+            EndPosition = endPosition;
+        }
+
+        public override ShapeTreeBase Copy()
+        {
+            return new ShapeGradientFill(Color, UseOkLabInterpolation, Type, BeginPosition, EndPosition, FillRule, BlendMode) { Opacity = Opacity };
+        }
+
+        protected internal override void Transform(Matrix3x2 matrix, float opacity)
+        {
+            base.Transform(matrix, opacity);
+            BeginPosition = Vector2.Transform(BeginPosition, matrix);
+            EndPosition = Vector2.Transform(EndPosition, matrix);
+        }
+
+        public override Brush GetBrush()
+        {
+            if (Type == GradientType.Radial)
+            {
+                return new RadialGradientBrush(Color, UseOkLabInterpolation, BeginPosition, EndPosition);
+            }
+            else
+            {
+                return new LinearGradientBrush(Color, UseOkLabInterpolation, BeginPosition, EndPosition);
+            }
+        }
+    }
+
+    file class ShapeSolidStroke : ShapeStrokeBase
     {
         public Vector4 Color { get; }
 
@@ -810,6 +974,52 @@ namespace NiVE3.Input
             var brushColor = Color;
             brushColor.W *= Opacity;
             return new SolidBrush(brushColor);
+        }
+    }
+
+    file class ShapeGradientStroke : ShapeStrokeBase
+    {
+        public ColorGradient Color { get; }
+
+        public bool UseOkLabInterpolation { get; }
+
+        public GradientType Type { get; }
+
+        public Vector2 BeginPosition { get; set; }
+
+        public Vector2 EndPosition { get; set; }
+
+        public ShapeGradientStroke(ColorGradient color, bool useOkLabInterpolation, GradientType type, Vector2 beginPosition, Vector2 endPosition, float width, EndCapStyle endCapStyle, JointStyle joinStyle, BlendMode blendMode) : base(width, endCapStyle, joinStyle, blendMode)
+        {
+            Color = color;
+            UseOkLabInterpolation = useOkLabInterpolation;
+            Type = type;
+            BeginPosition = beginPosition;
+            EndPosition = endPosition;
+        }
+
+        public override ShapeTreeBase Copy()
+        {
+            return new ShapeGradientStroke(Color, UseOkLabInterpolation, Type, BeginPosition, EndPosition, Width, EndCapStyle, JoinStyle, BlendMode) { Opacity = Opacity };
+        }
+
+        protected internal override void Transform(Matrix3x2 matrix, float opacity)
+        {
+            base.Transform(matrix, opacity);
+            BeginPosition = Vector2.Transform(BeginPosition, matrix);
+            EndPosition = Vector2.Transform(EndPosition, matrix);
+        }
+
+        public override Brush GetBrush()
+        {
+            if (Type == GradientType.Radial)
+            {
+                return new RadialGradientBrush(Color, UseOkLabInterpolation, BeginPosition, EndPosition);
+            }
+            else
+            {
+                return new LinearGradientBrush(Color, UseOkLabInterpolation, BeginPosition, EndPosition);
+            }
         }
     }
 }

@@ -1,0 +1,139 @@
+﻿<UserControl x:Class="NiVE3.UI.Primitive.ColorPicker"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:NiVE3.UI.Primitive"
+             xmlns:cv="clr-namespace:NiVE3.UI.Converter"
+             xmlns:gm="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup"
+             mc:Ignorable="d" 
+             x:Name="Root"
+             SizeChanged="Element_SizeChanged">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <cv:EnumToBoolConverter x:Key="EnumToBoolConverter"/>
+        
+        <Thickness x:Key="ValueMargin">0,8,0,0</Thickness>
+        
+        <Style x:Key="PickTypeRadioButton" TargetType="{x:Type RadioButton}" BasedOn="{StaticResource {x:Type RadioButton}}">
+            <Setter Property="Margin" Value="0,0,10,0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Grid.Column" Value="0"/>
+            <Setter Property="GroupName" Value="PickType"/>
+        </Style>
+
+        <Style x:Key="DeactiveCoverStyle" TargetType="{x:Type Rectangle}">
+            <Setter Property="Fill" Value="#33000000"/>
+            <Setter Property="Visibility" Value="Collapsed"/>
+            <Setter Property="IsHitTestVisible" Value="True"/>
+
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ElementName=Root, Path=IsEnabled}" Value="False">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        
+        <Grid Grid.Column="0">
+            <Border Width="258" Height="258" VerticalAlignment="Center" HorizontalAlignment="Center" BorderBrush="{gm:AppearanceResource ResourceKey=BorderBrush}" BorderThickness="1" Margin="5" SizeChanged="Element_SizeChanged">
+                <Grid>
+                    <Image x:Name="ColorPickArea" Stretch="Uniform" Source="{Binding ElementName=Root, Path=ColorPickAreaImage}" MouseDown="ColorPickArea_MouseDown" MouseMove="ColorPickArea_MouseMove" MouseUp="ColorPickArea_MouseUp"/>
+                    <Rectangle Style="{StaticResource DeactiveCoverStyle}"/>
+                </Grid>
+            </Border>
+            <Canvas IsHitTestVisible="False">
+                <Grid x:Name="SelectedColorCircle">
+                    <Ellipse Stroke="Black" StrokeThickness="1" Width="12" Height="12"/>
+                    <Ellipse Stroke="White" StrokeThickness="1" Width="10" Height="10" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                </Grid>
+            </Canvas>
+        </Grid>
+        <Grid Grid.Column="1" Margin="4,5,0,5">
+            <Border Width="26" Height="258" HorizontalAlignment="Center" BorderBrush="{gm:AppearanceResource ResourceKey=BorderBrush}" BorderThickness="1">
+                <Grid>
+                    <Image x:Name="ColorBar" Stretch="Fill" Source="{Binding ElementName=Root, Path=ColorBarImage}" MouseDown="ColorBar_MouseDown" MouseMove="ColorBar_MouseMove" MouseUp="ColorBar_MouseUp"/>
+                    <Rectangle Style="{StaticResource DeactiveCoverStyle}"/>
+                </Grid>
+            </Border>
+            <Canvas Width="42" IsHitTestVisible="False">
+                <Grid x:Name="SelectedColorBarArrow" Width="42" Canvas.Top="-2">
+                    <Path Data="M0,0 3,3 0,6 M39.5,0 36.5,3 39.5,6" Stroke="{gm:AppearanceResource ResourceKey=BorderBrush}" StrokeThickness="2" HorizontalAlignment="Center"/>
+                </Grid>
+            </Canvas>
+        </Grid>
+        <StackPanel Grid.Column="2" Margin="4,5,0,5" Grid.IsSharedSizeScope="True">
+            <Border BorderBrush="{gm:AppearanceResource ResourceKey=BorderBrush}" BorderThickness="1">
+                <Grid>
+                    <StackPanel>
+                        <Rectangle x:Name="NewColorPreview" Width="100" Height="30"/>
+                        <Rectangle x:Name="OldColorPreview" Width="100" Height="30"/>
+                    </StackPanel>
+                    <Rectangle Style="{StaticResource DeactiveCoverStyle}"/>
+                </Grid>
+            </Border>
+            <Grid Margin="0,12,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" SharedSizeGroup="ColorLabel"/>
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <RadioButton x:Name="HColorMap" Content="H:" IsChecked="{Binding ElementName=Root, Path=ColorPickType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static local:ColorPickType.H}, Mode=TwoWay}" Style="{StaticResource PickTypeRadioButton}"/>
+                <local:SlidableNumberTextBox x:Name="HValue" Grid.Column="1" Value="0" Maximum="360" Minimum="0" Digit="0" EndSlideEditValue="HSV_ValueChanged"/>
+            </Grid>
+            <Grid Margin="{StaticResource ValueMargin}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" SharedSizeGroup="ColorLabel"/>
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <RadioButton x:Name="SColorMap" Content="S:" IsChecked="{Binding ElementName=Root, Path=ColorPickType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static local:ColorPickType.S}, Mode=TwoWay}" Style="{StaticResource PickTypeRadioButton}"/>
+                <local:SlidableNumberTextBox x:Name="SValue" Grid.Column="1" Value="100" Maximum="100" Minimum="0" Digit="0" EndSlideEditValue="HSV_ValueChanged"/>
+            </Grid>
+            <Grid Margin="{StaticResource ValueMargin}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" SharedSizeGroup="ColorLabel"/>
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <RadioButton x:Name="VColorMap" Content="B:" IsChecked="{Binding ElementName=Root, Path=ColorPickType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static local:ColorPickType.V}, Mode=TwoWay}" Style="{StaticResource PickTypeRadioButton}"/>
+                <local:SlidableNumberTextBox x:Name="VValue" Grid.Column="1" Value="100" Maximum="100" Minimum="0" Digit="0" EndSlideEditValue="HSV_ValueChanged"/>
+            </Grid>
+            <Grid Margin="0,12,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" SharedSizeGroup="ColorLabel"/>
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <RadioButton x:Name="RColorMap" Content="R:" IsChecked="{Binding ElementName=Root, Path=ColorPickType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static local:ColorPickType.R}, Mode=TwoWay}" Style="{StaticResource PickTypeRadioButton}"/>
+                <local:SlidableNumberTextBox x:Name="RValue" Grid.Column="1" Value="255" Maximum="255" Minimum="0" Digit="0" EndSlideEditValue="RGB_ValueChanged"/>
+            </Grid>
+            <Grid Margin="{StaticResource ValueMargin}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" SharedSizeGroup="ColorLabel"/>
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <RadioButton x:Name="GColorMap" Content="G:" IsChecked="{Binding ElementName=Root, Path=ColorPickType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static local:ColorPickType.G}, Mode=TwoWay}" Style="{StaticResource PickTypeRadioButton}"/>
+                <local:SlidableNumberTextBox x:Name="GValue" Grid.Column="1" Value="255" Maximum="255" Minimum="0" Digit="0" EndSlideEditValue="RGB_ValueChanged"/>
+            </Grid>
+            <Grid Margin="{StaticResource ValueMargin}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" SharedSizeGroup="ColorLabel"/>
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <RadioButton x:Name="BColorMap" Content="B:" IsChecked="{Binding ElementName=Root, Path=ColorPickType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static local:ColorPickType.B}, Mode=TwoWay}" Style="{StaticResource PickTypeRadioButton}"/>
+                <local:SlidableNumberTextBox x:Name="BValue" Grid.Column="1" Value="255" Maximum="255" Minimum="0" Digit="0" EndSlideEditValue="RGB_ValueChanged"/>
+            </Grid>
+            <Grid Margin="0,12,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="#" Margin="0,0,4,0" VerticalAlignment="Center"/>
+                <TextBox x:Name="ColorCode" Grid.Column="1" Text="FFFFFF" TextChanged="ColorCode_TextChanged"/>
+            </Grid>
+        </StackPanel>
+    </Grid>
+</UserControl>
