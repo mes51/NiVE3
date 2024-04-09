@@ -36,9 +36,9 @@ namespace NiVE3.PresetPlugin.Effect.Blur
         {
             return
             [
-                new DoubleProperty(PropertyAmountId, LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Blur_BoxBlur_Amount), 0.0, 0.0, 10000.0, digit: 2),
-                new DoubleProperty(PropertyRepeatId, LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Blur_BoxBlur_Repeat), 3, 1, 50, digit: 0),
-                new EnumProperty(PropertyDirectionId, LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Blur_BoxBlur_Direction), typeof(BlurDirection), typeof(LanguageResourceDictionary), BlurDirection.HorizontalAndVertical, selectBoxWidth: 90.0)
+                new DoubleProperty(PropertyAmountId, LanguageResourceDictionary.ResourceKeys.Blur_BoxBlur_Amount, 0.0, 0.0, 10000.0, digit: 2),
+                new DoubleProperty(PropertyRepeatId, LanguageResourceDictionary.ResourceKeys.Blur_BoxBlur_Repeat, 3, 1, 50, digit: 0),
+                new EnumProperty(PropertyDirectionId, LanguageResourceDictionary.ResourceKeys.Blur_BoxBlur_Direction, typeof(BlurDirection), typeof(LanguageResourceDictionary), BlurDirection.HorizontalAndVertical, selectBoxWidth: 90.0)
             ];
         }
 

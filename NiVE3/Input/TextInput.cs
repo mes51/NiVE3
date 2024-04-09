@@ -160,140 +160,140 @@ namespace NiVE3.Input
         {
             return
             [
-                new SourceTextProperty(SourceTextId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_SourceText), StyledText.Empty),
-                new PropertyGroup(TextMoreOptionsGroupId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextMoreOptions),
+                new SourceTextProperty(SourceTextId, LanguageResourceDictionary.ResourceKeys.TextProperty_SourceText, StyledText.Empty),
+                new PropertyGroup(TextMoreOptionsGroupId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextMoreOptions,
                 [
-                    new Vector3dProperty(TextBaseAnchorPointRateId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextMoreOptions_BaseAnchorPointRate), new Vector3d(50.0), digit: 2, unitKey: LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Unit_Percent)),
-                    new Vector3dProperty(TextBoxSizeId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextMoreOptions_TextBoxSize), new Vector3d(), new Vector3d(), digit: 2),
-                    new EnumProperty(TextMoreOptionInterCharacterBlendModeId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextMoreOptions_InterCharacterBlendMode), typeof(BlendMode), typeof(LanguageResourceDictionary), BlendMode.Normal)
+                    new Vector3dProperty(TextBaseAnchorPointRateId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextMoreOptions_BaseAnchorPointRate, new Vector3d(50.0), digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
+                    new Vector3dProperty(TextBoxSizeId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextMoreOptions_TextBoxSize, new Vector3d(), new Vector3d(), digit: 2),
+                    new EnumProperty(TextMoreOptionInterCharacterBlendModeId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextMoreOptions_InterCharacterBlendMode, typeof(BlendMode), typeof(LanguageResourceDictionary), BlendMode.Normal)
                 ]),
-                new AppendableProperty(TextAnimatorsId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator),
+                new AppendableProperty(TextAnimatorsId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator,
                 [
-                    new AppendablePropertyItem(TextAnimatorAnimatorId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator), () =>
-                        new PropertyGroup(TextAnimatorAnimatorId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator),
+                    new AppendablePropertyItem(TextAnimatorAnimatorId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator, () =>
+                        new PropertyGroup(TextAnimatorAnimatorId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator,
                         [
-                            new AppendableProperty(TextAnimatorSelectorId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Selector),
+                            new AppendableProperty(TextAnimatorSelectorId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Selector,
                             [
-                                new AppendablePropertyItem(TextAnimatorSelectorSelectorId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Selector_Selector), () =>
-                                    new PropertyGroup(TextAnimatorSelectorSelectorId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Selector_Selector),
+                                new AppendablePropertyItem(TextAnimatorSelectorSelectorId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Selector_Selector, () =>
+                                    new PropertyGroup(TextAnimatorSelectorSelectorId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Selector_Selector,
                                     [
-                                        new DoubleProperty(TextAnimatorSelectorBeginId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Selector_Begin), 0.0, -100.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Unit_Percent)),
-                                        new DoubleProperty(TextAnimatorSelectorEndId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Selector_End), 100.0, -100.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Unit_Percent)),
-                                        new DoubleProperty(TextAnimatorSelectorOffsetId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Selector_Offset), 0.0, -100.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Unit_Percent)),
-                                        new PropertyGroup(TextAnimatorSelectorMoreOptionId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Selector_MoreOption),
+                                        new DoubleProperty(TextAnimatorSelectorBeginId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Selector_Begin, 0.0, -100.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
+                                        new DoubleProperty(TextAnimatorSelectorEndId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Selector_End, 100.0, -100.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
+                                        new DoubleProperty(TextAnimatorSelectorOffsetId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Selector_Offset, 0.0, -100.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
+                                        new PropertyGroup(TextAnimatorSelectorMoreOptionId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Selector_MoreOption,
                                         [
-                                            new EnumProperty(TextAnimatorSelectorCriteriaId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Selector_Criteria), typeof(SelectorCriteria), typeof(LanguageResourceDictionary), SelectorCriteria.Charactor, selectBoxWidth: 125.0),
-                                            new EnumProperty(TextAnimatorSelectorBlendModeId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Selector_BlendMode), typeof(SelectorBlendMode), typeof(LanguageResourceDictionary), SelectorBlendMode.Add, selectBoxWidth: 125.0),
-                                            new DoubleProperty(TextAnimatorSelectorAmountId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Selector_Amount), 100.0, 0.0, 100.0, digit: 2),
-                                            new EnumProperty(TextAnimatorSelectorShapeId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Selector_Shape), typeof(SelectorShape), typeof(LanguageResourceDictionary), SelectorShape.Rectangle, selectBoxWidth: 125.0),
-                                            new CheckBoxProperty(TextAnimatorSelectorEnableRandomId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Selector_EnableRandom), false),
-                                            new DoubleProperty(TextAnimatorSelectorRandomSeedId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Selector_RandomSeed), 0, double.MinValue, double.MaxValue, digit: 0)
+                                            new EnumProperty(TextAnimatorSelectorCriteriaId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Selector_Criteria, typeof(SelectorCriteria), typeof(LanguageResourceDictionary), SelectorCriteria.Charactor, selectBoxWidth: 125.0),
+                                            new EnumProperty(TextAnimatorSelectorBlendModeId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Selector_BlendMode, typeof(SelectorBlendMode), typeof(LanguageResourceDictionary), SelectorBlendMode.Add, selectBoxWidth: 125.0),
+                                            new DoubleProperty(TextAnimatorSelectorAmountId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Selector_Amount, 100.0, 0.0, 100.0, digit: 2),
+                                            new EnumProperty(TextAnimatorSelectorShapeId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Selector_Shape, typeof(SelectorShape), typeof(LanguageResourceDictionary), SelectorShape.Rectangle, selectBoxWidth: 125.0),
+                                            new CheckBoxProperty(TextAnimatorSelectorEnableRandomId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Selector_EnableRandom, false),
+                                            new DoubleProperty(TextAnimatorSelectorRandomSeedId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Selector_RandomSeed, 0, double.MinValue, double.MaxValue, digit: 0)
                                         ])
                                     ]))
                             ], 0),
-                            new AppendableProperty(TextAnimatorValueId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value),
+                            new AppendableProperty(TextAnimatorValueId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value,
                             [
-                                new AppendablePropertyItem(TextAnimatorValueAnchorPointId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_AnchorPoint), () =>
-                                    new PropertyGroup(TextAnimatorValueAnchorPointId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_AnchorPoint),
+                                new AppendablePropertyItem(TextAnimatorValueAnchorPointId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_AnchorPoint, () =>
+                                    new PropertyGroup(TextAnimatorValueAnchorPointId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_AnchorPoint,
                                     [
-                                        new Vector3dProperty(TextAnimatorValueAnchorPointId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_AnchorPoint), new Vector3d(), digit: 2)
+                                        new Vector3dProperty(TextAnimatorValueAnchorPointId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_AnchorPoint, new Vector3d(), digit: 2)
                                     ])),
-                                new AppendablePropertyItem(TextAnimatorValuePositionId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_Position), () =>
-                                    new PropertyGroup(TextAnimatorValuePositionId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_Position),
+                                new AppendablePropertyItem(TextAnimatorValuePositionId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_Position, () =>
+                                    new PropertyGroup(TextAnimatorValuePositionId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_Position,
                                     [
-                                        new Vector3dProperty(TextAnimatorValuePositionId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_Position), new Vector3d(), digit: 2)
+                                        new Vector3dProperty(TextAnimatorValuePositionId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_Position, new Vector3d(), digit: 2)
                                     ])),
-                                new AppendablePropertyItem(TextAnimatorValueScaleId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_Scale), () =>
-                                    new PropertyGroup(TextAnimatorValueScaleId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_Scale),
+                                new AppendablePropertyItem(TextAnimatorValueScaleId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_Scale, () =>
+                                    new PropertyGroup(TextAnimatorValueScaleId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_Scale,
                                     [
-                                        new Scale3dProperty(TextAnimatorValueScaleId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_Scale), new Vector3d(100.0), digit: 2)
+                                        new Scale3dProperty(TextAnimatorValueScaleId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_Scale, new Vector3d(100.0), digit: 2)
                                     ])),
-                                new AppendablePropertyItem(TextAnimatorValueAngleId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_Angle), () =>
-                                    new PropertyGroup(TextAnimatorValueAngleId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_Angle),
+                                new AppendablePropertyItem(TextAnimatorValueAngleId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_Angle, () =>
+                                    new PropertyGroup(TextAnimatorValueAngleId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_Angle,
                                     [
-                                        new AngleProperty(TextAnimatorValueAngleId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_Angle), 0.0, digit: 2)
+                                        new AngleProperty(TextAnimatorValueAngleId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_Angle, 0.0, digit: 2)
                                     ])),
-                                new AppendablePropertyItem(TextAnimatorValueSkewId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_Skew), () =>
-                                    new PropertyGroup(TextAnimatorValueSkewId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_Skew),
+                                new AppendablePropertyItem(TextAnimatorValueSkewId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_Skew, () =>
+                                    new PropertyGroup(TextAnimatorValueSkewId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_Skew,
                                     [
-                                        new DoubleProperty(TextAnimatorValueSkewId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_Skew), 0.0, -100.0, 100.0, digit: 2),
-                                        new AngleProperty(TextAnimatorValueSkewAxisId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_SkewAxis), 0.0, digit: 2)
+                                        new DoubleProperty(TextAnimatorValueSkewId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_Skew, 0.0, -100.0, 100.0, digit: 2),
+                                        new AngleProperty(TextAnimatorValueSkewAxisId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_SkewAxis, 0.0, digit: 2)
                                     ])),
-                                new AppendablePropertyItem(TextAnimatorValueOpacityId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_Opacity), () =>
-                                    new PropertyGroup(TextAnimatorValueOpacityId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_Opacity),
+                                new AppendablePropertyItem(TextAnimatorValueOpacityId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_Opacity, () =>
+                                    new PropertyGroup(TextAnimatorValueOpacityId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_Opacity,
                                     [
-                                        new DoubleProperty(TextAnimatorValueOpacityId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_Opacity), 100.0, 0.0, 100.0, digit: 2)
+                                        new DoubleProperty(TextAnimatorValueOpacityId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_Opacity, 100.0, 0.0, 100.0, digit: 2)
                                     ])),
                                 AppendablePropertyItemSeparator.Instance,
-                                new AppendablePropertyItem(TextAnimatorValueFontSizeId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_FontSize), () =>
-                                    new PropertyGroup(TextAnimatorValueFontSizeId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_FontSize),
+                                new AppendablePropertyItem(TextAnimatorValueFontSizeId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_FontSize, () =>
+                                    new PropertyGroup(TextAnimatorValueFontSizeId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_FontSize,
                                     [
                                         new DoubleProperty(
                                             TextAnimatorValueFontSizeId,
-                                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_FontSize),
+                                            LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_FontSize,
                                             0.0,
                                             double.MinValue,
                                             double.MaxValue,
                                             digit: 2,
-                                            unitKey: LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Unit_Pixel)
+                                            unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Pixel
                                         )
                                     ])),
-                                new AppendablePropertyItem(TextAnimatorValueFillColorId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_FillColor), () =>
-                                    new PropertyGroup(TextAnimatorValueFillColorId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_FillColor),
+                                new AppendablePropertyItem(TextAnimatorValueFillColorId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_FillColor, () =>
+                                    new PropertyGroup(TextAnimatorValueFillColorId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_FillColor,
                                     [
                                         new ColorProperty(
                                             TextAnimatorValueFillColorId,
-                                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_FillColor),
-                                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_FillColor),
-                                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Dialog_OK),
-                                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Dialog_Cancel),
+                                            LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_FillColor,
+                                            LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_FillColor,
+                                            LanguageResourceDictionary.ResourceKeys.Dialog_OK,
+                                            LanguageResourceDictionary.ResourceKeys.Dialog_Cancel,
                                             Vector4.One
                                         ),
-                                        new DoubleProperty(TextAnimatorValueFillColorOpacityId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_FillColorOpacity), 100.0, 0.0, 100.0, digit: 2)
+                                        new DoubleProperty(TextAnimatorValueFillColorOpacityId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_FillColorOpacity, 100.0, 0.0, 100.0, digit: 2)
                                     ])),
-                                new AppendablePropertyItem(TextAnimatorValueTextLineColorId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_TextLineColor), () =>
-                                    new PropertyGroup(TextAnimatorValueTextLineColorId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_TextLineColor),
+                                new AppendablePropertyItem(TextAnimatorValueTextLineColorId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_TextLineColor, () =>
+                                    new PropertyGroup(TextAnimatorValueTextLineColorId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_TextLineColor,
                                     [
                                         new ColorProperty(
                                             TextAnimatorValueTextLineColorId,
-                                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_TextLineColor),
-                                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_TextLineColor),
-                                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Dialog_OK),
-                                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Dialog_Cancel),
+                                            LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_TextLineColor,
+                                            LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_TextLineColor,
+                                            LanguageResourceDictionary.ResourceKeys.Dialog_OK,
+                                            LanguageResourceDictionary.ResourceKeys.Dialog_Cancel,
                                             new Vector4(0.0F, 0.0F, 1.0F, 1.0F)
                                         ),
-                                        new DoubleProperty(TextAnimatorValueTextLineColorOpacityId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_TextLineColorOpacity), 100.0, 0.0, 100.0, digit: 2)
+                                        new DoubleProperty(TextAnimatorValueTextLineColorOpacityId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_TextLineColorOpacity, 100.0, 0.0, 100.0, digit: 2)
                                     ])),
-                                new AppendablePropertyItem(TextAnimatorValueTextLineWidthId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_TextLineWidth), () =>
-                                    new PropertyGroup(TextAnimatorValueTextLineWidthId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_TextLineWidth),
+                                new AppendablePropertyItem(TextAnimatorValueTextLineWidthId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_TextLineWidth, () =>
+                                    new PropertyGroup(TextAnimatorValueTextLineWidthId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_TextLineWidth,
                                     [
                                         new DoubleProperty(
                                             TextAnimatorValueTextLineWidthId,
-                                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_TextLineWidth),
+                                            LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_TextLineWidth,
                                             3.0,
                                             double.MinValue,
                                             double.MaxValue,
                                             digit: 2,
-                                            unitKey: LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Unit_Pixel)
+                                            unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Pixel
                                         )
                                     ])),
                                 AppendablePropertyItemSeparator.Instance,
-                                new AppendablePropertyItem(TextAnimatorValueCharacterOffsetId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_CharacterOffset), () =>
-                                    new PropertyGroup(TextAnimatorValueCharacterOffsetId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_CharacterOffset),
+                                new AppendablePropertyItem(TextAnimatorValueCharacterOffsetId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_CharacterOffset, () =>
+                                    new PropertyGroup(TextAnimatorValueCharacterOffsetId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_CharacterOffset,
                                     [
-                                        new DoubleProperty(TextAnimatorValueCharacterOffsetId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_CharacterOffset), 0.0, -ushort.MaxValue, ushort.MaxValue, digit: 0),
-                                        new CheckBoxProperty(TextAnimatorValueCharacterOffsetWhiteSpaceReplacementCharId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_CharacterOffset_WhiteSpaceReplacementChar), false),
-                                        new CheckBoxProperty(TextAnimatorValueCharacterOffsetRestrictAsciiCharId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_CharacterOffset_RestrictAscii), false)
+                                        new DoubleProperty(TextAnimatorValueCharacterOffsetId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_CharacterOffset, 0.0, -ushort.MaxValue, ushort.MaxValue, digit: 0),
+                                        new CheckBoxProperty(TextAnimatorValueCharacterOffsetWhiteSpaceReplacementCharId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_CharacterOffset_WhiteSpaceReplacementChar, false),
+                                        new CheckBoxProperty(TextAnimatorValueCharacterOffsetRestrictAsciiCharId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_CharacterOffset_RestrictAscii, false)
                                     ])),
-                                new AppendablePropertyItem(TextAnimatorValueBlurId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_Blur), () =>
-                                    new PropertyGroup(TextAnimatorValueBlurId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_Blur),
+                                new AppendablePropertyItem(TextAnimatorValueBlurId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_Blur, () =>
+                                    new PropertyGroup(TextAnimatorValueBlurId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_Blur,
                                     [
                                         new Vector3dProperty(
                                             TextAnimatorValueBlurId,
-                                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.TextProperty_TextAnimator_Animator_Value_Blur),
+                                            LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_Blur,
                                             new Vector3d(),
                                             digit: 2,
-                                            unitKey: LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Unit_Pixel),
+                                            unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Pixel,
                                             separator: ",",
                                             useLinkRatio: true
                                         )

@@ -237,152 +237,152 @@ namespace NiVE3.Input
             [
                 new AppendablePropertyItem("Placeholder", "Placeholder", () => new PropertyGroup("Placeholder", "Placeholder", [])),
                 AppendablePropertyItemSeparator.Instance,
-                new AppendablePropertyItem(RectangleGroupId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_RectangleGroup), () =>
-                    new PropertyGroup(RectangleGroupId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_RectangleGroup),
+                new AppendablePropertyItem(RectangleGroupId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_RectangleGroup, () =>
+                    new PropertyGroup(RectangleGroupId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_RectangleGroup,
                     [
-                        new Vector3dProperty(RectangleSizeId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_ShapeObjectGroup_Size), new Vector3d(100.0), Vector3d.Zero, digit: 2, unitKey: LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Unit_Pixel), separator: ",", useLinkRatio: true),
-                        new Vector3dProperty(RectanglePositionId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_ShapeObjectGroup_Position), new Vector3d(), digit: 2),
-                        new DoubleProperty(RectangleCornerRoundedId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_RectangleGroup_CornerRounded), 0.0, 0.0, double.MaxValue, digit: 2)
+                        new Vector3dProperty(RectangleSizeId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_ShapeObjectGroup_Size, new Vector3d(100.0), Vector3d.Zero, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Pixel, separator: ",", useLinkRatio: true),
+                        new Vector3dProperty(RectanglePositionId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_ShapeObjectGroup_Position, new Vector3d(), digit: 2),
+                        new DoubleProperty(RectangleCornerRoundedId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_RectangleGroup_CornerRounded, 0.0, 0.0, double.MaxValue, digit: 2)
                     ])),
-                new AppendablePropertyItem(CircleGroupId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_CircleGroup), () =>
-                    new PropertyGroup(CircleGroupId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_CircleGroup),
+                new AppendablePropertyItem(CircleGroupId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_CircleGroup, () =>
+                    new PropertyGroup(CircleGroupId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_CircleGroup,
                     [
-                        new Vector3dProperty(CircleSizeId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_ShapeObjectGroup_Size), new Vector3d(100.0), Vector3d.Zero, digit: 2, unitKey: LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Unit_Pixel), separator: ",", useLinkRatio: true),
-                        new Vector3dProperty(CirclePositionId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_ShapeObjectGroup_Position), new Vector3d(), digit: 2)
+                        new Vector3dProperty(CircleSizeId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_ShapeObjectGroup_Size, new Vector3d(100.0), Vector3d.Zero, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Pixel, separator: ",", useLinkRatio: true),
+                        new Vector3dProperty(CirclePositionId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_ShapeObjectGroup_Position, new Vector3d(), digit: 2)
                     ])),
-                new AppendablePropertyItem(RegularPolygonGroupId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_RegularPolygonGroup), () =>
-                    new PropertyGroup(RegularPolygonGroupId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_RegularPolygonGroup),
+                new AppendablePropertyItem(RegularPolygonGroupId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_RegularPolygonGroup, () =>
+                    new PropertyGroup(RegularPolygonGroupId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_RegularPolygonGroup,
                     [
-                        new DoubleProperty(RegularPolygonPointCountId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_PolygonGroup_Points), 5.0, 3.0, 10000.0, digit: 0),
-                        new DoubleProperty(RegularPolygonRadiusId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_RegularPolygonGroup_Radius), 100.0, 0.0, double.MaxValue, digit: 2),
-                        new DoubleProperty(RegularPolygonRoundedId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_RegularPolygonGroup_Rounded), 0.0, double.MinValue, double.MaxValue, digit: 2, unitKey: LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Unit_Percent)),
-                        new Vector3dProperty(RegularPolygonPositionId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_ShapeObjectGroup_Position), Vector3d.Zero, digit: 2),
-                        new AngleProperty(RegularPolygonAngleId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_ShapeObjectGroup_Angle), 0.0, digit: 2)
+                        new DoubleProperty(RegularPolygonPointCountId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_PolygonGroup_Points, 5.0, 3.0, 10000.0, digit: 0),
+                        new DoubleProperty(RegularPolygonRadiusId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_RegularPolygonGroup_Radius, 100.0, 0.0, double.MaxValue, digit: 2),
+                        new DoubleProperty(RegularPolygonRoundedId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_RegularPolygonGroup_Rounded, 0.0, double.MinValue, double.MaxValue, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
+                        new Vector3dProperty(RegularPolygonPositionId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_ShapeObjectGroup_Position, Vector3d.Zero, digit: 2),
+                        new AngleProperty(RegularPolygonAngleId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_ShapeObjectGroup_Angle, 0.0, digit: 2)
                     ])),
-                new AppendablePropertyItem(StarGroupId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_StarGroup), () =>
-                    new PropertyGroup(StarGroupId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_StarGroup),
+                new AppendablePropertyItem(StarGroupId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_StarGroup, () =>
+                    new PropertyGroup(StarGroupId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_StarGroup,
                     [
-                        new DoubleProperty(StarPointCountId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_PolygonGroup_Points), 5.0, 3.0, 10000.0, digit: 0),
-                        new DoubleProperty(StarOuterRadiusId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_StarGroup_OuterRadius), 100.0, 0.0, double.MaxValue, digit: 2),
-                        new DoubleProperty(StarInnerRadiusId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_StarGroup_InnerRadius), 50.0, 0.0, double.MaxValue, digit: 2),
-                        new DoubleProperty(StarOuterRoundedId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_StarGroup_OuterRounded), 0.0, double.MinValue, double.MaxValue, digit: 2, unitKey: LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Unit_Percent)),
-                        new DoubleProperty(StarInnerRoundedId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_StarGroup_InnerRounded), 0.0, double.MinValue, double.MaxValue, digit: 2, unitKey: LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Unit_Percent)),
-                        new Vector3dProperty(StarPositionId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_ShapeObjectGroup_Position), Vector3d.Zero, digit: 2),
-                        new AngleProperty(StarAngleId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_ShapeObjectGroup_Angle), 0.0, digit: 2)
+                        new DoubleProperty(StarPointCountId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_PolygonGroup_Points, 5.0, 3.0, 10000.0, digit: 0),
+                        new DoubleProperty(StarOuterRadiusId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_StarGroup_OuterRadius, 100.0, 0.0, double.MaxValue, digit: 2),
+                        new DoubleProperty(StarInnerRadiusId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_StarGroup_InnerRadius, 50.0, 0.0, double.MaxValue, digit: 2),
+                        new DoubleProperty(StarOuterRoundedId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_StarGroup_OuterRounded, 0.0, double.MinValue, double.MaxValue, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
+                        new DoubleProperty(StarInnerRoundedId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_StarGroup_InnerRounded, 0.0, double.MinValue, double.MaxValue, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
+                        new Vector3dProperty(StarPositionId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_ShapeObjectGroup_Position, Vector3d.Zero, digit: 2),
+                        new AngleProperty(StarAngleId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_ShapeObjectGroup_Angle, 0.0, digit: 2)
                     ])),
                 AppendablePropertyItemSeparator.Instance,
-                new AppendablePropertyItem(SolidFillGroupId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_SolidFillGroup), () =>
-                    new PropertyGroup(SolidFillGroupId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_SolidFillGroup),
+                new AppendablePropertyItem(SolidFillGroupId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_SolidFillGroup, () =>
+                    new PropertyGroup(SolidFillGroupId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_SolidFillGroup,
                     [
-                        new EnumProperty(SolidFillRuleId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_FillGroup_FillRule), typeof(ShapeFillRule), typeof(LanguageResourceDictionary), ShapeFillRule.NonZero, selectBoxWidth: 100.0),
+                        new EnumProperty(SolidFillRuleId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_FillGroup_FillRule, typeof(ShapeFillRule), typeof(LanguageResourceDictionary), ShapeFillRule.NonZero, selectBoxWidth: 100.0),
                         new ColorProperty(
                             SolidFillColorId,
-                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_Drawing_Color),
-                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_Drawing_Color),
-                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Dialog_OK),
-                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Dialog_Cancel),
+                            LanguageResourceDictionary.ResourceKeys.ShapeProperty_Drawing_Color,
+                            LanguageResourceDictionary.ResourceKeys.ShapeProperty_Drawing_Color,
+                            LanguageResourceDictionary.ResourceKeys.Dialog_OK,
+                            LanguageResourceDictionary.ResourceKeys.Dialog_Cancel,
                             Vector4.One
                         ),
-                        new DoubleProperty(SolidFillOpacityId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_Drawing_Opacity), 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Unit_Percent)),
-                        new EnumProperty(SolidFillBlendModeId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_Drawing_BlendMode), typeof(BlendMode), typeof(LanguageResourceDictionary), BlendMode.Normal, selectBoxWidth: 100.0)
+                        new DoubleProperty(SolidFillOpacityId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Drawing_Opacity, 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
+                        new EnumProperty(SolidFillBlendModeId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Drawing_BlendMode, typeof(BlendMode), typeof(LanguageResourceDictionary), BlendMode.Normal, selectBoxWidth: 100.0)
                     ])),
-                new AppendablePropertyItem(GradientFillGroupId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_GradientFillGroup), () =>
-                    new PropertyGroup(GradientFillGroupId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_GradientFillGroup),
+                new AppendablePropertyItem(GradientFillGroupId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_GradientFillGroup, () =>
+                    new PropertyGroup(GradientFillGroupId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_GradientFillGroup,
                     [
-                        new EnumProperty(GradientFillRuleId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_FillGroup_FillRule), typeof(ShapeFillRule), typeof(LanguageResourceDictionary), ShapeFillRule.NonZero, selectBoxWidth: 100.0),
-                        new EnumProperty(GradientFillTypeId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_GradientGroup_Type), typeof(GradientType), typeof(LanguageResourceDictionary), GradientType.Linear, selectBoxWidth: 100.0),
-                        new Vector3dProperty(GradientFillBeginPositionId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_GradientGroup_BeginPosition), Vector3d.Zero, digit: 2),
-                        new Vector3dProperty(GradientFillEndPositionId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_GradientGroup_EndPosition), new Vector3d(100.0, 0.0, 0.0), digit: 2),
+                        new EnumProperty(GradientFillRuleId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_FillGroup_FillRule, typeof(ShapeFillRule), typeof(LanguageResourceDictionary), ShapeFillRule.NonZero, selectBoxWidth: 100.0),
+                        new EnumProperty(GradientFillTypeId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_GradientGroup_Type, typeof(GradientType), typeof(LanguageResourceDictionary), GradientType.Linear, selectBoxWidth: 100.0),
+                        new Vector3dProperty(GradientFillBeginPositionId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_GradientGroup_BeginPosition, Vector3d.Zero, digit: 2),
+                        new Vector3dProperty(GradientFillEndPositionId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_GradientGroup_EndPosition, new Vector3d(100.0, 0.0, 0.0), digit: 2),
                         new ColorGradientProperty(
                             GradientFillColorId,
-                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_Drawing_Color),
-                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_GradientGroup_Color_Edit),
-                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Dialog_OK),
-                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Dialog_Cancel),
+                            LanguageResourceDictionary.ResourceKeys.ShapeProperty_Drawing_Color,
+                            LanguageResourceDictionary.ResourceKeys.ShapeProperty_GradientGroup_Color_Edit,
+                            LanguageResourceDictionary.ResourceKeys.Dialog_OK,
+                            LanguageResourceDictionary.ResourceKeys.Dialog_Cancel,
                             showPreviewOKLabInterpolation: true
                         ),
-                        new CheckBoxProperty(GradientFillUseOkLabInterpolationId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_GradientGroup_UseOkLabInterpolation), false),
-                        new DoubleProperty(GradientFillOpacityId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_Drawing_Opacity), 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Unit_Percent)),
-                        new EnumProperty(GradientFillBlendModeId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_Drawing_BlendMode), typeof(BlendMode), typeof(LanguageResourceDictionary), BlendMode.Normal, selectBoxWidth: 100.0)
+                        new CheckBoxProperty(GradientFillUseOkLabInterpolationId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_GradientGroup_UseOkLabInterpolation, false),
+                        new DoubleProperty(GradientFillOpacityId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Drawing_Opacity, 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
+                        new EnumProperty(GradientFillBlendModeId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Drawing_BlendMode, typeof(BlendMode), typeof(LanguageResourceDictionary), BlendMode.Normal, selectBoxWidth: 100.0)
                     ])),
-                new AppendablePropertyItem(SolidStrokeGroupId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_SolidStrokeGroup), () =>
-                    new PropertyGroup(SolidStrokeGroupId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_SolidStrokeGroup),
+                new AppendablePropertyItem(SolidStrokeGroupId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_SolidStrokeGroup, () =>
+                    new PropertyGroup(SolidStrokeGroupId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_SolidStrokeGroup,
                     [
                         new ColorProperty(
                             SolidStrokeColorId,
-                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_Drawing_Color),
-                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_Drawing_Color),
-                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Dialog_OK),
-                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Dialog_Cancel),
+                            LanguageResourceDictionary.ResourceKeys.ShapeProperty_Drawing_Color,
+                            LanguageResourceDictionary.ResourceKeys.ShapeProperty_Drawing_Color,
+                            LanguageResourceDictionary.ResourceKeys.Dialog_OK,
+                            LanguageResourceDictionary.ResourceKeys.Dialog_Cancel,
                             new Vector4(0.0F, 0.0F, 1.0F, 1.0F)
                         ),
-                        new DoubleProperty(SolidStrokeOpacityId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_Drawing_Opacity), 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Unit_Percent)),
-                        new DoubleProperty(SolidStrokeWidthId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_StrokeGroup_Width), 4.0, 0.0, double.MaxValue, digit: 2),
-                        new EnumProperty(SolidStrokeEndCapStyleTypeId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_StrokeGroup_EndCapStyleType), typeof(EndCapStyle), typeof(LanguageResourceDictionary), EndCapStyle.Butt, selectBoxWidth: 100.0),
-                        new EnumProperty(SolidStrokeJoinStyleTypeId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_StrokeGroup_JoinStyleType), typeof(JointStyle), typeof(LanguageResourceDictionary), JointStyle.Square, selectBoxWidth: 100.0),
-                        new EnumProperty(SolidStrokeBlendModeId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_Drawing_BlendMode), typeof(BlendMode), typeof(LanguageResourceDictionary), BlendMode.Normal, selectBoxWidth: 100.0)
+                        new DoubleProperty(SolidStrokeOpacityId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Drawing_Opacity, 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
+                        new DoubleProperty(SolidStrokeWidthId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_StrokeGroup_Width, 4.0, 0.0, double.MaxValue, digit: 2),
+                        new EnumProperty(SolidStrokeEndCapStyleTypeId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_StrokeGroup_EndCapStyleType, typeof(EndCapStyle), typeof(LanguageResourceDictionary), EndCapStyle.Butt, selectBoxWidth: 100.0),
+                        new EnumProperty(SolidStrokeJoinStyleTypeId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_StrokeGroup_JoinStyleType, typeof(JointStyle), typeof(LanguageResourceDictionary), JointStyle.Square, selectBoxWidth: 100.0),
+                        new EnumProperty(SolidStrokeBlendModeId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Drawing_BlendMode, typeof(BlendMode), typeof(LanguageResourceDictionary), BlendMode.Normal, selectBoxWidth: 100.0)
                     ])),
-                new AppendablePropertyItem(GradientStrokeGroupId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_GradientStrokeGroup), () =>
-                    new PropertyGroup(GradientStrokeGroupId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_GradientStrokeGroup),
+                new AppendablePropertyItem(GradientStrokeGroupId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_GradientStrokeGroup, () =>
+                    new PropertyGroup(GradientStrokeGroupId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_GradientStrokeGroup,
                     [
-                        new EnumProperty(GradientStrokeTypeId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_GradientGroup_Type), typeof(GradientType), typeof(LanguageResourceDictionary), GradientType.Linear, selectBoxWidth: 100.0),
-                        new Vector3dProperty(GradientStrokeBeginPositionId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_GradientGroup_BeginPosition), Vector3d.Zero, digit: 2),
-                        new Vector3dProperty(GradientStrokeEndPositionId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_GradientGroup_EndPosition), new Vector3d(100.0, 0.0, 0.0), digit: 2),
+                        new EnumProperty(GradientStrokeTypeId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_GradientGroup_Type, typeof(GradientType), typeof(LanguageResourceDictionary), GradientType.Linear, selectBoxWidth: 100.0),
+                        new Vector3dProperty(GradientStrokeBeginPositionId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_GradientGroup_BeginPosition, Vector3d.Zero, digit: 2),
+                        new Vector3dProperty(GradientStrokeEndPositionId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_GradientGroup_EndPosition, new Vector3d(100.0, 0.0, 0.0), digit: 2),
                         new ColorGradientProperty(
                             GradientStrokeColorId,
-                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_Drawing_Color),
-                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_GradientGroup_Color_Edit),
-                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Dialog_OK),
-                            LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Dialog_Cancel),
+                            LanguageResourceDictionary.ResourceKeys.ShapeProperty_Drawing_Color,
+                            LanguageResourceDictionary.ResourceKeys.ShapeProperty_GradientGroup_Color_Edit,
+                            LanguageResourceDictionary.ResourceKeys.Dialog_OK,
+                            LanguageResourceDictionary.ResourceKeys.Dialog_Cancel,
                             showPreviewOKLabInterpolation: true
                         ),
-                        new CheckBoxProperty(GradientStrokeUseOkLabInterpolationId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_GradientGroup_UseOkLabInterpolation), false),
-                        new DoubleProperty(GradientStrokeOpacityId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_Drawing_Opacity), 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Unit_Percent)),
-                        new DoubleProperty(GradientStrokeWidthId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_StrokeGroup_Width), 4.0, 0.0, double.MaxValue, digit: 2),
-                        new EnumProperty(GradientStrokeEndCapStyleTypeId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_StrokeGroup_EndCapStyleType), typeof(EndCapStyle), typeof(LanguageResourceDictionary), EndCapStyle.Butt, selectBoxWidth: 100.0),
-                        new EnumProperty(GradientStrokeJoinStyleTypeId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_StrokeGroup_JoinStyleType), typeof(JointStyle), typeof(LanguageResourceDictionary), JointStyle.Square, selectBoxWidth: 100.0),
-                        new EnumProperty(GradientStrokeBlendModeId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_Drawing_BlendMode), typeof(BlendMode), typeof(LanguageResourceDictionary), BlendMode.Normal, selectBoxWidth: 100.0)
+                        new CheckBoxProperty(GradientStrokeUseOkLabInterpolationId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_GradientGroup_UseOkLabInterpolation, false),
+                        new DoubleProperty(GradientStrokeOpacityId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Drawing_Opacity, 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
+                        new DoubleProperty(GradientStrokeWidthId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_StrokeGroup_Width, 4.0, 0.0, double.MaxValue, digit: 2),
+                        new EnumProperty(GradientStrokeEndCapStyleTypeId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_StrokeGroup_EndCapStyleType, typeof(EndCapStyle), typeof(LanguageResourceDictionary), EndCapStyle.Butt, selectBoxWidth: 100.0),
+                        new EnumProperty(GradientStrokeJoinStyleTypeId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_StrokeGroup_JoinStyleType, typeof(JointStyle), typeof(LanguageResourceDictionary), JointStyle.Square, selectBoxWidth: 100.0),
+                        new EnumProperty(GradientStrokeBlendModeId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Drawing_BlendMode, typeof(BlendMode), typeof(LanguageResourceDictionary), BlendMode.Normal, selectBoxWidth: 100.0)
                     ])),
                 AppendablePropertyItemSeparator.Instance,
-                new AppendablePropertyItem(RepeaterGroupId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_RepeaterGroup), () =>
-                    new PropertyGroup(RepeaterGroupId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_RepeaterGroup),
+                new AppendablePropertyItem(RepeaterGroupId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_RepeaterGroup, () =>
+                    new PropertyGroup(RepeaterGroupId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_RepeaterGroup,
                     [
-                        new DoubleProperty(RepeaterCountId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_RepeaterGroup_Count), 3.0, 0.0, double.MaxValue, digit: 1),
-                        new DoubleProperty(RepeaterOffsetId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_RepeaterGroup_Offset), 0.0, double.MinValue, double.MaxValue, digit: 1),
-                        new PropertyGroup(RepeaterTransformGroupId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_Transform),
+                        new DoubleProperty(RepeaterCountId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_RepeaterGroup_Count, 3.0, 0.0, double.MaxValue, digit: 1),
+                        new DoubleProperty(RepeaterOffsetId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_RepeaterGroup_Offset, 0.0, double.MinValue, double.MaxValue, digit: 1),
+                        new PropertyGroup(RepeaterTransformGroupId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Transform,
                         [
-                            new Vector3dProperty(RepeaterTransformAnchorPointId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_Transform_AnchorPoint), Vector3d.Zero, digit: 2),
-                            new Vector3dProperty(RepeaterTransformPositionId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_Transform_Position), new Vector3d(100.0, 0.0, 0.0), digit: 2),
-                            new Scale3dProperty(RepeaterTransformScaleId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_Transform_Scale), new Vector3d(100.0), digit: 2),
-                            new AngleProperty(RepeaterTransformAngleId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_Transform_Angle), 0.0, digit: 2),
-                            new DoubleProperty(RepeaterTransformBeginPointOpacityId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_RepeaterGroup_Transform_BeginPointOpacity), 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Unit_Percent)),
-                            new DoubleProperty(RepeaterTransformEndPointOpacityId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_RepeaterGroup_Transform_EndPointOpacity), 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.Unit_Percent))
+                            new Vector3dProperty(RepeaterTransformAnchorPointId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Transform_AnchorPoint, Vector3d.Zero, digit: 2),
+                            new Vector3dProperty(RepeaterTransformPositionId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Transform_Position, new Vector3d(100.0, 0.0, 0.0), digit: 2),
+                            new Scale3dProperty(RepeaterTransformScaleId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Transform_Scale, new Vector3d(100.0), digit: 2),
+                            new AngleProperty(RepeaterTransformAngleId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Transform_Angle, 0.0, digit: 2),
+                            new DoubleProperty(RepeaterTransformBeginPointOpacityId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_RepeaterGroup_Transform_BeginPointOpacity, 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
+                            new DoubleProperty(RepeaterTransformEndPointOpacityId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_RepeaterGroup_Transform_EndPointOpacity, 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent)
                         ])
                     ])),
-                new AppendablePropertyItem(CombineGroupId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_CombineGroup), () =>
-                    new PropertyGroup(CombineGroupId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_CombineGroup),
+                new AppendablePropertyItem(CombineGroupId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_CombineGroup, () =>
+                    new PropertyGroup(CombineGroupId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_CombineGroup,
                     [
-                        new EnumProperty(CombineTypeId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_CombineGroup_CombineType), typeof(ClippingOperation), typeof(LanguageResourceDictionary), ClippingOperation.Union, selectBoxWidth: 100)
+                        new EnumProperty(CombineTypeId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_CombineGroup_CombineType, typeof(ClippingOperation), typeof(LanguageResourceDictionary), ClippingOperation.Union, selectBoxWidth: 100)
                     ]))
             ];
-            groupItems[0] = new AppendablePropertyItem(GroupPropertyId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_Group), () =>
-                new PropertyGroup(GroupPropertyId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_Group),
+            groupItems[0] = new AppendablePropertyItem(GroupPropertyId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Group, () =>
+                new PropertyGroup(GroupPropertyId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Group,
                 [
-                    new AppendableProperty(GroupContentPropertyId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_Group_Content), groupItems),
-                    new PropertyGroup(GroupTransformGroupId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_Transform),
+                    new AppendableProperty(GroupContentPropertyId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Group_Content, groupItems),
+                    new PropertyGroup(GroupTransformGroupId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Transform,
                     [
-                        new Vector3dProperty(GroupTransformAnchorPointId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_Transform_AnchorPoint), Vector3d.Zero, digit: 2),
-                        new Vector3dProperty(GroupTransformPositionId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_Transform_Position), Vector3d.Zero, digit: 2),
-                        new Scale3dProperty(GroupTransformScaleId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_Transform_Scale), new Vector3d(100.0), digit: 2),
-                        new DoubleProperty(GroupTransformSkewId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_Transform_Skew), 0.0, -100.0, 100.0, digit: 2),
-                        new AngleProperty(GroupTransformSkewAxisId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_Transform_SkewAxis), 0.0, digit: 2),
-                        new AngleProperty(GroupTransformAngleId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_Transform_Angle), 0.0, digit: 2),
-                        new DoubleProperty(GroupTransformOpacityId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_Transform_Opacity), 100.0, 0.0, 100.0, digit: 2)
+                        new Vector3dProperty(GroupTransformAnchorPointId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Transform_AnchorPoint, Vector3d.Zero, digit: 2),
+                        new Vector3dProperty(GroupTransformPositionId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Transform_Position, Vector3d.Zero, digit: 2),
+                        new Scale3dProperty(GroupTransformScaleId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Transform_Scale, new Vector3d(100.0), digit: 2),
+                        new DoubleProperty(GroupTransformSkewId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Transform_Skew, 0.0, -100.0, 100.0, digit: 2),
+                        new AngleProperty(GroupTransformSkewAxisId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Transform_SkewAxis, 0.0, digit: 2),
+                        new AngleProperty(GroupTransformAngleId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Transform_Angle, 0.0, digit: 2),
+                        new DoubleProperty(GroupTransformOpacityId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Transform_Opacity, 100.0, 0.0, 100.0, digit: 2)
                     ])
                 ]));
             return
             [
-                new AppendableProperty(ContentPropertyId, LanguageResourceDictionary.CreateLanguageResourceKey(LanguageResourceDictionary.ShapeProperty_Content), groupItems)
+                new AppendableProperty(ContentPropertyId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Content, groupItems)
             ];
         }
 

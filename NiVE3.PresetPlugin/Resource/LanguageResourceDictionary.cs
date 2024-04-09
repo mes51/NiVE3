@@ -5,107 +5,109 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Plugin.Resource;
+using NiVE3.SourceGenerator.LanguageResourceGenerator;
 
 namespace NiVE3.PresetPlugin.Resource
 {
-    class LanguageResourceDictionary : LanguageResourceDictionaryBase
+    [HasLanguageKey]
+    partial class LanguageResourceDictionary : LanguageResourceDictionaryBase
     {
         static Dictionary<string, Tuple<string, Version>> LanguageKeys { get; }
 
-        [DefaultValue("ポイント制御")]
+        [LanguageKey, DefaultValue("ポイント制御")]
         public const string ExpressionControl_PointControl_Name = nameof(ExpressionControl_PointControl_Name);
 
-        [DefaultValue("ポイント")]
+        [LanguageKey, DefaultValue("ポイント")]
         public const string ExpressionControl_PointControl_PropertyName = nameof(ExpressionControl_PointControl_PropertyName);
 
-        [DefaultValue("エクスプレッションで使用するポイント制御")]
+        [LanguageKey, DefaultValue("エクスプレッションで使用するポイント制御")]
         public const string ExpressionControl_PointControl_Description = nameof(ExpressionControl_PointControl_Description);
 
-        [DefaultValue("スライダー制御")]
+        [LanguageKey, DefaultValue("スライダー制御")]
         public const string ExpressionControl_SliderControl_Name = nameof(ExpressionControl_SliderControl_Name);
 
-        [DefaultValue("スライダー")]
+        [LanguageKey, DefaultValue("スライダー")]
         public const string ExpressionControl_SliderControl_PropertyName = nameof(ExpressionControl_SliderControl_PropertyName);
 
-        [DefaultValue("エクスプレッションで使用するスライダー制御")]
+        [LanguageKey, DefaultValue("エクスプレッションで使用するスライダー制御")]
         public const string ExpressionControl_SliderControl_Description = nameof(ExpressionControl_SliderControl_Description);
 
-        [DefaultValue("ボックスブラー")]
+        [LanguageKey, DefaultValue("ボックスブラー")]
         public const string Blur_BoxBlur_Name = nameof(Blur_BoxBlur_Name);
 
-        [DefaultValue("ボックスブラーを適用します")]
+        [LanguageKey, DefaultValue("ボックスブラーを適用します")]
         public const string Blur_BoxBlur_Description = nameof(Blur_BoxBlur_Description);
 
-        [DefaultValue("半径")]
+        [LanguageKey, DefaultValue("半径")]
         public const string Blur_BoxBlur_Amount = nameof(Blur_BoxBlur_Amount);
 
-        [DefaultValue("繰り返し")]
+        [LanguageKey, DefaultValue("繰り返し")]
         public const string Blur_BoxBlur_Repeat = nameof(Blur_BoxBlur_Repeat);
 
-        [DefaultValue("方向")]
+        [LanguageKey, DefaultValue("方向")]
         public const string Blur_BoxBlur_Direction = nameof(Blur_BoxBlur_Direction);
 
-        [DefaultValue("ダイナミクス")]
+        [LanguageKey, DefaultValue("ダイナミクス")]
         public const string Audio_Dynamics_Name = nameof(Audio_Dynamics_Name);
 
-        [DefaultValue("音声のダイナミクスを操作します")]
+        [LanguageKey, DefaultValue("音声のダイナミクスを操作します")]
         public const string Audio_Dynamics_Description = nameof(Audio_Dynamics_Description);
 
-        [DefaultValue("タイプ")]
+        [LanguageKey, DefaultValue("タイプ")]
         public const string Audio_Dynamics_DynamicsProcessorType = nameof(Audio_Dynamics_DynamicsProcessorType);
 
-        [DefaultValue("スレッシュホールド")]
+        [LanguageKey, DefaultValue("スレッシュホールド")]
         public const string Audio_Dynamics_Threshold = nameof(Audio_Dynamics_Threshold);
 
-        [DefaultValue("レシオ")]
+        [LanguageKey, DefaultValue("レシオ")]
         public const string Audio_Dynamics_Ratio = nameof(Audio_Dynamics_Ratio);
 
-        [DefaultValue("ゲイン")]
+        [LanguageKey, DefaultValue("ゲイン")]
         public const string Audio_Dynamics_Gain = nameof(Audio_Dynamics_Gain);
 
-        [DefaultValue("アタック")]
+        [LanguageKey, DefaultValue("アタック")]
         public const string Audio_Dynamics_Attack = nameof(Audio_Dynamics_Attack);
 
-        [DefaultValue("リリース")]
+        [LanguageKey, DefaultValue("リリース")]
         public const string Audio_Dynamics_Release = nameof(Audio_Dynamics_Release);
 
-        [DefaultValue("デフォルトレンダラ")]
+        [LanguageKey, DefaultValue("デフォルトレンダラ")]
         public const string Renderer_DefaultRenderer_Name = nameof(Renderer_DefaultRenderer_Name);
 
-        [DefaultValue("NiVE標準のレンダラ")]
+        [LanguageKey, DefaultValue("NiVE標準のレンダラ")]
         public const string Renderer_DefaultRenderer_Description = nameof(Renderer_DefaultRenderer_Description);
 
-        [DefaultValue("パラメトリックイコライザ")]
+        [LanguageKey, DefaultValue("パラメトリックイコライザ")]
         public const string Audio_ParametricEqualizer_Name = nameof(Audio_ParametricEqualizer_Name);
 
-        [DefaultValue("音声にイコライザを適用します")]
+        [LanguageKey, DefaultValue("音声にイコライザを適用します")]
         public const string Audio_ParametricEqualizer_Description = nameof(Audio_ParametricEqualizer_Description);
 
-        [DefaultValue("バンド")]
+        [LanguageKey, DefaultValue("バンド")]
         public const string Audio_ParametricEqualizer_BandPoints = nameof(Audio_ParametricEqualizer_BandPoints);
 
-        [DefaultValue("ピーク")]
+        [LanguageKey, DefaultValue("ピーク")]
         public const string Audio_ParametricEqualizer_BandPoint_Peak = nameof(Audio_ParametricEqualizer_BandPoint_Peak);
 
-        [DefaultValue("ハイパス")]
+        [LanguageKey, DefaultValue("ハイパス")]
         public const string Audio_ParametricEqualizer_BandPoint_HighPass = nameof(Audio_ParametricEqualizer_BandPoint_HighPass);
 
-        [DefaultValue("ローパス")]
+        [LanguageKey, DefaultValue("ローパス")]
         public const string Audio_ParametricEqualizer_BandPoint_LowPass = nameof(Audio_ParametricEqualizer_BandPoint_LowPass);
 
-        [DefaultValue("ハイシェルフ")]
+        [LanguageKey, DefaultValue("ハイシェルフ")]
         public const string Audio_ParametricEqualizer_BandPoint_HighShelf = nameof(Audio_ParametricEqualizer_BandPoint_HighShelf);
 
-        [DefaultValue("ローシェルフ")]
+        [LanguageKey, DefaultValue("ローシェルフ")]
         public const string Audio_ParametricEqualizer_BandPoint_LowShelf = nameof(Audio_ParametricEqualizer_BandPoint_LowShelf);
 
-        [DefaultValue("周波数")]
+        [LanguageKey, DefaultValue("周波数")]
         public const string Audio_ParametricEqualizer_Frequency = nameof(Audio_ParametricEqualizer_Frequency);
 
-        [DefaultValue("Q")]
+        [LanguageKey, DefaultValue("Q")]
         public const string Audio_ParametricEqualizer_Q = nameof(Audio_ParametricEqualizer_Q);
 
-        [DefaultValue("ゲイン")]
+        [LanguageKey, DefaultValue("ゲイン")]
         public const string Audio_ParametricEqualizer_Gain = nameof(Audio_ParametricEqualizer_Gain);
 
         // enum
@@ -133,13 +135,13 @@ namespace NiVE3.PresetPlugin.Resource
 
         // unit
 
-        [DefaultValue("ms")]
+        [LanguageKey, DefaultValue("ms")]
         public const string Unit_MilliSecond = nameof(Unit_MilliSecond);
 
-        [DefaultValue("dB")]
+        [LanguageKey, DefaultValue("dB")]
         public const string Unit_Decibel = nameof(Unit_Decibel);
 
-        [DefaultValue("Hz")]
+        [LanguageKey, DefaultValue("Hz")]
         public const string Unit_Hertz = nameof(Unit_Hertz);
 
         static LanguageResourceDictionary()
@@ -163,11 +165,6 @@ namespace NiVE3.PresetPlugin.Resource
             {
                 this[key] = defaultValue;
             }
-        }
-
-        public static LanguageResourceKey CreateResourceKey(string name)
-        {
-            return new LanguageResourceKey(typeof(LanguageResourceDictionary), name);
         }
 
         [AttributeUsage(AttributeTargets.Field, Inherited = false, AllowMultiple = false)]

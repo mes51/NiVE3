@@ -40,12 +40,12 @@ namespace NiVE3.PresetPlugin.Effect.Audio
         {
             return
             [
-                new EnumProperty(PropertyDynamicsProcessorTypeId, LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Audio_Dynamics_DynamicsProcessorType), typeof(DynamicsMode), typeof(LanguageResourceDictionary), DynamicsMode.Compressor, false, 100.0),
-                new DoubleProperty(PropertyThresholdId, LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Audio_Dynamics_Threshold), 0.0, -120.0, 0.0, digit: 2, unitKey: LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Unit_Decibel)),
-                new DoubleProperty(PropertyRatioId, LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Audio_Dynamics_Ratio), 2.0, 1.0, 20.0, digit: 2),
-                new DoubleProperty(PropertyGainId, LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Audio_Dynamics_Gain), 0.0, -60.0, 24.0, digit: 2, unitKey: LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Unit_Decibel)),
-                new DoubleProperty(PropertyAttackId, LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Audio_Dynamics_Attack), 50.0, 0.01, 1000.0, digit: 2, unitKey: LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Unit_MilliSecond)),
-                new DoubleProperty(PropertyReleaseId, LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Audio_Dynamics_Release), 500.0, 0.01, 10000.0, digit: 2, unitKey: LanguageResourceDictionary.CreateResourceKey(LanguageResourceDictionary.Unit_MilliSecond)),
+                new EnumProperty(PropertyDynamicsProcessorTypeId, LanguageResourceDictionary.ResourceKeys.Audio_Dynamics_DynamicsProcessorType, typeof(DynamicsMode), typeof(LanguageResourceDictionary), DynamicsMode.Compressor, false, 100.0),
+                new DoubleProperty(PropertyThresholdId, LanguageResourceDictionary.ResourceKeys.Audio_Dynamics_Threshold, 0.0, -120.0, 0.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Decibel),
+                new DoubleProperty(PropertyRatioId, LanguageResourceDictionary.ResourceKeys.Audio_Dynamics_Ratio, 2.0, 1.0, 20.0, digit: 2),
+                new DoubleProperty(PropertyGainId, LanguageResourceDictionary.ResourceKeys.Audio_Dynamics_Gain, 0.0, -60.0, 24.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Decibel),
+                new DoubleProperty(PropertyAttackId, LanguageResourceDictionary.ResourceKeys.Audio_Dynamics_Attack, 50.0, 0.01, 1000.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_MilliSecond),
+                new DoubleProperty(PropertyReleaseId, LanguageResourceDictionary.ResourceKeys.Audio_Dynamics_Release, 500.0, 0.01, 10000.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_MilliSecond),
             ];
         }
 
