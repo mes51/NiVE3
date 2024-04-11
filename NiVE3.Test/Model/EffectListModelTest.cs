@@ -48,7 +48,7 @@ namespace NiVE3.Test.Model
 
         public void Dispose() { }
 
-        public NImage Process(NImage image, ROI roi, double layerTime, IPropertyObject[] properties)
+        public NImage Process(NImage image, ROI roi, double layerTime, IPropertyObject[] properties, bool useGpu)
         {
             throw new NotImplementedException();
         }

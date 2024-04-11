@@ -32,7 +32,7 @@ namespace NiVE3.PresetPlugin.Effect.ExpressionControl
 
         public void Dispose() { }
 
-        public NImage Process(NImage image, ROI roi, double layerTime, IPropertyObject[] properties)
+        public NImage Process(NImage image, ROI roi, double layerTime, IPropertyObject[] properties, bool useGpu)
         {
             return image;
         }

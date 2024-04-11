@@ -42,7 +42,7 @@ namespace NiVE3.PresetPlugin.Effect.Blur
             ];
         }
 
-        public NImage Process(NImage image, ROI roi, double layerTime, IPropertyObject[] properties)
+        public NImage Process(NImage image, ROI roi, double layerTime, IPropertyObject[] properties, bool useGpu)
         {
             var amount = (float)(double)(properties.First(p => p.Id == PropertyAmountId).GetValue(layerTime) ?? 0.0);
             var repeat = (int)(double)(properties.First(p => p.Id == PropertyRepeatId).GetValue(layerTime) ?? 1.0);

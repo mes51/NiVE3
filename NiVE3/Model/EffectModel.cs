@@ -118,9 +118,9 @@ namespace NiVE3.Model
             }
         }
 
-        public NImage ProcessImage(NImage image, ROI roi, double layerTime)
+        public NImage ProcessImage(NImage image, ROI roi, double layerTime, bool useGpu)
         {
-            return Effect.Value.Process(image, roi, layerTime, Properties.ToArray());
+            return Effect.Value.Process(image, roi, layerTime, Properties.ToArray(), useGpu);
         }
 
         public float[] ProcessAudio(float[] audio, double startTime)

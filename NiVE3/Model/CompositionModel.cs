@@ -518,7 +518,7 @@ namespace NiVE3.Model
                     }
 
                     var mask = Renderer.RenderAdjustmentMask(adjustmentMaskImage);
-                    var (roi, currentFrame) = l.ProcessAdjustment(time, downSamplingRate, Renderer.GetCurrentRenderedImage());
+                    var (roi, currentFrame) = l.ProcessAdjustment(time, downSamplingRate, Renderer.GetCurrentRenderedImage(), useGpu);
 
                     // TODO: GPU対応
                     if (mask is GPURasterizedMaskImage gpuMaskImage)

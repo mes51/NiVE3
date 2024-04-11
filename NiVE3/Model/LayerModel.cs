@@ -499,7 +499,7 @@ namespace NiVE3.Model
                 // TODO: モジュラーエフェクト&ROI反映
                 foreach (var e in Effects.Where(e => !e.IsDummyEffect && e.IsEnable && e.SupportedSource.IsSupportedSource(SourceType)))
                 {
-                    image = e.ProcessImage(image, roi, layerTime);
+                    image = e.ProcessImage(image, roi, layerTime, useGpu);
                 }
             }
 
@@ -570,7 +570,7 @@ namespace NiVE3.Model
             );
         }
 
-        public (ROI, NImage) ProcessAdjustment(double time, double downSamplingRate, NImage currentFrame)
+        public (ROI, NImage) ProcessAdjustment(double time, double downSamplingRate, NImage currentFrame, bool useGpu)
         {
             var layerTime = time - SourceStartPoint;
             var roi = new ROI(new Int32Point(), new Int32Size(currentFrame.Width, currentFrame.Height), 0, 0, currentFrame.Width, currentFrame.Height);
@@ -580,7 +580,7 @@ namespace NiVE3.Model
                 // TODO: モジュラーエフェクト&ROI反映
                 foreach (var e in Effects.Where(e => !e.IsDummyEffect && e.IsEnable))
                 {
-                    currentFrame = e.ProcessImage(currentFrame, roi, layerTime);
+                    currentFrame = e.ProcessImage(currentFrame, roi, layerTime, useGpu);
                 }
             }
 
