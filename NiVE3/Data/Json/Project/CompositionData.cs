@@ -22,6 +22,8 @@ namespace NiVE3.Data.Json.Project
 
         public bool IsRetentionFrameRate { get; set; }
 
+        public bool ApplyToneMappingWhenNested { get; set; }
+
         public int ShutterAngle { get; set; }
 
         public int ShutterPhase { get; set; }
@@ -35,6 +37,8 @@ namespace NiVE3.Data.Json.Project
         public LayerData[] Layers { get; set; } = [];
 
         public Guid RendererPluginId { get; set; }
+
+        public Guid ToneMapperPluginId { get; set; }
 
         // for timeline
 

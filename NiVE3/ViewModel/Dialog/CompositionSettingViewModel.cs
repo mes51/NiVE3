@@ -18,6 +18,8 @@ namespace NiVE3.ViewModel.Dialog
     {
         public const string SelectedRendererType = nameof(SelectedRendererType);
 
+        public const string SelectedToneMapperType = nameof(SelectedToneMapperType);
+
         // TODO: 要調整
         const int FrameTimeDigit = 7;
 
@@ -70,6 +72,13 @@ namespace NiVE3.ViewModel.Dialog
             set { SetProperty(ref isRetentionFrameRate, value); }
         }
 
+        private bool applyToneMappingWhenNested;
+        public bool ApplyToneMappingWhenNested
+        {
+            get { return applyToneMappingWhenNested; }
+            set { SetProperty(ref applyToneMappingWhenNested, value); }
+        }
+
         private int shutterAngle = 180;
         public int ShutterAngle
         {
@@ -98,7 +107,16 @@ namespace NiVE3.ViewModel.Dialog
             set { SetProperty(ref selectedRenderer, value); }
         }
 
+        private int selectedToneMapper;
+        public int SelectedToneMapper
+        {
+            get { return selectedToneMapper; }
+            set { SetProperty(ref selectedToneMapper, value); }
+        }
+
         public string[] Renderers { get; }
+
+        public string[] ToneMappers { get; }
 
         public string Title => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.CompositionSettingView_Title);
 
@@ -112,15 +130,16 @@ namespace NiVE3.ViewModel.Dialog
 
         public ICommand DeletePresetCommand { get; }
 
-        RendererListModel RendererListModel { get; }
-
         Type[] RendererTypes { get; }
 
-        public CompositionSettingViewModel(RendererListModel rendererListModel)
+        Type[] ToneMapperTypes { get; }
+
+        public CompositionSettingViewModel(RendererListModel rendererListModel, ToneMapperListModel toneMapperListModel)
         {
-            RendererListModel = rendererListModel;
-            Renderers = rendererListModel.RendererMetadatas.Select(r => r.Name).ToArray();
-            RendererTypes = rendererListModel.RendererMetadatas.Select(r => r.PluginType).ToArray();
+            Renderers = [..rendererListModel.RendererMetadata.Select(r => r.Name)];
+            RendererTypes = [..rendererListModel.RendererMetadata.Select(r => r.PluginType)];
+            ToneMappers = [..toneMapperListModel.ToneMapperMetadata.Select(t => t.Name)];
+            ToneMapperTypes = [..toneMapperListModel.ToneMapperMetadata.Select(t => t.PluginType)];
 
             OKCommand = new DelegateCommand(() =>
             {
@@ -132,10 +151,12 @@ namespace NiVE3.ViewModel.Dialog
                     { nameof(FrameRate), FrameRate },
                     { nameof(Duration), Duration },
                     { nameof(IsRetentionFrameRate), IsRetentionFrameRate },
+                    { nameof(ApplyToneMappingWhenNested), ApplyToneMappingWhenNested },
                     { nameof(ShutterAngle), ShutterAngle },
                     { nameof(ShutterPhase), ShutterPhase },
                     { nameof(MotionBlurSampleCount), MotionBlurSampleCount },
-                    { SelectedRendererType, RendererTypes[SelectedRenderer] }
+                    { SelectedRendererType, RendererTypes[SelectedRenderer] },
+                    { SelectedToneMapperType, ToneMapperTypes[SelectedToneMapper] }
                 };
 
                 RequestClose?.Invoke(new DialogResult(ButtonResult.OK, result));

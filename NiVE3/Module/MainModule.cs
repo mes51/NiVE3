@@ -50,6 +50,7 @@ namespace NiVE3.Module
             Container.Register<FootageListModel>(Reuse.Singleton, FactoryMethod.ConstructorWithResolvableArguments);
             Container.Register<EffectListModel>(Reuse.Singleton, FactoryMethod.ConstructorWithResolvableArguments);
             Container.Register<RendererListModel>(Reuse.Singleton, FactoryMethod.ConstructorWithResolvableArguments);
+            Container.Register<ToneMapperListModel>(Reuse.Singleton, FactoryMethod.ConstructorWithResolvableArguments);
             Container.Register<TextPropertyModel>(Reuse.Singleton, FactoryMethod.ConstructorWithResolvableArguments);
             Container.Register<ProjectModel>(Reuse.Singleton, FactoryMethod.ConstructorWithResolvableArguments);
             Container.Register<ViewStateModel>(Reuse.Singleton, FactoryMethod.ConstructorWithResolvableArguments);

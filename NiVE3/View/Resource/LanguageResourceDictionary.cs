@@ -171,6 +171,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("ネスト時にフレームレートを維持")]
         public static readonly string CompositionSettingView_RetentionFrameRate = nameof(CompositionSettingView_RetentionFrameRate);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("ネスト時にトーンマッピングを適用")]
+        public static readonly string CompositionSettingView_ApplyToneMappingWhenNested = nameof(CompositionSettingView_ApplyToneMappingWhenNested);
+
         [ShowInMarkup, LanguageKey, DefaultValue("シャッター角度:")]
         public static readonly string CompositionSettingView_ShutterAngleLabel = nameof(CompositionSettingView_ShutterAngleLabel);
 
@@ -185,6 +188,9 @@ namespace NiVE3.View.Resource
 
         [ShowInMarkup, LanguageKey, DefaultValue("レンダラ:")]
         public static readonly string CompositionSettingView_RendererLabel = nameof(CompositionSettingView_RendererLabel);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("トーンマッパー:")]
+        public static readonly string CompositionSettingView_ToneMapperLabel = nameof(CompositionSettingView_ToneMapperLabel);
 
         [ShowInMarkup, LanguageKey, DefaultValue("色の選択")]
         public static readonly string ColorPickerDialog_Title = nameof(ColorPickerDialog_Title);
@@ -1049,6 +1055,14 @@ namespace NiVE3.View.Resource
 
         [ShowInMarkup, DefaultValue("右チャンネル")]
         public static readonly string WaveFormType_Right = nameof(WaveFormType_Right);
+
+        // Inner Plugin
+
+        [DefaultValue("なし")]
+        public const string ToneMapper_NoOpToneMapper_Name = nameof(ToneMapper_NoOpToneMapper_Name);
+
+        [DefaultValue("トーンマッピングを行いません")]
+        public const string ToneMapper_NoOpToneMapper_Description = nameof(ToneMapper_NoOpToneMapper_Description);
 
         static LanguageResourceDictionary()
         {

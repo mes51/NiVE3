@@ -82,6 +82,13 @@ namespace NiVE3.Model
             set { SetProperty(ref isRetentionFrameRate, value); }
         }
 
+        private bool applyToneMappingWhenNested;
+        public bool ApplyToneMappingWhenNested
+        {
+            get { return applyToneMappingWhenNested; }
+            set { SetProperty(ref applyToneMappingWhenNested, value); }
+        }
+
         private int shutterAngle;
         public int ShutterAngle
         {
@@ -159,7 +166,11 @@ namespace NiVE3.Model
 
         ExportLifetimeContext<IRenderer> RendererContext { get; }
 
+        ExportLifetimeContext<IToneMapper> ToneMapperContext { get; }
+
         Guid RendererPluginId { get; }
+
+        Guid ToneMapperPluginId { get; }
 
         FootageListModel FootageListModel { get; }
 
@@ -171,13 +182,36 @@ namespace NiVE3.Model
 
         IRenderer Renderer => RendererContext.Value;
 
-        public CompositionModel(ExportLifetimeContext<IRenderer> renderer, Guid rendererPluginId, FootageListModel footageListModel, EffectListModel effectListModel, TextPropertyModel textPropertyModel, HistoryModel historyModel) : this(renderer, rendererPluginId, footageListModel, effectListModel, textPropertyModel, historyModel, null) { }
+        IToneMapper ToneMapper => ToneMapperContext.Value;
 
-        public CompositionModel(ExportLifetimeContext<IRenderer> renderer, Guid rendererPluginId, FootageListModel footageListModel, EffectListModel effectListModel, TextPropertyModel textPropertyModel, HistoryModel historyModel, Guid? compositionId)
+        public CompositionModel(
+            ExportLifetimeContext<IRenderer> renderer,
+            ExportLifetimeContext<IToneMapper> toneMapper,
+            Guid rendererPluginId,
+            Guid toneMapperPluginId,
+            FootageListModel footageListModel,
+            EffectListModel effectListModel,
+            TextPropertyModel textPropertyModel,
+            HistoryModel historyModel
+        ) : this(renderer, toneMapper, rendererPluginId, toneMapperPluginId, footageListModel, effectListModel, textPropertyModel, historyModel, null) { }
+
+        public CompositionModel(
+            ExportLifetimeContext<IRenderer> renderer,
+            ExportLifetimeContext<IToneMapper> toneMapper,
+            Guid rendererPluginId,
+            Guid toneMapperPluginId,
+            FootageListModel footageListModel,
+            EffectListModel effectListModel,
+            TextPropertyModel textPropertyModel,
+            HistoryModel historyModel,
+            Guid? compositionId
+        )
         {
             CompositionId = compositionId ?? Guid.NewGuid();
             RendererContext = renderer;
+            ToneMapperContext = toneMapper;
             RendererPluginId = rendererPluginId;
+            ToneMapperPluginId = toneMapperPluginId;
             FootageListModel = footageListModel;
             EffectListModel = effectListModel;
             TextPropertyModel = textPropertyModel;
@@ -473,7 +507,7 @@ namespace NiVE3.Model
             DeleteLayers(layerIds);
         }
 
-        public NImage RenderFrame(double time, double downSamplingRate, bool useGpu)
+        public NImage RenderFrame(double time, double downSamplingRate, bool applyToneMapping, bool useGpu)
         {
             var allImages = new List<IDisposable>();
 
@@ -563,6 +597,11 @@ namespace NiVE3.Model
             }
 
             var result = Renderer.FinishRendering();
+
+            if (applyToneMapping)
+            {
+                result = ToneMapper.ToneMapping(result, useGpu);
+            }
 
             foreach (var i in allImages)
             {
@@ -664,12 +703,14 @@ namespace NiVE3.Model
                 FrameRate = FrameRate,
                 Duration = Duration,
                 IsRetentionFrameRate = IsRetentionFrameRate,
+                ApplyToneMappingWhenNested = ApplyToneMappingWhenNested,
                 ShutterAngle = ShutterAngle,
                 ShutterPhase = ShutterPhase,
                 MotionBlurSampleCount = MotionBlurSampleCount,
                 WorkareaBegin = WorkareaBegin,
                 WorkareaEnd = WorkareaEnd,
                 RendererPluginId = RendererPluginId,
+                ToneMapperPluginId = ToneMapperPluginId,
                 TimeBarRange = TimeBarRange,
                 TimeBarRangeStart = TimeBarRangeStart,
                 CurrentTime = CurrentTime,
@@ -685,6 +726,7 @@ namespace NiVE3.Model
             FrameRate = data.FrameRate;
             Duration = data.Duration;
             IsRetentionFrameRate = data.IsRetentionFrameRate;
+            ApplyToneMappingWhenNested = data.ApplyToneMappingWhenNested;
             ShutterAngle = data.ShutterAngle;
             ShutterPhase = data.ShutterPhase;
             MotionBlurSampleCount = data.MotionBlurSampleCount;
@@ -847,6 +889,8 @@ namespace NiVE3.Model
         {
             RendererContext.Value.Dispose();
             RendererContext.Dispose();
+            ToneMapperContext.Value.Dispose();
+            ToneMapperContext.Dispose();
         }
     }
 }

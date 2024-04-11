@@ -223,7 +223,7 @@ namespace NiVE3.Model
 
         public override NImage? GetImage(double time)
         {
-            return Composition?.RenderFrame(time, 1.0, ApplicationModel.UseGpu);
+            return Composition?.RenderFrame(time, 1.0, true, ApplicationModel.UseGpu);
         }
 
         public override float[]? GetAudio(double time, double length)

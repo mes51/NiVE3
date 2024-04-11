@@ -85,7 +85,7 @@ namespace NiVE3.Input
         public NImage ReadFrame(double time, bool toGpu)
         {
             // TODO: 親のコンポジションのダウンサンプリングの反映
-            return Composition.RenderFrame(time, 1.0, toGpu);
+            return Composition.RenderFrame(time, 1.0, Composition.ApplyToneMappingWhenNested, toGpu);
         }
 
         public float[] ReadAudio(double time, double length)

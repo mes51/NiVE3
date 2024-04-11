@@ -157,10 +157,12 @@ namespace NiVE3.ViewModel
                         result.Parameters.GetValue<double>(nameof(CompositionSettingViewModel.FrameRate)),
                         result.Parameters.GetValue<double>(nameof(CompositionSettingViewModel.Duration)),
                         result.Parameters.GetValue<bool>(nameof(CompositionSettingViewModel.IsRetentionFrameRate)),
+                        result.Parameters.GetValue<bool>(nameof(CompositionSettingViewModel.ApplyToneMappingWhenNested)),
                         result.Parameters.GetValue<int>(nameof(CompositionSettingViewModel.ShutterAngle)),
                         result.Parameters.GetValue<int>(nameof(CompositionSettingViewModel.ShutterPhase)),
                         result.Parameters.GetValue<int>(nameof(CompositionSettingViewModel.MotionBlurSampleCount)),
-                        result.Parameters.GetValue<Type>(CompositionSettingViewModel.SelectedRendererType)
+                        result.Parameters.GetValue<Type>(CompositionSettingViewModel.SelectedRendererType),
+                        result.Parameters.GetValue<Type>(CompositionSettingViewModel.SelectedToneMapperType)
                     );
                 }
             });

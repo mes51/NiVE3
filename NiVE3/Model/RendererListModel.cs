@@ -14,7 +14,7 @@ namespace NiVE3.Model
 {
     class RendererListModel : BindableBase
     {
-        public IReadOnlyList<IRendererMetadata> RendererMetadatas { get; }
+        public IReadOnlyList<IRendererMetadata> RendererMetadata { get; }
 
         [ImportMany]
         List<ExportFactory<IRenderer, IRendererMetadata>>? Renderers { get; set; }
@@ -31,11 +31,11 @@ namespace NiVE3.Model
 
             if (Renderers != null)
             {
-                RendererMetadatas = Renderers.Select(r => r.Metadata).ToList();
+                RendererMetadata = [..Renderers.Select(r => r.Metadata)];
             }
             else
             {
-                RendererMetadatas = [];
+                RendererMetadata = [];
             }
         }
 

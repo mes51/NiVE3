@@ -46,6 +46,8 @@ namespace NiVE3.Model
 
         RendererListModel RendererListModel { get; }
 
+        ToneMapperListModel ToneMapperListModel { get; }
+
         EffectListModel EffectListModel { get; }
 
         TextPropertyModel TextPropertyModel { get; }
@@ -58,10 +60,11 @@ namespace NiVE3.Model
 
         public event EventHandler<CompositionEventArgs>? CompositionRemoved;
 
-        public ProjectModel(FootageListModel footageListModel, RendererListModel rendererListModel, EffectListModel effectListModel, TextPropertyModel textPropertyModel, HistoryModel historyModel, ApplicationModel applicationModel)
+        public ProjectModel(FootageListModel footageListModel, RendererListModel rendererListModel, ToneMapperListModel toneMapperListModel, EffectListModel effectListModel, TextPropertyModel textPropertyModel, HistoryModel historyModel, ApplicationModel applicationModel)
         {
             FootageListModel = footageListModel;
             RendererListModel = rendererListModel;
+            ToneMapperListModel = toneMapperListModel;
             EffectListModel = effectListModel;
             TextPropertyModel = textPropertyModel;
             HistoryModel = historyModel;
@@ -77,11 +80,13 @@ namespace NiVE3.Model
             PropertyChanged += ProjectModel_PropertyChanged;
         }
 
-        public void CreateComposition(string name, int width, int height, double frameRate, double duration, bool isRetentionFrameRate, int shutterAngle, int shutterPhase, int motionBlurSampleCount, Type rendererType)
+        public void CreateComposition(string name, int width, int height, double frameRate, double duration, bool isRetentionFrameRate, bool applyToneMappingWhenNested, int shutterAngle, int shutterPhase, int motionBlurSampleCount, Type rendererType, Type toneMapperType)
         {
             var renderer = RendererListModel.CreateRenderer(rendererType);
+            var toneMapper = ToneMapperListModel.CreateToneMapper(toneMapperType);
             var rendererPluginId = RendererListModel.GetPluginId(rendererType);
-            var composition = new CompositionModel(renderer, rendererPluginId, FootageListModel, EffectListModel, TextPropertyModel, HistoryModel)
+            var toneMapperPluginId = ToneMapperListModel.GetPluginId(toneMapperType);
+            var composition = new CompositionModel(renderer, toneMapper, rendererPluginId, toneMapperPluginId, FootageListModel, EffectListModel, TextPropertyModel, HistoryModel)
             {
                 Name = name,
                 Width = width,
@@ -89,6 +94,7 @@ namespace NiVE3.Model
                 FrameRate = frameRate,
                 Duration = duration,
                 IsRetentionFrameRate = isRetentionFrameRate,
+                ApplyToneMappingWhenNested = applyToneMappingWhenNested,
                 ShutterAngle = shutterAngle,
                 ShutterPhase = shutterPhase,
                 MotionBlurSampleCount = motionBlurSampleCount
@@ -170,7 +176,8 @@ namespace NiVE3.Model
                 foreach (var compositionData in projectData.Compositions)
                 {
                     var renderer = RendererListModel.CreateRenderer(compositionData.RendererPluginId);
-                    var composition = new CompositionModel(renderer, compositionData.RendererPluginId, FootageListModel, EffectListModel, TextPropertyModel, HistoryModel, compositionData.CompositionId);
+                    var toneMapper = ToneMapperListModel.CreateToneMapper(compositionData.ToneMapperPluginId);
+                    var composition = new CompositionModel(renderer, toneMapper, compositionData.RendererPluginId, compositionData.ToneMapperPluginId, FootageListModel, EffectListModel, TextPropertyModel, HistoryModel, compositionData.CompositionId);
                     composition.LoadData(compositionData);
                     CompositionModels.Add(composition);
                 }

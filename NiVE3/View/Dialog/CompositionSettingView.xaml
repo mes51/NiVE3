@@ -171,6 +171,9 @@
                                 <Grid Style="{StaticResource ItemRowGrid}">
                                     <CheckBox Content="{gm:LanguageResource ResourceKey=CompositionSettingView_RetentionFrameRate}" IsChecked="{Binding IsRetentionFrameRate}"/>
                                 </Grid>
+                                <Grid Style="{StaticResource ItemRowGrid}">
+                                    <CheckBox Content="{gm:LanguageResource ResourceKey=CompositionSettingView_ApplyToneMappingWhenNested}" IsChecked="{Binding ApplyToneMappingWhenNested}"/>
+                                </Grid>
                             </StackPanel>
                         </GroupBox>
                     </Grid>
@@ -223,9 +226,26 @@
                                 </StackPanel>
                             </GroupBox>
 
-                            <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="{StaticResource ItemRowMargin}" HorizontalAlignment="Center">
-                                <TextBlock Text="{gm:LanguageResource ResourceKey=CompositionSettingView_RendererLabel}" Style="{StaticResource ItemLabel}"/>
-                                <ComboBox Width="300" Margin="5,0,0,0" ItemsSource="{Binding Renderers}" SelectedIndex="{Binding SelectedRenderer, Mode=TwoWay}"/>
+                            <StackPanel Grid.Row="1" Grid.IsSharedSizeScope="True">
+                                <Grid Grid.Row="1" Margin="{StaticResource ItemRowMargin}" HorizontalAlignment="Center">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" SharedSizeGroup="SelectTypeLabel"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=CompositionSettingView_RendererLabel}" Style="{StaticResource ItemLabel}"/>
+                                    <ComboBox Grid.Column="1" Width="300" Margin="5,0,0,0" ItemsSource="{Binding Renderers}" SelectedIndex="{Binding SelectedRenderer, Mode=TwoWay}"/>
+                                </Grid>
+
+                                <Grid Grid.Row="2" Margin="{StaticResource ItemRowMargin}" HorizontalAlignment="Center">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" SharedSizeGroup="SelectTypeLabel"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=CompositionSettingView_ToneMapperLabel}" Style="{StaticResource ItemLabel}"/>
+                                    <ComboBox Grid.Column="1" Width="300" Margin="5,0,0,0" ItemsSource="{Binding ToneMappers}" SelectedIndex="{Binding SelectedToneMapper, Mode=TwoWay}"/>
+                                </Grid>
                             </StackPanel>
                         </Grid>
                     </Grid>
