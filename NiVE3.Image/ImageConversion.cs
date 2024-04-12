@@ -13,7 +13,9 @@ namespace NiVE3.Image
 {
     public static unsafe class ImageConversion
     {
-        static readonly Vector128<float> ByteToFloat128 = Vector128.Create(0.00392156862745098F);
+        const float ByteToFloat = 0.00392156862745098F;
+
+        static readonly Vector<float> MaxBase = new Vector<float>(Enumerable.Repeat(new float[] { 0.0F, 0.0F, 0.0F, 1.0F }, Vector<float>.Count / 4).SelectMany(_ => _).ToArray());
 
         /// <summary>
         /// 8bpcから32bpcに変換します
@@ -35,19 +37,34 @@ namespace NiVE3.Image
         /// <param name="pixelCount">ピクセルの数</param>
         public static unsafe void ConvertToBGRA128(ReadOnlySpan<int> fromImage, Span<Vector4> toImage, int pixelCount)
         {
-            ref int pixelDataRef = ref MemoryMarshal.GetReference(fromImage);
-            ref Vector4 resultDataRef = ref MemoryMarshal.GetReference(toImage);
+            ref var pixelDataRef = ref MemoryMarshal.GetReference(fromImage);
+            ref var resultDataRef = ref MemoryMarshal.GetReference(toImage);
             fixed (int* fixedPixelData = &pixelDataRef)
             fixed (Vector128<float>* fixedResultData = &Unsafe.As<Vector4, Vector128<float>>(ref resultDataRef))
             {
-                int* pixelData = fixedPixelData;
-                Vector128<float>* resultData = fixedResultData;
-                Parallel.For(0, pixelCount, i =>
+                var vPixelData = (Vector<byte>*)fixedPixelData;
+                var vResultData = (Vector<float>*)fixedResultData;
+                var stride = Vector<float>.Count; // Vector<float>.Count / 4channel * 4px
+                Parallel.For(0, pixelCount / stride, i =>
+                {
+                    var c = vPixelData[i];
+                    Vector.Widen(c, out var ps1, out var ps2);
+                    Vector.Widen(ps1, out var pi1, out var pi2);
+                    Vector.Widen(ps2, out var pi3, out var pi4);
+                    vResultData[i * 4] = Vector.ConvertToSingle(pi1) * ByteToFloat;
+                    vResultData[i * 4 + 1] = Vector.ConvertToSingle(pi2) * ByteToFloat;
+                    vResultData[i * 4 + 2] = Vector.ConvertToSingle(pi3) * ByteToFloat;
+                    vResultData[i * 4 + 3] = Vector.ConvertToSingle(pi4) * ByteToFloat;
+                });
+
+                var pixelData = fixedPixelData;
+                var resultData = fixedResultData;
+                Parallel.For(pixelCount - (pixelCount % stride), pixelCount, i =>
                 {
                     var c = Sse2.ConvertScalarToVector128Int32(pixelData[i]).AsByte();
                     var cv = Sse2.UnpackLow(Sse2.UnpackLow(c, Vector128<byte>.Zero), Vector128<byte>.Zero).AsInt32();
 
-                    resultData[i] = Sse.Multiply(Sse2.ConvertToVector128Single(cv), ByteToFloat128);
+                    resultData[i] = Sse2.ConvertToVector128Single(cv) * ByteToFloat;
                 });
             }
         }
@@ -72,14 +89,28 @@ namespace NiVE3.Image
         /// <param name="pixelCount">ピクセルの数</param>
         public static unsafe void ConvertToBGRA32(ReadOnlySpan<Vector4> fromImage, Span<int> toImage, int pixelCount)
         {
-            ref Vector4 pixelDataRef = ref MemoryMarshal.GetReference(fromImage);
-            ref int resultDataRef = ref MemoryMarshal.GetReference(toImage);
+            ref var pixelDataRef = ref MemoryMarshal.GetReference(fromImage);
+            ref var resultDataRef = ref MemoryMarshal.GetReference(toImage);
             fixed (Vector128<float>* fixedPixelData = &Unsafe.As<Vector4, Vector128<float>>(ref pixelDataRef))
             fixed (int* fixedResultData = &resultDataRef)
             {
-                Vector128<float>* pixelData = fixedPixelData;
-                int* resultData = fixedResultData;
-                Parallel.For(0, pixelCount, i =>
+                var vPixelData = (Vector<float>*)fixedPixelData;
+                var vResultData = (Vector<byte>*)fixedResultData;
+                var stride = Vector<float>.Count; // Vector<float>.Count / 4channel * 4px
+                Parallel.For(0, pixelCount / stride, i =>
+                {
+                    var p1 = Vector.ConvertToUInt32(Vector.Min(Vector.Max(vPixelData[i * 4], Vector<float>.Zero), Vector<float>.One) * 255.0F);
+                    var p2 = Vector.ConvertToUInt32(Vector.Min(Vector.Max(vPixelData[i * 4 + 1], Vector<float>.Zero), Vector<float>.One) * 255.0F);
+                    var p3 = Vector.ConvertToUInt32(Vector.Min(Vector.Max(vPixelData[i * 4 + 2], Vector<float>.Zero), Vector<float>.One) * 255.0F);
+                    var p4 = Vector.ConvertToUInt32(Vector.Min(Vector.Max(vPixelData[i * 4 + 3], Vector<float>.Zero), Vector<float>.One) * 255.0F);
+                    var ps1 = Vector.Narrow(p1, p2);
+                    var ps2 = Vector.Narrow(p3, p4);
+                    vResultData[i] = Vector.Narrow(ps1, ps2);
+                });
+
+                var pixelData = fixedPixelData;
+                var resultData = fixedResultData;
+                Parallel.For(pixelCount - (pixelCount % stride), pixelCount, i =>
                 {
                     var p = Sse41.RoundCurrentDirection(pixelData[i] * 255.0F);
                     var p32 = Sse41.Min(Sse41.Max(Sse2.ConvertToVector128Int32(p), Vector128<int>.Zero), Vector128.Create(255));
@@ -109,14 +140,29 @@ namespace NiVE3.Image
         /// <param name="pixelCount">ピクセルの数</param>
         public static unsafe void ConvertToBGR32(ReadOnlySpan<Vector4> fromImage, Span<int> toImage, int pixelCount)
         {
-            ref Vector4 pixelDataRef = ref MemoryMarshal.GetReference(fromImage);
-            ref int resultDataRef = ref MemoryMarshal.GetReference(toImage);
+            ref var pixelDataRef = ref MemoryMarshal.GetReference(fromImage);
+            ref var resultDataRef = ref MemoryMarshal.GetReference(toImage);
             fixed (Vector128<float>* fixedPixelData = &Unsafe.As<Vector4, Vector128<float>>(ref pixelDataRef))
             fixed (int* fixedResultData = &resultDataRef)
             {
-                Vector128<float>* pixelData = fixedPixelData;
-                int* resultData = fixedResultData;
-                Parallel.For(0, pixelCount, i =>
+                var maxBase = MaxBase;
+                var vPixelData = (Vector<float>*)fixedPixelData;
+                var vResultData = (Vector<byte>*)fixedResultData;
+                var stride = Vector<float>.Count; // Vector<float>.Count / 4channel * 4px
+                Parallel.For(0, pixelCount / stride, i =>
+                {
+                    var p1 = Vector.ConvertToUInt32(Vector.Min(Vector.Max(vPixelData[i * 4], maxBase), Vector<float>.One) * 255.0F);
+                    var p2 = Vector.ConvertToUInt32(Vector.Min(Vector.Max(vPixelData[i * 4 + 1], maxBase), Vector<float>.One) * 255.0F);
+                    var p3 = Vector.ConvertToUInt32(Vector.Min(Vector.Max(vPixelData[i * 4 + 2], maxBase), Vector<float>.One) * 255.0F);
+                    var p4 = Vector.ConvertToUInt32(Vector.Min(Vector.Max(vPixelData[i * 4 + 3], maxBase), Vector<float>.One) * 255.0F);
+                    var ps1 = Vector.Narrow(p1, p2);
+                    var ps2 = Vector.Narrow(p3, p4);
+                    vResultData[i] = Vector.Narrow(ps1, ps2);
+                });
+
+                var pixelData = fixedPixelData;
+                var resultData = fixedResultData;
+                Parallel.For(pixelCount - (pixelCount % stride), pixelCount, i =>
                 {
                     var p = Sse41.RoundCurrentDirection(pixelData[i] * 255.0F);
                     var p32 = Sse41.Insert(Sse2.ConvertToVector128Int32(p), 255, 3);
