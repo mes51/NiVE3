@@ -18,8 +18,6 @@ namespace NiVE3.Image.Drawing
     {
         static readonly Vector128<float> Half128 = Vector128.Create(0.5F);
 
-        static readonly Vector128<float> One128 = Vector128.Create(1.0F);
-
         static readonly Vector4 ConvertToGrayScale = new Vector4(0.114478F, 0.586611F, 0.298912F, 0.0F);
 
         static readonly Vector4 Two = new Vector4(2.0F, 2.0F, 2.0F, 2.0F);
@@ -98,15 +96,13 @@ namespace NiVE3.Image.Drawing
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static Vector4 Add(in Vector4 back, in Vector4 front)
         {
-            var c = Vector4.Min(front + back, Vector4.One);
-            return Composite(back, front, c);
+            return Composite(back, front, front + back);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static Vector4 Subtract(in Vector4 back, in Vector4 front)
         {
-            var c = Vector4.Max(front - back, Vector4.Zero);
-            return Composite(back, front, c);
+            return Composite(back, front, front - back);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -129,12 +125,8 @@ namespace NiVE3.Image.Drawing
             var lt = 2.0F * back * front;
             var gte = Vector4.One - 2.0F * (Vector4.One - back) * (Vector4.One - front);
 
-            var c = Sse.Add(
-                Sse.And(mask, lt.AsVector128()),
-                Sse.AndNot(mask, gte.AsVector128())
-            ).AsVector4();
-
-            return Composite(back, front, c);
+            var c = (mask & lt.AsVector128()) + Sse.AndNot(mask, gte.AsVector128());
+            return Composite(back, front, c.AsVector4());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -144,12 +136,8 @@ namespace NiVE3.Image.Drawing
             var lt = 2.0F * back * front;
             var gte = Vector4.One - 2.0F * (Vector4.One - back) * (Vector4.One - front);
 
-            var c = Sse.Add(
-                Sse.And(mask, lt.AsVector128()),
-                Sse.AndNot(mask, gte.AsVector128())
-            ).AsVector4();
-
-            return Composite(back, front, c);
+            var c = (mask & lt.AsVector128()) + Sse.AndNot(mask, gte.AsVector128());
+            return Composite(back, front, c.AsVector4());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -159,39 +147,19 @@ namespace NiVE3.Image.Drawing
             var bv128 = back.AsVector128();
 
             var mask = Sse.CompareLessThan(fv128, Half128);
-            var lt = bv128.Pow((2.0F * (Vector4.One - front)).AsVector128());
-            var gte = bv128.Pow((Vector4.One / (2.0F * front)).AsVector128());
+            var lt = (fv128 * 2.0F - Vector128<float>.One) * (bv128 - bv128.Pow(Vector128.Create(2.0F))) + bv128;
+            var gte = (fv128 * 2.0F - Vector128<float>.One) * (bv128.Pow(Vector128.Create(0.5F)) - bv128) + bv128;
 
-            var c = Sse.Add(
-                Sse.And(mask, lt),
-                Sse.AndNot(mask, gte)
-            ).AsVector4();
-
-            return Composite(back, front, c);
+            var c = (mask & lt) + Sse.AndNot(mask, gte);
+            return Composite(back, front, c.AsVector4());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static Vector4 VividLight(in Vector4 back, in Vector4 front)
         {
-            var bv128 = back.AsVector128();
-
             var mask = Sse.CompareLessThan(front.AsVector128(), Half128);
-
-            var fv = front * 2.0F;
-            var ltMask = Sse.CompareLessThanOrEqual(bv128, (Vector4.One - fv).AsVector128());
-            var gteMask = Sse.CompareLessThan(bv128, (Two - fv).AsVector128());
-            var lt = Sse.And(ltMask, (back - (Vector4.One - fv) / fv).AsVector128());
-            var gte = Sse.Add(
-                Sse.And(gteMask, (back / (Two - fv)).AsVector128()),
-                Sse.AndNot(gteMask, Vector128.Create(1.0F))
-            );
-
-            var c = Sse.Add(
-                Sse.And(mask, lt),
-                Sse.AndNot(mask, gte)
-            ).AsVector4();
-
-            return Composite(back, fv, c);
+            var c = (mask & (Vector4.One - (Vector4.One - back) / (front * 2.0F)).AsVector128()) + Sse.AndNot(mask, (back / ((Vector4.One - front) * 2.0F)).AsVector128());
+            return Composite(back, front, c.AsVector4());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -202,21 +170,14 @@ namespace NiVE3.Image.Drawing
             var mask = Sse.CompareLessThan(front.AsVector128(), Half128);
 
             var fv = front * 2.0F;
-            var ltMask = Sse.CompareLessThan(bv128, (Vector4.One - fv).AsVector128());
+            var ltMask = Sse.CompareGreaterThanOrEqual(bv128, (Vector4.One - fv).AsVector128());
             var gteMask = Sse.CompareLessThan(bv128, (Two - fv).AsVector128());
             var tmp = (fv + back - Vector4.One).AsVector128();
-            var lt = Sse.And(ltMask, tmp);
-            var gte = Sse.Add(
-                Sse.And(gteMask, tmp),
-                Sse.AndNot(gteMask, Vector128.Create(1.0F))
-            );
+            var lt = (ltMask & tmp);
+            var gte = (gteMask & tmp) + Sse.AndNot(gteMask, Vector128<float>.One);
 
-            var c = Sse.Add(
-                Sse.And(mask, lt),
-                Sse.AndNot(mask, gte)
-            ).AsVector4();
-
-            return Composite(back, fv, c);
+            var c = (mask & lt) + Sse.AndNot(mask, gte);
+            return Composite(back, front, c.AsVector4());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -230,30 +191,19 @@ namespace NiVE3.Image.Drawing
             var fv128 = fv.AsVector128();
 
             var ltMask = Sse.CompareLessThan(fv128, bv128);
-            var gteMask = Sse.CompareLessThan(Sse.Subtract(fv128, Vector128.Create(1.0F)), bv128);
+            var gteMask = Sse.CompareLessThan(fv128 - Vector128<float>.One, bv128);
 
-            var lt = Sse.Add(
-                Sse.And(ltMask, fv128),
-                Sse.AndNot(ltMask, bv128)
-            );
-            var gte = Sse.Add(
-                Sse.And(gteMask, bv128),
-                Sse.AndNot(gteMask, Sse.Subtract(fv128, Vector128.Create(1.0F)))
-            );
+            var lt = (ltMask & fv128) + Sse.AndNot(ltMask, bv128);
+            var gte = (gteMask & bv128) + Sse.AndNot(gteMask, fv128 - Vector128<float>.One);
 
-            var c = Sse.Add(
-                Sse.And(mask, lt),
-                Sse.AndNot(mask, gte)
-            ).AsVector4();
-
-            return Composite(back, fv, c);
+            var c = (mask & lt) + Sse.AndNot(mask, gte);
+            return Composite(back, front, c.AsVector4());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static Vector4 ColorDodge(in Vector4 back, in Vector4 front)
         {
-            var c256 = new Vector4(1.00392156862745F);
-            var c = Vector4.Min((c256 * back) / (c256 - front), Vector4.One);
+            var c = Vector4.Min(back / (Vector4.One - front), Vector4.One);
             return Composite(back, front, c);
         }
 
@@ -267,27 +217,15 @@ namespace NiVE3.Image.Drawing
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static Vector4 ColorBurn(in Vector4 back, in Vector4 front)
         {
-            var mask = Sse.CompareLessThan((front + back).AsVector128(), One128);
-
-            var lteInnerMask = Sse.CompareLessThan(front.AsVector128(), Vector128<float>.Zero);
-
-            var lteInner = (Vector4.One - (Vector4.One - back) / front).AsVector128();
-
-            var c = Sse.AndNot(
-                mask,
-                Sse.Add(
-                    Sse.And(lteInnerMask, lteInner),
-                    Sse.AndNot(lteInnerMask, One128)
-                )
-            ).AsVector4();
-
-            return Composite(back, front, c);
+            var mask = Sse.CompareGreaterThan(front.AsVector128(), Vector128<float>.Zero);
+            var c = Vector4.One - (Vector4.One - back) / front;
+            return Composite(back, front, (mask & c.AsVector128()).AsVector4());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static Vector4 LinearBurn(in Vector4 back, in Vector4 front)
         {
-            var mask = Sse.CompareLessThan((front + back).AsVector128(), One128);
+            var mask = Sse.CompareLessThan((front + back).AsVector128(), Vector128<float>.One);
 
             var c = Sse.AndNot(
                 mask,
@@ -321,16 +259,14 @@ namespace NiVE3.Image.Drawing
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static Vector4 Exclusion(in Vector4 back, in Vector4 front)
         {
-            var c = ((Vector4.One - front) * back + (Vector4.One - back) * front);
+            var c = back + front - back * front * 2.0F;
             return Composite(back, front, c);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static Vector4 Hue(in Vector4 back, in Vector4 front)
         {
-            var luminance = GetLuminance(back);
-            var c = SetLuminance(SetSaturation(front, luminance), luminance);
-
+            var c = SetLuminance(SetSaturation(front, GetSaturation(back)), GetLuminance(back));
             return Composite(back, front, c);
         }
 
@@ -360,16 +296,19 @@ namespace NiVE3.Image.Drawing
         {
             var l = GetLuminance(c);
             var lv = new Vector4(l, l, l, 0.0F);
-            var n = c.HorizontalMinBy3Element();
-            if (n < 0.0F)
+            var min = c.HorizontalMinBy3Element();
+            var max = c.HorizontalMaxBy3Element();
+            var result = c;
+            if (min < 0.0F)
             {
-                return lv + (((c - lv) * l) / (l - n));
+                result = lv + ((result - lv) * l / (l - min));
             }
-            else
+            if (max > 1.0F)
             {
-                var x = c.HorizontalMaxBy3Element();
-                return lv + (((c - lv) * (1.0F - l)) / (x - l));
+                result = lv + ((result - lv) * (1.0F - l) / (max - l));
             }
+
+            return result;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -391,12 +330,12 @@ namespace NiVE3.Image.Drawing
                 {
                     if (min == c.Y)
                     {
-                        c.X = ((c.X - c.Y) * saturation) / (c.Z - c.Y);
+                        c.X = ((c.X - c.Y) / (c.Z - c.Y)) * saturation;
                         c.Y = 0.0F;
                     }
                     else
                     {
-                        c.Y = ((c.Y - c.X) * saturation) / (c.Z - c.X);
+                        c.Y = ((c.Y - c.X) / (c.Z - c.X)) * saturation;
                         c.X = 0.0F;
                     }
                     c.Z = saturation;
@@ -405,12 +344,12 @@ namespace NiVE3.Image.Drawing
                 {
                     if (min == c.X)
                     {
-                        c.Z = ((c.Z - c.X) * saturation) / (c.Y - c.X);
+                        c.Z = ((c.Z - c.X) / (c.Y - c.X)) * saturation;
                         c.X = 0.0F;
                     }
                     else
                     {
-                        c.X = ((c.X - c.Z) * saturation) / (c.Y - c.Z);
+                        c.X = ((c.X - c.Z) / (c.Y - c.Z)) * saturation;
                         c.Z = 0.0F;
                     }
                     c.Y = saturation;
@@ -419,12 +358,12 @@ namespace NiVE3.Image.Drawing
                 {
                     if (min == c.Z)
                     {
-                        c.Y = ((c.Y - c.Z) * saturation) / (c.X - c.Z);
+                        c.Y = ((c.Y - c.Z) / (c.X - c.Z)) * saturation;
                         c.Z = 0.0F;
                     }
                     else
                     {
-                        c.Z = ((c.Z - c.Y) * saturation) / (c.X - c.Y);
+                        c.Z = ((c.Z - c.Y) / (c.X - c.Y)) * saturation;
                         c.Y = 0.0F;
                     }
                     c.X = saturation;
@@ -447,7 +386,7 @@ namespace NiVE3.Image.Drawing
         static float GetSaturation(in Vector4 c)
         {
             var c128 = c.AsVector128();
-            return Sse.Subtract(c128.HorizontalMaxBy3Element(), c128.HorizontalMinBy3Element()).GetElement(0);
+            return (c128.HorizontalMaxBy3Element() - c128.HorizontalMinBy3Element()).GetElement(0);
         }
     }
 
