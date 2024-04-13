@@ -99,13 +99,6 @@ namespace NiVE3.View.Pane
             new FrameworkPropertyMetadata(0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, SelectedDownScaleRateChanged)
         );
 
-        private static readonly DependencyPropertyKey PreviewAreaScaleRateInvertPropertyKey = DependencyProperty.RegisterReadOnly(
-            nameof(PreviewAreaScaleRateInvert),
-            typeof(double),
-            typeof(PreviewView),
-            new FrameworkPropertyMetadata(1.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
-        );
-
         public static readonly DependencyProperty UseImageInterpolationProperty = DependencyProperty.Register(
             nameof(UseImageInterpolation),
             typeof(bool),
@@ -113,7 +106,44 @@ namespace NiVE3.View.Pane
             new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
+        private static readonly DependencyPropertyKey PreviewAreaScaleRateInvertPropertyKey = DependencyProperty.RegisterReadOnly(
+            nameof(PreviewAreaScaleRateInvert),
+            typeof(double),
+            typeof(PreviewView),
+            new FrameworkPropertyMetadata(1.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
         public static readonly DependencyProperty PreviewAreaScaleRateInvertProperty = PreviewAreaScaleRateInvertPropertyKey.DependencyProperty;
+
+        private static readonly DependencyPropertyKey PreviewAreaImageScaleXPropertyKey = DependencyProperty.RegisterReadOnly(
+            nameof(PreviewAreaImageScaleX),
+            typeof(double),
+            typeof(PreviewView),
+            new FrameworkPropertyMetadata(1.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        public static readonly DependencyProperty PreviewAreaImageScaleXProperty = PreviewAreaImageScaleXPropertyKey.DependencyProperty;
+
+        private static readonly DependencyPropertyKey PreviewAreaImageScaleYPropertyKey = DependencyProperty.RegisterReadOnly(
+            nameof(PreviewAreaImageScaleY),
+            typeof(double),
+            typeof(PreviewView),
+            new FrameworkPropertyMetadata(1.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        public static readonly DependencyProperty PreviewAreaImageScaleYProperty = PreviewAreaImageScaleYPropertyKey.DependencyProperty;
+
+        public double PreviewAreaImageScaleY
+        {
+            get { return (double)GetValue(PreviewAreaImageScaleYProperty); }
+            private set { SetValue(PreviewAreaImageScaleYPropertyKey, value); }
+        }
+
+        public double PreviewAreaImageScaleX
+        {
+            get { return (double)GetValue(PreviewAreaImageScaleXProperty); }
+            private set { SetValue(PreviewAreaImageScaleXPropertyKey, value); }
+        }
 
         public double PreviewAreaScaleRateInvert
         {
@@ -192,6 +222,10 @@ namespace NiVE3.View.Pane
                 VisualTree = factory
             };
 
+            var dpi = VisualTreeHelper.GetDpi(this);
+            PreviewAreaImageScaleX = 1.0 / dpi.DpiScaleX;
+            PreviewAreaImageScaleY = 1.0 / dpi.DpiScaleY;
+
             InitializeComponent();
 
             DataContextChanged += PreviewView_DataContextChanged;
@@ -217,13 +251,14 @@ namespace NiVE3.View.Pane
             {
                 if (viewModel.Width > 0 && viewModel.Height > 0)
                 {
+                    var dpi = VisualTreeHelper.GetDpi(this);
                     if (scale <= StretchPreview)
                     {
-                        scale = Math.Min(Math.Min(PreviewCanvas.ActualWidth / viewModel.Width, PreviewCanvas.ActualHeight / viewModel.Height), 6.4) * 100.0;
+                        scale = Math.Min(Math.Min(PreviewCanvas.ActualWidth / viewModel.Width * dpi.DpiScaleX, PreviewCanvas.ActualHeight / viewModel.Height * dpi.DpiScaleY), 6.4) * 100.0;
                     }
                     else if (scale < SeparatorScale)
                     {
-                        scale = Math.Min(Math.Min(PreviewCanvas.ActualWidth / viewModel.Width, PreviewCanvas.ActualHeight / viewModel.Height), 1.0) * 100.0;
+                        scale = Math.Min(Math.Min(PreviewCanvas.ActualWidth / viewModel.Width * dpi.DpiScaleX, PreviewCanvas.ActualHeight / viewModel.Height * dpi.DpiScaleY), 1.0) * 100.0;
                     }
                 }
                 else
@@ -244,8 +279,8 @@ namespace NiVE3.View.Pane
 
         void LayoutCenterPreviewArea()
         {
-            var realWidth = PreviewAnchorGrid.ActualWidth * PreviewAreaScaleRate;
-            var realHeight = PreviewAnchorGrid.ActualHeight * PreviewAreaScaleRate;
+            var realWidth = PreviewAnchorGrid.ActualWidth * PreviewAreaImageScaleX;
+            var realHeight = PreviewAnchorGrid.ActualHeight * PreviewAreaImageScaleY;
             Canvas.SetLeft(PreviewAnchorGrid, (PreviewCanvas.ActualWidth - realWidth) * 0.5);
             Canvas.SetTop(PreviewAnchorGrid, (PreviewCanvas.ActualHeight - realHeight) * 0.5);
             NeedPositionReset = realWidth <= 0.0 || realHeight <= 0.0;
@@ -411,18 +446,24 @@ namespace NiVE3.View.Pane
 
         static void PreviewAreaScaleRateChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is PreviewView preview)
+            if (d is not PreviewView preview)
             {
-                if (preview.IsStretchPreview)
-                {
-                    preview.LayoutCenterPreviewArea();
-                }
-                else if (e.OldValue is double oldScale)
-                {
-                    var diffX = (preview.PreviewAnchorGrid.ActualWidth * oldScale) - (preview.PreviewAnchorGrid.ActualWidth * preview.PreviewAreaScaleRate);
-                    var diffY = (preview.PreviewAnchorGrid.ActualHeight * oldScale) - (preview.PreviewAnchorGrid.ActualHeight * preview.PreviewAreaScaleRate);
-                    preview.MovePreviewArea(diffX * 0.5, diffY * 0.5, false);
-                }
+                return;
+            }
+
+            var dpi = VisualTreeHelper.GetDpi(preview);
+            preview.PreviewAreaImageScaleX = preview.PreviewAreaScaleRate / dpi.DpiScaleX;
+            preview.PreviewAreaImageScaleY = preview.PreviewAreaScaleRate / dpi.DpiScaleY;
+
+            if (preview.IsStretchPreview)
+            {
+                preview.LayoutCenterPreviewArea();
+            }
+            else if (e.OldValue is double oldScale)
+            {
+                var diffX = (preview.PreviewAnchorGrid.ActualWidth * oldScale) - (preview.PreviewAnchorGrid.ActualWidth * preview.PreviewAreaScaleRate);
+                var diffY = (preview.PreviewAnchorGrid.ActualHeight * oldScale) - (preview.PreviewAnchorGrid.ActualHeight * preview.PreviewAreaScaleRate);
+                preview.MovePreviewArea(diffX * 0.5 / dpi.DpiScaleX, diffY * 0.5 / dpi.DpiScaleY, false);
             }
         }
 

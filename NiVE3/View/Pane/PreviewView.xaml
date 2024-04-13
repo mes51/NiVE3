@@ -186,7 +186,7 @@
             <Canvas x:Name="PreviewCanvas" Background="Transparent" ClipToBounds="True" MouseDown="PreviewCanvas_MouseDown" MouseMove="PreviewCanvas_MouseMove" MouseUp="PreviewCanvas_MouseUp" MouseWheel="PreviewCanvas_MouseWheel">
                 <Grid x:Name="PreviewAnchorGrid" Width="{Binding Width}" Height="{Binding Height}">
                     <Grid.LayoutTransform>
-                        <ScaleTransform ScaleX="{Binding ElementName=Root, Path=PreviewAreaScaleRate}" ScaleY="{Binding ElementName=Root, Path=PreviewAreaScaleRate}"/>
+                        <ScaleTransform ScaleX="{Binding ElementName=Root, Path=PreviewAreaImageScaleX}" ScaleY="{Binding ElementName=Root, Path=PreviewAreaImageScaleY}"/>
                     </Grid.LayoutTransform>
                     <Grid Width="{Binding Width}" Height="{Binding Height}" Style="{StaticResource PreviewAreaStyle}" SizeChanged="PreviewArea_SizeChanged">
                         <Rectangle Visibility="{Binding ElementName=ShowCheckerboradCheckBox, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}">
