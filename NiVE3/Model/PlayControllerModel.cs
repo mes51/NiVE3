@@ -166,6 +166,18 @@ namespace NiVE3.Model
             StoppedPublisher.Publish(this, EventArgs.Empty);
         }
 
+        public void MoveToNextFrame()
+        {
+            CurrentTime = (int)(CurrentTime * FrameRate + 1) / FrameRate;
+            ChangeFrameRequestPublisher.Publish(this, EventArgs.Empty);
+        }
+
+        public void MoveToPrevFrame()
+        {
+            CurrentTime = (int)(CurrentTime * FrameRate - 1) / FrameRate;
+            ChangeFrameRequestPublisher.Publish(this, EventArgs.Empty);
+        }
+
         private void Timer_Tick(object? sender, EventArgs e)
         {
             // 前回のタイマー発火時間から次のタイマー発火までの時間を計測する

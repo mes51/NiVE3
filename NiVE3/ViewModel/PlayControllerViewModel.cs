@@ -112,15 +112,9 @@ namespace NiVE3.ViewModel
                 PlayControllerModel.Stop();
             }, () => PlayControllerModel.CanPreview && IsPlaying);
 
-            NextFrameCommand = new RequerySuggestedCommand(() =>
-            {
-                CurrentTime = (int)(CurrentTime * FrameRate + 1) / FrameRate;
-            }, () => PlayControllerModel.CanPreview && !IsPlaying);
+            NextFrameCommand = new RequerySuggestedCommand(() => PlayControllerModel.MoveToNextFrame(), () => PlayControllerModel.CanPreview && !IsPlaying);
 
-            PrevFrameCommand = new RequerySuggestedCommand(() =>
-            {
-                CurrentTime = (int)(CurrentTime * FrameRate - 1) / FrameRate;
-            }, () => PlayControllerModel.CanPreview && !IsPlaying);
+            PrevFrameCommand = new RequerySuggestedCommand(() => PlayControllerModel.MoveToPrevFrame(), () => PlayControllerModel.CanPreview && !IsPlaying);
 
             WiringModel();
         }
