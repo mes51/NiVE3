@@ -417,7 +417,7 @@ namespace NiVE3.Input
             maxX += minX - (int)minX;
             maxY += minY - (int)minY;
 
-            var image = new NManagedImage((int)MathF.Ceiling(maxX - minX) + 1, (int)MathF.Ceiling(maxY - minY))
+            var image = new NManagedImage((int)MathF.Ceiling(maxX - minX) + 1, (int)MathF.Ceiling(maxY - minY) + 1)
             {
                 Origin = -new Vector2d(minX, minY)
             };
@@ -425,7 +425,7 @@ namespace NiVE3.Input
             foreach (var (brush, fillRule, blendMode, path) in drawable)
             {
                 var bounds = path.Bounds;
-                var canvas = new NManagedImage((int)MathF.Ceiling(bounds.Width) + 1, (int)MathF.Ceiling(bounds.Height));
+                var canvas = new NManagedImage((int)MathF.Ceiling(bounds.Width) + 1, (int)MathF.Ceiling(bounds.Height) + 1);
                 var left = (int)MathF.Floor(bounds.Left);
                 var top = (int)MathF.Floor(bounds.Top);
                 switch (fillRule, imageInterpolationQuality)

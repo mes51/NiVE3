@@ -30,9 +30,10 @@ namespace NiVE3.Shape
                 return;
             }
 
+            offsetX++;
             var minY = Math.Max((int)MathF.Floor(polygons.Min(p => p.MinY) - offsetY), 0);
             var maxY = Math.Min((int)MathF.Ceiling(polygons.Max(p => p.MaxY) - offsetY), image.Height);
-            var minX = Math.Max((int)MathF.Floor(polygons.Min(p => p.MinX) - offsetX), 0);
+            var minX = Math.Max((int)MathF.Floor(polygons.Min(p => p.MinX) - offsetX), 0) - 1;
             var maxX = Math.Min((int)MathF.Ceiling(polygons.Max(p => p.MaxX) - offsetX) + 1, image.Width);
             Parallel.For(minY, maxY, h =>
             {
@@ -150,7 +151,10 @@ namespace NiVE3.Shape
                                 inout = depth > 0;
                             }
 
-                            temp[w] += area;
+                            if (w > -1)
+                            {
+                                temp[w] += area;
+                            }
                             if (inout)
                             {
                                 area = 1.0F;
@@ -314,9 +318,10 @@ namespace NiVE3.Shape
                 return;
             }
 
+            offsetX++;
             var minY = Math.Max((int)MathF.Floor(polygons.Min(p => p.MinY) - offsetY), 0);
             var maxY = Math.Min((int)MathF.Ceiling(polygons.Max(p => p.MaxY) - offsetY), image.Height);
-            var minX = Math.Max((int)MathF.Floor(polygons.Min(p => p.MinX) - offsetX), 0);
+            var minX = Math.Max((int)MathF.Floor(polygons.Min(p => p.MinX) - offsetX), 0) - 1;
             var maxX = Math.Min((int)MathF.Ceiling(polygons.Max(p => p.MaxX) - offsetX) + 1, image.Width);
             Parallel.For(minY, maxY, h =>
             {
@@ -393,7 +398,11 @@ namespace NiVE3.Shape
                                 }
                                 inout = (hi & 1) == 1;
                             }
-                            temp[w] += area;
+
+                            if (w > -1)
+                            {
+                                temp[w] += area;
+                            }
                             if (inout)
                             {
                                 area = 1.0F;
@@ -504,9 +513,10 @@ namespace NiVE3.Shape
                 return;
             }
 
+            offsetX++;
             var minY = Math.Max((int)MathF.Floor(polygons.Min(p => p.MinY) - offsetY), 0);
             var maxY = Math.Min((int)MathF.Ceiling(polygons.Max(p => p.MaxY) - offsetY), image.Height);
-            var minX = Math.Max((int)MathF.Floor(polygons.Min(p => p.MinX) - offsetX), 0);
+            var minX = Math.Max((int)MathF.Floor(polygons.Min(p => p.MinX) - offsetX), 0) - 1;
             var maxX = Math.Min((int)MathF.Ceiling(polygons.Max(p => p.MaxX) - offsetX) + 1, image.Width);
             Parallel.For(minY, maxY, h =>
             {
@@ -624,7 +634,10 @@ namespace NiVE3.Shape
                                 inout = depth > 0;
                             }
 
-                            temp[w] += area;
+                            if (w > -1)
+                            {
+                                temp[w] += area;
+                            }
                             if (inout)
                             {
                                 area = 1.0F;
@@ -776,9 +789,10 @@ namespace NiVE3.Shape
                 return;
             }
 
+            offsetX++;
             var minY = Math.Max((int)MathF.Floor(polygons.Min(p => p.MinY) - offsetY), 0);
             var maxY = Math.Min((int)MathF.Ceiling(polygons.Max(p => p.MaxY) - offsetY), image.Height);
-            var minX = Math.Max((int)MathF.Floor(polygons.Min(p => p.MinX) - offsetX), 0);
+            var minX = Math.Max((int)MathF.Floor(polygons.Min(p => p.MinX) - offsetX), 0) - 1;
             var maxX = Math.Min((int)MathF.Ceiling(polygons.Max(p => p.MaxX) - offsetX) + 1, image.Width);
             Parallel.For(minY, maxY, h =>
             {
@@ -855,7 +869,11 @@ namespace NiVE3.Shape
                                 }
                                 inout = (hi & 1) == 1;
                             }
-                            temp[w] += area;
+
+                            if (w > -1)
+                            {
+                                temp[w] += area;
+                            }
                             if (inout)
                             {
                                 area = 1.0F;
