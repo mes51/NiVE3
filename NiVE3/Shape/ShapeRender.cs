@@ -17,11 +17,11 @@ namespace NiVE3.Shape
 
         const float SamplingRate = 1.0F / SuperSamplingCount;
 
-        public static void FillPolygonNonZero(Polygon[] polygons, NManagedImage image, Brush brush, float offsetX = 0.0F, float offsetY = 0.0F)
+        public static void FillPolygonNonZero(Polygon[] polygons, NManagedImage image, Brush brush, float offsetX = 0.0F, float offsetY = 0.0F, BlendMode blendMode = BlendMode.Normal)
         {
             if (brush is SolidBrush solidBrush)
             {
-                FillPolygonNonZero(polygons, image, solidBrush.Color, offsetX, offsetY);
+                FillPolygonNonZero(polygons, image, solidBrush.Color, offsetX, offsetY, blendMode);
                 return;
             }
 
@@ -174,7 +174,7 @@ namespace NiVE3.Shape
                 {
                     if (temp[w] > 0.0F)
                     {
-                        data[w] = Blend.Process(BlendMode.Normal, data[w], brush.GetColor(w + offsetX, h + offsetY) * new Vector4(1.0F, 1.0F, 1.0F, temp[w] * SamplingRate));
+                        data[w] = Blend.Process(blendMode, data[w], brush.GetColor(w + offsetX, h + offsetY) * new Vector4(1.0F, 1.0F, 1.0F, temp[w] * SamplingRate));
                     }
                 }
 
@@ -182,11 +182,11 @@ namespace NiVE3.Shape
             });
         }
 
-        public static void FillPolygonNonZeroAiliased(Polygon[] polygons, NManagedImage image, Brush brush, float offsetX = 0.0F, float offsetY = 0.0F)
+        public static void FillPolygonNonZeroAiliased(Polygon[] polygons, NManagedImage image, Brush brush, float offsetX = 0.0F, float offsetY = 0.0F, BlendMode blendMode = BlendMode.Normal)
         {
             if (brush is SolidBrush solidBrush)
             {
-                FillPolygonNonZeroAiliased(polygons, image, solidBrush.Color, offsetX, offsetY);
+                FillPolygonNonZeroAiliased(polygons, image, solidBrush.Color, offsetX, offsetY, blendMode);
                 return;
             }
 
@@ -294,7 +294,7 @@ namespace NiVE3.Shape
 
                         if (inout)
                         {
-                            data[w] = Blend.Process(BlendMode.Normal, data[w], brush.GetColor(w + offsetX, h + offsetY));
+                            data[w] = Blend.Process(blendMode, data[w], brush.GetColor(w + offsetX, h + offsetY));
                         }
                         if (hi >= hitLine.Count)
                         {
@@ -305,11 +305,11 @@ namespace NiVE3.Shape
             });
         }
 
-        public static void FillPolygonEvenOdd(Polygon[] polygons, NManagedImage image, Brush brush, float offsetX = 0.0F, float offsetY = 0.0F)
+        public static void FillPolygonEvenOdd(Polygon[] polygons, NManagedImage image, Brush brush, float offsetX = 0.0F, float offsetY = 0.0F, BlendMode blendMode = BlendMode.Normal)
         {
             if (brush is SolidBrush solidBrush)
             {
-                FillPolygonEvenOdd(polygons, image, solidBrush.Color, offsetX, offsetY);
+                FillPolygonEvenOdd(polygons, image, solidBrush.Color, offsetX, offsetY, blendMode);
                 return;
             }
 
@@ -422,7 +422,7 @@ namespace NiVE3.Shape
                 {
                     if (temp[w] > 0.0F)
                     {
-                        data[w] = Blend.Process(BlendMode.Normal, data[w], brush.GetColor(w + offsetX, h + offsetY) * new Vector4(1.0F, 1.0F, 1.0F, temp[w] * SamplingRate));
+                        data[w] = Blend.Process(blendMode, data[w], brush.GetColor(w + offsetX, h + offsetY) * new Vector4(1.0F, 1.0F, 1.0F, temp[w] * SamplingRate));
                     }
                 }
 
@@ -430,11 +430,11 @@ namespace NiVE3.Shape
             });
         }
 
-        public static void FillPolygonEvenOddAiliased(Polygon[] polygons, NManagedImage image, Brush brush, float offsetX = 0.0F, float offsetY = 0.0F)
+        public static void FillPolygonEvenOddAiliased(Polygon[] polygons, NManagedImage image, Brush brush, float offsetX = 0.0F, float offsetY = 0.0F, BlendMode blendMode = BlendMode.Normal)
         {
             if (brush is SolidBrush solidBrush)
             {
-                FillPolygonEvenOddAiliased(polygons, image, solidBrush.Color, offsetX, offsetY);
+                FillPolygonEvenOddAiliased(polygons, image, solidBrush.Color, offsetX, offsetY, blendMode);
                 return;
             }
 
@@ -495,7 +495,7 @@ namespace NiVE3.Shape
                         }
                         if (inout)
                         {
-                            data[w] = Blend.Process(BlendMode.Normal, data[w], brush.GetColor(w + offsetX, h + offsetY));
+                            data[w] = Blend.Process(blendMode, data[w], brush.GetColor(w + offsetX, h + offsetY));
                         }
                         if (hi >= hitLine.Count)
                         {
@@ -506,7 +506,7 @@ namespace NiVE3.Shape
             });
         }
 
-        public static void FillPolygonNonZero(Polygon[] polygons, NManagedImage image, Vector4 color, float offsetX = 0.0F, float offsetY = 0.0F)
+        public static void FillPolygonNonZero(Polygon[] polygons, NManagedImage image, Vector4 color, float offsetX = 0.0F, float offsetY = 0.0F, BlendMode blendMode = BlendMode.Normal)
         {
             if (polygons.Length < 1)
             {
@@ -657,7 +657,7 @@ namespace NiVE3.Shape
                 {
                     if (temp[w] > 0.0F)
                     {
-                        data[w] = Blend.Process(BlendMode.Normal, data[w], color * new Vector4(1.0F, 1.0F, 1.0F, temp[w] * SamplingRate));
+                        data[w] = Blend.Process(blendMode, data[w], color * new Vector4(1.0F, 1.0F, 1.0F, temp[w] * SamplingRate));
                     }
                 }
 
@@ -665,7 +665,7 @@ namespace NiVE3.Shape
             });
         }
 
-        public static void FillPolygonNonZeroAiliased(Polygon[] polygons, NManagedImage image, Vector4 color, float offsetX = 0.0F, float offsetY = 0.0F)
+        public static void FillPolygonNonZeroAiliased(Polygon[] polygons, NManagedImage image, Vector4 color, float offsetX = 0.0F, float offsetY = 0.0F, BlendMode blendMode = BlendMode.Normal)
         {
             if (polygons.Length < 1)
             {
@@ -771,7 +771,7 @@ namespace NiVE3.Shape
 
                         if (inout)
                         {
-                            data[w] = Blend.Process(BlendMode.Normal, data[w], color);
+                            data[w] = Blend.Process(blendMode, data[w], color);
                         }
                         if (hi >= hitLine.Count)
                         {
@@ -782,7 +782,7 @@ namespace NiVE3.Shape
             });
         }
 
-        public static void FillPolygonEvenOdd(Polygon[] polygons, NManagedImage image, Vector4 color, float offsetX = 0.0F, float offsetY = 0.0F)
+        public static void FillPolygonEvenOdd(Polygon[] polygons, NManagedImage image, Vector4 color, float offsetX = 0.0F, float offsetY = 0.0F, BlendMode blendMode = BlendMode.Normal)
         {
             if (polygons.Length < 1)
             {
@@ -893,7 +893,7 @@ namespace NiVE3.Shape
                 {
                     if (temp[w] > 0.0F)
                     {
-                        data[w] = Blend.Process(BlendMode.Normal, data[w], color * new Vector4(1.0F, 1.0F, 1.0F, temp[w] * SamplingRate));
+                        data[w] = Blend.Process(blendMode, data[w], color * new Vector4(1.0F, 1.0F, 1.0F, temp[w] * SamplingRate));
                     }
                 }
 
@@ -901,7 +901,7 @@ namespace NiVE3.Shape
             });
         }
 
-        public static void FillPolygonEvenOddAiliased(Polygon[] polygons, NManagedImage image, Vector4 color, float offsetX = 0.0F, float offsetY = 0.0F)
+        public static void FillPolygonEvenOddAiliased(Polygon[] polygons, NManagedImage image, Vector4 color, float offsetX = 0.0F, float offsetY = 0.0F, BlendMode blendMode = BlendMode.Normal)
         {
             if (polygons.Length < 1)
             {
@@ -960,7 +960,7 @@ namespace NiVE3.Shape
                         }
                         if (inout)
                         {
-                            data[w] = Blend.Process(BlendMode.Normal, data[w], color);
+                            data[w] = Blend.Process(blendMode, data[w], color);
                         }
                         if (hi >= hitLine.Count)
                         {

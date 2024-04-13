@@ -426,12 +426,12 @@ namespace NiVE3.Input
                             case TextLineDrawOrder.AfterFill:
                                 if (fillColor.W > 0.0F)
                                 {
-                                    ShapeRender.FillPolygonNonZeroAiliased(fillPolygons, glyphImage, fillColor, glyphLeft, glyphTop);
+                                    ShapeRender.FillPolygonNonZeroAiliased(fillPolygons, glyphImage, fillColor, glyphLeft, glyphTop, BlendMode.Replace);
                                 }
                                 ShapeRender.FillPolygonNonZeroAiliased(outlinePolygons, glyphImage, textLineColor, glyphLeft, glyphTop);
                                 break;
                             default:
-                                ShapeRender.FillPolygonNonZeroAiliased(outlinePolygons, glyphImage, textLineColor, glyphLeft, glyphTop);
+                                ShapeRender.FillPolygonNonZeroAiliased(outlinePolygons, glyphImage, textLineColor, glyphLeft, glyphTop, BlendMode.Replace);
                                 if (fillColor.W > 0.0F)
                                 {
                                     ShapeRender.FillPolygonNonZeroAiliased(fillPolygons, glyphImage, fillColor, glyphLeft, glyphTop);
@@ -441,7 +441,7 @@ namespace NiVE3.Input
                     }
                     else
                     {
-                        ShapeRender.FillPolygonNonZeroAiliased(fillPolygons, glyphImage, fillColor, glyphLeft, glyphTop);
+                        ShapeRender.FillPolygonNonZeroAiliased(fillPolygons, glyphImage, fillColor, glyphLeft, glyphTop, BlendMode.Replace);
                     }
                 }
                 else
@@ -453,12 +453,12 @@ namespace NiVE3.Input
                             case TextLineDrawOrder.AfterFill:
                                 if (fillColor.W > 0.0F)
                                 {
-                                    ShapeRender.FillPolygonNonZero(fillPolygons, glyphImage, fillColor, glyphLeft, glyphTop);
+                                    ShapeRender.FillPolygonNonZero(fillPolygons, glyphImage, fillColor, glyphLeft, glyphTop, BlendMode.Replace);
                                 }
                                 ShapeRender.FillPolygonNonZero(outlinePolygons, glyphImage, textLineColor, glyphLeft, glyphTop);
                                 break;
                             default:
-                                ShapeRender.FillPolygonNonZero(outlinePolygons, glyphImage, textLineColor, glyphLeft, glyphTop);
+                                ShapeRender.FillPolygonNonZero(outlinePolygons, glyphImage, textLineColor, glyphLeft, glyphTop, BlendMode.Replace);
                                 if (fillColor.W > 0.0F)
                                 {
                                     ShapeRender.FillPolygonNonZero(fillPolygons, glyphImage, fillColor, glyphLeft, glyphTop);
@@ -468,7 +468,7 @@ namespace NiVE3.Input
                     }
                     else
                     {
-                        ShapeRender.FillPolygonNonZero(fillPolygons, glyphImage, fillColor, glyphLeft, glyphTop);
+                        ShapeRender.FillPolygonNonZero(fillPolygons, glyphImage, fillColor, glyphLeft, glyphTop, BlendMode.Replace);
                     }
                 }
 

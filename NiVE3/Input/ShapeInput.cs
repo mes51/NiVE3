@@ -425,26 +425,23 @@ namespace NiVE3.Input
             foreach (var (brush, fillRule, blendMode, path) in drawable)
             {
                 var bounds = path.Bounds;
-                var canvas = new NManagedImage((int)MathF.Ceiling(bounds.Width) + 1, (int)MathF.Ceiling(bounds.Height) + 1);
                 var left = (int)MathF.Floor(bounds.Left);
                 var top = (int)MathF.Floor(bounds.Top);
                 switch (fillRule, imageInterpolationQuality)
                 {
                     case (ShapeFillRule.NonZero, ImageInterpolationQuality.Level1):
-                        ShapeRender.FillPolygonNonZeroAiliased(ToPolygons(path), canvas, brush, left, top);
+                        ShapeRender.FillPolygonNonZeroAiliased(ToPolygons(path), image, brush, minX, minY, blendMode);
                         break;
                     case (ShapeFillRule.NonZero, _):
-                        ShapeRender.FillPolygonNonZero(ToPolygons(path), canvas, brush, left, top);
+                        ShapeRender.FillPolygonNonZero(ToPolygons(path), image, brush, minX, minY, blendMode);
                         break;
                     case (ShapeFillRule.EvenOdd, ImageInterpolationQuality.Level1):
-                        ShapeRender.FillPolygonEvenOddAiliased(ToPolygons(path), canvas, brush, left, top);
+                        ShapeRender.FillPolygonEvenOddAiliased(ToPolygons(path), image, brush, minX, minY, blendMode);
                         break;
                     case (ShapeFillRule.EvenOdd, _):
-                        ShapeRender.FillPolygonEvenOdd(ToPolygons(path), canvas, brush, left, top);
+                        ShapeRender.FillPolygonEvenOdd(ToPolygons(path), image, brush, minX, minY, blendMode);
                         break;
                 }
-
-                DrawImage(blendMode, image, canvas, left - minX, top - minY);
             }
 
             return image;
