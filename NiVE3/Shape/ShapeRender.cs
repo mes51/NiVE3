@@ -486,7 +486,7 @@ namespace NiVE3.Shape
                         }
                         if (inout)
                         {
-                            data[w] = Blend.Process(BlendMode.Normal, data[w], brush.GetColor(x + offsetX, h + offsetY));
+                            data[w] = Blend.Process(BlendMode.Normal, data[w], brush.GetColor(w + offsetX, h + offsetY));
                         }
                         if (hi >= hitLine.Count)
                         {
@@ -921,7 +921,7 @@ namespace NiVE3.Shape
                 if (hitLine.Count > 0 && max > offsetX - 2.0F)
                 {
                     hitLine.Sort();
-                    var hi = hitLine.FindIndex(p => p.Value >= -1.0F);
+                    var hi = hitLine.FindIndex(p => p.Value >= offsetX - 1.0F);
                     var hp = hitLine[hi].Value;
                     var inout = false;
                     for (var w = minX; w < maxX; w++)
