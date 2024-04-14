@@ -56,13 +56,7 @@ namespace NiVE3.View.Pane
             6400.0
         ];
 
-        public static readonly int[] DownScaleList =
-        [
-            1,
-            2,
-            3,
-            4
-        ];
+        public static readonly int[] DownScaleList = [..Enumerable.Range(1, 8)];
 
         public static readonly DependencyProperty IsStretchPreviewProperty = DependencyProperty.Register(
             nameof(IsStretchPreview),
@@ -426,7 +420,7 @@ namespace NiVE3.View.Pane
                 }
                 UpdateScale();
 
-                SelectedDownScaleRateIndex = Array.IndexOf(DownScaleList, viewModel.DownScaleRate);
+                SelectedDownScaleRateIndex = Array.IndexOf(DownScaleList, (int)viewModel.DownScaleRate);
             }
         }
 

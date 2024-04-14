@@ -35,6 +35,10 @@ namespace NiVE3.PresetPlugin.Renderer
 
         NManagedImage? CurrentFrame { get; set; }
 
+        float CurrentDownScaleRateX { get; set; }
+
+        float CurrentDownScaleRateY { get; set; }
+
         bool UseGpu { get; set; }
 
         double FieldOfView { get; set; }
@@ -64,7 +68,18 @@ namespace NiVE3.PresetPlugin.Renderer
                 throw new InvalidOperationException("rendering is already started"); // bug
             }
 
-            CurrentFrame = new NManagedImage(Width, Height, true);
+            if (downSamplingRate != 1.0)
+            {
+                CurrentFrame = new NManagedImage((int)Math.Floor(Width / downSamplingRate), (int)Math.Floor(Height / downSamplingRate), true);
+                CurrentDownScaleRateX = Width / (float)CurrentFrame.Width;
+                CurrentDownScaleRateY = Height / (float)CurrentFrame.Height;
+            }
+            else
+            {
+                CurrentFrame = new NManagedImage(Width, Height, true);
+                CurrentDownScaleRateX = 1.0F;
+                CurrentDownScaleRateY = 1.0F;
+            }
             UseGpu = useGpu;
 
             var zoom = Width / Math.Tan(DefaultFov * 0.5) * 0.5;
@@ -172,7 +187,7 @@ namespace NiVE3.PresetPlugin.Renderer
                 if (i.TrackMatteImage != null && i.TrackMatteMode.HasValue)
                 {
                     var trackMatteImage = i.TrackMatteImage;
-                    var result = new ManagedRasterizedMaskImage(Width, Height);
+                    var result = new ManagedRasterizedMaskImage(CurrentFrame.Width, CurrentFrame.Height);
                     var opacity = (double)(trackMatteImage.Transform[ILayerObject.TransformPropertyOpacityId] ?? 0.0) * 0.01;
                     if (opacity <= 0.0)
                     {
@@ -182,7 +197,7 @@ namespace NiVE3.PresetPlugin.Renderer
 
                     if (trackMatteImage.IsEnable3D)
                     {
-                        var renderer = new MaskRenderer3D(result, PointLights, SpotLights, ParallelLights, AmbientLights)
+                        var renderer = new MaskRenderer3D(result, Width, Height, PointLights, SpotLights, ParallelLights, AmbientLights)
                         {
                             ViewMatrix = ViewMatrix,
                             FieldOfView = FieldOfView
@@ -210,7 +225,8 @@ namespace NiVE3.PresetPlugin.Renderer
                     else
                     {
                         var renderer = new MaskRender2D(result);
-                        var matrix = CalcTransform2D(trackMatteImage.Transform, trackMatteImage.ParentTransforms);
+                        var downScale = Matrix3x3.CreateScale(1.0F / CurrentDownScaleRateX, 1.0F / CurrentDownScaleRateY);
+                        var matrix = CalcTransform2D(trackMatteImage.Transform, trackMatteImage.ParentTransforms) * downScale;
                         renderer.Draw(trackMatteImage.Image, (float)opacity, matrix, trackMatteImage.InterpolationQuality, null, i.TrackMatteMode.Value);
                     }
                     return result;
@@ -225,7 +241,7 @@ namespace NiVE3.PresetPlugin.Renderer
             {
                 if (group.First().IsEnable3D)
                 {
-                    var renderer = new Renderer3D(CurrentFrame, PointLights, SpotLights, ParallelLights, AmbientLights)
+                    var renderer = new Renderer3D(CurrentFrame, Width, Height, PointLights, SpotLights, ParallelLights, AmbientLights)
                     {
                         ViewMatrix = ViewMatrix,
                         FieldOfView = FieldOfView
@@ -259,10 +275,11 @@ namespace NiVE3.PresetPlugin.Renderer
                 {
                     var renderer = new Renderer2D(CurrentFrame);
 
+                    var downScale = Matrix3x3.CreateScale(1.0F / CurrentDownScaleRateX, 1.0F / CurrentDownScaleRateY);
                     foreach (var i in group)
                     {
                         var opacity = (double)(i.Transform[ILayerObject.TransformPropertyOpacityId] ?? 0.0) * 0.01;
-                        var matrix = CalcTransform2D(i.Transform, i.ParentTransforms);
+                        var matrix = Matrix3x3.CreateScale(i.DownSampleRateX, i.DownSampleRateY) * CalcTransform2D(i.Transform, i.ParentTransforms) * downScale;
 
                         renderer.Draw(i.Image, (float)opacity, matrix, i.InterpolationQuality, i.BlendMode, trackMattes[i]);
                     }
@@ -327,7 +344,7 @@ namespace NiVE3.PresetPlugin.Renderer
 
                 if (trackMatteImage.IsEnable3D)
                 {
-                    var renderer = new MaskRenderer3D(trackMatte, PointLights, SpotLights, ParallelLights, AmbientLights)
+                    var renderer = new MaskRenderer3D(trackMatte, Width, Height, PointLights, SpotLights, ParallelLights, AmbientLights)
                     {
                         ViewMatrix = ViewMatrix,
                         FieldOfView = FieldOfView
@@ -362,7 +379,7 @@ namespace NiVE3.PresetPlugin.Renderer
 
             if (image.IsEnable3D)
             {
-                var renderer = new MaskRenderer3D(result, [], [], [], [])
+                var renderer = new MaskRenderer3D(result, Width, Height, [], [], [], [])
                 {
                     ViewMatrix = ViewMatrix,
                     FieldOfView = FieldOfView

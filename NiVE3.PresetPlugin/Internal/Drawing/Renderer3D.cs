@@ -90,10 +90,10 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             var height = texture.Height;
             var offsetX = (Size - Width) * 0.5 / Size;
             var offsetY = (Size - Height) * 0.5 / Size;
-            var sv1 = Avx.Divide(Vector256.Create(0.0, 0.0, 0.0, Size), Vector256.Create((double)Size));
-            var sv2 = Avx.Divide(Vector256.Create(0.0, height, 0.0, Size), Vector256.Create((double)Size));
-            var sv3 = Avx.Divide(Vector256.Create(width, height, 0.0, Size), Vector256.Create((double)Size));
-            var sv4 = Avx.Divide(Vector256.Create(width, 0.0, 0.0, Size), Vector256.Create((double)Size));
+            var sv1 = Vector256.Create(0.0, 0.0, 0.0, Size) / Size;
+            var sv2 = Vector256.Create(0.0, height, 0.0, Size) / Size;
+            var sv3 = Vector256.Create(width, height, 0.0, Size) / Size;
+            var sv4 = Vector256.Create(width, 0.0, 0.0, Size) / Size;
 
             modelMatrix = Matrix4x4d.CreateTranslate(-texture.Origin.X / Size, -texture.Origin.Y / Size, 0.0) * modelMatrix;
             var mv = modelMatrix * ViewMatrix;
@@ -230,9 +230,9 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             var dSign = Math.Sign(divider.PlaneD);
             var n = divider.Normal;
             var planeD = Vector256.Create(divider.PlaneD, divider.PlaneD, divider.PlaneD, 0.0F);
-            var dd1 = Avx.And(Avx.Add(n.DotProduct(triangle.V1.Vertex), planeD), wClearMask);
-            var dd2 = Avx.And(Avx.Add(n.DotProduct(triangle.V2.Vertex), planeD), wClearMask);
-            var dd3 = Avx.And(Avx.Add(n.DotProduct(triangle.V3.Vertex), planeD), wClearMask);
+            var dd1 = Avx.And(n.DotProduct(triangle.V1.Vertex) + planeD, wClearMask);
+            var dd2 = Avx.And(n.DotProduct(triangle.V2.Vertex) + planeD, wClearMask);
+            var dd3 = Avx.And(n.DotProduct(triangle.V3.Vertex) + planeD, wClearMask);
             var maxD = MaxByAbs(MaxByAbs(dd1, dd2), dd3).GetElement(0);
             if (Math.Abs(maxD) < Epsilon)
             {
@@ -269,9 +269,9 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                         continue;
                     }
 
-                    var td1 = Avx.And(Avx.Add(t.V1.Vertex.DotProduct(n), planeD), wClearMask);
-                    var td2 = Avx.And(Avx.Add(t.V2.Vertex.DotProduct(n), planeD), wClearMask);
-                    var td3 = Avx.And(Avx.Add(t.V3.Vertex.DotProduct(n), planeD), wClearMask);
+                    var td1 = Avx.And(t.V1.Vertex.DotProduct(n) + planeD, wClearMask);
+                    var td2 = Avx.And(t.V2.Vertex.DotProduct(n) + planeD, wClearMask);
+                    var td3 = Avx.And(t.V3.Vertex.DotProduct(n) + planeD, wClearMask);
 
                     if (Math.Sign(MaxByAbs(MaxByAbs(td1, td2), td3).GetElement(0)) == dSign)
                     {
@@ -294,30 +294,30 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             var p2 = triangle.V2.Vertex;
             var p3 = triangle.V3.Vertex;
 
-            var p12 = Avx.Subtract(p2, p1);
-            var p23 = Avx.Subtract(p3, p2);
-            var p31 = Avx.Subtract(p1, p3);
+            var p12 = p2 - p1;
+            var p23 = p3 - p2;
+            var p31 = p1 - p3;
 
             var planeD = p.DotProduct(n);
 
-            var d1 = Avx.Subtract(p1, p).DotProduct(n).GetElement(0);
-            var d2 = Avx.Subtract(p2, p).DotProduct(n).GetElement(0);
-            var d3 = Avx.Subtract(p3, p).DotProduct(n).GetElement(0);
+            var d1 = (p1 - p).DotProduct(n).GetElement(0);
+            var d2 = (p2 - p).DotProduct(n).GetElement(0);
+            var d3 = (p3 - p).DotProduct(n).GetElement(0);
 
             if (d1 * d2 <= Epsilon)
             {
-                var dt1 = RoundCurrentDirection(Avx.Divide(Avx.Subtract(planeD, n.DotProduct(p1)), n.DotProduct(p12)), 10);
+                var dt1 = RoundCurrentDirection((planeD - n.DotProduct(p1)) / n.DotProduct(p12), 10);
                 var ep1 = new UVVertex(
-                    Avx.Blend((Fma.IsSupported ? Fma.MultiplyAdd(p12, dt1, p1) : Avx.Add(p1, Avx.Multiply(p12, dt1))), One, 0b1000),
+                    Avx.Blend(Fma.IsSupported ? Fma.MultiplyAdd(p12, dt1, p1) : (p1 + (p12 * dt1)), One, 0b1000),
                     triangle.V1.U + (triangle.V2.U - triangle.V1.U) * dt1.GetElement(0),
                     triangle.V1.V + (triangle.V2.V - triangle.V1.V) * dt1.GetElement(0)
                 );
 
                 if (d2 * d3 <= Epsilon)
                 {
-                    var dt2 = RoundCurrentDirection(Avx.Divide(Avx.Subtract(planeD, n.DotProduct(p2)), n.DotProduct(p23)), 10);
+                    var dt2 = RoundCurrentDirection((planeD - n.DotProduct(p2)) / n.DotProduct(p23), 10);
                     var ep2 = new UVVertex(
-                        Avx.Blend((Fma.IsSupported ? Fma.MultiplyAdd(p23, dt2, p2) : Avx.Add(p2, Avx.Multiply(p23, dt2))), One, 0b1000),
+                        Avx.Blend(Fma.IsSupported ? Fma.MultiplyAdd(p23, dt2, p2) : (p2 + (p23 * dt2)), One, 0b1000),
                         triangle.V2.U + (triangle.V3.U - triangle.V2.U) * dt2.GetElement(0),
                         triangle.V2.V + (triangle.V3.V - triangle.V2.V) * dt2.GetElement(0)
                     );
@@ -330,9 +330,9 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 }
                 else
                 {
-                    var dt3 = RoundCurrentDirection(Avx.Divide(Avx.Subtract(planeD, n.DotProduct(p3)), n.DotProduct(p31)), 10);
+                    var dt3 = RoundCurrentDirection((planeD - n.DotProduct(p3)) / n.DotProduct(p31), 10);
                     var ep3 = new UVVertex(
-                        Avx.Blend((Fma.IsSupported ? Fma.MultiplyAdd(p31, dt3, p3) : Avx.Add(p3, Avx.Multiply(p31, dt3))), One, 0b1000),
+                        Avx.Blend(Fma.IsSupported ? Fma.MultiplyAdd(p31, dt3, p3) : (p3 + (p31 * dt3)), One, 0b1000),
                         triangle.V3.U + (triangle.V1.U - triangle.V3.U) * dt3.GetElement(0),
                         triangle.V3.V + (triangle.V1.V - triangle.V3.V) * dt3.GetElement(0)
                     );
@@ -346,15 +346,15 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             }
             else if (d2 * d3 <= Epsilon)
             {
-                var dt2 = RoundCurrentDirection(Avx.Divide(Avx.Subtract(planeD, n.DotProduct(p2)), n.DotProduct(p23)), 10);
+                var dt2 = RoundCurrentDirection((planeD - n.DotProduct(p2)) / n.DotProduct(p23), 10);
                 var ep2 = new UVVertex(
-                    Avx.Blend((Fma.IsSupported ? Fma.MultiplyAdd(p23, dt2, p2) : Avx.Add(p2, Avx.Multiply(p23, dt2))), One, 0b1000),
+                    Avx.Blend(Fma.IsSupported ? Fma.MultiplyAdd(p23, dt2, p2) : (p2 + (p23 * dt2)), One, 0b1000),
                     triangle.V2.U + (triangle.V3.U - triangle.V2.U) * dt2.GetElement(0),
                     triangle.V2.V + (triangle.V3.V - triangle.V2.V) * dt2.GetElement(0)
                 );
-                var dt3 = RoundCurrentDirection(Avx.Divide(Avx.Subtract(planeD, n.DotProduct(p3)), n.DotProduct(p31)), 10);
+                var dt3 = RoundCurrentDirection((planeD - n.DotProduct(p3)) / n.DotProduct(p31), 10);
                 var ep3 = new UVVertex(
-                    Avx.Blend((Fma.IsSupported ? Fma.MultiplyAdd(p31, dt3, p3) : Avx.Add(p3, Avx.Multiply(p31, dt3))), One, 0b1000),
+                    Avx.Blend(Fma.IsSupported ? Fma.MultiplyAdd(p31, dt3, p3) : (p3 + (p31 * dt3)), One, 0b1000),
                     triangle.V3.U + (triangle.V1.U - triangle.V3.U) * dt3.GetElement(0),
                     triangle.V3.V + (triangle.V1.V - triangle.V3.V) * dt3.GetElement(0)
                 );
@@ -443,7 +443,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
         protected static Vector256<double> RoundCurrentDirection(in Vector256<double> v, int decimals)
         {
             var pow = Vector256.Create(Math.Pow(10.0, decimals));
-            return Avx.Divide(Avx.RoundCurrentDirection(Avx.Multiply(v, pow)), pow);
+            return Avx.RoundCurrentDirection(v * pow) / pow;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -468,12 +468,12 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
         {
             return Sse.Shuffle(
                 Sse41.Blend(
-                    Sse.Multiply(x, e).HorizontalAdd(),
-                    Sse.Multiply(y, e).HorizontalAdd(),
+                    (x * e).HorizontalAdd(),
+                    (y * e).HorizontalAdd(),
                     0b1010
                 ),
                 Sse41.Blend(
-                    Sse.Multiply(z, e).HorizontalAdd(),
+                    (z * e).HorizontalAdd(),
                     Vector128.Create(1.0F),
                     0b1010
                 ),
@@ -488,8 +488,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
         NManagedImage RenderImage { get; }
 
-        public Renderer3D(NManagedImage renderImage, List<PointLight> pointLights, List<SpotLight> spotLights, List<ParallelLight> parallelLights, List<AmbientLight> ambientLights)
-            : base(renderImage.Width, renderImage.Height, pointLights, spotLights, parallelLights, ambientLights)
+        public Renderer3D(NManagedImage renderImage, int width, int height, List<PointLight> pointLights, List<SpotLight> spotLights, List<ParallelLight> parallelLights, List<AmbientLight> ambientLights)
+            : base(width, height, pointLights, spotLights, parallelLights, ambientLights)
         {
             RenderImage = renderImage;
         }
@@ -504,12 +504,14 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 return;
             }
 
+            var scaleRateX = Width / (float)renderImageWidth;
+            var scaleRateY = Height / (float)renderImageHeight;
             var minZ = triangles.Select(t => Math.Min(Math.Min(t.V1.Vertex.GetElement(2), t.V2.Vertex.GetElement(2)), t.V3.Vertex.GetElement(2))).Min();
             var maxZ = triangles.Select(t => Math.Max(Math.Max(t.V1.Vertex.GetElement(2), t.V2.Vertex.GetElement(2)), t.V3.Vertex.GetElement(2))).Max();
             var projectionMatrix = Matrix4x4d.CreatePerspectiveFieldOfView(FieldOfView, 1.0, minZ, maxZ);
 
-            var offsetX = (Size - RenderImage.Width) * 0.5 / Size;
-            var offsetY = (Size - RenderImage.Height) * 0.5 / Size;
+            var offsetX = (Size - Width) * 0.5 / Size;
+            var offsetY = (Size - Height) * 0.5 / Size;
             Matrix4x4d.Invert(ViewMatrix, out var invtededViewMatrix);
             Matrix4x4d.Invert(projectionMatrix, out var invertedProjectionMatrix);
             var floatInvtededViewMatrix = (Matrix4x4)(invertedProjectionMatrix * Matrix4x4d.CreateTranslate(-offsetX, -offsetY, 0.0) * invtededViewMatrix);
@@ -518,11 +520,14 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             var hasLight = PointLights.Count > 0 || SpotLights.Count > 0 || ParallelLights.Count > 0 || AmbientLights.Count > 0;
 
             var shadowBuffer = new ShadowBuffer();
-            var pointLightShadows = PointLights.Select(l => l.IsEnableShadow ? RenderPointLightShadow(l, shadowBuffer, Size, (float)offsetX, (float)offsetY) : null).ToArray();
-            var spotLightShadows = SpotLights.Select(l => l.IsEnableShadow && LightTriangles[l].Count > 0 ? RenderSpotLightShadow(l, shadowBuffer, Size, (float)offsetX, (float)offsetY) : null).ToArray();
-            var parallelLightShadows = ParallelLights.Select(l => l.IsEnableShadow && LightTriangles[l].Count > 0 ? RenderParallelLightShadow(l, shadowBuffer, Size, (float)offsetX, (float)offsetY) : null).ToArray();
+            var shadowSize = Size == Width ? (int)(Size / scaleRateX) : (int)(Size / scaleRateY);
+            var pointLightShadows = PointLights.Select(l => l.IsEnableShadow ? RenderPointLightShadow(l, shadowBuffer, shadowSize, (float)offsetX, (float)offsetY) : null).ToArray();
+            var spotLightShadows = SpotLights.Select(l => l.IsEnableShadow && LightTriangles[l].Count > 0 ? RenderSpotLightShadow(l, shadowBuffer, shadowSize, (float)offsetX, (float)offsetY) : null).ToArray();
+            var parallelLightShadows = ParallelLights.Select(l => l.IsEnableShadow && LightTriangles[l].Count > 0 ? RenderParallelLightShadow(l, shadowBuffer, shadowSize, (float)offsetX, (float)offsetY) : null).ToArray();
             var hasShadow = pointLightShadows.Any(ss => ss != null && ss.Any(s => s != null)) || spotLightShadows.Any(s => s != null) || parallelLightShadows.Any(s => s != null);
 
+            var renderImageOffsetX = (int)(OffsetX / scaleRateX);
+            var renderImageOffsetY = (int)(OffsetY / scaleRateY);
             foreach (var triangle in triangles)
             {
                 var uv1 = triangle.V1.Transform(projectionMatrix);
@@ -537,27 +542,27 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 uv1 *= w1;
                 uv2 *= w2;
                 uv3 *= w3;
-                var dvv1 = Avx.Multiply(Avx.Add(uv1.Vertex, Vector256.Create(1.0, 1.0, 0.0, 0.0)), Vector256.Create(Size * 0.5, Size * 0.5, 1.0, 1.0));
-                var dvv2 = Avx.Multiply(Avx.Add(uv2.Vertex, Vector256.Create(1.0, 1.0, 0.0, 0.0)), Vector256.Create(Size * 0.5, Size * 0.5, 1.0, 1.0));
-                var dvv3 = Avx.Multiply(Avx.Add(uv3.Vertex, Vector256.Create(1.0, 1.0, 0.0, 0.0)), Vector256.Create(Size * 0.5, Size * 0.5, 1.0, 1.0));
+                var dvv1 = (uv1.Vertex + Vector256.Create(1.0, 1.0, 0.0, 0.0)) * Vector256.Create(Size * 0.5, Size * 0.5, 1.0, 1.0);
+                var dvv2 = (uv2.Vertex + Vector256.Create(1.0, 1.0, 0.0, 0.0)) * Vector256.Create(Size * 0.5, Size * 0.5, 1.0, 1.0);
+                var dvv3 = (uv3.Vertex + Vector256.Create(1.0, 1.0, 0.0, 0.0)) * Vector256.Create(Size * 0.5, Size * 0.5, 1.0, 1.0);
                 var vvX = Vector128.Create((float)triangle.V1.Vertex.GetElement(0), (float)triangle.V2.Vertex.GetElement(0), (float)triangle.V3.Vertex.GetElement(0), 0.0F);
                 var vvY = Vector128.Create((float)triangle.V1.Vertex.GetElement(1), (float)triangle.V2.Vertex.GetElement(1), (float)triangle.V3.Vertex.GetElement(1), 0.0F);
                 var vvZ = Vector128.Create((float)triangle.V1.Vertex.GetElement(2), (float)triangle.V2.Vertex.GetElement(2), (float)triangle.V3.Vertex.GetElement(2), 0.0F);
                 var svvX = Vector128.Create((float)uv1.Vertex.GetElement(0), (float)uv2.Vertex.GetElement(0), (float)uv3.Vertex.GetElement(0), 0.0F);
                 var svvY = Vector128.Create((float)uv1.Vertex.GetElement(1), (float)uv2.Vertex.GetElement(1), (float)uv3.Vertex.GetElement(1), 0.0F);
                 var svvZ = Vector128.Create((float)uv1.Vertex.GetElement(2), (float)uv2.Vertex.GetElement(2), (float)uv3.Vertex.GetElement(2), 0.0F);
-                var minX = MaxClampedSize((int)(Math.Min(Math.Min(dvv1.GetElement(0), dvv2.GetElement(0)), dvv3.GetElement(0))), OffsetX);
-                var maxX = MinClampedSize((int)Math.Ceiling(Math.Max(Math.Max(dvv1.GetElement(0), dvv2.GetElement(0)), dvv3.GetElement(0))), renderImageWidth + OffsetX);
-                var minY = MaxClampedSize((int)(Math.Min(Math.Min(dvv1.GetElement(1), dvv2.GetElement(1)), dvv3.GetElement(1))), OffsetY);
-                var maxY = MinClampedSize((int)Math.Ceiling(Math.Max(Math.Max(dvv1.GetElement(1), dvv2.GetElement(1)), dvv3.GetElement(1))), renderImageHeight + OffsetY);
+                var minX = (int)(MaxClampedSize((int)(Math.Min(Math.Min(dvv1.GetElement(0), dvv2.GetElement(0)), dvv3.GetElement(0))), OffsetX) / scaleRateX);
+                var maxX = (int)(MinClampedSize((int)Math.Ceiling(Math.Max(Math.Max(dvv1.GetElement(0), dvv2.GetElement(0)), dvv3.GetElement(0))), Width + OffsetX) / scaleRateX);
+                var minY = (int)(MaxClampedSize((int)(Math.Min(Math.Min(dvv1.GetElement(1), dvv2.GetElement(1)), dvv3.GetElement(1))), OffsetY) / scaleRateY);
+                var maxY = (int)(MinClampedSize((int)Math.Ceiling(Math.Max(Math.Max(dvv1.GetElement(1), dvv2.GetElement(1)), dvv3.GetElement(1))), Height + OffsetY) / scaleRateY);
                 var u = Vector128.Create((float)uv1.U, (float)uv2.U, (float)uv3.U, 0.0F);
                 var v = Vector128.Create((float)uv1.V, (float)uv2.V, (float)uv3.V, 0.0F);
                 var w = Vector128.Create((float)w1, (float)w2, (float)w3, 0.0F);
 
                 var denom = Vector128.Create((float)(1.0 / (((dvv2.GetElement(0) - dvv1.GetElement(0)) * (dvv3.GetElement(1) - dvv1.GetElement(1))) - ((dvv2.GetElement(1) - dvv1.GetElement(1)) * (dvv3.GetElement(0) - dvv1.GetElement(0))))));
-                var edgeX = Sse.Subtract(Vector128.Create((float)dvv3.GetElement(0), (float)dvv1.GetElement(0), (float)dvv2.GetElement(0), 0.0F), Vector128.Create((float)dvv2.GetElement(0), (float)dvv3.GetElement(0), (float)dvv1.GetElement(0), 0.0F));
-                var edgeY = Sse.Subtract(Vector128.Create((float)dvv3.GetElement(1), (float)dvv1.GetElement(1), (float)dvv2.GetElement(1), 0.0F), Vector128.Create((float)dvv2.GetElement(1), (float)dvv3.GetElement(1), (float)dvv1.GetElement(1), 0.0F));
-                var isFrontFace = triangle.Normal.DotProduct(Avx.Divide(Avx.Add(Avx.Add(triangle.V1.Vertex, triangle.V2.Vertex), triangle.V3.Vertex), Vector256.Create(3.0))).GetElement(0) <= 0.0;
+                var edgeX = Vector128.Create((float)dvv3.GetElement(0), (float)dvv1.GetElement(0), (float)dvv2.GetElement(0), 0.0F) - Vector128.Create((float)dvv2.GetElement(0), (float)dvv3.GetElement(0), (float)dvv1.GetElement(0), 0.0F);
+                var edgeY = Vector128.Create((float)dvv3.GetElement(1), (float)dvv1.GetElement(1), (float)dvv2.GetElement(1), 0.0F) - Vector128.Create((float)dvv2.GetElement(1), (float)dvv3.GetElement(1), (float)dvv1.GetElement(1), 0.0F);
+                var isFrontFace = triangle.Normal.DotProduct(((triangle.V1.Vertex + triangle.V2.Vertex + triangle.V3.Vertex) / 3.0)).GetElement(0) <= 0.0;
                 var vvEX = Vector128.Create((float)dvv2.GetElement(0), (float)dvv3.GetElement(0), (float)dvv1.GetElement(0), 0.0F);
                 var vvEY = Vector128.Create((float)dvv2.GetElement(1), (float)dvv3.GetElement(1), (float)dvv1.GetElement(1), 0.0F);
                 var useLight = hasLight && (triangle.IsAcceptLight || triangle.IsAcceptShadow);
@@ -595,10 +600,10 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                     var renderImageSpan = RenderImage.GetDataSpan();
                     var trackMatteSpan = (managedTrackMatte?.Data ?? EmptyTrackMatte).AsSpan();
                     var texture = managedTexture.GetDataSpan();
-                    var eY = Sse.Multiply(edgeX, Sse.Subtract(Vector128.Create(y, y, y, 0.0F), vvEY));
+                    var eY = edgeX * (Vector128.Create(y, y, y, 0.0F) * scaleRateY - vvEY);
 
-                    var offset = (y - OffsetY) * renderImageWidth;
-                    var p = offset + (minX - OffsetX);
+                    var offset = (y - renderImageOffsetY) * renderImageWidth;
+                    var p = offset + (minX - renderImageOffsetX);
 
                     var pointLights = CollectionsMarshal.AsSpan(PointLights);
                     var spotLights = CollectionsMarshal.AsSpan(SpotLights);
@@ -607,8 +612,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
                     for (int x = minX; x < maxX; x++, p++)
                     {
-                        var eX = Sse.Subtract(Vector128.Create(x, x, x, 0.0F), vvEX);
-                        var e = Sse.Multiply(Fma.IsSupported ? Fma.MultiplyAddNegated(edgeY, eX, eY) : Sse.Subtract(eY, Sse.Multiply(edgeY, eX)), denom);
+                        var eX = Vector128.Create(x, x, x, 0.0F) * scaleRateX - vvEX;
+                        var e = (Fma.IsSupported ? Fma.MultiplyAddNegated(edgeY, eX, eY) : (eY - (edgeY * eX))) * denom;
 
                         var ae = Sse.And(e, Sse.CompareGreaterThanOrEqual(e.Abs(), Vector128.Create(Epsilon)));
                         if (!Avx.TestZ(Sse.CompareLessThan(ae, Vector128<float>.Zero), Vector128.Create(float.NaN)))
@@ -616,9 +621,9 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                             continue;
                         }
 
-                        var tw = Sse.Multiply(w, e).HorizontalAdd();
-                        var tx = Sse.Divide(Sse.Multiply(u, e), tw).HorizontalAdd().GetElement(0) * textureWidth;
-                        var ty = Sse.Divide(Sse.Multiply(v, e), tw).HorizontalAdd().GetElement(0) * textureHeight;
+                        var tw = (w * e).HorizontalAdd();
+                        var tx = (u * e / tw).HorizontalAdd().GetElement(0) * textureWidth;
+                        var ty = (v * e / tw).HorizontalAdd().GetElement(0) * textureHeight;
 
                         var color = ImageInterpolation.Bilinear(texture, textureWidth, textureHeight, tx, ty);
                         color.W *= triangle.Opacity * trackMatteSpan[p % trackMatteSpan.Length];
@@ -676,7 +681,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                 for (var i = 0; i < SpotLights.Count; i++)
                                 {
                                     var l = spotLights[i];
-                                    var lightDiff = Sse.Subtract(position, l.Position).AsVector3();
+                                    var lightDiff = (position - l.Position).AsVector3();
                                     var light = Vector3.Normalize(lightDiff);
                                     var spotCone = MathF.Acos(Vector3.Dot(l.Direction, light));
 
@@ -723,7 +728,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                 {
                                     var l = pointLights[i];
                                     var lightColor = l.Color;
-                                    var lightDiff = Sse.Subtract(position, l.Position).AsVector3();
+                                    var lightDiff = (position - l.Position).AsVector3();
                                     var light = Vector3.Normalize(lightDiff);
                                     var falloff = CalcFalloff(lightDiff, l.FalloffType, l.FalloffStart, l.FalloffLength);
                                     var shadows = pointLightShadows[i];
@@ -779,7 +784,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                 {
                                     var l = spotLights[i];
                                     var lightColor = l.Color;
-                                    var lightDiff = Sse.Subtract(position, l.Position).AsVector3();
+                                    var lightDiff = (position - l.Position).AsVector3();
                                     var light = Vector3.Normalize(lightDiff);
                                     var spotCone = MathF.Acos(Vector3.Dot(l.Direction, light));
 
@@ -826,7 +831,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                 {
                                     var l = parallelLights[i];
                                     var lightColor = l.Color;
-                                    var lightDiff = Sse.Subtract(position, l.Position).AsVector3();
+                                    var lightDiff = (position - l.Position).AsVector3();
                                     var falloff = CalcFalloff(lightDiff, l.FalloffType, l.FalloffStart, l.FalloffLength);
 
                                     var shadow = parallelLightShadows[i];
@@ -994,9 +999,9 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 uv1 *= w1;
                 uv2 *= w2;
                 uv3 *= w3;
-                var dvv1 = Avx.Multiply(Avx.Add(uv1.Vertex, Vector256.Create(1.0, 1.0, 0.0, 0.0)), Vector256.Create(size * 0.5, size * 0.5, 1.0, 1.0));
-                var dvv2 = Avx.Multiply(Avx.Add(uv2.Vertex, Vector256.Create(1.0, 1.0, 0.0, 0.0)), Vector256.Create(size * 0.5, size * 0.5, 1.0, 1.0));
-                var dvv3 = Avx.Multiply(Avx.Add(uv3.Vertex, Vector256.Create(1.0, 1.0, 0.0, 0.0)), Vector256.Create(size * 0.5, size * 0.5, 1.0, 1.0));
+                var dvv1 = (uv1.Vertex + Vector256.Create(1.0, 1.0, 0.0, 0.0)) * Vector256.Create(size * 0.5, size * 0.5, 1.0, 1.0);
+                var dvv2 = (uv2.Vertex + Vector256.Create(1.0, 1.0, 0.0, 0.0)) * Vector256.Create(size * 0.5, size * 0.5, 1.0, 1.0);
+                var dvv3 = (uv3.Vertex + Vector256.Create(1.0, 1.0, 0.0, 0.0)) * Vector256.Create(size * 0.5, size * 0.5, 1.0, 1.0);
                 var vvX = Vector128.Create((float)uv1.Vertex.GetElement(0), (float)uv2.Vertex.GetElement(0), (float)uv3.Vertex.GetElement(0), 0.0F);
                 var vvY = Vector128.Create((float)uv1.Vertex.GetElement(1), (float)uv2.Vertex.GetElement(1), (float)uv3.Vertex.GetElement(1), 0.0F);
                 var vvZ = Vector128.Create((float)uv1.Vertex.GetElement(2), (float)uv2.Vertex.GetElement(2), (float)uv3.Vertex.GetElement(2), 0.0F);
@@ -1009,8 +1014,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 var w = Vector128.Create((float)w1, (float)w2, (float)w3, 0.0F);
 
                 var denom = Vector128.Create((float)(1.0 / (((dvv2.GetElement(0) - dvv1.GetElement(0)) * (dvv3.GetElement(1) - dvv1.GetElement(1))) - ((dvv2.GetElement(1) - dvv1.GetElement(1)) * (dvv3.GetElement(0) - dvv1.GetElement(0))))));
-                var edgeX = Sse.Subtract(Vector128.Create((float)dvv3.GetElement(0), (float)dvv1.GetElement(0), (float)dvv2.GetElement(0), 0.0F), Vector128.Create((float)dvv2.GetElement(0), (float)dvv3.GetElement(0), (float)dvv1.GetElement(0), 0.0F));
-                var edgeY = Sse.Subtract(Vector128.Create((float)dvv3.GetElement(1), (float)dvv1.GetElement(1), (float)dvv2.GetElement(1), 0.0F), Vector128.Create((float)dvv2.GetElement(1), (float)dvv3.GetElement(1), (float)dvv1.GetElement(1), 0.0F));
+                var edgeX = Vector128.Create((float)dvv3.GetElement(0), (float)dvv1.GetElement(0), (float)dvv2.GetElement(0), 0.0F) - Vector128.Create((float)dvv2.GetElement(0), (float)dvv3.GetElement(0), (float)dvv1.GetElement(0), 0.0F);
+                var edgeY = Vector128.Create((float)dvv3.GetElement(1), (float)dvv1.GetElement(1), (float)dvv2.GetElement(1), 0.0F) - Vector128.Create((float)dvv2.GetElement(1), (float)dvv3.GetElement(1), (float)dvv1.GetElement(1), 0.0F);
                 var vvEX = Vector128.Create((float)dvv2.GetElement(0), (float)dvv3.GetElement(0), (float)dvv1.GetElement(0), 0.0F);
                 var vvEY = Vector128.Create((float)dvv2.GetElement(1), (float)dvv3.GetElement(1), (float)dvv1.GetElement(1), 0.0F);
 
@@ -1032,23 +1037,23 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 Parallel.For(minY, maxY, y =>
                 {
                     var texture = managedTexture.GetDataSpan();
-                    var eY = Sse.Multiply(edgeX, Sse.Subtract(Vector128.Create(y, y, y, 0.0F), vvEY));
+                    var eY = edgeX * (Vector128.Create(y, y, y, 0.0F) - vvEY);
                     var offset = y * size;
                     var indicesSpan = shadowMap.Indices.AsSpan(offset, size);
                     var bufferIndicesSpan = shadowMap.BufferIndices.AsSpan(offset, size);
                     for (int x = minX; x < maxX; x++)
                     {
-                        var eX = Sse.Subtract(Vector128.Create(x, x, x, 0.0F), vvEX);
-                        var e = Sse.Multiply(Fma.IsSupported ? Fma.MultiplyAddNegated(edgeY, eX, eY) : Sse.Subtract(eY, Sse.Multiply(edgeY, eX)), denom);
+                        var eX = Vector128.Create(x, x, x, 0.0F) - vvEX;
+                        var e = (Fma.IsSupported ? Fma.MultiplyAddNegated(edgeY, eX, eY) : (eY - (edgeY * eX))) * denom;
                         var ae = Sse.And(e, Sse.CompareGreaterThanOrEqual(e.Abs(), Vector128.Create(Epsilon)));
                         if (!Avx.TestZ(Sse.CompareLessThan(ae, Vector128<float>.Zero), Vector128.Create(float.NaN)))
                         {
                             continue;
                         }
 
-                        var tw = Sse.Multiply(w, e).HorizontalAdd();
-                        var tx = Sse.Divide(Sse.Multiply(u, e), tw).HorizontalAdd().GetElement(0) * textureWidth;
-                        var ty = Sse.Divide(Sse.Multiply(v, e), tw).HorizontalAdd().GetElement(0) * textureHeight;
+                        var tw = (w * e).HorizontalAdd();
+                        var tx = (u * e / tw).HorizontalAdd().GetElement(0) * textureWidth;
+                        var ty = (v * e / tw).HorizontalAdd().GetElement(0) * textureHeight;
 
                         var color = ImageInterpolation.Bilinear(texture, textureWidth, textureHeight, tx, ty);
 
@@ -1217,8 +1222,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
         ManagedRasterizedMaskImage RenderImage { get; }
 
-        public MaskRenderer3D(ManagedRasterizedMaskImage renderImage, List<PointLight> pointLights, List<SpotLight> spotLights, List<ParallelLight> parallelLights, List<AmbientLight> ambientLights)
-            : base(renderImage.Width, renderImage.Height, pointLights, spotLights, parallelLights, ambientLights)
+        public MaskRenderer3D(ManagedRasterizedMaskImage renderImage, int width, int height, List<PointLight> pointLights, List<SpotLight> spotLights, List<ParallelLight> parallelLights, List<AmbientLight> ambientLights)
+            : base(width, height, pointLights, spotLights, parallelLights, ambientLights)
         {
             RenderImage = renderImage;
         }
@@ -1238,12 +1243,14 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 return;
             }
 
+            var scaleRateX = Width / (float)renderImageWidth;
+            var scaleRateY = Height / (float)renderImageHeight;
             var minZ = triangles.Select(t => Math.Min(Math.Min(t.V1.Vertex.GetElement(2), t.V2.Vertex.GetElement(2)), t.V3.Vertex.GetElement(2))).Min();
             var maxZ = triangles.Select(t => Math.Max(Math.Max(t.V1.Vertex.GetElement(2), t.V2.Vertex.GetElement(2)), t.V3.Vertex.GetElement(2))).Max();
             var projectionMatrix = Matrix4x4d.CreatePerspectiveFieldOfView(FieldOfView, 1.0, minZ, maxZ);
 
-            var offsetX = (Size - RenderImage.Width) * 0.5 / Size;
-            var offsetY = (Size - RenderImage.Height) * 0.5 / Size;
+            var offsetX = (Size - Width) * 0.5 / Size;
+            var offsetY = (Size - Height) * 0.5 / Size;
             Matrix4x4d.Invert(ViewMatrix, out var invtededViewMatrix);
             Matrix4x4d.Invert(projectionMatrix, out var invertedProjectionMatrix);
             var floatInvtededViewMatrix = (Matrix4x4)(invertedProjectionMatrix * Matrix4x4d.CreateTranslate(-offsetX, -offsetY, 0.0) * invtededViewMatrix);
@@ -1251,6 +1258,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             var convertedTrackMatte = new Dictionary<RasterizedMaskImage, ManagedRasterizedMaskImage>();
             var hasLight = PointLights.Count > 0 || SpotLights.Count > 0 || ParallelLights.Count > 0 || AmbientLights.Count > 0;
 
+            var renderImageOffsetX = (int)(OffsetX / scaleRateX);
+            var renderImageOffsetY = (int)(OffsetY / scaleRateY);
             foreach (var triangle in triangles)
             {
                 var uv1 = triangle.V1.Transform(projectionMatrix);
@@ -1265,27 +1274,27 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 uv1 *= w1;
                 uv2 *= w2;
                 uv3 *= w3;
-                var dvv1 = Avx.Multiply(Avx.Add(uv1.Vertex, Vector256.Create(1.0, 1.0, 0.0, 0.0)), Vector256.Create(Size * 0.5, Size * 0.5, 1.0, 1.0));
-                var dvv2 = Avx.Multiply(Avx.Add(uv2.Vertex, Vector256.Create(1.0, 1.0, 0.0, 0.0)), Vector256.Create(Size * 0.5, Size * 0.5, 1.0, 1.0));
-                var dvv3 = Avx.Multiply(Avx.Add(uv3.Vertex, Vector256.Create(1.0, 1.0, 0.0, 0.0)), Vector256.Create(Size * 0.5, Size * 0.5, 1.0, 1.0));
+                var dvv1 = (uv1.Vertex + Vector256.Create(1.0, 1.0, 0.0, 0.0)) * Vector256.Create(Size * 0.5, Size * 0.5, 1.0, 1.0);
+                var dvv2 = (uv2.Vertex + Vector256.Create(1.0, 1.0, 0.0, 0.0)) * Vector256.Create(Size * 0.5, Size * 0.5, 1.0, 1.0);
+                var dvv3 = (uv3.Vertex + Vector256.Create(1.0, 1.0, 0.0, 0.0)) * Vector256.Create(Size * 0.5, Size * 0.5, 1.0, 1.0);
                 var vvX = Vector128.Create((float)triangle.V1.Vertex.GetElement(0), (float)triangle.V2.Vertex.GetElement(0), (float)triangle.V3.Vertex.GetElement(0), 0.0F);
                 var vvY = Vector128.Create((float)triangle.V1.Vertex.GetElement(1), (float)triangle.V2.Vertex.GetElement(1), (float)triangle.V3.Vertex.GetElement(1), 0.0F);
                 var vvZ = Vector128.Create((float)triangle.V1.Vertex.GetElement(2), (float)triangle.V2.Vertex.GetElement(2), (float)triangle.V3.Vertex.GetElement(2), 0.0F);
                 var svvX = Vector128.Create((float)uv1.Vertex.GetElement(0), (float)uv2.Vertex.GetElement(0), (float)uv3.Vertex.GetElement(0), 0.0F);
                 var svvY = Vector128.Create((float)uv1.Vertex.GetElement(1), (float)uv2.Vertex.GetElement(1), (float)uv3.Vertex.GetElement(1), 0.0F);
                 var svvZ = Vector128.Create((float)uv1.Vertex.GetElement(2), (float)uv2.Vertex.GetElement(2), (float)uv3.Vertex.GetElement(2), 0.0F);
-                var minX = MaxClampedSize((int)(Math.Min(Math.Min(dvv1.GetElement(0), dvv2.GetElement(0)), dvv3.GetElement(0))), OffsetX);
-                var maxX = MinClampedSize((int)Math.Ceiling(Math.Max(Math.Max(dvv1.GetElement(0), dvv2.GetElement(0)), dvv3.GetElement(0))), renderImageWidth + OffsetX);
-                var minY = MaxClampedSize((int)(Math.Min(Math.Min(dvv1.GetElement(1), dvv2.GetElement(1)), dvv3.GetElement(1))), OffsetY);
-                var maxY = MinClampedSize((int)Math.Ceiling(Math.Max(Math.Max(dvv1.GetElement(1), dvv2.GetElement(1)), dvv3.GetElement(1))), renderImageHeight + OffsetY);
+                var minX = (int)(MaxClampedSize((int)(Math.Min(Math.Min(dvv1.GetElement(0), dvv2.GetElement(0)), dvv3.GetElement(0))), OffsetX) / scaleRateX);
+                var maxX = (int)(MinClampedSize((int)Math.Ceiling(Math.Max(Math.Max(dvv1.GetElement(0), dvv2.GetElement(0)), dvv3.GetElement(0))), Width + OffsetX) / scaleRateX);
+                var minY = (int)(MaxClampedSize((int)(Math.Min(Math.Min(dvv1.GetElement(1), dvv2.GetElement(1)), dvv3.GetElement(1))), OffsetY) / scaleRateY);
+                var maxY = (int)(MinClampedSize((int)Math.Ceiling(Math.Max(Math.Max(dvv1.GetElement(1), dvv2.GetElement(1)), dvv3.GetElement(1))), Height + OffsetY) / scaleRateY);
                 var u = Vector128.Create((float)uv1.U, (float)uv2.U, (float)uv3.U, 0.0F);
                 var v = Vector128.Create((float)uv1.V, (float)uv2.V, (float)uv3.V, 0.0F);
                 var w = Vector128.Create((float)w1, (float)w2, (float)w3, 0.0F);
 
                 var denom = Vector128.Create((float)(1.0 / (((dvv2.GetElement(0) - dvv1.GetElement(0)) * (dvv3.GetElement(1) - dvv1.GetElement(1))) - ((dvv2.GetElement(1) - dvv1.GetElement(1)) * (dvv3.GetElement(0) - dvv1.GetElement(0))))));
-                var edgeX = Sse.Subtract(Vector128.Create((float)dvv3.GetElement(0), (float)dvv1.GetElement(0), (float)dvv2.GetElement(0), 0.0F), Vector128.Create((float)dvv2.GetElement(0), (float)dvv3.GetElement(0), (float)dvv1.GetElement(0), 0.0F));
-                var edgeY = Sse.Subtract(Vector128.Create((float)dvv3.GetElement(1), (float)dvv1.GetElement(1), (float)dvv2.GetElement(1), 0.0F), Vector128.Create((float)dvv2.GetElement(1), (float)dvv3.GetElement(1), (float)dvv1.GetElement(1), 0.0F));
-                var isFrontFace = triangle.Normal.DotProduct(Avx.Divide(Avx.Add(Avx.Add(triangle.V1.Vertex, triangle.V2.Vertex), triangle.V3.Vertex), Vector256.Create(3.0))).GetElement(0) <= 0.0;
+                var edgeX = Vector128.Create((float)dvv3.GetElement(0), (float)dvv1.GetElement(0), (float)dvv2.GetElement(0), 0.0F) - Vector128.Create((float)dvv2.GetElement(0), (float)dvv3.GetElement(0), (float)dvv1.GetElement(0), 0.0F);
+                var edgeY = Vector128.Create((float)dvv3.GetElement(1), (float)dvv1.GetElement(1), (float)dvv2.GetElement(1), 0.0F) - Vector128.Create((float)dvv2.GetElement(1), (float)dvv3.GetElement(1), (float)dvv1.GetElement(1), 0.0F);
+                var isFrontFace = triangle.Normal.DotProduct((triangle.V1.Vertex + triangle.V2.Vertex + triangle.V3.Vertex) / 3.0).GetElement(0) <= 0.0;
                 var vvEX = Vector128.Create((float)dvv2.GetElement(0), (float)dvv3.GetElement(0), (float)dvv1.GetElement(0), 0.0F);
                 var vvEY = Vector128.Create((float)dvv2.GetElement(1), (float)dvv3.GetElement(1), (float)dvv1.GetElement(1), 0.0F);
                 var useLight = hasLight && triangle.IsAcceptLight && (trackMatteMode == TrackMatteMode.Luminance || trackMatteMode == TrackMatteMode.InvertLuminance);
@@ -1323,10 +1332,10 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                     var renderImageSpan = RenderImage.GetDataSpan();
                     var trackMatteSpan = (managedTrackMatte?.Data ?? EmptyTrackMatte).AsSpan();
                     var texture = managedTexture.GetDataSpan();
-                    var eY = Sse.Multiply(edgeX, Sse.Subtract(Vector128.Create(y, y, y, 0.0F), vvEY));
+                    var eY = edgeX * (Vector128.Create(y, y, y, 0.0F) * scaleRateY - vvEY);
 
-                    var offset = (y - OffsetY) * renderImageWidth;
-                    var p = offset + (minX - OffsetX);
+                    var offset = (y - renderImageOffsetY) * renderImageWidth;
+                    var p = offset + (minX - renderImageOffsetX);
 
                     var pointLights = CollectionsMarshal.AsSpan(PointLights);
                     var spotLights = CollectionsMarshal.AsSpan(SpotLights);
@@ -1335,8 +1344,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
                     for (int x = minX; x < maxX; x++, p++)
                     {
-                        var eX = Sse.Subtract(Vector128.Create(x, x, x, 0.0F), vvEX);
-                        var e = Sse.Multiply(Fma.IsSupported ? Fma.MultiplyAddNegated(edgeY, eX, eY) : Sse.Subtract(eY, Sse.Multiply(edgeY, eX)), denom);
+                        var eX = Vector128.Create(x, x, x, 0.0F) * scaleRateX - vvEX;
+                        var e = (Fma.IsSupported ? Fma.MultiplyAddNegated(edgeY, eX, eY) : (eY - (edgeY * eX))) * denom;
 
                         var ae = Sse.And(e, Sse.CompareGreaterThanOrEqual(e.Abs(), Vector128.Create(Epsilon)));
                         if (!Avx.TestZ(Sse.CompareLessThan(ae, Vector128<float>.Zero), Vector128.Create(float.NaN)))
@@ -1371,7 +1380,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                 {
                                     var l = pointLights[i];
                                     var lightColor = l.Color;
-                                    var lightDiff = Sse.Subtract(position, l.Position).AsVector3();
+                                    var lightDiff = (position - l.Position).AsVector3();
                                     var light = Vector3.Normalize(lightDiff);
                                     var falloff = CalcFalloff(lightDiff, l.FalloffType, l.FalloffStart, l.FalloffLength);
 
@@ -1397,7 +1406,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                 {
                                     var l = spotLights[i];
                                     var lightColor = l.Color;
-                                    var lightDiff = Sse.Subtract(position, l.Position).AsVector3();
+                                    var lightDiff = (position - l.Position).AsVector3();
                                     var light = Vector3.Normalize(lightDiff);
                                     var spotCone = MathF.Acos(Vector3.Dot(l.Direction, light));
 
@@ -1433,7 +1442,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                 {
                                     var l = parallelLights[i];
                                     var lightColor = l.Color;
-                                    var lightDiff = Sse.Subtract(position, l.Position).AsVector3();
+                                    var lightDiff = (position - l.Position).AsVector3();
                                     var falloff = CalcFalloff(lightDiff, l.FalloffType, l.FalloffStart, l.FalloffLength);
 
                                     var diffuseFactor = Vector3.Dot(l.Direction, n);

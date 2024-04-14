@@ -79,6 +79,13 @@ namespace NiVE3.Model
             set { SetProperty(ref height, value); }
         }
 
+        private double downScaleRate = 1.0;
+        public double DownScaleRate
+        {
+            get { return downScaleRate; }
+            set { SetProperty(ref downScaleRate, value); }
+        }
+
         private bool isLock;
         public bool IsLock
         {
@@ -179,6 +186,7 @@ namespace NiVE3.Model
                     WorkareaEnd = 0.0;
                     Duration = 0.0;
                     FrameRate = 30.0;
+                    DownScaleRate = 1.0;
                     Width = 0;
                     Height = 0;
                     Name = "";
@@ -223,7 +231,43 @@ namespace NiVE3.Model
 
         public override NImage? GetImage(double time)
         {
-            return Composition?.RenderFrame(time, 1.0, true, ApplicationModel.UseGpu);
+            var previewImage = Composition?.RenderFrame(time, DownScaleRate, true, ApplicationModel.UseGpu);
+            if (previewImage != null && DownScaleRate != 1.0)
+            {
+                var managedPreviewImage = previewImage switch
+                {
+                    NManagedImage managedImage => managedImage,
+                    NGPUImage gpuImage => gpuImage.CopyToCpu(),
+                    _ => null
+                };
+                if (managedPreviewImage == null)
+                {
+                    return null;
+                }
+                if (previewImage !=  managedPreviewImage)
+                {
+                    previewImage.Dispose();
+                }
+
+                var resizedImage = new NManagedImage(Width, Height);
+                var xRate = previewImage.Width / (float)Width;
+                var yRate = previewImage.Height / (float)Height;
+                Parallel.For(0, Height, y =>
+                {
+                    var resizedImageSpan = resizedImage.GetDataSpan().Slice(y * Width);
+                    var previewImageSpan = managedPreviewImage.GetDataSpan().Slice((int)(y * yRate) * managedPreviewImage.Width);
+
+                    for (var x = 0; x < resizedImage.Width; x++)
+                    {
+                        resizedImageSpan[x] = previewImageSpan[(int)Math.Min(x * xRate, managedPreviewImage.Width)];
+                    }
+                });
+
+                managedPreviewImage.Dispose();
+                previewImage = resizedImage;
+            }
+
+            return previewImage;
         }
 
         public override float[]? GetAudio(double time, double length)
@@ -259,6 +303,7 @@ namespace NiVE3.Model
                         WorkareaEnd = 0.0;
                         Duration = 0.0;
                         FrameRate = 30.0;
+                        DownScaleRate = 1.0;
                         Width = 0;
                         Height = 0;
                         Name = "";

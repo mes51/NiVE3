@@ -123,6 +123,14 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref height, value); }
         }
 
+        private double downScaleRate;
+        [NeedWire(nameof(PreviewModel))]
+        public double DownScaleRate
+        {
+            get { return downScaleRate; }
+            set { SetProperty(ref downScaleRate, value); }
+        }
+
         private bool isLock;
         [NeedWire(nameof(PreviewModel))]
         public bool IsLock
@@ -213,13 +221,6 @@ namespace NiVE3.ViewModel
         {
             get { return isStretchLimited; }
             set { SetProperty(ref isStretchLimited, value); }
-        }
-
-        private int downScaleRate;
-        public int DownScaleRate
-        {
-            get { return downScaleRate; }
-            set { SetProperty(ref downScaleRate, value); }
         }
 
         private bool isScrubbing;
@@ -550,6 +551,7 @@ namespace NiVE3.ViewModel
                     OnWorkareaChanged();
                     break;
                 case nameof(PreviewColorChannel):
+                case nameof(DownScaleRate):
                     UpdateCurrentFrame();
                     break;
                 case nameof(SelectedLayerIds):

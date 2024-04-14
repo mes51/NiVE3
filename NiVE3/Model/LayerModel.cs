@@ -513,7 +513,8 @@ namespace NiVE3.Model
             return new RenderableImage(
                 image,
                 roi,
-                downSamplingRate,
+                1.0F,
+                1.0F,
                 IsEnableMotionBlur,
                 IsEnable3D,
                 InterpolationQuality,
@@ -557,7 +558,8 @@ namespace NiVE3.Model
             return new RenderableImage(
                 image,
                 roi,
-                downSamplingRate,
+                1.0F,
+                1.0F,
                 IsEnableMotionBlur,
                 IsEnable3D,
                 InterpolationQuality,

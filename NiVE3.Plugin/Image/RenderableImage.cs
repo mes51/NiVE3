@@ -17,7 +17,8 @@ namespace NiVE3.Plugin.Image
     /// </summary>
     /// <param name="Image">レンダリングを行う画像</param>
     /// <param name="ROI">画像の最終的なROI</param>
-    /// <param name="DownSampleRate">ダウンサンプリングの倍率</param>
+    /// <param name="DownSampleRateX">幅のダウンサンプリングの倍率</param>
+    /// <param name="DownSampleRateY">高さのダウンサンプリングの倍率</param>
     /// <param name="IsEnableMotionBlur">モーションブラーが有効かどうか</param>
     /// <param name="IsEnable3D">3Dが有効かどうか</param>
     /// <param name="InterpolationQuality">画像のレンダリング時の補間方法</param>
@@ -28,7 +29,8 @@ namespace NiVE3.Plugin.Image
     public record RenderableImage(
         NImage Image,
         ROI ROI,
-        double DownSampleRate,
+        float DownSampleRateX,
+        float DownSampleRateY,
         bool IsEnableMotionBlur,
         bool IsEnable3D,
         ImageInterpolationQuality InterpolationQuality,

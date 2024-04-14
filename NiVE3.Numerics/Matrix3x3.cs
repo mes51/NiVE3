@@ -102,9 +102,10 @@ namespace NiVE3.Numerics
         /// <param name="x">Xの移動距離</param>
         /// <param name="y">Yの移動距離</param>
         /// <returns>計算後の行列</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly Matrix3x3 Translate(float x, float y)
         {
-            return this * new Matrix3x3(1.0F, 0.0F, 0.0F, 1.0F, x, y);
+            return this * CreateTranslate(x, y);
         }
 
         /// <summary>
@@ -112,13 +113,10 @@ namespace NiVE3.Numerics
         /// </summary>
         /// <param name="angle">回転角度</param>
         /// <returns>計算後の行列</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly Matrix3x3 Rotate(float angle)
         {
-            var rad = (float)(Math.PI / 180.0 * angle);
-            var cos = MathF.Cos(rad);
-            var sin = MathF.Sin(rad);
-
-            return this * new Matrix3x3(cos, sin, -sin, cos, 0.0F, 0.0F);
+            return this * CreateRotate(angle);
         }
 
         /// <summary>
@@ -127,9 +125,10 @@ namespace NiVE3.Numerics
         /// <param name="w">Xの比</param>
         /// <param name="h">Yの比</param>
         /// <returns>計算後の行列</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly Matrix3x3 Scale(float w, float h)
         {
-            return this * new Matrix3x3(w, 0.0F, 0.0F, h, 0.0F, 0.0F);
+            return this * CreateScale(w, h);
         }
 
         /// <summary>
@@ -138,6 +137,7 @@ namespace NiVE3.Numerics
         /// <param name="x">変換する点のX座標</param>
         /// <param name="y">変換する点のY座標</param>
         /// <returns>変換後の点</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly (float x, float y) Transform(float x, float y)
         {
             var p = new Vector3(x, y, 1.0F);
@@ -150,12 +150,14 @@ namespace NiVE3.Numerics
         /// </summary>
         /// <param name="v">変換する点</param>
         /// <returns>変換後の点</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly Vector2 Transform(Vector2 v)
         {
             var p = new Vector3(v, 1.0F);
             return (p.X * X + p.Y * Y + Z).AsVector128().AsVector2();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         readonly float Determinant()
         {
             return M11 * M22 * M33 + M12 * M23 * M31 + M13 * M21 * M32 - (M13 * M22 * M31 + M32 * M23 * M11 + M33 * M21 * M12);
@@ -198,12 +200,52 @@ namespace NiVE3.Numerics
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Matrix3x3 AffineTransform(Vector2 anchorPoint, Vector2 scale, float angle, Vector2 translate)
         {
             return Identity.Translate(-anchorPoint.X, -anchorPoint.Y)
                 .Scale(scale.X, scale.Y)
                 .Rotate(angle)
                 .Translate(translate.X, translate.Y);
+        }
+
+        /// <summary>
+        /// 平行移動します
+        /// </summary>
+        /// <param name="x">Xの移動距離</param>
+        /// <param name="y">Yの移動距離</param>
+        /// <returns>生成された行列</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Matrix3x3 CreateTranslate(float x, float y)
+        {
+            return new Matrix3x3(1.0F, 0.0F, 0.0F, 1.0F, x, y);
+        }
+
+        /// <summary>
+        /// 回転します
+        /// </summary>
+        /// <param name="angle">回転角度</param>
+        /// <returns>生成された行列</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Matrix3x3 CreateRotate(float angle)
+        {
+            var rad = (float)(Math.PI / 180.0 * angle);
+            var cos = MathF.Cos(rad);
+            var sin = MathF.Sin(rad);
+
+            return new Matrix3x3(cos, sin, -sin, cos, 0.0F, 0.0F);
+        }
+
+        /// <summary>
+        /// スケーリングします
+        /// </summary>
+        /// <param name="w">Xの比</param>
+        /// <param name="h">Yの比</param>
+        /// <returns>生成された行列</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Matrix3x3 CreateScale(float w, float h)
+        {
+            return new Matrix3x3(w, 0.0F, 0.0F, h, 0.0F, 0.0F);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -218,6 +260,7 @@ namespace NiVE3.Numerics
             return !a.Equals(b);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe static Matrix3x3 operator +(Matrix3x3 a, in Matrix3x3 b)
         {
             a.X += b.X;
@@ -226,6 +269,7 @@ namespace NiVE3.Numerics
             return a;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe static Matrix3x3 operator -(Matrix3x3 a, in Matrix3x3 b)
         {
             a.X -= b.X;
@@ -234,6 +278,7 @@ namespace NiVE3.Numerics
             return a;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe static Matrix3x3 operator -(Matrix3x3 a)
         {
             a.X = -a.X;
@@ -242,6 +287,7 @@ namespace NiVE3.Numerics
             return a;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe static Matrix3x3 operator *(Matrix3x3 a, in Matrix3x3 b)
         {
             a.X = a.X.X * b.X + a.X.Y * b.Y + a.X.Z * b.Z;
@@ -251,6 +297,7 @@ namespace NiVE3.Numerics
             return a;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe static Matrix3x3 operator *(Matrix3x3 a, float s)
         {
             a.X *= s;
