@@ -70,13 +70,13 @@ namespace NiVE3.PresetPlugin.Renderer
 
             if (downSamplingRate != 1.0)
             {
-                CurrentFrame = new NManagedImage((int)Math.Floor(Width / downSamplingRate), (int)Math.Floor(Height / downSamplingRate), true);
+                CurrentFrame = new NManagedImage((int)Math.Floor(Width / downSamplingRate), (int)Math.Floor(Height / downSamplingRate));
                 CurrentDownScaleRateX = Width / (float)CurrentFrame.Width;
                 CurrentDownScaleRateY = Height / (float)CurrentFrame.Height;
             }
             else
             {
-                CurrentFrame = new NManagedImage(Width, Height, true);
+                CurrentFrame = new NManagedImage(Width, Height);
                 CurrentDownScaleRateX = 1.0F;
                 CurrentDownScaleRateY = 1.0F;
             }

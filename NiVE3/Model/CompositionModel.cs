@@ -574,7 +574,7 @@ namespace NiVE3.Model
                         var currentFrameSpan = ((NManagedImage)currentFrame).GetDataSpan().Slice(y * currentFrame.Width, currentFrame.Width);
                         for (int x = roi.OriginalImagePosition.X, limit = x + roi.OriginalImageSize.Width, maskPos = 0, framePos = x; x < limit; x++,  maskPos++, framePos++)
                         {
-                            currentFrameSpan[framePos].W = maskSpan[maskPos];
+                            currentFrameSpan[framePos].W *= maskSpan[maskPos];
                         }
                     });
 
