@@ -145,22 +145,24 @@ namespace NiVE3.Input.Special
             SourceId = sourceId;
         }
 
-        public NImage ReadFrame(double time, bool toGpu)
+        public NImage ReadFrame(double time, double downSamplingRate, bool toGpu)
         {
-            var result = new NManagedImage(Width, Height);
+            var width = (int)(Width / downSamplingRate);
+            var height = (int)(Height / downSamplingRate);
+            var result = new NManagedImage(width, height);
 
-            var bar7Width = Width / 7.0;
-            var bar21Width = Width / 21.0;
-            var bar5Of28Width = Width / 28.0 * 5.0;
+            var bar7Width = width / 7.0;
+            var bar21Width = width / 21.0;
+            var bar5Of28Width = width / 28.0 * 5.0;
             var height12 = Height / 12.0;
 
-            Parallel.For(0, Height, y =>
+            Parallel.For(0, height, y =>
             {
-                var dataSpan = result.GetDataSpan()[(y * Width)..];
+                var dataSpan = result.GetDataSpan()[(y * width)..];
 
                 if (y <= height12 * 8.0)
                 {
-                    for (var x = 0; x < Width; x++)
+                    for (var x = 0; x < width; x++)
                     {
                         var colorIndex = Math.Min((int)(x / bar7Width), Top7BarColors.Length - 1);
                         dataSpan[x] = Top7BarColors[colorIndex];
@@ -168,7 +170,7 @@ namespace NiVE3.Input.Special
                 }
                 else if (y <= height12 * 9.0)
                 {
-                    for (var x = 0; x < Width; x++)
+                    for (var x = 0; x < width; x++)
                     {
                         var colorIndex = Math.Min((int)(x / bar7Width), Top7BarColors.Length - 1);
                         dataSpan[x] = (colorIndex % 2 == 0) ? Top7BarColors[Top7BarColors.Length - colorIndex - 1] : Black0;
@@ -176,7 +178,7 @@ namespace NiVE3.Input.Special
                 }
                 else
                 {
-                    for (var x = 0; x < Width; x++)
+                    for (var x = 0; x < width; x++)
                     {
                         if (x <= bar5Of28Width * 4.0)
                         {
@@ -225,7 +227,7 @@ namespace NiVE3.Input.Special
             Duration = duration;
         }
 
-        public NImage ReadFrame(double time, bool toGpu)
+        public NImage ReadFrame(double time, double downSamplingRate, bool toGpu)
         {
             throw new NotImplementedException();
         }
@@ -271,7 +273,7 @@ namespace NiVE3.Input.Special
             SourceId = sourceId;
         }
 
-        public NImage ReadFrame(double time, bool toGpu)
+        public NImage ReadFrame(double time, double downSamplingRate, bool toGpu)
         {
             throw new NotImplementedException();
         }

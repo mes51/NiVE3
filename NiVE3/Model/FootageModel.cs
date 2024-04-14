@@ -10,6 +10,7 @@ using NiVE3.Data.Json.Project;
 using NiVE3.Image;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Property;
+using NiVE3.Plugin.ValueObject;
 using NiVE3.Shared.Extension;
 using Prism.Mvvm;
 
@@ -187,15 +188,27 @@ namespace NiVE3.Model
             }
         }
 
-        public NImage ReadImage(double time, int compositionWidth, int compositionHeight, PropertyValueGroup? properties, ImageInterpolationQuality imageInterpolationQuality, bool toGpu)
+        public Int32Size CalcSize(double time, int compositionWidth, int compositionHeight, PropertyValueGroup? properties)
         {
             if (properties != null && Source is ICustomizableFootageSource customizableFootageSource)
             {
-                return customizableFootageSource.ReadFrame(time, compositionWidth, compositionHeight, properties, imageInterpolationQuality, toGpu);
+                return customizableFootageSource.CalcSize(time, compositionWidth, compositionHeight, properties);
             }
             else
             {
-                return Source.ReadFrame(time, toGpu);
+                return new Int32Size(Width, Height);
+            }
+        }
+
+        public NImage ReadImage(double time, double downSamplingRate, int compositionWidth, int compositionHeight, PropertyValueGroup? properties, ImageInterpolationQuality imageInterpolationQuality, bool toGpu)
+        {
+            if (properties != null && Source is ICustomizableFootageSource customizableFootageSource)
+            {
+                return customizableFootageSource.ReadFrame(time, downSamplingRate, compositionWidth, compositionHeight, properties, imageInterpolationQuality, toGpu);
+            }
+            else
+            {
+                return Source.ReadFrame(time, downSamplingRate, toGpu);
             }
         }
 

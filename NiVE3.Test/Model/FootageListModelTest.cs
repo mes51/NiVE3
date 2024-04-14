@@ -181,7 +181,7 @@ namespace NiVE3.Test.Model
             SourceId = id;
         }
 
-        public NImage ReadFrame(double time, bool toGpu)
+        public NImage ReadFrame(double time, double downSamplingRate, bool toGpu)
         {
             throw new NotImplementedException();
         }

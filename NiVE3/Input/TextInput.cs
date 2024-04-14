@@ -21,6 +21,7 @@ using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Property;
 using NiVE3.Plugin.Property.Properties;
+using NiVE3.Plugin.ValueObject;
 using NiVE3.Property;
 using NiVE3.Property.Types;
 using NiVE3.Shape;
@@ -309,12 +310,85 @@ namespace NiVE3.Input
             throw new NotImplementedException();
         }
 
-        public NImage ReadFrame(double time, bool toGpu)
+        public NImage ReadFrame(double time, double downSamplingRate, bool toGpu)
         {
             return new NManagedImage(1, 1);
         }
 
-        public NImage ReadFrame(double time, int compositionWidth, int compositionHeight, PropertyValueGroup properties, ImageInterpolationQuality imageInterpolationQuality, bool toGpu)
+        public Int32Size CalcSize(double time, int compositionWidth, int compositionHeight, PropertyValueGroup properties)
+        {
+            var sourceText = properties[SourceTextId] as StyledText ?? StyledText.Empty;
+            if (string.IsNullOrEmpty(sourceText.Text))
+            {
+                return new Int32Size(1, 1);
+            }
+
+            var structuredExtendedTextRun = new StructuredExtendedTextRun(sourceText.Text, sourceText.DefaultStyle, sourceText.Styles);
+            foreach (var animator in ((PropertyValueGroup[])(properties[TextAnimatorsId] ?? Array.Empty<PropertyValueGroup>())))
+            {
+                ApplyAnimator(structuredExtendedTextRun, animator);
+            }
+            structuredExtendedTextRun = structuredExtendedTextRun.ReconstructTextRunWithOffset();
+
+            var moreOptions = (PropertyValueGroup)(properties[TextMoreOptionsGroupId] ?? PropertyValueGroup.Empty);
+            var fontInfo = FontInfo.FindByUniqueId(sourceText.DefaultStyle.FontUniqueId) ?? FontInfo.FallbackFont;
+            var font = fontInfo.FontFamily.CreateFont((float)sourceText.DefaultStyle.FontSize);
+            var textOption = new TextOptions(font);
+            var wrappingSize = (Vector3d)(moreOptions[TextBoxSizeId] ?? new Vector3d());
+            textOption.WrappingLength = wrappingSize.X > 0.0 ? (float)wrappingSize.X : -1.0F;
+            textOption.WordBreaking = wrappingSize.X > 0.0 ? WordBreaking.BreakAll : WordBreaking.Standard;
+            textOption.TextRuns = structuredExtendedTextRun.Flatten();
+            textOption.TextAlignment = sourceText.DefaultStyle.TextAlign switch
+            {
+                TextAlign.Center => TextAlignment.Center,
+                TextAlign.Right => TextAlignment.End,
+                _ => TextAlignment.Start,
+            };
+            var baseAnchorPointRate = (Vector2)(Vector3d)(moreOptions[TextBaseAnchorPointRateId] ?? new Vector3d(50.0)) * 0.01F;
+            var glyphBuilder = new StyledGlyphBuilder((float)wrappingSize.X, (float)wrappingSize.Y, 1.0, baseAnchorPointRate);
+            TextRenderer.RenderTextTo(glyphBuilder, structuredExtendedTextRun.SourceText, textOption);
+            var glyphPolygons = new List<(Polygon[] fillPolygons, Polygon[] outlinePolygons, ExtendedTextRun textRun, Vector128<int> rect, Vector128<int> blurMargin, Vector2 origin)>();
+            foreach (var glyph in glyphBuilder.GetRenderableGlyhps())
+            {
+                var fillPolygons = glyph.FlattenedPath.Select(p => new Polygon(p.Points.Span)).ToArray();
+                var outlinePolygons = glyph.FlattenedOutlinePath.Select(p => new Polygon(p.Points.Span)).ToArray();
+
+                var fillRect = GetPolygonRect(fillPolygons);
+                var outlineRect = GetPolygonRect(outlinePolygons);
+                var rect = Vector128.Create(
+                    Math.Min(fillRect.GetElement(0), outlineRect.GetElement(0)),
+                    Math.Min(fillRect.GetElement(1), outlineRect.GetElement(1)),
+                    Math.Max(fillRect.GetElement(2), outlineRect.GetElement(2)),
+                    Math.Max(fillRect.GetElement(3), outlineRect.GetElement(3))
+                );
+                var blurMargin = Vector128.Create(
+                    (int)Math.Ceiling(glyph.TextRun.Blur.X),
+                    (int)Math.Ceiling(glyph.TextRun.Blur.Y),
+                    (int)Math.Ceiling(glyph.TextRun.Blur.X),
+                    (int)Math.Ceiling(glyph.TextRun.Blur.Y)
+                );
+                var fillOrigin = new Vector2(fillRect.GetElement(0), fillRect.GetElement(1)); //fillPolygons.Select(p => new Vector2(p.MinX, p.MinY)).Aggregate(new Vector2(float.MaxValue), Vector2.Min);
+                var origin = -fillOrigin + (outlinePolygons.Length > 0 ? fillOrigin - new Vector2(outlineRect.GetElement(0), outlineRect.GetElement(1)) : Vector2.Zero);
+                glyphPolygons.Add((fillPolygons, outlinePolygons, glyph.TextRun, rect, blurMargin, origin));
+            }
+
+            if (glyphPolygons.Count < 1)
+            {
+                return new Int32Size(1, 1);
+            }
+
+            var min = Vector128.Create(int.MaxValue);
+            var max = Vector128.Create(int.MinValue);
+            foreach (var (_, _, _, r, blurMargin, _) in glyphPolygons)
+            {
+                min = Sse41.Min(min, Sse2.Subtract(r, blurMargin));
+                max = Sse41.Max(max, Sse2.Add(r, blurMargin));
+            }
+
+            return new Int32Size(max.GetElement(2) - min.GetElement(0) + 1, max.GetElement(3) - min.GetElement(1));
+        }
+
+        public NImage ReadFrame(double time, double downSamplingRate, int compositionWidth, int compositionHeight, PropertyValueGroup properties, ImageInterpolationQuality imageInterpolationQuality, bool toGpu)
         {
             var sourceText = properties[SourceTextId] as StyledText ?? StyledText.Empty;
             if (string.IsNullOrEmpty(sourceText.Text))
@@ -344,7 +418,7 @@ namespace NiVE3.Input
                 _ => TextAlignment.Start,
             };
             var baseAnchorPointRate = (Vector2)(Vector3d)(moreOptions[TextBaseAnchorPointRateId] ?? new Vector3d(50.0)) * 0.01F;
-            var glyphBuilder = new StyledGlyphBuilder((float)wrappingSize.X, (float)wrappingSize.Y, baseAnchorPointRate);
+            var glyphBuilder = new StyledGlyphBuilder((float)wrappingSize.X, (float)wrappingSize.Y, downSamplingRate, baseAnchorPointRate);
             TextRenderer.RenderTextTo(glyphBuilder, structuredExtendedTextRun.SourceText, textOption);
             var glyphPolygons = new List<(Polygon[] fillPolygons, Polygon[] outlinePolygons, ExtendedTextRun textRun, Vector128<int> rect, Vector128<int> blurMargin, Vector2 origin)>();
             foreach (var glyph in glyphBuilder.GetRenderableGlyhps())

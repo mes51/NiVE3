@@ -241,7 +241,7 @@ namespace NiVE3.ViewModel
         {
             if (Footage.InputType == SourceType.Image || (Footage.InputType & SourceType.Video) != SourceType.None)
             {
-                using var image = Footage.ReadImage(Duration * 0.5, 0, 0, null, ImageInterpolationQuality.Level2, false) as NManagedImage;
+                using var image = Footage.ReadImage(Duration * 0.5, 1.0, 0, 0, null, ImageInterpolationQuality.Level2, false) as NManagedImage;
                 if (image != null)
                 {
                     var data = ArrayPool<byte>.Shared.Rent(image.DataLength * 4);

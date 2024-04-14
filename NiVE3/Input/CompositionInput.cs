@@ -82,10 +82,10 @@ namespace NiVE3.Input
             Composition = composition;
         }
 
-        public NImage ReadFrame(double time, bool toGpu)
+        public NImage ReadFrame(double time, double downSamplingRate, bool toGpu)
         {
             // TODO: 親のコンポジションのダウンサンプリングの反映
-            return Composition.RenderFrame(time, 1.0, Composition.ApplyToneMappingWhenNested, toGpu);
+            return Composition.RenderFrame(time, downSamplingRate, Composition.ApplyToneMappingWhenNested, toGpu);
         }
 
         public float[] ReadAudio(double time, double length)

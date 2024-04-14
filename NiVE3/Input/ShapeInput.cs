@@ -27,6 +27,8 @@ using Brush = NiVE3.Shape.Brush;
 using SolidBrush = NiVE3.Shape.SolidBrush;
 using LinearGradientBrush = NiVE3.Shape.LinearGradientBrush;
 using RadialGradientBrush = NiVE3.Shape.RadialGradientBrush;
+using NiVE3.Plugin.ValueObject;
+using System.Windows.Media;
 
 namespace NiVE3.Input
 {
@@ -391,16 +393,16 @@ namespace NiVE3.Input
             throw new NotImplementedException();
         }
 
-        public NImage ReadFrame(double time, bool toGpu)
+        public NImage ReadFrame(double time, double downSamplingRate, bool toGpu)
         {
             return new NManagedImage(1, 1);
         }
 
-        public NImage ReadFrame(double time, int compositionWidth, int compositionHeight, PropertyValueGroup properties, ImageInterpolationQuality imageInterpolationQuality, bool toGpu)
+        public Int32Size CalcSize(double time, int compositionWidth, int compositionHeight, PropertyValueGroup properties)
         {
             var contents = (properties[ContentPropertyId] as PropertyValueGroup[]) ?? [];
             var tree = CreateShapeTree(contents);
-            var drawable = tree.GetDrawables().ToArray();
+            var drawable = tree.GetDrawables(1.0F).ToArray();
 
             var minX = int.MaxValue;
             var minY = int.MaxValue;
@@ -414,13 +416,34 @@ namespace NiVE3.Input
                 maxX = Math.Max(maxX, (int)MathF.Ceiling(pathBounds.Right));
                 maxY = Math.Max(maxY, (int)MathF.Ceiling(pathBounds.Bottom));
             }
-            maxX += minX - (int)minX;
-            maxY += minY - (int)minY;
 
-            var image = new NManagedImage((int)MathF.Ceiling(maxX - minX) + 1, (int)MathF.Ceiling(maxY - minY) + 1)
+            return new Int32Size(maxX - minX, maxY - minY);
+        }
+
+        public NImage ReadFrame(double time, double downSamplingRate, int compositionWidth, int compositionHeight, PropertyValueGroup properties, ImageInterpolationQuality imageInterpolationQuality, bool toGpu)
+        {
+            var contents = (properties[ContentPropertyId] as PropertyValueGroup[]) ?? [];
+            var tree = CreateShapeTree(contents);
+            var drawable = tree.GetDrawables((float)(1.0 / downSamplingRate)).ToArray();
+
+            var minX = int.MaxValue;
+            var minY = int.MaxValue;
+            var maxX = int.MinValue;
+            var maxY = int.MinValue;
+            foreach (var (_, _, _, p) in drawable)
+            {
+                var pathBounds = p.Bounds;
+                minX = Math.Min(minX, (int)MathF.Floor(pathBounds.Left));
+                minY = Math.Min(minY, (int)MathF.Floor(pathBounds.Top));
+                maxX = Math.Max(maxX, (int)MathF.Ceiling(pathBounds.Right));
+                maxY = Math.Max(maxY, (int)MathF.Ceiling(pathBounds.Bottom));
+            }
+
+            var image = new NManagedImage(maxX - minX + 1, maxY - minY + 1)
             {
                 Origin = -new Vector2d(minX, minY)
             };
+            image.GetDataSpan().Fill(new Vector4(1.0F, 0.0F, 0.0F, 1.0F));
 
             foreach (var (brush, fillRule, blendMode, path) in drawable)
             {
@@ -718,21 +741,6 @@ namespace NiVE3.Input
         {
             return [..paths.SelectMany(p => p.Flatten()).Select(p => new Polygon(p.Points.Span))];
         }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void DrawImage(BlendMode blendMode, NManagedImage back, NManagedImage front, int offsetX, int offsetY)
-        {
-            Parallel.For(0, front.Height, y =>
-            {
-                var backSpan = back.GetDataSpan()[((offsetY + y) * back.Width + offsetX)..];
-                var frontSpan = front.GetDataSpan()[(y * front.Width)..];
-
-                for (var x = 0; x < front.Width; x++)
-                {
-                    backSpan[x] = Blend.Process(blendMode, backSpan[x], frontSpan[x]);
-                }
-            });
-        }
     }
 
     enum ShapeFillRule
@@ -763,13 +771,13 @@ namespace NiVE3.Input
             Nodes.Add(node);
         }
 
-        public IEnumerable<(Brush brush, ShapeFillRule, BlendMode blendMode, IPathCollection paths)> GetDrawables()
+        public IEnumerable<(Brush brush, ShapeFillRule, BlendMode blendMode, IPathCollection paths)> GetDrawables(float downSampling)
         {
             foreach (var node in Nodes.AsEnumerable().Reverse())
             {
                 if (node is ShapeGroupTree childGroup)
                 {
-                    foreach (var drawable in childGroup.GetDrawables())
+                    foreach (var drawable in childGroup.GetDrawables(downSampling))
                     {
                         yield return drawable;
                     }
@@ -779,10 +787,22 @@ namespace NiVE3.Input
                 switch (node)
                 {
                     case ShapeFillBase fill:
-                        yield return (fill.GetBrush(), fill.FillRule, fill.BlendMode, TraversePath(fill));
+                        {
+                            var brush = fill.GetBrush();
+                            brush.Transform(Matrix3x3.CreateScale(downSampling, downSampling));
+                            var path = TraversePath(fill);
+                            path = path.Transform(Matrix3x2.CreateScale(downSampling));
+                            yield return (brush, fill.FillRule, fill.BlendMode, path);
+                        }
                         break;
                     case ShapeStrokeBase stroke:
-                        yield return (stroke.GetBrush(), ShapeFillRule.NonZero, stroke.BlendMode, new PathCollection(TraversePath(stroke).Select(p => p.GenerateOutline(stroke.Width))));
+                        {
+                            var brush = stroke.GetBrush();
+                            brush.Transform(Matrix3x3.CreateScale(downSampling, downSampling));
+                            var path = (IPathCollection)new PathCollection(TraversePath(stroke).Select(p => p.GenerateOutline(stroke.Width)));
+                            path = path.Transform(Matrix3x2.CreateScale(downSampling));
+                            yield return (brush, ShapeFillRule.NonZero, stroke.BlendMode, path);
+                        }
                         break;
                 }
             }

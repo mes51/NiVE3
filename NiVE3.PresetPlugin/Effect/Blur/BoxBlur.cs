@@ -42,7 +42,7 @@ namespace NiVE3.PresetPlugin.Effect.Blur
             ];
         }
 
-        public NImage Process(NImage image, ROI roi, double layerTime, IPropertyObject[] properties, bool useGpu)
+        public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, double layerTime, IPropertyObject[] properties, bool useGpu)
         {
             var amount = (float)(double)(properties.First(p => p.Id == PropertyAmountId).GetValue(layerTime) ?? 0.0);
             var repeat = (int)(double)(properties.First(p => p.Id == PropertyRepeatId).GetValue(layerTime) ?? 1.0);
@@ -58,13 +58,13 @@ namespace NiVE3.PresetPlugin.Effect.Blur
                 switch (direction)
                 {
                     case BlurDirection.HorizontalAndVertical:
-                        Blur(image, roi, amount);
+                        Blur(image, roi, amount / (float)downSamplingRateX, amount / (float)downSamplingRateY);
                         break;
                     case BlurDirection.Horizontal:
-                        BlurHorizontal(image, roi, amount);
+                        BlurHorizontal(image, roi, amount / (float)downSamplingRateX);
                         break;
                     case BlurDirection.Vertical:
-                        BlurVertical(image, roi, amount);
+                        BlurVertical(image, roi, amount / (float)downSamplingRateY);
                         break;
                 }
             }
@@ -81,10 +81,10 @@ namespace NiVE3.PresetPlugin.Effect.Blur
 
         public void Dispose() { }
 
-        static void Blur(NImage image, ROI roi, float amount)
+        static void Blur(NImage image, ROI roi, float horizontal, float vertical)
         {
-            var pz = (int)Math.Ceiling(amount);
-            var fmz = pz - amount;
+            var pz = (int)Math.Ceiling(vertical);
+            var fmz = pz - vertical;
             var fz = 1 - fmz;
             var x = Math.Max(roi.Left - pz, 0);
             var y = roi.Top;
@@ -147,6 +147,9 @@ namespace NiVE3.PresetPlugin.Effect.Blur
                 }
             });
 
+            pz = (int)MathF.Ceiling(horizontal);
+            fmz = pz - horizontal;
+            fz = 1 - fmz;
             x = roi.Left;
             width = roi.Right;
             Parallel.For(y, height, delegate (int h)

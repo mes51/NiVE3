@@ -30,14 +30,17 @@ namespace NiVE3.Text
 
         float TextBoxHeight { get; }
 
+        float DownSampling { get; }
+
         float ShiftedLetterSpacing { get; set; }
 
         bool CurrentIsDiscardGlyph { get; set; }
 
-        public StyledGlyphBuilder(float textBoxWidth, float textBoxHeight, Vector2 baseAnchorPointRate, ISimplePath? textPath = null)
+        public StyledGlyphBuilder(float textBoxWidth, float textBoxHeight, double downSamplingRate, Vector2 baseAnchorPointRate, ISimplePath? textPath = null)
         {
             TextBoxWidth = textBoxWidth;
             TextBoxHeight = textBoxHeight;
+            DownSampling = 1.0F / (float)downSamplingRate;
             BaseAnchorPointRate = baseAnchorPointRate;
             Builder = new PathBuilder();
             if (textPath != null && textPath.Points.Length > 1)
@@ -81,14 +84,14 @@ namespace NiVE3.Text
                 CurrentIsDiscardGlyph = false;
             }
 
-            var transform = Matrix3x2.Identity;
+            var transform = Matrix3x2.CreateScale(DownSampling, DownSampling);
 
             if (CurrentParameters.TextRun is ExtendedTextRun textRun)
             {
                 var baseAnchorPointX = bounds.X + bounds.Width * BaseAnchorPointRate.X * textRun.HorizontalScale * 0.01F;
                 var baseAnchorPointY = bounds.Y + bounds.Height * BaseAnchorPointRate.Y * textRun.VerticalScale * 0.01F;
                 var skewRad = textRun.SkewAxis / 180.0F * MathF.PI;
-                transform = Matrix3x2.CreateTranslation(-bounds.X, -bounds.Y - bounds.Height) *
+                transform *= Matrix3x2.CreateTranslation(-bounds.X, -bounds.Y - bounds.Height) *
                     Matrix3x2.CreateScale(textRun.HorizontalScale * 0.01F, textRun.VerticalScale * 0.01F) *
                     Matrix3x2.CreateTranslation(bounds.X, bounds.Y + bounds.Height);
                 var affine = Matrix3x2.CreateTranslation(-baseAnchorPointX - textRun.AnchorPoint.X, -baseAnchorPointY - textRun.AnchorPoint.Y) *

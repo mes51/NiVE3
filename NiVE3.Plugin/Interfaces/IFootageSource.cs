@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Image;
 using NiVE3.Plugin.Property;
+using NiVE3.Plugin.ValueObject;
 
 namespace NiVE3.Plugin.Interfaces
 {
@@ -55,10 +56,11 @@ namespace NiVE3.Plugin.Interfaces
         /// 画像を読み込みます
         /// </summary>
         /// <param name="time">読み込むタイミングの時間</param>
+        /// <param name="downSamplingRate">ダウンサンプリングの比率</param>
         /// <param name="toGpu">GPU上に直接読み込む場合はtrue、CPU上に読み込む場合はfalse</param>
         /// <returns>読み込んだ画像を表すNImage</returns>
         // TODO: Acceleratorをラップしたものを渡す
-        NImage ReadFrame(double time, bool toGpu);
+        NImage ReadFrame(double time, double downSamplingRate, bool toGpu);
 
         /// <summary>
         /// 音声を読み込みます。読み込む音声は48kHz 2ch 32bit浮動小数点wavファイルと同じフォーマットである必要があります。
@@ -78,9 +80,20 @@ namespace NiVE3.Plugin.Interfaces
         PropertyBase[] GetOptionProperties();
 
         /// <summary>
+        /// 読み込む画像のサイズを計算します
+        /// </summary>
+        /// <param name="time">読み込むタイミングの時間</param>
+        /// <param name="compositionWidth">コンポジションの幅</param>
+        /// <param name="compositionHeight">コンポジションの高さ</param>
+        /// <param name="properties">オプションの値</param>
+        /// <returns>読み込む画像のサイズ</returns>
+        Int32Size CalcSize(double time, int compositionWidth, int compositionHeight, PropertyValueGroup properties);
+
+        /// <summary>
         /// 画像を読み込みます
         /// </summary>
         /// <param name="time">読み込むタイミングの時間</param>
+        /// <param name="downSamplingRate">ダウンサンプリングの比率</param>
         /// <param name="compositionWidth">コンポジションの幅</param>
         /// <param name="compositionHeight">コンポジションの高さ</param>
         /// <param name="properties">オプションの値</param>
@@ -88,6 +101,6 @@ namespace NiVE3.Plugin.Interfaces
         /// <param name="toGpu">GPU上に直接読み込む場合はtrue、CPU上に読み込む場合はfalse</param>
         /// <returns>読み込んだ画像を表すNImage</returns>
         // TODO: Acceleratorをラップしたものを渡す
-        NImage ReadFrame(double time, int compositionWidth, int compositionHeight, PropertyValueGroup properties, ImageInterpolationQuality imageInterpolationQuality, bool toGpu);
+        NImage ReadFrame(double time, double downSamplingRate, int compositionWidth, int compositionHeight, PropertyValueGroup properties, ImageInterpolationQuality imageInterpolationQuality, bool toGpu);
     }
 }

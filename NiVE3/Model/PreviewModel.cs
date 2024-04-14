@@ -144,7 +144,7 @@ namespace NiVE3.Model
         {
             if (Footage != null && (Footage.InputType.HasFlag(SourceType.Image) || Footage.InputType.HasFlag(SourceType.Video)))
             {
-                return Footage.ReadImage(time, 0, 0, null, ImageInterpolationQuality.Level2, false);
+                return Footage.ReadImage(time, 1.0, 0, 0, null, ImageInterpolationQuality.Level2, false);
             }
             else
             {

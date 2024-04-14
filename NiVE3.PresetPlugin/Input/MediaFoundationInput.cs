@@ -11,8 +11,11 @@ using System.Threading.Tasks;
 using System.Windows.Documents;
 using System.Windows.Input;
 using NiVE3.Image;
+using NiVE3.Image.Drawing;
+using NiVE3.Numerics;
 using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Interfaces;
+using NiVE3.PresetPlugin.Internal.Drawing;
 using NiVE3.PresetPlugin.Internal.MediaFoundation;
 
 namespace NiVE3.PresetPlugin.Input
@@ -139,7 +142,7 @@ namespace NiVE3.PresetPlugin.Input
             SourceType = audio != null ? SourceType.VideoAndAudio : SourceType.Video;
         }
 
-        public NImage ReadFrame(double time, bool toGpu)
+        public NImage ReadFrame(double time, double downSamplingRate, bool toGpu)
         {
             if (toGpu)
             {
@@ -154,6 +157,16 @@ namespace NiVE3.PresetPlugin.Input
                 ImageConversion.ConvertToBGRA128(data, result.Data, pixelCount);
 
                 ArrayPool<byte>.Shared.Return(data);
+
+                // TODO: MediaFoundation側でリサイズ出来るかどうかの調査
+                if (downSamplingRate != 1.0)
+                {
+                    var resizedResult = new NManagedImage((int)(Width / downSamplingRate), (int)(Height / downSamplingRate));
+                    var renderer = new Renderer2D(resizedResult);
+                    renderer.Draw(result, 1.0F, Matrix3x3.CreateScale((float)(1.0 / downSamplingRate), (float)(1.0 / downSamplingRate)), ImageInterpolationQuality.Level2, BlendMode.Replace, null);
+                    result.Dispose();
+                    result = resizedResult;
+                }
 
                 return result;
             }
@@ -198,7 +211,7 @@ namespace NiVE3.PresetPlugin.Input
             return Reader.Read(time, length);
         }
 
-        public NImage ReadFrame(double time, bool toGpu)
+        public NImage ReadFrame(double time, double downSamplingRate, bool toGpu)
         {
             throw new NotImplementedException();
         }

@@ -28,11 +28,13 @@ namespace NiVE3.Plugin.Interfaces
         /// </summary>
         /// <param name="image">適用先の画像</param>
         /// <param name="roi">エフェクトの適用範囲</param>
+        /// <param name="downSamplingRateX">幅のダウンサンプリングの比率</param>
+        /// <param name="downSamplingRateY">高さのダウンサンプリングの比率</param>
         /// <param name="layerTime">現在のレイヤーの時間</param>
         /// <param name="properties">プロパティ</param>
         /// <param name="useGpu">GPUを使用するかどうか</param
         /// <returns>エフェクト適用後の画像</returns>
-        NImage Process(NImage image, ROI roi, double layerTime, IPropertyObject[] properties, bool useGpu);
+        NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, double layerTime, IPropertyObject[] properties, bool useGpu);
 
         /// <summary>
         /// 音声にエフェクトを適用します

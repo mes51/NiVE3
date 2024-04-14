@@ -207,7 +207,7 @@ namespace NiVE3.PresetPlugin.Renderer
                             trackMatteImage.Image,
                             (float)opacity,
                             trackMatteImage.BlendMode,
-                            Calc3DModelMatrix(trackMatteImage.Transform, trackMatteImage.ParentTransforms, Width, Height),
+                            Matrix4x4d.CreateScale(trackMatteImage.DownSampleRateX, trackMatteImage.DownSampleRateY, 1.0) * Calc3DModelMatrix(trackMatteImage.Transform, trackMatteImage.ParentTransforms, Width, Height),
                             (bool)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionIsCastShadowId] ?? false),
                             (float)((double)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionLightTransmissionId] ?? 0.0) * 0.01),
                             (bool)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionIsAcceptShadowId] ?? false),
@@ -226,7 +226,7 @@ namespace NiVE3.PresetPlugin.Renderer
                     {
                         var renderer = new MaskRender2D(result);
                         var downScale = Matrix3x3.CreateScale(1.0F / CurrentDownScaleRateX, 1.0F / CurrentDownScaleRateY);
-                        var matrix = CalcTransform2D(trackMatteImage.Transform, trackMatteImage.ParentTransforms) * downScale;
+                        var matrix = Matrix3x3.CreateScale(i.DownSampleRateX, i.DownSampleRateY) * CalcTransform2D(trackMatteImage.Transform, trackMatteImage.ParentTransforms) * downScale;
                         renderer.Draw(trackMatteImage.Image, (float)opacity, matrix, trackMatteImage.InterpolationQuality, null, i.TrackMatteMode.Value);
                     }
                     return result;
@@ -255,7 +255,7 @@ namespace NiVE3.PresetPlugin.Renderer
                             i.Image,
                             (float)opacity,
                             i.BlendMode,
-                            Calc3DModelMatrix(i.Transform, i.ParentTransforms, Width, Height),
+                            Matrix4x4d.CreateScale(i.DownSampleRateX, i.DownSampleRateY, 1.0) * Calc3DModelMatrix(i.Transform, i.ParentTransforms, Width, Height),
                             (bool)(i.LayerOptions?[ILayerObject.ImageLayerOptionIsCastShadowId] ?? false),
                             (float)((double)(i.LayerOptions?[ILayerObject.ImageLayerOptionLightTransmissionId] ?? 0.0) * 0.01),
                             (bool)(i.LayerOptions?[ILayerObject.ImageLayerOptionIsAcceptShadowId] ?? false),
@@ -296,7 +296,7 @@ namespace NiVE3.PresetPlugin.Renderer
 
             // TODO: ダウンサンプリング・ROIの反映
             var renderer = new Renderer2D(CurrentFrame);
-            var matrix = Matrix3x3.Identity.Translate((Width - roi.OriginalImageSize.Width) * 0.5F + roi.OriginalImagePosition.X, (Height - roi.OriginalImageSize.Height) * 0.5F + roi.OriginalImagePosition.Y);
+            var matrix = Matrix3x3.Identity.Translate((CurrentFrame.Width - roi.OriginalImageSize.Width) * 0.5F + roi.OriginalImagePosition.X, (CurrentFrame.Height - roi.OriginalImageSize.Height) * 0.5F + roi.OriginalImagePosition.Y);
             renderer.Draw(image, 1.0F, matrix, interpolationQuality, blendMode, null);
         }
 
@@ -354,7 +354,7 @@ namespace NiVE3.PresetPlugin.Renderer
                         trackMatteImage.Image,
                         (float)trackMatteOpacity,
                         trackMatteImage.BlendMode,
-                        Calc3DModelMatrix(trackMatteImage.Transform, trackMatteImage.ParentTransforms, Width, Height),
+                        Matrix4x4d.CreateScale(trackMatteImage.DownSampleRateX, trackMatteImage.DownSampleRateY, 1.0) * Calc3DModelMatrix(trackMatteImage.Transform, trackMatteImage.ParentTransforms, Width, Height),
                         (bool)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionIsCastShadowId] ?? false),
                         (float)((double)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionLightTransmissionId] ?? 0.0) * 0.01),
                         (bool)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionIsAcceptShadowId] ?? false),
@@ -372,7 +372,8 @@ namespace NiVE3.PresetPlugin.Renderer
                 else
                 {
                     var renderer = new MaskRender2D(trackMatte);
-                    var matrix = CalcTransform2D(trackMatteImage.Transform, trackMatteImage.ParentTransforms);
+                    var downScale = Matrix3x3.CreateScale(1.0F / CurrentDownScaleRateX, 1.0F / CurrentDownScaleRateY);
+                    var matrix = Matrix3x3.CreateScale(trackMatteImage.DownSampleRateX, trackMatteImage.DownSampleRateY) * CalcTransform2D(trackMatteImage.Transform, trackMatteImage.ParentTransforms) * downScale;
                     renderer.Draw(trackMatteImage.Image, (float)trackMatteOpacity, matrix, trackMatteImage.InterpolationQuality, null, image.TrackMatteMode.Value);
                 }
             }
@@ -389,7 +390,7 @@ namespace NiVE3.PresetPlugin.Renderer
                     image.Image,
                     (float)opacity,
                     image.BlendMode,
-                    Calc3DModelMatrix(image.Transform, image.ParentTransforms, Width, Height),
+                    Matrix4x4d.CreateScale(image.DownSampleRateX, image.DownSampleRateY, 1.0) * Calc3DModelMatrix(image.Transform, image.ParentTransforms, Width, Height),
                     (bool)(image.LayerOptions?[ILayerObject.ImageLayerOptionIsCastShadowId] ?? false),
                     (float)((double)(image.LayerOptions?[ILayerObject.ImageLayerOptionLightTransmissionId] ?? 0.0) * 0.01),
                     (bool)(image.LayerOptions?[ILayerObject.ImageLayerOptionIsAcceptShadowId] ?? false),
@@ -407,7 +408,8 @@ namespace NiVE3.PresetPlugin.Renderer
             else
             {
                 var renderer = new MaskRender2D(result);
-                var matrix = CalcTransform2D(image.Transform, image.ParentTransforms);
+                var downScale = Matrix3x3.CreateScale(1.0F / CurrentDownScaleRateX, 1.0F / CurrentDownScaleRateY);
+                var matrix = Matrix3x3.CreateScale(image.DownSampleRateX, image.DownSampleRateY) * CalcTransform2D(image.Transform, image.ParentTransforms) * downScale;
                 renderer.Draw(image.Image, (float)opacity, matrix, image.InterpolationQuality, trackMatte, TrackMatteMode.Alpha);
             }
 

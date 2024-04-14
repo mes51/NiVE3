@@ -117,8 +117,10 @@ namespace NiVE3.Input
 
         internal FloatColor Color { get; set; } = new FloatColor(0.0F, 0.0F, 1.0F, 1.0F);
 
-        public NImage ReadFrame(double time, bool toGpu)
+        public NImage ReadFrame(double time, double downSamplingRate, bool toGpu)
         {
+            var width = (int)(Width / downSamplingRate);
+            var height = (int)(Height / downSamplingRate);
             if (toGpu)
             {
                 // TODO
@@ -126,7 +128,7 @@ namespace NiVE3.Input
             }
             else
             {
-                var image = new NManagedImage(Width, Height, true);
+                var image = new NManagedImage(width, height, true);
                 image.GetDataSpan().Fill((Vector4)Color);
                 return image;
             }

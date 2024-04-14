@@ -491,15 +491,18 @@ namespace NiVE3.Model
             var sourceTime = layerTime;
 
             var sourceOptionProperties = (TextProperties ?? ShapeProperties ?? SourceOptionProperties)?.GetValues(sourceTime);
-            var image = FootageModel.ReadImage(sourceTime, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties, InterpolationQuality, useGpu);
+            var image = FootageModel.ReadImage(sourceTime, downSamplingRate, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties, InterpolationQuality, useGpu);
+            var originalImageSize = downSamplingRate != 1.0 ? FootageModel.CalcSize(time, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties) : new Int32Size(image.Width, image.Height);
             var roi = new ROI(new Int32Point(), new Int32Size(image.Width, image.Height), 0, 0, image.Width, image.Height);
 
+            var downSamplingRateX = originalImageSize.Width / (float)image.Width;
+            var downSamplingRateY = originalImageSize.Height / (float)image.Height;
             if (IsEnableEffect)
             {
                 // TODO: モジュラーエフェクト&ROI反映
                 foreach (var e in Effects.Where(e => !e.IsDummyEffect && e.IsEnable && e.SupportedSource.IsSupportedSource(SourceType)))
                 {
-                    image = e.ProcessImage(image, roi, layerTime, useGpu);
+                    image = e.ProcessImage(image, roi, downSamplingRateX, downSamplingRateY, layerTime, useGpu);
                 }
             }
 
@@ -513,8 +516,8 @@ namespace NiVE3.Model
             return new RenderableImage(
                 image,
                 roi,
-                1.0F,
-                1.0F,
+                downSamplingRateX,
+                downSamplingRateY,
                 IsEnableMotionBlur,
                 IsEnable3D,
                 InterpolationQuality,
@@ -545,7 +548,8 @@ namespace NiVE3.Model
             var sourceTime = layerTime;
 
             var sourceOptionProperties = (TextProperties ?? ShapeProperties ?? SourceOptionProperties)?.GetValues(sourceTime);
-            var image = FootageModel.ReadImage(sourceTime, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties, InterpolationQuality, useGpu);
+            var image = FootageModel.ReadImage(sourceTime, downSamplingRate, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties, InterpolationQuality, useGpu);
+            var originalImageSize = downSamplingRate != 1.0 ? FootageModel.CalcSize(time, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties) : new Int32Size(image.Width, image.Height);
             var roi = new ROI(new Int32Point(), new Int32Size(image.Width, image.Height), 0, 0, image.Width, image.Height);
 
             RenderableImage? trackMatteImage = null;
@@ -558,8 +562,8 @@ namespace NiVE3.Model
             return new RenderableImage(
                 image,
                 roi,
-                1.0F,
-                1.0F,
+                originalImageSize.Width / (float)image.Width,
+                originalImageSize.Height / (float)image.Height,
                 IsEnableMotionBlur,
                 IsEnable3D,
                 InterpolationQuality,
@@ -572,7 +576,7 @@ namespace NiVE3.Model
             );
         }
 
-        public (ROI, NImage) ProcessAdjustment(double time, double downSamplingRate, NImage currentFrame, bool useGpu)
+        public (ROI, NImage) ProcessAdjustment(double time, NImage currentFrame, double downSamplingRateX, double downSamplingRateY, bool useGpu)
         {
             var layerTime = time - SourceStartPoint;
             var roi = new ROI(new Int32Point(), new Int32Size(currentFrame.Width, currentFrame.Height), 0, 0, currentFrame.Width, currentFrame.Height);
@@ -582,7 +586,7 @@ namespace NiVE3.Model
                 // TODO: モジュラーエフェクト&ROI反映
                 foreach (var e in Effects.Where(e => !e.IsDummyEffect && e.IsEnable))
                 {
-                    currentFrame = e.ProcessImage(currentFrame, roi, layerTime, useGpu);
+                    currentFrame = e.ProcessImage(currentFrame, roi, downSamplingRateX, downSamplingRateY, layerTime, useGpu);
                 }
             }
 
