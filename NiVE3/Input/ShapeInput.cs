@@ -443,7 +443,6 @@ namespace NiVE3.Input
             {
                 Origin = -new Vector2d(minX, minY)
             };
-            image.GetDataSpan().Fill(new Vector4(1.0F, 0.0F, 0.0F, 1.0F));
 
             foreach (var (brush, fillRule, blendMode, path) in drawable)
             {
