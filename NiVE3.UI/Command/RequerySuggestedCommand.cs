@@ -5,16 +5,16 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
-namespace NiVE3.View.Command
+namespace NiVE3.UI.Command
 {
-    class RequerySuggestedCommand : RequerySuggestedCommandBase
+    public class RequerySuggestedCommand : RequerySuggestedCommandBase
     {
         public RequerySuggestedCommand(Action func) : this(func, () => true) { }
 
         public RequerySuggestedCommand(Action func, Func<bool> canExecuteFunc) : base((_) => func(), (_) => canExecuteFunc()) { }
     }
 
-    class RequerySuggestedCommand<T> : RequerySuggestedCommandBase
+    public class RequerySuggestedCommand<T> : RequerySuggestedCommandBase
     {
         public RequerySuggestedCommand(Action<T> func) : this(func, (_) => true) { }
 
@@ -47,7 +47,7 @@ namespace NiVE3.View.Command
         }
     }
 
-    abstract class RequerySuggestedCommandBase : ICommand
+    public abstract class RequerySuggestedCommandBase : ICommand
     {
         public RequerySuggestedCommandBase(Action<object?> func) : this(func, (_) => true) { }
 

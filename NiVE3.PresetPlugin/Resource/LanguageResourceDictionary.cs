@@ -6,36 +6,39 @@ using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Plugin.Resource;
 using NiVE3.SourceGenerator.LanguageResourceGenerator;
+using NiVE3.SourceGenerator.ResourceMarkupGenerator;
 
 namespace NiVE3.PresetPlugin.Resource
 {
-    [HasLanguageKey]
+    [MarkupableResourceDictionary, HasLanguageKey]
     partial class LanguageResourceDictionary : LanguageResourceDictionaryBase
     {
         static Dictionary<string, Tuple<string, Version>> LanguageKeys { get; }
 
-        [LanguageKey, DefaultValue("ポイント制御")]
+        // Effects
+
+        [DefaultValue("ポイント制御")]
         public const string ExpressionControl_PointControl_Name = nameof(ExpressionControl_PointControl_Name);
+
+        [DefaultValue("エクスプレッションで使用するポイント制御")]
+        public const string ExpressionControl_PointControl_Description = nameof(ExpressionControl_PointControl_Description);
 
         [LanguageKey, DefaultValue("ポイント")]
         public const string ExpressionControl_PointControl_PropertyName = nameof(ExpressionControl_PointControl_PropertyName);
 
-        [LanguageKey, DefaultValue("エクスプレッションで使用するポイント制御")]
-        public const string ExpressionControl_PointControl_Description = nameof(ExpressionControl_PointControl_Description);
-
-        [LanguageKey, DefaultValue("スライダー制御")]
+        [DefaultValue("スライダー制御")]
         public const string ExpressionControl_SliderControl_Name = nameof(ExpressionControl_SliderControl_Name);
+
+        [DefaultValue("エクスプレッションで使用するスライダー制御")]
+        public const string ExpressionControl_SliderControl_Description = nameof(ExpressionControl_SliderControl_Description);
 
         [LanguageKey, DefaultValue("スライダー")]
         public const string ExpressionControl_SliderControl_PropertyName = nameof(ExpressionControl_SliderControl_PropertyName);
 
-        [LanguageKey, DefaultValue("エクスプレッションで使用するスライダー制御")]
-        public const string ExpressionControl_SliderControl_Description = nameof(ExpressionControl_SliderControl_Description);
-
-        [LanguageKey, DefaultValue("ボックスブラー")]
+        [DefaultValue("ボックスブラー")]
         public const string Blur_BoxBlur_Name = nameof(Blur_BoxBlur_Name);
 
-        [LanguageKey, DefaultValue("ボックスブラーを適用します")]
+        [DefaultValue("ボックスブラーを適用します")]
         public const string Blur_BoxBlur_Description = nameof(Blur_BoxBlur_Description);
 
         [LanguageKey, DefaultValue("半径")]
@@ -47,10 +50,10 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("方向")]
         public const string Blur_BoxBlur_Direction = nameof(Blur_BoxBlur_Direction);
 
-        [LanguageKey, DefaultValue("ダイナミクス")]
+        [DefaultValue("ダイナミクス")]
         public const string Audio_Dynamics_Name = nameof(Audio_Dynamics_Name);
 
-        [LanguageKey, DefaultValue("音声のダイナミクスを操作します")]
+        [DefaultValue("音声のダイナミクスを操作します")]
         public const string Audio_Dynamics_Description = nameof(Audio_Dynamics_Description);
 
         [LanguageKey, DefaultValue("タイプ")]
@@ -71,16 +74,10 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("リリース")]
         public const string Audio_Dynamics_Release = nameof(Audio_Dynamics_Release);
 
-        [LanguageKey, DefaultValue("デフォルトレンダラ")]
-        public const string Renderer_DefaultRenderer_Name = nameof(Renderer_DefaultRenderer_Name);
-
-        [LanguageKey, DefaultValue("NiVE標準のレンダラ")]
-        public const string Renderer_DefaultRenderer_Description = nameof(Renderer_DefaultRenderer_Description);
-
-        [LanguageKey, DefaultValue("パラメトリックイコライザ")]
+        [DefaultValue("パラメトリックイコライザ")]
         public const string Audio_ParametricEqualizer_Name = nameof(Audio_ParametricEqualizer_Name);
 
-        [LanguageKey, DefaultValue("音声にイコライザを適用します")]
+        [DefaultValue("音声にイコライザを適用します")]
         public const string Audio_ParametricEqualizer_Description = nameof(Audio_ParametricEqualizer_Description);
 
         [LanguageKey, DefaultValue("バンド")]
@@ -110,6 +107,52 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("ゲイン")]
         public const string Audio_ParametricEqualizer_Gain = nameof(Audio_ParametricEqualizer_Gain);
 
+        // Renderers
+
+        [DefaultValue("デフォルトレンダラ")]
+        public const string Renderer_DefaultRenderer_Name = nameof(Renderer_DefaultRenderer_Name);
+
+        [DefaultValue("NiVE標準のレンダラ")]
+        public const string Renderer_DefaultRenderer_Description = nameof(Renderer_DefaultRenderer_Description);
+
+        // Outputs
+
+        [DefaultValue("AVI出力")]
+        public const string AviOutput_Name = nameof(AviOutput_Name);
+
+        [DefaultValue("動画をAVIで出力します")]
+        public const string AviOutput_Description = nameof(AviOutput_Description);
+
+        [ShowInMarkup, DefaultValue("ビデオ出力")]
+        public const string AviOutputSettingView_Group_Video = nameof(AviOutputSettingView_Group_Video);
+
+        [ShowInMarkup, DefaultValue("チャンネル:")]
+        public const string AviOutputSettingView_Group_Video_OutputChannel = nameof(AviOutputSettingView_Group_Video_OutputChannel);
+
+        [ShowInMarkup, DefaultValue("コーデック:")]
+        public const string AviOutputSettingView_Group_Video_Codec = nameof(AviOutputSettingView_Group_Video_Codec);
+
+        [ShowInMarkup, DefaultValue("品質")]
+        public const string AviOutputSettingView_Group_Video_Quality = nameof(AviOutputSettingView_Group_Video_Quality);
+
+        [ShowInMarkup, DefaultValue("キーフレーム")]
+        public const string AviOutputSettingView_Group_Video_KeyFrame = nameof(AviOutputSettingView_Group_Video_KeyFrame);
+
+        [ShowInMarkup, DefaultValue("キーフレームを使用する")]
+        public const string AviOutputSettingView_Group_Video_KeyFrame_UseKeyFrame = nameof(AviOutputSettingView_Group_Video_KeyFrame_UseKeyFrame);
+
+        [ShowInMarkup, DefaultValue("コーデックの設定")]
+        public const string AviOutputSettingView_Group_Video_ConfigureCodec = nameof(AviOutputSettingView_Group_Video_ConfigureCodec);
+
+        [ShowInMarkup, DefaultValue("オーディオ出力")]
+        public const string AviOutputSettingView_Group_Audio = nameof(AviOutputSettingView_Group_Audio);
+
+        [ShowInMarkup, DefaultValue("サンプリングレート:")]
+        public const string AviOutputSettingView_Group_Audio_SamplingRate = nameof(AviOutputSettingView_Group_Audio_SamplingRate);
+
+        [ShowInMarkup, DefaultValue("ビット:")]
+        public const string AviOutputSettingView_Group_Audio_BitsPerSample = nameof(AviOutputSettingView_Group_Audio_BitsPerSample);
+
         // enum
 
         [DefaultValue("水平&垂直")]
@@ -132,6 +175,15 @@ namespace NiVE3.PresetPlugin.Resource
 
         [DefaultValue("ノイズゲート")]
         public const string DynamicsMode_NoiseGate = nameof(DynamicsMode_NoiseGate);
+
+        [DefaultValue("RGB")]
+        public const string OutputChannel_Rgb = nameof(OutputChannel_Rgb);
+
+        [DefaultValue("RGBA")]
+        public const string OutputChannel_Rgba = nameof(OutputChannel_Rgba);
+
+        [DefaultValue("アルファのみ")]
+        public const string OutputChannel_AlphaOnly = nameof(OutputChannel_AlphaOnly);
 
         // unit
 

@@ -17,6 +17,7 @@ using NiVE3.Mvvm;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Property;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
+using NiVE3.UI.Command;
 using NiVE3.View.Command;
 using NiVE3.View.Dock;
 using NiVE3.View.Part;

@@ -16,9 +16,9 @@ using NiVE3.Mvvm;
 using NiVE3.Image;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
-using NiVE3.View.Command;
 using Prism.Commands;
 using Prism.Mvvm;
+using NiVE3.UI.Command;
 
 namespace NiVE3.ViewModel
 {

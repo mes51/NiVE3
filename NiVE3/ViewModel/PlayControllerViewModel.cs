@@ -6,15 +6,10 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using NiVE3.Model;
-using NiVE3.Util;
-using NiVE3.View.Command;
 using NiVE3.View.Dock;
 using NiVE3.View.Resource;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
-using Prism.Commands;
-using Prism.Mvvm;
-using System.ComponentModel;
-using NiVE3.Mvvm;
+using NiVE3.UI.Command;
 
 namespace NiVE3.ViewModel
 {

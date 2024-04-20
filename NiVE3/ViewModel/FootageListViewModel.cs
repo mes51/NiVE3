@@ -11,6 +11,7 @@ using GongSolutions.Wpf.DragDrop;
 using NiVE3.Config;
 using NiVE3.Model;
 using NiVE3.Mvvm;
+using NiVE3.UI.Command;
 using NiVE3.View.Command;
 using NiVE3.View.Dialog;
 using NiVE3.View.Dock;

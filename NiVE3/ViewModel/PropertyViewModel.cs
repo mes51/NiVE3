@@ -16,7 +16,7 @@ using NiVE3.Plugin.Property;
 using NiVE3.Plugin.Property.Control;
 using NiVE3.Shared.Extension;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
-using NiVE3.View.Command;
+using NiVE3.UI.Command;
 using NiVE3.View.Primitive;
 using Prism.Commands;
 using Prism.Mvvm;

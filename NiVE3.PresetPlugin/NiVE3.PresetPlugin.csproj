@@ -3,13 +3,18 @@
   <PropertyGroup>
     <TargetFramework>net8.0-windows7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
+	<UseWPF>True</UseWPF>
     <Nullable>enable</Nullable>
 	  <IsPublishable>True</IsPublishable>
 	  <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+	  <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="HG.NWaves" Version="0.9.6" />
+    <PackageReference Include="NAudio.Core" Version="2.2.1" />
+    <PackageReference Include="Vanara.PInvoke.Gdi32" Version="4.0.0" />
+    <PackageReference Include="Vanara.PInvoke.Multimedia" Version="4.0.0" />
     <PackageReference Include="Vortice.Direct3D11" Version="3.5.0" />
     <PackageReference Include="Vortice.MediaFoundation" Version="3.5.0" />
   </ItemGroup>
@@ -19,7 +24,9 @@
     <ProjectReference Include="..\NiVE3.Numerics\NiVE3.Numerics.csproj" />
     <ProjectReference Include="..\NiVE3.Plugin\NiVE3.Plugin.csproj" />
     <ProjectReference Include="..\NiVE3.Shared\NiVE3.Shared.csproj" />
+	  <ProjectReference Include="..\NiVE3.SourceGenerator.ResourceMarkupGenerator\NiVE3.SourceGenerator.ResourceMarkupGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
 	  <ProjectReference Include="..\NiVE3.SourceGenerator.LanguageResourceGenerator\NiVE3.SourceGenerator.LanguageResourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+	  <ProjectReference Include="..\SharpAvi\SharpAvi\SharpAvi.csproj" />
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">

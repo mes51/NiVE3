@@ -14,6 +14,7 @@ using NiVE3.Data;
 using NiVE3.Image;
 using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Interfaces;
+using NiVE3.Plugin.ValueObject;
 using NiVE3.View.Input;
 using NiVE3.ViewModel.Input;
 
@@ -74,7 +75,7 @@ namespace NiVE3.Input
             return true;
         }
 
-        public FrameworkElement? GetLoadSetting(Size? compositionSize)
+        public FrameworkElement? GetLoadSetting(Int32Size? compositionSize)
         {
             return new SolidSettingView { DataContext = new SolidSettingViewModel() };
         }

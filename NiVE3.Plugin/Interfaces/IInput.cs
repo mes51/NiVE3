@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using NiVE3.Image;
+using NiVE3.Plugin.ValueObject;
 
 namespace NiVE3.Plugin.Interfaces
 {
@@ -50,7 +51,7 @@ namespace NiVE3.Plugin.Interfaces
         /// </summary>
         /// <param name="compositionSize">現在開いているコンポジションのサイズ。開いていない場合はnull。</param>
         /// <returns>入力プラグインの設定画面のView。ファイルによって設定画面が存在しない場合はnull</returns>
-        FrameworkElement? GetLoadSetting(Size? compositionSize) => null;
+        FrameworkElement? GetLoadSetting(Int32Size? compositionSize) => null;
 
         /// <summary>
         /// 入力プラグインの読み込み時の設定を適用します。

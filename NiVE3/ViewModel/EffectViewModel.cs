@@ -9,7 +9,7 @@ using NiVE3.Model;
 using NiVE3.Mvvm;
 using System.Windows.Input;
 using Prism.Commands;
-using NiVE3.View.Command;
+using NiVE3.UI.Command;
 
 namespace NiVE3.ViewModel
 {
