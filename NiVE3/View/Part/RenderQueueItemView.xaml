@@ -25,7 +25,7 @@
         </Style>
     </UserControl.Resources>
     <Expander Header="{Binding CompositionName}" IsExpanded="{Binding IsExpanded}" d:IsExpanded="True">
-        <StackPanel Orientation="Vertical">
+        <StackPanel Orientation="Vertical" IsEnabled="{Binding IsEditable}">
             <UniformGrid Columns="2">
                 <Grid VerticalAlignment="Center" Margin="5.0">
                     <Grid.ColumnDefinitions>

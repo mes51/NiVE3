@@ -153,6 +153,13 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref renderRangeEndStart, value); }
         }
 
+        private bool isEditable;
+        public bool IsEditable
+        {
+            get { return isEditable; }
+            set { SetProperty(ref isEditable, value); }
+        }
+
         public ICommand ChangeSaveFilePathCommand { get; }
 
         public ICommand OpenOutputSettingCommand { get; }
@@ -165,8 +172,6 @@ namespace NiVE3.ViewModel
         {
             RenderQueueItemModel = renderQueueItemModel;
             DialogService = dialogService;
-
-            WiringModel();
 
             ChangeSaveFilePathCommand = new RequerySuggestedCommand(() =>
             {
@@ -198,9 +203,13 @@ namespace NiVE3.ViewModel
                 }
             }, () => (State == RenderQueueItemState.Ready || State == RenderQueueItemState.NotReady) && HasOutputSetting);
 
+            WiringModel();
+
             PropertyChanged += RenderQueueItemViewModel_PropertyChanged;
 
             RenderRangeBeginLimit = EndTime - FrameDuration;
+            RenderRangeEndStart = BeginTime + FrameDuration;
+            IsEditable = State == RenderQueueItemState.NotReady || State == RenderQueueItemState.Ready;
         }
 
         private void RenderQueueItemViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -223,6 +232,9 @@ namespace NiVE3.ViewModel
                 case nameof(UseRenderQueueItemTimeRange) when !UseRenderQueueItemTimeRange:
                     BeginTime = 0;
                     EndTime = CompositionDuration;
+                    break;
+                case nameof(State):
+                    IsEditable = State == RenderQueueItemState.NotReady || State == RenderQueueItemState.Ready;
                     break;
             }
         }
