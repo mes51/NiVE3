@@ -12,6 +12,9 @@ using System.Windows.Input;
 using Prism.Commands;
 using Microsoft.Win32;
 using NiVE3.UI.Command;
+using Prism.Services.Dialogs;
+using NiVE3.ViewModel.Dialog;
+using NiVE3.View.Dialog;
 
 namespace NiVE3.ViewModel
 {
@@ -156,9 +159,12 @@ namespace NiVE3.ViewModel
 
         RenderQueueItemModel RenderQueueItemModel { get; }
 
-        public RenderQueueItemViewModel(RenderQueueItemModel renderQueueItemModel)
+        IDialogService DialogService { get; }
+
+        public RenderQueueItemViewModel(RenderQueueItemModel renderQueueItemModel, IDialogService dialogService)
         {
             RenderQueueItemModel = renderQueueItemModel;
+            DialogService = dialogService;
 
             WiringModel();
 
@@ -174,7 +180,22 @@ namespace NiVE3.ViewModel
 
             OpenOutputSettingCommand = new RequerySuggestedCommand(() =>
             {
+                var view = RenderQueueItemModel.GetSettingView();
+                if (view == null)
+                {
+                    return;
+                }
 
+                var param = new DialogParameters
+                {
+                    { nameof(OutputSettingViewModel.SettingView), view }
+                };
+                IDialogResult? result = null;
+                DialogService.ShowDialog(nameof(InputSettingView), param, r => result = r);
+                if (result?.Result == ButtonResult.OK)
+                {
+                    RenderQueueItemModel.ApplyOutputSetting(view.DataContext);
+                }
             }, () => (State == RenderQueueItemState.Ready || State == RenderQueueItemState.NotReady) && HasOutputSetting);
 
             PropertyChanged += RenderQueueItemViewModel_PropertyChanged;

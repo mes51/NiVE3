@@ -9,7 +9,7 @@
              xmlns:r="clr-namespace:NiVE3.View.Resource"
              xmlns:cv="clr-namespace:NiVE3.View.Converter"
              xmlns:vm="clr-namespace:NiVE3.ViewModel"
-             xmlns:mk="clr-namespace:NiVE3.Wpf.Markup"
+             xmlns:mk="clr-namespace:NiVE3.Shared.Wpf.Markup;assembly=NiVE3.Shared"
              xmlns:pl="clr-namespace:NiVE3.Plugin.Interfaces;assembly=NiVE3.Plugin"
              xmlns:vo="clr-namespace:NiVE3.ValueObject"
              xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"

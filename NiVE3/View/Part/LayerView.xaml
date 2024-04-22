@@ -16,6 +16,7 @@
              xmlns:pi="clr-namespace:NiVE3.Plugin.Interfaces;assembly=NiVE3.Plugin"
              xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
              xmlns:mk="clr-namespace:NiVE3.Wpf.Markup"
+             xmlns:smk="clr-namespace:NiVE3.Shared.Wpf.Markup;assembly=NiVE3.Shared"
              xmlns:vm="clr-namespace:NiVE3.ViewModel"
              xmlns:dd="urn:gong-wpf-dragdrop"
              mc:Ignorable="d" 
@@ -609,7 +610,7 @@
             </Grid>
 
             <Grid Grid.Column="7" Grid.Row="0" Style="{StaticResource ColumnGrid}">
-                <upr:ContextMenuSelectBox x:Name="BlendModeSelectBox" SelectedItem="{Binding BlendMode, Mode=OneWay}" ItemsSource="{mk:EnumValues EnumType={x:Type dr:BlendMode}}" Style="{StaticResource BlendModeSelectBoxStyle}" SelectItemChangedByUser="BlendModeSelectBox_SelectItemChangedByUser" dd:DragDrop.DragSourceIgnore="True"/>
+                <upr:ContextMenuSelectBox x:Name="BlendModeSelectBox" SelectedItem="{Binding BlendMode, Mode=OneWay}" ItemsSource="{smk:EnumValues EnumType={x:Type dr:BlendMode}}" Style="{StaticResource BlendModeSelectBoxStyle}" SelectItemChangedByUser="BlendModeSelectBox_SelectItemChangedByUser" dd:DragDrop.DragSourceIgnore="True"/>
             </Grid>
 
             <Grid Grid.Column="8" Grid.Row="0" Style="{StaticResource ColumnGrid}">
@@ -619,7 +620,7 @@
                 </Grid.ColumnDefinitions>
 
                 <upr:ContextMenuSelectBox Grid.Column="0" x:Name="TrackMatteSelectBox" SelectedItem="{Binding TrackMatteLayerProxy, Mode=OneWay}" ItemsSource="{StaticResource TrackMatteLayerCollection}" Style="{StaticResource TrackMatteSelectBoxStyle}" SelectItemChangedByUser="TrackMatteSelectBox_SelectItemChangedByUser" dd:DragDrop.DragSourceIgnore="True"/>
-                <upr:ContextMenuSelectBox Grid.Column="1" x:Name="TrackMatteModeSelectBox" SelectedItem="{Binding TrackMatteMode, Mode=OneWay}" ItemsSource="{mk:EnumValues EnumType={x:Type pi:TrackMatteMode}}" Style="{StaticResource TrackMatteModeSelectBoxStyle}" SelectItemChangedByUser="TrackMatteModeSelectBox_SelectItemChangedByUser" dd:DragDrop.DragSourceIgnore="True"/>
+                <upr:ContextMenuSelectBox Grid.Column="1" x:Name="TrackMatteModeSelectBox" SelectedItem="{Binding TrackMatteMode, Mode=OneWay}" ItemsSource="{smk:EnumValues EnumType={x:Type pi:TrackMatteMode}}" Style="{StaticResource TrackMatteModeSelectBoxStyle}" SelectItemChangedByUser="TrackMatteModeSelectBox_SelectItemChangedByUser" dd:DragDrop.DragSourceIgnore="True"/>
             </Grid>
 
             <Grid Grid.Column="9" Grid.Row="0" Style="{StaticResource ColumnGrid}">

@@ -11,7 +11,7 @@
              xmlns:upr="clr-namespace:NiVE3.UI.Primitive;assembly=NiVE3.UI"
              xmlns:ugm="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
              xmlns:cv="clr-namespace:NiVE3.View.Converter"
-             xmlns:mk="clr-namespace:NiVE3.Wpf.Markup"
+             xmlns:mk="clr-namespace:NiVE3.Shared.Wpf.Markup;assembly=NiVE3.Shared"
              xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">

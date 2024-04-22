@@ -53,8 +53,8 @@ namespace NiVE3.PresetPlugin.Output
                 Codec = string.IsNullOrEmpty(Setting?.Codec) ? new FourCC(0) : new FourCC(Setting.Codec),
                 OutputChannel = (OutputChannel)(Setting?.OutputChannel ?? 0),
                 CodecState = Setting?.State,
-                AudioSamplingRate = Setting?.AudioSamplingRate ?? 0,
-                AudioBitsPerSample = Setting?.AudioBitsPerSample ?? 0
+                AudioSamplingRate = Setting?.AudioSamplingRate ?? 48000,
+                AudioBitsPerSample = Setting?.AudioBitsPerSample ?? 32
             };
             return new AviOutputSettingView { DataContext = viewModel };
         }
@@ -96,7 +96,7 @@ namespace NiVE3.PresetPlugin.Output
             return false;
         }
 
-        public bool ApplyLoadSetting(object? setting)
+        public bool ApplyOutputSetting(object? setting)
         {
             if (setting is not AviOutputSettingViewModel viewModel)
             {
@@ -108,13 +108,13 @@ namespace NiVE3.PresetPlugin.Output
                 UseKeyFrameRate = viewModel.UseKeyFrameRate,
                 KeyFrameRate = viewModel.KeyFrameRate,
                 Quality = viewModel.Quality,
-                Codec = viewModel.Codec.ToString(),
+                Codec = viewModel.Codec == 0 ? "" : viewModel.Codec.ToString(),
                 OutputChannel = (int)viewModel.OutputChannel,
                 State = viewModel.CodecState,
                 AudioSamplingRate = viewModel.AudioSamplingRate,
                 AudioBitsPerSample = viewModel.AudioBitsPerSample
             };
-            return false;
+            return true;
         }
 
         public string ProcessOutputFilePath(string baseFilePath)

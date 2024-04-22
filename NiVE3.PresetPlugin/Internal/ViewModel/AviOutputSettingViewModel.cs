@@ -5,7 +5,9 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
+using System.Windows.Interop;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.PresetPlugin.Internal.Encoder;
 using NiVE3.PresetPlugin.Internal.Mvvm;
@@ -16,7 +18,7 @@ using SharpAvi;
 
 namespace NiVE3.PresetPlugin.Internal.ViewModel
 {
-    class AviOutputSettingViewModel : BindableBase, IDisposable
+    class AviOutputSettingViewModel : BindableBase
     {
         private bool supportQuality;
         public bool SupportQuality
@@ -121,8 +123,6 @@ namespace NiVE3.PresetPlugin.Internal.ViewModel
 
         int Height { get; }
 
-        CompressorConfigurator? Configurator { get; set; }
-
         public AviOutputSettingViewModel(int width, int height, SourceType outputSources)
         {
             Width = width;
@@ -131,9 +131,18 @@ namespace NiVE3.PresetPlugin.Internal.ViewModel
             HasAudio = outputSources.HasFlag(SourceType.Audio);
             UpdateCodecList();
 
-            OpenCodecConfigureCommand = new RequerySuggestedCommand(() =>
+            OpenCodecConfigureCommand = new RequerySuggestedCommand<DependencyObject>(ui =>
             {
-            }, () => Configurator?.HasConfigure ?? false);
+                var codec = CodecList[SelectedCodecIndex].Item1;
+                using var configurator = new CompressorConfigurator(codec, Width, Height, outputChannel.ToBitsPerPixel());
+                var ownerWindow = Window.GetWindow(ui);
+                if (CodecState != null)
+                {
+                    configurator.SetState(CodecState);
+                }
+                configurator.OpenConfig(new WindowInteropHelper(ownerWindow).Handle);
+                CodecState = configurator.GetState();
+            }, _ => HasConfigure);
 
             PropertyChanged += AviOutputSettingViewModel_PropertyChanged;
         }
@@ -147,19 +156,22 @@ namespace NiVE3.PresetPlugin.Internal.ViewModel
                 case nameof(SelectedCodecIndex):
                     {
                         var codec = CodecList[SelectedCodecIndex].Item1;
-                        Configurator?.Dispose();
                         if (codec == 0)
                         {
-                            Configurator = null;
+                            CodecState = null;
+                            SupportQuality = false;
+                            SupportKeyFrameRate = false;
+                            KeyFrameRate = 1;
+                            HasConfigure = false;
                         }
                         else
                         {
-                            Configurator = new CompressorConfigurator(codec, Width, Height, outputChannel.ToBitsPerPixel());
+                            using var configurator = new CompressorConfigurator(codec, Width, Height, outputChannel.ToBitsPerPixel());
                             CodecState = null;
-                            SupportQuality = Configurator.SupportQuality;
-                            SupportKeyFrameRate = Configurator.SupportKeyFrameRate;
-                            KeyFrameRate = Configurator.DefaultKeyFrameRate;
-                            HasConfigure = Configurator.HasConfigure;
+                            SupportQuality = configurator.SupportQuality;
+                            SupportKeyFrameRate = configurator.SupportKeyFrameRate;
+                            KeyFrameRate = configurator.DefaultKeyFrameRate;
+                            HasConfigure = configurator.HasConfigure;
                         }
                     }
                     break;
@@ -173,7 +185,7 @@ namespace NiVE3.PresetPlugin.Internal.ViewModel
                 return;
             }
 
-            var selectedCodec = CodecList[SelectedCodecIndex].Item1;
+            var selectedCodec = CodecList.Count > 0 ? CodecList[SelectedCodecIndex].Item1 : new FourCC(0);
             CodecList.Clear();
 
             var bpc = OutputChannel.ToBitsPerPixel();
@@ -183,16 +195,6 @@ namespace NiVE3.PresetPlugin.Internal.ViewModel
             }
 
             SelectedCodecIndex = Math.Max(CodecList.IndexOf(t => t.Item1 == selectedCodec), 0);
-        }
-
-        public void Dispose()
-        {
-            Configurator?.Dispose();
-        }
-
-        ~AviOutputSettingViewModel()
-        {
-            Dispose();
         }
     }
 }

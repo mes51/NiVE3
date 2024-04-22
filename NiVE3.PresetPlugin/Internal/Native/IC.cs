@@ -19,13 +19,13 @@ namespace NiVE3.PresetPlugin.Internal.Native
 
         public static bool CompressFramesInfo(HIC hic, ICCOMPRESSFRAMES compressFrames)
         {
-            return ICSendMessage(hic, ICM_Message.ICM_COMPRESS_FRAMES_INFO, compressFrames).ToInt32() == (int)ICERR.ICERR_OK;
+            return ICSendMessage(hic, ICM_Message.ICM_COMPRESS_FRAMES_INFO, compressFrames) == (nint)ICERR.ICERR_OK;
         }
 
         public static bool CompressBegin(HIC hic, in BITMAPINFOHEADER inputBitmapInfoHeader, nint outputBitmapInfoHeader)
         {
             using var ibihPtr = AllocatedNativeMemory.FromStruct(inputBitmapInfoHeader);
-            return ICSendMessage(hic, ICM_Message.ICM_COMPRESS_BEGIN, ibihPtr, outputBitmapInfoHeader).ToInt32() == (int)ICERR.ICERR_OK;
+            return ICSendMessage(hic, ICM_Message.ICM_COMPRESS_BEGIN, ibihPtr, outputBitmapInfoHeader) == (nint)ICERR.ICERR_OK;
         }
 
         public static void CompressEnd(HIC hic)
@@ -35,14 +35,14 @@ namespace NiVE3.PresetPlugin.Internal.Native
 
         public static AllocatedNativeMemory GetFormat(HIC hic, BITMAPINFOHEADER inputBitmapInfoHeader)
         {
-            var size = ICSendMessage(hic, ICM_Message.ICM_COMPRESS_GET_FORMAT, inputBitmapInfoHeader).ToInt32();
+            using var ibihPtr = AllocatedNativeMemory.FromStruct(inputBitmapInfoHeader);
+            var size = ICSendMessage(hic, ICM_Message.ICM_COMPRESS_GET_FORMAT, ibihPtr, 0).ToInt32();
             if (size < 1)
             {
                 return AllocatedNativeMemory.Null;
             }
 
             var globalMem = new AllocatedNativeMemory(size);
-            using var ibihPtr = AllocatedNativeMemory.FromStruct(inputBitmapInfoHeader);
             ICSendMessage(hic, ICM_Message.ICM_COMPRESS_GET_FORMAT, ibihPtr, globalMem);
 
             return globalMem;
@@ -51,7 +51,7 @@ namespace NiVE3.PresetPlugin.Internal.Native
         public static bool CompressQuery(HIC hic, in BITMAPINFOHEADER inputBitmapInfoHeader, nint outputBitmapInfoHeader)
         {
             using var ibihPtr = AllocatedNativeMemory.FromStruct(inputBitmapInfoHeader);
-            return ICSendMessage(hic, (uint)ICM_Message.ICM_COMPRESS_QUERY, ibihPtr, outputBitmapInfoHeader).ToInt32() == (int)ICERR.ICERR_OK;
+            return ICSendMessage(hic, (uint)ICM_Message.ICM_COMPRESS_QUERY, ibihPtr, outputBitmapInfoHeader) == (nint)ICERR.ICERR_OK;
         }
 
         public static int ICCompressGetSize(HIC hic, in BITMAPINFOHEADER inputBitmapInfoHeader, nint outputBitmapInfoHeader)
@@ -75,18 +75,18 @@ namespace NiVE3.PresetPlugin.Internal.Native
 
         public static bool QueryConfigure(HIC hic)
         {
-            return ICSendMessage(hic, ICM_Message.ICM_CONFIGURE, -1).ToInt32() == (int)ICERR.ICERR_OK;
+            return ICSendMessage(hic, ICM_Message.ICM_CONFIGURE, -1) == (nint)ICERR.ICERR_OK;
         }
 
         public static void Configure(HIC hic, nint hwnd)
         {
-            ICSendMessage(hic, ICM_Message.ICM_CONFIGURE, hwnd);
+            ICSendMessage(hic, ICM_Message.ICM_CONFIGURE, hwnd, 0);
         }
 
         public static bool GetDefaultKeyFrameRate(HIC hic, out int keyFrameRate)
         {
             using var store = new AllocatedNativeMemory(sizeof(int));
-            if (ICSendMessage(hic, ICM_Message.ICM_GETDEFAULTKEYFRAMERATE, store, store.Size).ToInt32() == (int)ICERR.ICERR_OK)
+            if (ICSendMessage(hic, ICM_Message.ICM_GETDEFAULTKEYFRAMERATE, store, store.Size) == (nint)ICERR.ICERR_OK)
             {
                 keyFrameRate = store.ToStruct<int>();
                 return true;

@@ -11,6 +11,7 @@ using NiVE3.SourceGenerator.ViewModelWireGenerator;
 using NiVE3.UI.Command;
 using NiVE3.View.Dock;
 using NiVE3.View.Resource;
+using Prism.Services.Dialogs;
 
 namespace NiVE3.ViewModel
 {
@@ -39,14 +40,14 @@ namespace NiVE3.ViewModel
         RenderQueueModel RenderQueueModel { get; }
 
 #pragma warning disable CS8618 // 各フィールドには初期化時に必ず値を代入するため無視
-        public RenderQueueViewModel(RenderQueueModel renderQueueModel)
+        public RenderQueueViewModel(RenderQueueModel renderQueueModel, IDialogService dialogService)
 #pragma warning restore CS8618
         {
             Title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.RenderQueueView_Title);
             Visibility = Visibility.Collapsed;
 
             RenderQueueModel = renderQueueModel;
-            Queue = renderQueueModel.Queue.CreateViewCollection(m => new RenderQueueItemViewModel(m));
+            Queue = renderQueueModel.Queue.CreateViewCollection(m => new RenderQueueItemViewModel(m, dialogService));
 
             StartRenderCommand = new RequerySuggestedCommand(() => { }, () => Queue.Any(q => q.State == RenderQueueItemState.Ready));
 

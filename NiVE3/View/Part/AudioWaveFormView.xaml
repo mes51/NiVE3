@@ -8,7 +8,7 @@
              xmlns:r="clr-namespace:NiVE3.View.Resource"
              xmlns:cv="clr-namespace:NiVE3.View.Converter"
              xmlns:ucv="clr-namespace:NiVE3.UI.Converter;assembly=NiVE3.UI"
-             xmlns:mk="clr-namespace:NiVE3.Wpf.Markup"
+             xmlns:mk="clr-namespace:NiVE3.Shared.Wpf.Markup;assembly=NiVE3.Shared"
              mc:Ignorable="d" 
              x:Name="Root"
              d:DesignHeight="450" d:DesignWidth="800">

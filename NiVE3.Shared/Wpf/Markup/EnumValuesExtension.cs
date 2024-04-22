@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Markup;
 
-namespace NiVE3.Wpf.Markup
+namespace NiVE3.Shared.Wpf.Markup
 {
-    class EnumValuesExtension : MarkupExtension
+    public class EnumValuesExtension : MarkupExtension
     {
         public Type? EnumType { get; set; }
 

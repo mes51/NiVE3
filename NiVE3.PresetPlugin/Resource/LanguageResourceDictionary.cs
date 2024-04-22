@@ -13,6 +13,8 @@ namespace NiVE3.PresetPlugin.Resource
     [MarkupableResourceDictionary, HasLanguageKey]
     partial class LanguageResourceDictionary : LanguageResourceDictionaryBase
     {
+        public static LanguageResourceDictionary Dictionary { get; }
+
         static Dictionary<string, Tuple<string, Version>> LanguageKeys { get; }
 
         // Effects
@@ -135,11 +137,8 @@ namespace NiVE3.PresetPlugin.Resource
         [ShowInMarkup, DefaultValue("品質")]
         public const string AviOutputSettingView_Group_Video_Quality = nameof(AviOutputSettingView_Group_Video_Quality);
 
-        [ShowInMarkup, DefaultValue("キーフレーム")]
-        public const string AviOutputSettingView_Group_Video_KeyFrame = nameof(AviOutputSettingView_Group_Video_KeyFrame);
-
         [ShowInMarkup, DefaultValue("キーフレームを使用する")]
-        public const string AviOutputSettingView_Group_Video_KeyFrame_UseKeyFrame = nameof(AviOutputSettingView_Group_Video_KeyFrame_UseKeyFrame);
+        public const string AviOutputSettingView_Group_Video_UseKeyFrame = nameof(AviOutputSettingView_Group_Video_UseKeyFrame);
 
         [ShowInMarkup, DefaultValue("コーデックの設定")]
         public const string AviOutputSettingView_Group_Video_ConfigureCodec = nameof(AviOutputSettingView_Group_Video_ConfigureCodec);
@@ -203,6 +202,8 @@ namespace NiVE3.PresetPlugin.Resource
                 .Select(f => (f.Name, f.GetCustomAttribute<DefaultValueAttribute>()))
                 .Where(t => t.Item2 != null)
                 .ToDictionary(t => t.Name, t => Tuple.Create(t.Item2!.DefaultValue, Version.Parse(t.Item2!.FromVersion)));
+
+            Dictionary = [];
         }
 
         public LanguageResourceDictionary()

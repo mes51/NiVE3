@@ -47,7 +47,7 @@ namespace NiVE3.Plugin.Interfaces
         /// GetOutputSettingで取得したViewを表示後、ユーザーによってOKが選択されたときに呼び出されます。
         /// </summary>
         /// <param name="setting">GetOutputSettingで取得したViewのDataContext</param>
-        bool ApplyLoadSetting(object? setting) => false;
+        bool ApplyOutputSetting(object? setting) => false;
 
         /// <summary>
         /// 現在のレンダリング設定で出力するファイルのパスを加工します

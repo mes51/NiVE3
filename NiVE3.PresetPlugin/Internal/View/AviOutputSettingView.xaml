@@ -4,13 +4,16 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:local="clr-namespace:NiVE3.PresetPlugin.Internal.View"
              xmlns:gm="clr-namespace:NiVE3.PresetPlugin.Resource.Wpf.GeneratedMarkup"
              xmlns:r="clr-namespace:NiVE3.PresetPlugin.Resource"
+             xmlns:o="clr-namespace:NiVE3.PresetPlugin.Output"
+             xmlns:cv="clr-namespace:NiVE3.PresetPlugin.Internal.View.Converter"
+             xmlns:mk="clr-namespace:NiVE3.Shared.Wpf.Markup;assembly=NiVE3.Shared"
              mc:Ignorable="d" 
              x:Name="Root"
-             d:DesignHeight="450" d:DesignWidth="800">
+             Width="600"
+             d:DesignHeight="450">
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -18,6 +21,8 @@
             </ResourceDictionary.MergedDictionaries>
 
             <Thickness x:Key="SettingItemMargin">0,5,0,0</Thickness>
+
+            <cv:EnumToLocalizedNameConverter x:Key="EnumToLocalizedNameConverter"/>
 
             <Style x:Key="SettingLabelTextBlock" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
                 <Setter Property="Margin" Value="0,0,5,0"/>
@@ -28,6 +33,10 @@
             <Style x:Key="GroupBoxStyle" TargetType="{x:Type GroupBox}" BasedOn="{StaticResource {x:Type GroupBox}}">
                 <Setter Property="Padding" Value="10"/>
             </Style>
+
+            <DataTemplate x:Key="OutputChannelTemplate">
+                <TextBlock Text="{Binding Converter={StaticResource EnumToLocalizedNameConverter}, ConverterParameter={x:Type o:OutputChannel}}"/>
+            </DataTemplate>
         </ResourceDictionary>
     </UserControl.Resources>
     <StackPanel Orientation="Vertical" Grid.IsSharedSizeScope="True">
@@ -40,7 +49,7 @@
                     </Grid.ColumnDefinitions>
 
                     <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=AviOutputSettingView_Group_Video_OutputChannel}" Style="{StaticResource SettingLabelTextBlock}"/>
-                    <ComboBox Grid.Column="1"/>
+                    <ComboBox Grid.Column="1" ItemsSource="{mk:EnumValues EnumType={x:Type o:OutputChannel}}" SelectedValue="{Binding OutputChannel}" ItemTemplate="{StaticResource OutputChannelTemplate}"/>
                 </Grid>
                 <Grid Margin="{StaticResource SettingItemMargin}">
                     <Grid.ColumnDefinitions>
@@ -49,18 +58,34 @@
                     </Grid.ColumnDefinitions>
 
                     <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=AviOutputSettingView_Group_Video_Codec}" Style="{StaticResource SettingLabelTextBlock}"/>
-                    <ComboBox Grid.Column="1"/>
+                    <ComboBox Grid.Column="1" ItemsSource="{Binding CodecList}" SelectedIndex="{Binding SelectedCodecIndex}" DisplayMemberPath="Item2"/>
                 </Grid>
                 <GroupBox Header="{gm:LanguageResource ResourceKey=AviOutputSettingView_Group_Video_Quality}" Margin="{StaticResource SettingItemMargin}" IsEnabled="{Binding SupportQuality}" Style="{StaticResource GroupBoxStyle}">
-                    <Slider Value="{Binding Quality}" Minimum="1" Maximum="100" TickFrequency="1"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition Width="27"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Slider Grid.Column="0" Value="{Binding Quality}" Minimum="1" Maximum="100" TickFrequency="1"/>
+                        <TextBlock Grid.Column="1" Text="{Binding Quality, StringFormat={}{0:D0}}" HorizontalAlignment="Right"/>
+                    </Grid>
                 </GroupBox>
-                <GroupBox Header="{gm:LanguageResource ResourceKey=AviOutputSettingView_Group_Video_KeyFrame}" Margin="{StaticResource SettingItemMargin}" IsEnabled="{Binding SupportKeyFrameRate}" Style="{StaticResource GroupBoxStyle}">
-                    <StackPanel>
-                        <CheckBox Content="{gm:LanguageResource ResourceKey=AviOutputSettingView_Group_Video_KeyFrame_UseKeyFrame}"/>
-                        <Slider Margin="{StaticResource SettingItemMargin}" Value="{Binding KeyFrameRate}" Minimum="1" Maximum="300" TickFrequency="1" IsEnabled="{Binding UseKeyFrameRate}"/>
-                    </StackPanel>
+                <GroupBox Margin="{StaticResource SettingItemMargin}" IsEnabled="{Binding SupportKeyFrameRate}" Style="{StaticResource GroupBoxStyle}">
+                    <GroupBox.Header>
+                        <CheckBox Content="{gm:LanguageResource ResourceKey=AviOutputSettingView_Group_Video_UseKeyFrame}" IsChecked="{Binding UseKeyFrameRate}"/>
+                    </GroupBox.Header>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition Width="27"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Slider Value="{Binding KeyFrameRate}" Minimum="1" Maximum="999" TickFrequency="1" IsEnabled="{Binding UseKeyFrameRate}"/>
+                        <TextBlock Grid.Column="1" Text="{Binding KeyFrameRate, StringFormat={}{0:D0}}" HorizontalAlignment="Right"/>
+                    </Grid>
                 </GroupBox>
-                <Button Content="{gm:LanguageResource ResourceKey=AviOutputSettingView_Group_Video_ConfigureCodec}" Margin="{StaticResource SettingItemMargin}" Height="23" Width="100" HorizontalAlignment="Right" IsEnabled="{Binding HasConfigure}"/>
+                <Button Content="{gm:LanguageResource ResourceKey=AviOutputSettingView_Group_Video_ConfigureCodec}" Margin="{StaticResource SettingItemMargin}" Height="23" Width="100" HorizontalAlignment="Right" IsEnabled="{Binding HasConfigure}" Command="{Binding OpenCodecConfigureCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Self}}"/>
             </StackPanel>
         </GroupBox>
         <GroupBox Header="{gm:LanguageResource ResourceKey=AviOutputSettingView_Group_Audio}" Margin="0,10,0,0" IsEnabled="{Binding HasAudio}" Style="{StaticResource GroupBoxStyle}">

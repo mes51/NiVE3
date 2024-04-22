@@ -6,7 +6,10 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using NiVE3.Plugin.Interfaces;
+using NiVE3.Plugin.ValueObject;
+using NiVE3.View.Resource;
 using Prism.Mvvm;
 
 namespace NiVE3.Model
@@ -92,14 +95,14 @@ namespace NiVE3.Model
             set { SetProperty(ref selectedOutputPluginId, value); }
         }
 
-        private bool isOutputVideo;
+        private bool isOutputVideo = true;
         public bool IsOutputVideo
         {
             get { return isOutputVideo; }
             set { SetProperty(ref isOutputVideo, value); }
         }
 
-        private bool isOutputAudio;
+        private bool isOutputAudio = true;
         public bool IsOutputAudio
         {
             get { return isOutputAudio; }
@@ -161,6 +164,13 @@ namespace NiVE3.Model
             return string.Join("|", supportedExtensions.Split(',').Select(e => e + "|" + e));
         }
 
+        public FrameworkElement? GetSettingView()
+        {
+            var size = IsOutputVideo ? new Int32Size(CompositionModel.Width, CompositionModel.Height) : (Int32Size?)null;
+            var sourceTypes = (IsOutputVideo ? SourceType.Video : SourceType.None) | (CompositionModel.HasAudio && IsOutputAudio ? SourceType.Audio : SourceType.None);
+            return Output.Value.GetOutputSetting(BeginTime, EndTime - BeginTime, FrameRate, size, sourceTypes);
+        }
+
         public void ChangeOutputPlugin(Guid newOutputPluginId)
         {
             Output?.Dispose();
@@ -181,6 +191,21 @@ namespace NiVE3.Model
             FilePath = Output.Value.ProcessOutputFilePath(newFilePath);
 
             // TODO: ヒストリに積む
+        }
+
+        public void ApplyOutputSetting(object? setting)
+        {
+            var prevSetting = Output.Value.SaveData();
+            var prevFilePath = FilePath;
+            if (Output.Value.ApplyOutputSetting(setting))
+            {
+                HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangeRenderQueueSetting));
+
+                ChangeFilePath(prevFilePath);
+                // TODO: ヒストリに積む
+
+                HistoryModel.EndGroup();
+            }
         }
 
         private void CompositionModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)

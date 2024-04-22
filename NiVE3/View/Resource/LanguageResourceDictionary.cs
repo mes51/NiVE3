@@ -363,6 +363,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("出力プラグインの設定")]
         public static readonly string RenderQueueItemView_OpenOutputSetting = nameof(RenderQueueItemView_OpenOutputSetting);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("出力設定")]
+        public static readonly string OutputSettingView_Title = nameof(OutputSettingView_Title);
+
         // History Command
 
         [ShowInMarkup, LanguageKey, DefaultValue("プロジェクトの新規作成/開く")]
@@ -469,6 +472,9 @@ namespace NiVE3.View.Resource
 
         [ShowInMarkup, LanguageKey, DefaultValue("レンダーキューの削除")]
         public static readonly string History_DeleteRenderQueue = nameof(History_DeleteRenderQueue);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("レンダーキューの設定変更")]
+        public static readonly string History_ChangeRenderQueueSetting = nameof(History_ChangeRenderQueueSetting);
 
         // Dialog
 
