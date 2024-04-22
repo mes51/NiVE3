@@ -50,6 +50,13 @@ namespace NiVE3.Plugin.Interfaces
         bool ApplyLoadSetting(object? setting) => false;
 
         /// <summary>
+        /// 現在のレンダリング設定で出力するファイルのパスを加工します
+        /// </summary>
+        /// <param name="baseFilePath">元となるファイルパス</param>
+        /// <returns>設定に合わせ、拡張子やファイル名が変更されたファイルパス</returns>
+        string ProcessOutputFilePath(string baseFilePath);
+
+        /// <summary>
         /// 出力処理を開始します。
         /// </summary>
         /// <param name="filePath">出力先のファイルパス</param>

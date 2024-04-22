@@ -100,6 +100,19 @@ namespace NiVE3.Config
             new PropertyMetadata(new SingleKeyGesture(Key.Enter))
         );
 
+        public static readonly DependencyProperty EnqueueRenderingGestureProperty = DependencyProperty.Register(
+            nameof(EnqueueRenderingGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new KeyGesture(Key.M, ModifierKeys.Control))
+        );
+
+        public InputGesture EnqueueRenderingGesture
+        {
+            get { return (InputGesture)GetValue(EnqueueRenderingGestureProperty); }
+            set { SetValue(EnqueueRenderingGestureProperty, value); }
+        }
+
         public InputGesture BeginEditNameGesture
         {
             get { return (InputGesture)GetValue(BeginEditNameGestureProperty); }

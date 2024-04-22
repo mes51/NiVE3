@@ -58,7 +58,6 @@ namespace NiVE3.Model
 
         public void Dispose()
         {
-            Input.Dispose();
             InputContext?.Dispose();
         }
     }

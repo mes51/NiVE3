@@ -162,7 +162,6 @@ namespace NiVE3.Model
 
         public void Dispose()
         {
-            Effect.Value.Dispose();
             Effect.Dispose();
         }
     }

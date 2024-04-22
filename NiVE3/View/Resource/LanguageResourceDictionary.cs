@@ -330,6 +330,39 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("レベルメーター")]
         public static readonly string AudioInformationView_Title = nameof(AudioInformationView_Title);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("レンダーキュー")]
+        public static readonly string RenderQueueView_Title = nameof(RenderQueueView_Title);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("出力プラグイン:")]
+        public static readonly string RenderQueueItemView_OutputPlugin = nameof(RenderQueueItemView_OutputPlugin);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("出力先:")]
+        public static readonly string RenderQueueItemView_OutputFilePath = nameof(RenderQueueItemView_OutputFilePath);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("参照")]
+        public static readonly string RenderQueueItemView_OutputFilePath_ChangePath = nameof(RenderQueueItemView_OutputFilePath_ChangePath);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("レンダリングする範囲を指定する")]
+        public static readonly string RenderQueueItemView_UseRenderQueueItemTimeRange = nameof(RenderQueueItemView_UseRenderQueueItemTimeRange);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("開始:")]
+        public static readonly string RenderQueueItemView_TimeRange_Begin = nameof(RenderQueueItemView_TimeRange_Begin);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("終了:")]
+        public static readonly string RenderQueueItemView_TimeRange_End = nameof(RenderQueueItemView_TimeRange_End);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("出力ソース")]
+        public static readonly string RenderQueueItemView_OutputSources = nameof(RenderQueueItemView_OutputSources);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("ビデオ")]
+        public static readonly string RenderQueueItemView_OutputSources_Video = nameof(RenderQueueItemView_OutputSources_Video);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("オーディオ(存在する場合)")]
+        public static readonly string RenderQueueItemView_OutputSources_Audio = nameof(RenderQueueItemView_OutputSources_Audio);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("出力プラグインの設定")]
+        public static readonly string RenderQueueItemView_OpenOutputSetting = nameof(RenderQueueItemView_OpenOutputSetting);
+
         // History Command
 
         [ShowInMarkup, LanguageKey, DefaultValue("プロジェクトの新規作成/開く")]
@@ -430,6 +463,12 @@ namespace NiVE3.View.Resource
 
         [ShowInMarkup, LanguageKey, DefaultValue("エフェクトのコメント変更")]
         public static readonly string History_ChangeEffectComment = nameof(History_ChangeEffectComment);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("レンダーキューの追加")]
+        public static readonly string History_EnqueueRendering = nameof(History_EnqueueRendering);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("レンダーキューの削除")]
+        public static readonly string History_DeleteRenderQueue = nameof(History_DeleteRenderQueue);
 
         // Dialog
 

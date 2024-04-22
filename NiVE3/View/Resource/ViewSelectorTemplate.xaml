@@ -29,4 +29,7 @@
     <DataTemplate DataType="{x:Type vm:AudioInformationViewModel}">
         <v:AudioInformationView />
     </DataTemplate>
+    <DataTemplate DataType="{x:Type vm:RenderQueueViewModel}">
+        <v:RenderQueueView />
+    </DataTemplate>
 </ResourceDictionary>

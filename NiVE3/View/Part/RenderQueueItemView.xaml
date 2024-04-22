@@ -1,0 +1,87 @@
+﻿<UserControl x:Class="NiVE3.View.Part.RenderQueueItemView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:NiVE3.View.Part"
+             xmlns:upr="clr-namespace:NiVE3.UI.Primitive;assembly=NiVE3.UI"
+             xmlns:cv="clr-namespace:NiVE3.View.Converter"
+             xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <Thickness x:Key="ItemMargin">0,5,0,0</Thickness>
+        <cv:TimeConverter x:Key="TimeConverter" FrameRate="{Binding FrameRate}"/>
+
+        <Style TargetType="{x:Type GroupBox}">
+            <Setter Property="Margin" Value="5,0,5,5"/>
+            <Setter Property="Padding" Value="10,10,10,5"/>
+        </Style>
+
+        <Style x:Key="SettingLabelTextBlockStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
+            <Setter Property="Margin" Value="0,0,5,0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+        </Style>
+    </UserControl.Resources>
+    <Expander Header="{Binding CompositionName}" IsExpanded="{Binding IsExpanded}" d:IsExpanded="True">
+        <StackPanel Orientation="Vertical">
+            <UniformGrid Columns="2">
+                <Grid VerticalAlignment="Center" Margin="5.0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=RenderQueueItemView_OutputPlugin}" Style="{StaticResource SettingLabelTextBlockStyle}"/>
+                    <ComboBox Grid.Column="1" ItemsSource="{Binding OutputPlugins}" SelectedIndex="{Binding SelectedOutputPlugin}" DisplayMemberPath="Item2"/>
+                </Grid>
+                <Grid VerticalAlignment="Center" Margin="5,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition />
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=RenderQueueItemView_OutputFilePath}" Style="{StaticResource SettingLabelTextBlockStyle}"/>
+                    <TextBlock Grid.Column="1" Text="{Binding FilePath}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                    <Button Grid.Column="2" Content="{gm:LanguageResource ResourceKey=RenderQueueItemView_OutputFilePath_ChangePath}" Width="75" Height="23" Command="{Binding ChangeSaveFilePathCommand}"/>
+                </Grid>
+            </UniformGrid>
+            <UniformGrid Columns="2" Margin="{StaticResource ItemMargin}" Grid.IsSharedSizeScope="True">
+                <GroupBox Header="{gm:LanguageResource ResourceKey=RenderQueueItemView_OutputSources}">
+                    <UniformGrid Rows="2">
+                        <CheckBox Content="{gm:LanguageResource ResourceKey=RenderQueueItemView_OutputSources_Video}" VerticalAlignment="Center" IsChecked="{Binding IsOutputVideo}" Command=""/>
+                        <CheckBox Content="{gm:LanguageResource ResourceKey=RenderQueueItemView_OutputSources_Audio}" VerticalAlignment="Center" IsChecked="{Binding IsOutputAudio}" Command=""/>
+                    </UniformGrid>
+                </GroupBox>
+                <GroupBox>
+                    <GroupBox.Header>
+                        <CheckBox Content="{gm:LanguageResource ResourceKey=RenderQueueItemView_UseRenderQueueItemTimeRange}" IsChecked="{Binding UseRenderQueueItemTimeRange}"/>
+                    </GroupBox.Header>
+                    <StackPanel IsEnabled="{Binding UseRenderQueueItemTimeRange}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="SettingLabel"/>
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=RenderQueueItemView_TimeRange_Begin}" Style="{StaticResource SettingLabelTextBlockStyle}"/>
+                            <upr:SlidableNumberTextBox Grid.Column="1" Value="{Binding BeginTime}" Maximum="{Binding RenderRangeBeginLimit}" Minimum="0" SlideChangeValue="{Binding FrameDuration}" Converter="{StaticResource TimeConverter}"/>
+                        </Grid>
+                        <Grid Margin="{StaticResource ItemMargin}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="SettingLabel"/>
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=RenderQueueItemView_TimeRange_End}" Style="{StaticResource SettingLabelTextBlockStyle}"/>
+                            <upr:SlidableNumberTextBox Grid.Column="1" Value="{Binding EndTime}" Maximum="{Binding CompositionDuration}" Minimum="{Binding RenderRangeEndStart}" SlideChangeValue="{Binding FrameDuration}" Converter="{StaticResource TimeConverter}"/>
+                        </Grid>
+                    </StackPanel>
+                </GroupBox>
+            </UniformGrid>
+            <Button Content="{gm:LanguageResource ResourceKey=RenderQueueItemView_OpenOutputSetting}" Margin="0,5,5,5" HorizontalAlignment="Right" Width="150" IsEnabled="{Binding HasOutputSetting}" Command="{Binding OpenOutputSettingCommand}"/>
+        </StackPanel>
+    </Expander>
+</UserControl>

@@ -33,6 +33,7 @@ namespace NiVE3.ViewModel
     [CommandHandling(nameof(BeginEditNameCommand), nameof(ShortcutKeySetting.BeginEditNameGesture))]
     [CommandHandling(nameof(AddSolidCommand), nameof(ShortcutKeySetting.AddSolidGesture))]
     [CommandHandling(nameof(DeleteCommand), nameof(ShortcutKeySetting.DeleteItemGesture))]
+    [CommandHandling(nameof(EnqueueRenderingCommand), nameof(ShortcutKeySetting.EnqueueRenderingGesture))]
     partial class TimelineViewModel : PaneViewModelBase, IDropTarget
     {
         private double frameRate;
@@ -357,6 +358,8 @@ namespace NiVE3.ViewModel
 
         public ICommand AddTextCommand { get; }
 
+        public ICommand EnqueueRenderingCommand { get; }
+
         WeakEventPublisher<EventArgs> CurrentTimeChangeByUserPublisher { get; } = new WeakEventPublisher<EventArgs>();
         public event EventHandler<EventArgs> CurrentTimeChangeByUser
         {
@@ -444,6 +447,8 @@ namespace NiVE3.ViewModel
             AddNullObjectCommand = new RequerySuggestedCommand(() => CompositionModel?.AddNullObject(), () => CompositionModel != null);
 
             AddTextCommand = new RequerySuggestedCommand(() => CompositionModel?.AddText(), () => CompositionModel != null);
+
+            EnqueueRenderingCommand = new RequerySuggestedCommand(() => CompositionModel?.EnqueueRendering(), () => CompositionModel != null);
 
             AudioPlayerModel = audioPlayerModel;
         }

@@ -7,29 +7,26 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 using NiVE3.Data.Json.Project;
-using NiVE3.Extension;
 using NiVE3.Input;
 using NiVE3.Numerics;
 using NiVE3.Image;
 using NiVE3.Plugin.Image;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Interfaces.RendererParams;
-using NiVE3.Plugin.ValueObject;
 using NiVE3.Shared.Extension;
 using NiVE3.ValueObject;
 using NiVE3.View.Resource;
-using Prism.Mvvm;
 using NiVE3.Image.Drawing;
 using System.Runtime.InteropServices;
 using System.Numerics;
 using System.Buffers;
 using NiVE3.Util;
+using NiVE3.Mvvm;
 
 namespace NiVE3.Model
 {
-    partial class CompositionModel : BindableBase, IDisposable, ICompositionObject
+    partial class CompositionModel : WeakPropertyChangedBindingBase, IDisposable, ICompositionObject
     {
         public Guid CompositionId { get; }
 
@@ -176,6 +173,8 @@ namespace NiVE3.Model
 
         EffectListModel EffectListModel { get; }
 
+        RenderQueueModel RenderQueueModel { get; }
+
         TextPropertyModel TextPropertyModel { get; }
 
         HistoryModel HistoryModel { get; }
@@ -191,9 +190,10 @@ namespace NiVE3.Model
             Guid toneMapperPluginId,
             FootageListModel footageListModel,
             EffectListModel effectListModel,
+            RenderQueueModel renderQueueModel,
             TextPropertyModel textPropertyModel,
             HistoryModel historyModel
-        ) : this(renderer, toneMapper, rendererPluginId, toneMapperPluginId, footageListModel, effectListModel, textPropertyModel, historyModel, null) { }
+        ) : this(renderer, toneMapper, rendererPluginId, toneMapperPluginId, footageListModel, effectListModel, renderQueueModel, textPropertyModel, historyModel, null) { }
 
         public CompositionModel(
             ExportLifetimeContext<IRenderer> renderer,
@@ -202,6 +202,7 @@ namespace NiVE3.Model
             Guid toneMapperPluginId,
             FootageListModel footageListModel,
             EffectListModel effectListModel,
+            RenderQueueModel renderQueueModel,
             TextPropertyModel textPropertyModel,
             HistoryModel historyModel,
             Guid? compositionId
@@ -214,6 +215,7 @@ namespace NiVE3.Model
             ToneMapperPluginId = toneMapperPluginId;
             FootageListModel = footageListModel;
             EffectListModel = effectListModel;
+            RenderQueueModel = renderQueueModel;
             TextPropertyModel = textPropertyModel;
             HistoryModel = historyModel;
             Layers = [];
@@ -691,6 +693,11 @@ namespace NiVE3.Model
             }
 
             return [..result];
+        }
+
+        public void EnqueueRendering()
+        {
+            RenderQueueModel.Enqueue(this);
         }
 
         public CompositionData SaveData()

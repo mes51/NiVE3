@@ -50,4 +50,9 @@ namespace NiVE3.Model
 
         public IFootageModel[] Footages { get; }
     }
+
+    class GetProjectPathRequestEventArgs : EventArgs
+    {
+        public string ProjectPath { get; set; } = "";
+    }
 }

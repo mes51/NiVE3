@@ -117,6 +117,11 @@ namespace NiVE3.PresetPlugin.Output
             return false;
         }
 
+        public string ProcessOutputFilePath(string baseFilePath)
+        {
+            return Path.ChangeExtension(baseFilePath, ".avi");
+        }
+
         public void BeginOutput(string filePath, double startTime, double duration, double frameRate, Int32Size? size, SourceType outputSources)
         {
             if (Writer != null)
