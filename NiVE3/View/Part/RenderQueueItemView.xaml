@@ -7,6 +7,7 @@
              xmlns:upr="clr-namespace:NiVE3.UI.Primitive;assembly=NiVE3.UI"
              xmlns:cv="clr-namespace:NiVE3.View.Converter"
              xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
+             xmlns:ugm="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
@@ -22,6 +23,78 @@
             <Setter Property="Margin" Value="0,0,5,0"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="HorizontalAlignment" Value="Right"/>
+        </Style>
+
+        <Style x:Key="ExpanderDownHeaderStyle" TargetType="{x:Type ToggleButton}">
+            <Setter Property="IsTabStop" Value="False"/>
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Margin" Value="1"/>
+            <Setter Property="MinWidth" Value="0"/>
+            <Setter Property="MinHeight" Value="0"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ToggleButton}">
+                        <Grid Background="Transparent">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Path x:Name="ExpandPath" Grid.Column="0" Margin="1,1,1,1" Fill="{ugm:AppearanceResource ResourceKey=TextBrush, ReturnDynamicResource=True}" Data="M 0,0 8.66025403784439,5 0,10" VerticalAlignment="Center" Width="10"/>
+                            <ContentPresenter Grid.Column="1" HorizontalAlignment="Left" Margin="4,0,0,0" RecognizesAccessKey="True" SnapsToDevicePixels="True" VerticalAlignment="Center"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter Property="LayoutTransform" TargetName="ExpandPath">
+                                    <Setter.Value>
+                                        <RotateTransform Angle="90"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        
+        <Style TargetType="{x:Type Expander}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Expander}">
+                        <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="3" SnapsToDevicePixels="true">
+                            <DockPanel>
+                                <ToggleButton x:Name="HeaderSite"
+                                              ContentTemplate="{TemplateBinding HeaderTemplate}"
+                                              Content="{TemplateBinding Header}"
+                                              ContentTemplateSelector="{TemplateBinding HeaderTemplateSelector}"
+                                              DockPanel.Dock="Top"
+                                              FontStretch="{TemplateBinding FontStretch}"
+                                              Foreground="{TemplateBinding Foreground}"
+                                              FontStyle="{TemplateBinding FontStyle}"
+                                              FontFamily="{TemplateBinding FontFamily}"
+                                              FontWeight="{TemplateBinding FontWeight}"
+                                              FontSize="{TemplateBinding FontSize}"
+                                              HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              IsChecked="{Binding IsExpanded, Mode=TwoWay, RelativeSource={RelativeSource Mode=TemplatedParent}}"
+                                              Padding="{TemplateBinding Padding}"
+                                              HorizontalAlignment="Left"
+                                              Style="{StaticResource ExpanderDownHeaderStyle}"
+                                              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                                <ContentPresenter x:Name="ExpandSite" DockPanel.Dock="Bottom" Focusable="false" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" Visibility="Collapsed"/>
+                            </DockPanel>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsExpanded" Value="true">
+                                <Setter Property="Visibility" TargetName="ExpandSite" Value="Visible"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
     </UserControl.Resources>
     <Expander Header="{Binding CompositionName}" IsExpanded="{Binding IsExpanded}" d:IsExpanded="True">

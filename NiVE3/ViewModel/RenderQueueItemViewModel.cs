@@ -21,6 +21,14 @@ namespace NiVE3.ViewModel
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
     partial class RenderQueueItemViewModel : BindableBase
     {
+        private Guid queueId;
+        [NeedWire(nameof(RenderQueueItemModel), IsOneWay = true)]
+        public Guid QueueId
+        {
+            get { return queueId; }
+            set { SetProperty(ref queueId, value); }
+        }
+
         private string filePath = "";
         [NeedWire(nameof(RenderQueueItemModel), IsOneWay = true)]
         public string FilePath
@@ -158,6 +166,13 @@ namespace NiVE3.ViewModel
         {
             get { return isEditable; }
             set { SetProperty(ref isEditable, value); }
+        }
+
+        private bool isSelected;
+        public bool IsSelected
+        {
+            get { return isSelected; }
+            set { SetProperty(ref isSelected, value); }
         }
 
         public ICommand ChangeSaveFilePathCommand { get; }

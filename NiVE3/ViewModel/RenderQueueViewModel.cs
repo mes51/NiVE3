@@ -5,18 +5,22 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using NiVE3.Config;
 using NiVE3.Model;
 using NiVE3.Mvvm;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
 using NiVE3.UI.Command;
+using NiVE3.View.Command;
 using NiVE3.View.Dock;
 using NiVE3.View.Resource;
+using Prism.Commands;
 using Prism.Services.Dialogs;
 
 namespace NiVE3.ViewModel
 {
     [PaneLocation(PaneLocation.Bottom)]
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
+    [CommandHandling(nameof(DeleteQueueCommand), nameof(ShortcutKeySetting.DeleteItemGesture))]
     partial class RenderQueueViewModel : SingletonePaneViewModelBase
     {
         private bool isRendering;
@@ -37,6 +41,10 @@ namespace NiVE3.ViewModel
 
         public ICommand StopRenderCommand { get; }
 
+        public ICommand DeleteQueueCommand { get; }
+
+        public ICommand DeleteQueueByItemCommand { get; }
+
         RenderQueueModel RenderQueueModel { get; }
 
 #pragma warning disable CS8618 // 各フィールドには初期化時に必ず値を代入するため無視
@@ -52,6 +60,29 @@ namespace NiVE3.ViewModel
             StartRenderCommand = new RequerySuggestedCommand(() => { }, () => Queue.Any(q => q.State == RenderQueueItemState.Ready));
 
             StopRenderCommand = new RequerySuggestedCommand(() => { }, () => IsRendering);
+
+            DeleteQueueCommand = new DelegateCommand(() =>
+            {
+                var targetIds = Queue.Where(q => q.IsSelected).Select(q => q.QueueId).ToArray();
+                if (targetIds.Length < 1)
+                {
+                    return;
+                }
+                RenderQueueModel.DeleteQueues(targetIds);
+            });
+
+            DeleteQueueByItemCommand = new DelegateCommand<RenderQueueItemViewModel>(q =>
+            {
+                if (q.IsSelected)
+                {
+                    var targetIds = Queue.Where(q => q.IsSelected).Select(q => q.QueueId).ToArray();
+                    RenderQueueModel.DeleteQueues(targetIds);
+                }
+                else
+                {
+                    RenderQueueModel.DeleteQueues([q.QueueId]);
+                }
+            });
         }
 
         partial void WiringModel();

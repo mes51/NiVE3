@@ -333,6 +333,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("レンダーキュー")]
         public static readonly string RenderQueueView_Title = nameof(RenderQueueView_Title);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("削除")]
+        public static readonly string RenderQueueView_ContextMenu_Delete = nameof(RenderQueueView_ContextMenu_Delete);
+
         [ShowInMarkup, LanguageKey, DefaultValue("出力プラグイン:")]
         public static readonly string RenderQueueItemView_OutputPlugin = nameof(RenderQueueItemView_OutputPlugin);
 

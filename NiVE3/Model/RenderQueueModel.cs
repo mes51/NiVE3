@@ -42,9 +42,9 @@ namespace NiVE3.Model
             HistoryModel.Add(new EnqueueHistoryCommand(this, item));
         }
 
-        public void DeleteByComposition(CompositionModel compositionModel)
+        public void DeleteQueues(Guid[] queueIds)
         {
-            var items = Queue.Where(q => q.CompositionModel == compositionModel).OrderBy(Queue.IndexOf).ToArray();
+            var items = Queue.Where(q => queueIds.Contains(q.QueueId)).OrderBy(Queue.IndexOf).ToArray();
             var indices = items.Select(Queue.IndexOf).ToArray();
 
             foreach (var item in items)
@@ -53,6 +53,12 @@ namespace NiVE3.Model
             }
 
             HistoryModel.Add(new DeleteRenderQueueHistoryCommand(this, items, indices));
+        }
+
+        public void DeleteByComposition(CompositionModel compositionModel)
+        {
+            var targetIds = Queue.Where(q => q.CompositionModel == compositionModel).Select(q =>q.QueueId).ToArray();
+            DeleteQueues(targetIds);
         }
 
         public void Clear()
