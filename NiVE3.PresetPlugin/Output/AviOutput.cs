@@ -170,7 +170,14 @@ namespace NiVE3.PresetPlugin.Output
 
             if (outputSources.HasFlag(SourceType.Audio))
             {
-                AudioStream = Writer.AddAudioStream(2, Setting.AudioSamplingRate, Setting.AudioBitsPerSample);
+                if (Setting.AudioBitsPerSample == 32)
+                {
+                    AudioStream = Writer.AddEncodingAudioStream(new UncompressedFloatAudioEncoder(Setting.AudioSamplingRate));
+                }
+                else
+                {
+                    AudioStream = Writer.AddAudioStream(2, Setting.AudioSamplingRate, Setting.AudioBitsPerSample);
+                }
             }
         }
 
