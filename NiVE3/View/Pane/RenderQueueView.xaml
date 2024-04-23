@@ -6,13 +6,16 @@
              xmlns:local="clr-namespace:NiVE3.View.Pane"
              xmlns:vm="clr-namespace:NiVE3.ViewModel"
              xmlns:pt="clr-namespace:NiVE3.View.Part"
+             xmlns:r="clr-namespace:NiVE3.View.Resource"
              xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
              mc:Ignorable="d" 
              x:Name="Root"
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
+        <r:BindingProxy x:Key="IsRenderingBindingProxy" Data="{Binding IsRendering}"/>
+
         <DataTemplate x:Key="RenderQueueItemTemplate" DataType="{x:Type vm:RenderQueueItemViewModel}">
-            <pt:RenderQueueItemView />
+            <pt:RenderQueueItemView IsLockedByRendering="{Binding Source={StaticResource IsRenderingBindingProxy}, Path=Data}"/>
         </DataTemplate>
 
         <Style x:Key="RenderQueueItemListViewItemStyle" TargetType="{x:Type ListViewItem}">
@@ -24,6 +27,12 @@
                     </ContextMenu>
                 </Setter.Value>
             </Setter>
+
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ElementName=Root, Path=DataContext.IsRendering}" Value="True">
+                    <Setter Property="ContextMenu" Value="{x:Null}"/>
+                </DataTrigger>
+            </Style.Triggers>
         </Style>
 
         <Style x:Key="ButtonStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">

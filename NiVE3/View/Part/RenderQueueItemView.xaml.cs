@@ -20,6 +20,19 @@ namespace NiVE3.View.Part
     /// </summary>
     public partial class RenderQueueItemView : UserControl
     {
+        public static readonly DependencyProperty IsLockedByRenderingProperty = DependencyProperty.Register(
+            nameof(IsLockedByRendering),
+            typeof(bool),
+            typeof(RenderQueueItemView),
+            new FrameworkPropertyMetadata(false)
+        );
+
+        public bool IsLockedByRendering
+        {
+            get { return (bool)GetValue(IsLockedByRenderingProperty); }
+            set { SetValue(IsLockedByRenderingProperty, value); }
+        }
+
         public RenderQueueItemView()
         {
             InitializeComponent();

@@ -99,7 +99,7 @@ namespace NiVE3.Model
             {
                 foreach (var item in Queue.Where(q => q.State == RenderQueueItemState.Ready))
                 {
-                    if (!IsRendering)
+                    if (IsAborting)
                     {
                         break;
                     }

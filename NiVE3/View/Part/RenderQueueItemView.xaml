@@ -9,10 +9,25 @@
              xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
              xmlns:ugm="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
              mc:Ignorable="d" 
+             x:Name="Root"
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
         <Thickness x:Key="ItemMargin">0,5,0,0</Thickness>
         <cv:TimeConverter x:Key="TimeConverter" FrameRate="{Binding FrameRate}"/>
+
+        <Style x:Key="ItemSettingContainerStyle" TargetType="{x:Type StackPanel}">
+            <Setter Property="Orientation" Value="Vertical"/>
+            <Setter Property="IsEnabled" Value="True"/>
+
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsEditable}" Value="False">
+                    <Setter Property="IsEnabled" Value="False"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding ElementName=Root, Path=IsLockedByRendering}" Value="True">
+                    <Setter Property="IsEnabled" Value="False"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
 
         <Style TargetType="{x:Type GroupBox}">
             <Setter Property="Margin" Value="5,0,5,5"/>
@@ -98,7 +113,7 @@
         </Style>
     </UserControl.Resources>
     <Expander Header="{Binding CompositionName}" IsExpanded="{Binding IsExpanded}" d:IsExpanded="True">
-        <StackPanel Orientation="Vertical" IsEnabled="{Binding IsEditable}">
+        <StackPanel Style="{StaticResource ItemSettingContainerStyle}">
             <UniformGrid Columns="2">
                 <Grid VerticalAlignment="Center" Margin="5.0">
                     <Grid.ColumnDefinitions>

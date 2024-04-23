@@ -13,8 +13,11 @@
         xmlns:vm="clr-namespace:NiVE3.ViewModel"
         xmlns:a="clr-namespace:NiVE3.Wpf.Attach"
         xmlns:b="clr-namespace:NiVE3.Wpf.Behavior"
+        xmlns:vp="clr-namespace:NiVE3.View.Pane"
         xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
         xmlns:ui="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
+        xmlns:r="clr-namespace:NiVE3.View.Resource"
+        xmlns:ur="clr-namespace:NiVE3.UI.Resources;assembly=NiVE3.UI"
         mc:Ignorable="d"
         x:Name="RootWindow"
         WindowStartupLocation="CenterScreen"
@@ -35,6 +38,7 @@
                 </cv:ConverterItem.Converter>
             </cv:ConverterItem>
         </cv:ConverterCollection>
+        <cv:BooleanInvertConverter x:Key="BooleanInvertConverter"/>
 
         <Style x:Key="LayoutItemContainerStyleBase" TargetType="{x:Type ad:LayoutItem}">
             <Setter Property="IsActive" Value="{Binding Model.IsActive, Mode=TwoWay}"/>
@@ -42,6 +46,41 @@
             <Setter Property="Title" Value="{Binding Model.Title}"/>
             <Setter Property="ContentId" Value="{Binding Model.ContentId}"/>
         </Style>
+
+        <r:BindingProxy x:Key="InvertedIsRenderingBindingProxy" Data="{Binding IsRendering, Converter={StaticResource BooleanInvertConverter}}"/>
+
+        <ur:DataTemplateCollection x:Key="LayoutItemTemplateSelector">
+            <DataTemplate DataType="{x:Type vm:FootageListViewModel}">
+                <vp:FootageListView IsEnabled="{Binding Source={StaticResource InvertedIsRenderingBindingProxy}, Path=Data}"/>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:PreviewViewModel}">
+                <vp:PreviewView IsEnabled="{Binding Source={StaticResource InvertedIsRenderingBindingProxy}, Path=Data}"/>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:TimelineViewModel}">
+                <vp:TimelineView IsEnabled="{Binding Source={StaticResource InvertedIsRenderingBindingProxy}, Path=Data}"/>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:EffectListViewModel}">
+                <vp:EffectListView IsEnabled="{Binding Source={StaticResource InvertedIsRenderingBindingProxy}, Path=Data}"/>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:PlayControllerViewModel}">
+                <vp:PlayControllerView IsEnabled="{Binding Source={StaticResource InvertedIsRenderingBindingProxy}, Path=Data}"/>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:HistoryViewModel}">
+                <vp:HistoryView IsEnabled="{Binding Source={StaticResource InvertedIsRenderingBindingProxy}, Path=Data}"/>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:LayerPropertyControllerViewModel}">
+                <vp:LayerPropertyControllerView IsEnabled="{Binding Source={StaticResource InvertedIsRenderingBindingProxy}, Path=Data}"/>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:TextPropertyViewModel}">
+                <vp:TextPropertyView IsEnabled="{Binding Source={StaticResource InvertedIsRenderingBindingProxy}, Path=Data}"/>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:AudioInformationViewModel}">
+                <vp:AudioInformationView IsEnabled="{Binding Source={StaticResource InvertedIsRenderingBindingProxy}, Path=Data}"/>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:RenderQueueViewModel}">
+                <vp:RenderQueueView />
+            </DataTemplate>
+        </ur:DataTemplateCollection>
 
         <vd:LayoutItemContainerStyleSelector x:Key="LayoutItemContainerStyleSelector">
             <vd:LayoutItemContainerStyle ViewModelType="{x:Type vm:FootageListViewModel}">
@@ -149,6 +188,7 @@
         <ad:DockingManager x:Name="Manager"
                            Grid.Row="1"
                            pr:RegionManager.RegionName="{x:Static vm:MainWindowViewModel.RegionName}"
+                           LayoutItemTemplateSelector="{StaticResource LayoutItemTemplateSelector}"
                            LayoutItemContainerStyleSelector="{StaticResource LayoutItemContainerStyleSelector}"
                            LayoutUpdateStrategy="{StaticResource LayoutInitializer}">
             <ad:LayoutRoot>
@@ -163,7 +203,7 @@
         </ad:DockingManager>
     </Grid>
     <i:Interaction.Behaviors>
-        <b:WindowGestureBehavior/>
+        <b:WindowGestureBehavior IsDisableWithoutNonEdit="{Binding IsRendering}"/>
         <!--
         <b:BorderlessWindowChromeBehavior/>
         -->

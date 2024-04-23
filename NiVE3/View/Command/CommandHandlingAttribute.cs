@@ -19,13 +19,15 @@ namespace NiVE3.View.Command
 
         public bool IsGlobal { get; set; }
 
+        public bool IsNonEditCommand { get; set; }
+
         public CommandHandlingAttribute(string commandName, string targetGesture)
         {
             CommandName = commandName;
             TargetGesture = targetGesture;
         }
 
-        public static ICommand? GetCommand(object target, string targetGesture, bool isGlobal)
+        public static ICommand? GetCommand(object target, string targetGesture, bool isGlobal, bool isNonEditOnly)
         {
             var type = target.GetType();
 #pragma warning disable CA1854 // リファクタを実行した結果の方が変になるため無視する
@@ -36,7 +38,7 @@ namespace NiVE3.View.Command
 #pragma warning restore CA1854 // 'IDictionary.TryGetValue(TKey, out TValue)' メソッドを優先します
 
             var commandInfo = Cache[type][targetGesture].FirstOrDefault();
-            if (commandInfo != null && (!isGlobal || commandInfo.Item1.IsGlobal))
+            if (commandInfo != null && (!isGlobal || commandInfo.Item1.IsGlobal) && (!isNonEditOnly || commandInfo.Item1.IsNonEditCommand))
             {
                 return commandInfo.Item2.GetValue(target) as ICommand;
             }
