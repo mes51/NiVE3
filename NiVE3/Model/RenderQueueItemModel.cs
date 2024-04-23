@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using NiVE3.Plugin.Interfaces;
@@ -122,15 +123,18 @@ namespace NiVE3.Model
 
         HistoryModel HistoryModel { get; }
 
+        ProjectModel ProjectModel { get; }
+
         ExportLifetimeContext<IOutput> Output { get; set; }
 
         object? OutputData { get; set; }
 
-        public RenderQueueItemModel(OutputListModel outputListModel, CompositionModel compositionModel, HistoryModel historyModel, string baseFilePath, Guid? queueId)
+        public RenderQueueItemModel(OutputListModel outputListModel, CompositionModel compositionModel, HistoryModel historyModel, ProjectModel projectModel, string baseFilePath, Guid? queueId)
         {
             OutputListModel = outputListModel;
             CompositionModel = compositionModel;
             HistoryModel = historyModel;
+            ProjectModel = projectModel;
             QueueId = queueId ?? Guid.NewGuid();
             BeginTime = compositionModel.WorkareaBegin;
             EndTime = CompositionModel.WorkareaEnd;
@@ -161,7 +165,7 @@ namespace NiVE3.Model
         public string GetSaveFileFilter()
         {
             var supportedExtensions = OutputListModel.GetMetadata(SelectedOutputPluginId)?.SupportedFileType ?? "*.*";
-            return string.Join("|", supportedExtensions.Split(',').Select(e => e + "|" + e));
+            return string.Join("|", supportedExtensions.Split(',').Select(e => e + "|*" + e));
         }
 
         public FrameworkElement? GetSettingView()
@@ -208,6 +212,62 @@ namespace NiVE3.Model
             }
         }
 
+        public void Rendering(Func<bool> isPause, Func<bool> isAbort, Action<double> updateProgress)
+        {
+            Application.Current.Dispatcher.Invoke(() => State = RenderQueueItemState.Processing);
+
+            var plugin = Output.Value;
+            var size = IsOutputVideo ? new Int32Size(CompositionModel.Width, CompositionModel.Height) : (Int32Size?)null;
+            var sourceTypes = (IsOutputVideo ? SourceType.Video : SourceType.None) | (CompositionModel.HasAudio && IsOutputAudio ? SourceType.Audio : SourceType.None);
+            plugin.BeginOutput(FilePath, BeginTime, EndTime - beginTime, FrameRate, size, sourceTypes);
+
+            var lastProcessedDuration = 0.0;
+            if (sourceTypes.HasFlag(SourceType.Video))
+            {
+                var passCount = plugin.GetPassCount();
+                var frameCount = Math.Ceiling((EndTime - beginTime) * FrameRate);
+                var totalFrameCount = frameCount * passCount;
+                updateProgress(0.0);
+                for (var pass = 0; pass < passCount; pass++)
+                {
+                    plugin.BeginPass(pass);
+                    for (var i = 0; i < frameCount; i++)
+                    {
+                        while (isPause() && !isAbort())
+                        {
+                            Thread.Sleep(100);
+                        }
+                        if (isAbort())
+                        {
+                            break;
+                        }
+
+                        var useGpu = ProjectModel.UseGpu;
+                        var time = BeginTime + i * FrameDuration;
+                        using var image = CompositionModel.RenderFrame(time, 1.0, true, useGpu);
+                        plugin.ProcessFrame(pass, time, image, useGpu);
+                        updateProgress((i + 1 + frameCount * pass) / (double)totalFrameCount * 100.0);
+                        lastProcessedDuration = (i + 1) * FrameDuration;
+                    }
+                    plugin.EndPass();
+                }
+            }
+            else
+            {
+                lastProcessedDuration = EndTime - BeginTime;
+            }
+
+            if (sourceTypes.HasFlag(SourceType.Audio))
+            {
+                var audio = CompositionModel.RenderAudio(BeginTime, lastProcessedDuration);
+                plugin.ProcessAudio(audio);
+            }
+
+            plugin.EndOutput();
+
+            Application.Current.Dispatcher.Invoke(() => State = isAbort() ? RenderQueueItemState.Aborted : RenderQueueItemState.Completed);
+        }
+
         private void CompositionModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             switch (e.PropertyName)
@@ -244,6 +304,7 @@ namespace NiVE3.Model
         Ready,
         Completed,
         Processing,
-        Aborted
+        Aborted,
+        Error
     }
 }

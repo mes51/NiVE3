@@ -59,7 +59,7 @@ namespace NiVE3.Test.Model
             throw new NotImplementedException();
         }
 
-        public int GetPass()
+        public int GetPassCount()
         {
             throw new NotImplementedException();
         }

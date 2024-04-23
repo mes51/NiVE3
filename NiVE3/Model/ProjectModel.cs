@@ -42,6 +42,15 @@ namespace NiVE3.Model
             set { SetProperty(ref isEdited, value); }
         }
 
+        private bool gpuErrorRaised;
+        public bool GpuErrorRaised
+        {
+            get { return gpuErrorRaised; }
+            set { SetProperty(ref gpuErrorRaised, value); }
+        }
+
+        public bool UseGpu => ApplicationModel.UseGpu && !GpuErrorRaised;
+
         FootageListModel FootageListModel { get; }
 
         RendererListModel RendererListModel { get; }
@@ -86,8 +95,6 @@ namespace NiVE3.Model
             FootageListModel.ShowCompositionPreview += FootageListModel_ShowCompositionPreview;
             FootageListModel.FootageDeleted += FootageListModel_FootageDeleted;
             FootageListModel.DeleteFootageByUndo += FootageListModel_DeleteFootageByUndo;
-
-            renderQueueModel.GetProjectPathRequest += RenderQueueModel_GetProjectPathRequest;
 
             historyModel.HistoryChanged += HistoryModel_HistoryChanged;
 
@@ -170,6 +177,7 @@ namespace NiVE3.Model
             RenderQueueModel.Clear();
             HistoryModel.Clear();
             CompositionModels.Clear();
+            GpuErrorRaised = false;
 
             foreach (var p in PreviewModels)
             {
@@ -306,11 +314,6 @@ namespace NiVE3.Model
                     preview.Footage = null;
                 }
             }
-        }
-
-        private void RenderQueueModel_GetProjectPathRequest(object? sender, GetProjectPathRequestEventArgs e)
-        {
-            e.ProjectPath = ProjectPath;
         }
 
         private void HistoryModel_HistoryChanged(object? sender, EventArgs e)

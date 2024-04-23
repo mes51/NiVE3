@@ -333,6 +333,21 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("レンダーキュー")]
         public static readonly string RenderQueueView_Title = nameof(RenderQueueView_Title);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("レンダリング状況:")]
+        public static readonly string RenderQueueView_Progress = nameof(RenderQueueView_Progress);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("レンダリング")]
+        public static readonly string RenderQueueView_Execute = nameof(RenderQueueView_Execute);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("中止")]
+        public static readonly string RenderQueueView_Stop = nameof(RenderQueueView_Stop);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("一時停止")]
+        public static readonly string RenderQueueView_Pause = nameof(RenderQueueView_Pause);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("一時停止")]
+        public static readonly string RenderQueueView_Continue = nameof(RenderQueueView_Continue);
+
         [ShowInMarkup, LanguageKey, DefaultValue("削除")]
         public static readonly string RenderQueueView_ContextMenu_Delete = nameof(RenderQueueView_ContextMenu_Delete);
 

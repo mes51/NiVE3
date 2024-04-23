@@ -192,7 +192,7 @@ namespace NiVE3.PresetPlugin.Output
 
         public void EndPass() { }
 
-        public int GetPass()
+        public int GetPassCount()
         {
             return 1;
         }
@@ -204,7 +204,7 @@ namespace NiVE3.PresetPlugin.Output
                 throw new InvalidOperationException();
             }
 
-            var data = ArrayPool<byte>.Shared.Rent(image.DataLength);
+            var data = ArrayPool<byte>.Shared.Rent(image.DataLength * 4);
             if (image is NGPUImage gpuImage)
             {
                 using var managedImage = gpuImage.CopyToCpu();

@@ -87,7 +87,7 @@ namespace NiVE3.Plugin.Interfaces
         /// 出力時、エンコードなどで必要なパスの回数を取得します。BeginOutput呼び出し後に呼び出されます。
         /// </summary>
         /// <returns>出力に必要なパスの回数</returns>
-        int GetPass();
+        int GetPassCount();
 
         /// <summary>
         /// 画像を書き出します。

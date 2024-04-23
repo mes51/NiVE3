@@ -24,10 +24,35 @@ namespace NiVE3.ViewModel
     partial class RenderQueueViewModel : SingletonePaneViewModelBase
     {
         private bool isRendering;
+        [NeedWire(nameof(RenderQueueModel), IsOneWay = true)]
         public bool IsRendering
         {
             get { return isRendering; }
             set { SetProperty(ref isRendering, value); }
+        }
+
+        private bool isPaused;
+        [NeedWire(nameof(RenderQueueModel), IsOneWay = true)]
+        public bool IsPaused
+        {
+            get { return isPaused; }
+            set { SetProperty(ref isPaused, value); }
+        }
+
+        private bool isAborting;
+        [NeedWire(nameof(RenderQueueModel), IsOneWay = true)]
+        public bool IsAborting
+        {
+            get { return isAborting; }
+            set { SetProperty(ref isAborting, value); }
+        }
+
+        private double progress;
+        [NeedWire(nameof(RenderQueueModel), IsOneWay = true)]
+        public double Progress
+        {
+            get { return progress; }
+            set { SetProperty(ref progress, value); }
         }
 
         private ObservableCollectionView<RenderQueueItemModel, RenderQueueItemViewModel> queue;
@@ -57,9 +82,23 @@ namespace NiVE3.ViewModel
             RenderQueueModel = renderQueueModel;
             Queue = renderQueueModel.Queue.CreateViewCollection(m => new RenderQueueItemViewModel(m, dialogService));
 
-            StartRenderCommand = new RequerySuggestedCommand(() => { }, () => Queue.Any(q => q.State == RenderQueueItemState.Ready));
+            StartRenderCommand = new RequerySuggestedCommand(() =>
+            {
+                if (!IsRendering)
+                {
+                    RenderQueueModel.StartRendering();
+                }
+                else if (!IsPaused)
+                {
+                    RenderQueueModel.PauseRendering();
+                }
+                else
+                {
+                    RenderQueueModel.ContinueRendering();
+                }
+            }, () => Queue.Any(q => q.State == RenderQueueItemState.Ready) || IsRendering);
 
-            StopRenderCommand = new RequerySuggestedCommand(() => { }, () => IsRendering);
+            StopRenderCommand = new RequerySuggestedCommand(() => RenderQueueModel.StopRendering(), () => IsRendering);
 
             DeleteQueueCommand = new DelegateCommand(() =>
             {
@@ -83,6 +122,8 @@ namespace NiVE3.ViewModel
                     RenderQueueModel.DeleteQueues([q.QueueId]);
                 }
             });
+
+            WiringModel();
         }
 
         partial void WiringModel();

@@ -153,7 +153,7 @@ namespace NiVE3.PresetPlugin.Internal.Encoder
                 Quality * 100,
                 PrevBuffer
             );
-            if (result)
+            if (!result)
             {
                 throw new InvalidOperationException();
             }

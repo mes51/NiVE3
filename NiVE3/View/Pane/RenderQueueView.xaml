@@ -25,6 +25,42 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <Style x:Key="ButtonStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Width" Value="75"/>
+            <Setter Property="Height" Value="23"/>
+            <Setter Property="Margin" Value="5,0,0,0"/>
+            <Setter Property="IsEnabled" Value="True"/>
+
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsAborting}" Value="True">
+                    <Setter Property="IsEnabled" Value="False"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="ExecuteButtonStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource ButtonStyle}">
+            <Setter Property="Content" Value="{gm:LanguageResource ResourceKey=RenderQueueView_Execute, ReturnDynamicResource=True}"/>
+
+            <Style.Triggers>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding IsRendering}" Value="True"/>
+                        <Condition Binding="{Binding IsPaused}" Value="False"/>
+                    </MultiDataTrigger.Conditions>
+
+                    <Setter Property="Content" Value="{gm:LanguageResource ResourceKey=RenderQueueView_Pause, ReturnDynamicResource=True}"/>
+                </MultiDataTrigger>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding IsRendering}" Value="True"/>
+                        <Condition Binding="{Binding IsPaused}" Value="True"/>
+                    </MultiDataTrigger.Conditions>
+
+                    <Setter Property="Content" Value="{gm:LanguageResource ResourceKey=RenderQueueView_Continue, ReturnDynamicResource=True}"/>
+                </MultiDataTrigger>
+            </Style.Triggers>
+        </Style>
     </UserControl.Resources>
     <Grid Margin="10">
         <Grid.RowDefinitions>
@@ -40,10 +76,10 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <TextBlock Grid.Column="0" Text="進捗:" VerticalAlignment="Center"/>
-            <ProgressBar Grid.Column="1" Margin="5,0,0,0"/>
-            <Button Grid.Column="2" Content="レンダリング" Width="75" Height="23" Margin="5,0,0,0" Command="{Binding StartRenderCommand}"/>
-            <Button Grid.Column="3" Content="中止" Width="75" Height="23" Margin="5,0,0,0" Command="{Binding StopRenderCommand}"/>
+            <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=RenderQueueView_Progress}" VerticalAlignment="Center"/>
+            <ProgressBar Grid.Column="1" Margin="5,0,0,0" Minimum="0" Maximum="100" Value="{Binding Progress}"/>
+            <Button Grid.Column="2" Style="{StaticResource ExecuteButtonStyle}" Command="{Binding StartRenderCommand}"/>
+            <Button Grid.Column="3" Content="{gm:LanguageResource ResourceKey=RenderQueueView_Stop}" Style="{StaticResource ButtonStyle}" Command="{Binding StopRenderCommand}"/>
         </Grid>
 
         <Grid Grid.Row="1" Margin="0,10,0,0">
