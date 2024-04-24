@@ -38,7 +38,7 @@ namespace NiVE3.PresetPlugin.Internal.Encoder
 
         public int EncodeFrame(ReadOnlySpan<byte> source, Span<byte> destination, out bool isKeyFrame)
         {
-            if (source.Length >= destination.Length)
+            if (source.Length > destination.Length)
             {
                 throw new ArgumentOutOfRangeException(nameof(destination));
             }

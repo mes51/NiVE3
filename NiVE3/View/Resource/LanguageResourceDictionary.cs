@@ -345,11 +345,14 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("一時停止")]
         public static readonly string RenderQueueView_Pause = nameof(RenderQueueView_Pause);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("一時停止")]
+        [ShowInMarkup, LanguageKey, DefaultValue("再開")]
         public static readonly string RenderQueueView_Continue = nameof(RenderQueueView_Continue);
 
         [ShowInMarkup, LanguageKey, DefaultValue("削除")]
         public static readonly string RenderQueueView_ContextMenu_Delete = nameof(RenderQueueView_ContextMenu_Delete);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("状態:")]
+        public static readonly string RenderQueueItemView_State = nameof(RenderQueueItemView_State);
 
         [ShowInMarkup, LanguageKey, DefaultValue("出力プラグイン:")]
         public static readonly string RenderQueueItemView_OutputPlugin = nameof(RenderQueueItemView_OutputPlugin);
@@ -386,112 +389,112 @@ namespace NiVE3.View.Resource
 
         // History Command
 
-        [ShowInMarkup, LanguageKey, DefaultValue("プロジェクトの新規作成/開く")]
+        [DefaultValue("プロジェクトの新規作成/開く")]
         public static readonly string History_NewProject = nameof(History_NewProject);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("フォルダの追加")]
+        [DefaultValue("フォルダの追加")]
         public static readonly string History_AddFolder = nameof(History_AddFolder);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("ファイルの読み込み")]
+        [DefaultValue("ファイルの読み込み")]
         public static readonly string History_LoadFootageFile = nameof(History_LoadFootageFile);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("フッテージの移動")]
+        [DefaultValue("フッテージの移動")]
         public static readonly string History_MoveFootage = nameof(History_MoveFootage);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("フッテージの名前変更")]
+        [DefaultValue("フッテージの名前変更")]
         public static readonly string History_ChangeFootageName = nameof(History_ChangeFootageName);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("フッテージのコメント変更")]
+        [DefaultValue("フッテージのコメント変更")]
         public static readonly string History_ChangeFootageComment = nameof(History_ChangeFootageComment);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("フッテージの削除")]
+        [DefaultValue("フッテージの削除")]
         public static readonly string History_DeleteFootages = nameof(History_DeleteFootages);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("コンポジションの追加")]
+        [DefaultValue("コンポジションの追加")]
         public static readonly string History_AddComposition = nameof(History_AddComposition);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("コンポジションの削除")]
+        [DefaultValue("コンポジションの削除")]
         public static readonly string History_RemoveComposition = nameof(History_RemoveComposition);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("レイヤーの追加")]
+        [DefaultValue("レイヤーの追加")]
         public static readonly string History_AddLayers = nameof(History_AddLayers);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("レイヤーの移動")]
+        [DefaultValue("レイヤーの移動")]
         public static readonly string History_MoveLayers = nameof(History_MoveLayers);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("レイヤーの削除")]
+        [DefaultValue("レイヤーの削除")]
         public static readonly string History_DeleteLayers = nameof(History_DeleteLayers);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("平面の追加")]
+        [DefaultValue("平面の追加")]
         public static readonly string History_AddSolid = nameof(History_AddSolid);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("レイヤー時間変更")]
+        [DefaultValue("レイヤー時間変更")]
         public static readonly string History_EditLayerDuration = nameof(History_EditLayerDuration);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("レイヤースイッチの切り替え")]
+        [DefaultValue("レイヤースイッチの切り替え")]
         public static readonly string History_ChangeLayerSwitch = nameof(History_ChangeLayerSwitch);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("レイヤーの名前変更")]
+        [DefaultValue("レイヤーの名前変更")]
         public static readonly string History_ChangeLayerName = nameof(History_ChangeLayerName);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("レイヤーのコメント変更")]
+        [DefaultValue("レイヤーのコメント変更")]
         public static readonly string History_ChangeLayerComment = nameof(History_ChangeLayerComment);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("合成モードの変更")]
+        [DefaultValue("合成モードの変更")]
         public static readonly string History_ChangeBlendMode = nameof(History_ChangeBlendMode);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("トラックマットの変更")]
+        [DefaultValue("トラックマットの変更")]
         public static readonly string History_ChangeTrackMatteLayer = nameof(History_ChangeTrackMatteLayer);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("トラックマットのモード変更")]
+        [DefaultValue("トラックマットのモード変更")]
         public static readonly string History_ChangeTrackMatteMode = nameof(History_ChangeTrackMatteMode);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("親レイヤーの変更")]
+        [DefaultValue("親レイヤーの変更")]
         public static readonly string History_ChangeParentLayer = nameof(History_ChangeParentLayer);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("レイヤーのタグの変更")]
+        [DefaultValue("レイヤーのタグの変更")]
         public static readonly string History_ChangeTagColor = nameof(History_ChangeTagColor);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("プロパティの変更")]
+        [DefaultValue("プロパティの変更")]
         public static readonly string History_ChangePropertyValue = nameof(History_ChangePropertyValue);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("キーフレームの追加")]
+        [DefaultValue("キーフレームの追加")]
         public static readonly string History_AddKeyFrame = nameof(History_AddKeyFrame);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("キーフレームの削除")]
+        [DefaultValue("キーフレームの削除")]
         public static readonly string History_RemoveKeyFrame = nameof(History_RemoveKeyFrame);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("キーフレームの移動")]
+        [DefaultValue("キーフレームの移動")]
         public static readonly string History_MoveKeyFrame = nameof(History_MoveKeyFrame);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("キーフレームの補間法の変更")]
+        [DefaultValue("キーフレームの補間法の変更")]
         public static readonly string History_ChangeKeyFrameInterpolationType = nameof(History_ChangeKeyFrameInterpolationType);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("エフェクトの追加")]
+        [DefaultValue("エフェクトの追加")]
         public static readonly string History_AddEffects = nameof(History_AddEffects);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("エフェクトの移動")]
+        [DefaultValue("エフェクトの移動")]
         public static readonly string History_MoveEffects = nameof(History_MoveEffects);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("エフェクトの有効・無効切り替え")]
+        [DefaultValue("エフェクトの有効・無効切り替え")]
         public static readonly string History_ChangeEffectsEnable = nameof(History_ChangeEffectsEnable);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("エフェクトの削除")]
+        [DefaultValue("エフェクトの削除")]
         public static readonly string History_DeleteEffects = nameof(History_DeleteEffects);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("エフェクトの名前変更")]
+        [DefaultValue("エフェクトの名前変更")]
         public static readonly string History_ChangeEffectName = nameof(History_ChangeEffectName);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("エフェクトのコメント変更")]
+        [DefaultValue("エフェクトのコメント変更")]
         public static readonly string History_ChangeEffectComment = nameof(History_ChangeEffectComment);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("レンダーキューの追加")]
+        [DefaultValue("レンダーキューの追加")]
         public static readonly string History_EnqueueRendering = nameof(History_EnqueueRendering);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("レンダーキューの削除")]
+        [DefaultValue("レンダーキューの削除")]
         public static readonly string History_DeleteRenderQueue = nameof(History_DeleteRenderQueue);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("レンダーキューの設定変更")]
+        [DefaultValue("レンダーキューの設定変更")]
         public static readonly string History_ChangeRenderQueueSetting = nameof(History_ChangeRenderQueueSetting);
 
         // Dialog
@@ -510,360 +513,360 @@ namespace NiVE3.View.Resource
 
         // Property
 
-        [ShowInMarkup, LanguageKey, DefaultValue("アンカーポイント")]
+        [LanguageKey, DefaultValue("アンカーポイント")]
         public static readonly string TransformProperty_AnchorPoint = nameof(TransformProperty_AnchorPoint);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("位置")]
+        [LanguageKey, DefaultValue("位置")]
         public static readonly string TransformProperty_Translate = nameof(TransformProperty_Translate);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("方向")]
+        [LanguageKey, DefaultValue("方向")]
         public static readonly string TransformProperty_Direction = nameof(TransformProperty_Direction);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("回転")]
+        [LanguageKey, DefaultValue("回転")]
         public static readonly string TransformProperty_ZAngle2D = nameof(TransformProperty_ZAngle2D);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("X回転")]
+        [LanguageKey, DefaultValue("X回転")]
         public static readonly string TransformProperty_XAngle3D = nameof(TransformProperty_XAngle3D);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("Y回転")]
+        [LanguageKey, DefaultValue("Y回転")]
         public static readonly string TransformProperty_YAngle3D = nameof(TransformProperty_YAngle3D);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("Z回転")]
+        [LanguageKey, DefaultValue("Z回転")]
         public static readonly string TransformProperty_ZAngle3D = nameof(TransformProperty_ZAngle3D);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("スケール")]
+        [LanguageKey, DefaultValue("スケール")]
         public static readonly string TransformProperty_Scale = nameof(TransformProperty_Scale);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("不透明度")]
+        [LanguageKey, DefaultValue("不透明度")]
         public static readonly string TransformProperty_Opacity = nameof(TransformProperty_Opacity);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("影を落とす")]
+        [LanguageKey, DefaultValue("影を落とす")]
         public static readonly string LayerOptionsProperty_IsCastShadow = nameof(LayerOptionsProperty_IsCastShadow);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("ライトを透過")]
+        [LanguageKey, DefaultValue("ライトを透過")]
         public static readonly string LayerOptionsProperty_LightTransmission = nameof(LayerOptionsProperty_LightTransmission);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("影を受ける")]
+        [LanguageKey, DefaultValue("影を受ける")]
         public static readonly string LayerOptionsProperty_IsAcceptShadow = nameof(LayerOptionsProperty_IsAcceptShadow);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("ライトを受ける")]
+        [LanguageKey, DefaultValue("ライトを受ける")]
         public static readonly string LayerOptionsProperty_IsAcceptLight = nameof(LayerOptionsProperty_IsAcceptLight);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("アンビエント")]
+        [LanguageKey, DefaultValue("アンビエント")]
         public static readonly string LayerOptionsProperty_Ambient = nameof(LayerOptionsProperty_Ambient);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("拡散")]
+        [LanguageKey, DefaultValue("拡散")]
         public static readonly string LayerOptionsProperty_Diffuse = nameof(LayerOptionsProperty_Diffuse);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("鏡面強度")]
+        [LanguageKey, DefaultValue("鏡面強度")]
         public static readonly string LayerOptionsProperty_SpecularIntensity = nameof(LayerOptionsProperty_SpecularIntensity);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("鏡面光沢")]
+        [LanguageKey, DefaultValue("鏡面光沢")]
         public static readonly string LayerOptionsProperty_SpecularShininess = nameof(LayerOptionsProperty_SpecularShininess);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("金属")]
+        [LanguageKey, DefaultValue("金属")]
         public static readonly string LayerOptionsProperty_Metal = nameof(LayerOptionsProperty_Metal);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("目標点")]
+        [LanguageKey, DefaultValue("目標点")]
         public static readonly string TransformProperty_CameraPointOfInterest = nameof(TransformProperty_CameraPointOfInterest);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("ズーム")]
+        [LanguageKey, DefaultValue("ズーム")]
         public static readonly string LayerOptionsProperty_CameraZoom = nameof(LayerOptionsProperty_CameraZoom);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("ライトの種類")]
+        [LanguageKey, DefaultValue("ライトの種類")]
         public static readonly string LayerOptionsProperty_LightType = nameof(LayerOptionsProperty_LightType);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("色")]
+        [LanguageKey, DefaultValue("色")]
         public static readonly string LayerOptionsProperty_Color = nameof(LayerOptionsProperty_Color);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("強度")]
+        [LanguageKey, DefaultValue("強度")]
         public static readonly string LayerOptionsProperty_Intensity = nameof(LayerOptionsProperty_Intensity);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("円錐頂角")]
+        [LanguageKey, DefaultValue("円錐頂角")]
         public static readonly string LayerOptionsProperty_ConeAngle = nameof(LayerOptionsProperty_ConeAngle);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("円錐ぼかし")]
+        [LanguageKey, DefaultValue("円錐ぼかし")]
         public static readonly string LayerOptionsProperty_ConeAttenuation = nameof(LayerOptionsProperty_ConeAttenuation);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("フォールオフの種類")]
+        [LanguageKey, DefaultValue("フォールオフの種類")]
         public static readonly string LayerOptionsProperty_FalloffType = nameof(LayerOptionsProperty_FalloffType);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("フォールオフの開始")]
+        [LanguageKey, DefaultValue("フォールオフの開始")]
         public static readonly string LayerOptionsProperty_FalloffStart = nameof(LayerOptionsProperty_FalloffStart);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("フォールオフの距離")]
+        [LanguageKey, DefaultValue("フォールオフの距離")]
         public static readonly string LayerOptionsProperty_FalloffLength = nameof(LayerOptionsProperty_FalloffLength);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("影を落とす")]
+        [LanguageKey, DefaultValue("影を落とす")]
         public static readonly string LayerOptionsProperty_EnableShadow = nameof(LayerOptionsProperty_EnableShadow);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("影の濃さ")]
+        [LanguageKey, DefaultValue("影の濃さ")]
         public static readonly string LayerOptionsProperty_ShadowStrength = nameof(LayerOptionsProperty_ShadowStrength);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("影のぼかし")]
+        [LanguageKey, DefaultValue("影のぼかし")]
         public static readonly string LayerOptionsProperty_ShadowScatterSize = nameof(LayerOptionsProperty_ShadowScatterSize);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("ソーステキスト")]
+        [LanguageKey, DefaultValue("ソーステキスト")]
         public static readonly string TextProperty_SourceText = nameof(TextProperty_SourceText);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("詳細")]
+        [LanguageKey, DefaultValue("詳細")]
         public static readonly string TextProperty_TextMoreOptions = nameof(TextProperty_TextMoreOptions);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("アンカーポイントの基準")]
+        [LanguageKey, DefaultValue("アンカーポイントの基準")]
         public static readonly string TextProperty_TextMoreOptions_BaseAnchorPointRate = nameof(TextProperty_TextMoreOptions_BaseAnchorPointRate);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("テキストボックスのサイズ")]
+        [LanguageKey, DefaultValue("テキストボックスのサイズ")]
         public static readonly string TextProperty_TextMoreOptions_TextBoxSize = nameof(TextProperty_TextMoreOptions_TextBoxSize);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("文字間のブレンドモード")]
+        [LanguageKey, DefaultValue("文字間のブレンドモード")]
         public static readonly string TextProperty_TextMoreOptions_InterCharacterBlendMode = nameof(TextProperty_TextMoreOptions_InterCharacterBlendMode);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("テキストアニメータ")]
+        [LanguageKey, DefaultValue("テキストアニメータ")]
         public static readonly string TextProperty_TextAnimator = nameof(TextProperty_TextAnimator);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("アニメータ")]
+        [LanguageKey, DefaultValue("アニメータ")]
         public static readonly string TextProperty_TextAnimator_Animator = nameof(TextProperty_TextAnimator_Animator);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("範囲セレクタ")]
+        [LanguageKey, DefaultValue("範囲セレクタ")]
         public static readonly string TextProperty_TextAnimator_Animator_Selector = nameof(TextProperty_TextAnimator_Animator_Selector);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("セレクタ")]
+        [LanguageKey, DefaultValue("セレクタ")]
         public static readonly string TextProperty_TextAnimator_Animator_Selector_Selector = nameof(TextProperty_TextAnimator_Animator_Selector_Selector);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("開始")]
+        [LanguageKey, DefaultValue("開始")]
         public static readonly string TextProperty_TextAnimator_Animator_Selector_Begin = nameof(TextProperty_TextAnimator_Animator_Selector_Begin);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("終了")]
+        [LanguageKey, DefaultValue("終了")]
         public static readonly string TextProperty_TextAnimator_Animator_Selector_End = nameof(TextProperty_TextAnimator_Animator_Selector_End);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("オフセット")]
+        [LanguageKey, DefaultValue("オフセット")]
         public static readonly string TextProperty_TextAnimator_Animator_Selector_Offset = nameof(TextProperty_TextAnimator_Animator_Selector_Offset);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("詳細")]
+        [LanguageKey, DefaultValue("詳細")]
         public static readonly string TextProperty_TextAnimator_Animator_Selector_MoreOption = nameof(TextProperty_TextAnimator_Animator_Selector_MoreOption);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("基準")]
+        [LanguageKey, DefaultValue("基準")]
         public static readonly string TextProperty_TextAnimator_Animator_Selector_Criteria = nameof(TextProperty_TextAnimator_Animator_Selector_Criteria);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("モード")]
+        [LanguageKey, DefaultValue("モード")]
         public static readonly string TextProperty_TextAnimator_Animator_Selector_BlendMode = nameof(TextProperty_TextAnimator_Animator_Selector_BlendMode);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("量")]
+        [LanguageKey, DefaultValue("量")]
         public static readonly string TextProperty_TextAnimator_Animator_Selector_Amount = nameof(TextProperty_TextAnimator_Animator_Selector_Amount);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("シェイプ")]
+        [LanguageKey, DefaultValue("シェイプ")]
         public static readonly string TextProperty_TextAnimator_Animator_Selector_Shape = nameof(TextProperty_TextAnimator_Animator_Selector_Shape);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("ランダム")]
+        [LanguageKey, DefaultValue("ランダム")]
         public static readonly string TextProperty_TextAnimator_Animator_Selector_EnableRandom = nameof(TextProperty_TextAnimator_Animator_Selector_EnableRandom);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("ランダムシード")]
+        [LanguageKey, DefaultValue("ランダムシード")]
         public static readonly string TextProperty_TextAnimator_Animator_Selector_RandomSeed = nameof(TextProperty_TextAnimator_Animator_Selector_RandomSeed);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("値")]
+        [LanguageKey, DefaultValue("値")]
         public static readonly string TextProperty_TextAnimator_Animator_Value = nameof(TextProperty_TextAnimator_Animator_Value);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("アンカーポイント")]
+        [LanguageKey, DefaultValue("アンカーポイント")]
         public static readonly string TextProperty_TextAnimator_Animator_Value_AnchorPoint = nameof(TextProperty_TextAnimator_Animator_Value_AnchorPoint);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("位置")]
+        [LanguageKey, DefaultValue("位置")]
         public static readonly string TextProperty_TextAnimator_Animator_Value_Position = nameof(TextProperty_TextAnimator_Animator_Value_Position);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("スケール")]
+        [LanguageKey, DefaultValue("スケール")]
         public static readonly string TextProperty_TextAnimator_Animator_Value_Scale = nameof(TextProperty_TextAnimator_Animator_Value_Scale);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("回転")]
+        [LanguageKey, DefaultValue("回転")]
         public static readonly string TextProperty_TextAnimator_Animator_Value_Angle = nameof(TextProperty_TextAnimator_Animator_Value_Angle);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("歪曲")]
+        [LanguageKey, DefaultValue("歪曲")]
         public static readonly string TextProperty_TextAnimator_Animator_Value_Skew = nameof(TextProperty_TextAnimator_Animator_Value_Skew);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("歪曲軸")]
+        [LanguageKey, DefaultValue("歪曲軸")]
         public static readonly string TextProperty_TextAnimator_Animator_Value_SkewAxis = nameof(TextProperty_TextAnimator_Animator_Value_SkewAxis);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("不透明度")]
+        [LanguageKey, DefaultValue("不透明度")]
         public static readonly string TextProperty_TextAnimator_Animator_Value_Opacity = nameof(TextProperty_TextAnimator_Animator_Value_Opacity);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("フォントサイズ")]
+        [LanguageKey, DefaultValue("フォントサイズ")]
         public static readonly string TextProperty_TextAnimator_Animator_Value_FontSize = nameof(TextProperty_TextAnimator_Animator_Value_FontSize);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("塗りの色")]
+        [LanguageKey, DefaultValue("塗りの色")]
         public static readonly string TextProperty_TextAnimator_Animator_Value_FillColor = nameof(TextProperty_TextAnimator_Animator_Value_FillColor);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("塗りの不透明度")]
+        [LanguageKey, DefaultValue("塗りの不透明度")]
         public static readonly string TextProperty_TextAnimator_Animator_Value_FillColorOpacity = nameof(TextProperty_TextAnimator_Animator_Value_FillColorOpacity);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("線の色")]
+        [LanguageKey, DefaultValue("線の色")]
         public static readonly string TextProperty_TextAnimator_Animator_Value_TextLineColor = nameof(TextProperty_TextAnimator_Animator_Value_TextLineColor);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("線の不透明度")]
+        [LanguageKey, DefaultValue("線の不透明度")]
         public static readonly string TextProperty_TextAnimator_Animator_Value_TextLineColorOpacity = nameof(TextProperty_TextAnimator_Animator_Value_TextLineColorOpacity);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("線の太さ")]
+        [LanguageKey, DefaultValue("線の太さ")]
         public static readonly string TextProperty_TextAnimator_Animator_Value_TextLineWidth = nameof(TextProperty_TextAnimator_Animator_Value_TextLineWidth);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("文字のオフセット")]
+        [LanguageKey, DefaultValue("文字のオフセット")]
         public static readonly string TextProperty_TextAnimator_Animator_Value_CharacterOffset = nameof(TextProperty_TextAnimator_Animator_Value_CharacterOffset);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("存在しない文字は空白にする")]
+        [LanguageKey, DefaultValue("存在しない文字は空白にする")]
         public static readonly string TextProperty_TextAnimator_Animator_Value_CharacterOffset_WhiteSpaceReplacementChar = nameof(TextProperty_TextAnimator_Animator_Value_CharacterOffset_WhiteSpaceReplacementChar);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("ASCIIの範囲内に収める")]
+        [LanguageKey, DefaultValue("ASCIIの範囲内に収める")]
         public static readonly string TextProperty_TextAnimator_Animator_Value_CharacterOffset_RestrictAscii = nameof(TextProperty_TextAnimator_Animator_Value_CharacterOffset_RestrictAscii);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("ブラー")]
+        [LanguageKey, DefaultValue("ブラー")]
         public static readonly string TextProperty_TextAnimator_Animator_Value_Blur = nameof(TextProperty_TextAnimator_Animator_Value_Blur);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("コンテンツ")]
+        [LanguageKey, DefaultValue("コンテンツ")]
         public static readonly string ShapeProperty_Content = nameof(ShapeProperty_Content);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("グループ")]
+        [LanguageKey, DefaultValue("グループ")]
         public static readonly string ShapeProperty_Group = nameof(ShapeProperty_Group);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("コンテンツ")]
+        [LanguageKey, DefaultValue("コンテンツ")]
         public static readonly string ShapeProperty_Group_Content = nameof(ShapeProperty_Group_Content);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("トランスフォーム")]
+        [LanguageKey, DefaultValue("トランスフォーム")]
         public static readonly string ShapeProperty_Transform = nameof(ShapeProperty_Transform);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("アンカーポイント")]
+        [LanguageKey, DefaultValue("アンカーポイント")]
         public static readonly string ShapeProperty_Transform_AnchorPoint = nameof(ShapeProperty_Transform_AnchorPoint);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("位置")]
+        [LanguageKey, DefaultValue("位置")]
         public static readonly string ShapeProperty_Transform_Position = nameof(ShapeProperty_Transform_Position);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("スケール")]
+        [LanguageKey, DefaultValue("スケール")]
         public static readonly string ShapeProperty_Transform_Scale = nameof(ShapeProperty_Transform_Scale);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("回転")]
+        [LanguageKey, DefaultValue("回転")]
         public static readonly string ShapeProperty_Transform_Angle = nameof(ShapeProperty_Transform_Angle);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("歪曲")]
+        [LanguageKey, DefaultValue("歪曲")]
         public static readonly string ShapeProperty_Transform_Skew = nameof(ShapeProperty_Transform_Skew);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("歪曲軸")]
+        [LanguageKey, DefaultValue("歪曲軸")]
         public static readonly string ShapeProperty_Transform_SkewAxis = nameof(ShapeProperty_Transform_SkewAxis);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("不透明度")]
+        [LanguageKey, DefaultValue("不透明度")]
         public static readonly string ShapeProperty_Transform_Opacity = nameof(ShapeProperty_Transform_Opacity);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("長方形")]
+        [LanguageKey, DefaultValue("長方形")]
         public static readonly string ShapeProperty_RectangleGroup = nameof(ShapeProperty_RectangleGroup);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("角丸")]
+        [LanguageKey, DefaultValue("角丸")]
         public static readonly string ShapeProperty_RectangleGroup_CornerRounded = nameof(ShapeProperty_RectangleGroup_CornerRounded);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("円")]
+        [LanguageKey, DefaultValue("円")]
         public static readonly string ShapeProperty_CircleGroup = nameof(ShapeProperty_CircleGroup);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("多角形")]
+        [LanguageKey, DefaultValue("多角形")]
         public static readonly string ShapeProperty_RegularPolygonGroup = nameof(ShapeProperty_RegularPolygonGroup);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("半径")]
+        [LanguageKey, DefaultValue("半径")]
         public static readonly string ShapeProperty_RegularPolygonGroup_Radius = nameof(ShapeProperty_RegularPolygonGroup_Radius);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("角の丸み")]
+        [LanguageKey, DefaultValue("角の丸み")]
         public static readonly string ShapeProperty_RegularPolygonGroup_Rounded = nameof(ShapeProperty_RegularPolygonGroup_Rounded);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("星")]
+        [LanguageKey, DefaultValue("星")]
         public static readonly string ShapeProperty_StarGroup = nameof(ShapeProperty_StarGroup);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("内半径")]
+        [LanguageKey, DefaultValue("内半径")]
         public static readonly string ShapeProperty_StarGroup_InnerRadius = nameof(ShapeProperty_StarGroup_InnerRadius);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("外半径")]
+        [LanguageKey, DefaultValue("外半径")]
         public static readonly string ShapeProperty_StarGroup_OuterRadius = nameof(ShapeProperty_StarGroup_OuterRadius);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("内側の丸み")]
+        [LanguageKey, DefaultValue("内側の丸み")]
         public static readonly string ShapeProperty_StarGroup_InnerRounded = nameof(ShapeProperty_StarGroup_InnerRounded);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("外側の丸み")]
+        [LanguageKey, DefaultValue("外側の丸み")]
         public static readonly string ShapeProperty_StarGroup_OuterRounded = nameof(ShapeProperty_StarGroup_OuterRounded);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("頂点数")]
+        [LanguageKey, DefaultValue("頂点数")]
         public static readonly string ShapeProperty_PolygonGroup_Points = nameof(ShapeProperty_PolygonGroup_Points);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("サイズ")]
+        [LanguageKey, DefaultValue("サイズ")]
         public static readonly string ShapeProperty_ShapeObjectGroup_Size = nameof(ShapeProperty_ShapeObjectGroup_Size);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("位置")]
+        [LanguageKey, DefaultValue("位置")]
         public static readonly string ShapeProperty_ShapeObjectGroup_Position = nameof(ShapeProperty_ShapeObjectGroup_Position);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("回転")]
+        [LanguageKey, DefaultValue("回転")]
         public static readonly string ShapeProperty_ShapeObjectGroup_Angle = nameof(ShapeProperty_ShapeObjectGroup_Angle);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("塗り")]
+        [LanguageKey, DefaultValue("塗り")]
         public static readonly string ShapeProperty_SolidFillGroup = nameof(ShapeProperty_SolidFillGroup);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("グラデーションの塗り")]
+        [LanguageKey, DefaultValue("グラデーションの塗り")]
         public static readonly string ShapeProperty_GradientFillGroup = nameof(ShapeProperty_GradientFillGroup);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("規則")]
+        [LanguageKey, DefaultValue("規則")]
         public static readonly string ShapeProperty_FillGroup_FillRule = nameof(ShapeProperty_FillGroup_FillRule);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("線")]
+        [LanguageKey, DefaultValue("線")]
         public static readonly string ShapeProperty_SolidStrokeGroup = nameof(ShapeProperty_SolidStrokeGroup);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("グラデーションの線")]
+        [LanguageKey, DefaultValue("グラデーションの線")]
         public static readonly string ShapeProperty_GradientStrokeGroup = nameof(ShapeProperty_GradientStrokeGroup);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("線幅")]
+        [LanguageKey, DefaultValue("線幅")]
         public static readonly string ShapeProperty_StrokeGroup_Width = nameof(ShapeProperty_StrokeGroup_Width);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("線端")]
+        [LanguageKey, DefaultValue("線端")]
         public static readonly string ShapeProperty_StrokeGroup_EndCapStyleType = nameof(ShapeProperty_StrokeGroup_EndCapStyleType);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("線の結合")]
+        [LanguageKey, DefaultValue("線の結合")]
         public static readonly string ShapeProperty_StrokeGroup_JoinStyleType = nameof(ShapeProperty_StrokeGroup_JoinStyleType);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("グラデーションの種類")]
+        [LanguageKey, DefaultValue("グラデーションの種類")]
         public static readonly string ShapeProperty_GradientGroup_Type = nameof(ShapeProperty_GradientGroup_Type);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("グラデーションの編集")]
+        [LanguageKey, DefaultValue("グラデーションの編集")]
         public static readonly string ShapeProperty_GradientGroup_Color_Edit = nameof(ShapeProperty_GradientGroup_Color_Edit);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("OKLab色空間で補間する")]
+        [LanguageKey, DefaultValue("OKLab色空間で補間する")]
         public static readonly string ShapeProperty_GradientGroup_UseOkLabInterpolation = nameof(ShapeProperty_GradientGroup_UseOkLabInterpolation);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("開始点")]
+        [LanguageKey, DefaultValue("開始点")]
         public static readonly string ShapeProperty_GradientGroup_BeginPosition = nameof(ShapeProperty_GradientGroup_BeginPosition);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("終了点")]
+        [LanguageKey, DefaultValue("終了点")]
         public static readonly string ShapeProperty_GradientGroup_EndPosition = nameof(ShapeProperty_GradientGroup_EndPosition);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("色")]
+        [LanguageKey, DefaultValue("色")]
         public static readonly string ShapeProperty_Drawing_Color = nameof(ShapeProperty_Drawing_Color);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("不透明度")]
+        [LanguageKey, DefaultValue("不透明度")]
         public static readonly string ShapeProperty_Drawing_Opacity = nameof(ShapeProperty_Drawing_Opacity);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("ブレンドモード")]
+        [LanguageKey, DefaultValue("ブレンドモード")]
         public static readonly string ShapeProperty_Drawing_BlendMode = nameof(ShapeProperty_Drawing_BlendMode);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("リピータ")]
+        [LanguageKey, DefaultValue("リピータ")]
         public static readonly string ShapeProperty_RepeaterGroup = nameof(ShapeProperty_RepeaterGroup);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("数")]
+        [LanguageKey, DefaultValue("数")]
         public static readonly string ShapeProperty_RepeaterGroup_Count = nameof(ShapeProperty_RepeaterGroup_Count);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("オフセット")]
+        [LanguageKey, DefaultValue("オフセット")]
         public static readonly string ShapeProperty_RepeaterGroup_Offset = nameof(ShapeProperty_RepeaterGroup_Offset);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("開始点の不透明度")]
+        [LanguageKey, DefaultValue("開始点の不透明度")]
         public static readonly string ShapeProperty_RepeaterGroup_Transform_BeginPointOpacity = nameof(ShapeProperty_RepeaterGroup_Transform_BeginPointOpacity);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("終了点の不透明度")]
+        [LanguageKey, DefaultValue("終了点の不透明度")]
         public static readonly string ShapeProperty_RepeaterGroup_Transform_EndPointOpacity = nameof(ShapeProperty_RepeaterGroup_Transform_EndPointOpacity);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("パスの結合")]
+        [LanguageKey, DefaultValue("パスの結合")]
         public static readonly string ShapeProperty_CombineGroup = nameof(ShapeProperty_CombineGroup);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("種類")]
+        [LanguageKey, DefaultValue("種類")]
         public static readonly string ShapeProperty_CombineGroup_CombineType = nameof(ShapeProperty_CombineGroup_CombineType);
 
         // Property Control
 
-        [ShowInMarkup, LanguageKey, DefaultValue("編集")]
+        [LanguageKey, DefaultValue("編集")]
         public static readonly string SourceTextPropertyControl_Edit = nameof(SourceTextPropertyControl_Edit);
 
         // Unit
@@ -882,242 +885,260 @@ namespace NiVE3.View.Resource
 
         // Enum
 
-        [ShowInMarkup, DefaultValue("RGB")]
+        [DefaultValue("RGB")]
         public static readonly string PreviewColorChannel_Rgb = nameof(PreviewColorChannel_Rgb);
 
-        [ShowInMarkup, DefaultValue("赤")]
+        [DefaultValue("赤")]
         public static readonly string PreviewColorChannel_R = nameof(PreviewColorChannel_R);
 
-        [ShowInMarkup, DefaultValue("緑")]
+        [DefaultValue("緑")]
         public static readonly string PreviewColorChannel_G = nameof(PreviewColorChannel_G);
 
-        [ShowInMarkup, DefaultValue("青")]
+        [DefaultValue("青")]
         public static readonly string PreviewColorChannel_B = nameof(PreviewColorChannel_B);
 
-        [ShowInMarkup, DefaultValue("アルファ")]
+        [DefaultValue("アルファ")]
         public static readonly string PreviewColorChannel_Alpha = nameof(PreviewColorChannel_Alpha);
 
-        [ShowInMarkup, DefaultValue("RGBストレート")]
+        [DefaultValue("RGBストレート")]
         public static readonly string PreviewColorChannel_RgbStraight = nameof(PreviewColorChannel_RgbStraight);
 
-        [ShowInMarkup, DefaultValue("通常")]
+        [DefaultValue("通常")]
         public static readonly string BlendMode_Normal = nameof(BlendMode_Normal);
 
-        [ShowInMarkup, DefaultValue("置換")]
+        [DefaultValue("置換")]
         public static readonly string BlendMode_Replace = nameof(BlendMode_Replace);
 
-        [ShowInMarkup, DefaultValue("加算")]
+        [DefaultValue("加算")]
         public static readonly string BlendMode_Add = nameof(BlendMode_Add);
 
-        [ShowInMarkup, DefaultValue("減算")]
+        [DefaultValue("減算")]
         public static readonly string BlendMode_Subtract = nameof(BlendMode_Subtract);
 
-        [ShowInMarkup, DefaultValue("乗算")]
+        [DefaultValue("乗算")]
         public static readonly string BlendMode_Multiply = nameof(BlendMode_Multiply);
 
-        [ShowInMarkup, DefaultValue("スクリーン")]
+        [DefaultValue("スクリーン")]
         public static readonly string BlendMode_Screen = nameof(BlendMode_Screen);
 
-        [ShowInMarkup, DefaultValue("オーバーレイ")]
+        [DefaultValue("オーバーレイ")]
         public static readonly string BlendMode_Overlay = nameof(BlendMode_Overlay);
 
-        [ShowInMarkup, DefaultValue("ハードライト")]
+        [DefaultValue("ハードライト")]
         public static readonly string BlendMode_HardLight = nameof(BlendMode_HardLight);
 
-        [ShowInMarkup, DefaultValue("ソフトライト")]
+        [DefaultValue("ソフトライト")]
         public static readonly string BlendMode_SoftLight = nameof(BlendMode_SoftLight);
 
-        [ShowInMarkup, DefaultValue("ビビッドライト")]
+        [DefaultValue("ビビッドライト")]
         public static readonly string BlendMode_VividLight = nameof(BlendMode_VividLight);
 
-        [ShowInMarkup, DefaultValue("リニアライト")]
+        [DefaultValue("リニアライト")]
         public static readonly string BlendMode_LinearLight = nameof(BlendMode_LinearLight);
 
-        [ShowInMarkup, DefaultValue("ピンライト")]
+        [DefaultValue("ピンライト")]
         public static readonly string BlendMode_PinLight = nameof(BlendMode_PinLight);
 
-        [ShowInMarkup, DefaultValue("覆い焼きカラー")]
+        [DefaultValue("覆い焼きカラー")]
         public static readonly string BlendMode_ColorDodge = nameof(BlendMode_ColorDodge);
 
-        [ShowInMarkup, DefaultValue("覆い焼きリニア")]
+        [DefaultValue("覆い焼きリニア")]
         public static readonly string BlendMode_LinearDodge = nameof(BlendMode_LinearDodge);
 
-        [ShowInMarkup, DefaultValue("焼き込みカラー")]
+        [DefaultValue("焼き込みカラー")]
         public static readonly string BlendMode_ColorBurn = nameof(BlendMode_ColorBurn);
 
-        [ShowInMarkup, DefaultValue("焼き込みリニア")]
+        [DefaultValue("焼き込みリニア")]
         public static readonly string BlendMode_LinearBurn = nameof(BlendMode_LinearBurn);
 
-        [ShowInMarkup, DefaultValue("比較(暗)")]
+        [DefaultValue("比較(暗)")]
         public static readonly string BlendMode_Darken = nameof(BlendMode_Darken);
 
-        [ShowInMarkup, DefaultValue("比較(明)")]
+        [DefaultValue("比較(明)")]
         public static readonly string BlendMode_Lighten = nameof(BlendMode_Lighten);
 
-        [ShowInMarkup, DefaultValue("差")]
+        [DefaultValue("差")]
         public static readonly string BlendMode_Difference = nameof(BlendMode_Difference);
 
-        [ShowInMarkup, DefaultValue("除外")]
+        [DefaultValue("除外")]
         public static readonly string BlendMode_Exclusion = nameof(BlendMode_Exclusion);
 
-        [ShowInMarkup, DefaultValue("色相")]
+        [DefaultValue("色相")]
         public static readonly string BlendMode_Hue = nameof(BlendMode_Hue);
 
-        [ShowInMarkup, DefaultValue("彩度")]
+        [DefaultValue("彩度")]
         public static readonly string BlendMode_Saturation = nameof(BlendMode_Saturation);
 
-        [ShowInMarkup, DefaultValue("カラー")]
+        [DefaultValue("カラー")]
         public static readonly string BlendMode_Color = nameof(BlendMode_Color);
 
-        [ShowInMarkup, DefaultValue("明度")]
+        [DefaultValue("明度")]
         public static readonly string BlendMode_Luminance = nameof(BlendMode_Luminance);
 
-        [ShowInMarkup, DefaultValue("アルファ")]
+        [DefaultValue("アルファ")]
         public static readonly string TrackMatteMode_Alpha = nameof(TrackMatteMode_Alpha);
 
-        [ShowInMarkup, DefaultValue("反転アルファ")]
+        [DefaultValue("反転アルファ")]
         public static readonly string TrackMatteMode_InvertAlpha = nameof(TrackMatteMode_InvertAlpha);
 
-        [ShowInMarkup, DefaultValue("明度")]
+        [DefaultValue("明度")]
         public static readonly string TrackMatteMode_Luminance = nameof(TrackMatteMode_Luminance);
 
-        [ShowInMarkup, DefaultValue("反転明度")]
+        [DefaultValue("反転明度")]
         public static readonly string TrackMatteMode_InvertLuminance = nameof(TrackMatteMode_InvertLuminance);
 
-        [ShowInMarkup, DefaultValue("ポイント")]
+        [DefaultValue("ポイント")]
         public static readonly string LightType_Point = nameof(LightType_Point);
 
-        [ShowInMarkup, DefaultValue("スポット")]
+        [DefaultValue("スポット")]
         public static readonly string LightType_Spot = nameof(LightType_Spot);
 
-        [ShowInMarkup, DefaultValue("平行")]
+        [DefaultValue("平行")]
         public static readonly string LightType_Parallel = nameof(LightType_Parallel);
 
-        [ShowInMarkup, DefaultValue("アンビエント")]
+        [DefaultValue("アンビエント")]
         public static readonly string LightType_Ambient = nameof(LightType_Ambient);
 
-        [ShowInMarkup, DefaultValue("なし")]
+        [DefaultValue("なし")]
         public static readonly string LightFalloffType_None = nameof(LightFalloffType_None);
 
-        [ShowInMarkup, DefaultValue("リニア")]
+        [DefaultValue("リニア")]
         public static readonly string LightFalloffType_Linear = nameof(LightFalloffType_Linear);
 
-        [ShowInMarkup, DefaultValue("逆二乗クランプ")]
+        [DefaultValue("逆二乗クランプ")]
         public static readonly string LightFalloffType_Exponential = nameof(LightFalloffType_Exponential);
 
-        [ShowInMarkup, DefaultValue("線の上に塗り")]
+        [DefaultValue("線の上に塗り")]
         public static readonly string TextLineDrawOrder_BeforeFill = nameof(TextLineDrawOrder_BeforeFill);
 
-        [ShowInMarkup, DefaultValue("塗りの上に線")]
+        [DefaultValue("塗りの上に線")]
         public static readonly string TextLineDrawOrder_AfterFill = nameof(TextLineDrawOrder_AfterFill);
 
-        [ShowInMarkup, DefaultValue("文字")]
+        [DefaultValue("文字")]
         public static readonly string SelectorCriteria_Charactor = nameof(SelectorCriteria_Charactor);
 
-        [ShowInMarkup, DefaultValue("空白を除いた文字")]
+        [DefaultValue("空白を除いた文字")]
         public static readonly string SelectorCriteria_CharactorWithoutSpace = nameof(SelectorCriteria_CharactorWithoutSpace);
 
-        [ShowInMarkup, DefaultValue("単語")]
+        [DefaultValue("単語")]
         public static readonly string SelectorCriteria_Word = nameof(SelectorCriteria_Word);
 
-        [ShowInMarkup, DefaultValue("行")]
+        [DefaultValue("行")]
         public static readonly string SelectorCriteria_Line = nameof(SelectorCriteria_Line);
 
-        [ShowInMarkup, DefaultValue("加算")]
+        [DefaultValue("加算")]
         public static readonly string SelectorBlendMode_Add = nameof(SelectorBlendMode_Add);
 
-        [ShowInMarkup, DefaultValue("減算")]
+        [DefaultValue("減算")]
         public static readonly string SelectorBlendMode_Subtract = nameof(SelectorBlendMode_Subtract);
 
-        [ShowInMarkup, DefaultValue("乗算")]
+        [DefaultValue("乗算")]
         public static readonly string SelectorBlendMode_Multiply = nameof(SelectorBlendMode_Multiply);
 
-        [ShowInMarkup, DefaultValue("最小")]
+        [DefaultValue("最小")]
         public static readonly string SelectorBlendMode_Min = nameof(SelectorBlendMode_Min);
 
-        [ShowInMarkup, DefaultValue("最大")]
+        [DefaultValue("最大")]
         public static readonly string SelectorBlendMode_Max = nameof(SelectorBlendMode_Max);
 
-        [ShowInMarkup, DefaultValue("差")]
+        [DefaultValue("差")]
         public static readonly string SelectorBlendMode_Difference = nameof(SelectorBlendMode_Difference);
 
-        [ShowInMarkup, DefaultValue("四角")]
+        [DefaultValue("四角")]
         public static readonly string SelectorShape_Rectangle = nameof(SelectorShape_Rectangle);
 
-        [ShowInMarkup, DefaultValue("上へ傾斜")]
+        [DefaultValue("上へ傾斜")]
         public static readonly string SelectorShape_RampUp = nameof(SelectorShape_RampUp);
 
-        [ShowInMarkup, DefaultValue("下へ傾斜")]
+        [DefaultValue("下へ傾斜")]
         public static readonly string SelectorShape_RampDown = nameof(SelectorShape_RampDown);
 
-        [ShowInMarkup, DefaultValue("三角形")]
+        [DefaultValue("三角形")]
         public static readonly string SelectorShape_Triangle = nameof(SelectorShape_Triangle);
 
-        [ShowInMarkup, DefaultValue("円")]
+        [DefaultValue("円")]
         public static readonly string SelectorShape_Circle = nameof(SelectorShape_Circle);
 
-        [ShowInMarkup, DefaultValue("非ゼロ規則")]
+        [DefaultValue("非ゼロ規則")]
         public static readonly string ShapeFillRule_NonZero = nameof(ShapeFillRule_NonZero);
 
-        [ShowInMarkup, DefaultValue("奇偶規則")]
+        [DefaultValue("奇偶規則")]
         public static readonly string ShapeFillRule_EvenOdd = nameof(ShapeFillRule_EvenOdd);
 
-        [ShowInMarkup, DefaultValue("線形")]
+        [DefaultValue("線形")]
         public static readonly string GradientType_Linear = nameof(GradientType_Linear);
 
-        [ShowInMarkup, DefaultValue("円形")]
+        [DefaultValue("円形")]
         public static readonly string GradientType_Radial = nameof(GradientType_Radial);
 
-        [ShowInMarkup, DefaultValue("バット")]
+        [DefaultValue("バット")]
         public static readonly string EndCapStyle_Butt = nameof(EndCapStyle_Butt);
 
-        [ShowInMarkup, DefaultValue("丸型")]
+        [DefaultValue("丸型")]
         public static readonly string EndCapStyle_Round = nameof(EndCapStyle_Round);
 
-        [ShowInMarkup, DefaultValue("四角")]
+        [DefaultValue("四角")]
         public static readonly string EndCapStyle_Square = nameof(EndCapStyle_Square);
 
-        [ShowInMarkup, DefaultValue("ポリゴン")]
+        [DefaultValue("ポリゴン")]
         public static readonly string EndCapStyle_Polygon = nameof(EndCapStyle_Polygon);
 
-        [ShowInMarkup, DefaultValue("結合")]
+        [DefaultValue("結合")]
         public static readonly string EndCapStyle_Joined = nameof(EndCapStyle_Joined);
 
-        [ShowInMarkup, DefaultValue("四角")]
+        [DefaultValue("四角")]
         public static readonly string JointStyle_Square = nameof(JointStyle_Square);
 
-        [ShowInMarkup, DefaultValue("丸型")]
+        [DefaultValue("丸型")]
         public static readonly string JointStyle_Round = nameof(JointStyle_Round);
 
-        [ShowInMarkup, DefaultValue("マイター")]
+        [DefaultValue("マイター")]
         public static readonly string JointStyle_Miter = nameof(JointStyle_Miter);
 
-        [ShowInMarkup, DefaultValue("結合")]
+        [DefaultValue("結合")]
         public static readonly string ClippingOperation_None = nameof(ClippingOperation_None);
 
-        [ShowInMarkup, DefaultValue("交差")]
+        [DefaultValue("交差")]
         public static readonly string ClippingOperation_Intersection = nameof(ClippingOperation_Intersection);
 
-        [ShowInMarkup, DefaultValue("追加")]
+        [DefaultValue("追加")]
         public static readonly string ClippingOperation_Union = nameof(ClippingOperation_Union);
 
-        [ShowInMarkup, DefaultValue("差")]
+        [DefaultValue("差")]
         public static readonly string ClippingOperation_Difference = nameof(ClippingOperation_Difference);
 
-        [ShowInMarkup, DefaultValue("中マド")]
+        [DefaultValue("中マド")]
         public static readonly string ClippingOperation_Xor = nameof(ClippingOperation_Xor);
 
-        [ShowInMarkup, DefaultValue("ステレオ")]
+        [DefaultValue("ステレオ")]
         public static readonly string WaveFormType_Stereo = nameof(WaveFormType_Stereo);
 
-        [ShowInMarkup, DefaultValue("モノラル")]
+        [DefaultValue("モノラル")]
         public static readonly string WaveFormType_Monaural = nameof(WaveFormType_Monaural);
 
-        [ShowInMarkup, DefaultValue("左チャンネル")]
+        [DefaultValue("左チャンネル")]
         public static readonly string WaveFormType_Left = nameof(WaveFormType_Left);
 
-        [ShowInMarkup, DefaultValue("右チャンネル")]
+        [DefaultValue("右チャンネル")]
         public static readonly string WaveFormType_Right = nameof(WaveFormType_Right);
+
+        [DefaultValue("レンダリング不可(要設定変更)")]
+        public static readonly string RenderQueueItemState_NotReady = nameof(RenderQueueItemState_NotReady);
+
+        [DefaultValue("レンダリング可")]
+        public static readonly string RenderQueueItemState_Ready = nameof(RenderQueueItemState_Ready);
+
+        [DefaultValue("レンダリング済み")]
+        public static readonly string RenderQueueItemState_Completed = nameof(RenderQueueItemState_Completed);
+
+        [DefaultValue("レンダリング中")]
+        public static readonly string RenderQueueItemState_Processing = nameof(RenderQueueItemState_Processing);
+
+        [DefaultValue("中止")]
+        public static readonly string RenderQueueItemState_Aborted = nameof(RenderQueueItemState_Aborted);
+
+        [DefaultValue("エラー")]
+        public static readonly string RenderQueueItemState_Error = nameof(RenderQueueItemState_Error);
 
         // Inner Plugin
 

@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              xmlns:local="clr-namespace:NiVE3.View.Part"
+             xmlns:m="clr-namespace:NiVE3.Model"
              xmlns:upr="clr-namespace:NiVE3.UI.Primitive;assembly=NiVE3.UI"
              xmlns:cv="clr-namespace:NiVE3.View.Converter"
              xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
@@ -15,10 +16,12 @@
     <UserControl.Resources>
         <Thickness x:Key="ItemMargin">0,5,0,0</Thickness>
         <cv:TimeConverter x:Key="TimeConverter" FrameRate="{Binding FrameRate}"/>
+        <cv:EnumToLocalizedNameConverter x:Key="EnumToLocalizedNameConverter"/>
 
         <Style x:Key="ItemSettingContainerStyle" TargetType="{x:Type StackPanel}">
             <Setter Property="Orientation" Value="Vertical"/>
             <Setter Property="IsEnabled" Value="True"/>
+            <Setter Property="Margin" Value="0,5"/>
 
             <Style.Triggers>
                 <DataTrigger Binding="{Binding IsEditable}" Value="False">
@@ -145,8 +148,17 @@
     </UserControl.Resources>
     <Expander Header="{Binding CompositionName}" IsExpanded="{Binding IsExpanded}" d:IsExpanded="True">
         <StackPanel Style="{StaticResource ItemSettingContainerStyle}">
-            <UniformGrid Columns="2">
-                <Grid VerticalAlignment="Center" Margin="5.0">
+            <Grid Margin="5,0,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=RenderQueueItemView_State}"/>
+                <TextBlock Grid.Column="1" Margin="5,0,0,0" Text="{Binding State, Converter={StaticResource EnumToLocalizedNameConverter}, ConverterParameter={x:Type m:RenderQueueItemState}}"/>
+            </Grid>
+            <UniformGrid Columns="2" Margin="{StaticResource ItemMargin}">
+                <Grid VerticalAlignment="Center" Margin="5,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition />
@@ -218,7 +230,7 @@
                     </StackPanel>
                 </GroupBox>
             </UniformGrid>
-            <Button Content="{gm:LanguageResource ResourceKey=RenderQueueItemView_OpenOutputSetting}" Margin="0,5,5,5" HorizontalAlignment="Right" Width="150" IsEnabled="{Binding HasOutputSetting}" Command="{Binding OpenOutputSettingCommand}"/>
+            <Button Content="{gm:LanguageResource ResourceKey=RenderQueueItemView_OpenOutputSetting}" Margin="0,5,5,0" HorizontalAlignment="Right" Width="150" IsEnabled="{Binding HasOutputSetting}" Command="{Binding OpenOutputSettingCommand}"/>
         </StackPanel>
     </Expander>
 </UserControl>
