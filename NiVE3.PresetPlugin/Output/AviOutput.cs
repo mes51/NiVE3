@@ -33,7 +33,7 @@ namespace NiVE3.PresetPlugin.Output
 
         const int BaseAudioSamplingRate = 48000;
 
-        CompressSetting? Setting { get; set; }
+        CompressSetting Setting { get; set; } = new CompressSetting();
 
         AviWriter? Writer { get; set; }
 
@@ -47,14 +47,14 @@ namespace NiVE3.PresetPlugin.Output
         {
             var viewModel = new AviOutputSettingViewModel(size?.Width ?? 0, size?.Height ?? 0, outputSources)
             {
-                UseKeyFrameRate = Setting?.UseKeyFrameRate ?? false,
-                KeyFrameRate = Setting?.KeyFrameRate ?? 0,
-                Quality = Setting?.Quality ?? 100,
-                Codec = string.IsNullOrEmpty(Setting?.Codec) ? new FourCC(0) : new FourCC(Setting.Codec),
-                OutputChannel = (OutputChannel)(Setting?.OutputChannel ?? 0),
-                CodecState = Setting?.State,
-                AudioSamplingRate = Setting?.AudioSamplingRate ?? 48000,
-                AudioBitsPerSample = Setting?.AudioBitsPerSample ?? 32
+                UseKeyFrameRate = Setting.UseKeyFrameRate,
+                KeyFrameRate = Setting.KeyFrameRate,
+                Quality = Setting.Quality,
+                Codec = string.IsNullOrEmpty(Setting.Codec) ? new FourCC(0) : new FourCC(Setting.Codec),
+                OutputChannel = (OutputChannel)Setting.OutputChannel,
+                CodecState = Setting.State,
+                AudioSamplingRate = Setting.AudioSamplingRate,
+                AudioBitsPerSample = Setting.AudioBitsPerSample
             };
             return new AviOutputSettingView { DataContext = viewModel };
         }
@@ -92,6 +92,7 @@ namespace NiVE3.PresetPlugin.Output
                     AudioSamplingRate = samplingRate,
                     AudioBitsPerSample = bitsPerSample
                 };
+                return true;
             }
             return false;
         }
@@ -128,8 +129,6 @@ namespace NiVE3.PresetPlugin.Output
             {
                 throw new InvalidOperationException();
             }
-
-            Setting ??= new CompressSetting();
 
             File.Open(filePath, FileMode.Create).Close();
 
@@ -295,7 +294,7 @@ namespace NiVE3.PresetPlugin.Output
 
         public string Codec { get; set; } = "";
 
-        public int OutputChannel { get; set; }
+        public int OutputChannel { get; set; } = (int)Output.OutputChannel.Rgba;
 
         public byte[]? State { get; set; }
 
