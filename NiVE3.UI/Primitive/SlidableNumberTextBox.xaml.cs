@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using NiVE3.UI.Converter;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace NiVE3.UI.Primitive
 {
@@ -214,8 +215,8 @@ namespace NiVE3.UI.Primitive
         public SlidableNumberTextBox()
         {
             InitializeComponent();
+            SetCurrentValue(ConverterProperty, DefaultConverter);
 
-            Converter = DefaultConverter;
             UpdateBinding();
         }
 
@@ -262,7 +263,7 @@ namespace NiVE3.UI.Primitive
             {
                 Mouse.Capture(null);
                 ClearFocus();
-                Value = PrevValue;
+                SetCurrentValue(ValueProperty, PrevValue);
                 IsClicked = false;
                 e.Handled = true;
 
@@ -316,7 +317,7 @@ namespace NiVE3.UI.Primitive
                     rate = 0.1;
                 }
                 // NOTE: CoerceValueでClampされる前の値がBindingで伝播してしまうため、Clampした値をセットする
-                Value = Math.Clamp(Value + ((int)diff.X + (int)diff.Y) * SlideChangeValue * rate, Minimum, Maximum);
+                SetCurrentValue(ValueProperty, Math.Clamp(Value + ((int)diff.X + (int)diff.Y) * SlideChangeValue * rate, Minimum, Maximum));
                 ClickPoint = newPos;
                 e.Handled = true;
             }
@@ -350,7 +351,7 @@ namespace NiVE3.UI.Primitive
                         rate = 0.1;
                     }
                     // NOTE: CoerceValueでClampされる前の値がBindingで伝播してしまうため、Clampした値をセットする
-                    Value = Math.Clamp(Value + ((int)diff.X + (int)diff.Y) * SlideChangeValue * rate, Minimum, Maximum);
+                    SetCurrentValue(ValueProperty, Math.Clamp(Value + ((int)diff.X + (int)diff.Y) * SlideChangeValue * rate, Minimum, Maximum));
                     e.Handled = true;
 
                     RaiseEvent(new RoutedEventArgs(EndSlideEditValueEvent, this));
@@ -372,7 +373,7 @@ namespace NiVE3.UI.Primitive
             else if (e.Key == Key.Escape)
             {
                 ClearFocus();
-                Value = PrevValue;
+                SetCurrentValue(ValueProperty, PrevValue);
                 e.Handled = true;
 
                 IsEditingText = false;
@@ -393,7 +394,7 @@ namespace NiVE3.UI.Primitive
 
             if (Validation.GetHasError(ValueTextBox))
             {
-                Value = PrevValue;
+                SetCurrentValue(ValueProperty, PrevValue);
                 ValueTextBlock.GetBindingExpression(TextBlock.TextProperty).UpdateTarget();
 
                 IsEditingText = false;
@@ -432,7 +433,7 @@ namespace NiVE3.UI.Primitive
         {
             if (d is SlidableNumberTextBox slider)
             {
-                slider.Value = Math.Min(Math.Max(slider.Value, slider.Minimum), slider.Maximum);
+                slider.SetCurrentValue(ValueProperty, Math.Min(Math.Max(slider.Value, slider.Minimum), slider.Maximum));
             }
         }
 
@@ -440,7 +441,7 @@ namespace NiVE3.UI.Primitive
         {
             if (d is SlidableNumberTextBox slider && slider.IntValue != (int)Math.Min(Math.Max(slider.Value, int.MinValue), int.MaxValue))
             {
-                slider.Value = slider.IntValue;
+                slider.SetCurrentValue(ValueProperty, (double)slider.IntValue);
             }
         }
 
@@ -448,7 +449,7 @@ namespace NiVE3.UI.Primitive
         {
             if (d is SlidableNumberTextBox slider)
             {
-                slider.IntValue = (int)Math.Min(Math.Max(slider.Value, int.MinValue), int.MaxValue);
+                slider.SetCurrentValue(IntValueProperty, (int)Math.Min(Math.Max(slider.Value, int.MinValue), int.MaxValue));
             }
         }
 

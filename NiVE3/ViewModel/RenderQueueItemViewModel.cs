@@ -69,6 +69,22 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref frameDuration, value); }
         }
 
+        private double compositionWorkareaBegin;
+        [NeedWire(nameof(RenderQueueItemModel), IsOneWay = true)]
+        public double CompositionWorkareaBegin
+        {
+            get { return compositionWorkareaBegin; }
+            set { SetProperty(ref compositionWorkareaBegin, value); }
+        }
+
+        private double compositionWorkareaEnd;
+        [NeedWire(nameof(RenderQueueItemModel), IsOneWay = true)]
+        public double CompositionWorkareaEnd
+        {
+            get { return compositionWorkareaEnd; }
+            set { SetProperty(ref compositionWorkareaEnd, value); }
+        }
+
         private double frameRate;
         [NeedWire(nameof(RenderQueueItemModel), IsOneWay = true)]
         public double FrameRate
@@ -179,9 +195,17 @@ namespace NiVE3.ViewModel
 
         public ICommand OpenOutputSettingCommand { get; }
 
+        public ICommand ChangeOutputTargetSourceCommand { get; }
+
+        public ICommand ChangeUseRenderQueueItemTimeRangeCommand { get; }
+
+        public ICommand ChangeRenderTimeRangeCommand { get; }
+
         RenderQueueItemModel RenderQueueItemModel { get; }
 
         IDialogService DialogService { get; }
+
+        bool IsEditableState => State == RenderQueueItemState.Ready || State == RenderQueueItemState.NotReady;
 
         public RenderQueueItemViewModel(RenderQueueItemModel renderQueueItemModel, IDialogService dialogService)
         {
@@ -196,7 +220,7 @@ namespace NiVE3.ViewModel
                 {
                     RenderQueueItemModel.ChangeFilePath(save.FileName);
                 }
-            }, () => State == RenderQueueItemState.Ready || State == RenderQueueItemState.NotReady);
+            }, () => IsEditableState);
 
             OpenOutputSettingCommand = new RequerySuggestedCommand(() =>
             {
@@ -216,7 +240,13 @@ namespace NiVE3.ViewModel
                 {
                     RenderQueueItemModel.ApplyOutputSetting(view.DataContext);
                 }
-            }, () => (State == RenderQueueItemState.Ready || State == RenderQueueItemState.NotReady) && HasOutputSetting);
+            }, () => IsEditableState && HasOutputSetting);
+
+            ChangeOutputTargetSourceCommand = new DelegateCommand(() => RenderQueueItemModel.ChangeOutputTargetSource(IsOutputVideo, IsOutputAudio), () => IsEditableState);
+
+            ChangeUseRenderQueueItemTimeRangeCommand = new DelegateCommand(() => RenderQueueItemModel.ChangeUseRenderQueueItemTimeRange(UseRenderQueueItemTimeRange), () => IsEditableState);
+
+            ChangeRenderTimeRangeCommand = new DelegateCommand(() => RenderQueueItemModel.ChangeRenderTimeRange(BeginTime, EndTime), () => IsEditableState);
 
             WiringModel();
 
@@ -226,6 +256,8 @@ namespace NiVE3.ViewModel
             RenderRangeEndStart = BeginTime + FrameDuration;
             IsEditable = State == RenderQueueItemState.NotReady || State == RenderQueueItemState.Ready;
         }
+
+        partial void WiringModel();
 
         private void RenderQueueItemViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
@@ -244,16 +276,10 @@ namespace NiVE3.ViewModel
                     RenderRangeBeginLimit = EndTime - FrameDuration;
                     RenderRangeEndStart = BeginTime + FrameDuration;
                     break;
-                case nameof(UseRenderQueueItemTimeRange) when !UseRenderQueueItemTimeRange:
-                    BeginTime = 0;
-                    EndTime = CompositionDuration;
-                    break;
                 case nameof(State):
                     IsEditable = State == RenderQueueItemState.NotReady || State == RenderQueueItemState.Ready;
                     break;
             }
         }
-
-        partial void WiringModel();
     }
 }

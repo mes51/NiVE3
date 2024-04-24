@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              xmlns:local="clr-namespace:NiVE3.View.Part"
              xmlns:upr="clr-namespace:NiVE3.UI.Primitive;assembly=NiVE3.UI"
              xmlns:cv="clr-namespace:NiVE3.View.Converter"
@@ -111,6 +112,36 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <Style x:Key="BeginTimeSlider" TargetType="{x:Type upr:SlidableNumberTextBox}" BasedOn="{StaticResource {x:Type upr:SlidableNumberTextBox}}">
+            <Setter Property="Value" Value="{Binding BeginTime}"/>
+            <Setter Property="Maximum" Value="{Binding RenderRangeBeginLimit}"/>
+            <Setter Property="Minimum" Value="0"/>
+            <Setter Property="SlideChangeValue" Value="{Binding FrameDuration}"/>
+            <Setter Property="Converter" Value="{StaticResource TimeConverter}"/>
+
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding UseRenderQueueItemTimeRange}" Value="False">
+                    <Setter Property="Value" Value="{Binding CompositionWorkareaBegin}"/>
+                    <Setter Property="Maximum" Value="{Binding CompositionDuration}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="EndTimeSlider" TargetType="{x:Type upr:SlidableNumberTextBox}" BasedOn="{StaticResource {x:Type upr:SlidableNumberTextBox}}">
+            <Setter Property="Value" Value="{Binding EndTime}"/>
+            <Setter Property="Maximum" Value="{Binding CompositionDuration}"/>
+            <Setter Property="Minimum" Value="{Binding RenderRangeEndStart}"/>
+            <Setter Property="SlideChangeValue" Value="{Binding FrameDuration}"/>
+            <Setter Property="Converter" Value="{StaticResource TimeConverter}"/>
+
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding UseRenderQueueItemTimeRange}" Value="False">
+                    <Setter Property="Value" Value="{Binding CompositionWorkareaEnd}"/>
+                    <Setter Property="Minimum" Value="0"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
     </UserControl.Resources>
     <Expander Header="{Binding CompositionName}" IsExpanded="{Binding IsExpanded}" d:IsExpanded="True">
         <StackPanel Style="{StaticResource ItemSettingContainerStyle}">
@@ -139,13 +170,13 @@
             <UniformGrid Columns="2" Margin="{StaticResource ItemMargin}" Grid.IsSharedSizeScope="True">
                 <GroupBox Header="{gm:LanguageResource ResourceKey=RenderQueueItemView_OutputSources}">
                     <UniformGrid Rows="2">
-                        <CheckBox Content="{gm:LanguageResource ResourceKey=RenderQueueItemView_OutputSources_Video}" VerticalAlignment="Center" IsChecked="{Binding IsOutputVideo}" Command=""/>
-                        <CheckBox Content="{gm:LanguageResource ResourceKey=RenderQueueItemView_OutputSources_Audio}" VerticalAlignment="Center" IsChecked="{Binding IsOutputAudio}" Command=""/>
+                        <CheckBox Content="{gm:LanguageResource ResourceKey=RenderQueueItemView_OutputSources_Video}" VerticalAlignment="Center" IsChecked="{Binding IsOutputVideo}" Command="{Binding ChangeOutputTargetSourceCommand}"/>
+                        <CheckBox Content="{gm:LanguageResource ResourceKey=RenderQueueItemView_OutputSources_Audio}" VerticalAlignment="Center" IsChecked="{Binding IsOutputAudio}" Command="{Binding ChangeOutputTargetSourceCommand}"/>
                     </UniformGrid>
                 </GroupBox>
                 <GroupBox>
                     <GroupBox.Header>
-                        <CheckBox Content="{gm:LanguageResource ResourceKey=RenderQueueItemView_UseRenderQueueItemTimeRange}" IsChecked="{Binding UseRenderQueueItemTimeRange}"/>
+                        <CheckBox Content="{gm:LanguageResource ResourceKey=RenderQueueItemView_UseRenderQueueItemTimeRange}" IsChecked="{Binding UseRenderQueueItemTimeRange}" Command="{Binding ChangeUseRenderQueueItemTimeRangeCommand}"/>
                     </GroupBox.Header>
                     <StackPanel IsEnabled="{Binding UseRenderQueueItemTimeRange}">
                         <Grid>
@@ -155,7 +186,16 @@
                             </Grid.ColumnDefinitions>
 
                             <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=RenderQueueItemView_TimeRange_Begin}" Style="{StaticResource SettingLabelTextBlockStyle}"/>
-                            <upr:SlidableNumberTextBox Grid.Column="1" Value="{Binding BeginTime}" Maximum="{Binding RenderRangeBeginLimit}" Minimum="0" SlideChangeValue="{Binding FrameDuration}" Converter="{StaticResource TimeConverter}"/>
+                            <upr:SlidableNumberTextBox Grid.Column="1" Style="{StaticResource BeginTimeSlider}">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="EndSlideEditValue">
+                                        <i:InvokeCommandAction Command="{Binding ChangeRenderTimeRangeCommand}"/>
+                                    </i:EventTrigger>
+                                    <i:EventTrigger EventName="EndTextEditValue">
+                                        <i:InvokeCommandAction Command="{Binding ChangeRenderTimeRangeCommand}"/>
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </upr:SlidableNumberTextBox>
                         </Grid>
                         <Grid Margin="{StaticResource ItemMargin}">
                             <Grid.ColumnDefinitions>
@@ -164,7 +204,16 @@
                             </Grid.ColumnDefinitions>
 
                             <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=RenderQueueItemView_TimeRange_End}" Style="{StaticResource SettingLabelTextBlockStyle}"/>
-                            <upr:SlidableNumberTextBox Grid.Column="1" Value="{Binding EndTime}" Maximum="{Binding CompositionDuration}" Minimum="{Binding RenderRangeEndStart}" SlideChangeValue="{Binding FrameDuration}" Converter="{StaticResource TimeConverter}"/>
+                            <upr:SlidableNumberTextBox Grid.Column="1" Style="{StaticResource EndTimeSlider}">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="EndSlideEditValue">
+                                        <i:InvokeCommandAction Command="{Binding ChangeRenderTimeRangeCommand}"/>
+                                    </i:EventTrigger>
+                                    <i:EventTrigger EventName="EndTextEditValue">
+                                        <i:InvokeCommandAction Command="{Binding ChangeRenderTimeRangeCommand}"/>
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </upr:SlidableNumberTextBox>
                         </Grid>
                     </StackPanel>
                 </GroupBox>

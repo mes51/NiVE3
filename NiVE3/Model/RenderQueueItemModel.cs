@@ -15,7 +15,7 @@ using Prism.Mvvm;
 
 namespace NiVE3.Model
 {
-    class RenderQueueItemModel : BindableBase, IDisposable
+    partial class RenderQueueItemModel : BindableBase, IDisposable
     {
         public Guid QueueId { get; }
 
@@ -45,6 +45,20 @@ namespace NiVE3.Model
         {
             get { return compositionDuration; }
             set { SetProperty(ref compositionDuration, value); }
+        }
+
+        private double compositionWorkareaBegin;
+        public double CompositionWorkareaBegin
+        {
+            get { return compositionWorkareaBegin; }
+            set { SetProperty(ref compositionWorkareaBegin, value); }
+        }
+
+        private double compositionWorkareaEnd;
+        public double CompositionWorkareaEnd
+        {
+            get { return compositionWorkareaEnd; }
+            set { SetProperty(ref compositionWorkareaEnd, value); }
         }
 
         private double frameDuration;
@@ -127,8 +141,6 @@ namespace NiVE3.Model
 
         ExportLifetimeContext<IOutput> Output { get; set; }
 
-        object? OutputData { get; set; }
-
         public RenderQueueItemModel(OutputListModel outputListModel, CompositionModel compositionModel, HistoryModel historyModel, ProjectModel projectModel, string baseFilePath, Guid? queueId)
         {
             OutputListModel = outputListModel;
@@ -141,6 +153,8 @@ namespace NiVE3.Model
             State = RenderQueueItemState.Ready;
             CompositionName = compositionModel.Name;
             CompositionDuration = compositionModel.Duration;
+            CompositionWorkareaBegin = compositionModel.WorkareaBegin;
+            CompositionWorkareaEnd = compositionModel.WorkareaEnd;
             FrameRate = compositionModel.FrameRate;
             FrameDuration = compositionModel.FrameDuration;
 
@@ -177,7 +191,10 @@ namespace NiVE3.Model
 
         public void ChangeOutputPlugin(Guid newOutputPluginId)
         {
-            Output?.Dispose();
+            var oldSelectedOutputPluginId = SelectedOutputPluginId;
+            var oldOutput = Output;
+            var oldHasOutputSetting = HasOutputSetting;
+
             SelectedOutputPluginId = newOutputPluginId;
             var output = OutputListModel.CreateOutput(newOutputPluginId);
             if (output == null)
@@ -187,14 +204,15 @@ namespace NiVE3.Model
             Output = output;
             HasOutputSetting = OutputListModel.GetMetadata(newOutputPluginId)?.HasSettingView ?? false;
 
-            // TODO: ヒストリに積む
+            HistoryModel.Add(new ChangeOutputPluginHistoryCommand(this, oldSelectedOutputPluginId, oldOutput, oldHasOutputSetting, newOutputPluginId, Output, HasOutputSetting));
         }
 
         public void ChangeFilePath(string newFilePath)
         {
+            var oldFilePath = FilePath;
             FilePath = Output.Value.ProcessOutputFilePath(newFilePath);
 
-            // TODO: ヒストリに積む
+            HistoryModel.Add(new ChangeFilePathHistoryCommand(this, oldFilePath, FilePath));
         }
 
         public void ApplyOutputSetting(object? setting)
@@ -206,26 +224,57 @@ namespace NiVE3.Model
                 HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangeRenderQueueSetting));
 
                 ChangeFilePath(prevFilePath);
-                // TODO: ヒストリに積む
+                HistoryModel.Add(new ChangeOutputSettingHistoryCommand(this, prevSetting, Output.Value.SaveData()));
 
                 HistoryModel.EndGroup();
             }
+        }
+
+        public void ChangeOutputTargetSource(bool video, bool audio)
+        {
+            var oldIsOutputVideo = IsOutputVideo;
+            var oldIsOutputAudio = IsOutputAudio;
+            IsOutputVideo = video;
+            IsOutputAudio = audio;
+
+            HistoryModel.Add(new ChangeOutputTargetSourceHistoryCommand(this, oldIsOutputVideo, oldIsOutputAudio, video, audio));
+        }
+
+        public void ChangeUseRenderQueueItemTimeRange(bool useRenderQueueItemTimeRange)
+        {
+            var oldUseRenderQueueItemTimeRange = UseRenderQueueItemTimeRange;
+            UseRenderQueueItemTimeRange = useRenderQueueItemTimeRange;
+
+            HistoryModel.Add(new ChangeUseRenderQueueItemTimeRangeHistoryCommand(this, oldUseRenderQueueItemTimeRange, useRenderQueueItemTimeRange));
+        }
+
+        public void ChangeRenderTimeRange(double begin, double end)
+        {
+            var oldBegin = BeginTime;
+            var oldEnd = EndTime;
+            BeginTime = begin;
+            EndTime = end;
+
+            HistoryModel.Add(new ChangeRenderTimeRangeHistoryCommand(this, oldBegin, oldEnd, begin, end));
         }
 
         public void Rendering(Func<bool> isPause, Func<bool> isAbort, Action<double> updateProgress)
         {
             Application.Current.Dispatcher.Invoke(() => State = RenderQueueItemState.Processing);
 
+            var beginTime = UseRenderQueueItemTimeRange ? BeginTime : CompositionModel.WorkareaBegin;
+            var endTime = UseRenderQueueItemTimeRange ? EndTime : CompositionModel.WorkareaEnd;
+
             var plugin = Output.Value;
             var size = IsOutputVideo ? new Int32Size(CompositionModel.Width, CompositionModel.Height) : (Int32Size?)null;
             var sourceTypes = (IsOutputVideo ? SourceType.Video : SourceType.None) | (CompositionModel.HasAudio && IsOutputAudio ? SourceType.Audio : SourceType.None);
-            plugin.BeginOutput(FilePath, BeginTime, EndTime - beginTime, FrameRate, size, sourceTypes);
+            plugin.BeginOutput(FilePath, beginTime, endTime - beginTime, FrameRate, size, sourceTypes);
 
             var lastProcessedDuration = 0.0;
             if (sourceTypes.HasFlag(SourceType.Video))
             {
                 var passCount = plugin.GetPassCount();
-                var frameCount = Math.Ceiling((EndTime - beginTime) * FrameRate);
+                var frameCount = Math.Ceiling((endTime - beginTime) * FrameRate);
                 var totalFrameCount = frameCount * passCount;
                 updateProgress(0.0);
                 for (var pass = 0; pass < passCount; pass++)
@@ -243,7 +292,7 @@ namespace NiVE3.Model
                         }
 
                         var useGpu = ProjectModel.UseGpu;
-                        var time = BeginTime + i * FrameDuration;
+                        var time = beginTime + i * FrameDuration;
                         using var image = CompositionModel.RenderFrame(time, 1.0, true, useGpu);
                         plugin.ProcessFrame(pass, time, image, useGpu);
                         updateProgress((i + 1 + frameCount * pass) / (double)totalFrameCount * 100.0);
@@ -254,12 +303,12 @@ namespace NiVE3.Model
             }
             else
             {
-                lastProcessedDuration = EndTime - BeginTime;
+                lastProcessedDuration = endTime - beginTime;
             }
 
             if (sourceTypes.HasFlag(SourceType.Audio))
             {
-                var audio = CompositionModel.RenderAudio(BeginTime, lastProcessedDuration);
+                var audio = CompositionModel.RenderAudio(beginTime, lastProcessedDuration);
                 plugin.ProcessAudio(audio);
             }
 
@@ -275,11 +324,6 @@ namespace NiVE3.Model
                 case nameof(CompositionModel.Name):
                     CompositionName = CompositionModel.Name;
                     break;
-                case nameof(CompositionModel.WorkareaBegin) when !UseRenderQueueItemTimeRange:
-                case nameof(CompositionModel.WorkareaEnd) when !UseRenderQueueItemTimeRange:
-                    BeginTime = CompositionModel.WorkareaBegin;
-                    EndTime = CompositionModel.WorkareaEnd;
-                    break;
                 case nameof(CompositionModel.Duration):
                     CompositionDuration = CompositionModel.Duration;
                     break;
@@ -288,6 +332,12 @@ namespace NiVE3.Model
                     break;
                 case nameof(CompositionModel.FrameRate):
                     FrameRate = CompositionModel.FrameRate;
+                    break;
+                case nameof(CompositionModel.WorkareaBegin):
+                    CompositionWorkareaBegin = CompositionModel.WorkareaBegin;
+                    break;
+                case nameof(CompositionModel.WorkareaEnd):
+                    CompositionWorkareaEnd = CompositionModel.WorkareaEnd;
                     break;
             }
         }
