@@ -47,38 +47,33 @@
             <Setter Property="ContentId" Value="{Binding Model.ContentId}"/>
         </Style>
 
-        <r:BindingProxy x:Key="InvertedIsRenderingBindingProxy" Data="{Binding IsRendering, Converter={StaticResource BooleanInvertConverter}}"/>
-
         <ur:DataTemplateCollection x:Key="LayoutItemTemplateSelector">
             <DataTemplate DataType="{x:Type vm:FootageListViewModel}">
-                <vp:FootageListView IsEnabled="{Binding Source={StaticResource InvertedIsRenderingBindingProxy}, Path=Data}"/>
+                <vp:FootageListView />
             </DataTemplate>
             <DataTemplate DataType="{x:Type vm:PreviewViewModel}">
-                <vp:PreviewView IsEnabled="{Binding Source={StaticResource InvertedIsRenderingBindingProxy}, Path=Data}"/>
+                <vp:PreviewView />
             </DataTemplate>
             <DataTemplate DataType="{x:Type vm:TimelineViewModel}">
-                <vp:TimelineView IsEnabled="{Binding Source={StaticResource InvertedIsRenderingBindingProxy}, Path=Data}"/>
+                <vp:TimelineView />
             </DataTemplate>
             <DataTemplate DataType="{x:Type vm:EffectListViewModel}">
-                <vp:EffectListView IsEnabled="{Binding Source={StaticResource InvertedIsRenderingBindingProxy}, Path=Data}"/>
+                <vp:EffectListView />
             </DataTemplate>
             <DataTemplate DataType="{x:Type vm:PlayControllerViewModel}">
-                <vp:PlayControllerView IsEnabled="{Binding Source={StaticResource InvertedIsRenderingBindingProxy}, Path=Data}"/>
+                <vp:PlayControllerView />
             </DataTemplate>
             <DataTemplate DataType="{x:Type vm:HistoryViewModel}">
-                <vp:HistoryView IsEnabled="{Binding Source={StaticResource InvertedIsRenderingBindingProxy}, Path=Data}"/>
+                <vp:HistoryView />
             </DataTemplate>
             <DataTemplate DataType="{x:Type vm:LayerPropertyControllerViewModel}">
-                <vp:LayerPropertyControllerView IsEnabled="{Binding Source={StaticResource InvertedIsRenderingBindingProxy}, Path=Data}"/>
+                <vp:LayerPropertyControllerView />
             </DataTemplate>
             <DataTemplate DataType="{x:Type vm:TextPropertyViewModel}">
-                <vp:TextPropertyView IsEnabled="{Binding Source={StaticResource InvertedIsRenderingBindingProxy}, Path=Data}"/>
+                <vp:TextPropertyView />
             </DataTemplate>
             <DataTemplate DataType="{x:Type vm:AudioInformationViewModel}">
-                <vp:AudioInformationView IsEnabled="{Binding Source={StaticResource InvertedIsRenderingBindingProxy}, Path=Data}"/>
-            </DataTemplate>
-            <DataTemplate DataType="{x:Type vm:RenderQueueViewModel}">
-                <vp:RenderQueueView />
+                <vp:AudioInformationView />
             </DataTemplate>
         </ur:DataTemplateCollection>
 
@@ -124,11 +119,6 @@
                 </Style>
             </vd:LayoutItemContainerStyle>
             <vd:LayoutItemContainerStyle ViewModelType="{x:Type vm:AudioInformationViewModel}">
-                <Style TargetType="{x:Type ad:LayoutAnchorableItem}" BasedOn="{StaticResource LayoutItemContainerStyleBase}">
-                    <Setter Property="Visibility" Value="{Binding Model.Visibility, Mode=TwoWay}"/>
-                </Style>
-            </vd:LayoutItemContainerStyle>
-            <vd:LayoutItemContainerStyle ViewModelType="{x:Type vm:RenderQueueViewModel}">
                 <Style TargetType="{x:Type ad:LayoutAnchorableItem}" BasedOn="{StaticResource LayoutItemContainerStyleBase}">
                     <Setter Property="Visibility" Value="{Binding Model.Visibility, Mode=TwoWay}"/>
                 </Style>
@@ -203,7 +193,7 @@
         </ad:DockingManager>
     </Grid>
     <i:Interaction.Behaviors>
-        <b:WindowGestureBehavior IsDisableWithoutNonEdit="{Binding IsRendering}"/>
+        <b:WindowGestureBehavior />
         <!--
         <b:BorderlessWindowChromeBehavior/>
         -->

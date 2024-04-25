@@ -42,13 +42,6 @@ namespace NiVE3.Model
             set { SetProperty(ref isEdited, value); }
         }
 
-        private bool isRendering;
-        public bool IsRendering
-        {
-            get { return isRendering; }
-            set { SetProperty(ref isRendering, value); }
-        }
-
         private bool gpuErrorRaised;
         public bool GpuErrorRaised
         {
@@ -102,8 +95,6 @@ namespace NiVE3.Model
             footageListModel.ShowCompositionPreview += FootageListModel_ShowCompositionPreview;
             footageListModel.FootageDeleted += FootageListModel_FootageDeleted;
             footageListModel.DeleteFootageByUndo += FootageListModel_DeleteFootageByUndo;
-
-            renderQueueModel.PropertyChanged += RenderQueueModel_PropertyChanged;
 
             historyModel.HistoryChanged += HistoryModel_HistoryChanged;
 
@@ -322,14 +313,6 @@ namespace NiVE3.Model
                 {
                     preview.Footage = null;
                 }
-            }
-        }
-
-        private void RenderQueueModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(RenderQueueModel.IsRendering))
-            {
-                IsRendering = RenderQueueModel.IsRendering;
             }
         }
 

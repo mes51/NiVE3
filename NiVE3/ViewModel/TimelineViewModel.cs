@@ -19,11 +19,14 @@ using NiVE3.Plugin.Property;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
 using NiVE3.UI.Command;
 using NiVE3.View.Command;
+using NiVE3.View.Dialog;
 using NiVE3.View.Dock;
 using NiVE3.View.Part;
 using NiVE3.View.Primitive;
 using NiVE3.View.Resource;
+using NiVE3.ViewModel.Dialog;
 using Prism.Commands;
+using Prism.Services.Dialogs;
 
 namespace NiVE3.ViewModel
 {
@@ -33,7 +36,7 @@ namespace NiVE3.ViewModel
     [CommandHandling(nameof(BeginEditNameCommand), nameof(ShortcutKeySetting.BeginEditNameGesture))]
     [CommandHandling(nameof(AddSolidCommand), nameof(ShortcutKeySetting.AddSolidGesture))]
     [CommandHandling(nameof(DeleteCommand), nameof(ShortcutKeySetting.DeleteItemGesture))]
-    [CommandHandling(nameof(EnqueueRenderingCommand), nameof(ShortcutKeySetting.EnqueueRenderingGesture))]
+    [CommandHandling(nameof(OpenRenderSettingCommand), nameof(ShortcutKeySetting.OpenRenderSettingGesture))]
     partial class TimelineViewModel : PaneViewModelBase, IDropTarget
     {
         private double frameRate;
@@ -358,7 +361,7 @@ namespace NiVE3.ViewModel
 
         public ICommand AddTextCommand { get; }
 
-        public ICommand EnqueueRenderingCommand { get; }
+        public ICommand OpenRenderSettingCommand { get; }
 
         WeakEventPublisher<EventArgs> CurrentTimeChangeByUserPublisher { get; } = new WeakEventPublisher<EventArgs>();
         public event EventHandler<EventArgs> CurrentTimeChangeByUser
@@ -375,10 +378,13 @@ namespace NiVE3.ViewModel
 
         IViewModelShortcutCommand? SelectTarget { get; set; }
 
-        public TimelineViewModel(ViewStateModel viewState, AudioPlayerModel audioPlayerModel)
+        IDialogService DialogService { get; }
+
+        public TimelineViewModel(ViewStateModel viewState, AudioPlayerModel audioPlayerModel, IDialogService dialogService)
         {
             ViewState = viewState;
             AudioPlayerModel = audioPlayerModel;
+            DialogService = dialogService;
             Title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Timeline_EmptyTitle);
             SelectedLayers = [];
 
@@ -448,7 +454,19 @@ namespace NiVE3.ViewModel
 
             AddTextCommand = new RequerySuggestedCommand(() => CompositionModel?.AddText(), () => CompositionModel != null);
 
-            EnqueueRenderingCommand = new RequerySuggestedCommand(() => CompositionModel?.EnqueueRendering(), () => CompositionModel != null);
+            OpenRenderSettingCommand = new RequerySuggestedCommand(() =>
+            {
+                var param = new DialogParameters
+                {
+                    { RenderSettingViewModel.CompositionParameterName, CompositionModel }
+                };
+                IDialogResult? result = null;
+                DialogService.ShowDialog(nameof(RenderSettingView), param, r => result = r);
+                if (result?.Result == ButtonResult.OK)
+                {
+                    System.Diagnostics.Debug.WriteLine(result);
+                }
+            }, () => CompositionModel != null);
 
             AudioPlayerModel = audioPlayerModel;
         }
@@ -459,7 +477,6 @@ namespace NiVE3.ViewModel
             {
                 return;
             }
-
 
             switch (dropInfo.Data)
             {

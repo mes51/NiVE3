@@ -19,19 +19,6 @@ namespace NiVE3.Wpf.Behavior
     {
         public static ICommand GestureCommand { get; } = new RoutedUICommand("", "Gesture", typeof(WindowGestureBehavior));
 
-        public static readonly DependencyProperty IsDisableWithoutNonEditProperty = DependencyProperty.Register(
-            nameof(IsDisableWithoutNonEdit),
-            typeof(bool),
-            typeof(WindowGestureBehavior),
-            new PropertyMetadata(true)
-        );
-
-        public bool IsDisableWithoutNonEdit
-        {
-            get { return (bool)GetValue(IsDisableWithoutNonEditProperty); }
-            set { SetValue(IsDisableWithoutNonEditProperty, value); }
-        }
-
         bool Initialized { get; set; }
 
         protected override void OnAttached()
@@ -81,7 +68,7 @@ namespace NiVE3.Wpf.Behavior
                 .FirstOrDefault(vm => vm.IsActive && vm.IsSelected);
             if (activeViewModel != null)
             {
-                var command = CommandHandlingAttribute.GetCommand(activeViewModel, gesture, false, IsDisableWithoutNonEdit);
+                var command = CommandHandlingAttribute.GetCommand(activeViewModel, gesture, false);
                 if (command != null)
                 {
                     return command;
@@ -92,14 +79,14 @@ namespace NiVE3.Wpf.Behavior
                 .OfType<PaneViewModelBase>()
                 .Cast<BindableBase>()
                 .Concat(mainWindowViewModel.CommandOnlyViewModels)
-                .Select(vm => CommandHandlingAttribute.GetCommand(vm, gesture, true, IsDisableWithoutNonEdit))
+                .Select(vm => CommandHandlingAttribute.GetCommand(vm, gesture, true))
                 .FirstOrDefault(c => c != null);
             if (globalCommand != null)
             {
                 return globalCommand;
             }
 
-            return CommandHandlingAttribute.GetCommand(mainWindowViewModel, gesture, false, IsDisableWithoutNonEdit);
+            return CommandHandlingAttribute.GetCommand(mainWindowViewModel, gesture, false);
         }
 
         private void GestureCommand_PreviewCanExecute(object sender, CanExecuteRoutedEventArgs e)

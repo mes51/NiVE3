@@ -76,7 +76,6 @@ namespace NiVE3.ViewModel
         public RenderQueueViewModel(RenderQueueModel renderQueueModel, IDialogService dialogService)
 #pragma warning restore CS8618
         {
-            Title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.RenderQueueView_Title);
             Visibility = Visibility.Collapsed;
 
             RenderQueueModel = renderQueueModel;

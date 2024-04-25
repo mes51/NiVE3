@@ -330,59 +330,38 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("レベルメーター")]
         public static readonly string AudioInformationView_Title = nameof(AudioInformationView_Title);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("レンダーキュー")]
-        public static readonly string RenderQueueView_Title = nameof(RenderQueueView_Title);
-
-        [ShowInMarkup, LanguageKey, DefaultValue("レンダリング状況:")]
-        public static readonly string RenderQueueView_Progress = nameof(RenderQueueView_Progress);
-
-        [ShowInMarkup, LanguageKey, DefaultValue("レンダリング")]
-        public static readonly string RenderQueueView_Execute = nameof(RenderQueueView_Execute);
-
-        [ShowInMarkup, LanguageKey, DefaultValue("中止")]
-        public static readonly string RenderQueueView_Stop = nameof(RenderQueueView_Stop);
-
-        [ShowInMarkup, LanguageKey, DefaultValue("一時停止")]
-        public static readonly string RenderQueueView_Pause = nameof(RenderQueueView_Pause);
-
-        [ShowInMarkup, LanguageKey, DefaultValue("再開")]
-        public static readonly string RenderQueueView_Continue = nameof(RenderQueueView_Continue);
-
-        [ShowInMarkup, LanguageKey, DefaultValue("削除")]
-        public static readonly string RenderQueueView_ContextMenu_Delete = nameof(RenderQueueView_ContextMenu_Delete);
-
-        [ShowInMarkup, LanguageKey, DefaultValue("状態:")]
-        public static readonly string RenderQueueItemView_State = nameof(RenderQueueItemView_State);
+        [ShowInMarkup, LanguageKey, DefaultValue("レンダリング設定")]
+        public static readonly string RenderSettingView_Title = nameof(RenderSettingView_Title);
 
         [ShowInMarkup, LanguageKey, DefaultValue("出力プラグイン:")]
-        public static readonly string RenderQueueItemView_OutputPlugin = nameof(RenderQueueItemView_OutputPlugin);
+        public static readonly string RenderSettingView_OutputPlugin = nameof(RenderSettingView_OutputPlugin);
 
         [ShowInMarkup, LanguageKey, DefaultValue("出力先:")]
-        public static readonly string RenderQueueItemView_OutputFilePath = nameof(RenderQueueItemView_OutputFilePath);
+        public static readonly string RenderSettingView_OutputFilePath = nameof(RenderSettingView_OutputFilePath);
 
         [ShowInMarkup, LanguageKey, DefaultValue("参照")]
-        public static readonly string RenderQueueItemView_OutputFilePath_ChangePath = nameof(RenderQueueItemView_OutputFilePath_ChangePath);
+        public static readonly string RenderSettingView_OutputFilePath_ChangePath = nameof(RenderSettingView_OutputFilePath_ChangePath);
 
         [ShowInMarkup, LanguageKey, DefaultValue("レンダリングする範囲を指定する")]
-        public static readonly string RenderQueueItemView_UseRenderQueueItemTimeRange = nameof(RenderQueueItemView_UseRenderQueueItemTimeRange);
+        public static readonly string RenderSettingView_UseRenderQueueItemTimeRange = nameof(RenderSettingView_UseRenderQueueItemTimeRange);
 
         [ShowInMarkup, LanguageKey, DefaultValue("開始:")]
-        public static readonly string RenderQueueItemView_TimeRange_Begin = nameof(RenderQueueItemView_TimeRange_Begin);
+        public static readonly string RenderSettingView_TimeRange_Begin = nameof(RenderSettingView_TimeRange_Begin);
 
         [ShowInMarkup, LanguageKey, DefaultValue("終了:")]
-        public static readonly string RenderQueueItemView_TimeRange_End = nameof(RenderQueueItemView_TimeRange_End);
+        public static readonly string RenderSettingView_TimeRange_End = nameof(RenderSettingView_TimeRange_End);
 
         [ShowInMarkup, LanguageKey, DefaultValue("出力ソース")]
-        public static readonly string RenderQueueItemView_OutputSources = nameof(RenderQueueItemView_OutputSources);
+        public static readonly string RenderSettingView_OutputSources = nameof(RenderSettingView_OutputSources);
 
         [ShowInMarkup, LanguageKey, DefaultValue("ビデオ")]
-        public static readonly string RenderQueueItemView_OutputSources_Video = nameof(RenderQueueItemView_OutputSources_Video);
+        public static readonly string RenderSettingView_OutputSources_Video = nameof(RenderSettingView_OutputSources_Video);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("オーディオ(存在する場合)")]
-        public static readonly string RenderQueueItemView_OutputSources_Audio = nameof(RenderQueueItemView_OutputSources_Audio);
+        [ShowInMarkup, LanguageKey, DefaultValue("オーディオ")]
+        public static readonly string RenderSettingView_OutputSources_Audio = nameof(RenderSettingView_OutputSources_Audio);
 
         [ShowInMarkup, LanguageKey, DefaultValue("出力プラグインの設定")]
-        public static readonly string RenderQueueItemView_OpenOutputSetting = nameof(RenderQueueItemView_OpenOutputSetting);
+        public static readonly string RenderSettingView_OpenOutputSetting = nameof(RenderSettingView_OpenOutputSetting);
 
         [ShowInMarkup, LanguageKey, DefaultValue("出力設定")]
         public static readonly string OutputSettingView_Title = nameof(OutputSettingView_Title);

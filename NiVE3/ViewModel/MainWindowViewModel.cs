@@ -61,14 +61,6 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref isEdited, value); }
         }
 
-        private bool isRendering;
-        [NeedWire(nameof(ProjectModel), IsOneWay = true)]
-        public bool IsRendering
-        {
-            get { return isRendering; }
-            set { SetProperty(ref isRendering, value); }
-        }
-
         public object[] ViewModels => [..MainRegion.Views];
 
         public object[] SingletonViewModels => MainRegion.Views.OfType<SingletonePaneViewModelBase>().ToArray();
