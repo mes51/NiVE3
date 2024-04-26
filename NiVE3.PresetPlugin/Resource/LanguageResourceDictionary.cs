@@ -152,6 +152,12 @@ namespace NiVE3.PresetPlugin.Resource
         [ShowInMarkup, DefaultValue("ビット:")]
         public const string AviOutputSettingView_Group_Audio_BitsPerSample = nameof(AviOutputSettingView_Group_Audio_BitsPerSample);
 
+        [DefaultValue("画像シーケンス出力")]
+        public const string SequentialImageOutput_Name = nameof(SequentialImageOutput_Name);
+
+        [DefaultValue("動画を連番画像として出力します")]
+        public const string SequentialImageOutput_Description = nameof(SequentialImageOutput_Description);
+
         // enum
 
         [DefaultValue("水平&垂直")]

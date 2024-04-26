@@ -190,6 +190,8 @@ namespace NiVE3.ViewModel.Dialog
             {
                 var save = new SaveFileDialog();
                 save.Filter = GetSaveFileFilter();
+                save.InitialDirectory = Path.GetDirectoryName(FilePath);
+                save.FileName = Path.GetFileName(FilePath);
                 if (save.ShowDialog() ?? false)
                 {
                     FilePath = Output.Value.ProcessOutputFilePath(save.FileName);
@@ -273,7 +275,7 @@ namespace NiVE3.ViewModel.Dialog
         {
             var id = OutputPlugins[SelectedOutputPlugin].Item1;
             var supportedExtensions = OutputListModel.GetMetadata(id)?.SupportedFileType ?? "*.*";
-            return string.Join("|", supportedExtensions.Split(',').Select(e => e + "|*" + e));
+            return string.Join("|", supportedExtensions.Split(',').Select(e => e + "|" + e));
         }
 
         FrameworkElement? GetSettingView()
@@ -283,7 +285,7 @@ namespace NiVE3.ViewModel.Dialog
 
             var beginTime = UseItemTimeRange ? BeginTime : CompositionWorkareaBegin;
             var endTime = UseItemTimeRange ? EndTime : CompositionWorkareaEnd;
-            return Output.Value.GetOutputSetting(beginTime, endTime - beginTime, FrameRate, size, sourceTypes);
+            return Output.Value.GetOutputSetting(FilePath, beginTime, endTime - beginTime, FrameRate, size, sourceTypes);
         }
 
         private void RenderingSettingViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -307,6 +309,7 @@ namespace NiVE3.ViewModel.Dialog
                         Output.Dispose();
                         Output = output;
                         HasOutputSetting = OutputListModel.GetMetadata(newOutputPluginId)?.HasSettingView ?? false;
+                        FilePath = output.Value.ProcessOutputFilePath(FilePath);
                     }
                     break;
             }

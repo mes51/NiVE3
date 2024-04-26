@@ -21,13 +21,14 @@ namespace NiVE3.Plugin.Interfaces
         /// 出力プラグインの設定画面を表示するためのウインドウを取得します。
         /// OutputMetadataAttribute.HasSettingViewがtrueの時のみ、Loadメソッド呼び出し後に呼ばれます。
         /// </summary>
+        /// <param name="filePath">書き出すファイルのパス</param>
         /// <param name="startTime">書き出しを開始するコンポジション内の時間</param>
         /// <param name="duration">書き出す長さ</param>
         /// <param name="frameRate">フレームレート</param>
         /// <param name="size">書き出す画像のサイズ。音声のみの場合はnull</param>
         /// <param name="outputSources">書き出すソースの種類</param>
         /// <returns>出力プラグインの設定画面のView。ファイルによって設定画面が存在しない場合はnull</returns>
-        FrameworkElement? GetOutputSetting(double startTime, double duration, double frameRate, Int32Size? size, SourceType outputSources) => null;
+        FrameworkElement? GetOutputSetting(string filePath, double startTime, double duration, double frameRate, Int32Size? size, SourceType outputSources) => null;
 
         /// <summary>
         /// 現在の出力プラグインの状態を表すデータをシリアル化可能な状態で取得します
