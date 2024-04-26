@@ -442,7 +442,7 @@ namespace NiVE3.View.Part
                 ReleaseMouseCapture();
 
                 var oldSelectedKeyFrame = SelectedKeyFrameIds.Where(id => KeyFrames.Any(k => k.Id == id)).Select(id => KeyFrames.First(k => k.Id == id)).ToArray();
-                var newTimes = oldSelectedKeyFrame.Select(k => Math.Round(diffTime + k.Time, TimeCalc.KeyFrameTimeDigit)).ToArray();
+                var newTimes = oldSelectedKeyFrame.Select(k => TimeCalc.RoundTimeDigit(diffTime + k.Time)).ToArray();
 
                 if (oldSelectedKeyFrame.Select((k, i) => k.Time == newTimes[i]).All(b => b))
                 {

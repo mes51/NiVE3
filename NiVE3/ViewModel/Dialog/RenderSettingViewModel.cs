@@ -249,6 +249,7 @@ namespace NiVE3.ViewModel.Dialog
         public void OnDialogOpened(IDialogParameters parameters)
         {
             var composition = parameters.GetValue<CompositionModel>(CompositionParameterName);
+            CompositionSize = new Int32Size(composition.Width, composition.Height);
             FrameRate = composition.FrameRate;
             FrameDuration = composition.FrameDuration;
             CompositionDuration = composition.Duration;

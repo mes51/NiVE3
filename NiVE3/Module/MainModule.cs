@@ -77,6 +77,7 @@ namespace NiVE3.Module
             containerRegistry.RegisterDialog<CompositionSettingView, CompositionSettingViewModel>();
             containerRegistry.RegisterDialog<RenderSettingView, RenderSettingViewModel>();
             containerRegistry.RegisterDialog<OutputSettingView, OutputSettingViewModel>();
+            containerRegistry.RegisterDialog<RenderingProgressView, RenderingProgressViewModel>();
         }
     }
 }

@@ -42,6 +42,7 @@
             <Setter Property="Minimum" Value="0"/>
             <Setter Property="SlideChangeValue" Value="{Binding FrameDuration}"/>
             <Setter Property="Converter" Value="{StaticResource TimeConverter}"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
 
             <Style.Triggers>
                 <DataTrigger Binding="{Binding UseRenderQueueItemTimeRange}" Value="False">
@@ -57,6 +58,7 @@
             <Setter Property="Minimum" Value="{Binding RenderRangeEndStart}"/>
             <Setter Property="SlideChangeValue" Value="{Binding FrameDuration}"/>
             <Setter Property="Converter" Value="{StaticResource TimeConverter}"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
 
             <Style.Triggers>
                 <DataTrigger Binding="{Binding UseRenderQueueItemTimeRange}" Value="False">
@@ -66,13 +68,13 @@
             </Style.Triggers>
         </Style>
     </UserControl.Resources>
-    <Grid Margin="10">
+    <Grid Margin="20,20,20,10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Orientation="Vertical" Margin="10">
+        <StackPanel Grid.Row="0" Orientation="Vertical">
             <Grid VerticalAlignment="Center">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -91,12 +93,12 @@
 
                 <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=RenderSettingView_OutputFilePath}" Style="{StaticResource SettingLabelTextBlockStyle}"/>
                 <TextBlock Grid.Column="1" Text="{Binding FilePath}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
-                <Button Grid.Column="2" Content="{gm:LanguageResource ResourceKey=RenderSettingView_OutputFilePath_ChangePath}" Width="75" Height="23" Command="{Binding ChangeSaveFilePathCommand}"/>
+                <Button Grid.Column="2" Content="{gm:LanguageResource ResourceKey=RenderSettingView_OutputFilePath_ChangePath}" Width="75" Height="21" Command="{Binding ChangeSaveFilePathCommand}"/>
             </Grid>
             <GroupBox Header="{gm:LanguageResource ResourceKey=RenderSettingView_OutputSources}">
                 <UniformGrid Rows="2">
-                    <CheckBox Content="{gm:LanguageResource ResourceKey=RenderSettingView_OutputSources_Video}" VerticalAlignment="Center" IsChecked="{Binding IsOutputVideo}"/>
-                    <CheckBox Content="{gm:LanguageResource ResourceKey=RenderSettingView_OutputSources_Audio}" VerticalAlignment="Center" IsChecked="{Binding IsOutputAudio}" Margin="0,5,0,0"/>
+                    <CheckBox Content="{gm:LanguageResource ResourceKey=RenderSettingView_OutputSources_Video}" VerticalAlignment="Center" IsChecked="{Binding IsOutputVideo}" HorizontalAlignment="Left"/>
+                    <CheckBox Content="{gm:LanguageResource ResourceKey=RenderSettingView_OutputSources_Audio}" VerticalAlignment="Center" IsChecked="{Binding IsOutputAudio}" HorizontalAlignment="Left" Margin="0,5,0,0"/>
                 </UniformGrid>
             </GroupBox>
             <GroupBox>
@@ -127,9 +129,9 @@
             <Button Content="{gm:LanguageResource ResourceKey=RenderSettingView_OpenOutputSetting}" Margin="{StaticResource ItemMargin}" HorizontalAlignment="Right" Width="150" IsEnabled="{Binding HasOutputSetting}" Command="{Binding OpenOutputSettingCommand}"/>
         </StackPanel>
 
-        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,10,0,0" HorizontalAlignment="Right">
-            <Button Content="{gm:LanguageResource ResourceKey=Dialog_OK}" Style="{StaticResource DialogDefaultCancelButton}" Command="{Binding OKCommand}"/>
-            <Button Content="{gm:LanguageResource ResourceKey=Dialog_Cancel}" Margin="5,0,0,0" Style="{StaticResource DialogCancelButton}" Command="{Binding CancelCommand}"/>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,20,0,0" HorizontalAlignment="Right">
+            <Button Content="{gm:LanguageResource ResourceKey=RenderSettingView_DialogButton_OK}" Style="{StaticResource DialogOKButton}" Command="{Binding OKCommand}"/>
+            <Button Content="{gm:LanguageResource ResourceKey=Dialog_Cancel}" Margin="5,0,0,0" Style="{StaticResource DialogDefaultCancelButton}" Command="{Binding CancelCommand}"/>
         </StackPanel>
     </Grid>
 </UserControl>

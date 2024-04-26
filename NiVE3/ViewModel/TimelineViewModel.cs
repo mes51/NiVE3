@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -456,16 +457,28 @@ namespace NiVE3.ViewModel
 
             OpenRenderSettingCommand = new RequerySuggestedCommand(() =>
             {
-                var param = new DialogParameters
+                var settingParams = new DialogParameters
                 {
                     { RenderSettingViewModel.CompositionParameterName, CompositionModel }
                 };
-                IDialogResult? result = null;
-                DialogService.ShowDialog(nameof(RenderSettingView), param, r => result = r);
-                if (result?.Result == ButtonResult.OK)
+                IDialogResult? settingResult = null;
+                DialogService.ShowDialog(nameof(RenderSettingView), settingParams, r => settingResult = r);
+                if (settingResult?.Result != ButtonResult.OK)
                 {
-                    System.Diagnostics.Debug.WriteLine(result);
+                    return;
                 }
+
+                var renderParams = new DialogParameters
+                {
+                    { RenderingProgressViewModel.CompositionParameterName, CompositionModel },
+                    { RenderingProgressViewModel.FilePathParameterName, settingResult.Parameters.GetValue<string>(nameof(RenderSettingViewModel.FilePath)) },
+                    { RenderingProgressViewModel.BeginTimeParameterName, settingResult.Parameters.GetValue<double>(nameof(RenderSettingViewModel.BeginTime)) },
+                    { RenderingProgressViewModel.EndTimeParameterName, settingResult.Parameters.GetValue<double>(nameof(RenderSettingViewModel.EndTime)) },
+                    { RenderingProgressViewModel.IsOutputVideoParameterName, settingResult.Parameters.GetValue<double>(nameof(RenderSettingViewModel.IsOutputVideo)) },
+                    { RenderingProgressViewModel.IsOutputAudioParameterName, settingResult.Parameters.GetValue<double>(nameof(RenderSettingViewModel.IsOutputAudio)) },
+                    { RenderingProgressViewModel.OutputParameterName, settingResult.Parameters.GetValue<ExportLifetimeContext<IOutput>>(RenderSettingViewModel.OutputParameterName) }
+                };
+                DialogService.ShowDialog(nameof(RenderingProgressView), renderParams, _ => { });
             }, () => CompositionModel != null);
 
             AudioPlayerModel = audioPlayerModel;

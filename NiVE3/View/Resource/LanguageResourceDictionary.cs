@@ -363,8 +363,32 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("出力プラグインの設定")]
         public static readonly string RenderSettingView_OpenOutputSetting = nameof(RenderSettingView_OpenOutputSetting);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("レンダリング")]
+        public static readonly string RenderSettingView_DialogButton_OK= nameof(RenderSettingView_DialogButton_OK);
+
         [ShowInMarkup, LanguageKey, DefaultValue("出力設定")]
         public static readonly string OutputSettingView_Title = nameof(OutputSettingView_Title);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("レンダリング")]
+        public static readonly string RenderingProgressView_Title = nameof(RenderingProgressView_Title);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("レンダリング状況:")]
+        public static readonly string RenderingProgressView_Progress = nameof(RenderingProgressView_Progress);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("フレーム")]
+        public static readonly string RenderingProgressView_Progress_Frame = nameof(RenderingProgressView_Progress_Frame);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("推定残り時間: {0:dd\\.hh\\:mm\\:ss}")]
+        public static readonly string RenderingProgressView_Eta = nameof(RenderingProgressView_Eta);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("一時停止")]
+        public static readonly string RenderingProgressView_Button_Pause = nameof(RenderingProgressView_Button_Pause);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("再開")]
+        public static readonly string RenderingProgressView_Button_Continue = nameof(RenderingProgressView_Button_Continue);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("中止")]
+        public static readonly string RenderingProgressView_Button_Abort = nameof(RenderingProgressView_Button_Abort);
 
         // History Command
 

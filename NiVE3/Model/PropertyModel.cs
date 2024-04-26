@@ -168,9 +168,9 @@ namespace NiVE3.Model
         {
             var time = CurrentTime - SourceStartPoint;
             var interpolationType = KeyFrames.LastOrDefault(k => k.Time <= time)?.InterpolationType ?? InterpolationType.Linear;
-            var keyFrame = new KeyFrame(Math.Round(time, TimeCalc.KeyFrameTimeDigit), value, new Ease(0.0, 0.0), new Ease(0.0, 0.0), interpolationType);
-            var index = KeyFrames.IndexOfLast(k => Math.Abs(k.Time - time) < TimeCalc.KeyFrameTimeEpsilon || k.Time <= time) + 1;
-            if (index > 0 && Math.Abs(KeyFrames[index - 1].Time - time) < TimeCalc.KeyFrameTimeEpsilon)
+            var keyFrame = new KeyFrame(TimeCalc.RoundTimeDigit(time), value, new Ease(0.0, 0.0), new Ease(0.0, 0.0), interpolationType);
+            var index = KeyFrames.IndexOfLast(k => Math.Abs(k.Time - time) < TimeCalc.TimeEpsilon || k.Time <= time) + 1;
+            if (index > 0 && Math.Abs(KeyFrames[index - 1].Time - time) < TimeCalc.TimeEpsilon)
             {
                 var oldKeyFrame = KeyFrames[index - 1];
                 KeyFrames[index - 1] = keyFrame;
@@ -298,8 +298,8 @@ namespace NiVE3.Model
             oldKeyFrames.AddRange(targetKeyFrames);
             foreach (var nk in newKeyFrames)
             {
-                var index = KeyFrames.IndexOfLast(k => Math.Abs(k.Time - nk.Time) < TimeCalc.KeyFrameTimeEpsilon || k.Time <= nk.Time) + 1;
-                if (index > 0 && Math.Abs(KeyFrames[index - 1].Time - nk.Time) < TimeCalc.KeyFrameTimeEpsilon)
+                var index = KeyFrames.IndexOfLast(k => Math.Abs(k.Time - nk.Time) < TimeCalc.TimeEpsilon || k.Time <= nk.Time) + 1;
+                if (index > 0 && Math.Abs(KeyFrames[index - 1].Time - nk.Time) < TimeCalc.TimeEpsilon)
                 {
                     oldKeyFrames.Add(KeyFrames[index - 1]);
                     KeyFrames[index - 1] = nk;
