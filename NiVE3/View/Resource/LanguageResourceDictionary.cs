@@ -343,7 +343,7 @@ namespace NiVE3.View.Resource
         public static readonly string RenderSettingView_OutputFilePath_ChangePath = nameof(RenderSettingView_OutputFilePath_ChangePath);
 
         [ShowInMarkup, LanguageKey, DefaultValue("レンダリングする範囲を指定する")]
-        public static readonly string RenderSettingView_UseRenderQueueItemTimeRange = nameof(RenderSettingView_UseRenderQueueItemTimeRange);
+        public static readonly string RenderSettingView_UseTimeRange = nameof(RenderSettingView_UseTimeRange);
 
         [ShowInMarkup, LanguageKey, DefaultValue("開始:")]
         public static readonly string RenderSettingView_TimeRange_Begin = nameof(RenderSettingView_TimeRange_Begin);
@@ -490,15 +490,6 @@ namespace NiVE3.View.Resource
 
         [DefaultValue("エフェクトのコメント変更")]
         public static readonly string History_ChangeEffectComment = nameof(History_ChangeEffectComment);
-
-        [DefaultValue("レンダーキューの追加")]
-        public static readonly string History_EnqueueRendering = nameof(History_EnqueueRendering);
-
-        [DefaultValue("レンダーキューの削除")]
-        public static readonly string History_DeleteRenderQueue = nameof(History_DeleteRenderQueue);
-
-        [DefaultValue("レンダーキューの設定変更")]
-        public static readonly string History_ChangeRenderQueueSetting = nameof(History_ChangeRenderQueueSetting);
 
         // Dialog
 
@@ -1124,24 +1115,6 @@ namespace NiVE3.View.Resource
 
         [DefaultValue("右チャンネル")]
         public static readonly string WaveFormType_Right = nameof(WaveFormType_Right);
-
-        [DefaultValue("レンダリング不可(要設定変更)")]
-        public static readonly string RenderQueueItemState_NotReady = nameof(RenderQueueItemState_NotReady);
-
-        [DefaultValue("レンダリング可")]
-        public static readonly string RenderQueueItemState_Ready = nameof(RenderQueueItemState_Ready);
-
-        [DefaultValue("レンダリング済み")]
-        public static readonly string RenderQueueItemState_Completed = nameof(RenderQueueItemState_Completed);
-
-        [DefaultValue("レンダリング中")]
-        public static readonly string RenderQueueItemState_Processing = nameof(RenderQueueItemState_Processing);
-
-        [DefaultValue("中止")]
-        public static readonly string RenderQueueItemState_Aborted = nameof(RenderQueueItemState_Aborted);
-
-        [DefaultValue("エラー")]
-        public static readonly string RenderQueueItemState_Error = nameof(RenderQueueItemState_Error);
 
         // Inner Plugin
 

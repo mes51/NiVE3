@@ -59,8 +59,6 @@ namespace NiVE3.Model
 
         EffectListModel EffectListModel { get; }
 
-        RenderQueueModel RenderQueueModel { get; }
-
         TextPropertyModel TextPropertyModel { get; }
 
         HistoryModel HistoryModel { get; }
@@ -76,7 +74,6 @@ namespace NiVE3.Model
             RendererListModel rendererListModel,
             ToneMapperListModel toneMapperListModel,
             EffectListModel effectListModel,
-            RenderQueueModel renderQueueModel,
             TextPropertyModel textPropertyModel,
             HistoryModel historyModel,
             ApplicationModel applicationModel
@@ -86,7 +83,6 @@ namespace NiVE3.Model
             RendererListModel = rendererListModel;
             ToneMapperListModel = toneMapperListModel;
             EffectListModel = effectListModel;
-            RenderQueueModel = renderQueueModel;
             TextPropertyModel = textPropertyModel;
             HistoryModel = historyModel;
             ApplicationModel = applicationModel;
@@ -107,7 +103,7 @@ namespace NiVE3.Model
             var toneMapper = ToneMapperListModel.CreateToneMapper(toneMapperType);
             var rendererPluginId = RendererListModel.GetPluginId(rendererType);
             var toneMapperPluginId = ToneMapperListModel.GetPluginId(toneMapperType);
-            var composition = new CompositionModel(renderer, toneMapper, rendererPluginId, toneMapperPluginId, FootageListModel, EffectListModel, RenderQueueModel, TextPropertyModel, HistoryModel)
+            var composition = new CompositionModel(renderer, toneMapper, rendererPluginId, toneMapperPluginId, FootageListModel, EffectListModel, TextPropertyModel, HistoryModel)
             {
                 Name = name,
                 Width = width,
@@ -174,7 +170,6 @@ namespace NiVE3.Model
                 c.Dispose();
             }
             FootageListModel.Clear();
-            RenderQueueModel.Clear();
             HistoryModel.Clear();
             CompositionModels.Clear();
             GpuErrorRaised = false;
@@ -200,7 +195,7 @@ namespace NiVE3.Model
                 {
                     var renderer = RendererListModel.CreateRenderer(compositionData.RendererPluginId);
                     var toneMapper = ToneMapperListModel.CreateToneMapper(compositionData.ToneMapperPluginId);
-                    var composition = new CompositionModel(renderer, toneMapper, compositionData.RendererPluginId, compositionData.ToneMapperPluginId, FootageListModel, EffectListModel, RenderQueueModel, TextPropertyModel, HistoryModel, compositionData.CompositionId);
+                    var composition = new CompositionModel(renderer, toneMapper, compositionData.RendererPluginId, compositionData.ToneMapperPluginId, FootageListModel, EffectListModel, TextPropertyModel, HistoryModel, compositionData.CompositionId);
                     composition.LoadData(compositionData);
                     CompositionModels.Add(composition);
                 }
@@ -293,7 +288,6 @@ namespace NiVE3.Model
                 {
                     RemoveCompositionModel(input.Composition);
                     HistoryModel.Add(new DeleteCompositionCommand(this, input.Composition));
-                    RenderQueueModel.DeleteByComposition(input.Composition);
                 }
 
                 var preview = PreviewModels.OfType<FootagePreviewModel>().FirstOrDefault(p => p.Footage == f);

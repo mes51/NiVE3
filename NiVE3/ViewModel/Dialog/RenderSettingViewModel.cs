@@ -35,11 +35,11 @@ namespace NiVE3.ViewModel.Dialog
             set { SetProperty(ref filePath, value); }
         }
 
-        private bool useRenderQueueItemTimeRange;
-        public bool UseRenderQueueItemTimeRange
+        private bool useItemTimeRange;
+        public bool UseItemTimeRange
         {
-            get { return useRenderQueueItemTimeRange; }
-            set { SetProperty(ref useRenderQueueItemTimeRange, value); }
+            get { return useItemTimeRange; }
+            set { SetProperty(ref useItemTimeRange, value); }
         }
 
         private double beginTime;
@@ -225,8 +225,8 @@ namespace NiVE3.ViewModel.Dialog
                 {
                     { OutputParameterName, Output },
                     { nameof(FilePath), FilePath },
-                    { nameof(BeginTime), UseRenderQueueItemTimeRange ? BeginTime : CompositionWorkareaBegin },
-                    { nameof(EndTime), UseRenderQueueItemTimeRange ? EndTime : CompositionWorkareaEnd },
+                    { nameof(BeginTime), UseItemTimeRange ? BeginTime : CompositionWorkareaBegin },
+                    { nameof(EndTime), UseItemTimeRange ? EndTime : CompositionWorkareaEnd },
                     { nameof(IsOutputVideo), IsOutputVideo },
                     { nameof(IsOutputAudio), IsOutputAudio }
                 };
@@ -281,8 +281,8 @@ namespace NiVE3.ViewModel.Dialog
             var size = IsOutputVideo ? CompositionSize : (Int32Size?)null;
             var sourceTypes = (IsOutputVideo ? SourceType.Video : SourceType.None) | (HasAudio && IsOutputAudio ? SourceType.Audio : SourceType.None);
 
-            var beginTime = UseRenderQueueItemTimeRange ? BeginTime : CompositionWorkareaBegin;
-            var endTime = UseRenderQueueItemTimeRange ? EndTime : CompositionWorkareaEnd;
+            var beginTime = UseItemTimeRange ? BeginTime : CompositionWorkareaBegin;
+            var endTime = UseItemTimeRange ? EndTime : CompositionWorkareaEnd;
             return Output.Value.GetOutputSetting(beginTime, endTime - beginTime, FrameRate, size, sourceTypes);
         }
 

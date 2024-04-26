@@ -76,7 +76,7 @@
             <Setter Property="HorizontalAlignment" Value="Left"/>
 
             <Style.Triggers>
-                <DataTrigger Binding="{Binding UseRenderQueueItemTimeRange}" Value="False">
+                <DataTrigger Binding="{Binding UseItemTimeRange}" Value="False">
                     <Setter Property="Value" Value="{Binding CompositionWorkareaBegin}"/>
                     <Setter Property="Maximum" Value="{Binding CompositionDuration}"/>
                 </DataTrigger>
@@ -92,7 +92,7 @@
             <Setter Property="HorizontalAlignment" Value="Left"/>
 
             <Style.Triggers>
-                <DataTrigger Binding="{Binding UseRenderQueueItemTimeRange}" Value="False">
+                <DataTrigger Binding="{Binding UseItemTimeRange}" Value="False">
                     <Setter Property="Value" Value="{Binding CompositionWorkareaEnd}"/>
                     <Setter Property="Minimum" Value="0"/>
                 </DataTrigger>
@@ -134,9 +134,9 @@
             </GroupBox>
             <GroupBox>
                 <GroupBox.Header>
-                    <CheckBox Content="{gm:LanguageResource ResourceKey=RenderSettingView_UseRenderQueueItemTimeRange}" IsChecked="{Binding UseRenderQueueItemTimeRange}"/>
+                    <CheckBox Content="{gm:LanguageResource ResourceKey=RenderSettingView_UseTimeRange}" IsChecked="{Binding UseItemTimeRange}"/>
                 </GroupBox.Header>
-                <StackPanel IsEnabled="{Binding UseRenderQueueItemTimeRange}">
+                <StackPanel IsEnabled="{Binding UseItemTimeRange}">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" SharedSizeGroup="SettingLabel"/>
