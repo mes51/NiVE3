@@ -29,12 +29,43 @@
             <Setter Property="Padding" Value="10,10,10,5"/>
         </Style>
 
+        <Style x:Key="IsOutputVideoCheckBoxStyle" TargetType="{x:Type CheckBox}" BasedOn="{StaticResource {x:Type CheckBox}}">
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="IsEnabled" Value="True"/>
+            <Setter Property="IsChecked" Value="{Binding IsOutputVideo}"/>
+
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding HasAudio}" Value="False">
+                    <Setter Property="IsEnabled" Value="False"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsOutputAudio}" Value="False">
+                    <Setter Property="IsEnabled" Value="False"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="IsOutputAudioCheckBoxStyle" TargetType="{x:Type CheckBox}" BasedOn="{StaticResource {x:Type CheckBox}}">
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="Margin" Value="0,5,0,0"/>
+            <Setter Property="IsEnabled" Value="True"/>
+            <Setter Property="IsChecked" Value="{Binding IsOutputAudio}"/>
+
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding HasAudio}" Value="False">
+                    <Setter Property="IsEnabled" Value="False"/>
+                    <Setter Property="IsChecked" Value="False"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsOutputVideo}" Value="False">
+                    <Setter Property="IsEnabled" Value="False"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        
         <Style x:Key="SettingLabelTextBlockStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
             <Setter Property="Margin" Value="0,0,5,0"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="HorizontalAlignment" Value="Right"/>
         </Style>
-
 
         <Style x:Key="BeginTimeSlider" TargetType="{x:Type upr:SlidableNumberTextBox}" BasedOn="{StaticResource {x:Type upr:SlidableNumberTextBox}}">
             <Setter Property="Value" Value="{Binding BeginTime}"/>
@@ -96,10 +127,10 @@
                 <Button Grid.Column="2" Content="{gm:LanguageResource ResourceKey=RenderSettingView_OutputFilePath_ChangePath}" Width="75" Height="21" Command="{Binding ChangeSaveFilePathCommand}"/>
             </Grid>
             <GroupBox Header="{gm:LanguageResource ResourceKey=RenderSettingView_OutputSources}">
-                <UniformGrid Rows="2">
-                    <CheckBox Content="{gm:LanguageResource ResourceKey=RenderSettingView_OutputSources_Video}" VerticalAlignment="Center" IsChecked="{Binding IsOutputVideo}" HorizontalAlignment="Left"/>
-                    <CheckBox Content="{gm:LanguageResource ResourceKey=RenderSettingView_OutputSources_Audio}" VerticalAlignment="Center" IsChecked="{Binding IsOutputAudio}" HorizontalAlignment="Left" Margin="0,5,0,0"/>
-                </UniformGrid>
+                <StackPanel>
+                    <CheckBox Content="{gm:LanguageResource ResourceKey=RenderSettingView_OutputSources_Video}" Style="{StaticResource IsOutputVideoCheckBoxStyle}"/>
+                    <CheckBox Content="{gm:LanguageResource ResourceKey=RenderSettingView_OutputSources_Audio}" Style="{StaticResource IsOutputAudioCheckBoxStyle}"/>
+                </StackPanel>
             </GroupBox>
             <GroupBox>
                 <GroupBox.Header>

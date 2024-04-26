@@ -140,6 +140,13 @@ namespace NiVE3.ViewModel.Dialog
             set { SetProperty(ref renderRangeEndStart, value); }
         }
 
+        private bool hasAudio;
+        public bool HasAudio
+        {
+            get { return hasAudio; }
+            set { SetProperty(ref hasAudio, value); }
+        }
+
         public ICommand ChangeSaveFilePathCommand { get; }
 
         public ICommand OpenOutputSettingCommand { get; }
@@ -159,8 +166,6 @@ namespace NiVE3.ViewModel.Dialog
         ExportLifetimeContext<IOutput> Output { get; set; }
 
         Int32Size CompositionSize { get; set; }
-
-        bool HasAudio { get; set; }
 
         public event Action<IDialogResult>? RequestClose;
 
@@ -257,6 +262,7 @@ namespace NiVE3.ViewModel.Dialog
             CompositionWorkareaEnd = composition.WorkareaEnd;
             BeginTime = composition.WorkareaBegin;
             EndTime = composition.WorkareaEnd;
+            HasAudio = composition.HasAudio;
 
             var baseFilePath = string.IsNullOrEmpty(ProjectModel.ProjectPath) ? Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) : Path.GetDirectoryName(ProjectModel.ProjectPath);
             baseFilePath = Path.Combine(baseFilePath ?? Path.GetFullPath("."), composition.Name + ".avi");
