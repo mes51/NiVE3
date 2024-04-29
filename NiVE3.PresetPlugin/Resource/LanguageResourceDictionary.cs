@@ -125,6 +125,20 @@ namespace NiVE3.PresetPlugin.Resource
         [DefaultValue("動画をAVIで出力します")]
         public const string AviOutput_Description = nameof(AviOutput_Description);
 
+        [DefaultValue("画像シーケンス出力")]
+        public const string SequentialImageOutput_Name = nameof(SequentialImageOutput_Name);
+
+        [DefaultValue("動画を連番画像として出力します")]
+        public const string SequentialImageOutput_Description = nameof(SequentialImageOutput_Description);
+
+        [DefaultValue("Wave出力")]
+        public const string WaveOutput_Name = nameof(WaveOutput_Name);
+
+        [DefaultValue("音声をPCM形式で出力します")]
+        public const string WaveOutput_Description = nameof(WaveOutput_Description);
+
+        // Output setting views
+
         [ShowInMarkup, DefaultValue("ビデオ出力")]
         public const string AviOutputSettingView_Group_Video = nameof(AviOutputSettingView_Group_Video);
 
@@ -152,11 +166,11 @@ namespace NiVE3.PresetPlugin.Resource
         [ShowInMarkup, DefaultValue("ビット:")]
         public const string AviOutputSettingView_Group_Audio_BitsPerSample = nameof(AviOutputSettingView_Group_Audio_BitsPerSample);
 
-        [DefaultValue("画像シーケンス出力")]
-        public const string SequentialImageOutput_Name = nameof(SequentialImageOutput_Name);
+        [ShowInMarkup, DefaultValue("サンプリングレート:")]
+        public const string WaveOutputSettingView_Group_Audio_SamplingRate = nameof(WaveOutputSettingView_Group_Audio_SamplingRate);
 
-        [DefaultValue("動画を連番画像として出力します")]
-        public const string SequentialImageOutput_Description = nameof(SequentialImageOutput_Description);
+        [ShowInMarkup, DefaultValue("ビット:")]
+        public const string WaveOutputSettingView_Group_Audio_BitsPerSample = nameof(WaveOutputSettingView_Group_Audio_BitsPerSample);
 
         // enum
 

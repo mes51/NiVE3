@@ -233,7 +233,6 @@ namespace NiVE3.PresetPlugin.Output
 
             if (BaseAudioSamplingRate != AudioStream.SamplesPerSecond)
             {
-                new WdlResamplingSampleProvider(null, 0);
                 var resampler = new WdlResampler();
                 resampler.SetMode(true, 2, true);
                 resampler.SetFilterParms();

@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:NiVE3.View.Dialog"
              xmlns:pr="http://prismlibrary.com/"
+             xmlns:pi="clr-namespace:NiVE3.Plugin.Interfaces;assembly=NiVE3.Plugin"
              xmlns:cv="clr-namespace:NiVE3.View.Converter"
              xmlns:upr="clr-namespace:NiVE3.UI.Primitive;assembly=NiVE3.UI"
              xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
@@ -23,6 +24,8 @@
     <UserControl.Resources>
         <Thickness x:Key="ItemMargin">0,10,0,0</Thickness>
         <cv:TimeConverter x:Key="TimeConverter" FrameRate="{Binding FrameRate}"/>
+        <cv:EnumToBoolConverter x:Key="EnumToBoolConverter"/>
+        <cv:EnumToBoolConverter x:Key="FlagEnumToBoolConverter" UseAndCompare="True"/>
 
         <Style TargetType="{x:Type GroupBox}">
             <Setter Property="Margin" Value="{StaticResource ItemMargin}"/>
@@ -35,6 +38,10 @@
             <Setter Property="IsChecked" Value="{Binding IsOutputVideo}"/>
 
             <Style.Triggers>
+                <DataTrigger Binding="{Binding SupportedSourceType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static pi:SourceType.VideoAndAudio}}" Value="False">
+                    <Setter Property="IsEnabled" Value="False"/>
+                    <Setter Property="IsChecked" Value="{Binding SupportedSourceType, Converter={StaticResource FlagEnumToBoolConverter}, ConverterParameter={x:Static pi:SourceType.Video}}"/>
+                </DataTrigger>
                 <DataTrigger Binding="{Binding HasAudio}" Value="False">
                     <Setter Property="IsEnabled" Value="False"/>
                 </DataTrigger>
@@ -51,6 +58,10 @@
             <Setter Property="IsChecked" Value="{Binding IsOutputAudio}"/>
 
             <Style.Triggers>
+                <DataTrigger Binding="{Binding SupportedSourceType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static pi:SourceType.VideoAndAudio}}" Value="False">
+                    <Setter Property="IsEnabled" Value="False"/>
+                    <Setter Property="IsChecked" Value="{Binding SupportedSourceType, Converter={StaticResource FlagEnumToBoolConverter}, ConverterParameter={x:Static pi:SourceType.Audio}}"/>
+                </DataTrigger>
                 <DataTrigger Binding="{Binding HasAudio}" Value="False">
                     <Setter Property="IsEnabled" Value="False"/>
                     <Setter Property="IsChecked" Value="False"/>

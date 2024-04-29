@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -14,6 +15,7 @@ using Microsoft.Win32;
 using NiVE3.Model;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.ValueObject;
+using NiVE3.UI.Command;
 using NiVE3.View.Dialog;
 using NiVE3.View.Resource;
 using Prism.Commands;
@@ -126,6 +128,13 @@ namespace NiVE3.ViewModel.Dialog
             set { SetProperty(ref isOutputAudio, value); }
         }
 
+        private SourceType supportedSourceType;
+        public SourceType SupportedSourceType
+        {
+            get { return supportedSourceType; }
+            set { SetProperty(ref supportedSourceType, value); }
+        }
+
         private double renderRangeBeginLimit;
         public double RenderRangeBeginLimit
         {
@@ -176,15 +185,7 @@ namespace NiVE3.ViewModel.Dialog
             DialogService = dialogService;
             OutputPlugins = [..outputListModel.OutputMetadatas.Values.Select(m => Tuple.Create(Guid.Parse(m.OutputUuid), m.Name))];
 
-            var defaultOutputPluginId = OutputPlugins.FirstOrDefault()?.Item1 ?? Guid.Empty;
-            var output = outputListModel.CreateOutput(defaultOutputPluginId);
-            if (output == null)
-            {
-                // NOTE: 出力プラグイン0個の場合はQueue側で作らせないようにする
-                throw new InvalidOperationException();
-            }
-            Output = output;
-            HasOutputSetting = OutputListModel.GetMetadata(defaultOutputPluginId)?.HasSettingView ?? false;
+            ChangeOutputPlugin(OutputPlugins.FirstOrDefault()?.Item1 ?? Guid.Empty);
 
             ChangeSaveFilePathCommand = new DelegateCommand(() =>
             {
@@ -221,20 +222,21 @@ namespace NiVE3.ViewModel.Dialog
                 }
             }, () => HasOutputSetting);
 
-            OKCommand = new DelegateCommand(() =>
+            OKCommand = new RequerySuggestedCommand(() =>
             {
+                var outputSourceTypes = GetOutputSourceType();
                 var result = new DialogParameters
                 {
                     { OutputParameterName, Output },
                     { nameof(FilePath), FilePath },
                     { nameof(BeginTime), UseItemTimeRange ? BeginTime : CompositionWorkareaBegin },
                     { nameof(EndTime), UseItemTimeRange ? EndTime : CompositionWorkareaEnd },
-                    { nameof(IsOutputVideo), IsOutputVideo },
-                    { nameof(IsOutputAudio), IsOutputAudio }
+                    { nameof(IsOutputVideo), outputSourceTypes.HasFlag(SourceType.Video) },
+                    { nameof(IsOutputAudio), outputSourceTypes.HasFlag(SourceType.Audio) }
                 };
 
                 RequestClose?.Invoke(new DialogResult(ButtonResult.OK, result));
-            });
+            }, () => GetOutputSourceType() != SourceType.None);
 
             CancelCommand = new DelegateCommand(() =>
             {
@@ -281,11 +283,36 @@ namespace NiVE3.ViewModel.Dialog
         FrameworkElement? GetSettingView()
         {
             var size = IsOutputVideo ? CompositionSize : (Int32Size?)null;
-            var sourceTypes = (IsOutputVideo ? SourceType.Video : SourceType.None) | (HasAudio && IsOutputAudio ? SourceType.Audio : SourceType.None);
+            var sourceTypes = GetOutputSourceType();
 
             var beginTime = UseItemTimeRange ? BeginTime : CompositionWorkareaBegin;
             var endTime = UseItemTimeRange ? EndTime : CompositionWorkareaEnd;
             return Output.Value.GetOutputSetting(FilePath, beginTime, endTime - beginTime, FrameRate, size, sourceTypes);
+        }
+
+        [MemberNotNull(nameof(Output))]
+        void ChangeOutputPlugin(Guid newOutputPluginId)
+        {
+            var output = OutputListModel.CreateOutput(newOutputPluginId);
+            if (output == null)
+            {
+                throw new InvalidOperationException();
+            }
+            Output = output;
+            var metadata = OutputListModel.GetMetadata(newOutputPluginId);
+            HasOutputSetting = metadata?.HasSettingView ?? false;
+            SupportedSourceType = metadata?.SupportedSourceType ?? SourceType.None;
+            FilePath = output.Value.ProcessOutputFilePath(FilePath);
+        }
+
+        SourceType GetOutputSourceType()
+        {
+            return SupportedSourceType switch
+            {
+                SourceType.VideoAndAudio => (IsOutputVideo ? SourceType.Video : SourceType.None) | (IsOutputAudio ?  SourceType.Audio : SourceType.None),
+                SourceType.Audio => HasAudio ? SourceType.Audio : SourceType.None,
+                _ => SupportedSourceType
+            };
         }
 
         private void RenderingSettingViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -299,18 +326,8 @@ namespace NiVE3.ViewModel.Dialog
                     RenderRangeBeginLimit = EndTime - FrameDuration;
                     break;
                 case nameof(SelectedOutputPlugin):
-                    {
-                        var newOutputPluginId = OutputPlugins[SelectedOutputPlugin].Item1;
-                        var output = OutputListModel.CreateOutput(newOutputPluginId);
-                        if (output == null)
-                        {
-                            throw new InvalidOperationException();
-                        }
-                        Output.Dispose();
-                        Output = output;
-                        HasOutputSetting = OutputListModel.GetMetadata(newOutputPluginId)?.HasSettingView ?? false;
-                        FilePath = output.Value.ProcessOutputFilePath(FilePath);
-                    }
+                    Output.Dispose();
+                    ChangeOutputPlugin(OutputPlugins[SelectedOutputPlugin].Item1);
                     break;
             }
         }
