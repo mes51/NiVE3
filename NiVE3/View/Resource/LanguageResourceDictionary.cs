@@ -860,7 +860,7 @@ namespace NiVE3.View.Resource
 
         // Property Control
 
-        [LanguageKey, DefaultValue("編集")]
+        [ShowInMarkup, LanguageKey, DefaultValue("編集")]
         public static readonly string SourceTextPropertyControl_Edit = nameof(SourceTextPropertyControl_Edit);
 
         // Unit
