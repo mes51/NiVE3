@@ -37,11 +37,11 @@ namespace NiVE3.ViewModel.Dialog
             set { SetProperty(ref filePath, value); }
         }
 
-        private bool useItemTimeRange;
-        public bool UseItemTimeRange
+        private RenderRangeType renderRangeType = RenderRangeType.Workarea;
+        public RenderRangeType RenderRangeType
         {
-            get { return useItemTimeRange; }
-            set { SetProperty(ref useItemTimeRange, value); }
+            get { return renderRangeType; }
+            set { SetProperty(ref renderRangeType, value); }
         }
 
         private double beginTime;
@@ -225,12 +225,14 @@ namespace NiVE3.ViewModel.Dialog
             OKCommand = new RequerySuggestedCommand(() =>
             {
                 var outputSourceTypes = GetOutputSourceType();
+                var (beginTime, endTime) = GetTimeRange();
                 var result = new DialogParameters
                 {
                     { OutputParameterName, Output },
                     { nameof(FilePath), FilePath },
-                    { nameof(BeginTime), UseItemTimeRange ? BeginTime : CompositionWorkareaBegin },
-                    { nameof(EndTime), UseItemTimeRange ? EndTime : CompositionWorkareaEnd },
+                    { nameof(RenderRangeType), RenderRangeType },
+                    { nameof(BeginTime), beginTime },
+                    { nameof(EndTime), endTime },
                     { nameof(IsOutputVideo), outputSourceTypes.HasFlag(SourceType.Video) },
                     { nameof(IsOutputAudio), outputSourceTypes.HasFlag(SourceType.Audio) }
                 };
@@ -285,9 +287,18 @@ namespace NiVE3.ViewModel.Dialog
             var size = IsOutputVideo ? CompositionSize : (Int32Size?)null;
             var sourceTypes = GetOutputSourceType();
 
-            var beginTime = UseItemTimeRange ? BeginTime : CompositionWorkareaBegin;
-            var endTime = UseItemTimeRange ? EndTime : CompositionWorkareaEnd;
+            var (beginTime, endTime) = GetTimeRange();
             return Output.Value.GetOutputSetting(FilePath, beginTime, endTime - beginTime, FrameRate, size, sourceTypes);
+        }
+
+        (double, double) GetTimeRange()
+        {
+            return RenderRangeType switch
+            {
+                RenderRangeType.All => (0.0, CompositionDuration),
+                RenderRangeType.Workarea => (CompositionWorkareaBegin, CompositionWorkareaEnd),
+                _ => (BeginTime, EndTime)
+            };
         }
 
         [MemberNotNull(nameof(Output))]

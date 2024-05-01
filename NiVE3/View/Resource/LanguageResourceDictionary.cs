@@ -342,8 +342,8 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("参照")]
         public static readonly string RenderSettingView_OutputFilePath_ChangePath = nameof(RenderSettingView_OutputFilePath_ChangePath);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("レンダリングする範囲を指定する")]
-        public static readonly string RenderSettingView_UseTimeRange = nameof(RenderSettingView_UseTimeRange);
+        [ShowInMarkup, LanguageKey, DefaultValue("レンダリング範囲")]
+        public static readonly string RenderSettingView_RenderRange = nameof(RenderSettingView_RenderRange);
 
         [ShowInMarkup, LanguageKey, DefaultValue("開始:")]
         public static readonly string RenderSettingView_TimeRange_Begin = nameof(RenderSettingView_TimeRange_Begin);
@@ -393,7 +393,7 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("進捗:")]
         public static readonly string RenderQueueView_Progress = nameof(RenderQueueView_Progress);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("残り時間: {0:dd\\.hh\\:mm\\:ss}")]
+        [ShowInMarkup, LanguageKey, DefaultValue("推定残り時間: {0:dd\\.hh\\:mm\\:ss}")]
         public static readonly string RenderQueueView_Eta = nameof(RenderQueueView_Eta);
 
         [ShowInMarkup, LanguageKey, DefaultValue("レンダリング")]
