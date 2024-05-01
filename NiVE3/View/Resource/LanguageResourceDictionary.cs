@@ -390,6 +390,57 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("中止")]
         public static readonly string RenderingProgressView_Button_Abort = nameof(RenderingProgressView_Button_Abort);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("進捗:")]
+        public static readonly string RenderQueueView_Progress = nameof(RenderQueueView_Progress);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("残り時間: {0:dd\\.hh\\:mm\\:ss}")]
+        public static readonly string RenderQueueView_Eta = nameof(RenderQueueView_Eta);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("レンダリング")]
+        public static readonly string RenderQueueView_Button_Rendering = nameof(RenderQueueView_Button_Rendering);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("一時停止")]
+        public static readonly string RenderQueueView_Button_Pause = nameof(RenderQueueView_Button_Pause);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("再開")]
+        public static readonly string RenderQueueView_Button_Continue = nameof(RenderQueueView_Button_Continue);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("中止")]
+        public static readonly string RenderQueueView_Button_Abort = nameof(RenderingProgressView_Button_Abort);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("削除")]
+        public static readonly string RenderQueueView_ContextMenu_Delete = nameof(RenderQueueView_ContextMenu_Delete);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("出力パス:")]
+        public static readonly string RenderQueueItemView_FilePath = nameof(RenderQueueItemView_FilePath);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("ステータス:")]
+        public static readonly string RenderQueueItemView_State = nameof(RenderQueueItemView_State);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("出力プラグイン:")]
+        public static readonly string RenderQueueItemView_OutputPluginName = nameof(RenderQueueItemView_OutputPluginName);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("(なし)")]
+        public static readonly string RenderQueueItemView_OutputPluginName_Empty = nameof(RenderQueueItemView_OutputPluginName_Empty);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("範囲:")]
+        public static readonly string RenderQueueItemView_RenderRange = nameof(RenderQueueItemView_RenderRange);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("出力ソース:")]
+        public static readonly string RenderQueueItemView_OutputSources = nameof(RenderQueueItemView_OutputSources);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("ビデオ")]
+        public static readonly string RenderQueueItemView_OutputSources_Video = nameof(RenderQueueItemView_OutputSources_Video);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("オーディオ")]
+        public static readonly string RenderQueueItemView_OutputSources_Audio = nameof(RenderQueueItemView_OutputSources_Audio);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("参照")]
+        public static readonly string RenderQueueItemView_Button_Reference = nameof(RenderQueueItemView_Button_Reference);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("レンダリング設定の変更")]
+        public static readonly string RenderQueueItemView_Button_EditSetting = nameof(RenderQueueItemView_Button_EditSetting);
+
         // History Command
 
         [DefaultValue("プロジェクトの新規作成/開く")]
@@ -1115,6 +1166,33 @@ namespace NiVE3.View.Resource
 
         [DefaultValue("右チャンネル")]
         public static readonly string WaveFormType_Right = nameof(WaveFormType_Right);
+
+        [DefaultValue("すべて")]
+        public static readonly string RenderRangeType_All = nameof(RenderRangeType_All);
+
+        [DefaultValue("コンポジションのワークエリア")]
+        public static readonly string RenderRangeType_Workarea = nameof(RenderRangeType_Workarea);
+
+        [DefaultValue("指定範囲")]
+        public static readonly string RenderRangeType_Specific = nameof(RenderRangeType_Specific);
+
+        [DefaultValue("設定不足")]
+        public static readonly string RenderQueueItemState_NotReady = nameof(RenderQueueItemState_NotReady);
+
+        [DefaultValue("レンダリング可能")]
+        public static readonly string RenderQueueItemState_Ready = nameof(RenderQueueItemState_Ready);
+
+        [DefaultValue("レンダリング中")]
+        public static readonly string RenderQueueItemState_Rendering = nameof(RenderQueueItemState_Rendering);
+
+        [DefaultValue("レンダリング済み")]
+        public static readonly string RenderQueueItemState_Completed = nameof(RenderQueueItemState_Completed);
+
+        [DefaultValue("中断")]
+        public static readonly string RenderQueueItemState_Aborted = nameof(RenderQueueItemState_Aborted);
+
+        [DefaultValue("エラー")]
+        public static readonly string RenderQueueItemState_Error = nameof(RenderQueueItemState_Error);
 
         // Inner Plugin
 

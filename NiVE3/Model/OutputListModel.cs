@@ -57,6 +57,18 @@ namespace NiVE3.Model
             return Outputs?.FirstOrDefault(o => Guid.Parse(o.Metadata.OutputUuid) == outputUuid)?.Metadata;
         }
 
+        public Guid GetId(Type pluginType)
+        {
+            if (OutputMetadatas.TryGetValue(pluginType, out var outputMetadata))
+            {
+                return Guid.Parse(outputMetadata.OutputUuid);
+            }
+            else
+            {
+                return Guid.Empty;
+            }
+        }
+
         // for test
         // NOTE: 本来は不要(直接コンストラクタに書きたい)が、MEFの都合上、テスト用のモッククラスを差し込めるようにするため、メソッドに切り出す
         // TODO: オブジェクト作成時にCatalogにモッククラスを差し込める方法があれば差し替える

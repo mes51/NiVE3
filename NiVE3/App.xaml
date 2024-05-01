@@ -11,11 +11,11 @@
                 <ui:AppearanceResourceDictionary x:Name="Appearance"/>
                 <r:FontawesomeResourceDictionary x:Name="FontawesomeIcon"/>
                 <x:StaticExtension Member="r:LanguageResourceDictionary.Dictionary" x:Name="Language"/>
+                <ResourceDictionary Source="pack://application:,,,/NiVE3.UI;component/Resources/Theme.xaml"/>
+                <ResourceDictionary Source="pack://application:,,,/NiVE3.UI;component/Resources/NamedTheme.xaml"/>
                 <ResourceDictionary Source="/View/Resource/Icons.xaml"/>
                 <ResourceDictionary Source="/View/Resource/Theme.xaml"/>
                 <ResourceDictionary Source="/View/Resource/NamedTheme.xaml"/>
-                <ResourceDictionary Source="pack://application:,,,/NiVE3.UI;component/Resources/Theme.xaml"/>
-                <ResourceDictionary Source="pack://application:,,,/NiVE3.UI;component/Resources/NamedTheme.xaml"/>
                 <!-- NOTE: xamlでリソースに登録されたアイコンを使用するため一番最後に読み込む -->
                 <r:CursorIconResourceDictionary x:Name="CursorIcon"/>
             </ResourceDictionary.MergedDictionaries>
