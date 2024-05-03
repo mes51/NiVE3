@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:local="clr-namespace:NiVE3.View.Part"
              xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
              xmlns:cv="clr-namespace:NiVE3.View.Converter"
@@ -13,10 +14,31 @@
     <UserControl.Resources>
         <cv:EnumToLocalizedNameConverter x:Key="EnumToLocalizedNameConverter"/>
         <cv:TimeConverter x:Key="TimeConverter" FrameRate="{Binding CompositionFrameRate}"/>
+        <cv:EnumToBoolConverter x:Key="EnumToBoolConverter"/>
         <cv:BooleanInvertConverter x:Key="BooleanInvertConverter"/>
 
+        <sys:Double x:Key="AllBeginTime">0</sys:Double>
         <Thickness x:Key="RowMargin">0,5,0,0</Thickness>
         <Thickness x:Key="ColMargin">5,0,0,0</Thickness>
+
+        <Style x:Key="RenderSelectCheckBoxStyle" TargetType="{x:Type CheckBox}" BasedOn="{StaticResource {x:Type CheckBox}}">
+            <Setter Property="Margin" Value="0,2,0,0"/>
+            <Setter Property="VerticalAlignment" Value="Top"/>
+            <Setter Property="IsEnabled" Value="True"/>
+            <Setter Property="IsChecked" Value="{Binding IsRenderSelected}"/>
+
+            <Style.Triggers>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding State, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static m:RenderQueueItemState.NotReady}}" Value="False"/>
+                        <Condition Binding="{Binding State, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static m:RenderQueueItemState.Ready}}" Value="False"/>
+                    </MultiDataTrigger.Conditions>
+
+                    <Setter Property="IsEnabled" Value="False"/>
+                    <Setter Property="IsChecked" Value="False"/>
+                </MultiDataTrigger>
+            </Style.Triggers>
+        </Style>
 
         <Style x:Key="OutputPluginNameTextBlockStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
             <Setter Property="Margin" Value="{StaticResource ColMargin}"/>
@@ -40,7 +62,7 @@
                         <Condition Binding="{Binding RenderRangeType}" Value="{x:Static m:RenderRangeType.All}"/>
                     </MultiDataTrigger.Conditions>
 
-                    <Setter Property="Text" Value="{Binding Source=0.0, Converter={StaticResource TimeConverter}}"/>
+                    <Setter Property="Text" Value="{Binding Source={StaticResource AllBeginTime}, Converter={StaticResource TimeConverter}}"/>
                 </MultiDataTrigger>
                 <MultiDataTrigger>
                     <MultiDataTrigger.Conditions>
@@ -48,7 +70,7 @@
                         <Condition Binding="{Binding RenderRangeType}" Value="{x:Static m:RenderRangeType.All}"/>
                     </MultiDataTrigger.Conditions>
 
-                    <Setter Property="Text" Value="{Binding Source=0.0, Converter={StaticResource TimeConverter}}"/>
+                    <Setter Property="Text" Value="{Binding Source={StaticResource AllBeginTime}, Converter={StaticResource TimeConverter}}"/>
                 </MultiDataTrigger>
                 <MultiDataTrigger>
                     <MultiDataTrigger.Conditions>
@@ -65,6 +87,14 @@
                     </MultiDataTrigger.Conditions>
 
                     <Setter Property="Text" Value="{Binding CompositionWorkareaBegin, Converter={StaticResource TimeConverter}}"/>
+                </MultiDataTrigger>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding State, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static m:RenderQueueItemState.NotReady}}" Value="False"/>
+                        <Condition Binding="{Binding State, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static m:RenderQueueItemState.Ready}}" Value="False"/>
+                    </MultiDataTrigger.Conditions>
+
+                    <Setter Property="Text" Value="{Binding FixedBeginTime, Converter={StaticResource TimeConverter}}"/>
                 </MultiDataTrigger>
             </Style.Triggers>
         </Style>
@@ -106,6 +136,14 @@
 
                     <Setter Property="Text" Value="{Binding CompositionWorkareaEnd, Converter={StaticResource TimeConverter}}"/>
                 </MultiDataTrigger>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding State, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static m:RenderQueueItemState.NotReady}}" Value="False"/>
+                        <Condition Binding="{Binding State, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static m:RenderQueueItemState.Ready}}" Value="False"/>
+                    </MultiDataTrigger.Conditions>
+
+                    <Setter Property="Text" Value="{Binding FixedEndTime, Converter={StaticResource TimeConverter}}"/>
+                </MultiDataTrigger>
             </Style.Triggers>
         </Style>
     </UserControl.Resources>
@@ -115,8 +153,8 @@
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
 
-        <CheckBox IsChecked="{Binding IsRenderSelected}"/>
-        <Expander Grid.Column="1" Header="{Binding CompositionName}" Margin="5,0,0,0" IsEnabled="{Binding IsExpanded}" d:IsExpanded="True">
+        <CheckBox Grid.Column="0" Style="{StaticResource RenderSelectCheckBoxStyle}"/>
+        <Expander Grid.Column="1" Header="{Binding CompositionName}" Margin="5,0,0,0" IsExpanded="{Binding IsExpanded}" VerticalAlignment="Top" d:IsExpanded="True">
             <StackPanel Margin="17,0,0,0" Grid.IsSharedSizeScope="True" IsEnabled="{Binding ElementName=Root, Path=IsLocked, Converter={StaticResource BooleanInvertConverter}}">
                 <Grid>
                     <Grid.ColumnDefinitions>

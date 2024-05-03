@@ -40,7 +40,7 @@ namespace NiVE3.Module
             ViewRegistry.RegisterViewWithRegion(MainWindowViewModel.RegionName, typeof(LayerPropertyControllerViewModel));
             ViewRegistry.RegisterViewWithRegion(MainWindowViewModel.RegionName, typeof(TextPropertyViewModel));
             ViewRegistry.RegisterViewWithRegion(MainWindowViewModel.RegionName, typeof(AudioInformationViewModel));
-            ViewRegistry.RegisterViewWithRegion(MainWindowViewModel.RegionName, typeof(RenderQueueIViewModel));
+            ViewRegistry.RegisterViewWithRegion(MainWindowViewModel.RegionName, typeof(RenderQueueViewModel));
         }
 
         public void RegisterTypes(IContainerRegistry containerRegistry)
@@ -68,7 +68,7 @@ namespace NiVE3.Module
             Container.Register<LayerPropertyControllerViewModel>(Reuse.Singleton, FactoryMethod.ConstructorWithResolvableArguments);
             Container.Register<TextPropertyViewModel>(Reuse.Singleton, FactoryMethod.ConstructorWithResolvableArguments);
             Container.Register<AudioInformationViewModel>(Reuse.Singleton, FactoryMethod.ConstructorWithResolvableArguments);
-            Container.Register<RenderQueueIViewModel>(Reuse.Singleton, FactoryMethod.ConstructorWithResolvableArguments);
+            Container.Register<RenderQueueViewModel>(Reuse.Singleton, FactoryMethod.ConstructorWithResolvableArguments);
 
             Container.Register<PreviewViewModel>(Reuse.Transient, FactoryMethod.ConstructorWithResolvableArguments);
             Container.Register<TimelineViewModel>(Reuse.Transient, FactoryMethod.ConstructorWithResolvableArguments);

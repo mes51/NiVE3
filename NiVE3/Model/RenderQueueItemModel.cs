@@ -47,6 +47,20 @@ namespace NiVE3.Model
             set { SetProperty(ref endTime, value); }
         }
 
+        private double fixedBeginTime;
+        public double FixedBeginTime
+        {
+            get { return fixedBeginTime; }
+            set { SetProperty(ref fixedBeginTime, value); }
+        }
+
+        private double fixedEndTime;
+        public double FixedEndTime
+        {
+            get { return fixedEndTime; }
+            set { SetProperty(ref fixedEndTime, value); }
+        }
+
         private bool isOutputVideo;
         public bool IsOutputVideo
         {
@@ -124,16 +138,16 @@ namespace NiVE3.Model
             set { SetProperty(ref compositionFrameRate, value); }
         }
 
-        ProjectModel ProjectModel { get; }
+        public CompositionModel CompositionModel { get; }
 
-        CompositionModel CompositionModel { get; }
+        ProjectModel ProjectModel { get; }
 
         OutputListModel OutputListModel { get; }
 
-        public RenderQueueItemModel(ProjectModel projectModel, CompositionModel compositionModel, OutputListModel outputListModel, ExportLifetimeContext<IOutput>? output)
+        public RenderQueueItemModel(CompositionModel compositionModel, ProjectModel projectModel, OutputListModel outputListModel, ExportLifetimeContext<IOutput>? output)
         {
-            ProjectModel = projectModel;
             CompositionModel = compositionModel;
+            ProjectModel = projectModel;
             OutputListModel = outputListModel;
             Output = output;
             if (output != null)
@@ -146,7 +160,53 @@ namespace NiVE3.Model
             CompositionName = compositionModel.Name;
             CompositionWorkareaBegin = compositionModel.WorkareaBegin;
             CompositionWorkareaEnd = compositionModel.WorkareaEnd;
+            CompositionDuration = compositionModel.Duration;
+            CompositionFrameRate = compositionModel.FrameRate;
             compositionModel.PropertyChanged += CompositionModel_PropertyChanged;
+
+            PropertyChanged += RenderQueueItemModel_PropertyChanged;
+        }
+
+        public void UpdateSetting(string filePath, RenderRangeType renderRangeType, double beginTime, double endTime, bool isOutputVideo, bool isOutputAudio, ExportLifetimeContext<IOutput> output)
+        {
+            FilePath = filePath;
+            RenderRangeType = renderRangeType;
+            BeginTime = beginTime;
+            EndTime = endTime;
+            IsOutputVideo = isOutputVideo;
+            IsOutputAudio = isOutputAudio;
+            if (output != Output)
+            {
+                Output?.Dispose();
+                Output = output;
+
+                OutputPluginId = OutputListModel.GetId(output.Value.GetType());
+                var metadata = OutputListModel.GetMetadata(OutputPluginId);
+                OutputPluginName = metadata?.Name ?? "";
+            }
+        }
+
+        public string GetSaveFileFilter()
+        {
+            if (OutputPluginId != Guid.Empty)
+            {
+                var supportedExtensions = OutputListModel.GetMetadata(OutputPluginId)?.SupportedFileType ?? "*.*";
+                return string.Join("|", supportedExtensions.Split(',').Select(e => e + "|" + e));
+            }
+            else
+            {
+                return "*.*|*.*";
+            }
+        }
+
+        (double beginTime, double endTime) GetTimeRange()
+        {
+            return RenderRangeType switch
+            {
+                RenderRangeType.All => (0.0, CompositionDuration),
+                RenderRangeType.Workarea => (CompositionWorkareaBegin, CompositionWorkareaEnd),
+                _ => (BeginTime, EndTime)
+            };
         }
 
         private void CompositionModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -169,6 +229,25 @@ namespace NiVE3.Model
                     CompositionFrameRate = CompositionModel.FrameRate;
                     break;
             }
+        }
+
+        private void RenderQueueItemModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(State) when State != RenderQueueItemState.NotReady && State != RenderQueueItemState.Ready:
+                    var (beginTime, endTime) = GetTimeRange();
+                    FixedBeginTime = beginTime;
+                    FixedEndTime = endTime;
+                    break;
+            }
+
+            if (State != RenderQueueItemState.NotReady && State != RenderQueueItemState.Ready)
+            {
+                return;
+            }
+
+            State = !string.IsNullOrEmpty(FilePath) && Output != null ? RenderQueueItemState.Ready : RenderQueueItemState.NotReady;
         }
 
         public void Dispose()

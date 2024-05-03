@@ -10,6 +10,11 @@ using NiVE3.Plugin.Interfaces;
 using Prism.Mvvm;
 using System.Windows.Input;
 using NiVE3.UI.Command;
+using Microsoft.Win32;
+using System.IO;
+using NiVE3.View.Dialog;
+using NiVE3.ViewModel.Dialog;
+using Prism.Services.Dialogs;
 
 namespace NiVE3.ViewModel
 {
@@ -164,20 +169,66 @@ namespace NiVE3.ViewModel
 
         RenderQueueItemModel RenderQueueItemModel { get; }
 
-        public RenderQueueItemViewModel(RenderQueueItemModel renderQueueItemModel)
+        IDialogService DialogService { get; }
+
+        public RenderQueueItemViewModel(RenderQueueItemModel renderQueueItemModel, IDialogService dialogService)
         {
             RenderQueueItemModel = renderQueueItemModel;
+            DialogService = dialogService;
 
             WiringModel();
 
             ChangeFilePathCommand = new RequerySuggestedCommand(() =>
             {
-
+                var save = new SaveFileDialog();
+                save.Filter = RenderQueueItemModel.GetSaveFileFilter();
+                save.InitialDirectory = Path.GetDirectoryName(FilePath);
+                save.FileName = Path.GetFileName(FilePath);
+                if (save.ShowDialog() ?? false)
+                {
+                    if (Output != null)
+                    {
+                        FilePath = Output.Value.ProcessOutputFilePath(save.FileName);
+                    }
+                    else
+                    {
+                        FilePath = save.FileName;
+                    }
+                }
             }, () => State == RenderQueueItemState.NotReady || State == RenderQueueItemState.Ready);
 
             ChangeSettingCommand = new RequerySuggestedCommand(() =>
             {
+                var settingParams = new DialogParameters
+                {
+                    { RenderSettingViewModel.CompositionParameterName, RenderQueueItemModel.CompositionModel },
+                    { nameof(RenderSettingViewModel.FilePath), FilePath },
+                    { nameof(RenderSettingViewModel.RenderRangeType), RenderRangeType },
+                    { nameof(RenderSettingViewModel.BeginTime), BeginTime },
+                    { nameof(RenderSettingViewModel.EndTime), EndTime },
+                    { nameof(RenderSettingViewModel.IsOutputVideo), IsOutputVideo },
+                    { nameof(RenderSettingViewModel.IsOutputAudio), IsOutputAudio },
+                    { nameof(RenderSettingViewModel.Mode), RenderSettingMode.ChangeSetting },
+                };
+                if (Output != null)
+                {
+                    settingParams.Add(RenderSettingViewModel.OutputParameterName, Output);
+                }
+                IDialogResult? settingResult = null;
+                DialogService.ShowDialog(nameof(RenderSettingView), settingParams, r => settingResult = r);
 
+                if (settingResult?.Result == ButtonResult.OK)
+                {
+                    RenderQueueItemModel.UpdateSetting(
+                        settingResult.Parameters.GetValue<string>(nameof(RenderSettingViewModel.FilePath)),
+                        settingResult.Parameters.GetValue<RenderRangeType>(nameof(RenderSettingViewModel.RenderRangeType)),
+                        settingResult.Parameters.GetValue<double>(nameof(RenderSettingViewModel.BeginTime)),
+                        settingResult.Parameters.GetValue<double>(nameof(RenderSettingViewModel.EndTime)),
+                        settingResult.Parameters.GetValue<bool>(nameof(RenderSettingViewModel.IsOutputVideo)),
+                        settingResult.Parameters.GetValue<bool>(nameof(RenderSettingViewModel.IsOutputAudio)),
+                        settingResult.Parameters.GetValue<ExportLifetimeContext<IOutput>>(RenderSettingViewModel.OutputParameterName)
+                    );
+                }
             }, () => State == RenderQueueItemState.NotReady || State == RenderQueueItemState.Ready);
         }
 

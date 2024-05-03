@@ -75,7 +75,7 @@
             <DataTemplate DataType="{x:Type vm:AudioInformationViewModel}">
                 <vp:AudioInformationView />
             </DataTemplate>
-            <DataTemplate DataType="{x:Type vm:RenderQueueIViewModel}">
+            <DataTemplate DataType="{x:Type vm:RenderQueueViewModel}">
                 <vp:RenderQueueView />
             </DataTemplate>
         </ur:DataTemplateCollection>
@@ -126,7 +126,7 @@
                     <Setter Property="Visibility" Value="{Binding Model.Visibility, Mode=TwoWay}"/>
                 </Style>
             </vd:LayoutItemContainerStyle>
-            <vd:LayoutItemContainerStyle ViewModelType="{x:Type vm:RenderQueueIViewModel}">
+            <vd:LayoutItemContainerStyle ViewModelType="{x:Type vm:RenderQueueViewModel}">
                 <Style TargetType="{x:Type ad:LayoutAnchorableItem}" BasedOn="{StaticResource LayoutItemContainerStyleBase}">
                     <Setter Property="Visibility" Value="{Binding Model.Visibility, Mode=TwoWay}"/>
                 </Style>

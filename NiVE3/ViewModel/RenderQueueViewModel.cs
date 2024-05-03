@@ -12,12 +12,13 @@ using NiVE3.View.Dock;
 using Prism.Mvvm;
 using System.Windows.Input;
 using NiVE3.UI.Command;
+using Prism.Services.Dialogs;
 
 namespace NiVE3.ViewModel
 {
     [PaneLocation(PaneLocation.Bottom)]
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
-    partial class RenderQueueIViewModel : SingletonePaneViewModelBase
+    partial class RenderQueueViewModel : SingletonePaneViewModelBase
     {
         private ObservableCollectionView<RenderQueueItemModel, RenderQueueItemViewModel> items;
         public ObservableCollectionView<RenderQueueItemModel, RenderQueueItemViewModel> Items
@@ -75,14 +76,14 @@ namespace NiVE3.ViewModel
         RenderQueueModel RenderQueueModel { get; }
 
 #pragma warning disable CS8618 // 各フィールドには初期化時に必ず値を代入するため無視
-        public RenderQueueIViewModel(RenderQueueModel renderQueueModel)
+        public RenderQueueViewModel(RenderQueueModel renderQueueModel, IDialogService dialogService)
 #pragma warning restore CS8618
         {
             Title = "レンダーキュー";
             Visibility = Visibility.Hidden;
 
             RenderQueueModel = renderQueueModel;
-            Items = renderQueueModel.Items.CreateViewCollection(m => new RenderQueueItemViewModel(m));
+            Items = renderQueueModel.Items.CreateViewCollection(m => new RenderQueueItemViewModel(m, dialogService));
 
             WiringModel();
 

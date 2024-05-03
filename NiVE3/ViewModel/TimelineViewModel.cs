@@ -457,28 +457,35 @@ namespace NiVE3.ViewModel
 
             OpenRenderSettingCommand = new RequerySuggestedCommand(() =>
             {
-                var settingParams = new DialogParameters
-                {
-                    { RenderSettingViewModel.CompositionParameterName, CompositionModel }
-                };
-                IDialogResult? settingResult = null;
-                DialogService.ShowDialog(nameof(RenderSettingView), settingParams, r => settingResult = r);
-                if (settingResult?.Result != ButtonResult.OK)
+                if (CompositionModel == null)
                 {
                     return;
                 }
 
-                var renderParams = new DialogParameters
+                var settingParams = new DialogParameters
                 {
-                    { RenderingProgressViewModel.CompositionParameterName, CompositionModel },
-                    { RenderingProgressViewModel.FilePathParameterName, settingResult.Parameters.GetValue<string>(nameof(RenderSettingViewModel.FilePath)) },
-                    { RenderingProgressViewModel.BeginTimeParameterName, settingResult.Parameters.GetValue<double>(nameof(RenderSettingViewModel.BeginTime)) },
-                    { RenderingProgressViewModel.EndTimeParameterName, settingResult.Parameters.GetValue<double>(nameof(RenderSettingViewModel.EndTime)) },
-                    { RenderingProgressViewModel.IsOutputVideoParameterName, settingResult.Parameters.GetValue<double>(nameof(RenderSettingViewModel.IsOutputVideo)) },
-                    { RenderingProgressViewModel.IsOutputAudioParameterName, settingResult.Parameters.GetValue<double>(nameof(RenderSettingViewModel.IsOutputAudio)) },
-                    { RenderingProgressViewModel.OutputParameterName, settingResult.Parameters.GetValue<ExportLifetimeContext<IOutput>>(RenderSettingViewModel.OutputParameterName) }
+                    { RenderSettingViewModel.CompositionParameterName, CompositionModel },
+                    { nameof(RenderSettingViewModel.RenderRangeType), RenderRangeType.Workarea },
+                    { nameof(RenderSettingViewModel.BeginTime), CompositionModel.WorkareaBegin },
+                    { nameof(RenderSettingViewModel.EndTime), CompositionModel.WorkareaEnd },
+                    { nameof(RenderSettingViewModel.IsOutputVideo), true },
+                    { nameof(RenderSettingViewModel.IsOutputAudio), true },
+                    { nameof(RenderSettingViewModel.Mode), RenderSettingMode.Enqueue },
                 };
-                DialogService.ShowDialog(nameof(RenderingProgressView), renderParams, _ => { });
+                IDialogResult? settingResult = null;
+                DialogService.ShowDialog(nameof(RenderSettingView), settingParams, r => settingResult = r);
+                if (settingResult?.Result == ButtonResult.OK)
+                {
+                    CompositionModel.EnqueueRender(
+                        settingResult.Parameters.GetValue<string>(nameof(RenderSettingViewModel.FilePath)),
+                        settingResult.Parameters.GetValue<RenderRangeType>(nameof(RenderSettingViewModel.RenderRangeType)),
+                        settingResult.Parameters.GetValue<double>(nameof(RenderSettingViewModel.BeginTime)),
+                        settingResult.Parameters.GetValue<double>(nameof(RenderSettingViewModel.EndTime)),
+                        settingResult.Parameters.GetValue<bool>(nameof(RenderSettingViewModel.IsOutputVideo)),
+                        settingResult.Parameters.GetValue<bool>(nameof(RenderSettingViewModel.IsOutputAudio)),
+                        settingResult.Parameters.GetValue<ExportLifetimeContext<IOutput>>(RenderSettingViewModel.OutputParameterName)
+                    );
+                }
             }, () => CompositionModel != null);
 
             AudioPlayerModel = audioPlayerModel;

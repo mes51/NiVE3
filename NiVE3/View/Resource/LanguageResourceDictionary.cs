@@ -363,8 +363,11 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("出力プラグインの設定")]
         public static readonly string RenderSettingView_OpenOutputSetting = nameof(RenderSettingView_OpenOutputSetting);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("キューに追加")]
+        public static readonly string RenderSettingView_Button_Enqueue = nameof(RenderSettingView_Button_Enqueue);
+
         [ShowInMarkup, LanguageKey, DefaultValue("レンダリング")]
-        public static readonly string RenderSettingView_DialogButton_OK= nameof(RenderSettingView_DialogButton_OK);
+        public static readonly string RenderSettingView_Button_StartRender= nameof(RenderSettingView_Button_StartRender);
 
         [ShowInMarkup, LanguageKey, DefaultValue("出力設定")]
         public static readonly string OutputSettingView_Title = nameof(OutputSettingView_Title);

@@ -11,6 +11,7 @@
              xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
              xmlns:mk="clr-namespace:NiVE3.Shared.Wpf.Markup;assembly=NiVE3.Shared"
              xmlns:m="clr-namespace:NiVE3.Model"
+             xmlns:dvm="clr-namespace:NiVE3.ViewModel.Dialog"
              mc:Ignorable="d" 
              pr:ViewModelLocator.AutoWireViewModel="True"
              Width="500">
@@ -28,11 +29,18 @@
         <cv:TimeConverter x:Key="TimeConverter" FrameRate="{Binding FrameRate}"/>
         <cv:EnumToBoolConverter x:Key="EnumToBoolConverter"/>
         <cv:EnumToBoolConverter x:Key="FlagEnumToBoolConverter" UseAndCompare="True"/>
+        <cv:EnumToVisibilityConverter x:Key="EnumToVisibilityConverter"/>
         <cv:EnumToLocalizedNameConverter x:Key="EnumToLocalizedNameConverter"/>
 
         <Style TargetType="{x:Type GroupBox}">
             <Setter Property="Margin" Value="{StaticResource ItemMargin}"/>
             <Setter Property="Padding" Value="10,10,10,5"/>
+        </Style>
+
+        <Style x:Key="SettingLabelTextBlockStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
+            <Setter Property="Margin" Value="0,0,5,0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Right"/>
         </Style>
 
         <Style x:Key="IsOutputVideoCheckBoxStyle" TargetType="{x:Type CheckBox}" BasedOn="{StaticResource {x:Type CheckBox}}">
@@ -44,12 +52,6 @@
                 <DataTrigger Binding="{Binding SupportedSourceType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static pi:SourceType.VideoAndAudio}}" Value="False">
                     <Setter Property="IsEnabled" Value="False"/>
                     <Setter Property="IsChecked" Value="{Binding SupportedSourceType, Converter={StaticResource FlagEnumToBoolConverter}, ConverterParameter={x:Static pi:SourceType.Video}}"/>
-                </DataTrigger>
-                <DataTrigger Binding="{Binding HasAudio}" Value="False">
-                    <Setter Property="IsEnabled" Value="False"/>
-                </DataTrigger>
-                <DataTrigger Binding="{Binding IsOutputAudio}" Value="False">
-                    <Setter Property="IsEnabled" Value="False"/>
                 </DataTrigger>
             </Style.Triggers>
         </Style>
@@ -65,22 +67,9 @@
                     <Setter Property="IsEnabled" Value="False"/>
                     <Setter Property="IsChecked" Value="{Binding SupportedSourceType, Converter={StaticResource FlagEnumToBoolConverter}, ConverterParameter={x:Static pi:SourceType.Audio}}"/>
                 </DataTrigger>
-                <DataTrigger Binding="{Binding HasAudio}" Value="False">
-                    <Setter Property="IsEnabled" Value="False"/>
-                    <Setter Property="IsChecked" Value="False"/>
-                </DataTrigger>
-                <DataTrigger Binding="{Binding IsOutputVideo}" Value="False">
-                    <Setter Property="IsEnabled" Value="False"/>
-                </DataTrigger>
             </Style.Triggers>
         </Style>
-        
-        <Style x:Key="SettingLabelTextBlockStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
-            <Setter Property="Margin" Value="0,0,5,0"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="HorizontalAlignment" Value="Right"/>
-        </Style>
-
+            
         <Style x:Key="RenderRangeTypeComboBoxStyle" TargetType="{x:Type ComboBox}" BasedOn="{StaticResource {x:Type ComboBox}}">
             <Setter Property="ItemTemplate">
                 <Setter.Value>
@@ -92,41 +81,28 @@
         </Style>
 
         <Style x:Key="BeginTimeSliderStyle" TargetType="{x:Type upr:SlidableNumberTextBox}" BasedOn="{StaticResource {x:Type upr:SlidableNumberTextBox}}">
-            <Setter Property="Value" Value="{Binding BeginTime}"/>
-            <Setter Property="Maximum" Value="{Binding RenderRangeBeginLimit}"/>
             <Setter Property="Minimum" Value="0"/>
             <Setter Property="SlideChangeValue" Value="{Binding FrameDuration}"/>
             <Setter Property="Converter" Value="{StaticResource TimeConverter}"/>
             <Setter Property="HorizontalAlignment" Value="Left"/>
-
-            <Style.Triggers>
-                <DataTrigger Binding="{Binding RenderRangeType}" Value="{x:Static m:RenderRangeType.Workarea}">
-                    <Setter Property="Value" Value="{Binding CompositionWorkareaBegin}"/>
-                    <Setter Property="Maximum" Value="{Binding CompositionDuration}"/>
-                </DataTrigger>
-                <DataTrigger Binding="{Binding RenderRangeType}" Value="{x:Static m:RenderRangeType.All}">
-                    <Setter Property="Value" Value="0"/>
-                    <Setter Property="Maximum" Value="{Binding CompositionDuration}"/>
-                </DataTrigger>
-            </Style.Triggers>
         </Style>
 
         <Style x:Key="EndTimeSliderStyle" TargetType="{x:Type upr:SlidableNumberTextBox}" BasedOn="{StaticResource {x:Type upr:SlidableNumberTextBox}}">
-            <Setter Property="Value" Value="{Binding EndTime}"/>
             <Setter Property="Maximum" Value="{Binding CompositionDuration}"/>
-            <Setter Property="Minimum" Value="{Binding RenderRangeEndStart}"/>
             <Setter Property="SlideChangeValue" Value="{Binding FrameDuration}"/>
             <Setter Property="Converter" Value="{StaticResource TimeConverter}"/>
             <Setter Property="HorizontalAlignment" Value="Left"/>
+        </Style>
+
+        <Style x:Key="OKButtonStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource DialogOKButton}">
+            <Setter Property="Content" Value="{gm:LanguageResource ResourceKey=RenderSettingView_Button_Enqueue, ReturnDynamicResource=True}"/>
 
             <Style.Triggers>
-                <DataTrigger Binding="{Binding RenderRangeType}" Value="{x:Static m:RenderRangeType.Workarea}">
-                    <Setter Property="Value" Value="{Binding CompositionWorkareaEnd}"/>
-                    <Setter Property="Minimum" Value="0"/>
+                <DataTrigger Binding="{Binding Mode}" Value="{x:Static dvm:RenderSettingMode.ChangeSetting}">
+                    <Setter Property="Content" Value="{gm:LanguageResource ResourceKey=Dialog_OK, ReturnDynamicResource=True}"/>
                 </DataTrigger>
-                <DataTrigger Binding="{Binding RenderRangeType}" Value="{x:Static m:RenderRangeType.All}">
-                    <Setter Property="Value" Value="{Binding CompositionDuration}"/>
-                    <Setter Property="Minimum" Value="0"/>
+                <DataTrigger Binding="{Binding Mode}" Value="{x:Static dvm:RenderSettingMode.QuickRendering}">
+                    <Setter Property="Content" Value="{gm:LanguageResource ResourceKey=RenderSettingView_Button_StartRender, ReturnDynamicResource=True}"/>
                 </DataTrigger>
             </Style.Triggers>
         </Style>
@@ -174,7 +150,10 @@
                         </Grid.ColumnDefinitions>
 
                         <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=RenderSettingView_TimeRange_Begin}" Style="{StaticResource SettingLabelTextBlockStyle}"/>
-                        <upr:SlidableNumberTextBox Grid.Column="1" Style="{StaticResource BeginTimeSliderStyle}"/>
+                        <!-- NOTE: 終了の方含め、なぜかValueのBinding先が変わっているのに値だけが更新されず、MaximumやらMinimumの更新時にBinding更新前の値で上書きしようとするので、それぞれでSlidableNumberTextBoxを用意する -->
+                        <upr:SlidableNumberTextBox Grid.Column="1" Style="{StaticResource BeginTimeSliderStyle}" Maximum="{Binding CompositionDuration}" Value="0" Visibility="{Binding RenderRangeType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter={x:Static m:RenderRangeType.All}}"/>
+                        <upr:SlidableNumberTextBox Grid.Column="1" Style="{StaticResource BeginTimeSliderStyle}" Maximum="{Binding CompositionDuration}" Value="{Binding CompositionWorkareaBegin, Mode=OneWay}" Visibility="{Binding RenderRangeType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter={x:Static m:RenderRangeType.Workarea}}"/>
+                        <upr:SlidableNumberTextBox Grid.Column="1" Style="{StaticResource BeginTimeSliderStyle}" Maximum="{Binding RenderRangeBeginLimit}" Value="{Binding BeginTime}" Visibility="{Binding RenderRangeType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter={x:Static m:RenderRangeType.Specific}}"/>
                     </Grid>
                     <Grid Margin="{StaticResource ItemMargin}" IsEnabled="{Binding RenderRangeType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static m:RenderRangeType.Specific}}">
                         <Grid.ColumnDefinitions>
@@ -183,7 +162,9 @@
                         </Grid.ColumnDefinitions>
 
                         <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=RenderSettingView_TimeRange_End}" Style="{StaticResource SettingLabelTextBlockStyle}"/>
-                        <upr:SlidableNumberTextBox Grid.Column="1" Style="{StaticResource EndTimeSliderStyle}"/>
+                        <upr:SlidableNumberTextBox Grid.Column="1" Style="{StaticResource EndTimeSliderStyle}" Minimum="0" Value="{Binding CompositionDuration, Mode=OneWay}" Visibility="{Binding RenderRangeType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter={x:Static m:RenderRangeType.All}}"/>
+                        <upr:SlidableNumberTextBox Grid.Column="1" Style="{StaticResource EndTimeSliderStyle}" Minimum="0" Value="{Binding CompositionWorkareaEnd, Mode=OneWay}" Visibility="{Binding RenderRangeType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter={x:Static m:RenderRangeType.Workarea}}"/>
+                        <upr:SlidableNumberTextBox Grid.Column="1" Style="{StaticResource EndTimeSliderStyle}" Minimum="{Binding RenderRangeEndStart}" Value="{Binding EndTime}" Visibility="{Binding RenderRangeType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter={x:Static m:RenderRangeType.Specific}}"/>
                     </Grid>
                 </StackPanel>
             </GroupBox>
@@ -191,7 +172,7 @@
         </StackPanel>
 
         <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,20,0,0" HorizontalAlignment="Right">
-            <Button Content="{gm:LanguageResource ResourceKey=RenderSettingView_DialogButton_OK}" Style="{StaticResource DialogOKButton}" Command="{Binding OKCommand}"/>
+            <Button Style="{StaticResource OKButtonStyle}" Command="{Binding OKCommand}"/>
             <Button Content="{gm:LanguageResource ResourceKey=Dialog_Cancel}" Margin="5,0,0,0" Style="{StaticResource DialogDefaultCancelButton}" Command="{Binding CancelCommand}"/>
         </StackPanel>
     </Grid>

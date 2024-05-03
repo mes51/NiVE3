@@ -156,6 +156,13 @@ namespace NiVE3.ViewModel.Dialog
             set { SetProperty(ref hasAudio, value); }
         }
 
+        private RenderSettingMode mode;
+        public RenderSettingMode Mode
+        {
+            get { return mode; }
+            set { SetProperty(ref mode, value); }
+        }
+
         public ICommand ChangeSaveFilePathCommand { get; }
 
         public ICommand OpenOutputSettingCommand { get; }
@@ -173,6 +180,8 @@ namespace NiVE3.ViewModel.Dialog
         IDialogService DialogService { get; }
 
         ExportLifetimeContext<IOutput> Output { get; set; }
+
+        ExportLifetimeContext<IOutput>? OriginalOutput { get; set; }
 
         Int32Size CompositionSize { get; set; }
 
@@ -225,14 +234,13 @@ namespace NiVE3.ViewModel.Dialog
             OKCommand = new RequerySuggestedCommand(() =>
             {
                 var outputSourceTypes = GetOutputSourceType();
-                var (beginTime, endTime) = GetTimeRange();
                 var result = new DialogParameters
                 {
                     { OutputParameterName, Output },
                     { nameof(FilePath), FilePath },
                     { nameof(RenderRangeType), RenderRangeType },
-                    { nameof(BeginTime), beginTime },
-                    { nameof(EndTime), endTime },
+                    { nameof(BeginTime), BeginTime },
+                    { nameof(EndTime), EndTime },
                     { nameof(IsOutputVideo), outputSourceTypes.HasFlag(SourceType.Video) },
                     { nameof(IsOutputAudio), outputSourceTypes.HasFlag(SourceType.Audio) }
                 };
@@ -242,7 +250,10 @@ namespace NiVE3.ViewModel.Dialog
 
             CancelCommand = new DelegateCommand(() =>
             {
-                Output.Dispose();
+                if (Mode != RenderSettingMode.ChangeSetting)
+                {
+                    Output.Dispose();
+                }
 
                 RequestClose?.Invoke(new DialogResult(ButtonResult.Cancel, null));
             });
@@ -266,8 +277,24 @@ namespace NiVE3.ViewModel.Dialog
             CompositionDuration = composition.Duration;
             CompositionWorkareaBegin = composition.WorkareaBegin;
             CompositionWorkareaEnd = composition.WorkareaEnd;
-            BeginTime = composition.WorkareaBegin;
-            EndTime = composition.WorkareaEnd;
+            RenderRangeType = parameters.GetValue<RenderRangeType>(nameof(RenderRangeType));
+            RenderRangeBeginLimit = 0.0;
+            RenderRangeEndStart = composition.Duration;
+            BeginTime = parameters.GetValue<double>(nameof(BeginTime));
+            EndTime = parameters.GetValue<double>(nameof(EndTime));
+            IsOutputVideo = parameters.GetValue<bool>(nameof(IsOutputVideo));
+            IsOutputAudio = parameters.GetValue<bool>(nameof(IsOutputAudio));
+            if (parameters.TryGetValue<string>(nameof(FilePath), out var filePath))
+            {
+                FilePath = filePath;
+            }
+            if (parameters.TryGetValue<ExportLifetimeContext<IOutput>>(nameof(Output), out var output))
+            {
+                Output?.Dispose();
+                Output = output;
+                OriginalOutput = output;
+            }
+            Mode = parameters.GetValue<RenderSettingMode>(nameof(Mode));
             HasAudio = composition.HasAudio;
 
             var baseFilePath = string.IsNullOrEmpty(ProjectModel.ProjectPath) ? Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) : Path.GetDirectoryName(ProjectModel.ProjectPath);
@@ -321,7 +348,6 @@ namespace NiVE3.ViewModel.Dialog
             return SupportedSourceType switch
             {
                 SourceType.VideoAndAudio => (IsOutputVideo ? SourceType.Video : SourceType.None) | (IsOutputAudio ?  SourceType.Audio : SourceType.None),
-                SourceType.Audio => HasAudio ? SourceType.Audio : SourceType.None,
                 _ => SupportedSourceType
             };
         }
@@ -337,10 +363,20 @@ namespace NiVE3.ViewModel.Dialog
                     RenderRangeBeginLimit = EndTime - FrameDuration;
                     break;
                 case nameof(SelectedOutputPlugin):
-                    Output.Dispose();
+                    if (Output != OriginalOutput)
+                    {
+                        Output.Dispose();
+                    }
                     ChangeOutputPlugin(OutputPlugins[SelectedOutputPlugin].Item1);
                     break;
             }
         }
+    }
+
+    enum RenderSettingMode
+    {
+        Enqueue,
+        ChangeSetting,
+        QuickRendering
     }
 }

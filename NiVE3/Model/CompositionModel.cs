@@ -173,6 +173,8 @@ namespace NiVE3.Model
 
         EffectListModel EffectListModel { get; }
 
+        RenderQueueModel RenderQueueModel { get; }
+
         TextPropertyModel TextPropertyModel { get; }
 
         HistoryModel HistoryModel { get; }
@@ -188,9 +190,10 @@ namespace NiVE3.Model
             Guid toneMapperPluginId,
             FootageListModel footageListModel,
             EffectListModel effectListModel,
+            RenderQueueModel renderQueueModel,
             TextPropertyModel textPropertyModel,
             HistoryModel historyModel
-        ) : this(renderer, toneMapper, rendererPluginId, toneMapperPluginId, footageListModel, effectListModel, textPropertyModel, historyModel, null) { }
+        ) : this(renderer, toneMapper, rendererPluginId, toneMapperPluginId, footageListModel, effectListModel, renderQueueModel, textPropertyModel, historyModel, null) { }
 
         public CompositionModel(
             ExportLifetimeContext<IRenderer> renderer,
@@ -199,6 +202,7 @@ namespace NiVE3.Model
             Guid toneMapperPluginId,
             FootageListModel footageListModel,
             EffectListModel effectListModel,
+            RenderQueueModel renderQueueModel,
             TextPropertyModel textPropertyModel,
             HistoryModel historyModel,
             Guid? compositionId
@@ -211,6 +215,7 @@ namespace NiVE3.Model
             ToneMapperPluginId = toneMapperPluginId;
             FootageListModel = footageListModel;
             EffectListModel = effectListModel;
+            RenderQueueModel = renderQueueModel;
             TextPropertyModel = textPropertyModel;
             HistoryModel = historyModel;
             Layers = [];
@@ -502,6 +507,11 @@ namespace NiVE3.Model
         {
             var layerIds = Layers.Where(l => l.FootageModel == footage).Select(l => l.LayerId).ToArray();
             DeleteLayers(layerIds);
+        }
+
+        public void EnqueueRender(string filePath, RenderRangeType renderRangeType, double beginTime, double endTime, bool isOutputVideo, bool isOutputAudio, ExportLifetimeContext<IOutput> output)
+        {
+            RenderQueueModel.Enqueue(this, filePath, renderRangeType, beginTime, endTime, isOutputVideo, isOutputAudio, output);
         }
 
         public NImage RenderFrame(double time, double downSamplingRate, bool applyToneMapping, bool useGpu)
