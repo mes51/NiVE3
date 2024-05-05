@@ -122,7 +122,7 @@ namespace NiVE3.Model
 
         public void RemoveQueues(Guid[] ids)
         {
-            var targets = Items.Where(m => ids.Contains(m.QueueId)).OrderBy(Items.IndexOf).ToArray();
+            var targets = Items.Where(i => ids.Contains(i.QueueId)).OrderBy(Items.IndexOf).ToArray();
             var indices = targets.Select(Items.IndexOf).ToArray();
 
             foreach (var i in targets)
@@ -131,6 +131,16 @@ namespace NiVE3.Model
             }
 
             HistoryModel.Add(new RemoveQueuesHistoryCommand(this, targets, indices));
+        }
+
+        public void RemoveQueuesByComposition(CompositionModel compositionModel)
+        {
+            RemoveQueues([..Items.Where(i => i.CompositionModel == compositionModel).Select(i => i.QueueId)]);
+        }
+
+        public void Clear()
+        {
+            Items.Clear();
         }
 
         public bool HasSameOutputFilePathQueue()

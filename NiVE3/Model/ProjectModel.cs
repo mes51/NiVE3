@@ -180,6 +180,7 @@ namespace NiVE3.Model
                 OnCompositionRemoved(c);
                 c.Dispose();
             }
+            RenderQueueModel.Clear();
             FootageListModel.Clear();
             HistoryModel.Clear();
             CompositionModels.Clear();
@@ -297,6 +298,8 @@ namespace NiVE3.Model
 
                 if (f.InputModel.Input is CompositionInput input)
                 {
+                    RenderQueueModel.RemoveQueuesByComposition(input.Composition);
+
                     RemoveCompositionModel(input.Composition);
                     HistoryModel.Add(new DeleteCompositionCommand(this, input.Composition));
                 }
