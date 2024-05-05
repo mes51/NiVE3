@@ -571,6 +571,12 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("フォルダを削除すると、中に含まれているフッテージも一緒に削除され、各コンポジションからも含まれているフッテージを使用しているレイヤーが削除されます。このフォルダを削除しますか?")]
         public static readonly string Dialog_ConfirmDeleteFootageFolder_Text = nameof(Dialog_ConfirmDeleteFootageFolder_Text);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("レンダリング開始")]
+        public static readonly string Dialog_ConfirmRenderOverwriteByQueueingItem_Title = nameof(Dialog_ConfirmRenderOverwriteByQueueingItem_Title);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("レンダーキューに同じファイル名、または命名規則のパスが存在します。レンダリングを行うと後続のキューによってファイルが上書きされる可能性があります。よろしいですか?")]
+        public static readonly string Dialog_ConfirmRenderOverwriteByQueueingItem_Text = nameof(Dialog_ConfirmRenderOverwriteByQueueingItem_Text);
+
         [ShowInMarkup, LanguageKey, DefaultValue("プロジェクトファイル")]
         public static readonly string Dialog_OpenSaveProject_Filter_Project = nameof(Dialog_OpenSaveProject_Filter_Project);
 

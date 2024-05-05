@@ -95,6 +95,13 @@ namespace NiVE3.Model
 
         public void Enqueue(CompositionModel compositionModel, string filePath, RenderRangeType renderRangeType, double beginTime, double endTime, bool isOutputVideo, bool isOutputAudio, ExportLifetimeContext<IOutput>? output)
         {
+            var duplicateCount = 1;
+            while (Items.Any(i => i.FilePath == filePath) || File.Exists(filePath))
+            {
+                filePath = Path.Combine(Path.GetDirectoryName(filePath) ?? "", Path.GetFileNameWithoutExtension(filePath) + $"_{duplicateCount}" + Path.GetExtension(filePath));
+                duplicateCount++;
+            }
+
             var queue = new RenderQueueItemModel(compositionModel, ProjectModel.Value, OutputListModel, HistoryModel, output);
             queue.FilePath = filePath;
             queue.RenderRangeType = renderRangeType;
@@ -124,6 +131,11 @@ namespace NiVE3.Model
             }
 
             HistoryModel.Add(new RemoveQueuesHistoryCommand(this, targets, indices));
+        }
+
+        public bool HasSameOutputFilePathQueue()
+        {
+            return Items.Select(i => i.FilePath).Distinct().Count() != Items.Count();
         }
 
         public void StartRender()

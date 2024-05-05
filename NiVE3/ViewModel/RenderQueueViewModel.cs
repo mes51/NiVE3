@@ -17,6 +17,7 @@ using System.ComponentModel;
 using System.Threading;
 using System.Diagnostics;
 using System.Windows.Threading;
+using NiVE3.View.Resource;
 
 namespace NiVE3.ViewModel
 {
@@ -122,6 +123,15 @@ namespace NiVE3.ViewModel
             {
                 if (!IsRendering)
                 {
+                    if (RenderQueueModel.HasSameOutputFilePathQueue())
+                    {
+                        var title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_ConfirmRenderOverwriteByQueueingItem_Title);
+                        var text = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_ConfirmRenderOverwriteByQueueingItem_Text);
+                        if (MessageBox.Show(text, title, MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes)
+                        {
+                            return;
+                        }
+                    }
                     RenderQueueModel.StartRender();
                 }
                 else
