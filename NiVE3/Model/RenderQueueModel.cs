@@ -10,7 +10,7 @@ using Prism.Mvvm;
 
 namespace NiVE3.Model
 {
-    class RenderQueueModel : BindableBase
+    partial class RenderQueueModel : BindableBase
     {
         private ObservableCollection<RenderQueueItemModel> items = [];
         public ObservableCollection<RenderQueueItemModel> Items
@@ -58,15 +58,18 @@ namespace NiVE3.Model
 
         OutputListModel OutputListModel { get; }
 
-        public RenderQueueModel(Lazy<ProjectModel> projectModel, OutputListModel outputListModel)
+        HistoryModel HistoryModel { get; }
+
+        public RenderQueueModel(Lazy<ProjectModel> projectModel, OutputListModel outputListModel, HistoryModel historyModel)
         {
             ProjectModel = projectModel;
             OutputListModel = outputListModel;
+            HistoryModel = historyModel;
         }
 
         public void Enqueue(CompositionModel compositionModel, string filePath, RenderRangeType renderRangeType, double beginTime, double endTime, bool isOutputVideo, bool isOutputAudio, ExportLifetimeContext<IOutput>? output)
         {
-            var queue = new RenderQueueItemModel(compositionModel, ProjectModel.Value, OutputListModel, output);
+            var queue = new RenderQueueItemModel(compositionModel, ProjectModel.Value, OutputListModel, HistoryModel, output);
             queue.FilePath = filePath;
             queue.RenderRangeType = renderRangeType;
             queue.BeginTime = beginTime;
@@ -75,6 +78,26 @@ namespace NiVE3.Model
             queue.IsOutputAudio = isOutputAudio;
 
             Items.Add(queue);
+
+            HistoryModel.Add(new EnqueueHistoryCommand(this, queue));
+        }
+
+        public void RemoveQueue(Guid id)
+        {
+            RemoveQueues([id]);
+        }
+
+        public void RemoveQueues(Guid[] ids)
+        {
+            var targets = Items.Where(m => ids.Contains(m.QueueId)).OrderBy(Items.IndexOf).ToArray();
+            var indices = targets.Select(Items.IndexOf).ToArray();
+
+            foreach (var i in targets)
+            {
+                Items.Remove(i);
+            }
+
+            HistoryModel.Add(new RemoveQueuesHistoryCommand(this, targets, indices));
         }
     }
 }

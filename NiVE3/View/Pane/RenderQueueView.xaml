@@ -46,7 +46,7 @@
             <Setter Property="ContextMenu">
                 <Setter.Value>
                     <ContextMenu>
-                        <MenuItem Header="{gm:LanguageResource ResourceKey=RenderQueueView_ContextMenu_Delete}" Command="{Binding Source={StaticResource DataContextProxy}, Path=Data.DeleteCommand}"/>
+                        <MenuItem Header="{gm:LanguageResource ResourceKey=RenderQueueView_ContextMenu_Delete}" Command="{Binding Source={StaticResource DataContextProxy}, Path=Data.DeleteCommand}" CommandParameter="{Binding}"/>
                     </ContextMenu>
                 </Setter.Value>
             </Setter>
@@ -87,6 +87,6 @@
             <Button Grid.Column="4" Style="{StaticResource RenderStartButtonStyle}"/>
             <Button Grid.Column="5" Content="{gm:LanguageResource ResourceKey=RenderQueueView_Button_Abort}" Margin="5,0,0,0" Command="{Binding AbortCommand}"/>
         </Grid>
-        <ListView Grid.Row="1" Margin="0,10,0,0" ItemsSource="{Binding Items}" HorizontalContentAlignment="Stretch" SelectionMode="Extended" ItemTemplate="{StaticResource RenderQueueItemTemplate}"/>
+        <ListView Grid.Row="1" Margin="0,10,0,0" ItemsSource="{Binding Items}" HorizontalContentAlignment="Stretch" SelectionMode="Extended" ItemTemplate="{StaticResource RenderQueueItemTemplate}" ItemContainerStyle="{StaticResource RenderQueueItemContainerStyle}" VirtualizingPanel.ScrollUnit="Pixel"/>
     </Grid>
 </UserControl>

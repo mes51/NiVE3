@@ -94,10 +94,17 @@ namespace NiVE3.ViewModel
 
             AbortCommand = new RequerySuggestedCommand(() => IsAborting = true, () => IsRendering);
 
-            DeleteCommand = new RequerySuggestedCommand(() =>
+            DeleteCommand = new RequerySuggestedCommand<RenderQueueItemViewModel>(vm =>
             {
-
-            }, () => !IsRendering);
+                if (vm.IsSelected)
+                {
+                    RenderQueueModel.RemoveQueues([..Items.Select(q => q.QueueId)]);
+                }
+                else
+                {
+                    RenderQueueModel.RemoveQueue(vm.QueueId);
+                }
+            }, _ => !IsRendering);
         }
 
         partial void WiringModel();

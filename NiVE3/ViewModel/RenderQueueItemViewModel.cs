@@ -21,6 +21,14 @@ namespace NiVE3.ViewModel
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
     partial class RenderQueueItemViewModel : BindableBase
     {
+        private Guid queueId;
+        [NeedWire(nameof(RenderQueueItemModel), IsOneWay = true)]
+        public Guid QueueId
+        {
+            get { return queueId; }
+            set { SetProperty(ref queueId, value); }
+        }
+
         private bool isRenderSelected;
         [NeedWire(nameof(RenderQueueItemModel), IsOneWay = true)]
         public bool IsRenderSelected
@@ -186,19 +194,13 @@ namespace NiVE3.ViewModel
                 save.FileName = Path.GetFileName(FilePath);
                 if (save.ShowDialog() ?? false)
                 {
-                    if (Output != null)
-                    {
-                        FilePath = Output.Value.ProcessOutputFilePath(save.FileName);
-                    }
-                    else
-                    {
-                        FilePath = save.FileName;
-                    }
+                    RenderQueueItemModel.ChangeFilePath(save.FileName);
                 }
             }, () => State == RenderQueueItemState.NotReady || State == RenderQueueItemState.Ready);
 
             ChangeSettingCommand = new RequerySuggestedCommand(() =>
             {
+                var prevSetting = (object?)null;
                 var settingParams = new DialogParameters
                 {
                     { RenderSettingViewModel.CompositionParameterName, RenderQueueItemModel.CompositionModel },
@@ -212,6 +214,7 @@ namespace NiVE3.ViewModel
                 };
                 if (Output != null)
                 {
+                    prevSetting = Output.Value.SaveData();
                     settingParams.Add(RenderSettingViewModel.OutputParameterName, Output);
                 }
                 IDialogResult? settingResult = null;
@@ -226,6 +229,7 @@ namespace NiVE3.ViewModel
                         settingResult.Parameters.GetValue<double>(nameof(RenderSettingViewModel.EndTime)),
                         settingResult.Parameters.GetValue<bool>(nameof(RenderSettingViewModel.IsOutputVideo)),
                         settingResult.Parameters.GetValue<bool>(nameof(RenderSettingViewModel.IsOutputAudio)),
+                        prevSetting,
                         settingResult.Parameters.GetValue<ExportLifetimeContext<IOutput>>(RenderSettingViewModel.OutputParameterName)
                     );
                 }

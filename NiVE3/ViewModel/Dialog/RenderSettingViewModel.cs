@@ -284,22 +284,24 @@ namespace NiVE3.ViewModel.Dialog
             EndTime = parameters.GetValue<double>(nameof(EndTime));
             IsOutputVideo = parameters.GetValue<bool>(nameof(IsOutputVideo));
             IsOutputAudio = parameters.GetValue<bool>(nameof(IsOutputAudio));
-            if (parameters.TryGetValue<string>(nameof(FilePath), out var filePath))
-            {
-                FilePath = filePath;
-            }
             if (parameters.TryGetValue<ExportLifetimeContext<IOutput>>(nameof(Output), out var output))
             {
                 Output?.Dispose();
                 Output = output;
                 OriginalOutput = output;
             }
+            if (parameters.TryGetValue<string>(nameof(FilePath), out var filePath))
+            {
+                FilePath = filePath;
+            }
+            else
+            {
+                var baseFilePath = string.IsNullOrEmpty(ProjectModel.ProjectPath) ? Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) : Path.GetDirectoryName(ProjectModel.ProjectPath);
+                baseFilePath = Path.Combine(baseFilePath ?? Path.GetFullPath("."), composition.Name + ".avi");
+                FilePath = Output.Value.ProcessOutputFilePath(baseFilePath);
+            }
             Mode = parameters.GetValue<RenderSettingMode>(nameof(Mode));
             HasAudio = composition.HasAudio;
-
-            var baseFilePath = string.IsNullOrEmpty(ProjectModel.ProjectPath) ? Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) : Path.GetDirectoryName(ProjectModel.ProjectPath);
-            baseFilePath = Path.Combine(baseFilePath ?? Path.GetFullPath("."), composition.Name + ".avi");
-            FilePath = Output.Value.ProcessOutputFilePath(baseFilePath);
         }
 
         string GetSaveFileFilter()

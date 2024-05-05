@@ -10,8 +10,15 @@ using Prism.Mvvm;
 
 namespace NiVE3.Model
 {
-    class RenderQueueItemModel : BindableBase, IDisposable
+    partial class RenderQueueItemModel : BindableBase, IDisposable
     {
+        private Guid queueId;
+        public Guid QueueId
+        {
+            get { return queueId; }
+            set { SetProperty(ref queueId, value); }
+        }
+
         private bool isRenderSelected;
         public bool IsRenderSelected
         {
@@ -144,11 +151,14 @@ namespace NiVE3.Model
 
         OutputListModel OutputListModel { get; }
 
-        public RenderQueueItemModel(CompositionModel compositionModel, ProjectModel projectModel, OutputListModel outputListModel, ExportLifetimeContext<IOutput>? output)
+        HistoryModel HistoryModel { get; }
+
+        public RenderQueueItemModel(CompositionModel compositionModel, ProjectModel projectModel, OutputListModel outputListModel, HistoryModel historyModel, ExportLifetimeContext<IOutput>? output, Guid? queueId = null)
         {
             CompositionModel = compositionModel;
             ProjectModel = projectModel;
             OutputListModel = outputListModel;
+            HistoryModel = historyModel;
             Output = output;
             if (output != null)
             {
@@ -156,6 +166,7 @@ namespace NiVE3.Model
                 var metadata = outputListModel.GetMetadata(OutputPluginId);
                 OutputPluginName = metadata?.Name ?? "";
             }
+            QueueId = queueId ?? Guid.NewGuid();
 
             CompositionName = compositionModel.Name;
             CompositionWorkareaBegin = compositionModel.WorkareaBegin;
@@ -167,8 +178,15 @@ namespace NiVE3.Model
             PropertyChanged += RenderQueueItemModel_PropertyChanged;
         }
 
-        public void UpdateSetting(string filePath, RenderRangeType renderRangeType, double beginTime, double endTime, bool isOutputVideo, bool isOutputAudio, ExportLifetimeContext<IOutput> output)
+        public void UpdateSetting(string filePath, RenderRangeType renderRangeType, double beginTime, double endTime, bool isOutputVideo, bool isOutputAudio, object? prevOutputSetting, ExportLifetimeContext<IOutput> output)
         {
+            var prevFilePath = FilePath;
+            var prevRenderRangeType = RenderRangeType;
+            var prevBeginTime = BeginTime;
+            var prevEndTime = EndTime;
+            var prevIsOutputVideo = IsOutputVideo;
+            var prevIsOutputAudio = IsOutputAudio;
+
             FilePath = filePath;
             RenderRangeType = renderRangeType;
             BeginTime = beginTime;
@@ -177,13 +195,73 @@ namespace NiVE3.Model
             IsOutputAudio = isOutputAudio;
             if (output != Output)
             {
-                Output?.Dispose();
-                Output = output;
+                var prevOutput = Output;
+                var prevOutputMetadata = Output != null ? OutputListModel.GetMetadata(OutputPluginId) : null;
 
+                Output = output;
                 OutputPluginId = OutputListModel.GetId(output.Value.GetType());
                 var metadata = OutputListModel.GetMetadata(OutputPluginId);
                 OutputPluginName = metadata?.Name ?? "";
+
+                HistoryModel.Add(
+                    new ChangeSettingWithNewOutputHistoryCommand(
+                        this,
+                        prevFilePath,
+                        prevRenderRangeType,
+                        prevBeginTime,
+                        prevEndTime,
+                        prevIsOutputVideo,
+                        prevIsOutputAudio,
+                        prevOutputMetadata,
+                        prevOutput,
+                        filePath,
+                        renderRangeType,
+                        beginTime,
+                        endTime,
+                        isOutputVideo,
+                        isOutputAudio,
+                        metadata,
+                        output
+                    )
+                );
             }
+            else
+            {
+                HistoryModel.Add(
+                    new ChangeSettingHistoryCommand(
+                        this,
+                        prevFilePath,
+                        prevRenderRangeType,
+                        prevBeginTime,
+                        prevEndTime,
+                        prevIsOutputVideo,
+                        prevIsOutputAudio,
+                        prevOutputSetting,
+                        filePath,
+                        renderRangeType,
+                        beginTime,
+                        endTime,
+                        isOutputVideo,
+                        isOutputAudio,
+                        output?.Value?.SaveData()
+                    )
+                );
+            }
+        }
+
+        public void ChangeFilePath(string newFilePath)
+        {
+            var prevFilePath = FilePath;
+            if (Output != null)
+            {
+                FilePath = Output.Value.ProcessOutputFilePath(newFilePath);
+            }
+            else
+            {
+                FilePath = newFilePath;
+            }
+
+            HistoryModel.Add(new ChangeFilePathHistoryCommand(this, prevFilePath, FilePath));
         }
 
         public string GetSaveFileFilter()

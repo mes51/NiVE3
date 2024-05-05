@@ -545,6 +545,15 @@ namespace NiVE3.View.Resource
         [DefaultValue("エフェクトのコメント変更")]
         public static readonly string History_ChangeEffectComment = nameof(History_ChangeEffectComment);
 
+        [DefaultValue("レンダーキューに追加")]
+        public static readonly string History_EnqueueRender = nameof(History_EnqueueRender);
+
+        [DefaultValue("レンダリング設定の変更")]
+        public static readonly string History_ChangeRenderQueueItemSetting = nameof(History_ChangeRenderQueueItemSetting);
+
+        [DefaultValue("レンダーキューの削除")]
+        public static readonly string History_RemoveRenderQueues = nameof(History_RemoveRenderQueues);
+
         // Dialog
 
         [ShowInMarkup, LanguageKey, DefaultValue("フッテージの削除")]
