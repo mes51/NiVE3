@@ -42,6 +42,13 @@ namespace NiVE3.Model
             set { SetProperty(ref isEdited, value); }
         }
 
+        private bool isRendering;
+        public bool IsRendering
+        {
+            get { return isRendering; }
+            set { SetProperty(ref isRendering, value); }
+        }
+
         private bool gpuErrorRaised;
         public bool GpuErrorRaised
         {

@@ -32,11 +32,18 @@
                     <MultiDataTrigger.Conditions>
                         <Condition Binding="{Binding State, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static m:RenderQueueItemState.NotReady}}" Value="False"/>
                         <Condition Binding="{Binding State, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static m:RenderQueueItemState.Ready}}" Value="False"/>
+                        <Condition Binding="{Binding State, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static m:RenderQueueItemState.Rendering}}" Value="False"/>
                     </MultiDataTrigger.Conditions>
 
-                    <Setter Property="IsEnabled" Value="False"/>
                     <Setter Property="IsChecked" Value="False"/>
+                    <Setter Property="IsEnabled" Value="False"/>
                 </MultiDataTrigger>
+                <DataTrigger Binding="{Binding State, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static m:RenderQueueItemState.Rendering}}" Value="True">
+                    <Setter Property="IsEnabled" Value="False"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding ElementName=Root, Path=IsLocked}" Value="True">
+                    <Setter Property="IsEnabled" Value="False"/>
+                </DataTrigger>
             </Style.Triggers>
         </Style>
 

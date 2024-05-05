@@ -2,10 +2,15 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using NiVE3.Plugin.Interfaces;
+using NiVE3.Plugin.ValueObject;
+using NiVE3.Util;
 using Prism.Mvvm;
 
 namespace NiVE3.Model
@@ -275,6 +280,94 @@ namespace NiVE3.Model
             {
                 return "*.*|*.*";
             }
+        }
+
+        public void ExecuteRender(Action<int> setTotalFrameCount, Action<int, TimeSpan> setProgress, Func<bool> isPaused, Func<bool> isAborting)
+        {
+            if (Output == null)
+            {
+                return;
+            }
+
+            var dispatcher = Application.Current.Dispatcher;
+            dispatcher.Invoke(() => State = RenderQueueItemState.Rendering);
+
+            var plugin = Output.Value;
+            var size = isOutputVideo ? new Int32Size(CompositionModel.Width, CompositionModel.Height) : (Int32Size?)null;
+            var sourceTypes = (isOutputVideo ? SourceType.Video : SourceType.None) | (CompositionModel.HasAudio && isOutputAudio ? SourceType.Audio : SourceType.None);
+            var frameRate = CompositionModel.FrameRate;
+            var frameDuration = CompositionModel.FrameDuration;
+
+            try
+            {
+                plugin.BeginOutput(filePath, beginTime, endTime - beginTime, frameRate, size, sourceTypes);
+
+                var lastProcessedDuration = 0.0;
+                if (sourceTypes.HasFlag(SourceType.Video))
+                {
+                    var passCount = plugin.GetPassCount();
+                    var frameCount = (int)Math.Ceiling((endTime - beginTime) * frameRate);
+                    var totalFrameCount = frameCount * passCount;
+                    setTotalFrameCount(totalFrameCount);
+                    for (var pass = 0; pass < passCount && !isAborting(); pass++)
+                    {
+                        plugin.BeginPass(pass);
+                        for (var i = 0; i < frameCount; i++)
+                        {
+                            while (isPaused() && !isAborting())
+                            {
+                                Thread.Sleep(100);
+                            }
+                            if (isAborting())
+                            {
+                                break;
+                            }
+
+                            var startTimestamp = Stopwatch.GetTimestamp();
+                            var useGpu = ProjectModel.UseGpu;
+                            var time = TimeCalc.RoundTimeDigit(beginTime + i * frameDuration);
+                            using var image = CompositionModel.RenderFrame(time, 1.0, true, useGpu);
+                            plugin.ProcessFrame(pass, time, image, useGpu);
+                            setProgress(i + 1 + frameCount * pass, Stopwatch.GetElapsedTime(startTimestamp));
+                            lastProcessedDuration = (i + 1) * frameDuration;
+                        }
+                        plugin.EndPass();
+                    }
+                }
+                else
+                {
+                    lastProcessedDuration = endTime - beginTime;
+                }
+
+                if (sourceTypes.HasFlag(SourceType.Audio))
+                {
+                    var audio = CompositionModel.RenderAudio(beginTime, lastProcessedDuration);
+                    plugin.ProcessAudio(audio);
+                }
+
+                plugin.EndOutput();
+
+                if (isAborting())
+                {
+                    dispatcher.Invoke(() => UpdateState(RenderQueueItemState.Aborted));
+                }
+                else
+                {
+                    dispatcher.Invoke(() => UpdateState(RenderQueueItemState.Completed));
+                }
+            }
+            catch
+            {
+                dispatcher.Invoke(() => UpdateState(RenderQueueItemState.Error));
+                throw;
+            }
+        }
+
+        void UpdateState(RenderQueueItemState state)
+        {
+            State = state;
+
+            HistoryModel.Add(new UpdateStateFromReadyHistoryCommand(this, state));
         }
 
         (double beginTime, double endTime) GetTimeRange()

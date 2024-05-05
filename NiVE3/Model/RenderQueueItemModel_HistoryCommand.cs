@@ -244,5 +244,32 @@ namespace NiVE3.Model
 
             public void Dispose() { }
         }
+
+        private class UpdateStateFromReadyHistoryCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangeRenderQueueItemSetting);
+
+            RenderQueueItemModel Model { get; }
+
+            RenderQueueItemState NewState { get; }
+
+            public UpdateStateFromReadyHistoryCommand(RenderQueueItemModel model, RenderQueueItemState newState)
+            {
+                Model = model;
+                NewState = newState;
+            }
+
+            public void Redo()
+            {
+                Model.State = NewState;
+            }
+
+            public void Undo()
+            {
+                Model.State = RenderQueueItemState.Ready;
+            }
+
+            public void Dispose() { }
+        }
     }
 }

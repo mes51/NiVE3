@@ -13,6 +13,10 @@ using Prism.Mvvm;
 using System.Windows.Input;
 using NiVE3.UI.Command;
 using Prism.Services.Dialogs;
+using System.ComponentModel;
+using System.Threading;
+using System.Diagnostics;
+using System.Windows.Threading;
 
 namespace NiVE3.ViewModel
 {
@@ -35,6 +39,22 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref progress, value); }
         }
 
+        private int renderedFrameCount;
+        [NeedWire(nameof(RenderQueueModel), IsOneWay = true)]
+        public int RenderedFrameCount
+        {
+            get { return renderedFrameCount; }
+            set { SetProperty(ref renderedFrameCount, value); }
+        }
+
+        private int totalFrameCount;
+        [NeedWire(nameof(RenderQueueModel), IsOneWay = true)]
+        public int TotalFrameCount
+        {
+            get { return totalFrameCount; }
+            set { SetProperty(ref totalFrameCount, value); }
+        }
+
         private bool isRendering;
         [NeedWire(nameof(RenderQueueModel), IsOneWay = true)]
         public bool IsRendering
@@ -44,7 +64,7 @@ namespace NiVE3.ViewModel
         }
 
         private bool isPaused;
-        [NeedWire(nameof(RenderQueueModel), IsOneWay = true)]
+        [NeedWire(nameof(RenderQueueModel))]
         public bool IsPaused
         {
             get { return isPaused; }
@@ -52,7 +72,7 @@ namespace NiVE3.ViewModel
         }
 
         private bool isAborting;
-        [NeedWire(nameof(RenderQueueModel), IsOneWay = true)]
+        [NeedWire(nameof(RenderQueueModel))]
         public bool IsAborting
         {
             get { return isAborting; }
@@ -67,6 +87,13 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref eta, value); }
         }
 
+        private TimeSpan currentEta;
+        public TimeSpan CurrentEta
+        {
+            get { return currentEta; }
+            set { SetProperty(ref currentEta, value); }
+        }
+
         public ICommand RenderStartCommand { get; }
 
         public ICommand AbortCommand { get; }
@@ -74,6 +101,10 @@ namespace NiVE3.ViewModel
         public ICommand DeleteCommand { get; }
 
         RenderQueueModel RenderQueueModel { get; }
+
+        Task? CalcEtaTask { get; set; }
+
+        long LastEtaUpdateTimestamp { get; set; }
 
 #pragma warning disable CS8618 // 各フィールドには初期化時に必ず値を代入するため無視
         public RenderQueueViewModel(RenderQueueModel renderQueueModel, IDialogService dialogService)
@@ -89,8 +120,15 @@ namespace NiVE3.ViewModel
 
             RenderStartCommand = new RequerySuggestedCommand(() =>
             {
-                IsRendering = true;
-            }, () => Items.Any(i => i.State == RenderQueueItemState.Ready) && !IsAborting);
+                if (!IsRendering)
+                {
+                    RenderQueueModel.StartRender();
+                }
+                else
+                {
+                    IsPaused = !IsPaused;
+                }
+            }, () => (Items.Any(i => i.State == RenderQueueItemState.Ready) || IsRendering) && !IsAborting);
 
             AbortCommand = new RequerySuggestedCommand(() => IsAborting = true, () => IsRendering);
 
@@ -98,15 +136,55 @@ namespace NiVE3.ViewModel
             {
                 if (vm.IsSelected)
                 {
-                    RenderQueueModel.RemoveQueues([..Items.Select(q => q.QueueId)]);
+                    RenderQueueModel.RemoveQueues([..Items.Where(q => q.IsSelected).Select(q => q.QueueId)]);
                 }
                 else
                 {
                     RenderQueueModel.RemoveQueue(vm.QueueId);
                 }
             }, _ => !IsRendering);
+
+            PropertyChanged += RenderQueueViewModel_PropertyChanged;
+        }
+
+        void StartCalcEtaTask()
+        {
+            var dispatcher = Application.Current.Dispatcher;
+            CalcEtaTask = Task.Run(() =>
+            {
+                while (IsRendering && !IsPaused)
+                {
+                    dispatcher.Invoke(() =>
+                    {
+                        if (LastEtaUpdateTimestamp < long.MaxValue)
+                        {
+                            CurrentEta = new TimeSpan(Math.Max((Eta - Stopwatch.GetElapsedTime(LastEtaUpdateTimestamp)).Ticks, 0));
+                        }
+                    });
+                    Thread.Sleep(1000);
+                }
+            });
         }
 
         partial void WiringModel();
+
+        private void RenderQueueViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(IsRendering) when IsRendering:
+                    LastEtaUpdateTimestamp = long.MaxValue;
+                    StartCalcEtaTask();
+                    break;
+                case nameof(IsPaused) when IsRendering:
+                    LastEtaUpdateTimestamp = long.MaxValue;
+                    StartCalcEtaTask();
+                    break;
+                case nameof(Eta):
+                    CurrentEta = Eta;
+                    LastEtaUpdateTimestamp = Stopwatch.GetTimestamp();
+                    break;
+            }
+        }
     }
 }

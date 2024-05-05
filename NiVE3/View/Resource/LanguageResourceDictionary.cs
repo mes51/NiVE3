@@ -396,6 +396,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("進捗:")]
         public static readonly string RenderQueueView_Progress = nameof(RenderQueueView_Progress);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("{0} フレーム")]
+        public static readonly string RenderQueueView_RenderedFrameCount = nameof(RenderQueueView_RenderedFrameCount);
+
         [ShowInMarkup, LanguageKey, DefaultValue("推定残り時間: {0:dd\\.hh\\:mm\\:ss}")]
         public static readonly string RenderQueueView_Eta = nameof(RenderQueueView_Eta);
 
@@ -553,6 +556,9 @@ namespace NiVE3.View.Resource
 
         [DefaultValue("レンダーキューの削除")]
         public static readonly string History_RemoveRenderQueues = nameof(History_RemoveRenderQueues);
+
+        [DefaultValue("レンダリング")]
+        public static readonly string History_ExecuteRendering = nameof(History_ExecuteRendering);
 
         // Dialog
 

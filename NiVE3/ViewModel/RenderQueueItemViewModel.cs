@@ -69,6 +69,22 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref endTime, value); }
         }
 
+        private double fixedBeginTime;
+        [NeedWire(nameof(RenderQueueItemModel), IsOneWay = true)]
+        public double FixedBeginTime
+        {
+            get { return fixedBeginTime; }
+            set { SetProperty(ref fixedBeginTime, value); }
+        }
+
+        private double fixedEndTime;
+        [NeedWire(nameof(RenderQueueItemModel), IsOneWay = true)]
+        public double FixedEndTime
+        {
+            get { return fixedEndTime; }
+            set { SetProperty(ref fixedEndTime, value); }
+        }
+
         private bool isOutputVideo;
         [NeedWire(nameof(RenderQueueItemModel), IsOneWay = true)]
         public bool IsOutputVideo

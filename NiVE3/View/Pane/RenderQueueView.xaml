@@ -12,6 +12,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
+        <cv:LocalizationConverter x:Key="RenderedFrameCountLocalizationConverter" LocalizeFormat="{gm:LanguageResource ResourceKey=RenderQueueView_RenderedFrameCount}"/>
         <cv:LocalizationConverter x:Key="EtaLocalizationConverter" LocalizeFormat="{gm:LanguageResource ResourceKey=RenderQueueView_Eta}"/>
 
         <r:BindingProxy x:Key="DataContextProxy" Data="{Binding}"/>
@@ -19,7 +20,6 @@
         <Style x:Key="RenderStartButtonStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
             <Setter Property="Margin" Value="10,0,0,0"/>
             <Setter Property="Content" Value="{gm:LanguageResource ResourceKey=RenderQueueView_Button_Rendering, ReturnDynamicResource=True}"/>
-            <Setter Property="Command" Value="{Binding RenderStartCommand}"/>
 
             <Style.Triggers>
                 <MultiDataTrigger>
@@ -75,17 +75,37 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
             <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=RenderQueueView_Progress}" VerticalAlignment="Center"/>
             <ProgressBar Grid.Column="1" Margin="5,0,0,0" Minimum="0" Maximum="100" Value="{Binding Progress}"/>
-            <TextBlock Grid.Column="2" Text="{Binding Progress, StringFormat={}{0:F0}%}" Margin="5,0,0,0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-            <!-- NOTE: 幅確保用 -->
-            <TextBlock Grid.Column="2" Text="100%" Margin="5,0,0,0" Visibility="Hidden"/>
-            <TextBlock Grid.Column="3" Text="{Binding Eta, Converter={StaticResource EtaLocalizationConverter}}" Margin="5,0,0,0" VerticalAlignment="Center"/>
-            <Button Grid.Column="4" Style="{StaticResource RenderStartButtonStyle}"/>
-            <Button Grid.Column="5" Content="{gm:LanguageResource ResourceKey=RenderQueueView_Button_Abort}" Margin="5,0,0,0" Command="{Binding AbortCommand}"/>
+
+            <Grid Grid.Column="2" VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="{Binding Progress, StringFormat={}{0:F0}%}" Margin="5,0,0,0" HorizontalAlignment="Right"/>
+                <!-- NOTE: 幅確保用 -->
+                <TextBlock Grid.Column="0" Text="100%" Margin="5,0,0,0" Visibility="Hidden"/>
+
+                <TextBlock Grid.Column="1" Text="{Binding RenderedFrameCount}" Margin="5,0,0,0" HorizontalAlignment="Right"/>
+                <!-- NOTE: 幅確保用 -->
+                <TextBlock Grid.Column="1" Text="999999" Margin="5,0,0,0" Visibility="Hidden"/>
+                <TextBlock Grid.Column="2" Text="/" Margin="5,0,0,0"/>
+                <TextBlock Grid.Column="3" Text="{Binding TotalFrameCount, Converter={StaticResource RenderedFrameCountLocalizationConverter}}" Margin="5,0,0,0" HorizontalAlignment="Right"/>
+                <!-- NOTE: 幅確保用 -->
+                <TextBlock Grid.Column="3" Text="{Binding Source=999999, Converter={StaticResource RenderedFrameCountLocalizationConverter}}" Margin="5,0,0,0" Visibility="Hidden"/>
+
+                <TextBlock Grid.Column="4" Text="{Binding CurrentEta, Converter={StaticResource EtaLocalizationConverter}}" Margin="5,0,0,0"/>
+            </Grid>
+
+            <Button Grid.Column="3" Style="{StaticResource RenderStartButtonStyle}" Command="{Binding RenderStartCommand}"/>
+            <Button Grid.Column="4" Content="{gm:LanguageResource ResourceKey=RenderQueueView_Button_Abort}" Margin="5,0,0,0" Command="{Binding AbortCommand}"/>
         </Grid>
         <ListView Grid.Row="1" Margin="0,10,0,0" ItemsSource="{Binding Items}" HorizontalContentAlignment="Stretch" SelectionMode="Extended" ItemTemplate="{StaticResource RenderQueueItemTemplate}" ItemContainerStyle="{StaticResource RenderQueueItemContainerStyle}" VirtualizingPanel.ScrollUnit="Pixel"/>
     </Grid>

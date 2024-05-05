@@ -2,16 +2,26 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.Composition;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
+using ILGPU.Runtime.Cuda;
 using NiVE3.Plugin.Interfaces;
+using NiVE3.Plugin.ValueObject;
+using NiVE3.Util;
+using NiVE3.View.Resource;
 using Prism.Mvvm;
 
 namespace NiVE3.Model
 {
     partial class RenderQueueModel : BindableBase
     {
+        const int EtaRingBufferSize = 30;
+
         private ObservableCollection<RenderQueueItemModel> items = [];
         public ObservableCollection<RenderQueueItemModel> Items
         {
@@ -24,6 +34,20 @@ namespace NiVE3.Model
         {
             get { return progress; }
             set { SetProperty(ref progress, value); }
+        }
+
+        private int renderedFrameCount;
+        public int RenderedFrameCount
+        {
+            get { return renderedFrameCount; }
+            set { SetProperty(ref renderedFrameCount, value); }
+        }
+
+        private int totalFrameCount;
+        public int TotalFrameCount
+        {
+            get { return totalFrameCount; }
+            set { SetProperty(ref totalFrameCount, value); }
         }
 
         private bool isRendering;
@@ -59,6 +83,8 @@ namespace NiVE3.Model
         OutputListModel OutputListModel { get; }
 
         HistoryModel HistoryModel { get; }
+
+        Task? RenderingTask { get; set; }
 
         public RenderQueueModel(Lazy<ProjectModel> projectModel, OutputListModel outputListModel, HistoryModel historyModel)
         {
@@ -98,6 +124,73 @@ namespace NiVE3.Model
             }
 
             HistoryModel.Add(new RemoveQueuesHistoryCommand(this, targets, indices));
+        }
+
+        public void StartRender()
+        {
+            IsRendering = true;
+            ProjectModel.Value.IsRendering = true;
+
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ExecuteRendering));
+
+            var dispatcher = Application.Current.Dispatcher;
+            RenderingTask = Task.Run(() =>
+            {
+                var frameRenderTimes = new RingBuffer<TimeSpan>(EtaRingBufferSize);
+
+                foreach (var item in (Items.Any(i => i.IsRenderSelected) ? Items.Where(i => i.IsRenderSelected) : Items).Where(i => i.State == RenderQueueItemState.Ready))
+                {
+                    dispatcher.Invoke(() => TotalFrameCount = 0);
+                    frameRenderTimes.Clear();
+
+                    dispatcher.Invoke(() =>
+                    {
+                        Progress = 0.0;
+                        Eta = TimeSpan.Zero;
+                    });
+
+                    item.ExecuteRender(
+                        f => dispatcher.Invoke(() => TotalFrameCount = f),
+                        (renderedFrames, renderTime) =>
+                        {
+                            frameRenderTimes.Append(renderTime);
+                            var eta = TimeSpan.FromSeconds((TotalFrameCount - renderedFrames) * frameRenderTimes.Sum(t => t.TotalSeconds) / frameRenderTimes.Count);
+                            dispatcher.Invoke(() =>
+                            {
+                                RenderedFrameCount = renderedFrames;
+                                Progress = renderedFrames / (double)TotalFrameCount * 100.0;
+                                Eta = eta;
+                            });
+                        },
+                        () => IsPaused,
+                        () => isAborting
+                    );
+
+                    if (IsAborting)
+                    {
+                        break;
+                    }
+                }
+            }).ContinueWith(t =>
+            {
+                dispatcher.Invoke(() =>
+                {
+                    IsRendering = false;
+                    IsPaused = false;
+                    IsAborting = false;
+                    Progress = 0.0;
+                    Eta = TimeSpan.Zero;
+                    TotalFrameCount = 0;
+                    RenderedFrameCount = 0;
+                    ProjectModel.Value.IsRendering = false;
+                    HistoryModel.EndGroup();
+                });
+
+                if (t.Exception != null)
+                {
+                    // TODO: エラーダイアログ表示
+                }
+            });
         }
     }
 }
