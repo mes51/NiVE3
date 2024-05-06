@@ -636,7 +636,8 @@
                                   NameAreaWidth="{Binding ElementName=Root, Path=DataContext.PropertyNameAreaWidth}"
                                   ControlAreaWidth="{Binding ElementName=Root, Path=LayerControlAreaWidth}"
                                   Visibility="{Binding HasEffect, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <pt:EffectCollectionView ItemsSource="{Binding Effects}"
+                <pt:EffectCollectionView x:Name="EffectCollectionView"
+                                         ItemsSource="{Binding Effects}"
                                          IndentLevel="2"
                                          ControlAreaWidth="{Binding ElementName=Root, Path=LayerControlAreaWidth}"
                                          CommentAreaWidth="{Binding ElementName=Root, Path=DataContext.LayerCommentColumnWidth}"
@@ -746,6 +747,8 @@
                 </pt:LayerItemExpander>
             </Grid>
         </StackPanel>
+
+        <r:ReadOnlyPropertyWire Reciever="{Binding ElementName=EffectCollectionView, Path=LastSelected}" Sender="{Binding LastSelectedEffect}"/>
 
         <local:DurationBar Grid.Column="1"
                            Grid.Row="0"

@@ -238,7 +238,7 @@ namespace NiVE3.Model
             public void Dispose() { }
         }
 
-        private class DeleteEffectEnableHistoryCommand : IHistoryCommand
+        private class DeleteEffectHistoryCommand : IHistoryCommand
         {
             public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_DeleteEffects);
 
@@ -248,7 +248,7 @@ namespace NiVE3.Model
 
             int[] Indices { get; }
 
-            public DeleteEffectEnableHistoryCommand(LayerModel model, EffectModel[] effects, int[] indices)
+            public DeleteEffectHistoryCommand(LayerModel model, EffectModel[] effects, int[] indices)
             {
                 Model = model;
                 Effects = effects;
@@ -272,6 +272,50 @@ namespace NiVE3.Model
             }
 
             public void Dispose() { }
+        }
+
+        private class PasteNewEffectsHistoryCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_PasteEffects);
+
+            LayerModel Model { get; }
+
+            EffectModel[] NewEffects { get; }
+
+            int InsertStartIndex { get; }
+
+            public PasteNewEffectsHistoryCommand(LayerModel model, EffectModel[] newEffects, int insertStartIndex)
+            {
+                Model = model;
+                NewEffects = newEffects;
+                InsertStartIndex = insertStartIndex;
+            }
+
+            public void Redo()
+            {
+                var index = InsertStartIndex;
+                foreach (var e in NewEffects)
+                {
+                    Model.Effects.Insert(index, e);
+                    index++;
+                }
+            }
+
+            public void Undo()
+            {
+                foreach (var e in NewEffects)
+                {
+                    Model.Effects.Remove(e);
+                }
+            }
+
+            public void Dispose()
+            {
+                foreach (var e in NewEffects)
+                {
+                    e.Dispose();
+                }
+            }
         }
 
         private class ChangeTagColorHistoryCommand : IHistoryCommand

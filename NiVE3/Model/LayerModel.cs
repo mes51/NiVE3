@@ -30,6 +30,7 @@ using NiVE3.Util;
 using System.Buffers;
 using System.Runtime.InteropServices;
 using NiVE3.Plugin.Attributes;
+using NiVE3.Data.Clipboard;
 
 namespace NiVE3.Model
 {
@@ -916,7 +917,7 @@ namespace NiVE3.Model
                 Effects.Remove(e);
             }
 
-            HistoryModel.Add(new DeleteEffectEnableHistoryCommand(this, effects, oldIndices));
+            HistoryModel.Add(new DeleteEffectHistoryCommand(this, effects, oldIndices));
         }
 
         public void ChangeTagColor(Color color)
@@ -1046,6 +1047,47 @@ namespace NiVE3.Model
                 effectModel.LoadData(effectData);
                 Effects.Add(effectModel);
             }
+        }
+
+        public CopyData<EffectData> CopyEffect(Guid[] ids)
+        {
+            var effects = Effects.Where(e => ids.Contains(e.EffectId));
+            return new CopyData<EffectData>(CopyDataType.Effect, [..effects.Select(e => e.SaveData())]);
+        }
+
+        public void PasteEffect(CopyData<EffectData> data, Guid[] selectedEffectIds, Guid? insertTargetId)
+        {
+            if (data.Type != CopyDataType.Effect || data.Data.Length < 1)
+            {
+                return;
+            }
+
+            // TODO: 型が一致するものがあったときはプロパティを上書きする
+            //var targetEffects = Effects.Where(e => selectedEffectIds.Contains(e.EffectId));
+
+            var addedEffect = new List<EffectModel>();
+            var insertStartIndex = insertTargetId.HasValue ? Effects.IndexOf(e => e.EffectId == insertTargetId) : -1;
+            if (insertStartIndex < 0)
+            {
+                insertStartIndex = Effects.Count;
+            }
+
+            var index = insertStartIndex;
+            foreach (var effectData in data.Data)
+            {
+                var newEffect = EffectListModel.CreateEffect(effectData.EffectPluginId, CompositionModel, this, HistoryModel);
+                if (newEffect == null)
+                {
+                    continue;
+                }
+
+                newEffect.LoadData(effectData);
+                Effects.Insert(index, newEffect);
+                addedEffect.Add(newEffect);
+                index++;
+            }
+
+            HistoryModel.Add(new PasteNewEffectsHistoryCommand(this, [..addedEffect], insertStartIndex));
         }
 
         private void Effects_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)

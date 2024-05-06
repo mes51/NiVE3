@@ -269,6 +269,58 @@ namespace NiVE3.Model
 
             public void Dispose() { }
         }
+
+        private class PasteKeyFramesHistoryCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_PasteKeyFrames);
+
+            PropertyModel Model { get; }
+
+            KeyFrame[] OldKeyFrames { get; }
+
+            int[] OldKeyFrameIndices { get; }
+
+            KeyFrame[] NewKeyFrames { get; }
+
+            int[] NewKeyFrameIndices { get; }
+
+            public PasteKeyFramesHistoryCommand(PropertyModel model, KeyFrame[] oldKeyFrames, int[] oldKeyFrameIndices, KeyFrame[] newKeyFrames, int[] newKeyFrameIndices)
+            {
+                Model = model;
+                OldKeyFrames = oldKeyFrames;
+                OldKeyFrameIndices = oldKeyFrameIndices;
+                NewKeyFrames = newKeyFrames;
+                NewKeyFrameIndices = newKeyFrameIndices;
+            }
+
+            public void Redo()
+            {
+                foreach (var ok in OldKeyFrames)
+                {
+                    Model.KeyFrames.Remove(ok);
+                }
+
+                foreach (var (nk, i) in NewKeyFrames.Zip(NewKeyFrameIndices))
+                {
+                    Model.KeyFrames.Insert(i, nk);
+                }
+            }
+
+            public void Undo()
+            {
+                foreach (var nk in NewKeyFrames)
+                {
+                    Model.KeyFrames.Remove(nk);
+                }
+
+                foreach (var (ok, i) in OldKeyFrames.Zip(OldKeyFrameIndices))
+                {
+                    Model.KeyFrames.Insert(i, ok);
+                }
+            }
+
+            public void Dispose() { }
+        }
     }
 
     partial class PropertyGroupModel
@@ -403,6 +455,39 @@ namespace NiVE3.Model
             {
                 Model.Children.SortBy(c => Array.IndexOf(PrevOrderedChildren, c));
                 Model.ValueCommited?.Invoke(Model, EventArgs.Empty);
+            }
+
+            public void Dispose() { }
+        }
+
+        private class PastePropertyHistoryCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_PasteProperty);
+
+            AppendablePropertyModel Model { get; }
+
+            IPropertyModel[] NewChildren { get; }
+
+            public PastePropertyHistoryCommand(AppendablePropertyModel model, IPropertyModel[] newChildren)
+            {
+                Model = model;
+                NewChildren = newChildren;
+            }
+
+            public void Redo()
+            {
+                foreach (var c in NewChildren)
+                {
+                    Model.Children.Add(c);
+                }
+            }
+
+            public void Undo()
+            {
+                foreach (var c in NewChildren)
+                {
+                    Model.Children.Remove(c);
+                }
             }
 
             public void Dispose() { }

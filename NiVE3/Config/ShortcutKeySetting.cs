@@ -58,6 +58,20 @@ namespace NiVE3.Config
             new PropertyMetadata(new SingleKeyGesture(Key.Delete))
         );
 
+        public static readonly DependencyProperty CopyItemGestureProperty = DependencyProperty.Register(
+            nameof(CopyItemGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new KeyGesture(Key.C, ModifierKeys.Control))
+        );
+
+        public static readonly DependencyProperty PasteItemGestureProperty = DependencyProperty.Register(
+            nameof(PasteItemGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new KeyGesture(Key.V, ModifierKeys.Control))
+        );
+
         public static readonly DependencyProperty NewCompositionGestureProperty = DependencyProperty.Register(
             nameof(NewCompositionGesture),
             typeof(InputGesture),
@@ -165,6 +179,18 @@ namespace NiVE3.Config
         {
             get { return (InputGesture)GetValue(OpenFileGestureProperty); }
             set { SetValue(OpenFileGestureProperty, value); }
+        }
+
+        public InputGesture PasteItemGesture
+        {
+            get { return (InputGesture)GetValue(PasteItemGestureProperty); }
+            set { SetValue(PasteItemGestureProperty, value); }
+        }
+
+        public InputGesture CopyItemGesture
+        {
+            get { return (InputGesture)GetValue(CopyItemGestureProperty); }
+            set { SetValue(CopyItemGestureProperty, value); }
         }
 
         public InputGesture DeleteItemGesture

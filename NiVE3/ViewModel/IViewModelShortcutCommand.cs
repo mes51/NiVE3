@@ -11,5 +11,9 @@ namespace NiVE3.ViewModel
     interface IViewModelShortcutCommand
     {
         DelegateCommand<SelectItemType?> DeleteCommand { get; }
+
+        DelegateCommand<SelectItemType?> CopyCommand { get; }
+
+        DelegateCommand<SelectItemType?> PasteCommand { get; }
     }
 }

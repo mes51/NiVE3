@@ -518,6 +518,9 @@ namespace NiVE3.View.Resource
         [DefaultValue("プロパティの変更")]
         public static readonly string History_ChangePropertyValue = nameof(History_ChangePropertyValue);
 
+        [DefaultValue("プロパティのペースト")]
+        public static readonly string History_PasteProperty = nameof(History_PasteProperty);
+
         [DefaultValue("キーフレームの追加")]
         public static readonly string History_AddKeyFrame = nameof(History_AddKeyFrame);
 
@@ -530,6 +533,9 @@ namespace NiVE3.View.Resource
         [DefaultValue("キーフレームの補間法の変更")]
         public static readonly string History_ChangeKeyFrameInterpolationType = nameof(History_ChangeKeyFrameInterpolationType);
 
+        [DefaultValue("キーフレームのペースト")]
+        public static readonly string History_PasteKeyFrames = nameof(History_PasteKeyFrames);
+
         [DefaultValue("エフェクトの追加")]
         public static readonly string History_AddEffects = nameof(History_AddEffects);
 
@@ -541,6 +547,9 @@ namespace NiVE3.View.Resource
 
         [DefaultValue("エフェクトの削除")]
         public static readonly string History_DeleteEffects = nameof(History_DeleteEffects);
+
+        [DefaultValue("エフェクトのペースト")]
+        public static readonly string History_PasteEffects = nameof(History_PasteEffects);
 
         [DefaultValue("エフェクトの名前変更")]
         public static readonly string History_ChangeEffectName = nameof(History_ChangeEffectName);

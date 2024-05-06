@@ -11,6 +11,8 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using GongSolutions.Wpf.DragDrop;
+using NiVE3.Data.Clipboard;
+using NiVE3.Data.Json.Project;
 using NiVE3.Image.Drawing;
 using NiVE3.Model;
 using NiVE3.Mvvm;
@@ -19,6 +21,7 @@ using NiVE3.Plugin.Interfaces;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
 using NiVE3.UI.Command;
 using NiVE3.UI.Dialog;
+using NiVE3.Util;
 using NiVE3.View.Part;
 using NiVE3.View.Primitive;
 using Prism.Commands;
@@ -469,6 +472,13 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref selectedEffects, value); }
         }
 
+        private EffectViewModel? lastSelectedEffect;
+        public EffectViewModel? LastSelectedEffect
+        {
+            get { return lastSelectedEffect; }
+            set { SetProperty(ref lastSelectedEffect, value); }
+        }
+
         public PropertyGroupViewModel TransformProperties { get; }
 
         public PropertyGroupViewModel? LayerOptionProperties { get; }
@@ -520,6 +530,10 @@ namespace NiVE3.ViewModel
         public ICommand ChangeTagColorCommand { get; }
 
         public DelegateCommand<SelectItemType?> DeleteCommand { get; }
+
+        public DelegateCommand<SelectItemType?> CopyCommand { get; }
+
+        public DelegateCommand<SelectItemType?> PasteCommand { get; }
 
         WeakEventPublisher<LayerSwitchEventArgs> LayerSwitchChangeRequestPublisher { get; } = new WeakEventPublisher<LayerSwitchEventArgs>();
         public event EventHandler<LayerSwitchEventArgs> LayerSwitchChangeRequest
@@ -761,6 +775,29 @@ namespace NiVE3.ViewModel
                     LayerModel.DeleteEffect(SelectedEffects.Select(e => e.EffectId).ToArray());
                 }
                 SelectedEffects.Clear();
+            });
+
+            CopyCommand = new DelegateCommand<SelectItemType?>(type =>
+            {
+                if (EditingParameter == EditingLayerParameter.None && SelectedEffects.Count > 0)
+                {
+                    ClipboardUtil.SetData(LayerModel.CopyEffect([.. SelectedEffects.Select(e => e.EffectId)]));
+                }
+            });
+
+            PasteCommand = new DelegateCommand<SelectItemType?>(type =>
+            {
+                if (EditingParameter != EditingLayerParameter.None)
+                {
+                    return;
+                }
+
+                var data = ClipboardUtil.GetData<EffectData>();
+                if (data != null)
+                {
+                    var insertTargetId = LastSelectedEffect?.EffectId;
+                    LayerModel.PasteEffect(data, [..SelectedEffects.Select(e => e.EffectId)], insertTargetId);
+                }
             });
 
             ChangeTagColorCommand = new DelegateCommand(() =>

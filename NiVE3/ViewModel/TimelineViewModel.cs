@@ -8,7 +8,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Data;
 using System.Windows.Input;
 using GongSolutions.Wpf.DragDrop;
 using NiVE3.Config;
@@ -37,6 +36,8 @@ namespace NiVE3.ViewModel
     [CommandHandling(nameof(BeginEditNameCommand), nameof(ShortcutKeySetting.BeginEditNameGesture))]
     [CommandHandling(nameof(AddSolidCommand), nameof(ShortcutKeySetting.AddSolidGesture))]
     [CommandHandling(nameof(DeleteCommand), nameof(ShortcutKeySetting.DeleteItemGesture))]
+    [CommandHandling(nameof(CopyCommand), nameof(ShortcutKeySetting.CopyItemGesture))]
+    [CommandHandling(nameof(PasteCommand), nameof(ShortcutKeySetting.PasteItemGesture))]
     [CommandHandling(nameof(OpenRenderSettingCommand), nameof(ShortcutKeySetting.OpenRenderSettingGesture))]
     partial class TimelineViewModel : PaneViewModelBase, IDropTarget
     {
@@ -350,6 +351,10 @@ namespace NiVE3.ViewModel
 
         public ICommand DeleteCommand { get; }
 
+        public ICommand CopyCommand { get; }
+
+        public ICommand PasteCommand { get; }
+
         public ICommand ChangeCurrentTimeCommand { get; }
 
         public ICommand AddShapeCommand { get; }
@@ -439,6 +444,38 @@ namespace NiVE3.ViewModel
                         var ids = SelectedLayers.Select(l => l.LayerId).ToArray();
                         CompositionModel?.DeleteLayers(ids);
                         SelectedLayers.Clear();
+                    }
+                }
+            }, () => CompositionModel != null && SelectedItemType != SelectItemType.None);
+
+            CopyCommand = new RequerySuggestedCommand(() =>
+            {
+                if (SelectTarget != null)
+                {
+                    SelectTarget.CopyCommand.Execute(SelectedItemType);
+                }
+                else
+                {
+                    if (SelectedLayers.Count < 1 && SelectedLayers.Any(l => l.EditingParameter != EditingLayerParameter.None))
+                    {
+                        return;
+                    }
+
+                    var ids = SelectedLayers.Select(l => l.LayerId).ToArray();
+                }
+            }, () => CompositionModel != null && SelectedItemType != SelectItemType.None);
+
+            PasteCommand = new RequerySuggestedCommand(() =>
+            {
+                if (SelectTarget != null)
+                {
+                    SelectTarget.PasteCommand.Execute(SelectedItemType);
+                }
+                else
+                {
+                    if (SelectedLayers.Count < 1 && SelectedLayers.Any(l => l.EditingParameter != EditingLayerParameter.None))
+                    {
+                        return;
                     }
                 }
             }, () => CompositionModel != null && SelectedItemType != SelectItemType.None);

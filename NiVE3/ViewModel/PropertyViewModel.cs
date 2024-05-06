@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using GongSolutions.Wpf.DragDrop;
+using NiVE3.Data.Clipboard;
+using NiVE3.Data.Json.Project;
 using NiVE3.Model;
 using NiVE3.Mvvm;
 using NiVE3.Plugin.Interfaces;
@@ -17,6 +19,7 @@ using NiVE3.Plugin.Property.Control;
 using NiVE3.Shared.Extension;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
 using NiVE3.UI.Command;
+using NiVE3.Util;
 using NiVE3.View.Primitive;
 using Prism.Commands;
 using Prism.Mvvm;
@@ -185,6 +188,10 @@ namespace NiVE3.ViewModel
 
         public DelegateCommand<SelectItemType?> DeleteCommand { get; }
 
+        public DelegateCommand<SelectItemType?> CopyCommand { get; }
+
+        public DelegateCommand<SelectItemType?> PasteCommand { get; }
+
         PropertyModel PropertyModel { get; }
 
         object? PrevValue { get; set; }
@@ -257,6 +264,24 @@ namespace NiVE3.ViewModel
                     PropertyModel.DeleteKeyFrames(keyFrames);
                 }
                 SelectedKeyFrameIds.Clear();
+            });
+
+            CopyCommand = new DelegateCommand<SelectItemType?>(type =>
+            {
+                var keyFrames = SelectedKeyFrameIds.Select(id => KeyFrames.FirstOrDefault(k => k.Id == id)).NonNull().ToArray();
+                if (keyFrames.Length > 0)
+                {
+                    ClipboardUtil.SetData(PropertyModel.CopyKeyFrames(keyFrames));
+                }
+            });
+
+            PasteCommand = new DelegateCommand<SelectItemType?>(type =>
+            {
+                var data = ClipboardUtil.GetData<KeyFrameClipboardData>();
+                if (data != null)
+                {
+                    PropertyModel.PasteKeyFrames(data);
+                }
             });
 
             WiringModel();
@@ -388,6 +413,10 @@ namespace NiVE3.ViewModel
 
         public DelegateCommand<SelectItemType?> DeleteCommand { get; }
 
+        public DelegateCommand<SelectItemType?> CopyCommand { get; }
+
+        public DelegateCommand<SelectItemType?> PasteCommand { get; }
+
         public ICommand BeginEditNameCommand { get; }
 
         public ICommand EndEditNameCommand { get; }
@@ -421,6 +450,10 @@ namespace NiVE3.ViewModel
             IsRenameable = isRenameable;
 
             DeleteCommand = new DelegateCommand<SelectItemType?>(_ => { });
+
+            CopyCommand = new DelegateCommand<SelectItemType?>(_ => { });
+
+            PasteCommand = new DelegateCommand<SelectItemType?>(_ => { });
 
             BeginEditNameCommand = new RequerySuggestedCommand(() =>
             {
@@ -525,6 +558,10 @@ namespace NiVE3.ViewModel
 
         public DelegateCommand<SelectItemType?> DeleteCommand { get; }
 
+        public DelegateCommand<SelectItemType?> CopyCommand { get; }
+
+        public DelegateCommand<SelectItemType?> PasteCommand { get; }
+
         public ICommand AppendItemCommand { get; }
 
         public AppendablePropertyItem[] Items => ((AppendableProperty)Property).Items;
@@ -561,6 +598,26 @@ namespace NiVE3.ViewModel
                 if (SelectedChildren.Count > 0)
                 {
                     AppendablePropertyModel.DeleteChildren(SelectedChildren.OfType<PropertyGroupViewModel>().Select(c => c.InstanceId).ToArray());
+                }
+            });
+
+            CopyCommand = new DelegateCommand<SelectItemType?>(type =>
+            {
+                if (SelectedChildren.Count < 1)
+                {
+                    return;
+                }
+
+                var data = AppendablePropertyModel.CopyChildrenProperty([..SelectedChildren.OfType<PropertyGroupViewModel>().Select(p => p.InstanceId)]);
+                ClipboardUtil.SetData(data);
+            });
+
+            PasteCommand = new DelegateCommand<SelectItemType?>(type =>
+            {
+                var data = ClipboardUtil.GetData<PropertyData>();
+                if (data != null)
+                {
+                    AppendablePropertyModel.PasteChildrenProperty(data);
                 }
             });
 

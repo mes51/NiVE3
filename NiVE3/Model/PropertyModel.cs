@@ -16,6 +16,7 @@ using System.Windows.Media.Animation;
 using NiVE3.Data.Json.Project;
 using NiVE3.Extension;
 using NiVE3.Util;
+using NiVE3.Data.Clipboard;
 
 namespace NiVE3.Model
 {
@@ -283,10 +284,65 @@ namespace NiVE3.Model
             }
 
             KeyFrames.Clear();
-            foreach (var k in data.KeyFrames.Select(k => new KeyFrame(k.Time, Property.PropertyType.DeserializeValue(k.Value), k.EaseIn, k.EaseOut, k.InterpolationType)))
+            foreach (var k in data.KeyFrames.Select(k => new KeyFrame(k.Time, Property.PropertyType.DeserializeValue(k.Value), k.EaseIn, k.EaseOut, k.InterpolationType, k.Id)))
             {
                 KeyFrames.Add(k);
             }
+        }
+
+        public CopyData<KeyFrameClipboardData> CopyKeyFrames(KeyFrame[] targetKeyFrames)
+        {
+            targetKeyFrames = [..targetKeyFrames.OrderBy(KeyFrames.IndexOf)];
+            var data = targetKeyFrames.Select(
+                k => new KeyFrameClipboardData
+                    {
+                        PropertyTypeName = Property.PropertyType.GetType().FullName ?? "",
+                        Time = k.Time,
+                        Value = Property.PropertyType.SerializeValue(k.Value),
+                        EaseIn = k.EaseIn,
+                        EaseOut = k.EaseOut,
+                        InterpolationType = k.InterpolationType,
+                        Id = k.Id
+                    }
+                ).ToArray();
+            return new CopyData<KeyFrameClipboardData>(CopyDataType.KeyFrame, data);
+        }
+
+        public void PasteKeyFrames(CopyData<KeyFrameClipboardData> data)
+        {
+            if (data.Type != CopyDataType.KeyFrame || data.Data.Length < 1)
+            {
+                return;
+            }
+
+            var startTime = data.Data.First().Time;
+            var newKeyFrames = new List<KeyFrame>();
+            foreach (var k in data.Data)
+            {
+                if (Property.PropertyType.GetType().FullName != k.PropertyTypeName)
+                {
+                    return;
+                }
+
+                var newTime = TimeCalc.RoundTimeDigit(k.Time - startTime + CurrentTime - SourceStartPoint);
+                newKeyFrames.Add(new KeyFrame(newTime, Property.PropertyType.DeserializeValue(k.Value), k.EaseIn, k.EaseOut, k.InterpolationType));
+            }
+
+            var oldKeyFrames = KeyFrames.Where(k => newKeyFrames.Any(nk => nk.Time == k.Time)).ToArray();
+            var oldKeyFrameIndices = KeyFrames.Where(oldKeyFrames.Contains).Select(KeyFrames.IndexOf).ToArray();
+            foreach (var ok in oldKeyFrames)
+            {
+                KeyFrames.Remove(ok);
+            }
+
+            var newKeyFrameIndices = new int[newKeyFrames.Count];
+            foreach (var nk in newKeyFrames)
+            {
+                var index = KeyFrames.IndexOfLast(k => Math.Abs(k.Time - nk.Time) < TimeCalc.TimeEpsilon || k.Time <= nk.Time) + 1;
+                KeyFrames.Insert(index, nk);
+            }
+
+            HistoryModel.Add(new PasteKeyFramesHistoryCommand(this, oldKeyFrames, oldKeyFrameIndices, [..newKeyFrames], newKeyFrameIndices));
         }
 
         void ReplaceKeyFrames(KeyFrame[] targetKeyFrames, KeyFrame[] newKeyFrames, string historyNameKey)
@@ -698,6 +754,43 @@ namespace NiVE3.Model
 
                 AddChildInternal(item, childData.InstanceId).LoadData(childData);
             }
+        }
+
+        public CopyData<PropertyData> CopyChildrenProperty(Guid[] ids)
+        {
+            var children = Children.OfType<PropertyGroupModel>().Where(p => ids.Contains(p.InstanceId)).OrderBy(Children.IndexOf);
+            var data = new PropertyData
+            {
+                PropertyId = PropertyId,
+                Name = Name,
+                Children = [.. children.Select(c => c.SaveData())]
+            };
+
+            return new CopyData<PropertyData>(CopyDataType.Property, [data]);
+        }
+
+        public void PasteChildrenProperty(CopyData<PropertyData> data)
+        {
+            if (data.Type != CopyDataType.Property || data.Data.Length < 1 || data.Data.First().PropertyId != PropertyId)
+            {
+                return;
+            }
+
+            var newChildren = new List<PropertyGroupModel>();
+            foreach (var childData in data.Data.First().Children ?? [])
+            {
+                var item = Items.FirstOrDefault(i => i.Id == childData.PropertyId);
+                if (item == null)
+                {
+                    continue;
+                }
+
+                var newChild = AddChildInternal(item, null);
+                newChild.LoadData(childData);
+                newChildren.Add(newChild);
+            }
+
+            HistoryModel.Add(new PastePropertyHistoryCommand(this, [..newChildren]));
         }
 
         PropertyGroupModel AddChildInternal(AppendablePropertyItem item, Guid? instanceId)

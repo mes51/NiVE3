@@ -131,10 +131,19 @@ namespace NiVE3.View.Primitive
             new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
-        private ObservableCollectionView<T>? SelectedItemsView
+        private static readonly DependencyPropertyKey LastSelectedPropertyKey = DependencyProperty.RegisterReadOnly(
+            nameof(LastSelected),
+            typeof(T),
+            typeof(StackableItemsCollectionView<T>),
+            new FrameworkPropertyMetadata(null)
+        );
+
+        public static readonly DependencyProperty LastSelectedProperty = LastSelectedPropertyKey.DependencyProperty;
+
+        public T? LastSelected
         {
-            get { return (ObservableCollectionView<T>)GetValue(SelectedItemsViewProperty); }
-            set { SetValue(SelectedItemsViewProperty, value); }
+            get { return (T?)GetValue(LastSelectedProperty); }
+            private set { SetValue(LastSelectedPropertyKey, value); }
         }
 
         public int IndentLevel
@@ -155,7 +164,11 @@ namespace NiVE3.View.Primitive
             set { SetValue(SelectedItemsProperty, value); }
         }
 
-        protected T? LastSelected { get; set; }
+        private ObservableCollectionView<T>? SelectedItemsView
+        {
+            get { return (ObservableCollectionView<T>)GetValue(SelectedItemsViewProperty); }
+            set { SetValue(SelectedItemsViewProperty, value); }
+        }
 
         static StackableItemsCollectionView()
         {
