@@ -581,7 +581,7 @@ namespace NiVE3.ViewModel
             SelectItemChangedPublisher.Publish(sender, new SelectItemEventArgs(e, this));
             if (e.OriginalSender is not PropertyGroupViewModel group || Children.Contains(group))
             {
-                foreach (var child in Children)
+                foreach (var child in Children.Where(c => !e.ObjectHierarchy.Contains(c)))
                 {
                     child.DeSelect();
                 }
