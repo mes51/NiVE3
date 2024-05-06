@@ -119,6 +119,8 @@ namespace NiVE3.Model
             Name = property.DisplayName;
             PropertyId = property.Id;
             Value = property.DefaultValue;
+            SourceStartPoint = layerModel?.SourceStartPoint ?? 0.0;
+            CurrentTime = compositionModel.CurrentTime;
 
             // NOTE: 本来はモデル側から設定してもらうものだが、引き回しの経路が複雑になりすぎる(レイヤーからだったり、エフェクトやマスクだったり)ため、自分から取りに行く
             compositionModel.PropertyChanged += CompositionModel_PropertyChanged;
