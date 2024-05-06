@@ -297,6 +297,7 @@ namespace NiVE3.Model
             var sourceTypes = (isOutputVideo ? SourceType.Video : SourceType.None) | (CompositionModel.HasAudio && isOutputAudio ? SourceType.Audio : SourceType.None);
             var frameRate = CompositionModel.FrameRate;
             var frameDuration = CompositionModel.FrameDuration;
+            var (beginTime, endTime) = GetTimeRange();
 
             try
             {
@@ -372,12 +373,19 @@ namespace NiVE3.Model
 
         (double beginTime, double endTime) GetTimeRange()
         {
-            return RenderRangeType switch
+            switch (RenderRangeType)
             {
-                RenderRangeType.All => (0.0, CompositionDuration),
-                RenderRangeType.Workarea => (CompositionWorkareaBegin, CompositionWorkareaEnd),
-                _ => (BeginTime, EndTime)
-            };
+                case RenderRangeType.All:
+                    return (0.0, CompositionDuration);
+                case RenderRangeType.Workarea:
+                    return (CompositionWorkareaBegin, CompositionWorkareaEnd);
+                default:
+                    {
+                        var beginTime = Math.Clamp(BeginTime, 0.0, TimeCalc.RoundTimeDigit(CompositionDuration - CompositionModel.FrameDuration));
+                        var endTime = Math.Clamp(EndTime, TimeCalc.RoundTimeDigit(beginTime + CompositionModel.FrameDuration), CompositionDuration);
+                        return (beginTime, endTime);
+                    }
+            }
         }
 
         private void CompositionModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
