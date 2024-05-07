@@ -46,18 +46,6 @@ namespace NiVE3.Plugin.Property.Properties
             SelectBoxWidth = selectBoxWidth;
         }
 
-        public override object CoerceValue(object value)
-        {
-            if (Values.Contains(value))
-            {
-                return value;
-            }
-            else
-            {
-                return Values.First();
-            }
-        }
-
         public override PropertyControlBase CreateControl(ICompositionObject composition, ILayerObject? layer, IEffectObject? effect, IPropertyViewModel viewModel)
         {
             var control = new EnumPropertyControl
@@ -67,9 +55,21 @@ namespace NiVE3.Plugin.Property.Properties
             return control;
         }
 
-        public override bool ValidateValue(object value)
+        public override object CoerceValue(object? value)
         {
-            return value.GetType() == EnumType;
+            if (value != null && Values.Contains(value))
+            {
+                return value;
+            }
+            else
+            {
+                return Values.First();
+            }
+        }
+
+        public override bool ValidateValue(object? value)
+        {
+            return value?.GetType() == EnumType;
         }
     }
 }

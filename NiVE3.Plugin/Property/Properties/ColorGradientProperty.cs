@@ -39,11 +39,6 @@ namespace NiVE3.Plugin.Property.Properties
             ShowPreviewOKLabInterpolation = showPreviewOKLabInterpolation;
         }
 
-        public override object CoerceValue(object value)
-        {
-            return (value as ColorGradient) ?? ColorGradient.Empty;
-        }
-
         public override PropertyControlBase CreateControl(ICompositionObject composition, ILayerObject? layer, IEffectObject? effect, IPropertyViewModel viewModel)
         {
             var control = new ColorGradientPropertyControl
@@ -56,7 +51,12 @@ namespace NiVE3.Plugin.Property.Properties
             return control;
         }
 
-        public override bool ValidateValue(object value)
+        public override object CoerceValue(object? value)
+        {
+            return (value as ColorGradient) ?? ColorGradient.Empty;
+        }
+
+        public override bool ValidateValue(object? value)
         {
             return value is ColorGradient;
         }

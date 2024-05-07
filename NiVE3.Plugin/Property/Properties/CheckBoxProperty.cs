@@ -16,11 +16,6 @@ namespace NiVE3.Plugin.Property.Properties
 
         public CheckBoxProperty(string id, LanguageResourceKey displayNameKey, bool defaultValue, bool isSupportKeyFrame = true) : base(id, displayNameKey, BooleanPropertyType.Instance, defaultValue, isSupportKeyFrame) { }
 
-        public override object CoerceValue(object value)
-        {
-            return value;
-        }
-
         public override PropertyControlBase CreateControl(ICompositionObject composition, ILayerObject? layer, IEffectObject? effect, IPropertyViewModel viewModel)
         {
             var control = new CheckBoxPropertyControl
@@ -30,7 +25,12 @@ namespace NiVE3.Plugin.Property.Properties
             return control;
         }
 
-        public override bool ValidateValue(object value)
+        public override object CoerceValue(object? value)
+        {
+            return value ?? false;
+        }
+
+        public override bool ValidateValue(object? value)
         {
             return value is bool;
         }

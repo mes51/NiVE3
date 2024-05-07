@@ -42,12 +42,12 @@ namespace NiVE3.Plugin.Property.Properties
             return control;
         }
 
-        public override object CoerceValue(object value)
+        public override object CoerceValue(object? value)
         {
-            return value;
+            return value ?? Vector3d.Zero;
         }
 
-        public override bool ValidateValue(object value)
+        public override bool ValidateValue(object? value)
         {
             return value is Vector3d;
         }

@@ -276,7 +276,7 @@ namespace NiVE3.Model
 
         public void LoadData(PropertyData data)
         {
-            Value = Property.PropertyType.DeserializeValue(data.Value);
+            Value = Property.CoerceValue(Property.PropertyType.DeserializeValue(data.Value));
 
             if (data.KeyFrames == null)
             {
@@ -284,7 +284,7 @@ namespace NiVE3.Model
             }
 
             KeyFrames.Clear();
-            foreach (var k in data.KeyFrames.Select(k => new KeyFrame(k.Time, Property.PropertyType.DeserializeValue(k.Value), k.EaseIn, k.EaseOut, k.InterpolationType, k.Id)))
+            foreach (var k in data.KeyFrames.Select(k => new KeyFrame(k.Time, Property.CoerceValue(Property.PropertyType.DeserializeValue(k.Value)), k.EaseIn, k.EaseOut, k.InterpolationType, k.Id)))
             {
                 KeyFrames.Add(k);
             }
@@ -295,16 +295,16 @@ namespace NiVE3.Model
             targetKeyFrames = [..targetKeyFrames.OrderBy(KeyFrames.IndexOf)];
             var data = targetKeyFrames.Select(
                 k => new KeyFrameClipboardData
-                    {
-                        PropertyTypeName = Property.PropertyType.GetType().FullName ?? "",
-                        Time = k.Time,
-                        Value = Property.PropertyType.SerializeValue(k.Value),
-                        EaseIn = k.EaseIn,
-                        EaseOut = k.EaseOut,
-                        InterpolationType = k.InterpolationType,
-                        Id = k.Id
-                    }
-                ).ToArray();
+                {
+                    PropertyTypeName = Property.PropertyType.GetType().FullName ?? "",
+                    Time = k.Time,
+                    Value = Property.PropertyType.SerializeValue(k.Value),
+                    EaseIn = k.EaseIn,
+                    EaseOut = k.EaseOut,
+                    InterpolationType = k.InterpolationType,
+                    Id = k.Id
+                }
+            ).ToArray();
             return new CopyData<KeyFrameClipboardData>(CopyDataType.KeyFrame, data);
         }
 
@@ -325,7 +325,7 @@ namespace NiVE3.Model
                 }
 
                 var newTime = TimeCalc.RoundTimeDigit(k.Time - startTime + CurrentTime - SourceStartPoint);
-                newKeyFrames.Add(new KeyFrame(newTime, Property.PropertyType.DeserializeValue(k.Value), k.EaseIn, k.EaseOut, k.InterpolationType));
+                newKeyFrames.Add(new KeyFrame(newTime, Property.CoerceValue(Property.PropertyType.DeserializeValue(k.Value)), k.EaseIn, k.EaseOut, k.InterpolationType));
             }
 
             var oldKeyFrames = KeyFrames.Where(k => newKeyFrames.Any(nk => nk.Time == k.Time)).ToArray();

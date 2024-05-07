@@ -19,7 +19,12 @@ namespace NiVE3.Property
 
         public SourceTextProperty(string id, LanguageResourceKey displayNameKey, object? defaultValue) : base(id, displayNameKey, SourceTextPropertyType.Instance, defaultValue, true) { }
 
-        public override object CoerceValue(object value)
+        public override PropertyControlBase CreateControl(ICompositionObject composition, ILayerObject? layer, IEffectObject? effect, IPropertyViewModel viewModel)
+        {
+            return new SourceTextPropertyControl();
+        }
+
+        public override object CoerceValue(object? value)
         {
             return value switch
             {
@@ -29,12 +34,7 @@ namespace NiVE3.Property
             };
         }
 
-        public override PropertyControlBase CreateControl(ICompositionObject composition, ILayerObject? layer, IEffectObject? effect, IPropertyViewModel viewModel)
-        {
-            return new SourceTextPropertyControl();
-        }
-
-        public override bool ValidateValue(object value)
+        public override bool ValidateValue(object? value)
         {
             return value is StyledText || value is string;
         }

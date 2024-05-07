@@ -91,14 +91,14 @@ namespace NiVE3.Plugin.Property
         /// </summary>
         /// <param name="value">検証対象の値</param>
         /// <returns>使用できる場合はtrue、出来ない場合はfalse</returns>
-        public abstract bool ValidateValue(object value);
+        public abstract bool ValidateValue(object? value);
 
         /// <summary>
         /// 値をこのプロパティの範囲、型に変更します
         /// </summary>
         /// <param name="value">変更対象の値</param>
         /// <returns>変更後の値</returns>
-        public abstract object CoerceValue(object value);
+        public abstract object CoerceValue(object? value);
 
         /// <summary>
         /// プロパティの表示管理用のステートを生成します

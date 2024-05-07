@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Shared.Extension;
@@ -91,12 +92,9 @@ namespace NiVE3.Plugin.Property.Types
             if (serializedValue is IDictionary<string, object> dictionary)
             {
                 var assemblyName = (string)dictionary[SerializedKeyAssemblyName];
+                var typeName = (string)dictionary[SerializedKeyType];
                 var assembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.FullName == assemblyName);
-                if (assembly == null)
-                {
-                    return null;
-                }
-                var type = assembly.GetType((string)dictionary[SerializedKeyType]);
+                var type = assembly?.GetType(typeName) ?? AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.DefinedTypes).FirstOrDefault(t => t.FullName == typeName);
                 if (type != null && type.IsEnum)
                 {
                     return Enum.Parse(type, (string)dictionary[SerializedKeyValue]);
