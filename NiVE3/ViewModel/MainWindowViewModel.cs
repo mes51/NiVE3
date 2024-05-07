@@ -201,9 +201,7 @@ namespace NiVE3.ViewModel
             }
 
             timelineViewModel.CompositionModel = e.Composition;
-            timelineViewModel.IsSelected = true;
-            timelineViewModel.IsActive = true;
-            MainRegion.Activate(timelineViewModel);
+            timelineViewModel.OpenPane();
         }
 
         private void ProjectModel_CompositionRemoved(object? sender, CompositionEventArgs e)

@@ -154,6 +154,7 @@ namespace NiVE3.ViewModel
                 }
             }, _ => !IsRendering);
 
+            renderQueueModel.RenderQueueItemAdded += RenderQueueModel_RenderQueueItemAdded;
             PropertyChanged += RenderQueueViewModel_PropertyChanged;
         }
 
@@ -177,6 +178,11 @@ namespace NiVE3.ViewModel
         }
 
         partial void WiringModel();
+
+        private void RenderQueueModel_RenderQueueItemAdded(object? sender, EventArgs e)
+        {
+            OpenPane();
+        }
 
         private void RenderQueueViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {

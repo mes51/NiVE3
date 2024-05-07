@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using NiVE3.View.Dock;
 using System.Reflection;
+using NiVE3.ViewModel;
 
 namespace NiVE3.Region
 {
@@ -65,6 +66,11 @@ namespace NiVE3.Region
                             Anchorable.Add(item);
                         });
                     }
+
+                    if (item is PaneViewModelBase pane)
+                    {
+                        pane.OpenPaneRequest += PaneViewModel_OpenPaneRequest;
+                    }
                 }
             }
 
@@ -87,6 +93,11 @@ namespace NiVE3.Region
                             Anchorable.Remove(item);
                         });
                     }
+
+                    if (item is PaneViewModelBase pane)
+                    {
+                        pane.OpenPaneRequest -= PaneViewModel_OpenPaneRequest;
+                    }
                 }
             }
 
@@ -97,6 +108,14 @@ namespace NiVE3.Region
                     Documents.Clear();
                     Anchorable.Clear();
                 });
+            }
+        }
+
+        private void PaneViewModel_OpenPaneRequest(object? sender, EventArgs e)
+        {
+            if (sender != null)
+            {
+                Region.Activate(sender);
             }
         }
 

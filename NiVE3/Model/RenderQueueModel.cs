@@ -79,6 +79,8 @@ namespace NiVE3.Model
             set { SetProperty(ref eta, value); }
         }
 
+        public event EventHandler? RenderQueueItemAdded;
+
         Lazy<ProjectModel> ProjectModel { get; }
 
         OutputListModel OutputListModel { get; }
@@ -114,6 +116,8 @@ namespace NiVE3.Model
             Items.Add(queue);
 
             HistoryModel.Add(new EnqueueHistoryCommand(this, queue));
+
+            RenderQueueItemAdded?.Invoke(this, EventArgs.Empty);
         }
 
         public void RemoveQueue(Guid id)

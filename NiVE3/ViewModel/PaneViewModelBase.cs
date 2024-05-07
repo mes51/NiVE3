@@ -47,6 +47,20 @@ namespace NiVE3.ViewModel
             add { PaneSelectedPublisher.Subscribe(value); }
             remove { PaneSelectedPublisher.Unsubscribe(value); }
         }
+
+        WeakEventPublisher<EventArgs> OpenPaneRequestPublisher { get; } = new WeakEventPublisher<EventArgs>();
+        public event EventHandler<EventArgs> OpenPaneRequest
+        {
+            add { OpenPaneRequestPublisher.Subscribe(value); }
+            remove { OpenPaneRequestPublisher.Unsubscribe(value); }
+        }
+
+        public virtual void OpenPane()
+        {
+            IsSelected = true;
+            IsActive = true;
+            OpenPaneRequestPublisher.Publish(this, EventArgs.Empty);
+        }
     }
 
     abstract class SingletonePaneViewModelBase : PaneViewModelBase
@@ -56,6 +70,12 @@ namespace NiVE3.ViewModel
         {
             get { return visibility; }
             set { SetProperty(ref visibility, value); }
+        }
+
+        public override void OpenPane()
+        {
+            Visibility = Visibility.Visible;
+            base.OpenPane();
         }
     }
 }
