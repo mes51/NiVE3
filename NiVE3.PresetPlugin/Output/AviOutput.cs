@@ -52,7 +52,7 @@ namespace NiVE3.PresetPlugin.Output
                 Quality = Setting.Quality,
                 Codec = string.IsNullOrEmpty(Setting.Codec) ? new FourCC(0) : new FourCC(Setting.Codec),
                 OutputChannel = (OutputChannel)Setting.OutputChannel,
-                CodecState = Setting.State,
+                CodecState = Setting.State != null ? Convert.FromBase64String(Setting.State) : null,
                 AudioSamplingRate = Setting.AudioSamplingRate,
                 AudioBitsPerSample = Setting.AudioBitsPerSample
             };
@@ -88,7 +88,7 @@ namespace NiVE3.PresetPlugin.Output
                     Quality = quality,
                     Codec = codec,
                     OutputChannel = outputChannel,
-                    State = codecState as byte[],
+                    State = codecState as string,
                     AudioSamplingRate = samplingRate,
                     AudioBitsPerSample = bitsPerSample
                 };
@@ -111,7 +111,7 @@ namespace NiVE3.PresetPlugin.Output
                 Quality = viewModel.Quality,
                 Codec = viewModel.Codec == 0 ? "" : viewModel.Codec.ToString(),
                 OutputChannel = (int)viewModel.OutputChannel,
-                State = viewModel.CodecState,
+                State = viewModel.CodecState != null ? Convert.ToBase64String(viewModel.CodecState) : null,
                 AudioSamplingRate = viewModel.AudioSamplingRate,
                 AudioBitsPerSample = viewModel.AudioBitsPerSample
             };
@@ -152,7 +152,7 @@ namespace NiVE3.PresetPlugin.Output
                     };
                     if (Setting.State != null)
                     {
-                        ((CompressedVideoEncoder)encoder).SetState(Setting.State);
+                        ((CompressedVideoEncoder)encoder).SetState(Convert.FromBase64String(Setting.State));
                     }
                 }
                 else
@@ -295,7 +295,7 @@ namespace NiVE3.PresetPlugin.Output
 
         public int OutputChannel { get; set; } = (int)Output.OutputChannel.Rgba;
 
-        public byte[]? State { get; set; }
+        public string? State { get; set; }
 
         public int AudioSamplingRate { get; set; } = 48000;
 

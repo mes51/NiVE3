@@ -284,7 +284,7 @@ namespace NiVE3.ViewModel.Dialog
             EndTime = parameters.GetValue<double>(nameof(EndTime));
             IsOutputVideo = parameters.GetValue<bool>(nameof(IsOutputVideo));
             IsOutputAudio = parameters.GetValue<bool>(nameof(IsOutputAudio));
-            if (parameters.TryGetValue<ExportLifetimeContext<IOutput>>(nameof(Output), out var output))
+            if (parameters.TryGetValue<ExportLifetimeContext<IOutput>>(OutputParameterName, out var output))
             {
                 Output?.Dispose();
                 Output = output;

@@ -13,11 +13,14 @@ namespace NiVE3.Data.Json.Project
 
         public CompositionData[] Compositions { get; set; }
 
+        public RenderQueueItemData[] RenderQueueItems { get; set; }
+
         [JsonConstructor]
-        public ProjectData(FootageListData footageList, CompositionData[] compositions)
+        public ProjectData(FootageListData footageList, CompositionData[] compositions, RenderQueueItemData[] renderQueueItems)
         {
             FootageList = footageList;
             Compositions = compositions;
+            RenderQueueItems = renderQueueItems;
         }
     }
 }

@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using ILGPU.Runtime.Cuda;
+using NiVE3.Data.Json.Project;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.Util;
@@ -213,6 +214,27 @@ namespace NiVE3.Model
                     // TODO: エラーダイアログ表示
                 }
             });
+        }
+
+        public RenderQueueItemData[] SaveData()
+        {
+            return [..Items.Select(i => i.SaveData())];
+        }
+
+        public void LoadData(RenderQueueItemData[] data, CompositionModel[] compositionModels)
+        {
+            foreach (var queueData in data)
+            {
+                var composition = compositionModels.FirstOrDefault(c => c.CompositionId == queueData.CompositionId);
+                if (composition == null)
+                {
+                    continue;
+                }
+
+                var item = new RenderQueueItemModel(composition, ProjectModel.Value, OutputListModel, HistoryModel, null, queueData.QueueId);
+                item.LoadData(queueData);
+                Items.Add(item);
+            }
         }
     }
 }

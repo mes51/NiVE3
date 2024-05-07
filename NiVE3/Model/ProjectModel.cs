@@ -155,7 +155,8 @@ namespace NiVE3.Model
         {
             var data = new ProjectData(
                 FootageListModel.SaveData(),
-                CompositionModels.Select(c => c.SaveData()).ToArray()
+                CompositionModels.Select(c => c.SaveData()).ToArray(),
+                RenderQueueModel.SaveData()
             );
 
             var json = JsonSerializer.Serialize(data);
@@ -220,6 +221,8 @@ namespace NiVE3.Model
                         composition.ReplacePlaceholder(footage);
                     }
                 }
+
+                RenderQueueModel.LoadData(projectData.RenderQueueItems, [..CompositionModels]);
             }
             //catch (Exception)
             //{

@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using NiVE3.Data.Json.Project;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.Util;
@@ -361,6 +362,51 @@ namespace NiVE3.Model
             {
                 dispatcher.Invoke(() => UpdateState(RenderQueueItemState.Error));
                 throw;
+            }
+        }
+
+        public RenderQueueItemData SaveData()
+        {
+            return new RenderQueueItemData
+            {
+                QueueId = QueueId,
+                IsRenderSelected = IsRenderSelected,
+                FilePath = FilePath,
+                RenderRangeType = RenderRangeType,
+                BeginTime = BeginTime,
+                EndTime = EndTime,
+                FixedBeginTime = FixedBeginTime,
+                FixedEndTime = FixedEndTime,
+                IsOutputVideo = IsOutputVideo,
+                IsOutputAudio = IsOutputAudio,
+                OutputPluginId = OutputPluginId,
+                OutputSetting = Output?.Value?.SaveData(),
+                State = State,
+                CompositionId = CompositionModel.CompositionId
+            };
+        }
+
+        public void LoadData(RenderQueueItemData data)
+        {
+            IsRenderSelected = data.IsRenderSelected;
+            FilePath = data.FilePath;
+            RenderRangeType = data.RenderRangeType;
+            BeginTime = data.BeginTime;
+            EndTime = data.EndTime;
+            FixedBeginTime = data.FixedBeginTime;
+            FixedEndTime = data.FixedEndTime;
+            IsOutputVideo = data.IsOutputVideo;
+            IsOutputAudio = data.IsOutputAudio;
+            OutputPluginId = data.OutputPluginId;
+            State = data.State;
+
+            var output = OutputListModel.CreateOutput(OutputPluginId);
+            if (output != null)
+            {
+                output.Value.LoadData(data.OutputSetting);
+                Output = output;
+                var metadata = OutputListModel.GetMetadata(OutputPluginId);
+                OutputPluginName = metadata?.Name ?? "";
             }
         }
 
