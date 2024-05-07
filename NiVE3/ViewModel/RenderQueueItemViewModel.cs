@@ -30,7 +30,7 @@ namespace NiVE3.ViewModel
         }
 
         private bool isRenderSelected;
-        [NeedWire(nameof(RenderQueueItemModel), IsOneWay = true)]
+        [NeedWire(nameof(RenderQueueItemModel))]
         public bool IsRenderSelected
         {
             get { return isRenderSelected; }
