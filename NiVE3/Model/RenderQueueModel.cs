@@ -145,6 +145,10 @@ namespace NiVE3.Model
 
         public void Clear()
         {
+            foreach (var item in Items)
+            {
+                item.Dispose();
+            }
             Items.Clear();
         }
 
