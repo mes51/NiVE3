@@ -482,6 +482,9 @@ namespace NiVE3.View.Resource
         [DefaultValue("コンポジションの設定変更")]
         public static readonly string History_ChangeCompositionSetting = nameof(History_ChangeCompositionSetting);
 
+        [DefaultValue("ワークエリアの変更")]
+        public static readonly string History_ChangeWorkarea = nameof(History_ChangeWorkarea);
+
         [DefaultValue("レイヤーの追加")]
         public static readonly string History_AddLayers = nameof(History_AddLayers);
 

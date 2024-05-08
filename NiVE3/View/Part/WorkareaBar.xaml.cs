@@ -106,6 +106,19 @@ namespace NiVE3.View.Part
             new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, TimeChanged, CoerceWorkareaEnd)
         );
 
+        public static readonly DependencyProperty CommandProperty = DependencyProperty.Register(
+            nameof(Command),
+            typeof(ICommand),
+            typeof(WorkareaBar),
+            new FrameworkPropertyMetadata(null)
+        );
+
+        public ICommand? Command
+        {
+            get { return (ICommand)GetValue(CommandProperty); }
+            set { SetValue(CommandProperty, value); }
+        }
+
         public double WorkareaEnd
         {
             get { return (double)GetValue(WorkareaEndProperty); }
@@ -235,6 +248,8 @@ namespace NiVE3.View.Part
         private void RangeStartThumb_DragCompleted(object sender, DragCompletedEventArgs e)
         {
             IsRangeStartThumbDragging = false;
+
+            Command?.Execute(Tuple.Create(WorkareaBegin, WorkareaEnd));
         }
 
         private void RangeEndThumb_DragStarted(object sender, DragStartedEventArgs e)
@@ -261,6 +276,8 @@ namespace NiVE3.View.Part
         private void RangeEndThumb_DragCompleted(object sender, DragCompletedEventArgs e)
         {
             IsRangeEndThumbDragging = false;
+
+            Command?.Execute(Tuple.Create(WorkareaBegin, WorkareaEnd));
         }
 
         private void RangeThumb_DragStarted(object sender, DragStartedEventArgs e)
@@ -288,6 +305,8 @@ namespace NiVE3.View.Part
         private void RangeThumb_DragCompleted(object sender, DragCompletedEventArgs e)
         {
             IsRangeThumbDragging = false;
+
+            Command?.Execute(Tuple.Create(WorkareaBegin, WorkareaEnd));
         }
 
         static void TimeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)

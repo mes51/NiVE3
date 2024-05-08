@@ -639,6 +639,22 @@ namespace NiVE3.Model
             );
         }
 
+        public void ChangeWorkarea(double begin, double end)
+        {
+            var prevWorkareaBegin = WorkareaBegin;
+            var prevWorkareaEnd = WorkareaEnd;
+
+            if (begin > end)
+            {
+                (begin, end) = (end, begin);
+            }
+
+            WorkareaBegin = Math.Clamp(begin, 0.0, Duration - FrameDuration);
+            WorkareaEnd = Math.Clamp(end, WorkareaBegin + FrameDuration, Duration);
+
+            HistoryModel.Add(new ChangeWorkareaHistoryCommand(this, prevWorkareaBegin, prevWorkareaEnd, WorkareaBegin, WorkareaEnd));
+        }
+
         public NImage RenderFrame(double time, double downSamplingRate, bool applyToneMapping, bool useGpu)
         {
             var allImages = new List<IDisposable>();

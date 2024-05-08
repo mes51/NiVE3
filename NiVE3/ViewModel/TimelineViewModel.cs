@@ -92,7 +92,7 @@ namespace NiVE3.ViewModel
         }
 
         private double workareaBegin;
-        [ManualWire(nameof(CompositionModel))]
+        [ManualWire(nameof(CompositionModel), IsOneWay = true)]
         public double WorkareaBegin
         {
             get { return workareaBegin; }
@@ -100,7 +100,7 @@ namespace NiVE3.ViewModel
         }
 
         private double workareaEnd;
-        [ManualWire(nameof(CompositionModel))]
+        [ManualWire(nameof(CompositionModel), IsOneWay = true)]
         public double WorkareaEnd
         {
             get { return workareaEnd; }
@@ -349,6 +349,8 @@ namespace NiVE3.ViewModel
 
         public ICommand BeginEditNameCommand { get; }
 
+        public ICommand ChangeWorkareaCommand { get; }
+
         public ICommand AddSolidCommand { get; }
 
         public ICommand DeleteCommand { get; }
@@ -417,6 +419,8 @@ namespace NiVE3.ViewModel
                     }
                 }
             }, () => SelectTarget != null || SelectedLayers.Count > 0);
+
+            ChangeWorkareaCommand = new DelegateCommand<Tuple<double, double>>(t => CompositionModel?.ChangeWorkarea(t.Item1, t.Item2));
 
             AddSolidCommand = new RequerySuggestedCommand(() =>
             {

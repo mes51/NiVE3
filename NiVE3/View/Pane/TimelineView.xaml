@@ -193,7 +193,17 @@
             </pr:ItemResizableStackPanel.ContextMenu>
         </pr:ItemResizableStackPanel>
 
-        <pt:WorkareaBar Grid.Row="2" Grid.Column="1" Grid.RowSpan="2" BarHeight="{Binding ElementName=HeightMeasurementHeader, Path=ActualHeight}" Duration="{Binding Duration}" FrameRate="{Binding FrameRate}" Range="{Binding TimeBarRange}" RangeStart="{Binding TimeBarRangeStart}" WorkareaBegin="{Binding WorkareaBegin}" WorkareaEnd="{Binding WorkareaEnd}"/>
+        <pt:WorkareaBar Grid.Row="2"
+                        Grid.Column="1"
+                        Grid.RowSpan="2"
+                        BarHeight="{Binding ElementName=HeightMeasurementHeader, Path=ActualHeight}"
+                        Duration="{Binding Duration}"
+                        FrameRate="{Binding FrameRate}"
+                        Range="{Binding TimeBarRange}"
+                        RangeStart="{Binding TimeBarRangeStart}"
+                        WorkareaBegin="{Binding WorkareaBegin}"
+                        WorkareaEnd="{Binding WorkareaEnd}"
+                        Command="{Binding ChangeWorkareaCommand}"/>
 
         <pt:LayerCollectionView Grid.Row="3"
                                 Grid.Column="0"

@@ -233,6 +233,44 @@ namespace NiVE3.Model
             public void Dispose() { }
         }
 
+        private class ChangeWorkareaHistoryCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangeWorkarea);
+
+            CompositionModel Model { get; }
+
+            double OldWorkareaBegin { get; }
+
+            double OldWorkareaEnd { get; }
+
+            double NewWorkareaBegin { get; }
+
+            double NewWorkareaEnd { get; }
+
+            public ChangeWorkareaHistoryCommand(CompositionModel model, double oldWorkareaBegin, double oldWorkareaEnd, double newWorkareaBegin, double newWorkareaEnd)
+            {
+                Model = model;
+                OldWorkareaBegin = oldWorkareaBegin;
+                OldWorkareaEnd = oldWorkareaEnd;
+                NewWorkareaBegin = newWorkareaBegin;
+                NewWorkareaEnd = newWorkareaEnd;
+            }
+
+            public void Redo()
+            {
+                Model.WorkareaBegin = NewWorkareaBegin;
+                Model.WorkareaEnd = NewWorkareaEnd;
+            }
+
+            public void Undo()
+            {
+                Model.WorkareaBegin = OldWorkareaBegin;
+                Model.WorkareaEnd = OldWorkareaEnd;
+            }
+
+            public void Dispose() { }
+        }
+
         private class AddLayersHistoryCommand : IHistoryCommand
         {
             public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_AddLayers);
