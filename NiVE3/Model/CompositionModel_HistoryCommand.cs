@@ -13,6 +13,226 @@ namespace NiVE3.Model
 {
     partial class CompositionModel
     {
+        private class ChangeCompositionSettingHistoryCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangeCompositionSetting);
+
+            CompositionModel Model { get; }
+
+            string OldName { get; }
+
+            int OldWidth { get; }
+
+            int OldHeight { get; }
+
+            double OldFrameRate { get; }
+
+            double OldDuration { get; }
+
+            bool OldIsRetentionFrameRate { get; }
+
+            bool OldApplyToneMappingWhenNested { get; }
+
+            int OldShutterAngle { get; }
+
+            int OldShutterPhase { get; }
+
+            int OldMotionBlurSampleCount { get; }
+
+            Guid OldRendererPluginId { get; }
+
+            Guid OldToneMapperPluginId { get; }
+
+            double OldWorkareaBegin { get; }
+
+            double OldWorkareaEnd { get; }
+
+            string NewName { get; }
+
+            int NewWidth { get; }
+
+            int NewHeight { get; }
+
+            double NewFrameRate { get; }
+
+            double NewDuration { get; }
+
+            bool NewIsRetentionFrameRate { get; }
+
+            bool NewApplyToneMappingWhenNested { get; }
+
+            int NewShutterAngle { get; }
+
+            int NewShutterPhase { get; }
+
+            int NewMotionBlurSampleCount { get; }
+
+            Guid NewRendererPluginId { get; }
+
+            Guid NewToneMapperPluginId { get; }
+
+            double NewWorkareaBegin { get; }
+
+            double NewWorkareaEnd { get; }
+
+            public ChangeCompositionSettingHistoryCommand(
+                CompositionModel model,
+                string oldName,
+                int oldWidth,
+                int oldHeight,
+                double oldFrameRate,
+                double oldDuration,
+                bool oldIsRetentionFrameRate,
+                bool oldApplyToneMappingWhenNested,
+                int oldShutterAngle,
+                int oldShutterPhase,
+                int oldMotionBlurSampleCount,
+                Guid oldRendererPluginId,
+                Guid oldToneMapperPluginId,
+                double oldWorkareaBegin,
+                double oldWorkareaEnd,
+                string newName,
+                int newWidth,
+                int newHeight,
+                double newFrameRate,
+                double newDuration,
+                bool newIsRetentionFrameRate,
+                bool newApplyToneMappingWhenNested,
+                int newShutterAngle,
+                int newShutterPhase,
+                int newMotionBlurSampleCount,
+                Guid newRendererPluginId,
+                Guid newToneMapperPluginId,
+                double newWorkareaBegin,
+                double newWorkareaEnd
+            )
+            {
+                Model = model;
+                OldName = oldName;
+                OldWidth = oldWidth;
+                OldHeight = oldHeight;
+                OldFrameRate = oldFrameRate;
+                OldDuration = oldDuration;
+                OldIsRetentionFrameRate = oldIsRetentionFrameRate;
+                OldApplyToneMappingWhenNested = oldApplyToneMappingWhenNested;
+                OldShutterAngle = oldShutterAngle;
+                OldShutterPhase = oldShutterPhase;
+                OldMotionBlurSampleCount = oldMotionBlurSampleCount;
+                OldRendererPluginId = oldRendererPluginId;
+                OldToneMapperPluginId = oldToneMapperPluginId;
+                OldWorkareaBegin = oldWorkareaBegin;
+                OldWorkareaEnd = oldWorkareaEnd;
+                NewName = newName;
+                NewWidth = newWidth;
+                NewHeight = newHeight;
+                NewFrameRate = newFrameRate;
+                NewDuration = newDuration;
+                NewIsRetentionFrameRate = newIsRetentionFrameRate;
+                NewApplyToneMappingWhenNested = newApplyToneMappingWhenNested;
+                NewShutterAngle = newShutterAngle;
+                NewShutterPhase = newShutterPhase;
+                NewMotionBlurSampleCount = newMotionBlurSampleCount;
+                NewRendererPluginId = newRendererPluginId;
+                NewToneMapperPluginId = newToneMapperPluginId;
+                NewWorkareaBegin = newWorkareaBegin;
+                NewWorkareaEnd = newWorkareaEnd;
+            }
+
+            public void Redo()
+            {
+                Model.IsSettingChanging = true;
+
+                Model.Name = NewName;
+                Model.Width = NewWidth;
+                Model.Height = NewHeight;
+                Model.FrameRate = NewFrameRate;
+                Model.Duration = NewDuration;
+                Model.IsRetentionFrameRate = NewIsRetentionFrameRate;
+                Model.ApplyToneMappingWhenNested = NewApplyToneMappingWhenNested;
+                Model.ShutterAngle = NewShutterAngle;
+                Model.ShutterPhase = NewShutterPhase;
+                Model.MotionBlurSampleCount = NewMotionBlurSampleCount;
+
+                if (Model.RendererPluginId != NewRendererPluginId)
+                {
+                    Model.RendererContext.Dispose();
+                    Model.RendererContext = Model.RendererListModel.CreateRenderer(NewRendererPluginId);
+                    Model.RendererPluginId = NewRendererPluginId;
+                    Model.RendererContext.Value.SetSize(NewWidth, NewHeight);
+                }
+                if (Model.ToneMapperPluginId != NewRendererPluginId)
+                {
+                    Model.ToneMapperContext.Dispose();
+                    Model.ToneMapperContext = Model.ToneMapperListModel.CreateToneMapper(NewToneMapperPluginId);
+                    Model.ToneMapperPluginId = NewToneMapperPluginId;
+                }
+
+                Model.WorkareaBegin = NewWorkareaBegin;
+                Model.WorkareaEnd = NewWorkareaEnd;
+                Model.FrameDuration = 1.0 / NewFrameRate;
+
+                if (Model.TimeBarRange > NewDuration)
+                {
+                    Model.TimeBarRange = NewDuration;
+                }
+                if (Model.TimeBarRangeStart + Model.TimeBarRange > NewDuration)
+                {
+                    Model.TimeBarRangeStart = Math.Max(NewDuration - Model.TimeBarRangeStart, 0.0);
+                }
+
+                Model.IsSettingChanging = false;
+                Model.OnCompositionUpdated();
+            }
+
+            public void Undo()
+            {
+                Model.IsSettingChanging = true;
+
+                Model.Name = OldName;
+                Model.Width = OldWidth;
+                Model.Height = OldHeight;
+                Model.FrameRate = OldFrameRate;
+                Model.Duration = OldDuration;
+                Model.IsRetentionFrameRate = OldIsRetentionFrameRate;
+                Model.ApplyToneMappingWhenNested = OldApplyToneMappingWhenNested;
+                Model.ShutterAngle = OldShutterAngle;
+                Model.ShutterPhase = OldShutterPhase;
+                Model.MotionBlurSampleCount = OldMotionBlurSampleCount;
+
+                if (Model.RendererPluginId != OldRendererPluginId)
+                {
+                    Model.RendererContext.Dispose();
+                    Model.RendererContext = Model.RendererListModel.CreateRenderer(OldRendererPluginId);
+                    Model.RendererPluginId = OldRendererPluginId;
+                    Model.RendererContext.Value.SetSize(OldWidth, OldHeight);
+                }
+                if (Model.ToneMapperPluginId != OldRendererPluginId)
+                {
+                    Model.ToneMapperContext.Dispose();
+                    Model.ToneMapperContext = Model.ToneMapperListModel.CreateToneMapper(OldToneMapperPluginId);
+                    Model.ToneMapperPluginId = OldToneMapperPluginId;
+                }
+
+                Model.WorkareaBegin = OldWorkareaBegin;
+                Model.WorkareaEnd = OldWorkareaEnd;
+                Model.FrameDuration = 1.0 / OldFrameRate;
+
+                if (Model.TimeBarRange > OldDuration)
+                {
+                    Model.TimeBarRange = OldDuration;
+                }
+                if (Model.TimeBarRangeStart + Model.TimeBarRange > OldDuration)
+                {
+                    Model.TimeBarRangeStart = Math.Max(OldDuration - Model.TimeBarRangeStart, 0.0);
+                }
+
+                Model.IsSettingChanging = false;
+                Model.OnCompositionUpdated();
+            }
+
+            public void Dispose() { }
+        }
+
         private class AddLayersHistoryCommand : IHistoryCommand
         {
             public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_AddLayers);

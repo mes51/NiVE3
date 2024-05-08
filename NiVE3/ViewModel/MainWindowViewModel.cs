@@ -169,8 +169,8 @@ namespace NiVE3.ViewModel
                         result.Parameters.GetValue<int>(nameof(CompositionSettingViewModel.ShutterAngle)),
                         result.Parameters.GetValue<int>(nameof(CompositionSettingViewModel.ShutterPhase)),
                         result.Parameters.GetValue<int>(nameof(CompositionSettingViewModel.MotionBlurSampleCount)),
-                        result.Parameters.GetValue<Type>(CompositionSettingViewModel.SelectedRendererType),
-                        result.Parameters.GetValue<Type>(CompositionSettingViewModel.SelectedToneMapperType)
+                        result.Parameters.GetValue<Guid>(CompositionSettingViewModel.SelectedRendererPluginId),
+                        result.Parameters.GetValue<Guid>(CompositionSettingViewModel.SelectedToneMapperPluginId)
                     );
                 }
             });

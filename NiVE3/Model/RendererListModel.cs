@@ -39,30 +39,6 @@ namespace NiVE3.Model
             }
         }
 
-        public Guid GetPluginId(Type rendererType)
-        {
-            if (Renderers == null)
-            {
-                throw new Exception(); // bug
-            }
-            return Guid.Parse(Renderers.First(f => f.Metadata.PluginType == rendererType).Metadata.RendererUuid);
-        }
-
-        public ExportLifetimeContext<IRenderer> CreateRenderer(Type rendererType)
-        {
-            if (Renderers == null)
-            {
-                throw new Exception(); // bug
-            }
-            var factory = Renderers.First(f => f.Metadata.PluginType == rendererType);
-            var result = factory.CreateExport();
-            if (factory.Metadata.IsSupportGpu)
-            {
-                result.Value.SetupAccelerator(AcceleratorModel); // TODO: Acceleratorの更新
-            }
-            return result;
-        }
-
         public ExportLifetimeContext<IRenderer> CreateRenderer(Guid rendererPluginId)
         {
             if (Renderers == null)

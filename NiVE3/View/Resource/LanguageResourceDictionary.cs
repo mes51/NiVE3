@@ -246,6 +246,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("テキストの追加(_T)")]
         public static readonly string Timeline_ContextMenu_AddText = nameof(Timeline_ContextMenu_AddText);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("コンポジションの設定...(_O)")]
+        public static readonly string Timeline_ContextMenu_CompositionSetting = nameof(Timeline_ContextMenu_CompositionSetting);
+
         [ShowInMarkup, LanguageKey, DefaultValue("なし")]
         public static readonly string Layer_EmptyTrackMatte = nameof(Layer_EmptyTrackMatte);
 
@@ -475,6 +478,9 @@ namespace NiVE3.View.Resource
 
         [DefaultValue("コンポジションの削除")]
         public static readonly string History_RemoveComposition = nameof(History_RemoveComposition);
+
+        [DefaultValue("コンポジションの設定変更")]
+        public static readonly string History_ChangeCompositionSetting = nameof(History_ChangeCompositionSetting);
 
         [DefaultValue("レイヤーの追加")]
         public static readonly string History_AddLayers = nameof(History_AddLayers);

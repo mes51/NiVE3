@@ -157,17 +157,19 @@ namespace NiVE3.Model
             }
         }
 
+        public Guid RendererPluginId { get; private set; }
+
+        public Guid ToneMapperPluginId { get; private set; }
+
         public bool HasAudio => Layers.Any(l => l.IsEnableSolo) ? Layers.Any(l => l.HasAudio && l.IsEnableAudio && l.IsEnableSolo) : Layers.Any(l => l.HasAudio && l.IsEnableAudio);
 
         public event EventHandler<EventArgs>? CompositionUpdated;
 
-        ExportLifetimeContext<IRenderer> RendererContext { get; }
+        bool IsSettingChanging { get; set; }
 
-        ExportLifetimeContext<IToneMapper> ToneMapperContext { get; }
+        ExportLifetimeContext<IRenderer> RendererContext { get; set; }
 
-        Guid RendererPluginId { get; }
-
-        Guid ToneMapperPluginId { get; }
+        ExportLifetimeContext<IToneMapper> ToneMapperContext { get; set; }
 
         FootageListModel FootageListModel { get; }
 
@@ -177,6 +179,10 @@ namespace NiVE3.Model
 
         TextPropertyModel TextPropertyModel { get; }
 
+        RendererListModel RendererListModel { get; }
+
+        ToneMapperListModel ToneMapperListModel { get; }
+
         HistoryModel HistoryModel { get; }
 
         IRenderer Renderer => RendererContext.Value;
@@ -184,38 +190,40 @@ namespace NiVE3.Model
         IToneMapper ToneMapper => ToneMapperContext.Value;
 
         public CompositionModel(
-            ExportLifetimeContext<IRenderer> renderer,
-            ExportLifetimeContext<IToneMapper> toneMapper,
             Guid rendererPluginId,
             Guid toneMapperPluginId,
             FootageListModel footageListModel,
             EffectListModel effectListModel,
             RenderQueueModel renderQueueModel,
             TextPropertyModel textPropertyModel,
+            RendererListModel rendererListModel,
+            ToneMapperListModel toneMapperListModel,
             HistoryModel historyModel
-        ) : this(renderer, toneMapper, rendererPluginId, toneMapperPluginId, footageListModel, effectListModel, renderQueueModel, textPropertyModel, historyModel, null) { }
+        ) : this(rendererPluginId, toneMapperPluginId, footageListModel, effectListModel, renderQueueModel, textPropertyModel, rendererListModel, toneMapperListModel, historyModel, null) { }
 
         public CompositionModel(
-            ExportLifetimeContext<IRenderer> renderer,
-            ExportLifetimeContext<IToneMapper> toneMapper,
             Guid rendererPluginId,
             Guid toneMapperPluginId,
             FootageListModel footageListModel,
             EffectListModel effectListModel,
             RenderQueueModel renderQueueModel,
             TextPropertyModel textPropertyModel,
+            RendererListModel rendererListModel,
+            ToneMapperListModel toneMapperListModel,
             HistoryModel historyModel,
             Guid? compositionId
         )
         {
             CompositionId = compositionId ?? Guid.NewGuid();
-            RendererContext = renderer;
-            ToneMapperContext = toneMapper;
+            RendererContext = rendererListModel.CreateRenderer(rendererPluginId);
+            ToneMapperContext = toneMapperListModel.CreateToneMapper(toneMapperPluginId);
             RendererPluginId = rendererPluginId;
             ToneMapperPluginId = toneMapperPluginId;
             FootageListModel = footageListModel;
             EffectListModel = effectListModel;
             RenderQueueModel = renderQueueModel;
+            RendererListModel = rendererListModel;
+            ToneMapperListModel = toneMapperListModel;
             TextPropertyModel = textPropertyModel;
             HistoryModel = historyModel;
             Layers = [];
@@ -514,6 +522,123 @@ namespace NiVE3.Model
             RenderQueueModel.Enqueue(this, filePath, renderRangeType, beginTime, endTime, isOutputVideo, isOutputAudio, output);
         }
 
+        public void ChangeCompositionSetting(string name, int width, int height, double frameRate, double duration, bool isRetentionFrameRate, bool applyToneMappingWhenNested, int shutterAngle, int shutterPhase, int motionBlurSampleCount, Guid rendererPluginId, Guid toneMapperPluginId)
+        {
+            if (Name == name &&
+                Width == width &&
+                Height == height &&
+                FrameRate == frameRate &&
+                Duration == duration &&
+                IsRetentionFrameRate == isRetentionFrameRate &&
+                ApplyToneMappingWhenNested == applyToneMappingWhenNested &&
+                ShutterAngle == shutterAngle &&
+                ShutterPhase == shutterPhase &&
+                MotionBlurSampleCount == motionBlurSampleCount &&
+                RendererPluginId == rendererPluginId &&
+                ToneMapperPluginId == toneMapperPluginId)
+            {
+                return;
+            }
+
+            IsSettingChanging = true;
+
+            var prevName = Name;
+            var prevWidth = Width;
+            var prevHeight = Height;
+            var prevFrameRate = FrameRate;
+            var prevDuration = Duration;
+            var prevIsRetentionFrameRate = IsRetentionFrameRate;
+            var prevApplyToneMappingWhenNested = ApplyToneMappingWhenNested;
+            var prevShutterAngle = ShutterAngle;
+            var prevShutterPhase = ShutterPhase;
+            var prevMotionBlurSampleCount = MotionBlurSampleCount;
+            var prevRendererPluginId = RendererPluginId;
+            var prevToneMapperPluginId = ToneMapperPluginId;
+            var prevWorkareaBegin = WorkareaBegin;
+            var prevWorkareaEnd = WorkareaEnd;
+
+            Name = name;
+            Width = width;
+            Height = height;
+            FrameRate = frameRate;
+            Duration = duration;
+            IsRetentionFrameRate = isRetentionFrameRate;
+            ApplyToneMappingWhenNested = applyToneMappingWhenNested;
+            ShutterAngle = shutterAngle;
+            ShutterPhase = shutterPhase;
+            MotionBlurSampleCount = motionBlurSampleCount;
+
+            if (RendererPluginId != rendererPluginId)
+            {
+                RendererContext.Dispose();
+                RendererContext = RendererListModel.CreateRenderer(rendererPluginId);
+                RendererPluginId = rendererPluginId;
+                RendererContext.Value.SetSize(Width, Height);
+            }
+            if (ToneMapperPluginId != toneMapperPluginId)
+            {
+                ToneMapperContext.Dispose();
+                ToneMapperContext = ToneMapperListModel.CreateToneMapper(toneMapperPluginId);
+                ToneMapperPluginId = toneMapperPluginId;
+            }
+
+            FrameDuration = 1.0 / FrameRate;
+            if (TimeBarRange > Duration)
+            {
+                TimeBarRange = Duration;
+            }
+            if (TimeBarRangeStart + TimeBarRange > Duration)
+            {
+                TimeBarRangeStart = Math.Max(Duration - TimeBarRangeStart, 0.0);
+            }
+            if (WorkareaBegin == 0.0 && WorkareaEnd == prevDuration)
+            {
+                WorkareaEnd = duration;
+            }
+            else
+            {
+                WorkareaBegin = Math.Min(WorkareaBegin, Duration - FrameDuration);
+                WorkareaEnd = Math.Clamp(WorkareaEnd, WorkareaBegin + FrameDuration, Duration);
+            }
+
+            IsSettingChanging = false;
+            OnCompositionUpdated();
+
+            HistoryModel.Add(
+                new ChangeCompositionSettingHistoryCommand(
+                    this,
+                    prevName,
+                    prevWidth,
+                    prevHeight,
+                    prevFrameRate,
+                    prevDuration,
+                    prevIsRetentionFrameRate,
+                    prevApplyToneMappingWhenNested,
+                    prevShutterAngle,
+                    prevShutterPhase,
+                    prevMotionBlurSampleCount,
+                    prevRendererPluginId,
+                    prevToneMapperPluginId,
+                    prevWorkareaBegin,
+                    prevWorkareaEnd,
+                    name,
+                    width,
+                    height,
+                    frameRate,
+                    duration,
+                    isRetentionFrameRate,
+                    applyToneMappingWhenNested,
+                    shutterAngle,
+                    shutterPhase,
+                    motionBlurSampleCount,
+                    rendererPluginId,
+                    toneMapperPluginId,
+                    WorkareaBegin,
+                    WorkareaEnd
+                )
+            );
+        }
+
         public NImage RenderFrame(double time, double downSamplingRate, bool applyToneMapping, bool useGpu)
         {
             var allImages = new List<IDisposable>();
@@ -804,6 +929,11 @@ namespace NiVE3.Model
             return CheckCycledSimulatedParentLayer(parentLayerId.Value, changed, checkedLayerIds);
         }
 
+        void OnCompositionUpdated()
+        {
+            CompositionUpdated?.Invoke(this, EventArgs.Empty);
+        }
+
         static CameraSetting CreateDefaultCameraSetting(int width, int height)
         {
             // TODO: LayerModelの方と合わせてどこかに定義する
@@ -838,6 +968,11 @@ namespace NiVE3.Model
 
         private void CompositionModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
+            if (IsSettingChanging)
+            {
+                return;
+            }
+
             switch (e.PropertyName)
             {
                 case nameof(FrameRate):
@@ -870,7 +1005,7 @@ namespace NiVE3.Model
                 e.PropertyName != nameof(WorkareaEnd) &&
                 e.PropertyName != nameof(CurrentTime))
             {
-                CompositionUpdated?.Invoke(this, EventArgs.Empty);
+                OnCompositionUpdated();
             }
         }
 
@@ -885,12 +1020,12 @@ namespace NiVE3.Model
                 newLayer.LayerUpdated += Layer_LayerUpdated; ;
             }
 
-            CompositionUpdated?.Invoke(this, EventArgs.Empty);
+            OnCompositionUpdated();
         }
 
         private void Layer_LayerUpdated(object? sender, EventArgs e)
         {
-            CompositionUpdated?.Invoke(this, EventArgs.Empty);
+            OnCompositionUpdated();
         }
 
         public void Dispose()

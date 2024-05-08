@@ -9,6 +9,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media.Media3D;
+using System.Xml.Linq;
 using GongSolutions.Wpf.DragDrop;
 using NiVE3.Config;
 using NiVE3.Image.Drawing;
@@ -367,6 +369,8 @@ namespace NiVE3.ViewModel
 
         public ICommand AddTextCommand { get; }
 
+        public ICommand CompositionSettingCommand { get; }
+
         public ICommand OpenRenderSettingCommand { get; }
 
         WeakEventPublisher<EventArgs> CurrentTimeChangeByUserPublisher { get; } = new WeakEventPublisher<EventArgs>();
@@ -491,6 +495,49 @@ namespace NiVE3.ViewModel
             AddNullObjectCommand = new RequerySuggestedCommand(() => CompositionModel?.AddNullObject(), () => CompositionModel != null);
 
             AddTextCommand = new RequerySuggestedCommand(() => CompositionModel?.AddText(), () => CompositionModel != null);
+
+            CompositionSettingCommand = new RequerySuggestedCommand(() =>
+            {
+                if (CompositionModel == null)
+                {
+                    return; 
+                }
+
+                var param = new DialogParameters
+                {
+                    { nameof(CompositionSettingViewModel.Name), CompositionModel.Name },
+                    { nameof(CompositionSettingViewModel.Width), CompositionModel.Width },
+                    { nameof(CompositionSettingViewModel.Height), CompositionModel.Height },
+                    { nameof(CompositionSettingViewModel.FrameRate), CompositionModel.FrameRate },
+                    { nameof(CompositionSettingViewModel.Duration), CompositionModel.Duration },
+                    { nameof(CompositionSettingViewModel.IsRetentionFrameRate), CompositionModel.IsRetentionFrameRate },
+                    { nameof(CompositionSettingViewModel.ApplyToneMappingWhenNested), CompositionModel.ApplyToneMappingWhenNested },
+                    { nameof(CompositionSettingViewModel.ShutterAngle), CompositionModel.ShutterAngle },
+                    { nameof(CompositionSettingViewModel.ShutterPhase), CompositionModel.ShutterPhase },
+                    { nameof(CompositionSettingViewModel.MotionBlurSampleCount), CompositionModel.MotionBlurSampleCount },
+                    { CompositionSettingViewModel.SelectedRendererPluginId, CompositionModel.RendererPluginId },
+                    { CompositionSettingViewModel.SelectedToneMapperPluginId, CompositionModel.ToneMapperPluginId }
+                };
+                IDialogResult? result = null;
+                DialogService.ShowDialog(nameof(CompositionSettingView), param, r => result = r);
+                if (result?.Result == ButtonResult.OK)
+                {
+                    CompositionModel.ChangeCompositionSetting(
+                        result.Parameters.GetValue<string>(nameof(CompositionSettingViewModel.Name)),
+                        result.Parameters.GetValue<int>(nameof(CompositionSettingViewModel.Width)),
+                        result.Parameters.GetValue<int>(nameof(CompositionSettingViewModel.Height)),
+                        result.Parameters.GetValue<double>(nameof(CompositionSettingViewModel.FrameRate)),
+                        result.Parameters.GetValue<double>(nameof(CompositionSettingViewModel.Duration)),
+                        result.Parameters.GetValue<bool>(nameof(CompositionSettingViewModel.IsRetentionFrameRate)),
+                        result.Parameters.GetValue<bool>(nameof(CompositionSettingViewModel.ApplyToneMappingWhenNested)),
+                        result.Parameters.GetValue<int>(nameof(CompositionSettingViewModel.ShutterAngle)),
+                        result.Parameters.GetValue<int>(nameof(CompositionSettingViewModel.ShutterPhase)),
+                        result.Parameters.GetValue<int>(nameof(CompositionSettingViewModel.MotionBlurSampleCount)),
+                        result.Parameters.GetValue<Guid>(CompositionSettingViewModel.SelectedRendererPluginId),
+                        result.Parameters.GetValue<Guid>(CompositionSettingViewModel.SelectedToneMapperPluginId)
+                    );
+                }
+            }, () => CompositionModel != null);
 
             OpenRenderSettingCommand = new RequerySuggestedCommand(() =>
             {

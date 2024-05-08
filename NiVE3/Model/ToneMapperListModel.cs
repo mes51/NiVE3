@@ -41,30 +41,6 @@ namespace NiVE3.Model
             }
         }
 
-        public Guid GetPluginId(Type toneMapperType)
-        {
-            if (ToneMappers == null)
-            {
-                throw new Exception(); // bug
-            }
-            return Guid.Parse(ToneMappers.First(f => f.Metadata.PluginType == toneMapperType).Metadata.ToneMapperUuid);
-        }
-
-        public ExportLifetimeContext<IToneMapper> CreateToneMapper(Type toneMapperType)
-        {
-            if (ToneMappers == null)
-            {
-                throw new Exception(); // bug
-            }
-            var facotry = ToneMappers.First(f => f.Metadata.PluginType == toneMapperType);
-            var result = facotry.CreateExport();
-            if (facotry.Metadata.IsSupportGpu)
-            {
-                result.Value.SetupAccelerator(AcceleratorModel); // TODO: Acceleratorの更新
-            }
-            return result;
-        }
-
         public ExportLifetimeContext<IToneMapper> CreateToneMapper(Guid toneMapperPluginId)
         {
             if (ToneMappers == null)

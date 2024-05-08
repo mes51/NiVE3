@@ -326,6 +326,18 @@ namespace NiVE3.Model
 
             switch (e.PropertyName)
             {
+                case nameof(Name):
+                    Name = Composition.Name;
+                    break;
+                case nameof(Width):
+                    Width = Composition.Width;
+                    break;
+                case nameof(Height):
+                    Height = Composition.Height;
+                    break;
+                case nameof(FrameRate):
+                    FrameRate = Composition.FrameRate;
+                    break;
                 case nameof(CompositionModel.WorkareaBegin):
                     WorkareaBegin = Composition.WorkareaBegin;
                     break;

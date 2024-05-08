@@ -16,9 +16,9 @@ namespace NiVE3.ViewModel.Dialog
 {
     class CompositionSettingViewModel : BindableBase, IDialogAware
     {
-        public const string SelectedRendererType = nameof(SelectedRendererType);
+        public const string SelectedRendererPluginId = nameof(SelectedRendererPluginId);
 
-        public const string SelectedToneMapperType = nameof(SelectedToneMapperType);
+        public const string SelectedToneMapperPluginId = nameof(SelectedToneMapperPluginId);
 
         // TODO: 要調整
         const int FrameTimeDigit = 7;
@@ -130,16 +130,16 @@ namespace NiVE3.ViewModel.Dialog
 
         public ICommand DeletePresetCommand { get; }
 
-        Type[] RendererTypes { get; }
+        Guid[] RendererTypes { get; }
 
-        Type[] ToneMapperTypes { get; }
+        Guid[] ToneMapperTypes { get; }
 
         public CompositionSettingViewModel(RendererListModel rendererListModel, ToneMapperListModel toneMapperListModel)
         {
             Renderers = [..rendererListModel.RendererMetadata.Select(r => r.Name)];
-            RendererTypes = [..rendererListModel.RendererMetadata.Select(r => r.PluginType)];
+            RendererTypes = [..rendererListModel.RendererMetadata.Select(r => Guid.Parse(r.RendererUuid))];
             ToneMappers = [..toneMapperListModel.ToneMapperMetadata.Select(t => t.Name)];
-            ToneMapperTypes = [..toneMapperListModel.ToneMapperMetadata.Select(t => t.PluginType)];
+            ToneMapperTypes = [..toneMapperListModel.ToneMapperMetadata.Select(t => Guid.Parse(t.ToneMapperUuid))];
 
             OKCommand = new DelegateCommand(() =>
             {
@@ -155,8 +155,8 @@ namespace NiVE3.ViewModel.Dialog
                     { nameof(ShutterAngle), ShutterAngle },
                     { nameof(ShutterPhase), ShutterPhase },
                     { nameof(MotionBlurSampleCount), MotionBlurSampleCount },
-                    { SelectedRendererType, RendererTypes[SelectedRenderer] },
-                    { SelectedToneMapperType, ToneMapperTypes[SelectedToneMapper] }
+                    { SelectedRendererPluginId, RendererTypes[SelectedRenderer] },
+                    { SelectedToneMapperPluginId, ToneMapperTypes[SelectedToneMapper] }
                 };
 
                 RequestClose?.Invoke(new DialogResult(ButtonResult.OK, result));
@@ -179,6 +179,31 @@ namespace NiVE3.ViewModel.Dialog
         public void OnDialogOpened(IDialogParameters parameters)
         {
             Name = parameters.GetValue<string>(nameof(Name));
+            if (parameters.TryGetValue<int>(nameof(Width), out var width) &&
+                parameters.TryGetValue<int>(nameof(Height), out var height) &&
+                parameters.TryGetValue<double>(nameof(FrameRate), out var frameRate) &&
+                parameters.TryGetValue<double>(nameof(Duration), out var duration) &&
+                parameters.TryGetValue<bool>(nameof(IsRetentionFrameRate), out var isRetentionFrameRate) &&
+                parameters.TryGetValue<bool>(nameof(ApplyToneMappingWhenNested), out var applyToneMappingWhenNested) &&
+                parameters.TryGetValue<int>(nameof(ShutterAngle), out var shutterAngle) &&
+                parameters.TryGetValue<int>(nameof(ShutterPhase), out var shutterPhase) &&
+                parameters.TryGetValue<int>(nameof(MotionBlurSampleCount), out var motionBlurSampleCount) &&
+                parameters.TryGetValue<Guid>(SelectedRendererPluginId, out var selectedRendererType) &&
+                parameters.TryGetValue<Guid>(SelectedToneMapperPluginId, out var selectedToneMapperType)
+            )
+            {
+                Width = width;
+                Height = height;
+                FrameRate = frameRate;
+                Duration = duration;
+                IsRetentionFrameRate = isRetentionFrameRate;
+                ApplyToneMappingWhenNested = applyToneMappingWhenNested;
+                ShutterAngle = shutterAngle;
+                ShutterPhase = shutterPhase;
+                MotionBlurSampleCount = motionBlurSampleCount;
+                SelectedRenderer = Math.Max(Array.IndexOf(RendererTypes, selectedRendererType), 0);
+                SelectedToneMapper = Math.Max(Array.IndexOf(ToneMapperTypes, selectedToneMapperType), 0);
+            }
         }
 
         public void OnDialogClosed() { }
