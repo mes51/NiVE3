@@ -494,6 +494,9 @@ namespace NiVE3.View.Resource
         [DefaultValue("レイヤーの削除")]
         public static readonly string History_DeleteLayers = nameof(History_DeleteLayers);
 
+        [DefaultValue("レイヤーのペースト")]
+        public static readonly string History_PasteLayers = nameof(History_PasteLayers);
+
         [DefaultValue("平面の追加")]
         public static readonly string History_AddSolid = nameof(History_AddSolid);
 

@@ -582,5 +582,49 @@ namespace NiVE3.Model
 
             public void Dispose() { }
         }
+
+        private class PasteLayersHistoryCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_PasteLayers);
+
+            CompositionModel Model { get; }
+
+            LayerModel[] NewLayers { get; }
+
+            int InsertStartIndex { get; }
+
+            public PasteLayersHistoryCommand(CompositionModel model, LayerModel[] newLayers, int insertStartIndex)
+            {
+                Model = model;
+                NewLayers = newLayers;
+                InsertStartIndex = insertStartIndex;
+            }
+
+            public void Redo()
+            {
+                var index = InsertStartIndex;
+                foreach (var l in NewLayers)
+                {
+                    Model.Layers.Insert(index, l);
+                    index++;
+                }
+            }
+
+            public void Undo()
+            {
+                foreach (var l in NewLayers)
+                {
+                    Model.Layers.Remove(l);
+                }
+            }
+
+            public void Dispose()
+            {
+                foreach (var l in NewLayers)
+                {
+                    l.Dispose();
+                }
+            }
+        }
     }
 }

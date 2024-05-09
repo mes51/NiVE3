@@ -13,6 +13,7 @@ using System.Windows.Media.Media3D;
 using System.Xml.Linq;
 using GongSolutions.Wpf.DragDrop;
 using NiVE3.Config;
+using NiVE3.Data.Json.Project;
 using NiVE3.Image.Drawing;
 using NiVE3.Model;
 using NiVE3.Mvvm;
@@ -20,6 +21,7 @@ using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Property;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
 using NiVE3.UI.Command;
+using NiVE3.Util;
 using NiVE3.View.Command;
 using NiVE3.View.Dialog;
 using NiVE3.View.Dock;
@@ -464,12 +466,13 @@ namespace NiVE3.ViewModel
                 }
                 else
                 {
-                    if (SelectedLayers.Count < 1 && SelectedLayers.Any(l => l.EditingParameter != EditingLayerParameter.None))
+                    if (CompositionModel == null || SelectedLayers.Count < 1 && SelectedLayers.Any(l => l.EditingParameter != EditingLayerParameter.None))
                     {
                         return;
                     }
 
                     var ids = SelectedLayers.Select(l => l.LayerId).ToArray();
+                    ClipboardUtil.SetData(CompositionModel.CopyLayer(ids));
                 }
             }, () => CompositionModel != null && SelectedItemType != SelectItemType.None);
 
@@ -481,9 +484,15 @@ namespace NiVE3.ViewModel
                 }
                 else
                 {
-                    if (SelectedLayers.Count < 1 && SelectedLayers.Any(l => l.EditingParameter != EditingLayerParameter.None))
+                    if (CompositionModel == null || SelectedLayers.Count < 1 && SelectedLayers.Any(l => l.EditingParameter != EditingLayerParameter.None))
                     {
                         return;
+                    }
+
+                    var data = ClipboardUtil.GetData<LayerData>();
+                    if (data != null)
+                    {
+                        CompositionModel.PasteLayer(data, LastSelectedLayerId);
                     }
                 }
             }, () => CompositionModel != null && SelectedItemType != SelectItemType.None);

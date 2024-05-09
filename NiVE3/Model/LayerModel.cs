@@ -510,8 +510,8 @@ namespace NiVE3.Model
             RenderableImage? trackMatteImage = null;
             if (withTrackMatte && TrackMatteLayerId.HasValue)
             {
-                var trackMatteLayer = CompositionModel.Layers.First(l => l.LayerId == TrackMatteLayerId);
-                trackMatteImage = trackMatteLayer.GetImage(time, downSamplingRate, false, useGpu);
+                var trackMatteLayer = CompositionModel.Layers.FirstOrDefault(l => l.LayerId == TrackMatteLayerId);
+                trackMatteImage = trackMatteLayer?.GetImage(time, downSamplingRate, false, useGpu);
             }
 
             return new RenderableImage(
@@ -1070,6 +1070,10 @@ namespace NiVE3.Model
             if (insertStartIndex < 0)
             {
                 insertStartIndex = Effects.Count;
+            }
+            else
+            {
+                insertStartIndex++;
             }
 
             var index = insertStartIndex;
