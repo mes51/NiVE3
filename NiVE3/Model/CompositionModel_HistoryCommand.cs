@@ -626,5 +626,86 @@ namespace NiVE3.Model
                 }
             }
         }
+
+        private class ChangeEnableShyHistoryCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangeEnableShy);
+
+            CompositionModel Model { get; }
+
+            bool NewState { get; }
+
+            public ChangeEnableShyHistoryCommand(CompositionModel model, bool newState)
+            {
+                Model = model;
+                NewState = newState;
+            }
+
+            public void Redo()
+            {
+                Model.IsEnableShy = NewState;
+            }
+
+            public void Undo()
+            {
+                Model.IsEnableShy = !NewState;
+            }
+
+            public void Dispose() { }
+        }
+
+        private class ChangeEnableFrameBlendHistoryCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangeEnableFrameBlend);
+
+            CompositionModel Model { get; }
+
+            bool NewState { get; }
+
+            public ChangeEnableFrameBlendHistoryCommand(CompositionModel model, bool newState)
+            {
+                Model = model;
+                NewState = newState;
+            }
+
+            public void Redo()
+            {
+                Model.IsEnableFrameBlend = NewState;
+            }
+
+            public void Undo()
+            {
+                Model.IsEnableFrameBlend = !NewState;
+            }
+
+            public void Dispose() { }
+        }
+
+        private class ChangeEnableMotionBlurHistoryCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangeEnableMotionBlur);
+
+            CompositionModel Model { get; }
+
+            bool NewState { get; }
+
+            public ChangeEnableMotionBlurHistoryCommand(CompositionModel model, bool newState)
+            {
+                Model = model;
+                NewState = newState;
+            }
+
+            public void Redo()
+            {
+                Model.IsEnableMotionBlur = NewState;
+            }
+
+            public void Undo()
+            {
+                Model.IsEnableMotionBlur = !NewState;
+            }
+
+            public void Dispose() { }
+        }
     }
 }

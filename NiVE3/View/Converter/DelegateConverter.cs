@@ -86,4 +86,44 @@ namespace NiVE3.View.Converter
             }
         }
     }
+
+    class DelegateMultiConverter<TFrom1, TFrom2, TTo> : IMultiValueConverter
+    {
+        Func<TFrom1, TFrom2, TTo>? ConvertFunc { get; }
+
+        Func<TTo, (TFrom1, TFrom2)>? ConvertBackFunc { get; }
+
+        public DelegateMultiConverter(Func<TFrom1, TFrom2, TTo>? convertFunc) : this(convertFunc, null) { }
+
+        public DelegateMultiConverter(Func<TFrom1, TFrom2, TTo>? convertFunc, Func<TTo, (TFrom1, TFrom2)>? convertBackFunc)
+        {
+            ConvertFunc = convertFunc;
+            ConvertBackFunc = convertBackFunc;
+        }
+
+        public object? Convert(object?[] values, Type targetType, object? parameter, CultureInfo culture)
+        {
+            if (ConvertFunc != null && values.Length > 1 && values[0] is TFrom1 from1 && values[1] is TFrom2 from2)
+            {
+                return ConvertFunc(from1, from2);
+            }
+            else
+            {
+                return DependencyProperty.UnsetValue;
+            }
+        }
+
+        public object?[] ConvertBack(object? value, Type[] targetTypes, object? parameter, CultureInfo culture)
+        {
+            if (ConvertBackFunc != null && value is TTo to)
+            {
+                var (from1, from2) = ConvertBackFunc(to);
+                return [from1, from2];
+            }
+            else
+            {
+                return [DependencyProperty.UnsetValue, DependencyProperty.UnsetValue];
+            }
+        }
+    }
 }

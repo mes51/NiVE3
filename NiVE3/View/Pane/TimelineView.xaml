@@ -108,9 +108,9 @@
             <ui:SlidableNumberTextBox Value="{Binding CurrentTime}" Converter="{StaticResource TimeConverter}" SlideChangeValue="{Binding FrameDuration}" Margin="5"/>
             -->
             <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,5,0">
-                <CheckBox Style="{StaticResource ShyCheckBox}"/>
-                <CheckBox Style="{StaticResource FrameBlendCheckBox}" Margin="5,0,0,0"/>
-                <CheckBox Style="{StaticResource MotionBlurCheckBox}" Margin="5,0,0,0"/>
+                <CheckBox IsChecked="{Binding IsEnableShy}" Style="{StaticResource ShyCheckBox}" Command="{Binding ChangeEnableShyCommand}"/>
+                <CheckBox IsChecked="{Binding IsEnableFrameBlend}" Style="{StaticResource FrameBlendCheckBox}" Margin="5,0,0,0" Command="{Binding ChangeEnableFrameBlendCommand}"/>
+                <CheckBox IsChecked="{Binding IsEnableMotionBlur}" Style="{StaticResource MotionBlurCheckBox}" Margin="5,0,0,0" Command="{Binding ChangeEnableMotionBlurCommand}"/>
             </StackPanel>
         </Grid>
 
@@ -214,6 +214,7 @@
                                 Range="{Binding TimeBarRange}"
                                 RangeStart="{Binding TimeBarRangeStart}"
                                 SelectedItems="{Binding SelectedLayers}"
+                                IsEnableShy="{Binding IsEnableShy}"
                                 Style="{StaticResource LayerCollectionStyle}"
                                 dd:DragDrop.DropHandler="{Binding}"
                                 dd:DragDrop.DragHandler="{Binding RelativeSource={RelativeSource Self}}"

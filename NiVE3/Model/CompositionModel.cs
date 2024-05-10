@@ -143,6 +143,27 @@ namespace NiVE3.Model
             set { SetProperty(ref workareaEnd, value); }
         }
 
+        private bool isEnableShy;
+        public bool IsEnableShy
+        {
+            get { return isEnableShy; }
+            set { SetProperty(ref isEnableShy, value); }
+        }
+
+        private bool isEnableFrameBlend;
+        public bool IsEnableFrameBlend
+        {
+            get { return isEnableFrameBlend; }
+            set { SetProperty(ref isEnableFrameBlend, value); }
+        }
+
+        private bool isEnableMotionBlur;
+        public bool IsEnableMotionBlur
+        {
+            get { return isEnableMotionBlur; }
+            set { SetProperty(ref isEnableMotionBlur, value); }
+        }
+
         private ObservableCollection<LayerModel> layers = [];
         public ObservableCollection<LayerModel> Layers
         {
@@ -656,6 +677,27 @@ namespace NiVE3.Model
             HistoryModel.Add(new ChangeWorkareaHistoryCommand(this, prevWorkareaBegin, prevWorkareaEnd, WorkareaBegin, WorkareaEnd));
         }
 
+        public void ChangeEnableShy()
+        {
+            IsEnableShy = !IsEnableShy;
+
+            HistoryModel.Add(new ChangeEnableShyHistoryCommand(this, IsEnableShy));
+        }
+
+        public void ChangeEnableFrameBlend()
+        {
+            IsEnableFrameBlend = !IsEnableFrameBlend;
+
+            HistoryModel.Add(new ChangeEnableFrameBlendHistoryCommand(this, IsEnableFrameBlend));
+        }
+
+        public void ChangeEnableMotionBlur()
+        {
+            IsEnableMotionBlur = !IsEnableMotionBlur;
+
+            HistoryModel.Add(new ChangeEnableMotionBlurHistoryCommand(this, IsEnableMotionBlur));
+        }
+
         public NImage RenderFrame(double time, double downSamplingRate, bool applyToneMapping, bool useGpu)
         {
             var allImages = new List<IDisposable>();
@@ -1092,7 +1134,8 @@ namespace NiVE3.Model
                 e.PropertyName != nameof(TimeBarRangeStart) &&
                 e.PropertyName != nameof(WorkareaBegin) &&
                 e.PropertyName != nameof(WorkareaEnd) &&
-                e.PropertyName != nameof(CurrentTime))
+                e.PropertyName != nameof(CurrentTime) &&
+                e.PropertyName != nameof(IsEnableShy))
             {
                 OnCompositionUpdated();
             }

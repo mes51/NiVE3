@@ -482,6 +482,15 @@ namespace NiVE3.View.Resource
         [DefaultValue("コンポジションの設定変更")]
         public static readonly string History_ChangeCompositionSetting = nameof(History_ChangeCompositionSetting);
 
+        [DefaultValue("シャイの有効・無効の切り替え")]
+        public static readonly string History_ChangeEnableShy = nameof(History_ChangeEnableShy);
+
+        [DefaultValue("フレームブレンドの有効・無効の切り替え")]
+        public static readonly string History_ChangeEnableFrameBlend = nameof(History_ChangeEnableFrameBlend);
+
+        [DefaultValue("モーションブラーの有効・無効の切り替え")]
+        public static readonly string History_ChangeEnableMotionBlur = nameof(History_ChangeEnableMotionBlur);
+
         [DefaultValue("ワークエリアの変更")]
         public static readonly string History_ChangeWorkarea = nameof(History_ChangeWorkarea);
 

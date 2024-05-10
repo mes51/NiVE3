@@ -109,6 +109,30 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref workareaEnd, value); }
         }
 
+        private bool isEnableShy;
+        [ManualWire(nameof(CompositionModel), IsOneWay = true)]
+        public bool IsEnableShy
+        {
+            get { return isEnableShy; }
+            set { SetProperty(ref isEnableShy, value); }
+        }
+
+        private bool isEnableFrameBlend;
+        [ManualWire(nameof(CompositionModel), IsOneWay = true)]
+        public bool IsEnableFrameBlend
+        {
+            get { return isEnableFrameBlend; }
+            set { SetProperty(ref isEnableFrameBlend, value); }
+        }
+
+        private bool isEnableMotionBlur;
+        [ManualWire(nameof(CompositionModel), IsOneWay = true)]
+        public bool IsEnableMotionBlur
+        {
+            get { return isEnableMotionBlur; }
+            set { SetProperty(ref isEnableMotionBlur, value); }
+        }
+
         private double layerNumberColumnWudth;
         [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineLayerNumberColumnWidth))]
         public double LayerNumberColumnWidth
@@ -275,6 +299,7 @@ namespace NiVE3.ViewModel
                         LastSelectedLayerId = null;
                         SelectedLayerIdsForPreview = null;
                     }
+                    compositionModel.PropertyChanged -= CompositionModel_PropertyChanged;
                 }
                 SetProperty(ref compositionModel, value);
                 if (value != null)
@@ -295,6 +320,7 @@ namespace NiVE3.ViewModel
                         return vm;
                     });
                     SelectedLayers = [];
+                    value.PropertyChanged += CompositionModel_PropertyChanged;
                 }
             }
         }
@@ -348,6 +374,12 @@ namespace NiVE3.ViewModel
             get { return isScrubbing; }
             set { SetProperty(ref isScrubbing, value); }
         }
+
+        public ICommand ChangeEnableShyCommand { get; }
+
+        public ICommand ChangeEnableFrameBlendCommand { get; }
+
+        public ICommand ChangeEnableMotionBlurCommand { get; }
 
         public ICommand BeginEditNameCommand { get; }
 
@@ -405,6 +437,12 @@ namespace NiVE3.ViewModel
             WiringModel();
 
             PropertyChanged += TimelineViewModel_PropertyChanged;
+
+            ChangeEnableShyCommand = new RequerySuggestedCommand(() => CompositionModel?.ChangeEnableShy(), () => CompositionModel != null);
+
+            ChangeEnableFrameBlendCommand = new RequerySuggestedCommand(() => CompositionModel?.ChangeEnableFrameBlend(), () => CompositionModel != null);
+
+            ChangeEnableMotionBlurCommand = new RequerySuggestedCommand(() => CompositionModel?.ChangeEnableMotionBlur(), () => CompositionModel != null);
 
             BeginEditNameCommand = new RequerySuggestedCommand(() =>
             {
@@ -695,6 +733,18 @@ namespace NiVE3.ViewModel
                 case nameof(CurrentTime) when CompositionModel != null && IsScrubbing && Keyboard.IsKeyDown(Key.LeftCtrl):
                     AudioPlayerModel.AddScrubSample(CompositionModel.RenderAudio(CurrentTime, CompositionModel.FrameDuration));
                     break;
+            }
+        }
+
+        private void CompositionModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(CompositionModel.IsEnableShy) && (CompositionModel?.IsEnableShy ?? true))
+            {
+                foreach (var l in (SelectedLayers?.Where(l => l.IsEnableShy)?.ToArray() ?? []))
+                {
+                    l.DeSelect();
+                    SelectedLayers?.Remove(l);
+                }
             }
         }
 

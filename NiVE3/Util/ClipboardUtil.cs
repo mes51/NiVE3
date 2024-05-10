@@ -14,7 +14,11 @@ namespace NiVE3.Util
         public static void SetData<T>(CopyData<T> data)
         {
             var json = JsonSerializer.Serialize(data);
-            Clipboard.SetText(json);
+            try
+            {
+                Clipboard.SetText(json);
+            }
+            catch { } // NOTE: 連打するとたまにエラーになる
         }
 
         public static CopyData<T>? GetData<T>()

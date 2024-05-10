@@ -18,6 +18,8 @@ namespace NiVE3.View.Part
     {
         static readonly IValueConverter LayerNumberOffsetConverter = new DelegateConverter<int, int>(v => v + 1);
 
+        static readonly IMultiValueConverter ShyConverter = new DelegateMultiConverter<bool, bool, Visibility>((enable, shy) => enable && shy ? Visibility.Collapsed : Visibility.Visible);
+
         public static readonly DependencyProperty RangeProperty = DependencyProperty.Register(
             nameof(Range),
             typeof(double),
@@ -38,6 +40,19 @@ namespace NiVE3.View.Part
             typeof(LayerCollectionView),
             new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
+
+        public static readonly DependencyProperty IsEnableShyProperty = DependencyProperty.Register(
+            nameof(IsEnableShy),
+            typeof(bool),
+            typeof(LayerCollectionView),
+            new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        public bool IsEnableShy
+        {
+            get { return (bool)GetValue(IsEnableShyProperty); }
+            set { SetValue(IsEnableShyProperty, value); }
+        }
 
         public double RangeStart
         {
@@ -120,6 +135,25 @@ namespace NiVE3.View.Part
                     Mode = BindingMode.OneWay
                 };
                 BindingOperations.SetBinding(layer, LayerView.CompositionFrameRateProperty, compositionFrameRateBinding);
+
+                var shyBinding = new MultiBinding
+                {
+                    Converter = ShyConverter,
+                    Mode = BindingMode.OneWay
+                };
+                shyBinding.Bindings.Add(new Binding
+                {
+                    Path = new PropertyPath(IsEnableShyProperty),
+                    Source = this,
+                    Mode = BindingMode.OneWay
+                });
+                shyBinding.Bindings.Add(new Binding
+                {
+                    Path = new PropertyPath(nameof(LayerViewModel.IsEnableShy)),
+                    Source = viewModel,
+                    Mode = BindingMode.OneWay
+                });
+                BindingOperations.SetBinding(layer, VisibilityProperty, shyBinding);
 
                 GongSolutions.Wpf.DragDrop.DragDrop.SetIsDropTarget(layer, true);
                 GongSolutions.Wpf.DragDrop.DragDrop.SetDropEventType(layer, EventType.Bubbled);
