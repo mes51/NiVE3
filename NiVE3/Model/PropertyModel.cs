@@ -217,16 +217,7 @@ namespace NiVE3.Model
 
         public void DeleteKeyFrames(KeyFrame[] targetKeyframes)
         {
-            targetKeyframes = [..targetKeyframes.OrderBy(KeyFrames.IndexOf)];
-            var oldIndices = targetKeyframes.Select(KeyFrames.IndexOf).ToArray();
-
-            foreach (var k in targetKeyframes)
-            {
-                KeyFrames.Remove(k);
-            }
-
-            HistoryModel.Add(new DeleteKeyFramesHistoryCommand(this, targetKeyframes, oldIndices));
-            ValueCommited?.Invoke(this, EventArgs.Empty);
+            DeleteKeyFramesInternal(targetKeyframes, false);
         }
 
         public IReadOnlyCollection<IPropertyObject>? GetChildren()
@@ -290,6 +281,14 @@ namespace NiVE3.Model
             }
         }
 
+        public CopyData<KeyFrameClipboardData> CutKeyFrames(KeyFrame[] targetKeyFrames)
+        {
+            var result = CopyKeyFrames(targetKeyFrames);
+            DeleteKeyFramesInternal(targetKeyFrames, true);
+
+            return result;
+        }
+
         public CopyData<KeyFrameClipboardData> CopyKeyFrames(KeyFrame[] targetKeyFrames)
         {
             targetKeyFrames = [..targetKeyFrames.OrderBy(KeyFrames.IndexOf)];
@@ -343,6 +342,20 @@ namespace NiVE3.Model
             }
 
             HistoryModel.Add(new PasteKeyFramesHistoryCommand(this, oldKeyFrames, oldKeyFrameIndices, [..newKeyFrames], newKeyFrameIndices));
+        }
+
+        void DeleteKeyFramesInternal(KeyFrame[] targetKeyframes, bool isCut)
+        {
+            targetKeyframes = [.. targetKeyframes.OrderBy(KeyFrames.IndexOf)];
+            var oldIndices = targetKeyframes.Select(KeyFrames.IndexOf).ToArray();
+
+            foreach (var k in targetKeyframes)
+            {
+                KeyFrames.Remove(k);
+            }
+
+            HistoryModel.Add(new DeleteKeyFramesHistoryCommand(this, targetKeyframes, oldIndices, isCut));
+            ValueCommited?.Invoke(this, EventArgs.Empty);
         }
 
         void ReplaceKeyFrames(KeyFrame[] targetKeyFrames, KeyFrame[] newKeyFrames, string historyNameKey)
@@ -678,16 +691,7 @@ namespace NiVE3.Model
 
         public void DeleteChildren(Guid[] propertyInstanceIds)
         {
-            var children = Children.OfType<PropertyGroupModel>().Where(c => propertyInstanceIds.Contains(c.InstanceId)).ToArray();
-            var indices = children.Select(Children.IndexOf).ToArray();
-
-            foreach (var c in children)
-            {
-                RemoveInternal(c);
-            }
-            ValueCommited?.Invoke(this, EventArgs.Empty);
-
-            HistoryModel.Add(new DeleteAppendablePropertyChildHistoryCommand(this, children, indices));
+            DeleteChildrenInternal(propertyInstanceIds, false);
         }
 
         public void MoveChild(Guid propertyInstanceId, int newIndex)
@@ -754,6 +758,14 @@ namespace NiVE3.Model
 
                 AddChildInternal(item, childData.InstanceId).LoadData(childData);
             }
+        }
+
+        public CopyData<PropertyData> CutChildren(Guid[] propertyInstanceIds)
+        {
+            var result = CopyChildrenProperty(propertyInstanceIds);
+            DeleteChildrenInternal(propertyInstanceIds, true);
+
+            return result;
         }
 
         public CopyData<PropertyData> CopyChildrenProperty(Guid[] ids)
@@ -837,6 +849,20 @@ namespace NiVE3.Model
                 child.ValueUpdated -= Child_ValueUpdated;
                 child.ValueCommited -= Child_ValueCommited;
             }
+        }
+
+        void DeleteChildrenInternal(Guid[] propertyInstanceIds, bool isCut)
+        {
+            var children = Children.OfType<PropertyGroupModel>().Where(c => propertyInstanceIds.Contains(c.InstanceId)).ToArray();
+            var indices = children.Select(Children.IndexOf).ToArray();
+
+            foreach (var c in children)
+            {
+                RemoveInternal(c);
+            }
+            ValueCommited?.Invoke(this, EventArgs.Empty);
+
+            HistoryModel.Add(new DeleteAppendablePropertyChildHistoryCommand(this, children, indices, isCut));
         }
 
         private void Child_ValueUpdated(object? sender, EventArgs e)

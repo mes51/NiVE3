@@ -240,7 +240,7 @@ namespace NiVE3.Model
 
         private class DeleteEffectHistoryCommand : IHistoryCommand
         {
-            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_DeleteEffects);
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(IsCut ? LanguageResourceDictionary.History_CutEffects : LanguageResourceDictionary.History_RemoveEffects);
 
             LayerModel Model { get; }
 
@@ -248,11 +248,14 @@ namespace NiVE3.Model
 
             int[] Indices { get; }
 
-            public DeleteEffectHistoryCommand(LayerModel model, EffectModel[] effects, int[] indices)
+            bool IsCut { get; }
+
+            public DeleteEffectHistoryCommand(LayerModel model, EffectModel[] effects, int[] indices, bool isCut)
             {
                 Model = model;
                 Effects = effects;
                 Indices = indices;
+                IsCut = isCut;
             }
 
             public void Redo()

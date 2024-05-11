@@ -501,7 +501,10 @@ namespace NiVE3.View.Resource
         public static readonly string History_MoveLayers = nameof(History_MoveLayers);
 
         [DefaultValue("レイヤーの削除")]
-        public static readonly string History_DeleteLayers = nameof(History_DeleteLayers);
+        public static readonly string History_RemoveLayers = nameof(History_RemoveLayers);
+
+        [DefaultValue("レイヤーの切り取り")]
+        public static readonly string History_CutLayers = nameof(History_CutLayers);
 
         [DefaultValue("レイヤーのペースト")]
         public static readonly string History_PasteLayers = nameof(History_PasteLayers);
@@ -539,6 +542,9 @@ namespace NiVE3.View.Resource
         [DefaultValue("プロパティの変更")]
         public static readonly string History_ChangePropertyValue = nameof(History_ChangePropertyValue);
 
+        [DefaultValue("プロパティの切り取り")]
+        public static readonly string History_CutProperty = nameof(History_CutProperty);
+
         [DefaultValue("プロパティのペースト")]
         public static readonly string History_PasteProperty = nameof(History_PasteProperty);
 
@@ -547,6 +553,9 @@ namespace NiVE3.View.Resource
 
         [DefaultValue("キーフレームの削除")]
         public static readonly string History_RemoveKeyFrame = nameof(History_RemoveKeyFrame);
+
+        [DefaultValue("キーフレームの切り取り")]
+        public static readonly string History_CutKeyFrame = nameof(History_CutKeyFrame);
 
         [DefaultValue("キーフレームの移動")]
         public static readonly string History_MoveKeyFrame = nameof(History_MoveKeyFrame);
@@ -567,7 +576,10 @@ namespace NiVE3.View.Resource
         public static readonly string History_ChangeEffectsEnable = nameof(History_ChangeEffectsEnable);
 
         [DefaultValue("エフェクトの削除")]
-        public static readonly string History_DeleteEffects = nameof(History_DeleteEffects);
+        public static readonly string History_RemoveEffects = nameof(History_RemoveEffects);
+
+        [DefaultValue("エフェクトの切り取り")]
+        public static readonly string History_CutEffects = nameof(History_CutEffects);
 
         [DefaultValue("エフェクトのペースト")]
         public static readonly string History_PasteEffects = nameof(History_PasteEffects);

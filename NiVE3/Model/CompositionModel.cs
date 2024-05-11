@@ -504,33 +504,9 @@ namespace NiVE3.Model
             }
         }
 
-        public void DeleteLayers(Guid[] layerIds)
+        public void DeleteLayers(Guid[] ids)
         {
-            var layers = Layers.Where(l => layerIds.Contains(l.LayerId)).OrderBy(Layers.IndexOf).ToArray();
-            var oldIndices = layers.Select(l => Layers.IndexOf(l)).ToArray();
-
-            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_DeleteLayers));
-
-            var childLayers = layers.SelectMany(p => Layers.Where(c => c.ParentLayerId == p.LayerId)).Select(l => l.LayerId).ToArray();
-            if (childLayers.Length > 0)
-            {
-                ChangeParentLayer(childLayers, null);
-            }
-
-            var trackMatteChildLayers = layers.SelectMany(p => Layers.Where(c => c.TrackMatteLayerId == p.LayerId)).Select(l => l.LayerId).ToArray();
-            if (trackMatteChildLayers.Length > 0)
-            {
-                ChangeTrackMatteLayers(trackMatteChildLayers, null);
-            }
-
-            foreach (var l in layers)
-            {
-                Layers.Remove(l);
-            }
-
-            HistoryModel.Add(new DeleteLayersHistoryCommand(this, layers, oldIndices));
-
-            HistoryModel.EndGroup();
+            DeleteLayersInternal(ids, false);
         }
 
         public void DeleteLayersByFootage(FootageModel footage)
@@ -954,13 +930,21 @@ namespace NiVE3.Model
             }
         }
 
-        public CopyData<LayerData> CopyLayer(Guid[] ids)
+        public CopyData<LayerData> CutLayers(Guid[] ids)
+        {
+            var result = CopyLayers(ids);
+            DeleteLayersInternal(ids, true);
+
+            return result;
+        }
+
+        public CopyData<LayerData> CopyLayers(Guid[] ids)
         {
             var layers = Layers.Where(l => ids.Contains(l.LayerId)).OrderBy(Layers.IndexOf);
             return new CopyData<LayerData>(CopyDataType.Layer, [..layers.Select(l => l.SaveData())]);
         }
 
-        public void PasteLayer(CopyData<LayerData> data, Guid? insertTargetId)
+        public void PasteLayers(CopyData<LayerData> data, Guid? insertTargetId)
         {
             if (data.Type != CopyDataType.Layer || data.Data.Length < 1)
             {
@@ -1058,6 +1042,35 @@ namespace NiVE3.Model
             }
 
             return CheckCycledSimulatedParentLayer(parentLayerId.Value, changed, checkedLayerIds);
+        }
+
+        void DeleteLayersInternal(Guid[] ids, bool isCut)
+        {
+            var layers = Layers.Where(l => ids.Contains(l.LayerId)).OrderBy(Layers.IndexOf).ToArray();
+            var oldIndices = layers.Select(l => Layers.IndexOf(l)).ToArray();
+
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_RemoveLayers));
+
+            var childLayers = layers.SelectMany(p => Layers.Where(c => c.ParentLayerId == p.LayerId)).Select(l => l.LayerId).ToArray();
+            if (childLayers.Length > 0)
+            {
+                ChangeParentLayer(childLayers, null);
+            }
+
+            var trackMatteChildLayers = layers.SelectMany(p => Layers.Where(c => c.TrackMatteLayerId == p.LayerId)).Select(l => l.LayerId).ToArray();
+            if (trackMatteChildLayers.Length > 0)
+            {
+                ChangeTrackMatteLayers(trackMatteChildLayers, null);
+            }
+
+            foreach (var l in layers)
+            {
+                Layers.Remove(l);
+            }
+
+            HistoryModel.Add(new DeleteLayersHistoryCommand(this, layers, oldIndices, isCut));
+
+            HistoryModel.EndGroup();
         }
 
         void OnCompositionUpdated()

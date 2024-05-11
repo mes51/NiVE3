@@ -40,6 +40,7 @@ namespace NiVE3.ViewModel
     [CommandHandling(nameof(BeginEditNameCommand), nameof(ShortcutKeySetting.BeginEditNameGesture))]
     [CommandHandling(nameof(AddSolidCommand), nameof(ShortcutKeySetting.AddSolidGesture))]
     [CommandHandling(nameof(DeleteCommand), nameof(ShortcutKeySetting.DeleteItemGesture))]
+    [CommandHandling(nameof(CutCommand), nameof(ShortcutKeySetting.CutItemGesture))]
     [CommandHandling(nameof(CopyCommand), nameof(ShortcutKeySetting.CopyItemGesture))]
     [CommandHandling(nameof(PasteCommand), nameof(ShortcutKeySetting.PasteItemGesture))]
     [CommandHandling(nameof(OpenRenderSettingCommand), nameof(ShortcutKeySetting.OpenRenderSettingGesture))]
@@ -389,6 +390,8 @@ namespace NiVE3.ViewModel
 
         public ICommand DeleteCommand { get; }
 
+        public ICommand CutCommand { get; }
+
         public ICommand CopyCommand { get; }
 
         public ICommand PasteCommand { get; }
@@ -496,6 +499,26 @@ namespace NiVE3.ViewModel
                 }
             }, () => CompositionModel != null && SelectedItemType != SelectItemType.None);
 
+            CutCommand = new RequerySuggestedCommand(() =>
+            {
+                if (SelectTarget != null)
+                {
+                    SelectTarget.CutCommand.Execute(SelectedItemType);
+                }
+                else
+                {
+                    if (CompositionModel == null || SelectedLayers.Count < 1 && SelectedLayers.Any(l => l.EditingParameter != EditingLayerParameter.None))
+                    {
+                        return;
+                    }
+
+                    var ids = SelectedLayers.Select(l => l.LayerId).ToArray();
+                    var copyData = CompositionModel.CutLayers(ids);
+                    ClipboardUtil.SetData(copyData);
+                    SelectedLayers.Clear();
+                }
+            }, () => CompositionModel != null && SelectedItemType != SelectItemType.None);
+
             CopyCommand = new RequerySuggestedCommand(() =>
             {
                 if (SelectTarget != null)
@@ -510,7 +533,7 @@ namespace NiVE3.ViewModel
                     }
 
                     var ids = SelectedLayers.Select(l => l.LayerId).ToArray();
-                    ClipboardUtil.SetData(CompositionModel.CopyLayer(ids));
+                    ClipboardUtil.SetData(CompositionModel.CopyLayers(ids));
                 }
             }, () => CompositionModel != null && SelectedItemType != SelectItemType.None);
 
@@ -530,7 +553,7 @@ namespace NiVE3.ViewModel
                     var data = ClipboardUtil.GetData<LayerData>();
                     if (data != null)
                     {
-                        CompositionModel.PasteLayer(data, LastSelectedLayerId);
+                        CompositionModel.PasteLayers(data, LastSelectedLayerId);
                     }
                 }
             }, () => CompositionModel != null);

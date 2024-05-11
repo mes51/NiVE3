@@ -531,6 +531,8 @@ namespace NiVE3.ViewModel
 
         public DelegateCommand<SelectItemType?> DeleteCommand { get; }
 
+        public DelegateCommand<SelectItemType?> CutCommand { get; }
+
         public DelegateCommand<SelectItemType?> CopyCommand { get; }
 
         public DelegateCommand<SelectItemType?> PasteCommand { get; }
@@ -772,7 +774,17 @@ namespace NiVE3.ViewModel
             {
                 if (EditingParameter == EditingLayerParameter.None && SelectedEffects.Count > 0)
                 {
-                    LayerModel.DeleteEffect(SelectedEffects.Select(e => e.EffectId).ToArray());
+                    LayerModel.DeleteEffect([..SelectedEffects.Select(e => e.EffectId)]);
+                }
+                SelectedEffects.Clear();
+            });
+
+            CutCommand = new DelegateCommand<SelectItemType?>(type =>
+            {
+                if (EditingParameter == EditingLayerParameter.None && SelectedEffects.Count > 0)
+                {
+                    var copyData = LayerModel.CutEffects([..SelectedEffects.Select(e => e.EffectId)]);
+                    ClipboardUtil.SetData(copyData);
                 }
                 SelectedEffects.Clear();
             });
@@ -781,7 +793,7 @@ namespace NiVE3.ViewModel
             {
                 if (EditingParameter == EditingLayerParameter.None && SelectedEffects.Count > 0)
                 {
-                    ClipboardUtil.SetData(LayerModel.CopyEffect([.. SelectedEffects.Select(e => e.EffectId)]));
+                    ClipboardUtil.SetData(LayerModel.CopyEffects([.. SelectedEffects.Select(e => e.EffectId)]));
                 }
             });
 
@@ -796,7 +808,7 @@ namespace NiVE3.ViewModel
                 if (data != null)
                 {
                     var insertTargetId = LastSelectedEffect?.EffectId;
-                    LayerModel.PasteEffect(data, [..SelectedEffects.Select(e => e.EffectId)], insertTargetId);
+                    LayerModel.PasteEffects(data, [..SelectedEffects.Select(e => e.EffectId)], insertTargetId);
                 }
             });
 

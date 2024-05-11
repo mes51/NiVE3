@@ -234,7 +234,7 @@ namespace NiVE3.Model
 
         private class DeleteKeyFramesHistoryCommand : IHistoryCommand
         {
-            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_RemoveKeyFrame);
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(IsCut ? LanguageResourceDictionary.History_CutKeyFrame : LanguageResourceDictionary.History_RemoveKeyFrame);
 
             PropertyModel Model { get; }
 
@@ -242,11 +242,14 @@ namespace NiVE3.Model
 
             int[] Indices { get; }
 
-            public DeleteKeyFramesHistoryCommand(PropertyModel model, KeyFrame[] keyFrames, int[] indices)
+            bool IsCut { get; }
+
+            public DeleteKeyFramesHistoryCommand(PropertyModel model, KeyFrame[] keyFrames, int[] indices, bool isCut)
             {
                 Model = model;
                 KeyFrames = keyFrames;
                 Indices = indices;
+                IsCut = isCut;
             }
 
             public void Redo()
@@ -392,7 +395,7 @@ namespace NiVE3.Model
 
         private class DeleteAppendablePropertyChildHistoryCommand : IHistoryCommand
         {
-            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangePropertyValue);
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(IsCut ? LanguageResourceDictionary.History_CutProperty : LanguageResourceDictionary.History_ChangePropertyValue);
 
             AppendablePropertyModel Model { get; }
 
@@ -400,11 +403,14 @@ namespace NiVE3.Model
 
             int[] Indices { get; }
 
-            public DeleteAppendablePropertyChildHistoryCommand(AppendablePropertyModel model, PropertyGroupModel[] children, int[] indices)
+            bool IsCut { get; }
+
+            public DeleteAppendablePropertyChildHistoryCommand(AppendablePropertyModel model, PropertyGroupModel[] children, int[] indices, bool isCut)
             {
                 Model = model;
                 Children = children;
                 Indices = indices;
+                IsCut = isCut;
             }
 
             public void Redo()

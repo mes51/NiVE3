@@ -549,7 +549,7 @@ namespace NiVE3.Model
 
         private class DeleteLayersHistoryCommand : IHistoryCommand
         {
-            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_DeleteLayers);
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(IsCut ? LanguageResourceDictionary.History_CutLayers : LanguageResourceDictionary.History_RemoveLayers);
 
             CompositionModel CompositionModel { get; }
 
@@ -557,11 +557,14 @@ namespace NiVE3.Model
 
             int[] Indices { get; }
 
-            public DeleteLayersHistoryCommand(CompositionModel compositionModel, LayerModel[] layers, int[] indices)
+            bool IsCut { get; }
+
+            public DeleteLayersHistoryCommand(CompositionModel compositionModel, LayerModel[] layers, int[] indices, bool isCut)
             {
                 CompositionModel = compositionModel;
                 Layers = layers;
                 Indices = indices;
+                IsCut = isCut;
             }
 
             public void Redo()

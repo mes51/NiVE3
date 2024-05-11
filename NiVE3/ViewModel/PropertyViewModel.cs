@@ -188,6 +188,8 @@ namespace NiVE3.ViewModel
 
         public DelegateCommand<SelectItemType?> DeleteCommand { get; }
 
+        public DelegateCommand<SelectItemType?> CutCommand { get; }
+
         public DelegateCommand<SelectItemType?> CopyCommand { get; }
 
         public DelegateCommand<SelectItemType?> PasteCommand { get; }
@@ -262,6 +264,17 @@ namespace NiVE3.ViewModel
                 if (keyFrames.Length > 0)
                 {
                     PropertyModel.DeleteKeyFrames(keyFrames);
+                }
+                SelectedKeyFrameIds.Clear();
+            });
+
+            CutCommand = new DelegateCommand<SelectItemType?>(type =>
+            {
+                var keyFrames = SelectedKeyFrameIds.Select(id => KeyFrames.FirstOrDefault(k => k.Id == id)).NonNull().ToArray();
+                if (keyFrames.Length > 0)
+                {
+                    var copyData = PropertyModel.CutKeyFrames(keyFrames);
+                    ClipboardUtil.SetData(copyData);
                 }
                 SelectedKeyFrameIds.Clear();
             });
@@ -413,6 +426,8 @@ namespace NiVE3.ViewModel
 
         public DelegateCommand<SelectItemType?> DeleteCommand { get; }
 
+        public DelegateCommand<SelectItemType?> CutCommand { get; }
+
         public DelegateCommand<SelectItemType?> CopyCommand { get; }
 
         public DelegateCommand<SelectItemType?> PasteCommand { get; }
@@ -450,6 +465,8 @@ namespace NiVE3.ViewModel
             IsRenameable = isRenameable;
 
             DeleteCommand = new DelegateCommand<SelectItemType?>(_ => { });
+
+            CutCommand = new DelegateCommand<SelectItemType?>(_ => { });
 
             CopyCommand = new DelegateCommand<SelectItemType?>(_ => { });
 
@@ -558,6 +575,8 @@ namespace NiVE3.ViewModel
 
         public DelegateCommand<SelectItemType?> DeleteCommand { get; }
 
+        public DelegateCommand<SelectItemType?> CutCommand { get; }
+
         public DelegateCommand<SelectItemType?> CopyCommand { get; }
 
         public DelegateCommand<SelectItemType?> PasteCommand { get; }
@@ -594,6 +613,14 @@ namespace NiVE3.ViewModel
             SelectItemCommand = new DelegateCommand(() => { });
 
             DeleteCommand = new DelegateCommand<SelectItemType?>(type =>
+            {
+                if (SelectedChildren.Count > 0)
+                {
+                    AppendablePropertyModel.DeleteChildren(SelectedChildren.OfType<PropertyGroupViewModel>().Select(c => c.InstanceId).ToArray());
+                }
+            });
+
+            CutCommand = new DelegateCommand<SelectItemType?>(type =>
             {
                 if (SelectedChildren.Count > 0)
                 {

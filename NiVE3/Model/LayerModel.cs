@@ -907,17 +907,9 @@ namespace NiVE3.Model
             HistoryModel.Add(new ChangeEffectEnableHistoryCommand(effects, oldValues, isEnable));
         }
 
-        public void DeleteEffect(Guid[] effectIds)
+        public void DeleteEffect(Guid[] ids)
         {
-            var effects = Effects.Where(l => effectIds.Contains(l.EffectId)).OrderBy(Effects.IndexOf).ToArray();
-            var oldIndices = effects.Select(Effects.IndexOf).ToArray();
-
-            foreach (var e in effects)
-            {
-                Effects.Remove(e);
-            }
-
-            HistoryModel.Add(new DeleteEffectHistoryCommand(this, effects, oldIndices));
+            DeleteEffectInternal(ids, false);
         }
 
         public void ChangeTagColor(Color color)
@@ -1049,13 +1041,21 @@ namespace NiVE3.Model
             }
         }
 
-        public CopyData<EffectData> CopyEffect(Guid[] ids)
+        public CopyData<EffectData> CutEffects(Guid[] ids)
+        {
+            var result = CopyEffects(ids);
+            DeleteEffectInternal(ids, true);
+
+            return result;
+        }
+
+        public CopyData<EffectData> CopyEffects(Guid[] ids)
         {
             var effects = Effects.Where(e => ids.Contains(e.EffectId));
             return new CopyData<EffectData>(CopyDataType.Effect, [..effects.Select(e => e.SaveData())]);
         }
 
-        public void PasteEffect(CopyData<EffectData> data, Guid[] selectedEffectIds, Guid? insertTargetId)
+        public void PasteEffects(CopyData<EffectData> data, Guid[] selectedEffectIds, Guid? insertTargetId)
         {
             if (data.Type != CopyDataType.Effect || data.Data.Length < 1)
             {
@@ -1092,6 +1092,19 @@ namespace NiVE3.Model
             }
 
             HistoryModel.Add(new PasteNewEffectsHistoryCommand(this, [..addedEffect], insertStartIndex));
+        }
+
+        void DeleteEffectInternal(Guid[] ids, bool isCut)
+        {
+            var effects = Effects.Where(l => ids.Contains(l.EffectId)).OrderBy(Effects.IndexOf).ToArray();
+            var oldIndices = effects.Select(Effects.IndexOf).ToArray();
+
+            foreach (var e in effects)
+            {
+                Effects.Remove(e);
+            }
+
+            HistoryModel.Add(new DeleteEffectHistoryCommand(this, effects, oldIndices, isCut));
         }
 
         private void Effects_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
