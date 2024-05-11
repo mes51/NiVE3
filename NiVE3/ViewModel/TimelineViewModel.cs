@@ -533,7 +533,7 @@ namespace NiVE3.ViewModel
                         CompositionModel.PasteLayer(data, LastSelectedLayerId);
                     }
                 }
-            }, () => CompositionModel != null && SelectedItemType != SelectItemType.None);
+            }, () => CompositionModel != null);
 
             ChangeCurrentTimeCommand = new DelegateCommand(() => CurrentTimeChangeByUserPublisher.Publish(this, EventArgs.Empty));
 
