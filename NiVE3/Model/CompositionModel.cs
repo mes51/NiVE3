@@ -946,12 +946,55 @@ namespace NiVE3.Model
 
         public void PasteLayers(CopyData<LayerData> data, Guid? insertTargetId)
         {
-            PasteLayersInternal(data, insertTargetId, false, false);
+            PasteLayersInternal(data, insertTargetId, false);
         }
 
         public void DuplicateLayers(Guid[] ids, Guid? insertTargetId)
         {
-            PasteLayersInternal(CopyLayers(ids), insertTargetId, true, false);
+            PasteLayersInternal(CopyLayers(ids), insertTargetId, true);
+        }
+
+        public void SplitLayers(Guid[] ids, double splitPositionTime)
+        {
+            var layers = Layers.Where(l => ids.Contains(l.LayerId))
+                .Where(l => l.InPoint < TimeCalc.RoundTimeDigit(splitPositionTime - l.SourceStartPoint) && l.OutPoint > TimeCalc.RoundTimeDigit(splitPositionTime - l.SourceStartPoint))
+                .OrderBy(Layers.IndexOf)
+                .ToArray();
+            if (layers.Length < 1)
+            {
+                return;
+            }
+
+            ids = [..layers.Select(l => l.LayerId)];
+
+            var data = CopyLayers(ids);
+            var addedLayer = new Dictionary<Guid, LayerModel>();
+            foreach (var layerData in data.Data)
+            {
+                var footageModels = FootageListModel.GetFootages(layerData.FootageId);
+                if (footageModels.Length < 1)
+                {
+                    continue;
+                }
+
+                layerData.InPoint = TimeCalc.RoundTimeDigit(splitPositionTime - layerData.SourceStartPoint);
+                var newLayer = new LayerModel(this, footageModels.First(), EffectListModel, HistoryModel);
+                newLayer.LoadData(layerData);
+                var index = Layers.IndexOf(l => l.LayerId == layerData.LayerId);
+                Layers.Insert(index, newLayer);
+                addedLayer.Add(layerData.LayerId, newLayer);
+            }
+
+            var oldOutPoint = new double[layers.Length];
+            var newOutPoint = new double[layers.Length];
+            for (var i = 0; i < layers.Length; i++)
+            {
+                oldOutPoint[i] = layers[i].OutPoint;
+                layers[i].OutPoint = splitPositionTime - layers[i].SourceStartPoint;
+                newOutPoint[i] = layers[i].OutPoint;
+            }
+
+            HistoryModel.Add(new SplitLayersHistoryCommand(this, layers, addedLayer, oldOutPoint, newOutPoint));
         }
 
         public void ReplacePlaceholder(FootageModel newFootageModel)
@@ -1017,7 +1060,7 @@ namespace NiVE3.Model
             HistoryModel.EndGroup();
         }
 
-        void PasteLayersInternal(CopyData<LayerData> data, Guid? insertTargetId, bool isDuplicate, bool isSplit)
+        void PasteLayersInternal(CopyData<LayerData> data, Guid? insertTargetId, bool isDuplicate)
         {
             if (data.Type != CopyDataType.Layer || data.Data.Length < 1)
             {
@@ -1080,7 +1123,7 @@ namespace NiVE3.Model
                 }
             }
 
-            HistoryModel.Add(new PasteLayersHistoryCommand(this, [.. addedLayer], insertStartIndex, isDuplicate, isSplit));
+            HistoryModel.Add(new PasteLayersHistoryCommand(this, [.. addedLayer], insertStartIndex, isDuplicate));
         }
 
         void OnCompositionUpdated()

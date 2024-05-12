@@ -457,6 +457,7 @@ namespace NiVE3.ViewModel
             {
                 foreach (var vm in viewModels)
                 {
+
                     lock (vm)
                     {
                         if (vm.Sample != null)

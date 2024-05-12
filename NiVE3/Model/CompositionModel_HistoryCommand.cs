@@ -588,9 +588,7 @@ namespace NiVE3.Model
 
         private class PasteLayersHistoryCommand : IHistoryCommand
         {
-            public string Name => LanguageResourceDictionary.Dictionary.GetText(
-                IsDuplicate ? LanguageResourceDictionary.History_DuplicateLayers : (IsSplit ? LanguageResourceDictionary.History_SplitLayers : LanguageResourceDictionary.History_PasteLayers)
-            );
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(IsDuplicate ? LanguageResourceDictionary.History_DuplicateLayers : LanguageResourceDictionary.History_PasteLayers);
 
             CompositionModel Model { get; }
 
@@ -600,15 +598,12 @@ namespace NiVE3.Model
 
             bool IsDuplicate { get; }
 
-            bool IsSplit { get; }
-
-            public PasteLayersHistoryCommand(CompositionModel model, LayerModel[] newLayers, int insertStartIndex, bool isDuplicate, bool isSplit)
+            public PasteLayersHistoryCommand(CompositionModel model, LayerModel[] newLayers, int insertStartIndex, bool isDuplicate)
             {
                 Model = model;
                 NewLayers = newLayers;
                 InsertStartIndex = insertStartIndex;
                 IsDuplicate = isDuplicate;
-                IsSplit = isSplit;
             }
 
             public void Redo()
@@ -632,6 +627,63 @@ namespace NiVE3.Model
             public void Dispose()
             {
                 foreach (var l in NewLayers)
+                {
+                    l.Dispose();
+                }
+            }
+        }
+
+        private class SplitLayersHistoryCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_SplitLayers);
+
+            CompositionModel Model { get; }
+
+            LayerModel[] TargetLayers { get; }
+
+            Dictionary<Guid, LayerModel> NewLayers { get; }
+
+            double[] OldOutPoints { get; }
+
+            double[] NewOutPoints { get; }
+
+            public SplitLayersHistoryCommand(CompositionModel model, LayerModel[] targetLayers, Dictionary<Guid, LayerModel> newLayers, double[] oldOutPoints, double[] newOutPoints)
+            {
+                Model = model;
+                TargetLayers = targetLayers;
+                NewLayers = newLayers;
+                OldOutPoints = oldOutPoints;
+                NewOutPoints = newOutPoints;
+            }
+
+            public void Redo()
+            {
+                foreach (var (id, l) in NewLayers)
+                {
+                    var index = Model.Layers.IndexOf(l => id == l.LayerId);
+                    Model.Layers.Insert(index, l);
+                }
+                foreach (var (l, o ) in TargetLayers.Zip(NewOutPoints))
+                {
+                    l.OutPoint = o;
+                }
+            }
+
+            public void Undo()
+            {
+                foreach (var l in NewLayers.Values)
+                {
+                    Model.Layers.Remove(l);
+                }
+                foreach (var (l, o) in TargetLayers.Zip(OldOutPoints))
+                {
+                    l.OutPoint = o;
+                }
+            }
+
+            public void Dispose()
+            {
+                foreach (var l in NewLayers.Values)
                 {
                     l.Dispose();
                 }

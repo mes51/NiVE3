@@ -86,6 +86,13 @@ namespace NiVE3.Config
             new PropertyMetadata(new KeyGesture(Key.D, ModifierKeys.Control))
         );
 
+        public static readonly DependencyProperty SplitLayerGestureProperty = DependencyProperty.Register(
+            nameof(SplitLayerGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new KeyGesture(Key.D, ModifierKeys.Shift | ModifierKeys.Control))
+        );
+
         public static readonly DependencyProperty NewCompositionGestureProperty = DependencyProperty.Register(
             nameof(NewCompositionGesture),
             typeof(InputGesture),
@@ -193,6 +200,12 @@ namespace NiVE3.Config
         {
             get { return (InputGesture)GetValue(OpenFileGestureProperty); }
             set { SetValue(OpenFileGestureProperty, value); }
+        }
+
+        public InputGesture SplitLayerGesture
+        {
+            get { return (InputGesture)GetValue(SplitLayerGestureProperty); }
+            set { SetValue(SplitLayerGestureProperty, value); }
         }
 
         public InputGesture DuplicateItemGesture
