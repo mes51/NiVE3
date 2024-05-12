@@ -457,7 +457,6 @@ namespace NiVE3.ViewModel
             {
                 foreach (var vm in viewModels)
                 {
-
                     lock (vm)
                     {
                         if (vm.Sample != null)
@@ -490,10 +489,17 @@ namespace NiVE3.ViewModel
 
                         group.Freeze();
 
-                        Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+
+                        // NOTE: 型はnon nullだが、すぐに落とした時等にnullになることがある
+                        //       また、nullになるタイミングは不定のため、ループの頭ではなくここでチェックする
+                        Application.Current?.Dispatcher?.BeginInvoke(new Action(() =>
                         {
                             vm.Sample = group;
                         }), DispatcherPriority.Background);
+                        if (Application.Current == null)
+                        {
+                            return;
+                        }
                     }
                 }
             });
