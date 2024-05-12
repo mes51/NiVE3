@@ -468,16 +468,19 @@ namespace NiVE3.Model
 
         private class PastePropertyHistoryCommand : IHistoryCommand
         {
-            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_PasteProperty);
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(IsDuplicate ? LanguageResourceDictionary.History_DuplicateProperty : LanguageResourceDictionary.History_PasteProperty);
 
             AppendablePropertyModel Model { get; }
 
             IPropertyModel[] NewChildren { get; }
 
-            public PastePropertyHistoryCommand(AppendablePropertyModel model, IPropertyModel[] newChildren)
+            bool IsDuplicate { get; }
+
+            public PastePropertyHistoryCommand(AppendablePropertyModel model, IPropertyModel[] newChildren, bool isDuplicate)
             {
                 Model = model;
                 NewChildren = newChildren;
+                IsDuplicate = isDuplicate;
             }
 
             public void Redo()

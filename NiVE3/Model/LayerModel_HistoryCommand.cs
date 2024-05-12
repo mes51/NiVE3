@@ -279,7 +279,7 @@ namespace NiVE3.Model
 
         private class PasteNewEffectsHistoryCommand : IHistoryCommand
         {
-            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_PasteEffects);
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(IsDuplicate ? LanguageResourceDictionary.History_DuplicateEffects : LanguageResourceDictionary.History_PasteEffects);
 
             LayerModel Model { get; }
 
@@ -287,11 +287,14 @@ namespace NiVE3.Model
 
             int InsertStartIndex { get; }
 
-            public PasteNewEffectsHistoryCommand(LayerModel model, EffectModel[] newEffects, int insertStartIndex)
+            bool IsDuplicate { get; }
+
+            public PasteNewEffectsHistoryCommand(LayerModel model, EffectModel[] newEffects, int insertStartIndex, bool isDuplicate)
             {
                 Model = model;
                 NewEffects = newEffects;
                 InsertStartIndex = insertStartIndex;
+                IsDuplicate = isDuplicate;
             }
 
             public void Redo()

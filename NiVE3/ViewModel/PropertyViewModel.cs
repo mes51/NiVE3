@@ -194,6 +194,8 @@ namespace NiVE3.ViewModel
 
         public DelegateCommand<SelectItemType?> PasteCommand { get; }
 
+        public DelegateCommand<SelectItemType?> DuplicateCommand { get; }
+
         PropertyModel PropertyModel { get; }
 
         object? PrevValue { get; set; }
@@ -296,6 +298,8 @@ namespace NiVE3.ViewModel
                     PropertyModel.PasteKeyFrames(data);
                 }
             });
+
+            DuplicateCommand = new DelegateCommand<SelectItemType?>(_ => { });
 
             WiringModel();
 
@@ -432,6 +436,8 @@ namespace NiVE3.ViewModel
 
         public DelegateCommand<SelectItemType?> PasteCommand { get; }
 
+        public DelegateCommand<SelectItemType?> DuplicateCommand { get; }
+
         public ICommand BeginEditNameCommand { get; }
 
         public ICommand EndEditNameCommand { get; }
@@ -471,6 +477,8 @@ namespace NiVE3.ViewModel
             CopyCommand = new DelegateCommand<SelectItemType?>(_ => { });
 
             PasteCommand = new DelegateCommand<SelectItemType?>(_ => { });
+
+            DuplicateCommand = new DelegateCommand<SelectItemType?>(_ => { });
 
             BeginEditNameCommand = new RequerySuggestedCommand(() =>
             {
@@ -581,6 +589,8 @@ namespace NiVE3.ViewModel
 
         public DelegateCommand<SelectItemType?> PasteCommand { get; }
 
+        public DelegateCommand<SelectItemType?> DuplicateCommand { get; }
+
         public ICommand AppendItemCommand { get; }
 
         public AppendablePropertyItem[] Items => ((AppendableProperty)Property).Items;
@@ -646,6 +656,11 @@ namespace NiVE3.ViewModel
                 {
                     AppendablePropertyModel.PasteChildrenProperty(data);
                 }
+            });
+
+            DuplicateCommand = new DelegateCommand<SelectItemType?>(type =>
+            {
+                AppendablePropertyModel.DuplicateChildrenProperty([..SelectedChildren.OfType<PropertyGroupViewModel>().Select(p => p.InstanceId)]);
             });
 
             AppendItemCommand = new DelegateCommand<AppendablePropertyItem>(i => AppendablePropertyModel.AddChild(i));

@@ -537,6 +537,8 @@ namespace NiVE3.ViewModel
 
         public DelegateCommand<SelectItemType?> PasteCommand { get; }
 
+        public DelegateCommand<SelectItemType?> DuplicateCommand { get; }
+
         WeakEventPublisher<LayerSwitchEventArgs> LayerSwitchChangeRequestPublisher { get; } = new WeakEventPublisher<LayerSwitchEventArgs>();
         public event EventHandler<LayerSwitchEventArgs> LayerSwitchChangeRequest
         {
@@ -793,7 +795,7 @@ namespace NiVE3.ViewModel
             {
                 if (EditingParameter == EditingLayerParameter.None && SelectedEffects.Count > 0)
                 {
-                    ClipboardUtil.SetData(LayerModel.CopyEffects([.. SelectedEffects.Select(e => e.EffectId)]));
+                    ClipboardUtil.SetData(LayerModel.CopyEffects([..SelectedEffects.Select(e => e.EffectId)]));
                 }
             });
 
@@ -810,6 +812,17 @@ namespace NiVE3.ViewModel
                     var insertTargetId = LastSelectedEffect?.EffectId;
                     LayerModel.PasteEffects(data, [..SelectedEffects.Select(e => e.EffectId)], insertTargetId);
                 }
+            });
+
+            DuplicateCommand = new DelegateCommand<SelectItemType?>(type =>
+            {
+                if (EditingParameter != EditingLayerParameter.None)
+                {
+                    return;
+                }
+
+                var insertTargetId = LastSelectedEffect?.EffectId;
+                LayerModel.DuplicateEffects([.. SelectedEffects.Select(e => e.EffectId)], insertTargetId);
             });
 
             ChangeTagColorCommand = new DelegateCommand(() =>

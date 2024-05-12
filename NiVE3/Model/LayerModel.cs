@@ -1051,11 +1051,35 @@ namespace NiVE3.Model
 
         public CopyData<EffectData> CopyEffects(Guid[] ids)
         {
-            var effects = Effects.Where(e => ids.Contains(e.EffectId));
+            var effects = Effects.Where(e => ids.Contains(e.EffectId)).OrderBy(Effects.IndexOf);
             return new CopyData<EffectData>(CopyDataType.Effect, [..effects.Select(e => e.SaveData())]);
         }
 
         public void PasteEffects(CopyData<EffectData> data, Guid[] selectedEffectIds, Guid? insertTargetId)
+        {
+            PasteEffectsInternal(data, selectedEffectIds, insertTargetId, false);
+        }
+
+        public void DuplicateEffects(Guid[] ids, Guid? insertTargetId)
+        {
+            var data = CopyEffects(ids);
+            PasteEffectsInternal(data, [], insertTargetId, true);
+        }
+
+        void DeleteEffectInternal(Guid[] ids, bool isCut)
+        {
+            var effects = Effects.Where(l => ids.Contains(l.EffectId)).OrderBy(Effects.IndexOf).ToArray();
+            var oldIndices = effects.Select(Effects.IndexOf).ToArray();
+
+            foreach (var e in effects)
+            {
+                Effects.Remove(e);
+            }
+
+            HistoryModel.Add(new DeleteEffectHistoryCommand(this, effects, oldIndices, isCut));
+        }
+
+        void PasteEffectsInternal(CopyData<EffectData> data, Guid[] selectedEffectIds, Guid? insertTargetId, bool isDuplicate)
         {
             if (data.Type != CopyDataType.Effect || data.Data.Length < 1)
             {
@@ -1091,20 +1115,7 @@ namespace NiVE3.Model
                 index++;
             }
 
-            HistoryModel.Add(new PasteNewEffectsHistoryCommand(this, [..addedEffect], insertStartIndex));
-        }
-
-        void DeleteEffectInternal(Guid[] ids, bool isCut)
-        {
-            var effects = Effects.Where(l => ids.Contains(l.EffectId)).OrderBy(Effects.IndexOf).ToArray();
-            var oldIndices = effects.Select(Effects.IndexOf).ToArray();
-
-            foreach (var e in effects)
-            {
-                Effects.Remove(e);
-            }
-
-            HistoryModel.Add(new DeleteEffectHistoryCommand(this, effects, oldIndices, isCut));
+            HistoryModel.Add(new PasteNewEffectsHistoryCommand(this, [.. addedEffect], insertStartIndex, isDuplicate));
         }
 
         private void Effects_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)

@@ -588,7 +588,9 @@ namespace NiVE3.Model
 
         private class PasteLayersHistoryCommand : IHistoryCommand
         {
-            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_PasteLayers);
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(
+                IsDuplicate ? LanguageResourceDictionary.History_DuplicateLayers : (IsSplit ? LanguageResourceDictionary.History_SplitLayers : LanguageResourceDictionary.History_PasteLayers)
+            );
 
             CompositionModel Model { get; }
 
@@ -596,11 +598,17 @@ namespace NiVE3.Model
 
             int InsertStartIndex { get; }
 
-            public PasteLayersHistoryCommand(CompositionModel model, LayerModel[] newLayers, int insertStartIndex)
+            bool IsDuplicate { get; }
+
+            bool IsSplit { get; }
+
+            public PasteLayersHistoryCommand(CompositionModel model, LayerModel[] newLayers, int insertStartIndex, bool isDuplicate, bool isSplit)
             {
                 Model = model;
                 NewLayers = newLayers;
                 InsertStartIndex = insertStartIndex;
+                IsDuplicate = isDuplicate;
+                IsSplit = isSplit;
             }
 
             public void Redo()

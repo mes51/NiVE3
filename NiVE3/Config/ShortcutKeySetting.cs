@@ -79,6 +79,13 @@ namespace NiVE3.Config
             new PropertyMetadata(new KeyGesture(Key.V, ModifierKeys.Control))
         );
 
+        public static readonly DependencyProperty DuplicateItemGestureProperty = DependencyProperty.Register(
+            nameof(DuplicateItemGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new KeyGesture(Key.D, ModifierKeys.Control))
+        );
+
         public static readonly DependencyProperty NewCompositionGestureProperty = DependencyProperty.Register(
             nameof(NewCompositionGesture),
             typeof(InputGesture),
@@ -186,6 +193,12 @@ namespace NiVE3.Config
         {
             get { return (InputGesture)GetValue(OpenFileGestureProperty); }
             set { SetValue(OpenFileGestureProperty, value); }
+        }
+
+        public InputGesture DuplicateItemGesture
+        {
+            get { return (InputGesture)GetValue(DuplicateItemGestureProperty); }
+            set { SetValue(DuplicateItemGestureProperty, value); }
         }
 
         public InputGesture PasteItemGesture

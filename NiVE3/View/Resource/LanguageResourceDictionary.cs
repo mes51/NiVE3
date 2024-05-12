@@ -509,6 +509,12 @@ namespace NiVE3.View.Resource
         [DefaultValue("レイヤーのペースト")]
         public static readonly string History_PasteLayers = nameof(History_PasteLayers);
 
+        [DefaultValue("レイヤーの複製")]
+        public static readonly string History_DuplicateLayers = nameof(History_DuplicateLayers);
+
+        [DefaultValue("レイヤーの分割")]
+        public static readonly string History_SplitLayers = nameof(History_SplitLayers);
+
         [DefaultValue("平面の追加")]
         public static readonly string History_AddSolid = nameof(History_AddSolid);
 
@@ -548,6 +554,9 @@ namespace NiVE3.View.Resource
         [DefaultValue("プロパティのペースト")]
         public static readonly string History_PasteProperty = nameof(History_PasteProperty);
 
+        [DefaultValue("プロパティの複製")]
+        public static readonly string History_DuplicateProperty = nameof(History_DuplicateProperty);
+
         [DefaultValue("キーフレームの追加")]
         public static readonly string History_AddKeyFrame = nameof(History_AddKeyFrame);
 
@@ -583,6 +592,9 @@ namespace NiVE3.View.Resource
 
         [DefaultValue("エフェクトのペースト")]
         public static readonly string History_PasteEffects = nameof(History_PasteEffects);
+
+        [DefaultValue("エフェクトの複製")]
+        public static readonly string History_DuplicateEffects = nameof(History_DuplicateEffects);
 
         [DefaultValue("エフェクトの名前変更")]
         public static readonly string History_ChangeEffectName = nameof(History_ChangeEffectName);

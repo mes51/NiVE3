@@ -783,26 +783,13 @@ namespace NiVE3.Model
 
         public void PasteChildrenProperty(CopyData<PropertyData> data)
         {
-            if (data.Type != CopyDataType.Property || data.Data.Length < 1 || data.Data.First().PropertyId != PropertyId)
-            {
-                return;
-            }
+            PasteChildrenInternal(data, false);
+        }
 
-            var newChildren = new List<PropertyGroupModel>();
-            foreach (var childData in data.Data.First().Children ?? [])
-            {
-                var item = Items.FirstOrDefault(i => i.Id == childData.PropertyId);
-                if (item == null)
-                {
-                    continue;
-                }
-
-                var newChild = AddChildInternal(item, null);
-                newChild.LoadData(childData);
-                newChildren.Add(newChild);
-            }
-
-            HistoryModel.Add(new PastePropertyHistoryCommand(this, [..newChildren]));
+        public void DuplicateChildrenProperty(Guid[] ids)
+        {
+            var data = CopyChildrenProperty(ids);
+            PasteChildrenInternal(data, true);
         }
 
         PropertyGroupModel AddChildInternal(AppendablePropertyItem item, Guid? instanceId)
@@ -863,6 +850,30 @@ namespace NiVE3.Model
             ValueCommited?.Invoke(this, EventArgs.Empty);
 
             HistoryModel.Add(new DeleteAppendablePropertyChildHistoryCommand(this, children, indices, isCut));
+        }
+
+        void PasteChildrenInternal(CopyData<PropertyData> data, bool isDuplicate)
+        {
+            if (data.Type != CopyDataType.Property || data.Data.Length < 1 || data.Data.First().PropertyId != PropertyId)
+            {
+                return;
+            }
+
+            var newChildren = new List<PropertyGroupModel>();
+            foreach (var childData in data.Data.First().Children ?? [])
+            {
+                var item = Items.FirstOrDefault(i => i.Id == childData.PropertyId);
+                if (item == null)
+                {
+                    continue;
+                }
+
+                var newChild = AddChildInternal(item, null);
+                newChild.LoadData(childData);
+                newChildren.Add(newChild);
+            }
+
+            HistoryModel.Add(new PastePropertyHistoryCommand(this, [.. newChildren], isDuplicate));
         }
 
         private void Child_ValueUpdated(object? sender, EventArgs e)

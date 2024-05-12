@@ -43,6 +43,7 @@ namespace NiVE3.ViewModel
     [CommandHandling(nameof(CutCommand), nameof(ShortcutKeySetting.CutItemGesture))]
     [CommandHandling(nameof(CopyCommand), nameof(ShortcutKeySetting.CopyItemGesture))]
     [CommandHandling(nameof(PasteCommand), nameof(ShortcutKeySetting.PasteItemGesture))]
+    [CommandHandling(nameof(DuplicateCommand), nameof(ShortcutKeySetting.DuplicateItemGesture))]
     [CommandHandling(nameof(OpenRenderSettingCommand), nameof(ShortcutKeySetting.OpenRenderSettingGesture))]
     partial class TimelineViewModel : PaneViewModelBase, IDropTarget
     {
@@ -396,6 +397,8 @@ namespace NiVE3.ViewModel
 
         public ICommand PasteCommand { get; }
 
+        public ICommand DuplicateCommand { get; }
+
         public ICommand ChangeCurrentTimeCommand { get; }
 
         public ICommand AddShapeCommand { get; }
@@ -557,6 +560,24 @@ namespace NiVE3.ViewModel
                     }
                 }
             }, () => CompositionModel != null);
+
+            DuplicateCommand = new RequerySuggestedCommand(() =>
+            {
+                if (SelectTarget != null)
+                {
+                    SelectTarget.DuplicateCommand.Execute(SelectedItemType);
+                }
+                else
+                {
+                    if (CompositionModel == null || SelectedLayers.Count < 1 && SelectedLayers.Any(l => l.EditingParameter != EditingLayerParameter.None))
+                    {
+                        return;
+                    }
+
+                    var ids = SelectedLayers.Select(l => l.LayerId).ToArray();
+                    CompositionModel.DuplicateLayers(ids, LastSelectedLayerId);
+                }
+            }, () => CompositionModel != null && SelectedItemType != SelectItemType.None);
 
             ChangeCurrentTimeCommand = new DelegateCommand(() => CurrentTimeChangeByUserPublisher.Publish(this, EventArgs.Empty));
 

@@ -946,68 +946,12 @@ namespace NiVE3.Model
 
         public void PasteLayers(CopyData<LayerData> data, Guid? insertTargetId)
         {
-            if (data.Type != CopyDataType.Layer || data.Data.Length < 1)
-            {
-                return;
-            }
+            PasteLayersInternal(data, insertTargetId, false, false);
+        }
 
-            var addedLayer = new List<LayerModel>();
-            var insertStartIndex = insertTargetId.HasValue ? Layers.IndexOf(l => l.LayerId == insertTargetId) : -1;
-            if (insertStartIndex < 0)
-            {
-                insertStartIndex = Layers.Count;
-            }
-            else
-            {
-                insertStartIndex++;
-            }
-
-            var index = insertStartIndex;
-            var newLayerIds = new Dictionary<Guid, Guid>();
-            foreach (var layerData in data.Data)
-            {
-                var footageModels = FootageListModel.GetFootages(layerData.FootageId);
-                if (footageModels.Length < 1)
-                {
-                    continue;
-                }
-
-                var newLayer = new LayerModel(this, footageModels.First(), EffectListModel, HistoryModel);
-                newLayer.LoadData(layerData);
-                Layers.Insert(index, newLayer);
-                addedLayer.Add(newLayer);
-                index++;
-
-                newLayerIds.Add(layerData.LayerId, newLayer.LayerId);
-            }
-
-            foreach (var layer in addedLayer)
-            {
-                if (layer.TrackMatteLayerId.HasValue && Layers.All(l => l.LayerId != layer.TrackMatteLayerId))
-                {
-                    if (newLayerIds.TryGetValue(layer.TrackMatteLayerId.Value, out var newTrackMatteLayerId))
-                    {
-                        layer.TrackMatteLayerId = newTrackMatteLayerId;
-                    }
-                    else
-                    {
-                        layer.TrackMatteLayerId = null;
-                    }
-                }
-                if (layer.ParentLayerId.HasValue && Layers.All(l => l.LayerId != layer.ParentLayerId))
-                {
-                    if (newLayerIds.TryGetValue(layer.ParentLayerId.Value, out var newParentLayerId))
-                    {
-                        layer.ParentLayerId = newParentLayerId;
-                    }
-                    else
-                    {
-                        layer.ParentLayerId = null;
-                    }
-                }
-            }
-
-            HistoryModel.Add(new PasteLayersHistoryCommand(this, [..addedLayer], insertStartIndex));
+        public void DuplicateLayers(Guid[] ids, Guid? insertTargetId)
+        {
+            PasteLayersInternal(CopyLayers(ids), insertTargetId, true, false);
         }
 
         public void ReplacePlaceholder(FootageModel newFootageModel)
@@ -1071,6 +1015,72 @@ namespace NiVE3.Model
             HistoryModel.Add(new DeleteLayersHistoryCommand(this, layers, oldIndices, isCut));
 
             HistoryModel.EndGroup();
+        }
+
+        void PasteLayersInternal(CopyData<LayerData> data, Guid? insertTargetId, bool isDuplicate, bool isSplit)
+        {
+            if (data.Type != CopyDataType.Layer || data.Data.Length < 1)
+            {
+                return;
+            }
+
+            var addedLayer = new List<LayerModel>();
+            var insertStartIndex = insertTargetId.HasValue ? Layers.IndexOf(l => l.LayerId == insertTargetId) : -1;
+            if (insertStartIndex < 0)
+            {
+                insertStartIndex = Layers.Count;
+            }
+            else
+            {
+                insertStartIndex++;
+            }
+
+            var index = insertStartIndex;
+            var newLayerIds = new Dictionary<Guid, Guid>();
+            foreach (var layerData in data.Data)
+            {
+                var footageModels = FootageListModel.GetFootages(layerData.FootageId);
+                if (footageModels.Length < 1)
+                {
+                    continue;
+                }
+
+                var newLayer = new LayerModel(this, footageModels.First(), EffectListModel, HistoryModel);
+                newLayer.LoadData(layerData);
+                Layers.Insert(index, newLayer);
+                addedLayer.Add(newLayer);
+                index++;
+
+                newLayerIds.Add(layerData.LayerId, newLayer.LayerId);
+            }
+
+            foreach (var layer in addedLayer)
+            {
+                if (layer.TrackMatteLayerId.HasValue && Layers.All(l => l.LayerId != layer.TrackMatteLayerId))
+                {
+                    if (newLayerIds.TryGetValue(layer.TrackMatteLayerId.Value, out var newTrackMatteLayerId))
+                    {
+                        layer.TrackMatteLayerId = newTrackMatteLayerId;
+                    }
+                    else
+                    {
+                        layer.TrackMatteLayerId = null;
+                    }
+                }
+                if (layer.ParentLayerId.HasValue && Layers.All(l => l.LayerId != layer.ParentLayerId))
+                {
+                    if (newLayerIds.TryGetValue(layer.ParentLayerId.Value, out var newParentLayerId))
+                    {
+                        layer.ParentLayerId = newParentLayerId;
+                    }
+                    else
+                    {
+                        layer.ParentLayerId = null;
+                    }
+                }
+            }
+
+            HistoryModel.Add(new PasteLayersHistoryCommand(this, [.. addedLayer], insertStartIndex, isDuplicate, isSplit));
         }
 
         void OnCompositionUpdated()
