@@ -690,14 +690,15 @@ namespace NiVE3.Model
                 Renderer.SetCamera(CreateDefaultCameraSetting(Width, Height));
             }
 
-            foreach (var light in Layers.Where(l => l.IsEnableVideo).Select(l => l.GetLightSetting(time)).NonNull())
+            var hasLightSolo = Layers.Any(l => l.IsLight && l.IsEnableVideo && l.IsEnableSolo);
+            foreach (var light in Layers.Where(l => l.IsEnableVideo && (!hasLightSolo || l.IsEnableSolo)).Select(l => l.GetLightSetting(time)).NonNull())
             {
                 Renderer.AddLight(light);
             }
 
             var images = new List<RenderableImage>();
-            var hasSolo = Layers.Any(l => l.IsEnableSolo);
-            foreach (var l in Layers.Where(l => l.HasImage && l.IsEnableVideo && (!hasSolo || l.IsEnableSolo)).Reverse())
+            var hasImageSolo = Layers.Any(l => l.HasImage && l.IsEnableVideo && l.IsEnableSolo);
+            foreach (var l in Layers.Where(l => l.HasImage && l.IsEnableVideo && (!hasImageSolo || l.IsEnableSolo)).Reverse())
             {
                 if (!l.IsContainsTime(time))
                 {
@@ -786,7 +787,7 @@ namespace NiVE3.Model
             var result = new float[(int)(length * Const.AudioSamplingRate) * 2];
             var resultVectorSpan = MemoryMarshal.Cast<float, Vector<float>>(result.AsSpan(0, (result.Length / vectorLength) * vectorLength));
 
-            var hasSolo = Layers.Any(l => l.IsEnableSolo);
+            var hasSolo = Layers.Any(l => l.HasAudio && l.IsEnableSolo);
             foreach (var l in Layers.Where(l => l.HasAudio && l.IsEnableAudio && (!hasSolo || l.IsEnableSolo)))
             {
                 if (!l.IsContainsTimeRange(time, time + length))

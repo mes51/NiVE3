@@ -124,7 +124,6 @@
                     <MultiDataTrigger.Conditions>
                         <Condition Binding="{Binding IsEnableVideo}" Value="True"/>
                         <Condition Binding="{Binding IsCamera}" Value="False"/>
-                        <Condition Binding="{Binding IsLight}" Value="False"/>
                     </MultiDataTrigger.Conditions>
 
                     <Setter Property="Visibility" Value="Visible"/>
