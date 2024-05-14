@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -214,11 +215,19 @@ namespace NiVE3.PresetPlugin.Output
             if (image is NGPUImage gpuImage)
             {
                 using var managedImage = gpuImage.CopyToCpu();
-                ImageConversion.ConvertToBGR32(managedImage.GetDataSpan(), data, managedImage.DataLength);
+                if (Setting.OutputChannel == (int)OutputChannel.Rgb)
+                {
+                    BlendBlack(managedImage);
+                }
+                ImageConversion.ConvertToBGRA32(managedImage.GetDataSpan(), data, managedImage.DataLength);
             }
             else if (image is NManagedImage managedImage)
             {
-                ImageConversion.ConvertToBGR32(managedImage.GetDataSpan(), data, managedImage.DataLength);
+                if (Setting.OutputChannel == (int)OutputChannel.Rgb)
+                {
+                    BlendBlack(managedImage);
+                }
+                ImageConversion.ConvertToBGRA32(managedImage.GetDataSpan(), data, managedImage.DataLength);
             }
 
             VideoStream.WriteFrame(true, data.AsSpan(0, image.DataLength * 4));
@@ -281,6 +290,19 @@ namespace NiVE3.PresetPlugin.Output
         }
 
         public void Dispose() { }
+
+        static void BlendBlack(NManagedImage image)
+        {
+            Parallel.For(0, image.Height, h =>
+            {
+                var span = image.GetDataSpan().Slice(h * image.Width, image.Width);
+                for (var i = 0; i < span.Length; i++)
+                {
+                    var p = span[i];
+                    span[i] = Vector4.Min(Vector4.Max(p * p.W + Vector4.UnitW, Vector4.Zero), Vector4.One);
+                }
+            });
+        }
     }
 
     class CompressSetting
