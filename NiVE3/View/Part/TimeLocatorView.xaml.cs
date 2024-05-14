@@ -255,6 +255,10 @@ namespace NiVE3.View.Part
             IsScrubbing = true;
 
             var time = TimeCalc.CalcTimeFromPixelAligned(e.GetPosition((IInputElement)sender).X - UIParameters.TimelineRangeThumbWidth, ActualWidth, Range, RangeStart, FrameRate, 0.0, Duration);
+            if (time >= Duration)
+            {
+                time = TimeCalc.AlignFloor(Duration - 1.0 / FrameRate, FrameRate);
+            }
             SetCurrentValue(CurrentTimeProperty, time);
             RaiseEvent(new RoutedEventArgs(CurrentTimeChangeByUserEvent, this));
             if (time < RangeStart)
@@ -275,6 +279,10 @@ namespace NiVE3.View.Part
             }
 
             var time = TimeCalc.CalcTimeFromPixelAligned(e.GetPosition((IInputElement)sender).X - UIParameters.TimelineRangeThumbWidth, ActualWidth, Range, RangeStart, FrameRate, 0.0, Duration);
+            if (time >= Duration)
+            {
+                time = TimeCalc.AlignFloor(Duration - 1.0 / FrameRate, FrameRate);
+            }
             SetCurrentValue(CurrentTimeProperty, time);
             RaiseEvent(new RoutedEventArgs(CurrentTimeChangeByUserEvent, this));
             if (time < RangeStart)
