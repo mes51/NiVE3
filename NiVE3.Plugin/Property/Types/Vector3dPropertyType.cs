@@ -6,11 +6,15 @@ using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Shared.Extension;
 using NiVE3.Numerics;
+using System.Runtime.InteropServices;
+using NiVE3.Plugin.Internal.Util;
 
 namespace NiVE3.Plugin.Property.Types
 {
     public class Vector3dPropertyType : IPropertyType
     {
+        static readonly byte[] ZeroHashBase = [..Enumerable.Repeat((byte)0, Marshal.SizeOf<Vector3d>())];
+
         public static Vector3dPropertyType Instance { get; } = new Vector3dPropertyType();
 
         public InterpolationType SupportedInterpolationTypes => InterpolationType.None | InterpolationType.Linear | InterpolationType.CatmullRom;
@@ -96,6 +100,18 @@ namespace NiVE3.Plugin.Property.Types
                 Vector3d vector => vector,
                 _ => null,
             };
+        }
+
+        public Span<byte> ConvertToHashBase(object? value)
+        {
+            if (value is Vector3d v)
+            {
+                return v.ConvertToSpan();
+            }
+            else
+            {
+                return ZeroHashBase;
+            }
         }
     }
 }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using NiVE3.Plugin.Internal.Util;
 using NiVE3.Shared.Extension;
 
 namespace NiVE3.Plugin.Property.Types
@@ -53,7 +54,7 @@ namespace NiVE3.Plugin.Property.Types
                     convertedValue = (int)v;
                     return true;
                 case int v:
-                    convertedValue = (int)v;
+                    convertedValue = v;
                     return true;
                 case uint v:
                     convertedValue = (int)v;
@@ -65,7 +66,7 @@ namespace NiVE3.Plugin.Property.Types
                     convertedValue = (int)v;
                     return true;
                 default:
-                    convertedValue = 0.0;
+                    convertedValue = 0;
                     return false;
             }
         }
@@ -102,6 +103,18 @@ namespace NiVE3.Plugin.Property.Types
             }
 
             return null;
+        }
+
+        public Span<byte> ConvertToHashBase(object? value)
+        {
+            if (value is Enum e)
+            {
+                return Convert.ToInt32(e).ConvertToSpan();
+            }
+            else
+            {
+                return [];
+            }
         }
     }
 }

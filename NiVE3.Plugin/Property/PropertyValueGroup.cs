@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO.Hashing;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using NiVE3.Plugin.Property.Types;
 
 namespace NiVE3.Plugin.Property
 {
@@ -11,7 +14,7 @@ namespace NiVE3.Plugin.Property
     /// </summary>
     public class PropertyValueGroup
     {
-        public static readonly PropertyValueGroup Empty = new PropertyValueGroup("", []);
+        public static readonly PropertyValueGroup Empty = new PropertyValueGroup("", [], []);
 
         /// <summary>
         /// このプロパティグループのIDを取得します
@@ -37,6 +40,8 @@ namespace NiVE3.Plugin.Property
                 }
             }
         }
+
+        Dictionary<string, IPropertyType> PropertyTypes { get; }
 
         Dictionary<string, object?> Values { get; }
 
@@ -131,9 +136,51 @@ namespace NiVE3.Plugin.Property
             }
         }
 
-        internal PropertyValueGroup(string propertyGroupId, Dictionary<string, object?> values)
+        internal Int128 CalcHash()
+        {
+            var hash = new XxHash3();
+            TraverseCalcHash(hash);
+
+            var result = (Int128)0;
+            var resultSpan = MemoryMarshal.CreateSpan(ref result, 1);
+            hash.GetCurrentHash(MemoryMarshal.Cast<Int128, byte>(resultSpan));
+
+            return result;
+        }
+
+        private void TraverseCalcHash(XxHash3 hash)
+        {
+            foreach (var (key, value) in Values)
+            {
+                var pt = PropertyTypes[key];
+                switch (pt)
+                {
+                    case PropertyGroupType:
+                        if (value != null)
+                        {
+                            ((PropertyValueGroup)value).TraverseCalcHash(hash);
+                        }
+                        break;
+                    case AppendablePropertyType:
+                        if (value is PropertyValueGroup[] children)
+                        {
+                            foreach (var c in children)
+                            {
+                                c.TraverseCalcHash(hash);
+                            }
+                        }
+                        break;
+                    default:
+                        hash.Append(pt.ConvertToHashBase(value));
+                        break;
+                }
+            }
+        }
+
+        internal PropertyValueGroup(string propertyGroupId, Dictionary<string, object?> values, Dictionary<string, IPropertyType> propertyTypes)
         {
             PropertyGroupId = propertyGroupId;
+            PropertyTypes = propertyTypes;
             Values = values;
         }
     }

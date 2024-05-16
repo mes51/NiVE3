@@ -17,6 +17,7 @@ using NiVE3.Data.Json.Project;
 using NiVE3.Extension;
 using NiVE3.Util;
 using NiVE3.Data.Clipboard;
+using NiVE3.Plugin.Property.Types;
 
 namespace NiVE3.Model
 {
@@ -512,6 +513,7 @@ namespace NiVE3.Model
         public PropertyValueGroup GetValues(double time)
         {
             var result = new Dictionary<string, object?>();
+            var propertyTypes = new Dictionary<string, IPropertyType>();
 
             foreach (var p in Children)
             {
@@ -527,9 +529,11 @@ namespace NiVE3.Model
                 {
                     result.Add(pp.PropertyId, pp.GetValue(time));
                 }
+
+                propertyTypes.Add(p.PropertyId, p.Property.PropertyType);
             }
 
-            return new PropertyValueGroup(Property.Id, result);
+            return new PropertyValueGroup(Property.Id, result, propertyTypes);
         }
 
         public void ChangeName(string name)

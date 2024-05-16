@@ -2,14 +2,18 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using NiVE3.Plugin.Internal.Util;
 using NiVE3.Shared.Extension;
 
 namespace NiVE3.Plugin.Property.Types
 {
     public class ColorPropertyType : IPropertyType
     {
+        static readonly byte[] TransparentHashBase = [..Enumerable.Repeat((byte)0, Marshal.SizeOf<Vector4>())];
+
         public static readonly ColorPropertyType Instance = new ColorPropertyType();
 
         public InterpolationType SupportedInterpolationTypes => InterpolationType.None | InterpolationType.Linear | InterpolationType.CatmullRom;
@@ -115,6 +119,18 @@ namespace NiVE3.Plugin.Property.Types
                 Convert.ToSingle(dictionary[nameof(SerializedColor.R)]),
                 Convert.ToSingle(dictionary[nameof(SerializedColor.A)])
             );
+        }
+
+        public Span<byte> ConvertToHashBase(object? value)
+        {
+            if (value is Vector4 color)
+            {
+                return color.ConvertToSpan();
+            }
+            else
+            {
+                return TransparentHashBase;
+            }
         }
     }
 

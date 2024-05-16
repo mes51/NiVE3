@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NiVE3.Plugin.Internal.Util;
 using NiVE3.Shared.Extension;
 
 namespace NiVE3.Plugin.Property.Types
 {
     public class DoublePropertyType : IPropertyType
     {
+        static readonly byte[] ZeroHashBase = [..Enumerable.Repeat((byte)0, sizeof(double))];
+
         public static readonly DoublePropertyType Instance = new DoublePropertyType();
 
         public InterpolationType SupportedInterpolationTypes => InterpolationType.None | InterpolationType.Linear | InterpolationType.CatmullRom;
@@ -103,6 +106,18 @@ namespace NiVE3.Plugin.Property.Types
         public object? DeserializeValue(object? serializedValue)
         {
             return Convert.ToDouble(serializedValue);
+        }
+
+        public Span<byte> ConvertToHashBase(object? value)
+        {
+            if (value is double v)
+            {
+                return v.ConvertToSpan();
+            }
+            else
+            {
+                return ZeroHashBase;
+            }
         }
     }
 }

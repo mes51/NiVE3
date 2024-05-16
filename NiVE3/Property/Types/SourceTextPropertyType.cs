@@ -4,7 +4,9 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Documents;
 using ILGPU.IR.Values;
+using NiVE3.Plugin.Internal.Util;
 using NiVE3.Plugin.Property;
 using NiVE3.Plugin.Property.Types;
 using NiVE3.Shared.Extension;
@@ -91,6 +93,42 @@ namespace NiVE3.Property.Types
             }
 
             return styledText.DefaultStyle;
+        }
+
+        public Span<byte> ConvertToHashBase(object? value)
+        {
+            if (value is not StyledText styledText)
+            {
+                return [];
+            }
+
+            var hashBase = new List<byte>();
+
+            hashBase.AddRange(Encoding.Unicode.GetBytes(styledText.Text));
+            foreach (var run in styledText.Styles)
+            {
+                hashBase.AddRange(BitConverter.GetBytes(run.Start));
+                hashBase.AddRange(BitConverter.GetBytes(run.End));
+            }
+
+            foreach (var style in styledText.Styles.Select(r => r.Style).Prepend(styledText.DefaultStyle))
+            {
+                hashBase.AddRange(Encoding.Unicode.GetBytes(style.FontUniqueId));
+                hashBase.AddRange(BitConverter.GetBytes(style.FontSize));
+                hashBase.AddRange(BitConverter.GetBytes(style.LineHeight));
+                hashBase.AddRange(BitConverter.GetBytes(style.LetterSpacing));
+                hashBase.AddRange(BitConverter.GetBytes(style.VerticalScale));
+                hashBase.AddRange(BitConverter.GetBytes(style.HorizontalScale));
+                hashBase.AddRange(BitConverter.GetBytes((int)style.TextLineDrawOrder));
+                hashBase.AddRange(BitConverter.GetBytes(style.TextLineWidth));
+                hashBase.AddRange(BitConverter.GetBytes(style.IsEnableBold));
+                hashBase.AddRange(BitConverter.GetBytes(style.IsEnableItalic));
+                hashBase.AddRange(BitConverter.GetBytes((int)style.TextAlign));
+                hashBase.AddRange(style.FillColor.ConvertToSpan().ToArray());
+                hashBase.AddRange(style.TextLineColor.ConvertToSpan().ToArray());
+            }
+
+            return hashBase.ToArray();
         }
     }
 }

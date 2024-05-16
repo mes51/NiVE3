@@ -45,5 +45,12 @@ namespace NiVE3.Plugin.Property.Types
         /// <param name="serializedValue">シリアライズされた値</param>
         /// <returns>プロパティの値</returns>
         object? DeserializeValue(object? serializedValue);
+
+        /// <summary>
+        /// 画像のキャッシュの際に使用するハッシュ計算用の値に変換します
+        /// </summary>
+        /// <param name="value">プロパティの値</param>
+        /// <returns>ハッシュ計算用のbyteのSpan</returns>
+        Span<byte> ConvertToHashBase(object? value);
     }
 }

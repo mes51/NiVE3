@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Image.Color;
+using NiVE3.Plugin.Internal.Util;
 using NiVE3.Shared.Extension;
 
 namespace NiVE3.Plugin.Property.Types
@@ -155,6 +157,28 @@ namespace NiVE3.Plugin.Property.Types
             {
                 return null;
             }
+        }
+
+        public Span<byte> ConvertToHashBase(object? value)
+        {
+            if (value is not ColorGradient gradient)
+            {
+                return [];
+            }
+
+            var hashBase = new List<byte>();
+            foreach (var colorStop in gradient.ColorStops)
+            {
+                hashBase.AddRange(BitConverter.GetBytes(colorStop.Position));
+                hashBase.AddRange(colorStop.Color.ConvertToSpan().ToArray());
+            }
+            foreach (var opacityStop in gradient.OpacityStops)
+            {
+                hashBase.AddRange(BitConverter.GetBytes(opacityStop.Position));
+                hashBase.AddRange(BitConverter.GetBytes(opacityStop.Opacity));
+            }
+
+            return hashBase.ToArray();
         }
     }
 }

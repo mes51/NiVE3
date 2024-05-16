@@ -9,6 +9,10 @@ namespace NiVE3.Plugin.Property.Types
 {
     public class BooleanPropertyType : IPropertyType
     {
+        static byte[] TrueHashBase = [1];
+
+        static byte[] FalseHashBase = [0];
+
         public static readonly BooleanPropertyType Instance = new BooleanPropertyType();
 
         public InterpolationType SupportedInterpolationTypes => InterpolationType.None;
@@ -51,6 +55,11 @@ namespace NiVE3.Plugin.Property.Types
         public object? DeserializeValue(object? serializedValue)
         {
             return serializedValue;
+        }
+
+        public Span<byte> ConvertToHashBase(object? value)
+        {
+            return value is bool b && b ? TrueHashBase : FalseHashBase;
         }
     }
 }
