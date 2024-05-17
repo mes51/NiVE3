@@ -14,7 +14,7 @@ namespace NiVE3.Cache
     {
         private static readonly ImageCache Instance = new ImageCache();
 
-        private DualKeyDictionary<Tuple<Guid, Int128, double>, Tuple<Guid, Int128>, Tuple<NManagedImage, ROI>> CachedImages { get; } = [];
+        private DualKeyDictionary<Tuple<Guid, double>, Int128, Tuple<Guid, Int128>, Tuple<NManagedImage, ROI>> CachedImages { get; } = [];
 
         private int CachedSize { get; set; }
 
@@ -22,7 +22,7 @@ namespace NiVE3.Cache
 
         private Tuple<NManagedImage, ROI>? GetInternal(in Guid objectId, in Int128 key, double time)
         {
-            if (CachedImages.TryGetValue(Tuple.Create(objectId, key, time), out var image))
+            if (CachedImages.TryGetValue(Tuple.Create(objectId, time), key, out var image))
             {
                 return image;
             }
@@ -34,7 +34,7 @@ namespace NiVE3.Cache
 
         private bool TryGetInternal(in Guid objectId, in Int128 key, double time, [NotNullWhen(true)] out Tuple<NManagedImage, ROI>? image)
         {
-            return CachedImages.TryGetValue(Tuple.Create(objectId, key, time), out image);
+            return CachedImages.TryGetValue(Tuple.Create(objectId, time), key, out image);
         }
 
         private bool TryGetInternal(in Guid objectId, in Int128 key, [NotNullWhen(true)] out Tuple<NManagedImage, ROI>? image)
@@ -53,14 +53,22 @@ namespace NiVE3.Cache
 
         private void AddInternal(in Guid objectId, in Int128 key, double time, Tuple<NManagedImage, ROI> image)
         {
-            var primaryKey = Tuple.Create(objectId, key, time);
-            if (CachedImages.ContainsKey(primaryKey))
+            var updateKey = Tuple.Create(objectId, time);
+            if (CachedImages.ContainsUpdateKey(updateKey))
             {
-                var oldImage = CachedImages[primaryKey];
-                CachedSize -= oldImage.Item1.DataLength;
-                oldImage.Item1.Dispose();
+                var oldImages = CachedImages.GetUpdateTargetKeys(updateKey).Select(k => CachedImages[updateKey, k]).ToArray();
+                CachedImages.Update(updateKey, key, Tuple.Create(objectId, key), image);
+
+                foreach (var i in oldImages)
+                {
+                    CachedSize -= i.Item1.DataLength;
+                    i.Item1.Dispose();
+                }
             }
-            CachedImages.Add(primaryKey, Tuple.Create(objectId, key), image);
+            else
+            {
+                CachedImages.Add(updateKey, key, Tuple.Create(objectId, key), image);
+            }
             CachedSize += image.Item1.DataLength;
         }
 
