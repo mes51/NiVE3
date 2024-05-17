@@ -60,6 +60,11 @@ namespace NiVE3.Plugin.Attributes
         string EffectUuid { get; }
 
         /// <summary>
+        /// 時間経過により適用結果が変わるエフェクトであるかどうかを表します
+        /// </summary>
+        bool IsRenderEveryFrame { get; }
+
+        /// <summary>
         /// 何もしないエフェクトであることを表します
         /// </summary>
         bool IsDummyEffect { get; }
@@ -91,6 +96,11 @@ namespace NiVE3.Plugin.Attributes
         public string Category { get; }
 
         public string EffectUuid { get; }
+
+        /// <summary>
+        /// 時間経過により適用結果が変わるエフェクトであるかどうか
+        /// </summary>
+        public bool IsRenderEveryFrame { get; }
 
         /// <summary>
         /// 何もしないエフェクトかどうか

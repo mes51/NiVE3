@@ -136,19 +136,14 @@ namespace NiVE3.Plugin.Property
             }
         }
 
-        internal Int128 CalcHash()
+        internal PropertyValueGroup(string propertyGroupId, Dictionary<string, object?> values, Dictionary<string, IPropertyType> propertyTypes)
         {
-            var hash = new XxHash3();
-            TraverseCalcHash(hash);
-
-            var result = (Int128)0;
-            var resultSpan = MemoryMarshal.CreateSpan(ref result, 1);
-            hash.GetCurrentHash(MemoryMarshal.Cast<Int128, byte>(resultSpan));
-
-            return result;
+            PropertyGroupId = propertyGroupId;
+            PropertyTypes = propertyTypes;
+            Values = values;
         }
 
-        private void TraverseCalcHash(XxHash3 hash)
+        internal void CalcHash(XxHash3 hash)
         {
             foreach (var (key, value) in Values)
             {
@@ -158,7 +153,7 @@ namespace NiVE3.Plugin.Property
                     case PropertyGroupType:
                         if (value != null)
                         {
-                            ((PropertyValueGroup)value).TraverseCalcHash(hash);
+                            ((PropertyValueGroup)value).CalcHash(hash);
                         }
                         break;
                     case AppendablePropertyType:
@@ -166,7 +161,7 @@ namespace NiVE3.Plugin.Property
                         {
                             foreach (var c in children)
                             {
-                                c.TraverseCalcHash(hash);
+                                c.CalcHash(hash);
                             }
                         }
                         break;
@@ -175,13 +170,6 @@ namespace NiVE3.Plugin.Property
                         break;
                 }
             }
-        }
-
-        internal PropertyValueGroup(string propertyGroupId, Dictionary<string, object?> values, Dictionary<string, IPropertyType> propertyTypes)
-        {
-            PropertyGroupId = propertyGroupId;
-            PropertyTypes = propertyTypes;
-            Values = values;
         }
     }
 }

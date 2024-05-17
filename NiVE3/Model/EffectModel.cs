@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
+using System.IO.Hashing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,6 +12,7 @@ using NiVE3.Image;
 using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Property;
+using NiVE3.Plugin.Property.Types;
 using NiVE3.Plugin.ValueObject;
 using Prism.Mvvm;
 
@@ -47,6 +49,8 @@ namespace NiVE3.Model
         }
 
         public string EffectName => Metadata.Name;
+
+        public bool IsRenderEveryFrame => Metadata.IsRenderEveryFrame;
 
         public bool IsDummyEffect => Metadata.IsDummyEffect;
 
@@ -148,6 +152,30 @@ namespace NiVE3.Model
             {
                 Properties.FirstOrDefault(p => p.PropertyId == propertyData.PropertyId)?.LoadData(propertyData);
             }
+        }
+
+        public void CalcPropertyHash(double layerTime, XxHash3 hash)
+        {
+            var properties = new Dictionary<string, object?>();
+            var propertyTypes = new Dictionary<string, IPropertyType>();
+            foreach (var p in Properties)
+            {
+                switch (p)
+                {
+                    case PropertyGroupModel pg:
+                        properties.Add(pg.PropertyId, pg.GetValues(layerTime));
+                        break;
+                    case AppendablePropertyModel ap:
+                        properties.Add(ap.PropertyId, ap.GetChildPropertyValues(layerTime));
+                        break;
+                    default:
+                        properties.Add(p.PropertyId, p.GetValue(layerTime));
+                        break;
+                }
+                propertyTypes.Add(p.PropertyId, p.Property.PropertyType);
+            }
+
+            new PropertyValueGroup(nameof(EffectModel), properties, propertyTypes).CalcHash(hash);
         }
 
         private void Property_ValueUpdated(object? sender, EventArgs e)

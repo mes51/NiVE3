@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using NiVE3.Cache;
 using NiVE3.Data.Json.Project;
 using NiVE3.Input;
 using NiVE3.View.Resource;
@@ -181,6 +182,7 @@ namespace NiVE3.Model
             FootageListModel.Clear();
             HistoryModel.Clear();
             CompositionModels.Clear();
+            ImageCache.Clear();
             GpuErrorRaised = false;
 
             foreach (var p in PreviewModels)

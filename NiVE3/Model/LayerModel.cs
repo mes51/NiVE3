@@ -31,6 +31,8 @@ using System.Buffers;
 using System.Runtime.InteropServices;
 using NiVE3.Plugin.Attributes;
 using NiVE3.Data.Clipboard;
+using System.IO.Hashing;
+using NiVE3.Cache;
 
 namespace NiVE3.Model
 {
@@ -297,6 +299,8 @@ namespace NiVE3.Model
 
         double PrevSourceStartPoint { get; set; }
 
+        bool HasRenderEveryFrameEffect { get; set; }
+
         public LayerModel(CompositionModel compositionModel, FootageModel footageModel, EffectListModel effectListModel, HistoryModel historyModel) : this(compositionModel, footageModel, effectListModel, historyModel, null) { }
 
         public LayerModel(CompositionModel compositionModel, FootageModel footageModel, EffectListModel effectListModel, HistoryModel historyModel, Guid? layerId)
@@ -492,18 +496,70 @@ namespace NiVE3.Model
             var sourceTime = layerTime;
 
             var sourceOptionProperties = (TextProperties ?? ShapeProperties ?? SourceOptionProperties)?.GetValues(sourceTime);
-            var image = FootageModel.ReadImage(sourceTime, downSamplingRate, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties, InterpolationQuality, useGpu);
-            var originalImageSize = downSamplingRate != 1.0 ? FootageModel.CalcSize(time, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties) : new Int32Size(image.Width, image.Height);
-            var roi = new ROI(new Int32Point(), new Int32Size(image.Width, image.Height), 0, 0, image.Width, image.Height);
 
-            var downSamplingRateX = originalImageSize.Width / (float)image.Width;
-            var downSamplingRateY = originalImageSize.Height / (float)image.Height;
-            if (IsEnableEffect)
+            NImage? image = null;
+            ROI? roi = null;
+            var downSamplingRateX = 1.0F;
+            var downSamplingRateY = 1.0F;
+            var hash = new XxHash3();
+
+            if (downSamplingRate == 1.0)
             {
-                // TODO: モジュラーエフェクト&ROI反映
-                foreach (var e in Effects.Where(e => !e.IsDummyEffect && e.IsEnable && e.SupportedSource.IsSupportedSource(SourceType)))
+                sourceOptionProperties?.CalcHash(hash);
+                hash.Append(IsEnableTimeRemap);
+                hash.Append(IsEnableEffect);
+                hash.Append(IsEnableFrameBlend);
+                hash.Append(InterpolationQuality);
+                foreach (var e in Effects)
                 {
-                    image = e.ProcessImage(image, roi, downSamplingRateX, downSamplingRateY, layerTime, useGpu);
+                    e.CalcPropertyHash(layerTime, hash);
+                }
+
+                if (SourceType.HasFlag(SourceType.Video) || HasRenderEveryFrameEffect)
+                {
+                    if (ImageCache.TryGet(LayerId, hash.ToInt128(), time, out var cachedImage))
+                    {
+                        image = cachedImage.Item1.Copy();
+                        roi = cachedImage.Item2;
+                    }
+                }
+                else
+                {
+                    if (ImageCache.TryGet(LayerId, hash.ToInt128(), out var cachedImage))
+                    {
+                        image = cachedImage.Item1.Copy();
+                        roi = cachedImage.Item2;
+                    }
+                }
+            }
+
+            if (image == null || !roi.HasValue)
+            {
+                image = FootageModel.ReadImage(sourceTime, downSamplingRate, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties, InterpolationQuality, useGpu);
+                roi = new ROI(new Int32Point(), new Int32Size(image.Width, image.Height), 0, 0, image.Width, image.Height);
+
+                var originalImageSize = downSamplingRate != 1.0 ? FootageModel.CalcSize(time, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties) : new Int32Size(image.Width, image.Height);
+                downSamplingRateX = originalImageSize.Width / (float)image.Width;
+                downSamplingRateY = originalImageSize.Height / (float)image.Height;
+                if (IsEnableEffect)
+                {
+                    // TODO: モジュラーエフェクト&ROI反映
+                    foreach (var e in Effects.Where(e => !e.IsDummyEffect && e.IsEnable && e.SupportedSource.IsSupportedSource(SourceType)))
+                    {
+                        image = e.ProcessImage(image, roi.Value, downSamplingRateX, downSamplingRateY, layerTime, useGpu);
+                    }
+                }
+
+                if (downSamplingRate == 1.0)
+                {
+                    if (image is NGPUImage gpuImage)
+                    {
+                        ImageCache.Add(LayerId, hash.ToInt128(), layerTime, Tuple.Create(gpuImage.CopyToCpu(), roi.Value));
+                    }
+                    else if (image is NManagedImage managedImage)
+                    {
+                        ImageCache.Add(LayerId, hash.ToInt128(), layerTime, Tuple.Create((NManagedImage)managedImage.Copy(), roi.Value));
+                    }
                 }
             }
 
@@ -516,7 +572,7 @@ namespace NiVE3.Model
 
             return new RenderableImage(
                 image,
-                roi,
+                roi.Value,
                 downSamplingRateX,
                 downSamplingRateY,
                 IsEnableMotionBlur,
@@ -1121,6 +1177,7 @@ namespace NiVE3.Model
         private void Effects_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             HasEffect = Effects.Count > 0;
+            HasRenderEveryFrameEffect = Effects.Any(e => e.IsRenderEveryFrame);
 
             foreach (var oldEffect in (e.OldItems?.Cast<EffectModel>() ?? []))
             {

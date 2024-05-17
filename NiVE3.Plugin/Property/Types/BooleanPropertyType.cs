@@ -9,9 +9,9 @@ namespace NiVE3.Plugin.Property.Types
 {
     public class BooleanPropertyType : IPropertyType
     {
-        static byte[] TrueHashBase = [1];
+        static readonly byte[] TrueHashBase = [1];
 
-        static byte[] FalseHashBase = [0];
+        static readonly byte[] FalseHashBase = [0];
 
         public static readonly BooleanPropertyType Instance = new BooleanPropertyType();
 
