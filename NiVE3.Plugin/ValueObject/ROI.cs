@@ -17,5 +17,6 @@ namespace NiVE3.Plugin.ValueObject
     /// <param name="Bottom">適用範囲の下</param>
     public readonly record struct ROI(Int32Point OriginalImagePosition, Int32Size OriginalImageSize, int Left, int Top, int Right, int Bottom)
     {
+        public static readonly ROI Empty = new ROI();
     }
 }

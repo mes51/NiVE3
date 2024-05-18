@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace NiVE3.Util
 {
-    class DualKeyDictionary<TUpdateKey, TPrimarySub, TSecondary, TValue> : IDictionary<Tuple<Tuple<TUpdateKey, TPrimarySub>, TSecondary>, TValue> where TUpdateKey : notnull where TPrimarySub : notnull where TSecondary : notnull
+    class DualKeyDictionary<TUpdateKey, TPrimarySub, TSecondary, TValue> : IDictionary<((TUpdateKey, TPrimarySub), TSecondary), TValue> where TUpdateKey : notnull where TPrimarySub : notnull where TSecondary : notnull
     {
-        public TValue this[Tuple<Tuple<TUpdateKey, TPrimarySub>, TSecondary> key]
+        public TValue this[((TUpdateKey, TPrimarySub), TSecondary) key]
         {
             get => MainDictionary[key];
             set => throw new NotSupportedException($"use {nameof(Update)}");
@@ -19,7 +19,7 @@ namespace NiVE3.Util
 
         public TValue this[TUpdateKey updateKey, TPrimarySub subKey]
         {
-            get => PrimaryDictionary[Tuple.Create(updateKey, subKey)];
+            get => PrimaryDictionary[(updateKey, subKey)];
         }
 
         public ReadOnlySpan<TValue> this[TSecondary key]
@@ -27,7 +27,7 @@ namespace NiVE3.Util
             get => CollectionsMarshal.AsSpan(SecondaryDictionary[key]);
         }
 
-        public ICollection<Tuple<Tuple<TUpdateKey, TPrimarySub>, TSecondary>> Keys => MainDictionary.Keys;
+        public ICollection<((TUpdateKey, TPrimarySub), TSecondary)> Keys => MainDictionary.Keys;
 
         public ICollection<TValue> Values => MainDictionary.Values;
 
@@ -35,17 +35,17 @@ namespace NiVE3.Util
 
         public bool IsReadOnly => false;
 
-        Dictionary<Tuple<Tuple<TUpdateKey, TPrimarySub>, TSecondary>, TValue> MainDictionary { get; } = [];
+        Dictionary<((TUpdateKey, TPrimarySub), TSecondary), TValue> MainDictionary { get; } = [];
 
-        Dictionary<Tuple<TUpdateKey, TPrimarySub>, TValue> PrimaryDictionary { get; } = [];
+        Dictionary<(TUpdateKey, TPrimarySub), TValue> PrimaryDictionary { get; } = [];
 
         Dictionary<TSecondary, List<TValue>> SecondaryDictionary { get; } = [];
 
         Dictionary<TUpdateKey, List<TPrimarySub>> UpdateTargetKeys { get; } = [];
 
-        Dictionary<Tuple<TUpdateKey, TPrimarySub>, TSecondary> SecondaryKeys { get; } = [];
+        Dictionary<(TUpdateKey, TPrimarySub), TSecondary> SecondaryKeys { get; } = [];
 
-        public void Add(Tuple<Tuple<TUpdateKey, TPrimarySub>, TSecondary> key, TValue value)
+        public void Add(((TUpdateKey, TPrimarySub), TSecondary) key, TValue value)
         {
             if (PrimaryDictionary.ContainsKey(key.Item1))
             {
@@ -69,14 +69,14 @@ namespace NiVE3.Util
             UpdateTargetKeys[key.Item1.Item1].Add(key.Item1.Item2);
         }
 
-        public void Add(KeyValuePair<Tuple<Tuple<TUpdateKey, TPrimarySub>, TSecondary>, TValue> item)
+        public void Add(KeyValuePair<((TUpdateKey, TPrimarySub), TSecondary), TValue> item)
         {
             Add(item.Key, item.Value);
         }
 
         public void Add(TUpdateKey updateKey, TPrimarySub subKey, TSecondary secondaryKey, TValue value)
         {
-            Add(Tuple.Create(Tuple.Create(updateKey, subKey), secondaryKey), value);
+            Add(((updateKey, subKey), secondaryKey), value);
         }
 
         public void Clear()
@@ -88,19 +88,19 @@ namespace NiVE3.Util
             SecondaryKeys.Clear();
         }
 
-        public bool Contains(KeyValuePair<Tuple<Tuple<TUpdateKey, TPrimarySub>, TSecondary>, TValue> item)
+        public bool Contains(KeyValuePair<((TUpdateKey, TPrimarySub), TSecondary), TValue> item)
         {
             return ContainsKey(item.Key);
         }
 
-        public bool ContainsKey(Tuple<Tuple<TUpdateKey, TPrimarySub>, TSecondary> key)
+        public bool ContainsKey(((TUpdateKey, TPrimarySub), TSecondary) key)
         {
             return MainDictionary.ContainsKey(key);
         }
 
         public bool ContainsKey(TUpdateKey updateKey, TPrimarySub subKey)
         {
-            return PrimaryDictionary.ContainsKey(Tuple.Create(updateKey, subKey));
+            return PrimaryDictionary.ContainsKey((updateKey, subKey));
         }
 
         public bool ContainsKey(TSecondary key)
@@ -108,17 +108,17 @@ namespace NiVE3.Util
             return SecondaryDictionary.TryGetValue(key, out var secondaryValues) && secondaryValues.Count > 0;
         }
 
-        public void CopyTo(KeyValuePair<Tuple<Tuple<TUpdateKey, TPrimarySub>, TSecondary>, TValue>[] array, int arrayIndex)
+        public void CopyTo(KeyValuePair<((TUpdateKey, TPrimarySub), TSecondary), TValue>[] array, int arrayIndex)
         {
-            ((ICollection<KeyValuePair<Tuple<Tuple<TUpdateKey, TPrimarySub>, TSecondary>, TValue>>)MainDictionary).CopyTo(array, arrayIndex);
+            ((ICollection<KeyValuePair<((TUpdateKey, TPrimarySub), TSecondary), TValue>>)MainDictionary).CopyTo(array, arrayIndex);
         }
 
-        public IEnumerator<KeyValuePair<Tuple<Tuple<TUpdateKey, TPrimarySub>, TSecondary>, TValue>> GetEnumerator()
+        public IEnumerator<KeyValuePair<((TUpdateKey, TPrimarySub), TSecondary), TValue>> GetEnumerator()
         {
             return MainDictionary.GetEnumerator();
         }
 
-        public bool Remove(Tuple<Tuple<TUpdateKey, TPrimarySub>, TSecondary> key)
+        public bool Remove(((TUpdateKey, TPrimarySub), TSecondary) key)
         {
             if (MainDictionary.ContainsKey(key))
             {
@@ -137,16 +137,16 @@ namespace NiVE3.Util
             }
         }
 
-        public bool Remove(KeyValuePair<Tuple<Tuple<TUpdateKey, TPrimarySub>, TSecondary>, TValue> item)
+        public bool Remove(KeyValuePair<((TUpdateKey, TPrimarySub), TSecondary), TValue> item)
         {
             return Remove(item.Key);
         }
 
         public bool Remove(TUpdateKey updateKey, TPrimarySub subKey)
         {
-            var primayKey = Tuple.Create(updateKey, subKey);
+            var primayKey = (updateKey, subKey);
             var secondaryKey = SecondaryKeys[primayKey];
-            return Remove(Tuple.Create(primayKey, secondaryKey));
+            return Remove((primayKey, secondaryKey));
         }
 
         public bool Remove(TUpdateKey updateKey)
@@ -173,14 +173,14 @@ namespace NiVE3.Util
             return result;
         }
 
-        public bool TryGetValue(Tuple<Tuple<TUpdateKey, TPrimarySub>, TSecondary> key, [MaybeNullWhen(false)] out TValue value)
+        public bool TryGetValue(((TUpdateKey, TPrimarySub), TSecondary) key, [MaybeNullWhen(false)] out TValue value)
         {
             return MainDictionary.TryGetValue(key, out value);
         }
 
         public bool TryGetValue(TUpdateKey updateKey, TPrimarySub subKey, [MaybeNullWhen(false)] out TValue value)
         {
-            return PrimaryDictionary.TryGetValue(Tuple.Create(updateKey, subKey), out value);
+            return PrimaryDictionary.TryGetValue((updateKey, subKey), out value);
         }
 
         public bool TryGetValues(TSecondary key, out ReadOnlySpan<TValue> values)

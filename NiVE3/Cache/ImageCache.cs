@@ -14,15 +14,17 @@ namespace NiVE3.Cache
     {
         private static readonly ImageCache Instance = new ImageCache();
 
-        private DualKeyDictionary<Tuple<Guid, double>, Int128, Tuple<Guid, Int128>, Tuple<NManagedImage, ROI>> CachedImages { get; } = [];
+        public static bool EnableCompress { get; set; } = true;
+
+        private DualKeyDictionary<(Guid, double), Int128, (Guid, Int128), (NManagedImage, ROI)> CachedImages { get; } = [];
 
         private int CachedSize { get; set; }
 
         private ImageCache() { }
 
-        private Tuple<NManagedImage, ROI>? GetInternal(in Guid objectId, in Int128 key, double time)
+        private (NManagedImage, ROI)? GetInternal(in Guid objectId, in Int128 key, double time)
         {
-            if (CachedImages.TryGetValue(Tuple.Create(objectId, time), key, out var image))
+            if (CachedImages.TryGetValue((objectId, time), key, out var image))
             {
                 return image;
             }
@@ -32,32 +34,32 @@ namespace NiVE3.Cache
             }
         }
 
-        private bool TryGetInternal(in Guid objectId, in Int128 key, double time, [NotNullWhen(true)] out Tuple<NManagedImage, ROI>? image)
+        private bool TryGetInternal(in Guid objectId, in Int128 key, double time, out (NManagedImage, ROI) image)
         {
-            return CachedImages.TryGetValue(Tuple.Create(objectId, time), key, out image);
+            return CachedImages.TryGetValue((objectId, time), key, out image);
         }
 
-        private bool TryGetInternal(in Guid objectId, in Int128 key, [NotNullWhen(true)] out Tuple<NManagedImage, ROI>? image)
+        private bool TryGetInternal(in Guid objectId, in Int128 key, out (NManagedImage, ROI) image)
         {
-            if (CachedImages.TryGetValues(Tuple.Create(objectId, key), out var values))
+            if (CachedImages.TryGetValues((objectId, key), out var values))
             {
                 image = values[0];
                 return true;
             }
             else
             {
-                image = null;
+                image = (null!, ROI.Empty);
                 return false;
             }
         }
 
-        private void AddInternal(in Guid objectId, in Int128 key, double time, Tuple<NManagedImage, ROI> image)
+        private void AddInternal(in Guid objectId, in Int128 key, double time, (NManagedImage, ROI) image)
         {
-            var updateKey = Tuple.Create(objectId, time);
+            var updateKey = (objectId, time);
             if (CachedImages.ContainsUpdateKey(updateKey))
             {
                 var oldImages = CachedImages.GetUpdateTargetKeys(updateKey).Select(k => CachedImages[updateKey, k]).ToArray();
-                CachedImages.Update(updateKey, key, Tuple.Create(objectId, key), image);
+                CachedImages.Update(updateKey, key, (objectId, key), image);
 
                 foreach (var i in oldImages)
                 {
@@ -67,7 +69,7 @@ namespace NiVE3.Cache
             }
             else
             {
-                CachedImages.Add(updateKey, key, Tuple.Create(objectId, key), image);
+                CachedImages.Add(updateKey, key, (objectId, key), image);
             }
             CachedSize += image.Item1.DataLength;
         }
@@ -82,22 +84,22 @@ namespace NiVE3.Cache
             CachedSize = 0;
         }
 
-        public static Tuple<NManagedImage, ROI>? Get(in Guid objectId, in Int128 key, double time)
+        public static (NManagedImage, ROI)? Get(in Guid objectId, in Int128 key, double time)
         {
             return Instance.GetInternal(objectId, key, time);
         }
 
-        public static bool TryGet(in Guid objectId, in Int128 key, double time, [NotNullWhen(true)] out Tuple<NManagedImage, ROI>? image)
+        public static bool TryGet(in Guid objectId, in Int128 key, double time, out (NManagedImage, ROI) image)
         {
             return Instance.TryGetInternal(objectId, key, time, out image);
         }
 
-        public static bool TryGet(in Guid objectId, in Int128 key, [NotNullWhen(true)] out Tuple<NManagedImage, ROI>? image)
+        public static bool TryGet(in Guid objectId, in Int128 key, out (NManagedImage, ROI) image)
         {
             return Instance.TryGetInternal(objectId, key, out image);
         }
 
-        public static void Add(in Guid objectId, in Int128 key, double time, Tuple<NManagedImage, ROI> image)
+        public static void Add(in Guid objectId, in Int128 key, double time, (NManagedImage, ROI) image)
         {
             Instance.AddInternal(objectId, key, time, image);
         }

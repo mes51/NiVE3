@@ -554,11 +554,11 @@ namespace NiVE3.Model
                 {
                     if (image is NGPUImage gpuImage)
                     {
-                        ImageCache.Add(LayerId, hash.ToInt128(), layerTime, Tuple.Create(gpuImage.CopyToCpu(), roi.Value));
+                        ImageCache.Add(LayerId, hash.ToInt128(), layerTime, (gpuImage.CopyToCpu(), roi.Value));
                     }
                     else if (image is NManagedImage managedImage)
                     {
-                        ImageCache.Add(LayerId, hash.ToInt128(), layerTime, Tuple.Create((NManagedImage)managedImage.Copy(), roi.Value));
+                        ImageCache.Add(LayerId, hash.ToInt128(), layerTime, ((NManagedImage)managedImage.Copy(), roi.Value));
                     }
                 }
             }
