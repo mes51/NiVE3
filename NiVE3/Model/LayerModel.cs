@@ -519,16 +519,14 @@ namespace NiVE3.Model
                 {
                     if (ImageCache.TryGet(LayerId, hash.ToInt128(), time, out var cachedImage))
                     {
-                        image = cachedImage.Item1.Copy();
-                        roi = cachedImage.Item2;
+                        (image, roi) = cachedImage;
                     }
                 }
                 else
                 {
                     if (ImageCache.TryGet(LayerId, hash.ToInt128(), out var cachedImage))
                     {
-                        image = cachedImage.Item1.Copy();
-                        roi = cachedImage.Item2;
+                        (image, roi) = cachedImage;
                     }
                 }
             }
@@ -554,11 +552,12 @@ namespace NiVE3.Model
                 {
                     if (image is NGPUImage gpuImage)
                     {
-                        ImageCache.Add(LayerId, hash.ToInt128(), layerTime, (gpuImage.CopyToCpu(), roi.Value));
+                        using var managedImage = gpuImage.CopyToCpu();
+                        ImageCache.Add(LayerId, hash.ToInt128(), layerTime, managedImage, roi.Value);
                     }
                     else if (image is NManagedImage managedImage)
                     {
-                        ImageCache.Add(LayerId, hash.ToInt128(), layerTime, ((NManagedImage)managedImage.Copy(), roi.Value));
+                        ImageCache.Add(LayerId, hash.ToInt128(), layerTime, managedImage, roi.Value);
                     }
                 }
             }
