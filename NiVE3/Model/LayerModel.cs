@@ -492,8 +492,7 @@ namespace NiVE3.Model
             }
 
             var layerTime = time - SourceStartPoint;
-            // TODO: タイムリマップ反映
-            var sourceTime = layerTime;
+            var sourceTime = CalcSourceTime(layerTime);
 
             var sourceOptionProperties = (TextProperties ?? ShapeProperties ?? SourceOptionProperties)?.GetValues(sourceTime);
 
@@ -512,7 +511,11 @@ namespace NiVE3.Model
                 hash.Append(InterpolationQuality);
                 foreach (var e in Effects)
                 {
-                    e.CalcPropertyHash(layerTime, hash);
+                    // TODO: DummyEffect中のモジュラーエフェクトを拾う
+                    if (e.IsEnable && !e.IsDummyEffect)
+                    {
+                        e.CalcPropertyHash(layerTime, hash);
+                    }
                 }
 
                 if (SourceType.HasFlag(SourceType.Video) || HasRenderEveryFrameEffect)
@@ -600,8 +603,7 @@ namespace NiVE3.Model
             }
 
             var layerTime = time - SourceStartPoint;
-            // TODO: タイムリマップ反映
-            var sourceTime = layerTime;
+            var sourceTime = CalcSourceTime(layerTime);
 
             var sourceOptionProperties = (TextProperties ?? ShapeProperties ?? SourceOptionProperties)?.GetValues(sourceTime);
             var image = FootageModel.ReadImage(sourceTime, downSamplingRate, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties, InterpolationQuality, useGpu);
@@ -720,8 +722,7 @@ namespace NiVE3.Model
             var layerTime = Math.Max(time - SourceStartPoint, InPoint);
             var layerLength = Math.Min(length, OutPoint - layerTime);
 
-            // TODO: タイムリマップ反映
-            var sourceTime = Math.Max(layerTime, 0.0);
+            var sourceTime = Math.Max(CalcSourceTime(layerTime), 0.0);
             var sourceLength = Math.Max(layerLength - (layerTime - sourceTime), 0.0);
 
             var result = new float[(int)(length * Const.AudioSamplingRate) * 2];
@@ -869,6 +870,52 @@ namespace NiVE3.Model
             }
 
             return [..parentTransforms];
+        }
+
+        public void CalcCacheKeyHash(XxHash3 hash, double time, bool withTrackMatte)
+        {
+            hash.Append(LayerId);
+
+            var layerTime = time - SourceStartPoint;
+            var sourceTime = CalcSourceTime(layerTime);
+
+            var sourceOptionProperties = (TextProperties ?? ShapeProperties ?? SourceOptionProperties)?.GetValues(sourceTime);
+            sourceOptionProperties?.CalcHash(hash);
+            hash.Append(SourceStartPoint);
+            hash.Append(InPoint);
+            hash.Append(OutPoint);
+            hash.Append(IsEnableTimeRemap);
+            hash.Append(IsEnableEffect);
+            hash.Append(IsEnableFrameBlend);
+            hash.Append(IsEnableMotionBlur);
+            hash.Append(IsEnableAdjustmentLayer);
+            hash.Append(IsEnable3D);
+            hash.Append(InterpolationQuality);
+            hash.Append(BlendMode);
+            hash.Append(TrackMatteLayerId);
+            hash.Append(TrackMatteMode);
+            hash.Append(ParentLayerId);
+            foreach (var e in Effects)
+            {
+                if (e.IsEnable && !e.IsDummyEffect)
+                {
+                    e.CalcPropertyHash(layerTime, hash);
+                }
+            }
+
+            LayerOptionProperties?.GetValues(layerTime)?.CalcHash(hash);
+            foreach (var pt in GetParentTransforms(time))
+            {
+                hash.Append(pt.ParentType);
+                pt.Transform.CalcHash(hash);
+            }
+
+            if (TrackMatteLayerId != null)
+            {
+                CompositionModel.Layers.FirstOrDefault(l => l.LayerId == TrackMatteLayerId)?.CalcCacheKeyHash(hash, time, false);
+            }
+
+            GetTransform(time).CalcHash(hash);
         }
 
         public void BeginEditDuration()
@@ -1171,6 +1218,12 @@ namespace NiVE3.Model
             }
 
             HistoryModel.Add(new PasteNewEffectsHistoryCommand(this, [.. addedEffect], insertStartIndex, isDuplicate));
+        }
+
+        double CalcSourceTime(double layerTime)
+        {
+            // TODO: タイムリマップ反映
+            return layerTime;
         }
 
         private void Effects_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)

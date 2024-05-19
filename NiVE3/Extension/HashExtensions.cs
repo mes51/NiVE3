@@ -24,5 +24,13 @@ namespace NiVE3.Extension
             var span = MemoryMarshal.CreateReadOnlySpan(ref value, 1);
             hash.Append(MemoryMarshal.Cast<T, byte>(span));
         }
+
+        public static void Append<T>(this XxHash3 hash, T? value) where T : unmanaged
+        {
+            if (value.HasValue)
+            {
+                hash.Append(value.Value);
+            }
+        }
     }
 }

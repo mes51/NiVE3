@@ -24,6 +24,10 @@ using System.Buffers;
 using NiVE3.Util;
 using NiVE3.Mvvm;
 using NiVE3.Data.Clipboard;
+using System.IO.Hashing;
+using NiVE3.Extension;
+using NiVE3.Cache;
+using NiVE3.Plugin.ValueObject;
 
 namespace NiVE3.Model
 {
@@ -676,105 +680,194 @@ namespace NiVE3.Model
 
         public NImage RenderFrame(double time, double downSamplingRate, bool applyToneMapping, bool useGpu)
         {
-            var allImages = new List<IDisposable>();
-
-            Renderer.BeginRendering(downSamplingRate, useGpu);
-
             var cameraSetting = Layers.FirstOrDefault(l => l.IsEnableVideo && l.IsCamera && l.IsContainsTime(time))?.GetCameraSetting(time);
-            if (cameraSetting != null)
-            {
-                Renderer.SetCamera(cameraSetting);
-            }
-            else
-            {
-                Renderer.SetCamera(CreateDefaultCameraSetting(Width, Height));
-            }
 
             var hasLightSolo = Layers.Any(l => l.IsLight && l.IsEnableVideo && l.IsEnableSolo);
-            foreach (var light in Layers.Where(l => l.IsEnableVideo && (!hasLightSolo || l.IsEnableSolo)).Select(l => l.GetLightSetting(time)).NonNull())
+            var useLights = Layers.Where(l => l.IsEnableVideo && (!hasLightSolo || l.IsEnableSolo)).Select(l => l.GetLightSetting(time)).NonNull().ToArray();
+
+            var hasImageSolo = Layers.Any(l => l.HasImage && l.IsEnableVideo && l.IsEnableSolo);
+            var useLayers = Layers.Where(l => l.HasImage && l.IsEnableVideo && (!hasImageSolo || l.IsEnableSolo)).Reverse().ToArray();
+
+            var hash = new XxHash3();
+            if (downSamplingRate == 1.0)
             {
-                Renderer.AddLight(light);
+                hash.Append(Width);
+                hash.Append(Height);
+                hash.Append(FrameRate);
+                hash.Append(ShutterAngle);
+                hash.Append(ShutterPhase);
+                hash.Append(motionBlurSampleCount);
+                hash.Append(IsEnableFrameBlend);
+                hash.Append(IsEnableMotionBlur);
+                hash.Append(RendererPluginId);
+                hash.Append(ToneMapperPluginId);
+
+                hash.Append(time);
+
+                if (cameraSetting != null)
+                {
+                    hash.Append(cameraSetting.PointOfInterest);
+                    hash.Append(cameraSetting.Position);
+                    hash.Append(cameraSetting.Orientation);
+                    hash.Append(cameraSetting.AngleX);
+                    hash.Append(cameraSetting.AngleY);
+                    hash.Append(cameraSetting.AngleZ);
+                    hash.Append(cameraSetting.Zoom);
+                    foreach (var pt in cameraSetting.ParentTransforms)
+                    {
+                        hash.Append(pt.ParentType);
+                        pt.Transform.CalcHash(hash);
+                    }
+                }
+                foreach (var light in useLights)
+                {
+                    hash.Append(light.LightType);
+                    hash.Append(light.PointOfInterest);
+                    hash.Append(light.Position);
+                    hash.Append(light.Orientation);
+                    hash.Append(light.AngleX);
+                    hash.Append(light.AngleY);
+                    hash.Append(light.AngleZ);
+                    hash.Append(light.Color);
+                    hash.Append(light.Intensity);
+                    hash.Append(light.ConeAngle);
+                    hash.Append(light.ConeAttenuation);
+                    hash.Append(light.FalloffType);
+                    hash.Append(light.FalloffStart);
+                    hash.Append(light.FalloffLength);
+                    hash.Append(light.IsEnableShadow);
+                    hash.Append(light.ShadowStrength);
+                    hash.Append(light.ShadowScatterSize);
+                    foreach (var pt in light.ParentTransforms)
+                    {
+                        hash.Append(pt.ParentType);
+                        pt.Transform.CalcHash(hash);
+                    }
+                }
+                foreach (var layer in useLayers)
+                {
+                    layer.CalcCacheKeyHash(hash, time, true);
+                }
             }
 
-            var images = new List<RenderableImage>();
-            var hasImageSolo = Layers.Any(l => l.HasImage && l.IsEnableVideo && l.IsEnableSolo);
-            foreach (var l in Layers.Where(l => l.HasImage && l.IsEnableVideo && (!hasImageSolo || l.IsEnableSolo)).Reverse())
+            NImage result;
+            var cacheKey = hash.ToInt128();
+            if (downSamplingRate != 1.0 || !ImageCache.TryGet(CompositionId, cacheKey, time, out var cachedImage))
             {
-                if (!l.IsContainsTime(time))
+                var allImages = new List<IDisposable>();
+
+                Renderer.BeginRendering(downSamplingRate, useGpu);
+
+                if (cameraSetting != null)
                 {
-                    continue;
+                    Renderer.SetCamera(cameraSetting);
+                }
+                else
+                {
+                    Renderer.SetCamera(CreateDefaultCameraSetting(Width, Height));
                 }
 
-                if (l.IsEnableAdjustmentLayer)
+                foreach (var light in useLights)
                 {
-                    if (images.Count > 0)
-                    {
-                        Renderer.Render([..images]);
-                    }
-                    images.Clear();
+                    Renderer.AddLight(light);
+                }
 
-                    using var adjustmentMaskImage = l.GetRawImage(time, downSamplingRate, true, useGpu);
-                    if (adjustmentMaskImage == null)
+                var images = new List<RenderableImage>();
+                foreach (var l in useLayers)
+                {
+                    if (!l.IsContainsTime(time))
                     {
                         continue;
                     }
 
-                    var mask = Renderer.RenderAdjustmentMask(adjustmentMaskImage);
-                    var currentRenderingFrame = Renderer.GetCurrentRenderedImage();
-                    var (roi, currentFrame) = l.ProcessAdjustment(time, currentRenderingFrame, Width / (double)currentRenderingFrame.Width, Height / (double)currentRenderingFrame.Height, useGpu);
-
-                    // TODO: GPU対応
-                    if (mask is GPURasterizedMaskImage gpuMaskImage)
+                    if (l.IsEnableAdjustmentLayer)
                     {
-                        var managedImage = gpuMaskImage.CopyToCpu();
-                        mask.Dispose();
-                        mask = managedImage;
-                    }
-                    if (currentFrame is NGPUImage gpuCurrentFrame)
-                    {
-                        var managedImage = gpuCurrentFrame.CopyToCpu();
-                        currentFrame.Dispose();
-                        currentFrame = managedImage;
-                    }
-                    Parallel.For(roi.OriginalImagePosition.Y, roi.OriginalImagePosition.Y + roi.OriginalImageSize.Height, y =>
-                    {
-                        var maskSpan = ((ManagedRasterizedMaskImage)mask).GetDataSpan().Slice((y - roi.OriginalImagePosition.Y) * mask.Width, mask.Width);
-                        var currentFrameSpan = ((NManagedImage)currentFrame).GetDataSpan().Slice(y * currentFrame.Width, currentFrame.Width);
-                        for (int x = roi.OriginalImagePosition.X, limit = x + roi.OriginalImageSize.Width, maskPos = 0, framePos = x; x < limit; x++,  maskPos++, framePos++)
+                        if (images.Count > 0)
                         {
-                            currentFrameSpan[framePos].W *= maskSpan[maskPos];
+                            Renderer.Render([.. images]);
                         }
-                    });
+                        images.Clear();
 
-                    Renderer.RenderAdjustmentLayer(currentFrame, roi, downSamplingRate, l.InterpolationQuality, l.BlendMode);
+                        using var adjustmentMaskImage = l.GetRawImage(time, downSamplingRate, true, useGpu);
+                        if (adjustmentMaskImage == null)
+                        {
+                            continue;
+                        }
 
-                    allImages.Add(currentFrame);
-                }
-                else
-                {
-                    var image = l.GetImage(time, downSamplingRate, true, useGpu);
-                    if (image != null)
+                        var mask = Renderer.RenderAdjustmentMask(adjustmentMaskImage);
+                        var currentRenderingFrame = Renderer.GetCurrentRenderedImage();
+                        var (roi, currentFrame) = l.ProcessAdjustment(time, currentRenderingFrame, Width / (double)currentRenderingFrame.Width, Height / (double)currentRenderingFrame.Height, useGpu);
+
+                        // TODO: GPU対応
+                        if (mask is GPURasterizedMaskImage gpuMaskImage)
+                        {
+                            var managedImage = gpuMaskImage.CopyToCpu();
+                            mask.Dispose();
+                            mask = managedImage;
+                        }
+                        if (currentFrame is NGPUImage gpuCurrentFrame)
+                        {
+                            var managedImage = gpuCurrentFrame.CopyToCpu();
+                            currentFrame.Dispose();
+                            currentFrame = managedImage;
+                        }
+                        Parallel.For(roi.OriginalImagePosition.Y, roi.OriginalImagePosition.Y + roi.OriginalImageSize.Height, y =>
+                        {
+                            var maskSpan = ((ManagedRasterizedMaskImage)mask).GetDataSpan().Slice((y - roi.OriginalImagePosition.Y) * mask.Width, mask.Width);
+                            var currentFrameSpan = ((NManagedImage)currentFrame).GetDataSpan().Slice(y * currentFrame.Width, currentFrame.Width);
+                            for (int x = roi.OriginalImagePosition.X, limit = x + roi.OriginalImageSize.Width, maskPos = 0, framePos = x; x < limit; x++, maskPos++, framePos++)
+                            {
+                                currentFrameSpan[framePos].W *= maskSpan[maskPos];
+                            }
+                        });
+
+                        Renderer.RenderAdjustmentLayer(currentFrame, roi, downSamplingRate, l.InterpolationQuality, l.BlendMode);
+
+                        allImages.Add(currentFrame);
+                    }
+                    else
                     {
-                        images.Add(image);
-                        allImages.Add(image);
+                        var image = l.GetImage(time, downSamplingRate, true, useGpu);
+                        if (image != null)
+                        {
+                            images.Add(image);
+                            allImages.Add(image);
+                        }
+                    }
+                }
+                if (images.Count > 0)
+                {
+                    Renderer.Render([.. images]);
+                }
+
+                result = Renderer.FinishRendering();
+
+                foreach (var i in allImages)
+                {
+                    i.Dispose();
+                }
+
+                if (downSamplingRate == 1.0)
+                {
+                    if (result is NGPUImage gpuImage)
+                    {
+                        using var managedImage = gpuImage.CopyToCpu();
+                        ImageCache.Add(CompositionId, cacheKey, time, managedImage, ROI.Empty);
+                    }
+                    else
+                    {
+                        ImageCache.Add(CompositionId, cacheKey, time, (NManagedImage)result, ROI.Empty);
                     }
                 }
             }
-            if (images.Count > 0)
+            else
             {
-                Renderer.Render([..images]);
+                result = cachedImage.Item1;
             }
-
-            var result = Renderer.FinishRendering();
 
             if (applyToneMapping)
             {
                 result = ToneMapper.ToneMapping(result, useGpu);
-            }
-
-            foreach (var i in allImages)
-            {
-                i.Dispose();
             }
 
             return result;
