@@ -145,7 +145,7 @@ namespace NiVE3.Plugin.Property
 
         internal void CalcHash(XxHash3 hash)
         {
-            foreach (var (key, value) in Values)
+            foreach (var (key, value) in Values.OrderBy(kv => kv.Key))
             {
                 var pt = PropertyTypes[key];
                 switch (pt)
@@ -159,9 +159,9 @@ namespace NiVE3.Plugin.Property
                     case AppendablePropertyType:
                         if (value is PropertyValueGroup[] children)
                         {
-                            foreach (var c in children)
+                            foreach (var child in children.OrderBy(c => c.PropertyGroupId))
                             {
-                                c.CalcHash(hash);
+                                child.CalcHash(hash);
                             }
                         }
                         break;
