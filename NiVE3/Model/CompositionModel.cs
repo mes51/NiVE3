@@ -1222,6 +1222,7 @@ namespace NiVE3.Model
 
         void OnCompositionUpdated()
         {
+            ImageCache.Clear(CompositionId);
             CompositionUpdated?.Invoke(this, EventArgs.Empty);
         }
 

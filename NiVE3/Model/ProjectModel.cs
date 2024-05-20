@@ -182,7 +182,7 @@ namespace NiVE3.Model
             FootageListModel.Clear();
             HistoryModel.Clear();
             CompositionModels.Clear();
-            ImageCache.Clear();
+            ImageCache.ClearAll();
             GpuErrorRaised = false;
 
             foreach (var p in PreviewModels)

@@ -6,6 +6,7 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using ImTools;
 using NiVE3.Image;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.Util;
@@ -20,7 +21,7 @@ namespace NiVE3.Cache
 
         public static bool EnableCompress { get; set; }
 
-        private DualKeyDictionary<(Guid, double), Int128, (Guid, Int128), (IDisposable, int, ROI)> CachedImages { get; } = [];
+        private DualKeyDictionary<Guid, (double, Int128), (Guid, Int128), (IDisposable, int, ROI)> CachedImages { get; } = [];
 
         private int CachedSize { get; set; }
 
@@ -28,7 +29,7 @@ namespace NiVE3.Cache
 
         private (NManagedImage, ROI)? GetInternal(in Guid objectId, in Int128 key, double time)
         {
-            if (CachedImages.TryGetValue((objectId, time), key, out var image))
+            if (CachedImages.TryGetValue(objectId, (time, key), out var image))
             {
                 return Decompress(image);
             }
@@ -40,7 +41,7 @@ namespace NiVE3.Cache
 
         private bool TryGetInternal(in Guid objectId, in Int128 key, double time, out (NManagedImage, ROI) image)
         {
-            var result = CachedImages.TryGetValue((objectId, time), key, out var compressedImage);
+            var result = CachedImages.TryGetValue(objectId, (time, key), out var compressedImage);
             if (result)
             {
                 image = Decompress(compressedImage);
@@ -66,9 +67,8 @@ namespace NiVE3.Cache
             }
         }
 
-        private void AddInternal(in Guid objectId, in Int128 key, double time, NManagedImage image, ROI roi)
+        private void AddInternal(Guid objectId, in Int128 key, double time, NManagedImage image, ROI roi)
         {
-            var updateKey = (objectId, time);
             (IDisposable, int, ROI) compressedImage;
             // NOTE: 実際に確保したメモリの容量で判定する
             var managedImageSize = image.Data.Length * ImageElementSize;
@@ -90,10 +90,10 @@ namespace NiVE3.Cache
             {
                 compressedImage = (image.Copy(), managedImageSize, roi);
             }
-            if (CachedImages.ContainsUpdateKey(updateKey))
+            if (CachedImages.ContainsUpdateKey(objectId))
             {
-                var oldImages = CachedImages.GetUpdateTargetKeys(updateKey).Select(k => CachedImages[updateKey, k]).ToArray();
-                CachedImages.Update(updateKey, key, (objectId, key), compressedImage);
+                var oldImages = CachedImages.GetUpdateTargetKeys(objectId).Select(k => CachedImages[objectId, k]).ToArray();
+                CachedImages.Update(objectId, (time, key), (objectId, key), compressedImage);
 
                 foreach (var i in oldImages)
                 {
@@ -103,12 +103,26 @@ namespace NiVE3.Cache
             }
             else
             {
-                CachedImages.Add(updateKey, key, (objectId, key), compressedImage);
+                CachedImages.Add(objectId, (time, key), (objectId, key), compressedImage);
             }
             CachedSize += compressedImage.Item2;
         }
 
-        private void ClearInternal()
+        private void ClearInternal(Guid objectId)
+        {
+            if (!CachedImages.ContainsUpdateKey(objectId))
+            {
+                return;
+            }
+
+            foreach (var (image, _, _) in CachedImages.GetUpdateTargetKeys(objectId).Select(k => CachedImages[objectId, k]))
+            {
+                image.Dispose();
+            }
+            CachedImages.Remove(objectId);
+        }
+
+        private void ClearAllInternal()
         {
             foreach (var image in CachedImages.Values)
             {
@@ -138,9 +152,14 @@ namespace NiVE3.Cache
             Instance.AddInternal(objectId, key, time, image, roi);
         }
 
-        public static void Clear()
+        public static void Clear(in Guid objectId)
         {
-            Instance.ClearInternal();
+            Instance.ClearInternal(objectId);
+        }
+
+        public static void ClearAll()
+        {
+            Instance.ClearAllInternal();
         }
 
         static (NManagedImage, ROI) Decompress((IDisposable, int, ROI) compressedImage)
