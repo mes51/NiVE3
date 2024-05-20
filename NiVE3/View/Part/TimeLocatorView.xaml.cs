@@ -75,6 +75,13 @@ namespace NiVE3.View.Part
             new FrameworkPropertyMetadata(Visibility.Visible, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
+        public static readonly DependencyProperty CompositionIdProperty = DependencyProperty.Register(
+            nameof(CompositionId),
+            typeof(Guid),
+            typeof(TimeLocatorView),
+            new FrameworkPropertyMetadata(Guid.Empty, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
         private static readonly DependencyProperty RangeBarIndicatorPositionProperty = DependencyProperty.Register(
             nameof(RangeBarIndicatorPosition),
             typeof(double),
@@ -186,6 +193,12 @@ namespace NiVE3.View.Part
         {
             get { return (double)GetValue(RangeBarIndicatorPositionProperty); }
             set { SetValue(RangeBarIndicatorPositionProperty, value); }
+        }
+
+        public Guid CompositionId
+        {
+            get { return (Guid)GetValue(CompositionIdProperty); }
+            set { SetValue(CompositionIdProperty, value); }
         }
 
         public Visibility RangeScrollBarVisibility

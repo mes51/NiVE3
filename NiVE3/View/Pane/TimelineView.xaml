@@ -233,6 +233,7 @@
                             Range="{Binding TimeBarRange}"
                             RangeStart="{Binding TimeBarRangeStart}"
                             RangeScrollBarVisibility="Collapsed"
+                            CompositionId="{Binding CompositionId}"
                             CurrentTimeChangeByUser="TimeLocator_CurrentTimeChangeByUser"/>
         <r:ReadOnlyPropertyWire Reciever="{Binding ElementName=TimeLocator, Path=IsScrubbing}" Sender="{Binding IsScrubbing}"/>
 

@@ -48,6 +48,14 @@ namespace NiVE3.ViewModel
     [CommandHandling(nameof(OpenRenderSettingCommand), nameof(ShortcutKeySetting.OpenRenderSettingGesture))]
     partial class TimelineViewModel : PaneViewModelBase, IDropTarget
     {
+        private Guid compositionId;
+        [ManualWire(nameof(CompositionModel), IsOneWay = true)]
+        public Guid CompositionId
+        {
+            get { return compositionId; }
+            set { SetProperty(ref compositionId, value); }
+        }
+
         private double frameRate;
         [ManualWire(nameof(CompositionModel), IsOneWay = true)]
         public double FrameRate

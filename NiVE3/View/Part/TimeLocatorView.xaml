@@ -35,6 +35,14 @@
                            RangeStart="{Binding ElementName=Root, Path=RangeStart, Mode=TwoWay}"
                            MinimumRange="{Binding ElementName=TimeBar, Path=MinimumRange, Mode=OneWay}"
                            Visibility="{Binding ElementName=Root, Path=RangeScrollBarVisibility}"/>
+        <local:CachedFrameIndicator Grid.Row="1"
+                                    Height="{x:Static r:UIParameters.TimeLocatorTimeBarHeight}"
+                                    Duration="{Binding ElementName=Root, Path=Duration}"
+                                    Range="{Binding ElementName=Root, Path=Range}"
+                                    RangeStart="{Binding ElementName=Root, Path=RangeStart}"
+                                    FrameRate="{Binding ElementName=Root, Path=FrameRate}"
+                                    CurrentTime="{Binding ElementName=Root, Path=CurrentTime}"
+                                    TargetObjectId="{Binding ElementName=Root, Path=CompositionId}"/>
         <pr:TimeBar Grid.Row="1" x:Name="TimeBar" Height="{x:Static r:UIParameters.TimeLocatorTimeBarHeight}" Duration="{Binding ElementName=Root, Path=Duration}" Range="{Binding ElementName=Root, Path=Range}" RangeStart="{Binding ElementName=Root, Path=RangeStart}" FrameRate="{Binding ElementName=Root, Path=FrameRate}" SideSpacerWidth="{x:Static r:UIParameters.TimelineRangeThumbWidth}"/>
         <Canvas Grid.Row="1" Grid.RowSpan="2" x:Name="IndicatorContainer" ClipToBounds="True">
             <pr:IndicatorView Height="{Binding ElementName=IndicatorContainer, Path=ActualHeight}" SnapsToDevicePixels="True" Canvas.Left="{Binding ElementName=Root, Path=IndicatorPosition}" Canvas.Top="8"/>
