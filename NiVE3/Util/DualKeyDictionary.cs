@@ -209,7 +209,7 @@ namespace NiVE3.Util
 
         public void Update(TUpdateKey updateKey, TPrimarySub subKey, TSecondary secondaryKey, TValue value)
         {
-            Remove(updateKey);
+            Remove(updateKey, subKey);
             Add(updateKey, subKey, secondaryKey, value);
         }
 

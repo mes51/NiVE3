@@ -92,8 +92,15 @@ namespace NiVE3.Cache
             }
             if (CachedImages.ContainsUpdateKey(objectId))
             {
-                var oldImages = CachedImages.GetUpdateTargetKeys(objectId).Select(k => CachedImages[objectId, k]).ToArray();
-                CachedImages.Update(objectId, (time, key), (objectId, key), compressedImage);
+                var oldImages = CachedImages.GetUpdateTargetKeys(objectId).Where(k => k.Item1 == time).Select(k => CachedImages[objectId, k]).ToArray();
+                if (oldImages.Length > 0)
+                {
+                    CachedImages.Update(objectId, (time, key), (objectId, key), compressedImage);
+                }
+                else
+                {
+                    CachedImages.Add(objectId, (time, key), (objectId, key), compressedImage);
+                }
 
                 foreach (var i in oldImages)
                 {
@@ -106,6 +113,18 @@ namespace NiVE3.Cache
                 CachedImages.Add(objectId, (time, key), (objectId, key), compressedImage);
             }
             CachedSize += compressedImage.Item2;
+        }
+
+        private double[] GetCachedTimeInternal(Guid objectId)
+        {
+            if (CachedImages.ContainsUpdateKey(objectId))
+            {
+                return CachedImages.GetUpdateTargetKeys(objectId).Select(t => t.Item1).ToArray();
+            }
+            else
+            {
+                return [];
+            }
         }
 
         private void ClearInternal(Guid objectId)
@@ -150,6 +169,11 @@ namespace NiVE3.Cache
         public static void Add(in Guid objectId, in Int128 key, double time, NManagedImage image, ROI roi)
         {
             Instance.AddInternal(objectId, key, time, image, roi);
+        }
+
+        public static double[] GetCachedTime(in Guid objectId)
+        {
+            return Instance.GetCachedTimeInternal(objectId);
         }
 
         public static void Clear(in Guid objectId)
