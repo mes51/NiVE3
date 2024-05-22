@@ -92,21 +92,19 @@ namespace NiVE3.Cache
             }
             if (CachedImages.ContainsUpdateKey(objectId))
             {
-                var oldImages = CachedImages.GetUpdateTargetKeys(objectId).Where(k => k.Item1 == time).Select(k => CachedImages[objectId, k]).ToArray();
-                if (oldImages.Length > 0)
+                var oldImageKeys = CachedImages.GetUpdateTargetKeys(objectId).Where(k => k.Item1 == time).ToArray();
+                if (oldImageKeys.Length > 0)
                 {
-                    CachedImages.Update(objectId, (time, key), (objectId, key), compressedImage);
-                }
-                else
-                {
-                    CachedImages.Add(objectId, (time, key), (objectId, key), compressedImage);
+                    foreach (var k in oldImageKeys)
+                    {
+                        var oldImage = CachedImages[objectId, k];
+                        CachedImages.Remove(objectId, k);
+                        CachedSize -= oldImage.Item2;
+                        oldImage.Item1.Dispose();
+                    }
                 }
 
-                foreach (var i in oldImages)
-                {
-                    CachedSize -= i.Item2;
-                    i.Item1.Dispose();
-                }
+                CachedImages.Add(objectId, (time, key), (objectId, key), compressedImage);
             }
             else
             {

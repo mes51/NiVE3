@@ -14,7 +14,7 @@ namespace NiVE3.Util
         public TValue this[((TUpdateKey, TPrimarySub), TSecondary) key]
         {
             get => MainDictionary[key];
-            set => throw new NotSupportedException($"use {nameof(Update)}");
+            set => throw new NotSupportedException();
         }
 
         public TValue this[TUpdateKey updateKey, TPrimarySub subKey]
@@ -204,13 +204,7 @@ namespace NiVE3.Util
 
         public TPrimarySub[] GetUpdateTargetKeys(TUpdateKey updateKey)
         {
-            return UpdateTargetKeys[updateKey].ToArray();
-        }
-
-        public void Update(TUpdateKey updateKey, TPrimarySub subKey, TSecondary secondaryKey, TValue value)
-        {
-            Remove(updateKey, subKey);
-            Add(updateKey, subKey, secondaryKey, value);
+            return [..UpdateTargetKeys[updateKey]];
         }
 
         IEnumerator IEnumerable.GetEnumerator()
