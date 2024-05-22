@@ -21,9 +21,13 @@ namespace NiVE3.Cache
 
         public static bool EnableCompress { get; set; }
 
+        public static long CacheLimit { get; set; } = 16L * 1024 * 1024 * 1024;
+
         private DualKeyDictionary<Guid, (double, Int128), (Guid, Int128), (IDisposable, int, ROI)> CachedImages { get; } = [];
 
-        private int CachedSize { get; set; }
+        private long CachedSize { get; set; }
+
+        private CacheKeyLru KeyLru { get; } = new CacheKeyLru();
 
         private ImageCache() { }
 
@@ -31,6 +35,7 @@ namespace NiVE3.Cache
         {
             if (CachedImages.TryGetValue(objectId, (time, key), out var image))
             {
+                KeyLru.Add(objectId, key, time);
                 return Decompress(image);
             }
             else
@@ -45,6 +50,7 @@ namespace NiVE3.Cache
             if (result)
             {
                 image = Decompress(compressedImage);
+                KeyLru.Add(objectId, key, time);
             }
             else
             {
@@ -58,6 +64,7 @@ namespace NiVE3.Cache
             if (CachedImages.TryGetValues((objectId, key), out var values))
             {
                 image = Decompress(values[0]);
+                KeyLru.UpdateLastAccessBySecondaryKey(objectId, key);
                 return true;
             }
             else
@@ -101,6 +108,7 @@ namespace NiVE3.Cache
                         CachedImages.Remove(objectId, k);
                         CachedSize -= oldImage.Item2;
                         oldImage.Item1.Dispose();
+                        KeyLru.Remove(objectId, k.Item2, k.Item1);
                     }
                 }
 
@@ -110,10 +118,25 @@ namespace NiVE3.Cache
             {
                 CachedImages.Add(objectId, (time, key), (objectId, key), compressedImage);
             }
+            KeyLru.Add(objectId, key, time);
             CachedSize += compressedImage.Item2;
+
+            while (CachedSize > CacheLimit)
+            {
+                var primaryKey = KeyLru.RemoveLast();
+                if (primaryKey.Item1 == Guid.Empty)
+                {
+                    break;
+                }
+
+                var oldImage = CachedImages[primaryKey.Item1, (primaryKey.Item3, primaryKey.Item2)];
+                oldImage.Item1.Dispose();
+                CachedSize -= oldImage.Item2;
+                CachedImages.Remove(primaryKey.Item1, (primaryKey.Item3, primaryKey.Item2));
+            }
         }
 
-        private double[] GetCachedTimeInternal(Guid objectId)
+        private double[] GetCachedTimeInternal(in Guid objectId)
         {
             if (CachedImages.ContainsUpdateKey(objectId))
             {
@@ -125,16 +148,17 @@ namespace NiVE3.Cache
             }
         }
 
-        private void ClearInternal(Guid objectId)
+        private void ClearInternal(in Guid objectId)
         {
             if (!CachedImages.ContainsUpdateKey(objectId))
             {
                 return;
             }
 
-            foreach (var (image, _, _) in CachedImages.GetUpdateTargetKeys(objectId).Select(k => CachedImages[objectId, k]))
+            foreach (var k in CachedImages.GetUpdateTargetKeys(objectId))
             {
-                image.Dispose();
+                CachedImages[objectId, k].Item1.Dispose();
+                KeyLru.Remove(objectId, k.Item2, k.Item1);
             }
             CachedImages.Remove(objectId);
         }
@@ -146,6 +170,7 @@ namespace NiVE3.Cache
                 image.Item1.Dispose();
             }
             CachedImages.Clear();
+            KeyLru.Clear();
             CachedSize = 0;
         }
 
