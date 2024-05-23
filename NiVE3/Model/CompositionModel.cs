@@ -937,16 +937,14 @@ namespace NiVE3.Model
                 }
                 else
                 {
-                    // TODO: テキストレイヤーやシェイプレイヤー等のサイズが可変な入力への対応
-                    var width = layer.FootageModel.Width;
-                    var height = layer.FootageModel.Height;
+                    var (origin, width, height) = layer.GetSourceFootageRect(time);
                     if (layer.IsEnable3D)
                     {
-                        result.Add(new ColoredPreviewBoundingBox(Renderer.GetBoundingBox3D(width, height, layer.GetTransform(time), layer.GetParentTransforms(time), activeCameraSetting), layer.TagColor));
+                        result.Add(new ColoredPreviewBoundingBox(Renderer.GetBoundingBox3D(origin, width, height, layer.GetTransform(time), layer.GetParentTransforms(time), activeCameraSetting), layer.TagColor));
                     }
                     else
                     {
-                        result.Add(new ColoredPreviewBoundingBox(Renderer.GetBoundingBox2D(width, height, layer.GetTransform(time), layer.GetParentTransforms(time)), layer.TagColor));
+                        result.Add(new ColoredPreviewBoundingBox(Renderer.GetBoundingBox2D(origin, width, height, layer.GetTransform(time), layer.GetParentTransforms(time)), layer.TagColor));
                     }
                 }
             }

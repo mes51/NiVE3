@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Data.Json.Project;
 using NiVE3.Image;
+using NiVE3.Numerics;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Property;
 using NiVE3.Plugin.ValueObject;
@@ -188,7 +189,7 @@ namespace NiVE3.Model
             }
         }
 
-        public Int32Size CalcSize(double time, int compositionWidth, int compositionHeight, PropertyValueGroup? properties)
+        public SourceFootageRect CalcSize(double time, int compositionWidth, int compositionHeight, PropertyValueGroup? properties)
         {
             if (properties != null && Source is ICustomizableFootageSource customizableFootageSource)
             {
@@ -196,7 +197,7 @@ namespace NiVE3.Model
             }
             else
             {
-                return new Int32Size(Width, Height);
+                return new SourceFootageRect(Vector2d.Zero, Width, Height);
             }
         }
 

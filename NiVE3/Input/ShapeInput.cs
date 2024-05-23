@@ -398,7 +398,7 @@ namespace NiVE3.Input
             return new NManagedImage(1, 1);
         }
 
-        public Int32Size CalcSize(double time, int compositionWidth, int compositionHeight, PropertyValueGroup properties)
+        public SourceFootageRect CalcSize(double time, int compositionWidth, int compositionHeight, PropertyValueGroup properties)
         {
             var contents = (properties[ContentPropertyId] as PropertyValueGroup[]) ?? [];
             var tree = CreateShapeTree(contents);
@@ -417,7 +417,7 @@ namespace NiVE3.Input
                 maxY = Math.Max(maxY, (int)MathF.Ceiling(pathBounds.Bottom));
             }
 
-            return new Int32Size(maxX - minX, maxY - minY);
+            return new SourceFootageRect(-new Vector2d(minX, minY), maxX - minX, maxY - minY);
         }
 
         public NImage ReadFrame(double time, double downSamplingRate, int compositionWidth, int compositionHeight, PropertyValueGroup properties, ImageInterpolationQuality imageInterpolationQuality, bool toGpu)

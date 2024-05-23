@@ -416,12 +416,13 @@ namespace NiVE3.PresetPlugin.Renderer
             return result;
         }
 
-        public PreviewBoundingBox GetBoundingBox2D(int width, int height, PropertyValueGroup transform, ParentTransform[] parentTransforms)
+        public PreviewBoundingBox GetBoundingBox2D(Vector2d origin, int width, int height, PropertyValueGroup transform, ParentTransform[] parentTransforms)
         {
             var matrix = CalcTransform2D(transform, parentTransforms);
             var anchorPoint = (Vector3d)(transform[ILayerObject.TransformAnchorPointId] ?? new Vector3d());
-
             var transformedAnchorPoint = (Vector2d)matrix.Transform((Vector2)anchorPoint.AsVector2d());
+
+            matrix = Matrix3x3.CreateTranslate(-(float)origin.X, -(float)origin.Y) * matrix;
             var leftTop = (Vector2d)matrix.Transform(new Vector2(0.0F, 0.0F));
             var rightTop = (Vector2d)matrix.Transform(new Vector2(width, 0.0F));
             var leftBottom = (Vector2d)matrix.Transform(new Vector2(0.0F, height));
@@ -434,7 +435,7 @@ namespace NiVE3.PresetPlugin.Renderer
             );
         }
 
-        public PreviewBoundingBox GetBoundingBox3D(int width, int height, PropertyValueGroup transform, ParentTransform[] parentTransforms, CameraSetting cameraSetting)
+        public PreviewBoundingBox GetBoundingBox3D(Vector2d origin, int width, int height, PropertyValueGroup transform, ParentTransform[] parentTransforms, CameraSetting cameraSetting)
         {
             var size = Math.Max(Width, Height);
             var fov = Math.Atan((Width / cameraSetting.Zoom) * 0.5) * 2.0;
@@ -455,6 +456,9 @@ namespace NiVE3.PresetPlugin.Renderer
                 var nullObjectAnchorPoint = ((Vector2d)nav) * (new Vector2d(size, size) * 0.5) + (new Vector2d(Width, Height) * 0.5);
                 return new PreviewBoundingBox(nullObjectAnchorPoint, [], true, nullObjectAnchorPoint.IsNaN() || nullObjectAnchorPoint.IsInfinty());
             }
+
+            var anchorPointMv = mv;
+            mv = Matrix4x4d.CreateTranslate(-origin.X / size, -origin.Y / size, 0.0) * mv;
 
             var v1 = mv.Transform(Avx.Divide(Vector256.Create(0.0, 0.0, 0.0, size), Vector256.Create((double)size)));
             var v2 = mv.Transform(Avx.Divide(Vector256.Create(0.0, height, 0.0, size), Vector256.Create((double)size)));
@@ -477,7 +481,7 @@ namespace NiVE3.PresetPlugin.Renderer
             v2 = Avx.Divide(v2, Vector256.Create(v2.GetElement(3)));
             v3 = Avx.Divide(v3, Vector256.Create(v3.GetElement(3)));
             v4 = Avx.Divide(v4, Vector256.Create(v4.GetElement(3)));
-            var av = projectionMatrix.Transform(mv.Transform(Avx.Divide(Avx.Add(anchorPoint.AsVector256(), Vector256.Create(0.0, 0.0, 0.0, size)), Vector256.Create((double)size))));
+            var av = projectionMatrix.Transform(anchorPointMv.Transform(Avx.Divide(Avx.Add(anchorPoint.AsVector256(), Vector256.Create(0.0, 0.0, 0.0, size)), Vector256.Create((double)size))));
             av = Avx.Divide(av, Vector256.Create(av.GetElement(3)));
 
             var s = new Vector2d(size, size) * 0.5;

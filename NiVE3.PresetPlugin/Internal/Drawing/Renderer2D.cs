@@ -24,7 +24,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
         public void Draw(NImage image, float opacity, Matrix3x3 transform, ImageInterpolationQuality interpolationQuality, BlendMode blendMode, RasterizedMaskImage? trackMatte)
         {
-            transform = Matrix3x3.Identity.Translate((float)-image.Origin.X, (float)-image.Origin.Y) * transform;
+            transform = Matrix3x3.CreateTranslate((float)-image.Origin.X, (float)-image.Origin.Y) * transform;
             if (!Matrix3x3.Invert(transform, out var inverted))
             {
                 return;

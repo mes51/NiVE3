@@ -80,14 +80,14 @@ namespace NiVE3.Plugin.Interfaces
         PropertyBase[] GetOptionProperties();
 
         /// <summary>
-        /// 読み込む画像のサイズを計算します
+        /// 読み込む画像のサイズと位置を計算します
         /// </summary>
         /// <param name="time">読み込むタイミングの時間</param>
         /// <param name="compositionWidth">コンポジションの幅</param>
         /// <param name="compositionHeight">コンポジションの高さ</param>
         /// <param name="properties">オプションの値</param>
-        /// <returns>読み込む画像のサイズ</returns>
-        Int32Size CalcSize(double time, int compositionWidth, int compositionHeight, PropertyValueGroup properties);
+        /// <returns>読み込む画像の四角形を表すSourceFootageRect</returns>
+        SourceFootageRect CalcSize(double time, int compositionWidth, int compositionHeight, PropertyValueGroup properties);
 
         /// <summary>
         /// 画像を読み込みます

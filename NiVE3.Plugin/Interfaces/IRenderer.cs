@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Image;
 using NiVE3.Image.Drawing;
+using NiVE3.Numerics;
 using NiVE3.Plugin.Image;
 using NiVE3.Plugin.Interfaces.RendererParams;
 using NiVE3.Plugin.Property;
@@ -84,23 +85,25 @@ namespace NiVE3.Plugin.Interfaces
         /// <summary>
         /// 2Dレイヤーのバウンディングボックスを取得します
         /// </summary>
+        /// <param name="origin">フッテージ画像の位置</param>
         /// <param name="width">レイヤーの幅</param>
         /// <param name="height">レイヤーの高さ</param>
         /// <param name="transform">レイヤーのトランスフォームの値</param>
         /// <param name="parentTransforms">親のレイヤーのトランスフォームの値</param>
         /// <returns>プレビューで表示するバウンディングボックス</returns>
-        PreviewBoundingBox GetBoundingBox2D(int width, int height, PropertyValueGroup transform, ParentTransform[] parentTransforms);
+        PreviewBoundingBox GetBoundingBox2D(Vector2d origin, int width, int height, PropertyValueGroup transform, ParentTransform[] parentTransforms);
 
         /// <summary>
         /// 3Dレイヤーのバウンディングボックスを取得します
         /// </summary>
+        /// <param name="origin">フッテージ画像の位置</param>
         /// <param name="width">レイヤーの幅</param>
         /// <param name="height">レイヤーの高さ</param>
         /// <param name="transform">レイヤーのトランスフォームの値</param>
         /// <param name="parentTransforms">親のレイヤーのトランスフォームの値</param>
         /// <param name="cameraSetting">カメラの設定</param>
         /// <returns>プレビューで表示するバウンディングボックス</returns>
-        PreviewBoundingBox GetBoundingBox3D(int width, int height, PropertyValueGroup transform, ParentTransform[] parentTransforms, CameraSetting cameraSetting);
+        PreviewBoundingBox GetBoundingBox3D(Vector2d origin, int width, int height, PropertyValueGroup transform, ParentTransform[] parentTransforms, CameraSetting cameraSetting);
 
         /// <summary>
         /// カメラのバウンディングボックスを取得します

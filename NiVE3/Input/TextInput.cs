@@ -315,12 +315,12 @@ namespace NiVE3.Input
             return new NManagedImage(1, 1);
         }
 
-        public Int32Size CalcSize(double time, int compositionWidth, int compositionHeight, PropertyValueGroup properties)
+        public SourceFootageRect CalcSize(double time, int compositionWidth, int compositionHeight, PropertyValueGroup properties)
         {
             var sourceText = properties[SourceTextId] as StyledText ?? StyledText.Empty;
             if (string.IsNullOrEmpty(sourceText.Text))
             {
-                return new Int32Size(1, 1);
+                return new SourceFootageRect(Vector2d.Zero, 1, 1);
             }
 
             var structuredExtendedTextRun = new StructuredExtendedTextRun(sourceText.Text, sourceText.DefaultStyle, sourceText.Styles);
@@ -374,7 +374,7 @@ namespace NiVE3.Input
 
             if (glyphPolygons.Count < 1)
             {
-                return new Int32Size(1, 1);
+                return new SourceFootageRect(Vector2d.Zero, 1, 1);
             }
 
             var min = Vector128.Create(int.MaxValue);
@@ -385,7 +385,9 @@ namespace NiVE3.Input
                 max = Sse41.Max(max, Sse2.Add(r, blurMargin));
             }
 
-            return new Int32Size(max.GetElement(2) - min.GetElement(0) + 1, max.GetElement(3) - min.GetElement(1));
+            var imageOrigin = (Vector2d)glyphPolygons[0].origin + new Vector2d(glyphPolygons[0].rect.GetElement(0) - min.GetElement(0), glyphPolygons[0].rect.GetElement(1) - min.GetElement(1));
+
+            return new SourceFootageRect(imageOrigin, max.GetElement(2) - min.GetElement(0) + 1, max.GetElement(3) - min.GetElement(1));
         }
 
         public NImage ReadFrame(double time, double downSamplingRate, int compositionWidth, int compositionHeight, PropertyValueGroup properties, ImageInterpolationQuality imageInterpolationQuality, bool toGpu)
