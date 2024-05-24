@@ -20,6 +20,7 @@ using System.Runtime.Intrinsics.X86;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.PresetPlugin.Internal.Drawing.Primitive3D;
 using NiVE3.Image.Drawing;
+using System.Runtime.CompilerServices;
 
 namespace NiVE3.PresetPlugin.Renderer
 {
@@ -82,8 +83,7 @@ namespace NiVE3.PresetPlugin.Renderer
             }
             UseGpu = useGpu;
 
-            var zoom = Width / Math.Tan(DefaultFov * 0.5) * 0.5;
-            ViewMatrix = Matrix4x4d.CreateLookAt(Vector256.Create(0.5, 0.5, -zoom / Width, 0.0), Vector256.Create(0.5, 0.5, 0.0, 0.0), Vector256.Create(0.0, 1.0, 0.0, 0.0));
+            ViewMatrix = CreateDefaultViewMatrix(Width);
             FieldOfView = DefaultFov;
             PointLights.Clear();
             SpotLights.Clear();
@@ -444,70 +444,66 @@ namespace NiVE3.PresetPlugin.Renderer
             var projectionMatrix = Matrix4x4d.CreatePerspectiveFieldOfView(fov, 1.0, double.Epsilon, double.PositiveInfinity);
             var modelMatrix = Calc3DModelMatrix(transform, parentTransforms, Width, Height);
             var viewMatrix = Calc3DViewMatrix(cameraSetting, Width, Height);
+            var offsetX = (size - Width) * 0.5 / size;
+            var offsetY = (size - Height) * 0.5 / size;
+            var offsetMatrix = Matrix4x4d.CreateTranslate(offsetX, offsetY, 0.0);
 
-            var mv = modelMatrix * viewMatrix * Matrix4x4d.CreateTranslate((size - Width) * 0.5 / size, (size - Height) * 0.5 / size, 0.0);
+            var mv = modelMatrix * viewMatrix;
+            var anchorPointMv = mv * offsetMatrix;
 
             // ヌルオブジェクト
             if (width == 0 && height == 0)
             {
-                var nav = projectionMatrix.Transform(mv.Transform(Avx.Divide(Avx.Add(anchorPoint.AsVector256(), Vector256.Create(0.0, 0.0, 0.0, size)), Vector256.Create((double)size))));
+                var nav = projectionMatrix.Transform(anchorPointMv.Transform(Avx.Divide(Avx.Add(anchorPoint.AsVector256(), Vector256.Create(0.0, 0.0, 0.0, size)), Vector256.Create((double)size))));
                 nav = Avx.Divide(nav, Vector256.Create(nav.GetElement(3)));
 
                 var nullObjectAnchorPoint = ((Vector2d)nav) * (new Vector2d(size, size) * 0.5) + (new Vector2d(Width, Height) * 0.5);
                 return new PreviewBoundingBox(nullObjectAnchorPoint, [], true, nullObjectAnchorPoint.IsNaN() || nullObjectAnchorPoint.IsInfinty());
             }
 
-            var anchorPointMv = mv;
             mv = Matrix4x4d.CreateTranslate(-origin.X / size, -origin.Y / size, 0.0) * mv;
+            var mvt = mv * offsetMatrix;
 
-            var v1 = mv.Transform(Avx.Divide(Vector256.Create(0.0, 0.0, 0.0, size), Vector256.Create((double)size)));
-            var v2 = mv.Transform(Avx.Divide(Vector256.Create(0.0, height, 0.0, size), Vector256.Create((double)size)));
-            var v3 = mv.Transform(Avx.Divide(Vector256.Create(width, height, 0.0, size), Vector256.Create((double)size)));
-            var v4 = mv.Transform(Avx.Divide(Vector256.Create(width, 0.0, 0.0, size), Vector256.Create((double)size)));
+            var sv1 = Vector256.Create(0.0, 0.0, 0.0, size) / size;
+            var sv2 = Vector256.Create(0.0, height, 0.0, size) / size;
+            var sv3 = Vector256.Create(width, height, 0.0, size) / size;
+            var sv4 = Vector256.Create(width, 0.0, 0.0, size) / size;
+            var v1 = mvt.Transform(sv1);
+            var v2 = mvt.Transform(sv2);
+            var v3 = mvt.Transform(sv3);
+            var v4 = mvt.Transform(sv4);
 
-            var t1Normal = Avx.Subtract(v2, v1).CrossProduct(Avx.Subtract(v3, v1)).Normalize();
-            var t2Normal = Avx.Subtract(v3, v1).CrossProduct(Avx.Subtract(v4, v1)).Normalize();
-            if (!Avx.TestZ(Avx.CompareNotEqual(t1Normal, t1Normal), Vector256.Create(double.NaN)) || !Avx.TestZ(Avx.CompareNotEqual(t2Normal, t2Normal), Vector256.Create(double.NaN)))
+            Matrix4x4d.Invert(mv, out var invertedModelViewMatrix);
+            invertedModelViewMatrix = Matrix4x4d.Transpose(invertedModelViewMatrix);
+
+            var farPoint = Avx.And(mv.Transform(Vector256.Create(0.0, 0.0, -10000.0, 1.0)), Vector256.Create(0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0).AsDouble());
+            var triangles = TriangleDivider.ClipAndDivide([new BoundingBoxTriangle(v1, v2, v3, farPoint, invertedModelViewMatrix), new BoundingBoxTriangle(v1, v3, v4, farPoint, invertedModelViewMatrix)]).ToArray();
+            var shapes = new List<BoundingBoxShape>(triangles.Length);
+            var projectionOffset = Vector256.Create(offsetX, offsetY, 0.0, 0.0) * size;
+            foreach (var triangle in triangles)
             {
-                return PreviewBoundingBox.Empty;
+                var uv1 = triangle.V1.Transform(projectionMatrix).Vertex;
+                var uv2 = triangle.V2.Transform(projectionMatrix).Vertex;
+                var uv3 = triangle.V3.Transform(projectionMatrix).Vertex;
+
+                var w1 = 1.0 / Math.Abs(uv1.GetElement(3));
+                var w2 = 1.0 / Math.Abs(uv2.GetElement(3));
+                var w3 = 1.0 / Math.Abs(uv3.GetElement(3));
+                uv1 *= w1;
+                uv2 *= w2;
+                uv3 *= w3;
+                var dvv1 = (uv1 + Vector256.Create(1.0, 1.0, 0.0, 0.0)) * Vector256.Create(size * 0.5, size * 0.5, 1.0, 1.0) - projectionOffset;
+                var dvv2 = (uv2 + Vector256.Create(1.0, 1.0, 0.0, 0.0)) * Vector256.Create(size * 0.5, size * 0.5, 1.0, 1.0) - projectionOffset;
+                var dvv3 = (uv3 + Vector256.Create(1.0, 1.0, 0.0, 0.0)) * Vector256.Create(size * 0.5, size * 0.5, 1.0, 1.0) - projectionOffset;
+
+                shapes.Add(new BoundingBoxShape([new Vector2d(dvv1.GetElement(0), dvv1.GetElement(1)), new Vector2d(dvv2.GetElement(0), dvv2.GetElement(1)), new Vector2d(dvv3.GetElement(0), dvv3.GetElement(1))], true, false));
             }
 
-            v1 = projectionMatrix.Transform(v1);
-            v2 = projectionMatrix.Transform(v2);
-            v3 = projectionMatrix.Transform(v3);
-            v4 = projectionMatrix.Transform(v4);
-
-            v1 = Avx.Divide(v1, Vector256.Create(v1.GetElement(3)));
-            v2 = Avx.Divide(v2, Vector256.Create(v2.GetElement(3)));
-            v3 = Avx.Divide(v3, Vector256.Create(v3.GetElement(3)));
-            v4 = Avx.Divide(v4, Vector256.Create(v4.GetElement(3)));
             var av = projectionMatrix.Transform(anchorPointMv.Transform(Avx.Divide(Avx.Add(anchorPoint.AsVector256(), Vector256.Create(0.0, 0.0, 0.0, size)), Vector256.Create((double)size))));
             av = Avx.Divide(av, Vector256.Create(av.GetElement(3)));
-
             var s = new Vector2d(size, size) * 0.5;
-            var offset = new Vector2d(Width, Height) * 0.5;
-            var bbAnchorPoint = ((Vector2d)av) * s + offset;
-
-            if (IntersectLine((Vector2d)v1, (Vector2d)v4, (Vector2d)v2, (Vector2d)v3) ||
-                IntersectLine((Vector2d)v1, (Vector2d)v4, (Vector2d)v1, (Vector2d)v3) ||
-                IntersectLine((Vector2d)v1, (Vector2d)v4, (Vector2d)v4, (Vector2d)v3))
-            {
-                // バウンディングボックスがクロスしているためアンカーポイントのみ表示
-                return new PreviewBoundingBox(bbAnchorPoint, [], true, bbAnchorPoint.IsNaN() || bbAnchorPoint.IsInfinty());
-            }
-            else
-            {
-                var leftTop = ((Vector2d)v1) * s + offset;
-                var rightTop = ((Vector2d)v4) * s + offset;
-                var leftBottom = ((Vector2d)v2) * s + offset;
-                var rightBottom = ((Vector2d)v3) * s + offset;
-                return new PreviewBoundingBox(
-                    bbAnchorPoint,
-                    [new BoundingBoxShape([leftTop, rightTop, rightBottom, leftBottom], true, false)],
-                    (leftTop - rightTop).IsZero && (leftTop - leftBottom).IsZero && (rightTop - rightBottom).IsZero && (leftBottom - rightBottom).IsZero,
-                    bbAnchorPoint.IsNaN() || bbAnchorPoint.IsInfinty()
-                );
-            }
+            var bbAnchorPoint = ((Vector2d)av) * s + (new Vector2d(Width, Height) * 0.5);
+            return new PreviewBoundingBox(bbAnchorPoint, shapes.ToArray(), shapes.Count < 1, bbAnchorPoint.IsNaN() || bbAnchorPoint.IsInfinty());
         }
 
         public PreviewBoundingBox GetCameraBoundingBox(CameraSetting targetCameraSetting, CameraSetting cameraSetting)
@@ -923,6 +919,13 @@ namespace NiVE3.PresetPlugin.Renderer
             }
 
             return true;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static Matrix4x4d CreateDefaultViewMatrix(double width)
+        {
+            var zoom = width / Math.Tan(DefaultFov * 0.5) * 0.5;
+            return Matrix4x4d.CreateLookAt(Vector256.Create(0.5, 0.5, -zoom / width, 0.0), Vector256.Create(0.5, 0.5, 0.0, 0.0), Vector256.Create(0.0, 1.0, 0.0, 0.0));
         }
 
         public void Dispose()

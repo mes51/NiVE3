@@ -22,19 +22,11 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
 
         public readonly UVVertex V3;
 
-        public readonly NImage Texture;
-
         public readonly int Id;
-
-        public readonly float Opacity;
-
-        public readonly bool IsCastShadow;
 
         public readonly bool SignIsDifferent;
 
         public readonly bool IsInvalidNormal;
-
-        public readonly float LightTransmission;
 
         public readonly Vector256<double> Normal;
 
@@ -48,15 +40,11 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
 
         readonly Matrix4x4d InvertMatrix;
 
-        protected TriangleBase(in UVVertex v1, in UVVertex v2, in UVVertex v3, in Vector256<double> farPoint, Matrix4x4d invertMatrix, NImage texture, float opacity, bool isCastShadow, float lightTransmission, int id)
+        protected TriangleBase(in UVVertex v1, in UVVertex v2, in UVVertex v3, in Vector256<double> farPoint, Matrix4x4d invertMatrix, int id)
         {
             V1 = v1;
             V2 = v2;
             V3 = v3;
-            Texture = texture;
-            Opacity = opacity;
-            IsCastShadow = isCastShadow;
-            LightTransmission = lightTransmission;
             Id = id;
             FarPoint = farPoint;
             InvertMatrix = invertMatrix;
@@ -83,10 +71,6 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
             V1 = v1;
             V2 = v2;
             V3 = v3;
-            Texture = baseTriangle.Texture;
-            Opacity = baseTriangle.Opacity;
-            IsCastShadow = baseTriangle.IsCastShadow;
-            LightTransmission = baseTriangle.LightTransmission;
             Id = baseTriangle.Id;
             FarPoint = baseTriangle.FarPoint;
             InvertMatrix = baseTriangle.InvertMatrix;
@@ -129,7 +113,36 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
         public abstract T CreateByNewVertex(in UVVertex v1, in UVVertex v2, in UVVertex v3);
     }
 
-    class Triangle : TriangleBase<Triangle>
+    abstract class TexturedTriangleBase<T> : TriangleBase<T> where T : TexturedTriangleBase<T>
+    {
+        public readonly NImage Texture;
+
+        public readonly float Opacity;
+
+        public readonly bool IsCastShadow;
+
+        public readonly float LightTransmission;
+
+        protected TexturedTriangleBase(in UVVertex v1, in UVVertex v2, in UVVertex v3, in Vector256<double> farPoint, Matrix4x4d invertMatrix, NImage texture, float opacity, bool isCastShadow, float lightTransmission, int id)
+            : base(v1, v2, v3, farPoint, invertMatrix, id)
+        {
+            Texture = texture;
+            Opacity = opacity;
+            IsCastShadow = isCastShadow;
+            LightTransmission = lightTransmission;
+        }
+
+        protected TexturedTriangleBase(TexturedTriangleBase<T> baseTriangle, in UVVertex v1, in UVVertex v2, in UVVertex v3)
+            : base(baseTriangle, v1, v2, v3)
+        {
+            Texture = baseTriangle.Texture;
+            Opacity = baseTriangle.Opacity;
+            IsCastShadow = baseTriangle.IsCastShadow;
+            LightTransmission = baseTriangle.LightTransmission;
+        }
+    }
+
+    class Triangle : TexturedTriangleBase<Triangle>
     {
         public readonly BlendMode BlendMode;
 
@@ -182,7 +195,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
         }
     }
 
-    class LightTriangle : TriangleBase<LightTriangle>
+    class LightTriangle : TexturedTriangleBase<LightTriangle>
     {
         public LightTriangle(in UVVertex v1, in UVVertex v2, in UVVertex v3, in Vector256<double> farPoint, in Matrix4x4d invertMatrix, NImage texture, float opacity, bool isCastShadow, float lightTransmission, int id)
             : base(v1, v2, v3, farPoint, invertMatrix, texture, opacity, isCastShadow, lightTransmission, id) { }
@@ -193,6 +206,20 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
         public override LightTriangle CreateByNewVertex(in UVVertex v1, in UVVertex v2, in UVVertex v3)
         {
             return new LightTriangle(this, v1, v2, v3);
+        }
+    }
+
+    class BoundingBoxTriangle : TriangleBase<BoundingBoxTriangle>
+    {
+        public BoundingBoxTriangle(in Vector256<double> v1, in Vector256<double> v2, in Vector256<double> v3, in Vector256<double> farPoint, Matrix4x4d invertMatrix)
+            : base(new UVVertex(v1, 0.0, 0.0), new UVVertex(v2, 0.0, 0.0), new UVVertex(v3, 0.0, 0.0), farPoint, invertMatrix, 0) { }
+
+        public BoundingBoxTriangle(TriangleBase<BoundingBoxTriangle> baseTriangle, in UVVertex v1, in UVVertex v2, in UVVertex v3)
+            : base(baseTriangle, v1, v2, v3) { }
+
+        public override BoundingBoxTriangle CreateByNewVertex(in UVVertex v1, in UVVertex v2, in UVVertex v3)
+        {
+            return new BoundingBoxTriangle(this, v1, v2, v3);
         }
     }
 }
