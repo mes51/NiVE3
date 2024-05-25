@@ -21,6 +21,7 @@ using NiVE3.Plugin.ValueObject;
 using NiVE3.PresetPlugin.Internal.Drawing.Primitive3D;
 using NiVE3.Image.Drawing;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace NiVE3.PresetPlugin.Renderer
 {
@@ -478,8 +479,14 @@ namespace NiVE3.PresetPlugin.Renderer
 
             var farPoint = Avx.And(mv.Transform(Vector256.Create(0.0, 0.0, -10000.0, 1.0)), Vector256.Create(0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0).AsDouble());
             var triangles = TriangleDivider.ClipAndDivide([new BoundingBoxTriangle(v1, v2, v3, farPoint, invertedModelViewMatrix), new BoundingBoxTriangle(v1, v3, v4, farPoint, invertedModelViewMatrix)]).ToArray();
-            var shapes = new List<BoundingBoxShape>(triangles.Length);
             var projectionOffset = Vector256.Create(offsetX, offsetY, 0.0, 0.0) * size;
+
+            var av = projectionMatrix.Transform(anchorPointMv.Transform(Avx.Divide(Avx.Add(anchorPoint.AsVector256(), Vector256.Create(0.0, 0.0, 0.0, size)), Vector256.Create((double)size))));
+            av = Avx.Divide(av, Vector256.Create(av.GetElement(3)));
+            var s = new Vector2d(size, size) * 0.5;
+            var bbAnchorPoint = ((Vector2d)av) * s + (new Vector2d(Width, Height) * 0.5);
+
+            var points = new List<Vector128<double>>();
             foreach (var triangle in triangles)
             {
                 var uv1 = triangle.V1.Transform(projectionMatrix).Vertex;
@@ -492,18 +499,56 @@ namespace NiVE3.PresetPlugin.Renderer
                 uv1 *= w1;
                 uv2 *= w2;
                 uv3 *= w3;
-                var dvv1 = (uv1 + Vector256.Create(1.0, 1.0, 0.0, 0.0)) * Vector256.Create(size * 0.5, size * 0.5, 1.0, 1.0) - projectionOffset;
-                var dvv2 = (uv2 + Vector256.Create(1.0, 1.0, 0.0, 0.0)) * Vector256.Create(size * 0.5, size * 0.5, 1.0, 1.0) - projectionOffset;
-                var dvv3 = (uv3 + Vector256.Create(1.0, 1.0, 0.0, 0.0)) * Vector256.Create(size * 0.5, size * 0.5, 1.0, 1.0) - projectionOffset;
+                var dvv1 = Avx.ExtractVector128((uv1 + Vector256.Create(1.0, 1.0, 0.0, 0.0)) * Vector256.Create(size * 0.5, size * 0.5, 1.0, 1.0) - projectionOffset, 0);
+                var dvv2 = Avx.ExtractVector128((uv2 + Vector256.Create(1.0, 1.0, 0.0, 0.0)) * Vector256.Create(size * 0.5, size * 0.5, 1.0, 1.0) - projectionOffset, 0);
+                var dvv3 = Avx.ExtractVector128((uv3 + Vector256.Create(1.0, 1.0, 0.0, 0.0)) * Vector256.Create(size * 0.5, size * 0.5, 1.0, 1.0) - projectionOffset, 0);
 
-                shapes.Add(new BoundingBoxShape([new Vector2d(dvv1.GetElement(0), dvv1.GetElement(1)), new Vector2d(dvv2.GetElement(0), dvv2.GetElement(1)), new Vector2d(dvv3.GetElement(0), dvv3.GetElement(1))], true, false));
+                points.Add(dvv1);
+                points.Add(dvv2);
+                points.Add(dvv3);
             }
 
-            var av = projectionMatrix.Transform(anchorPointMv.Transform(Avx.Divide(Avx.Add(anchorPoint.AsVector256(), Vector256.Create(0.0, 0.0, 0.0, size)), Vector256.Create((double)size))));
-            av = Avx.Divide(av, Vector256.Create(av.GetElement(3)));
-            var s = new Vector2d(size, size) * 0.5;
-            var bbAnchorPoint = ((Vector2d)av) * s + (new Vector2d(Width, Height) * 0.5);
-            return new PreviewBoundingBox(bbAnchorPoint, shapes.ToArray(), shapes.Count < 1, bbAnchorPoint.IsNaN() || bbAnchorPoint.IsInfinty());
+            points = [..points.Distinct()];
+            if (points.Count < 3)
+            {
+                // 空
+                return new PreviewBoundingBox(bbAnchorPoint, [], true, bbAnchorPoint.IsNaN() || bbAnchorPoint.IsInfinty());
+            }
+
+            var pointSpan = CollectionsMarshal.AsSpan(points);
+            var orderedPoints = new Vector128<double>[points.Count];
+            var used = 1;
+            orderedPoints[0] = points.MinBy(p => p.GetElement(0));
+            var prev = orderedPoints[0];
+            while (used < orderedPoints.Length)
+            {
+                var b = pointSpan[0];
+                for (var i = 1; i < pointSpan.Length; i++)
+                {
+                    var c = pointSpan[i];
+                    if (b == prev)
+                    {
+                        b = c;
+                    }
+                    else
+                    {
+                        var ab = b - prev;
+                        var ac = c - prev;
+                        var v = ab.CrossProduct(ac);
+                        if (v > 0.0 || (v == 0.0 && ac.LengthSquared() > ab.LengthSquared()))
+                        {
+                            b = c;
+                        }
+                    }
+                }
+
+                orderedPoints[used] = b;
+                prev = b;
+                used++;
+            }
+
+            var shape = new BoundingBoxShape([..orderedPoints.Select(v => (Vector2d)v)], true, false);
+            return new PreviewBoundingBox(bbAnchorPoint, [shape], false, bbAnchorPoint.IsNaN() || bbAnchorPoint.IsInfinty());
         }
 
         public PreviewBoundingBox GetCameraBoundingBox(CameraSetting targetCameraSetting, CameraSetting cameraSetting)
