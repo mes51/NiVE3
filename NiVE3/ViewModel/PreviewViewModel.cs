@@ -28,6 +28,7 @@ using NiVE3.View.Resource;
 using Prism.Commands;
 using System.Windows.Threading;
 using ImTools;
+using NiVE3.Numerics;
 
 namespace NiVE3.ViewModel
 {
@@ -255,6 +256,8 @@ namespace NiVE3.ViewModel
 
         public ICommand ChangeCurrentTimeCommand { get; }
 
+        public ICommand SelectLayerCommand { get; }
+
         int[] ImageBuffer { get; set; }
 
         Int32Rect BufferImageSize { get; set; }
@@ -314,6 +317,18 @@ namespace NiVE3.ViewModel
             RealFrameRateUpdateTimer.Tick += RealFrameRateUpdateTimer_Tick;
 
             ChangeCurrentTimeCommand = new DelegateCommand(() => CurrentTimeChangeByUserPublisher.Publish(this, EventArgs.Empty));
+
+            SelectLayerCommand = new DelegateCommand<Vector2d?>(p =>
+            {
+                if (p == null || PreviewModel is not CompositionPreviewModel compositionPreviewModel || compositionPreviewModel.Composition == null)
+                {
+                    return;
+                }
+
+                var pos = p.Value / (Scale * 0.01);
+                var layerId = compositionPreviewModel.Composition.FindLayerByPreviewPosition(CurrentTime, pos.X, pos.Y);
+                ViewState.NotifySelectLayer(compositionPreviewModel.Composition.CompositionId, layerId);
+            });
 
             WiringModel();
 

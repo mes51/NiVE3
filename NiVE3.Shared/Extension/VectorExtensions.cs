@@ -293,6 +293,12 @@ namespace NiVE3.Shared.Extension
 
             return Sse.Or(Sse.And(Vector128<float>.One, gteMask), Sse.And(Vector128.Create(-1.0F), ltMask));
         }
+
+        public static double CrossProduct(this in Vector128<double> x, in Vector128<double> y)
+        {
+            var v = Avx.Permute(x, 0b01) * y;
+            return -Sse3.HorizontalSubtract(v, v).GetElement(0);
+        }
     }
 
     public static class Vector256Extension

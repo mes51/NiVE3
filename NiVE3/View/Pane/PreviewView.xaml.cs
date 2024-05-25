@@ -14,6 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using NiVE3.Numerics;
 using NiVE3.Shared.Extension;
 using NiVE3.ValueObject;
 using NiVE3.View.Converter;
@@ -304,10 +305,21 @@ namespace NiVE3.View.Pane
             var viewModel = ViewModel;
             if (viewModel != null && !viewModel.IsFootage)
             {
-                IsMouseDown = true;
-                ClickPoint = e.GetPosition(PreviewCanvas);
-                PrevPoint = new Point(Canvas.GetLeft(PreviewAnchorGrid), Canvas.GetTop(PreviewAnchorGrid));
-                PreviewCanvas.CaptureMouse();
+                var pos = e.GetPosition(PreviewCanvas);
+                if (HandToolRadioButton.IsChecked ?? false)
+                {
+                    IsMouseDown = true;
+                    ClickPoint = pos;
+                    PrevPoint = new Point(Canvas.GetLeft(PreviewAnchorGrid), Canvas.GetTop(PreviewAnchorGrid));
+                    PreviewCanvas.CaptureMouse();
+                }
+                else
+                {
+                    var dpi = VisualTreeHelper.GetDpi(this);
+                    var compositionX = pos.X - Canvas.GetLeft(PreviewAnchorGrid);
+                    var compositionY = pos.Y - Canvas.GetTop(PreviewAnchorGrid);
+                    viewModel.SelectLayerCommand.Execute(new Vector2d(compositionX * dpi.DpiScaleX, compositionY * dpi.DpiScaleY));
+                }
             }
         }
 

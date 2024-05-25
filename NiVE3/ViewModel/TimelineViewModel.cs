@@ -696,6 +696,35 @@ namespace NiVE3.ViewModel
             AudioPlayerModel = audioPlayerModel;
         }
 
+        public void SelectLayer(Guid? layerId, bool isMultiSelect)
+        {
+            if (layerId == null && !isMultiSelect)
+            {
+                SelectedLayers?.Clear();
+            }
+            else if (Layers != null && SelectedLayers != null)
+            {
+                if (isMultiSelect)
+                {
+                    var selected = SelectedLayers.FirstOrDefault(l => l.LayerId == layerId);
+                    if (selected != null)
+                    {
+                        SelectedLayers.Remove(selected);
+                    }
+                    else
+                    {
+                        SelectedLayers.Add(Layers.First(l => l.LayerId == layerId));
+                    }
+                }
+                else if (!SelectedLayers.Any(l => l.LayerId == layerId))
+                {
+                    SelectedLayers.Clear();
+                    CurrentEditingCompositionId = CompositionModel?.CompositionId;
+                    SelectedLayers.Add(Layers.First(l => l.LayerId == layerId));
+                }
+            }
+        }
+
         public void DragOver(IDropInfo dropInfo)
         {
             if (Layers == null || CompositionModel == null)

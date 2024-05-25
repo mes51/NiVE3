@@ -211,8 +211,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
 
     class BoundingBoxTriangle : TriangleBase<BoundingBoxTriangle>
     {
-        public BoundingBoxTriangle(in Vector256<double> v1, in Vector256<double> v2, in Vector256<double> v3, in Vector256<double> farPoint, Matrix4x4d invertMatrix)
-            : base(new UVVertex(v1, 0.0, 0.0), new UVVertex(v2, 0.0, 0.0), new UVVertex(v3, 0.0, 0.0), farPoint, invertMatrix, 0) { }
+        public BoundingBoxTriangle(in Vector256<double> v1, in Vector256<double> v2, in Vector256<double> v3, in Vector256<double> farPoint, Matrix4x4d invertMatrix, int id = 0)
+            : base(new UVVertex(v1, 0.0, 0.0), new UVVertex(v2, 0.0, 0.0), new UVVertex(v3, 0.0, 0.0), farPoint, invertMatrix, id) { }
 
         public BoundingBoxTriangle(TriangleBase<BoundingBoxTriangle> baseTriangle, in UVVertex v1, in UVVertex v2, in UVVertex v3)
             : base(baseTriangle, v1, v2, v3) { }

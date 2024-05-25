@@ -87,21 +87,26 @@ namespace NiVE3.ViewModel
 
         ProjectModel ProjectModel { get; }
 
-        IDialogService DialogService { get; }
-
         PlayControllerModel PlayControllerModel { get; }
 
-        public MainWindowViewModel(IContainer container, IRegionManager region, ProjectModel projectModel, IDialogService dialogService, PlayControllerModel playControlModel)
+        ViewStateModel ViewState { get; }
+
+        IDialogService DialogService { get; }
+
+        public MainWindowViewModel(IContainer container, IRegionManager region, ProjectModel projectModel, PlayControllerModel playControllerModel, ViewStateModel viewState, IDialogService dialogService)
         {
             Container = container;
             Region = region;
             ProjectModel = projectModel;
+            PlayControllerModel = playControllerModel;
+            ViewState = viewState;
             DialogService = dialogService;
-            PlayControllerModel = playControlModel;
 
-            ProjectModel.OpenCompositionTimeline += ProjectModel_OpenCompositionTimeline;
-            ProjectModel.CompositionRemoved += ProjectModel_CompositionRemoved;
-            ProjectModel.PreviewModels.CollectionChanged += PreviewModels_CollectionChanged;
+            projectModel.OpenCompositionTimeline += ProjectModel_OpenCompositionTimeline;
+            projectModel.CompositionRemoved += ProjectModel_CompositionRemoved;
+            projectModel.PreviewModels.CollectionChanged += PreviewModels_CollectionChanged;
+
+            viewState.SelectLayerRequest += ViewState_SelectLayerRequest;
 
             OpenProjectCommand = new DelegateCommand(() =>
             {
@@ -177,7 +182,7 @@ namespace NiVE3.ViewModel
 
             RemoveViewModelCommand = new DelegateCommand<BindableBase>(MainRegion.Remove);
 
-            PlayControllerModel.ChangeFrameRequest += PlayControllerModel_ChangeFrameRequest;
+            playControllerModel.ChangeFrameRequest += PlayControllerModel_ChangeFrameRequest;
 
             MainRegion.Views.CollectionChanged += ViewModels_CollectionChanged;
 
@@ -329,6 +334,16 @@ namespace NiVE3.ViewModel
             if (vm != null)
             {
                 vm.CurrentTime = PlayControllerModel.CurrentTime;
+            }
+        }
+
+        private void ViewState_SelectLayerRequest(object? sender, SelectLayerEvent e)
+        {
+            var viewModel = ViewModels.OfType<TimelineViewModel>().FirstOrDefault(t => t.CompositionModel != null && t.CompositionId == e.CompositionId);
+            if (viewModel != null)
+            {
+                viewModel.OpenPane();
+                viewModel.SelectLayer(e.LayerId, Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl) || Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift));
             }
         }
     }

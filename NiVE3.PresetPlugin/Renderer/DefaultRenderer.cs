@@ -586,6 +586,116 @@ namespace NiVE3.PresetPlugin.Renderer
             );
         }
 
+        public Guid? SelectLayer(CameraSetting cameraSetting, LayerSkeleton[] layers, double x, double y)
+        {
+            var result = (Guid?)null;
+
+            var size = Math.Max(Width, Height);
+            var offsetX = (size - Width) * 0.5 / size;
+            var offsetY = (size - Height) * 0.5 / size;
+            var offsetMatrix = Matrix4x4d.CreateTranslate(offsetX, offsetY, 0.0);
+            var projectionOffset = Vector256.Create(offsetX, offsetY, 0.0, 0.0) * size;
+            var clickPoint = Vector256.Create(x, y, 0.0, 0.0);
+
+            var viewMatrix = Calc3DViewMatrix(cameraSetting, Width, Height);
+            var fov = Math.Atan((Width / (cameraSetting.Zoom)) * 0.5) * 2.0;
+            var projectionMatrix = Matrix4x4d.CreatePerspectiveFieldOfView(fov, 1.0, double.Epsilon, double.PositiveInfinity);
+
+            foreach (var group in layers.GroupByPrev(l => l.IsEnable3D))
+            {
+                if (group.First().IsEnable3D)
+                {
+                    var triangles = new List<BoundingBoxTriangle>();
+                    var ids = new Dictionary<int, Guid>();
+                    foreach (var ((layerId, (origin, width, height), isEnable3D, transformProperty, parentTransformProperties), i) in group.Reverse().ZipWithIndex())
+                    {
+                        var modelMatrix = Matrix4x4d.CreateTranslate(-origin.X / size, -origin.Y / size, 0.0) * Calc3DModelMatrix(transformProperty, parentTransformProperties, Width, Height);
+                        var mv = modelMatrix * viewMatrix;
+                        var mvt = mv * offsetMatrix;
+
+                        var sv1 = Vector256.Create(0.0, 0.0, 0.0, size) / size;
+                        var sv2 = Vector256.Create(0.0, height, 0.0, size) / size;
+                        var sv3 = Vector256.Create(width, height, 0.0, size) / size;
+                        var sv4 = Vector256.Create(width, 0.0, 0.0, size) / size;
+                        var v1 = mvt.Transform(sv1);
+                        var v2 = mvt.Transform(sv2);
+                        var v3 = mvt.Transform(sv3);
+                        var v4 = mvt.Transform(sv4);
+
+                        Matrix4x4d.Invert(mv, out var invertedModelViewMatrix);
+                        invertedModelViewMatrix = Matrix4x4d.Transpose(invertedModelViewMatrix);
+
+                        var farPoint = Avx.And(mv.Transform(Vector256.Create(0.0, 0.0, -10000.0, 1.0)), Vector256.Create(0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0).AsDouble());
+                        triangles.Add(new BoundingBoxTriangle(v1, v2, v3, farPoint, invertedModelViewMatrix, i));
+                        triangles.Add(new BoundingBoxTriangle(v1, v3, v4, farPoint, invertedModelViewMatrix, i));
+                        ids.Add(i, layerId);
+                    }
+
+                    var hit = new HashSet<int>();
+                    foreach (var triangle in TriangleDivider.ClipAndDivide(triangles))
+                    {
+                        if (hit.Contains(triangle.Id))
+                        {
+                            continue;
+                        }
+
+                        var uv1 = triangle.V1.Transform(projectionMatrix).Vertex;
+                        var uv2 = triangle.V2.Transform(projectionMatrix).Vertex;
+                        var uv3 = triangle.V3.Transform(projectionMatrix).Vertex;
+
+                        var w1 = 1.0 / Math.Abs(uv1.GetElement(3));
+                        var w2 = 1.0 / Math.Abs(uv2.GetElement(3));
+                        var w3 = 1.0 / Math.Abs(uv3.GetElement(3));
+                        uv1 *= w1;
+                        uv2 *= w2;
+                        uv3 *= w3;
+                        var dvv1 = (uv1 + Vector256.Create(1.0, 1.0, 0.0, 0.0)) * Vector256.Create(size * 0.5, size * 0.5, 1.0, 1.0) - projectionOffset;
+                        var dvv2 = (uv2 + Vector256.Create(1.0, 1.0, 0.0, 0.0)) * Vector256.Create(size * 0.5, size * 0.5, 1.0, 1.0) - projectionOffset;
+                        var dvv3 = (uv3 + Vector256.Create(1.0, 1.0, 0.0, 0.0)) * Vector256.Create(size * 0.5, size * 0.5, 1.0, 1.0) - projectionOffset;
+
+                        var ab = Avx.ExtractVector128(dvv2 - dvv1, 0);
+                        var bc = Avx.ExtractVector128(dvv3 - dvv2, 0);
+                        var ca = Avx.ExtractVector128(dvv1 - dvv3, 0);
+                        var ap = Avx.ExtractVector128(clickPoint - dvv1, 0);
+                        var bp = Avx.ExtractVector128(clickPoint - dvv2, 0);
+                        var cp = Avx.ExtractVector128(clickPoint - dvv3, 0);
+
+                        var abp = ab.CrossProduct(bp);
+                        var bcp = bc.CrossProduct(cp);
+                        var cap = ca.CrossProduct(ap);
+
+                        // TODO: Z座標を比較する
+                        if ((abp > 0.0 && bcp > 0.0 && cap > 0.0) || (abp < 0.0 && bcp < 0.0 && cap < 0.0))
+                        {
+                            result = ids[triangle.Id];
+                            hit.Add(triangle.Id);
+                        }
+                    }
+                }
+                else
+                {
+                    foreach (var (layerId, (origin, width, height), isEnable3D, transformProperty, parentTransformProperties) in group.Reverse())
+                    {
+                        var transform = CalcTransform2D(transformProperty, parentTransformProperties);
+                        transform = Matrix3x3.CreateTranslate(-(float)origin.X, -(float)origin.Y) * transform;
+                        if (!Matrix3x3.Invert(transform, out var inverted))
+                        {
+                            continue;
+                        }
+
+                        var (imageX, imageY) = inverted.Transform((float)x, (float)y);
+                        if (imageX > -1.0F && imageY > -1.0F && imageX < width && imageY < height)
+                        {
+                            result = layerId;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
+
         static Matrix3x3 CalcTransform2D(PropertyValueGroup transform, ParentTransform[] parentTransforms)
         {
             var matrix = GetTransform2D(transform);

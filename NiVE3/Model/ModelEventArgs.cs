@@ -50,4 +50,17 @@ namespace NiVE3.Model
 
         public IFootageModel[] Footages { get; }
     }
+
+    class SelectLayerEvent : EventArgs
+    {
+        public Guid CompositionId { get; }
+
+        public Guid? LayerId { get; }
+
+        public SelectLayerEvent(Guid compositionId, Guid? layerId)
+        {
+            CompositionId = compositionId;
+            LayerId = layerId;
+        }
+    }
 }

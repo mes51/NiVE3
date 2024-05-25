@@ -539,7 +539,7 @@ namespace NiVE3.Model
                 image = FootageModel.ReadImage(sourceTime, downSamplingRate, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties, InterpolationQuality, useGpu);
                 roi = new ROI(new Int32Point(), new Int32Size(image.Width, image.Height), 0, 0, image.Width, image.Height);
 
-                var originalImageSize = downSamplingRate != 1.0 ? FootageModel.CalcSize(time, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties) : new SourceFootageRect(Vector2d.Zero, image.Width, image.Height);
+                var originalImageSize = downSamplingRate != 1.0 ? FootageModel.CalcSize(sourceTime, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties) : new SourceFootageRect(Vector2d.Zero, image.Width, image.Height);
                 downSamplingRateX = originalImageSize.Width / (float)image.Width;
                 downSamplingRateY = originalImageSize.Height / (float)image.Height;
                 if (IsEnableEffect)
@@ -884,6 +884,24 @@ namespace NiVE3.Model
 
             var sourceOptionProperties = (TextProperties ?? ShapeProperties ?? SourceOptionProperties)?.GetValues(sourceTime);
             return FootageModel.CalcSize(time, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties);
+        }
+
+        public LayerSkeleton? GetLayerSkeleton(double time)
+        {
+            if (!HasImage || !IsContainsTime(time))
+            {
+                return null;
+            }
+
+            var layerTime = time - SourceStartPoint;
+            var sourceTime = CalcSourceTime(layerTime);
+
+            var transform = GetTransform(time);
+            var parentTransforms = GetParentTransforms(time);
+            var sourceOptionProperties = (TextProperties ?? ShapeProperties ?? SourceOptionProperties)?.GetValues(sourceTime);
+            var rect = FootageModel.CalcSize(sourceTime, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties);
+
+            return new LayerSkeleton(LayerId, rect, IsEnable3D, transform, parentTransforms);
         }
 
         public void CalcCacheKeyHash(XxHash3 hash, double time, bool withTrackMatte)

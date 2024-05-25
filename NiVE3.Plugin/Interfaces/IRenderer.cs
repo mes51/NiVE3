@@ -119,5 +119,15 @@ namespace NiVE3.Plugin.Interfaces
         /// <param name="cameraSetting">カメラの設定</param>
         /// <returns>プレビューで表示するバウンディングボックス</returns>
         PreviewBoundingBox GetLightBoundingBox(LightSetting lightSetting, CameraSetting cameraSetting);
+
+        /// <summary>
+        /// プレビュー上の座標からレイヤーを選択します
+        /// </summary>
+        /// <param name="cameraSetting">カメラの設定</param>
+        /// <param name="layers">現在コンポジションに存在する選択可能なレイヤーの配列</param>
+        /// <param name="x">プレビュー上のX座標</param>
+        /// <param name="y">プレビュー上のY座標</param>
+        /// <returns>プレビュー上の座標最前面に存在するレイヤーのID、存在しない場合はnull</returns>
+        Guid? SelectLayer(CameraSetting cameraSetting, LayerSkeleton[] layers, double x, double y);
     }
 }
