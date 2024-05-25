@@ -248,7 +248,7 @@ namespace NiVE3.PresetPlugin.Renderer
                         FieldOfView = FieldOfView
                     };
 
-                    foreach (var i in group)
+                    foreach (var i in group.Reverse())
                     {
                         var opacity = (double)(i.Transform[ILayerObject.TransformPropertyOpacityId] ?? 0.0) * 0.01;
 
