@@ -1010,27 +1010,6 @@ namespace NiVE3.PresetPlugin.Renderer
             }
         }
 
-        static bool IntersectLine(in Vector2d v1, in Vector2d v2, in Vector2d v3, in Vector2d v4)
-        {
-            var ab = v2 - v1;
-            var ac = v3 - v1;
-            var ad = v4 - v1;
-            if (((ab.X * ac.Y) - (ab.Y * ac.X)) * ((ab.X * ad.Y) - (ab.Y * ad.X)) >= 0.0)
-            {
-                return false;
-            }
-
-            var cd = v4 - v3;
-            var ca = v1 - v3;
-            var cb = v2 - v3;
-            if (((cd.X * ca.Y) - (cd.Y * ca.X)) * ((cd.X * cb.Y) - (cd.Y * cb.X)) >= 0.0)
-            {
-                return false;
-            }
-
-            return true;
-        }
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static Matrix4x4d CreateDefaultViewMatrix(double width)
         {
