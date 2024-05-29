@@ -157,6 +157,18 @@ namespace NiVE3.Numerics
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(Vector2d a, Vector2d b)
+        {
+            return a.Equals(b);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator !=(Vector2d a, Vector2d b)
+        {
+            return !a.Equals(b);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator Vector128<double>(Vector2d v)
         {
             return Vector128.Create(v.X, v.Y);
@@ -205,15 +217,15 @@ namespace NiVE3.Numerics
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(Vector2d a, Vector2d b)
+        public static explicit operator System.Windows.Vector(Vector2d v)
         {
-            return a.Equals(b);
+            return new System.Windows.Vector(v.X, v.Y);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(Vector2d a, Vector2d b)
+        public static explicit operator Vector2d(System.Windows.Vector v)
         {
-            return !a.Equals(b);
+            return new Vector2d(v.X, v.Y);
         }
     }
 
@@ -399,6 +411,18 @@ namespace NiVE3.Numerics
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator Vector3d(Vector2 v)
+        {
+            return new Vector3d(v.X, v.Y, 0.0);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator Vector2d(Vector3d v)
+        {
+            return new Vector2d(v.X, v.Y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator Vector3d(Vector2d v)
         {
             return new Vector3d(v.X, v.Y, 0.0);
         }

@@ -91,22 +91,25 @@ namespace NiVE3.ViewModel
 
         ViewStateModel ViewState { get; }
 
+        EventHubModel EventHubModel { get; }
+
         IDialogService DialogService { get; }
 
-        public MainWindowViewModel(IContainer container, IRegionManager region, ProjectModel projectModel, PlayControllerModel playControllerModel, ViewStateModel viewState, IDialogService dialogService)
+        public MainWindowViewModel(IContainer container, IRegionManager region, ProjectModel projectModel, PlayControllerModel playControllerModel, ViewStateModel viewState, EventHubModel eventHubModel, IDialogService dialogService)
         {
             Container = container;
             Region = region;
             ProjectModel = projectModel;
             PlayControllerModel = playControllerModel;
             ViewState = viewState;
+            EventHubModel = eventHubModel;
             DialogService = dialogService;
 
             projectModel.OpenCompositionTimeline += ProjectModel_OpenCompositionTimeline;
             projectModel.CompositionRemoved += ProjectModel_CompositionRemoved;
             projectModel.PreviewModels.CollectionChanged += PreviewModels_CollectionChanged;
 
-            viewState.SelectLayerRequest += ViewState_SelectLayerRequest;
+            eventHubModel.SelectLayerRequest += EventHubModel_SelectLayerRequest;
 
             OpenProjectCommand = new DelegateCommand(() =>
             {
@@ -337,7 +340,7 @@ namespace NiVE3.ViewModel
             }
         }
 
-        private void ViewState_SelectLayerRequest(object? sender, SelectLayerEvent e)
+        private void EventHubModel_SelectLayerRequest(object? sender, SelectLayerEvent e)
         {
             var viewModel = ViewModels.OfType<TimelineViewModel>().FirstOrDefault(t => t.CompositionModel != null && t.CompositionId == e.CompositionId);
             if (viewModel != null)

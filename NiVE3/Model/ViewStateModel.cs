@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Mvvm;
+using NiVE3.Numerics;
+using NiVE3.Plugin.Interfaces.RendererParams;
 using NiVE3.ViewModel;
 using Prism.Mvvm;
 
@@ -157,18 +159,6 @@ namespace NiVE3.Model
         {
             get { return isIgnoreUpdatePreview; }
             set { SetProperty(ref isIgnoreUpdatePreview, value); }
-        }
-
-        WeakEventPublisher<SelectLayerEvent> SelectLayerRequestPublisher { get; } = new WeakEventPublisher<SelectLayerEvent>();
-        public event EventHandler<SelectLayerEvent> SelectLayerRequest
-        {
-            add { SelectLayerRequestPublisher.Subscribe(value); }
-            remove { SelectLayerRequestPublisher.Unsubscribe(value); }
-        }
-
-        public void NotifySelectLayer(Guid compositionId, Guid? layerId)
-        {
-            SelectLayerRequestPublisher.Publish(this, new SelectLayerEvent(compositionId, layerId));
         }
     }
 }

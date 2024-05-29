@@ -911,7 +911,7 @@ namespace NiVE3.Model
             var result = new List<ColoredPreviewBoundingBox>();
 
             var activeCamera = Layers.FirstOrDefault(l => l.IsEnableVideo && l.IsCamera && l.IsContainsTime(time));
-            var activeCameraSetting = activeCamera?.GetCameraSetting(time) ?? CreateDefaultCameraSetting(Width, Height);
+            var activeCameraSetting = GetActiveCameraSetting(time);
 
             foreach (var layer in layers)
             {
@@ -1105,6 +1105,17 @@ namespace NiVE3.Model
             var layers = Layers.Where(l => l.HasImage && l.IsEnableVideo && (!hasImageSolo || l.IsEnableSolo)).Select(l => l.GetLayerSkeleton(time)).NonNull().Reverse().ToArray();
 
             return Renderer.SelectLayer(activeCameraSetting, layers, x, y);
+        }
+
+        public Vector3d Unproject(CameraSetting cameraSetting, double x, double y)
+        {
+            return Renderer.ScreenCoordToWorldCoord(cameraSetting, x, y);
+        }
+
+        public CameraSetting GetActiveCameraSetting(double time)
+        {
+            var activeCamera = Layers.FirstOrDefault(l => l.IsEnableVideo && l.IsCamera && l.IsContainsTime(time));
+            return activeCamera?.GetCameraSetting(time) ?? CreateDefaultCameraSetting(Width, Height);
         }
 
         bool CheckCycledSimulatedParentLayer(Guid layerId, Dictionary<Guid, Guid?> changed, HashSet<Guid>? checkedLayerIds = null)

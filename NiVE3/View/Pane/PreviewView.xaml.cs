@@ -14,6 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using ILGPU.Algorithms.Optimization.Optimizers;
 using NiVE3.Numerics;
 using NiVE3.Shared.Extension;
 using NiVE3.ValueObject;
@@ -35,6 +36,8 @@ namespace NiVE3.View.Pane
         public const double SeparatorScale = 0.0;
 
         public const double UseImageInterpolationThreshold = 200.0;
+
+        const double ToolMoveThreshold = 5.0;
 
         public static readonly double[] ScaleList =
         [
@@ -228,6 +231,10 @@ namespace NiVE3.View.Pane
 
         bool IsMouseDown { get; set; }
 
+        bool IsMovedByTool { get; set; }
+
+        ToolType UsingToolType { get; set; }
+
         Point ClickPoint { get; set; }
 
         Point PrevPoint { get; set; }
@@ -303,23 +310,26 @@ namespace NiVE3.View.Pane
         private void PreviewCanvas_MouseDown(object sender, MouseButtonEventArgs e)
         {
             var viewModel = ViewModel;
-            if (viewModel != null && !viewModel.IsFootage)
+            if (viewModel != null && !viewModel.IsFootage && !viewModel.IsPlaying)
             {
                 var pos = e.GetPosition(PreviewCanvas);
+                var prevPoint = new Point(Canvas.GetLeft(PreviewAnchorGrid), Canvas.GetTop(PreviewAnchorGrid));
+                ClickPoint = pos;
+                IsMouseDown = true;
+                IsMovedByTool = false;
                 if (HandToolRadioButton.IsChecked ?? false)
                 {
-                    IsMouseDown = true;
-                    ClickPoint = pos;
-                    PrevPoint = new Point(Canvas.GetLeft(PreviewAnchorGrid), Canvas.GetTop(PreviewAnchorGrid));
-                    PreviewCanvas.CaptureMouse();
+                    UsingToolType = ToolType.Hand;
+                    PrevPoint = prevPoint;
                 }
                 else
                 {
+                    UsingToolType = ToolType.Select;
                     var dpi = VisualTreeHelper.GetDpi(this);
-                    var compositionX = pos.X - Canvas.GetLeft(PreviewAnchorGrid);
-                    var compositionY = pos.Y - Canvas.GetTop(PreviewAnchorGrid);
-                    viewModel.SelectLayerCommand.Execute(new Vector2d(compositionX * dpi.DpiScaleX, compositionY * dpi.DpiScaleY));
+                    var beginPos = (Vector2d)(pos - prevPoint) * new Vector2d(dpi.DpiScaleX, dpi.DpiScaleY);
+                    viewModel.SelectLayerCommand.Execute(beginPos);
                 }
+                PreviewCanvas.CaptureMouse();
             }
         }
 
@@ -327,8 +337,30 @@ namespace NiVE3.View.Pane
         {
             if (IsMouseDown)
             {
-                var newPoint = e.GetPosition(PreviewCanvas) - ClickPoint + PrevPoint;
-                MovePreviewArea(newPoint.X, newPoint.Y, true);
+                var newPoint = e.GetPosition(PreviewCanvas);
+                switch (UsingToolType)
+                {
+                    case ToolType.Hand:
+                        var diff = newPoint - ClickPoint + PrevPoint;
+                        MovePreviewArea(diff.X, diff.Y, true);
+                        break;
+                    default:
+                        var dpi = VisualTreeHelper.GetDpi(this);
+                        var compositionPoint = new Vector2d(Canvas.GetLeft(PreviewAnchorGrid), Canvas.GetTop(PreviewAnchorGrid));
+                        var dpiScale = new Vector2d(dpi.DpiScaleX, dpi.DpiScaleY);
+                        var beginPos = ((Vector2d)ClickPoint - compositionPoint) * dpiScale;
+                        if (!IsMovedByTool && (newPoint - ClickPoint).Length > ToolMoveThreshold)
+                        {
+                            ViewModel?.BeginUseToolCommand.Execute(beginPos);
+                            IsMovedByTool = true;
+                        }
+                        if (IsMovedByTool)
+                        {
+                            var nextPoint = ((Vector2d)newPoint - compositionPoint) * dpiScale;
+                            ViewModel?.MoveLayersByToolCommand?.Execute(Tuple.Create(nextPoint, false));
+                        }
+                        break;
+                }
             }
         }
 
@@ -336,8 +368,25 @@ namespace NiVE3.View.Pane
         {
             if (IsMouseDown)
             {
-                var newPoint = e.GetPosition(PreviewCanvas) - ClickPoint + PrevPoint;
-                MovePreviewArea(newPoint.X, newPoint.Y, true);
+                var newPoint = e.GetPosition(PreviewCanvas);
+                var dpi = VisualTreeHelper.GetDpi(this);
+                switch (UsingToolType)
+                {
+                    case ToolType.Hand:
+                        var diff = newPoint - ClickPoint + PrevPoint;
+                        MovePreviewArea(diff.X, diff.Y, true);
+                        break;
+                    default:
+                        if (IsMovedByTool)
+                        {
+                            var compositionPoint = new Vector2d(Canvas.GetLeft(PreviewAnchorGrid), Canvas.GetTop(PreviewAnchorGrid));
+                            var dpiScale = new Vector2d(dpi.DpiScaleX, dpi.DpiScaleY);
+                            var nextPoint = ((Vector2d)newPoint - compositionPoint) * dpiScale;
+                            ViewModel?.MoveLayersByToolCommand?.Execute(Tuple.Create(nextPoint, true));
+                        }
+                        break;
+                }
+
                 PreviewCanvas.ReleaseMouseCapture();
                 IsMouseDown = false;
             }
@@ -414,6 +463,18 @@ namespace NiVE3.View.Pane
             if (e.NewValue is PreviewViewModel newViewModel)
             {
                 newViewModel.SourceChanged += ViewModel_SourceChanged;
+            }
+        }
+
+        private void Root_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (IsMovedByTool)
+            {
+                ViewModel?.AbortUseToolCommand?.Execute(null);
+                IsMovedByTool = false;
+                IsMouseDown = false;
+                PreviewCanvas.ReleaseMouseCapture();
+                e.Handled = true;
             }
         }
 

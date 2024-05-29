@@ -121,13 +121,22 @@ namespace NiVE3.Plugin.Interfaces
         PreviewBoundingBox GetLightBoundingBox(LightSetting lightSetting, CameraSetting cameraSetting);
 
         /// <summary>
-        /// プレビュー上の座標からレイヤーを選択します
+        /// スクリーン座標からレイヤーを選択します
         /// </summary>
         /// <param name="cameraSetting">カメラの設定</param>
         /// <param name="layers">現在コンポジションに存在する選択可能なレイヤーの配列</param>
-        /// <param name="x">プレビュー上のX座標</param>
-        /// <param name="y">プレビュー上のY座標</param>
-        /// <returns>プレビュー上の座標最前面に存在するレイヤーのID、存在しない場合はnull</returns>
+        /// <param name="x">スクリーンのX座標</param>
+        /// <param name="y">スクリーンのY座標</param>
+        /// <returns>スクリーンの座標最前面に存在するレイヤーのID、存在しない場合はnull</returns>
         Guid? SelectLayer(CameraSetting cameraSetting, LayerSkeleton[] layers, double x, double y);
+
+        /// <summary>
+        /// スクリーン座標からコンポジションのワールド座標に変換します。
+        /// </summary>
+        /// <param name="cameraSetting">カメラの設定</param>
+        /// <param name="x">スクリーンのX座標</param>
+        /// <param name="y">スクリーンのY座標</param>
+        /// <returns>コンポジションのワールド座標座標</returns>
+        Vector3d ScreenCoordToWorldCoord(CameraSetting cameraSetting, double x, double y);
     }
 }

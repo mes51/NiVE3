@@ -17,6 +17,7 @@ using NiVE3.Data.Json.Project;
 using NiVE3.Image.Drawing;
 using NiVE3.Model;
 using NiVE3.Mvvm;
+using NiVE3.Numerics;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Property;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
@@ -29,6 +30,7 @@ using NiVE3.View.Part;
 using NiVE3.View.Primitive;
 using NiVE3.View.Resource;
 using NiVE3.ViewModel.Dialog;
+using NiVE3.ViewModel.PreviewManipulation;
 using Prism.Commands;
 using Prism.Services.Dialogs;
 
@@ -437,22 +439,32 @@ namespace NiVE3.ViewModel
 
         AudioPlayerModel AudioPlayerModel { get; }
 
+        EventHubModel EventHubModel { get; }
+
         SelectItemType SelectedItemType { get; set; } = SelectItemType.None;
 
         IViewModelShortcutCommand? SelectTarget { get; set; }
 
         IDialogService DialogService { get; }
 
-        public TimelineViewModel(ViewStateModel viewState, AudioPlayerModel audioPlayerModel, IDialogService dialogService)
+        bool IsUsingTool { get; set; }
+
+        PreviewManipulationStateBase? PreviewManipulation { get; set; }
+
+        public TimelineViewModel(ViewStateModel viewState, AudioPlayerModel audioPlayerModel, EventHubModel eventHubModel, IDialogService dialogService)
         {
             ViewState = viewState;
             AudioPlayerModel = audioPlayerModel;
+            EventHubModel = eventHubModel;
             DialogService = dialogService;
             Title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Timeline_EmptyTitle);
             SelectedLayers = [];
 
             WiringModel();
 
+            eventHubModel.BeginUseToolRequest += EventHubModel_BeginUseToolRequest;
+            eventHubModel.MoveLayersByToolRequest += EventHubModel_MoveLayersByToolRequest;
+            eventHubModel.AbortUseToolRequest += EventHubModel_AbortUseToolRequest;
             PropertyChanged += TimelineViewModel_PropertyChanged;
 
             ChangeEnableShyCommand = new RequerySuggestedCommand(() => CompositionModel?.ChangeEnableShy(), () => CompositionModel != null);
@@ -722,6 +734,22 @@ namespace NiVE3.ViewModel
                     CurrentEditingCompositionId = CompositionModel?.CompositionId;
                     SelectedLayers.Add(Layers.First(l => l.LayerId == layerId));
                 }
+
+                if (SelectedLayers.Count > 0)
+                {
+                    if (SelectedItemType != SelectItemType.Layer)
+                    {
+                        foreach (var layer in SelectedLayers)
+                        {
+                            layer.DeSelect();
+                        }
+                    }
+                    SelectedItemType = SelectItemType.Layer;
+                }
+                else
+                {
+                    SelectedItemType = SelectItemType.None;
+                }
             }
         }
 
@@ -793,6 +821,54 @@ namespace NiVE3.ViewModel
         partial void BindComposition();
 
         partial void UnbindComposition();
+
+        private void EventHubModel_AbortUseToolRequest(object? sender, AbortUseToolEvent e)
+        {
+            if (!IsUsingTool || CompositionModel == null || e.CompositionId != CompositionId || PreviewManipulation == null)
+            {
+                return;
+            }
+
+            PreviewManipulation.Abort();
+            IsUsingTool = false;
+            PreviewManipulation = null;
+        }
+
+        private void EventHubModel_MoveLayersByToolRequest(object? sender, MoveLayersByToolEvent e)
+        {
+            if (!IsUsingTool || CompositionModel == null || e.CompositionId != CompositionId || PreviewManipulation == null)
+            {
+                return;
+            }
+
+            if (e.IsCommit)
+            {
+                PreviewManipulation.Commit(e.NextScreenPos);
+                IsUsingTool = false;
+                PreviewManipulation = null;
+            }
+            else
+            {
+                PreviewManipulation.Update(e.NextScreenPos);
+            }
+        }
+
+        private void EventHubModel_BeginUseToolRequest(object? sender, BeginUseToolEvent e)
+        {
+            if (IsUsingTool || CompositionModel == null || e.CompositionId != CompositionId || SelectedItemType != SelectItemType.Layer || SelectedLayers == null || SelectedLayers.Count < 1)
+            {
+                return;
+            }
+
+            IsUsingTool = true;
+            var cameraSetting = CompositionModel.GetActiveCameraSetting(CurrentTime);
+            switch (e.PropertyName)
+            {
+                case ILayerObject.TransformPositionId:
+                    PreviewManipulation = new PositionPreviewManipulationState([..SelectedLayers], CurrentTime, CompositionModel, cameraSetting, e.StartScreenPosition);
+                    break;
+            }
+        }
 
         private void TimelineViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {

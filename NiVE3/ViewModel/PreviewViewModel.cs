@@ -29,6 +29,8 @@ using Prism.Commands;
 using System.Windows.Threading;
 using ImTools;
 using NiVE3.Numerics;
+using ILGPU.Algorithms.Optimization.Optimizers;
+using NiVE3.Plugin.Interfaces.RendererParams;
 
 namespace NiVE3.ViewModel
 {
@@ -175,6 +177,14 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref currentEditingCompositionId, value); }
         }
 
+        private bool isPlaying;
+        [NeedWire(nameof(PlayControllerModel), IsOneWay = true)]
+        public bool IsPlaying
+        {
+            get { return isPlaying; }
+            set { SetProperty(ref isPlaying, value); }
+        }
+
         private double realFrameRate;
         public double RealFrameRate
         {
@@ -252,11 +262,24 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref boundingBoxes, value); }
         }
 
+        private ToolType toolType;
+        public ToolType ToolType
+        {
+            get { return toolType; }
+            set { SetProperty(ref toolType, value); }
+        }
+
         public PreviewModelBase PreviewModel { get; }
 
         public ICommand ChangeCurrentTimeCommand { get; }
 
         public ICommand SelectLayerCommand { get; }
+
+        public ICommand BeginUseToolCommand { get; }
+
+        public ICommand MoveLayersByToolCommand { get; }
+
+        public ICommand AbortUseToolCommand { get; }
 
         int[] ImageBuffer { get; set; }
 
@@ -270,6 +293,8 @@ namespace NiVE3.ViewModel
 
         bool NeedUpdateFrameNextTick { get; set; }
 
+        bool IsUsingTool { get; set; }
+
         Debouncer FrameUpdateDebouncer { get; }
 
         ViewStateModel ViewState { get; }
@@ -279,6 +304,8 @@ namespace NiVE3.ViewModel
         AudioPlayerModel AudioPlayerModel { get; }
 
         AudioInformationModel AudioInformationModel { get; }
+
+        EventHubModel EventHubModel { get; }
 
         ColoredPreviewBoundingBox[]? BoundingBoxesBuffer { get; set; }
 
@@ -305,13 +332,14 @@ namespace NiVE3.ViewModel
             remove { CurrentTimeChangeByUserPublisher.Unsubscribe(value); }
         }
 
-        public PreviewViewModel(PreviewModelBase previewModel, ViewStateModel viewState, PlayControllerModel playControllerModel, AudioPlayerModel audioPlayerModel, AudioInformationModel audioInformationModel)
+        public PreviewViewModel(PreviewModelBase previewModel, ViewStateModel viewState, PlayControllerModel playControllerModel, AudioPlayerModel audioPlayerModel, AudioInformationModel audioInformationModel, EventHubModel eventHubModel)
         {
             PreviewModel = previewModel;
             ViewState = viewState;
             PlayControllerModel = playControllerModel;
             AudioPlayerModel = audioPlayerModel;
             AudioInformationModel = audioInformationModel;
+            EventHubModel = eventHubModel;
 
             RealFrameRateUpdateTimer = new DispatcherTimer { Interval = AudioSpeedChangeInterval };
             RealFrameRateUpdateTimer.Tick += RealFrameRateUpdateTimer_Tick;
@@ -327,7 +355,49 @@ namespace NiVE3.ViewModel
 
                 var pos = p.Value / (Scale * 0.01);
                 var layerId = compositionPreviewModel.Composition.FindLayerByPreviewPosition(CurrentTime, pos.X, pos.Y);
-                ViewState.NotifySelectLayer(compositionPreviewModel.Composition.CompositionId, layerId);
+                EventHubModel.NotifySelectLayer(compositionPreviewModel.Composition.CompositionId, layerId);
+            });
+
+            BeginUseToolCommand = new DelegateCommand<Vector2d?>(p =>
+            {
+                if (!p.HasValue || ToolType == ToolType.Hand || PreviewModel is not CompositionPreviewModel compositionPreviewModel || compositionPreviewModel.Composition == null)
+                {
+                    return;
+                }
+
+                var propertyName = ToolType switch
+                {
+                    ToolType.Select => ILayerObject.TransformPositionId,
+                    _ => throw new Exception() // bug
+                };
+                IsUsingTool = true;
+                EventHubModel.NotifyBeginUseTool(compositionPreviewModel.Composition.CompositionId, p.Value / (Scale * 0.01), propertyName);
+            });
+
+            MoveLayersByToolCommand = new DelegateCommand<Tuple<Vector2d, bool>>(t =>
+            {
+                if (!IsUsingTool || PreviewModel is not CompositionPreviewModel compositionPreviewModel || compositionPreviewModel.Composition == null)
+                {
+                    return;
+                }
+
+                var (nextPos, isCommit) = t;
+                nextPos /= Scale * 0.01;
+                IsUsingTool = !isCommit;
+
+                EventHubModel.NotifyMoveLayersByTool(compositionPreviewModel.Composition.CompositionId, nextPos, isCommit);
+            });
+
+            AbortUseToolCommand = new DelegateCommand(() =>
+            {
+                if (!IsUsingTool || PreviewModel is not CompositionPreviewModel compositionPreviewModel || compositionPreviewModel.Composition == null)
+                {
+                    return;
+                }
+
+                IsUsingTool = false;
+
+                EventHubModel.NotifyAbortUseTool(compositionPreviewModel.Composition.CompositionId);
             });
 
             WiringModel();
@@ -537,9 +607,17 @@ namespace NiVE3.ViewModel
                     BufferImageSize = new Int32Rect(0, 0, Math.Max(Width, 1), Math.Max(Height, 1));
                     CurrentFrame = new WriteableBitmap(BufferImageSize.Width, BufferImageSize.Height, 96.0, 96.0, PixelFormats.Bgra32, null);
                     ImageBuffer = new int[BufferImageSize.Width * BufferImageSize.Height];
+                    if (IsUsingTool)
+                    {
+                        AbortUseToolCommand.Execute(null);
+                    }
                     UpdateCurrentFrame();
                     break;
                 case nameof(CurrentTime):
+                    if (IsUsingTool)
+                    {
+                        AbortUseToolCommand.Execute(null);
+                    }
                     UpdateCurrentFrame();
                     if (PreviewModel.IsFootage && !PlayControllerModel.IsPlaying && Keyboard.IsKeyDown(Key.LeftCtrl))
                     {
@@ -557,19 +635,35 @@ namespace NiVE3.ViewModel
                     }
                     break;
                 case nameof(Duration):
+                    if (IsUsingTool)
+                    {
+                        AbortUseToolCommand.Execute(null);
+                    }
                     TimeBarRange = Duration;
                     TimeBarRangeStart = 0.0;
                     OnWorkareaChanged();
                     break;
                 case nameof(WorkareaBegin):
                 case nameof(WorkareaEnd):
+                    if (IsUsingTool)
+                    {
+                        AbortUseToolCommand.Execute(null);
+                    }
                     OnWorkareaChanged();
                     break;
                 case nameof(PreviewColorChannel):
                 case nameof(DownScaleRate):
+                    if (IsUsingTool)
+                    {
+                        AbortUseToolCommand.Execute(null);
+                    }
                     UpdateCurrentFrame();
                     break;
                 case nameof(SelectedLayerIds):
+                    if (IsUsingTool)
+                    {
+                        AbortUseToolCommand.Execute(null);
+                    }
                     UpdateBoundingBox();
                     break;
                 case nameof(IsScrubbing) when PreviewModel.IsFootage && !PlayControllerModel.IsPlaying:
@@ -582,11 +676,18 @@ namespace NiVE3.ViewModel
                         AudioPlayerModel.StopScrub();
                     }
                     break;
+                case nameof(ToolType) when IsUsingTool:
+                    AbortUseToolCommand.Execute(null);
+                    break;
             }
         }
 
         private void PreviewModel_SourceChanged(object? sender, EventArgs e)
         {
+            if (IsUsingTool)
+            {
+                AbortUseToolCommand.Execute(null);
+            }
             Scale = 100.0;
             IsStretchPreview = false;
             IsStretchLimited = false;
@@ -607,6 +708,10 @@ namespace NiVE3.ViewModel
             if (!IsSelected)
             {
                 return;
+            }
+            if (IsUsingTool)
+            {
+                AbortUseToolCommand.Execute(null);
             }
 
             var audio = Array.Empty<float>();
@@ -662,5 +767,11 @@ namespace NiVE3.ViewModel
         B,
         Alpha,
         RgbStraight
+    }
+
+    enum ToolType
+    {
+        Hand,
+        Select
     }
 }

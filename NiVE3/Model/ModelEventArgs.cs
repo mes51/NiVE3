@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using NiVE3.Numerics;
+using NiVE3.Plugin.Interfaces.RendererParams;
 
 namespace NiVE3.Model
 {
@@ -61,6 +63,48 @@ namespace NiVE3.Model
         {
             CompositionId = compositionId;
             LayerId = layerId;
+        }
+    }
+
+    class BeginUseToolEvent : EventArgs
+    {
+        public Guid CompositionId { get; }
+
+        public Vector2d StartScreenPosition { get; }
+
+        public string PropertyName { get; }
+
+        public BeginUseToolEvent(Guid compositionId, Vector2d startScreenPosition, string propertyName)
+        {
+            CompositionId = compositionId;
+            StartScreenPosition = startScreenPosition;
+            PropertyName = propertyName;
+        }
+    }
+
+    class MoveLayersByToolEvent : EventArgs
+    {
+        public Guid CompositionId { get; }
+
+        public Vector2d NextScreenPos { get; }
+
+        public bool IsCommit { get; }
+
+        public MoveLayersByToolEvent(Guid compositionId, Vector2d nextScreenPos, bool isCommit)
+        {
+            CompositionId = compositionId;
+            NextScreenPos = nextScreenPos;
+            IsCommit = isCommit;
+        }
+    }
+
+    class AbortUseToolEvent : EventArgs
+    {
+        public Guid CompositionId { get; }
+
+        public AbortUseToolEvent(Guid compositionId)
+        {
+            CompositionId = compositionId;
         }
     }
 }

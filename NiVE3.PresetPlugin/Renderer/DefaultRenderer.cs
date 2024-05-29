@@ -741,6 +741,18 @@ namespace NiVE3.PresetPlugin.Renderer
             return result;
         }
 
+        public Vector3d ScreenCoordToWorldCoord(CameraSetting cameraSetting, double x, double y)
+        {
+            var size = Math.Max(Width, Height);
+            var offset = Vector256.Create(size - Width, size - Height, 0.0, 0.0) * 0.5 / size;
+            var viewMatrix = Calc3DViewMatrix(cameraSetting, Width, Height);
+            var fov = Math.Atan((Width / (cameraSetting.Zoom)) * 0.5) * 2.0;
+            var projectionMatrix = Matrix4x4d.CreatePerspectiveFieldOfView(fov, 1.0, TriangleDivider.NearZ, cameraSetting.Zoom / size);
+            Matrix4x4d.Invert(viewMatrix * projectionMatrix, out var invertedViewProjection);
+
+            return (Vector3d)invertedViewProjection.Transform(Vector256.Create(x / size, y / size, 1.0, 1.0) + offset) * size;
+        }
+
         static Matrix3x3 CalcTransform2D(PropertyValueGroup transform, ParentTransform[] parentTransforms)
         {
             var matrix = GetTransform2D(transform);
