@@ -652,28 +652,12 @@ namespace NiVE3.PresetPlugin.Renderer
                 {
                     var triangles = new List<BoundingBoxTriangle>();
                     var ids = new Dictionary<int, Guid>();
-                    foreach (var ((layerId, (origin, width, height), isEnable3D, transformProperty, parentTransformProperties), i) in group.Reverse().ZipWithIndex())
+                    foreach (var (layer, i) in group.Reverse().ZipWithIndex())
                     {
-                        var modelMatrix = Matrix4x4d.CreateTranslate(-origin.X / size, -origin.Y / size, 0.0) * Calc3DModelMatrix(transformProperty, parentTransformProperties, Width, Height);
-                        var mv = modelMatrix * viewMatrix;
-                        var mvt = mv * offsetMatrix;
-
-                        var sv1 = Vector256.Create(0.0, 0.0, 0.0, size) / size;
-                        var sv2 = Vector256.Create(0.0, height, 0.0, size) / size;
-                        var sv3 = Vector256.Create(width, height, 0.0, size) / size;
-                        var sv4 = Vector256.Create(width, 0.0, 0.0, size) / size;
-                        var v1 = mvt.Transform(sv1);
-                        var v2 = mvt.Transform(sv2);
-                        var v3 = mvt.Transform(sv3);
-                        var v4 = mvt.Transform(sv4);
-
-                        Matrix4x4d.Invert(mv, out var invertedModelViewMatrix);
-                        invertedModelViewMatrix = Matrix4x4d.Transpose(invertedModelViewMatrix);
-
-                        var farPoint = Avx.And(mv.Transform(Vector256.Create(0.0, 0.0, -10000.0, 1.0)), Vector256.Create(0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0).AsDouble());
-                        triangles.Add(new BoundingBoxTriangle(v1, v2, v3, farPoint, invertedModelViewMatrix, i));
-                        triangles.Add(new BoundingBoxTriangle(v1, v3, v4, farPoint, invertedModelViewMatrix, i));
-                        ids.Add(i, layerId);
+                        var (t1, t2) = CreateBoundingBoxTriangles(layer, Width, Height, viewMatrix, offsetMatrix, i);
+                        triangles.Add(t1);
+                        triangles.Add(t2);
+                        ids.Add(i, layer.LayerId);
                     }
 
                     var hit = new HashSet<int>();
@@ -741,16 +725,37 @@ namespace NiVE3.PresetPlugin.Renderer
             return result;
         }
 
-        public Vector3d ScreenCoordToWorldCoord(CameraSetting cameraSetting, double x, double y)
+        public Vector3d ScreenCoordToWorldCoord(CameraSetting cameraSetting, double x, double y, LayerSkeleton? baseLayer)
         {
             var size = Math.Max(Width, Height);
             var offset = Vector256.Create(size - Width, size - Height, 0.0, 0.0) * 0.5 / size;
             var viewMatrix = Calc3DViewMatrix(cameraSetting, Width, Height);
             var fov = Math.Atan((Width / (cameraSetting.Zoom)) * 0.5) * 2.0;
-            var projectionMatrix = Matrix4x4d.CreatePerspectiveFieldOfView(fov, 1.0, TriangleDivider.NearZ, cameraSetting.Zoom / size);
+
+            var minZ = (double)TriangleDivider.NearZ;
+            var maxZ = cameraSetting.Zoom / size;
+            if (baseLayer != null)
+            {
+                var offsetX = (size - Width) * 0.5 / size;
+                var offsetY = (size - Height) * 0.5 / size;
+                var offsetMatrix = Matrix4x4d.CreateTranslate(offsetX, offsetY, 0.0);
+
+                var (t1, t2) = CreateBoundingBoxTriangles(baseLayer, Width, Height, viewMatrix, offsetMatrix);
+                var triangles = TriangleDivider.ClipAndDivide([t1, t2]).ToArray();
+
+                if (triangles.Length > 0)
+                {
+                    minZ = triangles.Select(t => Math.Min(Math.Min(t.V1.Vertex.GetElement(2), t.V2.Vertex.GetElement(2)), t.V3.Vertex.GetElement(2))).Min();
+                    maxZ = triangles.Select(t => Math.Max(Math.Max(t.V1.Vertex.GetElement(2), t.V2.Vertex.GetElement(2)), t.V3.Vertex.GetElement(2))).Max();
+                }
+            }
+
+            var projectionMatrix = Matrix4x4d.CreatePerspectiveFieldOfView(fov, 1.0, minZ, maxZ);
             Matrix4x4d.Invert(viewMatrix * projectionMatrix, out var invertedViewProjection);
 
-            return (Vector3d)invertedViewProjection.Transform(Vector256.Create(x / size, y / size, 1.0, 1.0) + offset) * size;
+            var p = Vector256.Create(x, y, size * 0.5, size * 0.5) / (size * 0.5) - Vector256.Create(1.0, 1.0, 0.0, 0.0);
+            var result = invertedViewProjection.Transform(p);
+            return (Vector3d)result / result.GetElement(3) * size;
         }
 
         static Matrix3x3 CalcTransform2D(PropertyValueGroup transform, ParentTransform[] parentTransforms)
@@ -1065,6 +1070,32 @@ namespace NiVE3.PresetPlugin.Renderer
                 default:
                     return Matrix4x4d.Identity;
             }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static (BoundingBoxTriangle, BoundingBoxTriangle) CreateBoundingBoxTriangles(LayerSkeleton layerSkeleton, int compositionWidth, int compositionHeight, in Matrix4x4d viewMatrix, in Matrix4x4d offsetMatrix, int index = 0)
+        {
+            var size = Math.Max(compositionWidth, compositionHeight);
+            var (_, (origin, width, height), isEnable3D, transformProperty, parentTransformProperties) = layerSkeleton;
+
+            var modelMatrix = Matrix4x4d.CreateTranslate(-origin.X / size, -origin.Y / size, 0.0) * Calc3DModelMatrix(transformProperty, parentTransformProperties, compositionWidth, compositionHeight);
+            var mv = modelMatrix * viewMatrix;
+            var mvt = mv * offsetMatrix;
+            var sv1 = Vector256.Create(0.0, 0.0, 0.0, size) / size;
+            var sv2 = Vector256.Create(0.0, height, 0.0, size) / size;
+            var sv3 = Vector256.Create(width, height, 0.0, size) / size;
+            var sv4 = Vector256.Create(width, 0.0, 0.0, size) / size;
+            var v1 = mvt.Transform(sv1);
+            var v2 = mvt.Transform(sv2);
+            var v3 = mvt.Transform(sv3);
+            var v4 = mvt.Transform(sv4);
+
+            Matrix4x4d.Invert(mv, out var invertedModelViewMatrix);
+            invertedModelViewMatrix = Matrix4x4d.Transpose(invertedModelViewMatrix);
+
+            var farPoint = Avx.And(mv.Transform(Vector256.Create(0.0, 0.0, -10000.0, 1.0)), Vector256.Create(0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0).AsDouble());
+
+            return (new BoundingBoxTriangle(v1, v2, v3, farPoint, invertedModelViewMatrix, index), new BoundingBoxTriangle(v1, v3, v4, farPoint, invertedModelViewMatrix, index));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

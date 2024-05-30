@@ -136,7 +136,8 @@ namespace NiVE3.Plugin.Interfaces
         /// <param name="cameraSetting">カメラの設定</param>
         /// <param name="x">スクリーンのX座標</param>
         /// <param name="y">スクリーンのY座標</param>
+        /// <param name="baseLayer">基準となるレイヤー</param>
         /// <returns>コンポジションのワールド座標座標</returns>
-        Vector3d ScreenCoordToWorldCoord(CameraSetting cameraSetting, double x, double y);
+        Vector3d ScreenCoordToWorldCoord(CameraSetting cameraSetting, double x, double y, LayerSkeleton? baseLayer);
     }
 }

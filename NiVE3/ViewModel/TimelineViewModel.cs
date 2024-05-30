@@ -865,7 +865,14 @@ namespace NiVE3.ViewModel
             switch (e.PropertyName)
             {
                 case ILayerObject.TransformPositionId:
-                    PreviewManipulation = new PositionPreviewManipulationState([..SelectedLayers], CurrentTime, CompositionModel, cameraSetting, e.StartScreenPosition);
+                    PreviewManipulation = new PositionPreviewManipulationState(
+                        [..SelectedLayers],
+                        CompositionModel.FindLayerByPreviewPosition(CurrentTime, e.StartScreenPosition.X, e.StartScreenPosition.Y),
+                        CurrentTime,
+                        CompositionModel,
+                        cameraSetting,
+                        e.StartScreenPosition
+                    );
                     break;
             }
         }

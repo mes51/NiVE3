@@ -43,7 +43,9 @@ namespace NiVE3.ViewModel.PreviewManipulation
 
         Vector3d StartPosition { get; }
 
-        public PositionPreviewManipulationState(LayerViewModel[] layers, double time, CompositionModel compositionModel, CameraSetting cameraSetting, Vector2d startScreenPosition) : base(time, compositionModel, cameraSetting, startScreenPosition)
+        Guid? GrabbingLayerId { get; }
+
+        public PositionPreviewManipulationState(LayerViewModel[] layers, Guid? grabbingLayerId, double time, CompositionModel compositionModel, CameraSetting cameraSetting, Vector2d startScreenPosition) : base(time, compositionModel, cameraSetting, startScreenPosition)
         {
             var imageLayers = new List<(bool, PropertyViewModel)>();
             var prevPositions = new List<Vector3d>();
@@ -60,14 +62,15 @@ namespace NiVE3.ViewModel.PreviewManipulation
                 }
             }
 
+            GrabbingLayerId = compositionModel.Layers.Any(l => l.LayerId == grabbingLayerId && l.IsEnable3D) ? grabbingLayerId : null;
             Properties = [..imageLayers];
             PrevPositions = [..prevPositions];
-            StartPosition = compositionModel.Unproject(cameraSetting, startScreenPosition.X, startScreenPosition.Y);
+            StartPosition = compositionModel.Unproject(cameraSetting, Time, startScreenPosition.X, startScreenPosition.Y, GrabbingLayerId);
         }
 
         public override void Update(Vector2d screenPos)
         {
-            var newPosition = CompositionModel.Unproject(CameraSetting, screenPos.X, screenPos.Y);
+            var newPosition = CompositionModel.Unproject(CameraSetting, Time, screenPos.X, screenPos.Y, GrabbingLayerId);
             var diff3D = newPosition - StartPosition;
             var diff2D = screenPos - StartScreenPosition;
             foreach (var ((isEnable3d, property), prev) in Properties.Zip(PrevPositions))
