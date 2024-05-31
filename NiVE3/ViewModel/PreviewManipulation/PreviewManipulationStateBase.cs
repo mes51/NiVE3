@@ -7,6 +7,7 @@ using NiVE3.Model;
 using NiVE3.Numerics;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Interfaces.RendererParams;
+using NiVE3.View.Resource;
 
 namespace NiVE3.ViewModel.PreviewManipulation
 {
@@ -20,12 +21,15 @@ namespace NiVE3.ViewModel.PreviewManipulation
 
         protected Vector2d StartScreenPosition { get; }
 
-        protected PreviewManipulationStateBase(double time, CompositionModel compositionModel, CameraSetting cameraSetting, Vector2d startScreenPosition)
+        protected HistoryModel HistoryModel { get; }
+
+        protected PreviewManipulationStateBase(double time, CompositionModel compositionModel, CameraSetting cameraSetting, Vector2d startScreenPosition, HistoryModel historyModel)
         {
             Time = time;
             CompositionModel = compositionModel;
             CameraSetting = cameraSetting;
             StartScreenPosition = startScreenPosition;
+            HistoryModel = historyModel;
         }
 
         public abstract void Update(Vector2d screenPos);
@@ -45,7 +49,8 @@ namespace NiVE3.ViewModel.PreviewManipulation
 
         Guid? GrabbingLayerId { get; }
 
-        public PositionPreviewManipulationState(LayerViewModel[] layers, Guid? grabbingLayerId, double time, CompositionModel compositionModel, CameraSetting cameraSetting, Vector2d startScreenPosition) : base(time, compositionModel, cameraSetting, startScreenPosition)
+        public PositionPreviewManipulationState(LayerViewModel[] layers, Guid? grabbingLayerId, double time, CompositionModel compositionModel, CameraSetting cameraSetting, Vector2d startScreenPosition, HistoryModel historyModel)
+            : base(time, compositionModel, cameraSetting, startScreenPosition, historyModel)
         {
             var imageLayers = new List<(bool, PropertyViewModel)>();
             var prevPositions = new List<Vector3d>();
@@ -90,10 +95,12 @@ namespace NiVE3.ViewModel.PreviewManipulation
         {
             Update(screenPos);
 
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangePropertyValue));
             foreach (var (_, property) in Properties)
             {
                 property.EndEditCommand.Execute(null);
             }
+            HistoryModel.EndGroup();
         }
 
         public override void Abort()

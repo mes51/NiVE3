@@ -439,6 +439,8 @@ namespace NiVE3.ViewModel
 
         AudioPlayerModel AudioPlayerModel { get; }
 
+        HistoryModel HistoryModel { get; }
+
         EventHubModel EventHubModel { get; }
 
         SelectItemType SelectedItemType { get; set; } = SelectItemType.None;
@@ -451,10 +453,11 @@ namespace NiVE3.ViewModel
 
         PreviewManipulationStateBase? PreviewManipulation { get; set; }
 
-        public TimelineViewModel(ViewStateModel viewState, AudioPlayerModel audioPlayerModel, EventHubModel eventHubModel, IDialogService dialogService)
+        public TimelineViewModel(ViewStateModel viewState, AudioPlayerModel audioPlayerModel, HistoryModel historyModel, EventHubModel eventHubModel, IDialogService dialogService)
         {
             ViewState = viewState;
             AudioPlayerModel = audioPlayerModel;
+            HistoryModel = historyModel;
             EventHubModel = eventHubModel;
             DialogService = dialogService;
             Title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Timeline_EmptyTitle);
@@ -871,7 +874,8 @@ namespace NiVE3.ViewModel
                         CurrentTime,
                         CompositionModel,
                         cameraSetting,
-                        e.StartScreenPosition
+                        e.StartScreenPosition,
+                        HistoryModel
                     );
                     break;
             }
