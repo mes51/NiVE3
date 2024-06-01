@@ -317,14 +317,13 @@ namespace NiVE3.View.Pane
                 ClickPoint = pos;
                 IsMouseDown = true;
                 IsMovedByTool = false;
-                if (HandToolRadioButton.IsChecked ?? false)
+                UsingToolType = viewModel.ToolType;
+                if (UsingToolType == ToolType.Hand)
                 {
-                    UsingToolType = ToolType.Hand;
                     PrevPoint = prevPoint;
                 }
                 else
                 {
-                    UsingToolType = ToolType.Select;
                     var dpi = VisualTreeHelper.GetDpi(this);
                     var beginPos = (Vector2d)(pos - prevPoint) * new Vector2d(dpi.DpiScaleX, dpi.DpiScaleY);
                     viewModel.SelectLayerCommand.Execute(beginPos);

@@ -45,9 +45,9 @@ namespace NiVE3.Model
             SelectLayerRequestPublisher.Publish(this, new SelectLayerEvent(compositionId, layerId));
         }
 
-        public void NotifyBeginUseTool(Guid compositionId, Vector2d startScreenPos, string propertyName)
+        public void NotifyBeginUseTool(Guid compositionId, Vector2d startScreenPos, BeginUseToolEvent.PropertyType propertyType)
         {
-            BeginUseToolRequestPublisher.Publish(this, new BeginUseToolEvent(compositionId, startScreenPos, propertyName));
+            BeginUseToolRequestPublisher.Publish(this, new BeginUseToolEvent(compositionId, startScreenPos, propertyType));
         }
 
         public void NotifyMoveLayersByTool(Guid compositionId, Vector2d nextScreenPos, bool isCommit)

@@ -499,6 +499,10 @@ namespace NiVE3.ViewModel
 
         public bool IsNameEditing => EditingParameter == EditingLayerParameter.Name;
 
+        public bool HasImage => SourceType.HasFlag(SourceType.Image) || SourceType.HasFlag(SourceType.Video);
+
+        public bool HasAudio => SourceType.HasFlag(SourceType.Audio);
+
         public INameEditableViewModel? TargetChild => SelectedEffects.FirstOrDefault();
 
         public ICommand BeginEditDurationCommand { get; }

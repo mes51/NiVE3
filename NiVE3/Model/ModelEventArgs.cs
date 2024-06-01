@@ -72,13 +72,22 @@ namespace NiVE3.Model
 
         public Vector2d StartScreenPosition { get; }
 
-        public string PropertyName { get; }
+        public PropertyType Type { get; }
 
-        public BeginUseToolEvent(Guid compositionId, Vector2d startScreenPosition, string propertyName)
+        public BeginUseToolEvent(Guid compositionId, Vector2d startScreenPosition, PropertyType type)
         {
             CompositionId = compositionId;
             StartScreenPosition = startScreenPosition;
-            PropertyName = propertyName;
+            Type = type;
+        }
+
+        public enum PropertyType
+        {
+            Transform,
+            RotateAll,
+            RotateX,
+            RotateY,
+            RotateZ
         }
     }
 

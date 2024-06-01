@@ -255,8 +255,9 @@
                     <ComboBox SelectedValue="{Binding PreviewColorChannel}" ItemsSource="{mk:EnumValues {x:Type vm:PreviewColorChannel}}" Style="{StaticResource PreviewColorChannelComboBox}"/>
                     <CheckBox x:Name="ShowCheckerboradCheckBox" Content="チェッカーボード" Margin="5,0,0,0" VerticalAlignment="Center"/>
 
-                    <RadioButton x:Name="HandToolRadioButton" Content="手のひらツール" GroupName="Tool" Margin="5,0,0,0" VerticalAlignment="Center" IsChecked="{Binding ToolType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static vm:ToolType.Hand}}"/>
-                    <RadioButton x:Name="SelectToolRadioButton" Content="選択ツール" GroupName="Tool" Margin="5,0,0,0" VerticalAlignment="Center" IsChecked="{Binding ToolType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static vm:ToolType.Select}}"/>
+                    <RadioButton Content="手のひらツール" GroupName="Tool" Margin="5,0,0,0" VerticalAlignment="Center" IsChecked="{Binding ToolType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static vm:ToolType.Hand}}"/>
+                    <RadioButton Content="選択ツール" GroupName="Tool" Margin="5,0,0,0" VerticalAlignment="Center" IsChecked="{Binding ToolType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static vm:ToolType.Select}}"/>
+                    <RadioButton Content="回転ツール" GroupName="Tool" Margin="5,0,0,0" VerticalAlignment="Center" IsChecked="{Binding ToolType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static vm:ToolType.RotateAll}}"/>
                 </StackPanel>
                 <Grid Grid.Column="1" Visibility="{Binding RealFrameRateIsUpdated, Converter={StaticResource BooleanToVisibilityConverter}}" VerticalAlignment="Center" HorizontalAlignment="Right">
                     <Grid.ColumnDefinitions>

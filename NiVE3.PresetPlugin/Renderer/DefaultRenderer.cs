@@ -31,6 +31,8 @@ namespace NiVE3.PresetPlugin.Renderer
     {
         const double DefaultFov = 0.691111986546211; // 39.5978 / 180.0 * Math.PI
 
+        const double EpsilonZDiff = 1E-10;
+
         int Width { get; set; }
 
         int Height { get; set; }
@@ -748,6 +750,10 @@ namespace NiVE3.PresetPlugin.Renderer
                     minZ = triangles.Select(t => Math.Min(Math.Min(t.V1.Vertex.GetElement(2), t.V2.Vertex.GetElement(2)), t.V3.Vertex.GetElement(2))).Min();
                     maxZ = triangles.Select(t => Math.Max(Math.Max(t.V1.Vertex.GetElement(2), t.V2.Vertex.GetElement(2)), t.V3.Vertex.GetElement(2))).Max();
                 }
+                if (maxZ - minZ < EpsilonZDiff)
+                {
+                    maxZ += EpsilonZDiff;
+                }
             }
 
             var projectionMatrix = Matrix4x4d.CreatePerspectiveFieldOfView(fov, 1.0, minZ, maxZ);
@@ -755,7 +761,8 @@ namespace NiVE3.PresetPlugin.Renderer
 
             var p = Vector256.Create(x, y, size * 0.5, size * 0.5) / (size * 0.5) - Vector256.Create(1.0, 1.0, 0.0, 0.0);
             var result = invertedViewProjection.Transform(p);
-            return (Vector3d)result / result.GetElement(3) * size;
+            var w = result.GetElement(3);
+            return (Vector3d)result / (w != 0.0 ? w : 1.0) * size;
         }
 
         static Matrix3x3 CalcTransform2D(PropertyValueGroup transform, ParentTransform[] parentTransforms)

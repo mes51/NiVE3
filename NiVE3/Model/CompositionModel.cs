@@ -1107,10 +1107,14 @@ namespace NiVE3.Model
             return Renderer.SelectLayer(activeCameraSetting, layers, x, y);
         }
 
-        public Vector3d Unproject(CameraSetting cameraSetting, double time, double x, double y, Guid? baseLayerId)
+        public LayerSkeleton? GetLayerSkeleton(Guid layerId, double time)
         {
-            var baseLayer = Layers.FirstOrDefault(l => l.LayerId == baseLayerId);
-            return Renderer.ScreenCoordToWorldCoord(cameraSetting, x, y, baseLayer?.GetLayerSkeleton(time));
+            return Layers.FirstOrDefault(l => l.LayerId == layerId)?.GetLayerSkeleton(time);
+        }
+
+        public Vector3d Unproject(CameraSetting cameraSetting, double x, double y, LayerSkeleton? baseLayerSkeleton)
+        {
+            return Renderer.ScreenCoordToWorldCoord(cameraSetting, x, y, baseLayerSkeleton);
         }
 
         public CameraSetting GetActiveCameraSetting(double time)

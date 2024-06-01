@@ -365,13 +365,14 @@ namespace NiVE3.ViewModel
                     return;
                 }
 
-                var propertyName = ToolType switch
+                var propertyType = ToolType switch
                 {
-                    ToolType.Select => ILayerObject.TransformPositionId,
+                    ToolType.Select => BeginUseToolEvent.PropertyType.Transform,
+                    ToolType.RotateAll => BeginUseToolEvent.PropertyType.RotateAll,
                     _ => throw new Exception() // bug
                 };
                 IsUsingTool = true;
-                EventHubModel.NotifyBeginUseTool(compositionPreviewModel.Composition.CompositionId, p.Value / (Scale * 0.01), propertyName);
+                EventHubModel.NotifyBeginUseTool(compositionPreviewModel.Composition.CompositionId, p.Value / (Scale * 0.01), propertyType);
             });
 
             MoveLayersByToolCommand = new DelegateCommand<Tuple<Vector2d, bool>>(t =>
@@ -772,6 +773,7 @@ namespace NiVE3.ViewModel
     enum ToolType
     {
         Hand,
-        Select
+        Select,
+        RotateAll
     }
 }

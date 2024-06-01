@@ -865,18 +865,32 @@ namespace NiVE3.ViewModel
 
             IsUsingTool = true;
             var cameraSetting = CompositionModel.GetActiveCameraSetting(CurrentTime);
-            switch (e.PropertyName)
+            var baseLayerId = CompositionModel.FindLayerByPreviewPosition(CurrentTime, e.StartScreenPosition.X, e.StartScreenPosition.Y);
+            var baseLayerSkeleton = baseLayerId.HasValue ? CompositionModel.GetLayerSkeleton(baseLayerId.Value, CurrentTime) : null;
+            var baseLayerIs3D = baseLayerSkeleton?.IsEnable3D ?? false;
+            var imageLayers = SelectedLayers.Where(l => l.HasImage).ToArray();
+            if (imageLayers.Length < 0)
             {
-                case ILayerObject.TransformPositionId:
-                    PreviewManipulation = new PositionPreviewManipulationState(
-                        [..SelectedLayers],
-                        CompositionModel.FindLayerByPreviewPosition(CurrentTime, e.StartScreenPosition.X, e.StartScreenPosition.Y),
-                        CurrentTime,
-                        CompositionModel,
-                        cameraSetting,
-                        e.StartScreenPosition,
-                        HistoryModel
-                    );
+                // TODO: トランスフォーム以外のプロパティのプレビューでの操作に対応するとき、トランスフォームの操作の時のみreturnするようにする
+                return;
+            }
+
+            switch (e.Type)
+            {
+                case BeginUseToolEvent.PropertyType.Transform:
+                    PreviewManipulation = new PositionPreviewManipulationState(imageLayers, baseLayerSkeleton, CurrentTime, CompositionModel, cameraSetting, e.StartScreenPosition, HistoryModel);
+                    break;
+                case BeginUseToolEvent.PropertyType.RotateAll when !baseLayerIs3D:
+                case BeginUseToolEvent.PropertyType.RotateX when !baseLayerIs3D:
+                case BeginUseToolEvent.PropertyType.RotateY when !baseLayerIs3D:
+                case BeginUseToolEvent.PropertyType.RotateZ:
+                    break;
+                case BeginUseToolEvent.PropertyType.RotateAll:
+                    imageLayers = [..imageLayers.Where(l => l.IsEnable3D)];
+                    if (imageLayers.Length > 0)
+                    {
+                        PreviewManipulation = new RotateAllPreviewManipulationState(imageLayers, baseLayerSkeleton, CurrentTime, CompositionModel, cameraSetting, e.StartScreenPosition, HistoryModel);
+                    }
                     break;
             }
         }
