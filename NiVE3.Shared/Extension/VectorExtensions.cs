@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
@@ -37,7 +38,7 @@ namespace NiVE3.Shared.Extension
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float HorizontalAdd(this in Vector4 v)
         {
-            return v.AsVector128().HorizontalAdd().GetElement(0);
+            return Vector128.Sum(v.AsVector128());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -175,7 +176,7 @@ namespace NiVE3.Shared.Extension
             {
                 var scale = Avx.ConvertToVector256Double(
                     Avx2.ShiftLeftLogicalVariable(Vector128<int>.One,
-                    Avx.ConvertToVector128Int32(fx.Abs()).AsUInt32())
+                    Avx.ConvertToVector128Int32(Vector256.Abs(fx)).AsUInt32())
                 );
                 var divMask = Avx.CompareLessThan(fx, Vector256<double>.Zero);
 
@@ -186,7 +187,7 @@ namespace NiVE3.Shared.Extension
             }
             else
             {
-                var count = Avx.ConvertToVector128Int32(fx.Abs());
+                var count = Avx.ConvertToVector128Int32(Vector256.Abs(fx));
                 var countHigh = Sse2.UnpackHigh(count, count);
                 var shiftLow = Sse2.ShiftLeftLogical(Vector128<long>.One, Sse41.ConvertToVector128Int64(count)).AsInt32();
                 var shiftHigh = Sse2.ShiftLeftLogical(Vector128<long>.One, Sse41.ConvertToVector128Int64(countHigh)).AsInt32();
@@ -280,12 +281,6 @@ namespace NiVE3.Shared.Extension
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector128<float> Abs(this in Vector128<float> v)
-        {
-            return Sse.AndNot(Vector128.Create(-0.0F), v);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector128<float> SignWithoutZero(this in Vector128<float> v)
         {
             var gteMask = Sse.CompareGreaterThanOrEqual(v, Vector128<float>.Zero);
@@ -301,21 +296,16 @@ namespace NiVE3.Shared.Extension
             return -Sse3.HorizontalSubtract(v, v).GetElement(0);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double LengthSquared(this in Vector128<double> v)
         {
-            return Sse41.DotProduct(v, v, 0xFF).GetElement(0);
+            return Vector128.Dot(v, v);
         }
     }
 
     public static class Vector256Extension
     {
         const byte MmInsert0To3 = 3 << 4;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector256<double> Abs(this in Vector256<double> v)
-        {
-            return Avx.AndNot(Vector256.Create(-0.0), v);
-        }
 
         public static Vector256<double> Not(this in Vector256<double> v)
         {
@@ -346,61 +336,17 @@ namespace NiVE3.Shared.Extension
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector256<double> DotProduct(this in Vector256<double> a, in Vector256<double> b)
         {
-            var v = Avx.Multiply(a, b);
-            if (Avx2.IsSupported)
-            {
-                v = Avx.HorizontalAdd(v, v);
-                v = Avx2.Permute4x64(v, 0b00100010);
-                return Avx.HorizontalAdd(v, v);
-            }
-            else
-            {
-                var rv = Vector256.Create(Avx.ExtractVector128(v, 1), Avx.ExtractVector128(v, 0));
-                v = Avx.HorizontalAdd(v, rv);
-                return Avx.HorizontalAdd(v, v);
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector256<double> DotProduct(this in Vector256<double> a, in Vector256<double> b, int control)
-        {
-            var v = Avx.Multiply(a, b);
-            var addMask = Vector256.Create(
-                ((control & 0b00010000) != 0) ? 0xFFFFFFFFFFFFFFFFUL : 0,
-                ((control & 0b00100000) != 0) ? 0xFFFFFFFFFFFFFFFFUL : 0,
-                ((control & 0b01000000) != 0) ? 0xFFFFFFFFFFFFFFFFUL : 0,
-                ((control & 0b10000000) != 0) ? 0xFFFFFFFFFFFFFFFFUL : 0
-            ).AsDouble();
-            v = Avx.And(v, addMask);
-
-            Vector256<double> result;
-            if (Avx2.IsSupported)
-            {
-                v = Avx.HorizontalAdd(v, v);
-                v = Avx2.Permute4x64(v, 0b00100010);
-                result = Avx.HorizontalAdd(v, v);
-            }
-            else
-            {
-                var rv = Vector256.Create(Avx.ExtractVector128(v, 1), Avx.ExtractVector128(v, 0));
-                v = Avx.HorizontalAdd(v, rv);
-                result = Avx.HorizontalAdd(v, v);
-            }
-
-            var resultMask = Vector256.Create(
-                ((control & 0b0001) != 0) ? 0xFFFFFFFFFFFFFFFFUL : 0,
-                ((control & 0b0010) != 0) ? 0xFFFFFFFFFFFFFFFFUL : 0,
-                ((control & 0b0100) != 0) ? 0xFFFFFFFFFFFFFFFFUL : 0,
-                ((control & 0b1000) != 0) ? 0xFFFFFFFFFFFFFFFFUL : 0
-            ).AsDouble();
-            return Avx.And(result, resultMask);
+            var v = a * b;
+            v = Avx.HorizontalAdd(v, v);
+            var r = Avx.Permute2x128(v, v, 1);
+            return v + r;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector256<double> Normalize(this in Vector256<double> v)
         {
-            var length = Avx.Sqrt(v.DotProduct(v));
-            return Avx.Divide(v, length);
+            var length = Math.Sqrt(Vector256.Dot(v, v));
+            return v / length;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -496,7 +442,7 @@ namespace NiVE3.Shared.Extension
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector256<double> Permute4x64(this in Vector256<double> v, byte control)
+        public static Vector256<double> Permute4x64(this in Vector256<double> v, [ConstantExpected] byte control)
         {
             if (Avx2.IsSupported)
             {

@@ -249,19 +249,19 @@ namespace NiVE3.Numerics
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe static bool operator ==(in Matrix3x3 a, in Matrix3x3 b)
+        public static bool operator ==(in Matrix3x3 a, in Matrix3x3 b)
         {
             return a.Equals(b);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe static bool operator !=(in Matrix3x3 a, in Matrix3x3 b)
+        public static bool operator !=(in Matrix3x3 a, in Matrix3x3 b)
         {
             return !a.Equals(b);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe static Matrix3x3 operator +(Matrix3x3 a, in Matrix3x3 b)
+        public static Matrix3x3 operator +(Matrix3x3 a, in Matrix3x3 b)
         {
             a.X += b.X;
             a.Y += b.Y;
@@ -270,7 +270,7 @@ namespace NiVE3.Numerics
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe static Matrix3x3 operator -(Matrix3x3 a, in Matrix3x3 b)
+        public static Matrix3x3 operator -(Matrix3x3 a, in Matrix3x3 b)
         {
             a.X -= b.X;
             a.Y -= b.Y;
@@ -279,7 +279,7 @@ namespace NiVE3.Numerics
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe static Matrix3x3 operator -(Matrix3x3 a)
+        public static Matrix3x3 operator -(Matrix3x3 a)
         {
             a.X = -a.X;
             a.Y = -a.Y;
@@ -288,7 +288,7 @@ namespace NiVE3.Numerics
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe static Matrix3x3 operator *(Matrix3x3 a, in Matrix3x3 b)
+        public static Matrix3x3 operator *(Matrix3x3 a, in Matrix3x3 b)
         {
             a.X = a.X.X * b.X + a.X.Y * b.Y + a.X.Z * b.Z;
             a.Y = a.Y.X * b.X + a.Y.Y * b.Y + a.Y.Z * b.Z;
@@ -298,7 +298,7 @@ namespace NiVE3.Numerics
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe static Matrix3x3 operator *(Matrix3x3 a, float s)
+        public static Matrix3x3 operator *(Matrix3x3 a, float s)
         {
             a.X *= s;
             a.Y *= s;

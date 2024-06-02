@@ -60,6 +60,7 @@ namespace NiVE3.Numerics
             return double.IsInfinity(X) || double.IsInfinity(Y);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool Equals([NotNullWhen(true)] object? obj)
         {
             if (obj is Vector2d v)
@@ -72,19 +73,19 @@ namespace NiVE3.Numerics
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override int GetHashCode()
         {
-            var hashCode = new HashCode();
-            hashCode.Add(X);
-            hashCode.Add(Y);
-            return hashCode.ToHashCode();
+            return HashCode.Combine(X, Y);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override string ToString()
         {
             return $"< X = {X}, Y = {Y} >";
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Equals(Vector2d other)
         {
             return X == other.X && Y == other.Y;
@@ -270,6 +271,19 @@ namespace NiVE3.Numerics
             return Math.Sqrt(X * X + Y * Y + Z * Z);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool IsNaN()
+        {
+            return double.IsNaN(X) || double.IsNaN(Y) || double.IsNaN(Z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool IsInfinty()
+        {
+            return double.IsInfinity(X) || double.IsInfinity(Y) || double.IsInfinity(Z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool Equals([NotNullWhen(true)] object? obj)
         {
             if (obj is Vector3d v)
@@ -282,20 +296,19 @@ namespace NiVE3.Numerics
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override int GetHashCode()
         {
-            var hashCode = new HashCode();
-            hashCode.Add(X);
-            hashCode.Add(Y);
-            hashCode.Add(Z);
-            return hashCode.ToHashCode();
+            return HashCode.Combine(X, Y, Z);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override string ToString()
         {
             return $"< X = {X}, Y = {Y}, Z = {Z} >";
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Equals(Vector3d other)
         {
             return X == other.X && Y == other.Y && Z == other.Z;

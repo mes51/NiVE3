@@ -25,6 +25,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
         protected static readonly float[] EmptyTrackMatte = [1.0F];
 
+        static readonly Vector256<double> WithoutWMask = Vector256.Create(0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0).AsDouble();
+
         public Matrix4x4d ViewMatrix { get; set; }
 
         public double FieldOfView { get; set; }
@@ -104,7 +106,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             Matrix4x4d.Invert(mv, out var invertedModelViewMatrix);
             invertedModelViewMatrix = Matrix4x4d.Transpose(invertedModelViewMatrix);
 
-            var farPoint = Avx.And(mv.Transform(Vector256.Create(0.0, 0.0, -10000.0, 1.0)), Vector256.Create(0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0).AsDouble());
+            var farPoint = mv.Transform(Vector256.Create(0.0, 0.0, -10000.0, 1.0)) & WithoutWMask;
             Triangles.Add(new Triangle(uv1, uv2, uv3, farPoint, invertedModelViewMatrix, texture, opacity, blendType, isCastShadow, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte, LastId));
             Triangles.Add(new Triangle(uv1, uv3, uv4, farPoint, invertedModelViewMatrix, texture, opacity, blendType, isCastShadow, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte, LastId));
 
@@ -182,14 +184,14 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             Matrix4x4d.Invert(modelViewMatrix, out var invertedLightModelViewMatrix);
             invertedLightModelViewMatrix = Matrix4x4d.Transpose(invertedLightModelViewMatrix);
 
-            var lfarPoint = Avx.And(lmv.Transform(Vector256.Create(0.0, 0.0, -10000.0, 1.0)), Vector256.Create(0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0).AsDouble());
+            var lfarPoint = lmv.Transform(Vector256.Create(0.0, 0.0, -10000.0, 1.0)) & WithoutWMask;
             return (new LightTriangle(luv1, luv2, luv3, lfarPoint, invertedLightModelViewMatrix, texture, opacity, isCastShadow, lightTransmission, triangleId), new LightTriangle(luv1, luv3, luv4, lfarPoint, invertedLightModelViewMatrix, texture, opacity, isCastShadow, lightTransmission, triangleId));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected static Vector256<double> MaxByAbs(in Vector256<double> a, in Vector256<double> b)
         {
-            if (Sse2.MoveMask(Sse2.CompareGreaterThanOrEqual(Avx.ExtractVector128(a.Abs(), 0), Avx.ExtractVector128(b.Abs(), 0))) != 0)
+            if (Vector128.GreaterThanOrEqualAny(Vector256.GetLower(Vector256.Abs(a)), Vector256.GetLower(Vector256.Abs(b))))
             {
                 return a;
             }
@@ -260,18 +262,11 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected static Vector128<float> CalcBarycentricCoord(in Vector128<float> x, in Vector128<float> y, in Vector128<float> z, in Vector128<float> e)
         {
-            return Sse.Shuffle(
-                Sse41.Blend(
-                    (x * e).HorizontalAdd(),
-                    (y * e).HorizontalAdd(),
-                    0b1010
-                ),
-                Sse41.Blend(
-                    (z * e).HorizontalAdd(),
-                    Vector128.Create(1.0F),
-                    0b1010
-                ),
-                0b01000100
+            return Vector128.Create(
+                Vector128.Sum(x * e),
+                Vector128.Sum(y * e),
+                Vector128.Sum(z * e),
+                1.0F
             );
         }
     }
@@ -356,7 +351,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 var denom = Vector128.Create((float)(1.0 / (((dvv2.GetElement(0) - dvv1.GetElement(0)) * (dvv3.GetElement(1) - dvv1.GetElement(1))) - ((dvv2.GetElement(1) - dvv1.GetElement(1)) * (dvv3.GetElement(0) - dvv1.GetElement(0))))));
                 var edgeX = Vector128.Create((float)dvv3.GetElement(0), (float)dvv1.GetElement(0), (float)dvv2.GetElement(0), 0.0F) - Vector128.Create((float)dvv2.GetElement(0), (float)dvv3.GetElement(0), (float)dvv1.GetElement(0), 0.0F);
                 var edgeY = Vector128.Create((float)dvv3.GetElement(1), (float)dvv1.GetElement(1), (float)dvv2.GetElement(1), 0.0F) - Vector128.Create((float)dvv2.GetElement(1), (float)dvv3.GetElement(1), (float)dvv1.GetElement(1), 0.0F);
-                var isFrontFace = triangle.Normal.DotProduct(((triangle.V1.Vertex + triangle.V2.Vertex + triangle.V3.Vertex) / 3.0)).GetElement(0) <= 0.0;
+                var isFrontFace = Vector256.Dot(triangle.Normal, (triangle.V1.Vertex + triangle.V2.Vertex + triangle.V3.Vertex) / 3.0) <= 0.0;
                 var vvEX = Vector128.Create((float)dvv2.GetElement(0), (float)dvv3.GetElement(0), (float)dvv1.GetElement(0), 0.0F);
                 var vvEY = Vector128.Create((float)dvv2.GetElement(1), (float)dvv3.GetElement(1), (float)dvv1.GetElement(1), 0.0F);
                 var useLight = hasLight && (triangle.IsAcceptLight || triangle.IsAcceptShadow);
@@ -404,20 +399,20 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                     var parallelLights = CollectionsMarshal.AsSpan(ParallelLights);
                     var ambientLights = CollectionsMarshal.AsSpan(AmbientLights);
 
-                    for (int x = minX; x < maxX; x++, p++)
+                    for (var x = minX; x < maxX; x++, p++)
                     {
                         var eX = Vector128.Create(x, x, x, 0.0F) * scaleRateX - vvEX;
                         var e = (Fma.IsSupported ? Fma.MultiplyAddNegated(edgeY, eX, eY) : (eY - (edgeY * eX))) * denom;
 
-                        var ae = Sse.And(e, Sse.CompareGreaterThanOrEqual(e.Abs(), Vector128.Create(TriangleDivider.Epsilon)));
-                        if (!Avx.TestZ(Sse.CompareLessThan(ae, Vector128<float>.Zero), Vector128.Create(float.NaN)))
+                        var ae = e & Vector128.GreaterThanOrEqual(Vector128.Abs(e), Vector128.Create(TriangleDivider.Epsilon));
+                        if (Vector128.LessThanAny(ae, Vector128<float>.Zero))
                         {
                             continue;
                         }
 
-                        var tw = (w * e).HorizontalAdd();
-                        var tx = (u * e / tw).HorizontalAdd().GetElement(0) * textureWidth;
-                        var ty = (v * e / tw).HorizontalAdd().GetElement(0) * textureHeight;
+                        var tw = Vector128.Sum(w * e);
+                        var tx = Vector128.Sum(u * e / tw) * textureWidth;
+                        var ty = Vector128.Sum(v * e / tw) * textureHeight;
 
                         var color = ImageInterpolation.Bilinear(texture, textureWidth, textureHeight, tx, ty);
                         color.W *= triangle.Opacity * trackMatteSpan[p % trackMatteSpan.Length];
@@ -725,8 +720,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 return null;
             }
 
-            var min = triangles.Select(t => Avx.Min(Avx.Min(t.V1.Vertex, t.V2.Vertex), t.V3.Vertex)).Aggregate(Avx.Min);
-            var max = triangles.Select(t => Avx.Max(Avx.Max(t.V1.Vertex, t.V2.Vertex), t.V3.Vertex)).Aggregate(Avx.Max);
+            var min = triangles.Select(t => Vector256.Min(Vector256.Min(t.V1.Vertex, t.V2.Vertex), t.V3.Vertex)).Aggregate(Vector256.Min);
+            var max = triangles.Select(t => Vector256.Max(Vector256.Max(t.V1.Vertex, t.V2.Vertex), t.V3.Vertex)).Aggregate(Vector256.Max);
             if (min.GetElement(0) == max.GetElement(0) || min.GetElement(1) == max.GetElement(1))
             {
                 return null;
@@ -835,19 +830,19 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                     var offset = y * size;
                     var indicesSpan = shadowMap.Indices.AsSpan(offset, size);
                     var bufferIndicesSpan = shadowMap.BufferIndices.AsSpan(offset, size);
-                    for (int x = minX; x < maxX; x++)
+                    for (var x = minX; x < maxX; x++)
                     {
                         var eX = Vector128.Create(x, x, x, 0.0F) - vvEX;
                         var e = (Fma.IsSupported ? Fma.MultiplyAddNegated(edgeY, eX, eY) : (eY - (edgeY * eX))) * denom;
-                        var ae = Sse.And(e, Sse.CompareGreaterThanOrEqual(e.Abs(), Vector128.Create(TriangleDivider.Epsilon)));
-                        if (!Avx.TestZ(Sse.CompareLessThan(ae, Vector128<float>.Zero), Vector128.Create(float.NaN)))
+                        var ae = e & Vector128.GreaterThanOrEqual(Vector128.Abs(e), Vector128.Create(TriangleDivider.Epsilon));
+                        if (Vector128.LessThanAny(ae, Vector128<float>.Zero))
                         {
                             continue;
                         }
 
-                        var tw = (w * e).HorizontalAdd();
-                        var tx = (u * e / tw).HorizontalAdd().GetElement(0) * textureWidth;
-                        var ty = (v * e / tw).HorizontalAdd().GetElement(0) * textureHeight;
+                        var tw = Vector128.Sum(w * e);
+                        var tx = Vector128.Sum(u * e / tw) * textureWidth;
+                        var ty = Vector128.Sum(v * e / tw) * textureHeight;
 
                         var color = ImageInterpolation.Bilinear(texture, textureWidth, textureHeight, tx, ty);
 
@@ -1088,7 +1083,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 var denom = Vector128.Create((float)(1.0 / (((dvv2.GetElement(0) - dvv1.GetElement(0)) * (dvv3.GetElement(1) - dvv1.GetElement(1))) - ((dvv2.GetElement(1) - dvv1.GetElement(1)) * (dvv3.GetElement(0) - dvv1.GetElement(0))))));
                 var edgeX = Vector128.Create((float)dvv3.GetElement(0), (float)dvv1.GetElement(0), (float)dvv2.GetElement(0), 0.0F) - Vector128.Create((float)dvv2.GetElement(0), (float)dvv3.GetElement(0), (float)dvv1.GetElement(0), 0.0F);
                 var edgeY = Vector128.Create((float)dvv3.GetElement(1), (float)dvv1.GetElement(1), (float)dvv2.GetElement(1), 0.0F) - Vector128.Create((float)dvv2.GetElement(1), (float)dvv3.GetElement(1), (float)dvv1.GetElement(1), 0.0F);
-                var isFrontFace = triangle.Normal.DotProduct((triangle.V1.Vertex + triangle.V2.Vertex + triangle.V3.Vertex) / 3.0).GetElement(0) <= 0.0;
+                var isFrontFace = Vector256.Dot(triangle.Normal, (triangle.V1.Vertex + triangle.V2.Vertex + triangle.V3.Vertex) / 3.0) <= 0.0;
                 var vvEX = Vector128.Create((float)dvv2.GetElement(0), (float)dvv3.GetElement(0), (float)dvv1.GetElement(0), 0.0F);
                 var vvEY = Vector128.Create((float)dvv2.GetElement(1), (float)dvv3.GetElement(1), (float)dvv1.GetElement(1), 0.0F);
                 var useLight = hasLight && triangle.IsAcceptLight && (trackMatteMode == TrackMatteMode.Luminance || trackMatteMode == TrackMatteMode.InvertLuminance);
@@ -1136,20 +1131,20 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                     var parallelLights = CollectionsMarshal.AsSpan(ParallelLights);
                     var ambientLights = CollectionsMarshal.AsSpan(AmbientLights);
 
-                    for (int x = minX; x < maxX; x++, p++)
+                    for (var x = minX; x < maxX; x++, p++)
                     {
                         var eX = Vector128.Create(x, x, x, 0.0F) * scaleRateX - vvEX;
                         var e = (Fma.IsSupported ? Fma.MultiplyAddNegated(edgeY, eX, eY) : (eY - (edgeY * eX))) * denom;
 
-                        var ae = Sse.And(e, Sse.CompareGreaterThanOrEqual(e.Abs(), Vector128.Create(TriangleDivider.Epsilon)));
-                        if (!Avx.TestZ(Sse.CompareLessThan(ae, Vector128<float>.Zero), Vector128.Create(float.NaN)))
+                        var ae = e & Vector128.GreaterThanOrEqual(Vector128.Abs(e), Vector128.Create(TriangleDivider.Epsilon));
+                        if (Vector128.LessThanAny(ae, Vector128<float>.Zero))
                         {
                             continue;
                         }
 
-                        var tw = Sse.Multiply(w, e).HorizontalAdd();
-                        var tx = Sse.Divide(Sse.Multiply(u, e), tw).HorizontalAdd().GetElement(0) * textureWidth;
-                        var ty = Sse.Divide(Sse.Multiply(v, e), tw).HorizontalAdd().GetElement(0) * textureHeight;
+                        var tw = Vector128.Sum(w * e);
+                        var tx = Vector128.Sum((u * e) / tw) * textureWidth;
+                        var ty = Vector128.Sum((v * e) / tw) * textureHeight;
 
                         var color = ImageInterpolation.Bilinear(texture, textureWidth, textureHeight, tx, ty);
                         color.W *= trackMatteSpan[p % trackMatteSpan.Length];

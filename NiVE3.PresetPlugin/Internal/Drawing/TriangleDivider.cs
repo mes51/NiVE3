@@ -78,9 +78,9 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             var dSign = Math.Sign(divider.PlaneD);
             var n = divider.Normal;
             var planeD = Vector256.Create(divider.PlaneD, divider.PlaneD, divider.PlaneD, 0.0F);
-            var dd1 = Avx.And(n.DotProduct(triangle.V1.Vertex) + planeD, wClearMask);
-            var dd2 = Avx.And(n.DotProduct(triangle.V2.Vertex) + planeD, wClearMask);
-            var dd3 = Avx.And(n.DotProduct(triangle.V3.Vertex) + planeD, wClearMask);
+            var dd1 = (n.DotProduct(triangle.V1.Vertex) + planeD) & wClearMask;
+            var dd2 = (n.DotProduct(triangle.V2.Vertex) + planeD) & wClearMask;
+            var dd3 = (n.DotProduct(triangle.V3.Vertex) + planeD) & wClearMask;
             var maxD = MaxByAbs(MaxByAbs(dd1, dd2), dd3).GetElement(0);
             if (Math.Abs(maxD) < Epsilon)
             {
@@ -117,9 +117,9 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                         continue;
                     }
 
-                    var td1 = Avx.And(t.V1.Vertex.DotProduct(n) + planeD, wClearMask);
-                    var td2 = Avx.And(t.V2.Vertex.DotProduct(n) + planeD, wClearMask);
-                    var td3 = Avx.And(t.V3.Vertex.DotProduct(n) + planeD, wClearMask);
+                    var td1 = (t.V1.Vertex.DotProduct(n) + planeD) & wClearMask;
+                    var td2 = (t.V2.Vertex.DotProduct(n) + planeD) & wClearMask;
+                    var td3 = (t.V3.Vertex.DotProduct(n) + planeD) & wClearMask;
 
                     if (Math.Sign(MaxByAbs(MaxByAbs(td1, td2), td3).GetElement(0)) == dSign)
                     {
@@ -229,7 +229,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static Vector256<double> MaxByAbs(in Vector256<double> a, in Vector256<double> b)
         {
-            if (Sse2.MoveMask(Sse2.CompareGreaterThanOrEqual(Avx.ExtractVector128(a.Abs(), 0), Avx.ExtractVector128(b.Abs(), 0))) != 0)
+            if (Vector128.GreaterThanOrEqualAny(Vector256.GetLower(Vector256.Abs(a)), Vector256.GetLower(Vector256.Abs(b))))
             {
                 return a;
             }

@@ -150,10 +150,10 @@ namespace NiVE3.Numerics
 
         public static Matrix4x4d CreateLookAt(in Vector256<double> pos, in Vector256<double> target, in Vector256<double> up)
         {
-            var posInvZ = Avx.Multiply(pos, Vector256.Create(1.0, 1.0, -1.0, 1.0));
-            var targetInvZ = Avx.Multiply(target, Vector256.Create(1.0, 1.0, -1.0, 1.0));
+            var posInvZ = pos * Vector256.Create(1.0, 1.0, -1.0, 1.0);
+            var targetInvZ = target * Vector256.Create(1.0, 1.0, -1.0, 1.0);
 
-            var z = Avx.Subtract(posInvZ, targetInvZ).Normalize();
+            var z = (posInvZ - targetInvZ).Normalize();
             var x = up.CrossProduct(z).Normalize();
             var y = z.CrossProduct(x);
 
@@ -168,9 +168,9 @@ namespace NiVE3.Numerics
             result.M32 = y.GetElement(2);
             result.M33 = z.GetElement(2);
 
-            result.M41 = -x.DotProduct(posInvZ).GetElement(0);
-            result.M42 = -y.DotProduct(posInvZ).GetElement(0);
-            result.M43 = -z.DotProduct(posInvZ).GetElement(0);
+            result.M41 = Vector256.Dot(-x, posInvZ);
+            result.M42 = Vector256.Dot(-y, posInvZ);
+            result.M43 = Vector256.Dot(-z, posInvZ);
 
             return result;
         }
@@ -276,13 +276,13 @@ namespace NiVE3.Numerics
             return result;
         }
 
-        public unsafe static bool Invert(Matrix4x4d matrix, out Matrix4x4d result)
+        public static bool Invert(Matrix4x4d matrix, out Matrix4x4d result)
         {
             // Load the matrix values into rows
-            var row1 = Avx.LoadVector256(&matrix.M11);
-            var row2 = Avx.LoadVector256(&matrix.M21);
-            var row3 = Avx.LoadVector256(&matrix.M31);
-            var row4 = Avx.LoadVector256(&matrix.M41);
+            var row1 = Vector256.LoadUnsafe(ref matrix.M11);
+            var row2 = Vector256.LoadUnsafe(ref matrix.M21);
+            var row3 = Vector256.LoadUnsafe(ref matrix.M31);
+            var row4 = Vector256.LoadUnsafe(ref matrix.M41);
 
             // Transpose the matrix
             var vTemp1 = row1.Shuffle4x64(row2, 0x44); //_MM_SHUFFLE(1, 0, 1, 0)
@@ -302,9 +302,9 @@ namespace NiVE3.Numerics
             var V02 = row3.Shuffle4x64(row1, 0x88);  //_MM_SHUFFLE(2, 0, 2, 0)
             var V12 = row4.Shuffle4x64(row2, 0xDD);  //_MM_SHUFFLE(3, 1, 3, 1)
 
-            var D0 = Avx.Multiply(V00, V10);
-            var D1 = Avx.Multiply(V01, V11);
-            var D2 = Avx.Multiply(V02, V12);
+            var D0 = V00 * V10;
+            var D1 = V01 * V11;
+            var D2 = V02 * V12;
 
             V00 = row3.Permute4x64(0xEE);           //_MM_SHUFFLE(3, 2, 3, 2)
             V10 = row4.Permute4x64(0x50);           //_MM_SHUFFLE(1, 1, 0, 0)
@@ -315,9 +315,9 @@ namespace NiVE3.Numerics
 
             // Note:  We use this expansion pattern instead of Fused Multiply Add
             // in order to support older hardware
-            D0 = Avx.Subtract(D0, Avx.Multiply(V00, V10));
-            D1 = Avx.Subtract(D1, Avx.Multiply(V01, V11));
-            D2 = Avx.Subtract(D2, Avx.Multiply(V02, V12));
+            D0 = D0 - (V00 * V10);
+            D1 = D1 - (V01 * V11);
+            D2 = D2 - (V02 * V12);
 
             // V11 = D0Y,D0W,D2Y,D2Y
             V11 = D0.Shuffle4x64(D2, 0x5D);   //_MM_SHUFFLE(1, 1, 3, 1)
@@ -333,10 +333,10 @@ namespace NiVE3.Numerics
             var V03 = row3.Permute4x64(0x12);                    //_MM_SHUFFLE(0, 1, 0, 2)
             V13 = V13.Shuffle4x64(D1, 0x99);                  //_MM_SHUFFLE(2, 1, 2, 1)
 
-            var C0 = Avx.Multiply(V00, V10);
-            var C2 = Avx.Multiply(V01, V11);
-            var C4 = Avx.Multiply(V02, V12);
-            var C6 = Avx.Multiply(V03, V13);
+            var C0 = V00 * V10;
+            var C2 = V01 * V11;
+            var C4 = V02 * V12;
+            var C6 = V03 * V13;
 
             // V11 = D0X,D0Y,D2X,D2X
             V11 = D0.Shuffle4x64(D2, 0x4);     //_MM_SHUFFLE(0, 0, 1, 0)
@@ -352,10 +352,10 @@ namespace NiVE3.Numerics
             V03 = row3.Permute4x64(0x7b);         //_MM_SHUFFLE(1, 3, 2, 3)
             V13 = D1.Shuffle4x64(V13, 0x26);   //_MM_SHUFFLE(0, 2, 1, 2)
 
-            C0 = Avx.Subtract(C0, Avx.Multiply(V00, V10));
-            C2 = Avx.Subtract(C2, Avx.Multiply(V01, V11));
-            C4 = Avx.Subtract(C4, Avx.Multiply(V02, V12));
-            C6 = Avx.Subtract(C6, Avx.Multiply(V03, V13));
+            C0 = C0 - (V00 * V10);
+            C2 = C2 - (V01 * V11);
+            C4 = C4 - (V02 * V12);
+            C6 = C6 - (V03 * V13);
 
             V00 = row2.Permute4x64(0x33); //_MM_SHUFFLE(0, 3, 0, 3)
 
@@ -378,19 +378,19 @@ namespace NiVE3.Numerics
             V13 = D1.Shuffle4x64(D2, 0xEC);  //_MM_SHUFFLE(3, 2, 3, 0)
             V13 = V13.Permute4x64(0x93);        //_MM_SHUFFLE(2, 1, 0, 3)
 
-            V00 = Avx.Multiply(V00, V10);
-            V01 = Avx.Multiply(V01, V11);
-            V02 = Avx.Multiply(V02, V12);
-            V03 = Avx.Multiply(V03, V13);
+            V00 = V00 * V10;
+            V01 = V01 * V11;
+            V02 = V02 * V12;
+            V03 = V03 * V13;
 
-            var C1 = Avx.Subtract(C0, V00);
-            C0 = Avx.Add(C0, V00);
-            var C3 = Avx.Add(C2, V01);
-            C2 = Avx.Subtract(C2, V01);
-            var C5 = Avx.Subtract(C4, V02);
-            C4 = Avx.Add(C4, V02);
-            var C7 = Avx.Add(C6, V03);
-            C6 = Avx.Subtract(C6, V03);
+            var C1 = C0 - V00;
+            C0 = C0 + V00;
+            var C3 = C2 + V01;
+            C2 = C2 - V01;
+            var C5 = C4 - V02;
+            C4 = C4 + V02;
+            var C7 = C6 + V03;
+            C6 = C6 - V03;
 
             C0 = C0.Shuffle4x64(C1, 0xD8); //_MM_SHUFFLE(3, 1, 2, 0)
             C2 = C2.Shuffle4x64(C3, 0xD8); //_MM_SHUFFLE(3, 1, 2, 0)
@@ -404,7 +404,7 @@ namespace NiVE3.Numerics
 
             // Get the determinant
             vTemp2 = row1;
-            var det = C0.DotProduct(vTemp2).GetElement(0);
+            var det = Vector256.Dot(C0, vTemp2);
 
             // Check determinate is not zero
             if (Math.Abs(det) < double.Epsilon)
@@ -419,15 +419,15 @@ namespace NiVE3.Numerics
             // Create Vector256<double> copy of the determinant and invert them.
             var ones = Vector256.Create(1.0);
             var vTemp = Vector256.Create(det);
-            vTemp = Avx.Divide(ones, vTemp);
+            vTemp = ones / vTemp;
 
-            row1 = Avx.Multiply(C0, vTemp);
-            row2 = Avx.Multiply(C2, vTemp);
-            row3 = Avx.Multiply(C4, vTemp);
-            row4 = Avx.Multiply(C6, vTemp);
+            row1 = C0 * vTemp;
+            row2 = C2 * vTemp;
+            row3 = C4 * vTemp;
+            row4 = C6 * vTemp;
 
             Unsafe.SkipInit(out result);
-            ref Vector256<double> vResult = ref Unsafe.As<Matrix4x4d, Vector256<double>>(ref result);
+            ref var vResult = ref Unsafe.As<Matrix4x4d, Vector256<double>>(ref result);
 
             vResult = row1;
             Unsafe.Add(ref vResult, 1) = row2;
@@ -437,22 +437,22 @@ namespace NiVE3.Numerics
             return true;
         }
 
-        public unsafe static Matrix4x4d Transpose(Matrix4x4d matrix)
+        public static Matrix4x4d Transpose(Matrix4x4d matrix)
         {
-            var row1 = Avx.LoadVector256(&matrix.M11);
-            var row2 = Avx.LoadVector256(&matrix.M21);
-            var row3 = Avx.LoadVector256(&matrix.M31);
-            var row4 = Avx.LoadVector256(&matrix.M41);
+            var row1 = Vector256.LoadUnsafe(ref matrix.M11);
+            var row2 = Vector256.LoadUnsafe(ref matrix.M21);
+            var row3 = Vector256.LoadUnsafe(ref matrix.M31);
+            var row4 = Vector256.LoadUnsafe(ref matrix.M41);
 
             var l12 = Avx.UnpackLow(row1, row2);
             var l34 = Avx.UnpackLow(row3, row4);
             var h12 = Avx.UnpackHigh(row1, row2);
             var h34 = Avx.UnpackHigh(row3, row4);
 
-            Avx.Store(&matrix.M11, Vector256.Create(Avx.ExtractVector128(l12, 0), Avx.ExtractVector128(l34, 0)));
-            Avx.Store(&matrix.M21, Vector256.Create(Avx.ExtractVector128(h12, 0), Avx.ExtractVector128(h34, 0)));
-            Avx.Store(&matrix.M31, Vector256.Create(Avx.ExtractVector128(l12, 1), Avx.ExtractVector128(l34, 1)));
-            Avx.Store(&matrix.M41, Vector256.Create(Avx.ExtractVector128(h12, 1), Avx.ExtractVector128(h34, 1)));
+            Vector256.Create(Avx.ExtractVector128(l12, 0), Avx.ExtractVector128(l34, 0)).StoreUnsafe(ref matrix.M11);
+            Vector256.Create(Avx.ExtractVector128(h12, 0), Avx.ExtractVector128(h34, 0)).StoreUnsafe(ref matrix.M21);
+            Vector256.Create(Avx.ExtractVector128(l12, 1), Avx.ExtractVector128(l34, 1)).StoreUnsafe(ref matrix.M31);
+            Vector256.Create(Avx.ExtractVector128(h12, 1), Avx.ExtractVector128(h34, 1)).StoreUnsafe(ref matrix.M41);
 
             return matrix;
         }
@@ -470,145 +470,92 @@ namespace NiVE3.Numerics
                 .Translate(translate.X, translate.Y, translate.Z);
         }
 
-        public unsafe static bool operator ==(Matrix4x4d a, Matrix4x4d b)
+        public static bool operator ==(in Matrix4x4d a, in Matrix4x4d b)
         {
-            var e1 = Avx.MoveMask(Avx.CompareNotEqual(Avx.LoadVector256(&a.M11), Avx.LoadVector256(&b.M11)));
-            var e2 = Avx.MoveMask(Avx.CompareNotEqual(Avx.LoadVector256(&a.M21), Avx.LoadVector256(&b.M21)));
-            var e3 = Avx.MoveMask(Avx.CompareNotEqual(Avx.LoadVector256(&a.M31), Avx.LoadVector256(&b.M31)));
-            var e4 = Avx.MoveMask(Avx.CompareNotEqual(Avx.LoadVector256(&a.M41), Avx.LoadVector256(&b.M41)));
-
-            return e1 == 0 && e2 == 0 && e3 == 0 && e4 == 0;
+            return Vector256.LoadUnsafe(in a.M11) == Vector256.LoadUnsafe(in b.M11) &&
+                Vector256.LoadUnsafe(in a.M21) == Vector256.LoadUnsafe(in b.M21) &&
+                Vector256.LoadUnsafe(in a.M31) == Vector256.LoadUnsafe(in b.M31) &&
+                Vector256.LoadUnsafe(in a.M41) == Vector256.LoadUnsafe(in b.M41);
         }
 
-        public unsafe static bool operator !=(Matrix4x4d a, Matrix4x4d b)
+        public static bool operator !=(in Matrix4x4d a, in Matrix4x4d b)
         {
-            var e1 = Avx.MoveMask(Avx.CompareEqual(Avx.LoadVector256(&a.M11), Avx.LoadVector256(&b.M11)));
-            var e2 = Avx.MoveMask(Avx.CompareEqual(Avx.LoadVector256(&a.M21), Avx.LoadVector256(&b.M21)));
-            var e3 = Avx.MoveMask(Avx.CompareEqual(Avx.LoadVector256(&a.M31), Avx.LoadVector256(&b.M31)));
-            var e4 = Avx.MoveMask(Avx.CompareEqual(Avx.LoadVector256(&a.M41), Avx.LoadVector256(&b.M41)));
-
-            return e1 == 0 && e2 == 0 && e3 == 0 && e4 == 0;
+            return Vector256.LoadUnsafe(in a.M11) != Vector256.LoadUnsafe(in b.M11) &&
+                Vector256.LoadUnsafe(in a.M21) != Vector256.LoadUnsafe(in b.M21) &&
+                Vector256.LoadUnsafe(in a.M31) != Vector256.LoadUnsafe(in b.M31) &&
+                Vector256.LoadUnsafe(in a.M41) != Vector256.LoadUnsafe(in b.M41);
         }
 
-        public unsafe static Matrix4x4d operator +(Matrix4x4d a, Matrix4x4d b)
+        public static Matrix4x4d operator +(Matrix4x4d a, in Matrix4x4d b)
         {
-            Avx.Store(&a.M11, Avx.Add(Avx.LoadVector256(&a.M11), Avx.LoadVector256(&b.M11)));
-            Avx.Store(&a.M21, Avx.Add(Avx.LoadVector256(&a.M21), Avx.LoadVector256(&b.M21)));
-            Avx.Store(&a.M31, Avx.Add(Avx.LoadVector256(&a.M31), Avx.LoadVector256(&b.M31)));
-            Avx.Store(&a.M41, Avx.Add(Avx.LoadVector256(&a.M41), Avx.LoadVector256(&b.M41)));
+            (Vector256.LoadUnsafe(in a.M11) + Vector256.LoadUnsafe(in b.M11)).StoreUnsafe(ref a.M11);
+            (Vector256.LoadUnsafe(in a.M21) + Vector256.LoadUnsafe(in b.M21)).StoreUnsafe(ref a.M21);
+            (Vector256.LoadUnsafe(in a.M31) + Vector256.LoadUnsafe(in b.M31)).StoreUnsafe(ref a.M31);
+            (Vector256.LoadUnsafe(in a.M41) + Vector256.LoadUnsafe(in b.M41)).StoreUnsafe(ref a.M41);
 
             return a;
         }
 
-        public unsafe static Matrix4x4d operator -(Matrix4x4d a, Matrix4x4d b)
+        public static Matrix4x4d operator -(Matrix4x4d a, in Matrix4x4d b)
         {
-            Avx.Store(&a.M11, Avx.Subtract(Avx.LoadVector256(&a.M11), Avx.LoadVector256(&b.M11)));
-            Avx.Store(&a.M21, Avx.Subtract(Avx.LoadVector256(&a.M21), Avx.LoadVector256(&b.M21)));
-            Avx.Store(&a.M31, Avx.Subtract(Avx.LoadVector256(&a.M31), Avx.LoadVector256(&b.M31)));
-            Avx.Store(&a.M41, Avx.Subtract(Avx.LoadVector256(&a.M41), Avx.LoadVector256(&b.M41)));
+            (Vector256.LoadUnsafe(in a.M11) - Vector256.LoadUnsafe(in b.M11)).StoreUnsafe(ref a.M11);
+            (Vector256.LoadUnsafe(in a.M21) - Vector256.LoadUnsafe(in b.M21)).StoreUnsafe(ref a.M21);
+            (Vector256.LoadUnsafe(in a.M31) - Vector256.LoadUnsafe(in b.M31)).StoreUnsafe(ref a.M31);
+            (Vector256.LoadUnsafe(in a.M41) - Vector256.LoadUnsafe(in b.M41)).StoreUnsafe(ref a.M41);
 
             return a;
         }
 
-        public unsafe static Matrix4x4d operator -(Matrix4x4d a)
+        public static Matrix4x4d operator -(Matrix4x4d a)
         {
-            Avx.Store(&a.M11, Avx.Subtract(Vector256<double>.Zero, Avx.LoadVector256(&a.M11)));
-            Avx.Store(&a.M21, Avx.Subtract(Vector256<double>.Zero, Avx.LoadVector256(&a.M21)));
-            Avx.Store(&a.M31, Avx.Subtract(Vector256<double>.Zero, Avx.LoadVector256(&a.M31)));
-            Avx.Store(&a.M41, Avx.Subtract(Vector256<double>.Zero, Avx.LoadVector256(&a.M41)));
+            (-Vector256.LoadUnsafe(in a.M11)).StoreUnsafe(ref a.M11);
+            (-Vector256.LoadUnsafe(in a.M21)).StoreUnsafe(ref a.M21);
+            (-Vector256.LoadUnsafe(in a.M31)).StoreUnsafe(ref a.M31);
+            (-Vector256.LoadUnsafe(in a.M41)).StoreUnsafe(ref a.M41);
 
             return a;
         }
 
-        public unsafe static Matrix4x4d operator *(Matrix4x4d a, Matrix4x4d b)
+        public static Matrix4x4d operator *(Matrix4x4d a, in Matrix4x4d b)
         {
-            Avx.Store(
-                &a.M11,
-                Avx.Add(
-                    Avx.Add(
-                        Avx.Multiply(Avx.BroadcastScalarToVector256(&a.M11), Avx.LoadVector256(&b.M11)),
-                        Avx.Multiply(Avx.BroadcastScalarToVector256(&a.M12), Avx.LoadVector256(&b.M21))
-                    ),
-                    Avx.Add(
-                        Avx.Multiply(Avx.BroadcastScalarToVector256(&a.M13), Avx.LoadVector256(&b.M31)),
-                        Avx.Multiply(Avx.BroadcastScalarToVector256(&a.M14), Avx.LoadVector256(&b.M41))
-                    )
-                )
-            );
-            Avx.Store(
-                &a.M21,
-                Avx.Add(
-                    Avx.Add(
-                        Avx.Multiply(Avx.BroadcastScalarToVector256(&a.M21), Avx.LoadVector256(&b.M11)),
-                        Avx.Multiply(Avx.BroadcastScalarToVector256(&a.M22), Avx.LoadVector256(&b.M21))
-                    ),
-                    Avx.Add(
-                        Avx.Multiply(Avx.BroadcastScalarToVector256(&a.M23), Avx.LoadVector256(&b.M31)),
-                        Avx.Multiply(Avx.BroadcastScalarToVector256(&a.M24), Avx.LoadVector256(&b.M41))
-                    )
-                )
-            );
-            Avx.Store(
-                &a.M31,
-                Avx.Add(
-                    Avx.Add(
-                        Avx.Multiply(Avx.BroadcastScalarToVector256(&a.M31), Avx.LoadVector256(&b.M11)),
-                        Avx.Multiply(Avx.BroadcastScalarToVector256(&a.M32), Avx.LoadVector256(&b.M21))
-                    ),
-                    Avx.Add(
-                        Avx.Multiply(Avx.BroadcastScalarToVector256(&a.M33), Avx.LoadVector256(&b.M31)),
-                        Avx.Multiply(Avx.BroadcastScalarToVector256(&a.M34), Avx.LoadVector256(&b.M41))
-                    )
-                )
-            );
-            Avx.Store(
-                &a.M41,
-                Avx.Add(
-                    Avx.Add(
-                        Avx.Multiply(Avx.BroadcastScalarToVector256(&a.M41), Avx.LoadVector256(&b.M11)),
-                        Avx.Multiply(Avx.BroadcastScalarToVector256(&a.M42), Avx.LoadVector256(&b.M21))
-                    ),
-                    Avx.Add(
-                        Avx.Multiply(Avx.BroadcastScalarToVector256(&a.M43), Avx.LoadVector256(&b.M31)),
-                        Avx.Multiply(Avx.BroadcastScalarToVector256(&a.M44), Avx.LoadVector256(&b.M41))
-                    )
-                )
-            );
+            ((Vector256.Create(a.M11) * Vector256.LoadUnsafe(in b.M11) + Vector256.Create(a.M12) * Vector256.LoadUnsafe(in b.M21)) + (Vector256.Create(a.M13) * Vector256.LoadUnsafe(in b.M31) + Vector256.Create(a.M14) * Vector256.LoadUnsafe(in b.M41))).StoreUnsafe(ref a.M11);
+            ((Vector256.Create(a.M21) * Vector256.LoadUnsafe(in b.M11) + Vector256.Create(a.M22) * Vector256.LoadUnsafe(in b.M21)) + (Vector256.Create(a.M23) * Vector256.LoadUnsafe(in b.M31) + Vector256.Create(a.M24) * Vector256.LoadUnsafe(in b.M41))).StoreUnsafe(ref a.M21);
+            ((Vector256.Create(a.M31) * Vector256.LoadUnsafe(in b.M11) + Vector256.Create(a.M32) * Vector256.LoadUnsafe(in b.M21)) + (Vector256.Create(a.M33) * Vector256.LoadUnsafe(in b.M31) + Vector256.Create(a.M34) * Vector256.LoadUnsafe(in b.M41))).StoreUnsafe(ref a.M31);
+            ((Vector256.Create(a.M41) * Vector256.LoadUnsafe(in b.M11) + Vector256.Create(a.M42) * Vector256.LoadUnsafe(in b.M21)) + (Vector256.Create(a.M43) * Vector256.LoadUnsafe(in b.M31) + Vector256.Create(a.M44) * Vector256.LoadUnsafe(in b.M41))).StoreUnsafe(ref a.M41);
 
             return a;
         }
 
-        public unsafe static Matrix4x4d operator *(Matrix4x4d a, double s)
+        public static Matrix4x4d operator *(Matrix4x4d a, double s)
         {
-            var scalar = Vector256.Create(s);
-            Avx.Store(&a.M11, Avx.Multiply(Avx.LoadVector256(&a.M11), scalar));
-            Avx.Store(&a.M21, Avx.Multiply(Avx.LoadVector256(&a.M21), scalar));
-            Avx.Store(&a.M31, Avx.Multiply(Avx.LoadVector256(&a.M31), scalar));
-            Avx.Store(&a.M41, Avx.Multiply(Avx.LoadVector256(&a.M41), scalar));
+            (Vector256.LoadUnsafe(in a.M11) * s).StoreUnsafe(ref a.M11);
+            (Vector256.LoadUnsafe(in a.M21) * s).StoreUnsafe(ref a.M21);
+            (Vector256.LoadUnsafe(in a.M31) * s).StoreUnsafe(ref a.M31);
+            (Vector256.LoadUnsafe(in a.M41) * s).StoreUnsafe(ref a.M41);
 
             return a;
         }
 
-        public unsafe static explicit operator Matrix4x4d(Matrix4x4 m)
+        public static explicit operator Matrix4x4d(in Matrix4x4 m)
         {
-            var result = Zero;
+            Unsafe.SkipInit<Matrix4x4d>(out var result);
 
-            Avx.Store(&result.M11, Avx.ConvertToVector256Double(Sse.LoadVector128(&m.M11)));
-            Avx.Store(&result.M21, Avx.ConvertToVector256Double(Sse.LoadVector128(&m.M21)));
-            Avx.Store(&result.M31, Avx.ConvertToVector256Double(Sse.LoadVector128(&m.M31)));
-            Avx.Store(&result.M41, Avx.ConvertToVector256Double(Sse.LoadVector128(&m.M41)));
+            Avx.ConvertToVector256Double(Vector128.LoadUnsafe(in m.M11)).StoreUnsafe(ref result.M11);
+            Avx.ConvertToVector256Double(Vector128.LoadUnsafe(in m.M21)).StoreUnsafe(ref result.M21);
+            Avx.ConvertToVector256Double(Vector128.LoadUnsafe(in m.M31)).StoreUnsafe(ref result.M31);
+            Avx.ConvertToVector256Double(Vector128.LoadUnsafe(in m.M41)).StoreUnsafe(ref result.M41);
 
             return result;
         }
 
-        public unsafe static explicit operator Matrix4x4(Matrix4x4d m)
+        public static explicit operator Matrix4x4(in Matrix4x4d m)
         {
-            var result = Matrix4x4.Identity;
+            Unsafe.SkipInit<Matrix4x4>(out var result);
 
-            Sse.Store(&result.M11, Avx.ConvertToVector128Single(Avx.LoadVector256(&m.M11)));
-            Sse.Store(&result.M21, Avx.ConvertToVector128Single(Avx.LoadVector256(&m.M21)));
-            Sse.Store(&result.M31, Avx.ConvertToVector128Single(Avx.LoadVector256(&m.M31)));
-            Sse.Store(&result.M41, Avx.ConvertToVector128Single(Avx.LoadVector256(&m.M41)));
+            Avx.ConvertToVector128Single(Vector256.LoadUnsafe(in m.M11)).StoreUnsafe(ref result.M11);
+            Avx.ConvertToVector128Single(Vector256.LoadUnsafe(in m.M21)).StoreUnsafe(ref result.M21);
+            Avx.ConvertToVector128Single(Vector256.LoadUnsafe(in m.M31)).StoreUnsafe(ref result.M31);
+            Avx.ConvertToVector128Single(Vector256.LoadUnsafe(in m.M41)).StoreUnsafe(ref result.M41);
 
             return result;
         }
@@ -616,23 +563,15 @@ namespace NiVE3.Numerics
 
     public static class Matrix4x4dExtension
     {
-        public unsafe static Vector256<double> Transform(this Matrix4x4d matrix, in Vector256<double> v)
+        public static Vector256<double> Transform(this in Matrix4x4d matrix, in Vector256<double> v)
         {
-            var m1 = Avx.LoadVector256(&matrix.M11);
-            var m2 = Avx.LoadVector256(&matrix.M21);
-            var m3 = Avx.LoadVector256(&matrix.M31);
-            var m4 = Avx.LoadVector256(&matrix.M41);
+            var m1 = Vector256.LoadUnsafe(in matrix.M11);
+            var m2 = Vector256.LoadUnsafe(in matrix.M21);
+            var m3 = Vector256.LoadUnsafe(in matrix.M31);
+            var m4 = Vector256.LoadUnsafe(in matrix.M41);
 
-            return Avx.Add(
-                Avx.Add(
-                    Avx.Multiply(Vector256.Create(v.GetElement(0)), m1),
-                    Avx.Multiply(Vector256.Create(v.GetElement(1)), m2)
-                ),
-                Avx.Add(
-                    Avx.Multiply(Vector256.Create(v.GetElement(2)), m3),
-                    Avx.Multiply(Vector256.Create(v.GetElement(3)), m4)
-                )
-            );
+            return (Vector256.Create(v.GetElement(0)) * m1 + Vector256.Create(v.GetElement(1)) * m2) +
+                (Vector256.Create(v.GetElement(2)) * m3 + Vector256.Create(v.GetElement(3)) * m4);
         }
     }
 }

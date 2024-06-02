@@ -55,9 +55,9 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
             {
                 var invertedNormal = invertMatrix.Transform(Vector256.Create(0.0, 0.0, -1.0, 0.0));
                 InvertNormal = -Avx.Subtract(invertedNormal, Vector256.Create(0.0, 0.0, 0.0, invertedNormal.GetElement(3))).Normalize().AsVector3();
-                PlaneD = -Normal.DotProduct(v1.Vertex).GetElement(0);
+                PlaneD = Vector256.Dot(-Normal, v1.Vertex);
 
-                SignIsDifferent = Math.Sign(PlaneD) != Math.Sign(Normal.DotProduct(farPoint).GetElement(0) - PlaneD);
+                SignIsDifferent = Math.Sign(PlaneD) != Math.Sign(Vector256.Dot(Normal, farPoint) - PlaneD);
                 IsInvalidNormal = false;
             }
             else
@@ -81,9 +81,9 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
                 FloatNormal = Normal.AsVector3();
                 var invertedNormal = InvertMatrix.Transform(Vector256.Create(0.0, 0.0, -1.0, 0.0));
                 InvertNormal = -Avx.Subtract(invertedNormal, Vector256.Create(0.0, 0.0, 0.0, invertedNormal.GetElement(3))).Normalize().AsVector3();
-                PlaneD = -Normal.DotProduct(v1.Vertex).GetElement(0);
+                PlaneD = Vector256.Dot(-Normal, v1.Vertex);
 
-                SignIsDifferent = Math.Sign(PlaneD) != Math.Sign(Normal.DotProduct(baseTriangle.FarPoint).GetElement(0) - PlaneD);
+                SignIsDifferent = Math.Sign(PlaneD) != Math.Sign(Vector256.Dot(Normal, baseTriangle.FarPoint) - PlaneD);
                 IsInvalidNormal = false;
             }
             else
