@@ -119,52 +119,42 @@ namespace NiVE3.ViewModel.PreviewManipulation
 
     class RotateAllPreviewManipulationState : PreviewManipulationStateBase
     {
-        static readonly string[] RotatePropertyIds = [ILayerObject.TransformXAngleId, ILayerObject.TransformYAngleId, ILayerObject.TransformZAngleId];
+        PropertyViewModel[] Properties { get; }
 
-        PropertyViewModel[][] Properties { get; }
+        Vector3d[] PrevDirections { get; }
 
-        Vector3d[] PrevRotations { get; }
-
-        Vector3d StartPosition { get; }
-
-        LayerSkeleton? GrabbingLayerSkeleton { get; }
-
-        public RotateAllPreviewManipulationState(LayerViewModel[] layers, LayerSkeleton? grabbingLayerSkeleton, double time, CompositionModel compositionModel, CameraSetting cameraSetting, Vector2d startScreenPosition, HistoryModel historyModel)
+        public RotateAllPreviewManipulationState(LayerViewModel[] layers, double time, CompositionModel compositionModel, CameraSetting cameraSetting, Vector2d startScreenPosition, HistoryModel historyModel)
             : base(time, compositionModel, cameraSetting, startScreenPosition, historyModel)
         {
-            var properties = new List<PropertyViewModel[]>();
+            var properties = new List<PropertyViewModel>();
             var prevRotations = new List<Vector3d>();
             foreach (var layer in layers)
             {
-                var rotations = layer.TransformProperties?.Children?.Where(p => RotatePropertyIds.Contains(p.Property.Id))?.OfType<PropertyViewModel>()?.OrderBy(p => Array.IndexOf(RotatePropertyIds, p.Property.Id))?.ToArray() ?? [];
-                if (rotations.Length != 3)
+                var direction = layer.TransformProperties?.Children?.FirstOrDefault(p => p.Property.Id == ILayerObject.TransformDirectionId);
+                if (direction is PropertyViewModel vm)
                 {
-                    throw new Exception("rotation is not 3d"); // bug
+                    prevRotations.Add((Vector3d)(vm.CurrentTimeValue ?? Vector3d.Zero));
+                    vm.BeginEditCommand.Execute(null);
+                    properties.Add(vm);
                 }
-
-                prevRotations.Add(new Vector3d((double)(rotations[0].CurrentTimeValue ?? 0.0), (double)(rotations[1].CurrentTimeValue ?? 0.0), (double)(rotations[2].CurrentTimeValue ?? 0.0)));
-                foreach (var r in rotations)
-                {
-                    r.BeginEditCommand.Execute(null);
-                }
-                properties.Add(rotations);
             }
 
             Properties = [..properties];
-            PrevRotations = [..prevRotations];
-            GrabbingLayerSkeleton = grabbingLayerSkeleton;
-            StartPosition = compositionModel.Unproject(cameraSetting, startScreenPosition.X, startScreenPosition.Y, grabbingLayerSkeleton);
+            PrevDirections = [..prevRotations];
         }
 
         public override void Update(Vector2d screenPos)
         {
-            var newPosition = CompositionModel.Unproject(CameraSetting, screenPos.X, screenPos.Y, GrabbingLayerSkeleton);
-            var diff = newPosition - StartPosition;
-            foreach (var (rotations, prev) in Properties.Zip(PrevRotations))
+            var diff = (Vector3d)(screenPos - StartScreenPosition) * 0.2;
+            diff = new Vector3d(diff.Y, -diff.X, diff.Z);
+            foreach (var (direction, prev) in Properties.Zip(PrevDirections))
             {
-                rotations[0].CurrentTimeValue = prev.X + diff.Y;
-                rotations[1].CurrentTimeValue = prev.Y + diff.X;
-                rotations[2].CurrentTimeValue = prev.Z + diff.Z;
+                var dir = prev + diff;
+                while (dir.X < 0.0 || dir.Y < 0.0 || dir.Z < 0.0)
+                {
+                    dir = (dir + new Vector3d(360.0)) % 360.0;
+                }
+                direction.CurrentTimeValue = dir;
             }
         }
 
@@ -173,7 +163,7 @@ namespace NiVE3.ViewModel.PreviewManipulation
             Update(screenPos);
 
             HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangePropertyValue));
-            foreach (var property in Properties.SelectMany(_ => _))
+            foreach (var property in Properties)
             {
                 property.EndEditCommand.Execute(null);
             }
@@ -182,7 +172,7 @@ namespace NiVE3.ViewModel.PreviewManipulation
 
         public override void Abort()
         {
-            foreach (var property in Properties.SelectMany(_ => _))
+            foreach (var property in Properties)
             {
                 property.AbortEditCommand.Execute(null);
             }

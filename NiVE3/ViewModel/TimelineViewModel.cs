@@ -863,7 +863,6 @@ namespace NiVE3.ViewModel
                 return;
             }
 
-            IsUsingTool = true;
             var cameraSetting = CompositionModel.GetActiveCameraSetting(CurrentTime);
             var baseLayerId = CompositionModel.FindLayerByPreviewPosition(CurrentTime, e.StartScreenPosition.X, e.StartScreenPosition.Y);
             var baseLayerSkeleton = baseLayerId.HasValue ? CompositionModel.GetLayerSkeleton(baseLayerId.Value, CurrentTime) : null;
@@ -889,10 +888,12 @@ namespace NiVE3.ViewModel
                     imageLayers = [..imageLayers.Where(l => l.IsEnable3D)];
                     if (imageLayers.Length > 0)
                     {
-                        PreviewManipulation = new RotateAllPreviewManipulationState(imageLayers, baseLayerSkeleton, CurrentTime, CompositionModel, cameraSetting, e.StartScreenPosition, HistoryModel);
+                        PreviewManipulation = new RotateAllPreviewManipulationState(imageLayers, CurrentTime, CompositionModel, cameraSetting, e.StartScreenPosition, HistoryModel);
                     }
                     break;
             }
+
+            IsUsingTool = PreviewManipulation != null;
         }
 
         private void TimelineViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
