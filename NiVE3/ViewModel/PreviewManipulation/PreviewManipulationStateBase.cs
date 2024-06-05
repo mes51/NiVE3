@@ -48,9 +48,9 @@ namespace NiVE3.ViewModel.PreviewManipulation
 
         Vector3d StartPosition { get; }
 
-        LayerSkeleton? GrabbingLayerSkeleton { get; }
+        LayerSkeleton GrabbingLayerSkeleton { get; }
 
-        public PositionPreviewManipulationState(LayerViewModel[] layers, LayerSkeleton? grabbingLayerSkeleton, double time, CompositionModel compositionModel, CameraSetting cameraSetting, Vector2d startScreenPosition, HistoryModel historyModel)
+        public PositionPreviewManipulationState(LayerViewModel[] layers, LayerSkeleton grabbingLayerSkeleton, double time, CompositionModel compositionModel, CameraSetting cameraSetting, Vector2d startScreenPosition, HistoryModel historyModel)
             : base(time, compositionModel, cameraSetting, startScreenPosition, historyModel)
         {
             var properties = new List<(bool, PropertyViewModel)>();
@@ -68,15 +68,15 @@ namespace NiVE3.ViewModel.PreviewManipulation
                 }
             }
 
-            GrabbingLayerSkeleton = grabbingLayerSkeleton?.IsEnable3D ?? false ? grabbingLayerSkeleton : null;
+            GrabbingLayerSkeleton = grabbingLayerSkeleton;
             Properties = [..properties];
             PrevPositions = [..prevPositions];
-            StartPosition = compositionModel.Unproject(cameraSetting, startScreenPosition.X, startScreenPosition.Y, GrabbingLayerSkeleton);
+            StartPosition = compositionModel.Unprojection(cameraSetting, GrabbingLayerSkeleton, startScreenPosition);
         }
 
         public override void Update(Vector2d screenPos)
         {
-            var newPosition = CompositionModel.Unproject(CameraSetting, screenPos.X, screenPos.Y, GrabbingLayerSkeleton);
+            var newPosition = CompositionModel.Unprojection(CameraSetting, GrabbingLayerSkeleton, screenPos);
             var diff3D = newPosition - StartPosition;
             var diff2D = screenPos - StartScreenPosition;
             if (double.IsNaN(diff3D.X) || double.IsNaN(diff3D.Y) || double.IsNaN(diff3D.Z))
@@ -156,6 +156,86 @@ namespace NiVE3.ViewModel.PreviewManipulation
                 }
                 direction.CurrentTimeValue = dir;
             }
+        }
+
+        public override void Commit(Vector2d screenPos)
+        {
+            Update(screenPos);
+
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangePropertyValue));
+            foreach (var property in Properties)
+            {
+                property.EndEditCommand.Execute(null);
+            }
+            HistoryModel.EndGroup();
+        }
+
+        public override void Abort()
+        {
+            foreach (var property in Properties)
+            {
+                property.AbortEditCommand.Execute(null);
+            }
+        }
+    }
+
+    class RotateZPreviewManipulationState : PreviewManipulationStateBase
+    {
+        PropertyViewModel[] Properties { get; }
+
+        double[] PrevZ { get; }
+
+        Vector2d AnchorPoint { get; }
+
+        double PrevPointRadian { get; set; }
+
+        LayerSkeleton GrabbingLayerSkeleton { get; }
+
+        public RotateZPreviewManipulationState(LayerViewModel[] layers, LayerSkeleton grabbingLayerSkeleton, double time, CompositionModel compositionModel, CameraSetting cameraSetting, Vector2d startScreenPosition, HistoryModel historyModel) : base(time, compositionModel, cameraSetting, startScreenPosition, historyModel)
+        {
+            var properties = new List<PropertyViewModel>();
+            var prevZ = new List<double>();
+            foreach (var layer in layers)
+            {
+                var z = layer.TransformProperties?.Children?.FirstOrDefault(p => p.Property.Id == ILayerObject.TransformZAngleId);
+                if (z is PropertyViewModel vm)
+                {
+                    prevZ.Add((double)(vm.CurrentTimeValue ?? 0.0));
+                    vm.BeginEditCommand.Execute(null);
+                    properties.Add(vm);
+                }
+            }
+
+            GrabbingLayerSkeleton = grabbingLayerSkeleton;
+            Properties = [..properties];
+            PrevZ = [..prevZ];
+
+            var anchorPoint = (Vector3d)(grabbingLayerSkeleton.Transform[ILayerObject.TransformAnchorPointId] ?? Vector3d.Zero);
+            AnchorPoint = compositionModel.Projection(cameraSetting, grabbingLayerSkeleton, anchorPoint);
+            var prevPoint = startScreenPosition - AnchorPoint;
+            PrevPointRadian = Math.Atan2(prevPoint.Y, prevPoint.X);
+        }
+
+        public override void Update(Vector2d screenPos)
+        {
+            var pos = screenPos - AnchorPoint;
+            var prevSin = Math.Sin(-PrevPointRadian);
+            var prevCos = Math.Cos(-PrevPointRadian);
+            var rotated = new Vector2d(
+                pos.X * prevCos - pos.Y * prevSin,
+                pos.X * prevSin + pos.Y * prevCos
+            );
+
+            var rad = Math.Atan2(rotated.Y, rotated.X);
+            var diffAngle = rad / Math.PI * 180.0;
+            for (var i = 0; i < Properties.Length; i++)
+            {
+                var newAngle = PrevZ[i] + diffAngle;
+                Properties[i].CurrentTimeValue = newAngle;
+                PrevZ[i] = newAngle;
+            }
+
+            PrevPointRadian = Math.Atan2(pos.Y, pos.X);
         }
 
         public override void Commit(Vector2d screenPos)

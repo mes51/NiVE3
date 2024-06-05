@@ -864,7 +864,7 @@ namespace NiVE3.ViewModel
             }
 
             var cameraSetting = CompositionModel.GetActiveCameraSetting(CurrentTime);
-            var baseLayerId = CompositionModel.FindLayerByPreviewPosition(CurrentTime, e.StartScreenPosition.X, e.StartScreenPosition.Y);
+            var baseLayerId = CompositionModel.FindLayerByPreviewPosition(CurrentTime, e.StartScreenPosition);
             var baseLayerSkeleton = baseLayerId.HasValue ? CompositionModel.GetLayerSkeleton(baseLayerId.Value, CurrentTime) : null;
             var baseLayerIs3D = baseLayerSkeleton?.IsEnable3D ?? false;
             var imageLayers = SelectedLayers.Where(l => l.HasImage).ToArray();
@@ -876,15 +876,16 @@ namespace NiVE3.ViewModel
 
             switch (e.Type)
             {
-                case BeginUseToolEvent.PropertyType.Transform:
+                case BeginUseToolEvent.PropertyType.Transform when baseLayerSkeleton != null:
                     PreviewManipulation = new PositionPreviewManipulationState(imageLayers, baseLayerSkeleton, CurrentTime, CompositionModel, cameraSetting, e.StartScreenPosition, HistoryModel);
                     break;
-                case BeginUseToolEvent.PropertyType.RotateAll when !baseLayerIs3D:
-                case BeginUseToolEvent.PropertyType.RotateX when !baseLayerIs3D:
-                case BeginUseToolEvent.PropertyType.RotateY when !baseLayerIs3D:
-                case BeginUseToolEvent.PropertyType.RotateZ:
+                case BeginUseToolEvent.PropertyType.RotateAll when !baseLayerIs3D && baseLayerSkeleton != null:
+                case BeginUseToolEvent.PropertyType.RotateX when !baseLayerIs3D && baseLayerSkeleton != null:
+                case BeginUseToolEvent.PropertyType.RotateY when !baseLayerIs3D && baseLayerSkeleton != null:
+                case BeginUseToolEvent.PropertyType.RotateZ when baseLayerSkeleton != null:
+                    PreviewManipulation = new RotateZPreviewManipulationState(imageLayers, baseLayerSkeleton, CurrentTime, CompositionModel, cameraSetting, e.StartScreenPosition, HistoryModel);
                     break;
-                case BeginUseToolEvent.PropertyType.RotateAll:
+                case BeginUseToolEvent.PropertyType.RotateAll when baseLayerSkeleton != null:
                     imageLayers = [..imageLayers.Where(l => l.IsEnable3D)];
                     if (imageLayers.Length > 0)
                     {

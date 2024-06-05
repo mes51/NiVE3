@@ -354,7 +354,7 @@ namespace NiVE3.ViewModel
                 }
 
                 var pos = p.Value / (Scale * 0.01);
-                var layerId = compositionPreviewModel.Composition.FindLayerByPreviewPosition(CurrentTime, pos.X, pos.Y);
+                var layerId = compositionPreviewModel.Composition.FindLayerByPreviewPosition(CurrentTime, pos);
                 EventHubModel.NotifySelectLayer(compositionPreviewModel.Composition.CompositionId, layerId);
             });
 

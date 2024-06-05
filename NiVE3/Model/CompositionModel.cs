@@ -1097,14 +1097,14 @@ namespace NiVE3.Model
             }
         }
 
-        public Guid? FindLayerByPreviewPosition(double time, double x, double y)
+        public Guid? FindLayerByPreviewPosition(double time, Vector2d pos)
         {
             var activeCamera = Layers.FirstOrDefault(l => l.IsEnableVideo && l.IsCamera && l.IsContainsTime(time));
             var activeCameraSetting = activeCamera?.GetCameraSetting(time) ?? CreateDefaultCameraSetting(Width, Height);
             var hasImageSolo = Layers.Any(l => l.HasImage && l.IsEnableVideo && l.IsEnableSolo);
             var layers = Layers.Where(l => l.HasImage && l.IsEnableVideo && (!hasImageSolo || l.IsEnableSolo)).Select(l => l.GetLayerSkeleton(time)).NonNull().Reverse().ToArray();
 
-            return Renderer.SelectLayer(activeCameraSetting, layers, x, y);
+            return Renderer.SelectLayer(activeCameraSetting, layers, pos);
         }
 
         public LayerSkeleton? GetLayerSkeleton(Guid layerId, double time)
@@ -1112,9 +1112,14 @@ namespace NiVE3.Model
             return Layers.FirstOrDefault(l => l.LayerId == layerId)?.GetLayerSkeleton(time);
         }
 
-        public Vector3d Unproject(CameraSetting cameraSetting, double x, double y, LayerSkeleton? baseLayerSkeleton)
+        public Vector2d Projection(CameraSetting cameraSetting, LayerSkeleton? baseLayerSkeleton, Vector3d pos)
         {
-            return Renderer.ScreenCoordToWorldCoord(cameraSetting, x, y, baseLayerSkeleton);
+            return Renderer.WorldCoordToScreenCoord(cameraSetting, baseLayerSkeleton, pos);
+        }
+
+        public Vector3d Unprojection(CameraSetting cameraSetting, LayerSkeleton? baseLayerSkeleton, Vector2d pos)
+        {
+            return Renderer.ScreenCoordToWorldCoord(cameraSetting, baseLayerSkeleton, pos);
         }
 
         public CameraSetting GetActiveCameraSetting(double time)

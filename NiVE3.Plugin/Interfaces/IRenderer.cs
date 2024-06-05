@@ -125,19 +125,26 @@ namespace NiVE3.Plugin.Interfaces
         /// </summary>
         /// <param name="cameraSetting">カメラの設定</param>
         /// <param name="layers">現在コンポジションに存在する選択可能なレイヤーの配列</param>
-        /// <param name="x">スクリーンのX座標</param>
-        /// <param name="y">スクリーンのY座標</param>
+        /// <param name="pos">スクリーンの座標</param>
         /// <returns>スクリーンの座標最前面に存在するレイヤーのID、存在しない場合はnull</returns>
-        Guid? SelectLayer(CameraSetting cameraSetting, LayerSkeleton[] layers, double x, double y);
+        Guid? SelectLayer(CameraSetting cameraSetting, LayerSkeleton[] layers, Vector2d pos);
 
         /// <summary>
         /// スクリーン座標からコンポジションのワールド座標に変換します。
         /// </summary>
         /// <param name="cameraSetting">カメラの設定</param>
-        /// <param name="x">スクリーンのX座標</param>
-        /// <param name="y">スクリーンのY座標</param>
         /// <param name="baseLayer">基準となるレイヤー</param>
-        /// <returns>コンポジションのワールド座標座標</returns>
-        Vector3d ScreenCoordToWorldCoord(CameraSetting cameraSetting, double x, double y, LayerSkeleton? baseLayer);
+        /// <param name="pos">スクリーンの座標</param>
+        /// <returns>コンポジションのワールド座標</returns>
+        Vector3d ScreenCoordToWorldCoord(CameraSetting cameraSetting, LayerSkeleton? baseLayer, Vector2d pos);
+
+        /// <summary>
+        /// コンポジションのワールド座標からスクリーン座標に変換します
+        /// </summary>
+        /// <param name="cameraSetting">カメラの設定</param>
+        /// <param name="baseLayer">基準となるレイヤー</param>
+        /// <param name="pos">コンポジションのワールドの座標</param>
+        /// <returns>スクリーン座標</returns>
+        Vector2d WorldCoordToScreenCoord(CameraSetting cameraSetting, LayerSkeleton? baseLayer, Vector3d pos);
     }
 }

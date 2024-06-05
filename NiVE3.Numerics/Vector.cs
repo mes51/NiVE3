@@ -172,7 +172,7 @@ namespace NiVE3.Numerics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator Vector128<double>(Vector2d v)
         {
-            return Vector128.Create(v.X, v.Y);
+            return Vector128.LoadUnsafe(in v.X);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -184,7 +184,7 @@ namespace NiVE3.Numerics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator Vector2d(Vector128<double> v)
         {
-            return new Vector2d(v.GetElement(0), v.GetElement(1));
+            return Unsafe.BitCast<Vector128<double>, Vector2d>(v);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

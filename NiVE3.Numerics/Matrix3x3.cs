@@ -140,8 +140,7 @@ namespace NiVE3.Numerics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly (float x, float y) Transform(float x, float y)
         {
-            var p = new Vector3(x, y, 1.0F);
-            var result = p.X * X + p.Y * Y + Z;
+            var result = x * X + y * Y + Z;
             return (result.X, result.Y);
         }
 
@@ -153,8 +152,7 @@ namespace NiVE3.Numerics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly Vector2 Transform(Vector2 v)
         {
-            var p = new Vector3(v, 1.0F);
-            return (p.X * X + p.Y * Y + Z).AsVector128().AsVector2();
+            return (v.X * X + v.Y * Y + Z).AsVector128().AsVector2();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
