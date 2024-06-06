@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:local="clr-namespace:NiVE3.View.Pane"
+             xmlns:pr="clr-namespace:NiVE3.View.Primitive"
              xmlns:pt="clr-namespace:NiVE3.View.Part"
              xmlns:r="clr-namespace:NiVE3.View.Resource"
              xmlns:cv="clr-namespace:NiVE3.View.Converter"
@@ -21,7 +22,7 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
         <cv:LocalizationConverter x:Key="DownScaleRateConverter" LocalizeFormat="{gm:LanguageResource ResourceKey=PreviewView_DownScaleRateFormat}"/>
-        <cv:EnumToLocalizedNameConverter x:Key="PreviewColorChannelNameConverter"/>
+        <cv:EnumToLocalizedNameConverter x:Key="EnumToLocalizedNameConverter"/>
         <cv:ColorToBrushConverter x:Key="ColorToBrushConverter"/>
         <cv:EnumToBoolConverter x:Key="EnumToBoolConverter"/>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
@@ -108,7 +109,7 @@
             <Setter Property="ItemTemplate">
                 <Setter.Value>
                     <DataTemplate>
-                        <TextBlock Text="{Binding Converter={StaticResource PreviewColorChannelNameConverter}, ConverterParameter={x:Type vm:PreviewColorChannel}}"/>
+                        <TextBlock Text="{Binding Converter={StaticResource EnumToLocalizedNameConverter}, ConverterParameter={x:Type vm:PreviewColorChannel}}"/>
                     </DataTemplate>
                 </Setter.Value>
             </Setter>
@@ -175,6 +176,51 @@
                 </DataTrigger>
             </Style.Triggers>
         </Style>
+
+        <HierarchicalDataTemplate x:Key="ToolButtonItemSelectMenuItem" DataType="{x:Type vm:ToolType}">
+            <StackPanel Orientation="Horizontal">
+                <ContentControl x:Name="toolIcon" Margin="0,0,5,0"/>
+                <TextBlock Text="{Binding Converter={StaticResource EnumToLocalizedNameConverter}, ConverterParameter={x:Type vm:ToolType}}"/>
+            </StackPanel>
+            <HierarchicalDataTemplate.Triggers>
+                <DataTrigger Binding="{Binding}" Value="{x:Static vm:ToolType.RotateAll}">
+                    <Setter TargetName="toolIcon" Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate>
+                                <Path Fill="{TemplateBinding Foreground}" Data="{gm:FontawesomeResource ResourceKey=RotateRight, ReturnDynamicResource=True}" Style="{StaticResource IconBase}"/>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding}" Value="{x:Static vm:ToolType.RotateX}">
+                    <Setter TargetName="toolIcon" Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate>
+                                <Path Fill="{TemplateBinding Foreground}" Data="{gm:FontawesomeResource ResourceKey=RotateRight, ReturnDynamicResource=True}" Style="{StaticResource IconBase}"/>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding}" Value="{x:Static vm:ToolType.RotateY}">
+                    <Setter TargetName="toolIcon" Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate>
+                                <Path Fill="{TemplateBinding Foreground}" Data="{gm:FontawesomeResource ResourceKey=RotateRight, ReturnDynamicResource=True}" Style="{StaticResource IconBase}"/>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding}" Value="{x:Static vm:ToolType.RotateZ}">
+                    <Setter TargetName="toolIcon" Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate>
+                                <Path Fill="{TemplateBinding Foreground}" Data="{gm:FontawesomeResource ResourceKey=RotateRight, ReturnDynamicResource=True}" Style="{StaticResource IconBase}"/>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </DataTrigger>
+            </HierarchicalDataTemplate.Triggers>
+        </HierarchicalDataTemplate>
 
         <!--
         NOTE: ビルドや実行時には特に問題は無いが、なぜかここで定義するとクラスを改めて定義し直そうが場所を変えようがエラーが出るため、同じものをコードで定義して使用する
@@ -255,9 +301,72 @@
                     <ComboBox SelectedValue="{Binding PreviewColorChannel}" ItemsSource="{mk:EnumValues {x:Type vm:PreviewColorChannel}}" Style="{StaticResource PreviewColorChannelComboBox}"/>
                     <CheckBox x:Name="ShowCheckerboradCheckBox" Content="チェッカーボード" Margin="5,0,0,0" VerticalAlignment="Center"/>
 
-                    <RadioButton Content="手のひらツール" GroupName="Tool" Margin="5,0,0,0" VerticalAlignment="Center" IsChecked="{Binding ToolType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static vm:ToolType.Hand}}"/>
-                    <RadioButton Content="選択ツール" GroupName="Tool" Margin="5,0,0,0" VerticalAlignment="Center" IsChecked="{Binding ToolType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static vm:ToolType.Select}}"/>
-                    <RadioButton Content="回転ツール" GroupName="Tool" Margin="5,0,0,0" VerticalAlignment="Center" IsChecked="{Binding ToolType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static vm:ToolType.RotateAll}}"/>
+                    <RadioButton GroupName="Tool" Margin="5,0,0,0" VerticalAlignment="Center" Style="{StaticResource HandRadioButton}" IsChecked="{Binding ToolType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static vm:ToolType.Hand}}"/>
+                    <RadioButton GroupName="Tool" Margin="5,0,0,0" VerticalAlignment="Center" Style="{StaticResource CursorRadioButton}" IsChecked="{Binding ToolType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static vm:ToolType.Select}}"/>
+                    <pr:MultiItemRadioButton GroupName="Tool" Margin="5,0,0,0" VerticalAlignment="Center" SelectedItem="{Binding ToolType}" ItemSelectMenuItemTemplate="{StaticResource ToolButtonItemSelectMenuItem}">
+                        <!-- 代入順序の関係(先にコレクションを代入する)のため子要素として書く -->
+                        <pr:MultiItemRadioButton.ItemsSource>
+                            <x:Array Type="vm:ToolType">
+                                <vm:ToolType>RotateAll</vm:ToolType>
+                                <vm:ToolType>RotateX</vm:ToolType>
+                                <vm:ToolType>RotateY</vm:ToolType>
+                                <vm:ToolType>RotateZ</vm:ToolType>
+                            </x:Array>
+                        </pr:MultiItemRadioButton.ItemsSource>
+                        <pr:MultiItemRadioButton.ActiveItem>
+                            <x:Static Member="vm:ToolType.RotateAll"/>
+                        </pr:MultiItemRadioButton.ActiveItem>
+                        <pr:MultiItemRadioButton.Style>
+                            <Style TargetType="{x:Type pr:MultiItemRadioButton}" BasedOn="{StaticResource IconMultiRadioButtonBase}">
+                                <Style.Triggers>
+                                    <Trigger Property="ActiveItem" Value="{x:Static vm:ToolType.RotateAll}">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="{x:Type RadioButton}">
+                                                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="1">
+                                                        <Path Fill="{TemplateBinding Foreground}" Data="{gm:FontawesomeResource ResourceKey=RotateRight, ReturnDynamicResource=True}" Style="{StaticResource IconBase}"/>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Trigger>
+                                    <Trigger Property="ActiveItem" Value="{x:Static vm:ToolType.RotateX}">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="{x:Type RadioButton}">
+                                                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="1">
+                                                        <Path Fill="{TemplateBinding Foreground}" Data="{gm:FontawesomeResource ResourceKey=RotateRight, ReturnDynamicResource=True}" Style="{StaticResource IconBase}"/>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Trigger>
+                                    <Trigger Property="ActiveItem" Value="{x:Static vm:ToolType.RotateY}">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="{x:Type RadioButton}">
+                                                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="1">
+                                                        <Path Fill="{TemplateBinding Foreground}" Data="{gm:FontawesomeResource ResourceKey=RotateRight, ReturnDynamicResource=True}" Style="{StaticResource IconBase}"/>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Trigger>
+                                    <Trigger Property="ActiveItem" Value="{x:Static vm:ToolType.RotateZ}">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="{x:Type RadioButton}">
+                                                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="1">
+                                                        <Path Fill="{TemplateBinding Foreground}" Data="{gm:FontawesomeResource ResourceKey=RotateRight, ReturnDynamicResource=True}" Style="{StaticResource IconBase}"/>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </pr:MultiItemRadioButton.Style>
+                    </pr:MultiItemRadioButton>
                 </StackPanel>
                 <Grid Grid.Column="1" Visibility="{Binding RealFrameRateIsUpdated, Converter={StaticResource BooleanToVisibilityConverter}}" VerticalAlignment="Center" HorizontalAlignment="Right">
                     <Grid.ColumnDefinitions>

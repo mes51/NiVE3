@@ -83,6 +83,15 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, Icon("+", Size = 8)]
         public static readonly string SmallPlus = nameof(SmallPlus);
 
+        [ShowInMarkup, Icon("", Size = 12)]
+        public static readonly string Hand = nameof(Hand);
+
+        [ShowInMarkup, Icon("", Size = 12)]
+        public static readonly string Cursor = nameof(Cursor);
+
+        [ShowInMarkup, Icon("", Size = 12)]
+        public static readonly string RotateRight = nameof(RotateRight);
+
         public FontawesomeResourceDictionary()
         {
             var keys = typeof(FontawesomeResourceDictionary).GetFields(BindingFlags.Static | BindingFlags.Public)

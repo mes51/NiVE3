@@ -14,6 +14,8 @@ namespace NiVE3.ViewModel.PreviewManipulation
 {
     abstract class PreviewManipulationStateBase
     {
+        protected abstract PropertyViewModel[] Properties { get; }
+
         protected double Time { get; }
 
         protected CompositionModel CompositionModel { get; }
@@ -35,20 +37,38 @@ namespace NiVE3.ViewModel.PreviewManipulation
 
         public abstract void Update(Vector2d screenPos);
 
-        public abstract void Commit(Vector2d screenPos);
+        public virtual void Commit(Vector2d screenPos)
+        {
+            Update(screenPos);
 
-        public abstract void Abort();
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangePropertyValue));
+            foreach (var property in Properties)
+            {
+                property.EndEditCommand.Execute(null);
+            }
+            HistoryModel.EndGroup();
+        }
+
+        public virtual void Abort()
+        {
+            foreach (var property in Properties)
+            {
+                property.AbortEditCommand.Execute(null);
+            }
+        }
     }
 
     class PositionPreviewManipulationState : PreviewManipulationStateBase
     {
-        (bool isEnable3d, PropertyViewModel property)[] Properties { get; }
+        (bool isEnable3d, PropertyViewModel property)[] PositionProperties { get; }
 
         Vector3d[] PrevPositions { get; }
 
         Vector3d StartPosition { get; }
 
         LayerSkeleton GrabbingLayerSkeleton { get; }
+
+        protected override PropertyViewModel[] Properties => PositionProperties.Select(t => t.property).ToArray();
 
         public PositionPreviewManipulationState(LayerViewModel[] layers, LayerSkeleton grabbingLayerSkeleton, double time, CompositionModel compositionModel, CameraSetting cameraSetting, Vector2d startScreenPosition, HistoryModel historyModel)
             : base(time, compositionModel, cameraSetting, startScreenPosition, historyModel)
@@ -69,7 +89,7 @@ namespace NiVE3.ViewModel.PreviewManipulation
             }
 
             GrabbingLayerSkeleton = grabbingLayerSkeleton;
-            Properties = [..properties];
+            PositionProperties = [..properties];
             PrevPositions = [..prevPositions];
             StartPosition = compositionModel.Unprojection(cameraSetting, GrabbingLayerSkeleton, startScreenPosition);
         }
@@ -83,7 +103,7 @@ namespace NiVE3.ViewModel.PreviewManipulation
             {
                 return;
             }
-            foreach (var ((isEnable3d, property), prev) in Properties.Zip(PrevPositions))
+            foreach (var ((isEnable3d, property), prev) in PositionProperties.Zip(PrevPositions))
             {
                 if (isEnable3d)
                 {
@@ -95,31 +115,13 @@ namespace NiVE3.ViewModel.PreviewManipulation
                 }
             }
         }
-
-        public override void Commit(Vector2d screenPos)
-        {
-            Update(screenPos);
-
-            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangePropertyValue));
-            foreach (var (_, property) in Properties)
-            {
-                property.EndEditCommand.Execute(null);
-            }
-            HistoryModel.EndGroup();
-        }
-
-        public override void Abort()
-        {
-            foreach (var (_, property) in Properties)
-            {
-                property.AbortEditCommand.Execute(null);
-            }
-        }
     }
 
     class RotateAllPreviewManipulationState : PreviewManipulationStateBase
     {
-        PropertyViewModel[] Properties { get; }
+        const double ChangeRate = 0.2;
+
+        protected override PropertyViewModel[] Properties { get; }
 
         Vector3d[] PrevDirections { get; }
 
@@ -145,7 +147,7 @@ namespace NiVE3.ViewModel.PreviewManipulation
 
         public override void Update(Vector2d screenPos)
         {
-            var diff = (Vector3d)(screenPos - StartScreenPosition) * 0.2;
+            var diff = (Vector3d)(screenPos - StartScreenPosition) * ChangeRate;
             diff = new Vector3d(diff.Y, -diff.X, diff.Z);
             foreach (var (direction, prev) in Properties.Zip(PrevDirections))
             {
@@ -157,39 +159,91 @@ namespace NiVE3.ViewModel.PreviewManipulation
                 direction.CurrentTimeValue = dir;
             }
         }
+    }
 
-        public override void Commit(Vector2d screenPos)
+    class RotateXPreviewManipulationState : PreviewManipulationStateBase
+    {
+        const double ChangeRate = 0.2;
+
+        protected override PropertyViewModel[] Properties { get; }
+
+        double[] PrevX { get; }
+
+        public RotateXPreviewManipulationState(LayerViewModel[] layers, double time, CompositionModel compositionModel, CameraSetting cameraSetting, Vector2d startScreenPosition, HistoryModel historyModel) : base(time, compositionModel, cameraSetting, startScreenPosition, historyModel)
         {
-            Update(screenPos);
-
-            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangePropertyValue));
-            foreach (var property in Properties)
+            var properties = new List<PropertyViewModel>();
+            var prevX = new List<double>();
+            foreach (var layer in layers)
             {
-                property.EndEditCommand.Execute(null);
+                var z = layer.TransformProperties?.Children?.FirstOrDefault(p => p.Property.Id == ILayerObject.TransformXAngleId);
+                if (z is PropertyViewModel vm)
+                {
+                    prevX.Add((double)(vm.CurrentTimeValue ?? 0.0));
+                    vm.BeginEditCommand.Execute(null);
+                    properties.Add(vm);
+                }
             }
-            HistoryModel.EndGroup();
+
+            Properties = [..properties];
+            PrevX = [..prevX];
         }
 
-        public override void Abort()
+        public override void Update(Vector2d screenPos)
         {
-            foreach (var property in Properties)
+            var diff = (screenPos.Y - StartScreenPosition.Y) * ChangeRate;
+            foreach (var (property, prev) in Properties.Zip(PrevX))
             {
-                property.AbortEditCommand.Execute(null);
+                property.CurrentTimeValue = prev + diff;
+            }
+        }
+    }
+
+    class RotateYPreviewManipulationState : PreviewManipulationStateBase
+    {
+        const double ChangeRate = 0.2;
+
+        protected override PropertyViewModel[] Properties { get; }
+
+        double[] PrevY { get; }
+
+        public RotateYPreviewManipulationState(LayerViewModel[] layers, double time, CompositionModel compositionModel, CameraSetting cameraSetting, Vector2d startScreenPosition, HistoryModel historyModel) : base(time, compositionModel, cameraSetting, startScreenPosition, historyModel)
+        {
+            var properties = new List<PropertyViewModel>();
+            var prevX = new List<double>();
+            foreach (var layer in layers)
+            {
+                var z = layer.TransformProperties?.Children?.FirstOrDefault(p => p.Property.Id == ILayerObject.TransformYAngleId);
+                if (z is PropertyViewModel vm)
+                {
+                    prevX.Add((double)(vm.CurrentTimeValue ?? 0.0));
+                    vm.BeginEditCommand.Execute(null);
+                    properties.Add(vm);
+                }
+            }
+
+            Properties = [.. properties];
+            PrevY = [.. prevX];
+        }
+
+        public override void Update(Vector2d screenPos)
+        {
+            var diff = (screenPos.X - StartScreenPosition.X) * ChangeRate;
+            foreach (var (property, prev) in Properties.Zip(PrevY))
+            {
+                property.CurrentTimeValue = prev - diff;
             }
         }
     }
 
     class RotateZPreviewManipulationState : PreviewManipulationStateBase
     {
-        PropertyViewModel[] Properties { get; }
+        protected override PropertyViewModel[] Properties { get; }
 
         double[] PrevZ { get; }
 
         Vector2d AnchorPoint { get; }
 
         double PrevPointRadian { get; set; }
-
-        LayerSkeleton GrabbingLayerSkeleton { get; }
 
         public RotateZPreviewManipulationState(LayerViewModel[] layers, LayerSkeleton grabbingLayerSkeleton, double time, CompositionModel compositionModel, CameraSetting cameraSetting, Vector2d startScreenPosition, HistoryModel historyModel) : base(time, compositionModel, cameraSetting, startScreenPosition, historyModel)
         {
@@ -206,7 +260,6 @@ namespace NiVE3.ViewModel.PreviewManipulation
                 }
             }
 
-            GrabbingLayerSkeleton = grabbingLayerSkeleton;
             Properties = [..properties];
             PrevZ = [..prevZ];
 
@@ -236,26 +289,6 @@ namespace NiVE3.ViewModel.PreviewManipulation
             }
 
             PrevPointRadian = Math.Atan2(pos.Y, pos.X);
-        }
-
-        public override void Commit(Vector2d screenPos)
-        {
-            Update(screenPos);
-
-            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangePropertyValue));
-            foreach (var property in Properties)
-            {
-                property.EndEditCommand.Execute(null);
-            }
-            HistoryModel.EndGroup();
-        }
-
-        public override void Abort()
-        {
-            foreach (var property in Properties)
-            {
-                property.AbortEditCommand.Execute(null);
-            }
         }
     }
 }

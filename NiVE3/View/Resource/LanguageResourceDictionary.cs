@@ -1272,6 +1272,24 @@ namespace NiVE3.View.Resource
         [DefaultValue("エラー")]
         public static readonly string RenderQueueItemState_Error = nameof(RenderQueueItemState_Error);
 
+        [DefaultValue("手のひらツール")]
+        public static readonly string ToolType_Hand = nameof(ToolType_Hand);
+
+        [DefaultValue("選択ツール")]
+        public static readonly string ToolType_Select = nameof(ToolType_Select);
+
+        [DefaultValue("回転ツール")]
+        public static readonly string ToolType_RotateAll = nameof(ToolType_RotateAll);
+
+        [DefaultValue("X回転ツール")]
+        public static readonly string ToolType_RotateX = nameof(ToolType_RotateX);
+
+        [DefaultValue("Y回転ツール")]
+        public static readonly string ToolType_RotateY = nameof(ToolType_RotateY);
+
+        [DefaultValue("Z回転ツール")]
+        public static readonly string ToolType_RotateZ = nameof(ToolType_RotateZ);
+
         // Inner Plugin
 
         [DefaultValue("なし")]

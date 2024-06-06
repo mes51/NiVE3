@@ -57,5 +57,31 @@ namespace NiVE3.Extension
                 yield return group;
             }
         }
+
+        public static int IndexOf<T>(this IEnumerable<T> source, T value)
+        {
+            switch (source)
+            {
+                case T[] array:
+                    return Array.IndexOf(array, value);
+                case List<T> list:
+                    return list.IndexOf(value);
+                default:
+                    {
+                        var index = 0;
+                        var eq = EqualityComparer<T>.Default;
+                        foreach (var e in source)
+                        {
+                            if (eq.Equals(e, value))
+                            {
+                                return index;
+                            }
+                            index++;
+                        }
+
+                        return -1;
+                    }
+            }
+        }
     }
 }

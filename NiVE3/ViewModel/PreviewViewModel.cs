@@ -369,6 +369,9 @@ namespace NiVE3.ViewModel
                 {
                     ToolType.Select => BeginUseToolEvent.PropertyType.Transform,
                     ToolType.RotateAll => BeginUseToolEvent.PropertyType.RotateAll,
+                    ToolType.RotateX => BeginUseToolEvent.PropertyType.RotateX,
+                    ToolType.RotateY => BeginUseToolEvent.PropertyType.RotateY,
+                    ToolType.RotateZ => BeginUseToolEvent.PropertyType.RotateZ,
                     _ => throw new Exception() // bug
                 };
                 IsUsingTool = true;
@@ -774,6 +777,9 @@ namespace NiVE3.ViewModel
     {
         Hand,
         Select,
-        RotateAll
+        RotateAll,
+        RotateX,
+        RotateY,
+        RotateZ
     }
 }

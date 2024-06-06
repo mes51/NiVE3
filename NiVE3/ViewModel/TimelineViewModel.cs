@@ -892,6 +892,20 @@ namespace NiVE3.ViewModel
                         PreviewManipulation = new RotateAllPreviewManipulationState(imageLayers, CurrentTime, CompositionModel, cameraSetting, e.StartScreenPosition, HistoryModel);
                     }
                     break;
+                case BeginUseToolEvent.PropertyType.RotateX:
+                    imageLayers = [.. imageLayers.Where(l => l.IsEnable3D)];
+                    if (imageLayers.Length > 0)
+                    {
+                        PreviewManipulation = new RotateXPreviewManipulationState(imageLayers, CurrentTime, CompositionModel, cameraSetting, e.StartScreenPosition, HistoryModel);
+                    }
+                    break;
+                case BeginUseToolEvent.PropertyType.RotateY:
+                    imageLayers = [.. imageLayers.Where(l => l.IsEnable3D)];
+                    if (imageLayers.Length > 0)
+                    {
+                        PreviewManipulation = new RotateYPreviewManipulationState(imageLayers, CurrentTime, CompositionModel, cameraSetting, e.StartScreenPosition, HistoryModel);
+                    }
+                    break;
             }
 
             IsUsingTool = PreviewManipulation != null;
