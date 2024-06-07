@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Intrinsics;
 using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Extension;
@@ -352,6 +353,53 @@ namespace NiVE3.ViewModel.PreviewManipulation
             foreach (var (property, prev) in Properties.Zip(PrevScale))
             {
                 property.CurrentTimeValue = prev * new Vector3d(rate, 1.0);
+            }
+        }
+    }
+
+    class CameraOrbitPreviewManipulationState : PreviewManipulationStateBase
+    {
+        const double ChangeRate = 0.2;
+
+        protected override PropertyViewModel[] Properties { get; }
+
+        Vector3d StartCameraPosition { get; }
+
+        Vector3d CameraPoi { get; }
+
+        public CameraOrbitPreviewManipulationState(LayerViewModel targetCameraLayer, double time, CompositionModel compositionModel, CameraSetting cameraSetting, Vector2d startScreenPosition, HistoryModel historyModel) : base(time, compositionModel, cameraSetting, startScreenPosition, historyModel)
+        {
+            var cameraPositionProperty = targetCameraLayer.TransformProperties?.Children?.FirstOrDefault(p => p.Property.Id == ILayerObject.TransformPositionId);
+            var cameraPoiProperty = targetCameraLayer.TransformProperties?.Children?.FirstOrDefault(p => p.Property.Id == ILayerObject.TransformPointOfInterestId);
+            if (cameraPositionProperty is PropertyViewModel posVm && cameraPoiProperty is PropertyViewModel poiVm)
+            {
+                StartCameraPosition = (Vector3d)(posVm.CurrentTimeValue ?? Vector3d.Zero);
+                CameraPoi = (Vector3d)(poiVm.CurrentTimeValue ?? Vector3d.Zero);
+
+                posVm.BeginEditCommand.Execute(null);
+
+                Properties = [posVm];
+            }
+            else
+            {
+                Properties = [];
+            }
+        }
+
+        public override void Update(Vector2d screenPos)
+        {
+            var diff = (screenPos - StartScreenPosition) * ChangeRate;
+            var rotate = Matrix4x4d.CreateTranslate(-CameraPoi.X, -CameraPoi.Y, -CameraPoi.Z)
+                .RotateY(diff.X)
+                .RotateX(-diff.Y)
+                .Translate(CameraPoi.X, CameraPoi.Y, CameraPoi.Z);
+
+            var move = rotate.Transform(StartCameraPosition.ToHomogeneousCoord());
+            move /= move.GetElement(3);
+
+            foreach (var property in Properties)
+            {
+                property.CurrentTimeValue = (Vector3d)move;
             }
         }
     }

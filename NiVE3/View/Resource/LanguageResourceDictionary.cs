@@ -1293,6 +1293,15 @@ namespace NiVE3.View.Resource
         [DefaultValue("拡大縮小ツール")]
         public static readonly string ToolType_Scale = nameof(ToolType_Scale);
 
+        [DefaultValue("カメラ目標点周回ツール")]
+        public static readonly string ToolType_CameraOrbit = nameof(ToolType_CameraOrbit);
+
+        [DefaultValue("カメラパンツール")]
+        public static readonly string ToolType_CameraPan = nameof(ToolType_CameraPan);
+
+        [DefaultValue("カメラドリーツール")]
+        public static readonly string ToolType_CameraDolly = nameof(ToolType_CameraDolly);
+
         // Inner Plugin
 
         [DefaultValue("なし")]

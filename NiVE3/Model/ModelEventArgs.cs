@@ -81,14 +81,21 @@ namespace NiVE3.Model
             Type = type;
         }
 
-        public enum PropertyType
+        [Flags]
+        public enum PropertyType : int
         {
-            Transform,
-            RotateAll,
-            RotateX,
-            RotateY,
-            RotateZ,
-            Scale
+            None = 0,
+            LayerProperty = 0b01000000,
+            CameraProperty = 0b10000000,
+            Transform = LayerProperty | 0x01,
+            RotateAll = LayerProperty | 0x0E,
+            RotateX = LayerProperty | 0x02,
+            RotateY = LayerProperty | 0x04,
+            RotateZ = LayerProperty | 0x08,
+            Scale = LayerProperty | 0x10,
+            CameraOrbit = CameraProperty | 0x01,
+            CameraPan = CameraProperty | 0x02,
+            CameraDolly = CameraProperty | 0x4
         }
     }
 

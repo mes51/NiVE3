@@ -268,6 +268,12 @@ namespace NiVE3.Numerics
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Vector256<double> ToHomogeneousCoord()
+        {
+            return Vector256.Create(X, Y, Z, 1.0);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public double Length()
         {
             return Math.Sqrt(X * X + Y * Y + Z * Z);

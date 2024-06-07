@@ -1122,9 +1122,14 @@ namespace NiVE3.Model
             return Renderer.ScreenCoordToWorldCoord(cameraSetting, baseLayerSkeleton, pos);
         }
 
+        public LayerModel? GetActiveCamera(double time)
+        {
+            return Layers.FirstOrDefault(l => l.IsEnableVideo && l.IsCamera && l.IsContainsTime(time));
+        }
+
         public CameraSetting GetActiveCameraSetting(double time)
         {
-            var activeCamera = Layers.FirstOrDefault(l => l.IsEnableVideo && l.IsCamera && l.IsContainsTime(time));
+            var activeCamera = GetActiveCamera(time);
             return activeCamera?.GetCameraSetting(time) ?? CreateDefaultCameraSetting(Width, Height);
         }
 

@@ -858,31 +858,27 @@ namespace NiVE3.ViewModel
 
         private void EventHubModel_BeginUseToolRequest(object? sender, BeginUseToolEvent e)
         {
-            if (IsUsingTool || CompositionModel == null || e.CompositionId != CompositionId || SelectedItemType != SelectItemType.Layer || SelectedLayers == null || SelectedLayers.Count < 1)
+            if (IsUsingTool || CompositionModel == null || Layers == null || e.CompositionId != CompositionId || (SelectedItemType != SelectItemType.Layer && e.Type.HasFlag(BeginUseToolEvent.PropertyType.LayerProperty)))
             {
                 return;
             }
 
+            var activeCameraId = CompositionModel.GetActiveCamera(CurrentTime)?.LayerId;
             var cameraSetting = CompositionModel.GetActiveCameraSetting(CurrentTime);
             var baseLayerId = CompositionModel.FindLayerByPreviewPosition(CurrentTime, e.StartScreenPosition);
             var baseLayerSkeleton = baseLayerId.HasValue ? CompositionModel.GetLayerSkeleton(baseLayerId.Value, CurrentTime) : null;
             var baseLayerIs3D = baseLayerSkeleton?.IsEnable3D ?? false;
-            var imageLayers = SelectedLayers.Where(l => l.HasImage).ToArray();
-            if (imageLayers.Length < 0)
-            {
-                // TODO: トランスフォーム以外のプロパティのプレビューでの操作に対応するとき、トランスフォームの操作の時のみreturnするようにする
-                return;
-            }
+            var imageLayers = SelectedLayers?.Where(l => l.HasImage)?.ToArray() ?? [];
 
             switch (e.Type)
             {
-                case BeginUseToolEvent.PropertyType.Transform when baseLayerSkeleton != null:
+                case BeginUseToolEvent.PropertyType.Transform when imageLayers.Length > 0 && baseLayerSkeleton != null:
                     PreviewManipulation = new PositionPreviewManipulationState(imageLayers, baseLayerSkeleton, CurrentTime, CompositionModel, cameraSetting, e.StartScreenPosition, HistoryModel);
                     break;
-                case BeginUseToolEvent.PropertyType.RotateAll when !baseLayerIs3D && baseLayerSkeleton != null:
-                case BeginUseToolEvent.PropertyType.RotateX when !baseLayerIs3D && baseLayerSkeleton != null:
-                case BeginUseToolEvent.PropertyType.RotateY when !baseLayerIs3D && baseLayerSkeleton != null:
-                case BeginUseToolEvent.PropertyType.RotateZ when baseLayerSkeleton != null:
+                case BeginUseToolEvent.PropertyType.RotateAll when imageLayers.Length > 0 && !baseLayerIs3D && baseLayerSkeleton != null:
+                case BeginUseToolEvent.PropertyType.RotateX when imageLayers.Length > 0 &&!baseLayerIs3D && baseLayerSkeleton != null:
+                case BeginUseToolEvent.PropertyType.RotateY when imageLayers.Length > 0 && !baseLayerIs3D && baseLayerSkeleton != null:
+                case BeginUseToolEvent.PropertyType.RotateZ when imageLayers.Length > 0 && baseLayerSkeleton != null:
                     PreviewManipulation = new RotateZPreviewManipulationState(imageLayers, baseLayerSkeleton, CurrentTime, CompositionModel, cameraSetting, e.StartScreenPosition, HistoryModel);
                     break;
                 case BeginUseToolEvent.PropertyType.RotateAll when baseLayerSkeleton != null:
@@ -906,8 +902,11 @@ namespace NiVE3.ViewModel
                         PreviewManipulation = new RotateYPreviewManipulationState(imageLayers, CurrentTime, CompositionModel, cameraSetting, e.StartScreenPosition, HistoryModel);
                     }
                     break;
-                case BeginUseToolEvent.PropertyType.Scale when baseLayerSkeleton != null:
+                case BeginUseToolEvent.PropertyType.Scale when imageLayers.Length > 0 && baseLayerSkeleton != null:
                     PreviewManipulation = new ScalePreviewManipulationState(imageLayers, baseLayerSkeleton, CurrentTime, CompositionModel, cameraSetting, e.StartScreenPosition, HistoryModel);
+                    break;
+                case BeginUseToolEvent.PropertyType.CameraOrbit when activeCameraId != null:
+                    PreviewManipulation = new CameraOrbitPreviewManipulationState(Layers.First(l => l.LayerId == activeCameraId), CurrentTime, CompositionModel, cameraSetting, e.StartScreenPosition, HistoryModel);
                     break;
             }
 

@@ -179,7 +179,9 @@
 
         <HierarchicalDataTemplate x:Key="ToolButtonItemSelectMenuItem" DataType="{x:Type vm:ToolType}">
             <StackPanel Orientation="Horizontal">
-                <ContentControl x:Name="toolIcon" Margin="0,0,5,0"/>
+                <Grid Margin="0,0,5,0" Width="12" Height="12">
+                    <ContentControl x:Name="toolIcon" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Grid>
                 <TextBlock Text="{Binding Converter={StaticResource EnumToLocalizedNameConverter}, ConverterParameter={x:Type vm:ToolType}}"/>
             </StackPanel>
             <HierarchicalDataTemplate.Triggers>
@@ -215,6 +217,33 @@
                         <Setter.Value>
                             <ControlTemplate>
                                 <Path Fill="{TemplateBinding Foreground}" Data="{gm:FontawesomeResource ResourceKey=RotateRight, ReturnDynamicResource=True}" Style="{StaticResource IconBase}"/>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding}" Value="{x:Static vm:ToolType.CameraOrbit}">
+                    <Setter TargetName="toolIcon" Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate>
+                                <Path Fill="{TemplateBinding Foreground}" Data="{StaticResource CameraOrbit}" Style="{StaticResource IconBase}"/>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding}" Value="{x:Static vm:ToolType.CameraPan}">
+                    <Setter TargetName="toolIcon" Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate>
+                                <Path Fill="{TemplateBinding Foreground}" Data="{StaticResource CameraPan}" Style="{StaticResource IconBase}"/>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding}" Value="{x:Static vm:ToolType.CameraDolly}">
+                    <Setter TargetName="toolIcon" Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate>
+                                <Path Fill="{TemplateBinding Foreground}" Data="{StaticResource CameraDolly}" Style="{StaticResource IconBase}"/>
                             </ControlTemplate>
                         </Setter.Value>
                     </Setter>
@@ -368,6 +397,58 @@
                         </pr:MultiItemRadioButton.Style>
                     </pr:MultiItemRadioButton>
                     <RadioButton GroupName="Tool" Margin="5,0,0,0" VerticalAlignment="Center" Style="{StaticResource ArrowsUpDownLeftRightRadioButton}" IsChecked="{Binding ToolType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static vm:ToolType.Scale}}"/>
+                    <pr:MultiItemRadioButton GroupName="Tool" Margin="5,0,0,0" VerticalAlignment="Center" SelectedItem="{Binding ToolType}" ItemSelectMenuItemTemplate="{StaticResource ToolButtonItemSelectMenuItem}">
+                        <!-- 代入順序の関係(先にコレクションを代入する)のため子要素として書く -->
+                        <pr:MultiItemRadioButton.ItemsSource>
+                            <x:Array Type="vm:ToolType">
+                                <vm:ToolType>CameraOrbit</vm:ToolType>
+                                <vm:ToolType>CameraPan</vm:ToolType>
+                                <vm:ToolType>CameraDolly</vm:ToolType>
+                            </x:Array>
+                        </pr:MultiItemRadioButton.ItemsSource>
+                        <pr:MultiItemRadioButton.ActiveItem>
+                            <x:Static Member="vm:ToolType.CameraOrbit"/>
+                        </pr:MultiItemRadioButton.ActiveItem>
+                        <pr:MultiItemRadioButton.Style>
+                            <Style TargetType="{x:Type pr:MultiItemRadioButton}" BasedOn="{StaticResource IconMultiRadioButtonBase}">
+                                <Style.Triggers>
+                                    <Trigger Property="ActiveItem" Value="{x:Static vm:ToolType.CameraOrbit}">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="{x:Type RadioButton}">
+                                                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="1">
+                                                        <Path Fill="{TemplateBinding Foreground}" Data="{StaticResource CameraOrbit}" Style="{StaticResource IconBase}"/>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Trigger>
+                                    <Trigger Property="ActiveItem" Value="{x:Static vm:ToolType.CameraPan}">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="{x:Type RadioButton}">
+                                                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="1">
+                                                        <Path Fill="{TemplateBinding Foreground}" Data="{StaticResource CameraPan}" Style="{StaticResource IconBase}"/>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Trigger>
+                                    <Trigger Property="ActiveItem" Value="{x:Static vm:ToolType.CameraDolly}">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="{x:Type RadioButton}">
+                                                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="1">
+                                                        <Path Fill="{TemplateBinding Foreground}" Data="{StaticResource CameraDolly}" Style="{StaticResource IconBase}"/>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </pr:MultiItemRadioButton.Style>
+                    </pr:MultiItemRadioButton>
                 </StackPanel>
                 <Grid Grid.Column="1" Visibility="{Binding RealFrameRateIsUpdated, Converter={StaticResource BooleanToVisibilityConverter}}" VerticalAlignment="Center" HorizontalAlignment="Right">
                     <Grid.ColumnDefinitions>

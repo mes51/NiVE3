@@ -143,4 +143,19 @@
     <PathGeometry x:Key="NextFrameIcon" Figures="M0,0 0,16 14,8z M14,0 14,16 16,16 16,0z"/>
 
     <PathGeometry x:Key="PrevFrameIcon" Figures="M0,0 0,16 2,16, 2,0z M2,8 16,16 16,0z"/>
+
+    <GeometryGroup x:Key="CameraOrbit">
+        <CombinedGeometry GeometryCombineMode="Union" Geometry1="{gm:FontawesomeResource ResourceKey=RotateRight}"/>
+        <EllipseGeometry Center="6,6" RadiusX="1.5" RadiusY="1.5"/>
+    </GeometryGroup>
+
+    <GeometryGroup x:Key="CameraPan">
+        <PathGeometry Figures="M6,0 4,2 8,2z M0,6 2,4 2,8z M6,12 4,10 8,10z M12,6 10,4 10,8z"/>
+        <EllipseGeometry Center="6,6" RadiusX="1.5" RadiusY="1.5"/>
+    </GeometryGroup>
+
+    <GeometryGroup x:Key="CameraDolly">
+        <PathGeometry Figures="M2,0 0,2 4,2z M2,12 0,10 4,10z"/>
+        <EllipseGeometry Center="2,6" RadiusX="1.5" RadiusY="1.5"/>
+    </GeometryGroup>
 </ResourceDictionary>

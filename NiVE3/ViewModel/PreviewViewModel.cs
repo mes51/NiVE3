@@ -373,6 +373,9 @@ namespace NiVE3.ViewModel
                     ToolType.RotateY => BeginUseToolEvent.PropertyType.RotateY,
                     ToolType.RotateZ => BeginUseToolEvent.PropertyType.RotateZ,
                     ToolType.Scale => BeginUseToolEvent.PropertyType.Scale,
+                    ToolType.CameraOrbit => BeginUseToolEvent.PropertyType.CameraOrbit,
+                    ToolType.CameraPan => BeginUseToolEvent.PropertyType.CameraPan,
+                    ToolType.CameraDolly => BeginUseToolEvent.PropertyType.CameraDolly,
                     _ => throw new Exception() // bug
                 };
                 IsUsingTool = true;
@@ -782,6 +785,9 @@ namespace NiVE3.ViewModel
         RotateX,
         RotateY,
         RotateZ,
-        Scale
+        Scale,
+        CameraOrbit,
+        CameraPan,
+        CameraDolly
     }
 }
