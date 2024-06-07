@@ -92,6 +92,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, Icon("", Size = 12)]
         public static readonly string RotateRight = nameof(RotateRight);
 
+        [ShowInMarkup, Icon("", Size = 12)]
+        public static readonly string ArrowsUpDownLeftRight = nameof(ArrowsUpDownLeftRight);
+
         public FontawesomeResourceDictionary()
         {
             var keys = typeof(FontawesomeResourceDictionary).GetFields(BindingFlags.Static | BindingFlags.Public)

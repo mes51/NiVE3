@@ -291,4 +291,68 @@ namespace NiVE3.ViewModel.PreviewManipulation
             PrevPointRadian = Math.Atan2(pos.Y, pos.X);
         }
     }
+
+    class ScalePreviewManipulationState : PreviewManipulationStateBase
+    {
+        const double DefaultInvalidScale = 1000000.0;
+
+        protected override PropertyViewModel[] Properties { get; }
+
+        Vector3d[] PrevScale { get; }
+
+        Vector3d AnchorPoint { get; }
+
+        Vector2d LayerGrabPosition { get; }
+
+        LayerSkeleton GrabbingLayerSkeleton { get; }
+
+        public ScalePreviewManipulationState(LayerViewModel[] layers, LayerSkeleton grabbingLayerSkeleton, double time, CompositionModel compositionModel, CameraSetting cameraSetting, Vector2d startScreenPosition, HistoryModel historyModel) : base(time, compositionModel, cameraSetting, startScreenPosition, historyModel)
+        {
+            var properties = new List<PropertyViewModel>();
+            var prevScale = new List<Vector3d>();
+            foreach (var layer in layers)
+            {
+                var scale = layer.TransformProperties?.Children?.FirstOrDefault(p => p.Property.Id == ILayerObject.TransformScaleId);
+                if (scale is PropertyViewModel vm)
+                {
+                    prevScale.Add((Vector3d)(vm.CurrentTimeValue ?? Vector3d.Zero));
+                    vm.BeginEditCommand.Execute(null);
+                    properties.Add(vm);
+                }
+            }
+
+            Properties = [..properties];
+            PrevScale = [..prevScale];
+            AnchorPoint = (Vector3d)(grabbingLayerSkeleton.Transform[ILayerObject.TransformAnchorPointId] ?? Vector3d.Zero);
+            GrabbingLayerSkeleton = grabbingLayerSkeleton;
+            LayerGrabPosition = (Vector2d)(compositionModel.Unprojection(cameraSetting, grabbingLayerSkeleton, startScreenPosition) - AnchorPoint);
+        }
+
+        public override void Update(Vector2d screenPos)
+        {
+            var newPosition = (Vector2d)(CompositionModel.Unprojection(CameraSetting, GrabbingLayerSkeleton, screenPos) - AnchorPoint);
+            var rate = newPosition / LayerGrabPosition;
+            if (double.IsNaN(rate.X))
+            {
+                rate = new Vector2d(DefaultInvalidScale, rate.X);
+            }
+            else if (double.IsInfinity(rate.X))
+            {
+                rate = new Vector2d(DefaultInvalidScale * Math.Sign(rate.X), rate.Y);
+            }
+            if (double.IsNaN(rate.Y))
+            {
+                rate = new Vector2d(rate.X, DefaultInvalidScale);
+            }
+            else if (double.IsInfinity(rate.Y))
+            {
+                rate = new Vector2d(rate.X, DefaultInvalidScale * Math.Sign(rate.Y));
+            }
+
+            foreach (var (property, prev) in Properties.Zip(PrevScale))
+            {
+                property.CurrentTimeValue = prev * new Vector3d(rate, 1.0);
+            }
+        }
+    }
 }

@@ -87,7 +87,8 @@ namespace NiVE3.Model
             RotateAll,
             RotateX,
             RotateY,
-            RotateZ
+            RotateZ,
+            Scale
         }
     }
 

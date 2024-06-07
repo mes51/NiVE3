@@ -1290,6 +1290,9 @@ namespace NiVE3.View.Resource
         [DefaultValue("Z回転ツール")]
         public static readonly string ToolType_RotateZ = nameof(ToolType_RotateZ);
 
+        [DefaultValue("拡大縮小ツール")]
+        public static readonly string ToolType_Scale = nameof(ToolType_Scale);
+
         // Inner Plugin
 
         [DefaultValue("なし")]

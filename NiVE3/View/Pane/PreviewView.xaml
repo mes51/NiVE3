@@ -367,6 +367,7 @@
                             </Style>
                         </pr:MultiItemRadioButton.Style>
                     </pr:MultiItemRadioButton>
+                    <RadioButton GroupName="Tool" Margin="5,0,0,0" VerticalAlignment="Center" Style="{StaticResource ArrowsUpDownLeftRightRadioButton}" IsChecked="{Binding ToolType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static vm:ToolType.Scale}}"/>
                 </StackPanel>
                 <Grid Grid.Column="1" Visibility="{Binding RealFrameRateIsUpdated, Converter={StaticResource BooleanToVisibilityConverter}}" VerticalAlignment="Center" HorizontalAlignment="Right">
                     <Grid.ColumnDefinitions>

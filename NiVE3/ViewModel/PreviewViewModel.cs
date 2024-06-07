@@ -372,6 +372,7 @@ namespace NiVE3.ViewModel
                     ToolType.RotateX => BeginUseToolEvent.PropertyType.RotateX,
                     ToolType.RotateY => BeginUseToolEvent.PropertyType.RotateY,
                     ToolType.RotateZ => BeginUseToolEvent.PropertyType.RotateZ,
+                    ToolType.Scale => BeginUseToolEvent.PropertyType.Scale,
                     _ => throw new Exception() // bug
                 };
                 IsUsingTool = true;
@@ -780,6 +781,7 @@ namespace NiVE3.ViewModel
         RotateAll,
         RotateX,
         RotateY,
-        RotateZ
+        RotateZ,
+        Scale
     }
 }

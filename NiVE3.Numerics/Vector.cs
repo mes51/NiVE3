@@ -245,6 +245,8 @@ namespace NiVE3.Numerics
 
         public Vector3d(double value) : this(value, value, value) { }
 
+        public Vector3d(Vector2d v, double z) : this(v.X, v.Y, z) { }
+
         [JsonConstructor]
         public Vector3d(double x, double y, double z)
         {

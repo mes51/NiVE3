@@ -906,6 +906,9 @@ namespace NiVE3.ViewModel
                         PreviewManipulation = new RotateYPreviewManipulationState(imageLayers, CurrentTime, CompositionModel, cameraSetting, e.StartScreenPosition, HistoryModel);
                     }
                     break;
+                case BeginUseToolEvent.PropertyType.Scale when baseLayerSkeleton != null:
+                    PreviewManipulation = new ScalePreviewManipulationState(imageLayers, baseLayerSkeleton, CurrentTime, CompositionModel, cameraSetting, e.StartScreenPosition, HistoryModel);
+                    break;
             }
 
             IsUsingTool = PreviewManipulation != null;
