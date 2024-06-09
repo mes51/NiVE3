@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.Intrinsics;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using NiVE3.Extension;
 using NiVE3.Model;
 using NiVE3.Numerics;
@@ -59,6 +60,26 @@ namespace NiVE3.ViewModel.PreviewManipulation
                 property.AbortEditCommand.Execute(null);
             }
         }
+
+        protected Vector2d AlignScreenPosition(in Vector2d screenPos)
+        {
+            if (Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift))
+            {
+                var diff = screenPos - StartScreenPosition;
+                if (Math.Abs(diff.X) > Math.Abs(diff.Y))
+                {
+                    return new Vector2d(screenPos.X, StartScreenPosition.Y);
+                }
+                else
+                {
+                    return new Vector2d(StartScreenPosition.X, screenPos.Y);
+                }
+            }
+            else
+            {
+                return screenPos;
+            }
+        }
     }
 
     class PositionPreviewManipulationState : PreviewManipulationStateBase
@@ -99,6 +120,8 @@ namespace NiVE3.ViewModel.PreviewManipulation
 
         public override void Update(Vector2d screenPos)
         {
+            screenPos = AlignScreenPosition(screenPos);
+
             var newPosition = CompositionModel.Unprojection(CameraSetting, GrabbingLayerSkeleton, screenPos);
             var diff3D = newPosition - StartPosition;
             var diff2D = screenPos - StartScreenPosition;
@@ -148,6 +171,8 @@ namespace NiVE3.ViewModel.PreviewManipulation
 
         public override void Update(Vector2d screenPos)
         {
+            screenPos = AlignScreenPosition(screenPos);
+
             var diff = (Vector3d)(screenPos - StartScreenPosition) * ChangeRate;
             diff = new Vector3d(diff.Y, -diff.X, diff.Z);
             foreach (var (direction, prev) in Properties.Zip(PrevDirections))
@@ -327,6 +352,8 @@ namespace NiVE3.ViewModel.PreviewManipulation
 
         public override void Update(Vector2d screenPos)
         {
+            screenPos = AlignScreenPosition(screenPos);
+
             var newPosition = (Vector2d)(CompositionModel.Unprojection(CameraSetting, GrabbingLayerSkeleton, screenPos) - AnchorPoint);
             var rate = newPosition / LayerGrabPosition;
             if (double.IsNaN(rate.X))
@@ -382,6 +409,8 @@ namespace NiVE3.ViewModel.PreviewManipulation
 
         public override void Update(Vector2d screenPos)
         {
+            screenPos = AlignScreenPosition(screenPos);
+
             var diff = (screenPos - StartScreenPosition) * ChangeRate;
             var rotate = Matrix4x4d.CreateTranslate(-CameraPointOfInterest.X, -CameraPointOfInterest.Y, -CameraPointOfInterest.Z)
                 .RotateY(diff.X)
@@ -441,6 +470,8 @@ namespace NiVE3.ViewModel.PreviewManipulation
             {
                 return;
             }
+
+            screenPos = AlignScreenPosition(screenPos);
 
             var newPosition = CompositionModel.Unprojection(CameraSetting, null, screenPos);
             var diff = StartPosition - newPosition;

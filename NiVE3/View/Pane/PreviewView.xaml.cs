@@ -467,7 +467,7 @@ namespace NiVE3.View.Pane
 
         private void Root_KeyDown(object sender, KeyEventArgs e)
         {
-            if (IsMovedByTool)
+            if (IsMovedByTool && e.Key == Key.Escape)
             {
                 ViewModel?.AbortUseToolCommand?.Execute(null);
                 IsMovedByTool = false;
