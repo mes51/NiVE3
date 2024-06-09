@@ -908,6 +908,12 @@ namespace NiVE3.ViewModel
                 case BeginUseToolEvent.PropertyType.CameraOrbit when activeCameraId != null:
                     PreviewManipulation = new CameraOrbitPreviewManipulationState(Layers.First(l => l.LayerId == activeCameraId), CurrentTime, CompositionModel, cameraSetting, e.StartScreenPosition, HistoryModel);
                     break;
+                case BeginUseToolEvent.PropertyType.CameraPan when activeCameraId != null:
+                    PreviewManipulation = new CameraPanPreviewManipulationState(Layers.First(l => l.LayerId == activeCameraId), CurrentTime, CompositionModel, cameraSetting, e.StartScreenPosition, HistoryModel);
+                    break;
+                case BeginUseToolEvent.PropertyType.CameraDolly when activeCameraId != null:
+                    PreviewManipulation = new CameraDollyPreviewManipulationState(Layers.First(l => l.LayerId == activeCameraId), CurrentTime, CompositionModel, cameraSetting, e.StartScreenPosition, HistoryModel);
+                    break;
             }
 
             IsUsingTool = PreviewManipulation != null;

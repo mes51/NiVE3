@@ -301,6 +301,12 @@ namespace NiVE3.Shared.Extension
         {
             return Vector128.Dot(v, v);
         }
+
+        public static Vector128<double> Normalize(this in Vector128<double> v)
+        {
+            var length = Math.Sqrt(Vector128.Dot(v, v));
+            return v / length;
+        }
     }
 
     public static class Vector256Extension
@@ -340,6 +346,12 @@ namespace NiVE3.Shared.Extension
             v = Avx.HorizontalAdd(v, v);
             var r = Avx.Permute2x128(v, v, 1);
             return v + r;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double LengthSquared(this in Vector256<double> v)
+        {
+            return Vector256.Dot(v, v);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -10,6 +10,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Windows;
+using NiVE3.Shared.Extension;
 
 namespace NiVE3.Numerics
 {
@@ -46,6 +47,24 @@ namespace NiVE3.Numerics
         public Vector256<double> AsVector256()
         {
             return Vector256.Create(X, Y, 0.0, 0.0);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Vector128<double> AsVector128()
+        {
+            return Vector128.LoadUnsafe(in X);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public double Length()
+        {
+            return Math.Sqrt(AsVector128().LengthSquared());
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Vector2d Normalize()
+        {
+            return (Vector2d)AsVector128().Normalize();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -276,7 +295,13 @@ namespace NiVE3.Numerics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public double Length()
         {
-            return Math.Sqrt(X * X + Y * Y + Z * Z);
+            return Math.Sqrt(AsVector256().LengthSquared());
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Vector3d Normalize()
+        {
+            return (Vector3d)AsVector256().Normalize();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

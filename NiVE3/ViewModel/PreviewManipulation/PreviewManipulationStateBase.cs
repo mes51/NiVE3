@@ -15,6 +15,8 @@ namespace NiVE3.ViewModel.PreviewManipulation
 {
     abstract class PreviewManipulationStateBase
     {
+        protected const double ChangeRate = 0.2;
+
         protected abstract PropertyViewModel[] Properties { get; }
 
         protected double Time { get; }
@@ -120,8 +122,6 @@ namespace NiVE3.ViewModel.PreviewManipulation
 
     class RotateAllPreviewManipulationState : PreviewManipulationStateBase
     {
-        const double ChangeRate = 0.2;
-
         protected override PropertyViewModel[] Properties { get; }
 
         Vector3d[] PrevDirections { get; }
@@ -164,8 +164,6 @@ namespace NiVE3.ViewModel.PreviewManipulation
 
     class RotateXPreviewManipulationState : PreviewManipulationStateBase
     {
-        const double ChangeRate = 0.2;
-
         protected override PropertyViewModel[] Properties { get; }
 
         double[] PrevX { get; }
@@ -201,8 +199,6 @@ namespace NiVE3.ViewModel.PreviewManipulation
 
     class RotateYPreviewManipulationState : PreviewManipulationStateBase
     {
-        const double ChangeRate = 0.2;
-
         protected override PropertyViewModel[] Properties { get; }
 
         double[] PrevY { get; }
@@ -359,13 +355,11 @@ namespace NiVE3.ViewModel.PreviewManipulation
 
     class CameraOrbitPreviewManipulationState : PreviewManipulationStateBase
     {
-        const double ChangeRate = 0.2;
-
         protected override PropertyViewModel[] Properties { get; }
 
         Vector3d StartCameraPosition { get; }
 
-        Vector3d CameraPoi { get; }
+        Vector3d CameraPointOfInterest { get; }
 
         public CameraOrbitPreviewManipulationState(LayerViewModel targetCameraLayer, double time, CompositionModel compositionModel, CameraSetting cameraSetting, Vector2d startScreenPosition, HistoryModel historyModel) : base(time, compositionModel, cameraSetting, startScreenPosition, historyModel)
         {
@@ -374,7 +368,7 @@ namespace NiVE3.ViewModel.PreviewManipulation
             if (cameraPositionProperty is PropertyViewModel posVm && cameraPoiProperty is PropertyViewModel poiVm)
             {
                 StartCameraPosition = (Vector3d)(posVm.CurrentTimeValue ?? Vector3d.Zero);
-                CameraPoi = (Vector3d)(poiVm.CurrentTimeValue ?? Vector3d.Zero);
+                CameraPointOfInterest = (Vector3d)(poiVm.CurrentTimeValue ?? Vector3d.Zero);
 
                 posVm.BeginEditCommand.Execute(null);
 
@@ -389,10 +383,10 @@ namespace NiVE3.ViewModel.PreviewManipulation
         public override void Update(Vector2d screenPos)
         {
             var diff = (screenPos - StartScreenPosition) * ChangeRate;
-            var rotate = Matrix4x4d.CreateTranslate(-CameraPoi.X, -CameraPoi.Y, -CameraPoi.Z)
+            var rotate = Matrix4x4d.CreateTranslate(-CameraPointOfInterest.X, -CameraPointOfInterest.Y, -CameraPointOfInterest.Z)
                 .RotateY(diff.X)
                 .RotateX(-diff.Y)
-                .Translate(CameraPoi.X, CameraPoi.Y, CameraPoi.Z);
+                .Translate(CameraPointOfInterest.X, CameraPointOfInterest.Y, CameraPointOfInterest.Z);
 
             var move = rotate.Transform(StartCameraPosition.ToHomogeneousCoord());
             move /= move.GetElement(3);
@@ -401,6 +395,107 @@ namespace NiVE3.ViewModel.PreviewManipulation
             {
                 property.CurrentTimeValue = (Vector3d)move;
             }
+        }
+    }
+
+    class CameraPanPreviewManipulationState : PreviewManipulationStateBase
+    {
+        protected override PropertyViewModel[] Properties { get; }
+
+        Vector3d StartCameraPosition { get; }
+
+        Vector3d StartCameraPointOfInterest { get; }
+
+        Vector3d StartPosition { get; }
+
+        PropertyViewModel? PositionProperty { get; }
+
+        PropertyViewModel? PointOfInterestProperty { get; }
+
+        public CameraPanPreviewManipulationState(LayerViewModel targetCameraLayer, double time, CompositionModel compositionModel, CameraSetting cameraSetting, Vector2d startScreenPosition, HistoryModel historyModel) : base(time, compositionModel, cameraSetting, startScreenPosition, historyModel)
+        {
+            var cameraPositionProperty = targetCameraLayer.TransformProperties?.Children?.FirstOrDefault(p => p.Property.Id == ILayerObject.TransformPositionId);
+            var cameraPoiProperty = targetCameraLayer.TransformProperties?.Children?.FirstOrDefault(p => p.Property.Id == ILayerObject.TransformPointOfInterestId);
+            if (cameraPositionProperty is PropertyViewModel posVm && cameraPoiProperty is PropertyViewModel poiVm)
+            {
+                StartCameraPosition = (Vector3d)(posVm.CurrentTimeValue ?? Vector3d.Zero);
+                StartCameraPointOfInterest = (Vector3d)(poiVm.CurrentTimeValue ?? Vector3d.Zero);
+
+                posVm.BeginEditCommand.Execute(null);
+                poiVm.BeginEditCommand.Execute(null);
+
+                PointOfInterestProperty = poiVm;
+                PositionProperty = posVm;
+                Properties = [posVm, poiVm];
+                StartPosition = compositionModel.Unprojection(cameraSetting, null, startScreenPosition);
+            }
+            else
+            {
+                Properties = [];
+            }
+        }
+
+        public override void Update(Vector2d screenPos)
+        {
+            if (PositionProperty == null || PointOfInterestProperty == null)
+            {
+                return;
+            }
+
+            var newPosition = CompositionModel.Unprojection(CameraSetting, null, screenPos);
+            var diff = StartPosition - newPosition;
+            PositionProperty.CurrentTimeValue = StartCameraPosition + diff;
+            PointOfInterestProperty.CurrentTimeValue = StartCameraPointOfInterest + diff;
+        }
+    }
+
+    class CameraDollyPreviewManipulationState : PreviewManipulationStateBase
+    {
+        protected override PropertyViewModel[] Properties { get; }
+
+        Vector3d StartCameraPosition { get; }
+
+        Vector3d StartCameraPointOfInterest { get; }
+
+        Vector3d CameraDirection { get; }
+
+        PropertyViewModel? PositionProperty { get; }
+
+        PropertyViewModel? PointOfInterestProperty { get; }
+
+        public CameraDollyPreviewManipulationState(LayerViewModel targetCameraLayer, double time, CompositionModel compositionModel, CameraSetting cameraSetting, Vector2d startScreenPosition, HistoryModel historyModel) : base(time, compositionModel, cameraSetting, startScreenPosition, historyModel)
+        {
+            var cameraPositionProperty = targetCameraLayer.TransformProperties?.Children?.FirstOrDefault(p => p.Property.Id == ILayerObject.TransformPositionId);
+            var cameraPoiProperty = targetCameraLayer.TransformProperties?.Children?.FirstOrDefault(p => p.Property.Id == ILayerObject.TransformPointOfInterestId);
+            if (cameraPositionProperty is PropertyViewModel posVm && cameraPoiProperty is PropertyViewModel poiVm)
+            {
+                StartCameraPosition = (Vector3d)(posVm.CurrentTimeValue ?? Vector3d.Zero);
+                StartCameraPointOfInterest = (Vector3d)(poiVm.CurrentTimeValue ?? Vector3d.Zero);
+                CameraDirection = (StartCameraPosition - StartCameraPointOfInterest).Normalize();
+
+                posVm.BeginEditCommand.Execute(null);
+                poiVm.BeginEditCommand.Execute(null);
+
+                PointOfInterestProperty = poiVm;
+                PositionProperty = posVm;
+                Properties = [posVm, poiVm];
+            }
+            else
+            {
+                Properties = [];
+            }
+        }
+
+        public override void Update(Vector2d screenPos)
+        {
+            if (PositionProperty == null || PointOfInterestProperty == null)
+            {
+                return;
+            }
+
+            var move = CameraDirection * (screenPos.Y - StartScreenPosition.Y);
+            PositionProperty.CurrentTimeValue = StartCameraPosition + move;
+            PointOfInterestProperty.CurrentTimeValue = StartCameraPointOfInterest + move;
         }
     }
 }

@@ -724,13 +724,9 @@ namespace NiVE3.PresetPlugin.Renderer
             return result;
         }
 
-        public Vector2d WorldCoordToScreenCoord(CameraSetting cameraSetting, LayerSkeleton? baseLayer, Vector3d pos)
+        public Vector2d LocalCoordToScreenCoord(CameraSetting cameraSetting, LayerSkeleton baseLayer, Vector3d pos)
         {
-            if (baseLayer == null)
-            {
-                return new Vector2d(pos.X, pos.Y);
-            }
-            else if (baseLayer.IsEnable3D)
+            if (baseLayer.IsEnable3D)
             {
                 var size = Math.Max(Width, Height);
                 var fov = Math.Atan((Width / cameraSetting.Zoom) * 0.5) * 2.0;
@@ -753,13 +749,24 @@ namespace NiVE3.PresetPlugin.Renderer
             }
         }
 
-        public Vector3d ScreenCoordToWorldCoord(CameraSetting cameraSetting, LayerSkeleton? baseLayer, Vector2d pos)
+        public Vector2d WorldCoordToScreenCoord(CameraSetting cameraSetting, Vector3d pos)
         {
-            if (baseLayer == null)
-            {
-                return (Vector3d)pos;
-            }
-            else if (baseLayer.IsEnable3D)
+            var size = Math.Max(Width, Height);
+            var fov = Math.Atan((Width / cameraSetting.Zoom) * 0.5) * 2.0;
+            var projectionMatrix = Matrix4x4d.CreatePerspectiveFieldOfView(fov, 1.0, double.Epsilon, double.PositiveInfinity);
+            var viewMatrix = Calc3DViewMatrix(cameraSetting, Width, Height);
+            var offsetX = (size - Width) * 0.5 / size;
+            var offsetY = (size - Height) * 0.5 / size;
+            var offsetMatrix = Matrix4x4d.CreateTranslate(offsetX, offsetY, 0.0);
+            var mvt = viewMatrix * offsetMatrix;
+
+            var pp = projectionMatrix.Transform(mvt.Transform((pos.AsVector256() + Vector256.Create(0.0, 0.0, 0.0, size)) / Vector256.Create((double)size)));
+            return (Vector2d)(pp / pp.GetElement(3) * size * 0.5) + (new Vector2d(Width, Height) * 0.5);
+        }
+
+        public Vector3d ScreenCoordToLocalCoord(CameraSetting cameraSetting, LayerSkeleton baseLayer, Vector2d pos)
+        {
+            if (baseLayer.IsEnable3D)
             {
                 var size = Math.Max(Width, Height);
                 var offset = Vector256.Create(size - Width, size - Height, 0.0, 0.0) * 0.5 / size;
@@ -800,6 +807,26 @@ namespace NiVE3.PresetPlugin.Renderer
                 var (worldX, worldY) = inverted.Transform((float)pos.X, (float)pos.Y);
                 return new Vector3d(worldX, worldY, 0.0);
             }
+        }
+
+        public Vector3d ScreenCoordToWorldCoord(CameraSetting cameraSetting, Vector2d pos)
+        {
+            var size = Math.Max(Width, Height);
+            var offset = Vector256.Create(size - Width, size - Height, 0.0, 0.0) * 0.5 / size;
+            var viewMatrix = Calc3DViewMatrix(cameraSetting, Width, Height);
+            var fov = Math.Atan((Width / (cameraSetting.Zoom)) * 0.5) * 2.0;
+
+            var offsetX = (size - Width) * 0.5 / size;
+            var offsetY = (size - Height) * 0.5 / size;
+            var offsetMatrix = Matrix4x4d.CreateTranslate(offsetX, offsetY, 0.0);
+
+            var projectionMatrix = Matrix4x4d.CreatePerspectiveFieldOfView(fov, 1.0, TriangleDivider.NearZ, cameraSetting.Zoom / size);
+            Matrix4x4d.Invert(viewMatrix * projectionMatrix, out var invertedViewProjection);
+
+            var p = Vector256.Create(pos.X, pos.Y, size * 0.5, size * 0.5) / (size * 0.5) - Vector256.Create(1.0, 1.0, 0.0, 0.0);
+            var result = invertedViewProjection.Transform(p);
+            var w = result.GetElement(3);
+            return (Vector3d)(result / (w != 0.0 ? w : 1.0) * size);
         }
 
         static Matrix3x3 CalcTransform2D(PropertyValueGroup transform, ParentTransform[] parentTransforms)

@@ -1114,12 +1114,26 @@ namespace NiVE3.Model
 
         public Vector2d Projection(CameraSetting cameraSetting, LayerSkeleton? baseLayerSkeleton, Vector3d pos)
         {
-            return Renderer.WorldCoordToScreenCoord(cameraSetting, baseLayerSkeleton, pos);
+            if (baseLayerSkeleton != null)
+            {
+                return Renderer.LocalCoordToScreenCoord(cameraSetting, baseLayerSkeleton, pos);
+            }
+            else
+            {
+                return Renderer.WorldCoordToScreenCoord(cameraSetting, pos);
+            }
         }
 
         public Vector3d Unprojection(CameraSetting cameraSetting, LayerSkeleton? baseLayerSkeleton, Vector2d pos)
         {
-            return Renderer.ScreenCoordToWorldCoord(cameraSetting, baseLayerSkeleton, pos);
+            if (baseLayerSkeleton != null)
+            {
+                return Renderer.ScreenCoordToLocalCoord(cameraSetting, baseLayerSkeleton, pos);
+            }
+            else
+            {
+                return Renderer.ScreenCoordToWorldCoord(cameraSetting, pos);
+            }
         }
 
         public LayerModel? GetActiveCamera(double time)
