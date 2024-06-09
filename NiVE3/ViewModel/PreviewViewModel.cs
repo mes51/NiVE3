@@ -31,11 +31,18 @@ using ImTools;
 using NiVE3.Numerics;
 using ILGPU.Algorithms.Optimization.Optimizers;
 using NiVE3.Plugin.Interfaces.RendererParams;
+using NiVE3.View.Command;
+using NiVE3.Config;
 
 namespace NiVE3.ViewModel
 {
     [PaneLocation(PaneLocation.Document)]
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
+    [CommandHandling(nameof(ChangeToHandToolCommand), nameof(ShortcutKeySetting.SelectHandToolGesture), IsGlobal = true)]
+    [CommandHandling(nameof(ChangeToSelectToolCommand), nameof(ShortcutKeySetting.SelectSelectToolGesture), IsGlobal = true)]
+    [CommandHandling(nameof(ChangeToRotateToolCommand), nameof(ShortcutKeySetting.SelectRotateToolGesture), IsGlobal = true)]
+    [CommandHandling(nameof(ChangeToScaleCommand), nameof(ShortcutKeySetting.SelectScaleGestureGesture), IsGlobal = true)]
+    [CommandHandling(nameof(ChangeToCameraToolCommand), nameof(ShortcutKeySetting.SelectCameraToolGesture), IsGlobal = true)]
     partial class PreviewViewModel : PaneViewModelBase
     {
         const int Black = 255 << 24;
@@ -269,6 +276,20 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref toolType, value); }
         }
 
+        private ToolType activeRotateTool = ToolType.RotateAll;
+        public ToolType ActiveRotateTool
+        {
+            get { return activeRotateTool; }
+            set { SetProperty(ref activeRotateTool, value); }
+        }
+
+        private ToolType activeCameraTool = ToolType.CameraOrbit;
+        public ToolType ActiveCameraTool
+        {
+            get { return activeCameraTool; }
+            set { SetProperty(ref activeCameraTool, value); }
+        }
+
         public PreviewModelBase PreviewModel { get; }
 
         public ICommand ChangeCurrentTimeCommand { get; }
@@ -280,6 +301,16 @@ namespace NiVE3.ViewModel
         public ICommand MoveLayersByToolCommand { get; }
 
         public ICommand AbortUseToolCommand { get; }
+
+        public ICommand ChangeToHandToolCommand { get; }
+
+        public ICommand ChangeToSelectToolCommand { get; }
+
+        public ICommand ChangeToRotateToolCommand { get; }
+
+        public ICommand ChangeToScaleCommand { get; }
+
+        public ICommand ChangeToCameraToolCommand { get; }
 
         int[] ImageBuffer { get; set; }
 
@@ -407,6 +438,41 @@ namespace NiVE3.ViewModel
 
                 EventHubModel.NotifyAbortUseTool(compositionPreviewModel.Composition.CompositionId);
             });
+
+            ChangeToHandToolCommand = new DelegateCommand(() => ToolType = ToolType.Hand, () => PreviewModel is CompositionPreviewModel compositionPreviewModel && compositionPreviewModel.Composition != null);
+
+            ChangeToSelectToolCommand = new DelegateCommand(() => ToolType = ToolType.Select, () => PreviewModel is CompositionPreviewModel compositionPreviewModel && compositionPreviewModel.Composition != null);
+
+            ChangeToRotateToolCommand = new DelegateCommand(() =>
+            {
+                if (ToolType == ToolType.RotateAll || ToolType == ToolType.RotateX || ToolType == ToolType.RotateY || ToolType == ToolType.RotateZ)
+                {
+                    ActiveRotateTool = ToolType switch
+                    {
+                        ToolType.RotateAll => ToolType.RotateX,
+                        ToolType.RotateX => ToolType.RotateY,
+                        ToolType.RotateY => ToolType.RotateZ,
+                        _ => ToolType.RotateAll
+                    };
+                }
+                ToolType = ActiveRotateTool;
+            }, () => PreviewModel is CompositionPreviewModel compositionPreviewModel && compositionPreviewModel.Composition != null);
+
+            ChangeToScaleCommand = new DelegateCommand(() => ToolType = ToolType.Scale, () => PreviewModel is CompositionPreviewModel compositionPreviewModel && compositionPreviewModel.Composition != null);
+
+            ChangeToCameraToolCommand = new DelegateCommand(() =>
+            {
+                if (ToolType == ToolType.CameraOrbit || ToolType == ToolType.CameraPan || ToolType == ToolType.CameraDolly)
+                {
+                    ActiveCameraTool = ToolType switch
+                    {
+                        ToolType.CameraOrbit => ToolType.CameraPan,
+                        ToolType.CameraPan => ToolType.CameraDolly,
+                        _ => ToolType.CameraOrbit
+                    };
+                }
+                ToolType = ActiveCameraTool;
+            }, () => PreviewModel is CompositionPreviewModel compositionPreviewModel && compositionPreviewModel.Composition != null);
 
             WiringModel();
 

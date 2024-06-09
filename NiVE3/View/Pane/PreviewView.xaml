@@ -343,7 +343,7 @@
                             </x:Array>
                         </pr:MultiItemRadioButton.ItemsSource>
                         <pr:MultiItemRadioButton.ActiveItem>
-                            <x:Static Member="vm:ToolType.RotateAll"/>
+                            <Binding Path="ActiveRotateTool"/>
                         </pr:MultiItemRadioButton.ActiveItem>
                         <pr:MultiItemRadioButton.Style>
                             <Style TargetType="{x:Type pr:MultiItemRadioButton}" BasedOn="{StaticResource IconMultiRadioButtonBase}">
@@ -407,7 +407,7 @@
                             </x:Array>
                         </pr:MultiItemRadioButton.ItemsSource>
                         <pr:MultiItemRadioButton.ActiveItem>
-                            <x:Static Member="vm:ToolType.CameraOrbit"/>
+                            <Binding Path="ActiveCameraTool"/>
                         </pr:MultiItemRadioButton.ActiveItem>
                         <pr:MultiItemRadioButton.Style>
                             <Style TargetType="{x:Type pr:MultiItemRadioButton}" BasedOn="{StaticResource IconMultiRadioButtonBase}">

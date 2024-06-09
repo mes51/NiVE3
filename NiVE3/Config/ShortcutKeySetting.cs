@@ -142,6 +142,71 @@ namespace NiVE3.Config
             new PropertyMetadata(new KeyGesture(Key.M, ModifierKeys.Control))
         );
 
+        public static readonly DependencyProperty SelectHandToolGestureProperty = DependencyProperty.Register(
+            nameof(SelectHandToolGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new SingleKeyGesture(Key.H))
+        );
+
+        public static readonly DependencyProperty SelectSelectToolGestureProperty = DependencyProperty.Register(
+            nameof(SelectSelectToolGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new SingleKeyGesture(Key.V))
+        );
+
+        public static readonly DependencyProperty SelectRotateToolGestureProperty = DependencyProperty.Register(
+            nameof(SelectRotateToolGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new SingleKeyGesture(Key.W))
+        );
+
+        public static readonly DependencyProperty SelectScaleGestureGestureProperty = DependencyProperty.Register(
+            nameof(SelectScaleGestureGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new SingleKeyGesture(Key.Y))
+        );
+
+        public static readonly DependencyProperty SelectCameraToolGestureProperty = DependencyProperty.Register(
+            nameof(SelectCameraToolGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new SingleKeyGesture(Key.C))
+        );
+
+        public InputGesture SelectCameraToolGesture
+        {
+            get { return (InputGesture)GetValue(SelectCameraToolGestureProperty); }
+            set { SetValue(SelectCameraToolGestureProperty, value); }
+        }
+
+        public InputGesture SelectScaleGestureGesture
+        {
+            get { return (InputGesture)GetValue(SelectScaleGestureGestureProperty); }
+            set { SetValue(SelectScaleGestureGestureProperty, value); }
+        }
+
+        public InputGesture SelectRotateToolGesture
+        {
+            get { return (InputGesture)GetValue(SelectRotateToolGestureProperty); }
+            set { SetValue(SelectRotateToolGestureProperty, value); }
+        }
+
+        public InputGesture SelectSelectToolGesture
+        {
+            get { return (InputGesture)GetValue(SelectSelectToolGestureProperty); }
+            set { SetValue(SelectSelectToolGestureProperty, value); }
+        }
+
+        public InputGesture SelectHandToolGesture
+        {
+            get { return (InputGesture)GetValue(SelectHandToolGestureProperty); }
+            set { SetValue(SelectHandToolGestureProperty, value); }
+        }
+
         public InputGesture OpenRenderSettingGesture
         {
             get { return (InputGesture)GetValue(OpenRenderSettingGestureProperty); }

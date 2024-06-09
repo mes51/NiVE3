@@ -101,8 +101,7 @@ namespace NiVE3.ViewModel.PreviewManipulation
             var prevPositions = new List<Vector3d>();
             foreach (var layer in layers)
             {
-                var property = layer.TransformProperties?.Children?.FirstOrDefault(p => p.Property.Id == ILayerObject.TransformPositionId) as PropertyViewModel;
-                if (property != null)
+                if (layer.TransformProperties?.Children?.FirstOrDefault(p => p.Property.Id == ILayerObject.TransformPositionId) is PropertyViewModel property)
                 {
                     var position = (Vector3d)(property.CurrentTimeValue ?? Vector3d.Zero);
                     property.BeginEditCommand.Execute(null);
