@@ -318,7 +318,7 @@ namespace NiVE3.View.Pane
                 IsMouseDown = true;
                 IsMovedByTool = false;
                 UsingToolType = viewModel.ToolType;
-                if (UsingToolType == ToolType.Hand)
+                if (UsingToolType == ToolType.Hand || UsingToolType == ToolType.CameraOrbit || UsingToolType == ToolType.CameraPan || UsingToolType == ToolType.CameraDolly)
                 {
                     PrevPoint = prevPoint;
                 }
