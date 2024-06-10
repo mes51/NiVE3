@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace NiVE3.Image.Color
 {
     [StructLayout(LayoutKind.Sequential)]
-    public record struct Lab(float L, float a, float b)
+    public readonly record struct Lab(float L, float a, float b)
     {
         const double D65X = 95.0489F;
 
@@ -18,11 +18,11 @@ namespace NiVE3.Image.Color
 
         const double D65Z = 108.884F;
 
-        public float L = L;
+        public readonly float L = L;
 
-        public float a = a;
+        public readonly float a = a;
 
-        public float b = b;
+        public readonly float b = b;
 
 #pragma warning disable IDE0040 // for cast to Vector4
         readonly float Spacer;

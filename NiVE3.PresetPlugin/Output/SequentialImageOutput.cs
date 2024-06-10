@@ -38,8 +38,6 @@ namespace NiVE3.PresetPlugin.Output
 
         string EncodeType { get; set; } = SupportedExtensions.First();
 
-        int TotalFrameCount { get; set; }
-
         int CurrentFrameIndex { get; set; }
 
         WriteableBitmap OutputImageBuffer { get; set; } = new WriteableBitmap(1, 1, 96.0, 96.0, PixelFormats.Bgra32, null);
@@ -70,10 +68,9 @@ namespace NiVE3.PresetPlugin.Output
         {
             var replaceTarget = FrameCountRegex.Matches(filePath).Cast<Match>().Last();
             FrameCountFormat = "D0" + replaceTarget.Value.Replace("[", "").Replace("]", "").Length;
-            OutputFilePathPrefix = filePath.Substring(0, replaceTarget.Index);
-            OutputFilePathSuffix = filePath.Substring(replaceTarget.Index + replaceTarget.Length);
+            OutputFilePathPrefix = filePath[..replaceTarget.Index];
+            OutputFilePathSuffix = filePath[(replaceTarget.Index + replaceTarget.Length)..];
             EncodeType = Path.GetExtension(filePath);
-            TotalFrameCount = (int)(duration * frameRate);
             CurrentFrameIndex = 1;
 
             if (size.HasValue)

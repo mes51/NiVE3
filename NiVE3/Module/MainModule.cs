@@ -17,8 +17,6 @@ namespace NiVE3.Module
 {
     class MainModule : IModule
     {
-        IRegionManager RegionManager { get; }
-
         IRegionViewRegistry ViewRegistry { get; }
 
         IContainer Container { get; }
@@ -27,7 +25,6 @@ namespace NiVE3.Module
         {
             Container = container;
             ViewRegistry = registry;
-            RegionManager = manager;
         }
 
         public void OnInitialized(IContainerProvider containerProvider)

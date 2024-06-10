@@ -315,9 +315,9 @@ namespace NiVE3.Numerics
 
             // Note:  We use this expansion pattern instead of Fused Multiply Add
             // in order to support older hardware
-            D0 = D0 - (V00 * V10);
-            D1 = D1 - (V01 * V11);
-            D2 = D2 - (V02 * V12);
+            D0 -= (V00 * V10);
+            D1 -= (V01 * V11);
+            D2 -= (V02 * V12);
 
             // V11 = D0Y,D0W,D2Y,D2Y
             V11 = D0.Shuffle4x64(D2, 0x5D);   //_MM_SHUFFLE(1, 1, 3, 1)
@@ -352,10 +352,10 @@ namespace NiVE3.Numerics
             V03 = row3.Permute4x64(0x7b);         //_MM_SHUFFLE(1, 3, 2, 3)
             V13 = D1.Shuffle4x64(V13, 0x26);   //_MM_SHUFFLE(0, 2, 1, 2)
 
-            C0 = C0 - (V00 * V10);
-            C2 = C2 - (V01 * V11);
-            C4 = C4 - (V02 * V12);
-            C6 = C6 - (V03 * V13);
+            C0 -= (V00 * V10);
+            C2 -= (V01 * V11);
+            C4 -= (V02 * V12);
+            C6 -= (V03 * V13);
 
             V00 = row2.Permute4x64(0x33); //_MM_SHUFFLE(0, 3, 0, 3)
 
@@ -378,19 +378,19 @@ namespace NiVE3.Numerics
             V13 = D1.Shuffle4x64(D2, 0xEC);  //_MM_SHUFFLE(3, 2, 3, 0)
             V13 = V13.Permute4x64(0x93);        //_MM_SHUFFLE(2, 1, 0, 3)
 
-            V00 = V00 * V10;
-            V01 = V01 * V11;
-            V02 = V02 * V12;
-            V03 = V03 * V13;
+            V00 *= V10;
+            V01 *= V11;
+            V02 *= V12;
+            V03 *= V13;
 
             var C1 = C0 - V00;
-            C0 = C0 + V00;
+            C0 += V00;
             var C3 = C2 + V01;
-            C2 = C2 - V01;
+            C2 -= V01;
             var C5 = C4 - V02;
-            C4 = C4 + V02;
+            C4 += V02;
             var C7 = C6 + V03;
-            C6 = C6 - V03;
+            C6 -= V03;
 
             C0 = C0.Shuffle4x64(C1, 0xD8); //_MM_SHUFFLE(3, 1, 2, 0)
             C2 = C2.Shuffle4x64(C3, 0xD8); //_MM_SHUFFLE(3, 1, 2, 0)

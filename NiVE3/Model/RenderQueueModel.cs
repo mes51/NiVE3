@@ -105,13 +105,15 @@ namespace NiVE3.Model
                 duplicateCount++;
             }
 
-            var queue = new RenderQueueItemModel(compositionModel, ProjectModel.Value, OutputListModel, HistoryModel, output);
-            queue.FilePath = filePath;
-            queue.RenderRangeType = renderRangeType;
-            queue.BeginTime = beginTime;
-            queue.EndTime = endTime;
-            queue.IsOutputVideo = isOutputVideo;
-            queue.IsOutputAudio = isOutputAudio;
+            var queue = new RenderQueueItemModel(compositionModel, ProjectModel.Value, OutputListModel, HistoryModel, output)
+            {
+                FilePath = filePath,
+                RenderRangeType = renderRangeType,
+                BeginTime = beginTime,
+                EndTime = endTime,
+                IsOutputVideo = isOutputVideo,
+                IsOutputAudio = isOutputAudio
+            };
 
             Items.Add(queue);
 
@@ -154,7 +156,7 @@ namespace NiVE3.Model
 
         public bool HasSameOutputFilePathQueue()
         {
-            return Items.Select(i => i.FilePath).Distinct().Count() != Items.Count();
+            return Items.Select(i => i.FilePath).Distinct().Count() != Items.Count;
         }
 
         public void StartRender()

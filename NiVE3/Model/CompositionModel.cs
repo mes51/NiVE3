@@ -28,6 +28,7 @@ using System.IO.Hashing;
 using NiVE3.Extension;
 using NiVE3.Cache;
 using NiVE3.Plugin.ValueObject;
+using NiVE3.Shared.Util;
 
 namespace NiVE3.Model
 {
@@ -382,10 +383,7 @@ namespace NiVE3.Model
         {
             var layers = Layers.Where(l => layerIds.Contains(l.LayerId)).OrderBy(Layers.IndexOf).ToArray();
             var propertyInfo = typeof(LayerModel).GetProperty(switchName);
-            if (propertyInfo == null)
-            {
-                throw new Exception($"{switchName} Switch is not found"); // bug
-            }
+            Assertion.IsNotNull(propertyInfo, $"{switchName} Switch is not found");
 
             var oldValue = layers.Select(propertyInfo.GetValue).ToArray();
             foreach (var l in layers)

@@ -1,4 +1,5 @@
 ﻿using AvalonDock;
+using CommunityToolkit.Diagnostics;
 using Prism.Regions;
 using System;
 using System.Collections.Generic;
@@ -10,26 +11,9 @@ namespace NiVE3.Region
 {
     class DockingManagerRegionAdapter : RegionAdapterBase<DockingManager>
     {
-        IRegion? Region { get; set; }
-
-        DockingManager? RegionTarget { get; set; }
-
         public DockingManagerRegionAdapter(IRegionBehaviorFactory regionBehaviorFactory) : base(regionBehaviorFactory) { }
 
-        protected override void Adapt(IRegion region, DockingManager regionTarget)
-        {
-            if (region == null)
-            {
-                throw new ArgumentException(null, nameof(region));
-            }
-            if (regionTarget == null)
-            {
-                throw new ArgumentException(null, nameof(regionTarget));
-            }
-
-            Region = region;
-            RegionTarget = regionTarget;
-        }
+        protected override void Adapt(IRegion region, DockingManager regionTarget) { }
 
         protected override IRegion CreateRegion()
         {
@@ -42,14 +26,8 @@ namespace NiVE3.Region
 
         protected override void AttachBehaviors(IRegion region, DockingManager regionTarget)
         {
-            if (region == null)
-            {
-                throw new ArgumentException(null, nameof(region));
-            }
-            if (regionTarget == null)
-            {
-                throw new ArgumentException(null, nameof(regionTarget));
-            }
+            Guard.IsNotNull(region, nameof(region));
+            Guard.IsNotNull(regionTarget, nameof(regionTarget));
 
             region.Behaviors.Add(DockingManagerRegionBehavior.BehaviorName, new DockingManagerRegionBehavior { RegionTarget = regionTarget });
 

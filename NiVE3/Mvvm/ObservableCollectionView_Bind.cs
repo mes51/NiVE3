@@ -5,6 +5,7 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NiVE3.Shared.Util;
 
 namespace NiVE3.Mvvm
 {
@@ -34,10 +35,8 @@ namespace NiVE3.Mvvm
                 case NotifyCollectionChangedAction.Move:
                     {
                         var models = e.NewItems ?? e.OldItems;
-                        if (models == null)
-                        {
-                            throw new InvalidOperationException(nameof(e));
-                        }
+                        OperationGuard.ThrowIfNull(models, nameof(e));
+
                         var items = Views.Where(t => models.Contains(t.Model)).ToArray();
                         var oldStartIndex = Views.IndexOf(items[0]);
                         foreach (var i in items)

@@ -17,15 +17,12 @@ namespace NiVE3.PresetPlugin.Internal.Encoder
 
         public int MaxEncodedSize { get; }
 
-        int Width { get; }
-
         int Height { get; }
 
         int Stride { get; }
 
         public UncompressedRgbaVideoEncoder(int width, int height)
         {
-            Width = width;
             Height = height;
             Stride = width * 4;
             MaxEncodedSize = width * height * 4;

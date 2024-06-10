@@ -15,6 +15,7 @@ using Microsoft.Win32;
 using NiVE3.Model;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.ValueObject;
+using NiVE3.Shared.Util;
 using NiVE3.UI.Command;
 using NiVE3.View.Dialog;
 using NiVE3.View.Resource;
@@ -198,10 +199,12 @@ namespace NiVE3.ViewModel.Dialog
 
             ChangeSaveFilePathCommand = new DelegateCommand(() =>
             {
-                var save = new SaveFileDialog();
-                save.Filter = GetSaveFileFilter();
-                save.InitialDirectory = Path.GetDirectoryName(FilePath);
-                save.FileName = Path.GetFileName(FilePath);
+                var save = new SaveFileDialog
+                {
+                    Filter = GetSaveFileFilter(),
+                    InitialDirectory = Path.GetDirectoryName(FilePath),
+                    FileName = Path.GetFileName(FilePath)
+                };
                 if (save.ShowDialog() ?? false)
                 {
                     FilePath = Output.Value.ProcessOutputFilePath(save.FileName);
@@ -334,10 +337,8 @@ namespace NiVE3.ViewModel.Dialog
         void ChangeOutputPlugin(Guid newOutputPluginId)
         {
             var output = OutputListModel.CreateOutput(newOutputPluginId);
-            if (output == null)
-            {
-                throw new InvalidOperationException();
-            }
+            OperationGuard.ThrowIfNull(output);
+
             Output = output;
             var metadata = OutputListModel.GetMetadata(newOutputPluginId);
             HasOutputSetting = metadata?.HasSettingView ?? false;

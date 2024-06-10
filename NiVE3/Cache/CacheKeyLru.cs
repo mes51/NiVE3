@@ -30,7 +30,7 @@ namespace NiVE3.Cache
                 }
                 else
                 {
-                    SecondaryKeys.Add(secondaryKey, new List<(Guid, Int128, double)> { primaryKey });
+                    SecondaryKeys.Add(secondaryKey, [primaryKey]);
                 }
             }
             PrimaryKeyLru.Remove(primaryKey);

@@ -79,8 +79,8 @@ namespace NiVE3.Image.Color
                 return ColorStops[0].Color;
             }
 
-            var p = ColorStops.LastOrDefault(c => c.Position <= position, ColorStops.First());
-            var n = ColorStops.FirstOrDefault(c => c.Position > position, ColorStops.Last());
+            var p = ColorStops.LastOrDefault(c => c.Position <= position, ColorStops[0]);
+            var n = ColorStops.FirstOrDefault(c => c.Position > position, ColorStops[^1]);
             if (p == n)
             {
                 return p.Color;
@@ -110,8 +110,8 @@ namespace NiVE3.Image.Color
                 return OpacityStops[0].Opacity;
             }
 
-            var p = OpacityStops.LastOrDefault(o => o.Position <= position, OpacityStops.First());
-            var n = OpacityStops.FirstOrDefault(o => o.Position > position, OpacityStops.Last());
+            var p = OpacityStops.LastOrDefault(o => o.Position <= position, OpacityStops[0]);
+            var n = OpacityStops.FirstOrDefault(o => o.Position > position, OpacityStops[^1]);
 
             if (p == n)
             {

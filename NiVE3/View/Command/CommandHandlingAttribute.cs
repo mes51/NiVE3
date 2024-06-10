@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using NiVE3.Shared.Util;
 
 namespace NiVE3.View.Command
 {
@@ -52,11 +53,9 @@ namespace NiVE3.View.Command
                 .Select(a =>
                 {
                     var commandProperty = type.GetProperty(a.CommandName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-                    if (commandProperty == null)
-                    {
-                        // NOTE: ViewModel内に存在しないコマンドは指定してはいけない
-                        throw new InvalidOperationException($"this is bug! {a.CommandName} is not define in {type.Name}");
-                    }
+                    // NOTE: ViewModel内に存在しないコマンドは指定してはいけない
+                    Assertion.IsNotNull(commandProperty, $"{a.CommandName} is not define in {type.Name}");
+
                     return Tuple.Create(a, commandProperty);
                 })
                 .ToLookup(t => t.Item1.TargetGesture);

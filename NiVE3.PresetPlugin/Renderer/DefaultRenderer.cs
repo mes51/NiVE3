@@ -1179,6 +1179,7 @@ namespace NiVE3.PresetPlugin.Renderer
         public void Dispose()
         {
             CurrentFrame?.Dispose();
+            GC.SuppressFinalize(this);
         }
     }
 }

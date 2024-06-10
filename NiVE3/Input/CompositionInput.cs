@@ -8,6 +8,7 @@ using NiVE3.Model;
 using NiVE3.Image;
 using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Interfaces;
+using CommunityToolkit.Diagnostics;
 
 namespace NiVE3.Input
 {
@@ -34,10 +35,7 @@ namespace NiVE3.Input
         public CompositionInput(object? inputOption, CompositionModel[] compositions)
         {
             var compositionIdString = inputOption?.ToString();
-            if (compositionIdString == null)
-            {
-                throw new Exception();
-            }
+            Guard.IsNotNull(compositionIdString);
 
             var compositionId = Guid.Parse(compositionIdString);
             Composition = compositions.First(c => c.CompositionId == compositionId);

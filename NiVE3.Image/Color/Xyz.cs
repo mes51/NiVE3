@@ -12,13 +12,13 @@ using NiVE3.Shared.Extension;
 namespace NiVE3.Image.Color
 {
     [StructLayout(LayoutKind.Sequential)]
-    public record struct Xyz(float X, float Y, float Z)
+    public readonly record struct Xyz(float X, float Y, float Z)
     {
-        public float X = X;
+        public readonly float X = X;
 
-        public float Y = Y;
+        public readonly float Y = Y;
 
-        public float Z = Z;
+        public readonly float Z = Z;
 
 #pragma warning disable IDE0040 // for cast to Vector4
         readonly float Spacer;
@@ -32,7 +32,7 @@ namespace NiVE3.Image.Color
             var rgbRow2 = new Vector4(-0.9692660F,  1.8760108F,  0.0415560F, 0.0F);
             var rgbRow3 = new Vector4( 0.0556434F, -0.2040259F,  1.0572252F, 0.0F);
 
-            ref var xyz = ref Unsafe.As<Xyz, Vector4>(ref this);
+            var xyz = Unsafe.BitCast<Xyz, Vector4>(this);
             return new Vector4(
                 (xyz * rgbRow3).HorizontalAdd(),
                 (xyz * rgbRow2).HorizontalAdd(),

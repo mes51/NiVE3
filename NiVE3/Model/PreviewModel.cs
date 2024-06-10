@@ -254,8 +254,8 @@ namespace NiVE3.Model
                 var yRate = previewImage.Height / (float)Height;
                 Parallel.For(0, Height, y =>
                 {
-                    var resizedImageSpan = resizedImage.GetDataSpan().Slice(y * Width);
-                    var previewImageSpan = managedPreviewImage.GetDataSpan().Slice((int)(y * yRate) * managedPreviewImage.Width);
+                    var resizedImageSpan = resizedImage.GetDataSpan()[(y * Width)..];
+                    var previewImageSpan = managedPreviewImage.GetDataSpan()[((int)(y * yRate) * managedPreviewImage.Width)..];
 
                     for (var x = 0; x < resizedImage.Width; x++)
                     {

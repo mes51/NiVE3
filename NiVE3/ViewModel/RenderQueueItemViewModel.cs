@@ -204,10 +204,12 @@ namespace NiVE3.ViewModel
 
             ChangeFilePathCommand = new RequerySuggestedCommand(() =>
             {
-                var save = new SaveFileDialog();
-                save.Filter = RenderQueueItemModel.GetSaveFileFilter();
-                save.InitialDirectory = Path.GetDirectoryName(FilePath);
-                save.FileName = Path.GetFileName(FilePath);
+                var save = new SaveFileDialog
+                {
+                    Filter = RenderQueueItemModel.GetSaveFileFilter(),
+                    InitialDirectory = Path.GetDirectoryName(FilePath),
+                    FileName = Path.GetFileName(FilePath)
+                };
                 if (save.ShowDialog() ?? false)
                 {
                     RenderQueueItemModel.ChangeFilePath(save.FileName);
