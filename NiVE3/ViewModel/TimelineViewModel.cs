@@ -17,20 +17,18 @@ using NiVE3.Data.Json.Project;
 using NiVE3.Image.Drawing;
 using NiVE3.Model;
 using NiVE3.Mvvm;
-using NiVE3.Numerics;
 using NiVE3.Plugin.Interfaces;
-using NiVE3.Plugin.Property;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
 using NiVE3.UI.Command;
 using NiVE3.Util;
 using NiVE3.View.Command;
 using NiVE3.View.Dialog;
 using NiVE3.View.Dock;
-using NiVE3.View.Part;
 using NiVE3.View.Primitive;
 using NiVE3.View.Resource;
 using NiVE3.ViewModel.Dialog;
 using NiVE3.ViewModel.PreviewManipulation;
+using NiVE3.Shared.Extension;
 using Prism.Commands;
 using Prism.Services.Dialogs;
 
@@ -622,15 +620,15 @@ namespace NiVE3.ViewModel
 
             ChangeCurrentTimeCommand = new DelegateCommand(() => CurrentTimeChangeByUserPublisher.Publish(this, EventArgs.Empty));
 
-            AddShapeCommand = new RequerySuggestedCommand(() => CompositionModel?.AddShape(), () => CompositionModel != null);
+            AddShapeCommand = new RequerySuggestedCommand(() => CompositionModel?.AddShape(GetFirstSelectedLayerIndex()), () => CompositionModel != null);
 
-            AddCameraCommand = new RequerySuggestedCommand(() => CompositionModel?.AddCamera(), () => CompositionModel != null);
+            AddCameraCommand = new RequerySuggestedCommand(() => CompositionModel?.AddCamera(GetFirstSelectedLayerIndex()), () => CompositionModel != null);
 
-            AddLightCommand = new RequerySuggestedCommand(() => CompositionModel?.AddLight(), () => CompositionModel != null);
+            AddLightCommand = new RequerySuggestedCommand(() => CompositionModel?.AddLight(GetFirstSelectedLayerIndex()), () => CompositionModel != null);
 
-            AddNullObjectCommand = new RequerySuggestedCommand(() => CompositionModel?.AddNullObject(), () => CompositionModel != null);
+            AddNullObjectCommand = new RequerySuggestedCommand(() => CompositionModel?.AddNullObject(GetFirstSelectedLayerIndex()), () => CompositionModel != null);
 
-            AddTextCommand = new RequerySuggestedCommand(() => CompositionModel?.AddText(), () => CompositionModel != null);
+            AddTextCommand = new RequerySuggestedCommand(() => CompositionModel?.AddText(GetFirstSelectedLayerIndex()), () => CompositionModel != null);
 
             CompositionSettingCommand = new RequerySuggestedCommand(() =>
             {
@@ -816,6 +814,19 @@ namespace NiVE3.ViewModel
                         CompositionModel.MoveLayers(itemDragData.SelectedItems.Select(l => l.LayerId).ToArray(), itemDragData.DragItem.LayerId, newIndex);
                     }
                     break;
+            }
+        }
+
+        int GetFirstSelectedLayerIndex()
+        {
+            if (Layers != null && SelectedLayers != null && SelectedLayers.Count > 0)
+            {
+                var firstSelectedId = SelectedLayers[0].LayerId;
+                return Layers.IndexOf(l => l.LayerId == firstSelectedId);
+            }
+            else
+            {
+                return 0;
             }
         }
 

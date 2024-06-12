@@ -290,40 +290,40 @@ namespace NiVE3.Model
             }
         }
 
-        public void AddCamera()
+        public void AddCamera(int insertIndex)
         {
             var layer = new LayerModel(this, FootageListModel.CameraFootage, EffectListModel, HistoryModel)
             {
                 OutPoint = Duration
             };
-            Layers.Insert(0, layer);
+            Layers.Insert(insertIndex, layer);
 
             HistoryModel.Add(new AddLayersHistoryCommand(this, [layer], 0));
         }
 
-        public void AddLight()
+        public void AddLight(int insertIndex)
         {
             var layer = new LayerModel(this, FootageListModel.LightFootage, EffectListModel, HistoryModel)
             {
                 OutPoint = Duration
             };
-            Layers.Insert(0, layer);
+            Layers.Insert(insertIndex, layer);
 
             HistoryModel.Add(new AddLayersHistoryCommand(this, [layer], 0));
         }
 
-        public void AddNullObject()
+        public void AddNullObject(int insertIndex)
         {
             var layer = new LayerModel(this, FootageListModel.NullObjectFootage, EffectListModel, HistoryModel)
             {
                 OutPoint = Duration
             };
-            Layers.Insert(0, layer);
+            Layers.Insert(insertIndex, layer);
 
             HistoryModel.Add(new AddLayersHistoryCommand(this, [layer], 0));
         }
 
-        public void AddText()
+        public void AddText(int insertIndex)
         {
             var layer = new LayerModel(this, FootageListModel.TextFootage, EffectListModel, HistoryModel)
             {
@@ -333,19 +333,19 @@ namespace NiVE3.Model
             HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_AddLayers));
 
             TextPropertyModel.UpdateTextProperty(layer, 0.0);
-            Layers.Insert(0, layer); // TODO: 選択位置の上に挿入
+            Layers.Insert(insertIndex, layer);
             HistoryModel.Add(new AddLayersHistoryCommand(this, [layer], 0));
 
             HistoryModel.EndGroup();
         }
 
-        public void AddShape()
+        public void AddShape(int insertIndex)
         {
             var layer = new LayerModel(this, FootageListModel.ShapeFootage, EffectListModel, HistoryModel)
             {
                 OutPoint = Duration
             };
-            Layers.Insert(0, layer); // TODO: 選択位置の上に挿入
+            Layers.Insert(insertIndex, layer);
 
             HistoryModel.Add(new AddLayersHistoryCommand(this, [layer], 0));
         }
