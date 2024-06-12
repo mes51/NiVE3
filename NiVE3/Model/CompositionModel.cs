@@ -1274,9 +1274,7 @@ namespace NiVE3.Model
 
         static CameraSetting CreateDefaultCameraSetting(int width, int height)
         {
-            // TODO: LayerModelの方と合わせてどこかに定義する
-            const double DefaultCameraFov = 0.360000466176267;// Math.Tan(39.5978 * 0.5 * (Math.PI / 180.0))
-            var zoom = width / DefaultCameraFov * 0.5;
+            var zoom = width / Const.DefaultCameraFov * 0.5;
 
             return new CameraSetting(
                 new Vector3d(width * 0.5, height * 0.5, 0),

@@ -50,8 +50,6 @@ namespace NiVE3.Model
 
         const string AudioOptionGroupId = nameof(AudioOptionGroupId);
 
-        const double DefaultCameraFov = 0.360000466176267;// Math.Tan(39.5978 * 0.5 * (Math.PI / 180.0))
-
         private string name = "";
         public string Name
         {
@@ -335,7 +333,7 @@ namespace NiVE3.Model
                     LayerOptionProperties = new PropertyGroupModel(new PropertyGroup(LayerOptionGroupId, LanguageResourceDictionary.ResourceKeys.Layer_LayerOptions_Layer, []), compositionModel, this, historyModel);
                     break;
                 case CameraInput:
-                    var zoom = compositionModel.Width / DefaultCameraFov * 0.5;
+                    var zoom = compositionModel.Width / Const.DefaultCameraFov * 0.5;
                     IsEnableVideo = true;
                     TransformProperties = new PropertyGroupModel(new PropertyGroup(TransformGroupId, LanguageResourceDictionary.ResourceKeys.Layer_Transform,
                     [
@@ -354,7 +352,7 @@ namespace NiVE3.Model
                 case LightInput:
                     IsEnableVideo = true;
                     var offset = compositionModel.Width / 24.0;
-                    var zPos = compositionModel.Width / DefaultCameraFov * 0.125;
+                    var zPos = compositionModel.Width / Const.DefaultCameraFov * 0.125;
                     TransformProperties = new PropertyGroupModel(new PropertyGroup(TransformGroupId, LanguageResourceDictionary.ResourceKeys.Layer_Transform,
                     [
                         new Vector3dProperty(ILayerObject.TransformPointOfInterestId, LanguageResourceDictionary.ResourceKeys.TransformProperty_CameraPointOfInterest, new Vector3d(compositionModel.Width * 0.5, compositionModel.Height * 0.5, 0.0), true, 2, true),
