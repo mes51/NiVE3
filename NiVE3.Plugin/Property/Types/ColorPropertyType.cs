@@ -108,17 +108,23 @@ namespace NiVE3.Plugin.Property.Types
 
         public object? DeserializeValue(object? serializedValue)
         {
-            if (serializedValue is not IDictionary<string, object> dictionary)
+            if (serializedValue is SerializedColor serializedColor)
+            {
+                return new Vector4(serializedColor.B, serializedColor.G, serializedColor.R, serializedColor.A);
+            }
+            else if (serializedValue is IDictionary<string, object> dictionary)
+            {
+                return new Vector4(
+                    Convert.ToSingle(dictionary[nameof(SerializedColor.B)]),
+                    Convert.ToSingle(dictionary[nameof(SerializedColor.G)]),
+                    Convert.ToSingle(dictionary[nameof(SerializedColor.R)]),
+                    Convert.ToSingle(dictionary[nameof(SerializedColor.A)])
+                );
+            }
+            else
             {
                 return null;
             }
-
-            return new Vector4(
-                Convert.ToSingle(dictionary[nameof(SerializedColor.B)]),
-                Convert.ToSingle(dictionary[nameof(SerializedColor.G)]),
-                Convert.ToSingle(dictionary[nameof(SerializedColor.R)]),
-                Convert.ToSingle(dictionary[nameof(SerializedColor.A)])
-            );
         }
 
         public Span<byte> ConvertToHashBase(object? value)

@@ -55,10 +55,8 @@ namespace NiVE3.Image.Color
         public static ColorGradient? Deserialize(object serializedValue)
         {
             if (serializedValue is IDictionary<string, object> dic &&
-                dic.TryGetValue(nameof(ColorStops), out var colorStops) &&
-                dic.TryGetValue(nameof(OpacityStops), out var opacityStops) &&
-                colorStops is object[] serializedColorStops &&
-                opacityStops is object[] serializedOpacityStops)
+                dic.TryGetValue(nameof(ColorStops), out object[]? serializedColorStops) &&
+                dic.TryGetValue(nameof(OpacityStops), out object[]? serializedOpacityStops))
             {
                 return new ColorGradient([..serializedColorStops.Select(ColorStop.Deserialize).NonNull()], [..serializedOpacityStops.Select(OpacityStop.Deserialize).NonNull()]);
             }
@@ -152,7 +150,11 @@ namespace NiVE3.Image.Color
         /// <returns>デシリアライズされたColorStop、デシリアライズ出来なかった場合はnull</returns>
         public static ColorStop? Deserialize(object serializedValue)
         {
-            if (serializedValue is IDictionary<string, object> dic &&
+            if (serializedValue is SerializedColorStop colorStop)
+            {
+                return new ColorStop(new Vector4(colorStop.B, colorStop.G, colorStop.R, colorStop.A), colorStop.Position);
+            }
+            else if (serializedValue is IDictionary<string, object> dic &&
                 dic.TryGetValue(nameof(SerializedColorStop.R), out var r) &&
                 dic.TryGetValue(nameof(SerializedColorStop.G), out var g) &&
                 dic.TryGetValue(nameof(SerializedColorStop.B), out var b) &&
@@ -199,7 +201,11 @@ namespace NiVE3.Image.Color
         /// <returns>デシリアライズされたOpacityStop、デシリアライズ出来なかった場合はnull</returns>
         public static OpacityStop? Deserialize(object serializedValue)
         {
-            if (serializedValue is IDictionary<string, object> dic &&
+            if (serializedValue is OpacityStop opacityStop)
+            {
+                return new OpacityStop(opacityStop);
+            }
+            else if (serializedValue is IDictionary<string, object> dic &&
                 dic.TryGetValue(nameof(OpacityStop.Opacity), out var opacity) &&
                 dic.TryGetValue(nameof(OpacityStop.Position), out var position))
             {
