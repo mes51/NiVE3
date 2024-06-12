@@ -1287,7 +1287,11 @@ namespace NiVE3.Model
 
         private void LayerModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            LayerUpdated?.Invoke(this, EventArgs.Empty);
+            if (e.PropertyName != nameof(IsLock) &&
+                e.PropertyName != nameof(IsEnableShy))
+            {
+                LayerUpdated?.Invoke(this, EventArgs.Empty);
+            }
         }
 
         private void Effect_EffectUpdated(object? sender, EventArgs e)
