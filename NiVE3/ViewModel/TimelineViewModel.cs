@@ -985,6 +985,10 @@ namespace NiVE3.ViewModel
 
         private void Layers_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
+            foreach (var layer in e.OldItems?.OfType<LayerViewModel>() ?? [])
+            {
+                SelectedLayers?.Remove(layer);
+            }
             if (Layers?.All(l => l.LayerId != LastSelectedLayerId) ?? false)
             {
                 LastSelectedLayerId = null;
