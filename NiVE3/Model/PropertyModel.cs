@@ -24,8 +24,6 @@ namespace NiVE3.Model
 {
     interface IPropertyModel : IPropertyObject
     {
-        string PropertyId { get; }
-
         string Name { get; }
 
         object? Value { get; }
@@ -59,8 +57,6 @@ namespace NiVE3.Model
     partial class PropertyModel : BindableBase, IPropertyModel, IOverwriteablePropertyModel
     {
         public string Name { get; }
-
-        public string PropertyId { get; }
 
         private object? _value = null; // valueキーワードと被るため仕方なしでアンダーバーをつける
         public object? Value
@@ -127,7 +123,6 @@ namespace NiVE3.Model
             EffectModel = effectModel;
             HistoryModel = historyModel;
             Name = property.DisplayName;
-            PropertyId = property.Id;
             Value = property.DefaultValue;
             SourceStartPoint = layerModel?.SourceStartPoint ?? 0.0;
             CurrentTime = compositionModel.CurrentTime;
@@ -267,7 +262,7 @@ namespace NiVE3.Model
             }).ToArray();
             return new PropertyData
             {
-                PropertyId = PropertyId,
+                PropertyId = Property.Id,
                 PropertyTypeName = Property.PropertyType.GetType().FullName ?? "",
                 Name = Name,
                 Value = Property.PropertyType.SerializeValue(Value),
@@ -354,7 +349,7 @@ namespace NiVE3.Model
         {
             var data = new PropertyData
             {
-                PropertyId = PropertyId,
+                PropertyId = Property.Id,
                 PropertyTypeName = Property.PropertyType.GetType().FullName ?? "",
                 Name = Name,
                 Value = Property.PropertyType.SerializeValue(Value)
@@ -397,7 +392,7 @@ namespace NiVE3.Model
             }).ToArray();
             var data = new PropertyData
             {
-                PropertyId = PropertyId,
+                PropertyId = Property.Id,
                 PropertyTypeName = Property.PropertyType.GetType().FullName ?? "",
                 Name = Name,
                 Value = Property.PropertyType.SerializeValue(Value),
@@ -476,8 +471,6 @@ namespace NiVE3.Model
 
     partial class PropertyGroupModel : BindableBase, IPropertyModel, IOverwriteablePropertyModel
     {
-        public string PropertyId { get; }
-
         private string name = "";
         public string Name
         {
@@ -526,7 +519,6 @@ namespace NiVE3.Model
             EffectModel = effectModel;
             HistoryModel = historyModel;
             Name = property.DisplayName;
-            PropertyId = property.Id;
             InstanceId = instanceId ?? Guid.NewGuid();
 
             foreach (var c in ((PropertyGroup)property).Children)
@@ -581,18 +573,18 @@ namespace NiVE3.Model
             {
                 if (p is PropertyGroupModel pg)
                 {
-                    result.Add(pg.PropertyId, pg.GetValues(time));
+                    result.Add(pg.Property.Id, pg.GetValues(time));
                 }
                 else if (p is AppendablePropertyModel ap)
                 {
-                    result.Add(ap.PropertyId, ap.GetChildPropertyValues(time));
+                    result.Add(ap.Property.Id, ap.GetChildPropertyValues(time));
                 }
                 else if (p is PropertyModel pp)
                 {
-                    result.Add(pp.PropertyId, pp.GetValue(time));
+                    result.Add(pp.Property.Id, pp.GetValue(time));
                 }
 
-                propertyTypes.Add(p.PropertyId, p.Property.PropertyType);
+                propertyTypes.Add(p.Property.Id, p.Property.PropertyType);
             }
 
             return new PropertyValueGroup(Property.Id, result, propertyTypes);
@@ -611,7 +603,7 @@ namespace NiVE3.Model
 
         public IPropertyModel? FindProperty(string propertyId)
         {
-            var child = Children.FirstOrDefault(c => c.PropertyId == propertyId);
+            var child = Children.FirstOrDefault(c => c.Property.Id == propertyId);
             if (child != null)
             {
                 return child;
@@ -633,7 +625,7 @@ namespace NiVE3.Model
         {
             return new PropertyData
             {
-                PropertyId = PropertyId,
+                PropertyId = Property.Id,
                 InstanceId = InstanceId,
                 PropertyTypeName = Property.PropertyType.GetType().FullName ?? "",
                 Name = Name,
@@ -651,7 +643,7 @@ namespace NiVE3.Model
 
             foreach (var childData in data.Children)
             {
-                Children.FirstOrDefault(c => c.PropertyId == childData.PropertyId)?.LoadData(childData);
+                Children.FirstOrDefault(c => c.Property.Id == childData.PropertyId)?.LoadData(childData);
             }
         }
 
@@ -808,8 +800,6 @@ namespace NiVE3.Model
 
     partial class AppendablePropertyModel : BindableBase, IPropertyModel, IOverwriteablePropertyModel
     {
-        public string PropertyId { get; }
-
         public string Name { get; }
 
         public object? Value => null;
@@ -852,7 +842,6 @@ namespace NiVE3.Model
             LayerModel = layerModel;
             EffectModel = effectModel;
             HistoryModel = historyModel;
-            PropertyId = property.Id;
             Name = property.DisplayName;
 
             var ap = (AppendableProperty)property;
@@ -940,7 +929,7 @@ namespace NiVE3.Model
         {
             return new PropertyData
             {
-                PropertyId = PropertyId,
+                PropertyId = Property.Id,
                 PropertyTypeName = Property.PropertyType.GetType().FullName ?? "",
                 Name = Name,
                 Children = Children.Select(p => p.SaveData()).ToArray()
@@ -1000,7 +989,7 @@ namespace NiVE3.Model
             var children = Children.OfType<PropertyGroupModel>().Where(p => ids.Contains(p.InstanceId)).OrderBy(Children.IndexOf);
             var data = new PropertyData
             {
-                PropertyId = PropertyId,
+                PropertyId = Property.Id,
                 PropertyTypeName = Property.PropertyType.GetType().FullName ?? "",
                 Name = Name,
                 Children = [.. children.Select(c => c.SaveData())]
@@ -1011,7 +1000,7 @@ namespace NiVE3.Model
 
         public void PasteChildrenProperty(CopyData<PropertyData> data)
         {
-            if (data.Type != CopyDataType.AppendablePropertyChildren || data.Data.Length < 1 || data.Data.First().PropertyId != PropertyId)
+            if (data.Type != CopyDataType.AppendablePropertyChildren || data.Data.Length < 1 || data.Data.First().PropertyId != Property.Id)
             {
                 return;
             }
@@ -1052,7 +1041,7 @@ namespace NiVE3.Model
 
         void InsertInternal(int index, PropertyGroupModel child)
         {
-            if (Items.All(i => i.Id != child.PropertyId))
+            if (Items.All(i => i.Id != child.Property.Id))
             {
                 return;
             }

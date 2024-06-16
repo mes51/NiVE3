@@ -150,7 +150,7 @@ namespace NiVE3.Model
             IsEnable = data.IsEnable;
             foreach (var propertyData in data.Properties)
             {
-                Properties.FirstOrDefault(p => p.PropertyId == propertyData.PropertyId)?.LoadData(propertyData);
+                Properties.FirstOrDefault(p => p.Property.Id == propertyData.PropertyId)?.LoadData(propertyData);
             }
         }
 
@@ -163,16 +163,16 @@ namespace NiVE3.Model
                 switch (p)
                 {
                     case PropertyGroupModel pg:
-                        properties.Add(pg.PropertyId, pg.GetValues(layerTime));
+                        properties.Add(pg.Property.Id, pg.GetValues(layerTime));
                         break;
                     case AppendablePropertyModel ap:
-                        properties.Add(ap.PropertyId, ap.GetChildPropertyValues(layerTime));
+                        properties.Add(ap.Property.Id, ap.GetChildPropertyValues(layerTime));
                         break;
                     default:
-                        properties.Add(p.PropertyId, p.GetValue(layerTime));
+                        properties.Add(p.Property.Id, p.GetValue(layerTime));
                         break;
                 }
-                propertyTypes.Add(p.PropertyId, p.Property.PropertyType);
+                propertyTypes.Add(p.Property.Id, p.Property.PropertyType);
             }
 
             new PropertyValueGroup(nameof(EffectModel), properties, propertyTypes).CalcHash(hash);

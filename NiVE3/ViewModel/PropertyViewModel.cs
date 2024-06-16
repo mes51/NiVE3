@@ -522,7 +522,6 @@ namespace NiVE3.ViewModel
 
             DeleteCommand = new DelegateCommand<SelectItemType?>(_ =>
             {
-                // NOTE: キーフレームのみ削除
                 var targetChildren = SelectedChildren.OfType<PropertyViewModel>().Select(c => c.Property.Id).ToArray();
                 if (targetChildren.Length < 1)
                 {
@@ -534,7 +533,6 @@ namespace NiVE3.ViewModel
 
             CutCommand = new DelegateCommand<SelectItemType?>(_ =>
             {
-                // NOTE: キーフレームのみ切り取り
                 var targetChildren = SelectedChildren.OfType<PropertyViewModel>().Select(c => c.Property.Id).ToArray();
                 if (targetChildren.Length < 1)
                 {
