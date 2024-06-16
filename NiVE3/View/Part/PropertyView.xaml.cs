@@ -31,8 +31,6 @@ namespace NiVE3.View.Part
 
         PropertyViewModel? ViewModel => DataContext as PropertyViewModel;
 
-        //PropertyCollectionView? ParentCollection => ItemsControl.ItemsControlFromItemContainer(VisualTreeHelper.GetParent(this)) as PropertyCollectionView;
-
         static PropertyView()
         {
             BeforeNameSpaceWidthProperty.OverrideMetadata(typeof(PropertyView), new FrameworkPropertyMetadata(KeyFrameSwitchWidth, FrameworkPropertyMetadataOptions.Inherits));
@@ -55,7 +53,8 @@ namespace NiVE3.View.Part
 
         private void PropertyNameTextBlock_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            KeyFrameCollectionView.SelectAllKeyFrames();
+            ParentCollection?.SelectItem(ParentContainer, Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift), Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl));
+            (DataContext as IInternalPropertyViewModel)?.SelectItemCommand?.Execute(null);
             e.Handled = true;
         }
 

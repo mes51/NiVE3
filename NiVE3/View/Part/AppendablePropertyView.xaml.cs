@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using NiVE3.ViewModel;
 
 namespace NiVE3.View.Part
 {
@@ -30,6 +31,13 @@ namespace NiVE3.View.Part
             OpenAppendItemMenuButton.ContextMenu.Visibility = Visibility.Visible;
             OpenAppendItemMenuButton.ContextMenu.PlacementTarget = OpenAppendItemMenuButton;
             OpenAppendItemMenuButton.ContextMenu.IsOpen = true;
+        }
+
+        private void Root_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            ParentCollection?.SelectItem(ParentContainer, Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift), Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl));
+            (DataContext as IInternalPropertyViewModel)?.SelectItemCommand?.Execute(null);
+            e.Handled = true;
         }
     }
 }

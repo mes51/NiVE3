@@ -141,18 +141,18 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref hasKeyFrame, value); }
         }
 
-        private ObservableCollection<int> selectedKeyFrames = [];
+        private ObservableCollection<int> selectedKeyFramesIds = [];
         public ObservableCollection<int> SelectedKeyFrameIds
         {
-            get { return selectedKeyFrames; }
+            get { return selectedKeyFramesIds; }
             set
             {
-                if (selectedKeyFrames != value)
+                if (selectedKeyFramesIds != value)
                 {
-                    selectedKeyFrames.CollectionChanged -= SelectedKeyFrames_CollectionChanged;
-                    value.CollectionChanged += SelectedKeyFrames_CollectionChanged;
+                    selectedKeyFramesIds.CollectionChanged -= SelectedKeyFrameIds_CollectionChanged;
+                    value.CollectionChanged += SelectedKeyFrameIds_CollectionChanged;
                 }
-                SetProperty(ref selectedKeyFrames, value);
+                SetProperty(ref selectedKeyFramesIds, value);
             }
         }
 
@@ -184,6 +184,8 @@ namespace NiVE3.ViewModel
 
         public ICommand SelectItemCommand { get; }
 
+        public ICommand SelectKeyFrameCommand { get; }
+
         public ICommand ChangeKeyFramesInterpolationTypeCommand { get; }
 
         public DelegateCommand<SelectItemType?> DeleteCommand { get; }
@@ -201,6 +203,8 @@ namespace NiVE3.ViewModel
         object? PrevValue { get; set; }
 
         bool IsEditing { get; set; }
+
+        bool IsSelectingAll { get; set; }
 
         public PropertyViewModel(PropertyModel propertyModel)
         {
@@ -254,6 +258,12 @@ namespace NiVE3.ViewModel
 
             SelectItemCommand = new DelegateCommand(() =>
             {
+                SelectAllKeyFrames();
+                SelectItemChangedPublisher.Publish(this, new SelectItemEventArgs(SelectItemType.Property, true, this));
+            });
+
+            SelectKeyFrameCommand = new DelegateCommand(() =>
+            {
                 if (SelectedKeyFrameIds.Count > 0)
                 {
                     SelectItemChangedPublisher.Publish(this, new SelectItemEventArgs(SelectItemType.KeyFrame, true, SelectedKeyFrameIds.ToArray(), this));
@@ -272,30 +282,46 @@ namespace NiVE3.ViewModel
 
             CutCommand = new DelegateCommand<SelectItemType?>(type =>
             {
-                var keyFrames = SelectedKeyFrameIds.Select(id => KeyFrames.FirstOrDefault(k => k.Id == id)).NonNull().ToArray();
-                if (keyFrames.Length > 0)
+                if (SelectedKeyFrameIds.Count > 0)
                 {
-                    var copyData = PropertyModel.CutKeyFrames(keyFrames);
+                    var keyFrames = SelectedKeyFrameIds.Select(id => KeyFrames.FirstOrDefault(k => k.Id == id)).NonNull().ToArray();
+                    if (keyFrames.Length > 0)
+                    {
+                        var copyData = PropertyModel.CutKeyFrames(keyFrames);
+                        ClipboardUtil.SetData(copyData);
+                    }
+                    SelectedKeyFrameIds.Clear();
+                }
+                else
+                {
+                    var copyData = PropertyModel.CopyProperty();
                     ClipboardUtil.SetData(copyData);
                 }
-                SelectedKeyFrameIds.Clear();
             });
 
             CopyCommand = new DelegateCommand<SelectItemType?>(type =>
             {
-                var keyFrames = SelectedKeyFrameIds.Select(id => KeyFrames.FirstOrDefault(k => k.Id == id)).NonNull().ToArray();
-                if (keyFrames.Length > 0)
+                if (KeyFrames.Count > 0)
                 {
-                    ClipboardUtil.SetData(PropertyModel.CopyKeyFrames(keyFrames));
+                    var keyFrames = SelectedKeyFrameIds.Select(id => KeyFrames.FirstOrDefault(k => k.Id == id)).NonNull().ToArray();
+                    if (keyFrames.Length > 0)
+                    {
+                        ClipboardUtil.SetData(PropertyModel.CopyKeyFrames(keyFrames));
+                    }
+                }
+                else
+                {
+                    var copyData = PropertyModel.CopyProperty();
+                    ClipboardUtil.SetData(copyData);
                 }
             });
 
             PasteCommand = new DelegateCommand<SelectItemType?>(type =>
             {
-                var data = ClipboardUtil.GetData<KeyFrameClipboardData>();
-                if (data != null)
+                var propertyData = ClipboardUtil.GetData<PropertyData>();
+                if (propertyData != null)
                 {
-                    PropertyModel.PasteKeyFrames(data);
+                    PropertyModel.PasteProperty(propertyData);
                 }
             });
 
@@ -318,6 +344,17 @@ namespace NiVE3.ViewModel
         public void DeSelect()
         {
             SelectedKeyFrameIds.Clear();
+        }
+
+        public void SelectAllKeyFrames()
+        {
+            IsSelectingAll = true;
+            SelectedKeyFrameIds.Clear();
+            foreach (var k in KeyFrames)
+            {
+                SelectedKeyFrameIds.Add(k.Id);
+            }
+            IsSelectingAll = false;
         }
 
         object? CalculationValue()
@@ -355,11 +392,11 @@ namespace NiVE3.ViewModel
             CurrentTimeValue = CalculationValue();
         }
 
-        private void SelectedKeyFrames_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        private void SelectedKeyFrameIds_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
-            if (e.NewItems != null && e.NewItems.Count > 0)
+            if (!IsSelectingAll && SelectedKeyFrameIds.Count > 0)
             {
-                SelectItemChangedPublisher.Publish(this, new SelectItemEventArgs(SelectItemType.KeyFrame, false, e.NewItems.OfType<KeyFrame>().ToArray(), this));
+                SelectItemChangedPublisher.Publish(this, new SelectItemEventArgs(SelectItemType.KeyFrame, false, SelectedKeyFrameIds.ToArray(), this));
             }
         }
     }
@@ -449,6 +486,18 @@ namespace NiVE3.ViewModel
 
         public bool IsRenameable { get; }
 
+        private ObservableCollection<IInternalPropertyViewModel> selectedChildren = [];
+        public ObservableCollection<IInternalPropertyViewModel> SelectedChildren
+        {
+            get { return selectedChildren; }
+            set
+            {
+                selectedChildren.CollectionChanged -= SelectedChildren_CollectionChanged;
+                value.CollectionChanged += SelectedChildren_CollectionChanged;
+                SetProperty(ref selectedChildren, value);
+            }
+        }
+
         PropertyGroupModel PropertyGroupModel { get; }
 
         string PrevName { get; set; } = "";
@@ -457,6 +506,7 @@ namespace NiVE3.ViewModel
 
         public PropertyGroupViewModel(PropertyGroupModel propertyGroupModel, bool isRenameable)
         {
+            SelectedChildren = [];
             PropertyGroupModel = propertyGroupModel;
             InstanceId = propertyGroupModel.InstanceId;
             Property = propertyGroupModel.Property;
@@ -470,13 +520,50 @@ namespace NiVE3.ViewModel
             ViewState = propertyGroupModel.CreateState(this);
             IsRenameable = isRenameable;
 
-            DeleteCommand = new DelegateCommand<SelectItemType?>(_ => { });
+            DeleteCommand = new DelegateCommand<SelectItemType?>(_ =>
+            {
+                // NOTE: キーフレームのみ削除
+                var targetChildren = SelectedChildren.OfType<PropertyViewModel>().Select(c => c.Property.Id).ToArray();
+                if (targetChildren.Length < 1)
+                {
+                    return;
+                }
 
-            CutCommand = new DelegateCommand<SelectItemType?>(_ => { });
+                PropertyGroupModel.DeleteChildrenKeyFrames(targetChildren);
+            });
 
-            CopyCommand = new DelegateCommand<SelectItemType?>(_ => { });
+            CutCommand = new DelegateCommand<SelectItemType?>(_ =>
+            {
+                // NOTE: キーフレームのみ切り取り
+                var targetChildren = SelectedChildren.OfType<PropertyViewModel>().Select(c => c.Property.Id).ToArray();
+                if (targetChildren.Length < 1)
+                {
+                    return;
+                }
 
-            PasteCommand = new DelegateCommand<SelectItemType?>(_ => { });
+                var data = PropertyGroupModel.CutChildrenKeyFrames(targetChildren);
+                ClipboardUtil.SetData(data);
+            });
+
+            CopyCommand = new DelegateCommand<SelectItemType?>(type =>
+            {
+                if (SelectedChildren.Count < 1)
+                {
+                    return;
+                }
+
+                var data = PropertyGroupModel.CopyChildrenProperty([..SelectedChildren.Select(c => c.Property.Id)]);
+                ClipboardUtil.SetData(data);
+            });
+
+            PasteCommand = new DelegateCommand<SelectItemType?>(type =>
+            {
+                var propertyData = ClipboardUtil.GetData<PropertyData>();
+                if (propertyData != null)
+                {
+                    PropertyGroupModel.PasteChildrenProperty(propertyData, [..SelectedChildren.Select(c => c.Property.Id)]);
+                }
+            });
 
             DuplicateCommand = new DelegateCommand<SelectItemType?>(_ => { });
 
@@ -502,7 +589,7 @@ namespace NiVE3.ViewModel
             SelectItemCommand = new DelegateCommand(() =>
             {
                 DeSelect();
-                SelectItemChangedPublisher.Publish(this, new SelectItemEventArgs(SelectItemType.PropertyGroup, true, this));
+                SelectItemChangedPublisher.Publish(this, new SelectItemEventArgs(SelectItemType.Property, true, this));
             });
 
             WiringModel();
@@ -514,6 +601,7 @@ namespace NiVE3.ViewModel
             {
                 p.DeSelect();
             }
+            SelectedChildren.Clear();
         }
 
         partial void WiringModel();
@@ -521,11 +609,56 @@ namespace NiVE3.ViewModel
         private void Property_SelectItemChanged(object? sender, SelectItemEventArgs e)
         {
             SelectItemChangedPublisher.Publish(sender, new SelectItemEventArgs(e, this));
+            if (e.OriginalSender is IInternalPropertyViewModel property && Children.Contains(property))
+            {
+                foreach (var child in Children)
+                {
+                    if (child is PropertyViewModel childProperty && SelectedChildren.Contains(child))
+                    {
+                        childProperty.SelectAllKeyFrames();
+                    }
+                    else
+                    {
+                        child.DeSelect();
+                    }
+                }
+            }
+            else
+            {
+                var exclude = e.ObjectHierarchy.OfType<IInternalPropertyViewModel>().FirstOrDefault(Children.Contains);
+                foreach (var notSelected in Children.Where(c => c != exclude))
+                {
+                    notSelected.DeSelect();
+                    SelectedChildren.Remove(notSelected);
+                }
+                if (exclude != null && !SelectedChildren.Contains(exclude))
+                {
+                    SelectedChildren.Add(exclude);
+                }
+            }
         }
 
         private void Property_PropertyValueCommited(object? sender, PropertyValueCommitedEventArgs e)
         {
             PropertyValueUpdatePublisher.Publish(sender, new PropertyValueCommitedEventArgs(e, this));
+        }
+
+        private void SelectedChildren_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Reset)
+            {
+                foreach (var child in Children)
+                {
+                    child.DeSelect();
+                }
+            }
+            else
+            {
+                foreach (var old in e.OldItems?.OfType<IInternalPropertyViewModel>() ?? [])
+                {
+                    old.DeSelect();
+                }
+            }
         }
     }
 
@@ -599,7 +732,12 @@ namespace NiVE3.ViewModel
         public ObservableCollection<IInternalPropertyViewModel> SelectedChildren
         {
             get { return selectedChildren; }
-            set { SetProperty(ref selectedChildren, value); }
+            set
+            {
+                selectedChildren.CollectionChanged -= SelectedChildren_CollectionChanged;
+                value.CollectionChanged += SelectedChildren_CollectionChanged;
+                SetProperty(ref selectedChildren, value);
+            }
         }
 
         public INameEditableViewModel? TargetChild => SelectedChildren.FirstOrDefault() as INameEditableViewModel;
@@ -608,6 +746,7 @@ namespace NiVE3.ViewModel
 
         public AppendablePropertyViewModel(AppendablePropertyModel appendablePropertyModel)
         {
+            SelectedChildren = [];
             AppendablePropertyModel = appendablePropertyModel;
             Property = appendablePropertyModel.Property;
             children = appendablePropertyModel.Children.CreateViewCollection(m =>
@@ -620,7 +759,11 @@ namespace NiVE3.ViewModel
             Name = appendablePropertyModel.Name;
             ViewState = appendablePropertyModel.CreateState(this);
 
-            SelectItemCommand = new DelegateCommand(() => { });
+            SelectItemCommand = new DelegateCommand(() =>
+            {
+                DeSelect();
+                SelectItemChangedPublisher.Publish(this, new SelectItemEventArgs(SelectItemType.Property, true, this));
+            });
 
             DeleteCommand = new DelegateCommand<SelectItemType?>(type =>
             {
@@ -678,11 +821,18 @@ namespace NiVE3.ViewModel
         private void Property_SelectItemChanged(object? sender, SelectItemEventArgs e)
         {
             SelectItemChangedPublisher.Publish(sender, new SelectItemEventArgs(e, this));
-            if (e.OriginalSender is not PropertyGroupViewModel group || Children.Contains(group))
+            if (e.OriginalSender is IInternalPropertyViewModel property && Children.Contains(property))
             {
-                foreach (var child in Children.Where(c => !e.ObjectHierarchy.Contains(c)))
+                foreach (var child in Children)
                 {
-                    child.DeSelect();
+                    if (child is PropertyGroupViewModel childGroup && SelectedChildren.Contains(child))
+                    {
+                        childGroup.DeSelect();
+                    }
+                    else
+                    {
+                        child.DeSelect();
+                    }
                 }
             }
             else
@@ -742,6 +892,24 @@ namespace NiVE3.ViewModel
                         AppendablePropertyModel.MoveChildren(groups.SelectedItems.OfType<PropertyGroupViewModel>().Select(g => g.InstanceId).ToArray(), referencePropertyGroup.InstanceId, newIndex);
                     }
                     break;
+            }
+        }
+
+        private void SelectedChildren_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Reset)
+            {
+                foreach (var child in Children)
+                {
+                    child.DeSelect();
+                }
+            }
+            else
+            {
+                foreach (var old in e.OldItems?.OfType<IInternalPropertyViewModel>() ?? [])
+                {
+                    old.DeSelect();
+                }
             }
         }
     }

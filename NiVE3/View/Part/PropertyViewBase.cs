@@ -6,10 +6,12 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Input;
 using System.Windows.Media;
 using NiVE3.Plugin.Property;
 using NiVE3.View.Converter;
 using NiVE3.View.Resource;
+using NiVE3.ViewModel;
 
 namespace NiVE3.View.Part
 {

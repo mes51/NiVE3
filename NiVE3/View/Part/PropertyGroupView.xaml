@@ -14,9 +14,6 @@
                         MouseLeftButtonDown="Root_MouseLeftButtonDown"
                         dd:DragDrop.DragSourceIgnore="True"
                         d:DesignHeight="450" d:DesignWidth="800">
-    <UserControl.Resources>
-        <cv:HasAncestorConverter x:Key="HasAncestorConverter"/>
-    </UserControl.Resources>
     <local:LayerItemExpander HeaderText="{Binding Name, Mode=TwoWay}"
                              IndentLevel="{Binding ElementName=Root, Path=IndentLevel}"
                              IsAVSwitchColumnVisible="{Binding ElementName=Root, Path=IsAVSwitchColumnVisible}"
@@ -27,16 +24,8 @@
                              IsNameEditing="{Binding IsNameEditing}"
                              EndEditNameCommand="{Binding EndEditNameCommand}"
                              NameDragSourceIgnore="False"
-                             ParentHasExpanderArrow="{Binding ElementName=Root, Path=ParentHasExpanderArrow}">
-        <local:LayerItemExpander.Style>
-            <Style TargetType="{x:Type local:LayerItemExpander}" BasedOn="{StaticResource {x:Type local:LayerItemExpander}}">
-                <Style.Triggers>
-                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type DependencyObject}}, Converter={StaticResource HasAncestorConverter}, ConverterParameter={x:Type local:PropertyContentPresenter}}" Value="True">
-                        <Setter Property="IsHighlightHeader" Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:PropertyContentPresenter}}, Path=(pr:StackableItemsCollectionView.IsSelected)}"/>
-                    </DataTrigger>
-                </Style.Triggers>
-            </Style>
-        </local:LayerItemExpander.Style>
+                             ParentHasExpanderArrow="{Binding ElementName=Root, Path=ParentHasExpanderArrow}"
+                             IsHighlightHeader="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:PropertyContentPresenter}}, Path=(pr:StackableItemsCollectionView.IsSelected)}">
         <local:PropertyCollectionView ItemsSource="{Binding Children}"
                                       IndentLevel="{Binding ElementName=Root, Path=IndentLevel, Converter={x:Static local:PropertyGroupView.NextIndentConverter}}"
                                       ControlAreaWidth="{Binding ElementName=Root, Path=ControlAreaWidth}"
@@ -46,6 +35,7 @@
                                       Range="{Binding ElementName=Root, Path=Range}"
                                       RangeStart="{Binding ElementName=Root, Path=RangeStart}"
                                       CompositionFrameRate="{Binding ElementName=Root, Path=CompositionFrameRate}"
-                                      ParentHasExpanderArrow="{Binding ElementName=Root, Path=ParentHasExpanderArrow}"/>
+                                      ParentHasExpanderArrow="{Binding ElementName=Root, Path=ParentHasExpanderArrow}"
+                                      SelectedItems="{Binding SelectedChildren}"/>
     </local:LayerItemExpander>
 </local:PropertyViewBase>

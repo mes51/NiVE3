@@ -9,6 +9,7 @@
                         xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
                         mc:Ignorable="d" 
                         x:Name="Root"
+                        MouseLeftButtonDown="Root_MouseLeftButtonDown"
                         dd:DragDrop.DragSourceIgnore="True"
                         d:DesignHeight="450" d:DesignWidth="800">
     <local:PropertyViewBase.Resources>
@@ -48,7 +49,7 @@
                              ParentHasExpanderArrow="{Binding ElementName=Root, Path=ParentHasExpanderArrow}"
                              HeaderSubItemAreaWidth="{Binding ElementName=Root, Path=CalculatedControlAreaWidth}"
                              ControlAreaWidth="{Binding ElementName=Root, Path=ControlAreaWidth}"
-                             IsHighlightHeader="{Binding ElementName=Root, Path=(pr:StackableItemsCollectionView.IsSelected)}">
+                             IsHighlightHeader="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:PropertyContentPresenter}}, Path=(pr:StackableItemsCollectionView.IsSelected)}">
         <local:LayerItemExpander.HeaderSubItem>
             <Button x:Name="OpenAppendItemMenuButton" Height="13" Width="13" HorizontalAlignment="Left" VerticalAlignment="Center" Click="OpenAppendItemMenuButton_Click" ContextMenuService.IsEnabled="False">
                 <Button.ContextMenu>

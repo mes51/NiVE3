@@ -23,8 +23,6 @@ namespace NiVE3.View.Part
     /// </summary>
     public partial class PropertyGroupView : PropertyViewBase
     {
-        PropertyGroupViewModel? ViewModel => DataContext as PropertyGroupViewModel;
-
         public PropertyGroupView()
         {
             InitializeComponent();
@@ -34,7 +32,7 @@ namespace NiVE3.View.Part
         {
             Focus();
             ParentCollection?.SelectItem(ParentContainer, Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift), Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl));
-            ViewModel?.SelectItemCommand?.Execute(null);
+            (DataContext as IInternalPropertyViewModel)?.SelectItemCommand?.Execute(null);
             e.Handled = true;
         }
     }

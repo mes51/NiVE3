@@ -26,6 +26,16 @@
                 </DataTrigger>
             </Style.Triggers>
         </Style>
+
+        <Style x:Key="PropertyNameGrid" TargetType="{x:Type Grid}">
+            <Setter Property="Background" Value="Transparent"/>
+
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ElementName=Root, Path=(pr:StackableItemsCollectionView.IsSelected)}" Value="True">
+                    <Setter Property="Background" Value="{ugm:AppearanceResource ResourceKey=SelectedBackgroundFill, ReturnDynamicResource=True}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
     </local:PropertyViewBase.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
@@ -42,12 +52,13 @@
             </Grid.ColumnDefinitions>
 
             <CheckBox Grid.Column="1" IsChecked="{Binding HasKeyFrame, Mode=OneWay}" Style="{StaticResource KeyFrameSwitchCheckBox}" VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="{Binding Property.IsSupportKeyFrame, Converter={StaticResource BooleanToVisibilityConverter}}" Command="{Binding SwitchUseKeyFrameCommand}"/>
-            <TextBlock Grid.Column="2" Text="{Binding ViewState.SourceDisplayName}" Style="{StaticResource PropertyNameTextBlockStyle}" MouseLeftButtonDown="PropertyNameTextBlock_MouseLeftButtonDown"/>
+            <Grid Grid.Column="2" Style="{StaticResource PropertyNameGrid}">
+                <TextBlock Text="{Binding ViewState.SourceDisplayName}" Style="{StaticResource PropertyNameTextBlockStyle}" MouseLeftButtonDown="PropertyNameTextBlock_MouseLeftButtonDown"/>
+            </Grid>
             <Grid Grid.Column="3" x:Name="PropertyControlGrid"/>
         </Grid>
 
         <local:KeyFrameCollectionView Grid.Column="1"
-                                      x:Name="KeyFrameCollectionView"
                                       KeyFrames="{Binding KeyFrames}"
                                       SourceStartPoint="{Binding SourceStartPoint}"
                                       Range="{Binding ElementName=Root, Path=Range}"
@@ -55,7 +66,7 @@
                                       CompositionFrameRate="{Binding ElementName=Root, Path=CompositionFrameRate}"
                                       SelectedKeyFrameIds="{Binding SelectedKeyFrameIds}"
                                       SupportedInterpolationTypes="{Binding Property.PropertyType.SupportedInterpolationTypes}"
-                                      SelectItemCommand="{Binding SelectItemCommand}"
+                                      SelectItemCommand="{Binding SelectKeyFrameCommand}"
                                       KeyFrameMoveRequest="KeyFrameCollectionView_KeyFrameMoveRequest"
                                       KeyFrameInterpolationTypeChangeRequest="KeyFrameCollectionView_KeyFrameInterpolationTypeChangeRequest"/>
     </Grid>

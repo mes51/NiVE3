@@ -26,6 +26,8 @@ namespace NiVE3.Data.Clipboard
         Layer,
         Effect,
         Property,
+        PropertyGroup,
+        AppendablePropertyChildren,
         KeyFrame
     }
 }

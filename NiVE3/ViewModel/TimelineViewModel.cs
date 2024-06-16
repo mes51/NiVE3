@@ -1162,7 +1162,7 @@ namespace NiVE3.ViewModel
                 SelectedItemType = e.SelectItemType;
                 SelectTarget = e.SelectItemType switch
                 {
-                    SelectItemType.Effect or SelectItemType.PropertyGroup or SelectItemType.KeyFrame => e.CommandableOriginalParent,
+                    SelectItemType.Effect or SelectItemType.Property or SelectItemType.KeyFrame => e.CommandableOriginalParent,
                     _ => null,
                 };
             }
@@ -1195,7 +1195,7 @@ namespace NiVE3.ViewModel
         None,
         Layer,
         Effect,
-        PropertyGroup,
+        Property,
         KeyFrame,
     }
 }

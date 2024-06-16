@@ -18,6 +18,7 @@ using NiVE3.Extension;
 using NiVE3.Util;
 using NiVE3.Data.Clipboard;
 using NiVE3.Plugin.Property.Types;
+using ImTools;
 
 namespace NiVE3.Model
 {
@@ -46,9 +47,16 @@ namespace NiVE3.Model
         PropertyData SaveData();
 
         void LoadData(PropertyData data);
+
+        void PasteProperty(PropertyData data);
     }
 
-    partial class PropertyModel : BindableBase, IPropertyModel
+    file interface IOverwriteablePropertyModel : IPropertyModel
+    {
+        void OverwriteProperty(PropertyData data);
+    }
+
+    partial class PropertyModel : BindableBase, IPropertyModel, IOverwriteablePropertyModel
     {
         public string Name { get; }
 
@@ -260,6 +268,7 @@ namespace NiVE3.Model
             return new PropertyData
             {
                 PropertyId = PropertyId,
+                PropertyTypeName = Property.PropertyType.GetType().FullName ?? "",
                 Name = Name,
                 Value = Property.PropertyType.SerializeValue(Value),
                 KeyFrames = keyFramesData
@@ -282,7 +291,89 @@ namespace NiVE3.Model
             }
         }
 
-        public CopyData<KeyFrameClipboardData> CutKeyFrames(KeyFrame[] targetKeyFrames)
+        public void PasteProperty(PropertyData data)
+        {
+            if (Property.PropertyType.GetType().FullName != data.PropertyTypeName)
+            {
+                return;
+            }
+
+            var keyFrames = data.KeyFrames ?? [];
+            if (keyFrames.Length < 1)
+            {
+                var newValue = Property.CoerceValue(Property.PropertyType.DeserializeValue(data.Value));
+                var oldValue = Value;
+                Value = newValue;
+
+                HistoryModel.Add(new ValueChangeHistoryCommand(this, oldValue, newValue));
+            }
+            else
+            {
+                var startTime = keyFrames[0].Time;
+                var newKeyFrames = new List<KeyFrame>();
+                foreach (var k in keyFrames)
+                {
+                    var newTime = TimeCalc.RoundTimeDigit(k.Time - startTime + CurrentTime - SourceStartPoint);
+                    newKeyFrames.Add(new KeyFrame(newTime, Property.CoerceValue(Property.PropertyType.DeserializeValue(k.Value)), k.EaseIn, k.EaseOut, k.InterpolationType));
+                }
+
+                var oldKeyFrames = KeyFrames.Where(k => newKeyFrames.Any(nk => nk.Time == k.Time)).ToArray();
+                var oldKeyFrameIndices = KeyFrames.Where(oldKeyFrames.Contains).Select(KeyFrames.IndexOf).ToArray();
+                foreach (var ok in oldKeyFrames)
+                {
+                    KeyFrames.Remove(ok);
+                }
+
+                var newKeyFrameIndices = new int[newKeyFrames.Count];
+                foreach (var nk in newKeyFrames)
+                {
+                    var index = KeyFrames.IndexOfLast(k => Math.Abs(k.Time - nk.Time) < TimeCalc.TimeEpsilon || k.Time <= nk.Time) + 1;
+                    KeyFrames.Insert(index, nk);
+                }
+
+                HistoryModel.Add(new PasteKeyFramesHistoryCommand(this, oldKeyFrames, oldKeyFrameIndices, [.. newKeyFrames], newKeyFrameIndices));
+            }
+        }
+
+        public void OverwriteProperty(PropertyData data)
+        {
+            if (Property.PropertyType.GetType().FullName != data.PropertyTypeName)
+            {
+                return;
+            }
+
+            var oldKeyFrames = KeyFrames.ToArray();
+            var oldValue = Value;
+
+            LoadData(data);
+
+            HistoryModel.Add(new OverwritePropertyHistoryCommand(this, oldKeyFrames, oldValue, [..KeyFrames], Value));
+        }
+
+        public CopyData<PropertyData> CopyProperty()
+        {
+            var data = new PropertyData
+            {
+                PropertyId = PropertyId,
+                PropertyTypeName = Property.PropertyType.GetType().FullName ?? "",
+                Name = Name,
+                Value = Property.PropertyType.SerializeValue(Value)
+            };
+            return new CopyData<PropertyData>(CopyDataType.Property, [data]);
+        }
+
+        public void PasteProperty(CopyData<PropertyData> data)
+        {
+            var propertyData = data.Data.FirstOrDefault();
+            if (propertyData == null)
+            {
+                return;
+            }
+
+            PasteProperty(propertyData);
+        }
+
+        public CopyData<PropertyData> CutKeyFrames(KeyFrame[] targetKeyFrames)
         {
             var result = CopyKeyFrames(targetKeyFrames);
             DeleteKeyFramesInternal(targetKeyFrames, true);
@@ -290,59 +381,30 @@ namespace NiVE3.Model
             return result;
         }
 
-        public CopyData<KeyFrameClipboardData> CopyKeyFrames(KeyFrame[] targetKeyFrames)
+        public CopyData<PropertyData> CopyKeyFrames(KeyFrame[] targetKeyFrames)
         {
-            targetKeyFrames = [..targetKeyFrames.OrderBy(KeyFrames.IndexOf)];
-            var data = targetKeyFrames.Select(
-                k => new KeyFrameClipboardData
+            var keyFramesData = targetKeyFrames.OrderBy(KeyFrames.IndexOf).Select(k =>
+            {
+                return new KeyFrameData
                 {
-                    PropertyTypeName = Property.PropertyType.GetType().FullName ?? "",
                     Time = k.Time,
                     Value = Property.PropertyType.SerializeValue(k.Value),
                     EaseIn = k.EaseIn,
                     EaseOut = k.EaseOut,
                     InterpolationType = k.InterpolationType,
                     Id = k.Id
-                }
-            ).ToArray();
-            return new CopyData<KeyFrameClipboardData>(CopyDataType.KeyFrame, data);
-        }
-
-        public void PasteKeyFrames(CopyData<KeyFrameClipboardData> data)
-        {
-            if (data.Type != CopyDataType.KeyFrame || data.Data.Length < 1)
+                };
+            }).ToArray();
+            var data = new PropertyData
             {
-                return;
-            }
+                PropertyId = PropertyId,
+                PropertyTypeName = Property.PropertyType.GetType().FullName ?? "",
+                Name = Name,
+                Value = Property.PropertyType.SerializeValue(Value),
+                KeyFrames = keyFramesData
+            };
 
-            var startTime = data.Data.First().Time;
-            var newKeyFrames = new List<KeyFrame>();
-            foreach (var k in data.Data)
-            {
-                if (Property.PropertyType.GetType().FullName != k.PropertyTypeName)
-                {
-                    return;
-                }
-
-                var newTime = TimeCalc.RoundTimeDigit(k.Time - startTime + CurrentTime - SourceStartPoint);
-                newKeyFrames.Add(new KeyFrame(newTime, Property.CoerceValue(Property.PropertyType.DeserializeValue(k.Value)), k.EaseIn, k.EaseOut, k.InterpolationType));
-            }
-
-            var oldKeyFrames = KeyFrames.Where(k => newKeyFrames.Any(nk => nk.Time == k.Time)).ToArray();
-            var oldKeyFrameIndices = KeyFrames.Where(oldKeyFrames.Contains).Select(KeyFrames.IndexOf).ToArray();
-            foreach (var ok in oldKeyFrames)
-            {
-                KeyFrames.Remove(ok);
-            }
-
-            var newKeyFrameIndices = new int[newKeyFrames.Count];
-            foreach (var nk in newKeyFrames)
-            {
-                var index = KeyFrames.IndexOfLast(k => Math.Abs(k.Time - nk.Time) < TimeCalc.TimeEpsilon || k.Time <= nk.Time) + 1;
-                KeyFrames.Insert(index, nk);
-            }
-
-            HistoryModel.Add(new PasteKeyFramesHistoryCommand(this, oldKeyFrames, oldKeyFrameIndices, [..newKeyFrames], newKeyFrameIndices));
+            return new CopyData<PropertyData>(CopyDataType.KeyFrame, [data]);
         }
 
         void DeleteKeyFramesInternal(KeyFrame[] targetKeyframes, bool isCut)
@@ -412,7 +474,7 @@ namespace NiVE3.Model
         }
     }
 
-    partial class PropertyGroupModel : BindableBase, IPropertyModel
+    partial class PropertyGroupModel : BindableBase, IPropertyModel, IOverwriteablePropertyModel
     {
         public string PropertyId { get; }
 
@@ -573,6 +635,7 @@ namespace NiVE3.Model
             {
                 PropertyId = PropertyId,
                 InstanceId = InstanceId,
+                PropertyTypeName = Property.PropertyType.GetType().FullName ?? "",
                 Name = Name,
                 Children = Children.Select(p => p.SaveData()).ToArray()
             };
@@ -592,6 +655,146 @@ namespace NiVE3.Model
             }
         }
 
+        public void PasteProperty(PropertyData data)
+        {
+            PasteChildrenPropertyInternal(data, []);
+        }
+
+        public void OverwriteProperty(PropertyData data)
+        {
+            if (Property.PropertyType.GetType().FullName != data.PropertyTypeName || data.Children == null)
+            {
+                return;
+            }
+
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_PasteProperty));
+
+            var targetChildren = Children.Where(c => data.Children.Any(d => d.PropertyId == c.Property.Id)).OrderBy(c => data.Children.IndexOf(d => d.PropertyId == c.Property.Id)).OfType<IOverwriteablePropertyModel>();
+            foreach (var (childData, child) in data.Children.Zip(targetChildren))
+            {
+                child.OverwriteProperty(childData);
+            }
+
+            HistoryModel.EndGroup();
+        }
+
+        public CopyData<PropertyData> CopyChildrenProperty(string[] ids)
+        {
+            var children = Children.Where(p => ids.Contains(p.Property.Id)).OrderBy(Children.IndexOf);
+            var data = new PropertyData
+            {
+                PropertyId = Property.Id,
+                InstanceId = InstanceId,
+                PropertyTypeName = Property.PropertyType.GetType().FullName ?? "",
+                Name = Name,
+                Children = [.. children.Select(c => c.SaveData())]
+            };
+
+            return new CopyData<PropertyData>(CopyDataType.PropertyGroup, [data]);
+        }
+
+        public void PasteChildrenProperty(CopyData<PropertyData> data, string[] ids)
+        {
+            if (data.Type != CopyDataType.PropertyGroup || data.Data.Length < 1)
+            {
+                return;
+            }
+
+            PasteChildrenPropertyInternal(data.Data[0], ids);
+        }
+
+        public CopyData<PropertyData> CutChildrenKeyFrames(string[] ids)
+        {
+            var data = CopyChildrenProperty(ids);
+            DeleteChildrenKeyFramesInternal(ids, true);
+
+            return data;
+        }
+
+        public void DeleteChildrenKeyFrames(string[] ids)
+        {
+            DeleteChildrenKeyFramesInternal(ids, false);
+        }
+
+        void DeleteChildrenKeyFramesInternal(string[] ids, bool isCut)
+        {
+            var children = Children.OfType<PropertyModel>().Where(p => ids.Contains(p.Property.Id));
+
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_RemoveKeyFrame));
+            foreach (var child in children)
+            {
+                child.ClearKeyFrame();
+            }
+            HistoryModel.EndGroup();
+        }
+
+        void PasteChildrenPropertyInternal(PropertyData data, string[] ids)
+        {
+            if (Property.PropertyType.GetType().FullName != data.PropertyTypeName || data.Children == null || data.Children.Length < 1)
+            {
+                return;
+            }
+
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_PasteProperty));
+            if (data.Children.Length > 1)
+            {
+                // NOTE: 複数同時貼り付けの場合は同一のグループにしか貼り付けられない
+                if (data.PropertyId == Property.Id)
+                {
+                    var targetChildren = Children.Where(c => data.Children.Any(d => d.PropertyId == c.Property.Id)).OrderBy(c => data.Children.IndexOf(d => d.PropertyId == c.Property.Id)).OfType<IOverwriteablePropertyModel>();
+                    if (ids.Length > 0)
+                    {
+                        targetChildren = targetChildren.Where(c => ids.Contains(c.Property.Id));
+                    }
+                    foreach (var (childData, child) in data.Children.Zip(targetChildren))
+                    {
+                        switch (child)
+                        {
+                            case PropertyModel:
+                            case AppendableProperty:
+                                child.PasteProperty(childData);
+                                break;
+                            default:
+                                // NOTE: グループの貼り付けは孫以降すべて上書きする
+                                child.OverwriteProperty(childData);
+                                break;
+                        }
+                        child.OverwriteProperty(childData);
+                    }
+                    HistoryModel.EndGroup();
+                }
+                else
+                {
+                    HistoryModel.AbortGroup();
+                }
+            }
+            else if (ids.Length > 0)
+            {
+                var propertyData = data.Children[0];
+                var target = Children.Where(c => c.Property.PropertyType.GetType().FullName == propertyData.PropertyTypeName && ids.Contains(c.Property.Id));
+
+                var pasted = false;
+                foreach (var t in target)
+                {
+                    t.PasteProperty(propertyData);
+                    pasted = true;
+                }
+
+                if (pasted)
+                {
+                    HistoryModel.EndGroup();
+                }
+                else
+                {
+                    HistoryModel.AbortGroup();
+                }
+            }
+            else
+            {
+                HistoryModel.AbortGroup();
+            }
+        }
+
         private void Child_ValueUpdated(object? sender, EventArgs e)
         {
             ValueUpdated?.Invoke(sender, e);
@@ -603,7 +806,7 @@ namespace NiVE3.Model
         }
     }
 
-    partial class AppendablePropertyModel : BindableBase, IPropertyModel
+    partial class AppendablePropertyModel : BindableBase, IPropertyModel, IOverwriteablePropertyModel
     {
         public string PropertyId { get; }
 
@@ -738,6 +941,7 @@ namespace NiVE3.Model
             return new PropertyData
             {
                 PropertyId = PropertyId,
+                PropertyTypeName = Property.PropertyType.GetType().FullName ?? "",
                 Name = Name,
                 Children = Children.Select(p => p.SaveData()).ToArray()
             };
@@ -764,6 +968,25 @@ namespace NiVE3.Model
             }
         }
 
+        public void PasteProperty(PropertyData data)
+        {
+            PasteChildrenInternal(data, false);
+        }
+
+        public void OverwriteProperty(PropertyData data)
+        {
+            if (Property.PropertyType.GetType().FullName != data.PropertyTypeName)
+            {
+                return;
+            }
+
+            var oldChildren = Children.ToArray();
+
+            LoadData(data);
+
+            HistoryModel.Add(new OverwritePropertyHistoryCommand(this, oldChildren, [..Children]));
+        }
+
         public CopyData<PropertyData> CutChildren(Guid[] propertyInstanceIds)
         {
             var result = CopyChildrenProperty(propertyInstanceIds);
@@ -778,22 +1001,28 @@ namespace NiVE3.Model
             var data = new PropertyData
             {
                 PropertyId = PropertyId,
+                PropertyTypeName = Property.PropertyType.GetType().FullName ?? "",
                 Name = Name,
                 Children = [.. children.Select(c => c.SaveData())]
             };
 
-            return new CopyData<PropertyData>(CopyDataType.Property, [data]);
+            return new CopyData<PropertyData>(CopyDataType.AppendablePropertyChildren, [data]);
         }
 
         public void PasteChildrenProperty(CopyData<PropertyData> data)
         {
-            PasteChildrenInternal(data, false);
+            if (data.Type != CopyDataType.AppendablePropertyChildren || data.Data.Length < 1 || data.Data.First().PropertyId != PropertyId)
+            {
+                return;
+            }
+
+            PasteChildrenInternal(data.Data[0], false);
         }
 
         public void DuplicateChildrenProperty(Guid[] ids)
         {
             var data = CopyChildrenProperty(ids);
-            PasteChildrenInternal(data, true);
+            PasteChildrenInternal(data.Data[0], true);
         }
 
         PropertyGroupModel AddChildInternal(AppendablePropertyItem item, Guid? instanceId)
@@ -856,15 +1085,15 @@ namespace NiVE3.Model
             HistoryModel.Add(new DeleteAppendablePropertyChildHistoryCommand(this, children, indices, isCut));
         }
 
-        void PasteChildrenInternal(CopyData<PropertyData> data, bool isDuplicate)
+        void PasteChildrenInternal(PropertyData data, bool isDuplicate)
         {
-            if (data.Type != CopyDataType.Property || data.Data.Length < 1 || data.Data.First().PropertyId != PropertyId)
+            if (Property.PropertyType.GetType().FullName != data.PropertyTypeName)
             {
                 return;
             }
 
             var newChildren = new List<PropertyGroupModel>();
-            foreach (var childData in data.Data.First().Children ?? [])
+            foreach (var childData in data.Children ?? [])
             {
                 var item = Items.FirstOrDefault(i => i.Id == childData.PropertyId);
                 if (item == null)

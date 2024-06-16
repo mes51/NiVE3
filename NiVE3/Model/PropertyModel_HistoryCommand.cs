@@ -324,6 +324,52 @@ namespace NiVE3.Model
 
             public void Dispose() { }
         }
+
+        private class OverwritePropertyHistoryCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_PasteKeyFrames);
+
+            PropertyModel Model { get; }
+
+            KeyFrame[] OldKeyFrames { get; }
+
+            object? OldValue { get; }
+
+            KeyFrame[] NewKeyFrames { get; }
+
+            object? NewValue { get; }
+
+            public OverwritePropertyHistoryCommand(PropertyModel model, KeyFrame[] oldKeyFrames, object? oldValue, KeyFrame[] newKeyFrames, object? newValue)
+            {
+                Model = model;
+                OldKeyFrames = oldKeyFrames;
+                OldValue = oldValue;
+                NewKeyFrames = newKeyFrames;
+                NewValue = newValue;
+            }
+
+            public void Redo()
+            {
+                Model.KeyFrames.Clear();
+                Model.Value = NewValue;
+                foreach (var  k in NewKeyFrames)
+                {
+                    Model.KeyFrames.Add(k);
+                }
+            }
+
+            public void Undo()
+            {
+                Model.KeyFrames.Clear();
+                Model.Value = OldValue;
+                foreach (var k in OldKeyFrames)
+                {
+                    Model.KeyFrames.Add(k);
+                }
+            }
+
+            public void Dispose() { }
+        }
     }
 
     partial class PropertyGroupModel
@@ -496,6 +542,46 @@ namespace NiVE3.Model
                 foreach (var c in NewChildren)
                 {
                     Model.Children.Remove(c);
+                }
+            }
+
+            public void Dispose() { }
+        }
+
+        private class OverwritePropertyHistoryCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_PasteProperty);
+
+            AppendablePropertyModel Model { get; }
+
+            IPropertyModel[] OldChildren { get; }
+
+            IPropertyModel[] NewChildren { get; }
+
+            public OverwritePropertyHistoryCommand(AppendablePropertyModel model, IPropertyModel[] oldChildren, IPropertyModel[] newChildren)
+            {
+                Model = model;
+                OldChildren = oldChildren;
+                NewChildren = newChildren;
+            }
+
+            public void Redo()
+            {
+                Model.Children.Clear();
+
+                foreach (var c in NewChildren)
+                {
+                    Model.Children.Add(c);
+                }
+            }
+
+            public void Undo()
+            {
+                Model.Children.Clear();
+
+                foreach (var c in OldChildren)
+                {
+                    Model.Children.Add(c);
                 }
             }
 
