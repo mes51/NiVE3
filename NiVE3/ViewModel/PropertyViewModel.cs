@@ -795,7 +795,7 @@ namespace NiVE3.ViewModel
                 var data = ClipboardUtil.GetData<PropertyData>();
                 if (data != null)
                 {
-                    AppendablePropertyModel.PasteChildrenProperty(data);
+                    AppendablePropertyModel.PasteChildrenProperty(data, SelectedChildren.OfType<PropertyGroupViewModel>().FirstOrDefault()?.InstanceId);
                 }
             });
 

@@ -687,12 +687,19 @@ namespace NiVE3.Model
 
         public void PasteChildrenProperty(CopyData<PropertyData> data, string[] ids)
         {
-            if (data.Type != CopyDataType.PropertyGroup || data.Data.Length < 1)
+            if (data.Data.Length < 1)
             {
                 return;
             }
 
-            PasteChildrenPropertyInternal(data.Data[0], ids);
+            if (data.Type == CopyDataType.PropertyGroup)
+            {
+                PasteChildrenPropertyInternal(data.Data[0], ids);
+            }
+            else if (ids.Length == 1 && Children.FirstOrDefault(c => c.Property.Id == ids[0]) is IPropertyModel targetChild)
+            {
+                targetChild.PasteProperty(data.Data[0]);
+            }
         }
 
         public CopyData<PropertyData> CutChildrenKeyFrames(string[] ids)
@@ -998,14 +1005,23 @@ namespace NiVE3.Model
             return new CopyData<PropertyData>(CopyDataType.AppendablePropertyChildren, [data]);
         }
 
-        public void PasteChildrenProperty(CopyData<PropertyData> data)
+        public void PasteChildrenProperty(CopyData<PropertyData> data, Guid? targetId)
         {
-            if (data.Type != CopyDataType.AppendablePropertyChildren || data.Data.Length < 1 || data.Data.First().PropertyId != Property.Id)
+            if (data.Data.Length < 1)
             {
                 return;
             }
 
-            PasteChildrenInternal(data.Data[0], false);
+            if (data.Type == CopyDataType.AppendablePropertyChildren && data.Data[0].PropertyId == Property.Id)
+            {
+                PasteChildrenInternal(data.Data[0], false);
+            }
+            else if (data.Type == CopyDataType.PropertyGroup &&
+                Children.OfType<PropertyGroupModel>().FirstOrDefault(c => c.InstanceId == targetId) is IOverwriteablePropertyModel targetChild &&
+                targetChild.Property.Id == data.Data[0].PropertyId)
+            {
+                targetChild.OverwriteProperty(data.Data[0]);
+            }
         }
 
         public void DuplicateChildrenProperty(Guid[] ids)
