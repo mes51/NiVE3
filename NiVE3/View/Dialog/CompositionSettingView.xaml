@@ -31,12 +31,12 @@
         </Style>
 
         <Style x:Key="FirstSettingGroup" TargetType="{x:Type GroupBox}" BasedOn="{StaticResource {x:Type GroupBox}}">
-            <Setter Property="Padding" Value="100,0"/>
+            <Setter Property="VerticalAlignment" Value="Top"/>
         </Style>
 
         <Style x:Key="SettingGroup" TargetType="{x:Type GroupBox}" BasedOn="{StaticResource {x:Type GroupBox}}">
             <Setter Property="Margin" Value="0,10,0,0"/>
-            <Setter Property="Padding" Value="100,0"/>
+            <Setter Property="VerticalAlignment" Value="Top"/>
         </Style>
 
         <Style x:Key="FirstItemRowGrid" TargetType="{x:Type Grid}">
@@ -69,7 +69,7 @@
         </Style>
 
         <Style x:Key="SizeSlidableNumberTextBox" TargetType="{x:Type upr:SlidableNumberTextBox}" BasedOn="{StaticResource SmallSlidableNumberTextBox}">
-            <Setter Property="Maximum" Value="23000"/> <!-- DODO: コンポジションの最大サイズ調整 -->
+            <Setter Property="Maximum" Value="46300"/> <!-- DODO: コンポジションの最大サイズ調整 -->
             <Setter Property="Minimum" Value="4"/>
             <Setter Property="Digit" Value="0"/>
         </Style>
@@ -113,40 +113,36 @@
 
                 <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=CompositionSettingView_PresetNameLabel}" Style="{StaticResource ItemLabel}"/>
                 <ComboBox Grid.Column="1" IsEditable="False" Width="250" Margin="{StaticResource ItemMargin}"/>
-                <Button Grid.Column="2" Margin="10,0,0,0" Style="{StaticResource IconButton}" Command="{Binding CreatePresetCommand}"/>
-                <Button Grid.Column="3" Margin="5,0,0,0" Style="{StaticResource IconButton}" Command="{Binding DeletePresetCommand}"/>
+                <Button Grid.Column="2" Margin="10,0,0,0" Style="{StaticResource CopyButton}" Command="{Binding CreatePresetCommand}"/>
+                <Button Grid.Column="3" Margin="5,0,0,0" Style="{StaticResource DeleteButton}" Command="{Binding DeletePresetCommand}"/>
             </Grid>
 
-            <TabControl Grid.Row="2" Margin="10,10,10,0" Grid.IsSharedSizeScope="True">
+            <TabControl Grid.Row="2" Margin="10,10,10,0" FocusVisualStyle="{x:Null}" Grid.IsSharedSizeScope="True">
                 <TabItem Header="{gm:LanguageResource ResourceKey=CompositionSettingView_BasicTab}">
                     <Grid Style="{StaticResource TabInnerGrid}">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" SharedSizeGroup="TabHeight"/>
                         </Grid.RowDefinitions>
 
-                        <GroupBox Header="{gm:LanguageResource ResourceKey=CompositionSettingView_CompositionSettingGroup}" Style="{StaticResource FirstSettingGroup}" VerticalAlignment="Top">
-                            <StackPanel Margin="5" Grid.IsSharedSizeScope="True">
+                        <GroupBox Grid.Row="0" Header="{gm:LanguageResource ResourceKey=CompositionSettingView_CompositionSettingGroup}" Style="{StaticResource FirstSettingGroup}">
+                            <StackPanel Margin="5" HorizontalAlignment="Center" Grid.IsSharedSizeScope="True">
                                 <Grid Style="{StaticResource FirstItemRowGrid}">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto" SharedSizeGroup="Label"/>
                                         <ColumnDefinition />
-                                        <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
 
                                     <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=CompositionSettingView_CompositionWidthLabel}" Style="{StaticResource ItemLabel}"/>
-                                    <upr:SlidableNumberTextBox Grid.Column="1" IntValue="{Binding Width}" Style="{StaticResource SizeSlidableNumberTextBox}"/>
-                                    <TextBlock Grid.Column="2" Text="{gm:LanguageResource ResourceKey=CompositionSettingView_SizeUnitLabel}" Style="{StaticResource ItemUnitLabel}"/>
+                                    <upr:SlidableNumberTextBox Grid.Column="1" IntValue="{Binding Width}" Style="{StaticResource SizeSlidableNumberTextBox}" UnitText="{gm:LanguageResource ResourceKey=Unit_Pixel}"/>
                                 </Grid>
                                 <Grid Style="{StaticResource ItemRowGrid}">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto" SharedSizeGroup="Label"/>
                                         <ColumnDefinition />
-                                        <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
 
                                     <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=CompositionSettingView_CompositionHeightLabel}" Style="{StaticResource ItemLabel}"/>
-                                    <upr:SlidableNumberTextBox Grid.Column="1" IntValue="{Binding Height}" Style="{StaticResource SizeSlidableNumberTextBox}"/>
-                                    <TextBlock Grid.Column="2" Text="{gm:LanguageResource ResourceKey=CompositionSettingView_SizeUnitLabel}" Style="{StaticResource ItemUnitLabel}"/>
+                                    <upr:SlidableNumberTextBox Grid.Column="1" IntValue="{Binding Height}" Style="{StaticResource SizeSlidableNumberTextBox}" UnitText="{gm:LanguageResource ResourceKey=Unit_Pixel}"/>
                                 </Grid>
                                 <Grid Style="{StaticResource ItemRowGrid}">
                                     <Grid.ColumnDefinitions>
@@ -184,70 +180,68 @@
                             <RowDefinition Height="Auto" SharedSizeGroup="TabHeight"/>
                         </Grid.RowDefinitions>
 
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
+                        <GroupBox Grid.Row="0" Header="{gm:LanguageResource ResourceKey=CompositionSettingView_MotionBlurSettingGroup}"  Style="{StaticResource FirstSettingGroup}">
+                            <StackPanel Margin="5" HorizontalAlignment="Center" Grid.IsSharedSizeScope="True">
+                                <Grid Style="{StaticResource FirstItemRowGrid}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" SharedSizeGroup="Label"/>
+                                        <ColumnDefinition />
+                                    </Grid.ColumnDefinitions>
 
-                            <GroupBox Grid.Row="0" Header="{gm:LanguageResource ResourceKey=CompositionSettingView_MotionBlurSettingGroup}"  Style="{StaticResource FirstSettingGroup}">
-                                <StackPanel Margin="5" Grid.IsSharedSizeScope="True">
-                                    <Grid Style="{StaticResource FirstItemRowGrid}">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto" SharedSizeGroup="Label"/>
-                                            <ColumnDefinition />
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=CompositionSettingView_ShutterAngleLabel}" Style="{StaticResource ItemLabel}"/>
+                                    <upr:SlidableNumberTextBox Grid.Column="1" IntValue="{Binding ShutterAngle}" Style="{StaticResource ShutterSlidableNumberTextBox}" UnitText="{gm:LanguageResource ResourceKey=Unit_Angle}"/>
+                                </Grid>
+                                <Grid Style="{StaticResource ItemRowGrid}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" SharedSizeGroup="Label"/>
+                                        <ColumnDefinition />
+                                    </Grid.ColumnDefinitions>
 
-                                        <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=CompositionSettingView_ShutterAngleLabel}" Style="{StaticResource ItemLabel}"/>
-                                        <upr:SlidableNumberTextBox Grid.Column="1" IntValue="{Binding ShutterAngle}" Style="{StaticResource ShutterSlidableNumberTextBox}"/>
-                                        <TextBlock Grid.Column="2" Text="{gm:LanguageResource ResourceKey=CompositionSettingView_DegreeUnitLabel}" Style="{StaticResource ItemUnitLabel}"/>
-                                    </Grid>
-                                    <Grid Style="{StaticResource ItemRowGrid}">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto" SharedSizeGroup="Label"/>
-                                            <ColumnDefinition />
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=CompositionSettingView_ShutterPhaseLabel}" Style="{StaticResource ItemLabel}"/>
+                                    <upr:SlidableNumberTextBox Grid.Column="1" IntValue="{Binding ShutterPhase}" Style="{StaticResource ShutterSlidableNumberTextBox}" UnitText="{gm:LanguageResource ResourceKey=Unit_Angle}"/>
+                                </Grid>
+                                <Grid Style="{StaticResource ItemRowGrid}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" SharedSizeGroup="Label"/>
+                                        <ColumnDefinition />
+                                    </Grid.ColumnDefinitions>
 
-                                        <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=CompositionSettingView_ShutterPhaseLabel}" Style="{StaticResource ItemLabel}"/>
-                                        <upr:SlidableNumberTextBox Grid.Column="1" IntValue="{Binding ShutterPhase}" Style="{StaticResource ShutterSlidableNumberTextBox}"/>
-                                        <TextBlock Grid.Column="2" Text="{gm:LanguageResource ResourceKey=CompositionSettingView_DegreeUnitLabel}" Style="{StaticResource ItemUnitLabel}"/>
-                                    </Grid>
-                                    <Grid Style="{StaticResource ItemRowGrid}">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto" SharedSizeGroup="Label"/>
-                                            <ColumnDefinition />
-                                        </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=CompositionSettingView_MotionBlurSampleCountLabel}" Style="{StaticResource ItemLabel}"/>
+                                    <upr:SlidableNumberTextBox Grid.Column="1" IntValue="{Binding MotionBlurSampleCount}" Maximum="128" Minimum="1" Style="{StaticResource SmallSlidableNumberTextBox}"/>
+                                </Grid>
+                            </StackPanel>
+                        </GroupBox>
+                    </Grid>
+                </TabItem>
+                <TabItem Header="{gm:LanguageResource ResourceKey=CompositionSettingView_PluginTab}">
+                    <Grid Style="{StaticResource TabInnerGrid}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" SharedSizeGroup="TabHeight"/>
+                        </Grid.RowDefinitions>
 
-                                        <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=CompositionSettingView_MotionBlurSampleCountLabel}" Style="{StaticResource ItemLabel}"/>
-                                        <upr:SlidableNumberTextBox Grid.Column="1" IntValue="{Binding MotionBlurSampleCount}" Maximum="128" Minimum="1" Style="{StaticResource SmallSlidableNumberTextBox}"/>
-                                    </Grid>
-                                </StackPanel>
-                            </GroupBox>
-
-                            <StackPanel Grid.Row="1" Grid.IsSharedSizeScope="True">
-                                <Grid Grid.Row="1" Margin="{StaticResource ItemRowMargin}" HorizontalAlignment="Center">
+                        <GroupBox Grid.Row="0" Header="{gm:LanguageResource ResourceKey=CompositionSettingView_PluginSettingGroup}" Style="{StaticResource FirstSettingGroup}">
+                            <StackPanel Margin="5" HorizontalAlignment="Center" Grid.IsSharedSizeScope="True">
+                                <Grid Margin="{StaticResource ItemRowMargin}" HorizontalAlignment="Center">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto" SharedSizeGroup="SelectTypeLabel"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
 
                                     <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=CompositionSettingView_RendererLabel}" Style="{StaticResource ItemLabel}"/>
-                                    <ComboBox Grid.Column="1" Width="300" Margin="5,0,0,0" ItemsSource="{Binding Renderers}" SelectedIndex="{Binding SelectedRenderer, Mode=TwoWay}"/>
+                                    <ComboBox Grid.Column="1" Width="200" Margin="5,0,0,0" ItemsSource="{Binding Renderers}" SelectedIndex="{Binding SelectedRenderer, Mode=TwoWay}"/>
                                 </Grid>
 
-                                <Grid Grid.Row="2" Margin="{StaticResource ItemRowMargin}" HorizontalAlignment="Center">
+                                <Grid Margin="{StaticResource ItemRowMargin}" HorizontalAlignment="Center">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto" SharedSizeGroup="SelectTypeLabel"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
 
                                     <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=CompositionSettingView_ToneMapperLabel}" Style="{StaticResource ItemLabel}"/>
-                                    <ComboBox Grid.Column="1" Width="300" Margin="5,0,0,0" ItemsSource="{Binding ToneMappers}" SelectedIndex="{Binding SelectedToneMapper, Mode=TwoWay}"/>
+                                    <ComboBox Grid.Column="1" Width="200" Margin="5,0,0,0" ItemsSource="{Binding ToneMappers}" SelectedIndex="{Binding SelectedToneMapper, Mode=TwoWay}"/>
                                 </Grid>
                             </StackPanel>
-                        </Grid>
+                        </GroupBox>
                     </Grid>
                 </TabItem>
             </TabControl>

@@ -144,11 +144,17 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("高度")]
         public static readonly string CompositionSettingView_AdvancedTab = nameof(CompositionSettingView_AdvancedTab);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("プラグイン")]
+        public static readonly string CompositionSettingView_PluginTab = nameof(CompositionSettingView_PluginTab);
+
         [ShowInMarkup, LanguageKey, DefaultValue("コンポジション設定")]
         public static readonly string CompositionSettingView_CompositionSettingGroup = nameof(CompositionSettingView_CompositionSettingGroup);
 
         [ShowInMarkup, LanguageKey, DefaultValue("モーションブラー設定")]
         public static readonly string CompositionSettingView_MotionBlurSettingGroup = nameof(CompositionSettingView_MotionBlurSettingGroup);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("プラグイン設定")]
+        public static readonly string CompositionSettingView_PluginSettingGroup = nameof(CompositionSettingView_PluginSettingGroup);
 
         [ShowInMarkup, LanguageKey, DefaultValue("幅:")]
         public static readonly string CompositionSettingView_CompositionWidthLabel = nameof(CompositionSettingView_CompositionWidthLabel);
@@ -179,9 +185,6 @@ namespace NiVE3.View.Resource
 
         [ShowInMarkup, LanguageKey, DefaultValue("シャッターフェーズ:")]
         public static readonly string CompositionSettingView_ShutterPhaseLabel = nameof(CompositionSettingView_ShutterPhaseLabel);
-
-        [ShowInMarkup, LanguageKey, DefaultValue("°")]
-        public static readonly string CompositionSettingView_DegreeUnitLabel = nameof(CompositionSettingView_DegreeUnitLabel);
 
         [ShowInMarkup, LanguageKey, DefaultValue("フレームあたりのサンプル数:")]
         public static readonly string CompositionSettingView_MotionBlurSampleCountLabel = nameof(CompositionSettingView_MotionBlurSampleCountLabel);
