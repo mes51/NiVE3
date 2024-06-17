@@ -1189,7 +1189,19 @@ namespace NiVE3.Model
 
         public void PasteEffects(CopyData<EffectData> data, Guid[] selectedEffectIds, Guid? insertTargetId)
         {
-            PasteEffectsInternal(data, selectedEffectIds, insertTargetId, false);
+            if (data.Type != CopyDataType.Effect || data.Data.Length < 1)
+            {
+                return;
+            }
+
+            if (selectedEffectIds.Length == 1 && Effects.FirstOrDefault(e => e.EffectId == selectedEffectIds[0]) is EffectModel targetEffect && targetEffect.EffectPluginId == data.Data[0].EffectPluginId)
+            {
+                targetEffect.OverwriteEffect(data.Data[0]);
+            }
+            else
+            {
+                PasteEffectsInternal(data, selectedEffectIds, insertTargetId, false);
+            }
         }
 
         public void DuplicateEffects(Guid[] ids, Guid? insertTargetId)
@@ -1213,14 +1225,6 @@ namespace NiVE3.Model
 
         void PasteEffectsInternal(CopyData<EffectData> data, Guid[] selectedEffectIds, Guid? insertTargetId, bool isDuplicate)
         {
-            if (data.Type != CopyDataType.Effect || data.Data.Length < 1)
-            {
-                return;
-            }
-
-            // TODO: 型が一致するものがあったときはプロパティを上書きする
-            //var targetEffects = Effects.Where(e => selectedEffectIds.Contains(e.EffectId));
-
             var addedEffect = new List<EffectModel>();
             var insertStartIndex = insertTargetId.HasValue ? Effects.IndexOf(e => e.EffectId == insertTargetId) : -1;
             if (insertStartIndex < 0)

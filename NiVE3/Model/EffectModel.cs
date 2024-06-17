@@ -53,6 +53,8 @@ namespace NiVE3.Model
 
         public Guid EffectId { get; }
 
+        public Guid EffectPluginId => Guid.Parse(Metadata.EffectUuid);
+
         public event EventHandler<EventArgs>? EffectUpdated;
 
         ExportLifetimeContext<IEffect> Effect { get; }
@@ -115,7 +117,7 @@ namespace NiVE3.Model
             return new EffectData
             {
                 EffectId = EffectId,
-                EffectPluginId = Guid.Parse(Metadata.EffectUuid),
+                EffectPluginId = EffectPluginId,
                 Name = Name,
                 IsEnable = IsEnable,
                 Properties = Properties.SaveData()
@@ -130,6 +132,19 @@ namespace NiVE3.Model
             {
                 Properties.LoadData(data.Properties);
             }
+        }
+
+        public void OverwriteEffect(EffectData data)
+        {
+            if (data.EffectPluginId != EffectPluginId)
+            {
+                return;
+            }
+
+            var oldData = SaveData();
+            LoadData(data);
+
+            HistoryModel.Add(new OverwriteEffectHistoryCommand(this, oldData, data));
         }
 
         public void CalcPropertyHash(double layerTime, XxHash3 hash)
