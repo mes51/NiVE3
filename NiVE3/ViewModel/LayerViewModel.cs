@@ -469,7 +469,12 @@ namespace NiVE3.ViewModel
         public ObservableCollection<EffectViewModel> SelectedEffects
         {
             get { return selectedEffects; }
-            set { SetProperty(ref selectedEffects, value); }
+            set
+            {
+                selectedEffects.CollectionChanged -= SelectedEffects_CollectionChanged;
+                value.CollectionChanged += SelectedEffects_CollectionChanged;
+                SetProperty(ref selectedEffects, value);
+            }
         }
 
         private EffectViewModel? lastSelectedEffect;
@@ -996,12 +1001,18 @@ namespace NiVE3.ViewModel
             {
                 foreach (var effect in SelectedEffects.Where(v => v != e.Effect).ToArray())
                 {
-                    effect.DeSelect();
                     SelectedEffects.Remove(effect);
                 }
                 if (e.Effect != null && !SelectedEffects.Contains(e.Effect))
                 {
                     SelectedEffects.Add(e.Effect);
+
+                    TransformProperties?.DeSelect();
+                    LayerOptionProperties?.DeSelect();
+                    TextProperties?.DeSelect();
+                    ShapeProperties?.DeSelect();
+                    SourceOptionProperties?.DeSelect();
+                    AudioOptionProperties?.DeSelect();
                 }
             }
             else
@@ -1012,6 +1023,24 @@ namespace NiVE3.ViewModel
                 ShapeProperties?.DeSelect();
                 SourceOptionProperties?.DeSelect();
                 AudioOptionProperties?.DeSelect();
+            }
+        }
+
+        private void SelectedEffects_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Reset)
+            {
+                foreach (var effect in Effects)
+                {
+                    effect.DeSelect();
+                }
+            }
+            else
+            {
+                foreach (var effect in e.OldItems?.OfType<EffectViewModel>() ?? [])
+                {
+                    effect.DeSelect();
+                }
             }
         }
 

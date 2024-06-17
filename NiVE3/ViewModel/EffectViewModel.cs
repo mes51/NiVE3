@@ -10,11 +10,14 @@ using NiVE3.Mvvm;
 using System.Windows.Input;
 using Prism.Commands;
 using NiVE3.UI.Command;
+using System.Collections.ObjectModel;
+using NiVE3.Data.Json.Project;
+using NiVE3.Util;
 
 namespace NiVE3.ViewModel
 {
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
-    partial class EffectViewModel : BindableBase, INameEditableViewModel
+    partial class EffectViewModel : BindableBase, INameEditableViewModel, IViewModelShortcutCommand
     {
         private Guid effectId;
         [NeedWire(nameof(EffectModel), IsOneWay = true)]
@@ -46,13 +49,6 @@ namespace NiVE3.ViewModel
         {
             get { return isEnable; }
             set { SetProperty(ref isEnable, value); }
-        }
-
-        private ObservableCollectionView<IPropertyModel, IInternalPropertyViewModel> properties;
-        public ObservableCollectionView<IPropertyModel, IInternalPropertyViewModel> Properties
-        {
-            get { return properties; }
-            set { SetProperty(ref properties, value); }
         }
 
         private bool isExpanded;
@@ -97,6 +93,8 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref isCommentEditing, value); }
         }
 
+        public PropertyGroupViewModel Properties { get; }
+
         public ICommand ChangeIsEnableCommand { get; }
 
         public ICommand SelectItemCommand { get; }
@@ -109,6 +107,16 @@ namespace NiVE3.ViewModel
 
         public ICommand EndEditCommentCommand { get; }
 
+        public DelegateCommand<SelectItemType?> DeleteCommand { get; }
+
+        public DelegateCommand<SelectItemType?> CutCommand { get; }
+
+        public DelegateCommand<SelectItemType?> CopyCommand { get; }
+
+        public DelegateCommand<SelectItemType?> PasteCommand { get; }
+
+        public DelegateCommand<SelectItemType?> DuplicateCommand { get; }
+
         EffectModel EffectModel { get; }
 
         string PrevName { get; set; } = "";
@@ -120,6 +128,7 @@ namespace NiVE3.ViewModel
 #pragma warning restore CS8618
         {
             EffectModel = effectModel;
+            Properties = new PropertyGroupViewModel(effectModel.Properties);
 
             ChangeIsEnableCommand = new DelegateCommand(() =>
             {
@@ -166,23 +175,37 @@ namespace NiVE3.ViewModel
                 IsCommentEditing = false;
             }, _ => IsCommentEditing);
 
+            DeleteCommand = new DelegateCommand<SelectItemType?>(_ =>
+            {
+                Properties.DeleteCommand.Execute(null);
+            });
+
+            CutCommand = new DelegateCommand<SelectItemType?>(_ =>
+            {
+                Properties.CutCommand.Execute(null);
+            });
+
+            CopyCommand = new DelegateCommand<SelectItemType?>(_ =>
+            {
+                Properties.CopyCommand.Execute(null);
+            });
+
+            PasteCommand = new DelegateCommand<SelectItemType?>(_ =>
+            {
+                Properties.PasteCommand.Execute(null);
+            });
+
+            DuplicateCommand = new DelegateCommand<SelectItemType?>(_ => { });
+
             WiringModel();
 
-            Properties = effectModel.Properties.CreateViewCollection(m =>
-            {
-                var vm = InternalPropertyViewModel.CreateViewModel(m);
-                vm.SelectItemChanged += Property_SelectItemChanged;
-                vm.PropertyValueCommited += Property_PropertyValueCommited;
-                return vm;
-            });
+            Properties.SelectItemChanged += Property_SelectItemChanged;
+            Properties.PropertyValueCommited += Property_PropertyValueCommited;
         }
 
         public void DeSelect()
         {
-            foreach (var p in Properties)
-            {
-                p.DeSelect();
-            }
+            Properties.DeSelect();
         }
 
         partial void WiringModel();

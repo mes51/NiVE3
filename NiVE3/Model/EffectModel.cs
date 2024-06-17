@@ -41,12 +41,7 @@ namespace NiVE3.Model
             set { SetProperty(ref isEnable, value); }
         }
 
-        private ObservableCollection<IPropertyModel> properties = [];
-        public ObservableCollection<IPropertyModel> Properties
-        {
-            get { return properties; }
-            set { SetProperty(ref properties, value); }
-        }
+        public PropertyGroupModel Properties { get; }
 
         public string EffectName => Metadata.Name;
 
@@ -66,6 +61,8 @@ namespace NiVE3.Model
 
         HistoryModel HistoryModel { get; }
 
+        string EffectPropertyGroupId => $"{EffectName}_Properties";
+
         public EffectModel(ExportLifetimeContext<IEffect> effect, IEffectMetadata metadata, CompositionModel compositionModel, LayerModel layerModel, HistoryModel historyModel) : this(effect, metadata, compositionModel, layerModel, historyModel, null) { }
 
         public EffectModel(ExportLifetimeContext<IEffect> effect, IEffectMetadata metadata, CompositionModel compositionModel, LayerModel layerModel, HistoryModel historyModel, Guid? effectId)
@@ -75,27 +72,8 @@ namespace NiVE3.Model
             Name = metadata.Name;
             HistoryModel = historyModel;
             EffectId = effectId ?? Guid.NewGuid();
-
-            foreach (var p in effect.Value.GetProperties())
-            {
-                if (p is PropertyGroup)
-                {
-                    Properties.Add(new PropertyGroupModel(p, compositionModel, layerModel, this, historyModel));
-                }
-                else if (p is AppendableProperty)
-                {
-                    Properties.Add(new AppendablePropertyModel(p, compositionModel, layerModel, this, historyModel));
-                }
-                else
-                {
-                    Properties.Add(new PropertyModel(p, compositionModel, layerModel, this, historyModel));
-                }
-            }
-
-            foreach (var p in Properties)
-            {
-                p.ValueUpdated += Property_ValueUpdated;
-            }
+            Properties = new PropertyGroupModel(new PropertyGroup(EffectPropertyGroupId, "", effect.Value.GetProperties()), compositionModel, layerModel, this, historyModel);
+            Properties.ValueUpdated += Property_ValueUpdated;
 
             PropertyChanged += EffectModel_PropertyChanged;
         }
@@ -124,12 +102,12 @@ namespace NiVE3.Model
 
         public NImage ProcessImage(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, double layerTime, bool useGpu)
         {
-            return Effect.Value.Process(image, roi, downSamplingRateX, downSamplingRateY, layerTime, Properties.ToArray(), useGpu);
+            return Effect.Value.Process(image, roi, downSamplingRateX, downSamplingRateY, layerTime, Properties.Children.ToArray(), useGpu);
         }
 
         public float[] ProcessAudio(float[] audio, double startTime)
         {
-            return Effect.Value.Process(audio, startTime, Properties.ToArray());
+            return Effect.Value.Process(audio, startTime, Properties.Children.ToArray());
         }
 
         public EffectData SaveData()
@@ -140,7 +118,7 @@ namespace NiVE3.Model
                 EffectPluginId = Guid.Parse(Metadata.EffectUuid),
                 Name = Name,
                 IsEnable = IsEnable,
-                Properties = Properties.Select(p => p.SaveData()).ToArray()
+                Properties = Properties.SaveData()
             };
         }
 
@@ -148,34 +126,15 @@ namespace NiVE3.Model
         {
             Name = data.Name;
             IsEnable = data.IsEnable;
-            foreach (var propertyData in data.Properties)
+            if (data.Properties != null)
             {
-                Properties.FirstOrDefault(p => p.Property.Id == propertyData.PropertyId)?.LoadData(propertyData);
+                Properties.LoadData(data.Properties);
             }
         }
 
         public void CalcPropertyHash(double layerTime, XxHash3 hash)
         {
-            var properties = new Dictionary<string, object?>();
-            var propertyTypes = new Dictionary<string, IPropertyType>();
-            foreach (var p in Properties)
-            {
-                switch (p)
-                {
-                    case PropertyGroupModel pg:
-                        properties.Add(pg.Property.Id, pg.GetValues(layerTime));
-                        break;
-                    case AppendablePropertyModel ap:
-                        properties.Add(ap.Property.Id, ap.GetChildPropertyValues(layerTime));
-                        break;
-                    default:
-                        properties.Add(p.Property.Id, p.GetValue(layerTime));
-                        break;
-                }
-                propertyTypes.Add(p.Property.Id, p.Property.PropertyType);
-            }
-
-            new PropertyValueGroup(nameof(EffectModel), properties, propertyTypes).CalcHash(hash);
+            Properties.GetValues(layerTime).CalcHash(hash);
         }
 
         private void Property_ValueUpdated(object? sender, EventArgs e)

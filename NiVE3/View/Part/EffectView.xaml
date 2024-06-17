@@ -42,7 +42,7 @@
                 <pr:EditableTextBlock Text="{Binding Comment}" IsEditing="{Binding IsCommentEditing}" EndEditCommand="{Binding EndEditCommentCommand}"/>
             </Grid>
         </pt:LayerItemExpander.HeaderSubItem>
-        <pt:PropertyCollectionView ItemsSource="{Binding Properties}"
+        <pt:PropertyCollectionView ItemsSource="{Binding Properties.Children}"
                                    IndentLevel="{Binding ElementName=Root, Path=IndentLevel, Converter={x:Static local:EffectView.NextIndentConverter}}"
                                    ControlAreaWidth="{Binding ElementName=Root, Path=ControlAreaWidth}"
                                    NameAreaWidth="{Binding ElementName=Root, Path=NameAreaWidth}"
@@ -51,6 +51,7 @@
                                    Range="{Binding ElementName=Root, Path=Range}"
                                    RangeStart="{Binding ElementName=Root, Path=RangeStart}"
                                    CompositionFrameRate="{Binding ElementName=Root, Path=CompositionFrameRate}"
-                                   ParentHasExpanderArrow="{Binding ElementName=Root, Path=ParentHasExpanderArrow}"/>
+                                   ParentHasExpanderArrow="{Binding ElementName=Root, Path=ParentHasExpanderArrow}"
+                                   SelectedItems="{Binding Properties.SelectedChildren}"/>
     </pt:LayerItemExpander>
 </UserControl>

@@ -16,6 +16,6 @@ namespace NiVE3.Data.Json.Project
 
         public bool IsEnable { get; set; }
 
-        public PropertyData[] Properties { get; set; } = [];
+        public PropertyData? Properties { get; set; }
     }
 }
