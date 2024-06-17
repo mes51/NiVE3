@@ -17,7 +17,7 @@ namespace NiVE3.Image
         /// NiVEで扱うことが可能な最大ピクセル数
         /// Array.MaxLength によって制限されています
         /// </summary>
-        public const int MaxPixelCount = 46340 * 46340; // ≈ Math.Sqrt(Array.MaxLength)
+        public const int MaxPixelCount = 46300 * 46300; // ≈ Math.Sqrt(Array.MaxLength)
 
         /// <summary>
         /// 画像の幅
