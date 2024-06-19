@@ -90,8 +90,7 @@ namespace NiVE3.UI.Resources
                 }
             }
 
-            // all type or null
-            return Templates.FirstOrDefault(t => t.DataType == null);
+            return null;
         }
 
         static DataTemplate WrapTemplate(DataTemplate inner)

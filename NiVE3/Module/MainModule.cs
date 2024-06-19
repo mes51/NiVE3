@@ -74,6 +74,7 @@ namespace NiVE3.Module
             // MEMO: ViewなしショートカットのみのViewModelの場合
             // Container.RegisterMapping<CommandOnlyViewModelBase, ViewModelType>();
 
+            containerRegistry.RegisterDialog<NameSettingView, NameSettingViewModel>();
             containerRegistry.RegisterDialog<InputSettingView, InputSettingViewModel>();
             containerRegistry.RegisterDialog<CompositionSettingView, CompositionSettingViewModel>();
             containerRegistry.RegisterDialog<RenderSettingView, RenderSettingViewModel>();

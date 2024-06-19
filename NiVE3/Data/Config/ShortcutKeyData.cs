@@ -11,13 +11,13 @@ namespace NiVE3.Data.Config
 {
     class ShortcutKeyData
     {
-        public string? Name { get; set; }
+        public string Name { get; set; } = "";
 
-        public string? Type { get; set; }
+        public string Type { get; set; } = "";
 
-        public string? KeyString { get; set; }
+        public string KeyString { get; set; } = "";
 
-        public string? ModifierString { get; set; }
+        public string ModifierString { get; set; } = "";
 
         [IgnoreDataMember]
         public Key GestureKey

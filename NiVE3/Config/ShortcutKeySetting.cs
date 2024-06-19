@@ -369,7 +369,7 @@ namespace NiVE3.Config
                 foreach (var data in shortcutKeyData)
                 {
                     data.CorrectData();
-                    if (data.Name == null || !DependencyProperties.ContainsKey(data.Name))
+                    if (!DependencyProperties.ContainsKey(data.Name))
                     {
                         continue;
                     }

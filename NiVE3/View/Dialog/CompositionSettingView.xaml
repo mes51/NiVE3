@@ -4,9 +4,13 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:NiVE3.View.Dialog"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:pr="http://prismlibrary.com/"
              xmlns:cv="clr-namespace:NiVE3.View.Converter"
+             xmlns:dc="clr-namespace:NiVE3.Data.Config"
              xmlns:upr="clr-namespace:NiVE3.UI.Primitive;assembly=NiVE3.UI"
+             xmlns:ur="clr-namespace:NiVE3.UI.Resources;assembly=NiVE3.UI"
+             xmlns:r="clr-namespace:NiVE3.View.Resource"
              xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
              mc:Ignorable="d"
              pr:ViewModelLocator.AutoWireViewModel="True"
@@ -25,6 +29,28 @@
         <Thickness x:Key="ItemMargin">5,0,0,0</Thickness>
         <Thickness x:Key="ItemRowMargin">0,5,0,0</Thickness>
         <cv:TimeConverter x:Key="TimeConverter" FrameRate="{Binding FrameRate}"/>
+        <!-- NOTE: ComboBoxがnullを選択できないので、ダミーの値をnullとして扱う -->
+        <cv:NullToDummyConverter x:Key="NullToDummyConverter"/>
+        <sys:String x:Key="DummyPreset">Dummy</sys:String>
+
+        <CollectionViewSource x:Key="UserCompositionPresets" Source="{Binding Presets}"/>
+        <CompositeCollection x:Key="CompositionPresets">
+            <StaticResource ResourceKey="DummyPreset"/>
+            <Separator />
+            <CollectionContainer Collection="{Binding Source={StaticResource UserCompositionPresets}}"/>
+        </CompositeCollection>
+
+        <!-- NOTE: INotifyCollectionChangeの変更はBindingでは拾ってくれないため、無理矢理拾わせるためのクラスでラップする -->
+        <r:CollectionChangeNotifier x:Key="CompositionPresetsNotifier" Collection="{Binding Presets}"/>
+
+        <ur:DataTemplateCollection x:Key="PresetTemplateSelector">
+            <DataTemplate DataType="{x:Type dc:CompositionPresetData}">
+                <TextBlock Text="{Binding Name}"/>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type sys:String}">
+                <TextBlock Text="{gm:LanguageResource ResourceKey=CompositionSettingView_PresetName_Custom, ReturnDynamicResource=True}"/>
+            </DataTemplate>
+        </ur:DataTemplateCollection>
 
         <Style x:Key="TabInnerGrid" TargetType="{x:Type Grid}">
             <Setter Property="Margin" Value="10,0,10,10"/>
@@ -112,7 +138,13 @@
                 </Grid.ColumnDefinitions>
 
                 <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=CompositionSettingView_PresetNameLabel}" Style="{StaticResource ItemLabel}"/>
-                <ComboBox Grid.Column="1" IsEditable="False" Width="250" Margin="{StaticResource ItemMargin}"/>
+                <ComboBox Grid.Column="1"
+                          IsEditable="False"
+                          Width="250"
+                          Margin="{StaticResource ItemMargin}"
+                          ItemTemplateSelector="{StaticResource PresetTemplateSelector}"
+                          SelectedItem="{Binding SelectedPreset, Converter={StaticResource NullToDummyConverter}, ConverterParameter={StaticResource DummyPreset}}"
+                          ItemsSource="{StaticResource CompositionPresets}"/>
                 <Button Grid.Column="2" Margin="10,0,0,0" Style="{StaticResource CopyButton}" Command="{Binding CreatePresetCommand}"/>
                 <Button Grid.Column="3" Margin="5,0,0,0" Style="{StaticResource DeleteButton}" Command="{Binding DeletePresetCommand}"/>
             </Grid>

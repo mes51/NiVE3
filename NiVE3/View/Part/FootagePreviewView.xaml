@@ -151,7 +151,6 @@
                 </Grid>
             </DataTemplate>
         </ur:DataTemplateCollection>
-        
     </UserControl.Resources>
     <Grid Margin="10">
         <ContentPresenter Content="{Binding ElementName=Root, Path=SelectedFirstFootage}" ContentTemplateSelector="{StaticResource PreviewTemplateSelector}" Style="{StaticResource FootageInfoStyle}"/>

@@ -55,11 +55,25 @@
     <Style x:Key="IconButton" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
         <Setter Property="Width" Value="16"/>
         <Setter Property="Height" Value="16"/>
+        <Setter Property="Foreground" Value="{ugm:AppearanceResource ResourceKey=TextBrush, ReturnDynamicResource=True}" />
+
+        <Style.Triggers>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Foreground" Value="{ugm:AppearanceResource ResourceKey=DisableTextBrush, ReturnDynamicResource=True}" />
+            </Trigger>
+        </Style.Triggers>
     </Style>
 
     <Style x:Key="LargeIconButton" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
         <Setter Property="Width" Value="24"/>
         <Setter Property="Height" Value="24"/>
+        <Setter Property="Foreground" Value="{ugm:AppearanceResource ResourceKey=TextBrush, ReturnDynamicResource=True}" />
+
+        <Style.Triggers>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Foreground" Value="{ugm:AppearanceResource ResourceKey=DisableTextBrush, ReturnDynamicResource=True}" />
+            </Trigger>
+        </Style.Triggers>
     </Style>
 
     <Style x:Key="IconCheckBoxBase" TargetType="{x:Type CheckBox}">

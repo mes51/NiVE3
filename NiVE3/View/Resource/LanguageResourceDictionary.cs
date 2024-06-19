@@ -195,6 +195,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("トーンマッパー:")]
         public static readonly string CompositionSettingView_ToneMapperLabel = nameof(CompositionSettingView_ToneMapperLabel);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("カスタム")]
+        public static readonly string CompositionSettingView_PresetName_Custom = nameof(CompositionSettingView_PresetName_Custom);
+
         [ShowInMarkup, LanguageKey, DefaultValue("色の選択")]
         public static readonly string ColorPickerDialog_Title = nameof(ColorPickerDialog_Title);
 
@@ -619,23 +622,55 @@ namespace NiVE3.View.Resource
 
         // Dialog
 
-        [ShowInMarkup, LanguageKey, DefaultValue("フッテージの削除")]
+        [LanguageKey, DefaultValue("フッテージの削除")]
         public static readonly string Dialog_ConfirmDeleteFootage_Title = nameof(Dialog_ConfirmDeleteFootage_Title);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("フッテージを削除すると、各コンポジションからこのフッテージを使用しているレイヤーが削除されます。このフッテージを削除しますか?")]
+        [LanguageKey, DefaultValue("フッテージを削除すると、各コンポジションからこのフッテージを使用しているレイヤーが削除されます。このフッテージを削除しますか?")]
         public static readonly string Dialog_ConfirmDeleteFootage_Text = nameof(Dialog_ConfirmDeleteFootage_Text);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("フォルダを削除すると、中に含まれているフッテージも一緒に削除され、各コンポジションからも含まれているフッテージを使用しているレイヤーが削除されます。このフォルダを削除しますか?")]
+        [LanguageKey, DefaultValue("フォルダを削除すると、中に含まれているフッテージも一緒に削除され、各コンポジションからも含まれているフッテージを使用しているレイヤーが削除されます。このフォルダを削除しますか?")]
         public static readonly string Dialog_ConfirmDeleteFootageFolder_Text = nameof(Dialog_ConfirmDeleteFootageFolder_Text);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("レンダリング開始")]
+        [LanguageKey, DefaultValue("レンダリング開始")]
         public static readonly string Dialog_ConfirmRenderOverwriteByQueueingItem_Title = nameof(Dialog_ConfirmRenderOverwriteByQueueingItem_Title);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("レンダーキューに同じファイル名、または命名規則のパスが存在します。レンダリングを行うと後続のキューによってファイルが上書きされる可能性があります。よろしいですか?")]
+        [LanguageKey, DefaultValue("レンダーキューに同じファイル名、または命名規則のパスが存在します。レンダリングを行うと後続のキューによってファイルが上書きされる可能性があります。よろしいですか?")]
         public static readonly string Dialog_ConfirmRenderOverwriteByQueueingItem_Text = nameof(Dialog_ConfirmRenderOverwriteByQueueingItem_Text);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("プロジェクトファイル")]
+        [LanguageKey, DefaultValue("プロジェクトファイル")]
         public static readonly string Dialog_OpenSaveProject_Filter_Project = nameof(Dialog_OpenSaveProject_Filter_Project);
+
+        [LanguageKey, DefaultValue("プリセットの削除")]
+        public static readonly string Dialog_ConfirmDeleteCompositionPreset_Title = nameof(Dialog_ConfirmDeleteCompositionPreset_Title);
+
+        [LanguageKey, DefaultValue("選択しているプリセットを削除しますか?")]
+        public static readonly string Dialog_ConfirmDeleteCompositionPreset_Text = nameof(Dialog_ConfirmDeleteCompositionPreset_Text);
+
+        [LanguageKey, DefaultValue("「{0}」はすでに使用されています。上書きしますか?")]
+        public static readonly string Dialog_NameSettingView_ConfirmOverwrite_Text = nameof(Dialog_NameSettingView_ConfirmOverwrite_Text);
+
+        [LanguageKey, DefaultValue("新しいプリセット")]
+        public static readonly string Dialog_CompositionPresetName_Title = nameof(Dialog_CompositionPresetName_Title);
+
+        [LanguageKey, DefaultValue("プリセット名:")]
+        public static readonly string Dialog_CompositionPresetName_Label = nameof(Dialog_CompositionPresetName_Label);
+
+        // ValidationRule
+
+        [DefaultValue("入力が文字列ではありません")]
+        public static readonly string ValidationRule_General_NotString = nameof(ValidationRule_General_NotString);
+
+        [DefaultValue("文字数は{0}文字以上である必要があります")]
+        public static readonly string ValidationRule_StringLength_LessLength = nameof(ValidationRule_StringLength_LessLength);
+
+        [DefaultValue("文字数は{0}文字以下である必要があります")]
+        public static readonly string ValidationRule_StringLength_OverLength = nameof(ValidationRule_StringLength_OverLength);
+
+        [DefaultValue("文字数は{0}文字以上{1}文字以下である必要があります")]
+        public static readonly string ValidationRule_StringLength_OutOfRange = nameof(ValidationRule_StringLength_OutOfRange);
+
+        [DefaultValue("「{0}」はすでに使用されています")]
+        public static readonly string ValidationRule_RegisteredNames_AlreadyUsed = nameof(ValidationRule_RegisteredNames_AlreadyUsed);
 
         // Property
 
