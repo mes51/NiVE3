@@ -83,6 +83,10 @@ namespace NiVE3.Cache
                 if (SecondaryKeys.TryGetValue(secondaryKey, out var primaryKeys))
                 {
                     primaryKeys.RemoveAll(p => p.Item3 == time);
+                    if (primaryKeys.Count < 1)
+                    {
+                        SecondaryKeys.Remove(secondaryKey);
+                    }
                 }
             }
         }

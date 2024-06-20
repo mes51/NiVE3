@@ -125,9 +125,15 @@ namespace NiVE3.Util
                 var value = MainDictionary[key];
                 MainDictionary.Remove(key);
                 PrimaryDictionary.Remove(key.Item1);
-                SecondaryDictionary[key.Item2].Remove(value);
                 UpdateTargetKeys[key.Item1.Item1].Remove(key.Item1.Item2);
                 SecondaryKeys.Remove(key.Item1);
+
+                var secondaries = SecondaryDictionary[key.Item2];
+                secondaries.Remove(value);
+                if (secondaries.Count < 1)
+                {
+                    SecondaryDictionary.Remove(key.Item2);
+                }
 
                 return true;
             }

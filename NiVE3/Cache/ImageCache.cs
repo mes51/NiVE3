@@ -23,7 +23,7 @@ namespace NiVE3.Cache
 
         public static long CacheLimit { get; set; } = 16L * 1024 * 1024 * 1024;
 
-        private DualKeyDictionary<Guid, (double, Int128), (Guid, Int128), (IDisposable, int, ROI)> CachedImages { get; } = [];
+        private DualKeyDictionary<Guid, (double, Int128), (Guid, Int128), (IDisposable, long, ROI)> CachedImages { get; } = [];
 
         private long CachedSize { get; set; }
 
@@ -157,7 +157,9 @@ namespace NiVE3.Cache
 
             foreach (var k in CachedImages.GetUpdateTargetKeys(objectId))
             {
-                CachedImages[objectId, k].Item1.Dispose();
+                var image = CachedImages[objectId, k];
+                image.Item1.Dispose();
+                CachedSize -= image.Item2;
                 KeyLru.Remove(objectId, k.Item2, k.Item1);
             }
             CachedImages.Remove(objectId);
@@ -209,7 +211,7 @@ namespace NiVE3.Cache
             Instance.ClearAllInternal();
         }
 
-        static (NManagedImage, ROI) Decompress((IDisposable, int, ROI) compressedImage)
+        static (NManagedImage, ROI) Decompress((IDisposable, long, ROI) compressedImage)
         {
             var (image, _, roi) = compressedImage;
             if (image is NManagedImage notCompressed)
