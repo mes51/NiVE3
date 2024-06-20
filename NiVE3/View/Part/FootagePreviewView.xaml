@@ -52,7 +52,7 @@
                     </Grid.ColumnDefinitions>
 
                     <Grid Grid.Column="0" Width="100">
-                        <Border BorderBrush="{ui:AppearanceResource ResourceKey=BorderBrush, ReturnDynamicResource=True}" BorderThickness="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Border BorderBrush="{ui:AppearanceResource ResourceKey=BorderBrush, ReturnDynamicResource=True}" BorderThickness="1" HorizontalAlignment="Center" VerticalAlignment="Center" Background="Black">
                             <Image Grid.Column="0" Source="{Binding SampleImage}" Stretch="Uniform"/>
                         </Border>
                     </Grid>

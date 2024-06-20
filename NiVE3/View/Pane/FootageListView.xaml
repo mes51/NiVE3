@@ -107,9 +107,7 @@
             <RowDefinition />
         </Grid.RowDefinitions>
 
-        <!--
         <pt:FootagePreviewView Grid.Row="0" SelectedFootages="{Binding ElementName=Root, Path=SelectedFootages}"/>
-        -->
         <pv:TreeListView Grid.Row="1"
                          x:Name="FootageTreeListView"
                          ItemsSource="{Binding Footages}"
