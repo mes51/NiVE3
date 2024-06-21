@@ -138,7 +138,14 @@ namespace NiVE3.ViewModel
         private BitmapSource? sampleImage;
         public BitmapSource? SampleImage
         {
-            get { return sampleImage; }
+            get
+            {
+                if (IsDirty)
+                {
+                    UpdateSampleImage();
+                }
+                return sampleImage;
+            }
             set { SetProperty(ref sampleImage, value); }
         }
 
@@ -165,6 +172,8 @@ namespace NiVE3.ViewModel
 
         FootageModel Footage { get; }
 
+        bool IsDirty { get; set; } = true;
+
 #pragma warning disable CS8618 // 各フィールドには初期化時に必ず値を代入するため無視
         public FootageViewModel(FootageModel footage)
 #pragma warning restore CS8618
@@ -181,11 +190,7 @@ namespace NiVE3.ViewModel
             Comment = footage.Comment;
             InputType = footage.InputType;
 
-            UpdateSampleImage();
-
             WiringModel();
-
-            PropertyChanged += FootageViewModel_PropertyChanged;
 
             BeginEditNameCommand = new DelegateCommand(() =>
             {
@@ -224,6 +229,9 @@ namespace NiVE3.ViewModel
                 }
                 EditingParameter = EditingFootageParameter.None;
             });
+
+            PropertyChanged += FootageViewModel_PropertyChanged;
+            footage.UpdateSampleImageRequest += Footage_UpdateSampleImageRequest;
         }
 
         private void FootageViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -231,7 +239,7 @@ namespace NiVE3.ViewModel
             if (e.PropertyName == nameof(FilePath))
             {
                 FileExtension = Path.GetExtension(FilePath);
-                UpdateSampleImage();
+                IsDirty = true;
             }
         }
 
@@ -239,6 +247,7 @@ namespace NiVE3.ViewModel
 
         void UpdateSampleImage()
         {
+            IsDirty = false;
             if (Footage.InputType == SourceType.Image || (Footage.InputType & SourceType.Video) != SourceType.None)
             {
                 using var image = Footage.ReadImage(Duration * 0.5, 1.0, 0, 0, null, ImageInterpolationQuality.Level2, false) as NManagedImage;
@@ -252,6 +261,11 @@ namespace NiVE3.ViewModel
                     ArrayPool<byte>.Shared.Return(data);
                 }
             }
+        }
+
+        private void Footage_UpdateSampleImageRequest(object? sender, EventArgs e)
+        {
+            IsDirty = true;
         }
     }
 

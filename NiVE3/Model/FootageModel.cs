@@ -8,6 +8,8 @@ using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Data.Json.Project;
 using NiVE3.Image;
+using NiVE3.Input;
+using NiVE3.Mvvm;
 using NiVE3.Numerics;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Property;
@@ -140,6 +142,13 @@ namespace NiVE3.Model
 
         public ObservableCollection<IFootageModel>? Children => null;
 
+        WeakEventPublisher<EventArgs> UpdateSampleImageRequestPublisher { get; } = new WeakEventPublisher<EventArgs>();
+        public event EventHandler<EventArgs> UpdateSampleImageRequest
+        {
+            add { UpdateSampleImageRequestPublisher.Subscribe(value); }
+            remove { UpdateSampleImageRequestPublisher.Unsubscribe(value); }
+        }
+
         IFootageSource Source { get; }
 
         HistoryModel HistoryModel { get; }
@@ -171,6 +180,11 @@ namespace NiVE3.Model
             }
             FilePath = input.FilePath;
             InputType = source.SourceType;
+
+            if (input.Input is CompositionInput compositionInput)
+            {
+                compositionInput.Composition.CompositionUpdated += Composition_CompositionUpdated;
+            }
         }
 
         public void AddFootage(IFootageModel footage) { }
@@ -257,6 +271,11 @@ namespace NiVE3.Model
                 InputOption = InputModel.Input.SaveData(),
                 SourceId = Source.SourceId
             };
+        }
+
+        private void Composition_CompositionUpdated(object? sender, EventArgs e)
+        {
+            UpdateSampleImageRequestPublisher.Publish(this, EventArgs.Empty);
         }
     }
 
