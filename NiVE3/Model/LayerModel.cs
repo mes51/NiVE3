@@ -983,6 +983,11 @@ namespace NiVE3.Model
             }
         }
 
+        public void AddEffects(Guid[] effectUuids)
+        {
+            InsertEffect(effectUuids, Effects.Count);
+        }
+
         public void InsertEffect(Guid[] effectUuids, int index)
         {
             var effectModels = effectUuids.Select(id => EffectListModel.CreateEffect(id, CompositionModel, this, HistoryModel)).OfType<EffectModel>().ToArray();

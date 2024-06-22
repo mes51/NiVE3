@@ -283,22 +283,32 @@ namespace NiVE3.View.Pane
         {
             var realWidth = PreviewAnchorGrid.ActualWidth * PreviewAreaImageScaleX;
             var realHeight = PreviewAnchorGrid.ActualHeight * PreviewAreaImageScaleY;
-            Canvas.SetLeft(PreviewAnchorGrid, (PreviewCanvas.ActualWidth - realWidth) * 0.5);
-            Canvas.SetTop(PreviewAnchorGrid, (PreviewCanvas.ActualHeight - realHeight) * 0.5);
+            var viewModel = ViewModel;
+            if (viewModel != null)
+            {
+                viewModel.ScreenX = (PreviewCanvas.ActualWidth - realWidth) * 0.5;
+                viewModel.ScreenY = (PreviewCanvas.ActualHeight - realHeight) * 0.5;
+            }
             NeedPositionReset = realWidth <= 0.0 || realHeight <= 0.0;
         }
 
         void MovePreviewArea(double x, double y, bool isAbsolute)
         {
+            var viewModel = ViewModel;
+            if (viewModel == null)
+            {
+                return;
+            }
+
             if (isAbsolute)
             {
-                Canvas.SetLeft(PreviewAnchorGrid, x);
-                Canvas.SetTop(PreviewAnchorGrid, y);
+                viewModel.ScreenX = x;
+                viewModel.ScreenY = y;
             }
             else
             {
-                Canvas.SetLeft(PreviewAnchorGrid, Canvas.GetLeft(PreviewAnchorGrid) + x);
-                Canvas.SetTop(PreviewAnchorGrid, Canvas.GetTop(PreviewAnchorGrid) + y);
+                viewModel.ScreenX += x;
+                viewModel.ScreenY += y;
             }
         }
 
@@ -313,7 +323,7 @@ namespace NiVE3.View.Pane
             if (viewModel != null && !viewModel.IsFootage && !viewModel.IsPlaying)
             {
                 var pos = e.GetPosition(PreviewCanvas);
-                var prevPoint = new Point(Canvas.GetLeft(PreviewAnchorGrid), Canvas.GetTop(PreviewAnchorGrid));
+                var prevPoint = new Point(viewModel.ScreenX, viewModel.ScreenY);
                 ClickPoint = pos;
                 IsMouseDown = true;
                 IsMovedByTool = false;
@@ -336,6 +346,7 @@ namespace NiVE3.View.Pane
         {
             if (IsMouseDown)
             {
+                var viewModel = ViewModel;
                 var newPoint = e.GetPosition(PreviewCanvas);
                 switch (UsingToolType)
                 {
@@ -345,18 +356,18 @@ namespace NiVE3.View.Pane
                         break;
                     default:
                         var dpi = VisualTreeHelper.GetDpi(this);
-                        var compositionPoint = new Vector2d(Canvas.GetLeft(PreviewAnchorGrid), Canvas.GetTop(PreviewAnchorGrid));
+                        var compositionPoint = new Vector2d(viewModel?.ScreenX ?? 0.0, viewModel?.ScreenY ?? 0.0);
                         var dpiScale = new Vector2d(dpi.DpiScaleX, dpi.DpiScaleY);
                         var beginPos = ((Vector2d)ClickPoint - compositionPoint) * dpiScale;
                         if (!IsMovedByTool && (newPoint - ClickPoint).Length > ToolMoveThreshold)
                         {
-                            ViewModel?.BeginUseToolCommand.Execute(beginPos);
+                            viewModel?.BeginUseToolCommand.Execute(beginPos);
                             IsMovedByTool = true;
                         }
                         if (IsMovedByTool)
                         {
                             var nextPoint = ((Vector2d)newPoint - compositionPoint) * dpiScale;
-                            ViewModel?.MoveLayersByToolCommand?.Execute(Tuple.Create(nextPoint, false));
+                            viewModel?.MoveLayersByToolCommand?.Execute(Tuple.Create(nextPoint, false));
                         }
                         break;
                 }
@@ -367,6 +378,7 @@ namespace NiVE3.View.Pane
         {
             if (IsMouseDown)
             {
+                var viewModel = ViewModel;
                 var newPoint = e.GetPosition(PreviewCanvas);
                 var dpi = VisualTreeHelper.GetDpi(this);
                 switch (UsingToolType)
@@ -378,7 +390,7 @@ namespace NiVE3.View.Pane
                     default:
                         if (IsMovedByTool)
                         {
-                            var compositionPoint = new Vector2d(Canvas.GetLeft(PreviewAnchorGrid), Canvas.GetTop(PreviewAnchorGrid));
+                            var compositionPoint = new Vector2d(viewModel?.ScreenX ?? 0.0, viewModel?.ScreenY ?? 0.0);
                             var dpiScale = new Vector2d(dpi.DpiScaleX, dpi.DpiScaleY);
                             var nextPoint = ((Vector2d)newPoint - compositionPoint) * dpiScale;
                             ViewModel?.MoveLayersByToolCommand?.Execute(Tuple.Create(nextPoint, true));

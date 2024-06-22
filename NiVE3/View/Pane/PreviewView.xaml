@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:dd="urn:gong-wpf-dragdrop"
              xmlns:local="clr-namespace:NiVE3.View.Pane"
              xmlns:pr="clr-namespace:NiVE3.View.Primitive"
              xmlns:pt="clr-namespace:NiVE3.View.Part"
@@ -19,6 +19,7 @@
              SizeChanged="Root_SizeChanged"
              DataContextChanged="Root_DataContextChanged"
              KeyDown="Root_KeyDown"
+             dd:DragDrop.DragSourceIgnore="True"
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
         <cv:LocalizationConverter x:Key="DownScaleRateConverter" LocalizeFormat="{gm:LanguageResource ResourceKey=PreviewView_DownScaleRateFormat}"/>
@@ -266,8 +267,8 @@
         </Grid.RowDefinitions>
 
         <Border Grid.Row="0" Style="{StaticResource PreviewColorChannelBorder}">
-            <Canvas x:Name="PreviewCanvas" Background="Transparent" ClipToBounds="True" MouseDown="PreviewCanvas_MouseDown" MouseMove="PreviewCanvas_MouseMove" MouseUp="PreviewCanvas_MouseUp" MouseWheel="PreviewCanvas_MouseWheel">
-                <Grid x:Name="PreviewAnchorGrid" Width="{Binding Width}" Height="{Binding Height}">
+            <Canvas x:Name="PreviewCanvas" Background="Transparent" ClipToBounds="True" MouseDown="PreviewCanvas_MouseDown" MouseMove="PreviewCanvas_MouseMove" MouseUp="PreviewCanvas_MouseUp" MouseWheel="PreviewCanvas_MouseWheel" dd:DragDrop.DropHandler="{Binding}" dd:DragDrop.IsDropTarget="True" dd:DragDrop.DragSourceIgnore="False">
+                <Grid x:Name="PreviewAnchorGrid" Width="{Binding Width}" Height="{Binding Height}" Canvas.Left="{Binding ScreenX}" Canvas.Top="{Binding ScreenY}">
                     <Grid.LayoutTransform>
                         <ScaleTransform ScaleX="{Binding ElementName=Root, Path=PreviewAreaImageScaleX}" ScaleY="{Binding ElementName=Root, Path=PreviewAreaImageScaleY}"/>
                     </Grid.LayoutTransform>

@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Buffers;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
-using System.Numerics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
 using System.Text;
@@ -27,12 +23,10 @@ using NiVE3.View.Dock;
 using NiVE3.View.Resource;
 using Prism.Commands;
 using System.Windows.Threading;
-using ImTools;
 using NiVE3.Numerics;
-using ILGPU.Algorithms.Optimization.Optimizers;
-using NiVE3.Plugin.Interfaces.RendererParams;
 using NiVE3.View.Command;
 using NiVE3.Config;
+using GongSolutions.Wpf.DragDrop;
 
 namespace NiVE3.ViewModel
 {
@@ -43,7 +37,7 @@ namespace NiVE3.ViewModel
     [CommandHandling(nameof(ChangeToRotateToolCommand), nameof(ShortcutKeySetting.SelectRotateToolGesture), IsGlobal = true)]
     [CommandHandling(nameof(ChangeToScaleCommand), nameof(ShortcutKeySetting.SelectScaleGestureGesture), IsGlobal = true)]
     [CommandHandling(nameof(ChangeToCameraToolCommand), nameof(ShortcutKeySetting.SelectCameraToolGesture), IsGlobal = true)]
-    partial class PreviewViewModel : PaneViewModelBase
+    partial class PreviewViewModel : PaneViewModelBase, IDropTarget
     {
         const int Black = 255 << 24;
 
@@ -225,6 +219,20 @@ namespace NiVE3.ViewModel
         {
             get { return scale; }
             set { SetProperty(ref scale, value); }
+        }
+
+        private double screenX;
+        public double ScreenX
+        {
+            get { return screenX; }
+            set { SetProperty(ref screenX, value); }
+        }
+
+        private double screenY;
+        public double ScreenY
+        {
+            get { return screenY; }
+            set { SetProperty(ref screenY, value); }
         }
 
         private bool isStretchPreview;
@@ -530,6 +538,50 @@ namespace NiVE3.ViewModel
             PlayControllerModel.PreviewPlay -= PlayControllerModel_PreviewPlay;
             PlayControllerModel.Stopped -= PlayControllerModel_Stopped;
             PlayControllerModel.PauseChanged -= PlayControllerModel_PauseChanged;
+        }
+
+        public void DragOver(IDropInfo dropInfo)
+        {
+            if (PreviewModel is not CompositionPreviewModel compositionPreviewModel || compositionPreviewModel.Composition == null)
+            {
+                dropInfo.NotHandled = true;
+                return;
+            }
+
+            var dpi = VisualTreeHelper.GetDpi(dropInfo.VisualTarget);
+            var screenPos = (Vector2d)dropInfo.DropPosition - new Vector2d(ScreenX, ScreenY);
+            var pos = screenPos * new Vector2d(dpi.DpiScaleX, dpi.DpiScaleY) / (Scale * 0.01);
+            var layerId = compositionPreviewModel.Composition.FindLayerByPreviewPosition(CurrentTime, pos);
+
+            switch (dropInfo.Data)
+            {
+                case EffectListDragData when layerId.HasValue:
+                    dropInfo.Effects = DragDropEffects.Copy;
+                    break;
+                default:
+                    dropInfo.NotHandled = true;
+                    break;
+            }
+        }
+
+        public void Drop(IDropInfo dropInfo)
+        {
+            if (PreviewModel is not CompositionPreviewModel compositionPreviewModel || compositionPreviewModel.Composition == null)
+            {
+                return;
+            }
+
+            var dpi = VisualTreeHelper.GetDpi(dropInfo.VisualTarget);
+            var screenPos = (Vector2d)dropInfo.DropPosition - new Vector2d(ScreenX, ScreenY);
+            var pos = screenPos * new Vector2d(dpi.DpiScaleX, dpi.DpiScaleY) / (Scale * 0.01);
+            var layerId = compositionPreviewModel.Composition.FindLayerByPreviewPosition(CurrentTime, pos);
+
+            switch (dropInfo.Data)
+            {
+                case EffectListDragData effectListData when layerId.HasValue:
+                    compositionPreviewModel.Composition.AddEffectToLayer(layerId.Value, effectListData.Effects);
+                    break;
+            }
         }
 
         partial void WiringModel();

@@ -1145,6 +1145,12 @@ namespace NiVE3.Model
             return activeCamera?.GetCameraSetting(time) ?? CreateDefaultCameraSetting(Width, Height);
         }
 
+        public void AddEffectToLayer(Guid layerId, Guid[] effectUuids)
+        {
+            var layer = Layers.FirstOrDefault(l => l.LayerId == layerId);
+            layer?.AddEffects(effectUuids);
+        }
+
         bool CheckCycledSimulatedParentLayer(Guid layerId, Dictionary<Guid, Guid?> changed, HashSet<Guid>? checkedLayerIds = null)
         {
             checkedLayerIds ??= [];

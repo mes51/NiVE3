@@ -905,7 +905,7 @@ namespace NiVE3.ViewModel
                     LayerModel.InsertEffect(effectListData.Effects, dropInfo.InsertIndex);
                     break;
                 case EffectListDragData effectListData:
-                    LayerModel.InsertEffect(effectListData.Effects, Effects.Count);
+                    LayerModel.AddEffects(effectListData.Effects);
                     break;
                 case EffectViewModel effect:
                     {
