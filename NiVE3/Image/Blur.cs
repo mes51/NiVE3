@@ -3,6 +3,7 @@ using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,140 +15,206 @@ namespace NiVE3.Image
     {
         public static void BoxBlur(NManagedImage image, float horizontal, float vertical)
         {
-            var pz = (int)Math.Ceiling(vertical);
-            var fmz = pz - vertical;
-            var fz = 1.0F - fmz;
             var imageWidth = image.Width;
             var imageHeight = image.Height;
-            var temp = ArrayPool<Vector4>.Shared.Rent(image.DataLength);
-            temp.AsSpan(0, image.DataLength).Clear();
-
-            if (vertical > 0.0F)
-            {
-                Parallel.For(0, imageWidth, delegate (int w)
-                {
-                    var count = 0.0F;
-                    var rgb = Vector4.Zero;
-                    var a = 0.0F;
-                    var data = image.GetDataSpan();
-                    var tempSpan = temp.AsSpan();
-                    for (int h = -pz; h < imageHeight; h++)
-                    {
-                        int t = h - pz;
-                        if (t > -1)
-                        {
-                            var p = data[t * imageWidth + w];
-                            var ta = p.W * fz;
-                            rgb -= p * ta;
-                            a -= ta;
-                            count -= fz;
-                        }
-                        t++;
-                        if (fmz > 0.0F && t > -1)
-                        {
-                            var p = data[t * imageWidth + w];
-                            var ta = p.W * fmz;
-                            rgb -= p * ta;
-                            a -= ta;
-                            count -= fmz;
-                        }
-                        t = h + pz;
-                        if (t < imageHeight)
-                        {
-                            var p = data[t * imageWidth + w];
-                            var ta = p.W * fz;
-                            rgb += p * ta;
-                            a += ta;
-                            count += fz;
-                        }
-                        t--;
-                        if (fmz > 0.0F && t > -1 && t < imageHeight)
-                        {
-                            var p = data[t * imageWidth + w];
-                            var ta = p.W * fmz;
-                            rgb += p * ta;
-                            a += ta;
-                            count += fmz;
-                        }
-                        if (h > -1 && a > 0.0F)
-                        {
-                            var result = rgb / a;
-                            result.W = a / count;
-                            tempSpan[h * imageWidth + w] = result;
-                        }
-                    }
-                });
-            }
-            else
-            {
-                image.GetDataSpan().CopyTo(temp);
-            }
+            var imageData = image.Data;
+            var temp = ArrayPool<Vector4>.Shared.Rent(imageData.Length);
+            temp.AsSpan().Clear();
 
             if (horizontal > 0.0F)
             {
-                pz = (int)MathF.Ceiling(horizontal);
-                fmz = pz - horizontal;
-                fz = 1.0F - fmz;
-                Parallel.For(0, imageHeight, delegate (int h)
+                var pz = (int)Math.Ceiling(horizontal);
+                var fmz = pz - horizontal;
+                var fz = 1 - fmz;
+                var count = horizontal * 2.0F + 1.0F;
+
+                Parallel.For(0, imageHeight, h =>
                 {
-                    var count = 0.0F;
                     var rgb = Vector4.Zero;
                     var a = 0.0F;
-                    var data = image.GetDataSpan();
-                    var tempSpan = temp.AsSpan();
-                    for (int w = -pz; w < imageWidth; w++)
+                    var data = imageData.AsSpan(0, image.DataLength);
+
                     {
-                        int l = w - pz;
-                        if (l > -1)
+                        var w = -pz - 1;
+                        if (fmz > 0.0F)
                         {
-                            var p = tempSpan[h * imageWidth + l];
-                            var ta = p.W * fz;
-                            rgb -= p * ta;
-                            a -= ta;
-                            count -= fz;
-                        }
-                        l++;
-                        if (fmz > 0.0F && l > -1)
-                        {
-                            var p = tempSpan[h * imageWidth + l];
+                            var p = GetPixelForX(data, imageWidth, w, h);
                             var ta = p.W * fmz;
+                            rgb += p * ta;
+                            a += ta;
+
+                            p = GetPixelForX(data, imageWidth, pz, h);
+                            ta = p.W * fmz;
+                            rgb += p * ta;
+                            a += ta;
+                        }
+                        for (var limit = pz - (fmz > 0.0F ? 2 : 1); w <= limit; w++)
+                        {
+                            var p = GetPixelForX(data, imageWidth, w, h);
+                            var ta = p.W;
+                            rgb += p * ta;
+                            a += ta;
+                        }
+                    }
+
+                    for (var w = 0; w < imageWidth; w++)
+                    {
+                        var l = w - pz - 1;
+                        var p = GetPixelForX(data, imageWidth, l, h);
+                        var ta = p.W * fz;
+                        rgb -= p * ta;
+                        a -= ta;
+                        l++;
+
+                        if (fmz > 0.0F)
+                        {
+                            p = GetPixelForX(data, imageWidth, l, h);
+                            ta = p.W * fmz;
                             rgb -= p * ta;
                             a -= ta;
-                            count -= fmz;
                         }
                         l = w + pz;
-                        if (l < imageWidth)
-                        {
-                            var p = tempSpan[h * imageWidth + l];
-                            var ta = p.W * fz;
-                            rgb += p * ta;
-                            a += ta;
-                            count += fz;
-                        }
+
+                        p = GetPixelForX(data, imageWidth, l, h);
+                        ta = p.W * fz;
+                        rgb += p * ta;
+                        a += ta;
                         l--;
-                        if (fmz > 0.0F && l > -1 && l < imageWidth)
+
+                        if (fmz > 0.0F)
                         {
-                            var p = tempSpan[h * imageWidth + l];
-                            var ta = p.W * fmz;
+                            p = GetPixelForX(data, imageWidth, l, h);
+                            ta = p.W * fmz;
                             rgb += p * ta;
                             a += ta;
-                            count += fmz;
                         }
+
                         if (w > -1 && a > 0.0F)
                         {
                             var result = rgb / a;
                             result.W = a / count;
-                            data[h * imageWidth + w] = result;
+                            temp[w * imageHeight + h] = result;
                         }
                     }
                 });
             }
             else
             {
-                temp.AsSpan(0, image.DataLength).CopyTo(image.GetDataSpan());
+                Parallel.For(0, imageHeight, y =>
+                {
+                    var data = imageData.AsSpan(y * imageWidth, imageWidth);
+                    for (var x = 0; x < imageWidth; x++)
+                    {
+                        temp[x * imageHeight + y] = data[x];
+                    }
+                });
             }
 
-            ArrayPool<Vector4>.Shared.Return(temp, true);
+            if (vertical > 0.0F)
+            {
+                var pz = (int)Math.Ceiling(vertical);
+                var fmz = pz - vertical;
+                var fz = 1 - fmz;
+                var count = vertical * 2.0F + 1.0F;
+
+                Parallel.For(0, imageWidth, w =>
+                {
+                    var rgb = Vector4.Zero;
+                    var a = 0.0F;
+                    var data = temp.AsSpan(0, image.DataLength);
+
+                    {
+                        var h = -pz - 1;
+                        if (fmz > 0.0F)
+                        {
+                            var p = GetPixelForX(temp, imageHeight, h, w);
+                            var ta = p.W * fz;
+                            rgb += p * ta;
+                            a += ta;
+
+                            p = GetPixelForX(temp, imageHeight, pz, w);
+                            ta = p.W * fz;
+                            rgb += p * ta;
+                            a += ta;
+
+                            h++;
+                        }
+                        for (var limit = pz - (fmz > 0.0F ? 2 : 1); h <= limit; h++)
+                        {
+                            var p = GetPixelForX(temp, imageHeight, h, w);
+                            var ta = p.W;
+                            rgb += p * ta;
+                            a += ta;
+                        }
+                    }
+
+                    for (var h = 0; h < imageHeight; h++)
+                    {
+                        var t = h - pz - 1;
+                        var p = GetPixelForX(temp, imageHeight, t, w);
+                        var ta = p.W * fz;
+                        rgb -= p * ta;
+                        a -= ta;
+                        t++;
+
+                        if (fmz > 0.0F)
+                        {
+                            p = GetPixelForX(temp, imageHeight, t, w);
+                            ta = p.W * fmz;
+                            rgb -= p * ta;
+                            a -= ta;
+                        }
+                        t = h + pz;
+
+                        p = GetPixelForX(temp, imageHeight, t, w);
+                        ta = p.W * fz;
+                        rgb += p * ta;
+                        a += ta;
+                        t--;
+
+                        if (fmz > 0.0F)
+                        {
+                            p = GetPixelForX(temp, imageHeight, t, w);
+                            ta = p.W * fmz;
+                            rgb += p * ta;
+                            a += ta;
+                        }
+
+                        if (a > 0.0F)
+                        {
+                            var result = rgb / a;
+                            result.W = a / count;
+                            imageData[h * imageWidth + w] = result;
+                        }
+                    }
+                });
+            }
+            else
+            {
+                Parallel.For(0, imageWidth, x =>
+                {
+                    var data = temp.AsSpan(x * imageHeight, imageHeight);
+                    for (var y = 0; y < imageHeight; y++)
+                    {
+                        imageData[y * imageWidth + x] = data[y];
+                    }
+                });
+            }
+
+            ArrayPool<Vector4>.Shared.Return(temp);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static Vector4 GetPixelForX(Span<Vector4> data, int stride, int x, int y)
+        {
+            if (x > -1 && x < stride)
+            {
+                return data[y * stride + x];
+            }
+            else
+            {
+                return Vector4.Zero;
+            }
         }
     }
 }
