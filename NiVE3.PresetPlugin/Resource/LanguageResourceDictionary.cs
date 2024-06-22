@@ -37,6 +37,8 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("スライダー")]
         public const string ExpressionControl_SliderControl_PropertyName = nameof(ExpressionControl_SliderControl_PropertyName);
 
+        // BoxBlur
+
         [DefaultValue("ボックスブラー")]
         public const string Blur_BoxBlur_Name = nameof(Blur_BoxBlur_Name);
 
@@ -54,6 +56,28 @@ namespace NiVE3.PresetPlugin.Resource
 
         [LanguageKey, DefaultValue("エッジの繰り返しモード")]
         public const string Blur_BoxBlur_EdgeRepeatMode = nameof(Blur_BoxBlur_EdgeRepeatMode);
+
+        // PixelSort
+
+        [DefaultValue("ピクセルソート")]
+        public const string Stylize_PixelSort_Name = nameof(Stylize_PixelSort_Name);
+
+        [DefaultValue("画像のピクセルを閾値を基準にソートします")]
+        public const string Stylize_PixelSort_Description = nameof(Stylize_PixelSort_Description);
+
+        [LanguageKey, DefaultValue("閾値")]
+        public const string Stylize_PixelSort_Threshold = nameof(Stylize_PixelSort_Threshold);
+
+        [LanguageKey, DefaultValue("モード")]
+        public const string Stylize_PixelSort_Mode = nameof(Stylize_PixelSort_Mode);
+
+        [LanguageKey, DefaultValue("ソート")]
+        public const string Stylize_PixelSort_Sort = nameof(Stylize_PixelSort_Sort);
+
+        [LanguageKey, DefaultValue("チャンネル")]
+        public const string Stylize_PixelSort_Channel = nameof(Stylize_PixelSort_Channel);
+
+        // Dynamics
 
         [DefaultValue("ダイナミクス")]
         public const string Audio_Dynamics_Name = nameof(Audio_Dynamics_Name);
@@ -78,6 +102,8 @@ namespace NiVE3.PresetPlugin.Resource
 
         [LanguageKey, DefaultValue("リリース")]
         public const string Audio_Dynamics_Release = nameof(Audio_Dynamics_Release);
+
+        // ParametricEqualizer
 
         [DefaultValue("パラメトリックイコライザ")]
         public const string Audio_ParametricEqualizer_Name = nameof(Audio_ParametricEqualizer_Name);
@@ -197,6 +223,33 @@ namespace NiVE3.PresetPlugin.Resource
 
         [DefaultValue("鏡面繰り返し")]
         public const string EdgeRepeatMode_Mirror = nameof(EdgeRepeatMode_Mirror);
+
+        [DefaultValue("明るさ")]
+        public const string ThresholdMode_Brightness = nameof(ThresholdMode_Brightness);
+
+        [DefaultValue("暗さ")]
+        public const string ThresholdMode_Darkness = nameof(ThresholdMode_Darkness);
+
+        [DefaultValue("縦")]
+        public const string SortMode_Vertical = nameof(SortMode_Vertical);
+
+        [DefaultValue("横")]
+        public const string SortMode_Horizontal = nameof(SortMode_Horizontal);
+
+        [DefaultValue("RGB")]
+        public const string SortTargetChannel_RGB = nameof(SortTargetChannel_RGB);
+
+        [DefaultValue("赤")]
+        public const string SortTargetChannel_R = nameof(SortTargetChannel_R);
+
+        [DefaultValue("緑")]
+        public const string SortTargetChannel_G = nameof(SortTargetChannel_G);
+
+        [DefaultValue("青")]
+        public const string SortTargetChannel_B = nameof(SortTargetChannel_B);
+
+        [DefaultValue("アルファ")]
+        public const string SortTargetChannel_A = nameof(SortTargetChannel_A);
 
         [DefaultValue("コンプレッサー")]
         public const string DynamicsMode_Compressor = nameof(DynamicsMode_Compressor);

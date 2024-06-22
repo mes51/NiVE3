@@ -35,6 +35,7 @@ namespace NiVE3.Image
         /// <param name="fromImage">元となる8bpcの画像データ</param>
         /// <param name="toImage">変換先の32bpcの画像データ</param>
         /// <param name="pixelCount">ピクセルの数</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe void ConvertToBGRA128(ReadOnlySpan<int> fromImage, Span<Vector4> toImage, int pixelCount)
         {
             ref var pixelDataRef = ref MemoryMarshal.GetReference(fromImage);
@@ -87,6 +88,7 @@ namespace NiVE3.Image
         /// <param name="fromImage">元となる32bpcの画像データ</param>
         /// <param name="toImage">変換先の8bpcの画像データ</param>
         /// <param name="pixelCount">ピクセルの数</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe void ConvertToBGRA32(ReadOnlySpan<Vector4> fromImage, Span<int> toImage, int pixelCount)
         {
             ref var pixelDataRef = ref MemoryMarshal.GetReference(fromImage);
@@ -127,6 +129,7 @@ namespace NiVE3.Image
         /// <param name="fromImage">元となる32bpcの画像データ</param>
         /// <param name="toImage">変換先の8bpcの画像データ</param>
         /// <param name="pixelCount">ピクセルの数</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ConvertToBGR32(ReadOnlySpan<Vector4> fromImage, Span<byte> toImage, int pixelCount)
         {
             ConvertToBGR32(fromImage, MemoryMarshal.Cast<byte, int>(toImage[..(pixelCount * 4)]), pixelCount);
@@ -138,6 +141,7 @@ namespace NiVE3.Image
         /// <param name="fromImage">元となる32bpcの画像データ</param>
         /// <param name="toImage">変換先の8bpcの画像データ</param>
         /// <param name="pixelCount">ピクセルの数</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe void ConvertToBGR32(ReadOnlySpan<Vector4> fromImage, Span<int> toImage, int pixelCount)
         {
             ref var pixelDataRef = ref MemoryMarshal.GetReference(fromImage);
@@ -172,6 +176,34 @@ namespace NiVE3.Image
                     resultData[i] = Sse2.ConvertToInt32(p8.AsInt32());
                 });
             }
+        }
+
+        /// <summary>
+        /// 32bpcから8bpcの色に変換します
+        /// </summary>
+        /// <param name="color">変換する32bpcの色</param>
+        /// <returns>変換された8bpcの色</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int ToBGRA32(in Vector4 color)
+        {
+            var p = Sse41.RoundCurrentDirection(color.AsVector128() * 255.0F);
+            var p32 = Sse41.Min(Sse41.Max(Sse2.ConvertToVector128Int32(p), Vector128<int>.Zero), Vector128.Create(255));
+            var p16 = Sse2.PackSignedSaturate(p32, Vector128<int>.Zero);
+            var p8 = Sse2.PackUnsignedSaturate(p16, Vector128<short>.Zero);
+            return Sse2.ConvertToInt32(p8.AsInt32());
+        }
+
+        /// <summary>
+        /// 8bpcから32bpcの色に変換します
+        /// </summary>
+        /// <param name="color">変換する8bpcの色</param>
+        /// <returns>変換された32bpcの色</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector4 ToBGRA128(int color)
+        {
+            var c = Sse2.ConvertScalarToVector128Int32(color).AsByte();
+            var cv = Sse2.UnpackLow(Sse2.UnpackLow(c, Vector128<byte>.Zero), Vector128<byte>.Zero).AsInt32();
+            return (Sse2.ConvertToVector128Single(cv) * ByteToFloat).AsVector4();
         }
     }
 }
