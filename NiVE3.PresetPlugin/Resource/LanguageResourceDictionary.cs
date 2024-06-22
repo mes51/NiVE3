@@ -52,6 +52,9 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("方向")]
         public const string Blur_BoxBlur_Direction = nameof(Blur_BoxBlur_Direction);
 
+        [LanguageKey, DefaultValue("エッジの繰り返しモード")]
+        public const string Blur_BoxBlur_EdgeRepeatMode = nameof(Blur_BoxBlur_EdgeRepeatMode);
+
         [DefaultValue("ダイナミクス")]
         public const string Audio_Dynamics_Name = nameof(Audio_Dynamics_Name);
 
@@ -182,6 +185,18 @@ namespace NiVE3.PresetPlugin.Resource
 
         [DefaultValue("垂直")]
         public const string BlurDirection_Vertical = nameof(BlurDirection_Vertical);
+
+        [DefaultValue("なし")]
+        public const string EdgeRepeatMode_None = nameof(EdgeRepeatMode_None);
+
+        [DefaultValue("エッジのみ繰り返し")]
+        public const string EdgeRepeatMode_Wrap = nameof(EdgeRepeatMode_Wrap);
+
+        [DefaultValue("繰り返し")]
+        public const string EdgeRepeatMode_Repeat = nameof(EdgeRepeatMode_Repeat);
+
+        [DefaultValue("鏡面繰り返し")]
+        public const string EdgeRepeatMode_Mirror = nameof(EdgeRepeatMode_Mirror);
 
         [DefaultValue("コンプレッサー")]
         public const string DynamicsMode_Compressor = nameof(DynamicsMode_Compressor);
