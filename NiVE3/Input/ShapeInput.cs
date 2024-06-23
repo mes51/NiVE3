@@ -29,6 +29,7 @@ using LinearGradientBrush = NiVE3.Shape.LinearGradientBrush;
 using RadialGradientBrush = NiVE3.Shape.RadialGradientBrush;
 using NiVE3.Plugin.ValueObject;
 using System.Windows.Media;
+using ImTools;
 
 namespace NiVE3.Input
 {
@@ -218,6 +219,14 @@ namespace NiVE3.Input
 
         const string CombineTypeId = nameof(CombineTypeId);
 
+        const string TrimmingGroupId = nameof(TrimmingGroupId);
+
+        const string TrimmingBeginId = nameof(TrimmingBeginId);
+
+        const string TrimmingEndId = nameof(TrimmingEndId);
+
+        const string TrimmingOffsetId = nameof(TrimmingOffsetId);
+
         public static ShapeFootageSource Instance { get; } = new ShapeFootageSource();
 
         public string SourceId => "shape";
@@ -365,6 +374,13 @@ namespace NiVE3.Input
                     new PropertyGroup(CombineGroupId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_CombineGroup,
                     [
                         new EnumProperty(CombineTypeId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_CombineGroup_CombineType, typeof(ClippingOperation), typeof(LanguageResourceDictionary), ClippingOperation.Union, selectBoxWidth: 100)
+                    ])),
+                new AppendablePropertyItem(TrimmingGroupId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_TrimmingGroup, () =>
+                    new PropertyGroup(TrimmingGroupId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_TrimmingGroup,
+                    [
+                        new DoubleProperty(TrimmingBeginId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_TrimmingGroup_Begin, 0.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
+                        new DoubleProperty(TrimmingEndId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_TrimmingGroup_End, 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
+                        new AngleProperty(TrimmingOffsetId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_TrimmingGroup_Offset, 0.0, digit: 2)
                     ]))
             ];
             groupItems[0] = new AppendablePropertyItem(GroupPropertyId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Group, () =>
@@ -730,6 +746,20 @@ namespace NiVE3.Input
                     tree = new ShapeGroupTree();
                     tree.AddNode(newShape);
                 }
+                else if (property.TryGetValue(TrimmingBeginId, out var trimmingBegin))
+                {
+                    var offset = (double)(property[TrimmingOffsetId] ?? 0.0);
+                    offset = (((offset % 360.0) + 360.0) % 360.0) / 360.0;
+
+                    var begin = (double)(trimmingBegin ?? 0.0) * 0.01;
+                    var end = (double)(property[TrimmingEndId] ?? 0.0) * 0.01;
+                    if (begin > end)
+                    {
+                        (end, begin) = (begin, end);
+                    }
+
+                    tree.ApplyTrimming((float)(begin + offset), (float)(end + offset));
+                }
             }
 
             return tree;
@@ -853,6 +883,22 @@ namespace NiVE3.Input
             }
         }
 
+        public void ApplyTrimming(float begin, float end)
+        {
+            foreach (var node in Nodes)
+            {
+                switch (node)
+                {
+                    case ShapeGroupTree childGroup:
+                        childGroup.ApplyTrimming(begin, end);
+                        break;
+                    case ShapePath path:
+                        path.ApplyTrimming(begin, end);
+                        break;
+                }
+            }
+        }
+
         public void Transform(Vector3d anchorPoint, Vector3d position, Vector3d scale, double skew, double skewAxis, double angle, double opacity)
         {
             var skewRad = skewAxis / 180.0F * Math.PI;
@@ -918,6 +964,143 @@ namespace NiVE3.Input
         }
 
         public ShapePath(IPath path) : this(new PathCollection([path])) { }
+
+        public void ApplyTrimming(float begin, float end)
+        {
+            if (begin == end)
+            {
+                Paths = new PathCollection();
+                return;
+            }
+            else if (end - begin >= 1.0F)
+            {
+                return;
+            }
+
+            var newPaths = new List<IPath>();
+            foreach (var path in Paths)
+            {
+                var flattenedPaths = path.Flatten().ToArray();
+                var pathSegments = new (Vector2, Vector2, float)[flattenedPaths.Length == 1 ? 1 : flattenedPaths.Length * 2][];
+                if (flattenedPaths.Length == 1 && flattenedPaths[0].IsClosed)
+                {
+                    var points = new PointF[flattenedPaths[0].Points.Length * 2];
+                    flattenedPaths[0].Points.Span.CopyTo(points);
+                    flattenedPaths[0].Points.Span.CopyTo(points.AsSpan(flattenedPaths[0].Points.Length));
+                    var nextPoints = points.Skip(1).Append(points[0]);
+                    pathSegments[0] = [..points.Zip(nextPoints, (f, s) =>
+                    {
+                        var fv = (Vector2)f;
+                        var sv = (Vector2)s;
+                        return (fv, sv, (sv - fv).Length());
+                    })];
+                }
+                else
+                {
+                    for (var i = 0; i < flattenedPaths.Length; i++)
+                    {
+                        var points = flattenedPaths[i].Points.ToArray();
+                        var nextPoints = points.Skip(1);
+                        if (flattenedPaths[i].IsClosed)
+                        {
+                            nextPoints = nextPoints.Append(points[0]);
+                        }
+                        pathSegments[i] = [..points.Zip(nextPoints, (f, s) =>
+                        {
+                            var fv = (Vector2)f;
+                            var sv = (Vector2)s;
+                            return (fv, sv, (sv - fv).Length());
+                        })];
+                        pathSegments[i + flattenedPaths.Length] = pathSegments[i];
+                    }
+                }
+                var pathLengths = pathSegments.Select(p => p.Sum(s => s.Item3)).ToArray();
+                var totalLength = pathLengths.Sum();
+
+                var trimmedPaths = TrimPath(flattenedPaths, pathSegments, pathLengths, totalLength, begin, end);
+
+                if (path is ComplexPolygon)
+                {
+                    newPaths.Add(new ComplexPolygon(trimmedPaths));
+                }
+                else
+                {
+                    newPaths.AddRange(trimmedPaths);
+                }
+            }
+            Paths = new PathCollection(newPaths);
+        }
+
+        static IEnumerable<Path> TrimPath(ISimplePath[] flattenedPaths, (Vector2, Vector2, float)[][] pathSegments, float[] pathLengths, float totalLength, float begin, float end)
+        {
+            var trimmedPaths = new List<Path>();
+
+            var beginPosition = begin * totalLength * 0.5F;
+            var endPosition = end * totalLength * 0.5F;
+            var currentPosition = 0.0F;
+            for (var i = 0; i < pathSegments.Length && currentPosition < endPosition; i++)
+            {
+                if (currentPosition + pathLengths[i] < beginPosition)
+                {
+                    currentPosition += pathLengths[i];
+                    continue;
+                }
+
+                var bp = beginPosition - currentPosition;
+                var ep = endPosition - currentPosition;
+                if (bp <= 0.0F && ep >= pathLengths[i])
+                {
+                    trimmedPaths.Add(new Path(flattenedPaths[i % flattenedPaths.Length].Points.ToArray()));
+                    currentPosition += pathLengths[i];
+                    continue;
+                }
+
+                var newPoints = new List<PointF>();
+                foreach (var (start, next, length) in pathSegments[i])
+                {
+                    if (bp - length > 0.0F)
+                    {
+                        bp -= length;
+                        ep -= length;
+                        continue;
+                    }
+
+                    if (bp < 0.0F)
+                    {
+                        newPoints.Add(start);
+                    }
+                    else
+                    {
+                        newPoints.Add(Vector2.Lerp(start, next, bp / length));
+                    }
+
+                    bp -= length;
+                    ep -= length;
+
+                    if (ep < 0.0F)
+                    {
+                        newPoints.Add(Vector2.Lerp(start, next, (ep + length) / length));
+                    }
+                    else if (ep == 0.0F)
+                    {
+                        newPoints.Add(next);
+                    }
+
+                    if (ep <= 0.0F)
+                    {
+                        break;
+                    }
+                }
+                if (newPoints.Count > 1)
+                {
+                    trimmedPaths.Add(new Path([.. newPoints]));
+                }
+
+                currentPosition += pathLengths[i];
+            }
+
+            return trimmedPaths;
+        }
 
         public override ShapeTreeBase Copy()
         {

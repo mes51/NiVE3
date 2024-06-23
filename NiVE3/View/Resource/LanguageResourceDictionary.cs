@@ -1025,6 +1025,18 @@ namespace NiVE3.View.Resource
         [LanguageKey, DefaultValue("種類")]
         public static readonly string ShapeProperty_CombineGroup_CombineType = nameof(ShapeProperty_CombineGroup_CombineType);
 
+        [LanguageKey, DefaultValue("パスのトリミング")]
+        public static readonly string ShapeProperty_TrimmingGroup = nameof(ShapeProperty_TrimmingGroup);
+
+        [LanguageKey, DefaultValue("開始点")]
+        public static readonly string ShapeProperty_TrimmingGroup_Begin = nameof(ShapeProperty_TrimmingGroup_Begin);
+
+        [LanguageKey, DefaultValue("終了点")]
+        public static readonly string ShapeProperty_TrimmingGroup_End = nameof(ShapeProperty_TrimmingGroup_End);
+
+        [LanguageKey, DefaultValue("オフセット")]
+        public static readonly string ShapeProperty_TrimmingGroup_Offset = nameof(ShapeProperty_TrimmingGroup_Offset);
+
         // Property Control
 
         [ShowInMarkup, LanguageKey, DefaultValue("編集")]
