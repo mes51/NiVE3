@@ -73,7 +73,7 @@
                 <TextBlock Text="{Binding FileExtension, Mode=OneWay}"/>
             </DataTemplate>
         </ur:DataTemplateCollection>
-        
+
         <Style x:Key="ItemContainerStyle" TargetType="{x:Type pv:TreeListViewItem}">
             <Setter Property="ItemsSource" Value="{Binding Footages}"/>
             <EventSetter Event="MouseDoubleClick" Handler="TreeListViewItem_MouseDoubleClick"/>
