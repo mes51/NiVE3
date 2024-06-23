@@ -6,7 +6,6 @@
                         xmlns:local="clr-namespace:NiVE3.View.Part"
                         xmlns:dd="urn:gong-wpf-dragdrop"
                         xmlns:pr="clr-namespace:NiVE3.View.Primitive"
-                        xmlns:cv="clr-namespace:NiVE3.View.Converter"
                         mc:Ignorable="d" 
                         x:Name="Root"
                         Focusable="{Binding IsRenameable}"
@@ -14,18 +13,7 @@
                         MouseLeftButtonDown="Root_MouseLeftButtonDown"
                         dd:DragDrop.DragSourceIgnore="True"
                         d:DesignHeight="450" d:DesignWidth="800">
-    <local:PropertyViewBase.Resources>
-        <cv:HasAncestorConverter x:Key="HasAncestorConverter"/>
-
-        <!-- NOTE: XAMLのエラー抑制のため、先に親にPropertyContentPresenterがいるかどうかをチェックしてからバインディングする -->
-        <Style x:Key="LayerItemExpanderHighlightStyle" TargetType="{x:Type local:LayerItemExpander}" BasedOn="{StaticResource {x:Type local:LayerItemExpander}}">
-            <Style.Triggers>
-                <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Converter={StaticResource HasAncestorConverter}, ConverterParameter={x:Type local:PropertyContentPresenter}}" Value="True">
-                    <Setter Property="IsHighlightHeader" Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:PropertyContentPresenter}}, Path=(pr:StackableItemsCollectionView.IsSelected)}"/>
-                </DataTrigger>
-            </Style.Triggers>
-        </Style>
-    </local:PropertyViewBase.Resources>
+    <!-- NOTE: 親のPropertyContentPresenterを参照する都合上、どうしてもXAMLエラーが発生するが無視する -->
     <local:LayerItemExpander HeaderText="{Binding Name, Mode=TwoWay}"
                              IndentLevel="{Binding ElementName=Root, Path=IndentLevel}"
                              IsAVSwitchColumnVisible="{Binding ElementName=Root, Path=IsAVSwitchColumnVisible}"
@@ -37,7 +25,7 @@
                              EndEditNameCommand="{Binding EndEditNameCommand}"
                              NameDragSourceIgnore="False"
                              ParentHasExpanderArrow="{Binding ElementName=Root, Path=ParentHasExpanderArrow}"
-                             Style="{StaticResource LayerItemExpanderHighlightStyle}">
+                             IsHighlightHeader="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:PropertyContentPresenter}}, Path=(pr:StackableItemsCollectionView.IsSelected)}">
         <local:PropertyCollectionView ItemsSource="{Binding Children}"
                                       IndentLevel="{Binding ElementName=Root, Path=IndentLevel, Converter={x:Static local:PropertyGroupView.NextIndentConverter}}"
                                       ControlAreaWidth="{Binding ElementName=Root, Path=ControlAreaWidth}"
