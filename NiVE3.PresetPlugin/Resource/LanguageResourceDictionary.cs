@@ -77,6 +77,32 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("チャンネル")]
         public const string Stylize_PixelSort_Channel = nameof(Stylize_PixelSort_Channel);
 
+        // Level
+
+        [DefaultValue("レベル")]
+        public const string ColorCollection_Level_Name = nameof(ColorCollection_Level_Name);
+
+        [DefaultValue("画像のレベルとガンマを調整します")]
+        public const string ColorCollection_Level_Description = nameof(ColorCollection_Level_Description);
+
+        [LanguageKey, DefaultValue("チャンネル")]
+        public const string ColorCollection_Level_Channel = nameof(ColorCollection_Level_Channel);
+
+        [LanguageKey, DefaultValue("黒入力レベル")]
+        public const string ColorCollection_Level_BlackInLevel = nameof(ColorCollection_Level_BlackInLevel);
+
+        [LanguageKey, DefaultValue("白入力レベル")]
+        public const string ColorCollection_Level_WhiteInLevel = nameof(ColorCollection_Level_WhiteInLevel);
+
+        [LanguageKey, DefaultValue("黒出力レベル")]
+        public const string ColorCollection_Level_BlackOutLevel = nameof(ColorCollection_Level_BlackOutLevel);
+
+        [LanguageKey, DefaultValue("白出力レベル")]
+        public const string ColorCollection_Level_WhiteOutLevel = nameof(ColorCollection_Level_WhiteOutLevel);
+
+        [LanguageKey, DefaultValue("ガンマ")]
+        public const string ColorCollection_Level_Gamma = nameof(ColorCollection_Level_Gamma);
+
         // Dynamics
 
         [DefaultValue("ダイナミクス")]
@@ -237,19 +263,19 @@ namespace NiVE3.PresetPlugin.Resource
         public const string SortMode_Horizontal = nameof(SortMode_Horizontal);
 
         [DefaultValue("RGB")]
-        public const string SortTargetChannel_RGB = nameof(SortTargetChannel_RGB);
+        public const string ChannelType_RGB = nameof(ChannelType_RGB);
 
         [DefaultValue("赤")]
-        public const string SortTargetChannel_R = nameof(SortTargetChannel_R);
+        public const string ChannelType_R = nameof(ChannelType_R);
 
         [DefaultValue("緑")]
-        public const string SortTargetChannel_G = nameof(SortTargetChannel_G);
+        public const string ChannelType_G = nameof(ChannelType_G);
 
         [DefaultValue("青")]
-        public const string SortTargetChannel_B = nameof(SortTargetChannel_B);
+        public const string ChannelType_B = nameof(ChannelType_B);
 
         [DefaultValue("アルファ")]
-        public const string SortTargetChannel_A = nameof(SortTargetChannel_A);
+        public const string ChannelType_A = nameof(ChannelType_A);
 
         [DefaultValue("コンプレッサー")]
         public const string DynamicsMode_Compressor = nameof(DynamicsMode_Compressor);

@@ -12,6 +12,7 @@ using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Property;
 using NiVE3.Plugin.Property.Properties;
 using NiVE3.Plugin.ValueObject;
+using NiVE3.PresetPlugin.Effect.Util;
 using NiVE3.PresetPlugin.Resource;
 using NiVE3.Shared.Extension;
 
@@ -41,7 +42,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
                 new DoubleProperty(PropertyThresholdId, LanguageResourceDictionary.ResourceKeys.Stylize_PixelSort_Threshold, 0.5, float.MinValue, float.MaxValue, slideChangeValue: 0.01, digit: 2),
                 new EnumProperty(PropertyThresholdModeId, LanguageResourceDictionary.ResourceKeys.Stylize_PixelSort_Mode, typeof(ThresholdMode), typeof(LanguageResourceDictionary), ThresholdMode.Darkness, selectBoxWidth: 90),
                 new EnumProperty(PropertySortModeId, LanguageResourceDictionary.ResourceKeys.Stylize_PixelSort_Sort, typeof(SortMode), typeof(LanguageResourceDictionary), SortMode.Horizontal, selectBoxWidth: 90),
-                new EnumProperty(PropertySortTargetChannelId, LanguageResourceDictionary.ResourceKeys.Stylize_PixelSort_Channel, typeof(SortTargetChannel), typeof(LanguageResourceDictionary), SortTargetChannel.RGB, selectBoxWidth: 90),
+                new EnumProperty(PropertySortTargetChannelId, LanguageResourceDictionary.ResourceKeys.Stylize_PixelSort_Channel, typeof(ChannelType), typeof(LanguageResourceDictionary), ChannelType.RGB, selectBoxWidth: 90),
             ];
         }
 
@@ -50,7 +51,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
             var threshold = (float)(double)(properties.First(p => p.Id == PropertyThresholdId).GetValue(layerTime) ?? 0.5);
             var mode = (ThresholdMode)(properties.First(p => p.Id == PropertyThresholdModeId).GetValue(layerTime) ?? ThresholdMode.Brightness);
             var sort = (SortMode)(properties.First(p => p.Id == PropertySortModeId).GetValue(layerTime) ?? SortMode.Horizontal);
-            var channel = (SortTargetChannel)(properties.First(p => p.Id == PropertySortTargetChannelId).GetValue(layerTime) ?? SortTargetChannel.RGB);
+            var channel = (ChannelType)(properties.First(p => p.Id == PropertySortTargetChannelId).GetValue(layerTime) ?? ChannelType.RGB);
 
             NManagedImage managedImage;
             if (image is NGPUImage gpuImage)
@@ -83,7 +84,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
 
         public void Dispose() { }
 
-        static void SortVertical(NManagedImage image, int left, int top, int right, int bottom, float threshold, ThresholdMode mode, SortTargetChannel channel)
+        static void SortVertical(NManagedImage image, int left, int top, int right, int bottom, float threshold, ThresholdMode mode, ChannelType channel)
         {
             var imageWidth = image.Width;
             var imageHeight = image.Height;
@@ -112,7 +113,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
             });
         }
 
-        static void SortHorizontal(NManagedImage image, int left, int top, int right, int bottom, float threshold, ThresholdMode mode, SortTargetChannel channel)
+        static void SortHorizontal(NManagedImage image, int left, int top, int right, int bottom, float threshold, ThresholdMode mode, ChannelType channel)
         {
             var imageData = image.Data;
             var imageWidth = image.Width;
@@ -124,7 +125,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
                 var next = 0;
                 switch (channel)
                 {
-                    case SortTargetChannel.RGB:
+                    case ChannelType.RGB:
                         if (mode == ThresholdMode.Brightness)
                         {
                             while (x < data.Length)
@@ -166,7 +167,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
                             }
                         }
                         break;
-                    case SortTargetChannel.R:
+                    case ChannelType.R:
                         if (mode == ThresholdMode.Brightness)
                         {
                             while (x < data.Length)
@@ -208,7 +209,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
                             }
                         }
                         break;
-                    case SortTargetChannel.G:
+                    case ChannelType.G:
                         if (mode == ThresholdMode.Brightness)
                         {
                             while (x < data.Length)
@@ -250,7 +251,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
                             }
                         }
                         break;
-                    case SortTargetChannel.B:
+                    case ChannelType.B:
                         if (mode == ThresholdMode.Brightness)
                         {
                             while (x < data.Length)
@@ -292,7 +293,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
                             }
                         }
                         break;
-                    case SortTargetChannel.A:
+                    case ChannelType.A:
                         if (mode == ThresholdMode.Brightness)
                         {
                             while (x < data.Length)
@@ -559,14 +560,5 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
     {
         Vertical,
         Horizontal
-    }
-
-    public enum SortTargetChannel
-    {
-        RGB,
-        R,
-        G,
-        B,
-        A
     }
 }
