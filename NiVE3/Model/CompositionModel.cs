@@ -258,12 +258,12 @@ namespace NiVE3.Model
             PropertyChanged += CompositionModel_PropertyChanged;
         }
 
-        public void InsertLayers(Guid footageId, int index)
+        public void InsertLayers(Guid footageId, int index, double sourceStartPoint = 0.0, Vector3d? initialPosition = null)
         {
-            InsertLayers([footageId], index);
+            InsertLayers([footageId], index, sourceStartPoint, initialPosition);
         }
 
-        public void InsertLayers(Guid[] footageIds, int index)
+        public void InsertLayers(Guid[] footageIds, int index, double sourceStartPoint = 0.0, Vector3d? initialPosition = null)
         {
             var footages = footageIds.SelectMany(FootageListModel.GetFootages);
             var addedLayers = new List<LayerModel>();
@@ -279,6 +279,12 @@ namespace NiVE3.Model
                 {
                     layer.OutPoint = Duration;
                 }
+                layer.SourceStartPoint = sourceStartPoint;
+                if (initialPosition.HasValue && layer.TransformProperties?.FindProperty(ILayerObject.TransformPositionId) is PropertyModel position)
+                {
+                    position.Value = initialPosition.Value;
+                }
+
                 Layers.Insert(index, layer);
                 addedLayers.Add(layer);
                 index++;

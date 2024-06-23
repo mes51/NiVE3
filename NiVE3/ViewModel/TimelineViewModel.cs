@@ -792,7 +792,7 @@ namespace NiVE3.ViewModel
                     CompositionModel.InsertLayers(footage.FootageId, dropInfo.InsertIndex);
                     break;
                 case IFootageViewModel[] footages:
-                    CompositionModel.InsertLayers(footages.Select(f => f.FootageId).ToArray(), dropInfo.InsertIndex);
+                    CompositionModel.InsertLayers([..footages.Select(f => f.FootageId)], dropInfo.InsertIndex);
                     break;
                 case LayerViewModel layer:
                     {
@@ -811,7 +811,7 @@ namespace NiVE3.ViewModel
                         {
                             newIndex--;
                         }
-                        CompositionModel.MoveLayers(itemDragData.SelectedItems.Select(l => l.LayerId).ToArray(), itemDragData.DragItem.LayerId, newIndex);
+                        CompositionModel.MoveLayers([..itemDragData.SelectedItems.Select(l => l.LayerId)], itemDragData.DragItem.LayerId, newIndex);
                     }
                     break;
             }

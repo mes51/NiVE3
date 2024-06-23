@@ -555,6 +555,8 @@ namespace NiVE3.ViewModel
 
             switch (dropInfo.Data)
             {
+                case IFootageViewModel:
+                case IFootageViewModel[]:
                 case EffectListDragData when layerId.HasValue:
                     dropInfo.Effects = DragDropEffects.Copy;
                     break;
@@ -578,6 +580,12 @@ namespace NiVE3.ViewModel
 
             switch (dropInfo.Data)
             {
+                case IFootageViewModel footage:
+                    compositionPreviewModel.Composition.InsertLayers(footage.FootageId, 0, CurrentTime, (Vector3d)pos);
+                    break;
+                case IFootageViewModel[] footages:
+                    compositionPreviewModel.Composition.InsertLayers([..footages.Select(f => f.FootageId)], 0, CurrentTime, (Vector3d)pos);
+                    break;
                 case EffectListDragData effectListData when layerId.HasValue:
                     compositionPreviewModel.Composition.AddEffectToLayer(layerId.Value, effectListData.Effects);
                     break;
