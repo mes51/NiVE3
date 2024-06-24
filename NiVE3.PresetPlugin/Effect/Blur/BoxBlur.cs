@@ -15,6 +15,7 @@ using NiVE3.Plugin.Property;
 using NiVE3.Plugin.Property.Properties;
 using NiVE3.Plugin.Resource;
 using NiVE3.Plugin.ValueObject;
+using NiVE3.PresetPlugin.Extension;
 using NiVE3.PresetPlugin.Resource;
 
 namespace NiVE3.PresetPlugin.Effect.Blur
@@ -48,10 +49,10 @@ namespace NiVE3.PresetPlugin.Effect.Blur
 
         public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, double layerTime, IPropertyObject[] properties, bool useGpu)
         {
-            var amount = (float)(double)(properties.First(p => p.Id == PropertyAmountId).GetValue(layerTime) ?? 0.0);
-            var repeat = (int)(double)(properties.First(p => p.Id == PropertyRepeatId).GetValue(layerTime) ?? 1.0);
-            var direction  = (BlurDirection)(properties.First(p => p.Id == PropertyDirectionId).GetValue(layerTime) ?? BlurDirection.HorizontalAndVertical);
-            var edgeRepeatMode = (EdgeRepeatMode)(properties.First(p => p.Id == PropertyEdgeRepeatModeId).GetValue(layerTime) ?? EdgeRepeatMode.None);
+            var amount = (float)properties.GetValue(PropertyAmountId, layerTime, 0.0);
+            var repeat = (int)properties.GetValue(PropertyRepeatId, layerTime, 1.0);
+            var direction  = properties.GetValue(PropertyDirectionId, layerTime, BlurDirection.HorizontalAndVertical);
+            var edgeRepeatMode = properties.GetValue(PropertyEdgeRepeatModeId, layerTime, EdgeRepeatMode.None);
 
             if (amount <= 0.0F)
             {
@@ -60,14 +61,12 @@ namespace NiVE3.PresetPlugin.Effect.Blur
 
             if (useGpu)
             {
-
+                return image;
             }
             else
             {
                 return ProcessCpu(image, roi, (float)downSamplingRateX, (float)downSamplingRateY, amount, repeat, direction, edgeRepeatMode);
             }
-
-            return image;
         }
 
         public float[] Process(float[] audio, double startTime, IPropertyObject[] properties)

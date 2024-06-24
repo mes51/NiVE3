@@ -10,6 +10,7 @@ using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Property;
 using NiVE3.Plugin.Property.Properties;
 using NiVE3.Plugin.ValueObject;
+using NiVE3.PresetPlugin.Extension;
 using NiVE3.PresetPlugin.Internal;
 using NiVE3.PresetPlugin.Resource;
 using NWaves.Operations;
@@ -56,7 +57,7 @@ namespace NiVE3.PresetPlugin.Effect.Audio
 
         public float[] Process(float[] audio, double startTime, IPropertyObject[] properties)
         {
-            var mode = (DynamicsMode)(properties.First(p => p.Id == PropertyDynamicsProcessorTypeId).GetValue(startTime) ?? DynamicsMode.Compressor);
+            var mode = properties.GetValue(PropertyDynamicsProcessorTypeId, startTime, DynamicsMode.Compressor);
             var leftProcessor = new DynamicsProcessor(mode, Const.AudioSamplingRate, 0.0F, 2.0F);
             var rightProcessor = new DynamicsProcessor(mode, Const.AudioSamplingRate, 0.0F, 2.0F);
 
@@ -68,11 +69,11 @@ namespace NiVE3.PresetPlugin.Effect.Audio
             for (var i = 0; i < audio.Length; i += 2)
             {
                 var sampleTime = i / Const.AudioChannelCount * Const.AudioSampleTime;
-                var threshold = (float)(double)(thresholdProperty.GetValue(startTime + sampleTime) ?? 0.0);
-                var ratio = (float)(double)(ratioProperty.GetValue(startTime + sampleTime) ?? 2.0);
-                var gain = (float)(double)(gainProperty.GetValue(startTime + sampleTime) ?? 0.0);
-                var attack = (float)(double)(attackProperty.GetValue(startTime + sampleTime) ?? 50.0) * 0.001F;
-                var release = (float)(double)(releaseProperty.GetValue(startTime + sampleTime) ?? 500.0) * 0.001F;
+                var threshold = (float)thresholdProperty.GetValue(startTime + sampleTime, 0.0);
+                var ratio = (float)ratioProperty.GetValue(startTime + sampleTime, 2.0);
+                var gain = (float)gainProperty.GetValue(startTime + sampleTime, 0.0);
+                var attack = (float)attackProperty.GetValue(startTime + sampleTime, 50.0) * 0.001F;
+                var release = (float)releaseProperty.GetValue(startTime + sampleTime, 500.0) * 0.001F;
 
                 leftProcessor.Threshold = threshold;
                 rightProcessor.Threshold = threshold;

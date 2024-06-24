@@ -15,6 +15,7 @@ using NiVE3.Plugin.Property;
 using NiVE3.Plugin.Property.Properties;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.PresetPlugin.Effect.Util;
+using NiVE3.PresetPlugin.Extension;
 using NiVE3.PresetPlugin.Resource;
 using NiVE3.Shared.Extension;
 
@@ -55,12 +56,12 @@ namespace NiVE3.PresetPlugin.Effect.ColorCollection
 
         public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, double layerTime, IPropertyObject[] properties, bool useGpu)
         {
-            var channel = (ChannelType)(properties.First(p => p.Id == PropertyChannelId).GetValue(layerTime) ?? ChannelType.RGB);
-            var blackIn = (float)(double)(properties.First(p => p.Id == PropertyBlackInLevelId).GetValue(layerTime) ?? 0.0);
-            var whiteIn = (float)(double)(properties.First(p => p.Id == PropertyWhiteInLevelId).GetValue(layerTime) ?? 0.0);
-            var blackOut = (float)(double)(properties.First(p => p.Id == PropertyBlackOutLevelId).GetValue(layerTime) ?? 1.0);
-            var whiteOut = (float)(double)(properties.First(p => p.Id == PropertyWhiteOutLevelId).GetValue(layerTime) ?? 1.0);
-            var gamma = (float)(double)(properties.First(p => p.Id == PropertyGammaId).GetValue(layerTime) ?? 1.0);
+            var channel = properties.GetValue(PropertyChannelId, layerTime, ChannelType.RGB);
+            var blackIn = (float)properties.GetValue(PropertyBlackInLevelId, layerTime, 0.0);
+            var whiteIn = (float)properties.GetValue(PropertyWhiteInLevelId, layerTime, 1.0);
+            var blackOut = (float)properties.GetValue(PropertyBlackOutLevelId, layerTime, 0.0);
+            var whiteOut = (float)properties.GetValue(PropertyWhiteOutLevelId, layerTime, 1.0);
+            var gamma = (float)properties.GetValue(PropertyGammaId, layerTime, 1.0);
 
             if (useGpu)
             {

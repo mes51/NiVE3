@@ -13,6 +13,7 @@ using NiVE3.Plugin.Property;
 using NiVE3.Plugin.Property.Properties;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.PresetPlugin.Effect.Util;
+using NiVE3.PresetPlugin.Extension;
 using NiVE3.PresetPlugin.Resource;
 using NiVE3.Shared.Extension;
 
@@ -48,10 +49,10 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
 
         public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, double layerTime, IPropertyObject[] properties, bool useGpu)
         {
-            var threshold = (float)(double)(properties.First(p => p.Id == PropertyThresholdId).GetValue(layerTime) ?? 0.5);
-            var mode = (ThresholdMode)(properties.First(p => p.Id == PropertyThresholdModeId).GetValue(layerTime) ?? ThresholdMode.Brightness);
-            var sort = (SortMode)(properties.First(p => p.Id == PropertySortModeId).GetValue(layerTime) ?? SortMode.Horizontal);
-            var channel = (ChannelType)(properties.First(p => p.Id == PropertySortTargetChannelId).GetValue(layerTime) ?? ChannelType.RGB);
+            var threshold = (float)properties.GetValue(PropertyThresholdId, layerTime, 0.5);
+            var mode = properties.GetValue(PropertyThresholdModeId, layerTime, ThresholdMode.Brightness);
+            var sort = properties.GetValue(PropertySortModeId, layerTime, SortMode.Horizontal);
+            var channel = properties.GetValue(PropertySortTargetChannelId, layerTime, ChannelType.RGB);
 
             NManagedImage managedImage;
             if (image is NGPUImage gpuImage)
