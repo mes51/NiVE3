@@ -33,7 +33,7 @@ namespace NiVE3.UI.Resources
         [ShowInMarkup, BrushColorRange("#FFFFFF", "#313131")]
         public static readonly string TextBrush = nameof(TextBrush);
 
-        [ShowInMarkup, BrushColorRange("#999999", "#DDDDDD")]
+        [ShowInMarkup, BrushColorRange("#999999", "#BBBBBB")]
         public static readonly string DisableTextBrush = nameof(DisableTextBrush);
 
         [ShowInMarkup, BrushColorRange("#0000FF", "#3355FF")]

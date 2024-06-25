@@ -354,7 +354,7 @@
                                             <Setter.Value>
                                                 <ControlTemplate TargetType="{x:Type RadioButton}">
                                                     <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="1">
-                                                        <Path Fill="{TemplateBinding Foreground}" Data="{gm:FontawesomeResource ResourceKey=RotateRight, ReturnDynamicResource=True}" Style="{StaticResource IconBase}"/>
+                                                        <Image Source="{StaticResource ScaleImage}" Style="{StaticResource IconImageBase}"/>
                                                     </Border>
                                                 </ControlTemplate>
                                             </Setter.Value>
@@ -418,7 +418,7 @@
                                             <Setter.Value>
                                                 <ControlTemplate TargetType="{x:Type RadioButton}">
                                                     <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="1">
-                                                        <Path Fill="{TemplateBinding Foreground}" Data="{StaticResource CameraOrbit}" Style="{StaticResource IconBase}"/>
+                                                        <Image Source="{StaticResource CameraOrbitImage}" Style="{StaticResource IconImageBase}"/>
                                                     </Border>
                                                 </ControlTemplate>
                                             </Setter.Value>

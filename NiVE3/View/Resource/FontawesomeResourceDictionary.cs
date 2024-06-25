@@ -105,7 +105,7 @@ namespace NiVE3.View.Resource
         {
             var keys = typeof(FontawesomeResourceDictionary).GetFields(BindingFlags.Static | BindingFlags.Public)
                 .Select(f => ((string)f.GetValue(null)!, f.GetCustomAttribute<IconAttribute>()));
-            var fontFamily = new FontFamily(new Uri("pack://application:,,,/NiVE3;component/Resources/Font Awesome 6 Free-Solid-900.otf"), "#Font Awesome 6 Free Solid");
+            var fontFamily = new FontFamily(new Uri("pack://application:,,,/NiVE3;component/Resources/Font Awesome 6 Free-Solid-900.otf"), "./#Font Awesome 6 Free Solid");
             var typeface = new Typeface(fontFamily, FontStyles.Normal, FontWeights.Bold, FontStretches.Normal);
             var dip = VisualTreeHelper.GetDpi(new FrameworkElement()).PixelsPerDip;
             foreach (var (key, attr) in keys)

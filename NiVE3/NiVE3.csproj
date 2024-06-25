@@ -10,7 +10,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\CameraOrbit.png" />
+    <None Remove="Resources\Cursor.png" />
     <None Remove="Resources\Font Awesome 6 Free-Solid-900.otf" />
+    <None Remove="Resources\Hand.png" />
+    <None Remove="Resources\Rotate.png" />
+    <None Remove="Resources\Scale.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\Hand.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
 
   <ItemGroup>
@@ -40,7 +51,21 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="Resources\Font Awesome 6 Free-Solid-900.otf" />
+    <Resource Include="Resources\CameraOrbit.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Cursor.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Font Awesome 6 Free-Solid-900.otf">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Rotate.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Scale.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
 
 </Project>
