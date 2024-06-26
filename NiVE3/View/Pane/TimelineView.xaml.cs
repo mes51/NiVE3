@@ -32,5 +32,35 @@ namespace NiVE3.View.Pane
         {
             ViewModel?.ChangeCurrentTimeCommand?.Execute(null);
         }
+
+        private void Root_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            var viewModel = ViewModel;
+            if (viewModel == null)
+            {
+                return;
+            }
+
+            var dir = -Math.Sign(e.Delta);
+            if (Keyboard.IsKeyDown(Key.LeftShift) ||  Keyboard.IsKeyDown(Key.RightShift))
+            {
+                viewModel.TimeBarRangeStart = Math.Clamp(viewModel.TimeBarRangeStart + viewModel.TimeBarRange * 0.05 * dir, 0.0, viewModel.Duration - viewModel.TimeBarRange);
+                e.Handled = true;
+            }
+            else if (Keyboard.IsKeyDown(Key.LeftAlt) ||  Keyboard.IsKeyDown(Key.RightAlt))
+            {
+                if (e.Delta > 0)
+                {
+                    viewModel.TimeBarRange = Math.Max(viewModel.TimeBarRange * 0.5, TimeLocator.MinimumRange);
+                }
+                else
+                {
+                    viewModel.TimeBarRange = Math.Min(viewModel.TimeBarRange * 2.0, viewModel.Duration);
+                }
+                viewModel.TimeBarRangeStart = Math.Clamp(viewModel.CurrentTime - viewModel.TimeBarRange * 0.5, 0.0, viewModel.Duration - viewModel.TimeBarRange);
+
+                e.Handled = true;
+            }
+        }
     }
 }
