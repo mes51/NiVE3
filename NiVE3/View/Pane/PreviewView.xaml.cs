@@ -327,7 +327,7 @@ namespace NiVE3.View.Pane
                 ClickPoint = pos;
                 IsMouseDown = true;
                 IsMovedByTool = false;
-                UsingToolType = viewModel.ToolType;
+                UsingToolType = e.MiddleButton == MouseButtonState.Pressed ? ToolType.Hand : viewModel.ToolType;
                 if (UsingToolType == ToolType.Hand || UsingToolType == ToolType.CameraOrbit || UsingToolType == ToolType.CameraPan || UsingToolType == ToolType.CameraDolly)
                 {
                     PrevPoint = prevPoint;
