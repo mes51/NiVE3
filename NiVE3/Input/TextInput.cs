@@ -386,6 +386,21 @@ namespace NiVE3.Input
             }
 
             var imageOrigin = (Vector2d)glyphPolygons[0].origin + new Vector2d(glyphPolygons[0].rect.GetElement(0) - min.GetElement(0), glyphPolygons[0].rect.GetElement(1) - min.GetElement(1));
+            switch (sourceText.DefaultStyle.TextAlign)
+            {
+                case TextAlign.Center:
+                    {
+                        var measure = TextMeasurer.MeasureBounds(sourceText.Text, textOption);
+                        imageOrigin += new Vector2d(measure.Width * 0.5, 0.0);
+                    }
+                    break;
+                case TextAlign.Right:
+                    {
+                        var measure = TextMeasurer.MeasureBounds(sourceText.Text, textOption);
+                        imageOrigin += new Vector2d(measure.Width, 0.0);
+                    }
+                    break;
+            }
 
             return new SourceFootageRect(imageOrigin, max.GetElement(2) - min.GetElement(0) + 1, max.GetElement(3) - min.GetElement(1));
         }
