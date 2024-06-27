@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -23,6 +24,12 @@ namespace NiVE3.View.Part
     /// </summary>
     public partial class PropertyGroupView : PropertyViewBase
     {
+        static readonly IValueConverter InternalHasParentConverter = new HasAncestorConverter();
+
+        public static readonly IMultiValueConverter HasParentConverter = new DelegateMultiConverter<long, DependencyObject, bool>(
+            (_, obj) => (bool)InternalHasParentConverter.Convert(obj, typeof(bool), typeof(PropertyContentPresenter), CultureInfo.InvariantCulture)
+        );
+
         public PropertyGroupView()
         {
             InitializeComponent();

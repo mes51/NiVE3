@@ -13,7 +13,23 @@
                         MouseLeftButtonDown="Root_MouseLeftButtonDown"
                         dd:DragDrop.DragSourceIgnore="True"
                         d:DesignHeight="450" d:DesignWidth="800">
-    <!-- NOTE: 親のPropertyContentPresenterを参照する都合上、どうしてもXAMLエラーが発生するが無視する -->
+    <local:PropertyViewBase.Resources>
+        <Style x:Key="LayerItemExpanderStyle" TargetType="{x:Type local:LayerItemExpander}" BasedOn="{StaticResource {x:Type local:LayerItemExpander}}">
+            <Style.Triggers>
+                <DataTrigger Value="True">
+                    <DataTrigger.Binding>
+                        <MultiBinding Converter="{x:Static local:PropertyGroupView.HasParentConverter}">
+                            <!-- NOTE: 親更新のトリガー用 -->
+                            <Binding RelativeSource="{RelativeSource Self}" Path="ParentChangeTime"/>
+                            <Binding RelativeSource="{RelativeSource Self}"/>
+                        </MultiBinding>
+                    </DataTrigger.Binding>
+
+                    <Setter Property="IsHighlightHeader" Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:PropertyContentPresenter}}, Path=(pr:StackableItemsCollectionView.IsSelected)}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </local:PropertyViewBase.Resources>
     <local:LayerItemExpander HeaderText="{Binding Name, Mode=TwoWay}"
                              IndentLevel="{Binding ElementName=Root, Path=IndentLevel}"
                              IsAVSwitchColumnVisible="{Binding ElementName=Root, Path=IsAVSwitchColumnVisible}"
@@ -25,7 +41,7 @@
                              EndEditNameCommand="{Binding EndEditNameCommand}"
                              NameDragSourceIgnore="False"
                              ParentHasExpanderArrow="{Binding ElementName=Root, Path=ParentHasExpanderArrow}"
-                             IsHighlightHeader="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:PropertyContentPresenter}}, Path=(pr:StackableItemsCollectionView.IsSelected)}">
+                             Style="{StaticResource LayerItemExpanderStyle}">
         <local:PropertyCollectionView ItemsSource="{Binding Children}"
                                       IndentLevel="{Binding ElementName=Root, Path=IndentLevel, Converter={x:Static local:PropertyGroupView.NextIndentConverter}}"
                                       ControlAreaWidth="{Binding ElementName=Root, Path=ControlAreaWidth}"

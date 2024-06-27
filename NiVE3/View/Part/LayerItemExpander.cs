@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using System.Windows;
 using System.Windows.Input;
 using NiVE3.ViewModel;
+using System.Diagnostics;
 
 namespace NiVE3.View.Part
 {
@@ -134,6 +135,19 @@ namespace NiVE3.View.Part
             new FrameworkPropertyMetadata(new GridLength(0.0), FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
+        public static readonly DependencyProperty ParentChangeTimeProperty = DependencyProperty.Register(
+            nameof(ParentChangeTime),
+            typeof(long),
+            typeof(LayerItemExpander),
+            new FrameworkPropertyMetadata(0L)
+        );
+
+        public long ParentChangeTime
+        {
+            get { return (long)GetValue(ParentChangeTimeProperty); }
+            set { SetValue(ParentChangeTimeProperty, value); }
+        }
+
         public ICommand? EndEditNameCommand
         {
             get { return (ICommand)GetValue(EndEditNameCommandProperty); }
@@ -244,6 +258,12 @@ namespace NiVE3.View.Part
             // NOTE: なぜか何かイベントハンドラを渡さないとFocusVisualStyleがnullにならない
             // TODO: 原因の調査
             FocusVisualStyleProperty.OverrideMetadata(typeof(LayerItemExpander), new FrameworkPropertyMetadata(null, (_, _) => { }));
+        }
+
+        protected override void OnVisualParentChanged(DependencyObject oldParent)
+        {
+            base.OnVisualParentChanged(oldParent);
+            ParentChangeTime = Stopwatch.GetTimestamp();
         }
 
         static void IndentParameterChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
