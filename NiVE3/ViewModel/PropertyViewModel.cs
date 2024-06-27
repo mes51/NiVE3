@@ -773,10 +773,13 @@ namespace NiVE3.ViewModel
 
             CutCommand = new DelegateCommand<SelectItemType?>(type =>
             {
-                if (SelectedChildren.Count > 0)
+                if (SelectedChildren.Count < 1)
                 {
-                    AppendablePropertyModel.DeleteChildren(SelectedChildren.OfType<PropertyGroupViewModel>().Select(c => c.InstanceId).ToArray());
+                    return;
                 }
+
+                var data = AppendablePropertyModel.CutChildren(SelectedChildren.OfType<PropertyGroupViewModel>().Select(c => c.InstanceId).ToArray());
+                ClipboardUtil.SetData(data);
             });
 
             CopyCommand = new DelegateCommand<SelectItemType?>(type =>
