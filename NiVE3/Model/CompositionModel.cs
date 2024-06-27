@@ -655,6 +655,11 @@ namespace NiVE3.Model
                 (begin, end) = (end, begin);
             }
 
+            if (prevWorkareaBegin == begin && prevWorkareaEnd == end)
+            {
+                return;
+            }
+
             WorkareaBegin = Math.Clamp(begin, 0.0, Duration - FrameDuration);
             WorkareaEnd = Math.Clamp(end, WorkareaBegin + FrameDuration, Duration);
 

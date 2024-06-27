@@ -718,6 +718,10 @@ namespace NiVE3.Model
         void DeleteChildrenKeyFramesInternal(string[] ids, bool isCut)
         {
             var children = Children.OfType<PropertyModel>().Where(p => ids.Contains(p.Property.Id));
+            if (children.All(c => c.KeyFrames.Count < 1))
+            {
+                return;
+            }
 
             HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_RemoveKeyFrame));
             foreach (var child in children)
