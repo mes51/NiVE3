@@ -188,6 +188,8 @@ namespace NiVE3.ViewModel
 
         public ICommand ChangeKeyFramesInterpolationTypeCommand { get; }
 
+        public ICommand PlaceKeyFrameCommand { get; }
+
         public DelegateCommand<SelectItemType?> DeleteCommand { get; }
 
         public DelegateCommand<SelectItemType?> CutCommand { get; }
@@ -255,6 +257,20 @@ namespace NiVE3.ViewModel
             {
                 PropertyModel.ChangeKeyFramesInterpolationType(t.Item1, t.Item2);
             });
+
+            PlaceKeyFrameCommand = new RequerySuggestedCommand(() =>
+            {
+                var time = CurrentTime;
+                var index = KeyFrames.IndexOfLast(k => Math.Abs(k.Time - time) < TimeCalc.TimeEpsilon || k.Time <= time);
+                if (index > -1 && Math.Abs(KeyFrames[index].Time - time) < TimeCalc.TimeEpsilon)
+                {
+                    PropertyModel.DeleteKeyFrames([KeyFrames[index]]);
+                }
+                else
+                {
+                    PropertyModel.CreateKeyFrame(CurrentTimeValue);
+                }
+            }, () => KeyFrames.Count > 0);
 
             SelectItemCommand = new DelegateCommand(() =>
             {
