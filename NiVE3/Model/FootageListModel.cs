@@ -365,19 +365,19 @@ namespace NiVE3.Model
             PlaceholderInputs.Clear();
         }
 
-        public FootageListData SaveData()
+        public FootageListData SaveData(string projectDir)
         {
             return new FootageListData
             {
                 SortKey = (FootageSortKeyData)SortKey,
                 SortIsAscending = SortIsAscending,
-                Inputs = LoadedInputs.Select(m => m.SaveData()).ToArray(),
-                Placeholders = PlaceholderInputs.Select(m => m.SaveData()).ToArray(),
+                Inputs = LoadedInputs.Select(m => m.SaveData(projectDir)).ToArray(),
+                Placeholders = PlaceholderInputs.Select(m => m.SaveData(projectDir)).ToArray(),
                 Footages = Footages.Select(m => m.SaveData()).ToArray()
             };
         }
 
-        public void LoadData(FootageListData data)
+        public void LoadData(FootageListData data, string projectDir)
         {
             SortKey = (FootageSortKey)data.SortKey;
             SortIsAscending = data.SortIsAscending;
@@ -400,15 +400,11 @@ namespace NiVE3.Model
                     continue;
                 }
 
-                InputModel inputModel;
-                var input = inputPlugin.CreateExport();
-                if (inputPlugin.Metadata.IsSupportLoadToGpu)
+                var input = TryLoadInput(inputPlugin, inputData.FilePath, inputData.InputOption, inputPlugin.Metadata.IsSupportLoadToGpu ? AcceleratorModel : null) ??
+                    TryLoadInput(inputPlugin, Path.GetFullPath(inputData.RelativeFilePath, projectDir), inputData.InputOption, inputPlugin.Metadata.IsSupportLoadToGpu ? AcceleratorModel : null);
+                if (input != null)
                 {
-                    input.Value.SetupAccelerator(AcceleratorModel);
-                }
-                if (input.Value.Load(inputData.FilePath) && input.Value.LoadData(inputData.InputOption))
-                {
-                    inputModel = new InputModel(input, inputData.PluginId, inputPlugin.Metadata.IsSupportLoadToGpu, inputData.InputId);
+                    var inputModel = new InputModel(input, inputData.PluginId, inputPlugin.Metadata.IsSupportLoadToGpu, inputData.InputId);
 
                     AddInput(inputModel);
                     foreach (var source in input.Value.GetGroup().Flatten())
@@ -784,6 +780,24 @@ namespace NiVE3.Model
             }
 
             return result;
+        }
+
+        static ExportLifetimeContext<IInput>? TryLoadInput(ExportFactory<IInput, IInputMetadata> inputPlugin, string filePath, object? inputOptions, AcceleratorModel? acceleratorModel)
+        {
+            var input = inputPlugin.CreateExport();
+            if (acceleratorModel != null)
+            {
+                input.Value.SetupAccelerator(acceleratorModel);
+            }
+            if (input.Value.Load(filePath) && input.Value.LoadData(inputOptions))
+            {
+                return input;
+            }
+            else
+            {
+                input.Dispose();
+                return null;
+            }
         }
 
         private void FootageListModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)

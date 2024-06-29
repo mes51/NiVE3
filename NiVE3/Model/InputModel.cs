@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Data.Json.Project;
 using NiVE3.Extension;
+using NiVE3.Input;
 using NiVE3.Input.Special;
 using NiVE3.Plugin.Interfaces;
 using Prism.Mvvm;
@@ -28,6 +31,8 @@ namespace NiVE3.Model
 
         public bool IsPlaceholder => Input is PlaceholderInput;
 
+        public bool IsInternalInput => Input.GetType().GetCustomAttribute<InternalInputAttribute>() != null;
+
         ExportLifetimeContext<IInput>? InputContext { get; }
 
         public InputModel(IInput input, Guid pluginId, bool isSupportLoadToGpu, Guid? inputId = null)
@@ -44,13 +49,14 @@ namespace NiVE3.Model
             InputContext = inputContext;
         }
 
-        public InputData SaveData()
+        public InputData SaveData(string projectDir)
         {
             return new InputData
             {
                 InputId = InputId,
                 PluginId = PluginId,
                 FilePath = FilePath,
+                RelativeFilePath = IsInternalInput ? "" : Path.GetRelativePath(projectDir, FilePath),
                 InputOption = Input.SaveData(),
                 Sources = Input.GetGroup().Flatten().Select(s => new SourceData { SourceId = s.SourceId, SourceType = s.SourceType, Width = s.Width, Height = s.Height, Duration = s.Duration, FrameRate = s.FrameRate }).ToArray()
             };

@@ -150,8 +150,9 @@ namespace NiVE3.Model
 
         public void SaveProject()
         {
+            var projectDir = Path.GetDirectoryName(ProjectPath) ?? "";
             var data = new ProjectData(
-                FootageListModel.SaveData(),
+                FootageListModel.SaveData(projectDir),
                 CompositionModels.Select(c => c.SaveData()).ToArray(),
                 RenderQueueModel.SaveData()
             );
@@ -201,14 +202,15 @@ namespace NiVE3.Model
             HistoryModel.BeginLoadProject();
             try
             {
-                FootageListModel.LoadData(projectData.FootageList);
+                var projectDir = Path.GetDirectoryName(filePath) ?? "";
+                FootageListModel.LoadData(projectData.FootageList, projectDir);
                 foreach (var compositionData in projectData.Compositions)
                 {
                     var composition = new CompositionModel(compositionData.RendererPluginId, compositionData.ToneMapperPluginId, FootageListModel, EffectListModel, RenderQueueModel, TextPropertyModel, RendererListModel, ToneMapperListModel, HistoryModel, compositionData.CompositionId);
                     composition.LoadData(compositionData);
                     CompositionModels.Add(composition);
                 }
-                
+
                 var compositionFootages = FootageListModel.LoadCompositionFootageFromData(projectData.FootageList, [..CompositionModels]);
                 foreach (var composition in CompositionModels)
                 {
