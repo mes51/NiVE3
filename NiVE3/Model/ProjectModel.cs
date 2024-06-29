@@ -230,6 +230,7 @@ namespace NiVE3.Model
                 HistoryModel.EndLoadProject();
             }
 
+            ProjectPath = filePath;
             IsEdited = false;
         }
 
