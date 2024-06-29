@@ -11,6 +11,8 @@ using NiVE3.Numerics;
 using NiVE3.Shared.Extension;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Image.Drawing;
+using NiVE3.PresetPlugin.Internal.Util;
+using System.Runtime.CompilerServices;
 
 namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
 {
@@ -92,19 +94,18 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsDegenerate()
         {
-            var v1 = Avx.ExtractVector128(V1.Vertex, 0);
-            var v2 = Avx.ExtractVector128(V2.Vertex, 0);
-            var v3 = Avx.ExtractVector128(V3.Vertex, 0); //new Vector2(V3.Vertex.X, V3.Vertex.Y);
-            var a = Math.Sqrt(Sse41.DotProduct(v2, v3, 0b01110111).GetElement(0));
-            var b = Math.Sqrt(Sse41.DotProduct(v1, v3, 0b01110111).GetElement(0));
-            var c = Math.Sqrt(Sse41.DotProduct(v1, v2, 0b01110111).GetElement(0));
-            var s = (a + b + c) * 0.5F;
+            var ab = (V2.Vertex - V1.Vertex) & Consts.WithoutWMask;
+            var ac = (V3.Vertex - V1.Vertex) & Consts.WithoutWMask;
+            var cos = Vector256.Dot(ab, ac);
+            cos *= cos;
 
-            return s == 0.0F || s == a || s == b || s == c;
+            return (ab.LengthSquared() * ac.LengthSquared() - cos) <= 0.0;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsClipped()
         {
             return V1.Vertex.GetElement(3) <= 0.0 || V2.Vertex.GetElement(3) <= 0.0 || V3.Vertex.GetElement(3) <= 0.0;

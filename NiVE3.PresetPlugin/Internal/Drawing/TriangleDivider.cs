@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using NiVE3.PresetPlugin.Internal.Drawing.Primitive3D;
 using System.Runtime.CompilerServices;
 using NiVE3.Shared.Extension;
+using NiVE3.PresetPlugin.Internal.Util;
 
 namespace NiVE3.PresetPlugin.Internal.Drawing
 {
@@ -73,14 +74,13 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
         static void DivideTriangleByTriangle<T>(T triangle, T divider, List<T> near, List<T> far) where T : TriangleBase<T>
         {
             const double Epsilon = 1E-10;
-            var wClearMask = Vector256.Create(0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0).AsDouble();
 
             var dSign = Math.Sign(divider.PlaneD);
             var n = divider.Normal;
             var planeD = Vector256.Create(divider.PlaneD, divider.PlaneD, divider.PlaneD, 0.0F);
-            var dd1 = (n.DotProduct(triangle.V1.Vertex) + planeD) & wClearMask;
-            var dd2 = (n.DotProduct(triangle.V2.Vertex) + planeD) & wClearMask;
-            var dd3 = (n.DotProduct(triangle.V3.Vertex) + planeD) & wClearMask;
+            var dd1 = (n.DotProduct(triangle.V1.Vertex) + planeD) & Consts.WithoutWMask;
+            var dd2 = (n.DotProduct(triangle.V2.Vertex) + planeD) & Consts.WithoutWMask;
+            var dd3 = (n.DotProduct(triangle.V3.Vertex) + planeD) & Consts.WithoutWMask;
             var maxD = MaxByAbs(MaxByAbs(dd1, dd2), dd3).GetElement(0);
             if (Math.Abs(maxD) < Epsilon)
             {
@@ -117,9 +117,9 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                         continue;
                     }
 
-                    var td1 = (t.V1.Vertex.DotProduct(n) + planeD) & wClearMask;
-                    var td2 = (t.V2.Vertex.DotProduct(n) + planeD) & wClearMask;
-                    var td3 = (t.V3.Vertex.DotProduct(n) + planeD) & wClearMask;
+                    var td1 = (t.V1.Vertex.DotProduct(n) + planeD) & Consts.WithoutWMask;
+                    var td2 = (t.V2.Vertex.DotProduct(n) + planeD) & Consts.WithoutWMask;
+                    var td3 = (t.V3.Vertex.DotProduct(n) + planeD) & Consts.WithoutWMask;
 
                     if (Math.Sign(MaxByAbs(MaxByAbs(td1, td2), td3).GetElement(0)) == dSign)
                     {

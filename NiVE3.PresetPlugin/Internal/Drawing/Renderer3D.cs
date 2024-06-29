@@ -16,6 +16,7 @@ using System.Runtime.CompilerServices;
 using NiVE3.Plugin.Interfaces.RendererParams;
 using System.Buffers;
 using NiVE3.Image.Drawing;
+using NiVE3.PresetPlugin.Internal.Util;
 
 namespace NiVE3.PresetPlugin.Internal.Drawing
 {
@@ -24,8 +25,6 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
         protected const float ShininessStrength = 120.0F;
 
         protected static readonly float[] EmptyTrackMatte = [1.0F];
-
-        static readonly Vector256<double> WithoutWMask = Vector256.Create(0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0).AsDouble();
 
         public Matrix4x4d ViewMatrix { get; set; }
 
@@ -81,14 +80,22 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
         public void AddRect(NImage texture, float opacity, BlendMode blendType, Matrix4x4d modelMatrix, bool isCastShadow, float lightTransmission, bool isAcceptShadow, bool isAcceptLight, float ambient, float diffuse, float specularIntensity, float specularShininess, float metal, RasterizedMaskImage? trackMatte)
         {
+            AddRectInternal(texture, 0, 0, texture.Width, texture.Height, opacity, blendType, modelMatrix, isCastShadow, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
+        }
+
+        void AddRectInternal(NImage texture, int left, int top, int right, int bottom, float opacity, BlendMode blendType, Matrix4x4d modelMatrix, bool isCastShadow, float lightTransmission, bool isAcceptShadow, bool isAcceptLight, float ambient, float diffuse, float specularIntensity, float specularShininess, float metal, RasterizedMaskImage? trackMatte)
+        {
+            // TODO: ボリゴンの境目が見えたり、斜めの補間エラーが出たりしたら調整する
+            const double MaxTriangleEdgeLength = 0.5;
+
             var width = texture.Width;
             var height = texture.Height;
             var offsetX = (Size - Width) * 0.5 / Size;
             var offsetY = (Size - Height) * 0.5 / Size;
-            var sv1 = Vector256.Create(0.0, 0.0, 0.0, Size) / Size;
-            var sv2 = Vector256.Create(0.0, height, 0.0, Size) / Size;
-            var sv3 = Vector256.Create(width, height, 0.0, Size) / Size;
-            var sv4 = Vector256.Create(width, 0.0, 0.0, Size) / Size;
+            var sv1 = Vector256.Create(left, top, 0.0, Size) / Size;
+            var sv2 = Vector256.Create(left, bottom, 0.0, Size) / Size;
+            var sv3 = Vector256.Create(right, bottom, 0.0, Size) / Size;
+            var sv4 = Vector256.Create(right, top, 0.0, Size) / Size;
 
             modelMatrix = Matrix4x4d.CreateTranslate(-texture.Origin.X / Size, -texture.Origin.Y / Size, 0.0) * modelMatrix;
             var mv = modelMatrix * ViewMatrix;
@@ -98,15 +105,29 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             var v3 = mvt.Transform(sv3);
             var v4 = mvt.Transform(sv4);
 
-            var uv1 = new UVVertex(v1, 0.0F, 0.0F);
-            var uv2 = new UVVertex(v2, 0.0F, 1.0F);
-            var uv3 = new UVVertex(v3, 1.0F, 1.0F);
-            var uv4 = new UVVertex(v4, 1.0F, 0.0F);
+            if ((((v2 - v1) & Consts.WithoutWMask).LengthSquared() > MaxTriangleEdgeLength ||
+                ((v3 - v1) & Consts.WithoutWMask).LengthSquared() > MaxTriangleEdgeLength ||
+                ((v4 - v1) & Consts.WithoutWMask).LengthSquared() > MaxTriangleEdgeLength) &&
+                right - left > 1 && bottom - top > 1)
+            {
+                var hSplit = (right - left) / 2 + left;
+                var tSplit = (bottom - top) / 2 + top;
+                AddRectInternal(texture, left, top, hSplit, tSplit, opacity, blendType, modelMatrix, isCastShadow, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
+                AddRectInternal(texture, hSplit, top, right, tSplit, opacity, blendType, modelMatrix, isCastShadow, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
+                AddRectInternal(texture, left, tSplit, hSplit, bottom, opacity, blendType, modelMatrix, isCastShadow, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
+                AddRectInternal(texture, hSplit, tSplit, right, bottom, opacity, blendType, modelMatrix, isCastShadow, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
+                return;
+            }
+
+            var uv1 = new UVVertex(v1, left / (double)width, top / (double)height);
+            var uv2 = new UVVertex(v2, left / (double)width, bottom / (double)height);
+            var uv3 = new UVVertex(v3, right / (double)width, bottom / (double)height);
+            var uv4 = new UVVertex(v4, right / (double)width, top / (double)height);
 
             Matrix4x4d.Invert(mv, out var invertedModelViewMatrix);
             invertedModelViewMatrix = Matrix4x4d.Transpose(invertedModelViewMatrix);
 
-            var farPoint = mv.Transform(Vector256.Create(0.0, 0.0, -10000.0, 1.0)) & WithoutWMask;
+            var farPoint = mv.Transform(Vector256.Create(0.0, 0.0, -10000.0, 1.0)) & Consts.WithoutWMask;
             Triangles.Add(new Triangle(uv1, uv2, uv3, farPoint, invertedModelViewMatrix, texture, opacity, blendType, isCastShadow, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte, LastId));
             Triangles.Add(new Triangle(uv1, uv3, uv4, farPoint, invertedModelViewMatrix, texture, opacity, blendType, isCastShadow, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte, LastId));
 
@@ -184,7 +205,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             Matrix4x4d.Invert(modelViewMatrix, out var invertedLightModelViewMatrix);
             invertedLightModelViewMatrix = Matrix4x4d.Transpose(invertedLightModelViewMatrix);
 
-            var lfarPoint = lmv.Transform(Vector256.Create(0.0, 0.0, -10000.0, 1.0)) & WithoutWMask;
+            var lfarPoint = lmv.Transform(Vector256.Create(0.0, 0.0, -10000.0, 1.0)) & Consts.WithoutWMask;
             return (new LightTriangle(luv1, luv2, luv3, lfarPoint, invertedLightModelViewMatrix, texture, opacity, isCastShadow, lightTransmission, triangleId), new LightTriangle(luv1, luv3, luv4, lfarPoint, invertedLightModelViewMatrix, texture, opacity, isCastShadow, lightTransmission, triangleId));
         }
 
