@@ -269,7 +269,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             {
                 return int.MaxValue;
             }
-            else if (float.IsNegative(a))
+            else if (float.IsNegativeInfinity(a))
             {
                 return min;
             }
@@ -321,10 +321,13 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
         NManagedImage RenderImage { get; }
 
-        public Renderer3D(NManagedImage renderImage, int width, int height, List<PointLight> pointLights, List<SpotLight> spotLights, List<ParallelLight> parallelLights, List<AmbientLight> ambientLights)
+        bool IsEnableShadowAntiAlias { get; }
+
+        public Renderer3D(NManagedImage renderImage, int width, int height, bool isEnableShadowAntiAlias, List<PointLight> pointLights, List<SpotLight> spotLights, List<ParallelLight> parallelLights, List<AmbientLight> ambientLights)
             : base(width, height, pointLights, spotLights, parallelLights, ambientLights)
         {
             RenderImage = renderImage;
+            IsEnableShadowAntiAlias = isEnableShadowAntiAlias;
         }
 
         public void Render()
@@ -506,7 +509,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                     var shadow = shadows[(int)face];
                                     if (shadow != null)
                                     {
-                                        var transmissionColor = GetShadowColor(triangle.Id, shadow, shadowBuffer, l.ShadowScatterSize, shadowProjectionPos, floatInvtededViewMatrix, shadow.LightViewProjectionMatrix);
+                                        var transmissionColor = GetShadowColor(triangle.Id, shadow, l.ShadowScatterSize, IsEnableShadowAntiAlias, shadowProjectionPos, floatInvtededViewMatrix, shadow.LightViewProjectionMatrix);
                                         color *= transmissionColor;
                                     }
                                 }
@@ -531,7 +534,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                         {
                                             attenuation = MathF.Cos((1.0F - Math.Min((MathF.Cos(spotCone) - l.OuterConeCos) * l.InvertInnerConeCos, 1.0F)) * MathF.PI * 0.5F);
                                         }
-                                        var transmissionColor = GetShadowColor(triangle.Id, shadow, shadowBuffer, l.ShadowScatterSize, shadowProjectionPos, floatInvtededViewMatrix, shadow.LightViewProjectionMatrix);
+                                        var transmissionColor = GetShadowColor(triangle.Id, shadow, l.ShadowScatterSize, IsEnableShadowAntiAlias, shadowProjectionPos, floatInvtededViewMatrix, shadow.LightViewProjectionMatrix);
                                         color *= Vector4.Lerp(Vector4.One, transmissionColor, attenuation);
                                     }
                                 }
@@ -545,7 +548,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                         continue;
                                     }
 
-                                    var transmissionColor = GetShadowColor(triangle.Id, shadow, shadowBuffer, l.ShadowScatterSize, shadowProjectionPos, floatInvtededViewMatrix, shadow.LightViewProjectionMatrix);
+                                    var transmissionColor = GetShadowColor(triangle.Id, shadow, l.ShadowScatterSize, IsEnableShadowAntiAlias, shadowProjectionPos, floatInvtededViewMatrix, shadow.LightViewProjectionMatrix);
                                     color *= transmissionColor;
                                 }
 
@@ -586,7 +589,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                         var shadow = shadows[(int)face];
                                         if (shadow != null)
                                         {
-                                            var transmissionColor = GetShadowColor(triangle.Id, shadow, shadowBuffer, l.ShadowScatterSize, shadowProjectionPos, floatInvtededViewMatrix, shadow.LightViewProjectionMatrix);
+                                            var transmissionColor = GetShadowColor(triangle.Id, shadow, l.ShadowScatterSize, IsEnableShadowAntiAlias, shadowProjectionPos, floatInvtededViewMatrix, shadow.LightViewProjectionMatrix);
                                             if (!lightColor.CompareGreaterThanBy3Element(Vector3.Zero))
                                             {
                                                 continue;
@@ -626,7 +629,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                         var shadow = spotLightShadows[i];
                                         if (triangle.IsAcceptShadow && shadow != null)
                                         {
-                                            var transmissionColor = GetShadowColor(triangle.Id, shadow, shadowBuffer, l.ShadowScatterSize, shadowProjectionPos, floatInvtededViewMatrix, shadow.LightViewProjectionMatrix);
+                                            var transmissionColor = GetShadowColor(triangle.Id, shadow, l.ShadowScatterSize, IsEnableShadowAntiAlias, shadowProjectionPos, floatInvtededViewMatrix, shadow.LightViewProjectionMatrix);
                                             if (!transmissionColor.CompareGreaterThanBy3Element(Vector3.Zero))
                                             {
                                                 continue;
@@ -670,7 +673,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                     var shadow = parallelLightShadows[i];
                                     if (triangle.IsAcceptShadow && shadow != null)
                                     {
-                                        var transmissionColor = GetShadowColor(triangle.Id, shadow, shadowBuffer, l.ShadowScatterSize, shadowProjectionPos, floatInvtededViewMatrix, shadow.LightViewProjectionMatrix);
+                                        var transmissionColor = GetShadowColor(triangle.Id, shadow, l.ShadowScatterSize, IsEnableShadowAntiAlias, shadowProjectionPos, floatInvtededViewMatrix, shadow.LightViewProjectionMatrix);
                                         if (!transmissionColor.CompareGreaterThanBy3Element(Vector3.Zero))
                                         {
                                             continue;
@@ -917,16 +920,45 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             return shadowMap;
         }
 
-        static Vector4 GetShadowColor(int triangleId, ShadowMap shadowMap, ShadowBuffer shadowBuffer, float shadowScatterSize, in Vector4 shadowProjectionPos, in Matrix4x4 invtededViewMatrix, in Matrix4x4 lightViewProjectionMatrix)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static Vector4 GetShadowColor(int triangleId, ShadowMap shadowMap, float shadowScatterSize, bool isEnableAntiAlias, in Vector4 shadowProjectionPos, in Matrix4x4 invtededViewMatrix, in Matrix4x4 lightViewProjectionMatrix)
         {
             var shadowPos = Vector4.Transform(Vector4.Transform(shadowProjectionPos, invtededViewMatrix), lightViewProjectionMatrix);
             shadowPos /= shadowPos.W;
             var shadowTexPos = shadowPos * 0.5F + new Vector4(0.5F, 0.5F, 0.0F, 0.0F);
             var depth = MathF.Round(shadowPos.Z, DepthRoundingDigit);
             var size = shadowMap.ShadowMapSize;
+            var shadowBuffer = shadowMap.ShadowBuffer;
 
-            var shadowTextureX = (int)(shadowTexPos.X * size);
-            var shadowTextureY = (int)(shadowTexPos.Y * size);
+            var shadowTextureX = shadowTexPos.X * size;
+            var shadowTextureY = shadowTexPos.Y * size;
+            var intShadowTextureX = (int)shadowTextureX;
+            var intShadowTextureY = (int)shadowTextureY;
+
+            if (isEnableAntiAlias)
+            {
+                var s1 = SamplingShadowColor(triangleId, shadowMap, shadowScatterSize, intShadowTextureX, intShadowTextureY, depth);
+                var s2 = SamplingShadowColor(triangleId, shadowMap, shadowScatterSize, intShadowTextureX + 1, intShadowTextureY, depth);
+                var s3 = SamplingShadowColor(triangleId, shadowMap, shadowScatterSize, intShadowTextureX, intShadowTextureY + 1, depth);
+                var s4 = SamplingShadowColor(triangleId, shadowMap, shadowScatterSize, intShadowTextureX +1, intShadowTextureY + 1, depth);
+
+                return Vector4.Lerp(
+                    Vector4.Lerp(s1, s2, shadowTextureX - intShadowTextureX),
+                    Vector4.Lerp(s3, s4, shadowTextureX - intShadowTextureX),
+                    shadowTextureY - intShadowTextureY
+                );
+            }
+            else
+            {
+                return SamplingShadowColor(triangleId, shadowMap, shadowScatterSize, intShadowTextureX, intShadowTextureY, depth);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static Vector4 SamplingShadowColor(int triangleId, ShadowMap shadowMap, float shadowScatterSize, int shadowTextureX, int shadowTextureY, float depth)
+        {
+            var size = shadowMap.ShadowMapSize;
+            var shadowBuffer = shadowMap.ShadowBuffer;
 
             // TODO: 重くならないならfor文の方とまとめる
             if (shadowScatterSize <= 0.0F)

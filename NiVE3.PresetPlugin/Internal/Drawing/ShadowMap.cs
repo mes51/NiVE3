@@ -19,7 +19,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
         public readonly int ShadowMapSize;
 
-        ShadowBuffer ShadowBuffer { get; }
+        public ShadowBuffer ShadowBuffer { get; }
 
         public ShadowMap(ShadowBuffer shadowBuffer, int shadowMapSize, Matrix4x4 lightViewProjectionMatrix)
         {

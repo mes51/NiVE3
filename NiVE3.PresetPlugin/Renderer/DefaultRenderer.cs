@@ -57,6 +57,8 @@ namespace NiVE3.PresetPlugin.Renderer
 
         List<AmbientLight> AmbientLights { get; } = [];
 
+        bool IsEnableShadowAntiAlias { get; set; }
+
         public void SetupAccelerator(IAcceleratorObject accelerator) { }
 
         public void SetSize(int width, int height)
@@ -244,7 +246,7 @@ namespace NiVE3.PresetPlugin.Renderer
             {
                 if (group.First().IsEnable3D)
                 {
-                    var renderer = new Renderer3D(CurrentFrame, Width, Height, PointLights, SpotLights, ParallelLights, AmbientLights)
+                    var renderer = new Renderer3D(CurrentFrame, Width, Height, IsEnableShadowAntiAlias, PointLights, SpotLights, ParallelLights, AmbientLights)
                     {
                         ViewMatrix = ViewMatrix,
                         FieldOfView = FieldOfView
