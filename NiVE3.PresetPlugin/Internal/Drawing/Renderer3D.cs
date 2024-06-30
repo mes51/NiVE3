@@ -81,6 +81,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
         public void AddRect(NImage texture, float opacity, BlendMode blendType, Matrix4x4d modelMatrix, bool isCastShadow, float lightTransmission, bool isAcceptShadow, bool isAcceptLight, float ambient, float diffuse, float specularIntensity, float specularShininess, float metal, RasterizedMaskImage? trackMatte)
         {
             AddRectInternal(texture, 0, 0, texture.Width, texture.Height, opacity, blendType, modelMatrix, isCastShadow, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
+
+            LastId++;
         }
 
         void AddRectInternal(NImage texture, int left, int top, int right, int bottom, float opacity, BlendMode blendType, Matrix4x4d modelMatrix, bool isCastShadow, float lightTransmission, bool isAcceptShadow, bool isAcceptLight, float ambient, float diffuse, float specularIntensity, float specularShininess, float metal, RasterizedMaskImage? trackMatte)
@@ -188,8 +190,6 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 triangles.Add(lt1);
                 triangles.Add(lt2);
             }
-
-            LastId++;
         }
 
         static (LightTriangle, LightTriangle) CreateLightTriangle(
