@@ -16,7 +16,6 @@ using System.Runtime.CompilerServices;
 using NiVE3.Plugin.Interfaces.RendererParams;
 using System.Buffers;
 using NiVE3.Image.Drawing;
-using NiVE3.PresetPlugin.Internal.Util;
 
 namespace NiVE3.PresetPlugin.Internal.Drawing
 {
@@ -107,9 +106,9 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             var v3 = mvt.Transform(sv3);
             var v4 = mvt.Transform(sv4);
 
-            if ((((v2 - v1) & Consts.WithoutWMask).LengthSquared() > MaxTriangleEdgeLength ||
-                ((v3 - v1) & Consts.WithoutWMask).LengthSquared() > MaxTriangleEdgeLength ||
-                ((v4 - v1) & Consts.WithoutWMask).LengthSquared() > MaxTriangleEdgeLength) &&
+            if ((((v2 - v1) & Const.WithoutWMask256).LengthSquared() > MaxTriangleEdgeLength ||
+                ((v3 - v1) & Const.WithoutWMask256).LengthSquared() > MaxTriangleEdgeLength ||
+                ((v4 - v1) & Const.WithoutWMask256).LengthSquared() > MaxTriangleEdgeLength) &&
                 right - left > 1 && bottom - top > 1)
             {
                 var hSplit = (right - left) / 2 + left;
@@ -133,7 +132,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             Matrix4x4d.Invert(mv, out var invertedModelViewMatrix);
             invertedModelViewMatrix = Matrix4x4d.Transpose(invertedModelViewMatrix);
 
-            var farPoint = mv.Transform(Vector256.Create(0.0, 0.0, -10000.0, 1.0)) & Consts.WithoutWMask;
+            var farPoint = mv.Transform(Vector256.Create(0.0, 0.0, -10000.0, 1.0)) & Const.WithoutWMask256;
             Triangles.Add(new Triangle(uv1, uv2, uv3, farPoint, invertedModelViewMatrix, texture, opacity, blendType, isCastShadow, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte, LastId));
             Triangles.Add(new Triangle(uv1, uv3, uv4, farPoint, invertedModelViewMatrix, texture, opacity, blendType, isCastShadow, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte, LastId));
 
@@ -228,7 +227,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             Matrix4x4d.Invert(modelViewMatrix, out var invertedLightModelViewMatrix);
             invertedLightModelViewMatrix = Matrix4x4d.Transpose(invertedLightModelViewMatrix);
 
-            var lfarPoint = lmv.Transform(Vector256.Create(0.0, 0.0, -10000.0, 1.0)) & Consts.WithoutWMask;
+            var lfarPoint = lmv.Transform(Vector256.Create(0.0, 0.0, -10000.0, 1.0)) & Const.WithoutWMask256;
             return (new LightTriangle(luv1, luv2, luv3, lfarPoint, invertedLightModelViewMatrix, texture, opacity, isCastShadow, lightTransmission, triangleId), new LightTriangle(luv1, luv3, luv4, lfarPoint, invertedLightModelViewMatrix, texture, opacity, isCastShadow, lightTransmission, triangleId));
         }
 
@@ -321,16 +320,13 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
         NManagedImage RenderImage { get; }
 
-        bool IsEnableShadowAntiAlias { get; }
-
-        public Renderer3D(NManagedImage renderImage, int width, int height, bool isEnableShadowAntiAlias, List<PointLight> pointLights, List<SpotLight> spotLights, List<ParallelLight> parallelLights, List<AmbientLight> ambientLights)
+        public Renderer3D(NManagedImage renderImage, int width, int height, List<PointLight> pointLights, List<SpotLight> spotLights, List<ParallelLight> parallelLights, List<AmbientLight> ambientLights)
             : base(width, height, pointLights, spotLights, parallelLights, ambientLights)
         {
             RenderImage = renderImage;
-            IsEnableShadowAntiAlias = isEnableShadowAntiAlias;
         }
 
-        public void Render()
+        public void Render(bool enableAntiAlias, bool enableShadowAntiAlias)
         {
             var renderImageWidth = RenderImage.Width;
             var renderImageHeight = RenderImage.Height;
@@ -364,8 +360,11 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
             var renderImageOffsetX = (int)(OffsetX / scaleRateX);
             var renderImageOffsetY = (int)(OffsetY / scaleRateY);
-            foreach (var triangle in triangles)
+
+            var preProcessedTriangle = new PreProcessedTriangle[triangles.Length];
+            for (var i = 0; i < triangles.Length; i++)
             {
+                var triangle = triangles[i];
                 var uv1 = triangle.V1.Transform(projectionMatrix);
                 var uv2 = triangle.V2.Transform(projectionMatrix);
                 var uv3 = triangle.V3.Transform(projectionMatrix);
@@ -401,7 +400,6 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 var isFrontFace = Vector256.Dot(triangle.Normal, (triangle.V1.Vertex + triangle.V2.Vertex + triangle.V3.Vertex) / 3.0) <= 0.0;
                 var vvEX = Vector128.Create((float)dvv2.GetElement(0), (float)dvv3.GetElement(0), (float)dvv1.GetElement(0), 0.0F);
                 var vvEY = Vector128.Create((float)dvv2.GetElement(1), (float)dvv3.GetElement(1), (float)dvv1.GetElement(1), 0.0F);
-                var useLight = hasLight && (triangle.IsAcceptLight || triangle.IsAcceptShadow);
 
                 NManagedImage managedTexture;
                 if (triangle.Texture is NGPUImage gpuImage)
@@ -431,24 +429,233 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                     managedTrackMatte = (ManagedRasterizedMaskImage?)triangle.TrackMatte;
                 }
 
-                Parallel.For(minY, maxY, y =>
+                preProcessedTriangle[i] = new PreProcessedTriangle(
+                    triangle.Id,
+                    minX,
+                    maxX,
+                    minY,
+                    maxY,
+                    edgeX,
+                    edgeY,
+                    vvEX,
+                    vvEY,
+                    u,
+                    v,
+                    w,
+                    vvX,
+                    vvY,
+                    vvZ,
+                    svvX,
+                    svvY,
+                    svvZ,
+                    denom,
+                    isFrontFace,
+                    triangle.FloatNormal,
+                    managedTexture,
+                    managedTrackMatte,
+                    triangle.Opacity,
+                    triangle.LightTransmission,
+                    triangle.BlendMode,
+                    triangle.IsAcceptShadow,
+                    triangle.IsAcceptLight,
+                    triangle.Ambient,
+                    triangle.Diffuse,
+                    triangle.SpecularIntensity,
+                    triangle.SpecularShininess,
+                    triangle.Metal
+                );
+            }
+
+            if (enableAntiAlias)
+            {
+                using var interpolate = (NManagedImage)RenderImage.Copy();
+                Rasterize(
+                    RenderImage,
+                    preProcessedTriangle,
+                    renderImageOffsetX,
+                    renderImageOffsetY,
+                    scaleRateX,
+                    scaleRateY,
+                    floatInvtededViewMatrix,
+                    hasLight,
+                    PointLights,
+                    SpotLights,
+                    ParallelLights,
+                    AmbientLights,
+                    hasShadow,
+                    pointLightShadows,
+                    spotLightShadows,
+                    parallelLightShadows,
+                    enableShadowAntiAlias,
+                    0.0F,
+                    0.0F
+                );
+                Rasterize(
+                    interpolate,
+                    preProcessedTriangle,
+                    renderImageOffsetX,
+                    renderImageOffsetY,
+                    scaleRateX,
+                    scaleRateY,
+                    floatInvtededViewMatrix,
+                    hasLight,
+                    PointLights,
+                    SpotLights,
+                    ParallelLights,
+                    AmbientLights,
+                    hasShadow,
+                    pointLightShadows,
+                    spotLightShadows,
+                    parallelLightShadows,
+                    enableShadowAntiAlias,
+                    0.5F,
+                    0.5F
+                );
+
+                var renderImageData = RenderImage.Data;
+                var interpolateData = interpolate.Data;
+                renderImageData[0] = renderImageData[0] * 0.875F + interpolateData[0] * 0.125F;
+                Parallel.For(1, renderImageWidth, x =>
                 {
-                    var renderImageSpan = RenderImage.GetDataSpan();
-                    var trackMatteSpan = (managedTrackMatte?.Data ?? EmptyTrackMatte).AsSpan();
-                    var texture = managedTexture.GetDataSpan();
-                    var eY = edgeX * (Vector128.Create(y, y, y, 0.0F) * scaleRateY - vvEY);
+                    renderImageData[x] = renderImageData[x] * 0.75F + interpolateData[x - 1] * 0.125F + interpolateData[x] * 0.125F;
+                });
+                Parallel.For(1, renderImageHeight, y =>
+                {
+                    var p = y * renderImageWidth;
+                    renderImageData[p] = renderImageData[p] * 0.75F + interpolateData[p - renderImageWidth] * 0.125F + interpolateData[p] * 0.125F;
+                });
+                Parallel.For(1, renderImageHeight, y =>
+                {
+                    var renderImageDataSpan = renderImageData.AsSpan(y * renderImageWidth, renderImageWidth);
+                    var prevLineInterpolateDataSpan = interpolateData.AsSpan((y - 1) * renderImageWidth, renderImageWidth);
+                    var interpolateDataSpan = interpolateData.AsSpan(y * renderImageWidth, renderImageWidth);
+                    for (var x = 1; x < renderImageWidth; x++)
+                    {
+                        renderImageDataSpan[x] = renderImageDataSpan[x] * 0.5F +
+                            prevLineInterpolateDataSpan[x - 1] * 0.125F +
+                            prevLineInterpolateDataSpan[x] * 0.125F +
+                            interpolateDataSpan[x - 1] * 0.125F +
+                            interpolateDataSpan[x] * 0.125F;
+                    }
+                });
+            }
+            else
+            {
+                Rasterize(
+                    RenderImage,
+                    preProcessedTriangle,
+                    renderImageOffsetX,
+                    renderImageOffsetY,
+                    scaleRateX,
+                    scaleRateY,
+                    floatInvtededViewMatrix,
+                    hasLight,
+                    PointLights,
+                    SpotLights,
+                    ParallelLights,
+                    AmbientLights,
+                    hasShadow,
+                    pointLightShadows,
+                    spotLightShadows,
+                    parallelLightShadows,
+                    enableShadowAntiAlias,
+                    0.0F,
+                    0.0F
+                );
+            }
+
+            foreach (var (_, i) in convertedTexture)
+            {
+                i.Dispose();
+            }
+            foreach (var (_, i) in convertedTrackMatte)
+            {
+                i.Dispose();
+            }
+
+            foreach (var ss in pointLightShadows)
+            {
+                if (ss != null)
+                {
+                    foreach (var s in ss)
+                    {
+                        s?.Dispose();
+                    }
+                }
+            }
+            foreach (var s in spotLightShadows)
+            {
+                s?.Dispose();
+            }
+            foreach (var s in parallelLightShadows)
+            {
+                s?.Dispose();
+            }
+        }
+
+        static void Rasterize(
+            NManagedImage renderTarget,
+            PreProcessedTriangle[] triangles,
+            int renderImageOffsetX,
+            int renderImageOffsetY,
+            float scaleRateX,
+            float scaleRateY,
+            Matrix4x4 floatInvtededViewMatrix,
+            bool hasLight,
+            List<PointLight> pointLightList,
+            List<SpotLight> spotLightList,
+            List<ParallelLight> parallelLightList,
+            List<AmbientLight> ambientLightList,
+            bool hasShadow,
+            ShadowMap?[]?[] pointLightShadows,
+            ShadowMap?[] spotLightShadows,
+            ShadowMap?[] parallelLightShadows,
+            bool enableShadowAntiAlias,
+            float offsetX,
+            float offsetY
+        )
+        {
+            var renderImageWidth = renderTarget.Width;
+
+            foreach (var triangle in triangles)
+            {
+                var useLight = hasLight && (triangle.IsAcceptLight || triangle.IsAcceptShadow);
+
+                Parallel.For(triangle.MinY, triangle.MaxY, y =>
+                {
+                    var renderImageSpan = renderTarget.GetDataSpan();
+                    var trackMatteSpan = (triangle.TrackMatte?.Data ?? EmptyTrackMatte).AsSpan();
+                    var texture = triangle.Texture.GetDataSpan();
+                    var eY = (triangle.EdgeX * (Vector128.Create(y + offsetY) * scaleRateY - triangle.VVEY)) & Const.WithoutWMask128;
+
+                    var pointLights = CollectionsMarshal.AsSpan(pointLightList);
+                    var spotLights = CollectionsMarshal.AsSpan(spotLightList);
+                    var parallelLights = CollectionsMarshal.AsSpan(parallelLightList);
+                    var ambientLights = CollectionsMarshal.AsSpan(ambientLightList);
 
                     var offset = (y - renderImageOffsetY) * renderImageWidth;
-                    var p = offset + (minX - renderImageOffsetX);
+                    var p = offset + (triangle.MinX - renderImageOffsetX);
 
-                    var pointLights = CollectionsMarshal.AsSpan(PointLights);
-                    var spotLights = CollectionsMarshal.AsSpan(SpotLights);
-                    var parallelLights = CollectionsMarshal.AsSpan(ParallelLights);
-                    var ambientLights = CollectionsMarshal.AsSpan(AmbientLights);
-
-                    for (var x = minX; x < maxX; x++, p++)
+                    var id = triangle.Id;
+                    var maxX = triangle.MaxX;
+                    var vvEX = triangle.VVEX;
+                    var edgeY = triangle.EdgeY;
+                    var denom = triangle.Denominator;
+                    var textureWidth = triangle.Texture.Width;
+                    var textureHeight = triangle.Texture.Height;
+                    var u = triangle.U;
+                    var v = triangle.V;
+                    var w = triangle.W;
+                    var vvX = triangle.VVX;
+                    var vvY = triangle.VVY;
+                    var vvZ = triangle.VVZ;
+                    var svvX = triangle.SVVX;
+                    var svvY = triangle.SVVY;
+                    var svvZ = triangle.SVVZ;
+                    var isFrontFace = triangle.IsFrontFace;
+                    for (var x = triangle.MinX; x < maxX; x++, p++)
                     {
-                        var eX = Vector128.Create(x, x, x, 0.0F) * scaleRateX - vvEX;
+                        var eX = (Vector128.Create(x + offsetX) * scaleRateX - vvEX) & Const.WithoutWMask128;
                         var e = (Fma.IsSupported ? Fma.MultiplyAddNegated(edgeY, eX, eY) : (eY - (edgeY * eX))) * denom;
 
                         var ae = e & Vector128.GreaterThanOrEqual(Vector128.Abs(e), Vector128.Create(TriangleDivider.Epsilon));
@@ -481,7 +688,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
                             if (hasShadow && !triangle.IsAcceptLight && triangle.IsAcceptShadow)
                             {
-                                for (var i = 0; i < PointLights.Count; i++)
+                                for (var i = 0; i < pointLights.Length; i++)
                                 {
                                     var l = pointLights[i];
                                     var shadows = pointLightShadows[i];
@@ -509,12 +716,12 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                     var shadow = shadows[(int)face];
                                     if (shadow != null)
                                     {
-                                        var transmissionColor = GetShadowColor(triangle.Id, shadow, l.ShadowScatterSize, IsEnableShadowAntiAlias, shadowProjectionPos, floatInvtededViewMatrix, shadow.LightViewProjectionMatrix);
+                                        var transmissionColor = GetShadowColor(id, shadow, l.ShadowScatterSize, enableShadowAntiAlias, shadowProjectionPos, floatInvtededViewMatrix, shadow.LightViewProjectionMatrix);
                                         color *= transmissionColor;
                                     }
                                 }
 
-                                for (var i = 0; i < SpotLights.Count; i++)
+                                for (var i = 0; i < spotLights.Length; i++)
                                 {
                                     var l = spotLights[i];
                                     var lightDiff = (position - l.Position).AsVector3();
@@ -534,12 +741,12 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                         {
                                             attenuation = MathF.Cos((1.0F - Math.Min((MathF.Cos(spotCone) - l.OuterConeCos) * l.InvertInnerConeCos, 1.0F)) * MathF.PI * 0.5F);
                                         }
-                                        var transmissionColor = GetShadowColor(triangle.Id, shadow, l.ShadowScatterSize, IsEnableShadowAntiAlias, shadowProjectionPos, floatInvtededViewMatrix, shadow.LightViewProjectionMatrix);
+                                        var transmissionColor = GetShadowColor(id, shadow, l.ShadowScatterSize, enableShadowAntiAlias, shadowProjectionPos, floatInvtededViewMatrix, shadow.LightViewProjectionMatrix);
                                         color *= Vector4.Lerp(Vector4.One, transmissionColor, attenuation);
                                     }
                                 }
 
-                                for (var i = 0; i < ParallelLights.Count; i++)
+                                for (var i = 0; i < parallelLights.Length; i++)
                                 {
                                     var l = parallelLights[i];
                                     var shadow = parallelLightShadows[i];
@@ -548,7 +755,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                         continue;
                                     }
 
-                                    var transmissionColor = GetShadowColor(triangle.Id, shadow, l.ShadowScatterSize, IsEnableShadowAntiAlias, shadowProjectionPos, floatInvtededViewMatrix, shadow.LightViewProjectionMatrix);
+                                    var transmissionColor = GetShadowColor(id, shadow, l.ShadowScatterSize, enableShadowAntiAlias, shadowProjectionPos, floatInvtededViewMatrix, shadow.LightViewProjectionMatrix);
                                     color *= transmissionColor;
                                 }
 
@@ -560,7 +767,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                 var specular = Vector4.Zero;
                                 var ambient = Vector4.Zero;
 
-                                for (var i = 0; i < PointLights.Count; i++)
+                                for (var i = 0; i < pointLights.Length; i++)
                                 {
                                     var l = pointLights[i];
                                     var lightColor = l.Color;
@@ -589,7 +796,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                         var shadow = shadows[(int)face];
                                         if (shadow != null)
                                         {
-                                            var transmissionColor = GetShadowColor(triangle.Id, shadow, l.ShadowScatterSize, IsEnableShadowAntiAlias, shadowProjectionPos, floatInvtededViewMatrix, shadow.LightViewProjectionMatrix);
+                                            var transmissionColor = GetShadowColor(id, shadow, l.ShadowScatterSize, enableShadowAntiAlias, shadowProjectionPos, floatInvtededViewMatrix, shadow.LightViewProjectionMatrix);
                                             if (!lightColor.CompareGreaterThanBy3Element(Vector3.Zero))
                                             {
                                                 continue;
@@ -616,7 +823,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                     specular += Vector4.Lerp(lightColor, color * lightColor, triangle.Metal) * MathF.Pow(specularFactor, ShininessStrength * triangle.SpecularShininess) * triangle.SpecularIntensity * falloff;
                                 }
 
-                                for (var i = 0; i < SpotLights.Count; i++)
+                                for (var i = 0; i < spotLights.Length; i++)
                                 {
                                     var l = spotLights[i];
                                     var lightColor = l.Color;
@@ -629,7 +836,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                         var shadow = spotLightShadows[i];
                                         if (triangle.IsAcceptShadow && shadow != null)
                                         {
-                                            var transmissionColor = GetShadowColor(triangle.Id, shadow, l.ShadowScatterSize, IsEnableShadowAntiAlias, shadowProjectionPos, floatInvtededViewMatrix, shadow.LightViewProjectionMatrix);
+                                            var transmissionColor = GetShadowColor(id, shadow, l.ShadowScatterSize, enableShadowAntiAlias, shadowProjectionPos, floatInvtededViewMatrix, shadow.LightViewProjectionMatrix);
                                             if (!transmissionColor.CompareGreaterThanBy3Element(Vector3.Zero))
                                             {
                                                 continue;
@@ -663,7 +870,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                     }
                                 }
 
-                                for (var i = 0; i < ParallelLights.Count; i++)
+                                for (var i = 0; i < parallelLights.Length; i++)
                                 {
                                     var l = parallelLights[i];
                                     var lightColor = l.Color;
@@ -673,7 +880,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                     var shadow = parallelLightShadows[i];
                                     if (triangle.IsAcceptShadow && shadow != null)
                                     {
-                                        var transmissionColor = GetShadowColor(triangle.Id, shadow, l.ShadowScatterSize, IsEnableShadowAntiAlias, shadowProjectionPos, floatInvtededViewMatrix, shadow.LightViewProjectionMatrix);
+                                        var transmissionColor = GetShadowColor(id, shadow, l.ShadowScatterSize, enableShadowAntiAlias, shadowProjectionPos, floatInvtededViewMatrix, shadow.LightViewProjectionMatrix);
                                         if (!transmissionColor.CompareGreaterThanBy3Element(Vector3.Zero))
                                         {
                                             continue;
@@ -699,7 +906,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                     specular += Vector4.Lerp(lightColor, color * lightColor, triangle.Metal) * MathF.Pow(specularFactor, ShininessStrength * triangle.SpecularShininess) * triangle.SpecularIntensity * falloff;
                                 }
 
-                                for (var i = 0; i < AmbientLights.Count; i++)
+                                for (var i = 0; i < ambientLights.Length; i++)
                                 {
                                     ambient += ambientLights[i].Color * color;
                                 }
@@ -713,34 +920,6 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                         renderImageSpan[p] = Blend.Process(triangle.BlendMode, renderImageSpan[p], color);
                     }
                 });
-            }
-
-            foreach (var (_, i) in convertedTexture)
-            {
-                i.Dispose();
-            }
-            foreach (var (_, i) in convertedTrackMatte)
-            {
-                i.Dispose();
-            }
-
-            foreach (var ss in pointLightShadows)
-            {
-                if (ss != null)
-                {
-                    foreach (var s in ss)
-                    {
-                        s?.Dispose();
-                    }
-                }
-            }
-            foreach (var s in spotLightShadows)
-            {
-                s?.Dispose();
-            }
-            foreach (var s in parallelLightShadows)
-            {
-                s?.Dispose();
             }
         }
 
@@ -1079,6 +1258,42 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
         }
 #endif
         #endregion
+
+        private record PreProcessedTriangle(
+            int Id,
+            int MinX,
+            int MaxX,
+            int MinY,
+            int MaxY,
+            Vector128<float> EdgeX,
+            Vector128<float> EdgeY,
+            Vector128<float> VVEX,
+            Vector128<float> VVEY,
+            Vector128<float> U,
+            Vector128<float> V,
+            Vector128<float> W,
+            Vector128<float> VVX,
+            Vector128<float> VVY,
+            Vector128<float> VVZ,
+            Vector128<float> SVVX,
+            Vector128<float> SVVY,
+            Vector128<float> SVVZ,
+            Vector128<float> Denominator,
+            bool IsFrontFace,
+            Vector3 FloatNormal,
+            NManagedImage Texture,
+            ManagedRasterizedMaskImage? TrackMatte,
+            float Opacity,
+            float LightTransmission,
+            BlendMode BlendMode,
+            bool IsAcceptShadow,
+            bool IsAcceptLight,
+            float Ambient,
+            float Diffuse,
+            float SpecularIntensity,
+            float SpecularShininess,
+            float Metal
+        );
     }
 
     class MaskRenderer3D : Renderer3DBase
@@ -1093,7 +1308,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             RenderImage = renderImage;
         }
 
-        public void Render(TrackMatteMode trackMatteMode)
+        public void Render(TrackMatteMode trackMatteMode, bool enableAntiAlias)
         {
             if (trackMatteMode == TrackMatteMode.InvertAlpha || trackMatteMode == TrackMatteMode.InvertLuminance)
             {
@@ -1125,8 +1340,10 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
             var renderImageOffsetX = (int)(OffsetX / scaleRateX);
             var renderImageOffsetY = (int)(OffsetY / scaleRateY);
-            foreach (var triangle in triangles)
+            var preProcessedTriangles = new PreProcessedTriangle[triangles.Length];
+            for (var i = 0; i < triangles.Length; i++)
             {
+                var triangle = triangles[i];
                 var uv1 = triangle.V1.Transform(projectionMatrix);
                 var uv2 = triangle.V2.Transform(projectionMatrix);
                 var uv3 = triangle.V3.Transform(projectionMatrix);
@@ -1162,7 +1379,6 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 var isFrontFace = Vector256.Dot(triangle.Normal, (triangle.V1.Vertex + triangle.V2.Vertex + triangle.V3.Vertex) / 3.0) <= 0.0;
                 var vvEX = Vector128.Create((float)dvv2.GetElement(0), (float)dvv3.GetElement(0), (float)dvv1.GetElement(0), 0.0F);
                 var vvEY = Vector128.Create((float)dvv2.GetElement(1), (float)dvv3.GetElement(1), (float)dvv1.GetElement(1), 0.0F);
-                var useLight = hasLight && triangle.IsAcceptLight && (trackMatteMode == TrackMatteMode.Luminance || trackMatteMode == TrackMatteMode.InvertLuminance);
 
                 NManagedImage managedTexture;
                 if (triangle.Texture is NGPUImage gpuImage)
@@ -1192,24 +1408,140 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                     managedTrackMatte = (ManagedRasterizedMaskImage?)triangle.TrackMatte;
                 }
 
-                Parallel.For(minY, maxY, y =>
+                preProcessedTriangles[i] = new PreProcessedTriangle(
+                    minX,
+                    maxX,
+                    minY,
+                    maxY,
+                    edgeX,
+                    edgeY,
+                    vvEX,
+                    vvEY,
+                    u,
+                    v,
+                    w,
+                    vvX,
+                    vvY,
+                    vvZ,
+                    denom,
+                    isFrontFace,
+                    triangle.FloatNormal,
+                    managedTexture,
+                    managedTrackMatte,
+                    triangle.Opacity,
+                    triangle.LightTransmission,
+                    triangle.IsAcceptLight,
+                    triangle.Ambient,
+                    triangle.Diffuse,
+                    triangle.SpecularIntensity,
+                    triangle.SpecularShininess,
+                    triangle.Metal
+                );
+            }
+
+            if (enableAntiAlias)
+            {
+                using var interpolate = (ManagedRasterizedMaskImage)RenderImage.Copy();
+
+                Rasterize(trackMatteMode, RenderImage, preProcessedTriangles, renderImageOffsetX, renderImageOffsetY, scaleRateX, scaleRateY, hasLight, PointLights, SpotLights, ParallelLights, AmbientLights, 0.0F, 0.0F);
+                Rasterize(trackMatteMode, interpolate, preProcessedTriangles, renderImageOffsetX, renderImageOffsetY, scaleRateX, scaleRateY, hasLight, PointLights, SpotLights, ParallelLights, AmbientLights, 0.5F, 0.5F);
+
+                var renderImageData = RenderImage.Data;
+                var interpolateData = interpolate.Data;
+                renderImageData[0] = renderImageData[0] * 0.875F + interpolateData[0] * 0.125F;
+                Parallel.For(1, renderImageWidth, x =>
                 {
-                    var renderImageSpan = RenderImage.GetDataSpan();
-                    var trackMatteSpan = (managedTrackMatte?.Data ?? EmptyTrackMatte).AsSpan();
-                    var texture = managedTexture.GetDataSpan();
-                    var eY = edgeX * (Vector128.Create(y, y, y, 0.0F) * scaleRateY - vvEY);
+                    renderImageData[x] = renderImageData[x] * 0.75F + interpolateData[x - 1] * 0.125F + interpolateData[x] * 0.125F;
+                });
+                Parallel.For(1, renderImageHeight, y =>
+                {
+                    var p = y * renderImageWidth;
+                    renderImageData[p] = renderImageData[p] * 0.75F + interpolateData[p - renderImageWidth] * 0.125F + interpolateData[p] * 0.125F;
+                });
+                Parallel.For(1, renderImageHeight, y =>
+                {
+                    var renderImageDataSpan = renderImageData.AsSpan(y * renderImageWidth, renderImageWidth);
+                    var prevLineInterpolateDataSpan = interpolateData.AsSpan((y - 1) * renderImageWidth, renderImageWidth);
+                    var interpolateDataSpan = interpolateData.AsSpan(y * renderImageWidth, renderImageWidth);
+                    for (var x = 1; x < renderImageWidth; x++)
+                    {
+                        renderImageDataSpan[x] = renderImageDataSpan[x] * 0.5F +
+                            prevLineInterpolateDataSpan[x - 1] * 0.125F +
+                            prevLineInterpolateDataSpan[x] * 0.125F +
+                            interpolateDataSpan[x - 1] * 0.125F +
+                            interpolateDataSpan[x] * 0.125F;
+                    }
+                });
+            }
+            else
+            {
+                Rasterize(trackMatteMode, RenderImage, preProcessedTriangles, renderImageOffsetX, renderImageOffsetY, scaleRateX, scaleRateY, hasLight, PointLights, SpotLights, ParallelLights, AmbientLights, 0.0F, 0.0F);
+            }
+
+            foreach (var (_, i) in convertedTexture)
+            {
+                i.Dispose();
+            }
+            foreach (var (_, i) in convertedTrackMatte)
+            {
+                i.Dispose();
+            }
+        }
+
+        static void Rasterize(
+            TrackMatteMode trackMatteMode,
+            ManagedRasterizedMaskImage renderTarget,
+            PreProcessedTriangle[] triangles,
+            int renderImageOffsetX,
+            int renderImageOffsetY,
+            float scaleRateX,
+            float scaleRateY,
+            bool hasLight,
+            List<PointLight> pointLightList,
+            List<SpotLight> spotLightList,
+            List<ParallelLight> parallelLightList,
+            List<AmbientLight> ambientLightList,
+            float offsetX,
+            float offsetY
+        )
+        {
+            var renderImageWidth = renderTarget.Width;
+
+            foreach (var triangle in triangles)
+            {
+                var useLight = hasLight && triangle.IsAcceptLight && (trackMatteMode == TrackMatteMode.Luminance || trackMatteMode == TrackMatteMode.InvertLuminance);
+
+                Parallel.For(triangle.MinY, triangle.MaxY, y =>
+                {
+                    var renderImageSpan = renderTarget.GetDataSpan();
+                    var trackMatteSpan = (triangle.TrackMatte?.Data ?? EmptyTrackMatte).AsSpan();
+                    var texture = triangle.Texture.GetDataSpan();
+                    var eY = (triangle.EdgeX * (Vector128.Create(y + offsetY) * scaleRateY - triangle.VVEY)) & Const.WithoutWMask128;
 
                     var offset = (y - renderImageOffsetY) * renderImageWidth;
-                    var p = offset + (minX - renderImageOffsetX);
+                    var p = offset + (triangle.MinX - renderImageOffsetX);
 
-                    var pointLights = CollectionsMarshal.AsSpan(PointLights);
-                    var spotLights = CollectionsMarshal.AsSpan(SpotLights);
-                    var parallelLights = CollectionsMarshal.AsSpan(ParallelLights);
-                    var ambientLights = CollectionsMarshal.AsSpan(AmbientLights);
+                    var pointLights = CollectionsMarshal.AsSpan(pointLightList);
+                    var spotLights = CollectionsMarshal.AsSpan(spotLightList);
+                    var parallelLights = CollectionsMarshal.AsSpan(parallelLightList);
+                    var ambientLights = CollectionsMarshal.AsSpan(ambientLightList);
 
-                    for (var x = minX; x < maxX; x++, p++)
+                    var maxX = triangle.MaxX;
+                    var vvEX = triangle.VVEX;
+                    var edgeY = triangle.EdgeY;
+                    var denom = triangle.Denominator;
+                    var textureWidth = triangle.Texture.Width;
+                    var textureHeight = triangle.Texture.Height;
+                    var u = triangle.U;
+                    var v = triangle.V;
+                    var w = triangle.W;
+                    var vvX = triangle.VVX;
+                    var vvY = triangle.VVY;
+                    var vvZ = triangle.VVZ;
+                    var isFrontFace = triangle.IsFrontFace;
+                    for (var x = triangle.MinX; x < maxX; x++, p++)
                     {
-                        var eX = Vector128.Create(x, x, x, 0.0F) * scaleRateX - vvEX;
+                        var eX = (Vector128.Create(x + offsetX) * scaleRateX - vvEX) & Const.WithoutWMask128;
                         var e = (Fma.IsSupported ? Fma.MultiplyAddNegated(edgeY, eX, eY) : (eY - (edgeY * eX))) * denom;
 
                         var ae = e & Vector128.GreaterThanOrEqual(Vector128.Abs(e), Vector128.Create(TriangleDivider.Epsilon));
@@ -1241,7 +1573,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                 var specular = Vector4.Zero;
                                 var ambient = Vector4.Zero;
 
-                                for (var i = 0; i < PointLights.Count; i++)
+                                for (var i = 0; i < pointLights.Length; i++)
                                 {
                                     var l = pointLights[i];
                                     var lightColor = l.Color;
@@ -1267,7 +1599,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                     specular += Vector4.Lerp(lightColor, color * lightColor, triangle.Metal) * MathF.Pow(specularFactor, ShininessStrength * triangle.SpecularShininess) * triangle.SpecularIntensity * falloff;
                                 }
 
-                                for (var i = 0; i < SpotLights.Count; i++)
+                                for (var i = 0; i < spotLights.Length; i++)
                                 {
                                     var l = spotLights[i];
                                     var lightColor = l.Color;
@@ -1303,7 +1635,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                     }
                                 }
 
-                                for (var i = 0; i < ParallelLights.Count; i++)
+                                for (var i = 0; i < parallelLights.Length; i++)
                                 {
                                     var l = parallelLights[i];
                                     var lightColor = l.Color;
@@ -1328,7 +1660,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                     specular += Vector4.Lerp(lightColor, color * lightColor, triangle.Metal) * MathF.Pow(specularFactor, ShininessStrength * triangle.SpecularShininess) * triangle.SpecularIntensity * falloff;
                                 }
 
-                                for (var i = 0; i < AmbientLights.Count; i++)
+                                for (var i = 0; i < ambientLights.Length; i++)
                                 {
                                     ambient += ambientLights[i].Color * color;
                                 }
@@ -1350,16 +1682,37 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                     }
                 });
             }
-
-            foreach (var (_, i) in convertedTexture)
-            {
-                i.Dispose();
-            }
-            foreach (var (_, i) in convertedTrackMatte)
-            {
-                i.Dispose();
-            }
         }
+
+        private record PreProcessedTriangle(
+            int MinX,
+            int MaxX,
+            int MinY,
+            int MaxY,
+            Vector128<float> EdgeX,
+            Vector128<float> EdgeY,
+            Vector128<float> VVEX,
+            Vector128<float> VVEY,
+            Vector128<float> U,
+            Vector128<float> V,
+            Vector128<float> W,
+            Vector128<float> VVX,
+            Vector128<float> VVY,
+            Vector128<float> VVZ,
+            Vector128<float> Denominator,
+            bool IsFrontFace,
+            Vector3 FloatNormal,
+            NManagedImage Texture,
+            ManagedRasterizedMaskImage? TrackMatte,
+            float Opacity,
+            float LightTransmission,
+            bool IsAcceptLight,
+            float Ambient,
+            float Diffuse,
+            float SpecularIntensity,
+            float SpecularShininess,
+            float Metal
+        );
     }
 
     file enum PointLightShadowDirection : int

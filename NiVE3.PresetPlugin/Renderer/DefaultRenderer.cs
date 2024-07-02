@@ -57,6 +57,8 @@ namespace NiVE3.PresetPlugin.Renderer
 
         List<AmbientLight> AmbientLights { get; } = [];
 
+        bool IsEnableAntiAlias { get; set; }
+
         bool IsEnableShadowAntiAlias { get; set; }
 
         public void SetupAccelerator(IAcceleratorObject accelerator) { }
@@ -83,6 +85,7 @@ namespace NiVE3.PresetPlugin.Renderer
             else
             {
                 CurrentFrame = new NManagedImage(Width, Height);
+                CurrentFrame.GetDataSpan().Fill(new Vector4(1.0F, 1.0F, 1.0F, 0.0F));
                 CurrentDownScaleRateX = 1.0F;
                 CurrentDownScaleRateY = 1.0F;
             }
@@ -185,8 +188,6 @@ namespace NiVE3.PresetPlugin.Renderer
                 return;
             }
 
-            // TODO: ダウンサンプリング・ROIの反映
-
             var trackMattes = images.ToDictionary(i => i, i =>
             {
                 if (i.TrackMatteImage != null && i.TrackMatteMode.HasValue)
@@ -225,7 +226,7 @@ namespace NiVE3.PresetPlugin.Renderer
                             null
                         );
 
-                        renderer.Render(i.TrackMatteMode.Value);
+                        renderer.Render(i.TrackMatteMode.Value, IsEnableAntiAlias);
                     }
                     else
                     {
@@ -246,7 +247,7 @@ namespace NiVE3.PresetPlugin.Renderer
             {
                 if (group.First().IsEnable3D)
                 {
-                    var renderer = new Renderer3D(CurrentFrame, Width, Height, IsEnableShadowAntiAlias, PointLights, SpotLights, ParallelLights, AmbientLights)
+                    var renderer = new Renderer3D(CurrentFrame, Width, Height, PointLights, SpotLights, ParallelLights, AmbientLights)
                     {
                         ViewMatrix = ViewMatrix,
                         FieldOfView = FieldOfView
@@ -274,7 +275,7 @@ namespace NiVE3.PresetPlugin.Renderer
                         );
                     }
 
-                    renderer.Render();
+                    renderer.Render(IsEnableAntiAlias, IsEnableShadowAntiAlias);
                 }
                 else
                 {
@@ -299,7 +300,6 @@ namespace NiVE3.PresetPlugin.Renderer
                 return;
             }
 
-            // TODO: ダウンサンプリング・ROIの反映
             var renderer = new Renderer2D(CurrentFrame);
             var matrix = Matrix3x3.Identity.Translate((CurrentFrame.Width - roi.OriginalImageSize.Width) * 0.5F + roi.OriginalImagePosition.X, (CurrentFrame.Height - roi.OriginalImageSize.Height) * 0.5F + roi.OriginalImagePosition.Y);
             renderer.Draw(image, 1.0F, matrix, interpolationQuality, blendMode, null);
@@ -372,7 +372,7 @@ namespace NiVE3.PresetPlugin.Renderer
                         null
                     );
 
-                    renderer.Render(image.TrackMatteMode.Value);
+                    renderer.Render(image.TrackMatteMode.Value, IsEnableAntiAlias);
                 }
                 else
                 {
@@ -408,7 +408,7 @@ namespace NiVE3.PresetPlugin.Renderer
                     trackMatte
                 );
 
-                renderer.Render(TrackMatteMode.Alpha);
+                renderer.Render(TrackMatteMode.Alpha, IsEnableAntiAlias);
             }
             else
             {

@@ -78,9 +78,9 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             var dSign = Math.Sign(divider.PlaneD);
             var n = divider.Normal;
             var planeD = Vector256.Create(divider.PlaneD, divider.PlaneD, divider.PlaneD, 0.0F);
-            var dd1 = (n.DotProduct(triangle.V1.Vertex) + planeD) & Consts.WithoutWMask;
-            var dd2 = (n.DotProduct(triangle.V2.Vertex) + planeD) & Consts.WithoutWMask;
-            var dd3 = (n.DotProduct(triangle.V3.Vertex) + planeD) & Consts.WithoutWMask;
+            var dd1 = (n.DotProduct(triangle.V1.Vertex) + planeD) & Const.WithoutWMask256;
+            var dd2 = (n.DotProduct(triangle.V2.Vertex) + planeD) & Const.WithoutWMask256;
+            var dd3 = (n.DotProduct(triangle.V3.Vertex) + planeD) & Const.WithoutWMask256;
             var maxD = MaxByAbs(MaxByAbs(dd1, dd2), dd3).GetElement(0);
             if (Math.Abs(maxD) < Epsilon)
             {
@@ -117,9 +117,9 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                         continue;
                     }
 
-                    var td1 = (t.V1.Vertex.DotProduct(n) + planeD) & Consts.WithoutWMask;
-                    var td2 = (t.V2.Vertex.DotProduct(n) + planeD) & Consts.WithoutWMask;
-                    var td3 = (t.V3.Vertex.DotProduct(n) + planeD) & Consts.WithoutWMask;
+                    var td1 = (t.V1.Vertex.DotProduct(n) + planeD) & Const.WithoutWMask256;
+                    var td2 = (t.V2.Vertex.DotProduct(n) + planeD) & Const.WithoutWMask256;
+                    var td3 = (t.V3.Vertex.DotProduct(n) + planeD) & Const.WithoutWMask256;
 
                     if (Math.Sign(MaxByAbs(MaxByAbs(td1, td2), td3).GetElement(0)) == dSign)
                     {

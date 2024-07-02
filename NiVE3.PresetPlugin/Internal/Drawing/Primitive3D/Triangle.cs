@@ -97,8 +97,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsDegenerate()
         {
-            var ab = (V2.Vertex - V1.Vertex) & Consts.WithoutWMask;
-            var ac = (V3.Vertex - V1.Vertex) & Consts.WithoutWMask;
+            var ab = (V2.Vertex - V1.Vertex) & Const.WithoutWMask256;
+            var ac = (V3.Vertex - V1.Vertex) & Const.WithoutWMask256;
             var cos = Vector256.Dot(ab, ac);
             cos *= cos;
 

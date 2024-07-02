@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Intrinsics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -13,5 +14,9 @@ namespace NiVE3.PresetPlugin.Internal
         public const int AudioChannelCount = 2;
 
         public const double AudioSampleTime = 1.0 / AudioSamplingRate;
+
+        public static readonly Vector256<double> WithoutWMask256 = Vector256.Create(0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0).AsDouble();
+
+        public static readonly Vector128<float> WithoutWMask128 = Vector128.Create(0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0).AsSingle();
     }
 }
