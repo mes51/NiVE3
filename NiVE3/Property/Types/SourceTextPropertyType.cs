@@ -124,8 +124,8 @@ namespace NiVE3.Property.Types
                 hashBase.AddRange(BitConverter.GetBytes(style.IsEnableBold));
                 hashBase.AddRange(BitConverter.GetBytes(style.IsEnableItalic));
                 hashBase.AddRange(BitConverter.GetBytes((int)style.TextAlign));
-                hashBase.AddRange(style.FillColor.ConvertToSpan().ToArray());
-                hashBase.AddRange(style.TextLineColor.ConvertToSpan().ToArray());
+                hashBase.AddRange(style.FillColor.ConvertToSpan());
+                hashBase.AddRange(style.TextLineColor.ConvertToSpan());
             }
 
             return hashBase.ToArray();

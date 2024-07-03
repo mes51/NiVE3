@@ -170,7 +170,7 @@ namespace NiVE3.Plugin.Property.Types
             foreach (var colorStop in gradient.ColorStops)
             {
                 hashBase.AddRange(BitConverter.GetBytes(colorStop.Position));
-                hashBase.AddRange(colorStop.Color.ConvertToSpan().ToArray());
+                hashBase.AddRange(colorStop.Color.ConvertToSpan());
             }
             foreach (var opacityStop in gradient.OpacityStops)
             {
