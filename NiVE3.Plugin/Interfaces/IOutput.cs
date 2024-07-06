@@ -48,6 +48,7 @@ namespace NiVE3.Plugin.Interfaces
         /// GetOutputSettingで取得したViewを表示後、ユーザーによってOKが選択されたときに呼び出されます。
         /// </summary>
         /// <param name="setting">GetOutputSettingで取得したViewのDataContext</param>
+        /// <returns>適用に成功した場合はtrue、そうでない場合はfalse</returns>
         bool ApplyOutputSetting(object? setting) => false;
 
         /// <summary>

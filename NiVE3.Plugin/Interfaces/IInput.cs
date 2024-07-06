@@ -46,7 +46,7 @@ namespace NiVE3.Plugin.Interfaces
         bool LoadData(object? data) => true;
 
         /// <summary>
-        /// 入力プラグインの設定画面を表示するためのウインドウを取得します。
+        /// 入力プラグインの設定画面を表示するためのViewを取得します。
         /// InputMetadataAttribute.HasSettingViewがtrueの時のみ、Loadメソッド呼び出し後に呼ばれます。
         /// </summary>
         /// <param name="compositionSize">現在開いているコンポジションのサイズ。開いていない場合はnull。</param>

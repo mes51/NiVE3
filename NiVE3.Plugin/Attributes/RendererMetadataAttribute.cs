@@ -40,6 +40,11 @@ namespace NiVE3.Plugin.Attributes
         /// GPUによるアクセラレーションに対応しているかどうかを表します
         /// </summary>
         bool IsSupportGpu { get; }
+
+        /// <summary>
+        /// 設定画面が存在するかどうかを表します
+        /// </summary>
+        bool HasSettingView { get; }
     }
 
     /// <summary>
@@ -63,6 +68,11 @@ namespace NiVE3.Plugin.Attributes
         /// GPUによるアクセラレーションに対応しているかどうか
         /// </summary>
         public bool IsSupportGpu { get; set; }
+
+        /// <summary>
+        /// 設定画面が存在するかどうか
+        /// </summary>
+        public bool HasSettingView { get; set; }
 
         /// <summary>
         /// 多言語化用のResourceDictionaryの型

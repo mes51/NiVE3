@@ -75,10 +75,9 @@ namespace NiVE3.Module
             // Container.RegisterMapping<CommandOnlyViewModelBase, ViewModelType>();
 
             containerRegistry.RegisterDialog<NameSettingView, NameSettingViewModel>();
-            containerRegistry.RegisterDialog<InputSettingView, InputSettingViewModel>();
+            containerRegistry.RegisterDialog<PluginSettingView, PluginSettingViewModel>();
             containerRegistry.RegisterDialog<CompositionSettingView, CompositionSettingViewModel>();
             containerRegistry.RegisterDialog<RenderSettingView, RenderSettingViewModel>();
-            containerRegistry.RegisterDialog<OutputSettingView, OutputSettingViewModel>();
         }
     }
 }

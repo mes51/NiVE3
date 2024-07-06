@@ -90,7 +90,7 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("タイムライン")]
         public static readonly string TimelineView_Title = nameof(TimelineView_Title);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("入力設定")]
+        [DefaultValue("入力設定")]
         public static readonly string InputSettingView_Title = nameof(InputSettingView_Title);
 
         [ShowInMarkup, LanguageKey, DefaultValue("平面")]
@@ -194,6 +194,12 @@ namespace NiVE3.View.Resource
 
         [ShowInMarkup, LanguageKey, DefaultValue("トーンマッパー:")]
         public static readonly string CompositionSettingView_ToneMapperLabel = nameof(CompositionSettingView_ToneMapperLabel);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("レンダラの設定")]
+        public static readonly string CompositionSettingView_RendererSetting = nameof(CompositionSettingView_RendererSetting);
+
+        [DefaultValue("レンダラ設定")]
+        public static readonly string RendererSettingView_Title = nameof(RendererSettingView_Title);
 
         [ShowInMarkup, LanguageKey, DefaultValue("カスタム")]
         public static readonly string CompositionSettingView_PresetName_Custom = nameof(CompositionSettingView_PresetName_Custom);
@@ -378,7 +384,7 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("レンダリング")]
         public static readonly string RenderSettingView_Button_StartRender= nameof(RenderSettingView_Button_StartRender);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("出力設定")]
+        [DefaultValue("出力設定")]
         public static readonly string OutputSettingView_Title = nameof(OutputSettingView_Title);
 
         [ShowInMarkup, LanguageKey, DefaultValue("レンダリング")]

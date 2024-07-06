@@ -391,10 +391,11 @@ namespace NiVE3.ViewModel
         {
             var param = new DialogParameters
             {
-                { nameof(InputSettingViewModel.SettingView), e.View }
+                { PluginSettingViewModel.TitleLanguageResourceName, LanguageResourceDictionary.InputSettingView_Title },
+                { nameof(PluginSettingViewModel.SettingView), e.View }
             };
             IDialogResult? result = null;
-            DialogService.ShowDialog(nameof(InputSettingView), param, r => result = r);
+            DialogService.ShowDialog(nameof(PluginSettingView), param, r => result = r);
             e.IsOK = result?.Result == ButtonResult.OK;
         }
     }

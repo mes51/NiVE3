@@ -13,14 +13,14 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace NiVE3.View.Dialog
+namespace NiVE3.PresetPlugin.Internal.View
 {
     /// <summary>
-    /// OutputSettingView.xaml の相互作用ロジック
+    /// DefaultRendererSettingView.xaml の相互作用ロジック
     /// </summary>
-    public partial class OutputSettingView : UserControl
+    public partial class DefaultRendererSettingView : UserControl
     {
-        public OutputSettingView()
+        public DefaultRendererSettingView()
         {
             InitializeComponent();
         }

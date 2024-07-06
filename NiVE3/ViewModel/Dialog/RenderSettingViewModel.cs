@@ -221,10 +221,11 @@ namespace NiVE3.ViewModel.Dialog
 
                 var param = new DialogParameters
                 {
-                    { nameof(OutputSettingViewModel.SettingView), view }
+                    { PluginSettingViewModel.TitleLanguageResourceName, LanguageResourceDictionary.OutputSettingView_Title },
+                    { nameof(PluginSettingViewModel.SettingView), view }
                 };
                 IDialogResult? result = null;
-                DialogService.ShowDialog(nameof(OutputSettingView), param, r => result = r);
+                DialogService.ShowDialog(nameof(PluginSettingView), param, r => result = r);
                 if (result?.Result == ButtonResult.OK)
                 {
                     if (Output.Value.ApplyOutputSetting(view.DataContext))

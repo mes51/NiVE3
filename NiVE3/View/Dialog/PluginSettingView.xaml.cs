@@ -16,11 +16,11 @@ using System.Windows.Shapes;
 namespace NiVE3.View.Dialog
 {
     /// <summary>
-    /// InputSettingView.xaml の相互作用ロジック
+    /// PluginSettingView.xaml の相互作用ロジック
     /// </summary>
-    public partial class InputSettingView : UserControl
+    public partial class PluginSettingView : UserControl
     {
-        public InputSettingView()
+        public PluginSettingView()
         {
             InitializeComponent();
         }

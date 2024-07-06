@@ -43,6 +43,10 @@ namespace NiVE3.Model
 
             Guid OldToneMapperPluginId { get; }
 
+            object? OldRendererSetting { get; }
+
+            Int128 OldRendererSettingHash { get; }
+
             double OldWorkareaBegin { get; }
 
             double OldWorkareaEnd { get; }
@@ -71,6 +75,10 @@ namespace NiVE3.Model
 
             Guid NewToneMapperPluginId { get; }
 
+            object? NewRendererSetting { get; }
+
+            Int128 NewRendererSettingHash { get; }
+
             double NewWorkareaBegin { get; }
 
             double NewWorkareaEnd { get; }
@@ -89,6 +97,8 @@ namespace NiVE3.Model
                 int oldMotionBlurSampleCount,
                 Guid oldRendererPluginId,
                 Guid oldToneMapperPluginId,
+                object? oldRendererSetting,
+                Int128 oldRendererSettingHash,
                 double oldWorkareaBegin,
                 double oldWorkareaEnd,
                 string newName,
@@ -103,6 +113,8 @@ namespace NiVE3.Model
                 int newMotionBlurSampleCount,
                 Guid newRendererPluginId,
                 Guid newToneMapperPluginId,
+                object? newRendererSetting,
+                Int128 newRendererSettingHash,
                 double newWorkareaBegin,
                 double newWorkareaEnd
             )
@@ -120,6 +132,8 @@ namespace NiVE3.Model
                 OldMotionBlurSampleCount = oldMotionBlurSampleCount;
                 OldRendererPluginId = oldRendererPluginId;
                 OldToneMapperPluginId = oldToneMapperPluginId;
+                OldRendererSetting = oldRendererSetting;
+                OldRendererSettingHash = oldRendererSettingHash;
                 OldWorkareaBegin = oldWorkareaBegin;
                 OldWorkareaEnd = oldWorkareaEnd;
                 NewName = newName;
@@ -134,6 +148,8 @@ namespace NiVE3.Model
                 NewMotionBlurSampleCount = newMotionBlurSampleCount;
                 NewRendererPluginId = newRendererPluginId;
                 NewToneMapperPluginId = newToneMapperPluginId;
+                NewRendererSetting = newRendererSetting;
+                NewRendererSettingHash = newRendererSettingHash;
                 NewWorkareaBegin = newWorkareaBegin;
                 NewWorkareaEnd = newWorkareaEnd;
             }
@@ -159,7 +175,15 @@ namespace NiVE3.Model
                     Model.RendererContext = Model.RendererListModel.CreateRenderer(NewRendererPluginId);
                     Model.RendererPluginId = NewRendererPluginId;
                     Model.RendererContext.Value.SetSize(NewWidth, NewHeight);
+                    Model.RendererContext.Value.LoadSetting(NewRendererSetting);
+                    Model.RendererSettingHash = NewRendererSettingHash;
                 }
+                else if (Model.RendererSettingHash != NewRendererSettingHash)
+                {
+                    Model.RendererContext.Value.LoadSetting(NewRendererSetting);
+                    Model.RendererSettingHash = NewRendererSettingHash;
+                }
+                Model.RendererSettingHash = CalcRendererSettingHash(NewRendererSetting);
                 if (Model.ToneMapperPluginId != NewRendererPluginId)
                 {
                     Model.ToneMapperContext.Dispose();
@@ -205,6 +229,13 @@ namespace NiVE3.Model
                     Model.RendererContext = Model.RendererListModel.CreateRenderer(OldRendererPluginId);
                     Model.RendererPluginId = OldRendererPluginId;
                     Model.RendererContext.Value.SetSize(OldWidth, OldHeight);
+                    Model.RendererContext.Value.LoadSetting(OldRendererSetting);
+                    Model.RendererSettingHash = OldRendererSettingHash;
+                }
+                else if (Model.RendererSettingHash != OldRendererSettingHash)
+                {
+                    Model.RendererContext.Value.LoadSetting(OldRendererSetting);
+                    Model.RendererSettingHash = OldRendererSettingHash;
                 }
                 if (Model.ToneMapperPluginId != OldRendererPluginId)
                 {

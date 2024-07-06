@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using NiVE3.Data.Json.Converter;
 
 namespace NiVE3.Data.Json.Project
 {
@@ -39,6 +41,9 @@ namespace NiVE3.Data.Json.Project
         public Guid RendererPluginId { get; set; }
 
         public Guid ToneMapperPluginId { get; set; }
+
+        [JsonConverter(typeof(PluginOptionValueObjectConverter))]
+        public object? RendererSetting { get; set; }
 
         // for timeline
 

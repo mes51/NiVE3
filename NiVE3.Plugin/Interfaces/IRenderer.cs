@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using NiVE3.Image;
 using NiVE3.Image.Drawing;
 using NiVE3.Numerics;
@@ -27,6 +28,35 @@ namespace NiVE3.Plugin.Interfaces
         /// <param name="width">コンポジションの幅</param>
         /// <param name="height">コンポジションの高さ</param>
         void SetSize(int width, int height);
+
+        /// <summary>
+        /// 現在のレンダラの設定を表すデータをシリアル化可能な状態で取得します
+        /// </summary>
+        /// <returns>レンダラの設定を表すシリアル化可能なobject</returns>
+        object? SaveSetting() => null;
+
+        /// <summary>
+        /// レンダラの設定を読み込みます
+        /// </summary>
+        /// <param name="data">読み込むレンダラの設定を表すobject、コンポジション設定画面で最初に設定を行う場合などにnullになる可能性があります</param>
+        /// <returns>レンダラの設定が完了した場合はtrue、そうでない場合はfalse</returns>
+        bool LoadSetting(object? data) => true;
+
+        /// <summary>
+        /// レンダラの設定画面を表示するためのViewを取得します。
+        /// RendererMetadataAttribute.HasSettingViewがtrueの時のみ、ユーザーが設定変更をしようとしたときに呼ばれます。
+        /// </summary>
+        /// <param name="compositionSize">現在のコンポジションのサイズ。コンポジション設定画面上で変更されており、変更適用前の可能性があります</param>
+        /// <returns>レンダラの設定画面のView。画面が存在しない場合はnull</returns>
+        FrameworkElement? GetRendererSetting(Int32Size compositionSize) => null;
+
+        /// <summary>
+        /// レンダラの設定を適用します。
+        /// GetOutputSettingで取得したViewを表示後、ユーザーによってOKが選択されたときに呼び出されます。
+        /// </summary>
+        /// <param name="setting">GetOutputSettingで取得したViewのDataContext</param>
+        /// <returns>適用に成功した場合はtrue、そうでない場合はfalse</returns>
+        bool ApplySetting(object? setting) => false;
 
         /// <summary>
         /// 3D用のカメラを設定します。レンダリングする度に呼ばれます。

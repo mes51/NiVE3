@@ -650,7 +650,8 @@ namespace NiVE3.ViewModel
                     { nameof(CompositionSettingViewModel.ShutterPhase), CompositionModel.ShutterPhase },
                     { nameof(CompositionSettingViewModel.MotionBlurSampleCount), CompositionModel.MotionBlurSampleCount },
                     { CompositionSettingViewModel.SelectedRendererPluginId, CompositionModel.RendererPluginId },
-                    { CompositionSettingViewModel.SelectedToneMapperPluginId, CompositionModel.ToneMapperPluginId }
+                    { CompositionSettingViewModel.SelectedToneMapperPluginId, CompositionModel.ToneMapperPluginId },
+                    { nameof(CompositionSettingViewModel.RendererSetting), CompositionModel.RendererSetting }
                 };
                 IDialogResult? result = null;
                 DialogService.ShowDialog(nameof(CompositionSettingView), param, r => result = r);
@@ -668,7 +669,9 @@ namespace NiVE3.ViewModel
                         result.Parameters.GetValue<int>(nameof(CompositionSettingViewModel.ShutterPhase)),
                         result.Parameters.GetValue<int>(nameof(CompositionSettingViewModel.MotionBlurSampleCount)),
                         result.Parameters.GetValue<Guid>(CompositionSettingViewModel.SelectedRendererPluginId),
-                        result.Parameters.GetValue<Guid>(CompositionSettingViewModel.SelectedToneMapperPluginId)
+                        result.Parameters.GetValue<Guid>(CompositionSettingViewModel.SelectedToneMapperPluginId),
+                        result.Parameters.ContainsKey(CompositionSettingViewModel.RendererSettingViewData),
+                        result.Parameters.GetValue<object?>(CompositionSettingViewModel.RendererSettingViewData)
                     );
                 }
             }, () => CompositionModel != null);

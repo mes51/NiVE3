@@ -13,15 +13,22 @@ using Prism.Services.Dialogs;
 
 namespace NiVE3.ViewModel.Dialog
 {
-    class OutputSettingViewModel : BindableBase, IDialogAware
+    class PluginSettingViewModel : BindableBase, IDialogAware
     {
-        public string Title => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.OutputSettingView_Title);
+        public const string TitleLanguageResourceName = nameof(TitleLanguageResourceName);
+
+        private string title = "";
+        public string Title
+        {
+            get { return title; }
+            set { SetProperty(ref title, value); }
+        }
 
         private FrameworkElement? settingView;
         public FrameworkElement? SettingView
         {
             get { return settingView; }
-            set { SetProperty(ref settingView, value); }
+            private set { SetProperty(ref settingView, value); }
         }
 
         private bool hasErrors;
@@ -39,7 +46,7 @@ namespace NiVE3.ViewModel.Dialog
 
         public ICommand CancelCommand { get; }
 
-        public OutputSettingViewModel()
+        public PluginSettingViewModel()
         {
             OKCommand = new DelegateCommand(() => RequestClose?.Invoke(new DialogResult(ButtonResult.OK, null)));
 
@@ -55,6 +62,7 @@ namespace NiVE3.ViewModel.Dialog
 
         public void OnDialogOpened(IDialogParameters parameters)
         {
+            Title = LanguageResourceDictionary.Dictionary.GetText(parameters.GetValue<string>(TitleLanguageResourceName));
             // TODO: 何らか専用のエラー通知プロパティを作ってそこを優先して見る
             SettingView = parameters.GetValue<FrameworkElement>(nameof(SettingView));
             Validation.AddErrorHandler(SettingView, (sender, e) =>

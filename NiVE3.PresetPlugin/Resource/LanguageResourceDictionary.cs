@@ -172,6 +172,14 @@ namespace NiVE3.PresetPlugin.Resource
         [DefaultValue("NiVE標準のレンダラ")]
         public const string Renderer_DefaultRenderer_Description = nameof(Renderer_DefaultRenderer_Description);
 
+        // Renderer setting view
+
+        [ShowInMarkup, DefaultValue("アンチエイリアスを有効にする")]
+        public const string DefaultRendererSettingView_EnableAntiAlias = nameof(DefaultRendererSettingView_EnableAntiAlias);
+
+        [ShowInMarkup, DefaultValue("影のアンチエイリアスを有効にする")]
+        public const string DefaultRendererSettingView_EnableShadowAntiAlias = nameof(DefaultRendererSettingView_EnableShadowAntiAlias);
+
         // Outputs
 
         [DefaultValue("AVI出力")]

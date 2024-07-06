@@ -22,11 +22,14 @@ using NiVE3.PresetPlugin.Internal.Drawing.Primitive3D;
 using NiVE3.Image.Drawing;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Windows;
+using NiVE3.PresetPlugin.Internal.ViewModel;
+using NiVE3.PresetPlugin.Internal.View;
 
 namespace NiVE3.PresetPlugin.Renderer
 {
     [Export(typeof(IRenderer))]
-    [RendererMetadata(typeof(DefaultRenderer), LanguageResourceDictionary.Renderer_DefaultRenderer_Name, LanguageResourceDictionary.Renderer_DefaultRenderer_Description, "mes51", "0D30B1E6-3DF3-4A8E-85BB-DCD93BEC7BE0", LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
+    [RendererMetadata(typeof(DefaultRenderer), LanguageResourceDictionary.Renderer_DefaultRenderer_Name, LanguageResourceDictionary.Renderer_DefaultRenderer_Description, "mes51", "0D30B1E6-3DF3-4A8E-85BB-DCD93BEC7BE0", HasSettingView = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
     public class DefaultRenderer : IRenderer
     {
         const double DefaultFov = 0.691111986546211; // 39.5978 / 180.0 * Math.PI
@@ -57,9 +60,9 @@ namespace NiVE3.PresetPlugin.Renderer
 
         List<AmbientLight> AmbientLights { get; } = [];
 
-        bool IsEnableAntiAlias { get; set; }
+        bool EnableAntiAlias { get; set; }
 
-        bool IsEnableShadowAntiAlias { get; set; }
+        bool EnableShadowAntiAlias { get; set; }
 
         public void SetupAccelerator(IAcceleratorObject accelerator) { }
 
@@ -67,6 +70,59 @@ namespace NiVE3.PresetPlugin.Renderer
         {
             Width = width;
             Height = height;
+        }
+
+        public object? SaveSetting()
+        {
+            return new DefaultRendererSetting
+            {
+                EnableAntiAlias = EnableAntiAlias,
+                EnableShadowAntiAlias = EnableShadowAntiAlias
+            };
+        }
+
+        public bool LoadSetting(object? data)
+        {
+            if (data is DefaultRendererSetting setting)
+            {
+                EnableAntiAlias = setting.EnableAntiAlias;
+                EnableShadowAntiAlias = setting.EnableShadowAntiAlias;
+                return true;
+            }
+            else if (data is IDictionary<string, object> dictionary &&
+                dictionary.TryGetValue(nameof(DefaultRendererSetting.EnableAntiAlias), out bool enableAntiAlias) &&
+                dictionary.TryGetValue(nameof(DefaultRendererSetting.EnableShadowAntiAlias), out bool enableShadowAntiAlias))
+            {
+                EnableAntiAlias = enableAntiAlias;
+                EnableShadowAntiAlias = enableShadowAntiAlias;
+                return true;
+            }
+
+            return false;
+        }
+
+        public FrameworkElement? GetRendererSetting(Int32Size compositionSize)
+        {
+            var viewModel = new DefaultRendererSettingViewModel
+            {
+                EnableAntiAlias = EnableAntiAlias,
+                EnableShadowAntiAlias = EnableShadowAntiAlias
+            };
+            return new DefaultRendererSettingView { DataContext = viewModel };
+        }
+
+        public bool ApplySetting(object? setting)
+        {
+            if (setting is DefaultRendererSettingViewModel viewModel)
+            {
+                EnableAntiAlias = viewModel.EnableAntiAlias;
+                EnableShadowAntiAlias = viewModel.EnableShadowAntiAlias;
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         public void BeginRendering(double downSamplingRate, bool useGpu)
@@ -226,7 +282,7 @@ namespace NiVE3.PresetPlugin.Renderer
                             null
                         );
 
-                        renderer.Render(i.TrackMatteMode.Value, IsEnableAntiAlias);
+                        renderer.Render(i.TrackMatteMode.Value, EnableAntiAlias);
                     }
                     else
                     {
@@ -275,7 +331,7 @@ namespace NiVE3.PresetPlugin.Renderer
                         );
                     }
 
-                    renderer.Render(IsEnableAntiAlias, IsEnableShadowAntiAlias);
+                    renderer.Render(EnableAntiAlias, EnableShadowAntiAlias);
                 }
                 else
                 {
@@ -372,7 +428,7 @@ namespace NiVE3.PresetPlugin.Renderer
                         null
                     );
 
-                    renderer.Render(image.TrackMatteMode.Value, IsEnableAntiAlias);
+                    renderer.Render(image.TrackMatteMode.Value, EnableAntiAlias);
                 }
                 else
                 {
@@ -408,7 +464,7 @@ namespace NiVE3.PresetPlugin.Renderer
                     trackMatte
                 );
 
-                renderer.Render(TrackMatteMode.Alpha, IsEnableAntiAlias);
+                renderer.Render(TrackMatteMode.Alpha, EnableAntiAlias);
             }
             else
             {
@@ -1183,5 +1239,12 @@ namespace NiVE3.PresetPlugin.Renderer
             CurrentFrame?.Dispose();
             GC.SuppressFinalize(this);
         }
+    }
+
+    class DefaultRendererSetting
+    {
+        public bool EnableAntiAlias { get; set; }
+
+        public bool EnableShadowAntiAlias { get; set; }
     }
 }

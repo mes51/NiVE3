@@ -257,16 +257,19 @@
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto" SharedSizeGroup="SelectTypeLabel"/>
                                         <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto" SharedSizeGroup="SettingButton"/>
                                     </Grid.ColumnDefinitions>
 
                                     <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=CompositionSettingView_RendererLabel}" Style="{StaticResource ItemLabel}"/>
                                     <ComboBox Grid.Column="1" Width="200" Margin="5,0,0,0" ItemsSource="{Binding Renderers}" SelectedIndex="{Binding SelectedRenderer, Mode=TwoWay}"/>
+                                    <Button Grid.Column="2" Width="120" Margin="5,0,0,0" Content="{gm:LanguageResource ResourceKey=CompositionSettingView_RendererSetting}" Command="{Binding OpenRendererSettingCommand}"/>
                                 </Grid>
 
                                 <Grid Margin="{StaticResource ItemRowMargin}" HorizontalAlignment="Center">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto" SharedSizeGroup="SelectTypeLabel"/>
                                         <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto" SharedSizeGroup="SettingButton"/>
                                     </Grid.ColumnDefinitions>
 
                                     <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=CompositionSettingView_ToneMapperLabel}" Style="{StaticResource ItemLabel}"/>
