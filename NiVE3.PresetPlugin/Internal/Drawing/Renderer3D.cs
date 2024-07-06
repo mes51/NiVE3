@@ -514,15 +514,40 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
                 var renderImageData = RenderImage.Data;
                 var interpolateData = interpolate.Data;
-                renderImageData[0] = renderImageData[0] * 0.875F + interpolateData[0] * 0.125F;
+                var firstTa = renderImageData[0].W * 0.875F + interpolateData[0].W * 0.125F;
+                if (firstTa > 0.0F)
+                {
+                    var firstPixel = (renderImageData[0] * renderImageData[0].W * 0.875F + interpolateData[0] * interpolateData[0].W * 0.125F) / firstTa;
+                    firstPixel.W = firstTa;
+                    renderImageData[0] = firstPixel;
+                }
+
                 Parallel.For(1, renderImageWidth, x =>
                 {
-                    renderImageData[x] = renderImageData[x] * 0.75F + interpolateData[x - 1] * 0.125F + interpolateData[x] * 0.125F;
+                    var i1 = interpolateData[x - 1];
+                    var i2 = interpolateData[x];
+                    var targetPixel = renderImageData[x];
+                    var ta = i1.W * 0.125F + i2.W * 0.125F + targetPixel.W * 0.75F;
+                    if (ta > 0.0F)
+                    {
+                        targetPixel = (targetPixel * targetPixel.W * 0.75F + i1 * i1.W * 0.125F + i2 * i2.W * 0.125F) / ta;
+                        targetPixel.W = ta;
+                        renderImageData[x] = targetPixel;
+                    }
                 });
                 Parallel.For(1, renderImageHeight, y =>
                 {
                     var p = y * renderImageWidth;
-                    renderImageData[p] = renderImageData[p] * 0.75F + interpolateData[p - renderImageWidth] * 0.125F + interpolateData[p] * 0.125F;
+                    var i1 = interpolateData[p - renderImageWidth];
+                    var i2 = interpolateData[p];
+                    var targetPixel = renderImageData[p];
+                    var ta = i1.W * 0.125F + i2.W * 0.125F + targetPixel.W * 0.75F;
+                    if (ta > 0.0F)
+                    {
+                        targetPixel = (targetPixel * targetPixel.W * 0.75F + i1 * i1.W * 0.125F + i2 * i2.W * 0.125F) / ta;
+                        targetPixel.W = ta;
+                        renderImageData[p] = targetPixel;
+                    }
                 });
                 Parallel.For(1, renderImageHeight, y =>
                 {
@@ -531,11 +556,18 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                     var interpolateDataSpan = interpolateData.AsSpan(y * renderImageWidth, renderImageWidth);
                     for (var x = 1; x < renderImageWidth; x++)
                     {
-                        renderImageDataSpan[x] = renderImageDataSpan[x] * 0.5F +
-                            prevLineInterpolateDataSpan[x - 1] * 0.125F +
-                            prevLineInterpolateDataSpan[x] * 0.125F +
-                            interpolateDataSpan[x - 1] * 0.125F +
-                            interpolateDataSpan[x] * 0.125F;
+                        var i1 = prevLineInterpolateDataSpan[x - 1];
+                        var i2 = prevLineInterpolateDataSpan[x];
+                        var i3 = interpolateDataSpan[x - 1];
+                        var i4 = interpolateDataSpan[x];
+                        var targetPixel = renderImageDataSpan[x];
+                        var ta = targetPixel.W * 0.5F + i1.W * 0.125F + i2.W * 0.125F + i3.W * 0.125F + i4.W * 0.125F;
+                        if (ta > 0.0F)
+                        {
+                            targetPixel = (targetPixel * targetPixel.W * 0.5F + i1 * i1.W * 0.125F + i2 * i2.W * 0.125F + i3 * i3.W * 0.125F + i4 * i4.W * 0.125F) / ta;
+                            targetPixel.W = ta;
+                            renderImageDataSpan[x] = targetPixel;
+                        }
                     }
                 });
             }
