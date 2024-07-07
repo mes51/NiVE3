@@ -16,8 +16,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
     {
         // ビュー空間に持って行った後のカメラよりも後ろの部分のトリミング用ニアクリップ面
         //NOTE: 影用にカメラよりも前にニアクリップ面を持ってきているが、他含め描画上問題が
-        //      あったら調整する(現状、カメラのZ -2666.66に対し、レイヤーのZ -2666.57で消える)
-        public const float NearZ = 5E-5F;
+        //      あったら調整する(現状、カメラのZ -2666.66に対し、レイヤーのZ -2657.06(5E-5だと-2666.57)で消える)
+        public const float NearZ = 5E-3F;
 
         public const float Epsilon = 1E-7F;
 
