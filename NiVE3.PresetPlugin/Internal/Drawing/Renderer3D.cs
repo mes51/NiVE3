@@ -346,7 +346,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             var offsetY = (Size - Height) * 0.5 / Size;
             Matrix4x4d.Invert(ViewMatrix, out var invtededViewMatrix);
             Matrix4x4d.Invert(projectionMatrix, out var invertedProjectionMatrix);
-            var floatInvtededViewMatrix = (Matrix4x4)(invertedProjectionMatrix * Matrix4x4d.CreateTranslate(-offsetX, -offsetY, 0.0) * invtededViewMatrix);
+            var invertedViewMatrix = (Matrix4x4)(invertedProjectionMatrix * Matrix4x4d.CreateTranslate(-offsetX, -offsetY, 0.0) * invtededViewMatrix);
             var convertedTexture = new Dictionary<NImage, NManagedImage>();
             var convertedTrackMatte = new Dictionary<RasterizedMaskImage, ManagedRasterizedMaskImage>();
             var hasLight = PointLights.Count > 0 || SpotLights.Count > 0 || ParallelLights.Count > 0 || AmbientLights.Count > 0;
@@ -476,7 +476,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                     renderImageOffsetY,
                     scaleRateX,
                     scaleRateY,
-                    floatInvtededViewMatrix,
+                    invertedViewMatrix,
                     hasLight,
                     PointLights,
                     SpotLights,
@@ -497,7 +497,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                     renderImageOffsetY,
                     scaleRateX,
                     scaleRateY,
-                    floatInvtededViewMatrix,
+                    invertedViewMatrix,
                     hasLight,
                     PointLights,
                     SpotLights,
@@ -580,7 +580,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                     renderImageOffsetY,
                     scaleRateX,
                     scaleRateY,
-                    floatInvtededViewMatrix,
+                    invertedViewMatrix,
                     hasLight,
                     PointLights,
                     SpotLights,
@@ -632,7 +632,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             int renderImageOffsetY,
             float scaleRateX,
             float scaleRateY,
-            Matrix4x4 floatInvtededViewMatrix,
+            Matrix4x4 invertedViewMatrix,
             bool hasLight,
             List<PointLight> pointLightList,
             List<SpotLight> spotLightList,
@@ -730,7 +730,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                     }
 
                                     var face = PointLightShadowDirection.Front;
-                                    var faceDir = Vector4.Transform(Vector4.Transform(shadowProjectionPos, floatInvtededViewMatrix), l.FaceDetectionMatrix);
+                                    var faceDir = Vector4.Transform(Vector4.Transform(shadowProjectionPos, invertedViewMatrix), l.FaceDetectionMatrix);
                                     var absDir = Vector4.Abs(faceDir);
                                     if (absDir.Z >= absDir.X && absDir.Z >= absDir.Y)
                                     {
@@ -748,7 +748,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                     var shadow = shadows[(int)face];
                                     if (shadow != null)
                                     {
-                                        var transmissionColor = GetShadowColor(id, shadow, l.ShadowScatterSize, enableShadowAntiAlias, shadowProjectionPos, floatInvtededViewMatrix, shadow.LightViewProjectionMatrix);
+                                        var transmissionColor = GetShadowColor(id, shadow, l.ShadowScatterSize, enableShadowAntiAlias, shadowProjectionPos, invertedViewMatrix, shadow.LightViewProjectionMatrix);
                                         color *= transmissionColor;
                                     }
                                 }
@@ -773,7 +773,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                         {
                                             attenuation = MathF.Cos((1.0F - Math.Min((MathF.Cos(spotCone) - l.OuterConeCos) * l.InvertInnerConeCos, 1.0F)) * MathF.PI * 0.5F);
                                         }
-                                        var transmissionColor = GetShadowColor(id, shadow, l.ShadowScatterSize, enableShadowAntiAlias, shadowProjectionPos, floatInvtededViewMatrix, shadow.LightViewProjectionMatrix);
+                                        var transmissionColor = GetShadowColor(id, shadow, l.ShadowScatterSize, enableShadowAntiAlias, shadowProjectionPos, invertedViewMatrix, shadow.LightViewProjectionMatrix);
                                         color *= Vector4.Lerp(Vector4.One, transmissionColor, attenuation);
                                     }
                                 }
@@ -787,7 +787,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                         continue;
                                     }
 
-                                    var transmissionColor = GetShadowColor(id, shadow, l.ShadowScatterSize, enableShadowAntiAlias, shadowProjectionPos, floatInvtededViewMatrix, shadow.LightViewProjectionMatrix);
+                                    var transmissionColor = GetShadowColor(id, shadow, l.ShadowScatterSize, enableShadowAntiAlias, shadowProjectionPos, invertedViewMatrix, shadow.LightViewProjectionMatrix);
                                     color *= transmissionColor;
                                 }
 
@@ -810,7 +810,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                     if (triangle.IsAcceptShadow && shadows != null)
                                     {
                                         var face = PointLightShadowDirection.Front;
-                                        var faceDir = Vector4.Transform(Vector4.Transform(shadowProjectionPos, floatInvtededViewMatrix), l.FaceDetectionMatrix);
+                                        var faceDir = Vector4.Transform(Vector4.Transform(shadowProjectionPos, invertedViewMatrix), l.FaceDetectionMatrix);
                                         var absDir = Vector4.Abs(faceDir);
                                         if (absDir.Z >= absDir.X && absDir.Z >= absDir.Y)
                                         {
@@ -828,7 +828,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                         var shadow = shadows[(int)face];
                                         if (shadow != null)
                                         {
-                                            var transmissionColor = GetShadowColor(id, shadow, l.ShadowScatterSize, enableShadowAntiAlias, shadowProjectionPos, floatInvtededViewMatrix, shadow.LightViewProjectionMatrix);
+                                            var transmissionColor = GetShadowColor(id, shadow, l.ShadowScatterSize, enableShadowAntiAlias, shadowProjectionPos, invertedViewMatrix, shadow.LightViewProjectionMatrix);
                                             if (!lightColor.CompareGreaterThanBy3Element(Vector3.Zero))
                                             {
                                                 continue;
@@ -868,7 +868,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                         var shadow = spotLightShadows[i];
                                         if (triangle.IsAcceptShadow && shadow != null)
                                         {
-                                            var transmissionColor = GetShadowColor(id, shadow, l.ShadowScatterSize, enableShadowAntiAlias, shadowProjectionPos, floatInvtededViewMatrix, shadow.LightViewProjectionMatrix);
+                                            var transmissionColor = GetShadowColor(id, shadow, l.ShadowScatterSize, enableShadowAntiAlias, shadowProjectionPos, invertedViewMatrix, shadow.LightViewProjectionMatrix);
                                             if (!transmissionColor.CompareGreaterThanBy3Element(Vector3.Zero))
                                             {
                                                 continue;
@@ -912,7 +912,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                     var shadow = parallelLightShadows[i];
                                     if (triangle.IsAcceptShadow && shadow != null)
                                     {
-                                        var transmissionColor = GetShadowColor(id, shadow, l.ShadowScatterSize, enableShadowAntiAlias, shadowProjectionPos, floatInvtededViewMatrix, shadow.LightViewProjectionMatrix);
+                                        var transmissionColor = GetShadowColor(id, shadow, l.ShadowScatterSize, enableShadowAntiAlias, shadowProjectionPos, invertedViewMatrix, shadow.LightViewProjectionMatrix);
                                         if (!transmissionColor.CompareGreaterThanBy3Element(Vector3.Zero))
                                         {
                                             continue;
@@ -1132,9 +1132,9 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static Vector4 GetShadowColor(int triangleId, ShadowMap shadowMap, float shadowScatterSize, bool isEnableAntiAlias, in Vector4 shadowProjectionPos, in Matrix4x4 invtededViewMatrix, in Matrix4x4 lightViewProjectionMatrix)
+        static Vector4 GetShadowColor(int triangleId, ShadowMap shadowMap, float shadowScatterSize, bool isEnableAntiAlias, in Vector4 shadowProjectionPos, in Matrix4x4 invertedViewMatrix, in Matrix4x4 lightViewProjectionMatrix)
         {
-            var shadowPos = Vector4.Transform(Vector4.Transform(shadowProjectionPos, invtededViewMatrix), lightViewProjectionMatrix);
+            var shadowPos = Vector4.Transform(Vector4.Transform(shadowProjectionPos, invertedViewMatrix), lightViewProjectionMatrix);
             shadowPos /= shadowPos.W;
             var shadowTexPos = shadowPos * 0.5F + new Vector4(0.5F, 0.5F, 0.0F, 0.0F);
             var depth = MathF.Round(shadowPos.Z, DepthRoundingDigit);
