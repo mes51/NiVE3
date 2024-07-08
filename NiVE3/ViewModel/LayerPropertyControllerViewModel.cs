@@ -5,7 +5,6 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ILGPU.IR;
 using NiVE3.Model;
 using NiVE3.Mvvm;
 using NiVE3.Plugin.Interfaces;

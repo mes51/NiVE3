@@ -12,7 +12,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using ILGPU.IR;
 using NiVE3.Plugin.Property;
 using NiVE3.Plugin.Property.Control;
 using NiVE3.View.Resource;

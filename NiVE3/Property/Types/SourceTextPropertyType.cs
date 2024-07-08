@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Documents;
-using ILGPU.IR.Values;
 using NiVE3.Plugin.Internal.Util;
 using NiVE3.Plugin.Property;
 using NiVE3.Plugin.Property.Types;

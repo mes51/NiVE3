@@ -10,7 +10,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-using ILGPU.Runtime.Cuda;
 using Microsoft.Win32;
 using NiVE3.Model;
 using NiVE3.Plugin.Interfaces;

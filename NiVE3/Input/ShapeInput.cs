@@ -7,7 +7,6 @@ using System.Runtime.CompilerServices;
 using System.Security.Cryptography.Xml;
 using System.Text;
 using System.Threading.Tasks;
-using ILGPU.IR;
 using NiVE3.Image;
 using NiVE3.Image.Color;
 using NiVE3.Image.Drawing;

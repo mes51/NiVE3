@@ -9,7 +9,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using ILGPU.Runtime.Cuda;
 using NiVE3.Data.Json.Project;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.ValueObject;

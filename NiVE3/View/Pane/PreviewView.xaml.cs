@@ -14,7 +14,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using ILGPU.Algorithms.Optimization.Optimizers;
 using NiVE3.Numerics;
 using NiVE3.Shared.Extension;
 using NiVE3.ValueObject;
