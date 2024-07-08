@@ -5,6 +5,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using ComputeSharp;
 
 namespace NiVE3.Image
 {
@@ -62,6 +63,16 @@ namespace NiVE3.Image
             Data.AsSpan(0, DataLength).CopyTo(result.Data);
             result.Origin = Origin;
             return result;
+        }
+
+        /// <summary>
+        /// 画像データをGPU側にコピーしたNImageを新たに生成します
+        /// </summary>
+        /// <param name="device">GPUのデバイス</param>
+        /// <returns>生成されたNGPUImage</returns>
+        public NGPUImage CopyToGpu(GraphicsDevice device)
+        {
+            return new NGPUImage(Width, Height, device, GetDataSpan());
         }
 
         protected override void Dispose(bool disposing)
