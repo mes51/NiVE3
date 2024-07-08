@@ -267,6 +267,7 @@ namespace NiVE3.PresetPlugin.Renderer
 
                         renderer.AddRect(
                             trackMatteImage.Image,
+                            trackMatteImage.InterpolationQuality,
                             (float)opacity,
                             trackMatteImage.BlendMode,
                             Matrix4x4d.CreateScale(trackMatteImage.DownSampleRateX, trackMatteImage.DownSampleRateY, 1.0) * Calc3DModelMatrix(trackMatteImage.Transform, trackMatteImage.ParentTransforms, Width, Height),
@@ -315,6 +316,7 @@ namespace NiVE3.PresetPlugin.Renderer
 
                         renderer.AddRect(
                             i.Image,
+                            i.InterpolationQuality,
                             (float)opacity,
                             i.BlendMode,
                             Matrix4x4d.CreateScale(i.DownSampleRateX, i.DownSampleRateY, 1.0) * Calc3DModelMatrix(i.Transform, i.ParentTransforms, Width, Height),
@@ -413,6 +415,7 @@ namespace NiVE3.PresetPlugin.Renderer
 
                     renderer.AddRect(
                         trackMatteImage.Image,
+                        trackMatteImage.InterpolationQuality,
                         (float)trackMatteOpacity,
                         trackMatteImage.BlendMode,
                         Matrix4x4d.CreateScale(trackMatteImage.DownSampleRateX, trackMatteImage.DownSampleRateY, 1.0) * Calc3DModelMatrix(trackMatteImage.Transform, trackMatteImage.ParentTransforms, Width, Height),
@@ -449,6 +452,7 @@ namespace NiVE3.PresetPlugin.Renderer
 
                 renderer.AddRect(
                     image.Image,
+                    image.InterpolationQuality,
                     (float)opacity,
                     image.BlendMode,
                     Matrix4x4d.CreateScale(image.DownSampleRateX, image.DownSampleRateY, 1.0) * Calc3DModelMatrix(image.Transform, image.ParentTransforms, Width, Height),
