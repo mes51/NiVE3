@@ -1166,6 +1166,24 @@ namespace NiVE3.View.Resource
         [DefaultValue("反転明度")]
         public static readonly string TrackMatteMode_InvertLuminance = nameof(TrackMatteMode_InvertLuminance);
 
+        [DefaultValue("オフ")]
+        public static readonly string ShadowCastMode_None = nameof(ShadowCastMode_None);
+
+        [DefaultValue("オン")]
+        public static readonly string ShadowCastMode_Cast = nameof(ShadowCastMode_Cast);
+
+        [DefaultValue("影のみ")]
+        public static readonly string ShadowCastMode_ShadowOnly = nameof(ShadowCastMode_ShadowOnly);
+
+        [DefaultValue("オフ")]
+        public static readonly string ShadowAcceptMode_None = nameof(ShadowAcceptMode_None);
+
+        [DefaultValue("オン")]
+        public static readonly string ShadowAcceptMode_Accept = nameof(ShadowAcceptMode_Accept);
+
+        [DefaultValue("影のみ")]
+        public static readonly string ShadowAcceptMode_ShadowOnly = nameof(ShadowAcceptMode_ShadowOnly);
+
         [DefaultValue("ポイント")]
         public static readonly string LightType_Point = nameof(LightType_Point);
 

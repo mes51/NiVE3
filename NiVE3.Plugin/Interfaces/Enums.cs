@@ -48,9 +48,21 @@ namespace NiVE3.Plugin.Interfaces
     /// </summary>
     public enum TrackMatteMode
     {
+        /// <summary>
+        /// アルファ
+        /// </summary>
         Alpha,
+        /// <summary>
+        /// 反転アルファ
+        /// </summary>
         InvertAlpha,
+        /// <summary>
+        /// 輝度
+        /// </summary>
         Luminance,
+        /// <summary>
+        /// 反転輝度
+        /// </summary>
         InvertLuminance
     }
 
@@ -83,5 +95,24 @@ namespace NiVE3.Plugin.Interfaces
         /// アンビエントライトレイヤー
         /// </summary>
         AmbientLight
+    }
+
+    /// <summary>
+    /// 影を落とすかどうかの設定を表します
+    /// </summary>
+    public enum ShadowCastMode
+    {
+        /// <summary>
+        /// 影を落としません
+        /// </summary>
+        None,
+        /// <summary>
+        /// 影を落とします
+        /// </summary>
+        Cast,
+        /// <summary>
+        /// 影のみを落とし、レイヤーは表示しません
+        /// </summary>
+        ShadowOnly
     }
 }
