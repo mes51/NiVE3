@@ -5,12 +5,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using ComputeSharp;
 using NiVE3.Image;
 using NiVE3.Plugin.Property;
 
 namespace NiVE3.Plugin.Interfaces
 {
-    public interface IAcceleratorObject { }
+    public interface IAcceleratorObject
+    {
+        GraphicsDevice CurrentDevice { get; }
+    }
 
     public interface ICompositionObject { }
 
