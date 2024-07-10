@@ -2,22 +2,35 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using ComputeSharp;
 using NiVE3.Image;
 using NiVE3.Image.Drawing;
 using NiVE3.Numerics;
 using NiVE3.Plugin.Interfaces;
+using NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render2D;
 using NiVE3.Shared.Extension;
 
 namespace NiVE3.PresetPlugin.Internal.Drawing
 {
-    class Renderer2D
+    interface IRenderer2D
+    {
+        void Draw(NImage image, float opacity, Matrix3x3 transform, ImageInterpolationQuality interpolationQuality, BlendMode blendMode, RasterizedMaskImage? trackMatte);
+    }
+
+    interface IMaskRender2D
+    {
+        void Draw(NImage image, float opacity, Matrix3x3 transform, ImageInterpolationQuality interpolationQuality, RasterizedMaskImage? trackMatte, TrackMatteMode trackMatteMode);
+    }
+
+    class CpuRenderer2D : IRenderer2D
     {
         NManagedImage Target { get; }
 
-        public Renderer2D(NManagedImage target)
+        public CpuRenderer2D(NManagedImage target)
         {
             Target = target;
         }
@@ -73,7 +86,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                             continue;
                         }
 
-                        targetData[pos] = Blend.Process(blendMode, targetData[pos], p);
+                        targetData[pos] = Image.Drawing.Blend.Process(blendMode, targetData[pos], p);
                     }
                 });
             }
@@ -98,7 +111,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                             continue;
                         }
 
-                        targetData[pos] = Blend.Process(blendMode, targetData[pos], p);
+                        targetData[pos] = Image.Drawing.Blend.Process(blendMode, targetData[pos], p);
                     }
                 });
             }
@@ -114,13 +127,78 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
         }
     }
 
-    class MaskRender2D
+    class GpuRenderer2D : IRenderer2D
+    {
+        NGPUImage Target { get; }
+
+        GraphicsDevice Device { get; }
+
+        public GpuRenderer2D(NGPUImage target, GraphicsDevice device)
+        {
+            Target = target;
+            Device = device;
+        }
+
+        public void Draw(NImage image, float opacity, Matrix3x3 transform, ImageInterpolationQuality interpolationQuality, BlendMode blendMode, RasterizedMaskImage? trackMatte)
+        {
+            transform = Matrix3x3.CreateTranslate((float)-image.Origin.X, (float)-image.Origin.Y) * transform;
+            if (!Matrix3x3.Invert(transform, out var inverted))
+            {
+                return;
+            }
+
+            var gpuImage = image switch
+            {
+                NManagedImage managedImage => managedImage.CopyToGpu(Device),
+                _ => (NGPUImage)image
+            };
+            var gpuTrackMatte = trackMatte switch
+            {
+                ManagedRasterizedMaskImage managedTrackMatte => managedTrackMatte.CopyToGpu(Device),
+                _ => (GPURasterizedMaskImage?)trackMatte
+            };
+
+            using var canvas = new NGPUImage(Target.Width, Target.Height, Device);
+            using (var context = Device.CreateComputeContext())
+            {
+                switch (interpolationQuality)
+                {
+                    case ImageInterpolationQuality.Level1:
+                        context.For(canvas.Width, canvas.Height, new NearestNeighbor(canvas.Data, canvas.Width, gpuImage.Data, gpuImage.Width, gpuImage.Height, inverted.ToFloat3x3()));
+                        break;
+                    default:
+                        context.For(canvas.Width, canvas.Height, new Bilinear(canvas.Data, canvas.Width, gpuImage.Data, gpuImage.Width, gpuImage.Height, inverted.ToFloat3x3()));
+                        break;
+                }
+
+                if (gpuTrackMatte != null)
+                {
+                    context.For(Target.Data.Length, new BlendWithTrackMatte(Target.Data, canvas.Data, gpuTrackMatte.Data, (int)blendMode, opacity));
+                }
+                else
+                {
+                    context.For(Target.Data.Length, new ComputeShader.Render2D.Blend(Target.Data, canvas.Data, (int)blendMode, opacity));
+                }
+            }
+
+            if (gpuImage != image)
+            {
+                gpuImage.Dispose();
+            }
+            if (gpuTrackMatte != trackMatte)
+            {
+                gpuTrackMatte?.Dispose();
+            }
+        }
+    }
+
+    class CpuMaskRender2D : IMaskRender2D
     {
         static readonly Vector4 ToGrayScale = new Vector4(0.114478F, 0.586611F, 0.298912F, 0.0F);
 
         ManagedRasterizedMaskImage Target { get; }
 
-        public MaskRender2D(ManagedRasterizedMaskImage target)
+        public CpuMaskRender2D(ManagedRasterizedMaskImage target)
         {
             Target = target;
         }
@@ -220,6 +298,84 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             {
                 managedTrackMatte?.Dispose();
             }
+        }
+    }
+
+    class GpuMaskRender2D : IMaskRender2D
+    {
+        static readonly Vector4 ToGrayScale = new Vector4(0.114478F, 0.586611F, 0.298912F, 0.0F);
+
+        GPURasterizedMaskImage Target { get; }
+
+        GraphicsDevice Device { get; }
+
+        public GpuMaskRender2D(GPURasterizedMaskImage target, GraphicsDevice device)
+        {
+            Target = target;
+            Device = device;
+        }
+
+        public void Draw(NImage image, float opacity, Matrix3x3 transform, ImageInterpolationQuality interpolationQuality, RasterizedMaskImage? trackMatte, TrackMatteMode trackMatteMode)
+        {
+            if (!Matrix3x3.Invert(transform, out var inverted))
+            {
+                return;
+            }
+
+            var gpuImage = image switch
+            {
+                NManagedImage managedImage => managedImage.CopyToGpu(Device),
+                _ => (NGPUImage)image
+            };
+            var gpuTrackMatte = trackMatte switch
+            {
+                ManagedRasterizedMaskImage managedTrackMatte => managedTrackMatte.CopyToGpu(Device),
+                _ => (GPURasterizedMaskImage?)trackMatte
+            };
+
+            using var canvas = new NGPUImage(Target.Width, Target.Height, Device);
+            using (var context = Device.CreateComputeContext())
+            {
+                switch (interpolationQuality)
+                {
+                    case ImageInterpolationQuality.Level1:
+                        context.For(canvas.Width, canvas.Height, new NearestNeighbor(canvas.Data, canvas.Width, gpuImage.Data, gpuImage.Width, gpuImage.Height, inverted.ToFloat3x3()));
+                        break;
+                    default:
+                        context.For(canvas.Width, canvas.Height, new Bilinear(canvas.Data, canvas.Width, gpuImage.Data, gpuImage.Width, gpuImage.Height, inverted.ToFloat3x3()));
+                        break;
+                }
+
+                if (gpuTrackMatte != null)
+                {
+                    context.For(Target.Data.Length, new CreateMatteWithTrackMatte(Target.Data, canvas.Data, gpuTrackMatte.Data, (int)trackMatteMode, opacity));
+                }
+                else
+                {
+                    context.For(Target.Data.Length, new CreateMatte(Target.Data, canvas.Data, (int)trackMatteMode, opacity));
+                }
+            }
+
+            if (gpuImage != image)
+            {
+                gpuImage.Dispose();
+            }
+            if (gpuTrackMatte != trackMatte)
+            {
+                gpuTrackMatte?.Dispose();
+            }
+        }
+    }
+
+    static class Matrix3x3Extensions
+    {
+        public static Float3x3 ToFloat3x3(this in Matrix3x3 matrix)
+        {
+            return new Float3x3(
+                matrix.M11, matrix.M21, matrix.M31,
+                matrix.M12, matrix.M22, matrix.M32,
+                matrix.M13, matrix.M23, matrix.M33
+            );
         }
     }
 }

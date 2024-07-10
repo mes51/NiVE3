@@ -3,6 +3,7 @@ using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using ComputeSharp;
@@ -14,16 +15,57 @@ namespace NiVE3.Image
     /// </summary>
     public class NGPUImage : NImage
     {
-        public ReadWriteBuffer<Vector4> Data { get; }
+        /// <summary>
+        /// 画像データ
+        /// </summary>
+        public ReadWriteBuffer<Float4> Data { get; }
 
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="width">幅</param>
+        /// <param name="height">高さ</param>
+        /// <param name="device">GPUのデバイス</param>
         public NGPUImage(int width, int height, GraphicsDevice device) : base(width, height)
         {
-            Data = device.AllocateReadWriteBuffer<Vector4>(width * height);
+            Data = device.AllocateReadWriteBuffer<Float4>(width * height);
         }
 
-        public NGPUImage(int width, int height, GraphicsDevice device, ReadOnlySpan<Vector4> cpuData) : base(width, height)
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="width">幅</param>
+        /// <param name="height">高さ</param>
+        /// <param name="device">GPUのデバイス</param>
+        /// <param name="data">元となる画像データ</param>
+        /// <exception cref="ArgumentOutOfRangeException">データのサイズが幅*高さ未満です</exception>
+        public NGPUImage(int width, int height, GraphicsDevice device, ReadOnlySpan<Vector4> data) : base(width, height)
         {
-            Data = device.AllocateReadWriteBuffer(cpuData[..(width * height)]);
+            if (data.Length < width * height)
+            {
+                throw new ArgumentOutOfRangeException(nameof(data));
+            }
+
+            var float4Data = MemoryMarshal.Cast<Vector4, Float4>(data);
+            Data = device.AllocateReadWriteBuffer(float4Data[..(width * height)]);
+        }
+
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="width">幅</param>
+        /// <param name="height">高さ</param>
+        /// <param name="device">GPUのデバイス</param>
+        /// <param name="color">初期の各ピクセルの色</param>
+        public NGPUImage(int width, int height, GraphicsDevice device, Vector4 color) : base(width, height)
+        {
+            var length = width * height;
+            var data = ArrayPool<Vector4>.Shared.Rent(length); // NOTE: おそらくFloat4はそんなに使用されなくて無駄にPoolを確保することになるため、Vector4として確保、キャストして渡す
+            data.AsSpan(0, length).Fill(color);
+
+            var float4Data = MemoryMarshal.Cast<Vector4, Float4>(data);
+            Data = device.AllocateReadWriteBuffer<Float4>(float4Data[..length]);
+            ArrayPool<Vector4>.Shared.Return(data);
         }
 
         /// <summary>
@@ -42,7 +84,8 @@ namespace NiVE3.Image
         public override Vector4[] GetData()
         {
             var result = ArrayPool<Vector4>.Shared.Rent(DataLength);
-            Data.CopyTo(result.AsSpan(0, DataLength));
+            var float4Data = MemoryMarshal.Cast<Vector4, Float4>(result);
+            Data.CopyTo(float4Data[..DataLength]);
 
             return result;
         }
@@ -55,7 +98,8 @@ namespace NiVE3.Image
         public NManagedImage CopyToCpu(bool needClear = false)
         {
             var result = new NManagedImage(Width, Height, needClear);
-            Data.CopyTo(result.GetDataSpan());
+            var float4Data = MemoryMarshal.Cast<Vector4, Float4>(result.GetDataSpan());
+            Data.CopyTo(float4Data);
 
             return result;
         }
@@ -69,7 +113,7 @@ namespace NiVE3.Image
         {
             if (Width != image.Width || Height != image.Height)
             {
-                throw new ArgumentOutOfRangeException("different target image size");
+                throw new ArgumentOutOfRangeException(nameof(image));
             }
 
             Data.CopyTo(image.Data);

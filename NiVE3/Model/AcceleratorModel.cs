@@ -12,29 +12,45 @@ namespace NiVE3.Model
 {
     class AcceleratorModel : BindableBase, IAcceleratorObject, IDisposable
     {
-        public GraphicsDevice CurrentDevice { get; private set; }
+        public static readonly bool HasHardwareAcceleratedGPU;
 
-        public AcceleratorModel()
+        private GraphicsDevice? graphicsDevice;
+        public GraphicsDevice CurrentDevice
         {
-            var device = GraphicsDevice.QueryDevices(d => d.IsHardwareAccelerated && d.Luid.ToString() == ApplicationSetting.Setting.UseGpuLuid).FirstOrDefault();
-            if (device == null)
+            get
             {
-                device = GraphicsDevice.GetDefault();
-                if (!device.IsHardwareAccelerated)
+                // NOTE: HasHardwareAcceleratedGPUよりも先に使用するGraphicsDeviceを生成しないようにする
+                if (graphicsDevice == null)
                 {
-                    device = GraphicsDevice.QueryDevices(d => d.IsHardwareAccelerated).FirstOrDefault() ?? device;
+                    graphicsDevice = GraphicsDevice.QueryDevices(d => d.IsHardwareAccelerated && d.Luid.ToString() == ApplicationSetting.Setting.UseGpuLuid).FirstOrDefault();
+                    if (graphicsDevice == null)
+                    {
+                        graphicsDevice = GraphicsDevice.GetDefault();
+                        if (!graphicsDevice.IsHardwareAccelerated)
+                        {
+                            graphicsDevice = GraphicsDevice.QueryDevices(d => d.IsHardwareAccelerated).FirstOrDefault() ?? graphicsDevice;
+                        }
+                    }
                 }
-            }
 
-            CurrentDevice = device;
+                return graphicsDevice;
+            }
         }
 
-        public void Dispose() { }
-
-        public static bool CanUseGpu()
+        static AcceleratorModel()
         {
-            using var hardwareAccelerated = GraphicsDevice.QueryDevices(d => d.IsHardwareAccelerated).FirstOrDefault();
-            return hardwareAccelerated != null;
+            var device = GraphicsDevice.QueryDevices(d => d.IsHardwareAccelerated).FirstOrDefault();
+            HasHardwareAcceleratedGPU = device != null;
+
+            if (device != GraphicsDevice.GetDefault())
+            {
+                device?.Dispose();
+            }
+        }
+
+        public void Dispose()
+        {
+            graphicsDevice?.Dispose();
         }
     }
 }

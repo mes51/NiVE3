@@ -19,7 +19,7 @@ namespace NiVE3.Model
 
         public ApplicationModel()
         {
-            UseGpu = ApplicationSetting.Setting.UseGpu && AcceleratorModel.CanUseGpu();
+            UseGpu = ApplicationSetting.Setting.UseGpu && AcceleratorModel.HasHardwareAcceleratedGPU;
         }
     }
 }

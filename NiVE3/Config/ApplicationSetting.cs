@@ -21,7 +21,7 @@ namespace NiVE3.Config
 
         public string SolidFolderName { get; set; } = "Solid";
 
-        public bool UseGpu { get; set; } = true;
+        public bool UseGpu { get; set; } = false;
 
         public string UseGpuLuid { get; set; } = "";
     }

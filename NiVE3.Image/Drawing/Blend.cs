@@ -393,7 +393,7 @@ namespace NiVE3.Image.Drawing
     /// <summary>
     /// ブレンドモードを表します。
     /// </summary>
-    public enum BlendMode
+    public enum BlendMode : int
     {
         Normal,
         Replace,

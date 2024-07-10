@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ComputeSharp;
 
 namespace NiVE3.Image
 {
@@ -38,15 +39,6 @@ namespace NiVE3.Image
         }
 
         /// <summary>
-        /// マスク画像のデータを取得します。長さはDataLengthでスライスされます
-        /// </summary>
-        /// <returns>取得したマスク画像データ</returns>
-        public Span<float> GetDataSpan()
-        {
-            return Data.AsSpan(0, DataLength);
-        }
-
-        /// <summary>
         /// マスク画像を複製します
         /// </summary>
         /// <returns>複製されたマスク画像</returns>
@@ -56,6 +48,25 @@ namespace NiVE3.Image
             Data.AsSpan(0, DataLength).CopyTo(result.GetDataSpan()[..DataLength]);
             result.Origin = Origin;
             return result;
+        }
+
+        /// <summary>
+        /// マスク画像のデータを取得します。長さはDataLengthでスライスされます
+        /// </summary>
+        /// <returns>取得したマスク画像データ</returns>
+        public Span<float> GetDataSpan()
+        {
+            return Data.AsSpan(0, DataLength);
+        }
+
+        /// <summary>
+        /// マスク画像をGPU側にコピーしたRasterizedMaskImageを新たに生成します
+        /// </summary>
+        /// <param name="device">GPUのデバイス</param>
+        /// <returns>生成されたNGPUImage</returns>
+        public GPURasterizedMaskImage CopyToGpu(GraphicsDevice device)
+        {
+            return new GPURasterizedMaskImage(Width, Height, device, Data);
         }
 
         protected override void Dispose(bool disposing)
