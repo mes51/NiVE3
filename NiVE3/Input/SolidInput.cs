@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media.Media3D;
+using ComputeSharp;
 using NiVE3.Data;
 using NiVE3.Image;
 using NiVE3.Plugin.Attributes;
@@ -33,7 +34,10 @@ namespace NiVE3.Input
 
         SolidFootageSource Source { get; } = new SolidFootageSource();
 
-        public void SetupAccelerator(IAcceleratorObject accelerator) { }
+        public void SetupAccelerator(IAcceleratorObject accelerator)
+        {
+            Source.Accelerator = accelerator;
+        }
 
         public bool Load(string filePath)
         {
@@ -118,14 +122,15 @@ namespace NiVE3.Input
 
         internal FloatColor Color { get; set; } = new FloatColor(0.0F, 0.0F, 1.0F, 1.0F);
 
+        internal IAcceleratorObject? Accelerator { get; set; }
+
         public NImage ReadFrame(double time, double downSamplingRate, bool toGpu)
         {
             var width = (int)(Width / downSamplingRate);
             var height = (int)(Height / downSamplingRate);
-            if (toGpu)
+            if (toGpu && Accelerator != null)
             {
-                // TODO
-                throw new NotImplementedException();
+                return new NGPUImage(width, height, Accelerator.CurrentDevice, (Vector4)Color);
             }
             else
             {

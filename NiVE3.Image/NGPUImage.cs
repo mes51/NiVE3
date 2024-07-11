@@ -57,15 +57,10 @@ namespace NiVE3.Image
         /// <param name="height">高さ</param>
         /// <param name="device">GPUのデバイス</param>
         /// <param name="color">初期の各ピクセルの色</param>
-        public NGPUImage(int width, int height, GraphicsDevice device, Vector4 color) : base(width, height)
+        public NGPUImage(int width, int height, GraphicsDevice device, Vector4 color) : this(width, height, device)
         {
-            var length = width * height;
-            var data = ArrayPool<Vector4>.Shared.Rent(length); // NOTE: おそらくFloat4はそんなに使用されなくて無駄にPoolを確保することになるため、Vector4として確保、キャストして渡す
-            data.AsSpan(0, length).Fill(color);
-
-            var float4Data = MemoryMarshal.Cast<Vector4, Float4>(data);
-            Data = device.AllocateReadWriteBuffer<Float4>(float4Data[..length]);
-            ArrayPool<Vector4>.Shared.Return(data);
+            using var context = device.CreateComputeContext();
+            context.For(width * height, new ClearImage(Data, color));
         }
 
         /// <summary>
@@ -123,6 +118,16 @@ namespace NiVE3.Image
         {
             base.Dispose(disposing);
             Data.Dispose();
+        }
+    }
+
+    [ThreadGroupSize(DefaultThreadGroupSizes.X)]
+    [GeneratedComputeShaderDescriptor]
+    readonly partial struct ClearImage(ReadWriteBuffer<Float4> image, Float4 color) : IComputeShader
+    {
+        public void Execute()
+        {
+            image[ThreadIds.X] = color;
         }
     }
 }

@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using NiVE3.Numerics;
 using NiVE3.Plugin.Interfaces.RendererParams;
 using NiVE3.Shared.Extension;
+using NiVE3.PresetPlugin.Internal.Extension;
 
 namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
 {
@@ -95,6 +96,27 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
             FloatBottomLightViewMatrix = (Matrix4x4)BottomLightViewMatrix;
             FaceDetectionMatrix = (Matrix4x4)(baseLightViewMartrix * LookAtFront);
         }
+
+        public GPUPointLight ToGpu()
+        {
+            return new GPUPointLight(
+                Position.AsFloat4(),
+                Color.AsFloat4(),
+                (int)FalloffType,
+                FalloffStart,
+                FalloffLength,
+                IsEnableShadow,
+                ShadowStrength,
+                ShadowScatterSize,
+                FloatFrontLightViewMatrix.ToFloat4x4(),
+                FloatBackLightViewMatrix.ToFloat4x4(),
+                FloatLeftLightViewMatrix.ToFloat4x4(),
+                FloatRightLightViewMatrix.ToFloat4x4(),
+                FloatTopLightViewMatrix.ToFloat4x4(),
+                FloatBottomLightViewMatrix.ToFloat4x4(),
+                FaceDetectionMatrix.ToFloat4x4()
+            );
+        }
     }
 
     class SpotLight
@@ -155,6 +177,27 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
             LightViewMatrix = lightViewMartrix;
             FloatLightViewMatrix = (Matrix4x4)lightViewMartrix;
         }
+
+        public GPUSpotLight ToGpu()
+        {
+            return new GPUSpotLight(
+                Position.AsFloat4(),
+                Direction.AsFloat3(),
+                (float)ConeAttenuationRate,
+                InnerCone,
+                OuterCone,
+                OuterConeCos,
+                InvertInnerConeCos,
+                Color.AsFloat4(),
+                (int)FalloffType,
+                FalloffStart,
+                FalloffLength,
+                IsEnableShadow,
+                ShadowStrength,
+                ShadowScatterSize,
+                FloatLightViewMatrix.ToFloat4x4()
+            );
+        }
     }
 
     class ParallelLight
@@ -195,6 +238,22 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
             LightViewMatrix = lightViewMartrix;
             FloatLightViewMatrix = (Matrix4x4)lightViewMartrix;
         }
+
+        public GPUParallelLight ToGpu()
+        {
+            return new GPUParallelLight(
+                Position.AsFloat4(),
+                Direction.AsFloat3(),
+                Color.AsFloat4(),
+                (int)FalloffType,
+                FalloffStart,
+                FalloffLength,
+                IsEnableShadow,
+                ShadowStrength,
+                ShadowScatterSize,
+                FloatLightViewMatrix.ToFloat4x4()
+            );
+        }
     }
 
     class AmbientLight
@@ -204,6 +263,11 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
         public AmbientLight(Vector3 color, double intensity)
         {
             Color = new Vector4(color * (float)intensity, 1.0F);
+        }
+
+        public GPUAmbientLight ToGpu()
+        {
+            return new GPUAmbientLight(Color.AsFloat4());
         }
     }
 }

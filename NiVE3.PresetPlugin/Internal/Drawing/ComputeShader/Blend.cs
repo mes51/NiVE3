@@ -112,7 +112,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader
             var lt = 2.0F * back * front;
             var gte = 1.0F - 2.0F * (1.0F - back) * (1.0F - front);
 
-            var c = Mask(lt, mask) + NotMask(gte, mask);
+            var c = ShaderUtil.Mask(lt, mask) + ShaderUtil.NotMask(gte, mask);
             return Composite(back, front, c);
         }
 
@@ -122,7 +122,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader
             var lt = 2.0F * back * front;
             var gte = 1.0F - 2.0F * (1.0F - back) * (1.0F - front);
 
-            var c = Mask(lt, mask) + NotMask(gte, mask);
+            var c = ShaderUtil.Mask(lt, mask) + ShaderUtil.NotMask(gte, mask);
             return Composite(back, front, c);
         }
 
@@ -132,7 +132,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader
             var lt = (front * 2.0F - 1.0F) * (back - Hlsl.Pow(back, 2.0F)) + back;
             var gte = (front * 2.0F - 1.0F) * (Hlsl.Pow(back, 0.5F) - back) + back;
 
-            var c = Mask(lt, mask) + NotMask(gte, mask);
+            var c = ShaderUtil.Mask(lt, mask) + ShaderUtil.NotMask(gte, mask);
             return Composite(back, front, c);
         }
 
@@ -142,7 +142,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader
             var lt = 1.0F - (1.0F - back) / (front * 2.0F);
             var gte = back / ((1.0F - front) * 2.0F);
 
-            var c = Mask(lt, mask) + NotMask(gte, mask);
+            var c = ShaderUtil.Mask(lt, mask) + ShaderUtil.NotMask(gte, mask);
             return Composite(back, front, c);
         }
 
@@ -154,10 +154,10 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader
             var ltMask = back >= (1.0F - fv);
             var gteMask = back < (2.0F - fv);
             var tmp = fv + back - 1.0F;
-            var lt = Mask(tmp, ltMask);
-            var gte = Mask(tmp, gteMask) + NotMask(1.0F, gteMask);
+            var lt = ShaderUtil.Mask(tmp, ltMask);
+            var gte = ShaderUtil.Mask(tmp, gteMask) + ShaderUtil.NotMask(1.0F, gteMask);
 
-            var c = Mask(lt, mask) + NotMask(gte, mask);
+            var c = ShaderUtil.Mask(lt, mask) + ShaderUtil.NotMask(gte, mask);
             return Composite(back, front, c);
         }
 
@@ -169,10 +169,10 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader
             var ltMask = fv < back;
             var gteMask = (fv - 1.0F) < back;
 
-            var lt = Mask(fv, ltMask) + NotMask(back, ltMask);
-            var gte = Mask(back, gteMask) + NotMask(fv - 1.0F, gteMask);
+            var lt = ShaderUtil.Mask(fv, ltMask) + ShaderUtil.NotMask(back, ltMask);
+            var gte = ShaderUtil.Mask(back, gteMask) + ShaderUtil.NotMask(fv - 1.0F, gteMask);
 
-            var c = Mask(lt, mask) + NotMask(gte, mask);
+            var c = ShaderUtil.Mask(lt, mask) + ShaderUtil.NotMask(gte, mask);
             return Composite(back, front, c);
         }
 
@@ -192,13 +192,13 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader
         {
             var mask = front > 0.0F;
             var c = 1.0F - (1.0F - back) / front;
-            return Composite(back, front, Mask(c, mask));
+            return Composite(back, front, ShaderUtil.Mask(c, mask));
         }
 
         static Float4 LinearBurn(Float4 back, Float4 front)
         {
             var mask = (front + back) < 1.0F;
-            var c = NotMask(front + back - 1.0F, mask);
+            var c = ShaderUtil.NotMask(front + back - 1.0F, mask);
             return Composite(back, front, c);
         }
 
@@ -351,16 +351,6 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader
         static float GetLuminance(Float4 c)
         {
             return Hlsl.Dot(c.XYZ, ConvertToGrayScale);
-        }
-
-        static Float4 Mask(Float4 v, Bool4 mask)
-        {
-            return new Float4(mask.X ? v.X : 0.0F, mask.Y ? v.Y : 0.0F, mask.Z ? v.Z : 0.0F, mask.W ? v.W : 0.0F);
-        }
-
-        static Float4 NotMask(Float4 v, Bool4 mask)
-        {
-            return new Float4(mask.X ? 0.0F : v.X, mask.Y ? 0.0F : v.Y, mask.Z ? 0.0F : v.Z, mask.W ? 0.0F : v.W);
         }
 
         static float HorizontalMax(Float3 v)

@@ -180,10 +180,10 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render2D
                     p = c.W;
                     break;
                 case 1:
-                    p = Hlsl.Dot(c.XYZ, ConvertToGrayScale) * c.W;
+                    p = 1.0F - c.W;
                     break;
                 case 2:
-                    p = 1.0F - c.W;
+                    p = Hlsl.Dot(c.XYZ, ConvertToGrayScale) * c.W;
                     break;
                 case 3:
                     p = 1.0F - (Hlsl.Dot(c.XYZ, ConvertToGrayScale) * c.W);
@@ -210,10 +210,10 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render2D
                     p = c.W;
                     break;
                 case 1:
-                    p = Hlsl.Dot(c.XYZ, ConvertToGrayScale) * c.W;
+                    p = 1.0F - c.W;
                     break;
                 case 2:
-                    p = 1.0F - c.W;
+                    p = Hlsl.Dot(c.XYZ, ConvertToGrayScale) * c.W;
                     break;
                 case 3:
                     p = 1.0F - (Hlsl.Dot(c.XYZ, ConvertToGrayScale) * c.W);

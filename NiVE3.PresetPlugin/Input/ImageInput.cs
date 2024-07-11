@@ -107,7 +107,7 @@ namespace NiVE3.PresetPlugin.Input
             if (downSamplingRate != 1.0)
             {
                 var result = new NManagedImage((int)(Width / downSamplingRate), (int)(Height / downSamplingRate));
-                var renderer = new CpuRenderer2D(result);
+                var renderer = new CPURenderer2D(result);
                 renderer.Draw(Image, 1.0F, Matrix3x3.CreateScale(result.Width / (float)Width, result.Height / (float)Height), ImageInterpolationQuality.Level2, NiVE3.Image.Drawing.BlendMode.Replace, null);
                 return result;
             }

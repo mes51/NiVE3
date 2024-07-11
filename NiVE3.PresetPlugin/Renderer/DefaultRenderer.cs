@@ -284,13 +284,13 @@ namespace NiVE3.PresetPlugin.Renderer
             var frameHeight = 0;
             if (UseGpu && CurrentGpuFrame != null && Accelerator != null)
             {
-                renderer = new GpuRenderer2D(CurrentGpuFrame, Accelerator.CurrentDevice);
+                renderer = new GPURenderer2D(CurrentGpuFrame, Accelerator.CurrentDevice);
                 frameWidth = CurrentGpuFrame.Width;
                 frameHeight = CurrentGpuFrame.Height;
             }
             else if (CurrentManagedFrame != null)
             {
-                renderer = new CpuRenderer2D(CurrentManagedFrame);
+                renderer = new CPURenderer2D(CurrentManagedFrame);
                 frameWidth = CurrentManagedFrame.Width;
                 frameHeight = CurrentManagedFrame.Height;
             }
@@ -384,7 +384,7 @@ namespace NiVE3.PresetPlugin.Renderer
                 }
                 else
                 {
-                    var renderer = new CpuMaskRender2D(trackMatte);
+                    var renderer = new CPUMaskRender2D(trackMatte);
                     var downScale = Matrix3x3.CreateScale(1.0F / CurrentDownScaleRateX, 1.0F / CurrentDownScaleRateY);
                     var matrix = Matrix3x3.CreateScale(trackMatteImage.DownSampleRateX, trackMatteImage.DownSampleRateY) * CalcTransform2D(trackMatteImage.Transform, trackMatteImage.ParentTransforms) * downScale;
                     renderer.Draw(trackMatteImage.Image, (float)trackMatteOpacity, matrix, trackMatteImage.InterpolationQuality, null, image.TrackMatteMode.Value);
@@ -421,7 +421,7 @@ namespace NiVE3.PresetPlugin.Renderer
             }
             else
             {
-                var renderer = new CpuMaskRender2D(result);
+                var renderer = new CPUMaskRender2D(result);
                 var downScale = Matrix3x3.CreateScale(1.0F / CurrentDownScaleRateX, 1.0F / CurrentDownScaleRateY);
                 var matrix = Matrix3x3.CreateScale(image.DownSampleRateX, image.DownSampleRateY) * CalcTransform2D(image.Transform, image.ParentTransforms) * downScale;
                 renderer.Draw(image.Image, (float)opacity, matrix, image.InterpolationQuality, trackMatte, TrackMatteMode.Alpha);
@@ -891,7 +891,7 @@ namespace NiVE3.PresetPlugin.Renderer
                     }
                     else
                     {
-                        var renderer = new CpuMaskRender2D(result);
+                        var renderer = new CPUMaskRender2D(result);
                         var downScale = Matrix3x3.CreateScale(1.0F / CurrentDownScaleRateX, 1.0F / CurrentDownScaleRateY);
                         var matrix = Matrix3x3.CreateScale(i.DownSampleRateX, i.DownSampleRateY) * CalcTransform2D(trackMatteImage.Transform, trackMatteImage.ParentTransforms) * downScale;
                         renderer.Draw(trackMatteImage.Image, (float)opacity, matrix, trackMatteImage.InterpolationQuality, null, i.TrackMatteMode.Value);
@@ -941,7 +941,7 @@ namespace NiVE3.PresetPlugin.Renderer
                 }
                 else
                 {
-                    var renderer = new CpuRenderer2D(CurrentManagedFrame);
+                    var renderer = new CPURenderer2D(CurrentManagedFrame);
 
                     var downScale = Matrix3x3.CreateScale(1.0F / CurrentDownScaleRateX, 1.0F / CurrentDownScaleRateY);
                     foreach (var i in group)
@@ -984,35 +984,35 @@ namespace NiVE3.PresetPlugin.Renderer
 
                     if (trackMatteImage.IsEnable3D)
                     {
-                        //var renderer = new MaskRenderer3D(result, Width, Height, PointLights, SpotLights, ParallelLights, AmbientLights)
-                        //{
-                        //    ViewMatrix = ViewMatrix,
-                        //    FieldOfView = FieldOfView
-                        //};
-                        //
-                        //renderer.AddRect(
-                        //    trackMatteImage.Image,
-                        //    trackMatteImage.InterpolationQuality,
-                        //    (float)opacity,
-                        //    trackMatteImage.BlendMode,
-                        //    Matrix4x4d.CreateScale(trackMatteImage.DownSampleRateX, trackMatteImage.DownSampleRateY, 1.0) * Calc3DModelMatrix(trackMatteImage.Transform, trackMatteImage.ParentTransforms, Width, Height),
-                        //    (ShadowCastMode)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionIsCastShadowId] ?? ShadowCastMode.None),
-                        //    (float)((double)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionLightTransmissionId] ?? 0.0) * 0.01),
-                        //    (bool)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionIsAcceptShadowId] ?? false),
-                        //    (bool)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionIsAcceptLightId] ?? false),
-                        //    (float)((double)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionAmbientId] ?? 0.0) * 0.01),
-                        //    (float)((double)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionDiffuseId] ?? 0.0) * 0.01),
-                        //    (float)((double)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionSpecularIntensityId] ?? 0.0) * 0.01),
-                        //    (float)((double)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionSpecularShininessId] ?? 0.0) * 0.01),
-                        //    (float)((double)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionMetalId] ?? 0.0) * 0.01),
-                        //    null
-                        //);
-                        //
-                        //renderer.Render(i.TrackMatteMode.Value, EnableAntiAlias);
+                        var renderer = new GPUMaskRenderer3D(result, device, Width, Height, PointLights, SpotLights, ParallelLights, AmbientLights)
+                        {
+                            ViewMatrix = ViewMatrix,
+                            FieldOfView = FieldOfView
+                        };
+
+                        renderer.AddRect(
+                            trackMatteImage.Image,
+                            trackMatteImage.InterpolationQuality,
+                            (float)opacity,
+                            trackMatteImage.BlendMode,
+                            Matrix4x4d.CreateScale(trackMatteImage.DownSampleRateX, trackMatteImage.DownSampleRateY, 1.0) * Calc3DModelMatrix(trackMatteImage.Transform, trackMatteImage.ParentTransforms, Width, Height),
+                            (ShadowCastMode)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionIsCastShadowId] ?? ShadowCastMode.None),
+                            (float)((double)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionLightTransmissionId] ?? 0.0) * 0.01),
+                            (bool)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionIsAcceptShadowId] ?? false),
+                            (bool)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionIsAcceptLightId] ?? false),
+                            (float)((double)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionAmbientId] ?? 0.0) * 0.01),
+                            (float)((double)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionDiffuseId] ?? 0.0) * 0.01),
+                            (float)((double)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionSpecularIntensityId] ?? 0.0) * 0.01),
+                            (float)((double)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionSpecularShininessId] ?? 0.0) * 0.01),
+                            (float)((double)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionMetalId] ?? 0.0) * 0.01),
+                            null
+                        );
+
+                        renderer.Render(i.TrackMatteMode.Value, EnableAntiAlias);
                     }
                     else
                     {
-                        var renderer = new GpuMaskRender2D(result, device);
+                        var renderer = new GPUMaskRender2D(result, device);
                         var downScale = Matrix3x3.CreateScale(1.0F / CurrentDownScaleRateX, 1.0F / CurrentDownScaleRateY);
                         var matrix = Matrix3x3.CreateScale(i.DownSampleRateX, i.DownSampleRateY) * CalcTransform2D(trackMatteImage.Transform, trackMatteImage.ParentTransforms) * downScale;
                         renderer.Draw(trackMatteImage.Image, (float)opacity, matrix, trackMatteImage.InterpolationQuality, null, i.TrackMatteMode.Value);
@@ -1062,7 +1062,7 @@ namespace NiVE3.PresetPlugin.Renderer
                 }
                 else
                 {
-                    var renderer = new GpuRenderer2D(CurrentGpuFrame, device);
+                    var renderer = new GPURenderer2D(CurrentGpuFrame, device);
 
                     var downScale = Matrix3x3.CreateScale(1.0F / CurrentDownScaleRateX, 1.0F / CurrentDownScaleRateY);
                     foreach (var i in group)

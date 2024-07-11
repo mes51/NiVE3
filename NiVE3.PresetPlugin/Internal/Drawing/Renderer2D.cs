@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using ComputeSharp;
@@ -12,6 +10,7 @@ using NiVE3.Image.Drawing;
 using NiVE3.Numerics;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render2D;
+using NiVE3.PresetPlugin.Internal.Extension;
 using NiVE3.Shared.Extension;
 
 namespace NiVE3.PresetPlugin.Internal.Drawing
@@ -26,11 +25,11 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
         void Draw(NImage image, float opacity, Matrix3x3 transform, ImageInterpolationQuality interpolationQuality, RasterizedMaskImage? trackMatte, TrackMatteMode trackMatteMode);
     }
 
-    class CpuRenderer2D : IRenderer2D
+    class CPURenderer2D : IRenderer2D
     {
         NManagedImage Target { get; }
 
-        public CpuRenderer2D(NManagedImage target)
+        public CPURenderer2D(NManagedImage target)
         {
             Target = target;
         }
@@ -127,13 +126,13 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
         }
     }
 
-    class GpuRenderer2D : IRenderer2D
+    class GPURenderer2D : IRenderer2D
     {
         NGPUImage Target { get; }
 
         GraphicsDevice Device { get; }
 
-        public GpuRenderer2D(NGPUImage target, GraphicsDevice device)
+        public GPURenderer2D(NGPUImage target, GraphicsDevice device)
         {
             Target = target;
             Device = device;
@@ -192,13 +191,13 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
         }
     }
 
-    class CpuMaskRender2D : IMaskRender2D
+    class CPUMaskRender2D : IMaskRender2D
     {
         static readonly Vector4 ToGrayScale = new Vector4(0.114478F, 0.586611F, 0.298912F, 0.0F);
 
         ManagedRasterizedMaskImage Target { get; }
 
-        public CpuMaskRender2D(ManagedRasterizedMaskImage target)
+        public CPUMaskRender2D(ManagedRasterizedMaskImage target)
         {
             Target = target;
         }
@@ -301,7 +300,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
         }
     }
 
-    class GpuMaskRender2D : IMaskRender2D
+    class GPUMaskRender2D : IMaskRender2D
     {
         static readonly Vector4 ToGrayScale = new Vector4(0.114478F, 0.586611F, 0.298912F, 0.0F);
 
@@ -309,7 +308,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
         GraphicsDevice Device { get; }
 
-        public GpuMaskRender2D(GPURasterizedMaskImage target, GraphicsDevice device)
+        public GPUMaskRender2D(GPURasterizedMaskImage target, GraphicsDevice device)
         {
             Target = target;
             Device = device;
@@ -364,18 +363,6 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             {
                 gpuTrackMatte?.Dispose();
             }
-        }
-    }
-
-    static class Matrix3x3Extensions
-    {
-        public static Float3x3 ToFloat3x3(this in Matrix3x3 matrix)
-        {
-            return new Float3x3(
-                matrix.M11, matrix.M21, matrix.M31,
-                matrix.M12, matrix.M22, matrix.M32,
-                matrix.M13, matrix.M23, matrix.M33
-            );
         }
     }
 }
