@@ -489,7 +489,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             var renderImageOffsetX = (int)(OffsetX / scaleRateX);
             var renderImageOffsetY = (int)(OffsetY / scaleRateY);
             var preProcessedTriangles = new GPUMaskTriangle[triangles.Length];
-            var triangleIds = triangles.Select(t => t.Id).ToArray();
+            var triangleStates = new (int, int, int, int, int)[triangles.Length];
             for (var i = 0; i < triangles.Length; i++)
             {
                 var triangle = triangles[i];
@@ -587,6 +587,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                     triangle.SpecularShininess,
                     triangle.Metal
                 );
+                triangleStates[i] = (triangle.Id, preProcessedTriangles[i].TrueMinX, preProcessedTriangles[i].TrueMaxX, preProcessedTriangles[i].TrueMinY, preProcessedTriangles[i].TrueMaxY);
             }
 
             using (var triangleBuffer = Device.AllocateReadOnlyBuffer(preProcessedTriangles))
@@ -600,15 +601,15 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                     using var interpolate = new GPURasterizedMaskImage(RenderImage.Width, RenderImage.Height, Device);
                     RenderImage.CopyTo(interpolate);
 
-                    Rasterize(Device, trackMatteMode, RenderImage, triangleBuffer, triangleIds, textures, trackMattes, renderImageOffsetX, renderImageOffsetY, scaleRateX, scaleRateY, hasLight, pointLightBuffer, spotLightBuffer, parallelLightBuffer, ambientLightBuffer, 0.0F, 0.0F);
-                    Rasterize(Device, trackMatteMode, interpolate, triangleBuffer, triangleIds, textures, trackMattes, renderImageOffsetX, renderImageOffsetY, scaleRateX, scaleRateY, hasLight, pointLightBuffer, spotLightBuffer, parallelLightBuffer, ambientLightBuffer, 0.5F, 0.5F);
+                    Rasterize(Device, trackMatteMode, RenderImage, triangleBuffer, triangleStates, textures, trackMattes, renderImageOffsetX, renderImageOffsetY, scaleRateX, scaleRateY, hasLight, pointLightBuffer, spotLightBuffer, parallelLightBuffer, ambientLightBuffer, 0.0F, 0.0F);
+                    Rasterize(Device, trackMatteMode, interpolate, triangleBuffer, triangleStates, textures, trackMattes, renderImageOffsetX, renderImageOffsetY, scaleRateX, scaleRateY, hasLight, pointLightBuffer, spotLightBuffer, parallelLightBuffer, ambientLightBuffer, 0.5F, 0.5F);
 
                     using var context = Device.CreateComputeContext();
                     context.For(RenderImage.Width, RenderImage.Height, new MaskAntiAlias(RenderImage.Data, interpolate.Data, RenderImage.Width));
                 }
                 else
                 {
-                    Rasterize(Device, trackMatteMode, RenderImage, triangleBuffer, triangleIds, textures, trackMattes, renderImageOffsetX, renderImageOffsetY, scaleRateX, scaleRateY, hasLight, pointLightBuffer, spotLightBuffer, parallelLightBuffer, ambientLightBuffer, 0.0F, 0.0F);
+                    Rasterize(Device, trackMatteMode, RenderImage, triangleBuffer, triangleStates, textures, trackMattes, renderImageOffsetX, renderImageOffsetY, scaleRateX, scaleRateY, hasLight, pointLightBuffer, spotLightBuffer, parallelLightBuffer, ambientLightBuffer, 0.0F, 0.0F);
                 }
             }
 
@@ -627,7 +628,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             TrackMatteMode trackMatteMode,
             GPURasterizedMaskImage renderTarget,
             ReadOnlyBuffer<GPUMaskTriangle> triangleBuffer,
-            int[] triangleIds,
+            (int, int, int, int, int)[] triangleState,
             NGPUImage[] textures,
             GPURasterizedMaskImage?[] trackMattes,
             int renderImageOffsetX,
@@ -645,15 +646,19 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
         {
             using var emptyTrackMatte = device.AllocateReadWriteBuffer<float>([1.0F]);
 
-            foreach (var groupedTriangleIds in triangleIds.ZipWithIndex().GroupByPrev(t => t.Item1))
+            foreach (var groupedTriangleIds in triangleState.ZipWithIndex().GroupByPrev(t => t.Item1))
             {
                 using var context = device.CreateComputeContext();
-                foreach (var (_, i) in groupedTriangleIds)
+                foreach (var ((_, minX, maxX, minY, maxY), i) in groupedTriangleIds)
                 {
+                    if (minX - renderImageOffsetX >= renderTarget.Width || maxX - renderImageOffsetX <= 0 || minY - renderImageOffsetY >= renderTarget.Height || maxY - renderImageOffsetY <= 0)
+                    {
+                        continue;
+                    }
                     var texture = textures[i];
                     context.For(
-                        renderTarget.Width,
-                        renderTarget.Height,
+                        maxX - minX,
+                        maxY - minY,
                         new RasterizeMask3D(
                             renderTarget.Data,
                             renderTarget.Width,

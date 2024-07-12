@@ -43,15 +43,15 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
 
         public void Execute()
         {
-            var x = ThreadIds.X + renderImageOffsetX;
-            var y = ThreadIds.Y + renderImageOffsetY;
             var triangle = triangles[triangleIndex];
+            var x = ThreadIds.X + triangle.TrueMinX;
+            var y = ThreadIds.Y + triangle.TrueMinY;
             if (x < triangle.TrueMinX || x >= triangle.TrueMaxX || y < triangle.TrueMinY || y >= triangle.TrueMaxY)
             {
                 return;
             }
 
-            var p = ThreadIds.Y * renderImageWidth + ThreadIds.X;
+            var p = (ThreadIds.Y + triangle.TrueMinY - renderImageOffsetY) * renderImageWidth + ThreadIds.X + triangle.TrueMinX - renderImageOffsetX;
             var useLight = hasLight & triangle.IsAcceptLight & (trackMatteMode == 2 || trackMatteMode == 3);
 
             var eY = new Float4((triangle.EdgeX * ((y + offsetY) * scaleRateY - triangle.VVEY)).XYZ, 0.0F);
