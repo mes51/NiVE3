@@ -21,9 +21,13 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
         ReadOnlyBuffer<GPUMaskTriangle> triangles,
         int triangleIndex,
         Bool hasLight,
+        int pointLightCount,
         ReadOnlyBuffer<GPUPointLight> pointLights,
+        int spotLightCount,
         ReadOnlyBuffer<GPUSpotLight> spotLights,
+        int parallelLightCount,
         ReadOnlyBuffer<GPUParallelLight> parallelLights,
+        int ambientLightCount,
         ReadOnlyBuffer<GPUAmbientLight> ambientLights,
         ReadWriteBuffer<Float4> texture,
         int textureWidth,
@@ -87,13 +91,13 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
                     var specular = Float4.Zero;
                     var ambient = Float4.Zero;
 
-                    for (var i = 0; i < pointLights.Length; i++)
+                    for (var i = 0; i < pointLightCount; i++)
                     {
                         var l = pointLights[i];
                         var lightColor = l.Color;
                         var lightDiff = (position - l.Position).XYZ;
                         var light = Hlsl.Normalize(lightDiff);
-                        var falloff = CalcFalloff(lightDiff, l.FalloffType, l.FalloffStart, l.FalloffLength);
+                        var falloff = ShaderUtil.CalcFalloff(lightDiff, l.FalloffType, l.FalloffStart, l.FalloffLength);
 
                         var diffuseFactor = Hlsl.Dot(light, n);
                         var isBack = diffuseFactor < 0.0F;
@@ -113,7 +117,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
                         specular += Hlsl.Lerp(lightColor, color * lightColor, triangle.Metal) * Hlsl.Pow(specularFactor, ShininessStrength * triangle.SpecularShininess) * triangle.SpecularIntensity * falloff;
                     }
 
-                    for (var i = 0; i < spotLights.Length; i++)
+                    for (var i = 0; i < spotLightCount; i++)
                     {
                         var l = spotLights[i];
                         var lightColor = l.Color;
@@ -129,7 +133,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
                                 attenuation = Hlsl.Cos((1.0F - Hlsl.Min((Hlsl.Cos(spotCone) - l.OuterConeCos) * l.InvertInnerConeCos, 1.0F)) * PI * 0.5F);
                             }
 
-                            var falloff = CalcFalloff(lightDiff, l.FalloffType, l.FalloffStart, l.FalloffLength);
+                            var falloff = ShaderUtil.CalcFalloff(lightDiff, l.FalloffType, l.FalloffStart, l.FalloffLength);
                             var diffuseFactor = Hlsl.Dot(light, n);
                             var isBack = diffuseFactor < 0.0F;
                             if (isBack)
@@ -149,12 +153,12 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
                         }
                     }
 
-                    for (var i = 0; i < parallelLights.Length; i++)
+                    for (var i = 0; i < parallelLightCount; i++)
                     {
                         var l = parallelLights[i];
                         var lightColor = l.Color;
                         var lightDiff = (position - l.Position).XYZ;
-                        var falloff = CalcFalloff(lightDiff, l.FalloffType, l.FalloffStart, l.FalloffLength);
+                        var falloff = ShaderUtil.CalcFalloff(lightDiff, l.FalloffType, l.FalloffStart, l.FalloffLength);
 
                         var diffuseFactor = Hlsl.Dot(l.Direction, n);
                         var isBack = diffuseFactor < 0.0F;
@@ -174,7 +178,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
                         specular += Hlsl.Lerp(lightColor, color * lightColor, triangle.Metal) * Hlsl.Pow(specularFactor, ShininessStrength * triangle.SpecularShininess) * triangle.SpecularIntensity * falloff;
                     }
 
-                    for (var i = 0; i < ambientLights.Length; i++)
+                    for (var i = 0; i < ambientLightCount; i++)
                     {
                         ambient += ambientLights[i].Color * color;
                     }
@@ -318,26 +322,6 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
                 var t = Hlsl.Lerp(Hlsl.Lerp(c1 * c1.W, c3 * c3.W, qq), Hlsl.Lerp(c2 * c2.W, c4 * c4.W, qq), pp) / ta;
                 t.W = ta;
                 return t;
-            }
-        }
-
-        static float CalcFalloff(Float3 diff, int type, float falloffStart, float falloffLength)
-        {
-            var length = Hlsl.Length(diff);
-            if (length <= falloffStart)
-            {
-                return 1.0F;
-            }
-            length -= falloffStart;
-
-            switch (type)
-            {
-                case 1:
-                    return Hlsl.Max((falloffLength - length) / falloffLength, 0.0F);
-                case 2:
-                    return Hlsl.Min(1.0F / Hlsl.Pow(1.0F + length, 2.0F), 1.0F);
-                default:
-                    return 1.0F;
             }
         }
     }

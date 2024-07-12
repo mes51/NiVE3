@@ -33,5 +33,25 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader
                 0.0F
             );
         }
+
+        public static float CalcFalloff(Float3 diff, int type, float falloffStart, float falloffLength)
+        {
+            var length = Hlsl.Length(diff);
+            if (length <= falloffStart)
+            {
+                return 1.0F;
+            }
+            length -= falloffStart;
+
+            switch (type)
+            {
+                case 1:
+                    return Hlsl.Max((falloffLength - length) / falloffLength, 0.0F);
+                case 2:
+                    return Hlsl.Min(1.0F / Hlsl.Pow(1.0F + length, 2.0F), 1.0F);
+                default:
+                    return 1.0F;
+            }
+        }
     }
 }

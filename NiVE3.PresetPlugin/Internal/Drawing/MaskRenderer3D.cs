@@ -601,15 +601,84 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                     using var interpolate = new GPURasterizedMaskImage(RenderImage.Width, RenderImage.Height, Device);
                     RenderImage.CopyTo(interpolate);
 
-                    Rasterize(Device, trackMatteMode, RenderImage, triangleBuffer, triangleStates, textures, trackMattes, renderImageOffsetX, renderImageOffsetY, scaleRateX, scaleRateY, hasLight, pointLightBuffer, spotLightBuffer, parallelLightBuffer, ambientLightBuffer, 0.0F, 0.0F);
-                    Rasterize(Device, trackMatteMode, interpolate, triangleBuffer, triangleStates, textures, trackMattes, renderImageOffsetX, renderImageOffsetY, scaleRateX, scaleRateY, hasLight, pointLightBuffer, spotLightBuffer, parallelLightBuffer, ambientLightBuffer, 0.5F, 0.5F);
+                    Rasterize(
+                        Device,
+                        trackMatteMode,
+                        RenderImage,
+                        triangleBuffer,
+                        triangleStates,
+                        textures,
+                        trackMattes,
+                        renderImageOffsetX,
+                        renderImageOffsetY,
+                        scaleRateX,
+                        scaleRateY,
+                        hasLight,
+                        PointLights.Count,
+                        pointLightBuffer,
+                        SpotLights.Count,
+                        spotLightBuffer,
+                        ParallelLights.Count,
+                        parallelLightBuffer,
+                        AmbientLights.Count,
+                        ambientLightBuffer,
+                        0.0F,
+                        0.0F
+                    );
+                    Rasterize(
+                        Device,
+                        trackMatteMode,
+                        RenderImage,
+                        triangleBuffer,
+                        triangleStates,
+                        textures,
+                        trackMattes,
+                        renderImageOffsetX,
+                        renderImageOffsetY,
+                        scaleRateX,
+                        scaleRateY,
+                        hasLight,
+                        PointLights.Count,
+                        pointLightBuffer,
+                        SpotLights.Count,
+                        spotLightBuffer,
+                        ParallelLights.Count,
+                        parallelLightBuffer,
+                        AmbientLights.Count,
+                        ambientLightBuffer,
+                        0.5F,
+                        0.5F
+                    );
 
                     using var context = Device.CreateComputeContext();
                     context.For(RenderImage.Width, RenderImage.Height, new MaskAntiAlias(RenderImage.Data, interpolate.Data, RenderImage.Width));
                 }
                 else
                 {
-                    Rasterize(Device, trackMatteMode, RenderImage, triangleBuffer, triangleStates, textures, trackMattes, renderImageOffsetX, renderImageOffsetY, scaleRateX, scaleRateY, hasLight, pointLightBuffer, spotLightBuffer, parallelLightBuffer, ambientLightBuffer, 0.0F, 0.0F);
+                    Rasterize(
+                        Device,
+                        trackMatteMode,
+                        RenderImage,
+                        triangleBuffer,
+                        triangleStates,
+                        textures,
+                        trackMattes,
+                        renderImageOffsetX,
+                        renderImageOffsetY,
+                        scaleRateX,
+                        scaleRateY,
+                        hasLight,
+                        PointLights.Count,
+                        pointLightBuffer,
+                        SpotLights.Count,
+                        spotLightBuffer,
+                        ParallelLights.Count,
+                        parallelLightBuffer,
+                        AmbientLights.Count,
+                        ambientLightBuffer,
+                        0.0F,
+                        0.0F
+                    );
                 }
             }
 
@@ -636,9 +705,13 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             float scaleRateX,
             float scaleRateY,
             bool hasLight,
+            int pointLightCount,
             ReadOnlyBuffer<GPUPointLight> pointLightBuffer,
+            int spotLightCount,
             ReadOnlyBuffer<GPUSpotLight> spotLightBuffer,
+            int parallelLightCount,
             ReadOnlyBuffer<GPUParallelLight> parallelLightBuffer,
+            int ambientLightCount,
             ReadOnlyBuffer<GPUAmbientLight> ambientLightBuffer,
             float offsetX,
             float offsetY
@@ -670,9 +743,13 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                             triangleBuffer,
                             i,
                             hasLight,
+                            pointLightCount,
                             pointLightBuffer,
+                            spotLightCount,
                             spotLightBuffer,
+                            parallelLightCount,
                             parallelLightBuffer,
+                            ambientLightCount,
                             ambientLightBuffer,
                             texture.Data,
                             texture.Width,
