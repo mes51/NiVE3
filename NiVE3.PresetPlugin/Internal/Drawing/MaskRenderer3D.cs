@@ -529,20 +529,20 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 var vvEX = Vector128.Create((float)dvv2.GetElement(0), (float)dvv3.GetElement(0), (float)dvv1.GetElement(0), 0.0F);
                 var vvEY = Vector128.Create((float)dvv2.GetElement(1), (float)dvv3.GetElement(1), (float)dvv1.GetElement(1), 0.0F);
 
-                NGPUImage gpuImage;
-                if (triangle.Texture is NManagedImage managedImage)
+                NGPUImage gpuTexture;
+                if (triangle.Texture is NManagedImage managedTexture)
                 {
-                    if (!convertedTexture.ContainsKey(managedImage))
+                    if (!convertedTexture.ContainsKey(managedTexture))
                     {
-                        convertedTexture.Add(managedImage, managedImage.CopyToGpu(Device));
+                        convertedTexture.Add(managedTexture, managedTexture.CopyToGpu(Device));
                     }
-                    gpuImage = convertedTexture[triangle.Texture];
+                    gpuTexture = convertedTexture[managedTexture];
                 }
                 else
                 {
-                    gpuImage = (NGPUImage)triangle.Texture;
+                    gpuTexture = (NGPUImage)triangle.Texture;
                 }
-                textures[i] = gpuImage;
+                textures[i] = gpuTexture;
 
                 GPURasterizedMaskImage? gpuTrackMatte;
                 if (triangle.TrackMatte is ManagedRasterizedMaskImage managedRasterizedMask)
@@ -717,7 +717,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             float offsetY
         )
         {
-            using var emptyTrackMatte = device.AllocateReadWriteBuffer<float>([1.0F]);
+            using var emptyTrackMatte = device.AllocateReadWriteBuffer(EmptyTrackMatte);
 
             foreach (var groupedTriangleIds in triangleState.ZipWithIndex().GroupByPrev(t => t.Item1))
             {

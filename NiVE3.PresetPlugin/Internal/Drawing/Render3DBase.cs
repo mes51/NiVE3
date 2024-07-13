@@ -19,6 +19,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 {
     abstract class Renderer3DBase
     {
+        protected const int DepthRoundingDigit = 5; // TODO: 要調整
+
         protected const float ShininessStrength = 120.0F;
 
         protected static readonly float[] EmptyTrackMatte = [1.0F];

@@ -13,19 +13,20 @@ using NiVE3.Plugin.Interfaces;
 using NiVE3.Shared.Extension;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
-using NiVE3.Plugin.Interfaces.RendererParams;
 using System.Buffers;
 using NiVE3.Image.Drawing;
+using ComputeSharp;
+using NiVE3.PresetPlugin.Internal.Extension;
+using NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D;
+using NiVE3.PresetPlugin.Internal.Drawing.ComputeShader;
 
 namespace NiVE3.PresetPlugin.Internal.Drawing
 {
-    class Renderer3D : Renderer3DBase
+    class CPURenderer3D : Renderer3DBase
     {
-        const int DepthRoundingDigit = 5; // TODO: 要調整
-
         NManagedImage RenderImage { get; }
 
-        public Renderer3D(NManagedImage renderImage, int width, int height, List<PointLight> pointLights, List<SpotLight> spotLights, List<ParallelLight> parallelLights, List<AmbientLight> ambientLights)
+        public CPURenderer3D(NManagedImage renderImage, int width, int height, List<PointLight> pointLights, List<SpotLight> spotLights, List<ParallelLight> parallelLights, List<AmbientLight> ambientLights)
             : base(width, height, pointLights, spotLights, parallelLights, ambientLights)
         {
             RenderImage = renderImage;
@@ -1028,5 +1029,476 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             float SpecularShininess,
             float Metal
         );
+    }
+
+    class GPURenderer3D : Renderer3DBase
+    {
+        NGPUImage RenderImage { get; }
+
+        GraphicsDevice Device { get; }
+
+        public GPURenderer3D(NGPUImage renderImage, GraphicsDevice device, int width, int height, List<PointLight> pointLights, List<SpotLight> spotLights, List<ParallelLight> parallelLights, List<AmbientLight> ambientLights)
+            : base(width, height, pointLights, spotLights, parallelLights, ambientLights)
+        {
+            RenderImage = renderImage;
+            Device = device;
+        }
+
+        public void Render(bool enableAntiAlias, bool enableShadowAntiAlias)
+        {
+            var renderImageWidth = RenderImage.Width;
+            var renderImageHeight = RenderImage.Height;
+            var triangles = TriangleDivider.ClipAndDivide(Triangles).ToArray();
+            if (triangles.Length < 1)
+            {
+                return;
+            }
+
+            var scaleRateX = Width / (float)renderImageWidth;
+            var scaleRateY = Height / (float)renderImageHeight;
+            var minZ = triangles.Select(t => Math.Min(Math.Min(t.V1.Vertex.GetElement(2), t.V2.Vertex.GetElement(2)), t.V3.Vertex.GetElement(2))).Min();
+            var maxZ = triangles.Select(t => Math.Max(Math.Max(t.V1.Vertex.GetElement(2), t.V2.Vertex.GetElement(2)), t.V3.Vertex.GetElement(2))).Max();
+            var projectionMatrix = Matrix4x4d.CreatePerspectiveFieldOfView(FieldOfView, 1.0, minZ, maxZ);
+
+            var offsetX = (Size - Width) * 0.5 / Size;
+            var offsetY = (Size - Height) * 0.5 / Size;
+            Matrix4x4d.Invert(ViewMatrix, out var invertedViewMatrix);
+            Matrix4x4d.Invert(projectionMatrix, out var invertedProjectionMatrix);
+            var invertedProjectionViewMatrix = (Matrix4x4)(invertedProjectionMatrix * Matrix4x4d.CreateTranslate(-offsetX, -offsetY, 0.0) * invertedViewMatrix);
+            var convertedTexture = new Dictionary<NImage, NGPUImage>();
+            var convertedTrackMatte = new Dictionary<RasterizedMaskImage, GPURasterizedMaskImage>();
+            var textures = new NGPUImage[triangles.Length];
+            var trackMattes = new GPURasterizedMaskImage?[triangles.Length];
+            var hasLight = PointLights.Count > 0 || SpotLights.Count > 0 || ParallelLights.Count > 0 || AmbientLights.Count > 0;
+
+            var shadowSize = Size == Width ? (int)(Size / scaleRateX) : (int)(Size / scaleRateY);
+            //var pointLightShadows = PointLights.Select(l => l.IsEnableShadow ? RenderPointLightShadow(l, shadowSize, (float)offsetX, (float)offsetY) : null).ToArray();
+            //var spotLightShadows = SpotLights.Select(l => l.IsEnableShadow && LightTriangles[l].Count > 0 ? RenderSpotLightShadow(l, shadowSize, (float)offsetX, (float)offsetY) : null).ToArray();
+            //var parallelLightShadows = ParallelLights.Select(l => l.IsEnableShadow && LightTriangles[l].Count > 0 ? RenderParallelLightShadow(l, shadowSize, (float)offsetX, (float)offsetY) : null).ToArray();
+            //var hasShadow = pointLightShadows.Any(ss => ss != null && ss.Any(s => s != null)) || spotLightShadows.Any(s => s != null) || parallelLightShadows.Any(s => s != null);
+
+            var renderImageOffsetX = (int)(OffsetX / scaleRateX);
+            var renderImageOffsetY = (int)(OffsetY / scaleRateY);
+            var preProcessedTriangles = new GPUTriangle[triangles.Length];
+            var triangleStates = new (int, int, int, int, int, bool, int)[triangles.Length];
+            for (var i = 0; i < triangles.Length; i++)
+            {
+                var triangle = triangles[i];
+                var uv1 = triangle.V1.Transform(projectionMatrix);
+                var uv2 = triangle.V2.Transform(projectionMatrix);
+                var uv3 = triangle.V3.Transform(projectionMatrix);
+                var textureWidth = triangle.Texture.Width;
+                var textureHeight = triangle.Texture.Height;
+
+                var w1 = 1.0 / Math.Abs(uv1.Vertex.GetElement(3));
+                var w2 = 1.0 / Math.Abs(uv2.Vertex.GetElement(3));
+                var w3 = 1.0 / Math.Abs(uv3.Vertex.GetElement(3));
+                uv1 *= w1;
+                uv2 *= w2;
+                uv3 *= w3;
+                var dvv1 = (uv1.Vertex + Vector256.Create(1.0, 1.0, 0.0, 0.0)) * Vector256.Create(Size * 0.5, Size * 0.5, 1.0, 1.0);
+                var dvv2 = (uv2.Vertex + Vector256.Create(1.0, 1.0, 0.0, 0.0)) * Vector256.Create(Size * 0.5, Size * 0.5, 1.0, 1.0);
+                var dvv3 = (uv3.Vertex + Vector256.Create(1.0, 1.0, 0.0, 0.0)) * Vector256.Create(Size * 0.5, Size * 0.5, 1.0, 1.0);
+                var vvX = Vector128.Create((float)triangle.V1.Vertex.GetElement(0), (float)triangle.V2.Vertex.GetElement(0), (float)triangle.V3.Vertex.GetElement(0), 0.0F);
+                var vvY = Vector128.Create((float)triangle.V1.Vertex.GetElement(1), (float)triangle.V2.Vertex.GetElement(1), (float)triangle.V3.Vertex.GetElement(1), 0.0F);
+                var vvZ = Vector128.Create((float)triangle.V1.Vertex.GetElement(2), (float)triangle.V2.Vertex.GetElement(2), (float)triangle.V3.Vertex.GetElement(2), 0.0F);
+                var svvX = Vector128.Create((float)uv1.Vertex.GetElement(0), (float)uv2.Vertex.GetElement(0), (float)uv3.Vertex.GetElement(0), 0.0F);
+                var svvY = Vector128.Create((float)uv1.Vertex.GetElement(1), (float)uv2.Vertex.GetElement(1), (float)uv3.Vertex.GetElement(1), 0.0F);
+                var svvZ = Vector128.Create((float)uv1.Vertex.GetElement(2), (float)uv2.Vertex.GetElement(2), (float)uv3.Vertex.GetElement(2), 0.0F);
+                var minX = (int)(MaxClampedSize((int)(Math.Min(Math.Min(dvv1.GetElement(0), dvv2.GetElement(0)), dvv3.GetElement(0))), OffsetX) / scaleRateX);
+                var maxX = (int)(MinClampedSize((int)Math.Ceiling(Math.Max(Math.Max(dvv1.GetElement(0), dvv2.GetElement(0)), dvv3.GetElement(0))), Width + OffsetX) / scaleRateX);
+                var minY = (int)(MaxClampedSize((int)(Math.Min(Math.Min(dvv1.GetElement(1), dvv2.GetElement(1)), dvv3.GetElement(1))), OffsetY) / scaleRateY);
+                var maxY = (int)(MinClampedSize((int)Math.Ceiling(Math.Max(Math.Max(dvv1.GetElement(1), dvv2.GetElement(1)), dvv3.GetElement(1))), Height + OffsetY) / scaleRateY);
+                var u = Vector128.Create((float)uv1.U, (float)uv2.U, (float)uv3.U, 0.0F);
+                var v = Vector128.Create((float)uv1.V, (float)uv2.V, (float)uv3.V, 0.0F);
+                var w = Vector128.Create((float)w1, (float)w2, (float)w3, 0.0F);
+
+                var denom = Vector128.Create((float)(1.0 / (((dvv2.GetElement(0) - dvv1.GetElement(0)) * (dvv3.GetElement(1) - dvv1.GetElement(1))) - ((dvv2.GetElement(1) - dvv1.GetElement(1)) * (dvv3.GetElement(0) - dvv1.GetElement(0))))));
+                var edgeX = Vector128.Create((float)dvv3.GetElement(0), (float)dvv1.GetElement(0), (float)dvv2.GetElement(0), 0.0F) - Vector128.Create((float)dvv2.GetElement(0), (float)dvv3.GetElement(0), (float)dvv1.GetElement(0), 0.0F);
+                var edgeY = Vector128.Create((float)dvv3.GetElement(1), (float)dvv1.GetElement(1), (float)dvv2.GetElement(1), 0.0F) - Vector128.Create((float)dvv2.GetElement(1), (float)dvv3.GetElement(1), (float)dvv1.GetElement(1), 0.0F);
+                var isFrontFace = Vector256.Dot(triangle.Normal, (triangle.V1.Vertex + triangle.V2.Vertex + triangle.V3.Vertex) / 3.0) <= 0.0;
+                var vvEX = Vector128.Create((float)dvv2.GetElement(0), (float)dvv3.GetElement(0), (float)dvv1.GetElement(0), 0.0F);
+                var vvEY = Vector128.Create((float)dvv2.GetElement(1), (float)dvv3.GetElement(1), (float)dvv1.GetElement(1), 0.0F);
+
+
+                NGPUImage gpuTexture;
+                if (triangle.Texture is NManagedImage managedTexture)
+                {
+                    if (!convertedTexture.ContainsKey(managedTexture))
+                    {
+                        convertedTexture.Add(managedTexture, managedTexture.CopyToGpu(Device));
+                    }
+                    gpuTexture = convertedTexture[triangle.Texture];
+                }
+                else
+                {
+                    gpuTexture = (NGPUImage)triangle.Texture;
+                }
+                textures[i] = gpuTexture;
+
+                GPURasterizedMaskImage? gpuTrackMatte;
+                if (triangle.TrackMatte is ManagedRasterizedMaskImage managedTrackMatte)
+                {
+                    if (!convertedTrackMatte.ContainsKey(managedTrackMatte))
+                    {
+                        convertedTrackMatte.Add(managedTrackMatte, managedTrackMatte.CopyToGpu(Device));
+                    }
+                    gpuTrackMatte = convertedTrackMatte[managedTrackMatte];
+                }
+                else
+                {
+                    gpuTrackMatte = (GPURasterizedMaskImage?)triangle.TrackMatte;
+                }
+                trackMattes[i] = gpuTrackMatte;
+
+                preProcessedTriangles[i] = new GPUTriangle(
+                    triangle.Id,
+                    minX,
+                    maxX,
+                    minY,
+                    maxY,
+                    edgeX.AsFloat4(),
+                    edgeY.AsFloat4(),
+                    vvEX.AsFloat4(),
+                    vvEY.AsFloat4(),
+                    u.AsFloat4(),
+                    v.AsFloat4(),
+                    w.AsFloat4(),
+                    vvX.AsFloat4(),
+                    vvY.AsFloat4(),
+                    vvZ.AsFloat4(),
+                    svvX.AsFloat4(),
+                    svvY.AsFloat4(),
+                    svvZ.AsFloat4(),
+                    denom.AsFloat4(),
+                    isFrontFace,
+                    triangle.FloatNormal,
+                    (int)triangle.InterpolationQuality,
+                    triangle.Opacity,
+                    triangle.LightTransmission,
+                    (int)triangle.BlendMode,
+                    triangle.IsAcceptShadow,
+                    triangle.IsAcceptLight,
+                    triangle.Ambient,
+                    triangle.Diffuse,
+                    triangle.SpecularIntensity,
+                    triangle.SpecularShininess,
+                    triangle.Metal
+                );
+                var useLight = hasLight && (triangle.IsAcceptLight || triangle.IsAcceptShadow);
+                triangleStates[i] = (triangle.Id, preProcessedTriangles[i].TrueMinX, preProcessedTriangles[i].TrueMaxX, preProcessedTriangles[i].TrueMinY, preProcessedTriangles[i].TrueMaxY, useLight, preProcessedTriangles[i].BlendMode);
+            }
+
+            using (var triangleBuffer = Device.AllocateReadOnlyBuffer(preProcessedTriangles))
+            using (var pointLightBuffer = PointLights.Count > 0 ? Device.AllocateReadOnlyBuffer([.. PointLights.Select(p => p.ToGpu())]) : Device.AllocateReadOnlyBuffer<GPUPointLight>(1))
+            using (var spotLightBuffer = SpotLights.Count > 0 ? Device.AllocateReadOnlyBuffer([.. SpotLights.Select(s => s.ToGpu())]) : Device.AllocateReadOnlyBuffer<GPUSpotLight>(1))
+            using (var parallelLightBuffer = ParallelLights.Count > 0 ? Device.AllocateReadOnlyBuffer([.. ParallelLights.Select(p => p.ToGpu())]) : Device.AllocateReadOnlyBuffer<GPUParallelLight>(1))
+            using (var ambientLightBuffer = AmbientLights.Count > 0 ? Device.AllocateReadOnlyBuffer([.. AmbientLights.Select(a => a.ToGpu())]) : Device.AllocateReadOnlyBuffer<GPUAmbientLight>(1))
+            {
+                if (enableAntiAlias)
+                {
+                    using var interpolate = new NGPUImage(RenderImage.Width, RenderImage.Height, Device);
+                    RenderImage.CopyTo(interpolate);
+
+                    Rasterize(
+                        Device,
+                        RenderImage,
+                        triangleBuffer,
+                        triangleStates,
+                        textures,
+                        trackMattes,
+                        renderImageOffsetX,
+                        renderImageOffsetY,
+                        scaleRateX,
+                        scaleRateY,
+                        invertedProjectionViewMatrix,
+                        PointLights.Count,
+                        pointLightBuffer,
+                        SpotLights.Count,
+                        spotLightBuffer,
+                        ParallelLights.Count,
+                        parallelLightBuffer,
+                        AmbientLights.Count,
+                        ambientLightBuffer,
+                        shadowSize,
+                        enableShadowAntiAlias,
+                        0.0F,
+                        0.0F
+                    );
+                    Rasterize(
+                        Device,
+                        interpolate,
+                        triangleBuffer,
+                        triangleStates,
+                        textures,
+                        trackMattes,
+                        renderImageOffsetX,
+                        renderImageOffsetY,
+                        scaleRateX,
+                        scaleRateY,
+                        invertedProjectionViewMatrix,
+                        PointLights.Count,
+                        pointLightBuffer,
+                        SpotLights.Count,
+                        spotLightBuffer,
+                        ParallelLights.Count,
+                        parallelLightBuffer,
+                        AmbientLights.Count,
+                        ambientLightBuffer,
+                        shadowSize,
+                        enableShadowAntiAlias,
+                        0.5F,
+                        0.5F
+                    );
+
+                    using var context = Device.CreateComputeContext();
+                    context.For(RenderImage.Width, RenderImage.Height, new AntiAlias(RenderImage.Data, interpolate.Data, RenderImage.Width));
+                }
+                else
+                {
+                    Rasterize(
+                        Device,
+                        RenderImage,
+                        triangleBuffer,
+                        triangleStates,
+                        textures,
+                        trackMattes,
+                        renderImageOffsetX,
+                        renderImageOffsetY,
+                        scaleRateX,
+                        scaleRateY,
+                        invertedProjectionViewMatrix,
+                        PointLights.Count,
+                        pointLightBuffer,
+                        SpotLights.Count,
+                        spotLightBuffer,
+                        ParallelLights.Count,
+                        parallelLightBuffer,
+                        AmbientLights.Count,
+                        ambientLightBuffer,
+                        shadowSize,
+                        enableShadowAntiAlias,
+                        0.0F,
+                        0.0F
+                    );
+                }
+            }
+
+            foreach (var (_, i) in convertedTexture)
+            {
+                i.Dispose();
+            }
+            foreach (var (_, i) in convertedTrackMatte)
+            {
+                i?.Dispose();
+            }
+        }
+
+        static void Rasterize(
+            GraphicsDevice device,
+            NGPUImage renderTarget,
+            ReadOnlyBuffer<GPUTriangle> triangleBuffer,
+            (int, int, int, int, int, bool, int)[] triangleState,
+            NGPUImage[] textures,
+            GPURasterizedMaskImage?[] trackMattes,
+            int renderImageOffsetX,
+            int renderImageOffsetY,
+            float scaleRateX,
+            float scaleRateY,
+            in Float4x4 invertedProjectionViewMatrix,
+            int pointLightCount,
+            ReadOnlyBuffer<GPUPointLight> pointLightBuffer,
+            int spotLightCount,
+            ReadOnlyBuffer<GPUSpotLight> spotLightBuffer,
+            int parallelLightCount,
+            ReadOnlyBuffer<GPUParallelLight> parallelLightBuffer,
+            int ambientLightCount,
+            ReadOnlyBuffer<GPUAmbientLight> ambientLightBuffer,
+            int shadowSize,
+            bool enableShadowAntiAlias,
+            float offsetX,
+            float offsetY
+        )
+        {
+            using var emptyTrackMatte = device.AllocateReadWriteBuffer(EmptyTrackMatte);
+            using var rasterizedData = device.AllocateReadWriteBuffer<GPURasterizedPixel>(renderTarget.DataLength);
+            using var context = device.CreateComputeContext();
+            using var emptyShadowMap = device.AllocateReadWriteBuffer([0]);
+            using var emptyShadowBuffer = device.AllocateReadWriteBuffer([new GPUShadowPixel()]);
+
+            foreach (var groupedTriangleIds in triangleState.ZipWithIndex().GroupByPrev(t => t.Item1).Select(g => g.ToArray()))
+            {
+                var useLight = false;
+                var blendMode = 0;
+                var totalMinX = int.MaxValue;
+                var totalMaxX = -1;
+                var totalMinY = int.MaxValue;
+                var totalMaxY = -1;
+                foreach (var ((_, minX, maxX, minY, maxY, l, b), _) in groupedTriangleIds)
+                {
+                    useLight = l;
+                    blendMode = b;
+                    totalMinX = Math.Min(totalMinX, minX - renderImageOffsetX);
+                    totalMaxX = Math.Max(totalMaxX, maxX - renderImageOffsetX);
+                    totalMinY = Math.Min(totalMinY, minY - renderImageOffsetY);
+                    totalMaxY = Math.Max(totalMaxY, maxY - renderImageOffsetY);
+                }
+
+                if (totalMaxX - totalMinX < 1 || totalMaxY - totalMinY < 1)
+                {
+                    continue;
+                }
+
+                context.For(totalMaxX - totalMinX, totalMaxY - totalMinY, new ClearRasterizedImage(rasterizedData, renderTarget.Width, totalMinX, totalMinY));
+                context.Barrier(rasterizedData);
+
+                foreach (var ((_, minX, maxX, minY, maxY, l, b), i) in groupedTriangleIds)
+                {
+                    if (minX - renderImageOffsetX >= renderTarget.Width || maxX - renderImageOffsetX <= 0 || minY - renderImageOffsetY >= renderTarget.Height || maxY - renderImageOffsetY <= 0)
+                    {
+                        continue;
+                    }
+                    var texture = textures[i];
+                    context.For(
+                        maxX - minX,
+                        maxY - minY,
+                        new Rasterize3D(
+                            rasterizedData,
+                            renderTarget.Width,
+                            renderImageOffsetX,
+                            renderImageOffsetY,
+                            scaleRateX,
+                            scaleRateY,
+                            triangleBuffer,
+                            i,
+                            texture.Data,
+                            texture.Width,
+                            texture.Height,
+                            trackMattes[i]?.Data ?? emptyTrackMatte,
+                            offsetX,
+                            offsetY
+                        )
+                    );
+                }
+                context.Barrier(rasterizedData);
+
+                if (useLight)
+                {
+                    for (var i = 0; i < pointLightCount; i++)
+                    {
+                        context.For(
+                            totalMaxX - totalMinX,
+                            totalMaxY - totalMinY,
+                            new LightingByPointLight(
+                                rasterizedData,
+                                triangleBuffer,
+                                groupedTriangleIds[0].Item2,
+                                pointLightBuffer,
+                                i,
+                                invertedProjectionViewMatrix,
+                                shadowSize,
+                                false,
+                                emptyShadowMap,
+                                emptyShadowBuffer,
+                                new Float4x4(),
+                                emptyShadowMap,
+                                emptyShadowBuffer,
+                                new Float4x4(),
+                                emptyShadowMap,
+                                emptyShadowBuffer,
+                                new Float4x4(),
+                                emptyShadowMap,
+                                emptyShadowBuffer,
+                                new Float4x4(),
+                                emptyShadowMap,
+                                emptyShadowBuffer,
+                                new Float4x4(),
+                                emptyShadowMap,
+                                emptyShadowBuffer,
+                                new Float4x4(),
+                                enableShadowAntiAlias,
+                                renderTarget.Width,
+                                totalMinX,
+                                totalMinY
+                            )
+                        );
+                    }
+                    context.Barrier(rasterizedData);
+
+                    for (var i = 0; i < spotLightCount; i++)
+                    {
+                        context.For(
+                            totalMaxX - totalMinX,
+                            totalMaxY - totalMinY,
+                            new LightingBySpotLight(
+                                rasterizedData,
+                                triangleBuffer,
+                                groupedTriangleIds[0].Item2,
+                                spotLightBuffer,
+                                i,
+                                invertedProjectionViewMatrix,
+                                shadowSize,
+                                false,
+                                emptyShadowMap,
+                                emptyShadowBuffer,
+                                enableShadowAntiAlias,
+                                renderTarget.Width,
+                                totalMinX,
+                                totalMinY
+                            )
+                        );
+                    }
+                    context.Barrier(rasterizedData);
+
+                    for (var i = 0; i < parallelLightCount; i++)
+                    {
+                        context.For(
+                            totalMaxX - totalMinX,
+                            totalMaxY - totalMinY,
+                            new LightingByParallelLight(
+                                rasterizedData,
+                                triangleBuffer,
+                                groupedTriangleIds[0].Item2,
+                                parallelLightBuffer,
+                                i,
+                                invertedProjectionViewMatrix,
+                                shadowSize,
+                                false,
+                                emptyShadowMap,
+                                emptyShadowBuffer,
+                                enableShadowAntiAlias,
+                                renderTarget.Width,
+                                totalMinX,
+                                totalMinY
+                            )
+                        );
+                    }
+                    context.Barrier(rasterizedData);
+
+                    context.For(totalMaxX - totalMinX, totalMaxY - totalMinY, new LightingByAmbientLight(rasterizedData, triangleBuffer, groupedTriangleIds[0].Item2, ambientLightBuffer, ambientLightCount, renderTarget.Width, totalMinX, totalMinY));
+                    context.Barrier(rasterizedData);
+                }
+
+                context.For(totalMaxX - totalMinX, totalMaxY - totalMinY, new BlendRasterized(renderTarget.Data, rasterizedData, useLight, renderTarget.Width, totalMinX, totalMinY, blendMode));
+                context.Barrier(renderTarget.Data);
+            }
+        }
+
+        /*
+        object?[]? RenderPointLightShadow(PointLight pointLight, int shadowSize, float offsetX, float offsetY)
+        {
+            return null;
+        }
+
+        object? RenderSpotLightShadow(SpotLight spotLight, int shadowSize, float offsetX, float offsetY)
+        {
+            return null;
+        }
+
+        object? RenderParallelLightShadow(ParallelLight parallelLight, int shadowSize, float offsetX, float offsetY)
+        {
+            return null;
+        }
+        */
     }
 }
