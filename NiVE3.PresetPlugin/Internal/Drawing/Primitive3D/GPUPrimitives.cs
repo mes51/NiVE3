@@ -146,6 +146,53 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
         public readonly float Metal = Metal;
     }
 
+    readonly record struct GPUShadowTriangle(
+        int Id,
+        int MinX,
+        int MaxX,
+        int MinY,
+        int MaxY,
+        Float4 EdgeX,
+        Float4 EdgeY,
+        Float4 VVEX,
+        Float4 VVEY,
+        Float4 U,
+        Float4 V,
+        Float4 W,
+        Float4 VVX,
+        Float4 VVY,
+        Float4 VVZ,
+        Float4 Denominator,
+        int InterpolationQuality,
+        float Opacity,
+        float LightTransmission
+    )
+    {
+        public readonly int Id = Id;
+        public readonly int MinX = MinX;
+        public readonly int MaxX = MaxX;
+        public readonly int MinY = MinY;
+        public readonly int MaxY = MaxY;
+        public readonly int TrueMinX = Math.Min(MinX, MaxX);
+        public readonly int TrueMaxX = Math.Max(MinX, MaxX);
+        public readonly int TrueMinY = Math.Min(MinY, MaxY);
+        public readonly int TrueMaxY = Math.Max(MinY, MaxY);
+        public readonly Float4 EdgeX = EdgeX;
+        public readonly Float4 EdgeY = EdgeY;
+        public readonly Float4 VVEX = VVEX;
+        public readonly Float4 VVEY = VVEY;
+        public readonly Float4 U = U;
+        public readonly Float4 V = V;
+        public readonly Float4 W = W;
+        public readonly Float4 VVX = VVX;
+        public readonly Float4 VVY = VVY;
+        public readonly Float4 VVZ = VVZ;
+        public readonly Float4 Denominator = Denominator;
+        public readonly int InterpolationQuality = InterpolationQuality;
+        public readonly float Opacity = Opacity;
+        public readonly float LightTransmission = LightTransmission;
+    }
+
     readonly record struct GPUPointLight(
         Float4 Position,
         Float4 Color,

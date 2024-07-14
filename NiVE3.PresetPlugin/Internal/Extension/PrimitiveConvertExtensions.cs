@@ -44,12 +44,14 @@ namespace NiVE3.PresetPlugin.Internal.Extension
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Float4x4 ToFloat4x4(this in Matrix4x4 matrix)
         {
-            return new Float4x4(
-                matrix.M11, matrix.M21, matrix.M31, matrix.M41,
-                matrix.M12, matrix.M22, matrix.M32, matrix.M42,
-                matrix.M13, matrix.M23, matrix.M33, matrix.M43,
-                matrix.M14, matrix.M24, matrix.M34, matrix.M44
-            );
+            //return new Float4x4(
+            //    matrix.M11, matrix.M21, matrix.M31, matrix.M41,
+            //    matrix.M12, matrix.M22, matrix.M32, matrix.M42,
+            //    matrix.M13, matrix.M23, matrix.M33, matrix.M43,
+            //    matrix.M14, matrix.M24, matrix.M34, matrix.M44
+            //);
+
+            return (Float4x4)matrix;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

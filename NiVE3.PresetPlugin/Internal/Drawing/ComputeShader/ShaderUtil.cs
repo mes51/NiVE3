@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ComputeSharp;
+using NiVE3.PresetPlugin.Internal.Drawing.Primitive3D;
 
 namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader
 {
@@ -27,10 +28,10 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader
         public static Float4 CalcBarycentricCoord(Float4 x, Float4 y, Float4 z, Float4 e)
         {
             return new Float4(
-                Sum(x * e),
-                Sum(y * e),
-                Sum(z * e),
-                0.0F
+                Hlsl.Dot(x.XYZ, e.XYZ),
+                Hlsl.Dot(y.XYZ, e.XYZ),
+                Hlsl.Dot(z.XYZ, e.XYZ),
+                1.0F
             );
         }
 
@@ -52,6 +53,36 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader
                 default:
                     return 1.0F;
             }
+        }
+
+        public static float DepthRound(float value)
+        {
+            const float DepthRoundingDigit = 10000.0F; // TODO: 要調整
+            return Hlsl.Round(value * DepthRoundingDigit) / DepthRoundingDigit;
+        }
+
+        public static Float4 CalcE(int x, int y, GPUTriangle triangle, float scaleRateX, float scaleRateY, float offsetX, float offsetY)
+        {
+            const float Epsilon = 1E-7F;
+
+            x += triangle.TrueMinX;
+            y += triangle.TrueMinY;
+            if (x < triangle.TrueMinX || x >= triangle.TrueMaxX || y < triangle.TrueMinY || y >= triangle.TrueMaxY)
+            {
+                return -Float4.One;
+            }
+
+            var eY = new Float4((triangle.EdgeX * ((y + offsetY) * scaleRateY - triangle.VVEY)).XYZ, 0.0F);
+            var eX = new Float4(((x + offsetX) * scaleRateX - triangle.VVEX).XYZ, 0.0F);
+            var e = (eY - (triangle.EdgeY * eX)) * triangle.Denominator;
+
+            var ae = Mask(e, Hlsl.Abs(e) >= Epsilon);
+            if (Hlsl.Any(ae < 0.0F))
+            {
+                return -Float4.One;
+            }
+
+            return e;
         }
     }
 }

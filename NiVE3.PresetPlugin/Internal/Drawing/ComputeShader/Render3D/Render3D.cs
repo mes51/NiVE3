@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ComputeSharp;
-using NiVE3.PresetPlugin.Internal.Drawing;
 using NiVE3.PresetPlugin.Internal.Drawing.Primitive3D;
 
 namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
@@ -28,34 +27,16 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
         float offsetY
     ) : IComputeShader
     {
-        const float Epsilon = 1E-7F;
-
-        const float ShininessStrength = 120.0F;
-
-        const float PI = MathF.PI;
-
         public void Execute()
         {
             var triangle = triangles[triangleIndex];
-            var x = ThreadIds.X + triangle.TrueMinX;
-            var y = ThreadIds.Y + triangle.TrueMinY;
-            if (x < triangle.TrueMinX || x >= triangle.TrueMaxX || y < triangle.TrueMinY || y >= triangle.TrueMaxY)
+            var e = ShaderUtil.CalcE(ThreadIds.X, ThreadIds.Y, triangle, scaleRateX, scaleRateY, offsetX, offsetY);
+            if (Hlsl.Any(e < 0.0F))
             {
                 return;
             }
 
             var p = (ThreadIds.Y + triangle.TrueMinY - renderImageOffsetY) * renderImageWidth + ThreadIds.X + triangle.TrueMinX - renderImageOffsetX;
-
-            var eY = new Float4((triangle.EdgeX * ((y + offsetY) * scaleRateY - triangle.VVEY)).XYZ, 0.0F);
-            var eX = new Float4(((x + offsetX) * scaleRateX - triangle.VVEX).XYZ, 0.0F);
-            var e = (eY - (triangle.EdgeY * eX)) * triangle.Denominator;
-
-            var ae = ShaderUtil.Mask(e, Hlsl.Abs(e) >= Epsilon);
-            if (Hlsl.Any(ae < 0.0F))
-            {
-                return;
-            }
-
             var tw = ShaderUtil.Sum(triangle.W * e);
             var tx = ShaderUtil.Sum(triangle.U * e / tw) * textureWidth;
             var ty = ShaderUtil.Sum(triangle.V * e / tw) * textureHeight;
@@ -71,7 +52,6 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
             var result = new GPURasterizedPixel();
 #pragma warning restore IDE0017 // オブジェクトの初期化を簡略化します
             result.Color = color;
-            result.E = e;
             renderImage[p] = result;
         }
 
@@ -197,6 +177,13 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
     [GeneratedComputeShaderDescriptor]
     readonly partial struct LightingByPointLight(
         ReadWriteBuffer<GPURasterizedPixel> rasterizedImage,
+        int renderImageWidth,
+        int renderImageOffsetX,
+        int renderImageOffsetY,
+        float scaleRateX,
+        float scaleRateY,
+        float offsetX,
+        float offsetY,
         ReadOnlyBuffer<GPUTriangle> triangles,
         int triangleIndex,
         ReadOnlyBuffer<GPUPointLight> pointLights,
@@ -222,10 +209,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
         ReadWriteBuffer<int> bottomShadowMap,
         ReadWriteBuffer<GPUShadowPixel> bottomShadowBuffer,
         Float4x4 bottomLightViewProjectionMatrix,
-        Bool enableShadowAntiAlias,
-        int width,
-        int startX,
-        int startY
+        Bool enableShadowAntiAlias
     ) : IComputeShader
     {
         const float ShininessStrength = 120.0F;
@@ -233,18 +217,24 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
         public void Execute()
         {
             var triangle = triangles[triangleIndex];
-            var p = (ThreadIds.Y + startY) * width + ThreadIds.X + startX;
+            var e = ShaderUtil.CalcE(ThreadIds.X, ThreadIds.Y, triangle, scaleRateX, scaleRateY, offsetX, offsetY);
+            if (Hlsl.Any(e < 0.0F))
+            {
+                return;
+            }
+
+            var p = (ThreadIds.Y + triangle.TrueMinY - renderImageOffsetY) * renderImageWidth + ThreadIds.X + triangle.TrueMinX - renderImageOffsetX;
             var rasterizedPixel = rasterizedImage[p];
 
             var color = rasterizedPixel.Color;
             var a = color.W;
             var l = pointLights[lightIndex];
-            var position = ShaderUtil.CalcBarycentricCoord(triangle.VVX, triangle.VVY, triangle.VVZ, rasterizedPixel.E);
+            var position = ShaderUtil.CalcBarycentricCoord(triangle.VVX, triangle.VVY, triangle.VVZ, e);
             var n = triangle.IsFrontFace ? -triangle.FloatNormal : triangle.FloatNormal;
             var shadowProjectionPos = Float4.Zero;
             if (hasShadow)
             {
-                shadowProjectionPos = ShaderUtil.CalcBarycentricCoord(triangle.SVVX, triangle.SVVY, triangle.SVVZ, rasterizedPixel.E);
+                shadowProjectionPos = ShaderUtil.CalcBarycentricCoord(triangle.SVVX, triangle.SVVY, triangle.SVVZ, e);
             }
 
             if (hasShadow & !triangle.IsAcceptLight & triangle.IsAcceptShadow)
@@ -380,74 +370,83 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
     [GeneratedComputeShaderDescriptor]
     readonly partial struct LightingBySpotLight(
         ReadWriteBuffer<GPURasterizedPixel> rasterizedImage,
+        int renderImageWidth,
+        int renderImageOffsetX,
+        int renderImageOffsetY,
+        float scaleRateX,
+        float scaleRateY,
+        float offsetX,
+        float offsetY,
         ReadOnlyBuffer<GPUTriangle> triangles,
         int triangleIndex,
         ReadOnlyBuffer<GPUSpotLight> spotLights,
         int lightIndex,
         Float4x4 invertedProjectionViewMatrix,
+        Float4x4 lightViewProjectionMatrix,
         int shadowMapSize,
         Bool hasShadow,
         ReadWriteBuffer<int> shadowMap,
         ReadWriteBuffer<GPUShadowPixel> shadowBuffer,
-        Bool enableShadowAntiAlias,
-        int width,
-        int startX,
-        int startY
+        Bool enableShadowAntiAlias
     ) : IComputeShader
     {
         const float ShininessStrength = 120.0F;
 
         const float PI = MathF.PI;
+        const float Epsilon = 1E-7F;
 
         public void Execute()
         {
             var triangle = triangles[triangleIndex];
-            var p = (ThreadIds.Y + startY) * width + ThreadIds.X + startX;
+            var e = ShaderUtil.CalcE(ThreadIds.X, ThreadIds.Y, triangle, scaleRateX, scaleRateY, offsetX, offsetY);
+            if (Hlsl.Any(e < 0.0F))
+            {
+                return;
+            }
+
+            var p = (ThreadIds.Y + triangle.TrueMinY - renderImageOffsetY) * renderImageWidth + ThreadIds.X + triangle.TrueMinX - renderImageOffsetX;
             var rasterizedPixel = rasterizedImage[p];
 
             var color = rasterizedPixel.Color;
             var a = color.W;
             var l = spotLights[lightIndex];
-            var position = ShaderUtil.CalcBarycentricCoord(triangle.VVX, triangle.VVY, triangle.VVZ, rasterizedPixel.E);
-            var n = triangle.IsFrontFace ? -triangle.FloatNormal : triangle.FloatNormal;
             var shadowProjectionPos = Float4.Zero;
             if (hasShadow)
             {
-                shadowProjectionPos = ShaderUtil.CalcBarycentricCoord(triangle.SVVX, triangle.SVVY, triangle.SVVZ, rasterizedPixel.E);
+                shadowProjectionPos = ShaderUtil.CalcBarycentricCoord(triangle.SVVX, triangle.SVVY, triangle.SVVZ, e);
+            }
+
+            var position = ShaderUtil.CalcBarycentricCoord(triangle.VVX, triangle.VVY, triangle.VVZ, e);
+            var lightColor = l.Color;
+            var lightDiff = (position - l.Position).XYZ;
+            var light = Hlsl.Normalize(lightDiff);
+            var spotCone = Hlsl.Acos(Hlsl.Dot(l.Direction, light));
+            var attenuation = 1.0F;
+            if (l.ConeAttenuationRate > 0.0)
+            {
+                attenuation = Hlsl.Cos((1.0F - Hlsl.Min((Hlsl.Cos(spotCone) - l.OuterConeCos) * l.InvertInnerConeCos, 1.0F)) * PI * 0.5F);
             }
 
             if (hasShadow & !triangle.IsAcceptLight & triangle.IsAcceptShadow)
             {
-                color *= GetShadowColor(triangle.Id, l.ShadowScatterSize, shadowProjectionPos, invertedProjectionViewMatrix);
+                color *= Hlsl.Lerp(1.0F, GetShadowColor(triangle.Id, l.ShadowScatterSize, shadowProjectionPos), attenuation);
                 color.W = a;
                 rasterizedPixel.Color = color;
             }
             else if (triangle.IsAcceptLight)
             {
-                var lightColor = l.Color;
-                var lightDiff = (position - l.Position).XYZ;
-                var light = Hlsl.Normalize(lightDiff);
-                var spotCone = Hlsl.Acos(Hlsl.Dot(l.Direction, light));
-
                 if (spotCone <= l.OuterCone)
                 {
+                    var n = triangle.IsFrontFace ? -triangle.FloatNormal : triangle.FloatNormal;
+
                     if (triangle.IsAcceptShadow)
                     {
-                        var transmissionColor = GetShadowColor(triangle.Id, l.ShadowScatterSize, shadowProjectionPos, invertedProjectionViewMatrix);
-                        if (transmissionColor.W < 1.0F)
+                        var transmissionColor = GetShadowColor(triangle.Id, l.ShadowScatterSize, shadowProjectionPos);
+                        if (Hlsl.All(lightColor.XYZ < 0.0F))
                         {
-                            if (Hlsl.All(lightColor.XYZ < 0.0F))
-                            {
-                                return;
-                            }
-                            lightColor *= transmissionColor;
+                            return;
                         }
-                    }
-
-                    var attenuation = 1.0F;
-                    if (l.ConeAttenuationRate > 0.0)
-                    {
-                        attenuation = Hlsl.Cos((1.0F - Hlsl.Min((Hlsl.Cos(spotCone) - l.OuterConeCos) * l.InvertInnerConeCos, 1.0F)) * PI * 0.5F);
+                        lightColor *= transmissionColor;
                     }
 
                     var falloff = ShaderUtil.CalcFalloff(lightDiff, l.FalloffType, l.FalloffStart, l.FalloffLength);
@@ -473,9 +472,114 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
             rasterizedImage[p] = rasterizedPixel;
         }
 
-        Float4 GetShadowColor(int id, float shadowScatterSize, Float4 shadowProjectionPos, Float4x4 invertedProjectionViewMatrix)
+        Float4 GetShadowColor(int triangleId, float shadowScatterSize, Float4 shadowProjectionPos)
         {
-            return Float4.One;
+            if (shadowMap.Length < shadowMapSize)
+            {
+                return Float4.One;
+            }
+
+            var shadowPos = (shadowProjectionPos * invertedProjectionViewMatrix) * lightViewProjectionMatrix;
+            shadowPos /= shadowPos.W;
+            var shadowTexPos = shadowPos * 0.5F + new Float4(0.5F, 0.5F, 0.0F, 0.0F);
+            var depth = ShaderUtil.DepthRound(shadowPos.Z);
+
+            var shadowTexture = shadowTexPos * shadowMapSize;
+            var intShadowTextureX = (int)shadowTexture.X;
+            var intShadowTextureY = (int)shadowTexture.Y;
+
+            if (enableShadowAntiAlias)
+            {
+                var s1 = SamplingShadowColor(triangleId, shadowScatterSize, intShadowTextureX, intShadowTextureY, depth);
+                var s2 = SamplingShadowColor(triangleId, shadowScatterSize, intShadowTextureX + 1, intShadowTextureY, depth);
+                var s3 = SamplingShadowColor(triangleId, shadowScatterSize, intShadowTextureX, intShadowTextureY + 1, depth);
+                var s4 = SamplingShadowColor(triangleId, shadowScatterSize, intShadowTextureX + 1, intShadowTextureY + 1, depth);
+
+                return Hlsl.Lerp(
+                    Hlsl.Lerp(s1, s2, shadowTexture.X - intShadowTextureX),
+                    Hlsl.Lerp(s3, s4, shadowTexture.X - intShadowTextureX),
+                    shadowTexture.Y - intShadowTextureY
+                );
+            }
+            else
+            {
+                return SamplingShadowColor(triangleId, shadowScatterSize, intShadowTextureX, intShadowTextureY, depth);
+            }
+        }
+
+        Float4 SamplingShadowColor(int triangleId, float shadowScatterSize, int shadowTextureX, int shadowTextureY, float depth)
+        {
+            if (shadowScatterSize <= 0.0F)
+            {
+                if (shadowTextureX < 0 || shadowTextureX >= shadowMapSize || shadowTextureY < 0 || shadowTextureY >= shadowMapSize)
+                {
+                    return Float4.One;
+                }
+                else
+                {
+                    var tc = new Float3(1.0F, 1.0F, 1.0F);
+                    var si = shadowTextureY * shadowMapSize + shadowTextureX;
+                    var index = shadowMap[si];
+                    while (index >= 0 && Hlsl.Any(tc > 0.0F))
+                    {
+                        var sp = shadowBuffer[index];
+                        if (sp.TriangleId == triangleId || depth < sp.Depth)
+                        {
+                            break;
+                        }
+
+                        tc *= sp.Color;
+                        index = sp.NextIndex;
+                    }
+                    return new Float4(tc, 1.0F);
+                }
+            }
+            else
+            {
+                var transmissionColor = Float3.Zero;
+                var samplingRange = (int)Hlsl.Ceil(shadowScatterSize) * 2 + 1;
+                var edgeRate = shadowScatterSize % 1.0F;
+                if (edgeRate <= 0.0F)
+                {
+                    edgeRate = 1.0F;
+                }
+                for (int stsy = shadowTextureY - samplingRange / 2, cy = 0; cy < samplingRange; stsy++, cy++)
+                {
+                    var yRate = (cy == 0 || cy == samplingRange - 1 ? edgeRate : 1.0F);
+                    if (stsy < 0 || stsy >= shadowMapSize)
+                    {
+                        transmissionColor += Float3.One * ((samplingRange - 2) + edgeRate * 2.0F) * yRate;
+                        continue;
+                    }
+                    for (int stsx = shadowTextureX - samplingRange / 2, cx = 0; cx < samplingRange; stsx++, cx++)
+                    {
+                        var rate = (cx == 0 || cx == samplingRange - 1 ? edgeRate : 1.0F) * yRate;
+                        if (stsx < 0 || stsx >= shadowMapSize)
+                        {
+                            transmissionColor += Float3.One * rate;
+                            continue;
+                        }
+
+                        var tc = Float3.One;
+                        var si = stsy * shadowMapSize + stsx;
+                        var index = shadowMap[si];
+                        while (index >= 0 && Hlsl.Any(tc > 0.0F))
+                        {
+                            var sp = shadowBuffer[index];
+                            if (sp.TriangleId == triangleId || depth < sp.Depth)
+                            {
+                                break;
+                            }
+
+                            tc *= sp.Color;
+                            index = sp.NextIndex;
+                        }
+                        transmissionColor += tc * rate;
+                    }
+                }
+
+                return new Float4(transmissionColor / ((shadowScatterSize * 2.0F + 1.0F) * (shadowScatterSize * 2.0F + 1.0F)), 1.0F);
+            }
         }
     }
 
@@ -483,6 +587,13 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
     [GeneratedComputeShaderDescriptor]
     readonly partial struct LightingByParallelLight(
         ReadWriteBuffer<GPURasterizedPixel> rasterizedImage,
+        int renderImageWidth,
+        int renderImageOffsetX,
+        int renderImageOffsetY,
+        float scaleRateX,
+        float scaleRateY,
+        float offsetX,
+        float offsetY,
         ReadOnlyBuffer<GPUTriangle> triangles,
         int triangleIndex,
         ReadOnlyBuffer<GPUParallelLight> parallelLights,
@@ -492,10 +603,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
         Bool hasShadow,
         ReadWriteBuffer<int> shadowMap,
         ReadWriteBuffer<GPUShadowPixel> shadowBuffer,
-        Bool enableShadowAntiAlias,
-        int width,
-        int startX,
-        int startY
+        Bool enableShadowAntiAlias
     ) : IComputeShader
     {
         const float ShininessStrength = 120.0F;
@@ -503,18 +611,24 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
         public void Execute()
         {
             var triangle = triangles[triangleIndex];
-            var p = (ThreadIds.Y + startY) * width + ThreadIds.X + startX;
+            var e = ShaderUtil.CalcE(ThreadIds.X, ThreadIds.Y, triangle, scaleRateX, scaleRateY, offsetX, offsetY);
+            if (Hlsl.Any(e < 0.0F))
+            {
+                return;
+            }
+
+            var p = (ThreadIds.Y + triangle.TrueMinY - renderImageOffsetY) * renderImageWidth + ThreadIds.X + triangle.TrueMinX - renderImageOffsetX;
             var rasterizedPixel = rasterizedImage[p];
 
             var color = rasterizedPixel.Color;
             var a = color.W;
             var l = parallelLights[lightIndex];
-            var position = ShaderUtil.CalcBarycentricCoord(triangle.VVX, triangle.VVY, triangle.VVZ, rasterizedPixel.E);
+            var position = ShaderUtil.CalcBarycentricCoord(triangle.VVX, triangle.VVY, triangle.VVZ, e);
             var n = triangle.IsFrontFace ? -triangle.FloatNormal : triangle.FloatNormal;
             var shadowProjectionPos = Float4.Zero;
             if (hasShadow)
             {
-                shadowProjectionPos = ShaderUtil.CalcBarycentricCoord(triangle.SVVX, triangle.SVVY, triangle.SVVZ, rasterizedPixel.E);
+                shadowProjectionPos = ShaderUtil.CalcBarycentricCoord(triangle.SVVX, triangle.SVVY, triangle.SVVZ, e);
             }
 
             if (hasShadow & !triangle.IsAcceptLight & triangle.IsAcceptShadow)
@@ -601,14 +715,14 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
 
     [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
     [GeneratedComputeShaderDescriptor]
-    readonly partial struct BlendRasterized(ReadWriteBuffer<Float4> renderTarget, ReadWriteBuffer<GPURasterizedPixel> rasterizedImage, Bool useLight, int width, int startX, int startY, int blendMode) : IComputeShader
+    readonly partial struct BlendRasterized(ReadWriteBuffer<Float4> renderTarget, ReadWriteBuffer<GPURasterizedPixel> rasterizedImage, Bool useLight, Bool acceptLight, int width, int startX, int startY, int blendMode) : IComputeShader
     {
         public void Execute()
         {
             var p = (ThreadIds.Y + startY) * width + ThreadIds.X + startX;
             var rasterizedPixel = rasterizedImage[p];
             var color = rasterizedPixel.Color;
-            if (useLight)
+            if (useLight & acceptLight)
             {
                 var a = color.W;
                 color = rasterizedPixel.Specular + rasterizedPixel.Diffuse + rasterizedPixel.Ambient;
@@ -662,4 +776,241 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
             image[p] = new GPURasterizedPixel();
         }
     }
+
+    [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
+    [GeneratedComputeShaderDescriptor]
+    readonly partial struct RasterizeShadow(
+        ReadWriteBuffer<int> counter,
+        ReadWriteBuffer<int> shadowMap,
+        ReadWriteBuffer<GPUShadowPixel> shadowBuffer,
+        int size,
+        ReadOnlyBuffer<GPUShadowTriangle> triangles,
+        int triangleIndex,
+        ReadWriteBuffer<Float4> texture,
+        int textureWidth,
+        int textureHeight,
+        float shadowStrength
+    ) : IComputeShader
+    {
+        const float Epsilon = 1E-7F;
+
+        public void Execute()
+        {
+            var triangle = triangles[triangleIndex];
+            var x = ThreadIds.X + triangle.TrueMinX;
+            var y = ThreadIds.Y + triangle.TrueMinY;
+            if (x < triangle.TrueMinX || x >= triangle.TrueMaxX || y < triangle.TrueMinY || y >= triangle.TrueMaxY)
+            {
+                return;
+            }
+
+            var eY = triangle.EdgeX * (new Float4(y, y, y, 0.0F) - triangle.VVEY);
+            var eX = new Float4(x, x, x, 0.0F) - triangle.VVEX;
+            var e = (eY - (triangle.EdgeY * eX)) * triangle.Denominator;
+
+            var ae = ShaderUtil.Mask(e, Hlsl.Abs(e) >= Epsilon);
+            if (Hlsl.Any(ae < 0.0F))
+            {
+                return;
+            }
+
+            var tw = ShaderUtil.Sum(triangle.W * e);
+            var tx = ShaderUtil.Sum(triangle.U * e / tw) * textureWidth;
+            var ty = ShaderUtil.Sum(triangle.V * e / tw) * textureHeight;
+
+            var color = triangle.InterpolationQuality == 0 ? NearestNeighbor(tx, ty) : Bilinear(tx, ty);
+
+            // α == 0 もしくはライト透過100%の白
+            if (color.W <= 0.0F || (triangle.LightTransmission >= 1.0F && color.X >= 1.0F && color.Y >= 1.0F && color.Z >= 1.0F))
+            {
+                return;
+            }
+
+            var d = ShaderUtil.CalcBarycentricCoord(triangle.VVX, triangle.VVY, triangle.VVZ, e);
+
+            var shadowColor = 1.0F - Hlsl.Lerp(1.0F, Hlsl.Lerp(Float4.UnitW, Hlsl.Clamp(color, 0.0F, 1.0F), triangle.LightTransmission), Hlsl.Min(color.W, 1.0F) * triangle.Opacity);
+            shadowColor = 1.0F - Hlsl.Clamp(shadowColor * shadowStrength, 0.0F, 1.0F);
+
+            var p = y * size + x;
+            Hlsl.InterlockedAdd(ref counter[0], 1, out var bufferIndex);
+            Hlsl.InterlockedExchange(ref shadowMap[p], bufferIndex, out var oldBufferIndex);
+
+            var sp = new GPUShadowPixel();
+            sp.Color = shadowColor.XYZ;
+            sp.Depth = Hlsl.Clamp(ShaderUtil.DepthRound(d.Z), 0.0F, 1.0F);
+            sp.TriangleId = triangle.Id;
+            sp.NextIndex = oldBufferIndex;
+            shadowBuffer[bufferIndex] = sp;
+        }
+
+        Float4 NearestNeighbor(float x, float y)
+        {
+            var ix = (int)x;
+            var iy = (int)y;
+
+            if (ix > -1 && iy > -1 && ix < textureWidth && iy < textureHeight)
+            {
+                return texture[iy * textureWidth + ix];
+            }
+            else
+            {
+                return new Float4(1.0F, 1.0F, 1.0F, 0.0F);
+            }
+        }
+
+        Float4 Bilinear(float x, float y)
+        {
+            var ix = (int)x;
+            var iy = (int)y;
+
+            if (ix == x && iy == y)
+            {
+                if (ix > -1 && iy > -1 && ix < textureWidth && iy < textureHeight)
+                {
+                    return texture[iy * textureWidth + ix];
+                }
+                else
+                {
+                    return new Float4(1.0F, 1.0F, 1.0F, 0.0F);
+                }
+            }
+            else if (ix < -1 || iy < -1 || ix >= textureWidth || iy >= textureHeight)
+            {
+                return new Float4(1.0F, 1.0F, 1.0F, 0.0F);
+            }
+
+            var pp = x - ix;
+            var qq = y - iy;
+            var ip = 1.0F - pp;
+            var iq = 1.0F - qq;
+            var mw = textureWidth - 1;
+            var mh = textureHeight - 1;
+
+            var c1 = new Float4(1.0F, 1.0F, 1.0F, 0.0F);
+            var c2 = new Float4(1.0F, 1.0F, 1.0F, 0.0F);
+            var c3 = new Float4(1.0F, 1.0F, 1.0F, 0.0F);
+            var c4 = new Float4(1.0F, 1.0F, 1.0F, 0.0F);
+            var pos = iy * textureWidth + ix;
+
+            if (ix > -1)
+            {
+                if (ix < mw)
+                {
+                    if (iy > -1)
+                    {
+                        c1 = texture[pos];
+                        c2 = texture[pos + 1];
+                        if (iy < mh)
+                        {
+                            pos += textureWidth;
+                            c3 = texture[pos];
+                            c4 = texture[pos + 1];
+                        }
+                    }
+                    else
+                    {
+                        pos += textureWidth;
+                        c3 = texture[pos];
+                        c4 = texture[pos + 1];
+                    }
+                }
+                else
+                {
+                    if (iy > -1)
+                    {
+                        c1 = texture[pos];
+                        if (iy < mh)
+                        {
+                            c3 = texture[pos + textureWidth];
+                        }
+                    }
+                    else
+                    {
+                        c3 = texture[pos + textureWidth];
+                    }
+                }
+            }
+            else
+            {
+                pos++;
+                if (iy > -1)
+                {
+                    c2 = texture[pos];
+                    if (iy < mh)
+                    {
+                        c4 = texture[pos + textureWidth];
+                    }
+                }
+                else
+                {
+                    c4 = texture[pos + textureWidth];
+                }
+            }
+
+            var ta = Hlsl.Lerp(Hlsl.Lerp(c1, c3, qq), Hlsl.Lerp(c2, c4, qq), pp).W;
+            if (ta <= 0.0F)
+            {
+                return new Float4(1.0F, 1.0F, 1.0F, 0.0F);
+            }
+            else
+            {
+                var t = Hlsl.Lerp(Hlsl.Lerp(c1 * c1.W, c3 * c3.W, qq), Hlsl.Lerp(c2 * c2.W, c4 * c4.W, qq), pp) / ta;
+                t.W = ta;
+                return t;
+            }
+        }
+    }
+
+    [ThreadGroupSize(DefaultThreadGroupSizes.X)]
+    [GeneratedComputeShaderDescriptor]
+    readonly partial struct InitShadowMap(ReadWriteBuffer<int> shadowMap) : IComputeShader
+    {
+        public void Execute()
+        {
+            shadowMap[ThreadIds.X] = -1;
+        }
+    }
+
+    #region Debug shaders
+    #if DEBUG
+
+    [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
+    [GeneratedComputeShaderDescriptor]
+    readonly partial struct DisplayShadowMap(ReadWriteBuffer<Float4> renderTarget, int width, ReadWriteBuffer<int> shadowMap, ReadWriteBuffer<GPUShadowPixel> shadowBuffer, int shadowMapSize) : IComputeShader
+    {
+        const int Scale = 4;
+
+        public void Execute()
+        {
+            var x = ThreadIds.X * Scale;
+            var y = ThreadIds.Y * Scale;
+            if (x >= shadowMapSize || y >= shadowMapSize)
+            {
+                return;
+            }
+
+            var color = Float3.Zero;
+            for (var iy = 0; iy < Scale; iy++)
+            {
+                for (var ix = 0; ix < Scale; ix++)
+                {
+                    var si = shadowMap[(y + iy) * shadowMapSize + x + ix];
+                    if (si < 0)
+                    {
+                        color += Float3.One;
+                    }
+                    else
+                    {
+                        color += shadowBuffer[si].Color;
+                    }
+                }
+            }
+
+            var p = ThreadIds.Y * width + ThreadIds.X;
+            renderTarget[p] = new Float4(color / Scale / Scale, 1.0F);
+        }
+    }
+
+    #endif
+    #endregion Debug shaders
 }

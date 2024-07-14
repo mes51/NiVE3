@@ -16,13 +16,11 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader
         public Float4 Diffuse;
 
         public Float4 Ambient;
-
-        public Float4 E;
     }
 
     struct GPUShadowPixel
     {
-        public Float4 Color;
+        public Float3 Color;
 
         public float Depth;
 

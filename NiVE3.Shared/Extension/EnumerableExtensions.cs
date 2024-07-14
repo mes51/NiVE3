@@ -59,6 +59,17 @@ namespace NiVE3.Shared.Extension
             }
         }
 
+        public static IEnumerable<T> NonNull<T>(this IEnumerable<T?> source) where T : struct
+        {
+            foreach (var v in source)
+            {
+                if (v != null)
+                {
+                    yield return v.Value;
+                }
+            }
+        }
+
         public static IEnumerable<IEnumerable<T>> GroupByPrev<T, TKey>(this IEnumerable<T> source, Func<T, TKey> keySelector) where T : notnull where TKey : IEquatable<TKey>
         {
             var key = default(TKey);
