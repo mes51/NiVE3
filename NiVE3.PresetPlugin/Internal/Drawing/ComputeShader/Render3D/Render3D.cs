@@ -943,37 +943,17 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
 
     [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
     [GeneratedComputeShaderDescriptor]
-    readonly partial struct LightingByAmbientLight(
+    readonly partial struct BlendRasterized(
+        ReadWriteBuffer<Float4> renderTarget,
         ReadWriteBuffer<GPURasterizedPixel> rasterizedImage,
-        ReadOnlyBuffer<GPUTriangle> triangles,
-        int triangleIndex,
-        ReadOnlyBuffer<GPUAmbientLight> ambientLights,
-        int ambientLightCount,
+        Bool useLight,
+        Bool acceptLight,
+        Float4 ambientLightColor,
         int width,
         int startX,
-        int startY
+        int startY,
+        int blendMode
     ) : IComputeShader
-    {
-        public void Execute()
-        {
-            var ambientRate = triangles[triangleIndex].Ambient;
-            var p = (ThreadIds.Y + startY) * width + ThreadIds.X + startX;
-            var rasterizedPixel = rasterizedImage[p];
-            var ambient = Float4.Zero;
-
-            for (var i = 0; i < ambientLightCount; i++)
-            {
-                ambient += ambientLights[i].Color * ambientRate;
-            }
-
-            rasterizedPixel.Ambient += rasterizedPixel.Color * ambient;
-            rasterizedImage[p] = rasterizedPixel;
-        }
-    }
-
-    [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
-    [GeneratedComputeShaderDescriptor]
-    readonly partial struct BlendRasterized(ReadWriteBuffer<Float4> renderTarget, ReadWriteBuffer<GPURasterizedPixel> rasterizedImage, Bool useLight, Bool acceptLight, int width, int startX, int startY, int blendMode) : IComputeShader
     {
         public void Execute()
         {
@@ -983,7 +963,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
             if (useLight & acceptLight)
             {
                 var a = color.W;
-                color = rasterizedPixel.Specular + rasterizedPixel.Diffuse + rasterizedPixel.Ambient;
+                color = rasterizedPixel.Specular + rasterizedPixel.Diffuse + ambientLightColor * color;
                 color.W = a;
             }
             renderTarget[p] = BlendMethods.Process(blendMode, renderTarget[p], color);

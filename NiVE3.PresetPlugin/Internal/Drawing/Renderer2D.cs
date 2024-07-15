@@ -9,8 +9,8 @@ using NiVE3.Image;
 using NiVE3.Image.Drawing;
 using NiVE3.Numerics;
 using NiVE3.Plugin.Interfaces;
+using NiVE3.PresetPlugin.Extension;
 using NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render2D;
-using NiVE3.PresetPlugin.Internal.Extension;
 using NiVE3.Shared.Extension;
 
 namespace NiVE3.PresetPlugin.Internal.Drawing

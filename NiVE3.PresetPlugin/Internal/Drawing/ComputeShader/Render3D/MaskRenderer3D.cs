@@ -27,8 +27,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
         ReadOnlyBuffer<GPUSpotLight> spotLights,
         int parallelLightCount,
         ReadOnlyBuffer<GPUParallelLight> parallelLights,
-        int ambientLightCount,
-        ReadOnlyBuffer<GPUAmbientLight> ambientLights,
+        Float4 ambientLightColor,
         ReadWriteBuffer<Float4> texture,
         int textureWidth,
         int textureHeight,
@@ -178,12 +177,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
                         specular += Hlsl.Lerp(lightColor, color * lightColor, triangle.Metal) * Hlsl.Pow(specularFactor, ShininessStrength * triangle.SpecularShininess) * triangle.SpecularIntensity * falloff;
                     }
 
-                    for (var i = 0; i < ambientLightCount; i++)
-                    {
-                        ambient += ambientLights[i].Color * color;
-                    }
-
-                    color = diffuse * triangle.Diffuse + specular + ambient * triangle.Ambient;
+                    color = diffuse * triangle.Diffuse + specular + ambientLightColor * color * triangle.Ambient;
                     color.W = alpha;
                     color = Hlsl.Max(Hlsl.Min(color, 1.0F), 0.0F);
                 }

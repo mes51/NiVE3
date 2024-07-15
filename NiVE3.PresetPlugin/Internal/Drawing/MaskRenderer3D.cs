@@ -11,10 +11,10 @@ using ComputeSharp;
 using NiVE3.Image;
 using NiVE3.Numerics;
 using NiVE3.Plugin.Interfaces;
+using NiVE3.PresetPlugin.Extension;
 using NiVE3.PresetPlugin.Internal.Drawing.ComputeShader;
 using NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D;
 using NiVE3.PresetPlugin.Internal.Drawing.Primitive3D;
-using NiVE3.PresetPlugin.Internal.Extension;
 using NiVE3.Shared.Extension;
 
 namespace NiVE3.PresetPlugin.Internal.Drawing
@@ -576,7 +576,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                     vvZ.AsFloat4(),
                     denom.AsFloat4(),
                     isFrontFace,
-                    triangle.FloatNormal.AsFloat3(),
+                    triangle.FloatNormal,
                     (int)triangle.InterpolationQuality,
                     triangle.Opacity,
                     triangle.LightTransmission,
@@ -590,11 +590,12 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 triangleStates[i] = (triangle.Id, preProcessedTriangles[i].TrueMinX, preProcessedTriangles[i].TrueMaxX, preProcessedTriangles[i].TrueMinY, preProcessedTriangles[i].TrueMaxY);
             }
 
+            var ambientLightColor = AmbientLights.Aggregate(Vector4.Zero, (m, a) => m + a.Color);
+
             using (var triangleBuffer = Device.AllocateReadOnlyBuffer(preProcessedTriangles))
             using (var pointLightBuffer = PointLights.Count > 0 ? Device.AllocateReadOnlyBuffer([..PointLights.Select(p => p.ToGpu())]) : Device.AllocateReadOnlyBuffer<GPUPointLight>(1))
             using (var spotLightBuffer = SpotLights.Count > 0 ? Device.AllocateReadOnlyBuffer([..SpotLights.Select(s => s.ToGpu())]) : Device.AllocateReadOnlyBuffer<GPUSpotLight>(1))
             using (var parallelLightBuffer = ParallelLights.Count > 0 ? Device.AllocateReadOnlyBuffer([..ParallelLights.Select(p => p.ToGpu())]) : Device.AllocateReadOnlyBuffer<GPUParallelLight>(1))
-            using (var ambientLightBuffer = AmbientLights.Count > 0 ? Device.AllocateReadOnlyBuffer([..AmbientLights.Select(a => a.ToGpu())]) : Device.AllocateReadOnlyBuffer<GPUAmbientLight>(1))
             {
                 if (enableAntiAlias)
                 {
@@ -620,8 +621,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                         spotLightBuffer,
                         ParallelLights.Count,
                         parallelLightBuffer,
-                        AmbientLights.Count,
-                        ambientLightBuffer,
+                        ambientLightColor,
                         0.0F,
                         0.0F
                     );
@@ -644,8 +644,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                         spotLightBuffer,
                         ParallelLights.Count,
                         parallelLightBuffer,
-                        AmbientLights.Count,
-                        ambientLightBuffer,
+                        ambientLightColor,
                         0.5F,
                         0.5F
                     );
@@ -674,8 +673,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                         spotLightBuffer,
                         ParallelLights.Count,
                         parallelLightBuffer,
-                        AmbientLights.Count,
-                        ambientLightBuffer,
+                        ambientLightColor,
                         0.0F,
                         0.0F
                     );
@@ -711,8 +709,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             ReadOnlyBuffer<GPUSpotLight> spotLightBuffer,
             int parallelLightCount,
             ReadOnlyBuffer<GPUParallelLight> parallelLightBuffer,
-            int ambientLightCount,
-            ReadOnlyBuffer<GPUAmbientLight> ambientLightBuffer,
+            Float4 ambientLightColor,
             float offsetX,
             float offsetY
         )
@@ -749,8 +746,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                             spotLightBuffer,
                             parallelLightCount,
                             parallelLightBuffer,
-                            ambientLightCount,
-                            ambientLightBuffer,
+                            ambientLightColor,
                             texture.Data,
                             texture.Width,
                             texture.Height,

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using NiVE3.Numerics;
 using NiVE3.Plugin.Interfaces.RendererParams;
 using NiVE3.Shared.Extension;
-using NiVE3.PresetPlugin.Internal.Extension;
+using NiVE3.PresetPlugin.Extension;
 
 namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
 {
@@ -101,7 +101,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
         {
             return new GPUPointLight(
                 Position.AsFloat4(),
-                Color.AsFloat4(),
+                Color,
                 (int)FalloffType,
                 FalloffStart,
                 FalloffLength,
@@ -182,13 +182,13 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
         {
             return new GPUSpotLight(
                 Position.AsFloat4(),
-                Direction.AsFloat3(),
+                Direction,
                 (float)ConeAttenuationRate,
                 InnerCone,
                 OuterCone,
                 OuterConeCos,
                 InvertInnerConeCos,
-                Color.AsFloat4(),
+                Color,
                 (int)FalloffType,
                 FalloffStart,
                 FalloffLength,
@@ -243,8 +243,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
         {
             return new GPUParallelLight(
                 Position.AsFloat4(),
-                Direction.AsFloat3(),
-                Color.AsFloat4(),
+                Direction,
+                Color,
                 (int)FalloffType,
                 FalloffStart,
                 FalloffLength,
@@ -267,7 +267,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
 
         public GPUAmbientLight ToGpu()
         {
-            return new GPUAmbientLight(Color.AsFloat4());
+            return new GPUAmbientLight(Color);
         }
     }
 }

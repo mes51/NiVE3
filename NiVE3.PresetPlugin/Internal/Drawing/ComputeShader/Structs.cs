@@ -14,8 +14,6 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader
         public Float4 Specular;
 
         public Float4 Diffuse;
-
-        public Float4 Ambient;
     }
 
     struct GPUShadowPixel
