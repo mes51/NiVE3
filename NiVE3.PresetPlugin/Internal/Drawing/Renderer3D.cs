@@ -330,6 +330,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             {
                 s?.Dispose();
             }
+
+            shadowBuffer.Dispose();
         }
 
         static void Rasterize(

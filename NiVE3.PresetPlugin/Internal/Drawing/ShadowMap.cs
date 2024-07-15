@@ -21,6 +21,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
         public ShadowBuffer ShadowBuffer { get; }
 
+        bool Disposed { get; set; }
+
         public ShadowMap(ShadowBuffer shadowBuffer, int shadowMapSize, Matrix4x4 lightViewProjectionMatrix)
         {
             ShadowMapSize = shadowMapSize;
@@ -41,8 +43,14 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
         public void Dispose()
         {
+            if (Disposed)
+            {
+                return;
+            }
+
             ArrayPool<int>.Shared.Return(Indices);
             ArrayPool<int>.Shared.Return(BufferIndices);
+            Disposed = true;
         }
     }
 
@@ -53,6 +61,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
         public readonly List<ShadowPixel[]> Buffers = [];
 
         int CurrentHeadIndex = -1;
+
+        bool Disposed { get; set; }
 
         public void AllocBuffer(int length)
         {
@@ -75,10 +85,16 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
         public void Dispose()
         {
+            if (Disposed)
+            {
+                return;
+            }
+
             foreach (var b in Buffers)
             {
                 ArrayPool<ShadowPixel>.Shared.Return(b);
             }
+            Disposed = true;
         }
     }
 
