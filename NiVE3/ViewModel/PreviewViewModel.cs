@@ -27,6 +27,8 @@ using NiVE3.Numerics;
 using NiVE3.View.Command;
 using NiVE3.Config;
 using GongSolutions.Wpf.DragDrop;
+using ComputeSharp;
+using NiVE3.InternalShader;
 
 namespace NiVE3.ViewModel
 {
@@ -344,6 +346,8 @@ namespace NiVE3.ViewModel
 
         AudioInformationModel AudioInformationModel { get; }
 
+        AcceleratorModel AcceleratorModel { get; }
+
         EventHubModel EventHubModel { get; }
 
         ColoredPreviewBoundingBox[]? BoundingBoxesBuffer { get; set; }
@@ -371,13 +375,14 @@ namespace NiVE3.ViewModel
             remove { CurrentTimeChangeByUserPublisher.Unsubscribe(value); }
         }
 
-        public PreviewViewModel(PreviewModelBase previewModel, ViewStateModel viewState, PlayControllerModel playControllerModel, AudioPlayerModel audioPlayerModel, AudioInformationModel audioInformationModel, EventHubModel eventHubModel)
+        public PreviewViewModel(PreviewModelBase previewModel, ViewStateModel viewState, PlayControllerModel playControllerModel, AudioPlayerModel audioPlayerModel, AudioInformationModel audioInformationModel, AcceleratorModel acceleratorModel, EventHubModel eventHubModel)
         {
             PreviewModel = previewModel;
             ViewState = viewState;
             PlayControllerModel = playControllerModel;
             AudioPlayerModel = audioPlayerModel;
             AudioInformationModel = audioInformationModel;
+            AcceleratorModel = acceleratorModel;
             EventHubModel = eventHubModel;
 
             RealFrameRateUpdateTimer = new DispatcherTimer { Interval = AudioSpeedChangeInterval };
@@ -611,59 +616,72 @@ namespace NiVE3.ViewModel
             using var image = PreviewModel.GetImage(CurrentTime);
             if (image != null && BufferImageSize.Width == image.Width && BufferImageSize.Height == image.Height)
             {
-                var dataSize = image.DataLength;
-                var imageData = image.GetData();
-                var data = ImageBuffer;
-
-                // TODO: SDR変換を入れるかどうか
-                switch (PreviewColorChannel)
+                if (image is NGPUImage gpuImage)
                 {
-                    case PreviewColorChannel.R:
-                        Parallel.For(0, dataSize, i =>
-                        {
-                            var p = Avx.Permute(Sse41.RoundCurrentDirection(imageData[i].AsVector128() * 255.0F), 0b10101010);
-                            var p32 = Sse41.Min(Sse41.Max(Sse2.ConvertToVector128Int32(p), Vector128<int>.Zero), Vector128.Create(255));
-                            var p16 = Sse2.PackSignedSaturate(p32, Vector128<int>.Zero);
-                            var p8 = Sse2.PackUnsignedSaturate(p16, Vector128<short>.Zero);
-                            data[i] = Sse2.ConvertToInt32(p8.AsInt32()) | Black;
-                        });
-                        break;
-                    case PreviewColorChannel.G:
-                        Parallel.For(0, dataSize, i =>
-                        {
-                            var p = Avx.Permute(Sse41.RoundCurrentDirection(imageData[i].AsVector128() * 255.0F), 0b01010101);
-                            var p32 = Sse41.Min(Sse41.Max(Sse2.ConvertToVector128Int32(p), Vector128<int>.Zero), Vector128.Create(255));
-                            var p16 = Sse2.PackSignedSaturate(p32, Vector128<int>.Zero);
-                            var p8 = Sse2.PackUnsignedSaturate(p16, Vector128<short>.Zero);
-                            data[i] = Sse2.ConvertToInt32(p8.AsInt32()) | Black;
-                        });
-                        break;
-                    case PreviewColorChannel.B:
-                        Parallel.For(0, dataSize, i =>
-                        {
-                            var p = Avx.Permute(Sse41.RoundCurrentDirection(imageData[i].AsVector128() * 255.0F), 0b00000000);
-                            var p32 = Sse41.Min(Sse41.Max(Sse2.ConvertToVector128Int32(p), Vector128<int>.Zero), Vector128.Create(255));
-                            var p16 = Sse2.PackSignedSaturate(p32, Vector128<int>.Zero);
-                            var p8 = Sse2.PackUnsignedSaturate(p16, Vector128<short>.Zero);
-                            data[i] = Sse2.ConvertToInt32(p8.AsInt32()) | Black;
-                        });
-                        break;
-                    case PreviewColorChannel.Alpha:
-                        Parallel.For(0, dataSize, i =>
-                        {
-                            var p = Avx.Permute(Sse41.RoundCurrentDirection(imageData[i].AsVector128() * 255.0F), 0b11111111);
-                            var p32 = Sse41.Min(Sse41.Max(Sse2.ConvertToVector128Int32(p), Vector128<int>.Zero), Vector128.Create(255));
-                            var p16 = Sse2.PackSignedSaturate(p32, Vector128<int>.Zero);
-                            var p8 = Sse2.PackUnsignedSaturate(p16, Vector128<short>.Zero);
-                            data[i] = Sse2.ConvertToInt32(p8.AsInt32()) | Black;
-                        });
-                        break;
-                    case PreviewColorChannel.RgbStraight:
-                        ImageConversion.ConvertToBGR32(imageData, ImageBuffer, dataSize);
-                        break;
-                    default:
-                        ImageConversion.ConvertToBGRA32(imageData, ImageBuffer, dataSize);
-                        break;
+                    var device = AcceleratorModel.CurrentDevice;
+                    using var convertedImageData = device.AllocateReadWriteBuffer<int>(image.DataLength);
+                    using (var context = device.CreateComputeContext())
+                    {
+                        context.For(gpuImage.DataLength, new ConvertToPreviewImage(gpuImage.Data, convertedImageData, (int)PreviewColorChannel));
+                    }
+                    convertedImageData.CopyTo(ImageBuffer);
+                }
+                else
+                {
+                    var dataSize = image.DataLength;
+                    var imageData = image.GetData();
+                    var data = ImageBuffer;
+
+                    // TODO: SDR変換を入れるかどうか
+                    switch (PreviewColorChannel)
+                    {
+                        case PreviewColorChannel.R:
+                            Parallel.For(0, dataSize, i =>
+                            {
+                                var p = Avx.Permute(Sse41.RoundCurrentDirection(imageData[i].AsVector128() * 255.0F), 0b10101010);
+                                var p32 = Sse41.Min(Sse41.Max(Sse2.ConvertToVector128Int32(p), Vector128<int>.Zero), Vector128.Create(255));
+                                var p16 = Sse2.PackSignedSaturate(p32, Vector128<int>.Zero);
+                                var p8 = Sse2.PackUnsignedSaturate(p16, Vector128<short>.Zero);
+                                data[i] = Sse2.ConvertToInt32(p8.AsInt32()) | Black;
+                            });
+                            break;
+                        case PreviewColorChannel.G:
+                            Parallel.For(0, dataSize, i =>
+                            {
+                                var p = Avx.Permute(Sse41.RoundCurrentDirection(imageData[i].AsVector128() * 255.0F), 0b01010101);
+                                var p32 = Sse41.Min(Sse41.Max(Sse2.ConvertToVector128Int32(p), Vector128<int>.Zero), Vector128.Create(255));
+                                var p16 = Sse2.PackSignedSaturate(p32, Vector128<int>.Zero);
+                                var p8 = Sse2.PackUnsignedSaturate(p16, Vector128<short>.Zero);
+                                data[i] = Sse2.ConvertToInt32(p8.AsInt32()) | Black;
+                            });
+                            break;
+                        case PreviewColorChannel.B:
+                            Parallel.For(0, dataSize, i =>
+                            {
+                                var p = Avx.Permute(Sse41.RoundCurrentDirection(imageData[i].AsVector128() * 255.0F), 0b00000000);
+                                var p32 = Sse41.Min(Sse41.Max(Sse2.ConvertToVector128Int32(p), Vector128<int>.Zero), Vector128.Create(255));
+                                var p16 = Sse2.PackSignedSaturate(p32, Vector128<int>.Zero);
+                                var p8 = Sse2.PackUnsignedSaturate(p16, Vector128<short>.Zero);
+                                data[i] = Sse2.ConvertToInt32(p8.AsInt32()) | Black;
+                            });
+                            break;
+                        case PreviewColorChannel.Alpha:
+                            Parallel.For(0, dataSize, i =>
+                            {
+                                var p = Avx.Permute(Sse41.RoundCurrentDirection(imageData[i].AsVector128() * 255.0F), 0b11111111);
+                                var p32 = Sse41.Min(Sse41.Max(Sse2.ConvertToVector128Int32(p), Vector128<int>.Zero), Vector128.Create(255));
+                                var p16 = Sse2.PackSignedSaturate(p32, Vector128<int>.Zero);
+                                var p8 = Sse2.PackUnsignedSaturate(p16, Vector128<short>.Zero);
+                                data[i] = Sse2.ConvertToInt32(p8.AsInt32()) | Black;
+                            });
+                            break;
+                        case PreviewColorChannel.RgbStraight:
+                            ImageConversion.ConvertToBGR32(imageData, ImageBuffer, dataSize);
+                            break;
+                        default:
+                            ImageConversion.ConvertToBGRA32(imageData, ImageBuffer, dataSize);
+                            break;
+                    }
                 }
             }
             else
