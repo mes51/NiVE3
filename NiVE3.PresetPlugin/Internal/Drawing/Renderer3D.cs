@@ -1072,10 +1072,9 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             var hasLight = PointLights.Count > 0 || SpotLights.Count > 0 || ParallelLights.Count > 0 || AmbientLights.Count > 0;
 
             var shadowSize = Size == Width ? (int)(Size / scaleRateX) : (int)(Size / scaleRateY);
-            //var pointLightShadows = PointLights.Select(l => l.IsEnableShadow ? RenderPointLightShadow(l, shadowSize, (float)offsetX, (float)offsetY) : null).ToArray();
+            var pointLightShadows = PointLights.Select(l => l.IsEnableShadow ? RenderPointLightShadow(l, shadowSize, (float)offsetX, (float)offsetY, convertedTextures) : null).ToArray();
             var spotLightShadows = SpotLights.Select(l => l.IsEnableShadow && LightTriangles[l].Count > 0 ? RenderSpotLightShadow(l, shadowSize, (float)offsetX, (float)offsetY, convertedTextures) : null).ToArray();
-            //var parallelLightShadows = ParallelLights.Select(l => l.IsEnableShadow && LightTriangles[l].Count > 0 ? RenderParallelLightShadow(l, shadowSize, (float)offsetX, (float)offsetY) : null).ToArray();
-            //var hasShadow = pointLightShadows.Any(ss => ss != null && ss.Any(s => s != null)) || spotLightShadows.Any(s => s != null) || parallelLightShadows.Any(s => s != null);
+            var parallelLightShadows = ParallelLights.Select(l => l.IsEnableShadow && LightTriangles[l].Count > 0 ? RenderParallelLightShadow(l, shadowSize, (float)offsetX, (float)offsetY, convertedTextures) : null).ToArray();
 
             var renderImageOffsetX = (int)(OffsetX / scaleRateX);
             var renderImageOffsetY = (int)(OffsetY / scaleRateY);
@@ -1213,11 +1212,13 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                         invertedProjectionViewMatrix,
                         PointLights.Count,
                         pointLightBuffer,
+                        pointLightShadows,
                         SpotLights.Count,
                         spotLightBuffer,
                         spotLightShadows,
                         ParallelLights.Count,
                         parallelLightBuffer,
+                        parallelLightShadows,
                         AmbientLights.Count,
                         ambientLightBuffer,
                         shadowSize,
@@ -1239,11 +1240,13 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                         invertedProjectionViewMatrix,
                         PointLights.Count,
                         pointLightBuffer,
+                        pointLightShadows,
                         SpotLights.Count,
                         spotLightBuffer,
                         spotLightShadows,
                         ParallelLights.Count,
                         parallelLightBuffer,
+                        parallelLightShadows,
                         AmbientLights.Count,
                         ambientLightBuffer,
                         shadowSize,
@@ -1271,11 +1274,13 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                         invertedProjectionViewMatrix,
                         PointLights.Count,
                         pointLightBuffer,
+                        pointLightShadows,
                         SpotLights.Count,
                         spotLightBuffer,
                         spotLightShadows,
                         ParallelLights.Count,
                         parallelLightBuffer,
+                        parallelLightShadows,
                         AmbientLights.Count,
                         ambientLightBuffer,
                         shadowSize,
@@ -1295,7 +1300,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 i?.Dispose();
             }
 
-            foreach (var (shadowMap, shadowBuffer, _) in spotLightShadows.NonNull())
+            foreach (var (shadowMap, shadowBuffer, _) in pointLightShadows.NonNull().SelectMany(_ => _).Concat(spotLightShadows).Concat(parallelLightShadows).NonNull())
             {
                 shadowMap.Dispose();
                 shadowBuffer.Dispose();
@@ -1316,11 +1321,13 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             in Float4x4 invertedProjectionViewMatrix,
             int pointLightCount,
             ReadOnlyBuffer<GPUPointLight> pointLightBuffer,
+            (ReadWriteBuffer<int> shadowMap, ReadWriteBuffer<GPUShadowPixel> shadowBuffer, Float4x4 lightViewProjectionMatrix)?[]?[] pointLightShadows,
             int spotLightCount,
             ReadOnlyBuffer<GPUSpotLight> spotLightBuffer,
             (ReadWriteBuffer<int> shadowMap, ReadWriteBuffer<GPUShadowPixel> shadowBuffer, Float4x4 lightViewProjectionMatrix)?[] spotLightShadows,
             int parallelLightCount,
             ReadOnlyBuffer<GPUParallelLight> parallelLightBuffer,
+            (ReadWriteBuffer<int> shadowMap, ReadWriteBuffer<GPUShadowPixel> shadowBuffer, Float4x4 lightViewProjectionMatrix)?[] parallelLightShadows,
             int ambientLightCount,
             ReadOnlyBuffer<GPUAmbientLight> ambientLightBuffer,
             int shadowMapSize,
@@ -1405,20 +1412,20 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                 maxY - minY,
                                 new LightingByPointLight(
                                     rasterizedData,
-                                        renderTarget.Width,
-                                        renderImageOffsetX,
-                                        renderImageOffsetY,
-                                        scaleRateX,
-                                        scaleRateY,
-                                        offsetX,
-                                        offsetY,
+                                    renderTarget.Width,
+                                    renderImageOffsetX,
+                                    renderImageOffsetY,
+                                    scaleRateX,
+                                    scaleRateY,
+                                    offsetX,
+                                    offsetY,
                                     triangleBuffer,
                                     ti,
                                     pointLightBuffer,
                                     i,
                                     invertedProjectionViewMatrix,
                                     shadowMapSize,
-                                    false,
+                                    pointLightShadows[i] != null,
                                     emptyShadowMap,
                                     emptyShadowBuffer,
                                     new Float4x4(),
@@ -1482,27 +1489,29 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                     {
                         foreach (var ((_, minX, maxX, minY, maxY, _, _, _), ti) in groupedTriangleIds)
                         {
+                            var (shadowMap, shadowBuffer, lightViewProjectionMatrix) = parallelLightShadows[i] ?? (emptyShadowMap, emptyShadowBuffer, new Float4x4());
                             context.For(
                                 maxX - minX,
                                 maxY - minY,
                                 new LightingByParallelLight(
                                     rasterizedData,
-                                        renderTarget.Width,
-                                        renderImageOffsetX,
-                                        renderImageOffsetY,
-                                        scaleRateX,
-                                        scaleRateY,
-                                        offsetX,
-                                        offsetY,
+                                    renderTarget.Width,
+                                    renderImageOffsetX,
+                                    renderImageOffsetY,
+                                    scaleRateX,
+                                    scaleRateY,
+                                    offsetX,
+                                    offsetY,
                                     triangleBuffer,
                                     ti,
                                     parallelLightBuffer,
                                     i,
                                     invertedProjectionViewMatrix,
+                                    lightViewProjectionMatrix,
                                     shadowMapSize,
-                                    false,
-                                    emptyShadowMap,
-                                    emptyShadowBuffer,
+                                    parallelLightShadows[i] != null,
+                                    shadowMap,
+                                    shadowBuffer,
                                     enableShadowAntiAlias
                                 )
                             );
@@ -1519,7 +1528,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             }
         }
 
-        (ReadWriteBuffer<int> shadowMap, ReadWriteBuffer<GPUShadowPixel> shadowBuffer, Float4x4 lightViewProjectionMatrix)?[]? RenderPointLightShadow(PointLight pointLight, int shadowSize, float offsetX, float offsetY)
+        (ReadWriteBuffer<int> shadowMap, ReadWriteBuffer<GPUShadowPixel> shadowBuffer, Float4x4 lightViewProjectionMatrix)?[]? RenderPointLightShadow(PointLight pointLight, int shadowSize, float offsetX, float offsetY, Dictionary<NImage, NGPUImage> convertedTexture)
         {
             return null;
         }
@@ -1539,9 +1548,24 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             return RenderShadow(Device, triangles, spotLight.FloatLightViewMatrix, lightProjectionMatrix, shadowMapSize, spotLight.ShadowStrength, offsetX, offsetY, convertedTexture);
         }
 
-        (ReadWriteBuffer<int> shadowMap, ReadWriteBuffer<GPUShadowPixel> shadowBuffer, Float4x4 lightViewProjectionMatrix)? RenderParallelLightShadow(ParallelLight parallelLight, int shadowSize, float offsetX, float offsetY)
+        (ReadWriteBuffer<int> shadowMap, ReadWriteBuffer<GPUShadowPixel> shadowBuffer, Float4x4 lightViewProjectionMatrix)? RenderParallelLightShadow(ParallelLight parallelLight, int shadowSize, float offsetX, float offsetY, Dictionary<NImage, NGPUImage> convertedTexture)
         {
-            return null;
+            var triangles = TriangleDivider.ClipAndDivide(LightTriangles[parallelLight]).ToArray();
+            if (triangles.Length < 1)
+            {
+                return null;
+            }
+
+            var min = triangles.Select(t => Vector256.Min(Vector256.Min(t.V1.Vertex, t.V2.Vertex), t.V3.Vertex)).Aggregate(Vector256.Min);
+            var max = triangles.Select(t => Vector256.Max(Vector256.Max(t.V1.Vertex, t.V2.Vertex), t.V3.Vertex)).Aggregate(Vector256.Max);
+            if (min.GetElement(0) == max.GetElement(0) || min.GetElement(1) == max.GetElement(1))
+            {
+                return null;
+            }
+
+            var lightProjectionMatrix = Matrix4x4d.CreateOrthographic(min.GetElement(0), max.GetElement(0), min.GetElement(1), max.GetElement(1), min.GetElement(2), max.GetElement(2));
+
+            return RenderShadow(Device, triangles, parallelLight.FloatLightViewMatrix, lightProjectionMatrix, shadowSize, parallelLight.ShadowStrength, offsetX, offsetY, convertedTexture);
         }
 
         static (ReadWriteBuffer<int> shadowMap, ReadWriteBuffer<GPUShadowPixel> shadowBuffer, Float4x4 lightViewProjectionMatrix) RenderShadow(
