@@ -31,7 +31,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
         {
             var triangle = triangles[triangleIndex];
             var e = ShaderUtil.CalcE(ThreadIds.X, ThreadIds.Y, triangle, scaleRateX, scaleRateY, offsetX, offsetY);
-            if (Hlsl.Any(e < 0.0F))
+            if (Hlsl.Any(Hlsl.IsNaN(e)))
             {
                 return;
             }
@@ -213,7 +213,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
         {
             var triangle = triangles[triangleIndex];
             var e = ShaderUtil.CalcE(ThreadIds.X, ThreadIds.Y, triangle, scaleRateX, scaleRateY, offsetX, offsetY);
-            if (Hlsl.Any(e < 0.0F))
+            if (Hlsl.Any(Hlsl.IsNaN(e)))
             {
                 return;
             }
@@ -554,7 +554,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
         {
             var triangle = triangles[triangleIndex];
             var e = ShaderUtil.CalcE(ThreadIds.X, ThreadIds.Y, triangle, scaleRateX, scaleRateY, offsetX, offsetY);
-            if (Hlsl.Any(e < 0.0F))
+            if (Hlsl.Any(Hlsl.IsNaN(e)))
             {
                 return;
             }
@@ -767,7 +767,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
         {
             var triangle = triangles[triangleIndex];
             var e = ShaderUtil.CalcE(ThreadIds.X, ThreadIds.Y, triangle, scaleRateX, scaleRateY, offsetX, offsetY);
-            if (Hlsl.Any(e < 0.0F))
+            if (Hlsl.Any(Hlsl.IsNaN(e)))
             {
                 return;
             }

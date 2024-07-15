@@ -69,7 +69,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader
             y += triangle.TrueMinY;
             if (x < triangle.TrueMinX || x >= triangle.TrueMaxX || y < triangle.TrueMinY || y >= triangle.TrueMaxY)
             {
-                return -Float4.One;
+                return -float.NaN;
             }
 
             var eY = new Float4((triangle.EdgeX * ((y + offsetY) * scaleRateY - triangle.VVEY)).XYZ, 0.0F);
@@ -79,7 +79,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader
             var ae = Mask(e, Hlsl.Abs(e) >= Epsilon);
             if (Hlsl.Any(ae < 0.0F))
             {
-                return -Float4.One;
+                return -float.NaN;
             }
 
             return e;
