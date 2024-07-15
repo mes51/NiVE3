@@ -107,7 +107,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
         )
         {
             // TODO: ボリゴンの境目が見えたり、斜めの補間エラーが出たりしたら調整する
-            const double MaxTriangleEdgeLength = 0.1;
+            const double MaxTriangleEdgeLength = 0.25;
 
             var width = texture.Width;
             var height = texture.Height;
