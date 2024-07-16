@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics;
 using System.Text;
 using System.Threading.Tasks;
@@ -53,8 +54,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             var invertedProjectionViewMatrix = ((Matrix4x4)(invertedProjectionMatrix * Matrix4x4d.CreateTranslate(-offsetX, -offsetY, 0.0) * invertedViewMatrix)).ToFloat4x4();
             var convertedTextures = new Dictionary<NImage, NGPUImage>();
             var convertedTrackMattes = new Dictionary<RasterizedMaskImage, GPURasterizedMaskImage>();
-            var textures = new NGPUImage[triangles.Length];
-            var trackMattes = new GPURasterizedMaskImage?[triangles.Length];
+            var textureList = new List<NGPUImage>(triangles.Length);
+            var trackMatteList = new List<GPURasterizedMaskImage?>(triangles.Length);
             var hasLight = PointLights.Count > 0 || SpotLights.Count > 0 || ParallelLights.Count > 0 || AmbientLights.Count > 0;
 
             var shadowSize = Size == Width ? (int)(Size / scaleRateX) : (int)(Size / scaleRateY);
@@ -64,8 +65,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
             var renderImageOffsetX = (int)(OffsetX / scaleRateX);
             var renderImageOffsetY = (int)(OffsetY / scaleRateY);
-            var preProcessedTriangles = new GPUTriangle[triangles.Length];
-            var triangleStates = new (int, int, int, int, int, bool, bool, float, int)[triangles.Length];
+            var preProcessedTriangleList = new List<GPUTriangle>(triangles.Length);
+            var triangleStateList = new List<(int id, int minX, int maxX, int minY, int maxY, bool useLight, bool isAcceptLight, float ambient, int blendMode)>(triangles.Length);
             for (var i = 0; i < triangles.Length; i++)
             {
                 var triangle = triangles[i];
@@ -84,16 +85,22 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 var dvv1 = (uv1.Vertex + Vector256.Create(1.0, 1.0, 0.0, 0.0)) * Vector256.Create(Size * 0.5, Size * 0.5, 1.0, 1.0);
                 var dvv2 = (uv2.Vertex + Vector256.Create(1.0, 1.0, 0.0, 0.0)) * Vector256.Create(Size * 0.5, Size * 0.5, 1.0, 1.0);
                 var dvv3 = (uv3.Vertex + Vector256.Create(1.0, 1.0, 0.0, 0.0)) * Vector256.Create(Size * 0.5, Size * 0.5, 1.0, 1.0);
+                var minX = (int)(MaxClampedSize((int)(Math.Min(Math.Min(dvv1.GetElement(0), dvv2.GetElement(0)), dvv3.GetElement(0))), OffsetX) / scaleRateX);
+                var maxX = (int)(MinClampedSize((int)Math.Ceiling(Math.Max(Math.Max(dvv1.GetElement(0), dvv2.GetElement(0)), dvv3.GetElement(0))), Width + OffsetX) / scaleRateX);
+                var minY = (int)(MaxClampedSize((int)(Math.Min(Math.Min(dvv1.GetElement(1), dvv2.GetElement(1)), dvv3.GetElement(1))), OffsetY) / scaleRateY);
+                var maxY = (int)(MinClampedSize((int)Math.Ceiling(Math.Max(Math.Max(dvv1.GetElement(1), dvv2.GetElement(1)), dvv3.GetElement(1))), Height + OffsetY) / scaleRateY);
+
+                if (minX - renderImageOffsetX >= renderImageWidth || maxX - renderImageOffsetX <= 0 || minY - renderImageOffsetY >= renderImageHeight || maxY - renderImageOffsetY <= 0)
+                {
+                    continue;
+                }
+
                 var vvX = Vector128.Create((float)triangle.V1.Vertex.GetElement(0), (float)triangle.V2.Vertex.GetElement(0), (float)triangle.V3.Vertex.GetElement(0), 0.0F);
                 var vvY = Vector128.Create((float)triangle.V1.Vertex.GetElement(1), (float)triangle.V2.Vertex.GetElement(1), (float)triangle.V3.Vertex.GetElement(1), 0.0F);
                 var vvZ = Vector128.Create((float)triangle.V1.Vertex.GetElement(2), (float)triangle.V2.Vertex.GetElement(2), (float)triangle.V3.Vertex.GetElement(2), 0.0F);
                 var svvX = Vector128.Create((float)uv1.Vertex.GetElement(0), (float)uv2.Vertex.GetElement(0), (float)uv3.Vertex.GetElement(0), 0.0F);
                 var svvY = Vector128.Create((float)uv1.Vertex.GetElement(1), (float)uv2.Vertex.GetElement(1), (float)uv3.Vertex.GetElement(1), 0.0F);
                 var svvZ = Vector128.Create((float)uv1.Vertex.GetElement(2), (float)uv2.Vertex.GetElement(2), (float)uv3.Vertex.GetElement(2), 0.0F);
-                var minX = (int)(MaxClampedSize((int)(Math.Min(Math.Min(dvv1.GetElement(0), dvv2.GetElement(0)), dvv3.GetElement(0))), OffsetX) / scaleRateX);
-                var maxX = (int)(MinClampedSize((int)Math.Ceiling(Math.Max(Math.Max(dvv1.GetElement(0), dvv2.GetElement(0)), dvv3.GetElement(0))), Width + OffsetX) / scaleRateX);
-                var minY = (int)(MaxClampedSize((int)(Math.Min(Math.Min(dvv1.GetElement(1), dvv2.GetElement(1)), dvv3.GetElement(1))), OffsetY) / scaleRateY);
-                var maxY = (int)(MinClampedSize((int)Math.Ceiling(Math.Max(Math.Max(dvv1.GetElement(1), dvv2.GetElement(1)), dvv3.GetElement(1))), Height + OffsetY) / scaleRateY);
                 var u = Vector128.Create((float)uv1.U, (float)uv2.U, (float)uv3.U, 0.0F);
                 var v = Vector128.Create((float)uv1.V, (float)uv2.V, (float)uv3.V, 0.0F);
                 var w = Vector128.Create((float)w1, (float)w2, (float)w3, 0.0F);
@@ -118,7 +125,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 {
                     gpuTexture = (NGPUImage)triangle.Texture;
                 }
-                textures[i] = gpuTexture;
+                textureList.Add(gpuTexture);
 
                 GPURasterizedMaskImage? gpuTrackMatte;
                 if (triangle.TrackMatte is ManagedRasterizedMaskImage managedTrackMatte)
@@ -133,9 +140,9 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 {
                     gpuTrackMatte = (GPURasterizedMaskImage?)triangle.TrackMatte;
                 }
-                trackMattes[i] = gpuTrackMatte;
+                trackMatteList.Add(gpuTrackMatte);
 
-                preProcessedTriangles[i] = new GPUTriangle(
+                var preProcessed = new GPUTriangle(
                     triangle.Id,
                     minX,
                     maxX,
@@ -169,13 +176,14 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                     triangle.SpecularShininess,
                     triangle.Metal
                 );
+                preProcessedTriangleList.Add(preProcessed);
                 var useLight = hasLight && (triangle.IsAcceptLight || triangle.IsAcceptShadow);
-                triangleStates[i] = (triangle.Id, preProcessedTriangles[i].TrueMinX, preProcessedTriangles[i].TrueMaxX, preProcessedTriangles[i].TrueMinY, preProcessedTriangles[i].TrueMaxY, useLight, triangle.IsAcceptLight, triangle.Ambient, preProcessedTriangles[i].BlendMode);
+                triangleStateList.Add((triangle.Id, preProcessed.TrueMinX, preProcessed.TrueMaxX, preProcessed.TrueMinY, preProcessed.TrueMaxY, useLight, triangle.IsAcceptLight, triangle.Ambient, preProcessed.BlendMode));
             }
 
             var ambientLightColor = AmbientLights.Aggregate(Vector4.Zero, (m, a) => m + a.Color);
 
-            using (var triangleBuffer = Device.AllocateReadOnlyBuffer(preProcessedTriangles))
+            using (var triangleBuffer = Device.AllocateReadOnlyBuffer<GPUTriangle>(CollectionsMarshal.AsSpan(preProcessedTriangleList)))
             using (var pointLightBuffer = PointLights.Count > 0 ? Device.AllocateReadOnlyBuffer([..PointLights.Select(p => p.ToGpu())]) : Device.AllocateReadOnlyBuffer<GPUPointLight>(1))
             using (var spotLightBuffer = SpotLights.Count > 0 ? Device.AllocateReadOnlyBuffer([..SpotLights.Select(s => s.ToGpu())]) : Device.AllocateReadOnlyBuffer<GPUSpotLight>(1))
             using (var parallelLightBuffer = ParallelLights.Count > 0 ? Device.AllocateReadOnlyBuffer([..ParallelLights.Select(p => p.ToGpu())]) : Device.AllocateReadOnlyBuffer<GPUParallelLight>(1))
@@ -189,9 +197,9 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                         Device,
                         RenderImage,
                         triangleBuffer,
-                        triangleStates,
-                        textures,
-                        trackMattes,
+                        triangleStateList,
+                        CollectionsMarshal.AsSpan(textureList),
+                        CollectionsMarshal.AsSpan(trackMatteList),
                         renderImageOffsetX,
                         renderImageOffsetY,
                         scaleRateX,
@@ -216,9 +224,9 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                         Device,
                         interpolate,
                         triangleBuffer,
-                        triangleStates,
-                        textures,
-                        trackMattes,
+                        triangleStateList,
+                        CollectionsMarshal.AsSpan(textureList),
+                        CollectionsMarshal.AsSpan(trackMatteList),
                         renderImageOffsetX,
                         renderImageOffsetY,
                         scaleRateX,
@@ -249,9 +257,9 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                         Device,
                         RenderImage,
                         triangleBuffer,
-                        triangleStates,
-                        textures,
-                        trackMattes,
+                        triangleStateList,
+                        CollectionsMarshal.AsSpan(textureList),
+                        CollectionsMarshal.AsSpan(trackMatteList),
                         renderImageOffsetX,
                         renderImageOffsetY,
                         scaleRateX,
@@ -304,9 +312,9 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             GraphicsDevice device,
             NGPUImage renderTarget,
             ReadOnlyBuffer<GPUTriangle> triangleBuffer,
-            (int, int, int, int, int, bool, bool, float, int)[] triangleState,
-            NGPUImage[] textures,
-            GPURasterizedMaskImage?[] trackMattes,
+            List<(int id, int minX, int maxX, int minY, int maxY, bool useLight, bool isAcceptLight, float ambient, int blendMode)> triangleState,
+            ReadOnlySpan<NGPUImage> textures,
+            ReadOnlySpan<GPURasterizedMaskImage?> trackMattes,
             int renderImageOffsetX,
             int renderImageOffsetY,
             float scaleRateX,
@@ -332,26 +340,31 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             using var rasterizedData = device.AllocateReadWriteBuffer<GPURasterizedPixel>(renderTarget.DataLength);
             using var context = device.CreateComputeContext();
 
-            foreach (var groupedTriangleIds in triangleState.ZipWithIndex().GroupByPrev(t => t.Item1).Select(g => g.ToArray()))
+            foreach (var groupedTriangleIds in triangleState.ZipWithIndex().GroupByPrev(t => t.Item1.id).Select(g => g.ToArray()))
             {
+                if (groupedTriangleIds.Length < 1)
+                {
+                    continue;
+                }
+
                 var useLight = false;
                 var acceptLight = false;
                 var blendMode = 0;
                 var ambientRate = 0.0F;
                 var totalMinX = int.MaxValue;
-                var totalMaxX = -1;
+                var totalMaxX = int.MinValue;
                 var totalMinY = int.MaxValue;
-                var totalMaxY = -1;
+                var totalMaxY = int.MinValue;
                 foreach (var ((_, minX, maxX, minY, maxY, l, a, ar, b), _) in groupedTriangleIds)
                 {
                     useLight = l;
                     acceptLight = a;
                     blendMode = b;
                     ambientRate = ar;
-                    totalMinX = Math.Min(totalMinX, minX - renderImageOffsetX);
-                    totalMaxX = Math.Max(totalMaxX, maxX - renderImageOffsetX);
-                    totalMinY = Math.Min(totalMinY, minY - renderImageOffsetY);
-                    totalMaxY = Math.Max(totalMaxY, maxY - renderImageOffsetY);
+                    totalMinX = Math.Min(totalMinX, minX);
+                    totalMaxX = Math.Max(totalMaxX, maxX);
+                    totalMinY = Math.Min(totalMinY, minY);
+                    totalMaxY = Math.Max(totalMaxY, maxY);
                 }
 
                 if (totalMaxX - totalMinX < 1 || totalMaxY - totalMinY < 1)
@@ -359,38 +372,33 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                     continue;
                 }
 
-                context.For(totalMaxX - totalMinX, totalMaxY - totalMinY, new ClearRasterizedImage(rasterizedData, renderTarget.Width, totalMinX, totalMinY));
+                context.For(totalMaxX - totalMinX, totalMaxY - totalMinY, new ClearRasterizedImage(rasterizedData, renderTarget.Width, totalMinX - renderImageOffsetX, totalMinY - renderImageOffsetY));
                 context.Barrier(rasterizedData);
 
-                foreach (var ((_, minX, maxX, minY, maxY, _, _, _, _), i) in groupedTriangleIds)
-                {
-                    if (minX - renderImageOffsetX >= renderTarget.Width || maxX - renderImageOffsetX <= 0 || minY - renderImageOffsetY >= renderTarget.Height || maxY - renderImageOffsetY <= 0)
-                    {
-                        continue;
-                    }
-
-                    var texture = textures[i];
-                    context.For(
-                        maxX - minX,
-                        maxY - minY,
-                        new Rasterize3D(
-                            rasterizedData,
-                            renderTarget.Width,
-                            renderImageOffsetX,
-                            renderImageOffsetY,
-                            scaleRateX,
-                            scaleRateY,
-                            triangleBuffer,
-                            i,
-                            texture.Data,
-                            texture.Width,
-                            texture.Height,
-                            trackMattes[i]?.Data ?? emptyTrackMatte,
-                            offsetX,
-                            offsetY
-                        )
-                    );
-                }
+                var texture = textures[groupedTriangleIds[0].Item2];
+                context.For(
+                    totalMaxX - totalMinX,
+                    totalMaxY - totalMinY,
+                    new Rasterize3D(
+                        rasterizedData,
+                        renderTarget.Width,
+                        renderImageOffsetX,
+                        renderImageOffsetY,
+                        scaleRateX,
+                        scaleRateY,
+                        triangleBuffer,
+                        groupedTriangleIds[0].Item2,
+                        groupedTriangleIds[^1].Item2,
+                        texture.Data,
+                        texture.Width,
+                        texture.Height,
+                        trackMattes[groupedTriangleIds[0].Item2]?.Data ?? emptyTrackMatte,
+                        offsetX,
+                        offsetY,
+                        totalMinX,
+                        totalMinY
+                    )
+                );
                 context.Barrier(rasterizedData);
 
                 if (useLight)
@@ -404,124 +412,129 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                     for (var i = 0; i < pointLightCount; i++)
                     {
                         var (shadowMaps, lightViewProjectionMatrixes) = pointLightShadows[i] ?? (emptyPointLightShadows, emptyLightViewProjectionMatrixes);
-                        foreach (var ((_, minX, maxX, minY, maxY, _, _, _, _), ti) in groupedTriangleIds)
-                        {
-                            var (frontShadowMap, frontShadowBuffer) = shadowMaps?[0] ?? (emptyShadowMap, emptyShadowBuffer);
-                            var (backShadowMap, backShadowBuffer) = shadowMaps?[1] ?? (emptyShadowMap, emptyShadowBuffer);
-                            var (leftShadowMap, leftShadowBuffer) = shadowMaps?[2] ?? (emptyShadowMap, emptyShadowBuffer);
-                            var (rightShadowMap, rightShadowBuffer) = shadowMaps?[3] ?? (emptyShadowMap, emptyShadowBuffer);
-                            var (topShadowMap, topShadowBuffer) = shadowMaps?[4] ?? (emptyShadowMap, emptyShadowBuffer);
-                            var (bottomShadowMap, bottomShadowBuffer) = shadowMaps?[5] ?? (emptyShadowMap, emptyShadowBuffer);
+                        var (frontShadowMap, frontShadowBuffer) = shadowMaps?[0] ?? (emptyShadowMap, emptyShadowBuffer);
+                        var (backShadowMap, backShadowBuffer) = shadowMaps?[1] ?? (emptyShadowMap, emptyShadowBuffer);
+                        var (leftShadowMap, leftShadowBuffer) = shadowMaps?[2] ?? (emptyShadowMap, emptyShadowBuffer);
+                        var (rightShadowMap, rightShadowBuffer) = shadowMaps?[3] ?? (emptyShadowMap, emptyShadowBuffer);
+                        var (topShadowMap, topShadowBuffer) = shadowMaps?[4] ?? (emptyShadowMap, emptyShadowBuffer);
+                        var (bottomShadowMap, bottomShadowBuffer) = shadowMaps?[5] ?? (emptyShadowMap, emptyShadowBuffer);
 
-                            context.For(
-                                maxX - minX,
-                                maxY - minY,
-                                new LightingByPointLight(
-                                    rasterizedData,
-                                    renderTarget.Width,
-                                    renderImageOffsetX,
-                                    renderImageOffsetY,
-                                    scaleRateX,
-                                    scaleRateY,
-                                    offsetX,
-                                    offsetY,
-                                    triangleBuffer,
-                                    ti,
-                                    pointLightBuffer,
-                                    i,
-                                    invertedProjectionViewMatrix,
-                                    shadowMapSize,
-                                    pointLightShadows[i] != null,
-                                    frontShadowMap,
-                                    frontShadowBuffer,
-                                    backShadowMap,
-                                    backShadowBuffer,
-                                    leftShadowMap,
-                                    leftShadowBuffer,
-                                    rightShadowMap,
-                                    rightShadowBuffer,
-                                    topShadowMap,
-                                    topShadowBuffer,
-                                    bottomShadowMap,
-                                    bottomShadowBuffer,
-                                    lightViewProjectionMatrixes,
-                                    enableShadowAntiAlias
-                                )
-                            );
-                        }
+                        context.For(
+                            totalMaxX - totalMinX,
+                            totalMaxY - totalMinY,
+                            new LightingByPointLight(
+                                rasterizedData,
+                                renderTarget.Width,
+                                renderImageOffsetX,
+                                renderImageOffsetY,
+                                scaleRateX,
+                                scaleRateY,
+                                offsetX,
+                                offsetY,
+                                triangleBuffer,
+                                groupedTriangleIds[0].Item2,
+                                groupedTriangleIds[^1].Item2,
+                                pointLightBuffer,
+                                i,
+                                invertedProjectionViewMatrix,
+                                shadowMapSize,
+                                pointLightShadows[i] != null,
+                                frontShadowMap,
+                                frontShadowBuffer,
+                                backShadowMap,
+                                backShadowBuffer,
+                                leftShadowMap,
+                                leftShadowBuffer,
+                                rightShadowMap,
+                                rightShadowBuffer,
+                                topShadowMap,
+                                topShadowBuffer,
+                                bottomShadowMap,
+                                bottomShadowBuffer,
+                                lightViewProjectionMatrixes,
+                                enableShadowAntiAlias,
+                                totalMinX,
+                                totalMinY
+                            )
+                        );
+
                         context.Barrier(rasterizedData);
                     }
 
                     for (var i = 0; i < spotLightCount; i++)
                     {
                         var (shadowMap, shadowBuffer, lightViewProjectionMatrix) = spotLightShadows[i] ?? (emptyShadowMap, emptyShadowBuffer, new Float4x4());
-                        foreach (var ((_, minX, maxX, minY, maxY, _, _, _, _), ti) in groupedTriangleIds)
-                        {
-                            context.For(
-                                maxX - minX,
-                                maxY - minY,
-                                new LightingBySpotLight(
-                                    rasterizedData,
-                                    renderTarget.Width,
-                                    renderImageOffsetX,
-                                    renderImageOffsetY,
-                                    scaleRateX,
-                                    scaleRateY,
-                                    offsetX,
-                                    offsetY,
-                                    triangleBuffer,
-                                    ti,
-                                    spotLightBuffer,
-                                    i,
-                                    invertedProjectionViewMatrix,
-                                    lightViewProjectionMatrix,
-                                    shadowMapSize,
-                                    spotLightShadows[i] != null,
-                                    shadowMap,
-                                    shadowBuffer,
-                                    enableShadowAntiAlias
-                                )
-                            );
-                        }
+
+                        context.For(
+                            totalMaxX - totalMinX,
+                            totalMaxY - totalMinY,
+                            new LightingBySpotLight(
+                                rasterizedData,
+                                renderTarget.Width,
+                                renderImageOffsetX,
+                                renderImageOffsetY,
+                                scaleRateX,
+                                scaleRateY,
+                                offsetX,
+                                offsetY,
+                                triangleBuffer,
+                                groupedTriangleIds[0].Item2,
+                                groupedTriangleIds[^1].Item2,
+                                spotLightBuffer,
+                                i,
+                                invertedProjectionViewMatrix,
+                                lightViewProjectionMatrix,
+                                shadowMapSize,
+                                spotLightShadows[i] != null,
+                                shadowMap,
+                                shadowBuffer,
+                                enableShadowAntiAlias,
+                                totalMinX,
+                                totalMinY
+                            )
+                        );
+
                         context.Barrier(rasterizedData);
                     }
 
                     for (var i = 0; i < parallelLightCount; i++)
                     {
-                        foreach (var ((_, minX, maxX, minY, maxY, _, _, _, _), ti) in groupedTriangleIds)
-                        {
-                            var (shadowMap, shadowBuffer, lightViewProjectionMatrix) = parallelLightShadows[i] ?? (emptyShadowMap, emptyShadowBuffer, new Float4x4());
-                            context.For(
-                                maxX - minX,
-                                maxY - minY,
-                                new LightingByParallelLight(
-                                    rasterizedData,
-                                    renderTarget.Width,
-                                    renderImageOffsetX,
-                                    renderImageOffsetY,
-                                    scaleRateX,
-                                    scaleRateY,
-                                    offsetX,
-                                    offsetY,
-                                    triangleBuffer,
-                                    ti,
-                                    parallelLightBuffer,
-                                    i,
-                                    invertedProjectionViewMatrix,
-                                    lightViewProjectionMatrix,
-                                    shadowMapSize,
-                                    parallelLightShadows[i] != null,
-                                    shadowMap,
-                                    shadowBuffer,
-                                    enableShadowAntiAlias
-                                )
-                            );
-                        }
+                        var (shadowMap, shadowBuffer, lightViewProjectionMatrix) = parallelLightShadows[i] ?? (emptyShadowMap, emptyShadowBuffer, new Float4x4());
+
+                        context.For(
+                            totalMaxX - totalMinX,
+                            totalMaxY - totalMinY,
+                            new LightingByParallelLight(
+                                rasterizedData,
+                                renderTarget.Width,
+                                renderImageOffsetX,
+                                renderImageOffsetY,
+                                scaleRateX,
+                                scaleRateY,
+                                offsetX,
+                                offsetY,
+                                triangleBuffer,
+                                groupedTriangleIds[0].Item2,
+                                groupedTriangleIds[^1].Item2,
+                                parallelLightBuffer,
+                                i,
+                                invertedProjectionViewMatrix,
+                                lightViewProjectionMatrix,
+                                shadowMapSize,
+                                parallelLightShadows[i] != null,
+                                shadowMap,
+                                shadowBuffer,
+                                enableShadowAntiAlias,
+                                totalMinX,
+                                totalMinY
+                            )
+                        );
+
                         context.Barrier(rasterizedData);
                     }
                 }
 
-                context.For(totalMaxX - totalMinX, totalMaxY - totalMinY, new BlendRasterized(renderTarget.Data, rasterizedData, useLight, acceptLight, ambientLightColor * ambientRate, renderTarget.Width, totalMinX, totalMinY, blendMode));
+                context.For(totalMaxX - totalMinX, totalMaxY - totalMinY, new BlendRasterized(renderTarget.Data, rasterizedData, useLight, acceptLight, ambientLightColor * ambientRate, renderTarget.Width, totalMinX - renderImageOffsetX, totalMinY - renderImageOffsetY, blendMode));
                 context.Barrier(renderTarget.Data);
             }
         }
@@ -612,8 +625,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             Dictionary<NImage, NGPUImage> convertedTexture
         )
         {
-            var preProcessedTriangle = new GPUShadowTriangle[triangles.Length];
-            var textures = new NGPUImage[triangles.Length];
+            var preProcessedTriangle = new List<GPUShadowTriangle>(triangles.Length);
+            var textures = new List<NGPUImage>(triangles.Length);
             var area = 0;
 
             for (var i = 0; i < triangles.Length; i++)
@@ -635,13 +648,19 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 var dvv1 = (uv1.Vertex + Vector256.Create(1.0, 1.0, 0.0, 0.0)) * Vector256.Create(shadowMapSize * 0.5, shadowMapSize * 0.5, 1.0, 1.0);
                 var dvv2 = (uv2.Vertex + Vector256.Create(1.0, 1.0, 0.0, 0.0)) * Vector256.Create(shadowMapSize * 0.5, shadowMapSize * 0.5, 1.0, 1.0);
                 var dvv3 = (uv3.Vertex + Vector256.Create(1.0, 1.0, 0.0, 0.0)) * Vector256.Create(shadowMapSize * 0.5, shadowMapSize * 0.5, 1.0, 1.0);
-                var vvX = Vector128.Create((float)uv1.Vertex.GetElement(0), (float)uv2.Vertex.GetElement(0), (float)uv3.Vertex.GetElement(0), 0.0F);
-                var vvY = Vector128.Create((float)uv1.Vertex.GetElement(1), (float)uv2.Vertex.GetElement(1), (float)uv3.Vertex.GetElement(1), 0.0F);
-                var vvZ = Vector128.Create((float)uv1.Vertex.GetElement(2), (float)uv2.Vertex.GetElement(2), (float)uv3.Vertex.GetElement(2), 0.0F);
                 var minX = MaxClampedSize((int)(Math.Min(Math.Min(dvv1.GetElement(0), dvv2.GetElement(0)), dvv3.GetElement(0))), 0);
                 var maxX = MinClampedSize((int)Math.Ceiling(Math.Max(Math.Max(dvv1.GetElement(0), dvv2.GetElement(0)), dvv3.GetElement(0))), shadowMapSize);
                 var minY = MaxClampedSize((int)(Math.Min(Math.Min(dvv1.GetElement(1), dvv2.GetElement(1)), dvv3.GetElement(1))), 0);
                 var maxY = MinClampedSize((int)Math.Ceiling(Math.Max(Math.Max(dvv1.GetElement(1), dvv2.GetElement(1)), dvv3.GetElement(1))), shadowMapSize);
+
+                if (minX >= shadowMapSize || maxX <= 0 || minY >= shadowMapSize || maxY <= 0)
+                {
+                    continue;
+                }
+
+                var vvX = Vector128.Create((float)uv1.Vertex.GetElement(0), (float)uv2.Vertex.GetElement(0), (float)uv3.Vertex.GetElement(0), 0.0F);
+                var vvY = Vector128.Create((float)uv1.Vertex.GetElement(1), (float)uv2.Vertex.GetElement(1), (float)uv3.Vertex.GetElement(1), 0.0F);
+                var vvZ = Vector128.Create((float)uv1.Vertex.GetElement(2), (float)uv2.Vertex.GetElement(2), (float)uv3.Vertex.GetElement(2), 0.0F);
                 var u = Vector128.Create((float)uv1.U, (float)uv2.U, (float)uv3.U, 0.0F);
                 var v = Vector128.Create((float)uv1.V, (float)uv2.V, (float)uv3.V, 0.0F);
                 var w = Vector128.Create((float)w1, (float)w2, (float)w3, 0.0F);
@@ -665,9 +684,9 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 {
                     gpuTexture = (NGPUImage)triangle.Texture;
                 }
-                textures[i] = gpuTexture;
+                textures.Add(gpuTexture);
 
-                preProcessedTriangle[i] = new GPUShadowTriangle(
+                var preProcessed = new GPUShadowTriangle(
                     triangle.Id,
                     minX,
                     maxX,
@@ -688,6 +707,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                     triangle.Opacity,
                     triangle.LightTransmission
                 );
+                preProcessedTriangle.Add(preProcessed);
 
                 var barycenter = Vector256.GetLower((dvv1 + dvv2 + dvv3) / 3.0);
                 var maxSize = Math.Max(Math.Abs(maxX - minX), Math.Abs(maxY - minY));
@@ -696,7 +716,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 var svb = (Vector256.GetLower(dvv2) - barycenter) * scale - sva;
                 var svc = (Vector256.GetLower(dvv3) - barycenter) * scale - sva;
 
-                if (preProcessedTriangle[i].TrueMinX < shadowMapSize && preProcessedTriangle[i].TrueMaxX > 0 && preProcessedTriangle[i].TrueMinY < shadowMapSize && preProcessedTriangle[i].TrueMaxY > 0)
+                if (preProcessed.TrueMinX < shadowMapSize && preProcessed.TrueMaxX > 0 && preProcessed.TrueMinY < shadowMapSize && preProcessed.TrueMaxY > 0)
                 {
                     area += Math.Min((int)Math.Ceiling(Math.Abs(svb.GetElement(0) * svc.GetElement(1) - svc.GetElement(0) * svb.GetElement(1)) * 0.5), Math.Abs(maxX - minX) * Math.Abs(maxY - minY));
                 }
@@ -709,7 +729,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
             var lightViewProjectionMatrix = (lightViewMatrix * Matrix4x4.CreateTranslation(offsetX, offsetY, 0.0F) * (Matrix4x4)lightProjectionMatrix).ToFloat4x4();
             var floatLightProjectionMatrix = ((Matrix4x4)lightProjectionMatrix).ToFloat4x4();
-            using var triangleBuffer = device.AllocateReadOnlyBuffer(preProcessedTriangle);
+            using var triangleBuffer = device.AllocateReadOnlyBuffer<GPUShadowTriangle>(CollectionsMarshal.AsSpan(preProcessedTriangle));
             using var counter = device.AllocateReadWriteBuffer([0]);
             var shadowMap = device.AllocateReadWriteBuffer<int>(shadowMapSize * shadowMapSize);
             var shadowBuffer = device.AllocateReadWriteBuffer<GPUShadowPixel>(area);
@@ -717,33 +737,45 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             {
                 context.For(shadowMapSize * shadowMapSize, new InitShadowMap(shadowMap));
 
-                foreach (var groupedTriangle in preProcessedTriangle.ZipWithIndex().GroupByPrev(t => t.Item1.Id))
+                foreach (var groupedTriangle in preProcessedTriangle.ZipWithIndex().GroupByPrev(t => t.Item1.Id).Select(g => g.ToArray()))
                 {
-                    foreach (var (triangle, i) in groupedTriangle)
+                    if (groupedTriangle.Length < 1)
                     {
-                        if (triangle.TrueMinX >= shadowMapSize || triangle.TrueMaxX <= 0 || triangle.TrueMinY >= shadowMapSize || triangle.TrueMaxY <= 0)
-                        {
-                            continue;
-                        }
-
-                        var texture = textures[i];
-                        context.For(
-                            triangle.TrueMaxX - triangle.TrueMinX,
-                            triangle.TrueMaxY - triangle.TrueMinY,
-                            new RasterizeShadow(
-                                counter,
-                                shadowMap,
-                                shadowBuffer,
-                                shadowMapSize,
-                                triangleBuffer,
-                                i,
-                                texture.Data,
-                                texture.Width,
-                                texture.Height,
-                                shadowStrength
-                            )
-                        );
+                        continue;
                     }
+
+                    var totalMinX = int.MaxValue;
+                    var totalMaxX = int.MinValue;
+                    var totalMinY = int.MaxValue;
+                    var totalMaxY = int.MinValue;
+                    foreach (var (triangle, _) in groupedTriangle)
+                    {
+                        totalMinX = Math.Min(totalMinX, triangle.TrueMinX);
+                        totalMaxX = Math.Max(totalMaxX, triangle.TrueMaxX);
+                        totalMinY = Math.Min(totalMinY, triangle.TrueMinY);
+                        totalMaxY = Math.Max(totalMaxY, triangle.TrueMaxY);
+                    }
+
+                    var texture = textures[groupedTriangle[0].Item2];
+                    context.For(
+                        totalMaxX - totalMinX,
+                        totalMaxY - totalMinY,
+                        new RasterizeShadow(
+                            counter,
+                            shadowMap,
+                            shadowBuffer,
+                            shadowMapSize,
+                            triangleBuffer,
+                            groupedTriangle[0].Item2,
+                            groupedTriangle[^1].Item2,
+                            texture.Data,
+                            texture.Width,
+                            texture.Height,
+                            shadowStrength,
+                            totalMinX,
+                            totalMinY
+                        )
+                    );
 
                     context.Barrier(shadowBuffer);
                 }

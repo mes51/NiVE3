@@ -18,41 +18,51 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
         float scaleRateX,
         float scaleRateY,
         ReadOnlyBuffer<GPUTriangle> triangles,
-        int triangleIndex,
+        int beginTriangleIndex,
+        int endTriangleIndex,
         ReadWriteBuffer<Float4> texture,
         int textureWidth,
         int textureHeight,
         ReadWriteBuffer<float> trackMatte,
         float offsetX,
-        float offsetY
+        float offsetY,
+        int startX,
+        int startY
     ) : IComputeShader
     {
         public void Execute()
         {
-            var triangle = triangles[triangleIndex];
-            var e = ShaderUtil.CalcE(ThreadIds.X, ThreadIds.Y, triangle, scaleRateX, scaleRateY, offsetX, offsetY);
-            if (Hlsl.Any(Hlsl.IsNaN(e)))
+            var x = ThreadIds.X + startX;
+            var y = ThreadIds.Y + startY;
+            for (var ti = beginTriangleIndex; ti <= endTriangleIndex; ti++)
             {
-                return;
-            }
+                var triangle = triangles[ti];
+                var e = ShaderUtil.CalcE(x, y, triangle, scaleRateX, scaleRateY, offsetX, offsetY);
+                if (Hlsl.Any(Hlsl.IsNaN(e)))
+                {
+                    continue;
+                }
 
-            var p = (ThreadIds.Y + triangle.TrueMinY - renderImageOffsetY) * renderImageWidth + ThreadIds.X + triangle.TrueMinX - renderImageOffsetX;
-            var tw = ShaderUtil.Sum(triangle.W * e);
-            var tx = ShaderUtil.Sum(triangle.U * e / tw) * textureWidth;
-            var ty = ShaderUtil.Sum(triangle.V * e / tw) * textureHeight;
+                var p = (y - renderImageOffsetY) * renderImageWidth + x - renderImageOffsetX;
+                var tw = ShaderUtil.Sum(triangle.W * e);
+                var tx = ShaderUtil.Sum(triangle.U * e / tw) * textureWidth;
+                var ty = ShaderUtil.Sum(triangle.V * e / tw) * textureHeight;
 
-            var color = triangle.InterpolationQuality == 0 ? NearestNeighbor(tx, ty) : Bilinear(tx, ty);
-            color.W *= trackMatte[p % trackMatte.Length] * triangle.Opacity;
-            if (color.W <= 0.0F)
-            {
-                return;
-            }
+                var color = triangle.InterpolationQuality == 0 ? NearestNeighbor(tx, ty) : Bilinear(tx, ty);
+                color.W *= trackMatte[p % trackMatte.Length] * triangle.Opacity;
+                if (color.W <= 0.0F)
+                {
+                    continue;
+                }
 
 #pragma warning disable IDE0017 // NOTE: ComputeSharpのSourceGeneratorでは非対応
-            var result = new GPURasterizedPixel();
+                var result = new GPURasterizedPixel();
 #pragma warning restore IDE0017 // オブジェクトの初期化を簡略化します
-            result.Color = color;
-            renderImage[p] = result;
+                result.Color = color;
+                renderImage[p] = result;
+
+                break;
+            }
         }
 
         Float4 NearestNeighbor(float x, float y)
@@ -185,7 +195,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
         float offsetX,
         float offsetY,
         ReadOnlyBuffer<GPUTriangle> triangles,
-        int triangleIndex,
+        int beginTriangleIndex,
+        int endTriangleIndex,
         ReadOnlyBuffer<GPUPointLight> pointLights,
         int lightIndex,
         Float4x4 invertedProjectionViewMatrix,
@@ -204,76 +215,85 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
         ReadWriteBuffer<int> bottomShadowMap,
         ReadWriteBuffer<GPUShadowPixel> bottomShadowBuffer,
         ConstantBuffer<Float4x4> lightViewProjectionMatrixs,
-    Bool enableShadowAntiAlias
+        Bool enableShadowAntiAlias,
+        int startX,
+        int startY
     ) : IComputeShader
     {
         const float ShininessStrength = 120.0F;
 
         public void Execute()
         {
-            var triangle = triangles[triangleIndex];
-            var e = ShaderUtil.CalcE(ThreadIds.X, ThreadIds.Y, triangle, scaleRateX, scaleRateY, offsetX, offsetY);
-            if (Hlsl.Any(Hlsl.IsNaN(e)))
+            var x = ThreadIds.X + startX;
+            var y = ThreadIds.Y + startY;
+            for (var ti = beginTriangleIndex; ti <= endTriangleIndex; ti++)
             {
-                return;
-            }
-
-            var p = (ThreadIds.Y + triangle.TrueMinY - renderImageOffsetY) * renderImageWidth + ThreadIds.X + triangle.TrueMinX - renderImageOffsetX;
-            var rasterizedPixel = rasterizedImage[p];
-
-            var color = rasterizedPixel.Color;
-            var a = color.W;
-            var l = pointLights[lightIndex];
-            var shadowProjectionPos = Float4.Zero;
-            if (hasShadow)
-            {
-                shadowProjectionPos = ShaderUtil.CalcBarycentricCoord(triangle.SVVX, triangle.SVVY, triangle.SVVZ, e);
-            }
-
-            if (hasShadow & !triangle.IsAcceptLight & triangle.IsAcceptShadow)
-            {
-                color *= GetShadowColor(triangle.Id, l.ShadowScatterSize, shadowProjectionPos, invertedProjectionViewMatrix, l.FaceDetectionMatrix);
-                color.W = a;
-                rasterizedPixel.Color = color;
-            }
-            else if (triangle.IsAcceptLight)
-            {
-                var lightColor = l.Color;
-
-                if (triangle.IsAcceptShadow)
+                var triangle = triangles[ti];
+                var e = ShaderUtil.CalcE(x, y, triangle, scaleRateX, scaleRateY, offsetX, offsetY);
+                if (Hlsl.Any(Hlsl.IsNaN(e)))
                 {
-                    var transmissionColor = GetShadowColor(triangle.Id, l.ShadowScatterSize, shadowProjectionPos, invertedProjectionViewMatrix, l.FaceDetectionMatrix);
-                    if (Hlsl.All(lightColor.XYZ < 0.0F))
+                    continue;
+                }
+
+                var p = (y - renderImageOffsetY) * renderImageWidth + x - renderImageOffsetX;
+                var rasterizedPixel = rasterizedImage[p];
+
+                var color = rasterizedPixel.Color;
+                var a = color.W;
+                var l = pointLights[lightIndex];
+                var shadowProjectionPos = Float4.Zero;
+                if (hasShadow)
+                {
+                    shadowProjectionPos = ShaderUtil.CalcBarycentricCoord(triangle.SVVX, triangle.SVVY, triangle.SVVZ, e);
+                }
+
+                if (hasShadow & !triangle.IsAcceptLight & triangle.IsAcceptShadow)
+                {
+                    color *= GetShadowColor(triangle.Id, l.ShadowScatterSize, shadowProjectionPos, invertedProjectionViewMatrix, l.FaceDetectionMatrix);
+                    color.W = a;
+                    rasterizedPixel.Color = color;
+                }
+                else if (triangle.IsAcceptLight)
+                {
+                    var lightColor = l.Color;
+
+                    if (triangle.IsAcceptShadow)
                     {
-                        return;
+                        var transmissionColor = GetShadowColor(triangle.Id, l.ShadowScatterSize, shadowProjectionPos, invertedProjectionViewMatrix, l.FaceDetectionMatrix);
+                        if (Hlsl.All(lightColor.XYZ < 0.0F))
+                        {
+                            continue;
+                        }
+                        lightColor *= transmissionColor;
                     }
-                    lightColor *= transmissionColor;
+
+                    var position = ShaderUtil.CalcBarycentricCoord(triangle.VVX, triangle.VVY, triangle.VVZ, e);
+                    var n = triangle.IsFrontFace ? -triangle.FloatNormal : triangle.FloatNormal;
+                    var lightDiff = (position - l.Position).XYZ;
+                    var light = Hlsl.Normalize(lightDiff);
+                    var falloff = ShaderUtil.CalcFalloff(lightDiff, l.FalloffType, l.FalloffStart, l.FalloffLength);
+                    var diffuseFactor = Hlsl.Dot(light, n);
+                    var isBack = diffuseFactor < 0.0F;
+                    if (isBack)
+                    {
+                        diffuseFactor *= -triangle.LightTransmission;
+                    }
+                    rasterizedPixel.Diffuse += lightColor * color * diffuseFactor * falloff * triangle.Diffuse;
+
+                    var view = -Hlsl.Normalize(position.XYZ);
+                    var halfLE = Hlsl.Normalize(view - light);
+                    var specularFactor = Hlsl.Max(Hlsl.Dot(-n, halfLE), 0.0F);
+                    if (isBack)
+                    {
+                        specularFactor *= -triangle.LightTransmission;
+                    }
+                    rasterizedPixel.Specular += Hlsl.Lerp(lightColor, color * lightColor, triangle.Metal) * Hlsl.Pow(specularFactor, ShininessStrength * triangle.SpecularShininess) * triangle.SpecularIntensity * falloff;
                 }
 
-                var position = ShaderUtil.CalcBarycentricCoord(triangle.VVX, triangle.VVY, triangle.VVZ, e);
-                var n = triangle.IsFrontFace ? -triangle.FloatNormal : triangle.FloatNormal;
-                var lightDiff = (position - l.Position).XYZ;
-                var light = Hlsl.Normalize(lightDiff);
-                var falloff = ShaderUtil.CalcFalloff(lightDiff, l.FalloffType, l.FalloffStart, l.FalloffLength);
-                var diffuseFactor = Hlsl.Dot(light, n);
-                var isBack = diffuseFactor < 0.0F;
-                if (isBack)
-                {
-                    diffuseFactor *= -triangle.LightTransmission;
-                }
-                rasterizedPixel.Diffuse += lightColor * color * diffuseFactor * falloff * triangle.Diffuse;
+                rasterizedImage[p] = rasterizedPixel;
 
-                var view = -Hlsl.Normalize(position.XYZ);
-                var halfLE = Hlsl.Normalize(view - light);
-                var specularFactor = Hlsl.Max(Hlsl.Dot(-n, halfLE), 0.0F);
-                if (isBack)
-                {
-                    specularFactor *= -triangle.LightTransmission;
-                }
-                rasterizedPixel.Specular += Hlsl.Lerp(lightColor, color * lightColor, triangle.Metal) * Hlsl.Pow(specularFactor, ShininessStrength * triangle.SpecularShininess) * triangle.SpecularIntensity * falloff;
+                break;
             }
-
-            rasterizedImage[p] = rasterizedPixel;
         }
 
         Float4 GetShadowColor(int triangleId, float shadowScatterSize, Float4 shadowProjectionPos, Float4x4 invertedProjectionViewMatrix, Float4x4 faceDetectionMatrix)
@@ -534,7 +554,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
         float offsetX,
         float offsetY,
         ReadOnlyBuffer<GPUTriangle> triangles,
-        int triangleIndex,
+        int beginTriangleIndex,
+        int endTriangleIndex,
         ReadOnlyBuffer<GPUSpotLight> spotLights,
         int lightIndex,
         Float4x4 invertedProjectionViewMatrix,
@@ -543,7 +564,9 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
         Bool hasShadow,
         ReadWriteBuffer<int> shadowMap,
         ReadWriteBuffer<GPUShadowPixel> shadowBuffer,
-        Bool enableShadowAntiAlias
+        Bool enableShadowAntiAlias,
+        int startX,
+        int startY
     ) : IComputeShader
     {
         const float ShininessStrength = 120.0F;
@@ -552,78 +575,85 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
 
         public void Execute()
         {
-            var triangle = triangles[triangleIndex];
-            var e = ShaderUtil.CalcE(ThreadIds.X, ThreadIds.Y, triangle, scaleRateX, scaleRateY, offsetX, offsetY);
-            if (Hlsl.Any(Hlsl.IsNaN(e)))
+            var x = ThreadIds.X + startX;
+            var y = ThreadIds.Y + startY;
+            for (var ti = beginTriangleIndex; ti <= endTriangleIndex; ti++)
             {
-                return;
-            }
-
-            var p = (ThreadIds.Y + triangle.TrueMinY - renderImageOffsetY) * renderImageWidth + ThreadIds.X + triangle.TrueMinX - renderImageOffsetX;
-            var rasterizedPixel = rasterizedImage[p];
-
-            var color = rasterizedPixel.Color;
-            var a = color.W;
-            var l = spotLights[lightIndex];
-            var shadowProjectionPos = Float4.Zero;
-            if (hasShadow)
-            {
-                shadowProjectionPos = ShaderUtil.CalcBarycentricCoord(triangle.SVVX, triangle.SVVY, triangle.SVVZ, e);
-            }
-
-            var position = ShaderUtil.CalcBarycentricCoord(triangle.VVX, triangle.VVY, triangle.VVZ, e);
-            var lightColor = l.Color;
-            var lightDiff = (position - l.Position).XYZ;
-            var light = Hlsl.Normalize(lightDiff);
-            var spotCone = Hlsl.Acos(Hlsl.Dot(l.Direction, light));
-            var attenuation = 1.0F;
-            if (l.ConeAttenuationRate > 0.0)
-            {
-                attenuation = Hlsl.Cos((1.0F - Hlsl.Min((Hlsl.Cos(spotCone) - l.OuterConeCos) * l.InvertInnerConeCos, 1.0F)) * PI * 0.5F);
-            }
-
-            if (hasShadow & !triangle.IsAcceptLight & triangle.IsAcceptShadow)
-            {
-                color *= Hlsl.Lerp(1.0F, GetShadowColor(triangle.Id, l.ShadowScatterSize, shadowProjectionPos), attenuation);
-                color.W = a;
-                rasterizedPixel.Color = color;
-            }
-            else if (triangle.IsAcceptLight)
-            {
-                if (spotCone <= l.OuterCone)
+                var triangle = triangles[ti];
+                var e = ShaderUtil.CalcE(x, y, triangle, scaleRateX, scaleRateY, offsetX, offsetY);
+                if (Hlsl.Any(Hlsl.IsNaN(e)))
                 {
-                    if (hasShadow & triangle.IsAcceptShadow)
-                    {
-                        var transmissionColor = GetShadowColor(triangle.Id, l.ShadowScatterSize, shadowProjectionPos);
-                        if (Hlsl.All(lightColor.XYZ < 0.0F))
-                        {
-                            return;
-                        }
-                        lightColor *= transmissionColor;
-                    }
-
-                    var n = triangle.IsFrontFace ? -triangle.FloatNormal : triangle.FloatNormal;
-                    var falloff = ShaderUtil.CalcFalloff(lightDiff, l.FalloffType, l.FalloffStart, l.FalloffLength);
-                    var diffuseFactor = Hlsl.Dot(light, n);
-                    var isBack = diffuseFactor < 0.0F;
-                    if (isBack)
-                    {
-                        diffuseFactor *= -triangle.LightTransmission;
-                    }
-                    rasterizedPixel.Diffuse += lightColor * color * diffuseFactor * falloff * attenuation * triangle.Diffuse;
-
-                    var view = -Hlsl.Normalize(position.XYZ);
-                    var halfLE = Hlsl.Normalize(view - light);
-                    var specularFactor = Hlsl.Max(Hlsl.Dot(-n, halfLE), 0.0F);
-                    if (isBack)
-                    {
-                        specularFactor *= -triangle.LightTransmission;
-                    }
-                    rasterizedPixel.Specular += Hlsl.Lerp(lightColor, color * lightColor, triangle.Metal) * Hlsl.Pow(specularFactor, ShininessStrength * triangle.SpecularShininess) * triangle.SpecularIntensity * falloff * attenuation;
+                    continue;
                 }
-            }
 
-            rasterizedImage[p] = rasterizedPixel;
+                var p = (y - renderImageOffsetY) * renderImageWidth + x - renderImageOffsetX;
+                var rasterizedPixel = rasterizedImage[p];
+
+                var color = rasterizedPixel.Color;
+                var a = color.W;
+                var l = spotLights[lightIndex];
+                var shadowProjectionPos = Float4.Zero;
+                if (hasShadow)
+                {
+                    shadowProjectionPos = ShaderUtil.CalcBarycentricCoord(triangle.SVVX, triangle.SVVY, triangle.SVVZ, e);
+                }
+
+                var position = ShaderUtil.CalcBarycentricCoord(triangle.VVX, triangle.VVY, triangle.VVZ, e);
+                var lightColor = l.Color;
+                var lightDiff = (position - l.Position).XYZ;
+                var light = Hlsl.Normalize(lightDiff);
+                var spotCone = Hlsl.Acos(Hlsl.Dot(l.Direction, light));
+                var attenuation = 1.0F;
+                if (l.ConeAttenuationRate > 0.0)
+                {
+                    attenuation = Hlsl.Cos((1.0F - Hlsl.Min((Hlsl.Cos(spotCone) - l.OuterConeCos) * l.InvertInnerConeCos, 1.0F)) * PI * 0.5F);
+                }
+
+                if (hasShadow & !triangle.IsAcceptLight & triangle.IsAcceptShadow)
+                {
+                    color *= Hlsl.Lerp(1.0F, GetShadowColor(triangle.Id, l.ShadowScatterSize, shadowProjectionPos), attenuation);
+                    color.W = a;
+                    rasterizedPixel.Color = color;
+                }
+                else if (triangle.IsAcceptLight)
+                {
+                    if (spotCone <= l.OuterCone)
+                    {
+                        if (hasShadow & triangle.IsAcceptShadow)
+                        {
+                            var transmissionColor = GetShadowColor(triangle.Id, l.ShadowScatterSize, shadowProjectionPos);
+                            if (Hlsl.All(lightColor.XYZ < 0.0F))
+                            {
+                                continue;
+                            }
+                            lightColor *= transmissionColor;
+                        }
+
+                        var n = triangle.IsFrontFace ? -triangle.FloatNormal : triangle.FloatNormal;
+                        var falloff = ShaderUtil.CalcFalloff(lightDiff, l.FalloffType, l.FalloffStart, l.FalloffLength);
+                        var diffuseFactor = Hlsl.Dot(light, n);
+                        var isBack = diffuseFactor < 0.0F;
+                        if (isBack)
+                        {
+                            diffuseFactor *= -triangle.LightTransmission;
+                        }
+                        rasterizedPixel.Diffuse += lightColor * color * diffuseFactor * falloff * attenuation * triangle.Diffuse;
+
+                        var view = -Hlsl.Normalize(position.XYZ);
+                        var halfLE = Hlsl.Normalize(view - light);
+                        var specularFactor = Hlsl.Max(Hlsl.Dot(-n, halfLE), 0.0F);
+                        if (isBack)
+                        {
+                            specularFactor *= -triangle.LightTransmission;
+                        }
+                        rasterizedPixel.Specular += Hlsl.Lerp(lightColor, color * lightColor, triangle.Metal) * Hlsl.Pow(specularFactor, ShininessStrength * triangle.SpecularShininess) * triangle.SpecularIntensity * falloff * attenuation;
+                    }
+                }
+
+                rasterizedImage[p] = rasterizedPixel;
+
+                break;
+            }
         }
 
         Float4 GetShadowColor(int triangleId, float shadowScatterSize, Float4 shadowProjectionPos)
@@ -749,7 +779,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
         float offsetX,
         float offsetY,
         ReadOnlyBuffer<GPUTriangle> triangles,
-        int triangleIndex,
+        int beginTriangleIndex,
+        int endTriangleIndex,
         ReadOnlyBuffer<GPUParallelLight> parallelLights,
         int lightIndex,
         Float4x4 invertedProjectionViewMatrix,
@@ -758,76 +789,85 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
         Bool hasShadow,
         ReadWriteBuffer<int> shadowMap,
         ReadWriteBuffer<GPUShadowPixel> shadowBuffer,
-        Bool enableShadowAntiAlias
+        Bool enableShadowAntiAlias,
+        int startX,
+        int startY
     ) : IComputeShader
     {
         const float ShininessStrength = 120.0F;
 
         public void Execute()
         {
-            var triangle = triangles[triangleIndex];
-            var e = ShaderUtil.CalcE(ThreadIds.X, ThreadIds.Y, triangle, scaleRateX, scaleRateY, offsetX, offsetY);
-            if (Hlsl.Any(Hlsl.IsNaN(e)))
+            var x = ThreadIds.X + startX;
+            var y = ThreadIds.Y + startY;
+            for (var ti = beginTriangleIndex; ti <= endTriangleIndex; ti++)
             {
-                return;
-            }
-
-            var p = (ThreadIds.Y + triangle.TrueMinY - renderImageOffsetY) * renderImageWidth + ThreadIds.X + triangle.TrueMinX - renderImageOffsetX;
-            var rasterizedPixel = rasterizedImage[p];
-
-            var color = rasterizedPixel.Color;
-            var a = color.W;
-            var l = parallelLights[lightIndex];
-            var shadowProjectionPos = Float4.Zero;
-            if (hasShadow)
-            {
-                shadowProjectionPos = ShaderUtil.CalcBarycentricCoord(triangle.SVVX, triangle.SVVY, triangle.SVVZ, e);
-            }
-
-            var position = ShaderUtil.CalcBarycentricCoord(triangle.VVX, triangle.VVY, triangle.VVZ, e);
-
-            if (hasShadow & !triangle.IsAcceptLight & triangle.IsAcceptShadow)
-            {
-                color *= GetShadowColor(triangle.Id, l.ShadowScatterSize, shadowProjectionPos);
-                color.W = a;
-                rasterizedPixel.Color = color;
-            }
-            else if (triangle.IsAcceptLight)
-            {
-                var lightColor = l.Color;
-
-                if (hasShadow & triangle.IsAcceptShadow)
+                var triangle = triangles[ti];
+                var e = ShaderUtil.CalcE(x, y, triangle, scaleRateX, scaleRateY, offsetX, offsetY);
+                if (Hlsl.Any(Hlsl.IsNaN(e)))
                 {
-                    var transmissionColor = GetShadowColor(triangle.Id, l.ShadowScatterSize, shadowProjectionPos);
-                    if (Hlsl.All(lightColor.XYZ < 0.0F))
+                    continue;
+                }
+
+                var p = (y - renderImageOffsetY) * renderImageWidth + x - renderImageOffsetX;
+                var rasterizedPixel = rasterizedImage[p];
+
+                var color = rasterizedPixel.Color;
+                var a = color.W;
+                var l = parallelLights[lightIndex];
+                var shadowProjectionPos = Float4.Zero;
+                if (hasShadow)
+                {
+                    shadowProjectionPos = ShaderUtil.CalcBarycentricCoord(triangle.SVVX, triangle.SVVY, triangle.SVVZ, e);
+                }
+
+                var position = ShaderUtil.CalcBarycentricCoord(triangle.VVX, triangle.VVY, triangle.VVZ, e);
+
+                if (hasShadow & !triangle.IsAcceptLight & triangle.IsAcceptShadow)
+                {
+                    color *= GetShadowColor(triangle.Id, l.ShadowScatterSize, shadowProjectionPos);
+                    color.W = a;
+                    rasterizedPixel.Color = color;
+                }
+                else if (triangle.IsAcceptLight)
+                {
+                    var lightColor = l.Color;
+
+                    if (hasShadow & triangle.IsAcceptShadow)
                     {
-                        return;
+                        var transmissionColor = GetShadowColor(triangle.Id, l.ShadowScatterSize, shadowProjectionPos);
+                        if (Hlsl.All(lightColor.XYZ < 0.0F))
+                        {
+                            continue;
+                        }
+                        lightColor *= transmissionColor;
                     }
-                    lightColor *= transmissionColor;
+
+                    var lightDiff = (position - l.Position).XYZ;
+                    var n = triangle.IsFrontFace ? -triangle.FloatNormal : triangle.FloatNormal;
+                    var falloff = ShaderUtil.CalcFalloff(lightDiff, l.FalloffType, l.FalloffStart, l.FalloffLength);
+                    var diffuseFactor = Hlsl.Dot(l.Direction, n);
+                    var isBack = diffuseFactor < 0.0F;
+                    if (isBack)
+                    {
+                        diffuseFactor *= -triangle.LightTransmission;
+                    }
+                    rasterizedPixel.Diffuse += lightColor * color * diffuseFactor * falloff * triangle.Diffuse;
+
+                    var view = -Hlsl.Normalize(position.XYZ);
+                    var halfLE = Hlsl.Normalize(view - l.Direction);
+                    var specularFactor = Hlsl.Max(Hlsl.Dot(-n, halfLE), 0.0F);
+                    if (isBack)
+                    {
+                        specularFactor *= -triangle.LightTransmission;
+                    }
+                    rasterizedPixel.Specular += Hlsl.Lerp(lightColor, color * lightColor, triangle.Metal) * Hlsl.Pow(specularFactor, ShininessStrength * triangle.SpecularShininess) * triangle.SpecularIntensity * falloff;
                 }
 
-                var lightDiff = (position - l.Position).XYZ;
-                var n = triangle.IsFrontFace ? -triangle.FloatNormal : triangle.FloatNormal;
-                var falloff = ShaderUtil.CalcFalloff(lightDiff, l.FalloffType, l.FalloffStart, l.FalloffLength);
-                var diffuseFactor = Hlsl.Dot(l.Direction, n);
-                var isBack = diffuseFactor < 0.0F;
-                if (isBack)
-                {
-                    diffuseFactor *= -triangle.LightTransmission;
-                }
-                rasterizedPixel.Diffuse += lightColor * color * diffuseFactor * falloff * triangle.Diffuse;
+                rasterizedImage[p] = rasterizedPixel;
 
-                var view = -Hlsl.Normalize(position.XYZ);
-                var halfLE = Hlsl.Normalize(view - l.Direction);
-                var specularFactor = Hlsl.Max(Hlsl.Dot(-n, halfLE), 0.0F);
-                if (isBack)
-                {
-                    specularFactor *= -triangle.LightTransmission;
-                }
-                rasterizedPixel.Specular += Hlsl.Lerp(lightColor, color * lightColor, triangle.Metal) * Hlsl.Pow(specularFactor, ShininessStrength * triangle.SpecularShininess) * triangle.SpecularIntensity * falloff;
+                break;
             }
-
-            rasterizedImage[p] = rasterizedPixel;
         }
 
         Float4 GetShadowColor(int triangleId, float shadowScatterSize, Float4 shadowProjectionPos)
@@ -1023,64 +1063,72 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
         ReadWriteBuffer<GPUShadowPixel> shadowBuffer,
         int size,
         ReadOnlyBuffer<GPUShadowTriangle> triangles,
-        int triangleIndex,
+        int beginTriangleIndex,
+        int endTriangleIndex,
         ReadWriteBuffer<Float4> texture,
         int textureWidth,
         int textureHeight,
-        float shadowStrength
+        float shadowStrength,
+        int startX,
+        int startY
     ) : IComputeShader
     {
         const float Epsilon = 1E-7F;
 
         public void Execute()
         {
-            var triangle = triangles[triangleIndex];
-            var x = ThreadIds.X + triangle.TrueMinX;
-            var y = ThreadIds.Y + triangle.TrueMinY;
-            if (x < triangle.TrueMinX || x >= triangle.TrueMaxX || y < triangle.TrueMinY || y >= triangle.TrueMaxY)
+            for (var ti = beginTriangleIndex; ti <= endTriangleIndex; ti++)
             {
-                return;
-            }
+                var triangle = triangles[ti];
+                var x = ThreadIds.X + startX;
+                var y = ThreadIds.Y + startY;
+                if (x < triangle.TrueMinX || x >= triangle.TrueMaxX || y < triangle.TrueMinY || y >= triangle.TrueMaxY)
+                {
+                    continue;
+                }
 
-            var eY = triangle.EdgeX * (new Float4(y, y, y, 0.0F) - triangle.VVEY);
-            var eX = new Float4(x, x, x, 0.0F) - triangle.VVEX;
-            var e = (eY - (triangle.EdgeY * eX)) * triangle.Denominator;
+                var eY = triangle.EdgeX * (new Float4(y, y, y, 0.0F) - triangle.VVEY);
+                var eX = new Float4(x, x, x, 0.0F) - triangle.VVEX;
+                var e = (eY - (triangle.EdgeY * eX)) * triangle.Denominator;
 
-            var ae = ShaderUtil.Mask(e, Hlsl.Abs(e) >= Epsilon);
-            if (Hlsl.Any(ae < 0.0F))
-            {
-                return;
-            }
+                var ae = ShaderUtil.Mask(e, Hlsl.Abs(e) >= Epsilon);
+                if (Hlsl.Any(ae < 0.0F))
+                {
+                    continue;
+                }
 
-            var tw = ShaderUtil.Sum(triangle.W * e);
-            var tx = ShaderUtil.Sum(triangle.U * e / tw) * textureWidth;
-            var ty = ShaderUtil.Sum(triangle.V * e / tw) * textureHeight;
+                var tw = ShaderUtil.Sum(triangle.W * e);
+                var tx = ShaderUtil.Sum(triangle.U * e / tw) * textureWidth;
+                var ty = ShaderUtil.Sum(triangle.V * e / tw) * textureHeight;
 
-            var color = triangle.InterpolationQuality == 0 ? NearestNeighbor(tx, ty) : Bilinear(tx, ty);
+                var color = triangle.InterpolationQuality == 0 ? NearestNeighbor(tx, ty) : Bilinear(tx, ty);
 
-            // α == 0 もしくはライト透過100%の白
-            if (color.W <= 0.0F || (triangle.LightTransmission >= 1.0F && color.X >= 1.0F && color.Y >= 1.0F && color.Z >= 1.0F))
-            {
-                return;
-            }
+                // α == 0 もしくはライト透過100%の白
+                if (color.W <= 0.0F || (triangle.LightTransmission >= 1.0F && color.X >= 1.0F && color.Y >= 1.0F && color.Z >= 1.0F))
+                {
+                    continue;
+                }
 
-            var d = ShaderUtil.CalcBarycentricCoord(triangle.VVX, triangle.VVY, triangle.VVZ, e);
+                var d = ShaderUtil.CalcBarycentricCoord(triangle.VVX, triangle.VVY, triangle.VVZ, e);
 
-            var shadowColor = 1.0F - Hlsl.Lerp(1.0F, Hlsl.Lerp(Float4.UnitW, Hlsl.Clamp(color, 0.0F, 1.0F), triangle.LightTransmission), Hlsl.Min(color.W, 1.0F) * triangle.Opacity);
-            shadowColor = 1.0F - Hlsl.Clamp(shadowColor * shadowStrength, 0.0F, 1.0F);
+                var shadowColor = 1.0F - Hlsl.Lerp(1.0F, Hlsl.Lerp(Float4.UnitW, Hlsl.Clamp(color, 0.0F, 1.0F), triangle.LightTransmission), Hlsl.Min(color.W, 1.0F) * triangle.Opacity);
+                shadowColor = 1.0F - Hlsl.Clamp(shadowColor * shadowStrength, 0.0F, 1.0F);
 
-            var p = y * size + x;
-            Hlsl.InterlockedAdd(ref counter[0], 1, out var bufferIndex);
-            Hlsl.InterlockedExchange(ref shadowMap[p], bufferIndex, out var oldBufferIndex);
+                var p = y * size + x;
+                Hlsl.InterlockedAdd(ref counter[0], 1, out var bufferIndex);
+                Hlsl.InterlockedExchange(ref shadowMap[p], bufferIndex, out var oldBufferIndex);
 
 #pragma warning disable IDE0017 // NOTE: ComputeSharpでは非対応
-            var sp = new GPUShadowPixel();
+                var sp = new GPUShadowPixel();
 #pragma warning restore IDE0017 // オブジェクトの初期化を簡略化します
-            sp.Color = shadowColor.XYZ;
-            sp.Depth = Hlsl.Clamp(ShaderUtil.DepthRound(d.Z), 0.0F, 1.0F);
-            sp.TriangleId = triangle.Id;
-            sp.NextIndex = oldBufferIndex;
-            shadowBuffer[bufferIndex] = sp;
+                sp.Color = shadowColor.XYZ;
+                sp.Depth = Hlsl.Clamp(ShaderUtil.DepthRound(d.Z), 0.0F, 1.0F);
+                sp.TriangleId = triangle.Id;
+                sp.NextIndex = oldBufferIndex;
+                shadowBuffer[bufferIndex] = sp;
+
+                break;
+            }
         }
 
         Float4 NearestNeighbor(float x, float y)

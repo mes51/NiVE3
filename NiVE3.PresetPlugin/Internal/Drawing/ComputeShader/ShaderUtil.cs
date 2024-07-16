@@ -65,8 +65,6 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader
         {
             const float Epsilon = 1E-7F;
 
-            x += triangle.TrueMinX;
-            y += triangle.TrueMinY;
             if (x < triangle.TrueMinX || x >= triangle.TrueMaxX || y < triangle.TrueMinY || y >= triangle.TrueMaxY)
             {
                 return -float.NaN;
