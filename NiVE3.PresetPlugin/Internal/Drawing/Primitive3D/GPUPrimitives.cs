@@ -13,6 +13,81 @@ using NiVE3.Plugin.Interfaces;
 namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
 {
     readonly record struct GPUTriangle(
+        int MinX,
+        int MaxX,
+        int MinY,
+        int MaxY,
+        Float4 EdgeX,
+        Float4 EdgeY,
+        Float4 VVEX,
+        Float4 VVEY,
+        Float4 Denominator
+    )
+    {
+        public readonly int MinX = MinX;
+        public readonly int MaxX = MaxX;
+        public readonly int MinY = MinY;
+        public readonly int MaxY = MaxY;
+        public readonly Float4 EdgeX = EdgeX;
+        public readonly Float4 EdgeY = EdgeY;
+        public readonly Float4 VVEX = VVEX;
+        public readonly Float4 VVEY = VVEY;
+        public readonly Float4 Denominator = Denominator;
+    }
+
+    readonly record struct GPUTriangleTexturing(
+        Float4 U,
+        Float4 V,
+        Float4 W,
+        int InterpolationQuality,
+        float Opacity
+    )
+    {
+        public readonly Float4 U = U;
+        public readonly Float4 V = V;
+        public readonly Float4 W = W;
+        public readonly int InterpolationQuality = InterpolationQuality;
+        public readonly float Opacity = Opacity;
+    }
+
+    readonly record struct GPUTriangleLighting(
+        int Id,
+        Float4 VVX,
+        Float4 VVY,
+        Float4 VVZ,
+        Float4 SVVX,
+        Float4 SVVY,
+        Float4 SVVZ,
+        Bool IsFrontFace,
+        Float3 FloatNormal,
+        float LightTransmission,
+        Bool IsAcceptShadow,
+        Bool IsAcceptLight,
+        float Diffuse,
+        float SpecularIntensity,
+        float SpecularShininess,
+        float Metal
+    )
+    {
+        public readonly int Id = Id;
+        public readonly Float4 VVX = VVX;
+        public readonly Float4 VVY = VVY;
+        public readonly Float4 VVZ = VVZ;
+        public readonly Float4 SVVX = SVVX;
+        public readonly Float4 SVVY = SVVY;
+        public readonly Float4 SVVZ = SVVZ;
+        public readonly Bool IsFrontFace = IsFrontFace;
+        public readonly Float3 FloatNormal = FloatNormal;
+        public readonly float LightTransmission = LightTransmission;
+        public readonly Bool IsAcceptShadow = IsAcceptShadow;
+        public readonly Bool IsAcceptLight = IsAcceptLight;
+        public readonly float Diffuse = Diffuse;
+        public readonly float SpecularIntensity = SpecularIntensity;
+        public readonly float SpecularShininess = SpecularShininess;
+        public readonly float Metal = Metal;
+    }
+
+    readonly record struct GPUOldTriangle(
         int Id,
         int MinX,
         int MaxX,

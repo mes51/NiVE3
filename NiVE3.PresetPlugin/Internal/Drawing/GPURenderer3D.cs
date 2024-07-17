@@ -17,7 +17,6 @@ using NiVE3.Shared.Extension;
 
 namespace NiVE3.PresetPlugin.Internal.Drawing
 {
-
     class GPURenderer3D : Renderer3DBase
     {
         NGPUImage RenderImage { get; }
@@ -65,8 +64,10 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
             var renderImageOffsetX = (int)(OffsetX / scaleRateX);
             var renderImageOffsetY = (int)(OffsetY / scaleRateY);
-            var preProcessedTriangleList = new List<GPUTriangle>(triangles.Length);
-            var triangleStateList = new List<(int id, int minX, int maxX, int minY, int maxY, bool useLight, bool isAcceptLight, float ambient, int blendMode)>(triangles.Length);
+            var preProcessedTriangles = new List<GPUTriangle>(triangles.Length);
+            var preProcessedTriangleTexturing = new List<GPUTriangleTexturing>(triangles.Length);
+            var preProcessedTriangleLighting = new List<GPUTriangleLighting>(triangles.Length);
+            var triangleMaterials = new List<(int id, int minX, int maxX, int minY, int maxY, bool useLight, bool isAcceptLight, float ambient, int blendMode)>();
             for (var i = 0; i < triangles.Length; i++)
             {
                 var triangle = triangles[i];
@@ -142,8 +143,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 }
                 trackMatteList.Add(gpuTrackMatte);
 
-                var preProcessed = new GPUTriangle(
-                    triangle.Id,
+                preProcessedTriangles.Add(new GPUTriangle(
                     minX,
                     maxX,
                     minY,
@@ -152,38 +152,79 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                     edgeY.AsFloat4(),
                     vvEX.AsFloat4(),
                     vvEY.AsFloat4(),
+                    denom.AsFloat4()
+                ));
+                preProcessedTriangleTexturing.Add(new GPUTriangleTexturing(
                     u.AsFloat4(),
                     v.AsFloat4(),
                     w.AsFloat4(),
+                    (int)triangle.InterpolationQuality,
+                    triangle.Opacity
+                ));
+                preProcessedTriangleLighting.Add(new GPUTriangleLighting(
+                    triangle.Id,
                     vvX.AsFloat4(),
                     vvY.AsFloat4(),
                     vvZ.AsFloat4(),
                     svvX.AsFloat4(),
                     svvY.AsFloat4(),
                     svvZ.AsFloat4(),
-                    denom.AsFloat4(),
                     isFrontFace,
                     triangle.FloatNormal,
-                    (int)triangle.InterpolationQuality,
-                    triangle.Opacity,
                     triangle.LightTransmission,
-                    (int)triangle.BlendMode,
                     triangle.IsAcceptShadow,
                     triangle.IsAcceptLight,
-                    triangle.Ambient,
                     triangle.Diffuse,
                     triangle.SpecularIntensity,
                     triangle.SpecularShininess,
                     triangle.Metal
-                );
-                preProcessedTriangleList.Add(preProcessed);
-                var useLight = hasLight && (triangle.IsAcceptLight || triangle.IsAcceptShadow);
-                triangleStateList.Add((triangle.Id, preProcessed.TrueMinX, preProcessed.TrueMaxX, preProcessed.TrueMinY, preProcessed.TrueMaxY, useLight, triangle.IsAcceptLight, triangle.Ambient, preProcessed.BlendMode));
+                ));
+                triangleMaterials.Add((
+                    triangle.Id,
+                    Math.Min(minX, maxX),
+                    Math.Max(minX, maxX),
+                    Math.Min(minY, maxY),
+                    Math.Max(minY, maxY),
+                    hasLight && (triangle.IsAcceptLight || triangle.IsAcceptShadow),
+                    triangle.IsAcceptLight,
+                    triangle.Ambient,
+                    (int)triangle.BlendMode
+                ));
+            }
+
+            var triangleGroups = new List<TriangleGroup>();
+            foreach (var triangleGroup in triangleMaterials.ZipWithIndex().GroupByPrev(t => t.Item1.id).Select(g => g.ToArray()))
+            {
+                var minX = triangleGroup.Select(t => t.Item1.minX).Min();
+                var maxX = triangleGroup.Select(t => t.Item1.maxX).Max();
+                var minY = triangleGroup.Select(t => t.Item1.minY).Min();
+                var maxY = triangleGroup.Select(t => t.Item1.maxY).Max();
+
+                if (maxX - minX < 1 || maxY - minY < 1)
+                {
+                    continue;
+                }
+
+                triangleGroups.Add(new TriangleGroup(
+                    triangleGroup[0].Item1.id,
+                    minX,
+                    maxX,
+                    minY,
+                    maxY,
+                    triangleGroup[0].Item1.useLight,
+                    triangleGroup[0].Item1.isAcceptLight,
+                    triangleGroup[0].Item1.ambient,
+                    triangleGroup[0].Item1.blendMode,
+                    triangleGroup[0].Item2,
+                    triangleGroup[^1].Item2
+                ));
             }
 
             var ambientLightColor = AmbientLights.Aggregate(Vector4.Zero, (m, a) => m + a.Color);
 
-            using (var triangleBuffer = Device.AllocateReadOnlyBuffer<GPUTriangle>(CollectionsMarshal.AsSpan(preProcessedTriangleList)))
+            using (var triangleBuffer = Device.AllocateReadOnlyBuffer<GPUTriangle>(CollectionsMarshal.AsSpan(preProcessedTriangles)))
+            using (var triangleTexturingBuffer = Device.AllocateReadOnlyBuffer<GPUTriangleTexturing>(CollectionsMarshal.AsSpan(preProcessedTriangleTexturing)))
+            using (var triangleLightingBuffer = Device.AllocateReadOnlyBuffer<GPUTriangleLighting>(CollectionsMarshal.AsSpan(preProcessedTriangleLighting)))
             using (var pointLightBuffer = PointLights.Count > 0 ? Device.AllocateReadOnlyBuffer([..PointLights.Select(p => p.ToGpu())]) : Device.AllocateReadOnlyBuffer<GPUPointLight>(1))
             using (var spotLightBuffer = SpotLights.Count > 0 ? Device.AllocateReadOnlyBuffer([..SpotLights.Select(s => s.ToGpu())]) : Device.AllocateReadOnlyBuffer<GPUSpotLight>(1))
             using (var parallelLightBuffer = ParallelLights.Count > 0 ? Device.AllocateReadOnlyBuffer([..ParallelLights.Select(p => p.ToGpu())]) : Device.AllocateReadOnlyBuffer<GPUParallelLight>(1))
@@ -197,7 +238,9 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                         Device,
                         RenderImage,
                         triangleBuffer,
-                        triangleStateList,
+                        triangleTexturingBuffer,
+                        triangleLightingBuffer,
+                        CollectionsMarshal.AsSpan(triangleGroups),
                         CollectionsMarshal.AsSpan(textureList),
                         CollectionsMarshal.AsSpan(trackMatteList),
                         renderImageOffsetX,
@@ -224,7 +267,9 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                         Device,
                         interpolate,
                         triangleBuffer,
-                        triangleStateList,
+                        triangleTexturingBuffer,
+                        triangleLightingBuffer,
+                        CollectionsMarshal.AsSpan(triangleGroups),
                         CollectionsMarshal.AsSpan(textureList),
                         CollectionsMarshal.AsSpan(trackMatteList),
                         renderImageOffsetX,
@@ -257,7 +302,9 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                         Device,
                         RenderImage,
                         triangleBuffer,
-                        triangleStateList,
+                        triangleTexturingBuffer,
+                        triangleLightingBuffer,
+                        CollectionsMarshal.AsSpan(triangleGroups),
                         CollectionsMarshal.AsSpan(textureList),
                         CollectionsMarshal.AsSpan(trackMatteList),
                         renderImageOffsetX,
@@ -312,7 +359,9 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             GraphicsDevice device,
             NGPUImage renderTarget,
             ReadOnlyBuffer<GPUTriangle> triangleBuffer,
-            List<(int id, int minX, int maxX, int minY, int maxY, bool useLight, bool isAcceptLight, float ambient, int blendMode)> triangleState,
+            ReadOnlyBuffer<GPUTriangleTexturing> triangleTexturingBuffer,
+            ReadOnlyBuffer<GPUTriangleLighting> triangleLightingBuffer,
+            ReadOnlySpan<TriangleGroup> triangleGroups,
             ReadOnlySpan<NGPUImage> textures,
             ReadOnlySpan<GPURasterizedMaskImage?> trackMattes,
             int renderImageOffsetX,
@@ -340,42 +389,18 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             using var rasterizedData = device.AllocateReadWriteBuffer<GPURasterizedPixel>(renderTarget.DataLength);
             using var context = device.CreateComputeContext();
 
-            foreach (var groupedTriangleIds in triangleState.ZipWithIndex().GroupByPrev(t => t.Item1.id).Select(g => g.ToArray()))
+            for (var gi = 0; gi < triangleGroups.Length; gi++)
             {
-                if (groupedTriangleIds.Length < 1)
-                {
-                    continue;
-                }
-
-                var useLight = false;
-                var acceptLight = false;
-                var blendMode = 0;
-                var ambientRate = 0.0F;
-                var totalMinX = int.MaxValue;
-                var totalMaxX = int.MinValue;
-                var totalMinY = int.MaxValue;
-                var totalMaxY = int.MinValue;
-                foreach (var ((_, minX, maxX, minY, maxY, l, a, ar, b), _) in groupedTriangleIds)
-                {
-                    useLight = l;
-                    acceptLight = a;
-                    blendMode = b;
-                    ambientRate = ar;
-                    totalMinX = Math.Min(totalMinX, minX);
-                    totalMaxX = Math.Max(totalMaxX, maxX);
-                    totalMinY = Math.Min(totalMinY, minY);
-                    totalMaxY = Math.Max(totalMaxY, maxY);
-                }
-
-                if (totalMaxX - totalMinX < 1 || totalMaxY - totalMinY < 1)
-                {
-                    continue;
-                }
+                var group = triangleGroups[gi];
+                var totalMinX = group.MinX;
+                var totalMaxX = group.MaxX;
+                var totalMinY = group.MinY;
+                var totalMaxY = group.MaxY;
 
                 context.For(totalMaxX - totalMinX, totalMaxY - totalMinY, new ClearRasterizedImage(rasterizedData, renderTarget.Width, totalMinX - renderImageOffsetX, totalMinY - renderImageOffsetY));
                 context.Barrier(rasterizedData);
 
-                var texture = textures[groupedTriangleIds[0].Item2];
+                var texture = textures[group.BeginTriangleIndex];
                 context.For(
                     totalMaxX - totalMinX,
                     totalMaxY - totalMinY,
@@ -387,12 +412,13 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                         scaleRateX,
                         scaleRateY,
                         triangleBuffer,
-                        groupedTriangleIds[0].Item2,
-                        groupedTriangleIds[^1].Item2,
+                        triangleTexturingBuffer,
+                        group.BeginTriangleIndex,
+                        group.EndTriangleIndex,
                         texture.Data,
                         texture.Width,
                         texture.Height,
-                        trackMattes[groupedTriangleIds[0].Item2]?.Data ?? emptyTrackMatte,
+                        trackMattes[group.BeginTriangleIndex]?.Data ?? emptyTrackMatte,
                         offsetX,
                         offsetY,
                         totalMinX,
@@ -401,7 +427,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 );
                 context.Barrier(rasterizedData);
 
-                if (useLight)
+                if (group.UseLight)
                 {
                     using var emptyShadowMap = device.AllocateReadWriteBuffer([0]);
                     using var emptyShadowBuffer = device.AllocateReadWriteBuffer([new GPUShadowPixel()]);
@@ -432,8 +458,9 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                 offsetX,
                                 offsetY,
                                 triangleBuffer,
-                                groupedTriangleIds[0].Item2,
-                                groupedTriangleIds[^1].Item2,
+                                triangleLightingBuffer,
+                                group.BeginTriangleIndex,
+                                group.EndTriangleIndex,
                                 pointLightBuffer,
                                 i,
                                 invertedProjectionViewMatrix,
@@ -478,8 +505,9 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                 offsetX,
                                 offsetY,
                                 triangleBuffer,
-                                groupedTriangleIds[0].Item2,
-                                groupedTriangleIds[^1].Item2,
+                                triangleLightingBuffer,
+                                group.BeginTriangleIndex,
+                                group.EndTriangleIndex,
                                 spotLightBuffer,
                                 i,
                                 invertedProjectionViewMatrix,
@@ -514,8 +542,9 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                 offsetX,
                                 offsetY,
                                 triangleBuffer,
-                                groupedTriangleIds[0].Item2,
-                                groupedTriangleIds[^1].Item2,
+                                triangleLightingBuffer,
+                                group.BeginTriangleIndex,
+                                group.EndTriangleIndex,
                                 parallelLightBuffer,
                                 i,
                                 invertedProjectionViewMatrix,
@@ -534,7 +563,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                     }
                 }
 
-                context.For(totalMaxX - totalMinX, totalMaxY - totalMinY, new BlendRasterized(renderTarget.Data, rasterizedData, useLight, acceptLight, ambientLightColor * ambientRate, renderTarget.Width, totalMinX - renderImageOffsetX, totalMinY - renderImageOffsetY, blendMode));
+                context.For(totalMaxX - totalMinX, totalMaxY - totalMinY, new BlendRasterized(renderTarget.Data, rasterizedData, group.UseLight, group.IsAcceptLight, ambientLightColor * group.Ambient, renderTarget.Width, totalMinX - renderImageOffsetX, totalMinY - renderImageOffsetY, group.BlendMode));
                 context.Barrier(renderTarget.Data);
             }
         }
@@ -615,7 +644,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
         static (ReadWriteBuffer<int> shadowMap, ReadWriteBuffer<GPUShadowPixel> shadowBuffer, Float4x4 lightViewProjectionMatrix)? RenderShadow(
             GraphicsDevice device,
-            LightTriangle[] triangles,
+            ShadowTriangle[] triangles,
             in Matrix4x4 lightViewMatrix,
             in Matrix4x4d lightProjectionMatrix,
             int shadowMapSize,
@@ -783,5 +812,19 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
             return (shadowMap, shadowBuffer, lightViewProjectionMatrix);
         }
+
+        private record TriangleGroup(
+            int Id,
+            int MinX,
+            int MaxX,
+            int MinY,
+            int MaxY,
+            bool UseLight,
+            bool IsAcceptLight,
+            float Ambient,
+            int BlendMode,
+            int BeginTriangleIndex,
+            int EndTriangleIndex
+        );
     }
 }

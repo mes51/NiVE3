@@ -215,17 +215,17 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
         }
     }
 
-    class LightTriangle : TexturedTriangleBase<LightTriangle>
+    class ShadowTriangle : TexturedTriangleBase<ShadowTriangle>
     {
-        public LightTriangle(in UVVertex v1, in UVVertex v2, in UVVertex v3, in Vector256<double> farPoint, in Matrix4x4d invertMatrix, NImage texture, ImageInterpolationQuality interpolationQuality, float opacity, float lightTransmission, int id)
+        public ShadowTriangle(in UVVertex v1, in UVVertex v2, in UVVertex v3, in Vector256<double> farPoint, in Matrix4x4d invertMatrix, NImage texture, ImageInterpolationQuality interpolationQuality, float opacity, float lightTransmission, int id)
             : base(v1, v2, v3, farPoint, invertMatrix, texture, interpolationQuality, opacity, lightTransmission, id) { }
 
-        public LightTriangle(LightTriangle baseTriangle, in UVVertex v1, in UVVertex v2, in UVVertex v3)
+        public ShadowTriangle(ShadowTriangle baseTriangle, in UVVertex v1, in UVVertex v2, in UVVertex v3)
             : base(baseTriangle, v1, v2, v3) { }
 
-        public override LightTriangle CreateByNewVertex(in UVVertex v1, in UVVertex v2, in UVVertex v3)
+        public override ShadowTriangle CreateByNewVertex(in UVVertex v1, in UVVertex v2, in UVVertex v3)
         {
-            return new LightTriangle(this, v1, v2, v3);
+            return new ShadowTriangle(this, v1, v2, v3);
         }
     }
 

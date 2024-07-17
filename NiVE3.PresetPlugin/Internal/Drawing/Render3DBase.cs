@@ -51,7 +51,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
         protected List<Triangle> Triangles { get; } = [];
 
-        protected Dictionary<object, List<LightTriangle>> LightTriangles { get; }
+        protected Dictionary<object, List<ShadowTriangle>> LightTriangles { get; }
 
         public Renderer3DBase(int width, int height, List<PointLight> pointLights, List<SpotLight> spotLights, List<ParallelLight> parallelLights, List<AmbientLight> ambientLights)
         {
@@ -65,7 +65,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             ParallelLights = parallelLights;
             AmbientLights = ambientLights;
 
-            LightTriangles = pointLights.Cast<object>().Concat(spotLights).Concat(parallelLights).ToDictionary(k => k, _ => new List<LightTriangle>());
+            LightTriangles = pointLights.Cast<object>().Concat(spotLights).Concat(parallelLights).ToDictionary(k => k, _ => new List<ShadowTriangle>());
             foreach (var pointLight in pointLights)
             {
                 LightTriangles.Add(new PointLightHolder(pointLight, PointLightShadowDirection.Front), []);
@@ -217,7 +217,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             }
         }
 
-        static (LightTriangle, LightTriangle) CreateLightTriangle(
+        static (ShadowTriangle, ShadowTriangle) CreateLightTriangle(
             int triangleId,
             NImage texture,
             ImageInterpolationQuality interpolationQuality,
@@ -255,8 +255,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
             var lfarPoint = lmv.Transform(Vector256.Create(0.0, 0.0, -10000.0, 1.0)) & Const.WithoutWMask256;
             return (
-                new LightTriangle(luv1, luv2, luv3, lfarPoint, invertedLightModelViewMatrix, texture, interpolationQuality, opacity, lightTransmission, triangleId),
-                new LightTriangle(luv1, luv3, luv4, lfarPoint, invertedLightModelViewMatrix, texture, interpolationQuality, opacity, lightTransmission, triangleId)
+                new ShadowTriangle(luv1, luv2, luv3, lfarPoint, invertedLightModelViewMatrix, texture, interpolationQuality, opacity, lightTransmission, triangleId),
+                new ShadowTriangle(luv1, luv3, luv4, lfarPoint, invertedLightModelViewMatrix, texture, interpolationQuality, opacity, lightTransmission, triangleId)
             );
         }
 
