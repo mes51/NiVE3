@@ -172,13 +172,16 @@ namespace NiVE3.ViewModel
 
         FootageModel Footage { get; }
 
+        ApplicationModel ApplicationModel { get; }
+
         bool IsDirty { get; set; } = true;
 
 #pragma warning disable CS8618 // 各フィールドには初期化時に必ず値を代入するため無視
-        public FootageViewModel(FootageModel footage)
+        public FootageViewModel(FootageModel footage, ApplicationModel applicationModel)
 #pragma warning restore CS8618
         {
             Footage = footage;
+            ApplicationModel = applicationModel;
             FootageId = footage.FootageId;
             Name = footage.Name;
             Width = footage.Width;
@@ -250,11 +253,11 @@ namespace NiVE3.ViewModel
             IsDirty = false;
             if (Footage.InputType == SourceType.Image || (Footage.InputType & SourceType.Video) != SourceType.None)
             {
-                using var image = Footage.ReadImage(Duration * 0.5, 1.0, 0, 0, null, ImageInterpolationQuality.Level2, false) as NManagedImage;
+                using var image = Footage.ReadImage(Duration * 0.5, 1.0, 0, 0, null, ImageInterpolationQuality.Level2, ApplicationModel.UseGpu);
                 if (image != null)
                 {
                     var data = ArrayPool<byte>.Shared.Rent(image.DataLength * 4);
-                    ImageConversion.ConvertToBGRA32(image.GetDataSpan(), data, image.DataLength);
+                    ImageConversion.ConvertToBGRA32(image.GetData()[..image.DataLength], data, image.DataLength);
                     var writable = new WriteableBitmap(image.Width, image.Height, 96.0, 96.0, PixelFormats.Bgra32, null);
                     writable.WritePixels(new Int32Rect(0, 0, image.Width, image.Height), data, image.Width * 4, 0);
                     SampleImage = writable;
@@ -335,14 +338,14 @@ namespace NiVE3.ViewModel
         FootageFolderModel Folder { get; }
 
 #pragma warning disable CS8618 // 各フィールドには初期化時に必ず値を代入するため無視
-        public FootageFolderViewModel(FootageFolderModel folder)
+        public FootageFolderViewModel(FootageFolderModel folder, ApplicationModel applicationModel)
 #pragma warning restore CS8618
         {
             Folder = folder;
             FootageId = folder.FootageId;
             Name = folder.Name;
             Comment = folder.Comment;
-            Footages = folder.Children.CreateViewCollection<IFootageModel, IFootageViewModel>(m => m is FootageModel model ? new FootageViewModel(model) : new FootageFolderViewModel((FootageFolderModel)m));
+            Footages = folder.Children.CreateViewCollection<IFootageModel, IFootageViewModel>(m => m is FootageModel model ? new FootageViewModel(model, applicationModel) : new FootageFolderViewModel((FootageFolderModel)m, applicationModel));
 
             WiringModel();
 

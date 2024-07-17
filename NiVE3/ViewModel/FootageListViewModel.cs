@@ -133,12 +133,12 @@ namespace NiVE3.ViewModel
         IDialogService DialogService { get; }
 
 #pragma warning disable CS8618 // 各フィールドには初期化時に必ず値を代入するため無視
-        public FootageListViewModel(FootageListModel footageListModel, IDialogService dialogService)
+        public FootageListViewModel(FootageListModel footageListModel, ApplicationModel applicationModel, IDialogService dialogService)
 #pragma warning restore CS8618
         {
             FootageListModel = footageListModel;
             DialogService = dialogService;
-            Footages = footageListModel.Footages.CreateViewCollection<IFootageModel, IFootageViewModel>(m => m is FootageModel footage ? new FootageViewModel(footage) : new FootageFolderViewModel((FootageFolderModel)m));
+            Footages = footageListModel.Footages.CreateViewCollection<IFootageModel, IFootageViewModel>(m => m is FootageModel footage ? new FootageViewModel(footage, applicationModel) : new FootageFolderViewModel((FootageFolderModel)m, applicationModel));
 
             Title = "フッテージ";
 
