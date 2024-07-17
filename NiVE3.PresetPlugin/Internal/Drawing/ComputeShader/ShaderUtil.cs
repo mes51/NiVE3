@@ -61,28 +61,6 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader
             return Hlsl.Round(value * DepthRoundingDigit) / DepthRoundingDigit;
         }
 
-        public static Float4 CalcE(int x, int y, GPUOldTriangle triangle, float scaleRateX, float scaleRateY, float offsetX, float offsetY)
-        {
-            const float Epsilon = 1E-7F;
-
-            if (x < triangle.TrueMinX || x >= triangle.TrueMaxX || y < triangle.TrueMinY || y >= triangle.TrueMaxY)
-            {
-                return -float.NaN;
-            }
-
-            var eY = new Float4((triangle.EdgeX * ((y + offsetY) * scaleRateY - triangle.VVEY)).XYZ, 0.0F);
-            var eX = new Float4(((x + offsetX) * scaleRateX - triangle.VVEX).XYZ, 0.0F);
-            var e = (eY - (triangle.EdgeY * eX)) * triangle.Denominator;
-
-            var ae = Mask(e, Hlsl.Abs(e) >= Epsilon);
-            if (Hlsl.Any(ae < 0.0F))
-            {
-                return -float.NaN;
-            }
-
-            return e;
-        }
-
         public static Float4 CalcE(int x, int y, GPUTriangle triangle, float scaleRateX, float scaleRateY, float offsetX, float offsetY)
         {
             const float Epsilon = 1E-7F;
