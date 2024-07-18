@@ -172,11 +172,11 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
                 if (gpuTrackMatte != null)
                 {
-                    context.For(Target.Data.Length, new BlendWithTrackMatte(Target.Data, canvas.Data, gpuTrackMatte.Data, (int)blendMode, opacity));
+                    context.For(Target.Width, Target.Height, new BlendWithTrackMatte(Target.Data, canvas.Data, gpuTrackMatte.Data, Target.Width, (int)blendMode, opacity));
                 }
                 else
                 {
-                    context.For(Target.Data.Length, new ComputeShader.Render2D.Blend(Target.Data, canvas.Data, (int)blendMode, opacity));
+                    context.For(Target.Width, Target.Height, new ComputeShader.Render2D.Blend(Target.Data, canvas.Data, Target.Width, (int)blendMode, opacity));
                 }
             }
 
@@ -347,11 +347,11 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
                 if (gpuTrackMatte != null)
                 {
-                    context.For(Target.Data.Length, new CreateMatteWithTrackMatte(Target.Data, canvas.Data, gpuTrackMatte.Data, (int)trackMatteMode, opacity));
+                    context.For(Target.Width, Target.Height, new CreateMatteWithTrackMatte(Target.Data, canvas.Data, gpuTrackMatte.Data, Target.Width, (int)trackMatteMode, opacity));
                 }
                 else
                 {
-                    context.For(Target.Data.Length, new CreateMatte(Target.Data, canvas.Data, (int)trackMatteMode, opacity));
+                    context.For(Target.Width, Target.Height, new CreateMatte(Target.Data, canvas.Data, Target.Width, (int)trackMatteMode, opacity));
                 }
             }
 

@@ -1257,13 +1257,13 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
         }
     }
 
-    [ThreadGroupSize(DefaultThreadGroupSizes.X)]
+    [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
     [GeneratedComputeShaderDescriptor]
-    readonly partial struct InitShadowMap(ReadWriteBuffer<int> shadowMap) : IComputeShader
+    readonly partial struct InitShadowMap(ReadWriteBuffer<int> shadowMap, int width) : IComputeShader
     {
         public void Execute()
         {
-            shadowMap[ThreadIds.X] = -1;
+            shadowMap[ThreadIds.Y * width + ThreadIds.X] = -1;
         }
     }
 

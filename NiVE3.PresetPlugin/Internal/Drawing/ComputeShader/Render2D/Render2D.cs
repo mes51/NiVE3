@@ -140,39 +140,42 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render2D
         }
     }
 
-    [ThreadGroupSize(DefaultThreadGroupSizes.X)]
+    [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
     [GeneratedComputeShaderDescriptor]
-    readonly partial struct BlendWithTrackMatte(ReadWriteBuffer<Float4> target, ReadWriteBuffer<Float4> image, ReadWriteBuffer<float> trackMatte, int blendMode, float opacity) : IComputeShader
+    readonly partial struct BlendWithTrackMatte(ReadWriteBuffer<Float4> target, ReadWriteBuffer<Float4> image, ReadWriteBuffer<float> trackMatte, int width, int blendMode, float opacity) : IComputeShader
     {
         public void Execute()
         {
-            var c = image[ThreadIds.X];
-            c.W *= trackMatte[ThreadIds.X] * opacity;
-            target[ThreadIds.X] = BlendMethods.Process(blendMode, target[ThreadIds.X], c);
+            var pos = ThreadIds.Y * width + ThreadIds.X;
+            var c = image[pos];
+            c.W *= trackMatte[pos] * opacity;
+            target[pos] = BlendMethods.Process(blendMode, target[pos], c);
         }
     }
 
-    [ThreadGroupSize(DefaultThreadGroupSizes.X)]
+    [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
     [GeneratedComputeShaderDescriptor]
-    readonly partial struct Blend(ReadWriteBuffer<Float4> target, ReadWriteBuffer<Float4> image, int blendMode, float opacity) : IComputeShader
+    readonly partial struct Blend(ReadWriteBuffer<Float4> target, ReadWriteBuffer<Float4> image, int width, int blendMode, float opacity) : IComputeShader
     {
         public void Execute()
         {
-            var c = image[ThreadIds.X];
+            var pos = ThreadIds.Y * width + ThreadIds.X;
+            var c = image[pos];
             c.W *= opacity;
-            target[ThreadIds.X] = BlendMethods.Process(blendMode, target[ThreadIds.X], c);
+            target[pos] = BlendMethods.Process(blendMode, target[pos], c);
         }
     }
 
-    [ThreadGroupSize(DefaultThreadGroupSizes.X)]
+    [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
     [GeneratedComputeShaderDescriptor]
-    readonly partial struct CreateMatteWithTrackMatte(ReadWriteBuffer<float> target, ReadWriteBuffer<Float4> image, ReadWriteBuffer<float> trackMatte, int trackMatteMode, float opacity) : IComputeShader
+    readonly partial struct CreateMatteWithTrackMatte(ReadWriteBuffer<float> target, ReadWriteBuffer<Float4> image, ReadWriteBuffer<float> trackMatte, int width, int trackMatteMode, float opacity) : IComputeShader
     {
         static readonly Float3 ConvertToGrayScale = new Float3(0.114478F, 0.586611F, 0.298912F);
 
         public void Execute()
         {
-            var c = image[ThreadIds.X];
+            var pos = ThreadIds.Y * width + ThreadIds.X;
+            var c = image[pos];
             var p = 0.0F;
             switch (trackMatteMode)
             {
@@ -190,19 +193,20 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render2D
                     break;
             }
 
-            target[ThreadIds.X] = p * opacity * trackMatte[ThreadIds.X];
+            target[pos] = p * opacity * trackMatte[pos];
         }
     }
 
-    [ThreadGroupSize(DefaultThreadGroupSizes.X)]
+    [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
     [GeneratedComputeShaderDescriptor]
-    readonly partial struct CreateMatte(ReadWriteBuffer<float> target, ReadWriteBuffer<Float4> image, int trackMatteMode, float opacity) : IComputeShader
+    readonly partial struct CreateMatte(ReadWriteBuffer<float> target, ReadWriteBuffer<Float4> image, int width, int trackMatteMode, float opacity) : IComputeShader
     {
         static readonly Float3 ConvertToGrayScale = new Float3(0.114478F, 0.586611F, 0.298912F);
 
         public void Execute()
         {
-            var c = image[ThreadIds.X];
+            var pos = ThreadIds.Y * width + ThreadIds.X;
+            var c = image[pos];
             var p = 0.0F;
             switch (trackMatteMode)
             {
@@ -220,7 +224,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render2D
                     break;
             }
 
-            target[ThreadIds.X] = p * opacity;
+            target[pos] = p * opacity;
         }
     }
 }

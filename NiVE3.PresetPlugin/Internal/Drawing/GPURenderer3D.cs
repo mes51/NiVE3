@@ -764,7 +764,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             var shadowBuffer = device.AllocateReadWriteBuffer<GPUShadowPixel>(area);
             using (var context = device.CreateComputeContext())
             {
-                context.For(shadowMapSize * shadowMapSize, new InitShadowMap(shadowMap));
+                context.For(shadowMapSize, shadowMapSize, new InitShadowMap(shadowMap, shadowMapSize));
 
                 foreach (var groupedTriangle in preProcessedTriangle.ZipWithIndex().GroupByPrev(t => t.Item1.Id).Select(g => g.ToArray()))
                 {

@@ -7,13 +7,14 @@ using ComputeSharp;
 
 namespace NiVE3.InternalShader
 {
-    [ThreadGroupSize(DefaultThreadGroupSizes.X)]
+    [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
     [GeneratedComputeShaderDescriptor]
-    public readonly partial struct ConvertToPreviewImage(ReadWriteBuffer<Float4> image, ReadWriteBuffer<int> result, int mode) : IComputeShader
+    public readonly partial struct ConvertToPreviewImage(ReadWriteBuffer<Float4> image, ReadWriteBuffer<int> result, int width, int mode) : IComputeShader
     {
         public void Execute()
         {
-            var pixel = Hlsl.Round(Hlsl.Clamp(image[ThreadIds.X], 0.0F, 1.0F) * 255.0F);
+            var pos = ThreadIds.Y * width + ThreadIds.X;
+            var pixel = Hlsl.Round(Hlsl.Clamp(image[pos], 0.0F, 1.0F) * 255.0F);
             var converted = new Int4();
 
             switch (mode)
@@ -38,7 +39,7 @@ namespace NiVE3.InternalShader
                     break;
             }
 
-            result[ThreadIds.X] = (converted.X & 0xFF) | (converted.Y & 0xFF) << 8 | (converted.Z & 0xFF) << 16 | (converted.W & 0xFF) << 24;
+            result[pos] = (converted.X & 0xFF) | (converted.Y & 0xFF) << 8 | (converted.Z & 0xFF) << 16 | (converted.W & 0xFF) << 24;
         }
     }
 }

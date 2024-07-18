@@ -59,9 +59,9 @@ namespace NiVE3.Image
         /// <param name="color">初期の各ピクセルの色</param>
         public NGPUImage(int width, int height, GraphicsDevice device, Vector4 color) : this(width, height, device)
         {
-            using var context = device.CreateComputeContext();
             Data = device.AllocateReadWriteBuffer<Float4>(width * height);
-            context.For(width * height, new ClearImage(Data, color));
+            using var context = device.CreateComputeContext();
+            context.For(width, height, new ClearImage(Data, width, color));
         }
 
         /// <summary>
@@ -122,13 +122,13 @@ namespace NiVE3.Image
         }
     }
 
-    [ThreadGroupSize(DefaultThreadGroupSizes.X)]
+    [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
     [GeneratedComputeShaderDescriptor]
-    readonly partial struct ClearImage(ReadWriteBuffer<Float4> image, Float4 color) : IComputeShader
+    readonly partial struct ClearImage(ReadWriteBuffer<Float4> image, int width, Float4 color) : IComputeShader
     {
         public void Execute()
         {
-            image[ThreadIds.X] = color;
+            image[ThreadIds.Y * width + ThreadIds.X] = color;
         }
     }
 }

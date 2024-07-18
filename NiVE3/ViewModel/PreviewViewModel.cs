@@ -622,7 +622,7 @@ namespace NiVE3.ViewModel
                     using var convertedImageData = device.AllocateReadWriteBuffer<int>(image.DataLength);
                     using (var context = device.CreateComputeContext())
                     {
-                        context.For(gpuImage.DataLength, new ConvertToPreviewImage(gpuImage.Data, convertedImageData, (int)PreviewColorChannel));
+                        context.For(gpuImage.Width, gpuImage.Height, new ConvertToPreviewImage(gpuImage.Data, convertedImageData, gpuImage.Width, (int)PreviewColorChannel));
                     }
                     convertedImageData.CopyTo(ImageBuffer);
                 }
