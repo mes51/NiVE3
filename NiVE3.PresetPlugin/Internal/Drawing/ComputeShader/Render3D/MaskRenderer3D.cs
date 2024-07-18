@@ -111,7 +111,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
                         var specularFactor = Hlsl.Max(Hlsl.Dot(-n, halfLE), 0.0F);
                         if (isBack)
                         {
-                            specularFactor *= -triangle.LightTransmission;
+                            specularFactor *= triangle.LightTransmission;
                         }
                         specular += Hlsl.Lerp(lightColor, color * lightColor, triangle.Metal) * Hlsl.Pow(specularFactor, ShininessStrength * triangle.SpecularShininess) * triangle.SpecularIntensity * falloff;
                     }
@@ -146,7 +146,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
                             var specularFactor = Hlsl.Max(Hlsl.Dot(-n, halfLE), 0.0F);
                             if (isBack)
                             {
-                                specularFactor *= -triangle.LightTransmission;
+                                specularFactor *= triangle.LightTransmission;
                             }
                             specular += Hlsl.Lerp(lightColor, color * lightColor, triangle.Metal) * Hlsl.Pow(specularFactor, ShininessStrength * triangle.SpecularShininess) * triangle.SpecularIntensity * falloff * attenuation;
                         }
@@ -172,7 +172,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
                         var specularFactor = Hlsl.Max(Hlsl.Dot(-n, halfLE), 0.0F);
                         if (isBack)
                         {
-                            specularFactor *= -triangle.LightTransmission;
+                            specularFactor *= triangle.LightTransmission;
                         }
                         specular += Hlsl.Lerp(lightColor, color * lightColor, triangle.Metal) * Hlsl.Pow(specularFactor, ShininessStrength * triangle.SpecularShininess) * triangle.SpecularIntensity * falloff;
                     }

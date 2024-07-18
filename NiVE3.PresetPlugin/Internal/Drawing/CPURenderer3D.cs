@@ -555,7 +555,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                     var specularFactor = Math.Max(Vector3.Dot(-n, halfLE), 0.0F);
                                     if (isBack)
                                     {
-                                        specularFactor *= -triangle.LightTransmission;
+                                        specularFactor *= triangle.LightTransmission;
                                     }
                                     specular += Vector4.Lerp(lightColor, color * lightColor, triangle.Metal) * MathF.Pow(specularFactor, ShininessStrength * triangle.SpecularShininess) * triangle.SpecularIntensity * falloff;
                                 }
@@ -601,7 +601,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                         var specularFactor = Math.Max(Vector3.Dot(-n, halfLE), 0.0F);
                                         if (isBack)
                                         {
-                                            specularFactor *= -triangle.LightTransmission;
+                                            specularFactor *= triangle.LightTransmission;
                                         }
                                         specular += Vector4.Lerp(lightColor, color * lightColor, triangle.Metal) * MathF.Pow(specularFactor, ShininessStrength * triangle.SpecularShininess) * triangle.SpecularIntensity * falloff * attenuation;
                                     }
@@ -638,7 +638,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                     var specularFactor = Math.Max(Vector3.Dot(-n, halfLE), 0.0F);
                                     if (isBack)
                                     {
-                                        specularFactor *= -triangle.LightTransmission;
+                                        specularFactor *= triangle.LightTransmission;
                                     }
                                     specular += Vector4.Lerp(lightColor, color * lightColor, triangle.Metal) * MathF.Pow(specularFactor, ShininessStrength * triangle.SpecularShininess) * triangle.SpecularIntensity * falloff;
                                 }
