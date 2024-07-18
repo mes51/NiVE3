@@ -60,6 +60,7 @@ namespace NiVE3.Image
         public NGPUImage(int width, int height, GraphicsDevice device, Vector4 color) : this(width, height, device)
         {
             using var context = device.CreateComputeContext();
+            Data = device.AllocateReadWriteBuffer<Float4>(width * height);
             context.For(width * height, new ClearImage(Data, color));
         }
 
