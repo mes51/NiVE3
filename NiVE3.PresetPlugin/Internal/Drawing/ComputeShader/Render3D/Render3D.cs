@@ -61,6 +61,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
                 var result = new GPURasterizedPixel();
 #pragma warning restore IDE0017 // オブジェクトの初期化を簡略化します
                 result.Color = color;
+                result.E = e;
+                result.TriangleIndex = ti + 1;
                 renderImage[p] = result;
 
                 break;
@@ -192,14 +194,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
         int renderImageWidth,
         int renderImageOffsetX,
         int renderImageOffsetY,
-        float scaleRateX,
-        float scaleRateY,
-        float offsetX,
-        float offsetY,
-        ReadOnlyBuffer<GPUTriangle> triangles,
         ReadOnlyBuffer<GPUTriangleLighting> triangleLighting,
-        int beginTriangleIndex,
-        int endTriangleIndex,
         ReadOnlyBuffer<GPUPointLight> pointLights,
         int lightIndex,
         Float4x4 invertedProjectionViewMatrix,
@@ -229,75 +224,69 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
         {
             var x = ThreadIds.X + startX;
             var y = ThreadIds.Y + startY;
-            for (var ti = beginTriangleIndex; ti <= endTriangleIndex; ti++)
+
+            var p = (y - renderImageOffsetY) * renderImageWidth + x - renderImageOffsetX;
+            var rasterizedPixel = rasterizedImage[p];
+            if (rasterizedPixel.TriangleIndex < 1)
             {
-                var triangle = triangles[ti];
-                var e = ShaderUtil.CalcE(x, y, triangle, scaleRateX, scaleRateY, offsetX, offsetY);
-                if (Hlsl.Any(Hlsl.IsNaN(e)))
-                {
-                    continue;
-                }
-
-                var lighting = triangleLighting[ti];
-                var p = (y - renderImageOffsetY) * renderImageWidth + x - renderImageOffsetX;
-                var rasterizedPixel = rasterizedImage[p];
-
-                var color = rasterizedPixel.Color;
-                var a = color.W;
-                var l = pointLights[lightIndex];
-                var shadowProjectionPos = Float4.Zero;
-                if (hasShadow)
-                {
-                    shadowProjectionPos = ShaderUtil.CalcBarycentricCoord(lighting.SVVX, lighting.SVVY, lighting.SVVZ, e);
-                }
-
-                if (hasShadow & !lighting.IsAcceptLight & lighting.IsAcceptShadow)
-                {
-                    color *= GetShadowColor(lighting.Id, l.ShadowScatterSize, shadowProjectionPos, invertedProjectionViewMatrix, l.FaceDetectionMatrix);
-                    color.W = a;
-                    rasterizedPixel.Color = color;
-                }
-                else if (lighting.IsAcceptLight)
-                {
-                    var lightColor = l.Color;
-
-                    if (lighting.IsAcceptShadow)
-                    {
-                        var transmissionColor = GetShadowColor(lighting.Id, l.ShadowScatterSize, shadowProjectionPos, invertedProjectionViewMatrix, l.FaceDetectionMatrix);
-                        if (Hlsl.All(lightColor.XYZ < 0.0F))
-                        {
-                            continue;
-                        }
-                        lightColor *= transmissionColor;
-                    }
-
-                    var position = ShaderUtil.CalcBarycentricCoord(lighting.VVX, lighting.VVY, lighting.VVZ, e);
-                    var n = lighting.IsFrontFace ? -lighting.FloatNormal : lighting.FloatNormal;
-                    var lightDiff = (position - l.Position).XYZ;
-                    var light = Hlsl.Normalize(lightDiff);
-                    var falloff = ShaderUtil.CalcFalloff(lightDiff, l.FalloffType, l.FalloffStart, l.FalloffLength);
-                    var diffuseFactor = Hlsl.Dot(light, n);
-                    var isBack = diffuseFactor < 0.0F;
-                    if (isBack)
-                    {
-                        diffuseFactor *= -lighting.LightTransmission;
-                    }
-                    rasterizedPixel.Diffuse += lightColor * color * diffuseFactor * falloff * lighting.Diffuse;
-
-                    var view = -Hlsl.Normalize(position.XYZ);
-                    var halfLE = Hlsl.Normalize(view - light);
-                    var specularFactor = Hlsl.Max(Hlsl.Dot(-n, halfLE), 0.0F);
-                    if (isBack)
-                    {
-                        specularFactor *= lighting.LightTransmission;
-                    }
-                    rasterizedPixel.Specular += Hlsl.Lerp(lightColor, color * lightColor, lighting.Metal) * Hlsl.Pow(specularFactor, ShininessStrength * lighting.SpecularShininess) * lighting.SpecularIntensity * falloff;
-                }
-
-                rasterizedImage[p] = rasterizedPixel;
-
-                break;
+                return;
             }
+            var lighting = triangleLighting[rasterizedPixel.TriangleIndex - 1];
+            var e = rasterizedPixel.E;
+
+            var color = rasterizedPixel.Color;
+            var a = color.W;
+            var l = pointLights[lightIndex];
+            var shadowProjectionPos = Float4.Zero;
+            if (hasShadow)
+            {
+                shadowProjectionPos = ShaderUtil.CalcBarycentricCoord(lighting.SVVX, lighting.SVVY, lighting.SVVZ, e);
+            }
+
+            if (hasShadow & !lighting.IsAcceptLight & lighting.IsAcceptShadow)
+            {
+                color *= GetShadowColor(lighting.Id, l.ShadowScatterSize, shadowProjectionPos, invertedProjectionViewMatrix, l.FaceDetectionMatrix);
+                color.W = a;
+                rasterizedPixel.Color = color;
+            }
+            else if (lighting.IsAcceptLight)
+            {
+                var lightColor = l.Color;
+
+                if (lighting.IsAcceptShadow)
+                {
+                    var transmissionColor = GetShadowColor(lighting.Id, l.ShadowScatterSize, shadowProjectionPos, invertedProjectionViewMatrix, l.FaceDetectionMatrix);
+                    if (Hlsl.All(lightColor.XYZ < 0.0F))
+                    {
+                        return;
+                    }
+                    lightColor *= transmissionColor;
+                }
+
+                var position = ShaderUtil.CalcBarycentricCoord(lighting.VVX, lighting.VVY, lighting.VVZ, e);
+                var n = lighting.IsFrontFace ? -lighting.FloatNormal : lighting.FloatNormal;
+                var lightDiff = (position - l.Position).XYZ;
+                var light = Hlsl.Normalize(lightDiff);
+                var falloff = ShaderUtil.CalcFalloff(lightDiff, l.FalloffType, l.FalloffStart, l.FalloffLength);
+                var diffuseFactor = Hlsl.Dot(light, n);
+                var isBack = diffuseFactor < 0.0F;
+                if (isBack)
+                {
+                    diffuseFactor *= -lighting.LightTransmission;
+                }
+                rasterizedPixel.Diffuse += lightColor * color * diffuseFactor * falloff * lighting.Diffuse;
+
+                var view = -Hlsl.Normalize(position.XYZ);
+                var halfLE = Hlsl.Normalize(view - light);
+                var specularFactor = Hlsl.Max(Hlsl.Dot(-n, halfLE), 0.0F);
+                if (isBack)
+                {
+                    specularFactor *= lighting.LightTransmission;
+                }
+                rasterizedPixel.Specular += Hlsl.Lerp(lightColor, color * lightColor, lighting.Metal) * Hlsl.Pow(specularFactor, ShininessStrength * lighting.SpecularShininess) * lighting.SpecularIntensity * falloff;
+            }
+
+            rasterizedImage[p] = rasterizedPixel;
         }
 
         Float4 GetShadowColor(int triangleId, float shadowScatterSize, Float4 shadowProjectionPos, Float4x4 invertedProjectionViewMatrix, Float4x4 faceDetectionMatrix)
@@ -553,14 +542,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
         int renderImageWidth,
         int renderImageOffsetX,
         int renderImageOffsetY,
-        float scaleRateX,
-        float scaleRateY,
-        float offsetX,
-        float offsetY,
-        ReadOnlyBuffer<GPUTriangle> triangles,
         ReadOnlyBuffer<GPUTriangleLighting> triangleLighting,
-        int beginTriangleIndex,
-        int endTriangleIndex,
         ReadOnlyBuffer<GPUSpotLight> spotLights,
         int lightIndex,
         Float4x4 invertedProjectionViewMatrix,
@@ -582,84 +564,78 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
         {
             var x = ThreadIds.X + startX;
             var y = ThreadIds.Y + startY;
-            for (var ti = beginTriangleIndex; ti <= endTriangleIndex; ti++)
+
+            var p = (y - renderImageOffsetY) * renderImageWidth + x - renderImageOffsetX;
+            var rasterizedPixel = rasterizedImage[p];
+            if (rasterizedPixel.TriangleIndex < 1)
             {
-                var triangle = triangles[ti];
-                var e = ShaderUtil.CalcE(x, y, triangle, scaleRateX, scaleRateY, offsetX, offsetY);
-                if (Hlsl.Any(Hlsl.IsNaN(e)))
-                {
-                    continue;
-                }
-
-                var lighting = triangleLighting[ti];
-                var p = (y - renderImageOffsetY) * renderImageWidth + x - renderImageOffsetX;
-                var rasterizedPixel = rasterizedImage[p];
-
-                var color = rasterizedPixel.Color;
-                var a = color.W;
-                var l = spotLights[lightIndex];
-                var shadowProjectionPos = Float4.Zero;
-                if (hasShadow)
-                {
-                    shadowProjectionPos = ShaderUtil.CalcBarycentricCoord(lighting.SVVX, lighting.SVVY, lighting.SVVZ, e);
-                }
-
-                var position = ShaderUtil.CalcBarycentricCoord(lighting.VVX, lighting.VVY, lighting.VVZ, e);
-                var lightColor = l.Color;
-                var lightDiff = (position - l.Position).XYZ;
-                var light = Hlsl.Normalize(lightDiff);
-                var spotCone = Hlsl.Acos(Hlsl.Dot(l.Direction, light));
-                var attenuation = 1.0F;
-                if (l.ConeAttenuationRate > 0.0)
-                {
-                    attenuation = Hlsl.Cos((1.0F - Hlsl.Min((Hlsl.Cos(spotCone) - l.OuterConeCos) * l.InvertInnerConeCos, 1.0F)) * PI * 0.5F);
-                }
-
-                if (hasShadow & !lighting.IsAcceptLight & lighting.IsAcceptShadow)
-                {
-                    color *= Hlsl.Lerp(1.0F, GetShadowColor(lighting.Id, l.ShadowScatterSize, shadowProjectionPos), attenuation);
-                    color.W = a;
-                    rasterizedPixel.Color = color;
-                }
-                else if (lighting.IsAcceptLight)
-                {
-                    if (spotCone <= l.OuterCone)
-                    {
-                        if (hasShadow & lighting.IsAcceptShadow)
-                        {
-                            var transmissionColor = GetShadowColor(lighting.Id, l.ShadowScatterSize, shadowProjectionPos);
-                            if (Hlsl.All(lightColor.XYZ < 0.0F))
-                            {
-                                continue;
-                            }
-                            lightColor *= transmissionColor;
-                        }
-
-                        var n = lighting.IsFrontFace ? -lighting.FloatNormal : lighting.FloatNormal;
-                        var falloff = ShaderUtil.CalcFalloff(lightDiff, l.FalloffType, l.FalloffStart, l.FalloffLength);
-                        var diffuseFactor = Hlsl.Dot(light, n);
-                        var isBack = diffuseFactor < 0.0F;
-                        if (isBack)
-                        {
-                            diffuseFactor *= -lighting.LightTransmission;
-                        }
-                        rasterizedPixel.Diffuse += lightColor * color * diffuseFactor * falloff * attenuation * lighting.Diffuse;
-
-                        var view = -Hlsl.Normalize(position.XYZ);
-                        var halfLE = Hlsl.Normalize(view - light);
-                        var specularFactor = Hlsl.Max(Hlsl.Dot(-n, halfLE), 0.0F);
-                        if (isBack)
-                        {
-                            specularFactor *= lighting.LightTransmission;
-                        }
-                        rasterizedPixel.Specular += Hlsl.Lerp(lightColor, color * lightColor, lighting.Metal) * Hlsl.Pow(specularFactor, ShininessStrength * lighting.SpecularShininess) * lighting.SpecularIntensity * falloff * attenuation;
-                    }
-                }
-
-                rasterizedImage[p] = rasterizedPixel;
-
-                break;
+                return;
             }
+            var lighting = triangleLighting[rasterizedPixel.TriangleIndex - 1];
+            var e = rasterizedPixel.E;
+
+            var color = rasterizedPixel.Color;
+            var a = color.W;
+            var l = spotLights[lightIndex];
+            var shadowProjectionPos = Float4.Zero;
+            if (hasShadow)
+            {
+                shadowProjectionPos = ShaderUtil.CalcBarycentricCoord(lighting.SVVX, lighting.SVVY, lighting.SVVZ, e);
+            }
+
+            var position = ShaderUtil.CalcBarycentricCoord(lighting.VVX, lighting.VVY, lighting.VVZ, e);
+            var lightColor = l.Color;
+            var lightDiff = (position - l.Position).XYZ;
+            var light = Hlsl.Normalize(lightDiff);
+            var spotCone = Hlsl.Acos(Hlsl.Dot(l.Direction, light));
+            var attenuation = 1.0F;
+            if (l.ConeAttenuationRate > 0.0)
+            {
+                attenuation = Hlsl.Cos((1.0F - Hlsl.Min((Hlsl.Cos(spotCone) - l.OuterConeCos) * l.InvertInnerConeCos, 1.0F)) * PI * 0.5F);
+            }
+
+            if (hasShadow & !lighting.IsAcceptLight & lighting.IsAcceptShadow)
+            {
+                color *= Hlsl.Lerp(1.0F, GetShadowColor(lighting.Id, l.ShadowScatterSize, shadowProjectionPos), attenuation);
+                color.W = a;
+                rasterizedPixel.Color = color;
+            }
+            else if (lighting.IsAcceptLight)
+            {
+                if (spotCone <= l.OuterCone)
+                {
+                    if (hasShadow & lighting.IsAcceptShadow)
+                    {
+                        var transmissionColor = GetShadowColor(lighting.Id, l.ShadowScatterSize, shadowProjectionPos);
+                        if (Hlsl.All(lightColor.XYZ < 0.0F))
+                        {
+                            return;
+                        }
+                        lightColor *= transmissionColor;
+                    }
+
+                    var n = lighting.IsFrontFace ? -lighting.FloatNormal : lighting.FloatNormal;
+                    var falloff = ShaderUtil.CalcFalloff(lightDiff, l.FalloffType, l.FalloffStart, l.FalloffLength);
+                    var diffuseFactor = Hlsl.Dot(light, n);
+                    var isBack = diffuseFactor < 0.0F;
+                    if (isBack)
+                    {
+                        diffuseFactor *= -lighting.LightTransmission;
+                    }
+                    rasterizedPixel.Diffuse += lightColor * color * diffuseFactor * falloff * attenuation * lighting.Diffuse;
+
+                    var view = -Hlsl.Normalize(position.XYZ);
+                    var halfLE = Hlsl.Normalize(view - light);
+                    var specularFactor = Hlsl.Max(Hlsl.Dot(-n, halfLE), 0.0F);
+                    if (isBack)
+                    {
+                        specularFactor *= lighting.LightTransmission;
+                    }
+                    rasterizedPixel.Specular += Hlsl.Lerp(lightColor, color * lightColor, lighting.Metal) * Hlsl.Pow(specularFactor, ShininessStrength * lighting.SpecularShininess) * lighting.SpecularIntensity * falloff * attenuation;
+                }
+            }
+
+            rasterizedImage[p] = rasterizedPixel;
         }
 
         Float4 GetShadowColor(int triangleId, float shadowScatterSize, Float4 shadowProjectionPos)
@@ -780,14 +756,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
         int renderImageWidth,
         int renderImageOffsetX,
         int renderImageOffsetY,
-        float scaleRateX,
-        float scaleRateY,
-        float offsetX,
-        float offsetY,
-        ReadOnlyBuffer<GPUTriangle> triangles,
         ReadOnlyBuffer<GPUTriangleLighting> triangleLighting,
-        int beginTriangleIndex,
-        int endTriangleIndex,
         ReadOnlyBuffer<GPUParallelLight> parallelLights,
         int lightIndex,
         Float4x4 invertedProjectionViewMatrix,
@@ -807,75 +776,69 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
         {
             var x = ThreadIds.X + startX;
             var y = ThreadIds.Y + startY;
-            for (var ti = beginTriangleIndex; ti <= endTriangleIndex; ti++)
+
+            var p = (y - renderImageOffsetY) * renderImageWidth + x - renderImageOffsetX;
+            var rasterizedPixel = rasterizedImage[p];
+            if (rasterizedPixel.TriangleIndex < 1)
             {
-                var triangle = triangles[ti];
-                var e = ShaderUtil.CalcE(x, y, triangle, scaleRateX, scaleRateY, offsetX, offsetY);
-                if (Hlsl.Any(Hlsl.IsNaN(e)))
-                {
-                    continue;
-                }
-
-                var lighting = triangleLighting[ti];
-                var p = (y - renderImageOffsetY) * renderImageWidth + x - renderImageOffsetX;
-                var rasterizedPixel = rasterizedImage[p];
-
-                var color = rasterizedPixel.Color;
-                var a = color.W;
-                var l = parallelLights[lightIndex];
-                var shadowProjectionPos = Float4.Zero;
-                if (hasShadow)
-                {
-                    shadowProjectionPos = ShaderUtil.CalcBarycentricCoord(lighting.SVVX, lighting.SVVY, lighting.SVVZ, e);
-                }
-
-                var position = ShaderUtil.CalcBarycentricCoord(lighting.VVX, lighting.VVY, lighting.VVZ, e);
-
-                if (hasShadow & !lighting.IsAcceptLight & lighting.IsAcceptShadow)
-                {
-                    color *= GetShadowColor(lighting.Id, l.ShadowScatterSize, shadowProjectionPos);
-                    color.W = a;
-                    rasterizedPixel.Color = color;
-                }
-                else if (lighting.IsAcceptLight)
-                {
-                    var lightColor = l.Color;
-
-                    if (hasShadow & lighting.IsAcceptShadow)
-                    {
-                        var transmissionColor = GetShadowColor(lighting.Id, l.ShadowScatterSize, shadowProjectionPos);
-                        if (Hlsl.All(lightColor.XYZ < 0.0F))
-                        {
-                            continue;
-                        }
-                        lightColor *= transmissionColor;
-                    }
-
-                    var lightDiff = (position - l.Position).XYZ;
-                    var n = lighting.IsFrontFace ? -lighting.FloatNormal : lighting.FloatNormal;
-                    var falloff = ShaderUtil.CalcFalloff(lightDiff, l.FalloffType, l.FalloffStart, l.FalloffLength);
-                    var diffuseFactor = Hlsl.Dot(l.Direction, n);
-                    var isBack = diffuseFactor < 0.0F;
-                    if (isBack)
-                    {
-                        diffuseFactor *= -lighting.LightTransmission;
-                    }
-                    rasterizedPixel.Diffuse += lightColor * color * diffuseFactor * falloff * lighting.Diffuse;
-
-                    var view = -Hlsl.Normalize(position.XYZ);
-                    var halfLE = Hlsl.Normalize(view - l.Direction);
-                    var specularFactor = Hlsl.Max(Hlsl.Dot(-n, halfLE), 0.0F);
-                    if (isBack)
-                    {
-                        specularFactor *= lighting.LightTransmission;
-                    }
-                    rasterizedPixel.Specular += Hlsl.Lerp(lightColor, color * lightColor, lighting.Metal) * Hlsl.Pow(specularFactor, ShininessStrength * lighting.SpecularShininess) * lighting.SpecularIntensity * falloff;
-                }
-
-                rasterizedImage[p] = rasterizedPixel;
-
-                break;
+                return;
             }
+            var lighting = triangleLighting[rasterizedPixel.TriangleIndex - 1];
+            var e = rasterizedPixel.E;
+
+            var color = rasterizedPixel.Color;
+            var a = color.W;
+            var l = parallelLights[lightIndex];
+            var shadowProjectionPos = Float4.Zero;
+            if (hasShadow)
+            {
+                shadowProjectionPos = ShaderUtil.CalcBarycentricCoord(lighting.SVVX, lighting.SVVY, lighting.SVVZ, e);
+            }
+
+            var position = ShaderUtil.CalcBarycentricCoord(lighting.VVX, lighting.VVY, lighting.VVZ, e);
+
+            if (hasShadow & !lighting.IsAcceptLight & lighting.IsAcceptShadow)
+            {
+                color *= GetShadowColor(lighting.Id, l.ShadowScatterSize, shadowProjectionPos);
+                color.W = a;
+                rasterizedPixel.Color = color;
+            }
+            else if (lighting.IsAcceptLight)
+            {
+                var lightColor = l.Color;
+
+                if (hasShadow & lighting.IsAcceptShadow)
+                {
+                    var transmissionColor = GetShadowColor(lighting.Id, l.ShadowScatterSize, shadowProjectionPos);
+                    if (Hlsl.All(lightColor.XYZ < 0.0F))
+                    {
+                        return;
+                    }
+                    lightColor *= transmissionColor;
+                }
+
+                var lightDiff = (position - l.Position).XYZ;
+                var n = lighting.IsFrontFace ? -lighting.FloatNormal : lighting.FloatNormal;
+                var falloff = ShaderUtil.CalcFalloff(lightDiff, l.FalloffType, l.FalloffStart, l.FalloffLength);
+                var diffuseFactor = Hlsl.Dot(l.Direction, n);
+                var isBack = diffuseFactor < 0.0F;
+                if (isBack)
+                {
+                    diffuseFactor *= -lighting.LightTransmission;
+                }
+                rasterizedPixel.Diffuse += lightColor * color * diffuseFactor * falloff * lighting.Diffuse;
+
+                var view = -Hlsl.Normalize(position.XYZ);
+                var halfLE = Hlsl.Normalize(view - l.Direction);
+                var specularFactor = Hlsl.Max(Hlsl.Dot(-n, halfLE), 0.0F);
+                if (isBack)
+                {
+                    specularFactor *= lighting.LightTransmission;
+                }
+                rasterizedPixel.Specular += Hlsl.Lerp(lightColor, color * lightColor, lighting.Metal) * Hlsl.Pow(specularFactor, ShininessStrength * lighting.SpecularShininess) * lighting.SpecularIntensity * falloff;
+            }
+
+            rasterizedImage[p] = rasterizedPixel;
         }
 
         Float4 GetShadowColor(int triangleId, float shadowScatterSize, Float4 shadowProjectionPos)

@@ -11,9 +11,13 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader
     {
         public Float4 Color;
 
+        public Float4 E;
+
         public Float4 Specular;
 
         public Float4 Diffuse;
+
+        public int TriangleIndex;
     }
 
     struct GPUShadowPixel
