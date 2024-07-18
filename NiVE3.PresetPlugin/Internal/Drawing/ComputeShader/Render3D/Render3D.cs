@@ -10,6 +10,180 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
 {
     [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
     [GeneratedComputeShaderDescriptor]
+    readonly partial struct Rasterize3DDirect(
+        ReadWriteBuffer<Float4> renderTarget,
+        int renderImageWidth,
+        int renderImageOffsetX,
+        int renderImageOffsetY,
+        float scaleRateX,
+        float scaleRateY,
+        ReadOnlyBuffer<GPUTriangle> triangles,
+        ReadOnlyBuffer<GPUTriangleTexturing> triangleTexturings,
+        int beginTriangleIndex,
+        int endTriangleIndex,
+        ReadWriteBuffer<Float4> texture,
+        int textureWidth,
+        int textureHeight,
+        ReadWriteBuffer<float> trackMatte,
+        int blendMode,
+        float offsetX,
+        float offsetY,
+        int startX,
+        int startY
+    ) : IComputeShader
+    {
+        public void Execute()
+        {
+            var x = ThreadIds.X + startX;
+            var y = ThreadIds.Y + startY;
+            for (var ti = beginTriangleIndex; ti <= endTriangleIndex; ti++)
+            {
+                var triangle = triangles[ti];
+                var e = ShaderUtil.CalcE(x, y, triangle, scaleRateX, scaleRateY, offsetX, offsetY);
+                if (Hlsl.Any(Hlsl.IsNaN(e)))
+                {
+                    continue;
+                }
+
+                var texturing = triangleTexturings[ti];
+                var p = (y - renderImageOffsetY) * renderImageWidth + x - renderImageOffsetX;
+                var tw = ShaderUtil.Sum(texturing.W * e);
+                var tx = ShaderUtil.Sum(texturing.U * e / tw) * textureWidth;
+                var ty = ShaderUtil.Sum(texturing.V * e / tw) * textureHeight;
+
+                var color = texturing.InterpolationQuality == 0 ? NearestNeighbor(tx, ty) : Bilinear(tx, ty);
+                color.W *= trackMatte[p % trackMatte.Length] * texturing.Opacity;
+                if (color.W <= 0.0F)
+                {
+                    break;
+                }
+
+                renderTarget[p] = BlendMethods.Process(blendMode, renderTarget[p], color);
+
+                break;
+            }
+        }
+
+        Float4 NearestNeighbor(float x, float y)
+        {
+            var ix = (int)x;
+            var iy = (int)y;
+
+            if (ix > -1 && iy > -1 && ix < textureWidth && iy < textureHeight)
+            {
+                return texture[iy * textureWidth + ix];
+            }
+            else
+            {
+                return new Float4(1.0F, 1.0F, 1.0F, 0.0F);
+            }
+        }
+
+        Float4 Bilinear(float x, float y)
+        {
+            var ix = (int)x;
+            var iy = (int)y;
+
+            if (ix == x && iy == y)
+            {
+                if (ix > -1 && iy > -1 && ix < textureWidth && iy < textureHeight)
+                {
+                    return texture[iy * textureWidth + ix];
+                }
+                else
+                {
+                    return new Float4(1.0F, 1.0F, 1.0F, 0.0F);
+                }
+            }
+            else if (ix < -1 || iy < -1 || ix >= textureWidth || iy >= textureHeight)
+            {
+                return new Float4(1.0F, 1.0F, 1.0F, 0.0F);
+            }
+
+            var pp = x - ix;
+            var qq = y - iy;
+            var ip = 1.0F - pp;
+            var iq = 1.0F - qq;
+            var mw = textureWidth - 1;
+            var mh = textureHeight - 1;
+
+            var c1 = new Float4(1.0F, 1.0F, 1.0F, 0.0F);
+            var c2 = new Float4(1.0F, 1.0F, 1.0F, 0.0F);
+            var c3 = new Float4(1.0F, 1.0F, 1.0F, 0.0F);
+            var c4 = new Float4(1.0F, 1.0F, 1.0F, 0.0F);
+            var pos = iy * textureWidth + ix;
+
+            if (ix > -1)
+            {
+                if (ix < mw)
+                {
+                    if (iy > -1)
+                    {
+                        c1 = texture[pos];
+                        c2 = texture[pos + 1];
+                        if (iy < mh)
+                        {
+                            pos += textureWidth;
+                            c3 = texture[pos];
+                            c4 = texture[pos + 1];
+                        }
+                    }
+                    else
+                    {
+                        pos += textureWidth;
+                        c3 = texture[pos];
+                        c4 = texture[pos + 1];
+                    }
+                }
+                else
+                {
+                    if (iy > -1)
+                    {
+                        c1 = texture[pos];
+                        if (iy < mh)
+                        {
+                            c3 = texture[pos + textureWidth];
+                        }
+                    }
+                    else
+                    {
+                        c3 = texture[pos + textureWidth];
+                    }
+                }
+            }
+            else
+            {
+                pos++;
+                if (iy > -1)
+                {
+                    c2 = texture[pos];
+                    if (iy < mh)
+                    {
+                        c4 = texture[pos + textureWidth];
+                    }
+                }
+                else
+                {
+                    c4 = texture[pos + textureWidth];
+                }
+            }
+
+            var ta = Hlsl.Lerp(Hlsl.Lerp(c1, c3, qq), Hlsl.Lerp(c2, c4, qq), pp).W;
+            if (ta <= 0.0F)
+            {
+                return new Float4(1.0F, 1.0F, 1.0F, 0.0F);
+            }
+            else
+            {
+                var t = Hlsl.Lerp(Hlsl.Lerp(c1 * c1.W, c3 * c3.W, qq), Hlsl.Lerp(c2 * c2.W, c4 * c4.W, qq), pp) / ta;
+                t.W = ta;
+                return t;
+            }
+        }
+    }
+
+    [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
+    [GeneratedComputeShaderDescriptor]
     readonly partial struct Rasterize3D(
         ReadWriteBuffer<GPURasterizedPixel> renderImage,
         int renderImageWidth,
@@ -54,7 +228,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
                 color.W *= trackMatte[p % trackMatte.Length] * texturing.Opacity;
                 if (color.W <= 0.0F)
                 {
-                    continue;
+                    break;
                 }
 
 #pragma warning disable IDE0017 // NOTE: ComputeSharpのSourceGeneratorでは非対応

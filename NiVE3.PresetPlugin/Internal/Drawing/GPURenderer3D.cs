@@ -14,6 +14,7 @@ using NiVE3.PresetPlugin.Internal.Drawing.ComputeShader;
 using NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D;
 using NiVE3.PresetPlugin.Internal.Drawing.Primitive3D;
 using NiVE3.Shared.Extension;
+using static Vanara.PInvoke.Kernel32;
 
 namespace NiVE3.PresetPlugin.Internal.Drawing
 {
@@ -220,113 +221,180 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 ));
             }
 
-            var ambientLightColor = AmbientLights.Aggregate(Vector4.Zero, (m, a) => m + a.Color);
-
-            using (var triangleBuffer = Device.AllocateReadOnlyBuffer<GPUTriangle>(CollectionsMarshal.AsSpan(preProcessedTriangles)))
-            using (var triangleTexturingBuffer = Device.AllocateReadOnlyBuffer<GPUTriangleTexturing>(CollectionsMarshal.AsSpan(preProcessedTriangleTexturing)))
-            using (var triangleLightingBuffer = Device.AllocateReadOnlyBuffer<GPUTriangleLighting>(CollectionsMarshal.AsSpan(preProcessedTriangleLighting)))
-            using (var pointLightBuffer = PointLights.Count > 0 ? Device.AllocateReadOnlyBuffer([..PointLights.Select(p => p.ToGpu())]) : Device.AllocateReadOnlyBuffer<GPUPointLight>(1))
-            using (var spotLightBuffer = SpotLights.Count > 0 ? Device.AllocateReadOnlyBuffer([..SpotLights.Select(s => s.ToGpu())]) : Device.AllocateReadOnlyBuffer<GPUSpotLight>(1))
-            using (var parallelLightBuffer = ParallelLights.Count > 0 ? Device.AllocateReadOnlyBuffer([..ParallelLights.Select(p => p.ToGpu())]) : Device.AllocateReadOnlyBuffer<GPUParallelLight>(1))
+            if (hasLight)
             {
-                if (enableAntiAlias)
+                var ambientLightColor = AmbientLights.Aggregate(Vector4.Zero, (m, a) => m + a.Color);
+
+                using (var triangleBuffer = Device.AllocateReadOnlyBuffer<GPUTriangle>(CollectionsMarshal.AsSpan(preProcessedTriangles)))
+                using (var triangleTexturingBuffer = Device.AllocateReadOnlyBuffer<GPUTriangleTexturing>(CollectionsMarshal.AsSpan(preProcessedTriangleTexturing)))
+                using (var triangleLightingBuffer = Device.AllocateReadOnlyBuffer<GPUTriangleLighting>(CollectionsMarshal.AsSpan(preProcessedTriangleLighting)))
+                using (var pointLightBuffer = PointLights.Count > 0 ? Device.AllocateReadOnlyBuffer([.. PointLights.Select(p => p.ToGpu())]) : Device.AllocateReadOnlyBuffer<GPUPointLight>(1))
+                using (var spotLightBuffer = SpotLights.Count > 0 ? Device.AllocateReadOnlyBuffer([.. SpotLights.Select(s => s.ToGpu())]) : Device.AllocateReadOnlyBuffer<GPUSpotLight>(1))
+                using (var parallelLightBuffer = ParallelLights.Count > 0 ? Device.AllocateReadOnlyBuffer([.. ParallelLights.Select(p => p.ToGpu())]) : Device.AllocateReadOnlyBuffer<GPUParallelLight>(1))
                 {
-                    using var interpolate = new NGPUImage(RenderImage.Width, RenderImage.Height, Device);
-                    RenderImage.CopyTo(interpolate);
+                    if (enableAntiAlias)
+                    {
+                        using var interpolate = new NGPUImage(RenderImage.Width, RenderImage.Height, Device);
+                        RenderImage.CopyTo(interpolate);
 
-                    Rasterize(
-                        Device,
-                        RenderImage,
-                        triangleBuffer,
-                        triangleTexturingBuffer,
-                        triangleLightingBuffer,
-                        CollectionsMarshal.AsSpan(triangleGroups),
-                        CollectionsMarshal.AsSpan(textureList),
-                        CollectionsMarshal.AsSpan(trackMatteList),
-                        renderImageOffsetX,
-                        renderImageOffsetY,
-                        scaleRateX,
-                        scaleRateY,
-                        invertedProjectionViewMatrix,
-                        PointLights.Count,
-                        pointLightBuffer,
-                        pointLightShadows,
-                        SpotLights.Count,
-                        spotLightBuffer,
-                        spotLightShadows,
-                        ParallelLights.Count,
-                        parallelLightBuffer,
-                        parallelLightShadows,
-                        ambientLightColor,
-                        shadowSize,
-                        enableShadowAntiAlias,
-                        0.0F,
-                        0.0F
-                    );
-                    Rasterize(
-                        Device,
-                        interpolate,
-                        triangleBuffer,
-                        triangleTexturingBuffer,
-                        triangleLightingBuffer,
-                        CollectionsMarshal.AsSpan(triangleGroups),
-                        CollectionsMarshal.AsSpan(textureList),
-                        CollectionsMarshal.AsSpan(trackMatteList),
-                        renderImageOffsetX,
-                        renderImageOffsetY,
-                        scaleRateX,
-                        scaleRateY,
-                        invertedProjectionViewMatrix,
-                        PointLights.Count,
-                        pointLightBuffer,
-                        pointLightShadows,
-                        SpotLights.Count,
-                        spotLightBuffer,
-                        spotLightShadows,
-                        ParallelLights.Count,
-                        parallelLightBuffer,
-                        parallelLightShadows,
-                        ambientLightColor,
-                        shadowSize,
-                        enableShadowAntiAlias,
-                        0.5F,
-                        0.5F
-                    );
+                        Rasterize(
+                            Device,
+                            RenderImage,
+                            triangleBuffer,
+                            triangleTexturingBuffer,
+                            triangleLightingBuffer,
+                            CollectionsMarshal.AsSpan(triangleGroups),
+                            CollectionsMarshal.AsSpan(textureList),
+                            CollectionsMarshal.AsSpan(trackMatteList),
+                            renderImageOffsetX,
+                            renderImageOffsetY,
+                            scaleRateX,
+                            scaleRateY,
+                            invertedProjectionViewMatrix,
+                            PointLights.Count,
+                            pointLightBuffer,
+                            pointLightShadows,
+                            SpotLights.Count,
+                            spotLightBuffer,
+                            spotLightShadows,
+                            ParallelLights.Count,
+                            parallelLightBuffer,
+                            parallelLightShadows,
+                            ambientLightColor,
+                            shadowSize,
+                            enableShadowAntiAlias,
+                            0.0F,
+                            0.0F
+                        );
+                        Rasterize(
+                            Device,
+                            interpolate,
+                            triangleBuffer,
+                            triangleTexturingBuffer,
+                            triangleLightingBuffer,
+                            CollectionsMarshal.AsSpan(triangleGroups),
+                            CollectionsMarshal.AsSpan(textureList),
+                            CollectionsMarshal.AsSpan(trackMatteList),
+                            renderImageOffsetX,
+                            renderImageOffsetY,
+                            scaleRateX,
+                            scaleRateY,
+                            invertedProjectionViewMatrix,
+                            PointLights.Count,
+                            pointLightBuffer,
+                            pointLightShadows,
+                            SpotLights.Count,
+                            spotLightBuffer,
+                            spotLightShadows,
+                            ParallelLights.Count,
+                            parallelLightBuffer,
+                            parallelLightShadows,
+                            ambientLightColor,
+                            shadowSize,
+                            enableShadowAntiAlias,
+                            0.5F,
+                            0.5F
+                        );
 
-                    using var context = Device.CreateComputeContext();
-                    context.For(RenderImage.Width, RenderImage.Height, new AntiAlias(RenderImage.Data, interpolate.Data, RenderImage.Width));
+                        using var context = Device.CreateComputeContext();
+                        context.For(RenderImage.Width, RenderImage.Height, new AntiAlias(RenderImage.Data, interpolate.Data, RenderImage.Width));
+                    }
+                    else
+                    {
+                        Rasterize(
+                            Device,
+                            RenderImage,
+                            triangleBuffer,
+                            triangleTexturingBuffer,
+                            triangleLightingBuffer,
+                            CollectionsMarshal.AsSpan(triangleGroups),
+                            CollectionsMarshal.AsSpan(textureList),
+                            CollectionsMarshal.AsSpan(trackMatteList),
+                            renderImageOffsetX,
+                            renderImageOffsetY,
+                            scaleRateX,
+                            scaleRateY,
+                            invertedProjectionViewMatrix,
+                            PointLights.Count,
+                            pointLightBuffer,
+                            pointLightShadows,
+                            SpotLights.Count,
+                            spotLightBuffer,
+                            spotLightShadows,
+                            ParallelLights.Count,
+                            parallelLightBuffer,
+                            parallelLightShadows,
+                            ambientLightColor,
+                            shadowSize,
+                            enableShadowAntiAlias,
+                            0.0F,
+                            0.0F
+                        );
+                    }
                 }
-                else
+            }
+            else
+            {
+                using (var triangleBuffer = Device.AllocateReadOnlyBuffer<GPUTriangle>(CollectionsMarshal.AsSpan(preProcessedTriangles)))
+                using (var triangleTexturingBuffer = Device.AllocateReadOnlyBuffer<GPUTriangleTexturing>(CollectionsMarshal.AsSpan(preProcessedTriangleTexturing)))
                 {
-                    Rasterize(
-                        Device,
-                        RenderImage,
-                        triangleBuffer,
-                        triangleTexturingBuffer,
-                        triangleLightingBuffer,
-                        CollectionsMarshal.AsSpan(triangleGroups),
-                        CollectionsMarshal.AsSpan(textureList),
-                        CollectionsMarshal.AsSpan(trackMatteList),
-                        renderImageOffsetX,
-                        renderImageOffsetY,
-                        scaleRateX,
-                        scaleRateY,
-                        invertedProjectionViewMatrix,
-                        PointLights.Count,
-                        pointLightBuffer,
-                        pointLightShadows,
-                        SpotLights.Count,
-                        spotLightBuffer,
-                        spotLightShadows,
-                        ParallelLights.Count,
-                        parallelLightBuffer,
-                        parallelLightShadows,
-                        ambientLightColor,
-                        shadowSize,
-                        enableShadowAntiAlias,
-                        0.0F,
-                        0.0F
-                    );
+                    if (enableAntiAlias)
+                    {
+                        using var interpolate = new NGPUImage(RenderImage.Width, RenderImage.Height, Device);
+                        RenderImage.CopyTo(interpolate);
+
+                        RasterizeDirect(
+                            Device,
+                            RenderImage,
+                            triangleBuffer,
+                            triangleTexturingBuffer,
+                            CollectionsMarshal.AsSpan(triangleGroups),
+                            CollectionsMarshal.AsSpan(textureList),
+                            CollectionsMarshal.AsSpan(trackMatteList),
+                            renderImageOffsetX,
+                            renderImageOffsetY,
+                            scaleRateX,
+                            scaleRateY,
+                            0.0F,
+                            0.0F
+                        );
+                        RasterizeDirect(
+                            Device,
+                            interpolate,
+                            triangleBuffer,
+                            triangleTexturingBuffer,
+                            CollectionsMarshal.AsSpan(triangleGroups),
+                            CollectionsMarshal.AsSpan(textureList),
+                            CollectionsMarshal.AsSpan(trackMatteList),
+                            renderImageOffsetX,
+                            renderImageOffsetY,
+                            scaleRateX,
+                            scaleRateY,
+                            0.5F,
+                            0.5F
+                        );
+
+                        using var context = Device.CreateComputeContext();
+                        context.For(RenderImage.Width, RenderImage.Height, new AntiAlias(RenderImage.Data, interpolate.Data, RenderImage.Width));
+                    }
+                    else
+                    {
+                        RasterizeDirect(
+                            Device,
+                            RenderImage,
+                            triangleBuffer,
+                            triangleTexturingBuffer,
+                            CollectionsMarshal.AsSpan(triangleGroups),
+                            CollectionsMarshal.AsSpan(textureList),
+                            CollectionsMarshal.AsSpan(trackMatteList),
+                            renderImageOffsetX,
+                            renderImageOffsetY,
+                            scaleRateX,
+                            scaleRateY,
+                            0.0F,
+                            0.0F
+                        );
+                    }
                 }
             }
 
@@ -352,6 +420,63 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             {
                 shadowMap.Dispose();
                 shadowBuffer.Dispose();
+            }
+        }
+
+        static void RasterizeDirect(
+            GraphicsDevice device,
+            NGPUImage renderTarget,
+            ReadOnlyBuffer<GPUTriangle> triangleBuffer,
+            ReadOnlyBuffer<GPUTriangleTexturing> triangleTexturingBuffer,
+            ReadOnlySpan<TriangleGroup> triangleGroups,
+            ReadOnlySpan<NGPUImage> textures,
+            ReadOnlySpan<GPURasterizedMaskImage?> trackMattes,
+            int renderImageOffsetX,
+            int renderImageOffsetY,
+            float scaleRateX,
+            float scaleRateY,
+            float offsetX,
+            float offsetY
+        )
+        {
+            using var emptyTrackMatte = device.AllocateReadWriteBuffer(EmptyTrackMatte);
+            using var context = device.CreateComputeContext();
+
+            for (var gi = 0; gi < triangleGroups.Length; gi++)
+            {
+                var group = triangleGroups[gi];
+                var totalMinX = group.MinX;
+                var totalMaxX = group.MaxX;
+                var totalMinY = group.MinY;
+                var totalMaxY = group.MaxY;
+
+                var texture = textures[group.BeginTriangleIndex];
+                context.For(
+                    totalMaxX - totalMinX,
+                    totalMaxY - totalMinY,
+                    new Rasterize3DDirect(
+                        renderTarget.Data,
+                        renderTarget.Width,
+                        renderImageOffsetX,
+                        renderImageOffsetY,
+                        scaleRateX,
+                        scaleRateY,
+                        triangleBuffer,
+                        triangleTexturingBuffer,
+                        group.BeginTriangleIndex,
+                        group.EndTriangleIndex,
+                        texture.Data,
+                        texture.Width,
+                        texture.Height,
+                        trackMattes[group.BeginTriangleIndex]?.Data ?? emptyTrackMatte,
+                        group.BlendMode,
+                        offsetX,
+                        offsetY,
+                        totalMinX,
+                        totalMinY
+                    )
+                );
+                context.Barrier(renderTarget.Data);
             }
         }
 
