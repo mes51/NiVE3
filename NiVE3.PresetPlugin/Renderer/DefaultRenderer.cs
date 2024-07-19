@@ -334,6 +334,27 @@ namespace NiVE3.PresetPlugin.Renderer
             }
         }
 
+        public void AbortRendering()
+        {
+            if (CurrentGpuFrame == null && CurrentManagedFrame == null)
+            {
+                throw new InvalidOperationException("rendering not started"); // bug
+            }
+
+            try
+            {
+                CurrentGpuFrame?.Dispose();
+            }
+            catch { }
+            try
+            {
+                CurrentManagedFrame?.Dispose();
+            }
+            catch { }
+            CurrentGpuFrame = null;
+            CurrentManagedFrame = null;
+        }
+
         public RasterizedMaskImage RenderAdjustmentMask(RenderableImage image)
         {
             var result = new ManagedRasterizedMaskImage(Width, Height);

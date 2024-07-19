@@ -29,6 +29,7 @@ using NiVE3.Config;
 using GongSolutions.Wpf.DragDrop;
 using ComputeSharp;
 using NiVE3.InternalShader;
+using NiVE3.Exceptions;
 
 namespace NiVE3.ViewModel
 {
@@ -340,6 +341,8 @@ namespace NiVE3.ViewModel
 
         ViewStateModel ViewState { get; }
 
+        ApplicationModel ApplicationModel { get; }
+
         PlayControllerModel PlayControllerModel { get; }
 
         AudioPlayerModel AudioPlayerModel { get; }
@@ -375,10 +378,11 @@ namespace NiVE3.ViewModel
             remove { CurrentTimeChangeByUserPublisher.Unsubscribe(value); }
         }
 
-        public PreviewViewModel(PreviewModelBase previewModel, ViewStateModel viewState, PlayControllerModel playControllerModel, AudioPlayerModel audioPlayerModel, AudioInformationModel audioInformationModel, AcceleratorModel acceleratorModel, EventHubModel eventHubModel)
+        public PreviewViewModel(PreviewModelBase previewModel, ViewStateModel viewState, ApplicationModel applicationModel, PlayControllerModel playControllerModel, AudioPlayerModel audioPlayerModel, AudioInformationModel audioInformationModel, AcceleratorModel acceleratorModel, EventHubModel eventHubModel)
         {
             PreviewModel = previewModel;
             ViewState = viewState;
+            ApplicationModel = applicationModel;
             PlayControllerModel = playControllerModel;
             AudioPlayerModel = audioPlayerModel;
             AudioInformationModel = audioInformationModel;
@@ -613,18 +617,46 @@ namespace NiVE3.ViewModel
 
             IsCurrentFrameUpdating = true;
 
-            using var image = PreviewModel.GetImage(CurrentTime);
+            NImage? image;
+            try
+            {
+                image = PreviewModel.GetImage(CurrentTime);
+            }
+            catch (GPUException ex)
+            {
+                IsCurrentFrameUpdating = false;
+                NeedUpdateFrameNextTick = true;
+                ApplicationModel.CaughtGPUException(ex);
+                return;
+            }
+
             if (image != null && BufferImageSize.Width == image.Width && BufferImageSize.Height == image.Height)
             {
                 if (image is NGPUImage gpuImage)
                 {
-                    var device = AcceleratorModel.CurrentDevice;
-                    using var convertedImageData = device.AllocateReadWriteBuffer<int>(image.DataLength);
-                    using (var context = device.CreateComputeContext())
+                    try
                     {
-                        context.For(gpuImage.Width, gpuImage.Height, new ConvertToPreviewImage(gpuImage.Data, convertedImageData, gpuImage.Width, (int)PreviewColorChannel));
+                        var device = AcceleratorModel.CurrentDevice;
+                        using var convertedImageData = device.AllocateReadWriteBuffer<int>(image.DataLength);
+                        using (var context = device.CreateComputeContext())
+                        {
+                            context.For(gpuImage.Width, gpuImage.Height, new ConvertToPreviewImage(gpuImage.Data, convertedImageData, gpuImage.Width, (int)PreviewColorChannel));
+                        }
+                        convertedImageData.CopyTo(ImageBuffer);
                     }
-                    convertedImageData.CopyTo(ImageBuffer);
+                    catch (Exception ex)
+                    {
+                        try
+                        {
+                            image.Dispose();
+                        }
+                        catch { }
+
+                        IsCurrentFrameUpdating = false;
+                        NeedUpdateFrameNextTick = true;
+                        ApplicationModel.CaughtGPUException(new GPUException(ex));
+                        return;
+                    }
                 }
                 else
                 {
@@ -695,6 +727,9 @@ namespace NiVE3.ViewModel
                     ImageBuffer.AsSpan().Clear();
                 }
             }
+
+            image?.Dispose();
+
             IsDirtyImageBuffer = true;
             UpdateBoundingBox();
             IsCurrentFrameUpdating = false;

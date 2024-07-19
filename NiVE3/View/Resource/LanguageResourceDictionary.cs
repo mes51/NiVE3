@@ -628,38 +628,44 @@ namespace NiVE3.View.Resource
 
         // Dialog
 
-        [LanguageKey, DefaultValue("フッテージの削除")]
+        [DefaultValue("フッテージの削除")]
         public static readonly string Dialog_ConfirmDeleteFootage_Title = nameof(Dialog_ConfirmDeleteFootage_Title);
 
-        [LanguageKey, DefaultValue("フッテージを削除すると、各コンポジションからこのフッテージを使用しているレイヤーが削除されます。このフッテージを削除しますか?")]
+        [DefaultValue("フッテージを削除すると、各コンポジションからこのフッテージを使用しているレイヤーが削除されます。このフッテージを削除しますか?")]
         public static readonly string Dialog_ConfirmDeleteFootage_Text = nameof(Dialog_ConfirmDeleteFootage_Text);
 
-        [LanguageKey, DefaultValue("フォルダを削除すると、中に含まれているフッテージも一緒に削除され、各コンポジションからも含まれているフッテージを使用しているレイヤーが削除されます。このフォルダを削除しますか?")]
+        [DefaultValue("フォルダを削除すると、中に含まれているフッテージも一緒に削除され、各コンポジションからも含まれているフッテージを使用しているレイヤーが削除されます。このフォルダを削除しますか?")]
         public static readonly string Dialog_ConfirmDeleteFootageFolder_Text = nameof(Dialog_ConfirmDeleteFootageFolder_Text);
 
-        [LanguageKey, DefaultValue("レンダリング開始")]
+        [DefaultValue("レンダリング開始")]
         public static readonly string Dialog_ConfirmRenderOverwriteByQueueingItem_Title = nameof(Dialog_ConfirmRenderOverwriteByQueueingItem_Title);
 
-        [LanguageKey, DefaultValue("レンダーキューに同じファイル名、または命名規則のパスが存在します。レンダリングを行うと後続のキューによってファイルが上書きされる可能性があります。よろしいですか?")]
+        [DefaultValue("レンダーキューに同じファイル名、または命名規則のパスが存在します。レンダリングを行うと後続のキューによってファイルが上書きされる可能性があります。よろしいですか?")]
         public static readonly string Dialog_ConfirmRenderOverwriteByQueueingItem_Text = nameof(Dialog_ConfirmRenderOverwriteByQueueingItem_Text);
 
-        [LanguageKey, DefaultValue("プロジェクトファイル")]
+        [DefaultValue("プロジェクトファイル")]
         public static readonly string Dialog_OpenSaveProject_Filter_Project = nameof(Dialog_OpenSaveProject_Filter_Project);
 
-        [LanguageKey, DefaultValue("プリセットの削除")]
+        [DefaultValue("プリセットの削除")]
         public static readonly string Dialog_ConfirmDeleteCompositionPreset_Title = nameof(Dialog_ConfirmDeleteCompositionPreset_Title);
 
-        [LanguageKey, DefaultValue("選択しているプリセットを削除しますか?")]
+        [DefaultValue("選択しているプリセットを削除しますか?")]
         public static readonly string Dialog_ConfirmDeleteCompositionPreset_Text = nameof(Dialog_ConfirmDeleteCompositionPreset_Text);
 
-        [LanguageKey, DefaultValue("「{0}」はすでに使用されています。上書きしますか?")]
+        [DefaultValue("「{0}」はすでに使用されています。上書きしますか?")]
         public static readonly string Dialog_NameSettingView_ConfirmOverwrite_Text = nameof(Dialog_NameSettingView_ConfirmOverwrite_Text);
 
-        [LanguageKey, DefaultValue("新しいプリセット")]
+        [DefaultValue("新しいプリセット")]
         public static readonly string Dialog_CompositionPresetName_Title = nameof(Dialog_CompositionPresetName_Title);
 
-        [LanguageKey, DefaultValue("プリセット名:")]
+        [DefaultValue("プリセット名:")]
         public static readonly string Dialog_CompositionPresetName_Label = nameof(Dialog_CompositionPresetName_Label);
+
+        [DefaultValue("エラー")]
+        public static readonly string Dialog_RaiseGPUException_Title = nameof(Dialog_RaiseGPUException_Title);
+
+        [DefaultValue("レンダリング中にエラーが発生しました。GPUでの処理中に問題が発生した可能性があるため、CPUでの処理に切り替えます。")]
+        public static readonly string Dialog_RaiseGPUException_Text = nameof(Dialog_RaiseGPUException_Text);
 
         // ValidationRule
 

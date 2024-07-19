@@ -30,6 +30,7 @@ using NiVE3.Cache;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.Shared.Util;
 using System.Text.Json;
+using NiVE3.Exceptions;
 
 namespace NiVE3.Model
 {
@@ -788,96 +789,140 @@ namespace NiVE3.Model
             if (downSamplingRate != 1.0 || !ImageCache.TryGet(CompositionId, cacheKey, time, out var cachedImage))
             {
                 var allImages = new List<IDisposable>();
-
-                Renderer.BeginRendering(downSamplingRate, useGpu);
-
-                if (cameraSetting != null)
+                try
                 {
-                    Renderer.SetCamera(cameraSetting);
-                }
-                else
-                {
-                    Renderer.SetCamera(CreateDefaultCameraSetting(Width, Height));
-                }
 
-                foreach (var light in useLights)
-                {
-                    Renderer.AddLight(light);
-                }
+                    Renderer.BeginRendering(downSamplingRate, useGpu);
 
-                var images = new List<RenderableImage>();
-                foreach (var l in useLayers)
-                {
-                    if (!l.IsContainsTime(time))
+                    if (cameraSetting != null)
                     {
-                        continue;
+                        Renderer.SetCamera(cameraSetting);
+                    }
+                    else
+                    {
+                        Renderer.SetCamera(CreateDefaultCameraSetting(Width, Height));
                     }
 
-                    if (l.IsEnableAdjustmentLayer)
+                    foreach (var light in useLights)
                     {
-                        if (images.Count > 0)
-                        {
-                            Renderer.Render([.. images]);
-                        }
-                        images.Clear();
+                        Renderer.AddLight(light);
+                    }
 
-                        using var adjustmentMaskImage = l.GetRawImage(time, downSamplingRate, true, useGpu);
-                        if (adjustmentMaskImage == null)
+                    var images = new List<RenderableImage>();
+                    foreach (var l in useLayers)
+                    {
+                        if (!l.IsContainsTime(time))
                         {
                             continue;
                         }
 
-                        var mask = Renderer.RenderAdjustmentMask(adjustmentMaskImage);
-                        var currentRenderingFrame = Renderer.GetCurrentRenderedImage();
-                        var (roi, currentFrame) = l.ProcessAdjustment(time, currentRenderingFrame, Width / (double)currentRenderingFrame.Width, Height / (double)currentRenderingFrame.Height, useGpu);
-
-                        // TODO: GPU対応
-                        if (mask is GPURasterizedMaskImage gpuMaskImage)
+                        if (l.IsEnableAdjustmentLayer)
                         {
-                            var managedImage = gpuMaskImage.CopyToCpu();
-                            mask.Dispose();
-                            mask = managedImage;
-                        }
-                        if (currentFrame is NGPUImage gpuCurrentFrame)
-                        {
-                            var managedImage = gpuCurrentFrame.CopyToCpu();
-                            currentFrame.Dispose();
-                            currentFrame = managedImage;
-                        }
-                        Parallel.For(roi.OriginalImagePosition.Y, roi.OriginalImagePosition.Y + roi.OriginalImageSize.Height, y =>
-                        {
-                            var maskSpan = ((ManagedRasterizedMaskImage)mask).GetDataSpan().Slice((y - roi.OriginalImagePosition.Y) * mask.Width, mask.Width);
-                            var currentFrameSpan = ((NManagedImage)currentFrame).GetDataSpan().Slice(y * currentFrame.Width, currentFrame.Width);
-                            for (int x = roi.OriginalImagePosition.X, limit = x + roi.OriginalImageSize.Width, maskPos = 0, framePos = x; x < limit; x++, maskPos++, framePos++)
+                            if (images.Count > 0)
                             {
-                                currentFrameSpan[framePos].W *= maskSpan[maskPos];
+                                Renderer.Render([.. images]);
                             }
-                        });
+                            images.Clear();
 
-                        Renderer.RenderAdjustmentLayer(currentFrame, roi, downSamplingRate, l.InterpolationQuality, l.BlendMode);
+                            using var adjustmentMaskImage = l.GetRawImage(time, downSamplingRate, true, useGpu);
+                            if (adjustmentMaskImage == null)
+                            {
+                                continue;
+                            }
 
-                        allImages.Add(currentFrame);
+                            var mask = Renderer.RenderAdjustmentMask(adjustmentMaskImage);
+                            var currentRenderingFrame = Renderer.GetCurrentRenderedImage();
+                            var (roi, currentFrame) = l.ProcessAdjustment(time, currentRenderingFrame, Width / (double)currentRenderingFrame.Width, Height / (double)currentRenderingFrame.Height, useGpu);
+
+                            // TODO: GPU対応
+                            if (mask is GPURasterizedMaskImage gpuMaskImage)
+                            {
+                                var managedImage = gpuMaskImage.CopyToCpu();
+                                mask.Dispose();
+                                mask = managedImage;
+                            }
+                            if (currentFrame is NGPUImage gpuCurrentFrame)
+                            {
+                                var managedImage = gpuCurrentFrame.CopyToCpu();
+                                currentFrame.Dispose();
+                                currentFrame = managedImage;
+                            }
+                            Parallel.For(roi.OriginalImagePosition.Y, roi.OriginalImagePosition.Y + roi.OriginalImageSize.Height, y =>
+                            {
+                                var maskSpan = ((ManagedRasterizedMaskImage)mask).GetDataSpan().Slice((y - roi.OriginalImagePosition.Y) * mask.Width, mask.Width);
+                                var currentFrameSpan = ((NManagedImage)currentFrame).GetDataSpan().Slice(y * currentFrame.Width, currentFrame.Width);
+                                for (int x = roi.OriginalImagePosition.X, limit = x + roi.OriginalImageSize.Width, maskPos = 0, framePos = x; x < limit; x++, maskPos++, framePos++)
+                                {
+                                    currentFrameSpan[framePos].W *= maskSpan[maskPos];
+                                }
+                            });
+
+                            Renderer.RenderAdjustmentLayer(currentFrame, roi, downSamplingRate, l.InterpolationQuality, l.BlendMode);
+
+                            allImages.Add(currentFrame);
+                        }
+                        else
+                        {
+                            var image = l.GetImage(time, downSamplingRate, true, useGpu);
+                            if (image != null)
+                            {
+                                images.Add(image);
+                                allImages.Add(image);
+                            }
+                        }
+                    }
+                    if (images.Count > 0)
+                    {
+                        Renderer.Render([.. images]);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Renderer.AbortRendering();
+                    try
+                    {
+                        foreach (var i in allImages)
+                        {
+                            i.Dispose();
+                        }
+                    }
+                    catch { }
+                    if (ex is not GPUException && useGpu)
+                    {
+                        throw new GPUException(ex);
                     }
                     else
                     {
-                        var image = l.GetImage(time, downSamplingRate, true, useGpu);
-                        if (image != null)
-                        {
-                            images.Add(image);
-                            allImages.Add(image);
-                        }
+                        throw;
                     }
                 }
-                if (images.Count > 0)
+
+                try
                 {
-                    Renderer.Render([.. images]);
+                    result = Renderer.FinishRendering();
                 }
-
-                result = Renderer.FinishRendering();
-
-                foreach (var i in allImages)
+                catch (Exception ex)
                 {
-                    i.Dispose();
+                    Renderer.AbortRendering();
+                    if (useGpu)
+                    {
+                        throw new GPUException(ex);
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                finally
+                {
+                    try
+                    {
+                        foreach (var i in allImages)
+                        {
+                            i.Dispose();
+                        }
+                    }
+                    catch { }
                 }
 
                 if (downSamplingRate == 1.0)
@@ -900,7 +945,21 @@ namespace NiVE3.Model
 
             if (applyToneMapping)
             {
-                result = ToneMapper.ToneMapping(result, useGpu);
+                try
+                {
+                    result = ToneMapper.ToneMapping(result, useGpu);
+                }
+                catch (Exception ex)
+                {
+                    if (useGpu)
+                    {
+                        throw new GPUException(ex);
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
             }
 
             return result;

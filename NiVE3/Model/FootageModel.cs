@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Data.Json.Project;
+using NiVE3.Exceptions;
 using NiVE3.Image;
 using NiVE3.Input;
 using NiVE3.Mvvm;
@@ -217,13 +218,31 @@ namespace NiVE3.Model
 
         public NImage ReadImage(double time, double downSamplingRate, int compositionWidth, int compositionHeight, PropertyValueGroup? properties, ImageInterpolationQuality imageInterpolationQuality, bool toGpu)
         {
-            if (properties != null && Source is ICustomizableFootageSource customizableFootageSource)
+            try
             {
-                return customizableFootageSource.ReadFrame(time, downSamplingRate, compositionWidth, compositionHeight, properties, imageInterpolationQuality, toGpu);
+                if (properties != null && Source is ICustomizableFootageSource customizableFootageSource)
+                {
+                    return customizableFootageSource.ReadFrame(time, downSamplingRate, compositionWidth, compositionHeight, properties, imageInterpolationQuality, toGpu);
+                }
+                else
+                {
+                    return Source.ReadFrame(time, downSamplingRate, toGpu);
+                }
             }
-            else
+            catch (GPUException)
             {
-                return Source.ReadFrame(time, downSamplingRate, toGpu);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                if (toGpu)
+                {
+                    throw new GPUException(ex);
+                }
+                else
+                {
+                    throw;
+                }
             }
         }
 

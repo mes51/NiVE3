@@ -118,7 +118,11 @@ namespace NiVE3.Image
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
-            Data.Dispose();
+            try
+            {
+                Data.Dispose();
+            }
+            catch { } // NOTE: 生成に失敗した場合 null になることがある
         }
     }
 

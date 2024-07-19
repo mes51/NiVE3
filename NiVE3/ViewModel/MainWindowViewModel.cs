@@ -95,7 +95,7 @@ namespace NiVE3.ViewModel
 
         IDialogService DialogService { get; }
 
-        public MainWindowViewModel(IContainer container, IRegionManager region, ProjectModel projectModel, PlayControllerModel playControllerModel, ViewStateModel viewState, EventHubModel eventHubModel, IDialogService dialogService)
+        public MainWindowViewModel(IContainer container, IRegionManager region, ApplicationModel applicationModel, ProjectModel projectModel, PlayControllerModel playControllerModel, ViewStateModel viewState, EventHubModel eventHubModel, IDialogService dialogService)
         {
             Container = container;
             Region = region;
@@ -104,6 +104,8 @@ namespace NiVE3.ViewModel
             ViewState = viewState;
             EventHubModel = eventHubModel;
             DialogService = dialogService;
+
+            applicationModel.RaiseGPUException += ApplicationModel_RaiseGPUException;
 
             projectModel.OpenCompositionTimeline += ProjectModel_OpenCompositionTimeline;
             projectModel.CompositionRemoved += ProjectModel_CompositionRemoved;
@@ -197,6 +199,16 @@ namespace NiVE3.ViewModel
         }
 
         partial void WiringModel();
+
+        private void ApplicationModel_RaiseGPUException(object? sender, EventArgs e)
+        {
+            if (!ProjectModel.IsRendering)
+            {
+                var title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_RaiseGPUException_Title);
+                var text = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_RaiseGPUException_Text);
+                MessageBox.Show(text, title, MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
 
         private void ProjectModel_OpenCompositionTimeline(object? sender, CompositionEventArgs e)
         {

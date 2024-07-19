@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Data.Json.Project;
+using NiVE3.Exceptions;
 using NiVE3.Image;
 using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Interfaces;
@@ -104,7 +105,21 @@ namespace NiVE3.Model
 
         public NImage ProcessImage(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, double layerTime, bool useGpu)
         {
-            return Effect.Value.Process(image, roi, downSamplingRateX, downSamplingRateY, layerTime, Properties.Children.ToArray(), useGpu);
+            try
+            {
+                return Effect.Value.Process(image, roi, downSamplingRateX, downSamplingRateY, layerTime, Properties.Children.ToArray(), useGpu);
+            }
+            catch (Exception ex)
+            {
+                if (useGpu)
+                {
+                    throw new GPUException(ex);
+                }
+                else
+                {
+                    throw;
+                }
+            }
         }
 
         public float[] ProcessAudio(float[] audio, double startTime)

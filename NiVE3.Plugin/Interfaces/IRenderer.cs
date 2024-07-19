@@ -106,6 +106,11 @@ namespace NiVE3.Plugin.Interfaces
         NImage FinishRendering();
 
         /// <summary>
+        /// エラーが発生したときなどにレンダリングを中止します
+        /// </summary>
+        void AbortRendering();
+
+        /// <summary>
         /// 調整レイヤーのマスクを描画します
         /// </summary>
         /// <param name="image">描画するレイヤー</param>
