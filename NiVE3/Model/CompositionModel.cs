@@ -276,7 +276,7 @@ namespace NiVE3.Model
             var startIndex = index;
             foreach (var f in footages)
             {
-                if (f.InputModel.Input is CompositionInput compositionInput && IsCycledComposition(this, compositionInput))
+                if (f.InputModel.Input is CompositionInput compositionInput && IsCycledComposition(this, compositionInput.Composition))
                 {
                     continue;
                 }
@@ -525,7 +525,7 @@ namespace NiVE3.Model
 
         public void DeleteLayersByFootage(FootageModel footage)
         {
-            var layerIds = Layers.Where(l => l.FootageModel == footage).Select(l => l.LayerId).ToArray();
+            var layerIds = Layers.Where(l => l.IsSameFootage(footage)).Select(l => l.LayerId).ToArray();
             DeleteLayers(layerIds);
         }
 
@@ -809,6 +809,7 @@ namespace NiVE3.Model
                     }
 
                     var images = new List<RenderableImage>();
+                    var rawImages = new List<(LayerModel, RenderableImage)>();
                     foreach (var l in useLayers)
                     {
                         if (!l.IsContainsTime(time))
@@ -863,11 +864,18 @@ namespace NiVE3.Model
                         }
                         else
                         {
-                            var image = l.GetImage(time, downSamplingRate, true, useGpu);
+                            var isRawImage = l.IsImage && !l.IsCustomizableFootageSource && !l.HasEffect;
+
+                            var (prevLayer, rawImage) = isRawImage ? rawImages.FirstOrDefault(t => l.IsSameFootage(t.Item1)) : (null, null);
+                            var image = (prevLayer != null && rawImage != null ? l.GetSameImage(time, downSamplingRate, true, useGpu, rawImage) : null) ?? l.GetImage(time, downSamplingRate, true, useGpu);
                             if (image != null)
                             {
                                 images.Add(image);
                                 allImages.Add(image);
+                                if (isRawImage && prevLayer == null)
+                                {
+                                    rawImages.Add((l, image));
+                                }
                             }
                         }
                     }
@@ -1187,7 +1195,7 @@ namespace NiVE3.Model
 
         public void ReplacePlaceholder(FootageModel newFootageModel)
         {
-            foreach (var layer in Layers.Where(l => l.FootageModel.IsPlaceholder && l.FootageModel.FootageId == newFootageModel.FootageId))
+            foreach (var layer in Layers.Where(l => l.FootageIsPlaceholder(newFootageModel.FootageId)))
             {
                 layer.ReplaceFootage(newFootageModel);
             }
@@ -1390,13 +1398,13 @@ namespace NiVE3.Model
             );
         }
 
-        static bool IsCycledComposition(CompositionModel target, CompositionInput input)
+        static bool IsCycledComposition(CompositionModel target, CompositionModel input)
         {
-            if (input.Composition == target)
+            if (input == target)
             {
                 return true;
             }
-            foreach (var i in input.Composition.Layers.Select(l => l.FootageModel.InputModel.Input).OfType<CompositionInput>())
+            foreach (var i in input.Layers.Select(l => l.GetNestedComposition()).NonNull())
             {
                 if (IsCycledComposition(target, i))
                 {

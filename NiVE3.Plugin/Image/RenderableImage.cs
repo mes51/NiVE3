@@ -42,10 +42,16 @@ namespace NiVE3.Plugin.Image
         TrackMatteMode? TrackMatteMode
     ) : IDisposable
     {
+        bool Disposed { get; set; }
+
         public void Dispose()
         {
-            Image.Dispose();
-            TrackMatteImage?.Dispose();
+            if (!Disposed)
+            {
+                Image.Dispose();
+                TrackMatteImage?.Dispose();
+                Disposed = true;
+            }
         }
     }
 }

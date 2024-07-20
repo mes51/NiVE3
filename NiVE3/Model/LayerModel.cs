@@ -33,6 +33,7 @@ using NiVE3.Plugin.Attributes;
 using NiVE3.Data.Clipboard;
 using System.IO.Hashing;
 using NiVE3.Cache;
+using System.Security.Cryptography.Xml;
 
 namespace NiVE3.Model
 {
@@ -254,6 +255,10 @@ namespace NiVE3.Model
 
         public bool HasAudio => SourceType.HasFlag(SourceType.Audio);
 
+        public bool IsImage => SourceType.HasFlag(SourceType.Image);
+
+        public bool IsCustomizableFootageSource => FootageModel.IsCustomizableFootageSource;
+
         private ObservableCollection<EffectModel> effects = [];
         public ObservableCollection<EffectModel> Effects
         {
@@ -269,8 +274,6 @@ namespace NiVE3.Model
             }
         }
 
-        public FootageModel FootageModel { get; set; }
-
         public PropertyGroupModel? TransformProperties { get; }
 
         public PropertyGroupModel? LayerOptionProperties { get; }
@@ -284,6 +287,8 @@ namespace NiVE3.Model
         public PropertyGroupModel? AudioOptionProperties { get; }
 
         public event EventHandler<EventArgs>? LayerUpdated;
+
+        FootageModel FootageModel { get; set; }
 
         EffectListModel EffectListModel { get; }
 
@@ -632,6 +637,34 @@ namespace NiVE3.Model
             );
         }
 
+        public RenderableImage GetSameImage(double time, double downSamplingRate, bool withTrackMatte, bool useGpu, RenderableImage baseImage)
+        {
+            var layerTime = time - SourceStartPoint;
+
+            RenderableImage? trackMatteImage = null;
+            if (withTrackMatte && TrackMatteLayerId.HasValue)
+            {
+                var trackMatteLayer = CompositionModel.Layers.First(l => l.LayerId == TrackMatteLayerId);
+                trackMatteImage = trackMatteLayer.GetImage(time, downSamplingRate, false, useGpu);
+            }
+
+            return new RenderableImage(
+                baseImage.Image,
+                baseImage.ROI,
+                baseImage.DownSampleRateX,
+                baseImage.DownSampleRateY,
+                IsEnableMotionBlur,
+                IsEnable3D,
+                InterpolationQuality,
+                BlendMode,
+                GetTransform(time),
+                GetParentTransforms(time),
+                LayerOptionProperties?.GetValues(layerTime),
+                trackMatteImage,
+                TrackMatteLayerId.HasValue ? TrackMatteMode : null
+            );
+        }
+
         public (ROI, NImage) ProcessAdjustment(double time, NImage currentFrame, double downSamplingRateX, double downSamplingRateY, bool useGpu)
         {
             var layerTime = time - SourceStartPoint;
@@ -743,6 +776,26 @@ namespace NiVE3.Model
             var layerEndTime = end - SourceStartPoint;
 
             return (layerBeginTime < OutPoint && layerEndTime > InPoint);
+        }
+
+        public bool IsSameFootage(FootageModel footage)
+        {
+            return FootageModel == footage;
+        }
+
+        public bool IsSameFootage(LayerModel layerModel)
+        {
+            return IsSameFootage(layerModel.FootageModel);
+        }
+
+        public bool FootageIsPlaceholder(Guid footageId)
+        {
+            return FootageModel.IsPlaceholder && FootageModel.FootageId == footageId;
+        }
+
+        public CompositionModel? GetNestedComposition()
+        {
+            return (FootageModel.InputModel.Input as CompositionInput)?.Composition;
         }
 
         public CameraSetting? GetCameraSetting(double time)
