@@ -8,6 +8,7 @@ using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Threading.Tasks;
+using ComputeSharp;
 using NiVE3.Image;
 using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Interfaces;
@@ -23,7 +24,7 @@ namespace NiVE3.PresetPlugin.Effect.ColorCollection
 {
     [Export(typeof(IEffect))]
     [EffectMetadata(LanguageResourceDictionary.ColorCollection_Level_Name, "mes51", "色調補正", LanguageResourceDictionary.ColorCollection_Level_Description, ID, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
-    public class Level : IEffect
+    sealed public class Level : IEffect
     {
         const string ID = "9EE3E1A0-476B-488B-A3CE-17422D0B6C75";
 
@@ -39,7 +40,12 @@ namespace NiVE3.PresetPlugin.Effect.ColorCollection
 
         const string PropertyGammaId = nameof(PropertyGammaId);
 
-        public void SetupAccelerator(IAcceleratorObject accelerator) { }
+        IAcceleratorObject? AcceleratorObject { get; set; }
+
+        public void SetupAccelerator(IAcceleratorObject accelerator)
+        {
+            AcceleratorObject = accelerator;
+        }
 
         public PropertyBase[] GetProperties()
         {
@@ -63,9 +69,9 @@ namespace NiVE3.PresetPlugin.Effect.ColorCollection
             var whiteOut = (float)properties.GetValue(PropertyWhiteOutLevelId, layerTime, 1.0);
             var gamma = (float)properties.GetValue(PropertyGammaId, layerTime, 1.0);
 
-            if (useGpu)
+            if (useGpu && AcceleratorObject != null)
             {
-                return image;
+                return ProcessGpu(AcceleratorObject.CurrentDevice, image, roi, channel, blackIn, whiteIn, blackOut, whiteOut, gamma);
             }
             else
             {
@@ -80,7 +86,7 @@ namespace NiVE3.PresetPlugin.Effect.ColorCollection
 
         public void Dispose() { }
 
-        static NImage ProcessCpu(NImage image, ROI roi, ChannelType channel, float blackIn, float whiteIn, float blackOut, float whiteOut, float gamma)
+        static NManagedImage ProcessCpu(NImage image, ROI roi, ChannelType channel, float blackIn, float whiteIn, float blackOut, float whiteOut, float gamma)
         {
             NManagedImage managedImage;
             if (image is NGPUImage gpuImage)
@@ -167,6 +173,82 @@ namespace NiVE3.PresetPlugin.Effect.ColorCollection
             }
 
             return managedImage;
+        }
+
+        static NGPUImage ProcessGpu(GraphicsDevice device, NImage image, ROI roi, ChannelType channel, float blackIn, float whiteIn, float blackOut, float whiteOut, float gamma)
+        {
+            NGPUImage gpuImage;
+            if (image is NManagedImage managedImage)
+            {
+                gpuImage = managedImage.CopyToGpu(device);
+                image.Dispose();
+            }
+            else
+            {
+                gpuImage = (NGPUImage)image;
+            }
+
+            var inAdd = blackIn >= whiteIn ? 0.0F : (1.0F / (whiteIn - blackIn));
+            var outAdd = whiteOut - blackOut;
+            using (var context = device.CreateComputeContext())
+            {
+                context.For(roi.Right - roi.Left, roi.Bottom - roi.Top, new LevelProcess(gpuImage.Data, gpuImage.Width, roi.Left, roi.Top, (int)channel, blackIn, blackOut, inAdd, outAdd, gamma));
+            }
+
+            return gpuImage;
+        }
+    }
+
+    [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
+    [GeneratedComputeShaderDescriptor]
+    readonly partial struct LevelProcess(ReadWriteBuffer<Float4> image, int width, int startX, int startY, int channel, float blackIn, float blackOut, float inAdd, float outAdd, float gamma) : IComputeShader
+    {
+        public void Execute()
+        {
+            var p = (ThreadIds.Y + startY) * width + ThreadIds.X + startX;
+
+            switch (channel)
+            {
+                case 1:
+                    {
+                        var c = image[p];
+                        c.Z = Hlsl.Pow((c.Z - blackIn) * inAdd, gamma) * outAdd + blackOut;
+                        image[p] = c;
+                    }
+                    break;
+                case 2:
+                    {
+                        var c = image[p];
+                        c.Y = Hlsl.Pow((c.Y - blackIn) * inAdd, gamma) * outAdd + blackOut;
+                        image[p] = c;
+                    }
+                    break;
+                case 3:
+                    {
+                        var c = image[p];
+                        c.X = Hlsl.Pow((c.X - blackIn) * inAdd, gamma) * outAdd + blackOut;
+                        image[p] = c;
+                    }
+                    break;
+                case 4:
+                    {
+                        var c = image[p];
+                        c.W = Hlsl.Pow((c.W - blackIn) * inAdd, gamma) * outAdd + blackOut;
+                        image[p] = c;
+                    }
+                    break;
+                default:
+                    {
+                        var c = Hlsl.Pow((image[p] - blackIn) * inAdd, gamma) * outAdd + blackOut;
+                        if (Hlsl.Any(Hlsl.IsNaN(c.XYZ)))
+                        {
+                            c = new Float4();
+                        }
+                        c.W = image[p].W;
+                        image[p] = c;
+                    }
+                    break;
+            }
         }
     }
 }

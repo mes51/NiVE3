@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace NiVE3.PresetPlugin.Effect.Util
 {
-    public enum ChannelType
+    public enum ChannelType : int
     {
         RGB,
         R,
