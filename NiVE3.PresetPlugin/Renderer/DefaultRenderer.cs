@@ -997,7 +997,7 @@ namespace NiVE3.PresetPlugin.Renderer
                         {
                             using (var context = device.CreateComputeContext())
                             {
-                                context.For(result.Data.Length, new FillMask(result.Data, 1.0F));
+                                context.For(result.Width, result.Height, new FillMask(result.Data, result.Width, 1.0F));
                             }
                         }
                         return result;

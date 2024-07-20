@@ -7,23 +7,23 @@ using ComputeSharp;
 
 namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader
 {
-    [ThreadGroupSize(DefaultThreadGroupSizes.X)]
+    [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
     [GeneratedComputeShaderDescriptor]
-    readonly partial struct FillColor(ReadWriteBuffer<Float4> image, Float4 color) : IComputeShader
+    readonly partial struct FillColor(ReadWriteBuffer<Float4> image, int width, Float4 color) : IComputeShader
     {
         public void Execute()
         {
-            image[ThreadIds.X] = color;
+            image[ThreadIds.Y * width + ThreadIds.X] = color;
         }
     }
 
-    [ThreadGroupSize(DefaultThreadGroupSizes.X)]
+    [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
     [GeneratedComputeShaderDescriptor]
-    readonly partial struct FillMask(ReadWriteBuffer<float> mask, float alpha) : IComputeShader
+    readonly partial struct FillMask(ReadWriteBuffer<float> mask, int width, float alpha) : IComputeShader
     {
         public void Execute()
         {
-            mask[ThreadIds.X] = alpha;
+            mask[ThreadIds.Y * width + ThreadIds.X] = alpha;
         }
     }
 }

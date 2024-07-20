@@ -458,7 +458,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             if (trackMatteMode == TrackMatteMode.InvertAlpha || trackMatteMode == TrackMatteMode.InvertLuminance)
             {
                 using var context = Device.CreateComputeContext();
-                context.For(RenderImage.DataLength, new FillMask(RenderImage.Data, 1.0F));
+                context.For(RenderImage.Width, RenderImage.Height, new FillMask(RenderImage.Data, RenderImage.Width, 1.0F));
             }
 
             var renderImageWidth = RenderImage.Width;
