@@ -193,6 +193,7 @@ namespace NiVE3.ViewModel
 
             var timelineViewModel = Container.Resolve<TimelineViewModel>();
             timelineViewModel.CurrentTimeChangeByUser += TimelineViewModel_CurrentTimeChangeByUser;
+            timelineViewModel.PaneSelected += TimelineViewModel_PaneSelected;
             MainRegion.Add(timelineViewModel);
 
             WiringModel();
@@ -217,6 +218,7 @@ namespace NiVE3.ViewModel
             {
                 timelineViewModel = Container.Resolve<TimelineViewModel>();
                 timelineViewModel.CurrentTimeChangeByUser += TimelineViewModel_CurrentTimeChangeByUser;
+                timelineViewModel.PaneSelected += TimelineViewModel_PaneSelected;
                 MainRegion.Add(timelineViewModel);
             }
 
@@ -280,6 +282,7 @@ namespace NiVE3.ViewModel
                 foreach (var vm in removedPane.OfType<TimelineViewModel>())
                 {
                     vm.CurrentTimeChangeByUser -= TimelineViewModel_CurrentTimeChangeByUser;
+                    vm.PaneSelected -= TimelineViewModel_PaneSelected;
                 }
             }
         }
@@ -324,6 +327,14 @@ namespace NiVE3.ViewModel
             {
                 PlayControllerModel.Stop();
                 PlayControllerModel.CurrentTime = vm.CurrentTime;
+            }
+        }
+
+        private void TimelineViewModel_PaneSelected(object? sender, EventArgs e)
+        {
+            if (sender is TimelineViewModel vm && vm.CompositionModel != null)
+            {
+                ProjectModel.ShowCompositionPreview(vm.CompositionModel);
             }
         }
 

@@ -236,6 +236,20 @@ namespace NiVE3.Model
             IsEdited = false;
         }
 
+        public void ShowCompositionPreview(CompositionModel composition)
+        {
+            var freePreviewModel = PreviewModels.OfType<CompositionPreviewModel>().FirstOrDefault(p => !p.IsLock);
+            if (freePreviewModel != null)
+            {
+                freePreviewModel.Composition = composition;
+                freePreviewModel.CurrentTime = composition.CurrentTime;
+            }
+            else
+            {
+                PreviewModels.Add(new CompositionPreviewModel(ApplicationModel) { Composition = composition, CurrentTime = composition.CurrentTime });
+            }
+        }
+
         void AddCompositionModel(CompositionModel composition)
         {
             CompositionModels.Add(composition);
@@ -277,16 +291,7 @@ namespace NiVE3.Model
 
         private void FootageListModel_ShowCompositionPreview(object? sender, CompositionEventArgs e)
         {
-            var freePreviewModel = PreviewModels.OfType<CompositionPreviewModel>().FirstOrDefault(p => !p.IsLock);
-            if (freePreviewModel != null)
-            {
-                freePreviewModel.Composition = e.Composition;
-                freePreviewModel.CurrentTime = e.Composition.CurrentTime;
-            }
-            else
-            {
-                PreviewModels.Add(new CompositionPreviewModel(ApplicationModel) { Composition = e.Composition, CurrentTime = e.Composition.CurrentTime });
-            }
+            ShowCompositionPreview(e.Composition);
             OnOpenCompositionTimeline(e.Composition);
         }
 
