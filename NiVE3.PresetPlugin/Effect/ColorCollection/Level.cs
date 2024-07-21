@@ -92,7 +92,6 @@ namespace NiVE3.PresetPlugin.Effect.ColorCollection
             if (image is NGPUImage gpuImage)
             {
                 managedImage = gpuImage.CopyToCpu();
-                image.Dispose();
             }
             else
             {
@@ -181,7 +180,6 @@ namespace NiVE3.PresetPlugin.Effect.ColorCollection
             if (image is NManagedImage managedImage)
             {
                 gpuImage = managedImage.CopyToGpu(device);
-                image.Dispose();
             }
             else
             {
@@ -192,7 +190,7 @@ namespace NiVE3.PresetPlugin.Effect.ColorCollection
             var outAdd = whiteOut - blackOut;
             using (var context = device.CreateComputeContext())
             {
-                context.For(roi.Right - roi.Left, roi.Bottom - roi.Top, new LevelProcess(gpuImage.Data, gpuImage.Width, roi.Left, roi.Top, (int)channel, blackIn, blackOut, inAdd, outAdd, gamma));
+                context.For(roi.Width, roi.Height, new LevelProcess(gpuImage.Data, gpuImage.Width, roi.Left, roi.Top, (int)channel, blackIn, blackOut, inAdd, outAdd, gamma));
             }
 
             return gpuImage;

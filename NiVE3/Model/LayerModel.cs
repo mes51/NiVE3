@@ -550,7 +550,12 @@ namespace NiVE3.Model
                     // TODO: モジュラーエフェクト&ROI反映
                     foreach (var e in Effects.Where(e => !e.IsDummyEffect && e.IsEnable && e.SupportedSource.IsSupportedSource(SourceType)))
                     {
-                        image = e.ProcessImage(image, roi.Value, downSamplingRateX, downSamplingRateY, layerTime, useGpu);
+                        var processedImage = e.ProcessImage(image, roi.Value, downSamplingRateX, downSamplingRateY, layerTime, useGpu);
+                        if (processedImage != image)
+                        {
+                            image.Dispose();
+                        }
+                        image = processedImage;
                     }
                 }
 

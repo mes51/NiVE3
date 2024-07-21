@@ -8,6 +8,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using ComputeSharp;
 using NiVE3.Image;
 using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Interfaces;
@@ -21,8 +22,8 @@ using NiVE3.PresetPlugin.Resource;
 namespace NiVE3.PresetPlugin.Effect.Blur
 {
     [Export(typeof(IEffect))]
-    [EffectMetadata(LanguageResourceDictionary.Blur_BoxBlur_Name, "mes51", "ブラー", LanguageResourceDictionary.Blur_BoxBlur_Description, ID, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
-    public class BoxBlur : IEffect
+    [EffectMetadata(LanguageResourceDictionary.Blur_BoxBlur_Name, "mes51", "ブラー", LanguageResourceDictionary.Blur_BoxBlur_Description, ID, IsSupportGpu = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
+    public sealed class BoxBlur : IEffect
     {
         const string ID = "6DC081A1-4748-45ED-95BB-3E48AA74FD48";
 
@@ -35,6 +36,13 @@ namespace NiVE3.PresetPlugin.Effect.Blur
         const string PropertyIsRepeatEdgeId = nameof(PropertyIsRepeatEdgeId);
 
         const string PropertyEdgeRepeatModeId = nameof(PropertyEdgeRepeatModeId);
+
+        IAcceleratorObject? AcceleratorObject { get; set; }
+
+        public void SetupAccelerator(IAcceleratorObject accelerator)
+        {
+            AcceleratorObject = accelerator;
+        }
 
         public PropertyBase[] GetProperties()
         {
@@ -59,9 +67,9 @@ namespace NiVE3.PresetPlugin.Effect.Blur
                 return image;
             }
 
-            if (useGpu)
+            if (useGpu && AcceleratorObject != null)
             {
-                return image;
+                return ProcessGpu(AcceleratorObject.CurrentDevice, image, roi, (float)downSamplingRateX, (float)downSamplingRateY, amount, repeat, direction, edgeRepeatMode);
             }
             else
             {
@@ -74,18 +82,15 @@ namespace NiVE3.PresetPlugin.Effect.Blur
             throw new NotImplementedException();
         }
 
-        public void SetupAccelerator(IAcceleratorObject accelerator) { }
-
         public void Dispose() { }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static NImage ProcessCpu(NImage image, ROI roi, float downSamplingRateX, float downSamplingRateY, float amount, int repeat, BlurDirection direction, EdgeRepeatMode edgeRepeatMode)
+        static NManagedImage ProcessCpu(NImage image, ROI roi, float downSamplingRateX, float downSamplingRateY, float amount, int repeat, BlurDirection direction, EdgeRepeatMode edgeRepeatMode)
         {
             NManagedImage managedImage;
             if (image is NGPUImage gpuImage)
             {
                 managedImage = gpuImage.CopyToCpu();
-                image.Dispose();
             }
             else
             {
@@ -109,6 +114,87 @@ namespace NiVE3.PresetPlugin.Effect.Blur
             }
 
             return managedImage;
+        }
+
+        static NGPUImage ProcessGpu(GraphicsDevice device, NImage image, ROI roi, float downSamplingRateX, float downSamplingRateY, float amount, int repeat, BlurDirection direction, EdgeRepeatMode edgeRepeatMode)
+        {
+            NGPUImage gpuImage;
+            if (image is NManagedImage managedImage)
+            {
+                gpuImage = managedImage.CopyToGpu(device);
+            }
+            else
+            {
+                gpuImage = (NGPUImage)image;
+            }
+
+            {
+                using var temp = new NGPUImage(gpuImage.Width, gpuImage.Height, device);
+                gpuImage.CopyTo(temp);
+                switch (direction)
+                {
+                    case BlurDirection.HorizontalAndVertical:
+                        using (var context = device.CreateComputeContext())
+                        {
+                            for (var i = 0; i < repeat; i++)
+                            {
+                                context.For(roi.Width, roi.Height, new BlurHorizontalProcess(temp.Data, gpuImage.Data, gpuImage.Width, amount, (int)edgeRepeatMode, roi.Left, roi.Top));
+                                context.Barrier(temp.Data);
+                                context.Barrier(gpuImage.Data);
+                                context.For(roi.Width, roi.Height, new BlurVerticalProcess(gpuImage.Data, temp.Data, gpuImage.Width, gpuImage.Height, amount, (int)edgeRepeatMode, roi.Left, roi.Top));
+                                context.Barrier(temp.Data);
+                                context.Barrier(gpuImage.Data);
+                            }
+                        }
+                        break;
+                    case BlurDirection.Horizontal:
+                        {
+                            var src = temp;
+                            var dst = gpuImage;
+
+                            using (var context = device.CreateComputeContext())
+                            {
+                                for (var i = 0; i < repeat; i++)
+                                {
+                                    (src, dst) = (dst, src);
+                                    context.For(roi.Width, roi.Height, new BlurHorizontalProcess(dst.Data, src.Data, src.Width, amount, (int)edgeRepeatMode, roi.Left, roi.Top));
+                                    context.Barrier(dst.Data);
+                                    context.Barrier(src.Data);
+                                }
+                            }
+
+                            if (dst == temp)
+                            {
+                                temp.CopyTo(gpuImage);
+                            }
+                        }
+                        break;
+                    case BlurDirection.Vertical:
+                        {
+                            var src = temp;
+                            var dst = gpuImage;
+
+                            using (var context = device.CreateComputeContext())
+                            {
+                                for (var i = 0; i < repeat; i++)
+                                {
+                                    (src, dst) = (dst, src);
+                                    context.For(roi.Width, roi.Height, new BlurVerticalProcess(dst.Data, src.Data, src.Width, src.Height, amount, (int)edgeRepeatMode, roi.Left, roi.Top));
+                                    context.Barrier(dst.Data);
+                                    context.Barrier(src.Data);
+                                }
+                            }
+
+                            if (dst == temp)
+                            {
+                                temp.CopyTo(gpuImage);
+                            }
+                        }
+                        break;
+                }
+            }
+
+            return gpuImage;
         }
 
         static void Blur(NManagedImage image, ROI roi, float horizontal, float vertical, EdgeRepeatMode edgeRepeatMode)
@@ -516,6 +602,150 @@ namespace NiVE3.PresetPlugin.Effect.Blur
                     else
                     {
                         return Vector4.Zero;
+                    }
+            }
+        }
+    }
+
+    [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
+    [GeneratedComputeShaderDescriptor]
+    readonly partial struct BlurHorizontalProcess(ReadWriteBuffer<Float4> result, ReadWriteBuffer<Float4> image, int width, float amount, int edgeRepeatMode, int startX, int startY) : IComputeShader
+    {
+        public void Execute()
+        {
+            var range = (int)Hlsl.Floor(amount);
+            var x = ThreadIds.X + startX;
+            var y = ThreadIds.Y + startY;
+
+            var c = new Float4();
+            var a = 0.0F;
+            for (var i = -range; i <= range; i++)
+            {
+                var tc = GetPixel(x + i, y);
+                c += tc * tc.W;
+                a += tc.W;
+            }
+
+            var edge = (int)Hlsl.Ceil(amount);
+            if (edge != range)
+            {
+                var tc = GetPixel(x - edge, y);
+                c += tc * tc.W * (edge - amount);
+                a += tc.W * (edge - amount);
+
+                tc = GetPixel(x + edge, y);
+                c += tc * tc.W * (edge - amount);
+                a += tc.W * (edge - amount);
+            }
+
+            if (a > 0.0F)
+            {
+                var rc = c / a;
+                rc.W = a / (amount * 2.0F + 1.0F);
+                result[y * width + x] = rc;
+            }
+            else
+            {
+                result[y * width + x] = 0.0F;
+            }
+        }
+
+        Float4 GetPixel(int l, int y)
+        {
+            switch (edgeRepeatMode)
+            {
+                case 1:
+                    return image[y * width + Hlsl.Clamp(l, 0, width - 1)];
+                case 2:
+                    return image[y * width + (((l% width) + width) % width)];
+                case 3:
+                    {
+                        var lw = width - 1;
+                        var a = Hlsl.Abs(l);
+                        var b = a % (lw * 2);
+                        var c = b - Hlsl.Max(b - lw, 0) * 2;
+                        return image[y * width + c];
+                    }
+                default:
+                    if (l > -1 && l < width)
+                    {
+                        return image[y * width + l];
+                    }
+                    else
+                    {
+                        return 0.0F;
+                    }
+            }
+        }
+    }
+
+    [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
+    [GeneratedComputeShaderDescriptor]
+    readonly partial struct BlurVerticalProcess(ReadWriteBuffer<Float4> result, ReadWriteBuffer<Float4> image, int width, int height, float amount, int edgeRepeatMode, int startX, int startY) : IComputeShader
+    {
+        public void Execute()
+        {
+            var range = (int)Hlsl.Floor(amount);
+            var x = ThreadIds.X + startX;
+            var y = ThreadIds.Y + startY;
+
+            var c = new Float4();
+            var a = 0.0F;
+            for (var i = -range; i <= range; i++)
+            {
+                var tc = GetPixel(x, y + i);
+                c += tc * tc.W;
+                a += tc.W;
+            }
+
+            var edge = (int)Hlsl.Ceil(amount);
+            if (edge != range)
+            {
+                var tc = GetPixel(x, y - edge);
+                c += tc * tc.W * (edge - amount);
+                a += tc.W * (edge - amount);
+
+                tc = GetPixel(x, y + edge);
+                c += tc * tc.W * (edge - amount);
+                a += tc.W * (edge - amount);
+            }
+
+            if (a > 0.0F)
+            {
+                var rc = c / a;
+                rc.W = a / (amount * 2.0F + 1.0F);
+                result[y * width + x] = rc;
+            }
+            else
+            {
+                result[y * width + x] = 0.0F;
+            }
+        }
+
+        Float4 GetPixel(int x, int t)
+        {
+            switch (edgeRepeatMode)
+            {
+                case 1:
+                    return image[Hlsl.Clamp(t, 0, height - 1) * width + x];
+                case 2:
+                    return image[(((t % height) + height) % height) * width + x];
+                case 3:
+                    {
+                        var lh = height - 1;
+                        var a = Hlsl.Abs(t);
+                        var b = a % (lh * 2);
+                        var c = b - Hlsl.Max(b - lh, 0) * 2;
+                        return image[c * width + x];
+                    }
+                default:
+                    if (t > -1 && t < height)
+                    {
+                        return image[t * width + x];
+                    }
+                    else
+                    {
+                        return 0.0F;
                     }
             }
         }

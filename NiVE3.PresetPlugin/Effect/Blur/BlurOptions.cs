@@ -13,7 +13,7 @@ namespace NiVE3.PresetPlugin.Effect.Blur
         Vertical
     }
 
-    enum EdgeRepeatMode
+    enum EdgeRepeatMode : int
     {
         None,
         Wrap,

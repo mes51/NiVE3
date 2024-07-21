@@ -18,5 +18,9 @@ namespace NiVE3.Plugin.ValueObject
     public readonly record struct ROI(Int32Point OriginalImagePosition, Int32Size OriginalImageSize, int Left, int Top, int Right, int Bottom)
     {
         public static readonly ROI Empty = new ROI();
+
+        public int Width { get; } = Right - Left;
+
+        public int Height { get; } = Bottom - Top;
     }
 }
