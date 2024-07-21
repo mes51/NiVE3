@@ -154,6 +154,8 @@ namespace NiVE3.Model
 
         HistoryModel HistoryModel { get; }
 
+        bool IsSupportLoadToGpu { get; }
+
         public FootageModel(InputModel input, IFootageSource source, HistoryModel historyModel) : this(input, source, historyModel, null) { }
 
         public FootageModel(InputModel input, IFootageSource source, HistoryModel historyModel, Guid? footageId)
@@ -162,6 +164,7 @@ namespace NiVE3.Model
             FootageId = footageId ?? Guid.NewGuid();
             InputModel = input;
             Source = source;
+            IsSupportLoadToGpu = input.IsSupportLoadToGpu;
             Name = Path.GetFileName(input.FilePath);
             if (source.SourceType.HasFlag(SourceType.Video))
             {
@@ -222,11 +225,11 @@ namespace NiVE3.Model
             {
                 if (properties != null && Source is ICustomizableFootageSource customizableFootageSource)
                 {
-                    return customizableFootageSource.ReadFrame(time, downSamplingRate, compositionWidth, compositionHeight, properties, imageInterpolationQuality, toGpu);
+                    return customizableFootageSource.ReadFrame(time, downSamplingRate, compositionWidth, compositionHeight, properties, imageInterpolationQuality, toGpu && IsSupportLoadToGpu);
                 }
                 else
                 {
-                    return Source.ReadFrame(time, downSamplingRate, toGpu);
+                    return Source.ReadFrame(time, downSamplingRate, toGpu && IsSupportLoadToGpu);
                 }
             }
             catch (GPUException)
@@ -235,7 +238,7 @@ namespace NiVE3.Model
             }
             catch (Exception ex)
             {
-                if (toGpu)
+                if (toGpu && IsSupportLoadToGpu)
                 {
                     throw new GPUException(ex);
                 }

@@ -21,7 +21,7 @@ using NiVE3.PresetPlugin.Internal.MediaFoundation;
 namespace NiVE3.PresetPlugin.Input
 {
     [Export(typeof(IInput))]
-    [InputMetadata(typeof(MediaFoundationInput), "MediaFoundationInput", "", "mes51", ID, "*.avi,*.mp4,*.m4a,*.wav,*.mp3,*.wma,*.aac", true)]
+    [InputMetadata(typeof(MediaFoundationInput), "MediaFoundationInput", "", "mes51", ID, "*.avi,*.mp4,*.m4a,*.wav,*.mp3,*.wma,*.aac")]
     public class MediaFoundationInput : IInput
     {
         const string ID = "3BB12986-32DF-4C41-8D36-46C5E402C6AC";
@@ -144,32 +144,26 @@ namespace NiVE3.PresetPlugin.Input
 
         public NImage ReadFrame(double time, double downSamplingRate, bool toGpu)
         {
-            if (toGpu)
+            // TODO: TerraFXへの移行が出来るかとComputeSharpに直接渡せるかの調査
+
+            var result = new NManagedImage(Width, Height, false);
+            var data = VideoReader.GetFrame(time);
+            var pixelCount = Width * Height;
+            ImageConversion.ConvertToBGRA128(data, result.Data, pixelCount);
+
+            ArrayPool<byte>.Shared.Return(data);
+
+            // TODO: MediaFoundation側でリサイズ出来るかどうかの調査
+            if (downSamplingRate != 1.0)
             {
-                // TODO
-                throw new NotImplementedException();
+                var resizedResult = new NManagedImage((int)(Width / downSamplingRate), (int)(Height / downSamplingRate));
+                var renderer = new CPURenderer2D(resizedResult);
+                renderer.Draw(result, 1.0F, Matrix3x3.CreateScale((float)(1.0 / downSamplingRate), (float)(1.0 / downSamplingRate)), ImageInterpolationQuality.Level2, BlendMode.Replace, null);
+                result.Dispose();
+                result = resizedResult;
             }
-            else
-            {
-                var result = new NManagedImage(Width, Height, false);
-                var data = VideoReader.GetFrame(time);
-                var pixelCount = Width * Height;
-                ImageConversion.ConvertToBGRA128(data, result.Data, pixelCount);
 
-                ArrayPool<byte>.Shared.Return(data);
-
-                // TODO: MediaFoundation側でリサイズ出来るかどうかの調査
-                if (downSamplingRate != 1.0)
-                {
-                    var resizedResult = new NManagedImage((int)(Width / downSamplingRate), (int)(Height / downSamplingRate));
-                    var renderer = new CPURenderer2D(resizedResult);
-                    renderer.Draw(result, 1.0F, Matrix3x3.CreateScale((float)(1.0 / downSamplingRate), (float)(1.0 / downSamplingRate)), ImageInterpolationQuality.Level2, BlendMode.Replace, null);
-                    result.Dispose();
-                    result = resizedResult;
-                }
-
-                return result;
-            }
+            return result;
         }
 
         public float[] ReadAudio(double time, double length)
