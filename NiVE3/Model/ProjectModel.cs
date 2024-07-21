@@ -281,10 +281,11 @@ namespace NiVE3.Model
             if (freePreviewModel != null)
             {
                 freePreviewModel.Composition = e.Composition;
+                freePreviewModel.CurrentTime = e.Composition.CurrentTime;
             }
             else
             {
-                PreviewModels.Add(new CompositionPreviewModel(ApplicationModel) { Composition = e.Composition });
+                PreviewModels.Add(new CompositionPreviewModel(ApplicationModel) { Composition = e.Composition, CurrentTime = e.Composition.CurrentTime });
             }
             OnOpenCompositionTimeline(e.Composition);
         }
