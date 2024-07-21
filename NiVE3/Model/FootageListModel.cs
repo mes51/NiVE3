@@ -431,9 +431,6 @@ namespace NiVE3.Model
                 }
                 else
                 {
-                    input.Value.Dispose();
-                    input.Dispose();
-
                     foreach (var sourceData in inputData.Sources)
                     {
                         var placeholderInput = new PlaceholderInput(sourceData.SourceType, sourceData.Width, sourceData.Height, sourceData.FrameRate, sourceData.Duration, inputData.InputOption, sourceData.SourceId);
