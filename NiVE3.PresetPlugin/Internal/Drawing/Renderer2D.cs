@@ -271,8 +271,6 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
     class CPUMaskRender2D : MaskRender2DBase
     {
-        static readonly Vector4 ToGrayScale = new Vector4(0.114478F, 0.586611F, 0.298912F, 0.0F);
-
         ManagedRasterizedMaskImage Target { get; }
 
         public CPUMaskRender2D(ManagedRasterizedMaskImage target)
@@ -332,9 +330,9 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                         targetData[pos] = trackMatteMode switch
                         {
                             TrackMatteMode.Alpha => p.W,
-                            TrackMatteMode.Luminance => (p * ToGrayScale).HorizontalAdd() * p.W,
+                            TrackMatteMode.Luminance => (p * Const.ConvertToGrayScale).HorizontalAdd() * p.W,
                             TrackMatteMode.InvertAlpha => 1.0F - p.W,
-                            TrackMatteMode.InvertLuminance => 1.0F - (p * ToGrayScale).HorizontalAdd() * p.W,
+                            TrackMatteMode.InvertLuminance => 1.0F - (p * Const.ConvertToGrayScale).HorizontalAdd() * p.W,
                             _ => 0.0F
                         } * opacity * trackMatteData[pos];
                     }
@@ -358,9 +356,9 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                         targetData[pos] = trackMatteMode switch
                         {
                             TrackMatteMode.Alpha => p.W,
-                            TrackMatteMode.Luminance => (p * ToGrayScale).HorizontalAdd() * p.W,
+                            TrackMatteMode.Luminance => (p * Const.ConvertToGrayScale).HorizontalAdd() * p.W,
                             TrackMatteMode.InvertAlpha => 1.0F - p.W,
-                            TrackMatteMode.InvertLuminance => 1.0F - (p * ToGrayScale).HorizontalAdd() * p.W,
+                            TrackMatteMode.InvertLuminance => 1.0F - (p * Const.ConvertToGrayScale).HorizontalAdd() * p.W,
                             _ => 0.0F
                         } * opacity;
                     }
@@ -380,8 +378,6 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
     class GPUMaskRender2D : MaskRender2DBase
     {
-        static readonly Vector4 ToGrayScale = new Vector4(0.114478F, 0.586611F, 0.298912F, 0.0F);
-
         GPURasterizedMaskImage Target { get; }
 
         GraphicsDevice Device { get; }

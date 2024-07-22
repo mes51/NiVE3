@@ -103,6 +103,23 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("ガンマ")]
         public const string ColorCollection_Level_Gamma = nameof(ColorCollection_Level_Gamma);
 
+        // RandomNoise
+
+        [DefaultValue("ノイズ")]
+        public const string Noise_RandomNoise_Name = nameof(Noise_RandomNoise_Name);
+
+        [DefaultValue("ランダムなノイズを生成します")]
+        public const string Noise_RandomNoise_Description = nameof(Noise_RandomNoise_Description);
+
+        [LanguageKey, DefaultValue("量")]
+        public const string Noise_RandomNoise_Amount = nameof(Noise_RandomNoise_Amount);
+
+        [LanguageKey, DefaultValue("カラーノイズ")]
+        public const string Noise_RandomNoise_IsColorNoise = nameof(Noise_RandomNoise_IsColorNoise);
+
+        [LanguageKey, DefaultValue("シード値")]
+        public const string Noise_RandomNoise_Seed = nameof(Noise_RandomNoise_Seed);
+
         // Dynamics
 
         [DefaultValue("ダイナミクス")]
@@ -316,6 +333,9 @@ namespace NiVE3.PresetPlugin.Resource
 
         [LanguageKey, DefaultValue("Hz")]
         public const string Unit_Hertz = nameof(Unit_Hertz);
+
+        [LanguageKey, DefaultValue("%")]
+        public const string Unit_Percent = nameof(Unit_Percent);
 
         static LanguageResourceDictionary()
         {

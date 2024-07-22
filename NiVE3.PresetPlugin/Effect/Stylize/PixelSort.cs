@@ -14,6 +14,7 @@ using NiVE3.Plugin.Property.Properties;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.PresetPlugin.Effect.Util;
 using NiVE3.PresetPlugin.Extension;
+using NiVE3.PresetPlugin.Internal;
 using NiVE3.PresetPlugin.Resource;
 using NiVE3.Shared.Extension;
 
@@ -32,8 +33,6 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
         const string PropertySortModeId = nameof(PropertySortModeId);
 
         const string PropertySortTargetChannelId = nameof(PropertySortTargetChannelId);
-
-        static readonly Vector4 ConvertToGrayScale = new Vector4(0.114478F, 0.586611F, 0.298912F, 0.0F);
 
         public void SetupAccelerator(IAcceleratorObject accelerator) { }
 
@@ -345,7 +344,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
         {
             while (x < data.Length)
             {
-                if ((data[x] * ConvertToGrayScale).HorizontalAdd() < threshold)
+                if ((data[x] * Const.ConvertToGrayScale).HorizontalAdd() < threshold)
                 {
                     x++;
                 }
@@ -363,7 +362,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
         {
             while (x < data.Length)
             {
-                if ((data[x] * ConvertToGrayScale).HorizontalAdd() > threshold)
+                if ((data[x] * Const.ConvertToGrayScale).HorizontalAdd() > threshold)
                 {
                     x++;
                 }
@@ -523,7 +522,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static int CompareRGB(Vector4 a, Vector4 b)
         {
-            return (a * ConvertToGrayScale).HorizontalAdd().CompareTo((b * ConvertToGrayScale).HorizontalAdd());
+            return (a * Const.ConvertToGrayScale).HorizontalAdd().CompareTo((b * Const.ConvertToGrayScale).HorizontalAdd());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

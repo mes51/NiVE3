@@ -93,7 +93,10 @@ namespace NiVE3.Image
         /// <returns>生成されたNManagedImage</returns>
         public NManagedImage CopyToCpu(bool needClear = false)
         {
-            var result = new NManagedImage(Width, Height, needClear);
+            var result = new NManagedImage(Width, Height, needClear)
+            {
+                Origin = Origin
+            };
             var float4Data = MemoryMarshal.Cast<Vector4, Float4>(result.GetDataSpan());
             Data.CopyTo(float4Data);
 

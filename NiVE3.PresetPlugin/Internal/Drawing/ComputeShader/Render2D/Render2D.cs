@@ -176,8 +176,6 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render2D
         Float3x3 transform
     ) : IComputeShader
     {
-        static readonly Float3 ConvertToGrayScale = new Float3(0.114478F, 0.586611F, 0.298912F);
-
         public void Execute()
         {
             var pos = ThreadIds.Y * targetWidth + ThreadIds.X;
@@ -204,10 +202,10 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render2D
                     p = 1.0F - c.W;
                     break;
                 case 2:
-                    p = Hlsl.Dot(c.XYZ, ConvertToGrayScale) * c.W;
+                    p = Hlsl.Dot(c.XYZ, Const.ConvertToGrayScaleFloat3) * c.W;
                     break;
                 case 3:
-                    p = 1.0F - (Hlsl.Dot(c.XYZ, ConvertToGrayScale) * c.W);
+                    p = 1.0F - (Hlsl.Dot(c.XYZ, Const.ConvertToGrayScaleFloat3) * c.W);
                     break;
             }
 

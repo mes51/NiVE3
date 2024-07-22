@@ -42,8 +42,6 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
 
         const float PI = MathF.PI;
 
-        static readonly Float4 ToGrayScale = new Float4(0.114478F, 0.586611F, 0.298912F, 0.0F);
-
         public void Execute()
         {
             var triangle = triangles[triangleIndex];
@@ -193,10 +191,10 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
                     matte = 1.0F - color.W;
                     break;
                 case 2:
-                    matte = ShaderUtil.Sum(color * ToGrayScale) * color.W;
+                    matte = Hlsl.Dot(color.XYZ, Const.ConvertToGrayScaleFloat3) * color.W;
                     break;
                 case 3:
-                    matte = 1.0F - ShaderUtil.Sum(color * ToGrayScale) * color.W;
+                    matte = 1.0F - Hlsl.Dot(color.XYZ, Const.ConvertToGrayScaleFloat3) * color.W;
                     break;
             }
             renderImage[p] = matte * triangle.Opacity;

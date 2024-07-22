@@ -100,7 +100,7 @@ namespace NiVE3.Plugin.Attributes
         /// <summary>
         /// 時間経過により適用結果が変わるエフェクトであるかどうか
         /// </summary>
-        public bool IsRenderEveryFrame { get; }
+        public bool IsRenderEveryFrame { get; set; }
 
         /// <summary>
         /// 何もしないエフェクトかどうか

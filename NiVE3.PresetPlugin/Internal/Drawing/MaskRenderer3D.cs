@@ -21,8 +21,6 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 {
     class MaskRenderer3D : Renderer3DBase
     {
-        static readonly Vector4 ToGrayScale = new Vector4(0.114478F, 0.586611F, 0.298912F, 0.0F);
-
         ManagedRasterizedMaskImage RenderImage { get; }
 
         public MaskRenderer3D(ManagedRasterizedMaskImage renderImage, int width, int height, List<PointLight> pointLights, List<SpotLight> spotLights, List<ParallelLight> parallelLights, List<AmbientLight> ambientLights)
@@ -398,9 +396,9 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                         renderImageSpan[p] = trackMatteMode switch
                         {
                             TrackMatteMode.Alpha => color.W,
-                            TrackMatteMode.Luminance => (color * ToGrayScale).HorizontalAdd(),
+                            TrackMatteMode.Luminance => (color * Const.ConvertToGrayScale).HorizontalAdd(),
                             TrackMatteMode.InvertAlpha => 1.0F - color.W,
-                            TrackMatteMode.InvertLuminance => 1.0F - (color * ToGrayScale).HorizontalAdd(),
+                            TrackMatteMode.InvertLuminance => 1.0F - (color * Const.ConvertToGrayScale).HorizontalAdd(),
                             _ => 0.0F
                         } * triangle.Opacity;
                     }

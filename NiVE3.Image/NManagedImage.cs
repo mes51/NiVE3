@@ -59,9 +59,11 @@ namespace NiVE3.Image
         /// <returns>複製された画像</returns>
         public override NImage Copy()
         {
-            var result = new NManagedImage(Width, Height, false);
+            var result = new NManagedImage(Width, Height, false)
+            {
+                Origin = Origin
+            };
             Data.AsSpan(0, DataLength).CopyTo(result.Data);
-            result.Origin = Origin;
             return result;
         }
 
@@ -72,7 +74,10 @@ namespace NiVE3.Image
         /// <returns>生成されたNGPUImage</returns>
         public NGPUImage CopyToGpu(GraphicsDevice device)
         {
-            return new NGPUImage(Width, Height, device, GetDataSpan());
+            return new NGPUImage(Width, Height, device, GetDataSpan())
+            {
+                Origin = Origin
+            };
         }
 
         protected override void Dispose(bool disposing)
