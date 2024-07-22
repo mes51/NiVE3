@@ -279,7 +279,7 @@ namespace NiVE3.PresetPlugin.Renderer
 
         public void RenderAdjustmentLayer(NImage image, ROI roi, double downSamplingRate, ImageInterpolationQuality interpolationQuality, BlendMode blendMode)
         {
-            IRenderer2D? renderer = null;
+            Renderer2DBase? renderer = null;
             var frameWidth = 0;
             var frameHeight = 0;
             if (UseGpu && CurrentGpuFrame != null && Accelerator != null)
@@ -295,7 +295,7 @@ namespace NiVE3.PresetPlugin.Renderer
                 frameHeight = CurrentManagedFrame.Height;
             }
             var matrix = Matrix3x3.Identity.Translate((frameWidth - roi.OriginalImageSize.Width) * 0.5F + roi.OriginalImagePosition.X, (frameHeight - roi.OriginalImageSize.Height) * 0.5F + roi.OriginalImagePosition.Y);
-            renderer?.Draw(image, 1.0F, matrix, interpolationQuality, blendMode, null);
+            renderer?.DrawSingleImage(image, 1.0F, matrix, interpolationQuality, blendMode, null);
         }
 
         public NImage GetCurrentRenderedImage()
@@ -970,8 +970,10 @@ namespace NiVE3.PresetPlugin.Renderer
                         var opacity = (double)(i.Transform[ILayerObject.TransformPropertyOpacityId] ?? 0.0) * 0.01;
                         var matrix = Matrix3x3.CreateScale(i.DownSampleRateX, i.DownSampleRateY) * CalcTransform2D(i.Transform, i.ParentTransforms) * downScale;
 
-                        renderer.Draw(i.Image, (float)opacity, matrix, i.InterpolationQuality, i.BlendMode, trackMattes[i]);
+                        renderer.AddImage(i.Image, (float)opacity, matrix, i.InterpolationQuality, i.BlendMode, trackMattes[i]);
                     }
+
+                    renderer.Draw();
                 }
             }
         }
@@ -1091,8 +1093,10 @@ namespace NiVE3.PresetPlugin.Renderer
                         var opacity = (double)(i.Transform[ILayerObject.TransformPropertyOpacityId] ?? 0.0) * 0.01;
                         var matrix = Matrix3x3.CreateScale(i.DownSampleRateX, i.DownSampleRateY) * CalcTransform2D(i.Transform, i.ParentTransforms) * downScale;
 
-                        renderer.Draw(i.Image, (float)opacity, matrix, i.InterpolationQuality, i.BlendMode, trackMattes[i]);
+                        renderer.AddImage(i.Image, (float)opacity, matrix, i.InterpolationQuality, i.BlendMode, trackMattes[i]);
                     }
+
+                    renderer.Draw();
                 }
             }
         }

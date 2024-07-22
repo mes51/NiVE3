@@ -158,7 +158,7 @@ namespace NiVE3.PresetPlugin.Input
             {
                 var resizedResult = new NManagedImage((int)(Width / downSamplingRate), (int)(Height / downSamplingRate));
                 var renderer = new CPURenderer2D(resizedResult);
-                renderer.Draw(result, 1.0F, Matrix3x3.CreateScale((float)(1.0 / downSamplingRate), (float)(1.0 / downSamplingRate)), ImageInterpolationQuality.Level2, BlendMode.Replace, null);
+                renderer.DrawSingleImage(result, 1.0F, Matrix3x3.CreateScale((float)(1.0 / downSamplingRate), (float)(1.0 / downSamplingRate)), ImageInterpolationQuality.Level2, BlendMode.Replace, null);
                 result.Dispose();
                 result = resizedResult;
             }

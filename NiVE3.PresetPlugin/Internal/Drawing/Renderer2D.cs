@@ -15,17 +15,46 @@ using NiVE3.Shared.Extension;
 
 namespace NiVE3.PresetPlugin.Internal.Drawing
 {
-    interface IRenderer2D
+    abstract class Renderer2DBase
     {
-        void Draw(NImage image, float opacity, Matrix3x3 transform, ImageInterpolationQuality interpolationQuality, BlendMode blendMode, RasterizedMaskImage? trackMatte);
+        private List<ImageInfo> Images { get; } = [];
+
+        protected IReadOnlyList<ImageInfo> RenderImages => Images;
+
+        public void AddImage(NImage image, float opacity, Matrix3x3 transform, ImageInterpolationQuality interpolationQuality, BlendMode blendMode, RasterizedMaskImage? trackMatte)
+        {
+            transform = Matrix3x3.CreateTranslate((float)-image.Origin.X, (float)-image.Origin.Y) * transform;
+            if (!Matrix3x3.Invert(transform, out var inverted))
+            {
+                return;
+            }
+
+            Images.Add(new ImageInfo(image, opacity, transform, inverted, interpolationQuality, blendMode, trackMatte));
+        }
+
+        public void Draw()
+        {
+            Render();
+            Images.Clear();
+        }
+
+        protected abstract void Render();
+
+        public void DrawSingleImage(NImage image, float opacity, Matrix3x3 transform, ImageInterpolationQuality interpolationQuality, BlendMode blendMode, RasterizedMaskImage? trackMatte)
+        {
+            AddImage(image, opacity, transform, interpolationQuality, blendMode, trackMatte);
+            Draw();
+        }
+
+        protected record ImageInfo(NImage Image, float Opacity, Matrix3x3 transform, Matrix3x3 InvertedTransform, ImageInterpolationQuality InterpolationQuality, BlendMode BlendMode, RasterizedMaskImage? TrackMatte);
     }
 
-    interface IMaskRender2D
+    abstract class MaskRender2DBase
     {
-        void Draw(NImage image, float opacity, Matrix3x3 transform, ImageInterpolationQuality interpolationQuality, RasterizedMaskImage? trackMatte, TrackMatteMode trackMatteMode);
+        public abstract void Draw(NImage image, float opacity, Matrix3x3 transform, ImageInterpolationQuality interpolationQuality, RasterizedMaskImage? trackMatte, TrackMatteMode trackMatteMode);
     }
 
-    class CPURenderer2D : IRenderer2D
+    class CPURenderer2D : Renderer2DBase
     {
         NManagedImage Target { get; }
 
@@ -34,99 +63,116 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             Target = target;
         }
 
-        public void Draw(NImage image, float opacity, Matrix3x3 transform, ImageInterpolationQuality interpolationQuality, BlendMode blendMode, RasterizedMaskImage? trackMatte)
+        protected override void Render()
         {
-            transform = Matrix3x3.CreateTranslate((float)-image.Origin.X, (float)-image.Origin.Y) * transform;
-            if (!Matrix3x3.Invert(transform, out var inverted))
-            {
-                return;
-            }
+            var convertedImages = new Dictionary<NImage, NManagedImage>();
+            var convertedTrackMatte = new Dictionary<RasterizedMaskImage, ManagedRasterizedMaskImage>();
 
-            var managedImage = image switch
+            foreach (var (image, opacity, transform, inverted, interpolationQuality, blendMode, trackMatte) in RenderImages)
             {
-                NGPUImage gpuImage => gpuImage.CopyToCpu(),
-                _ => (NManagedImage)image
-            };
-            var managedTrackMatte = trackMatte switch
-            {
-                GPURasterizedMaskImage gpuTrackMatte => gpuTrackMatte.CopyToCpu(),
-                _ => (ManagedRasterizedMaskImage?)trackMatte
-            };
-
-            var p1 = transform.Transform(new Vector2());
-            var p2 = transform.Transform(new Vector2(image.Width, 0.0F));
-            var p3 = transform.Transform(new Vector2(image.Width, image.Height));
-            var p4 = transform.Transform(new Vector2(0.0F, image.Height));
-            var minX = Math.Max((int)Math.Floor(Math.Min(Math.Min(Math.Min(p1.X, p2.X), p3.X), p4.X)), 0);
-            var minY = Math.Max((int)Math.Floor(Math.Min(Math.Min(Math.Min(p1.Y, p2.Y), p3.Y), p4.Y)), 0);
-            var maxX = Math.Min((int)Math.Ceiling(Math.Max(Math.Max(Math.Max(p1.X, p2.X), p3.X), p4.X)), Target.Width);
-            var maxY = Math.Min((int)Math.Ceiling(Math.Max(Math.Max(Math.Max(p1.Y, p2.Y), p3.Y), p4.Y)), Target.Height);
-
-            var width = Target.Width;
-            if (managedTrackMatte != null)
-            {
-                Parallel.For(minY, maxY, y =>
+                NManagedImage managedImage;
+                if (image is NGPUImage gpuImage)
                 {
-                    var targetData = Target.GetDataSpan();
-                    var imageData = managedImage.GetDataSpan();
-                    var trackMatteData = managedTrackMatte.GetDataSpan();
-                    for (int x = minX, pos = y * Target.Width + minX; x < maxX; x++, pos++)
+                    if (!convertedImages.ContainsKey(gpuImage))
                     {
-                        var (imageX, imageY) = inverted.Transform(x, y);
-                        var p = interpolationQuality switch
-                        {
-                            ImageInterpolationQuality.Level2 => ImageInterpolation.Bilinear(imageData, image.Width, image.Height, imageX, imageY),
-                            _ => ImageInterpolation.NearestNeighbor(imageData, image.Width, image.Height, imageX, imageY)
-                        };
-
-                        p.W *= opacity * trackMatteData[pos];
-                        if (p.W <= 0.0F)
-                        {
-                            continue;
-                        }
-
-                        targetData[pos] = Image.Drawing.Blend.Process(blendMode, targetData[pos], p);
+                        convertedImages.Add(gpuImage, gpuImage.CopyToCpu());
                     }
-                });
-            }
-            else
-            {
-                Parallel.For(minY, maxY, y =>
+                    managedImage = convertedImages[gpuImage];
+                }
+                else
                 {
-                    var targetData = Target.GetDataSpan();
-                    var imageData = managedImage.GetDataSpan();
-                    for (int x = minX, pos = y * Target.Width + minX; x < maxX; x++, pos++)
+                    managedImage = (NManagedImage)image;
+                }
+
+                ManagedRasterizedMaskImage? managedTrackMatte;
+                if (trackMatte is GPURasterizedMaskImage gpuTrackMatte)
+                {
+                    if (!convertedTrackMatte.ContainsKey(gpuTrackMatte))
                     {
-                        var (imageX, imageY) = inverted.Transform(x, y);
-                        var p = interpolationQuality switch
-                        {
-                            ImageInterpolationQuality.Level2 => ImageInterpolation.Bilinear(imageData, image.Width, image.Height, imageX, imageY),
-                            _ => ImageInterpolation.NearestNeighbor(imageData, image.Width, image.Height, imageX, imageY)
-                        };
-
-                        p.W *= opacity;
-                        if (p.W <= 0.0F)
-                        {
-                            continue;
-                        }
-
-                        targetData[pos] = Image.Drawing.Blend.Process(blendMode, targetData[pos], p);
+                        convertedTrackMatte.Add(gpuTrackMatte, gpuTrackMatte.CopyToCpu());
                     }
-                });
+                    managedTrackMatte = convertedTrackMatte[gpuTrackMatte];
+                }
+                else
+                {
+                    managedTrackMatte = (ManagedRasterizedMaskImage?)trackMatte;
+                }
+
+                var p1 = transform.Transform(new Vector2());
+                var p2 = transform.Transform(new Vector2(image.Width, 0.0F));
+                var p3 = transform.Transform(new Vector2(image.Width, image.Height));
+                var p4 = transform.Transform(new Vector2(0.0F, image.Height));
+                var minX = Math.Max((int)Math.Floor(Math.Min(Math.Min(Math.Min(p1.X, p2.X), p3.X), p4.X)), 0);
+                var minY = Math.Max((int)Math.Floor(Math.Min(Math.Min(Math.Min(p1.Y, p2.Y), p3.Y), p4.Y)), 0);
+                var maxX = Math.Min((int)Math.Ceiling(Math.Max(Math.Max(Math.Max(p1.X, p2.X), p3.X), p4.X)), Target.Width);
+                var maxY = Math.Min((int)Math.Ceiling(Math.Max(Math.Max(Math.Max(p1.Y, p2.Y), p3.Y), p4.Y)), Target.Height);
+
+                var width = Target.Width;
+                if (managedTrackMatte != null)
+                {
+                    Parallel.For(minY, maxY, y =>
+                    {
+                        var targetData = Target.GetDataSpan();
+                        var imageData = managedImage.GetDataSpan();
+                        var trackMatteData = managedTrackMatte.GetDataSpan();
+                        for (int x = minX, pos = y * Target.Width + minX; x < maxX; x++, pos++)
+                        {
+                            var (imageX, imageY) = inverted.Transform(x, y);
+                            var p = interpolationQuality switch
+                            {
+                                ImageInterpolationQuality.Level2 => ImageInterpolation.Bilinear(imageData, image.Width, image.Height, imageX, imageY),
+                                _ => ImageInterpolation.NearestNeighbor(imageData, image.Width, image.Height, imageX, imageY)
+                            };
+
+                            p.W *= opacity * trackMatteData[pos];
+                            if (p.W <= 0.0F)
+                            {
+                                continue;
+                            }
+
+                            targetData[pos] = Image.Drawing.Blend.Process(blendMode, targetData[pos], p);
+                        }
+                    });
+                }
+                else
+                {
+                    Parallel.For(minY, maxY, y =>
+                    {
+                        var targetData = Target.GetDataSpan();
+                        var imageData = managedImage.GetDataSpan();
+                        for (int x = minX, pos = y * Target.Width + minX; x < maxX; x++, pos++)
+                        {
+                            var (imageX, imageY) = inverted.Transform(x, y);
+                            var p = interpolationQuality switch
+                            {
+                                ImageInterpolationQuality.Level2 => ImageInterpolation.Bilinear(imageData, image.Width, image.Height, imageX, imageY),
+                                _ => ImageInterpolation.NearestNeighbor(imageData, image.Width, image.Height, imageX, imageY)
+                            };
+
+                            p.W *= opacity;
+                            if (p.W <= 0.0F)
+                            {
+                                continue;
+                            }
+
+                            targetData[pos] = Image.Drawing.Blend.Process(blendMode, targetData[pos], p);
+                        }
+                    });
+                }
             }
 
-            if (managedImage != image)
+            foreach (var i in convertedImages.Values)
             {
-                managedImage.Dispose();
+                i.Dispose();
             }
-            if (managedTrackMatte != trackMatte)
+            foreach (var t in convertedTrackMatte.Values)
             {
-                managedTrackMatte?.Dispose();
+                t.Dispose();
             }
         }
     }
 
-    class GPURenderer2D : IRenderer2D
+    class GPURenderer2D : Renderer2DBase
     {
         NGPUImage Target { get; }
 
@@ -138,60 +184,92 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             Device = device;
         }
 
-        public void Draw(NImage image, float opacity, Matrix3x3 transform, ImageInterpolationQuality interpolationQuality, BlendMode blendMode, RasterizedMaskImage? trackMatte)
+        protected override void Render()
         {
-            transform = Matrix3x3.CreateTranslate((float)-image.Origin.X, (float)-image.Origin.Y) * transform;
-            if (!Matrix3x3.Invert(transform, out var inverted))
-            {
-                return;
-            }
+            var convertedImage = new Dictionary<NImage, NGPUImage>();
+            var convertedTrackMatte = new Dictionary<RasterizedMaskImage, GPURasterizedMaskImage>();
 
-            var gpuImage = image switch
+            foreach (var (image, _, _, _, _, _, trackMatte) in RenderImages)
             {
-                NManagedImage managedImage => managedImage.CopyToGpu(Device),
-                _ => (NGPUImage)image
-            };
-            var gpuTrackMatte = trackMatte switch
-            {
-                ManagedRasterizedMaskImage managedTrackMatte => managedTrackMatte.CopyToGpu(Device),
-                _ => (GPURasterizedMaskImage?)trackMatte
-            };
-
-            using var canvas = new NGPUImage(Target.Width, Target.Height, Device);
-            using (var context = Device.CreateComputeContext())
-            {
-                switch (interpolationQuality)
+                NGPUImage gpuImage;
+                if (image is NManagedImage managedImage)
                 {
-                    case ImageInterpolationQuality.Level1:
-                        context.For(canvas.Width, canvas.Height, new NearestNeighbor(canvas.Data, canvas.Width, gpuImage.Data, gpuImage.Width, gpuImage.Height, inverted.ToFloat3x3()));
-                        break;
-                    default:
-                        context.For(canvas.Width, canvas.Height, new Bilinear(canvas.Data, canvas.Width, gpuImage.Data, gpuImage.Width, gpuImage.Height, inverted.ToFloat3x3()));
-                        break;
-                }
-
-                if (gpuTrackMatte != null)
-                {
-                    context.For(Target.Width, Target.Height, new BlendWithTrackMatte(Target.Data, canvas.Data, gpuTrackMatte.Data, Target.Width, (int)blendMode, opacity));
+                    if (!convertedImage.ContainsKey(managedImage))
+                    {
+                        convertedImage.Add(managedImage, managedImage.CopyToGpu(Device));
+                    }
+                    gpuImage = convertedImage[managedImage];
                 }
                 else
                 {
-                    context.For(Target.Width, Target.Height, new ComputeShader.Render2D.Blend(Target.Data, canvas.Data, Target.Width, (int)blendMode, opacity));
+                    gpuImage = (NGPUImage)image;
+                }
+
+                GPURasterizedMaskImage? gpuTrackMatte;
+                if (trackMatte is ManagedRasterizedMaskImage managedTrackMatte)
+                {
+                    if (!convertedTrackMatte.ContainsKey(managedTrackMatte))
+                    {
+                        convertedTrackMatte.Add(managedTrackMatte, managedTrackMatte.CopyToGpu(Device));
+                    }
+                    gpuTrackMatte = convertedTrackMatte[managedTrackMatte];
+                }
+                else
+                {
+                    gpuTrackMatte = (GPURasterizedMaskImage?)trackMatte;
                 }
             }
 
-            if (gpuImage != image)
+            using (var emptyTrackMatte = Device.AllocateReadWriteBuffer([1.0F]))
+            using (var context = Device.CreateComputeContext())
             {
-                gpuImage.Dispose();
+                foreach (var (image, opacity, _, inverted, interpolationQuality, blendMode, trackMatte) in RenderImages)
+                {
+                    var gpuImage = image switch
+                    {
+                        NManagedImage => convertedImage[image],
+                        _ => (NGPUImage)image
+                    };
+                    var gpuTrackMatte = trackMatte switch
+                    {
+                        ManagedRasterizedMaskImage => convertedTrackMatte[trackMatte],
+                        _ => (GPURasterizedMaskImage?)trackMatte
+                    };
+                    var trackMatteData = gpuTrackMatte?.Data ?? emptyTrackMatte;
+
+                    context.For(
+                        Target.Width,
+                        Target.Height,
+                        new Render2D(
+                            Target.Data,
+                            Target.Width,
+                            gpuImage.Data,
+                            gpuImage.Width,
+                            gpuImage.Height,
+                            (int)interpolationQuality,
+                            trackMatteData,
+                            opacity,
+                            (int)blendMode,
+                            inverted.ToFloat3x3()
+                        )
+                    );
+                }
+
+                context.Barrier(Target.Data);
             }
-            if (gpuTrackMatte != trackMatte)
+
+            foreach (var i in convertedImage.Values)
             {
-                gpuTrackMatte?.Dispose();
+                i.Dispose();
+            }
+            foreach (var t in convertedTrackMatte.Values)
+            {
+                t.Dispose();
             }
         }
     }
 
-    class CPUMaskRender2D : IMaskRender2D
+    class CPUMaskRender2D : MaskRender2DBase
     {
         static readonly Vector4 ToGrayScale = new Vector4(0.114478F, 0.586611F, 0.298912F, 0.0F);
 
@@ -202,7 +280,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             Target = target;
         }
 
-        public void Draw(NImage image, float opacity, Matrix3x3 transform, ImageInterpolationQuality interpolationQuality, RasterizedMaskImage? trackMatte, TrackMatteMode trackMatteMode)
+        public override void Draw(NImage image, float opacity, Matrix3x3 transform, ImageInterpolationQuality interpolationQuality, RasterizedMaskImage? trackMatte, TrackMatteMode trackMatteMode)
         {
             if (!Matrix3x3.Invert(transform, out var inverted))
             {
@@ -300,7 +378,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
         }
     }
 
-    class GPUMaskRender2D : IMaskRender2D
+    class GPUMaskRender2D : MaskRender2DBase
     {
         static readonly Vector4 ToGrayScale = new Vector4(0.114478F, 0.586611F, 0.298912F, 0.0F);
 
@@ -314,7 +392,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             Device = device;
         }
 
-        public void Draw(NImage image, float opacity, Matrix3x3 transform, ImageInterpolationQuality interpolationQuality, RasterizedMaskImage? trackMatte, TrackMatteMode trackMatteMode)
+        public override void Draw(NImage image, float opacity, Matrix3x3 transform, ImageInterpolationQuality interpolationQuality, RasterizedMaskImage? trackMatte, TrackMatteMode trackMatteMode)
         {
             if (!Matrix3x3.Invert(transform, out var inverted))
             {
@@ -332,34 +410,36 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 _ => (GPURasterizedMaskImage?)trackMatte
             };
 
-            using var canvas = new NGPUImage(Target.Width, Target.Height, Device);
+            var trackMatteData = gpuTrackMatte?.Data ?? Device.AllocateReadWriteBuffer([1.0F]);
             using (var context = Device.CreateComputeContext())
             {
-                switch (interpolationQuality)
-                {
-                    case ImageInterpolationQuality.Level1:
-                        context.For(canvas.Width, canvas.Height, new NearestNeighbor(canvas.Data, canvas.Width, gpuImage.Data, gpuImage.Width, gpuImage.Height, inverted.ToFloat3x3()));
-                        break;
-                    default:
-                        context.For(canvas.Width, canvas.Height, new Bilinear(canvas.Data, canvas.Width, gpuImage.Data, gpuImage.Width, gpuImage.Height, inverted.ToFloat3x3()));
-                        break;
-                }
-
-                if (gpuTrackMatte != null)
-                {
-                    context.For(Target.Width, Target.Height, new CreateMatteWithTrackMatte(Target.Data, canvas.Data, gpuTrackMatte.Data, Target.Width, (int)trackMatteMode, opacity));
-                }
-                else
-                {
-                    context.For(Target.Width, Target.Height, new CreateMatte(Target.Data, canvas.Data, Target.Width, (int)trackMatteMode, opacity));
-                }
+                context.For(
+                    Target.Width,
+                    Target.Height,
+                    new RenderMatte2D(
+                        Target.Data,
+                        Target.Width,
+                        gpuImage.Data,
+                        gpuImage.Width,
+                        gpuImage.Height,
+                        (int)interpolationQuality,
+                        trackMatteData,
+                        opacity,
+                        (int)trackMatteMode,
+                        inverted.ToFloat3x3()
+                    )
+                );
             }
 
             if (gpuImage != image)
             {
                 gpuImage.Dispose();
             }
-            if (gpuTrackMatte != trackMatte)
+            if (gpuTrackMatte == null)
+            {
+                trackMatteData.Dispose();
+            }
+            else if (gpuTrackMatte != trackMatte)
             {
                 gpuTrackMatte?.Dispose();
             }
