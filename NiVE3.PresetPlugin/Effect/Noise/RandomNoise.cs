@@ -16,11 +16,12 @@ using NiVE3.PresetPlugin.Extension;
 using NiVE3.PresetPlugin.Internal;
 using NiVE3.Shared.Extension;
 using ComputeSharp;
+using NiVE3.Plugin.Resource;
 
 namespace NiVE3.PresetPlugin.Effect.Noise
 {
     [Export(typeof(IEffect))]
-    [EffectMetadata(LanguageResourceDictionary.Noise_RandomNoise_Name, "mes51", "ノイズ", LanguageResourceDictionary.Noise_RandomNoise_Description, ID, IsSupportGpu = true, IsRenderEveryFrame = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
+    [EffectMetadata(LanguageResourceDictionary.Noise_RandomNoise_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_Noise, LanguageResourceDictionary.Noise_RandomNoise_Description, ID, IsSupportGpu = true, IsRenderEveryFrame = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
     public sealed class RandomNoise : IEffect
     {
         const string ID = "6D2B8747-EC1B-455B-8670-FAD8B9F79BE2";

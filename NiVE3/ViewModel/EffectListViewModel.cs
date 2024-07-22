@@ -14,6 +14,7 @@ using NiVE3.Extension;
 using Prism.Mvvm;
 using System.Text.RegularExpressions;
 using NiVE3.Plugin.Attributes;
+using NiVE3.Plugin.Resource;
 
 namespace NiVE3.ViewModel
 {
@@ -50,7 +51,16 @@ namespace NiVE3.ViewModel
 
             foreach (var e in EffectListModel.EffectMetadatas)
             {
-                Effects.Add(Tuple.Create(e.Name, e.Category, Guid.Parse(e.EffectUuid)));
+                var category = e.Category;
+                if (DefaultLanguageResourceNames.EffectCategories.Contains(category))
+                {
+                    category = LanguageResourceDictionary.Dictionary.GetText(category);
+                    if (category.Length < 1)
+                    {
+                        category = e.Category;
+                    }
+                }
+                Effects.Add(Tuple.Create(e.Name, category, Guid.Parse(e.EffectUuid)));
             }
 
             PropertyChanged += EffectListViewModel_PropertyChanged;

@@ -361,18 +361,18 @@ namespace NiVE3.PresetPlugin.Resource
                 this[key] = defaultValue;
             }
         }
+    }
 
-        [AttributeUsage(AttributeTargets.Field, Inherited = false, AllowMultiple = false)]
-        sealed class DefaultValueAttribute : Attribute
+    [AttributeUsage(AttributeTargets.Field, Inherited = false, AllowMultiple = false)]
+    file sealed class DefaultValueAttribute : Attribute
+    {
+        public DefaultValueAttribute(string defaultValue)
         {
-            public DefaultValueAttribute(string defaultValue)
-            {
-                DefaultValue = defaultValue;
-            }
-
-            public string DefaultValue { get; }
-
-            public string FromVersion { get; set; } = "0.0.0.0";
+            DefaultValue = defaultValue;
         }
+
+        public string DefaultValue { get; }
+
+        public string FromVersion { get; set; } = "0.0.0.0";
     }
 }

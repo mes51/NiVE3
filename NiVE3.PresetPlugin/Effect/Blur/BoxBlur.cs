@@ -22,7 +22,7 @@ using NiVE3.PresetPlugin.Resource;
 namespace NiVE3.PresetPlugin.Effect.Blur
 {
     [Export(typeof(IEffect))]
-    [EffectMetadata(LanguageResourceDictionary.Blur_BoxBlur_Name, "mes51", "ブラー", LanguageResourceDictionary.Blur_BoxBlur_Description, ID, IsSupportGpu = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
+    [EffectMetadata(LanguageResourceDictionary.Blur_BoxBlur_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_Blur, LanguageResourceDictionary.Blur_BoxBlur_Description, ID, IsSupportGpu = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
     public sealed class BoxBlur : IEffect
     {
         const string ID = "6DC081A1-4748-45ED-95BB-3E48AA74FD48";

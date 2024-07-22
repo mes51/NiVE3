@@ -10,6 +10,7 @@ using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Property;
 using NiVE3.Plugin.Property.Properties;
+using NiVE3.Plugin.Resource;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.PresetPlugin.Internal;
 using NiVE3.PresetPlugin.Resource;
@@ -18,7 +19,7 @@ using NWaves.Filters.BiQuad;
 namespace NiVE3.PresetPlugin.Effect.Audio
 {
     [Export(typeof(IEffect))]
-    [EffectMetadata(LanguageResourceDictionary.Audio_ParametricEqualizer_Name, "mes51", "オーディオ", LanguageResourceDictionary.Audio_ParametricEqualizer_Description, ID, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary), SupportedSource = EffectSupportedSource.Audio)]
+    [EffectMetadata(LanguageResourceDictionary.Audio_ParametricEqualizer_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_Audio, LanguageResourceDictionary.Audio_ParametricEqualizer_Description, ID, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary), SupportedSource = EffectSupportedSource.Audio)]
     public class ParametricEqualizer : IEffect
     {
         const string ID = "E003C444-877F-47AD-8936-05B89EE5C53F";

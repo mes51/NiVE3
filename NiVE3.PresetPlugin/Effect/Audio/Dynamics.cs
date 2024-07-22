@@ -9,6 +9,7 @@ using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Property;
 using NiVE3.Plugin.Property.Properties;
+using NiVE3.Plugin.Resource;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.PresetPlugin.Extension;
 using NiVE3.PresetPlugin.Internal;
@@ -18,7 +19,7 @@ using NWaves.Operations;
 namespace NiVE3.PresetPlugin.Effect.Audio
 {
     [Export(typeof(IEffect))]
-    [EffectMetadata(LanguageResourceDictionary.Audio_Dynamics_Name, "mes51", "オーディオ", LanguageResourceDictionary.Audio_Dynamics_Description, ID, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary), SupportedSource = EffectSupportedSource.Audio)]
+    [EffectMetadata(LanguageResourceDictionary.Audio_Dynamics_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_Audio, LanguageResourceDictionary.Audio_Dynamics_Description, ID, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary), SupportedSource = EffectSupportedSource.Audio)]
     public class Dynamics : IEffect
     {
         const string ID = "B244012D-AEA1-40E6-BB6B-FE253DE62D67";

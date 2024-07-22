@@ -83,32 +83,32 @@ namespace NiVE3.UI.Resources
                 this[key] = attribute.GetValue(Appearance);
             }
         }
+    }
 
-        [AttributeUsage(AttributeTargets.Field, Inherited = false, AllowMultiple = false)]
-        abstract class AppearanceChangeableAttribute : Attribute
+    [AttributeUsage(AttributeTargets.Field, Inherited = false, AllowMultiple = false)]
+    abstract class AppearanceChangeableAttribute : Attribute
+    {
+        public abstract object GetValue(double appearance);
+    }
+
+    [AttributeUsage(AttributeTargets.Field, Inherited = false, AllowMultiple = false)]
+    file sealed class BrushColorRangeAttribute : AppearanceChangeableAttribute
+    {
+        public Color DarkColor { get; set; }
+
+        public Color LightColor { get; set; }
+
+        public BrushColorRangeAttribute(string darkColorHex, string lightColorHex)
         {
-            public abstract object GetValue(double appearance);
+            DarkColor = ColorExtensions.FromHex(darkColorHex);
+            LightColor = ColorExtensions.FromHex(lightColorHex);
         }
 
-        [AttributeUsage(AttributeTargets.Field, Inherited = false, AllowMultiple = false)]
-        sealed class BrushColorRangeAttribute : AppearanceChangeableAttribute
+        public override object GetValue(double appearance)
         {
-            public Color DarkColor { get; set; }
-
-            public Color LightColor { get; set; }
-
-            public BrushColorRangeAttribute(string darkColorHex, string lightColorHex)
-            {
-                DarkColor = ColorExtensions.FromHex(darkColorHex);
-                LightColor = ColorExtensions.FromHex(lightColorHex);
-            }
-
-            public override object GetValue(double appearance)
-            {
-                var brush = new SolidColorBrush(DarkColor.Interpolate(LightColor, appearance));
-                brush.Freeze();
-                return brush;
-            }
+            var brush = new SolidColorBrush(DarkColor.Interpolate(LightColor, appearance));
+            brush.Freeze();
+            return brush;
         }
     }
 

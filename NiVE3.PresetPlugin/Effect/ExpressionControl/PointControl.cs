@@ -17,7 +17,7 @@ using NiVE3.Plugin.ValueObject;
 namespace NiVE3.PresetPlugin.Effect.ExpressionControl
 {
     [Export(typeof(IEffect))]
-    [EffectMetadata(LanguageResourceDictionary.ExpressionControl_PointControl_Name, "mes51", "エクスプレッション制御", LanguageResourceDictionary.ExpressionControl_PointControl_Description, "6836A601-35DC-405D-8D77-D6DC52A36845", IsDummyEffect = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
+    [EffectMetadata(LanguageResourceDictionary.ExpressionControl_PointControl_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_ExpressionControl, LanguageResourceDictionary.ExpressionControl_PointControl_Description, "6836A601-35DC-405D-8D77-D6DC52A36845", IsDummyEffect = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
     public class PointControl : IEffect
     {
         public PropertyBase[] GetProperties()

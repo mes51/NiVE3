@@ -11,6 +11,7 @@ using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Property;
 using NiVE3.Plugin.Property.Properties;
+using NiVE3.Plugin.Resource;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.PresetPlugin.Effect.Util;
 using NiVE3.PresetPlugin.Extension;
@@ -21,7 +22,7 @@ using NiVE3.Shared.Extension;
 namespace NiVE3.PresetPlugin.Effect.Stylize
 {
     [Export(typeof(IEffect))]
-    [EffectMetadata(LanguageResourceDictionary.Stylize_PixelSort_Name, "mes51", "スタイライズ", LanguageResourceDictionary.Stylize_PixelSort_Description, ID, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
+    [EffectMetadata(LanguageResourceDictionary.Stylize_PixelSort_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_Stylize, LanguageResourceDictionary.Stylize_PixelSort_Description, ID, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
     public class PixelSort : IEffect
     {
         const string ID = "BF9E258A-FE18-4747-8799-FC92B9CA0907";

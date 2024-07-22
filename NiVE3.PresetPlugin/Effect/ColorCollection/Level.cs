@@ -14,6 +14,7 @@ using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Property;
 using NiVE3.Plugin.Property.Properties;
+using NiVE3.Plugin.Resource;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.PresetPlugin.Effect.Util;
 using NiVE3.PresetPlugin.Extension;
@@ -23,7 +24,7 @@ using NiVE3.Shared.Extension;
 namespace NiVE3.PresetPlugin.Effect.ColorCollection
 {
     [Export(typeof(IEffect))]
-    [EffectMetadata(LanguageResourceDictionary.ColorCollection_Level_Name, "mes51", "色調補正", LanguageResourceDictionary.ColorCollection_Level_Description, ID, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
+    [EffectMetadata(LanguageResourceDictionary.ColorCollection_Level_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_ColorCollection, LanguageResourceDictionary.ColorCollection_Level_Description, ID, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
     sealed public class Level : IEffect
     {
         const string ID = "9EE3E1A0-476B-488B-A3CE-17422D0B6C75";

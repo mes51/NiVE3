@@ -462,6 +462,26 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("レンダリング設定の変更")]
         public static readonly string RenderQueueItemView_Button_EditSetting = nameof(RenderQueueItemView_Button_EditSetting);
 
+        // Effect category names
+
+        [DefaultValue("オーディオ")]
+        public static readonly string EffectCategory_Audio = DefaultLanguageResourceNames.EffectCategory_Audio;
+
+        [DefaultValue("ブラー")]
+        public static readonly string EffectCategory_Blur = DefaultLanguageResourceNames.EffectCategory_Blur;
+
+        [DefaultValue("カラー補正")]
+        public static readonly string EffectCategory_ColorCollection = DefaultLanguageResourceNames.EffectCategory_ColorCollection;
+
+        [DefaultValue("エクスプレッション制御")]
+        public static readonly string EffectCategory_ExpressionControl = DefaultLanguageResourceNames.EffectCategory_ExpressionControl;
+
+        [DefaultValue("ノイズ")]
+        public static readonly string EffectCategory_Noise = DefaultLanguageResourceNames.EffectCategory_Noise;
+
+        [DefaultValue("スタイライズ")]
+        public static readonly string EffectCategory_Stylize = DefaultLanguageResourceNames.EffectCategory_Stylize;
+
         // History Command
 
         [DefaultValue("プロジェクトの新規作成/開く")]
@@ -1413,18 +1433,18 @@ namespace NiVE3.View.Resource
                 this[key] = defaultValue;
             }
         }
+    }
 
-        [AttributeUsage(AttributeTargets.Field, Inherited = false, AllowMultiple = false)]
-        sealed class DefaultValueAttribute : Attribute
+    [AttributeUsage(AttributeTargets.Field, Inherited = false, AllowMultiple = false)]
+    file sealed class DefaultValueAttribute : Attribute
+    {
+        public DefaultValueAttribute(string defaultValue)
         {
-            public DefaultValueAttribute(string defaultValue)
-            {
-                DefaultValue = defaultValue;
-            }
-
-            public string DefaultValue { get; }
-
-            public string FromVersion { get; set; } = "0.0.0.0";
+            DefaultValue = defaultValue;
         }
+
+        public string DefaultValue { get; }
+
+        public string FromVersion { get; set; } = "0.0.0.0";
     }
 }
