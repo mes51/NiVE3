@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ComputeSharp;
 
-namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader
+namespace NiVE3.PresetPlugin.Internal.ComputeShader
 {
     static class BlendMethods
     {
@@ -112,7 +112,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader
             var lt = 2.0F * back * front;
             var gte = 1.0F - 2.0F * (1.0F - back) * (1.0F - front);
 
-            var c = ShaderUtil.Mask(lt, mask) + ShaderUtil.NotMask(gte, mask);
+            var c = Float4Util.Mask(lt, mask) + Float4Util.NotMask(gte, mask);
             return Composite(back, front, c);
         }
 
@@ -122,7 +122,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader
             var lt = 2.0F * back * front;
             var gte = 1.0F - 2.0F * (1.0F - back) * (1.0F - front);
 
-            var c = ShaderUtil.Mask(lt, mask) + ShaderUtil.NotMask(gte, mask);
+            var c = Float4Util.Mask(lt, mask) + Float4Util.NotMask(gte, mask);
             return Composite(back, front, c);
         }
 
@@ -132,7 +132,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader
             var lt = (front * 2.0F - 1.0F) * (back - Hlsl.Pow(back, 2.0F)) + back;
             var gte = (front * 2.0F - 1.0F) * (Hlsl.Pow(back, 0.5F) - back) + back;
 
-            var c = ShaderUtil.Mask(lt, mask) + ShaderUtil.NotMask(gte, mask);
+            var c = Float4Util.Mask(lt, mask) + Float4Util.NotMask(gte, mask);
             return Composite(back, front, c);
         }
 
@@ -142,7 +142,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader
             var lt = 1.0F - (1.0F - back) / (front * 2.0F);
             var gte = back / ((1.0F - front) * 2.0F);
 
-            var c = ShaderUtil.Mask(lt, mask) + ShaderUtil.NotMask(gte, mask);
+            var c = Float4Util.Mask(lt, mask) + Float4Util.NotMask(gte, mask);
             return Composite(back, front, c);
         }
 
@@ -154,10 +154,10 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader
             var ltMask = back >= (1.0F - fv);
             var gteMask = back < (2.0F - fv);
             var tmp = fv + back - 1.0F;
-            var lt = ShaderUtil.Mask(tmp, ltMask);
-            var gte = ShaderUtil.Mask(tmp, gteMask) + ShaderUtil.NotMask(1.0F, gteMask);
+            var lt = Float4Util.Mask(tmp, ltMask);
+            var gte = Float4Util.Mask(tmp, gteMask) + Float4Util.NotMask(1.0F, gteMask);
 
-            var c = ShaderUtil.Mask(lt, mask) + ShaderUtil.NotMask(gte, mask);
+            var c = Float4Util.Mask(lt, mask) + Float4Util.NotMask(gte, mask);
             return Composite(back, front, c);
         }
 
@@ -169,10 +169,10 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader
             var ltMask = fv < back;
             var gteMask = (fv - 1.0F) < back;
 
-            var lt = ShaderUtil.Mask(fv, ltMask) + ShaderUtil.NotMask(back, ltMask);
-            var gte = ShaderUtil.Mask(back, gteMask) + ShaderUtil.NotMask(fv - 1.0F, gteMask);
+            var lt = Float4Util.Mask(fv, ltMask) + Float4Util.NotMask(back, ltMask);
+            var gte = Float4Util.Mask(back, gteMask) + Float4Util.NotMask(fv - 1.0F, gteMask);
 
-            var c = ShaderUtil.Mask(lt, mask) + ShaderUtil.NotMask(gte, mask);
+            var c = Float4Util.Mask(lt, mask) + Float4Util.NotMask(gte, mask);
             return Composite(back, front, c);
         }
 
@@ -192,13 +192,13 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader
         {
             var mask = front > 0.0F;
             var c = 1.0F - (1.0F - back) / front;
-            return Composite(back, front, ShaderUtil.Mask(c, mask));
+            return Composite(back, front, Float4Util.Mask(c, mask));
         }
 
         static Float4 LinearBurn(Float4 back, Float4 front)
         {
             var mask = (front + back) < 1.0F;
-            var c = ShaderUtil.NotMask(front + back - 1.0F, mask);
+            var c = Float4Util.NotMask(front + back - 1.0F, mask);
             return Composite(back, front, c);
         }
 

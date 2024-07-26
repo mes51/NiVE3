@@ -120,6 +120,74 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("シード値")]
         public const string Noise_RandomNoise_Seed = nameof(Noise_RandomNoise_Seed);
 
+        // FractalNoise
+
+        [DefaultValue("フラクタルノイズ")]
+        public const string Noise_FractalNoise_Name = nameof(Noise_FractalNoise_Name);
+
+        [DefaultValue("ノイズからパターンを生成します")]
+        public const string Noise_FractalNoise_Description = nameof(Noise_FractalNoise_Description);
+
+        [LanguageKey, DefaultValue("フラクタルの種類")]
+        public const string Noise_FractalNoise_FractalType = nameof(Noise_FractalNoise_FractalType);
+
+        [LanguageKey, DefaultValue("ノイズの種類")]
+        public const string Noise_FractalNoise_NoiseType = nameof(Noise_FractalNoise_NoiseType);
+
+        [LanguageKey, DefaultValue("反転")]
+        public const string Noise_FractalNoise_Invert = nameof(Noise_FractalNoise_Invert);
+
+        [LanguageKey, DefaultValue("コントラスト")]
+        public const string Noise_FractalNoise_Contrast = nameof(Noise_FractalNoise_Contrast);
+
+        [LanguageKey, DefaultValue("明るさ")]
+        public const string Noise_FractalNoise_Luminance = nameof(Noise_FractalNoise_Luminance);
+
+        [LanguageKey, DefaultValue("トランスフォーム")]
+        public const string Noise_FractalNoise_Transform = nameof(Noise_FractalNoise_Transform);
+
+        [LanguageKey, DefaultValue("位置")]
+        public const string Noise_FractalNoise_Transform_Position = nameof(Noise_FractalNoise_Transform_Position);
+
+        [LanguageKey, DefaultValue("スケール")]
+        public const string Noise_FractalNoise_Transform_Scale = nameof(Noise_FractalNoise_Transform_Scale);
+
+        [LanguageKey, DefaultValue("回転")]
+        public const string Noise_FractalNoise_Transform_Angle = nameof(Noise_FractalNoise_Transform_Angle);
+
+        [LanguageKey, DefaultValue("複雑度")]
+        public const string Noise_FractalNoise_Octave = nameof(Noise_FractalNoise_Octave);
+
+        [LanguageKey, DefaultValue("繰り返し設定")]
+        public const string Noise_FractalNoise_OctaveSetting = nameof(Noise_FractalNoise_OctaveSetting);
+
+        [LanguageKey, DefaultValue("影響度")]
+        public const string Noise_FractalNoise_OctaveSetting_Amount = nameof(Noise_FractalNoise_OctaveSetting_Amount);
+
+        [LanguageKey, DefaultValue("位置のオフセット")]
+        public const string Noise_FractalNoise_OctaveSetting_PositionOffset = nameof(Noise_FractalNoise_OctaveSetting_PositionOffset);
+
+        [LanguageKey, DefaultValue("スケール")]
+        public const string Noise_FractalNoise_OctaveSetting_Scale = nameof(Noise_FractalNoise_OctaveSetting_Scale);
+
+        [LanguageKey, DefaultValue("回転")]
+        public const string Noise_FractalNoise_OctaveSetting_Angle = nameof(Noise_FractalNoise_OctaveSetting_Angle);
+
+        [LanguageKey, DefaultValue("スケールの中心を合わせる")]
+        public const string Noise_FractalNoise_OctaveSetting_CenteringScale = nameof(Noise_FractalNoise_OctaveSetting_CenteringScale);
+
+        [LanguageKey, DefaultValue("展開")]
+        public const string Noise_FractalNoise_Evolution = nameof(Noise_FractalNoise_Evolution);
+
+        [LanguageKey, DefaultValue("ランダムシード")]
+        public const string Noise_FractalNoise_RandomSeed = nameof(Noise_FractalNoise_RandomSeed);
+
+        [LanguageKey, DefaultValue("不透明度")]
+        public const string Noise_FractalNoise_Opacity = nameof(Noise_FractalNoise_Opacity);
+
+        [LanguageKey, DefaultValue("ブレンドモード")]
+        public const string Noise_FractalNoise_BlendMode = nameof(Noise_FractalNoise_BlendMode);
+
         // Dynamics
 
         [DefaultValue("ダイナミクス")]
@@ -254,6 +322,78 @@ namespace NiVE3.PresetPlugin.Resource
 
         // enum
 
+        [DefaultValue("通常")]
+        public const string BlendMode_Normal = nameof(BlendMode_Normal);
+
+        [DefaultValue("置換")]
+        public const string BlendMode_Replace = nameof(BlendMode_Replace);
+
+        [DefaultValue("加算")]
+        public const string BlendMode_Add = nameof(BlendMode_Add);
+
+        [DefaultValue("減算")]
+        public const string BlendMode_Subtract = nameof(BlendMode_Subtract);
+
+        [DefaultValue("乗算")]
+        public const string BlendMode_Multiply = nameof(BlendMode_Multiply);
+
+        [DefaultValue("スクリーン")]
+        public const string BlendMode_Screen = nameof(BlendMode_Screen);
+
+        [DefaultValue("オーバーレイ")]
+        public const string BlendMode_Overlay = nameof(BlendMode_Overlay);
+
+        [DefaultValue("ハードライト")]
+        public const string BlendMode_HardLight = nameof(BlendMode_HardLight);
+
+        [DefaultValue("ソフトライト")]
+        public const string BlendMode_SoftLight = nameof(BlendMode_SoftLight);
+
+        [DefaultValue("ビビッドライト")]
+        public const string BlendMode_VividLight = nameof(BlendMode_VividLight);
+
+        [DefaultValue("リニアライト")]
+        public const string BlendMode_LinearLight = nameof(BlendMode_LinearLight);
+
+        [DefaultValue("ピンライト")]
+        public const string BlendMode_PinLight = nameof(BlendMode_PinLight);
+
+        [DefaultValue("覆い焼きカラー")]
+        public const string BlendMode_ColorDodge = nameof(BlendMode_ColorDodge);
+
+        [DefaultValue("覆い焼きリニア")]
+        public const string BlendMode_LinearDodge = nameof(BlendMode_LinearDodge);
+
+        [DefaultValue("焼き込みカラー")]
+        public const string BlendMode_ColorBurn = nameof(BlendMode_ColorBurn);
+
+        [DefaultValue("焼き込みリニア")]
+        public const string BlendMode_LinearBurn = nameof(BlendMode_LinearBurn);
+
+        [DefaultValue("比較(暗)")]
+        public const string BlendMode_Darken = nameof(BlendMode_Darken);
+
+        [DefaultValue("比較(明)")]
+        public const string BlendMode_Lighten = nameof(BlendMode_Lighten);
+
+        [DefaultValue("差")]
+        public const string BlendMode_Difference = nameof(BlendMode_Difference);
+
+        [DefaultValue("除外")]
+        public const string BlendMode_Exclusion = nameof(BlendMode_Exclusion);
+
+        [DefaultValue("色相")]
+        public const string BlendMode_Hue = nameof(BlendMode_Hue);
+
+        [DefaultValue("彩度")]
+        public const string BlendMode_Saturation = nameof(BlendMode_Saturation);
+
+        [DefaultValue("カラー")]
+        public const string BlendMode_Color = nameof(BlendMode_Color);
+
+        [DefaultValue("明度")]
+        public const string BlendMode_Luminance = nameof(BlendMode_Luminance);
+
         [DefaultValue("水平&垂直")]
         public const string BlurDirection_HorizontalAndVertical = nameof(BlurDirection_HorizontalAndVertical);
 
@@ -322,6 +462,27 @@ namespace NiVE3.PresetPlugin.Resource
 
         [DefaultValue("アルファのみ")]
         public const string OutputChannel_AlphaOnly = nameof(OutputChannel_AlphaOnly);
+
+        [DefaultValue("基本")]
+        public const string FractalType_Normal = nameof(FractalType_Normal);
+
+        [DefaultValue("タービュランス")]
+        public const string FractalType_Turbulent = nameof(FractalType_Turbulent);
+
+        [DefaultValue("最大")]
+        public const string FractalType_Max = nameof(FractalType_Max);
+
+        [DefaultValue("ブロック")]
+        public const string NoiseType_Block = nameof(NoiseType_Block);
+
+        [DefaultValue("リニア")]
+        public const string NoiseType_Linear = nameof(NoiseType_Linear);
+
+        [DefaultValue("スムーズ")]
+        public const string NoiseType_SmoothLinear = nameof(NoiseType_SmoothLinear);
+
+        [DefaultValue("パーリン")]
+        public const string NoiseType_Parlin = nameof(NoiseType_Parlin);
 
         // unit
 

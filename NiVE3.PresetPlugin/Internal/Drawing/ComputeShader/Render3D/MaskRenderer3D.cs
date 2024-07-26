@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ComputeSharp;
+using NiVE3.PresetPlugin.Internal.ComputeShader;
 using NiVE3.PresetPlugin.Internal.Drawing.Primitive3D;
 
 namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
@@ -59,15 +60,15 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
             var eX = new Float4(((x + offsetX) * scaleRateX - triangle.VVEX).XYZ, 0.0F);
             var e = (eY - (triangle.EdgeY * eX)) * triangle.Denominator;
 
-            var ae = ShaderUtil.Mask(e, Hlsl.Abs(e) >= Epsilon);
+            var ae = Float4Util.Mask(e, Hlsl.Abs(e) >= Epsilon);
             if (Hlsl.Any(ae < 0.0F))
             {
                 return;
             }
 
-            var tw = ShaderUtil.Sum(triangle.W * e);
-            var tx = ShaderUtil.Sum((triangle.U * e) / tw) * textureWidth;
-            var ty = ShaderUtil.Sum((triangle.V * e) / tw) * textureHeight;
+            var tw = Float4Util.Sum(triangle.W * e);
+            var tx = Float4Util.Sum((triangle.U * e) / tw) * textureWidth;
+            var ty = Float4Util.Sum((triangle.V * e) / tw) * textureHeight;
 
             var color = triangle.InterpolationQuality == 0 ? NearestNeighbor(tx, ty) : Bilinear(tx, ty);
             color.W *= trackMatte[p % trackMatte.Length];

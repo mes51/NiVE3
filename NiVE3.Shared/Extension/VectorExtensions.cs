@@ -88,6 +88,14 @@ namespace NiVE3.Shared.Extension
         }
     }
 
+    public static class Vector64Extensions
+    {
+        public static Vector2 AsVector2(this Vector64<float> v)
+        {
+            return Unsafe.As<Vector64<float>, Vector2>(ref v);
+        }
+    }
+
     public static class Vector128Extensions
     {
         static readonly Vector128<float> MaxValue = Vector128.Create(float.MaxValue);

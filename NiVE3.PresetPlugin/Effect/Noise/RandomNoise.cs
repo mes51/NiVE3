@@ -116,15 +116,14 @@ namespace NiVE3.PresetPlugin.Effect.Noise
 
             var imageOriginX = (float)(roi.OriginalImagePosition.X + image.Origin.X);
             var imageOriginY = (float)(roi.OriginalImagePosition.Y + image.Origin.Y);
-            var uTime = unchecked((uint)time.GetHashCode());
             using var context = device.CreateComputeContext();
             if (isColor)
             {
-                context.For(roi.Width, roi.Height, new ColorRandomNoiseProcess(gpuImage.Data, gpuImage.Width, amount, uTime, seed, roi.Left, roi.Top, imageOriginX, imageOriginY));
+                context.For(roi.Width, roi.Height, new ColorRandomNoiseProcess(gpuImage.Data, gpuImage.Width, amount, (float)time, seed, roi.Left, roi.Top, imageOriginX, imageOriginY));
             }
             else
             {
-                context.For(roi.Width, roi.Height, new GrayScaleRandomNoiseProcess(gpuImage.Data, gpuImage.Width, amount, uTime, seed, roi.Left, roi.Top, imageOriginX, imageOriginY));
+                context.For(roi.Width, roi.Height, new GrayScaleRandomNoiseProcess(gpuImage.Data, gpuImage.Width, amount, (float)time, seed, roi.Left, roi.Top, imageOriginX, imageOriginY));
             }
 
             return gpuImage;
@@ -133,11 +132,12 @@ namespace NiVE3.PresetPlugin.Effect.Noise
 
     [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
     [GeneratedComputeShaderDescriptor]
-    readonly partial struct GrayScaleRandomNoiseProcess(ReadWriteBuffer<Float4> image, int width, float amount, uint time, uint seed, int startX, int startY, float originX, float originY) : IComputeShader
+    readonly partial struct GrayScaleRandomNoiseProcess(ReadWriteBuffer<Float4> image, int width, float amount, float time, uint seed, int startX, int startY, float originX, float originY) : IComputeShader
     {
         public void Execute()
         {
-            var noise = Hlsl.Dot(NoiseFunction.Pcg3DGpu(ThreadIds.X + startX - originX, ThreadIds.Y + startY - originY, time, seed), Const.ConvertToGrayScaleFloat3);
+            var v = Hlsl.AsUInt(new Float3(ThreadIds.X + startX - originX, ThreadIds.Y + startY - originY, time));
+            var noise = Hlsl.Dot(NoiseFunction.Pcg3DGpu(v, seed), Const.ConvertToGrayScaleFloat3);
 
             var pos = (ThreadIds.Y + startY) * width + ThreadIds.X + startX;
             image[pos] = Hlsl.Lerp(image[pos], new Float4(noise, noise, noise, 1.0F), amount);
@@ -146,58 +146,15 @@ namespace NiVE3.PresetPlugin.Effect.Noise
 
     [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
     [GeneratedComputeShaderDescriptor]
-    readonly partial struct ColorRandomNoiseProcess(ReadWriteBuffer<Float4> image, int width, float amount, uint time, uint seed, int startX, int startY, float originX, float originY) : IComputeShader
+    readonly partial struct ColorRandomNoiseProcess(ReadWriteBuffer<Float4> image, int width, float amount, float time, uint seed, int startX, int startY, float originX, float originY) : IComputeShader
     {
         public void Execute()
         {
-            var noise = new Float4(NoiseFunction.Pcg3DGpu(ThreadIds.X + startX - originX, ThreadIds.Y + startY - originY, time, seed), 1.0F);
+            var v = Hlsl.AsUInt(new Float3(ThreadIds.X + startX - originX, ThreadIds.Y + startY - originY, time));
+            var noise = new Float4(NoiseFunction.Pcg3DGpu(v, seed), 1.0F);
 
             var pos = (ThreadIds.Y + startY) * width + ThreadIds.X + startX;
             image[pos] = Hlsl.Lerp(image[pos], noise, amount);
-        }
-    }
-
-    // from https://jcgt.org/published/0009/03/02/paper.pdf
-    static class NoiseFunction
-    {
-        const uint Multiplyer = 1664525U;
-
-        const uint Increment = 1013904223U;
-
-        public static Vector4 Pcg3DCpu(uint x, uint y, uint time, uint seed)
-        {
-            const uint Multiplyer = 1664525U;
-            const uint Increment = 1013904223U;
-
-            var vx = (x + seed) * Multiplyer + Increment;
-            var vy = (y + seed) * Multiplyer + Increment;
-            var vz = (time + seed) * Multiplyer + Increment;
-
-            vx += vy * vz;
-            vy += vz * vx;
-            vz += vx * vy;
-            vx ^= vx >> 16;
-            vy ^= vy >> 16;
-            vz ^= vz >> 16;
-            vx += vy * vz;
-            vy += vz * vx;
-            vz += vx * vy;
-
-            return new Vector4((vx / (float)uint.MaxValue), (vy / (float)uint.MaxValue), (vz / (float)uint.MaxValue), 1.0F);
-        }
-
-        public static Float3 Pcg3DGpu(float x, float y, uint time, uint seed)
-        {
-            var v = (new UInt3(Hlsl.AsUInt(x), Hlsl.AsUInt(y), time) + seed) * Multiplyer + Increment;
-            v.X += v.Y * v.Z;
-            v.Y += v.Z * v.X;
-            v.Z += v.X * v.Y;
-            v ^= v >> 16U;
-            v.X += v.Y * v.Z;
-            v.Y += v.Z * v.X;
-            v.Z += v.X * v.Y;
-
-            return new Float3(v.X / (float)uint.MaxValue, v.Y / (float)uint.MaxValue, v.Z / (float)uint.MaxValue);
         }
     }
 }

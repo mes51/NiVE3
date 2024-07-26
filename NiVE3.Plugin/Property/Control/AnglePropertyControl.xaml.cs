@@ -36,6 +36,19 @@ namespace NiVE3.Plugin.Property.Control
             new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, AngleChanged)
         );
 
+        public static readonly DependencyProperty IsOnlyPositiveDirectionProperty = DependencyProperty.Register(
+            nameof(IsOnlyPositiveDirection),
+            typeof(bool),
+            typeof(AnglePropertyControl),
+            new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        public bool IsOnlyPositiveDirection
+        {
+            get { return (bool)GetValue(IsOnlyPositiveDirectionProperty); }
+            set { SetValue(IsOnlyPositiveDirectionProperty, value); }
+        }
+
         public double Angle
         {
             get { return (double)GetValue(AngleProperty); }
@@ -114,7 +127,14 @@ namespace NiVE3.Plugin.Property.Control
                 return;
             }
 
-            viewModel.CurrentTimeValue = control.RotateCount * 360.0 + control.Angle;
+            if (control.IsOnlyPositiveDirection)
+            {
+                viewModel.CurrentTimeValue = Math.Max(control.RotateCount * 360.0 + control.Angle, 0.0);
+            }
+            else
+            {
+                viewModel.CurrentTimeValue = control.RotateCount * 360.0 + control.Angle;
+            }
         }
     }
 }

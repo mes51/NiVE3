@@ -5,8 +5,10 @@
                            xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
                            xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
                            xmlns:local="clr-namespace:NiVE3.Plugin.Property.Control"
+                           xmlns:sys="clr-namespace:System;assembly=mscorlib"
                            xmlns:gm="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
                            xmlns:pr="clr-namespace:NiVE3.UI.Primitive;assembly=NiVE3.UI"
+                           xmlns:cv="clr-namespace:NiVE3.Plugin.Property.Control.Converter"
                            mc:Ignorable="d" 
                            x:Name="Root"
                            DataContextChanged="Root_DataContextChanged"
@@ -17,6 +19,39 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/NiVE3.Plugin;component/Property/Control/Resources/Icons.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+
+            <cv:LessThanConverter x:Key="LessThanConverter"/>
+
+            <Style x:Key="RotateCountSliderStyle" TargetType="{x:Type pr:SlidableNumberTextBox}" BasedOn="{StaticResource {x:Type pr:SlidableNumberTextBox}}">
+                <Setter Property="Margin" Value="5,0,2,0"/>
+                <Setter Property="VerticalAlignment" Value="Center"/>
+                <Setter Property="Digit" Value="0"/>
+                <Setter Property="Minimum" Value="{x:Static sys:Double.MinValue}"/>
+
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding Property.IsOnlyPositiveDirection}" Value="True">
+                        <Setter Property="Minimum" Value="0"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style x:Key="AngleSliderStyle" TargetType="{x:Type pr:SlidableNumberTextBox}" BasedOn="{StaticResource {x:Type pr:SlidableNumberTextBox}}">
+                <Setter Property="Margin" Value="5,0,0,0"/>
+                <Setter Property="VerticalAlignment" Value="Center"/>
+                <Setter Property="UnitText" Value="°"/>
+                <Setter Property="Minimum" Value="{x:Static sys:Double.MinValue}"/>
+
+                <Style.Triggers>
+                    <MultiDataTrigger>
+                        <MultiDataTrigger.Conditions>
+                            <Condition Binding="{Binding Property.IsOnlyPositiveDirection}" Value="True"/>
+                            <Condition Binding="{Binding ElementName=Root, Path=Angle, Converter={StaticResource LessThanConverter}, ConverterParameter=0}" Value="True"/>
+                        </MultiDataTrigger.Conditions>
+
+                        <Setter Property="Minimum" Value="0"/>
+                    </MultiDataTrigger>
+                </Style.Triggers>
+            </Style>
         </ResourceDictionary>
     </local:PropertyControlBase.Resources>
     <Grid>
@@ -26,7 +61,7 @@
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
 
-        <pr:SlidableNumberTextBox Grid.Column="0" x:Name="RotateCountSlider" Digit="0" Value="{Binding ElementName=Root, Path=RotateCount}" Margin="5,0,2,0" VerticalAlignment="Center">
+        <pr:SlidableNumberTextBox Grid.Column="0" x:Name="RotateCountSlider" Value="{Binding ElementName=Root, Path=RotateCount}" Style="{StaticResource RotateCountSliderStyle}">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="BeginSlideEditValue">
                     <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
@@ -49,7 +84,7 @@
             </i:Interaction.Triggers>
         </pr:SlidableNumberTextBox>
         <Path Grid.Column="1" Fill="{gm:AppearanceResource ResourceKey=TextBrush}" Data="{StaticResource CrossIcon}" VerticalAlignment="Center" Margin="0,4,0,0" />
-        <pr:SlidableNumberTextBox Grid.Column="2" x:Name="AngleSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=Angle}" Margin="5,0,0,0" UnitText="°" VerticalAlignment="Center">
+        <pr:SlidableNumberTextBox Grid.Column="2" x:Name="AngleSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=Angle}" Style="{StaticResource AngleSliderStyle}">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="BeginSlideEditValue">
                     <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>

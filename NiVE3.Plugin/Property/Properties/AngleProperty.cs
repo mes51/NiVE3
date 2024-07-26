@@ -14,28 +14,40 @@ namespace NiVE3.Plugin.Property.Properties
     {
         public int Digit { get; }
 
-        public AngleProperty(string id, string displayName, double defaultValue, bool isSupportKeyFrame = true, int digit = -1) : base(id, displayName, DoublePropertyType.Instance, defaultValue, isSupportKeyFrame)
+        public bool IsOnlyPositiveDirection { get; }
+
+        public AngleProperty(string id, string displayName, double defaultValue, bool isSupportKeyFrame = true, int digit = -1, bool isOnlyPositiveDirection = false) : base(id, displayName, DoublePropertyType.Instance, defaultValue, isSupportKeyFrame)
         {
             Digit = digit;
+            IsOnlyPositiveDirection = isOnlyPositiveDirection;
         }
 
-        public AngleProperty(string id, LanguageResourceKey displayNameKey, double defaultValue, bool isSupportKeyFrame = true, int digit = -1) : base(id, displayNameKey, DoublePropertyType.Instance, defaultValue, isSupportKeyFrame)
+        public AngleProperty(string id, LanguageResourceKey displayNameKey, double defaultValue, bool isSupportKeyFrame = true, int digit = -1, bool isOnlyPositiveDirection = false) : base(id, displayNameKey, DoublePropertyType.Instance, defaultValue, isSupportKeyFrame)
         {
             Digit = digit;
+            IsOnlyPositiveDirection = isOnlyPositiveDirection;
         }
 
         public override PropertyControlBase CreateControl(ICompositionObject composition, ILayerObject? layer, IEffectObject? effect, IPropertyViewModel viewModel)
         {
             var control = new AnglePropertyControl
             {
-                DataContext = viewModel
+                DataContext = viewModel,
+                IsOnlyPositiveDirection = IsOnlyPositiveDirection
             };
             return control;
         }
 
         public override object CoerceValue(object? value)
         {
-            return value ?? 0.0;
+            if (value is double angle)
+            {
+                return IsOnlyPositiveDirection ? Math.Max(angle, 0.0) : angle;
+            }
+            else
+            {
+                return 0.0;
+            }
         }
 
         public override bool ValidateValue(object? value)

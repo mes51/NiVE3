@@ -4,8 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ComputeSharp;
-using NiVE3.Plugin.Interfaces;
-using static Vanara.PInvoke.Kernel32;
+using NiVE3.PresetPlugin.Internal.ComputeShader;
 
 namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render2D
 {
