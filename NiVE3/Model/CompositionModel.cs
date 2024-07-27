@@ -420,14 +420,17 @@ namespace NiVE3.Model
 
         public void ChangeTrackMatteLayers(Guid[] layerIds, Guid? targetLayerId)
         {
+            var targetLayer = Layers.First(l => l.LayerId == targetLayerId);
             var layers = Layers.Where(l => layerIds.Where(id => id != targetLayerId).Contains(l.LayerId)).OrderBy(Layers.IndexOf).ToArray();
             var oldValues = layers.Select(l => l.TrackMatteLayerId).ToArray();
             foreach (var l in layers)
             {
                 l.TrackMatteLayerId = targetLayerId;
             }
+            var oldEnableVideo = targetLayer.IsEnableVideo;
+            targetLayer.IsEnableVideo = false;
 
-            HistoryModel.Add(new ChangeTrackMatteLayerHistoryCommand(layers, oldValues, targetLayerId));
+            HistoryModel.Add(new ChangeTrackMatteLayerHistoryCommand(layers, targetLayer, oldValues, targetLayerId, oldEnableVideo));
         }
 
         public void ChangeTrackMatteModes(Guid[] layerIds, TrackMatteMode mode)

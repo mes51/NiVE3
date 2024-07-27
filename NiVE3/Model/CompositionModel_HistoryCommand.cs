@@ -468,15 +468,21 @@ namespace NiVE3.Model
 
             LayerModel[] Layers { get; }
 
+            LayerModel TargetLayer { get; }
+
             Guid?[] OldValues { get; }
 
             Guid? NewValue { get; }
 
-            public ChangeTrackMatteLayerHistoryCommand(LayerModel[] layers, Guid?[] oldValues, Guid? newValue)
+            bool OldEnableVideo { get; }
+
+            public ChangeTrackMatteLayerHistoryCommand(LayerModel[] layers, LayerModel targetLayer, Guid?[] oldValues, Guid? newValue, bool oldEnableVideo)
             {
                 Layers = layers;
+                TargetLayer = targetLayer;
                 OldValues = oldValues;
                 NewValue = newValue;
+                OldEnableVideo = oldEnableVideo;
             }
 
             public void Redo()
@@ -485,6 +491,7 @@ namespace NiVE3.Model
                 {
                     l.TrackMatteLayerId = NewValue;
                 }
+                TargetLayer.IsEnableVideo = false;
             }
 
             public void Undo()
@@ -493,6 +500,7 @@ namespace NiVE3.Model
                 {
                     l.TrackMatteLayerId = t;
                 }
+                TargetLayer.IsEnableVideo = OldEnableVideo;
             }
 
             public void Dispose() { }
