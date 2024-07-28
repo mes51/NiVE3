@@ -379,7 +379,7 @@ namespace NiVE3.Image.Drawing
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static float GetLuminance(in Vector4 c)
         {
-            return (c * ConvertToGrayScale).HorizontalAdd();
+            return Vector4.Dot(c, ConvertToGrayScale);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

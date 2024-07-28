@@ -391,7 +391,7 @@ namespace NiVE3.PresetPlugin.Resource
         [DefaultValue("カラー")]
         public const string BlendMode_Color = nameof(BlendMode_Color);
 
-        [DefaultValue("明度")]
+        [DefaultValue("輝度")]
         public const string BlendMode_Luminance = nameof(BlendMode_Luminance);
 
         [DefaultValue("水平&垂直")]

@@ -1180,7 +1180,7 @@ namespace NiVE3.View.Resource
         [DefaultValue("カラー")]
         public static readonly string BlendMode_Color = nameof(BlendMode_Color);
 
-        [DefaultValue("明度")]
+        [DefaultValue("輝度")]
         public static readonly string BlendMode_Luminance = nameof(BlendMode_Luminance);
 
         [DefaultValue("アルファ")]
