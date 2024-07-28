@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -37,7 +38,7 @@ namespace NiVE3.Plugin.Property.Types
             throw new NotImplementedException();
         }
 
-        public bool TryConvertFrom(object otherValue, out object convertedValue)
+        public bool TryConvertFrom(object otherValue, [NotNullWhen(true)] out object? convertedValue)
         {
             throw new NotImplementedException();
         }

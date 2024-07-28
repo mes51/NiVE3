@@ -1273,6 +1273,20 @@ namespace NiVE3.Model
             PasteEffectsInternal(data, [], insertTargetId, true);
         }
 
+        public void UpdateCompositionDependProperties()
+        {
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_UpdateValueByCompositionStateChanged));
+
+            LayerOptionProperties?.UpdateValueByCompositionStateChanged();
+            SourceOptionProperties?.UpdateValueByCompositionStateChanged();
+            foreach (var effect in Effects)
+            {
+                effect.UpdateCompositionDependProperties();
+            }
+
+            HistoryModel.EndGroup();
+        }
+
         void DeleteEffectInternal(Guid[] ids, bool isCut)
         {
             var effects = Effects.Where(l => ids.Contains(l.EffectId)).OrderBy(Effects.IndexOf).ToArray();

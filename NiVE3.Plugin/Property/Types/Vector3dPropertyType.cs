@@ -8,6 +8,7 @@ using NiVE3.Shared.Extension;
 using NiVE3.Numerics;
 using System.Runtime.InteropServices;
 using NiVE3.Plugin.Internal.Util;
+using System.Diagnostics.CodeAnalysis;
 
 namespace NiVE3.Plugin.Property.Types
 {
@@ -67,7 +68,7 @@ namespace NiVE3.Plugin.Property.Types
             }
         }
 
-        public bool TryConvertFrom(object otherValue, out object convertedValue)
+        public bool TryConvertFrom(object otherValue, [NotNullWhen(true)] out object? convertedValue)
         {
             switch (otherValue)
             {

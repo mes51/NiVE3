@@ -8,9 +8,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace NiVE3.View.Resource
+namespace NiVE3.UI.Resources
 {
-    class CollectionChangeNotifier : Freezable, INotifyPropertyChanged, INotifyCollectionChanged, IEnumerable
+    public class CollectionChangeNotifier : Freezable, INotifyPropertyChanged, INotifyCollectionChanged, IEnumerable
     {
         public static readonly DependencyProperty CollectionProperty = DependencyProperty.Register(
             nameof(Collection),
@@ -45,7 +45,7 @@ namespace NiVE3.View.Resource
 
         static void CollectionChangedHandler(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is  CollectionChangeNotifier notifier)
+            if (d is CollectionChangeNotifier notifier)
             {
                 if (e.OldValue is INotifyCollectionChanged oldCollection)
                 {

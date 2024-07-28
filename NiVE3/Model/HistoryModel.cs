@@ -125,7 +125,14 @@ namespace NiVE3.Model
             GroupNestCount--;
             if (GroupNestCount < 1 && CurrentGroup != null)
             {
-                AddInternal(CurrentGroup);
+                if (CurrentGroup.HasCommand)
+                {
+                    AddInternal(CurrentGroup);
+                }
+                else
+                {
+                    HistoryGroupChangingPublisher.Publish(this, EventArgs.Empty);
+                }
                 CurrentGroup = null;
             }
             else
@@ -214,6 +221,8 @@ namespace NiVE3.Model
         private class GroupedHistoryCommand : IHistoryCommand
         {
             public string Name { get; }
+
+            public bool HasCommand => Commands.Count > 0;
 
             List<IHistoryCommand> Commands { get; } = [];
 

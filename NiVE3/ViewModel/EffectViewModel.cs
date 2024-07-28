@@ -10,9 +10,6 @@ using NiVE3.Mvvm;
 using System.Windows.Input;
 using Prism.Commands;
 using NiVE3.UI.Command;
-using System.Collections.ObjectModel;
-using NiVE3.Data.Json.Project;
-using NiVE3.Util;
 
 namespace NiVE3.ViewModel
 {

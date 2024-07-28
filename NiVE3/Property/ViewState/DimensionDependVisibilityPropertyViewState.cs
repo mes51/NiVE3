@@ -11,19 +11,17 @@ namespace NiVE3.Property.ViewState
 {
     class DimensionDependVisibilityPropertyViewState : PropertyViewState
     {
-        ILayerObject LayerObject { get; }
+        ILayerViewModel LayerObject { get; }
 
-        public DimensionDependVisibilityPropertyViewState(string sourceDisplayName, ILayerObject layerObject) : base(sourceDisplayName, true, layerObject.IsEnable3D)
+        public DimensionDependVisibilityPropertyViewState(string sourceDisplayName, ILayerViewModel layerObject) : base(sourceDisplayName, true, layerObject.IsEnable3D)
         {
             LayerObject = layerObject;
-
-            // TODO: PropertyViewModel = LayerViewModelと寿命は同じため大丈夫たとは思うが、リークする可能性を考慮した方が良いかも?
-            ((INotifyPropertyChanged)layerObject).PropertyChanged += Layer_PropertyChanged;
+            layerObject.PropertyChanged += Layer_PropertyChanged;
         }
 
         private void Layer_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(ILayerObject.IsEnable3D))
+            if (e.PropertyName == nameof(ILayerViewModel.IsEnable3D))
             {
                 IsVisible = LayerObject.IsEnable3D;
             }

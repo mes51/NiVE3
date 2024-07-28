@@ -13,7 +13,6 @@ using NiVE3.Image;
 using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Property;
-using NiVE3.Plugin.Property.Types;
 using NiVE3.Plugin.ValueObject;
 using Prism.Mvvm;
 
@@ -165,6 +164,11 @@ namespace NiVE3.Model
         public void CalcPropertyHash(double layerTime, XxHash3 hash)
         {
             Properties.GetValues(layerTime).CalcHash(hash);
+        }
+
+        public void UpdateCompositionDependProperties()
+        {
+            Properties.UpdateValueByCompositionStateChanged();
         }
 
         private void Property_ValueUpdated(object? sender, EventArgs e)

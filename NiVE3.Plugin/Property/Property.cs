@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -51,6 +52,7 @@ namespace NiVE3.Plugin.Property
         /// <param name="displayName">プロパティの名前</param>
         /// <param name="propertyType">使用するPropertyType</param>
         /// <param name="defaultValue">デフォルトの値</param>
+        /// <param name="isSupportKeyFrame">キーフレームをサポートするかどうか</param>
         public PropertyBase(string id, string displayName, IPropertyType propertyType, object? defaultValue, bool isSupportKeyFrame = true)
         {
             Id = id;
@@ -67,6 +69,7 @@ namespace NiVE3.Plugin.Property
         /// <param name="displayNameKey">プロパティの名前のLanguageResourceKey</param>
         /// <param name="propertyType">使用するPropertyType</param>
         /// <param name="defaultValue">デフォルトの値</param>
+        /// <param name="isSupportKeyFrame">キーフレームをサポートするかどうか</param>
         public PropertyBase(string id, LanguageResourceKey displayNameKey, IPropertyType propertyType, object? defaultValue, bool isSupportKeyFrame = true)
         {
             Id = id;
@@ -83,8 +86,8 @@ namespace NiVE3.Plugin.Property
         /// <param name="layer">このプロパティが含まれるレイヤー。コンポジションのプロパティの場合はnull</param>
         /// <param name="effect">このプロパティが含まれるエフェクト。レイヤーのプロパティやコンポジションのプロパティの場合はnull</param>
         /// <param name="viewModel">このプロパティのViewModel</param>
-        /// <returns></returns>
-        public abstract PropertyControlBase CreateControl(ICompositionObject composition, ILayerObject? layer, IEffectObject? effect, IPropertyViewModel viewModel);
+        /// <returns>プロパティを操作するコントロール</returns>
+        public abstract PropertyControlBase CreateControl(ICompositionViewModel composition, ILayerViewModel? layer, IEffectViewModel? effect, IPropertyViewModel viewModel);
 
         /// <summary>
         /// 値がこのプロパティで使用できるか検証します
@@ -98,7 +101,7 @@ namespace NiVE3.Plugin.Property
         /// </summary>
         /// <param name="value">変更対象の値</param>
         /// <returns>変更後の値</returns>
-        public abstract object CoerceValue(object? value);
+        public abstract object? CoerceValue(object? value);
 
         /// <summary>
         /// プロパティの表示管理用のステートを生成します
@@ -108,9 +111,69 @@ namespace NiVE3.Plugin.Property
         /// <param name="effect">このプロパティが含まれるエフェクト。レイヤーのプロパティやコンポジションのプロパティの場合はnull</param>
         /// <param name="viewModel">このプロパティのViewModel</param>
         /// <returns>ステートを管理するPropertyViewState</returns>
-        public virtual PropertyViewState CreateState(ICompositionObject composition, ILayerObject? layer, IEffectObject? effect, IPropertyViewModel viewModel)
+        public virtual PropertyViewState CreateState(ICompositionViewModel composition, ILayerViewModel? layer, IEffectViewModel? effect, IPropertyViewModel viewModel)
         {
             return new PropertyViewState(DisplayName);
+        }
+    }
+
+    /// <summary>
+    /// コンポジションの状態に依存するプロパティを表します
+    /// </summary>
+    public abstract class CompositionDependPropertyBase : PropertyBase
+    {
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="id">プロパティのID</param>
+        /// <param name="displayName">プロパティの名前</param>
+        /// <param name="propertyType">使用するPropertyType</param>
+        /// <param name="defaultValue">デフォルトの値</param>
+        protected CompositionDependPropertyBase(string id, string displayName, IPropertyType propertyType, object? defaultValue) : base(id, displayName, propertyType, defaultValue, false) { }
+
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="id">プロパティのID</param>
+        /// <param name="displayNameKey">プロパティの名前のLanguageResourceKey</param>
+        /// <param name="propertyType">使用するPropertyType</param>
+        /// <param name="defaultValue">デフォルトの値</param>
+        protected CompositionDependPropertyBase(string id, LanguageResourceKey displayNameKey, IPropertyType propertyType, object? defaultValue) : base(id, displayNameKey, propertyType, defaultValue, false) { }
+
+        /// <summary>
+        /// 値がこのプロパティで使用できるか検証します
+        /// </summary>
+        /// <param name="value">検証対象の値</param>
+        /// <param name="composition">コンポジション</param>
+        /// <returns>使用できる場合はtrue、出来ない場合はfalse</returns>
+        public abstract bool ValidateValue(object? value, ICompositionObject composition);
+
+        /// <summary>
+        /// 値をこのプロパティの範囲、型に変更します
+        /// </summary>
+        /// <param name="value">変更対象の値</param>
+        /// <param name="composition">コンポジション</param>
+        /// <returns>変更後の値</returns>
+        public abstract object? CoerceValue(object? value, ICompositionObject composition);
+
+        /// <summary>
+        /// コンポジションに変更があった事による値の更新を行います
+        /// </summary>
+        /// <param name="value">更新前の値</param>
+        /// <param name="composition">コンポジション</param>
+        /// <returns>変更後の値</returns>
+        public abstract object? ChangeValueByCompositionStateChanged(object? value, ICompositionObject composition);
+
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public override bool ValidateValue(object? value)
+        {
+            return false;
+        }
+
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public override object? CoerceValue(object? value)
+        {
+            return value;
         }
     }
 
@@ -151,7 +214,7 @@ namespace NiVE3.Plugin.Property
         /// <param name="effect"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        public override PropertyControlBase CreateControl(ICompositionObject composition, ILayerObject? layer, IEffectObject? effect, IPropertyViewModel viewModel)
+        public override PropertyControlBase CreateControl(ICompositionViewModel composition, ILayerViewModel? layer, IEffectViewModel? effect, IPropertyViewModel viewModel)
         {
             throw new NotImplementedException();
         }
@@ -162,7 +225,7 @@ namespace NiVE3.Plugin.Property
         /// <param name="value"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        public override bool ValidateValue(object value)
+        public override bool ValidateValue(object? value)
         {
             throw new NotImplementedException();
         }
@@ -173,7 +236,7 @@ namespace NiVE3.Plugin.Property
         /// <param name="value"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        public override object CoerceValue(object value)
+        public override object? CoerceValue(object? value)
         {
             throw new NotImplementedException();
         }
@@ -220,17 +283,37 @@ namespace NiVE3.Plugin.Property
             }
         }
 
-        public override object CoerceValue(object value)
+        /// <summary>
+        /// 使用しません
+        /// </summary>
+        /// <param name="composition"></param>
+        /// <param name="layer"></param>
+        /// <param name="effect"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public override PropertyControlBase CreateControl(ICompositionViewModel composition, ILayerViewModel? layer, IEffectViewModel? effect, IPropertyViewModel viewModel)
         {
             throw new NotImplementedException();
         }
 
-        public override PropertyControlBase CreateControl(ICompositionObject composition, ILayerObject? layer, IEffectObject? effect, IPropertyViewModel viewModel)
+        /// <summary>
+        /// 使用しません
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public override bool ValidateValue(object? value)
         {
             throw new NotImplementedException();
         }
 
-        public override bool ValidateValue(object value)
+        /// <summary>
+        /// 使用しません
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public override object? CoerceValue(object? value)
         {
             throw new NotImplementedException();
         }

@@ -25,7 +25,7 @@ namespace NiVE3.Plugin.Property.Properties
             Digit = digit;
         }
 
-        public override PropertyControlBase CreateControl(ICompositionObject composition, ILayerObject? layer, IEffectObject? effect, IPropertyViewModel viewModel)
+        public override PropertyControlBase CreateControl(ICompositionViewModel composition, ILayerViewModel? layer, IEffectViewModel? effect, IPropertyViewModel viewModel)
         {
             var control = new DirectionPropertyControl
             {
@@ -34,7 +34,7 @@ namespace NiVE3.Plugin.Property.Properties
             return control;
         }
 
-        public override object CoerceValue(object? value)
+        public override object? CoerceValue(object? value)
         {
             return (Vector3d)(value ?? Vector3d.Zero) % 360.0;
         }

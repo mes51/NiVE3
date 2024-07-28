@@ -17,7 +17,7 @@ namespace NiVE3.Property
     {
         public Vector2DOr3DProperty(string id, LanguageResourceKey displayNameKey, Vector3d defaultValue, bool isSupportKeyFrame = true, int digit = -1) : base(id, displayNameKey, defaultValue, isSupportKeyFrame, digit, true) { }
 
-        public override PropertyControlBase CreateControl(ICompositionObject composition, ILayerObject? layer, IEffectObject? effect, IPropertyViewModel viewModel)
+        public override PropertyControlBase CreateControl(ICompositionViewModel composition, ILayerViewModel? layer, IEffectViewModel? effect, IPropertyViewModel viewModel)
         {
             var control = base.CreateControl(composition, layer, effect, viewModel);
 
@@ -25,7 +25,7 @@ namespace NiVE3.Property
             {
                 var is3DBinding = new Binding
                 {
-                    Path = new PropertyPath(nameof(ILayerObject.IsEnable3D)),
+                    Path = new PropertyPath(nameof(ILayerViewModel.IsEnable3D)),
                     Source = layer,
                     Mode = BindingMode.OneWay
                 };

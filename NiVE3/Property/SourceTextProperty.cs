@@ -19,12 +19,12 @@ namespace NiVE3.Property
 
         public SourceTextProperty(string id, LanguageResourceKey displayNameKey, object? defaultValue) : base(id, displayNameKey, SourceTextPropertyType.Instance, defaultValue, true) { }
 
-        public override PropertyControlBase CreateControl(ICompositionObject composition, ILayerObject? layer, IEffectObject? effect, IPropertyViewModel viewModel)
+        public override PropertyControlBase CreateControl(ICompositionViewModel composition, ILayerViewModel? layer, IEffectViewModel? effect, IPropertyViewModel viewModel)
         {
             return new SourceTextPropertyControl();
         }
 
-        public override object CoerceValue(object? value)
+        public override object? CoerceValue(object? value)
         {
             return value switch
             {

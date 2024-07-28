@@ -194,6 +194,8 @@ namespace NiVE3.Model
 
         public bool HasAudio => Layers.Any(l => l.IsEnableSolo) ? Layers.Any(l => l.HasAudio && l.IsEnableAudio && l.IsEnableSolo) : Layers.Any(l => l.HasAudio && l.IsEnableAudio);
 
+        public IReadOnlyCollection<LayerInfo> LayerIdentifiers => [..Layers.Select(l => new LayerInfo(l.LayerId, l.SourceType))];
+
         public event EventHandler<EventArgs>? CompositionUpdated;
 
         bool IsSettingChanging { get; set; }
@@ -291,14 +293,12 @@ namespace NiVE3.Model
                     position.Value = initialPosition.Value;
                 }
 
-                Layers.Insert(index, layer);
                 addedLayers.Add(layer);
-                index++;
             }
 
             if (addedLayers.Count > 0)
             {
-                HistoryModel.Add(new AddLayersHistoryCommand(this, [..addedLayers], startIndex));
+                InsertLayerInternal([..addedLayers], startIndex);
             }
         }
 
@@ -308,9 +308,7 @@ namespace NiVE3.Model
             {
                 OutPoint = Duration
             };
-            Layers.Insert(insertIndex, layer);
-
-            HistoryModel.Add(new AddLayersHistoryCommand(this, [layer], 0));
+            InsertLayerInternal([layer], insertIndex);
         }
 
         public void AddLight(int insertIndex)
@@ -319,9 +317,7 @@ namespace NiVE3.Model
             {
                 OutPoint = Duration
             };
-            Layers.Insert(insertIndex, layer);
-
-            HistoryModel.Add(new AddLayersHistoryCommand(this, [layer], 0));
+            InsertLayerInternal([layer], insertIndex);
         }
 
         public void AddNullObject(int insertIndex)
@@ -330,9 +326,7 @@ namespace NiVE3.Model
             {
                 OutPoint = Duration
             };
-            Layers.Insert(insertIndex, layer);
-
-            HistoryModel.Add(new AddLayersHistoryCommand(this, [layer], 0));
+            InsertLayerInternal([layer], insertIndex);
         }
 
         public void AddText(int insertIndex)
@@ -345,8 +339,7 @@ namespace NiVE3.Model
             HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_AddLayers));
 
             TextPropertyModel.UpdateTextProperty(layer, 0.0);
-            Layers.Insert(insertIndex, layer);
-            HistoryModel.Add(new AddLayersHistoryCommand(this, [layer], 0));
+            InsertLayerInternal([layer], insertIndex);
 
             HistoryModel.EndGroup();
         }
@@ -357,9 +350,7 @@ namespace NiVE3.Model
             {
                 OutPoint = Duration
             };
-            Layers.Insert(insertIndex, layer);
-
-            HistoryModel.Add(new AddLayersHistoryCommand(this, [layer], 0));
+            InsertLayerInternal([layer], insertIndex);
         }
 
         public void MoveLayer(Guid layerId, int newIndex)
@@ -386,8 +377,15 @@ namespace NiVE3.Model
 
             if (!prevIndices.SequenceEqual(layers.Select(l => Layers.IndexOf(l))))
             {
-                // TODO: 古いインデックスを保持するのでは無く、古いLayersを配列にしたものを渡す
+                HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_MoveLayers));
+
+                foreach (var layer in Layers)
+                {
+                    layer.UpdateCompositionDependProperties();
+                }
                 HistoryModel.Add(new MoveLayersHistoryCommand(this, layers, prevIndices, [..newOrderedLayers]));
+
+                HistoryModel.EndGroup();
             }
         }
 
@@ -1193,7 +1191,15 @@ namespace NiVE3.Model
                 newOutPoint[i] = layers[i].OutPoint;
             }
 
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_SplitLayers));
+
+            foreach (var layer in layers)
+            {
+                layer.UpdateCompositionDependProperties();
+            }
             HistoryModel.Add(new SplitLayersHistoryCommand(this, layers, addedLayer, oldOutPoint, newOutPoint));
+
+            HistoryModel.EndGroup();
         }
 
         public void ReplacePlaceholder(FootageModel newFootageModel)
@@ -1260,6 +1266,11 @@ namespace NiVE3.Model
             layer?.AddEffects(effectUuids);
         }
 
+        public ILayerObject? GetLayer(Guid layerId)
+        {
+            return Layers.FirstOrDefault(l => l.LayerId == layerId);
+        }
+
         bool CheckCycledSimulatedParentLayer(Guid layerId, Dictionary<Guid, Guid?> changed, HashSet<Guid>? checkedLayerIds = null)
         {
             checkedLayerIds ??= [];
@@ -1286,31 +1297,55 @@ namespace NiVE3.Model
             return CheckCycledSimulatedParentLayer(parentLayerId.Value, changed, checkedLayerIds);
         }
 
+        void InsertLayerInternal(LayerModel[] layers, int insertIndex)
+        {
+            var index = insertIndex;
+            foreach (var layer in layers)
+            {
+                Layers.Insert(index, layer);
+                index++;
+            }
+
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_AddLayers));
+
+            foreach (var layer in layers)
+            {
+                layer.UpdateCompositionDependProperties();
+            }
+            HistoryModel.Add(new AddLayersHistoryCommand(this, layers, insertIndex));
+
+            HistoryModel.EndGroup();
+        }
+
         void DeleteLayersInternal(Guid[] ids, bool isCut)
         {
-            var layers = Layers.Where(l => ids.Contains(l.LayerId)).OrderBy(Layers.IndexOf).ToArray();
-            var oldIndices = layers.Select(l => Layers.IndexOf(l)).ToArray();
+            var removeLayers = Layers.Where(l => ids.Contains(l.LayerId)).OrderBy(Layers.IndexOf).ToArray();
+            var oldIndices = removeLayers.Select(l => Layers.IndexOf(l)).ToArray();
 
             HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_RemoveLayers));
 
-            var childLayers = layers.SelectMany(p => Layers.Where(c => c.ParentLayerId == p.LayerId)).Select(l => l.LayerId).ToArray();
+            var childLayers = removeLayers.SelectMany(p => Layers.Where(c => c.ParentLayerId == p.LayerId)).Select(l => l.LayerId).ToArray();
             if (childLayers.Length > 0)
             {
                 ChangeParentLayer(childLayers, null);
             }
 
-            var trackMatteChildLayers = layers.SelectMany(p => Layers.Where(c => c.TrackMatteLayerId == p.LayerId)).Select(l => l.LayerId).ToArray();
+            var trackMatteChildLayers = removeLayers.SelectMany(p => Layers.Where(c => c.TrackMatteLayerId == p.LayerId)).Select(l => l.LayerId).ToArray();
             if (trackMatteChildLayers.Length > 0)
             {
                 ChangeTrackMatteLayers(trackMatteChildLayers, null);
             }
 
-            foreach (var l in layers)
+            foreach (var l in removeLayers)
             {
                 Layers.Remove(l);
             }
 
-            HistoryModel.Add(new DeleteLayersHistoryCommand(this, layers, oldIndices, isCut));
+            foreach (var layer in Layers)
+            {
+                layer.UpdateCompositionDependProperties();
+            }
+            HistoryModel.Add(new DeleteLayersHistoryCommand(this, removeLayers, oldIndices, isCut));
 
             HistoryModel.EndGroup();
         }
@@ -1378,7 +1413,15 @@ namespace NiVE3.Model
                 }
             }
 
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(isDuplicate ? LanguageResourceDictionary.History_DuplicateLayers : LanguageResourceDictionary.History_PasteLayers));
+
+            foreach (var layer in layers)
+            {
+                layer.UpdateCompositionDependProperties();
+            }
             HistoryModel.Add(new PasteLayersHistoryCommand(this, [.. addedLayer], insertStartIndex, isDuplicate));
+
+            HistoryModel.EndGroup();
         }
 
         void OnCompositionUpdated()

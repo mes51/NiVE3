@@ -646,6 +646,9 @@ namespace NiVE3.View.Resource
         [DefaultValue("レンダリング")]
         public static readonly string History_ExecuteRendering = nameof(History_ExecuteRendering);
 
+        [DefaultValue("コンポジション更新に伴うプロパティの更新")]
+        public static readonly string History_UpdateValueByCompositionStateChanged = nameof(History_UpdateValueByCompositionStateChanged);
+
         // Dialog
 
         [DefaultValue("フッテージの削除")]

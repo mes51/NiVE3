@@ -1,0 +1,94 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using NiVE3.Plugin.Interfaces;
+using NiVE3.Plugin.Internal.Util;
+using NiVE3.Plugin.ValueObject;
+using NiVE3.Shared.Extension;
+
+namespace NiVE3.Plugin.Property.Types
+{
+    internal class UseLayerImagePropertyType : IPropertyType
+    {
+        public static readonly UseLayerImagePropertyType Instance = new UseLayerImagePropertyType();
+
+        public InterpolationType SupportedInterpolationTypes => InterpolationType.None;
+
+        private UseLayerImagePropertyType() { }
+
+        public object? Interpolate(IReadOnlyList<KeyFrame> keyFrames, double t)
+        {
+            var baseKeyFrameIndex = keyFrames.IndexOfLast(k => k.Time <= t);
+            if (baseKeyFrameIndex < 0)
+            {
+                return keyFrames[0].Value;
+            }
+            else if (baseKeyFrameIndex >= keyFrames.Count - 1)
+            {
+                return keyFrames[baseKeyFrameIndex].Value;
+            }
+            return keyFrames[baseKeyFrameIndex].Value;
+        }
+
+        public bool TryConvertFrom(object otherValue, [NotNullWhen(true)] out object? convertedValue)
+        {
+            if (otherValue is UseLayerImageTarget target)
+            {
+                convertedValue = target;
+                return true;
+            }
+            else
+            {
+                convertedValue = UseLayerImageTarget.Empty;
+                return false;
+            }
+        }
+
+        public object? SerializeValue(object? value)
+        {
+            return value;
+        }
+
+        public object? DeserializeValue(object? serializedValue)
+        {
+            if (serializedValue is UseLayerImageTarget identifier)
+            {
+                return identifier;
+            }
+            else if (serializedValue is IDictionary<string, object> dictionary)
+            {
+                var layerId = dictionary[nameof(UseLayerImageTarget.LayerId)] switch
+                {
+                    Guid guid => guid,
+                    string str => Guid.Parse(str),
+                    _ => Guid.Empty
+                };
+
+                return new UseLayerImageTarget(layerId, Enum.Parse<LayerImageProcessType>((string)dictionary[nameof(UseLayerImageTarget.ImageProcessType)]));
+            }
+            else
+            {
+                return UseLayerImageTarget.Empty;
+            }
+        }
+
+        public Span<byte> ConvertToHashBase(object? value)
+        {
+            if (value is UseLayerImageTarget target)
+            {
+                return (target.LayerId, target.ImageProcessType).ConvertToSpan();
+            }
+            else if (value is Guid layerId)
+            {
+                return layerId.ConvertToSpan();
+            }
+            else
+            {
+                return [];
+            }
+        }
+    }
+}

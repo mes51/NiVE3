@@ -41,7 +41,7 @@
         </CompositeCollection>
 
         <!-- NOTE: INotifyCollectionChangeの変更はBindingでは拾ってくれないため、無理矢理拾わせるためのクラスでラップする -->
-        <r:CollectionChangeNotifier x:Key="CompositionPresetsNotifier" Collection="{Binding Presets}"/>
+        <ur:CollectionChangeNotifier x:Key="CompositionPresetsNotifier" Collection="{Binding Presets}"/>
 
         <ur:DataTemplateCollection x:Key="PresetTemplateSelector">
             <DataTemplate DataType="{x:Type dc:CompositionPresetData}">

@@ -28,7 +28,7 @@ namespace NiVE3.Plugin.Property.Properties
             IsOnlyPositiveDirection = isOnlyPositiveDirection;
         }
 
-        public override PropertyControlBase CreateControl(ICompositionObject composition, ILayerObject? layer, IEffectObject? effect, IPropertyViewModel viewModel)
+        public override PropertyControlBase CreateControl(ICompositionViewModel composition, ILayerViewModel? layer, IEffectViewModel? effect, IPropertyViewModel viewModel)
         {
             var control = new AnglePropertyControl
             {
@@ -38,7 +38,7 @@ namespace NiVE3.Plugin.Property.Properties
             return control;
         }
 
-        public override object CoerceValue(object? value)
+        public override object? CoerceValue(object? value)
         {
             if (value is double angle)
             {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -33,7 +34,7 @@ namespace NiVE3.Plugin.Property.Types
             return keyFrames[baseKeyFrameIndex].Value;
         }
 
-        public bool TryConvertFrom(object otherValue, out object convertedValue)
+        public bool TryConvertFrom(object otherValue, [NotNullWhen(true)] out object? convertedValue)
         {
             if (otherValue is bool v)
             {

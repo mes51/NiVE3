@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace NiVE3.Mvvm
 {
-    partial class ObservableCollectionView<T, TView> : IList, IList<TView>, INotifyCollectionChanged, INotifyPropertyChanged
+    partial class ObservableCollectionView<T, TView> : IList, IList<TView>, IReadOnlyList<TView>, INotifyCollectionChanged, INotifyPropertyChanged
     {
         static readonly object SyncObj = new object();
 

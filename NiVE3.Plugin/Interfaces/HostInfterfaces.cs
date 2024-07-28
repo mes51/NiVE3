@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
@@ -8,15 +9,32 @@ using System.Windows.Input;
 using ComputeSharp;
 using NiVE3.Image;
 using NiVE3.Plugin.Property;
+using NiVE3.Plugin.ValueObject;
 
 namespace NiVE3.Plugin.Interfaces
 {
     public interface IAcceleratorObject
     {
+        /// <summary>
+        /// 現在使用しているGPUのデバイスを取得します
+        /// </summary>
         GraphicsDevice CurrentDevice { get; }
     }
 
-    public interface ICompositionObject { }
+    public interface ICompositionObject
+    {
+        /// <summary>
+        /// レイヤーを表す識別子の一覧を取得します
+        /// </summary>
+        IReadOnlyCollection<LayerInfo> LayerIdentifiers { get; }
+
+        /// <summary>
+        /// レイヤーの識別子からレイヤーを取得します
+        /// </summary>
+        /// <param name="layerIdentifier">レイヤーの識別子</param>
+        /// <returns>レイヤーを表すILayerObject。一致するレイヤーがなかった場合はnull</returns>
+        ILayerObject? GetLayer(Guid layerIdentifier);
+    }
 
     public interface ILayerObject
     {
@@ -83,8 +101,6 @@ namespace NiVE3.Plugin.Interfaces
         public const string LightLayerOptionShadowScatterSizeId = nameof(LightLayerOptionShadowScatterSizeId);
 
         public const string AudioLevelId = nameof(AudioLevelId);
-
-        bool IsEnable3D { get; }
     }
 
     public interface IEffectObject { }
@@ -99,6 +115,29 @@ namespace NiVE3.Plugin.Interfaces
 
         public PropertyValueGroup? GetValues(double time);
     }
+
+    public interface ICompositionViewModel : INotifyPropertyChanged
+    {
+        /// <summary>
+        /// レイヤーのViewModelの一覧を取得します。INotifyCollectionChangedでもあります。
+        /// </summary>
+        IReadOnlyCollection<ILayerViewModel> LayerViewModels { get; }
+    }
+
+    public interface ILayerViewModel : INotifyPropertyChanged
+    {
+        Guid LayerId { get; }
+
+        string Name { get; }
+
+        string SourceName { get; }
+
+        SourceType SourceType { get; }
+
+        bool IsEnable3D { get; }
+    }
+
+    public interface IEffectViewModel : INotifyPropertyChanged { }
 
     public interface IPropertyViewModel : INotifyPropertyChanged
     {

@@ -19,6 +19,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using NiVE3.Extension;
+using NiVE3.Shared.Extension;
 
 namespace NiVE3.View.Primitive
 {

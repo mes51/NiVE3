@@ -370,6 +370,38 @@ namespace NiVE3.Model
 
             public void Dispose() { }
         }
+
+        private class UpdateValueByCompositionStateChangedHistoryCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_UpdateValueByCompositionStateChanged);
+
+            PropertyModel Model { get; }
+
+            object? OldValue { get; }
+
+            object? NewValue { get; }
+
+            public UpdateValueByCompositionStateChangedHistoryCommand(PropertyModel model, object? oldValue, object? newValue)
+            {
+                Model = model;
+                OldValue = oldValue;
+                NewValue = newValue;
+            }
+
+            public void Redo()
+            {
+                Model.Value = NewValue;
+                Model.ValueCommited?.Invoke(Model, EventArgs.Empty);
+            }
+
+            public void Undo()
+            {
+                Model.Value = OldValue;
+                Model.ValueCommited?.Invoke(Model, EventArgs.Empty);
+            }
+
+            public void Dispose() { }
+        }
     }
 
     partial class PropertyGroupModel

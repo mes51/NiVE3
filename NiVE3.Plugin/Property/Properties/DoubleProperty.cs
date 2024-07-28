@@ -50,7 +50,7 @@ namespace NiVE3.Plugin.Property.Properties
             Unit = unitKey?.GetText() ?? "";
         }
 
-        public override PropertyControlBase CreateControl(ICompositionObject composition, ILayerObject? layer, IEffectObject? effect, IPropertyViewModel viewModel)
+        public override PropertyControlBase CreateControl(ICompositionViewModel composition, ILayerViewModel? layer, IEffectViewModel? effect, IPropertyViewModel viewModel)
         {
             var control = new DoublePropertyControl
             {
@@ -60,7 +60,7 @@ namespace NiVE3.Plugin.Property.Properties
             return control;
         }
 
-        public override object CoerceValue(object? value)
+        public override object? CoerceValue(object? value)
         {
             return Math.Clamp((double)(value ?? 0.0), MinValue, MaxValue);
         }

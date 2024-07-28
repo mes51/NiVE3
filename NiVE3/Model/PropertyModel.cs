@@ -19,6 +19,10 @@ using NiVE3.Util;
 using NiVE3.Data.Clipboard;
 using NiVE3.Plugin.Property.Types;
 using ImTools;
+using System.Collections.Specialized;
+using NiVE3.Mvvm;
+using NiVE3.Plugin.ValueObject;
+using NiVE3.SourceGenerator.ViewModelWireGenerator;
 
 namespace NiVE3.Model
 {
@@ -41,6 +45,8 @@ namespace NiVE3.Model
         PropertyControlBase CreateControl(IPropertyViewModel viewModel);
 
         PropertyViewState CreateState(IPropertyViewModel propertyViewModel);
+
+        void UpdateValueByCompositionStateChanged();
 
         PropertyData SaveData();
 
@@ -139,12 +145,12 @@ namespace NiVE3.Model
 
         public PropertyControlBase CreateControl(IPropertyViewModel viewModel)
         {
-            return Property.CreateControl(CompositionModel, LayerModel, EffectModel, viewModel);
+            return Property.CreateControl(new CompositionViewModelProxy(CompositionModel), LayerModel != null ? new LayerViewModelProxy(LayerModel) : null, EffectModel != null ? new EffectViewModelProxy(EffectModel) : null, viewModel);
         }
 
         public PropertyViewState CreateState(IPropertyViewModel viewModel)
         {
-            return Property.CreateState(CompositionModel, LayerModel, EffectModel, viewModel);
+            return Property.CreateState(new CompositionViewModelProxy(CompositionModel), LayerModel != null ? new LayerViewModelProxy(LayerModel) : null, EffectModel != null ? new EffectViewModelProxy(EffectModel) : null, viewModel);
         }
 
         public void CommitProperty(object? newValue, object? prevValue)
@@ -246,6 +252,21 @@ namespace NiVE3.Model
             return null;
         }
 
+        public void UpdateValueByCompositionStateChanged()
+        {
+            if (Property is CompositionDependPropertyBase cp)
+            {
+                var oldValue = Value;
+                Value = cp.ChangeValueByCompositionStateChanged(Value, CompositionModel);
+
+                if (oldValue != Value)
+                {
+                    ValueCommited?.Invoke(this, EventArgs.Empty);
+                    HistoryModel.Add(new UpdateValueByCompositionStateChangedHistoryCommand(this, oldValue, Value));
+                }
+            }
+        }
+
         public PropertyData SaveData()
         {
             var keyFramesData = KeyFrames.Select(k =>
@@ -272,7 +293,16 @@ namespace NiVE3.Model
 
         public void LoadData(PropertyData data)
         {
-            Value = Property.CoerceValue(Property.PropertyType.DeserializeValue(data.Value));
+            var cp = Property as CompositionDependPropertyBase;
+
+            if (cp != null)
+            {
+                Value = cp.CoerceValue(cp.PropertyType.DeserializeValue(data.Value), CompositionModel);
+            }
+            else
+            {
+                Value = Property.CoerceValue(Property.PropertyType.DeserializeValue(data.Value));
+            }
 
             if (data.KeyFrames == null)
             {
@@ -280,9 +310,19 @@ namespace NiVE3.Model
             }
 
             KeyFrames.Clear();
-            foreach (var k in data.KeyFrames.Select(k => new KeyFrame(k.Time, Property.CoerceValue(Property.PropertyType.DeserializeValue(k.Value)), k.EaseIn, k.EaseOut, k.InterpolationType, k.Id)))
+            if (cp != null)
             {
-                KeyFrames.Add(k);
+                foreach (var k in data.KeyFrames.Select(k => new KeyFrame(k.Time, cp.CoerceValue(cp.PropertyType.DeserializeValue(k.Value), CompositionModel), k.EaseIn, k.EaseOut, k.InterpolationType, k.Id)))
+                {
+                    KeyFrames.Add(k);
+                }
+            }
+            else
+            {
+                foreach (var k in data.KeyFrames.Select(k => new KeyFrame(k.Time, Property.CoerceValue(Property.PropertyType.DeserializeValue(k.Value)), k.EaseIn, k.EaseOut, k.InterpolationType, k.Id)))
+                {
+                    KeyFrames.Add(k);
+                }
             }
         }
 
@@ -296,7 +336,11 @@ namespace NiVE3.Model
             var keyFrames = data.KeyFrames ?? [];
             if (keyFrames.Length < 1)
             {
-                var newValue = Property.CoerceValue(Property.PropertyType.DeserializeValue(data.Value));
+                var newValue = Property switch
+                {
+                    CompositionDependPropertyBase cp => cp.CoerceValue(Property.PropertyType.DeserializeValue(data.Value), CompositionModel),
+                    _ => Property.CoerceValue(Property.PropertyType.DeserializeValue(data.Value))
+                };
                 var oldValue = Value;
                 Value = newValue;
 
@@ -306,10 +350,21 @@ namespace NiVE3.Model
             {
                 var startTime = keyFrames[0].Time;
                 var newKeyFrames = new List<KeyFrame>();
-                foreach (var k in keyFrames)
+                if (Property is CompositionDependPropertyBase cp)
                 {
-                    var newTime = TimeCalc.RoundTimeDigit(k.Time - startTime + CurrentTime - SourceStartPoint);
-                    newKeyFrames.Add(new KeyFrame(newTime, Property.CoerceValue(Property.PropertyType.DeserializeValue(k.Value)), k.EaseIn, k.EaseOut, k.InterpolationType));
+                    foreach (var k in keyFrames)
+                    {
+                        var newTime = TimeCalc.RoundTimeDigit(k.Time - startTime + CurrentTime - SourceStartPoint);
+                        newKeyFrames.Add(new KeyFrame(newTime, cp.CoerceValue(cp.PropertyType.DeserializeValue(k.Value), CompositionModel), k.EaseIn, k.EaseOut, k.InterpolationType));
+                    }
+                }
+                else
+                {
+                    foreach (var k in keyFrames)
+                    {
+                        var newTime = TimeCalc.RoundTimeDigit(k.Time - startTime + CurrentTime - SourceStartPoint);
+                        newKeyFrames.Add(new KeyFrame(newTime, Property.CoerceValue(Property.PropertyType.DeserializeValue(k.Value)), k.EaseIn, k.EaseOut, k.InterpolationType));
+                    }
                 }
 
                 var oldKeyFrames = KeyFrames.Where(k => newKeyFrames.Any(nk => nk.Time == k.Time)).ToArray();
@@ -551,7 +606,7 @@ namespace NiVE3.Model
 
         public PropertyViewState CreateState(IPropertyViewModel viewModel)
         {
-            return Property.CreateState(CompositionModel, LayerModel, EffectModel, viewModel);
+            return Property.CreateState(new CompositionViewModelProxy(CompositionModel), LayerModel != null ? new LayerViewModelProxy(LayerModel) : null, EffectModel != null ? new EffectViewModelProxy(EffectModel) : null, viewModel);
         }
 
         public IReadOnlyCollection<IPropertyObject>? GetChildren()
@@ -588,6 +643,18 @@ namespace NiVE3.Model
             }
 
             return new PropertyValueGroup(Property.Id, result, propertyTypes);
+        }
+
+        public void UpdateValueByCompositionStateChanged()
+        {
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_UpdateValueByCompositionStateChanged));
+
+            foreach (var child in Children)
+            {
+                child.UpdateValueByCompositionStateChanged();
+            }
+
+            HistoryModel.EndGroup();
         }
 
         public void ChangeName(string name)
@@ -870,7 +937,7 @@ namespace NiVE3.Model
 
         public PropertyViewState CreateState(IPropertyViewModel viewModel)
         {
-            return Property.CreateState(CompositionModel, LayerModel, EffectModel, viewModel);
+            return Property.CreateState(new CompositionViewModelProxy(CompositionModel), LayerModel != null ? new LayerViewModelProxy(LayerModel) : null, EffectModel != null ? new EffectViewModelProxy(EffectModel) : null, viewModel);
         }
 
         public IReadOnlyCollection<IPropertyObject>? GetChildren()
@@ -886,6 +953,18 @@ namespace NiVE3.Model
         public PropertyValueGroup? GetValues(double time)
         {
             return null;
+        }
+
+        public void UpdateValueByCompositionStateChanged()
+        {
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_UpdateValueByCompositionStateChanged));
+
+            foreach (var child in Children)
+            {
+                child.UpdateValueByCompositionStateChanged();
+            }
+
+            HistoryModel.EndGroup();
         }
 
         public void AddChild(AppendablePropertyItem item)
@@ -1126,6 +1205,83 @@ namespace NiVE3.Model
         private void Child_ValueCommited(object? sender, EventArgs e)
         {
             ValueCommited?.Invoke(sender, e);
+        }
+    }
+
+    class CompositionViewModelProxy : WeakPropertyChangedBindingBase, ICompositionViewModel
+    {
+        public IReadOnlyCollection<ILayerViewModel> LayerViewModels { get; }
+
+        public CompositionViewModelProxy(CompositionModel composition)
+        {
+            LayerViewModels = composition.Layers.CreateViewCollection(l => new LayerViewModelProxy(l));
+        }
+    }
+
+    [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
+    partial class LayerViewModelProxy : WeakPropertyChangedBindingBase, ILayerViewModel
+    {
+        private Guid layerId;
+        [NeedWire(nameof(LayerModel), IsOneWay = true)]
+        public Guid LayerId
+        {
+            get { return layerId; }
+            set { SetProperty(ref layerId, value); }
+        }
+
+        private bool isEnable3D;
+        [NeedWire(nameof(LayerModel), IsOneWay = true)]
+        public bool IsEnable3D
+        {
+            get { return isEnable3D; }
+            set { SetProperty(ref isEnable3D, value); }
+        }
+
+        private string name = "";
+        [NeedWire(nameof(LayerModel), IsOneWay = true)]
+        public string Name
+        {
+            get { return name; }
+            set { SetProperty(ref name, value); }
+        }
+
+        private string sourceName = "";
+        [NeedWire(nameof(LayerModel), IsOneWay = true)]
+        public string SourceName
+        {
+            get { return sourceName; }
+            set { SetProperty(ref sourceName, value); }
+        }
+
+        private SourceType sourceType;
+        [NeedWire(nameof(LayerModel), IsOneWay = true)]
+        public SourceType SourceType
+        {
+            get { return sourceType; }
+            set { SetProperty(ref sourceType, value); }
+        }
+
+        LayerModel LayerModel { get; }
+
+        public LayerViewModelProxy(LayerModel layerModel)
+        {
+            LayerModel = layerModel;
+
+            WiringModel();
+        }
+
+        partial void WiringModel();
+    }
+
+    class EffectViewModelProxy : WeakPropertyChangedBindingBase, IEffectViewModel
+    {
+#pragma warning disable IDE0052 // 読み取られていないプライベート メンバーを削除
+        EffectModel EffectModel { get; }
+#pragma warning restore IDE0052 // 読み取られていないプライベート メンバーを削除
+
+        public EffectViewModelProxy(EffectModel effectModel)
+        {
+            EffectModel = effectModel;
         }
     }
 }
