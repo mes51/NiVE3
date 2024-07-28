@@ -28,6 +28,9 @@ namespace NiVE3.Plugin.Internal.View.Resources
         [DefaultValue("OKLab色空間での補間をプレビューする")]
         public static readonly string ColorGradientDialog_UseOkLabInterpolation = nameof(ColorGradientDialog_UseOkLabInterpolation);
 
+        [DefaultValue("なし")]
+        public const string PropertyControl_UseLayerImagePropertyControl_None = nameof(PropertyControl_UseLayerImagePropertyControl_None);
+
         [DefaultValue("OK")]
         public static readonly string Dialog_OK = nameof(Dialog_OK);
 
@@ -36,6 +39,17 @@ namespace NiVE3.Plugin.Internal.View.Resources
 
         [DefaultValue("%")]
         public static readonly string Unit_Percent = nameof(Unit_Percent);
+
+        // Enum
+
+        [DefaultValue("ソース")]
+        public const string LayerImageProcessType_Raw = nameof(LayerImageProcessType_Raw);
+
+        [DefaultValue("マスク")]
+        public const string LayerImageProcessType_Masked = nameof(LayerImageProcessType_Masked);
+
+        [DefaultValue("エフェクト")]
+        public const string LayerImageProcessType_Effected = nameof(LayerImageProcessType_Effected);
 
         public static LanguageResourceDictionary Dictionary { get; }
 

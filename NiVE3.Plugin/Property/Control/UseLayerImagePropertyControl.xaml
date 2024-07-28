@@ -7,7 +7,7 @@
                            xmlns:ucv="clr-namespace:NiVE3.UI.Converter;assembly=NiVE3.UI"
                            xmlns:ur="clr-namespace:NiVE3.UI.Resources;assembly=NiVE3.UI"
                            xmlns:cv="clr-namespace:NiVE3.Plugin.Property.Control.Converter"
-                           xmlns:r="clr-namespace:NiVE3.Plugin.Property.Control.Resources"
+                           xmlns:r="clr-namespace:NiVE3.Plugin.Internal.View.Resources"
                            xmlns:vo="clr-namespace:NiVE3.Plugin.ValueObject"
                            xmlns:local="clr-namespace:NiVE3.Plugin.Property.Control"
                            mc:Ignorable="d" 
@@ -24,7 +24,7 @@
             <ucv:EqualValueConverter x:Key="EqualValueConverter"/>
             <cv:CollectionIndexConverter x:Key="CollectionIndexConverter" Offset="1"/>
             <cv:EnumToLocalizedNameConverter x:Key="EnumToLocalizedNameConverter" EnumType="{x:Type vo:LayerImageProcessType}" LanguageResourceDictionaryType="{x:Type r:LanguageResourceDictionary}"/>
-            <cv:EnumTypeToArrayConverter x:Key="EnumTypeToArrayConverter"/>
+            <cv:EnumTypeToArrayConverter x:Key="EnumTypeToArrayConverter" FilterNeverEditorBrowsable="True"/>
 
             <CollectionViewSource x:Key="LayerCollectionViewSource" Source="{Binding Source={x:Reference Root}, Path=LayerCollectionSource}"/>
             <CompositeCollection x:Key="LayerCollection">
