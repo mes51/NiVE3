@@ -113,7 +113,7 @@ namespace NiVE3.PresetPlugin.Effect.Noise
             ];
         }
 
-        public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, double layerTime, IPropertyObject[] properties, bool useGpu)
+        public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, double layerTime, IPropertyObject[] properties, ICompositionObject composition, bool useGpu)
         {
             var fractalType = properties.GetValue(PropertyFractalTypeId, layerTime, FractalType.Normal);
             var noiseType = properties.GetValue(PropertyNoiseTypeId, layerTime, NoiseType.Parlin);
@@ -191,7 +191,7 @@ namespace NiVE3.PresetPlugin.Effect.Noise
             }
         }
 
-        public float[] Process(float[] audio, double startTime, IPropertyObject[] properties)
+        public float[] Process(float[] audio, double startTime, IPropertyObject[] properties, ICompositionObject composition)
         {
             throw new NotImplementedException();
         }

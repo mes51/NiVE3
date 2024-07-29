@@ -55,7 +55,7 @@ namespace NiVE3.PresetPlugin.Effect.Blur
             ];
         }
 
-        public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, double layerTime, IPropertyObject[] properties, bool useGpu)
+        public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, double layerTime, IPropertyObject[] properties, ICompositionObject composition, bool useGpu)
         {
             var amount = (float)properties.GetValue(PropertyAmountId, layerTime, 0.0);
             var repeat = (int)properties.GetValue(PropertyRepeatId, layerTime, 1.0);
@@ -77,7 +77,7 @@ namespace NiVE3.PresetPlugin.Effect.Blur
             }
         }
 
-        public float[] Process(float[] audio, double startTime, IPropertyObject[] properties)
+        public float[] Process(float[] audio, double startTime, IPropertyObject[] properties, ICompositionObject composition)
         {
             throw new NotImplementedException();
         }

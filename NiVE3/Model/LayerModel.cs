@@ -34,6 +34,7 @@ using NiVE3.Data.Clipboard;
 using System.IO.Hashing;
 using NiVE3.Cache;
 using System.Security.Cryptography.Xml;
+using System.Security.Policy;
 
 namespace NiVE3.Model
 {
@@ -479,6 +480,42 @@ namespace NiVE3.Model
                 AudioOptionProperties.ValueCommited += Properties_ValueCommited;
             }
             PropertyChanged += LayerModel_PropertyChanged;
+        }
+
+        public NImage GetRawImage(double layerTime, double downSamplingRate, bool useGpu)
+        {
+            var sourceTime = CalcSourceTime(layerTime);
+            var sourceOptionProperties = (TextProperties ?? ShapeProperties ?? SourceOptionProperties)?.GetValues(sourceTime);
+
+            return FootageModel.ReadImage(sourceTime, downSamplingRate, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties, InterpolationQuality, useGpu);
+        }
+
+        public NImage GetEffectedImage(double layerTime, double downSamplingRate, bool useGpu)
+        {
+            var sourceTime = CalcSourceTime(layerTime);
+            var sourceOptionProperties = (TextProperties ?? ShapeProperties ?? SourceOptionProperties)?.GetValues(sourceTime);
+
+            var image = FootageModel.ReadImage(sourceTime, downSamplingRate, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties, InterpolationQuality, useGpu);
+            var roi = new ROI(new Int32Point(), new Int32Size(image.Width, image.Height), 0, 0, image.Width, image.Height);
+
+            var originalImageSize = downSamplingRate != 1.0 ? FootageModel.CalcSize(sourceTime, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties) : new SourceFootageRect(Vector2d.Zero, image.Width, image.Height);
+            var downSamplingRateX = originalImageSize.Width / (float)image.Width;
+            var downSamplingRateY = originalImageSize.Height / (float)image.Height;
+            if (IsEnableEffect)
+            {
+                // TODO: モジュラーエフェクト&ROI反映
+                foreach (var e in Effects.Where(e => !e.IsDummyEffect && e.IsEnable && e.SupportedSource.IsSupportedSource(SourceType)))
+                {
+                    var processedImage = e.ProcessImage(image, roi, downSamplingRateX, downSamplingRateY, layerTime, useGpu);
+                    if (processedImage != image)
+                    {
+                        image.Dispose();
+                    }
+                    image = processedImage;
+                }
+            }
+
+            return image;
         }
 
         public RenderableImage? GetImage(double time, double downSamplingRate, bool withTrackMatte, bool useGpu)

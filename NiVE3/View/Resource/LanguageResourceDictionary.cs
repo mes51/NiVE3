@@ -473,6 +473,9 @@ namespace NiVE3.View.Resource
         [DefaultValue("カラー補正")]
         public static readonly string EffectCategory_ColorCollection = DefaultLanguageResourceNames.EffectCategory_ColorCollection;
 
+        [DefaultValue("ディストーション")]
+        public static readonly string EffectCategory_Distortion = DefaultLanguageResourceNames.EffectCategory_Distortion;
+
         [DefaultValue("エクスプレッション制御")]
         public static readonly string EffectCategory_ExpressionControl = DefaultLanguageResourceNames.EffectCategory_ExpressionControl;
 

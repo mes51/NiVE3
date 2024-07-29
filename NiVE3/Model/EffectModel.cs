@@ -61,9 +61,13 @@ namespace NiVE3.Model
 
         IEffectMetadata Metadata { get; }
 
+        CompositionModel CompositionModel { get; }
+
         HistoryModel HistoryModel { get; }
 
         string EffectPropertyGroupId => $"{EffectName}_Properties";
+
+        bool IsSupportGpu { get; }
 
         public EffectModel(ExportLifetimeContext<IEffect> effect, IEffectMetadata metadata, CompositionModel compositionModel, LayerModel layerModel, HistoryModel historyModel) : this(effect, metadata, compositionModel, layerModel, historyModel, null) { }
 
@@ -73,8 +77,10 @@ namespace NiVE3.Model
             Metadata = metadata;
             Name = metadata.Name;
             HistoryModel = historyModel;
+            CompositionModel = compositionModel;
             EffectId = effectId ?? Guid.NewGuid();
             Properties = new PropertyGroupModel(new PropertyGroup(EffectPropertyGroupId, "", effect.Value.GetProperties()), compositionModel, layerModel, this, historyModel);
+            IsSupportGpu = metadata.IsSupportGpu;
             Properties.ValueUpdated += Property_ValueUpdated;
 
             PropertyChanged += EffectModel_PropertyChanged;
@@ -106,7 +112,7 @@ namespace NiVE3.Model
         {
             try
             {
-                return Effect.Value.Process(image, roi, downSamplingRateX, downSamplingRateY, layerTime, Properties.Children.ToArray(), useGpu);
+                return Effect.Value.Process(image, roi, downSamplingRateX, downSamplingRateY, layerTime, Properties.Children.ToArray(), CompositionModel, useGpu && IsSupportGpu);
             }
             catch (Exception ex)
             {
@@ -123,7 +129,7 @@ namespace NiVE3.Model
 
         public float[] ProcessAudio(float[] audio, double startTime)
         {
-            return Effect.Value.Process(audio, startTime, Properties.Children.ToArray());
+            return Effect.Value.Process(audio, startTime, Properties.Children.ToArray(), CompositionModel);
         }
 
         public EffectData SaveData()

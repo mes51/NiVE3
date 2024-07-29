@@ -15,6 +15,12 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector4 NearestNeighbor(Span<Vector4> texture, int width, int height, float x, float y)
         {
+            return NearestNeighbor(texture, width, height, x, y, EmptyPixel);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector4 NearestNeighbor(Span<Vector4> texture, int width, int height, float x, float y, in Vector4 defaultColor)
+        {
             var ix = (int)Math.Floor(x);
             var iy = (int)Math.Floor(y);
 
@@ -24,11 +30,27 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             }
             else
             {
-                return EmptyPixel;
+                return defaultColor;
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector4 NearestNeighborLoop(Span<Vector4> texture, int width, int height, float x, float y)
+        {
+            var ix = (int)Math.Floor(x);
+            var iy = (int)Math.Floor(y);
+
+            return texture[RepeatCoord(iy, height) * width + RepeatCoord(ix, width)];
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector4 Bilinear(Span<Vector4> texture, int width, int height, float x, float y)
+        {
+            return Bilinear(texture, width, height, x, y, EmptyPixel);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector4 Bilinear(Span<Vector4> texture, int width, int height, float x, float y, in Vector4 defaultColor)
         {
             var ix = (int)Math.Floor(x);
             var iy = (int)Math.Floor(y);
@@ -41,12 +63,12 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 }
                 else
                 {
-                    return EmptyPixel;
+                    return defaultColor;
                 }
             }
             else if (ix < -1 || iy < -1 || ix >= width || iy >= height)
             {
-                return EmptyPixel;
+                return defaultColor;
             }
 
             var pp = x - ix;
@@ -56,10 +78,10 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             var mw = width - 1;
             var mh = height - 1;
 
-            var c1 = EmptyPixel;
-            var c2 = EmptyPixel;
-            var c3 = EmptyPixel;
-            var c4 = EmptyPixel;
+            var c1 = defaultColor;
+            var c2 = defaultColor;
+            var c3 = defaultColor;
+            var c4 = defaultColor;
             var pos = iy * width + ix;
 
             if (ix > -1)
@@ -120,12 +142,47 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             var ta = Vector4.Lerp(Vector4.Lerp(c1, c3, qq), Vector4.Lerp(c2, c4, qq), pp).W;
             if (ta <= 0.0F)
             {
+                return defaultColor;
+            }
+            var t = Vector4.Lerp(Vector4.Lerp(c1 * c1.W, c3 * c3.W, qq), Vector4.Lerp(c2 * c2.W, c4 * c4.W, qq), pp) / ta;
+            t.W = ta;
+
+            return t;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector4 BilinearLoop(Span<Vector4> texture, int width, int height, float x, float y)
+        {
+            var ix = (int)Math.Floor(x);
+            var iy = (int)Math.Floor(y);
+
+            if (ix == x && iy == y)
+            {
+                return texture[RepeatCoord(iy, height) * width + RepeatCoord(ix, width)];
+            }
+
+            var c1 = texture[RepeatCoord(iy, height) * width + RepeatCoord(ix, width)];
+            var c2 = texture[RepeatCoord(iy, height) * width + RepeatCoord(ix + 1, width)];
+            var c3 = texture[RepeatCoord(iy + 1, height) * width + RepeatCoord(ix, width)];
+            var c4 = texture[RepeatCoord(iy + 1, height) * width + RepeatCoord(ix + 1, width)];
+
+            var pp = x - ix;
+            var qq = y - iy;
+            var ta = Vector4.Lerp(Vector4.Lerp(c1, c3, qq), Vector4.Lerp(c2, c4, qq), pp).W;
+            if (ta <= 0.0F)
+            {
                 return EmptyPixel;
             }
             var t = Vector4.Lerp(Vector4.Lerp(c1 * c1.W, c3 * c3.W, qq), Vector4.Lerp(c2 * c2.W, c4 * c4.W, qq), pp) / ta;
             t.W = ta;
 
             return t;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static int RepeatCoord(int v, int max)
+        {
+            return ((v % max) + max) % max;
         }
     }
 }

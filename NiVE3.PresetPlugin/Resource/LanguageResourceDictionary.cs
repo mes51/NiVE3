@@ -188,6 +188,35 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("ブレンドモード")]
         public const string Noise_FractalNoise_BlendMode = nameof(Noise_FractalNoise_BlendMode);
 
+        // DisplacementMap
+
+        [DefaultValue("ディスプレイスメントマップ")]
+        public const string Distortion_DisplacementMap_Name = nameof(Distortion_DisplacementMap_Name);
+
+        [DefaultValue("レイヤーの色を元に画像をゆがめます")]
+        public const string Distortion_DisplacementMap_Description = nameof(Distortion_DisplacementMap_Description);
+
+        [LanguageKey, DefaultValue("ソースレイヤー")]
+        public const string Distortion_DisplacementMap_SourceLayer = nameof(Distortion_DisplacementMap_SourceLayer);
+
+        [LanguageKey, DefaultValue("水平チャンネル")]
+        public const string Distortion_DisplacementMap_HorizontalChannel = nameof(Distortion_DisplacementMap_HorizontalChannel);
+
+        [LanguageKey, DefaultValue("水平最大移動距離")]
+        public const string Distortion_DisplacementMap_HorizontalMaxMove = nameof(Distortion_DisplacementMap_HorizontalMaxMove);
+
+        [LanguageKey, DefaultValue("垂直チャンネル")]
+        public const string Distortion_DisplacementMap_VerticalChannel = nameof(Distortion_DisplacementMap_VerticalChannel);
+
+        [LanguageKey, DefaultValue("垂直最大移動距離")]
+        public const string Distortion_DisplacementMap_VerticalMaxMove = nameof(Distortion_DisplacementMap_VerticalMaxMove);
+
+        [LanguageKey, DefaultValue("ソースレイヤーの配置")]
+        public const string Distortion_DisplacementMap_SourceLayerPosition = nameof(Distortion_DisplacementMap_SourceLayerPosition);
+
+        [LanguageKey, DefaultValue("画像をループする")]
+        public const string Distortion_DisplacementMap_IsLoopImage = nameof(Distortion_DisplacementMap_IsLoopImage);
+
         // Dynamics
 
         [DefaultValue("ダイナミクス")]
@@ -483,6 +512,48 @@ namespace NiVE3.PresetPlugin.Resource
 
         [DefaultValue("パーリン")]
         public const string NoiseType_Parlin = nameof(NoiseType_Parlin);
+
+        [DefaultValue("赤")]
+        public const string DisplacemenMapChannelType_R = nameof(DisplacemenMapChannelType_R);
+
+        [DefaultValue("緑")]
+        public const string DisplacemenMapChannelType_G = nameof(DisplacemenMapChannelType_G);
+
+        [DefaultValue("青")]
+        public const string DisplacemenMapChannelType_B = nameof(DisplacemenMapChannelType_B);
+
+        [DefaultValue("アルファ")]
+        public const string DisplacemenMapChannelType_A = nameof(DisplacemenMapChannelType_A);
+
+        [DefaultValue("輝度")]
+        public const string DisplacemenMapChannelType_Luminance = nameof(DisplacemenMapChannelType_Luminance);
+
+        [DefaultValue("色相")]
+        public const string DisplacemenMapChannelType_Hue = nameof(DisplacemenMapChannelType_Hue);
+
+        [DefaultValue("彩度")]
+        public const string DisplacemenMapChannelType_Saturation = nameof(DisplacemenMapChannelType_Saturation);
+
+        [DefaultValue("明度")]
+        public const string DisplacemenMapChannelType_Lightness = nameof(DisplacemenMapChannelType_Lightness);
+
+        [DefaultValue("オン")]
+        public const string DisplacemenMapChannelType_On = nameof(DisplacemenMapChannelType_On);
+
+        [DefaultValue("半分")]
+        public const string DisplacemenMapChannelType_Half = nameof(DisplacemenMapChannelType_Half);
+
+        [DefaultValue("オフ")]
+        public const string DisplacemenMapChannelType_Off = nameof(DisplacemenMapChannelType_Off);
+
+        [DefaultValue("中央配置")]
+        public const string DisplacementSourceLayerPositionType_Center = nameof(DisplacementSourceLayerPositionType_Center);
+
+        [DefaultValue("リサイズ")]
+        public const string DisplacementSourceLayerPositionType_Stretch = nameof(DisplacementSourceLayerPositionType_Stretch);
+
+        [DefaultValue("ループ")]
+        public const string DisplacementSourceLayerPositionType_Loop = nameof(DisplacementSourceLayerPositionType_Loop);
 
         // unit
 

@@ -31,6 +31,12 @@ namespace NiVE3.Plugin.Resource
         public const string EffectCategory_ColorCollection = nameof(EffectCategory_ColorCollection);
 
         /// <summary>
+        /// エフェクトのディストーションカテゴリを表します
+        /// </summary>
+        [EffectCategory]
+        public const string EffectCategory_Distortion = nameof(EffectCategory_Distortion);
+
+        /// <summary>
         /// エフェクトのエクスプレッション制御カテゴリを表します
         /// </summary>
         [EffectCategory]

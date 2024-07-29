@@ -97,12 +97,12 @@ namespace NiVE3.PresetPlugin.Effect.Audio
             ];
         }
 
-        public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, double layerTime, IPropertyObject[] properties, bool useGpu)
+        public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, double layerTime, IPropertyObject[] properties, ICompositionObject composition, bool useGpu)
         {
             throw new NotImplementedException();
         }
 
-        public float[] Process(float[] audio, double startTime, IPropertyObject[] properties)
+        public float[] Process(float[] audio, double startTime, IPropertyObject[] properties, ICompositionObject composition)
         {
             var leftFilters = new List<BiQuadFilter>();
             var rightFilters = new List<BiQuadFilter>();

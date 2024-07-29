@@ -49,7 +49,7 @@ namespace NiVE3.PresetPlugin.Effect.Noise
             ];
         }
 
-        public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, double layerTime, IPropertyObject[] properties, bool useGpu)
+        public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, double layerTime, IPropertyObject[] properties, ICompositionObject composition, bool useGpu)
         {
             var amount = (float)properties.GetValue(PropertyAmountId, layerTime, 0.0) * 0.01F;
             var isColor = (bool)properties.GetValue(PropertyIsColorNoiseId, layerTime, false);
@@ -65,7 +65,7 @@ namespace NiVE3.PresetPlugin.Effect.Noise
             }
         }
 
-        public float[] Process(float[] audio, double startTime, IPropertyObject[] properties)
+        public float[] Process(float[] audio, double startTime, IPropertyObject[] properties, ICompositionObject composition)
         {
             throw new NotImplementedException();
         }
