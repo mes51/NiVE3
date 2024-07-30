@@ -501,7 +501,46 @@ namespace NiVE3.Model
             var sourceTime = CalcSourceTime(layerTime);
             var sourceOptionProperties = (TextProperties ?? ShapeProperties ?? SourceOptionProperties)?.GetValues(sourceTime);
 
-            var image = FootageModel.ReadImage(sourceTime, downSamplingRate, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties, InterpolationQuality, useGpu);
+            NImage? image = null;
+            var hash = new XxHash3();
+            if (downSamplingRate == 1.0)
+            {
+                sourceOptionProperties?.CalcHash(hash);
+                hash.Append(IsEnableTimeRemap);
+                hash.Append(IsEnableEffect);
+                hash.Append(IsEnableFrameBlend);
+                hash.Append(InterpolationQuality);
+                foreach (var e in Effects)
+                {
+                    // TODO: DummyEffect中のモジュラーエフェクトを拾う
+                    if (e.IsEnable && !e.IsDummyEffect)
+                    {
+                        e.CalcPropertyHash(layerTime, hash);
+                    }
+                }
+
+                if (SourceType.HasFlag(SourceType.Video) || HasRenderEveryFrameEffect)
+                {
+                    if (ImageCache.TryGet(LayerId, hash.ToInt128(), layerTime, out var cachedImage))
+                    {
+                        (image, _) = cachedImage;
+                    }
+                }
+                else
+                {
+                    if (ImageCache.TryGet(LayerId, hash.ToInt128(), out var cachedImage))
+                    {
+                        (image, _) = cachedImage;
+                    }
+                }
+            }
+
+            if (image != null)
+            {
+                return image;
+            }
+
+            image = FootageModel.ReadImage(sourceTime, downSamplingRate, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties, InterpolationQuality, useGpu);
             var roi = new ROI(new Int32Point(), new Int32Size(image.Width, image.Height), 0, 0, image.Width, image.Height);
 
             var originalImageSize = downSamplingRate != 1.0 ? FootageModel.CalcSize(sourceTime, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties) : new SourceFootageRect(Vector2d.Zero, image.Width, image.Height);
@@ -518,6 +557,19 @@ namespace NiVE3.Model
                         image.Dispose();
                     }
                     image = processedImage;
+                }
+
+                if (downSamplingRate == 1.0)
+                {
+                    if (image is NGPUImage gpuImage)
+                    {
+                        using var managedImage = gpuImage.CopyToCpu();
+                        ImageCache.Add(LayerId, hash.ToInt128(), layerTime, managedImage, roi);
+                    }
+                    else if (image is NManagedImage managedImage)
+                    {
+                        ImageCache.Add(LayerId, hash.ToInt128(), layerTime, managedImage, roi);
+                    }
                 }
             }
 
@@ -572,7 +624,7 @@ namespace NiVE3.Model
 
                 if (SourceType.HasFlag(SourceType.Video) || HasRenderEveryFrameEffect)
                 {
-                    if (ImageCache.TryGet(LayerId, hash.ToInt128(), time, out var cachedImage))
+                    if (ImageCache.TryGet(LayerId, hash.ToInt128(), layerTime, out var cachedImage))
                     {
                         (image, roi) = cachedImage;
                     }
@@ -1334,6 +1386,16 @@ namespace NiVE3.Model
             }
 
             HistoryModel.EndGroup();
+        }
+
+        public void ClearCacheByLayerUpdated()
+        {
+            if ((LayerOptionProperties?.HasCompositionDependProperty() ?? false) ||
+                (SourceOptionProperties?.HasCompositionDependProperty() ?? false) ||
+                effects.Any(e => e.HasCompositionDependProperty()))
+            {
+                ImageCache.Clear(LayerId);
+            }
         }
 
         void DeleteEffectInternal(Guid[] ids, bool isCut)

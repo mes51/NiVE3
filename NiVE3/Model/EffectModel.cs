@@ -177,6 +177,11 @@ namespace NiVE3.Model
             Properties.UpdateValueByCompositionStateChanged();
         }
 
+        public bool HasCompositionDependProperty()
+        {
+            return Properties.HasCompositionDependProperty();
+        }
+
         private void Property_ValueUpdated(object? sender, EventArgs e)
         {
             EffectUpdated?.Invoke(this, EventArgs.Empty);

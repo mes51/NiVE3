@@ -48,6 +48,8 @@ namespace NiVE3.Model
 
         void UpdateValueByCompositionStateChanged();
 
+        bool HasCompositionDependProperty();
+
         PropertyData SaveData();
 
         void LoadData(PropertyData data);
@@ -265,6 +267,11 @@ namespace NiVE3.Model
                     HistoryModel.Add(new UpdateValueByCompositionStateChangedHistoryCommand(this, oldValue, Value));
                 }
             }
+        }
+
+        public bool HasCompositionDependProperty()
+        {
+            return Property is CompositionDependPropertyBase;
         }
 
         public PropertyData SaveData()
@@ -657,6 +664,11 @@ namespace NiVE3.Model
             HistoryModel.EndGroup();
         }
 
+        public bool HasCompositionDependProperty()
+        {
+            return Children.Any(c => c.HasCompositionDependProperty());
+        }
+
         public void ChangeName(string name)
         {
             if (name != Name)
@@ -965,6 +977,11 @@ namespace NiVE3.Model
             }
 
             HistoryModel.EndGroup();
+        }
+
+        public bool HasCompositionDependProperty()
+        {
+            return Children.Any(c => c.HasCompositionDependProperty());
         }
 
         public void AddChild(AppendablePropertyItem item)

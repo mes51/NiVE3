@@ -1534,6 +1534,13 @@ namespace NiVE3.Model
 
         private void Layer_LayerUpdated(object? sender, EventArgs e)
         {
+            if (sender is LayerModel updateLayer)
+            {
+                foreach (var layer in Layers)
+                {
+                    layer.ClearCacheByLayerUpdated();
+                }
+            }
             OnCompositionUpdated();
         }
 
