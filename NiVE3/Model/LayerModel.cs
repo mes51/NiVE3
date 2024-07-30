@@ -492,6 +492,12 @@ namespace NiVE3.Model
 
         public NImage GetEffectedImage(double layerTime, double downSamplingRate, bool useGpu)
         {
+            using var entry = CycleChecker.TryEnter(LayerId);
+            if (entry == null)
+            {
+                return GetRawImage(layerTime, downSamplingRate, useGpu);
+            }
+
             var sourceTime = CalcSourceTime(layerTime);
             var sourceOptionProperties = (TextProperties ?? ShapeProperties ?? SourceOptionProperties)?.GetValues(sourceTime);
 
@@ -529,6 +535,12 @@ namespace NiVE3.Model
             if ((double)(transform[ILayerObject.TransformPropertyOpacityId] ?? 0.0) <= 0.0)
             {
                 return null;
+            }
+
+            using var entry = CycleChecker.TryEnter(LayerId);
+            if (entry == null)
+            {
+                return GetRawImage(time, downSamplingRate, withTrackMatte, useGpu);
             }
 
             var layerTime = time - SourceStartPoint;

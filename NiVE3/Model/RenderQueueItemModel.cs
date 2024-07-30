@@ -328,6 +328,7 @@ namespace NiVE3.Model
                             var startTimestamp = Stopwatch.GetTimestamp();
                             var useGpu = ProjectModel.UseGpu;
                             var time = TimeCalc.RoundTimeDigit(beginTime + i * frameDuration);
+                            using var checker = CycleChecker.StartCheck();
                             using var image = CompositionModel.RenderFrame(time, 1.0, true, useGpu);
                             plugin.ProcessFrame(pass, time, image, useGpu);
                             setProgress(i + 1 + frameCount * pass, Stopwatch.GetElapsedTime(startTimestamp));

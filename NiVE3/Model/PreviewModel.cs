@@ -9,6 +9,7 @@ using NiVE3.Mvvm;
 using NiVE3.Image;
 using NiVE3.Plugin.Interfaces;
 using Prism.Mvvm;
+using NiVE3.Util;
 
 namespace NiVE3.Model
 {
@@ -231,6 +232,8 @@ namespace NiVE3.Model
 
         public override NImage? GetImage(double time)
         {
+            using var checker = CycleChecker.StartCheck();
+
             var previewImage = Composition?.RenderFrame(time, DownScaleRate, true, ApplicationModel.UseGpu);
             if (previewImage != null && DownScaleRate != 1.0)
             {
