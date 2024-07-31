@@ -19,5 +19,7 @@ namespace NiVE3.ViewModel
         DelegateCommand<SelectItemType?> PasteCommand { get; }
 
         DelegateCommand<SelectItemType?> DuplicateCommand { get; }
+
+        DelegateCommand<SelectItemType?> SelectAllCommand { get; }
     }
 }

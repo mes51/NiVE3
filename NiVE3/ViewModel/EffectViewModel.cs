@@ -114,6 +114,8 @@ namespace NiVE3.ViewModel
 
         public DelegateCommand<SelectItemType?> DuplicateCommand { get; }
 
+        public DelegateCommand<SelectItemType?> SelectAllCommand { get; }
+
         EffectModel EffectModel { get; }
 
         string PrevName { get; set; } = "";
@@ -193,6 +195,8 @@ namespace NiVE3.ViewModel
             });
 
             DuplicateCommand = new DelegateCommand<SelectItemType?>(_ => { });
+
+            SelectAllCommand = new DelegateCommand<SelectItemType?>(_ => { });
 
             WiringModel();
 

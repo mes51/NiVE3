@@ -200,6 +200,8 @@ namespace NiVE3.ViewModel
 
         public DelegateCommand<SelectItemType?> DuplicateCommand { get; }
 
+        public DelegateCommand<SelectItemType?> SelectAllCommand { get; }
+
         PropertyModel PropertyModel { get; }
 
         object? PrevValue { get; set; }
@@ -342,6 +344,11 @@ namespace NiVE3.ViewModel
             });
 
             DuplicateCommand = new DelegateCommand<SelectItemType?>(_ => { });
+
+            SelectAllCommand = new DelegateCommand<SelectItemType?>(_ =>
+            {
+                SelectAllKeyFrames();
+            });
 
             WiringModel();
 
@@ -491,6 +498,8 @@ namespace NiVE3.ViewModel
 
         public DelegateCommand<SelectItemType?> DuplicateCommand { get; }
 
+        public DelegateCommand<SelectItemType?> SelectAllCommand { get; }
+
         public ICommand BeginEditNameCommand { get; }
 
         public ICommand EndEditNameCommand { get; }
@@ -580,6 +589,15 @@ namespace NiVE3.ViewModel
             });
 
             DuplicateCommand = new DelegateCommand<SelectItemType?>(_ => { });
+
+            SelectAllCommand = new DelegateCommand<SelectItemType?>(_ =>
+            {
+                DeSelect();
+                foreach (var child in Children)
+                {
+                    SelectedChildren.Add(child);
+                }
+            });
 
             BeginEditNameCommand = new RequerySuggestedCommand(() =>
             {
@@ -738,6 +756,8 @@ namespace NiVE3.ViewModel
 
         public DelegateCommand<SelectItemType?> DuplicateCommand { get; }
 
+        public DelegateCommand<SelectItemType?> SelectAllCommand { get; }
+
         public ICommand AppendItemCommand { get; }
 
         public AppendablePropertyItem[] Items => ((AppendableProperty)Property).Items;
@@ -821,6 +841,15 @@ namespace NiVE3.ViewModel
             DuplicateCommand = new DelegateCommand<SelectItemType?>(type =>
             {
                 AppendablePropertyModel.DuplicateChildrenProperty([..SelectedChildren.OfType<PropertyGroupViewModel>().Select(p => p.InstanceId)]);
+            });
+
+            SelectAllCommand = new DelegateCommand<SelectItemType?>(_ =>
+            {
+                DeSelect();
+                foreach (var child in Children)
+                {
+                    SelectedChildren.Add(child);
+                }
             });
 
             AppendItemCommand = new DelegateCommand<AppendablePropertyItem>(i => AppendablePropertyModel.AddChild(i));

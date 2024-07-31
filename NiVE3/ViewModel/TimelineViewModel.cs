@@ -44,6 +44,7 @@ namespace NiVE3.ViewModel
     [CommandHandling(nameof(CopyCommand), nameof(ShortcutKeySetting.CopyItemGesture))]
     [CommandHandling(nameof(PasteCommand), nameof(ShortcutKeySetting.PasteItemGesture))]
     [CommandHandling(nameof(DuplicateCommand), nameof(ShortcutKeySetting.DuplicateItemGesture))]
+    [CommandHandling(nameof(SelectAllCommand), nameof(ShortcutKeySetting.SelectAllGesture))]
     [CommandHandling(nameof(SplitLayerCommand), nameof(ShortcutKeySetting.SplitLayerGesture))]
     [CommandHandling(nameof(OpenRenderSettingCommand), nameof(ShortcutKeySetting.OpenRenderSettingGesture))]
     partial class TimelineViewModel : PaneViewModelBase, IDropTarget
@@ -408,6 +409,8 @@ namespace NiVE3.ViewModel
 
         public ICommand DuplicateCommand { get; }
 
+        public ICommand SelectAllCommand { get; }
+
         public ICommand SplitLayerCommand { get; }
 
         public ICommand ChangeCurrentTimeCommand { get; }
@@ -602,6 +605,29 @@ namespace NiVE3.ViewModel
                     CompositionModel.DuplicateLayers(ids, LastSelectedLayerId);
                 }
             }, () => CompositionModel != null && SelectedItemType != SelectItemType.None);
+
+            SelectAllCommand = new RequerySuggestedCommand(() =>
+            {
+                if (SelectTarget != null)
+                {
+                    SelectTarget.SelectAllCommand.Execute(SelectedItemType);
+                }
+                else
+                {
+                    if (CompositionModel == null || Layers == null || Layers.Count < 1)
+                    {
+                        return;
+                    }
+
+                    CurrentEditingCompositionId = CompositionModel?.CompositionId;
+                    SelectedLayers.Clear();
+                    foreach (var layer in Layers)
+                    {
+                        SelectedLayers.Add(layer);
+                    }
+                    LastSelectedLayerId = Layers[0].LayerId;
+                }
+            }, () => CompositionModel != null);
 
             SplitLayerCommand = new RequerySuggestedCommand(() =>
             {

@@ -546,6 +546,8 @@ namespace NiVE3.ViewModel
 
         public DelegateCommand<SelectItemType?> DuplicateCommand { get; }
 
+        public DelegateCommand<SelectItemType?> SelectAllCommand { get; }
+
         WeakEventPublisher<LayerSwitchEventArgs> LayerSwitchChangeRequestPublisher { get; } = new WeakEventPublisher<LayerSwitchEventArgs>();
         public event EventHandler<LayerSwitchEventArgs> LayerSwitchChangeRequest
         {
@@ -830,6 +832,20 @@ namespace NiVE3.ViewModel
 
                 var insertTargetId = LastSelectedEffect?.EffectId;
                 LayerModel.DuplicateEffects([.. SelectedEffects.Select(e => e.EffectId)], insertTargetId);
+            });
+
+            SelectAllCommand = new DelegateCommand<SelectItemType?>(_ =>
+            {
+                if (EditingParameter != EditingLayerParameter.None)
+                {
+                    return;
+                }
+
+                DeSelect();
+                foreach (var e in Effects)
+                {
+                    SelectedEffects.Add(e);
+                }
             });
 
             ChangeTagColorCommand = new DelegateCommand(() =>

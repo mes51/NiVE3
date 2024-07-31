@@ -177,6 +177,19 @@ namespace NiVE3.Config
             new PropertyMetadata(new SingleKeyGesture(Key.C))
         );
 
+        public static readonly DependencyProperty SelectAllGestureProperty = DependencyProperty.Register(
+            nameof(SelectAllGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new KeyGesture(Key.A, ModifierKeys.Control))
+        );
+
+        public InputGesture SelectAllGesture
+        {
+            get { return (InputGesture)GetValue(SelectAllGestureProperty); }
+            set { SetValue(SelectAllGestureProperty, value); }
+        }
+
         public InputGesture SelectCameraToolGesture
         {
             get { return (InputGesture)GetValue(SelectCameraToolGestureProperty); }
