@@ -19,6 +19,7 @@ using NiVE3.SourceGenerator.ViewModelWireGenerator;
 using Prism.Commands;
 using Prism.Mvvm;
 using NiVE3.UI.Command;
+using NiVE3.Util;
 
 namespace NiVE3.ViewModel
 {
@@ -135,6 +136,7 @@ namespace NiVE3.ViewModel
 
         public bool IsFolder => false;
 
+
         private BitmapSource? sampleImage;
         public BitmapSource? SampleImage
         {
@@ -157,6 +159,8 @@ namespace NiVE3.ViewModel
         }
 
         public ObservableCollectionView<IFootageModel, IFootageViewModel>? Footages => null;
+
+        public bool HasImage => InputType.HasFlag(SourceType.Image) || InputType.HasFlag(SourceType.Video);
 
         public ICommand BeginEditNameCommand { get; }
 
@@ -239,10 +243,15 @@ namespace NiVE3.ViewModel
 
         private void FootageViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(FilePath))
+            switch (e.PropertyName)
             {
-                FileExtension = Path.GetExtension(FilePath);
-                IsDirty = true;
+                case nameof(FilePath):
+                    FileExtension = Path.GetExtension(FilePath);
+                    IsDirty = true;
+                    break;
+                case nameof(InputType):
+                    RaisePropertyChanged(nameof(HasImage));
+                    break;
             }
         }
 
@@ -253,6 +262,7 @@ namespace NiVE3.ViewModel
             IsDirty = false;
             if (Footage.InputType == SourceType.Image || (Footage.InputType & SourceType.Video) != SourceType.None)
             {
+                using var checker = CycleChecker.StartCheck();
                 using var image = Footage.ReadImage(Duration * 0.5, 1.0, 0, 0, null, ImageInterpolationQuality.Level2, ApplicationModel.UseGpu);
                 if (image != null)
                 {

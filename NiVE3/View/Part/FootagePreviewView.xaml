@@ -25,6 +25,13 @@
         <cv:LocalizationConverter x:Key="FolderItemCountConverter" LocalizeFormat="{gm:LanguageResource ResourceKey=FootagePreviewView_FolderItemCount}"/>
         <cv:LocalizationConverter x:Key="SelectedItemCountConverter" LocalizeFormat="{gm:LanguageResource ResourceKey=FootagePreviewView_SelectedItemCount}"/>
 
+        <Style x:Key="IconTextBlockStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
+            <Setter Property="FontFamily" Value="{StaticResource FontAwesome}"/>
+            <Setter Property="FontSize" Value="50"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
         <Style x:Key="FootageInfoStyle" TargetType="{x:Type ContentPresenter}">
             <Setter Property="Visibility" Value="Visible"/>
             <Style.Triggers>
@@ -45,6 +52,32 @@
 
         <ur:DataTemplateCollection x:Key="PreviewTemplateSelector">
             <DataTemplate DataType="{x:Type vm:FootageViewModel}">
+                <DataTemplate.Resources>
+                    <Style x:Key="SampleImageBorderStyle" TargetType="{x:Type Border}">
+                        <Setter Property="BorderBrush" Value="{ui:AppearanceResource ResourceKey=BorderBrush, ReturnDynamicResource=True}"/>
+                        <Setter Property="BorderThickness" Value="1"/>
+                        <Setter Property="HorizontalAlignment" Value="Center"/>
+                        <Setter Property="VerticalAlignment" Value="Center"/>
+                        <Setter Property="Background" Value="Black"/>
+                        <Setter Property="Visibility" Value="Visible"/>
+
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding HasImage}" Value="False">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+
+                    <Style x:Key="AudioIconStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource IconTextBlockStyle}">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding HasImage}" Value="False">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataTemplate.Resources>
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
@@ -52,9 +85,10 @@
                     </Grid.ColumnDefinitions>
 
                     <Grid Grid.Column="0" Width="100">
-                        <Border BorderBrush="{ui:AppearanceResource ResourceKey=BorderBrush, ReturnDynamicResource=True}" BorderThickness="1" HorizontalAlignment="Center" VerticalAlignment="Center" Background="Black">
+                        <Border Style="{StaticResource SampleImageBorderStyle}">
                             <Image Grid.Column="0" Source="{Binding SampleImage}" Stretch="Uniform"/>
                         </Border>
+                        <TextBlock Text="" Style="{StaticResource AudioIconStyle}"/>
                     </Grid>
                     <Grid Grid.Column="1" Margin="5,0,0,0">
                         <Grid.RowDefinitions>
@@ -136,7 +170,7 @@
                     </Grid.ColumnDefinitions>
 
                     <Grid Grid.Column="0" Width="100">
-                        <TextBlock Text="" FontFamily="{StaticResource FontAwesome}" FontSize="50" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <TextBlock Text="" Style="{StaticResource IconTextBlockStyle}"/>
                     </Grid>
                     <Grid Grid.Column="1" Margin="5,0,0,0">
                         <Grid.RowDefinitions>
@@ -161,7 +195,7 @@
             </Grid.ColumnDefinitions>
 
             <Grid Grid.Column="0" Width="100">
-                <TextBlock Text="" FontFamily="{StaticResource FontAwesome}" FontSize="50" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <TextBlock Text="" Style="{StaticResource IconTextBlockStyle}"/>
             </Grid>
             <TextBlock Grid.Column="1" Text="{Binding ElementName=Root, Path=SelectedFootages.Count, Converter={StaticResource SelectedItemCountConverter}}" Margin="5,0,0,0" VerticalAlignment="Top"/>
         </Grid>
