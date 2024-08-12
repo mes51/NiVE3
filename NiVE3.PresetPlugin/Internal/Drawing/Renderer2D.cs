@@ -253,6 +253,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                             inverted.ToFloat3x3()
                         )
                     );
+
+                    context.Barrier(Target.Data);
                 }
 
                 context.Barrier(Target.Data);
@@ -425,6 +427,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                         inverted.ToFloat3x3()
                     )
                 );
+
+                context.Barrier(Target.Data);
             }
 
             if (gpuImage != image)
