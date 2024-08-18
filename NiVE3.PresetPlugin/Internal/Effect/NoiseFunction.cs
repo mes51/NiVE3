@@ -7,8 +7,9 @@ using System.Runtime.Intrinsics;
 using System.Text;
 using System.Threading.Tasks;
 using ComputeSharp;
+using NiVE3.Shared.Extension;
 
-namespace NiVE3.PresetPlugin.Effect.Noise
+namespace NiVE3.PresetPlugin.Internal.Effect
 {
     static class NoiseFunction
     {
@@ -18,7 +19,7 @@ namespace NiVE3.PresetPlugin.Effect.Noise
 
         // from https://jcgt.org/published/0009/03/02/paper.pdf
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector4 Pcg3DCpu(uint x, uint y, uint z, uint seed)
+        public static Vector128<uint> Pcg3DUIntCpu(uint x, uint y, uint z, uint seed)
         {
             var vx = (x + seed) * Multiplyer + Increment;
             var vy = (y + seed) * Multiplyer + Increment;
@@ -34,7 +35,14 @@ namespace NiVE3.PresetPlugin.Effect.Noise
             vy += vz * vx;
             vz += vx * vy;
 
-            return new Vector4((vx / (float)uint.MaxValue), (vy / (float)uint.MaxValue), (vz / (float)uint.MaxValue), 1.0F);
+            return Vector128.Create(vx, vy, vz, 0);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector4 Pcg3DFloatCpu(uint x, uint y, uint z, uint seed)
+        {
+            var result = Pcg3DUIntCpu(x, y, z, seed);
+            return (Vector128.ConvertToSingle(result) / Vector128.Create((float)uint.MaxValue)).AsVector4();
         }
 
         // from https://jcgt.org/published/0009/03/02/paper.pdf
@@ -95,7 +103,7 @@ namespace NiVE3.PresetPlugin.Effect.Noise
         }
 
         // from https://jcgt.org/published/0009/03/02/paper.pdf
-        public static Float3 Pcg3DGpu(UInt3 pos, uint seed)
+        public static UInt3 Pcg3DUIntGpu(UInt3 pos, uint seed)
         {
             var v = (pos + seed) * Multiplyer + Increment;
             v.X += v.Y * v.Z;
@@ -106,11 +114,16 @@ namespace NiVE3.PresetPlugin.Effect.Noise
             v.Y += v.Z * v.X;
             v.Z += v.X * v.Y;
 
+            return v;
+        }
+
+        public static Float3 Pcg3DFloatGpu(UInt3 pos, uint seed)
+        {
+            var v = Pcg3DUIntGpu(pos, seed);
             return new Float3(v.X / (float)uint.MaxValue, v.Y / (float)uint.MaxValue, v.Z / (float)uint.MaxValue);
         }
 
         // from https://jcgt.org/published/0009/03/02/paper.pdf
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float Pcg3D1FloatGpu(UInt3 pos, uint seed)
         {
             var v = (pos + seed) * Multiplyer + Increment;
@@ -131,7 +144,6 @@ namespace NiVE3.PresetPlugin.Effect.Noise
         /// <param name="seed"></param>
         /// <returns></returns>
         // from https://jcgt.org/published/0009/03/02/paper.pdf
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static UInt4 Pcg3D1UInt4Gpu(UInt3 pos, uint seed)
         {
             var vx = ((pos.XXXX + seed) + new UInt4(0U, 1U, 0U, 1U)) * Multiplyer + Increment;
@@ -155,7 +167,6 @@ namespace NiVE3.PresetPlugin.Effect.Noise
         /// <param name="y"></param>
         /// <param name="z"></param>
         /// <param name="seed"></param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Float4 Pcg3D1Float4Gpu(UInt3 pos, uint seed)
         {
             var v = Pcg3D1UInt4Gpu(pos, seed);

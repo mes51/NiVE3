@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -115,6 +116,37 @@ namespace NiVE3.Shared.Extension
                         }
 
                         return -1;
+                    }
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static IEnumerable<T> RepeatInfinity<T>(this IEnumerable<T> source)
+        {
+            switch (source)
+            {
+                case T[] array:
+                    for (var i = 0; ; i = (i + 1) % array.Length)
+                    {
+                        yield return array[i];
+                    }
+                case IList<T> list:
+                    for (var i = 0; ; i = (i + 1) % list.Count)
+                    {
+                        yield return list[i];
+                    }
+                case IReadOnlyList<T> list:
+                    for (var i = 0; ; i = (i + 1) % list.Count)
+                    {
+                        yield return list[i];
+                    }
+                default:
+                    while (true)
+                    {
+                        foreach (var e in source)
+                        {
+                            yield return e;
+                        }
                     }
             }
         }

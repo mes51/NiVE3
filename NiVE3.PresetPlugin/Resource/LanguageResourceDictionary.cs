@@ -77,6 +77,62 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("チャンネル")]
         public const string Stylize_PixelSort_Channel = nameof(Stylize_PixelSort_Channel);
 
+        // BrokenJpeg
+
+        [DefaultValue("BrokenJpeg")]
+        public const string Stylize_BrokenJpeg_Name = nameof(Stylize_BrokenJpeg_Name);
+
+        [DefaultValue("画像をJPEGとして圧縮、データを壊す事でグリッチ様の効果を生成します")]
+        public const string Stylize_BrokenJpeg_Description = nameof(Stylize_BrokenJpeg_Description);
+
+        [LanguageKey, DefaultValue("圧縮品質")]
+        public const string Stylize_BrokenJpeg_CompressQuality = nameof(Stylize_BrokenJpeg_CompressQuality);
+
+        [LanguageKey, DefaultValue("色空間")]
+        public const string Stylize_BrokenJpeg_ColorSpace = nameof(Stylize_BrokenJpeg_ColorSpace);
+
+        [LanguageKey, DefaultValue("背景色")]
+        public const string Stylize_BrokenJpeg_BackgroundColor = nameof(Stylize_BrokenJpeg_BackgroundColor);
+
+        [LanguageKey, DefaultValue("画像データの破損")]
+        public const string Stylize_BrokenJpeg_BokenScan = nameof(Stylize_BrokenJpeg_BokenScan);
+
+        [LanguageKey, DefaultValue("破損箇所数")]
+        public const string Stylize_BrokenJpeg_BokenScan_BrokenCount = nameof(Stylize_BrokenJpeg_BokenScan_BrokenCount);
+
+        [LanguageKey, DefaultValue("破損範囲開始")]
+        public const string Stylize_BrokenJpeg_BokenScan_BrokenRangeBegin = nameof(Stylize_BrokenJpeg_BokenScan_BrokenRangeBegin);
+
+        [LanguageKey, DefaultValue("破損範囲終了")]
+        public const string Stylize_BrokenJpeg_BokenScan_BrokenRangeEnd = nameof(Stylize_BrokenJpeg_BokenScan_BrokenRangeEnd);
+
+        [LanguageKey, DefaultValue("ランダムシード")]
+        public const string Stylize_BrokenJpeg_BokenScan_RandomSeed = nameof(Stylize_BrokenJpeg_BokenScan_RandomSeed);
+
+        [LanguageKey, DefaultValue("量子化テーブル(輝度)の破損")]
+        public const string Stylize_BrokenJpeg_BrokenQuantizeTable_Luminance = nameof(Stylize_BrokenJpeg_BrokenQuantizeTable_Luminance);
+
+        [LanguageKey, DefaultValue("量子化テーブル(色差)の破損")]
+        public const string Stylize_BrokenJpeg_BrokenQuantizeTable_Chrominance = nameof(Stylize_BrokenJpeg_BrokenQuantizeTable_Chrominance);
+
+        [LanguageKey, DefaultValue("量子化テーブルを壊す")]
+        public const string Stylize_BrokenJpeg_BrokenQuantizeTable_Enabled = nameof(Stylize_BrokenJpeg_BrokenQuantizeTable_Enabled);
+
+        [LanguageKey, DefaultValue("破損箇所")]
+        public const string Stylize_BrokenJpeg_BrokenQuantizeTable_BrokenPosition = nameof(Stylize_BrokenJpeg_BrokenQuantizeTable_BrokenPosition);
+
+        [LanguageKey, DefaultValue("置き換える値")]
+        public const string Stylize_BrokenJpeg_BrokenQuantizeTable_ReplaceValue = nameof(Stylize_BrokenJpeg_BrokenQuantizeTable_ReplaceValue);
+
+        [LanguageKey, DefaultValue("破損箇所数")]
+        public const string Stylize_BrokenJpeg_BrokenQuantizeTable_BrokenCount = nameof(Stylize_BrokenJpeg_BrokenQuantizeTable_BrokenCount);
+
+        [LanguageKey, DefaultValue("置き換え最大値")]
+        public const string Stylize_BrokenJpeg_BrokenQuantizeTable_MaxValue = nameof(Stylize_BrokenJpeg_BrokenQuantizeTable_MaxValue);
+
+        [LanguageKey, DefaultValue("ランダムシード")]
+        public const string Stylize_BrokenJpeg_BrokenQuantizeTable_RandomSeed = nameof(Stylize_BrokenJpeg_BrokenQuantizeTable_RandomSeed);
+
         // Level
 
         [DefaultValue("レベル")]
@@ -349,6 +405,17 @@ namespace NiVE3.PresetPlugin.Resource
         [ShowInMarkup, DefaultValue("ビット:")]
         public const string WaveOutputSettingView_Group_Audio_BitsPerSample = nameof(WaveOutputSettingView_Group_Audio_BitsPerSample);
 
+        // Dialog
+
+        [LanguageKey, DefaultValue("OK")]
+        public const string Dialog_OK = nameof(Dialog_OK);
+
+        [LanguageKey, DefaultValue("キャンセル")]
+        public const string Dialog_Cancel = nameof(Dialog_Cancel);
+
+        [LanguageKey, DefaultValue("背景色の選択")]
+        public const string Dialog_ColorDialog_Title_BackgroundColor = nameof(Dialog_ColorDialog_Title_BackgroundColor);
+
         // enum
 
         [DefaultValue("通常")]
@@ -554,6 +621,24 @@ namespace NiVE3.PresetPlugin.Resource
 
         [DefaultValue("ループ")]
         public const string DisplacementSourceLayerPositionType_Loop = nameof(DisplacementSourceLayerPositionType_Loop);
+
+        [DefaultValue("RGB")]
+        public const string JpegColorSpace_Rgb = nameof(JpegColorSpace_Rgb);
+
+        [DefaultValue("YCbCr 4:4:4")]
+        public const string JpegColorSpace_YCbCr444 = nameof(JpegColorSpace_YCbCr444);
+
+        [DefaultValue("YCbCr 4:2:2")]
+        public const string JpegColorSpace_YCbCr422 = nameof(JpegColorSpace_YCbCr422);
+
+        [DefaultValue("YCbCr 4:2:0")]
+        public const string JpegColorSpace_YCbCr420 = nameof(JpegColorSpace_YCbCr420);
+
+        [DefaultValue("YCbCr 4:1:1")]
+        public const string JpegColorSpace_YCbCr411 = nameof(JpegColorSpace_YCbCr411);
+
+        [DefaultValue("YCbCr 4:1:0")]
+        public const string JpegColorSpace_YCbCr410 = nameof(JpegColorSpace_YCbCr410);
 
         // unit
 

@@ -20,6 +20,7 @@ using NiVE3.Plugin.Resource;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.PresetPlugin.Extension;
 using NiVE3.PresetPlugin.Internal.ComputeShader;
+using NiVE3.PresetPlugin.Internal.Effect;
 using NiVE3.PresetPlugin.Resource;
 using NiVE3.Shared.Extension;
 

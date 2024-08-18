@@ -14,9 +14,9 @@ using NiVE3.Plugin.ValueObject;
 using NiVE3.PresetPlugin.Resource;
 using NiVE3.PresetPlugin.Extension;
 using NiVE3.PresetPlugin.Internal;
-using NiVE3.Shared.Extension;
 using ComputeSharp;
 using NiVE3.Plugin.Resource;
+using NiVE3.PresetPlugin.Internal.Effect;
 
 namespace NiVE3.PresetPlugin.Effect.Noise
 {
@@ -92,12 +92,12 @@ namespace NiVE3.PresetPlugin.Effect.Noise
                 for (var x = bx; x < ex; x++)
                 {
                     var ux = BitConverter.SingleToUInt32Bits(x - imageOriginX);
-                    var noise = NoiseFunction.Pcg3DCpu(ux, uy, uTime, seed);
+                    var noise = NoiseFunction.Pcg3DFloatCpu(ux, uy, uTime, seed);
                     if (!isColor)
                     {
                         noise = new Vector4(Vector4.Dot(noise, Const.ConvertToGrayScale));
-                        noise.W = 1.0F;
                     }
+                    noise.W = 1.0F;
 
                     imageSpan[x] = Vector4.Lerp(imageSpan[x], noise, amount);
                 }
@@ -137,7 +137,7 @@ namespace NiVE3.PresetPlugin.Effect.Noise
         public void Execute()
         {
             var v = Hlsl.AsUInt(new Float3(ThreadIds.X + startX - originX, ThreadIds.Y + startY - originY, time));
-            var noise = Hlsl.Dot(NoiseFunction.Pcg3DGpu(v, seed), Const.ConvertToGrayScaleFloat3);
+            var noise = Hlsl.Dot(NoiseFunction.Pcg3DFloatGpu(v, seed), Const.ConvertToGrayScaleFloat3);
 
             var pos = (ThreadIds.Y + startY) * width + ThreadIds.X + startX;
             image[pos] = Hlsl.Lerp(image[pos], new Float4(noise, noise, noise, 1.0F), amount);
@@ -151,7 +151,7 @@ namespace NiVE3.PresetPlugin.Effect.Noise
         public void Execute()
         {
             var v = Hlsl.AsUInt(new Float3(ThreadIds.X + startX - originX, ThreadIds.Y + startY - originY, time));
-            var noise = new Float4(NoiseFunction.Pcg3DGpu(v, seed), 1.0F);
+            var noise = new Float4(NoiseFunction.Pcg3DFloatGpu(v, seed), 1.0F);
 
             var pos = (ThreadIds.Y + startY) * width + ThreadIds.X + startX;
             image[pos] = Hlsl.Lerp(image[pos], noise, amount);
