@@ -159,6 +159,37 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("ガンマ")]
         public const string ColorCollection_Level_Gamma = nameof(ColorCollection_Level_Gamma);
 
+        // LuminanceAndContrast
+
+        [DefaultValue("輝度&コントラスト")]
+        public const string ColorCollection_LuminanceAndContrast_Name = nameof(ColorCollection_LuminanceAndContrast_Name);
+
+        [DefaultValue("画像の輝度とコントラストを調整します")]
+        public const string ColorCollection_LuminanceAndContrast_Description = nameof(ColorCollection_LuminanceAndContrast_Description);
+
+        [LanguageKey, DefaultValue("輝度")]
+        public const string ColorCollection_LuminanceAndContrast_Luminance = nameof(ColorCollection_LuminanceAndContrast_Luminance);
+
+        [LanguageKey, DefaultValue("コントラスト")]
+        public const string ColorCollection_LuminanceAndContrast_Contrast = nameof(ColorCollection_LuminanceAndContrast_Contrast);
+
+        // HueAndSaturation
+
+        [DefaultValue("色相と彩度")]
+        public const string ColorCollection_HueAndSaturation_Name = nameof(ColorCollection_HueAndSaturation_Name);
+
+        [DefaultValue("画像の色相と彩度、明度を調整します")]
+        public const string ColorCollection_HueAndSaturation_Description = nameof(ColorCollection_HueAndSaturation_Description);
+
+        [LanguageKey, DefaultValue("色相")]
+        public const string ColorCollection_HueAndSaturation_Hue = nameof(ColorCollection_HueAndSaturation_Hue);
+
+        [LanguageKey, DefaultValue("彩度")]
+        public const string ColorCollection_HueAndSaturation_Saturation = nameof(ColorCollection_HueAndSaturation_Saturation);
+
+        [LanguageKey, DefaultValue("明度")]
+        public const string ColorCollection_HueAndSaturation_Lightness = nameof(ColorCollection_HueAndSaturation_Lightness);
+
         // RandomNoise
 
         [DefaultValue("ノイズ")]

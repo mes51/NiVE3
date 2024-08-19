@@ -86,6 +86,12 @@ namespace NiVE3.Shared.Extension
             var p8 = Sse2.PackUnsignedSaturate(p16, Vector128<short>.Zero);
             return Sse2.ConvertToInt32(p8.AsInt32());
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector4 Mod(this in Vector4 a, float b)
+        {
+            return a.AsVector128().Mod(b).AsVector4();
+        }
     }
 
     public static class Vector64Extensions
@@ -310,10 +316,17 @@ namespace NiVE3.Shared.Extension
             return Vector128.Dot(v, v);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector128<double> Normalize(this in Vector128<double> v)
         {
             var length = Math.Sqrt(Vector128.Dot(v, v));
             return v / length;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector128<float> Mod(this in Vector128<float> a, float b)
+        {
+            return a - Sse41.RoundToZero(a / b) * b;
         }
     }
 

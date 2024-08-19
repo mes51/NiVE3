@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace NiVE3.Image.Color
 {
     [StructLayout(LayoutKind.Sequential)]
-    public readonly record struct Lab(float L, float a, float b)
+    public record struct Lab(float L, float a, float b)
     {
         const double D65X = 95.0489F;
 
@@ -18,11 +18,11 @@ namespace NiVE3.Image.Color
 
         const double D65Z = 108.884F;
 
-        public readonly float L = L;
+        public float L = L;
 
-        public readonly float a = a;
+        public float a = a;
 
-        public readonly float b = b;
+        public float b = b;
 
 #pragma warning disable IDE0040 // for cast to Vector4
         readonly float Spacer;
@@ -30,7 +30,7 @@ namespace NiVE3.Image.Color
 
         // http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.html
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Vector4 ToRgb()
+        public readonly Vector4 ToRgb()
         {
             const double Delta = 216.0 / 24389.0;
             const double Kappa = 24389 / 27.0 / 116.0;

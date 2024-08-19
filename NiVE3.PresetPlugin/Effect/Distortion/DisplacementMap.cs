@@ -214,8 +214,8 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
                     return (Vector4.Dot(color, Const.ConvertToGrayScale) - 0.5F) * 2.0F;
                 case DisplacemenMapChannelType.Hue:
                     {
-                        var min = color.AsVector128().HorizontalMinBy3Element().GetElement(0);
-                        var max = color.AsVector128().HorizontalMaxBy3Element().GetElement(0);
+                        var min = color.HorizontalMinBy3Element();
+                        var max = color.HorizontalMaxBy3Element();
                         var diff = max - min;
                         var h = diff != 0.0F ? max switch
                         {

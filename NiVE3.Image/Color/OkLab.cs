@@ -13,13 +13,13 @@ using NiVE3.Shared.Extension;
 namespace NiVE3.Image.Color
 {
     [StructLayout(LayoutKind.Sequential)]
-    public readonly record struct OkLab(float L, float a, float b)
+    public record struct OkLab(float L, float a, float b)
     {
-        public readonly float L = L;
+        public float L = L;
 
-        public readonly float a = a;
+        public float a = a;
 
-        public readonly float b = b;
+        public float b = b;
 
 #pragma warning disable IDE0040 // for cast to Vector4
         readonly float Spacer;
@@ -27,7 +27,7 @@ namespace NiVE3.Image.Color
 
         // https://bottosson.github.io/posts/oklab/
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Vector4 ToRgb()
+        public readonly Vector4 ToRgb()
         {
             var lab = Vector128.LoadUnsafe(in L);
             var lmsRow1 = Vector128.Create(1.0F, 0.3963377774F, 0.2158037573F, 0.0F);

@@ -12,20 +12,20 @@ using NiVE3.Shared.Extension;
 namespace NiVE3.Image.Color
 {
     [StructLayout(LayoutKind.Sequential)]
-    public readonly record struct Xyz(float X, float Y, float Z)
+    public record struct Xyz(float X, float Y, float Z)
     {
-        public readonly float X = X;
+        public float X = X;
 
-        public readonly float Y = Y;
+        public float Y = Y;
 
-        public readonly float Z = Z;
+        public float Z = Z;
 
 #pragma warning disable IDE0040 // for cast to Vector4
         readonly float Spacer;
 #pragma warning restore IDE0040
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Vector4 ToRgb()
+        public readonly Vector4 ToRgb()
         {
             // from: http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.html
             var rgbRow1 = new Vector4( 3.2404542F, -1.5371385F, -0.4985314F, 0.0F);
