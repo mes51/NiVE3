@@ -35,6 +35,8 @@ using System.IO.Hashing;
 using NiVE3.Cache;
 using System.Security.Cryptography.Xml;
 using System.Security.Policy;
+using ComputeSharp;
+using NiVE3.InternalShader;
 
 namespace NiVE3.Model
 {
@@ -295,7 +297,9 @@ namespace NiVE3.Model
 
         CompositionModel CompositionModel { get; }
 
-        HistoryModel HistoryModel { get; set; }
+        HistoryModel HistoryModel { get; }
+
+        AcceleratorModel AcceleratorModel { get; }
 
         double PrevInPoint { get; set; }
 
@@ -305,15 +309,16 @@ namespace NiVE3.Model
 
         bool HasRenderEveryFrameEffect { get; set; }
 
-        public LayerModel(CompositionModel compositionModel, FootageModel footageModel, EffectListModel effectListModel, HistoryModel historyModel) : this(compositionModel, footageModel, effectListModel, historyModel, null) { }
+        public LayerModel(CompositionModel compositionModel, FootageModel footageModel, EffectListModel effectListModel, HistoryModel historyModel, AcceleratorModel acceleratorModel) : this(compositionModel, footageModel, effectListModel, historyModel, acceleratorModel, null) { }
 
-        public LayerModel(CompositionModel compositionModel, FootageModel footageModel, EffectListModel effectListModel, HistoryModel historyModel, Guid? layerId)
+        public LayerModel(CompositionModel compositionModel, FootageModel footageModel, EffectListModel effectListModel, HistoryModel historyModel, AcceleratorModel acceleratorModel, Guid? layerId)
         {
             Effects = [];
             FootageModel = footageModel;
             EffectListModel = effectListModel;
             CompositionModel = compositionModel;
             HistoryModel = historyModel;
+            AcceleratorModel = acceleratorModel;
             Name = footageModel.Name;
             Duration = footageModel.Duration;
             OutPoint = footageModel.Duration;
@@ -648,16 +653,26 @@ namespace NiVE3.Model
                 downSamplingRateY = originalImageSize.Height / (float)image.Height;
                 if (IsEnableEffect)
                 {
-                    // TODO: モジュラーエフェクト&ROI反映
+                    // TODO: モジュラーエフェクトの反映
+                    var (newRoi, expandedImage) = CalcAndExpandImage(image, downSamplingRateX, downSamplingRateY, layerTime);
+                    if (expandedImage != image)
+                    {
+                        image.Dispose();
+                        image = expandedImage;
+                    }
+                    roi = newRoi;
+
                     foreach (var e in Effects.Where(e => !e.IsDummyEffect && e.IsEnable && e.SupportedSource.IsSupportedSource(SourceType)))
                     {
-                        var processedImage = e.ProcessImage(image, roi.Value, downSamplingRateX, downSamplingRateY, layerTime, useGpu);
+                        var processedImage = e.ProcessImage(image, newRoi, downSamplingRateX, downSamplingRateY, layerTime, useGpu);
                         if (processedImage != image)
                         {
                             image.Dispose();
                         }
                         image = processedImage;
                     }
+
+                    roi = newRoi;
                 }
 
                 if (downSamplingRate == 1.0)
@@ -778,10 +793,23 @@ namespace NiVE3.Model
 
             if (IsEnableEffect)
             {
-                // TODO: モジュラーエフェクト&ROI反映
+                // TODO: モジュラーエフェクト反映
+                var (newRoi, expandedImage) = CalcAndExpandImage(currentFrame, downSamplingRateX, downSamplingRateY, layerTime);
+                if (expandedImage != currentFrame)
+                {
+                    currentFrame.Dispose();
+                    currentFrame = expandedImage;
+                }
+                roi = newRoi;
+
                 foreach (var e in Effects.Where(e => !e.IsDummyEffect && e.IsEnable))
                 {
-                    currentFrame = e.ProcessImage(currentFrame, roi, downSamplingRateX, downSamplingRateY, layerTime, useGpu);
+                    var processedImage = e.ProcessImage(currentFrame, roi, downSamplingRateX, downSamplingRateY, layerTime, useGpu);
+                    if (processedImage != currentFrame)
+                    {
+                        currentFrame.Dispose();
+                    }
+                    currentFrame = processedImage;
                 }
             }
 
@@ -1446,6 +1474,49 @@ namespace NiVE3.Model
         {
             // TODO: タイムリマップ反映
             return layerTime;
+        }
+
+        (ROI, NImage) CalcAndExpandImage(NImage image, double downSamplingRateX, double downSamplingRateY, double layerTime)
+        {
+            var newRoi = new ROI(new Int32Point(), new Int32Size(image.Width, image.Height), 0, 0, image.Width, image.Height);
+            foreach (var e in Effects.Where(e => !e.IsDummyEffect && e.IsEnable && e.SupportedSource.IsSupportedSource(SourceType)))
+            {
+                newRoi = e.CalcRoi(newRoi, downSamplingRateX, downSamplingRateY, layerTime);
+            }
+
+            if (newRoi.Left < 0 || newRoi.Top < 0 || newRoi.Right > image.Width || newRoi.Bottom > image.Height)
+            {
+                var expandLeft = Math.Max(-newRoi.Left, 0);
+                var expandTop = Math.Max(-newRoi.Top, 0);
+                var newSize = new Int32Size(Math.Max(newRoi.Right, image.Width) + expandLeft, Math.Max(newRoi.Bottom, image.Height) + expandLeft);
+
+                if (image is NGPUImage gpuImage)
+                {
+                    var newGpuImage = new NGPUImage(newSize.Width, newSize.Height, AcceleratorModel.CurrentDevice);
+                    using (var context = AcceleratorModel.CurrentDevice.CreateComputeContext())
+                    {
+                        context.For(gpuImage.Width, gpuImage.Height, new CopyImage(gpuImage.Data, newGpuImage.Data, gpuImage.Width, newSize.Width, newSize.Height, expandLeft, expandTop));
+                    }
+
+                    image = newGpuImage;
+                }
+                else if (image is NManagedImage managedImage)
+                {
+                    var newManagedImage = new NManagedImage(newSize.Width, newSize.Height);
+                    Parallel.For(0, managedImage.Height, y =>
+                    {
+                        managedImage.Data.AsSpan(y * managedImage.Width, managedImage.Width).CopyTo(newManagedImage.Data.AsSpan((y + expandTop) * newSize.Width + expandLeft));
+                    });
+
+                    image = newManagedImage;
+                }
+
+                var newLeft = Math.Max(newRoi.Left, 0);
+                var newTop = Math.Max(newRoi.Top, 0);
+                newRoi = new ROI(newRoi.OriginalImagePosition + new Int32Point(expandLeft, expandTop), new Int32Size(image.Width, image.Height), newLeft, newTop, newRoi.Right + expandLeft, newRoi.Bottom + expandTop);
+            }
+
+            return (newRoi, image);
         }
 
         private void Effects_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)

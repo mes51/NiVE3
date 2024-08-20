@@ -542,6 +542,9 @@ namespace NiVE3.PresetPlugin.Resource
         [DefaultValue("鏡面繰り返し")]
         public const string EdgeRepeatMode_Mirror = nameof(EdgeRepeatMode_Mirror);
 
+        [DefaultValue("エッジを拡張する")]
+        public const string EdgeRepeatMode_AddAmount = nameof(EdgeRepeatMode_AddAmount);
+
         [DefaultValue("明るさ")]
         public const string ThresholdMode_Brightness = nameof(ThresholdMode_Brightness);
 

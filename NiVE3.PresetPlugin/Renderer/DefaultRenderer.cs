@@ -295,7 +295,7 @@ namespace NiVE3.PresetPlugin.Renderer
                 frameHeight = CurrentManagedFrame.Height;
             }
             var matrix = Matrix3x3.Identity.Translate((frameWidth - roi.OriginalImageSize.Width) * 0.5F + roi.OriginalImagePosition.X, (frameHeight - roi.OriginalImageSize.Height) * 0.5F + roi.OriginalImagePosition.Y);
-            renderer?.DrawSingleImage(image, 1.0F, matrix, interpolationQuality, blendMode, null);
+            renderer?.DrawSingleImage(roi.OriginalImagePosition, image, 1.0F, matrix, interpolationQuality, blendMode, null);
         }
 
         public NImage GetCurrentRenderedImage()
@@ -384,6 +384,7 @@ namespace NiVE3.PresetPlugin.Renderer
                     };
 
                     renderer.AddRect(
+                        trackMatteImage.ROI.OriginalImagePosition,
                         trackMatteImage.Image,
                         trackMatteImage.InterpolationQuality,
                         (float)trackMatteOpacity,
@@ -421,6 +422,7 @@ namespace NiVE3.PresetPlugin.Renderer
                 };
 
                 renderer.AddRect(
+                    image.ROI.OriginalImagePosition,
                     image.Image,
                     image.InterpolationQuality,
                     (float)opacity,
@@ -891,6 +893,7 @@ namespace NiVE3.PresetPlugin.Renderer
                         };
 
                         renderer.AddRect(
+                            trackMatteImage.ROI.OriginalImagePosition,
                             trackMatteImage.Image,
                             trackMatteImage.InterpolationQuality,
                             (float)opacity,
@@ -940,6 +943,7 @@ namespace NiVE3.PresetPlugin.Renderer
                         var opacity = (double)(i.Transform[ILayerObject.TransformPropertyOpacityId] ?? 0.0) * 0.01;
 
                         renderer.AddRect(
+                            i.ROI.OriginalImagePosition,
                             i.Image,
                             i.InterpolationQuality,
                             (float)opacity,
@@ -970,7 +974,7 @@ namespace NiVE3.PresetPlugin.Renderer
                         var opacity = (double)(i.Transform[ILayerObject.TransformPropertyOpacityId] ?? 0.0) * 0.01;
                         var matrix = Matrix3x3.CreateScale(i.DownSampleRateX, i.DownSampleRateY) * CalcTransform2D(i.Transform, i.ParentTransforms) * downScale;
 
-                        renderer.AddImage(i.Image, (float)opacity, matrix, i.InterpolationQuality, i.BlendMode, trackMattes[i]);
+                        renderer.AddImage(i.ROI.OriginalImagePosition, i.Image, (float)opacity, matrix, i.InterpolationQuality, i.BlendMode, trackMattes[i]);
                     }
 
                     renderer.Draw();
@@ -1014,6 +1018,7 @@ namespace NiVE3.PresetPlugin.Renderer
                         };
 
                         renderer.AddRect(
+                            trackMatteImage.ROI.OriginalImagePosition,
                             trackMatteImage.Image,
                             trackMatteImage.InterpolationQuality,
                             (float)opacity,
@@ -1063,6 +1068,7 @@ namespace NiVE3.PresetPlugin.Renderer
                         var opacity = (double)(i.Transform[ILayerObject.TransformPropertyOpacityId] ?? 0.0) * 0.01;
                     
                         renderer.AddRect(
+                            i.ROI.OriginalImagePosition,
                             i.Image,
                             i.InterpolationQuality,
                             (float)opacity,
@@ -1093,7 +1099,7 @@ namespace NiVE3.PresetPlugin.Renderer
                         var opacity = (double)(i.Transform[ILayerObject.TransformPropertyOpacityId] ?? 0.0) * 0.01;
                         var matrix = Matrix3x3.CreateScale(i.DownSampleRateX, i.DownSampleRateY) * CalcTransform2D(i.Transform, i.ParentTransforms) * downScale;
 
-                        renderer.AddImage(i.Image, (float)opacity, matrix, i.InterpolationQuality, i.BlendMode, trackMattes[i]);
+                        renderer.AddImage(i.ROI.OriginalImagePosition, i.Image, (float)opacity, matrix, i.InterpolationQuality, i.BlendMode, trackMattes[i]);
                     }
 
                     renderer.Draw();

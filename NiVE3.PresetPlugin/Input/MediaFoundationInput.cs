@@ -15,6 +15,7 @@ using NiVE3.Image.Drawing;
 using NiVE3.Numerics;
 using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Interfaces;
+using NiVE3.Plugin.ValueObject;
 using NiVE3.PresetPlugin.Internal.Drawing;
 using NiVE3.PresetPlugin.Internal.MediaFoundation;
 
@@ -158,7 +159,7 @@ namespace NiVE3.PresetPlugin.Input
             {
                 var resizedResult = new NManagedImage((int)(Width / downSamplingRate), (int)(Height / downSamplingRate));
                 var renderer = new CPURenderer2D(resizedResult);
-                renderer.DrawSingleImage(result, 1.0F, Matrix3x3.CreateScale((float)(1.0 / downSamplingRate), (float)(1.0 / downSamplingRate)), ImageInterpolationQuality.Level2, BlendMode.Replace, null);
+                renderer.DrawSingleImage(new Int32Point(), result, 1.0F, Matrix3x3.CreateScale((float)(1.0 / downSamplingRate), (float)(1.0 / downSamplingRate)), ImageInterpolationQuality.Level2, BlendMode.Replace, null);
                 result.Dispose();
                 result = resizedResult;
             }

@@ -9,6 +9,7 @@ using NiVE3.Image;
 using NiVE3.Image.Drawing;
 using NiVE3.Numerics;
 using NiVE3.Plugin.Interfaces;
+using NiVE3.Plugin.ValueObject;
 using NiVE3.PresetPlugin.Extension;
 using NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render2D;
 using NiVE3.Shared.Extension;
@@ -21,9 +22,9 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
         protected IReadOnlyList<ImageInfo> RenderImages => Images;
 
-        public void AddImage(NImage image, float opacity, Matrix3x3 transform, ImageInterpolationQuality interpolationQuality, BlendMode blendMode, RasterizedMaskImage? trackMatte)
+        public void AddImage(Int32Point roiOrigin, NImage image, float opacity, Matrix3x3 transform, ImageInterpolationQuality interpolationQuality, BlendMode blendMode, RasterizedMaskImage? trackMatte)
         {
-            transform = Matrix3x3.CreateTranslate((float)-image.Origin.X, (float)-image.Origin.Y) * transform;
+            transform = Matrix3x3.CreateTranslate((float)-(roiOrigin.X + image.Origin.X), (float)-(roiOrigin.Y + image.Origin.Y)) * transform;
             if (!Matrix3x3.Invert(transform, out var inverted))
             {
                 return;
@@ -40,9 +41,9 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
         protected abstract void Render();
 
-        public void DrawSingleImage(NImage image, float opacity, Matrix3x3 transform, ImageInterpolationQuality interpolationQuality, BlendMode blendMode, RasterizedMaskImage? trackMatte)
+        public void DrawSingleImage(Int32Point roiOrigin, NImage image, float opacity, Matrix3x3 transform, ImageInterpolationQuality interpolationQuality, BlendMode blendMode, RasterizedMaskImage? trackMatte)
         {
-            AddImage(image, opacity, transform, interpolationQuality, blendMode, trackMatte);
+            AddImage(roiOrigin, image, opacity, transform, interpolationQuality, blendMode, trackMatte);
             Draw();
         }
 

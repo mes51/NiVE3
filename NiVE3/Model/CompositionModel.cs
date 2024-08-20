@@ -218,6 +218,8 @@ namespace NiVE3.Model
 
         HistoryModel HistoryModel { get; }
 
+        AcceleratorModel AcceleratorModel { get; }
+
         IRenderer Renderer => RendererContext.Value;
 
         IToneMapper ToneMapper => ToneMapperContext.Value;
@@ -233,8 +235,9 @@ namespace NiVE3.Model
             TextPropertyModel textPropertyModel,
             RendererListModel rendererListModel,
             ToneMapperListModel toneMapperListModel,
-            HistoryModel historyModel
-        ) : this(rendererPluginId, toneMapperPluginId, footageListModel, effectListModel, renderQueueModel, textPropertyModel, rendererListModel, toneMapperListModel, historyModel, null) { }
+            HistoryModel historyModel,
+            AcceleratorModel acceleratorModel
+        ) : this(rendererPluginId, toneMapperPluginId, footageListModel, effectListModel, renderQueueModel, textPropertyModel, rendererListModel, toneMapperListModel, historyModel, acceleratorModel, null) { }
 
         public CompositionModel(
             Guid rendererPluginId,
@@ -246,6 +249,7 @@ namespace NiVE3.Model
             RendererListModel rendererListModel,
             ToneMapperListModel toneMapperListModel,
             HistoryModel historyModel,
+            AcceleratorModel acceleratorModel,
             Guid? compositionId
         )
         {
@@ -261,6 +265,7 @@ namespace NiVE3.Model
             ToneMapperListModel = toneMapperListModel;
             TextPropertyModel = textPropertyModel;
             HistoryModel = historyModel;
+            AcceleratorModel = acceleratorModel;
             Layers = [];
 
             PropertyChanged += CompositionModel_PropertyChanged;
@@ -282,7 +287,7 @@ namespace NiVE3.Model
                 {
                     continue;
                 }
-                var layer = new LayerModel(this, f, EffectListModel, HistoryModel);
+                var layer = new LayerModel(this, f, EffectListModel, HistoryModel, AcceleratorModel);
                 if (f.InputType == SourceType.Image || f.InputType == SourceType.None)
                 {
                     layer.OutPoint = Duration;
@@ -304,7 +309,7 @@ namespace NiVE3.Model
 
         public void AddCamera(int insertIndex)
         {
-            var layer = new LayerModel(this, FootageListModel.CameraFootage, EffectListModel, HistoryModel)
+            var layer = new LayerModel(this, FootageListModel.CameraFootage, EffectListModel, HistoryModel, AcceleratorModel)
             {
                 OutPoint = Duration
             };
@@ -313,7 +318,7 @@ namespace NiVE3.Model
 
         public void AddLight(int insertIndex)
         {
-            var layer = new LayerModel(this, FootageListModel.LightFootage, EffectListModel, HistoryModel)
+            var layer = new LayerModel(this, FootageListModel.LightFootage, EffectListModel, HistoryModel, AcceleratorModel)
             {
                 OutPoint = Duration
             };
@@ -322,7 +327,7 @@ namespace NiVE3.Model
 
         public void AddNullObject(int insertIndex)
         {
-            var layer = new LayerModel(this, FootageListModel.NullObjectFootage, EffectListModel, HistoryModel)
+            var layer = new LayerModel(this, FootageListModel.NullObjectFootage, EffectListModel, HistoryModel, AcceleratorModel)
             {
                 OutPoint = Duration
             };
@@ -331,7 +336,7 @@ namespace NiVE3.Model
 
         public void AddText(int insertIndex)
         {
-            var layer = new LayerModel(this, FootageListModel.TextFootage, EffectListModel, HistoryModel)
+            var layer = new LayerModel(this, FootageListModel.TextFootage, EffectListModel, HistoryModel, AcceleratorModel)
             {
                 OutPoint = Duration
             };
@@ -346,7 +351,7 @@ namespace NiVE3.Model
 
         public void AddShape(int insertIndex)
         {
-            var layer = new LayerModel(this, FootageListModel.ShapeFootage, EffectListModel, HistoryModel)
+            var layer = new LayerModel(this, FootageListModel.ShapeFootage, EffectListModel, HistoryModel, AcceleratorModel)
             {
                 OutPoint = Duration
             };
@@ -836,7 +841,6 @@ namespace NiVE3.Model
                             var currentRenderingFrame = Renderer.GetCurrentRenderedImage();
                             var (roi, currentFrame) = l.ProcessAdjustment(time, currentRenderingFrame, Width / (double)currentRenderingFrame.Width, Height / (double)currentRenderingFrame.Height, useGpu);
 
-                            // TODO: GPU対応
                             if (mask is GPURasterizedMaskImage gpuMaskImage)
                             {
                                 var managedImage = gpuMaskImage.CopyToCpu();
@@ -1109,7 +1113,7 @@ namespace NiVE3.Model
                     continue;
                 }
 
-                var layer = new LayerModel(this, footageModels.First(), EffectListModel, HistoryModel, layerData.LayerId);
+                var layer = new LayerModel(this, footageModels.First(), EffectListModel, HistoryModel, AcceleratorModel, layerData.LayerId);
                 layer.LoadData(layerData);
                 Layers.Add(layer);
             }
@@ -1175,7 +1179,7 @@ namespace NiVE3.Model
                 }
 
                 layerData.InPoint = TimeCalc.RoundTimeDigit(splitPositionTime - layerData.SourceStartPoint);
-                var newLayer = new LayerModel(this, footageModels.First(), EffectListModel, HistoryModel);
+                var newLayer = new LayerModel(this, footageModels.First(), EffectListModel, HistoryModel, AcceleratorModel);
                 newLayer.LoadData(layerData);
                 var index = Layers.IndexOf(l => l.LayerId == layerData.LayerId);
                 Layers.Insert(index, newLayer);
@@ -1378,7 +1382,7 @@ namespace NiVE3.Model
                     continue;
                 }
 
-                var newLayer = new LayerModel(this, footageModels.First(), EffectListModel, HistoryModel);
+                var newLayer = new LayerModel(this, footageModels.First(), EffectListModel, HistoryModel, AcceleratorModel);
                 newLayer.LoadData(layerData);
                 Layers.Insert(index, newLayer);
                 addedLayer.Add(newLayer);

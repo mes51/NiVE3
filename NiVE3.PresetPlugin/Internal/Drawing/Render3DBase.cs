@@ -12,6 +12,7 @@ using NiVE3.Image.Drawing;
 using NiVE3.Numerics;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Interfaces.RendererParams;
+using NiVE3.Plugin.ValueObject;
 using NiVE3.PresetPlugin.Internal.Drawing.Primitive3D;
 using NiVE3.Shared.Extension;
 
@@ -77,14 +78,32 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             }
         }
 
-        public void AddRect(NImage texture, ImageInterpolationQuality interpolationQuality, float opacity, BlendMode blendType, Matrix4x4d modelMatrix, ShadowCastMode shadowCastMode, float lightTransmission, bool isAcceptShadow, bool isAcceptLight, float ambient, float diffuse, float specularIntensity, float specularShininess, float metal, RasterizedMaskImage? trackMatte)
+        public void AddRect(
+            Int32Point roiOrigin,
+            NImage texture,
+            ImageInterpolationQuality interpolationQuality,
+            float opacity,
+            BlendMode blendType,
+            Matrix4x4d modelMatrix,
+            ShadowCastMode shadowCastMode,
+            float lightTransmission,
+            bool isAcceptShadow,
+            bool isAcceptLight,
+            float ambient,
+            float diffuse,
+            float specularIntensity,
+            float specularShininess,
+            float metal,
+            RasterizedMaskImage? trackMatte
+        )
         {
-            AddRectInternal(texture, interpolationQuality, 0, 0, texture.Width, texture.Height, opacity, blendType, modelMatrix, shadowCastMode, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
+            AddRectInternal(roiOrigin, texture, interpolationQuality, 0, 0, texture.Width, texture.Height, opacity, blendType, modelMatrix, shadowCastMode, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
 
             LastId++;
         }
 
         void AddRectInternal(
+            Int32Point roiOrigin,
             NImage texture,
             ImageInterpolationQuality interpolationQuality,
             int left,
@@ -118,7 +137,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             var sv3 = Vector256.Create(right, bottom, 0.0, Size) / Size;
             var sv4 = Vector256.Create(right, top, 0.0, Size) / Size;
 
-            var originOffsetedModelMatrix = Matrix4x4d.CreateTranslate(-texture.Origin.X / Size, -texture.Origin.Y / Size, 0.0) * modelMatrix;
+            var originOffsetedModelMatrix = Matrix4x4d.CreateTranslate(-(roiOrigin.X + texture.Origin.X) / Size, -(roiOrigin.Y + texture.Origin.Y) / Size, 0.0) * modelMatrix;
             var mv = originOffsetedModelMatrix * ViewMatrix;
             var mvt = mv * Matrix4x4d.CreateTranslate(offsetX, offsetY, 0.0);
             var v1 = mvt.Transform(sv1);
@@ -133,10 +152,10 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             {
                 var hSplit = (right - left) / 2 + left;
                 var tSplit = (bottom - top) / 2 + top;
-                AddRectInternal(texture, interpolationQuality, left, top, hSplit, tSplit, opacity, blendType, modelMatrix, shadowCastMode, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
-                AddRectInternal(texture, interpolationQuality, hSplit, top, right, tSplit, opacity, blendType, modelMatrix, shadowCastMode, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
-                AddRectInternal(texture, interpolationQuality, left, tSplit, hSplit, bottom, opacity, blendType, modelMatrix, shadowCastMode, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
-                AddRectInternal(texture, interpolationQuality, hSplit, tSplit, right, bottom, opacity, blendType, modelMatrix, shadowCastMode, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
+                AddRectInternal(roiOrigin, texture, interpolationQuality, left, top, hSplit, tSplit, opacity, blendType, modelMatrix, shadowCastMode, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
+                AddRectInternal(roiOrigin, texture, interpolationQuality, hSplit, top, right, tSplit, opacity, blendType, modelMatrix, shadowCastMode, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
+                AddRectInternal(roiOrigin, texture, interpolationQuality, left, tSplit, hSplit, bottom, opacity, blendType, modelMatrix, shadowCastMode, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
+                AddRectInternal(roiOrigin, texture, interpolationQuality, hSplit, tSplit, right, bottom, opacity, blendType, modelMatrix, shadowCastMode, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
                 return;
             }
 

@@ -18,6 +18,7 @@ namespace NiVE3.PresetPlugin.Effect.Blur
         None,
         Wrap,
         Repeat,
-        Mirror
+        Mirror,
+        AddAmount
     }
 }

@@ -55,6 +55,34 @@ namespace NiVE3.PresetPlugin.Effect.Blur
             ];
         }
 
+        public ROI CalcRoi(ROI baseRoi, double downSamplingRateX, double downSamplingRateY, double layerTime, IPropertyObject[] properties, ICompositionObject composition)
+        {
+            var edgeRepeatMode = properties.GetValue(PropertyEdgeRepeatModeId, layerTime, EdgeRepeatMode.None);
+
+            if (edgeRepeatMode == EdgeRepeatMode.AddAmount)
+            {
+                var amount = (float)properties.GetValue(PropertyAmountId, layerTime, 0.0);
+                var repeat = (int)properties.GetValue(PropertyRepeatId, layerTime, 1.0);
+                var direction = properties.GetValue(PropertyDirectionId, layerTime, BlurDirection.HorizontalAndVertical);
+
+                var expandX = (int)Math.Ceiling(amount * repeat / downSamplingRateX);
+                var expandY = (int)Math.Ceiling(amount * repeat / downSamplingRateY);
+                switch (direction)
+                {
+                    case BlurDirection.Horizontal:
+                        return baseRoi.Expand(-expandX, 0, expandX, 0);
+                    case BlurDirection.Vertical:
+                        return baseRoi.Expand(0, -expandY, 0, expandY);
+                    default:
+                        return baseRoi.Expand(-expandX, -expandY, expandX, expandY);
+                }
+            }
+            else
+            {
+                return baseRoi;
+            }
+        }
+
         public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, double layerTime, IPropertyObject[] properties, ICompositionObject composition, bool useGpu)
         {
             var amount = (float)properties.GetValue(PropertyAmountId, layerTime, 0.0);

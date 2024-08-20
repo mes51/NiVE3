@@ -22,5 +22,28 @@ namespace NiVE3.Plugin.ValueObject
         public int Width { get; } = Right - Left;
 
         public int Height { get; } = Bottom - Top;
+
+        /// <summary>
+        /// エフェクトの適用範囲を拡張、または縮小します
+        /// </summary>
+        /// <param name="amount">拡張、または縮小する量</param>
+        /// <returns>新しいエフェクトの適用範囲</returns>
+        public ROI Expand(int amount)
+        {
+            return Expand(-amount, -amount, amount, amount);
+        }
+
+        /// <summary>
+        /// エフェクトの適用範囲を拡張、または縮小します
+        /// </summary>
+        /// <param name="left">左端の拡張、または縮小する量</param>
+        /// <param name="top">上端の拡張、または縮小する量</param>
+        /// <param name="right">右端の拡張、または縮小する量</param>
+        /// <param name="bottom">下端の拡張、または縮小する量</param>
+        /// <returns>新しいエフェクトの適用範囲</returns>
+        public ROI Expand(int left, int top, int right, int bottom)
+        {
+            return new ROI(OriginalImagePosition, OriginalImageSize, Left + left, Top + top, Right + right, Bottom + bottom);
+        }
     }
 }

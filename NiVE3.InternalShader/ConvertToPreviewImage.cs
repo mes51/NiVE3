@@ -9,7 +9,7 @@ namespace NiVE3.InternalShader
 {
     [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
     [GeneratedComputeShaderDescriptor]
-    public readonly partial struct ConvertToPreviewImage(ReadWriteBuffer<Float4> image, ReadWriteBuffer<int> result, int width, int mode) : IComputeShader
+    readonly partial struct ConvertToPreviewImage(ReadWriteBuffer<Float4> image, ReadWriteBuffer<int> result, int width, int mode) : IComputeShader
     {
         public void Execute()
         {

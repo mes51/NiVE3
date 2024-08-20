@@ -108,6 +108,11 @@ namespace NiVE3.Model
             }
         }
 
+        public ROI CalcRoi(ROI baseRoi, double downSamplingRateX, double downSamplingRateY, double layerTime)
+        {
+            return Effect.Value.CalcRoi(baseRoi, downSamplingRateX, downSamplingRateY, layerTime, Properties.Children.ToArray(), CompositionModel);
+        }
+
         public NImage ProcessImage(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, double layerTime, bool useGpu)
         {
             try

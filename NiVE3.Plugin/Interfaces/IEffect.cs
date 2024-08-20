@@ -24,6 +24,18 @@ namespace NiVE3.Plugin.Interfaces
         PropertyBase[] GetProperties();
 
         /// <summary>
+        /// エフェクトの適用範囲を計算します
+        /// </summary>
+        /// <param name="baseRoi">このエフェクトの前までで計算されたエフェクトの適用範囲</param>
+        /// <param name="downSamplingRateX">幅のダウンサンプリングの比率</param>
+        /// <param name="downSamplingRateY">高さのダウンサンプリングの比率</param>
+        /// <param name="layerTime">現在のレイヤーの時間</param>
+        /// <param name="properties">プロパティ</param>
+        /// <param name="composition">コンポジション</param>
+        /// <returns>計算後のエフェクトの適用範囲</returns>
+        ROI CalcRoi(ROI baseRoi, double downSamplingRateX, double downSamplingRateY, double layerTime, IPropertyObject[] properties, ICompositionObject composition) => baseRoi;
+
+        /// <summary>
         /// 画像にエフェクトを適用します
         /// </summary>
         /// <param name="image">適用先の画像</param>

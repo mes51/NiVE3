@@ -73,6 +73,8 @@ namespace NiVE3.Model
 
         HistoryModel HistoryModel { get; }
 
+        AcceleratorModel AcceleratorModel { get; }
+
         ApplicationModel ApplicationModel { get; }
 
         public event EventHandler<CompositionEventArgs>? OpenCompositionTimeline;
@@ -87,6 +89,7 @@ namespace NiVE3.Model
             RenderQueueModel renderQueueModel,
             TextPropertyModel textPropertyModel,
             HistoryModel historyModel,
+            AcceleratorModel acceleratorModel,
             ApplicationModel applicationModel
         )
         {
@@ -97,6 +100,7 @@ namespace NiVE3.Model
             RenderQueueModel = renderQueueModel;
             TextPropertyModel = textPropertyModel;
             HistoryModel = historyModel;
+            AcceleratorModel = acceleratorModel;
             ApplicationModel = applicationModel;
 
             footageListModel.ShowFootagePreview += FootageListModel_ShowFootagePreview;
@@ -111,7 +115,7 @@ namespace NiVE3.Model
 
         public void CreateComposition(string name, int width, int height, double frameRate, double duration, bool isRetentionFrameRate, bool applyToneMappingWhenNested, int shutterAngle, int shutterPhase, int motionBlurSampleCount, Guid rendererPluginId, Guid toneMapperPluginId)
         {
-            var composition = new CompositionModel(rendererPluginId, toneMapperPluginId, FootageListModel, EffectListModel, RenderQueueModel, TextPropertyModel, RendererListModel, ToneMapperListModel, HistoryModel)
+            var composition = new CompositionModel(rendererPluginId, toneMapperPluginId, FootageListModel, EffectListModel, RenderQueueModel, TextPropertyModel, RendererListModel, ToneMapperListModel, HistoryModel, AcceleratorModel)
             {
                 Name = name,
                 Width = width,
@@ -206,7 +210,7 @@ namespace NiVE3.Model
                 FootageListModel.LoadData(projectData.FootageList, projectDir);
                 foreach (var compositionData in projectData.Compositions)
                 {
-                    var composition = new CompositionModel(compositionData.RendererPluginId, compositionData.ToneMapperPluginId, FootageListModel, EffectListModel, RenderQueueModel, TextPropertyModel, RendererListModel, ToneMapperListModel, HistoryModel, compositionData.CompositionId);
+                    var composition = new CompositionModel(compositionData.RendererPluginId, compositionData.ToneMapperPluginId, FootageListModel, EffectListModel, RenderQueueModel, TextPropertyModel, RendererListModel, ToneMapperListModel, HistoryModel, AcceleratorModel, compositionData.CompositionId);
                     composition.LoadData(compositionData);
                     CompositionModels.Add(composition);
                 }
