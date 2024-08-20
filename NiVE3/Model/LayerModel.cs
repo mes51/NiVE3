@@ -517,8 +517,7 @@ namespace NiVE3.Model
                 hash.Append(InterpolationQuality);
                 foreach (var e in Effects)
                 {
-                    // TODO: DummyEffect中のモジュラーエフェクトを拾う
-                    if (e.IsEnable && !e.IsDummyEffect)
+                    if (e.IsEnable)
                     {
                         e.CalcPropertyHash(layerTime, hash);
                     }
@@ -553,14 +552,19 @@ namespace NiVE3.Model
             var downSamplingRateY = originalImageSize.Height / (float)image.Height;
             if (IsEnableEffect)
             {
-                // TODO: モジュラーエフェクト&ROI反映
-                foreach (var e in Effects.Where(e => !e.IsDummyEffect && e.IsEnable && e.SupportedSource.IsSupportedSource(SourceType)))
+                // TODO: モジュラーエフェクト反映
+                var (newRoi, expandedImage) = CalcAndExpandImage(image, downSamplingRateX, downSamplingRateY, layerTime);
+                if (image != expandedImage)
                 {
-                    var processedImage = e.ProcessImage(image, roi, downSamplingRateX, downSamplingRateY, layerTime, useGpu);
-                    if (processedImage != image)
-                    {
-                        image.Dispose();
-                    }
+                    image.Dispose();
+                    image = expandedImage;
+                }
+                roi = newRoi;
+
+                var processedImage = ApplyEffect(image, roi, downSamplingRateX, downSamplingRateY, layerTime, useGpu);
+                if (image != processedImage)
+                {
+                    image.Dispose();
                     image = processedImage;
                 }
 
@@ -620,8 +624,7 @@ namespace NiVE3.Model
                 hash.Append(InterpolationQuality);
                 foreach (var e in Effects)
                 {
-                    // TODO: DummyEffect中のモジュラーエフェクトを拾う
-                    if (e.IsEnable && !e.IsDummyEffect)
+                    if (e.IsEnable)
                     {
                         e.CalcPropertyHash(layerTime, hash);
                     }
@@ -662,13 +665,10 @@ namespace NiVE3.Model
                     }
                     roi = newRoi;
 
-                    foreach (var e in Effects.Where(e => !e.IsDummyEffect && e.IsEnable && e.SupportedSource.IsSupportedSource(SourceType)))
+                    var processedImage = ApplyEffect(image, roi.Value, downSamplingRateX, downSamplingRateY, layerTime, useGpu);
+                    if (image != processedImage)
                     {
-                        var processedImage = e.ProcessImage(image, newRoi, downSamplingRateX, downSamplingRateY, layerTime, useGpu);
-                        if (processedImage != image)
-                        {
-                            image.Dispose();
-                        }
+                        image.Dispose();
                         image = processedImage;
                     }
 
@@ -802,13 +802,10 @@ namespace NiVE3.Model
                 }
                 roi = newRoi;
 
-                foreach (var e in Effects.Where(e => !e.IsDummyEffect && e.IsEnable))
+                var processedImage = ApplyEffect(currentFrame, roi, downSamplingRateX, downSamplingRateY, layerTime, useGpu);
+                if (currentFrame != processedImage)
                 {
-                    var processedImage = e.ProcessImage(currentFrame, roi, downSamplingRateX, downSamplingRateY, layerTime, useGpu);
-                    if (processedImage != currentFrame)
-                    {
-                        currentFrame.Dispose();
-                    }
+                    currentFrame.Dispose();
                     currentFrame = processedImage;
                 }
             }
@@ -1114,7 +1111,7 @@ namespace NiVE3.Model
             hash.Append(ParentLayerId);
             foreach (var e in Effects)
             {
-                if (e.IsEnable && !e.IsDummyEffect)
+                if (e.IsEnable)
                 {
                     e.CalcPropertyHash(layerTime, hash);
                 }
@@ -1479,16 +1476,19 @@ namespace NiVE3.Model
         (ROI, NImage) CalcAndExpandImage(NImage image, double downSamplingRateX, double downSamplingRateY, double layerTime)
         {
             var newRoi = new ROI(new Int32Point(), new Int32Size(image.Width, image.Height), 0, 0, image.Width, image.Height);
-            foreach (var e in Effects.Where(e => !e.IsDummyEffect && e.IsEnable && e.SupportedSource.IsSupportedSource(SourceType)))
+            foreach (var e in Effects.Where(e => e.IsEnable && e.SupportedSource.IsSupportedSource(SourceType)))
             {
                 newRoi = e.CalcRoi(newRoi, downSamplingRateX, downSamplingRateY, layerTime);
+                var (left, right) = newRoi.Left > newRoi.Right ? (newRoi.Right, newRoi.Left) : (newRoi.Left, newRoi.Right);
+                var (top, bottom) = newRoi.Top > newRoi.Bottom ? (newRoi.Bottom, newRoi.Top) : (newRoi.Top, newRoi.Bottom);
+                newRoi = new ROI(newRoi.OriginalImagePosition, newRoi.OriginalImageSize, left, top, right, bottom);
             }
 
             if (newRoi.Left < 0 || newRoi.Top < 0 || newRoi.Right > image.Width || newRoi.Bottom > image.Height)
             {
                 var expandLeft = Math.Max(-newRoi.Left, 0);
                 var expandTop = Math.Max(-newRoi.Top, 0);
-                var newSize = new Int32Size(Math.Max(newRoi.Right, image.Width) + expandLeft, Math.Max(newRoi.Bottom, image.Height) + expandLeft);
+                var newSize = new Int32Size(Math.Max(newRoi.Right, image.Width) + expandLeft, Math.Max(newRoi.Bottom, image.Height) + expandTop);
 
                 if (image is NGPUImage gpuImage)
                 {
@@ -1517,6 +1517,27 @@ namespace NiVE3.Model
             }
 
             return (newRoi, image);
+        }
+
+        NImage ApplyEffect(NImage image, in ROI roi, double downSamplingRateX, double downSamplingRateY, double layerTime, bool useGpu)
+        {
+            if (roi.Width <= 0 || roi.Height <= 0)
+            {
+                return image;
+            }
+
+            var firstImage = image;
+            foreach (var e in Effects.Where(e => !e.IsDummyEffect && e.IsEnable && e.SupportedSource.IsSupportedSource(SourceType)))
+            {
+                var processedImage = e.ProcessImage(image, roi, downSamplingRateX, downSamplingRateY, layerTime, useGpu);
+                if (processedImage != image && firstImage != image)
+                {
+                    image.Dispose();
+                }
+                image = processedImage;
+            }
+
+            return image;
         }
 
         private void Effects_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)

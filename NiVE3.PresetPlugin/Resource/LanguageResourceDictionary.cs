@@ -365,6 +365,26 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("ゲイン")]
         public const string Audio_ParametricEqualizer_Gain = nameof(Audio_ParametricEqualizer_Gain);
 
+        // ChangeROI
+
+        [DefaultValue("範囲変更")]
+        public const string Utility_ChangeROI_Name = nameof(Utility_ChangeROI_Name);
+
+        [DefaultValue("エフェクトを適用する範囲を変更します")]
+        public const string Utility_ChangeROI_Description = nameof(Utility_ChangeROI_Description);
+
+        [LanguageKey, DefaultValue("左")]
+        public const string Utility_ChangeROI_Left = nameof(Utility_ChangeROI_Left);
+
+        [LanguageKey, DefaultValue("上")]
+        public const string Utility_ChangeROI_Top = nameof(Utility_ChangeROI_Top);
+
+        [LanguageKey, DefaultValue("右")]
+        public const string Utility_ChangeROI_Right = nameof(Utility_ChangeROI_Right);
+
+        [LanguageKey, DefaultValue("下")]
+        public const string Utility_ChangeROI_Bottom = nameof(Utility_ChangeROI_Bottom);
+
         // Renderers
 
         [DefaultValue("デフォルトレンダラ")]
