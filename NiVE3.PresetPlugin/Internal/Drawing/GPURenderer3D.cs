@@ -193,6 +193,11 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 ));
             }
 
+            if (preProcessedTriangles.Count < 1)
+            {
+                return;
+            }
+
             var triangleGroups = new List<TriangleGroup>();
             foreach (var triangleGroup in triangleMaterials.ZipWithIndex().GroupByPrev(t => t.Item1.id).Select(g => g.ToArray()))
             {
