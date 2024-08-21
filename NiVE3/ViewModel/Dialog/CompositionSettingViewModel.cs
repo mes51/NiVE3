@@ -97,7 +97,7 @@ namespace NiVE3.ViewModel.Dialog
             set { SetProperty(ref shutterAngle, value); }
         }
 
-        private int shutterPhase = 180;
+        private int shutterPhase = -90;
         public int ShutterPhase
         {
             get { return shutterPhase; }

@@ -734,14 +734,15 @@ namespace NiVE3.Model
                 if (downSamplingRate != 1.0 || !ImageCache.TryGet(CompositionId, cacheKey, time, out var cachedImage))
                 {
                     var frameBlendRatio = 1.0F / MotionBlurSampleCount;
-                    var subFrameInterval = FrameDuration / MotionBlurSampleCount;
+                    var subFrameInterval = (FrameDuration * ShutterAngle / 360.0) / MotionBlurSampleCount;
+                    var shatterStartTime = time + FrameDuration * ShutterPhase / 360.0F;
                     if (useGpu)
                     {
                         var device = AcceleratorModel.CurrentDevice;
                         var result = new NGPUImage(Width, Height, device);
                         for (var i = 0; i < MotionBlurSampleCount; i++)
                         {
-                            using var subFrame = RenderFrameInternal(time + subFrameInterval * i, downSamplingRate, applyToneMapping, useGpu);
+                            using var subFrame = RenderFrameInternal(Math.Max(shatterStartTime + subFrameInterval * i, 0.0), downSamplingRate, applyToneMapping, useGpu);
 
                             var gpuImage = subFrame switch
                             {
@@ -775,7 +776,7 @@ namespace NiVE3.Model
                         var result = new NManagedImage(Width, Height);
                         for (var i = 0; i < MotionBlurSampleCount; i++)
                         {
-                            using var subFrame = RenderFrameInternal(time + subFrameInterval * i, downSamplingRate, applyToneMapping, useGpu);
+                            using var subFrame = RenderFrameInternal(Math.Max(shatterStartTime + subFrameInterval * i, 0.0), downSamplingRate, applyToneMapping, useGpu);
 
                             var managedImage = subFrame switch
                             {
@@ -1505,7 +1506,7 @@ namespace NiVE3.Model
             hash.Append(FrameRate);
             hash.Append(ShutterAngle);
             hash.Append(ShutterPhase);
-            hash.Append(motionBlurSampleCount);
+            hash.Append(MotionBlurSampleCount);
             hash.Append(IsEnableFrameBlend);
             hash.Append(IsEnableMotionBlur);
             hash.Append(RendererPluginId);
