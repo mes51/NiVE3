@@ -192,6 +192,11 @@ namespace NiVE3.Model
             EffectUpdated?.Invoke(this, EventArgs.Empty);
         }
 
+        public bool PropertyHasKeyFrame()
+        {
+            return Properties.HasKeyFrames();
+        }
+
         private void EffectModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             EffectUpdated?.Invoke(this, EventArgs.Empty);

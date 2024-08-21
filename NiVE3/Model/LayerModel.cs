@@ -1423,6 +1423,17 @@ namespace NiVE3.Model
             }
         }
 
+        public bool IsMotionBlurTarget()
+        {
+            return IsEnableMotionBlur &&
+                ((TransformProperties?.HasKeyFrames() ?? false) ||
+                (LayerOptionProperties?.HasKeyFrames() ?? false) ||
+                (TextProperties?.HasKeyFrames() ?? false) ||
+                (ShapeProperties?.HasKeyFrames() ?? false) ||
+                (SourceOptionProperties?.HasKeyFrames() ?? false) ||
+                Effects.Any(e => e.IsRenderEveryFrame || e.PropertyHasKeyFrame()));
+        }
+
         void DeleteEffectInternal(Guid[] ids, bool isCut)
         {
             var effects = Effects.Where(l => ids.Contains(l.EffectId)).OrderBy(Effects.IndexOf).ToArray();

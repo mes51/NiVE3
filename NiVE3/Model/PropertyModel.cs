@@ -50,6 +50,8 @@ namespace NiVE3.Model
 
         bool HasCompositionDependProperty();
 
+        bool HasKeyFrames();
+
         PropertyData SaveData();
 
         void LoadData(PropertyData data);
@@ -272,6 +274,11 @@ namespace NiVE3.Model
         public bool HasCompositionDependProperty()
         {
             return Property is CompositionDependPropertyBase;
+        }
+
+        public bool HasKeyFrames()
+        {
+            return KeyFrames.Count > 0;
         }
 
         public PropertyData SaveData()
@@ -669,6 +676,11 @@ namespace NiVE3.Model
             return Children.Any(c => c.HasCompositionDependProperty());
         }
 
+        public bool HasKeyFrames()
+        {
+            return Children.Any(p => p.HasKeyFrames());
+        }
+
         public void ChangeName(string name)
         {
             if (name != Name)
@@ -982,6 +994,11 @@ namespace NiVE3.Model
         public bool HasCompositionDependProperty()
         {
             return Children.Any(c => c.HasCompositionDependProperty());
+        }
+
+        public bool HasKeyFrames()
+        {
+            return Children.Any(p => p.HasKeyFrames());
         }
 
         public void AddChild(AppendablePropertyItem item)
