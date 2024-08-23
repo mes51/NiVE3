@@ -37,6 +37,16 @@ namespace NiVE3.PresetPlugin.Internal.ComputeShader
             return new Float4(hue, saturation, lightness, color.W);
         }
 
+        public static Float4 RgbToYCbCr(Float4 color)
+        {
+            return new Float4(
+                Hlsl.Dot(color, new Float4(0.299F, 0.587F, 0.114F, 0.0F)),
+                0.5F + Hlsl.Dot(color, new Float4(-0.168736F, -0.331264F, 0.5F, 0.0F)),
+                0.5F + Hlsl.Dot(color, new Float4(0.5F, -0.418688F, -0.081312F, 0.0F)),
+                color.W
+            );
+        }
+
         // SEE: https://en.wikipedia.org/wiki/HSL_and_HSV#HSL_to_RGB_alternative
         public static Float4 HslToRgb(Float4 hsl)
         {
@@ -53,6 +63,17 @@ namespace NiVE3.PresetPlugin.Internal.ComputeShader
 
             var c = lightness - a * Hlsl.Max(-1.0F, Hlsl.Min(Hlsl.Min(k - 3.0F, 9.0F - k), 1.0F));
             return new Float4(c.XYZ, hsl.W);
+        }
+
+        public static Float4 YCbCrToRgb(Float4 ycbcr)
+        {
+            ycbcr -= new Float4(0.0F, 0.5F, 0.5F, 0.0F);
+            return new Float4(
+                Hlsl.Dot(ycbcr, new Float4(1.0F, 0.0F, 1.402F, 0.0F)),
+                Hlsl.Dot(ycbcr, new Float4(1.0F, -0.344136F, -0.714136F, 0.0F)),
+                Hlsl.Dot(ycbcr, new Float4(1.0F, 1.772F, 0.0F, 0.0F)),
+                ycbcr.W
+            );
         }
     }
 }

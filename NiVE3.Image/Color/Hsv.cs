@@ -9,9 +9,9 @@ using NiVE3.Shared.Extension;
 
 namespace NiVE3.Image.Color
 {
-    public record struct Hsl(float Hue, float Saturation, float Lightness)
+    public record struct Hsv(float Hue, float Saturation, float Value)
     {
-        // SEE: https://en.wikipedia.org/wiki/HSL_and_HSV#HSL_to_RGB_alternative
+        // SEE: https://en.wikipedia.org/wiki/HSL_and_HSV#HSV_to_RGB_alternative
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly Vector4 ToRgb()
         {
@@ -21,17 +21,16 @@ namespace NiVE3.Image.Color
                 hue += 360.0F;
             }
             var saturation = Math.Clamp(Saturation, 0.0F, 1.0F);
-            var lightness = Math.Clamp(Lightness, 0.0F, 1.0F);
+            var value = Math.Clamp(Value, 0.0F, 1.0F);
 
-            var k = (new Vector4(4.0F, 8.0F, 0.0F, 0.0F) + new Vector4(hue / 30.0F)).Mod(12.0F);
-            var a = saturation * Math.Min(lightness, 1.0F - lightness);
+            var k = (new Vector4(1.0F, 3.0F, 5.0F, 0.0F) + new Vector4(hue / 60.0F)).Mod(6.0F);
 
-            var c = new Vector4(lightness) - a * Vector4.Max(-Vector4.One, Vector4.Min(Vector4.Min(k - new Vector4(3.0F), new Vector4(9.0F) - k), Vector4.One));
+            var c = new Vector4(value) - new Vector4(value * saturation) * Vector4.Max(Vector4.Zero, Vector4.Min(Vector4.Min(k, new Vector4(4.0F) - k), Vector4.One));
             return c.AsVector3().AsVector4() + Vector4.UnitW;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Hsl FromRgb(in Vector4 color)
+        public static Hsv FromRgb(in Vector4 color)
         {
             var clamped = Vector4.Clamp(color, Vector4.Zero, Vector4.One);
             var min = clamped.HorizontalMinBy3Element();
@@ -44,10 +43,9 @@ namespace NiVE3.Image.Color
                 _ when max == clamped.Y => (clamped.X - clamped.Z) / diff * 60.0F + 120.0F,
                 _ => (clamped.Y - clamped.X) / diff * 60.0F
             } : 0.0F;
-            var lightness = (max + min) * 0.5F;
-            var saturation = lightness >= 1.0F || lightness <= 0.0F ? 0.0F : (diff / (1.0F - Math.Abs(lightness * 2.0F - 1.0F)));
+            var saturation = max <= 0.0F ? 0.0F : (diff / max);
 
-            return new Hsl(hue, saturation, lightness);
+            return new Hsv(hue, saturation, max);
         }
     }
 }

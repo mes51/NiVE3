@@ -34,9 +34,9 @@ namespace NiVE3.Image.Color
 
             var xyz = Unsafe.BitCast<Xyz, Vector4>(this);
             return new Vector4(
-                (xyz * rgbRow3).HorizontalAdd(),
-                (xyz * rgbRow2).HorizontalAdd(),
-                (xyz * rgbRow1).HorizontalAdd(),
+                Vector4.Dot(xyz, rgbRow3),
+                Vector4.Dot(xyz, rgbRow2),
+                Vector4.Dot(xyz, rgbRow1),
                 1.0F
             );
         }
@@ -50,9 +50,9 @@ namespace NiVE3.Image.Color
             var xyzRow3 = new Vector4(0.9503041F, 0.1191920F, 0.0193339F, 0.0F);
 
             return new Xyz(
-                (color * xyzRow1).HorizontalAdd(),
-                (color * xyzRow2).HorizontalAdd(),
-                (color * xyzRow3).HorizontalAdd()
+                Vector4.Dot(color, xyzRow1),
+                Vector4.Dot(color, xyzRow2),
+                Vector4.Dot(color, xyzRow3)
             );
         }
     }

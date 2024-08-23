@@ -190,6 +190,23 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("明度")]
         public const string ColorCollection_HueAndSaturation_Lightness = nameof(ColorCollection_HueAndSaturation_Lightness);
 
+        // AutoContrastCorrection
+
+        [DefaultValue("自動コントラスト")]
+        public const string ColorCollection_AutoContrastCorrection_Name = nameof(ColorCollection_AutoContrastCorrection_Name);
+
+        [DefaultValue("ヒストグラムを元にコントラストを自動で調整します")]
+        public const string ColorCollection_AutoContrastCorrection_Description = nameof(ColorCollection_AutoContrastCorrection_Description);
+
+        [LanguageKey, DefaultValue("シャドウのクリップ")]
+        public const string ColorCollection_AutoContrastCorrection_ShadowClip = nameof(ColorCollection_AutoContrastCorrection_ShadowClip);
+
+        [LanguageKey, DefaultValue("ハイライトのクリップ")]
+        public const string ColorCollection_AutoContrastCorrection_HighlightClip = nameof(ColorCollection_AutoContrastCorrection_HighlightClip);
+
+        [LanguageKey, DefaultValue("元画像のブレンド")]
+        public const string ColorCollection_AutoContrastCorrection_BlendOriginal = nameof(ColorCollection_AutoContrastCorrection_BlendOriginal);
+
         // RandomNoise
 
         [DefaultValue("ノイズ")]
