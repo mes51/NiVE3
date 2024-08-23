@@ -49,7 +49,7 @@ namespace NiVE3.PresetPlugin.Effect.ColorCollection
             var luminance = (float)properties.GetValue(PropertyLuminanceId, layerTime, 0.0) * 0.01F;
             var contrast = (float)(properties.GetValue(PropertyContrastId, layerTime, 0.0) + 100.0F) * 0.01F;
 
-            if (luminance == 0.0F && contrast == 0.0F)
+            if (luminance == 0.0F && contrast == 1.0F)
             {
                 return image;
             }
@@ -120,9 +120,7 @@ namespace NiVE3.PresetPlugin.Effect.ColorCollection
             var pos = (ThreadIds.Y + startY) * width + ThreadIds.X + startX;
             var color = image[pos];
             var a = color.W;
-            color = (color - 0.5F) * contrast + 0.5F + luminance;
-            color.W = a;
-            image[pos] = color;
+            image[pos] = new Float4(((color - 0.5F) * contrast + 0.5F + luminance).XYZ, a);
         }
     }
 }
