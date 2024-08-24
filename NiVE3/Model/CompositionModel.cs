@@ -724,10 +724,11 @@ namespace NiVE3.Model
         {
             if (IsEnableMotionBlur && Layers.Any(l => l.IsMotionBlurTarget()))
             {
+                var shatterStartTime = FrameDuration * ShutterPhase / 360.0F;
                 var hash = new XxHash3();
                 if (downSamplingRate == 1.0)
                 {
-                    CalcCacheHash(hash, time);
+                    CalcCacheHash(hash, time, 0.0, false);
                 }
 
                 var cacheKey = hash.ToInt128();
@@ -735,14 +736,13 @@ namespace NiVE3.Model
                 {
                     var frameBlendRatio = 1.0F / MotionBlurSampleCount;
                     var subFrameInterval = (FrameDuration * ShutterAngle / 360.0) / MotionBlurSampleCount;
-                    var shatterStartTime = time + FrameDuration * ShutterPhase / 360.0F;
                     if (useGpu)
                     {
                         var device = AcceleratorModel.CurrentDevice;
                         var result = new NGPUImage(Width, Height, device);
                         for (var i = 0; i < MotionBlurSampleCount; i++)
                         {
-                            using var subFrame = RenderFrameInternal(Math.Max(shatterStartTime + subFrameInterval * i, 0.0), downSamplingRate, applyToneMapping, useGpu);
+                            using var subFrame = RenderFrameInternal(time, shatterStartTime +subFrameInterval * i, true, downSamplingRate, applyToneMapping, useGpu);
 
                             var gpuImage = subFrame switch
                             {
@@ -776,7 +776,7 @@ namespace NiVE3.Model
                         var result = new NManagedImage(Width, Height);
                         for (var i = 0; i < MotionBlurSampleCount; i++)
                         {
-                            using var subFrame = RenderFrameInternal(Math.Max(shatterStartTime + subFrameInterval * i, 0.0), downSamplingRate, applyToneMapping, useGpu);
+                            using var subFrame = RenderFrameInternal(time, shatterStartTime + subFrameInterval * i, true, downSamplingRate, applyToneMapping, useGpu);
 
                             var managedImage = subFrame switch
                             {
@@ -833,7 +833,7 @@ namespace NiVE3.Model
             }
             else
             {
-                return RenderFrameInternal(time, downSamplingRate, applyToneMapping, useGpu);
+                return RenderFrameInternal(time, 0.0, false, downSamplingRate, applyToneMapping, useGpu);
             }
         }
 
@@ -1134,7 +1134,7 @@ namespace NiVE3.Model
             return Layers.FirstOrDefault(l => l.LayerId == layerId);
         }
 
-        NImage RenderFrameInternal(double time, double downSamplingRate, bool applyToneMapping, bool useGpu)
+        NImage RenderFrameInternal(double time, double shutterTime, bool isSubFrame, double downSamplingRate, bool applyToneMapping, bool useGpu)
         {
             var cameraSetting = Layers.FirstOrDefault(l => l.IsEnableVideo && l.IsCamera && l.IsContainsTime(time))?.GetCameraSetting(time);
 
@@ -1143,21 +1143,21 @@ namespace NiVE3.Model
 
             var hasImageSolo = Layers.Any(l => l.HasImage && l.IsEnableVideo && l.IsEnableSolo);
             var useLayers = Layers.Where(l => l.HasImage && l.IsEnableVideo && (!hasImageSolo || l.IsEnableSolo)).Reverse().ToArray();
+            var subFrameTime = Math.Max(time + shutterTime, 0.0);
 
             var hash = new XxHash3();
             if (downSamplingRate == 1.0)
             {
-                CalcCacheHash(hash, time);
+                CalcCacheHash(hash, time, shutterTime, isSubFrame);
             }
 
             NImage result;
             var cacheKey = hash.ToInt128();
-            if (downSamplingRate != 1.0 || !ImageCache.TryGet(CompositionId, cacheKey, time, out var cachedImage))
+            if (downSamplingRate != 1.0 || !ImageCache.TryGet(CompositionId, cacheKey, IsEnableMotionBlur ? subFrameTime : time, out var cachedImage))
             {
                 var allImages = new List<IDisposable>();
                 try
                 {
-
                     Renderer.BeginRendering(downSamplingRate, useGpu);
 
                     if (cameraSetting != null)
@@ -1178,7 +1178,8 @@ namespace NiVE3.Model
                     var rawImages = new List<(LayerModel, RenderableImage)>();
                     foreach (var l in useLayers)
                     {
-                        if (!l.IsContainsTime(time))
+                        var currentTime = IsEnableMotionBlur && l.IsEnableMotionBlur ? subFrameTime : time;
+                        if (!l.IsContainsTime(currentTime))
                         {
                             continue;
                         }
@@ -1191,7 +1192,7 @@ namespace NiVE3.Model
                             }
                             images.Clear();
 
-                            using var adjustmentMaskImage = l.GetRawImage(time, downSamplingRate, true, useGpu);
+                            using var adjustmentMaskImage = l.GetRawImage(currentTime, downSamplingRate, true, useGpu);
                             if (adjustmentMaskImage == null)
                             {
                                 continue;
@@ -1199,7 +1200,7 @@ namespace NiVE3.Model
 
                             var mask = Renderer.RenderAdjustmentMask(adjustmentMaskImage);
                             var currentRenderingFrame = Renderer.GetCurrentRenderedImage();
-                            var (roi, currentFrame) = l.ProcessAdjustment(time, currentRenderingFrame, Width / (double)currentRenderingFrame.Width, Height / (double)currentRenderingFrame.Height, useGpu);
+                            var (roi, currentFrame) = l.ProcessAdjustment(currentTime, currentRenderingFrame, Width / (double)currentRenderingFrame.Width, Height / (double)currentRenderingFrame.Height, useGpu);
 
                             if (mask is GPURasterizedMaskImage gpuMaskImage)
                             {
@@ -1232,7 +1233,7 @@ namespace NiVE3.Model
                             var isRawImage = l.IsImage && !l.IsCustomizableFootageSource && !l.HasEffect;
 
                             var (prevLayer, rawImage) = isRawImage ? rawImages.FirstOrDefault(t => l.IsSameFootage(t.Item1)) : (null, null);
-                            var image = (prevLayer != null && rawImage != null ? l.GetSameImage(time, downSamplingRate, true, useGpu, rawImage) : null) ?? l.GetImage(time, downSamplingRate, true, useGpu);
+                            var image = (prevLayer != null && rawImage != null ? l.GetSameImage(currentTime, downSamplingRate, true, useGpu, rawImage) : null) ?? l.GetImage(currentTime, downSamplingRate, true, useGpu);
                             if (image != null)
                             {
                                 images.Add(image);
@@ -1491,8 +1492,14 @@ namespace NiVE3.Model
             HistoryModel.EndGroup();
         }
 
-        void CalcCacheHash(XxHash3 hash, double time)
+        void CalcCacheHash(XxHash3 hash, double time, double shutterTime, bool isSubFrame)
         {
+            if (IsEnableMotionBlur)
+            {
+                time = Math.Max(time + shutterTime, 0.0);
+                hash.Append(isSubFrame);
+            }
+
             var cameraSetting = Layers.FirstOrDefault(l => l.IsEnableVideo && l.IsCamera && l.IsContainsTime(time))?.GetCameraSetting(time);
 
             var hasLightSolo = Layers.Any(l => l.IsLight && l.IsEnableVideo && l.IsEnableSolo);
