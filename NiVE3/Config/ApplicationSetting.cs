@@ -17,12 +17,19 @@ namespace NiVE3.Config
 
         private ApplicationSetting() { }
 
-        public double Appearance { get; set; } = 1.0;
+        public event EventHandler? UpdateSetting;
+
+        public bool IsDarkMode { get; set; }
 
         public string SolidFolderName { get; set; } = "Solid";
 
-        public bool UseGpu { get; set; } = true;
+        public bool ForceUseCpu { get; set; }
 
         public string UseGpuLuid { get; set; } = "";
+
+        public void RaiseUpdateSetting()
+        {
+            UpdateSetting?.Invoke(this, EventArgs.Empty);
+        }
     }
 }

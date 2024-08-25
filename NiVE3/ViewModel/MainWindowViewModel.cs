@@ -81,6 +81,8 @@ namespace NiVE3.ViewModel
 
         public ICommand ExitCommand { get; }
 
+        public ICommand OpenSettingCommand { get; }
+
         public ICommand NewCompositionCommand { get; }
 
         public ICommand RemoveViewModelCommand { get; }
@@ -146,6 +148,11 @@ namespace NiVE3.ViewModel
             });
 
             ExitCommand = new DelegateCommand(() => System.Diagnostics.Debug.WriteLine("Exec Command: ExitCommand"));
+
+            OpenSettingCommand = new DelegateCommand(() =>
+            {
+                DialogService.ShowDialog(nameof(OptionView));
+            });
 
             NewCompositionCommand = new DelegateCommand(() =>
             {

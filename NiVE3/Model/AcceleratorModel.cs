@@ -14,26 +14,27 @@ namespace NiVE3.Model
     {
         public static readonly bool HasHardwareAcceleratedGPU;
 
-        private GraphicsDevice? graphicsDevice;
+        private GraphicsDevice? currentDevice;
         public GraphicsDevice CurrentDevice
         {
             get
             {
                 // NOTE: HasHardwareAcceleratedGPUよりも先に使用するGraphicsDeviceを生成しないようにする
-                if (graphicsDevice == null)
+                if (currentDevice == null)
                 {
-                    graphicsDevice = GraphicsDevice.QueryDevices(d => d.IsHardwareAccelerated && d.Luid.ToString() == ApplicationSetting.Setting.UseGpuLuid).FirstOrDefault();
-                    if (graphicsDevice == null)
+                    currentDevice = GraphicsDevice.QueryDevices(d => d.IsHardwareAccelerated && d.Luid.ToString() == ApplicationSetting.Setting.UseGpuLuid).FirstOrDefault();
+                    if (currentDevice == null)
                     {
-                        graphicsDevice = GraphicsDevice.GetDefault();
-                        if (!graphicsDevice.IsHardwareAccelerated)
+                        currentDevice = GraphicsDevice.GetDefault();
+                        if (!currentDevice.IsHardwareAccelerated)
                         {
-                            graphicsDevice = GraphicsDevice.QueryDevices(d => d.IsHardwareAccelerated).FirstOrDefault() ?? graphicsDevice;
+                            currentDevice = GraphicsDevice.QueryDevices(d => d.IsHardwareAccelerated).FirstOrDefault() ?? currentDevice;
                         }
                     }
+                    currentDevice.DeviceLost += GraphicsDevice_DeviceLost;
                 }
 
-                return graphicsDevice;
+                return currentDevice;
             }
         }
 
@@ -48,9 +49,34 @@ namespace NiVE3.Model
             }
         }
 
+        public AcceleratorModel()
+        {
+            ApplicationSetting.Setting.UpdateSetting += Setting_UpdateSetting;
+        }
+
         public void Dispose()
         {
-            graphicsDevice?.Dispose();
+            currentDevice?.Dispose();
+        }
+
+        private void GraphicsDevice_DeviceLost(object? sender, DeviceLostEventArgs e)
+        {
+            currentDevice = null;
+        }
+
+        private void Setting_UpdateSetting(object? sender, EventArgs e)
+        {
+            if (currentDevice == null)
+            {
+                return;
+            }
+
+            var oldDevice = currentDevice;
+            currentDevice = null;
+            if (CurrentDevice != oldDevice && oldDevice != GraphicsDevice.GetDefault())
+            {
+                oldDevice.Dispose();
+            }
         }
     }
 }

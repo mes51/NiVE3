@@ -27,14 +27,20 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("ファイル(_F)")]
         public static readonly string MainWindow_Menu_File = nameof(MainWindow_Menu_File);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("プロジェクトを開く(_O)")]
-        public static readonly string MainWindow_Menu_OpenProject = nameof(MainWindow_Menu_OpenProject);
-
-        [ShowInMarkup, LanguageKey, DefaultValue("終了(_X)")]
-        public static readonly string MainWindow_Menu_Exit = nameof(MainWindow_Menu_Exit);
-
         [ShowInMarkup, LanguageKey, DefaultValue("表示(_V)")]
         public static readonly string MainWindow_Menu_View = nameof(MainWindow_Menu_View);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("ツール(_T)")]
+        public static readonly string MainWindow_Menu_Tool = nameof(MainWindow_Menu_Tool);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("プロジェクトを開く(_O)")]
+        public static readonly string MainWindow_MenuItem_OpenProject = nameof(MainWindow_MenuItem_OpenProject);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("終了(_X)")]
+        public static readonly string MainWindow_MenuItem_Exit = nameof(MainWindow_MenuItem_Exit);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("環境設定(_O)...")]
+        public static readonly string MainWindow_MenuItem_OpenSetting = nameof(MainWindow_MenuItem_OpenSetting);
 
         [ShowInMarkup, LanguageKey, DefaultValue("再生コントロール")]
         public static readonly string PlayControlView_Title = nameof(PlayControlView_Title);
@@ -206,6 +212,9 @@ namespace NiVE3.View.Resource
 
         [ShowInMarkup, LanguageKey, DefaultValue("色の選択")]
         public static readonly string ColorPickerDialog_Title = nameof(ColorPickerDialog_Title);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("適用")]
+        public static readonly string Dialog_Apply = nameof(Dialog_Apply);
 
         [ShowInMarkup, LanguageKey, DefaultValue("OK")]
         public static readonly string Dialog_OK = nameof(Dialog_OK);
@@ -461,6 +470,30 @@ namespace NiVE3.View.Resource
 
         [ShowInMarkup, LanguageKey, DefaultValue("レンダリング設定の変更")]
         public static readonly string RenderQueueItemView_Button_EditSetting = nameof(RenderQueueItemView_Button_EditSetting);
+
+        [DefaultValue("環境設定")]
+        public static readonly string OptionView_Title = nameof(OptionView_Title);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("全般")]
+        public static readonly string OptionView_Category_General = nameof(OptionView_Category_General);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("パフォーマンス")]
+        public static readonly string OptionView_Category_Performance = nameof(OptionView_Category_Performance);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("平面のフォルダ名")]
+        public static readonly string OptionView_General_SolidFilderName = nameof(OptionView_General_SolidFilderName);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("GPU設定")]
+        public static readonly string OptionView_Performance_GpuSetting = nameof(OptionView_Performance_GpuSetting);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("GPUを使用しない")]
+        public static readonly string OptionView_Performance_ForceUseCpu = nameof(OptionView_Performance_ForceUseCpu);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("使用するGPU:")]
+        public static readonly string OptionView_Performance_UseGpuDevice_Label = nameof(OptionView_Performance_UseGpuDevice_Label);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("(デフォルト)")]
+        public static readonly string OptionView_Performance_UseGpuDevice_Default = nameof(OptionView_Performance_UseGpuDevice_Default);
 
         // Effect category names
 

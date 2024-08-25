@@ -6,13 +6,14 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Data;
 
-namespace NiVE3.UI.Converter
+namespace NiVE3.View.Converter
 {
-    public class EqualValueConverter : IValueConverter
+    [ValueConversion(typeof(object), typeof(string))]
+    class ToStringConverter : IValueConverter
     {
         public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
-            return (value == null && parameter == null) || (value != null && parameter != null && value.Equals(parameter));
+            return value?.ToString() ?? "";
         }
 
         public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)

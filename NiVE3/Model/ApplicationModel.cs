@@ -15,7 +15,7 @@ namespace NiVE3.Model
         private bool useGpu;
         public bool UseGpu
         {
-            get { return useGpu; }
+            get { return !ApplicationSetting.Setting.ForceUseCpu && useGpu; }
             set { SetProperty(ref useGpu, value); }
         }
 
@@ -30,7 +30,7 @@ namespace NiVE3.Model
 
         public ApplicationModel()
         {
-            UseGpu = ApplicationSetting.Setting.UseGpu && AcceleratorModel.HasHardwareAcceleratedGPU;
+            UseGpu = AcceleratorModel.HasHardwareAcceleratedGPU;
         }
 
         public void CaughtGPUException(GPUException ex)

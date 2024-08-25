@@ -79,6 +79,7 @@ namespace NiVE3.Module
             containerRegistry.RegisterDialog<PluginSettingView, PluginSettingViewModel>();
             containerRegistry.RegisterDialog<CompositionSettingView, CompositionSettingViewModel>();
             containerRegistry.RegisterDialog<RenderSettingView, RenderSettingViewModel>();
+            containerRegistry.RegisterDialog<OptionView, OptionViewModel>();
         }
     }
 }

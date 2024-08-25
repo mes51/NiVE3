@@ -13,7 +13,7 @@
              PreviewMouseDown="Root_PreviewMouseDown"
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
-        <cv:EqualValueConverter x:Key="EqualValueConverter"/>
+        <cv:EqualMultiValueConverter x:Key="EqualMultiValueConverter"/>
 
         <Style x:Key="SelectorMenuItem" TargetType="{x:Type MenuItem}" BasedOn="{StaticResource {x:Type MenuItem}}">
             <Setter Property="IsChecked" Value="False"/>
@@ -21,7 +21,7 @@
             <Style.Triggers>
                 <DataTrigger Value="True">
                     <DataTrigger.Binding>
-                        <MultiBinding Converter="{StaticResource EqualValueConverter}">
+                        <MultiBinding Converter="{StaticResource EqualMultiValueConverter}">
                             <Binding Path="DataContext" RelativeSource="{RelativeSource Self}"/>
                             <Binding Path="SelectedItem" Source="{x:Reference Root}"/>
                         </MultiBinding>

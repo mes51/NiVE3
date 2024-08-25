@@ -1,0 +1,106 @@
+﻿<UserControl x:Class="NiVE3.View.Dialog.OptionView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:NiVE3.View.Dialog"
+             xmlns:pr="http://prismlibrary.com/"
+             xmlns:vm="clr-namespace:NiVE3.ViewModel.Dialog"
+             xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
+             xmlns:ucv="clr-namespace:NiVE3.UI.Converter;assembly=NiVE3.UI"
+             xmlns:cv="clr-namespace:NiVE3.View.Converter"
+             xmlns:mk="clr-namespace:NiVE3.Wpf.Markup"
+             xmlns:vl="clr-namespace:NiVE3.View.Validation"
+             mc:Ignorable="d" 
+             pr:ViewModelLocator.AutoWireViewModel="True"
+             Height="450"
+             Width="800">
+    <UserControl.Resources>
+        <cv:ConverterCollection x:Key="SelectTypeConverter">
+            <cv:ConverterItem>
+                <cv:ToStringConverter />
+            </cv:ConverterItem>
+            <cv:ConverterItem>
+                <ucv:EqualValueConverter />
+            </cv:ConverterItem>
+            <cv:ConverterItem>
+                <BooleanToVisibilityConverter />
+            </cv:ConverterItem>
+        </cv:ConverterCollection>
+        <cv:BooleanInvertConverter x:Key="BooleanInvertConverter"/>
+
+        <Thickness x:Key="ItemMargin">0,10,0,0</Thickness>
+        <Thickness x:Key="GroupBoxInnerMargin">10</Thickness>
+
+        <Style x:Key="SettingPanelStyle" TargetType="{x:Type ScrollViewer}">
+            <Setter Property="HorizontalScrollBarVisibility" Value="Hidden"/>
+            <Setter Property="VerticalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="Margin" Value="10,0,0,0"/>
+        </Style>
+
+        <Style x:Key="ExecApplyButtonStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ElementName=SolidFolderNameTextBox, Path=(Validation.HasError)}" Value="True">
+                    <Setter Property="IsEnabled" Value="False"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+
+        <ListBox Grid.Row="0" Grid.Column="0" x:Name="SettingType" Width="150" SelectedIndex="0">
+            <ListBoxItem Content="{gm:LanguageResource ResourceKey=OptionView_Category_General}"/>
+            <ListBoxItem Content="{gm:LanguageResource ResourceKey=OptionView_Category_Performance}"/>
+        </ListBox>
+
+        <ScrollViewer Grid.Row="0" Grid.Column="1" Style="{StaticResource SettingPanelStyle}" Visibility="{Binding ElementName=SettingType, Path=SelectedIndex, Converter={StaticResource SelectTypeConverter}, ConverterParameter=0}">
+            <StackPanel>
+                <GroupBox Header="{gm:LanguageResource ResourceKey=OptionView_General_SolidFilderName}">
+                    <TextBox x:Name="SolidFolderNameTextBox" Margin="{StaticResource GroupBoxInnerMargin}">
+                        <TextBox.Text>
+                            <Binding Path="SolidFolderName" UpdateSourceTrigger="PropertyChanged">
+                                <Binding.ValidationRules>
+                                    <vl:StringLengthValidationRule MinLength="1"/>
+                                </Binding.ValidationRules>
+                            </Binding>
+                        </TextBox.Text>
+                    </TextBox>
+                </GroupBox>
+            </StackPanel>
+        </ScrollViewer>
+
+        <ScrollViewer Grid.Row="0" Grid.Column="1" Style="{StaticResource SettingPanelStyle}" Visibility="{Binding ElementName=SettingType, Path=SelectedIndex, Converter={StaticResource SelectTypeConverter}, ConverterParameter=1}">
+            <StackPanel>
+                <GroupBox Header="{gm:LanguageResource ResourceKey=OptionView_Performance_GpuSetting}">
+                    <StackPanel Margin="{StaticResource GroupBoxInnerMargin}">
+                        <CheckBox Content="{gm:LanguageResource ResourceKey=OptionView_Performance_ForceUseCpu}" IsChecked="{Binding ForceUseCpu}"/>
+                        <Grid Margin="{StaticResource ItemMargin}" IsEnabled="{Binding ForceUseCpu, Converter={StaticResource BooleanInvertConverter}}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=OptionView_Performance_UseGpuDevice_Label}" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                            <ComboBox Grid.Column="1" ItemsSource="{x:Static vm:OptionViewModel.AvailableGpuDevices}" SelectedItem="{Binding SelectedGpuDevice}" DisplayMemberPath="Item2"/>
+                        </Grid>
+                    </StackPanel>
+                </GroupBox>
+            </StackPanel>
+        </ScrollViewer>
+
+        <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,10,0,0" HorizontalAlignment="Right">
+            <Button Content="{gm:LanguageResource ResourceKey=Dialog_Apply}" Style="{StaticResource ExecApplyButtonStyle}" Command="{Binding ApplyCommand}"/>
+            <Button Content="{gm:LanguageResource ResourceKey=Dialog_OK}" Style="{StaticResource ExecApplyButtonStyle}" Margin="5,0,0,0" Command="{Binding OKCommand}"/>
+            <Button Content="{gm:LanguageResource ResourceKey=Dialog_Cancel}"  Margin="5,0,0,0" Command="{Binding CancelCommand}"/>
+        </StackPanel>
+    </Grid>
+</UserControl>

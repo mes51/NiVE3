@@ -14,7 +14,7 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
         <cv:EnumToLocalizedNameConverter x:Key="EnumToLocalizedNameConverter"/>
-        <ucv:EqualValueConverter x:Key="EqualValueConverter"/>
+        <ucv:EqualMultiValueConverter x:Key="EqualMultiValueConverter"/>
         <!-- NOTE: なぜか一番上に持って行くとXamlReaderがエラーを吐く -->
         <BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
 
@@ -26,7 +26,7 @@
             <Style.Triggers>
                 <DataTrigger Value="True">
                     <DataTrigger.Binding>
-                        <MultiBinding Converter="{StaticResource EqualValueConverter}">
+                        <MultiBinding Converter="{StaticResource EqualMultiValueConverter}">
                             <Binding Path="DataContext" RelativeSource="{RelativeSource Self}"/>
                             <Binding Path="DataContext.AudioWaveFormType" Source="{x:Reference Root}"/>
                         </MultiBinding>
