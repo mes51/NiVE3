@@ -74,6 +74,9 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("ソート")]
         public const string Stylize_PixelSort_Sort = nameof(Stylize_PixelSort_Sort);
 
+        [LanguageKey, DefaultValue("ソート順")]
+        public const string Stylize_PixelSort_SortOrder = nameof(Stylize_PixelSort_SortOrder);
+
         [LanguageKey, DefaultValue("チャンネル")]
         public const string Stylize_PixelSort_Channel = nameof(Stylize_PixelSort_Channel);
 
@@ -593,6 +596,12 @@ namespace NiVE3.PresetPlugin.Resource
 
         [DefaultValue("横")]
         public const string SortMode_Horizontal = nameof(SortMode_Horizontal);
+
+        [DefaultValue("昇順")]
+        public const string SortOrder_Ascending = nameof(SortOrder_Ascending);
+
+        [DefaultValue("降順")]
+        public const string SortOrder_Descending = nameof(SortOrder_Descending);
 
         [DefaultValue("RGB")]
         public const string ChannelType_RGB = nameof(ChannelType_RGB);

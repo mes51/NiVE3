@@ -35,6 +35,8 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
 
         const string PropertySortTargetChannelId = nameof(PropertySortTargetChannelId);
 
+        const string PropertySortOrderId = nameof(PropertySortOrderId);
+
         public void SetupAccelerator(IAcceleratorObject accelerator) { }
 
         public PropertyBase[] GetProperties()
@@ -43,6 +45,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
                 new DoubleProperty(PropertyThresholdId, LanguageResourceDictionary.ResourceKeys.Stylize_PixelSort_Threshold, 0.5, float.MinValue, float.MaxValue, slideChangeValue: 0.01, digit: 2),
                 new EnumProperty(PropertyThresholdModeId, LanguageResourceDictionary.ResourceKeys.Stylize_PixelSort_Mode, typeof(ThresholdMode), typeof(LanguageResourceDictionary), ThresholdMode.Darkness, selectBoxWidth: 90),
                 new EnumProperty(PropertySortModeId, LanguageResourceDictionary.ResourceKeys.Stylize_PixelSort_Sort, typeof(SortMode), typeof(LanguageResourceDictionary), SortMode.Horizontal, selectBoxWidth: 90),
+                new EnumProperty(PropertySortOrderId, LanguageResourceDictionary.ResourceKeys.Stylize_PixelSort_SortOrder, typeof(SortOrder), typeof(LanguageResourceDictionary), SortOrder.Ascending, selectBoxWidth: 90),
                 new EnumProperty(PropertySortTargetChannelId, LanguageResourceDictionary.ResourceKeys.Stylize_PixelSort_Channel, typeof(ChannelType), typeof(LanguageResourceDictionary), ChannelType.RGB, selectBoxWidth: 90),
             ];
         }
@@ -52,6 +55,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
             var threshold = (float)properties.GetValue(PropertyThresholdId, layerTime, 0.5);
             var mode = properties.GetValue(PropertyThresholdModeId, layerTime, ThresholdMode.Brightness);
             var sort = properties.GetValue(PropertySortModeId, layerTime, SortMode.Horizontal);
+            var order = properties.GetValue(PropertySortOrderId, layerTime, SortOrder.Ascending);
             var channel = properties.GetValue(PropertySortTargetChannelId, layerTime, ChannelType.RGB);
 
             NManagedImage managedImage;
@@ -65,13 +69,27 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
                 managedImage = (NManagedImage)image;
             }
 
+            var comparison = (channel, order) switch
+            {
+                (ChannelType.RGB, SortOrder.Descending) => CompareRGBDescending,
+                (ChannelType.R, SortOrder.Ascending) => CompareRAscending,
+                (ChannelType.R, SortOrder.Descending) => CompareRDescending,
+                (ChannelType.G, SortOrder.Ascending) => CompareGAscending,
+                (ChannelType.G, SortOrder.Descending) => CompareGDescending,
+                (ChannelType.B, SortOrder.Ascending) => CompareBAscending,
+                (ChannelType.B, SortOrder.Descending) => CompareBDescending,
+                (ChannelType.A, SortOrder.Ascending) => CompareAAscending,
+                (ChannelType.A, SortOrder.Descending) => CompareADescending,
+                _ => (Comparison<Vector4>)CompareRGBAscending
+            };
+
             switch (sort)
             {
                 case SortMode.Vertical:
-                    SortVertical(managedImage, roi.Left, roi.Top, roi.Right, roi.Bottom, threshold, mode, channel);
+                    SortVertical(managedImage, roi.Left, roi.Top, roi.Right, roi.Bottom, threshold, mode, channel, comparison);
                     break;
                 default:
-                    SortHorizontal(managedImage, roi.Left, roi.Top, roi.Right, roi.Bottom, threshold, mode, channel);
+                    SortHorizontal(managedImage, roi.Left, roi.Top, roi.Right, roi.Bottom, threshold, mode, channel, comparison);
                     break;
             }
 
@@ -85,7 +103,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
 
         public void Dispose() { }
 
-        static void SortVertical(NManagedImage image, int left, int top, int right, int bottom, float threshold, ThresholdMode mode, ChannelType channel)
+        static void SortVertical(NManagedImage image, int left, int top, int right, int bottom, float threshold, ThresholdMode mode, ChannelType channel, Comparison<Vector4> comparison)
         {
             var imageWidth = image.Width;
             var imageHeight = image.Height;
@@ -102,7 +120,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
                 }
             });
 
-            SortHorizontal(temp, top, left, bottom, right, threshold, mode, channel);
+            SortHorizontal(temp, top, left, bottom, right, threshold, mode, channel, comparison);
 
             Parallel.For(0, imageWidth, x =>
             {
@@ -114,7 +132,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
             });
         }
 
-        static void SortHorizontal(NManagedImage image, int left, int top, int right, int bottom, float threshold, ThresholdMode mode, ChannelType channel)
+        static void SortHorizontal(NManagedImage image, int left, int top, int right, int bottom, float threshold, ThresholdMode mode, ChannelType channel, Comparison<Vector4> comparison)
         {
             var imageData = image.Data;
             var imageWidth = image.Width;
@@ -124,218 +142,46 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
                 var data = imageData.AsSpan(y * imageWidth + left, right - left);
                 var x = 0;
                 var next = 0;
-                switch (channel)
+
+                if (mode == ThresholdMode.Brightness)
                 {
-                    case ChannelType.RGB:
-                        if (mode == ThresholdMode.Brightness)
+                    while (x < data.Length)
+                    {
+                        x = SearchXBrightnessRGB(data, x, threshold);
+                        next = SearchXDarknessRGB(data, x + 1, threshold);
+
+                        if (x < 0)
                         {
-                            while (x < data.Length)
-                            {
-                                x = SearchXBrightnessRGB(data, x, threshold);
-                                next = SearchXDarknessRGB(data, x + 1, threshold);
-
-                                if (x < 0)
-                                {
-                                    break;
-                                }
-                                if (next < 0)
-                                {
-                                    next = data.Length;
-                                }
-
-                                data[x..next].Sort(CompareRGB);
-                                x = next + 1;
-                            }
+                            break;
                         }
-                        else
+                        if (next < 0)
                         {
-                            while (x < data.Length)
-                            {
-                                x = SearchXDarknessRGB(data, x, threshold);
-                                next = SearchXBrightnessRGB(data, x + 1, threshold);
-
-                                if (x < 0)
-                                {
-                                    break;
-                                }
-                                if (next < 0)
-                                {
-                                    next = data.Length;
-                                }
-
-                                data[x..next].Sort(CompareRGB);
-                                x = next + 1;
-                            }
+                            next = data.Length;
                         }
-                        break;
-                    case ChannelType.R:
-                        if (mode == ThresholdMode.Brightness)
+
+                        data[x..next].Sort(comparison);
+                        x = next + 1;
+                    }
+                }
+                else
+                {
+                    while (x < data.Length)
+                    {
+                        x = SearchXDarknessRGB(data, x, threshold);
+                        next = SearchXBrightnessRGB(data, x + 1, threshold);
+
+                        if (x < 0)
                         {
-                            while (x < data.Length)
-                            {
-                                x = SearchXBrightnessR(data, x, threshold);
-                                next = SearchXDarknessR(data, x + 1, threshold);
-
-                                if (x < 0)
-                                {
-                                    break;
-                                }
-                                if (next < 0)
-                                {
-                                    next = data.Length;
-                                }
-
-                                data[x..next].Sort(CompareR);
-                                x = next + 1;
-                            }
+                            break;
                         }
-                        else
+                        if (next < 0)
                         {
-                            while (x < data.Length)
-                            {
-                                x = SearchXDarknessR(data, x, threshold);
-                                next = SearchXBrightnessR(data, x + 1, threshold);
-
-                                if (x < 0)
-                                {
-                                    break;
-                                }
-                                if (next < 0)
-                                {
-                                    next = data.Length;
-                                }
-
-                                data[x..next].Sort(CompareR);
-                                x = next + 1;
-                            }
+                            next = data.Length;
                         }
-                        break;
-                    case ChannelType.G:
-                        if (mode == ThresholdMode.Brightness)
-                        {
-                            while (x < data.Length)
-                            {
-                                x = SearchXBrightnessG(data, x, threshold);
-                                next = SearchXDarknessG(data, x + 1, threshold);
 
-                                if (x < 0)
-                                {
-                                    break;
-                                }
-                                if (next < 0)
-                                {
-                                    next = data.Length;
-                                }
-
-                                data[x..next].Sort(CompareG);
-                                x = next + 1;
-                            }
-                        }
-                        else
-                        {
-                            while (x < data.Length)
-                            {
-                                x = SearchXDarknessG(data, x, threshold);
-                                next = SearchXBrightnessG(data, x + 1, threshold);
-
-                                if (x < 0)
-                                {
-                                    break;
-                                }
-                                if (next < 0)
-                                {
-                                    next = data.Length;
-                                }
-
-                                data[x..next].Sort(CompareG);
-                                x = next + 1;
-                            }
-                        }
-                        break;
-                    case ChannelType.B:
-                        if (mode == ThresholdMode.Brightness)
-                        {
-                            while (x < data.Length)
-                            {
-                                x = SearchXBrightnessB(data, x, threshold);
-                                next = SearchXDarknessB(data, x + 1, threshold);
-
-                                if (x < 0)
-                                {
-                                    break;
-                                }
-                                if (next < 0)
-                                {
-                                    next = data.Length;
-                                }
-
-                                data[x..next].Sort(CompareB);
-                                x = next + 1;
-                            }
-                        }
-                        else
-                        {
-                            while (x < data.Length)
-                            {
-                                x = SearchXDarknessB(data, x, threshold);
-                                next = SearchXBrightnessB(data, x + 1, threshold);
-
-                                if (x < 0)
-                                {
-                                    break;
-                                }
-                                if (next < 0)
-                                {
-                                    next = data.Length;
-                                }
-
-                                data[x..next].Sort(CompareB);
-                                x = next + 1;
-                            }
-                        }
-                        break;
-                    case ChannelType.A:
-                        if (mode == ThresholdMode.Brightness)
-                        {
-                            while (x < data.Length)
-                            {
-                                x = SearchXBrightnessA(data, x, threshold);
-                                next = SearchXDarknessA(data, x + 1, threshold);
-
-                                if (x < 0)
-                                {
-                                    break;
-                                }
-                                if (next < 0)
-                                {
-                                    next = data.Length;
-                                }
-
-                                data[x..next].Sort(CompareB);
-                                x = next + 1;
-                            }
-                        }
-                        else
-                        {
-                            while (x < data.Length)
-                            {
-                                x = SearchXDarknessA(data, x, threshold);
-                                next = SearchXBrightnessA(data, x + 1, threshold);
-
-                                if (x < 0)
-                                {
-                                    break;
-                                }
-                                if (next < 0)
-                                {
-                                    next = data.Length;
-                                }
-
-                                data[x..next].Sort(CompareA);
-                                x = next + 1;
-                            }
-                        }
-                        break;
+                        data[x..next].Sort(comparison);
+                        x = next + 1;
+                    }
                 }
             });
         }
@@ -521,45 +367,81 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static int CompareRGB(Vector4 a, Vector4 b)
+        static int CompareRGBAscending(Vector4 a, Vector4 b)
         {
             return (a * Const.ConvertToGrayScale).HorizontalAdd().CompareTo((b * Const.ConvertToGrayScale).HorizontalAdd());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static int CompareR(Vector4 a, Vector4 b)
+        static int CompareRGBDescending(Vector4 a, Vector4 b)
+        {
+            return (b * Const.ConvertToGrayScale).HorizontalAdd().CompareTo((a * Const.ConvertToGrayScale).HorizontalAdd());
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static int CompareRAscending(Vector4 a, Vector4 b)
         {
             return a.Z.CompareTo(b.Z);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static int CompareG(Vector4 a, Vector4 b)
+        static int CompareRDescending(Vector4 a, Vector4 b)
+        {
+            return b.Z.CompareTo(a.Z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static int CompareGAscending(Vector4 a, Vector4 b)
         {
             return a.Y.CompareTo(b.Y);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static int CompareB(Vector4 a, Vector4 b)
+        static int CompareGDescending(Vector4 a, Vector4 b)
+        {
+            return b.Y.CompareTo(a.Y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static int CompareBAscending(Vector4 a, Vector4 b)
         {
             return a.X.CompareTo(b.X);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static int CompareA(Vector4 a, Vector4 b)
+        static int CompareBDescending(Vector4 a, Vector4 b)
+        {
+            return b.X.CompareTo(a.X);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static int CompareAAscending(Vector4 a, Vector4 b)
         {
             return a.W.CompareTo(b.W);
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static int CompareADescending(Vector4 a, Vector4 b)
+        {
+            return b.W.CompareTo(b.W);
+        }
     }
 
-    public enum ThresholdMode
+    enum ThresholdMode
     {
         Brightness,
         Darkness
     }
 
-    public enum SortMode
+    enum SortMode
     {
         Vertical,
         Horizontal
+    }
+
+    enum SortOrder
+    {
+        Ascending,
+        Descending
     }
 }
