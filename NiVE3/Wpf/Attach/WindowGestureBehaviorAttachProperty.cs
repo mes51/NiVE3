@@ -35,7 +35,7 @@ namespace NiVE3.Wpf.Attach
                 return;
             }
 
-            var behaviors = Interaction.GetBehaviors(sender);
+            var behaviors = Microsoft.Xaml.Behaviors.Interaction.GetBehaviors(sender);
             var behavior = behaviors.FirstOrDefault(b => b is WindowGestureBehavior);
             if (behavior != null)
             {

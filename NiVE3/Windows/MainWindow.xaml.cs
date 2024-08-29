@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,6 +13,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using NiVE3.Config;
+using NiVE3.ViewModel;
 
 namespace NiVE3.Windows
 {
@@ -25,9 +28,31 @@ namespace NiVE3.Windows
             InitializeComponent();
         }
 
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        private void Window_Closing(object sender, CancelEventArgs e)
         {
-            NiVE3.Config.ShortcutKeySetting.Setting.Save();
+            if (DataContext is MainWindowViewModel viewModel)
+            {
+                if (viewModel.IsRendering)
+                {
+                    viewModel.StopRenderingBeforeCloseCommand.Execute(null);
+                    if (!viewModel.IsForceClosing)
+                    {
+                        e.Cancel = true;
+                        return;
+                    }
+                }
+                else if (viewModel.IsEdited)
+                {
+                    viewModel.SaveProjectBeforeCloseCommand.Execute(null);
+                    if (!viewModel.IsForceClosing)
+                    {
+                        e.Cancel = true;
+                        return;
+                    }
+                }
+            }
+
+            ShortcutKeySetting.Setting.Save();
         }
     }
 }

@@ -225,6 +225,11 @@ namespace NiVE3.Model
             });
         }
 
+        public void AbortRendering()
+        {
+            IsAborting = true;
+        }
+
         public RenderQueueItemData[] SaveData()
         {
             return [..Items.Select(i => i.SaveData())];

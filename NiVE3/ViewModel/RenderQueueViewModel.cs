@@ -73,7 +73,7 @@ namespace NiVE3.ViewModel
         }
 
         private bool isAborting;
-        [NeedWire(nameof(RenderQueueModel))]
+        [NeedWire(nameof(RenderQueueModel), IsOneWay = true)]
         public bool IsAborting
         {
             get { return isAborting; }
@@ -140,7 +140,7 @@ namespace NiVE3.ViewModel
                 }
             }, () => (Items.Any(i => i.State == RenderQueueItemState.Ready) || IsRendering) && !IsAborting);
 
-            AbortCommand = new RequerySuggestedCommand(() => IsAborting = true, () => IsRendering);
+            AbortCommand = new RequerySuggestedCommand(() => RenderQueueModel.AbortRendering(), () => IsRendering);
 
             DeleteCommand = new RequerySuggestedCommand<RenderQueueItemViewModel>(vm =>
             {

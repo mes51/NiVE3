@@ -254,6 +254,14 @@ namespace NiVE3.Model
             }
         }
 
+        public void AbortRendering()
+        {
+            if (IsRendering)
+            {
+                RenderQueueModel.AbortRendering();
+            }
+        }
+
         void AddCompositionModel(CompositionModel composition)
         {
             CompositionModels.Add(composition);

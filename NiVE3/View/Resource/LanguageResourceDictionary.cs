@@ -726,6 +726,18 @@ namespace NiVE3.View.Resource
         [DefaultValue("レンダリング中にエラーが発生しました。GPUでの処理中に問題が発生した可能性があるため、CPUでの処理に切り替えます。")]
         public static readonly string Dialog_RaiseGPUException_Text = nameof(Dialog_RaiseGPUException_Text);
 
+        [DefaultValue("確認")]
+        public static readonly string Dialog_NotSaveEditedWhenClose_Title = nameof(Dialog_NotSaveEditedWhenClose_Title);
+
+        [DefaultValue("未保存の編集内容があります。アプリケーション終了前に保存しますか?")]
+        public static readonly string Dialog_NotSaveEditedWhenClose_Text = nameof(Dialog_NotSaveEditedWhenClose_Text);
+
+        [DefaultValue("確認")]
+        public static readonly string Dialog_StopRenderingWhenClose_Title = nameof(Dialog_StopRenderingWhenClose_Title);
+
+        [DefaultValue("現在レンダリング実行中です。レンダリングを停止してアプリケーションを終了しますか?")]
+        public static readonly string Dialog_StopRenderingWhenClose_Text = nameof(Dialog_StopRenderingWhenClose_Text);
+
         // ValidationRule
 
         [DefaultValue("入力が文字列ではありません")]

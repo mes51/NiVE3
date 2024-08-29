@@ -13,6 +13,8 @@
         xmlns:vm="clr-namespace:NiVE3.ViewModel"
         xmlns:a="clr-namespace:NiVE3.Wpf.Attach"
         xmlns:b="clr-namespace:NiVE3.Wpf.Behavior"
+        xmlns:it="clr-namespace:NiVE3.Wpf.Interaction.Trigger"
+        xmlns:ia="clr-namespace:NiVE3.Wpf.Interaction.Action"
         xmlns:vp="clr-namespace:NiVE3.View.Pane"
         xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
         xmlns:ui="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
@@ -211,4 +213,9 @@
         <b:BorderlessWindowChromeBehavior/>
         -->
     </i:Interaction.Behaviors>
+    <i:Interaction.Triggers>
+        <it:InteractionRequestTrigger SourceObject="{Binding CloseRequest}">
+            <ia:WindowCloseAction />
+        </it:InteractionRequestTrigger>
+    </i:Interaction.Triggers>
 </Window>

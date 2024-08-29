@@ -19,6 +19,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using NiVE3.Wpf.Interaction.Trigger;
+using System.Threading;
 
 namespace NiVE3.ViewModel
 {
@@ -69,11 +71,15 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref isRendering, value); }
         }
 
+        public bool IsForceClosing { get; set; }
+
         public object[] ViewModels => [..MainRegion.Views];
 
         public object[] SingletonViewModels => MainRegion.Views.OfType<SingletonePaneViewModelBase>().ToArray();
 
         public CommandOnlyViewModelBase[] CommandOnlyViewModels => Container.ResolveMany<CommandOnlyViewModelBase>().ToArray();
+
+        public InteractionRequest CloseRequest { get; } = new InteractionRequest();
 
         public ICommand OpenProjectCommand { get; }
 
@@ -86,6 +92,10 @@ namespace NiVE3.ViewModel
         public ICommand NewCompositionCommand { get; }
 
         public ICommand RemoveViewModelCommand { get; }
+
+        public ICommand SaveProjectBeforeCloseCommand { get; }
+
+        public ICommand StopRenderingBeforeCloseCommand { get; }
 
         ProjectModel ProjectModel { get; }
 
@@ -129,25 +139,9 @@ namespace NiVE3.ViewModel
                 ProjectModel.LoadProject(open.FileName);
             });
 
-            SaveProjectCommand = new DelegateCommand(() =>
-            {
-                if (string.IsNullOrEmpty(ProjectModel.ProjectPath))
-                {
-                    var save = new SaveFileDialog
-                    {
-                        Filter = $"{LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_OpenSaveProject_Filter_Project)}(*.nvp3)|*.nvp3"
-                    };
-                    if (!(save.ShowDialog() ?? false))
-                    {
-                        return;
-                    }
-                    ProjectPath = save.FileName;
-                }
+            SaveProjectCommand = new DelegateCommand(() => SaveProject());
 
-                ProjectModel.SaveProject();
-            });
-
-            ExitCommand = new DelegateCommand(() => System.Diagnostics.Debug.WriteLine("Exec Command: ExitCommand"));
+            ExitCommand = new DelegateCommand(() => CloseRequest.Raise());
 
             OpenSettingCommand = new DelegateCommand(() =>
             {
@@ -194,6 +188,47 @@ namespace NiVE3.ViewModel
 
             RemoveViewModelCommand = new DelegateCommand<BindableBase>(MainRegion.Remove);
 
+            SaveProjectBeforeCloseCommand = new DelegateCommand(() =>
+            {
+                var title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_NotSaveEditedWhenClose_Title);
+                var text = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_NotSaveEditedWhenClose_Text);
+                switch (MessageBox.Show(text, title, MessageBoxButton.YesNoCancel))
+                {
+                    case MessageBoxResult.Yes:
+                        SaveProject();
+                        break;
+                    case MessageBoxResult.No:
+                        IsForceClosing = true;
+                        break;
+                }
+            });
+
+            StopRenderingBeforeCloseCommand = new DelegateCommand(() =>
+            {
+                var title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_StopRenderingWhenClose_Title);
+                var text = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_StopRenderingWhenClose_Text);
+                if (MessageBox.Show(text, title, MessageBoxButton.OKCancel, MessageBoxImage.Warning) == MessageBoxResult.OK)
+                {
+                    ProjectModel.AbortRendering();
+                    while (IsRendering)
+                    {
+                        Thread.Sleep(10);
+                        
+                        // NOTE: MAGIC https://hilapon.hatenadiary.org/entry/20130225/1361779314
+                        Application.Current.Dispatcher.Invoke((Action)(() => { }), System.Windows.Threading.DispatcherPriority.Background);
+                    }
+                }
+                else
+                {
+                    return;
+                }
+
+                if (IsEdited)
+                {
+                    SaveProjectBeforeCloseCommand.Execute(null);
+                }
+            });
+
             playControllerModel.ChangeFrameRequest += PlayControllerModel_ChangeFrameRequest;
 
             MainRegion.Views.CollectionChanged += ViewModels_CollectionChanged;
@@ -207,6 +242,24 @@ namespace NiVE3.ViewModel
         }
 
         partial void WiringModel();
+
+        void SaveProject()
+        {
+            if (string.IsNullOrEmpty(ProjectModel.ProjectPath))
+            {
+                var save = new SaveFileDialog
+                {
+                    Filter = $"{LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_OpenSaveProject_Filter_Project)}(*.nvp3)|*.nvp3"
+                };
+                if (!(save.ShowDialog() ?? false))
+                {
+                    return;
+                }
+                ProjectPath = save.FileName;
+            }
+
+            ProjectModel.SaveProject();
+        }
 
         private void ApplicationModel_RaiseGPUException(object? sender, EventArgs e)
         {
