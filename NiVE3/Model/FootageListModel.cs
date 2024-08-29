@@ -253,6 +253,10 @@ namespace NiVE3.Model
             {
                 DeleteFootageInternal(f);
             }
+            foreach (var i in inputs)
+            {
+                DeleteInput(i);
+            }
             HistoryModel.Add(new DeleteFootageHistoryCommand(this, footages, parents, inputs));
 
             OnFootageDeleted(allTargetFootages);
