@@ -127,6 +127,25 @@ namespace NiVE3.ViewModel
 
             OpenProjectCommand = new DelegateCommand(() =>
             {
+                if (IsEdited)
+                {
+                    var title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_NotSaveEditedWhenClose_Title);
+                    var text = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_NotSaveEditedWhenClose_Text);
+                    switch (MessageBox.Show(text, title, MessageBoxButton.YesNoCancel, MessageBoxImage.Warning))
+                    {
+                        case MessageBoxResult.Yes:
+                            if (!SaveProject())
+                            {
+                                return;
+                            }
+                            break;
+                        case MessageBoxResult.No:
+                            break;
+                        default:
+                            return;
+                    }
+                }
+
                 var open = new OpenFileDialog
                 {
                     Filter = $"{LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_OpenSaveProject_Filter_Project)}(*.nvp3)|*.nvp3"
@@ -192,7 +211,7 @@ namespace NiVE3.ViewModel
             {
                 var title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_NotSaveEditedWhenClose_Title);
                 var text = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_NotSaveEditedWhenClose_Text);
-                switch (MessageBox.Show(text, title, MessageBoxButton.YesNoCancel))
+                switch (MessageBox.Show(text, title, MessageBoxButton.YesNoCancel, MessageBoxImage.Warning))
                 {
                     case MessageBoxResult.Yes:
                         SaveProject();
@@ -243,7 +262,7 @@ namespace NiVE3.ViewModel
 
         partial void WiringModel();
 
-        void SaveProject()
+        bool SaveProject()
         {
             if (string.IsNullOrEmpty(ProjectModel.ProjectPath))
             {
@@ -253,12 +272,14 @@ namespace NiVE3.ViewModel
                 };
                 if (!(save.ShowDialog() ?? false))
                 {
-                    return;
+                    return false;
                 }
                 ProjectPath = save.FileName;
             }
 
             ProjectModel.SaveProject();
+
+            return true;
         }
 
         private void ApplicationModel_RaiseGPUException(object? sender, EventArgs e)

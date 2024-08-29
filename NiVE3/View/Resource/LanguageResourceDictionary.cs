@@ -738,6 +738,12 @@ namespace NiVE3.View.Resource
         [DefaultValue("現在レンダリング実行中です。レンダリングを停止してアプリケーションを終了しますか?")]
         public static readonly string Dialog_StopRenderingWhenClose_Text = nameof(Dialog_StopRenderingWhenClose_Text);
 
+        [DefaultValue("確認")]
+        public static readonly string Dialog_NotSaveEditedWhenCloseProject_Title = nameof(Dialog_NotSaveEditedWhenCloseProject_Title);
+
+        [DefaultValue("未保存の編集内容があります。プロジェクトを閉じる前に保存しますか?")]
+        public static readonly string Dialog_NotSaveEditedWhenCloseProject_Text = nameof(Dialog_NotSaveEditedWhenCloseProject_Text);
+
         // ValidationRule
 
         [DefaultValue("入力が文字列ではありません")]
