@@ -168,9 +168,10 @@
         </Grid.RowDefinitions>
         <Menu Grid.Row="0" VerticalAlignment="Top">
             <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_Menu_File}">
-                <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_OpenProject}" a:MenuItemGestureBindingProperty.InputBinding="{Binding ElementName=OpenProjectGesture}"/>
+                <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_File_NewProject}" a:MenuItemGestureBindingProperty.InputBinding="{Binding ElementName=NewProjectGesture}"/>
+                <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_File_OpenProject}" a:MenuItemGestureBindingProperty.InputBinding="{Binding ElementName=OpenProjectGesture}"/>
                 <Separator />
-                <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_Exit}" a:MenuItemGestureBindingProperty.InputBinding="{Binding ElementName=ExitGesture}"/>
+                <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_File_Exit}" a:MenuItemGestureBindingProperty.InputBinding="{Binding ElementName=ExitGesture}"/>
             </MenuItem>
             <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_Menu_View}" ItemsSource="{Binding SingletonViewModels}">
                 <MenuItem.ItemContainerStyle>
@@ -186,7 +187,7 @@
                 </MenuItem.ItemTemplate>
             </MenuItem>
             <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_Menu_Tool}">
-                <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_OpenSetting}" Command="{Binding OpenSettingCommand}"/>
+                <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_Tool_OpenSetting}" Command="{Binding OpenSettingCommand}"/>
             </MenuItem>
         </Menu>
 

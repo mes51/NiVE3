@@ -152,6 +152,36 @@ namespace NiVE3.Model
             PreviewModels.Remove(previewModel);
         }
 
+        public void ClearToNewProject()
+        {
+            foreach (var c in CompositionModels)
+            {
+                OnCompositionRemoved(c);
+                c.Dispose();
+            }
+            RenderQueueModel.Clear();
+            FootageListModel.Clear();
+            HistoryModel.Clear();
+            CompositionModels.Clear();
+            ImageCache.ClearAll();
+            GpuErrorRaised = false;
+
+            foreach (var p in PreviewModels)
+            {
+                switch (p)
+                {
+                    case FootagePreviewModel fp:
+                        fp.Footage = null;
+                        break;
+                    case CompositionPreviewModel cp:
+                        cp.Composition = null;
+                        break;
+                }
+            }
+
+            IsEdited = false;
+        }
+
         public void SaveProject()
         {
             var projectDir = Path.GetDirectoryName(ProjectPath) ?? "";
@@ -178,30 +208,7 @@ namespace NiVE3.Model
                 return;
             }
 
-            foreach (var c in CompositionModels)
-            {
-                OnCompositionRemoved(c);
-                c.Dispose();
-            }
-            RenderQueueModel.Clear();
-            FootageListModel.Clear();
-            HistoryModel.Clear();
-            CompositionModels.Clear();
-            ImageCache.ClearAll();
-            GpuErrorRaised = false;
-
-            foreach (var p in PreviewModels)
-            {
-                switch (p)
-                {
-                    case FootagePreviewModel fp:
-                        fp.Footage = null;
-                        break;
-                    case CompositionPreviewModel cp:
-                        cp.Composition = null;
-                        break;
-                }
-            }
+            ClearToNewProject();
 
             HistoryModel.BeginLoadProject();
             try

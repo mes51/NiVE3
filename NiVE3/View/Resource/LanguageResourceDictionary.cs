@@ -33,14 +33,17 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("ツール(_T)")]
         public static readonly string MainWindow_Menu_Tool = nameof(MainWindow_Menu_Tool);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("新規プロジェクト(_N)")]
+        public static readonly string MainWindow_MenuItem_File_NewProject = nameof(MainWindow_MenuItem_File_NewProject);
+
         [ShowInMarkup, LanguageKey, DefaultValue("プロジェクトを開く(_O)")]
-        public static readonly string MainWindow_MenuItem_OpenProject = nameof(MainWindow_MenuItem_OpenProject);
+        public static readonly string MainWindow_MenuItem_File_OpenProject = nameof(MainWindow_MenuItem_File_OpenProject);
 
         [ShowInMarkup, LanguageKey, DefaultValue("終了(_X)")]
-        public static readonly string MainWindow_MenuItem_Exit = nameof(MainWindow_MenuItem_Exit);
+        public static readonly string MainWindow_MenuItem_File_Exit = nameof(MainWindow_MenuItem_File_Exit);
 
         [ShowInMarkup, LanguageKey, DefaultValue("環境設定(_O)...")]
-        public static readonly string MainWindow_MenuItem_OpenSetting = nameof(MainWindow_MenuItem_OpenSetting);
+        public static readonly string MainWindow_MenuItem_Tool_OpenSetting = nameof(MainWindow_MenuItem_Tool_OpenSetting);
 
         [ShowInMarkup, LanguageKey, DefaultValue("再生コントロール")]
         public static readonly string PlayControlView_Title = nameof(PlayControlView_Title);

@@ -24,6 +24,7 @@ using System.Threading;
 
 namespace NiVE3.ViewModel
 {
+    [CommandHandling(nameof(NewProjectCommand), nameof(ShortcutKeySetting.NewProjectGesture))]
     [CommandHandling(nameof(OpenProjectCommand), nameof(ShortcutKeySetting.OpenProjectGesture))]
     [CommandHandling(nameof(SaveProjectCommand), nameof(ShortcutKeySetting.SaveProjectGesture))]
     [CommandHandling(nameof(ExitCommand), nameof(ShortcutKeySetting.ExitGesture))]
@@ -81,6 +82,8 @@ namespace NiVE3.ViewModel
 
         public InteractionRequest CloseRequest { get; } = new InteractionRequest();
 
+        public ICommand NewProjectCommand { get; }
+
         public ICommand OpenProjectCommand { get; }
 
         public ICommand SaveProjectCommand { get; }
@@ -124,6 +127,30 @@ namespace NiVE3.ViewModel
             projectModel.PreviewModels.CollectionChanged += PreviewModels_CollectionChanged;
 
             eventHubModel.SelectLayerRequest += EventHubModel_SelectLayerRequest;
+
+            NewProjectCommand = new DelegateCommand(() =>
+            {
+                if (IsEdited)
+                {
+                    var title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_NotSaveEditedWhenCloseProject_Title);
+                    var text = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_NotSaveEditedWhenCloseProject_Text);
+                    switch (MessageBox.Show(text, title, MessageBoxButton.YesNoCancel, MessageBoxImage.Warning))
+                    {
+                        case MessageBoxResult.Yes:
+                            if (!SaveProject())
+                            {
+                                return;
+                            }
+                            break;
+                        case MessageBoxResult.No:
+                            break;
+                        default:
+                            return;
+                    }
+                }
+
+                ProjectModel.ClearToNewProject();
+            });
 
             OpenProjectCommand = new DelegateCommand(() =>
             {

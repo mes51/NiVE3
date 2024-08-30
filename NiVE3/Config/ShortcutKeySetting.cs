@@ -23,6 +23,13 @@ namespace NiVE3.Config
 
         public static Dictionary<string, DependencyProperty> DependencyProperties { get; }
 
+        public static readonly DependencyProperty NewProjectGestureProperty = DependencyProperty.Register(
+            nameof(NewProjectGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new KeyGesture(Key.N, ModifierKeys.Alt))
+        );
+
         public static readonly DependencyProperty OpenProjectGestureProperty = DependencyProperty.Register(
             nameof(OpenProjectGesture),
             typeof(InputGesture),
@@ -266,6 +273,12 @@ namespace NiVE3.Config
         {
             get { return (InputGesture)GetValue(OpenProjectGestureProperty); }
             set { SetValue(OpenProjectGestureProperty, value); }
+        }
+
+        public InputGesture NewProjectGesture
+        {
+            get { return (InputGesture)GetValue(NewProjectGestureProperty); }
+            set { SetValue(NewProjectGestureProperty, value); }
         }
 
         public InputGesture ExitGesture
