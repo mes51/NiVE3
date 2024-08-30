@@ -33,8 +33,17 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("ツール(_T)")]
         public static readonly string MainWindow_Menu_Tool = nameof(MainWindow_Menu_Tool);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("新規プロジェクト(_N)")]
+        [ShowInMarkup, LanguageKey, DefaultValue("新規(_N)")]
+        public static readonly string MainWindow_Menu_File_New = nameof(MainWindow_Menu_File_New);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("新規プロジェクト(_P)")]
         public static readonly string MainWindow_MenuItem_File_NewProject = nameof(MainWindow_MenuItem_File_NewProject);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("新規フォルダ(_F)")]
+        public static readonly string MainWindow_MenuItem_File_NewFolder = nameof(MainWindow_MenuItem_File_NewFolder);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("新規コンポジション(_C)")]
+        public static readonly string MainWindow_MenuItem_File_NewComposition = nameof(MainWindow_MenuItem_File_NewComposition);
 
         [ShowInMarkup, LanguageKey, DefaultValue("プロジェクトを開く(_O)")]
         public static readonly string MainWindow_MenuItem_File_OpenProject = nameof(MainWindow_MenuItem_File_OpenProject);

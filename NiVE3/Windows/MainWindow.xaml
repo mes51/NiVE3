@@ -168,7 +168,11 @@
         </Grid.RowDefinitions>
         <Menu Grid.Row="0" VerticalAlignment="Top">
             <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_Menu_File}">
-                <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_File_NewProject}" a:MenuItemGestureBindingProperty.InputBinding="{Binding ElementName=NewProjectGesture}"/>
+                <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_Menu_File_New}">
+                    <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_File_NewProject}" a:MenuItemGestureBindingProperty.InputBinding="{Binding ElementName=NewProjectGesture}"/>
+                    <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_File_NewComposition}" a:MenuItemGestureBindingProperty.InputBinding="{Binding ElementName=NewCompositionGesture}"/>
+                    <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_File_NewFolder}" a:MenuItemGestureBindingProperty.InputBinding="{Binding ElementName=NewFootageFolderGesture}"/>
+                </MenuItem>
                 <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_File_OpenProject}" a:MenuItemGestureBindingProperty.InputBinding="{Binding ElementName=OpenProjectGesture}"/>
                 <Separator />
                 <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_File_Exit}" a:MenuItemGestureBindingProperty.InputBinding="{Binding ElementName=ExitGesture}"/>
