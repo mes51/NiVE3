@@ -24,7 +24,7 @@ using NiVE3.Shared.Extension;
 namespace NiVE3.PresetPlugin.Effect.ColorCollection
 {
     [Export(typeof(IEffect))]
-    [EffectMetadata(LanguageResourceDictionary.ColorCollection_AutoContrastCorrection_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_ColorCollection, LanguageResourceDictionary.ColorCollection_AutoContrastCorrection_Description, ID, IsSupportGpu = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
+    [EffectMetadata(LanguageResourceDictionary.ColorCollection_AutoContrastCorrection_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_ColorCollection, LanguageResourceDictionary.ColorCollection_AutoContrastCorrection_Description, ID, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
     public sealed class AutoContrastCorrection : IEffect
     {
         public const int BinSize = 1024;
@@ -60,14 +60,7 @@ namespace NiVE3.PresetPlugin.Effect.ColorCollection
             var highlightClip = (float)properties.GetValue(PropertyHighlightClipId, layerTime, 0.0) * 0.01F;
             var newColorRate = 1.0F - (float)properties.GetValue(PropertyBlendOriginalId, layerTime, 0.0) * 0.01F;
 
-            if (useGpu && AcceleratorObject != null)
-            {
-                return ProcessGpu(AcceleratorObject.CurrentDevice, image, roi, shadowClip, highlightClip, newColorRate);
-            }
-            else
-            {
-                return ProcessCpu(image, roi, shadowClip, highlightClip, newColorRate);
-            }
+            return ProcessCpu(image, roi, shadowClip, highlightClip, newColorRate);
         }
 
         public float[] Process(float[] audio, double startTime, IPropertyObject[] properties, ICompositionObject composition)
@@ -183,6 +176,8 @@ namespace NiVE3.PresetPlugin.Effect.ColorCollection
             return managedImage;
         }
 
+        // TODO: 単色になったレイヤーに適用したときなど、GPUで特定のビンに値が集まっても重くならないヒストグラムの計算方法を探す
+        /*
         static NGPUImage ProcessGpu(GraphicsDevice device, NImage image, ROI roi, float shadowClip, float highlightClip, float newColorRate)
         {
             var gpuImage = image switch
@@ -211,6 +206,7 @@ namespace NiVE3.PresetPlugin.Effect.ColorCollection
 
             return gpuImage;
         }
+        //*/
 
         static (float lightnessRange, float shadowValue) CalcBin(int[] bin, float shadowClip, float highlightClip, int totalCount)
         {
@@ -224,10 +220,11 @@ namespace NiVE3.PresetPlugin.Effect.ColorCollection
             var highlightValue = (bin.IndexOfLast(v => highlightClipCount >= v) + 1) / (float)BinSize;
             var lightnessRange = 1.0F / Math.Max(highlightValue - shadowValue, 0.01F);
 
-            return (lightnessRange, shadowValue);
+            return (lightnessRange, highlightValue <= shadowValue ? 0.0F : shadowValue);
         }
     }
 
+    /*
     [ThreadGroupSize(ThreadGroupSize, ThreadGroupSize, 1)]
     [GeneratedComputeShaderDescriptor]
     readonly partial struct HistogramProcess(ReadWriteBuffer<Float4> image, ReadWriteBuffer<int> bin, int width) : IComputeShader
@@ -262,7 +259,6 @@ namespace NiVE3.PresetPlugin.Effect.ColorCollection
                     Hlsl.InterlockedAdd(ref bin[i], TempBin[i]);
                 }
             }
-            //*/
         }
     }
 
@@ -291,4 +287,5 @@ namespace NiVE3.PresetPlugin.Effect.ColorCollection
             image[pos] = newColor;
         }
     }
+    //*/
 }
