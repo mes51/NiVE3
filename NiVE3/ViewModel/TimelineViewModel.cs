@@ -1246,6 +1246,10 @@ namespace NiVE3.ViewModel
             else
             {
                 LastSelectedLayerId = null;
+                if ((SelectedLayers?.Count ?? 0) < 1)
+                {
+                    SelectedItemType = SelectItemType.None;
+                }
             }
         }
     }

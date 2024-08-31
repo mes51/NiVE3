@@ -27,7 +27,10 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("ファイル(_F)")]
         public static readonly string MainWindow_Menu_File = nameof(MainWindow_Menu_File);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("エフェクト(_E)")]
+        [ShowInMarkup, LanguageKey, DefaultValue("編集(_E)")]
+        public static readonly string MainWindow_Menu_Edit = nameof(MainWindow_Menu_Edit);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("エフェクト(_P)")]
         public static readonly string MainWindow_Menu_Effect = nameof(MainWindow_Menu_Effect);
 
         [ShowInMarkup, LanguageKey, DefaultValue("表示(_V)")]
@@ -53,6 +56,27 @@ namespace NiVE3.View.Resource
 
         [ShowInMarkup, LanguageKey, DefaultValue("終了(_X)")]
         public static readonly string MainWindow_MenuItem_File_Exit = nameof(MainWindow_MenuItem_File_Exit);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("切り取り(_X)")]
+        public static readonly string MainWindow_MenuItem_Edit_Cut = nameof(MainWindow_MenuItem_Edit_Cut);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("コピー(_C)")]
+        public static readonly string MainWindow_MenuItem_Edit_Copy = nameof(MainWindow_MenuItem_Edit_Copy);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("ペースト(_P)")]
+        public static readonly string MainWindow_MenuItem_Edit_Paste = nameof(MainWindow_MenuItem_Edit_Paste);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("複製(_E)")]
+        public static readonly string MainWindow_MenuItem_Edit_Duplicate = nameof(MainWindow_MenuItem_Edit_Duplicate);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("レイヤーを分割(_S)")]
+        public static readonly string MainWindow_MenuItem_Edit_SplitLayer = nameof(MainWindow_MenuItem_Edit_SplitLayer);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("削除(_D)")]
+        public static readonly string MainWindow_MenuItem_Edit_Delete = nameof(MainWindow_MenuItem_Edit_Delete);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("すべて選択(_A)")]
+        public static readonly string MainWindow_MenuItem_Edit_SelectAll = nameof(MainWindow_MenuItem_Edit_SelectAll);
 
         [ShowInMarkup, LanguageKey, DefaultValue("環境設定(_O)...")]
         public static readonly string MainWindow_MenuItem_Tool_OpenSetting = nameof(MainWindow_MenuItem_Tool_OpenSetting);

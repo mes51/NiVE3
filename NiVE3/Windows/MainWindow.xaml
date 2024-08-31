@@ -279,6 +279,16 @@
                     <Separator />
                     <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_File_Exit}" a:MenuItemGestureBindingProperty.InputBinding="{Binding ElementName=ExitGesture}"/>
                 </MenuItem>
+                <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_Menu_Edit}">
+                    <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_Edit_Cut}" a:MenuItemGestureBindingProperty.InputBinding="{Binding ElementName=CutItemGesture}"/>
+                    <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_Edit_Copy}" a:MenuItemGestureBindingProperty.InputBinding="{Binding ElementName=CopyItemGesture}"/>
+                    <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_Edit_Paste}" a:MenuItemGestureBindingProperty.InputBinding="{Binding ElementName=PasteItemGesture}"/>
+                    <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_Edit_Duplicate}" a:MenuItemGestureBindingProperty.InputBinding="{Binding ElementName=DuplicateItemGesture}"/>
+                    <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_Edit_SplitLayer}" a:MenuItemGestureBindingProperty.InputBinding="{Binding ElementName=SplitLayerGesture}"/>
+                    <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_Edit_Delete}" a:MenuItemGestureBindingProperty.InputBinding="{Binding ElementName=DeleteItemGesture}"/>
+                    <Separator />
+                    <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_Edit_SelectAll}" a:MenuItemGestureBindingProperty.InputBinding="{Binding ElementName=SelectAllGesture}"/>
+                </MenuItem>
                 <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_Menu_Effect}" ItemsSource="{Binding GroupedEffects}">
                     <MenuItem.ItemTemplate>
                         <HierarchicalDataTemplate ItemsSource="{Binding Value}">
