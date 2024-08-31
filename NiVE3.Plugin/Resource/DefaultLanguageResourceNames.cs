@@ -54,6 +54,12 @@ namespace NiVE3.Plugin.Resource
         [EffectCategory]
         public const string EffectCategory_Stylize = nameof(EffectCategory_Stylize);
 
+        /// <summary>
+        /// エフェクトのユーティリティカテゴリを表します
+        /// </summary>
+        [EffectCategory]
+        public const string EffectCategory_Utility = nameof(EffectCategory_Utility);
+
         static DefaultLanguageResourceNames()
         {
             EffectCategories = [..typeof(DefaultLanguageResourceNames).GetFields().Where(f => f.GetCustomAttribute<EffectCategoryAttribute>() != null).Select(f => f.Name)];

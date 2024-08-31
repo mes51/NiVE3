@@ -17,7 +17,7 @@ using NiVE3.PresetPlugin.Resource;
 namespace NiVE3.PresetPlugin.Effect.Utility
 {
     [Export(typeof(IEffect))]
-    [EffectMetadata(LanguageResourceDictionary.Utility_ChangeROI_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_ExpressionControl, LanguageResourceDictionary.Utility_ChangeROI_Description, ID, IsDummyEffect = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
+    [EffectMetadata(LanguageResourceDictionary.Utility_ChangeROI_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_Utility, LanguageResourceDictionary.Utility_ChangeROI_Description, ID, IsDummyEffect = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
     public class ChangeROI : IEffect
     {
         const string ID = "88E49421-9275-4454-9F95-FE8F3D2F1A93";

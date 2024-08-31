@@ -533,6 +533,9 @@ namespace NiVE3.View.Resource
         [DefaultValue("スタイライズ")]
         public static readonly string EffectCategory_Stylize = DefaultLanguageResourceNames.EffectCategory_Stylize;
 
+        [DefaultValue("ユーティリティ")]
+        public static readonly string EffectCategory_Utility = DefaultLanguageResourceNames.EffectCategory_Utility;
+
         // History Command
 
         [DefaultValue("プロジェクトの新規作成/開く")]
