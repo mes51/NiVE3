@@ -129,12 +129,15 @@ namespace NiVE3.Model
     {
         public Guid CompositionId { get; }
 
-        public Guid EffectPluginId { get; }
+        public Guid? TargetLayerId { get; }
 
-        public AddEffectEventArgs(Guid compositionId, Guid effectPluginId)
+        public Guid[] EffectPluginIds { get; }
+
+        public AddEffectEventArgs(Guid compositionId, Guid? targetLayerId, Guid[] effectPluginIds)
         {
             CompositionId = compositionId;
-            EffectPluginId = effectPluginId;
+            TargetLayerId = targetLayerId;
+            EffectPluginIds = effectPluginIds;
         }
     }
 }

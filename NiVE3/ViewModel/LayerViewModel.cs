@@ -609,16 +609,19 @@ namespace NiVE3.ViewModel
 
         ViewStateModel ViewState { get; }
 
+        EventHubModel EventHubModel { get; }
+
         string PrevName { get; set; } = "";
 
         string PrevComment { get; set; } = "";
 
 #pragma warning disable CS8618 // 各フィールドには初期化時に必ず値を代入するため無視
-        public LayerViewModel(LayerModel layerModel, ViewStateModel viewState, IEnumerable<LayerModelProxy> trackMatteViewSource, IEnumerable<LayerModelProxy> parentLayerViewSource)
+        public LayerViewModel(LayerModel layerModel, ViewStateModel viewState, EventHubModel eventHubModel, IEnumerable<LayerModelProxy> trackMatteViewSource, IEnumerable<LayerModelProxy> parentLayerViewSource)
 #pragma warning restore CS8618
         {
             LayerModel = layerModel;
             ViewState = viewState;
+            EventHubModel = eventHubModel;
             TrackMatteViewSource = trackMatteViewSource;
             ParentLayerViewSource = parentLayerViewSource;
             SelectedEffects = [];
@@ -920,7 +923,7 @@ namespace NiVE3.ViewModel
                     LayerModel.InsertEffect(effectListData.Effects, dropInfo.InsertIndex);
                     break;
                 case EffectListDragData effectListData:
-                    LayerModel.AddEffects(effectListData.Effects);
+                    EventHubModel.NotifyAddEffectToSelectedLayers(LayerModel.ParentCompositionId, LayerId, effectListData.Effects);
                     break;
                 case EffectViewModel effect:
                     {

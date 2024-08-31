@@ -301,7 +301,7 @@ namespace NiVE3.ViewModel
 
             AddEffectCommand = new RequerySuggestedCommand<EffectItem>(effectItem =>
             {
-                EventHubModel.NotifyAddEffectToSelectedLayers(ViewState.CurrentEditingCompositionId ?? Guid.Empty, effectItem.PluginId);
+                EventHubModel.NotifyAddEffectToSelectedLayers(ViewState.CurrentEditingCompositionId ?? Guid.Empty, null, [effectItem.PluginId]);
             }, _ => ViewState.CurrentEditingCompositionId.HasValue && ViewState.LastSelectedLayerId.HasValue);
 
             playControllerModel.ChangeFrameRequest += PlayControllerModel_ChangeFrameRequest;

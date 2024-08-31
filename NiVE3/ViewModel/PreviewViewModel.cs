@@ -597,7 +597,7 @@ namespace NiVE3.ViewModel
                     compositionPreviewModel.Composition.InsertLayers([..footages.Select(f => f.FootageId)], 0, CurrentTime, (Vector3d)pos);
                     break;
                 case EffectListDragData effectListData when layerId.HasValue:
-                    compositionPreviewModel.Composition.AddEffectToLayer(layerId.Value, effectListData.Effects);
+                    EventHubModel.NotifyAddEffectToSelectedLayers(compositionPreviewModel.Composition.CompositionId, layerId.Value, effectListData.Effects);
                     break;
             }
         }

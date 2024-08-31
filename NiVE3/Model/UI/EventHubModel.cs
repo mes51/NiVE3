@@ -8,7 +8,7 @@ using NiVE3.Numerics;
 using NiVE3.Plugin.Interfaces.RendererParams;
 using Prism.Mvvm;
 
-namespace NiVE3.Model
+namespace NiVE3.Model.UI
 {
     class EventHubModel : BindableBase
     {
@@ -67,9 +67,9 @@ namespace NiVE3.Model
             AbortUseToolRequestPublisher.Publish(this, new AbortUseToolEvent(compositionId));
         }
 
-        public void NotifyAddEffectToSelectedLayers(Guid compositionId, Guid effectPluginId)
+        public void NotifyAddEffectToSelectedLayers(Guid compositionId, Guid? targetLayerId, Guid[] effectPluginIds)
         {
-            AddEffectToSelectedLayersPublisher.Publish(this, new AddEffectEventArgs(compositionId, effectPluginId));
+            AddEffectToSelectedLayersPublisher.Publish(this, new AddEffectEventArgs(compositionId, targetLayerId, effectPluginIds));
         }
     }
 }

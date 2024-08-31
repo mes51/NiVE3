@@ -322,7 +322,7 @@ namespace NiVE3.ViewModel
                     var parentLayerCollectionView = value.Layers.CreateViewCollection(m => new LayerModelProxy(m));
                     Layers = value.Layers.CreateViewCollection(m =>
                     {
-                        var vm = new LayerViewModel(m, ViewState, trackMatteCollectionView, parentLayerCollectionView);
+                        var vm = new LayerViewModel(m, ViewState, EventHubModel, trackMatteCollectionView, parentLayerCollectionView);
                         vm.LayerSwitchChangeRequest += LayerViewModel_LayerSwitchChangeRequest;
                         vm.BlendModeChangeRequest += LayerViewModel_BlendModeChangeRequest;
                         vm.TrackMatteLayerChangeRequest += LayerViewModel_TrackMatteLayerChangeRequest;
@@ -869,13 +869,31 @@ namespace NiVE3.ViewModel
 
         private void EventHubModel_AddEffectToSelectedLayers(object? sender, AddEffectEventArgs e)
         {
-            if (IsUsingTool || CompositionModel == null || Layers == null || SelectedLayers == null || SelectedLayers.Count < 1 || e.CompositionId != CompositionId)
+            if (IsUsingTool || CompositionModel == null || Layers == null || e.CompositionId != CompositionId)
             {
                 return;
             }
 
-            // TODO: 他含め選択レイヤーにまとめてエフェクトを適用する
-            CompositionModel.AddEffectToLayer(SelectedLayers[0].LayerId, [e.EffectPluginId]);
+            if (e.TargetLayerId.HasValue)
+            {
+                if (Layers.All(l => l.LayerId != e.TargetLayerId))
+                {
+                    return;
+                }
+
+                if ((SelectedLayers != null && SelectedLayers.Any(l => l.LayerId == e.TargetLayerId)))
+                {
+                    CompositionModel.AddEffectsToLayers([.. SelectedLayers.Select(l => l.LayerId)], e.EffectPluginIds);
+                }
+                else
+                {
+                    CompositionModel.AddEffectsToLayers([e.TargetLayerId.Value], e.EffectPluginIds);
+                }
+            }
+            else if (SelectedLayers != null && SelectedLayers.Count > 0)
+            {
+                CompositionModel.AddEffectsToLayers([.. SelectedLayers.Select(l => l.LayerId)], e.EffectPluginIds);
+            }
         }
 
         private void EventHubModel_AbortUseToolRequest(object? sender, AbortUseToolEvent e)

@@ -1124,10 +1124,30 @@ namespace NiVE3.Model
             return activeCamera?.GetCameraSetting(time) ?? CreateDefaultCameraSetting(Width, Height);
         }
 
-        public void AddEffectToLayer(Guid layerId, Guid[] effectUuids)
+        public void AddEffectsToLayers(Guid[] layerIds, Guid[] effectUuids)
         {
-            var layer = Layers.FirstOrDefault(l => l.LayerId == layerId);
-            layer?.AddEffects(effectUuids);
+            if (layerIds.Length < 1 || effectUuids.Length < 1)
+            {
+                return;
+            }
+
+            if (layerIds.Length == 1)
+            {
+                var layerId = layerIds[0];
+                var layer = Layers.FirstOrDefault(l => l.LayerId == layerId);
+                layer?.AddEffects(effectUuids);
+            }
+            else
+            {
+                HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_AddEffects));
+
+                foreach (var l in Layers.Where(l => layerIds.Contains(l.LayerId)))
+                {
+                    l.AddEffects(effectUuids);
+                }
+
+                HistoryModel.EndGroup();
+            }
         }
 
         public ILayerObject? GetLayer(Guid layerId)

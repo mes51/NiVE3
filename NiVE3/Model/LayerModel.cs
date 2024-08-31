@@ -262,6 +262,8 @@ namespace NiVE3.Model
 
         public bool IsCustomizableFootageSource => FootageModel.IsCustomizableFootageSource;
 
+        public Guid ParentCompositionId => CompositionModel.CompositionId;
+
         private ObservableCollection<EffectModel> effects = [];
         public ObservableCollection<EffectModel> Effects
         {
