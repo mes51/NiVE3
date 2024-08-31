@@ -40,6 +40,13 @@ namespace NiVE3.Model
             remove { AbortUseToolRequestPublisher.Unsubscribe(value); }
         }
 
+        WeakEventPublisher<AddEffectEventArgs> AddEffectToSelectedLayersPublisher { get; } = new WeakEventPublisher<AddEffectEventArgs>();
+        public event EventHandler<AddEffectEventArgs> AddEffectToSelectedLayers
+        {
+            add { AddEffectToSelectedLayersPublisher.Subscribe(value); }
+            remove { AddEffectToSelectedLayersPublisher.Unsubscribe(value); }
+        }
+
         public void NotifySelectLayer(Guid compositionId, Guid? layerId)
         {
             SelectLayerRequestPublisher.Publish(this, new SelectLayerEvent(compositionId, layerId));
@@ -58,6 +65,11 @@ namespace NiVE3.Model
         public void NotifyAbortUseTool(Guid compositionId)
         {
             AbortUseToolRequestPublisher.Publish(this, new AbortUseToolEvent(compositionId));
+        }
+
+        public void NotifyAddEffectToSelectedLayers(Guid compositionId, Guid effectPluginId)
+        {
+            AddEffectToSelectedLayersPublisher.Publish(this, new AddEffectEventArgs(compositionId, effectPluginId));
         }
     }
 }

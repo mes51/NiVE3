@@ -27,6 +27,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("ファイル(_F)")]
         public static readonly string MainWindow_Menu_File = nameof(MainWindow_Menu_File);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("エフェクト(_E)")]
+        public static readonly string MainWindow_Menu_Effect = nameof(MainWindow_Menu_Effect);
+
         [ShowInMarkup, LanguageKey, DefaultValue("表示(_V)")]
         public static readonly string MainWindow_Menu_View = nameof(MainWindow_Menu_View);
 

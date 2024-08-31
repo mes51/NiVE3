@@ -470,6 +470,7 @@ namespace NiVE3.ViewModel
             eventHubModel.BeginUseToolRequest += EventHubModel_BeginUseToolRequest;
             eventHubModel.MoveLayersByToolRequest += EventHubModel_MoveLayersByToolRequest;
             eventHubModel.AbortUseToolRequest += EventHubModel_AbortUseToolRequest;
+            eventHubModel.AddEffectToSelectedLayers += EventHubModel_AddEffectToSelectedLayers;
             PropertyChanged += TimelineViewModel_PropertyChanged;
 
             ChangeEnableShyCommand = new RequerySuggestedCommand(() => CompositionModel?.ChangeEnableShy(), () => CompositionModel != null);
@@ -865,6 +866,17 @@ namespace NiVE3.ViewModel
         partial void BindComposition();
 
         partial void UnbindComposition();
+
+        private void EventHubModel_AddEffectToSelectedLayers(object? sender, AddEffectEventArgs e)
+        {
+            if (IsUsingTool || CompositionModel == null || Layers == null || SelectedLayers == null || SelectedLayers.Count < 1 || e.CompositionId != CompositionId)
+            {
+                return;
+            }
+
+            // TODO: 他含め選択レイヤーにまとめてエフェクトを適用する
+            CompositionModel.AddEffectToLayer(SelectedLayers[0].LayerId, [e.EffectPluginId]);
+        }
 
         private void EventHubModel_AbortUseToolRequest(object? sender, AbortUseToolEvent e)
         {

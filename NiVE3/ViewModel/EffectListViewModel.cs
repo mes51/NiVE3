@@ -11,10 +11,8 @@ using NiVE3.Model;
 using NiVE3.View.Dock;
 using NiVE3.View.Resource;
 using NiVE3.Extension;
-using Prism.Mvvm;
 using System.Text.RegularExpressions;
-using NiVE3.Plugin.Attributes;
-using NiVE3.Plugin.Resource;
+using NiVE3.Model.UI;
 
 namespace NiVE3.ViewModel
 {
@@ -32,8 +30,8 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref filterText, value); }
         }
 
-        private ObservableCollection<Tuple<string, string, Guid>> effects = [];
-        public ObservableCollection<Tuple<string, string, Guid>> Effects
+        private ObservableCollection<EffectItem> effects = [];
+        public ObservableCollection<EffectItem> Effects
         {
             get { return effects; }
             set { SetProperty(ref effects, value); }
@@ -43,24 +41,18 @@ namespace NiVE3.ViewModel
 
         EffectListModel EffectListModel { get; }
 
-        public EffectListViewModel(EffectListModel effectListModel)
+        EffectListStateModel EffectListStateModel { get; }
+
+        public EffectListViewModel(EffectListModel effectListModel, EffectListStateModel effectListStateModel)
         {
             Title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.EffectListView_Title);
             EffectListModel = effectListModel;
+            EffectListStateModel = effectListStateModel;
             FilteredEffects = Effects.CreateCollectionView(() => FilterText, FilterEffect);
 
-            foreach (var e in EffectListModel.EffectMetadatas)
+            foreach (var e in effectListStateModel.Effects)
             {
-                var category = e.Category;
-                if (DefaultLanguageResourceNames.EffectCategories.Contains(category))
-                {
-                    category = LanguageResourceDictionary.Dictionary.GetText(category);
-                    if (category.Length < 1)
-                    {
-                        category = e.Category;
-                    }
-                }
-                Effects.Add(Tuple.Create(e.Name, category, Guid.Parse(e.EffectUuid)));
+                Effects.Add(e);
             }
 
             PropertyChanged += EffectListViewModel_PropertyChanged;
@@ -68,7 +60,7 @@ namespace NiVE3.ViewModel
 
         public void StartDrag(IDragInfo dragInfo)
         {
-            dragInfo.Data = new EffectListDragData(dragInfo.SourceItems.Cast<Tuple<string, string, Guid>>().Select(t => t.Item3).ToArray());
+            dragInfo.Data = new EffectListDragData(dragInfo.SourceItems.Cast<EffectItem>().Select(t => t.PluginId).ToArray());
             dragInfo.Effects = DragDropEffects.Copy;
         }
 
@@ -88,7 +80,7 @@ namespace NiVE3.ViewModel
             return false;
         }
 
-        static bool FilterEffect(Tuple<string, string, Guid> effect, string filterKey)
+        static bool FilterEffect(EffectItem effect, string filterKey)
         {
             if (string.IsNullOrEmpty(filterKey))
             {
@@ -96,7 +88,7 @@ namespace NiVE3.ViewModel
             }
 
             var keys = FilterSeparatorRegex.Split(filterKey);
-            return keys.All(effect.Item1.Contains) || keys.All(effect.Item2.Contains);
+            return keys.All(effect.Name.Contains) || keys.All(effect.Category.Contains);
         }
 
         private void EffectListViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)

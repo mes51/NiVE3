@@ -17,8 +17,8 @@
         <TextBox Grid.Row="0" Text="{Binding FilterText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
         <DataGrid Grid.Row="1" ItemsSource="{Binding FilteredEffects}" AutoGenerateColumns="False" CanUserReorderColumns="False" CanUserDeleteRows="False" CanUserAddRows="False" dd:DragDrop.IsDragSource="True" dd:DragDrop.DragHandler="{Binding}">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="{gm:LanguageResource ResourceKey=EffectList_Name}" Binding="{Binding Item1}" Width="150" IsReadOnly="True"/>
-                <DataGridTextColumn Header="{gm:LanguageResource ResourceKey=EffectList_Category}" Binding="{Binding Item2}" Width="150" IsReadOnly="True"/>
+                <DataGridTextColumn Header="{gm:LanguageResource ResourceKey=EffectList_Name}" Binding="{Binding Name}" Width="150" IsReadOnly="True"/>
+                <DataGridTextColumn Header="{gm:LanguageResource ResourceKey=EffectList_Category}" Binding="{Binding Category}" Width="150" IsReadOnly="True"/>
             </DataGrid.Columns>
         </DataGrid>
     </Grid>

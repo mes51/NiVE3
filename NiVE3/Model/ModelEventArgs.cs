@@ -124,4 +124,17 @@ namespace NiVE3.Model
             CompositionId = compositionId;
         }
     }
+
+    class AddEffectEventArgs : EventArgs
+    {
+        public Guid CompositionId { get; }
+
+        public Guid EffectPluginId { get; }
+
+        public AddEffectEventArgs(Guid compositionId, Guid effectPluginId)
+        {
+            CompositionId = compositionId;
+            EffectPluginId = effectPluginId;
+        }
+    }
 }

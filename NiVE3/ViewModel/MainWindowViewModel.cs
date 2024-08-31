@@ -22,6 +22,8 @@ using System.Windows.Input;
 using NiVE3.Wpf.Interaction.Trigger;
 using System.Threading;
 using NiVE3.Model.UI;
+using System.Collections.ObjectModel;
+using NiVE3.UI.Command;
 
 namespace NiVE3.ViewModel
 {
@@ -73,6 +75,13 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref isRendering, value); }
         }
 
+        private Dictionary<string, List<EffectItem>> groupedEffects = [];
+        public Dictionary<string, List<EffectItem>> GroupedEffects
+        {
+            get { return groupedEffects; }
+            set { SetProperty(ref groupedEffects, value); }
+        }
+
         public bool IsForceClosing { get; set; }
 
         public object[] ViewModels => [..MainRegion.Views];
@@ -101,23 +110,28 @@ namespace NiVE3.ViewModel
 
         public ICommand StopRenderingBeforeCloseCommand { get; }
 
+        public ICommand AddEffectCommand { get; }
+
         ProjectModel ProjectModel { get; }
 
         PlayControllerModel PlayControllerModel { get; }
 
         ViewStateModel ViewState { get; }
 
+        EffectListStateModel EffectListStateModel { get; }
+
         EventHubModel EventHubModel { get; }
 
         IDialogService DialogService { get; }
 
-        public MainWindowViewModel(IContainer container, IRegionManager region, ApplicationModel applicationModel, ProjectModel projectModel, PlayControllerModel playControllerModel, ViewStateModel viewState, EventHubModel eventHubModel, IDialogService dialogService)
+        public MainWindowViewModel(IContainer container, IRegionManager region, ApplicationModel applicationModel, ProjectModel projectModel, PlayControllerModel playControllerModel, ViewStateModel viewState, EffectListStateModel effectListStateModel, EventHubModel eventHubModel, IDialogService dialogService)
         {
             Container = container;
             Region = region;
             ProjectModel = projectModel;
             PlayControllerModel = playControllerModel;
             ViewState = viewState;
+            EffectListStateModel = effectListStateModel;
             EventHubModel = eventHubModel;
             DialogService = dialogService;
 
@@ -128,6 +142,15 @@ namespace NiVE3.ViewModel
             projectModel.PreviewModels.CollectionChanged += PreviewModels_CollectionChanged;
 
             eventHubModel.SelectLayerRequest += EventHubModel_SelectLayerRequest;
+
+            foreach (var e in effectListStateModel.Effects)
+            {
+                if (!GroupedEffects.ContainsKey(e.Category))
+                {
+                    GroupedEffects.Add(e.Category, []);
+                }
+                GroupedEffects[e.Category].Add(e);
+            }
 
             NewProjectCommand = new DelegateCommand(() =>
             {
@@ -275,6 +298,11 @@ namespace NiVE3.ViewModel
                     SaveProjectBeforeCloseCommand.Execute(null);
                 }
             });
+
+            AddEffectCommand = new RequerySuggestedCommand<EffectItem>(effectItem =>
+            {
+                EventHubModel.NotifyAddEffectToSelectedLayers(ViewState.CurrentEditingCompositionId ?? Guid.Empty, effectItem.PluginId);
+            }, _ => ViewState.CurrentEditingCompositionId.HasValue && ViewState.LastSelectedLayerId.HasValue);
 
             playControllerModel.ChangeFrameRequest += PlayControllerModel_ChangeFrameRequest;
 
