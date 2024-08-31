@@ -1,5 +1,6 @@
 ﻿using DryIoc;
 using NiVE3.Model;
+using NiVE3.Model.UI;
 using NiVE3.View.Dialog;
 using NiVE3.ViewModel;
 using NiVE3.ViewModel.Dialog;

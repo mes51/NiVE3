@@ -24,6 +24,7 @@ using Prism.Commands;
 using NiVE3.Input;
 using NiVE3.Property.Types;
 using NiVE3.Data;
+using NiVE3.Model.UI;
 
 namespace NiVE3.ViewModel
 {

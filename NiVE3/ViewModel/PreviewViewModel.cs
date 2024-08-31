@@ -30,6 +30,7 @@ using GongSolutions.Wpf.DragDrop;
 using ComputeSharp;
 using NiVE3.InternalShader;
 using NiVE3.Exceptions;
+using NiVE3.Model.UI;
 
 namespace NiVE3.ViewModel
 {

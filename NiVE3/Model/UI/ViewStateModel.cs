@@ -10,7 +10,7 @@ using NiVE3.Plugin.Interfaces.RendererParams;
 using NiVE3.ViewModel;
 using Prism.Mvvm;
 
-namespace NiVE3.Model
+namespace NiVE3.Model.UI
 {
     class ViewStateModel : BindableBase
     {

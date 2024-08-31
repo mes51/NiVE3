@@ -13,6 +13,7 @@ using GongSolutions.Wpf.DragDrop;
 using NiVE3.Data.Json.Project;
 using NiVE3.Image.Drawing;
 using NiVE3.Model;
+using NiVE3.Model.UI;
 using NiVE3.Mvvm;
 using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Interfaces;

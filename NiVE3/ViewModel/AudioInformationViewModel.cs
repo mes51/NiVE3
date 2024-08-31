@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using NiVE3.Model;
 using NiVE3.View.Dock;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
 using Prism.Mvvm;
 using System.ComponentModel;
 using NiVE3.View.Resource;
+using NiVE3.Model.UI;
 
 namespace NiVE3.ViewModel
 {

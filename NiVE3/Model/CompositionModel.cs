@@ -34,6 +34,7 @@ using NiVE3.Exceptions;
 using ComputeSharp;
 using NiVE3.InternalShader.MotionBlur;
 using System.Windows.Xps.Packaging;
+using NiVE3.Model.UI;
 
 namespace NiVE3.Model
 {

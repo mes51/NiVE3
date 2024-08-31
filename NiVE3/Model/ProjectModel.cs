@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using NiVE3.Cache;
 using NiVE3.Data.Json.Project;
 using NiVE3.Input;
+using NiVE3.Model.UI;
 using NiVE3.View.Resource;
 using Prism.Mvvm;
 

@@ -31,6 +31,7 @@ using NiVE3.ViewModel.PreviewManipulation;
 using NiVE3.Shared.Extension;
 using Prism.Commands;
 using Prism.Services.Dialogs;
+using NiVE3.Model.UI;
 
 namespace NiVE3.ViewModel
 {

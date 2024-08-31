@@ -21,6 +21,7 @@ using System.Windows;
 using System.Windows.Input;
 using NiVE3.Wpf.Interaction.Trigger;
 using System.Threading;
+using NiVE3.Model.UI;
 
 namespace NiVE3.ViewModel
 {

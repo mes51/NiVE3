@@ -11,7 +11,7 @@ using NiVE3.Text;
 using Prism.Mvvm;
 using SixLabors.Fonts;
 
-namespace NiVE3.Model
+namespace NiVE3.Model.UI
 {
     class TextPropertyModel : BindableBase
     {
@@ -118,8 +118,8 @@ namespace NiVE3.Model
         public TextPropertyModel()
 #pragma warning restore CS8618
         {
-            FontGroups = [..FontInfo.LoadedFonts.GroupBy(f => f.Name).Select(g => new FontGroup([..g])).OrderBy(g => g.FontName)];
-            SelectedFont = (FontGroups.FirstOrDefault(g => g.FontName == DefaultFontName)?.SubFamiles?.TryGetValue(DefaultFontSubFamilyName, out var defaultFont) ?? false) ? defaultFont : FontInfo.FallbackFont;
+            FontGroups = [.. FontInfo.LoadedFonts.GroupBy(f => f.Name).Select(g => new FontGroup([.. g])).OrderBy(g => g.FontName)];
+            SelectedFont = FontGroups.FirstOrDefault(g => g.FontName == DefaultFontName)?.SubFamiles?.TryGetValue(DefaultFontSubFamilyName, out var defaultFont) ?? false ? defaultFont : FontInfo.FallbackFont;
         }
 
         public TextStyle GetStyle()
@@ -160,7 +160,7 @@ namespace NiVE3.Model
 
         public void UpdateTextProperty(LayerModel targetLayer, double time)
         {
-            var currentText = (targetLayer.GetTextProperties(time)?.TryGetValueInTree(TextFootageSource.SourceTextId, out var styledText) ?? false) ? (styledText as StyledText) ?? StyledText.Empty : StyledText.Empty;
+            var currentText = targetLayer.GetTextProperties(time)?.TryGetValueInTree(TextFootageSource.SourceTextId, out var styledText) ?? false ? styledText as StyledText ?? StyledText.Empty : StyledText.Empty;
             var newStyle = GetStyle();
             targetLayer.UpdateTextProperty(TextFootageSource.SourceTextId, SourceTextPropertyType.ReplaceDefaultStyle(currentText, newStyle));
         }

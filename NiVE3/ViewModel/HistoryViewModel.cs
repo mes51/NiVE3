@@ -14,6 +14,7 @@ using Prism.Commands;
 using Prism.Mvvm;
 using NiVE3.Mvvm;
 using System.Collections.Specialized;
+using NiVE3.Model.UI;
 
 namespace NiVE3.ViewModel
 {

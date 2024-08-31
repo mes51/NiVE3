@@ -5,11 +5,11 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-using NiVE3.Model;
 using NiVE3.View.Dock;
 using NiVE3.View.Resource;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
 using NiVE3.UI.Command;
+using NiVE3.Model.UI;
 
 namespace NiVE3.ViewModel
 {

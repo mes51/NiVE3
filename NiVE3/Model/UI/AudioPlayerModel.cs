@@ -7,7 +7,7 @@ using NiVE3.Audio;
 using NiVE3.Util;
 using Prism.Mvvm;
 
-namespace NiVE3.Model
+namespace NiVE3.Model.UI
 {
     class AudioPlayerModel : BindableBase
     {
@@ -83,7 +83,7 @@ namespace NiVE3.Model
         {
             if (PreviewPlayer != null)
             {
-                return (PreviewWaveProvider.GetActualPosition(PreviewPlayer.GetPosition()) / Const.AudioChannelCount) / (double)Const.AudioSamplingRate;
+                return PreviewWaveProvider.GetActualPosition(PreviewPlayer.GetPosition()) / Const.AudioChannelCount / (double)Const.AudioSamplingRate;
             }
             else
             {

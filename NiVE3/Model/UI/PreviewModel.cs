@@ -11,7 +11,7 @@ using NiVE3.Plugin.Interfaces;
 using Prism.Mvvm;
 using NiVE3.Util;
 
-namespace NiVE3.Model
+namespace NiVE3.Model.UI
 {
     abstract class PreviewModelBase : BindableBase
     {
@@ -247,7 +247,7 @@ namespace NiVE3.Model
                 {
                     return null;
                 }
-                if (previewImage !=  managedPreviewImage)
+                if (previewImage != managedPreviewImage)
                 {
                     previewImage.Dispose();
                 }

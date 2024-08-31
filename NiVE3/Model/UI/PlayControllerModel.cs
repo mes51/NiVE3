@@ -10,7 +10,7 @@ using NiVE3.Mvvm;
 using NiVE3.Util;
 using Prism.Mvvm;
 
-namespace NiVE3.Model
+namespace NiVE3.Model.UI
 {
     class PlayControllerModel : BindableBase, IDisposable
     {
@@ -121,7 +121,7 @@ namespace NiVE3.Model
 
         public void Play()
         {
-            if ((IsPlaying && !IsPaused) || !CanPreview)
+            if (IsPlaying && !IsPaused || !CanPreview)
             {
                 return;
             }
@@ -194,12 +194,12 @@ namespace NiVE3.Model
                 var time = CurrentTime;
                 if (time < WorkareaBegin || time > WorkareaEnd)
                 {
-                    CurrentTime = ((int)Math.Round(CurrentTime * FrameRate + 1) / FrameRate) % Duration;
+                    CurrentTime = (int)Math.Round(CurrentTime * FrameRate + 1) / FrameRate % Duration;
                 }
                 else
                 {
                     var workarea = WorkareaEnd - WorkareaBegin;
-                    CurrentTime = (((int)Math.Round((CurrentTime - WorkareaBegin) * FrameRate + 1) / FrameRate) % workarea) + WorkareaBegin;
+                    CurrentTime = (int)Math.Round((CurrentTime - WorkareaBegin) * FrameRate + 1) / FrameRate % workarea + WorkareaBegin;
                 }
                 ChangeFrameRequestPublisher.Publish(this, EventArgs.Empty);
             });
