@@ -21,6 +21,23 @@ namespace NiVE3.Wpf.Attach
             new PropertyMetadata(null, InputBindingChanged)
         );
 
+        public static readonly DependencyProperty InputGestureProperty = DependencyProperty.RegisterAttached(
+            "InputGesture",
+            typeof(InputGesture),
+            typeof(MenuItemGestureBindingProperty),
+            new PropertyMetadata(null, InputGestureChanged)
+        );
+
+        public static InputGesture GetInputGesture(DependencyObject obj)
+        {
+            return (InputGesture)obj.GetValue(InputGestureProperty);
+        }
+
+        public static void SetInputGesture(DependencyObject obj, InputGesture value)
+        {
+            obj.SetValue(InputGestureProperty, value);
+        }
+
         public static InputBinding GetInputBinding(DependencyObject obj)
         {
             return (InputBinding)obj.GetValue(InputBindingProperty);
@@ -54,6 +71,29 @@ namespace NiVE3.Wpf.Attach
                     item.InputGestureText = "";
                     item.ClearValue(MenuItem.CommandProperty);
                     item.ClearValue(MenuItem.CommandParameterProperty);
+                }
+            }
+        }
+
+        static void InputGestureChanged(DependencyObject obj, DependencyPropertyChangedEventArgs e)
+        {
+            if (obj is MenuItem item)
+            {
+                if (e.NewValue is InputGesture gesture)
+                {
+                    switch (gesture)
+                    {
+                        case KeyGesture keyGesture:
+                            item.InputGestureText = keyGesture.GetDisplayStringForCulture(CultureInfo.CurrentCulture);
+                            break;
+                        case SingleKeyGesture singleKeyGesture:
+                            item.InputGestureText = singleKeyGesture.GetDisplayStringForCulture(CultureInfo.CurrentCulture);
+                            break;
+                    }
+                }
+                else
+                {
+                    item.InputGestureText = "";
                 }
             }
         }

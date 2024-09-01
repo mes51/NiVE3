@@ -20,6 +20,7 @@
         xmlns:ia="clr-namespace:NiVE3.Wpf.Interaction.Action"
         xmlns:vp="clr-namespace:NiVE3.View.Pane"
         xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
+        xmlns:sgm="clr-namespace:NiVE3.Config.Wpf.GeneratedMarkup"
         xmlns:ui="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
         xmlns:r="clr-namespace:NiVE3.View.Resource"
         xmlns:ur="clr-namespace:NiVE3.UI.Resources;assembly=NiVE3.UI"
@@ -271,23 +272,23 @@
                 </Menu.ItemsPanel>
                 <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_Menu_File}">
                     <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_Menu_File_New}">
-                        <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_File_NewProject}" a:MenuItemGestureBindingProperty.InputBinding="{Binding ElementName=NewProjectGesture}"/>
-                        <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_File_NewComposition}" a:MenuItemGestureBindingProperty.InputBinding="{Binding ElementName=NewCompositionGesture}"/>
-                        <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_File_NewFolder}" a:MenuItemGestureBindingProperty.InputBinding="{Binding ElementName=NewFootageFolderGesture}"/>
+                        <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_File_NewProject}" a:MenuItemGestureBindingProperty.InputBinding="{sgm:ShortcutKeyBinding ResourceKey=NewProjectGesture}"/>
+                        <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_File_NewComposition}" a:MenuItemGestureBindingProperty.InputBinding="{sgm:ShortcutKeyBinding ResourceKey=NewCompositionGesture}"/>
+                        <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_File_NewFolder}" a:MenuItemGestureBindingProperty.InputBinding="{sgm:ShortcutKeyBinding ResourceKey=NewFootageFolderGesture}"/>
                     </MenuItem>
-                    <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_File_OpenProject}" a:MenuItemGestureBindingProperty.InputBinding="{Binding ElementName=OpenProjectGesture}"/>
+                    <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_File_OpenProject}" a:MenuItemGestureBindingProperty.InputBinding="{sgm:ShortcutKeyBinding ResourceKey=OpenProjectGesture}"/>
                     <Separator />
-                    <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_File_Exit}" a:MenuItemGestureBindingProperty.InputBinding="{Binding ElementName=ExitGesture}"/>
+                    <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_File_Exit}" a:MenuItemGestureBindingProperty.InputBinding="{sgm:ShortcutKeyBinding ResourceKey=ExitGesture}"/>
                 </MenuItem>
                 <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_Menu_Edit}">
-                    <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_Edit_Cut}" a:MenuItemGestureBindingProperty.InputBinding="{Binding ElementName=CutItemGesture}"/>
-                    <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_Edit_Copy}" a:MenuItemGestureBindingProperty.InputBinding="{Binding ElementName=CopyItemGesture}"/>
-                    <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_Edit_Paste}" a:MenuItemGestureBindingProperty.InputBinding="{Binding ElementName=PasteItemGesture}"/>
-                    <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_Edit_Duplicate}" a:MenuItemGestureBindingProperty.InputBinding="{Binding ElementName=DuplicateItemGesture}"/>
-                    <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_Edit_SplitLayer}" a:MenuItemGestureBindingProperty.InputBinding="{Binding ElementName=SplitLayerGesture}"/>
-                    <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_Edit_Delete}" a:MenuItemGestureBindingProperty.InputBinding="{Binding ElementName=DeleteItemGesture}"/>
+                    <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_Edit_Cut}" a:MenuItemGestureBindingProperty.InputBinding="{sgm:ShortcutKeyBinding ResourceKey=CutItemGesture}"/>
+                    <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_Edit_Copy}" a:MenuItemGestureBindingProperty.InputBinding="{sgm:ShortcutKeyBinding ResourceKey=CopyItemGesture}"/>
+                    <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_Edit_Paste}" a:MenuItemGestureBindingProperty.InputBinding="{sgm:ShortcutKeyBinding ResourceKey=PasteItemGesture}"/>
+                    <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_Edit_Duplicate}" a:MenuItemGestureBindingProperty.InputBinding="{sgm:ShortcutKeyBinding ResourceKey=DuplicateItemGesture}"/>
+                    <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_Edit_SplitLayer}" a:MenuItemGestureBindingProperty.InputBinding="{sgm:ShortcutKeyBinding ResourceKey=SplitLayerGesture}"/>
+                    <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_Edit_Delete}" a:MenuItemGestureBindingProperty.InputBinding="{sgm:ShortcutKeyBinding ResourceKey=DeleteItemGesture}"/>
                     <Separator />
-                    <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_Edit_SelectAll}" a:MenuItemGestureBindingProperty.InputBinding="{Binding ElementName=SelectAllGesture}"/>
+                    <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_Edit_SelectAll}" a:MenuItemGestureBindingProperty.InputBinding="{sgm:ShortcutKeyBinding ResourceKey=SelectAllGesture}"/>
                 </MenuItem>
                 <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_Menu_Effect}" ItemsSource="{Binding GroupedEffects}">
                     <MenuItem.ItemTemplate>

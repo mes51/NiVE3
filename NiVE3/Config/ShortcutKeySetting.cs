@@ -12,9 +12,13 @@ using NiVE3.Data.Config;
 using NiVE3.Extension;
 using NiVE3.Util;
 using NiVE3.Wpf.Input;
+using NiVE3.SourceGenerator.ResourceMarkupGenerator;
+using NiVE3.Wpf.Behavior;
 
 namespace NiVE3.Config
 {
+    [MarkupableBinding(InstancePropertyName = nameof(Setting), OverrideExtensionName = "ShortcutKeyBinding", RoutingCommandOwnerType = typeof(WindowGestureBehavior), RoutingCommandName = "Gesture")]
+    [MarkupableGesture(InstancePropertyName = nameof(Setting), OverrideExtensionName = "ShortcutKeyGesture")]
     class ShortcutKeySetting : DependencyObject
     {
         static readonly string FilePath = Path.Combine(Paths.ConfigDirectory, "shortcut_keys.json");
@@ -191,144 +195,168 @@ namespace NiVE3.Config
             new PropertyMetadata(new KeyGesture(Key.A, ModifierKeys.Control))
         );
 
+        [ShowInMarkup]
         public InputGesture SelectAllGesture
         {
             get { return (InputGesture)GetValue(SelectAllGestureProperty); }
             set { SetValue(SelectAllGestureProperty, value); }
         }
 
+        [ShowInMarkup]
         public InputGesture SelectCameraToolGesture
         {
             get { return (InputGesture)GetValue(SelectCameraToolGestureProperty); }
             set { SetValue(SelectCameraToolGestureProperty, value); }
         }
 
+        [ShowInMarkup]
         public InputGesture SelectScaleGestureGesture
         {
             get { return (InputGesture)GetValue(SelectScaleGestureGestureProperty); }
             set { SetValue(SelectScaleGestureGestureProperty, value); }
         }
 
+        [ShowInMarkup]
         public InputGesture SelectRotateToolGesture
         {
             get { return (InputGesture)GetValue(SelectRotateToolGestureProperty); }
             set { SetValue(SelectRotateToolGestureProperty, value); }
         }
 
+        [ShowInMarkup]
         public InputGesture SelectSelectToolGesture
         {
             get { return (InputGesture)GetValue(SelectSelectToolGestureProperty); }
             set { SetValue(SelectSelectToolGestureProperty, value); }
         }
 
+        [ShowInMarkup]
         public InputGesture SelectHandToolGesture
         {
             get { return (InputGesture)GetValue(SelectHandToolGestureProperty); }
             set { SetValue(SelectHandToolGestureProperty, value); }
         }
 
+        [ShowInMarkup]
         public InputGesture OpenRenderSettingGesture
         {
             get { return (InputGesture)GetValue(OpenRenderSettingGestureProperty); }
             set { SetValue(OpenRenderSettingGestureProperty, value); }
         }
 
+        [ShowInMarkup]
         public InputGesture BeginEditNameGesture
         {
             get { return (InputGesture)GetValue(BeginEditNameGestureProperty); }
             set { SetValue(BeginEditNameGestureProperty, value); }
         }
 
+        [ShowInMarkup]
         public InputGesture RedoGesture
         {
             get { return (InputGesture)GetValue(RedoGestureProperty); }
             set { SetValue(RedoGestureProperty, value); }
         }
 
+        [ShowInMarkup]
         public InputGesture UndoGesture
         {
             get { return (InputGesture)GetValue(UndoGestureProperty); }
             set { SetValue(UndoGestureProperty, value); }
         }
 
+        [ShowInMarkup]
         public InputGesture NewFootageFolderGesture
         {
             get { return (InputGesture)GetValue(NewFootageFolderGestureProperty); }
             set { SetValue(NewFootageFolderGestureProperty, value); }
         }
 
+        [ShowInMarkup]
         public InputGesture AddSolidGesture
         {
             get { return (InputGesture)GetValue(AddSolidGestureProperty); }
             set { SetValue(AddSolidGestureProperty, value); }
         }
 
+        [ShowInMarkup]
         public InputGesture SaveProjectGesture
         {
             get { return (InputGesture)GetValue(SaveProjectGestureProperty); }
             set { SetValue(SaveProjectGestureProperty, value); }
         }
 
+        [ShowInMarkup]
         public InputGesture OpenProjectGesture
         {
             get { return (InputGesture)GetValue(OpenProjectGestureProperty); }
             set { SetValue(OpenProjectGestureProperty, value); }
         }
 
+        [ShowInMarkup]
         public InputGesture NewProjectGesture
         {
             get { return (InputGesture)GetValue(NewProjectGestureProperty); }
             set { SetValue(NewProjectGestureProperty, value); }
         }
 
+        [ShowInMarkup]
         public InputGesture ExitGesture
         {
             get { return (InputGesture)GetValue(ExitGestureProperty); }
             set { SetValue(ExitGestureProperty, value); }
         }
 
+        [ShowInMarkup]
         public InputGesture OpenFileGesture
         {
             get { return (InputGesture)GetValue(OpenFileGestureProperty); }
             set { SetValue(OpenFileGestureProperty, value); }
         }
 
+        [ShowInMarkup]
         public InputGesture SplitLayerGesture
         {
             get { return (InputGesture)GetValue(SplitLayerGestureProperty); }
             set { SetValue(SplitLayerGestureProperty, value); }
         }
 
+        [ShowInMarkup]
         public InputGesture DuplicateItemGesture
         {
             get { return (InputGesture)GetValue(DuplicateItemGestureProperty); }
             set { SetValue(DuplicateItemGestureProperty, value); }
         }
 
+        [ShowInMarkup]
         public InputGesture PasteItemGesture
         {
             get { return (InputGesture)GetValue(PasteItemGestureProperty); }
             set { SetValue(PasteItemGestureProperty, value); }
         }
 
+        [ShowInMarkup]
         public InputGesture CopyItemGesture
         {
             get { return (InputGesture)GetValue(CopyItemGestureProperty); }
             set { SetValue(CopyItemGestureProperty, value); }
         }
 
+        [ShowInMarkup]
         public InputGesture CutItemGesture
         {
             get { return (InputGesture)GetValue(CutItemGestureProperty); }
             set { SetValue(CutItemGestureProperty, value); }
         }
 
+        [ShowInMarkup]
         public InputGesture DeleteItemGesture
         {
             get { return (InputGesture)GetValue(DeleteItemGestureProperty); }
             set { SetValue(DeleteItemGestureProperty, value); }
         }
 
+        [ShowInMarkup]
         public InputGesture NewCompositionGesture
         {
             get { return (InputGesture)GetValue(NewCompositionGestureProperty); }

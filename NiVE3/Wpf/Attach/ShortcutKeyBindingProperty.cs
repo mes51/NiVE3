@@ -38,22 +38,12 @@ namespace NiVE3.Wpf.Attach
             if (sender is UIElement uiElement)
             {
                 var frameworkElement = uiElement as FrameworkElement;
-                var nameScope = NameScope.GetNameScope(uiElement);
-                if (nameScope == null)
-                {
-                    nameScope = new NameScope();
-                    NameScope.SetNameScope(uiElement, nameScope);
-                }
 
                 var oldInputBindings = uiElement.InputBindings.OfType<GestureBindableKeyBinding>().ToArray();
                 foreach (var keyBinding in oldInputBindings)
                 {
                     BindingOperations.ClearAllBindings(keyBinding);
                     uiElement.InputBindings.Remove(keyBinding);
-                    if (keyBinding.CommandParameter is string key)
-                    {
-                        nameScope.UnregisterName(key);
-                    }
                 }
 
                 if (e.NewValue is bool enable && enable)
@@ -70,7 +60,6 @@ namespace NiVE3.Wpf.Attach
                         BindingOperations.SetBinding(keyBinding, GestureBindableKeyBinding.BindableGestureProperty, binding);
 
                         uiElement.InputBindings.Add(keyBinding);
-                        nameScope.RegisterName(key, keyBinding);
                     }
                 }
             }

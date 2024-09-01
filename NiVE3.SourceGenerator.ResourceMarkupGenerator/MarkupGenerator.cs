@@ -19,193 +19,21 @@ namespace NiVE3.SourceGenerator.ResourceMarkupGenerator
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
-            context.RegisterPostInitializationOutput(static context =>
+            var resourceDictionaryEmitter = new MarkupableResourceDictionaryEmitter();
+            var inputBindingEmitter = new MarkupableInputBindingEmitter();
+            var inputGestureEmitter = new MarkupableInputGestureEmitter();
+
+            context.RegisterPostInitializationOutput(context =>
             {
-                context.CancellationToken.ThrowIfCancellationRequested();
-
-                context.AddSource("MarkupableResourceDictionaryAttribute", $"namespace {Namespace};" + """
-
-using System;
-
-[AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
-sealed class MarkupableResourceDictionaryAttribute : Attribute
-{
-    public bool IsPublic { get; set; }
-}
-""");
-
-                context.CancellationToken.ThrowIfCancellationRequested();
-
-                context.AddSource("ShowInMarkupAttribute", $"namespace {Namespace};" + """
-
-using System;
-
-[AttributeUsage(AttributeTargets.Field, Inherited = false, AllowMultiple = false)]
-sealed class ShowInMarkupAttribute : Attribute { }
-""");
+                ShowInMarkupAttributeEmitter.RegisterAttributes(context);
+                resourceDictionaryEmitter.RegisterAttributes(context);
+                inputBindingEmitter.RegisterAttributes(context);
+                inputGestureEmitter.RegisterAttributes(context);
             });
 
-            var typeDefinitions = context.SyntaxProvider.ForAttributeWithMetadataName(
-                $"{Namespace}.MarkupableResourceDictionaryAttribute",
-                static (node, token) => node is ClassDeclarationSyntax,
-                static (context, token) => (TypeDeclarationSyntax)context.TargetNode
-            );
-
-            var source = typeDefinitions.Combine(context.CompilationProvider).WithComparer(Comparer.Instance);
-
-            context.RegisterSourceOutput(source, (context, source) =>
-            {
-                context.CancellationToken.ThrowIfCancellationRequested();
-
-                Emit(context, source.Item1, source.Item2);
-            });
-        }
-
-        static void Emit(SourceProductionContext context, TypeDeclarationSyntax syntax, Compilation compilation)
-        {
-            var semanticModel = compilation.GetSemanticModel(syntax.SyntaxTree);
-            if (semanticModel == null)
-            {
-                return;
-            }
-
-            if (semanticModel.GetDeclaredSymbol(syntax, context.CancellationToken) is not INamedTypeSymbol typeSymbol)
-            {
-                return;
-            }
-
-            var markupableResourceDictionary = compilation.GetTypeByMetadataName(MarkupableResourceDictionaryFullName);
-            if (markupableResourceDictionary == null)
-            {
-                throw new InvalidOperationException($"{MarkupableResourceDictionaryFullName} is not found");
-            }
-
-            var showInMarkup = compilation.GetTypeByMetadataName(ShowInMarkupFullName);
-            if (showInMarkup == null)
-            {
-                throw new InvalidOperationException($"{ShowInMarkupFullName} is not found");
-            }
-
-            var markupableResourceDictionaryAttribute = typeSymbol.GetAttributes().FirstOrDefault(a => SymbolEqualityComparer.Default.Equals(markupableResourceDictionary, a.AttributeClass));
-            if (markupableResourceDictionaryAttribute == null)
-            {
-                throw new InvalidOperationException("processing class is not applied MarkupableResourceDictionaryAttribute"); // may be bug
-            }
-
-            var isPublic = (bool?)markupableResourceDictionaryAttribute.NamedArguments.FirstOrDefault(a => a.Key == "IsPublic").Value.Value ?? false;
-
-            var baseType = typeSymbol.BaseType;
-            while (baseType != null)
-            {
-                if (baseType.ToString() == "System.Windows.ResourceDictionary")
-                {
-                    break;
-                }
-                baseType = baseType.BaseType;
-                if (baseType == null)
-                {
-                    context.ReportDiagnostic(
-                        Diagnostic.Create(DiagnosticDescriptors.TypeIsNotResourceDictionary, syntax.Identifier.GetLocation(), typeSymbol.Name)
-                    );
-                    return;
-                }
-            }
-
-            var ns = $"namespace {typeSymbol.ContainingNamespace}.Wpf.GeneratedMarkup;";
-
-            var fileName = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
-                .Replace("global::", "")
-                .Replace("<", "_")
-                .Replace(">", "_") + ".MarkupGenerator.g.cs";
-
-            var markupTypeName = $"{typeSymbol.Name.Replace("ResourceDictionary", "")}ResourceExtension";
-            var enumTypeName = $"{typeSymbol.Name.Replace("ResourceDictionary", "")}ResourceType";
-
-            var code = new StringBuilder($$"""
-// <auto-generated/>
-#nullable enable
-#pragma warning disable CS8600
-#pragma warning disable CS8601
-#pragma warning disable CS8602
-#pragma warning disable CS8603
-#pragma warning disable CS8604
-
-using System;
-using System.Windows;
-using System.Windows.Markup;
-
-{{ns}}
-
-{{(isPublic ? "public " : "")}}class {{markupTypeName}} : MarkupExtension
-{
-    public {{enumTypeName}} ResourceKey { get; set; }
-
-    /// <summary>
-    /// DataTemplate内で使用する時はTrue、そうでない場合はFalse
-    /// </summary>
-    public bool ReturnDynamicResource { get; set; }
-
-    public {{markupTypeName}}() { }
-
-    public {{markupTypeName}}({{enumTypeName}} resourceKey)
-    {
-        ResourceKey = resourceKey;
-    }
-
-    public override object ProvideValue(IServiceProvider serviceProvider)
-    {
-        var key = typeof({{typeSymbol.ToDisplayString()}}).GetField(ResourceKey.ToString())?.GetValue(null) as string;
-        if (key != null)
-        {
-            var dr = new DynamicResourceExtension(key);
-            if (ReturnDynamicResource)
-            {
-                return dr;
-            }
-            else
-            {
-                return dr.ProvideValue(serviceProvider);
-            }
-        }
-        else
-        {
-            return null;
-        }
-    }
-}
-
-{{(isPublic ? "public " : "")}}enum {{enumTypeName}}
-{
-
-""");
-
-            var fields = typeSymbol.GetMembers()
-                .OfType<IFieldSymbol>()
-                .Where(f => f is { IsStatic: true, DeclaredAccessibility: Accessibility.Public, IsImplicitlyDeclared: false, CanBeReferencedByName: true })
-                .Where(f => f.GetAttributes().Any(a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, showInMarkup)))
-                .ToArray();
-
-            code.AppendLine(string.Join(",\r\n", fields.Select(f => $"    {f.Name}")));
-
-            code.AppendLine("}");
-
-            context.AddSource(fileName, code.ToString());
-        }
-    }
-
-    // https://github.com/Cysharp/MemoryPack/blob/0093aa8f9ae37f15c72afbd953fa702649e915f5/src/MemoryPack.Generator/MemoryPackGenerator.cs#L266
-    class Comparer : IEqualityComparer<(TypeDeclarationSyntax, Compilation)>
-    {
-        public static readonly Comparer Instance = new Comparer();
-
-        public bool Equals((TypeDeclarationSyntax, Compilation) x, (TypeDeclarationSyntax, Compilation) y)
-        {
-            return x.Item1.Equals(y.Item1);
-        }
-
-        public int GetHashCode((TypeDeclarationSyntax, Compilation) obj)
-        {
-            return obj.Item1.GetHashCode();
+            resourceDictionaryEmitter.RegisterEmit(context);
+            inputBindingEmitter.RegisterEmit(context);
+            inputGestureEmitter.RegisterEmit(context);
         }
     }
 }

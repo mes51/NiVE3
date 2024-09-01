@@ -33,7 +33,7 @@ namespace NiVE3.Wpf.Input
             set
             {
                 base.Gesture = value;
-                BindableGesture = value;
+                SetCurrentValue(BindableGestureProperty, value);
             }
         }
 
@@ -50,13 +50,7 @@ namespace NiVE3.Wpf.Input
         {
             if (sender is GestureBindableKeyBinding inputBinding && e.NewValue is InputGesture newInput)
             {
-                // NOTE: 直接Propertyを操作するとBindingが外れるため設定し直す
-                var binding = BindingOperations.GetBindingBase(inputBinding, BindableGestureProperty);
-                if (binding != null)
-                {
-                    inputBinding.Gesture = newInput;
-                    BindingOperations.SetBinding(inputBinding, BindableGestureProperty, binding);
-                }
+                inputBinding.Gesture = newInput;
             }
         }
 

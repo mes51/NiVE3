@@ -30,7 +30,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NiVE3.SourceGenerator.Langu
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpAvi", "SharpAvi\SharpAvi\SharpAvi.csproj", "{7FE0FEC3-688C-4779-8A05-B679222F4CD5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NiVE3.InternalShader", "NiVE3.InternalShader\NiVE3.InternalShader.csproj", "{BBDCAF4F-5DB5-4135-B574-55B380DD212C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NiVE3.InternalShader", "NiVE3.InternalShader\NiVE3.InternalShader.csproj", "{BBDCAF4F-5DB5-4135-B574-55B380DD212C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
