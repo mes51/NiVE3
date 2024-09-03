@@ -291,20 +291,23 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("(なし)")]
         public static readonly string Timeline_EmptyTitle = nameof(Timeline_EmptyTitle);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("シェイプの追加(_S)")]
-        public static readonly string Timeline_ContextMenu_AddShape = nameof(Timeline_ContextMenu_AddShape);
+        [ShowInMarkup, LanguageKey, DefaultValue("追加(_A)")]
+        public static readonly string Timeline_ContextMenu_AddLayer = nameof(Timeline_ContextMenu_AddLayer);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("カメラの追加(_C)")]
-        public static readonly string Timeline_ContextMenu_AddCamera = nameof(Timeline_ContextMenu_AddCamera);
+        [ShowInMarkup, LanguageKey, DefaultValue("シェイプ(_S)")]
+        public static readonly string Timeline_ContextMenu_AddLayer_Shape = nameof(Timeline_ContextMenu_AddLayer_Shape);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("ライトの追加(_L)")]
-        public static readonly string Timeline_ContextMenu_AddLight = nameof(Timeline_ContextMenu_AddLight);
+        [ShowInMarkup, LanguageKey, DefaultValue("カメラ(_C)")]
+        public static readonly string Timeline_ContextMenu_AddLayer_Camera = nameof(Timeline_ContextMenu_AddLayer_Camera);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("ヌルオブジェクトの追加(_N)")]
-        public static readonly string Timeline_ContextMenu_AddNullObject = nameof(Timeline_ContextMenu_AddNullObject);
+        [ShowInMarkup, LanguageKey, DefaultValue("ライト(_L)")]
+        public static readonly string Timeline_ContextMenu_AddLayer_Light = nameof(Timeline_ContextMenu_AddLayer_Light);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("テキストの追加(_T)")]
-        public static readonly string Timeline_ContextMenu_AddText = nameof(Timeline_ContextMenu_AddText);
+        [ShowInMarkup, LanguageKey, DefaultValue("ヌルオブジェクト(_N)")]
+        public static readonly string Timeline_ContextMenu_AddLayer_NullObject = nameof(Timeline_ContextMenu_AddLayer_NullObject);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("テキスト(_T)")]
+        public static readonly string Timeline_ContextMenu_AddLayer_Text = nameof(Timeline_ContextMenu_AddLayer_Text);
 
         [ShowInMarkup, LanguageKey, DefaultValue("コンポジションの設定...(_O)")]
         public static readonly string Timeline_ContextMenu_CompositionSetting = nameof(Timeline_ContextMenu_CompositionSetting);

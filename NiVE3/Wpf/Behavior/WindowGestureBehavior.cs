@@ -17,7 +17,7 @@ namespace NiVE3.Wpf.Behavior
 {
     class WindowGestureBehavior : Behavior<Window>
     {
-        public static RoutedUICommand GestureCommand { get; } = new RoutedUICommand("", "Gesture", typeof(WindowGestureBehavior));
+        public static RoutedCommand GestureCommand { get; } = new RoutedCommand("Gesture", typeof(WindowGestureBehavior));
 
         bool Initialized { get; set; }
 
@@ -91,7 +91,7 @@ namespace NiVE3.Wpf.Behavior
 
         private void GestureCommand_PreviewCanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
-            if (e.Command is RoutedUICommand uiCommand && uiCommand.Name == GestureCommand.Name && uiCommand.OwnerType == typeof(WindowGestureBehavior))
+            if (e.Command is RoutedCommand uiCommand && uiCommand.Name == GestureCommand.Name && uiCommand.OwnerType == typeof(WindowGestureBehavior))
             {
                 e.CanExecute = FindCommand(e.Parameter as string ?? "")?.CanExecute(null) ?? false;
                 e.Handled = true;
@@ -100,7 +100,7 @@ namespace NiVE3.Wpf.Behavior
 
         private void GestureCommand_PreviewExecuted(object sender, ExecutedRoutedEventArgs e)
         {
-            if (e.Command is RoutedUICommand uiCommand && uiCommand.Name == GestureCommand.Name && uiCommand.OwnerType == typeof(WindowGestureBehavior))
+            if (e.Command is RoutedCommand uiCommand && uiCommand.Name == GestureCommand.Name && uiCommand.OwnerType == typeof(WindowGestureBehavior))
             {
                 FindCommand(e.Parameter as string ?? "")?.Execute(null);
                 e.Handled = true;

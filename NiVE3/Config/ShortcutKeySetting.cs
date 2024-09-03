@@ -195,6 +195,90 @@ namespace NiVE3.Config
             new PropertyMetadata(new KeyGesture(Key.A, ModifierKeys.Control))
         );
 
+        public static readonly DependencyProperty AddShapeLayerGestureProperty = DependencyProperty.Register(
+            nameof(AddShapeLayerGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new KeyGesture(Key.None))
+        );
+
+        public static readonly DependencyProperty AddCameraLayerGestureProperty = DependencyProperty.Register(
+            nameof(AddCameraLayerGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new KeyGesture(Key.None))
+        );
+
+        public static readonly DependencyProperty AddLightLayerGestureProperty = DependencyProperty.Register(
+            nameof(AddLightLayerGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new KeyGesture(Key.None))
+        );
+
+        public static readonly DependencyProperty AddNullObjectLayerGestureProperty = DependencyProperty.Register(
+            nameof(AddNullObjectLayerGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new KeyGesture(Key.None))
+        );
+
+        public static readonly DependencyProperty AddTextLayerGestureProperty = DependencyProperty.Register(
+            nameof(AddTextLayerGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new KeyGesture(Key.None))
+        );
+
+        public static readonly DependencyProperty OpenCompositionSettingGestureProperty = DependencyProperty.Register(
+            nameof(OpenCompositionSettingGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new KeyGesture(Key.None))
+        );
+
+        [ShowInMarkup]
+        public InputGesture OpenCompositionSettingGesture
+        {
+            get { return (InputGesture)GetValue(OpenCompositionSettingGestureProperty); }
+            set { SetValue(OpenCompositionSettingGestureProperty, value); }
+        }
+
+        [ShowInMarkup]
+        public InputGesture AddTextLayerGesture
+        {
+            get { return (InputGesture)GetValue(AddTextLayerGestureProperty); }
+            set { SetValue(AddTextLayerGestureProperty, value); }
+        }
+
+        [ShowInMarkup]
+        public InputGesture AddNullObjectLayerGesture
+        {
+            get { return (InputGesture)GetValue(AddNullObjectLayerGestureProperty); }
+            set { SetValue(AddNullObjectLayerGestureProperty, value); }
+        }
+
+        [ShowInMarkup]
+        public InputGesture AddLightLayerGesture
+        {
+            get { return (InputGesture)GetValue(AddLightLayerGestureProperty); }
+            set { SetValue(AddLightLayerGestureProperty, value); }
+        }
+
+        [ShowInMarkup]
+        public InputGesture AddCameraLayerGesture
+        {
+            get { return (InputGesture)GetValue(AddCameraLayerGestureProperty); }
+            set { SetValue(AddCameraLayerGestureProperty, value); }
+        }
+
+        [ShowInMarkup]
+        public InputGesture AddShapeLayerGesture
+        {
+            get { return (InputGesture)GetValue(AddShapeLayerGestureProperty); }
+            set { SetValue(AddShapeLayerGestureProperty, value); }
+        }
+
         [ShowInMarkup]
         public InputGesture SelectAllGesture
         {

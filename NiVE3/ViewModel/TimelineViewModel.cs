@@ -48,6 +48,12 @@ namespace NiVE3.ViewModel
     [CommandHandling(nameof(SelectAllCommand), nameof(ShortcutKeySetting.SelectAllGesture))]
     [CommandHandling(nameof(SplitLayerCommand), nameof(ShortcutKeySetting.SplitLayerGesture))]
     [CommandHandling(nameof(OpenRenderSettingCommand), nameof(ShortcutKeySetting.OpenRenderSettingGesture))]
+    [CommandHandling(nameof(AddShapeCommand), nameof(ShortcutKeySetting.AddShapeLayerGesture))]
+    [CommandHandling(nameof(AddCameraCommand), nameof(ShortcutKeySetting.AddCameraLayerGesture))]
+    [CommandHandling(nameof(AddLightCommand), nameof(ShortcutKeySetting.AddLightLayerGesture))]
+    [CommandHandling(nameof(AddNullObjectCommand), nameof(ShortcutKeySetting.AddNullObjectLayerGesture))]
+    [CommandHandling(nameof(AddTextCommand), nameof(ShortcutKeySetting.AddTextLayerGesture))]
+    [CommandHandling(nameof(CompositionSettingCommand), nameof(ShortcutKeySetting.OpenCompositionSettingGesture))]
     partial class TimelineViewModel : PaneViewModelBase, IDropTarget
     {
         private Guid compositionId;

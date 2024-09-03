@@ -50,7 +50,7 @@ sealed class {{AttributeName}} : Attribute
         {
             return null;
         }
-        var command = new System.Windows.Input.RoutedUICommand("", "{{routingCommandName}}", typeof({{routingCommandOwnerType.ToDisplayString()}}));
+        var command = new System.Windows.Input.RoutedCommand("{{routingCommandName}}", typeof({{routingCommandOwnerType.ToDisplayString()}}));
         var dp = (DependencyProperty?)typeof({{typeSymbol.ToDisplayString()}}).GetField(key + "Property", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static)?.GetValue(null);
 
         System.Windows.Input.InputBinding inputBinding;

@@ -10,8 +10,10 @@
              xmlns:cv="clr-namespace:NiVE3.View.Converter"
              xmlns:pr="clr-namespace:NiVE3.View.Primitive"
              xmlns:pt="clr-namespace:NiVE3.View.Part"
+             xmlns:a="clr-namespace:NiVE3.Wpf.Attach"
              xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
              xmlns:ugm="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
+             xmlns:cgm="clr-namespace:NiVE3.Config.Wpf.GeneratedMarkup"
              mc:Ignorable="d" 
              x:Name="Root"
              PreviewMouseWheel="Root_PreviewMouseWheel"
@@ -65,13 +67,15 @@
                     <Setter Property="ContextMenu">
                         <Setter.Value>
                             <ContextMenu>
-                                <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddShape}" Command="{Binding AddShapeCommand}"/>
-                                <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddCamera}" Command="{Binding AddCameraCommand}"/>
-                                <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddLight}" Command="{Binding AddLightCommand}"/>
-                                <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddNullObject}" Command="{Binding AddNullObjectCommand}"/>
-                                <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddText}" Command="{Binding AddTextCommand}"/>
+                                <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddLayer}">
+                                    <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddLayer_Shape}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=AddShapeLayerGesture}" CommandTarget="{Binding Source={x:Reference Root}}"/>
+                                    <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddLayer_Camera}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=AddCameraLayerGesture}" CommandTarget="{Binding Source={x:Reference Root}}"/>
+                                    <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddLayer_Light}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=AddLightLayerGesture}" CommandTarget="{Binding Source={x:Reference Root}}"/>
+                                    <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddLayer_NullObject}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=AddNullObjectLayerGesture}" CommandTarget="{Binding Source={x:Reference Root}}"/>
+                                    <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddLayer_Text}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=AddTextLayerGesture}" CommandTarget="{Binding Source={x:Reference Root}}"/>
+                                </MenuItem>
                                 <Separator />
-                                <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_CompositionSetting}" Command="{Binding CompositionSettingCommand}"/>
+                                <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_CompositionSetting}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=OpenCompositionSettingGesture}" CommandTarget="{Binding Source={x:Reference Root}}"/>
                             </ContextMenu>
                         </Setter.Value>
                     </Setter>
