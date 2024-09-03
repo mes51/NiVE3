@@ -51,6 +51,28 @@
         </Style>
 
         <Style x:Key="LayerCollectionStyle" TargetType="{x:Type pt:LayerCollectionView}" BasedOn="{x:Static pt:LayerCollectionView.DefaultStyle}">
+            <Setter Property="LayerContextMenu">
+                <Setter.Value>
+                    <ContextMenu>
+                        <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddLayer}">
+                            <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddLayer_Shape}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=AddShapeLayerGesture}" CommandTarget="{Binding Source={x:Reference Root}}"/>
+                            <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddLayer_Camera}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=AddCameraLayerGesture}" CommandTarget="{Binding Source={x:Reference Root}}"/>
+                            <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddLayer_Light}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=AddLightLayerGesture}" CommandTarget="{Binding Source={x:Reference Root}}"/>
+                            <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddLayer_NullObject}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=AddNullObjectLayerGesture}" CommandTarget="{Binding Source={x:Reference Root}}"/>
+                            <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddLayer_Text}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=AddTextLayerGesture}" CommandTarget="{Binding Source={x:Reference Root}}"/>
+                        </MenuItem>
+                        <Separator />
+                        <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_Cut}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=CutItemGesture}"/>
+                        <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_Copy}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=CopyItemGesture}"/>
+                        <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_Paste}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=PasteItemGesture}"/>
+                        <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_Duplicate}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=DuplicateItemGesture}"/>
+                        <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_SplitLayer}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=SplitLayerGesture}"/>
+                        <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_Delete}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=DeleteItemGesture}"/>
+                        <Separator />
+                        <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_CompositionSetting}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=OpenCompositionSettingGesture}" CommandTarget="{Binding Source={x:Reference Root}}"/>
+                    </ContextMenu>
+                </Setter.Value>
+            </Setter>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type ItemsControl}">

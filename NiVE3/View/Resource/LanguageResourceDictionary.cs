@@ -309,6 +309,24 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("テキスト(_T)")]
         public static readonly string Timeline_ContextMenu_AddLayer_Text = nameof(Timeline_ContextMenu_AddLayer_Text);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("切り取り(_X)")]
+        public static readonly string Timeline_ContextMenu_Cut = nameof(Timeline_ContextMenu_Cut);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("コピー(_C)")]
+        public static readonly string Timeline_ContextMenu_Copy = nameof(Timeline_ContextMenu_Copy);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("ペースト(_P)")]
+        public static readonly string Timeline_ContextMenu_Paste = nameof(Timeline_ContextMenu_Paste);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("複製(_E)")]
+        public static readonly string Timeline_ContextMenu_Duplicate = nameof(Timeline_ContextMenu_Duplicate);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("レイヤーを分割(_S)")]
+        public static readonly string Timeline_ContextMenu_SplitLayer = nameof(Timeline_ContextMenu_SplitLayer);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("削除(_D)")]
+        public static readonly string Timeline_ContextMenu_Delete = nameof(Timeline_ContextMenu_Delete);
+
         [ShowInMarkup, LanguageKey, DefaultValue("コンポジションの設定...(_O)")]
         public static readonly string Timeline_ContextMenu_CompositionSetting = nameof(Timeline_ContextMenu_CompositionSetting);
 
