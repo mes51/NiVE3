@@ -72,6 +72,12 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("終了(_X)")]
         public static readonly string MainWindow_MenuItem_File_Exit = nameof(MainWindow_MenuItem_File_Exit);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("元に戻す(_U)")]
+        public static readonly string MainWindow_MenuItem_Edit_Undo = nameof(MainWindow_MenuItem_Edit_Undo);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("やり直し(_R)")]
+        public static readonly string MainWindow_MenuItem_Edit_Redo = nameof(MainWindow_MenuItem_Edit_Redo);
+
         [ShowInMarkup, LanguageKey, DefaultValue("切り取り(_X)")]
         public static readonly string MainWindow_MenuItem_Edit_Cut = nameof(MainWindow_MenuItem_Edit_Cut);
 

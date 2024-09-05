@@ -289,6 +289,9 @@
                     <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_File_Exit}" a:MenuItemGestureBindingProperty.InputBinding="{sgm:ShortcutKeyBinding ResourceKey=ExitGesture}"/>
                 </MenuItem>
                 <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_Menu_Edit}">
+                    <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_Edit_Undo}" a:MenuItemGestureBindingProperty.InputBinding="{sgm:ShortcutKeyBinding ResourceKey=UndoGesture}"/>
+                    <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_Edit_Redo}" a:MenuItemGestureBindingProperty.InputBinding="{sgm:ShortcutKeyBinding ResourceKey=RedoGesture}"/>
+                    <Separator />
                     <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_Edit_Cut}" a:MenuItemGestureBindingProperty.InputBinding="{sgm:ShortcutKeyBinding ResourceKey=CutItemGesture}"/>
                     <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_Edit_Copy}" a:MenuItemGestureBindingProperty.InputBinding="{sgm:ShortcutKeyBinding ResourceKey=CopyItemGesture}"/>
                     <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_Edit_Paste}" a:MenuItemGestureBindingProperty.InputBinding="{sgm:ShortcutKeyBinding ResourceKey=PasteItemGesture}"/>
