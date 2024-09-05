@@ -39,7 +39,7 @@ namespace NiVE3.ViewModel
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
     [ManualViewModelWireable(nameof(CompositionModel), nameof(BindComposition), nameof(UnbindComposition), WithInitializeProperty = true)]
     [CommandHandling(nameof(BeginEditNameCommand), nameof(ShortcutKeySetting.BeginEditNameGesture))]
-    [CommandHandling(nameof(AddSolidCommand), nameof(ShortcutKeySetting.AddSolidGesture))]
+    [CommandHandling(nameof(AddSolidLayerCommand), nameof(ShortcutKeySetting.AddSolidLayerGesture))]
     [CommandHandling(nameof(DeleteCommand), nameof(ShortcutKeySetting.DeleteItemGesture))]
     [CommandHandling(nameof(CutCommand), nameof(ShortcutKeySetting.CutItemGesture))]
     [CommandHandling(nameof(CopyCommand), nameof(ShortcutKeySetting.CopyItemGesture))]
@@ -404,7 +404,7 @@ namespace NiVE3.ViewModel
 
         public ICommand ChangeWorkareaCommand { get; }
 
-        public ICommand AddSolidCommand { get; }
+        public ICommand AddSolidLayerCommand { get; }
 
         public ICommand DeleteCommand { get; }
 
@@ -503,7 +503,7 @@ namespace NiVE3.ViewModel
 
             ChangeWorkareaCommand = new DelegateCommand<Tuple<double, double>>(t => CompositionModel?.ChangeWorkarea(t.Item1, t.Item2));
 
-            AddSolidCommand = new RequerySuggestedCommand(() =>
+            AddSolidLayerCommand = new RequerySuggestedCommand(() =>
             {
                 if (CompositionModel == null || Layers == null)
                 {

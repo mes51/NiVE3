@@ -64,6 +64,8 @@ namespace NiVE3.Model
 
         public FootageModel ShapeFootage { get; }
 
+        public string[] SupportedAllExtensions { get; private set; } = [];
+
         Dictionary<Type, string[]> SupportedFileTypes { get; set; } = [];
 
         List<InputModel> LoadedInputs { get; } = [];
@@ -716,6 +718,7 @@ namespace NiVE3.Model
             }
 
             SupportedFileTypes = InputMetadatas.ToDictionary(m => m.Key, m => m.Value.SupportedFileType.Split(",").Select(e => e.Trim('*', '.')).ToArray());
+            SupportedAllExtensions = [..SupportedFileTypes.Values.SelectMany(_ => _).Where(s => !string.IsNullOrEmpty(s)).Select(s => "*." + s)];
         }
 
         void OnShowFootagePreview(FootageModel footage)

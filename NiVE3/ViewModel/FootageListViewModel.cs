@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using GongSolutions.Wpf.DragDrop;
+using Microsoft.Win32;
 using NiVE3.Config;
 using NiVE3.Model;
 using NiVE3.Mvvm;
@@ -28,10 +29,12 @@ namespace NiVE3.ViewModel
     }
 
     [PaneLocation(PaneLocation.Left1Center)]
-    [CommandHandling(nameof(OpenFileCommand), nameof(ShortcutKeySetting.OpenFileGesture), IsGlobal = true)]
+    [CommandHandling(nameof(LoadFileCommand), nameof(ShortcutKeySetting.OpenFileGesture), IsGlobal = true)]
     [CommandHandling(nameof(AddFootageFolderCommand), nameof(ShortcutKeySetting.NewFootageFolderGesture), IsGlobal = true)]
     [CommandHandling(nameof(DeleteFootageCommand), nameof(ShortcutKeySetting.DeleteItemGesture))]
     [CommandHandling(nameof(BeginEditNameCommand), nameof(ShortcutKeySetting.BeginEditNameGesture))]
+    [CommandHandling(nameof(LoadSolidCommand), nameof(ShortcutKeySetting.LoadSolidGesture), IsGlobal = true)]
+    [CommandHandling(nameof(LoadFileCommand), nameof(ShortcutKeySetting.LoadFileGesture), IsGlobal = true)]
     class FootageListViewModel : SingletonePaneViewModelBase, IFootageViewModelList, IDropTarget, IDragSource
     {
         private ObservableCollectionView<IFootageModel, IFootageViewModel> footages;
@@ -108,15 +111,15 @@ namespace NiVE3.ViewModel
 
         public ICommand MoveFootageListCommand { get; }
 
-        public ICommand OpenFileCommand { get; }
+        public ICommand LoadSolidCommand { get; }
+
+        public ICommand LoadFileCommand { get; }
 
         public ICommand DeleteFootageCommand { get; }
 
         public ICommand AddSolidCommand { get; }
 
         public ICommand AddFootageFolderCommand { get; }
-
-        public ICommand LoadFileCommand { get; }
 
         public ICommand ShowPreviewCommand { get; }
 
@@ -169,7 +172,19 @@ namespace NiVE3.ViewModel
                 }
             });
 
-            OpenFileCommand = new DelegateCommand(() => System.Diagnostics.Debug.WriteLine("FootageViewModel.OpenFileCommand is not implemented"));
+            LoadSolidCommand = new DelegateCommand(() => FootageListModel.AddSolid());
+
+            LoadFileCommand = new DelegateCommand(() =>
+            {
+                var open = new OpenFileDialog
+                {
+                    Filter = $"{LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_LoadFile_Filter_SupportedAllTypes)}({string.Join(",", FootageListModel.SupportedAllExtensions)})|{string.Join(";", FootageListModel.SupportedAllExtensions)}"
+                };
+                if (open.ShowDialog() ?? false)
+                {
+                    FootageListModel.LoadFile(open.FileName, null);
+                }
+            });
 
             DeleteFootageCommand = new RequerySuggestedCommand(() =>
             {
@@ -202,8 +217,6 @@ namespace NiVE3.ViewModel
             AddSolidCommand = new DelegateCommand(() => FootageListModel.AddSolid());
 
             AddFootageFolderCommand = new DelegateCommand(() => FootageListModel.AddFolder());
-
-            LoadFileCommand = new DelegateCommand<Tuple<string, Guid?>>(t => FootageListModel.LoadFile(t.Item1, t.Item2));
 
             ShowPreviewCommand = new DelegateCommand<FootageViewModel>(f => FootageListModel.ShowPreview(f.FootageId));
 
@@ -330,7 +343,7 @@ namespace NiVE3.ViewModel
                         var targetFolderId = (target as IFootageViewModel)?.FootageId;
                         foreach (var f in files)
                         {
-                            LoadFileCommand.Execute(Tuple.Create(f, targetFolderId));
+                            FootageListModel.LoadFile(f, targetFolderId);
                         }
                     }
                     break;

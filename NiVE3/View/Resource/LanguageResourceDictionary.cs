@@ -60,6 +60,15 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("別名でプロジェクトを保存(_V)")]
         public static readonly string MainWindow_MenuItem_File_SaveProjectAsNewName = nameof(MainWindow_MenuItem_File_SaveProjectAsNewName);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("読み込み(_L)")]
+        public static readonly string MainWindow_MenuItem_File_Load = nameof(MainWindow_MenuItem_File_Load);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("ファイル...(_F)")]
+        public static readonly string MainWindow_MenuItem_File_LoadFile = nameof(MainWindow_MenuItem_File_LoadFile);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("平面...(_S)")]
+        public static readonly string MainWindow_MenuItem_File_LoadSolid = nameof(MainWindow_MenuItem_File_LoadSolid);
+
         [ShowInMarkup, LanguageKey, DefaultValue("終了(_X)")]
         public static readonly string MainWindow_MenuItem_File_Exit = nameof(MainWindow_MenuItem_File_Exit);
 
@@ -773,6 +782,9 @@ namespace NiVE3.View.Resource
 
         [DefaultValue("プロジェクトファイル")]
         public static readonly string Dialog_OpenSaveProject_Filter_Project = nameof(Dialog_OpenSaveProject_Filter_Project);
+
+        [DefaultValue("サポートしている全てのファイル形式")]
+        public static readonly string Dialog_LoadFile_Filter_SupportedAllTypes = nameof(Dialog_LoadFile_Filter_SupportedAllTypes);
 
         [DefaultValue("プリセットの削除")]
         public static readonly string Dialog_ConfirmDeleteCompositionPreset_Title = nameof(Dialog_ConfirmDeleteCompositionPreset_Title);

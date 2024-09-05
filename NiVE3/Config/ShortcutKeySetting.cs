@@ -118,8 +118,8 @@ namespace NiVE3.Config
             new PropertyMetadata(new KeyGesture(Key.N, ModifierKeys.Control))
         );
 
-        public static readonly DependencyProperty AddSolidGestureProperty = DependencyProperty.Register(
-            nameof(AddSolidGesture),
+        public static readonly DependencyProperty AddSolidLayerGestureProperty = DependencyProperty.Register(
+            nameof(AddSolidLayerGesture),
             typeof(InputGesture),
             typeof(ShortcutKeySetting),
             new PropertyMetadata(new KeyGesture(Key.Y, ModifierKeys.Control))
@@ -244,6 +244,34 @@ namespace NiVE3.Config
             new PropertyMetadata(new KeyGesture(Key.None))
         );
 
+        public static readonly DependencyProperty LoadSolidGestureProperty = DependencyProperty.Register(
+            nameof(LoadSolidGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new KeyGesture(Key.None))
+        );
+
+        public static readonly DependencyProperty LoadFileGestureProperty = DependencyProperty.Register(
+            nameof(LoadFileGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new KeyGesture(Key.None))
+        );
+
+        [ShowInMarkup]
+        public InputGesture LoadFileGesture
+        {
+            get { return (InputGesture)GetValue(LoadFileGestureProperty); }
+            set { SetValue(LoadFileGestureProperty, value); }
+        }
+
+        [ShowInMarkup]
+        public InputGesture LoadSolidGesture
+        {
+            get { return (InputGesture)GetValue(LoadSolidGestureProperty); }
+            set { SetValue(LoadSolidGestureProperty, value); }
+        }
+
         [ShowInMarkup]
         public InputGesture OpenCompositionSettingGesture
         {
@@ -364,10 +392,10 @@ namespace NiVE3.Config
         }
 
         [ShowInMarkup]
-        public InputGesture AddSolidGesture
+        public InputGesture AddSolidLayerGesture
         {
-            get { return (InputGesture)GetValue(AddSolidGestureProperty); }
-            set { SetValue(AddSolidGestureProperty, value); }
+            get { return (InputGesture)GetValue(AddSolidLayerGestureProperty); }
+            set { SetValue(AddSolidLayerGestureProperty, value); }
         }
 
         [ShowInMarkup]
