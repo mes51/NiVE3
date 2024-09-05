@@ -48,6 +48,13 @@ namespace NiVE3.Config
             new PropertyMetadata(new KeyGesture(Key.S, ModifierKeys.Control))
         );
 
+        public static readonly DependencyProperty SaveProjectAsNewNameGestureProperty = DependencyProperty.Register(
+            nameof(SaveProjectAsNewNameGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new KeyGesture(Key.S, ModifierKeys.Control | ModifierKeys.Shift))
+        );
+
         public static readonly DependencyProperty ExitGestureProperty = DependencyProperty.Register(
             nameof(ExitGesture),
             typeof(InputGesture),
@@ -361,6 +368,13 @@ namespace NiVE3.Config
         {
             get { return (InputGesture)GetValue(AddSolidGestureProperty); }
             set { SetValue(AddSolidGestureProperty, value); }
+        }
+
+        [ShowInMarkup]
+        public InputGesture SaveProjectAsNewNameGesture
+        {
+            get { return (InputGesture)GetValue(SaveProjectAsNewNameGestureProperty); }
+            set { SetValue(SaveProjectAsNewNameGestureProperty, value); }
         }
 
         [ShowInMarkup]

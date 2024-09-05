@@ -278,6 +278,9 @@
                     </MenuItem>
                     <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_File_OpenProject}" a:MenuItemGestureBindingProperty.InputBinding="{sgm:ShortcutKeyBinding ResourceKey=OpenProjectGesture}"/>
                     <Separator />
+                    <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_File_SaveProject}" a:MenuItemGestureBindingProperty.InputBinding="{sgm:ShortcutKeyBinding ResourceKey=SaveProjectGesture}"/>
+                    <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_File_SaveProjectAsNewName}" a:MenuItemGestureBindingProperty.InputBinding="{sgm:ShortcutKeyBinding ResourceKey=SaveProjectAsNewNameGesture}"/>
+                    <Separator />
                     <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_File_Exit}" a:MenuItemGestureBindingProperty.InputBinding="{sgm:ShortcutKeyBinding ResourceKey=ExitGesture}"/>
                 </MenuItem>
                 <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_Menu_Edit}">

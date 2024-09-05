@@ -30,6 +30,7 @@ namespace NiVE3.ViewModel
     [CommandHandling(nameof(NewProjectCommand), nameof(ShortcutKeySetting.NewProjectGesture))]
     [CommandHandling(nameof(OpenProjectCommand), nameof(ShortcutKeySetting.OpenProjectGesture))]
     [CommandHandling(nameof(SaveProjectCommand), nameof(ShortcutKeySetting.SaveProjectGesture))]
+    [CommandHandling(nameof(SaveProjectAsNewNameCommand), nameof(ShortcutKeySetting.SaveProjectAsNewNameGesture))]
     [CommandHandling(nameof(ExitCommand), nameof(ShortcutKeySetting.ExitGesture))]
     [CommandHandling(nameof(NewCompositionCommand), nameof(ShortcutKeySetting.NewCompositionGesture))]
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
@@ -98,6 +99,8 @@ namespace NiVE3.ViewModel
 
         public ICommand SaveProjectCommand { get; }
 
+        public ICommand SaveProjectAsNewNameCommand { get; }
+
         public ICommand ExitCommand { get; }
 
         public ICommand OpenSettingCommand { get; }
@@ -161,7 +164,7 @@ namespace NiVE3.ViewModel
                     switch (MessageBox.Show(text, title, MessageBoxButton.YesNoCancel, MessageBoxImage.Warning))
                     {
                         case MessageBoxResult.Yes:
-                            if (!SaveProject())
+                            if (!SaveProject(false))
                             {
                                 return;
                             }
@@ -185,7 +188,7 @@ namespace NiVE3.ViewModel
                     switch (MessageBox.Show(text, title, MessageBoxButton.YesNoCancel, MessageBoxImage.Warning))
                     {
                         case MessageBoxResult.Yes:
-                            if (!SaveProject())
+                            if (!SaveProject(false))
                             {
                                 return;
                             }
@@ -209,7 +212,9 @@ namespace NiVE3.ViewModel
                 ProjectModel.LoadProject(open.FileName);
             });
 
-            SaveProjectCommand = new DelegateCommand(() => SaveProject());
+            SaveProjectCommand = new RequerySuggestedCommand(() => SaveProject(false), () => IsEdited);
+
+            SaveProjectAsNewNameCommand = new DelegateCommand(() => SaveProject(true));
 
             ExitCommand = new DelegateCommand(() => CloseRequest.Raise());
 
@@ -265,7 +270,7 @@ namespace NiVE3.ViewModel
                 switch (MessageBox.Show(text, title, MessageBoxButton.YesNoCancel, MessageBoxImage.Warning))
                 {
                     case MessageBoxResult.Yes:
-                        SaveProject();
+                        SaveProject(false);
                         break;
                     case MessageBoxResult.No:
                         IsForceClosing = true;
@@ -318,9 +323,9 @@ namespace NiVE3.ViewModel
 
         partial void WiringModel();
 
-        bool SaveProject()
+        bool SaveProject(bool asNewName)
         {
-            if (string.IsNullOrEmpty(ProjectModel.ProjectPath))
+            if (string.IsNullOrEmpty(ProjectModel.ProjectPath) || asNewName)
             {
                 var save = new SaveFileDialog
                 {

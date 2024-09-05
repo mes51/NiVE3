@@ -54,6 +54,12 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("プロジェクトを開く(_O)")]
         public static readonly string MainWindow_MenuItem_File_OpenProject = nameof(MainWindow_MenuItem_File_OpenProject);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("プロジェクトを保存(_S)")]
+        public static readonly string MainWindow_MenuItem_File_SaveProject = nameof(MainWindow_MenuItem_File_SaveProject);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("別名でプロジェクトを保存(_V)")]
+        public static readonly string MainWindow_MenuItem_File_SaveProjectAsNewName = nameof(MainWindow_MenuItem_File_SaveProjectAsNewName);
+
         [ShowInMarkup, LanguageKey, DefaultValue("終了(_X)")]
         public static readonly string MainWindow_MenuItem_File_Exit = nameof(MainWindow_MenuItem_File_Exit);
 
