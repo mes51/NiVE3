@@ -48,7 +48,7 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("新規フォルダ(_F)")]
         public static readonly string MainWindow_MenuItem_File_NewFolder = nameof(MainWindow_MenuItem_File_NewFolder);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("新規コンポジション(_C)")]
+        [ShowInMarkup, LanguageKey, DefaultValue("新規コンポジション...(_C)")]
         public static readonly string MainWindow_MenuItem_File_NewComposition = nameof(MainWindow_MenuItem_File_NewComposition);
 
         [ShowInMarkup, LanguageKey, DefaultValue("プロジェクトを開く(_O)")]
@@ -128,6 +128,27 @@ namespace NiVE3.View.Resource
 
         [ShowInMarkup, LanguageKey, DefaultValue("コメント")]
         public static readonly string FootageListView_FootageComment = nameof(FootageListView_FootageComment);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("削除(_D)")]
+        public static readonly string FootageListView_ContextMenu_Delete = nameof(FootageListView_ContextMenu_Delete);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("新規(_N)")]
+        public static readonly string FootageListView_ContextMenu_New = nameof(FootageListView_ContextMenu_New);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("新規コンポジション...(_C)")]
+        public static readonly string FootageListView_ContextMenu_NewComposition = nameof(FootageListView_ContextMenu_NewComposition);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("新規フォルダ(_F)")]
+        public static readonly string FootageListView_ContextMenu_NewFolder = nameof(FootageListView_ContextMenu_NewFolder);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("読み込み(_L)")]
+        public static readonly string FootageListView_ContextMenu_Load = nameof(FootageListView_ContextMenu_Load);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("ファイル...(_F)")]
+        public static readonly string FootageListView_ContextMenu_LoadFile = nameof(FootageListView_ContextMenu_LoadFile);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("平面...(_S)")]
+        public static readonly string FootageListView_ContextMenu_LoadSolid = nameof(FootageListView_ContextMenu_LoadSolid);
 
         [ShowInMarkup, LanguageKey, DefaultValue("エフェクト")]
         public static readonly string EffectListView_Title = nameof(EffectListView_Title);

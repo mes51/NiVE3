@@ -13,6 +13,7 @@
              xmlns:a="clr-namespace:NiVE3.Wpf.Attach"
              xmlns:ur="clr-namespace:NiVE3.UI.Resources;assembly=NiVE3.UI"
              xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
+             xmlns:sgm="clr-namespace:NiVE3.Config.Wpf.GeneratedMarkup"
              xmlns:pi="clr-namespace:NiVE3.Plugin.Interfaces;assembly=NiVE3.Plugin"
              xmlns:dd="urn:gong-wpf-dragdrop"
              mc:Ignorable="d"
@@ -76,6 +77,22 @@
 
         <Style x:Key="ItemContainerStyle" TargetType="{x:Type pv:TreeListViewItem}">
             <Setter Property="ItemsSource" Value="{Binding Footages}"/>
+            <Setter Property="ContextMenu">
+                <Setter.Value>
+                    <ContextMenu>
+                        <MenuItem Header="{gm:LanguageResource ResourceKey=FootageListView_ContextMenu_Delete}" a:MenuItemGestureBindingProperty.InputBinding="{sgm:ShortcutKeyBinding ResourceKey=DeleteItemGesture}"/>
+                        <Separator />
+                        <MenuItem Header="{gm:LanguageResource ResourceKey=FootageListView_ContextMenu_New}">
+                            <MenuItem Header="{gm:LanguageResource ResourceKey=FootageListView_ContextMenu_NewComposition}" a:MenuItemGestureBindingProperty.InputBinding="{sgm:ShortcutKeyBinding ResourceKey=NewCompositionGesture}"/>
+                            <MenuItem Header="{gm:LanguageResource ResourceKey=FootageListView_ContextMenu_NewFolder}" a:MenuItemGestureBindingProperty.InputBinding="{sgm:ShortcutKeyBinding ResourceKey=NewFootageFolderGesture}"/>
+                        </MenuItem>
+                        <MenuItem Header="{gm:LanguageResource ResourceKey=FootageListView_ContextMenu_Load}">
+                            <MenuItem Header="{gm:LanguageResource ResourceKey=FootageListView_ContextMenu_LoadFile}" a:MenuItemGestureBindingProperty.InputBinding="{sgm:ShortcutKeyBinding ResourceKey=LoadFileGesture}"/>
+                            <MenuItem Header="{gm:LanguageResource ResourceKey=FootageListView_ContextMenu_LoadSolid}" a:MenuItemGestureBindingProperty.InputBinding="{sgm:ShortcutKeyBinding ResourceKey=LoadSolidGesture}"/>
+                        </MenuItem>
+                    </ContextMenu>
+                </Setter.Value>
+            </Setter>
             <EventSetter Event="MouseDoubleClick" Handler="TreeListViewItem_MouseDoubleClick"/>
         </Style>
 
@@ -129,6 +146,18 @@
                     <MenuItem Header="{gm:LanguageResource ResourceKey=FootageListView_FootageFilePath}" IsCheckable="True" IsChecked="{Binding ShowFilePath}"/>
                 </ContextMenu>
             </pv:TreeListView.HeaderContextMenu>
+            <pv:TreeListView.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="{gm:LanguageResource ResourceKey=FootageListView_ContextMenu_New}">
+                        <MenuItem Header="{gm:LanguageResource ResourceKey=FootageListView_ContextMenu_NewComposition}" a:MenuItemGestureBindingProperty.InputBinding="{sgm:ShortcutKeyBinding ResourceKey=NewCompositionGesture}"/>
+                        <MenuItem Header="{gm:LanguageResource ResourceKey=FootageListView_ContextMenu_NewFolder}" a:MenuItemGestureBindingProperty.InputBinding="{sgm:ShortcutKeyBinding ResourceKey=NewFootageFolderGesture}"/>
+                    </MenuItem>
+                    <MenuItem Header="{gm:LanguageResource ResourceKey=FootageListView_ContextMenu_Load}">
+                        <MenuItem Header="{gm:LanguageResource ResourceKey=FootageListView_ContextMenu_LoadFile}" a:MenuItemGestureBindingProperty.InputBinding="{sgm:ShortcutKeyBinding ResourceKey=LoadFileGesture}"/>
+                        <MenuItem Header="{gm:LanguageResource ResourceKey=FootageListView_ContextMenu_LoadSolid}" a:MenuItemGestureBindingProperty.InputBinding="{sgm:ShortcutKeyBinding ResourceKey=LoadSolidGesture}"/>
+                    </MenuItem>
+                </ContextMenu>
+            </pv:TreeListView.ContextMenu>
         </pv:TreeListView>
     </Grid>
 </UserControl>
