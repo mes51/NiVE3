@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Wpf.Input;
 using System.Windows.Input;
+using System.Text.Json.Serialization;
 
 namespace NiVE3.Data.Config
 {
@@ -19,14 +19,14 @@ namespace NiVE3.Data.Config
 
         public string ModifierString { get; set; } = "";
 
-        [IgnoreDataMember]
+        [JsonIgnore]
         public Key GestureKey
         {
             get => Enum.TryParse(KeyString, out Key key) ? key : Key.None;
             set => KeyString = value.ToString();
         }
 
-        [IgnoreDataMember]
+        [JsonIgnore]
         public ModifierKeys Modifier
         {
             get => Enum.TryParse(ModifierString, out ModifierKeys modifier) ? modifier : ModifierKeys.None;
