@@ -9,11 +9,22 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows;
 using NiVE3.Wpf.Input;
+using NiVE3.View.Converter;
 
 namespace NiVE3.Wpf.Attach
 {
     class MenuItemGestureBindingProperty
     {
+        static IValueConverter DisplayKeyConverter = new DelegateConverter<InputGesture, string>(gesture =>
+        {
+            return gesture switch
+            {
+                KeyGesture keyGesture => keyGesture.GetDisplayStringForCulture(CultureInfo.CurrentCulture),
+                SingleKeyGesture singleKeyGesture => singleKeyGesture.GetDisplayStringForCulture(CultureInfo.CurrentCulture),
+                _ => ""
+            };
+        });
+
         public static readonly DependencyProperty InputBindingProperty = DependencyProperty.RegisterAttached(
             "InputBinding",
             typeof(InputBinding),
@@ -54,21 +65,23 @@ namespace NiVE3.Wpf.Attach
             {
                 if (e.NewValue is InputBinding binding)
                 {
-                    switch (binding.Gesture)
-                    {
-                        case KeyGesture keyGesture:
-                            item.InputGestureText = keyGesture.GetDisplayStringForCulture(CultureInfo.CurrentCulture);
-                            break;
-                        case SingleKeyGesture singleKeyGesture:
-                            item.InputGestureText = singleKeyGesture.GetDisplayStringForCulture(CultureInfo.CurrentCulture);
-                            break;
-                    }
+                    // TODO: BindableGestureを持つinterfaceを定義するかどうか(SourceGeneratorで生成するクラスが依存する事になるのをどうするか)
+                    item.SetBinding(MenuItem.InputGestureTextProperty, new Binding { Source = binding, Mode = BindingMode.OneWay, Path = new PropertyPath("BindableGesture"), Converter = DisplayKeyConverter });
                     item.SetBinding(MenuItem.CommandProperty, new Binding(nameof(InputBinding.Command)) { Source = binding, Mode = BindingMode.OneWay });
                     item.SetBinding(MenuItem.CommandParameterProperty, new Binding(nameof(InputBinding.CommandParameter)) { Source = binding, Mode = BindingMode.OneWay });
+
+                    var displayKey = binding.Gesture switch
+                    {
+                        KeyGesture keyGesture => keyGesture.GetDisplayStringForCulture(CultureInfo.CurrentCulture),
+                        SingleKeyGesture singleKeyGesture => singleKeyGesture.GetDisplayStringForCulture(CultureInfo.CurrentCulture),
+                        _ => ""
+                    };
+                    item.SetCurrentValue(MenuItem.InputGestureTextProperty, displayKey);
                 }
                 else
                 {
                     item.InputGestureText = "";
+                    item.ClearValue(MenuItem.InputGestureTextProperty);
                     item.ClearValue(MenuItem.CommandProperty);
                     item.ClearValue(MenuItem.CommandParameterProperty);
                 }
