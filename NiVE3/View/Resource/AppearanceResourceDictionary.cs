@@ -47,6 +47,12 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, BrushColorRange("#F14D53", "#F14D53")]
         public static readonly string AudioLevelMeterOverZeroEnableFill = nameof(AudioLevelMeterOverZeroEnableFill);
 
+        [ShowInMarkup, BrushColorRange("#111111", "#EEEEEE")]
+        public static readonly string DataGridGroupRowBackgroundFill = nameof(DataGridGroupRowBackgroundFill);
+
+        [ShowInMarkup, BrushColorRange("#EE4444", "#EE9999")]
+        public static readonly string DataGridGroupRowErrorBackgroundFill = nameof(DataGridGroupRowErrorBackgroundFill);
+
         double appearance = 0.0;
         public double Appearance
         {

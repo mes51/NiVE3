@@ -102,6 +102,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("環境設定(_O)...")]
         public static readonly string MainWindow_MenuItem_Tool_OpenSetting = nameof(MainWindow_MenuItem_Tool_OpenSetting);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("ショートカットキー設定(_S)...")]
+        public static readonly string MainWindow_MenuItem_Tool_OpenShortcutKeySetting = nameof(MainWindow_MenuItem_Tool_OpenShortcutKeySetting);
+
         [ShowInMarkup, LanguageKey, DefaultValue("再生コントロール")]
         public static readonly string PlayControlView_Title = nameof(PlayControlView_Title);
 
@@ -597,6 +600,27 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("(デフォルト)")]
         public static readonly string OptionView_Performance_UseGpuDevice_Default = nameof(OptionView_Performance_UseGpuDevice_Default);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("ショートカットキー設定")]
+        public static readonly string ShortcutKeySettingView_Title = nameof(ShortcutKeySettingView_Title);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("検索")]
+        public static readonly string ShortcutKeySettingView_FilterLabel = nameof(ShortcutKeySettingView_FilterLabel);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("名前")]
+        public static readonly string ShortcutKeySettingView_Column_Name = nameof(ShortcutKeySettingView_Column_Name);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("キー")]
+        public static readonly string ShortcutKeySettingView_Column_Key = nameof(ShortcutKeySettingView_Column_Key);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("重複")]
+        public static readonly string ShortcutKeySettingView_Column_Duplicated = nameof(ShortcutKeySettingView_Column_Duplicated);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("ショートカットキーの変更(_E)")]
+        public static readonly string ShortcutKeySettingView_ContextMenu_Edit = nameof(ShortcutKeySettingView_ContextMenu_Edit);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("ショートカットキーの削除(_D)")]
+        public static readonly string ShortcutKeySettingView_ContextMenu_Delete = nameof(ShortcutKeySettingView_ContextMenu_Delete);
+
         // Effect category names
 
         [DefaultValue("オーディオ")]
@@ -851,6 +875,12 @@ namespace NiVE3.View.Resource
 
         [DefaultValue("未保存の編集内容があります。プロジェクトを閉じる前に保存しますか?")]
         public static readonly string Dialog_NotSaveEditedWhenCloseProject_Text = nameof(Dialog_NotSaveEditedWhenCloseProject_Text);
+
+        [DefaultValue("エラー")]
+        public static readonly string Dialog_InvalidShortcutKeyCombination_Title = nameof(Dialog_InvalidShortcutKeyCombination_Title);
+
+        [DefaultValue("設定しようとしたキーの組み合わせは使用できません。他のキーの組み合わせを使用してください。")]
+        public static readonly string Dialog_InvalidShortcutKeyCombination_Text = nameof(Dialog_InvalidShortcutKeyCombination_Text);
 
         // ValidationRule
 
@@ -1239,6 +1269,104 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("編集")]
         public static readonly string SourceTextPropertyControl_Edit = nameof(SourceTextPropertyControl_Edit);
 
+        // ShortcutKeyNames
+
+        [DefaultValue("ファイルの読み込み")]
+        public static readonly string ShortcutKeyName_LoadFileGesture = nameof(ShortcutKeyName_LoadFileGesture);
+
+        [DefaultValue("平面の読み込み")]
+        public static readonly string ShortcutKeyName_LoadSolidGesture = nameof(ShortcutKeyName_LoadSolidGesture);
+
+        [DefaultValue("コンポジション設定")]
+        public static readonly string ShortcutKeyName_OpenCompositionSettingGesture = nameof(ShortcutKeyName_OpenCompositionSettingGesture);
+
+        [DefaultValue("テキストの追加")]
+        public static readonly string ShortcutKeyName_AddTextLayerGesture = nameof(ShortcutKeyName_AddTextLayerGesture);
+
+        [DefaultValue("ヌルオブジェクトの追加")]
+        public static readonly string ShortcutKeyName_AddNullObjectLayerGesture = nameof(ShortcutKeyName_AddNullObjectLayerGesture);
+
+        [DefaultValue("ライトの追加")]
+        public static readonly string ShortcutKeyName_AddLightLayerGesture = nameof(ShortcutKeyName_AddLightLayerGesture);
+
+        [DefaultValue("カメラの追加")]
+        public static readonly string ShortcutKeyName_AddCameraLayerGesture = nameof(ShortcutKeyName_AddCameraLayerGesture);
+
+        [DefaultValue("シェイプの追加")]
+        public static readonly string ShortcutKeyName_AddShapeLayerGesture = nameof(ShortcutKeyName_AddShapeLayerGesture);
+
+        [DefaultValue("全て選択")]
+        public static readonly string ShortcutKeyName_SelectAllGesture = nameof(ShortcutKeyName_SelectAllGesture);
+
+        [DefaultValue("カメラツールに切り替え")]
+        public static readonly string ShortcutKeyName_SelectCameraToolGesture = nameof(ShortcutKeyName_SelectCameraToolGesture);
+
+        [DefaultValue("拡大縮小ツールに切り替え")]
+        public static readonly string ShortcutKeyName_SelectScaleGestureGesture = nameof(ShortcutKeyName_SelectScaleGestureGesture);
+
+        [DefaultValue("回転ツールに切り替え")]
+        public static readonly string ShortcutKeyName_SelectRotateToolGesture = nameof(ShortcutKeyName_SelectRotateToolGesture);
+
+        [DefaultValue("選択ツールに切り替え")]
+        public static readonly string ShortcutKeyName_SelectSelectToolGesture = nameof(ShortcutKeyName_SelectSelectToolGesture);
+
+        [DefaultValue("手のひらツールに切り替え")]
+        public static readonly string ShortcutKeyName_SelectHandToolGesture = nameof(ShortcutKeyName_SelectHandToolGesture);
+
+        [DefaultValue("レンダリング設定・レンダーキューに追加")]
+        public static readonly string ShortcutKeyName_OpenRenderSettingGesture = nameof(ShortcutKeyName_OpenRenderSettingGesture);
+
+        [DefaultValue("名前の変更")]
+        public static readonly string ShortcutKeyName_BeginEditNameGesture = nameof(ShortcutKeyName_BeginEditNameGesture);
+
+        [DefaultValue("やり直し")]
+        public static readonly string ShortcutKeyName_RedoGesture = nameof(ShortcutKeyName_RedoGesture);
+
+        [DefaultValue("元に戻す")]
+        public static readonly string ShortcutKeyName_UndoGesture = nameof(ShortcutKeyName_UndoGesture);
+
+        [DefaultValue("フォルダを追加")]
+        public static readonly string ShortcutKeyName_NewFootageFolderGesture = nameof(ShortcutKeyName_NewFootageFolderGesture);
+
+        [DefaultValue("平面の追加")]
+        public static readonly string ShortcutKeyName_AddSolidLayerGesture = nameof(ShortcutKeyName_AddSolidLayerGesture);
+
+        [DefaultValue("別名でプロジェクトを保存")]
+        public static readonly string ShortcutKeyName_SaveProjectAsNewNameGesture = nameof(ShortcutKeyName_SaveProjectAsNewNameGesture);
+
+        [DefaultValue("プロジェクトを保存")]
+        public static readonly string ShortcutKeyName_SaveProjectGesture = nameof(ShortcutKeyName_SaveProjectGesture);
+
+        [DefaultValue("プロジェクトを開く")]
+        public static readonly string ShortcutKeyName_OpenProjectGesture = nameof(ShortcutKeyName_OpenProjectGesture);
+
+        [DefaultValue("新規プロジェクト")]
+        public static readonly string ShortcutKeyName_NewProjectGesture = nameof(ShortcutKeyName_NewProjectGesture);
+
+        [DefaultValue("終了")]
+        public static readonly string ShortcutKeyName_ExitGesture = nameof(ShortcutKeyName_ExitGesture);
+
+        [DefaultValue("レイヤーを分割")]
+        public static readonly string ShortcutKeyName_SplitLayerGesture = nameof(ShortcutKeyName_SplitLayerGesture);
+
+        [DefaultValue("複製")]
+        public static readonly string ShortcutKeyName_DuplicateItemGesture = nameof(ShortcutKeyName_DuplicateItemGesture);
+
+        [DefaultValue("ペースト")]
+        public static readonly string ShortcutKeyName_PasteItemGesture = nameof(ShortcutKeyName_PasteItemGesture);
+
+        [DefaultValue("コピー")]
+        public static readonly string ShortcutKeyName_CopyItemGesture = nameof(ShortcutKeyName_CopyItemGesture);
+
+        [DefaultValue("切り取り")]
+        public static readonly string ShortcutKeyName_CutItemGesture = nameof(ShortcutKeyName_CutItemGesture);
+
+        [DefaultValue("削除")]
+        public static readonly string ShortcutKeyName_DeleteItemGesture = nameof(ShortcutKeyName_DeleteItemGesture);
+
+        [DefaultValue("新規コンポジション")]
+        public static readonly string ShortcutKeyName_NewCompositionGesture = nameof(ShortcutKeyName_NewCompositionGesture);
+
         // Unit
 
         [ShowInMarkup, LanguageKey, DefaultValue("%")]
@@ -1566,6 +1694,27 @@ namespace NiVE3.View.Resource
 
         [DefaultValue("カメラドリーツール")]
         public static readonly string ToolType_CameraDolly = nameof(ToolType_CameraDolly);
+
+        [DefaultValue("ファイル")]
+        public static readonly string ShortcutKeyCategoryType_File = nameof(ShortcutKeyCategoryType_File);
+
+        [DefaultValue("編集")]
+        public static readonly string ShortcutKeyCategoryType_Edit = nameof(ShortcutKeyCategoryType_Edit);
+
+        [DefaultValue("フッテージ")]
+        public static readonly string ShortcutKeyCategoryType_Footage = nameof(ShortcutKeyCategoryType_Footage);
+
+        [DefaultValue("コンポジション")]
+        public static readonly string ShortcutKeyCategoryType_Composition = nameof(ShortcutKeyCategoryType_Composition);
+
+        [DefaultValue("レイヤー")]
+        public static readonly string ShortcutKeyCategoryType_Layer = nameof(ShortcutKeyCategoryType_Layer);
+
+        [DefaultValue("ツール")]
+        public static readonly string ShortcutKeyCategoryType_Tool = nameof(ShortcutKeyCategoryType_Tool);
+
+        [DefaultValue("その他")]
+        public static readonly string ShortcutKeyCategoryType_Other = nameof(ShortcutKeyCategoryType_Other);
 
         // Inner Plugin
 

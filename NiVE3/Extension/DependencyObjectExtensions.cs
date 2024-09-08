@@ -45,5 +45,40 @@ namespace NiVE3.Extension
                 return p?.FindLogicalParent(predicate);
             }
         }
+
+        public static T? FindVisualChild<T>(this DependencyObject parent, bool traverse = false) where T : DependencyObject
+        {
+            return parent.FindVisualChild<T>(_ => true, traverse);
+        }
+
+        public static T? FindVisualChild<T>(this DependencyObject parent, Predicate<T> predicate, bool traverse = false) where T : DependencyObject
+        {
+            var childCount = VisualTreeHelper.GetChildrenCount(parent);
+            var children = new DependencyObject[childCount];
+            for (var i = 0; i < childCount; i++)
+            {
+                var c = VisualTreeHelper.GetChild(parent, i);
+                if (c is T child && predicate(child))
+                {
+                    return child;
+                }
+
+                children[i] = c;
+            }
+
+            if (traverse)
+            {
+                foreach (var c in children)
+                {
+                    var t = c.FindVisualChild(predicate);
+                    if (t != null)
+                    {
+                        return t;
+                    }
+                }
+            }
+
+            return null;
+        }
     }
 }

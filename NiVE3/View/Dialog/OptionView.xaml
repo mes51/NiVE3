@@ -13,8 +13,8 @@
              xmlns:vl="clr-namespace:NiVE3.View.Validation"
              mc:Ignorable="d" 
              pr:ViewModelLocator.AutoWireViewModel="True"
-             Height="450"
-             Width="800">
+             d:Height="450"
+             d:Width="800">
     <UserControl.Resources>
         <cv:ConverterCollection x:Key="SelectTypeConverter">
             <cv:ConverterItem>
@@ -46,6 +46,16 @@
             </Style.Triggers>
         </Style>
     </UserControl.Resources>
+    <pr:Dialog.WindowStyle>
+        <Style TargetType="{x:Type Window}">
+            <Setter Property="pr:Dialog.WindowStartupLocation" Value="CenterOwner"/>
+            <Setter Property="Width" Value="800"/>
+            <Setter Property="Height" Value="450"/>
+            <Setter Property="MinHeight" Value="150"/>
+            <Setter Property="MinWidth" Value="150"/>
+            <Setter Property="ShowInTaskbar" Value="False"/>
+        </Style>
+    </pr:Dialog.WindowStyle>
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition />

@@ -27,6 +27,8 @@ namespace NiVE3.Config
 
         public static Dictionary<string, DependencyProperty> DependencyProperties { get; }
 
+        public static Dictionary<ShortcutKeyCategoryType, string[]> CategorizedShortcutKeys { get; }
+
         public static readonly DependencyProperty NewProjectGestureProperty = DependencyProperty.Register(
             nameof(NewProjectGesture),
             typeof(InputGesture),
@@ -60,13 +62,6 @@ namespace NiVE3.Config
             typeof(InputGesture),
             typeof(ShortcutKeySetting),
             new PropertyMetadata(new KeyGesture(Key.F4, ModifierKeys.Alt))
-        );
-
-        public static readonly DependencyProperty OpenFileGestureProperty = DependencyProperty.Register(
-            nameof(OpenFileGesture),
-            typeof(InputGesture),
-            typeof(ShortcutKeySetting),
-            new PropertyMetadata(new KeyGesture(Key.O, ModifierKeys.Control | ModifierKeys.Shift))
         );
 
         public static readonly DependencyProperty DeleteItemGestureProperty = DependencyProperty.Register(
@@ -258,6 +253,7 @@ namespace NiVE3.Config
             new PropertyMetadata(new KeyGesture(Key.None))
         );
 
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Footage)]
         [ShowInMarkup]
         public InputGesture LoadFileGesture
         {
@@ -265,6 +261,7 @@ namespace NiVE3.Config
             set { SetValue(LoadFileGestureProperty, value); }
         }
 
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Footage)]
         [ShowInMarkup]
         public InputGesture LoadSolidGesture
         {
@@ -272,6 +269,7 @@ namespace NiVE3.Config
             set { SetValue(LoadSolidGestureProperty, value); }
         }
 
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Composition)]
         [ShowInMarkup]
         public InputGesture OpenCompositionSettingGesture
         {
@@ -279,6 +277,7 @@ namespace NiVE3.Config
             set { SetValue(OpenCompositionSettingGestureProperty, value); }
         }
 
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Composition)]
         [ShowInMarkup]
         public InputGesture AddTextLayerGesture
         {
@@ -286,6 +285,7 @@ namespace NiVE3.Config
             set { SetValue(AddTextLayerGestureProperty, value); }
         }
 
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Composition)]
         [ShowInMarkup]
         public InputGesture AddNullObjectLayerGesture
         {
@@ -293,6 +293,7 @@ namespace NiVE3.Config
             set { SetValue(AddNullObjectLayerGestureProperty, value); }
         }
 
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Composition)]
         [ShowInMarkup]
         public InputGesture AddLightLayerGesture
         {
@@ -300,6 +301,7 @@ namespace NiVE3.Config
             set { SetValue(AddLightLayerGestureProperty, value); }
         }
 
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Composition)]
         [ShowInMarkup]
         public InputGesture AddCameraLayerGesture
         {
@@ -307,6 +309,7 @@ namespace NiVE3.Config
             set { SetValue(AddCameraLayerGestureProperty, value); }
         }
 
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Composition)]
         [ShowInMarkup]
         public InputGesture AddShapeLayerGesture
         {
@@ -314,6 +317,7 @@ namespace NiVE3.Config
             set { SetValue(AddShapeLayerGestureProperty, value); }
         }
 
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Edit)]
         [ShowInMarkup]
         public InputGesture SelectAllGesture
         {
@@ -328,6 +332,7 @@ namespace NiVE3.Config
             set { SetValue(SelectCameraToolGestureProperty, value); }
         }
 
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Tool)]
         [ShowInMarkup]
         public InputGesture SelectScaleGestureGesture
         {
@@ -335,6 +340,7 @@ namespace NiVE3.Config
             set { SetValue(SelectScaleGestureGestureProperty, value); }
         }
 
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Tool)]
         [ShowInMarkup]
         public InputGesture SelectRotateToolGesture
         {
@@ -342,13 +348,15 @@ namespace NiVE3.Config
             set { SetValue(SelectRotateToolGestureProperty, value); }
         }
 
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Tool)]
         [ShowInMarkup]
         public InputGesture SelectSelectToolGesture
         {
             get { return (InputGesture)GetValue(SelectSelectToolGestureProperty); }
             set { SetValue(SelectSelectToolGestureProperty, value); }
         }
-
+        
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Tool)]
         [ShowInMarkup]
         public InputGesture SelectHandToolGesture
         {
@@ -356,6 +364,7 @@ namespace NiVE3.Config
             set { SetValue(SelectHandToolGestureProperty, value); }
         }
 
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Composition)]
         [ShowInMarkup]
         public InputGesture OpenRenderSettingGesture
         {
@@ -363,6 +372,7 @@ namespace NiVE3.Config
             set { SetValue(OpenRenderSettingGestureProperty, value); }
         }
 
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Edit)]
         [ShowInMarkup]
         public InputGesture BeginEditNameGesture
         {
@@ -370,6 +380,7 @@ namespace NiVE3.Config
             set { SetValue(BeginEditNameGestureProperty, value); }
         }
 
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Edit)]
         [ShowInMarkup]
         public InputGesture RedoGesture
         {
@@ -377,6 +388,7 @@ namespace NiVE3.Config
             set { SetValue(RedoGestureProperty, value); }
         }
 
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Edit)]
         [ShowInMarkup]
         public InputGesture UndoGesture
         {
@@ -384,6 +396,7 @@ namespace NiVE3.Config
             set { SetValue(UndoGestureProperty, value); }
         }
 
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Footage)]
         [ShowInMarkup]
         public InputGesture NewFootageFolderGesture
         {
@@ -391,6 +404,7 @@ namespace NiVE3.Config
             set { SetValue(NewFootageFolderGestureProperty, value); }
         }
 
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Composition)]
         [ShowInMarkup]
         public InputGesture AddSolidLayerGesture
         {
@@ -398,6 +412,7 @@ namespace NiVE3.Config
             set { SetValue(AddSolidLayerGestureProperty, value); }
         }
 
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.File)]
         [ShowInMarkup]
         public InputGesture SaveProjectAsNewNameGesture
         {
@@ -405,6 +420,7 @@ namespace NiVE3.Config
             set { SetValue(SaveProjectAsNewNameGestureProperty, value); }
         }
 
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.File)]
         [ShowInMarkup]
         public InputGesture SaveProjectGesture
         {
@@ -412,6 +428,7 @@ namespace NiVE3.Config
             set { SetValue(SaveProjectGestureProperty, value); }
         }
 
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.File)]
         [ShowInMarkup]
         public InputGesture OpenProjectGesture
         {
@@ -419,6 +436,7 @@ namespace NiVE3.Config
             set { SetValue(OpenProjectGestureProperty, value); }
         }
 
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.File)]
         [ShowInMarkup]
         public InputGesture NewProjectGesture
         {
@@ -426,6 +444,7 @@ namespace NiVE3.Config
             set { SetValue(NewProjectGestureProperty, value); }
         }
 
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.File)]
         [ShowInMarkup]
         public InputGesture ExitGesture
         {
@@ -433,13 +452,7 @@ namespace NiVE3.Config
             set { SetValue(ExitGestureProperty, value); }
         }
 
-        [ShowInMarkup]
-        public InputGesture OpenFileGesture
-        {
-            get { return (InputGesture)GetValue(OpenFileGestureProperty); }
-            set { SetValue(OpenFileGestureProperty, value); }
-        }
-
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Edit)]
         [ShowInMarkup]
         public InputGesture SplitLayerGesture
         {
@@ -447,6 +460,7 @@ namespace NiVE3.Config
             set { SetValue(SplitLayerGestureProperty, value); }
         }
 
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Edit)]
         [ShowInMarkup]
         public InputGesture DuplicateItemGesture
         {
@@ -454,6 +468,7 @@ namespace NiVE3.Config
             set { SetValue(DuplicateItemGestureProperty, value); }
         }
 
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Edit)]
         [ShowInMarkup]
         public InputGesture PasteItemGesture
         {
@@ -461,6 +476,7 @@ namespace NiVE3.Config
             set { SetValue(PasteItemGestureProperty, value); }
         }
 
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Edit)]
         [ShowInMarkup]
         public InputGesture CopyItemGesture
         {
@@ -468,6 +484,7 @@ namespace NiVE3.Config
             set { SetValue(CopyItemGestureProperty, value); }
         }
 
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Edit)]
         [ShowInMarkup]
         public InputGesture CutItemGesture
         {
@@ -475,6 +492,7 @@ namespace NiVE3.Config
             set { SetValue(CutItemGestureProperty, value); }
         }
 
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Edit)]
         [ShowInMarkup]
         public InputGesture DeleteItemGesture
         {
@@ -482,6 +500,7 @@ namespace NiVE3.Config
             set { SetValue(DeleteItemGestureProperty, value); }
         }
 
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.File)]
         [ShowInMarkup]
         public InputGesture NewCompositionGesture
         {
@@ -493,9 +512,14 @@ namespace NiVE3.Config
         {
             Setting = new ShortcutKeySetting();
 
-            DependencyProperties = typeof(ShortcutKeySetting).GetFields(BindingFlags.Public | BindingFlags.Static)
-                .Select(f => Tuple.Create(f.Name, (DependencyProperty)f.GetValue(null)!))
+            var fields = typeof(ShortcutKeySetting).GetFields(BindingFlags.Public | BindingFlags.Static).Where(f => f.FieldType == typeof(DependencyProperty)).ToArray();
+            DependencyProperties = fields.Select(f => Tuple.Create(f.Name, (DependencyProperty)f.GetValue(null)!))
                 .ToDictionary(t => t.Item1.Replace("Property", ""), t => t.Item2);
+
+            var fieldNames = fields.Select(p => p.Name.Replace("Property", "")).ToArray();
+            var gestureProperties = typeof(ShortcutKeySetting).GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(p => fieldNames.Contains(p.Name));
+            CategorizedShortcutKeys = gestureProperties.GroupBy(p => p.GetCustomAttribute<ShortcutKeyCategoryAttribute>()?.Type ?? ShortcutKeyCategoryType.Other, p => p.Name)
+                .ToDictionary(g => g.Key, g => g.ToArray());
 
             Setting.Load();
         }
@@ -591,5 +615,27 @@ namespace NiVE3.Config
             }
             catch { }
         }
+    }
+
+    [AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
+    sealed class ShortcutKeyCategoryAttribute : Attribute
+    {
+        public ShortcutKeyCategoryType Type { get; }
+
+        public ShortcutKeyCategoryAttribute(ShortcutKeyCategoryType type)
+        {
+            Type = type;
+        }
+    }
+
+    enum ShortcutKeyCategoryType
+    {
+        File,
+        Edit,
+        Footage,
+        Composition,
+        Layer,
+        Tool,
+        Other
     }
 }

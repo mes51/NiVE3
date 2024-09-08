@@ -8,7 +8,8 @@
     <pr:PrismApplication.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ui:AppearanceResourceDictionary x:Name="Appearance"/>
+                <ui:AppearanceResourceDictionary x:Name="UIAppearance"/>
+                <r:AppearanceResourceDictionary x:Name="Appearance"/>
                 <r:FontawesomeResourceDictionary x:Name="FontawesomeIcon"/>
                 <x:StaticExtension Member="r:LanguageResourceDictionary.Dictionary" x:Name="Language"/>
                 <ResourceDictionary Source="pack://application:,,,/NiVE3.UI;component/Resources/Theme.xaml"/>

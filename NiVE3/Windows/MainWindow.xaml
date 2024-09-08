@@ -335,6 +335,7 @@
                 </MenuItem>
                 <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_Menu_Tool}">
                     <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_Tool_OpenSetting}" Command="{Binding OpenSettingCommand}"/>
+                    <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_Tool_OpenShortcutKeySetting}" Command="{Binding OpenShortcutKeySettingCommand}"/>
                 </MenuItem>
             </Menu>
 

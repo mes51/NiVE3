@@ -21,7 +21,6 @@ namespace NiVE3.ViewModel
     {
         [GeneratedRegex("\\s+", RegexOptions.Compiled)]
         private static partial Regex GenerateFilterSeparatorRegex();
-        static readonly Regex FilterSeparatorRegex = GenerateFilterSeparatorRegex();
 
         private string filterText = "";
         public string FilterText
@@ -87,7 +86,7 @@ namespace NiVE3.ViewModel
                 return true;
             }
 
-            var keys = FilterSeparatorRegex.Split(filterKey);
+            var keys = GenerateFilterSeparatorRegex().Split(filterKey);
             return keys.All(effect.Name.Contains) || keys.All(effect.Category.Contains);
         }
 
