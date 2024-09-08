@@ -52,11 +52,6 @@ namespace NiVE3.View.Primitive
             remove { RemoveHandler(ShortcutKeyInputCompletedEvent, value); }
         }
 
-        public ShortcutKeyInput()
-        {
-            SetResourceReference(ForegroundProperty, nameof(AppearanceResourceDictionary.TextBrush));
-        }
-
         public void Clear()
         {
             Modifier = ModifierKeys.None;
