@@ -12,7 +12,9 @@ namespace NiVE3.Extension
     {
         public static ICollectionView CreateCollectionView<T, TKey>(this IEnumerable<T> collection, Func<TKey?> key, Func<T, TKey, bool> predicate)
         {
-            var view = CollectionViewSource.GetDefaultView(collection);
+            var source = new CollectionViewSource();
+            source.Source = collection;
+            var view = source.View;
             view.Filter = item =>
             {
                 var keyValue = key();
