@@ -165,7 +165,10 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
             };
             encoder.Compress(compressImage.Data);
 
-            BreakScan(encoder, scanBrokenCount, scanBrokenRangeBegin, scanBrokenRangeEnd, scanRandomSeed, layerTime);
+            if (scanBrokenCount > 1)
+            {
+                BreakScan(encoder, scanBrokenCount, scanBrokenRangeBegin, scanBrokenRangeEnd, scanRandomSeed, layerTime);
+            }
             if (luminanceQTEnableBroken)
             {
                 BreakQuantizeTable(encoder.QuantizeTables[0], 0, luminanceQTBrokenPosition, luminanceQRReplaceValue, luminanceQTBrokenCount, luminanceQTMaxValue, luminanceQTRandomSeed, layerTime);

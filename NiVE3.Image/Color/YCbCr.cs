@@ -25,9 +25,9 @@ namespace NiVE3.Image.Color
         {
             var ycbcr = Unsafe.BitCast<YCbCr, Vector4>(this) - new Vector4(0.0F, 0.5F, 0.5F, 0.0F);
             return new Vector4(
-                Vector4.Dot(ycbcr, new Vector4(1.0F, 0.0F, 1.402F, 0.0F)),
-                Vector4.Dot(ycbcr, new Vector4(1.0F, -0.344136F, -0.714136F, 0.0F)),
                 Vector4.Dot(ycbcr, new Vector4(1.0F, 1.772F, 0.0F, 0.0F)),
+                Vector4.Dot(ycbcr, new Vector4(1.0F, -0.344136F, -0.714136F, 0.0F)),
+                Vector4.Dot(ycbcr, new Vector4(1.0F, 0.0F, 1.402F, 0.0F)),
                 1.0F
             );
         }
@@ -36,9 +36,9 @@ namespace NiVE3.Image.Color
         public static YCbCr FromRgb(in Vector4 color)
         {
             return new YCbCr(
-                Vector4.Dot(color, new Vector4(0.299F, 0.587F, 0.114F, 0.0F)),
-                0.5F + Vector4.Dot(color, new Vector4(-0.168736F, -0.331264F, 0.5F, 0.0F)),
-                0.5F + Vector4.Dot(color, new Vector4(0.5F, -0.418688F, -0.081312F, 0.0F))
+                Vector4.Dot(color, new Vector4(0.114F, 0.587F, 0.299F, 0.0F)),
+                0.5F + Vector4.Dot(color, new Vector4(0.5F, -0.331264F, -0.168736F, 0.0F)),
+                0.5F + Vector4.Dot(color, new Vector4(-0.081312F, -0.418688F, 0.5F, 0.0F))
             );
         }
     }

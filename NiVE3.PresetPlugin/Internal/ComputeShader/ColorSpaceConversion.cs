@@ -40,9 +40,9 @@ namespace NiVE3.PresetPlugin.Internal.ComputeShader
         public static Float4 RgbToYCbCr(Float4 color)
         {
             return new Float4(
-                Hlsl.Dot(color, new Float4(0.299F, 0.587F, 0.114F, 0.0F)),
-                0.5F + Hlsl.Dot(color, new Float4(-0.168736F, -0.331264F, 0.5F, 0.0F)),
-                0.5F + Hlsl.Dot(color, new Float4(0.5F, -0.418688F, -0.081312F, 0.0F)),
+                Hlsl.Dot(color, new Float4(0.114F, 0.587F, 0.299F, 0.0F)),
+                0.5F + Hlsl.Dot(color, new Float4(0.5F, -0.331264F, -0.168736F, 0.0F)),
+                0.5F + Hlsl.Dot(color, new Float4(-0.081312F, -0.418688F, 0.5F, 0.0F)),
                 color.W
             );
         }
@@ -69,9 +69,9 @@ namespace NiVE3.PresetPlugin.Internal.ComputeShader
         {
             ycbcr -= new Float4(0.0F, 0.5F, 0.5F, 0.0F);
             return new Float4(
-                Hlsl.Dot(ycbcr, new Float4(1.0F, 0.0F, 1.402F, 0.0F)),
-                Hlsl.Dot(ycbcr, new Float4(1.0F, -0.344136F, -0.714136F, 0.0F)),
                 Hlsl.Dot(ycbcr, new Float4(1.0F, 1.772F, 0.0F, 0.0F)),
+                Hlsl.Dot(ycbcr, new Float4(1.0F, -0.344136F, -0.714136F, 0.0F)),
+                Hlsl.Dot(ycbcr, new Float4(1.0F, 0.0F, 1.402F, 0.0F)),
                 ycbcr.W
             );
         }

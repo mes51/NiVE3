@@ -217,9 +217,9 @@ namespace NiVE3.PresetPlugin.Internal.Effect.Jpeg
         protected static Vector4 ToYCbCr(in Vector4 rgb)
         {
             return new Vector4(
-                Vector4.Dot(rgb, new Vector4(0.299F, 0.587F, 0.114F, 0.0F)),
-                0.5F + Vector4.Dot(rgb, new Vector4(-0.168736F, -0.331264F, 0.5F, 0.0F)),
-                0.5F + Vector4.Dot(rgb, new Vector4(0.5F, -0.418688F, -0.081312F, 0.0F)),
+                Vector4.Dot(rgb, new Vector4(0.114F, 0.587F, 0.299F, 0.0F)),
+                0.5F + Vector4.Dot(rgb, new Vector4(0.5F, -0.331264F, -0.168736F, 0.0F)),
+                0.5F + Vector4.Dot(rgb, new Vector4(-0.081312F, -0.418688F, 0.5F, 0.0F)),
                 0.0F
             );
         }
@@ -229,9 +229,9 @@ namespace NiVE3.PresetPlugin.Internal.Effect.Jpeg
         {
             ycbcr -= new Vector4(0.0F, 0.5F, 0.5F, 0.0F);
             return new Vector4(
-                Vector4.Dot(ycbcr, new Vector4(1.0F, 0.0F, 1.402F, 0.0F)),
-                Vector4.Dot(ycbcr, new Vector4(1.0F, -0.344136F, -0.714136F, 0.0F)),
                 Vector4.Dot(ycbcr, new Vector4(1.0F, 1.772F, 0.0F, 0.0F)),
+                Vector4.Dot(ycbcr, new Vector4(1.0F, -0.344136F, -0.714136F, 0.0F)),
+                Vector4.Dot(ycbcr, new Vector4(1.0F, 0.0F, 1.402F, 0.0F)),
                 1.0F
             );
         }
