@@ -405,6 +405,20 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("下")]
         public const string Utility_ChangeROI_Bottom = nameof(Utility_ChangeROI_Bottom);
 
+        // Median
+
+        [DefaultValue("メディアン")]
+        public const string Noise_Median_Name = nameof(Noise_Median_Name);
+
+        [DefaultValue("画像に対し、メディアンフィルタを適用します")]
+        public const string Noise_Median_Description = nameof(Noise_Median_Description);
+
+        [LanguageKey, DefaultValue("範囲")]
+        public const string Noise_Median_Radius = nameof(Noise_Median_Radius);
+
+        [LanguageKey, DefaultValue("アルファにも適用する")]
+        public const string Noise_Median_ApplyToAlpha = nameof(Noise_Median_ApplyToAlpha);
+
         // Renderers
 
         [DefaultValue("デフォルトレンダラ")]
