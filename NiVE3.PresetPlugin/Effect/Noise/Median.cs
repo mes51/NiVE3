@@ -8,6 +8,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Documents;
 using ComputeSharp;
 using NiVE3.Image;
 using NiVE3.Plugin.Attributes;
@@ -81,89 +82,161 @@ namespace NiVE3.PresetPlugin.Effect.Noise
             var imageHeight = managedImage.Height;
             var k = radius * 2 + 1;
             var temp = ArrayPool<Vector4>.Shared.Rent(managedImage.DataLength);
-            temp.AsSpan(0, managedImage.DataLength).Fill(Vector4.UnitW);
+            temp.AsSpan(0, managedImage.DataLength).Clear();
 
             // NOTE: 本来medianはSeparableではないが、効果としては大体同じになるので縦横で分割する
             Parallel.For(Math.Max(roi.Top - radius, 0), Math.Min(roi.Bottom + radius, imageHeight), y =>
             {
-                Span<float> tempKeys = k < 256 ? stackalloc float[k] : new float[k];
                 var imageDataSpan = imageData.AsSpan(y * imageWidth, imageWidth);
+                var linkNodes = Enumerable.Range(0, k).Select(_ => new LinkedListNode<float>(0.0F)).ToArray();
+                var list = new LinkedList<float>();
+                var channelCount = applyToAlpha ? 4 : 3;
+                var medianPos = k / 2 - (k % 2 == 1 ? 0 : 1);
 
-                for (var x = roi.Left; x < roi.Right; x++)
+                for (var c = 0; c < channelCount; c++)
                 {
-                    var sx = Math.Max(x - radius, 0);
-                    var ex = Math.Min(x + radius + 1, imageWidth);
-                    var length = ex - sx;
-                    var targetSpan = MemoryMarshal.Cast<Vector4, float>(imageDataSpan[sx..ex]);
-                    if (applyToAlpha)
-                    {
-                        for (var c = 0; c < 4; c++)
-                        {
-                            for (var tx = 0; tx < length; tx++)
-                            {
-                                tempKeys[tx] = targetSpan[tx * 4 + c];
-                            }
+                    list.Clear();
 
-                            tempKeys[..length].Sort();
-                            ref var pixel = ref Unsafe.Add(ref temp[x * imageHeight + y].X, c);
-                            pixel = tempKeys[length / 2 - (length % 2 == 1 ? 0 : 1)];
-                        }
+                    for (var i = 0; i < linkNodes.Length; i++)
+                    {
+                        linkNodes[i].Value = imageDataSpan[GetMirroredPos(roi.Left + i - radius - 2, imageWidth)][c];
+                        InsertToSortedList(list, linkNodes[i], null);
                     }
-                    else
-                    {
-                        for (var c = 0; c < 3; c++)
-                        {
-                            for (var tx = 0; tx < length; tx++)
-                            {
-                                tempKeys[tx] = targetSpan[tx * 4 + c];
-                            }
 
-                            tempKeys[..length].Sort();
-                            ref var pixel = ref Unsafe.Add(ref temp[x * imageHeight + y].X, c);
-                            pixel = tempKeys[length / 2 - (length % 2 == 1 ? 0 : 1)];
+                    var medianNode = GetNode(list, medianPos);
+
+                    for (var x = roi.Left; x < roi.Right; x++)
+                    {
+                        var node = linkNodes[(((x - radius - 1) % k) + k) % k];
+                        var removePrevNode = false;
+                        if (node == medianNode)
+                        {
+                            medianNode = medianNode.Next;
                         }
+                        else
+                        {
+                            var prevNode = medianNode.Previous;
+                            while (prevNode != null)
+                            {
+                                if (prevNode == node)
+                                {
+                                    removePrevNode = true;
+                                    break;
+                                }
+                                else
+                                {
+                                    prevNode = prevNode.Previous;
+                                }
+                            }
+                        }
+                        if (medianNode == null)
+                        {
+                            throw new Exception("median is not found"); // bug
+                        }
+
+                        list.Remove(node);
+                        node.Value = imageDataSpan[GetMirroredPos(x + radius, imageWidth)][c];
+                        InsertToSortedList(list, node, medianNode);
+
+                        if (removePrevNode)
+                        {
+                            if (node.Value >= medianNode.Value)
+                            {
+                                medianNode = medianNode.Next;
+                            }
+                        }
+                        else
+                        {
+                            if (node.Value < medianNode.Value)
+                            {
+                                medianNode = medianNode.Previous;
+                            }
+                        }
+                        if (medianNode == null)
+                        {
+                            throw new Exception("median is not found"); // bug
+                        }
+
+                        ref var pixel = ref Unsafe.Add(ref temp[x * imageHeight + y].X, c);
+                        pixel = medianNode.Value;
                     }
                 }
             });
 
             Parallel.For(roi.Left, roi.Right, x =>
             {
-                Span<float> tempKeys = k < 256 ? stackalloc float[k] : new float[k];
                 var tempSpan = temp.AsSpan(x * imageHeight, imageHeight);
+                var linkNodes = Enumerable.Range(0, k).Select(_ => new LinkedListNode<float>(0.0F)).ToArray();
+                var list = new LinkedList<float>();
+                var channelCount = applyToAlpha ? 4 : 3;
+                var medianPos = k / 2 - (k % 2 == 1 ? 0 : 1);
 
-                for (var y = roi.Top; y < roi.Bottom; y++)
+                for (var c = 0; c < channelCount; c++)
                 {
-                    var sy = Math.Max(y - radius, 0);
-                    var ey = Math.Min(y + radius + 1, imageHeight);
-                    var length = ey - sy;
-                    var targetSpan = MemoryMarshal.Cast<Vector4, float>(tempSpan[sy..ey]);
-                    if (applyToAlpha)
-                    {
-                        for (var c = 0; c < 4; c++)
-                        {
-                            for (var ty = 0; ty < length; ty++)
-                            {
-                                tempKeys[ty] = targetSpan[ty * 4 + c];
-                            }
+                    list.Clear();
 
-                            tempKeys[..length].Sort();
-                            ref var pixel = ref Unsafe.Add(ref imageData[y * imageWidth + x].X, c);
-                            pixel = tempKeys[length / 2 - (length % 2 == 1 ? 0 : 1)];
-                        }
+                    for (var i = 0; i < linkNodes.Length; i++)
+                    {
+                        linkNodes[i].Value = tempSpan[GetMirroredPos(roi.Top + i - radius - 2, imageHeight)][c];
+                        InsertToSortedList(list, linkNodes[i], null);
                     }
-                    else
-                    {
-                        for (var c = 0; c < 3; c++)
-                        {
-                            for (var ty = 0; ty < length; ty++)
-                            {
-                                tempKeys[ty] = targetSpan[ty * 4 + c];
-                            }
 
-                            tempKeys.Sort();
-                            ref var pixel = ref Unsafe.Add(ref imageData[y * imageWidth + x].X, c);
-                            pixel = tempKeys[length / 2 - (length % 2 == 1 ? 0 : 1)];
+                    var medianNode = GetNode(list, medianPos);
+
+                    for (var y = roi.Top; y < roi.Bottom; y++)
+                    {
+                        var node = linkNodes[(((y - radius - 1) % k) + k) % k];
+                        var removePrevNode = false;
+                        if (node == medianNode)
+                        {
+                            medianNode = medianNode.Next;
                         }
+                        else
+                        {
+                            var prevNode = medianNode.Previous;
+                            while (prevNode != null)
+                            {
+                                if (prevNode == node)
+                                {
+                                    removePrevNode = true;
+                                    break;
+                                }
+                                else
+                                {
+                                    prevNode = prevNode.Previous;
+                                }
+                            }
+                        }
+                        if (medianNode == null)
+                        {
+                            throw new Exception("median is not found"); // bug
+                        }
+
+                        list.Remove(node);
+                        node.Value = tempSpan[GetMirroredPos(y + radius, imageHeight)][c];
+                        InsertToSortedList(list, node, medianNode);
+
+                        if (removePrevNode)
+                        {
+                            if (node.Value >= medianNode.Value)
+                            {
+                                medianNode = medianNode.Next;
+                            }
+                        }
+                        else
+                        {
+                            if (node.Value < medianNode.Value)
+                            {
+                                medianNode = medianNode.Previous;
+                            }
+                        }
+                        if (medianNode == null)
+                        {
+                            throw new Exception("median is not found"); // bug
+                        }
+
+                        ref var pixel = ref Unsafe.Add(ref imageData[y * imageWidth + x].X, c);
+                        pixel = medianNode.Value;
                     }
                 }
             });
@@ -171,6 +244,53 @@ namespace NiVE3.PresetPlugin.Effect.Noise
             ArrayPool<Vector4>.Shared.Return(temp);
 
             return managedImage;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static int GetMirroredPos(int p, int size)
+        {
+            var s = size - 1;
+            var b = Math.Abs(p) % (s * 2);
+            return b - Math.Max(b - s, 0) * 2;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void InsertToSortedList<T>(LinkedList<T> list, LinkedListNode<T> node, LinkedListNode<T>? medianNode) where T : IComparisonOperators<T, T, bool>
+        {
+            var currentNode = medianNode != null && node.Value >= medianNode.Value ? medianNode : list.First;
+            while (currentNode != null)
+            {
+                if (currentNode.Value <= node.Value)
+                {
+                    currentNode = currentNode.Next;
+                }
+                else
+                {
+                    list.AddBefore(currentNode, node);
+                    return;
+                }
+            }
+            if (currentNode == null)
+            {
+                list.AddLast(node);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static LinkedListNode<T> GetNode<T>(LinkedList<T> list, int index)
+        {
+            var node = list.First;
+            for (var i = 1; i <= index; i++)
+            {
+                node = node?.Next;
+            }
+
+            if (node == null)
+            {
+                throw new IndexOutOfRangeException();
+            }
+
+            return node;
         }
     }
 }
