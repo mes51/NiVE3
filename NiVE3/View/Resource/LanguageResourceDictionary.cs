@@ -638,6 +638,9 @@ namespace NiVE3.View.Resource
         [DefaultValue("エクスプレッション制御")]
         public static readonly string EffectCategory_ExpressionControl = DefaultLanguageResourceNames.EffectCategory_ExpressionControl;
 
+        [DefaultValue("描画")]
+        public static readonly string EffectCategory_Generate = DefaultLanguageResourceNames.EffectCategory_Generate;
+
         [DefaultValue("ノイズ")]
         public static readonly string EffectCategory_Noise = DefaultLanguageResourceNames.EffectCategory_Noise;
 

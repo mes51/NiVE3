@@ -419,6 +419,20 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("アルファにも適用する")]
         public const string Noise_Median_ApplyToAlpha = nameof(Noise_Median_ApplyToAlpha);
 
+        // Fill
+
+        [DefaultValue("塗り")]
+        public const string Generate_Fill_Name = nameof(Generate_Fill_Name);
+
+        [DefaultValue("画像を指定した色で塗りつぶします")]
+        public const string Generate_Fill_Description = nameof(Generate_Fill_Description);
+
+        [LanguageKey, DefaultValue("色")]
+        public const string Generate_Fill_Color = nameof(Generate_Fill_Color);
+
+        [LanguageKey, DefaultValue("アルファを維持する")]
+        public const string Generate_Fill_Keep_Alpha = nameof(Generate_Fill_Keep_Alpha);
+
         // Renderers
 
         [DefaultValue("デフォルトレンダラ")]
@@ -500,6 +514,9 @@ namespace NiVE3.PresetPlugin.Resource
 
         [LanguageKey, DefaultValue("背景色の選択")]
         public const string Dialog_ColorDialog_Title_BackgroundColor = nameof(Dialog_ColorDialog_Title_BackgroundColor);
+
+        [LanguageKey, DefaultValue("色の選択")]
+        public const string Dialog_ColorDialog_Title_Color = nameof(Dialog_ColorDialog_Title_Color);
 
         // enum
 

@@ -43,6 +43,12 @@ namespace NiVE3.Plugin.Resource
         public const string EffectCategory_ExpressionControl = nameof(EffectCategory_ExpressionControl);
 
         /// <summary>
+        /// エフェクトの描画カテゴリを表します
+        /// </summary>
+        [EffectCategory]
+        public const string EffectCategory_Generate = nameof(EffectCategory_Generate);
+
+        /// <summary>
         /// エフェクトのノイズカテゴリを表します
         /// </summary>
         [EffectCategory]
