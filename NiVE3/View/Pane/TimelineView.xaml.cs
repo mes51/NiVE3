@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using NiVE3.ViewModel;
+using NiVE3.Wpf.Behavior;
 
 namespace NiVE3.View.Pane
 {
@@ -69,6 +70,18 @@ namespace NiVE3.View.Pane
         {
             LayerCollectionView.Focus();
             e.Handled = true;
+        }
+
+        private void TiltWheelBehavior_MouseTiltWheel(object sender, MouseTiltWheelEventArgs e)
+        {
+            var viewModel = ViewModel;
+            if (viewModel == null)
+            {
+                return;
+            }
+
+            var dir = Math.Sign(e.Delta);
+            viewModel.TimeBarRangeStart = Math.Clamp(viewModel.TimeBarRangeStart + viewModel.TimeBarRange * 0.05 * dir, 0.0, viewModel.Duration - viewModel.TimeBarRange);
         }
     }
 }

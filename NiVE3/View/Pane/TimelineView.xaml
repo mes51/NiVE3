@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              xmlns:dd="urn:gong-wpf-dragdrop"
              xmlns:local="clr-namespace:NiVE3.View.Pane"
              xmlns:vm="clr-namespace:NiVE3.ViewModel"
@@ -11,6 +12,7 @@
              xmlns:pr="clr-namespace:NiVE3.View.Primitive"
              xmlns:pt="clr-namespace:NiVE3.View.Part"
              xmlns:a="clr-namespace:NiVE3.Wpf.Attach"
+             xmlns:b="clr-namespace:NiVE3.Wpf.Behavior"
              xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
              xmlns:ugm="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
              xmlns:cgm="clr-namespace:NiVE3.Config.Wpf.GeneratedMarkup"
@@ -280,4 +282,8 @@
             <pr:RangeScrollBar Grid.Column="1" Minimum="0" Maximum="{Binding Duration}" Range="{Binding TimeBarRange}" RangeStart="{Binding TimeBarRangeStart}" MinimumRange="{Binding ElementName=TimeLocator, Path=MinimumRange, Mode=OneWay}"/>
         </Grid>
     </Grid>
+
+    <i:Interaction.Behaviors>
+        <b:TiltWheelBehavior MouseTiltWheel="TiltWheelBehavior_MouseTiltWheel"/>
+    </i:Interaction.Behaviors>
 </UserControl>
