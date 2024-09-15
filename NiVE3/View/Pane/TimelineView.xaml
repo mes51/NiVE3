@@ -51,6 +51,9 @@
         </Style>
 
         <Style x:Key="LayerCollectionStyle" TargetType="{x:Type pt:LayerCollectionView}" BasedOn="{x:Static pt:LayerCollectionView.DefaultStyle}">
+            <Setter Property="Focusable" Value="True"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Background" Value="Transparent"/>
             <Setter Property="LayerContextMenu">
                 <Setter.Value>
                     <ContextMenu>
@@ -232,7 +235,8 @@
                         WorkareaEnd="{Binding WorkareaEnd}"
                         Command="{Binding ChangeWorkareaCommand}"/>
 
-        <pt:LayerCollectionView Grid.Row="3"
+        <pt:LayerCollectionView x:Name="LayerCollectionView"
+                                Grid.Row="3"
                                 Grid.Column="0"
                                 Grid.ColumnSpan="3"
                                 ItemsSource="{Binding Layers}"
@@ -243,6 +247,7 @@
                                 SelectedItems="{Binding SelectedLayers}"
                                 IsEnableShy="{Binding IsEnableShy}"
                                 Style="{StaticResource LayerCollectionStyle}"
+                                MouseDown="LayerCollectionView_MouseDown"
                                 dd:DragDrop.DropHandler="{Binding}"
                                 dd:DragDrop.DragHandler="{Binding RelativeSource={RelativeSource Self}}"
                                 dd:DragDrop.IsDragSource="True"
