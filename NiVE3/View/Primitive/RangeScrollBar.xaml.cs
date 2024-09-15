@@ -134,8 +134,10 @@ namespace NiVE3.View.Primitive
 
             var totalRange = Maximum - Minimum;
             var rangeBounds = arrangeBounds.Width - UIParameters.TimelineRangeThumbTotalWidth;
-            if (rangeBounds < 0.0)
+            if (rangeBounds < 0.0 || totalRange <= 0.0)
             {
+                DecreaseButton.Width = 0.0;
+                IncreaseButton.Width = 0.0;
                 return arrangeBounds;
             }
 
