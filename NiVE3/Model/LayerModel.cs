@@ -1505,7 +1505,10 @@ namespace NiVE3.Model
 
                 if (image is NGPUImage gpuImage)
                 {
-                    var newGpuImage = new NGPUImage(newSize.Width, newSize.Height, AcceleratorModel.CurrentDevice);
+                    var newGpuImage = new NGPUImage(newSize.Width, newSize.Height, AcceleratorModel.CurrentDevice)
+                    {
+                        Origin = gpuImage.Origin
+                    };
                     using (var context = AcceleratorModel.CurrentDevice.CreateComputeContext())
                     {
                         context.For(gpuImage.Width, gpuImage.Height, new CopyImage(gpuImage.Data, newGpuImage.Data, gpuImage.Width, newSize.Width, newSize.Height, expandLeft, expandTop));
@@ -1515,7 +1518,10 @@ namespace NiVE3.Model
                 }
                 else if (image is NManagedImage managedImage)
                 {
-                    var newManagedImage = new NManagedImage(newSize.Width, newSize.Height);
+                    var newManagedImage = new NManagedImage(newSize.Width, newSize.Height)
+                    {
+                        Origin = managedImage.Origin
+                    };
                     Parallel.For(0, managedImage.Height, y =>
                     {
                         managedImage.Data.AsSpan(y * managedImage.Width, managedImage.Width).CopyTo(newManagedImage.Data.AsSpan((y + expandTop) * newSize.Width + expandLeft));
