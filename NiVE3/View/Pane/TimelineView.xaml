@@ -7,6 +7,7 @@
              xmlns:dd="urn:gong-wpf-dragdrop"
              xmlns:local="clr-namespace:NiVE3.View.Pane"
              xmlns:vm="clr-namespace:NiVE3.ViewModel"
+             xmlns:um="clr-namespace:NiVE3.Model.UI"
              xmlns:r="clr-namespace:NiVE3.View.Resource"
              xmlns:cv="clr-namespace:NiVE3.View.Converter"
              xmlns:pr="clr-namespace:NiVE3.View.Primitive"
@@ -24,6 +25,8 @@
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <cv:TimeConverter x:Key="TimeConverter" FrameRate="{Binding FrameRate}"/>
         <cv:IsNullConverter x:Key="IsNullConverter"/>
+
+        <r:BindingProxy x:Key="ViewModelProxy" Data="{Binding}"/>
 
         <Thickness x:Key="ColumnMargin">2,0,0,0</Thickness>
         <Thickness x:Key="IconMargin">4,0,0,0</Thickness>
@@ -65,6 +68,26 @@
                             <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddLayer_Light}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=AddLightLayerGesture}" CommandTarget="{Binding Source={x:Reference Root}}"/>
                             <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddLayer_NullObject}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=AddNullObjectLayerGesture}" CommandTarget="{Binding Source={x:Reference Root}}"/>
                             <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddLayer_Text}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=AddTextLayerGesture}" CommandTarget="{Binding Source={x:Reference Root}}"/>
+                        </MenuItem>
+                        <Separator />
+                        <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_Effect}" ItemsSource="{Binding Source={StaticResource ViewModelProxy}, Path=Data.GroupedEffects}">
+                            <MenuItem.ItemTemplate>
+                                <HierarchicalDataTemplate ItemsSource="{Binding Value}">
+                                    <TextBlock Text="{Binding Key}"/>
+
+                                    <HierarchicalDataTemplate.ItemTemplate>
+                                        <DataTemplate DataType="{x:Type um:EffectItem}">
+                                            <TextBlock Text="{Binding Name}"/>
+                                        </DataTemplate>
+                                    </HierarchicalDataTemplate.ItemTemplate>
+                                    <HierarchicalDataTemplate.ItemContainerStyle>
+                                        <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource {x:Type MenuItem}}">
+                                            <Setter Property="Command" Value="{Binding Source={StaticResource ViewModelProxy}, Path=Data.AddEffectCommand}"/>
+                                            <Setter Property="CommandParameter" Value="{Binding}"/>
+                                        </Style>
+                                    </HierarchicalDataTemplate.ItemContainerStyle>
+                                </HierarchicalDataTemplate>
+                            </MenuItem.ItemTemplate>
                         </MenuItem>
                         <Separator />
                         <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_Cut}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=CutItemGesture}"/>

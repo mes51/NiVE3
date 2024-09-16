@@ -394,6 +394,13 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref isScrubbing, value); }
         }
 
+        private Dictionary<string, List<EffectItem>> groupedEffects = [];
+        public Dictionary<string, List<EffectItem>> GroupedEffects
+        {
+            get { return groupedEffects; }
+            set { SetProperty(ref groupedEffects, value); }
+        }
+
         public ICommand ChangeEnableShyCommand { get; }
 
         public ICommand ChangeEnableFrameBlendCommand { get; }
@@ -432,6 +439,8 @@ namespace NiVE3.ViewModel
 
         public ICommand AddTextCommand { get; }
 
+        public ICommand AddEffectCommand { get; }
+
         public ICommand CompositionSettingCommand { get; }
 
         public ICommand OpenRenderSettingCommand { get; }
@@ -444,6 +453,8 @@ namespace NiVE3.ViewModel
         }
 
         ViewStateModel ViewState { get; }
+
+        EffectListStateModel EffectListStateModel { get; }
 
         AudioPlayerModel AudioPlayerModel { get; }
 
@@ -461,15 +472,27 @@ namespace NiVE3.ViewModel
 
         PreviewManipulationStateBase? PreviewManipulation { get; set; }
 
-        public TimelineViewModel(ViewStateModel viewState, AudioPlayerModel audioPlayerModel, HistoryModel historyModel, EventHubModel eventHubModel, IDialogService dialogService)
+        public TimelineViewModel(ViewStateModel viewState, EffectListStateModel effectListStateModel, AudioPlayerModel audioPlayerModel, HistoryModel historyModel, EventHubModel eventHubModel, IDialogService dialogService)
         {
             ViewState = viewState;
+            EffectListStateModel = effectListStateModel;
             AudioPlayerModel = audioPlayerModel;
             HistoryModel = historyModel;
             EventHubModel = eventHubModel;
             DialogService = dialogService;
             Title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Timeline_EmptyTitle);
             SelectedLayers = [];
+
+            foreach (var e in effectListStateModel.Effects)
+            {
+                if (!GroupedEffects.TryGetValue(e.Category, out var value))
+                {
+                    value = [];
+                    GroupedEffects.Add(e.Category, value);
+                }
+
+                value.Add(e);
+            }
 
             WiringModel();
 
@@ -663,6 +686,16 @@ namespace NiVE3.ViewModel
             AddNullObjectCommand = new RequerySuggestedCommand(() => CompositionModel?.AddNullObject(GetFirstSelectedLayerIndex()), () => CompositionModel != null);
 
             AddTextCommand = new RequerySuggestedCommand(() => CompositionModel?.AddText(GetFirstSelectedLayerIndex()), () => CompositionModel != null);
+
+            AddEffectCommand = new RequerySuggestedCommand<EffectItem>(effectItem =>
+            {
+                if (CompositionModel == null || SelectedLayers == null)
+                {
+                    return;
+                }
+
+                CompositionModel.AddEffectsToLayers([.. SelectedLayers.Select(l => l.LayerId)], [effectItem.PluginId]);
+            }, _ => CompositionModel != null && (SelectedLayers?.Count ?? 0) > 0);
 
             CompositionSettingCommand = new RequerySuggestedCommand(() =>
             {

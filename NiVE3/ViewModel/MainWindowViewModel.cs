@@ -150,11 +150,13 @@ namespace NiVE3.ViewModel
 
             foreach (var e in effectListStateModel.Effects)
             {
-                if (!GroupedEffects.ContainsKey(e.Category))
+                if (!GroupedEffects.TryGetValue(e.Category, out var value))
                 {
-                    GroupedEffects.Add(e.Category, []);
+                    value = [];
+                    GroupedEffects.Add(e.Category, value);
                 }
-                GroupedEffects[e.Category].Add(e);
+
+                value.Add(e);
             }
 
             NewProjectCommand = new DelegateCommand(() =>

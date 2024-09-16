@@ -351,6 +351,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("ヌルオブジェクト(_N)")]
         public static readonly string Timeline_ContextMenu_AddLayer_NullObject = nameof(Timeline_ContextMenu_AddLayer_NullObject);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("エフェクト(_E)")]
+        public static readonly string Timeline_ContextMenu_Effect = nameof(Timeline_ContextMenu_Effect);
+
         [ShowInMarkup, LanguageKey, DefaultValue("テキスト(_T)")]
         public static readonly string Timeline_ContextMenu_AddLayer_Text = nameof(Timeline_ContextMenu_AddLayer_Text);
 
@@ -363,7 +366,7 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("ペースト(_P)")]
         public static readonly string Timeline_ContextMenu_Paste = nameof(Timeline_ContextMenu_Paste);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("複製(_E)")]
+        [ShowInMarkup, LanguageKey, DefaultValue("複製(_L)")]
         public static readonly string Timeline_ContextMenu_Duplicate = nameof(Timeline_ContextMenu_Duplicate);
 
         [ShowInMarkup, LanguageKey, DefaultValue("レイヤーを分割(_S)")]
