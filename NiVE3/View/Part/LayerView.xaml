@@ -13,9 +13,11 @@
              xmlns:pt="clr-namespace:NiVE3.View.Part"
              xmlns:cv="clr-namespace:NiVE3.View.Converter"
              xmlns:r="clr-namespace:NiVE3.View.Resource"
+             xmlns:a="clr-namespace:NiVE3.Wpf.Attach"
              xmlns:dr="clr-namespace:NiVE3.Image.Drawing;assembly=NiVE3.Image"
              xmlns:pi="clr-namespace:NiVE3.Plugin.Interfaces;assembly=NiVE3.Plugin"
              xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
+             xmlns:cgm="clr-namespace:NiVE3.Config.Wpf.GeneratedMarkup"
              xmlns:mk="clr-namespace:NiVE3.Wpf.Markup"
              xmlns:smk="clr-namespace:NiVE3.Shared.Wpf.Markup;assembly=NiVE3.Shared"
              xmlns:vm="clr-namespace:NiVE3.ViewModel"
@@ -68,6 +70,16 @@
         <!-- NOTE: INotifyCollectionChangeの変更はBindingでは拾ってくれないため、無理矢理拾わせるためのクラスでラップする -->
         <ur:CollectionChangeNotifier x:Key="TrackMatteCollectionNotifier" Collection="{Binding TrackMatteViewSource}"/>
         <ur:CollectionChangeNotifier x:Key="ParentLayerCollectionNotifier" Collection="{Binding ParentLayerViewSource}"/>
+
+        <r:BindingProxy x:Key="ViewModelProxy" Data="{Binding}"/>
+
+        <ContextMenu x:Key="EffectContextMenu">
+            <MenuItem Header="{gm:LanguageResource ResourceKey=Layer_Effect_ContextMenu_Cut}" a:MenuItemGestureBindingProperty.InputGesture="{cgm:ShortcutKeyBinding ResourceKey=CutItemGesture}" Command="{Binding Source={StaticResource ViewModelProxy}, Path=Data.CutEffectCommand}"/>
+            <MenuItem Header="{gm:LanguageResource ResourceKey=Layer_Effect_ContextMenu_Copy}" a:MenuItemGestureBindingProperty.InputGesture="{cgm:ShortcutKeyBinding ResourceKey=CopyItemGesture}" Command="{Binding Source={StaticResource ViewModelProxy}, Path=Data.CopyEffectCommand}"/>
+            <MenuItem Header="{gm:LanguageResource ResourceKey=Layer_Effect_ContextMenu_Paste}" a:MenuItemGestureBindingProperty.InputGesture="{cgm:ShortcutKeyBinding ResourceKey=PasteItemGesture}" Command="{Binding Source={StaticResource ViewModelProxy}, Path=Data.PasteEffectCommand}"/>
+            <MenuItem Header="{gm:LanguageResource ResourceKey=Layer_Effect_ContextMenu_Duplicate}" a:MenuItemGestureBindingProperty.InputGesture="{cgm:ShortcutKeyBinding ResourceKey=DuplicateItemGesture}" Command="{Binding Source={StaticResource ViewModelProxy}, Path=Data.DuplicateEffectCommand}"/>
+            <MenuItem Header="{gm:LanguageResource ResourceKey=Layer_Effect_ContextMenu_Delete}" a:MenuItemGestureBindingProperty.InputGesture="{cgm:ShortcutKeyBinding ResourceKey=DeleteItemGesture}" Command="{Binding Source={StaticResource ViewModelProxy}, Path=Data.DeleteEffectCommand}"/>
+        </ContextMenu>
 
         <Style x:Key="HeaderGridStyle" TargetType="{x:Type Grid}">
             <Setter Property="Background" Value="Transparent"/>
@@ -649,6 +661,7 @@
                                          RangeStart="{Binding ElementName=Root, Path=RangeStart}"
                                          CompositionFrameRate="{Binding ElementName=Root, Path=CompositionFrameRate}"
                                          SelectedItems="{Binding SelectedEffects}"
+                                         EffectContextMenu="{StaticResource EffectContextMenu}"
                                          dd:DragDrop.DropHandler="{Binding}"
                                          dd:DragDrop.DragHandler="{Binding RelativeSource={RelativeSource Self}}"
                                          dd:DragDrop.IsDragSource="True"

@@ -10,6 +10,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using GongSolutions.Wpf.DragDrop;
+using NiVE3.Data.Clipboard;
 using NiVE3.Data.Json.Project;
 using NiVE3.Image.Drawing;
 using NiVE3.Model;
@@ -537,6 +538,16 @@ namespace NiVE3.ViewModel
 
         public ICommand ChangeTagColorCommand { get; }
 
+        public ICommand CutEffectCommand { get; }
+
+        public ICommand CopyEffectCommand { get; }
+
+        public ICommand PasteEffectCommand { get; }
+
+        public ICommand DuplicateEffectCommand { get; }
+
+        public ICommand DeleteEffectCommand { get; }
+
         public DelegateCommand<SelectItemType?> DeleteCommand { get; }
 
         public DelegateCommand<SelectItemType?> CutCommand { get; }
@@ -785,34 +796,25 @@ namespace NiVE3.ViewModel
 
             SelectItemCommand = new DelegateCommand(() => SelectItemChangedPublisher.Publish(this, new SelectItemEventArgs(SelectItemType.Layer, true, this)));
 
-            DeleteCommand = new DelegateCommand<SelectItemType?>(type =>
+            CutEffectCommand = new RequerySuggestedCommand(() =>
             {
                 if (EditingParameter == EditingLayerParameter.None && SelectedEffects.Count > 0)
                 {
-                    LayerModel.DeleteEffect([..SelectedEffects.Select(e => e.EffectId)]);
-                }
-                SelectedEffects.Clear();
-            });
-
-            CutCommand = new DelegateCommand<SelectItemType?>(type =>
-            {
-                if (EditingParameter == EditingLayerParameter.None && SelectedEffects.Count > 0)
-                {
-                    var copyData = LayerModel.CutEffects([..SelectedEffects.Select(e => e.EffectId)]);
+                    var copyData = LayerModel.CutEffects([.. SelectedEffects.Select(e => e.EffectId)]);
                     ClipboardUtil.SetData(copyData);
                 }
                 SelectedEffects.Clear();
-            });
+            }, () => EditingParameter == EditingLayerParameter.None && SelectedEffects.Count > 0);
 
-            CopyCommand = new DelegateCommand<SelectItemType?>(type =>
+            CopyEffectCommand = new RequerySuggestedCommand(() =>
             {
                 if (EditingParameter == EditingLayerParameter.None && SelectedEffects.Count > 0)
                 {
-                    ClipboardUtil.SetData(LayerModel.CopyEffects([..SelectedEffects.Select(e => e.EffectId)]));
+                    ClipboardUtil.SetData(LayerModel.CopyEffects([.. SelectedEffects.Select(e => e.EffectId)]));
                 }
-            });
+            }, () => EditingParameter == EditingLayerParameter.None && SelectedEffects.Count > 0);
 
-            PasteCommand = new DelegateCommand<SelectItemType?>(type =>
+            PasteEffectCommand = new RequerySuggestedCommand(() =>
             {
                 if (EditingParameter != EditingLayerParameter.None)
                 {
@@ -823,20 +825,39 @@ namespace NiVE3.ViewModel
                 if (data != null)
                 {
                     var insertTargetId = LastSelectedEffect?.EffectId;
-                    LayerModel.PasteEffects(data, [..SelectedEffects.Select(e => e.EffectId)], insertTargetId);
+                    LayerModel.PasteEffects(data, [.. SelectedEffects.Select(e => e.EffectId)], insertTargetId);
                 }
-            });
+            }, () => EditingParameter == EditingLayerParameter.None && ClipboardUtil.GetData<EffectData>()?.Type == CopyDataType.Effect);
 
-            DuplicateCommand = new DelegateCommand<SelectItemType?>(type =>
+            DuplicateEffectCommand = new RequerySuggestedCommand(() =>
             {
-                if (EditingParameter != EditingLayerParameter.None)
+                if (EditingParameter != EditingLayerParameter.None && SelectedEffects.Count < 1)
                 {
                     return;
                 }
 
                 var insertTargetId = LastSelectedEffect?.EffectId;
                 LayerModel.DuplicateEffects([.. SelectedEffects.Select(e => e.EffectId)], insertTargetId);
-            });
+            }, () => EditingParameter == EditingLayerParameter.None && SelectedEffects.Count > 0);
+
+            DeleteEffectCommand = new RequerySuggestedCommand(() =>
+            {
+                if (EditingParameter == EditingLayerParameter.None && SelectedEffects.Count > 0)
+                {
+                    LayerModel.DeleteEffect([.. SelectedEffects.Select(e => e.EffectId)]);
+                }
+                SelectedEffects.Clear();
+            }, () => EditingParameter == EditingLayerParameter.None && SelectedEffects.Count > 0);
+
+            DeleteCommand = new DelegateCommand<SelectItemType?>(type => DeleteEffectCommand.Execute(null));
+
+            CutCommand = new DelegateCommand<SelectItemType?>(type => CutEffectCommand.Execute(null));
+
+            CopyCommand = new DelegateCommand<SelectItemType?>(type => CopyEffectCommand.Execute(null));
+
+            PasteCommand = new DelegateCommand<SelectItemType?>(type => PasteEffectCommand.Execute(null));
+
+            DuplicateCommand = new DelegateCommand<SelectItemType?>(type => DuplicateEffectCommand.Execute(null));
 
             SelectAllCommand = new DelegateCommand<SelectItemType?>(_ =>
             {

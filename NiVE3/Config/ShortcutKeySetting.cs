@@ -18,7 +18,6 @@ using NiVE3.Wpf.Behavior;
 namespace NiVE3.Config
 {
     [MarkupableBinding(InstancePropertyName = nameof(Setting), OverrideExtensionName = "ShortcutKeyBinding", RoutingCommandOwnerType = typeof(WindowGestureBehavior), RoutingCommandName = "Gesture")]
-    [MarkupableGesture(InstancePropertyName = nameof(Setting), OverrideExtensionName = "ShortcutKeyGesture")]
     class ShortcutKeySetting : DependencyObject
     {
         static readonly string FilePath = Path.Combine(Paths.ConfigDirectory, "shortcut_keys.json");

@@ -34,17 +34,17 @@ namespace NiVE3.Wpf.Attach
 
         public static readonly DependencyProperty InputGestureProperty = DependencyProperty.RegisterAttached(
             "InputGesture",
-            typeof(InputGesture),
+            typeof(InputBinding),
             typeof(MenuItemGestureBindingProperty),
             new PropertyMetadata(null, InputGestureChanged)
         );
 
-        public static InputGesture GetInputGesture(DependencyObject obj)
+        public static InputBinding GetInputGesture(DependencyObject obj)
         {
-            return (InputGesture)obj.GetValue(InputGestureProperty);
+            return (InputBinding)obj.GetValue(InputGestureProperty);
         }
 
-        public static void SetInputGesture(DependencyObject obj, InputGesture value)
+        public static void SetInputGesture(DependencyObject obj, InputBinding value)
         {
             obj.SetValue(InputGestureProperty, value);
         }
@@ -92,21 +92,22 @@ namespace NiVE3.Wpf.Attach
         {
             if (obj is MenuItem item)
             {
-                if (e.NewValue is InputGesture gesture)
+                if (e.NewValue is InputBinding binding)
                 {
-                    switch (gesture)
+                    item.SetBinding(MenuItem.InputGestureTextProperty, new Binding { Source = binding, Mode = BindingMode.OneWay, Path = new PropertyPath("BindableGesture"), Converter = DisplayKeyConverter });
+
+                    var displayKey = binding.Gesture switch
                     {
-                        case KeyGesture keyGesture:
-                            item.InputGestureText = keyGesture.GetDisplayStringForCulture(CultureInfo.CurrentCulture);
-                            break;
-                        case SingleKeyGesture singleKeyGesture:
-                            item.InputGestureText = singleKeyGesture.GetDisplayStringForCulture(CultureInfo.CurrentCulture);
-                            break;
-                    }
+                        KeyGesture keyGesture => keyGesture.GetDisplayStringForCulture(CultureInfo.CurrentCulture),
+                        SingleKeyGesture singleKeyGesture => singleKeyGesture.GetDisplayStringForCulture(CultureInfo.CurrentCulture),
+                        _ => ""
+                    };
+                    item.SetCurrentValue(MenuItem.InputGestureTextProperty, displayKey);
                 }
                 else
                 {
                     item.InputGestureText = "";
+                    item.ClearValue(MenuItem.InputGestureTextProperty);
                 }
             }
         }

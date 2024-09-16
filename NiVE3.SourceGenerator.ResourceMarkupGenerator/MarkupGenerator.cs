@@ -21,19 +21,16 @@ namespace NiVE3.SourceGenerator.ResourceMarkupGenerator
         {
             var resourceDictionaryEmitter = new MarkupableResourceDictionaryEmitter();
             var inputBindingEmitter = new MarkupableInputBindingEmitter();
-            var inputGestureEmitter = new MarkupableInputGestureEmitter();
 
             context.RegisterPostInitializationOutput(context =>
             {
                 ShowInMarkupAttributeEmitter.RegisterAttributes(context);
                 resourceDictionaryEmitter.RegisterAttributes(context);
                 inputBindingEmitter.RegisterAttributes(context);
-                inputGestureEmitter.RegisterAttributes(context);
             });
 
             resourceDictionaryEmitter.RegisterEmit(context);
             inputBindingEmitter.RegisterEmit(context);
-            inputGestureEmitter.RegisterEmit(context);
         }
     }
 }

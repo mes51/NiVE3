@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using NiVE3.View.Primitive;
@@ -75,6 +76,19 @@ namespace NiVE3.View.Part
             typeof(EffectCollectionView),
             new FrameworkPropertyMetadata(true, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
+
+        public static readonly DependencyProperty EffectContextMenuProperty = DependencyProperty.Register(
+            nameof(EffectContextMenu),
+            typeof(ContextMenu),
+            typeof(EffectCollectionView),
+            new FrameworkPropertyMetadata(null)
+        );
+
+        public ContextMenu? EffectContextMenu
+        {
+            get { return (ContextMenu?)GetValue(EffectContextMenuProperty); }
+            set { SetValue(EffectContextMenuProperty, value); }
+        }
 
         public bool ParentHasExpanderArrow
         {
@@ -150,7 +164,7 @@ namespace NiVE3.View.Part
 
                 var indentLevelBinding = new Binding
                 {
-                    Path = new PropertyPath(nameof(IndentLevel)),
+                    Path = new PropertyPath(IndentLevelProperty),
                     Source = this,
                     Mode = BindingMode.OneWay
                 };
@@ -158,7 +172,7 @@ namespace NiVE3.View.Part
 
                 var isAVSwitchColumnVisibleBinding = new Binding
                 {
-                    Path = new PropertyPath(nameof(IsAVSwitchColumnVisible)),
+                    Path = new PropertyPath(IsAVSwitchColumnVisibleProperty),
                     Source = this,
                     Mode = BindingMode.OneWay
                 };
@@ -166,7 +180,7 @@ namespace NiVE3.View.Part
 
                 var isTagColumnVisibleBinding = new Binding
                 {
-                    Path = new PropertyPath(nameof(IsTagColumnVisible)),
+                    Path = new PropertyPath(IsTagColumnVisibleProperty),
                     Source = this,
                     Mode = BindingMode.OneWay
                 };
@@ -174,7 +188,7 @@ namespace NiVE3.View.Part
 
                 var isCommentColumnVisibleBinding = new Binding
                 {
-                    Path = new PropertyPath(nameof(IsCommentColumnVisible)),
+                    Path = new PropertyPath(IsCommentColumnVisibleProperty),
                     Source = this,
                     Mode = BindingMode.OneWay
                 };
@@ -182,7 +196,7 @@ namespace NiVE3.View.Part
 
                 var controlAreaWidthBinding = new Binding
                 {
-                    Path = new PropertyPath(nameof(ControlAreaWidth)),
+                    Path = new PropertyPath(ControlAreaWidthProperty),
                     Source = this,
                     Mode = BindingMode.OneWay
                 };
@@ -190,7 +204,7 @@ namespace NiVE3.View.Part
 
                 var commentAreaWidthBinding = new Binding
                 {
-                    Path = new PropertyPath(nameof(CommentAreaWidth)),
+                    Path = new PropertyPath(CommentAreaWidthProperty),
                     Source = this,
                     Mode = BindingMode.OneWay
                 };
@@ -198,7 +212,7 @@ namespace NiVE3.View.Part
 
                 var nameAreaWidthBinding = new Binding
                 {
-                    Path = new PropertyPath(nameof(NameAreaWidth)),
+                    Path = new PropertyPath(NameAreaWidthProperty),
                     Source = this,
                     Mode = BindingMode.OneWay
                 };
@@ -206,7 +220,7 @@ namespace NiVE3.View.Part
 
                 var rangeBinding = new Binding
                 {
-                    Path = new PropertyPath(nameof(Range)),
+                    Path = new PropertyPath(RangeProperty),
                     Source = this,
                     Mode = BindingMode.OneWay
                 };
@@ -214,7 +228,7 @@ namespace NiVE3.View.Part
 
                 var rangeStartBinding = new Binding
                 {
-                    Path = new PropertyPath(nameof(RangeStart)),
+                    Path = new PropertyPath(RangeStartProperty),
                     Source = this,
                     Mode = BindingMode.OneWay
                 };
@@ -222,7 +236,7 @@ namespace NiVE3.View.Part
 
                 var compositionFrameRateBinding = new Binding
                 {
-                    Path = new PropertyPath(nameof(CompositionFrameRate)),
+                    Path = new PropertyPath(CompositionFrameRateProperty),
                     Source = this,
                     Mode = BindingMode.OneWay
                 };
@@ -230,11 +244,19 @@ namespace NiVE3.View.Part
 
                 var parentHasExpanderArrowBinding = new Binding
                 {
-                    Path = new PropertyPath(nameof(ParentHasExpanderArrow)),
+                    Path = new PropertyPath(ParentHasExpanderArrowProperty),
                     Source = this,
                     Mode = BindingMode.OneWay
                 };
                 BindingOperations.SetBinding(effect, EffectView.ParentHasExpanderArrowProperty, parentHasExpanderArrowBinding);
+
+                var contextMenuBinding = new Binding
+                {
+                    Path = new PropertyPath(EffectContextMenuProperty),
+                    Source = this,
+                    Mode = BindingMode.OneWay
+                };
+                BindingOperations.SetBinding(effect, ContextMenuProperty, contextMenuBinding);
             }
         }
     }
