@@ -22,6 +22,8 @@ namespace NiVE3.Data.Json.Project
         [JsonConverter(typeof(PluginOptionValueObjectConverter))]
         public object? Value { get; set; }
 
+        public bool IsEnabled { get; set; } = true;
+
         public KeyFrameData[] KeyFrames { get; set; } = [];
 
         public PropertyData[]? Children { get; set; }

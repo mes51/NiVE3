@@ -492,7 +492,7 @@ namespace NiVE3.Model
         public NImage GetRawImage(double layerTime, double downSamplingRate, bool useGpu)
         {
             var sourceTime = CalcSourceTime(layerTime);
-            var sourceOptionProperties = (TextProperties ?? ShapeProperties ?? SourceOptionProperties)?.GetValues(sourceTime);
+            var sourceOptionProperties = (TextProperties ?? ShapeProperties ?? SourceOptionProperties)?.GetValues(sourceTime, true);
 
             return FootageModel.ReadImage(sourceTime, downSamplingRate, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties, InterpolationQuality, useGpu);
         }
@@ -506,7 +506,7 @@ namespace NiVE3.Model
             }
 
             var sourceTime = CalcSourceTime(layerTime);
-            var sourceOptionProperties = (TextProperties ?? ShapeProperties ?? SourceOptionProperties)?.GetValues(sourceTime);
+            var sourceOptionProperties = (TextProperties ?? ShapeProperties ?? SourceOptionProperties)?.GetValues(sourceTime, true);
 
             NImage? image = null;
             var hash = new XxHash3();
@@ -609,7 +609,7 @@ namespace NiVE3.Model
             var layerTime = time - SourceStartPoint;
             var sourceTime = CalcSourceTime(layerTime);
 
-            var sourceOptionProperties = (TextProperties ?? ShapeProperties ?? SourceOptionProperties)?.GetValues(sourceTime);
+            var sourceOptionProperties = (TextProperties ?? ShapeProperties ?? SourceOptionProperties)?.GetValues(sourceTime, true);
 
             NImage? image = null;
             ROI? roi = null;
@@ -731,7 +731,7 @@ namespace NiVE3.Model
             var layerTime = time - SourceStartPoint;
             var sourceTime = CalcSourceTime(layerTime);
 
-            var sourceOptionProperties = (TextProperties ?? ShapeProperties ?? SourceOptionProperties)?.GetValues(sourceTime);
+            var sourceOptionProperties = (TextProperties ?? ShapeProperties ?? SourceOptionProperties)?.GetValues(sourceTime, true);
             var image = FootageModel.ReadImage(sourceTime, downSamplingRate, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties, InterpolationQuality, useGpu);
             var originalImageSize = downSamplingRate != 1.0 ? FootageModel.CalcSize(time, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties) : new SourceFootageRect(Vector2d.Zero, image.Width, image.Height);
             var roi = new ROI(new Int32Point(), new Int32Size(image.Width, image.Height), 0, 0, image.Width, image.Height);
@@ -1008,7 +1008,7 @@ namespace NiVE3.Model
         public PropertyValueGroup? GetTextProperties(double time)
         {
             var layerTime = time - SourceStartPoint;
-            return TextProperties?.GetValues(layerTime);
+            return TextProperties?.GetValues(layerTime, true);
         }
 
         public ParentTransform[] GetParentTransforms(double time)
@@ -1066,7 +1066,7 @@ namespace NiVE3.Model
             var layerTime = time - SourceStartPoint;
             var sourceTime = CalcSourceTime(layerTime);
 
-            var sourceOptionProperties = (TextProperties ?? ShapeProperties ?? SourceOptionProperties)?.GetValues(sourceTime);
+            var sourceOptionProperties = (TextProperties ?? ShapeProperties ?? SourceOptionProperties)?.GetValues(sourceTime, true);
             return FootageModel.CalcSize(time, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties);
         }
 
@@ -1082,7 +1082,7 @@ namespace NiVE3.Model
 
             var transform = GetTransform(time);
             var parentTransforms = GetParentTransforms(time);
-            var sourceOptionProperties = (TextProperties ?? ShapeProperties ?? SourceOptionProperties)?.GetValues(sourceTime);
+            var sourceOptionProperties = (TextProperties ?? ShapeProperties ?? SourceOptionProperties)?.GetValues(sourceTime, true);
             var rect = FootageModel.CalcSize(sourceTime, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties);
 
             return new LayerSkeleton(LayerId, rect, IsEnable3D, transform, parentTransforms);
@@ -1095,7 +1095,7 @@ namespace NiVE3.Model
             var layerTime = time - SourceStartPoint;
             var sourceTime = CalcSourceTime(layerTime);
 
-            var sourceOptionProperties = (TextProperties ?? ShapeProperties ?? SourceOptionProperties)?.GetValues(sourceTime);
+            var sourceOptionProperties = (TextProperties ?? ShapeProperties ?? SourceOptionProperties)?.GetValues(sourceTime, true);
             sourceOptionProperties?.CalcHash(hash);
             hash.Append(SourceStartPoint);
             hash.Append(InPoint);

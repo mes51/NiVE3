@@ -113,11 +113,13 @@ namespace NiVE3.Plugin.Interfaces
     {
         string Id { get; }
 
+        bool IsEnable { get; }
+
         IReadOnlyCollection<IPropertyObject>? GetChildren();
 
         public object? GetValue(double tme);
 
-        public PropertyValueGroup? GetValues(double time);
+        public PropertyValueGroup? GetValues(double time, bool withoutDisableProperty = false);
     }
 
     public interface ICompositionViewModel : INotifyPropertyChanged

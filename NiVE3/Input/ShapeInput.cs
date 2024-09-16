@@ -28,7 +28,6 @@ using LinearGradientBrush = NiVE3.Shape.LinearGradientBrush;
 using RadialGradientBrush = NiVE3.Shape.RadialGradientBrush;
 using NiVE3.Plugin.ValueObject;
 using System.Windows.Media;
-using ImTools;
 
 namespace NiVE3.Input
 {
@@ -385,7 +384,7 @@ namespace NiVE3.Input
             groupItems[0] = new AppendablePropertyItem(GroupPropertyId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Group, () =>
                 new PropertyGroup(GroupPropertyId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Group,
                 [
-                    new AppendableProperty(GroupContentPropertyId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Group_Content, groupItems),
+                    new AppendableProperty(GroupContentPropertyId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Group_Content, groupItems, useEnableSwitch: true),
                     new PropertyGroup(GroupTransformGroupId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Transform,
                     [
                         new Vector3dProperty(GroupTransformAnchorPointId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Transform_AnchorPoint, Vector3d.Zero, digit: 2),
@@ -399,7 +398,7 @@ namespace NiVE3.Input
                 ]));
             return
             [
-                new AppendableProperty(ContentPropertyId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Content, groupItems)
+                new AppendableProperty(ContentPropertyId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Content, groupItems, useEnableSwitch: true)
             ];
         }
 

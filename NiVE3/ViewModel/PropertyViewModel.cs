@@ -30,6 +30,8 @@ namespace NiVE3.ViewModel
     {
         string Name { get; }
 
+        bool IsEnable { get; }
+
         PropertyViewState ViewState { get; }
 
         event EventHandler<SelectItemEventArgs> SelectItemChanged;
@@ -67,6 +69,8 @@ namespace NiVE3.ViewModel
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
     partial class PropertyViewModel : BindableBase, IInternalPropertyViewModel
     {
+        public bool IsEnable => true;
+
         public PropertyViewState ViewState { get; }
 
         private string name = "";
@@ -435,6 +439,17 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref name, value); }
         }
 
+        private bool isEnable;
+        [NeedWire(nameof(PropertyGroupModel), IsOneWay = true)]
+        public bool IsEnable
+        {
+            get { return isEnable; }
+            set { SetProperty(ref isEnable, value); }
+        }
+
+        [NeedWire(nameof(PropertyGroupModel), IsOneWay = true)]
+        public bool UseEnableSwitch { get; set; }
+
         public PropertyViewState ViewState { get; }
 
         public ObservableCollection<KeyFrame>? KeyFrames => null;
@@ -482,6 +497,13 @@ namespace NiVE3.ViewModel
             remove { PropertyValueUpdatePublisher.Unsubscribe(value); }
         }
 
+        WeakEventPublisher<EventArgs> IsEnableChangeRequestPublisher { get; } = new WeakEventPublisher<EventArgs>();
+        public event EventHandler<EventArgs> IsEnableChangeRequest
+        {
+            add { IsEnableChangeRequestPublisher.Subscribe(value); }
+            remove { IsEnableChangeRequestPublisher.Unsubscribe(value); }
+        }
+
         public ICommand BeginEditCommand => throw new NotImplementedException();
 
         public ICommand EndEditCommand => throw new NotImplementedException();
@@ -505,6 +527,8 @@ namespace NiVE3.ViewModel
         public ICommand EndEditNameCommand { get; }
 
         public ICommand SelectItemCommand { get; }
+
+        public ICommand ChangeIsEnableCommand { get; }
 
         [NeedWire(nameof(PropertyGroupModel), IsOneWay = true)]
         public Guid InstanceId { get; set; }
@@ -624,6 +648,11 @@ namespace NiVE3.ViewModel
                 SelectItemChangedPublisher.Publish(this, new SelectItemEventArgs(SelectItemType.Property, true, this));
             });
 
+            ChangeIsEnableCommand = new DelegateCommand(() =>
+            {
+                IsEnableChangeRequestPublisher.Publish(this, EventArgs.Empty);
+            });
+
             WiringModel();
         }
 
@@ -696,6 +725,8 @@ namespace NiVE3.ViewModel
 
     partial class AppendablePropertyViewModel : BindableBase, IInternalPropertyViewModel, IDropTarget, INameEditableParentViewModel
     {
+        public bool IsEnable => true;
+
         public string Name { get; }
 
         public PropertyViewState ViewState { get; }
@@ -788,6 +819,7 @@ namespace NiVE3.ViewModel
                 var vm = new PropertyGroupViewModel((PropertyGroupModel)m, true);
                 vm.SelectItemChanged += Property_SelectItemChanged;
                 vm.PropertyValueCommited += Property_PropertyValueCommited;
+                vm.IsEnableChangeRequest += Property_IsEnableChangeRequest;
                 return (IInternalPropertyViewModel)vm;
             });
             Name = appendablePropertyModel.Name;
@@ -899,6 +931,23 @@ namespace NiVE3.ViewModel
         private void Property_PropertyValueCommited(object? sender, PropertyValueCommitedEventArgs e)
         {
             PropertyValueUpdatePublisher.Publish(sender, new PropertyValueCommitedEventArgs(e, this));
+        }
+
+        private void Property_IsEnableChangeRequest(object? sender, EventArgs e)
+        {
+            if (sender is not PropertyGroupViewModel child)
+            {
+                return;
+            }
+
+            if (SelectedChildren.Contains(child))
+            {
+                AppendablePropertyModel.ChangeIsEnable([.. SelectedChildren.OfType<PropertyGroupViewModel>().Select(c => c.InstanceId)], !child.IsEnable);
+            }
+            else
+            {
+                AppendablePropertyModel.ChangeIsEnable([child.InstanceId], !child.IsEnable);
+            }
         }
 
         public void DragOver(IDropInfo dropInfo)

@@ -199,9 +199,9 @@ namespace NiVE3.Plugin.Property
         /// コンストラクタ
         /// </summary>
         /// <param name="id">プロパティのID</param>
-        /// <param name="displayName">グループの名前</param>
+        /// <param name="displayNameKey">グループの名前のLanguageResourceKey</param>
         /// <param name="children">グループに含まれるプロパティ</param>
-        public PropertyGroup(string id, LanguageResourceKey displayName, PropertyBase[] children) : base(id, displayName, PropertyGroupType.Instance, null, false)
+        public PropertyGroup(string id, LanguageResourceKey displayNameKey, PropertyBase[] children) : base(id, displayNameKey, PropertyGroupType.Instance, null, false)
         {
             Children = children;
         }
@@ -251,20 +251,24 @@ namespace NiVE3.Plugin.Property
 
         public AppendablePropertyItem? DefaultAppendedItem { get; }
 
+        public bool UseEnableSwitch { get; }
+
         /// <summary>
         /// コンストラクタ
         /// </summary>
         /// <param name="id">プロパティのID</param>
-        /// <param name="displayNameKey">親プロパティの名前</param>
+        /// <param name="displayName">親プロパティの名前</param>
         /// <param name="items">このプロパティに追加可能な子プロパティの生成メソッド</param>
         /// <param name="defaultAppendedItemIndex">初期状態で追加されている子プロパティのインデックス</param>
-        public AppendableProperty(string id, string displayName, AppendablePropertyItem[] items, int? defaultAppendedItemIndex = null) : base(id, displayName, AppendablePropertyType.Instance, null, false)
+        /// <param name="useEnableSwitch">子プロパティに有効/無効スイッチを表示するかどうか</param>
+        public AppendableProperty(string id, string displayName, AppendablePropertyItem[] items, int? defaultAppendedItemIndex = null, bool useEnableSwitch = false) : base(id, displayName, AppendablePropertyType.Instance, null, false)
         {
             Items = items;
             if (defaultAppendedItemIndex != null)
             {
                 DefaultAppendedItem = items[defaultAppendedItemIndex.Value];
             }
+            UseEnableSwitch = useEnableSwitch;
         }
 
         /// <summary>
@@ -274,13 +278,15 @@ namespace NiVE3.Plugin.Property
         /// <param name="displayNameKey">親プロパティの名前のLanguageResourceKey</param>
         /// <param name="items">このプロパティに追加可能な子プロパティの生成メソッド</param>
         /// <param name="defaultAppendedItemIndex">初期状態で追加されている子プロパティのインデックス</param>
-        public AppendableProperty(string id, LanguageResourceKey displayNameKey, AppendablePropertyItem[] items, int? defaultAppendedItemIndex = null) : base(id, displayNameKey, AppendablePropertyType.Instance, null, false)
+        /// <param name="useEnableSwitch">子プロパティに有効/無効スイッチを表示するかどうか</param>
+        public AppendableProperty(string id, LanguageResourceKey displayNameKey, AppendablePropertyItem[] items, int? defaultAppendedItemIndex = null, bool useEnableSwitch = false) : base(id, displayNameKey, AppendablePropertyType.Instance, null, false)
         {
             Items = items;
             if (defaultAppendedItemIndex != null)
             {
                 DefaultAppendedItem = items[defaultAppendedItemIndex.Value];
             }
+            UseEnableSwitch = useEnableSwitch;
         }
 
         /// <summary>
@@ -352,7 +358,7 @@ namespace NiVE3.Plugin.Property
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        /// <param name="id">子プロパティのルートグループのID</param>
+        /// <param name="id">子プロパティのルートグループのID。他AppendablePropertyItemと被らないようユニークである必要があります</param>
         /// <param name="nameKey">プロパティの名前のLanguageResourceKey</param>
         /// <param name="createFunc">プロパティを生成するメソッド</param>
         public AppendablePropertyItem(string id, LanguageResourceKey nameKey, Func<PropertyGroup> createFunc)

@@ -8,20 +8,15 @@ using System.Threading.Tasks;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Property;
 using NiVE3.Plugin.Property.Control;
-using NiVE3.ViewModel;
 using NiVE3.Shared.Extension;
 using Prism.Mvvm;
 using NiVE3.View.Resource;
-using System.Windows.Media.Animation;
 using NiVE3.Data.Json.Project;
 using NiVE3.Extension;
 using NiVE3.Util;
 using NiVE3.Data.Clipboard;
 using NiVE3.Plugin.Property.Types;
-using ImTools;
-using System.Collections.Specialized;
 using NiVE3.Mvvm;
-using NiVE3.Plugin.ValueObject;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
 
 namespace NiVE3.Model
@@ -31,6 +26,8 @@ namespace NiVE3.Model
         string Name { get; }
 
         object? Value { get; }
+
+        bool IsEnable { get; }
 
         ObservableCollection<KeyFrame>? KeyFrames { get; }
 
@@ -74,6 +71,8 @@ namespace NiVE3.Model
             get { return _value; }
             set { SetProperty(ref _value, value); }
         }
+
+        public bool IsEnable => true;
 
         private double sourceStartPoint;
         public double SourceStartPoint
@@ -251,7 +250,7 @@ namespace NiVE3.Model
             }
         }
 
-        public PropertyValueGroup? GetValues(double time)
+        public PropertyValueGroup? GetValues(double time, bool withoutDisableProperty = false)
         {
             return null;
         }
@@ -547,6 +546,13 @@ namespace NiVE3.Model
             set { SetProperty(ref name, value); }
         }
 
+        private bool isEnabled = true;
+        public bool IsEnable
+        {
+            get { return isEnabled; }
+            set { SetProperty(ref isEnabled, value); }
+        }
+
         public Guid InstanceId { get; }
 
         public object? Value => null;
@@ -564,6 +570,8 @@ namespace NiVE3.Model
 
         public string Id => Property.Id;
 
+        public bool UseEnableSwitch { get; }
+
         public event EventHandler<EventArgs>? ValueUpdated;
 
         public event EventHandler<EventArgs>? ValueCommited;
@@ -576,11 +584,11 @@ namespace NiVE3.Model
 
         HistoryModel HistoryModel { get; }
 
-        public PropertyGroupModel(PropertyBase property, CompositionModel compositionModel, HistoryModel historyModel, Guid? instanceId = null) : this(property, compositionModel, null, null, historyModel, instanceId) { }
+        public PropertyGroupModel(PropertyBase property, CompositionModel compositionModel, HistoryModel historyModel, Guid? instanceId = null) : this(property, compositionModel, null, null, historyModel, false, instanceId) { }
 
-        public PropertyGroupModel(PropertyBase property, CompositionModel compositionModel, LayerModel? layerModel, HistoryModel historyModel, Guid? instanceId = null) : this(property, compositionModel, layerModel, null, historyModel, instanceId) { }
+        public PropertyGroupModel(PropertyBase property, CompositionModel compositionModel, LayerModel? layerModel, HistoryModel historyModel, Guid? instanceId = null) : this(property, compositionModel, layerModel, null, historyModel, false, instanceId) { }
 
-        public PropertyGroupModel(PropertyBase property, CompositionModel compositionModel, LayerModel? layerModel, EffectModel? effectModel, HistoryModel historyModel, Guid? instanceId = null)
+        public PropertyGroupModel(PropertyBase property, CompositionModel compositionModel, LayerModel? layerModel, EffectModel? effectModel, HistoryModel historyModel, bool useEnableSwitch, Guid? instanceId = null)
         {
             Property = property;
             CompositionModel = compositionModel;
@@ -588,13 +596,14 @@ namespace NiVE3.Model
             EffectModel = effectModel;
             HistoryModel = historyModel;
             Name = property.DisplayName;
+            UseEnableSwitch = useEnableSwitch;
             InstanceId = instanceId ?? Guid.NewGuid();
 
             foreach (var c in ((PropertyGroup)property).Children)
             {
                 if (c is PropertyGroup)
                 {
-                    Children.Add(new PropertyGroupModel(c, compositionModel, layerModel, effectModel, historyModel));
+                    Children.Add(new PropertyGroupModel(c, compositionModel, layerModel, effectModel, historyModel, false));
                 }
                 else if (c is AppendableProperty)
                 {
@@ -633,7 +642,7 @@ namespace NiVE3.Model
             return null;
         }
 
-        public PropertyValueGroup GetValues(double time)
+        public PropertyValueGroup GetValues(double time, bool withoutDisableProperty = false)
         {
             var result = new Dictionary<string, object?>();
             var propertyTypes = new Dictionary<string, IPropertyType>();
@@ -642,11 +651,11 @@ namespace NiVE3.Model
             {
                 if (p is PropertyGroupModel pg)
                 {
-                    result.Add(pg.Property.Id, pg.GetValues(time));
+                    result.Add(pg.Property.Id, pg.GetValues(time, withoutDisableProperty));
                 }
                 else if (p is AppendablePropertyModel ap)
                 {
-                    result.Add(ap.Property.Id, ap.GetChildPropertyValues(time));
+                    result.Add(ap.Property.Id, ap.GetChildPropertyValues(time, withoutDisableProperty));
                 }
                 else if (p is PropertyModel pp)
                 {
@@ -656,7 +665,7 @@ namespace NiVE3.Model
                 propertyTypes.Add(p.Property.Id, p.Property.PropertyType);
             }
 
-            return new PropertyValueGroup(Property.Id, result, propertyTypes);
+            return new PropertyValueGroup(Property.Id, result, propertyTypes, IsEnable);
         }
 
         public void UpdateValueByCompositionStateChanged()
@@ -718,6 +727,7 @@ namespace NiVE3.Model
             {
                 PropertyId = Property.Id,
                 InstanceId = InstanceId,
+                IsEnabled = IsEnable,
                 PropertyTypeName = Property.PropertyType.GetType().FullName ?? "",
                 Name = Name,
                 Children = Children.Select(p => p.SaveData()).ToArray()
@@ -727,6 +737,7 @@ namespace NiVE3.Model
         public void LoadData(PropertyData data)
         {
             Name = data.Name;
+            IsEnable = !UseEnableSwitch || data.IsEnabled;
             if (data.Children == null)
             {
                 return;
@@ -906,6 +917,8 @@ namespace NiVE3.Model
 
         public object? Value => null;
 
+        public bool IsEnable => true;
+
         public ObservableCollection<KeyFrame>? KeyFrames => null;
 
         private ObservableCollection<IPropertyModel> children = [];
@@ -924,6 +937,8 @@ namespace NiVE3.Model
         public event EventHandler<EventArgs>? ValueUpdated;
 
         public event EventHandler<EventArgs>? ValueCommited;
+
+        bool UseEnableSwitch { get; }
 
         CompositionModel CompositionModel { get; }
 
@@ -948,6 +963,7 @@ namespace NiVE3.Model
 
             var ap = (AppendableProperty)property;
             Items = ap.Items;
+            UseEnableSwitch = ap.UseEnableSwitch;
             if (ap.DefaultAppendedItem != null)
             {
                 AddChildInternal(ap.DefaultAppendedItem, null);
@@ -971,10 +987,10 @@ namespace NiVE3.Model
 
         public object? GetValue(double time)
         {
-            return GetChildPropertyValues(time);
+            return GetChildPropertyValues(time, false);
         }
 
-        public PropertyValueGroup? GetValues(double time)
+        public PropertyValueGroup? GetValues(double time, bool withoutDisableProperty = false)
         {
             return null;
         }
@@ -1044,9 +1060,16 @@ namespace NiVE3.Model
             }
         }
 
-        public PropertyValueGroup[] GetChildPropertyValues(double time)
+        public PropertyValueGroup[] GetChildPropertyValues(double time, bool withoutDisableProperty)
         {
-            return Children.OfType<PropertyGroupModel>().Select(m => m.GetValues(time)).ToArray();
+            if (withoutDisableProperty)
+            {
+                return Children.OfType<PropertyGroupModel>().Where(m => m.IsEnable).Select(m => m.GetValues(time, withoutDisableProperty)).ToArray();
+            }
+            else
+            {
+                return Children.OfType<PropertyGroupModel>().Select(m => m.GetValues(time, withoutDisableProperty)).ToArray();
+            }
         }
 
         public PropertyData SaveData()
@@ -1147,10 +1170,25 @@ namespace NiVE3.Model
             PasteChildrenInternal(data.Data[0], true);
         }
 
+        public void ChangeIsEnable(Guid[] ids, bool isEnable)
+        {
+            var children = Children.OfType<PropertyGroupModel>().Where(c => ids.Contains(c.InstanceId)).ToArray();
+            var oldState = children.Select(c => c.IsEnable).ToArray();
+
+            foreach (var c in children)
+            {
+                c.IsEnable = isEnable;
+            }
+
+            HistoryModel.Add(new ChangeIsEnableHistoryCommand(this, children, oldState, isEnable));
+
+            ValueCommited?.Invoke(this, EventArgs.Empty);
+        }
+
         PropertyGroupModel AddChildInternal(AppendablePropertyItem item, Guid? instanceId)
         {
             var group = item.CreateFunc();
-            var groupModel = new PropertyGroupModel(group, CompositionModel, LayerModel, EffectModel, HistoryModel, instanceId);
+            var groupModel = new PropertyGroupModel(group, CompositionModel, LayerModel, EffectModel, HistoryModel, UseEnableSwitch, instanceId);
             groupModel.ValueUpdated += Child_ValueUpdated;
             groupModel.ValueCommited += Child_ValueCommited;
 

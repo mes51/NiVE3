@@ -6,7 +6,6 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
-using ImTools;
 using NiVE3.Image;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.Util;

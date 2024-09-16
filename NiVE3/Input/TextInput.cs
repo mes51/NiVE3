@@ -12,7 +12,6 @@ using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media.TextFormatting;
-using ImTools;
 using NiVE3.Extension;
 using NiVE3.Image;
 using NiVE3.Image.Drawing;
@@ -191,7 +190,7 @@ namespace NiVE3.Input
                                             new DoubleProperty(TextAnimatorSelectorRandomSeedId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Selector_RandomSeed, 0, double.MinValue, double.MaxValue, digit: 0)
                                         ])
                                     ]))
-                            ], 0),
+                            ], 0, true),
                             new AppendableProperty(TextAnimatorValueId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value,
                             [
                                 new AppendablePropertyItem(TextAnimatorValueAnchorPointId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_AnchorPoint, () =>
@@ -299,9 +298,9 @@ namespace NiVE3.Input
                                             useLinkRatio: true
                                         )
                                     ])),
-                            ])
+                            ], useEnableSwitch: true)
                         ]))
-                ])
+                ], useEnableSwitch: true)
             ];
         }
 

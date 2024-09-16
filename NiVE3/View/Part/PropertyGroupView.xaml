@@ -6,6 +6,7 @@
                         xmlns:local="clr-namespace:NiVE3.View.Part"
                         xmlns:dd="urn:gong-wpf-dragdrop"
                         xmlns:pr="clr-namespace:NiVE3.View.Primitive"
+                        xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
                         mc:Ignorable="d" 
                         x:Name="Root"
                         Focusable="{Binding IsRenameable}"
@@ -14,6 +15,8 @@
                         dd:DragDrop.DragSourceIgnore="True"
                         d:DesignHeight="450" d:DesignWidth="800">
     <local:PropertyViewBase.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+
         <Style x:Key="LayerItemExpanderStyle" TargetType="{x:Type local:LayerItemExpander}" BasedOn="{StaticResource {x:Type local:LayerItemExpander}}">
             <Style.Triggers>
                 <DataTrigger Value="True">
@@ -42,6 +45,11 @@
                              NameDragSourceIgnore="False"
                              ParentHasExpanderArrow="{Binding ElementName=Root, Path=ParentHasExpanderArrow}"
                              Style="{StaticResource LayerItemExpanderStyle}">
+        <local:LayerItemExpander.Switches>
+            <Grid Margin="1.5,0,0,0" Visibility="{Binding UseEnableSwitch, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue={x:Static Visibility.Collapsed}}">
+                <CheckBox Content="{gm:FontawesomeResource ResourceKey=Eye}" Style="{StaticResource LayerSwitchCheckBox}" IsChecked="{Binding IsEnable, Mode=OneWay}" HorizontalAlignment="Left" Command="{Binding ChangeIsEnableCommand}"/>
+            </Grid>
+        </local:LayerItemExpander.Switches>
         <local:PropertyCollectionView ItemsSource="{Binding Children}"
                                       IndentLevel="{Binding ElementName=Root, Path=IndentLevel, Converter={x:Static local:PropertyGroupView.NextIndentConverter}}"
                                       ControlAreaWidth="{Binding ElementName=Root, Path=ControlAreaWidth}"

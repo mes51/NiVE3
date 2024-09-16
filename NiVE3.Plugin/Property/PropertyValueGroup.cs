@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using NiVE3.Plugin.Internal.Util;
 using NiVE3.Plugin.Property.Types;
 
 namespace NiVE3.Plugin.Property
@@ -14,12 +15,17 @@ namespace NiVE3.Plugin.Property
     /// </summary>
     public class PropertyValueGroup
     {
-        public static readonly PropertyValueGroup Empty = new PropertyValueGroup("", [], []);
+        public static readonly PropertyValueGroup Empty = new PropertyValueGroup("", [], [], false);
 
         /// <summary>
         /// このプロパティグループのIDを取得します
         /// </summary>
         public string PropertyGroupId { get; }
+
+        /// <summary>
+        /// このプロパティグループの有効/無効を表します
+        /// </summary>
+        public bool IsEnable { get; }
 
         /// <summary>
         /// プロパティの値を取得します
@@ -136,7 +142,7 @@ namespace NiVE3.Plugin.Property
             }
         }
 
-        internal PropertyValueGroup(string propertyGroupId, Dictionary<string, object?> values, Dictionary<string, IPropertyType> propertyTypes)
+        internal PropertyValueGroup(string propertyGroupId, Dictionary<string, object?> values, Dictionary<string, IPropertyType> propertyTypes, bool isEnable)
         {
             PropertyGroupId = propertyGroupId;
             PropertyTypes = propertyTypes;
@@ -145,6 +151,7 @@ namespace NiVE3.Plugin.Property
 
         internal void CalcHash(XxHash3 hash)
         {
+            hash.Append(IsEnable.ConvertToSpan());
             foreach (var (key, value) in Values.OrderBy(kv => kv.Key))
             {
                 var pt = PropertyTypes[key];

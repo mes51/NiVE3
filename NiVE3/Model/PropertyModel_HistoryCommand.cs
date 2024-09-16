@@ -619,5 +619,44 @@ namespace NiVE3.Model
 
             public void Dispose() { }
         }
+
+        private class ChangeIsEnableHistoryCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangePropertyValue);
+
+            AppendablePropertyModel Model { get; }
+
+            PropertyGroupModel[] TargetChildren { get; }
+
+            bool[] OldState { get; }
+
+            bool NewState { get; }
+
+            public ChangeIsEnableHistoryCommand(AppendablePropertyModel model, PropertyGroupModel[] targetChildren, bool[] oldState, bool newState)
+            {
+                Model = model;
+                TargetChildren = targetChildren;
+                OldState = oldState;
+                NewState = newState;
+            }
+
+            public void Redo()
+            {
+                foreach (var c in TargetChildren)
+                {
+                    c.IsEnable = NewState;
+                }
+            }
+
+            public void Undo()
+            {
+                foreach (var (c, old) in TargetChildren.Zip(OldState))
+                {
+                    c.IsEnable = old;
+                }
+            }
+
+            public void Dispose() { }
+        }
     }
 }
