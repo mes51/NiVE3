@@ -50,8 +50,13 @@ namespace NiVE3.View.Part
             }
         }
 
-        private void PropertyNameTextBlock_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private void PropertyNameTextBlock_MouseDown(object sender, MouseButtonEventArgs e)
         {
+            if (e.ChangedButton != MouseButton.Left && e.ChangedButton != MouseButton.Right)
+            {
+                return;
+            }
+
             ParentCollection?.SelectItem(ParentContainer, Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift), Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl));
             (DataContext as IInternalPropertyViewModel)?.SelectItemCommand?.Execute(null);
             e.Handled = true;
