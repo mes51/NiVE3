@@ -14,6 +14,7 @@ using System.Windows.Data;
 using NiVE3.View.Converter;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Windows.Media.Effects;
 
 namespace NiVE3.View.Primitive
 {
@@ -124,6 +125,13 @@ namespace NiVE3.View.Primitive
             new FrameworkPropertyMetadata(0)
         );
 
+        public static readonly DependencyProperty ItemContextMenuProperty = DependencyProperty.Register(
+            nameof(ItemContextMenu),
+            typeof(ContextMenu),
+            typeof(StackableItemsCollectionView<T>),
+            new FrameworkPropertyMetadata(null)
+        );
+
         private static readonly DependencyProperty SelectedItemsViewProperty = DependencyProperty.Register(
             nameof(SelectedItemsView),
             typeof(ObservableCollectionView<T>),
@@ -144,6 +152,12 @@ namespace NiVE3.View.Primitive
         {
             get { return (T?)GetValue(LastSelectedProperty); }
             private set { SetValue(LastSelectedPropertyKey, value); }
+        }
+
+        public ContextMenu? ItemContextMenu
+        {
+            get { return (ContextMenu?)GetValue(ItemContextMenuProperty); }
+            set { SetValue(ItemContextMenuProperty, value); }
         }
 
         public int IndentLevel
@@ -183,11 +197,7 @@ namespace NiVE3.View.Primitive
 
             IsTabStopProperty.OverrideMetadata(typeof(StackableItemsCollectionView<T>), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.Inherits));
             ItemsSourceProperty.OverrideMetadata(typeof(StackableItemsCollectionView<T>), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.Inherits, ItemsSourceChanged));
-        }
-
-        public StackableItemsCollectionView()
-        {
-            Style = DefaultStyle;
+            StyleProperty.OverrideMetadata(typeof(StackableItemsCollectionView<T>), new FrameworkPropertyMetadata(DefaultStyle, FrameworkPropertyMetadataOptions.Inherits));
         }
 
         public override void StartDrag(IDragInfo dragInfo)
@@ -324,6 +334,14 @@ namespace NiVE3.View.Primitive
                 ConverterParameter = item
             };
             BindingOperations.SetBinding(element, IsSelectedProperty, isSelectedBinding);
+
+            var contextMenuBinding = new Binding
+            {
+                Path = new PropertyPath(ItemContextMenuProperty),
+                Source = this,
+                Mode = BindingMode.OneWay
+            };
+            BindingOperations.SetBinding(element, ContextMenuProperty, contextMenuBinding);
         }
 
         protected override void OnItemsSourceChanged(IEnumerable oldValue, IEnumerable newValue)

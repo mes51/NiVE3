@@ -27,8 +27,6 @@ namespace NiVE3.Model
 
         object? Value { get; }
 
-        bool IsEnable { get; }
-
         ObservableCollection<KeyFrame>? KeyFrames { get; }
 
         ObservableCollection<IPropertyModel>? Children { get; }
@@ -248,6 +246,28 @@ namespace NiVE3.Model
             {
                 return Property.PropertyType.Interpolate(KeyFrames, time);
             }
+        }
+
+        public object? GetCurrentTimeValue()
+        {
+            var time = CurrentTime - SourceStartPoint;
+            return GetValue(time);
+        }
+
+        public void ResetProperty()
+        {
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ResetPropertyValue));
+
+            if (HasKeyFrames())
+            {
+                CreateKeyFrame(Property.DefaultValue);
+            }
+            else
+            {
+                CommitProperty(Property.DefaultValue, Value);
+            }
+
+            HistoryModel.EndGroup();
         }
 
         public PropertyValueGroup? GetValues(double time, bool withoutDisableProperty = false)
@@ -701,6 +721,74 @@ namespace NiVE3.Model
             }
         }
 
+        public void CreateKeyFrames(string[] ids)
+        {
+            var children = Children.Where(p => ids.Contains(p.Property.Id)).OrderBy(Children.IndexOf);
+            if (!children.Any())
+            {
+                return;
+            }
+
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_AddKeyFrame));
+
+            foreach (var c in children)
+            {
+                switch (c)
+                {
+                    case PropertyModel p:
+                        p.CreateKeyFrame(p.GetCurrentTimeValue());
+                        break;
+                    case PropertyGroupModel pg:
+                        pg.CreateKeyFramesAllChildren();
+                        break;
+                    case AppendablePropertyModel ap:
+                        ap.CreateKeyFramesAllChildren();
+                        break;
+                }
+            }
+
+            HistoryModel.EndGroup();
+        }
+
+        public void CreateKeyFramesAllChildren()
+        {
+            CreateKeyFrames([..Children.Select(c => c.Property.Id)]);
+        }
+
+        public void ResetProperties(string[] ids)
+        {
+            var children = Children.Where(p => ids.Contains(p.Property.Id)).OrderBy(Children.IndexOf);
+            if (!children.Any())
+            {
+                return;
+            }
+
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ResetPropertyValue));
+
+            foreach (var c in children)
+            {
+                switch (c)
+                {
+                    case PropertyModel p:
+                        p.ResetProperty();
+                        break;
+                    case PropertyGroupModel pg:
+                        pg.ResetAllChildren();
+                        break;
+                    case AppendablePropertyModel ap:
+                        ap.ResetAllChildren();
+                        break;
+                }
+            }
+
+            HistoryModel.EndGroup();
+        }
+
+        public void ResetAllChildren()
+        {
+            ResetProperties([..Children.Select(c => c.Property.Id)]);
+        }
+
         public IPropertyModel? FindProperty(string propertyId)
         {
             var child = Children.FirstOrDefault(c => c.Property.Id == propertyId);
@@ -1015,6 +1103,52 @@ namespace NiVE3.Model
         public bool HasKeyFrames()
         {
             return Children.Any(p => p.HasKeyFrames());
+        }
+
+        public void CreateKeyFrames(Guid[] propertyInstanceIds)
+        {
+            var children = Children.OfType<PropertyGroupModel>().Where(c => propertyInstanceIds.Contains(c.InstanceId));
+            if (!children.Any())
+            {
+                return;
+            }
+
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_AddKeyFrame));
+
+            foreach (var c in children)
+            {
+                c.CreateKeyFramesAllChildren();
+            }
+
+            HistoryModel.EndGroup();
+        }
+
+        public void CreateKeyFramesAllChildren()
+        {
+            CreateKeyFrames([..Children.OfType<PropertyGroupModel>().Select(c => c.InstanceId)]);
+        }
+
+        public void ResetProperties(Guid[] propertyInstanceIds)
+        {
+            var children = Children.OfType<PropertyGroupModel>().Where(c => propertyInstanceIds.Contains(c.InstanceId));
+            if (!children.Any())
+            {
+                return;
+            }
+
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ResetPropertyValue));
+
+            foreach (var c in children)
+            {
+                c.ResetAllChildren();
+            }
+
+            HistoryModel.EndGroup();
+        }
+
+        public void ResetAllChildren()
+        {
+            ResetProperties([..Children.OfType<PropertyGroupModel>().Select(c => c.InstanceId)]);
         }
 
         public void AddChild(AppendablePropertyItem item)

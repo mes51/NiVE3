@@ -8,6 +8,8 @@
                     xmlns:pt="clr-namespace:NiVE3.View.Part"
                     xmlns:pr="clr-namespace:NiVE3.View.Primitive"
                     xmlns:ugm="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
+                    xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
+                    xmlns:cgm="clr-namespace:NiVE3.Config.Wpf.GeneratedMarkup"
                     xmlns:r="clr-namespace:NiVE3.View.Resource">
     <Style x:Key="{x:Type ad:LayoutDocumentFloatingWindowControl}" TargetType="{x:Type ad:LayoutDocumentFloatingWindowControl}">
         <Setter Property="a:ShortcutKeyBindingProperty.InputBinding" Value="True"/>
@@ -19,7 +21,7 @@
         <Setter Property="a:WindowGestureBehaviorAttachProperty.Attach" Value="True"/>
     </Style>
 
-    <Style TargetType="{x:Type pr:EditableTextBlock}" >
+    <Style TargetType="{x:Type pr:EditableTextBlock}">
         <!-- NOTE: BasedOn用 -->
     </Style>
 
@@ -124,6 +126,18 @@
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="{x:Type pt:PropertyCollectionView}" BasedOn="{x:Static pt:PropertyCollectionView.DefaultStyle}">
+        <Setter Property="ItemContextMenu">
+            <Setter.Value>
+                <ContextMenu>
+                    <MenuItem Header="{gm:LanguageResource ResourceKey=PropertyCollection_ContextMenu_AddKeyFrame}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=AddKeyFrameGesture}"/>
+                    <Separator />
+                    <MenuItem Header="{gm:LanguageResource ResourceKey=PropertyCollection_ContextMenu_ResetProperty}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=ResetPropertyGesture}"/>
+                </ContextMenu>
             </Setter.Value>
         </Setter>
     </Style>

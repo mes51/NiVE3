@@ -77,19 +77,6 @@ namespace NiVE3.View.Part
             new FrameworkPropertyMetadata(true, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
-        public static readonly DependencyProperty EffectContextMenuProperty = DependencyProperty.Register(
-            nameof(EffectContextMenu),
-            typeof(ContextMenu),
-            typeof(EffectCollectionView),
-            new FrameworkPropertyMetadata(null)
-        );
-
-        public ContextMenu? EffectContextMenu
-        {
-            get { return (ContextMenu?)GetValue(EffectContextMenuProperty); }
-            set { SetValue(EffectContextMenuProperty, value); }
-        }
-
         public bool ParentHasExpanderArrow
         {
             get { return (bool)GetValue(ParentHasExpanderArrowProperty); }
@@ -249,14 +236,6 @@ namespace NiVE3.View.Part
                     Mode = BindingMode.OneWay
                 };
                 BindingOperations.SetBinding(effect, EffectView.ParentHasExpanderArrowProperty, parentHasExpanderArrowBinding);
-
-                var contextMenuBinding = new Binding
-                {
-                    Path = new PropertyPath(EffectContextMenuProperty),
-                    Source = this,
-                    Mode = BindingMode.OneWay
-                };
-                BindingOperations.SetBinding(effect, ContextMenuProperty, contextMenuBinding);
             }
         }
     }

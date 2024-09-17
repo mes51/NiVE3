@@ -661,7 +661,7 @@
                                          RangeStart="{Binding ElementName=Root, Path=RangeStart}"
                                          CompositionFrameRate="{Binding ElementName=Root, Path=CompositionFrameRate}"
                                          SelectedItems="{Binding SelectedEffects}"
-                                         EffectContextMenu="{StaticResource EffectContextMenu}"
+                                         ItemContextMenu="{StaticResource EffectContextMenu}"
                                          dd:DragDrop.DropHandler="{Binding}"
                                          dd:DragDrop.DragHandler="{Binding RelativeSource={RelativeSource Self}}"
                                          dd:DragDrop.IsDragSource="True"

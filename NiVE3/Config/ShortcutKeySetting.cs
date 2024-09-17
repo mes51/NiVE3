@@ -252,6 +252,36 @@ namespace NiVE3.Config
             new PropertyMetadata(new KeyGesture(Key.None))
         );
 
+        public static readonly DependencyProperty AddKeyFrameGestureProperty = DependencyProperty.Register(
+            nameof(AddKeyFrameGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new KeyGesture(Key.None))
+        );
+
+        public static readonly DependencyProperty ResetPropertyGestureProperty = DependencyProperty.Register(
+            nameof(ResetPropertyGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new KeyGesture(Key.None))
+        );
+
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Edit)]
+        [ShowInMarkup]
+        public InputGesture ResetPropertyGesture
+        {
+            get { return (InputGesture)GetValue(ResetPropertyGestureProperty); }
+            set { SetValue(ResetPropertyGestureProperty, value); }
+        }
+
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Edit)]
+        [ShowInMarkup]
+        public InputGesture AddKeyFrameGesture
+        {
+            get { return (InputGesture)GetValue(AddKeyFrameGestureProperty); }
+            set { SetValue(AddKeyFrameGestureProperty, value); }
+        }
+
         [ShortcutKeyCategory(ShortcutKeyCategoryType.Footage)]
         [ShowInMarkup]
         public InputGesture LoadFileGesture

@@ -46,6 +46,8 @@ namespace NiVE3.ViewModel
     [CommandHandling(nameof(PasteCommand), nameof(ShortcutKeySetting.PasteItemGesture))]
     [CommandHandling(nameof(DuplicateCommand), nameof(ShortcutKeySetting.DuplicateItemGesture))]
     [CommandHandling(nameof(SelectAllCommand), nameof(ShortcutKeySetting.SelectAllGesture))]
+    [CommandHandling(nameof(AddKeyFrameCommand), nameof(ShortcutKeySetting.AddKeyFrameGesture))]
+    [CommandHandling(nameof(ResetPropertyCommand), nameof(ShortcutKeySetting.ResetPropertyGesture))]
     [CommandHandling(nameof(SplitLayerCommand), nameof(ShortcutKeySetting.SplitLayerGesture))]
     [CommandHandling(nameof(OpenRenderSettingCommand), nameof(ShortcutKeySetting.OpenRenderSettingGesture))]
     [CommandHandling(nameof(AddShapeCommand), nameof(ShortcutKeySetting.AddShapeLayerGesture))]
@@ -425,6 +427,10 @@ namespace NiVE3.ViewModel
 
         public ICommand SelectAllCommand { get; }
 
+        public ICommand AddKeyFrameCommand { get; }
+
+        public ICommand ResetPropertyCommand { get; }
+
         public ICommand SplitLayerCommand { get; }
 
         public ICommand ChangeCurrentTimeCommand { get; }
@@ -659,6 +665,10 @@ namespace NiVE3.ViewModel
                     LastSelectedLayerId = Layers[0].LayerId;
                 }
             }, () => CompositionModel != null);
+
+            AddKeyFrameCommand = new RequerySuggestedCommand(() => SelectTarget?.AddKeyFrameCommand?.Execute(SelectedItemType), () => CompositionModel != null && SelectedItemType == SelectItemType.Property);
+
+            ResetPropertyCommand = new RequerySuggestedCommand(() => SelectTarget?.ResetPropertyCommand?.Execute(SelectedItemType), () => CompositionModel != null && SelectedItemType == SelectItemType.Property);
 
             SplitLayerCommand = new RequerySuggestedCommand(() =>
             {

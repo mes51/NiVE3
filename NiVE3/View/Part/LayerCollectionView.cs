@@ -48,19 +48,6 @@ namespace NiVE3.View.Part
             new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
-        public static readonly DependencyProperty LayerContextMenuProperty = DependencyProperty.Register(
-            nameof(LayerContextMenu),
-            typeof(ContextMenu),
-            typeof(LayerCollectionView),
-            new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
-        );
-
-        public ContextMenu? LayerContextMenu
-        {
-            get { return (ContextMenu)GetValue(LayerContextMenuProperty); }
-            set { SetValue(LayerContextMenuProperty, value); }
-        }
-
         public bool IsEnableShy
         {
             get { return (bool)GetValue(IsEnableShyProperty); }
@@ -167,14 +154,6 @@ namespace NiVE3.View.Part
                     Mode = BindingMode.OneWay
                 });
                 BindingOperations.SetBinding(layer, VisibilityProperty, shyBinding);
-
-                var contextMenuBinding = new Binding
-                {
-                    Path = new PropertyPath(LayerContextMenuProperty),
-                    Source = this,
-                    Mode = BindingMode.OneWay
-                };
-                BindingOperations.SetBinding(layer, ContextMenuProperty, contextMenuBinding);
 
                 GongSolutions.Wpf.DragDrop.DragDrop.SetIsDropTarget(layer, true);
                 GongSolutions.Wpf.DragDrop.DragDrop.SetDropEventType(layer, EventType.Bubbled);

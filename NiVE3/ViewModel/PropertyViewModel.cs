@@ -206,6 +206,10 @@ namespace NiVE3.ViewModel
 
         public DelegateCommand<SelectItemType?> SelectAllCommand { get; }
 
+        public DelegateCommand<SelectItemType?> AddKeyFrameCommand { get; }
+
+        public DelegateCommand<SelectItemType?> ResetPropertyCommand { get; }
+
         PropertyModel PropertyModel { get; }
 
         object? PrevValue { get; set; }
@@ -353,6 +357,18 @@ namespace NiVE3.ViewModel
             {
                 SelectAllKeyFrames();
             });
+
+            AddKeyFrameCommand = new DelegateCommand<SelectItemType?>(_ =>
+            {
+                var time = CurrentTime;
+                var index = KeyFrames.IndexOfLast(k => Math.Abs(k.Time - time) < TimeCalc.TimeEpsilon || k.Time <= time);
+                if (index > -1 && Math.Abs(KeyFrames[index].Time - time) >= TimeCalc.TimeEpsilon)
+                {
+                    PropertyModel.CreateKeyFrame(CurrentTimeValue);
+                }
+            });
+
+            ResetPropertyCommand = new DelegateCommand<SelectItemType?>(_ => PropertyModel.ResetProperty());
 
             WiringModel();
 
@@ -522,6 +538,10 @@ namespace NiVE3.ViewModel
 
         public DelegateCommand<SelectItemType?> SelectAllCommand { get; }
 
+        public DelegateCommand<SelectItemType?> AddKeyFrameCommand { get; }
+
+        public DelegateCommand<SelectItemType?> ResetPropertyCommand { get; }
+
         public ICommand BeginEditNameCommand { get; }
 
         public ICommand EndEditNameCommand { get; }
@@ -621,6 +641,26 @@ namespace NiVE3.ViewModel
                 {
                     SelectedChildren.Add(child);
                 }
+            });
+
+            AddKeyFrameCommand = new DelegateCommand<SelectItemType?>(_ =>
+            {
+                if (SelectedChildren.Count < 1)
+                {
+                    return;
+                }
+
+                PropertyGroupModel.CreateKeyFrames([..SelectedChildren.Select(c => c.Property.Id)]);
+            });
+
+            ResetPropertyCommand = new DelegateCommand<SelectItemType?>(_ =>
+            {
+                if (SelectedChildren.Count < 1)
+                {
+                    return;
+                }
+
+                PropertyGroupModel.ResetProperties([..SelectedChildren.Select(c => c.Property.Id)]);
             });
 
             BeginEditNameCommand = new RequerySuggestedCommand(() =>
@@ -789,6 +829,10 @@ namespace NiVE3.ViewModel
 
         public DelegateCommand<SelectItemType?> SelectAllCommand { get; }
 
+        public DelegateCommand<SelectItemType?> AddKeyFrameCommand { get; }
+
+        public DelegateCommand<SelectItemType?> ResetPropertyCommand { get; }
+
         public ICommand AppendItemCommand { get; }
 
         public AppendablePropertyItem[] Items => ((AppendableProperty)Property).Items;
@@ -882,6 +926,26 @@ namespace NiVE3.ViewModel
                 {
                     SelectedChildren.Add(child);
                 }
+            });
+
+            AddKeyFrameCommand = new DelegateCommand<SelectItemType?>(_ =>
+            {
+                if (SelectedChildren.Count < 1)
+                {
+                    return;
+                }
+
+                AppendablePropertyModel.CreateKeyFrames([..SelectedChildren.OfType<PropertyGroupViewModel>().Select(c => c.InstanceId)]);
+            });
+
+            ResetPropertyCommand = new DelegateCommand<SelectItemType?>(_ =>
+            {
+                if (SelectedChildren.Count < 1)
+                {
+                    return;
+                }
+
+                AppendablePropertyModel.ResetProperties([..SelectedChildren.OfType<PropertyGroupViewModel>().Select(c => c.InstanceId)]);
             });
 
             AppendItemCommand = new DelegateCommand<AppendablePropertyItem>(i => AppendablePropertyModel.AddChild(i));

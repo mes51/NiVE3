@@ -474,6 +474,12 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("線の太さ")]
         public static readonly string TextPropertyView_Property_LineWidth = nameof(TextPropertyView_Property_LineWidth);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("キーフレームの追加(_A)")]
+        public static readonly string PropertyCollection_ContextMenu_AddKeyFrame = nameof(PropertyCollection_ContextMenu_AddKeyFrame);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("プロパティをリセット(_R)")]
+        public static readonly string PropertyCollection_ContextMenu_ResetProperty = nameof(PropertyCollection_ContextMenu_ResetProperty);
+
         [ShowInMarkup, LanguageKey, DefaultValue("レベルメーター")]
         public static readonly string AudioInformationView_Title = nameof(AudioInformationView_Title);
 
@@ -765,6 +771,9 @@ namespace NiVE3.View.Resource
 
         [DefaultValue("プロパティの変更")]
         public static readonly string History_ChangePropertyValue = nameof(History_ChangePropertyValue);
+
+        [DefaultValue("プロパティのリセット")]
+        public static readonly string History_ResetPropertyValue = nameof(History_ResetPropertyValue);
 
         [DefaultValue("プロパティの切り取り")]
         public static readonly string History_CutProperty = nameof(History_CutProperty);
@@ -1291,6 +1300,12 @@ namespace NiVE3.View.Resource
         public static readonly string SourceTextPropertyControl_Edit = nameof(SourceTextPropertyControl_Edit);
 
         // ShortcutKeyNames
+
+        [DefaultValue("プロパティをリセット")]
+        public static readonly string ShortcutKeyName_ResetPropertyGesture = nameof(ShortcutKeyName_ResetPropertyGesture);
+
+        [DefaultValue("キーフレームを追加")]
+        public static readonly string ShortcutKeyName_AddKeyFrameGesture = nameof(ShortcutKeyName_AddKeyFrameGesture);
 
         [DefaultValue("ファイルの読み込み")]
         public static readonly string ShortcutKeyName_LoadFileGesture = nameof(ShortcutKeyName_LoadFileGesture);

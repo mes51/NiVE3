@@ -140,7 +140,7 @@ namespace NiVE3.View.Part
             var factory = new FrameworkElementFactory(uiType);
             var controlAreaWidthBinding = new Binding
             {
-                Path = new PropertyPath(nameof(ControlAreaWidth)),
+                Path = new PropertyPath(ControlAreaWidthProperty),
                 Source = this,
                 Mode = BindingMode.OneWay
             };
@@ -148,7 +148,7 @@ namespace NiVE3.View.Part
 
             var nameAreaWidthBinding = new Binding
             {
-                Path = new PropertyPath(nameof(NameAreaWidth)),
+                Path = new PropertyPath(NameAreaWidthProperty),
                 Source = this,
                 Mode = BindingMode.OneWay
             };
@@ -156,7 +156,7 @@ namespace NiVE3.View.Part
 
             var indentLevelBinding = new Binding
             {
-                Path = new PropertyPath(nameof(IndentLevel)),
+                Path = new PropertyPath(IndentLevelProperty),
                 Source = this,
                 Mode = BindingMode.OneWay
             };
@@ -202,7 +202,7 @@ namespace NiVE3.View.Part
 
             var rangeBinding = new Binding
             {
-                Path = new PropertyPath(nameof(Range)),
+                Path = new PropertyPath(RangeProperty),
                 Source = this,
                 Mode = BindingMode.OneWay
             };
@@ -210,7 +210,7 @@ namespace NiVE3.View.Part
 
             var rangeStartBinding = new Binding
             {
-                Path = new PropertyPath(nameof(RangeStart)),
+                Path = new PropertyPath(RangeStartProperty),
                 Source = this,
                 Mode = BindingMode.OneWay
             };
@@ -218,7 +218,7 @@ namespace NiVE3.View.Part
 
             var compositionFrameRateBinding = new Binding
             {
-                Path = new PropertyPath(nameof(CompositionFrameRate)),
+                Path = new PropertyPath(CompositionFrameRateProperty),
                 Source = this,
                 Mode = BindingMode.OneWay
             };
@@ -226,11 +226,19 @@ namespace NiVE3.View.Part
 
             var parentHasExpanderArrowBinding = new Binding
             {
-                Path = new PropertyPath(nameof(ParentHasExpanderArrow)),
+                Path = new PropertyPath(ParentHasExpanderArrowProperty),
                 Source = this,
                 Mode = BindingMode.OneWay
             };
             factory.SetBinding(PropertyViewBase.ParentHasExpanderArrowProperty, parentHasExpanderArrowBinding);
+
+            var contextMenuBinding = new Binding()
+            {
+                Path = new PropertyPath(ContextMenuProperty),
+                Source = this,
+                Mode = BindingMode.OneWay
+            };
+            factory.SetBinding(ContextMenuProperty, contextMenuBinding);
 
             return factory;
         }

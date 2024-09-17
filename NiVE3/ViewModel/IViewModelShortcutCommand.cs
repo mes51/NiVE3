@@ -10,6 +10,8 @@ namespace NiVE3.ViewModel
 {
     interface IViewModelShortcutCommand
     {
+        private static readonly DelegateCommand<SelectItemType?> Empty = new DelegateCommand<SelectItemType?>(_ => { });
+
         DelegateCommand<SelectItemType?> DeleteCommand { get; }
 
         DelegateCommand<SelectItemType?> CutCommand { get; }
@@ -21,5 +23,9 @@ namespace NiVE3.ViewModel
         DelegateCommand<SelectItemType?> DuplicateCommand { get; }
 
         DelegateCommand<SelectItemType?> SelectAllCommand { get; }
+
+        DelegateCommand<SelectItemType?> AddKeyFrameCommand => Empty;
+
+        DelegateCommand<SelectItemType?> ResetPropertyCommand => Empty;
     }
 }
