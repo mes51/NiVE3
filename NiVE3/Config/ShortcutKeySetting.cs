@@ -14,12 +14,16 @@ using NiVE3.Util;
 using NiVE3.Wpf.Input;
 using NiVE3.SourceGenerator.ResourceMarkupGenerator;
 using NiVE3.Wpf.Behavior;
+using System.Text.RegularExpressions;
 
 namespace NiVE3.Config
 {
     [MarkupableBinding(InstancePropertyName = nameof(Setting), OverrideExtensionName = "ShortcutKeyBinding", RoutingCommandOwnerType = typeof(WindowGestureBehavior), RoutingCommandName = "Gesture")]
-    class ShortcutKeySetting : DependencyObject
+    partial class ShortcutKeySetting : DependencyObject
     {
+        [GeneratedRegex("Property$")]
+        private static partial Regex DependencyPropertyNameRegex();
+
         static readonly string FilePath = Path.Combine(Paths.ConfigDirectory, "shortcut_keys.json");
 
         public static ShortcutKeySetting Setting { get; }
@@ -542,8 +546,9 @@ namespace NiVE3.Config
             Setting = new ShortcutKeySetting();
 
             var fields = typeof(ShortcutKeySetting).GetFields(BindingFlags.Public | BindingFlags.Static).Where(f => f.FieldType == typeof(DependencyProperty)).ToArray();
+            var regex = DependencyPropertyNameRegex();
             DependencyProperties = fields.Select(f => Tuple.Create(f.Name, (DependencyProperty)f.GetValue(null)!))
-                .ToDictionary(t => t.Item1.Replace("Property", ""), t => t.Item2);
+                .ToDictionary(t => regex.Replace(t.Item1, ""), t => t.Item2);
 
             var fieldNames = fields.Select(p => p.Name.Replace("Property", "")).ToArray();
             var gestureProperties = typeof(ShortcutKeySetting).GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(p => fieldNames.Contains(p.Name));
