@@ -3,6 +3,7 @@
                     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
                     xmlns:ad="https://github.com/Dirkster99/AvalonDock"
                     xmlns:dd="urn:gong-wpf-dragdrop"
+                    xmlns:vm="clr-namespace:NiVE3.ViewModel"
                     xmlns:a="clr-namespace:NiVE3.Wpf.Attach"
                     xmlns:b="clr-namespace:NiVE3.Wpf.Behavior"
                     xmlns:pt="clr-namespace:NiVE3.View.Part"
@@ -10,7 +11,8 @@
                     xmlns:ugm="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
                     xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
                     xmlns:cgm="clr-namespace:NiVE3.Config.Wpf.GeneratedMarkup"
-                    xmlns:r="clr-namespace:NiVE3.View.Resource">
+                    xmlns:r="clr-namespace:NiVE3.View.Resource"
+                    xmlns:ur="clr-namespace:NiVE3.UI.Resources;assembly=NiVE3.UI">
     <Style x:Key="{x:Type ad:LayoutDocumentFloatingWindowControl}" TargetType="{x:Type ad:LayoutDocumentFloatingWindowControl}">
         <Setter Property="a:ShortcutKeyBindingProperty.InputBinding" Value="True"/>
         <Setter Property="a:WindowGestureBehaviorAttachProperty.Attach" Value="True"/>
@@ -131,13 +133,116 @@
     </Style>
 
     <Style TargetType="{x:Type pt:PropertyCollectionView}" BasedOn="{x:Static pt:PropertyCollectionView.DefaultStyle}">
-        <Setter Property="ItemContextMenu">
+        <Style.Resources>
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        </Style.Resources>
+
+        <Setter Property="ItemTemplateSelector">
             <Setter.Value>
-                <ContextMenu>
-                    <MenuItem Header="{gm:LanguageResource ResourceKey=PropertyCollection_ContextMenu_AddKeyFrame}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=AddKeyFrameGesture}"/>
-                    <Separator />
-                    <MenuItem Header="{gm:LanguageResource ResourceKey=PropertyCollection_ContextMenu_ResetProperty}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=ResetPropertyGesture}"/>
-                </ContextMenu>
+                <ur:DataTemplateCollection>
+                    <DataTemplate DataType="{x:Type vm:PropertyViewModel}">
+                        <pt:PropertyView ControlAreaWidth="{Binding RelativeSource={RelativeSource AncestorType={x:Type pt:PropertyCollectionView}}, Path=ControlAreaWidth}"
+                                         NameAreaWidth="{Binding RelativeSource={RelativeSource AncestorType={x:Type pt:PropertyCollectionView}}, Path=NameAreaWidth}"
+                                         IndentLevel="{Binding RelativeSource={RelativeSource AncestorType={x:Type pt:PropertyCollectionView}}, Path=IndentLevel}"
+                                         IsAVSwitchColumnVisible="{Binding RelativeSource={RelativeSource AncestorType={x:Type pt:PropertyCollectionView}}, Path=IsAVSwitchColumnVisible}"
+                                         IsTagColumnVisible="{Binding RelativeSource={RelativeSource AncestorType={x:Type pt:PropertyCollectionView}}, Path=IsTagColumnVisible}"
+                                         ViewState="{Binding ViewState}"
+                                         Visibility="{Binding ViewState.IsVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                         IsEnabled="{Binding ViewState.IsEnabled}"
+                                         Range="{Binding RelativeSource={RelativeSource AncestorType={x:Type pt:PropertyCollectionView}}, Path=Range}"
+                                         RangeStart="{Binding RelativeSource={RelativeSource AncestorType={x:Type pt:PropertyCollectionView}}, Path=RangeStart}"
+                                         CompositionFrameRate="{Binding RelativeSource={RelativeSource AncestorType={x:Type pt:PropertyCollectionView}}, Path=CompositionFrameRate}"
+                                         ParentHasExpanderArrow="{Binding RelativeSource={RelativeSource AncestorType={x:Type pt:PropertyCollectionView}}, Path=ParentHasExpanderArrow}"
+                                         Tag="{Binding RelativeSource={RelativeSource AncestorType={x:Type pt:PropertyCollectionView}}, Path=DataContext}">
+                            <pt:PropertyView.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="{gm:LanguageResource ResourceKey=PropertyCollection_ContextMenu_AddKeyFrame, ReturnDynamicResource=True}" a:MenuItemGestureBindingProperty.InputGesture="{cgm:ShortcutKeyBinding ResourceKey=AddKeyFrameGesture}" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.Tag.AddKeyFrameToSelectedChildrenCommand}"/>
+                                    <Separator />
+                                    <MenuItem Header="{gm:LanguageResource ResourceKey=PropertyCollection_ContextMenu_ResetProperty, ReturnDynamicResource=True}" a:MenuItemGestureBindingProperty.InputGesture="{cgm:ShortcutKeyBinding ResourceKey=ResetPropertyGesture}" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.Tag.ResetSelectedChildrenCommand}"/>
+                                    <Separator />
+                                    <MenuItem Header="{gm:LanguageResource ResourceKey=PropertyCollection_ContextMenu_CutKeyFrame, ReturnDynamicResource=True}" a:MenuItemGestureBindingProperty.InputGesture="{cgm:ShortcutKeyBinding ResourceKey=CutItemGesture}" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.Tag.CutSelectedChildrenCommand}"/>
+                                    <MenuItem Header="{gm:LanguageResource ResourceKey=PropertyCollection_ContextMenu_CopyProperty, ReturnDynamicResource=True}" a:MenuItemGestureBindingProperty.InputGesture="{cgm:ShortcutKeyBinding ResourceKey=CopyItemGesture}" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.Tag.CopySelectedChildrenCommand}"/>
+                                    <MenuItem Header="{gm:LanguageResource ResourceKey=PropertyCollection_ContextMenu_PasteProperty, ReturnDynamicResource=True}" a:MenuItemGestureBindingProperty.InputGesture="{cgm:ShortcutKeyBinding ResourceKey=PasteItemGesture}" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.Tag.PasteToSelectedChildrenCommand}"/>
+                                    <MenuItem Header="{gm:LanguageResource ResourceKey=PropertyCollection_ContextMenu_DeleteKeyFrame, ReturnDynamicResource=True}" a:MenuItemGestureBindingProperty.InputGesture="{cgm:ShortcutKeyBinding ResourceKey=DeleteItemGesture}" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.Tag.DeleteSelectedChildrenCommand}"/>
+                                </ContextMenu>
+                            </pt:PropertyView.ContextMenu>
+                        </pt:PropertyView>
+                    </DataTemplate>
+                    <DataTemplate DataType="{x:Type vm:PropertyGroupViewModel}">
+                        <pt:PropertyGroupView ControlAreaWidth="{Binding RelativeSource={RelativeSource AncestorType={x:Type pt:PropertyCollectionView}}, Path=ControlAreaWidth}"
+                                              NameAreaWidth="{Binding RelativeSource={RelativeSource AncestorType={x:Type pt:PropertyCollectionView}}, Path=NameAreaWidth}"
+                                              IndentLevel="{Binding RelativeSource={RelativeSource AncestorType={x:Type pt:PropertyCollectionView}}, Path=IndentLevel}"
+                                              IsAVSwitchColumnVisible="{Binding RelativeSource={RelativeSource AncestorType={x:Type pt:PropertyCollectionView}}, Path=IsAVSwitchColumnVisible}"
+                                              IsTagColumnVisible="{Binding RelativeSource={RelativeSource AncestorType={x:Type pt:PropertyCollectionView}}, Path=IsTagColumnVisible}"
+                                              ViewState="{Binding ViewState}"
+                                              Visibility="{Binding ViewState.IsVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                              IsEnabled="{Binding ViewState.IsEnabled}"
+                                              Range="{Binding RelativeSource={RelativeSource AncestorType={x:Type pt:PropertyCollectionView}}, Path=Range}"
+                                              RangeStart="{Binding RelativeSource={RelativeSource AncestorType={x:Type pt:PropertyCollectionView}}, Path=RangeStart}"
+                                              CompositionFrameRate="{Binding RelativeSource={RelativeSource AncestorType={x:Type pt:PropertyCollectionView}}, Path=CompositionFrameRate}"
+                                              ParentHasExpanderArrow="{Binding RelativeSource={RelativeSource AncestorType={x:Type pt:PropertyCollectionView}}, Path=ParentHasExpanderArrow}"
+                                              Tag="{Binding RelativeSource={RelativeSource AncestorType={x:Type pt:PropertyCollectionView}}, Path=DataContext}">
+                            <pt:PropertyGroupView.Style>
+                                <Style TargetType="{x:Type pt:PropertyGroupView}">
+                                    <Setter Property="ContextMenu">
+                                        <Setter.Value>
+                                            <ContextMenu>
+                                                <MenuItem Header="{gm:LanguageResource ResourceKey=PropertyCollection_ContextMenu_AddKeyFrame}" a:MenuItemGestureBindingProperty.InputGesture="{cgm:ShortcutKeyBinding ResourceKey=AddKeyFrameGesture}" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.Tag.AddKeyFrameToSelectedChildrenCommand}"/>
+                                                <Separator />
+                                                <MenuItem Header="{gm:LanguageResource ResourceKey=PropertyCollection_ContextMenu_ResetProperty}" a:MenuItemGestureBindingProperty.InputGesture="{cgm:ShortcutKeyBinding ResourceKey=ResetPropertyGesture}" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.Tag.ResetSelectedChildrenCommand}"/>
+                                            </ContextMenu>
+                                        </Setter.Value>
+                                    </Setter>
+
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type pt:PropertyCollectionView}}, Path=IsAppendablePropertyChild}" Value="True">
+                                            <Setter Property="ContextMenu">
+                                                <Setter.Value>
+                                                    <ContextMenu>
+                                                        <MenuItem Header="{gm:LanguageResource ResourceKey=PropertyCollection_ContextMenu_AddKeyFrame}" a:MenuItemGestureBindingProperty.InputGesture="{cgm:ShortcutKeyBinding ResourceKey=AddKeyFrameGesture}" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.Tag.AddKeyFrameToSelectedChildrenCommand}"/>
+                                                        <Separator />
+                                                        <MenuItem Header="{gm:LanguageResource ResourceKey=PropertyCollection_ContextMenu_ResetProperty}" a:MenuItemGestureBindingProperty.InputGesture="{cgm:ShortcutKeyBinding ResourceKey=ResetPropertyGesture}" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.Tag.ResetSelectedChildrenCommand}"/>
+                                                        <Separator />
+                                                        <MenuItem Header="{gm:LanguageResource ResourceKey=PropertyCollection_ContextMenu_CutPropertyGroup}" a:MenuItemGestureBindingProperty.InputGesture="{cgm:ShortcutKeyBinding ResourceKey=CutItemGesture}" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.Tag.CutSelectedChildrenCommand}"/>
+                                                        <MenuItem Header="{gm:LanguageResource ResourceKey=PropertyCollection_ContextMenu_CopyProperty}" a:MenuItemGestureBindingProperty.InputGesture="{cgm:ShortcutKeyBinding ResourceKey=CopyItemGesture}" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.Tag.CopySelectedChildrenCommand}"/>
+                                                        <MenuItem Header="{gm:LanguageResource ResourceKey=PropertyCollection_ContextMenu_PasteProperty}" a:MenuItemGestureBindingProperty.InputGesture="{cgm:ShortcutKeyBinding ResourceKey=PasteItemGesture}" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.Tag.PasteToSelectedChildrenCommand}"/>
+                                                        <MenuItem Header="{gm:LanguageResource ResourceKey=PropertyCollection_ContextMenu_DeletePropertyGroup}" a:MenuItemGestureBindingProperty.InputGesture="{cgm:ShortcutKeyBinding ResourceKey=DeleteItemGesture}" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.Tag.DeleteSelectedChildrenCommand}"/>
+                                                        <MenuItem Header="{gm:LanguageResource ResourceKey=PropertyCollection_ContextMenu_DuplicatePropertyGroup}" a:MenuItemGestureBindingProperty.InputGesture="{cgm:ShortcutKeyBinding ResourceKey=DuplicateItemGesture}" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.Tag.DuplicateSelectedChildrenCommand}"/>
+                                                    </ContextMenu>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </pt:PropertyGroupView.Style>
+                        </pt:PropertyGroupView>
+                    </DataTemplate>
+                    <DataTemplate DataType="{x:Type vm:AppendablePropertyViewModel}">
+                        <pt:AppendablePropertyView ControlAreaWidth="{Binding RelativeSource={RelativeSource AncestorType={x:Type pt:PropertyCollectionView}}, Path=ControlAreaWidth}"
+                                                   NameAreaWidth="{Binding RelativeSource={RelativeSource AncestorType={x:Type pt:PropertyCollectionView}}, Path=NameAreaWidth}"
+                                                   IndentLevel="{Binding RelativeSource={RelativeSource AncestorType={x:Type pt:PropertyCollectionView}}, Path=IndentLevel}"
+                                                   IsAVSwitchColumnVisible="{Binding RelativeSource={RelativeSource AncestorType={x:Type pt:PropertyCollectionView}}, Path=IsAVSwitchColumnVisible}"
+                                                   IsTagColumnVisible="{Binding RelativeSource={RelativeSource AncestorType={x:Type pt:PropertyCollectionView}}, Path=IsTagColumnVisible}"
+                                                   ViewState="{Binding ViewState}"
+                                                   Visibility="{Binding ViewState.IsVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                                   IsEnabled="{Binding ViewState.IsEnabled}"
+                                                   Range="{Binding RelativeSource={RelativeSource AncestorType={x:Type pt:PropertyCollectionView}}, Path=Range}"
+                                                   RangeStart="{Binding RelativeSource={RelativeSource AncestorType={x:Type pt:PropertyCollectionView}}, Path=RangeStart}"
+                                                   CompositionFrameRate="{Binding RelativeSource={RelativeSource AncestorType={x:Type pt:PropertyCollectionView}}, Path=CompositionFrameRate}"
+                                                   ParentHasExpanderArrow="{Binding RelativeSource={RelativeSource AncestorType={x:Type pt:PropertyCollectionView}}, Path=ParentHasExpanderArrow}"
+                                                   Tag="{Binding RelativeSource={RelativeSource AncestorType={x:Type pt:PropertyCollectionView}}, Path=DataContext}">
+                            <pt:AppendablePropertyView.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="{gm:LanguageResource ResourceKey=PropertyCollection_ContextMenu_AddKeyFrame, ReturnDynamicResource=True}" a:MenuItemGestureBindingProperty.InputGesture="{cgm:ShortcutKeyBinding ResourceKey=AddKeyFrameGesture}" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.Tag.AddKeyFrameToSelectedChildrenCommand}"/>
+                                    <Separator />
+                                    <MenuItem Header="{gm:LanguageResource ResourceKey=PropertyCollection_ContextMenu_ResetProperty, ReturnDynamicResource=True}" a:MenuItemGestureBindingProperty.InputGesture="{cgm:ShortcutKeyBinding ResourceKey=ResetPropertyGesture}" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.Tag.ResetSelectedChildrenCommand}"/>
+                                    <Separator />
+                                    <MenuItem Header="{gm:LanguageResource ResourceKey=PropertyCollection_ContextMenu_PasteProperty, ReturnDynamicResource=True}" a:MenuItemGestureBindingProperty.InputGesture="{cgm:ShortcutKeyBinding ResourceKey=PasteItemGesture}" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.Tag.PasteToSelectedChildrenCommand}"/>
+                                </ContextMenu>
+                            </pt:AppendablePropertyView.ContextMenu>
+                        </pt:AppendablePropertyView>
+                    </DataTemplate>
+                </ur:DataTemplateCollection>
             </Setter.Value>
         </Setter>
     </Style>

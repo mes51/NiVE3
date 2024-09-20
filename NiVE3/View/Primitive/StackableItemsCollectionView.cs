@@ -132,6 +132,13 @@ namespace NiVE3.View.Primitive
             new FrameworkPropertyMetadata(null)
         );
 
+        public static readonly DependencyProperty UseItemContextMenuProperty = DependencyProperty.Register(
+            nameof(UseItemContextMenu),
+            typeof(bool),
+            typeof(StackableItemsCollectionView<T>),
+            new FrameworkPropertyMetadata(true)
+        );
+
         private static readonly DependencyProperty SelectedItemsViewProperty = DependencyProperty.Register(
             nameof(SelectedItemsView),
             typeof(ObservableCollectionView<T>),
@@ -152,6 +159,12 @@ namespace NiVE3.View.Primitive
         {
             get { return (T?)GetValue(LastSelectedProperty); }
             private set { SetValue(LastSelectedPropertyKey, value); }
+        }
+
+        public bool UseItemContextMenu
+        {
+            get { return (bool)GetValue(UseItemContextMenuProperty); }
+            set { SetValue(UseItemContextMenuProperty, value); }
         }
 
         public ContextMenu? ItemContextMenu
@@ -335,13 +348,16 @@ namespace NiVE3.View.Primitive
             };
             BindingOperations.SetBinding(element, IsSelectedProperty, isSelectedBinding);
 
-            var contextMenuBinding = new Binding
+            if (UseItemContextMenu)
             {
-                Path = new PropertyPath(ItemContextMenuProperty),
-                Source = this,
-                Mode = BindingMode.OneWay
-            };
-            BindingOperations.SetBinding(element, ContextMenuProperty, contextMenuBinding);
+                var contextMenuBinding = new Binding
+                {
+                    Path = new PropertyPath(ItemContextMenuProperty),
+                    Source = this,
+                    Mode = BindingMode.OneWay
+                };
+                BindingOperations.SetBinding(element, ContextMenuProperty, contextMenuBinding);
+            }
         }
 
         protected override void OnItemsSourceChanged(IEnumerable oldValue, IEnumerable newValue)

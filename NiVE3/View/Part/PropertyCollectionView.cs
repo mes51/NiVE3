@@ -66,6 +66,19 @@ namespace NiVE3.View.Part
             new FrameworkPropertyMetadata(true, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
+        public static readonly DependencyProperty IsAppendablePropertyChildProperty = DependencyProperty.Register(
+            nameof(IsAppendablePropertyChild),
+            typeof(bool),
+            typeof(PropertyCollectionView),
+            new FrameworkPropertyMetadata(false)
+        );
+
+        public bool IsAppendablePropertyChild
+        {
+            get { return (bool)GetValue(IsAppendablePropertyChildProperty); }
+            set { SetValue(IsAppendablePropertyChildProperty, value); }
+        }
+
         public bool ParentHasExpanderArrow
         {
             get { return (bool)GetValue(ParentHasExpanderArrowProperty); }
@@ -108,139 +121,14 @@ namespace NiVE3.View.Part
             set { SetValue(IsAVSwitchColumnVisibleProperty, value); }
         }
 
-        public PropertyCollectionView()
+        static PropertyCollectionView()
         {
-            var templateSelector = new DataTemplateCollection();
-            templateSelector.Templates.Add(new DataTemplate
-            {
-                DataType = typeof(PropertyViewModel),
-                VisualTree = CreateControlFactory(typeof(PropertyView))
-            });
-            templateSelector.Templates.Add(new DataTemplate
-            {
-                DataType = typeof(AppendablePropertyViewModel),
-                VisualTree = CreateControlFactory(typeof(AppendablePropertyView))
-            });
-            templateSelector.Templates.Add(new DataTemplate
-            {
-                DataType = typeof(PropertyGroupViewModel),
-                VisualTree = CreateControlFactory(typeof(PropertyGroupView))
-            });
-
-            ItemTemplateSelector = templateSelector;
+            UseItemContextMenuProperty.OverrideMetadata(typeof(PropertyCollectionView), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.Inherits));
         }
 
         protected override DependencyObject GetContainerForItemOverride()
         {
             return new PropertyContentPresenter();
-        }
-
-        FrameworkElementFactory CreateControlFactory(Type uiType)
-        {
-            var factory = new FrameworkElementFactory(uiType);
-            var controlAreaWidthBinding = new Binding
-            {
-                Path = new PropertyPath(ControlAreaWidthProperty),
-                Source = this,
-                Mode = BindingMode.OneWay
-            };
-            factory.SetBinding(PropertyViewBase.ControlAreaWidthProperty, controlAreaWidthBinding);
-
-            var nameAreaWidthBinding = new Binding
-            {
-                Path = new PropertyPath(NameAreaWidthProperty),
-                Source = this,
-                Mode = BindingMode.OneWay
-            };
-            factory.SetBinding(PropertyViewBase.NameAreaWidthProperty, nameAreaWidthBinding);
-
-            var indentLevelBinding = new Binding
-            {
-                Path = new PropertyPath(IndentLevelProperty),
-                Source = this,
-                Mode = BindingMode.OneWay
-            };
-            factory.SetBinding(PropertyViewBase.IndentLevelProperty, indentLevelBinding);
-
-            var isAVSwitchColumnVisibleBinding = new Binding
-            {
-                Path = new PropertyPath(IsAVSwitchColumnVisibleProperty),
-                Source = this,
-                Mode = BindingMode.OneWay
-            };
-            factory.SetBinding(PropertyViewBase.IsAVSwitchColumnVisibleProperty, isAVSwitchColumnVisibleBinding);
-
-            var isTagColumnVisibleBinding = new Binding
-            {
-                Path = new PropertyPath(IsTagColumnVisibleProperty),
-                Source = this,
-                Mode = BindingMode.OneWay
-            };
-            factory.SetBinding(PropertyViewBase.IsTagColumnVisibleProperty, isTagColumnVisibleBinding);
-
-            var viewStateBinding = new Binding
-            {
-                Path = new PropertyPath(nameof(PropertyViewModel.ViewState)),
-                Mode = BindingMode.OneWay
-            };
-            factory.SetBinding(PropertyViewBase.ViewStateProperty, viewStateBinding);
-
-            var visibilityBinding = new Binding
-            {
-                Path = new PropertyPath($"{nameof(PropertyViewModel.ViewState)}.{nameof(PropertyViewState.IsVisible)}"),
-                Mode = BindingMode.OneWay,
-                Converter = VisibilityConverter
-            };
-            factory.SetBinding(VisibilityProperty, visibilityBinding);
-
-            var isEnabledBinding = new Binding
-            {
-                Path = new PropertyPath($"{nameof(PropertyViewModel.ViewState)}.{nameof(PropertyViewState.IsEnabled)}"),
-                Mode = BindingMode.OneWay
-            };
-            factory.SetBinding(IsEnabledProperty, isEnabledBinding);
-
-            var rangeBinding = new Binding
-            {
-                Path = new PropertyPath(RangeProperty),
-                Source = this,
-                Mode = BindingMode.OneWay
-            };
-            factory.SetBinding(PropertyViewBase.RangeProperty, rangeBinding);
-
-            var rangeStartBinding = new Binding
-            {
-                Path = new PropertyPath(RangeStartProperty),
-                Source = this,
-                Mode = BindingMode.OneWay
-            };
-            factory.SetBinding(PropertyViewBase.RangeStartProperty, rangeStartBinding);
-
-            var compositionFrameRateBinding = new Binding
-            {
-                Path = new PropertyPath(CompositionFrameRateProperty),
-                Source = this,
-                Mode = BindingMode.OneWay
-            };
-            factory.SetBinding(PropertyViewBase.CompositionFrameRateProperty, compositionFrameRateBinding);
-
-            var parentHasExpanderArrowBinding = new Binding
-            {
-                Path = new PropertyPath(ParentHasExpanderArrowProperty),
-                Source = this,
-                Mode = BindingMode.OneWay
-            };
-            factory.SetBinding(PropertyViewBase.ParentHasExpanderArrowProperty, parentHasExpanderArrowBinding);
-
-            var contextMenuBinding = new Binding()
-            {
-                Path = new PropertyPath(ContextMenuProperty),
-                Source = this,
-                Mode = BindingMode.OneWay
-            };
-            factory.SetBinding(ContextMenuProperty, contextMenuBinding);
-
-            return factory;
         }
     }
 

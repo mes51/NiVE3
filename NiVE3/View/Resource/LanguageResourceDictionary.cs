@@ -480,6 +480,27 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("プロパティをリセット(_R)")]
         public static readonly string PropertyCollection_ContextMenu_ResetProperty = nameof(PropertyCollection_ContextMenu_ResetProperty);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("キーフレームを切り取り(_X)")]
+        public static readonly string PropertyCollection_ContextMenu_CutKeyFrame = nameof(PropertyCollection_ContextMenu_CutKeyFrame);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("プロパティを切り取り(_X)")]
+        public static readonly string PropertyCollection_ContextMenu_CutPropertyGroup = nameof(PropertyCollection_ContextMenu_CutPropertyGroup);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("コピー(_C)")]
+        public static readonly string PropertyCollection_ContextMenu_CopyProperty = nameof(PropertyCollection_ContextMenu_CopyProperty);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("ペースト(_P)")]
+        public static readonly string PropertyCollection_ContextMenu_PasteProperty = nameof(PropertyCollection_ContextMenu_PasteProperty);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("キーフレームを削除(_D)")]
+        public static readonly string PropertyCollection_ContextMenu_DeleteKeyFrame = nameof(PropertyCollection_ContextMenu_DeleteKeyFrame);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("プロパティを削除(_D)")]
+        public static readonly string PropertyCollection_ContextMenu_DeletePropertyGroup = nameof(PropertyCollection_ContextMenu_DeletePropertyGroup);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("プロパティを複製(_E)")]
+        public static readonly string PropertyCollection_ContextMenu_DuplicatePropertyGroup = nameof(PropertyCollection_ContextMenu_DuplicatePropertyGroup);
+
         [ShowInMarkup, LanguageKey, DefaultValue("レベルメーター")]
         public static readonly string AudioInformationView_Title = nameof(AudioInformationView_Title);
 

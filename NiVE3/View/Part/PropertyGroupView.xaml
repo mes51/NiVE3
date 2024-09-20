@@ -5,8 +5,10 @@
                         xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
                         xmlns:local="clr-namespace:NiVE3.View.Part"
                         xmlns:dd="urn:gong-wpf-dragdrop"
+                        xmlns:a="clr-namespace:NiVE3.Wpf.Attach"
                         xmlns:pr="clr-namespace:NiVE3.View.Primitive"
                         xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
+                        xmlns:cgm="clr-namespace:NiVE3.Config.Wpf.GeneratedMarkup"
                         mc:Ignorable="d" 
                         x:Name="Root"
                         Focusable="{Binding IsRenameable}"
@@ -16,6 +18,23 @@
                         d:DesignHeight="450" d:DesignWidth="800">
     <local:PropertyViewBase.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+
+        <ContextMenu x:Key="PropertyContextMenu">
+            <MenuItem Header="{gm:LanguageResource ResourceKey=PropertyCollection_ContextMenu_AddKeyFrame}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=AddKeyFrameGesture}"/>
+            <Separator />
+            <MenuItem Header="{gm:LanguageResource ResourceKey=PropertyCollection_ContextMenu_ResetProperty}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=ResetPropertyGesture}"/>
+            <Separator />
+            <MenuItem Header="{gm:LanguageResource ResourceKey=PropertyCollection_ContextMenu_CutKeyFrame}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=CutItemGesture}"/>
+            <MenuItem Header="{gm:LanguageResource ResourceKey=PropertyCollection_ContextMenu_CopyProperty}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=CutItemGesture}"/>
+            <MenuItem Header="{gm:LanguageResource ResourceKey=PropertyCollection_ContextMenu_PasteProperty}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=CutItemGesture}"/>
+            <MenuItem Header="{gm:LanguageResource ResourceKey=PropertyCollection_ContextMenu_DeleteKeyFrame}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=CutItemGesture}"/>
+        </ContextMenu>
+
+        <ContextMenu x:Key="PropertyGroupContextMenu">
+            <MenuItem Header="{gm:LanguageResource ResourceKey=PropertyCollection_ContextMenu_AddKeyFrame}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=AddKeyFrameGesture}"/>
+            <Separator />
+            <MenuItem Header="{gm:LanguageResource ResourceKey=PropertyCollection_ContextMenu_ResetProperty}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=ResetPropertyGesture}"/>
+        </ContextMenu>
 
         <Style x:Key="LayerItemExpanderStyle" TargetType="{x:Type local:LayerItemExpander}" BasedOn="{StaticResource {x:Type local:LayerItemExpander}}">
             <Style.Triggers>
