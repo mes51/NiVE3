@@ -1400,7 +1400,10 @@ namespace NiVE3.Model
                 newChildren.Add(newChild);
             }
 
-            HistoryModel.Add(new PastePropertyHistoryCommand(this, [.. newChildren], isDuplicate));
+            if (newChildren.Count > 0)
+            {
+                HistoryModel.Add(new PastePropertyHistoryCommand(this, [..newChildren], isDuplicate));
+            }
         }
 
         private void Child_ValueUpdated(object? sender, EventArgs e)
