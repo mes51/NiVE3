@@ -27,6 +27,34 @@
         <!-- NOTE: BasedOn用 -->
     </Style>
 
+    <Style TargetType="{x:Type pr:PlaceholderTextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type pr:PlaceholderTextBox}">
+                    <Border x:Name="border" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
+                        <Grid>
+                            <ScrollViewer x:Name="PART_ContentHost" Focusable="False" HorizontalScrollBarVisibility="{TemplateBinding HorizontalScrollBarVisibility}" VerticalScrollBarVisibility="{TemplateBinding VerticalScrollBarVisibility}" />
+                            <TextBlock x:Name="Placeholder"
+                                       Text="{TemplateBinding Placeholder}"
+                                       FontSize="{TemplateBinding PlaceholderFontSize}"
+                                       HorizontalAlignment="Left"
+                                       VerticalAlignment="Center"
+                                       Margin="4,0"
+                                       TextTrimming="CharacterEllipsis"
+                                       TextWrapping="NoWrap"
+                                       Foreground="{ugm:AppearanceResource ResourceKey=DisableTextBrush, ReturnDynamicResource=True}" IsHitTestVisible="False"/>
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsVisiblePlaceholder" Value="False">
+                            <Setter TargetName="Placeholder" Property="Visibility" Value="Collapsed"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style TargetType="{x:Type pt:LayerItemExpander}">
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Template">

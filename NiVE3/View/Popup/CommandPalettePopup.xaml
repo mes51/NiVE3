@@ -5,6 +5,8 @@
        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
        xmlns:local="clr-namespace:NiVE3.View.Part"
        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+       xmlns:pr="clr-namespace:NiVE3.View.Primitive"
+       xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
        mc:Ignorable="d" 
        x:Name="Root"
        Placement="Center"
@@ -37,7 +39,7 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
 
-            <TextBox x:Name="FilterTextBox" Grid.Row="0" FontSize="28" Margin="0,0,0,10" Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}" KeyDown="FilterTextBox_KeyDown"/>
+            <pr:PlaceholderTextBox x:Name="FilterTextBox" Grid.Row="0" FontSize="28" Margin="0,0,0,10" Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}" Placeholder="{gm:LanguageResource ResourceKey=CommandPalettePopup_FilterText_Placeholder}" PlaceholderFontSize="20" KeyDown="FilterTextBox_KeyDown"/>
             <ListView Grid.Row="1"
                       FontSize="16"
                       ItemTemplate="{StaticResource CommandTemplate}"

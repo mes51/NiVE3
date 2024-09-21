@@ -666,6 +666,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("ショートカットキーの削除(_D)")]
         public static readonly string ShortcutKeySettingView_ContextMenu_Delete = nameof(ShortcutKeySettingView_ContextMenu_Delete);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("コマンドを検索")]
+        public static readonly string CommandPalettePopup_FilterText_Placeholder = nameof(CommandPalettePopup_FilterText_Placeholder);
+
         // Effect category names
 
         [DefaultValue("オーディオ")]
