@@ -35,8 +35,13 @@ namespace NiVE3.View.Part
             InitializeComponent();
         }
 
-        private void Root_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private void Root_MouseDown(object sender, MouseButtonEventArgs e)
         {
+            if (e.ChangedButton != MouseButton.Left && e.ChangedButton != MouseButton.Right)
+            {
+                return;
+            }
+
             Focus();
             ParentCollection?.SelectItem(ParentContainer, Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift), Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl));
             (DataContext as IInternalPropertyViewModel)?.SelectItemCommand?.Execute(null);

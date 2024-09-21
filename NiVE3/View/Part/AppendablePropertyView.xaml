@@ -11,7 +11,7 @@
                         xmlns:cgm="clr-namespace:NiVE3.Config.Wpf.GeneratedMarkup"
                         mc:Ignorable="d" 
                         x:Name="Root"
-                        MouseLeftButtonDown="Root_MouseLeftButtonDown"
+                        MouseDown="Root_MouseDown"
                         dd:DragDrop.DragSourceIgnore="True"
                         d:DesignHeight="450" d:DesignWidth="800">
     <local:PropertyViewBase.Resources>
