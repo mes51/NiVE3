@@ -270,6 +270,21 @@ namespace NiVE3.Config
             new PropertyMetadata(new KeyGesture(Key.None))
         );
 
+        public static readonly DependencyProperty OpenCommandPaletteGestureProperty = DependencyProperty.Register(
+            nameof(OpenCommandPaletteGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new KeyGesture(Key.Space, ModifierKeys.Control))
+        );
+
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Other)]
+        [ShowInMarkup]
+        public InputGesture OpenCommandPaletteGesture
+        {
+            get { return (InputGesture)GetValue(OpenCommandPaletteGestureProperty); }
+            set { SetValue(OpenCommandPaletteGestureProperty, value); }
+        }
+
         [ShortcutKeyCategory(ShortcutKeyCategoryType.Edit)]
         [ShowInMarkup]
         public InputGesture ResetPropertyGesture

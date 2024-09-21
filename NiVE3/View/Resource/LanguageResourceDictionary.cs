@@ -1322,6 +1322,9 @@ namespace NiVE3.View.Resource
 
         // ShortcutKeyNames
 
+        [DefaultValue("コマンドパレットを開く")]
+        public static readonly string ShortcutKeyName_OpenCommandPaletteGesture = nameof(ShortcutKeyName_OpenCommandPaletteGesture);
+
         [DefaultValue("プロパティをリセット")]
         public static readonly string ShortcutKeyName_ResetPropertyGesture = nameof(ShortcutKeyName_ResetPropertyGesture);
 

@@ -3,6 +3,7 @@ using NiVE3.Model;
 using NiVE3.Model.UI;
 using NiVE3.View.Dialog;
 using NiVE3.ViewModel;
+using NiVE3.ViewModel.CommandOnly;
 using NiVE3.ViewModel.Dialog;
 using Prism.Ioc;
 using Prism.Modularity;
@@ -39,6 +40,8 @@ namespace NiVE3.Module
             ViewRegistry.RegisterViewWithRegion(MainWindowViewModel.RegionName, typeof(TextPropertyViewModel));
             ViewRegistry.RegisterViewWithRegion(MainWindowViewModel.RegionName, typeof(AudioInformationViewModel));
             ViewRegistry.RegisterViewWithRegion(MainWindowViewModel.RegionName, typeof(RenderQueueViewModel));
+
+            ViewRegistry.RegisterViewWithRegion(CommandPaletteViewModel.RegionName, typeof(CommandPaletteViewModel));
         }
 
         public void RegisterTypes(IContainerRegistry containerRegistry)
@@ -70,12 +73,13 @@ namespace NiVE3.Module
             Container.Register<TextPropertyViewModel>(Reuse.Singleton, FactoryMethod.ConstructorWithResolvableArguments);
             Container.Register<AudioInformationViewModel>(Reuse.Singleton, FactoryMethod.ConstructorWithResolvableArguments);
             Container.Register<RenderQueueViewModel>(Reuse.Singleton, FactoryMethod.ConstructorWithResolvableArguments);
+            Container.Register<CommandPaletteViewModel>(Reuse.Singleton, FactoryMethod.ConstructorWithResolvableArguments);
 
             Container.Register<PreviewViewModel>(Reuse.Transient, FactoryMethod.ConstructorWithResolvableArguments);
             Container.Register<TimelineViewModel>(Reuse.Transient, FactoryMethod.ConstructorWithResolvableArguments);
 
-            // MEMO: ViewなしショートカットのみのViewModelの場合
-            // Container.RegisterMapping<CommandOnlyViewModelBase, ViewModelType>();
+            Container.Register<CommandPaletteCommandOnlyViewModel>(Reuse.Singleton, FactoryMethod.ConstructorWithResolvableArguments);
+            Container.RegisterMapping<CommandOnlyViewModelBase, CommandPaletteCommandOnlyViewModel>();
 
             containerRegistry.RegisterDialog<NameSettingView, NameSettingViewModel>();
             containerRegistry.RegisterDialog<PluginSettingView, PluginSettingViewModel>();
