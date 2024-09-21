@@ -373,6 +373,7 @@ namespace NiVE3.Config
             set { SetValue(SelectAllGestureProperty, value); }
         }
 
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Edit)]
         [ShowInMarkup]
         public InputGesture SelectCameraToolGesture
         {
