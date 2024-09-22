@@ -16,6 +16,8 @@ namespace NiVE3.View.Resource
     {
         public static LanguageResourceDictionary Dictionary { get; }
 
+        public static LanguageResourceDictionary JPDictionary { get; }
+
         static Dictionary<string, Tuple<string, Version>> LanguageKeys { get; }
 
         [ShowInMarkup, LanguageKey, DefaultValue("NicoVisualEffects 3{0}")]
@@ -1795,14 +1797,17 @@ namespace NiVE3.View.Resource
                 .ToDictionary(t => t.Name, t => Tuple.Create(t.Item2!.DefaultValue, Version.Parse(t.Item2!.FromVersion)));
 
             Dictionary = [];
+            JPDictionary = new LanguageResourceDictionary("ja-JP");
         }
 
-        public LanguageResourceDictionary()
+        public LanguageResourceDictionary() : this(null) { }
+
+        public LanguageResourceDictionary(string? forceLangCode)
         {
-            Reload();
+            Reload(forceLangCode);
         }
 
-        protected override void Reload()
+        protected override void Reload(string? forceLangCode = null)
         {
             // TODO: 言語情報読み込み&バージョン比較後適用
             foreach (var (key, (defaultValue, version)) in LanguageKeys)

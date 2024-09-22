@@ -781,7 +781,7 @@ namespace NiVE3.PresetPlugin.Resource
             Reload();
         }
 
-        protected override void Reload()
+        protected override void Reload(string? forceLangCode = null)
         {
             // TODO: 言語情報読み込み&バージョン比較後適用
             foreach (var (key, (defaultValue, version)) in LanguageKeys)

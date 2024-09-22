@@ -17,19 +17,12 @@
        Opened="Root_Opened"
        d:DesignHeight="450" d:DesignWidth="800">
     <Popup.Resources>
-        <DataTemplate x:Key="CommandTemplate" DataType="{x:Type sys:Tuple`4}">
-            <TextBlock>
-                <TextBlock.Text>
-                    <MultiBinding StringFormat="{}{0} > {1}">
-                        <Binding Path="Item1"/>
-                        <Binding Path="Item2"/>
-                    </MultiBinding>
-                </TextBlock.Text>
-            </TextBlock>
+        <DataTemplate x:Key="CommandTemplate" DataType="{x:Type sys:Tuple`5}">
+            <TextBlock Text="{Binding Item1}"/>
         </DataTemplate>
 
         <Style x:Key="CommandItemContainerStyle" TargetType="{x:Type ListViewItem}">
-            <Setter Property="IsEnabled" Value="{Binding Item4}"/>
+            <Setter Property="IsEnabled" Value="{Binding Item5}"/>
         </Style>
     </Popup.Resources>
     <Border BorderBrush="Black" BorderThickness="1" Background="White">

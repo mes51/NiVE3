@@ -27,7 +27,7 @@ namespace NiVE3.ViewModel
 
         public static readonly string RegionName = "CommandPalette";
 
-        static readonly Tuple<string, string, string>[] AllCommands;
+        static readonly Tuple<string, string[], string>[] AllShortcutCommands;
 
         private bool isOpen;
         public bool IsOpen
@@ -36,15 +36,15 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref isOpen, value); }
         }
 
-        private ObservableCollection<Tuple<string, string, string, bool>> commands = [];
-        public ObservableCollection<Tuple<string, string, string, bool>> Commands
+        private ObservableCollection<Tuple<string, string[], ICommand, object?, bool>> commands = [];
+        public ObservableCollection<Tuple<string, string[], ICommand, object?, bool>> Commands
         {
             get { return commands; }
             set { SetProperty(ref commands, value); }
         }
 
-        private Tuple<string, string, string, bool>? selectedCommand;
-        public Tuple<string, string, string, bool>? SelectedCommand
+        private Tuple<string, string[], ICommand, object?, bool>? selectedCommand;
+        public Tuple<string, string[], ICommand, object?, bool>? SelectedCommand
         {
             get { return selectedCommand; }
             set { SetProperty(ref selectedCommand, value); }
@@ -63,12 +63,20 @@ namespace NiVE3.ViewModel
 
         static CommandPaletteViewModel()
         {
-            AllCommands = [..ShortcutKeySetting.CategorizedShortcutKeys.SelectMany(kv =>
+            AllShortcutCommands = [..ShortcutKeySetting.CategorizedShortcutKeys.SelectMany(kv =>
             {
-                var category = LanguageResourceDictionary.Dictionary.GetText($"{typeof(ShortcutKeyCategoryType).Name}_{kv.Key}");
+                var categoryKey = $"{typeof(ShortcutKeyCategoryType).Name}_{kv.Key}";
+                var category = LanguageResourceDictionary.Dictionary.GetText(categoryKey);
+                var jpCategory = LanguageResourceDictionary.JPDictionary.GetText(categoryKey);
                 return kv.Value
                     .Where(n => n != nameof(ShortcutKeySetting.OpenCommandPaletteGesture)) // NOTE: コマンドパレットからコマンドパレットを開いても意味が無いので除去
-                    .Select(n => Tuple.Create(category, LanguageResourceDictionary.Dictionary.GetText($"ShortcutKeyName_{n}"), n));
+                    .Select(n =>
+                    {
+                        var nameKey = $"ShortcutKeyName_{n}";
+                        var name = LanguageResourceDictionary.Dictionary.GetText(nameKey);
+                        var jpName = LanguageResourceDictionary.JPDictionary.GetText(nameKey);
+                        return Tuple.Create($"{category} > {name}", new string[] { category, name, jpCategory, jpName }, n);
+                    });
             })];
         }
 
@@ -84,9 +92,19 @@ namespace NiVE3.ViewModel
                 }
 
                 var inputElement = Keyboard.FocusedElement;
-                if (WindowGestureBehavior.GestureCommand.CanExecute(SelectedCommand.Item3, inputElement))
+                if (SelectedCommand.Item3 is RoutedCommand routedCommand)
                 {
-                    WindowGestureBehavior.GestureCommand.Execute(SelectedCommand.Item3, inputElement);
+                    if (routedCommand.CanExecute(SelectedCommand.Item4, inputElement))
+                    {
+                        routedCommand.Execute(SelectedCommand.Item4, inputElement);
+                    }
+                }
+                else
+                {
+                    if (SelectedCommand.Item3.CanExecute(SelectedCommand.Item4))
+                    {
+                        SelectedCommand.Item3.Execute(SelectedCommand.Item4);
+                    }
                 }
             }, () => SelectedCommand != null);
 
@@ -101,16 +119,17 @@ namespace NiVE3.ViewModel
 
             Commands.Clear();
             var inputElement = Keyboard.FocusedElement;
-            foreach (var (category, name, gesture) in AllCommands)
+            var gestureCommand = WindowGestureBehavior.GestureCommand;
+            foreach (var (displayName, searchTexts, gesture) in AllShortcutCommands)
             {
-                Commands.Add(Tuple.Create(category, name, gesture, WindowGestureBehavior.GestureCommand.CanExecute(gesture, inputElement)));
+                Commands.Add(Tuple.Create<string, string[], ICommand, object?, bool>(displayName, searchTexts, gestureCommand, gesture, gestureCommand.CanExecute(gesture, inputElement)));
             }
 
             SelectedCommand = Commands.FirstOrDefault();
             IsOpen = true;
         }
 
-        static bool FilterCommand(Tuple<string, string, string, bool> command, string filterKey)
+        static bool FilterCommand(Tuple<string, string[], ICommand, object?, bool> command, string filterKey)
         {
             if (string.IsNullOrEmpty(filterKey))
             {
@@ -118,7 +137,7 @@ namespace NiVE3.ViewModel
             }
 
             var keys = GenerateFilterSeparatorRegex().Split(filterKey);
-            return keys.All(command.Item1.Contains) || keys.All(command.Item2.Contains);
+            return keys.All(k => command.Item2.Any(s => s.Contains(k)));
         }
 
         private void CommandPaletteViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -128,7 +147,7 @@ namespace NiVE3.ViewModel
                 FilteredCommands.Refresh();
                 if (SelectedCommand == null || !FilterCommand(SelectedCommand, FilterText))
                 {
-                    SelectedCommand = FilteredCommands.Cast<Tuple<string, string, string, bool>>().FirstOrDefault();
+                    SelectedCommand = FilteredCommands.Cast<Tuple<string, string[], ICommand, object?, bool>>().FirstOrDefault();
                 }
             }
         }

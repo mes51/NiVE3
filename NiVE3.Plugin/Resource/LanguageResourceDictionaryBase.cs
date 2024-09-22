@@ -25,7 +25,7 @@ namespace NiVE3.Plugin.Resource
 
         static Dictionary<Type, LanguageResourceDictionaryBase> Cache { get; } = [];
 
-        protected abstract void Reload();
+        protected abstract void Reload(string? forceLangCode = null);
 
         public string GetText(string key)
         {
