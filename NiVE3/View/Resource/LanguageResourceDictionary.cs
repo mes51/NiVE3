@@ -671,6 +671,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("コマンドを検索")]
         public static readonly string CommandPalettePopup_FilterText_Placeholder = nameof(CommandPalettePopup_FilterText_Placeholder);
 
+        [DefaultValue("エフェクト")]
+        public static readonly string CommandPalettePopup_DisplayName_EffectCategory = nameof(CommandPalettePopup_DisplayName_EffectCategory);
+
         // Effect category names
 
         [DefaultValue("オーディオ")]

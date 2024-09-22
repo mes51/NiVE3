@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using NiVE3.Config;
 using NiVE3.Extension;
+using NiVE3.Model.UI;
 using NiVE3.UI.Command;
 using NiVE3.View.Command;
 using NiVE3.View.Resource;
@@ -61,6 +62,14 @@ namespace NiVE3.ViewModel
 
         public ICommand ExecuteCommand { get; }
 
+        ViewStateModel ViewState { get; }
+
+        EffectListStateModel EffectListStateModel { get; }
+
+        EventHubModel EventHubModel { get; }
+
+        Tuple<string, string[], ICommand, object?>[] EffectCommands { get; }
+
         static CommandPaletteViewModel()
         {
             AllShortcutCommands = [..ShortcutKeySetting.CategorizedShortcutKeys.SelectMany(kv =>
@@ -80,8 +89,20 @@ namespace NiVE3.ViewModel
             })];
         }
 
-        public CommandPaletteViewModel(IEventAggregator eventAggregator)
+        public CommandPaletteViewModel(ViewStateModel viewState, EffectListStateModel effectListStateModel, EventHubModel eventHubModel, IEventAggregator eventAggregator)
         {
+            ViewState = viewState;
+            EffectListStateModel = effectListStateModel;
+            EventHubModel = eventHubModel;
+
+            var effectCategory = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.CommandPalettePopup_DisplayName_EffectCategory);
+            var jpEffectCategory = LanguageResourceDictionary.JPDictionary.GetText(LanguageResourceDictionary.CommandPalettePopup_DisplayName_EffectCategory);
+            var effectCommand = new DelegateCommand<EffectItem>(effectItem =>
+            {
+                EventHubModel.NotifyAddEffectToSelectedLayers(ViewState.CurrentEditingCompositionId ?? Guid.Empty, null, [effectItem.PluginId]);
+            }, _ => ViewState.CurrentEditingCompositionId.HasValue && ViewState.LastSelectedLayerId.HasValue);
+            EffectCommands = [..effectListStateModel.Effects.Select(e => Tuple.Create<string, string[], ICommand, object?>($"{effectCategory} > {e.Category} > {e.Name}", [effectCategory, e.Category, e.Name, jpEffectCategory], effectCommand, e))];
+
             FilteredCommands = Commands.CreateCollectionView(() => FilterText, FilterCommand);
 
             ExecuteCommand = new RequerySuggestedCommand(() =>
@@ -123,6 +144,10 @@ namespace NiVE3.ViewModel
             foreach (var (displayName, searchTexts, gesture) in AllShortcutCommands)
             {
                 Commands.Add(Tuple.Create<string, string[], ICommand, object?, bool>(displayName, searchTexts, gestureCommand, gesture, gestureCommand.CanExecute(gesture, inputElement)));
+            }
+            foreach (var (displayName, searchTexts, command, effectItem) in EffectCommands)
+            {
+                Commands.Add(Tuple.Create(displayName, searchTexts, command, effectItem, command.CanExecute(effectItem)));
             }
 
             SelectedCommand = Commands.FirstOrDefault();
