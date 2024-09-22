@@ -8,6 +8,7 @@
              xmlns:vm="clr-namespace:NiVE3.ViewModel"
              xmlns:pt="clr-namespace:NiVE3.View.Part"
              xmlns:pr="clr-namespace:NiVE3.View.Primitive"
+             xmlns:cv="clr-namespace:NiVE3.View.Converter"
              xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
              mc:Ignorable="d" 
              x:Name="Root"
@@ -18,6 +19,7 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
         <BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+        <cv:EnumerableIsEmptyConverter x:Key="EnumerableIsEmptyConverter"/>
     </UserControl.Resources>
     <pt:LayerItemExpander HeaderText="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                           IndentLevel="{Binding ElementName=Root, Path=IndentLevel}"
@@ -31,7 +33,8 @@
                           ParentHasExpanderArrow="{Binding ElementName=Root, Path=ParentHasExpanderArrow}"
                           IsHighlightHeader="{Binding ElementName=Root, Path=(pr:StackableItemsCollectionView.IsSelected)}"
                           IsNameEditing="{Binding IsNameEditing}"
-                          EndEditNameCommand="{Binding EndEditNameCommand}">
+                          EndEditNameCommand="{Binding EndEditNameCommand}"
+                          HideExpander="{Binding Properties.Children, Converter={StaticResource EnumerableIsEmptyConverter}}">
         <pt:LayerItemExpander.Switches>
             <Grid Margin="1.5,0,0,0">
                 <CheckBox Content="{gm:FontawesomeResource ResourceKey=FlorinSign}" Style="{StaticResource LayerSwitchCheckBox}" IsChecked="{Binding IsEnable, Mode=OneWay}" HorizontalAlignment="Left" Command="{Binding ChangeIsEnableCommand}"/>

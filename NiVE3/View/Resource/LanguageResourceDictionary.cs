@@ -682,6 +682,9 @@ namespace NiVE3.View.Resource
         [DefaultValue("ブラー")]
         public static readonly string EffectCategory_Blur = DefaultLanguageResourceNames.EffectCategory_Blur;
 
+        [DefaultValue("チャンネル")]
+        public static readonly string EffectCategory_Channel = DefaultLanguageResourceNames.EffectCategory_Channel;
+
         [DefaultValue("カラー補正")]
         public static readonly string EffectCategory_ColorCollection = DefaultLanguageResourceNames.EffectCategory_ColorCollection;
 

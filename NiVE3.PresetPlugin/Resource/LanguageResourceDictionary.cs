@@ -433,6 +433,14 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("アルファを維持する")]
         public const string Generate_Fill_Keep_Alpha = nameof(Generate_Fill_Keep_Alpha);
 
+        // Unmult
+
+        [DefaultValue("Unmult")]
+        public const string Channel_Unmult_Name = nameof(Channel_Unmult_Name);
+
+        [DefaultValue("黒背景に合成された画像からαを復元します")]
+        public const string Channel_Unmult_Description = nameof(Channel_Unmult_Description);
+
         // Renderers
 
         [DefaultValue("デフォルトレンダラ")]

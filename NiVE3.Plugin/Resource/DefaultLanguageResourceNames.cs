@@ -25,6 +25,12 @@ namespace NiVE3.Plugin.Resource
         public const string EffectCategory_Blur = nameof(EffectCategory_Blur);
 
         /// <summary>
+        /// エフェクトのチャンネルカテゴリを表します
+        /// </summary>
+        [EffectCategory]
+        public const string EffectCategory_Channel = nameof(EffectCategory_Channel);
+
+        /// <summary>
         /// エフェクトのカラー補正カテゴリを表します
         /// </summary>
         [EffectCategory]

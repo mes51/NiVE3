@@ -142,6 +142,19 @@ namespace NiVE3.View.Part
             new FrameworkPropertyMetadata(0L)
         );
 
+        public static readonly DependencyProperty HideExpanderProperty = DependencyProperty.Register(
+            nameof(HideExpander),
+            typeof(bool),
+            typeof(LayerItemExpander),
+            new FrameworkPropertyMetadata(false)
+        );
+
+        public bool HideExpander
+        {
+            get { return (bool)GetValue(HideExpanderProperty); }
+            set { SetValue(HideExpanderProperty, value); }
+        }
+
         public long ParentChangeTime
         {
             get { return (long)GetValue(ParentChangeTimeProperty); }
