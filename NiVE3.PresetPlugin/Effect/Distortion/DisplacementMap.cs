@@ -150,6 +150,11 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
                 }
             });
 
+            if (managedSourceImage != sourceImage)
+            {
+                managedSourceImage.Dispose();
+            }
+
             return managedImage;
         }
 
@@ -192,6 +197,11 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
                         roi.Top
                     )
                 );
+            }
+
+            if (gpuSourceImage != sourceImage)
+            {
+                gpuSourceImage.Dispose();
             }
 
             return gpuImage;
