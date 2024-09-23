@@ -441,6 +441,29 @@ namespace NiVE3.PresetPlugin.Resource
         [DefaultValue("黒背景に合成された画像からαを復元します")]
         public const string Channel_Unmult_Description = nameof(Channel_Unmult_Description);
 
+        // SolidComposite
+
+        [DefaultValue("単色合成")]
+        public const string Channel_SolidComposite_Name = nameof(Channel_SolidComposite_Name);
+
+        [DefaultValue("指定した色を前景、または背景に合成します")]
+        public const string Channel_SolidComposite_Description = nameof(Channel_SolidComposite_Description);
+
+        [LanguageKey, DefaultValue("ソースの不透明度")]
+        public const string Channel_SolidComposite_SourceOpacity = nameof(Channel_SolidComposite_SourceOpacity);
+
+        [LanguageKey, DefaultValue("カラー")]
+        public const string Channel_SolidComposite_Color = nameof(Channel_SolidComposite_Color);
+
+        [LanguageKey, DefaultValue("不透明度")]
+        public const string Channel_SolidComposite_Opacity = nameof(Channel_SolidComposite_Opacity);
+
+        [LanguageKey, DefaultValue("ソースの合成順")]
+        public const string Channel_SolidComposite_Order = nameof(Channel_SolidComposite_Order);
+
+        [LanguageKey, DefaultValue("ブレンドモード")]
+        public const string Channel_SolidComposite_BlendMode = nameof(Channel_SolidComposite_BlendMode);
+
         // Renderers
 
         [DefaultValue("デフォルトレンダラ")]
@@ -758,6 +781,12 @@ namespace NiVE3.PresetPlugin.Resource
 
         [DefaultValue("YCbCr 4:1:0")]
         public const string JpegColorSpace_YCbCr410 = nameof(JpegColorSpace_YCbCr410);
+
+        [DefaultValue("前景")]
+        public const string SolidCompositeOrder_Front = nameof(SolidCompositeOrder_Front);
+
+        [DefaultValue("背景")]
+        public const string SolidCompositeOrder_Back = nameof(SolidCompositeOrder_Back);
 
         // unit
 
