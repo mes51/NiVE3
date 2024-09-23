@@ -464,6 +464,23 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("ブレンドモード")]
         public const string Channel_SolidComposite_BlendMode = nameof(Channel_SolidComposite_BlendMode);
 
+        // Clamp
+
+        [DefaultValue("クランプ")]
+        public const string Channel_Clamp_Name = nameof(Channel_Clamp_Name);
+
+        [DefaultValue("色の値の範囲を指定した範囲に制限します")]
+        public const string Channel_Clamp_Description = nameof(Channel_Clamp_Description);
+
+        [LanguageKey, DefaultValue("最大値")]
+        public const string Channel_Clamp_Max = nameof(Channel_Clamp_Max);
+
+        [LanguageKey, DefaultValue("最小値")]
+        public const string Channel_Clamp_Min = nameof(Channel_Clamp_Min);
+
+        [LanguageKey, DefaultValue("アルファもクランプする")]
+        public const string Channel_Clamp_IsClampAlpha = nameof(Channel_Clamp_IsClampAlpha);
+
         // Renderers
 
         [DefaultValue("デフォルトレンダラ")]
