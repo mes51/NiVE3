@@ -99,7 +99,7 @@ namespace NiVE3.PresetPlugin.Effect.Noise
 
                     for (var i = 0; i < linkNodes.Length; i++)
                     {
-                        linkNodes[i].Value = imageDataSpan[GetMirroredPos(roi.Left + i - radius - 2, imageWidth)][c];
+                        linkNodes[i].Value = imageDataSpan[CoordWrap.Mirror(roi.Left + i - radius - 2, imageWidth)][c];
                         InsertToSortedList(list, linkNodes[i], null);
                     }
 
@@ -107,7 +107,7 @@ namespace NiVE3.PresetPlugin.Effect.Noise
 
                     for (var x = roi.Left; x < roi.Right; x++)
                     {
-                        var node = linkNodes[(((x - radius - 1) % k) + k) % k];
+                        var node = linkNodes[CoordWrap.Repeat(x - radius - 1, k)];
                         var removePrevNode = false;
                         if (node == medianNode)
                         {
@@ -135,7 +135,7 @@ namespace NiVE3.PresetPlugin.Effect.Noise
                         }
 
                         list.Remove(node);
-                        node.Value = imageDataSpan[GetMirroredPos(x + radius, imageWidth)][c];
+                        node.Value = imageDataSpan[CoordWrap.Mirror(x + radius, imageWidth)][c];
                         InsertToSortedList(list, node, medianNode);
 
                         if (removePrevNode)
@@ -177,7 +177,7 @@ namespace NiVE3.PresetPlugin.Effect.Noise
 
                     for (var i = 0; i < linkNodes.Length; i++)
                     {
-                        linkNodes[i].Value = tempSpan[GetMirroredPos(roi.Top + i - radius - 2, imageHeight)][c];
+                        linkNodes[i].Value = tempSpan[CoordWrap.Mirror(roi.Top + i - radius - 2, imageHeight)][c];
                         InsertToSortedList(list, linkNodes[i], null);
                     }
 
@@ -185,7 +185,7 @@ namespace NiVE3.PresetPlugin.Effect.Noise
 
                     for (var y = roi.Top; y < roi.Bottom; y++)
                     {
-                        var node = linkNodes[(((y - radius - 1) % k) + k) % k];
+                        var node = linkNodes[CoordWrap.Repeat(y - radius - 1, k)];
                         var removePrevNode = false;
                         if (node == medianNode)
                         {
@@ -213,7 +213,7 @@ namespace NiVE3.PresetPlugin.Effect.Noise
                         }
 
                         list.Remove(node);
-                        node.Value = tempSpan[GetMirroredPos(y + radius, imageHeight)][c];
+                        node.Value = tempSpan[CoordWrap.Mirror(y + radius, imageHeight)][c];
                         InsertToSortedList(list, node, medianNode);
 
                         if (removePrevNode)
@@ -244,14 +244,6 @@ namespace NiVE3.PresetPlugin.Effect.Noise
             ArrayPool<Vector4>.Shared.Return(temp);
 
             return managedImage;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static int GetMirroredPos(int p, int size)
-        {
-            var s = size - 1;
-            var b = Math.Abs(p) % (s * 2);
-            return b - Math.Max(b - s, 0) * 2;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

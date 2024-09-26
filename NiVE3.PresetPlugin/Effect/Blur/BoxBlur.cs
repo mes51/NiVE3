@@ -16,6 +16,7 @@ using NiVE3.Plugin.Property;
 using NiVE3.Plugin.Property.Properties;
 using NiVE3.Plugin.Resource;
 using NiVE3.Plugin.ValueObject;
+using NiVE3.PresetPlugin.Effect.Util;
 using NiVE3.PresetPlugin.Extension;
 using NiVE3.PresetPlugin.Resource;
 
@@ -582,17 +583,11 @@ namespace NiVE3.PresetPlugin.Effect.Blur
             switch (edgeRepeatMode)
             {
                 case EdgeRepeatMode.Wrap:
-                    return data[Math.Clamp(t, 0, height - 1) * width + w];
+                    return data[CoordWrap.Wrap(t, height) * width + w];
                 case EdgeRepeatMode.Repeat:
-                    return data[(((t % height) + height) % height) * width + w];
+                    return data[CoordWrap.Repeat(t, height) * width + w];
                 case EdgeRepeatMode.Mirror:
-                    {
-                        var lh = height - 1;
-                        var a = Math.Abs(t);
-                        var b = a % (lh * 2);
-                        var c = b - Math.Max(b - lh, 0) * 2;
-                        return data[c * width + w];
-                    }
+                    return data[CoordWrap.Mirror(t, height) * width + w];
                 default:
                     if (t > -1 && t < height)
                     {
@@ -611,17 +606,11 @@ namespace NiVE3.PresetPlugin.Effect.Blur
             switch (edgeRepeatMode)
             {
                 case EdgeRepeatMode.Wrap:
-                    return data[h * width + Math.Clamp(l, 0, width - 1)];
+                    return data[h * width + CoordWrap.Wrap(l, width)];
                 case EdgeRepeatMode.Repeat:
-                    return data[h * width + (((l % width) + width) % width)];
+                    return data[h * width + CoordWrap.Repeat(l, width)];
                 case EdgeRepeatMode.Mirror:
-                    {
-                        var lw = width - 1;
-                        var a = Math.Abs(l);
-                        var b = a % (lw * 2);
-                        var c = b - Math.Max(b - lw, 0) * 2;
-                        return data[h * width + c];
-                    }
+                    return data[h * width + CoordWrap.Mirror(l, width)];
                 default:
                     if (l > -1 && l < width)
                     {
