@@ -56,15 +56,6 @@
                                     </DataTrigger.Binding>
                                     <Setter Property="IsChecked" Value="True"/>
                                 </DataTrigger>
-                                <DataTrigger Value="True">
-                                    <DataTrigger.Binding>
-                                        <MultiBinding Converter="{StaticResource EqualMultiValueConverter}">
-                                            <Binding Path="DataContext.LayerId" RelativeSource="{RelativeSource Self}"/>
-                                            <Binding Path="DataContext.LayerId" Source="{x:Reference Root}"/>
-                                        </MultiBinding>
-                                    </DataTrigger.Binding>
-                                    <Setter Property="IsEnabled" Value="False"/>
-                                </DataTrigger>
                                 <DataTrigger Binding="{Binding SourceType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static local:UseLayerImagePropertyControl.ImageSourceType}}" Value="False">
                                     <Setter Property="Visibility" Value="Collapsed"/>
                                 </DataTrigger>
@@ -100,12 +91,6 @@
                         </DataTemplate>
                     </Setter.Value>
                 </Setter>
-
-                <Style.Triggers>
-                    <DataTrigger Binding="{Binding IsNotRenderable}" Value="True">
-                        <Setter Property="Visibility" Value="Hidden"/>
-                    </DataTrigger>
-                </Style.Triggers>
             </Style>
 
             <Style x:Key="ImageProcessTypeSelectBoxStyle" TargetType="{x:Type upr:ContextMenuSelectBox}" BasedOn="{StaticResource {x:Type upr:ContextMenuSelectBox}}">
