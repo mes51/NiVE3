@@ -277,6 +277,21 @@ namespace NiVE3.Config
             new PropertyMetadata(new KeyGesture(Key.Space, ModifierKeys.Control))
         );
 
+        public static readonly DependencyProperty ChangeLayerTagsRandomlyGestureProperty = DependencyProperty.Register(
+            nameof(ChangeLayerTagsRandomlyGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new KeyGesture(Key.None))
+        );
+
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Edit)]
+        [ShowInMarkup]
+        public InputGesture ChangeLayerTagsRandomlyGesture
+        {
+            get { return (InputGesture)GetValue(ChangeLayerTagsRandomlyGestureProperty); }
+            set { SetValue(ChangeLayerTagsRandomlyGestureProperty, value); }
+        }
+
         [ShortcutKeyCategory(ShortcutKeyCategoryType.Other)]
         [ShowInMarkup]
         public InputGesture OpenCommandPaletteGesture

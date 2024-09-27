@@ -44,6 +44,15 @@ namespace NiVE3.Image.Color
             return new Xyz((float)(f(x) * D65X), (float)(f(y) * D65Y), (float)(f(z) * D65Z)).ToRgb();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly float Distance(in Lab other)
+        {
+            var a = Unsafe.BitCast<Lab, Vector4>(this);
+            var b = Unsafe.BitCast<Lab, Vector4>(other);
+
+            return Vector4.Distance(a, b);
+        }
+
         // http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.html
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Lab FromRgb(Vector4 color)

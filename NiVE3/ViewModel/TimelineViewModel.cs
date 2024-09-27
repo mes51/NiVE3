@@ -56,6 +56,7 @@ namespace NiVE3.ViewModel
     [CommandHandling(nameof(AddNullObjectCommand), nameof(ShortcutKeySetting.AddNullObjectLayerGesture))]
     [CommandHandling(nameof(AddTextCommand), nameof(ShortcutKeySetting.AddTextLayerGesture))]
     [CommandHandling(nameof(CompositionSettingCommand), nameof(ShortcutKeySetting.OpenCompositionSettingGesture))]
+    [CommandHandling(nameof(ChangeLayerTagsRandomlyCommand), nameof(ShortcutKeySetting.ChangeLayerTagsRandomlyGesture))]
     partial class TimelineViewModel : PaneViewModelBase, IDropTarget
     {
         private Guid compositionId;
@@ -447,6 +448,8 @@ namespace NiVE3.ViewModel
 
         public ICommand AddEffectCommand { get; }
 
+        public ICommand ChangeLayerTagsRandomlyCommand { get; }
+
         public ICommand CompositionSettingCommand { get; }
 
         public ICommand OpenRenderSettingCommand { get; }
@@ -699,13 +702,23 @@ namespace NiVE3.ViewModel
 
             AddEffectCommand = new RequerySuggestedCommand<EffectItem>(effectItem =>
             {
-                if (CompositionModel == null || SelectedLayers == null)
+                if (CompositionModel == null || SelectedLayers.Count < 1)
                 {
                     return;
                 }
 
-                CompositionModel.AddEffectsToLayers([.. SelectedLayers.Select(l => l.LayerId)], [effectItem.PluginId]);
-            }, _ => CompositionModel != null && (SelectedLayers?.Count ?? 0) > 0);
+                CompositionModel.AddEffectsToLayers([..SelectedLayers.Select(l => l.LayerId)], [effectItem.PluginId]);
+            }, _ => CompositionModel != null && SelectedLayers.Count > 0);
+
+            ChangeLayerTagsRandomlyCommand = new RequerySuggestedCommand(() =>
+            {
+                if (CompositionModel == null || SelectedLayers.Count < 1)
+                {
+                    return;
+                }
+
+                CompositionModel.ChangeLayerTagsRandomly([..SelectedLayers.Select(l => l.LayerId)]);
+            }, () => CompositionModel != null && SelectedLayers.Count > 0);
 
             CompositionSettingCommand = new RequerySuggestedCommand(() =>
             {

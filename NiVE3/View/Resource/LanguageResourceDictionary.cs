@@ -377,6 +377,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("削除(_D)")]
         public static readonly string Timeline_ContextMenu_Delete = nameof(Timeline_ContextMenu_Delete);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("レイヤーのタグをランダムに変更(_T)")]
+        public static readonly string Timeline_ContextMenu_ChangeLayerTagsRandomly = nameof(Timeline_ContextMenu_ChangeLayerTagsRandomly);
+
         [ShowInMarkup, LanguageKey, DefaultValue("コンポジションの設定...(_O)")]
         public static readonly string Timeline_ContextMenu_CompositionSetting = nameof(Timeline_ContextMenu_CompositionSetting);
 
@@ -1332,6 +1335,9 @@ namespace NiVE3.View.Resource
         public static readonly string SourceTextPropertyControl_Edit = nameof(SourceTextPropertyControl_Edit);
 
         // ShortcutKeyNames
+
+        [DefaultValue("レイヤーのタグをランダムに変更する")]
+        public static readonly string ShortcutKeyName_ChangeLayerTagsRandomlyGesture = nameof(ShortcutKeyName_ChangeLayerTagsRandomlyGesture);
 
         [DefaultValue("コマンドパレットを開く")]
         public static readonly string ShortcutKeyName_OpenCommandPaletteGesture = nameof(ShortcutKeyName_OpenCommandPaletteGesture);

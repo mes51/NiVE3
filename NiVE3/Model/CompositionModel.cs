@@ -35,6 +35,7 @@ using ComputeSharp;
 using NiVE3.InternalShader.MotionBlur;
 using System.Windows.Xps.Packaging;
 using NiVE3.Model.UI;
+using NiVE3.Image.Color;
 
 namespace NiVE3.Model
 {
@@ -1148,6 +1149,36 @@ namespace NiVE3.Model
 
                 HistoryModel.EndGroup();
             }
+        }
+
+        public void ChangeLayerTagsRandomly(Guid[] layerIds)
+        {
+            if (layerIds.Length < 1)
+            {
+                return;
+            }
+
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangeTagColor));
+
+            var rand = Random.Shared;
+            var prevColor = (Lab?)null;
+            foreach (var layer in Layers.Where(l => layerIds.Contains(l.LayerId)))
+            {
+                while (true)
+                {
+                    var newColor = new Hsv(rand.NextSingle() * 360.0F, rand.NextSingle() * 0.2F + 0.5F, rand.NextSingle() * 0.5F + 0.5F).ToRgb();
+                    var newLab = Lab.FromRgb(newColor);
+
+                    if (prevColor == null || newLab.Distance(prevColor.Value) >= 3.0F)
+                    {
+                        layer.ChangeTagColor(newColor.ToColor());
+                        prevColor = newLab;
+                        break;
+                    }
+                }
+            }
+
+            HistoryModel.EndGroup();
         }
 
         public ILayerObject? GetLayer(Guid layerId)
