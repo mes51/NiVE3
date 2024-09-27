@@ -37,6 +37,7 @@ using System.Security.Cryptography.Xml;
 using System.Security.Policy;
 using ComputeSharp;
 using NiVE3.InternalShader;
+using NiVE3.Config;
 
 namespace NiVE3.Model
 {
@@ -329,6 +330,43 @@ namespace NiVE3.Model
 
             IsEnableVideo = SourceType.HasFlag(SourceType.Video) || SourceType.HasFlag(SourceType.Image);
             IsEnableAudio = SourceType.HasFlag(SourceType.Audio);
+
+            if (footageModel.InputModel.Input is ShapeInput)
+            {
+                TagColor = ApplicationSetting.Setting.DefaultShapeLayerTag;
+            }
+            else if (footageModel.InputModel.Input is CameraInput)
+            {
+                TagColor = ApplicationSetting.Setting.DefaultCameraLayerTag;
+            }
+            else if (footageModel.InputModel.Input is LightInput)
+            {
+                TagColor = ApplicationSetting.Setting.DefaultLightLayerTag;
+            }
+            else if (footageModel.InputModel.Input is NullObjectInput)
+            {
+                TagColor = ApplicationSetting.Setting.DefaultNullObjectLayerTag;
+            }
+            else if (footageModel.InputModel.Input is TextInput)
+            {
+                TagColor = ApplicationSetting.Setting.DefaultTextLayerTag;
+            }
+            else if (footageModel.InputModel.Input is CompositionInput)
+            {
+                TagColor = ApplicationSetting.Setting.DefaultCompositionLayerTag;
+            }
+            else if (SourceType.HasFlag(SourceType.Video))
+            {
+                TagColor = ApplicationSetting.Setting.DefaultVideoLayerTag;
+            }
+            else if (SourceType.HasFlag(SourceType.Audio))
+            {
+                TagColor = ApplicationSetting.Setting.DefaultAudioLayerTag;
+            }
+            else
+            {
+                TagColor = ApplicationSetting.Setting.DefaultImageLayerTag;
+            }
 
             switch (footageModel.InputModel.Input)
             {
