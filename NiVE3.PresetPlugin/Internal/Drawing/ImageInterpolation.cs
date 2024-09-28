@@ -13,13 +13,13 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
         static readonly Vector4 EmptyPixel = new Vector4(1.0F, 1.0F, 1.0F, 0.0F);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector4 NearestNeighbor(Span<Vector4> texture, int width, int height, float x, float y)
+        public static Vector4 NearestNeighbor(ReadOnlySpan<Vector4> texture, int width, int height, float x, float y)
         {
             return NearestNeighbor(texture, width, height, x, y, EmptyPixel);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector4 NearestNeighbor(Span<Vector4> texture, int width, int height, float x, float y, in Vector4 defaultColor)
+        public static Vector4 NearestNeighbor(ReadOnlySpan<Vector4> texture, int width, int height, float x, float y, in Vector4 defaultColor)
         {
             var ix = (int)Math.Floor(x);
             var iy = (int)Math.Floor(y);
@@ -35,7 +35,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector4 NearestNeighborLoop(Span<Vector4> texture, int width, int height, float x, float y)
+        public static Vector4 NearestNeighborLoop(ReadOnlySpan<Vector4> texture, int width, int height, float x, float y)
         {
             var ix = (int)Math.Floor(x);
             var iy = (int)Math.Floor(y);
@@ -44,13 +44,13 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector4 Bilinear(Span<Vector4> texture, int width, int height, float x, float y)
+        public static Vector4 Bilinear(ReadOnlySpan<Vector4> texture, int width, int height, float x, float y)
         {
             return Bilinear(texture, width, height, x, y, EmptyPixel);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector4 Bilinear(Span<Vector4> texture, int width, int height, float x, float y, in Vector4 defaultColor)
+        public static Vector4 Bilinear(ReadOnlySpan<Vector4> texture, int width, int height, float x, float y, in Vector4 defaultColor)
         {
             var ix = (int)Math.Floor(x);
             var iy = (int)Math.Floor(y);
@@ -151,7 +151,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector4 BilinearLoop(Span<Vector4> texture, int width, int height, float x, float y)
+        public static Vector4 BilinearLoop(ReadOnlySpan<Vector4> texture, int width, int height, float x, float y)
         {
             var ix = (int)Math.Floor(x);
             var iy = (int)Math.Floor(y);
@@ -172,6 +172,140 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             if (ta <= 0.0F)
             {
                 return EmptyPixel;
+            }
+            var t = Vector4.Lerp(Vector4.Lerp(c1 * c1.W, c3 * c3.W, qq), Vector4.Lerp(c2 * c2.W, c4 * c4.W, qq), pp) / ta;
+            t.W = ta;
+
+            return t;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector4 BilinearEdgeRepeat(ReadOnlySpan<Vector4> texture, int width, int height, float x, float y)
+        {
+            return BilinearEdgeRepeat(texture, width, height, x, y, EmptyPixel);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector4 BilinearEdgeRepeat(ReadOnlySpan<Vector4> texture, int width, int height, float x, float y, in Vector4 defaultColor)
+        {
+            var ix = (int)Math.Floor(x);
+            var iy = (int)Math.Floor(y);
+
+            if (ix == x && iy == y)
+            {
+                if (ix > -1 && iy > -1 && ix < width && iy < height)
+                {
+                    return texture[iy * width + ix];
+                }
+                else
+                {
+                    return defaultColor;
+                }
+            }
+            else if (ix < -1 || iy < -1 || ix >= width || iy >= height)
+            {
+                return defaultColor;
+            }
+
+            var pp = x - ix;
+            var qq = y - iy;
+            var ip = 1.0F - pp;
+            var iq = 1.0F - qq;
+            var mw = width - 1;
+            var mh = height - 1;
+
+            Vector4 c1;
+            Vector4 c2;
+            Vector4 c3;
+            Vector4 c4;
+            var pos = iy * width + ix;
+
+            if (ix > -1)
+            {
+                if (ix < mw)
+                {
+                    if (iy > -1)
+                    {
+                        c1 = texture[pos];
+                        c2 = texture[pos + 1];
+                        if (iy < mh)
+                        {
+                            pos += width;
+                            c3 = texture[pos];
+                            c4 = texture[pos + 1];
+                        }
+                        else
+                        {
+                            c3 = c1;
+                            c4 = c2;
+                        }
+                    }
+                    else
+                    {
+                        pos += width;
+                        c3 = texture[pos];
+                        c4 = texture[pos + 1];
+                        c1 = c3;
+                        c2 = c4;
+                    }
+                }
+                else
+                {
+                    if (iy > -1)
+                    {
+                        c1 = texture[pos];
+                        c2 = c1;
+                        if (iy < mh)
+                        {
+                            c3 = texture[pos + width];
+                            c4 = c3;
+                        }
+                        else
+                        {
+                            c3 = c1;
+                            c4 = c1;
+                        }
+                    }
+                    else
+                    {
+                        c3 = texture[pos + width];
+                        c1 = c3;
+                        c2 = c3;
+                        c4 = c3;
+                    }
+                }
+            }
+            else
+            {
+                pos++;
+                if (iy > -1)
+                {
+                    c2 = texture[pos];
+                    c1 = c2;
+                    if (iy < mh)
+                    {
+                        c4 = texture[pos + width];
+                        c3 = c4;
+                    }
+                    else
+                    {
+                        c3 = c2;
+                        c4 = c2;
+                    }
+                }
+                else
+                {
+                    c4 = texture[pos + width];
+                    c1 = c4;
+                    c2 = c4;
+                    c3 = c4;
+                }
+            }
+
+            var ta = Vector4.Lerp(Vector4.Lerp(c1, c3, qq), Vector4.Lerp(c2, c4, qq), pp).W;
+            if (ta <= 0.0F)
+            {
+                return defaultColor;
             }
             var t = Vector4.Lerp(Vector4.Lerp(c1 * c1.W, c3 * c3.W, qq), Vector4.Lerp(c2 * c2.W, c4 * c4.W, qq), pp) / ta;
             t.W = ta;

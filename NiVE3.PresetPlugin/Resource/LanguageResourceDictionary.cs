@@ -300,7 +300,7 @@ namespace NiVE3.PresetPlugin.Resource
         [DefaultValue("ディスプレイスメントマップ")]
         public const string Distortion_DisplacementMap_Name = nameof(Distortion_DisplacementMap_Name);
 
-        [DefaultValue("レイヤーの色を元に画像をゆがめます")]
+        [DefaultValue("レイヤーの色を元に画像を歪ませます")]
         public const string Distortion_DisplacementMap_Description = nameof(Distortion_DisplacementMap_Description);
 
         [LanguageKey, DefaultValue("ソースレイヤー")]
@@ -480,6 +480,29 @@ namespace NiVE3.PresetPlugin.Resource
 
         [LanguageKey, DefaultValue("アルファもクランプする")]
         public const string Channel_Clamp_IsClampAlpha = nameof(Channel_Clamp_IsClampAlpha);
+
+        // GlassDistortion
+
+        [DefaultValue("ガラス歪み")]
+        public const string Distortion_GlassDistortion_Name = nameof(Distortion_GlassDistortion_Name);
+
+        [DefaultValue("ソースレイヤーのグラデーションの向きに応じて画像を歪ませます")]
+        public const string Distortion_GlassDistortion_Description = nameof(Distortion_GlassDistortion_Description);
+
+        [LanguageKey, DefaultValue("ソースレイヤー")]
+        public const string Distortion_GlassDistortion_SourceLayer = nameof(Distortion_GlassDistortion_SourceLayer);
+
+        [LanguageKey, DefaultValue("チャンネル")]
+        public const string Distortion_GlassDistortion_Channel = nameof(Distortion_GlassDistortion_Channel);
+
+        [LanguageKey, DefaultValue("ソースレイヤーの位置")]
+        public const string Distortion_GlassDistortion_SourceLayerPosition = nameof(Distortion_GlassDistortion_SourceLayerPosition);
+
+        [LanguageKey, DefaultValue("適用率")]
+        public const string Distortion_GlassDistortion_Rate = nameof(Distortion_GlassDistortion_Rate);
+
+        [LanguageKey, DefaultValue("移動量")]
+        public const string Distortion_GlassDistortion_DisplacementAmount = nameof(Distortion_GlassDistortion_DisplacementAmount);
 
         // Renderers
 

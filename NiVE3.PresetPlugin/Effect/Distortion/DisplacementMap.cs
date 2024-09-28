@@ -804,26 +804,4 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
             return ((v % max) + max) % max;
         }
     }
-
-    enum DisplacemenMapChannelType
-    {
-        R,
-        G,
-        B,
-        A,
-        Luminance,
-        Hue,
-        Saturation,
-        Lightness,
-        On,
-        Half,
-        Off
-    }
-
-    enum DisplacementSourceLayerPositionType
-    {
-        Center,
-        Stretch,
-        Loop
-    }
 }
