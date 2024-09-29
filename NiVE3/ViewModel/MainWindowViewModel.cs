@@ -22,7 +22,6 @@ using System.Windows.Input;
 using NiVE3.Wpf.Interaction.Trigger;
 using System.Threading;
 using NiVE3.Model.UI;
-using System.Collections.ObjectModel;
 using NiVE3.UI.Command;
 
 namespace NiVE3.ViewModel
@@ -216,7 +215,7 @@ namespace NiVE3.ViewModel
                 ProjectModel.LoadProject(open.FileName);
             });
 
-            SaveProjectCommand = new RequerySuggestedCommand(() => SaveProject(false), () => IsEdited);
+            SaveProjectCommand = new DelegateCommand(() => SaveProject(false), () => IsEdited).ObservesProperty(() => IsEdited);
 
             SaveProjectAsNewNameCommand = new DelegateCommand(() => SaveProject(true));
 

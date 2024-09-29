@@ -178,7 +178,7 @@ namespace NiVE3.ViewModel
             ViewState = propertyGroupModel.CreateState(this);
             IsRenameable = isRenameable;
 
-            AddKeyFrameToSelectedChildrenCommand = new RequerySuggestedCommand(() =>
+            AddKeyFrameToSelectedChildrenCommand = new DelegateCommand(() =>
             {
                 if (SelectedChildren.Count < 1)
                 {
@@ -186,9 +186,9 @@ namespace NiVE3.ViewModel
                 }
 
                 PropertyGroupModel.CreateKeyFrames([.. SelectedChildren.Select(c => c.Property.Id)]);
-            }, () => SelectedChildren.Count > 0);
+            }, () => SelectedChildren.Count > 0).ObservesProperty(() => SelectedChildren.Count);
 
-            ResetSelectedChildrenCommand = new RequerySuggestedCommand(() =>
+            ResetSelectedChildrenCommand = new DelegateCommand(() =>
             {
                 if (SelectedChildren.Count < 1)
                 {
@@ -196,9 +196,9 @@ namespace NiVE3.ViewModel
                 }
 
                 PropertyGroupModel.ResetProperties([.. SelectedChildren.Select(c => c.Property.Id)]);
-            }, () => SelectedChildren.Count > 0);
+            }, () => SelectedChildren.Count > 0).ObservesProperty(() => SelectedChildren.Count);
 
-            CutSelectedChildrenCommand = new RequerySuggestedCommand(() =>
+            CutSelectedChildrenCommand = new DelegateCommand(() =>
             {
                 var targetChildren = SelectedChildren.OfType<PropertyViewModel>().Select(c => c.Property.Id).ToArray();
                 if (targetChildren.Length < 1)
@@ -208,9 +208,9 @@ namespace NiVE3.ViewModel
 
                 var data = PropertyGroupModel.CutChildrenKeyFrames(targetChildren);
                 ClipboardUtil.SetData(data);
-            }, () => SelectedChildren.Count > 0);
+            }, () => SelectedChildren.Count > 0).ObservesProperty(() => SelectedChildren.Count);
 
-            CopySelectedChildrenCommand = new RequerySuggestedCommand(() =>
+            CopySelectedChildrenCommand = new DelegateCommand(() =>
             {
                 if (SelectedChildren.Count < 1)
                 {
@@ -219,7 +219,7 @@ namespace NiVE3.ViewModel
 
                 var data = PropertyGroupModel.CopyChildrenProperty([.. SelectedChildren.Select(c => c.Property.Id)]);
                 ClipboardUtil.SetData(data);
-            }, () => SelectedChildren.Count > 0);
+            }, () => SelectedChildren.Count > 0).ObservesProperty(() => SelectedChildren.Count);
 
             PasteToSelectedChildrenCommand = new RequerySuggestedCommand(() =>
             {
@@ -234,7 +234,7 @@ namespace NiVE3.ViewModel
                 return type == CopyDataType.PropertyGroup || type == CopyDataType.AppendablePropertyChildren;
             });
 
-            DeleteSelectedChildrenCommand = new RequerySuggestedCommand(() =>
+            DeleteSelectedChildrenCommand = new DelegateCommand(() =>
             {
                 var targetChildren = SelectedChildren.OfType<PropertyViewModel>().Select(c => c.Property.Id).ToArray();
                 if (targetChildren.Length < 1)
@@ -243,7 +243,7 @@ namespace NiVE3.ViewModel
                 }
 
                 PropertyGroupModel.DeleteChildrenKeyFrames(targetChildren);
-            }, () => SelectedChildren.Count > 0);
+            }, () => SelectedChildren.Count > 0).ObservesProperty(() => SelectedChildren.Count);
 
             DuplicateSelectedChildrenCommand = new DelegateCommand(() => { });
 
@@ -270,15 +270,15 @@ namespace NiVE3.ViewModel
 
             ResetPropertyCommand = new DelegateCommand<SelectItemType?>(_ => ResetSelectedChildrenCommand.Execute(null));
 
-            BeginEditNameCommand = new RequerySuggestedCommand(() =>
+            BeginEditNameCommand = new DelegateCommand(() =>
             {
                 PrevName = Name;
                 IsNameEditing = true;
-            }, () => IsRenameable && !IsNameEditing);
+            }, () => IsRenameable && !IsNameEditing).ObservesProperty(() => IsNameEditing);
 
-            EndEditNameCommand = new RequerySuggestedCommand<bool>(commit =>
+            EndEditNameCommand = new DelegateCommand<bool?>(commit =>
             {
-                if (commit)
+                if (commit ?? false)
                 {
                     PropertyGroupModel.ChangeName(Name);
                 }
@@ -287,7 +287,7 @@ namespace NiVE3.ViewModel
                     Name = PrevName;
                 }
                 IsNameEditing = false;
-            }, _ => IsRenameable && IsNameEditing);
+            }, _ => IsRenameable && IsNameEditing).ObservesProperty(() => IsNameEditing);
 
             SelectItemCommand = new DelegateCommand(() =>
             {

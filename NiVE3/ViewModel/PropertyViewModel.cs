@@ -102,18 +102,18 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref hasKeyFrame, value); }
         }
 
-        private ObservableCollection<int> selectedKeyFramesIds = [];
+        private ObservableCollection<int> selectedKeyFrameIds = [];
         public ObservableCollection<int> SelectedKeyFrameIds
         {
-            get { return selectedKeyFramesIds; }
+            get { return selectedKeyFrameIds; }
             set
             {
-                if (selectedKeyFramesIds != value)
+                if (selectedKeyFrameIds != value)
                 {
-                    selectedKeyFramesIds.CollectionChanged -= SelectedKeyFrameIds_CollectionChanged;
+                    selectedKeyFrameIds.CollectionChanged -= SelectedKeyFrameIds_CollectionChanged;
                     value.CollectionChanged += SelectedKeyFrameIds_CollectionChanged;
                 }
-                SetProperty(ref selectedKeyFramesIds, value);
+                SetProperty(ref selectedKeyFrameIds, value);
             }
         }
 
@@ -181,11 +181,16 @@ namespace NiVE3.ViewModel
 
         public DelegateCommand<SelectItemType?> ResetPropertyCommand { get; }
 
+        private bool isEditing;
+        bool IsEditing
+        {
+            get { return isEditing; }
+            set { SetProperty(ref isEditing, value); }
+        }
+
         PropertyModel PropertyModel { get; }
 
         object? PrevValue { get; set; }
-
-        bool IsEditing { get; set; }
 
         bool IsSelectingAll { get; set; }
 
@@ -196,26 +201,26 @@ namespace NiVE3.ViewModel
             ViewState = propertyModel.CreateState(this);
             SelectedKeyFrameIds = [];
 
-            BeginEditCommand = new RequerySuggestedCommand(() =>
+            BeginEditCommand = new DelegateCommand(() =>
             {
                 PrevValue = CurrentTimeValue;
                 IsEditing = true;
                 UseEditingValue = true;
-            }, () => !IsEditing);
+            }, () => !IsEditing).ObservesProperty(() => IsEditing);
 
-            EndEditCommand = new RequerySuggestedCommand(() =>
+            EndEditCommand = new DelegateCommand(() =>
             {
                 PropertyModel.CommitProperty(CurrentTimeValue, PrevValue);
                 IsEditing = false;
                 UseEditingValue = false;
-            }, () => IsEditing);
+            }, () => IsEditing).ObservesProperty(() => IsEditing);
 
-            AbortEditCommand = new RequerySuggestedCommand(() =>
+            AbortEditCommand = new DelegateCommand(() =>
             {
                 CurrentTimeValue = PrevValue;
                 IsEditing = false;
                 UseEditingValue = false;
-            }, () => IsEditing);
+            }, () => IsEditing).ObservesProperty(() => IsEditing);
 
             SwitchUseKeyFrameCommand = new DelegateCommand(() =>
             {
@@ -239,7 +244,7 @@ namespace NiVE3.ViewModel
                 PropertyModel.ChangeKeyFramesInterpolationType(t.Item1, t.Item2);
             });
 
-            PlaceKeyFrameCommand = new RequerySuggestedCommand(() =>
+            PlaceKeyFrameCommand = new DelegateCommand(() =>
             {
                 var time = CurrentTime;
                 var index = KeyFrames.IndexOfLast(k => Math.Abs(k.Time - time) < TimeCalc.TimeEpsilon || k.Time <= time);
@@ -251,7 +256,7 @@ namespace NiVE3.ViewModel
                 {
                     PropertyModel.CreateKeyFrame(CurrentTimeValue);
                 }
-            }, () => KeyFrames.Count > 0);
+            }, () => KeyFrames.Count > 0).ObservesProperty(() => KeyFrames.Count);
 
             SelectItemCommand = new DelegateCommand(() =>
             {
@@ -279,7 +284,7 @@ namespace NiVE3.ViewModel
 
             ResetSelectedChildrenCommand = new DelegateCommand(() => PropertyModel.ResetProperty());
 
-            CutSelectedChildrenCommand = new RequerySuggestedCommand(() =>
+            CutSelectedChildrenCommand = new DelegateCommand(() =>
             {
                 if (SelectedKeyFrameIds.Count > 0)
                 {
@@ -296,7 +301,7 @@ namespace NiVE3.ViewModel
                     var copyData = PropertyModel.CopyProperty();
                     ClipboardUtil.SetData(copyData);
                 }
-            }, () => SelectedKeyFrameIds.Count > 0);
+            }, () => SelectedKeyFrameIds.Count > 0).ObservesProperty(() => SelectedKeyFrameIds.Count);
 
             CopySelectedChildrenCommand = new DelegateCommand(() =>
             {
@@ -324,7 +329,7 @@ namespace NiVE3.ViewModel
                 }
             }, () => ClipboardUtil.GetData<PropertyData>()?.Type == CopyDataType.Property);
 
-            DeleteSelectedChildrenCommand = new RequerySuggestedCommand(() =>
+            DeleteSelectedChildrenCommand = new DelegateCommand(() =>
             {
                 var keyFrames = SelectedKeyFrameIds.Select(id => KeyFrames.FirstOrDefault(k => k.Id == id)).NonNull().ToArray();
                 if (keyFrames.Length > 0)
@@ -332,7 +337,7 @@ namespace NiVE3.ViewModel
                     PropertyModel.DeleteKeyFrames(keyFrames);
                 }
                 SelectedKeyFrameIds.Clear();
-            }, () => SelectedKeyFrameIds.Count > 0);
+            }, () => SelectedKeyFrameIds.Count > 0).ObservesProperty(() => SelectedKeyFrameIds.Count);
 
             DuplicateSelectedChildrenCommand = new DelegateCommand(() => { });
 

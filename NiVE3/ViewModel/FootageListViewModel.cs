@@ -185,7 +185,7 @@ namespace NiVE3.ViewModel
                 }
             });
 
-            DeleteFootageCommand = new RequerySuggestedCommand(() =>
+            DeleteFootageCommand = new DelegateCommand(() =>
             {
                 if (SelectedFootages.Count < 1)
                 {
@@ -211,7 +211,7 @@ namespace NiVE3.ViewModel
                 }
 
                 FootageListModel.DeleteFootages(SelectedFootages.Select(f => f.FootageId).ToArray());
-            }, () => SelectedFootages.Count > 0);
+            }, () => SelectedFootages.Count > 0).ObservesProperty(() => SelectedFootages.Count);
 
             AddSolidCommand = new DelegateCommand(() => FootageListModel.AddSolid());
 
@@ -219,41 +219,45 @@ namespace NiVE3.ViewModel
 
             ShowPreviewCommand = new DelegateCommand<FootageViewModel>(f => FootageListModel.ShowPreview(f.FootageId));
 
-            BeginEditNameCommand = new RequerySuggestedCommand(() =>
+            BeginEditNameCommand = new DelegateCommand(() =>
             {
                 EditingParameter = EditingFootageParameter.Name;
                 EditingFootage = SelectedFootages.First();
                 EditingFootage.BeginEditNameCommand.Execute(null);
-            }, () => SelectedFootages.Count > 0 && EditingParameter == EditingFootageParameter.None);
+            }, () => SelectedFootages.Count > 0 && EditingParameter == EditingFootageParameter.None)
+                .ObservesProperty(() => SelectedFootages.Count)
+                .ObservesProperty(() => EditingParameter);
 
-            EndEditNameCommand = new RequerySuggestedCommand<bool>(commit =>
+            EndEditNameCommand = new DelegateCommand<bool?>(commit =>
             {
                 if (EditingFootage == null)
                 {
                     return;
                 }
 
-                EditingFootage.EndEditNameCommand.Execute(commit);
+                EditingFootage.EndEditNameCommand.Execute(commit ?? false);
                 EditingParameter = EditingFootageParameter.None;
-            }, _ => EditingParameter == EditingFootageParameter.Name);
+            }, _ => EditingParameter == EditingFootageParameter.Name).ObservesProperty(() => EditingParameter);
 
-            BeginEditCommentCommand = new RequerySuggestedCommand<IFootageViewModel>(viewModel =>
+            BeginEditCommentCommand = new DelegateCommand<IFootageViewModel>(viewModel =>
             {
                 EditingParameter = EditingFootageParameter.Comment;
                 EditingFootage = viewModel;
                 EditingFootage.BeginEditCommentCommand.Execute(null);
-            }, _ => EditingParameter == EditingFootageParameter.None);
+            }, _ => SelectedFootages.Count > 0 && EditingParameter == EditingFootageParameter.None)
+                .ObservesProperty(() => SelectedFootages.Count)
+                .ObservesProperty(() => EditingParameter);
 
-            EndEditCommentCommand = new RequerySuggestedCommand<bool>(commit =>
+            EndEditCommentCommand = new DelegateCommand<bool?>(commit =>
             {
                 if (EditingFootage == null)
                 {
                     return;
                 }
 
-                EditingFootage.EndEditCommentCommand.Execute(commit); ;
+                EditingFootage.EndEditCommentCommand.Execute(commit ?? false);
                 EditingParameter = EditingFootageParameter.None;
-            }, _ => EditingParameter == EditingFootageParameter.Comment);
+            }, _ => EditingParameter == EditingFootageParameter.Comment).ObservesProperty(() => EditingParameter);
 
             FootageListModel.ShowLoadSetting += FootageListModel_ShowLoadSetting;
         }

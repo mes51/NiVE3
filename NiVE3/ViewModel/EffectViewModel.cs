@@ -9,7 +9,6 @@ using NiVE3.Model;
 using NiVE3.Mvvm;
 using System.Windows.Input;
 using Prism.Commands;
-using NiVE3.UI.Command;
 
 namespace NiVE3.ViewModel
 {
@@ -136,21 +135,25 @@ namespace NiVE3.ViewModel
 
             SelectItemCommand = new DelegateCommand(() => SelectItemChangedPublisher.Publish(this, new SelectItemEventArgs(SelectItemType.Effect, true, this)));
 
-            BeginEditNameCommand = new RequerySuggestedCommand(() =>
+            BeginEditNameCommand = new DelegateCommand(() =>
             {
                 IsNameEditing = true;
                 PrevName = Name;
-            }, () => !IsNameEditing && !IsCommentEditing);
+            }, () => !IsNameEditing && !IsCommentEditing)
+                .ObservesProperty(() => IsNameEditing)
+                .ObservesProperty(() => IsCommentEditing);
 
-            BeginEditCommentCommand = new RequerySuggestedCommand(() =>
+            BeginEditCommentCommand = new DelegateCommand(() =>
             {
                 IsCommentEditing = true;
                 PrevComment = Comment;
-            }, () => !IsNameEditing && !IsCommentEditing);
+            }, () => !IsNameEditing && !IsCommentEditing)
+                .ObservesProperty(() => IsNameEditing)
+                .ObservesProperty(() => IsCommentEditing);
 
-            EndEditNameCommand = new RequerySuggestedCommand<bool>(commit =>
+            EndEditNameCommand = new DelegateCommand<bool?>(commit =>
             {
-                if (commit && !string.IsNullOrEmpty(Name))
+                if ((commit ?? false) && !string.IsNullOrEmpty(Name))
                 {
                     EffectModel.ChangeName(Name);
                 }
@@ -159,11 +162,11 @@ namespace NiVE3.ViewModel
                     Name = PrevName;
                 }
                 IsNameEditing = false;
-            }, _ => IsNameEditing);
+            }, _ => IsNameEditing).ObservesProperty(() => IsNameEditing);
 
-            EndEditCommentCommand = new RequerySuggestedCommand<bool>(commit =>
+            EndEditCommentCommand = new DelegateCommand<bool?>(commit =>
             {
-                if (commit)
+                if (commit ?? false)
                 {
                     EffectModel.ChangeComment(Comment);
                 }
@@ -172,7 +175,7 @@ namespace NiVE3.ViewModel
                     Comment = PrevComment;
                 }
                 IsCommentEditing = false;
-            }, _ => IsCommentEditing);
+            }, _ => IsCommentEditing).ObservesProperty(() => IsCommentEditing);
 
             DeleteCommand = new DelegateCommand<SelectItemType?>(_ =>
             {

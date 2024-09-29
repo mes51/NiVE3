@@ -10,8 +10,6 @@ using System.Windows.Input;
 using NiVE3.Config;
 using NiVE3.Extension;
 using NiVE3.Model.UI;
-using NiVE3.UI.Command;
-using NiVE3.View.Command;
 using NiVE3.View.Resource;
 using NiVE3.ViewModel.CommandOnly;
 using NiVE3.Wpf.Behavior;
@@ -105,7 +103,7 @@ namespace NiVE3.ViewModel
 
             FilteredCommands = Commands.CreateCollectionView(() => FilterText, FilterCommand);
 
-            ExecuteCommand = new RequerySuggestedCommand(() =>
+            ExecuteCommand = new DelegateCommand(() =>
             {
                 if (SelectedCommand == null)
                 {
@@ -127,7 +125,7 @@ namespace NiVE3.ViewModel
                         SelectedCommand.Item3.Execute(SelectedCommand.Item4);
                     }
                 }
-            }, () => SelectedCommand != null);
+            }, () => SelectedCommand != null).ObservesProperty(() => SelectedCommand);
 
             eventAggregator.GetEvent<OpenCommandPaletteEvent>().Subscribe(OpenPalette);
 

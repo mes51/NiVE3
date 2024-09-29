@@ -13,7 +13,6 @@ using System.Windows.Input;
 using NiVE3.Data.Config;
 using NiVE3.Model;
 using NiVE3.Plugin.ValueObject;
-using NiVE3.UI.Command;
 using NiVE3.Util;
 using NiVE3.View.Dialog;
 using NiVE3.View.Resource;
@@ -241,7 +240,7 @@ namespace NiVE3.ViewModel.Dialog
 
             CancelCommand = new DelegateCommand(() => RequestClose?.Invoke(new DialogResult(ButtonResult.Cancel, null)));
 
-            CreatePresetCommand = new RequerySuggestedCommand(() =>
+            CreatePresetCommand = new DelegateCommand(() =>
             {
                 var param = new DialogParameters
                 {
@@ -280,9 +279,9 @@ namespace NiVE3.ViewModel.Dialog
                         Presets.Remove(newPreset);
                     }
                 }
-            }, () => SelectedPreset == null);
+            }, () => SelectedPreset == null).ObservesProperty(() => SelectedPreset);
 
-            DeletePresetCommand = new RequerySuggestedCommand(() =>
+            DeletePresetCommand = new DelegateCommand(() =>
             {
                 if (SelectedPreset == null)
                 {
@@ -296,9 +295,9 @@ namespace NiVE3.ViewModel.Dialog
                     Presets.Remove(SelectedPreset);
                     SelectedPreset = null;
                 }
-            }, () => SelectedPreset != null);
+            }, () => SelectedPreset != null).ObservesProperty(() => SelectedPreset);
 
-            OpenRendererSettingCommand = new RequerySuggestedCommand(() =>
+            OpenRendererSettingCommand = new DelegateCommand(() =>
             {
                 using var renderer = rendererListModel.CreateRenderer(RendererTypes[SelectedRenderer]);
                 renderer.Value.LoadSetting(RendererSetting);
@@ -322,7 +321,7 @@ namespace NiVE3.ViewModel.Dialog
                     RendererSettingViewDataContext = view.DataContext;
                     RendererSettingChanged = true;
                 }
-            }, () => RendererHasSettingViews[SelectedRenderer]);
+            }, () => RendererHasSettingViews[SelectedRenderer]).ObservesProperty(() => SelectedRenderer);
 
             PropertyChanged += CompositionSettingViewModel_PropertyChanged;
         }

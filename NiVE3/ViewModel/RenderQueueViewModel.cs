@@ -18,6 +18,7 @@ using System.Threading;
 using System.Diagnostics;
 using System.Windows.Threading;
 using NiVE3.View.Resource;
+using Prism.Commands;
 
 namespace NiVE3.ViewModel
 {
@@ -140,9 +141,9 @@ namespace NiVE3.ViewModel
                 }
             }, () => (Items.Any(i => i.State == RenderQueueItemState.Ready) || IsRendering) && !IsAborting);
 
-            AbortCommand = new RequerySuggestedCommand(() => RenderQueueModel.AbortRendering(), () => IsRendering);
+            AbortCommand = new DelegateCommand(() => RenderQueueModel.AbortRendering(), () => IsRendering).ObservesProperty(() => IsRendering);
 
-            DeleteCommand = new RequerySuggestedCommand<RenderQueueItemViewModel>(vm =>
+            DeleteCommand = new DelegateCommand<RenderQueueItemViewModel>(vm =>
             {
                 if (vm.IsSelected)
                 {
@@ -152,7 +153,7 @@ namespace NiVE3.ViewModel
                 {
                     RenderQueueModel.RemoveQueue(vm.QueueId);
                 }
-            }, _ => !IsRendering);
+            }, _ => !IsRendering).ObservesProperty(() => IsRendering);
 
             renderQueueModel.RenderQueueItemAdded += RenderQueueModel_RenderQueueItemAdded;
             PropertyChanged += RenderQueueViewModel_PropertyChanged;

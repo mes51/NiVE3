@@ -147,7 +147,7 @@ namespace NiVE3.ViewModel
                 SelectItemChangedPublisher.Publish(this, new SelectItemEventArgs(SelectItemType.Property, true, this));
             });
 
-            AddKeyFrameToSelectedChildrenCommand = new RequerySuggestedCommand(() =>
+            AddKeyFrameToSelectedChildrenCommand = new DelegateCommand(() =>
             {
                 if (SelectedChildren.Count < 1)
                 {
@@ -155,9 +155,9 @@ namespace NiVE3.ViewModel
                 }
 
                 AppendablePropertyModel.CreateKeyFrames([.. SelectedChildren.OfType<PropertyGroupViewModel>().Select(c => c.InstanceId)]);
-            }, () => SelectedChildren.Count > 0);
+            }, () => SelectedChildren.Count > 0).ObservesProperty(() => SelectedChildren.Count);
 
-            ResetSelectedChildrenCommand = new RequerySuggestedCommand(() =>
+            ResetSelectedChildrenCommand = new DelegateCommand(() =>
             {
                 if (SelectedChildren.Count < 1)
                 {
@@ -165,9 +165,9 @@ namespace NiVE3.ViewModel
                 }
 
                 AppendablePropertyModel.ResetProperties([.. SelectedChildren.OfType<PropertyGroupViewModel>().Select(c => c.InstanceId)]);
-            }, () => SelectedChildren.Count > 0);
+            }, () => SelectedChildren.Count > 0).ObservesProperty(() => SelectedChildren.Count);
 
-            CutSelectedChildrenCommand = new RequerySuggestedCommand(() =>
+            CutSelectedChildrenCommand = new DelegateCommand(() =>
             {
                 if (SelectedChildren.Count < 1)
                 {
@@ -176,9 +176,9 @@ namespace NiVE3.ViewModel
 
                 var data = AppendablePropertyModel.CutChildren([.. SelectedChildren.OfType<PropertyGroupViewModel>().Select(c => c.InstanceId)]);
                 ClipboardUtil.SetData(data);
-            }, () => SelectedChildren.Count > 0);
+            }, () => SelectedChildren.Count > 0).ObservesProperty(() => SelectedChildren.Count);
 
-            CopySelectedChildrenCommand = new RequerySuggestedCommand(() =>
+            CopySelectedChildrenCommand = new DelegateCommand(() =>
             {
                 if (SelectedChildren.Count < 1)
                 {
@@ -187,7 +187,7 @@ namespace NiVE3.ViewModel
 
                 var data = AppendablePropertyModel.CopyChildrenProperty([.. SelectedChildren.OfType<PropertyGroupViewModel>().Select(p => p.InstanceId)]);
                 ClipboardUtil.SetData(data);
-            }, () => SelectedChildren.Count > 0);
+            }, () => SelectedChildren.Count > 0).ObservesProperty(() => SelectedChildren.Count);
 
             PasteToSelectedChildrenCommand = new RequerySuggestedCommand(() =>
             {
@@ -198,15 +198,15 @@ namespace NiVE3.ViewModel
                 }
             }, () => ClipboardUtil.GetData<PropertyData>()?.Type == CopyDataType.AppendablePropertyChildren);
 
-            DeleteSelectedChildrenCommand = new RequerySuggestedCommand(() =>
+            DeleteSelectedChildrenCommand = new DelegateCommand(() =>
             {
                 if (SelectedChildren.Count > 0)
                 {
                     AppendablePropertyModel.DeleteChildren(SelectedChildren.OfType<PropertyGroupViewModel>().Select(c => c.InstanceId).ToArray());
                 }
-            }, () => SelectedChildren.Count > 0);
+            }, () => SelectedChildren.Count > 0).ObservesProperty(() => SelectedChildren.Count);
 
-            DuplicateSelectedChildrenCommand = new RequerySuggestedCommand(() =>
+            DuplicateSelectedChildrenCommand = new DelegateCommand(() =>
             {
                 if (SelectedChildren.Count < 1)
                 {
@@ -214,7 +214,7 @@ namespace NiVE3.ViewModel
                 }
 
                 AppendablePropertyModel.DuplicateChildrenProperty([.. SelectedChildren.OfType<PropertyGroupViewModel>().Select(p => p.InstanceId)]);
-            }, () => SelectedChildren.Count > 0);
+            }, () => SelectedChildren.Count > 0).ObservesProperty(() => SelectedChildren.Count); ;
 
             DeleteCommand = new DelegateCommand<SelectItemType?>(_ => DeleteSelectedChildrenCommand.Execute(null));
 

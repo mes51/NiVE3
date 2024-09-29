@@ -9,12 +9,12 @@ using NiVE3.Model;
 using NiVE3.Plugin.Interfaces;
 using Prism.Mvvm;
 using System.Windows.Input;
-using NiVE3.UI.Command;
 using Microsoft.Win32;
 using System.IO;
 using NiVE3.View.Dialog;
 using NiVE3.ViewModel.Dialog;
 using Prism.Services.Dialogs;
+using Prism.Commands;
 
 namespace NiVE3.ViewModel
 {
@@ -202,7 +202,7 @@ namespace NiVE3.ViewModel
 
             WiringModel();
 
-            ChangeFilePathCommand = new RequerySuggestedCommand(() =>
+            ChangeFilePathCommand = new DelegateCommand(() =>
             {
                 var save = new SaveFileDialog
                 {
@@ -214,9 +214,9 @@ namespace NiVE3.ViewModel
                 {
                     RenderQueueItemModel.ChangeFilePath(save.FileName);
                 }
-            }, () => State == RenderQueueItemState.NotReady || State == RenderQueueItemState.Ready);
+            }, () => State == RenderQueueItemState.NotReady || State == RenderQueueItemState.Ready).ObservesProperty(() => State);
 
-            ChangeSettingCommand = new RequerySuggestedCommand(() =>
+            ChangeSettingCommand = new DelegateCommand(() =>
             {
                 var prevSetting = (object?)null;
                 var settingParams = new DialogParameters
@@ -251,7 +251,7 @@ namespace NiVE3.ViewModel
                         settingResult.Parameters.GetValue<ExportLifetimeContext<IOutput>>(RenderSettingViewModel.OutputParameterName)
                     );
                 }
-            }, () => State == RenderQueueItemState.NotReady || State == RenderQueueItemState.Ready);
+            }, () => State == RenderQueueItemState.NotReady || State == RenderQueueItemState.Ready).ObservesProperty(() => State);
         }
 
         partial void WiringModel();

@@ -16,7 +16,6 @@ using NiVE3.Image.Drawing;
 using NiVE3.Model;
 using NiVE3.Model.UI;
 using NiVE3.Mvvm;
-using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
 using NiVE3.UI.Command;
@@ -689,17 +688,17 @@ namespace NiVE3.ViewModel
             PropertyNameAreaWidth = (IsLayerNumberColumnVisible ? LayerNumberColumnWidth : 0.0) + LayerNameColumnWidth;
             IsComposition = layerModel.IsComposition;
 
-            BeginEditDurationCommand = new RequerySuggestedCommand(() =>
+            BeginEditDurationCommand = new DelegateCommand(() =>
             {
                 LayerModel.BeginEditDuration();
                 EditingParameter = EditingLayerParameter.Duration;
-            }, () => EditingParameter == EditingLayerParameter.None);
+            }, () => EditingParameter == EditingLayerParameter.None).ObservesProperty(() => EditingParameter);
 
-            CommitEditDurationCommand = new RequerySuggestedCommand(() =>
+            CommitEditDurationCommand = new DelegateCommand(() =>
             {
                 LayerModel.CommitEditDuration();
                 EditingParameter = EditingLayerParameter.None;
-            }, () => EditingParameter == EditingLayerParameter.Duration);
+            }, () => EditingParameter == EditingLayerParameter.Duration).ObservesProperty(() => EditingParameter);
 
             ChangeLayerSwitchCommand = new DelegateCommand<string>(name =>
             {
@@ -756,21 +755,21 @@ namespace NiVE3.ViewModel
                 ParentLayerChangeRequestPublisher.Publish(this, new ReferenceLayerChangeEvent(parentLayer?.LayerId));
             });
 
-            BeginEditNameCommand = new RequerySuggestedCommand(() =>
+            BeginEditNameCommand = new DelegateCommand(() =>
             {
                 PrevName = Name;
                 EditingParameter = EditingLayerParameter.Name;
-            }, () => EditingParameter == EditingLayerParameter.None);
+            }, () => EditingParameter == EditingLayerParameter.None).ObservesProperty(() => EditingParameter);
 
-            BeginEditCommentCommand = new RequerySuggestedCommand(() =>
+            BeginEditCommentCommand = new DelegateCommand(() =>
             {
                 PrevComment = Comment;
                 EditingParameter = EditingLayerParameter.Comment;
-            }, () => EditingParameter == EditingLayerParameter.None);
+            }, () => EditingParameter == EditingLayerParameter.None).ObservesProperty(() => EditingParameter);
 
-            EndEditNameCommand = new RequerySuggestedCommand<bool>(commit =>
+            EndEditNameCommand = new DelegateCommand<bool?>(commit =>
             {
-                if (commit && !string.IsNullOrEmpty(Name))
+                if ((commit ?? false) && !string.IsNullOrEmpty(Name))
                 {
                     LayerModel.ChangeName(Name);
                 }
@@ -779,11 +778,11 @@ namespace NiVE3.ViewModel
                     Name = PrevName;
                 }
                 EditingParameter = EditingLayerParameter.None;
-            }, _ => EditingParameter == EditingLayerParameter.Name);
+            }, _ => EditingParameter == EditingLayerParameter.Name).ObservesProperty(() => EditingParameter);
 
-            EndEditCommentCommand = new RequerySuggestedCommand<bool>(commit =>
+            EndEditCommentCommand = new DelegateCommand<bool?>(commit =>
             {
-                if (commit)
+                if (commit ?? false)
                 {
                     LayerModel.ChangeComment(Comment);
                 }
@@ -792,11 +791,11 @@ namespace NiVE3.ViewModel
                     Comment = PrevComment;
                 }
                 EditingParameter = EditingLayerParameter.None;
-            }, _ => EditingParameter == EditingLayerParameter.Comment);
+            }, _ => EditingParameter == EditingLayerParameter.Comment).ObservesProperty(() => EditingParameter);
 
             SelectItemCommand = new DelegateCommand(() => SelectItemChangedPublisher.Publish(this, new SelectItemEventArgs(SelectItemType.Layer, true, this)));
 
-            CutEffectCommand = new RequerySuggestedCommand(() =>
+            CutEffectCommand = new DelegateCommand(() =>
             {
                 if (EditingParameter == EditingLayerParameter.None && SelectedEffects.Count > 0)
                 {
@@ -804,15 +803,19 @@ namespace NiVE3.ViewModel
                     ClipboardUtil.SetData(copyData);
                 }
                 SelectedEffects.Clear();
-            }, () => EditingParameter == EditingLayerParameter.None && SelectedEffects.Count > 0);
+            }, () => EditingParameter == EditingLayerParameter.None && SelectedEffects.Count > 0)
+                .ObservesProperty(() => EditingParameter)
+                .ObservesProperty(() => SelectedEffects.Count);
 
-            CopyEffectCommand = new RequerySuggestedCommand(() =>
+            CopyEffectCommand = new DelegateCommand(() =>
             {
                 if (EditingParameter == EditingLayerParameter.None && SelectedEffects.Count > 0)
                 {
                     ClipboardUtil.SetData(LayerModel.CopyEffects([.. SelectedEffects.Select(e => e.EffectId)]));
                 }
-            }, () => EditingParameter == EditingLayerParameter.None && SelectedEffects.Count > 0);
+            }, () => EditingParameter == EditingLayerParameter.None && SelectedEffects.Count > 0)
+                .ObservesProperty(() => EditingParameter)
+                .ObservesProperty(() => SelectedEffects.Count);
 
             PasteEffectCommand = new RequerySuggestedCommand(() =>
             {
@@ -829,7 +832,7 @@ namespace NiVE3.ViewModel
                 }
             }, () => EditingParameter == EditingLayerParameter.None && ClipboardUtil.GetData<EffectData>()?.Type == CopyDataType.Effect);
 
-            DuplicateEffectCommand = new RequerySuggestedCommand(() =>
+            DuplicateEffectCommand = new DelegateCommand(() =>
             {
                 if (EditingParameter != EditingLayerParameter.None && SelectedEffects.Count < 1)
                 {
@@ -838,16 +841,20 @@ namespace NiVE3.ViewModel
 
                 var insertTargetId = LastSelectedEffect?.EffectId;
                 LayerModel.DuplicateEffects([.. SelectedEffects.Select(e => e.EffectId)], insertTargetId);
-            }, () => EditingParameter == EditingLayerParameter.None && SelectedEffects.Count > 0);
+            }, () => EditingParameter == EditingLayerParameter.None && SelectedEffects.Count > 0)
+                .ObservesProperty(() => EditingParameter)
+                .ObservesProperty(() => SelectedEffects.Count);
 
-            DeleteEffectCommand = new RequerySuggestedCommand(() =>
+            DeleteEffectCommand = new DelegateCommand(() =>
             {
                 if (EditingParameter == EditingLayerParameter.None && SelectedEffects.Count > 0)
                 {
                     LayerModel.DeleteEffect([.. SelectedEffects.Select(e => e.EffectId)]);
                 }
                 SelectedEffects.Clear();
-            }, () => EditingParameter == EditingLayerParameter.None && SelectedEffects.Count > 0);
+            }, () => EditingParameter == EditingLayerParameter.None && SelectedEffects.Count > 0)
+                .ObservesProperty(() => EditingParameter)
+                .ObservesProperty(() => SelectedEffects.Count);
 
             DeleteCommand = new DelegateCommand<SelectItemType?>(type => DeleteEffectCommand.Execute(null));
 

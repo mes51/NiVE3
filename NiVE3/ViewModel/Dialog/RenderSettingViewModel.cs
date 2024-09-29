@@ -232,7 +232,7 @@ namespace NiVE3.ViewModel.Dialog
                         FilePath = Output.Value.ProcessOutputFilePath(FilePath);
                     }
                 }
-            }, () => HasOutputSetting);
+            }, () => HasOutputSetting).ObservesProperty(() => HasOutputSetting);
 
             OKCommand = new RequerySuggestedCommand(() =>
             {

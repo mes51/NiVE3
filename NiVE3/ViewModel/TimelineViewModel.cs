@@ -19,7 +19,6 @@ using NiVE3.Model;
 using NiVE3.Mvvm;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
-using NiVE3.UI.Command;
 using NiVE3.Util;
 using NiVE3.View.Command;
 using NiVE3.View.Dialog;
@@ -461,6 +460,20 @@ namespace NiVE3.ViewModel
             remove { CurrentTimeChangeByUserPublisher.Unsubscribe(value); }
         }
 
+        private IViewModelShortcutCommand? selectedTarget;
+        public IViewModelShortcutCommand? SelectedTarget
+        {
+            get { return selectedTarget; }
+            set { SetProperty(ref selectedTarget, value); }
+        }
+
+        private SelectItemType selectedItemType = SelectItemType.None;
+        public SelectItemType SelectedItemType
+        {
+            get { return selectedItemType; }
+            set { SetProperty(ref selectedItemType, value); }
+        }
+
         ViewStateModel ViewState { get; }
 
         EffectListStateModel EffectListStateModel { get; }
@@ -470,10 +483,6 @@ namespace NiVE3.ViewModel
         HistoryModel HistoryModel { get; }
 
         EventHubModel EventHubModel { get; }
-
-        SelectItemType SelectedItemType { get; set; } = SelectItemType.None;
-
-        IViewModelShortcutCommand? SelectTarget { get; set; }
 
         IDialogService DialogService { get; }
 
@@ -511,31 +520,33 @@ namespace NiVE3.ViewModel
             eventHubModel.AddEffectToSelectedLayers += EventHubModel_AddEffectToSelectedLayers;
             PropertyChanged += TimelineViewModel_PropertyChanged;
 
-            ChangeEnableShyCommand = new RequerySuggestedCommand(() => CompositionModel?.ChangeEnableShy(), () => CompositionModel != null);
+            ChangeEnableShyCommand = new DelegateCommand(() => CompositionModel?.ChangeEnableShy(), () => CompositionModel != null).ObservesProperty(() => CompositionModel);
 
-            ChangeEnableFrameBlendCommand = new RequerySuggestedCommand(() => CompositionModel?.ChangeEnableFrameBlend(), () => CompositionModel != null);
+            ChangeEnableFrameBlendCommand = new DelegateCommand(() => CompositionModel?.ChangeEnableFrameBlend(), () => CompositionModel != null).ObservesProperty(() => CompositionModel);
 
-            ChangeEnableMotionBlurCommand = new RequerySuggestedCommand(() => CompositionModel?.ChangeEnableMotionBlur(), () => CompositionModel != null);
+            ChangeEnableMotionBlurCommand = new DelegateCommand(() => CompositionModel?.ChangeEnableMotionBlur(), () => CompositionModel != null).ObservesProperty(() => CompositionModel);
 
-            BeginEditNameCommand = new RequerySuggestedCommand(() =>
+            BeginEditNameCommand = new DelegateCommand(() =>
             {
-                if (SelectTarget == null && SelectedLayers.Count > 0 && SelectedLayers.First().BeginEditNameCommand.CanExecute(null))
+                if (SelectedTarget == null && SelectedLayers.Count > 0 && SelectedLayers.First().BeginEditNameCommand.CanExecute(null))
                 {
                     SelectedLayers.First().BeginEditNameCommand.Execute(null);
                 }
                 else
                 {
-                    var targetChild = (SelectTarget as INameEditableParentViewModel)?.TargetChild;
+                    var targetChild = (SelectedTarget as INameEditableParentViewModel)?.TargetChild;
                     if (targetChild?.BeginEditNameCommand?.CanExecute(null) ?? false)
                     {
                         targetChild.BeginEditNameCommand.Execute(null);
                     }
                 }
-            }, () => SelectTarget != null || SelectedLayers.Count > 0);
+            }, () => SelectedTarget != null || SelectedLayers.Count > 0)
+                .ObservesProperty(() => SelectedTarget)
+                .ObservesProperty(() => SelectedLayers.Count);
 
             ChangeWorkareaCommand = new DelegateCommand<Tuple<double, double>>(t => CompositionModel?.ChangeWorkarea(t.Item1, t.Item2));
 
-            AddSolidLayerCommand = new RequerySuggestedCommand(() =>
+            AddSolidLayerCommand = new DelegateCommand(() =>
             {
                 if (CompositionModel == null || Layers == null)
                 {
@@ -550,13 +561,13 @@ namespace NiVE3.ViewModel
                 {
                     CompositionModel.AddSolid(Layers.Count);
                 }
-            }, () => CompositionModel != null);
+            }, () => CompositionModel != null).ObservesProperty(() => CompositionModel);
 
-            DeleteCommand = new RequerySuggestedCommand(() =>
+            DeleteCommand = new DelegateCommand(() =>
             {
-                if (SelectTarget != null)
+                if (SelectedTarget != null)
                 {
-                    SelectTarget.DeleteCommand.Execute(SelectedItemType);
+                    SelectedTarget.DeleteCommand.Execute(SelectedItemType);
                 }
                 else
                 {
@@ -567,13 +578,15 @@ namespace NiVE3.ViewModel
                         SelectedLayers.Clear();
                     }
                 }
-            }, () => CompositionModel != null && SelectedItemType != SelectItemType.None);
+            }, () => CompositionModel != null && SelectedItemType != SelectItemType.None)
+                .ObservesProperty(() => CompositionModel)
+                .ObservesProperty(() => SelectedItemType);
 
-            CutCommand = new RequerySuggestedCommand(() =>
+            CutCommand = new DelegateCommand(() =>
             {
-                if (SelectTarget != null)
+                if (SelectedTarget != null)
                 {
-                    SelectTarget.CutCommand.Execute(SelectedItemType);
+                    SelectedTarget.CutCommand.Execute(SelectedItemType);
                 }
                 else
                 {
@@ -587,13 +600,15 @@ namespace NiVE3.ViewModel
                     ClipboardUtil.SetData(copyData);
                     SelectedLayers.Clear();
                 }
-            }, () => CompositionModel != null && SelectedItemType != SelectItemType.None);
+            }, () => CompositionModel != null && SelectedItemType != SelectItemType.None)
+                .ObservesProperty(() => CompositionModel)
+                .ObservesProperty(() => SelectedItemType);
 
-            CopyCommand = new RequerySuggestedCommand(() =>
+            CopyCommand = new DelegateCommand(() =>
             {
-                if (SelectTarget != null)
+                if (SelectedTarget != null)
                 {
-                    SelectTarget.CopyCommand.Execute(SelectedItemType);
+                    SelectedTarget.CopyCommand.Execute(SelectedItemType);
                 }
                 else
                 {
@@ -605,13 +620,15 @@ namespace NiVE3.ViewModel
                     var ids = SelectedLayers.Select(l => l.LayerId).ToArray();
                     ClipboardUtil.SetData(CompositionModel.CopyLayers(ids));
                 }
-            }, () => CompositionModel != null && SelectedItemType != SelectItemType.None);
+            }, () => CompositionModel != null && SelectedItemType != SelectItemType.None)
+                .ObservesProperty(() => CompositionModel)
+                .ObservesProperty(() => SelectedItemType);
 
-            PasteCommand = new RequerySuggestedCommand(() =>
+            PasteCommand = new DelegateCommand(() =>
             {
-                if (SelectTarget != null)
+                if (SelectedTarget != null)
                 {
-                    SelectTarget.PasteCommand.Execute(SelectedItemType);
+                    SelectedTarget.PasteCommand.Execute(SelectedItemType);
                 }
                 else
                 {
@@ -626,13 +643,13 @@ namespace NiVE3.ViewModel
                         CompositionModel.PasteLayers(data, LastSelectedLayerId);
                     }
                 }
-            }, () => CompositionModel != null);
+            }, () => CompositionModel != null).ObservesProperty(() => CompositionModel);
 
-            DuplicateCommand = new RequerySuggestedCommand(() =>
+            DuplicateCommand = new DelegateCommand(() =>
             {
-                if (SelectTarget != null)
+                if (SelectedTarget != null)
                 {
-                    SelectTarget.DuplicateCommand.Execute(SelectedItemType);
+                    SelectedTarget.DuplicateCommand.Execute(SelectedItemType);
                 }
                 else
                 {
@@ -644,13 +661,15 @@ namespace NiVE3.ViewModel
                     var ids = SelectedLayers.Select(l => l.LayerId).ToArray();
                     CompositionModel.DuplicateLayers(ids, LastSelectedLayerId);
                 }
-            }, () => CompositionModel != null && SelectedItemType != SelectItemType.None);
+            }, () => CompositionModel != null && SelectedItemType != SelectItemType.None)
+                .ObservesProperty(() => CompositionModel)
+                .ObservesProperty(() => SelectedItemType);
 
-            SelectAllCommand = new RequerySuggestedCommand(() =>
+            SelectAllCommand = new DelegateCommand(() =>
             {
-                if (SelectTarget != null)
+                if (SelectedTarget != null)
                 {
-                    SelectTarget.SelectAllCommand.Execute(SelectedItemType);
+                    SelectedTarget.SelectAllCommand.Execute(SelectedItemType);
                 }
                 else
                 {
@@ -667,13 +686,17 @@ namespace NiVE3.ViewModel
                     }
                     LastSelectedLayerId = Layers[0].LayerId;
                 }
-            }, () => CompositionModel != null);
+            }, () => CompositionModel != null).ObservesProperty(() => CompositionModel);
 
-            AddKeyFrameCommand = new RequerySuggestedCommand(() => SelectTarget?.AddKeyFrameCommand?.Execute(SelectedItemType), () => CompositionModel != null && SelectedItemType == SelectItemType.Property);
+            AddKeyFrameCommand = new DelegateCommand(() => SelectedTarget?.AddKeyFrameCommand?.Execute(SelectedItemType), () => CompositionModel != null && SelectedItemType == SelectItemType.Property)
+                .ObservesProperty(() => CompositionModel)
+                .ObservesProperty(() => SelectedItemType);
 
-            ResetPropertyCommand = new RequerySuggestedCommand(() => SelectTarget?.ResetPropertyCommand?.Execute(SelectedItemType), () => CompositionModel != null && SelectedItemType == SelectItemType.Property);
+            ResetPropertyCommand = new DelegateCommand(() => SelectedTarget?.ResetPropertyCommand?.Execute(SelectedItemType), () => CompositionModel != null && SelectedItemType == SelectItemType.Property)
+                .ObservesProperty(() => CompositionModel)
+                .ObservesProperty(() => SelectedItemType);
 
-            SplitLayerCommand = new RequerySuggestedCommand(() =>
+            SplitLayerCommand = new DelegateCommand(() =>
             {
                 if (CompositionModel == null || SelectedLayers.Any(l => l.EditingParameter != EditingLayerParameter.None))
                 {
@@ -686,21 +709,21 @@ namespace NiVE3.ViewModel
                 {
                     CompositionModel.SplitLayers(ids, CurrentTime);
                 }
-            }, () => CompositionModel != null);
+            }, () => CompositionModel != null).ObservesProperty(() => CompositionModel);
 
             ChangeCurrentTimeCommand = new DelegateCommand(() => CurrentTimeChangeByUserPublisher.Publish(this, EventArgs.Empty));
 
-            AddShapeCommand = new RequerySuggestedCommand(() => CompositionModel?.AddShape(GetFirstSelectedLayerIndex()), () => CompositionModel != null);
+            AddShapeCommand = new DelegateCommand(() => CompositionModel?.AddShape(GetFirstSelectedLayerIndex()), () => CompositionModel != null).ObservesProperty(() => CompositionModel);
 
-            AddCameraCommand = new RequerySuggestedCommand(() => CompositionModel?.AddCamera(GetFirstSelectedLayerIndex()), () => CompositionModel != null);
+            AddCameraCommand = new DelegateCommand(() => CompositionModel?.AddCamera(GetFirstSelectedLayerIndex()), () => CompositionModel != null).ObservesProperty(() => CompositionModel);
 
-            AddLightCommand = new RequerySuggestedCommand(() => CompositionModel?.AddLight(GetFirstSelectedLayerIndex()), () => CompositionModel != null);
+            AddLightCommand = new DelegateCommand(() => CompositionModel?.AddLight(GetFirstSelectedLayerIndex()), () => CompositionModel != null).ObservesProperty(() => CompositionModel);
 
-            AddNullObjectCommand = new RequerySuggestedCommand(() => CompositionModel?.AddNullObject(GetFirstSelectedLayerIndex()), () => CompositionModel != null);
+            AddNullObjectCommand = new DelegateCommand(() => CompositionModel?.AddNullObject(GetFirstSelectedLayerIndex()), () => CompositionModel != null).ObservesProperty(() => CompositionModel);
 
-            AddTextCommand = new RequerySuggestedCommand(() => CompositionModel?.AddText(GetFirstSelectedLayerIndex()), () => CompositionModel != null);
+            AddTextCommand = new DelegateCommand(() => CompositionModel?.AddText(GetFirstSelectedLayerIndex()), () => CompositionModel != null).ObservesProperty(() => CompositionModel);
 
-            AddEffectCommand = new RequerySuggestedCommand<EffectItem>(effectItem =>
+            AddEffectCommand = new DelegateCommand<EffectItem>(effectItem =>
             {
                 if (CompositionModel == null || SelectedLayers.Count < 1)
                 {
@@ -708,9 +731,11 @@ namespace NiVE3.ViewModel
                 }
 
                 CompositionModel.AddEffectsToLayers([..SelectedLayers.Select(l => l.LayerId)], [effectItem.PluginId]);
-            }, _ => CompositionModel != null && SelectedLayers.Count > 0);
+            }, _ => CompositionModel != null && SelectedLayers.Count > 0)
+                .ObservesProperty(() => CompositionModel)
+                .ObservesProperty(() => SelectedLayers.Count);
 
-            ChangeLayerTagsRandomlyCommand = new RequerySuggestedCommand(() =>
+            ChangeLayerTagsRandomlyCommand = new DelegateCommand(() =>
             {
                 if (CompositionModel == null || SelectedLayers.Count < 1)
                 {
@@ -718,9 +743,11 @@ namespace NiVE3.ViewModel
                 }
 
                 CompositionModel.ChangeLayerTagsRandomly([..SelectedLayers.Select(l => l.LayerId)]);
-            }, () => CompositionModel != null && SelectedLayers.Count > 0);
+            }, () => CompositionModel != null && SelectedLayers.Count > 0)
+                .ObservesProperty(() => CompositionModel)
+                .ObservesProperty(() => SelectedLayers.Count);
 
-            CompositionSettingCommand = new RequerySuggestedCommand(() =>
+            CompositionSettingCommand = new DelegateCommand(() =>
             {
                 if (CompositionModel == null)
                 {
@@ -764,9 +791,9 @@ namespace NiVE3.ViewModel
                         result.Parameters.GetValue<object?>(CompositionSettingViewModel.RendererSettingViewData)
                     );
                 }
-            }, () => CompositionModel != null);
+            }, () => CompositionModel != null).ObservesProperty(() => CompositionModel);
 
-            OpenRenderSettingCommand = new RequerySuggestedCommand(() =>
+            OpenRenderSettingCommand = new DelegateCommand(() =>
             {
                 if (CompositionModel == null)
                 {
@@ -797,7 +824,7 @@ namespace NiVE3.ViewModel
                         settingResult.Parameters.GetValue<ExportLifetimeContext<IOutput>>(RenderSettingViewModel.OutputParameterName)
                     );
                 }
-            }, () => CompositionModel != null);
+            }, () => CompositionModel != null).ObservesProperty(() => CompositionModel);
 
             AudioPlayerModel = audioPlayerModel;
         }
@@ -1282,7 +1309,7 @@ namespace NiVE3.ViewModel
             if (e.IsUserAction)
             {
                 SelectedItemType = e.SelectItemType;
-                SelectTarget = e.SelectItemType switch
+                SelectedTarget = e.SelectItemType switch
                 {
                     SelectItemType.Effect or SelectItemType.Property or SelectItemType.KeyFrame => e.CommandableOriginalParent,
                     _ => null,
@@ -1300,7 +1327,7 @@ namespace NiVE3.ViewModel
                     SelectedLayers.Add(e.Layer);
                 }
             }
-            if (SelectTarget != null || (e.SelectItemType == SelectItemType.Layer && e.Layer != null && (SelectedLayers?.Contains(e.Layer) ?? false)))
+            if (SelectedTarget != null || (e.SelectItemType == SelectItemType.Layer && e.Layer != null && (SelectedLayers?.Contains(e.Layer) ?? false)))
             {
                 CurrentEditingCompositionId = CompositionModel?.CompositionId;
                 LastSelectedLayerId = e.Layer?.LayerId;
