@@ -1338,7 +1338,7 @@ namespace NiVE3.Model
             };
         }
 
-        public void LoadData(LayerData data)
+        public void LoadData(LayerData data, bool coerceProperties)
         {
             Name = data.Name;
             Comment = data.Comment;
@@ -1400,6 +1400,21 @@ namespace NiVE3.Model
                 effectModel.LoadData(effectData);
                 Effects.Add(effectModel);
             }
+
+            if (coerceProperties)
+            {
+                CoerceProperties();
+            }
+        }
+
+        public void CoerceProperties()
+        {
+            TransformProperties?.CoerceValues();
+            LayerOptionProperties?.CoerceValues();
+            TextProperties?.CoerceValues();
+            ShapeProperties?.CoerceValues();
+            SourceOptionProperties?.CoerceValues();
+            AudioOptionProperties?.CoerceValues();
         }
 
         public CopyData<EffectData> CutEffects(Guid[] ids)

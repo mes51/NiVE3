@@ -285,33 +285,37 @@ namespace NiVE3.Model
 
         public void LoadData(PropertyData data)
         {
-            var cp = Property as CompositionDependPropertyBase;
-
-            if (cp != null)
-            {
-                Value = cp.CoerceValue(cp.PropertyType.DeserializeValue(data.Value), CompositionModel);
-            }
-            else
-            {
-                Value = Property.CoerceValue(Property.PropertyType.DeserializeValue(data.Value));
-            }
-
+            Value = Property.PropertyType.DeserializeValue(data.Value);
             if (data.KeyFrames == null)
             {
                 return;
             }
 
             KeyFrames.Clear();
+            foreach (var k in data.KeyFrames.Select(k => new KeyFrame(k.Time, Property.PropertyType.DeserializeValue(k.Value), k.EaseIn, k.EaseOut, k.InterpolationType, k.Id)))
+            {
+                KeyFrames.Add(k);
+            }
+        }
+
+        public void CoerceValues()
+        {
+            var oldKeyFrames = KeyFrames.ToArray();
+            KeyFrames.Clear();
+
+            var cp = Property as CompositionDependPropertyBase;
             if (cp != null)
             {
-                foreach (var k in data.KeyFrames.Select(k => new KeyFrame(k.Time, cp.CoerceValue(cp.PropertyType.DeserializeValue(k.Value), CompositionModel), k.EaseIn, k.EaseOut, k.InterpolationType, k.Id)))
+                Value = cp.CoerceValue(Value, CompositionModel);
+                foreach (var k in oldKeyFrames.Select(k => new KeyFrame(k.Time, cp.CoerceValue(cp.PropertyType.DeserializeValue(k.Value), CompositionModel), k.EaseIn, k.EaseOut, k.InterpolationType, k.Id)))
                 {
                     KeyFrames.Add(k);
                 }
             }
             else
             {
-                foreach (var k in data.KeyFrames.Select(k => new KeyFrame(k.Time, Property.CoerceValue(Property.PropertyType.DeserializeValue(k.Value)), k.EaseIn, k.EaseOut, k.InterpolationType, k.Id)))
+                Value = Property.CoerceValue(Value);
+                foreach (var k in oldKeyFrames.Select(k => new KeyFrame(k.Time, Property.CoerceValue(Property.PropertyType.DeserializeValue(k.Value)), k.EaseIn, k.EaseOut, k.InterpolationType, k.Id)))
                 {
                     KeyFrames.Add(k);
                 }

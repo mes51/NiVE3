@@ -159,6 +159,11 @@ namespace NiVE3.Model
             }
         }
 
+        public void CoerceProperties()
+        {
+            Properties.CoerceValues();
+        }
+
         public void OverwriteEffect(EffectData data)
         {
             if (data.EffectPluginId != EffectPluginId)

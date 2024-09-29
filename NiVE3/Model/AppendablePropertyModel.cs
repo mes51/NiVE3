@@ -254,6 +254,14 @@ namespace NiVE3.Model
             }
         }
 
+        public void CoerceValues()
+        {
+            foreach (var child in Children)
+            {
+                child.CoerceValues();
+            }
+        }
+
         public void PasteProperty(PropertyData data)
         {
             PasteChildrenInternal(data, false);

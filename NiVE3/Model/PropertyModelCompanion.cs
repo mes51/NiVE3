@@ -43,6 +43,8 @@ namespace NiVE3.Model
 
         void LoadData(PropertyData data);
 
+        void CoerceValues();
+
         void PasteProperty(PropertyData data);
     }
 

@@ -975,7 +975,8 @@ namespace NiVE3.Model
                 }
 
                 var layer = new LayerModel(this, footageModels.First(), EffectListModel, HistoryModel, AcceleratorModel, layerData.LayerId);
-                layer.LoadData(layerData);
+                // NOTE: CompositionDependPropertyBaseが全てのレイヤーをロードしてからでないと正しくCoerceValueが行えないので後からCoercePropertiesを呼ぶ
+                layer.LoadData(layerData, false);
                 Layers.Add(layer);
             }
 
@@ -989,6 +990,7 @@ namespace NiVE3.Model
                 {
                     layer.ParentLayerId = null;
                 }
+                layer.CoerceProperties();
             }
         }
 
@@ -1041,7 +1043,7 @@ namespace NiVE3.Model
 
                 layerData.InPoint = TimeCalc.RoundTimeDigit(splitPositionTime - layerData.SourceStartPoint);
                 var newLayer = new LayerModel(this, footageModels.First(), EffectListModel, HistoryModel, AcceleratorModel);
-                newLayer.LoadData(layerData);
+                newLayer.LoadData(layerData, true);
                 var index = Layers.IndexOf(l => l.LayerId == layerData.LayerId);
                 Layers.Insert(index, newLayer);
                 addedLayer.Add(layerData.LayerId, newLayer);
@@ -1499,7 +1501,7 @@ namespace NiVE3.Model
                 }
 
                 var newLayer = new LayerModel(this, footageModels.First(), EffectListModel, HistoryModel, AcceleratorModel);
-                newLayer.LoadData(layerData);
+                newLayer.LoadData(layerData, true);
                 Layers.Insert(index, newLayer);
                 addedLayer.Add(newLayer);
                 index++;

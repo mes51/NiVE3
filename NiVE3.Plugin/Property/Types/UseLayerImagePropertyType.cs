@@ -67,7 +67,7 @@ namespace NiVE3.Plugin.Property.Types
                     _ => Guid.Empty
                 };
 
-                return new UseLayerImageTarget(layerId, Enum.Parse<LayerImageProcessType>((string)dictionary[nameof(UseLayerImageTarget.ImageProcessType)]));
+                return new UseLayerImageTarget(layerId, (LayerImageProcessType)(int)dictionary[nameof(UseLayerImageTarget.ImageProcessType)]);
             }
             else
             {
