@@ -189,9 +189,9 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <ComboBox Grid.Row="0" Margin="{StaticResource VerticalStackMargin}" ItemsSource="{Binding Fonts}" ItemTemplateSelector="{StaticResource FontTemplateSelector}" SelectedIndex="{Binding SelectedFontGroupIndex}" Grid.IsSharedSizeScope="True"/>
-        
-        <ComboBox Grid.Row="1" Margin="{StaticResource VerticalStackMargin}" ItemsSource="{Binding SelectedFontGroup.SubFamiles}" ItemTemplateSelector="{StaticResource FontSubFamilyTemplateSelector}" SelectedIndex="{Binding SelectedFontSubFamilyIndex}"/>
+        <ComboBox Grid.Row="0" Margin="{StaticResource VerticalStackMargin}" ItemsSource="{Binding Fonts}" ItemTemplateSelector="{StaticResource FontTemplateSelector}" SelectedIndex="{Binding SelectedFontGroupIndex}" Grid.IsSharedSizeScope="True" DropDownOpened="FontListComboBox_DropDownOpened"/>
+
+        <ComboBox Grid.Row="1" Margin="{StaticResource VerticalStackMargin}" ItemsSource="{Binding SelectedFontGroup.SubFamiles}" ItemTemplateSelector="{StaticResource FontSubFamilyTemplateSelector}" SelectedIndex="{Binding SelectedFontSubFamilyIndex}" DropDownOpened="FontSubFamilyListComboBox_DropDownOpened"/>
         
         <UniformGrid Grid.Row="2" Columns="2" Margin="{StaticResource VerticalStackMargin}">
             <Grid Style="{StaticResource ParameterLeftGridStyle}">

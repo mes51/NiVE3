@@ -30,40 +30,70 @@ namespace NiVE3.View.Pane
             InitializeComponent();
         }
 
+        TextPropertyViewModel? ViewModel => DataContext as TextPropertyViewModel;
+
         private void FillColorChangeButton_Click(object sender, RoutedEventArgs e)
         {
-            if (DataContext is TextPropertyViewModel vm)
+            var viewModel = ViewModel;
+            if (viewModel == null)
             {
-                var dialog = new ColorPickerDialog(vm.FillColor.ToByteColor())
-                {
-                    Owner = Application.Current.MainWindow,
-                    Title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.ColorPickerDialog_Title),
-                    OKButtonText = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_OK),
-                    CancelButtonText = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_Cancel)
-                };
-                if (dialog.ShowDialog() ?? false)
-                {
-                    vm.FillColor = FloatColor.FromColor(dialog.Color);
-                }
+                return;
+            }
+
+            var dialog = new ColorPickerDialog(viewModel.FillColor.ToByteColor())
+            {
+                Owner = Application.Current.MainWindow,
+                Title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.ColorPickerDialog_Title),
+                OKButtonText = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_OK),
+                CancelButtonText = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_Cancel)
+            };
+            if (dialog.ShowDialog() ?? false)
+            {
+                viewModel.FillColor = FloatColor.FromColor(dialog.Color);
             }
         }
 
         private void TextLineColorChangeButton_Click(object sender, RoutedEventArgs e)
         {
-            if (DataContext is TextPropertyViewModel vm)
+            var viewModel = ViewModel;
+            if (viewModel == null)
             {
-                var dialog = new ColorPickerDialog(vm.TextLineColor.ToByteColor())
-                {
-                    Owner = Application.Current.MainWindow,
-                    Title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.ColorPickerDialog_Title),
-                    OKButtonText = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_OK),
-                    CancelButtonText = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_Cancel)
-                };
-                if (dialog.ShowDialog() ?? false)
-                {
-                    vm.TextLineColor = FloatColor.FromColor(dialog.Color);
-                }
+                return;
             }
+
+            var dialog = new ColorPickerDialog(viewModel.TextLineColor.ToByteColor())
+            {
+                Owner = Application.Current.MainWindow,
+                Title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.ColorPickerDialog_Title),
+                OKButtonText = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_OK),
+                CancelButtonText = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_Cancel)
+            };
+            if (dialog.ShowDialog() ?? false)
+            {
+                viewModel.TextLineColor = FloatColor.FromColor(dialog.Color);
+            }
+        }
+
+        private void FontListComboBox_DropDownOpened(object sender, EventArgs e)
+        {
+            var viewModel = ViewModel;
+            if (viewModel == null)
+            {
+                return;
+            }
+
+            viewModel.CreateFontSampleGeometryCommand.Execute(null);
+        }
+
+        private void FontSubFamilyListComboBox_DropDownOpened(object sender, EventArgs e)
+        {
+            var viewModel = ViewModel;
+            if (viewModel == null)
+            {
+                return;
+            }
+
+            viewModel.CreateSubFamilySampleGeometryCommaned.Execute(null);
         }
     }
 }

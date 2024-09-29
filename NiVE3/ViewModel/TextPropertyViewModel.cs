@@ -232,7 +232,13 @@ namespace NiVE3.ViewModel
 
         public ICommand AbortEditCommand { get; }
 
+        public ICommand CreateFontSampleGeometryCommand { get; }
+
+        public ICommand CreateSubFamilySampleGeometryCommaned { get; }
+
         object? PrevValue { get; set; }
+
+        bool FontSampleCreated { get; set; }
 
         public TextPropertyViewModel(TextPropertyModel textPropertyModel, ProjectModel projectModel, ViewStateModel viewStateModel)
         {
@@ -283,7 +289,22 @@ namespace NiVE3.ViewModel
                 }
             });
 
-            FontViewModelBase.CreateSampleGeometry(Fonts);
+            CreateFontSampleGeometryCommand = new DelegateCommand(() =>
+            {
+                if (!FontSampleCreated)
+                {
+                    FontViewModelBase.CreateSampleGeometry(Fonts);
+                    FontSampleCreated = true;
+                }
+            });
+
+            CreateSubFamilySampleGeometryCommaned = new DelegateCommand(() =>
+            {
+                if (SelectedFontSubFamilyIndex > -1)
+                {
+                    FontViewModelBase.CreateSampleGeometry(Fonts[SelectedFontGroupIndex].SubFamiles);
+                }
+            });
         }
 
         partial void WiringModel();
@@ -390,8 +411,6 @@ namespace NiVE3.ViewModel
                         IsFontChanging = true;
                         TextPropertyModel.SelectedFont = SelectedFontGroup.SubFamiles[SelectedFontSubFamilyIndex].FontInfo;
                         IsFontChanging = false;
-
-                        FontViewModelBase.CreateSampleGeometry(Fonts[SelectedFontGroupIndex].SubFamiles);
                     }
                     ChangeTextLayerProperty();
                     RaisePropertyChanged(nameof(IsSupportBold));
