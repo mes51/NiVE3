@@ -198,7 +198,7 @@ namespace NiVE3.ViewModel
                 PropertyGroupModel.ResetProperties([.. SelectedChildren.Select(c => c.Property.Id)]);
             }, () => SelectedChildren.Count > 0).ObservesProperty(() => SelectedChildren.Count);
 
-            CutSelectedChildrenCommand = new DelegateCommand(() =>
+            CutSelectedChildrenCommand = new RequerySuggestedCommand(() =>
             {
                 var targetChildren = SelectedChildren.OfType<PropertyViewModel>().Select(c => c.Property.Id).ToArray();
                 if (targetChildren.Length < 1)
@@ -208,7 +208,7 @@ namespace NiVE3.ViewModel
 
                 var data = PropertyGroupModel.CutChildrenKeyFrames(targetChildren);
                 ClipboardUtil.SetData(data);
-            }, () => SelectedChildren.Count > 0).ObservesProperty(() => SelectedChildren.Count);
+            }, () => SelectedChildren.Count > 0 && SelectedChildren.OfType<PropertyViewModel>().Any(p => p.HasKeyFrame));
 
             CopySelectedChildrenCommand = new DelegateCommand(() =>
             {
@@ -234,7 +234,7 @@ namespace NiVE3.ViewModel
                 return type == CopyDataType.PropertyGroup || type == CopyDataType.AppendablePropertyChildren;
             });
 
-            DeleteSelectedChildrenCommand = new DelegateCommand(() =>
+            DeleteSelectedChildrenCommand = new RequerySuggestedCommand(() =>
             {
                 var targetChildren = SelectedChildren.OfType<PropertyViewModel>().Select(c => c.Property.Id).ToArray();
                 if (targetChildren.Length < 1)
@@ -243,7 +243,7 @@ namespace NiVE3.ViewModel
                 }
 
                 PropertyGroupModel.DeleteChildrenKeyFrames(targetChildren);
-            }, () => SelectedChildren.Count > 0).ObservesProperty(() => SelectedChildren.Count);
+            }, () => SelectedChildren.Count > 0 && SelectedChildren.OfType<PropertyViewModel>().Any(p => p.HasKeyFrame));
 
             DuplicateSelectedChildrenCommand = new DelegateCommand(() => { });
 
