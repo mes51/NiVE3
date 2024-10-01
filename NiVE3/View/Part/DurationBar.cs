@@ -95,23 +95,43 @@ namespace NiVE3.View.Part
             new FrameworkPropertyMetadata(Colors.Red, FrameworkPropertyMetadataOptions.AffectsRender, TagColorChanged)
         );
 
-        private static readonly DependencyPropertyKey IsClickedPropertyKey = DependencyProperty.RegisterReadOnly(
-            nameof(IsClicked),
-            typeof(bool),
+        public static readonly DependencyProperty BeginEditDurationCommandProperty = DependencyProperty.Register(
+            nameof(BeginEditDurationCommand),
+            typeof(ICommand),
             typeof(DurationBar),
-            new FrameworkPropertyMetadata(false, IsClickChangedHandler)
+            new FrameworkPropertyMetadata(null)
         );
 
-        public static readonly DependencyProperty IsClickedProperty = IsClickedPropertyKey.DependencyProperty;
-
-        public static RoutedEvent IsClickedChangedEvent = EventManager.RegisterRoutedEvent(
-            nameof(IsClickedChanged), RoutingStrategy.Direct, typeof(EventHandler), typeof(DurationBar)
+        public static readonly DependencyProperty EndEditDurationCommandProperty = DependencyProperty.Register(
+            nameof(EndEditDurationCommand),
+            typeof(ICommand),
+            typeof(DurationBar),
+            new FrameworkPropertyMetadata(null)
         );
 
-        public bool IsClicked
+        public static readonly DependencyProperty AbortEditDurationCommandProperty = DependencyProperty.Register(
+            nameof(AbortEditDurationCommand),
+            typeof(ICommand),
+            typeof(DurationBar),
+            new FrameworkPropertyMetadata(null)
+        );
+
+        public ICommand? AbortEditDurationCommand
         {
-            get { return (bool)GetValue(IsClickedProperty); }
-            private set { SetValue(IsClickedPropertyKey, value); }
+            get { return (ICommand)GetValue(AbortEditDurationCommandProperty); }
+            set { SetValue(AbortEditDurationCommandProperty, value); }
+        }
+
+        public ICommand? EndEditDurationCommand
+        {
+            get { return (ICommand)GetValue(EndEditDurationCommandProperty); }
+            set { SetValue(EndEditDurationCommandProperty, value); }
+        }
+
+        public ICommand? BeginEditDurationCommand
+        {
+            get { return (ICommand)GetValue(BeginEditDurationCommandProperty); }
+            set { SetValue(BeginEditDurationCommandProperty, value); }
         }
 
         public Color TagColor
@@ -174,11 +194,7 @@ namespace NiVE3.View.Part
             set { SetValue(RangeStartProperty, value); }
         }
 
-        public event EventHandler IsClickedChanged
-        {
-            add { AddHandler(IsClickedChangedEvent, value); }
-            remove { RemoveHandler(IsClickedChangedEvent, value); }
-        }
+        bool IsClicked { get; set; }
 
         double ClickX { get; set; }
 
@@ -227,6 +243,9 @@ namespace NiVE3.View.Part
                 ViewboxUnits = BrushMappingMode.Absolute,
                 TileMode = TileMode.Tile,
             }.FreezeCurrentObject();
+
+            FocusableProperty.OverrideMetadata(typeof(DurationBar), new FrameworkPropertyMetadata(true, FrameworkPropertyMetadataOptions.Inherits));
+            FocusVisualStyleProperty.OverrideMetadata(typeof(DurationBar), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.Inherits));
         }
 
         public DurationBar()
@@ -234,6 +253,7 @@ namespace NiVE3.View.Part
             MouseDown += DurationBar_MouseDown;
             MouseMove += DurationBar_MouseMove;
             MouseUp += DurationBar_MouseUp;
+            KeyDown += DurationBar_KeyDown;
         }
 
         private void DurationBar_MouseUp(object sender, MouseButtonEventArgs e)
@@ -243,6 +263,8 @@ namespace NiVE3.View.Part
                 EditMode = DurationEditMode.None;
                 IsClicked = false;
                 ReleaseMouseCapture();
+                Keyboard.ClearFocus();
+                EndEditDurationCommand?.Execute(null);
                 e.Handled = true;
             }
         }
@@ -385,7 +407,9 @@ namespace NiVE3.View.Part
             {
                 EditMode = DurationEditMode.InPoint;
                 IsClicked = true;
+                Keyboard.Focus(this);
                 CaptureMouse();
+                BeginEditDurationCommand?.Execute(null);
                 e.Handled = true;
                 return;
             }
@@ -395,7 +419,9 @@ namespace NiVE3.View.Part
             {
                 EditMode = DurationEditMode.OutPoint;
                 IsClicked = true;
+                Keyboard.Focus(this);
                 CaptureMouse();
+                BeginEditDurationCommand?.Execute(null);
                 e.Handled = true;
                 return;
             }
@@ -404,7 +430,9 @@ namespace NiVE3.View.Part
             {
                 EditMode = DurationEditMode.SourceStartPoint;
                 IsClicked = true;
+                Keyboard.Focus(this);
                 CaptureMouse();
+                BeginEditDurationCommand?.Execute(null);
                 e.Handled = true;
                 return;
             }
@@ -420,7 +448,22 @@ namespace NiVE3.View.Part
             {
                 EditMode = DurationEditMode.Slip;
                 IsClicked = true;
+                Keyboard.Focus(this);
                 CaptureMouse();
+                BeginEditDurationCommand?.Execute(null);
+                e.Handled = true;
+            }
+        }
+
+        private void DurationBar_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape && IsClicked)
+            {
+                EditMode = DurationEditMode.None;
+                IsClicked = false;
+                ReleaseMouseCapture();
+                Keyboard.ClearFocus();
+                AbortEditDurationCommand?.Execute(null);
                 e.Handled = true;
             }
         }
@@ -458,14 +501,6 @@ namespace NiVE3.View.Part
             {
                 durationBar.DurationBrush = new SolidColorBrush(Color.FromArgb(DurationBrushAlpha, durationBar.TagColor.R, durationBar.TagColor.G, durationBar.TagColor.B)).FreezeCurrentObject();
                 durationBar.EnableAreaBrush = new SolidColorBrush(durationBar.TagColor).FreezeCurrentObject();
-            }
-        }
-
-        static void IsClickChangedHandler(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            if (d is DurationBar durationBar)
-            {
-                durationBar.RaiseEvent(new RoutedEventArgs(IsClickedChangedEvent, d));
             }
         }
 

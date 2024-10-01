@@ -1181,10 +1181,17 @@ namespace NiVE3.Model
 
         public void CommitEditDuration()
         {
-            if (PrevInPoint != inPoint || PrevOutPoint != OutPoint || PrevSourceStartPoint != SourceStartPoint)
+            if (PrevInPoint != InPoint || PrevOutPoint != OutPoint || PrevSourceStartPoint != SourceStartPoint)
             {
                 HistoryModel.Add(new EditDurationHistoryCommand(this, PrevInPoint, PrevOutPoint, PrevSourceStartPoint, InPoint, OutPoint, SourceStartPoint));
             }
+        }
+
+        public void AbortEditDuration()
+        {
+            InPoint = PrevInPoint;
+            OutPoint = PrevOutPoint;
+            SourceStartPoint = PrevSourceStartPoint;
         }
 
         public void ChangeName(string name)

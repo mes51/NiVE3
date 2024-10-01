@@ -152,17 +152,5 @@ namespace NiVE3.View.Part
         {
             ViewModel?.ChangeParentLayerCommand?.Execute(ParentLayerSelectBox.SelectedItem);
         }
-
-        private void DurationBar_IsClickedChanged(object sender, EventArgs e)
-        {
-            if (DurationBar.IsClicked)
-            {
-                ViewModel?.BeginEditDurationCommand?.Execute(null);
-            }
-            else
-            {
-                ViewModel?.CommitEditDurationCommand?.Execute(null);
-            }
-        }
     }
 }

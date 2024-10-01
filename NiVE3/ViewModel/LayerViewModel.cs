@@ -513,6 +513,8 @@ namespace NiVE3.ViewModel
 
         public ICommand CommitEditDurationCommand { get; }
 
+        public ICommand AbortEditDurationCommand { get; }
+
         public ICommand ChangeLayerSwitchCommand { get; }
 
         public ICommand ChangeInterpolationQualityCommand { get; }
@@ -697,6 +699,12 @@ namespace NiVE3.ViewModel
             CommitEditDurationCommand = new DelegateCommand(() =>
             {
                 LayerModel.CommitEditDuration();
+                EditingParameter = EditingLayerParameter.None;
+            }, () => EditingParameter == EditingLayerParameter.Duration).ObservesProperty(() => EditingParameter);
+
+            AbortEditDurationCommand = new DelegateCommand(() =>
+            {
+                LayerModel.AbortEditDuration();
                 EditingParameter = EditingLayerParameter.None;
             }, () => EditingParameter == EditingLayerParameter.Duration).ObservesProperty(() => EditingParameter);
 

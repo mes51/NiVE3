@@ -776,6 +776,8 @@
                            HasDuration="{Binding SourceType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static pi:SourceType.VideoAndAudio}}"
                            IsEnableTimeRemap="{Binding IsEnableTimeRemap}"
                            TagColor="{Binding TagColor}"
-                           IsClickedChanged="DurationBar_IsClickedChanged"/>
+                           BeginEditDurationCommand="{Binding BeginEditDurationCommand}"
+                           EndEditDurationCommand="{Binding CommitEditDurationCommand}"
+                           AbortEditDurationCommand="{Binding AbortEditDurationCommand}"/>
     </Grid>
 </UserControl>
