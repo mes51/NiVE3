@@ -49,6 +49,19 @@ namespace NiVE3.Shared.Extension
             }
         }
 
+        public static IEnumerable<(TFirst First, TSecond Second, TThird Third, TFourth Fourth)> Zip<TFirst, TSecond, TThird, TFourth>(this IEnumerable<TFirst> first, IEnumerable<TSecond> second, IEnumerable<TThird> third, IEnumerable<TFourth> fourth)
+        {
+            using var firstEnumerator = first.GetEnumerator();
+            using var secondEnumerator = second.GetEnumerator();
+            using var thirdEnumerator = third.GetEnumerator();
+            using var fourthEnumerator = fourth.GetEnumerator();
+
+            while (firstEnumerator.MoveNext() && secondEnumerator.MoveNext() && thirdEnumerator.MoveNext() && fourthEnumerator.MoveNext())
+            {
+                yield return (firstEnumerator.Current, secondEnumerator.Current, thirdEnumerator.Current, fourthEnumerator.Current);
+            }
+        }
+
         public static IEnumerable<T> NonNull<T>(this IEnumerable<T?> source)
         {
             foreach (var v in source)

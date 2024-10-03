@@ -776,8 +776,8 @@
                            HasDuration="{Binding SourceType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static pi:SourceType.VideoAndAudio}}"
                            IsEnableTimeRemap="{Binding IsEnableTimeRemap}"
                            TagColor="{Binding TagColor}"
-                           BeginEditDurationCommand="{Binding BeginEditDurationCommand}"
-                           EndEditDurationCommand="{Binding CommitEditDurationCommand}"
-                           AbortEditDurationCommand="{Binding AbortEditDurationCommand}"/>
+                           BeginEditDurationCommand="{Binding BeginEditDurationRequestCommand}"
+                           UpdateDurationCommand="{Binding UpdateDurationRequestCommand}"
+                           AbortEditDurationCommand="{Binding AbortEditDurationRequestCommand}"/>
     </Grid>
 </UserControl>

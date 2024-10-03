@@ -304,12 +304,6 @@ namespace NiVE3.Model
 
         AcceleratorModel AcceleratorModel { get; }
 
-        double PrevInPoint { get; set; }
-
-        double PrevOutPoint { get; set; }
-
-        double PrevSourceStartPoint { get; set; }
-
         bool HasRenderEveryFrameEffect { get; set; }
 
         public LayerModel(CompositionModel compositionModel, FootageModel footageModel, EffectListModel effectListModel, HistoryModel historyModel, AcceleratorModel acceleratorModel) : this(compositionModel, footageModel, effectListModel, historyModel, acceleratorModel, null) { }
@@ -1172,26 +1166,9 @@ namespace NiVE3.Model
             GetTransform(time).CalcHash(hash);
         }
 
-        public void BeginEditDuration()
+        public void CommitEditDuration(double prevInPoint, double inPoint, double prevOutPoint, double outPoint, double prevSourceStartPoint, double sourceStartPoint)
         {
-            PrevInPoint = InPoint;
-            PrevOutPoint = OutPoint;
-            PrevSourceStartPoint = SourceStartPoint;
-        }
-
-        public void CommitEditDuration()
-        {
-            if (PrevInPoint != InPoint || PrevOutPoint != OutPoint || PrevSourceStartPoint != SourceStartPoint)
-            {
-                HistoryModel.Add(new EditDurationHistoryCommand(this, PrevInPoint, PrevOutPoint, PrevSourceStartPoint, InPoint, OutPoint, SourceStartPoint));
-            }
-        }
-
-        public void AbortEditDuration()
-        {
-            InPoint = PrevInPoint;
-            OutPoint = PrevOutPoint;
-            SourceStartPoint = PrevSourceStartPoint;
+            HistoryModel.Add(new EditDurationHistoryCommand(this, prevInPoint, prevOutPoint, prevSourceStartPoint, inPoint, outPoint, sourceStartPoint));
         }
 
         public void ChangeName(string name)

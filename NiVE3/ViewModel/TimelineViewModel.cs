@@ -26,7 +26,7 @@ using NiVE3.View.Dock;
 using NiVE3.View.Primitive;
 using NiVE3.View.Resource;
 using NiVE3.ViewModel.Dialog;
-using NiVE3.ViewModel.PreviewManipulation;
+using NiVE3.ViewModel.TimelineEditing;
 using NiVE3.Shared.Extension;
 using Prism.Commands;
 using Prism.Services.Dialogs;
@@ -488,7 +488,13 @@ namespace NiVE3.ViewModel
 
         bool IsUsingTool { get; set; }
 
+        bool IsEditingDuration { get; set; }
+
+        bool IsEditingAny => IsUsingTool || IsEditingDuration;
+
         PreviewManipulationStateBase? PreviewManipulation { get; set; }
+
+        DurationManipulationStateBase? DurationManipulation { get; set; }
 
         public TimelineViewModel(ViewStateModel viewState, EffectListStateModel effectListStateModel, AudioPlayerModel audioPlayerModel, HistoryModel historyModel, EventHubModel eventHubModel, IDialogService dialogService)
         {
@@ -518,6 +524,9 @@ namespace NiVE3.ViewModel
             eventHubModel.MoveLayersByToolRequest += EventHubModel_MoveLayersByToolRequest;
             eventHubModel.AbortUseToolRequest += EventHubModel_AbortUseToolRequest;
             eventHubModel.AddEffectToSelectedLayers += EventHubModel_AddEffectToSelectedLayers;
+            eventHubModel.BeginEditDurationRequest += EventHubModel_BeginEditDurationRequest;
+            eventHubModel.UpdateDurationRequest += EventHubModel_UpdateDurationRequest;
+            eventHubModel.AbortEditDurationRequest += EventHubModel_AbortEditDurationRequest;
             PropertyChanged += TimelineViewModel_PropertyChanged;
 
             ChangeEnableShyCommand = new DelegateCommand(() => CompositionModel?.ChangeEnableShy(), () => CompositionModel != null).ObservesProperty(() => CompositionModel);
@@ -956,9 +965,67 @@ namespace NiVE3.ViewModel
 
         partial void UnbindComposition();
 
+        private void EventHubModel_AbortEditDurationRequest(object? sender, AbortEditDurationEventArgs e)
+        {
+            if (!IsEditingDuration || CompositionModel == null || Layers == null || e.CompositionId != CompositionId || DurationManipulation == null)
+            {
+                return;
+            }
+
+            DurationManipulation.Abort();
+            IsEditingDuration = false;
+            DurationManipulation = null;
+        }
+
+        private void EventHubModel_UpdateDurationRequest(object? sender, UpdateDurationEventArgs e)
+        {
+            if (!IsEditingDuration || CompositionModel == null || Layers == null || e.CompositionId != CompositionId || DurationManipulation == null)
+            {
+                return;
+            }
+
+            if (e.IsCommit)
+            {
+                DurationManipulation.Commit(e.InPointDiff, e.OutPointDiff, e.SourceStartPointDiff);
+                IsEditingDuration = false;
+                DurationManipulation = null;
+            }
+            else
+            {
+                DurationManipulation.Update(e.InPointDiff, e.OutPointDiff, e.SourceStartPointDiff);
+            }
+        }
+
+        private void EventHubModel_BeginEditDurationRequest(object? sender, BeginEditDurationEventArgs e)
+        {
+            if (IsEditingAny || CompositionModel == null || Layers == null || e.CompositionId != CompositionId || Layers.All(l => l.LayerId != e.LayerId))
+            {
+                return;
+            }
+
+            var targetLayers = (SelectedLayers?.Any(l => l.LayerId == e.LayerId) ?? false) ? SelectedLayers.ToArray() : [Layers.First(l => l.LayerId == e.LayerId)];
+            switch (e.Type)
+            {
+                case BeginEditDurationEventArgs.DurationType.InPoint:
+                    DurationManipulation = new InPointDurationManipulationState(CompositionModel, targetLayers, HistoryModel);
+                    break;
+                case BeginEditDurationEventArgs.DurationType.OutPoint:
+                    DurationManipulation = new OutPointDurationManipulationState(CompositionModel, targetLayers, HistoryModel);
+                    break;
+                case BeginEditDurationEventArgs.DurationType.SourceStartPoint:
+                    DurationManipulation = new SourceStartPointDurationManipulationState(CompositionModel, targetLayers, HistoryModel);
+                    break;
+                case BeginEditDurationEventArgs.DurationType.Slip:
+                    DurationManipulation = new SlipDurationManipulationState(CompositionModel, targetLayers, HistoryModel);
+                    break;
+            }
+
+            IsEditingDuration = DurationManipulation != null;
+        }
+
         private void EventHubModel_AddEffectToSelectedLayers(object? sender, AddEffectEventArgs e)
         {
-            if (IsUsingTool || CompositionModel == null || Layers == null || e.CompositionId != CompositionId)
+            if (IsEditingAny || CompositionModel == null || Layers == null || e.CompositionId != CompositionId)
             {
                 return;
             }
@@ -985,7 +1052,7 @@ namespace NiVE3.ViewModel
             }
         }
 
-        private void EventHubModel_AbortUseToolRequest(object? sender, AbortUseToolEvent e)
+        private void EventHubModel_AbortUseToolRequest(object? sender, AbortUseToolEventArgs e)
         {
             if (!IsUsingTool || CompositionModel == null || e.CompositionId != CompositionId || PreviewManipulation == null)
             {
@@ -997,7 +1064,7 @@ namespace NiVE3.ViewModel
             PreviewManipulation = null;
         }
 
-        private void EventHubModel_MoveLayersByToolRequest(object? sender, MoveLayersByToolEvent e)
+        private void EventHubModel_MoveLayersByToolRequest(object? sender, MoveLayersByToolEventArgs e)
         {
             if (!IsUsingTool || CompositionModel == null || e.CompositionId != CompositionId || PreviewManipulation == null)
             {
@@ -1016,9 +1083,9 @@ namespace NiVE3.ViewModel
             }
         }
 
-        private void EventHubModel_BeginUseToolRequest(object? sender, BeginUseToolEvent e)
+        private void EventHubModel_BeginUseToolRequest(object? sender, BeginUseToolEventArgs e)
         {
-            if (IsUsingTool || CompositionModel == null || Layers == null || e.CompositionId != CompositionId || (SelectedItemType != SelectItemType.Layer && e.Type.HasFlag(BeginUseToolEvent.PropertyType.LayerProperty)))
+            if (IsEditingAny || CompositionModel == null || Layers == null || e.CompositionId != CompositionId || (SelectedItemType != SelectItemType.Layer && e.Type.HasFlag(BeginUseToolEventArgs.PropertyType.LayerProperty)))
             {
                 return;
             }
@@ -1032,46 +1099,46 @@ namespace NiVE3.ViewModel
 
             switch (e.Type)
             {
-                case BeginUseToolEvent.PropertyType.Transform when imageLayers.Length > 0 && baseLayerSkeleton != null:
+                case BeginUseToolEventArgs.PropertyType.Transform when imageLayers.Length > 0 && baseLayerSkeleton != null:
                     PreviewManipulation = new PositionPreviewManipulationState(imageLayers, baseLayerSkeleton, CurrentTime, CompositionModel, cameraSetting, e.StartScreenPosition, HistoryModel);
                     break;
-                case BeginUseToolEvent.PropertyType.RotateAll when imageLayers.Length > 0 && !baseLayerIs3D && baseLayerSkeleton != null:
-                case BeginUseToolEvent.PropertyType.RotateX when imageLayers.Length > 0 &&!baseLayerIs3D && baseLayerSkeleton != null:
-                case BeginUseToolEvent.PropertyType.RotateY when imageLayers.Length > 0 && !baseLayerIs3D && baseLayerSkeleton != null:
-                case BeginUseToolEvent.PropertyType.RotateZ when imageLayers.Length > 0 && baseLayerSkeleton != null:
+                case BeginUseToolEventArgs.PropertyType.RotateAll when imageLayers.Length > 0 && !baseLayerIs3D && baseLayerSkeleton != null:
+                case BeginUseToolEventArgs.PropertyType.RotateX when imageLayers.Length > 0 &&!baseLayerIs3D && baseLayerSkeleton != null:
+                case BeginUseToolEventArgs.PropertyType.RotateY when imageLayers.Length > 0 && !baseLayerIs3D && baseLayerSkeleton != null:
+                case BeginUseToolEventArgs.PropertyType.RotateZ when imageLayers.Length > 0 && baseLayerSkeleton != null:
                     PreviewManipulation = new RotateZPreviewManipulationState(imageLayers, baseLayerSkeleton, CurrentTime, CompositionModel, cameraSetting, e.StartScreenPosition, HistoryModel);
                     break;
-                case BeginUseToolEvent.PropertyType.RotateAll when baseLayerSkeleton != null:
+                case BeginUseToolEventArgs.PropertyType.RotateAll when baseLayerSkeleton != null:
                     imageLayers = [..imageLayers.Where(l => l.IsEnable3D)];
                     if (imageLayers.Length > 0)
                     {
                         PreviewManipulation = new RotateAllPreviewManipulationState(imageLayers, CurrentTime, CompositionModel, cameraSetting, e.StartScreenPosition, HistoryModel);
                     }
                     break;
-                case BeginUseToolEvent.PropertyType.RotateX:
+                case BeginUseToolEventArgs.PropertyType.RotateX:
                     imageLayers = [.. imageLayers.Where(l => l.IsEnable3D)];
                     if (imageLayers.Length > 0)
                     {
                         PreviewManipulation = new RotateXPreviewManipulationState(imageLayers, CurrentTime, CompositionModel, cameraSetting, e.StartScreenPosition, HistoryModel);
                     }
                     break;
-                case BeginUseToolEvent.PropertyType.RotateY:
+                case BeginUseToolEventArgs.PropertyType.RotateY:
                     imageLayers = [.. imageLayers.Where(l => l.IsEnable3D)];
                     if (imageLayers.Length > 0)
                     {
                         PreviewManipulation = new RotateYPreviewManipulationState(imageLayers, CurrentTime, CompositionModel, cameraSetting, e.StartScreenPosition, HistoryModel);
                     }
                     break;
-                case BeginUseToolEvent.PropertyType.Scale when imageLayers.Length > 0 && baseLayerSkeleton != null:
+                case BeginUseToolEventArgs.PropertyType.Scale when imageLayers.Length > 0 && baseLayerSkeleton != null:
                     PreviewManipulation = new ScalePreviewManipulationState(imageLayers, baseLayerSkeleton, CurrentTime, CompositionModel, cameraSetting, e.StartScreenPosition, HistoryModel);
                     break;
-                case BeginUseToolEvent.PropertyType.CameraOrbit when activeCameraId != null:
+                case BeginUseToolEventArgs.PropertyType.CameraOrbit when activeCameraId != null:
                     PreviewManipulation = new CameraOrbitPreviewManipulationState(Layers.First(l => l.LayerId == activeCameraId), CurrentTime, CompositionModel, cameraSetting, e.StartScreenPosition, HistoryModel);
                     break;
-                case BeginUseToolEvent.PropertyType.CameraPan when activeCameraId != null:
+                case BeginUseToolEventArgs.PropertyType.CameraPan when activeCameraId != null:
                     PreviewManipulation = new CameraPanPreviewManipulationState(Layers.First(l => l.LayerId == activeCameraId), CurrentTime, CompositionModel, cameraSetting, e.StartScreenPosition, HistoryModel);
                     break;
-                case BeginUseToolEvent.PropertyType.CameraDolly when activeCameraId != null:
+                case BeginUseToolEventArgs.PropertyType.CameraDolly when activeCameraId != null:
                     PreviewManipulation = new CameraDollyPreviewManipulationState(Layers.First(l => l.LayerId == activeCameraId), CurrentTime, CompositionModel, cameraSetting, e.StartScreenPosition, HistoryModel);
                     break;
             }

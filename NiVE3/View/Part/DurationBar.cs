@@ -8,6 +8,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using NiVE3.Extension;
+using NiVE3.Model;
 using NiVE3.Util;
 using NiVE3.View.Resource;
 
@@ -102,8 +103,8 @@ namespace NiVE3.View.Part
             new FrameworkPropertyMetadata(null)
         );
 
-        public static readonly DependencyProperty EndEditDurationCommandProperty = DependencyProperty.Register(
-            nameof(EndEditDurationCommand),
+        public static readonly DependencyProperty UpdateDurationCommandProperty = DependencyProperty.Register(
+            nameof(UpdateDurationCommand),
             typeof(ICommand),
             typeof(DurationBar),
             new FrameworkPropertyMetadata(null)
@@ -122,10 +123,10 @@ namespace NiVE3.View.Part
             set { SetValue(AbortEditDurationCommandProperty, value); }
         }
 
-        public ICommand? EndEditDurationCommand
+        public ICommand? UpdateDurationCommand
         {
-            get { return (ICommand)GetValue(EndEditDurationCommandProperty); }
-            set { SetValue(EndEditDurationCommandProperty, value); }
+            get { return (ICommand)GetValue(UpdateDurationCommandProperty); }
+            set { SetValue(UpdateDurationCommandProperty, value); }
         }
 
         public ICommand? BeginEditDurationCommand
@@ -263,8 +264,7 @@ namespace NiVE3.View.Part
                 EditMode = DurationEditMode.None;
                 IsClicked = false;
                 ReleaseMouseCapture();
-                Keyboard.ClearFocus();
-                EndEditDurationCommand?.Execute(null);
+                UpdateDurationCommand?.Execute(Tuple.Create(0.0, 0.0, 0.0, true));
                 e.Handled = true;
             }
         }
@@ -287,17 +287,15 @@ namespace NiVE3.View.Part
                                 var prev = InPoint;
                                 var newTime = TimeCalc.AlignRound(globalTime, frameRate) - SourceStartPoint;
                                 var max = TimeCalc.AlignFloor(OutPoint - frameDuration, frameRate);
+                                var newInPoint = Math.Min(newTime, max);
                                 if (HasDuration && !IsEnableTimeRemap)
                                 {
                                     max = Math.Max(max, 0.0);
-                                    InPoint = Math.Min(Math.Max(newTime, 0.0), max);
+                                    newInPoint = Math.Min(Math.Max(newTime, 0.0), max);
                                 }
-                                else
-                                {
-                                    InPoint = Math.Min(newTime, max);
-                                }
-                                changed = prev != InPoint;
-                                diffTime = InPoint - prev;
+                                changed = prev != newInPoint;
+                                diffTime = newInPoint - prev;
+                                UpdateDurationCommand?.Execute(Tuple.Create(diffTime, 0.0, 0.0, false));
                             }
                             break;
                         case DurationEditMode.OutPoint:
@@ -305,26 +303,25 @@ namespace NiVE3.View.Part
                                 var prev = OutPoint;
                                 var newTime = TimeCalc.AlignRound(globalTime, frameRate) - SourceStartPoint;
                                 var min = TimeCalc.AlignFloor(InPoint + frameDuration, frameRate);
+                                var newOutPoint = Math.Max(newTime, min);
                                 if (HasDuration && !IsEnableTimeRemap)
                                 {
                                     min = Math.Min(min, Duration);
-                                    OutPoint = Math.Min(Math.Max(newTime, min), Duration);
+                                    newOutPoint = Math.Min(Math.Max(newTime, min), Duration);
                                 }
-                                else
-                                {
-                                    OutPoint = Math.Max(newTime, min);
-                                }
-                                changed = prev != OutPoint;
-                                diffTime = OutPoint - prev;
+                                changed = prev != newOutPoint;
+                                diffTime = newOutPoint - prev;
+                                UpdateDurationCommand?.Execute(Tuple.Create(0.0, diffTime, 0.0, false));
                             }
                             break;
                         case DurationEditMode.SourceStartPoint:
                             {
                                 var subFrameTime = SourceStartPoint - TimeCalc.AlignFloor(SourceStartPoint, frameRate);
                                 var prev = SourceStartPoint;
-                                SourceStartPoint = TimeCalc.AlignFloor(SourceStartPoint + diffTime, frameRate) + subFrameTime;
-                                diffTime = SourceStartPoint - prev;
-                                changed = prev != SourceStartPoint;
+                                var newSourceStartPoint = TimeCalc.AlignFloor(SourceStartPoint + diffTime, frameRate) + subFrameTime;
+                                diffTime = newSourceStartPoint - prev;
+                                changed = prev != newSourceStartPoint;
+                                UpdateDurationCommand?.Execute(Tuple.Create(0.0, 0.0, diffTime, false));
                             }
                             break;
                         case DurationEditMode.Slip:
@@ -346,9 +343,7 @@ namespace NiVE3.View.Part
                                 }
                                 if (InPoint != newInPoint && OutPoint != newOutPoint)
                                 {
-                                    SourceStartPoint += diffTime;
-                                    InPoint = newInPoint;
-                                    OutPoint = newOutPoint;
+                                    UpdateDurationCommand?.Execute(Tuple.Create(0.0, 0.0, diffTime, false));
                                     changed = true;
                                 }
                             }
@@ -409,7 +404,7 @@ namespace NiVE3.View.Part
                 IsClicked = true;
                 Keyboard.Focus(this);
                 CaptureMouse();
-                BeginEditDurationCommand?.Execute(null);
+                BeginEditDurationCommand?.Execute(BeginEditDurationEventArgs.DurationType.InPoint);
                 e.Handled = true;
                 return;
             }
@@ -421,7 +416,7 @@ namespace NiVE3.View.Part
                 IsClicked = true;
                 Keyboard.Focus(this);
                 CaptureMouse();
-                BeginEditDurationCommand?.Execute(null);
+                BeginEditDurationCommand?.Execute(BeginEditDurationEventArgs.DurationType.OutPoint);
                 e.Handled = true;
                 return;
             }
@@ -432,7 +427,7 @@ namespace NiVE3.View.Part
                 IsClicked = true;
                 Keyboard.Focus(this);
                 CaptureMouse();
-                BeginEditDurationCommand?.Execute(null);
+                BeginEditDurationCommand?.Execute(BeginEditDurationEventArgs.DurationType.SourceStartPoint);
                 e.Handled = true;
                 return;
             }
@@ -450,7 +445,7 @@ namespace NiVE3.View.Part
                 IsClicked = true;
                 Keyboard.Focus(this);
                 CaptureMouse();
-                BeginEditDurationCommand?.Execute(null);
+                BeginEditDurationCommand?.Execute(BeginEditDurationEventArgs.DurationType.Slip);
                 e.Handled = true;
             }
         }

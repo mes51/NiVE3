@@ -416,15 +416,15 @@ namespace NiVE3.ViewModel
 
                 var propertyType = ToolType switch
                 {
-                    ToolType.Select => BeginUseToolEvent.PropertyType.Transform,
-                    ToolType.RotateAll => BeginUseToolEvent.PropertyType.RotateAll,
-                    ToolType.RotateX => BeginUseToolEvent.PropertyType.RotateX,
-                    ToolType.RotateY => BeginUseToolEvent.PropertyType.RotateY,
-                    ToolType.RotateZ => BeginUseToolEvent.PropertyType.RotateZ,
-                    ToolType.Scale => BeginUseToolEvent.PropertyType.Scale,
-                    ToolType.CameraOrbit => BeginUseToolEvent.PropertyType.CameraOrbit,
-                    ToolType.CameraPan => BeginUseToolEvent.PropertyType.CameraPan,
-                    ToolType.CameraDolly => BeginUseToolEvent.PropertyType.CameraDolly,
+                    ToolType.Select => BeginUseToolEventArgs.PropertyType.Transform,
+                    ToolType.RotateAll => BeginUseToolEventArgs.PropertyType.RotateAll,
+                    ToolType.RotateX => BeginUseToolEventArgs.PropertyType.RotateX,
+                    ToolType.RotateY => BeginUseToolEventArgs.PropertyType.RotateY,
+                    ToolType.RotateZ => BeginUseToolEventArgs.PropertyType.RotateZ,
+                    ToolType.Scale => BeginUseToolEventArgs.PropertyType.Scale,
+                    ToolType.CameraOrbit => BeginUseToolEventArgs.PropertyType.CameraOrbit,
+                    ToolType.CameraPan => BeginUseToolEventArgs.PropertyType.CameraPan,
+                    ToolType.CameraDolly => BeginUseToolEventArgs.PropertyType.CameraDolly,
                     _ => throw new Exception() // bug
                 };
                 IsUsingTool = true;

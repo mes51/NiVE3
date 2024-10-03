@@ -507,7 +507,15 @@ namespace NiVE3.ViewModel
 
         public bool HasAudio => SourceType.HasFlag(SourceType.Audio);
 
+        public bool HasDuration => HasAudio || SourceType.HasFlag(SourceType.Video);
+
         public INameEditableViewModel? TargetChild => SelectedEffects.FirstOrDefault();
+
+        public ICommand BeginEditDurationRequestCommand { get; }
+
+        public ICommand UpdateDurationRequestCommand { get; }
+
+        public ICommand AbortEditDurationRequestCommand { get; }
 
         public ICommand BeginEditDurationCommand { get; }
 
@@ -627,6 +635,12 @@ namespace NiVE3.ViewModel
 
         string PrevComment { get; set; } = "";
 
+        double PrevInPoint { get; set; }
+
+        double PrevOutPoint { get; set; }
+
+        double PrevSourceStartPoint { get; set; }
+
 #pragma warning disable CS8618 // 各フィールドには初期化時に必ず値を代入するため無視
         public LayerViewModel(LayerModel layerModel, ViewStateModel viewState, EventHubModel eventHubModel, IEnumerable<LayerModelProxy> trackMatteViewSource, IEnumerable<LayerModelProxy> parentLayerViewSource)
 #pragma warning restore CS8618
@@ -690,21 +704,43 @@ namespace NiVE3.ViewModel
             PropertyNameAreaWidth = (IsLayerNumberColumnVisible ? LayerNumberColumnWidth : 0.0) + LayerNameColumnWidth;
             IsComposition = layerModel.IsComposition;
 
+            BeginEditDurationRequestCommand = new DelegateCommand<BeginEditDurationEventArgs.DurationType?>(type =>
+            {
+                EventHubModel.NotifyBeginEditDuration(LayerModel.ParentCompositionId, LayerId, type ?? BeginEditDurationEventArgs.DurationType.None);
+            }, _ => EditingParameter == EditingLayerParameter.None).ObservesProperty(() => EditingParameter);
+
+            UpdateDurationRequestCommand = new DelegateCommand<Tuple<double, double, double, bool>>(t =>
+            {
+                EventHubModel.NotifyUpdateDuration(LayerModel.ParentCompositionId, t.Item1, t.Item2, t.Item3, t.Item4);
+            }, _ => EditingParameter == EditingLayerParameter.Duration).ObservesProperty(() => EditingParameter);
+
+            AbortEditDurationRequestCommand = new DelegateCommand(() =>
+            {
+                eventHubModel.NotifyAbortEditDuration(LayerModel.ParentCompositionId);
+            }, () => EditingParameter == EditingLayerParameter.Duration).ObservesProperty(() => EditingParameter);
+
             BeginEditDurationCommand = new DelegateCommand(() =>
             {
-                LayerModel.BeginEditDuration();
+                PrevInPoint = InPoint;
+                PrevOutPoint = OutPoint;
+                PrevSourceStartPoint = SourceStartPoint;
                 EditingParameter = EditingLayerParameter.Duration;
             }, () => EditingParameter == EditingLayerParameter.None).ObservesProperty(() => EditingParameter);
 
             CommitEditDurationCommand = new DelegateCommand(() =>
             {
-                LayerModel.CommitEditDuration();
+                if (InPoint != PrevInPoint || OutPoint != PrevOutPoint || SourceStartPoint != PrevSourceStartPoint)
+                {
+                    LayerModel.CommitEditDuration(PrevInPoint, InPoint, PrevOutPoint, OutPoint, PrevSourceStartPoint, SourceStartPoint);
+                }
                 EditingParameter = EditingLayerParameter.None;
             }, () => EditingParameter == EditingLayerParameter.Duration).ObservesProperty(() => EditingParameter);
 
             AbortEditDurationCommand = new DelegateCommand(() =>
             {
-                LayerModel.AbortEditDuration();
+                InPoint = PrevInPoint;
+                OutPoint = PrevOutPoint;
+                SourceStartPoint = PrevSourceStartPoint;
                 EditingParameter = EditingLayerParameter.None;
             }, () => EditingParameter == EditingLayerParameter.Duration).ObservesProperty(() => EditingParameter);
 

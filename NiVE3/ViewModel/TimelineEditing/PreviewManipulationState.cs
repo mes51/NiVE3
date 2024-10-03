@@ -12,7 +12,7 @@ using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Interfaces.RendererParams;
 using NiVE3.View.Resource;
 
-namespace NiVE3.ViewModel.PreviewManipulation
+namespace NiVE3.ViewModel.TimelineEditing
 {
     abstract class PreviewManipulationStateBase
     {

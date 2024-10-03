@@ -513,7 +513,7 @@ namespace NiVE3.ViewModel
             }
         }
 
-        private void EventHubModel_SelectLayerRequest(object? sender, SelectLayerEvent e)
+        private void EventHubModel_SelectLayerRequest(object? sender, SelectLayerEventArgs e)
         {
             var viewModel = ViewModels.OfType<TimelineViewModel>().FirstOrDefault(t => t.CompositionModel != null && t.CompositionId == e.CompositionId);
             if (viewModel != null)

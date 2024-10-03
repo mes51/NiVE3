@@ -12,29 +12,29 @@ namespace NiVE3.Model.UI
 {
     class EventHubModel : BindableBase
     {
-        WeakEventPublisher<SelectLayerEvent> SelectLayerRequestPublisher { get; } = new WeakEventPublisher<SelectLayerEvent>();
-        public event EventHandler<SelectLayerEvent> SelectLayerRequest
+        WeakEventPublisher<SelectLayerEventArgs> SelectLayerRequestPublisher { get; } = new WeakEventPublisher<SelectLayerEventArgs>();
+        public event EventHandler<SelectLayerEventArgs> SelectLayerRequest
         {
             add { SelectLayerRequestPublisher.Subscribe(value); }
             remove { SelectLayerRequestPublisher.Unsubscribe(value); }
         }
 
-        WeakEventPublisher<BeginUseToolEvent> BeginUseToolRequestPublisher { get; } = new WeakEventPublisher<BeginUseToolEvent>();
-        public event EventHandler<BeginUseToolEvent> BeginUseToolRequest
+        WeakEventPublisher<BeginUseToolEventArgs> BeginUseToolRequestPublisher { get; } = new WeakEventPublisher<BeginUseToolEventArgs>();
+        public event EventHandler<BeginUseToolEventArgs> BeginUseToolRequest
         {
             add { BeginUseToolRequestPublisher.Subscribe(value); }
             remove { BeginUseToolRequestPublisher.Unsubscribe(value); }
         }
 
-        WeakEventPublisher<MoveLayersByToolEvent> MoveLayersByToolRequestPublisher { get; } = new WeakEventPublisher<MoveLayersByToolEvent>();
-        public event EventHandler<MoveLayersByToolEvent> MoveLayersByToolRequest
+        WeakEventPublisher<MoveLayersByToolEventArgs> MoveLayersByToolRequestPublisher { get; } = new WeakEventPublisher<MoveLayersByToolEventArgs>();
+        public event EventHandler<MoveLayersByToolEventArgs> MoveLayersByToolRequest
         {
             add { MoveLayersByToolRequestPublisher.Subscribe(value); }
             remove { MoveLayersByToolRequestPublisher.Unsubscribe(value); }
         }
 
-        WeakEventPublisher<AbortUseToolEvent> AbortUseToolRequestPublisher { get; } = new WeakEventPublisher<AbortUseToolEvent>();
-        public event EventHandler<AbortUseToolEvent> AbortUseToolRequest
+        WeakEventPublisher<AbortUseToolEventArgs> AbortUseToolRequestPublisher { get; } = new WeakEventPublisher<AbortUseToolEventArgs>();
+        public event EventHandler<AbortUseToolEventArgs> AbortUseToolRequest
         {
             add { AbortUseToolRequestPublisher.Subscribe(value); }
             remove { AbortUseToolRequestPublisher.Unsubscribe(value); }
@@ -47,29 +47,65 @@ namespace NiVE3.Model.UI
             remove { AddEffectToSelectedLayersPublisher.Unsubscribe(value); }
         }
 
-        public void NotifySelectLayer(Guid compositionId, Guid? layerId)
+        WeakEventPublisher<BeginEditDurationEventArgs> BeginEditDurationRequestPublisher { get; } = new WeakEventPublisher<BeginEditDurationEventArgs>();
+        public event EventHandler<BeginEditDurationEventArgs> BeginEditDurationRequest
         {
-            SelectLayerRequestPublisher.Publish(this, new SelectLayerEvent(compositionId, layerId));
+            add { BeginEditDurationRequestPublisher.Subscribe(value); }
+            remove { BeginEditDurationRequestPublisher.Unsubscribe(value); }
         }
 
-        public void NotifyBeginUseTool(Guid compositionId, Vector2d startScreenPos, BeginUseToolEvent.PropertyType propertyType)
+        WeakEventPublisher<UpdateDurationEventArgs> UpdateDurationRequestPublisher { get; } = new WeakEventPublisher<UpdateDurationEventArgs>();
+        public event EventHandler<UpdateDurationEventArgs> UpdateDurationRequest
         {
-            BeginUseToolRequestPublisher.Publish(this, new BeginUseToolEvent(compositionId, startScreenPos, propertyType));
+            add { UpdateDurationRequestPublisher.Subscribe(value); }
+            remove { UpdateDurationRequestPublisher.Unsubscribe(value); }
+        }
+
+        WeakEventPublisher<AbortEditDurationEventArgs> AbortEditDurationRequestPublisher { get; } = new WeakEventPublisher<AbortEditDurationEventArgs>();
+        public event EventHandler<AbortEditDurationEventArgs> AbortEditDurationRequest
+        {
+            add { AbortEditDurationRequestPublisher.Subscribe(value); }
+            remove { AbortEditDurationRequestPublisher.Unsubscribe(value); }
+        }
+
+        public void NotifySelectLayer(Guid compositionId, Guid? layerId)
+        {
+            SelectLayerRequestPublisher.Publish(this, new SelectLayerEventArgs(compositionId, layerId));
+        }
+
+        public void NotifyBeginUseTool(Guid compositionId, Vector2d startScreenPos, BeginUseToolEventArgs.PropertyType propertyType)
+        {
+            BeginUseToolRequestPublisher.Publish(this, new BeginUseToolEventArgs(compositionId, startScreenPos, propertyType));
         }
 
         public void NotifyMoveLayersByTool(Guid compositionId, Vector2d nextScreenPos, bool isCommit)
         {
-            MoveLayersByToolRequestPublisher.Publish(this, new MoveLayersByToolEvent(compositionId, nextScreenPos, isCommit));
+            MoveLayersByToolRequestPublisher.Publish(this, new MoveLayersByToolEventArgs(compositionId, nextScreenPos, isCommit));
         }
 
         public void NotifyAbortUseTool(Guid compositionId)
         {
-            AbortUseToolRequestPublisher.Publish(this, new AbortUseToolEvent(compositionId));
+            AbortUseToolRequestPublisher.Publish(this, new AbortUseToolEventArgs(compositionId));
         }
 
         public void NotifyAddEffectToSelectedLayers(Guid compositionId, Guid? targetLayerId, Guid[] effectPluginIds)
         {
             AddEffectToSelectedLayersPublisher.Publish(this, new AddEffectEventArgs(compositionId, targetLayerId, effectPluginIds));
+        }
+
+        public void NotifyBeginEditDuration(Guid compositionId, Guid layerId, BeginEditDurationEventArgs.DurationType durationType)
+        {
+            BeginEditDurationRequestPublisher.Publish(this, new BeginEditDurationEventArgs(compositionId, layerId, durationType));
+        }
+
+        public void NotifyUpdateDuration(Guid compositionId, double inPointDiff, double outPointDiff, double sourceStartPointDiff, bool isCommit)
+        {
+            UpdateDurationRequestPublisher.Publish(this, new UpdateDurationEventArgs(compositionId, inPointDiff, outPointDiff, sourceStartPointDiff, isCommit));
+        }
+
+        public void NotifyAbortEditDuration(Guid compositionId)
+        {
+            AbortEditDurationRequestPublisher.Publish(this, new AbortEditDurationEventArgs(compositionId));
         }
     }
 }

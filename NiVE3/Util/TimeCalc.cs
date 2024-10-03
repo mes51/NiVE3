@@ -38,7 +38,7 @@ namespace NiVE3.Util
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double AlignFloor(double time, double frameRate)
         {
-            return (int)(time * frameRate) / frameRate;
+            return (int)Math.Round(time * frameRate, TimeDigit) / frameRate;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

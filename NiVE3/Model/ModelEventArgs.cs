@@ -53,20 +53,20 @@ namespace NiVE3.Model
         public IFootageModel[] Footages { get; }
     }
 
-    class SelectLayerEvent : EventArgs
+    class SelectLayerEventArgs : EventArgs
     {
         public Guid CompositionId { get; }
 
         public Guid? LayerId { get; }
 
-        public SelectLayerEvent(Guid compositionId, Guid? layerId)
+        public SelectLayerEventArgs(Guid compositionId, Guid? layerId)
         {
             CompositionId = compositionId;
             LayerId = layerId;
         }
     }
 
-    class BeginUseToolEvent : EventArgs
+    class BeginUseToolEventArgs : EventArgs
     {
         public Guid CompositionId { get; }
 
@@ -74,7 +74,7 @@ namespace NiVE3.Model
 
         public PropertyType Type { get; }
 
-        public BeginUseToolEvent(Guid compositionId, Vector2d startScreenPosition, PropertyType type)
+        public BeginUseToolEventArgs(Guid compositionId, Vector2d startScreenPosition, PropertyType type)
         {
             CompositionId = compositionId;
             StartScreenPosition = startScreenPosition;
@@ -99,7 +99,7 @@ namespace NiVE3.Model
         }
     }
 
-    class MoveLayersByToolEvent : EventArgs
+    class MoveLayersByToolEventArgs : EventArgs
     {
         public Guid CompositionId { get; }
 
@@ -107,7 +107,7 @@ namespace NiVE3.Model
 
         public bool IsCommit { get; }
 
-        public MoveLayersByToolEvent(Guid compositionId, Vector2d nextScreenPos, bool isCommit)
+        public MoveLayersByToolEventArgs(Guid compositionId, Vector2d nextScreenPos, bool isCommit)
         {
             CompositionId = compositionId;
             NextScreenPos = nextScreenPos;
@@ -115,11 +115,11 @@ namespace NiVE3.Model
         }
     }
 
-    class AbortUseToolEvent : EventArgs
+    class AbortUseToolEventArgs : EventArgs
     {
         public Guid CompositionId { get; }
 
-        public AbortUseToolEvent(Guid compositionId)
+        public AbortUseToolEventArgs(Guid compositionId)
         {
             CompositionId = compositionId;
         }
@@ -138,6 +138,63 @@ namespace NiVE3.Model
             CompositionId = compositionId;
             TargetLayerId = targetLayerId;
             EffectPluginIds = effectPluginIds;
+        }
+    }
+
+    class BeginEditDurationEventArgs : EventArgs
+    {
+        public Guid CompositionId { get; }
+
+        public Guid LayerId { get; }
+
+        public DurationType Type { get; }
+
+        public BeginEditDurationEventArgs(Guid compositionId, Guid layerId, DurationType type)
+        {
+            CompositionId = compositionId;
+            LayerId = layerId;
+            Type = type;
+        }
+
+        public enum DurationType
+        {
+            None,
+            InPoint,
+            OutPoint,
+            SourceStartPoint,
+            Slip
+        }
+    }
+
+    class UpdateDurationEventArgs : EventArgs
+    {
+        public Guid CompositionId { get; }
+
+        public double InPointDiff { get; }
+
+        public double OutPointDiff { get; }
+
+        public double SourceStartPointDiff { get; }
+
+        public bool IsCommit { get; }
+
+        public UpdateDurationEventArgs(Guid compositionId, double inPointDiff, double outPointDiff, double sourceStartPointDiff, bool isCommit)
+        {
+            CompositionId = compositionId;
+            InPointDiff = inPointDiff;
+            OutPointDiff = outPointDiff;
+            SourceStartPointDiff = sourceStartPointDiff;
+            IsCommit = isCommit;
+        }
+    }
+
+    class AbortEditDurationEventArgs : EventArgs
+    {
+        public Guid CompositionId { get; }
+
+        public AbortEditDurationEventArgs(Guid compositionId)
+        {
+            CompositionId = compositionId;
         }
     }
 }
