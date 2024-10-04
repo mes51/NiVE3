@@ -43,6 +43,10 @@ namespace NiVE3.Image.Color
                 _ when max == clamped.Y => (clamped.X - clamped.Z) / diff * 60.0F + 120.0F,
                 _ => (clamped.Y - clamped.X) / diff * 60.0F
             } : 0.0F;
+            if (hue < 0.0F)
+            {
+                hue += 360.0F;
+            }
             var saturation = max <= 0.0F ? 0.0F : (diff / max);
 
             return new Hsv(hue, saturation, max);

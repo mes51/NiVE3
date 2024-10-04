@@ -84,7 +84,7 @@
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
                 <RadioButton x:Name="HColorMap" Content="H:" IsChecked="{Binding ElementName=Root, Path=ColorPickType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static local:ColorPickType.H}, Mode=TwoWay}" Style="{StaticResource PickTypeRadioButton}"/>
-                <local:SlidableNumberTextBox x:Name="HValue" Grid.Column="1" Value="0" Maximum="360" Minimum="0" Digit="0" EndSlideEditValue="HSV_ValueChanged"/>
+                <local:SlidableNumberTextBox x:Name="HValue" Grid.Column="1" Value="{Binding ElementName=Root, Path=Hue}" Maximum="360" Minimum="0" Digit="0"/>
             </Grid>
             <Grid Margin="{StaticResource ValueMargin}">
                 <Grid.ColumnDefinitions>
@@ -92,7 +92,7 @@
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
                 <RadioButton x:Name="SColorMap" Content="S:" IsChecked="{Binding ElementName=Root, Path=ColorPickType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static local:ColorPickType.S}, Mode=TwoWay}" Style="{StaticResource PickTypeRadioButton}"/>
-                <local:SlidableNumberTextBox x:Name="SValue" Grid.Column="1" Value="100" Maximum="100" Minimum="0" Digit="0" EndSlideEditValue="HSV_ValueChanged"/>
+                <local:SlidableNumberTextBox x:Name="SValue" Grid.Column="1" Value="{Binding ElementName=Root, Path=Saturation}" Maximum="100" Minimum="0" Digit="0"/>
             </Grid>
             <Grid Margin="{StaticResource ValueMargin}">
                 <Grid.ColumnDefinitions>
@@ -100,7 +100,7 @@
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
                 <RadioButton x:Name="VColorMap" Content="B:" IsChecked="{Binding ElementName=Root, Path=ColorPickType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static local:ColorPickType.V}, Mode=TwoWay}" Style="{StaticResource PickTypeRadioButton}"/>
-                <local:SlidableNumberTextBox x:Name="VValue" Grid.Column="1" Value="100" Maximum="100" Minimum="0" Digit="0" EndSlideEditValue="HSV_ValueChanged"/>
+                <local:SlidableNumberTextBox x:Name="VValue" Grid.Column="1" Value="{Binding ElementName=Root, Path=Value}" Maximum="100" Minimum="0" Digit="0"/>
             </Grid>
             <Grid Margin="0,12,0,0">
                 <Grid.ColumnDefinitions>
@@ -108,7 +108,7 @@
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
                 <RadioButton x:Name="RColorMap" Content="R:" IsChecked="{Binding ElementName=Root, Path=ColorPickType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static local:ColorPickType.R}, Mode=TwoWay}" Style="{StaticResource PickTypeRadioButton}"/>
-                <local:SlidableNumberTextBox x:Name="RValue" Grid.Column="1" Value="255" Maximum="255" Minimum="0" Digit="0" EndSlideEditValue="RGB_ValueChanged"/>
+                <local:SlidableNumberTextBox x:Name="RValue" Grid.Column="1" Value="{Binding ElementName=Root, Path=Red}" Maximum="255" Minimum="0" Digit="0"/>
             </Grid>
             <Grid Margin="{StaticResource ValueMargin}">
                 <Grid.ColumnDefinitions>
@@ -116,7 +116,7 @@
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
                 <RadioButton x:Name="GColorMap" Content="G:" IsChecked="{Binding ElementName=Root, Path=ColorPickType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static local:ColorPickType.G}, Mode=TwoWay}" Style="{StaticResource PickTypeRadioButton}"/>
-                <local:SlidableNumberTextBox x:Name="GValue" Grid.Column="1" Value="255" Maximum="255" Minimum="0" Digit="0" EndSlideEditValue="RGB_ValueChanged"/>
+                <local:SlidableNumberTextBox x:Name="GValue" Grid.Column="1" Value="{Binding ElementName=Root, Path=Green}" Maximum="255" Minimum="0" Digit="0"/>
             </Grid>
             <Grid Margin="{StaticResource ValueMargin}">
                 <Grid.ColumnDefinitions>
@@ -124,7 +124,7 @@
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
                 <RadioButton x:Name="BColorMap" Content="B:" IsChecked="{Binding ElementName=Root, Path=ColorPickType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static local:ColorPickType.B}, Mode=TwoWay}" Style="{StaticResource PickTypeRadioButton}"/>
-                <local:SlidableNumberTextBox x:Name="BValue" Grid.Column="1" Value="255" Maximum="255" Minimum="0" Digit="0" EndSlideEditValue="RGB_ValueChanged"/>
+                <local:SlidableNumberTextBox x:Name="BValue" Grid.Column="1" Value="{Binding ElementName=Root, Path=Blue}" Maximum="255" Minimum="0" Digit="0"/>
             </Grid>
             <Grid Margin="0,12,0,0">
                 <Grid.ColumnDefinitions>
