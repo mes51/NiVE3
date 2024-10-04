@@ -19,8 +19,8 @@ using NiVE3.UI.Command;
 using NiVE3.View.Dialog;
 using NiVE3.View.Resource;
 using Prism.Commands;
+using Prism.Dialogs;
 using Prism.Mvvm;
-using Prism.Services.Dialogs;
 
 namespace NiVE3.ViewModel.Dialog
 {
@@ -185,7 +185,7 @@ namespace NiVE3.ViewModel.Dialog
 
         Int32Size CompositionSize { get; set; }
 
-        public event Action<IDialogResult>? RequestClose;
+        public DialogCloseListener RequestClose { get; }
 
         public RenderSettingViewModel(ProjectModel projectModel, OutputListModel outputListModel, IDialogService dialogService)
         {
@@ -248,7 +248,7 @@ namespace NiVE3.ViewModel.Dialog
                     { nameof(IsOutputAudio), outputSourceTypes.HasFlag(SourceType.Audio) }
                 };
 
-                RequestClose?.Invoke(new DialogResult(ButtonResult.OK, result));
+                RequestClose.Invoke(new DialogResult(ButtonResult.OK) { Parameters = result });
             }, () => GetOutputSourceType() != SourceType.None);
 
             CancelCommand = new DelegateCommand(() =>
@@ -258,7 +258,7 @@ namespace NiVE3.ViewModel.Dialog
                     Output.Dispose();
                 }
 
-                RequestClose?.Invoke(new DialogResult(ButtonResult.Cancel, null));
+                RequestClose.Invoke(new DialogResult(ButtonResult.Cancel));
             });
 
             PropertyChanged += RenderingSettingViewModel_PropertyChanged;

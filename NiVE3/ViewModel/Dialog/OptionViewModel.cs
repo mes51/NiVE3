@@ -12,8 +12,8 @@ using NiVE3.Config;
 using NiVE3.UI.Command;
 using NiVE3.View.Resource;
 using Prism.Commands;
+using Prism.Dialogs;
 using Prism.Mvvm;
-using Prism.Services.Dialogs;
 
 namespace NiVE3.ViewModel.Dialog
 {
@@ -25,7 +25,7 @@ namespace NiVE3.ViewModel.Dialog
 
         public string Title => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.OptionView_Title);
 
-        public event Action<IDialogResult>? RequestClose;
+        public DialogCloseListener RequestClose { get; }
 
         public ICommand ApplyCommand { get; }
 
@@ -106,10 +106,10 @@ namespace NiVE3.ViewModel.Dialog
             {
                 ApplySetting();
 
-                RequestClose?.Invoke(new DialogResult(ButtonResult.OK));
+                RequestClose.Invoke(new DialogResult(ButtonResult.OK));
             });
 
-            CancelCommand = new DelegateCommand(() => RequestClose?.Invoke(new DialogResult(ButtonResult.Cancel)));
+            CancelCommand = new DelegateCommand(() => RequestClose.Invoke(new DialogResult(ButtonResult.Cancel)));
 
             PropertyChanged += OptionViewModel_PropertyChanged;
         }

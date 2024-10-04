@@ -12,13 +12,13 @@ using NiVE3.View.Dock;
 using Prism.Mvvm;
 using System.Windows.Input;
 using NiVE3.UI.Command;
-using Prism.Services.Dialogs;
 using System.ComponentModel;
 using System.Threading;
 using System.Diagnostics;
 using System.Windows.Threading;
 using NiVE3.View.Resource;
 using Prism.Commands;
+using Prism.Dialogs;
 
 namespace NiVE3.ViewModel
 {

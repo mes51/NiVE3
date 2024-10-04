@@ -1,6 +1,6 @@
 ﻿using AvalonDock;
 using CommunityToolkit.Diagnostics;
-using Prism.Regions;
+using Prism.Navigation.Regions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +17,7 @@ namespace NiVE3.Region
 
         protected override IRegion CreateRegion()
         {
-            var region = new Prism.Regions.Region
+            var region = new Prism.Navigation.Regions.Region
             {
                 SortComparison = null
             };

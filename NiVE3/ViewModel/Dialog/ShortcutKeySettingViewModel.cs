@@ -18,8 +18,8 @@ using NiVE3.ValueObject;
 using NiVE3.View.Resource;
 using NiVE3.Wpf.Input;
 using Prism.Commands;
+using Prism.Dialogs;
 using Prism.Mvvm;
-using Prism.Services.Dialogs;
 
 namespace NiVE3.ViewModel.Dialog
 {
@@ -78,7 +78,7 @@ namespace NiVE3.ViewModel.Dialog
 
         public ICommand ChangeShortcutKeyCommand { get; }
 
-        public event Action<IDialogResult>? RequestClose;
+        public DialogCloseListener RequestClose { get; }
 
         public ShortcutKeySettingViewModel()
         {
@@ -93,10 +93,10 @@ namespace NiVE3.ViewModel.Dialog
                 }
                 ShortcutKeySetting.Setting.Save();
 
-                RequestClose?.Invoke(new DialogResult(ButtonResult.OK));
+                RequestClose.Invoke(new DialogResult(ButtonResult.OK));
             }, () => IsEdited && DuplicatedKeys.Values.All(k => k.Count < 1));
 
-            CancelCommand = new DelegateCommand(() => RequestClose?.Invoke(new DialogResult(ButtonResult.Cancel)));
+            CancelCommand = new DelegateCommand(() => RequestClose.Invoke(new DialogResult(ButtonResult.Cancel)));
 
             DeleteShortcutKeyCommand = new DelegateCommand<ShortcutKeyName>(name =>
             {

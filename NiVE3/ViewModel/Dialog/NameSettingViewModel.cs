@@ -7,8 +7,8 @@ using System.Windows;
 using System.Windows.Input;
 using NiVE3.View.Resource;
 using Prism.Commands;
+using Prism.Dialogs;
 using Prism.Mvvm;
-using Prism.Services.Dialogs;
 
 namespace NiVE3.ViewModel.Dialog
 {
@@ -49,11 +49,11 @@ namespace NiVE3.ViewModel.Dialog
             set { SetProperty(ref registeredNames, value); }
         }
 
-        public event Action<IDialogResult>? RequestClose;
-
         public ICommand OKCommand { get; }
 
         public ICommand CancelCommand { get; }
+
+        public DialogCloseListener RequestClose { get; }
 
         public NameSettingViewModel()
         {
@@ -72,10 +72,10 @@ namespace NiVE3.ViewModel.Dialog
                 {
                     { nameof(Name), Name }
                 };
-                RequestClose?.Invoke(new DialogResult(ButtonResult.OK, result));
+                RequestClose.Invoke(new DialogResult(ButtonResult.OK) { Parameters = result });
             });
 
-            CancelCommand = new DelegateCommand(() => RequestClose?.Invoke(new DialogResult(ButtonResult.Cancel, null)));
+            CancelCommand = new DelegateCommand(() => RequestClose.Invoke(new DialogResult(ButtonResult.Cancel)));
         }
 
         public bool CanCloseDialog()

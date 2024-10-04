@@ -9,8 +9,6 @@ using NiVE3.ViewModel.Dialog;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
 using Prism.Commands;
 using Prism.Mvvm;
-using Prism.Regions;
-using Prism.Services.Dialogs;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -23,6 +21,8 @@ using NiVE3.Wpf.Interaction.Trigger;
 using System.Threading;
 using NiVE3.Model.UI;
 using NiVE3.UI.Command;
+using Prism.Navigation.Regions;
+using Prism.Dialogs;
 
 namespace NiVE3.ViewModel
 {

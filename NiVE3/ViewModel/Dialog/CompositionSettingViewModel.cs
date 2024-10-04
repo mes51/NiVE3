@@ -17,8 +17,8 @@ using NiVE3.Util;
 using NiVE3.View.Dialog;
 using NiVE3.View.Resource;
 using Prism.Commands;
+using Prism.Dialogs;
 using Prism.Mvvm;
-using Prism.Services.Dialogs;
 
 namespace NiVE3.ViewModel.Dialog
 {
@@ -153,7 +153,7 @@ namespace NiVE3.ViewModel.Dialog
 
         public string Title => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.CompositionSettingView_Title);
 
-        public event Action<IDialogResult>? RequestClose;
+        public DialogCloseListener RequestClose { get; }
 
         public ICommand OKCommand { get; }
 
@@ -230,15 +230,15 @@ namespace NiVE3.ViewModel.Dialog
                     { SelectedRendererPluginId, RendererTypes[SelectedRenderer] },
                     { SelectedToneMapperPluginId, ToneMapperTypes[SelectedToneMapper] },
                 };
-                if (RendererSettingChanged)
+                if (RendererSettingChanged && RendererSettingViewDataContext != null)
                 {
                     result.Add(RendererSettingViewData, RendererSettingViewDataContext);
                 }
 
-                RequestClose?.Invoke(new DialogResult(ButtonResult.OK, result));
+                RequestClose.Invoke(new DialogResult(ButtonResult.OK) { Parameters = result });
             });
 
-            CancelCommand = new DelegateCommand(() => RequestClose?.Invoke(new DialogResult(ButtonResult.Cancel, null)));
+            CancelCommand = new DelegateCommand(() => RequestClose.Invoke(new DialogResult(ButtonResult.Cancel)));
 
             CreatePresetCommand = new DelegateCommand(() =>
             {

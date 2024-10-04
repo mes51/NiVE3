@@ -13,8 +13,8 @@ using Microsoft.Win32;
 using System.IO;
 using NiVE3.View.Dialog;
 using NiVE3.ViewModel.Dialog;
-using Prism.Services.Dialogs;
 using Prism.Commands;
+using Prism.Dialogs;
 
 namespace NiVE3.ViewModel
 {

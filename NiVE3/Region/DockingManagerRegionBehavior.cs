@@ -1,6 +1,4 @@
 ﻿using AvalonDock;
-using Prism.Regions.Behaviors;
-using Prism.Regions;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -12,6 +10,8 @@ using System.Windows;
 using NiVE3.View.Dock;
 using System.Reflection;
 using NiVE3.ViewModel;
+using Prism.Navigation.Regions;
+using Prism.Navigation.Regions.Behaviors;
 
 namespace NiVE3.Region
 {

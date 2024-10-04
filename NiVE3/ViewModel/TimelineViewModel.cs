@@ -29,8 +29,8 @@ using NiVE3.ViewModel.Dialog;
 using NiVE3.ViewModel.TimelineEditing;
 using NiVE3.Shared.Extension;
 using Prism.Commands;
-using Prism.Services.Dialogs;
 using NiVE3.Model.UI;
+using Prism.Dialogs;
 
 namespace NiVE3.ViewModel
 {
@@ -797,7 +797,7 @@ namespace NiVE3.ViewModel
                         result.Parameters.GetValue<Guid>(CompositionSettingViewModel.SelectedRendererPluginId),
                         result.Parameters.GetValue<Guid>(CompositionSettingViewModel.SelectedToneMapperPluginId),
                         result.Parameters.ContainsKey(CompositionSettingViewModel.RendererSettingViewData),
-                        result.Parameters.GetValue<object?>(CompositionSettingViewModel.RendererSettingViewData)
+                        result.Parameters.ContainsKey(CompositionSettingViewModel.RendererSettingViewData) ? result.Parameters.GetValue<object>(CompositionSettingViewModel.RendererSettingViewData) : null
                     );
                 }
             }, () => CompositionModel != null).ObservesProperty(() => CompositionModel);

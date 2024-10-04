@@ -19,7 +19,7 @@ using NiVE3.View.Dock;
 using NiVE3.View.Resource;
 using NiVE3.ViewModel.Dialog;
 using Prism.Commands;
-using Prism.Services.Dialogs;
+using Prism.Dialogs;
 
 namespace NiVE3.ViewModel
 {

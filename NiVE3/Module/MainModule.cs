@@ -7,7 +7,7 @@ using NiVE3.ViewModel.CommandOnly;
 using NiVE3.ViewModel.Dialog;
 using Prism.Ioc;
 using Prism.Modularity;
-using Prism.Regions;
+using Prism.Navigation.Regions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
