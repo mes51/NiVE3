@@ -56,6 +56,8 @@ namespace NiVE3.ViewModel
     [CommandHandling(nameof(AddTextCommand), nameof(ShortcutKeySetting.AddTextLayerGesture))]
     [CommandHandling(nameof(CompositionSettingCommand), nameof(ShortcutKeySetting.OpenCompositionSettingGesture))]
     [CommandHandling(nameof(ChangeLayerTagsRandomlyCommand), nameof(ShortcutKeySetting.ChangeLayerTagsRandomlyGesture))]
+    [CommandHandling(nameof(MoveInPointToIndicatorCommand), nameof(ShortcutKeySetting.MoveInPointToIndicatorGesture))]
+    [CommandHandling(nameof(MoveOutPointToIndicatorCommand), nameof(ShortcutKeySetting.MoveOutPointToIndicatorGesture))]
     partial class TimelineViewModel : PaneViewModelBase, IDropTarget
     {
         private Guid compositionId;
@@ -449,6 +451,10 @@ namespace NiVE3.ViewModel
 
         public ICommand ChangeLayerTagsRandomlyCommand { get; }
 
+        public ICommand MoveInPointToIndicatorCommand { get; }
+
+        public ICommand MoveOutPointToIndicatorCommand { get; }
+
         public ICommand CompositionSettingCommand { get; }
 
         public ICommand OpenRenderSettingCommand { get; }
@@ -752,6 +758,30 @@ namespace NiVE3.ViewModel
                 }
 
                 CompositionModel.ChangeLayerTagsRandomly([..SelectedLayers.Select(l => l.LayerId)]);
+            }, () => CompositionModel != null && SelectedLayers.Count > 0)
+                .ObservesProperty(() => CompositionModel)
+                .ObservesProperty(() => SelectedLayers.Count);
+
+            MoveInPointToIndicatorCommand = new DelegateCommand(() =>
+            {
+                if (CompositionModel == null || SelectedLayers.Count < 1)
+                {
+                    return;
+                }
+
+                CompositionModel.MoveLayerSourceStartPointToInPoint([..SelectedLayers.Select(l => l.LayerId)], CurrentTime);
+            }, () => CompositionModel != null && SelectedLayers.Count > 0)
+                .ObservesProperty(() => CompositionModel)
+                .ObservesProperty(() => SelectedLayers.Count);
+
+            MoveOutPointToIndicatorCommand = new DelegateCommand(() =>
+            {
+                if (CompositionModel == null || SelectedLayers.Count < 1)
+                {
+                    return;
+                }
+
+                CompositionModel.MoveLayerSourceStartPointToOutPoint([..SelectedLayers.Select(l => l.LayerId)], CurrentTime);
             }, () => CompositionModel != null && SelectedLayers.Count > 0)
                 .ObservesProperty(() => CompositionModel)
                 .ObservesProperty(() => SelectedLayers.Count);

@@ -1168,6 +1168,9 @@ namespace NiVE3.Model
 
         public void CommitEditDuration(double prevInPoint, double inPoint, double prevOutPoint, double outPoint, double prevSourceStartPoint, double sourceStartPoint)
         {
+            InPoint = inPoint;
+            OutPoint = outPoint;
+            SourceStartPoint = sourceStartPoint;
             HistoryModel.Add(new EditDurationHistoryCommand(this, prevInPoint, prevOutPoint, prevSourceStartPoint, inPoint, outPoint, sourceStartPoint));
         }
 

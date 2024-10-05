@@ -1183,6 +1183,48 @@ namespace NiVE3.Model
             HistoryModel.EndGroup();
         }
 
+        public void MoveLayerSourceStartPointToInPoint(Guid[] layerIds, double targetTime)
+        {
+            if (layerIds.Length < 1)
+            {
+                return;
+            }
+
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_EditLayerDuration));
+
+            foreach (var layer in Layers.Where(l => layerIds.Contains(l.LayerId)))
+            {
+                var newSourceStartPoint = TimeCalc.AlignRound(targetTime - layer.InPoint, FrameRate);
+                if (layer.SourceStartPoint != newSourceStartPoint)
+                {
+                    layer.CommitEditDuration(layer.InPoint, layer.InPoint, layer.OutPoint, layer.OutPoint, layer.SourceStartPoint, newSourceStartPoint);
+                }
+            }
+
+            HistoryModel.EndGroup();
+        }
+
+        public void MoveLayerSourceStartPointToOutPoint(Guid[] layerIds, double targetTime)
+        {
+            if (layerIds.Length < 1)
+            {
+                return;
+            }
+
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_EditLayerDuration));
+
+            foreach (var layer in Layers.Where(l => layerIds.Contains(l.LayerId)))
+            {
+                var newSourceStartPoint = TimeCalc.AlignRound(targetTime - layer.OutPoint + FrameDuration, FrameRate);
+                if (layer.SourceStartPoint != newSourceStartPoint)
+                {
+                    layer.CommitEditDuration(layer.InPoint, layer.InPoint, layer.OutPoint, layer.OutPoint, layer.SourceStartPoint, newSourceStartPoint);
+                }
+            }
+
+            HistoryModel.EndGroup();
+        }
+
         public ILayerObject? GetLayer(Guid layerId)
         {
             return Layers.FirstOrDefault(l => l.LayerId == layerId);

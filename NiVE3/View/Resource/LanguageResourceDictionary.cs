@@ -1336,6 +1336,12 @@ namespace NiVE3.View.Resource
 
         // ShortcutKeyNames
 
+        [DefaultValue("インジケーターの位置にアウトポイントを移動")]
+        public static readonly string ShortcutKeyName_MoveOutPointToIndicatorGesture = nameof(ShortcutKeyName_MoveOutPointToIndicatorGesture);
+
+        [DefaultValue("インジケーターの位置にインポイントを移動")]
+        public static readonly string ShortcutKeyName_MoveInPointToIndicatorGesture = nameof(ShortcutKeyName_MoveInPointToIndicatorGesture);
+
         [DefaultValue("レイヤーのタグをランダムに変更する")]
         public static readonly string ShortcutKeyName_ChangeLayerTagsRandomlyGesture = nameof(ShortcutKeyName_ChangeLayerTagsRandomlyGesture);
 

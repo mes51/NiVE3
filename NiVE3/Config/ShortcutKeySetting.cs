@@ -284,6 +284,36 @@ namespace NiVE3.Config
             new PropertyMetadata(new KeyGesture(Key.None))
         );
 
+        public static readonly DependencyProperty MoveInPointToIndicatorGestureProperty = DependencyProperty.Register(
+            nameof(MoveInPointToIndicatorGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new SingleKeyGesture(Key.OemOpenBrackets))
+        );
+
+        public static readonly DependencyProperty MoveOutPointToIndicatorGestureProperty = DependencyProperty.Register(
+            nameof(MoveOutPointToIndicatorGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new SingleKeyGesture(Key.OemCloseBrackets))
+        );
+
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Edit)]
+        [ShowInMarkup]
+        public InputGesture MoveOutPointToIndicatorGesture
+        {
+            get { return (InputGesture)GetValue(MoveOutPointToIndicatorGestureProperty); }
+            set { SetValue(MoveOutPointToIndicatorGestureProperty, value); }
+        }
+
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Edit)]
+        [ShowInMarkup]
+        public InputGesture MoveInPointToIndicatorGesture
+        {
+            get { return (InputGesture)GetValue(MoveInPointToIndicatorGestureProperty); }
+            set { SetValue(MoveInPointToIndicatorGestureProperty, value); }
+        }
+
         [ShortcutKeyCategory(ShortcutKeyCategoryType.Edit)]
         [ShowInMarkup]
         public InputGesture ChangeLayerTagsRandomlyGesture
