@@ -377,7 +377,16 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("削除(_D)")]
         public static readonly string Timeline_ContextMenu_Delete = nameof(Timeline_ContextMenu_Delete);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("レイヤーのタグをランダムに変更(_T)")]
+        [ShowInMarkup, LanguageKey, DefaultValue("時間(_T)")]
+        public static readonly string Timeline_ContextMenu_Time = nameof(Timeline_ContextMenu_Time);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("インポイントをインジケーターの位置に移動(_I)")]
+        public static readonly string Timeline_ContextMenu_MoveInPointToIndicator = nameof(Timeline_ContextMenu_MoveInPointToIndicator);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("アウトポイントをインジケーターの位置に移動(_O)")]
+        public static readonly string Timeline_ContextMenu_MoveOutPointToIndicator = nameof(Timeline_ContextMenu_MoveOutPointToIndicator);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("レイヤーのタグをランダムに変更(_R)")]
         public static readonly string Timeline_ContextMenu_ChangeLayerTagsRandomly = nameof(Timeline_ContextMenu_ChangeLayerTagsRandomly);
 
         [ShowInMarkup, LanguageKey, DefaultValue("コンポジションの設定...(_O)")]

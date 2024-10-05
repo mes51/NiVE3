@@ -98,6 +98,10 @@
                         <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_SplitLayer}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=SplitLayerGesture}"/>
                         <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_Delete}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=DeleteItemGesture}"/>
                         <Separator />
+                        <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_Time}">
+                            <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_MoveInPointToIndicator}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=MoveInPointToIndicatorGesture}"/>
+                            <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_MoveOutPointToIndicator}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=MoveOutPointToIndicatorGesture}"/>
+                        </MenuItem>
                         <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_ChangeLayerTagsRandomly}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=ChangeLayerTagsRandomlyGesture}"/>
                         <Separator />
                         <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_CompositionSetting}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=OpenCompositionSettingGesture}" CommandTarget="{Binding Source={x:Reference Root}}"/>
