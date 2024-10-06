@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="NCalcSync" Version="5.2.9" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\NiVE3.Image\NiVE3.Image.csproj" />
     <ProjectReference Include="..\NiVE3.Shared\NiVE3.Shared.csproj" />
     <ProjectReference Include="..\NiVE3.SourceGenerator.ResourceMarkupGenerator\NiVE3.SourceGenerator.ResourceMarkupGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />

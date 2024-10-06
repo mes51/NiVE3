@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
+using NCalc;
 
 namespace NiVE3.UI.Converter
 {
@@ -47,9 +47,14 @@ namespace NiVE3.UI.Converter
         {
             if (value is string str)
             {
+                if (double.TryParse(str, out var num))
+                {
+                    return num;
+                }
+
                 try
                 {
-                    var result = new DataTable().Compute(str, null);
+                    var result = new NCalc.Expression(str, ExpressionOptions.IgnoreCaseAtBuiltInFunctions).Evaluate();
                     switch (result)
                     {
                         case byte v:
