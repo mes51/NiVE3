@@ -298,6 +298,66 @@ namespace NiVE3.Config
             new PropertyMetadata(new SingleKeyGesture(Key.OemCloseBrackets))
         );
 
+        public static readonly DependencyProperty ShiftSourceStartPointToNextFrameGestureProperty = DependencyProperty.Register(
+            nameof(ShiftSourceStartPointToNextFrameGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new KeyGesture(Key.PageDown, ModifierKeys.Alt))
+        );
+
+        public static readonly DependencyProperty ShiftSourceStartPointToPreviousFrameGestureProperty = DependencyProperty.Register(
+            nameof(ShiftSourceStartPointToPreviousFrameGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new KeyGesture(Key.PageUp, ModifierKeys.Alt))
+        );
+
+        public static readonly DependencyProperty ShiftSourceStartPointToNext10FrameGestureProperty = DependencyProperty.Register(
+            nameof(ShiftSourceStartPointToNext10FrameGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new KeyGesture(Key.PageDown, ModifierKeys.Shift | ModifierKeys.Alt))
+        );
+
+        public static readonly DependencyProperty ShiftSourceStartPointToPrevious10FrameGestureProperty = DependencyProperty.Register(
+            nameof(ShiftSourceStartPointToPrevious10FrameGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new KeyGesture(Key.PageUp, ModifierKeys.Shift | ModifierKeys.Alt))
+        );
+
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Edit)]
+        [ShowInMarkup]
+        public InputGesture ShiftSourceStartPointToPrevious10FrameGesture
+        {
+            get { return (InputGesture)GetValue(ShiftSourceStartPointToPrevious10FrameGestureProperty); }
+            set { SetValue(ShiftSourceStartPointToPrevious10FrameGestureProperty, value); }
+        }
+
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Edit)]
+        [ShowInMarkup]
+        public InputGesture ShiftSourceStartPointToNext10FrameGesture
+        {
+            get { return (InputGesture)GetValue(ShiftSourceStartPointToNext10FrameGestureProperty); }
+            set { SetValue(ShiftSourceStartPointToNext10FrameGestureProperty, value); }
+        }
+
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Edit)]
+        [ShowInMarkup]
+        public InputGesture ShiftSourceStartPointToPreviousFrameGesture
+        {
+            get { return (InputGesture)GetValue(ShiftSourceStartPointToPreviousFrameGestureProperty); }
+            set { SetValue(ShiftSourceStartPointToPreviousFrameGestureProperty, value); }
+        }
+
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Edit)]
+        [ShowInMarkup]
+        public InputGesture ShiftSourceStartPointToNextFrameGesture
+        {
+            get { return (InputGesture)GetValue(ShiftSourceStartPointToNextFrameGestureProperty); }
+            set { SetValue(ShiftSourceStartPointToNextFrameGestureProperty, value); }
+        }
+
         [ShortcutKeyCategory(ShortcutKeyCategoryType.Edit)]
         [ShowInMarkup]
         public InputGesture MoveOutPointToIndicatorGesture

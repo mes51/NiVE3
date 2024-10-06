@@ -58,6 +58,10 @@ namespace NiVE3.ViewModel
     [CommandHandling(nameof(ChangeLayerTagsRandomlyCommand), nameof(ShortcutKeySetting.ChangeLayerTagsRandomlyGesture))]
     [CommandHandling(nameof(MoveInPointToIndicatorCommand), nameof(ShortcutKeySetting.MoveInPointToIndicatorGesture))]
     [CommandHandling(nameof(MoveOutPointToIndicatorCommand), nameof(ShortcutKeySetting.MoveOutPointToIndicatorGesture))]
+    [CommandHandling(nameof(ShiftSourceStartPointToNextFrameCommand), nameof(ShortcutKeySetting.ShiftSourceStartPointToNextFrameGesture))]
+    [CommandHandling(nameof(ShiftSourceStartPointToPreviousFrameCommand), nameof(ShortcutKeySetting.ShiftSourceStartPointToPreviousFrameGesture))]
+    [CommandHandling(nameof(ShiftSourceStartPointToNext10FrameCommand), nameof(ShortcutKeySetting.ShiftSourceStartPointToNext10FrameGesture))]
+    [CommandHandling(nameof(ShiftSourceStartPointToPrevious10FrameCommand), nameof(ShortcutKeySetting.ShiftSourceStartPointToPrevious10FrameGesture))]
     partial class TimelineViewModel : PaneViewModelBase, IDropTarget
     {
         private Guid compositionId;
@@ -455,6 +459,14 @@ namespace NiVE3.ViewModel
 
         public ICommand MoveOutPointToIndicatorCommand { get; }
 
+        public ICommand ShiftSourceStartPointToNextFrameCommand { get; }
+
+        public ICommand ShiftSourceStartPointToPreviousFrameCommand { get; }
+
+        public ICommand ShiftSourceStartPointToNext10FrameCommand { get; }
+
+        public ICommand ShiftSourceStartPointToPrevious10FrameCommand { get; }
+
         public ICommand CompositionSettingCommand { get; }
 
         public ICommand OpenRenderSettingCommand { get; }
@@ -782,6 +794,54 @@ namespace NiVE3.ViewModel
                 }
 
                 CompositionModel.MoveLayerSourceStartPointToOutPoint([..SelectedLayers.Select(l => l.LayerId)], CurrentTime);
+            }, () => CompositionModel != null && SelectedLayers.Count > 0)
+                .ObservesProperty(() => CompositionModel)
+                .ObservesProperty(() => SelectedLayers.Count);
+
+            ShiftSourceStartPointToNextFrameCommand = new DelegateCommand(() =>
+            {
+                if (CompositionModel == null || SelectedLayers.Count < 1)
+                {
+                    return;
+                }
+
+                CompositionModel.MoveLayerSourceStartPoint([..SelectedLayers.Select(l => l.LayerId)], FrameDuration);
+            }, () => CompositionModel != null && SelectedLayers.Count > 0)
+                .ObservesProperty(() => CompositionModel)
+                .ObservesProperty(() => SelectedLayers.Count);
+
+            ShiftSourceStartPointToPreviousFrameCommand = new DelegateCommand(() =>
+            {
+                if (CompositionModel == null || SelectedLayers.Count < 1)
+                {
+                    return;
+                }
+
+                CompositionModel.MoveLayerSourceStartPoint([..SelectedLayers.Select(l => l.LayerId)], -FrameDuration);
+            }, () => CompositionModel != null && SelectedLayers.Count > 0)
+                .ObservesProperty(() => CompositionModel)
+                .ObservesProperty(() => SelectedLayers.Count);
+
+            ShiftSourceStartPointToNext10FrameCommand = new DelegateCommand(() =>
+            {
+                if (CompositionModel == null || SelectedLayers.Count < 1)
+                {
+                    return;
+                }
+
+                CompositionModel.MoveLayerSourceStartPoint([..SelectedLayers.Select(l => l.LayerId)], FrameDuration * 10.0);
+            }, () => CompositionModel != null && SelectedLayers.Count > 0)
+                .ObservesProperty(() => CompositionModel)
+                .ObservesProperty(() => SelectedLayers.Count);
+
+            ShiftSourceStartPointToPrevious10FrameCommand = new DelegateCommand(() =>
+            {
+                if (CompositionModel == null || SelectedLayers.Count < 1)
+                {
+                    return;
+                }
+
+                CompositionModel.MoveLayerSourceStartPoint([..SelectedLayers.Select(l => l.LayerId)], FrameDuration * -10.0);
             }, () => CompositionModel != null && SelectedLayers.Count > 0)
                 .ObservesProperty(() => CompositionModel)
                 .ObservesProperty(() => SelectedLayers.Count);

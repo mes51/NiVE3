@@ -1225,6 +1225,27 @@ namespace NiVE3.Model
             HistoryModel.EndGroup();
         }
 
+        public void MoveLayerSourceStartPoint(Guid[] layerIds, double diff)
+        {
+            if (layerIds.Length < 1)
+            {
+                return;
+            }
+
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_EditLayerDuration));
+
+            foreach (var layer in Layers.Where(l => layerIds.Contains(l.LayerId)))
+            {
+                var newSourceStartPoint = TimeCalc.AlignRound(layer.SourceStartPoint + diff, FrameRate);
+                if (layer.SourceStartPoint != newSourceStartPoint)
+                {
+                    layer.CommitEditDuration(layer.InPoint, layer.InPoint, layer.OutPoint, layer.OutPoint, layer.SourceStartPoint, newSourceStartPoint);
+                }
+            }
+
+            HistoryModel.EndGroup();
+        }
+
         public ILayerObject? GetLayer(Guid layerId)
         {
             return Layers.FirstOrDefault(l => l.LayerId == layerId);
