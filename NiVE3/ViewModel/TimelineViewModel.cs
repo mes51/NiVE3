@@ -62,6 +62,12 @@ namespace NiVE3.ViewModel
     [CommandHandling(nameof(ShiftSourceStartPointToPreviousFrameCommand), nameof(ShortcutKeySetting.ShiftSourceStartPointToPreviousFrameGesture))]
     [CommandHandling(nameof(ShiftSourceStartPointToNext10FrameCommand), nameof(ShortcutKeySetting.ShiftSourceStartPointToNext10FrameGesture))]
     [CommandHandling(nameof(ShiftSourceStartPointToPrevious10FrameCommand), nameof(ShortcutKeySetting.ShiftSourceStartPointToPrevious10FrameGesture))]
+    [CommandHandling(nameof(MoveIndicatorToNextFrameCommand), nameof(ShortcutKeySetting.MoveIndicatorToNextFrameGesture))]
+    [CommandHandling(nameof(MoveIndicatorToPreviousFrameCommand), nameof(ShortcutKeySetting.MoveIndicatorToPreviousFrameGesture))]
+    [CommandHandling(nameof(MoveIndicatorToNext10FrameCommand), nameof(ShortcutKeySetting.MoveIndicatorToNext10FrameGesture))]
+    [CommandHandling(nameof(MoveIndicatorToPrevious10FrameCommand), nameof(ShortcutKeySetting.MoveIndicatorToPrevious10FrameGesture))]
+    [CommandHandling(nameof(MoveIndicatorToCompositionBeginCommand), nameof(ShortcutKeySetting.MoveIndicatorToCompositionBeginGesture))]
+    [CommandHandling(nameof(MoveIndicatorToCompositionEndCommand), nameof(ShortcutKeySetting.MoveIndicatorToCompositionEndGesture))]
     partial class TimelineViewModel : PaneViewModelBase, IDropTarget
     {
         private Guid compositionId;
@@ -470,6 +476,18 @@ namespace NiVE3.ViewModel
         public ICommand CompositionSettingCommand { get; }
 
         public ICommand OpenRenderSettingCommand { get; }
+
+        public ICommand MoveIndicatorToNextFrameCommand { get; }
+
+        public ICommand MoveIndicatorToPreviousFrameCommand { get; }
+
+        public ICommand MoveIndicatorToNext10FrameCommand { get; }
+
+        public ICommand MoveIndicatorToPrevious10FrameCommand { get; }
+
+        public ICommand MoveIndicatorToCompositionBeginCommand { get; }
+
+        public ICommand MoveIndicatorToCompositionEndCommand { get; }
 
         WeakEventPublisher<EventArgs> CurrentTimeChangeByUserPublisher { get; } = new WeakEventPublisher<EventArgs>();
         public event EventHandler<EventArgs> CurrentTimeChangeByUser
@@ -923,6 +941,42 @@ namespace NiVE3.ViewModel
                         settingResult.Parameters.GetValue<ExportLifetimeContext<IOutput>>(RenderSettingViewModel.OutputParameterName)
                     );
                 }
+            }, () => CompositionModel != null).ObservesProperty(() => CompositionModel);
+
+            MoveIndicatorToNextFrameCommand = new DelegateCommand(() =>
+            {
+                CurrentTime = TimeCalc.AlignRound(CurrentTime + FrameDuration, FrameRate);
+                CurrentTimeChangeByUserPublisher.Publish(this, EventArgs.Empty);
+            }, () => CompositionModel != null).ObservesProperty(() => CompositionModel);
+
+            MoveIndicatorToPreviousFrameCommand = new DelegateCommand(() =>
+            {
+                CurrentTime = TimeCalc.AlignRound(CurrentTime - FrameDuration, FrameRate);
+                CurrentTimeChangeByUserPublisher.Publish(this, EventArgs.Empty);
+            }, () => CompositionModel != null).ObservesProperty(() => CompositionModel);
+
+            MoveIndicatorToNext10FrameCommand = new DelegateCommand(() =>
+            {
+                CurrentTime = TimeCalc.AlignRound(CurrentTime + FrameDuration * 10.0, FrameRate);
+                CurrentTimeChangeByUserPublisher.Publish(this, EventArgs.Empty);
+            }, () => CompositionModel != null).ObservesProperty(() => CompositionModel);
+
+            MoveIndicatorToPrevious10FrameCommand = new DelegateCommand(() =>
+            {
+                CurrentTime = TimeCalc.AlignRound(CurrentTime - FrameDuration * 10.0, FrameRate);
+                CurrentTimeChangeByUserPublisher.Publish(this, EventArgs.Empty);
+            }, () => CompositionModel != null).ObservesProperty(() => CompositionModel);
+
+            MoveIndicatorToCompositionBeginCommand = new DelegateCommand(() =>
+            {
+                CurrentTime = 0.0;
+                CurrentTimeChangeByUserPublisher.Publish(this, EventArgs.Empty);
+            }, () => CompositionModel != null).ObservesProperty(() => CompositionModel);
+
+            MoveIndicatorToCompositionEndCommand = new DelegateCommand(() =>
+            {
+                CurrentTime = TimeCalc.AlignRound(Duration - FrameDuration, FrameRate);
+                CurrentTimeChangeByUserPublisher.Publish(this, EventArgs.Empty);
             }, () => CompositionModel != null).ObservesProperty(() => CompositionModel);
 
             AudioPlayerModel = audioPlayerModel;

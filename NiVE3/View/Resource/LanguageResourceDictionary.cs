@@ -1357,6 +1357,24 @@ namespace NiVE3.View.Resource
 
         // ShortcutKeyNames
 
+        [DefaultValue("インジケーターをコンポジションの最後に移動する")]
+        public static readonly string ShortcutKeyName_MoveIndicatorToCompositionEndGesture = nameof(ShortcutKeyName_MoveIndicatorToCompositionEndGesture);
+
+        [DefaultValue("インジケーターをコンポジションの最初に移動する")]
+        public static readonly string ShortcutKeyName_MoveIndicatorToCompositionBeginGesture = nameof(ShortcutKeyName_MoveIndicatorToCompositionBeginGesture);
+
+        [DefaultValue("インジケーターを10フレーム前に移動する")]
+        public static readonly string ShortcutKeyName_MoveIndicatorToPrevious10FrameGesture = nameof(ShortcutKeyName_MoveIndicatorToPrevious10FrameGesture);
+
+        [DefaultValue("インジケーターを10フレーム後ろに移動する")]
+        public static readonly string ShortcutKeyName_MoveIndicatorToNext10FrameGesture = nameof(ShortcutKeyName_MoveIndicatorToNext10FrameGesture);
+
+        [DefaultValue("インジケーターを1フレーム前に移動する")]
+        public static readonly string ShortcutKeyName_MoveIndicatorToPreviousFrameGesture = nameof(ShortcutKeyName_MoveIndicatorToPreviousFrameGesture);
+
+        [DefaultValue("インジケーターを1フレーム後ろに移動する")]
+        public static readonly string ShortcutKeyName_MoveIndicatorToNextFrameGesture = nameof(ShortcutKeyName_MoveIndicatorToNextFrameGesture);
+
         [DefaultValue("レイヤーを10フレーム前にシフトする")]
         public static readonly string ShortcutKeyName_ShiftSourceStartPointToPrevious10FrameGesture = nameof(ShortcutKeyName_ShiftSourceStartPointToPrevious10FrameGesture);
 

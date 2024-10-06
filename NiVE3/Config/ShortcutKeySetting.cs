@@ -326,6 +326,96 @@ namespace NiVE3.Config
             new PropertyMetadata(new KeyGesture(Key.PageUp, ModifierKeys.Shift | ModifierKeys.Alt))
         );
 
+        public static readonly DependencyProperty MoveIndicatorToNextFrameGestureProperty = DependencyProperty.Register(
+            nameof(MoveIndicatorToNextFrameGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new KeyGesture(Key.Right, ModifierKeys.Control))
+        );
+
+        public static readonly DependencyProperty MoveIndicatorToPreviousFrameGestureProperty = DependencyProperty.Register(
+            nameof(MoveIndicatorToPreviousFrameGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new KeyGesture(Key.Left, ModifierKeys.Control))
+        );
+
+        public static readonly DependencyProperty MoveIndicatorToNext10FrameGestureProperty = DependencyProperty.Register(
+            nameof(MoveIndicatorToNext10FrameGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new KeyGesture(Key.Right, ModifierKeys.Shift | ModifierKeys.Control))
+        );
+
+        public static readonly DependencyProperty MoveIndicatorToPrevious10FrameGestureProperty = DependencyProperty.Register(
+            nameof(MoveIndicatorToPrevious10FrameGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new KeyGesture(Key.Left, ModifierKeys.Shift | ModifierKeys.Control))
+        );
+
+        public static readonly DependencyProperty MoveIndicatorToCompositionBeginGestureProperty = DependencyProperty.Register(
+            nameof(MoveIndicatorToCompositionBeginGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new SingleKeyGesture(Key.Home))
+        );
+
+        public static readonly DependencyProperty MoveIndicatorToCompositionEndGestureProperty = DependencyProperty.Register(
+            nameof(MoveIndicatorToCompositionEndGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new SingleKeyGesture(Key.End))
+        );
+
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Composition)]
+        [ShowInMarkup]
+        public InputGesture MoveIndicatorToCompositionEndGesture
+        {
+            get { return (InputGesture)GetValue(MoveIndicatorToCompositionEndGestureProperty); }
+            set { SetValue(MoveIndicatorToCompositionEndGestureProperty, value); }
+        }
+
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Composition)]
+        [ShowInMarkup]
+        public InputGesture MoveIndicatorToCompositionBeginGesture
+        {
+            get { return (InputGesture)GetValue(MoveIndicatorToCompositionBeginGestureProperty); }
+            set { SetValue(MoveIndicatorToCompositionBeginGestureProperty, value); }
+        }
+
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Composition)]
+        [ShowInMarkup]
+        public InputGesture MoveIndicatorToPrevious10FrameGesture
+        {
+            get { return (InputGesture)GetValue(MoveIndicatorToPrevious10FrameGestureProperty); }
+            set { SetValue(MoveIndicatorToPrevious10FrameGestureProperty, value); }
+        }
+
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Composition)]
+        [ShowInMarkup]
+        public InputGesture MoveIndicatorToNext10FrameGesture
+        {
+            get { return (InputGesture)GetValue(MoveIndicatorToNext10FrameGestureProperty); }
+            set { SetValue(MoveIndicatorToNext10FrameGestureProperty, value); }
+        }
+
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Composition)]
+        [ShowInMarkup]
+        public InputGesture MoveIndicatorToPreviousFrameGesture
+        {
+            get { return (InputGesture)GetValue(MoveIndicatorToPreviousFrameGestureProperty); }
+            set { SetValue(MoveIndicatorToPreviousFrameGestureProperty, value); }
+        }
+
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Composition)]
+        [ShowInMarkup]
+        public InputGesture MoveIndicatorToNextFrameGesture
+        {
+            get { return (InputGesture)GetValue(MoveIndicatorToNextFrameGestureProperty); }
+            set { SetValue(MoveIndicatorToNextFrameGestureProperty, value); }
+        }
+
         [ShortcutKeyCategory(ShortcutKeyCategoryType.Edit)]
         [ShowInMarkup]
         public InputGesture ShiftSourceStartPointToPrevious10FrameGesture
