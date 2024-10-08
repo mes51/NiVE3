@@ -25,6 +25,8 @@ namespace NiVE3.Model
 
         PropertyBase Property { get; }
 
+        Int128 ObjectId { get; }
+
         event EventHandler<EventArgs>? ValueUpdated;
 
         event EventHandler<EventArgs>? ValueCommited;

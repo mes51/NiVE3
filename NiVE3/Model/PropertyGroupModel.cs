@@ -13,6 +13,8 @@ using NiVE3.Plugin.Property;
 using Prism.Mvvm;
 using NiVE3.View.Resource;
 using NiVE3.Shared.Extension;
+using System.IO.Hashing;
+using NiVE3.Extension;
 
 namespace NiVE3.Model
 {
@@ -47,6 +49,8 @@ namespace NiVE3.Model
 
         public PropertyBase Property { get; }
 
+        public Int128 ObjectId { get; }
+
         public string Id => Property.Id;
 
         public bool UseEnableSwitch { get; }
@@ -63,11 +67,11 @@ namespace NiVE3.Model
 
         HistoryModel HistoryModel { get; }
 
-        public PropertyGroupModel(PropertyBase property, CompositionModel compositionModel, HistoryModel historyModel, Guid? instanceId = null) : this(property, compositionModel, null, null, historyModel, false, instanceId) { }
+        public PropertyGroupModel(PropertyBase property, Int128 parentObjectId, CompositionModel compositionModel, HistoryModel historyModel, Guid? instanceId = null) : this(property, parentObjectId, compositionModel, null, null, historyModel, false, instanceId) { }
 
-        public PropertyGroupModel(PropertyBase property, CompositionModel compositionModel, LayerModel? layerModel, HistoryModel historyModel, Guid? instanceId = null) : this(property, compositionModel, layerModel, null, historyModel, false, instanceId) { }
+        public PropertyGroupModel(PropertyBase property, Int128 parentObjectId, CompositionModel compositionModel, LayerModel? layerModel, HistoryModel historyModel, Guid? instanceId = null) : this(property, parentObjectId, compositionModel, layerModel, null, historyModel, false, instanceId) { }
 
-        public PropertyGroupModel(PropertyBase property, CompositionModel compositionModel, LayerModel? layerModel, EffectModel? effectModel, HistoryModel historyModel, bool useEnableSwitch, Guid? instanceId = null)
+        public PropertyGroupModel(PropertyBase property, Int128 parentObjectId, CompositionModel compositionModel, LayerModel? layerModel, EffectModel? effectModel, HistoryModel historyModel, bool useEnableSwitch, Guid? instanceId = null)
         {
             Property = property;
             CompositionModel = compositionModel;
@@ -78,19 +82,25 @@ namespace NiVE3.Model
             UseEnableSwitch = useEnableSwitch;
             InstanceId = instanceId ?? Guid.NewGuid();
 
+            var objectIdHash = new XxHash3();
+            objectIdHash.Append(parentObjectId);
+            objectIdHash.Append(instanceId ?? Guid.Empty);
+            objectIdHash.Append(property.Id);
+            ObjectId = objectIdHash.ToInt128();
+
             foreach (var c in ((PropertyGroup)property).Children)
             {
                 if (c is PropertyGroup)
                 {
-                    Children.Add(new PropertyGroupModel(c, compositionModel, layerModel, effectModel, historyModel, false));
+                    Children.Add(new PropertyGroupModel(c, ObjectId, compositionModel, layerModel, effectModel, historyModel, false));
                 }
                 else if (c is AppendableProperty)
                 {
-                    Children.Add(new AppendablePropertyModel(c, compositionModel, layerModel, effectModel, historyModel));
+                    Children.Add(new AppendablePropertyModel(c, ObjectId, compositionModel, layerModel, effectModel, historyModel));
                 }
                 else
                 {
-                    Children.Add(new PropertyModel(c, compositionModel, layerModel, effectModel, historyModel));
+                    Children.Add(new PropertyModel(c, ObjectId, compositionModel, layerModel, effectModel, historyModel));
                 }
             }
 

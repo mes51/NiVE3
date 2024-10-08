@@ -15,6 +15,8 @@ using NiVE3.Data.Json.Project;
 using NiVE3.Util;
 using NiVE3.Data.Clipboard;
 using NiVE3.Plugin.Property.Types;
+using System.IO.Hashing;
+using NiVE3.Extension;
 
 namespace NiVE3.Model
 {
@@ -63,6 +65,8 @@ namespace NiVE3.Model
 
         public PropertyBase Property { get; }
 
+        public Int128 ObjectId { get; }
+
         public string Id => Property.Id;
 
         public event EventHandler<EventArgs>? ValueUpdated;
@@ -77,11 +81,11 @@ namespace NiVE3.Model
 
         HistoryModel HistoryModel { get; }
 
-        public PropertyModel(PropertyBase property, CompositionModel compositionModel, HistoryModel historyModel) : this(property, compositionModel, null, null, historyModel) { }
+        public PropertyModel(PropertyBase property, Int128 parentObjectId, CompositionModel compositionModel, HistoryModel historyModel) : this(property, parentObjectId, compositionModel, null, null, historyModel) { }
 
-        public PropertyModel(PropertyBase property, CompositionModel compositionModel, LayerModel? layerModel, HistoryModel historyModel) : this(property, compositionModel, layerModel, null, historyModel) { }
+        public PropertyModel(PropertyBase property, Int128 parentObjectId, CompositionModel compositionModel, LayerModel? layerModel, HistoryModel historyModel) : this(property, parentObjectId, compositionModel, layerModel, null, historyModel) { }
 
-        public PropertyModel(PropertyBase property, CompositionModel compositionModel, LayerModel? layerModel, EffectModel? effectModel, HistoryModel historyModel)
+        public PropertyModel(PropertyBase property, Int128 parentObjectId, CompositionModel compositionModel, LayerModel? layerModel, EffectModel? effectModel, HistoryModel historyModel)
         {
             Property = property;
             CompositionModel = compositionModel;
@@ -92,6 +96,11 @@ namespace NiVE3.Model
             Value = property.DefaultValue;
             SourceStartPoint = layerModel?.SourceStartPoint ?? 0.0;
             CurrentTime = compositionModel.CurrentTime;
+
+            var objectIdHash = new XxHash3();
+            objectIdHash.Append(parentObjectId);
+            objectIdHash.Append(property.Id);
+            ObjectId = objectIdHash.ToInt128();
 
             // NOTE: 本来はモデル側から設定してもらうものだが、引き回しの経路が複雑になりすぎる(レイヤーからだったり、エフェクトやマスクだったり)ため、自分から取りに行く
             compositionModel.PropertyChanged += CompositionModel_PropertyChanged;

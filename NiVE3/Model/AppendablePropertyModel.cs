@@ -12,6 +12,8 @@ using NiVE3.Plugin.Property;
 using Prism.Mvvm;
 using NiVE3.Shared.Extension;
 using NiVE3.View.Resource;
+using System.IO.Hashing;
+using NiVE3.Extension;
 
 namespace NiVE3.Model
 {
@@ -34,6 +36,8 @@ namespace NiVE3.Model
 
         public PropertyBase Property { get; }
 
+        public Int128 ObjectId { get; }
+
         public string Id => Property.Id;
 
         public AppendablePropertyItem[] Items { get; }
@@ -52,11 +56,11 @@ namespace NiVE3.Model
 
         HistoryModel HistoryModel { get; }
 
-        public AppendablePropertyModel(PropertyBase property, CompositionModel compositionModel, HistoryModel historyModel) : this(property, compositionModel, null, null, historyModel) { }
+        public AppendablePropertyModel(PropertyBase property, Int128 parentObjectId, CompositionModel compositionModel, HistoryModel historyModel) : this(property, parentObjectId, compositionModel, null, null, historyModel) { }
 
-        public AppendablePropertyModel(PropertyBase property, CompositionModel compositionModel, LayerModel? layerModel, HistoryModel historyModel) : this(property, compositionModel, layerModel, null, historyModel) { }
+        public AppendablePropertyModel(PropertyBase property, Int128 parentObjectId, CompositionModel compositionModel, LayerModel? layerModel, HistoryModel historyModel) : this(property, parentObjectId, compositionModel, layerModel, null, historyModel) { }
 
-        public AppendablePropertyModel(PropertyBase property, CompositionModel compositionModel, LayerModel? layerModel, EffectModel? effectModel, HistoryModel historyModel)
+        public AppendablePropertyModel(PropertyBase property, Int128 parentObjectId, CompositionModel compositionModel, LayerModel? layerModel, EffectModel? effectModel, HistoryModel historyModel)
         {
             Property = property;
             CompositionModel = compositionModel;
@@ -64,6 +68,11 @@ namespace NiVE3.Model
             EffectModel = effectModel;
             HistoryModel = historyModel;
             Name = property.DisplayName;
+
+            var objectIdHash = new XxHash3();
+            objectIdHash.Append(parentObjectId);
+            objectIdHash.Append(property.Id);
+            ObjectId = objectIdHash.ToInt128();
 
             var ap = (AppendableProperty)property;
             Items = ap.Items;
@@ -346,7 +355,7 @@ namespace NiVE3.Model
         PropertyGroupModel AddChildInternal(AppendablePropertyItem item, Guid? instanceId)
         {
             var group = item.CreateFunc();
-            var groupModel = new PropertyGroupModel(group, CompositionModel, LayerModel, EffectModel, HistoryModel, UseEnableSwitch, instanceId);
+            var groupModel = new PropertyGroupModel(group, ObjectId, CompositionModel, LayerModel, EffectModel, HistoryModel, UseEnableSwitch, instanceId);
             groupModel.ValueUpdated += Child_ValueUpdated;
             groupModel.ValueCommited += Child_ValueCommited;
 

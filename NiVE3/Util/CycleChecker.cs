@@ -20,7 +20,12 @@ namespace NiVE3.Util
 
         private CycleChecker() { }
 
-        Entry? TryEnter(Guid objectId)
+        Entry? TryEnterInternal(in Guid objectId)
+        {
+            return TryEnterInternal(Unsafe.BitCast<Guid, Int128>(objectId));
+        }
+
+        Entry? TryEnterInternal(Int128 objectId)
         {
             if (Entries.Any(e => e.ObjectId == objectId))
             {
@@ -63,7 +68,17 @@ namespace NiVE3.Util
                 throw new InvalidOperationException(); // bug
             }
 
-            return CurrentChecker.TryEnter(objectId);
+            return CurrentChecker.TryEnterInternal(objectId);
+        }
+
+        public static IDisposable? TryEnter(in Int128 objectId)
+        {
+            if (CurrentChecker == null)
+            {
+                throw new InvalidOperationException(); // bug
+            }
+
+            return CurrentChecker.TryEnterInternal(objectId);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -84,18 +99,29 @@ namespace NiVE3.Util
 
         private class Entry : IDisposable
         {
-            public Guid ObjectId { get; private set; }
+            public Int128 ObjectId { get; private set; }
 
             CycleChecker? CurrentChecker { get; set; }
 
-            public void Enter(CycleChecker chekcer, Guid objectId)
+            public void Enter(CycleChecker checker, in Guid objectId)
             {
                 if (CurrentChecker != null)
                 {
                     throw new InvalidOperationException(); // bug;
                 }
 
-                CurrentChecker = chekcer;
+                CurrentChecker = checker;
+                ObjectId = Unsafe.BitCast<Guid, Int128>(objectId);
+            }
+
+            public void Enter(CycleChecker checker, in Int128 objectId)
+            {
+                if (CurrentChecker != null)
+                {
+                    throw new InvalidOperationException(); // bug;
+                }
+
+                CurrentChecker = checker;
                 ObjectId = objectId;
             }
 
@@ -108,7 +134,7 @@ namespace NiVE3.Util
 
                 var checker = CurrentChecker;
                 CurrentChecker = null;
-                ObjectId = Guid.Empty;
+                ObjectId = 0;
 
                 checker.Leave(this);
             }

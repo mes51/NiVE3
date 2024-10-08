@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Data.Json.Project;
 using NiVE3.Exceptions;
+using NiVE3.Extension;
 using NiVE3.Image;
 using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Interfaces;
@@ -79,7 +80,7 @@ namespace NiVE3.Model
             HistoryModel = historyModel;
             CompositionModel = compositionModel;
             EffectId = effectId ?? Guid.NewGuid();
-            Properties = new PropertyGroupModel(new PropertyGroup(EffectPropertyGroupId, "", effect.Value.GetProperties()), compositionModel, layerModel, this, historyModel, false);
+            Properties = new PropertyGroupModel(new PropertyGroup(EffectPropertyGroupId, "", effect.Value.GetProperties()), EffectId.ToInt128(), compositionModel, layerModel, this, historyModel, false);
             IsSupportGpu = metadata.IsSupportGpu;
             Properties.ValueUpdated += Property_ValueUpdated;
 
