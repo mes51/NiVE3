@@ -36,8 +36,6 @@ namespace NiVE3.Model
 
         public Guid InstanceId { get; }
 
-        public object? Value => null;
-
         public ObservableCollection<KeyFrame>? KeyFrames => null;
 
         private ObservableCollection<IPropertyModel> children = [];

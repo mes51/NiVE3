@@ -21,8 +21,6 @@ namespace NiVE3.Model
     {
         public string Name { get; }
 
-        public object? Value => null;
-
         public bool IsEnable => true;
 
         public ObservableCollection<KeyFrame>? KeyFrames => null;

@@ -399,7 +399,7 @@ namespace NiVE3.ViewModel
 
         private void PropertyModel_ValueCommited(object? sender, EventArgs e)
         {
-            PropertyValueUpdatePublisher.Publish(this, new PropertyValueCommitedEventArgs(PropertyModel.Value, this));
+            PropertyValueUpdatePublisher.Publish(this, new PropertyValueCommitedEventArgs(this));
         }
 
         private void PropertyViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)

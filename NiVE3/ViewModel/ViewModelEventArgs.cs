@@ -98,19 +98,15 @@ namespace NiVE3.ViewModel
 
     class PropertyValueCommitedEventArgs : EventArgs
     {
-        public object? Value { get; }
-
         public IInternalPropertyViewModel[] PropertyHierarchy { get; }
 
-        public PropertyValueCommitedEventArgs(object? value, IInternalPropertyViewModel sender)
+        public PropertyValueCommitedEventArgs(IInternalPropertyViewModel sender)
         {
-            Value = value;
             PropertyHierarchy = [sender];
         }
 
         public PropertyValueCommitedEventArgs(PropertyValueCommitedEventArgs e, IInternalPropertyViewModel parent)
         {
-            Value = e.Value;
             PropertyHierarchy = [..e.PropertyHierarchy, parent];
         }
     }

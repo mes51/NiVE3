@@ -17,8 +17,6 @@ namespace NiVE3.Model
     {
         string Name { get; }
 
-        object? Value { get; }
-
         ObservableCollection<KeyFrame>? KeyFrames { get; }
 
         ObservableCollection<IPropertyModel>? Children { get; }
