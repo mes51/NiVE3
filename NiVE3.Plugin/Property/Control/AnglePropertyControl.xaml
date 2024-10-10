@@ -45,7 +45,7 @@
                     <MultiDataTrigger>
                         <MultiDataTrigger.Conditions>
                             <Condition Binding="{Binding Property.IsOnlyPositiveDirection}" Value="True"/>
-                            <Condition Binding="{Binding ElementName=Root, Path=Angle, Converter={StaticResource LessThanConverter}, ConverterParameter=0}" Value="True"/>
+                            <Condition Binding="{Binding ElementName=Root, Path=RawAngle, Converter={StaticResource LessThanConverter}, ConverterParameter=0}" Value="True"/>
                         </MultiDataTrigger.Conditions>
 
                         <Setter Property="Minimum" Value="0"/>
@@ -61,7 +61,7 @@
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
 
-        <pr:SlidableNumberTextBox Grid.Column="0" x:Name="RotateCountSlider" Value="{Binding ElementName=Root, Path=RotateCount}" Style="{StaticResource RotateCountSliderStyle}">
+        <pr:SlidableNumberTextBox Grid.Column="0" x:Name="RotateCountSlider" Value="{Binding ElementName=Root, Path=RawRotateCount}" DisplayValue="{Binding ElementName=Root, Path=RotateCount}" ShowDisplayValue="{Binding IsEnableExpression}" Style="{StaticResource RotateCountSliderStyle}">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="BeginSlideEditValue">
                     <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
@@ -84,7 +84,7 @@
             </i:Interaction.Triggers>
         </pr:SlidableNumberTextBox>
         <Path Grid.Column="1" Fill="{gm:AppearanceResource ResourceKey=TextBrush}" Data="{StaticResource CrossIcon}" VerticalAlignment="Center" Margin="0,4,0,0" />
-        <pr:SlidableNumberTextBox Grid.Column="2" x:Name="AngleSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=Angle}" Style="{StaticResource AngleSliderStyle}">
+        <pr:SlidableNumberTextBox Grid.Column="2" x:Name="AngleSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=RawAngle}" DisplayValue="{Binding ElementName=Root, Path=Angle}" ShowDisplayValue="{Binding IsEnableExpression}" Style="{StaticResource AngleSliderStyle}">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="BeginSlideEditValue">
                     <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>

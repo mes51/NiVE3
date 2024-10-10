@@ -7,7 +7,27 @@
                            mc:Ignorable="d" 
                            x:Name="Root"
                            d:DesignHeight="450" d:DesignWidth="800">
+    <local:PropertyControlBase.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/NiVE3.Plugin;component/Property/Control/Resources/Icons.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <Style x:Key="CheckBoxStyle" TargetType="{x:Type CheckBox}" BasedOn="{StaticResource {x:Type CheckBox}}">
+                <Setter Property="Margin" Value="5,0,0,0"/>
+                <Setter Property="VerticalAlignment" Value="Center"/>
+                <Setter Property="HorizontalAlignment" Value="Left"/>
+                <Setter Property="IsChecked" Value="{Binding CurrentTimeRawValue, Mode=OneWay}"/>
+
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsEnableExpression}" Value="True">
+                        <Setter Property="IsChecked" Value="{Binding CurrentTimeValue, Mode=OneWay}"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </ResourceDictionary>
+    </local:PropertyControlBase.Resources>
     <Grid>
-        <CheckBox Margin="5,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center" IsChecked="{Binding CurrentTimeRawValue, Mode=OneWay}" Command="{Binding ElementName=Root, Path=ChangeCheckedCommand}"/>
+        <CheckBox Style="{StaticResource CheckBoxStyle}" Command="{Binding ElementName=Root, Path=ChangeCheckedCommand}"/>
     </Grid>
 </local:PropertyControlBase>

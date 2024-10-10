@@ -88,6 +88,20 @@ namespace NiVE3.UI.Primitive
             new FrameworkPropertyMetadata(false)
         );
 
+        public static readonly DependencyProperty DisplayValueProperty = DependencyProperty.Register(
+            nameof(DisplayValue),
+            typeof(double),
+            typeof(SlidableNumberTextBox),
+            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        public static readonly DependencyProperty ShowDisplayValueProperty = DependencyProperty.Register(
+            nameof(ShowDisplayValue),
+            typeof(bool),
+            typeof(SlidableNumberTextBox),
+            new FrameworkPropertyMetadata(false, ShowDisplayValueChanged)
+        );
+
         public static readonly RoutedEvent BeginSlideEditValueEvent = EventManager.RegisterRoutedEvent(
             nameof(BeginSlideEditValue), RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(SlidableNumberTextBox)
         );
@@ -111,6 +125,18 @@ namespace NiVE3.UI.Primitive
         public static readonly RoutedEvent AbortTextEditValueEvent = EventManager.RegisterRoutedEvent(
             nameof(AbortTextEditValue), RoutingStrategy.Direct, typeof(RoutedEventHandler), typeof(SlidableNumberTextBox)
         );
+
+        public bool ShowDisplayValue
+        {
+            get { return (bool)GetValue(ShowDisplayValueProperty); }
+            set { SetValue(ShowDisplayValueProperty, value); }
+        }
+
+        public double DisplayValue
+        {
+            get { return (double)GetValue(DisplayValueProperty); }
+            set { SetValue(DisplayValueProperty, value); }
+        }
 
         private bool IsClicked
         {
@@ -225,7 +251,14 @@ namespace NiVE3.UI.Primitive
             BindingOperations.ClearBinding(ValueTextBlock, TextBlock.TextProperty);
             BindingOperations.ClearBinding(ValueTextBox, TextBox.TextProperty);
 
-            BindingOperations.SetBinding(ValueTextBlock, TextBlock.TextProperty, new Binding(nameof(Value)) { Source = this, Converter = Converter, StringFormat = $"{{0}}{UnitText}" });
+            if (ShowDisplayValue)
+            {
+                BindingOperations.SetBinding(ValueTextBlock, TextBlock.TextProperty, new Binding(nameof(DisplayValue)) { Source = this, Converter = Converter, StringFormat = $"{{0}}{UnitText}" });
+            }
+            else
+            {
+                BindingOperations.SetBinding(ValueTextBlock, TextBlock.TextProperty, new Binding(nameof(Value)) { Source = this, Converter = Converter, StringFormat = $"{{0}}{UnitText}" });
+            }
             BindingOperations.SetBinding(ValueTextBox, TextBox.TextProperty, new Binding(nameof(Value)) { Source = this, Converter = Converter, UpdateSourceTrigger = UpdateSourceTrigger.Explicit, NotifyOnSourceUpdated = true });
         }
 
@@ -454,6 +487,14 @@ namespace NiVE3.UI.Primitive
         }
 
         static void UnitTextChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is SlidableNumberTextBox slider)
+            {
+                slider.UpdateBinding();
+            }
+        }
+
+        static void ShowDisplayValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is SlidableNumberTextBox slider)
             {

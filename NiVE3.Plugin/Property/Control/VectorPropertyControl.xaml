@@ -80,7 +80,17 @@
         </Grid.ColumnDefinitions>
 
         <CheckBox Grid.Column="0" IsChecked="{Binding ElementName=Root, Path=IsLinkRatio}" Visibility="{Binding ElementName=Root, Path=UseLinkRatio, Converter={StaticResource BooleanToVisibilityConverter}}" Style="{StaticResource LinkCheckBox}"/>
-        <pr:SlidableNumberTextBox Grid.Column="1" x:Name="ValueXSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=ValueX}" Minimum="{Binding ElementName=Root, Path=MinimumX}" Maximum="{Binding ElementName=Root, Path=MaximumX}" UnitText="{Binding ElementName=Root, Path=Unit}" Margin="5,0,2,0" VerticalAlignment="Center">
+        <pr:SlidableNumberTextBox x:Name="ValueXSlider"
+                                  Grid.Column="1"
+                                  Digit="{Binding Property.Digit}"
+                                  Value="{Binding ElementName=Root, Path=RawValueX}"
+                                  DisplayValue="{Binding ElementName=Root, Path=ValueX}"
+                                  ShowDisplayValue="{Binding IsEnableExpression}"
+                                  Minimum="{Binding ElementName=Root, Path=MinimumX}"
+                                  Maximum="{Binding ElementName=Root, Path=MaximumX}"
+                                  UnitText="{Binding ElementName=Root, Path=Unit}"
+                                  Margin="5,0,2,0"
+                                  VerticalAlignment="Center">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="BeginSlideEditValue">
                     <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
@@ -126,7 +136,17 @@
         <Grid Grid.Column="2" Style="{StaticResource SeparatorGridStyle}">
             <TextBlock Text="{Binding ElementName=Root, Path=Separator}" VerticalAlignment="Bottom"/>
         </Grid>
-        <pr:SlidableNumberTextBox Grid.Column="3" x:Name="ValueYSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=ValueY}" Minimum="{Binding ElementName=Root, Path=MinimumY}" Maximum="{Binding ElementName=Root, Path=MaximumY}" UnitText="{Binding ElementName=Root, Path=Unit}" Margin="5,0,2,0" VerticalAlignment="Center">
+        <pr:SlidableNumberTextBox x:Name="ValueYSlider"
+                                  Grid.Column="3"
+                                  Digit="{Binding Property.Digit}"
+                                  Value="{Binding ElementName=Root, Path=RawValueY}"
+                                  DisplayValue="{Binding ElementName=Root, Path=ValueY}"
+                                  ShowDisplayValue="{Binding IsEnableExpression}"
+                                  Minimum="{Binding ElementName=Root, Path=MinimumY}"
+                                  Maximum="{Binding ElementName=Root, Path=MaximumY}"
+                                  UnitText="{Binding ElementName=Root, Path=Unit}"
+                                  Margin="5,0,2,0"
+                                  VerticalAlignment="Center">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="BeginSlideEditValue">
                     <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
@@ -172,7 +192,18 @@
         <Grid Grid.Column="4" Style="{StaticResource SeparatorGridStyle}">
             <TextBlock Text="{Binding ElementName=Root, Path=Separator}" VerticalAlignment="Bottom" Visibility="{Binding ElementName=Root, Path=Is3D, Converter={StaticResource BooleanToVisibilityConverter}}"/>
         </Grid>
-        <pr:SlidableNumberTextBox Grid.Column="5" x:Name="ValueZSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=ValueZ}" Minimum="{Binding ElementName=Root, Path=MinimumZ}" Maximum="{Binding ElementName=Root, Path=MaximumZ}" UnitText="{Binding ElementName=Root, Path=Unit}" Margin="5,0,0,0" VerticalAlignment="Center" Visibility="{Binding ElementName=Root, Path=Is3D, Converter={StaticResource BooleanToVisibilityConverter}}">
+        <pr:SlidableNumberTextBox x:Name="ValueZSlider"
+                                  Grid.Column="5"
+                                  Digit="{Binding Property.Digit}"
+                                  Value="{Binding ElementName=Root, Path=RawValueZ}"
+                                  DisplayValue="{Binding ElementName=Root, Path=ValueZ}"
+                                  ShowDisplayValue="{Binding IsEnableExpression}"
+                                  Minimum="{Binding ElementName=Root, Path=MinimumZ}"
+                                  Maximum="{Binding ElementName=Root, Path=MaximumZ}"
+                                  UnitText="{Binding ElementName=Root, Path=Unit}"
+                                  Margin="5,0,0,0"
+                                  VerticalAlignment="Center"
+                                  Visibility="{Binding ElementName=Root, Path=Is3D, Converter={StaticResource BooleanToVisibilityConverter}}">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="BeginSlideEditValue">
                     <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>

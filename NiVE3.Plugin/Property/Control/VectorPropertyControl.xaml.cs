@@ -31,25 +31,46 @@ namespace NiVE3.Plugin.Property.Control
             new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
+        public static readonly DependencyProperty RawValueXProperty = DependencyProperty.Register(
+            nameof(RawValueX),
+            typeof(double),
+            typeof(VectorPropertyControl),
+            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, VectorValueChanged)
+        );
+
+        public static readonly DependencyProperty RawValueYProperty = DependencyProperty.Register(
+            nameof(RawValueY),
+            typeof(double),
+            typeof(VectorPropertyControl),
+            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, VectorValueChanged)
+        );
+
+        public static readonly DependencyProperty RawValueZProperty = DependencyProperty.Register(
+            nameof(RawValueZ),
+            typeof(double),
+            typeof(VectorPropertyControl),
+            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, VectorValueChanged)
+        );
+
         public static readonly DependencyProperty ValueXProperty = DependencyProperty.Register(
             nameof(ValueX),
             typeof(double),
             typeof(VectorPropertyControl),
-            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, VectorValueChanged)
+            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
         public static readonly DependencyProperty ValueYProperty = DependencyProperty.Register(
             nameof(ValueY),
             typeof(double),
             typeof(VectorPropertyControl),
-            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, VectorValueChanged)
+            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
         public static readonly DependencyProperty ValueZProperty = DependencyProperty.Register(
             nameof(ValueZ),
             typeof(double),
             typeof(VectorPropertyControl),
-            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, VectorValueChanged)
+            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
         public static readonly DependencyProperty MinimumXProperty = DependencyProperty.Register(
@@ -200,6 +221,24 @@ namespace NiVE3.Plugin.Property.Control
             set { SetValue(ValueXProperty, value); }
         }
 
+        public double RawValueZ
+        {
+            get { return (double)GetValue(RawValueZProperty); }
+            set { SetValue(RawValueZProperty, value); }
+        }
+
+        public double RawValueY
+        {
+            get { return (double)GetValue(RawValueYProperty); }
+            set { SetValue(RawValueYProperty, value); }
+        }
+
+        public double RawValueX
+        {
+            get { return (double)GetValue(RawValueXProperty); }
+            set { SetValue(RawValueXProperty, value); }
+        }
+
         public bool Is3D
         {
             get { return (bool)GetValue(Is3DProperty); }
@@ -227,19 +266,19 @@ namespace NiVE3.Plugin.Property.Control
                 if (UseLinkRatio && IsLinkRatio)
                 {
                     var baseValue = 1.0;
-                    if (ValueX != 0.0)
+                    if (RawValueX != 0.0)
                     {
-                        baseValue = ValueX;
+                        baseValue = RawValueX;
                     }
-                    else if (ValueY != 0.0)
+                    else if (RawValueY != 0.0)
                     {
-                        baseValue = ValueY;
+                        baseValue = RawValueY;
                     }
-                    else if (ValueZ != 0.0)
+                    else if (RawValueZ != 0.0)
                     {
-                        baseValue = ValueZ;
+                        baseValue = RawValueZ;
                     }
-                    ScaleRatio = new Vector3d(ValueX, ValueY, ValueZ) / baseValue;
+                    ScaleRatio = new Vector3d(RawValueX, RawValueY, RawValueZ) / baseValue;
                 }
                 IsEditingProperty = false;
             });
@@ -260,35 +299,53 @@ namespace NiVE3.Plugin.Property.Control
                 newViewModel.PropertyChanged += ViewModel_PropertyChanged;
             }
 
-            if (ViewModel?.CurrentTimeRawValue is not Vector3d vector)
+            if (ViewModel is not IPropertyViewModel viewModel)
+            {
+                return;
+            }
+
+            if (viewModel.CurrentTimeRawValue is not Vector3d rawVector)
             {
                 return;
             }
 
             IsValueChanging = true;
 
-            ValueX = vector.X;
-            ValueY = vector.Y;
-            ValueZ = vector.Z;
+            RawValueX = rawVector.X;
+            RawValueY = rawVector.Y;
+            RawValueZ = rawVector.Z;
 
             IsValueChanging = false;
 
             if (UseLinkRatio && IsLinkRatio && !IsEditingProperty)
             {
                 var baseValue = 1.0;
-                if (ValueX != 0.0)
+                if (RawValueX != 0.0)
                 {
-                    baseValue = ValueX;
+                    baseValue = RawValueX;
                 }
-                else if (ValueY != 0.0)
+                else if (RawValueY != 0.0)
                 {
-                    baseValue = ValueY;
+                    baseValue = RawValueY;
                 }
-                else if (ValueZ != 0.0)
+                else if (RawValueZ != 0.0)
                 {
-                    baseValue = ValueZ;
+                    baseValue = RawValueZ;
                 }
-                ScaleRatio = new Vector3d(ValueX, ValueY, ValueZ) / baseValue;
+                ScaleRatio = new Vector3d(RawValueX, RawValueY, RawValueZ) / baseValue;
+            }
+
+            if (viewModel.IsEnableExpression && viewModel.CurrentTimeValue is Vector3d vector)
+            {
+                ValueX = vector.X;
+                ValueY = vector.Y;
+                ValueZ = vector.Z;
+            }
+            else
+            {
+                ValueX = RawValueX;
+                ValueY = RawValueY;
+                ValueZ = RawValueZ;
             }
         }
 
@@ -303,35 +360,48 @@ namespace NiVE3.Plugin.Property.Control
         private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             var viewModel = ViewModel;
-            if (viewModel == null || viewModel.CurrentTimeRawValue is not Vector3d vector)
+            if (viewModel == null || viewModel.CurrentTimeRawValue is not Vector3d rawVector)
             {
                 return;
             }
 
             IsValueChanging = true;
 
-            ValueX = vector.X;
-            ValueY = vector.Y;
-            ValueZ = vector.Z;
+            RawValueX = rawVector.X;
+            RawValueY = rawVector.Y;
+            RawValueZ = rawVector.Z;
 
             IsValueChanging = false;
 
             if (UseLinkRatio && IsLinkRatio && !IsEditingProperty)
             {
                 var baseValue = 1.0;
-                if (ValueX != 0.0)
+                if (RawValueX != 0.0)
                 {
-                    baseValue = ValueX;
+                    baseValue = RawValueX;
                 }
-                else if (ValueY != 0.0)
+                else if (RawValueY != 0.0)
                 {
-                    baseValue = ValueY;
+                    baseValue = RawValueY;
                 }
-                else if (ValueZ != 0.0)
+                else if (RawValueZ != 0.0)
                 {
-                    baseValue = ValueZ;
+                    baseValue = RawValueZ;
                 }
-                ScaleRatio = new Vector3d(ValueX, ValueY, ValueZ) / baseValue;
+                ScaleRatio = new Vector3d(RawValueX, RawValueY, RawValueZ) / baseValue;
+            }
+
+            if (viewModel.IsEnableExpression && viewModel.CurrentTimeValue is Vector3d vector)
+            {
+                ValueX = vector.X;
+                ValueY = vector.Y;
+                ValueZ = vector.Z;
+            }
+            else
+            {
+                ValueX = RawValueX;
+                ValueY = RawValueY;
+                ValueZ = RawValueZ;
             }
         }
 
@@ -345,22 +415,22 @@ namespace NiVE3.Plugin.Property.Control
             if (control.UseLinkRatio && control.IsLinkRatio)
             {
                 var scale = control.ScaleRatio;
-                if ((e.Property == ValueXProperty && scale.X == 0.0) ||
-                    (e.Property == ValueYProperty && scale.Y == 0.0) ||
-                    (e.Property == ValueZProperty && scale.Z == 0.0))
+                if ((e.Property == RawValueXProperty && scale.X == 0.0) ||
+                    (e.Property == RawValueYProperty && scale.Y == 0.0) ||
+                    (e.Property == RawValueZProperty && scale.Z == 0.0))
                 {
                     scale = new Vector3d(1.0, 1.0, 1.0);
                     control.ScaleRatio = scale;
                 }
-                else if (e.Property == ValueXProperty)
+                else if (e.Property == RawValueXProperty)
                 {
                     scale /= scale.X; ;
                 }
-                else if (e.Property == ValueYProperty)
+                else if (e.Property == RawValueYProperty)
                 {
                     scale /= scale.Y;
                 }
-                else if (e.Property == ValueZProperty)
+                else if (e.Property == RawValueZProperty)
                 {
                     scale /= scale.Z;
                 }
@@ -369,7 +439,7 @@ namespace NiVE3.Plugin.Property.Control
             }
             else
             {
-                viewModel.CurrentTimeRawValue = new Vector3d(control.ValueX, control.ValueY, control.ValueZ);
+                viewModel.CurrentTimeRawValue = new Vector3d(control.RawValueX, control.RawValueY, control.RawValueZ);
             }
         }
 
@@ -380,19 +450,19 @@ namespace NiVE3.Plugin.Property.Control
                 if (control.UseLinkRatio && control.IsLinkRatio)
                 {
                     var baseValue = 1.0;
-                    if (control.ValueX != 0.0)
+                    if (control.RawValueX != 0.0)
                     {
-                        baseValue = control.ValueX;
+                        baseValue = control.RawValueX;
                     }
-                    else if (control.ValueY != 0.0)
+                    else if (control.RawValueY != 0.0)
                     {
-                        baseValue = control.ValueY;
+                        baseValue = control.RawValueY;
                     }
-                    else if (control.ValueZ != 0.0)
+                    else if (control.RawValueZ != 0.0)
                     {
-                        baseValue = control.ValueZ;
+                        baseValue = control.RawValueZ;
                     }
-                    control.ScaleRatio = new Vector3d(control.ValueX, control.ValueY, control.ValueZ) / baseValue;
+                    control.ScaleRatio = new Vector3d(control.RawValueX, control.RawValueY, control.RawValueZ) / baseValue;
                 }
             }
         }

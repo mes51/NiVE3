@@ -28,7 +28,7 @@
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
 
-        <pr:SlidableNumberTextBox Grid.Column="0" x:Name="ValueXSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=ValueX}" UnitText="°" Margin="5,0,2,0" VerticalAlignment="Center">
+        <pr:SlidableNumberTextBox Grid.Column="0" x:Name="ValueXSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=RawValueX}" DisplayValue="{Binding ElementName=Root, Path=ValueX}" ShowDisplayValue="{Binding IsEnableExpression}" UnitText="°" Margin="5,0,2,0" VerticalAlignment="Center">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="BeginSlideEditValue">
                     <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
@@ -51,7 +51,7 @@
             </i:Interaction.Triggers>
         </pr:SlidableNumberTextBox>
         <Path Grid.Column="1" Fill="{gm:AppearanceResource ResourceKey=TextBrush}" Data="{StaticResource CrossIcon}" VerticalAlignment="Center" Margin="0,4,0,0" />
-        <pr:SlidableNumberTextBox Grid.Column="2" x:Name="ValueYSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=ValueY}" UnitText="°" Margin="5,0,2,0" VerticalAlignment="Center">
+        <pr:SlidableNumberTextBox Grid.Column="2" x:Name="ValueYSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=RawValueY}" DisplayValue="{Binding ElementName=Root, Path=ValueY}" ShowDisplayValue="{Binding IsEnableExpression}" UnitText="°" Margin="5,0,2,0" VerticalAlignment="Center">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="BeginSlideEditValue">
                     <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
@@ -74,7 +74,7 @@
             </i:Interaction.Triggers>
         </pr:SlidableNumberTextBox>
         <Path Grid.Column="3" Fill="{gm:AppearanceResource ResourceKey=TextBrush}" Data="{StaticResource CrossIcon}" VerticalAlignment="Center" Margin="0,4,0,0"/>
-        <pr:SlidableNumberTextBox Grid.Column="4" x:Name="ValueZSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=ValueZ}" UnitText="°" Margin="5,0,0,0" VerticalAlignment="Center">
+        <pr:SlidableNumberTextBox Grid.Column="4" x:Name="ValueZSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=RawValueZ}" DisplayValue="{Binding ElementName=Root, Path=ValueZ}" ShowDisplayValue="{Binding IsEnableExpression}" UnitText="°" Margin="5,0,0,0" VerticalAlignment="Center">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="BeginSlideEditValue">
                     <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>

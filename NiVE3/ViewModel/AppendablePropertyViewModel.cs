@@ -45,11 +45,15 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref isExpanded, value); }
         }
 
+        public object? CurrentTimeValue => null;
+
         public object? CurrentTimeRawValue
         {
             get => null;
             set { }
         }
+
+        public bool IsEnableExpression => false;
 
         public PropertyBase Property { get; }
 

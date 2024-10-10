@@ -20,8 +20,14 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type Button}">
                         <Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
-                            <Rectangle Fill="{Binding CurrentTimeRawValue, Converter={StaticResource ColorToBrushConverter}}"/>
+                            <Rectangle x:Name="ColorSampleRect" Fill="{Binding CurrentTimeRawValue, Converter={StaticResource ColorToBrushConverter}}"/>
                         </Border>
+
+                        <ControlTemplate.Triggers>
+                            <DataTrigger Binding="{Binding IsEnableExpression}" Value="True">
+                                <Setter TargetName="ColorSampleRect" Property="Fill" Value="{Binding CurrentTimeValue, Converter={StaticResource ColorToBrushConverter}}"/>
+                            </DataTrigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>

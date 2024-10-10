@@ -149,7 +149,11 @@ namespace NiVE3.Plugin.Interfaces
     {
         PropertyBase Property { get; }
 
+        object? CurrentTimeValue { get; }
+
         object? CurrentTimeRawValue { get; set; }
+
+        bool IsEnableExpression { get; }
 
         ICommand BeginEditCommand { get; }
 

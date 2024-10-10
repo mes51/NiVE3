@@ -22,18 +22,32 @@ namespace NiVE3.Plugin.Property.Control
     /// </summary>
     public partial class AnglePropertyControl : PropertyControlBase
     {
+        public static readonly DependencyProperty RawRotateCountProperty = DependencyProperty.Register(
+            nameof(RawRotateCount),
+            typeof(int),
+            typeof(AnglePropertyControl),
+            new FrameworkPropertyMetadata(0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, AngleChanged)
+        );
+
+        public static readonly DependencyProperty RawAngleProperty = DependencyProperty.Register(
+            nameof(RawAngle),
+            typeof(double),
+            typeof(AnglePropertyControl),
+            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, AngleChanged)
+        );
+
         public static readonly DependencyProperty RotateCountProperty = DependencyProperty.Register(
             nameof(RotateCount),
             typeof(int),
             typeof(AnglePropertyControl),
-            new FrameworkPropertyMetadata(0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, AngleChanged)
+            new FrameworkPropertyMetadata(0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
         public static readonly DependencyProperty AngleProperty = DependencyProperty.Register(
             nameof(Angle),
             typeof(double),
             typeof(AnglePropertyControl),
-            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, AngleChanged)
+            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
         public static readonly DependencyProperty IsOnlyPositiveDirectionProperty = DependencyProperty.Register(
@@ -61,6 +75,18 @@ namespace NiVE3.Plugin.Property.Control
             set { SetValue(RotateCountProperty, value); }
         }
 
+        public double RawAngle
+        {
+            get { return (double)GetValue(RawAngleProperty); }
+            set { SetValue(RawAngleProperty, value); }
+        }
+
+        public int RawRotateCount
+        {
+            get { return (int)GetValue(RawRotateCountProperty); }
+            set { SetValue(RawRotateCountProperty, value); }
+        }
+
         bool IsValueChanging { get; set; }
 
         public AnglePropertyControl()
@@ -79,17 +105,35 @@ namespace NiVE3.Plugin.Property.Control
                 newViewModel.PropertyChanged += ViewModel_PropertyChanged;
             }
 
-            if (ViewModel?.CurrentTimeRawValue is double angle)
+            if (ViewModel is not IPropertyViewModel viewModel)
+            {
+                return;
+            }
+
+            if (viewModel.CurrentTimeRawValue is double rawAngle)
+            {
+                var rawRotate = (int)(rawAngle / 360.0);
+                rawAngle %= 360.0;
+
+                IsValueChanging = true;
+
+                RawRotateCount = rawRotate;
+                RawAngle = rawAngle;
+
+                IsValueChanging = false;
+            }
+            if (viewModel.IsEnableExpression && viewModel.CurrentTimeValue is double angle)
             {
                 var rotate = (int)(angle / 360.0);
                 angle %= 360.0;
 
-                IsValueChanging = true;
-
                 RotateCount = rotate;
                 Angle = angle;
-
-                IsValueChanging = false;
+            }
+            else
+            {
+                RotateCount = RawRotateCount;
+                Angle = RawAngle;
             }
         }
 
@@ -104,20 +148,34 @@ namespace NiVE3.Plugin.Property.Control
         private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             var viewModel = ViewModel;
-            if (viewModel == null || viewModel.CurrentTimeRawValue is not double angle)
+            if (viewModel == null || viewModel.CurrentTimeRawValue is not double rawAngle)
             {
                 return;
             }
 
-            var rotate = (int)(angle / 360.0);
-            angle %= 360.0;
+            var rawRotate = (int)(rawAngle / 360.0);
+            rawAngle %= 360.0;
 
             IsValueChanging = true;
 
-            RotateCount = rotate;
-            Angle = angle;
+            RawRotateCount = rawRotate;
+            RawAngle = rawAngle;
 
             IsValueChanging = false;
+
+            if (viewModel.IsEnableExpression && viewModel.CurrentTimeValue is double angle)
+            {
+                var rotate = (int)(angle / 360.0);
+                angle %= 360.0;
+
+                RotateCount = rotate;
+                Angle = angle;
+            }
+            else
+            {
+                RotateCount = RawRotateCount;
+                Angle = RawAngle;
+            }
         }
 
         static void AngleChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -129,11 +187,11 @@ namespace NiVE3.Plugin.Property.Control
 
             if (control.IsOnlyPositiveDirection)
             {
-                viewModel.CurrentTimeRawValue = Math.Max(control.RotateCount * 360.0 + control.Angle, 0.0);
+                viewModel.CurrentTimeRawValue = Math.Max(control.RawRotateCount * 360.0 + control.RawAngle, 0.0);
             }
             else
             {
-                viewModel.CurrentTimeRawValue = control.RotateCount * 360.0 + control.Angle;
+                viewModel.CurrentTimeRawValue = control.RawRotateCount * 360.0 + control.RawAngle;
             }
         }
     }

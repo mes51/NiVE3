@@ -80,6 +80,13 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref useEditingValue, value); }
         }
 
+        private bool isEnableExpression;
+        public bool IsEnableExpression
+        {
+            get { return isEnableExpression; }
+            set { SetProperty(ref isEnableExpression, value); }
+        }
+
         private object? currentTimeValue;
         public object? CurrentTimeValue
         {
