@@ -45,7 +45,7 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref isExpanded, value); }
         }
 
-        public object? CurrentTimeValue
+        public object? CurrentTimeRawValue
         {
             get => null;
             set { }

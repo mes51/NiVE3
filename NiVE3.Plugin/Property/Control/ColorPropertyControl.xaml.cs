@@ -41,7 +41,7 @@ namespace NiVE3.Plugin.Property.Control
                     return;
                 }
 
-                var dialog = new ColorPickerDialog((Vector4)(viewModel.CurrentTimeValue ?? Vector4.Zero))
+                var dialog = new ColorPickerDialog((Vector4)(viewModel.CurrentTimeRawValue ?? Vector4.Zero))
                 {
                     Owner = Application.Current.MainWindow,
                     Title = DialogTitle,
@@ -51,7 +51,7 @@ namespace NiVE3.Plugin.Property.Control
                 if (dialog.ShowDialog() ?? false)
                 {
                     viewModel.BeginEditCommand.Execute(null);
-                    viewModel.CurrentTimeValue = dialog.VectorColor;
+                    viewModel.CurrentTimeRawValue = dialog.VectorColor;
                     viewModel.EndEditCommand.Execute(null);
                 }
             });

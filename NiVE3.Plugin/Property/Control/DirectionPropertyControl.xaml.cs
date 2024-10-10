@@ -80,7 +80,7 @@ namespace NiVE3.Plugin.Property.Control
                 newViewModel.PropertyChanged += ViewModel_PropertyChanged;
             }
 
-            if (ViewModel?.CurrentTimeValue is Vector3d vector)
+            if (ViewModel?.CurrentTimeRawValue is Vector3d vector)
             {
                 IsValueChanging = true;
 
@@ -103,7 +103,7 @@ namespace NiVE3.Plugin.Property.Control
         private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             var viewModel = ViewModel;
-            if (viewModel == null || viewModel.CurrentTimeValue is not Vector3d vector)
+            if (viewModel == null || viewModel.CurrentTimeRawValue is not Vector3d vector)
             {
                 return;
             }
@@ -124,7 +124,7 @@ namespace NiVE3.Plugin.Property.Control
                 return;
             }
 
-            viewModel.CurrentTimeValue = new Vector3d(control.ValueX % 360.0, control.ValueY % 360.0, control.ValueZ % 360.0);
+            viewModel.CurrentTimeRawValue = new Vector3d(control.ValueX % 360.0, control.ValueY % 360.0, control.ValueZ % 360.0);
         }
     }
 }

@@ -34,7 +34,7 @@ namespace NiVE3.Plugin.Property.Control
                 }
 
                 viewModel.BeginEditCommand.Execute(null);
-                viewModel.CurrentTimeValue = !(bool)(viewModel.CurrentTimeValue ?? false);
+                viewModel.CurrentTimeRawValue = !(bool)(viewModel.CurrentTimeRawValue ?? false);
                 viewModel.EndEditCommand.Execute(null);
             });
 

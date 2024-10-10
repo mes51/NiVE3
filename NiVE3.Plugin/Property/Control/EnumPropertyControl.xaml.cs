@@ -67,7 +67,7 @@ namespace NiVE3.Plugin.Property.Control
             if (e.NewValue is IPropertyViewModel newViewModel)
             {
                 newViewModel.PropertyChanged += ViewModel_PropertyChanged;
-                SetCurrentValue(SelectedValueProperty, newViewModel.CurrentTimeValue);
+                SetCurrentValue(SelectedValueProperty, newViewModel.CurrentTimeRawValue);
             }
         }
 
@@ -81,16 +81,16 @@ namespace NiVE3.Plugin.Property.Control
 
             viewModel.BeginEditCommand.Execute(null);
 
-            viewModel.CurrentTimeValue = SelectedValue;
+            viewModel.CurrentTimeRawValue = SelectedValue;
 
             viewModel.EndEditCommand.Execute(null);
         }
 
         private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(IPropertyViewModel.CurrentTimeValue))
+            if (e.PropertyName == nameof(IPropertyViewModel.CurrentTimeRawValue))
             {
-                SetCurrentValue(SelectedValueProperty, ViewModel?.CurrentTimeValue);
+                SetCurrentValue(SelectedValueProperty, ViewModel?.CurrentTimeRawValue);
             }
         }
     }

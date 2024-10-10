@@ -20,7 +20,7 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type Button}">
                         <Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
-                            <Rectangle Fill="{Binding CurrentTimeValue, Converter={StaticResource ColorToBrushConverter}}"/>
+                            <Rectangle Fill="{Binding CurrentTimeRawValue, Converter={StaticResource ColorToBrushConverter}}"/>
                         </Border>
                     </ControlTemplate>
                 </Setter.Value>

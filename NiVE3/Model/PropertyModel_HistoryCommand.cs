@@ -31,13 +31,13 @@ namespace NiVE3.Model
 
             public void Redo()
             {
-                Model.Value = NewValue;
+                Model.RawValue = NewValue;
                 Model.ValueCommited?.Invoke(Model, EventArgs.Empty);
             }
 
             public void Undo()
             {
-                Model.Value = OldValue;
+                Model.RawValue = OldValue;
                 Model.ValueCommited?.Invoke(Model, EventArgs.Empty);
             }
 
@@ -70,7 +70,7 @@ namespace NiVE3.Model
             public void Undo()
             {
                 Model.KeyFrames.Remove(KeyFrame);
-                Model.Value = OldValue;
+                Model.RawValue = OldValue;
                 Model.ValueCommited?.Invoke(Model, EventArgs.Empty);
             }
 
@@ -351,7 +351,7 @@ namespace NiVE3.Model
             public void Redo()
             {
                 Model.KeyFrames.Clear();
-                Model.Value = NewValue;
+                Model.RawValue = NewValue;
                 foreach (var  k in NewKeyFrames)
                 {
                     Model.KeyFrames.Add(k);
@@ -361,7 +361,7 @@ namespace NiVE3.Model
             public void Undo()
             {
                 Model.KeyFrames.Clear();
-                Model.Value = OldValue;
+                Model.RawValue = OldValue;
                 foreach (var k in OldKeyFrames)
                 {
                     Model.KeyFrames.Add(k);
@@ -390,13 +390,13 @@ namespace NiVE3.Model
 
             public void Redo()
             {
-                Model.Value = NewValue;
+                Model.RawValue = NewValue;
                 Model.ValueCommited?.Invoke(Model, EventArgs.Empty);
             }
 
             public void Undo()
             {
-                Model.Value = OldValue;
+                Model.RawValue = OldValue;
                 Model.ValueCommited?.Invoke(Model, EventArgs.Empty);
             }
 

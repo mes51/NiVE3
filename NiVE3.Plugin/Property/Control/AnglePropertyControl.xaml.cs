@@ -79,7 +79,7 @@ namespace NiVE3.Plugin.Property.Control
                 newViewModel.PropertyChanged += ViewModel_PropertyChanged;
             }
 
-            if (ViewModel?.CurrentTimeValue is double angle)
+            if (ViewModel?.CurrentTimeRawValue is double angle)
             {
                 var rotate = (int)(angle / 360.0);
                 angle %= 360.0;
@@ -104,7 +104,7 @@ namespace NiVE3.Plugin.Property.Control
         private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             var viewModel = ViewModel;
-            if (viewModel == null || viewModel.CurrentTimeValue is not double angle)
+            if (viewModel == null || viewModel.CurrentTimeRawValue is not double angle)
             {
                 return;
             }
@@ -129,11 +129,11 @@ namespace NiVE3.Plugin.Property.Control
 
             if (control.IsOnlyPositiveDirection)
             {
-                viewModel.CurrentTimeValue = Math.Max(control.RotateCount * 360.0 + control.Angle, 0.0);
+                viewModel.CurrentTimeRawValue = Math.Max(control.RotateCount * 360.0 + control.Angle, 0.0);
             }
             else
             {
-                viewModel.CurrentTimeValue = control.RotateCount * 360.0 + control.Angle;
+                viewModel.CurrentTimeRawValue = control.RotateCount * 360.0 + control.Angle;
             }
         }
     }

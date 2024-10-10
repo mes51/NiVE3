@@ -22,14 +22,9 @@ namespace NiVE3.Model
 {
     partial class PropertyModel : BindableBase, IPropertyModel, IOverwriteablePropertyModel
     {
-        public string Name { get; }
+        public const string RawValueUpdateKey = nameof(RawValue);
 
-        private object? _value = null; // valueキーワードと被るため仕方なしでアンダーバーをつける
-        public object? Value
-        {
-            get { return _value; }
-            set { SetProperty(ref _value, value); }
-        }
+        public string Name { get; }
 
         public bool IsEnable => true;
 
@@ -73,6 +68,13 @@ namespace NiVE3.Model
 
         public event EventHandler<EventArgs>? ValueCommited;
 
+        private object? rawValue;
+        object? RawValue
+        {
+            get { return rawValue; }
+            set { SetProperty(ref rawValue, value); }
+        }
+
         CompositionModel CompositionModel { get; }
 
         LayerModel? LayerModel { get; }
@@ -93,7 +95,7 @@ namespace NiVE3.Model
             EffectModel = effectModel;
             HistoryModel = historyModel;
             Name = property.DisplayName;
-            Value = property.DefaultValue;
+            RawValue = property.DefaultValue;
             SourceStartPoint = layerModel?.SourceStartPoint ?? 0.0;
             CurrentTime = compositionModel.CurrentTime;
 
@@ -139,7 +141,7 @@ namespace NiVE3.Model
                 }
                 else
                 {
-                    Value = newValue;
+                    RawValue = newValue;
                     HistoryModel.Add(new ValueChangeHistoryCommand(this, prevValue, newValue));
                     ValueCommited?.Invoke(this, EventArgs.Empty);
                 }
@@ -204,16 +206,28 @@ namespace NiVE3.Model
             return Children;
         }
 
-        public object? GetValue(double time)
+        public void UpdateUncommitedRawValue(object? value)
+        {
+            RawValue = value;
+        }
+
+        public object? GetRawValue(double time)
         {
             if (UseEditingValue || KeyFrames.Count < 1)
             {
-                return Value;
+                return RawValue;
             }
             else
             {
                 return Property.PropertyType.Interpolate(KeyFrames, time);
             }
+        }
+
+        public object? GetValue(double time)
+        {
+            var value = GetRawValue(time);
+            // TODO: エクスプレッションの処理
+            return value;
         }
 
         public object? GetCurrentTimeValue()
@@ -232,7 +246,7 @@ namespace NiVE3.Model
             }
             else
             {
-                CommitProperty(Property.DefaultValue, Value);
+                CommitProperty(Property.DefaultValue, RawValue);
             }
 
             HistoryModel.EndGroup();
@@ -247,13 +261,13 @@ namespace NiVE3.Model
         {
             if (Property is CompositionDependPropertyBase cp)
             {
-                var oldValue = Value;
-                Value = cp.ChangeValueByCompositionStateChanged(Value, CompositionModel);
+                var oldValue = RawValue;
+                RawValue = cp.ChangeValueByCompositionStateChanged(RawValue, CompositionModel);
 
-                if (oldValue != Value)
+                if (oldValue != RawValue)
                 {
                     ValueCommited?.Invoke(this, EventArgs.Empty);
-                    HistoryModel.Add(new UpdateValueByCompositionStateChangedHistoryCommand(this, oldValue, Value));
+                    HistoryModel.Add(new UpdateValueByCompositionStateChangedHistoryCommand(this, oldValue, RawValue));
                 }
             }
         }
@@ -287,14 +301,14 @@ namespace NiVE3.Model
                 PropertyId = Property.Id,
                 PropertyTypeName = Property.PropertyType.GetType().FullName ?? "",
                 Name = Name,
-                Value = Property.PropertyType.SerializeValue(Value),
+                Value = Property.PropertyType.SerializeValue(RawValue),
                 KeyFrames = keyFramesData
             };
         }
 
         public void LoadData(PropertyData data)
         {
-            Value = Property.PropertyType.DeserializeValue(data.Value);
+            RawValue = Property.PropertyType.DeserializeValue(data.Value);
             if (data.KeyFrames == null)
             {
                 return;
@@ -315,7 +329,7 @@ namespace NiVE3.Model
             var cp = Property as CompositionDependPropertyBase;
             if (cp != null)
             {
-                Value = cp.CoerceValue(Value, CompositionModel);
+                RawValue = cp.CoerceValue(RawValue, CompositionModel);
                 foreach (var k in oldKeyFrames.Select(k => new KeyFrame(k.Time, cp.CoerceValue(cp.PropertyType.DeserializeValue(k.Value), CompositionModel), k.EaseIn, k.EaseOut, k.InterpolationType, k.Id)))
                 {
                     KeyFrames.Add(k);
@@ -323,7 +337,7 @@ namespace NiVE3.Model
             }
             else
             {
-                Value = Property.CoerceValue(Value);
+                RawValue = Property.CoerceValue(RawValue);
                 foreach (var k in oldKeyFrames.Select(k => new KeyFrame(k.Time, Property.CoerceValue(Property.PropertyType.DeserializeValue(k.Value)), k.EaseIn, k.EaseOut, k.InterpolationType, k.Id)))
                 {
                     KeyFrames.Add(k);
@@ -346,8 +360,8 @@ namespace NiVE3.Model
                     CompositionDependPropertyBase cp => cp.CoerceValue(Property.PropertyType.DeserializeValue(data.Value), CompositionModel),
                     _ => Property.CoerceValue(Property.PropertyType.DeserializeValue(data.Value))
                 };
-                var oldValue = Value;
-                Value = newValue;
+                var oldValue = RawValue;
+                RawValue = newValue;
 
                 HistoryModel.Add(new ValueChangeHistoryCommand(this, oldValue, newValue));
             }
@@ -398,11 +412,11 @@ namespace NiVE3.Model
             }
 
             var oldKeyFrames = KeyFrames.ToArray();
-            var oldValue = Value;
+            var oldValue = RawValue;
 
             LoadData(data);
 
-            HistoryModel.Add(new OverwritePropertyHistoryCommand(this, oldKeyFrames, oldValue, [..KeyFrames], Value));
+            HistoryModel.Add(new OverwritePropertyHistoryCommand(this, oldKeyFrames, oldValue, [..KeyFrames], RawValue));
         }
 
         public CopyData<PropertyData> CopyProperty()
@@ -412,7 +426,7 @@ namespace NiVE3.Model
                 PropertyId = Property.Id,
                 PropertyTypeName = Property.PropertyType.GetType().FullName ?? "",
                 Name = Name,
-                Value = Property.PropertyType.SerializeValue(Value)
+                Value = Property.PropertyType.SerializeValue(RawValue)
             };
             return new CopyData<PropertyData>(CopyDataType.Property, [data]);
         }
@@ -455,7 +469,7 @@ namespace NiVE3.Model
                 PropertyId = Property.Id,
                 PropertyTypeName = Property.PropertyType.GetType().FullName ?? "",
                 Name = Name,
-                Value = Property.PropertyType.SerializeValue(Value),
+                Value = Property.PropertyType.SerializeValue(RawValue),
                 KeyFrames = keyFramesData
             };
 
@@ -522,7 +536,7 @@ namespace NiVE3.Model
 
         private void PropertyModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(Value))
+            if (e.PropertyName == nameof(RawValue))
             {
                 ValueUpdated?.Invoke(this, EventArgs.Empty);
             }

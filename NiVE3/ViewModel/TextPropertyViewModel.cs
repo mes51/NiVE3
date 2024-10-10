@@ -262,7 +262,7 @@ namespace NiVE3.ViewModel
                 if (SourceTextPropertyModel != null)
                 {
                     SourceTextPropertyModel.UseEditingValue = true;
-                    PrevValue = SourceTextPropertyModel.Value;
+                    PrevValue = SourceTextPropertyModel.GetRawValue(CurrentTime - SourceTextPropertyModel.SourceStartPoint);
                 }
             });
 
@@ -285,7 +285,7 @@ namespace NiVE3.ViewModel
                 if (SourceTextPropertyModel != null)
                 {
                     SourceTextPropertyModel.UseEditingValue = false;
-                    SourceTextPropertyModel.Value = PrevValue;
+                    SourceTextPropertyModel.UpdateUncommitedRawValue(PrevValue);
                 }
             });
 
@@ -378,11 +378,11 @@ namespace NiVE3.ViewModel
             var newStyle = TextPropertyModel.GetStyle();
             if (IsPropertyEditing)
             {
-                SourceTextPropertyModel.Value = SourceTextPropertyType.ReplaceDefaultStyle(PrevValue, newStyle);
+                SourceTextPropertyModel.UpdateUncommitedRawValue(SourceTextPropertyType.ReplaceDefaultStyle(PrevValue, newStyle));
             }
             else
             {
-                var prevValue = SourceTextPropertyModel.Value;
+                var prevValue = SourceTextPropertyModel.GetRawValue(CurrentTime - TargetLayer.SourceStartPoint);
                 SourceTextPropertyModel.CurrentTime = CurrentTime;
                 SourceTextPropertyModel.SourceStartPoint = TargetLayer.SourceStartPoint;
                 SourceTextPropertyModel.CommitProperty(SourceTextPropertyType.ReplaceDefaultStyle(prevValue, newStyle), prevValue);

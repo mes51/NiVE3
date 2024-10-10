@@ -88,7 +88,7 @@ namespace NiVE3.Plugin.Property.Control
             if (e.NewValue is IPropertyViewModel newViewModel)
             {
                 newViewModel.PropertyChanged += ViewModel_PropertyChanged;
-                if (newViewModel.CurrentTimeValue is UseLayerImageTarget target)
+                if (newViewModel.CurrentTimeRawValue is UseLayerImageTarget target)
                 {
                     SetCurrentValue(SelectedLayerProperty, CompositionViewModel.LayerViewModels.FirstOrDefault(l => l.LayerId == target.LayerId));
                     SetCurrentValue(SelectedImageProcessTypeProperty, target.ImageProcessType);
@@ -111,7 +111,7 @@ namespace NiVE3.Plugin.Property.Control
 
             viewModel.BeginEditCommand.Execute(null);
 
-            viewModel.CurrentTimeValue = SelectedLayer != null ? new UseLayerImageTarget(SelectedLayer.LayerId, SelectedImageProcessType) : UseLayerImageTarget.Empty;
+            viewModel.CurrentTimeRawValue = SelectedLayer != null ? new UseLayerImageTarget(SelectedLayer.LayerId, SelectedImageProcessType) : UseLayerImageTarget.Empty;
 
             viewModel.EndEditCommand.Execute(null);
         }
@@ -126,16 +126,16 @@ namespace NiVE3.Plugin.Property.Control
 
             viewModel.BeginEditCommand.Execute(null);
 
-            viewModel.CurrentTimeValue = SelectedLayer != null ? new UseLayerImageTarget(SelectedLayer.LayerId, SelectedImageProcessType) : UseLayerImageTarget.Empty;
+            viewModel.CurrentTimeRawValue = SelectedLayer != null ? new UseLayerImageTarget(SelectedLayer.LayerId, SelectedImageProcessType) : UseLayerImageTarget.Empty;
 
             viewModel.EndEditCommand.Execute(null);
         }
 
         private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(IPropertyViewModel.CurrentTimeValue))
+            if (e.PropertyName == nameof(IPropertyViewModel.CurrentTimeRawValue))
             {
-                if (ViewModel?.CurrentTimeValue is UseLayerImageTarget target)
+                if (ViewModel?.CurrentTimeRawValue is UseLayerImageTarget target)
                 {
                     SetCurrentValue(SelectedLayerProperty, CompositionViewModel.LayerViewModels.FirstOrDefault(l => l.LayerId == target.LayerId));
                     SetCurrentValue(SelectedImageProcessTypeProperty, target.ImageProcessType);

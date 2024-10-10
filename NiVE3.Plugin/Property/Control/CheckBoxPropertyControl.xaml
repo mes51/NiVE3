@@ -8,6 +8,6 @@
                            x:Name="Root"
                            d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
-        <CheckBox Margin="5,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center" IsChecked="{Binding CurrentTimeValue, Mode=OneWay}" Command="{Binding ElementName=Root, Path=ChangeCheckedCommand}"/>
+        <CheckBox Margin="5,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center" IsChecked="{Binding CurrentTimeRawValue, Mode=OneWay}" Command="{Binding ElementName=Root, Path=ChangeCheckedCommand}"/>
     </Grid>
 </local:PropertyControlBase>

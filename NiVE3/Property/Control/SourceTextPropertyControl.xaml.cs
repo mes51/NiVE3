@@ -56,7 +56,7 @@ namespace NiVE3.Property.Control
             if (e.NewValue is IPropertyViewModel newViewModel)
             {
                 newViewModel.PropertyChanged += ViewModel_PropertyChanged;
-                if (newViewModel.CurrentTimeValue is StyledText d)
+                if (newViewModel.CurrentTimeRawValue is StyledText d)
                 {
                     SetCurrentValue(SourceTextProperty, d.Text);
                 }
@@ -71,7 +71,7 @@ namespace NiVE3.Property.Control
         private void EditCancelButton_Click(object sender, RoutedEventArgs e)
         {
             EditPopup.IsOpen = false;
-            if (ViewModel?.CurrentTimeValue is StyledText d)
+            if (ViewModel?.CurrentTimeRawValue is StyledText d)
             {
                 SetCurrentValue(SourceTextProperty, d.Text);
             }
@@ -82,21 +82,21 @@ namespace NiVE3.Property.Control
             EditPopup.IsOpen = false;
 
             var viewModel = ViewModel;
-            if (viewModel == null || viewModel.CurrentTimeValue is not StyledText d)
+            if (viewModel == null || viewModel.CurrentTimeRawValue is not StyledText d)
             {
                 return;
             }
 
             viewModel.BeginEditCommand.Execute(null);
 
-            viewModel.CurrentTimeValue = d.ChangeText(SourceText);
+            viewModel.CurrentTimeRawValue = d.ChangeText(SourceText);
 
             viewModel.EndEditCommand.Execute(null);
         }
 
         private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(IPropertyViewModel.CurrentTimeValue) && ViewModel?.CurrentTimeValue is StyledText d)
+            if (e.PropertyName == nameof(IPropertyViewModel.CurrentTimeRawValue) && ViewModel?.CurrentTimeRawValue is StyledText d)
             {
                 SetCurrentValue(SourceTextProperty, d.Text);
             }

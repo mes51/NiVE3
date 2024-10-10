@@ -87,7 +87,7 @@ namespace NiVE3.Plugin.Property.Control
                     return;
                 }
 
-                var dialog = new ColorGradientEditDialog((ColorGradient)(ViewModel?.CurrentTimeValue ?? ColorGradient.WhiteBlackGradient))
+                var dialog = new ColorGradientEditDialog((ColorGradient)(ViewModel?.CurrentTimeRawValue ?? ColorGradient.WhiteBlackGradient))
                 {
                     Owner = Application.Current.MainWindow,
                     ShowPreviewOKLabInterpolation = ShowPreviewOKLabInterpolation
@@ -95,7 +95,7 @@ namespace NiVE3.Plugin.Property.Control
                 if (dialog.ShowDialog() ?? false)
                 {
                     viewModel.BeginEditCommand.Execute(null);
-                    viewModel.CurrentTimeValue = dialog.GetColorGradient();
+                    viewModel.CurrentTimeRawValue = dialog.GetColorGradient();
                     viewModel.EndEditCommand.Execute(null);
                 }
             });

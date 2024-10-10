@@ -300,7 +300,7 @@ namespace NiVE3.Model
                 layer.SourceStartPoint = sourceStartPoint;
                 if (initialPosition.HasValue && layer.TransformProperties?.FindProperty(ILayerObject.TransformPositionId) is PropertyModel position)
                 {
-                    position.Value = initialPosition.Value;
+                    position.UpdateUncommitedRawValue(initialPosition.Value);
                 }
 
                 addedLayers.Add(layer);

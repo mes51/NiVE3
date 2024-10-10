@@ -857,7 +857,8 @@ namespace NiVE3.Model
                 audio = effect.ProcessAudio(audio, layerTime);
             }
 
-            if (AudioOptionProperties != null && AudioOptionProperties.Children.First(p => p.Property.Id == ILayerObject.AudioLevelId) is PropertyModel level && (level.KeyFrames.Count > 0 || ((Vector3d)(level.Value ?? Vector3d.Zero)) != Vector3d.Zero))
+            // TODO: エクスプレッション有効/無効判定の追加
+            if (AudioOptionProperties != null && AudioOptionProperties.Children.First(p => p.Property.Id == ILayerObject.AudioLevelId) is PropertyModel level && (level.KeyFrames.Count > 0 || ((Vector3d)(level.GetRawValue(layerTime) ?? Vector3d.Zero)) != Vector3d.Zero))
             {
                 var audioSpan = audio.AsSpan();
                 if (level.KeyFrames.Count > 1)
@@ -887,7 +888,7 @@ namespace NiVE3.Model
                 }
                 else
                 {
-                    var audioLevel = ((Vector3d)(level.KeyFrames.FirstOrDefault()?.Value ?? level.Value ?? Vector3d.Zero));
+                    var audioLevel = ((Vector3d)(level.KeyFrames.FirstOrDefault()?.Value ?? level.GetRawValue(layerTime) ?? Vector3d.Zero));
                     var lLevel = MathF.Pow(10.0F, (float)(audioLevel.X * 0.05));
                     var rLevel = MathF.Pow(10.0F, (float)(audioLevel.Y * 0.05));
 
@@ -1276,10 +1277,10 @@ namespace NiVE3.Model
             FootageModel = footageModel;
         }
 
-        public void UpdateTextProperty(string propertyId, object? value)
+        public void UpdateTextProperty(string propertyId, object? value, double layerTime)
         {
             var property = TextProperties?.FindProperty(propertyId) as PropertyModel;
-            property?.CommitProperty(value, property?.Value);
+            property?.CommitProperty(value, property?.GetRawValue(layerTime));
         }
 
         public LayerData SaveData()

@@ -158,11 +158,11 @@ namespace NiVE3.Model.UI
             TextLineColor = (FloatColor)style.TextLineColor;
         }
 
-        public void UpdateTextProperty(LayerModel targetLayer, double time)
+        public void UpdateTextProperty(LayerModel targetLayer, double layerTime)
         {
-            var currentText = targetLayer.GetTextProperties(time)?.TryGetValueInTree(TextFootageSource.SourceTextId, out var styledText) ?? false ? styledText as StyledText ?? StyledText.Empty : StyledText.Empty;
+            var currentText = targetLayer.GetTextProperties(layerTime)?.TryGetValueInTree(TextFootageSource.SourceTextId, out var styledText) ?? false ? styledText as StyledText ?? StyledText.Empty : StyledText.Empty;
             var newStyle = GetStyle();
-            targetLayer.UpdateTextProperty(TextFootageSource.SourceTextId, SourceTextPropertyType.ReplaceDefaultStyle(currentText, newStyle));
+            targetLayer.UpdateTextProperty(TextFootageSource.SourceTextId, SourceTextPropertyType.ReplaceDefaultStyle(currentText, newStyle), layerTime);
         }
     }
 

@@ -72,14 +72,6 @@ namespace NiVE3.ViewModel
 
         public ObservableCollectionView<IPropertyModel, IInternalPropertyViewModel>? Children => null;
 
-        private object? _value;
-        [NeedWire(nameof(PropertyModel))]
-        public object? Value
-        {
-            get { return _value; }
-            set { SetProperty(ref _value, value); }
-        }
-
         private bool useEditingValue;
         [NeedWire(nameof(PropertyModel))]
         public bool UseEditingValue
@@ -93,6 +85,13 @@ namespace NiVE3.ViewModel
         {
             get { return currentTimeValue; }
             set { SetProperty(ref currentTimeValue, value); }
+        }
+
+        private object? currentTimeRawValue;
+        public object? CurrentTimeRawValue
+        {
+            get { return currentTimeRawValue; }
+            set { SetProperty(ref currentTimeRawValue, value); }
         }
 
         private bool hasKeyFrame;
@@ -362,10 +361,12 @@ namespace NiVE3.ViewModel
 
             WiringModel();
 
-            CurrentTimeValue = Value;
+            CurrentTimeRawValue = CalculationRawValue();
+            CurrentTimeValue = CalculationValue();
             HasKeyFrame = KeyFrames.Count > 0;
 
             PropertyModel.ValueCommited += PropertyModel_ValueCommited;
+            PropertyModel.PropertyChanged += PropertyModel_PropertyChanged;
             PropertyChanged += PropertyViewModel_PropertyChanged;
         }
 
@@ -390,6 +391,11 @@ namespace NiVE3.ViewModel
             IsSelectingAll = false;
         }
 
+        object? CalculationRawValue()
+        {
+            return PropertyModel.GetRawValue(CurrentTime - SourceStartPoint);
+        }
+
         object? CalculationValue()
         {
             return PropertyModel.GetValue(CurrentTime - SourceStartPoint);
@@ -402,19 +408,26 @@ namespace NiVE3.ViewModel
             PropertyValueUpdatePublisher.Publish(this, new PropertyValueCommitedEventArgs(this));
         }
 
+        private void PropertyModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == PropertyModel.RawValueUpdateKey && !IsEditing)
+            {
+                CurrentTimeRawValue = CalculationRawValue();
+            }
+        }
+
         private void PropertyViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             switch (e.PropertyName)
             {
-                case nameof(CurrentTimeValue) when IsEditing:
-                    Value = CurrentTimeValue;
+                case nameof(CurrentTimeRawValue) when IsEditing:
+                    PropertyModel.UpdateUncommitedRawValue(CurrentTimeRawValue);
+                    CurrentTimeValue = CalculationValue();
                     break;
+                case nameof(CurrentTimeRawValue):
                 case nameof(CurrentTime):
                 case nameof(SourceStartPoint):
                     CurrentTimeValue = CalculationValue();
-                    break;
-                case nameof(Value):
-                    CurrentTimeValue = Value;
                     break;
             }
         }
@@ -422,6 +435,7 @@ namespace NiVE3.ViewModel
         private void KeyFrames_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             HasKeyFrame = KeyFrames.Count > 0;
+            CurrentTimeRawValue = CalculationRawValue();
             CurrentTimeValue = CalculationValue();
         }
 
