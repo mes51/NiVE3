@@ -17,6 +17,8 @@ namespace NiVE3.Plugin.Property.Types
 
         public InterpolationType SupportedInterpolationTypes => InterpolationType.None | InterpolationType.Linear | InterpolationType.CatmullRom;
 
+        public bool IsSupportedExpression => true;
+
         private DoublePropertyType() { }
 
         public object? Interpolate(IReadOnlyList<KeyFrame> keyFrames, double t)
@@ -67,6 +69,54 @@ namespace NiVE3.Plugin.Property.Types
             {
                 return ZeroHashBase;
             }
+        }
+
+        public bool TryConvertFromExpressionValue(object? expressionValue, out object? value)
+        {
+            switch (expressionValue)
+            {
+                case byte v:
+                    value = (double)v;
+                    return true;
+                case sbyte v:
+                    value = (double)v;
+                    return true;
+                case short v:
+                    value = (double)v;
+                    return true;
+                case ushort v:
+                    value = (double)v;
+                    return true;
+                case int v:
+                    value = (double)v;
+                    return true;
+                case uint v:
+                    value = (double)v;
+                    return true;
+                case long v:
+                    value = (double)v;
+                    return true;
+                case ulong v:
+                    value = (double)v;
+                    return true;
+                case float v:
+                    value = (double)v;
+                    return true;
+                case double:
+                    value = expressionValue;
+                    return true;
+                case decimal v:
+                    value = (double)v;
+                    return true;
+                default:
+                    value = 0.0;
+                    return false;
+            }
+        }
+
+        public object? ConvertToExpressionValue(object? value)
+        {
+            return value;
         }
     }
 }

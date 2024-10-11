@@ -19,6 +19,9 @@ namespace NiVE3.Property.Types
 
         public InterpolationType SupportedInterpolationTypes => InterpolationType.None;
 
+        // TODO: エクスプレッション対応
+        public bool IsSupportedExpression => false;
+
         private SourceTextPropertyType() { }
 
         public object? Interpolate(IReadOnlyList<KeyFrame> keyFrames, double t)
@@ -33,25 +36,6 @@ namespace NiVE3.Property.Types
                 return keyFrames[baseKeyFrameIndex].Value;
             }
             return keyFrames[baseKeyFrameIndex].Value;
-        }
-
-        public bool TryConvertFrom(object otherValue, out object convertedValue)
-        {
-            if (otherValue is StyledText)
-            {
-                convertedValue = otherValue;
-                return true;
-            }
-            else if (otherValue is string s)
-            {
-                convertedValue = new StyledText(s, TextStyle.Empty, []);
-                return true;
-            }
-            else
-            {
-                convertedValue = StyledText.Empty;
-                return false;
-            }
         }
 
         public object? SerializeValue(object? value)
@@ -128,6 +112,16 @@ namespace NiVE3.Property.Types
             }
 
             return hashBase.ToArray();
+        }
+
+        public bool TryConvertFromExpressionValue(object? expressionValue, out object? value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public object? ConvertToExpressionValue(object? value)
+        {
+            throw new NotImplementedException();
         }
     }
 }

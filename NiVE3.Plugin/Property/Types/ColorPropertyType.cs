@@ -19,6 +19,8 @@ namespace NiVE3.Plugin.Property.Types
 
         public InterpolationType SupportedInterpolationTypes => InterpolationType.None | InterpolationType.Linear | InterpolationType.CatmullRom;
 
+        public bool IsSupportedExpression => true;
+
         private ColorPropertyType() { }
 
         public object? Interpolate(IReadOnlyList<KeyFrame> keyFrames, double t)
@@ -90,6 +92,47 @@ namespace NiVE3.Plugin.Property.Types
             {
                 return TransparentHashBase;
             }
+        }
+
+        public bool TryConvertFromExpressionValue(object? expressionValue, out object? value)
+        {
+            if (expressionValue is object[] colorElements)
+            {
+                if (colorElements.Length < 3)
+                {
+                    value = null;
+                    return false;
+                }
+
+                try
+                {
+                    var b = Convert.ToSingle(colorElements[0]);
+                    var g = Convert.ToSingle(colorElements[1]);
+                    var r = Convert.ToSingle(colorElements[2]);
+
+                    if (colorElements.Length > 3)
+                    {
+                        var a = Convert.ToSingle(colorElements[3]);
+                        value = new Vector4(b, g, r, a);
+                    }
+                    else
+                    {
+                        value = new Vector4(b, g, r, 1.0F);
+                    }
+                    return true;
+                }
+                catch { } // そのまま最後に流れ落ちる
+            }
+
+            value = null;
+            return false;
+        }
+
+        public object? ConvertToExpressionValue(object? value)
+        {
+            var color = (Vector4)(value ?? Vector4.Zero);
+
+            return new object[] { color.X, color.Y, color.Z, color.W };
         }
     }
 

@@ -22,6 +22,8 @@ namespace NiVE3.Plugin.Property.Types
 
         public InterpolationType SupportedInterpolationTypes => InterpolationType.None;
 
+        public bool IsSupportedExpression => false;
+
         private EnumPropertyType() { }
 
         public object? Interpolate(IReadOnlyList<KeyFrame> keyFrames, double t)
@@ -82,6 +84,16 @@ namespace NiVE3.Plugin.Property.Types
             {
                 return [];
             }
+        }
+
+        public bool TryConvertFromExpressionValue(object? expressionValue, out object? value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public object? ConvertToExpressionValue(object? value)
+        {
+            throw new NotImplementedException();
         }
     }
 }

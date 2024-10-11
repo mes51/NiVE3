@@ -9,6 +9,7 @@ using NiVE3.Numerics;
 using System.Runtime.InteropServices;
 using NiVE3.Plugin.Internal.Util;
 using System.Diagnostics.CodeAnalysis;
+using System.Numerics;
 
 namespace NiVE3.Plugin.Property.Types
 {
@@ -19,6 +20,8 @@ namespace NiVE3.Plugin.Property.Types
         public static Vector3dPropertyType Instance { get; } = new Vector3dPropertyType();
 
         public InterpolationType SupportedInterpolationTypes => InterpolationType.None | InterpolationType.Linear | InterpolationType.CatmullRom;
+
+        public bool IsSupportedExpression => true;
 
         private Vector3dPropertyType() { }
 
@@ -97,6 +100,45 @@ namespace NiVE3.Plugin.Property.Types
             {
                 return ZeroHashBase;
             }
+        }
+
+        public bool TryConvertFromExpressionValue(object? expressionValue, out object? value)
+        {
+            if (expressionValue is object[] vectorElements)
+            {
+                if (vectorElements.Length < 2)
+                {
+                    value = null;
+                    return false;
+                }
+
+                try
+                {
+                    var x = Convert.ToDouble(vectorElements[0]);
+                    var y = Convert.ToDouble(vectorElements[1]);
+
+                    if (vectorElements.Length > 2)
+                    {
+                        var z = Convert.ToDouble(vectorElements[2]);
+                        value = new Vector3d(x, y, z);
+                    }
+                    else
+                    {
+                        value = new Vector3d(x, y, 0.0);
+                    }
+                    return true;
+                }
+                catch { } // そのまま最後に流れ落ちる
+            }
+
+            value = null;
+            return false;
+        }
+
+        public object? ConvertToExpressionValue(object? value)
+        {
+            var vector = (Vector3d)(value ?? Vector3d.Zero);
+            return new object[] { vector.X, vector.Y, vector.Z };
         }
     }
 }

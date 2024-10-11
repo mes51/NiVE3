@@ -18,6 +18,11 @@ namespace NiVE3.Plugin.Property.Types
         InterpolationType SupportedInterpolationTypes { get; }
 
         /// <summary>
+        /// エクスプレッションをサポートするかどうか
+        /// </summary>
+        bool IsSupportedExpression { get; }
+
+        /// <summary>
         /// 2つのプロパティを補間します
         /// </summary>
         /// <param name="keyFrames">2つ以上の時間順でソートされたキーフレーム</param>
@@ -45,5 +50,20 @@ namespace NiVE3.Plugin.Property.Types
         /// <param name="value">プロパティの値</param>
         /// <returns>ハッシュ計算用のbyteのSpan</returns>
         Span<byte> ConvertToHashBase(object? value);
+
+        /// <summary>
+        /// エクスプレッションで処理された後の値から、このプロパティの型の値に変換します
+        /// </summary>
+        /// <param name="expressionValue">エクスプレッションから返ってきた値。プリミティブ型、またはstringの単体、配列、IDictionary&gt;string, object?&lt;のいずれか</param>
+        /// <param name="value">このプロパティの型の値。変換できなかった場合は不定</param>
+        /// <returns>このプロパティの型の値に変換できたかどうか</returns>
+        bool TryConvertFromExpressionValue(object? expressionValue, out object? value);
+
+        /// <summary>
+        /// このプロパティの型の値からエクスプレッションで使用可能な値に変換します
+        /// </summary>
+        /// <param name="value">このプロパティの型の値</param>
+        /// <returns>プリミティブ型、またはstringの単体、配列、IDictionary&gt;string, object?&lt;のいずれか</returns>
+        object? ConvertToExpressionValue(object? value);
     }
 }

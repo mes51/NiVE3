@@ -857,8 +857,7 @@ namespace NiVE3.Model
                 audio = effect.ProcessAudio(audio, layerTime);
             }
 
-            // TODO: エクスプレッション有効/無効判定の追加
-            if (AudioOptionProperties != null && AudioOptionProperties.Children.First(p => p.Property.Id == ILayerObject.AudioLevelId) is PropertyModel level && (level.KeyFrames.Count > 0 || ((Vector3d)(level.GetRawValue(layerTime) ?? Vector3d.Zero)) != Vector3d.Zero))
+            if (AudioOptionProperties != null && AudioOptionProperties.Children.First(p => p.Property.Id == ILayerObject.AudioLevelId) is PropertyModel level && (level.IsEnableExpression || level.KeyFrames.Count > 0 || ((Vector3d)(level.GetRawValue(layerTime) ?? Vector3d.Zero)) != Vector3d.Zero))
             {
                 var audioSpan = audio.AsSpan();
                 if (level.KeyFrames.Count > 1)

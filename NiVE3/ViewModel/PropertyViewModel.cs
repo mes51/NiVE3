@@ -81,6 +81,7 @@ namespace NiVE3.ViewModel
         }
 
         private bool isEnableExpression;
+        [NeedWire(nameof(PropertyModel), IsOneWay = true)]
         public bool IsEnableExpression
         {
             get { return isEnableExpression; }

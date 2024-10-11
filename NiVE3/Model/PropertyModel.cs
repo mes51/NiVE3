@@ -49,6 +49,13 @@ namespace NiVE3.Model
             set { SetProperty(ref keyFrames, value); }
         }
 
+        private bool isEnableExpression;
+        public bool IsEnableExpression
+        {
+            get { return isEnableExpression; }
+            set { SetProperty(ref isEnableExpression, value); }
+        }
+
         private bool useEditingValue;
         public bool UseEditingValue
         {
@@ -226,7 +233,23 @@ namespace NiVE3.Model
         public object? GetValue(double time)
         {
             var value = GetRawValue(time);
-            // TODO: エクスプレッションの処理
+
+            if (IsEnableExpression)
+            {
+                using var entry = CycleChecker.TryEnter(ObjectId);
+                if (entry != null)
+                {
+                    var expressionValue = Property.PropertyType.ConvertToExpressionValue(value);
+
+                    // TODO: エクスプレッションの処理
+
+                    if (Property.PropertyType.TryConvertFromExpressionValue(expressionValue, out var newValue))
+                    {
+                        value = newValue;
+                    }
+                }
+            }
+
             return value;
         }
 
