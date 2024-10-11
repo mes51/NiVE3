@@ -47,58 +47,6 @@ namespace NiVE3.Plugin.Property.Types
             }
         }
 
-        public bool TryConvertFrom(object otherValue, [NotNullWhen(true)] out object? convertedValue)
-        {
-            switch (otherValue)
-            {
-                case byte v:
-                    convertedValue = (double)v;
-                    return true;
-                case sbyte v:
-                    convertedValue = (double)v;
-                    return true;
-                case short v:
-                    convertedValue = (double)v;
-                    return true;
-                case ushort v:
-                    convertedValue = (double)v;
-                    return true;
-                case int v:
-                    convertedValue = (double)v;
-                    return true;
-                case uint v:
-                    convertedValue = (double)v;
-                    return true;
-                case long v:
-                    convertedValue = (double)v;
-                    return true;
-                case ulong v:
-                    convertedValue = (double)v;
-                    return true;
-                case Int128 v:
-                    convertedValue = (double)v;
-                    return true;
-                case UInt128 v:
-                    convertedValue = (double)v;
-                    return true;
-                case Half v:
-                    convertedValue = (double)v;
-                    return true;
-                case float v:
-                    convertedValue = (double)v;
-                    return true;
-                case double:
-                    convertedValue = otherValue;
-                    return true;
-                case decimal v:
-                    convertedValue = (double)v;
-                    return true;
-                default:
-                    convertedValue = 0.0;
-                    return false;
-            }
-        }
-
         public object? SerializeValue(object? value)
         {
             return value;

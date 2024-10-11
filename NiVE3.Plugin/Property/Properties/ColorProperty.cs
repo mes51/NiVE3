@@ -56,10 +56,5 @@ namespace NiVE3.Plugin.Property.Properties
             };
             return color;
         }
-
-        public override bool ValidateValue(object? value)
-        {
-            return value is Vector4 || value is Color;
-        }
     }
 }

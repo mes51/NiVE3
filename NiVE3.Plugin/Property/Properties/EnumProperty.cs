@@ -66,10 +66,5 @@ namespace NiVE3.Plugin.Property.Properties
                 return Values.First();
             }
         }
-
-        public override bool ValidateValue(object? value)
-        {
-            return value?.GetType() == EnumType;
-        }
     }
 }

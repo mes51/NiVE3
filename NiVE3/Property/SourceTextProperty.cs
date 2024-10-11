@@ -33,10 +33,5 @@ namespace NiVE3.Property
                 _ => StyledText.Empty
             };
         }
-
-        public override bool ValidateValue(object? value)
-        {
-            return value is StyledText || value is string;
-        }
     }
 }

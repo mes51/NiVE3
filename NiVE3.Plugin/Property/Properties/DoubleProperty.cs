@@ -64,10 +64,5 @@ namespace NiVE3.Plugin.Property.Properties
         {
             return Math.Clamp((double)(value ?? 0.0), MinValue, MaxValue);
         }
-
-        public override bool ValidateValue(object? value)
-        {
-            return value is double;
-        }
     }
 }

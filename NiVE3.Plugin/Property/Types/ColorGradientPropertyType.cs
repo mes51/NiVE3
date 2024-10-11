@@ -129,20 +129,6 @@ namespace NiVE3.Plugin.Property.Types
             }
         }
 
-        public bool TryConvertFrom(object otherValue, [NotNullWhen(true)] out object? convertedValue)
-        {
-            // TODO: エクスプレッション用の型を用意する
-            switch (otherValue)
-            {
-                case ColorGradient:
-                    convertedValue = otherValue;
-                    return true;
-            }
-
-            convertedValue = new ColorGradient([new ColorStop(Vector4.One, 0.0F)], [new OpacityStop(1.0F, 0.0F)]);
-            return false;
-        }
-
         public object? SerializeValue(object? value)
         {
             return (value as ColorGradient)?.Serialize();

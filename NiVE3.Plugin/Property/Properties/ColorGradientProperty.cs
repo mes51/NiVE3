@@ -55,10 +55,5 @@ namespace NiVE3.Plugin.Property.Properties
         {
             return (value as ColorGradient) ?? ColorGradient.Empty;
         }
-
-        public override bool ValidateValue(object? value)
-        {
-            return value is ColorGradient;
-        }
     }
 }

@@ -26,14 +26,6 @@ namespace NiVE3.Plugin.Property.Types
         object? Interpolate(IReadOnlyList<KeyFrame> keyFrames, double t);
 
         /// <summary>
-        /// 他のプロパティの値から現在のプロパティの値に変更します。
-        /// </summary>
-        /// <param name="otherValue">変換元のプロパティの値</param>
-        /// <param name="convertedValue">変換後のプロパティの値</param>
-        /// <returns>値が変換できた場合はtrue、非対応等で変換できなかった場合はfalse</returns>
-        bool TryConvertFrom(object otherValue, [NotNullWhen(true)] out object? convertedValue);
-
-        /// <summary>
         /// 値をJSONで保存可能な形式にシリアライズします
         /// </summary>
         /// <param name="value">プロパティの値</param>

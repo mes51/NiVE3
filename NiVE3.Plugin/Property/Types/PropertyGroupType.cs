@@ -37,10 +37,5 @@ namespace NiVE3.Plugin.Property.Types
         {
             throw new NotImplementedException();
         }
-
-        public bool TryConvertFrom(object otherValue, [NotNullWhen(true)] out object? convertedValue)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

@@ -49,54 +49,6 @@ namespace NiVE3.Plugin.Property.Types
             }
         }
 
-        public bool TryConvertFrom(object otherValue, [NotNullWhen(true)] out object? convertedValue)
-        {
-            switch (otherValue)
-            {
-                case Vector4:
-                    convertedValue = otherValue;
-                    return true;
-                case Array array:
-                    var elements = array.Cast<object>()
-                        .Select(
-                            e =>
-                            {
-                                return e switch
-                                {
-                                    byte v => v,
-                                    sbyte v => v,
-                                    short v => v,
-                                    ushort v => v,
-                                    int v => v,
-                                    uint v => v,
-                                    long v => v,
-                                    ulong v => v,
-                                    Int128 v => (float)v,
-                                    UInt128 v => (float)v,
-                                    Half v => (float)v,
-                                    float v => v,
-                                    double v => (float)v,
-                                    decimal v => (float)v,
-                                    _ => 0.0F,
-                                };
-                            })
-                        .ToArray();
-                    if (elements.Length > 3)
-                    {
-                        convertedValue = new Vector4(elements[0], elements[1], elements[2], elements[3]);
-                        return true;
-                    }
-                    else
-                    {
-                        convertedValue = new Vector4();
-                        return false;
-                    }
-                default:
-                    convertedValue = new Vector4();
-                    return false;
-            }
-        }
-
         public object? SerializeValue(object? value)
         {
             if (value is not Vector4 v)

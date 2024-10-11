@@ -38,10 +38,5 @@ namespace NiVE3.Plugin.Property.Properties
         {
             return (Vector3d)(value ?? Vector3d.Zero) % 360.0;
         }
-
-        public override bool ValidateValue(object? value)
-        {
-            return value is Vector3d;
-        }
     }
 }

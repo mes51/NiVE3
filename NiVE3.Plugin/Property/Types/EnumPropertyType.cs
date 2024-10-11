@@ -38,40 +38,6 @@ namespace NiVE3.Plugin.Property.Types
             return keyFrames[baseKeyFrameIndex].Value;
         }
 
-        public bool TryConvertFrom(object otherValue, [NotNullWhen(true)] out object? convertedValue)
-        {
-            switch (otherValue)
-            {
-                case byte v:
-                    convertedValue = (int)v;
-                    return true;
-                case sbyte v:
-                    convertedValue = (int)v;
-                    return true;
-                case short v:
-                    convertedValue = (int)v;
-                    return true;
-                case ushort v:
-                    convertedValue = (int)v;
-                    return true;
-                case int v:
-                    convertedValue = v;
-                    return true;
-                case uint v:
-                    convertedValue = (int)v;
-                    return true;
-                case long v:
-                    convertedValue = (int)v;
-                    return true;
-                case ulong v:
-                    convertedValue = (int)v;
-                    return true;
-                default:
-                    convertedValue = 0;
-                    return false;
-            }
-        }
-
         public object? SerializeValue(object? value)
         {
             if (value != null)

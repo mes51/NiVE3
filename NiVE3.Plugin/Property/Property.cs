@@ -90,13 +90,6 @@ namespace NiVE3.Plugin.Property
         public abstract PropertyControlBase CreateControl(ICompositionViewModel composition, ILayerViewModel? layer, IEffectViewModel? effect, IPropertyViewModel viewModel);
 
         /// <summary>
-        /// 値がこのプロパティで使用できるか検証します
-        /// </summary>
-        /// <param name="value">検証対象の値</param>
-        /// <returns>使用できる場合はtrue、出来ない場合はfalse</returns>
-        public abstract bool ValidateValue(object? value);
-
-        /// <summary>
         /// 値をこのプロパティの範囲、型に変更します
         /// </summary>
         /// <param name="value">変更対象の値</param>
@@ -165,12 +158,6 @@ namespace NiVE3.Plugin.Property
         public abstract object? ChangeValueByCompositionStateChanged(object? value, ICompositionObject composition);
 
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public override bool ValidateValue(object? value)
-        {
-            return false;
-        }
-
-        [EditorBrowsable(EditorBrowsableState.Never)]
         public override object? CoerceValue(object? value)
         {
             return value;
@@ -215,17 +202,6 @@ namespace NiVE3.Plugin.Property
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
         public override PropertyControlBase CreateControl(ICompositionViewModel composition, ILayerViewModel? layer, IEffectViewModel? effect, IPropertyViewModel viewModel)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// 使用しません
-        /// </summary>
-        /// <param name="value"></param>
-        /// <returns></returns>
-        /// <exception cref="NotImplementedException"></exception>
-        public override bool ValidateValue(object? value)
         {
             throw new NotImplementedException();
         }
@@ -298,17 +274,6 @@ namespace NiVE3.Plugin.Property
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
         public override PropertyControlBase CreateControl(ICompositionViewModel composition, ILayerViewModel? layer, IEffectViewModel? effect, IPropertyViewModel viewModel)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// 使用しません
-        /// </summary>
-        /// <param name="value"></param>
-        /// <returns></returns>
-        /// <exception cref="NotImplementedException"></exception>
-        public override bool ValidateValue(object? value)
         {
             throw new NotImplementedException();
         }

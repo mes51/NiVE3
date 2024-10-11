@@ -33,20 +33,6 @@ namespace NiVE3.Plugin.Property.Types
             return keyFrames[baseKeyFrameIndex].Value;
         }
 
-        public bool TryConvertFrom(object otherValue, [NotNullWhen(true)] out object? convertedValue)
-        {
-            if (otherValue is UseLayerImageTarget target)
-            {
-                convertedValue = target;
-                return true;
-            }
-            else
-            {
-                convertedValue = UseLayerImageTarget.Empty;
-                return false;
-            }
-        }
-
         public object? SerializeValue(object? value)
         {
             return value;

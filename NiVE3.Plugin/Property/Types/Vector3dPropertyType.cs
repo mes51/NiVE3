@@ -68,22 +68,6 @@ namespace NiVE3.Plugin.Property.Types
             }
         }
 
-        public bool TryConvertFrom(object otherValue, [NotNullWhen(true)] out object? convertedValue)
-        {
-            switch (otherValue)
-            {
-                case Vector3d v:
-                    convertedValue = v;
-                    return true;
-                case Vector256<double> v:
-                    convertedValue = (Vector3d)v;
-                    return true;
-                default:
-                    convertedValue = new Vector3d();
-                    return false;
-            }
-        }
-
         public object? SerializeValue(object? value)
         {
             return value;
