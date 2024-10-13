@@ -103,7 +103,7 @@ namespace NiVE3.ViewModel.TimelineEditing
             {
                 if (layer.TransformProperties?.Children?.FirstOrDefault(p => p.Property.Id == ILayerObject.TransformPositionId) is PropertyViewModel property)
                 {
-                    var position = (Vector3d)(property.CurrentTimeValue ?? Vector3d.Zero);
+                    var position = (Vector3d)(property.CurrentTimeRawValue ?? Vector3d.Zero);
                     property.BeginEditCommand.Execute(null);
 
                     properties.Add((layer.IsEnable3D, property));
@@ -132,11 +132,11 @@ namespace NiVE3.ViewModel.TimelineEditing
             {
                 if (isEnable3d)
                 {
-                    property.CurrentTimeValue = prev + diff3D;
+                    property.CurrentTimeRawValue = prev + diff3D;
                 }
                 else
                 {
-                    property.CurrentTimeValue = prev + (Vector3d)diff2D;
+                    property.CurrentTimeRawValue = prev + (Vector3d)diff2D;
                 }
             }
         }
@@ -158,7 +158,7 @@ namespace NiVE3.ViewModel.TimelineEditing
                 var direction = layer.TransformProperties?.Children?.FirstOrDefault(p => p.Property.Id == ILayerObject.TransformDirectionId);
                 if (direction is PropertyViewModel vm)
                 {
-                    prevRotations.Add((Vector3d)(vm.CurrentTimeValue ?? Vector3d.Zero));
+                    prevRotations.Add((Vector3d)(vm.CurrentTimeRawValue ?? Vector3d.Zero));
                     vm.BeginEditCommand.Execute(null);
                     properties.Add(vm);
                 }
@@ -181,7 +181,7 @@ namespace NiVE3.ViewModel.TimelineEditing
                 {
                     dir = (dir + new Vector3d(360.0)) % 360.0;
                 }
-                direction.CurrentTimeValue = dir;
+                direction.CurrentTimeRawValue = dir;
             }
         }
     }
@@ -201,7 +201,7 @@ namespace NiVE3.ViewModel.TimelineEditing
                 var z = layer.TransformProperties?.Children?.FirstOrDefault(p => p.Property.Id == ILayerObject.TransformXAngleId);
                 if (z is PropertyViewModel vm)
                 {
-                    prevX.Add((double)(vm.CurrentTimeValue ?? 0.0));
+                    prevX.Add((double)(vm.CurrentTimeRawValue ?? 0.0));
                     vm.BeginEditCommand.Execute(null);
                     properties.Add(vm);
                 }
@@ -216,7 +216,7 @@ namespace NiVE3.ViewModel.TimelineEditing
             var diff = (screenPos.Y - StartScreenPosition.Y) * ChangeRate;
             foreach (var (property, prev) in Properties.Zip(PrevX))
             {
-                property.CurrentTimeValue = prev + diff;
+                property.CurrentTimeRawValue = prev + diff;
             }
         }
     }
@@ -236,7 +236,7 @@ namespace NiVE3.ViewModel.TimelineEditing
                 var z = layer.TransformProperties?.Children?.FirstOrDefault(p => p.Property.Id == ILayerObject.TransformYAngleId);
                 if (z is PropertyViewModel vm)
                 {
-                    prevX.Add((double)(vm.CurrentTimeValue ?? 0.0));
+                    prevX.Add((double)(vm.CurrentTimeRawValue ?? 0.0));
                     vm.BeginEditCommand.Execute(null);
                     properties.Add(vm);
                 }
@@ -251,7 +251,7 @@ namespace NiVE3.ViewModel.TimelineEditing
             var diff = (screenPos.X - StartScreenPosition.X) * ChangeRate;
             foreach (var (property, prev) in Properties.Zip(PrevY))
             {
-                property.CurrentTimeValue = prev - diff;
+                property.CurrentTimeRawValue = prev - diff;
             }
         }
     }
@@ -275,7 +275,7 @@ namespace NiVE3.ViewModel.TimelineEditing
                 var z = layer.TransformProperties?.Children?.FirstOrDefault(p => p.Property.Id == ILayerObject.TransformZAngleId);
                 if (z is PropertyViewModel vm)
                 {
-                    prevZ.Add((double)(vm.CurrentTimeValue ?? 0.0));
+                    prevZ.Add((double)(vm.CurrentTimeRawValue ?? 0.0));
                     vm.BeginEditCommand.Execute(null);
                     properties.Add(vm);
                 }
@@ -305,7 +305,7 @@ namespace NiVE3.ViewModel.TimelineEditing
             for (var i = 0; i < Properties.Length; i++)
             {
                 var newAngle = PrevZ[i] + diffAngle;
-                Properties[i].CurrentTimeValue = newAngle;
+                Properties[i].CurrentTimeRawValue = newAngle;
                 PrevZ[i] = newAngle;
             }
 
@@ -336,7 +336,7 @@ namespace NiVE3.ViewModel.TimelineEditing
                 var scale = layer.TransformProperties?.Children?.FirstOrDefault(p => p.Property.Id == ILayerObject.TransformScaleId);
                 if (scale is PropertyViewModel vm)
                 {
-                    prevScale.Add((Vector3d)(vm.CurrentTimeValue ?? Vector3d.Zero));
+                    prevScale.Add((Vector3d)(vm.CurrentTimeRawValue ?? Vector3d.Zero));
                     vm.BeginEditCommand.Execute(null);
                     properties.Add(vm);
                 }
@@ -374,7 +374,7 @@ namespace NiVE3.ViewModel.TimelineEditing
 
             foreach (var (property, prev) in Properties.Zip(PrevScale))
             {
-                property.CurrentTimeValue = prev * new Vector3d(rate, 1.0);
+                property.CurrentTimeRawValue = prev * new Vector3d(rate, 1.0);
             }
         }
     }
@@ -393,8 +393,8 @@ namespace NiVE3.ViewModel.TimelineEditing
             var cameraPoiProperty = targetCameraLayer.TransformProperties?.Children?.FirstOrDefault(p => p.Property.Id == ILayerObject.TransformPointOfInterestId);
             if (cameraPositionProperty is PropertyViewModel posVm && cameraPoiProperty is PropertyViewModel poiVm)
             {
-                StartCameraPosition = (Vector3d)(posVm.CurrentTimeValue ?? Vector3d.Zero);
-                CameraPointOfInterest = (Vector3d)(poiVm.CurrentTimeValue ?? Vector3d.Zero);
+                StartCameraPosition = (Vector3d)(posVm.CurrentTimeRawValue ?? Vector3d.Zero);
+                CameraPointOfInterest = (Vector3d)(poiVm.CurrentTimeRawValue ?? Vector3d.Zero);
 
                 posVm.BeginEditCommand.Execute(null);
 
@@ -421,7 +421,7 @@ namespace NiVE3.ViewModel.TimelineEditing
 
             foreach (var property in Properties)
             {
-                property.CurrentTimeValue = (Vector3d)move;
+                property.CurrentTimeRawValue = (Vector3d)move;
             }
         }
     }
@@ -446,8 +446,8 @@ namespace NiVE3.ViewModel.TimelineEditing
             var cameraPoiProperty = targetCameraLayer.TransformProperties?.Children?.FirstOrDefault(p => p.Property.Id == ILayerObject.TransformPointOfInterestId);
             if (cameraPositionProperty is PropertyViewModel posVm && cameraPoiProperty is PropertyViewModel poiVm)
             {
-                StartCameraPosition = (Vector3d)(posVm.CurrentTimeValue ?? Vector3d.Zero);
-                StartCameraPointOfInterest = (Vector3d)(poiVm.CurrentTimeValue ?? Vector3d.Zero);
+                StartCameraPosition = (Vector3d)(posVm.CurrentTimeRawValue ?? Vector3d.Zero);
+                StartCameraPointOfInterest = (Vector3d)(poiVm.CurrentTimeRawValue ?? Vector3d.Zero);
 
                 posVm.BeginEditCommand.Execute(null);
                 poiVm.BeginEditCommand.Execute(null);
@@ -474,8 +474,8 @@ namespace NiVE3.ViewModel.TimelineEditing
 
             var newPosition = CompositionModel.Unprojection(CameraSetting, null, screenPos);
             var diff = StartPosition - newPosition;
-            PositionProperty.CurrentTimeValue = StartCameraPosition + diff;
-            PointOfInterestProperty.CurrentTimeValue = StartCameraPointOfInterest + diff;
+            PositionProperty.CurrentTimeRawValue = StartCameraPosition + diff;
+            PointOfInterestProperty.CurrentTimeRawValue = StartCameraPointOfInterest + diff;
         }
     }
 
@@ -499,8 +499,8 @@ namespace NiVE3.ViewModel.TimelineEditing
             var cameraPoiProperty = targetCameraLayer.TransformProperties?.Children?.FirstOrDefault(p => p.Property.Id == ILayerObject.TransformPointOfInterestId);
             if (cameraPositionProperty is PropertyViewModel posVm && cameraPoiProperty is PropertyViewModel poiVm)
             {
-                StartCameraPosition = (Vector3d)(posVm.CurrentTimeValue ?? Vector3d.Zero);
-                StartCameraPointOfInterest = (Vector3d)(poiVm.CurrentTimeValue ?? Vector3d.Zero);
+                StartCameraPosition = (Vector3d)(posVm.CurrentTimeRawValue ?? Vector3d.Zero);
+                StartCameraPointOfInterest = (Vector3d)(poiVm.CurrentTimeRawValue ?? Vector3d.Zero);
                 CameraDirection = (StartCameraPosition - StartCameraPointOfInterest).Normalize();
 
                 posVm.BeginEditCommand.Execute(null);
@@ -524,8 +524,8 @@ namespace NiVE3.ViewModel.TimelineEditing
             }
 
             var move = CameraDirection * (screenPos.Y - StartScreenPosition.Y);
-            PositionProperty.CurrentTimeValue = StartCameraPosition + move;
-            PointOfInterestProperty.CurrentTimeValue = StartCameraPointOfInterest + move;
+            PositionProperty.CurrentTimeRawValue = StartCameraPosition + move;
+            PointOfInterestProperty.CurrentTimeRawValue = StartCameraPointOfInterest + move;
         }
     }
 }

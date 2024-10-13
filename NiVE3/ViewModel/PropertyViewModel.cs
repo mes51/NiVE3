@@ -115,7 +115,7 @@ namespace NiVE3.ViewModel
         public object? CurrentTimeValue
         {
             get { return currentTimeValue; }
-            set { SetProperty(ref currentTimeValue, value); }
+            private set { SetProperty(ref currentTimeValue, value); }
         }
 
         private object? currentTimeRawValue;
