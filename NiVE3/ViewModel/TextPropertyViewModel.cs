@@ -357,7 +357,7 @@ namespace NiVE3.ViewModel
 
             IsFontChanging = true;
 
-            var style = SourceTextPropertyType.GetDefaultStyle(SourceTextPropertyModel.GetValue(CurrentTime - TargetLayer.SourceStartPoint));
+            var style = SourceTextPropertyType.GetDefaultStyle(SourceTextPropertyModel.GetValue(CurrentTime - TargetLayer.SourceStartPoint, CurrentTime));
             if (style != null)
             {
                 TextPropertyModel.SetStyle(style);

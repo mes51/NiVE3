@@ -246,7 +246,7 @@ namespace NiVE3.Model
             }
         }
 
-        public object? GetValue(double layerTime)
+        object? IPropertyObject.GetValue(double layerTime)
         {
             return GetValue(layerTime, layerTime + SourceStartPoint);
         }
@@ -308,7 +308,7 @@ namespace NiVE3.Model
             HistoryModel.EndGroup();
         }
 
-        public PropertyValueGroup? GetValues(double layerTime, bool withoutDisableProperty = false)
+        PropertyValueGroup? IPropertyObject.GetValues(double layerTime, bool withoutDisableProperty)
         {
             return null;
         }

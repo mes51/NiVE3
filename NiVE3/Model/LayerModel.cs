@@ -521,7 +521,7 @@ namespace NiVE3.Model
             PropertyChanged += LayerModel_PropertyChanged;
         }
 
-        public NImage GetRawImage(double layerTime, double downSamplingRate, bool useGpu)
+        NImage ILayerObject.GetRawImage(double layerTime, double downSamplingRate, bool useGpu)
         {
             return GetRawImage(layerTime, layerTime + SourceStartPoint, downSamplingRate, useGpu);
         }
@@ -534,7 +534,7 @@ namespace NiVE3.Model
             return FootageModel.ReadImage(sourceTime, downSamplingRate, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties, InterpolationQuality, useGpu);
         }
 
-        public NImage GetEffectedImage(double layerTime, double downSamplingRate, bool useGpu)
+        NImage ILayerObject.GetEffectedImage(double layerTime, double downSamplingRate, bool useGpu)
         {
             return GetEffectedImage(layerTime, layerTime + SourceStartPoint, downSamplingRate, useGpu);
         }

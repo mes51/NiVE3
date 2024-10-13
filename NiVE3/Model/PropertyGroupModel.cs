@@ -129,7 +129,7 @@ namespace NiVE3.Model
             return Children;
         }
 
-        public object? GetValue(double layerTime)
+        object? IPropertyObject.GetValue(double layerTime)
         {
             return null;
         }
@@ -139,7 +139,7 @@ namespace NiVE3.Model
             return null;
         }
 
-        public PropertyValueGroup GetValues(double layerTime, bool withoutDisableProperty = false)
+        PropertyValueGroup IPropertyObject.GetValues(double layerTime, bool withoutDisableProperty)
         {
             return GetValues(layerTime, layerTime + SourceStartPoint, withoutDisableProperty);
         }
