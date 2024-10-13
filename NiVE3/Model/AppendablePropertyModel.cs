@@ -14,12 +14,15 @@ using NiVE3.Shared.Extension;
 using NiVE3.View.Resource;
 using System.IO.Hashing;
 using NiVE3.Extension;
+using System.ComponentModel;
 
 namespace NiVE3.Model
 {
     partial class AppendablePropertyModel : BindableBase, IPropertyModel, IOverwriteablePropertyModel
     {
         public string Name { get; }
+
+        public double SourceStartPoint { get; set; }
 
         public bool IsEnable => true;
 
@@ -54,11 +57,9 @@ namespace NiVE3.Model
 
         HistoryModel HistoryModel { get; }
 
-        public AppendablePropertyModel(PropertyBase property, Int128 parentObjectId, CompositionModel compositionModel, HistoryModel historyModel) : this(property, parentObjectId, compositionModel, null, null, historyModel) { }
+        public AppendablePropertyModel(PropertyBase property, Int128 parentObjectId, CompositionModel compositionModel, LayerModel layerModel, HistoryModel historyModel) : this(property, parentObjectId, compositionModel, layerModel, null, historyModel) { }
 
-        public AppendablePropertyModel(PropertyBase property, Int128 parentObjectId, CompositionModel compositionModel, LayerModel? layerModel, HistoryModel historyModel) : this(property, parentObjectId, compositionModel, layerModel, null, historyModel) { }
-
-        public AppendablePropertyModel(PropertyBase property, Int128 parentObjectId, CompositionModel compositionModel, LayerModel? layerModel, EffectModel? effectModel, HistoryModel historyModel)
+        public AppendablePropertyModel(PropertyBase property, Int128 parentObjectId, CompositionModel compositionModel, LayerModel layerModel, EffectModel? effectModel, HistoryModel historyModel)
         {
             Property = property;
             CompositionModel = compositionModel;
@@ -66,6 +67,7 @@ namespace NiVE3.Model
             EffectModel = effectModel;
             HistoryModel = historyModel;
             Name = property.DisplayName;
+            SourceStartPoint = layerModel.SourceStartPoint;
 
             var objectIdHash = new XxHash3();
             objectIdHash.Append(parentObjectId);
@@ -79,6 +81,9 @@ namespace NiVE3.Model
             {
                 AddChildInternal(ap.DefaultAppendedItem, null);
             }
+
+            // NOTE: 本来はモデル側から設定してもらうものだが、引き回しの経路が複雑になりすぎる(レイヤーからだったり、エフェクトやマスクだったり)ため、自分から取りに行く
+            layerModel.PropertyChanged += LayerModel_PropertyChanged;
         }
 
         public PropertyControlBase CreateControl(IPropertyViewModel viewModel)
@@ -96,12 +101,17 @@ namespace NiVE3.Model
             return Children;
         }
 
-        public object? GetValue(double time)
+        public object? GetValue(double layerTime)
         {
-            return GetChildPropertyValues(time, false);
+            return GetValue(layerTime, layerTime + SourceStartPoint);
         }
 
-        public PropertyValueGroup? GetValues(double time, bool withoutDisableProperty = false)
+        public object? GetValue(double time, double globalTime)
+        {
+            return GetChildPropertyValues(time, globalTime, false);
+        }
+
+        public PropertyValueGroup? GetValues(double layerTime, bool withoutDisableProperty = false)
         {
             return null;
         }
@@ -217,15 +227,15 @@ namespace NiVE3.Model
             }
         }
 
-        public PropertyValueGroup[] GetChildPropertyValues(double time, bool withoutDisableProperty)
+        public PropertyValueGroup[] GetChildPropertyValues(double time, double globalTime, bool withoutDisableProperty)
         {
             if (withoutDisableProperty)
             {
-                return Children.OfType<PropertyGroupModel>().Where(m => m.IsEnable).Select(m => m.GetValues(time, withoutDisableProperty)).ToArray();
+                return Children.OfType<PropertyGroupModel>().Where(m => m.IsEnable).Select(m => m.GetValues(time, globalTime, withoutDisableProperty)).ToArray();
             }
             else
             {
-                return Children.OfType<PropertyGroupModel>().Select(m => m.GetValues(time, withoutDisableProperty)).ToArray();
+                return Children.OfType<PropertyGroupModel>().Select(m => m.GetValues(time, globalTime, withoutDisableProperty)).ToArray();
             }
         }
 
@@ -445,6 +455,14 @@ namespace NiVE3.Model
         private void Child_ValueCommited(object? sender, EventArgs e)
         {
             ValueCommited?.Invoke(sender, e);
+        }
+
+        private void LayerModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(LayerModel.SourceStartPoint))
+            {
+                SourceStartPoint = LayerModel?.SourceStartPoint ?? 0.0;
+            }
         }
     }
 }

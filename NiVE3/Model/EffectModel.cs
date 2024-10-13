@@ -178,9 +178,9 @@ namespace NiVE3.Model
             HistoryModel.Add(new OverwriteEffectHistoryCommand(this, oldData, data));
         }
 
-        public void CalcPropertyHash(double layerTime, XxHash3 hash)
+        public void CalcPropertyHash(double layerTime, double globalTime, XxHash3 hash)
         {
-            Properties.GetValues(layerTime).CalcHash(hash);
+            Properties.GetValues(layerTime, globalTime).CalcHash(hash);
         }
 
         public void UpdateCompositionDependProperties()

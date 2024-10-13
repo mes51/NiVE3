@@ -54,7 +54,7 @@ namespace NiVE3.Plugin.Property.Types
         /// <summary>
         /// エクスプレッションで処理された後の値から、このプロパティの型の値に変換します
         /// </summary>
-        /// <param name="expressionValue">エクスプレッションから返ってきた値。プリミティブ型、またはstringの単体、配列、IDictionary&gt;string, object?&lt;のいずれか</param>
+        /// <param name="expressionValue">エクスプレッションから返ってきた値。プリミティブ型、またはstringの単体、配列、IDictionary&lt;string, object?&gt;のいずれか</param>
         /// <param name="value">このプロパティの型の値。変換できなかった場合は不定</param>
         /// <returns>このプロパティの型の値に変換できたかどうか</returns>
         bool TryConvertFromExpressionValue(object? expressionValue, out object? value);
@@ -63,7 +63,7 @@ namespace NiVE3.Plugin.Property.Types
         /// このプロパティの型の値からエクスプレッションで使用可能な値に変換します
         /// </summary>
         /// <param name="value">このプロパティの型の値</param>
-        /// <returns>プリミティブ型、またはstringの単体、配列、IDictionary&gt;string, object?&lt;のいずれか</returns>
+        /// <returns>プリミティブ型、またはstringの単体、配列、IDictionary&lt;string, object?&gt;のいずれか</returns>
         object? ConvertToExpressionValue(object? value);
     }
 }

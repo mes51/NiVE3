@@ -80,8 +80,31 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref useEditingValue, value); }
         }
 
-        private bool isEnableExpression;
+        private bool useExpression;
         [NeedWire(nameof(PropertyModel), IsOneWay = true)]
+        public bool UseExpression
+        {
+            get { return useExpression; }
+            set { SetProperty(ref useExpression, value); }
+        }
+
+        private bool hasExpressionError;
+        [NeedWire(nameof(PropertyModel), IsOneWay = true)]
+        public bool HasExpressionError
+        {
+            get { return hasExpressionError; }
+            set { SetProperty(ref hasExpressionError, value); }
+        }
+
+        private string expressionCode = "";
+        [NeedWire(nameof(PropertyModel), IsOneWay = true)]
+        public string ExpressionCode
+        {
+            get { return expressionCode; }
+            set { SetProperty(ref expressionCode, value); }
+        }
+
+        private bool isEnableExpression;
         public bool IsEnableExpression
         {
             get { return isEnableExpression; }
@@ -206,6 +229,7 @@ namespace NiVE3.ViewModel
             PropertyModel = propertyModel;
             Property = propertyModel.Property;
             ViewState = propertyModel.CreateState(this);
+            IsEnableExpression = propertyModel.IsEnableExpression;
             SelectedKeyFrameIds = [];
 
             BeginEditCommand = new DelegateCommand(() =>
@@ -406,7 +430,8 @@ namespace NiVE3.ViewModel
 
         object? CalculationValue()
         {
-            return PropertyModel.GetValue(CurrentTime - SourceStartPoint);
+            using var checker = CycleChecker.StartCheck();
+            return PropertyModel.GetValue(CurrentTime - SourceStartPoint, CurrentTime);
         }
 
         partial void WiringModel();
@@ -436,6 +461,10 @@ namespace NiVE3.ViewModel
                 case nameof(CurrentTime):
                 case nameof(SourceStartPoint):
                     CurrentTimeValue = CalculationValue();
+                    break;
+                case nameof(UseExpression):
+                case nameof(HasExpressionError):
+                    IsEnableExpression = PropertyModel.IsEnableExpression;
                     break;
             }
         }

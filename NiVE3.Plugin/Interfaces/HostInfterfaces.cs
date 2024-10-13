@@ -117,9 +117,9 @@ namespace NiVE3.Plugin.Interfaces
 
         IReadOnlyCollection<IPropertyObject>? GetChildren();
 
-        public object? GetValue(double tme);
+        public object? GetValue(double layerTime);
 
-        public PropertyValueGroup? GetValues(double time, bool withoutDisableProperty = false);
+        public PropertyValueGroup? GetValues(double layerTime, bool withoutDisableProperty = false);
     }
 
     public interface ICompositionViewModel : INotifyPropertyChanged

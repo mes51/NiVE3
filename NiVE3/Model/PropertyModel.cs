@@ -17,6 +17,8 @@ using NiVE3.Data.Clipboard;
 using NiVE3.Plugin.Property.Types;
 using System.IO.Hashing;
 using NiVE3.Extension;
+using NiVE3.Expression;
+using System.Diagnostics.CodeAnalysis;
 
 namespace NiVE3.Model
 {
@@ -49,11 +51,18 @@ namespace NiVE3.Model
             set { SetProperty(ref keyFrames, value); }
         }
 
-        private bool isEnableExpression;
-        public bool IsEnableExpression
+        private bool useExpression;
+        public bool UseExpression
         {
-            get { return isEnableExpression; }
-            set { SetProperty(ref isEnableExpression, value); }
+            get { return useExpression; }
+            set { SetProperty(ref useExpression, value); }
+        }
+
+        private bool hasExpressionError;
+        public bool HasExpressionError
+        {
+            get { return hasExpressionError; }
+            set { SetProperty(ref hasExpressionError, value); }
         }
 
         private bool useEditingValue;
@@ -63,6 +72,13 @@ namespace NiVE3.Model
             set { SetProperty(ref useEditingValue, value); }
         }
 
+        private string expressionCode = "";
+        public string ExpressionCode
+        {
+            get { return expressionCode; }
+            set { SetProperty(ref expressionCode, value); }
+        }
+
         public ObservableCollection<IPropertyModel>? Children => null;
 
         public PropertyBase Property { get; }
@@ -70,6 +86,9 @@ namespace NiVE3.Model
         public Int128 ObjectId { get; }
 
         public string Id => Property.Id;
+
+        [MemberNotNullWhen(true, nameof(CompiledScript))]
+        public bool IsEnableExpression => UseExpression && !HasExpressionError && CompiledScript != null;
 
         public event EventHandler<EventArgs>? ValueUpdated;
 
@@ -84,17 +103,17 @@ namespace NiVE3.Model
 
         CompositionModel CompositionModel { get; }
 
-        LayerModel? LayerModel { get; }
+        LayerModel LayerModel { get; }
 
         EffectModel? EffectModel { get; }
 
         HistoryModel HistoryModel { get; }
 
-        public PropertyModel(PropertyBase property, Int128 parentObjectId, CompositionModel compositionModel, HistoryModel historyModel) : this(property, parentObjectId, compositionModel, null, null, historyModel) { }
+        ExpressionScript? CompiledScript { get; set; }
 
-        public PropertyModel(PropertyBase property, Int128 parentObjectId, CompositionModel compositionModel, LayerModel? layerModel, HistoryModel historyModel) : this(property, parentObjectId, compositionModel, layerModel, null, historyModel) { }
+        public PropertyModel(PropertyBase property, Int128 parentObjectId, CompositionModel compositionModel, LayerModel layerModel, HistoryModel historyModel) : this(property, parentObjectId, compositionModel, layerModel, null, historyModel) { }
 
-        public PropertyModel(PropertyBase property, Int128 parentObjectId, CompositionModel compositionModel, LayerModel? layerModel, EffectModel? effectModel, HistoryModel historyModel)
+        public PropertyModel(PropertyBase property, Int128 parentObjectId, CompositionModel compositionModel, LayerModel layerModel, EffectModel? effectModel, HistoryModel historyModel)
         {
             Property = property;
             CompositionModel = compositionModel;
@@ -103,7 +122,7 @@ namespace NiVE3.Model
             HistoryModel = historyModel;
             Name = property.DisplayName;
             RawValue = property.DefaultValue;
-            SourceStartPoint = layerModel?.SourceStartPoint ?? 0.0;
+            SourceStartPoint = layerModel.SourceStartPoint;
             CurrentTime = compositionModel.CurrentTime;
 
             var objectIdHash = new XxHash3();
@@ -113,10 +132,7 @@ namespace NiVE3.Model
 
             // NOTE: 本来はモデル側から設定してもらうものだが、引き回しの経路が複雑になりすぎる(レイヤーからだったり、エフェクトやマスクだったり)ため、自分から取りに行く
             compositionModel.PropertyChanged += CompositionModel_PropertyChanged;
-            if (layerModel != null)
-            {
-                layerModel.PropertyChanged += LayerModel_PropertyChanged;
-            }
+            layerModel.PropertyChanged += LayerModel_PropertyChanged;
 
             PropertyChanged += PropertyModel_PropertyChanged;
         }
@@ -230,7 +246,12 @@ namespace NiVE3.Model
             }
         }
 
-        public object? GetValue(double time)
+        public object? GetValue(double layerTime)
+        {
+            return GetValue(layerTime, layerTime + SourceStartPoint);
+        }
+
+        public object? GetValue(double time, double globalTime)
         {
             var value = GetRawValue(time);
 
@@ -241,11 +262,23 @@ namespace NiVE3.Model
                 {
                     var expressionValue = Property.PropertyType.ConvertToExpressionValue(value);
 
-                    // TODO: エクスプレッションの処理
-
-                    if (Property.PropertyType.TryConvertFromExpressionValue(expressionValue, out var newValue))
+                    try
                     {
-                        value = newValue;
+                        using var context = ExpressionEngine.CreateContext(globalTime, CompositionModel, LayerModel, EffectModel, this);
+                        var expressionResult = context.Evaluate(CompiledScript, expressionValue);
+
+                        if (Property.PropertyType.TryConvertFromExpressionValue(expressionResult, out var newValue))
+                        {
+                            value = newValue;
+                        }
+                        else
+                        {
+                            HasExpressionError = true;
+                        }
+                    }
+                    catch
+                    {
+                        HasExpressionError = true;
                     }
                 }
             }
@@ -256,7 +289,7 @@ namespace NiVE3.Model
         public object? GetCurrentTimeValue()
         {
             var time = CurrentTime - SourceStartPoint;
-            return GetValue(time);
+            return GetValue(time, CurrentTime);
         }
 
         public void ResetProperty()
@@ -275,7 +308,7 @@ namespace NiVE3.Model
             HistoryModel.EndGroup();
         }
 
-        public PropertyValueGroup? GetValues(double time, bool withoutDisableProperty = false)
+        public PropertyValueGroup? GetValues(double layerTime, bool withoutDisableProperty = false)
         {
             return null;
         }
@@ -559,9 +592,32 @@ namespace NiVE3.Model
 
         private void PropertyModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(RawValue))
+            switch (e.PropertyName)
             {
-                ValueUpdated?.Invoke(this, EventArgs.Empty);
+                case nameof(RawValue):
+                    ValueUpdated?.Invoke(this, EventArgs.Empty);
+                    break;
+                case nameof(ExpressionCode):
+                    CompiledScript?.Dispose();
+                    if (string.IsNullOrEmpty(ExpressionCode))
+                    {
+                        CompiledScript = null;
+                        HasExpressionError = false;
+                    }
+                    else
+                    {
+                        try
+                        {
+                            CompiledScript = ExpressionEngine.Compile(ExpressionCode);
+                            HasExpressionError = false;
+                        }
+                        catch
+                        {
+                            CompiledScript = null;
+                            HasExpressionError = true;
+                        }
+                    }
+                    break;
             }
         }
     }

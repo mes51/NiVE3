@@ -17,6 +17,8 @@ namespace NiVE3.Model
     {
         string Name { get; }
 
+        double SourceStartPoint { get; }
+
         ObservableCollection<KeyFrame>? KeyFrames { get; }
 
         ObservableCollection<IPropertyModel>? Children { get; }
@@ -46,6 +48,8 @@ namespace NiVE3.Model
         void CoerceValues();
 
         void PasteProperty(PropertyData data);
+
+        object? GetValue(double time, double globalTime);
     }
 
      interface IOverwriteablePropertyModel : IPropertyModel
