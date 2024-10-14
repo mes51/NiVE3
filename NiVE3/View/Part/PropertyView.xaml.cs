@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -28,6 +29,19 @@ namespace NiVE3.View.Part
 
         public static readonly GridLength KeyFrameSwitchGridLength = new GridLength(KeyFrameSwitchWidth);
 
+        public static readonly DependencyProperty HasExpressionProperty = DependencyProperty.Register(
+            nameof(HasExpression),
+            typeof(bool),
+            typeof(PropertyView),
+            new FrameworkPropertyMetadata(false)
+        );
+
+        public bool HasExpression
+        {
+            get { return (bool)GetValue(HasExpressionProperty); }
+            set { SetValue(HasExpressionProperty, value); }
+        }
+
         PropertyViewModel? ViewModel => DataContext as PropertyViewModel;
 
         static PropertyView()
@@ -42,11 +56,19 @@ namespace NiVE3.View.Part
 
         private void Root_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            var viewModel = ViewModel;
-            if (viewModel != null)
+            if (e.OldValue is PropertyViewModel oldViewModel)
+            {
+                oldViewModel.PropertyChanged -= PropertyViewModel_PropertyChanged;
+            }
+            if (e.NewValue is PropertyViewModel newViewModel)
             {
                 PropertyControlGrid.Children.Clear();
-                PropertyControlGrid.Children.Add(viewModel.CreateControl());
+                PropertyControlGrid.Children.Add(newViewModel.CreateControl());
+
+                HasExpression = !string.IsNullOrEmpty(newViewModel.ExpressionCode);
+                BeforeNameSpaceWidth = KeyFrameSwitchWidth + (HasExpression ? UIParameters.ArrowWidth : 0.0);
+
+                newViewModel.PropertyChanged += PropertyViewModel_PropertyChanged;
             }
         }
 
@@ -82,6 +104,15 @@ namespace NiVE3.View.Part
             }
 
             viewModel.ChangeKeyFramesInterpolationTypeCommand.Execute(Tuple.Create(e.KeyFrames, e.InterpolationType));
+        }
+
+        private void PropertyViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(PropertyViewModel.ExpressionCode))
+            {
+                HasExpression = !string.IsNullOrEmpty(ViewModel?.ExpressionCode);
+                BeforeNameSpaceWidth = KeyFrameSwitchWidth + (HasExpression ? UIParameters.ArrowWidth : 0.0);
+            }
         }
     }
 }

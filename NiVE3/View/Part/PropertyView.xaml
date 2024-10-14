@@ -6,6 +6,7 @@
                         xmlns:local="clr-namespace:NiVE3.View.Part"
                         xmlns:cv="clr-namespace:NiVE3.View.Converter"
                         xmlns:pr="clr-namespace:NiVE3.View.Primitive"
+                        xmlns:r="clr-namespace:NiVE3.View.Resource"
                         xmlns:ugm="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
                         mc:Ignorable="d" 
                         x:Name="Root"
@@ -71,6 +72,7 @@
         <Grid Grid.Column="0" ClipToBounds="True">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="{Binding ElementName=Root, Path=IndentMarginLeft}"/>
+                <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="{x:Static local:PropertyView.KeyFrameSwitchGridLength}"/>
                 <ColumnDefinition Width="{Binding ElementName=Root, Path=CalculatedNameAreaWidth}"/>
                 <ColumnDefinition Width="{Binding ElementName=Root, Path=CalculatedControlAreaWidth}"/>
@@ -79,11 +81,12 @@
             <Grid Grid.Column="0" ClipToBounds="True">
                 <Button Style="{StaticResource KeyFramePlaceButtonStyle}" Command="{Binding PlaceKeyFrameCommand}"/>
             </Grid>
-            <CheckBox Grid.Column="1" IsChecked="{Binding HasKeyFrame, Mode=OneWay}" Style="{StaticResource KeyFrameSwitchCheckBox}" VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="{Binding Property.IsSupportKeyFrame, Converter={StaticResource BooleanToVisibilityConverter}}" Command="{Binding SwitchUseKeyFrameCommand}"/>
-            <Grid Grid.Column="2" Style="{StaticResource PropertyNameGridStyle}">
+            <ToggleButton Grid.Column="1" Style="{StaticResource ArrowExpanderStyle}" Width="{x:Static r:UIParameters.ArrowWidth}" Visibility="{Binding ElementName=Root, Path=HasExpression, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+            <CheckBox Grid.Column="2" IsChecked="{Binding HasKeyFrame, Mode=OneWay}" Style="{StaticResource KeyFrameSwitchCheckBox}" VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="{Binding Property.IsSupportKeyFrame, Converter={StaticResource BooleanToVisibilityConverter}}" Command="{Binding SwitchUseKeyFrameCommand}"/>
+            <Grid Grid.Column="3" Style="{StaticResource PropertyNameGridStyle}">
                 <TextBlock Text="{Binding ViewState.SourceDisplayName}" Style="{StaticResource PropertyNameTextBlockStyle}" MouseDown="PropertyNameTextBlock_MouseDown"/>
             </Grid>
-            <Grid Grid.Column="3" x:Name="PropertyControlGrid"/>
+            <Grid Grid.Column="4" x:Name="PropertyControlGrid"/>
         </Grid>
 
         <local:KeyFrameCollectionView Grid.Column="1"
