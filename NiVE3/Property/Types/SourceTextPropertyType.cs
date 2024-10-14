@@ -121,7 +121,44 @@ namespace NiVE3.Property.Types
 
         public object? ConvertToExpressionValue(object? value)
         {
-            throw new NotImplementedException();
+            if (value is not StyledText text)
+            {
+                return null;
+            }
+
+            var styles = text.Styles.Select(s =>
+            {
+                return (object)new Dictionary<string, object?>
+                {
+                    { "style", ConvertStyleToExpressionValue(s.Style) },
+                    { "run", new object[] { s.Start, s.End } }
+                };
+            }).ToArray();
+            return new Dictionary<string, object?>
+            {
+                { "text", text.Text },
+                { "defaultStyle", ConvertStyleToExpressionValue(text.DefaultStyle) },
+                { "styles", styles }
+            };
+        }
+
+        static object ConvertStyleToExpressionValue(TextStyle style)
+        {
+            return new Dictionary<string, object?>
+            {
+                { "font", style.FontUniqueId },
+                { "fontSize", style.FontSize },
+                { "lineHeight", style.LineHeight },
+                { "verticalScale", style.VerticalScale },
+                { "horizontalScale", style.HorizontalScale },
+                { "order", (int)style.TextLineDrawOrder },
+                { "lineWidth", style.TextLineWidth },
+                { "isEnableBold", style.IsEnableBold },
+                { "isEnableItalic", style.IsEnableItalic },
+                { "align", (int)style.TextAlign },
+                { "fillColor", new object[] { style.FillColor.X, style.FillColor.Y, style.FillColor.Z, style.FillColor.W } },
+                { "lineColor", new object[] { style.TextLineColor.X, style.TextLineColor.Y, style.TextLineColor.Z, style.TextLineColor.W } }
+            };
         }
     }
 }

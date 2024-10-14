@@ -177,7 +177,31 @@ namespace NiVE3.Plugin.Property.Types
 
         public object? ConvertToExpressionValue(object? value)
         {
-            throw new NotImplementedException();
+            if (value is not ColorGradient colorGradient)
+            {
+                return null;
+            }
+
+            var colors = colorGradient.ColorStops.Select(c => {
+                return (object)new Dictionary<string, object?>
+                {
+                    { "color", new object[] { c.Color.X, c.Color.Y, c.Color.Z, c.Color.W } },
+                    { "position", c.Position }
+                };
+            }).ToArray();
+            var opacities = colorGradient.OpacityStops.Select(c => {
+                return (object)new Dictionary<string, object?>
+                {
+                    { "opacity", c.Opacity },
+                    { "position", c.Position }
+                };
+            }).ToArray();
+
+            return new Dictionary<string, object?>
+            {
+                { nameof(colors), colors },
+                { nameof(opacities), opacities },
+            };
         }
     }
 }

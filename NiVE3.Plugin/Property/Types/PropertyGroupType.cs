@@ -20,11 +20,6 @@ namespace NiVE3.Plugin.Property.Types
 
         public bool IsSupportedExpression => throw new NotImplementedException();
 
-        public object? ConvertToExpressionValue(object? value)
-        {
-            throw new NotImplementedException();
-        }
-
         public Span<byte> ConvertToHashBase(object? value)
         {
             throw new NotImplementedException();
@@ -48,6 +43,11 @@ namespace NiVE3.Plugin.Property.Types
         public bool TryConvertFromExpressionValue(object? expressionValue, out object? value)
         {
             throw new NotImplementedException();
+        }
+
+        public object? ConvertToExpressionValue(object? value)
+        {
+            return null;
         }
     }
 }

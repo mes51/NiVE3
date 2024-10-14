@@ -93,7 +93,14 @@ namespace NiVE3.Plugin.Property.Types
 
         public object? ConvertToExpressionValue(object? value)
         {
-            throw new NotImplementedException();
+            if (value is Enum e)
+            {
+                return Convert.ToInt32(e);
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 }
