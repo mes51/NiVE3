@@ -879,6 +879,8 @@ namespace NiVE3.Model
             var activeCamera = Layers.FirstOrDefault(l => l.IsEnableVideo && l.IsCamera && l.IsContainsTime(time));
             var activeCameraSetting = GetActiveCameraSetting(time);
 
+            using var checker = CycleChecker.StartCheck();
+
             foreach (var layer in layers)
             {
                 if (layer.IsCamera)
