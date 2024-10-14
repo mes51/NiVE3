@@ -431,7 +431,21 @@ namespace NiVE3.ViewModel
         object? CalculationValue()
         {
             using var checker = CycleChecker.StartCheck();
-            return PropertyModel.GetValue(CurrentTime - SourceStartPoint, CurrentTime);
+            var entries = PropertyModel.EnterCycricForCalcProperty();
+            if (entries.HasValue)
+            {
+                var result = PropertyModel.GetValue(CurrentTime - SourceStartPoint, CurrentTime);
+
+                entries.Value.effectEntry?.Dispose();
+                entries.Value.layerEntry.Dispose();
+                entries.Value.compositionEntry.Dispose();
+
+                return result;
+            }
+            else
+            {
+                return CalculationRawValue();
+            }
         }
 
         partial void WiringModel();

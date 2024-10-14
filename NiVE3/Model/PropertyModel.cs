@@ -532,6 +532,23 @@ namespace NiVE3.Model
             return new CopyData<PropertyData>(CopyDataType.KeyFrame, [data]);
         }
 
+        public (IDisposable compositionEntry, IDisposable layerEntry, IDisposable? effectEntry)? EnterCycricForCalcProperty()
+        {
+            var compositionEntry = CycleChecker.TryEnter(CompositionModel.CompositionId);
+            var layerEntry = CycleChecker.TryEnter(LayerModel.LayerId);
+
+            if (compositionEntry == null || layerEntry == null)
+            {
+                layerEntry?.Dispose();
+                compositionEntry?.Dispose();
+                return null;
+            }
+            else
+            {
+                return (compositionEntry, layerEntry, EffectModel != null ? CycleChecker.TryEnter(EffectModel.EffectId) : null);
+            }
+        }
+
         void DeleteKeyFramesInternal(KeyFrame[] targetKeyframes, bool isCut)
         {
             targetKeyframes = [.. targetKeyframes.OrderBy(KeyFrames.IndexOf)];
