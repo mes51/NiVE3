@@ -15,6 +15,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using NiVE3.Plugin.Property;
 using NiVE3.Plugin.Property.Control;
+using NiVE3.View.Converter;
 using NiVE3.View.Resource;
 using NiVE3.ViewModel;
 
@@ -28,6 +29,8 @@ namespace NiVE3.View.Part
         const double KeyFrameSwitchWidth = 22.0;
 
         public static readonly GridLength KeyFrameSwitchGridLength = new GridLength(KeyFrameSwitchWidth);
+
+        public static readonly IMultiValueConverter ShowExpressionCodeConverter = new DelegateMultiConverter<bool, bool, bool>((a, b) => a && b);
 
         public static readonly DependencyProperty HasExpressionProperty = DependencyProperty.Register(
             nameof(HasExpression),

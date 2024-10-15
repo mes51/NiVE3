@@ -432,205 +432,230 @@
             <RowDefinition Height="{x:Static r:UIParameters.LayerUIHeightGridLength}"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="{Binding ElementName=Root, Path=LayerControlAreaWidth}"/>
-            <ColumnDefinition />
-        </Grid.ColumnDefinitions>
 
-        <Grid Grid.Column="0" Grid.Row="0" Style="{StaticResource HeaderGridStyle}" ClipToBounds="True" dd:DragDrop.DragSourceIgnore="False">
+        <Grid Grid.Row="0">
+            <!--
+            NOTE: 列0の幅を他の要素に影響されないようにするため、2行2列なGrid 1つを用意するのでは無く、2行のGridの中に2列のGridをネストする
+            NOTE: 子の幅(DesiredSize?)がGrid.Columnで指定した列の幅以上になる場合、ColumnSpanを使ってWidth="*"な列まで拡大したとしても幅が足りないと判断してGrid.Columnの列の幅を変えるらしい?
+            https://stackoverflow.com/questions/5679081/looking-for-explanation-for-wpf-grid-columnspan-behavior
+            -->
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="{Binding IsAVSwitchColumnVisible, Converter={StaticResource AVSwitchGridWidthSwitch}}"/>
-
-                <ColumnDefinition Width="{x:Static r:UIParameters.ArrowWidthGridLength}"/>
-
-                <ColumnDefinition Width="{Binding IsTagColumnVisible, Converter={StaticResource TagGridWidthSwitch}}"/>
-
-                <ColumnDefinition>
-                    <ColumnDefinition.Width>
-                        <MultiBinding Converter="{StaticResource SwitchValueConverter}">
-                            <Binding Path="IsLayerNumberColumnVisible"/>
-                            <Binding Path="LayerNumberColumnWidth" Converter="{StaticResource GridLengthConverter}"/>
-                        </MultiBinding>
-                    </ColumnDefinition.Width>
-                </ColumnDefinition>
-
-                <ColumnDefinition Width="{Binding LayerNameColumnWidth, Converter={StaticResource GridLengthConverter}}"/>
-
-                <ColumnDefinition>
-                    <ColumnDefinition.Width>
-                        <MultiBinding Converter="{StaticResource SwitchValueConverter}">
-                            <Binding Path="IsLayerCommentColumnVisible"/>
-                            <Binding Path="LayerCommentColumnWidth" Converter="{StaticResource GridLengthConverter}"/>
-                        </MultiBinding>
-                    </ColumnDefinition.Width>
-                </ColumnDefinition>
-
-                <ColumnDefinition>
-                    <ColumnDefinition.Width>
-                        <MultiBinding Converter="{StaticResource SwitchValueConverter}">
-                            <Binding Path="IsLayerSwitchColumnVisible"/>
-                            <Binding Path="LayerSwitchColumnWidth" Converter="{StaticResource GridLengthConverter}"/>
-                        </MultiBinding>
-                    </ColumnDefinition.Width>
-                </ColumnDefinition>
-
-                <ColumnDefinition>
-                    <ColumnDefinition.Width>
-                        <MultiBinding Converter="{StaticResource SwitchValueConverter}">
-                            <Binding Path="IsModeColumnVisible"/>
-                            <Binding Path="ModeColumnWidth" Converter="{StaticResource GridLengthConverter}"/>
-                        </MultiBinding>
-                    </ColumnDefinition.Width>
-                </ColumnDefinition>
-
-                <ColumnDefinition>
-                    <ColumnDefinition.Width>
-                        <MultiBinding Converter="{StaticResource SwitchValueConverter}">
-                            <Binding Path="IsTrackMatteColumnVisible"/>
-                            <Binding Path="TrackMatteColumnWidth" Converter="{StaticResource GridLengthConverter}"/>
-                        </MultiBinding>
-                    </ColumnDefinition.Width>
-                </ColumnDefinition>
-
-                <ColumnDefinition>
-                    <ColumnDefinition.Width>
-                        <MultiBinding Converter="{StaticResource SwitchValueConverter}">
-                            <Binding Path="IsParentLayerColumnVisible"/>
-                            <Binding Path="ParentLayerColumnWidth" Converter="{StaticResource GridLengthConverter}"/>
-                        </MultiBinding>
-                    </ColumnDefinition.Width>
-                </ColumnDefinition>
+                <ColumnDefinition Width="{Binding ElementName=Root, Path=LayerControlAreaWidth}"/>
+                <ColumnDefinition />
             </Grid.ColumnDefinitions>
 
-            <Grid Grid.Column="0" Grid.Row="0" Style="{StaticResource ColumnGrid}">
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0.5,0,0,0">
-                    <CheckBox Content="{gm:FontawesomeResource ResourceKey=Eye}"
-                              Style="{StaticResource IsEnableSwitchStyle}"
-                              IsChecked="{Binding IsEnableVideo, Mode=OneWay}"
-                              Command="{Binding ChangeLayerSwitchCommand}"
-                              CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableVideo}"/>
-                    
-                    <CheckBox Content="{gm:FontawesomeResource ResourceKey=VolumeHigh}"
-                              Style="{StaticResource LayerSwitch}"
-                              IsChecked="{Binding IsEnableAudio, Mode=OneWay}"
-                              Visibility="{Binding SourceType, Converter={StaticResource AVTypeVisibleConverter}, ConverterParameter={x:Static pi:SourceType.Audio}}"
-                              Command="{Binding ChangeLayerSwitchCommand}"
-                              CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableAudio}"/>
-                    
-                    <CheckBox Content="{gm:FontawesomeResource ResourceKey=Circle}"
-                              Style="{StaticResource SoloSwitchStyle}"
-                              IsChecked="{Binding IsEnableSolo, Mode=OneWay}"
-                              Command="{Binding ChangeLayerSwitchCommand}"
-                              CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableSolo}"/>
-                    
-                    <CheckBox Content="{gm:FontawesomeResource ResourceKey=Lock}"
-                              Style="{StaticResource LayerSwitch}"
-                              IsChecked="{Binding IsLock, Mode=OneWay}"
-                              Command="{Binding ChangeLayerSwitchCommand}"
-                              CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsLock}"/>
-                </StackPanel>
-            </Grid>
-
-            <Grid Grid.Column="1" Grid.Row="0"  Style="{StaticResource ColumnGrid}" dd:DragDrop.DragSourceIgnore="True">
-                <ToggleButton x:Name="ExpandButton" IsChecked="{Binding IsExpanded}" Style="{StaticResource ArrowExpanderStyle}"/>
-            </Grid>
-
-            <Grid Grid.Column="2" Grid.Row="0"  Style="{StaticResource ColumnGrid}" dd:DragDrop.DragSourceIgnore="True">
-                <Button Style="{StaticResource TagColorButton}"/>
-            </Grid>
-
-            <Grid Grid.Column="3" Grid.Row="0"  Style="{StaticResource ColumnGrid}">
-                <TextBlock Text="{Binding ElementName=Root, Path=LayerNumber}" Style="{StaticResource LayerText}"/>
-            </Grid>
-
-            <Grid Grid.Column="4" Grid.Row="0"  Style="{StaticResource ColumnGrid}">
-                <pr:EditableTextBlock Text="{Binding Name}" IsEditing="{Binding EditingParameter, Converter={StaticResource EqualEnumToBoolConverter}, ConverterParameter={x:Static vm:EditingLayerParameter.Name}}" EndEditCommand="{Binding EndEditNameCommand}"/>
-            </Grid>
-
-            <Grid Grid.Column="5" Grid.Row="0"  Style="{StaticResource ColumnGrid}" Background="Transparent" PreviewMouseDown="LayerCommentGrid_PreviewMouseDown">
-                <pr:EditableTextBlock Text="{Binding Comment}" IsEditing="{Binding EditingParameter, Converter={StaticResource EqualEnumToBoolConverter}, ConverterParameter={x:Static vm:EditingLayerParameter.Comment}}" EndEditCommand="{Binding EndEditCommentCommand}"/>
-            </Grid>
-
-            <Grid Grid.Column="6" Grid.Row="0" Style="{StaticResource ColumnGrid}">
-                <StackPanel Orientation="Horizontal" Margin="1.5,0,0,0">
-                    <CheckBox IsChecked="{Binding IsEnableShy, Mode=OneWay}"
-                              Style="{StaticResource ShyLayerSwitch}"
-                              Command="{Binding ChangeLayerSwitchCommand}"
-                              CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableShy}"/>
-                    
-                    <CheckBox Content="{gm:FontawesomeResource ResourceKey=Sun}"
-                              Style="{StaticResource LayerSwitch}"
-                              IsChecked="{Binding IsEnableCollapse, Mode=OneWay}"
-                              Visibility="{Binding IsComposition, Converter={StaticResource BooleanToVisibilityHiddenConverter}}"
-                              Command="{Binding ChangeLayerSwitchCommand, Mode=OneWay}"
-                              CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableCollapse}"/>
-
-                    <pt:MultipleStateLayerSwitch State="{Binding InterpolationQuality, Mode=OneWay}"
-                                                 Width="15"
-                                                 Height="15"
-                                                 Margin="1,0,0,0"
-                                                 Visibility="{Binding SourceType, Converter={StaticResource AVTypeVisibleConverter}, ConverterParameter={x:Static local:LayerView.CompositionDisplayableSourceType}}"
-                                                 Command="{Binding ChangeInterpolationQualityCommand}">
-                        <pt:MultipleStateLayerSwitchItem State="{x:Static pi:ImageInterpolationQuality.Level1}" Icon="{StaticResource ImageInterpolationLevel1Icon}"/>
-                        <pt:MultipleStateLayerSwitchItem State="{x:Static pi:ImageInterpolationQuality.Level2}" Icon="{StaticResource ImageInterpolationLevel2Icon}"/>
-                    </pt:MultipleStateLayerSwitch>
-                    
-                    <CheckBox Content="{gm:FontawesomeResource ResourceKey=FlorinSign}"
-                              Style="{StaticResource LayerSwitch}"
-                              IsChecked="{Binding IsEnableEffect, Mode=OneWay}"
-                              Visibility="{Binding HasEffect, Converter={StaticResource BooleanToVisibilityHiddenConverter}}"
-                              Command="{Binding ChangeLayerSwitchCommand}"
-                              CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableEffect}"/>
-                    
-                    <CheckBox Content="{StaticResource FrameBlendIcon}"
-                              Style="{StaticResource LayerSwitch}"
-                              IsChecked="{Binding IsEnableFrameBlend, Mode=OneWay}"
-                              Visibility="{Binding SourceType, Converter={StaticResource AVTypeVisibleConverter}, ConverterParameter={x:Static pi:SourceType.Video}}"
-                              Command="{Binding ChangeLayerSwitchCommand}"
-                              CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableFrameBlend}"/>
-                    
-                    <CheckBox Content="{StaticResource MotionBlurIcon}"
-                              Style="{StaticResource LayerSwitch}"
-                              IsChecked="{Binding IsEnableMotionBlur, Mode=OneWay}"
-                              Visibility="{Binding SourceType, Converter={StaticResource AVTypeVisibleConverter}, ConverterParameter={x:Static local:LayerView.CompositionDisplayableSourceType}}"
-                              Command="{Binding ChangeLayerSwitchCommand}"
-                              CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableMotionBlur}"/>
-                    
-                    <CheckBox Content="{gm:FontawesomeResource ResourceKey=CircleHalfStroke}"
-                              Style="{StaticResource LayerSwitch}"
-                              IsChecked="{Binding IsEnableAdjustmentLayer, Mode=OneWay}"
-                              Visibility="{Binding SourceType, Converter={StaticResource AVTypeVisibleConverter}, ConverterParameter={x:Static local:LayerView.CompositionDisplayableSourceType}}"
-                              Command="{Binding ChangeLayerSwitchCommand}"
-                              CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableAdjustmentLayer}"/>
-                    
-                    <CheckBox Content="{gm:FontawesomeResource ResourceKey=Cube}"
-                              Style="{StaticResource Enable3DSwitchStyle}"
-                              IsChecked="{Binding IsEnable3D, Mode=OneWay}"
-                              Command="{Binding ChangeLayerSwitchCommand}"
-                              CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnable3D}"/>
-                </StackPanel>
-            </Grid>
-
-            <Grid Grid.Column="7" Grid.Row="0" Style="{StaticResource ColumnGrid}">
-                <upr:ContextMenuSelectBox x:Name="BlendModeSelectBox" SelectedItem="{Binding BlendMode, Mode=OneWay}" ItemsSource="{smk:EnumValues EnumType={x:Type dr:BlendMode}}" Style="{StaticResource BlendModeSelectBoxStyle}" SelectItemChangedByUser="BlendModeSelectBox_SelectItemChangedByUser" dd:DragDrop.DragSourceIgnore="True"/>
-            </Grid>
-
-            <Grid Grid.Column="8" Grid.Row="0" Style="{StaticResource ColumnGrid}">
+            <Grid Grid.Column="0" Style="{StaticResource HeaderGridStyle}" ClipToBounds="True" dd:DragDrop.DragSourceIgnore="False">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition />
-                    <ColumnDefinition />
+                    <ColumnDefinition Width="{Binding IsAVSwitchColumnVisible, Converter={StaticResource AVSwitchGridWidthSwitch}}"/>
+
+                    <ColumnDefinition Width="{x:Static r:UIParameters.ArrowWidthGridLength}"/>
+
+                    <ColumnDefinition Width="{Binding IsTagColumnVisible, Converter={StaticResource TagGridWidthSwitch}}"/>
+
+                    <ColumnDefinition>
+                        <ColumnDefinition.Width>
+                            <MultiBinding Converter="{StaticResource SwitchValueConverter}">
+                                <Binding Path="IsLayerNumberColumnVisible"/>
+                                <Binding Path="LayerNumberColumnWidth" Converter="{StaticResource GridLengthConverter}"/>
+                            </MultiBinding>
+                        </ColumnDefinition.Width>
+                    </ColumnDefinition>
+
+                    <ColumnDefinition Width="{Binding LayerNameColumnWidth, Converter={StaticResource GridLengthConverter}}"/>
+
+                    <ColumnDefinition>
+                        <ColumnDefinition.Width>
+                            <MultiBinding Converter="{StaticResource SwitchValueConverter}">
+                                <Binding Path="IsLayerCommentColumnVisible"/>
+                                <Binding Path="LayerCommentColumnWidth" Converter="{StaticResource GridLengthConverter}"/>
+                            </MultiBinding>
+                        </ColumnDefinition.Width>
+                    </ColumnDefinition>
+
+                    <ColumnDefinition>
+                        <ColumnDefinition.Width>
+                            <MultiBinding Converter="{StaticResource SwitchValueConverter}">
+                                <Binding Path="IsLayerSwitchColumnVisible"/>
+                                <Binding Path="LayerSwitchColumnWidth" Converter="{StaticResource GridLengthConverter}"/>
+                            </MultiBinding>
+                        </ColumnDefinition.Width>
+                    </ColumnDefinition>
+
+                    <ColumnDefinition>
+                        <ColumnDefinition.Width>
+                            <MultiBinding Converter="{StaticResource SwitchValueConverter}">
+                                <Binding Path="IsModeColumnVisible"/>
+                                <Binding Path="ModeColumnWidth" Converter="{StaticResource GridLengthConverter}"/>
+                            </MultiBinding>
+                        </ColumnDefinition.Width>
+                    </ColumnDefinition>
+
+                    <ColumnDefinition>
+                        <ColumnDefinition.Width>
+                            <MultiBinding Converter="{StaticResource SwitchValueConverter}">
+                                <Binding Path="IsTrackMatteColumnVisible"/>
+                                <Binding Path="TrackMatteColumnWidth" Converter="{StaticResource GridLengthConverter}"/>
+                            </MultiBinding>
+                        </ColumnDefinition.Width>
+                    </ColumnDefinition>
+
+                    <ColumnDefinition>
+                        <ColumnDefinition.Width>
+                            <MultiBinding Converter="{StaticResource SwitchValueConverter}">
+                                <Binding Path="IsParentLayerColumnVisible"/>
+                                <Binding Path="ParentLayerColumnWidth" Converter="{StaticResource GridLengthConverter}"/>
+                            </MultiBinding>
+                        </ColumnDefinition.Width>
+                    </ColumnDefinition>
                 </Grid.ColumnDefinitions>
 
-                <upr:ContextMenuSelectBox Grid.Column="0" x:Name="TrackMatteSelectBox" SelectedItem="{Binding TrackMatteLayerProxy, Mode=OneWay}" ItemsSource="{StaticResource TrackMatteLayerCollection}" Style="{StaticResource TrackMatteSelectBoxStyle}" SelectItemChangedByUser="TrackMatteSelectBox_SelectItemChangedByUser" dd:DragDrop.DragSourceIgnore="True"/>
-                <upr:ContextMenuSelectBox Grid.Column="1" x:Name="TrackMatteModeSelectBox" SelectedItem="{Binding TrackMatteMode, Mode=OneWay}" ItemsSource="{smk:EnumValues EnumType={x:Type pi:TrackMatteMode}}" Style="{StaticResource TrackMatteModeSelectBoxStyle}" SelectItemChangedByUser="TrackMatteModeSelectBox_SelectItemChangedByUser" dd:DragDrop.DragSourceIgnore="True"/>
+                <Grid Grid.Column="0" Style="{StaticResource ColumnGrid}">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0.5,0,0,0">
+                        <CheckBox Content="{gm:FontawesomeResource ResourceKey=Eye}"
+                                  Style="{StaticResource IsEnableSwitchStyle}"
+                                  IsChecked="{Binding IsEnableVideo, Mode=OneWay}"
+                                  Command="{Binding ChangeLayerSwitchCommand}"
+                                  CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableVideo}"/>
+
+                        <CheckBox Content="{gm:FontawesomeResource ResourceKey=VolumeHigh}"
+                                  Style="{StaticResource LayerSwitch}"
+                                  IsChecked="{Binding IsEnableAudio, Mode=OneWay}"
+                                  Visibility="{Binding SourceType, Converter={StaticResource AVTypeVisibleConverter}, ConverterParameter={x:Static pi:SourceType.Audio}}"
+                                  Command="{Binding ChangeLayerSwitchCommand}"
+                                  CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableAudio}"/>
+
+                        <CheckBox Content="{gm:FontawesomeResource ResourceKey=Circle}"
+                                  Style="{StaticResource SoloSwitchStyle}"
+                                  IsChecked="{Binding IsEnableSolo, Mode=OneWay}"
+                                  Command="{Binding ChangeLayerSwitchCommand}"
+                                  CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableSolo}"/>
+
+                        <CheckBox Content="{gm:FontawesomeResource ResourceKey=Lock}"
+                                  Style="{StaticResource LayerSwitch}"
+                                  IsChecked="{Binding IsLock, Mode=OneWay}"
+                                  Command="{Binding ChangeLayerSwitchCommand}"
+                                  CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsLock}"/>
+                    </StackPanel>
+                </Grid>
+
+                <Grid Grid.Column="1" Style="{StaticResource ColumnGrid}" dd:DragDrop.DragSourceIgnore="True">
+                    <ToggleButton x:Name="ExpandButton" IsChecked="{Binding IsExpanded}" Style="{StaticResource ArrowExpanderStyle}"/>
+                </Grid>
+
+                <Grid Grid.Column="2" Style="{StaticResource ColumnGrid}" dd:DragDrop.DragSourceIgnore="True">
+                    <Button Style="{StaticResource TagColorButton}"/>
+                </Grid>
+
+                <Grid Grid.Column="3" Style="{StaticResource ColumnGrid}">
+                    <TextBlock Text="{Binding ElementName=Root, Path=LayerNumber}" Style="{StaticResource LayerText}"/>
+                </Grid>
+
+                <Grid Grid.Column="4" Style="{StaticResource ColumnGrid}">
+                    <pr:EditableTextBlock Text="{Binding Name}" IsEditing="{Binding EditingParameter, Converter={StaticResource EqualEnumToBoolConverter}, ConverterParameter={x:Static vm:EditingLayerParameter.Name}}" EndEditCommand="{Binding EndEditNameCommand}"/>
+                </Grid>
+
+                <Grid Grid.Column="5" Style="{StaticResource ColumnGrid}" Background="Transparent" PreviewMouseDown="LayerCommentGrid_PreviewMouseDown">
+                    <pr:EditableTextBlock Text="{Binding Comment}" IsEditing="{Binding EditingParameter, Converter={StaticResource EqualEnumToBoolConverter}, ConverterParameter={x:Static vm:EditingLayerParameter.Comment}}" EndEditCommand="{Binding EndEditCommentCommand}"/>
+                </Grid>
+
+                <Grid Grid.Column="6" Style="{StaticResource ColumnGrid}">
+                    <StackPanel Orientation="Horizontal" Margin="1.5,0,0,0">
+                        <CheckBox IsChecked="{Binding IsEnableShy, Mode=OneWay}"
+                                  Style="{StaticResource ShyLayerSwitch}"
+                                  Command="{Binding ChangeLayerSwitchCommand}"
+                                  CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableShy}"/>
+
+                        <CheckBox Content="{gm:FontawesomeResource ResourceKey=Sun}"
+                                  Style="{StaticResource LayerSwitch}"
+                                  IsChecked="{Binding IsEnableCollapse, Mode=OneWay}"
+                                  Visibility="{Binding IsComposition, Converter={StaticResource BooleanToVisibilityHiddenConverter}}"
+                                  Command="{Binding ChangeLayerSwitchCommand, Mode=OneWay}"
+                                  CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableCollapse}"/>
+
+                        <pt:MultipleStateLayerSwitch State="{Binding InterpolationQuality, Mode=OneWay}"
+                                                     Width="15"
+                                                     Height="15"
+                                                     Margin="1,0,0,0"
+                                                     Visibility="{Binding SourceType, Converter={StaticResource AVTypeVisibleConverter}, ConverterParameter={x:Static local:LayerView.CompositionDisplayableSourceType}}"
+                                                     Command="{Binding ChangeInterpolationQualityCommand}">
+                            <pt:MultipleStateLayerSwitchItem State="{x:Static pi:ImageInterpolationQuality.Level1}" Icon="{StaticResource ImageInterpolationLevel1Icon}"/>
+                            <pt:MultipleStateLayerSwitchItem State="{x:Static pi:ImageInterpolationQuality.Level2}" Icon="{StaticResource ImageInterpolationLevel2Icon}"/>
+                        </pt:MultipleStateLayerSwitch>
+
+                        <CheckBox Content="{gm:FontawesomeResource ResourceKey=FlorinSign}"
+                                  Style="{StaticResource LayerSwitch}"
+                                  IsChecked="{Binding IsEnableEffect, Mode=OneWay}"
+                                  Visibility="{Binding HasEffect, Converter={StaticResource BooleanToVisibilityHiddenConverter}}"
+                                  Command="{Binding ChangeLayerSwitchCommand}"
+                                  CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableEffect}"/>
+
+                        <CheckBox Content="{StaticResource FrameBlendIcon}"
+                                  Style="{StaticResource LayerSwitch}"
+                                  IsChecked="{Binding IsEnableFrameBlend, Mode=OneWay}"
+                                  Visibility="{Binding SourceType, Converter={StaticResource AVTypeVisibleConverter}, ConverterParameter={x:Static pi:SourceType.Video}}"
+                                  Command="{Binding ChangeLayerSwitchCommand}"
+                                  CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableFrameBlend}"/>
+
+                        <CheckBox Content="{StaticResource MotionBlurIcon}"
+                                  Style="{StaticResource LayerSwitch}"
+                                  IsChecked="{Binding IsEnableMotionBlur, Mode=OneWay}"
+                                  Visibility="{Binding SourceType, Converter={StaticResource AVTypeVisibleConverter}, ConverterParameter={x:Static local:LayerView.CompositionDisplayableSourceType}}"
+                                  Command="{Binding ChangeLayerSwitchCommand}"
+                                  CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableMotionBlur}"/>
+
+                        <CheckBox Content="{gm:FontawesomeResource ResourceKey=CircleHalfStroke}"
+                                  Style="{StaticResource LayerSwitch}"
+                                  IsChecked="{Binding IsEnableAdjustmentLayer, Mode=OneWay}"
+                                  Visibility="{Binding SourceType, Converter={StaticResource AVTypeVisibleConverter}, ConverterParameter={x:Static local:LayerView.CompositionDisplayableSourceType}}"
+                                  Command="{Binding ChangeLayerSwitchCommand}"
+                                  CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableAdjustmentLayer}"/>
+
+                        <CheckBox Content="{gm:FontawesomeResource ResourceKey=Cube}"
+                                  Style="{StaticResource Enable3DSwitchStyle}"
+                                  IsChecked="{Binding IsEnable3D, Mode=OneWay}"
+                                  Command="{Binding ChangeLayerSwitchCommand}"
+                                  CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnable3D}"/>
+                    </StackPanel>
+                </Grid>
+
+                <Grid Grid.Column="7" Style="{StaticResource ColumnGrid}">
+                    <upr:ContextMenuSelectBox x:Name="BlendModeSelectBox" SelectedItem="{Binding BlendMode, Mode=OneWay}" ItemsSource="{smk:EnumValues EnumType={x:Type dr:BlendMode}}" Style="{StaticResource BlendModeSelectBoxStyle}" SelectItemChangedByUser="BlendModeSelectBox_SelectItemChangedByUser" dd:DragDrop.DragSourceIgnore="True"/>
+                </Grid>
+
+                <Grid Grid.Column="8" Style="{StaticResource ColumnGrid}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+
+                    <upr:ContextMenuSelectBox Grid.Column="0" x:Name="TrackMatteSelectBox" SelectedItem="{Binding TrackMatteLayerProxy, Mode=OneWay}" ItemsSource="{StaticResource TrackMatteLayerCollection}" Style="{StaticResource TrackMatteSelectBoxStyle}" SelectItemChangedByUser="TrackMatteSelectBox_SelectItemChangedByUser" dd:DragDrop.DragSourceIgnore="True"/>
+                    <upr:ContextMenuSelectBox Grid.Column="1" x:Name="TrackMatteModeSelectBox" SelectedItem="{Binding TrackMatteMode, Mode=OneWay}" ItemsSource="{smk:EnumValues EnumType={x:Type pi:TrackMatteMode}}" Style="{StaticResource TrackMatteModeSelectBoxStyle}" SelectItemChangedByUser="TrackMatteModeSelectBox_SelectItemChangedByUser" dd:DragDrop.DragSourceIgnore="True"/>
+                </Grid>
+
+                <Grid Grid.Column="9" Style="{StaticResource ColumnGrid}">
+                    <upr:ContextMenuSelectBox x:Name="ParentLayerSelectBox" SelectedItem="{Binding ParentLayerProxy, Mode=OneWay}" ItemsSource="{StaticResource ParentLayerCollection}" Style="{StaticResource ParentLayerSelectBoxStyle}" SelectItemChangedByUser="ParentLayerSelectBox_SelectItemChangedByUser" dd:DragDrop.DragSourceIgnore="True"/>
+                </Grid>
             </Grid>
 
-            <Grid Grid.Column="9" Grid.Row="0" Style="{StaticResource ColumnGrid}">
-                <upr:ContextMenuSelectBox x:Name="ParentLayerSelectBox" SelectedItem="{Binding ParentLayerProxy, Mode=OneWay}" ItemsSource="{StaticResource ParentLayerCollection}" Style="{StaticResource ParentLayerSelectBoxStyle}" SelectItemChangedByUser="ParentLayerSelectBox_SelectItemChangedByUser" dd:DragDrop.DragSourceIgnore="True"/>
-            </Grid>
+            <local:DurationBar Grid.Column="1"
+                               x:Name="DurationBar"
+                               Margin="0,1"
+                               Range="{Binding ElementName=Root, Path=Range}"
+                               RangeStart="{Binding ElementName=Root, Path=RangeStart}"
+                               Duration="{Binding Duration}"
+                               SourceStartPoint="{Binding SourceStartPoint}"
+                               InPoint="{Binding InPoint}"
+                               OutPoint="{Binding OutPoint}"
+                               CompositionFrameRate="{Binding ElementName=Root, Path=CompositionFrameRate}"
+                               HasDuration="{Binding SourceType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static pi:SourceType.VideoAndAudio}}"
+                               IsEnableTimeRemap="{Binding IsEnableTimeRemap}"
+                               TagColor="{Binding TagColor}"
+                               BeginEditDurationCommand="{Binding BeginEditDurationRequestCommand}"
+                               UpdateDurationCommand="{Binding UpdateDurationRequestCommand}"
+                               AbortEditDurationCommand="{Binding AbortEditDurationRequestCommand}"/>
         </Grid>
 
-        <StackPanel Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" Visibility="{Binding IsExpanded, Converter={StaticResource BooleanToVisibilityConverter}}">
+        <StackPanel Grid.Row="1" Visibility="{Binding IsExpanded, Converter={StaticResource BooleanToVisibilityConverter}}">
             <pt:LayerItemExpander HeaderText="{gm:LanguageResource ResourceKey=Layer_Effects}"
                                   IndentLevel="1"
                                   IsAVSwitchColumnVisible="{Binding ElementName=Root, Path=DataContext.IsAVSwitchColumnVisible}"
@@ -761,23 +786,5 @@
         </StackPanel>
 
         <r:ReadOnlyPropertyWire Reciever="{Binding ElementName=EffectCollectionView, Path=LastSelected}" Sender="{Binding LastSelectedEffect}"/>
-
-        <local:DurationBar Grid.Column="1"
-                           Grid.Row="0"
-                           x:Name="DurationBar"
-                           Margin="0,1"
-                           Range="{Binding ElementName=Root, Path=Range}"
-                           RangeStart="{Binding ElementName=Root, Path=RangeStart}"
-                           Duration="{Binding Duration}"
-                           SourceStartPoint="{Binding SourceStartPoint}"
-                           InPoint="{Binding InPoint}"
-                           OutPoint="{Binding OutPoint}"
-                           CompositionFrameRate="{Binding ElementName=Root, Path=CompositionFrameRate}"
-                           HasDuration="{Binding SourceType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static pi:SourceType.VideoAndAudio}}"
-                           IsEnableTimeRemap="{Binding IsEnableTimeRemap}"
-                           TagColor="{Binding TagColor}"
-                           BeginEditDurationCommand="{Binding BeginEditDurationRequestCommand}"
-                           UpdateDurationCommand="{Binding UpdateDurationRequestCommand}"
-                           AbortEditDurationCommand="{Binding AbortEditDurationRequestCommand}"/>
     </Grid>
 </UserControl>

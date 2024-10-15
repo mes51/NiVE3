@@ -195,6 +195,10 @@ namespace NiVE3.ViewModel
 
         public ICommand PlaceKeyFrameCommand { get; }
 
+        public ICommand CommitExpressionCodeCommand { get; }
+
+        public ICommand ChangeUseExpressionCommand { get; }
+
         public DelegateCommand<SelectItemType?> DeleteCommand { get; }
 
         public DelegateCommand<SelectItemType?> CutCommand { get; }
@@ -255,13 +259,27 @@ namespace NiVE3.ViewModel
 
             SwitchUseKeyFrameCommand = new DelegateCommand(() =>
             {
-                if (KeyFrames.Count > 0)
+                if (Keyboard.IsKeyDown(Key.LeftAlt) || Keyboard.IsKeyDown(Key.RightAlt))
                 {
-                    PropertyModel.ClearKeyFrame();
+                    if (string.IsNullOrEmpty(PropertyModel.ExpressionCode))
+                    {
+                        PropertyModel.ChangeExpressionCode("thisProperty");
+                    }
+                    else
+                    {
+                        PropertyModel.ChangeExpressionCode("");
+                    }
                 }
                 else
                 {
-                    PropertyModel.CreateKeyFrame(CurrentTimeValue);
+                    if (KeyFrames.Count > 0)
+                    {
+                        PropertyModel.ClearKeyFrame();
+                    }
+                    else
+                    {
+                        PropertyModel.CreateKeyFrame(CurrentTimeValue);
+                    }
                 }
             });
 
@@ -288,6 +306,10 @@ namespace NiVE3.ViewModel
                     PropertyModel.CreateKeyFrame(CurrentTimeValue);
                 }
             }, () => KeyFrames.Count > 0).ObservesProperty(() => KeyFrames.Count);
+
+            CommitExpressionCodeCommand = new DelegateCommand(() => PropertyModel.ChangeExpressionCode(ExpressionCode));
+
+            ChangeUseExpressionCommand = new DelegateCommand(() => PropertyModel.ChangeUseExpression(!UseExpression), () => !string.IsNullOrEmpty(PropertyModel.ExpressionCode));
 
             SelectItemCommand = new DelegateCommand(() =>
             {

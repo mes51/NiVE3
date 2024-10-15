@@ -402,6 +402,82 @@ namespace NiVE3.Model
 
             public void Dispose() { }
         }
+
+        private class ChangeExpressionCodeHistoryCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangeExpression);
+
+            PropertyModel Model { get; }
+
+            string OldExpressionCode { get; }
+
+            bool OldUseExpression { get; }
+
+            bool OldHasExpressionError { get; }
+
+            string NewExpressionCode { get; }
+
+            bool NewUseExpression { get; }
+
+            bool NewHasExpressionError { get; }
+
+            public ChangeExpressionCodeHistoryCommand(PropertyModel model, string oldExpressionCode, bool oldUseExpression, bool oldHasExpressionError, string newExpressionCode, bool newUseExpression, bool newHasExpressionError)
+            {
+                Model = model;
+                OldExpressionCode = oldExpressionCode;
+                OldUseExpression = oldUseExpression;
+                OldHasExpressionError = oldHasExpressionError;
+                NewExpressionCode = newExpressionCode;
+                NewUseExpression = newUseExpression;
+                NewHasExpressionError = newHasExpressionError;
+            }
+
+            public void Redo()
+            {
+                Model.ExpressionCode = NewExpressionCode;
+                Model.UseExpression = NewUseExpression;
+                Model.HasExpressionError = NewHasExpressionError;
+            }
+
+            public void Undo()
+            {
+                Model.ExpressionCode = OldExpressionCode;
+                Model.UseExpression = OldUseExpression;
+                Model.HasExpressionError = OldHasExpressionError;
+            }
+
+            public void Dispose() { }
+        }
+
+        private class ChangeUseExpressionHistoryCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangeUseExpression);
+
+            PropertyModel Model { get; }
+
+            bool OldUseExpression { get; }
+
+            bool NewUseExpression { get; }
+
+            public ChangeUseExpressionHistoryCommand(PropertyModel model, bool oldUseExpression, bool newUseExpression)
+            {
+                Model = model;
+                OldUseExpression = oldUseExpression;
+                NewUseExpression = newUseExpression;
+            }
+
+            public void Redo()
+            {
+                Model.UseExpression = NewUseExpression;
+            }
+
+            public void Undo()
+            {
+                Model.UseExpression = OldUseExpression;
+            }
+
+            public void Dispose() { }
+        }
     }
 
     partial class PropertyGroupModel

@@ -64,12 +64,16 @@
         </Style>
     </local:PropertyViewBase.Resources>
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="{x:Static r:UIParameters.LayerUIHeightGridLength}"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="{Binding ElementName=Root, Path=ControlAreaWidth, Converter={StaticResource GridLengthConverter}}"/>
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
 
-        <Grid Grid.Column="0" ClipToBounds="True">
+        <Grid Grid.Row="0" Grid.Column="0" ClipToBounds="True">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="{Binding ElementName=Root, Path=IndentMarginLeft}"/>
                 <ColumnDefinition Width="Auto" />
@@ -81,7 +85,7 @@
             <Grid Grid.Column="0" ClipToBounds="True">
                 <Button Style="{StaticResource KeyFramePlaceButtonStyle}" Command="{Binding PlaceKeyFrameCommand}"/>
             </Grid>
-            <ToggleButton Grid.Column="1" Style="{StaticResource ArrowExpanderStyle}" Width="{x:Static r:UIParameters.ArrowWidth}" Visibility="{Binding ElementName=Root, Path=HasExpression, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+            <ToggleButton x:Name="ExpressionCodeFoldButton" Grid.Column="1" Style="{StaticResource ArrowExpanderStyle}" Visibility="{Binding ElementName=Root, Path=HasExpression, Converter={StaticResource BooleanToVisibilityConverter}}"/>
             <CheckBox Grid.Column="2" IsChecked="{Binding HasKeyFrame, Mode=OneWay}" Style="{StaticResource KeyFrameSwitchCheckBox}" VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="{Binding Property.IsSupportKeyFrame, Converter={StaticResource BooleanToVisibilityConverter}}" Command="{Binding SwitchUseKeyFrameCommand}"/>
             <Grid Grid.Column="3" Style="{StaticResource PropertyNameGridStyle}">
                 <TextBlock Text="{Binding ViewState.SourceDisplayName}" Style="{StaticResource PropertyNameTextBlockStyle}" MouseDown="PropertyNameTextBlock_MouseDown"/>
@@ -89,7 +93,8 @@
             <Grid Grid.Column="4" x:Name="PropertyControlGrid"/>
         </Grid>
 
-        <local:KeyFrameCollectionView Grid.Column="1"
+        <local:KeyFrameCollectionView Grid.Row="0"
+                                      Grid.Column="1"
                                       KeyFrames="{Binding KeyFrames}"
                                       SourceStartPoint="{Binding SourceStartPoint}"
                                       Range="{Binding ElementName=Root, Path=Range}"
@@ -100,5 +105,31 @@
                                       SelectItemCommand="{Binding SelectKeyFrameCommand}"
                                       KeyFrameMoveRequest="KeyFrameCollectionView_KeyFrameMoveRequest"
                                       KeyFrameInterpolationTypeChangeRequest="KeyFrameCollectionView_KeyFrameInterpolationTypeChangeRequest"/>
+
+        <Grid Grid.Row="1" Grid.Column="1" ClipToBounds="True" Margin="{x:Static r:UIParameters.TimelineRangeThumbMargin}">
+            <Grid.Visibility>
+                <MultiBinding>
+                    <MultiBinding.Converter>
+                        <cv:MultiConverterCollection ToSingleConverter="{x:Static local:PropertyView.ShowExpressionCodeConverter}">
+                            <cv:ConverterItem>
+                                <BooleanToVisibilityConverter />
+                            </cv:ConverterItem>
+                        </cv:MultiConverterCollection>
+                    </MultiBinding.Converter>
+
+                    <Binding ElementName="ExpressionCodeFoldButton" Path="IsChecked"/>
+                    <Binding ElementName="Root" Path="HasExpression"/>
+                </MultiBinding>
+            </Grid.Visibility>
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="{x:Static r:UIParameters.LayerUIHeightGridLength}" MinHeight="{x:Static r:UIParameters.LayerUIHeight}"/>
+                <RowDefinition Height="3"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock Grid.Row="0" Text="{Binding ExpressionCode}" MinHeight="{x:Static r:UIParameters.LayerUIHeight}" TextWrapping="NoWrap" ClipToBounds="True"/>
+
+            <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Focusable="False" IsTabStop="False" ResizeDirection="Rows" ResizeBehavior="PreviousAndCurrent"/>
+        </Grid>
     </Grid>
 </local:PropertyViewBase>

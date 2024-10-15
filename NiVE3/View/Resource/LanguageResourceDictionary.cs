@@ -840,6 +840,12 @@ namespace NiVE3.View.Resource
         [DefaultValue("プロパティの複製")]
         public static readonly string History_DuplicateProperty = nameof(History_DuplicateProperty);
 
+        [DefaultValue("エクスプレッションの変更")]
+        public static readonly string History_ChangeExpression = nameof(History_ChangeExpression);
+
+        [DefaultValue("エクスプレッションの有効・無効の切り替え")]
+        public static readonly string History_ChangeUseExpression = nameof(History_ChangeUseExpression);
+
         [DefaultValue("キーフレームの追加")]
         public static readonly string History_AddKeyFrame = nameof(History_AddKeyFrame);
 

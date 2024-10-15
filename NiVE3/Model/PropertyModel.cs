@@ -207,6 +207,31 @@ namespace NiVE3.Model
             ValueCommited?.Invoke(this, EventArgs.Empty);
         }
 
+        public void ChangeExpressionCode(string expressionCode)
+        {
+            var oldCode = ExpressionCode;
+            var oldUseExpression = UseExpression;
+            var oldHasExpressionError = HasExpressionError;
+
+            ExpressionCode = expressionCode;
+            UseExpression = !string.IsNullOrEmpty(expressionCode);
+
+            HistoryModel.Add(new ChangeExpressionCodeHistoryCommand(this, oldCode, oldUseExpression, oldHasExpressionError, expressionCode, UseExpression, HasExpressionError));
+        }
+
+        public void ChangeUseExpression(bool useExpression)
+        {
+            if (UseExpression == useExpression)
+            {
+                return;
+            }
+
+            var oldUseExpression = UseExpression;
+            UseExpression = useExpression;
+
+            HistoryModel.Add(new ChangeUseExpressionHistoryCommand(this, oldUseExpression, useExpression));
+        }
+
         public void MoveTimeKeyFrames(KeyFrame[] targetKeyFrames, double[] newTime)
         {
             var newKeyFrames = targetKeyFrames.Zip(newTime, (k, nt) => new KeyFrame(nt, k.Value, k.EaseIn, k.EaseOut, k.InterpolationType, k.Id)).OrderBy(k => k.Time).ToArray();

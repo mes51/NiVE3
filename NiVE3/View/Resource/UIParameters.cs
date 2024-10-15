@@ -37,5 +37,7 @@ namespace NiVE3.View.Resource
         public static readonly GridLength AVSwitchWidthWithHalfSplitterGridLength = new GridLength(AVSwitchWidthWithHalfSplitter);
 
         public static readonly GridLength TagAreaWidthGridLength = new GridLength(TagAreaWidth);
+
+        public static readonly Thickness TimelineRangeThumbMargin = new Thickness(TimelineRangeThumbWidth, 0.0, TimelineRangeThumbWidth, 0.0);
     }
 }
