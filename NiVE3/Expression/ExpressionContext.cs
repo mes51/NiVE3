@@ -26,7 +26,7 @@ namespace NiVE3.Expression
 
         public object? Evaluate(ExpressionScript script, object? value)
         {
-            Realm.SetValue("thisProperty", value);
+            Realm.SetValue("thisProperty", value ?? JsValue.Null);
             return ToExpressionValue(Realm.Evaluate(script.Script).ToObject());
         }
 
