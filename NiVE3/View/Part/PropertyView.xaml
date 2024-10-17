@@ -4,9 +4,11 @@
                         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
                         xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
                         xmlns:local="clr-namespace:NiVE3.View.Part"
+                        xmlns:ae="http://icsharpcode.net/sharpdevelop/avalonedit"
                         xmlns:cv="clr-namespace:NiVE3.View.Converter"
                         xmlns:pr="clr-namespace:NiVE3.View.Primitive"
                         xmlns:r="clr-namespace:NiVE3.View.Resource"
+                        xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
                         xmlns:ugm="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
                         mc:Ignorable="d" 
                         x:Name="Root"
@@ -62,6 +64,31 @@
                 </DataTrigger>
             </Style.Triggers>
         </Style>
+
+        <Style x:Key="ExpressionGridStyle" TargetType="{x:Type Grid}">
+            <Setter Property="Visibility" Value="Collapsed"/>
+
+            <Style.Triggers>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding ElementName=ExpressionCodeFoldButton, Path=IsChecked}" Value="True"/>
+                        <Condition Binding="{Binding ElementName=Root, Path=HasExpression}" Value="True"/>
+                    </MultiDataTrigger.Conditions>
+
+                    <Setter Property="Visibility" Value="Visible"/>
+                </MultiDataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style TargetType="{x:Type ae:TextArea}">
+            <EventSetter Event="LostMouseCapture" Handler="ExpressionCodeEditor_LostMouseCapture"/>
+            <EventSetter Event="Mouse.PreviewMouseDownOutsideCapturedElement" Handler="ExpressionCodeEditor_PreviewMouseDownOutsideCapturedElement"/>
+        </Style>
+
+        <Style TargetType="{x:Type ae:LineNumberMargin}" BasedOn="{StaticResource {x:Type ae:LineNumberMargin}}">
+            <EventSetter Event="LostMouseCapture" Handler="ExpressionCodeEditor_LostMouseCapture"/>
+            <EventSetter Event="Mouse.PreviewMouseDownOutsideCapturedElement" Handler="ExpressionCodeEditor_PreviewMouseDownOutsideCapturedElement"/>
+        </Style>
     </local:PropertyViewBase.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -106,28 +133,48 @@
                                       KeyFrameMoveRequest="KeyFrameCollectionView_KeyFrameMoveRequest"
                                       KeyFrameInterpolationTypeChangeRequest="KeyFrameCollectionView_KeyFrameInterpolationTypeChangeRequest"/>
 
-        <Grid Grid.Row="1" Grid.Column="1" ClipToBounds="True" Margin="{x:Static r:UIParameters.TimelineRangeThumbMargin}">
-            <Grid.Visibility>
-                <MultiBinding>
-                    <MultiBinding.Converter>
-                        <cv:MultiConverterCollection ToSingleConverter="{x:Static local:PropertyView.ShowExpressionCodeConverter}">
-                            <cv:ConverterItem>
-                                <BooleanToVisibilityConverter />
-                            </cv:ConverterItem>
-                        </cv:MultiConverterCollection>
-                    </MultiBinding.Converter>
+        <Grid Grid.Row="1" Grid.Column="0" Style="{StaticResource ExpressionGridStyle}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="{Binding ElementName=Root, Path=IndentMarginLeft}"/>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="{x:Static local:PropertyView.KeyFrameSwitchGridLength}"/>
+                <ColumnDefinition Width="{Binding ElementName=Root, Path=CalculatedNameAreaWidth}"/>
+                <ColumnDefinition Width="{Binding ElementName=Root, Path=CalculatedControlAreaWidth}"/>
+            </Grid.ColumnDefinitions>
 
-                    <Binding ElementName="ExpressionCodeFoldButton" Path="IsChecked"/>
-                    <Binding ElementName="Root" Path="HasExpression"/>
-                </MultiBinding>
-            </Grid.Visibility>
+            <Grid Grid.Column="3">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
 
+                <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=PropertyView_Expression}" VerticalAlignment="Center" HorizontalAlignment="Left" TextTrimming="CharacterEllipsis"/>
+
+                <Path Grid.Column="1" Margin="5,0,0,0" VerticalAlignment="Center" Data="{gm:FontawesomeResource ResourceKey=TriangleExclamation}" Fill="Yellow" Stroke="Black" StrokeThickness="1" Visibility="{Binding HasExpressionError, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+            </Grid>
+        </Grid>
+
+        <Grid Grid.Row="1" Grid.Column="1" ClipToBounds="True" Margin="{x:Static r:UIParameters.TimelineRangeThumbMargin}" Style="{StaticResource ExpressionGridStyle}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="{x:Static r:UIParameters.LayerUIHeightGridLength}" MinHeight="{x:Static r:UIParameters.LayerUIHeight}"/>
                 <RowDefinition Height="3"/>
             </Grid.RowDefinitions>
 
-            <TextBlock Grid.Row="0" Text="{Binding ExpressionCode}" MinHeight="{x:Static r:UIParameters.LayerUIHeight}" TextWrapping="NoWrap" ClipToBounds="True"/>
+            <TextBlock Grid.Row="0" Text="{Binding ExpressionCode}" MinHeight="{x:Static r:UIParameters.LayerUIHeight}" Background="Transparent" TextWrapping="NoWrap" ClipToBounds="True" MouseDown="ExpressionCodeTextBlock_MouseDown"/>
+            <pr:CodeEditor x:Name="ExpressionCodeEditor"
+                           Grid.Row="0"
+                           Document="{Binding ExpressionCodeDocument}"
+                           MinHeight="{x:Static r:UIParameters.LayerUIHeight}"
+                           SyntaxHighlighting="JavaScript"
+                           ShowLineNumbers="True"
+                           LineNumbersForeground="{ugm:AppearanceResource ResourceKey=TextBrush}"
+                           FontFamily="{StaticResource Sono}"
+                           HorizontalScrollBarVisibility="Auto"
+                           VerticalScrollBarVisibility="Auto"
+                           Visibility="{Binding IsEditingExpression, Converter={StaticResource BooleanToVisibilityConverter}}"
+                           LostFocus="ExpressionCodeEditor_LostFocus"
+                           KeyDown="ExpressionCodeEditor_KeyDown"
+                           Mouse.PreviewMouseDownOutsideCapturedElement="ExpressionCodeEditor_PreviewMouseDownOutsideCapturedElement"/>
 
             <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Focusable="False" IsTabStop="False" ResizeDirection="Rows" ResizeBehavior="PreviousAndCurrent"/>
         </Grid>

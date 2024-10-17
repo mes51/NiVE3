@@ -117,5 +117,63 @@ namespace NiVE3.View.Part
                 BeforeNameSpaceWidth = KeyFrameSwitchWidth + (HasExpression ? UIParameters.ArrowWidth : 0.0);
             }
         }
+
+        private void ExpressionCodeTextBlock_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            var viewModel = ViewModel;
+            if (viewModel == null || !viewModel.BeginEditExpressionCommand.CanExecute(null))
+            {
+                return;
+            }
+
+            viewModel.BeginEditExpressionCommand.Execute(null);
+            Mouse.Capture(ExpressionCodeEditor, CaptureMode.SubTree);
+        }
+
+        private void ExpressionCodeEditor_LostFocus(object sender, RoutedEventArgs e)
+        {
+            var viewModel = ViewModel;
+            if (viewModel == null || !viewModel.EndEditExpressionCommand.CanExecute(null))
+            {
+                return;
+            }
+
+            viewModel.EndEditExpressionCommand.Execute(null);
+        }
+
+        private void ExpressionCodeEditor_KeyDown(object sender, KeyEventArgs e)
+        {
+            var viewModel = ViewModel;
+            if (e.Key != Key.Escape || viewModel == null || viewModel.AbortEditExpressionCommand.CanExecute(null))
+            {
+                return;
+            }
+
+            e.Handled = true;
+            viewModel.AbortEditExpressionCommand.Execute(null);
+        }
+
+        private void ExpressionCodeEditor_PreviewMouseDownOutsideCapturedElement(object sender, MouseButtonEventArgs e)
+        {
+            var viewModel = ViewModel;
+            if (viewModel == null || !viewModel.EndEditExpressionCommand.CanExecute(null))
+            {
+                return;
+            }
+
+            var pos = e.GetPosition(ExpressionCodeEditor);
+            if (pos.X < 0.0 || pos.X >= ExpressionCodeEditor.ActualWidth || pos.Y < 0.0 || pos.Y >= ExpressionCodeEditor.ActualHeight)
+            {
+                viewModel.EndEditExpressionCommand.Execute(null);
+            }
+        }
+
+        private void ExpressionCodeEditor_LostMouseCapture(object sender, MouseEventArgs e)
+        {
+            if (ViewModel?.IsEditingExpression ?? false)
+            {
+                Mouse.Capture(ExpressionCodeEditor, CaptureMode.SubTree);
+            }
+        }
     }
 }

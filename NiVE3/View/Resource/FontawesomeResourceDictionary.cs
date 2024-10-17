@@ -101,6 +101,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, Icon("", Size = 12)]
         public static readonly string TrackCan = nameof(TrackCan);
 
+        [ShowInMarkup, Icon("", Size = 12)]
+        public static readonly string TriangleExclamation = nameof(TriangleExclamation);
+
         public FontawesomeResourceDictionary()
         {
             var keys = typeof(FontawesomeResourceDictionary).GetFields(BindingFlags.Static | BindingFlags.Public)

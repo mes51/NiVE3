@@ -203,8 +203,6 @@ namespace NiVE3.View.Part
 
         static KeyFrameCollectionView()
         {
-            ClipToBoundsProperty.OverrideMetadata(typeof(KeyFrameCollectionView), new FrameworkPropertyMetadata(true, FrameworkPropertyMetadataOptions.Inherits));
-
             var keyFrameLinearLeftFigure = new PathFigure
             {
                 StartPoint = new Point(0.5, 0.0)
@@ -274,6 +272,10 @@ namespace NiVE3.View.Part
                 }
             }
             KeyFrameIcons = new ReadOnlyDictionary<(InterpolationType, InterpolationType), Geometry>(keyFrameGeometries);
+
+            ClipToBoundsProperty.OverrideMetadata(typeof(KeyFrameCollectionView), new FrameworkPropertyMetadata(true, FrameworkPropertyMetadataOptions.Inherits));
+            FocusableProperty.OverrideMetadata(typeof(KeyFrameCollectionView), new FrameworkPropertyMetadata(true, FrameworkPropertyMetadataOptions.Inherits));
+            FocusVisualStyleProperty.OverrideMetadata(typeof(KeyFrameCollectionView), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.Inherits));
         }
 
         public KeyFrameCollectionView()

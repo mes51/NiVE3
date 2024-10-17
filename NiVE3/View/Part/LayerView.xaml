@@ -94,7 +94,7 @@
             <Setter Property="Height" Value="12"/>
             <Setter Property="Background" Value="{Binding TagColor, Converter={StaticResource ColorToBrushConverter}}"/>
             <Setter Property="IsTabStop" Value="False"/>
-            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Focusable" Value="True"/>
             <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
             <Setter Property="Command" Value="{Binding ChangeTagColorCommand}"/>
 

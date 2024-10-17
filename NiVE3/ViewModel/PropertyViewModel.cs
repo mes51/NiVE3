@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using ICSharpCode.AvalonEdit.Document;
 using NiVE3.Data.Clipboard;
 using NiVE3.Data.Json.Project;
 using NiVE3.Model;
@@ -169,6 +170,12 @@ namespace NiVE3.ViewModel
 
         public ICommand AbortEditCommand { get; }
 
+        public ICommand BeginEditExpressionCommand { get; }
+
+        public ICommand EndEditExpressionCommand { get; }
+
+        public ICommand AbortEditExpressionCommand { get; }
+
         public ICommand SwitchUseKeyFrameCommand { get; }
 
         public ICommand MoveTimeKeyFramesCommand { get; }
@@ -222,6 +229,20 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref isEditing, value); }
         }
 
+        private bool isEditingExpression;
+        public bool IsEditingExpression
+        {
+            get { return isEditingExpression; }
+            set { SetProperty(ref isEditingExpression, value); }
+        }
+
+        private TextDocument expressionCodeDocument = new TextDocument();
+        public TextDocument ExpressionCodeDocument
+        {
+            get { return expressionCodeDocument; }
+            set { SetProperty(ref expressionCodeDocument, value); }
+        }
+
         PropertyModel PropertyModel { get; }
 
         object? PrevValue { get; set; }
@@ -235,27 +256,49 @@ namespace NiVE3.ViewModel
             ViewState = propertyModel.CreateState(this);
             IsEnableExpression = propertyModel.IsEnableExpression;
             SelectedKeyFrameIds = [];
+            ExpressionCodeDocument.Text = propertyModel.ExpressionCode;
 
             BeginEditCommand = new DelegateCommand(() =>
             {
-                PrevValue = CurrentTimeValue;
+                PrevValue = CurrentTimeRawValue;
                 IsEditing = true;
                 UseEditingValue = true;
             }, () => !IsEditing).ObservesProperty(() => IsEditing);
 
             EndEditCommand = new DelegateCommand(() =>
             {
-                PropertyModel.CommitProperty(CurrentTimeValue, PrevValue);
+                PropertyModel.CommitProperty(CurrentTimeRawValue, PrevValue);
                 IsEditing = false;
                 UseEditingValue = false;
-            }, () => IsEditing).ObservesProperty(() => IsEditing);
+            }, () => IsEditing && !IsEditingExpression).ObservesProperty(() => IsEditing).ObservesProperty(() => IsEditingExpression);
 
             AbortEditCommand = new DelegateCommand(() =>
             {
-                CurrentTimeValue = PrevValue;
+                CurrentTimeRawValue = PrevValue;
                 IsEditing = false;
                 UseEditingValue = false;
-            }, () => IsEditing).ObservesProperty(() => IsEditing);
+            }, () => IsEditing && !IsEditingExpression).ObservesProperty(() => IsEditing).ObservesProperty(() => IsEditingExpression);
+
+            BeginEditExpressionCommand = new DelegateCommand(() =>
+            {
+                IsEditing = true;
+                IsEditingExpression = true;
+            }, () => !IsEditing).ObservesProperty(() => IsEditing);
+
+            EndEditExpressionCommand = new DelegateCommand(() =>
+            {
+                PropertyModel.ChangeExpressionCode(ExpressionCodeDocument.Text);
+                IsEditing = false;
+                IsEditingExpression = false;
+            }, () => IsEditing && IsEditingExpression).ObservesProperty(() => IsEditing).ObservesProperty(() => IsEditingExpression);
+
+            AbortEditExpressionCommand = new DelegateCommand(() =>
+            {
+                ExpressionCode = PropertyModel.ExpressionCode;
+                ExpressionCodeDocument.Text = PropertyModel.ExpressionCode;
+                IsEditing = false;
+                IsEditingExpression = false;
+            }, () => IsEditing && IsEditingExpression).ObservesProperty(() => IsEditing).ObservesProperty(() => IsEditingExpression);
 
             SwitchUseKeyFrameCommand = new DelegateCommand(() =>
             {
@@ -278,7 +321,7 @@ namespace NiVE3.ViewModel
                     }
                     else
                     {
-                        PropertyModel.CreateKeyFrame(CurrentTimeValue);
+                        PropertyModel.CreateKeyFrame(CurrentTimeRawValue);
                     }
                 }
             });
@@ -303,7 +346,7 @@ namespace NiVE3.ViewModel
                 }
                 else
                 {
-                    PropertyModel.CreateKeyFrame(CurrentTimeValue);
+                    PropertyModel.CreateKeyFrame(CurrentTimeRawValue);
                 }
             }, () => KeyFrames.Count > 0).ObservesProperty(() => KeyFrames.Count);
 
@@ -331,7 +374,7 @@ namespace NiVE3.ViewModel
                 var index = KeyFrames.IndexOfLast(k => Math.Abs(k.Time - time) < TimeCalc.TimeEpsilon || k.Time <= time);
                 if (index > -1 && Math.Abs(KeyFrames[index].Time - time) >= TimeCalc.TimeEpsilon)
                 {
-                    PropertyModel.CreateKeyFrame(CurrentTimeValue);
+                    PropertyModel.CreateKeyFrame(CurrentTimeRawValue);
                 }
             });
 
@@ -479,9 +522,14 @@ namespace NiVE3.ViewModel
 
         private void PropertyModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == PropertyModel.RawValueUpdateKey && !IsEditing)
+            switch (e.PropertyName)
             {
-                CurrentTimeRawValue = CalculationRawValue();
+                case PropertyModel.RawValueUpdateKey when !IsEditing:
+                    CurrentTimeRawValue = CalculationRawValue();
+                    break;
+                case nameof(PropertyModel.ExpressionCode) when !IsEditing:
+                    ExpressionCodeDocument.Text = PropertyModel.ExpressionCode;
+                    break;
             }
         }
 

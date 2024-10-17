@@ -16,6 +16,7 @@
     <None Remove="Resources\Hand.png" />
     <None Remove="Resources\Rotate.png" />
     <None Remove="Resources\Scale.png" />
+    <None Remove="Resources\Sono-Regular.otf" />
   </ItemGroup>
 
   <ItemGroup>
@@ -25,6 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="AvalonEdit" Version="6.3.0.90" />
     <PackageReference Include="CommunityToolkit.Diagnostics" Version="8.3.2" />
     <PackageReference Include="ComputeSharp" Version="3.0.1" />
     <PackageReference Include="Dirkster.AvalonDock" Version="4.72.1" />
@@ -66,6 +68,9 @@
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Resources\Scale.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Sono-Regular.otf">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>

@@ -527,6 +527,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("プロパティを複製(_E)")]
         public static readonly string PropertyCollection_ContextMenu_DuplicatePropertyGroup = nameof(PropertyCollection_ContextMenu_DuplicatePropertyGroup);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("エクスプレッション")]
+        public static readonly string PropertyView_Expression = nameof(PropertyView_Expression);
+
         [ShowInMarkup, LanguageKey, DefaultValue("レベルメーター")]
         public static readonly string AudioInformationView_Title = nameof(AudioInformationView_Title);
 

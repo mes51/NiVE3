@@ -4,6 +4,7 @@
                     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
                     xmlns:ad="https://github.com/Dirkster99/AvalonDock"
                     xmlns:dd="urn:gong-wpf-dragdrop"
+                    xmlns:ae="http://icsharpcode.net/sharpdevelop/avalonedit"
                     xmlns:vm="clr-namespace:NiVE3.ViewModel"
                     xmlns:a="clr-namespace:NiVE3.Wpf.Attach"
                     xmlns:b="clr-namespace:NiVE3.Wpf.Behavior"
@@ -154,7 +155,8 @@
                             </Grid>
                             <ContentPresenter x:Name="ExpandSite"
                                               DockPanel.Dock="Bottom"
-                                              Focusable="False"
+                                              Focusable="True"
+                                              FocusVisualStyle="{x:Null}"
                                               Content="{TemplateBinding Content}"
                                               HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                                               Margin="{TemplateBinding Padding}"
@@ -285,5 +287,9 @@
                 </ur:DataTemplateCollection>
             </Setter.Value>
         </Setter>
+    </Style>
+
+    <Style TargetType="{x:Type ae:LineNumberMargin}">
+        <Setter Property="Margin" Value="10,0,0,0"/>
     </Style>
 </ResourceDictionary>

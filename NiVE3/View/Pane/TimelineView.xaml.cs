@@ -25,8 +25,6 @@ namespace NiVE3.View.Pane
         public TimelineView()
         {
             InitializeComponent();
-
-            FocusManager.SetIsFocusScope(LayerCollectionView, true);
         }
 
         TimelineViewModel? ViewModel => DataContext as TimelineViewModel;

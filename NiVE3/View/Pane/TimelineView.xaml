@@ -116,7 +116,7 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type ItemsControl}">
                         <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="true">
-                            <ScrollViewer HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Visible" Focusable="False">
+                            <ScrollViewer HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Visible" Focusable="True" FocusVisualStyle="{x:Null}" IsTabStop="False">
                                 <ItemsPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
                             </ScrollViewer>
                         </Border>
@@ -284,6 +284,7 @@
                                 IsEnableShy="{Binding IsEnableShy}"
                                 Style="{StaticResource LayerCollectionStyle}"
                                 MouseDown="LayerCollectionView_MouseDown"
+                                FocusManager.IsFocusScope="True"
                                 dd:DragDrop.DropHandler="{Binding}"
                                 dd:DragDrop.DragHandler="{Binding RelativeSource={RelativeSource Self}}"
                                 dd:DragDrop.IsDragSource="True"

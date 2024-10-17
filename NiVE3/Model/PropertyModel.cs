@@ -207,16 +207,21 @@ namespace NiVE3.Model
             ValueCommited?.Invoke(this, EventArgs.Empty);
         }
 
-        public void ChangeExpressionCode(string expressionCode)
+        public void ChangeExpressionCode(string newExpressionCode)
         {
+            if (ExpressionCode == newExpressionCode)
+            {
+                return;
+            }
+
             var oldCode = ExpressionCode;
             var oldUseExpression = UseExpression;
             var oldHasExpressionError = HasExpressionError;
 
-            ExpressionCode = expressionCode;
-            UseExpression = !string.IsNullOrEmpty(expressionCode);
+            ExpressionCode = newExpressionCode;
+            UseExpression = !string.IsNullOrEmpty(newExpressionCode);
 
-            HistoryModel.Add(new ChangeExpressionCodeHistoryCommand(this, oldCode, oldUseExpression, oldHasExpressionError, expressionCode, UseExpression, HasExpressionError));
+            HistoryModel.Add(new ChangeExpressionCodeHistoryCommand(this, oldCode, oldUseExpression, oldHasExpressionError, newExpressionCode, UseExpression, HasExpressionError));
         }
 
         public void ChangeUseExpression(bool useExpression)

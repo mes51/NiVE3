@@ -21,6 +21,7 @@
                 <r:CursorIconResourceDictionary x:Name="CursorIcon"/>
             </ResourceDictionary.MergedDictionaries>
             <FontFamily x:Key="FontAwesome">/NiVE3;component/Resources/Font Awesome 6 Free-Solid-900.otf#Font Awesome 6 Free Solid</FontFamily>
+            <FontFamily x:Key="Sono">/NiVE3;component/Resources/Sono-Regular.otf#Sono Regular</FontFamily>
         </ResourceDictionary>
     </pr:PrismApplication.Resources>
 </pr:PrismApplication>
