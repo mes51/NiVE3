@@ -1,0 +1,152 @@
+﻿<?xml version="1.0"?>
+<SyntaxDefinition name="JavsScript_Expression" extensions=".js" xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
+    <Color name="Digits" foreground="DarkBlue" exampleText="3.14" />
+    <Color name="Comment" foreground="Green" exampleText="// comment" />
+    <Color name="String" foreground="Sienna" exampleText="var text = &quot;Hello, World!&quot;;" />
+    <Color name="Character" foreground="Sienna" exampleText="var char = 'a';" />
+    <Color name="Regex" foreground="Sienna" exampleText="/abc/m" />
+    <Color name="JavaScriptKeyWords" foreground="Blue" exampleText="return myVariable;" />
+    <Color name="JavaScriptIntrinsics" foreground="Blue" exampleText="Math.random()" />
+    <Color name="JavaScriptLiterals" foreground="Blue" exampleText="return false;" />
+    <Color name="JavaScriptGlobalFunctions" foreground="Blue" exampleText="escape(myString);" />
+    <RuleSet ignoreCase="false">
+        <Keywords color="JavaScriptKeyWords">
+			<Word>break</Word>
+			<Word>case</Word>
+			<Word>catch</Word>
+			<Word>class</Word>
+			<Word>const</Word>
+			<Word>continue</Word>
+			<Word>default</Word>
+			<Word>delete</Word>
+			<Word>do</Word>
+			<Word>else</Word>
+			<Word>extends</Word>
+			<Word>finally</Word>
+			<Word>for</Word>
+			<Word>function</Word>
+			<Word>if</Word>
+			<Word>in</Word>
+			<Word>instanceof</Word>
+			<Word>new</Word>
+			<Word>return</Word>
+			<Word>super</Word>
+			<Word>switch</Word>
+			<Word>this</Word>
+			<Word>throw</Word>
+			<Word>try</Word>
+			<Word>typeof</Word>
+			<Word>var</Word>
+			<Word>void</Word>
+			<Word>while</Word>
+			<Word>with</Word>
+			<Word>let</Word>
+			<Word>static</Word>
+			<Word>yield</Word>
+			<Word>await</Word>
+        </Keywords>
+        <Keywords color="JavaScriptIntrinsics">
+			<Word>Object</Word>
+			<Word>Function</Word>
+			<Word>Boolean</Word>
+			<Word>Symbol</Word>
+			<Word>Error</Word>
+			<Word>AggregateError</Word>
+			<Word>EvalError</Word>
+			<Word>RangeError</Word>
+			<Word>ReferenceError</Word>
+			<Word>SyntaxError</Word>
+			<Word>TypeError</Word>
+			<Word>URIError</Word>
+			<Word>Number</Word>
+			<Word>BigInt</Word>
+			<Word>Math</Word>
+			<Word>Date</Word>
+			<Word>String</Word>
+			<Word>RegExp</Word>
+			<Word>Array</Word>
+			<Word>Int8Array</Word>
+			<Word>Uint8Array</Word>
+			<Word>Uint8ClampedArray</Word>
+			<Word>Int16Array</Word>
+			<Word>Uint16Array</Word>
+			<Word>Int32Array</Word>
+			<Word>Uint32Array</Word>
+			<Word>BigInt64Array</Word>
+			<Word>BigUint64Array</Word>
+			<Word>Float16Array</Word>
+			<Word>Float32Array</Word>
+			<Word>Float64Array</Word>
+			<Word>Map</Word>
+			<Word>Set</Word>
+			<Word>WeakMap</Word>
+			<Word>WeakSet</Word>
+			<Word>ArrayBuffer</Word>
+			<Word>SharedArrayBuffer</Word>
+			<Word>DataView</Word>
+			<Word>Atomics</Word>
+			<Word>JSON</Word>
+			<Word>WeakRef</Word>
+			<Word>FinalizationRegistry</Word>
+			<Word>Promise</Word>
+			<Word>Reflect</Word>
+			<Word>Proxy</Word>
+			<Word>Intl</Word>
+        </Keywords>
+        <Keywords color="JavaScriptLiterals">
+			<Word>false</Word>
+			<Word>true</Word>
+			<Word>null</Word>
+			<Word>undefined</Word>
+			<Word>globalThis</Word>
+			<Word>NaN</Word>
+			<Word>Infinity</Word>
+        </Keywords>
+        <Keywords color="JavaScriptGlobalFunctions">
+			<Word>eval</Word>
+			<Word>isFinite</Word>
+			<Word>isNaN</Word>
+			<Word>parseFloat</Word>
+			<Word>parseInt</Word>
+			<Word>decodeURI</Word>
+			<Word>decodeURIComponent</Word>
+			<Word>encodeURI</Word>
+			<Word>encodeURIComponent</Word>
+			<Word>escape</Word>
+			<Word>unescape</Word>
+        </Keywords>
+        <Span color="Comment">
+            <Begin>//</Begin>
+        </Span>
+        <Span color="Comment" multiline="true">
+            <Begin>/\*</Begin>
+            <End>\*/</End>
+        </Span>
+        <Span color="Regex">
+            <Begin>(?&lt;!([})\]\w]+\s*))/</Begin>
+            <End>/</End>
+        </Span>
+        <Span color="String" multiline="true">
+            <Begin>"</Begin>
+            <End>"</End>
+            <RuleSet>
+                <Span begin="\\" end="." />
+            </RuleSet>
+        </Span>
+        <Span color="String" multiline="true">
+            <Begin>`</Begin>
+            <End>`</End>
+            <RuleSet>
+				<Span begin="\\" end="." />
+			</RuleSet>
+		</Span>
+		<Span color="Character">
+			<Begin>'</Begin>
+			<End>'</End>
+			<RuleSet>
+				<Span begin="\\" end="." />
+            </RuleSet>
+        </Span>
+        <Rule color="Digits">\b0[xX][0-9a-fA-F]+|(\b\d+(\.[0-9]+)?|\.[0-9]+)([eE][+-]?[0-9]+)?</Rule>
+    </RuleSet>
+</SyntaxDefinition>

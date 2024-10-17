@@ -12,11 +12,18 @@
   <ItemGroup>
     <None Remove="Resources\CameraOrbit.png" />
     <None Remove="Resources\Cursor.png" />
+    <None Remove="Resources\ExpressionSyntax.xshd" />
     <None Remove="Resources\Font Awesome 6 Free-Solid-900.otf" />
     <None Remove="Resources\Hand.png" />
     <None Remove="Resources\Rotate.png" />
     <None Remove="Resources\Scale.png" />
     <None Remove="Resources\Sono-Regular.otf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\ExpressionSyntax.xshd">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
 
   <ItemGroup>

@@ -165,7 +165,7 @@
                            Grid.Row="0"
                            Document="{Binding ExpressionCodeDocument}"
                            MinHeight="{x:Static r:UIParameters.LayerUIHeight}"
-                           SyntaxHighlighting="JavaScript"
+                           SyntaxHighlighting="ExpressionJavaScript"
                            ShowLineNumbers="True"
                            LineNumbersForeground="{ugm:AppearanceResource ResourceKey=TextBrush}"
                            FontFamily="{StaticResource Sono}"

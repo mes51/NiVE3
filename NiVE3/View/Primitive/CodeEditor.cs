@@ -7,10 +7,12 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
+using System.Xml;
 using ICSharpCode.AvalonEdit;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Folding;
-using ICSharpCode.AvalonEdit.Rendering;
+using ICSharpCode.AvalonEdit.Highlighting;
+using ICSharpCode.AvalonEdit.Highlighting.Xshd;
 using NiVE3.View.Primitive.Editor;
 
 namespace NiVE3.View.Primitive
@@ -28,6 +30,12 @@ namespace NiVE3.View.Primitive
         static CodeEditor()
         {
             DocumentProperty.OverrideMetadata(typeof(CodeEditor), new FrameworkPropertyMetadata(DocumentProperty.DefaultMetadata.DefaultValue, FrameworkPropertyMetadataOptions.Inherits, DocumentPropertyChanged));
+
+            var expressionSyntaxDefinitionStream = Application.GetResourceStream(new Uri("/Resources/ExpressionSyntax.xshd", UriKind.Relative));
+            using var reader = new XmlTextReader(expressionSyntaxDefinitionStream.Stream);
+
+            var manager = HighlightingManager.Instance;
+            manager.RegisterHighlighting("ExpressionJavaScript", null, HighlightingLoader.Load(reader, manager));
         }
 
         public CodeEditor()
