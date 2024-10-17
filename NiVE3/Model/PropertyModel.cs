@@ -220,6 +220,7 @@ namespace NiVE3.Model
 
             ExpressionCode = newExpressionCode;
             UseExpression = !string.IsNullOrEmpty(newExpressionCode);
+            ValueCommited?.Invoke(this, EventArgs.Empty);
 
             HistoryModel.Add(new ChangeExpressionCodeHistoryCommand(this, oldCode, oldUseExpression, oldHasExpressionError, newExpressionCode, UseExpression, HasExpressionError));
         }
