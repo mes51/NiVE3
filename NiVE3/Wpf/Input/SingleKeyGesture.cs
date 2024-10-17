@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
+using ICSharpCode.AvalonEdit;
 
 namespace NiVE3.Wpf.Input
 {
@@ -29,7 +30,7 @@ namespace NiVE3.Wpf.Input
         {
             if (inputEventArgs is KeyEventArgs e)
             {
-                if (e.OriginalSource is not TextBoxBase)
+                if (e.OriginalSource is not TextBoxBase && !(e.OriginalSource.GetType().Namespace?.StartsWith(typeof(TextEditor).Namespace ?? "") ?? false))
                 {
                     return (int)Key == (int)e.Key &&
                         !Keyboard.IsKeyDown(Key.LeftCtrl) &&
