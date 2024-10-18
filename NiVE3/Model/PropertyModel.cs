@@ -673,5 +673,10 @@ namespace NiVE3.Model
                     break;
             }
         }
+
+        ~PropertyModel()
+        {
+            CompiledScript?.Dispose();
+        }
     }
 }

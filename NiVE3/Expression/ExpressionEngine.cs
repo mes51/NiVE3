@@ -26,10 +26,7 @@ namespace NiVE3.Expression
 
         public static ExpressionContext CreateContext(double globalTime, CompositionModel compositionModel, LayerModel? layerModel, EffectModel? effectModel, PropertyModel propertyModel)
         {
-            var realm = Engine.Intrinsics.ShadowRealm.Construct();
-            realm.SetValue("time", globalTime);
-
-            return new ExpressionContext(Engine, realm);
+            return new ExpressionContext(globalTime);
         }
 
         public static ExpressionScript Compile(string code)

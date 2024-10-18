@@ -14,26 +14,25 @@ namespace NiVE3.Expression
     {
         Engine Engine { get; }
 
-        ShadowRealm Realm { get; }
-
         bool Disposed { get; set; }
 
-        public ExpressionContext(Engine engine, ShadowRealm realm)
+        public ExpressionContext(double time)
         {
-            Engine = engine;
-            Realm = realm;
+            Engine = new Engine();
+            Engine.SetValue("time", time);
         }
 
         public object? Evaluate(ExpressionScript script, object? value)
         {
-            Realm.SetValue("thisProperty", value ?? JsValue.Null);
-            return ToExpressionValue(Realm.Evaluate(script.Script).ToObject());
+            Engine.SetValue("thisProperty", value ?? JsValue.Null);
+            return ToExpressionValue(Engine.Evaluate(script.Script).ToObject());
         }
 
         public void Dispose()
         {
             if (!Disposed)
             {
+                Engine.Dispose();
                 Disposed = true;
             }
         }
