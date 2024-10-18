@@ -139,6 +139,7 @@ namespace NiVE3.View.Part
             }
 
             viewModel.EndEditExpressionCommand.Execute(null);
+            Mouse.Capture(null);
         }
 
         private void ExpressionCodeEditor_KeyDown(object sender, KeyEventArgs e)
@@ -151,6 +152,7 @@ namespace NiVE3.View.Part
 
             e.Handled = true;
             viewModel.AbortEditExpressionCommand.Execute(null);
+            Mouse.Capture(null);
         }
 
         private void ExpressionCodeEditor_LostMouseCapture(object sender, MouseEventArgs e)
@@ -173,6 +175,7 @@ namespace NiVE3.View.Part
             if (pos.X < 0.0 || pos.X >= ExpressionArea.ActualWidth || pos.Y < 0.0 || pos.Y >= ExpressionArea.ActualHeight)
             {
                 viewModel.EndEditExpressionCommand.Execute(null);
+                Mouse.Capture(null);
             }
         }
     }
