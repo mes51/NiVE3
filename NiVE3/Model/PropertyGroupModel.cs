@@ -111,6 +111,10 @@ namespace NiVE3.Model
             {
                 c.ValueUpdated += Child_ValueUpdated;
                 c.ValueCommited += Child_ValueCommited;
+                if (c is PropertyModel p)
+                {
+                    p.ExpressionUpdated += Child_ExpressionUpdated;
+                }
             }
         }
 
@@ -489,6 +493,11 @@ namespace NiVE3.Model
         }
 
         private void Child_ValueCommited(object? sender, EventArgs e)
+        {
+            ValueCommited?.Invoke(sender, e);
+        }
+
+        private void Child_ExpressionUpdated(object? sender, EventArgs e)
         {
             ValueCommited?.Invoke(sender, e);
         }

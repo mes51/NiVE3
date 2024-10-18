@@ -463,6 +463,7 @@ namespace NiVE3.ViewModel
             HasKeyFrame = KeyFrames.Count > 0;
 
             PropertyModel.ValueCommited += PropertyModel_ValueCommited;
+            PropertyModel.ExpressionUpdated += PropertyModel_ExpressionUpdated;
             PropertyModel.PropertyChanged += PropertyModel_PropertyChanged;
             PropertyChanged += PropertyViewModel_PropertyChanged;
         }
@@ -517,6 +518,12 @@ namespace NiVE3.ViewModel
 
         private void PropertyModel_ValueCommited(object? sender, EventArgs e)
         {
+            PropertyValueUpdatePublisher.Publish(this, new PropertyValueCommitedEventArgs(this));
+        }
+
+        private void PropertyModel_ExpressionUpdated(object? sender, EventArgs e)
+        {
+            CurrentTimeValue = CalculationValue();
             PropertyValueUpdatePublisher.Publish(this, new PropertyValueCommitedEventArgs(this));
         }
 
