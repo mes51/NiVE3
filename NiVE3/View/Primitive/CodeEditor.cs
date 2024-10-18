@@ -30,12 +30,6 @@ namespace NiVE3.View.Primitive
         static CodeEditor()
         {
             DocumentProperty.OverrideMetadata(typeof(CodeEditor), new FrameworkPropertyMetadata(DocumentProperty.DefaultMetadata.DefaultValue, FrameworkPropertyMetadataOptions.Inherits, DocumentPropertyChanged));
-
-            var expressionSyntaxDefinitionStream = Application.GetResourceStream(new Uri("/Resources/ExpressionSyntax.xshd", UriKind.Relative));
-            using var reader = new XmlTextReader(expressionSyntaxDefinitionStream.Stream);
-
-            var manager = HighlightingManager.Instance;
-            manager.RegisterHighlighting("ExpressionJavaScript", null, HighlightingLoader.Load(reader, manager));
         }
 
         public CodeEditor()
@@ -47,6 +41,8 @@ namespace NiVE3.View.Primitive
             {
                 return;
             }
+
+            SyntaxLoader.Load();
 
             UpdateTimer.Tick += UpdateTimer_Tick;
             TextChanged += CodeEditor_TextChanged;
@@ -105,6 +101,37 @@ namespace NiVE3.View.Primitive
             }
 
             editor.InstallFoldingManager();
+        }
+    }
+
+    file static class SyntaxLoader
+    {
+        static bool Loaded { get; set; }
+
+        static readonly object SyncObject = new object();
+
+        public static void Load()
+        {
+            if (Loaded)
+            {
+                return;
+            }
+
+            lock (SyncObject)
+            {
+                if (Loaded)
+                {
+                    return;
+                }
+
+                var expressionSyntaxDefinitionStream = Application.GetResourceStream(new Uri("/Resources/ExpressionSyntax.xshd", UriKind.Relative));
+                using var reader = new XmlTextReader(expressionSyntaxDefinitionStream.Stream);
+
+                var manager = HighlightingManager.Instance;
+                manager.RegisterHighlighting("ExpressionJavaScript", null, HighlightingLoader.Load(reader, manager));
+
+                Loaded = true;
+            }
         }
     }
 }
