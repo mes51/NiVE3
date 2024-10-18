@@ -1490,12 +1490,12 @@ namespace NiVE3.Model
         public bool IsMotionBlurTarget()
         {
             return IsEnableMotionBlur &&
-                ((TransformProperties?.HasKeyFrames() ?? false) ||
-                (LayerOptionProperties?.HasKeyFrames() ?? false) ||
-                (TextProperties?.HasKeyFrames() ?? false) ||
-                (ShapeProperties?.HasKeyFrames() ?? false) ||
-                (SourceOptionProperties?.HasKeyFrames() ?? false) ||
-                Effects.Any(e => e.IsRenderEveryFrame || e.PropertyHasKeyFrame()));
+                ((TransformProperties?.IsChangeableByTime() ?? false) ||
+                (LayerOptionProperties?.IsChangeableByTime() ?? false) ||
+                (TextProperties?.IsChangeableByTime() ?? false) ||
+                (ShapeProperties?.IsChangeableByTime() ?? false) ||
+                (SourceOptionProperties?.IsChangeableByTime() ?? false) ||
+                Effects.Any(e => e.IsRenderEveryFrame || e.PropertyIsChangeableByTime()));
         }
 
         void DeleteEffectInternal(Guid[] ids, bool isCut)

@@ -369,6 +369,11 @@ namespace NiVE3.Model
             return KeyFrames.Count > 0;
         }
 
+        public bool IsChangeableByTime()
+        {
+            return IsEnableExpression;
+        }
+
         public PropertyData SaveData()
         {
             var keyFramesData = KeyFrames.Select(k =>

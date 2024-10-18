@@ -192,6 +192,11 @@ namespace NiVE3.Model
             return Children.Any(p => p.HasKeyFrames());
         }
 
+        public bool IsChangeableByTime()
+        {
+            return Children.Any(p => p.IsChangeableByTime()) || HasKeyFrames();
+        }
+
         public void ChangeName(string name)
         {
             if (name != Name)

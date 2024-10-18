@@ -41,6 +41,8 @@ namespace NiVE3.Model
 
         bool HasKeyFrames();
 
+        bool IsChangeableByTime();
+
         PropertyData SaveData();
 
         void LoadData(PropertyData data);
@@ -53,9 +55,9 @@ namespace NiVE3.Model
     }
 
      interface IOverwriteablePropertyModel : IPropertyModel
-    {
+     {
         void OverwriteProperty(PropertyData data);
-    }
+     }
 
     class CompositionViewModelProxy : WeakPropertyChangedBindingBase, ICompositionViewModel
     {

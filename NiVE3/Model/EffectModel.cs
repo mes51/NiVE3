@@ -198,9 +198,9 @@ namespace NiVE3.Model
             EffectUpdated?.Invoke(this, EventArgs.Empty);
         }
 
-        public bool PropertyHasKeyFrame()
+        public bool PropertyIsChangeableByTime()
         {
-            return Properties.HasKeyFrames();
+            return Properties.IsChangeableByTime();
         }
 
         private void EffectModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)

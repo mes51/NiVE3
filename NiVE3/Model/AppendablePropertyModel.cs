@@ -138,6 +138,11 @@ namespace NiVE3.Model
             return Children.Any(p => p.HasKeyFrames());
         }
 
+        public bool IsChangeableByTime()
+        {
+            return Children.Any(p => p.IsChangeableByTime()) || HasKeyFrames();
+        }
+
         public void CreateKeyFrames(Guid[] propertyInstanceIds)
         {
             var children = Children.OfType<PropertyGroupModel>().Where(c => propertyInstanceIds.Contains(c.InstanceId));
