@@ -82,12 +82,12 @@
 
         <Style TargetType="{x:Type ae:TextArea}">
             <EventSetter Event="LostMouseCapture" Handler="ExpressionCodeEditor_LostMouseCapture"/>
-            <EventSetter Event="Mouse.PreviewMouseDownOutsideCapturedElement" Handler="ExpressionCodeEditor_PreviewMouseDownOutsideCapturedElement"/>
+            <EventSetter Event="Mouse.PreviewMouseDownOutsideCapturedElement" Handler="ExpressionArea_PreviewMouseDownOutsideCapturedElement"/>
         </Style>
 
         <Style TargetType="{x:Type ae:LineNumberMargin}" BasedOn="{StaticResource {x:Type ae:LineNumberMargin}}">
             <EventSetter Event="LostMouseCapture" Handler="ExpressionCodeEditor_LostMouseCapture"/>
-            <EventSetter Event="Mouse.PreviewMouseDownOutsideCapturedElement" Handler="ExpressionCodeEditor_PreviewMouseDownOutsideCapturedElement"/>
+            <EventSetter Event="Mouse.PreviewMouseDownOutsideCapturedElement" Handler="ExpressionArea_PreviewMouseDownOutsideCapturedElement"/>
         </Style>
     </local:PropertyViewBase.Resources>
     <Grid>
@@ -154,15 +154,20 @@
             </Grid>
         </Grid>
 
-        <Grid Grid.Row="1" Grid.Column="1" ClipToBounds="True" Margin="{x:Static r:UIParameters.TimelineRangeThumbMargin}" Style="{StaticResource ExpressionGridStyle}">
+        <Grid x:Name="ExpressionArea"
+              Grid.Row="1"
+              Grid.Column="1"
+              ClipToBounds="True"
+              Margin="{x:Static r:UIParameters.TimelineRangeThumbMargin}"
+              Style="{StaticResource ExpressionGridStyle}"
+              Mouse.PreviewMouseDownOutsideCapturedElement="ExpressionArea_PreviewMouseDownOutsideCapturedElement">
             <Grid.RowDefinitions>
                 <RowDefinition Height="{x:Static r:UIParameters.LayerUIHeightGridLength}" MinHeight="{x:Static r:UIParameters.LayerUIHeight}"/>
                 <RowDefinition Height="3"/>
             </Grid.RowDefinitions>
 
             <TextBlock Grid.Row="0" Text="{Binding ExpressionCode}" MinHeight="{x:Static r:UIParameters.LayerUIHeight}" Background="Transparent" TextWrapping="NoWrap" ClipToBounds="True" MouseDown="ExpressionCodeTextBlock_MouseDown"/>
-            <pr:CodeEditor x:Name="ExpressionCodeEditor"
-                           Grid.Row="0"
+            <pr:CodeEditor Grid.Row="0"
                            Document="{Binding ExpressionCodeDocument}"
                            MinHeight="{x:Static r:UIParameters.LayerUIHeight}"
                            SyntaxHighlighting="ExpressionJavaScript"
@@ -173,8 +178,7 @@
                            VerticalScrollBarVisibility="Auto"
                            Visibility="{Binding IsEditingExpression, Converter={StaticResource BooleanToVisibilityConverter}}"
                            LostFocus="ExpressionCodeEditor_LostFocus"
-                           KeyDown="ExpressionCodeEditor_KeyDown"
-                           Mouse.PreviewMouseDownOutsideCapturedElement="ExpressionCodeEditor_PreviewMouseDownOutsideCapturedElement"/>
+                           KeyDown="ExpressionCodeEditor_KeyDown"/>
 
             <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Focusable="False" IsTabStop="False" ResizeDirection="Rows" ResizeBehavior="PreviousAndCurrent"/>
         </Grid>

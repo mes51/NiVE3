@@ -127,7 +127,7 @@ namespace NiVE3.View.Part
             }
 
             viewModel.BeginEditExpressionCommand.Execute(null);
-            Mouse.Capture(ExpressionCodeEditor, CaptureMode.SubTree);
+            Mouse.Capture(ExpressionArea, CaptureMode.SubTree);
         }
 
         private void ExpressionCodeEditor_LostFocus(object sender, RoutedEventArgs e)
@@ -153,7 +153,15 @@ namespace NiVE3.View.Part
             viewModel.AbortEditExpressionCommand.Execute(null);
         }
 
-        private void ExpressionCodeEditor_PreviewMouseDownOutsideCapturedElement(object sender, MouseButtonEventArgs e)
+        private void ExpressionCodeEditor_LostMouseCapture(object sender, MouseEventArgs e)
+        {
+            if (ViewModel?.IsEditingExpression ?? false)
+            {
+                Mouse.Capture(ExpressionArea, CaptureMode.SubTree);
+            }
+        }
+
+        private void ExpressionArea_PreviewMouseDownOutsideCapturedElement(object sender, MouseButtonEventArgs e)
         {
             var viewModel = ViewModel;
             if (viewModel == null || !viewModel.EndEditExpressionCommand.CanExecute(null))
@@ -161,18 +169,10 @@ namespace NiVE3.View.Part
                 return;
             }
 
-            var pos = e.GetPosition(ExpressionCodeEditor);
-            if (pos.X < 0.0 || pos.X >= ExpressionCodeEditor.ActualWidth || pos.Y < 0.0 || pos.Y >= ExpressionCodeEditor.ActualHeight)
+            var pos = e.GetPosition(ExpressionArea);
+            if (pos.X < 0.0 || pos.X >= ExpressionArea.ActualWidth || pos.Y < 0.0 || pos.Y >= ExpressionArea.ActualHeight)
             {
                 viewModel.EndEditExpressionCommand.Execute(null);
-            }
-        }
-
-        private void ExpressionCodeEditor_LostMouseCapture(object sender, MouseEventArgs e)
-        {
-            if (ViewModel?.IsEditingExpression ?? false)
-            {
-                Mouse.Capture(ExpressionCodeEditor, CaptureMode.SubTree);
             }
         }
     }
