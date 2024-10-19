@@ -437,7 +437,7 @@ namespace NiVE3.Model
                 Model.ExpressionCode = NewExpressionCode;
                 Model.UseExpression = NewUseExpression;
                 Model.HasExpressionError = NewHasExpressionError;
-                Model.ExpressionUpdated?.Invoke(Model, EventArgs.Empty);
+                Model.OnExpressionUpdated();
             }
 
             public void Undo()
@@ -445,7 +445,7 @@ namespace NiVE3.Model
                 Model.ExpressionCode = OldExpressionCode;
                 Model.UseExpression = OldUseExpression;
                 Model.HasExpressionError = OldHasExpressionError;
-                Model.ExpressionUpdated?.Invoke(Model, EventArgs.Empty);
+                Model.OnExpressionUpdated();
             }
 
             public void Dispose() { }
@@ -471,13 +471,13 @@ namespace NiVE3.Model
             public void Redo()
             {
                 Model.UseExpression = NewUseExpression;
-                Model.ExpressionUpdated?.Invoke(Model, EventArgs.Empty);
+                Model.OnExpressionUpdated();
             }
 
             public void Undo()
             {
                 Model.UseExpression = OldUseExpression;
-                Model.ExpressionUpdated?.Invoke(Model, EventArgs.Empty);
+                Model.OnExpressionUpdated();
             }
 
             public void Dispose() { }

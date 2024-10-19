@@ -222,7 +222,7 @@ namespace NiVE3.Model
 
             ExpressionCode = newExpressionCode;
             UseExpression = !string.IsNullOrEmpty(newExpressionCode);
-            ExpressionUpdated?.Invoke(this, EventArgs.Empty);
+            OnExpressionUpdated();
 
             HistoryModel.Add(new ChangeExpressionCodeHistoryCommand(this, oldCode, oldUseExpression, oldHasExpressionError, newExpressionCode, UseExpression, HasExpressionError));
         }
@@ -627,6 +627,12 @@ namespace NiVE3.Model
 
             oldKeyFrames.Sort((a, b) => a.Time.CompareTo(b.Time));
             HistoryModel.Add(new ReplaceKeyFramesHistoryCommand(this, [..oldKeyFrames], newKeyFrames, historyNameKey));
+            ValueCommited?.Invoke(this, EventArgs.Empty);
+        }
+
+        void OnExpressionUpdated()
+        {
+            ExpressionUpdated?.Invoke(this, EventArgs.Empty);
             ValueCommited?.Invoke(this, EventArgs.Empty);
         }
 
