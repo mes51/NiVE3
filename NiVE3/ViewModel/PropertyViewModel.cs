@@ -312,6 +312,7 @@ namespace NiVE3.ViewModel
                     {
                         PropertyModel.ChangeExpressionCode("");
                     }
+                    RaisePropertyChanged(nameof(HasKeyFrame));
                 }
                 else
                 {
