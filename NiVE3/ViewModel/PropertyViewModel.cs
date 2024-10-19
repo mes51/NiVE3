@@ -257,6 +257,7 @@ namespace NiVE3.ViewModel
             IsEnableExpression = propertyModel.IsEnableExpression;
             SelectedKeyFrameIds = [];
             ExpressionCodeDocument.Text = propertyModel.ExpressionCode;
+            ExpressionCodeDocument.UndoStack.ClearAll();
 
             BeginEditCommand = new DelegateCommand(() =>
             {
@@ -295,7 +296,7 @@ namespace NiVE3.ViewModel
             AbortEditExpressionCommand = new DelegateCommand(() =>
             {
                 ExpressionCode = PropertyModel.ExpressionCode;
-                ExpressionCodeDocument.Text = PropertyModel.ExpressionCode;
+                UpdateExpressionCodeDocument(PropertyModel.ExpressionCode);
                 IsEditing = false;
                 IsEditingExpression = false;
             }, () => IsEditing && IsEditingExpression).ObservesProperty(() => IsEditing).ObservesProperty(() => IsEditingExpression);
@@ -515,6 +516,12 @@ namespace NiVE3.ViewModel
             }
         }
 
+        void UpdateExpressionCodeDocument(string text)
+        {
+            ExpressionCodeDocument.Text = text;
+            ExpressionCodeDocument.UndoStack.ClearAll();
+        }
+
         partial void WiringModel();
 
         private void PropertyModel_ValueCommited(object? sender, EventArgs e)
@@ -536,7 +543,7 @@ namespace NiVE3.ViewModel
                     CurrentTimeRawValue = CalculationRawValue();
                     break;
                 case nameof(PropertyModel.ExpressionCode) when !IsEditing:
-                    ExpressionCodeDocument.Text = PropertyModel.ExpressionCode;
+                    UpdateExpressionCodeDocument(PropertyModel.ExpressionCode);
                     break;
             }
         }
