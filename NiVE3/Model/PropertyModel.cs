@@ -303,7 +303,14 @@ namespace NiVE3.Model
 
                         if (Property.PropertyType.TryConvertFromExpressionValue(expressionResult, out var newValue))
                         {
-                            value = newValue;
+                            if (Property is CompositionDependPropertyBase cp)
+                            {
+                                value = cp.CoerceValue(newValue, CompositionModel);
+                            }
+                            else
+                            {
+                                value = Property.CoerceValue(newValue);
+                            }
                         }
                         else
                         {
