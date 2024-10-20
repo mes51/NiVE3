@@ -573,6 +573,18 @@ namespace NiVE3.Model
             PasteProperty(propertyData);
         }
 
+        public void PasteExpressionOnly(PropertyData data)
+        {
+            var oldCode = ExpressionCode;
+            var oldUseExpression = UseExpression;
+
+            ExpressionCode = data.ExpressionCode;
+            UseExpression = data.UseExpression;
+            OnExpressionUpdated();
+
+            HistoryModel.Add(new ChangeExpressionCodeHistoryCommand(this, oldCode, oldUseExpression, ExpressionCode, UseExpression));
+        }
+
         public CopyData<PropertyData> CutKeyFrames(KeyFrame[] targetKeyFrames)
         {
             var result = CopyKeyFrames(targetKeyFrames);

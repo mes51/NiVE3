@@ -518,6 +518,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("ペースト(_P)")]
         public static readonly string PropertyCollection_ContextMenu_PasteProperty = nameof(PropertyCollection_ContextMenu_PasteProperty);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("エクスプレッションのみペースト(_E)")]
+        public static readonly string PropertyCollection_ContextMenu_PasteExpressionOnly = nameof(PropertyCollection_ContextMenu_PasteExpressionOnly);
+
         [ShowInMarkup, LanguageKey, DefaultValue("キーフレームを削除(_D)")]
         public static readonly string PropertyCollection_ContextMenu_DeleteKeyFrame = nameof(PropertyCollection_ContextMenu_DeleteKeyFrame);
 

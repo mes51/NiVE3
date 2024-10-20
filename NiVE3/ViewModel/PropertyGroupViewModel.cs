@@ -141,6 +141,8 @@ namespace NiVE3.ViewModel
 
         public ICommand DuplicateSelectedChildrenCommand { get; }
 
+        public ICommand PasteExpressionOnlyCommand { get; }
+
         public ICommand ChangeIsEnableCommand { get; }
 
         [NeedWire(nameof(PropertyGroupModel), IsOneWay = true)]
@@ -297,6 +299,19 @@ namespace NiVE3.ViewModel
             {
                 DeSelect();
                 SelectItemChangedPublisher.Publish(this, new SelectItemEventArgs(SelectItemType.Property, true, this));
+            });
+
+            PasteExpressionOnlyCommand = new RequerySuggestedCommand(() =>
+            {
+                var propertyData = ClipboardUtil.GetData<PropertyData>();
+                if (propertyData != null)
+                {
+                    PropertyGroupModel.PasteExpressionOnly(propertyData, [..SelectedChildren.Select(c => c.Property.Id)]);
+                }
+            }, () =>
+            {
+                var type = ClipboardUtil.GetData<PropertyData>()?.Type;
+                return type == CopyDataType.PropertyGroup || type == CopyDataType.AppendablePropertyChildren;
             });
 
             ChangeIsEnableCommand = new DelegateCommand(() =>

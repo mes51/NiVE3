@@ -337,6 +337,93 @@ namespace NiVE3.Model
             PasteChildrenPropertyInternal(data, []);
         }
 
+        public void PasteExpressionOnly(CopyData<PropertyData> data, string[] ids)
+        {
+            if (data.Data.Length < 1 || ids.Length < 1)
+            {
+                return;
+            }
+
+            var propertyData = data.Data[0];
+            if (data.Type == CopyDataType.PropertyGroup)
+            {
+                if (propertyData.Children == null)
+                {
+                    return;
+                }
+
+                HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangeExpression));
+
+                if (propertyData.Children.Length > 1)
+                {
+                    // NOTE: 複数同時貼り付けの場合は同一のグループにしか貼り付けられない
+                    if (propertyData.PropertyId == Property.Id)
+                    {
+                        // NOTE: 数を合わせるために一旦IOverwriteablePropertyModelでとってくる
+                        var targetChildren = Children.Where(c => propertyData.Children.Any(d => d.PropertyId == c.Property.Id)).OrderBy(c => propertyData.Children.IndexOf(d => d.PropertyId == c.Property.Id)).OfType<IOverwriteablePropertyModel>();
+                        if (ids.Length > 0)
+                        {
+                            targetChildren = targetChildren.Where(c => ids.Contains(c.Property.Id));
+                        }
+
+                        foreach (var (childData, child) in propertyData.Children.Zip(targetChildren))
+                        {
+                            if (child is PropertyModel p)
+                            {
+                                p.PasteExpressionOnly(childData);
+                            }
+                        }
+
+                        HistoryModel.EndGroup();
+                    }
+                    else
+                    {
+                        HistoryModel.AbortGroup();
+                    }
+                }
+                else if (ids.Length > 0)
+                {
+                    var childData = propertyData.Children[0];
+
+                    var pasted = false;
+                    foreach (var child in Children.Where(c => ids.Contains(c.Property.Id)).OfType<PropertyModel>())
+                    {
+                        child.PasteExpressionOnly(childData);
+                        pasted = true;
+                    }
+
+                    if (pasted)
+                    {
+                        HistoryModel.EndGroup();
+                    }
+                    else
+                    {
+                        HistoryModel.AbortGroup();
+                    }
+                }
+            }
+            else if (data.Type == CopyDataType.Property)
+            {
+                HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangeExpression));
+
+                var pasted = false;
+                foreach (var child in Children.Where(c => ids.Contains(c.Property.Id)).OfType<PropertyModel>())
+                {
+                    child.PasteExpressionOnly(propertyData);
+                    pasted = true;
+                }
+
+                if (pasted)
+                {
+                    HistoryModel.EndGroup();
+                }
+                else
+                {
+                    HistoryModel.AbortGroup();
+                }
+            }
+        }
+
         public void OverwriteProperty(PropertyData data)
         {
             if (Property.PropertyType.GetType().FullName != data.PropertyTypeName || data.Children == null)
