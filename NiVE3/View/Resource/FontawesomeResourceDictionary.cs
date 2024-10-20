@@ -104,6 +104,12 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, Icon("", Size = 12)]
         public static readonly string TriangleExclamation = nameof(TriangleExclamation);
 
+        [ShowInMarkup, Icon("=", Size = 12, OriginY = -2.0)]
+        public static readonly string Equal = nameof(Equal);
+
+        [ShowInMarkup, Icon("", Size = 12)]
+        public static readonly string NotEqual = nameof(NotEqual);
+
         public FontawesomeResourceDictionary()
         {
             var keys = typeof(FontawesomeResourceDictionary).GetFields(BindingFlags.Static | BindingFlags.Public)
@@ -124,7 +130,7 @@ namespace NiVE3.View.Resource
                 {
                         ft = new FormattedText(attr.Glyph, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, size * (size / ft.Width), Brushes.Black, dip);
                 }
-                this[key] = ft.BuildGeometry(new Point());
+                this[key] = ft.BuildGeometry(new Point(attr.OriginX, attr.OriginY));
             }
         }
 
@@ -134,6 +140,10 @@ namespace NiVE3.View.Resource
             public string Glyph { get; }
 
             public double Size { get; set; } = 12.0;
+
+            public double OriginX { get; set; } = 0.0;
+
+            public double OriginY { get; set; } = 0.0;
 
             public IconAttribute(string glyph)
             {

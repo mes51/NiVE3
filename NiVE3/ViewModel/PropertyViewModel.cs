@@ -370,7 +370,9 @@ namespace NiVE3.ViewModel
 
             CommitExpressionCodeCommand = new DelegateCommand(() => PropertyModel.ChangeExpressionCode(ExpressionCode));
 
-            ChangeUseExpressionCommand = new DelegateCommand(() => PropertyModel.ChangeUseExpression(!UseExpression), () => !string.IsNullOrEmpty(PropertyModel.ExpressionCode));
+            ChangeUseExpressionCommand = new DelegateCommand(() => PropertyModel.ChangeUseExpression(!UseExpression), () => !string.IsNullOrEmpty(ExpressionCode) && !HasExpressionError)
+                .ObservesProperty(() => ExpressionCode)
+                .ObservesProperty(() => HasExpressionError);
 
             SelectItemCommand = new DelegateCommand(() =>
             {

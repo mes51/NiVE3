@@ -247,7 +247,7 @@ namespace NiVE3.Model
 
             var oldUseExpression = UseExpression;
             UseExpression = useExpression;
-            ExpressionUpdated?.Invoke(this, EventArgs.Empty);
+            OnExpressionUpdated();
 
             HistoryModel.Add(new ChangeUseExpressionHistoryCommand(this, oldUseExpression, useExpression));
         }
