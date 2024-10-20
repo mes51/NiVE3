@@ -75,13 +75,6 @@ namespace NiVE3.View.Primitive
             {
                 PlacementTarget = this
             };
-            var messageBinding = new Binding
-            {
-                Path = new PropertyPath(CodeErrorMessageProperty),
-                Source = this,
-                Mode = BindingMode.OneWay
-            };
-            BindingOperations.SetBinding(ErrorToolTip, ContentControl.ContentProperty, messageBinding);
 
             if (DesignerProperties.GetIsInDesignMode(this))
             {
@@ -271,7 +264,12 @@ namespace NiVE3.View.Primitive
             }
 
             var offset = Document.GetOffset(pos.Value.Location);
-            ErrorToolTip.IsOpen = ErrorDisplayService.GetMarker(offset) != null;
+            var marker = ErrorDisplayService.GetMarker(offset);
+            if (marker != null)
+            {
+                ErrorToolTip.Content = marker.ErrorMessage;
+                ErrorToolTip.IsOpen = true;
+            }
         }
 
         private static void CodeErrorChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
