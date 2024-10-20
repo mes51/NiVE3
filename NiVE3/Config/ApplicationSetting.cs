@@ -46,6 +46,8 @@ namespace NiVE3.Config
 
         public Color DefaultCompositionLayerTag { get; set; } = Color.FromRgb(152, 137, 93);
 
+        public int ExpressionTimeout { get; set; } = 10;
+
         public void RaiseUpdateSetting()
         {
             UpdateSetting?.Invoke(this, EventArgs.Empty);

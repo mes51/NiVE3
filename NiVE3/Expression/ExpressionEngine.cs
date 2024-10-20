@@ -18,9 +18,6 @@ namespace NiVE3.Expression
             Engine = new Engine(options =>
             {
                 options.Strict = true;
-                options.AddObjectConverter<ObjectDictionaryConverter>();
-                options.AddObjectConverter<ObjectArrayConverter>();
-                options.Interop.CreateClrObject = io => new Dictionary<string, object?>();
             });
         }
 

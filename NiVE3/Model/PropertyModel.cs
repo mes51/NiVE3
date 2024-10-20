@@ -326,15 +326,18 @@ namespace NiVE3.Model
                         else
                         {
                             ExpressionErrorMessage = "Expression result is invalid";
-                            var lines = ExpressionCode.Split("\n").Select(l => l.Replace("\r", "")).Reverse().SkipWhile(string.IsNullOrEmpty).ToArray();
-                            var lastLine = lines.FirstOrDefault("");
-                            ExpressionErrorSourceLocation = SourceLocation.From(Position.From(lines.Length, lastLine.Length - 1), Position.From(lines.Length, lastLine.Length));
+                            ExpressionErrorSourceLocation = GetLastLocation();
                         }
                     }
                     catch (JavaScriptException ex)
                     {
                         ExpressionErrorMessage = ex.Message;
                         ExpressionErrorSourceLocation = ex.Location;
+                    }
+                    catch (TimeoutException ex)
+                    {
+                        ExpressionErrorMessage = ex.Message;
+                        ExpressionErrorSourceLocation = GetLastLocation();
                     }
                 }
             }
@@ -676,6 +679,13 @@ namespace NiVE3.Model
             oldKeyFrames.Sort((a, b) => a.Time.CompareTo(b.Time));
             HistoryModel.Add(new ReplaceKeyFramesHistoryCommand(this, [..oldKeyFrames], newKeyFrames, historyNameKey));
             ValueCommited?.Invoke(this, EventArgs.Empty);
+        }
+
+        SourceLocation GetLastLocation()
+        {
+            var lines = ExpressionCode.Split("\n").Select(l => l.Replace("\r", "")).Reverse().SkipWhile(string.IsNullOrEmpty).ToArray();
+            var lastLine = lines.FirstOrDefault("");
+            return SourceLocation.From(Position.From(lines.Length, lastLine.Length - 1), Position.From(lines.Length, lastLine.Length));
         }
 
         void OnExpressionUpdated()

@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using Jint;
 using Jint.Native;
 using Jint.Native.ShadowRealm;
+using NiVE3.Config;
+using NiVE3.Expression.Converter;
 
 namespace NiVE3.Expression
 {
@@ -18,7 +20,14 @@ namespace NiVE3.Expression
 
         public ExpressionContext(double time)
         {
-            Engine = new Engine();
+            Engine = new Engine(options =>
+            {
+                options.Strict = true;
+                options.AddObjectConverter<ObjectDictionaryConverter>();
+                options.AddObjectConverter<ObjectArrayConverter>();
+                options.Interop.CreateClrObject = io => new Dictionary<string, object?>();
+                options.TimeoutInterval(TimeSpan.FromSeconds(ApplicationSetting.Setting.ExpressionTimeout));
+            });
             Engine.SetValue("time", time);
         }
 
