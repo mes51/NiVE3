@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,10 +11,13 @@ using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Threading;
 using System.Xml;
+using Acornima;
 using ICSharpCode.AvalonEdit;
 using ICSharpCode.AvalonEdit.Folding;
 using ICSharpCode.AvalonEdit.Highlighting;
 using ICSharpCode.AvalonEdit.Highlighting.Xshd;
+using Jint;
+using NiVE3.Expression;
 using NiVE3.View.Primitive.Editor;
 
 namespace NiVE3.View.Primitive
@@ -29,30 +33,17 @@ namespace NiVE3.View.Primitive
             new FrameworkPropertyMetadata("", CodeErrorChanged)
         );
 
-        public static readonly DependencyProperty CodeErrorStartOffsetProperty = DependencyProperty.Register(
-            nameof(CodeErrorStartOffset),
-            typeof(int),
+        public static readonly DependencyProperty CodeErrorLocationProperty = DependencyProperty.Register(
+            nameof(CodeErrorLocation),
+            typeof(SourceLocation),
             typeof(CodeEditor),
-            new FrameworkPropertyMetadata(0, CodeErrorChanged)
+            new FrameworkPropertyMetadata(new SourceLocation())
         );
 
-        public static readonly DependencyProperty CodeErrorLengthProperty = DependencyProperty.Register(
-            nameof(CodeErrorLength),
-            typeof(int),
-            typeof(CodeEditor),
-            new FrameworkPropertyMetadata(-1, CodeErrorChanged)
-        );
-
-        public int CodeErrorLength
+        public SourceLocation CodeErrorLocation
         {
-            get { return (int)GetValue(CodeErrorLengthProperty); }
-            set { SetValue(CodeErrorLengthProperty, value); }
-        }
-
-        public int CodeErrorStartOffset
-        {
-            get { return (int)GetValue(CodeErrorStartOffsetProperty); }
-            set { SetValue(CodeErrorStartOffsetProperty, value); }
+            get { return (SourceLocation)GetValue(CodeErrorLocationProperty); }
+            set { SetValue(CodeErrorLocationProperty, value); }
         }
 
         public string CodeErrorMessage
@@ -178,19 +169,67 @@ namespace NiVE3.View.Primitive
                 return;
             }
 
-            ErrorDisplayService.SetError(CodeErrorMessage, CodeErrorStartOffset, CodeErrorLength);
+            var (offset, length) = CalcCodePosition(Document.Text, CodeErrorLocation);
+            ErrorDisplayService.SetError(CodeErrorMessage, offset, length);
             TextArea.TextView.Redraw();
+        }
+
+        void SetCurrentCompileError(ScriptPreparationException ex)
+        {
+            if (ErrorDisplayService == null)
+            {
+                return;
+            }
+
+            ErrorDisplayService.Clear();
+            if (ex.InnerException is ParseErrorException pex)
+            {
+                var (offset, length) = CalcCodePosition(Document.Text, SourceLocation.From(pex.Error.Position, pex.Error.Position));
+                ErrorDisplayService.SetError(pex.Message, offset, length);
+            }
+            else
+            {
+                ErrorDisplayService.SetError(ex.Message, 0, 1);
+            }
+
+            TextArea.TextView.Redraw();
+        }
+
+        static (int offset, int length) CalcCodePosition(string code, SourceLocation location)
+        {
+            var lines = code.Split("\n");
+            var offset = lines.Take(location.Start.Line - 1).Sum(l => l.Length + 1) + location.Start.Column;
+            var length = lines.Take(location.End.Line - 1).Sum(l => l.Length + 1) + location.End.Column - offset;
+
+            if (length < 1)
+            {
+                length = 1;
+                if (offset >= code.Length)
+                {
+                    offset--;
+                }
+            }
+
+            return (offset, length);
         }
 
         private void UpdateTimer_Tick(object? sender, EventArgs e)
         {
             UpdateTimer.Stop();
-            if (CurrentFoldingManager == null)
-            {
-                return;
-            }
 
-            CurrentFoldingManager.UpdateFoldings(FoldingStrategy.CreateNewFolding(Document), -1);
+            CurrentFoldingManager?.UpdateFoldings(FoldingStrategy.CreateNewFolding(Document), -1);
+
+            if (ErrorDisplayService != null && !string.IsNullOrEmpty(Document.Text))
+            {
+                try
+                {
+                    using var _ = ExpressionEngine.Compile(Document.Text);
+                }
+                catch (ScriptPreparationException ex)
+                {
+                    SetCurrentCompileError(ex);
+                }
+            }
         }
 
         private void CodeEditor_TextChanged(object? sender, EventArgs e)

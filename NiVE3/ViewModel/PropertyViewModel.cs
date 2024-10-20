@@ -149,20 +149,6 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref hasKeyFrame, value); }
         }
 
-        private int expressionErrorStartOffset;
-        public int ExpressionErrorStartOffset
-        {
-            get { return expressionErrorStartOffset; }
-            set { SetProperty(ref expressionErrorStartOffset, value); }
-        }
-
-        private int expressionErrorLength;
-        public int ExpressionErrorLength
-        {
-            get { return expressionErrorLength; }
-            set { SetProperty(ref expressionErrorLength, value); }
-        }
-
         private ObservableCollection<int> selectedKeyFrameIds = [];
         public ObservableCollection<int> SelectedKeyFrameIds
         {
@@ -574,12 +560,6 @@ namespace NiVE3.ViewModel
                     break;
                 case nameof(PropertyModel.ExpressionCode) when !IsEditing:
                     UpdateExpressionCodeDocument(PropertyModel.ExpressionCode);
-                    if (!string.IsNullOrEmpty(ExpressionErrorMessage))
-                    {
-                        var (start, end) = PropertyModel.ExpressionErrorSourceLocation;
-                        ExpressionErrorStartOffset = CalcPosition(ExpressionCode, start);
-                        ExpressionErrorLength = CalcPosition(ExpressionCode, end) - ExpressionErrorStartOffset;
-                    }
                     break;
             }
         }
@@ -604,21 +584,6 @@ namespace NiVE3.ViewModel
                 case nameof(ExpressionErrorMessage):
                     IsEnableExpression = PropertyModel.IsEnableExpression;
                     HasExpressionError = PropertyModel.HasExpressionError;
-                    if (!string.IsNullOrEmpty(ExpressionErrorMessage))
-                    {
-                        var (start, end) = ExpressionErrorSourceLocation;
-                        ExpressionErrorStartOffset = CalcPosition(ExpressionCode, start);
-                        ExpressionErrorLength = Math.Max(CalcPosition(ExpressionCode, end) - ExpressionErrorStartOffset, 1);
-                    }
-                    break;
-                case nameof(ExpressionCode):
-                case nameof(ExpressionErrorSourceLocation):
-                    if (!string.IsNullOrEmpty(ExpressionErrorMessage))
-                    {
-                        var (start, end) = ExpressionErrorSourceLocation;
-                        ExpressionErrorStartOffset = CalcPosition(ExpressionCode, start);
-                        ExpressionErrorLength = Math.Max(CalcPosition(ExpressionCode, end) - ExpressionErrorStartOffset, 1);
-                    }
                     break;
             }
         }
@@ -636,11 +601,6 @@ namespace NiVE3.ViewModel
             {
                 SelectItemChangedPublisher.Publish(this, new SelectItemEventArgs(SelectItemType.KeyFrame, false, SelectedKeyFrameIds.ToArray(), this));
             }
-        }
-
-        static int CalcPosition(string code, Position position)
-        {
-            return code.Split("\n").Take(position.Line - 1).Sum(l => l.Length + 1) + position.Column;
         }
     }
 }
