@@ -239,7 +239,18 @@
                            VerticalScrollBarVisibility="Auto"
                            Visibility="{Binding IsEditingExpression, Converter={StaticResource BooleanToVisibilityConverter}}"
                            LostFocus="ExpressionCodeEditor_LostFocus"
-                           KeyDown="ExpressionCodeEditor_KeyDown"/>
+                           KeyDown="ExpressionCodeEditor_KeyDown">
+                <pr:CodeEditor.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="{gm:LanguageResource ResourceKey=PropertyView_ContextMenu_ExpressionCode_Cut}" Command="Cut"/>
+                        <MenuItem Header="{gm:LanguageResource ResourceKey=PropertyView_ContextMenu_ExpressionCode_Copy}" Command="Copy"/>
+                        <MenuItem Header="{gm:LanguageResource ResourceKey=PropertyView_ContextMenu_ExpressionCode_Paste}" Command="Paste"/>
+                        <Separator />
+                        <MenuItem Header="{gm:LanguageResource ResourceKey=PropertyView_ContextMenu_ExpressionCode_Undo}" Command="Undo"/>
+                        <MenuItem Header="{gm:LanguageResource ResourceKey=PropertyView_ContextMenu_ExpressionCode_Redo}" Command="Redo"/>
+                    </ContextMenu>
+                </pr:CodeEditor.ContextMenu>
+            </pr:CodeEditor>
 
             <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Focusable="False" IsTabStop="False" ResizeDirection="Rows" ResizeBehavior="PreviousAndCurrent"/>
         </Grid>

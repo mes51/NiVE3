@@ -530,6 +530,21 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("エクスプレッション")]
         public static readonly string PropertyView_Expression = nameof(PropertyView_Expression);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("切り取り(_X)")]
+        public static readonly string PropertyView_ContextMenu_ExpressionCode_Cut = nameof(PropertyView_ContextMenu_ExpressionCode_Cut);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("コピー(_C)")]
+        public static readonly string PropertyView_ContextMenu_ExpressionCode_Copy = nameof(PropertyView_ContextMenu_ExpressionCode_Copy);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("ペースト(_P)")]
+        public static readonly string PropertyView_ContextMenu_ExpressionCode_Paste = nameof(PropertyView_ContextMenu_ExpressionCode_Paste);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("元に戻す(_U)")]
+        public static readonly string PropertyView_ContextMenu_ExpressionCode_Undo = nameof(PropertyView_ContextMenu_ExpressionCode_Undo);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("やり直す(_R)")]
+        public static readonly string PropertyView_ContextMenu_ExpressionCode_Redo = nameof(PropertyView_ContextMenu_ExpressionCode_Redo);
+
         [ShowInMarkup, LanguageKey, DefaultValue("レベルメーター")]
         public static readonly string AudioInformationView_Title = nameof(AudioInformationView_Title);
 
