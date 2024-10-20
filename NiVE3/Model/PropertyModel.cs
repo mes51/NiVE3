@@ -419,6 +419,8 @@ namespace NiVE3.Model
                 PropertyTypeName = Property.PropertyType.GetType().FullName ?? "",
                 Name = Name,
                 Value = Property.PropertyType.SerializeValue(RawValue),
+                ExpressionCode = ExpressionCode,
+                UseExpression = UseExpression,
                 KeyFrames = keyFramesData
             };
         }
@@ -430,6 +432,9 @@ namespace NiVE3.Model
             {
                 return;
             }
+
+            ExpressionCode = data.ExpressionCode;
+            UseExpression = data.UseExpression;
 
             KeyFrames.Clear();
             foreach (var k in data.KeyFrames.Select(k => new KeyFrame(k.Time, Property.PropertyType.DeserializeValue(k.Value), k.EaseIn, k.EaseOut, k.InterpolationType, k.Id)))
@@ -478,9 +483,16 @@ namespace NiVE3.Model
                     _ => Property.CoerceValue(Property.PropertyType.DeserializeValue(data.Value))
                 };
                 var oldValue = RawValue;
-                RawValue = newValue;
+                var oldExpressionCode = ExpressionCode;
+                var oldUseExpression = UseExpression;
 
-                HistoryModel.Add(new ValueChangeHistoryCommand(this, oldValue, newValue));
+                RawValue = newValue;
+                ExpressionCode = data.ExpressionCode;
+                UseExpression = data.UseExpression;
+
+                OnExpressionUpdated();
+
+                HistoryModel.Add(new PastePropertyHistoryCommand(this, oldValue, oldExpressionCode, oldUseExpression, newValue, ExpressionCode, UseExpression));
             }
             else
             {
@@ -543,7 +555,9 @@ namespace NiVE3.Model
                 PropertyId = Property.Id,
                 PropertyTypeName = Property.PropertyType.GetType().FullName ?? "",
                 Name = Name,
-                Value = Property.PropertyType.SerializeValue(RawValue)
+                Value = Property.PropertyType.SerializeValue(RawValue),
+                ExpressionCode = ExpressionCode,
+                UseExpression = UseExpression
             };
             return new CopyData<PropertyData>(CopyDataType.Property, [data]);
         }

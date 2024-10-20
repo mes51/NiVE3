@@ -24,6 +24,10 @@ namespace NiVE3.Data.Json.Project
 
         public bool IsEnabled { get; set; } = true;
 
+        public string ExpressionCode { get; set; } = "";
+
+        public bool UseExpression { get; set; }
+
         public KeyFrameData[] KeyFrames { get; set; } = [];
 
         public PropertyData[]? Children { get; set; }

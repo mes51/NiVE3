@@ -325,6 +325,54 @@ namespace NiVE3.Model
             public void Dispose() { }
         }
 
+        private class PastePropertyHistoryCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangePropertyValue);
+
+            PropertyModel Model { get; }
+
+            object? OldValue { get; }
+
+            string OldExpressionCode { get; }
+
+            bool OldUseExpression { get; }
+
+            object? NewValue { get; }
+
+            string NewExpressionCode { get; }
+
+            bool NewUseExpression { get; }
+
+            public PastePropertyHistoryCommand(PropertyModel model, object? oldValue, string oldExpressionCode, bool oldUseExpression, object? newValue, string newExpressionCode, bool newUseExpression)
+            {
+                Model = model;
+                OldValue = oldValue;
+                OldExpressionCode = oldExpressionCode;
+                OldUseExpression = oldUseExpression;
+                NewValue = newValue;
+                NewExpressionCode = newExpressionCode;
+                NewUseExpression = newUseExpression;
+            }
+
+            public void Redo()
+            {
+                Model.RawValue = NewValue;
+                Model.ExpressionCode = NewExpressionCode;
+                Model.UseExpression = NewUseExpression;
+                Model.OnExpressionUpdated();
+            }
+
+            public void Undo()
+            {
+                Model.RawValue = OldValue;
+                Model.ExpressionCode = OldExpressionCode;
+                Model.UseExpression = OldUseExpression;
+                Model.OnExpressionUpdated();
+            }
+
+            public void Dispose() { }
+        }
+
         private class OverwritePropertyHistoryCommand : IHistoryCommand
         {
             public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_PasteKeyFrames);
