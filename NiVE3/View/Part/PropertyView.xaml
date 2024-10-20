@@ -190,6 +190,9 @@
             <TextBlock Grid.Row="0" Text="{Binding ExpressionCode}" MinHeight="{x:Static r:UIParameters.LayerUIHeight}" Background="Transparent" TextWrapping="NoWrap" ClipToBounds="True" MouseDown="ExpressionCodeTextBlock_MouseDown"/>
             <pr:CodeEditor Grid.Row="0"
                            Document="{Binding ExpressionCodeDocument}"
+                           CodeErrorMessage="{Binding ExpressionErrorMessage}"
+                           CodeErrorStartOffset="{Binding ExpressionErrorStartOffset}"
+                           CodeErrorLength="{Binding ExpressionErrorLength}"
                            MinHeight="{x:Static r:UIParameters.LayerUIHeight}"
                            SyntaxHighlighting="ExpressionJavaScript"
                            ShowLineNumbers="True"

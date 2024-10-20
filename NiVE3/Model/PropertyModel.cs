@@ -19,6 +19,9 @@ using System.IO.Hashing;
 using NiVE3.Extension;
 using NiVE3.Expression;
 using System.Diagnostics.CodeAnalysis;
+using Jint;
+using Jint.Runtime;
+using Acornima;
 
 namespace NiVE3.Model
 {
@@ -58,13 +61,6 @@ namespace NiVE3.Model
             set { SetProperty(ref useExpression, value); }
         }
 
-        private bool hasExpressionError;
-        public bool HasExpressionError
-        {
-            get { return hasExpressionError; }
-            set { SetProperty(ref hasExpressionError, value); }
-        }
-
         private bool useEditingValue;
         public bool UseEditingValue
         {
@@ -79,6 +75,20 @@ namespace NiVE3.Model
             set { SetProperty(ref expressionCode, value); }
         }
 
+        private string expressionErrorMessage = "";
+        public string ExpressionErrorMessage
+        {
+            get { return expressionErrorMessage; }
+            set { SetProperty(ref expressionErrorMessage, value); }
+        }
+
+        private SourceLocation expressionErrorSourceLocation;
+        public SourceLocation ExpressionErrorSourceLocation
+        {
+            get { return expressionErrorSourceLocation; }
+            set { SetProperty(ref expressionErrorSourceLocation, value); }
+        }
+
         public ObservableCollection<IPropertyModel>? Children => null;
 
         public PropertyBase Property { get; }
@@ -86,6 +96,8 @@ namespace NiVE3.Model
         public Int128 ObjectId { get; }
 
         public string Id => Property.Id;
+
+        public bool HasExpressionError => !string.IsNullOrEmpty(ExpressionErrorMessage);
 
         [MemberNotNullWhen(true, nameof(CompiledScript))]
         public bool IsEnableExpression => UseExpression && !HasExpressionError && CompiledScript != null;
@@ -218,13 +230,12 @@ namespace NiVE3.Model
 
             var oldCode = ExpressionCode;
             var oldUseExpression = UseExpression;
-            var oldHasExpressionError = HasExpressionError;
 
             ExpressionCode = newExpressionCode;
             UseExpression = !string.IsNullOrEmpty(newExpressionCode);
             OnExpressionUpdated();
 
-            HistoryModel.Add(new ChangeExpressionCodeHistoryCommand(this, oldCode, oldUseExpression, oldHasExpressionError, newExpressionCode, UseExpression, HasExpressionError));
+            HistoryModel.Add(new ChangeExpressionCodeHistoryCommand(this, oldCode, oldUseExpression, newExpressionCode, UseExpression));
         }
 
         public void ChangeUseExpression(bool useExpression)
@@ -314,12 +325,16 @@ namespace NiVE3.Model
                         }
                         else
                         {
-                            HasExpressionError = true;
+                            ExpressionErrorMessage = "Expression result is invalid";
+                            var lines = ExpressionCode.Split("\n").Select(l => l.Replace("\r", "")).Reverse().SkipWhile(string.IsNullOrEmpty).ToArray();
+                            var lastLine = lines.FirstOrDefault("");
+                            ExpressionErrorSourceLocation = SourceLocation.From(Position.From(lines.Length, lastLine.Length - 1), Position.From(lines.Length, lastLine.Length));
                         }
                     }
-                    catch
+                    catch (JavaScriptException ex)
                     {
-                        HasExpressionError = true;
+                        ExpressionErrorMessage = ex.Message;
+                        ExpressionErrorSourceLocation = ex.Location;
                     }
                 }
             }
@@ -671,19 +686,29 @@ namespace NiVE3.Model
                     if (string.IsNullOrEmpty(ExpressionCode))
                     {
                         CompiledScript = null;
-                        HasExpressionError = false;
+                        ExpressionErrorMessage = "";
+                        ExpressionErrorSourceLocation = new SourceLocation();
                     }
                     else
                     {
                         try
                         {
                             CompiledScript = ExpressionEngine.Compile(ExpressionCode);
-                            HasExpressionError = false;
+                            ExpressionErrorMessage = "";
+                            ExpressionErrorSourceLocation = new SourceLocation();
                         }
-                        catch
+                        catch (ScriptPreparationException ex)
                         {
                             CompiledScript = null;
-                            HasExpressionError = true;
+                            if (ex.InnerException is ParseErrorException pex)
+                            {
+                                ExpressionErrorMessage = pex.Message;
+                                ExpressionErrorSourceLocation = SourceLocation.From(pex.Error.Position, pex.Error.Position);
+                            }
+                            else
+                            {
+                                ExpressionErrorMessage = ex.Message;
+                            }
                         }
                     }
                     break;

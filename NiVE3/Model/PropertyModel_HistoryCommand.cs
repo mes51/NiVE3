@@ -413,30 +413,23 @@ namespace NiVE3.Model
 
             bool OldUseExpression { get; }
 
-            bool OldHasExpressionError { get; }
-
             string NewExpressionCode { get; }
 
             bool NewUseExpression { get; }
 
-            bool NewHasExpressionError { get; }
-
-            public ChangeExpressionCodeHistoryCommand(PropertyModel model, string oldExpressionCode, bool oldUseExpression, bool oldHasExpressionError, string newExpressionCode, bool newUseExpression, bool newHasExpressionError)
+            public ChangeExpressionCodeHistoryCommand(PropertyModel model, string oldExpressionCode, bool oldUseExpression, string newExpressionCode, bool newUseExpression)
             {
                 Model = model;
                 OldExpressionCode = oldExpressionCode;
                 OldUseExpression = oldUseExpression;
-                OldHasExpressionError = oldHasExpressionError;
                 NewExpressionCode = newExpressionCode;
                 NewUseExpression = newUseExpression;
-                NewHasExpressionError = newHasExpressionError;
             }
 
             public void Redo()
             {
                 Model.ExpressionCode = NewExpressionCode;
                 Model.UseExpression = NewUseExpression;
-                Model.HasExpressionError = NewHasExpressionError;
                 Model.OnExpressionUpdated();
             }
 
@@ -444,7 +437,6 @@ namespace NiVE3.Model
             {
                 Model.ExpressionCode = OldExpressionCode;
                 Model.UseExpression = OldUseExpression;
-                Model.HasExpressionError = OldHasExpressionError;
                 Model.OnExpressionUpdated();
             }
 

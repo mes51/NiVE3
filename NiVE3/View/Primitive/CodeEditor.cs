@@ -5,11 +5,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Threading;
 using System.Xml;
 using ICSharpCode.AvalonEdit;
-using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Folding;
 using ICSharpCode.AvalonEdit.Highlighting;
 using ICSharpCode.AvalonEdit.Highlighting.Xshd;
@@ -21,21 +22,75 @@ namespace NiVE3.View.Primitive
     {
         static readonly TimeSpan FoldingUpdateInterval = new TimeSpan(0, 0, 0, 0, 500);
 
+        public static readonly DependencyProperty CodeErrorMessageProperty = DependencyProperty.Register(
+            nameof(CodeErrorMessage),
+            typeof(string),
+            typeof(CodeEditor),
+            new FrameworkPropertyMetadata("", CodeErrorChanged)
+        );
+
+        public static readonly DependencyProperty CodeErrorStartOffsetProperty = DependencyProperty.Register(
+            nameof(CodeErrorStartOffset),
+            typeof(int),
+            typeof(CodeEditor),
+            new FrameworkPropertyMetadata(0, CodeErrorChanged)
+        );
+
+        public static readonly DependencyProperty CodeErrorLengthProperty = DependencyProperty.Register(
+            nameof(CodeErrorLength),
+            typeof(int),
+            typeof(CodeEditor),
+            new FrameworkPropertyMetadata(-1, CodeErrorChanged)
+        );
+
+        public int CodeErrorLength
+        {
+            get { return (int)GetValue(CodeErrorLengthProperty); }
+            set { SetValue(CodeErrorLengthProperty, value); }
+        }
+
+        public int CodeErrorStartOffset
+        {
+            get { return (int)GetValue(CodeErrorStartOffsetProperty); }
+            set { SetValue(CodeErrorStartOffsetProperty, value); }
+        }
+
+        public string CodeErrorMessage
+        {
+            get { return (string)GetValue(CodeErrorMessageProperty); }
+            set { SetValue(CodeErrorMessageProperty, value); }
+        }
+
         FoldingManager? CurrentFoldingManager { get; set; }
 
         DispatcherTimer UpdateTimer { get; }
 
         CurrentLineBackgroundRenderer CurrentLineBackgroundRenderer { get; set; }
 
+        ErrorDisplayService? ErrorDisplayService { get; set; }
+
+        ToolTip ErrorToolTip { get; }
+
         static CodeEditor()
         {
-            DocumentProperty.OverrideMetadata(typeof(CodeEditor), new FrameworkPropertyMetadata(DocumentProperty.DefaultMetadata.DefaultValue, FrameworkPropertyMetadataOptions.Inherits, DocumentPropertyChanged));
+            VisibilityProperty.OverrideMetadata(typeof(CodeEditor), new FrameworkPropertyMetadata(VisibilityProperty.DefaultMetadata.DefaultValue, FrameworkPropertyMetadataOptions.Inherits, VisibilityChanged));
         }
 
         public CodeEditor()
         {
             UpdateTimer = new DispatcherTimer { Interval = FoldingUpdateInterval };
             CurrentLineBackgroundRenderer = new CurrentLineBackgroundRenderer(this);
+            ErrorToolTip = new ToolTip
+            {
+                PlacementTarget = this
+            };
+            var messageBinding = new Binding
+            {
+                Path = new PropertyPath(CodeErrorMessageProperty),
+                Source = this,
+                Mode = BindingMode.OneWay
+            };
+            BindingOperations.SetBinding(ErrorToolTip, ContentControl.ContentProperty, messageBinding);
 
             if (DesignerProperties.GetIsInDesignMode(this))
             {
@@ -47,14 +102,54 @@ namespace NiVE3.View.Primitive
             UpdateTimer.Tick += UpdateTimer_Tick;
             TextChanged += CodeEditor_TextChanged;
             Loaded += CodeEditor_Loaded;
+            DocumentChanged += CodeEditor_DocumentChanged;
+
+            TextArea.TextView.MouseHover += TextView_MouseHover;
+            TextArea.TextView.MouseHoverStopped += TextView_MouseHoverStopped;
+            TextArea.TextView.VisualLinesChanged += TextView_VisualLinesChanged;
         }
 
         private void CodeEditor_Loaded(object sender, RoutedEventArgs e)
         {
             var backgroundRenderers = TextArea.TextView.BackgroundRenderers;
-            if (backgroundRenderers.OfType<CurrentLineBackgroundRenderer>().FirstOrDefault() != null)
+            if (backgroundRenderers.OfType<CurrentLineBackgroundRenderer>().FirstOrDefault() == null)
             {
                 backgroundRenderers.Add(CurrentLineBackgroundRenderer);
+            }
+
+            if (ErrorDisplayService != null)
+            {
+                backgroundRenderers.Remove(ErrorDisplayService);
+            }
+            if (Document != null)
+            {
+                ErrorDisplayService = new ErrorDisplayService(Document);
+                backgroundRenderers.Add(ErrorDisplayService);
+            }
+            else
+            {
+                ErrorDisplayService = null;
+            }
+        }
+
+        private void CodeEditor_DocumentChanged(object? sender, EventArgs e)
+        {
+            InstallFoldingManager();
+
+            var backgroundRenderers = TextArea.TextView.BackgroundRenderers;
+
+            if (ErrorDisplayService != null)
+            {
+                backgroundRenderers.Remove(ErrorDisplayService);
+            }
+            if (Document != null)
+            {
+                ErrorDisplayService = new ErrorDisplayService(Document);
+                backgroundRenderers.Add(ErrorDisplayService);
+            }
+            else
+            {
+                ErrorDisplayService = null;
             }
         }
 
@@ -76,6 +171,17 @@ namespace NiVE3.View.Primitive
             }
         }
 
+        void UpdateErrorMaker()
+        {
+            if (ErrorDisplayService == null)
+            {
+                return;
+            }
+
+            ErrorDisplayService.SetError(CodeErrorMessage, CodeErrorStartOffset, CodeErrorLength);
+            TextArea.TextView.Redraw();
+        }
+
         private void UpdateTimer_Tick(object? sender, EventArgs e)
         {
             UpdateTimer.Stop();
@@ -90,17 +196,59 @@ namespace NiVE3.View.Primitive
         private void CodeEditor_TextChanged(object? sender, EventArgs e)
         {
             UpdateTimer.Stop();
+
+            if (ErrorDisplayService != null && ErrorDisplayService.HasErrorMaker)
+            {
+                ErrorDisplayService.Clear();
+                TextArea.TextView.Redraw();
+            }
+
             UpdateTimer.Start();
         }
 
-        private static void DocumentPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private void TextView_VisualLinesChanged(object? sender, EventArgs e)
         {
-            if (d is not CodeEditor editor)
+            ErrorToolTip.IsOpen = false;
+        }
+
+        private void TextView_MouseHoverStopped(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            ErrorToolTip.IsOpen = false;
+        }
+
+        private void TextView_MouseHover(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            if (ErrorDisplayService == null)
             {
                 return;
             }
 
-            editor.InstallFoldingManager();
+            var textView = TextArea.TextView;
+            var mousePos = e.GetPosition(textView);
+            var pos = textView.GetPositionFloor(new Point(mousePos.X + textView.ScrollOffset.X, mousePos.Y + textView.ScrollOffset.Y));
+            if (!pos.HasValue)
+            {
+                return;
+            }
+
+            var offset = Document.GetOffset(pos.Value.Location);
+            ErrorToolTip.IsOpen = ErrorDisplayService.GetMarker(offset) != null;
+        }
+
+        private static void CodeErrorChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is CodeEditor editor)
+            {
+                editor.UpdateErrorMaker();
+            }
+        }
+
+        private static void VisibilityChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is CodeEditor editor)
+            {
+                editor.UpdateErrorMaker();
+            }
         }
     }
 
