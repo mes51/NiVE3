@@ -221,6 +221,8 @@ namespace NiVE3.Model
 
         ToneMapperListModel ToneMapperListModel { get; }
 
+        ProjectModel ProjectModel { get; }
+
         HistoryModel HistoryModel { get; }
 
         AcceleratorModel AcceleratorModel { get; }
@@ -240,9 +242,10 @@ namespace NiVE3.Model
             TextPropertyModel textPropertyModel,
             RendererListModel rendererListModel,
             ToneMapperListModel toneMapperListModel,
+            ProjectModel projectModel,
             HistoryModel historyModel,
             AcceleratorModel acceleratorModel
-        ) : this(rendererPluginId, toneMapperPluginId, footageListModel, effectListModel, renderQueueModel, textPropertyModel, rendererListModel, toneMapperListModel, historyModel, acceleratorModel, null) { }
+        ) : this(rendererPluginId, toneMapperPluginId, footageListModel, effectListModel, renderQueueModel, textPropertyModel, rendererListModel, toneMapperListModel, projectModel, historyModel, acceleratorModel, null) { }
 
         public CompositionModel(
             Guid rendererPluginId,
@@ -253,6 +256,7 @@ namespace NiVE3.Model
             TextPropertyModel textPropertyModel,
             RendererListModel rendererListModel,
             ToneMapperListModel toneMapperListModel,
+            ProjectModel projectModel,
             HistoryModel historyModel,
             AcceleratorModel acceleratorModel,
             Guid? compositionId
@@ -268,6 +272,7 @@ namespace NiVE3.Model
             RenderQueueModel = renderQueueModel;
             RendererListModel = rendererListModel;
             ToneMapperListModel = toneMapperListModel;
+            ProjectModel = projectModel;
             TextPropertyModel = textPropertyModel;
             HistoryModel = historyModel;
             AcceleratorModel = acceleratorModel;
@@ -292,7 +297,7 @@ namespace NiVE3.Model
                 {
                     continue;
                 }
-                var layer = new LayerModel(this, f, EffectListModel, HistoryModel, AcceleratorModel);
+                var layer = new LayerModel(ProjectModel, this, f, EffectListModel, HistoryModel, AcceleratorModel);
                 if (f.InputType == SourceType.Image || f.InputType == SourceType.None)
                 {
                     layer.OutPoint = Duration;
@@ -314,7 +319,7 @@ namespace NiVE3.Model
 
         public void AddCamera(int insertIndex)
         {
-            var layer = new LayerModel(this, FootageListModel.CameraFootage, EffectListModel, HistoryModel, AcceleratorModel)
+            var layer = new LayerModel(ProjectModel, this, FootageListModel.CameraFootage, EffectListModel, HistoryModel, AcceleratorModel)
             {
                 OutPoint = Duration
             };
@@ -323,7 +328,7 @@ namespace NiVE3.Model
 
         public void AddLight(int insertIndex)
         {
-            var layer = new LayerModel(this, FootageListModel.LightFootage, EffectListModel, HistoryModel, AcceleratorModel)
+            var layer = new LayerModel(ProjectModel, this, FootageListModel.LightFootage, EffectListModel, HistoryModel, AcceleratorModel)
             {
                 OutPoint = Duration
             };
@@ -332,7 +337,7 @@ namespace NiVE3.Model
 
         public void AddNullObject(int insertIndex)
         {
-            var layer = new LayerModel(this, FootageListModel.NullObjectFootage, EffectListModel, HistoryModel, AcceleratorModel)
+            var layer = new LayerModel(ProjectModel, this, FootageListModel.NullObjectFootage, EffectListModel, HistoryModel, AcceleratorModel)
             {
                 OutPoint = Duration
             };
@@ -341,7 +346,7 @@ namespace NiVE3.Model
 
         public void AddText(int insertIndex)
         {
-            var layer = new LayerModel(this, FootageListModel.TextFootage, EffectListModel, HistoryModel, AcceleratorModel)
+            var layer = new LayerModel(ProjectModel, this, FootageListModel.TextFootage, EffectListModel, HistoryModel, AcceleratorModel)
             {
                 OutPoint = Duration
             };
@@ -356,7 +361,7 @@ namespace NiVE3.Model
 
         public void AddShape(int insertIndex)
         {
-            var layer = new LayerModel(this, FootageListModel.ShapeFootage, EffectListModel, HistoryModel, AcceleratorModel)
+            var layer = new LayerModel(ProjectModel, this, FootageListModel.ShapeFootage, EffectListModel, HistoryModel, AcceleratorModel)
             {
                 OutPoint = Duration
             };
@@ -976,7 +981,7 @@ namespace NiVE3.Model
                     continue;
                 }
 
-                var layer = new LayerModel(this, footageModels.First(), EffectListModel, HistoryModel, AcceleratorModel, layerData.LayerId);
+                var layer = new LayerModel(ProjectModel, this, footageModels.First(), EffectListModel, HistoryModel, AcceleratorModel, layerData.LayerId);
                 // NOTE: CompositionDependPropertyBaseが全てのレイヤーをロードしてからでないと正しくCoerceValueが行えないので後からCoercePropertiesを呼ぶ
                 layer.LoadData(layerData, false);
                 Layers.Add(layer);
@@ -1044,7 +1049,7 @@ namespace NiVE3.Model
                 }
 
                 layerData.InPoint = TimeCalc.RoundTimeDigit(splitPositionTime - layerData.SourceStartPoint);
-                var newLayer = new LayerModel(this, footageModels.First(), EffectListModel, HistoryModel, AcceleratorModel);
+                var newLayer = new LayerModel(ProjectModel, this, footageModels.First(), EffectListModel, HistoryModel, AcceleratorModel);
                 newLayer.LoadData(layerData, true);
                 var index = Layers.IndexOf(l => l.LayerId == layerData.LayerId);
                 Layers.Insert(index, newLayer);
@@ -1565,7 +1570,7 @@ namespace NiVE3.Model
                     continue;
                 }
 
-                var newLayer = new LayerModel(this, footageModels.First(), EffectListModel, HistoryModel, AcceleratorModel);
+                var newLayer = new LayerModel(ProjectModel, this, footageModels.First(), EffectListModel, HistoryModel, AcceleratorModel);
                 newLayer.LoadData(layerData, true);
                 Layers.Insert(index, newLayer);
                 addedLayer.Add(newLayer);

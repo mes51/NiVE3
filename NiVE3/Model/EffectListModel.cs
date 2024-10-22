@@ -39,7 +39,7 @@ namespace NiVE3.Model
             }
         }
 
-        public EffectModel? CreateEffect(Guid effectUuid, CompositionModel compositionModel, LayerModel layerModel, HistoryModel historyModel, Guid? effectId = null)
+        public EffectModel? CreateEffect(Guid effectUuid, ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, HistoryModel historyModel, Guid? effectId = null)
         {
             var factory = Effects?.FirstOrDefault(f => Guid.Parse(f.Metadata.EffectUuid) == effectUuid);
             if (factory != null)
@@ -49,7 +49,7 @@ namespace NiVE3.Model
                 {
                     effect.Value.SetupAccelerator(AcceleratorModel); // TODO: Acceleratorの更新
                 }
-                return new EffectModel(effect, factory.Metadata, compositionModel, layerModel, historyModel, effectId);
+                return new EffectModel(effect, factory.Metadata, projectModel, compositionModel, layerModel, historyModel, effectId);
             }
             else
             {

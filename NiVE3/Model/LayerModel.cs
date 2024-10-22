@@ -265,6 +265,10 @@ namespace NiVE3.Model
 
         public Guid ParentCompositionId => CompositionModel.CompositionId;
 
+        public int SourceWidth => IsCustomizableFootageSource ? CompositionModel.Width : FootageModel.Width;
+
+        public int SourceHeight => IsCustomizableFootageSource ? CompositionModel.Height : FootageModel.Height;
+
         private ObservableCollection<EffectModel> effects = [];
         public ObservableCollection<EffectModel> Effects
         {
@@ -298,6 +302,8 @@ namespace NiVE3.Model
 
         EffectListModel EffectListModel { get; }
 
+        ProjectModel ProjectModel { get; }
+
         CompositionModel CompositionModel { get; }
 
         HistoryModel HistoryModel { get; }
@@ -306,13 +312,14 @@ namespace NiVE3.Model
 
         bool HasRenderEveryFrameEffect { get; set; }
 
-        public LayerModel(CompositionModel compositionModel, FootageModel footageModel, EffectListModel effectListModel, HistoryModel historyModel, AcceleratorModel acceleratorModel) : this(compositionModel, footageModel, effectListModel, historyModel, acceleratorModel, null) { }
+        public LayerModel(ProjectModel projectModel, CompositionModel compositionModel, FootageModel footageModel, EffectListModel effectListModel, HistoryModel historyModel, AcceleratorModel acceleratorModel) : this(projectModel, compositionModel, footageModel, effectListModel, historyModel, acceleratorModel, null) { }
 
-        public LayerModel(CompositionModel compositionModel, FootageModel footageModel, EffectListModel effectListModel, HistoryModel historyModel, AcceleratorModel acceleratorModel, Guid? layerId)
+        public LayerModel(ProjectModel projectModel, CompositionModel compositionModel, FootageModel footageModel, EffectListModel effectListModel, HistoryModel historyModel, AcceleratorModel acceleratorModel, Guid? layerId)
         {
             Effects = [];
             FootageModel = footageModel;
             EffectListModel = effectListModel;
+            ProjectModel = projectModel;
             CompositionModel = compositionModel;
             HistoryModel = historyModel;
             AcceleratorModel = acceleratorModel;
@@ -374,8 +381,8 @@ namespace NiVE3.Model
                         new Angle3DElementProperty(ILayerObject.TransformXAngleId, LanguageResourceDictionary.ResourceKeys.TransformProperty_XAngle3D, 0.0, digit: 2),
                         new Angle3DElementProperty(ILayerObject.TransformYAngleId, LanguageResourceDictionary.ResourceKeys.TransformProperty_YAngle3D, 0.0, digit: 2),
                         new ZAngleProperty(ILayerObject.TransformZAngleId, LanguageResourceDictionary.ResourceKeys.TransformProperty_ZAngle2D, LanguageResourceDictionary.ResourceKeys.TransformProperty_ZAngle3D, 0.0, digit: 2)
-                    ]), LayerId.ToInt128(), compositionModel, this, historyModel);
-                    LayerOptionProperties = new PropertyGroupModel(new PropertyGroup(LayerOptionGroupId, LanguageResourceDictionary.ResourceKeys.Layer_LayerOptions_Layer, []), LayerId.ToInt128(), compositionModel, this, historyModel);
+                    ]), LayerId.ToInt128(), projectModel, compositionModel, this, historyModel);
+                    LayerOptionProperties = new PropertyGroupModel(new PropertyGroup(LayerOptionGroupId, LanguageResourceDictionary.ResourceKeys.Layer_LayerOptions_Layer, []), LayerId.ToInt128(), projectModel, compositionModel, this, historyModel);
                     break;
                 case CameraInput:
                     var zoom = compositionModel.Width / Const.DefaultCameraFov * 0.5;
@@ -388,11 +395,11 @@ namespace NiVE3.Model
                         new AngleProperty(ILayerObject.TransformXAngleId, LanguageResourceDictionary.ResourceKeys.TransformProperty_XAngle3D, 0.0, digit: 2),
                         new AngleProperty(ILayerObject.TransformYAngleId, LanguageResourceDictionary.ResourceKeys.TransformProperty_YAngle3D, 0.0, digit: 2),
                         new AngleProperty(ILayerObject.TransformZAngleId, LanguageResourceDictionary.ResourceKeys.TransformProperty_ZAngle3D, 0.0, digit: 2),
-                    ]), LayerId.ToInt128(), compositionModel, this, historyModel);
+                    ]), LayerId.ToInt128(), projectModel, compositionModel, this, historyModel);
                     LayerOptionProperties = new PropertyGroupModel(new PropertyGroup(LayerOptionGroupId, LanguageResourceDictionary.ResourceKeys.Layer_LayerOptions_Camera,
                     [
                         new DoubleProperty(ILayerObject.CameraLayerOptionZoomId, LanguageResourceDictionary.ResourceKeys.LayerOptionsProperty_CameraZoom, zoom, 0.01, double.MaxValue, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Pixel)
-                    ]), LayerId.ToInt128(), compositionModel, this, historyModel);
+                    ]), LayerId.ToInt128(), projectModel, compositionModel, this, historyModel);
                     break;
                 case LightInput:
                     IsEnableVideo = true;
@@ -406,7 +413,7 @@ namespace NiVE3.Model
                         new AngleProperty(ILayerObject.TransformXAngleId, LanguageResourceDictionary.ResourceKeys.TransformProperty_XAngle3D, 0.0, digit: 2),
                         new AngleProperty(ILayerObject.TransformYAngleId, LanguageResourceDictionary.ResourceKeys.TransformProperty_YAngle3D, 0.0, digit: 2),
                         new AngleProperty(ILayerObject.TransformZAngleId, LanguageResourceDictionary.ResourceKeys.TransformProperty_ZAngle3D, 0.0, digit: 2),
-                    ]), LayerId.ToInt128(), compositionModel, this, historyModel);
+                    ]), LayerId.ToInt128(), projectModel, compositionModel, this, historyModel);
                     LayerOptionProperties = new PropertyGroupModel(new PropertyGroup(LayerOptionGroupId, LanguageResourceDictionary.ResourceKeys.Layer_LayerOptions_Light,
                     [
                         new EnumProperty(ILayerObject.LightLayerOptionLightTypeId, LanguageResourceDictionary.ResourceKeys.LayerOptionsProperty_LightType, typeof(LightType), typeof(LanguageResourceDictionary), LightType.Spot, false),
@@ -427,20 +434,20 @@ namespace NiVE3.Model
                         new CheckBoxProperty(ILayerObject.LightLayerOptionEnableShadowId, LanguageResourceDictionary.ResourceKeys.LayerOptionsProperty_EnableShadow, true),
                         new DoubleProperty(ILayerObject.LightLayerOptionShadowStrengthId, LanguageResourceDictionary.ResourceKeys.LayerOptionsProperty_ShadowStrength, 100.0, 0.0, double.MaxValue, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
                         new DoubleProperty(ILayerObject.LightLayerOptionShadowScatterSizeId, LanguageResourceDictionary.ResourceKeys.LayerOptionsProperty_ShadowScatterSize, 0.0, 0.0, double.MaxValue, slideChangeValue: 0.1, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Pixel)
-                    ]), LayerId.ToInt128(), compositionModel, this, historyModel);
+                    ]), LayerId.ToInt128(), projectModel, compositionModel, this, historyModel);
                     break;
                 default:
                     if (footageModel.InputModel.Input is TextInput)
                     {
-                        TextProperties = new PropertyGroupModel(new PropertyGroup(TextGroupId, LanguageResourceDictionary.ResourceKeys.Layer_TextOption, footageModel.GetOptionProperties()), LayerId.ToInt128(), compositionModel, this, historyModel);
+                        TextProperties = new PropertyGroupModel(new PropertyGroup(TextGroupId, LanguageResourceDictionary.ResourceKeys.Layer_TextOption, footageModel.GetOptionProperties()), LayerId.ToInt128(), projectModel, compositionModel, this, historyModel);
                     }
                     else if (footageModel.InputModel.Input is ShapeInput)
                     {
-                        ShapeProperties = new PropertyGroupModel(new PropertyGroup(ShapeGroupId, LanguageResourceDictionary.ResourceKeys.Layer_ShapeOption, footageModel.GetOptionProperties()), LayerId.ToInt128(), compositionModel, this, historyModel);
+                        ShapeProperties = new PropertyGroupModel(new PropertyGroup(ShapeGroupId, LanguageResourceDictionary.ResourceKeys.Layer_ShapeOption, footageModel.GetOptionProperties()), LayerId.ToInt128(), projectModel, compositionModel, this, historyModel);
                     }
                     else if (footageModel.IsCustomizableFootageSource)
                     {
-                        SourceOptionProperties = new PropertyGroupModel(new PropertyGroup(SourceOptionGroupId, LanguageResourceDictionary.ResourceKeys.Layer_SourceOption, footageModel.GetOptionProperties()), LayerId.ToInt128(), compositionModel, this, historyModel);
+                        SourceOptionProperties = new PropertyGroupModel(new PropertyGroup(SourceOptionGroupId, LanguageResourceDictionary.ResourceKeys.Layer_SourceOption, footageModel.GetOptionProperties()), LayerId.ToInt128(), projectModel, compositionModel, this, historyModel);
                     }
                     if (footageModel.InputType.HasFlag(SourceType.Audio))
                     {
@@ -457,7 +464,7 @@ namespace NiVE3.Model
                                 separator: ",",
                                 useLinkRatio: true
                             )
-                        ]), LayerId.ToInt128(), compositionModel, this, historyModel);
+                        ]), LayerId.ToInt128(), projectModel, compositionModel, this, historyModel);
                     }
                     if (footageModel.InputType.HasFlag(SourceType.Video) || footageModel.InputType.HasFlag(SourceType.Image))
                     {
@@ -471,7 +478,7 @@ namespace NiVE3.Model
                             new Angle3DElementProperty(ILayerObject.TransformYAngleId, LanguageResourceDictionary.ResourceKeys.TransformProperty_YAngle3D, 0.0, digit: 2),
                             new ZAngleProperty(ILayerObject.TransformZAngleId, LanguageResourceDictionary.ResourceKeys.TransformProperty_ZAngle2D, LanguageResourceDictionary.ResourceKeys.TransformProperty_ZAngle3D, 0.0, digit: 2),
                             new DoubleProperty(ILayerObject.TransformPropertyOpacityId, LanguageResourceDictionary.ResourceKeys.TransformProperty_Opacity, 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent)
-                        ]), LayerId.ToInt128(), compositionModel, this, historyModel);
+                        ]), LayerId.ToInt128(), projectModel, compositionModel, this, historyModel);
                         LayerOptionProperties = new PropertyGroupModel(new PropertyGroup(LayerOptionGroupId, LanguageResourceDictionary.ResourceKeys.Layer_LayerOptions_Layer,
                         [
                             new EnumProperty(ILayerObject.ImageLayerOptionIsCastShadowId, LanguageResourceDictionary.ResourceKeys.LayerOptionsProperty_IsCastShadow, typeof(ShadowCastMode), typeof(LanguageResourceDictionary), ShadowCastMode.None, selectBoxWidth: 100),
@@ -483,7 +490,7 @@ namespace NiVE3.Model
                             new DoubleProperty(ILayerObject.ImageLayerOptionSpecularIntensityId, LanguageResourceDictionary.ResourceKeys.LayerOptionsProperty_SpecularIntensity, 50.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
                             new DoubleProperty(ILayerObject.ImageLayerOptionSpecularShininessId, LanguageResourceDictionary.ResourceKeys.LayerOptionsProperty_SpecularShininess, 5.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
                             new DoubleProperty(ILayerObject.ImageLayerOptionMetalId, LanguageResourceDictionary.ResourceKeys.LayerOptionsProperty_Metal, 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
-                        ]), LayerId.ToInt128(), compositionModel, this, historyModel);
+                        ]), LayerId.ToInt128(), projectModel, compositionModel, this, historyModel);
                     }
                     break;
             }
@@ -1223,7 +1230,7 @@ namespace NiVE3.Model
 
         public void InsertEffect(Guid[] effectUuids, int index)
         {
-            var effectModels = effectUuids.Select(id => EffectListModel.CreateEffect(id, CompositionModel, this, HistoryModel)).OfType<EffectModel>().ToArray();
+            var effectModels = effectUuids.Select(id => EffectListModel.CreateEffect(id, ProjectModel, CompositionModel, this, HistoryModel)).OfType<EffectModel>().ToArray();
 
             var i = index;
             foreach (var e in effectModels)
@@ -1400,7 +1407,7 @@ namespace NiVE3.Model
 
             foreach (var effectData in data.Effects)
             {
-                var effectModel = EffectListModel.CreateEffect(effectData.EffectPluginId, CompositionModel, this, HistoryModel, effectData.EffectId);
+                var effectModel = EffectListModel.CreateEffect(effectData.EffectPluginId, ProjectModel, CompositionModel, this, HistoryModel, effectData.EffectId);
                 if (effectModel == null)
                 {
                     continue;
@@ -1527,7 +1534,7 @@ namespace NiVE3.Model
             var index = insertStartIndex;
             foreach (var effectData in data.Data)
             {
-                var newEffect = EffectListModel.CreateEffect(effectData.EffectPluginId, CompositionModel, this, HistoryModel);
+                var newEffect = EffectListModel.CreateEffect(effectData.EffectPluginId, ProjectModel, CompositionModel, this, HistoryModel);
                 if (newEffect == null)
                 {
                     continue;

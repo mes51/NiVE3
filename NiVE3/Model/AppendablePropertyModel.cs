@@ -49,6 +49,8 @@ namespace NiVE3.Model
 
         bool UseEnableSwitch { get; }
 
+        ProjectModel ProjectModel { get; }
+
         CompositionModel CompositionModel { get; }
 
         LayerModel? LayerModel { get; }
@@ -57,11 +59,12 @@ namespace NiVE3.Model
 
         HistoryModel HistoryModel { get; }
 
-        public AppendablePropertyModel(PropertyBase property, Int128 parentObjectId, CompositionModel compositionModel, LayerModel layerModel, HistoryModel historyModel) : this(property, parentObjectId, compositionModel, layerModel, null, historyModel) { }
+        public AppendablePropertyModel(PropertyBase property, Int128 parentObjectId, ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, HistoryModel historyModel) : this(property, parentObjectId, projectModel, compositionModel, layerModel, null, historyModel) { }
 
-        public AppendablePropertyModel(PropertyBase property, Int128 parentObjectId, CompositionModel compositionModel, LayerModel layerModel, EffectModel? effectModel, HistoryModel historyModel)
+        public AppendablePropertyModel(PropertyBase property, Int128 parentObjectId, ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, EffectModel? effectModel, HistoryModel historyModel)
         {
             Property = property;
+            ProjectModel = projectModel;
             CompositionModel = compositionModel;
             LayerModel = layerModel;
             EffectModel = effectModel;
@@ -368,7 +371,7 @@ namespace NiVE3.Model
         PropertyGroupModel AddChildInternal(AppendablePropertyItem item, Guid? instanceId)
         {
             var group = item.CreateFunc();
-            var groupModel = new PropertyGroupModel(group, ObjectId, CompositionModel, LayerModel, EffectModel, HistoryModel, UseEnableSwitch, instanceId);
+            var groupModel = new PropertyGroupModel(group, ObjectId, ProjectModel, CompositionModel, LayerModel, EffectModel, HistoryModel, UseEnableSwitch, instanceId);
             groupModel.ValueUpdated += Child_ValueUpdated;
             groupModel.ValueCommited += Child_ValueCommited;
 

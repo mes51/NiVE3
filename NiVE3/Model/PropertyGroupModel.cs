@@ -60,6 +60,8 @@ namespace NiVE3.Model
 
         public event EventHandler<EventArgs>? ValueCommited;
 
+        ProjectModel ProjectModel { get; }
+
         CompositionModel CompositionModel { get; }
 
         LayerModel? LayerModel { get; }
@@ -68,11 +70,12 @@ namespace NiVE3.Model
 
         HistoryModel HistoryModel { get; }
 
-        public PropertyGroupModel(PropertyBase property, Int128 parentObjectId, CompositionModel compositionModel, LayerModel layerModel, HistoryModel historyModel, Guid? instanceId = null) : this(property, parentObjectId, compositionModel, layerModel, null, historyModel, false, instanceId) { }
+        public PropertyGroupModel(PropertyBase property, Int128 parentObjectId, ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, HistoryModel historyModel, Guid? instanceId = null) : this(property, parentObjectId, projectModel, compositionModel, layerModel, null, historyModel, false, instanceId) { }
 
-        public PropertyGroupModel(PropertyBase property, Int128 parentObjectId, CompositionModel compositionModel, LayerModel layerModel, EffectModel? effectModel, HistoryModel historyModel, bool useEnableSwitch, Guid? instanceId = null)
+        public PropertyGroupModel(PropertyBase property, Int128 parentObjectId, ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, EffectModel? effectModel, HistoryModel historyModel, bool useEnableSwitch, Guid? instanceId = null)
         {
             Property = property;
+            ProjectModel = projectModel;
             CompositionModel = compositionModel;
             LayerModel = layerModel;
             EffectModel = effectModel;
@@ -95,15 +98,15 @@ namespace NiVE3.Model
             {
                 if (c is PropertyGroup)
                 {
-                    Children.Add(new PropertyGroupModel(c, ObjectId, compositionModel, layerModel, effectModel, historyModel, false));
+                    Children.Add(new PropertyGroupModel(c, ObjectId, projectModel, compositionModel, layerModel, effectModel, historyModel, false));
                 }
                 else if (c is AppendableProperty)
                 {
-                    Children.Add(new AppendablePropertyModel(c, ObjectId, compositionModel, layerModel, effectModel, historyModel));
+                    Children.Add(new AppendablePropertyModel(c, ObjectId, projectModel, compositionModel, layerModel, effectModel, historyModel));
                 }
                 else
                 {
-                    Children.Add(new PropertyModel(c, ObjectId, compositionModel, layerModel, effectModel, historyModel));
+                    Children.Add(new PropertyModel(c, ObjectId, projectModel, compositionModel, layerModel, effectModel, historyModel));
                 }
             }
 

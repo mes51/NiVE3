@@ -115,6 +115,8 @@ namespace NiVE3.Model
             set { SetProperty(ref rawValue, value); }
         }
 
+        ProjectModel ProjectModel { get; }
+
         CompositionModel CompositionModel { get; }
 
         LayerModel LayerModel { get; }
@@ -125,11 +127,12 @@ namespace NiVE3.Model
 
         ExpressionScript? CompiledScript { get; set; }
 
-        public PropertyModel(PropertyBase property, Int128 parentObjectId, CompositionModel compositionModel, LayerModel layerModel, HistoryModel historyModel) : this(property, parentObjectId, compositionModel, layerModel, null, historyModel) { }
+        public PropertyModel(PropertyBase property, Int128 parentObjectId, ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, HistoryModel historyModel) : this(property, parentObjectId, projectModel, compositionModel, layerModel, null, historyModel) { }
 
-        public PropertyModel(PropertyBase property, Int128 parentObjectId, CompositionModel compositionModel, LayerModel layerModel, EffectModel? effectModel, HistoryModel historyModel)
+        public PropertyModel(PropertyBase property, Int128 parentObjectId, ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, EffectModel? effectModel, HistoryModel historyModel)
         {
             Property = property;
+            ProjectModel = projectModel;
             CompositionModel = compositionModel;
             LayerModel = layerModel;
             EffectModel = effectModel;
@@ -309,7 +312,7 @@ namespace NiVE3.Model
 
                     try
                     {
-                        using var context = ExpressionEngine.CreateContext(globalTime, CompositionModel, LayerModel, EffectModel, this);
+                        using var context = ExpressionEngine.CreateContext(globalTime, ProjectModel, CompositionModel, LayerModel, EffectModel, this);
                         var expressionResult = context.Evaluate(CompiledScript, expressionValue);
 
                         if (Property.PropertyType.TryConvertFromExpressionValue(expressionResult, out var newValue))

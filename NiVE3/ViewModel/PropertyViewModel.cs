@@ -323,7 +323,7 @@ namespace NiVE3.ViewModel
                 {
                     if (string.IsNullOrEmpty(PropertyModel.ExpressionCode))
                     {
-                        PropertyModel.ChangeExpressionCode("thisProperty");
+                        PropertyModel.ChangeExpressionCode("thisPropertyValue");
                     }
                     else
                     {

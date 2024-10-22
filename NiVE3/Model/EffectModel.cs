@@ -70,9 +70,9 @@ namespace NiVE3.Model
 
         bool IsSupportGpu { get; }
 
-        public EffectModel(ExportLifetimeContext<IEffect> effect, IEffectMetadata metadata, CompositionModel compositionModel, LayerModel layerModel, HistoryModel historyModel) : this(effect, metadata, compositionModel, layerModel, historyModel, null) { }
+        public EffectModel(ExportLifetimeContext<IEffect> effect, IEffectMetadata metadata, ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, HistoryModel historyModel) : this(effect, metadata, projectModel, compositionModel, layerModel, historyModel, null) { }
 
-        public EffectModel(ExportLifetimeContext<IEffect> effect, IEffectMetadata metadata, CompositionModel compositionModel, LayerModel layerModel, HistoryModel historyModel, Guid? effectId)
+        public EffectModel(ExportLifetimeContext<IEffect> effect, IEffectMetadata metadata, ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, HistoryModel historyModel, Guid? effectId)
         {
             Effect = effect;
             Metadata = metadata;
@@ -80,7 +80,7 @@ namespace NiVE3.Model
             HistoryModel = historyModel;
             CompositionModel = compositionModel;
             EffectId = effectId ?? Guid.NewGuid();
-            Properties = new PropertyGroupModel(new PropertyGroup(EffectPropertyGroupId, "", effect.Value.GetProperties()), EffectId.ToInt128(), compositionModel, layerModel, this, historyModel, false);
+            Properties = new PropertyGroupModel(new PropertyGroup(EffectPropertyGroupId, "", effect.Value.GetProperties()), EffectId.ToInt128(), projectModel, compositionModel, layerModel, this, historyModel, false);
             IsSupportGpu = metadata.IsSupportGpu;
             Properties.ValueUpdated += Property_ValueUpdated;
 
