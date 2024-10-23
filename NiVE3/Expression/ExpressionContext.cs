@@ -363,7 +363,7 @@ namespace NiVE3.Expression
                 { "name", effectModel.Name },
                 { "comment", effectModel.Comment },
                 { "isEnable", effectModel.IsEnable },
-                { "properties", WrapProperty(context, effectModel.Properties, time) }
+                { "property", (Func<string, JsValue>)(key => FindProperty(context, effectModel.Properties, key, time)) }
             };
 
             return JsValue.FromObject(context.Engine, values);
@@ -421,7 +421,7 @@ namespace NiVE3.Expression
             var values = new Dictionary<string, object>
             {
                 { "name", propertyGroupModel.Name },
-                { "children", (Func<string, JsValue>)(key => FindProperty(context, propertyGroupModel, key, time)) }
+                { "property", (Func<string, JsValue>)(key => FindProperty(context, propertyGroupModel, key, time)) }
             };
 
             return JsValue.FromObject(context.Engine, values);
@@ -432,7 +432,7 @@ namespace NiVE3.Expression
             var values = new Dictionary<string, object>
             {
                 { "name", appendablePropertyModel.Name },
-                { "children", (Func<object, JsValue>)(key => FindProperty(context, appendablePropertyModel, key, time)) }
+                { "property", (Func<object, JsValue>)(key => FindProperty(context, appendablePropertyModel, key, time)) }
             };
 
             return JsValue.FromObject(context.Engine, values);
