@@ -308,7 +308,7 @@ namespace NiVE3.Model
                 using var entry = CycleChecker.TryEnter(ObjectId);
                 if (entry != null)
                 {
-                    var expressionValue = Property.PropertyType.ConvertToExpressionValue(value);
+                    var expressionValue = ToExpressionValue(value);
 
                     try
                     {
@@ -346,6 +346,11 @@ namespace NiVE3.Model
             }
 
             return value;
+        }
+
+        public object? ToExpressionValue(object? value)
+        {
+            return Property.PropertyType.ConvertToExpressionValue(value);
         }
 
         public object? GetCurrentTimeValue()

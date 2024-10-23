@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Jint;
 using Jint.Native;
 using Jint.Native.ShadowRealm;
+using Jint.Runtime;
 using Jint.Runtime.Descriptors;
 using Jint.Runtime.Interop;
 using NiVE3.Config;
@@ -381,8 +382,24 @@ namespace NiVE3.Expression
                     {
                         var result = new JsObject(context.Engine);
                         result.Set("name", p.Name);
+                        result.FastSetProperty("valueAtTime", new PropertyDescriptor(
+                            new ClrFunction(context.Engine, "valueAtTime", (_, args) =>
+                            {
+                                if (args.Length < 1)
+                                {
+#pragma warning disable CA1507 // NOTE: JSから引数を配列として受け取る都合上、引数名は存在しないので定数で引数名を渡す
+                                    throw new ArgumentOutOfRangeException("time");
+#pragma warning restore CA1507 // nameof を使用してシンボル名を表現します
+                                }
+                                var time = args[0].AsNumber();
+                                return JsValue.FromObject(context.Engine, p.ToExpressionValue(p.GetValue(time - p.SourceStartPoint, time)) ?? JsValue.Null);
+                            }, 1),
+                            false,
+                            false,
+                            false
+                        ));
                         result.FastSetProperty("value", new GetSetPropertyDescriptor(
-                            new ClrFunction(context.Engine, "value", (_, _) => JsValue.FromObject(context.Engine, p.GetValue(time - p.SourceStartPoint, time))),
+                            new ClrFunction(context.Engine, "value", (_, _) => JsValue.FromObject(context.Engine, p.ToExpressionValue(p.GetValue(time - p.SourceStartPoint, time)))),
                             null,
                             false,
                             false
