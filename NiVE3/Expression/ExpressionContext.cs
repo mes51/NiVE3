@@ -243,6 +243,7 @@ namespace NiVE3.Expression
             var values = new Dictionary<string, object>
             {
                 { "name", layerModel.Name },
+                { "index", layerModel.Index },
                 { "width", layerModel.SourceWidth },
                 { "height", layerModel.SourceHeight },
                 { "comment", layerModel.Comment },

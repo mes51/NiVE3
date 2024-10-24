@@ -269,6 +269,8 @@ namespace NiVE3.Model
 
         public int SourceHeight => IsCustomizableFootageSource ? CompositionModel.Height : FootageModel.Height;
 
+        public int Index => CompositionModel.Layers.IndexOf(this) + 1;
+
         private ObservableCollection<EffectModel> effects = [];
         public ObservableCollection<EffectModel> Effects
         {
