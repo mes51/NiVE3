@@ -16,6 +16,7 @@ using NiVE3.Expression.Converter;
 using NiVE3.Expression.Utility;
 using NiVE3.Model;
 using NiVE3.Plugin.Interfaces;
+using NiVE3.Plugin.Property;
 using NiVE3.Shared.Extension;
 
 namespace NiVE3.Expression
@@ -412,6 +413,80 @@ namespace NiVE3.Expression
                             false
                         ));
 
+                        result.Set("keyFrameCount", propertyModel.KeyFrames?.Count ?? 0);
+                        result.FastSetProperty("keyFrame", new PropertyDescriptor(
+                            new ClrFunction(context.Engine, "keyFrame", (_, args) =>
+                            {
+                                if (args.Length < 1)
+                                {
+#pragma warning disable CA1507 // NOTE: JSから引数を配列として受け取る都合上、引数名は存在しないので定数で引数名を渡す
+                                    throw new ArgumentOutOfRangeException("index");
+#pragma warning restore CA1507 // nameof を使用してシンボル名を表現します
+                                }
+
+                                var index = (int)args[0].AsNumber();
+                                if (index < 1 || index > p.KeyFrames.Count)
+                                {
+                                    return JsValue.Undefined;
+                                }
+
+                                return WrapKeyFrame(context, p, p.KeyFrames[index - 1]);
+                            }, 1),
+                            false,
+                            false,
+                            false
+                        ));
+                        result.FastSetProperty("getKeyFrameNextTime", new PropertyDescriptor(
+                            new ClrFunction(context.Engine, "getKeyFrameNextTime", (_, args) =>
+                            {
+                                if (args.Length < 1)
+                                {
+#pragma warning disable CA1507 // NOTE: JSから引数を配列として受け取る都合上、引数名は存在しないので定数で引数名を渡す
+                                    throw new ArgumentOutOfRangeException("time");
+#pragma warning restore CA1507 // nameof を使用してシンボル名を表現します
+                                }
+
+                                var time = args[0].AsNumber();
+                                foreach (var keyFrame in p.KeyFrames)
+                                {
+                                    if (keyFrame.Time >= time)
+                                    {
+                                        return WrapKeyFrame(context, p, keyFrame);
+                                    }
+                                }
+
+                                return JsValue.Undefined;
+                            }, 1),
+                            false,
+                            false,
+                            false
+                        ));
+                        result.FastSetProperty("getKeyFramePrevTime", new PropertyDescriptor(
+                            new ClrFunction(context.Engine, "getKeyFramePrevTime", (_, args) =>
+                            {
+                                if (args.Length < 1)
+                                {
+#pragma warning disable CA1507 // NOTE: JSから引数を配列として受け取る都合上、引数名は存在しないので定数で引数名を渡す
+                                    throw new ArgumentOutOfRangeException("time");
+#pragma warning restore CA1507 // nameof を使用してシンボル名を表現します
+                                }
+
+                                var time = args[0].AsNumber();
+                                foreach (var keyFrame in p.KeyFrames.Reverse())
+                                {
+                                    if (keyFrame.Time <= time)
+                                    {
+                                        return WrapKeyFrame(context, p, keyFrame);
+                                    }
+                                }
+
+                                return JsValue.Undefined;
+                            }, 1),
+                            false,
+                            false,
+                            false
+                        ));
+
                         return result;
                     }
                 case PropertyGroupModel g:
@@ -440,6 +515,17 @@ namespace NiVE3.Expression
             {
                 { "name", appendablePropertyModel.Name },
                 { "property", (Func<object, JsValue>)(key => FindProperty(context, appendablePropertyModel, key, time)) }
+            };
+
+            return JsValue.FromObject(context.Engine, values);
+        }
+
+        static JsValue WrapKeyFrame(ExpressionContext context, PropertyModel propertyModel, KeyFrame keyFrame)
+        {
+            var values = new Dictionary<string, object>
+            {
+                { "time", keyFrame.Time },
+                { "value", propertyModel.ToExpressionValue(keyFrame.Value) ?? JsValue.Null }
             };
 
             return JsValue.FromObject(context.Engine, values);
