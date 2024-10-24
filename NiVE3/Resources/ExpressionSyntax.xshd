@@ -6,7 +6,8 @@
     <Color name="Character" foreground="Sienna" exampleText="var char = 'a';" />
     <Color name="Regex" foreground="Sienna" exampleText="/abc/m" />
     <Color name="JavaScriptKeyWords" foreground="Blue" exampleText="return myVariable;" />
-    <Color name="JavaScriptIntrinsics" foreground="Blue" exampleText="Math.random()" />
+	<Color name="JavaScriptIntrinsics" foreground="#2B91AF" exampleText="Math.random()" />
+	<Color name="ExpressionIntrinsics" foreground="#2B91AF" exampleText="Math.random()" />
     <Color name="JavaScriptLiterals" foreground="Blue" exampleText="return false;" />
     <Color name="JavaScriptGlobalFunctions" foreground="Blue" exampleText="escape(myString);" />
     <RuleSet name="JavaScriptCode" ignoreCase="false">
@@ -93,6 +94,9 @@
 			<Word>Proxy</Word>
 			<Word>Intl</Word>
         </Keywords>
+		<Keywords color="ExpressionIntrinsics">
+			<Word>Random</Word>
+		</Keywords>
         <Keywords color="JavaScriptLiterals">
 			<Word>false</Word>
 			<Word>true</Word>
@@ -102,6 +106,7 @@
 			<Word>NaN</Word>
 			<Word>Infinity</Word>
         </Keywords>
+		<!--
         <Keywords color="JavaScriptGlobalFunctions">
 			<Word>eval</Word>
 			<Word>isFinite</Word>
@@ -115,6 +120,7 @@
 			<Word>escape</Word>
 			<Word>unescape</Word>
         </Keywords>
+		-->
         <Span color="Comment">
             <Begin>//</Begin>
         </Span>
