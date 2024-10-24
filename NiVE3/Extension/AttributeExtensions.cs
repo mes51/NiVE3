@@ -11,12 +11,12 @@ namespace NiVE3.Extension
     {
         public static bool IsApplied<T>(this Type type) where T : Attribute
         {
-            return type.GetCustomAttribute<T>() != null;
+            return Attribute.IsDefined(type, typeof(T));
         }
 
         public static bool IsApplied<T>(this object obj) where T : Attribute
         {
-            return obj.GetType().GetCustomAttribute<T>() != null;
+            return Attribute.IsDefined(obj.GetType(), typeof(T));
         }
     }
 }

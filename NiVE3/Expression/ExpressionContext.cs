@@ -13,6 +13,7 @@ using Jint.Runtime.Descriptors;
 using Jint.Runtime.Interop;
 using NiVE3.Config;
 using NiVE3.Expression.Converter;
+using NiVE3.Expression.Utility;
 using NiVE3.Model;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Shared.Extension;
@@ -47,6 +48,10 @@ namespace NiVE3.Expression
                 options.AddObjectConverter<ObjectArrayConverter>();
                 options.Interop.CreateClrObject = static io => new Dictionary<string, object?>();
                 options.TimeoutInterval(TimeSpan.FromSeconds(ApplicationSetting.Setting.ExpressionTimeout));
+                options.SetTypeResolver(new TypeResolver
+                {
+                    MemberFilter = static member => Attribute.IsDefined(member, typeof(ExpressionPublicMemberAttribute))
+                });
             });
             Engine.SetValue("time", globalTime);
             Engine.SetValue("comp", (Func<string, JsValue>)(key => FindComposition(this, key, globalTime)));
@@ -57,6 +62,7 @@ namespace NiVE3.Expression
                 Engine.SetValue("thisEffect", WrapEffect(this, effectModel, globalTime));
             }
             Engine.SetValue("thisProperty", WrapProperty(this, propertyModel, globalTime));
+            Engine.SetValue("Random", new ExpressionRandom(globalTime, propertyModel.ObjectId));
         }
 
         public object? Evaluate(ExpressionScript script, object? value)
