@@ -40,7 +40,7 @@ namespace NiVE3.Plugin.Property.Types
             throw new NotImplementedException();
         }
 
-        public bool TryConvertFromExpressionValue(object? expressionValue, out object? value)
+        public bool TryConvertFromExpressionValue(object? expressionValue, object? rawValue, out object? value)
         {
             throw new NotImplementedException();
         }

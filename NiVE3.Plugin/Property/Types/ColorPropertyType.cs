@@ -94,7 +94,7 @@ namespace NiVE3.Plugin.Property.Types
             }
         }
 
-        public bool TryConvertFromExpressionValue(object? expressionValue, out object? value)
+        public bool TryConvertFromExpressionValue(object? expressionValue, object? rawValue, out object? value)
         {
             if (expressionValue is object[] colorElements)
             {

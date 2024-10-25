@@ -51,7 +51,7 @@ namespace NiVE3.Plugin.Property.Types
             return value is bool b && b ? TrueHashBase : FalseHashBase;
         }
 
-        public bool TryConvertFromExpressionValue(object? expressionValue, out object? value)
+        public bool TryConvertFromExpressionValue(object? expressionValue, object? rawValue, out object? value)
         {
             if (expressionValue is bool b)
             {

@@ -301,21 +301,22 @@ namespace NiVE3.Model
 
         public object? GetValue(double time, double globalTime)
         {
-            var value = GetRawValue(time);
+            var rawValue = GetRawValue(time);
+            var value = rawValue;
 
             if (IsEnableExpression)
             {
                 using var entry = CycleChecker.TryEnter(ObjectId);
                 if (entry != null)
                 {
-                    var expressionValue = ToExpressionValue(value);
+                    var expressionValue = ToExpressionValue(rawValue);
 
                     try
                     {
                         using var context = ExpressionEngine.CreateContext(globalTime, ProjectModel, CompositionModel, LayerModel, EffectModel, this);
                         var expressionResult = context.Evaluate(CompiledScript, expressionValue);
 
-                        if (Property.PropertyType.TryConvertFromExpressionValue(expressionResult, out var newValue))
+                        if (Property.PropertyType.TryConvertFromExpressionValue(expressionResult, rawValue, out var newValue))
                         {
                             if (Property is CompositionDependPropertyBase cp)
                             {

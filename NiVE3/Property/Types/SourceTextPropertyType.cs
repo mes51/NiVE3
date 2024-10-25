@@ -19,8 +19,7 @@ namespace NiVE3.Property.Types
 
         public InterpolationType SupportedInterpolationTypes => InterpolationType.None;
 
-        // TODO: エクスプレッション対応
-        public bool IsSupportedExpression => false;
+        public bool IsSupportedExpression => true;
 
         private SourceTextPropertyType() { }
 
@@ -114,9 +113,56 @@ namespace NiVE3.Property.Types
             return hashBase.ToArray();
         }
 
-        public bool TryConvertFromExpressionValue(object? expressionValue, out object? value)
+        public bool TryConvertFromExpressionValue(object? expressionValue, object? rawValue, out object? value)
         {
-            throw new NotImplementedException();
+            if (rawValue is not StyledText baseText)
+            {
+                value = null;
+                return false;
+            }
+
+            if (expressionValue is string text)
+            {
+                value = baseText.ChangeText(text);
+                return true;
+            }
+            else if (expressionValue is IDictionary<string, object?> dictionary)
+            {
+                if (!dictionary.TryGetValue("text", out string? styledText) || !dictionary.TryGetValue("defaultStyle", out IDictionary<string, object?>? defaultStyleData))
+                {
+                    value = null;
+                    return false;
+                }
+
+                var defaultStyle = ConvertExpressionValueToStyle(defaultStyleData);
+                var styles = new List<TextStyleRun>();
+                if (dictionary.TryGetValue("styles", out object[]? styleRunsData))
+                {
+                    foreach (var styleRunData in styleRunsData.OfType<IDictionary<string, object?>>())
+                    {
+                        if (styleRunData.TryGetValue("run", out object[]? run) && run.Length > 1 && styleRunData.TryGetValue("style", out IDictionary<string, object?>? styleData))
+                        {
+                            var begin = Convert.ToInt32(run[0]);
+                            var end = Convert.ToInt32(run[1]);
+                            if (begin == end)
+                            {
+                                continue;
+                            }
+                            else if (end < begin)
+                            {
+                                (begin, end) = (end, begin);
+                            }
+                            styles.Add(new TextStyleRun(begin, end, ConvertExpressionValueToStyle(styleData)));
+                        }
+                    }
+                }
+
+                value = new StyledText(styledText, defaultStyle, [..styles]);
+                return true;
+            }
+
+            value = null;
+            return false;
         }
 
         public object? ConvertToExpressionValue(object? value)
@@ -159,6 +205,11 @@ namespace NiVE3.Property.Types
                 { "fillColor", new object[] { style.FillColor.X, style.FillColor.Y, style.FillColor.Z, style.FillColor.W } },
                 { "lineColor", new object[] { style.TextLineColor.X, style.TextLineColor.Y, style.TextLineColor.Z, style.TextLineColor.W } }
             };
+        }
+
+        static TextStyle ConvertExpressionValueToStyle(IDictionary<string, object?> expressionValue)
+        {
+            return TextStyle.Empty;
         }
     }
 }
