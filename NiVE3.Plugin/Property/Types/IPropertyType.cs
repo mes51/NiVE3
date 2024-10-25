@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NiVE3.Plugin.Interfaces;
 
 namespace NiVE3.Plugin.Property.Types
 {
@@ -65,5 +66,25 @@ namespace NiVE3.Plugin.Property.Types
         /// <param name="value">このプロパティの型の値</param>
         /// <returns>プリミティブ型、またはstringの単体、配列、IDictionary&lt;string, object?&gt;のいずれか</returns>
         object? ConvertToExpressionValue(object? value);
+    }
+
+    public interface ICompositionDependIPropertyType : IPropertyType
+    {
+        /// <summary>
+        /// エクスプレッションで処理された後の値から、このプロパティの型の値に変換します
+        /// </summary>
+        /// <param name="expressionValue">エクスプレッションから返ってきた値。プリミティブ型、またはstringの単体、配列、IDictionary&lt;string, object?&gt;のいずれか</param>
+        /// <param name="composition">コンポジション</param>
+        /// <param name="value">このプロパティの型の値。変換できなかった場合は不定</param>
+        /// <returns>このプロパティの型の値に変換できたかどうか</returns>
+        bool TryConvertFromExpressionValue(object? expressionValue, ICompositionObject composition, out object? value);
+
+        /// <summary>
+        /// このプロパティの型の値からエクスプレッションで使用可能な値に変換します
+        /// </summary>
+        /// <param name="value">このプロパティの型の値</param>
+        /// <param name="composition">コンポジション</param>
+        /// <returns>プリミティブ型、またはstringの単体、配列、IDictionary&lt;string, object?&gt;のいずれか</returns>
+        object? ConvertToExpressionValue(object? value, ICompositionObject composition);
     }
 }

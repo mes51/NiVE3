@@ -11,7 +11,7 @@ using NiVE3.Shared.Extension;
 
 namespace NiVE3.Plugin.Property.Types
 {
-    internal class UseLayerImagePropertyType : IPropertyType
+    internal class UseLayerImagePropertyType : ICompositionDependIPropertyType
     {
         public static readonly UseLayerImagePropertyType Instance = new UseLayerImagePropertyType();
 
@@ -84,11 +84,21 @@ namespace NiVE3.Plugin.Property.Types
             throw new NotImplementedException();
         }
 
+        public bool TryConvertFromExpressionValue(object? expressionValue, ICompositionObject composition, out object? value)
+        {
+            throw new NotImplementedException();
+        }
+
         public object? ConvertToExpressionValue(object? value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public object? ConvertToExpressionValue(object? value, ICompositionObject composition)
         {
             if (value is UseLayerImageTarget target)
             {
-                return target.LayerId.ToString();
+                return composition.GetLayer(target.LayerId)?.Name ?? "";
             }
             else
             {

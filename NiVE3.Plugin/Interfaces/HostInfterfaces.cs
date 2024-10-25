@@ -102,6 +102,8 @@ namespace NiVE3.Plugin.Interfaces
 
         public const string AudioLevelId = nameof(AudioLevelId);
 
+        public string Name { get; }
+
         NImage GetRawImage(double layerTime, double downSamplingRate, bool useGpu);
 
         NImage GetEffectedImage(double layerTime, double downSamplingRate, bool useGpu);

@@ -213,6 +213,7 @@ namespace NiVE3.Expression
             return JsValue.Undefined;
         }
 
+        // TODO: ここら辺ラッパークラスを用意する?
         static JsValue WrapComposition(ExpressionContext context, CompositionModel compositionModel, double time)
         {
             var values = new Dictionary<string, object>

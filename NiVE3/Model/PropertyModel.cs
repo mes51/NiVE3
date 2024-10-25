@@ -350,7 +350,14 @@ namespace NiVE3.Model
 
         public object? ToExpressionValue(object? value)
         {
-            return Property.PropertyType.ConvertToExpressionValue(value);
+            if (Property.PropertyType is ICompositionDependIPropertyType cpt)
+            {
+                return cpt.ConvertToExpressionValue(value, CompositionModel);
+            }
+            else
+            {
+                return Property.PropertyType.ConvertToExpressionValue(value);
+            }
         }
 
         public object? GetCurrentTimeValue()
