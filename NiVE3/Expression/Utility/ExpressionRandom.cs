@@ -27,11 +27,12 @@ namespace NiVE3.Expression.Utility
             setSeed(0);
         }
 
+        #region Expression members
+#pragma warning disable IDE1006 // NOTE: エクスプレッション用メソッドのため、命名規則は camelCase を許容する
+
         [ExpressionPublicMember]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#pragma warning disable IDE1006 // NOTE: エクスプレッション用メソッドのため、命名規則は camelCase を許容する
         public double next()
-#pragma warning restore IDE1006 // 命名スタイル
         {
             var result = BitOperations.RotateLeft(S2 * 5, 7) * 9;
             var t = S2 << 17;
@@ -52,18 +53,14 @@ namespace NiVE3.Expression.Utility
 
         [ExpressionPublicMember]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#pragma warning disable IDE1006 // NOTE: エクスプレッション用メソッドのため、命名規則は camelCase を許容する
         public double next(double max)
-#pragma warning restore IDE1006 // 命名スタイル
         {
             return next(max, 0.0);
         }
 
         [ExpressionPublicMember]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#pragma warning disable IDE1006 // NOTE: エクスプレッション用メソッドのため、命名規則は camelCase を許容する
         public double next(double max, double min)
-#pragma warning restore IDE1006 // 命名スタイル
         {
             if (max < min)
             {
@@ -76,27 +73,21 @@ namespace NiVE3.Expression.Utility
 
         [ExpressionPublicMember]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#pragma warning disable IDE1006 // NOTE: エクスプレッション用メソッドのため、命名規則は camelCase を許容する
         public void setSeed(double seed)
-#pragma warning restore IDE1006 // 命名スタイル
         {
             setSeed(seed, true, false);
         }
 
         [ExpressionPublicMember]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#pragma warning disable IDE1006 // NOTE: エクスプレッション用メソッドのため、命名規則は camelCase を許容する
         public void setSeed(double seed, bool isChangeByTime)
-#pragma warning restore IDE1006 // 命名スタイル
         {
             setSeed(seed, isChangeByTime, false);
         }
 
         [ExpressionPublicMember]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#pragma warning disable IDE1006 // NOTE: エクスプレッション用メソッドのため、命名規則は camelCase を許容する
         public void setSeed(double seed, bool isChangeByTime, bool isGlobalSeed)
-#pragma warning restore IDE1006 // 命名スタイル
         {
             if (isGlobalSeed)
             {
@@ -107,6 +98,9 @@ namespace NiVE3.Expression.Utility
                 GeneratePRNGParameters(BitConverter.DoubleToUInt64Bits(seed + (isChangeByTime ? Time : 0.0)) ^ ObjectIdSeed);
             }
         }
+
+#pragma warning restore IDE1006 // 命名スタイル
+        #endregion Expression members
 
         // SEE: https://xoshiro.di.unimi.it/splitmix64.c
         void GeneratePRNGParameters(ulong seed)
