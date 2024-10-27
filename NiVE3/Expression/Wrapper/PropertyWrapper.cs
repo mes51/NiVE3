@@ -20,14 +20,21 @@ namespace NiVE3.Expression.Wrapper
 #pragma warning restore IDE1006 // 命名スタイル
         #endregion Expression members
 
-        public static IPropertyWrapper? FindProperty(PropertyGroupModel propertyGroupModel, string name, double globalTime)
+        public static IPropertyWrapper? FindProperty(PropertyGroupModel propertyGroupModel, object key, double globalTime)
         {
-            foreach (var child in propertyGroupModel.Children)
+            if (key is string name)
             {
-                if (child.Name == name)
+                foreach (var child in propertyGroupModel.Children)
                 {
-                    return Wrap(child, globalTime);
+                    if (child.Name == name)
+                    {
+                        return Wrap(child, globalTime);
+                    }
                 }
+            }
+            else if (key is double index && index > 0 && index <= propertyGroupModel.Children.Count)
+            {
+                return Wrap(propertyGroupModel.Children[(int)index - 1], globalTime);
             }
 
             return null;
@@ -45,9 +52,9 @@ namespace NiVE3.Expression.Wrapper
                     }
                 }
             }
-            else if (key is int index && index > 0 && index <= appendablePropertyModel.Children.Count)
+            else if (key is double index && index > 0 && index <= appendablePropertyModel.Children.Count)
             {
-                return Wrap(appendablePropertyModel.Children[index - 1], globalTime);
+                return Wrap(appendablePropertyModel.Children[(int)index - 1], globalTime);
             }
 
             return null;
@@ -247,9 +254,9 @@ namespace NiVE3.Expression.Wrapper
         public IPropertyWrapper? parentProperty => PropertyGroupModel.ParentPropertyModel != null ? IPropertyWrapper.Wrap(PropertyGroupModel.ParentPropertyModel, GlobalTime) : null;
 
         [ExpressionPublicMember]
-        public IPropertyWrapper? property(string name)
+        public IPropertyWrapper? property(object key)
         {
-            return IPropertyWrapper.FindProperty(PropertyGroupModel, name, GlobalTime);
+            return IPropertyWrapper.FindProperty(PropertyGroupModel, key, GlobalTime);
         }
 
 #pragma warning restore IDE1006 // 命名スタイル

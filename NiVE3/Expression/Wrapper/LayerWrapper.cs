@@ -143,9 +143,9 @@ namespace NiVE3.Expression.Wrapper
                     }
                 }
             }
-            else if (key is int index && index > 0 && index <= LayerModel.Effects.Count)
+            else if (key is double index && index > 0 && index <= LayerModel.Effects.Count)
             {
-                return new EffectWrapper(LayerModel.Effects[index - 1], GlobalTime);
+                return new EffectWrapper(LayerModel.Effects[(int)index - 1], GlobalTime);
             }
 
             return null;

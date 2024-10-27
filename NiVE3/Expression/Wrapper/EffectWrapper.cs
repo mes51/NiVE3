@@ -22,9 +22,9 @@ namespace NiVE3.Expression.Wrapper
         public bool isEnable => EffectModel.IsEnable;
 
         [ExpressionPublicMember]
-        public IPropertyWrapper? property(string name)
+        public IPropertyWrapper? property(object key)
         {
-            return IPropertyWrapper.FindProperty(EffectModel.Properties, name, GlobalTime);
+            return IPropertyWrapper.FindProperty(EffectModel.Properties, key, GlobalTime);
         }
 
 #pragma warning restore IDE1006 // 命名スタイル
