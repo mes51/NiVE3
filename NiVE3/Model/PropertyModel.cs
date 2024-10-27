@@ -72,7 +72,19 @@ namespace NiVE3.Model
         public string ExpressionCode
         {
             get { return expressionCode; }
-            set { SetProperty(ref expressionCode, value); }
+            set
+            {
+                var oldIsEmpty = string.IsNullOrEmpty(expressionCode);
+                if (!oldIsEmpty && string.IsNullOrEmpty(value))
+                {
+                    HistoryModel.HistoryChanged -= HistoryModel_HistoryChanged;
+                }
+                SetProperty(ref expressionCode, value);
+                if (oldIsEmpty && !string.IsNullOrEmpty(value))
+                {
+                    HistoryModel.HistoryChanged += HistoryModel_HistoryChanged;
+                }
+            }
         }
 
         private string expressionErrorMessage = "";
@@ -107,6 +119,8 @@ namespace NiVE3.Model
         public event EventHandler<EventArgs>? ValueCommited;
 
         public event EventHandler<EventArgs>? ExpressionUpdated;
+
+        public event EventHandler<EventArgs>? ValueInvalidateByHistoryChanged;
 
         private object? rawValue;
         object? RawValue
@@ -765,6 +779,11 @@ namespace NiVE3.Model
                     }
                     break;
             }
+        }
+
+        private void HistoryModel_HistoryChanged(object? sender, EventArgs e)
+        {
+            ValueInvalidateByHistoryChanged?.Invoke(this, EventArgs.Empty);
         }
 
         ~PropertyModel()

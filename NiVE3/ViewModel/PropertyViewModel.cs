@@ -485,6 +485,7 @@ namespace NiVE3.ViewModel
             PropertyModel.ValueCommited += PropertyModel_ValueCommited;
             PropertyModel.ExpressionUpdated += PropertyModel_ExpressionUpdated;
             PropertyModel.PropertyChanged += PropertyModel_PropertyChanged;
+            PropertyModel.ValueInvalidateByHistoryChanged += PropertyModel_ValueInvalidateByHistoryChanged;
             PropertyChanged += PropertyViewModel_PropertyChanged;
         }
 
@@ -589,6 +590,11 @@ namespace NiVE3.ViewModel
                     HasExpressionError = PropertyModel.HasExpressionError;
                     break;
             }
+        }
+
+        private void PropertyModel_ValueInvalidateByHistoryChanged(object? sender, EventArgs e)
+        {
+            CurrentTimeValue = CalculationValue();
         }
 
         private void KeyFrames_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
