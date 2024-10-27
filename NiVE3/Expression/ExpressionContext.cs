@@ -59,7 +59,7 @@ namespace NiVE3.Expression
             Engine.SetValue("time", globalTime);
             Engine.SetValue("comp", (Func<string, CompositionWrapper?>)(key => FindComposition(this, key, globalTime)));
             Engine.SetValue("thisComp", new CompositionWrapper(compositionModel, globalTime));
-            Engine.SetValue("thisLayer", new LayerWrapper(layerModel, globalTime));
+            Engine.SetValue("thisLayer", new LayerWrapper(layerModel, compositionModel, globalTime));
             if (effectModel != null)
             {
                 Engine.SetValue("thisEffect", new EffectWrapper(effectModel, globalTime));

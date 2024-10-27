@@ -68,7 +68,7 @@ namespace NiVE3.Expression.Wrapper
             get
             {
                 var camera = CompositionModel.GetActiveCamera(GlobalTime);
-                return camera!= null ? new LayerWrapper(camera, GlobalTime) : null;
+                return camera!= null ? new LayerWrapper(camera, CompositionModel, GlobalTime) : null;
             }
         }
 
@@ -81,13 +81,13 @@ namespace NiVE3.Expression.Wrapper
                 {
                     if (layer.Name == name)
                     {
-                        return new LayerWrapper(layer, GlobalTime);
+                        return new LayerWrapper(layer, CompositionModel, GlobalTime);
                     }
                 }
             }
             else if (key is int index && index > 0 && CompositionModel.Layers.Count <= index)
             {
-                return new LayerWrapper(CompositionModel.Layers[index - 1], GlobalTime);
+                return new LayerWrapper(CompositionModel.Layers[index - 1], CompositionModel, GlobalTime);
             }
 
             return null;

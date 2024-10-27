@@ -9,7 +9,7 @@ using NiVE3.Shared.Extension;
 
 namespace NiVE3.Expression.Wrapper
 {
-    record LayerWrapper(LayerModel LayerModel, double GlobalTime)
+    record LayerWrapper(LayerModel LayerModel, CompositionModel CompositionModel, double GlobalTime)
     {
         #region Expression members
 #pragma warning disable IDE1006 // NOTE: エクスプレッション用メソッドのため、命名規則は camelCase を許容する
@@ -88,6 +88,29 @@ namespace NiVE3.Expression.Wrapper
 
         [ExpressionPublicMember]
         public string blendMode => LayerModel.BlendMode.ToString();
+
+        [ExpressionPublicMember]
+        public LayerWrapper? parent
+        {
+            get
+            {
+                var parentLayer = CompositionModel.Layers.FirstOrDefault(l => l.LayerId == LayerModel.ParentLayerId);
+                return parentLayer != null ? new LayerWrapper(parentLayer, CompositionModel, GlobalTime) : null;
+            }
+        }
+
+        [ExpressionPublicMember]
+        public LayerWrapper? trackMatte
+        {
+            get
+            {
+                var trackMatteLayer = CompositionModel.Layers.FirstOrDefault(l => l.LayerId == LayerModel.TrackMatteLayerId);
+                return trackMatteLayer != null ? new LayerWrapper(trackMatteLayer, CompositionModel, GlobalTime) : null;
+            }
+        }
+
+        [ExpressionPublicMember]
+        public string trackMatteMode => LayerModel.TrackMatteMode.ToString();
 
         [ExpressionPublicMember]
         public LayerTransformPropertiesWrapper? transform { get; } = LayerModel.TransformProperties != null ? new LayerTransformPropertiesWrapper(LayerModel.TransformProperties, GlobalTime) : null;
