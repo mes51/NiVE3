@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Model;
+using NiVE3.Util;
 
 namespace NiVE3.Expression.Wrapper
 {
@@ -68,6 +69,16 @@ namespace NiVE3.Expression.Wrapper
 
     record PropertyWrapper(PropertyModel PropertyModel, double GlobalTime) : IPropertyWrapper
     {
+        const string LoopModeCycle = "cycle";
+
+        const string LoopModePingPong = "pingpong";
+
+        const string LoopDirectionInfinity = "infinity";
+
+        const string LoopDirectionIn = "in";
+
+        const string LoopDirectionOut = "out";
+
         #region Expression members
 #pragma warning disable IDE1006 // NOTE: エクスプレッション用メソッドのため、命名規則は camelCase を許容する
 
@@ -123,6 +134,96 @@ namespace NiVE3.Expression.Wrapper
             }
 
             return null;
+        }
+
+        [ExpressionPublicMember]
+        public object? loop()
+        {
+            return loop(LoopModeCycle, LoopDirectionInfinity, 0, PropertyModel.KeyFrames.Count);
+        }
+
+        [ExpressionPublicMember]
+        public object? loop(string mode)
+        {
+            return loop(mode, LoopDirectionInfinity, 0, PropertyModel.KeyFrames.Count);
+        }
+
+        [ExpressionPublicMember]
+        public object? loop(string mode, string direction)
+        {
+            return loop(mode, direction, 0, PropertyModel.KeyFrames.Count);
+        }
+
+        [ExpressionPublicMember]
+        public object? loop(string mode, string direction, int rangeStart)
+        {
+            return loop(mode, direction, rangeStart, PropertyModel.KeyFrames.Count);
+        }
+
+        [ExpressionPublicMember]
+        public object? loop(string mode, string direction, int rangeBegin, int rangeEnd)
+        {
+            if (mode != LoopModeCycle && mode != LoopModePingPong)
+            {
+                throw new ArgumentException(null, nameof(mode));
+            }
+            if (direction != LoopDirectionInfinity && direction != LoopDirectionIn &&  direction != LoopDirectionOut)
+            {
+                throw new ArgumentException(null, nameof(direction));
+            }
+            if (PropertyModel.KeyFrames.Count < 0)
+            {
+                throw new InvalidOperationException("keyframe not found");
+            }
+
+            if (PropertyModel.KeyFrames.Count < 1)
+            {
+                return PropertyModel.GetValue(GlobalTime - PropertyModel.SourceStartPoint, GlobalTime);
+            }
+
+            if (rangeEnd < rangeBegin)
+            {
+                (rangeBegin, rangeEnd) = (rangeEnd, rangeBegin);
+            }
+            rangeBegin = Math.Max(rangeBegin, 1) - 1;
+            rangeEnd = Math.Min(rangeEnd, PropertyModel.KeyFrames.Count) - 1;
+
+            var beginKeyFrame = PropertyModel.KeyFrames[rangeBegin];
+            var endKeyFrame = PropertyModel.KeyFrames[rangeEnd];
+            var timeRange = endKeyFrame.Time - beginKeyFrame.Time;
+
+            var targetTime = 0.0;
+            var baseTime = TimeCalc.RoundTimeDigit(GlobalTime - PropertyModel.SourceStartPoint - beginKeyFrame.Time);
+            switch (mode)
+            {
+                case LoopModeCycle:
+                    targetTime = ((TimeCalc.RoundTimeDigit(baseTime % timeRange) + timeRange) % timeRange) + beginKeyFrame.Time;
+                    break;
+                case LoopModePingPong:
+                    {
+                        var b = Math.Abs(baseTime / timeRange) % 2.0;
+                        targetTime = (b - Math.Max(b - 1.0, 0.0) * 2.0) * timeRange + beginKeyFrame.Time;
+                    }
+                    break;
+            }
+
+            switch (direction)
+            {
+                case LoopDirectionIn:
+                    if (baseTime >= 0.0)
+                    {
+                        targetTime = GlobalTime - PropertyModel.SourceStartPoint;
+                    }
+                    break;
+                case LoopDirectionOut:
+                    if (baseTime + beginKeyFrame.Time < endKeyFrame.Time)
+                    {
+                        targetTime = GlobalTime - PropertyModel.SourceStartPoint;
+                    }
+                    break;
+            }
+
+            return PropertyModel.ToExpressionValue(PropertyModel.GetValue(targetTime, targetTime + PropertyModel.SourceStartPoint));
         }
 
 #pragma warning restore IDE1006 // 命名スタイル
