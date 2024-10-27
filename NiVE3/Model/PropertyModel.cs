@@ -786,6 +786,7 @@ namespace NiVE3.Model
 
         private void HistoryModel_HistoryChanged(object? sender, EventArgs e)
         {
+            ValueCommited?.Invoke(this, EventArgs.Empty);
             ValueInvalidateByHistoryChanged?.Invoke(this, EventArgs.Empty);
         }
 
