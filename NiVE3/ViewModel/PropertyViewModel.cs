@@ -319,7 +319,7 @@ namespace NiVE3.ViewModel
 
             SwitchUseKeyFrameCommand = new DelegateCommand(() =>
             {
-                if (Keyboard.IsKeyDown(Key.LeftAlt) || Keyboard.IsKeyDown(Key.RightAlt))
+                if ((Keyboard.IsKeyDown(Key.LeftAlt) || Keyboard.IsKeyDown(Key.RightAlt)) && Property.PropertyType.IsSupportedExpression)
                 {
                     if (string.IsNullOrEmpty(PropertyModel.ExpressionCode))
                     {
