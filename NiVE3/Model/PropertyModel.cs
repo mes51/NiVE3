@@ -105,6 +105,8 @@ namespace NiVE3.Model
 
         public PropertyBase Property { get; }
 
+        public IPropertyModel ParentPropertyModel { get; }
+
         public Int128 ObjectId { get; }
 
         public string Id => Property.Id;
@@ -141,11 +143,12 @@ namespace NiVE3.Model
 
         ExpressionScript? CompiledScript { get; set; }
 
-        public PropertyModel(PropertyBase property, Int128 parentObjectId, ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, HistoryModel historyModel) : this(property, parentObjectId, projectModel, compositionModel, layerModel, null, historyModel) { }
+        public PropertyModel(PropertyBase property, IPropertyModel parentPropertyModel, ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, HistoryModel historyModel) : this(property, parentPropertyModel, projectModel, compositionModel, layerModel, null, historyModel) { }
 
-        public PropertyModel(PropertyBase property, Int128 parentObjectId, ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, EffectModel? effectModel, HistoryModel historyModel)
+        public PropertyModel(PropertyBase property, IPropertyModel parentPropertyModel, ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, EffectModel? effectModel, HistoryModel historyModel)
         {
             Property = property;
+            ParentPropertyModel = parentPropertyModel;
             ProjectModel = projectModel;
             CompositionModel = compositionModel;
             LayerModel = layerModel;
@@ -157,7 +160,7 @@ namespace NiVE3.Model
             CurrentTime = compositionModel.CurrentTime;
 
             var objectIdHash = new XxHash3();
-            objectIdHash.Append(parentObjectId);
+            objectIdHash.Append(parentPropertyModel.ObjectId);
             objectIdHash.Append(property.Id);
             ObjectId = objectIdHash.ToInt128();
 

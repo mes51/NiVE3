@@ -50,6 +50,8 @@ namespace NiVE3.Model
 
         public PropertyBase Property { get; }
 
+        public IPropertyModel? ParentPropertyModel { get; }
+
         public Int128 ObjectId { get; }
 
         public string Id => Property.Id;
@@ -70,11 +72,16 @@ namespace NiVE3.Model
 
         HistoryModel HistoryModel { get; }
 
-        public PropertyGroupModel(PropertyBase property, Int128 parentObjectId, ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, HistoryModel historyModel, Guid? instanceId = null) : this(property, parentObjectId, projectModel, compositionModel, layerModel, null, historyModel, false, instanceId) { }
+        public PropertyGroupModel(PropertyBase property, IPropertyModel parentPropertyModel, ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, EffectModel? effectModel, HistoryModel historyModel, bool useEnableSwitch = false, Guid? instanceId = null)
+            : this(property, parentPropertyModel, 0, projectModel, compositionModel, layerModel, effectModel, historyModel, useEnableSwitch, instanceId) { }
 
-        public PropertyGroupModel(PropertyBase property, Int128 parentObjectId, ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, EffectModel? effectModel, HistoryModel historyModel, bool useEnableSwitch, Guid? instanceId = null)
+        public PropertyGroupModel(PropertyBase property, Int128 parentObjectId, ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, EffectModel? effectModel, HistoryModel historyModel, bool useEnableSwitch = false, Guid? instanceId = null)
+            : this(property, null, parentObjectId, projectModel, compositionModel, layerModel, effectModel, historyModel, useEnableSwitch, instanceId) { }
+
+        private PropertyGroupModel(PropertyBase property, IPropertyModel? parentPropertyModel, Int128 parentObjectId, ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, EffectModel? effectModel, HistoryModel historyModel, bool useEnableSwitch, Guid? instanceId = null)
         {
             Property = property;
+            ParentPropertyModel = parentPropertyModel;
             ProjectModel = projectModel;
             CompositionModel = compositionModel;
             LayerModel = layerModel;
@@ -86,7 +93,7 @@ namespace NiVE3.Model
             SourceStartPoint = layerModel.SourceStartPoint;
 
             var objectIdHash = new XxHash3();
-            objectIdHash.Append(parentObjectId);
+            objectIdHash.Append(parentPropertyModel?.ObjectId ?? parentObjectId);
             objectIdHash.Append(instanceId ?? Guid.Empty);
             objectIdHash.Append(property.Id);
             ObjectId = objectIdHash.ToInt128();
@@ -98,15 +105,15 @@ namespace NiVE3.Model
             {
                 if (c is PropertyGroup)
                 {
-                    Children.Add(new PropertyGroupModel(c, ObjectId, projectModel, compositionModel, layerModel, effectModel, historyModel, false));
+                    Children.Add(new PropertyGroupModel(c, this, 0, projectModel, compositionModel, layerModel, effectModel, historyModel, false));
                 }
                 else if (c is AppendableProperty)
                 {
-                    Children.Add(new AppendablePropertyModel(c, ObjectId, projectModel, compositionModel, layerModel, effectModel, historyModel));
+                    Children.Add(new AppendablePropertyModel(c, this, projectModel, compositionModel, layerModel, effectModel, historyModel));
                 }
                 else
                 {
-                    Children.Add(new PropertyModel(c, ObjectId, projectModel, compositionModel, layerModel, effectModel, historyModel));
+                    Children.Add(new PropertyModel(c, this, projectModel, compositionModel, layerModel, effectModel, historyModel));
                 }
             }
 

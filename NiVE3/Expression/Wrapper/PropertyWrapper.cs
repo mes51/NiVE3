@@ -15,6 +15,8 @@ namespace NiVE3.Expression.Wrapper
 
         string name { get; }
 
+        IPropertyWrapper? parentProperty { get; }
+
 #pragma warning restore IDE1006 // 命名スタイル
         #endregion Expression members
 
@@ -51,7 +53,7 @@ namespace NiVE3.Expression.Wrapper
             return null;
         }
 
-        public static IPropertyWrapper Wrap(IPropertyModel propertyModel, double globalTime)
+        static IPropertyWrapper Wrap(IPropertyModel propertyModel, double globalTime)
         {
             switch (propertyModel)
             {
@@ -84,6 +86,9 @@ namespace NiVE3.Expression.Wrapper
 
         [ExpressionPublicMember]
         public string name => PropertyModel.Name;
+
+        [ExpressionPublicMember]
+        public IPropertyWrapper? parentProperty => IPropertyWrapper.Wrap(PropertyModel.ParentPropertyModel, GlobalTime);
 
         [ExpressionPublicMember]
         public int keyFrameCount => PropertyModel.KeyFrames.Count;
@@ -239,6 +244,9 @@ namespace NiVE3.Expression.Wrapper
         public string name => PropertyGroupModel.Name;
 
         [ExpressionPublicMember]
+        public IPropertyWrapper? parentProperty => PropertyGroupModel.ParentPropertyModel != null ? IPropertyWrapper.Wrap(PropertyGroupModel.ParentPropertyModel, GlobalTime) : null;
+
+        [ExpressionPublicMember]
         public IPropertyWrapper? property(string name)
         {
             return IPropertyWrapper.FindProperty(PropertyGroupModel, name, GlobalTime);
@@ -255,6 +263,9 @@ namespace NiVE3.Expression.Wrapper
 
         [ExpressionPublicMember]
         public string name => AppendablePropertyModel.Name;
+
+        [ExpressionPublicMember]
+        public IPropertyWrapper? parentProperty => IPropertyWrapper.Wrap(AppendablePropertyModel.ParentPropertyModel, GlobalTime);
 
         [ExpressionPublicMember]
         public IPropertyWrapper? property(object key)

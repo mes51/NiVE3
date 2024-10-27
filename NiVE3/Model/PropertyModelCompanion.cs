@@ -25,6 +25,8 @@ namespace NiVE3.Model
 
         PropertyBase Property { get; }
 
+        IPropertyModel? ParentPropertyModel { get; }
+
         Int128 ObjectId { get; }
 
         event EventHandler<EventArgs>? ValueUpdated;
