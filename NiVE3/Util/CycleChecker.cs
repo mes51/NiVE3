@@ -52,6 +52,7 @@ namespace NiVE3.Util
 
         public static IDisposable StartCheck()
         {
+            // TODO: 今後呼び出し階層が深くなると地獄が見えるので、何度も呼び出し可能にした上でDispose時に抜けていないEntryがないかどうか、checkerに名前を付けてデバッグしやすくする程度にする
             if (CurrentChecker != null)
             {
                 throw new InvalidOperationException(); // bug

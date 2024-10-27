@@ -25,6 +25,7 @@ using NiVE3.Input;
 using NiVE3.Property.Types;
 using NiVE3.Data;
 using NiVE3.Model.UI;
+using NiVE3.Util;
 
 namespace NiVE3.ViewModel
 {
@@ -357,6 +358,7 @@ namespace NiVE3.ViewModel
 
             IsFontChanging = true;
 
+            using var checker = CycleChecker.StartCheck();
             var style = SourceTextPropertyType.GetDefaultStyle(SourceTextPropertyModel.GetValue(CurrentTime - TargetLayer.SourceStartPoint, CurrentTime));
             if (style != null)
             {

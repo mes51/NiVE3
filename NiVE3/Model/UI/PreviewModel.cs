@@ -232,8 +232,6 @@ namespace NiVE3.Model.UI
 
         public override NImage? GetImage(double time)
         {
-            using var checker = CycleChecker.StartCheck();
-
             var previewImage = Composition?.RenderFrame(time, DownScaleRate, true, ApplicationModel.UseGpu);
             if (previewImage != null && DownScaleRate != 1.0)
             {

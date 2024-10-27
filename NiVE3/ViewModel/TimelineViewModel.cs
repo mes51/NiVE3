@@ -31,6 +31,7 @@ using NiVE3.Shared.Extension;
 using Prism.Commands;
 using NiVE3.Model.UI;
 using Prism.Dialogs;
+using NiVE3.Plugin.Interfaces.RendererParams;
 
 namespace NiVE3.ViewModel
 {
@@ -1234,10 +1235,17 @@ namespace NiVE3.ViewModel
                 return;
             }
 
-            var activeCameraId = CompositionModel.GetActiveCamera(CurrentTime)?.LayerId;
-            var cameraSetting = CompositionModel.GetActiveCameraSetting(CurrentTime);
-            var baseLayerId = CompositionModel.FindLayerByPreviewPosition(CurrentTime, e.StartScreenPosition);
-            var baseLayerSkeleton = baseLayerId.HasValue ? CompositionModel.GetLayerSkeleton(baseLayerId.Value, CurrentTime) : null;
+            Guid? activeCameraId;
+            CameraSetting? cameraSetting;
+            Guid? baseLayerId;
+            LayerSkeleton? baseLayerSkeleton;
+            using (var checker = CycleChecker.StartCheck())
+            {
+                activeCameraId = CompositionModel.GetActiveCamera(CurrentTime)?.LayerId;
+                cameraSetting = CompositionModel.GetActiveCameraSetting(CurrentTime);
+                baseLayerId = CompositionModel.FindLayerByPreviewPosition(CurrentTime, e.StartScreenPosition);
+                baseLayerSkeleton = baseLayerId.HasValue ? CompositionModel.GetLayerSkeleton(baseLayerId.Value, CurrentTime) : null;
+            }
             var baseLayerIs3D = baseLayerSkeleton?.IsEnable3D ?? false;
             var imageLayers = SelectedLayers?.Where(l => l.HasImage)?.ToArray() ?? [];
 
