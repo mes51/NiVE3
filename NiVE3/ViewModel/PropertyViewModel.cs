@@ -578,6 +578,7 @@ namespace NiVE3.ViewModel
                 case nameof(CurrentTime):
                 case nameof(SourceStartPoint):
                     CurrentTimeValue = CalculationValue();
+                    CurrentTimeRawValue = CalculationRawValue();
                     break;
                 case nameof(UseExpression):
                     IsEnableExpression = PropertyModel.IsEnableExpression;
