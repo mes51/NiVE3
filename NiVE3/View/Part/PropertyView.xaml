@@ -136,7 +136,7 @@
     </local:PropertyViewBase.Resources>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="{x:Static r:UIParameters.LayerUIHeightGridLength}"/>
+            <RowDefinition MinHeight="{x:Static r:UIParameters.LayerUIHeight}"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
