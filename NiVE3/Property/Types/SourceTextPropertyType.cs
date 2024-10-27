@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Documents;
@@ -134,7 +135,7 @@ namespace NiVE3.Property.Types
                     return false;
                 }
 
-                var defaultStyle = ConvertExpressionValueToStyle(defaultStyleData);
+                var defaultStyle = ConvertExpressionValueToStyle(defaultStyleData, baseText.DefaultStyle);
                 var styles = new List<TextStyleRun>();
                 if (dictionary.TryGetValue("styles", out object[]? styleRunsData))
                 {
@@ -152,7 +153,7 @@ namespace NiVE3.Property.Types
                             {
                                 (begin, end) = (end, begin);
                             }
-                            styles.Add(new TextStyleRun(begin, end, ConvertExpressionValueToStyle(styleData)));
+                            styles.Add(new TextStyleRun(begin, end, ConvertExpressionValueToStyle(styleData, baseText.DefaultStyle)));
                         }
                     }
                 }
@@ -202,14 +203,69 @@ namespace NiVE3.Property.Types
                 { "isEnableBold", style.IsEnableBold },
                 { "isEnableItalic", style.IsEnableItalic },
                 { "align", (int)style.TextAlign },
-                { "fillColor", new object[] { style.FillColor.X, style.FillColor.Y, style.FillColor.Z, style.FillColor.W } },
-                { "lineColor", new object[] { style.TextLineColor.X, style.TextLineColor.Y, style.TextLineColor.Z, style.TextLineColor.W } }
+                { "fillColor", style.FillColor },
+                { "lineColor", style.TextLineColor }
             };
         }
 
-        static TextStyle ConvertExpressionValueToStyle(IDictionary<string, object?> expressionValue)
+        static TextStyle ConvertExpressionValueToStyle(IDictionary<string, object?> expressionValue, TextStyle defaultStyle)
         {
-            return TextStyle.Empty;
+            if (!expressionValue.TryGetValue("font", out string? font))
+            {
+                font = defaultStyle.FontUniqueId;
+            }
+            if (!expressionValue.TryGetValue("fontSize", out double fontSize))
+            {
+                fontSize = defaultStyle.FontSize;
+            }
+            if (!expressionValue.TryGetValue("lineHeight", out double lineHeight))
+            {
+                lineHeight = defaultStyle.LineHeight;
+            }
+            if (!expressionValue.TryGetValue("verticalScale", out double verticalScale))
+            {
+                verticalScale = defaultStyle.VerticalScale;
+            }
+            if (!expressionValue.TryGetValue("horizontalScale", out double horizontalScale))
+            {
+                horizontalScale = defaultStyle.HorizontalScale;
+            }
+            var order = expressionValue.TryGetValue("order", out double orderValue) ? (TextLineDrawOrder)(int)orderValue : defaultStyle.TextLineDrawOrder;
+            if (!expressionValue.TryGetValue("lineWidth", out double lineWidth))
+            {
+                lineWidth = defaultStyle.TextLineWidth;
+            }
+            if (!expressionValue.TryGetValue("isEnableBold", out bool isEnableBold))
+            {
+                isEnableBold = defaultStyle.IsEnableBold;
+            }
+            if (!expressionValue.TryGetValue("isEnableItalic", out bool isEnableItalic))
+            {
+                isEnableItalic = defaultStyle.IsEnableItalic;
+            }
+            var align = expressionValue.TryGetValue("align", out double alignValue) ? (TextAlign)(int)alignValue : defaultStyle.TextAlign;
+            var fillColor = expressionValue.TryGetValue("fillColor", out object[]? fillColorValue) ? ExpressionObjectArrayToVector4(fillColorValue) : defaultStyle.FillColor;
+            var lineColor = expressionValue.TryGetValue("lineColor", out object[]? lineColorValue) ? ExpressionObjectArrayToVector4(lineColorValue) : defaultStyle.TextLineColor;
+
+            return new TextStyle(font, (float)fontSize, (float)lineHeight, defaultStyle.LetterSpacing, (float)verticalScale, (float)horizontalScale, order, (float)lineWidth, isEnableBold, isEnableItalic, align, fillColor, lineColor);
+        }
+
+        static Vector4 ExpressionObjectArrayToVector4(object[] values)
+        {
+            var doubleValues = values.OfType<double>().ToArray();
+            switch (doubleValues.Length)
+            {
+                case 1:
+                    return new Vector4((float)doubleValues[0], 0.0F, 0.0F, 0.0F);
+                case 2:
+                    return new Vector4((float)doubleValues[0], (float)doubleValues[1], 0.0F, 0.0F);
+                case 3:
+                    return new Vector4((float)doubleValues[0], (float)doubleValues[1], (float)doubleValues[2], 0.0F);
+                case 4:
+                    return new Vector4((float)doubleValues[0], (float)doubleValues[1], (float)doubleValues[2], (float)doubleValues[3]);
+                default:
+                    return Vector4.Zero;
+            }
         }
     }
 }
