@@ -280,6 +280,7 @@ namespace NiVE3.View.Part
 
         public KeyFrameCollectionView()
         {
+            Loaded += KeyFrameCollectionView_Loaded;
             Unloaded += KeyFrameCollectionView_Unloaded;
             MouseDown += KeyFrameCollectionView_MouseDown;
             MouseMove += KeyFrameCollectionView_MouseMove;
@@ -409,6 +410,22 @@ namespace NiVE3.View.Part
                 SelectedKeyFrameIds.Clear();
                 SelectedKeyFrameIds.Add(keyFrame.Id);
                 LastSelected = keyFrame;
+            }
+        }
+
+        private void KeyFrameCollectionView_Loaded(object sender, RoutedEventArgs e)
+        {
+            // NOTE: フローティング・再ドッキング時用
+            // NOTE: イベントの呼び出し順的にKeyFramesChangedやSelectedKeyFrameIdsChangedよりも後に呼ばれるため、一度登録済みのイベントを削除してから再登録する
+            if (KeyFrames != null)
+            {
+                CollectionChangedEventManager.RemoveHandler(KeyFrames, KeyFrameCollection_CollectionChanged);
+                CollectionChangedEventManager.AddHandler(KeyFrames, KeyFrameCollection_CollectionChanged);
+            }
+            if (SelectedKeyFrameIds != null)
+            {
+                CollectionChangedEventManager.RemoveHandler(SelectedKeyFrameIds, KeyFrameCollection_CollectionChanged);
+                CollectionChangedEventManager.AddHandler(SelectedKeyFrameIds, KeyFrameCollection_CollectionChanged);
             }
         }
 
