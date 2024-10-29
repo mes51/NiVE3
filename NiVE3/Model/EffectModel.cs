@@ -145,6 +145,7 @@ namespace NiVE3.Model
                 EffectId = EffectId,
                 EffectPluginId = EffectPluginId,
                 Name = Name,
+                Comment = Comment,
                 IsEnable = IsEnable,
                 Properties = Properties.SaveData()
             };
@@ -153,6 +154,7 @@ namespace NiVE3.Model
         public void LoadData(EffectData data)
         {
             Name = data.Name;
+            Comment = data.Comment;
             IsEnable = data.IsEnable;
             if (data.Properties != null)
             {

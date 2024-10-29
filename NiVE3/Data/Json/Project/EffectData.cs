@@ -14,6 +14,8 @@ namespace NiVE3.Data.Json.Project
 
         public string Name { get; set; } = "";
 
+        public string Comment { get; set; } = "";
+
         public bool IsEnable { get; set; }
 
         public PropertyData? Properties { get; set; }
