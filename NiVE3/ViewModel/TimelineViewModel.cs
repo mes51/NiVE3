@@ -1533,6 +1533,13 @@ namespace NiVE3.ViewModel
                     SelectItemType.Effect or SelectItemType.Property or SelectItemType.KeyFrame => e.CommandableOriginalParent,
                     _ => null,
                 };
+                if (e.SelectItemType == SelectItemType.Layer && SelectedLayers != null)
+                {
+                    foreach (var layer in SelectedLayers)
+                    {
+                        layer.DeSelect();
+                    }
+                }
             }
             if (e.SelectItemType != SelectItemType.Layer && SelectedLayers != null)
             {

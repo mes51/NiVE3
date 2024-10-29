@@ -1107,6 +1107,11 @@ namespace NiVE3.ViewModel
             }
             else
             {
+                // NOTE: エフェクトのプロパティのみ選択解除する
+                foreach (var effect in SelectedEffects)
+                {
+                    effect.DeSelect();
+                }
                 TransformProperties?.DeSelect();
                 LayerOptionProperties?.DeSelect();
                 TextProperties?.DeSelect();
