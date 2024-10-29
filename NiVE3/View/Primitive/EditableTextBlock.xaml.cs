@@ -123,6 +123,8 @@ namespace NiVE3.View.Primitive
             set { SetValue(BackgroundProperty, value); }
         }
 
+        bool IsAborting { get; set; }
+
         public EditableTextBlock()
         {
             InitializeComponent();
@@ -153,9 +155,20 @@ namespace NiVE3.View.Primitive
             }
             else if (e.Key == Key.Escape && (EndEditCommand?.CanExecute(false) ?? false))
             {
+                IsAborting = true;
                 EndEditCommand.Execute(false);
                 EditTextBox.ReleaseMouseCapture();
                 e.Handled = true;
+                IsAborting = false;
+            }
+        }
+
+        private void EditTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (!IsAborting && (EndEditCommand?.CanExecute(false) ?? false))
+            {
+                EndEditCommand.Execute(true);
+                EditTextBox.ReleaseMouseCapture();
             }
         }
 

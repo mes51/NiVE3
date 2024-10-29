@@ -52,6 +52,7 @@
                  Visibility="{Binding ElementName=Root, Path=IsEditing, Converter={StaticResource BoolToVisibilityConverter}}"
                  IsVisibleChanged="EditTextBox_IsVisibleChanged"
                  PreviewKeyDown="EditTextBox_PreviewKeyDown"
+                 LostFocus="EditTextBox_LostFocus"
                  Mouse.PreviewMouseDownOutsideCapturedElement="EditTextBox_PreviewMouseDownOutsideCapturedElement"/>
     </Grid>
 </Decorator>
