@@ -238,6 +238,8 @@ namespace NiVE3.UI.Primitive
             remove { RemoveHandler(BeginSlideEditValueEvent, value); }
         }
 
+        bool IsAborting { get; set; }
+
         public SlidableNumberTextBox()
         {
             InitializeComponent();
@@ -294,6 +296,7 @@ namespace NiVE3.UI.Primitive
         {
             if (IsClicked && e.Key == Key.Escape)
             {
+                IsAborting = true;
                 Mouse.Capture(null);
                 ClearFocus();
                 SetCurrentValue(ValueProperty, PrevValue);
@@ -301,6 +304,7 @@ namespace NiVE3.UI.Primitive
                 e.Handled = true;
 
                 RaiseEvent(new RoutedEventArgs(AbortSlideEditValueEvent, this));
+                IsAborting = false;
             }
         }
 
@@ -405,12 +409,14 @@ namespace NiVE3.UI.Primitive
             }
             else if (e.Key == Key.Escape)
             {
+                IsAborting = true;
                 ClearFocus();
                 SetCurrentValue(ValueProperty, PrevValue);
                 e.Handled = true;
 
                 IsEditingText = false;
                 RaiseEvent(new RoutedEventArgs(AbortTextEditValueEvent, this));
+                IsAborting = false;
             }
         }
 
@@ -423,21 +429,29 @@ namespace NiVE3.UI.Primitive
 
         private void ValueTextBox_LostFocus(object sender, RoutedEventArgs e)
         {
-            ((TextBox)sender).GetBindingExpression(TextBox.TextProperty).UpdateSource();
+            if (sender is not TextBox textBox)
+            {
+                return;
+            }
 
-            if (Validation.GetHasError(ValueTextBox))
+            if (IsAborting || Validation.GetHasError(ValueTextBox))
             {
                 SetCurrentValue(ValueProperty, PrevValue);
                 ValueTextBlock.GetBindingExpression(TextBlock.TextProperty).UpdateTarget();
+                textBox.GetBindingExpression(TextBox.TextProperty).UpdateTarget();
 
                 IsEditingText = false;
                 RaiseEvent(new RoutedEventArgs(AbortTextEditValueEvent, this));
+            }
+            else
+            {
+                textBox.GetBindingExpression(TextBox.TextProperty).UpdateSource();
             }
         }
 
         private void ValueTextBox_SourceUpdated(object sender, DataTransferEventArgs e)
         {
-            if (IsEditingText && !ValueTextBox.IsFocused)
+            if (!IsAborting && IsEditingText && !ValueTextBox.IsFocused)
             {
                 IsEditingText = false;
                 RaiseEvent(new RoutedEventArgs(EndTextEditValueEvent, this));
