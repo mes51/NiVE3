@@ -259,19 +259,19 @@ namespace NiVE3.PresetPlugin.Effect.Blur
                     var w = x - pz - 1;
                     if (fmz > 0.0F)
                     {
-                        var p = GetPixelForX(data, imageWidth, w, h, edgeRepeatMode);
+                        var p = BlurUtil.GetPixelForX(data, imageWidth, w, h, edgeRepeatMode);
                         var ta = p.W * fmz;
                         rgb += p * ta;
                         a += ta;
 
-                        p = GetPixelForX(data, imageWidth, x + pz, h, edgeRepeatMode);
+                        p = BlurUtil.GetPixelForX(data, imageWidth, x + pz, h, edgeRepeatMode);
                         ta = p.W * fmz;
                         rgb += p * ta;
                         a += ta;
                     }
                     for (var limit = x + pz - (fmz > 0.0F ? 2 : 1); w <= limit; w++)
                     {
-                        var p = GetPixelForX(data, imageWidth, w, h, edgeRepeatMode);
+                        var p = BlurUtil.GetPixelForX(data, imageWidth, w, h, edgeRepeatMode);
                         var ta = p.W;
                         rgb += p * ta;
                         a += ta;
@@ -281,7 +281,7 @@ namespace NiVE3.PresetPlugin.Effect.Blur
                 for (var w = x; w < width; w++)
                 {
                     var l = w - pz - 1;
-                    var p = GetPixelForX(data, imageWidth, l, h, edgeRepeatMode);
+                    var p = BlurUtil.GetPixelForX(data, imageWidth, l, h, edgeRepeatMode);
                     var ta = p.W * fz;
                     rgb -= p * ta;
                     a -= ta;
@@ -289,14 +289,14 @@ namespace NiVE3.PresetPlugin.Effect.Blur
 
                     if (fmz > 0.0F)
                     {
-                        p = GetPixelForX(data, imageWidth, l, h, edgeRepeatMode);
+                        p = BlurUtil.GetPixelForX(data, imageWidth, l, h, edgeRepeatMode);
                         ta = p.W * fmz;
                         rgb -= p * ta;
                         a -= ta;
                     }
                     l = w + pz;
 
-                    p = GetPixelForX(data, imageWidth, l, h, edgeRepeatMode);
+                    p = BlurUtil.GetPixelForX(data, imageWidth, l, h, edgeRepeatMode);
                     ta = p.W * fz;
                     rgb += p * ta;
                     a += ta;
@@ -304,7 +304,7 @@ namespace NiVE3.PresetPlugin.Effect.Blur
 
                     if (fmz > 0.0F)
                     {
-                        p = GetPixelForX(data, imageWidth, l, h, edgeRepeatMode);
+                        p = BlurUtil.GetPixelForX(data, imageWidth, l, h, edgeRepeatMode);
                         ta = p.W * fmz;
                         rgb += p * ta;
                         a += ta;
@@ -336,12 +336,12 @@ namespace NiVE3.PresetPlugin.Effect.Blur
                     var h = y - pz - 1;
                     if (fmz > 0.0F)
                     {
-                        var p = GetPixelForX(temp, imageHeight, h, w, edgeRepeatMode);
+                        var p = BlurUtil.GetPixelForX(temp, imageHeight, h, w, edgeRepeatMode);
                         var ta = p.W * fz;
                         rgb += p * ta;
                         a += ta;
 
-                        p = GetPixelForX(temp, imageHeight, y + pz, w, edgeRepeatMode);
+                        p = BlurUtil.GetPixelForX(temp, imageHeight, y + pz, w, edgeRepeatMode);
                         ta = p.W * fz;
                         rgb += p * ta;
                         a += ta;
@@ -350,7 +350,7 @@ namespace NiVE3.PresetPlugin.Effect.Blur
                     }
                     for (var limit = y + pz - (fmz > 0.0F ? 2 : 1); h <= limit; h++)
                     {
-                        var p = GetPixelForX(temp, imageHeight, h, w, edgeRepeatMode);
+                        var p = BlurUtil.GetPixelForX(temp, imageHeight, h, w, edgeRepeatMode);
                         var ta = p.W;
                         rgb += p * ta;
                         a += ta;
@@ -360,7 +360,7 @@ namespace NiVE3.PresetPlugin.Effect.Blur
                 for (var h = y; h < height; h++)
                 {
                     var t = h - pz - 1;
-                    var p = GetPixelForX(temp, imageHeight, t, w, edgeRepeatMode);
+                    var p = BlurUtil.GetPixelForX(temp, imageHeight, t, w, edgeRepeatMode);
                     var ta = p.W * fz;
                     rgb -= p * ta;
                     a -= ta;
@@ -368,14 +368,14 @@ namespace NiVE3.PresetPlugin.Effect.Blur
 
                     if (fmz > 0.0F)
                     {
-                        p = GetPixelForX(temp, imageHeight, t, w, edgeRepeatMode);
+                        p = BlurUtil.GetPixelForX(temp, imageHeight, t, w, edgeRepeatMode);
                         ta = p.W * fmz;
                         rgb -= p * ta;
                         a -= ta;
                     }
                     t = h + pz;
 
-                    p = GetPixelForX(temp, imageHeight, t, w, edgeRepeatMode);
+                    p = BlurUtil.GetPixelForX(temp, imageHeight, t, w, edgeRepeatMode);
                     ta = p.W * fz;
                     rgb += p * ta;
                     a += ta;
@@ -383,7 +383,7 @@ namespace NiVE3.PresetPlugin.Effect.Blur
 
                     if (fmz > 0.0F)
                     {
-                        p = GetPixelForX(temp, imageHeight, t, w, edgeRepeatMode);
+                        p = BlurUtil.GetPixelForX(temp, imageHeight, t, w, edgeRepeatMode);
                         ta = p.W * fmz;
                         rgb += p * ta;
                         a += ta;
@@ -425,19 +425,19 @@ namespace NiVE3.PresetPlugin.Effect.Blur
                     var w = x - pz - 1;
                     if (fmz > 0.0F)
                     {
-                        var p = GetPixelForX(data, imageWidth, w, h, edgeRepeatMode);
+                        var p = BlurUtil.GetPixelForX(data, imageWidth, w, h, edgeRepeatMode);
                         var ta = p.W * fmz;
                         rgb += p * ta;
                         a += ta;
 
-                        p = GetPixelForX(data, imageWidth, x + pz, h, edgeRepeatMode);
+                        p = BlurUtil.GetPixelForX(data, imageWidth, x + pz, h, edgeRepeatMode);
                         ta = p.W * fmz;
                         rgb += p * ta;
                         a += ta;
                     }
                     for (var limit = x + pz - (fmz > 0.0F ? 2 : 1); w <= limit; w++)
                     {
-                        var p = GetPixelForX(data, imageWidth, w, h, edgeRepeatMode);
+                        var p = BlurUtil.GetPixelForX(data, imageWidth, w, h, edgeRepeatMode);
                         var ta = p.W;
                         rgb += p * ta;
                         a += ta;
@@ -447,7 +447,7 @@ namespace NiVE3.PresetPlugin.Effect.Blur
                 for (var w = x; w < width; w++)
                 {
                     var l = w - pz - 1;
-                    var p = GetPixelForX(data, imageWidth, l, h, edgeRepeatMode);
+                    var p = BlurUtil.GetPixelForX(data, imageWidth, l, h, edgeRepeatMode);
                     var ta = p.W * fz;
                     rgb -= p * ta;
                     a -= ta;
@@ -455,14 +455,14 @@ namespace NiVE3.PresetPlugin.Effect.Blur
 
                     if (fmz > 0.0F)
                     {
-                        p = GetPixelForX(data, imageWidth, l, h, edgeRepeatMode);
+                        p = BlurUtil.GetPixelForX(data, imageWidth, l, h, edgeRepeatMode);
                         ta = p.W * fmz;
                         rgb -= p * ta;
                         a -= ta;
                     }
                     l = w + pz;
 
-                    p = GetPixelForX(data, imageWidth, l, h, edgeRepeatMode);
+                    p = BlurUtil.GetPixelForX(data, imageWidth, l, h, edgeRepeatMode);
                     ta = p.W * fz;
                     rgb += p * ta;
                     a += ta;
@@ -470,7 +470,7 @@ namespace NiVE3.PresetPlugin.Effect.Blur
 
                     if (fmz > 0.0F)
                     {
-                        p = GetPixelForX(data, imageWidth, l, h, edgeRepeatMode);
+                        p = BlurUtil.GetPixelForX(data, imageWidth, l, h, edgeRepeatMode);
                         ta = p.W * fmz;
                         rgb += p * ta;
                         a += ta;
@@ -512,12 +512,12 @@ namespace NiVE3.PresetPlugin.Effect.Blur
                     var h = y - pz - 1;
                     if (fmz > 0.0F)
                     {
-                        var p = GetPixelForY(data, imageWidth, imageHeight, h, w, edgeRepeatMode);
+                        var p = BlurUtil.GetPixelForY(data, imageWidth, imageHeight, h, w, edgeRepeatMode);
                         var ta = p.W * fz;
                         rgb += p * ta;
                         a += ta;
 
-                        p = GetPixelForY(data, imageWidth, imageHeight, y + pz, w, edgeRepeatMode);
+                        p = BlurUtil.GetPixelForY(data, imageWidth, imageHeight, y + pz, w, edgeRepeatMode);
                         ta = p.W * fz;
                         rgb += p * ta;
                         a += ta;
@@ -526,7 +526,7 @@ namespace NiVE3.PresetPlugin.Effect.Blur
                     }
                     for (var limit = y + pz - (fmz > 0.0F ? 2 : 1); h <= limit; h++)
                     {
-                        var p = GetPixelForY(data, imageWidth, imageHeight, h, w, edgeRepeatMode);
+                        var p = BlurUtil.GetPixelForY(data, imageWidth, imageHeight, h, w, edgeRepeatMode);
                         var ta = p.W;
                         rgb += p * ta;
                         a += ta;
@@ -536,7 +536,7 @@ namespace NiVE3.PresetPlugin.Effect.Blur
                 for (var h = y; h < height; h++)
                 {
                     var t = h - pz - 1;
-                    var p = GetPixelForY(data, imageWidth, imageHeight, t, w, edgeRepeatMode);
+                    var p = BlurUtil.GetPixelForY(data, imageWidth, imageHeight, t, w, edgeRepeatMode);
                     var ta = p.W * fz;
                     rgb -= p * ta;
                     a -= ta;
@@ -544,14 +544,14 @@ namespace NiVE3.PresetPlugin.Effect.Blur
 
                     if (fmz > 0.0F)
                     {
-                        p = GetPixelForY(data, imageWidth, imageHeight, t, w, edgeRepeatMode);
+                        p = BlurUtil.GetPixelForY(data, imageWidth, imageHeight, t, w, edgeRepeatMode);
                         ta = p.W * fmz;
                         rgb -= p * ta;
                         a -= ta;
                     }
                     t = h + pz;
 
-                    p = GetPixelForY(data, imageWidth, imageHeight, t, w, edgeRepeatMode);
+                    p = BlurUtil.GetPixelForY(data, imageWidth, imageHeight, t, w, edgeRepeatMode);
                     ta = p.W * fz;
                     rgb += p * ta;
                     a += ta;
@@ -559,7 +559,7 @@ namespace NiVE3.PresetPlugin.Effect.Blur
 
                     if (fmz > 0.0F)
                     {
-                        p = GetPixelForY(data, imageWidth, imageHeight, t, w, edgeRepeatMode);
+                        p = BlurUtil.GetPixelForY(data, imageWidth, imageHeight, t, w, edgeRepeatMode);
                         ta = p.W * fmz;
                         rgb += p * ta;
                         a += ta;
@@ -575,52 +575,6 @@ namespace NiVE3.PresetPlugin.Effect.Blur
             });
 
             temp.AsSpan(0, image.DataLength).CopyTo(imageData.AsSpan(0, image.DataLength));
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static Vector4 GetPixelForY(Span<Vector4> data, int width, int height, int t, int w, EdgeRepeatMode edgeRepeatMode)
-        {
-            switch (edgeRepeatMode)
-            {
-                case EdgeRepeatMode.Wrap:
-                    return data[CoordWrap.Wrap(t, height) * width + w];
-                case EdgeRepeatMode.Repeat:
-                    return data[CoordWrap.Repeat(t, height) * width + w];
-                case EdgeRepeatMode.Mirror:
-                    return data[CoordWrap.Mirror(t, height) * width + w];
-                default:
-                    if (t > -1 && t < height)
-                    {
-                        return data[t * width + w];
-                    }
-                    else
-                    {
-                        return Vector4.Zero;
-                    }
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static Vector4 GetPixelForX(Span<Vector4> data, int width, int l, int h, EdgeRepeatMode edgeRepeatMode)
-        {
-            switch (edgeRepeatMode)
-            {
-                case EdgeRepeatMode.Wrap:
-                    return data[h * width + CoordWrap.Wrap(l, width)];
-                case EdgeRepeatMode.Repeat:
-                    return data[h * width + CoordWrap.Repeat(l, width)];
-                case EdgeRepeatMode.Mirror:
-                    return data[h * width + CoordWrap.Mirror(l, width)];
-                default:
-                    if (l > -1 && l < width)
-                    {
-                        return data[h * width + l];
-                    }
-                    else
-                    {
-                        return Vector4.Zero;
-                    }
-            }
         }
     }
 

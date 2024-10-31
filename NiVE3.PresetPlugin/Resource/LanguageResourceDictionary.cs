@@ -57,6 +57,23 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("エッジの繰り返しモード")]
         public const string Blur_BoxBlur_EdgeRepeatMode = nameof(Blur_BoxBlur_EdgeRepeatMode);
 
+        // GaussianBlur
+
+        [DefaultValue("ガウスブラー")]
+        public const string Blur_GaussianBlur_Name = nameof(Blur_GaussianBlur_Name);
+
+        [DefaultValue("ガウスブラーを適用します")]
+        public const string Blur_GaussianBlur_Description = nameof(Blur_GaussianBlur_Description);
+
+        [LanguageKey, DefaultValue("半径")]
+        public const string Blur_GaussianBlur_Amount = nameof(Blur_GaussianBlur_Amount);
+
+        [LanguageKey, DefaultValue("方向")]
+        public const string Blur_GaussianBlur_Direction = nameof(Blur_GaussianBlur_Direction);
+
+        [LanguageKey, DefaultValue("エッジの繰り返しモード")]
+        public const string Blur_GaussianBlur_EdgeRepeatMode = nameof(Blur_GaussianBlur_EdgeRepeatMode);
+
         // PixelSort
 
         [DefaultValue("ピクセルソート")]
