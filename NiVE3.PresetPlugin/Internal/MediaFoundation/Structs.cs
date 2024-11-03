@@ -34,7 +34,7 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
             IsTopDown = isTopDown;
         }
 
-        public static FormatInfo GetVideoFormat(IMFSourceReader reader, int videoStreamId)
+        public static FormatInfo GetVideoFormat(IMFSourceReader reader, SourceReaderIndex videoStreamId)
         {
             using var mediaType = reader.GetCurrentMediaType(videoStreamId);
             if (mediaType == null)
@@ -42,7 +42,7 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
                 return new FormatInfo();
             }
 
-            if (mediaType.Get<Guid>(MediaTypeAttributeKeys.Subtype) != VideoFormatGuids.Argb32 && mediaType.Get<Guid>(MediaTypeAttributeKeys.Subtype) != VideoFormatGuids.NV12)
+            if (mediaType.GetGUID(MediaTypeAttributeKeys.Subtype) != VideoFormatGuids.Argb32 && mediaType.GetGUID(MediaTypeAttributeKeys.Subtype) != VideoFormatGuids.NV12)
             {
                 return new FormatInfo();
             }
@@ -51,7 +51,7 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
             var stride = 1;
             try
             {
-                stride = mediaType.Get<int>(MediaTypeAttributeKeys.DefaultStride);
+                stride = unchecked((int)mediaType.GetUInt32(MediaTypeAttributeKeys.DefaultStride));
             }
             catch { }
             var (aspectRatioNumerator, aspectRatioDenominator) = (1, 1);

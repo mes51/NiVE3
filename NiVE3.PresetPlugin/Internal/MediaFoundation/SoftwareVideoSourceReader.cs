@@ -39,10 +39,10 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
             }
 
             Reader = MediaFactory.MFCreateSourceReaderFromURL(filePath, attributes);
-            Reader.SetCurrentMediaType(FirstVideoStreamId, mediaType);
-            Reader.SetStreamSelection(FirstVideoStreamId, true);
+            Reader.SetCurrentMediaType(SourceReaderIndex.FirstVideoStream, mediaType);
+            Reader.SetStreamSelection(SourceReaderIndex.FirstVideoStream, true);
 
-            Format = FormatInfo.GetVideoFormat(Reader, FirstVideoStreamId);
+            Format = FormatInfo.GetVideoFormat(Reader, SourceReaderIndex.FirstVideoStream);
 
             Succeeded = Format.Width != 0;
             if (Succeeded)

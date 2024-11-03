@@ -14,8 +14,6 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
     {
         protected const double DurationRate = 1E7;
 
-        protected const int FirstVideoStreamId = (int)MidlMidlItfMfreadwrite000000010001.MfSourceReaderFirstVideoStream;
-
         public bool Succeeded { get; init; }
 
         public double Duration { get; init; }
@@ -51,7 +49,7 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
                 return -1.0;
             }
 
-            var duration = Reader.GetPresentationAttribute((int)MidlMidlItfMfreadwrite000000010001.MfSourceReaderMediaSource, PresentationDescriptionAttributeKeys.Duration);
+            var duration = Reader.GetPresentationAttribute(SourceReaderIndex.MediaSource, PresentationDescriptionAttributeKeys.Duration);
 
             if (duration.ElementType == SharpGen.Runtime.Win32.VariantElementType.ULong)
             {
@@ -70,7 +68,7 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
                 return -1.0;
             }
 
-            using var mediaType = Reader.GetCurrentMediaType((int)MidlMidlItfMfreadwrite000000010001.MfSourceReaderFirstVideoStream);
+            using var mediaType = Reader.GetCurrentMediaType(SourceReaderIndex.FirstVideoStream);
             if (mediaType == null)
             {
                 return -1.0;
@@ -89,19 +87,18 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
                 return null;
             }
 
-            long seekTolerance = (long)(5000000.0 / FrameRate);
+            var seekTolerance = (long)(5000000.0 / FrameRate);
 
             var longTime = (long)(time * DurationRate);
-            var pos = new Variant { ElementType = VariantElementType.Long, Value = longTime };
-            Reader.SetCurrentPosition(Guid.Empty, pos);
+            Reader.SetCurrentPosition(longTime);
 
             IMFSample? sample = null;
-            int skipCount = 0;
+            var skipCount = 0;
             while (true)
             {
-                Reader.ReadSample(FirstVideoStreamId, 0, out int _, out int flags, out long _, out IMFSample? sampleTemp);
+                var sampleTemp = Reader.ReadSample(SourceReaderIndex.FirstVideoStream, SourceReaderControlFlag.None, out var _, out var flags, out var _);
 
-                if ((flags & (int)SourceReaderFlag.FEndofstream) != 0)
+                if ((flags & SourceReaderFlag.EndOfStream) != 0)
                 {
                     break;
                 }
@@ -145,7 +142,7 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
             var expectedLength = Format.Height * Format.Width * 4;
             using var buffer = sample.ConvertToContiguousBuffer();
             var result = Array.Empty<byte>();
-            buffer.Lock(out nint ptr, out int _, out int length);
+            buffer.Lock(out var ptr, out var _, out var length);
 
             if (length >= expectedLength)
             {

@@ -13,7 +13,7 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static (int, int) GetDoubleInt32(IMFAttributes attributes, Guid guidKey)
         {
-            var result = attributes.Get<ulong>(guidKey);
+            var result = attributes.GetUInt64(guidKey);
             return SplitDoubleInt32(result);
         }
 

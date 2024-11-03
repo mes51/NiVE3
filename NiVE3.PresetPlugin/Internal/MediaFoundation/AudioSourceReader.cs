@@ -13,8 +13,6 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
 {
     class AudioSourceReader : IDisposable
     {
-        const int FirstAudioStreamId = (int)MidlMidlItfMfreadwrite000000010001.MfSourceReaderFirstAudioStream;
-
         const double DurationRate = 1E7;
 
         const long RewindRetrySpan = 1000;
@@ -42,24 +40,24 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
             {
                 return;
             }
-            if (mediaType.SetUInt32(MediaTypeAttributeKeys.AudioSamplesPerSecond, IFootageSource.SupportAudioSamplingRate).Failure)
+            if (mediaType.Set(MediaTypeAttributeKeys.AudioSamplesPerSecond, IFootageSource.SupportAudioSamplingRate).Failure)
             {
                 return;
             }
-            if (mediaType.SetUInt32(MediaTypeAttributeKeys.AudioNumChannels, IFootageSource.SupportChannelCount).Failure)
+            if (mediaType.Set(MediaTypeAttributeKeys.AudioNumChannels, IFootageSource.SupportChannelCount).Failure)
             {
                 return;
             }
 
             Reader = MediaFactory.MFCreateSourceReaderFromURL(filePath, null);
-            Reader.SetCurrentMediaType(FirstAudioStreamId, mediaType);
-            Reader.SetStreamSelection(FirstAudioStreamId, true);
+            Reader.SetCurrentMediaType(SourceReaderIndex.FirstAudioStream, mediaType);
+            Reader.SetStreamSelection(SourceReaderIndex.FirstAudioStream, true);
 
-            using var currentMediaType = Reader.GetCurrentMediaType(FirstAudioStreamId);
-            Success = currentMediaType.Get<Guid>(MediaTypeAttributeKeys.Subtype) == AudioFormatGuids.Float &&
-                currentMediaType.Get<int>(MediaTypeAttributeKeys.AudioSamplesPerSecond) == IFootageSource.SupportAudioSamplingRate &&
-                currentMediaType.Get<int>(MediaTypeAttributeKeys.AudioNumChannels) == IFootageSource.SupportChannelCount &&
-                currentMediaType.Get<int>(MediaTypeAttributeKeys.AudioBitsPerSample) == sizeof(float) * 8;
+            using var currentMediaType = Reader.GetCurrentMediaType(SourceReaderIndex.FirstAudioStream);
+            Success = currentMediaType.GetGUID(MediaTypeAttributeKeys.Subtype) == AudioFormatGuids.Float &&
+                currentMediaType.GetUInt32(MediaTypeAttributeKeys.AudioSamplesPerSecond) == IFootageSource.SupportAudioSamplingRate &&
+                currentMediaType.GetUInt32(MediaTypeAttributeKeys.AudioNumChannels) == IFootageSource.SupportChannelCount &&
+                currentMediaType.GetUInt32(MediaTypeAttributeKeys.AudioBitsPerSample) == sizeof(float) * 8;
 
             Duration = GetDuration();
         }
@@ -71,7 +69,7 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
                 return -1.0;
             }
 
-            var duration = Reader.GetPresentationAttribute((int)MidlMidlItfMfreadwrite000000010001.MfSourceReaderMediaSource, PresentationDescriptionAttributeKeys.Duration);
+            var duration = Reader.GetPresentationAttribute(SourceReaderIndex.MediaSource, PresentationDescriptionAttributeKeys.Duration);
 
             if (duration.ElementType == SharpGen.Runtime.Win32.VariantElementType.ULong)
             {
@@ -93,8 +91,7 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
             }
 
             var longTime = (long)(time * DurationRate);
-            var pos = new Variant { ElementType = VariantElementType.Long, Value = longTime };
-            Reader.SetCurrentPosition(Guid.Empty, pos);
+            Reader.SetCurrentPosition(longTime);
             var result = new float[(int)(length * IFootageSource.SupportAudioSamplingRate) * 2];
 
             var writeCount = 0;
@@ -102,9 +99,9 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
             var isFirst = true;
             while (writeCount < result.Length)
             {
-                Reader.ReadSample(FirstAudioStreamId, 0, out int _, out int flags, out long _, out IMFSample? sample);
+                var sample = Reader.ReadSample(SourceReaderIndex.FirstAudioStream, 0, out var _, out var flags, out var _);
 
-                if ((flags & (int)SourceReaderFlag.FEndofstream) != 0)
+                if ((flags & SourceReaderFlag.EndOfStream) != 0)
                 {
                     break;
                 }
@@ -122,8 +119,7 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
                     {
                         break;
                     }
-                    pos = new Variant { ElementType = VariantElementType.Long, Value = longTime - RewindRetrySpan * (rewindCount + 1) };
-                    Reader.SetCurrentPosition(Guid.Empty, pos);
+                    Reader.SetCurrentPosition(longTime - RewindRetrySpan * (rewindCount + 1));
                     rewindCount++;
                     continue;
                 }

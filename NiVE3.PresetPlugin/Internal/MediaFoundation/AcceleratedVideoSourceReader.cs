@@ -46,8 +46,8 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
             attributes.DxgiManager = DxgiManager;
 
             Reader = MediaFactory.MFCreateSourceReaderFromURL(filePath, attributes);
-            using var nativeMediaType = Reader.GetNativeMediaType(FirstVideoStreamId, 0);
-            var majorType = nativeMediaType.Get<Guid>(MediaTypeAttributeKeys.MajorType);
+            using var nativeMediaType = Reader.GetNativeMediaType(SourceReaderIndex.FirstVideoStream, 0);
+            var majorType = nativeMediaType.GetGUID(MediaTypeAttributeKeys.MajorType);
             if (majorType != MediaTypeGuids.Video)
             {
                 return;
@@ -62,17 +62,17 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
             {
                 return;
             }
-            Reader.SetCurrentMediaType(FirstVideoStreamId, mediaType);
-            Reader.SetStreamSelection(FirstVideoStreamId, true);
+            Reader.SetCurrentMediaType(SourceReaderIndex.FirstVideoStream, mediaType);
+            Reader.SetStreamSelection(SourceReaderIndex.FirstVideoStream, true);
 
-            var decoder = (IMFTransform)Reader.GetServiceForStream(FirstVideoStreamId, Guid.Empty, typeof(IMFTransform).GUID);
+            var decoder = (IMFTransform)Reader.GetServiceForStream(SourceReaderIndex.FirstVideoStream, Guid.Empty, typeof(IMFTransform).GUID);
             if (decoder == null)
             {
                 return;
             }
             decoder.ProcessMessage(TMessageType.MessageSetD3DManager, unchecked((nuint)DxgiManager.NativePointer));
 
-            Format = FormatInfo.GetVideoFormat(Reader, FirstVideoStreamId);
+            Format = FormatInfo.GetVideoFormat(Reader, SourceReaderIndex.FirstVideoStream);
 
             var transformPtr = Com.CoCreateInstance(CLSID_VideoProcessorMFT, null, CLSCTX.CLSCTX_INPROC_SERVER, typeof(IMFTransform).GUID);
             if (transformPtr == nint.Zero)
@@ -125,20 +125,15 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
                 return;
             }
 
-            using var mediaType = Reader.GetCurrentMediaType(FirstVideoStreamId);
+            using var mediaType = Reader.GetCurrentMediaType(SourceReaderIndex.FirstVideoStream);
 
-            const int WidthAlign = 2;
-            const int HeightAlign = 16;
-            var height = Format.Height % HeightAlign != 0 ? (Format.Height / HeightAlign + 1) * HeightAlign : Format.Height;
-            var alignedCorrectedWidth = Format.CorrectedWidth % WidthAlign != 0 ? (Format.CorrectedWidth / WidthAlign + 1) * WidthAlign : Format.CorrectedWidth;
-            var alignedCorrectedHeight = Format.CorrectedHeight % HeightAlign != 0 ? (Format.CorrectedHeight / HeightAlign + 1) * HeightAlign : Format.CorrectedHeight;
+            //const int WidthAlign = 2;
+            //const int HeightAlign = 16;
+            //var height = Format.Height % HeightAlign != 0 ? (Format.Height / HeightAlign + 1) * HeightAlign : Format.Height;
+            //var alignedCorrectedWidth = Format.CorrectedWidth % WidthAlign != 0 ? (Format.CorrectedWidth / WidthAlign + 1) * WidthAlign : Format.CorrectedWidth;
+            //var alignedCorrectedHeight = Format.CorrectedHeight % HeightAlign != 0 ? (Format.CorrectedHeight / HeightAlign + 1) * HeightAlign : Format.CorrectedHeight;
 
-            using var inputMediaType = Reader.GetCurrentMediaType(FirstVideoStreamId);
-            for (var i = 0; i < inputMediaType.Count; i++)
-            {
-                inputMediaType.GetByIndex((uint)i, out var key);
-                System.Diagnostics.Debug.WriteLine("{0}: {1}", key, inputMediaType.Get(key));
-            }
+            using var inputMediaType = Reader.GetCurrentMediaType(SourceReaderIndex.FirstVideoStream);
 
             inputMediaType.Set(MediaTypeAttributeKeys.AllSamplesIndependent, true);
             inputMediaType.Set(MediaTypeAttributeKeys.FixedSizeSamples, true);
@@ -149,7 +144,7 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
             outputMediaType.Set(MediaTypeAttributeKeys.Subtype, VideoFormatGuids.Argb32);
             outputMediaType.Set(MediaTypeAttributeKeys.AllSamplesIndependent, true);
             outputMediaType.Set(MediaTypeAttributeKeys.FixedSizeSamples, true);
-            outputMediaType.Set(MediaTypeAttributeKeys.DefaultStride, Format.CorrectedWidth);
+            outputMediaType.Set(MediaTypeAttributeKeys.DefaultStride, (uint)(Format.CorrectedWidth * 4)); // NOTE: int だと float 扱いにされるため uint にする
             Util.SetDoubleInt32(outputMediaType, MediaTypeAttributeKeys.PixelAspectRatio, 1, 1);
             Util.SetDoubleInt32(outputMediaType, MediaTypeAttributeKeys.FrameSize, Format.CorrectedWidth, Format.CorrectedHeight);
             Transform.SetOutputType(0, outputMediaType, 0);
