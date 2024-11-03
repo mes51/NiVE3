@@ -28,6 +28,11 @@ namespace NiVE3.Plugin.Interfaces
         public string SourceId { get; }
 
         /// <summary>
+        /// ソースの名前
+        /// </summary>
+        public string? Name { get; }
+
+        /// <summary>
         /// 読み込んだファイルのフレームレート
         /// </summary>
         double FrameRate { get; }

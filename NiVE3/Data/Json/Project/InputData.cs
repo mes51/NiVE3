@@ -38,5 +38,7 @@ namespace NiVE3.Data.Json.Project
         public SourceType SourceType { get; set; } = SourceType.None;
 
         public string SourceId { get; set; } = "";
+
+        public string? Name { get; set; }
     }
 }

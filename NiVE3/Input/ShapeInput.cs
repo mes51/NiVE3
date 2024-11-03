@@ -229,6 +229,8 @@ namespace NiVE3.Input
 
         public string SourceId => "shape";
 
+        public string? Name => null;
+
         public double FrameRate => 0.0;
 
         public int Width => 0;

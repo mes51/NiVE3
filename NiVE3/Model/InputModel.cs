@@ -58,7 +58,7 @@ namespace NiVE3.Model
                 FilePath = FilePath,
                 RelativeFilePath = IsInternalInput ? "" : Path.GetRelativePath(projectDir, FilePath),
                 InputOption = Input.SaveData(),
-                Sources = Input.GetGroup().Flatten().Select(s => new SourceData { SourceId = s.SourceId, SourceType = s.SourceType, Width = s.Width, Height = s.Height, Duration = s.Duration, FrameRate = s.FrameRate }).ToArray()
+                Sources = Input.GetGroup().Flatten().Select(s => new SourceData { Name = s.Name, SourceId = s.SourceId, SourceType = s.SourceType, Width = s.Width, Height = s.Height, Duration = s.Duration, FrameRate = s.FrameRate }).ToArray()
             };
         }
 

@@ -14,6 +14,8 @@ namespace NiVE3.Input.Special
 
         public string SourceId => "empty";
 
+        public string? Name => null;
+
         public double FrameRate => 0.0;
 
         public int Width => 0;

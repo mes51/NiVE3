@@ -63,6 +63,8 @@ namespace NiVE3.Input
     {
         public string SourceId => "Composition";
 
+        public string? Name => Composition.Name;
+
         public double FrameRate => Composition.FrameRate;
 
         public int Width => Composition.Width;

@@ -165,7 +165,7 @@ namespace NiVE3.Model
             InputModel = input;
             Source = source;
             IsSupportLoadToGpu = input.IsSupportLoadToGpu;
-            Name = Path.GetFileName(input.FilePath);
+            Name = string.IsNullOrEmpty(source.Name) ? Path.GetFileName(input.FilePath) : source.Name;
             if (source.SourceType.HasFlag(SourceType.Video))
             {
                 Width = source.Width;
@@ -181,6 +181,7 @@ namespace NiVE3.Model
             else if (source.SourceType.HasFlag(SourceType.Audio))
             {
                 Duration = source.Duration;
+                FrameRate = 30.0;
             }
             FilePath = input.FilePath;
             InputType = source.SourceType;

@@ -2,6 +2,7 @@
 using System.Buffers;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics;
@@ -118,6 +119,8 @@ namespace NiVE3.PresetPlugin.Input
     {
         public string SourceId => "0"; // TODO
 
+        public string? Name => null;
+
         public double FrameRate { get; }
 
         public int Width { get; }
@@ -183,6 +186,8 @@ namespace NiVE3.PresetPlugin.Input
     class MediaFoundationAudioFootageSource : IFootageSource
     {
         public string SourceId => "0"; // TODO
+
+        public string? Name => null;
 
         public double FrameRate => throw new NotImplementedException();
 

@@ -27,6 +27,8 @@ namespace NiVE3.Input.Special
 
         string SourceId { get; }
 
+        string? Name { get; }
+
         double FrameRate { get; }
 
         int Width { get; }
@@ -39,7 +41,7 @@ namespace NiVE3.Input.Special
 
         object? InputOption { get; set; }
 
-        public PlaceholderInput(SourceType sourceType, int width, int height, double frameRate, double duration, object? inputOption, string sourceId)
+        public PlaceholderInput(SourceType sourceType, int width, int height, double frameRate, double duration, object? inputOption, string sourceId, string? name)
         {
             SourceType = sourceType;
             Width = width;
@@ -48,6 +50,7 @@ namespace NiVE3.Input.Special
             Duration = duration;
             InputOption = inputOption;
             SourceId = sourceId;
+            Name = name;
         }
 
         public FootageSourceGroup GetGroup()
@@ -55,15 +58,15 @@ namespace NiVE3.Input.Special
             IFootageSource source;
             if (SourceType.HasFlag(SourceType.Video) || SourceType.HasFlag(SourceType.Image))
             {
-                source = new PlaceholderImageFootageSource(FilePath, SourceType, Width, Height, FrameRate, Duration, SourceId);
+                source = new PlaceholderImageFootageSource(FilePath, SourceType, Width, Height, FrameRate, Duration, SourceId, Name);
             }
             else if (SourceType.HasFlag(SourceType.Audio))
             {
-                source = new PlaceholderAudioFootageSource(Duration, SourceId);
+                source = new PlaceholderAudioFootageSource(Duration, SourceId, Name);
             }
             else
             {
-                source = new PlaceholderOtherFootageSource(SourceId);
+                source = new PlaceholderOtherFootageSource(SourceId, Name);
             }
             return new FootageSourceGroup([source]);
         }
@@ -122,6 +125,8 @@ namespace NiVE3.Input.Special
 
         public string SourceId { get; }
 
+        public string? Name { get; }
+
         public double FrameRate { get; }
 
         public int Width { get; }
@@ -134,7 +139,7 @@ namespace NiVE3.Input.Special
 
         string FileName {  get; }
 
-        public PlaceholderImageFootageSource(string fileName, SourceType sourceType, int width, int height, double frameRate, double duration, string sourceId)
+        public PlaceholderImageFootageSource(string fileName, SourceType sourceType, int width, int height, double frameRate, double duration, string sourceId, string? name)
         {
             FileName = fileName;
             SourceType = sourceType;
@@ -143,6 +148,7 @@ namespace NiVE3.Input.Special
             FrameRate = frameRate;
             Duration = duration;
             SourceId = sourceId;
+            Name = name;
         }
 
         public NImage ReadFrame(double time, double downSamplingRate, bool toGpu)
@@ -211,6 +217,8 @@ namespace NiVE3.Input.Special
     {
         public string SourceId { get; }
 
+        public string? Name { get; }
+
         public double FrameRate => 0.0;
 
         public int Width => 0;
@@ -221,9 +229,10 @@ namespace NiVE3.Input.Special
 
         public SourceType SourceType => SourceType.Audio;
 
-        public PlaceholderAudioFootageSource(double duration, string sourceId)
+        public PlaceholderAudioFootageSource(double duration, string sourceId, string? name)
         {
             SourceId = sourceId;
+            Name = name;
             Duration = duration;
         }
 
@@ -258,6 +267,8 @@ namespace NiVE3.Input.Special
     {
         public string SourceId { get; }
 
+        public string? Name { get; }
+
         public double FrameRate => 0.0;
 
         public int Width => 0;
@@ -268,9 +279,10 @@ namespace NiVE3.Input.Special
 
         public SourceType SourceType => SourceType.None;
 
-        public PlaceholderOtherFootageSource(string sourceId)
+        public PlaceholderOtherFootageSource(string sourceId, string? name)
         {
             SourceId = sourceId;
+            Name = name;
         }
 
         public NImage ReadFrame(double time, double downSamplingRate, bool toGpu)

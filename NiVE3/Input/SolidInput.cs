@@ -110,6 +110,8 @@ namespace NiVE3.Input
     {
         public string SourceId => "Solid";
 
+        public string? Name => null;
+
         public double FrameRate => 0.0;
 
         public double Duration => 0.0;

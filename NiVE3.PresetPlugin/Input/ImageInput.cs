@@ -86,6 +86,8 @@ namespace NiVE3.PresetPlugin.Input
     {
         public string SourceId => "0";
 
+        public string? Name => null;
+
         public double FrameRate => 0.0;
 
         public int Width => Image.Width;

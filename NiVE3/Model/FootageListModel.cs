@@ -397,7 +397,7 @@ namespace NiVE3.Model
                 {
                     foreach (var sourceData in inputData.Sources)
                     {
-                        var placeholderInput = new PlaceholderInput(sourceData.SourceType, sourceData.Width, sourceData.Height, sourceData.FrameRate, sourceData.Duration, inputData.InputOption, sourceData.SourceId);
+                        var placeholderInput = new PlaceholderInput(sourceData.SourceType, sourceData.Width, sourceData.Height, sourceData.FrameRate, sourceData.Duration, inputData.InputOption, sourceData.SourceId, sourceData.Name);
                         placeholderInput.Load(inputData.FilePath);
                         var placeholderInputModel = new InputModel(placeholderInput, inputData.PluginId, false, inputData.InputId);
                         PlaceholderInputs.Add(placeholderInputModel);
@@ -439,7 +439,7 @@ namespace NiVE3.Model
                 {
                     foreach (var sourceData in inputData.Sources)
                     {
-                        var placeholderInput = new PlaceholderInput(sourceData.SourceType, sourceData.Width, sourceData.Height, sourceData.FrameRate, sourceData.Duration, inputData.InputOption, sourceData.SourceId);
+                        var placeholderInput = new PlaceholderInput(sourceData.SourceType, sourceData.Width, sourceData.Height, sourceData.FrameRate, sourceData.Duration, inputData.InputOption, sourceData.SourceId, sourceData.Name);
                         placeholderInput.Load(inputData.FilePath);
                         var placeholderInputModel = new InputModel(placeholderInput, inputData.PluginId, false, inputData.InputId);
                         PlaceholderInputs.Add(placeholderInputModel);
@@ -468,7 +468,7 @@ namespace NiVE3.Model
                     }
                     else
                     {
-                        var placeholderInput = new PlaceholderInput(footageData.InputType, footageData.Width, footageData.Height, footageData.FrameRate, footageData.Duration, footageData.InputOption, footageData.SourceId);
+                        var placeholderInput = new PlaceholderInput(footageData.InputType, footageData.Width, footageData.Height, footageData.FrameRate, footageData.Duration, footageData.InputOption, footageData.SourceId, footageData.Name);
                         placeholderInput.Load(footageData.FilePath);
                         inputModel = new InputModel(placeholderInput, footageData.InputPluginId.Value, false, footageData.InputId);
                         source = placeholderInput.GetGroup().Sources.First();

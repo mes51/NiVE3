@@ -166,6 +166,8 @@ namespace NiVE3.Test.Model
     {
         public string SourceId { get; }
 
+        public string? Name => null;
+
         public double FrameRate => 0.0;
 
         public int Width => 1;
