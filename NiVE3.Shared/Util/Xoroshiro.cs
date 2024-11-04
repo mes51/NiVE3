@@ -12,38 +12,38 @@ namespace NiVE3.Shared.Util
     // https://prng.di.unimi.it/
     public struct Xoroshiro
     {
-        ulong S1;
-
-        ulong S2;
+        ulong S1 = 0UL;
+        ulong S2 = 0UL;
+        ulong S3 = 0UL;
+        ulong S4 = 0UL;
 
         public Xoroshiro()
         {
-            S1 = unchecked((ulong)Random.Shared.NextInt64());
-            S2 = unchecked((ulong)Random.Shared.NextInt64());
+            GeneratePRNGParameters(unchecked((ulong)(Random.Shared.NextInt64())));
         }
 
-        public Xoroshiro(ulong seed1, ulong seed2)
+        public Xoroshiro(long seed)
         {
-            S1 = seed1;
-            S2 = seed2;
+            GeneratePRNGParameters(unchecked((ulong)seed));
         }
 
-        public Xoroshiro(int seed)
+        public Xoroshiro(ulong seed)
         {
-            var seedRand = new Random(seed);
-            S1 = (ulong)seedRand.NextInt64();
-            S2 = (ulong)seedRand.NextInt64();
+            GeneratePRNGParameters(seed);
         }
 
         public ulong NextUInt64()
         {
-            var s0 = S1;
-            var s1 = S2;
-            var result = BitOperations.RotateLeft(s0 * 5, 7) * 9;
+            var result = BitOperations.RotateLeft(S2 * 5, 7) * 9;
+            var t = S2 << 17;
 
-            s1 ^= s0;
-            S1 = BitOperations.RotateLeft(s0, 24) ^ s1 ^ (s1 << 16);
-            S2 = BitOperations.RotateLeft(s1, 37);
+            S3 ^= S1;
+            S4 ^= S2;
+            S2 ^= S3;
+            S1 ^= S4;
+
+            S3 ^= t;
+            S4 = BitOperations.RotateLeft(S4, 45);
 
             return result;
         }
@@ -105,6 +105,8 @@ namespace NiVE3.Shared.Util
 
         public double NextDouble()
         {
+            // SEE: https://prng.di.unimi.it/
+            //      "Generating uniform doubles in the unit interval"
             return (NextUInt64() >> 11) / (double)(1U << 53);
         }
 
@@ -129,6 +131,30 @@ namespace NiVE3.Shared.Util
                     (span[j], span[i]) = (span[i], span[j]);
                 }
             }
+        }
+
+        // SEE: https://xoshiro.di.unimi.it/splitmix64.c
+        void GeneratePRNGParameters(ulong seed)
+        {
+            var z = (seed += 0x9E3779B97F4A7C15UL);
+            z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9UL;
+            z = (z ^ (z >> 27)) * 0x94D049BB133111EBUL;
+            S1 = z ^ (z >> 31);
+
+            z = (seed += 0x9E3779B97F4A7C15UL);
+            z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9UL;
+            z = (z ^ (z >> 27)) * 0x94D049BB133111EBUL;
+            S2 = z ^ (z >> 31);
+
+            z = (seed += 0x9E3779B97F4A7C15UL);
+            z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9UL;
+            z = (z ^ (z >> 27)) * 0x94D049BB133111EBUL;
+            S3 = z ^ (z >> 31);
+
+            z = (seed += 0x9E3779B97F4A7C15UL);
+            z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9UL;
+            z = (z ^ (z >> 27)) * 0x94D049BB133111EBUL;
+            S4 = z ^ (z >> 31);
         }
     }
 }

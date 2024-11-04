@@ -24,7 +24,7 @@ using NiVE3.Shared.Extension;
 namespace NiVE3.PresetPlugin.Effect.Distortion
 {
     [Export(typeof(IEffect))]
-    [EffectMetadata(LanguageResourceDictionary.Distortion_DisplacementMap_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_Distortion, LanguageResourceDictionary.Distortion_DisplacementMap_Description, ID, IsSupportGpu = false, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
+    [EffectMetadata(LanguageResourceDictionary.Distortion_DisplacementMap_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_Distortion, LanguageResourceDictionary.Distortion_DisplacementMap_Description, ID, IsSupportGpu = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
     public sealed class DisplacementMap : IEffect
     {
         static readonly Vector4 Half = Vector4.One * 0.5F;

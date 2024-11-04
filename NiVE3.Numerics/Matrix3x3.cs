@@ -235,6 +235,23 @@ namespace NiVE3.Numerics
         }
 
         /// <summary>
+        /// 指定した点で回転します
+        /// </summary>
+        /// <param name="angle">回転角度</param>
+        /// <param name="x">中心X座標</param>
+        /// <param name="y">中心Y座標</param>
+        /// <returns>生成された行列</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Matrix3x3 CreateRotateAt(float angle, float x, float y)
+        {
+            var rad = (float)(Math.PI / 180.0 * angle);
+            var cos = MathF.Cos(rad);
+            var sin = MathF.Sin(rad);
+
+            return new Matrix3x3(cos, sin,  -sin, cos, x - x * cos + y * sin, y - x * sin - y * cos);
+        }
+
+        /// <summary>
         /// スケーリングします
         /// </summary>
         /// <param name="w">Xの比</param>
