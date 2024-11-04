@@ -131,7 +131,7 @@ namespace NiVE3.PresetPlugin.Input
 
         public float[] ReadAudio(double time, double length)
         {
-            var pos = (int)(time * Const.AudioSampleTime);
+            var pos = (int)(time * Const.AudioSamplingRate);
             var result = new float[Math.Min((int)(length * Const.AudioSamplingRate), Signal.Samples.Length - pos) * 2];
 
             for (int i = 0, p = pos; i < result.Length; i += 2, p++)
