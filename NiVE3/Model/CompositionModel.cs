@@ -198,6 +198,8 @@ namespace NiVE3.Model
 
         public bool HasAudio => Layers.Any(l => l.IsEnableSolo) ? Layers.Any(l => l.HasAudio && l.IsEnableAudio && l.IsEnableSolo) : Layers.Any(l => l.HasAudio && l.IsEnableAudio);
 
+        public Int32Size Size => new Int32Size(Width, Height);
+
         public IReadOnlyCollection<LayerInfo> LayerIdentifiers => [..Layers.Select(l => new LayerInfo(l.LayerId, l.SourceType))];
 
         public event EventHandler<EventArgs>? CompositionUpdated;

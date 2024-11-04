@@ -10,6 +10,7 @@ using NiVE3.Model;
 using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Interfaces;
 using System.Reflection;
+using NiVE3.Model.UI;
 
 namespace NiVE3.Test.Model
 {
@@ -98,7 +99,7 @@ namespace NiVE3.Test.Model
         FootageListModel CreateModel()
         {
             // TODO: Mock化
-            var model = new FootageListModel(null!, new HistoryModel());
+            var model = new FootageListModel(null!, new HistoryModel(), new ViewStateModel());
             var testCatalog = new AssemblyCatalog(GetType().Assembly);
             var selfCatalog = new AssemblyCatalog(typeof(FootageListModel).Assembly);
             var catalog = new AggregateCatalog(selfCatalog, testCatalog);

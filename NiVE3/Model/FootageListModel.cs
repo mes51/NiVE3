@@ -17,6 +17,7 @@ using NiVE3.Data.Json.Project;
 using NiVE3.Extension;
 using NiVE3.Input;
 using NiVE3.Input.Special;
+using NiVE3.Model.UI;
 using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Shared.Extension;
@@ -76,6 +77,8 @@ namespace NiVE3.Model
 
         AcceleratorModel AcceleratorModel { get; }
 
+        ViewStateModel ViewState { get; }
+
         public event EventHandler<ShowLoadSettingEventArgs>? ShowLoadSetting;
 
         public event EventHandler<FootageModelEventArgs>? ShowFootagePreview;
@@ -86,7 +89,7 @@ namespace NiVE3.Model
 
         public event EventHandler<FootageEventArgs>? DeleteFootageByUndo;
 
-        public FootageListModel(AcceleratorModel acceleratorModel, HistoryModel historyModel)
+        public FootageListModel(AcceleratorModel acceleratorModel, HistoryModel historyModel, ViewStateModel viewState)
         {
             var pluginCatalog = new DirectoryCatalog(Paths.PluginDirectory);
             var selfCatalog = new AssemblyCatalog(typeof(FootageListModel).Assembly);
@@ -98,6 +101,7 @@ namespace NiVE3.Model
 
             AcceleratorModel = acceleratorModel;
             HistoryModel = historyModel;
+            ViewState = viewState;
 
             //TODO: イベントの追加方法をfieldに対し行うか、nullableにした上でコンストラクタでインスタンスをセットするのが良いか
             Footages = [];
@@ -595,8 +599,9 @@ namespace NiVE3.Model
 
             if (InputMetadatas[plugin.GetType()].HasSettingView)
             {
-                // TODO: コンポジションサイズをとってくる
-                var view = plugin.GetLoadSetting(null);
+                // TODO: フッテージの中から探すのではなく、ProjectModelから引っ張ってくる?
+                var currentComposition = ViewState.CurrentEditingCompositionId != null ? FindComposition(ViewState.CurrentEditingCompositionId.Value, Footages) : null;
+                var view = plugin.GetLoadSetting(currentComposition?.Size);
                 if (view != null)
                 {
                     var e = new ShowLoadSettingEventArgs(view);
@@ -739,6 +744,19 @@ namespace NiVE3.Model
         void OnFootageDeleted(IFootageModel[] footages)
         {
             FootageDeleted?.Invoke(this, new FootageEventArgs(footages));
+        }
+
+        static CompositionModel? FindComposition(Guid compositionId, IEnumerable<IFootageModel> list)
+        {
+            var model = list.OfType<FootageModel>().Select(f => f.InputModel.Input).OfType<CompositionInput>().FirstOrDefault(c => c.Composition.CompositionId == compositionId)?.Composition;
+            if (model != null)
+            {
+                return model;
+            }
+
+            return list.OfType<FootageFolderModel>()
+                .Select(l => FindComposition(compositionId, l.Children))
+                .FirstOrDefault(r => r != null);
         }
 
         static IFootageModel? FindModel(Guid targetId, IEnumerable<IFootageModel> list)

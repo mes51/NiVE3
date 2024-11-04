@@ -14,6 +14,8 @@ namespace NiVE3.Plugin.ValueObject
     /// <param name="Height">高さ</param>
     public readonly record struct Int32Size(int Width, int Height)
     {
+        public static readonly Int32Size Empty = new Int32Size(0, 0);
+
         public override string ToString()
         {
             return $"< Width = {Width}, Height = {Height} >";

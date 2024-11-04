@@ -81,7 +81,7 @@ namespace NiVE3.Input
 
         public FrameworkElement? GetLoadSetting(Int32Size? compositionSize)
         {
-            return new SolidSettingView { DataContext = new SolidSettingViewModel() };
+            return new SolidSettingView { DataContext = new SolidSettingViewModel(compositionSize) };
         }
 
         public bool ApplyLoadSetting(object? setting)

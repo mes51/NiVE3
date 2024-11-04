@@ -565,6 +565,7 @@ namespace NiVE3.ViewModel
             eventHubModel.UpdateDurationRequest += EventHubModel_UpdateDurationRequest;
             eventHubModel.AbortEditDurationRequest += EventHubModel_AbortEditDurationRequest;
             PropertyChanged += TimelineViewModel_PropertyChanged;
+            PaneSelected += TimelineViewModel_PaneSelected;
 
             ChangeEnableShyCommand = new DelegateCommand(() => CompositionModel?.ChangeEnableShy(), () => CompositionModel != null).ObservesProperty(() => CompositionModel);
 
@@ -1337,6 +1338,11 @@ namespace NiVE3.ViewModel
                     AudioPlayerModel.AddScrubSample(CompositionModel.RenderAudio(CurrentTime, CompositionModel.FrameDuration));
                     break;
             }
+        }
+
+        private void TimelineViewModel_PaneSelected(object? sender, EventArgs e)
+        {
+            CurrentEditingCompositionId = CompositionModel?.CompositionId;
         }
 
         private void CompositionModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)

@@ -64,7 +64,7 @@
 
                     <CheckBox Grid.RowSpan="2" Grid.Column="2" Content="{gm:LanguageResource ResourceKey=SolidInputSettingView_IsFixRatio}" IsChecked="{Binding IsFixRatio}" Margin="10,0,0,0" VerticalAlignment="Center"/>
 
-                    <Button Grid.Row="2" Grid.ColumnSpan="3" Content="{gm:LanguageResource ResourceKey=SolidInputSettingView_FitCompositionSize}" Width="200" Margin="0,10" HorizontalAlignment="Center"/>
+                    <Button Grid.Row="2" Grid.ColumnSpan="3" Content="{gm:LanguageResource ResourceKey=SolidInputSettingView_FitCompositionSize}" Width="200" Margin="0,10" HorizontalAlignment="Center" Command="{Binding ChangeToCompositionSizeCommand}"/>
                 </Grid>
             </GroupBox>
 
@@ -72,11 +72,9 @@
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition />
-                        <ColumnDefinition />
                     </Grid.ColumnDefinitions>
 
-                    <Button Grid.Column="0" Width="48" Height="27" Margin="0,10,5,10" HorizontalAlignment="Right" BorderBrush="{ugm:AppearanceResource ResourceKey=BorderBrush}" Style="{StaticResource ColorChangeButtonStyle}" Click="ColorChangeButton_Click"/>
-                    <Button Grid.Column="1" Width="24" Height="24" Margin="0,10" HorizontalAlignment="Left"/>
+                    <Button Grid.Column="0" Width="48" Height="27" Margin="0,10" HorizontalAlignment="Center" BorderBrush="{ugm:AppearanceResource ResourceKey=BorderBrush}" Style="{StaticResource ColorChangeButtonStyle}" Click="ColorChangeButton_Click"/>
                 </Grid>
             </GroupBox>
         </Grid>

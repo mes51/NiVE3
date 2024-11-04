@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Media;
 using NiVE3.Data;
+using NiVE3.Plugin.ValueObject;
 using NiVE3.View.Resource;
 using Prism.Commands;
 using Prism.Mvvm;
@@ -59,10 +60,28 @@ namespace NiVE3.ViewModel.Input
             set { SetProperty(ref colorBrush, value); }
         }
 
+        private Int32Size? compositionSize;
+        public Int32Size? CompositionSize
+        {
+            get { return compositionSize; }
+            set { SetProperty(ref compositionSize, value); }
+        }
+
         public double FixedRatio { get; private set; }
 
-        public SolidSettingViewModel()
+        public ICommand ChangeToCompositionSizeCommand { get; }
+
+        public SolidSettingViewModel(Int32Size? compositionSize)
         {
+            CompositionSize = compositionSize;
+
+            ChangeToCompositionSizeCommand = new DelegateCommand(() =>
+            {
+                var compSize = CompositionSize ?? Int32Size.Empty;
+                Width = compSize.Width;
+                Height = compSize.Height;
+            }, () => CompositionSize != null).ObservesProperty(() => CompositionSize);
+
             PropertyChanged += SolidSettingViewModel_PropertyChanged;
         }
 
