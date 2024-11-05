@@ -227,6 +227,35 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("元画像のブレンド")]
         public const string ColorCollection_AutoContrastCorrection_BlendOriginal = nameof(ColorCollection_AutoContrastCorrection_BlendOriginal);
 
+        // MultiTone
+
+        [DefaultValue("マルチトーン")]
+        public const string ColorCollection_MultiTone_Name = nameof(ColorCollection_MultiTone_Name);
+
+        [DefaultValue("指定した色でハイライト～シャドウまでの色を設定します")]
+        public const string ColorCollection_MultiTone_Description = nameof(ColorCollection_MultiTone_Description);
+
+        [LanguageKey, DefaultValue("使用するミッドトーンの数")]
+        public const string ColorCollection_MultiTone_UseMidToneCount = nameof(ColorCollection_MultiTone_UseMidToneCount);
+
+        [LanguageKey, DefaultValue("シャドウ")]
+        public const string ColorCollection_MultiTone_ShadowColor = nameof(ColorCollection_MultiTone_ShadowColor);
+
+        [LanguageKey, DefaultValue("ミッドトーン1")]
+        public const string ColorCollection_MultiTone_MidToneColor1 = nameof(ColorCollection_MultiTone_MidToneColor1);
+
+        [LanguageKey, DefaultValue("ミッドトーン2")]
+        public const string ColorCollection_MultiTone_MidToneColor2 = nameof(ColorCollection_MultiTone_MidToneColor2);
+
+        [LanguageKey, DefaultValue("ミッドトーン3")]
+        public const string ColorCollection_MultiTone_MidToneColor3 = nameof(ColorCollection_MultiTone_MidToneColor3);
+
+        [LanguageKey, DefaultValue("ミッドトーン4")]
+        public const string ColorCollection_MultiTone_MidToneColor4 = nameof(ColorCollection_MultiTone_MidToneColor4);
+
+        [LanguageKey, DefaultValue("ハイライト")]
+        public const string ColorCollection_MultiTone_HighlightColor = nameof(ColorCollection_MultiTone_HighlightColor);
+
         // RandomNoise
 
         [DefaultValue("ノイズ")]
