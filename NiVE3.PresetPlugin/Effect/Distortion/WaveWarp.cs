@@ -22,8 +22,8 @@ using NiVE3.PresetPlugin.Resource;
 namespace NiVE3.PresetPlugin.Effect.Distortion
 {
     [Export(typeof(IEffect))]
-    [EffectMetadata(LanguageResourceDictionary.Distortion_WaveCurve_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_Distortion, LanguageResourceDictionary.Distortion_WaveCurve_Description, ID, IsSupportGpu = true, IsRenderEveryFrame = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
-    public sealed class WaveCurve : IEffect
+    [EffectMetadata(LanguageResourceDictionary.Distortion_WaveWarp_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_Distortion, LanguageResourceDictionary.Distortion_WaveWarp_Description, ID, IsSupportGpu = true, IsRenderEveryFrame = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
+    public sealed class WaveWarp : IEffect
     {
         const string ID = "CF55D043-4440-418F-A62F-429EA63402B7";
 
@@ -52,19 +52,19 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
         {
             return
             [
-                new EnumProperty(PropertyTypeId, LanguageResourceDictionary.ResourceKeys.Distortion_WaveCurve_Type, typeof(WaveCurveType), typeof(LanguageResourceDictionary), WaveCurveType.Sin, selectBoxWidth: 90.0),
-                new DoubleProperty(PropertyAmplitudeId, LanguageResourceDictionary.ResourceKeys.Distortion_WaveCurve_Amplitude, 10.0, 0.0, double.MaxValue, digit: 2),
-                new DoubleProperty(PropertyIntervalId, LanguageResourceDictionary.ResourceKeys.Distortion_WaveCurve_Interval, 40.0, 1.0, double.MaxValue, digit: 2),
-                new DoubleProperty(PropertySpeedId, LanguageResourceDictionary.ResourceKeys.Distortion_WaveCurve_Speed, 10.0, 0.0, double.MaxValue, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_AnglePerSec),
-                new AngleProperty(PropertyAngleId, LanguageResourceDictionary.ResourceKeys.Distortion_WaveCurve_Angle, 0.0),
-                new AngleProperty(PropertyPhaseId, LanguageResourceDictionary.ResourceKeys.Distortion_WaveCurve_Phase, 0.0),
-                new DoubleProperty(PropertyRandomSeedId, LanguageResourceDictionary.ResourceKeys.Distortion_WaveCurve_RandomSeed, 0.0, 0.0, double.MaxValue, digit: 0)
+                new EnumProperty(PropertyTypeId, LanguageResourceDictionary.ResourceKeys.Distortion_WaveWarp_Type, typeof(WaveWarpType), typeof(LanguageResourceDictionary), WaveWarpType.Sin, selectBoxWidth: 90.0),
+                new DoubleProperty(PropertyAmplitudeId, LanguageResourceDictionary.ResourceKeys.Distortion_WaveWarp_Amplitude, 10.0, 0.0, double.MaxValue, digit: 2),
+                new DoubleProperty(PropertyIntervalId, LanguageResourceDictionary.ResourceKeys.Distortion_WaveWarp_Interval, 40.0, 1.0, double.MaxValue, digit: 2),
+                new DoubleProperty(PropertySpeedId, LanguageResourceDictionary.ResourceKeys.Distortion_WaveWarp_Speed, 10.0, double.MinValue, double.MaxValue, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_AnglePerSec),
+                new AngleProperty(PropertyAngleId, LanguageResourceDictionary.ResourceKeys.Distortion_WaveWarp_Angle, 0.0),
+                new AngleProperty(PropertyPhaseId, LanguageResourceDictionary.ResourceKeys.Distortion_WaveWarp_Phase, 0.0),
+                new DoubleProperty(PropertyRandomSeedId, LanguageResourceDictionary.ResourceKeys.Distortion_WaveWarp_RandomSeed, 0.0, 0.0, double.MaxValue, digit: 0)
             ];
         }
 
         public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, double layerTime, IPropertyObject[] properties, ICompositionObject composition, bool useGpu)
         {
-            var type = properties.GetValue(PropertyTypeId, layerTime, WaveCurveType.Sin);
+            var type = properties.GetValue(PropertyTypeId, layerTime, WaveWarpType.Sin);
             var amp = (float)(properties.GetValue(PropertyAmplitudeId, layerTime, 0.0) / downSamplingRateY);
             var interval = (float)(properties.GetValue(PropertyIntervalId, layerTime, 1.0) / downSamplingRateX);
             var speed = (float)properties.GetValue(PropertySpeedId, layerTime, 0.0);
@@ -94,7 +94,7 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
 
         public void Dispose() { }
 
-        static NManagedImage ProcessCpu(NImage image, ROI roi, float downSamplingRateX, float downSamplingRateY, WaveCurveType type, float amp, float interval, float speed, float angle, float phase, uint randomSeed, float time)
+        static NManagedImage ProcessCpu(NImage image, ROI roi, float downSamplingRateX, float downSamplingRateY, WaveWarpType type, float amp, float interval, float speed, float angle, float phase, uint randomSeed, float time)
         {
             var managedImage = image switch
             {
@@ -132,7 +132,7 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
             return managedImage;
         }
 
-        static NGPUImage ProcessGpu(GraphicsDevice device, NImage image, ROI roi, float downSamplingRateX, float downSamplingRateY, WaveCurveType type, float amp, float interval, float speed, float angle, float phase, uint randomSeed, float time)
+        static NGPUImage ProcessGpu(GraphicsDevice device, NImage image, ROI roi, float downSamplingRateX, float downSamplingRateY, WaveWarpType type, float amp, float interval, float speed, float angle, float phase, uint randomSeed, float time)
         {
             var gpuImage = image switch
             {
@@ -151,13 +151,13 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
             var basePhase = phase + speed * time;
 
             using var context = device.CreateComputeContext();
-            context.For(roi.Width, roi.Height, new WaveCurveProcess(gpuImage.Data, gpuImage.Width, gpuImage.Height, sourceImage.Data, (int)type, basePhase, amp, interval, randomSeed, transform.ToFloat3x3(), iTransform.ToFloat3x3(), roi.Left, roi.Top));
+            context.For(roi.Width, roi.Height, new WaveWarpProcess(gpuImage.Data, gpuImage.Width, gpuImage.Height, sourceImage.Data, (int)type, basePhase, amp, interval, randomSeed, transform.ToFloat3x3(), iTransform.ToFloat3x3(), roi.Left, roi.Top));
 
             return gpuImage;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static float GenerateWave(WaveCurveType type, float baseAngle, float x, float interval, uint randomSeed)
+        static float GenerateWave(WaveWarpType type, float baseAngle, float x, float interval, uint randomSeed)
         {
             const float AngleInterval = 180.0F;
             const uint CoordLimit = 0xFFF;
@@ -165,9 +165,9 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
             var phaseAngle = baseAngle + x * 360.0F / interval;
             switch (type)
             {
-                case WaveCurveType.Sin:
+                case WaveWarpType.Sin:
                     return MathF.Sin(phaseAngle / AngleInterval * MathF.PI);
-                case WaveCurveType.Rectangle:
+                case WaveWarpType.Rectangle:
                     if (phaseAngle < 0.0F)
                     {
                         return ((-phaseAngle / AngleInterval) % 2.0F) < 1.0F ? 1.0F : -1.0F;
@@ -176,13 +176,13 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
                     {
                         return ((phaseAngle / AngleInterval) % 2.0F) > 1.0F ? 1.0F : -1.0F;
                     }
-                case WaveCurveType.Triangle:
+                case WaveWarpType.Triangle:
                     {
                         var a = Math.Abs(phaseAngle / AngleInterval);
                         var b = a % 2.0F;
                         return (b - Math.Max(b - 1.0F, 0.0F) * 2.0F - 0.5F) * 2.0F;
                     }
-                case WaveCurveType.Saw:
+                case WaveWarpType.Saw:
                     if (phaseAngle < 0.0F)
                     {
                         return (1.0F - (-phaseAngle / AngleInterval % 1.0F) - 0.5F) * 2.0F;
@@ -191,13 +191,13 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
                     {
                         return ((phaseAngle / AngleInterval % 1.0F) - 0.5F) * 2.0F;
                     }
-                case WaveCurveType.Noise:
+                case WaveWarpType.Noise:
                     {
                         var count = phaseAngle / AngleInterval;
                         var uCount = unchecked((uint)(int)MathF.Floor(count)) % CoordLimit;
                         return (NoiseFunction.Pcg3D1FloatCpu(uCount, 0, 0, randomSeed) - 0.5F) * 2.0F;
                     }
-                case WaveCurveType.SmoothNoise:
+                case WaveWarpType.SmoothNoise:
                     {
                         var count = phaseAngle / AngleInterval;
                         var diff = SmoothFade(count - MathF.Floor(count));
@@ -218,7 +218,7 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
 
     [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
     [GeneratedComputeShaderDescriptor]
-    readonly partial struct WaveCurveProcess(ReadWriteBuffer<Float4> image, int width, int height, ReadWriteBuffer<Float4> originalImage, int type, float baseAngle, float amp, float interval, uint randomSeed, Float3x3 transform, Float3x3 iTransform, int startX, int startY) : IComputeShader
+    readonly partial struct WaveWarpProcess(ReadWriteBuffer<Float4> image, int width, int height, ReadWriteBuffer<Float4> originalImage, int type, float baseAngle, float amp, float interval, uint randomSeed, Float3x3 transform, Float3x3 iTransform, int startX, int startY) : IComputeShader
     {
         const float PI = MathF.PI;
 
@@ -344,9 +344,9 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
             var phaseAngle = baseAngle + x * 360.0F / interval;
             switch (type)
             {
-                case 0: // WaveCurveType.Sin
+                case 0: // WaveWarpType.Sin
                     return Hlsl.Sin(phaseAngle / AngleInterval * PI);
-                case 1: // WaveCurveType.Rectangle:
+                case 1: // WaveWarpType.Rectangle:
                     if (phaseAngle < 0.0F)
                     {
                         return ((-phaseAngle / AngleInterval) % 2.0F) < 1.0F ? 1.0F : -1.0F;
@@ -355,13 +355,13 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
                     {
                         return ((phaseAngle / AngleInterval) % 2.0F) > 1.0F ? 1.0F : -1.0F;
                     }
-                case 2: // WaveCurveType.Triangle:
+                case 2: // WaveWarpType.Triangle:
                     {
                         var a = Hlsl.Abs(phaseAngle / AngleInterval);
                         var b = a % 2.0F;
                         return (b - Hlsl.Max(b - 1.0F, 0.0F) * 2.0F - 0.5F) * 2.0F;
                     }
-                case 3: // WaveCurveType.Saw:
+                case 3: // WaveWarpType.Saw:
                     if (phaseAngle < 0.0F)
                     {
                         return (1.0F - (-phaseAngle / AngleInterval % 1.0F) - 0.5F) * 2.0F;
@@ -370,13 +370,13 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
                     {
                         return ((phaseAngle / AngleInterval % 1.0F) - 0.5F) * 2.0F;
                     }
-                case 4: // WaveCurveType.Noise:
+                case 4: // WaveWarpType.Noise:
                     {
                         var count = phaseAngle / AngleInterval;
                         var uCount = ((uint)(int)Hlsl.Floor(count)) % CoordLimit;
                         return (NoiseFunction.Pcg3D1FloatCpu(uCount, 0, 0, randomSeed) - 0.5F) * 2.0F;
                     }
-                case 5: // WaveCurveType.SmoothNoise:
+                case 5: // WaveWarpType.SmoothNoise:
                     {
                         var count = phaseAngle / AngleInterval;
                         var diff = SmoothFade(count - Hlsl.Floor(count));
@@ -394,7 +394,7 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
         }
     }
 
-    enum WaveCurveType : int
+    enum WaveWarpType : int
     {
         Sin,
         Rectangle,

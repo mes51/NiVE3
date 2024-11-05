@@ -341,34 +341,34 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("画像をループする")]
         public const string Distortion_DisplacementMap_IsLoopImage = nameof(Distortion_DisplacementMap_IsLoopImage);
 
-        // WaveCurve
+        // WaveWarp
 
         [DefaultValue("波形ワープ")]
-        public const string Distortion_WaveCurve_Name = nameof(Distortion_WaveCurve_Name);
+        public const string Distortion_WaveWarp_Name = nameof(Distortion_WaveWarp_Name);
 
         [DefaultValue("画像をを正弦波やノコギリ波などの波状に変形します。")]
-        public const string Distortion_WaveCurve_Description = nameof(Distortion_WaveCurve_Description);
+        public const string Distortion_WaveWarp_Description = nameof(Distortion_WaveWarp_Description);
 
         [LanguageKey, DefaultValue("波形")]
-        public const string Distortion_WaveCurve_Type = nameof(Distortion_WaveCurve_Type);
+        public const string Distortion_WaveWarp_Type = nameof(Distortion_WaveWarp_Type);
 
         [LanguageKey, DefaultValue("振幅")]
-        public const string Distortion_WaveCurve_Amplitude = nameof(Distortion_WaveCurve_Amplitude);
+        public const string Distortion_WaveWarp_Amplitude = nameof(Distortion_WaveWarp_Amplitude);
 
         [LanguageKey, DefaultValue("波形の間隔")]
-        public const string Distortion_WaveCurve_Interval = nameof(Distortion_WaveCurve_Interval);
+        public const string Distortion_WaveWarp_Interval = nameof(Distortion_WaveWarp_Interval);
 
         [LanguageKey, DefaultValue("速度")]
-        public const string Distortion_WaveCurve_Speed = nameof(Distortion_WaveCurve_Speed);
+        public const string Distortion_WaveWarp_Speed = nameof(Distortion_WaveWarp_Speed);
 
         [LanguageKey, DefaultValue("角度")]
-        public const string Distortion_WaveCurve_Angle = nameof(Distortion_WaveCurve_Angle);
+        public const string Distortion_WaveWarp_Angle = nameof(Distortion_WaveWarp_Angle);
 
         [LanguageKey, DefaultValue("位相")]
-        public const string Distortion_WaveCurve_Phase = nameof(Distortion_WaveCurve_Phase);
+        public const string Distortion_WaveWarp_Phase = nameof(Distortion_WaveWarp_Phase);
 
         [LanguageKey, DefaultValue("ランダムシード")]
-        public const string Distortion_WaveCurve_RandomSeed = nameof(Distortion_WaveCurve_RandomSeed);
+        public const string Distortion_WaveWarp_RandomSeed = nameof(Distortion_WaveWarp_RandomSeed);
 
         // Dynamics
 
@@ -875,22 +875,22 @@ namespace NiVE3.PresetPlugin.Resource
         public const string SolidCompositeOrder_Back = nameof(SolidCompositeOrder_Back);
 
         [DefaultValue("サイン")]
-        public const string WaveCurveType_Sin = nameof(SolidCompositeOrder_Back);
+        public const string WaveWarpType_Sin = nameof(SolidCompositeOrder_Back);
 
         [DefaultValue("矩形")]
-        public const string WaveCurveType_Rectangle = nameof(WaveCurveType_Rectangle);
+        public const string WaveWarpType_Rectangle = nameof(WaveWarpType_Rectangle);
 
         [DefaultValue("三角")]
-        public const string WaveCurveType_Triangle = nameof(WaveCurveType_Triangle);
+        public const string WaveWarpType_Triangle = nameof(WaveWarpType_Triangle);
 
         [DefaultValue("のこぎり")]
-        public const string WaveCurveType_Saw = nameof(WaveCurveType_Saw);
+        public const string WaveWarpType_Saw = nameof(WaveWarpType_Saw);
 
         [DefaultValue("ノイズ")]
-        public const string WaveCurveType_Noise = nameof(WaveCurveType_Noise);
+        public const string WaveWarpType_Noise = nameof(WaveWarpType_Noise);
 
         [DefaultValue("ノイズ(滑らか)")]
-        public const string WaveCurveType_SmoothNoise = nameof(WaveCurveType_SmoothNoise);
+        public const string WaveWarpType_SmoothNoise = nameof(WaveWarpType_SmoothNoise);
 
         // unit
 
