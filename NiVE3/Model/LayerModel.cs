@@ -33,11 +33,10 @@ using NiVE3.Plugin.Attributes;
 using NiVE3.Data.Clipboard;
 using System.IO.Hashing;
 using NiVE3.Cache;
-using System.Security.Cryptography.Xml;
-using System.Security.Policy;
 using ComputeSharp;
 using NiVE3.InternalShader;
 using NiVE3.Config;
+using NAudio.Dsp;
 
 namespace NiVE3.Model
 {
@@ -67,6 +66,13 @@ namespace NiVE3.Model
         {
             get { return comment; }
             set { SetProperty(ref comment, value); }
+        }
+
+        private double sourceDuration;
+        public double SourceDuration
+        {
+            get { return sourceDuration; }
+            set { SetProperty(ref sourceDuration, value); }
         }
 
         private double duration;
@@ -116,6 +122,13 @@ namespace NiVE3.Model
         {
             get { return tagColor; }
             set { SetProperty(ref tagColor, value); }
+        }
+
+        private double playRate = 100.0;
+        public double PlayRate
+        {
+            get { return playRate; }
+            set { SetProperty(ref playRate, value); }
         }
 
         private bool isEnableVideo;
@@ -271,6 +284,8 @@ namespace NiVE3.Model
 
         public int Index => CompositionModel.Layers.IndexOf(this) + 1;
 
+        public double CompositionFrameRate => CompositionModel.FrameRate;
+
         private ObservableCollection<EffectModel> effects = [];
         public ObservableCollection<EffectModel> Effects
         {
@@ -326,6 +341,7 @@ namespace NiVE3.Model
             HistoryModel = historyModel;
             AcceleratorModel = acceleratorModel;
             Name = footageModel.Name;
+            SourceDuration = footageModel.Duration;
             Duration = footageModel.Duration;
             OutPoint = footageModel.Duration;
             SourceType = footageModel.InputType;
@@ -563,18 +579,7 @@ namespace NiVE3.Model
             var hash = new XxHash3();
             if (downSamplingRate == 1.0)
             {
-                sourceOptionProperties?.CalcHash(hash);
-                hash.Append(IsEnableTimeRemap);
-                hash.Append(IsEnableEffect);
-                hash.Append(IsEnableFrameBlend);
-                hash.Append(InterpolationQuality);
-                foreach (var e in Effects)
-                {
-                    if (e.IsEnable)
-                    {
-                        e.CalcPropertyHash(layerTime, globalTime, hash);
-                    }
-                }
+                CalcCacheKeyHash(hash, layerTime, false);
 
                 if (SourceType.HasFlag(SourceType.Video) || HasRenderEveryFrameEffect)
                 {
@@ -670,18 +675,7 @@ namespace NiVE3.Model
 
             if (downSamplingRate == 1.0)
             {
-                sourceOptionProperties?.CalcHash(hash);
-                hash.Append(IsEnableTimeRemap);
-                hash.Append(IsEnableEffect);
-                hash.Append(IsEnableFrameBlend);
-                hash.Append(InterpolationQuality);
-                foreach (var e in Effects)
-                {
-                    if (e.IsEnable)
-                    {
-                        e.CalcPropertyHash(layerTime, time, hash);
-                    }
-                }
+                CalcCacheKeyHash(hash, layerTime, withTrackMatte);
 
                 if (SourceType.HasFlag(SourceType.Video) || HasRenderEveryFrameEffect)
                 {
@@ -949,12 +943,56 @@ namespace NiVE3.Model
             var layerTime = Math.Max(time - SourceStartPoint, InPoint);
             var layerLength = Math.Min(length, OutPoint - layerTime);
 
-            var sourceTime = Math.Max(CalcSourceTime(layerTime), 0.0);
-            var sourceLength = Math.Max(layerLength - (layerTime - sourceTime), 0.0);
+            var sourceBeginTime = Math.Max(CalcSourceTime(layerTime), 0.0);
+            var sourceEndTime = CalcSourceTime(layerTime + layerLength);
+            var reversed = sourceEndTime < sourceBeginTime;
+            if (reversed)
+            {
+                (sourceBeginTime, sourceEndTime) = (sourceEndTime, sourceBeginTime);
+            }
+            var sourceLength = Math.Max(sourceEndTime - sourceBeginTime, 0.0);
+            if ((int)(sourceLength * Const.AudioSamplingRate) < 1)
+            {
+                return [];
+            }
 
-            var result = new float[(int)(length * Const.AudioSamplingRate) * 2];
-            var audio = FootageModel.ReadAudio(sourceTime, sourceLength);
-            var startPos = (int)(Math.Max((InPoint + SourceStartPoint) - time, 0.0) * Const.AudioSamplingRate) * 2;
+            var audio = FootageModel.ReadAudio(sourceBeginTime, sourceLength);
+            if (reversed)
+            {
+                for (int i = 0, limit = audio.Length / 2; i < limit; i += 2)
+                {
+                    var (tempL, tempR) = (audio[i], audio[i + 1]);
+                    (audio[i], audio[i + 1]) = (audio[audio.Length - i - 2], audio[audio.Length - i - 1]);
+                    (audio[audio.Length - i - 2], audio[audio.Length - i - 1]) = (tempL, tempR);
+                }
+            }
+            if (PlayRate != 100.0)
+            {
+                var virtualSamplingRate = (int)(Const.AudioSamplingRate * Math.Abs(PlayRate) * 0.01);
+                var resampler = new WdlResampler();
+                resampler.SetMode(true, 2, true);
+                resampler.SetFilterParms();
+                resampler.SetFeedMode(false);
+                resampler.SetRates(virtualSamplingRate, Const.AudioSamplingRate);
+
+                var requestFrameCount = audio.Length / Const.AudioChannelCount;
+                var resamplerNeeded = resampler.ResamplePrepare(requestFrameCount, Const.AudioChannelCount, out var inBuffer, out var inBufferOffset) * Const.AudioChannelCount;
+                if (resamplerNeeded > 0)
+                {
+                    audio.AsSpan(0, Math.Min(audio.Length, inBuffer.Length - inBufferOffset)).CopyTo(inBuffer.AsSpan(inBufferOffset));
+                    var outCount = resampler.ResampleOut(audio, 0, resamplerNeeded, requestFrameCount, Const.AudioChannelCount) * Const.AudioChannelCount;
+
+                    if (audio.Length > outCount)
+                    {
+                        var newBuffer = new float[outCount];
+                        audio.AsSpan(0, outCount).CopyTo(newBuffer);
+                        audio = newBuffer;
+                    }
+                }
+            }
+
+            var result = new float[(int)(length * Const.AudioSamplingRate) * Const.AudioChannelCount];
+            var startPos = (int)(Math.Max((InPoint + SourceStartPoint) - time, 0.0) * Const.AudioSamplingRate) * Const.AudioChannelCount;
             audio.AsSpan(0, Math.Min(audio.Length, result.Length - startPos)).CopyTo(result.AsSpan(startPos));
 
             return result;
@@ -1174,6 +1212,7 @@ namespace NiVE3.Model
             hash.Append(TrackMatteLayerId);
             hash.Append(TrackMatteMode);
             hash.Append(ParentLayerId);
+            hash.Append(PlayRate);
             foreach (var e in Effects)
             {
                 if (e.IsEnable)
@@ -1189,7 +1228,7 @@ namespace NiVE3.Model
                 pt.Transform.CalcHash(hash);
             }
 
-            if (TrackMatteLayerId != null)
+            if (withTrackMatte && TrackMatteLayerId != null)
             {
                 CompositionModel.Layers.FirstOrDefault(l => l.LayerId == TrackMatteLayerId)?.CalcCacheKeyHash(hash, time, false);
             }
@@ -1223,6 +1262,24 @@ namespace NiVE3.Model
                 Comment = comment;
                 HistoryModel.Add(new ChangeCommentHistoryCommand(this, prevComment, comment));
             }
+        }
+
+        public void ChangePlayRate(double newRate)
+        {
+            if (PlayRate == newRate)
+            {
+                return;
+            }
+
+            var oldPlayRate = PlayRate;
+            var oldInPoint = InPoint;
+            var oldOutPoint = OutPoint;
+            PlayRate = newRate;
+            Duration = Math.Abs(SourceDuration / (newRate * 0.01));
+            InPoint = Math.Min(oldInPoint, Duration - CompositionModel.FrameDuration);
+            OutPoint = Math.Min(oldOutPoint, Duration);
+
+            HistoryModel.Add(new ChangePlayRateHistoryCommand(this, oldPlayRate, oldInPoint, oldOutPoint, newRate, InPoint, OutPoint));
         }
 
         public void AddEffects(Guid[] effectUuids)
@@ -1553,8 +1610,15 @@ namespace NiVE3.Model
 
         double CalcSourceTime(double layerTime)
         {
-            // TODO: タイムリマップ反映
-            return layerTime;
+            // TODO: タイムリマップ使用時にそっち優先で反映
+            if (PlayRate >= 0.0)
+            {
+                return layerTime * PlayRate * 0.01;
+            }
+            else
+            {
+                return SourceDuration + layerTime * PlayRate * 0.01;
+            }
         }
 
         (ROI, NImage) CalcAndExpandImage(NImage image, double downSamplingRateX, double downSamplingRateY, double layerTime)
@@ -1659,8 +1723,11 @@ namespace NiVE3.Model
 
         private void LayerModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName != nameof(IsLock) &&
-                e.PropertyName != nameof(IsEnableShy))
+            if (e.PropertyName == nameof(PlayRate) || e.PropertyName == nameof(SourceDuration))
+            {
+                Duration = Math.Abs(SourceDuration / (PlayRate * 0.01));
+            }
+            if (e.PropertyName != nameof(IsLock) && e.PropertyName != nameof(IsEnableShy))
             {
                 LayerUpdated?.Invoke(this, EventArgs.Empty);
             }

@@ -102,9 +102,11 @@
                             <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_MoveInPointToIndicator}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=MoveInPointToIndicatorGesture}"/>
                             <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_MoveOutPointToIndicator}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=MoveOutPointToIndicatorGesture}"/>
                             <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_ShiftSourceStartPointToNextFrame}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=ShiftSourceStartPointToNextFrameGesture}"/>
-                            <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_ShiftSourceStartPointToPreviousFrameGesture}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=ShiftSourceStartPointToPreviousFrameGesture}"/>
+                            <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_ShiftSourceStartPointToPreviousFrame}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=ShiftSourceStartPointToPreviousFrameGesture}"/>
                             <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_ShiftSourceStartPointToNext10Frame}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=ShiftSourceStartPointToNext10FrameGesture}"/>
-                            <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_ShiftSourceStartPointToPrevious10FrameGesture}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=ShiftSourceStartPointToPrevious10FrameGesture}"/>
+                            <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_ShiftSourceStartPointToPrevious10Frame}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=ShiftSourceStartPointToPrevious10FrameGesture}"/>
+                            <Separator />
+                            <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_ChangePlayRate}" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.DataContext.PlayRateChangeCommand}"/>
                         </MenuItem>
                         <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_ChangeLayerTagsRandomly}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=ChangeLayerTagsRandomlyGesture}"/>
                         <Separator />

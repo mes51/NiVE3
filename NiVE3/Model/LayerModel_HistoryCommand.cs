@@ -353,5 +353,51 @@ namespace NiVE3.Model
 
             public void Dispose() { }
         }
+
+        private class ChangePlayRateHistoryCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangeLayerPlayRate);
+
+            LayerModel Model { get; }
+
+            double OldPlayRate { get; }
+
+            double OldInPoint { get; }
+
+            double OldOutPoint { get; }
+
+            double NewPlayRate { get; }
+
+            double NewInPoint { get; }
+
+            double NewOutPoint { get; }
+
+            public ChangePlayRateHistoryCommand(LayerModel model, double oldPlayRate, double oldInPoint, double oldOutPoint, double newPlayRate, double newInPoint, double newOutPoint)
+            {
+                Model = model;
+                OldPlayRate = oldPlayRate;
+                OldInPoint = oldInPoint;
+                OldOutPoint = oldOutPoint;
+                NewPlayRate = newPlayRate;
+                NewInPoint = newInPoint;
+                NewOutPoint = newOutPoint;
+            }
+
+            public void Redo()
+            {
+                Model.PlayRate = NewPlayRate;
+                Model.InPoint = NewInPoint;
+                Model.OutPoint = NewOutPoint;
+            }
+
+            public void Undo()
+            {
+                Model.PlayRate = OldPlayRate;
+                Model.InPoint = OldInPoint;
+                Model.OutPoint = OldOutPoint;
+            }
+
+            public void Dispose() { }
+        }
     }
 }

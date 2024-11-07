@@ -12,6 +12,7 @@ using NiVE3.Plugin.Interfaces;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
 using NiVE3.View.Dock;
 using NiVE3.View.Resource;
+using Prism.Dialogs;
 
 namespace NiVE3.ViewModel
 {
@@ -88,6 +89,8 @@ namespace NiVE3.ViewModel
 
         EventHubModel EventHubModel { get; }
 
+        IDialogService DialogService { get; }
+
         private CompositionModel? compositionModel;
         public CompositionModel? Composition
         {
@@ -111,11 +114,12 @@ namespace NiVE3.ViewModel
             }
         }
 
-        public LayerPropertyControllerViewModel(ProjectModel project, ViewStateModel viewState, EventHubModel eventHubModel)
+        public LayerPropertyControllerViewModel(ProjectModel project, ViewStateModel viewState, EventHubModel eventHubModel, IDialogService dialogService)
         {
             ProjectModel = project;
             ViewState = viewState;
             EventHubModel = eventHubModel;
+            DialogService = dialogService;
             Title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.LayerPropertyControllerView_Title_Empty);
 
             WiringModel();
@@ -132,7 +136,7 @@ namespace NiVE3.ViewModel
                 var layerModel = Composition.Layers.FirstOrDefault(l => l.LayerId == LastSelectedLayerId);
                 if (layerModel != null)
                 {
-                    TargetLayer = new LayerViewModel(layerModel, ViewState, EventHubModel, trackMatteCollectionView, parentLayerCollectionView);
+                    TargetLayer = new LayerViewModel(layerModel, ViewState, EventHubModel, trackMatteCollectionView, parentLayerCollectionView, DialogService);
                     TargetLayer.LayerSwitchChangeRequest += LayerViewModel_LayerSwitchChangeRequest;
                 }
                 else

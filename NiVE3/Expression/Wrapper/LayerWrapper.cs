@@ -33,6 +33,9 @@ namespace NiVE3.Expression.Wrapper
         public double duration => LayerModel.Duration;
 
         [ExpressionPublicMember]
+        public double sourceDuration => LayerModel.SourceDuration;
+
+        [ExpressionPublicMember]
         public double sourceStartPoint => LayerModel.SourceStartPoint;
 
         [ExpressionPublicMember]

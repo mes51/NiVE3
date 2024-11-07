@@ -390,13 +390,16 @@ namespace NiVE3.View.Resource
         public static readonly string Timeline_ContextMenu_ShiftSourceStartPointToNextFrame = nameof(Timeline_ContextMenu_ShiftSourceStartPointToNextFrame);
 
         [ShowInMarkup, LanguageKey, DefaultValue("レイヤーを1フレーム前にシフトする(_P)")]
-        public static readonly string Timeline_ContextMenu_ShiftSourceStartPointToPreviousFrameGesture = nameof(Timeline_ContextMenu_ShiftSourceStartPointToPreviousFrameGesture);
+        public static readonly string Timeline_ContextMenu_ShiftSourceStartPointToPreviousFrame= nameof(Timeline_ContextMenu_ShiftSourceStartPointToPreviousFrame);
 
         [ShowInMarkup, LanguageKey, DefaultValue("レイヤーを10フレーム後ろにシフトする(_A)")]
         public static readonly string Timeline_ContextMenu_ShiftSourceStartPointToNext10Frame = nameof(Timeline_ContextMenu_ShiftSourceStartPointToNext10Frame);
 
         [ShowInMarkup, LanguageKey, DefaultValue("レイヤーを10フレーム前にシフトする(_R)")]
-        public static readonly string Timeline_ContextMenu_ShiftSourceStartPointToPrevious10FrameGesture = nameof(Timeline_ContextMenu_ShiftSourceStartPointToPrevious10FrameGesture);
+        public static readonly string Timeline_ContextMenu_ShiftSourceStartPointToPrevious10Frame = nameof(Timeline_ContextMenu_ShiftSourceStartPointToPrevious10Frame);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("再生速度を変更...(_S)")]
+        public static readonly string Timeline_ContextMenu_ChangePlayRate = nameof(Timeline_ContextMenu_ChangePlayRate);
 
         [ShowInMarkup, LanguageKey, DefaultValue("レイヤーのタグをランダムに変更(_R)")]
         public static readonly string Timeline_ContextMenu_ChangeLayerTagsRandomly = nameof(Timeline_ContextMenu_ChangeLayerTagsRandomly);
@@ -719,6 +722,18 @@ namespace NiVE3.View.Resource
         [DefaultValue("エフェクト")]
         public static readonly string CommandPalettePopup_DisplayName_EffectCategory = nameof(CommandPalettePopup_DisplayName_EffectCategory);
 
+        [DefaultValue("再生速度設定")]
+        public static readonly string PlayRateSettingView_Title = nameof(PlayRateSettingView_Title);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("ソースの長さ:")]
+        public static readonly string PlayRateSettingView_SourceDuration = nameof(PlayRateSettingView_SourceDuration);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("変更後の長さ:")]
+        public static readonly string PlayRateSettingView_Duration = nameof(PlayRateSettingView_Duration);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("再生速度:")]
+        public static readonly string PlayRateSettingView_PlayRate = nameof(PlayRateSettingView_PlayRate);
+
         // Effect category names
 
         [DefaultValue("オーディオ")]
@@ -845,6 +860,9 @@ namespace NiVE3.View.Resource
 
         [DefaultValue("レイヤーのタグの変更")]
         public static readonly string History_ChangeTagColor = nameof(History_ChangeTagColor);
+
+        [DefaultValue("レイヤーの再生時間の変更")]
+        public static readonly string History_ChangeLayerPlayRate = nameof(History_ChangeLayerPlayRate);
 
         [DefaultValue("プロパティの変更")]
         public static readonly string History_ChangePropertyValue = nameof(History_ChangePropertyValue);

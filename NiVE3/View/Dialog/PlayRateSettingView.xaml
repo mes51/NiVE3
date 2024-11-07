@@ -1,0 +1,75 @@
+﻿<UserControl x:Class="NiVE3.View.Dialog.PlayRateSettingView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:NiVE3.View.Dialog"
+             xmlns:pr="http://prismlibrary.com/"
+             xmlns:upr="clr-namespace:NiVE3.UI.Primitive;assembly=NiVE3.UI"
+             xmlns:cv="clr-namespace:NiVE3.View.Converter"
+             xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
+             mc:Ignorable="d" 
+             pr:ViewModelLocator.AutoWireViewModel="True"
+             d:Width="300" d:Height="300">
+    <pr:Dialog.WindowStyle>
+        <Style TargetType="{x:Type Window}">
+            <Setter Property="pr:Dialog.WindowStartupLocation" Value="CenterOwner"/>
+            <Setter Property="Width" Value="300"/>
+            <Setter Property="SizeToContent" Value="Height"/>
+            <Setter Property="ResizeMode" Value="NoResize"/>
+            <Setter Property="ShowInTaskbar" Value="False"/>
+        </Style>
+    </pr:Dialog.WindowStyle>
+    <UserControl.Resources>
+        <cv:TimeConverter x:Key="TimeConverter" FrameRate="{Binding CompositionFrameRate}"/>
+    </UserControl.Resources>
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Grid.IsSharedSizeScope="True" HorizontalAlignment="Center">
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0" VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" SharedSizeGroup="Label"/>
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Margin="0,0,5,0" Text="{gm:LanguageResource ResourceKey=PlayRateSettingView_SourceDuration}" HorizontalAlignment="Right"/>
+                <TextBlock Grid.Column="1" Text="{Binding SourceDuration, Converter={StaticResource TimeConverter}, Mode=OneWay}" HorizontalAlignment="Left"/>
+            </Grid>
+
+            <Grid Grid.Row="1" VerticalAlignment="Center" Margin="0,5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" SharedSizeGroup="Label"/>
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Margin="0,0,5,0" Text="{gm:LanguageResource ResourceKey=PlayRateSettingView_Duration}" HorizontalAlignment="Right"/>
+                <TextBlock Grid.Column="1" Text="{Binding Duration, Converter={StaticResource TimeConverter}, Mode=OneWay}" HorizontalAlignment="Left"/>
+            </Grid>
+
+            <Grid Grid.Row="2" VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" SharedSizeGroup="Label"/>
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Margin="0,0,5,0" Text="{gm:LanguageResource ResourceKey=PlayRateSettingView_PlayRate}" HorizontalAlignment="Right"/>
+                <upr:SlidableNumberTextBox Grid.Column="1" Value="{Binding PlayRate}" Minimum="{Binding MinPlayRate}" Maximum="{Binding MaxPlayRate}" Digit="2" UnitText="{gm:LanguageResource ResourceKey=Unit_Percent}"/>
+            </Grid>
+        </Grid>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+            <Button Content="{gm:LanguageResource ResourceKey=Dialog_Cancel}" Style="{StaticResource DialogDefaultCancelButton}" Command="{Binding CancelCommand}" Margin="0,0,5,0"/>
+            <Button Content="{gm:LanguageResource ResourceKey=Dialog_OK}" Style="{StaticResource DialogOKButton}" Command="{Binding OKCommand}"/>
+        </StackPanel>
+    </Grid>
+</UserControl>

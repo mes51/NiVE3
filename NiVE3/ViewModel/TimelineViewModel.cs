@@ -343,7 +343,7 @@ namespace NiVE3.ViewModel
                     var parentLayerCollectionView = value.Layers.CreateViewCollection(m => new LayerModelProxy(m));
                     Layers = value.Layers.CreateViewCollection(m =>
                     {
-                        var vm = new LayerViewModel(m, ViewState, EventHubModel, trackMatteCollectionView, parentLayerCollectionView);
+                        var vm = new LayerViewModel(m, ViewState, EventHubModel, trackMatteCollectionView, parentLayerCollectionView, DialogService);
                         vm.LayerSwitchChangeRequest += LayerViewModel_LayerSwitchChangeRequest;
                         vm.BlendModeChangeRequest += LayerViewModel_BlendModeChangeRequest;
                         vm.TrackMatteLayerChangeRequest += LayerViewModel_TrackMatteLayerChangeRequest;
