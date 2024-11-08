@@ -568,9 +568,6 @@ namespace NiVE3.Model
                 return ((ILayerObject)this).GetRawImage(layerTime, downSamplingRate, useGpu);
             }
 
-            var sourceTime = CalcSourceTime(layerTime);
-            var sourceOptionProperties = (TextProperties ?? ShapeProperties ?? SourceOptionProperties)?.GetValues(sourceTime, globalTime, true);
-
             NImage? image = null;
             var hash = new XxHash3();
             if (downSamplingRate == 1.0)
@@ -598,10 +595,7 @@ namespace NiVE3.Model
                 return image;
             }
 
-            image = FootageModel.ReadImage(sourceTime, downSamplingRate, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties, InterpolationQuality, useGpu);
-            var roi = new ROI(new Int32Point(), new Int32Size(image.Width, image.Height), 0, 0, image.Width, image.Height);
-
-            var originalImageSize = downSamplingRate != 1.0 ? FootageModel.CalcSize(sourceTime, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties) : new SourceFootageRect(Vector2d.Zero, image.Width, image.Height);
+            (image, var originalImageSize, var roi) = GetFootageImage(layerTime + SourceStartPoint, downSamplingRate, useGpu, false);
             var downSamplingRateX = originalImageSize.Width / (float)image.Width;
             var downSamplingRateY = originalImageSize.Height / (float)image.Height;
             if (IsEnableEffect)
