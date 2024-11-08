@@ -1693,7 +1693,7 @@ namespace NiVE3.Model
             var originalImageSize = SourceFootageRect.Empty;
 
             // TODO: サイズ変更可能なビデオもフレームブレンドできるようにする?
-            if (IsVideo && !IsCustomizableFootageSource && frameBlend && IsEnableFrameBlend)
+            if (((IsComposition && (GetNestedComposition()?.IsRetentionFrameRate ?? false)) || (IsVideo && !IsComposition)) && !IsCustomizableFootageSource && frameBlend && IsEnableFrameBlend)
             {
                 var sourceCurrentFrameTime = TimeCalc.AlignFloor(sourceTime, FootageModel.FrameRate);
                 var sourceNextFrameTime = TimeCalc.AlignRound(sourceCurrentFrameTime + 1.0 / FootageModel.FrameRate, FootageModel.FrameRate);
