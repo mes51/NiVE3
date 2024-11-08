@@ -522,9 +522,11 @@ namespace NiVE3.ViewModel
 
         public bool IsNameEditing => EditingParameter == EditingLayerParameter.Name;
 
-        public bool HasImage => SourceType.HasFlag(SourceType.Image) || SourceType.HasFlag(SourceType.Video);
+        public bool HasImage => LayerModel.HasImage;
 
-        public bool HasAudio => SourceType.HasFlag(SourceType.Audio);
+        public bool HasAudio => LayerModel.HasAudio;
+
+        public bool IsVideo => LayerModel.IsVideo;
 
         public bool HasDuration => HasAudio || SourceType.HasFlag(SourceType.Video);
 
@@ -971,7 +973,7 @@ namespace NiVE3.ViewModel
                 {
                     LayerModel.ChangePlayRate(result.Parameters.GetValue<double>(nameof(PlayRateSettingViewModel.PlayRate)));
                 }
-            }, () => SourceType.HasFlag(SourceType.Video) || SourceType.HasFlag(SourceType.Audio));
+            }, () => IsVideo || HasAudio);
 
             PropertyChanged += LayerViewModel_PropertyChanged;
         }

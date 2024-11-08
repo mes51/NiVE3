@@ -274,6 +274,8 @@ namespace NiVE3.Model
 
         public bool IsImage => SourceType.HasFlag(SourceType.Image);
 
+        public bool IsVideo => SourceType.HasFlag(SourceType.Video);
+
         public bool IsCustomizableFootageSource => FootageModel.IsCustomizableFootageSource;
 
         public Guid ParentCompositionId => CompositionModel.CompositionId;
@@ -548,11 +550,8 @@ namespace NiVE3.Model
 
         NImage ILayerObject.GetRawImage(double layerTime, double downSamplingRate, bool useGpu)
         {
-            return GetRawImage(layerTime, layerTime + SourceStartPoint, downSamplingRate, useGpu);
-        }
+            var globalTime = layerTime + SourceStartPoint;
 
-        public NImage GetRawImage(double layerTime, double globalTime, double downSamplingRate, bool useGpu)
-        {
             var sourceTime = CalcSourceTime(layerTime);
             var sourceOptionProperties = (TextProperties ?? ShapeProperties ?? SourceOptionProperties)?.GetValues(sourceTime, globalTime, true);
 
@@ -561,15 +560,12 @@ namespace NiVE3.Model
 
         NImage ILayerObject.GetEffectedImage(double layerTime, double downSamplingRate, bool useGpu)
         {
-            return GetEffectedImage(layerTime, layerTime + SourceStartPoint, downSamplingRate, useGpu);
-        }
+            var globalTime = layerTime + SourceStartPoint;
 
-        public NImage GetEffectedImage(double layerTime, double globalTime, double downSamplingRate, bool useGpu)
-        {
             using var entry = CycleChecker.TryEnter(LayerId);
             if (entry == null)
             {
-                return GetRawImage(layerTime, globalTime, downSamplingRate, useGpu);
+                return ((ILayerObject)this).GetRawImage(layerTime, downSamplingRate, useGpu);
             }
 
             var sourceTime = CalcSourceTime(layerTime);
@@ -579,9 +575,9 @@ namespace NiVE3.Model
             var hash = new XxHash3();
             if (downSamplingRate == 1.0)
             {
-                CalcCacheKeyHash(hash, layerTime, false);
+                CalcCacheKeyHash(hash, layerTime, false, false);
 
-                if (SourceType.HasFlag(SourceType.Video) || HasRenderEveryFrameEffect)
+                if (IsVideo || HasRenderEveryFrameEffect)
                 {
                     if (ImageCache.TryGet(LayerId, hash.ToInt128(), layerTime, out var cachedImage))
                     {
@@ -643,7 +639,7 @@ namespace NiVE3.Model
             return image;
         }
 
-        public RenderableImage? GetImage(double time, double downSamplingRate, bool withTrackMatte, bool useGpu)
+        public RenderableImage? GetImage(double time, double downSamplingRate, bool withTrackMatte, bool useGpu, bool frameBlend)
         {
             if (!HasImage)
             {
@@ -659,13 +655,11 @@ namespace NiVE3.Model
             using var entry = CycleChecker.TryEnter(LayerId);
             if (entry == null)
             {
-                return GetRawImage(time, downSamplingRate, withTrackMatte, useGpu);
+                return GetRawImage(time, downSamplingRate, withTrackMatte, useGpu, frameBlend);
             }
 
             var layerTime = time - SourceStartPoint;
             var sourceTime = CalcSourceTime(layerTime);
-
-            var sourceOptionProperties = (TextProperties ?? ShapeProperties ?? SourceOptionProperties)?.GetValues(sourceTime, time, true);
 
             NImage? image = null;
             ROI? roi = null;
@@ -675,9 +669,9 @@ namespace NiVE3.Model
 
             if (downSamplingRate == 1.0)
             {
-                CalcCacheKeyHash(hash, layerTime, withTrackMatte);
+                CalcCacheKeyHash(hash, layerTime, withTrackMatte, frameBlend);
 
-                if (SourceType.HasFlag(SourceType.Video) || HasRenderEveryFrameEffect)
+                if (IsVideo || HasRenderEveryFrameEffect)
                 {
                     if (ImageCache.TryGet(LayerId, hash.ToInt128(), layerTime, out var cachedImage))
                     {
@@ -695,10 +689,8 @@ namespace NiVE3.Model
 
             if (image == null || !roi.HasValue)
             {
-                image = FootageModel.ReadImage(sourceTime, downSamplingRate, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties, InterpolationQuality, useGpu);
-                roi = new ROI(new Int32Point(), new Int32Size(image.Width, image.Height), 0, 0, image.Width, image.Height);
+                (image, var originalImageSize, roi) = GetFootageImage(time, downSamplingRate, useGpu, frameBlend);
 
-                var originalImageSize = downSamplingRate != 1.0 ? FootageModel.CalcSize(sourceTime, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties) : new SourceFootageRect(Vector2d.Zero, image.Width, image.Height);
                 downSamplingRateX = originalImageSize.Width / (float)image.Width;
                 downSamplingRateY = originalImageSize.Height / (float)image.Height;
                 if (IsEnableEffect)
@@ -740,7 +732,7 @@ namespace NiVE3.Model
             if (withTrackMatte && TrackMatteLayerId.HasValue)
             {
                 var trackMatteLayer = CompositionModel.Layers.FirstOrDefault(l => l.LayerId == TrackMatteLayerId);
-                trackMatteImage = trackMatteLayer?.GetImage(time, downSamplingRate, false, useGpu);
+                trackMatteImage = trackMatteLayer?.GetImage(time, downSamplingRate, false, useGpu, frameBlend);
             }
 
             return new RenderableImage(
@@ -760,7 +752,7 @@ namespace NiVE3.Model
             );
         }
 
-        public RenderableImage? GetRawImage(double time, double downSamplingRate, bool withTrackMatte, bool useGpu)
+        public RenderableImage? GetRawImage(double time, double downSamplingRate, bool withTrackMatte, bool useGpu, bool frameBlend)
         {
             if (!HasImage)
             {
@@ -776,16 +768,13 @@ namespace NiVE3.Model
             var layerTime = time - SourceStartPoint;
             var sourceTime = CalcSourceTime(layerTime);
 
-            var sourceOptionProperties = (TextProperties ?? ShapeProperties ?? SourceOptionProperties)?.GetValues(sourceTime, time, true);
-            var image = FootageModel.ReadImage(sourceTime, downSamplingRate, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties, InterpolationQuality, useGpu);
-            var originalImageSize = downSamplingRate != 1.0 ? FootageModel.CalcSize(time, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties) : new SourceFootageRect(Vector2d.Zero, image.Width, image.Height);
-            var roi = new ROI(new Int32Point(), new Int32Size(image.Width, image.Height), 0, 0, image.Width, image.Height);
+            var (image, originalImageSize, roi) = GetFootageImage(time, downSamplingRate, useGpu, frameBlend);
 
             RenderableImage? trackMatteImage = null;
             if (withTrackMatte && TrackMatteLayerId.HasValue)
             {
                 var trackMatteLayer = CompositionModel.Layers.First(l => l.LayerId == TrackMatteLayerId);
-                trackMatteImage = trackMatteLayer.GetImage(time, downSamplingRate, false, useGpu);
+                trackMatteImage = trackMatteLayer.GetImage(time, downSamplingRate, false, useGpu, frameBlend);
             }
 
             return new RenderableImage(
@@ -805,7 +794,7 @@ namespace NiVE3.Model
             );
         }
 
-        public RenderableImage GetSameImage(double time, double downSamplingRate, bool withTrackMatte, bool useGpu, RenderableImage baseImage)
+        public RenderableImage GetSameImage(double time, double downSamplingRate, bool withTrackMatte, bool useGpu, bool frameBlend, RenderableImage baseImage)
         {
             var layerTime = time - SourceStartPoint;
 
@@ -813,7 +802,7 @@ namespace NiVE3.Model
             if (withTrackMatte && TrackMatteLayerId.HasValue)
             {
                 var trackMatteLayer = CompositionModel.Layers.First(l => l.LayerId == TrackMatteLayerId);
-                trackMatteImage = trackMatteLayer.GetImage(time, downSamplingRate, false, useGpu);
+                trackMatteImage = trackMatteLayer.GetImage(time, downSamplingRate, false, useGpu, frameBlend);
             }
 
             return new RenderableImage(
@@ -1189,8 +1178,9 @@ namespace NiVE3.Model
             return new LayerSkeleton(LayerId, rect, IsEnable3D, transform, parentTransforms);
         }
 
-        public void CalcCacheKeyHash(XxHash3 hash, double time, bool withTrackMatte)
+        public void CalcCacheKeyHash(XxHash3 hash, double time, bool withTrackMatte, bool frameBlend)
         {
+            hash.Append(frameBlend);
             hash.Append(LayerId);
 
             var layerTime = time - SourceStartPoint;
@@ -1230,7 +1220,7 @@ namespace NiVE3.Model
 
             if (withTrackMatte && TrackMatteLayerId != null)
             {
-                CompositionModel.Layers.FirstOrDefault(l => l.LayerId == TrackMatteLayerId)?.CalcCacheKeyHash(hash, time, false);
+                CompositionModel.Layers.FirstOrDefault(l => l.LayerId == TrackMatteLayerId)?.CalcCacheKeyHash(hash, time, false, frameBlend);
             }
 
             GetTransform(time).CalcHash(hash);
@@ -1692,6 +1682,129 @@ namespace NiVE3.Model
             }
 
             return image;
+        }
+
+        (NImage, SourceFootageRect, ROI) GetFootageImage(double time, double downSamplingRate, bool useGpu, bool frameBlend)
+        {
+            var layerTime = time - SourceStartPoint;
+            var sourceTime = CalcSourceTime(layerTime);
+
+            NImage image;
+            var originalImageSize = SourceFootageRect.Empty;
+
+            // TODO: サイズ変更可能なビデオもフレームブレンドできるようにする?
+            if (IsVideo && !IsCustomizableFootageSource && frameBlend && IsEnableFrameBlend)
+            {
+                var sourceCurrentFrameTime = TimeCalc.AlignFloor(sourceTime, FootageModel.FrameRate);
+                var sourceNextFrameTime = TimeCalc.AlignRound(sourceCurrentFrameTime + 1.0 / FootageModel.FrameRate, FootageModel.FrameRate);
+                var blendRate = (float)((sourceTime - sourceCurrentFrameTime) * FootageModel.FrameRate);
+
+                image = FootageModel.ReadImage(sourceCurrentFrameTime, downSamplingRate, CompositionModel.Width, CompositionModel.Height, null, InterpolationQuality, useGpu);
+                originalImageSize = downSamplingRate != 1.0 ? FootageModel.CalcSize(time, CompositionModel.Width, CompositionModel.Height, null) : new SourceFootageRect(Vector2d.Zero, image.Width, image.Height);
+
+                var nextFrameImage = FootageModel.ReadImage(sourceNextFrameTime, downSamplingRate, CompositionModel.Width, CompositionModel.Height, null, InterpolationQuality, useGpu);
+
+                var blendedImage = BlendFrame(image, nextFrameImage, blendRate, useGpu);
+                if (image != blendedImage)
+                {
+                    image.Dispose();
+                    image = blendedImage;
+                }
+                if (image != nextFrameImage)
+                {
+                    nextFrameImage.Dispose();
+                }
+            }
+            else
+            {
+                var sourceOptionProperties = (TextProperties ?? ShapeProperties ?? SourceOptionProperties)?.GetValues(sourceTime, time, true);
+                image = FootageModel.ReadImage(sourceTime, downSamplingRate, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties, InterpolationQuality, useGpu);
+                originalImageSize = downSamplingRate != 1.0 ? FootageModel.CalcSize(time, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties) : new SourceFootageRect(Vector2d.Zero, image.Width, image.Height);
+            }
+
+            return (image, originalImageSize, new ROI(new Int32Point(), new Int32Size(image.Width, image.Height), 0, 0, image.Width, image.Height));
+        }
+
+        NImage BlendFrame(NImage baseImage, NImage blendTargetImage, float blendRate, bool useGpu)
+        {
+            if (blendRate <= 0.0F)
+            {
+                return baseImage;
+            }
+            else if (blendRate >= 1.0F)
+            {
+                return blendTargetImage;
+            }
+
+            var iBlendRate = 1.0F - blendRate;
+            if (useGpu)
+            {
+                var device = AcceleratorModel.CurrentDevice;
+                var baseGpuImage = baseImage switch
+                {
+                    NManagedImage baseManagedImage => baseManagedImage.CopyToGpu(device),
+                    _ => (NGPUImage)baseImage
+                };
+                var targetGpuImage = blendTargetImage switch
+                {
+                    NManagedImage targetManagedImage => targetManagedImage.CopyToGpu(device),
+                    _ => (NGPUImage)blendTargetImage
+                };
+
+                using (var context = device.CreateComputeContext())
+                {
+                    context.For(baseGpuImage.Width, baseGpuImage.Height, new FrameBlend(baseGpuImage.Data, targetGpuImage.Data, baseGpuImage.Width, blendRate, iBlendRate));
+                }
+
+                if (targetGpuImage != blendTargetImage)
+                {
+                    targetGpuImage.Dispose();
+                }
+
+                return baseGpuImage;
+            }
+            else
+            {
+                var baseManagedImage = baseImage switch
+                {
+                    NGPUImage baseGpuImage => baseGpuImage.CopyToCpu(),
+                    _ => (NManagedImage)baseImage
+                };
+                var targetManagedImage = blendTargetImage switch
+                {
+                    NGPUImage targetGpuImage => targetGpuImage.CopyToCpu(),
+                    _ => (NManagedImage)blendTargetImage
+                };
+
+                var baseImageData = baseManagedImage.Data;
+                var targetImageData = targetManagedImage.Data;
+                var width = baseManagedImage.Width;
+                var vectoredLength = width - (width % Vector<float>.Count);
+                var remainLength = width - vectoredLength;
+                Parallel.For(0, baseManagedImage.Height, y =>
+                {
+                    var baseImageDataSpan = baseImageData.AsSpan(y * width, width);
+                    var targetImageDataSpan = targetImageData.AsSpan(y * width, width);
+
+                    var vectorBaseImageDataSpan = MemoryMarshal.Cast<Vector4, Vector<float>>(baseImageDataSpan[..vectoredLength]);
+                    var vectorTargetImageDataSpan = MemoryMarshal.Cast<Vector4, Vector<float>>(targetImageDataSpan[..vectoredLength]);
+                    for (var i = 0; i < vectorBaseImageDataSpan.Length; i++)
+                    {
+                        vectorBaseImageDataSpan[i] = vectorBaseImageDataSpan[i] * iBlendRate + vectorTargetImageDataSpan[i] * blendRate;
+                    }
+                    for (int i = vectoredLength, c = 0; c < remainLength; i++, c++)
+                    {
+                        baseImageDataSpan[i] = baseImageDataSpan[i] * iBlendRate + targetImageDataSpan[i] * blendRate;
+                    }
+                });
+
+                if (targetManagedImage != blendTargetImage)
+                {
+                    targetManagedImage.Dispose();
+                }
+
+                return baseManagedImage;
+            }
         }
 
         private void Effects_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)

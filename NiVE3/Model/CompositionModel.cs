@@ -1315,7 +1315,7 @@ namespace NiVE3.Model
                             }
                             images.Clear();
 
-                            using var adjustmentMaskImage = l.GetRawImage(currentTime, downSamplingRate, true, useGpu);
+                            using var adjustmentMaskImage = l.GetRawImage(currentTime, downSamplingRate, true, useGpu, IsEnableFrameBlend);
                             if (adjustmentMaskImage == null)
                             {
                                 continue;
@@ -1356,7 +1356,7 @@ namespace NiVE3.Model
                             var isRawImage = l.IsImage && !l.IsCustomizableFootageSource && !l.HasEffect;
 
                             var (prevLayer, rawImage) = isRawImage ? rawImages.FirstOrDefault(t => l.IsSameFootage(t.Item1)) : (null, null);
-                            var image = (prevLayer != null && rawImage != null ? l.GetSameImage(currentTime, downSamplingRate, true, useGpu, rawImage) : null) ?? l.GetImage(currentTime, downSamplingRate, true, useGpu);
+                            var image = (prevLayer != null && rawImage != null ? l.GetSameImage(currentTime, downSamplingRate, true, useGpu, IsEnableFrameBlend, rawImage) : null) ?? l.GetImage(currentTime, downSamplingRate, true, useGpu, IsEnableFrameBlend);
                             if (image != null)
                             {
                                 images.Add(image);
@@ -1687,7 +1687,7 @@ namespace NiVE3.Model
             }
             foreach (var layer in useLayers)
             {
-                layer.CalcCacheKeyHash(hash, time, true);
+                layer.CalcCacheKeyHash(hash, time, true, IsEnableFrameBlend);
             }
         }
 

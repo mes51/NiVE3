@@ -75,7 +75,8 @@ namespace NiVE3.Expression.Wrapper
         [ExpressionPublicMember]
         public bool isEnableEffect => LayerModel.IsEnableEffect;
 
-        //public bool isEnableFrameBlend => LayerModel.IsEnableFrameBlend;
+        [ExpressionPublicMember]
+        public bool isEnableFrameBlend => LayerModel.IsEnableFrameBlend;
 
         [ExpressionPublicMember]
         public bool isEnableMotionBlur => LayerModel.IsEnableMotionBlur;
