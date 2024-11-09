@@ -116,7 +116,7 @@ namespace NiVE3.ViewModel.Dialog
             {
                 case nameof(PlayRate) when !IsChangingRate:
                     IsChangingRate = true;
-                    Duration = Math.Abs(SourceDuration / (PlayRate * 0.01));
+                    Duration = SourceDuration / (PlayRate * 0.01);
                     IsChangingRate = false;
                     break;
                 case nameof(Duration) when !IsChangingRate:

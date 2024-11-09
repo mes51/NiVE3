@@ -35,12 +35,14 @@ namespace NiVE3.View.Converter
                 return DependencyProperty.UnsetValue;
             }
 
+            var sign = Math.Sign(time);
+            time = Math.Abs(time);
             var hour = (int)(time / 3600);
             var minute = (int)((time % 3600) / 60);
             var second = (int)(time % 60);
             var frame = (int)Math.Round((time % 1) * FrameRate);
 
-            return $"{hour}:{minute:D2}:{second:D2}:{frame.ToString("D" + Math.Max((int)Math.Ceiling(Math.Log10(FrameRate)), 2))}";
+            return $"{(sign < 0.0 ? "-" : "")}{hour}:{minute:D2}:{second:D2}:{frame.ToString("D" + Math.Max((int)Math.Ceiling(Math.Log10(FrameRate)), 2))}";
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
@@ -53,21 +55,42 @@ namespace NiVE3.View.Converter
             var part = timeText.Split(":");
             Array.Reverse(part);
             var time = 0.0;
+            var sign = 1.0;
             if (part.Length > 0)
             {
-                time += ParseValue(part[0]) / FrameRate;
+                var parsedValue = ParseValue(part[0]);
+                time += Math.Abs(parsedValue) / FrameRate;
+                sign = Math.Sign(parsedValue);
             }
             if (part.Length > 1)
             {
-                time += ParseValue(part[1]);
+                var parsedValue = ParseValue(part[1]);
+                time += Math.Abs(parsedValue);
+                sign = Math.Sign(parsedValue);
             }
             if (part.Length > 2)
             {
-                time += ParseValue(part[2]) * 60.0;
+                var parsedValue = ParseValue(part[2]);
+                time += Math.Abs(parsedValue) * 60.0;
+                sign = Math.Sign(parsedValue);
             }
             if (part.Length > 3)
             {
-                time += ParseValue(part[3]) * 3600.0;
+                var parsedValue = ParseValue(part[3]);
+                time += Math.Abs(parsedValue) * 3600.0;
+                sign = Math.Sign(parsedValue);
+            }
+
+            if (sign == 0.0)
+            {
+                if (part[^1].StartsWith("-"))
+                {
+                    sign = -1.0;
+                }
+                else
+                {
+                    sign = 1.0;
+                }
             }
 
             if (double.IsNaN(time))
@@ -76,7 +99,7 @@ namespace NiVE3.View.Converter
             }
             else
             {
-                return time;
+                return time * sign;
             }
         }
 
