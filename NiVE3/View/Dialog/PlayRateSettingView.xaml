@@ -53,7 +53,7 @@
                 </Grid.ColumnDefinitions>
 
                 <TextBlock Grid.Column="0" Margin="0,0,5,0" Text="{gm:LanguageResource ResourceKey=PlayRateSettingView_Duration}" HorizontalAlignment="Right"/>
-                <TextBlock Grid.Column="1" Text="{Binding Duration, Converter={StaticResource TimeConverter}, Mode=OneWay}" HorizontalAlignment="Left"/>
+                <upr:SlidableNumberTextBox Grid.Column="1" Value="{Binding Duration}" Converter="{StaticResource TimeConverter}" SlideChangeValue="{Binding FrameDuration}" HorizontalAlignment="Left"/>
             </Grid>
 
             <Grid Grid.Row="2" VerticalAlignment="Center">

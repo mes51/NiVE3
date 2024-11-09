@@ -66,6 +66,8 @@ namespace NiVE3.ViewModel.Dialog
 
         double FrameDuration => 1.0 / CompositionFrameRate;
 
+        bool IsChangingRate { get; set; }
+
         public PlayRateSettingViewModel()
         {
             OKCommand = new DelegateCommand(() =>
@@ -94,20 +96,33 @@ namespace NiVE3.ViewModel.Dialog
 
         public void OnDialogOpened(IDialogParameters parameters)
         {
+            IsChangingRate = true;
+
             PlayRate = parameters.GetValue<double>(nameof(PlayRate));
             SourceDuration = parameters.GetValue<double>(nameof(SourceDuration));
             CompositionFrameRate = parameters.GetValue<double>(nameof(CompositionFrameRate));
             MinPlayRate = SourceDuration / FrameDuration * -100.0;
             MaxPlayRate = -MinPlayRate;
             Duration = Math.Abs(SourceDuration / (PlayRate * 0.01));
+
+            RaisePropertyChanged(nameof(FrameDuration));
+
+            IsChangingRate = false;
         }
 
         private void PlayRateSettingViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             switch (e.PropertyName)
             {
-                case nameof(PlayRate):
+                case nameof(PlayRate) when !IsChangingRate:
+                    IsChangingRate = true;
                     Duration = Math.Abs(SourceDuration / (PlayRate * 0.01));
+                    IsChangingRate = false;
+                    break;
+                case nameof(Duration) when !IsChangingRate:
+                    IsChangingRate = true;
+                    PlayRate = Duration != 0.0 ? SourceDuration / Duration * 100.0 : MaxPlayRate;
+                    IsChangingRate = false;
                     break;
             }
         }
