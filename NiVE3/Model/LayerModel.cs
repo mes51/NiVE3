@@ -286,8 +286,6 @@ namespace NiVE3.Model
 
         public int Index => CompositionModel.Layers.IndexOf(this) + 1;
 
-        public double CompositionFrameRate => CompositionModel.FrameRate;
-
         private ObservableCollection<EffectModel> effects = [];
         public ObservableCollection<EffectModel> Effects
         {
@@ -1248,8 +1246,10 @@ namespace NiVE3.Model
             }
         }
 
-        public void ChangePlayRate(double newRate)
+        public void ChangePlayRate(double newRate, double compositionFrameRate)
         {
+            var maxPlayRate = Duration * compositionFrameRate * 100.0;
+            newRate = Math.Clamp(newRate, -maxPlayRate, maxPlayRate);
             if (PlayRate == newRate)
             {
                 return;

@@ -578,8 +578,6 @@ namespace NiVE3.ViewModel
 
         public ICommand DeleteEffectCommand { get; }
 
-        public ICommand PlayRateChangeCommand { get; }
-
         public DelegateCommand<SelectItemType?> DeleteCommand { get; }
 
         public DelegateCommand<SelectItemType?> CutCommand { get; }
@@ -654,8 +652,6 @@ namespace NiVE3.ViewModel
 
         EventHubModel EventHubModel { get; }
 
-        IDialogService DialogService { get; }
-
         string PrevName { get; set; } = "";
 
         string PrevComment { get; set; } = "";
@@ -667,7 +663,7 @@ namespace NiVE3.ViewModel
         double PrevSourceStartPoint { get; set; }
 
 #pragma warning disable CS8618 // 各フィールドには初期化時に必ず値を代入するため無視
-        public LayerViewModel(LayerModel layerModel, ViewStateModel viewState, EventHubModel eventHubModel, IEnumerable<LayerModelProxy> trackMatteViewSource, IEnumerable<LayerModelProxy> parentLayerViewSource, IDialogService dialogService)
+        public LayerViewModel(LayerModel layerModel, ViewStateModel viewState, EventHubModel eventHubModel, IEnumerable<LayerModelProxy> trackMatteViewSource, IEnumerable<LayerModelProxy> parentLayerViewSource)
 #pragma warning restore CS8618
         {
             LayerModel = layerModel;
@@ -676,7 +672,6 @@ namespace NiVE3.ViewModel
             TrackMatteViewSource = trackMatteViewSource;
             ParentLayerViewSource = parentLayerViewSource;
             SelectedEffects = [];
-            DialogService = dialogService;
 
             Effects = layerModel.Effects.CreateViewCollection(e =>
             {
@@ -958,22 +953,6 @@ namespace NiVE3.ViewModel
                     LayerModel.ChangeTagColor(colorDialog.Color);
                 }
             });
-
-            PlayRateChangeCommand = new DelegateCommand(() =>
-            {
-                var param = new DialogParameters
-                {
-                    { nameof(PlayRateSettingViewModel.PlayRate), PlayRate },
-                    { nameof(PlayRateSettingViewModel.SourceDuration), SourceDuration },
-                    { nameof(PlayRateSettingViewModel.CompositionFrameRate), LayerModel.CompositionFrameRate }
-                };
-                IDialogResult? result = null;
-                DialogService.ShowDialog(nameof(PlayRateSettingView), param, r => result = r);
-                if (result != null && result.Result == ButtonResult.OK)
-                {
-                    LayerModel.ChangePlayRate(result.Parameters.GetValue<double>(nameof(PlayRateSettingViewModel.PlayRate)));
-                }
-            }, () => IsVideo || HasAudio);
 
             PropertyChanged += LayerViewModel_PropertyChanged;
         }

@@ -1252,6 +1252,23 @@ namespace NiVE3.Model
             HistoryModel.EndGroup();
         }
 
+        public void ChangeLayerPlayRate(Guid[] layerIds, double newRate)
+        {
+            if (layerIds.Length < 1)
+            {
+                return;
+            }
+
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangeLayerPlayRate));
+
+            foreach (var layer in Layers.Where(l => layerIds.Contains(l.LayerId)))
+            {
+                layer.ChangePlayRate(newRate, FrameRate);
+            }
+
+            HistoryModel.EndGroup();
+        }
+
         public ILayerObject? GetLayer(Guid layerId)
         {
             return Layers.FirstOrDefault(l => l.LayerId == layerId);

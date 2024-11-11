@@ -386,16 +386,16 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("アウトポイントをインジケーターの位置に移動(_O)")]
         public static readonly string Timeline_ContextMenu_MoveOutPointToIndicator = nameof(Timeline_ContextMenu_MoveOutPointToIndicator);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("レイヤーを1フレーム後ろにシフトする(_N)")]
+        [ShowInMarkup, LanguageKey, DefaultValue("レイヤーを1フレーム後ろにシフト(_N)")]
         public static readonly string Timeline_ContextMenu_ShiftSourceStartPointToNextFrame = nameof(Timeline_ContextMenu_ShiftSourceStartPointToNextFrame);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("レイヤーを1フレーム前にシフトする(_P)")]
+        [ShowInMarkup, LanguageKey, DefaultValue("レイヤーを1フレーム前にシフト(_P)")]
         public static readonly string Timeline_ContextMenu_ShiftSourceStartPointToPreviousFrame= nameof(Timeline_ContextMenu_ShiftSourceStartPointToPreviousFrame);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("レイヤーを10フレーム後ろにシフトする(_A)")]
+        [ShowInMarkup, LanguageKey, DefaultValue("レイヤーを10フレーム後ろにシフト(_A)")]
         public static readonly string Timeline_ContextMenu_ShiftSourceStartPointToNext10Frame = nameof(Timeline_ContextMenu_ShiftSourceStartPointToNext10Frame);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("レイヤーを10フレーム前にシフトする(_R)")]
+        [ShowInMarkup, LanguageKey, DefaultValue("レイヤーを10フレーム前にシフト(_R)")]
         public static readonly string Timeline_ContextMenu_ShiftSourceStartPointToPrevious10Frame = nameof(Timeline_ContextMenu_ShiftSourceStartPointToPrevious10Frame);
 
         [ShowInMarkup, LanguageKey, DefaultValue("再生速度を変更...(_S)")]
@@ -1402,34 +1402,37 @@ namespace NiVE3.View.Resource
 
         // ShortcutKeyNames
 
-        [DefaultValue("インジケーターをコンポジションの最後に移動する")]
+        [DefaultValue("再生速度を変更")]
+        public static readonly string ShortcutKeyName_ChangeLayerPlayRateGesture = nameof(ShortcutKeyName_ChangeLayerPlayRateGesture);
+
+        [DefaultValue("インジケーターをコンポジションの最後に移動")]
         public static readonly string ShortcutKeyName_MoveIndicatorToCompositionEndGesture = nameof(ShortcutKeyName_MoveIndicatorToCompositionEndGesture);
 
-        [DefaultValue("インジケーターをコンポジションの最初に移動する")]
+        [DefaultValue("インジケーターをコンポジションの最初に移動")]
         public static readonly string ShortcutKeyName_MoveIndicatorToCompositionBeginGesture = nameof(ShortcutKeyName_MoveIndicatorToCompositionBeginGesture);
 
-        [DefaultValue("インジケーターを10フレーム前に移動する")]
+        [DefaultValue("インジケーターを10フレーム前に移動")]
         public static readonly string ShortcutKeyName_MoveIndicatorToPrevious10FrameGesture = nameof(ShortcutKeyName_MoveIndicatorToPrevious10FrameGesture);
 
-        [DefaultValue("インジケーターを10フレーム後ろに移動する")]
+        [DefaultValue("インジケーターを10フレーム後ろに移動")]
         public static readonly string ShortcutKeyName_MoveIndicatorToNext10FrameGesture = nameof(ShortcutKeyName_MoveIndicatorToNext10FrameGesture);
 
-        [DefaultValue("インジケーターを1フレーム前に移動する")]
+        [DefaultValue("インジケーターを1フレーム前に移動")]
         public static readonly string ShortcutKeyName_MoveIndicatorToPreviousFrameGesture = nameof(ShortcutKeyName_MoveIndicatorToPreviousFrameGesture);
 
-        [DefaultValue("インジケーターを1フレーム後ろに移動する")]
+        [DefaultValue("インジケーターを1フレーム後ろに移動")]
         public static readonly string ShortcutKeyName_MoveIndicatorToNextFrameGesture = nameof(ShortcutKeyName_MoveIndicatorToNextFrameGesture);
 
-        [DefaultValue("レイヤーを10フレーム前にシフトする")]
+        [DefaultValue("レイヤーを10フレーム前にシフト")]
         public static readonly string ShortcutKeyName_ShiftSourceStartPointToPrevious10FrameGesture = nameof(ShortcutKeyName_ShiftSourceStartPointToPrevious10FrameGesture);
 
-        [DefaultValue("レイヤーを10フレーム後ろにシフトする")]
+        [DefaultValue("レイヤーを10フレーム後ろにシフト")]
         public static readonly string ShortcutKeyName_ShiftSourceStartPointToNext10FrameGesture = nameof(ShortcutKeyName_ShiftSourceStartPointToNext10FrameGesture);
 
-        [DefaultValue("レイヤーを1フレーム前にシフトする")]
+        [DefaultValue("レイヤーを1フレーム前にシフト")]
         public static readonly string ShortcutKeyName_ShiftSourceStartPointToPreviousFrameGesture = nameof(ShortcutKeyName_ShiftSourceStartPointToPreviousFrameGesture);
 
-        [DefaultValue("レイヤーを1フレーム後ろにシフトする")]
+        [DefaultValue("レイヤーを1フレーム後ろにシフト")]
         public static readonly string ShortcutKeyName_ShiftSourceStartPointToNextFrameGesture = nameof(ShortcutKeyName_ShiftSourceStartPointToNextFrameGesture);
 
         [DefaultValue("インジケーターの位置にアウトポイントを移動")]
@@ -1438,7 +1441,7 @@ namespace NiVE3.View.Resource
         [DefaultValue("インジケーターの位置にインポイントを移動")]
         public static readonly string ShortcutKeyName_MoveInPointToIndicatorGesture = nameof(ShortcutKeyName_MoveInPointToIndicatorGesture);
 
-        [DefaultValue("レイヤーのタグをランダムに変更する")]
+        [DefaultValue("レイヤーのタグをランダムに変更")]
         public static readonly string ShortcutKeyName_ChangeLayerTagsRandomlyGesture = nameof(ShortcutKeyName_ChangeLayerTagsRandomlyGesture);
 
         [DefaultValue("コマンドパレットを開く")]

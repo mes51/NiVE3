@@ -69,6 +69,7 @@ namespace NiVE3.ViewModel
     [CommandHandling(nameof(MoveIndicatorToPrevious10FrameCommand), nameof(ShortcutKeySetting.MoveIndicatorToPrevious10FrameGesture))]
     [CommandHandling(nameof(MoveIndicatorToCompositionBeginCommand), nameof(ShortcutKeySetting.MoveIndicatorToCompositionBeginGesture))]
     [CommandHandling(nameof(MoveIndicatorToCompositionEndCommand), nameof(ShortcutKeySetting.MoveIndicatorToCompositionEndGesture))]
+    [CommandHandling(nameof(PlayRateChangeCommand), nameof(ShortcutKeySetting.ChangeLayerPlayRateGesture))]
     partial class TimelineViewModel : PaneViewModelBase, IDropTarget
     {
         private Guid compositionId;
@@ -343,7 +344,7 @@ namespace NiVE3.ViewModel
                     var parentLayerCollectionView = value.Layers.CreateViewCollection(m => new LayerModelProxy(m));
                     Layers = value.Layers.CreateViewCollection(m =>
                     {
-                        var vm = new LayerViewModel(m, ViewState, EventHubModel, trackMatteCollectionView, parentLayerCollectionView, DialogService);
+                        var vm = new LayerViewModel(m, ViewState, EventHubModel, trackMatteCollectionView, parentLayerCollectionView);
                         vm.LayerSwitchChangeRequest += LayerViewModel_LayerSwitchChangeRequest;
                         vm.BlendModeChangeRequest += LayerViewModel_BlendModeChangeRequest;
                         vm.TrackMatteLayerChangeRequest += LayerViewModel_TrackMatteLayerChangeRequest;
@@ -489,6 +490,8 @@ namespace NiVE3.ViewModel
         public ICommand MoveIndicatorToCompositionBeginCommand { get; }
 
         public ICommand MoveIndicatorToCompositionEndCommand { get; }
+
+        public ICommand PlayRateChangeCommand { get; }
 
         WeakEventPublisher<EventArgs> CurrentTimeChangeByUserPublisher { get; } = new WeakEventPublisher<EventArgs>();
         public event EventHandler<EventArgs> CurrentTimeChangeByUser
@@ -980,6 +983,30 @@ namespace NiVE3.ViewModel
                 CurrentTime = TimeCalc.AlignRound(Duration - FrameDuration, FrameRate);
                 CurrentTimeChangeByUserPublisher.Publish(this, EventArgs.Empty);
             }, () => CompositionModel != null).ObservesProperty(() => CompositionModel);
+
+            PlayRateChangeCommand = new DelegateCommand(() =>
+            {
+                if (CompositionModel == null || SelectedLayers.Count < 1)
+                {
+                    return;
+                }
+
+                var baseTargetLayer = SelectedLayers[0];
+                var param = new DialogParameters
+                {
+                    { nameof(PlayRateSettingViewModel.PlayRate), baseTargetLayer.PlayRate },
+                    { nameof(PlayRateSettingViewModel.SourceDuration), baseTargetLayer.SourceDuration },
+                    { nameof(PlayRateSettingViewModel.CompositionFrameRate), FrameRate }
+                };
+                IDialogResult? result = null;
+                DialogService.ShowDialog(nameof(PlayRateSettingView), param, r => result = r);
+                if (result != null && result.Result == ButtonResult.OK)
+                {
+                    CompositionModel.ChangeLayerPlayRate([..SelectedLayers.Select(l => l.LayerId)], result.Parameters.GetValue<double>(nameof(PlayRateSettingViewModel.PlayRate)));
+                }
+            }, () => CompositionModel != null && SelectedLayers.Count > 0 && SelectedLayers.All(l => l.HasDuration))
+                .ObservesProperty(() => CompositionModel)
+                .ObservesProperty(() => SelectedLayers);
 
             AudioPlayerModel = audioPlayerModel;
         }

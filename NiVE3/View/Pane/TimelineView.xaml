@@ -106,7 +106,7 @@
                             <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_ShiftSourceStartPointToNext10Frame}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=ShiftSourceStartPointToNext10FrameGesture}"/>
                             <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_ShiftSourceStartPointToPrevious10Frame}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=ShiftSourceStartPointToPrevious10FrameGesture}"/>
                             <Separator />
-                            <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_ChangePlayRate}" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.DataContext.PlayRateChangeCommand}"/>
+                            <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_ChangePlayRate}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=ChangeLayerPlayRateGesture}"/>
                         </MenuItem>
                         <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_ChangeLayerTagsRandomly}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=ChangeLayerTagsRandomlyGesture}"/>
                         <Separator />

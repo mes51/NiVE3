@@ -368,6 +368,21 @@ namespace NiVE3.Config
             new PropertyMetadata(new SingleKeyGesture(Key.End))
         );
 
+        public static readonly DependencyProperty ChangeLayerPlayRateGestureProperty = DependencyProperty.Register(
+            nameof(ChangeLayerPlayRateGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new KeyGesture(Key.None))
+        );
+
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Edit)]
+        [ShowInMarkup]
+        public InputGesture ChangeLayerPlayRateGesture
+        {
+            get { return (InputGesture)GetValue(ChangeLayerPlayRateGestureProperty); }
+            set { SetValue(ChangeLayerPlayRateGestureProperty, value); }
+        }
+
         [ShortcutKeyCategory(ShortcutKeyCategoryType.Composition)]
         [ShowInMarkup]
         public InputGesture MoveIndicatorToCompositionEndGesture
