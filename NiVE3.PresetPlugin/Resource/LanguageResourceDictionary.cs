@@ -153,6 +153,29 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("ランダムシード")]
         public const string Stylize_BrokenJpeg_BrokenQuantizeTable_RandomSeed = nameof(Stylize_BrokenJpeg_BrokenQuantizeTable_RandomSeed);
 
+        // Threshold
+
+        [DefaultValue("二値化")]
+        public const string Stylize_Binarization_Name = nameof(Stylize_Binarization_Name);
+
+        [DefaultValue("画像を閾値未満と閾値以上で2色に変換します")]
+        public const string Stylize_Binarization_Description = nameof(Stylize_Binarization_Description);
+
+        [LanguageKey, DefaultValue("閾値")]
+        public const string Stylize_Binarization_Threshold = nameof(Stylize_Binarization_Threshold);
+
+        [LanguageKey, DefaultValue("ハイライト")]
+        public const string Stylize_Binarization_HighlightColor = nameof(Stylize_Binarization_HighlightColor);
+
+        [LanguageKey, DefaultValue("ハイライトの不透明度")]
+        public const string Stylize_Binarization_HighlightOpacity = nameof(Stylize_Binarization_HighlightOpacity);
+
+        [LanguageKey, DefaultValue("シャドウ")]
+        public const string Stylize_Binarization_ShadowColor = nameof(Stylize_Binarization_ShadowColor);
+
+        [LanguageKey, DefaultValue("シャドウの不透明度")]
+        public const string Stylize_Binarization_ShadowOpacity = nameof(Stylize_Binarization_ShadowOpacity);
+
         // Level
 
         [DefaultValue("レベル")]
