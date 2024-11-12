@@ -153,7 +153,7 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("ランダムシード")]
         public const string Stylize_BrokenJpeg_BrokenQuantizeTable_RandomSeed = nameof(Stylize_BrokenJpeg_BrokenQuantizeTable_RandomSeed);
 
-        // Threshold
+        // Binarization
 
         [DefaultValue("二値化")]
         public const string Stylize_Binarization_Name = nameof(Stylize_Binarization_Name);
@@ -579,6 +579,20 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("アルファもクランプする")]
         public const string Channel_Clamp_IsClampAlpha = nameof(Channel_Clamp_IsClampAlpha);
 
+        // Invert
+
+        [DefaultValue("反転")]
+        public const string Channel_Invert_Name = nameof(Channel_Invert_Name);
+
+        [DefaultValue("画像の色を反転します")]
+        public const string Channel_Invert_Description = nameof(Channel_Invert_Description);
+
+        [LanguageKey, DefaultValue("チャンネル")]
+        public const string Channel_Invert_Channel = nameof(Channel_Invert_Channel);
+
+        [LanguageKey, DefaultValue("元画像のブレンド")]
+        public const string Channel_Invert_BlendOriginal = nameof(Channel_Invert_BlendOriginal);
+
         // GlassDistortion
 
         [DefaultValue("ガラス歪み")]
@@ -817,6 +831,27 @@ namespace NiVE3.PresetPlugin.Resource
 
         [DefaultValue("アルファ")]
         public const string ChannelType_A = nameof(ChannelType_A);
+
+        [DefaultValue("RGB")]
+        public const string WithHSLChannelType_RGB = nameof(WithHSLChannelType_RGB);
+
+        [DefaultValue("赤")]
+        public const string WithHSLChannelType_R = nameof(WithHSLChannelType_R);
+
+        [DefaultValue("緑")]
+        public const string WithHSLChannelType_G = nameof(WithHSLChannelType_G);
+
+        [DefaultValue("青")]
+        public const string WithHSLChannelType_B = nameof(WithHSLChannelType_B);
+
+        [DefaultValue("アルファ")]
+        public const string WithHSLChannelType_A = nameof(WithHSLChannelType_A);
+
+        [DefaultValue("色相")]
+        public const string WithHSLChannelType_Hue = nameof(WithHSLChannelType_Hue);
+
+        [DefaultValue("彩度")]
+        public const string WithHSLChannelType_Saturation = nameof(WithHSLChannelType_Saturation);
 
         [DefaultValue("コンプレッサー")]
         public const string DynamicsMode_Compressor = nameof(DynamicsMode_Compressor);

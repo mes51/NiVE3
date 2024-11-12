@@ -14,4 +14,15 @@ namespace NiVE3.PresetPlugin.Effect.Util
         B,
         A
     }
+
+    public enum WithHSLChannelType : int
+    {
+        RGB,
+        R,
+        G,
+        B,
+        A,
+        Hue,
+        Saturation
+    }
 }
