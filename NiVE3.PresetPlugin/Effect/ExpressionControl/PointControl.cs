@@ -20,11 +20,11 @@ namespace NiVE3.PresetPlugin.Effect.ExpressionControl
     [EffectMetadata(LanguageResourceDictionary.ExpressionControl_PointControl_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_ExpressionControl, LanguageResourceDictionary.ExpressionControl_PointControl_Description, "6836A601-35DC-405D-8D77-D6DC52A36845", IsDummyEffect = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
     public class PointControl : IEffect
     {
-        public PropertyBase[] GetProperties()
+        public PropertyBase[] GetProperties(Int32Size sourceSize)
         {
             return
             [
-                new Vector3dProperty("point", new LanguageResourceKey(typeof(LanguageResourceDictionary), LanguageResourceDictionary.ExpressionControl_PointControl_PropertyName), new Vector3d(), true, 2)
+                new Vector3dProperty("point", new LanguageResourceKey(typeof(LanguageResourceDictionary), LanguageResourceDictionary.ExpressionControl_PointControl_PropertyName), new Vector3d(sourceSize.Width * 0.5, sourceSize.Height * 0.5, 0.0), true, 2)
             ];
         }
 

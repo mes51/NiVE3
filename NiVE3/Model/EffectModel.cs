@@ -80,7 +80,7 @@ namespace NiVE3.Model
             HistoryModel = historyModel;
             CompositionModel = compositionModel;
             EffectId = effectId ?? Guid.NewGuid();
-            Properties = new PropertyGroupModel(new PropertyGroup(EffectPropertyGroupId, "", effect.Value.GetProperties()), EffectId.ToInt128(), projectModel, compositionModel, layerModel, this, historyModel, false);
+            Properties = new PropertyGroupModel(new PropertyGroup(EffectPropertyGroupId, "", effect.Value.GetProperties(new Int32Size(layerModel.SourceWidth, layerModel.SourceHeight))), EffectId.ToInt128(), projectModel, compositionModel, layerModel, this, historyModel, false);
             IsSupportGpu = metadata.IsSupportGpu;
             Properties.ValueUpdated += Property_ValueUpdated;
 

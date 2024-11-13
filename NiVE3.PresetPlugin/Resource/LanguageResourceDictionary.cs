@@ -398,7 +398,7 @@ namespace NiVE3.PresetPlugin.Resource
         [DefaultValue("波形ワープ")]
         public const string Distortion_WaveWarp_Name = nameof(Distortion_WaveWarp_Name);
 
-        [DefaultValue("画像をを正弦波やノコギリ波などの波状に変形します。")]
+        [DefaultValue("画像をを正弦波やノコギリ波などの波状に変形します")]
         public const string Distortion_WaveWarp_Description = nameof(Distortion_WaveWarp_Description);
 
         [LanguageKey, DefaultValue("波形")]

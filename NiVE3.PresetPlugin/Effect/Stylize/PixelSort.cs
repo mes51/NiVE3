@@ -39,7 +39,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
 
         public void SetupAccelerator(IAcceleratorObject accelerator) { }
 
-        public PropertyBase[] GetProperties()
+        public PropertyBase[] GetProperties(Int32Size sourceSize)
         {
             return [
                 new DoubleProperty(PropertyThresholdId, LanguageResourceDictionary.ResourceKeys.Stylize_PixelSort_Threshold, 0.5, float.MinValue, float.MaxValue, slideChangeValue: 0.01, digit: 2),

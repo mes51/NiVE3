@@ -41,7 +41,7 @@ namespace NiVE3.Test.Model
 
         public void SetupAccelerator(IAcceleratorObject accelerator) { }
 
-        public PropertyBase[] GetProperties()
+        public PropertyBase[] GetProperties(Int32Size sourceSize)
         {
             return [];
         }

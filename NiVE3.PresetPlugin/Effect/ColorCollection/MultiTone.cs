@@ -47,7 +47,7 @@ namespace NiVE3.PresetPlugin.Effect.ColorCollection
             AcceleratorObject = accelerator;
         }
 
-        public PropertyBase[] GetProperties()
+        public PropertyBase[] GetProperties(Int32Size sourceSize)
         {
             var dialogTitle = LanguageResourceDictionary.ResourceKeys.Dialog_ColorDialog_Title_Color;
             var dialogOk = LanguageResourceDictionary.ResourceKeys.Dialog_OK;

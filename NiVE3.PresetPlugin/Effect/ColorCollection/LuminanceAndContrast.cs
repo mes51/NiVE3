@@ -35,7 +35,7 @@ namespace NiVE3.PresetPlugin.Effect.ColorCollection
             AcceleratorObject = accelerator;
         }
 
-        public PropertyBase[] GetProperties()
+        public PropertyBase[] GetProperties(Int32Size sourceSize)
         {
             return
             [

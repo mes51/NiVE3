@@ -20,8 +20,9 @@ namespace NiVE3.Plugin.Interfaces
         /// <summary>
         /// このエフェクトを操作するためのプロパティを取得します
         /// </summary>
+        /// <param name="sourceSize">ソースのサイズ。音声のみの場合、またはフッテージがICustomizableFootageSourceの画像・動画の場合はコンポジションサイズになります</param>
         /// <returns>PropertyBaseの配列</returns>
-        PropertyBase[] GetProperties();
+        PropertyBase[] GetProperties(Int32Size sourceSize);
 
         /// <summary>
         /// エフェクトの適用範囲を計算します
