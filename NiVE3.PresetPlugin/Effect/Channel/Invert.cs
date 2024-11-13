@@ -44,7 +44,7 @@ namespace NiVE3.PresetPlugin.Effect.Channel
             return
             [
                 new EnumProperty(PropertyChannelId, LanguageResourceDictionary.ResourceKeys.Channel_Invert_Channel, typeof(WithHSLChannelType), typeof(LanguageResourceDictionary), WithHSLChannelType.RGB, selectBoxWidth: 90.0),
-                new DoubleProperty(PropertyBlendOrignalId, LanguageResourceDictionary.ResourceKeys.Channel_Invert_BlendOriginal, 0.0, 0.0, 100.0, digit: 2)
+                new DoubleProperty(PropertyBlendOrignalId, LanguageResourceDictionary.ResourceKeys.Channel_Invert_BlendOriginal, 0.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent)
             ];
         }
 
