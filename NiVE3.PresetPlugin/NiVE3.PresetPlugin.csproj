@@ -16,7 +16,7 @@
     <PackageReference Include="NAudio.Core" Version="2.2.1" />
     <PackageReference Include="Vanara.PInvoke.Gdi32" Version="4.0.4" />
     <PackageReference Include="Vanara.PInvoke.Multimedia" Version="4.0.4" />
-    <PackageReference Include="Vortice.Direct3D11" Version="3.5.0" />
+    <PackageReference Include="Vortice.Direct3D11" Version="3.6.2" />
     <PackageReference Include="Vortice.MediaFoundation" Version="3.6.2" />
   </ItemGroup>
 
