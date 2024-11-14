@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Jint;
 using Jint.Native;
+using Jint.Native.Object;
 using Jint.Native.ShadowRealm;
 using Jint.Runtime;
 using Jint.Runtime.Descriptors;
@@ -56,6 +57,7 @@ namespace NiVE3.Expression
                     MemberFilter = static member => Attribute.IsDefined(member, typeof(ExpressionPublicMemberAttribute))
                 });
             });
+            (Engine.GetValue("Math") as ObjectInstance)?.Delete("random");
             Engine.SetValue("time", globalTime);
             Engine.SetValue("comp", (Func<string, CompositionWrapper?>)(key => FindComposition(this, key, globalTime)));
             Engine.SetValue("thisComp", new CompositionWrapper(compositionModel, globalTime));
