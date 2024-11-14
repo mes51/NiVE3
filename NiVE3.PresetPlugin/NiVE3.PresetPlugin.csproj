@@ -8,6 +8,7 @@
 	  <IsPublishable>True</IsPublishable>
 	  <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 	  <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+	  <LangVersion>13</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>

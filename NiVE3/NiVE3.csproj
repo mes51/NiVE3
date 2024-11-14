@@ -7,6 +7,7 @@
     <UseWPF>true</UseWPF>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AllowUnsafeBlocks>False</AllowUnsafeBlocks>
+    <LangVersion>13</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>

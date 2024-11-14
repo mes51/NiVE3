@@ -4,6 +4,7 @@
     <TargetFramework>net8.0-windows7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
+    <LangVersion>13</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>

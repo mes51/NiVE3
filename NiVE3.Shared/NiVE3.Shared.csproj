@@ -5,6 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 	<UseWPF>true</UseWPF>
+    <LangVersion>13</LangVersion>
   </PropertyGroup>
 
 </Project>

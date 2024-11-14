@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
 	<UseWPF>true</UseWPF>
 	<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <LangVersion>13</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
