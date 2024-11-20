@@ -9,34 +9,80 @@ namespace NiVE3.Shared.Extension
 {
     public static class EnumerableExtensions
     {
-        public static int IndexOf<T>(this IEnumerable<T> source, Predicate<T> predicate)
+        public static int IndexOf<T>(this IEnumerable<T> source, T value)
         {
-            var index = 0;
-            foreach (var item in source)
+            switch (source)
             {
-                if (predicate(item))
-                {
-                    return index;
-                }
-                index++;
-            }
+                case T[] array:
+                    return Array.IndexOf(array, value);
+                case List<T> list:
+                    return list.IndexOf(value);
+                default:
+                    {
+                        var index = 0;
+                        var eq = EqualityComparer<T>.Default;
+                        foreach (var e in source)
+                        {
+                            if (eq.Equals(e, value))
+                            {
+                                return index;
+                            }
+                            index++;
+                        }
 
-            return -1;
+                        return -1;
+                    }
+            }
         }
 
-        public static int IndexOfLast<T>(this IEnumerable<T> source, Predicate<T> predicate)
+        public static int FindIndex<T>(this IEnumerable<T> source, Predicate<T> predicate)
         {
-            var index = source.Count() - 1;
-            foreach (var item in source.Reverse())
+            switch (source)
             {
-                if (predicate(item))
-                {
-                    return index;
-                }
-                index--;
-            }
+                case T[] array:
+                    return Array.FindIndex(array, predicate);
+                case List<T> list:
+                    return list.FindIndex(predicate);
+                default:
+                    {
+                        var index = 0;
+                        foreach (var item in source)
+                        {
+                            if (predicate(item))
+                            {
+                                return index;
+                            }
+                            index++;
+                        }
 
-            return -1;
+                        return -1;
+                    }
+            }
+        }
+
+        public static int FindLastIndex<T>(this IEnumerable<T> source, Predicate<T> predicate)
+        {
+            switch (source)
+            {
+                case T[] array:
+                    return Array.FindLastIndex(array, predicate);
+                case List<T> list:
+                    return list.FindLastIndex(predicate);
+                default:
+                    {
+                        var index = source.Count() - 1;
+                        foreach (var item in source.Reverse())
+                        {
+                            if (predicate(item))
+                            {
+                                return index;
+                            }
+                            index--;
+                        }
+
+                        return -1;
+                    }
+            }
         }
 
         public static IEnumerable<(T, int)> ZipWithIndex<T>(this IEnumerable<T> source)
@@ -104,32 +150,6 @@ namespace NiVE3.Shared.Extension
             if (group.Count > 0)
             {
                 yield return group;
-            }
-        }
-
-        public static int IndexOf<T>(this IEnumerable<T> source, T value)
-        {
-            switch (source)
-            {
-                case T[] array:
-                    return Array.IndexOf(array, value);
-                case List<T> list:
-                    return list.IndexOf(value);
-                default:
-                    {
-                        var index = 0;
-                        var eq = EqualityComparer<T>.Default;
-                        foreach (var e in source)
-                        {
-                            if (eq.Equals(e, value))
-                            {
-                                return index;
-                            }
-                            index++;
-                        }
-
-                        return -1;
-                    }
             }
         }
 

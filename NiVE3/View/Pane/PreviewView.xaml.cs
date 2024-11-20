@@ -410,7 +410,7 @@ namespace NiVE3.View.Pane
                 if (IsStretchPreview)
                 {
                     var currentScale = PreviewAreaScaleRate * 100.0;
-                    var newIndex = ScaleList.IndexOf(v => v > currentScale);
+                    var newIndex = ScaleList.FindIndex(v => v > currentScale);
                     if (newIndex < 0)
                     {
                         newIndex = maximumScaleIndex;
@@ -428,7 +428,7 @@ namespace NiVE3.View.Pane
                 if (IsStretchPreview)
                 {
                     var currentScale = PreviewAreaScaleRate * 100.0;
-                    var newIndex = ScaleList.IndexOfLast(v => v < currentScale);
+                    var newIndex = ScaleList.FindLastIndex(v => v < currentScale);
                     if (newIndex < 0)
                     {
                         newIndex = minimumScaleIndex;
@@ -499,7 +499,7 @@ namespace NiVE3.View.Pane
                 }
                 else
                 {
-                    SelectedScaleIndex = ScaleList.IndexOf(s => s >= viewModel.Scale);
+                    SelectedScaleIndex = ScaleList.FindIndex(s => s >= viewModel.Scale);
                 }
                 UpdateScale();
 

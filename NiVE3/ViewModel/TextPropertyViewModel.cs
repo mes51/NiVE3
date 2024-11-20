@@ -325,7 +325,7 @@ namespace NiVE3.ViewModel
 
             var newSelectedFont = TextPropertyModel.SelectedFont;
             var groupIndex = Fonts.FindIndex(f => f.SubFamiles.Any(sf => sf.FontInfo.UniqueId == newSelectedFont.UniqueId));
-            var subFamilyIndex = Fonts[groupIndex].SubFamiles.IndexOf(sf => sf.FontInfo.UniqueId == newSelectedFont.UniqueId);
+            var subFamilyIndex = Fonts[groupIndex].SubFamiles.FindIndex(sf => sf.FontInfo.UniqueId == newSelectedFont.UniqueId);
             SelectedFontGroupIndex = groupIndex;
             SelectedFontSubFamilyIndex = subFamilyIndex;
 

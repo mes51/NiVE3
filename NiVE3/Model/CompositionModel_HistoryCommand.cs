@@ -699,7 +699,7 @@ namespace NiVE3.Model
             {
                 foreach (var (id, l) in NewLayers)
                 {
-                    var index = Model.Layers.IndexOf(l => id == l.LayerId);
+                    var index = Model.Layers.FindIndex(l => id == l.LayerId);
                     Model.Layers.Insert(index, l);
                 }
                 foreach (var (l, o ) in TargetLayers.Zip(NewOutPoints))

@@ -370,7 +370,7 @@ namespace NiVE3.Model
                     if (propertyData.PropertyId == Property.Id)
                     {
                         // NOTE: 数を合わせるために一旦IOverwriteablePropertyModelでとってくる
-                        var targetChildren = Children.Where(c => propertyData.Children.Any(d => d.PropertyId == c.Property.Id)).OrderBy(c => propertyData.Children.IndexOf(d => d.PropertyId == c.Property.Id)).OfType<IOverwriteablePropertyModel>();
+                        var targetChildren = Children.Where(c => propertyData.Children.Any(d => d.PropertyId == c.Property.Id)).OrderBy(c => propertyData.Children.FindIndex(d => d.PropertyId == c.Property.Id)).OfType<IOverwriteablePropertyModel>();
                         if (ids.Length > 0)
                         {
                             targetChildren = targetChildren.Where(c => ids.Contains(c.Property.Id));
@@ -443,7 +443,7 @@ namespace NiVE3.Model
 
             HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_PasteProperty));
 
-            var targetChildren = Children.Where(c => data.Children.Any(d => d.PropertyId == c.Property.Id)).OrderBy(c => data.Children.IndexOf(d => d.PropertyId == c.Property.Id)).OfType<IOverwriteablePropertyModel>();
+            var targetChildren = Children.Where(c => data.Children.Any(d => d.PropertyId == c.Property.Id)).OrderBy(c => data.Children.FindIndex(d => d.PropertyId == c.Property.Id)).OfType<IOverwriteablePropertyModel>();
             foreach (var (childData, child) in data.Children.Zip(targetChildren))
             {
                 child.OverwriteProperty(childData);
@@ -526,7 +526,7 @@ namespace NiVE3.Model
                 // NOTE: 複数同時貼り付けの場合は同一のグループにしか貼り付けられない
                 if (data.PropertyId == Property.Id)
                 {
-                    var targetChildren = Children.Where(c => data.Children.Any(d => d.PropertyId == c.Property.Id)).OrderBy(c => data.Children.IndexOf(d => d.PropertyId == c.Property.Id)).OfType<IOverwriteablePropertyModel>();
+                    var targetChildren = Children.Where(c => data.Children.Any(d => d.PropertyId == c.Property.Id)).OrderBy(c => data.Children.FindIndex(d => d.PropertyId == c.Property.Id)).OfType<IOverwriteablePropertyModel>();
                     if (ids.Length > 0)
                     {
                         targetChildren = targetChildren.Where(c => ids.Contains(c.Property.Id));

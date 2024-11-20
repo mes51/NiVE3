@@ -221,7 +221,7 @@ namespace NiVE3.Model
             var prevOrderedChildren = Children.OfType<PropertyGroupModel>().ToArray();
             var targetGroups = prevOrderedChildren.Where(g => propertyInstanceIds.Contains(g.InstanceId)).ToArray();
             var prevIndices = targetGroups.Select(Children.IndexOf).ToArray();
-            var startIndex = newIndex - targetGroups.IndexOf(c => c.InstanceId == referencePropertyInstanceId);
+            var startIndex = newIndex - targetGroups.FindIndex(c => c.InstanceId == referencePropertyInstanceId);
             var newOrderedChildren = new List<IPropertyModel>(prevOrderedChildren.Length);
             newOrderedChildren.AddRange(prevOrderedChildren.Except(targetGroups).Take(startIndex));
             newOrderedChildren.AddRange(targetGroups);

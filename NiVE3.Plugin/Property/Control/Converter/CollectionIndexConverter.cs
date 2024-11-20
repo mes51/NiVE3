@@ -21,11 +21,11 @@ namespace NiVE3.Plugin.Property.Control.Converter
             {
                 if (values[0] is IEnumerable collection1)
                 {
-                    return collection1.Cast<object>().IndexOf(v => (v == null && values[1] == null) || (v?.Equals(values[1]) ?? false)) + Offset;
+                    return collection1.Cast<object>().FindIndex(v => (v == null && values[1] == null) || (v?.Equals(values[1]) ?? false)) + Offset;
                 }
                 else if (values[1] is IEnumerable collection2)
                 {
-                    return collection2.Cast<object>().IndexOf(v => (v == null && values[0] == null) || (v?.Equals(values[0]) ?? false)) + Offset;
+                    return collection2.Cast<object>().FindIndex(v => (v == null && values[0] == null) || (v?.Equals(values[0]) ?? false)) + Offset;
                 }
             }
 

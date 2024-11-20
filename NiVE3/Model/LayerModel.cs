@@ -1299,7 +1299,7 @@ namespace NiVE3.Model
 
             var effects = Effects.Where(l => effectIds.Contains(l.EffectId)).OrderBy(Effects.IndexOf).ToArray();
             var prevIndices = effects.Select(l => Effects.IndexOf(l)).ToArray();
-            var startIndex = newIndex - effects.IndexOf(l => l.EffectId == referenceEffectId);
+            var startIndex = newIndex - effects.FindIndex(l => l.EffectId == referenceEffectId);
             var newOrderedEffects = new List<EffectModel>(Effects.Count);
             newOrderedEffects.AddRange(Effects.Except(effects).Take(startIndex));
             newOrderedEffects.AddRange(effects);
@@ -1564,7 +1564,7 @@ namespace NiVE3.Model
         void PasteEffectsInternal(CopyData<EffectData> data, Guid[] selectedEffectIds, Guid? insertTargetId, bool isDuplicate)
         {
             var addedEffect = new List<EffectModel>();
-            var insertStartIndex = insertTargetId.HasValue ? Effects.IndexOf(e => e.EffectId == insertTargetId) : -1;
+            var insertStartIndex = insertTargetId.HasValue ? Effects.FindIndex(e => e.EffectId == insertTargetId) : -1;
             if (insertStartIndex < 0)
             {
                 insertStartIndex = Effects.Count;

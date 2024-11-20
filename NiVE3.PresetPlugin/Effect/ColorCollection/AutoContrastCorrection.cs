@@ -215,9 +215,9 @@ namespace NiVE3.PresetPlugin.Effect.ColorCollection
                 bin[i] = bin[i] + bin[i - 1];
             }
             var shadowClipCount = (int)MathF.Round(totalCount * shadowClip);
-            var shadowValue = (bin.IndexOf(v => shadowClipCount <= v) + 1) / (float)BinSize;
+            var shadowValue = (bin.FindIndex(v => shadowClipCount <= v) + 1) / (float)BinSize;
             var highlightClipCount = (int)MathF.Round(totalCount * (1.0F - highlightClip));
-            var highlightValue = (bin.IndexOfLast(v => highlightClipCount >= v) + 1) / (float)BinSize;
+            var highlightValue = (bin.FindLastIndex(v => highlightClipCount >= v) + 1) / (float)BinSize;
             var lightnessRange = 1.0F / Math.Max(highlightValue - shadowValue, 0.01F);
 
             return (lightnessRange, highlightValue <= shadowValue ? 0.0F : shadowValue);

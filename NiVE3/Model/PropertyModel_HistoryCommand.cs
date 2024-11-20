@@ -219,7 +219,7 @@ namespace NiVE3.Model
 
                 foreach (var k in newKeyFrames)
                 {
-                    var index = Model.KeyFrames.IndexOfLast(k => k.Time <= k.Time) + 1;
+                    var index = Model.KeyFrames.FindLastIndex(k => k.Time <= k.Time) + 1;
                     if (index > 0 && Model.KeyFrames[index - 1].Time == k.Time)
                     {
                         Model.KeyFrames[index - 1] = k;

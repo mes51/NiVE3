@@ -25,6 +25,11 @@ namespace NiVE3.Shared.Extension
             ArrayList.Adapter(collection).Sort(comparer);
         }
 
+        public static void Sort<T>(this ObservableCollection<T> collection, Comparison<T> comparison)
+        {
+            ArrayList.Adapter(collection).Sort(new ComparisonComparer<T>(comparison));
+        }
+
         public static void SortBy<T>(this ObservableCollection<T> collection, Func<T, int> sortKey)
         {
             var sorted = collection.OrderBy(e => sortKey(e)).ToArray();
@@ -74,36 +79,49 @@ namespace NiVE3.Shared.Extension
                 return Comparer.Compare(tx, ty);
             }
         }
+    }
 
-        private class SortByComparerWrapper<T> : IComparer where T : notnull
+    file class SortByComparerWrapper<T> : IComparer where T : notnull
+    {
+        Dictionary<T, int> SortKeys { get; }
+
+        public SortByComparerWrapper(Dictionary<T, int> sortKeys)
         {
-            Dictionary<T, int> SortKeys { get; }
+            SortKeys = sortKeys;
+        }
 
-            public SortByComparerWrapper(Dictionary<T, int> sortKeys)
+        public int Compare(object? x, object? y)
+        {
+            if (x == null)
             {
-                SortKeys = sortKeys;
+                if (y != null)
+                {
+                    return -1;
+                }
+                else
+                {
+                    return 0;
+                }
+            }
+            else if (y is null)
+            {
+                return 1;
             }
 
-            public int Compare(object? x, object? y)
-            {
-                if (x == null)
-                {
-                    if (y != null)
-                    {
-                        return -1;
-                    }
-                    else
-                    {
-                        return 0;
-                    }
-                }
-                else if (y is null)
-                {
-                    return 1;
-                }
+            return SortKeys[(T)x].CompareTo(SortKeys[(T)y]);
+        }
+    }
 
-                return SortKeys[(T)x].CompareTo(SortKeys[(T)y]);
+    file class ComparisonComparer<T>(Comparison<T> Comparison) : IComparer
+    {
+        public int Compare(object? x, object? y)
+        {
+            if (x is T a && y is T b)
+            {
+                return Comparison(a, b);
             }
+
+            return 0;
         }
     }
 }

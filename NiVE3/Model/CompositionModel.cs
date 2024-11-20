@@ -383,7 +383,7 @@ namespace NiVE3.Model
 
             var layers = Layers.Where(l => layerIds.Contains(l.LayerId)).OrderBy(Layers.IndexOf).ToArray();
             var prevIndices = layers.Select(l => Layers.IndexOf(l)).ToArray();
-            var startIndex = newIndex - layers.IndexOf(l => l.LayerId == referenceLayerId);
+            var startIndex = newIndex - layers.FindIndex(l => l.LayerId == referenceLayerId);
             var newOrderedLayers = new List<LayerModel>(Layers.Count);
             newOrderedLayers.AddRange(Layers.Except(layers).Take(startIndex));
             newOrderedLayers.AddRange(layers);
@@ -1050,7 +1050,7 @@ namespace NiVE3.Model
                 layerData.InPoint = TimeCalc.RoundTimeDigit(splitPositionTime - layerData.SourceStartPoint);
                 var newLayer = new LayerModel(ProjectModel, this, footageModels.First(), EffectListModel, HistoryModel, AcceleratorModel);
                 newLayer.LoadData(layerData, true);
-                var index = Layers.IndexOf(l => l.LayerId == layerData.LayerId);
+                var index = Layers.FindIndex(l => l.LayerId == layerData.LayerId);
                 Layers.Insert(index, newLayer);
                 addedLayer.Add(layerData.LayerId, newLayer);
             }
@@ -1566,7 +1566,7 @@ namespace NiVE3.Model
             }
 
             var addedLayer = new List<LayerModel>();
-            var insertStartIndex = insertTargetId.HasValue ? Layers.IndexOf(l => l.LayerId == insertTargetId) : -1;
+            var insertStartIndex = insertTargetId.HasValue ? Layers.FindIndex(l => l.LayerId == insertTargetId) : -1;
             if (insertStartIndex < 0)
             {
                 insertStartIndex = Layers.Count;

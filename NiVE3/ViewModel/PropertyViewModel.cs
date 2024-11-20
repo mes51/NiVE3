@@ -357,7 +357,7 @@ namespace NiVE3.ViewModel
             PlaceKeyFrameCommand = new DelegateCommand(() =>
             {
                 var time = CurrentTime;
-                var index = KeyFrames.IndexOfLast(k => Math.Abs(k.Time - time) < TimeCalc.TimeEpsilon || k.Time <= time);
+                var index = KeyFrames.FindLastIndex(k => Math.Abs(k.Time - time) < TimeCalc.TimeEpsilon || k.Time <= time);
                 if (index > -1 && Math.Abs(KeyFrames[index].Time - time) < TimeCalc.TimeEpsilon)
                 {
                     PropertyModel.DeleteKeyFrames([KeyFrames[index]]);
@@ -391,7 +391,7 @@ namespace NiVE3.ViewModel
             AddKeyFrameToSelectedChildrenCommand = new DelegateCommand(() =>
             {
                 var time = CurrentTime;
-                var index = KeyFrames.IndexOfLast(k => Math.Abs(k.Time - time) < TimeCalc.TimeEpsilon || k.Time <= time);
+                var index = KeyFrames.FindLastIndex(k => Math.Abs(k.Time - time) < TimeCalc.TimeEpsilon || k.Time <= time);
                 if (index > -1 && Math.Abs(KeyFrames[index].Time - time) >= TimeCalc.TimeEpsilon)
                 {
                     PropertyModel.CreateKeyFrame(CurrentTimeRawValue);

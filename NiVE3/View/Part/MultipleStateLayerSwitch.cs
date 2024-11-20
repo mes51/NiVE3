@@ -138,7 +138,7 @@ namespace NiVE3.View.Part
                     }
 
                     var state = State;
-                    var index = items.IndexOf(i => (i.State == null && state == null) || (i.State?.Equals(state) ?? false));
+                    var index = Shared.Extension.EnumerableExtensions.FindIndex(items, i => (i.State == null && state == null) || (i.State?.Equals(state) ?? false));
                     if (index < 0)
                     {
                         State = items.First().State;

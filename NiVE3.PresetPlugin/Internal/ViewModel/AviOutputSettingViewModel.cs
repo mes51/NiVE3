@@ -109,7 +109,7 @@ namespace NiVE3.PresetPlugin.Internal.ViewModel
             get => CodecList[SelectedCodecIndex].Item1;
             set
             {
-                SelectedCodecIndex = Math.Max(CodecList.IndexOf(t => t.Item1 == value), 0);
+                SelectedCodecIndex = Math.Max(CodecList.FindIndex(t => t.Item1 == value), 0);
             }
         }
 
@@ -194,7 +194,7 @@ namespace NiVE3.PresetPlugin.Internal.ViewModel
                 CodecList.Add(t);
             }
 
-            SelectedCodecIndex = Math.Max(CodecList.IndexOf(t => t.Item1 == selectedCodec), 0);
+            SelectedCodecIndex = Math.Max(CodecList.FindIndex(t => t.Item1 == selectedCodec), 0);
         }
     }
 }

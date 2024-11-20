@@ -1124,7 +1124,7 @@ namespace NiVE3.ViewModel
             if (Layers != null && SelectedLayers != null && SelectedLayers.Count > 0)
             {
                 var firstSelectedId = SelectedLayers[0].LayerId;
-                return Layers.IndexOf(l => l.LayerId == firstSelectedId);
+                return Layers.FindIndex(l => l.LayerId == firstSelectedId);
             }
             else
             {

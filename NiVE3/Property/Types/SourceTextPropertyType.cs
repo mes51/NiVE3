@@ -26,7 +26,7 @@ namespace NiVE3.Property.Types
 
         public object? Interpolate(IReadOnlyList<KeyFrame> keyFrames, double t)
         {
-            var baseKeyFrameIndex = keyFrames.IndexOfLast(k => k.Time <= t);
+            var baseKeyFrameIndex = keyFrames.FindLastIndex(k => k.Time <= t);
             if (baseKeyFrameIndex < 0)
             {
                 return keyFrames[0].Value;

@@ -21,7 +21,7 @@ using NiVE3.PresetPlugin.Resource;
 namespace NiVE3.PresetPlugin.Effect.ColorCollection
 {
     [Export(typeof(IEffect))]
-    [EffectMetadata(LanguageResourceDictionary.ColorCollection_MultiTone_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_ColorCollection, LanguageResourceDictionary.ColorCollection_MultiTone_Description, ID, IsSupportGpu = true, IsRenderEveryFrame = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
+    [EffectMetadata(LanguageResourceDictionary.ColorCollection_MultiTone_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_ColorCollection, LanguageResourceDictionary.ColorCollection_MultiTone_Description, ID, IsSupportGpu = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
     public sealed class MultiTone : IEffect
     {
         const string ID = "E542A978-1AE4-4DB2-BA0B-66DFA5A0E362";

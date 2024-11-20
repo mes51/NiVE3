@@ -1,0 +1,181 @@
+﻿<pc:PropertyControlBase x:Class="NiVE3.PresetPlugin.Property.Control.ToneCurvePropertyControl"
+                        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                        xmlns:local="clr-namespace:NiVE3.PresetPlugin.Property.Control"
+                        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+                        xmlns:pc="clr-namespace:NiVE3.Plugin.Property.Control;assembly=NiVE3.Plugin"
+                        xmlns:v="clr-namespace:NiVE3.PresetPlugin.Internal.View"
+                        xmlns:cv="clr-namespace:NiVE3.PresetPlugin.Internal.View.Converter"
+                        xmlns:r="clr-namespace:NiVE3.PresetPlugin.Resource"
+                        xmlns:ur="clr-namespace:NiVE3.UI.Resources;assembly=NiVE3.UI"
+                        xmlns:gm="clr-namespace:NiVE3.PresetPlugin.Resource.Wpf.GeneratedMarkup"
+                        xmlns:ugm="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
+                        mc:Ignorable="d" 
+                        x:Name="Root"
+                        DataContextChanged="Root_DataContextChanged"
+                        Unloaded="Root_Unloaded"
+                        d:DesignHeight="450" d:DesignWidth="800">
+    <pc:PropertyControlBase.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <r:LanguageResourceDictionary />
+                <ur:AppearanceResourceDictionary />
+            </ResourceDictionary.MergedDictionaries>
+
+            <sys:Int32 x:Key="Zero">0</sys:Int32>
+            <sys:Int32 x:Key="One">1</sys:Int32>
+            <sys:Int32 x:Key="Two">2</sys:Int32>
+            <sys:Int32 x:Key="Three">3</sys:Int32>
+            <sys:Int32 x:Key="Four">4</sys:Int32>
+
+            <cv:EqualToVisibilityConverter x:Key="EqualToVisibilityConverter"/>
+            <cv:EqualToVisibilityConverter x:Key="InvertedEqualToVisibilityConverter" Inverted="True"/>
+
+            <Style x:Key="GraphAreaGrid" TargetType="{x:Type Grid}">
+                <Setter Property="HorizontalAlignment" Value="Left"/>
+                <Setter Property="MaxWidth" Value="300"/>
+                <Setter Property="MinWidth" Value="50"/>
+
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding ElementName=EditViewSizeMRadioButton, Path=IsChecked}" Value="True">
+                        <Setter Property="MaxWidth" Value="200"/>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding ElementName=EditViewSizeSRadioButton, Path=IsChecked}" Value="True">
+                        <Setter Property="MaxWidth" Value="100"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style x:Key="GraphAreaBorder" TargetType="{x:Type Border}">
+                <Setter Property="Margin" Value="0,5,0,0"/>
+                <Setter Property="BorderBrush" Value="{ugm:AppearanceResource ResourceKey=BorderBrush, ReturnDynamicResource=True}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="VerticalAlignment" Value="Top"/>
+                <Setter Property="MaxHeight" Value="300"/>
+                <Setter Property="MinHeight" Value="50"/>
+
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding ElementName=EditViewSizeMRadioButton, Path=IsChecked}" Value="True">
+                        <Setter Property="MaxHeight" Value="200"/>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding ElementName=EditViewSizeSRadioButton, Path=IsChecked}" Value="True">
+                        <Setter Property="MaxHeight" Value="100"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style x:Key="BackgroundGridLineStyle" TargetType="{x:Type Line}">
+                <Setter Property="Stroke" Value="DarkGray"/>
+                <Setter Property="StrokeThickness" Value="1"/>
+                <Setter Property="StrokeDashArray" Value="5,5"/>
+            </Style>
+
+            <Style x:Key="BackgroundToneCurvePointEditViewStyle" TargetType="{x:Type v:ToneCurvePointEditView}">
+                <Setter Property="IsHitTestVisible" Value="False"/>
+                <Setter Property="IsReadOnly" Value="True"/>
+                <Setter Property="LineWidth" Value="0.5"/>
+            </Style>
+
+            <Style x:Key="BlackLineBackgroundToneCurvePointEditViewStyle" TargetType="{x:Type v:ToneCurvePointEditView}" BasedOn="{StaticResource BackgroundToneCurvePointEditViewStyle}">
+                <Setter Property="LineBrush" Value="Black"/>
+            </Style>
+
+            <Style x:Key="EditableToneCurvePointEditViewStyle" TargetType="{x:Type v:ToneCurvePointEditView}">
+                <EventSetter Event="BeginEdit" Handler="ToneCurvePointEditView_BeginEdit"/>
+                <EventSetter Event="EndEdit" Handler="ToneCurvePointEditView_EndEdit"/>
+                <EventSetter Event="AbortEdit" Handler="ToneCurvePointEditView_AbortEdit"/>
+                <EventSetter Event="UpdatePoints" Handler="ToneCurvePointEditView_UpdatePoints"/>
+            </Style>
+
+            <Style x:Key="BlackLineEditableToneCurvePointEditViewStyle" TargetType="{x:Type v:ToneCurvePointEditView}" BasedOn="{StaticResource EditableToneCurvePointEditViewStyle}">
+                <Setter Property="LineBrush" Value="Black"/>
+            </Style>
+        </ResourceDictionary>
+    </pc:PropertyControlBase.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+
+        <Grid Grid.Column="0" Margin="0,0,10,0">
+            <Grid.RowDefinitions>
+                <RowDefinition  Height="{Binding ElementName=MeasurementEditChannelHeight, Path=ActualHeight}"/>
+                <RowDefinition />
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Row="1" Orientation="Vertical" VerticalAlignment="Top">
+                <RadioButton x:Name="EditViewSizeLRadioButton" Content="{gm:LanguageResource ResourceKey=ToneCurvePropertyControl_EditViewSize_L}" Margin="0,5,0,0" GroupName="PointEditViewSize"/>
+                <RadioButton x:Name="EditViewSizeMRadioButton" Content="{gm:LanguageResource ResourceKey=ToneCurvePropertyControl_EditViewSize_M}" IsChecked="True" Margin="0,5,0,0" GroupName="PointEditViewSize"/>
+                <RadioButton x:Name="EditViewSizeSRadioButton" Content="{gm:LanguageResource ResourceKey=ToneCurvePropertyControl_EditViewSize_S}" Margin="0,5,0,0" GroupName="PointEditViewSize"/>
+            </StackPanel>
+        </Grid>
+        
+        <Grid Grid.Column="1" x:Name="Wrapper">
+            <Grid Width="{Binding ElementName=Wrapper, Path=ActualWidth}" Style="{StaticResource GraphAreaGrid}" d:MaxWidth="300" d:Width="300">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=ToneCurvePropertyControl_EditChannel}" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                    <ComboBox x:Name="EditChannelComboBox" Grid.Column="1" SelectedIndex="0">
+                        <ComboBoxItem Content="{gm:LanguageResource ResourceKey=ToneCurvePropertyControl_EditChannel_Rgb}"/>
+                        <ComboBoxItem Content="{gm:LanguageResource ResourceKey=ToneCurvePropertyControl_EditChannel_R}"/>
+                        <ComboBoxItem Content="{gm:LanguageResource ResourceKey=ToneCurvePropertyControl_EditChannel_G}"/>
+                        <ComboBoxItem Content="{gm:LanguageResource ResourceKey=ToneCurvePropertyControl_EditChannel_B}"/>
+                        <ComboBoxItem Content="{gm:LanguageResource ResourceKey=ToneCurvePropertyControl_EditChannel_A}"/>
+                    </ComboBox>
+
+                    <!-- NOTE: サイズ変更ラジオボタンの上の余白測定用 -->
+                    <Rectangle x:Name="MeasurementEditChannelHeight" Fill="Transparent" Visibility="Hidden"/>
+                </Grid>
+
+                <Border Grid.Row="1" Height="{Binding ElementName=Wrapper, Path=ActualWidth}" Style="{StaticResource GraphAreaBorder}" d:MaxHeight="300" d:Height="300">
+                    <Grid ClipToBounds="True">
+                        <Grid x:Name="BackgroundGrid">
+                            <Grid.RowDefinitions>
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+
+                            <Line Grid.Row="0" Grid.ColumnSpan="3" X1="0" Y1="0" X2="{Binding ElementName=BackgroundGrid, Path=ActualWidth}" Y2="0" VerticalAlignment="Bottom" Style="{StaticResource BackgroundGridLineStyle}"/>
+                            <Line Grid.Row="1" Grid.ColumnSpan="3" X1="0" Y1="0" X2="{Binding ElementName=BackgroundGrid, Path=ActualWidth}" Y2="0" VerticalAlignment="Bottom" Style="{StaticResource BackgroundGridLineStyle}"/>
+
+                            <Line Grid.Column="0" Grid.RowSpan="3" X1="0" Y1="0" X2="0" Y2="{Binding ElementName=BackgroundGrid, Path=ActualHeight}" HorizontalAlignment="Right" Style="{StaticResource BackgroundGridLineStyle}"/>
+                            <Line Grid.Column="1" Grid.RowSpan="3" X1="0" Y1="0" X2="0" Y2="{Binding ElementName=BackgroundGrid, Path=ActualHeight}" HorizontalAlignment="Right" Style="{StaticResource BackgroundGridLineStyle}"/>
+                        </Grid>
+
+                        <!-- display only -->
+                        <v:ToneCurvePointEditView Points="{Binding ElementName=Root, Path=APoints}" IsDashed="True" Visibility="{Binding ElementName=EditChannelComboBox, Path=SelectedIndex, Converter={StaticResource InvertedEqualToVisibilityConverter}, ConverterParameter={StaticResource Four}}" Style="{StaticResource BlackLineBackgroundToneCurvePointEditViewStyle}"/>
+                        <v:ToneCurvePointEditView Points="{Binding ElementName=Root, Path=BPoints}" LineBrush="#0000FF" Visibility="{Binding ElementName=EditChannelComboBox, Path=SelectedIndex, Converter={StaticResource InvertedEqualToVisibilityConverter}, ConverterParameter={StaticResource Three}}" Style="{StaticResource BackgroundToneCurvePointEditViewStyle}"/>
+                        <v:ToneCurvePointEditView Points="{Binding ElementName=Root, Path=GPoints}" LineBrush="#00FF00" Visibility="{Binding ElementName=EditChannelComboBox, Path=SelectedIndex, Converter={StaticResource InvertedEqualToVisibilityConverter}, ConverterParameter={StaticResource Two}}" Style="{StaticResource BackgroundToneCurvePointEditViewStyle}"/>
+                        <v:ToneCurvePointEditView Points="{Binding ElementName=Root, Path=RPoints}" LineBrush="#FF0000" Visibility="{Binding ElementName=EditChannelComboBox, Path=SelectedIndex, Converter={StaticResource InvertedEqualToVisibilityConverter}, ConverterParameter={StaticResource One}}" Style="{StaticResource BackgroundToneCurvePointEditViewStyle}"/>
+                        <v:ToneCurvePointEditView Points="{Binding ElementName=Root, Path=RgbPoints}" Visibility="{Binding ElementName=EditChannelComboBox, Path=SelectedIndex, Converter={StaticResource InvertedEqualToVisibilityConverter}, ConverterParameter={StaticResource Zero}}" Style="{StaticResource BlackLineBackgroundToneCurvePointEditViewStyle}"/>
+
+                        <!-- editable -->
+                        <v:ToneCurvePointEditView Points="{Binding ElementName=Root, Path=APoints}" IsDashed="True" Visibility="{Binding ElementName=EditChannelComboBox, Path=SelectedIndex, Converter={StaticResource EqualToVisibilityConverter}, ConverterParameter={StaticResource Four}}" Style="{StaticResource BlackLineEditableToneCurvePointEditViewStyle}"/>
+                        <v:ToneCurvePointEditView Points="{Binding ElementName=Root, Path=BPoints}" LineBrush="#0000FF" Visibility="{Binding ElementName=EditChannelComboBox, Path=SelectedIndex, Converter={StaticResource EqualToVisibilityConverter}, ConverterParameter={StaticResource Three}}" Style="{StaticResource EditableToneCurvePointEditViewStyle}"/>
+                        <v:ToneCurvePointEditView Points="{Binding ElementName=Root, Path=GPoints}" LineBrush="#00FF00" Visibility="{Binding ElementName=EditChannelComboBox, Path=SelectedIndex, Converter={StaticResource EqualToVisibilityConverter}, ConverterParameter={StaticResource Two}}" Style="{StaticResource EditableToneCurvePointEditViewStyle}"/>
+                        <v:ToneCurvePointEditView Points="{Binding ElementName=Root, Path=RPoints}" LineBrush="#FF0000" Visibility="{Binding ElementName=EditChannelComboBox, Path=SelectedIndex, Converter={StaticResource EqualToVisibilityConverter}, ConverterParameter={StaticResource One}}" Style="{StaticResource EditableToneCurvePointEditViewStyle}"/>
+                        <v:ToneCurvePointEditView Points="{Binding ElementName=Root, Path=RgbPoints}" Visibility="{Binding ElementName=EditChannelComboBox, Path=SelectedIndex, Converter={StaticResource EqualToVisibilityConverter}, ConverterParameter={StaticResource Zero}}" Style="{StaticResource BlackLineEditableToneCurvePointEditViewStyle}"/>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>
+    </Grid>
+</pc:PropertyControlBase>

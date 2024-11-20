@@ -17,6 +17,35 @@ namespace NiVE3.PresetPlugin.Resource
 
         static Dictionary<string, Tuple<string, Version>> LanguageKeys { get; }
 
+        // Property Controls
+
+        [ShowInMarkup, DefaultValue("編集")]
+        public const string ToneCurvePropertyControl_EditChannel = nameof(ToneCurvePropertyControl_EditChannel);
+
+        [ShowInMarkup, DefaultValue("RGB")]
+        public const string ToneCurvePropertyControl_EditChannel_Rgb = nameof(ToneCurvePropertyControl_EditChannel_Rgb);
+
+        [ShowInMarkup, DefaultValue("R")]
+        public const string ToneCurvePropertyControl_EditChannel_R = nameof(ToneCurvePropertyControl_EditChannel_R);
+
+        [ShowInMarkup, DefaultValue("G")]
+        public const string ToneCurvePropertyControl_EditChannel_G = nameof(ToneCurvePropertyControl_EditChannel_G);
+
+        [ShowInMarkup, DefaultValue("B")]
+        public const string ToneCurvePropertyControl_EditChannel_B = nameof(ToneCurvePropertyControl_EditChannel_B);
+
+        [ShowInMarkup, DefaultValue("A")]
+        public const string ToneCurvePropertyControl_EditChannel_A = nameof(ToneCurvePropertyControl_EditChannel_A);
+
+        [ShowInMarkup, DefaultValue("L")]
+        public const string ToneCurvePropertyControl_EditViewSize_L = nameof(ToneCurvePropertyControl_EditViewSize_L);
+
+        [ShowInMarkup, DefaultValue("M")]
+        public const string ToneCurvePropertyControl_EditViewSize_M = nameof(ToneCurvePropertyControl_EditViewSize_M);
+
+        [ShowInMarkup, DefaultValue("S")]
+        public const string ToneCurvePropertyControl_EditViewSize_S = nameof(ToneCurvePropertyControl_EditViewSize_S);
+
         // Effects
 
         [DefaultValue("ポイント制御")]
@@ -278,6 +307,17 @@ namespace NiVE3.PresetPlugin.Resource
 
         [LanguageKey, DefaultValue("ハイライト")]
         public const string ColorCollection_MultiTone_HighlightColor = nameof(ColorCollection_MultiTone_HighlightColor);
+
+        // ToneCurve
+
+        [DefaultValue("トーンカーブ")]
+        public const string ColorCollection_ToneCurve_Name = nameof(ColorCollection_ToneCurve_Name);
+
+        [DefaultValue("画像の色をグラフに応じて調整します")]
+        public const string ColorCollection_ToneCurve_Description = nameof(ColorCollection_ToneCurve_Description);
+
+        [LanguageKey, DefaultValue("トーンカーブ")]
+        public const string ColorCollection_ToneCurve_ToneCurve = nameof(ColorCollection_ToneCurve_ToneCurve);
 
         // RandomNoise
 
