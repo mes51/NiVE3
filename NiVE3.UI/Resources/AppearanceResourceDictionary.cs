@@ -48,19 +48,22 @@ namespace NiVE3.UI.Resources
         [ShowInMarkup, BrushColorRange("#11FFFFFF", "#11000000")]
         public static readonly string OutOfWorkareaBrush = nameof(OutOfWorkareaBrush);
 
-        double appearance = 0.0;
-        public double Appearance
+        bool isDarkMode = false;
+        public bool IsDarkMode
         {
-            get => appearance;
-            set
+            get => isDarkMode;
+            internal set
             {
-                if (value != appearance)
+                if (isDarkMode != value)
                 {
-                    appearance = value;
+                    isDarkMode = value;
+                    AppearanceChanged?.Invoke(this, EventArgs.Empty);
                     Update();
                 }
             }
         }
+
+        public event EventHandler? AppearanceChanged;
 
         static AppearanceResourceDictionary()
         {
@@ -72,7 +75,6 @@ namespace NiVE3.UI.Resources
 
         public AppearanceResourceDictionary()
         {
-            appearance = 1.0;
             Update();
         }
 
@@ -80,7 +82,7 @@ namespace NiVE3.UI.Resources
         {
             foreach (var (key, attribute) in ColorKeys)
             {
-                this[key] = attribute.GetValue(Appearance);
+                this[key] = attribute.GetValue(IsDarkMode);
             }
         }
     }
@@ -88,7 +90,7 @@ namespace NiVE3.UI.Resources
     [AttributeUsage(AttributeTargets.Field, Inherited = false, AllowMultiple = false)]
     abstract class AppearanceChangeableAttribute : Attribute
     {
-        public abstract object GetValue(double appearance);
+        public abstract object GetValue(bool isDarkMode);
     }
 
     [AttributeUsage(AttributeTargets.Field, Inherited = false, AllowMultiple = false)]
@@ -104,9 +106,9 @@ namespace NiVE3.UI.Resources
             LightColor = ColorExtensions.FromHex(lightColorHex);
         }
 
-        public override object GetValue(double appearance)
+        public override object GetValue(bool isDarkMode)
         {
-            var brush = new SolidColorBrush(DarkColor.Interpolate(LightColor, appearance));
+            var brush = new SolidColorBrush(isDarkMode ? DarkColor : LightColor);
             brush.Freeze();
             return brush;
         }
@@ -135,15 +137,6 @@ namespace NiVE3.UI.Resources
         public static string ToHex(this Color color)
         {
             return color.R.ToString("X2") + color.G.ToString("X2") + color.B.ToString("X2");
-        }
-
-        public static Color Interpolate(this Color source, Color next, double t)
-        {
-            var a = (byte)Math.Round(source.A + (next.A - source.A) * t);
-            var r = (byte)Math.Round(source.R + (next.R - source.R) * t);
-            var g = (byte)Math.Round(source.G + (next.G - source.G) * t);
-            var b = (byte)Math.Round(source.B + (next.B - source.B) * t);
-            return Color.FromArgb(a, r, g, b);
         }
     }
 }
