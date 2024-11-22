@@ -77,11 +77,10 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
             if (edgeRepeatMode == EdgeRepeatMode.AddAmount)
             {
                 var amount = (float)properties.GetValue(PropertyRangeId, layerTime, 0.0);
-                var repeat = (int)properties.GetValue(PropertyRangeId, layerTime, 1.0);
                 var direction = properties.GetValue(PropertyDirectionId, layerTime, GlowDirection.HorizontalAndVertical);
 
-                var expandX = (int)Math.Ceiling(amount * repeat / downSamplingRateX);
-                var expandY = (int)Math.Ceiling(amount * repeat / downSamplingRateY);
+                var expandX = (int)Math.Ceiling(amount / downSamplingRateX);
+                var expandY = (int)Math.Ceiling(amount / downSamplingRateY);
                 switch (direction)
                 {
                     case GlowDirection.Horizontal:
