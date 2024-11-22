@@ -33,6 +33,15 @@ namespace NiVE3.PresetPlugin.Property.Types
             var keyFrame1 = keyFrames[baseKeyFrameIndex];
             var keyFrame2 = keyFrames[baseKeyFrameIndex + 1];
 
+            if (keyFrame1.Time == t)
+            {
+                return keyFrame1.Value;
+            }
+            else if (keyFrame2.Time == t)
+            {
+                return keyFrame2.Value;
+            }
+
             switch(keyFrame1.InterpolationType)
             {
                 case InterpolationType.Linear:
