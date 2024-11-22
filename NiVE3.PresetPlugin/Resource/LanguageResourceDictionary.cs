@@ -707,22 +707,22 @@ namespace NiVE3.PresetPlugin.Resource
         // Outputs
 
         [DefaultValue("AVI出力")]
-        public const string AviOutput_Name = nameof(AviOutput_Name);
+        public const string Output_AviOutput_Name = nameof(Output_AviOutput_Name);
 
         [DefaultValue("動画をAVIで出力します")]
-        public const string AviOutput_Description = nameof(AviOutput_Description);
+        public const string Output_AviOutput_Description = nameof(Output_AviOutput_Description);
 
         [DefaultValue("画像シーケンス出力")]
-        public const string SequentialImageOutput_Name = nameof(SequentialImageOutput_Name);
+        public const string Output_SequentialImageOutput_Name = nameof(Output_SequentialImageOutput_Name);
 
         [DefaultValue("動画を連番画像として出力します")]
-        public const string SequentialImageOutput_Description = nameof(SequentialImageOutput_Description);
+        public const string Output_SequentialImageOutput_Description = nameof(Output_SequentialImageOutput_Description);
 
         [DefaultValue("Wave出力")]
-        public const string WaveOutput_Name = nameof(WaveOutput_Name);
+        public const string Output_WaveOutput_Name = nameof(Output_WaveOutput_Name);
 
         [DefaultValue("音声をPCM形式で出力します")]
-        public const string WaveOutput_Description = nameof(WaveOutput_Description);
+        public const string Output_WaveOutput_Description = nameof(Output_WaveOutput_Description);
 
         // Output setting views
 

@@ -19,7 +19,7 @@ using NiVE3.PresetPlugin.Resource;
 namespace NiVE3.PresetPlugin.Output
 {
     [Export(typeof(IOutput))]
-    [OutputMetadata(typeof(SequentialImageOutput), LanguageResourceDictionary.SequentialImageOutput_Name, "mes51", LanguageResourceDictionary.SequentialImageOutput_Description, ID, SupportedFileTypes, SourceType.Video, false, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
+    [OutputMetadata(typeof(SequentialImageOutput), LanguageResourceDictionary.Output_SequentialImageOutput_Name, "mes51", LanguageResourceDictionary.Output_SequentialImageOutput_Description, ID, SupportedFileTypes, SourceType.Video, false, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
     public partial class SequentialImageOutput : IOutput
     {
         const string ID = "7982BB66-B3A5-43E9-A38E-2AF91C01912B";

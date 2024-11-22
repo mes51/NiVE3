@@ -27,7 +27,7 @@ using SharpAvi.Output;
 namespace NiVE3.PresetPlugin.Output
 {
     [Export(typeof(IOutput))]
-    [OutputMetadata(typeof(AviOutput), LanguageResourceDictionary.AviOutput_Name, "mes51", LanguageResourceDictionary.AviOutput_Description, ID, "*.avi", SourceType.VideoAndAudio, true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
+    [OutputMetadata(typeof(AviOutput), LanguageResourceDictionary.Output_AviOutput_Name, "mes51", LanguageResourceDictionary.Output_AviOutput_Description, ID, "*.avi", SourceType.VideoAndAudio, true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
     public class AviOutput : IOutput
     {
         const string ID = "447492E0-E815-49DC-9D65-355CC3866285";

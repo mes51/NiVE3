@@ -24,7 +24,7 @@ using static Vanara.PInvoke.WinMm;
 namespace NiVE3.PresetPlugin.Output
 {
     [Export(typeof(IOutput))]
-    [OutputMetadata(typeof(WaveOutput), LanguageResourceDictionary.WaveOutput_Name, "mes51", LanguageResourceDictionary.WaveOutput_Description, ID, "*.wav", SourceType.Audio, true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
+    [OutputMetadata(typeof(WaveOutput), LanguageResourceDictionary.Output_WaveOutput_Name, "mes51", LanguageResourceDictionary.Output_WaveOutput_Description, ID, "*.wav", SourceType.Audio, true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
     public class WaveOutput : IOutput
     {
         const string ID = "F2375CE2-01EB-4B9C-B778-28222788A6FE";
