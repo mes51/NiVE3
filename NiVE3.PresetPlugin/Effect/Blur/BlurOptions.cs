@@ -12,13 +12,4 @@ namespace NiVE3.PresetPlugin.Effect.Blur
         Horizontal,
         Vertical
     }
-
-    enum EdgeRepeatMode : int
-    {
-        None,
-        Wrap,
-        Repeat,
-        Mirror,
-        AddAmount
-    }
 }

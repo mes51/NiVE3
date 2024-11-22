@@ -25,4 +25,10 @@ namespace NiVE3.PresetPlugin.Effect.Util
         Hue,
         Saturation
     }
+
+    enum CompositeOrder : int
+    {
+        Front,
+        Back
+    }
 }

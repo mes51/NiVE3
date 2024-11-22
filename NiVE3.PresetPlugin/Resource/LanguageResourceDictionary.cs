@@ -205,6 +205,38 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("シャドウの不透明度")]
         public const string Stylize_Binarization_ShadowOpacity = nameof(Stylize_Binarization_ShadowOpacity);
 
+        // Glow
+
+        [DefaultValue("グロー")]
+        public const string Stylize_Glow_Name = nameof(Stylize_Glow_Name);
+
+        [DefaultValue("画像を発光させたような効果を適用します")]
+        public const string Stylize_Glow_Description = nameof(Stylize_Glow_Description);
+
+        [LanguageKey, DefaultValue("グロー範囲")]
+        public const string Stylize_Glow_Range = nameof(Stylize_Glow_Range);
+
+        [LanguageKey, DefaultValue("グロー強度")]
+        public const string Stylize_Glow_Strength = nameof(Stylize_Glow_Strength);
+
+        [LanguageKey, DefaultValue("閾値")]
+        public const string Stylize_Glow_Threshold = nameof(Stylize_Binarization_Threshold);
+
+        [LanguageKey, DefaultValue("グローの色")]
+        public const string Stylize_Glow_Color = nameof(Stylize_Glow_Color);
+
+        [LanguageKey, DefaultValue("ブレンドモード")]
+        public const string Stylize_Glow_BlendMode = nameof(Stylize_Glow_BlendMode);
+
+        [LanguageKey, DefaultValue("合成順")]
+        public const string Stylize_Glow_CompositeOrder = nameof(Stylize_Glow_CompositeOrder);
+
+        [LanguageKey, DefaultValue("エッジの繰り返しモード")]
+        public const string Stylize_Glow_EdgeRepeatMode = nameof(Stylize_Glow_EdgeRepeatMode);
+
+        [LanguageKey, DefaultValue("グローの方向")]
+        public const string Stylize_Glow_Direction = nameof(Stylize_Glow_Direction);
+
         // Level
 
         [DefaultValue("レベル")]
@@ -824,6 +856,15 @@ namespace NiVE3.PresetPlugin.Resource
         [DefaultValue("垂直")]
         public const string BlurDirection_Vertical = nameof(BlurDirection_Vertical);
 
+        [DefaultValue("水平&垂直")]
+        public const string GlowDirection_HorizontalAndVertical = nameof(GlowDirection_HorizontalAndVertical);
+
+        [DefaultValue("水平")]
+        public const string GlowDirection_Horizontal = nameof(GlowDirection_Horizontal);
+
+        [DefaultValue("垂直")]
+        public const string GlowDirection_Vertical = nameof(GlowDirection_Vertical);
+
         [DefaultValue("なし")]
         public const string EdgeRepeatMode_None = nameof(EdgeRepeatMode_None);
 
@@ -996,13 +1037,13 @@ namespace NiVE3.PresetPlugin.Resource
         public const string JpegColorSpace_YCbCr410 = nameof(JpegColorSpace_YCbCr410);
 
         [DefaultValue("前景")]
-        public const string SolidCompositeOrder_Front = nameof(SolidCompositeOrder_Front);
+        public const string CompositeOrder_Front = nameof(CompositeOrder_Front);
 
         [DefaultValue("背景")]
-        public const string SolidCompositeOrder_Back = nameof(SolidCompositeOrder_Back);
+        public const string CompositeOrder_Back = nameof(CompositeOrder_Back);
 
         [DefaultValue("サイン")]
-        public const string WaveWarpType_Sin = nameof(SolidCompositeOrder_Back);
+        public const string WaveWarpType_Sin = nameof(WaveWarpType_Sin);
 
         [DefaultValue("矩形")]
         public const string WaveWarpType_Rectangle = nameof(WaveWarpType_Rectangle);

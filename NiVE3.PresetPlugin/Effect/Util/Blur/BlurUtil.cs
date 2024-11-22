@@ -5,9 +5,10 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using NiVE3.PresetPlugin.Effect.Blur;
 using NiVE3.PresetPlugin.Effect.Util;
 
-namespace NiVE3.PresetPlugin.Effect.Blur
+namespace NiVE3.PresetPlugin.Effect.Util.Blur
 {
     static class BlurUtil
     {

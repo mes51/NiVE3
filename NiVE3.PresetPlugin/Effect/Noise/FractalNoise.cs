@@ -515,7 +515,7 @@ namespace NiVE3.PresetPlugin.Effect.Noise
                 context.For(
                     roi.Width,
                     roi.Height,
-                    new BlendProcess(
+                    new FractalNoiseBlendProcess(
                         gpuImage.Data,
                         gpuImage.Width,
                         noise,
@@ -745,7 +745,7 @@ namespace NiVE3.PresetPlugin.Effect.Noise
 
     [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
     [GeneratedComputeShaderDescriptor]
-    readonly partial struct BlendProcess(ReadWriteBuffer<Float4> image, int width, ReadWriteBuffer<float> noise, float denom, float contrast, float luminance, Bool isInvert, float opacity, int blendMode, int startX, int startY) : IComputeShader
+    readonly partial struct FractalNoiseBlendProcess(ReadWriteBuffer<Float4> image, int width, ReadWriteBuffer<float> noise, float denom, float contrast, float luminance, Bool isInvert, float opacity, int blendMode, int startX, int startY) : IComputeShader
     {
         public void Execute()
         {

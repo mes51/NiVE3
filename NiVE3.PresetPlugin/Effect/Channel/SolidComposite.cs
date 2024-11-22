@@ -14,6 +14,7 @@ using NiVE3.Plugin.Property;
 using NiVE3.Plugin.Property.Properties;
 using NiVE3.Plugin.Resource;
 using NiVE3.Plugin.ValueObject;
+using NiVE3.PresetPlugin.Effect.Util;
 using NiVE3.PresetPlugin.Extension;
 using NiVE3.PresetPlugin.Internal.ComputeShader;
 using NiVE3.PresetPlugin.Resource;
@@ -50,7 +51,7 @@ namespace NiVE3.PresetPlugin.Effect.Channel
                 new DoubleProperty(PropertySourceOpacityId, LanguageResourceDictionary.ResourceKeys.Channel_SolidComposite_SourceOpacity, 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
                 new ColorProperty(PropertyColorId, LanguageResourceDictionary.ResourceKeys.Channel_SolidComposite_Color, LanguageResourceDictionary.ResourceKeys.Dialog_ColorDialog_Title_Color, LanguageResourceDictionary.ResourceKeys.Dialog_OK, LanguageResourceDictionary.ResourceKeys.Dialog_Cancel, Vector4.One),
                 new DoubleProperty(PropertyOpacityId, LanguageResourceDictionary.ResourceKeys.Channel_SolidComposite_Opacity, 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
-                new EnumProperty(PropertyOrderId, LanguageResourceDictionary.ResourceKeys.Channel_SolidComposite_Order, typeof(SolidCompositeOrder), typeof(LanguageResourceDictionary), SolidCompositeOrder.Front, selectBoxWidth: 90.0),
+                new EnumProperty(PropertyOrderId, LanguageResourceDictionary.ResourceKeys.Channel_SolidComposite_Order, typeof(CompositeOrder), typeof(LanguageResourceDictionary), CompositeOrder.Front, selectBoxWidth: 90.0),
                 new EnumProperty(PropertyBlendModeId, LanguageResourceDictionary.ResourceKeys.Channel_SolidComposite_BlendMode, typeof(BlendMode), typeof(LanguageResourceDictionary), BlendMode.Normal, selectBoxWidth: 90.0)
             ];
         }
@@ -60,7 +61,7 @@ namespace NiVE3.PresetPlugin.Effect.Channel
             var sourceOpacity = (float)properties.GetValue(PropertySourceOpacityId, layerTime, 100.0) * 0.01F;
             var color = properties.GetValue(PropertyColorId, layerTime, Vector4.Zero);
             var opacity = (float)properties.GetValue(PropertyOpacityId, layerTime, 100.0) * 0.01F;
-            var order = properties.GetValue(PropertyOrderId, layerTime, SolidCompositeOrder.Front);
+            var order = properties.GetValue(PropertyOrderId, layerTime, CompositeOrder.Front);
             var blendMode = properties.GetValue(PropertyBlendModeId, layerTime, BlendMode.Normal);
             color.W = opacity;
 
@@ -81,7 +82,7 @@ namespace NiVE3.PresetPlugin.Effect.Channel
 
         public void Dispose() { }
 
-        static NManagedImage ProcessCpu(NImage image, ROI roi, float sourceOpacity, Vector4 color, SolidCompositeOrder order, BlendMode blendMode)
+        static NManagedImage ProcessCpu(NImage image, ROI roi, float sourceOpacity, Vector4 color, CompositeOrder order, BlendMode blendMode)
         {
             var managedImage = image switch
             {
@@ -90,7 +91,7 @@ namespace NiVE3.PresetPlugin.Effect.Channel
             };
 
             var imageData = managedImage.Data;
-            if (order == SolidCompositeOrder.Front)
+            if (order == CompositeOrder.Front)
             {
                 Parallel.For(roi.Top, roi.Bottom, y =>
                 {
@@ -120,7 +121,7 @@ namespace NiVE3.PresetPlugin.Effect.Channel
             return managedImage;
         }
 
-        static NGPUImage ProcessGpu(GraphicsDevice device, NImage image, ROI roi, float sourceOpacity, Vector4 color, SolidCompositeOrder order, BlendMode blendMode)
+        static NGPUImage ProcessGpu(GraphicsDevice device, NImage image, ROI roi, float sourceOpacity, Vector4 color, CompositeOrder order, BlendMode blendMode)
         {
             var gpuImage = image switch
             {
@@ -133,12 +134,6 @@ namespace NiVE3.PresetPlugin.Effect.Channel
 
             return gpuImage;
         }
-    }
-
-    enum SolidCompositeOrder
-    {
-        Front,
-        Back
     }
 
     [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
