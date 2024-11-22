@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using ComputeSharp;
@@ -13,11 +14,15 @@ using NiVE3.PresetPlugin.Resource;
 
 namespace NiVE3.PresetPlugin.ToneMapper
 {
+    // SEE: https://knarkowicz.wordpress.com/2016/01/06/aces-filmic-tone-mapping-curve/
+
     [Export(typeof(IToneMapper))]
     [ToneMapperMetadata(typeof(ACESFilmic), LanguageResourceDictionary.ToneMapper_ACESFilmic_Name, "mes51", LanguageResourceDictionary.ToneMapper_ACESFilmic_Description, ID, IsSupportGpu = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
     public sealed class ACESFilmic : IToneMapper
     {
         const string ID = "3ED40944-167E-457D-BD50-E017BADED959";
+
+        static readonly Vector<float> AlphaMask = new Vector<float>([.. Enumerable.Range(0, Vector<float>.Count / 4).SelectMany(_ => new float[] { 0.0F, 0.0F, 0.0F, BitConverter.Int32BitsToSingle(-1) })]);
 
         IAcceleratorObject? AcceleratorObject { get; set; }
 
@@ -48,20 +53,37 @@ namespace NiVE3.PresetPlugin.ToneMapper
                 _ => (NManagedImage)image
             };
 
+            const float a = 2.51F;
+            const float b = 0.03F;
+            const float c = 2.43F;
+            const float d = 0.59F;
+            const float e = 0.14F;
+
             var imageWidth = managedImage.Width;
             var imageData = managedImage.Data;
             Parallel.For(0, managedImage.Height, y =>
             {
                 var imageDataSpan = imageData.AsSpan(y * imageWidth, imageWidth);
-                for (var x = 0; x < imageDataSpan.Length; x++)
+                var x = 0;
+                if (Vector<float>.Count > 4)
                 {
-                    // SEE: https://knarkowicz.wordpress.com/2016/01/06/aces-filmic-tone-mapping-curve/
-                    const float a = 2.51F;
-                    const float b = 0.03F;
-                    const float c = 2.43F;
-                    const float d = 0.59F;
-                    const float e = 0.14F;
+                    var alphaMask = AlphaMask;
+                    var invertedAlphaMask = new Vector<int>(-1).As<int, float>() ^ alphaMask;
+                    var vectorLength = imageDataSpan.Length - (imageDataSpan.Length % (Vector<float>.Count / 4));
+                    var vectorImageDataSpan = MemoryMarshal.Cast<Vector4, Vector<float>>(imageDataSpan[..vectorLength]);
 
+                    for (var v = 0; v < vectorImageDataSpan.Length; v++)
+                    {
+                        var color = vectorImageDataSpan[v];
+                        var alpha = color & alphaMask;
+                        color = Vector.Max(Vector.Min((color * (a * color + new Vector<float>(b))) / (color * (c * color + new Vector<float>(d)) + new Vector<float>(e)), Vector<float>.One), Vector<float>.Zero);
+                        vectorImageDataSpan[v] = (color & invertedAlphaMask) + alpha;
+                    }
+
+                    x = vectorLength;
+                }
+                for (; x < imageDataSpan.Length; x++)
+                {
                     var color = imageDataSpan[x];
                     var alpha = Math.Clamp(color.W, 0.0F, 1.0F);
                     color = Vector4.Clamp((color * (a * color + new Vector4(b))) / (color * (c * color + new Vector4(d)) + new Vector4(e)), Vector4.Zero, Vector4.One);
@@ -94,7 +116,6 @@ namespace NiVE3.PresetPlugin.ToneMapper
     {
         public void Execute()
         {
-            // SEE: https://knarkowicz.wordpress.com/2016/01/06/aces-filmic-tone-mapping-curve/
             const float a = 2.51F;
             const float b = 0.03F;
             const float c = 2.43F;
