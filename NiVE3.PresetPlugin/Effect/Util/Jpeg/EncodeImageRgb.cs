@@ -8,7 +8,7 @@ using System.Runtime.Intrinsics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NiVE3.PresetPlugin.Internal.Effect.Jpeg
+namespace NiVE3.PresetPlugin.Effect.Util.Jpeg
 {
     class EncodeImageRgb : EncodeImageBase
     {

@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Shared.Extension;
 
-namespace NiVE3.PresetPlugin.Internal.Effect.Jpeg
+namespace NiVE3.PresetPlugin.Effect.Util.Jpeg
 {
     abstract class EncodeImageBase
     {
@@ -50,7 +50,7 @@ namespace NiVE3.PresetPlugin.Internal.Effect.Jpeg
             {
                 for (var x = 0; x < Mcu.LineSize; x++, pos++)
                 {
-                    coefficient[pos] = MathF.Cos(((2.0F * x + 1.0F) * y * MathF.PI) / (2.0F * Mcu.LineSize));
+                    coefficient[pos] = MathF.Cos((2.0F * x + 1.0F) * y * MathF.PI / (2.0F * Mcu.LineSize));
                     if (y == 0)
                     {
                         coefficient[pos] *= InvSqrt2;
@@ -87,7 +87,7 @@ namespace NiVE3.PresetPlugin.Internal.Effect.Jpeg
 
             var eobCodes = acHuffmanTables.Select(ht => ht.GetCode(0, 0)).ToArray();
 
-            var writer = new BitWriter((rowCount / colCounts.Length) * colCounts.Sum() * Mcu.LineSize);
+            var writer = new BitWriter(rowCount / colCounts.Length * colCounts.Sum() * Mcu.LineSize);
             for (int row = 0, mpos = 0; row < rowCount; row++)
             {
                 var currentInterleaveMap = interleaveMap[row % interleaveMap.Length].AsSpan();
@@ -316,49 +316,49 @@ namespace NiVE3.PresetPlugin.Internal.Effect.Jpeg
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static int GetLastNonZeroIndex(ref Mcu mcu)
         {
-            var flags = Vector256.ExtractMostSignificantBits(Vector256.Equals(mcu.Row8, Vector256<int>.Zero));
+            var flags = Vector256.Equals(mcu.Row8, Vector256<int>.Zero).ExtractMostSignificantBits();
             if (flags != 255)
             {
                 return 55 + BitOperations.TrailingZeroCount(~flags);
             }
 
-            flags = Vector256.ExtractMostSignificantBits(Vector256.Equals(mcu.Row7, Vector256<int>.Zero));
+            flags = Vector256.Equals(mcu.Row7, Vector256<int>.Zero).ExtractMostSignificantBits();
             if (flags != 255)
             {
                 return 47 + BitOperations.TrailingZeroCount(~flags);
             }
 
-            flags = Vector256.ExtractMostSignificantBits(Vector256.Equals(mcu.Row6, Vector256<int>.Zero));
+            flags = Vector256.Equals(mcu.Row6, Vector256<int>.Zero).ExtractMostSignificantBits();
             if (flags != 255)
             {
                 return 39 + BitOperations.TrailingZeroCount(~flags);
             }
 
-            flags = Vector256.ExtractMostSignificantBits(Vector256.Equals(mcu.Row5, Vector256<int>.Zero));
+            flags = Vector256.Equals(mcu.Row5, Vector256<int>.Zero).ExtractMostSignificantBits();
             if (flags != 255)
             {
                 return 31 + BitOperations.TrailingZeroCount(~flags);
             }
 
-            flags = Vector256.ExtractMostSignificantBits(Vector256.Equals(mcu.Row4, Vector256<int>.Zero));
+            flags = Vector256.Equals(mcu.Row4, Vector256<int>.Zero).ExtractMostSignificantBits();
             if (flags != 255)
             {
                 return 23 + BitOperations.TrailingZeroCount(~flags);
             }
 
-            flags = Vector256.ExtractMostSignificantBits(Vector256.Equals(mcu.Row3, Vector256<int>.Zero));
+            flags = Vector256.Equals(mcu.Row3, Vector256<int>.Zero).ExtractMostSignificantBits();
             if (flags != 255)
             {
                 return 15 + BitOperations.TrailingZeroCount(~flags);
             }
 
-            flags = Vector256.ExtractMostSignificantBits(Vector256.Equals(mcu.Row2, Vector256<int>.Zero));
+            flags = Vector256.Equals(mcu.Row2, Vector256<int>.Zero).ExtractMostSignificantBits();
             if (flags != 255)
             {
                 return 7 + BitOperations.TrailingZeroCount(~flags);
             }
 
-            flags = Vector256.ExtractMostSignificantBits(Vector256.Equals(mcu.Row1, Vector256<int>.Zero));
+            flags = Vector256.Equals(mcu.Row1, Vector256<int>.Zero).ExtractMostSignificantBits();
             return BitOperations.TrailingZeroCount(~flags) - 1;
         }
     }

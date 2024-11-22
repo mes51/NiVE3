@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NiVE3.PresetPlugin.Internal.Effect.Jpeg
+namespace NiVE3.PresetPlugin.Effect.Util.Jpeg
 {
     class BitWriter(int initialCapacity)
     {
@@ -39,10 +39,10 @@ namespace NiVE3.PresetPlugin.Internal.Effect.Jpeg
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Write(uint value, int bits)
         {
-            value = value & (0xFFFFFFFFU >> (32 - bits));
+            value = value & 0xFFFFFFFFU >> 32 - bits;
             if (RemainBit > bits)
             {
-                RemainData |= value << (32 - RemainBit);
+                RemainData |= value << 32 - RemainBit;
                 RemainBit -= bits;
                 return;
             }
@@ -54,13 +54,13 @@ namespace NiVE3.PresetPlugin.Internal.Effect.Jpeg
                 tmp.AsSpan().CopyTo(Buffer);
             }
 
-            RemainData |= value << (32 - RemainBit);
+            RemainData |= value << 32 - RemainBit;
             Buffer[Position] = RemainData;
             Position++;
 
             RemainBit = 32 - bits + RemainBit;
             var newUsedBits = bits - (32 - RemainBit);
-            RemainData = (value & (0xFFFFFFFFU << newUsedBits)) >> newUsedBits;
+            RemainData = (value & 0xFFFFFFFFU << newUsedBits) >> newUsedBits;
         }
 
         public uint[] ToArray()

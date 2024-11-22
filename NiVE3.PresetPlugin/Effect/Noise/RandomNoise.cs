@@ -16,7 +16,7 @@ using NiVE3.PresetPlugin.Extension;
 using NiVE3.PresetPlugin.Internal;
 using ComputeSharp;
 using NiVE3.Plugin.Resource;
-using NiVE3.PresetPlugin.Internal.Effect;
+using NiVE3.PresetPlugin.Effect.Util;
 
 namespace NiVE3.PresetPlugin.Effect.Noise
 {

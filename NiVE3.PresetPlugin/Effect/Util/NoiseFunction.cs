@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using ComputeSharp;
 using NiVE3.Shared.Extension;
 
-namespace NiVE3.PresetPlugin.Internal.Effect
+namespace NiVE3.PresetPlugin.Effect.Util
 {
     static class NoiseFunction
     {
@@ -59,7 +59,7 @@ namespace NiVE3.PresetPlugin.Internal.Effect
             vx ^= vx >> 16;
             vy ^= vy >> 16;
             vz ^= vz >> 16;
-            
+
             return (vx + vy * vz) / (float)uint.MaxValue;
         }
 
@@ -103,7 +103,7 @@ namespace NiVE3.PresetPlugin.Internal.Effect
         }
 
         // from https://jcgt.org/published/0009/03/02/paper.pdf
-        public static UInt3 Pcg3DUIntGpu(UInt3 pos, uint seed)
+        public static uint3 Pcg3DUIntGpu(uint3 pos, uint seed)
         {
             var v = (pos + seed) * Multiplyer + Increment;
             v.X += v.Y * v.Z;
@@ -117,14 +117,14 @@ namespace NiVE3.PresetPlugin.Internal.Effect
             return v;
         }
 
-        public static Float3 Pcg3DFloatGpu(UInt3 pos, uint seed)
+        public static float3 Pcg3DFloatGpu(uint3 pos, uint seed)
         {
             var v = Pcg3DUIntGpu(pos, seed);
-            return new Float3(v.X / (float)uint.MaxValue, v.Y / (float)uint.MaxValue, v.Z / (float)uint.MaxValue);
+            return new float3(v.X / (float)uint.MaxValue, v.Y / (float)uint.MaxValue, v.Z / (float)uint.MaxValue);
         }
 
         // from https://jcgt.org/published/0009/03/02/paper.pdf
-        public static float Pcg3D1FloatGpu(UInt3 pos, uint seed)
+        public static float Pcg3D1FloatGpu(uint3 pos, uint seed)
         {
             var v = (pos + seed) * Multiplyer + Increment;
             v.X += v.Y * v.Z;
@@ -144,10 +144,10 @@ namespace NiVE3.PresetPlugin.Internal.Effect
         /// <param name="seed"></param>
         /// <returns></returns>
         // from https://jcgt.org/published/0009/03/02/paper.pdf
-        public static UInt4 Pcg3D1UInt4Gpu(UInt3 pos, uint seed)
+        public static uint4 Pcg3D1UInt4Gpu(uint3 pos, uint seed)
         {
-            var vx = ((pos.XXXX + seed) + new UInt4(0U, 1U, 0U, 1U)) * Multiplyer + Increment;
-            var vy = ((pos.YYYY + seed) + new UInt4(0U, 0U, 1U, 1U)) * Multiplyer + Increment;
+            var vx = (pos.XXXX + seed + new uint4(0U, 1U, 0U, 1U)) * Multiplyer + Increment;
+            var vy = (pos.YYYY + seed + new uint4(0U, 0U, 1U, 1U)) * Multiplyer + Increment;
             var vz = (pos.ZZZZ + seed) * Multiplyer + Increment;
 
             vx += vy * vz;
@@ -167,10 +167,10 @@ namespace NiVE3.PresetPlugin.Internal.Effect
         /// <param name="y"></param>
         /// <param name="z"></param>
         /// <param name="seed"></param>
-        public static Float4 Pcg3D1Float4Gpu(UInt3 pos, uint seed)
+        public static float4 Pcg3D1Float4Gpu(uint3 pos, uint seed)
         {
             var v = Pcg3D1UInt4Gpu(pos, seed);
-            return new Float4(v.X / (float)uint.MaxValue, v.Y / (float)uint.MaxValue, v.Z / (float)uint.MaxValue, v.W / (float)uint.MaxValue);
+            return new float4(v.X / (float)uint.MaxValue, v.Y / (float)uint.MaxValue, v.Z / (float)uint.MaxValue, v.W / (float)uint.MaxValue);
         }
     }
 }

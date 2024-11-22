@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NiVE3.PresetPlugin.Internal.Effect.Jpeg
+namespace NiVE3.PresetPlugin.Effect.Util.Jpeg
 {
     class BitReader
     {
@@ -66,8 +66,8 @@ namespace NiVE3.PresetPlugin.Internal.Effect.Jpeg
             var nextBits = 32 - BitPosition;
 
             var currentMask = 0xFFFFFFFFU >> BitPosition;
-            var nextMask = 0xFFFFFFFFU >> (nextBits);
-            return ((current >> BitPosition) & currentMask) | ((next & nextMask) << nextBits);
+            var nextMask = 0xFFFFFFFFU >> nextBits;
+            return current >> BitPosition & currentMask | (next & nextMask) << nextBits;
         }
     }
 }

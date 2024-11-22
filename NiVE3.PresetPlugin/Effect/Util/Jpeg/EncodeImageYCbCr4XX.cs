@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Shared.Extension;
 
-namespace NiVE3.PresetPlugin.Internal.Effect.Jpeg
+namespace NiVE3.PresetPlugin.Effect.Util.Jpeg
 {
     class EncodeImageYCbCr4XX : EncodeImageBase
     {
@@ -54,7 +54,7 @@ namespace NiVE3.PresetPlugin.Internal.Effect.Jpeg
 
             Parallel.For(0, Height, y =>
             {
-                var chrominanceLine = (y / VerticalSubSampling) * chrominanceWidth;
+                var chrominanceLine = y / VerticalSubSampling * chrominanceWidth;
                 var isChrominanceSamplingLine = y % VerticalSubSampling == 0;
                 for (int x = 0, pos = y * Width; x < Width; x++, pos++)
                 {
@@ -93,7 +93,7 @@ namespace NiVE3.PresetPlugin.Internal.Effect.Jpeg
 
                     var isYOnlyCol = col % HorizontalSubSampling != 0;
                     var chrominanceCol = col / HorizontalSubSampling;
-                    var mpos = mline + col + (isYOnlyRow ? 0 : ((chrominanceCol * 2) + (isYOnlyCol ? 2 : 0)));
+                    var mpos = mline + col + (isYOnlyRow ? 0 : chrominanceCol * 2 + (isYOnlyCol ? 2 : 0));
                     Dct(channelData, dct);
                     Quantize(dct, QuantizeTables[0].GetVectorTable(), ref mcuData[mpos]);
                     Mcu.ReOrderZigZag(ref mcuData[mpos]);
@@ -101,7 +101,7 @@ namespace NiVE3.PresetPlugin.Internal.Effect.Jpeg
                     if (!isYOnlyRow && !isYOnlyCol)
                     {
                         channelData.Clear();
-                        for (int y = 0, imageY = (row / VerticalSubSampling) * Mcu.LineSize; y < Mcu.LineSize && imageY < Height; y++, imageY++)
+                        for (int y = 0, imageY = row / VerticalSubSampling * Mcu.LineSize; y < Mcu.LineSize && imageY < Height; y++, imageY++)
                         {
                             var imageX = chrominanceCol * Mcu.LineSize;
                             var pos = y * Mcu.LineSize;
@@ -118,7 +118,7 @@ namespace NiVE3.PresetPlugin.Internal.Effect.Jpeg
                         Mcu.ReOrderZigZag(ref mcuData[mpos]);
 
                         channelData.Clear();
-                        for (int y = 0, imageY = (row / VerticalSubSampling) * Mcu.LineSize; y < Mcu.LineSize && imageY < Height; y++, imageY++)
+                        for (int y = 0, imageY = row / VerticalSubSampling * Mcu.LineSize; y < Mcu.LineSize && imageY < Height; y++, imageY++)
                         {
                             var imageX = chrominanceCol * Mcu.LineSize;
                             var pos = y * Mcu.LineSize;
@@ -168,7 +168,7 @@ namespace NiVE3.PresetPlugin.Internal.Effect.Jpeg
 
                     var isYOnlyCol = col % HorizontalSubSampling != 0;
                     var chrominanceCol = col / HorizontalSubSampling;
-                    var mpos = mline + col + (isYOnlyRow ? 0 : ((chrominanceCol * 2) + (isYOnlyCol ? 2 : 0)));
+                    var mpos = mline + col + (isYOnlyRow ? 0 : chrominanceCol * 2 + (isYOnlyCol ? 2 : 0));
 
                     Dequantize(ref mcuData[mpos], QuantizeTables[0].GetVectorTable(), dct);
                     IDct(dct, channelData);
@@ -189,7 +189,7 @@ namespace NiVE3.PresetPlugin.Internal.Effect.Jpeg
                         mpos++;
                         Dequantize(ref mcuData[mpos], QuantizeTables[1].GetVectorTable(), dct);
                         IDct(dct, channelData);
-                        for (int y = 0, imageY = (row / VerticalSubSampling) * Mcu.LineSize; y < Mcu.LineSize && imageY < Height; y++, imageY++)
+                        for (int y = 0, imageY = row / VerticalSubSampling * Mcu.LineSize; y < Mcu.LineSize && imageY < Height; y++, imageY++)
                         {
                             var imageX = chrominanceCol * Mcu.LineSize;
                             var ipos = y * Mcu.LineSize;
@@ -204,7 +204,7 @@ namespace NiVE3.PresetPlugin.Internal.Effect.Jpeg
                         mpos++;
                         Dequantize(ref mcuData[mpos], QuantizeTables[2].GetVectorTable(), dct);
                         IDct(dct, channelData);
-                        for (int y = 0, imageY = (row / VerticalSubSampling) * Mcu.LineSize; y < Mcu.LineSize && imageY < Height; y++, imageY++)
+                        for (int y = 0, imageY = row / VerticalSubSampling * Mcu.LineSize; y < Mcu.LineSize && imageY < Height; y++, imageY++)
                         {
                             var imageX = chrominanceCol * Mcu.LineSize;
                             var ipos = y * Mcu.LineSize;
@@ -220,7 +220,7 @@ namespace NiVE3.PresetPlugin.Internal.Effect.Jpeg
 
             Parallel.For(0, Height, y =>
             {
-                var chrominanceLine = (y / VerticalSubSampling) * chrominanceWidth;
+                var chrominanceLine = y / VerticalSubSampling * chrominanceWidth;
                 for (int x = 0, pos = y * Width; x < Width; x++, pos++)
                 {
                     var cpos = chrominanceLine + x / HorizontalSubSampling;

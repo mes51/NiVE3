@@ -7,7 +7,6 @@ using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Controls;
 using ComputeSharp;
 using NiVE3.Image;
 using NiVE3.Image.Drawing;
@@ -17,11 +16,10 @@ using NiVE3.Plugin.Property;
 using NiVE3.Plugin.Property.Properties;
 using NiVE3.Plugin.Resource;
 using NiVE3.Plugin.ValueObject;
+using NiVE3.PresetPlugin.Effect.Util;
+using NiVE3.PresetPlugin.Effect.Util.Jpeg;
 using NiVE3.PresetPlugin.Extension;
-using NiVE3.PresetPlugin.Internal.Effect;
-using NiVE3.PresetPlugin.Internal.Effect.Jpeg;
 using NiVE3.PresetPlugin.Resource;
-using Vanara.Extensions.Reflection;
 
 namespace NiVE3.PresetPlugin.Effect.Stylize
 {

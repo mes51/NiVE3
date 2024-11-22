@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NiVE3.PresetPlugin.Internal.Effect.Jpeg
+namespace NiVE3.PresetPlugin.Effect.Util.Jpeg
 {
     class HuffmanTable
     {
@@ -172,7 +172,7 @@ namespace NiVE3.PresetPlugin.Internal.Effect.Jpeg
             var valueBits = EncodedValueBits[32767 + coeff];
 
             ref var code = ref HuffmanCodes[runLength << 4 | valueBits];
-            return (code.Size + valueBits, (encodedValue << code.Size) | code.Code);
+            return (code.Size + valueBits, encodedValue << code.Size | code.Code);
         }
 
         public (int useBits, int runLength, int coeff) GetValue(uint encodedValue)
@@ -181,7 +181,7 @@ namespace NiVE3.PresetPlugin.Internal.Effect.Jpeg
             var codeLength = 0;
             for (var i = 1; i <= 16; i++)
             {
-                var mask = 0xFFFFFFFFU >> (32 - i);
+                var mask = 0xFFFFFFFFU >> 32 - i;
                 var extractedCode = (encodedValue & mask).BitReverse(i);
                 if (extractedCode <= MaxCodes[i - 1])
                 {
@@ -197,10 +197,10 @@ namespace NiVE3.PresetPlugin.Internal.Effect.Jpeg
             }
 
             var value = code.Value;
-            var runLength = (value >> 4) & 0xF;
+            var runLength = value >> 4 & 0xF;
             var valueBits = value & 0xF;
-            var valueMask = 0x7FFFFFFF >> (31 - valueBits);
-            var coeff = DecodedValues[valueBits << 16 | (ushort)((encodedValue >> codeLength) & valueMask)];
+            var valueMask = 0x7FFFFFFF >> 31 - valueBits;
+            var coeff = DecodedValues[valueBits << 16 | (ushort)(encodedValue >> codeLength & valueMask)];
             return (codeLength + valueBits, runLength, coeff);
         }
 
@@ -219,14 +219,14 @@ namespace NiVE3.PresetPlugin.Internal.Effect.Jpeg
             BitReversedTable = new uint[16][];
             for (var i = 0; i < 16; i++)
             {
-                BitReversedTable[i] = new uint[(1 << (i + 1))];
+                BitReversedTable[i] = new uint[(1 << i + 1)];
                 for (var v = 0U; v < BitReversedTable[i].Length; v++)
                 {
                     var result = 0U;
                     for (var b = 0; b <= i; b++)
                     {
-                        var bit = (v & (1U << b)) >> b;
-                        result |= bit << (i - b);
+                        var bit = (v & 1U << b) >> b;
+                        result |= bit << i - b;
                     }
                     BitReversedTable[i][v] = result;
                 }
@@ -242,7 +242,7 @@ namespace NiVE3.PresetPlugin.Internal.Effect.Jpeg
             }
             else if (bitCount <= BitReversedTable.Length)
             {
-                return BitReversedTable[bitCount - 1][v & (0xFFFFFFFFU >> (32 - bitCount))];
+                return BitReversedTable[bitCount - 1][v & 0xFFFFFFFFU >> 32 - bitCount];
             }
             else
             {
@@ -257,7 +257,7 @@ namespace NiVE3.PresetPlugin.Internal.Effect.Jpeg
             for (var i = 0; i < bitCount; i++)
             {
                 var bit = (v & (uint)(1 << i)) >> i;
-                result |= bit << (bitCount - 1 - i);
+                result |= bit << bitCount - 1 - i;
             }
             return result;
         }

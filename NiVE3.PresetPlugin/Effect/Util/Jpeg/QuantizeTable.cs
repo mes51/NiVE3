@@ -6,7 +6,7 @@ using System.Runtime.Intrinsics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NiVE3.PresetPlugin.Internal.Effect.Jpeg
+namespace NiVE3.PresetPlugin.Effect.Util.Jpeg
 {
     // from RFC2435 Appendix A
     // SEE: https://datatracker.ietf.org/doc/html/rfc2435#appendix-A
