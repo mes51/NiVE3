@@ -759,6 +759,14 @@ namespace NiVE3.PresetPlugin.Resource
         [ShowInMarkup, DefaultValue("ビット:")]
         public const string WaveOutputSettingView_Group_Audio_BitsPerSample = nameof(WaveOutputSettingView_Group_Audio_BitsPerSample);
 
+        // Tone Mapper
+
+        [DefaultValue("ACES Filmic")]
+        public const string ToneMapper_ACESFilmic_Name = nameof(ToneMapper_ACESFilmic_Name);
+
+        [DefaultValue("ACESに近似したトーンマッピングを行います")]
+        public const string ToneMapper_ACESFilmic_Description = nameof(ToneMapper_ACESFilmic_Description);
+
         // Dialog
 
         [LanguageKey, DefaultValue("OK")]

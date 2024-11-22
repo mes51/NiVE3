@@ -15,7 +15,7 @@ namespace NiVE3.ToneMapper
     [ToneMapperMetadata(typeof(NoOpToneMapper), LanguageResourceDictionary.ToneMapper_NoOpToneMapper_Name, "mes51", LanguageResourceDictionary.ToneMapper_NoOpToneMapper_Description, ID, IsSupportGpu = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
     class NoOpToneMapper : IToneMapper
     {
-        const string ID = "D20F11E2-FDC8-482D-8730-30C517811176";
+        public const string ID = "D20F11E2-FDC8-482D-8730-30C517811176";
 
         public void SetupAccelerator(IAcceleratorObject accelerator) { }
 

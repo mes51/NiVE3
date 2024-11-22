@@ -1461,7 +1461,12 @@ namespace NiVE3.Model
             {
                 try
                 {
-                    result = ToneMapper.ToneMapping(result, useGpu);
+                    var toneMapped = ToneMapper.ToneMapping(result, useGpu);
+                    if (result != toneMapped)
+                    {
+                        result.Dispose();
+                        result = toneMapped;
+                    }
                 }
                 catch (Exception ex)
                 {

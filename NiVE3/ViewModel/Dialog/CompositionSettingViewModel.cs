@@ -13,6 +13,7 @@ using System.Windows.Input;
 using NiVE3.Data.Config;
 using NiVE3.Model;
 using NiVE3.Plugin.ValueObject;
+using NiVE3.ToneMapper;
 using NiVE3.Util;
 using NiVE3.View.Dialog;
 using NiVE3.View.Resource;
@@ -182,8 +183,10 @@ namespace NiVE3.ViewModel.Dialog
             Renderers = [..rendererListModel.RendererMetadata.Select(r => r.Name)];
             RendererTypes = [..rendererListModel.RendererMetadata.Select(r => Guid.Parse(r.RendererUuid))];
             RendererHasSettingViews = [..rendererListModel.RendererMetadata.Select(r => r.HasSettingView)];
-            ToneMappers = [..toneMapperListModel.ToneMapperMetadata.Select(t => t.Name)];
-            ToneMapperTypes = [..toneMapperListModel.ToneMapperMetadata.Select(t => Guid.Parse(t.ToneMapperUuid))];
+            // NOTE: NoOpToneMapperを先頭に持ってくる
+            var toneMapperMetadata = toneMapperListModel.ToneMapperMetadata.OrderBy(m => m.ToneMapperUuid == NoOpToneMapper.ID ? "" : m.ToneMapperUuid).ToArray();
+            ToneMappers = [..toneMapperMetadata.Select(t => t.Name)];
+            ToneMapperTypes = [..toneMapperMetadata.Select(t => Guid.Parse(t.ToneMapperUuid))];
             DialogService = dialogService;
 
             if (File.Exists(Paths.CompositionPresetFilePath))
