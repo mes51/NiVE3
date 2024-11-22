@@ -151,12 +151,12 @@ namespace NiVE3.PresetPlugin.Effect.Util.Blur
                     if (fmz > 0.0F)
                     {
                         var p = BlurUtil.GetPixelForX(data, imageWidth, w, h, edgeRepeatMode);
-                        var ta = p.W * fmz;
+                        var ta = p.W * fz;
                         rgb += p * ta;
                         a += ta;
 
-                        p = BlurUtil.GetPixelForX(data, imageWidth, x + pz, h, edgeRepeatMode);
-                        ta = p.W * fmz;
+                        p = BlurUtil.GetPixelForX(data, imageWidth, x + pz - 1, h, edgeRepeatMode);
+                        ta = p.W * fz;
                         rgb += p * ta;
                         a += ta;
                     }
@@ -232,7 +232,7 @@ namespace NiVE3.PresetPlugin.Effect.Util.Blur
                         rgb += p * ta;
                         a += ta;
 
-                        p = BlurUtil.GetPixelForX(temp, imageHeight, y + pz, w, edgeRepeatMode);
+                        p = BlurUtil.GetPixelForX(temp, imageHeight, y + pz - 1 , w, edgeRepeatMode);
                         ta = p.W * fz;
                         rgb += p * ta;
                         a += ta;
@@ -296,7 +296,7 @@ namespace NiVE3.PresetPlugin.Effect.Util.Blur
         {
             var pz = (int)Math.Ceiling(amount);
             var fmz = pz - amount;
-            var fz = 1 - fmz;
+            var fz = 1.0F - fmz;
             var x = roi.Left;
             var width = roi.Right;
             var imageWidth = image.Width;
@@ -317,14 +317,16 @@ namespace NiVE3.PresetPlugin.Effect.Util.Blur
                     if (fmz > 0.0F)
                     {
                         var p = BlurUtil.GetPixelForX(data, imageWidth, w, h, edgeRepeatMode);
-                        var ta = p.W * fmz;
+                        var ta = p.W * fz;
                         rgb += p * ta;
                         a += ta;
 
-                        p = BlurUtil.GetPixelForX(data, imageWidth, x + pz, h, edgeRepeatMode);
-                        ta = p.W * fmz;
+                        p = BlurUtil.GetPixelForX(data, imageWidth, x + pz - 1, h, edgeRepeatMode);
+                        ta = p.W * fz;
                         rgb += p * ta;
                         a += ta;
+
+                        w++;
                     }
                     for (var limit = x + pz - (fmz > 0.0F ? 2 : 1); w <= limit; w++)
                     {
@@ -408,7 +410,7 @@ namespace NiVE3.PresetPlugin.Effect.Util.Blur
                         rgb += p * ta;
                         a += ta;
 
-                        p = BlurUtil.GetPixelForY(data, imageWidth, imageHeight, y + pz, w, edgeRepeatMode);
+                        p = BlurUtil.GetPixelForY(data, imageWidth, imageHeight, y + pz - 1, w, edgeRepeatMode);
                         ta = p.W * fz;
                         rgb += p * ta;
                         a += ta;
@@ -491,13 +493,14 @@ namespace NiVE3.PresetPlugin.Effect.Util.Blur
             var edge = (int)Hlsl.Ceil(amount);
             if (edge != range)
             {
+                var fz = amount - range;
                 var tc = GetPixel(x - edge, y);
-                c += tc * tc.W * (edge - amount);
-                a += tc.W * (edge - amount);
+                c += tc * tc.W * fz;
+                a += tc.W * fz;
 
                 tc = GetPixel(x + edge, y);
-                c += tc * tc.W * (edge - amount);
-                a += tc.W * (edge - amount);
+                c += tc * tc.W * fz;
+                a += tc.W * fz;
             }
 
             if (a > 0.0F)
@@ -517,17 +520,11 @@ namespace NiVE3.PresetPlugin.Effect.Util.Blur
             switch (edgeRepeatMode)
             {
                 case 1:
-                    return image[y * width + Hlsl.Clamp(l, 0, width - 1)];
+                    return image[y * width + CoordWrapGpu.Wrap(l, width)];
                 case 2:
-                    return image[y * width + (((l % width) + width) % width)];
+                    return image[y * width + CoordWrapGpu.Repeat(l, width)];
                 case 3:
-                    {
-                        var lw = width - 1;
-                        var a = Hlsl.Abs(l);
-                        var b = a % (lw * 2);
-                        var c = b - Hlsl.Max(b - lw, 0) * 2;
-                        return image[y * width + c];
-                    }
+                    return image[y * width + CoordWrapGpu.Mirror(l, width)];
                 default:
                     if (l > -1 && l < width)
                     {
@@ -563,13 +560,14 @@ namespace NiVE3.PresetPlugin.Effect.Util.Blur
             var edge = (int)Hlsl.Ceil(amount);
             if (edge != range)
             {
+                var fz = amount - range;
                 var tc = GetPixel(x, y - edge);
-                c += tc * tc.W * (edge - amount);
-                a += tc.W * (edge - amount);
+                c += tc * tc.W * fz;
+                a += tc.W * fz;
 
                 tc = GetPixel(x, y + edge);
-                c += tc * tc.W * (edge - amount);
-                a += tc.W * (edge - amount);
+                c += tc * tc.W * fz;
+                a += tc.W * fz;
             }
 
             if (a > 0.0F)
@@ -589,17 +587,11 @@ namespace NiVE3.PresetPlugin.Effect.Util.Blur
             switch (edgeRepeatMode)
             {
                 case 1:
-                    return image[Hlsl.Clamp(t, 0, height - 1) * width + x];
+                    return image[CoordWrapGpu.Wrap(t, height) * width + x];
                 case 2:
-                    return image[(((t % height) + height) % height) * width + x];
+                    return image[CoordWrapGpu.Repeat(t, height) * width + x];
                 case 3:
-                    {
-                        var lh = height - 1;
-                        var a = Hlsl.Abs(t);
-                        var b = a % (lh * 2);
-                        var c = b - Hlsl.Max(b - lh, 0) * 2;
-                        return image[c * width + x];
-                    }
+                    return image[CoordWrapGpu.Mirror(t, height) * width + x];
                 default:
                     if (t > -1 && t < height)
                     {
