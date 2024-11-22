@@ -644,6 +644,11 @@ namespace NiVE3.Model
                 WorkareaEnd = Math.Clamp(WorkareaEnd, WorkareaBegin + FrameDuration, Duration);
             }
 
+            if (prevWidth != Width || prevHeight != Height)
+            {
+                Renderer.SetSize(Width, Height);
+            }
+
             IsSettingChanging = false;
             OnCompositionUpdated();
 

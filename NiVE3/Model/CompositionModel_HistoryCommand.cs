@@ -204,6 +204,11 @@ namespace NiVE3.Model
                     Model.TimeBarRangeStart = Math.Max(NewDuration - Model.TimeBarRangeStart, 0.0);
                 }
 
+                if (OldWidth != NewWidth || OldHeight != NewHeight)
+                {
+                    Model.Renderer.SetSize(Model.Width, Model.Height);
+                }
+
                 Model.IsSettingChanging = false;
                 Model.OnCompositionUpdated();
             }
@@ -255,6 +260,11 @@ namespace NiVE3.Model
                 if (Model.TimeBarRangeStart + Model.TimeBarRange > OldDuration)
                 {
                     Model.TimeBarRangeStart = Math.Max(OldDuration - Model.TimeBarRangeStart, 0.0);
+                }
+
+                if (OldWidth != NewWidth || OldHeight != NewHeight)
+                {
+                    Model.Renderer.SetSize(Model.Width, Model.Height);
                 }
 
                 Model.IsSettingChanging = false;
