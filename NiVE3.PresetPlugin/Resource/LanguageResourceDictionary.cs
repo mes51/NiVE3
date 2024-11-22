@@ -767,6 +767,12 @@ namespace NiVE3.PresetPlugin.Resource
         [DefaultValue("ACESに近似したトーンマッピングを行います")]
         public const string ToneMapper_ACESFilmic_Description = nameof(ToneMapper_ACESFilmic_Description);
 
+        [DefaultValue("ACES")]
+        public const string ToneMapper_ACES_Name = nameof(ToneMapper_ACES_Name);
+
+        [DefaultValue("ACES色空間でトーンマッピングを行います")]
+        public const string ToneMapper_ACES_Description = nameof(ToneMapper_ACES_Description);
+
         // Dialog
 
         [LanguageKey, DefaultValue("OK")]
