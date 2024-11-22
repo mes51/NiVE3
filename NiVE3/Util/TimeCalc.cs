@@ -42,6 +42,12 @@ namespace NiVE3.Util
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double AlignCeiling(double time, double frameRate)
+        {
+            return (int)Math.Ceiling(Math.Round(time * frameRate, TimeDigit)) / frameRate;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double RoundTimeDigit(double time)
         {
             return Math.Round(time, TimeDigit);
