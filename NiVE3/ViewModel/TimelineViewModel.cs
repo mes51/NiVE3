@@ -889,9 +889,16 @@ namespace NiVE3.ViewModel
                     { nameof(CompositionSettingViewModel.ShutterPhase), CompositionModel.ShutterPhase },
                     { nameof(CompositionSettingViewModel.MotionBlurSampleCount), CompositionModel.MotionBlurSampleCount },
                     { CompositionSettingViewModel.SelectedRendererPluginId, CompositionModel.RendererPluginId },
-                    { CompositionSettingViewModel.SelectedToneMapperPluginId, CompositionModel.ToneMapperPluginId },
-                    { nameof(CompositionSettingViewModel.RendererSetting), CompositionModel.RendererSetting }
+                    { CompositionSettingViewModel.SelectedToneMapperPluginId, CompositionModel.ToneMapperPluginId }
                 };
+                if (CompositionModel.RendererSetting != null)
+                {
+                    param.Add(nameof(CompositionSettingViewModel.RendererSetting), CompositionModel.RendererSetting);
+                }
+                if (CompositionModel.ToneMapperSetting != null)
+                {
+                    param.Add(nameof(CompositionSettingViewModel.ToneMapperSetting), CompositionModel.ToneMapperSetting);
+                }
                 IDialogResult? result = null;
                 DialogService.ShowDialog(nameof(CompositionSettingView), param, r => result = r);
                 if (result?.Result == ButtonResult.OK)
@@ -910,7 +917,9 @@ namespace NiVE3.ViewModel
                         result.Parameters.GetValue<Guid>(CompositionSettingViewModel.SelectedRendererPluginId),
                         result.Parameters.GetValue<Guid>(CompositionSettingViewModel.SelectedToneMapperPluginId),
                         result.Parameters.ContainsKey(CompositionSettingViewModel.RendererSettingViewData),
-                        result.Parameters.ContainsKey(CompositionSettingViewModel.RendererSettingViewData) ? result.Parameters.GetValue<object>(CompositionSettingViewModel.RendererSettingViewData) : null
+                        result.Parameters.ContainsKey(CompositionSettingViewModel.RendererSettingViewData) ? result.Parameters.GetValue<object>(CompositionSettingViewModel.RendererSettingViewData) : null,
+                        result.Parameters.ContainsKey(CompositionSettingViewModel.ToneMapperSettingViewData),
+                        result.Parameters.ContainsKey(CompositionSettingViewModel.ToneMapperSettingViewData) ? result.Parameters.GetValue<object>(CompositionSettingViewModel.ToneMapperSettingViewData) : null
                     );
                 }
             }, () => CompositionModel != null).ObservesProperty(() => CompositionModel);

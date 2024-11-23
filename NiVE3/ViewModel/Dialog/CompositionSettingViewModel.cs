@@ -31,6 +31,8 @@ namespace NiVE3.ViewModel.Dialog
 
         public const string RendererSettingViewData = nameof(RendererSettingViewData);
 
+        public const string ToneMapperSettingViewData = nameof(ToneMapperSettingViewData);
+
         // TODO: 要調整
         const int FrameTimeDigit = 7;
 
@@ -132,6 +134,13 @@ namespace NiVE3.ViewModel.Dialog
             set { SetProperty(ref rendererSetting, value); }
         }
 
+        private object? toneMapperSetting;
+        public object? ToneMapperSetting
+        {
+            get { return toneMapperSetting; }
+            set { SetProperty(ref toneMapperSetting, value); }
+        }
+
         private ObservableCollection<CompositionPresetData> presets = [];
         public ObservableCollection<CompositionPresetData> Presets
         {
@@ -152,6 +161,8 @@ namespace NiVE3.ViewModel.Dialog
 
         public bool[] RendererHasSettingViews { get; }
 
+        public bool[] ToneMapperHasSettingViews { get; }
+
         public string Title => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.CompositionSettingView_Title);
 
         public DialogCloseListener RequestClose { get; }
@@ -166,6 +177,8 @@ namespace NiVE3.ViewModel.Dialog
 
         public ICommand OpenRendererSettingCommand { get; }
 
+        public ICommand OpenToneMapperSettingCommand { get; }
+
         Guid[] RendererTypes { get; }
 
         Guid[] ToneMapperTypes { get; }
@@ -176,7 +189,11 @@ namespace NiVE3.ViewModel.Dialog
 
         object? RendererSettingViewDataContext { get; set; }
 
+        object? ToneMapperSettingViewDataContext { get; set; }
+
         bool RendererSettingChanged { get; set; }
+
+        bool ToneMapperSettingChanged { get; set; }
 
         public CompositionSettingViewModel(RendererListModel rendererListModel, ToneMapperListModel toneMapperListModel, IDialogService dialogService)
         {
@@ -187,6 +204,7 @@ namespace NiVE3.ViewModel.Dialog
             var toneMapperMetadata = toneMapperListModel.ToneMapperMetadata.OrderBy(m => m.ToneMapperUuid == NoOpToneMapper.ID ? "" : m.ToneMapperUuid).ToArray();
             ToneMappers = [..toneMapperMetadata.Select(t => t.Name)];
             ToneMapperTypes = [..toneMapperMetadata.Select(t => Guid.Parse(t.ToneMapperUuid))];
+            ToneMapperHasSettingViews = [..toneMapperMetadata.Select(t => t.HasSettingView)];
             DialogService = dialogService;
 
             if (File.Exists(Paths.CompositionPresetFilePath))
@@ -236,6 +254,10 @@ namespace NiVE3.ViewModel.Dialog
                 if (RendererSettingChanged && RendererSettingViewDataContext != null)
                 {
                     result.Add(RendererSettingViewData, RendererSettingViewDataContext);
+                }
+                if (ToneMapperSettingChanged && ToneMapperSettingViewDataContext != null)
+                {
+                    result.Add(ToneMapperSettingViewData, ToneMapperSettingViewDataContext);
                 }
 
                 RequestClose.Invoke(new DialogResult(ButtonResult.OK) { Parameters = result });
@@ -326,6 +348,32 @@ namespace NiVE3.ViewModel.Dialog
                 }
             }, () => RendererHasSettingViews[SelectedRenderer]).ObservesProperty(() => SelectedRenderer);
 
+            OpenToneMapperSettingCommand = new DelegateCommand(() =>
+            {
+                using var toneMapper = toneMapperListModel.CreateToneMapper(ToneMapperTypes[SelectedToneMapper]);
+                toneMapper.Value.LoadSetting(ToneMapperSetting);
+
+                var view = toneMapper.Value.GetToneMapperSetting();
+                if (view == null)
+                {
+                    return;
+                }
+
+                var param = new DialogParameters
+                {
+                    { PluginSettingViewModel.TitleLanguageResourceName, LanguageResourceDictionary.ToneMapperSettingView_Title },
+                    { nameof(PluginSettingViewModel.SettingView), view }
+                };
+                IDialogResult? result = null;
+                DialogService.ShowDialog(nameof(PluginSettingView), param, r => result = r);
+                if (result?.Result == ButtonResult.OK && toneMapper.Value.ApplySetting(view.DataContext))
+                {
+                    ToneMapperSetting = toneMapper.Value.SaveSetting();
+                    ToneMapperSettingViewDataContext = view.DataContext;
+                    ToneMapperSettingChanged = true;
+                }
+            }, () => ToneMapperHasSettingViews[SelectedToneMapper]).ObservesProperty(() => SelectedToneMapper);
+
             PropertyChanged += CompositionSettingViewModel_PropertyChanged;
         }
 
@@ -361,7 +409,14 @@ namespace NiVE3.ViewModel.Dialog
                 MotionBlurSampleCount = motionBlurSampleCount;
                 SelectedRenderer = Math.Max(Array.IndexOf(RendererTypes, selectedRendererType), 0);
                 SelectedToneMapper = Math.Max(Array.IndexOf(ToneMapperTypes, selectedToneMapperType), 0);
-                RendererSetting = parameters.GetValue<object?>(nameof(RendererSetting));
+                if (parameters.TryGetValue(nameof(RendererSetting), out object? rendererSetting))
+                {
+                    RendererSetting = rendererSetting;
+                }
+                if (parameters.TryGetValue(nameof(ToneMapperSetting), out object? toneMapperSetting))
+                {
+                    ToneMapperSetting = toneMapperSetting;
+                }
             }
         }
 
@@ -394,6 +449,11 @@ namespace NiVE3.ViewModel.Dialog
                     RendererSettingViewDataContext = null;
                     RendererSettingChanged = false;
                     break;
+                case nameof(SelectedToneMapper):
+                    ToneMapperSetting = null;
+                    ToneMapperSettingViewDataContext = null;
+                    ToneMapperSettingChanged = false;
+                    break;
             }
 
             if (!IsChangingPreset &&
@@ -402,6 +462,7 @@ namespace NiVE3.ViewModel.Dialog
                 e.PropertyName != nameof(SelectedRenderer) &&
                 e.PropertyName != nameof(SelectedToneMapper) &&
                 e.PropertyName != nameof(RendererSetting) &&
+                e.PropertyName != nameof(ToneMapperSetting) &&
                 e.PropertyName != nameof(SelectedPreset))
             {
                 var current = new CompositionPresetData

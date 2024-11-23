@@ -47,6 +47,10 @@ namespace NiVE3.Model
 
             Int128 OldRendererSettingHash { get; }
 
+            object? OldToneMapperSetting { get; }
+
+            Int128 OldToneMapperSettingHash { get; }
+
             double OldWorkareaBegin { get; }
 
             double OldWorkareaEnd { get; }
@@ -79,6 +83,10 @@ namespace NiVE3.Model
 
             Int128 NewRendererSettingHash { get; }
 
+            object? NewToneMapperSetting { get; }
+
+            Int128 NewToneMapperSettingHash { get; }
+
             double NewWorkareaBegin { get; }
 
             double NewWorkareaEnd { get; }
@@ -99,6 +107,8 @@ namespace NiVE3.Model
                 Guid oldToneMapperPluginId,
                 object? oldRendererSetting,
                 Int128 oldRendererSettingHash,
+                object? oldToneMapperSetting,
+                Int128 oldToneMapperSettingHash,
                 double oldWorkareaBegin,
                 double oldWorkareaEnd,
                 string newName,
@@ -115,6 +125,8 @@ namespace NiVE3.Model
                 Guid newToneMapperPluginId,
                 object? newRendererSetting,
                 Int128 newRendererSettingHash,
+                object? newToneMapperSetting,
+                Int128 newToneMapperSettingHash,
                 double newWorkareaBegin,
                 double newWorkareaEnd
             )
@@ -134,6 +146,8 @@ namespace NiVE3.Model
                 OldToneMapperPluginId = oldToneMapperPluginId;
                 OldRendererSetting = oldRendererSetting;
                 OldRendererSettingHash = oldRendererSettingHash;
+                OldToneMapperSetting = oldToneMapperSetting;
+                OldToneMapperSettingHash = oldToneMapperSettingHash;
                 OldWorkareaBegin = oldWorkareaBegin;
                 OldWorkareaEnd = oldWorkareaEnd;
                 NewName = newName;
@@ -150,6 +164,8 @@ namespace NiVE3.Model
                 NewToneMapperPluginId = newToneMapperPluginId;
                 NewRendererSetting = newRendererSetting;
                 NewRendererSettingHash = newRendererSettingHash;
+                NewToneMapperSetting = newToneMapperSetting;
+                NewToneMapperSettingHash = newToneMapperSettingHash;
                 NewWorkareaBegin = newWorkareaBegin;
                 NewWorkareaEnd = newWorkareaEnd;
             }
@@ -183,12 +199,19 @@ namespace NiVE3.Model
                     Model.RendererContext.Value.LoadSetting(NewRendererSetting);
                     Model.RendererSettingHash = NewRendererSettingHash;
                 }
-                Model.RendererSettingHash = CalcRendererSettingHash(NewRendererSetting);
+                Model.RendererSettingHash = CalcPluginSettingHash(NewRendererSetting);
                 if (Model.ToneMapperPluginId != NewRendererPluginId)
                 {
                     Model.ToneMapperContext.Dispose();
                     Model.ToneMapperContext = Model.ToneMapperListModel.CreateToneMapper(NewToneMapperPluginId);
                     Model.ToneMapperPluginId = NewToneMapperPluginId;
+                    Model.ToneMapperContext.Value.LoadSetting(NewToneMapperSetting);
+                    Model.ToneMapperSettingHash = NewToneMapperSettingHash;
+                }
+                else if (Model.ToneMapperSettingHash != NewToneMapperSettingHash)
+                {
+                    Model.ToneMapperContext.Value.LoadSetting(NewToneMapperSetting);
+                    Model.ToneMapperSettingHash = NewToneMapperSettingHash;
                 }
 
                 Model.WorkareaBegin = NewWorkareaBegin;
@@ -247,6 +270,13 @@ namespace NiVE3.Model
                     Model.ToneMapperContext.Dispose();
                     Model.ToneMapperContext = Model.ToneMapperListModel.CreateToneMapper(OldToneMapperPluginId);
                     Model.ToneMapperPluginId = OldToneMapperPluginId;
+                    Model.ToneMapperContext.Value.LoadSetting(OldToneMapperSetting);
+                    Model.ToneMapperSettingHash = OldToneMapperSettingHash;
+                }
+                else if (Model.ToneMapperSettingHash != OldToneMapperSettingHash)
+                {
+                    Model.ToneMapperContext.Value.LoadSetting(OldToneMapperSetting);
+                    Model.ToneMapperSettingHash = OldToneMapperSettingHash;
                 }
 
                 Model.WorkareaBegin = OldWorkareaBegin;

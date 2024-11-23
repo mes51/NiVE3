@@ -114,7 +114,7 @@ namespace NiVE3.Model
             PropertyChanged += ProjectModel_PropertyChanged;
         }
 
-        public void CreateComposition(string name, int width, int height, double frameRate, double duration, bool isRetentionFrameRate, bool applyToneMappingWhenNested, int shutterAngle, int shutterPhase, int motionBlurSampleCount, Guid rendererPluginId, Guid toneMapperPluginId)
+        public void CreateComposition(string name, int width, int height, double frameRate, double duration, bool isRetentionFrameRate, bool applyToneMappingWhenNested, int shutterAngle, int shutterPhase, int motionBlurSampleCount, Guid rendererPluginId, object? rendererSettingData, Guid toneMapperPluginId, object? toneMapperSettingData)
         {
             var composition = new CompositionModel(rendererPluginId, toneMapperPluginId, FootageListModel, EffectListModel, RenderQueueModel, TextPropertyModel, RendererListModel, ToneMapperListModel, this, HistoryModel, AcceleratorModel)
             {
@@ -129,6 +129,7 @@ namespace NiVE3.Model
                 ShutterPhase = shutterPhase,
                 MotionBlurSampleCount = motionBlurSampleCount
             };
+            composition.ApplyInitialSettingData(rendererSettingData, toneMapperSettingData);
             HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_AddComposition));
             HistoryModel.Add(new AddCompositionCommand(this, composition));
             CompositionModels.Add(composition);

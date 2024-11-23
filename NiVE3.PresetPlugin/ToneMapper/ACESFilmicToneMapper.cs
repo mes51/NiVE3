@@ -17,8 +17,8 @@ namespace NiVE3.PresetPlugin.ToneMapper
     // SEE: https://knarkowicz.wordpress.com/2016/01/06/aces-filmic-tone-mapping-curve/
 
     [Export(typeof(IToneMapper))]
-    [ToneMapperMetadata(typeof(ACESFilmic), LanguageResourceDictionary.ToneMapper_ACESFilmic_Name, "mes51", LanguageResourceDictionary.ToneMapper_ACESFilmic_Description, ID, IsSupportGpu = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
-    public sealed class ACESFilmic : IToneMapper
+    [ToneMapperMetadata(typeof(ACESFilmicToneMapper), LanguageResourceDictionary.ToneMapper_ACESFilmicToneMapper_Name, "mes51", LanguageResourceDictionary.ToneMapper_ACESFilmicToneMapper_Description, ID, IsSupportGpu = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
+    public sealed class ACESFilmicToneMapper : IToneMapper
     {
         const string ID = "3ED40944-167E-457D-BD50-E017BADED959";
 

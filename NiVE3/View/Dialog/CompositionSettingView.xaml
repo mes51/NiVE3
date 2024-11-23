@@ -273,6 +273,7 @@
 
                                     <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=CompositionSettingView_ToneMapperLabel}" Style="{StaticResource ItemLabel}"/>
                                     <ComboBox Grid.Column="1" Width="200" Margin="5,0,0,0" ItemsSource="{Binding ToneMappers}" SelectedIndex="{Binding SelectedToneMapper, Mode=TwoWay}"/>
+                                    <Button Grid.Column="2" Width="120" Margin="5,0,0,0" Content="{gm:LanguageResource ResourceKey=CompositionSettingView_ToneMapperSetting}" Command="{Binding OpenToneMapperSettingCommand}"/>
                                 </Grid>
                             </StackPanel>
                         </GroupBox>

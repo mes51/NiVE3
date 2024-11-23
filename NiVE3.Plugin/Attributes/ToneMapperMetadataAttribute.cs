@@ -37,6 +37,11 @@ namespace NiVE3.Plugin.Attributes
         string ToneMapperUuid { get; }
 
         /// <summary>
+        /// 書き出しの設定画面が存在するかどうかを表します
+        /// </summary>
+        bool HasSettingView { get; }
+
+        /// <summary>
         /// GPUによるアクセラレーションに対応しているかどうかを表します
         /// </summary>
         bool IsSupportGpu { get; }
@@ -58,6 +63,11 @@ namespace NiVE3.Plugin.Attributes
         public string Author { get; }
 
         public string ToneMapperUuid { get; }
+
+        /// <summary>
+        /// 書き出しの設定画面が存在するかどうか
+        /// </summary>
+        public bool HasSettingView { get; set; }
 
         /// <summary>
         /// GPUによるアクセラレーションに対応しているかどうか

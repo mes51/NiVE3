@@ -13,6 +13,9 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NiVE3.Test", "NiVE3.Test\NiVE3.Test.csproj", "{7A8121F1-A393-4BA8-95FC-79EE21733697}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NiVE3.PresetPlugin", "NiVE3.PresetPlugin\NiVE3.PresetPlugin.csproj", "{42F664F2-ACDA-41A0-94E8-0541F9B8D356}"
+	ProjectSection(ProjectDependencies) = postProject
+		{466B8ED7-B9BE-41AF-BD1E-2EA80CE9BDEC} = {466B8ED7-B9BE-41AF-BD1E-2EA80CE9BDEC}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NiVE3.SourceGenerator.ResourceMarkupGenerator", "NiVE3.SourceGenerator.ResourceMarkupGenerator\NiVE3.SourceGenerator.ResourceMarkupGenerator.csproj", "{44737DDC-83B2-4D8C-93CB-28842963868D}"
 EndProject

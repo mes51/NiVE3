@@ -252,6 +252,8 @@ namespace NiVE3.ViewModel
                 DialogService.ShowDialog(nameof(CompositionSettingView), param, r => result = r);
                 if (result != null && result.Result == ButtonResult.OK)
                 {
+                    result.Parameters.TryGetValue(CompositionSettingViewModel.RendererSettingViewData, out object? rendererSettingData);
+                    result.Parameters.TryGetValue(CompositionSettingViewModel.ToneMapperSettingViewData, out object? toneMapperSettingData);
                     ProjectModel.CreateComposition(
                         result.Parameters.GetValue<string>(nameof(CompositionSettingViewModel.Name)),
                         result.Parameters.GetValue<int>(nameof(CompositionSettingViewModel.Width)),
@@ -264,7 +266,9 @@ namespace NiVE3.ViewModel
                         result.Parameters.GetValue<int>(nameof(CompositionSettingViewModel.ShutterPhase)),
                         result.Parameters.GetValue<int>(nameof(CompositionSettingViewModel.MotionBlurSampleCount)),
                         result.Parameters.GetValue<Guid>(CompositionSettingViewModel.SelectedRendererPluginId),
-                        result.Parameters.GetValue<Guid>(CompositionSettingViewModel.SelectedToneMapperPluginId)
+                        rendererSettingData,
+                        result.Parameters.GetValue<Guid>(CompositionSettingViewModel.SelectedToneMapperPluginId),
+                        toneMapperSettingData
                     );
                 }
             });

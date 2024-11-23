@@ -762,16 +762,27 @@ namespace NiVE3.PresetPlugin.Resource
         // Tone Mapper
 
         [DefaultValue("ACES Filmic")]
-        public const string ToneMapper_ACESFilmic_Name = nameof(ToneMapper_ACESFilmic_Name);
+        public const string ToneMapper_ACESFilmicToneMapper_Name = nameof(ToneMapper_ACESFilmicToneMapper_Name);
 
         [DefaultValue("ACESに近似したトーンマッピングを行います")]
-        public const string ToneMapper_ACESFilmic_Description = nameof(ToneMapper_ACESFilmic_Description);
+        public const string ToneMapper_ACESFilmicToneMapper_Description = nameof(ToneMapper_ACESFilmicToneMapper_Description);
 
         [DefaultValue("ACES")]
-        public const string ToneMapper_ACES_Name = nameof(ToneMapper_ACES_Name);
+        public const string ToneMapper_ACESToneMapper_Name = nameof(ToneMapper_ACESToneMapper_Name);
 
         [DefaultValue("ACES色空間でトーンマッピングを行います")]
-        public const string ToneMapper_ACES_Description = nameof(ToneMapper_ACES_Description);
+        public const string ToneMapper_ACESToneMapper_Description = nameof(ToneMapper_ACESToneMapper_Description);
+
+        [DefaultValue("Reinhard Extended")]
+        public const string ToneMapper_ReinhardExtendedToneMapper_Name = nameof(ToneMapper_ReinhardExtendedToneMapper_Name);
+
+        [DefaultValue("拡張Reinhardの式でトーンマッピングを行います")]
+        public const string ToneMapper_ReinhardExtendedToneMapper_Description = nameof(ToneMapper_ReinhardExtendedToneMapper_Description);
+
+        // Tone Mapper setting views
+
+        [ShowInMarkup, DefaultValue("最高輝度:")]
+        public const string ReinhardExtendedToneMapperSettingView_MaxLuminance = nameof(ReinhardExtendedToneMapperSettingView_MaxLuminance);
 
         // Dialog
 

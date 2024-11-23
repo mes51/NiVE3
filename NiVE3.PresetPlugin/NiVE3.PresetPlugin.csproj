@@ -28,6 +28,7 @@
     <ProjectReference Include="..\NiVE3.Shared\NiVE3.Shared.csproj" />
 	  <ProjectReference Include="..\NiVE3.SourceGenerator.ResourceMarkupGenerator\NiVE3.SourceGenerator.ResourceMarkupGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
 	  <ProjectReference Include="..\NiVE3.SourceGenerator.LanguageResourceGenerator\NiVE3.SourceGenerator.LanguageResourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+	  <ProjectReference Include="..\NiVE3.UI\NiVE3.UI.csproj" />
 	  <ProjectReference Include="..\SharpAvi\SharpAvi\SharpAvi.csproj" />
   </ItemGroup>
 

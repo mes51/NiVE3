@@ -290,8 +290,14 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("レンダラの設定")]
         public static readonly string CompositionSettingView_RendererSetting = nameof(CompositionSettingView_RendererSetting);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("トーンマッパーの設定")]
+        public static readonly string CompositionSettingView_ToneMapperSetting = nameof(CompositionSettingView_ToneMapperSetting);
+
         [DefaultValue("レンダラ設定")]
         public static readonly string RendererSettingView_Title = nameof(RendererSettingView_Title);
+
+        [DefaultValue("トーンマッパー設定")]
+        public static readonly string ToneMapperSettingView_Title = nameof(ToneMapperSettingView_Title);
 
         [ShowInMarkup, LanguageKey, DefaultValue("カスタム")]
         public static readonly string CompositionSettingView_PresetName_Custom = nameof(CompositionSettingView_PresetName_Custom);

@@ -16,8 +16,8 @@ namespace NiVE3.PresetPlugin.ToneMapper
     // SEE: https://github.com/TheRealMJP/BakingLab/blob/master/BakingLab/ACES.hlsl
 
     [Export(typeof(IToneMapper))]
-    [ToneMapperMetadata(typeof(ACESFilmic), LanguageResourceDictionary.ToneMapper_ACES_Name, "mes51", LanguageResourceDictionary.ToneMapper_ACES_Description, ID, IsSupportGpu = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
-    public sealed class ACES : IToneMapper
+    [ToneMapperMetadata(typeof(ACESFilmicToneMapper), LanguageResourceDictionary.ToneMapper_ACESToneMapper_Name, "mes51", LanguageResourceDictionary.ToneMapper_ACESToneMapper_Description, ID, IsSupportGpu = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
+    public sealed class ACESToneMapper : IToneMapper
     {
         const string ID = "25DC98C5-5953-42DF-998D-B8F08249D24B";
 

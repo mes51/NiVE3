@@ -45,6 +45,9 @@ namespace NiVE3.Data.Json.Project
         [JsonConverter(typeof(PluginOptionValueObjectConverter))]
         public object? RendererSetting { get; set; }
 
+        [JsonConverter(typeof(PluginOptionValueObjectConverter))]
+        public object? ToneMapperSetting { get; set; }
+
         // for timeline
 
         public double TimeBarRange { get; set; }

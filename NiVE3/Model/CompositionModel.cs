@@ -196,6 +196,8 @@ namespace NiVE3.Model
 
         public object? RendererSetting { get; private set; }
 
+        public object? ToneMapperSetting { get; private set; }
+
         public bool HasAudio => Layers.Any(l => l.IsEnableSolo) ? Layers.Any(l => l.HasAudio && l.IsEnableAudio && l.IsEnableSolo) : Layers.Any(l => l.HasAudio && l.IsEnableAudio);
 
         public Int32Size Size => new Int32Size(Width, Height);
@@ -233,6 +235,8 @@ namespace NiVE3.Model
         IToneMapper ToneMapper => ToneMapperContext.Value;
 
         Int128 RendererSettingHash { get; set; }
+
+        Int128 ToneMapperSettingHash { get; set; }
 
         public CompositionModel(
             Guid rendererPluginId,
@@ -280,6 +284,16 @@ namespace NiVE3.Model
             Layers = [];
 
             PropertyChanged += CompositionModel_PropertyChanged;
+        }
+
+        public void ApplyInitialSettingData(object? rendererSettingData, object? toneMapperSettingData)
+        {
+            Renderer.ApplySetting(rendererSettingData);
+            RendererSetting = Renderer.SaveSetting();
+            RendererSettingHash = CalcPluginSettingHash(RendererSetting);
+            ToneMapper.ApplySetting(toneMapperSettingData);
+            ToneMapperSetting = ToneMapper.SaveSetting();
+            ToneMapperSettingHash = CalcPluginSettingHash(ToneMapperSetting);
         }
 
         public void InsertLayers(Guid footageId, int index, double sourceStartPoint = 0.0, Vector3d? initialPosition = null)
@@ -551,7 +565,24 @@ namespace NiVE3.Model
             RenderQueueModel.Enqueue(this, filePath, renderRangeType, beginTime, endTime, isOutputVideo, isOutputAudio, output);
         }
 
-        public void ChangeCompositionSetting(string name, int width, int height, double frameRate, double duration, bool isRetentionFrameRate, bool applyToneMappingWhenNested, int shutterAngle, int shutterPhase, int motionBlurSampleCount, Guid rendererPluginId, Guid toneMapperPluginId, bool rendererSettingChanged, object? rendererSettingData)
+        public void ChangeCompositionSetting(
+            string name,
+            int width,
+            int height,
+            double frameRate,
+            double duration,
+            bool isRetentionFrameRate,
+            bool applyToneMappingWhenNested,
+            int shutterAngle,
+            int shutterPhase,
+            int motionBlurSampleCount,
+            Guid rendererPluginId,
+            Guid toneMapperPluginId,
+            bool rendererSettingChanged,
+            object? rendererSettingData,
+            bool toneMapperSettingChanged,
+            object? toneMapperSettingData
+        )
         {
             if (Name == name &&
                 Width == width &&
@@ -565,7 +596,8 @@ namespace NiVE3.Model
                 MotionBlurSampleCount == motionBlurSampleCount &&
                 RendererPluginId == rendererPluginId &&
                 ToneMapperPluginId == toneMapperPluginId &&
-                !rendererSettingChanged)
+                !rendererSettingChanged &&
+                !toneMapperSettingChanged)
             {
                 return;
             }
@@ -586,6 +618,8 @@ namespace NiVE3.Model
             var prevToneMapperPluginId = ToneMapperPluginId;
             var prevRendererSetting = RendererSetting;
             var prevRendererSettingHash = RendererSettingHash;
+            var prevToneMapperSetting = ToneMapperSetting;
+            var prevToneMapperSettingHash = ToneMapperSettingHash;
             var prevWorkareaBegin = WorkareaBegin;
             var prevWorkareaEnd = WorkareaEnd;
 
@@ -611,18 +645,29 @@ namespace NiVE3.Model
                     RendererContext.Value.ApplySetting(rendererSettingData);
                 }
                 RendererSetting = RendererContext.Value.SaveSetting();
-                RendererSettingHash = CalcRendererSettingHash(RendererSetting);
+                RendererSettingHash = CalcPluginSettingHash(RendererSetting);
             }
             else if (rendererSettingChanged && RendererContext.Value.ApplySetting(rendererSettingData))
             {
                 RendererSetting = RendererContext.Value.SaveSetting();
-                RendererSettingHash = CalcRendererSettingHash(RendererSetting);
+                RendererSettingHash = CalcPluginSettingHash(RendererSetting);
             }
             if (ToneMapperPluginId != toneMapperPluginId)
             {
                 ToneMapperContext.Dispose();
                 ToneMapperContext = ToneMapperListModel.CreateToneMapper(toneMapperPluginId);
                 ToneMapperPluginId = toneMapperPluginId;
+                if (toneMapperSettingChanged)
+                {
+                    ToneMapperContext.Value.ApplySetting(toneMapperSettingData);
+                }
+                ToneMapperSetting = ToneMapperContext.Value.SaveSetting();
+                ToneMapperSettingHash = CalcPluginSettingHash(ToneMapperSetting);
+            }
+            else if (toneMapperSettingChanged && ToneMapperContext.Value.ApplySetting(toneMapperSettingData))
+            {
+                ToneMapperSetting = ToneMapperContext.Value.SaveSetting();
+                ToneMapperSettingHash = CalcPluginSettingHash(ToneMapperSetting);
             }
 
             FrameDuration = 1.0 / FrameRate;
@@ -669,6 +714,8 @@ namespace NiVE3.Model
                     prevToneMapperPluginId,
                     prevRendererSetting,
                     prevRendererSettingHash,
+                    prevToneMapperSetting,
+                    prevToneMapperSettingHash,
                     prevWorkareaBegin,
                     prevWorkareaEnd,
                     name,
@@ -685,6 +732,8 @@ namespace NiVE3.Model
                     toneMapperPluginId,
                     RendererSetting,
                     RendererSettingHash,
+                    ToneMapperSetting,
+                    ToneMapperSettingHash,
                     WorkareaBegin,
                     WorkareaEnd
                 )
@@ -949,6 +998,7 @@ namespace NiVE3.Model
                 RendererPluginId = RendererPluginId,
                 ToneMapperPluginId = ToneMapperPluginId,
                 RendererSetting = Renderer.SaveSetting(),
+                ToneMapperSetting = ToneMapper.SaveSetting(),
                 TimeBarRange = TimeBarRange,
                 TimeBarRangeStart = TimeBarRangeStart,
                 CurrentTime = CurrentTime,
@@ -969,8 +1019,11 @@ namespace NiVE3.Model
             ShutterPhase = data.ShutterPhase;
             MotionBlurSampleCount = data.MotionBlurSampleCount;
             RendererSetting = data.RendererSetting;
-            RendererSettingHash = CalcRendererSettingHash(data.RendererSetting);
+            RendererSettingHash = CalcPluginSettingHash(data.RendererSetting);
             Renderer.LoadSetting(data.RendererSetting);
+            ToneMapperSetting = data.ToneMapperSetting;
+            ToneMapperSettingHash = CalcPluginSettingHash(data.ToneMapperSetting);
+            ToneMapper.LoadSetting(data.ToneMapperSetting);
             WorkareaBegin = data.WorkareaBegin;
             WorkareaEnd = data.WorkareaEnd;
             TimeBarRange = data.TimeBarRange;
@@ -1669,6 +1722,7 @@ namespace NiVE3.Model
             hash.Append(RendererPluginId);
             hash.Append(ToneMapperPluginId);
             hash.Append(RendererSettingHash);
+            hash.Append(ToneMapperSettingHash);
 
             hash.Append(time);
 
@@ -1754,16 +1808,16 @@ namespace NiVE3.Model
             return false;
         }
 
-        static Int128 CalcRendererSettingHash(object? rendererSetting)
+        static Int128 CalcPluginSettingHash(object? pluginSetting)
         {
-            if (rendererSetting == null)
+            if (pluginSetting == null)
             {
                 return 0;
             }
             else
             {
                 var hash = new XxHash3();
-                hash.Append(JsonSerializer.Serialize(rendererSetting));
+                hash.Append(JsonSerializer.Serialize(pluginSetting));
                 return hash.ToInt128();
             }
         }
