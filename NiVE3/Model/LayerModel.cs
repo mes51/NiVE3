@@ -513,6 +513,8 @@ namespace NiVE3.Model
                     break;
             }
 
+            FootageModel.FootageUpdated += FootageModel_FootageUpdated;
+
             if (TransformProperties != null)
             {
                 TransformProperties.ValueUpdated += Properties_ValueUpdated;
@@ -1174,6 +1176,7 @@ namespace NiVE3.Model
         {
             hash.Append(frameBlend);
             hash.Append(LayerId);
+            hash.Append(FootageModel.LastUpdated);
 
             var layerTime = time - SourceStartPoint;
             var sourceTime = CalcSourceTime(layerTime);
@@ -1922,6 +1925,11 @@ namespace NiVE3.Model
                 newEffect.EffectUpdated += Effect_EffectUpdated;
             }
 
+            LayerUpdated?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void FootageModel_FootageUpdated(object? sender, EventArgs e)
+        {
             LayerUpdated?.Invoke(this, EventArgs.Empty);
         }
 

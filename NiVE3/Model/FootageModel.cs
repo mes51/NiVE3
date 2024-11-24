@@ -133,6 +133,14 @@ namespace NiVE3.Model
             set { SetProperty(ref sortIsAscending, value); }
         }
 
+        // TODO: フッテージの再読み込み実装時に更新するようにする
+        private DateTime lastUpdated;
+        public DateTime LastUpdated
+        {
+            get { return lastUpdated; }
+            set { SetProperty(ref lastUpdated, value); }
+        }
+
         public string FileName => Path.GetFileName(InputModel.FilePath);
 
         public bool IsPlaceholder => InputModel.IsPlaceholder;
@@ -148,6 +156,13 @@ namespace NiVE3.Model
         {
             add { UpdateSampleImageRequestPublisher.Subscribe(value); }
             remove { UpdateSampleImageRequestPublisher.Unsubscribe(value); }
+        }
+
+        WeakEventPublisher<EventArgs> FootageUpdatedPublisher { get; } = new WeakEventPublisher<EventArgs>();
+        public event EventHandler<EventArgs> FootageUpdated
+        {
+            add { FootageUpdatedPublisher.Subscribe(value); }
+            remove { FootageUpdatedPublisher.Unsubscribe(value); }
         }
 
         IFootageSource Source { get; }
@@ -185,6 +200,7 @@ namespace NiVE3.Model
             }
             FilePath = input.FilePath;
             InputType = source.SourceType;
+            LastUpdated = DateTime.Now;
 
             if (input.Input is CompositionInput compositionInput)
             {
@@ -298,7 +314,9 @@ namespace NiVE3.Model
 
         private void Composition_CompositionUpdated(object? sender, EventArgs e)
         {
+            LastUpdated = DateTime.Now;
             UpdateSampleImageRequestPublisher.Publish(this, EventArgs.Empty);
+            FootageUpdatedPublisher.Publish(this, EventArgs.Empty);
         }
     }
 

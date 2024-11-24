@@ -204,7 +204,12 @@ namespace NiVE3.Model
 
         public IReadOnlyCollection<LayerInfo> LayerIdentifiers => [..Layers.Select(l => new LayerInfo(l.LayerId, l.SourceType))];
 
-        public event EventHandler<EventArgs>? CompositionUpdated;
+        WeakEventPublisher<EventArgs> CompositionUpdatedPublisher { get; } = new WeakEventPublisher<EventArgs>();
+        public event EventHandler<EventArgs> CompositionUpdated
+        {
+            add { CompositionUpdatedPublisher.Subscribe(value); }
+            remove { CompositionUpdatedPublisher.Unsubscribe(value); }
+        }
 
         bool IsSettingChanging { get; set; }
 
@@ -1775,7 +1780,7 @@ namespace NiVE3.Model
         void OnCompositionUpdated()
         {
             ImageCache.Clear(CompositionId);
-            CompositionUpdated?.Invoke(this, EventArgs.Empty);
+            CompositionUpdatedPublisher.Publish(this, EventArgs.Empty);
         }
 
         static CameraSetting CreateDefaultCameraSetting(int width, int height)
