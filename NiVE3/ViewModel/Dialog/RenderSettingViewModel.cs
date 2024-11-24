@@ -282,7 +282,7 @@ namespace NiVE3.ViewModel.Dialog
             CompositionWorkareaEnd = composition.WorkareaEnd;
             RenderRangeType = parameters.GetValue<RenderRangeType>(nameof(RenderRangeType));
             RenderRangeBeginLimit = 0.0;
-            RenderRangeEndStart = composition.Duration;
+            RenderRangeEndStart = composition.FrameDuration;
             BeginTime = parameters.GetValue<double>(nameof(BeginTime));
             EndTime = parameters.GetValue<double>(nameof(EndTime));
             IsOutputVideo = parameters.GetValue<bool>(nameof(IsOutputVideo));
