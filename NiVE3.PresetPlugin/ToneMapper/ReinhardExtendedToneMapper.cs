@@ -7,6 +7,7 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using ComputeSharp;
 using NiVE3.Image;
 using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Interfaces;
@@ -33,11 +34,6 @@ namespace NiVE3.PresetPlugin.ToneMapper
         public void SetupAccelerator(IAcceleratorObject accelerator)
         {
             AcceleratorObject = accelerator;
-        }
-
-        public NImage ToneMapping(NImage image, bool useGpu)
-        {
-            return ProcessCpu(image, MaxLuminance * MaxLuminance);
         }
 
         public FrameworkElement? GetToneMapperSetting()
@@ -88,6 +84,19 @@ namespace NiVE3.PresetPlugin.ToneMapper
             return true;
         }
 
+        public NImage ToneMapping(NImage image, bool useGpu)
+        {
+            var squaredMaxLuminance = MaxLuminance * MaxLuminance;
+            if (useGpu && AcceleratorObject != null)
+            {
+                return ProcessGpu(AcceleratorObject.CurrentDevice, image, squaredMaxLuminance);
+            }
+            else
+            {
+                return ProcessCpu(image, squaredMaxLuminance);
+            }
+        }
+
         public void Dispose() { }
 
         static NManagedImage ProcessCpu(NImage image, float squaredMaxLuminance)
@@ -125,10 +134,47 @@ namespace NiVE3.PresetPlugin.ToneMapper
 
             return managedImage;
         }
+
+        static NGPUImage ProcessGpu(GraphicsDevice device, NImage image, float squaredMaxLuminance)
+        {
+            var gpuImage = image switch
+            {
+                NManagedImage managedImage => managedImage.CopyToGpu(device),
+                _ => (NGPUImage)image
+            };
+
+            using var context = device.CreateComputeContext();
+            context.For(gpuImage.Width, gpuImage.Height, new ReinhardExtendedProcess(gpuImage.Data, gpuImage.Width, squaredMaxLuminance));
+
+            return gpuImage;
+        }
     }
 
     class ReinhardExtendedSetting
     {
         public float MaxLuminance { get; set; } = 1.0F;
+    }
+
+    [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
+    [GeneratedComputeShaderDescriptor]
+    readonly partial struct ReinhardExtendedProcess(ReadWriteBuffer<Float4> image, int width, float squaredMaxLuminance) : IComputeShader
+    {
+        public void Execute()
+        {
+            var pos = ThreadIds.Y * width + ThreadIds.X;
+
+            var color = image[pos];
+            var oldLuminance = Hlsl.Dot(color.XYZ, Const.ConvertToGrayScaleFloat3);
+            if (oldLuminance == 0.0F || oldLuminance == -1.0F)
+            {
+                image[pos] = new Float4(0.0F, 0.0F, 0.0F, color.W);
+            }
+            else
+            {
+                var num = oldLuminance * (1.0F + (oldLuminance / squaredMaxLuminance));
+                var newLuminance = num / (1.0F + oldLuminance);
+                image[pos] = new Float4((color * (newLuminance / oldLuminance)).XYZ, color.W);
+            }
+        }
     }
 }
