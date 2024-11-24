@@ -243,3 +243,7 @@ dotnet_diagnostic.IDE0059.severity = none
 dotnet_diagnostic.IDE0060.severity = silent
 # IDE0079: 不要な抑制を削除します
 dotnet_diagnostic.IDE0079.severity = silent
+
+# SEE: https://zenn.dev/benutomo/articles/b29f72366023b9#%E8%A7%A3%E6%B1%BA%E6%96%B9%E6%B3%95%EF%BC%92
+# TODO: 直すならα版のうちにResourceDictionary周りを別DLLに切り出す等で回避する
+dotnet_diagnostic.CS0436.severity = silent
