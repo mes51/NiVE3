@@ -249,7 +249,7 @@ namespace NiVE3.Model
                         endTime,
                         isOutputVideo,
                         isOutputAudio,
-                        output?.Value?.SaveData()
+                        output?.Value?.SaveSetting()
                     )
                 );
             }
@@ -381,7 +381,7 @@ namespace NiVE3.Model
                 IsOutputVideo = IsOutputVideo,
                 IsOutputAudio = IsOutputAudio,
                 OutputPluginId = OutputPluginId,
-                OutputSetting = Output?.Value?.SaveData(),
+                OutputSetting = Output?.Value?.SaveSetting(),
                 State = State,
                 CompositionId = CompositionModel.CompositionId
             };
@@ -404,7 +404,7 @@ namespace NiVE3.Model
             var output = OutputListModel.CreateOutput(OutputPluginId);
             if (output != null)
             {
-                output.Value.LoadData(data.OutputSetting);
+                output.Value.LoadSetting(data.OutputSetting);
                 Output = output;
                 var metadata = OutputListModel.GetMetadata(OutputPluginId);
                 OutputPluginName = metadata?.Name ?? "";

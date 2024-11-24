@@ -89,7 +89,7 @@ namespace NiVE3.Model
                 Model.EndTime = NewEndTime;
                 Model.IsOutputVideo = NewIsOutputVideo;
                 Model.IsOutputAudio = NewIsOutputAudio;
-                Model.Output?.Value?.LoadData(NewSetting);
+                Model.Output?.Value?.LoadSetting(NewSetting);
             }
 
             public void Undo()
@@ -100,7 +100,7 @@ namespace NiVE3.Model
                 Model.EndTime = OldEndTime;
                 Model.IsOutputVideo = OldIsOutputVideo;
                 Model.IsOutputAudio = OldIsOutputAudio;
-                Model.Output?.Value?.LoadData(OldSetting);
+                Model.Output?.Value?.LoadSetting(OldSetting);
             }
 
             public void Dispose() { }

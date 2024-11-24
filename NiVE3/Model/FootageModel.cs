@@ -307,7 +307,7 @@ namespace NiVE3.Model
                 InputType = InputType,
                 InputId = InputModel.InputId,
                 InputPluginId = InputModel.PluginId,
-                InputOption = InputModel.Input.SaveData(),
+                InputOption = InputModel.Input.SaveSetting(),
                 SourceId = Source.SourceId
             };
         }

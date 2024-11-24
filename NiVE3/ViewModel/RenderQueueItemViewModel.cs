@@ -232,7 +232,7 @@ namespace NiVE3.ViewModel
                 };
                 if (Output != null)
                 {
-                    prevSetting = Output.Value.SaveData();
+                    prevSetting = Output.Value.SaveSetting();
                     settingParams.Add(RenderSettingViewModel.OutputParameterName, Output);
                 }
                 IDialogResult? settingResult = null;

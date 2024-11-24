@@ -50,7 +50,7 @@ namespace NiVE3.Input
 
         public void Dispose() { }
 
-        public object? SaveData()
+        public object? SaveSetting()
         {
             return new SolidData
             {
@@ -60,7 +60,7 @@ namespace NiVE3.Input
             };
         }
 
-        public bool LoadData(object? data)
+        public bool LoadSetting(object? data)
         {
             if (data is not IDictionary<string, object> solidData)
             {
@@ -84,7 +84,7 @@ namespace NiVE3.Input
             return new SolidSettingView { DataContext = new SolidSettingViewModel(compositionSize) };
         }
 
-        public bool ApplyLoadSetting(object? setting)
+        public bool ApplySetting(object? setting)
         {
             if (setting is SolidSettingViewModel vm)
             {

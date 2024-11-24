@@ -60,12 +60,12 @@ namespace NiVE3.PresetPlugin.Output
             return new AviOutputSettingView { DataContext = viewModel };
         }
 
-        public object? SaveData()
+        public object? SaveSetting()
         {
             return Setting;
         }
 
-        public bool LoadData(object? state)
+        public bool LoadSetting(object? state)
         {
             if (state is CompressSetting setting)
             {
@@ -98,7 +98,7 @@ namespace NiVE3.PresetPlugin.Output
             return false;
         }
 
-        public bool ApplyOutputSetting(object? setting)
+        public bool ApplySetting(object? setting)
         {
             if (setting is not AviOutputSettingViewModel viewModel)
             {

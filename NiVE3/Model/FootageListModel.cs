@@ -612,7 +612,7 @@ namespace NiVE3.Model
                         return null;
                     }
 
-                    if (!plugin.ApplyLoadSetting(view.DataContext))
+                    if (!plugin.ApplySetting(view.DataContext))
                     {
                         plugin.Dispose();
                         return null;
@@ -811,7 +811,7 @@ namespace NiVE3.Model
             {
                 input.Value.SetupAccelerator(acceleratorModel);
             }
-            if (input.Value.Load(filePath) && input.Value.LoadData(inputOptions))
+            if (input.Value.Load(filePath) && input.Value.LoadSetting(inputOptions))
             {
                 return input;
             }

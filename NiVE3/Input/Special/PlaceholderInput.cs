@@ -77,12 +77,12 @@ namespace NiVE3.Input.Special
             return true;
         }
 
-        public object? SaveData()
+        public object? SaveSetting()
         {
             return InputOption;
         }
 
-        public bool LoadData(object? data)
+        public bool LoadSetting(object? data)
         {
             InputOption = data;
             return true;

@@ -227,7 +227,7 @@ namespace NiVE3.ViewModel.Dialog
                 DialogService.ShowDialog(nameof(PluginSettingView), param, r => result = r);
                 if (result?.Result == ButtonResult.OK)
                 {
-                    if (Output.Value.ApplyOutputSetting(view.DataContext))
+                    if (Output.Value.ApplySetting(view.DataContext))
                     {
                         FilePath = Output.Value.ProcessOutputFilePath(FilePath);
                     }

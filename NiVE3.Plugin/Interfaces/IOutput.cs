@@ -34,14 +34,14 @@ namespace NiVE3.Plugin.Interfaces
         /// 現在の出力プラグインの状態を表すデータをシリアル化可能な状態で取得します
         /// </summary>
         /// <returns>出力プラグインの状態を表すシリアル化可能なobject</returns>
-        object? SaveData() => null;
+        object? SaveSetting() => null;
 
         /// <summary>
         /// 出力プラグインの状態を読み込みます
         /// </summary>
         /// <param name="data">読み込む出力プラグインの状態を表すobject</param>
         /// <returns>プラグインの初期化、およびファイルの読み込みが完了した場合はtrue、そうでない場合はfalse</returns>
-        bool LoadData(object? data) => true;
+        bool LoadSetting(object? data) => true;
 
         /// <summary>
         /// 出力プラグインの読み込み時の設定を適用します。
@@ -49,7 +49,7 @@ namespace NiVE3.Plugin.Interfaces
         /// </summary>
         /// <param name="setting">GetOutputSettingで取得したViewのDataContext</param>
         /// <returns>適用に成功した場合はtrue、そうでない場合はfalse</returns>
-        bool ApplyOutputSetting(object? setting) => false;
+        bool ApplySetting(object? setting) => false;
 
         /// <summary>
         /// 現在のレンダリング設定で出力するファイルのパスを加工します

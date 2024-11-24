@@ -46,7 +46,7 @@ namespace NiVE3.Input
             return true;
         }
 
-        public object? SaveData()
+        public object? SaveSetting()
         {
             return Composition.CompositionId;
         }

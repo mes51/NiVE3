@@ -57,7 +57,7 @@ namespace NiVE3.Model
                 PluginId = PluginId,
                 FilePath = FilePath,
                 RelativeFilePath = IsInternalInput ? "" : Path.GetRelativePath(projectDir, FilePath),
-                InputOption = Input.SaveData(),
+                InputOption = Input.SaveSetting(),
                 Sources = Input.GetGroup().Flatten().Select(s => new SourceData { Name = s.Name, SourceId = s.SourceId, SourceType = s.SourceType, Width = s.Width, Height = s.Height, Duration = s.Duration, FrameRate = s.FrameRate }).ToArray()
             };
         }

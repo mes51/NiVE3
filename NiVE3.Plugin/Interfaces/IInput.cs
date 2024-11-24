@@ -36,14 +36,14 @@ namespace NiVE3.Plugin.Interfaces
         /// 現在の入力プラグインの状態を表すデータをシリアル化可能な状態で取得します
         /// </summary>
         /// <returns>入力プラグインの状態を表すシリアル化可能なobject</returns>
-        object? SaveData() => null;
+        object? SaveSetting() => null;
 
         /// <summary>
         /// 入力プラグインの状態を読み込みます
         /// </summary>
         /// <param name="data">読み込む入力プラグインの状態を表すobject</param>
         /// <returns>プラグインの初期化、およびファイルの読み込みが完了した場合はtrue、そうでない場合はfalse</returns>
-        bool LoadData(object? data) => true;
+        bool LoadSetting(object? data) => true;
 
         /// <summary>
         /// 入力プラグインの設定画面を表示するためのViewを取得します。
@@ -59,7 +59,7 @@ namespace NiVE3.Plugin.Interfaces
         /// </summary>
         /// <param name="setting">GetLoadSettingで取得したViewのDataContext</param>
         /// <returns>設定を反映し、ファイルの読み込みが完了した場合はtrue、そうでない場合はfalse</returns>
-        bool ApplyLoadSetting(object? setting) => true;
+        bool ApplySetting(object? setting) => true;
 
         /// <summary>
         /// 読み込んだファイルから、ソースを取得します
