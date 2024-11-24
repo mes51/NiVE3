@@ -527,6 +527,11 @@ namespace NiVE3.ViewModel
                     CurrentFrame.WritePixels(BufferImageSize, ImageBuffer, BufferImageSize.Width * 4, 0);
                     IsDirtyImageBuffer = false;
                 }
+                if (ViewState.IsIgnoreUpdatePreview)
+                {
+                    return;
+                }
+
                 if (IsDirtyBoundingBoxesBuffer)
                 {
                     BoundingBoxes.Clear();

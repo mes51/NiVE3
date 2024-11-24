@@ -675,7 +675,7 @@ namespace NiVE3.ViewModel
 
             Effects = layerModel.Effects.CreateViewCollection(e =>
             {
-                var vm = new EffectViewModel(e);
+                var vm = new EffectViewModel(e, viewState);
                 vm.EffectEnableChangeRequest += Effect_EffectEnableChangeRequest;
                 vm.SelectItemChanged += Effect_SelectItemChanged;
                 vm.PropertyValueCommited += Effect_PropertyValueCommited;
@@ -684,37 +684,37 @@ namespace NiVE3.ViewModel
 
             if (layerModel.TransformProperties != null)
             {
-                TransformProperties = new PropertyGroupViewModel(layerModel.TransformProperties);
+                TransformProperties = new PropertyGroupViewModel(layerModel.TransformProperties, viewState);
                 TransformProperties.SelectItemChanged += PropertyGroupViewModel_SelectItemChanged;
                 TransformProperties.PropertyValueCommited += PropertyGroupViewModel_PropertyValueCommited;
             }
             if (layerModel.LayerOptionProperties != null)
             {
-                LayerOptionProperties = new PropertyGroupViewModel(layerModel.LayerOptionProperties);
+                LayerOptionProperties = new PropertyGroupViewModel(layerModel.LayerOptionProperties, viewState);
                 LayerOptionProperties.SelectItemChanged += PropertyGroupViewModel_SelectItemChanged;
                 LayerOptionProperties.PropertyValueCommited += PropertyGroupViewModel_PropertyValueCommited;
             }
             if (layerModel.TextProperties != null)
             {
-                TextProperties = new PropertyGroupViewModel(layerModel.TextProperties);
+                TextProperties = new PropertyGroupViewModel(layerModel.TextProperties, viewState);
                 TextProperties.SelectItemChanged += PropertyGroupViewModel_SelectItemChanged;
                 TextProperties.PropertyValueCommited += PropertyGroupViewModel_PropertyValueCommited;
             }
             if (layerModel.ShapeProperties != null)
             {
-                ShapeProperties = new PropertyGroupViewModel(layerModel.ShapeProperties);
+                ShapeProperties = new PropertyGroupViewModel(layerModel.ShapeProperties, viewState);
                 ShapeProperties.SelectItemChanged += PropertyGroupViewModel_SelectItemChanged;
                 ShapeProperties.PropertyValueCommited += PropertyGroupViewModel_PropertyValueCommited;
             }
             if (layerModel.SourceOptionProperties != null)
             {
-                SourceOptionProperties = new PropertyGroupViewModel(layerModel.SourceOptionProperties);
+                SourceOptionProperties = new PropertyGroupViewModel(layerModel.SourceOptionProperties, viewState);
                 SourceOptionProperties.SelectItemChanged += PropertyGroupViewModel_SelectItemChanged;
                 SourceOptionProperties.PropertyValueCommited += PropertyGroupViewModel_PropertyValueCommited;
             }
             if (layerModel.AudioOptionProperties != null)
             {
-                AudioOptionProperties = new PropertyGroupViewModel(layerModel.AudioOptionProperties);
+                AudioOptionProperties = new PropertyGroupViewModel(layerModel.AudioOptionProperties, viewState);
                 AudioOptionProperties.SelectItemChanged += PropertyGroupViewModel_SelectItemChanged;
                 AudioOptionProperties.PropertyValueCommited += PropertyGroupViewModel_PropertyValueCommited;
             }

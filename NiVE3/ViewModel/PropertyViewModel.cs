@@ -13,6 +13,7 @@ using ICSharpCode.AvalonEdit.Document;
 using NiVE3.Data.Clipboard;
 using NiVE3.Data.Json.Project;
 using NiVE3.Model;
+using NiVE3.Model.UI;
 using NiVE3.Mvvm;
 using NiVE3.Plugin.Property;
 using NiVE3.Plugin.Property.Control;
@@ -261,13 +262,20 @@ namespace NiVE3.ViewModel
 
         PropertyModel PropertyModel { get; }
 
+        ViewStateModel ApplicationViewState { get; }
+
         object? PrevValue { get; set; }
 
         bool IsSelectingAll { get; set; }
 
-        public PropertyViewModel(PropertyModel propertyModel)
+        bool IsSubscribedApplicationViewStatePropertyChanged { get; set; }
+
+        bool NeedPublishPropertyValueUpdate { get; set; }
+
+        public PropertyViewModel(PropertyModel propertyModel, ViewStateModel viewState)
         {
             PropertyModel = propertyModel;
+            ApplicationViewState = viewState;
             Property = propertyModel.Property;
             ViewState = propertyModel.CreateState(this);
             IsEnableExpression = propertyModel.IsEnableExpression;
@@ -479,7 +487,15 @@ namespace NiVE3.ViewModel
             WiringModel();
 
             CurrentTimeRawValue = CalculationRawValue();
-            CurrentTimeValue = CalculationValue();
+            if (!ApplicationViewState.IsIgnoreUpdatePreview)
+            {
+                CurrentTimeValue = CalculationValue();
+            }
+            else
+            {
+                ApplicationViewState.PropertyChanged += ApplicationViewState_PropertyChanged;
+                IsSubscribedApplicationViewStatePropertyChanged = true;
+            }
             HasKeyFrame = KeyFrames.Count > 0;
 
             PropertyModel.ValueCommited += PropertyModel_ValueCommited;
@@ -550,8 +566,20 @@ namespace NiVE3.ViewModel
 
         private void PropertyModel_ExpressionUpdated(object? sender, EventArgs e)
         {
-            CurrentTimeValue = CalculationValue();
-            PropertyValueUpdatePublisher.Publish(this, new PropertyValueCommitedEventArgs(this));
+            if (!ApplicationViewState.IsIgnoreUpdatePreview)
+            {
+                CurrentTimeValue = CalculationValue();
+                PropertyValueUpdatePublisher.Publish(this, new PropertyValueCommitedEventArgs(this));
+            }
+            else
+            {
+                if (!IsSubscribedApplicationViewStatePropertyChanged)
+                {
+                    ApplicationViewState.PropertyChanged += ApplicationViewState_PropertyChanged;
+                    IsSubscribedApplicationViewStatePropertyChanged = true;
+                }
+                NeedPublishPropertyValueUpdate = true;
+            }
         }
 
         private void PropertyModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -573,13 +601,29 @@ namespace NiVE3.ViewModel
             {
                 case nameof(CurrentTimeRawValue) when IsEditing:
                     PropertyModel.UpdateUncommitedRawValue(CurrentTimeRawValue);
-                    CurrentTimeValue = CalculationValue();
+                    if (!ApplicationViewState.IsIgnoreUpdatePreview)
+                    {
+                        CurrentTimeValue = CalculationValue();
+                    }
+                    else if (!IsSubscribedApplicationViewStatePropertyChanged)
+                    {
+                        ApplicationViewState.PropertyChanged += ApplicationViewState_PropertyChanged;
+                        IsSubscribedApplicationViewStatePropertyChanged = true;
+                    }
                     break;
                 case nameof(CurrentTimeRawValue):
                 case nameof(CurrentTime):
                 case nameof(SourceStartPoint):
-                    CurrentTimeValue = CalculationValue();
                     CurrentTimeRawValue = CalculationRawValue();
+                    if (!ApplicationViewState.IsIgnoreUpdatePreview)
+                    {
+                        CurrentTimeValue = CalculationValue();
+                    }
+                    else if (!IsSubscribedApplicationViewStatePropertyChanged)
+                    {
+                        ApplicationViewState.PropertyChanged += ApplicationViewState_PropertyChanged;
+                        IsSubscribedApplicationViewStatePropertyChanged = true;
+                    }
                     break;
                 case nameof(UseExpression):
                     IsEnableExpression = PropertyModel.IsEnableExpression;
@@ -594,14 +638,30 @@ namespace NiVE3.ViewModel
 
         private void PropertyModel_ValueInvalidateByHistoryChanged(object? sender, EventArgs e)
         {
-            CurrentTimeValue = CalculationValue();
+            if (!ApplicationViewState.IsIgnoreUpdatePreview)
+            {
+                CurrentTimeValue = CalculationValue();
+            }
+            else if (!IsSubscribedApplicationViewStatePropertyChanged)
+            {
+                ApplicationViewState.PropertyChanged += ApplicationViewState_PropertyChanged;
+                IsSubscribedApplicationViewStatePropertyChanged = true;
+            }
         }
 
         private void KeyFrames_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             HasKeyFrame = KeyFrames.Count > 0;
             CurrentTimeRawValue = CalculationRawValue();
-            CurrentTimeValue = CalculationValue();
+            if (!ApplicationViewState.IsIgnoreUpdatePreview)
+            {
+                CurrentTimeValue = CalculationValue();
+            }
+            else if (!IsSubscribedApplicationViewStatePropertyChanged)
+            {
+                ApplicationViewState.PropertyChanged += ApplicationViewState_PropertyChanged;
+                IsSubscribedApplicationViewStatePropertyChanged = true;
+            }
         }
 
         private void SelectedKeyFrameIds_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -609,6 +669,21 @@ namespace NiVE3.ViewModel
             if (!IsSelectingAll && SelectedKeyFrameIds.Count > 0)
             {
                 SelectItemChangedPublisher.Publish(this, new SelectItemEventArgs(SelectItemType.KeyFrame, false, SelectedKeyFrameIds.ToArray(), this));
+            }
+        }
+
+        private void ApplicationViewState_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(ViewStateModel.IsIgnoreUpdatePreview) && !ApplicationViewState.IsIgnoreUpdatePreview)
+            {
+                CurrentTimeValue = CalculationValue();
+                if (NeedPublishPropertyValueUpdate)
+                {
+                    PropertyValueUpdatePublisher.Publish(this, new PropertyValueCommitedEventArgs(this));
+                    NeedPublishPropertyValueUpdate = false;
+                }
+                ApplicationViewState.PropertyChanged -= ApplicationViewState_PropertyChanged;
+                IsSubscribedApplicationViewStatePropertyChanged = false;
             }
         }
     }

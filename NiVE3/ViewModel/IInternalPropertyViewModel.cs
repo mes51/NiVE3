@@ -9,6 +9,7 @@ using NiVE3.Mvvm;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Property;
 using System.Windows.Input;
+using NiVE3.Model.UI;
 
 namespace NiVE3.ViewModel
 {
@@ -50,19 +51,19 @@ namespace NiVE3.ViewModel
 
     static class InternalPropertyViewModel
     {
-        public static IInternalPropertyViewModel CreateViewModel(IPropertyModel model)
+        public static IInternalPropertyViewModel CreateViewModel(IPropertyModel model, ViewStateModel viewState)
         {
             if (model is PropertyGroupModel pg)
             {
-                return new PropertyGroupViewModel(pg);
+                return new PropertyGroupViewModel(pg, viewState);
             }
             else if (model is AppendablePropertyModel ap)
             {
-                return new AppendablePropertyViewModel(ap);
+                return new AppendablePropertyViewModel(ap, viewState);
             }
             else
             {
-                return new PropertyViewModel((PropertyModel)model);
+                return new PropertyViewModel((PropertyModel)model, viewState);
             }
         }
     }

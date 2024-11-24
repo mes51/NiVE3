@@ -69,9 +69,19 @@ namespace NiVE3.ViewModel
             HistoryModel = model;
             ViewState = viewState;
 
-            UndoCommand = new DelegateCommand(() => HistoryModel.Undo(), () => HistoryModel.CanUndo());
+            UndoCommand = new DelegateCommand(() =>
+            {
+                IsIgnoreUpdatePreview = true;
+                HistoryModel.Undo();
+                IsIgnoreUpdatePreview = false;
+            }, () => HistoryModel.CanUndo());
 
-            RedoCommand = new DelegateCommand(() => HistoryModel.Redo(), () => HistoryModel.CanRedo());
+            RedoCommand = new DelegateCommand(() =>
+            {
+                IsIgnoreUpdatePreview = true;
+                HistoryModel.Redo();
+                IsIgnoreUpdatePreview = false;
+            }, () => HistoryModel.CanRedo());
 
             ReproduceToTargetHistoryCommand = new DelegateCommand<IHistoryCommand>(targetHistory =>
             {

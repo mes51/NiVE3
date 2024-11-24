@@ -16,6 +16,7 @@ using NiVE3.SourceGenerator.ViewModelWireGenerator;
 using NiVE3.Data.Json.Project;
 using NiVE3.Util;
 using NiVE3.Data.Clipboard;
+using NiVE3.Model.UI;
 
 namespace NiVE3.ViewModel
 {
@@ -166,9 +167,9 @@ namespace NiVE3.ViewModel
 
         string PrevName { get; set; } = "";
 
-        public PropertyGroupViewModel(PropertyGroupModel propertyGroupModel) : this(propertyGroupModel, false) { }
+        public PropertyGroupViewModel(PropertyGroupModel propertyGroupModel, ViewStateModel viewState) : this(propertyGroupModel, viewState, false) { }
 
-        public PropertyGroupViewModel(PropertyGroupModel propertyGroupModel, bool isRenameable)
+        public PropertyGroupViewModel(PropertyGroupModel propertyGroupModel, ViewStateModel viewState, bool isRenameable)
         {
             SelectedChildren = [];
             PropertyGroupModel = propertyGroupModel;
@@ -176,7 +177,7 @@ namespace NiVE3.ViewModel
             Property = propertyGroupModel.Property;
             children = propertyGroupModel.Children.CreateViewCollection(m =>
             {
-                var vm = InternalPropertyViewModel.CreateViewModel(m);
+                var vm = InternalPropertyViewModel.CreateViewModel(m, viewState);
                 vm.SelectItemChanged += Property_SelectItemChanged;
                 vm.PropertyValueCommited += Property_PropertyValueCommited;
                 return vm;

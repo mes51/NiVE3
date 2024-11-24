@@ -18,6 +18,7 @@ using NiVE3.View.Primitive;
 using NiVE3.Util;
 using NiVE3.Data.Json.Project;
 using NiVE3.Data.Clipboard;
+using NiVE3.Model.UI;
 
 namespace NiVE3.ViewModel
 {
@@ -129,14 +130,14 @@ namespace NiVE3.ViewModel
 
         AppendablePropertyModel AppendablePropertyModel { get; }
 
-        public AppendablePropertyViewModel(AppendablePropertyModel appendablePropertyModel)
+        public AppendablePropertyViewModel(AppendablePropertyModel appendablePropertyModel, ViewStateModel viewState)
         {
             SelectedChildren = [];
             AppendablePropertyModel = appendablePropertyModel;
             Property = appendablePropertyModel.Property;
             children = appendablePropertyModel.Children.CreateViewCollection(m =>
             {
-                var vm = new PropertyGroupViewModel((PropertyGroupModel)m, true);
+                var vm = new PropertyGroupViewModel((PropertyGroupModel)m, viewState, true);
                 vm.SelectItemChanged += Property_SelectItemChanged;
                 vm.PropertyValueCommited += Property_PropertyValueCommited;
                 vm.IsEnableChangeRequest += Property_IsEnableChangeRequest;

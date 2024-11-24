@@ -9,6 +9,7 @@ using NiVE3.Model;
 using NiVE3.Mvvm;
 using System.Windows.Input;
 using Prism.Commands;
+using NiVE3.Model.UI;
 
 namespace NiVE3.ViewModel
 {
@@ -122,11 +123,11 @@ namespace NiVE3.ViewModel
         string PrevComment { get; set; } = "";
 
 #pragma warning disable CS8618 // 各フィールドには初期化時に必ず値を代入するため無視
-        public EffectViewModel(EffectModel effectModel)
+        public EffectViewModel(EffectModel effectModel, ViewStateModel viewState)
 #pragma warning restore CS8618
         {
             EffectModel = effectModel;
-            Properties = new PropertyGroupViewModel(effectModel.Properties);
+            Properties = new PropertyGroupViewModel(effectModel.Properties, viewState);
 
             ChangeIsEnableCommand = new DelegateCommand(() =>
             {
