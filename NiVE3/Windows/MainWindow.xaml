@@ -30,6 +30,7 @@
         WindowStartupLocation="CenterScreen"
         Closing="Window_Closing"
         Height="1000" Width="1800"
+        KeyboardNavigation.ControlTabNavigation="None"
         a:ShortcutKeyBindingProperty.InputBinding="True"
         pr:ViewModelLocator.AutoWireViewModel="False">
     <Window.Resources>
