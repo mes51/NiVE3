@@ -566,7 +566,12 @@ namespace NiVE3.Input
 
                 if (textRun.Blur != Vector2.Zero)
                 {
-                    Blur.BoxBlur(glyphImage, textRun.Blur.X, textRun.Blur.Y);
+                    var horizontalRange = textRun.Blur.X / 2.0F;
+                    var verticalRange = textRun.Blur.Y / 2.0F;
+
+                    Blur.BoxBlur(glyphImage, horizontalRange, verticalRange);
+                    Blur.BoxBlur(glyphImage, horizontalRange, verticalRange);
+                    Blur.BoxBlur(glyphImage, horizontalRange, verticalRange);
                 }
                 DrawImage(interCharBlendMode, image, glyphImage, textRun.Opacity, intLeft - min.GetElement(0) - blurMargin.GetElement(0), intTop - min.GetElement(1) - blurMargin.GetElement(1));
             }

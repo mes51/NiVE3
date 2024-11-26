@@ -25,7 +25,7 @@ namespace NiVE3.Image
             {
                 var pz = (int)Math.Ceiling(horizontal);
                 var fmz = pz - horizontal;
-                var fz = 1 - fmz;
+                var fz = 1.0F - fmz;
                 var count = horizontal * 2.0F + 1.0F;
 
                 Parallel.For(0, imageHeight, h =>
@@ -39,12 +39,12 @@ namespace NiVE3.Image
                         if (fmz > 0.0F)
                         {
                             var p = GetPixelForX(data, imageWidth, w, h);
-                            var ta = p.W * fmz;
+                            var ta = p.W * fz;
                             rgb += p * ta;
                             a += ta;
 
-                            p = GetPixelForX(data, imageWidth, pz, h);
-                            ta = p.W * fmz;
+                            p = GetPixelForX(data, imageWidth, pz - 1, h);
+                            ta = p.W * fz;
                             rgb += p * ta;
                             a += ta;
                         }
@@ -114,7 +114,7 @@ namespace NiVE3.Image
             {
                 var pz = (int)Math.Ceiling(vertical);
                 var fmz = pz - vertical;
-                var fz = 1 - fmz;
+                var fz = 1.0F - fmz;
                 var count = vertical * 2.0F + 1.0F;
 
                 Parallel.For(0, imageWidth, w =>
@@ -132,7 +132,7 @@ namespace NiVE3.Image
                             rgb += p * ta;
                             a += ta;
 
-                            p = GetPixelForX(temp, imageHeight, pz, w);
+                            p = GetPixelForX(temp, imageHeight, pz - 1, w);
                             ta = p.W * fz;
                             rgb += p * ta;
                             a += ta;
