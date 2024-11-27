@@ -29,8 +29,6 @@ namespace NiVE3.PresetPlugin.Effect.Blur
 
         const string PropertyDirectionId = nameof(PropertyDirectionId);
 
-        const string PropertyIsRepeatEdgeId = nameof(PropertyIsRepeatEdgeId);
-
         const string PropertyEdgeRepeatModeId = nameof(PropertyEdgeRepeatModeId);
 
         IAcceleratorObject? AcceleratorObject { get; set; }

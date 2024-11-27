@@ -74,7 +74,7 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
                                 for (var x = 0; x < targetWidth; x++)
                                 {
                                     var sourceX = x * scaleX;
-                                    resizedImageDataSpan[x] = ImageInterpolation.BilinearEdgeRepeat(sourceImageData, sourceImage.Width, sourceImage.Height, sourceX, sourceY);
+                                    resizedImageDataSpan[x] = ImageInterpolation.BilinearInflateEdge(sourceImageData, sourceImage.Width, sourceImage.Height, sourceX, sourceY);
                                 }
                             });
                         }

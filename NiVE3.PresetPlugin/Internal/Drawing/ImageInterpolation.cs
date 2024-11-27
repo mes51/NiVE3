@@ -5,6 +5,7 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using NiVE3.PresetPlugin.Effect.Util;
 
 namespace NiVE3.PresetPlugin.Internal.Drawing
 {
@@ -40,7 +41,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             var ix = (int)Math.Floor(x);
             var iy = (int)Math.Floor(y);
 
-            return texture[RepeatCoord(iy, height) * width + RepeatCoord(ix, width)];
+            return texture[CoordWrap.Repeat(iy, height) * width + CoordWrap.Repeat(ix, width)];
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -151,20 +152,36 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector4 BilinearLoop(ReadOnlySpan<Vector4> texture, int width, int height, float x, float y)
+        public static Vector4 Bilinear(ReadOnlySpan<Vector4> texture, int width, int height, float x, float y, in Vector4 defaultColor, BilinearEdgeMode edgeRepeatMode)
+        {
+            switch (edgeRepeatMode)
+            {
+                case BilinearEdgeMode.Wrap:
+                    return BilinearEdgeRepeat(texture, width, height, x, y);
+                case BilinearEdgeMode.Repeat:
+                    return BilinearLoop(texture, width, height, x, y);
+                case BilinearEdgeMode.Mirror:
+                    return BilinearMirror(texture, width, height, x, y);
+                default:
+                    return Bilinear(texture, width, height, x, y, defaultColor);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector4 BilinearEdgeRepeat(ReadOnlySpan<Vector4> texture, int width, int height, float x, float y)
         {
             var ix = (int)Math.Floor(x);
             var iy = (int)Math.Floor(y);
 
             if (ix == x && iy == y)
             {
-                return texture[RepeatCoord(iy, height) * width + RepeatCoord(ix, width)];
+                return texture[CoordWrap.Wrap(iy, height) * width + CoordWrap.Wrap(ix, width)];
             }
 
-            var c1 = texture[RepeatCoord(iy, height) * width + RepeatCoord(ix, width)];
-            var c2 = texture[RepeatCoord(iy, height) * width + RepeatCoord(ix + 1, width)];
-            var c3 = texture[RepeatCoord(iy + 1, height) * width + RepeatCoord(ix, width)];
-            var c4 = texture[RepeatCoord(iy + 1, height) * width + RepeatCoord(ix + 1, width)];
+            var c1 = texture[CoordWrap.Wrap(iy, height) * width + CoordWrap.Wrap(ix, width)];
+            var c2 = texture[CoordWrap.Wrap(iy, height) * width + CoordWrap.Wrap(ix + 1, width)];
+            var c3 = texture[CoordWrap.Wrap(iy + 1, height) * width + CoordWrap.Wrap(ix, width)];
+            var c4 = texture[CoordWrap.Wrap(iy + 1, height) * width + CoordWrap.Wrap(ix + 1, width)];
 
             var pp = x - ix;
             var qq = y - iy;
@@ -180,13 +197,89 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector4 BilinearEdgeRepeat(ReadOnlySpan<Vector4> texture, int width, int height, float x, float y)
+        public static Vector4 BilinearLoop(ReadOnlySpan<Vector4> texture, int width, int height, float x, float y)
         {
-            return BilinearEdgeRepeat(texture, width, height, x, y, EmptyPixel);
+            var ix = (int)Math.Floor(x);
+            var iy = (int)Math.Floor(y);
+
+            if (ix == x && iy == y)
+            {
+                return texture[CoordWrap.Repeat(iy, height) * width + CoordWrap.Repeat(ix, width)];
+            }
+
+            var c1 = texture[CoordWrap.Repeat(iy, height) * width + CoordWrap.Repeat(ix, width)];
+            var c2 = texture[CoordWrap.Repeat(iy, height) * width + CoordWrap.Repeat(ix + 1, width)];
+            var c3 = texture[CoordWrap.Repeat(iy + 1, height) * width + CoordWrap.Repeat(ix, width)];
+            var c4 = texture[CoordWrap.Repeat(iy + 1, height) * width + CoordWrap.Repeat(ix + 1, width)];
+
+            var pp = x - ix;
+            var qq = y - iy;
+            var ta = Vector4.Lerp(Vector4.Lerp(c1, c3, qq), Vector4.Lerp(c2, c4, qq), pp).W;
+            if (ta <= 0.0F)
+            {
+                return EmptyPixel;
+            }
+            var t = Vector4.Lerp(Vector4.Lerp(c1 * c1.W, c3 * c3.W, qq), Vector4.Lerp(c2 * c2.W, c4 * c4.W, qq), pp) / ta;
+            t.W = ta;
+
+            return t;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector4 BilinearEdgeRepeat(ReadOnlySpan<Vector4> texture, int width, int height, float x, float y, in Vector4 defaultColor)
+        public static Vector4 BilinearMirror(ReadOnlySpan<Vector4> texture, int width, int height, float x, float y)
+        {
+            var ix = (int)Math.Floor(x);
+            var iy = (int)Math.Floor(y);
+
+            if (ix == x && iy == y)
+            {
+                return texture[CoordWrap.Mirror(iy, height) * width + CoordWrap.Mirror(ix, width)];
+            }
+
+            var c1 = texture[CoordWrap.Mirror(iy, height) * width + CoordWrap.Mirror(ix, width)];
+            var c2 = texture[CoordWrap.Mirror(iy, height) * width + CoordWrap.Mirror(ix + 1, width)];
+            var c3 = texture[CoordWrap.Mirror(iy + 1, height) * width + CoordWrap.Mirror(ix, width)];
+            var c4 = texture[CoordWrap.Mirror(iy + 1, height) * width + CoordWrap.Mirror(ix + 1, width)];
+
+            var pp = x - ix;
+            var qq = y - iy;
+            var ta = Vector4.Lerp(Vector4.Lerp(c1, c3, qq), Vector4.Lerp(c2, c4, qq), pp).W;
+            if (ta <= 0.0F)
+            {
+                return EmptyPixel;
+            }
+            var t = Vector4.Lerp(Vector4.Lerp(c1 * c1.W, c3 * c3.W, qq), Vector4.Lerp(c2 * c2.W, c4 * c4.W, qq), pp) / ta;
+            t.W = ta;
+
+            return t;
+        }
+
+        /// <summary>
+        /// 補間時のみ、端の色をリピートする
+        /// </summary>
+        /// <param name="texture"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector4 BilinearInflateEdge(ReadOnlySpan<Vector4> texture, int width, int height, float x, float y)
+        {
+            return BilinearInflateEdge(texture, width, height, x, y, EmptyPixel);
+        }
+        
+        /// <summary>
+        /// 補間時のみ、端の色をリピートする
+        /// </summary>
+        /// <param name="texture"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector4 BilinearInflateEdge(ReadOnlySpan<Vector4> texture, int width, int height, float x, float y, in Vector4 defaultColor)
         {
             var ix = (int)Math.Floor(x);
             var iy = (int)Math.Floor(y);
@@ -312,11 +405,13 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
             return t;
         }
+    }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static int RepeatCoord(int v, int max)
-        {
-            return ((v % max) + max) % max;
-        }
+    enum BilinearEdgeMode
+    {
+        None,
+        Wrap,
+        Repeat,
+        Mirror
     }
 }
