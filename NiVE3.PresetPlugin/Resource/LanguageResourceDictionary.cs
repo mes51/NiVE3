@@ -514,6 +514,17 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("ランダムシード")]
         public const string Distortion_WaveWarp_RandomSeed = nameof(Distortion_WaveWarp_RandomSeed);
 
+        // FishEye
+
+        [DefaultValue("魚眼")]
+        public const string Distortion_FishEye_Name = nameof(Distortion_FishEye_Name);
+
+        [DefaultValue("画像を魚眼レンズで見たときのように歪ませます")]
+        public const string Distortion_FishEye_Description = nameof(Distortion_FishEye_Description);
+
+        [LanguageKey, DefaultValue("量")]
+        public const string Distortion_FishEye_Amount = nameof(Distortion_FishEye_Amount);
+
         // Dynamics
 
         [DefaultValue("ダイナミクス")]
