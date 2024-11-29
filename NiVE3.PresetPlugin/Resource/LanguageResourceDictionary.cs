@@ -257,6 +257,44 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("グローの方向")]
         public const string Stylize_Glow_Direction = nameof(Stylize_Glow_Direction);
 
+        // ChromaticAberration
+
+        [DefaultValue("色収差")]
+        public const string Stylize_ChromaticAberration_Name = nameof(Stylize_ChromaticAberration_Name);
+
+        [DefaultValue("画像に色収差が発生したような効果を適用します")]
+        public const string Stylize_ChromaticAberration_Description = nameof(Stylize_ChromaticAberration_Description);
+
+        [LanguageKey, DefaultValue("色差のチャンネル")]
+        public const string Stylize_ChromaticAberration_Channel = nameof(Stylize_ChromaticAberration_Channel);
+
+        [LanguageKey, DefaultValue("トランスフォーム")]
+        public const string Stylize_ChromaticAberration_Transform_Group = nameof(Stylize_ChromaticAberration_Transform_Group);
+
+        [LanguageKey, DefaultValue("アンカーポイント")]
+        public const string Stylize_ChromaticAberration_Transform_AnchorPoint = nameof(Stylize_ChromaticAberration_Transform_AnchorPoint);
+
+        [LanguageKey, DefaultValue("位置")]
+        public const string Stylize_ChromaticAberration_Transform_Position = nameof(Stylize_ChromaticAberration_Transform_Position);
+
+        [LanguageKey, DefaultValue("スケール")]
+        public const string Stylize_ChromaticAberration_Transform_Scale = nameof(Stylize_ChromaticAberration_Transform_Scale);
+
+        [LanguageKey, DefaultValue("回転")]
+        public const string Stylize_ChromaticAberration_Transform_Angle = nameof(Stylize_ChromaticAberration_Transform_Angle);
+
+        [LanguageKey, DefaultValue("歪み")]
+        public const string Stylize_ChromaticAberration_Distortion_Group = nameof(Stylize_ChromaticAberration_Distortion_Group);
+
+        [LanguageKey, DefaultValue("歪み")]
+        public const string Stylize_ChromaticAberration_Distortion_Distortion = nameof(Stylize_ChromaticAberration_Distortion_Distortion);
+
+        [LanguageKey, DefaultValue("色差の歪み")]
+        public const string Stylize_ChromaticAberration_Distortion_ChromaDistortion = nameof(Stylize_ChromaticAberration_Distortion_ChromaDistortion);
+
+        [LanguageKey, DefaultValue("範囲外の画像を繰り返す")]
+        public const string Stylize_ChromaticAberration_IsMirrorEdge = nameof(Stylize_ChromaticAberration_IsMirrorEdge);
+
         // Level
 
         [DefaultValue("レベル")]
@@ -1115,6 +1153,15 @@ namespace NiVE3.PresetPlugin.Resource
 
         [DefaultValue("ノイズ(滑らか)")]
         public const string WaveWarpType_SmoothNoise = nameof(WaveWarpType_SmoothNoise);
+
+        [DefaultValue("赤&青")]
+        public const string ChromaticAberrationChannelType_RedAndBlue = nameof(ChromaticAberrationChannelType_RedAndBlue);
+
+        [DefaultValue("赤&緑")]
+        public const string ChromaticAberrationChannelType_RedAndGreen = nameof(ChromaticAberrationChannelType_RedAndGreen);
+
+        [DefaultValue("緑&青")]
+        public const string ChromaticAberrationChannelType_GreenAndBlue = nameof(ChromaticAberrationChannelType_GreenAndBlue);
 
         // unit
 
