@@ -62,13 +62,21 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
             {
                 var rad = (properties.GetValue(PropertyAngleId, layerTime, 0.0) + 90.0) / 180.0 * Math.PI;
                 var length = (float)(properties.GetValue(PropertyLengthId, layerTime, 0.0) / downSamplingRateX);
+                var count = (int)properties.GetValue(PropertyCountId, layerTime, 1.0);
                 var maxRange = (int)MathF.Ceiling(length) * 2;
-                var sin = (float)Math.Sin(rad);
-                var cos = (float)Math.Cos(rad);
+                var radianIncrement = Math.PI / count;
 
-                var expandX = (int)Math.Ceiling(Math.Abs(maxRange * cos));
-                var expandY = (int)Math.Ceiling(Math.Abs(maxRange * sin));
-                return baseRoi.Expand(-expandX, -expandY, expandX, expandY);
+                var maxExpandX = 0;
+                var maxExpandY = 0;
+                for (var i = 0; i < count; i++)
+                {
+                    var sin = (float)Math.Sin(rad + radianIncrement * i);
+                    var cos = (float)Math.Cos(rad + radianIncrement * i);
+                    maxExpandX = Math.Max(maxExpandX, (int)Math.Ceiling(Math.Abs(maxRange * cos)));
+                    maxExpandY = Math.Max(maxExpandY, (int)Math.Ceiling(Math.Abs(maxRange * sin)));
+                }
+
+                return baseRoi.Expand(-maxExpandX, -maxExpandY, maxExpandX, maxExpandY);
             }
             else
             {
