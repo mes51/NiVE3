@@ -295,6 +295,41 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("範囲外の画像を繰り返す")]
         public const string Stylize_ChromaticAberration_IsMirrorEdge = nameof(Stylize_ChromaticAberration_IsMirrorEdge);
 
+        // StarBurst
+
+        [DefaultValue("スターバースト")]
+        public const string Stylize_StarBurst_Name = nameof(Stylize_StarBurst_Name);
+
+        [DefaultValue("画像の明るい部分を放射状に光らせます")]
+        public const string Stylize_StarBurst_Description = nameof(Stylize_StarBurst_Description);
+
+        [LanguageKey, DefaultValue("光条の強さ")]
+        public const string Stylize_StarBurst_Strength = nameof(Stylize_StarBurst_Strength);
+
+        [LanguageKey, DefaultValue("光条の本数")]
+        public const string Stylize_StarBurst_Count = nameof(Stylize_StarBurst_Count);
+
+        [LanguageKey, DefaultValue("光条の長さ")]
+        public const string Stylize_StarBurst_Length = nameof(Stylize_StarBurst_Length);
+
+        [LanguageKey, DefaultValue("光条の角度")]
+        public const string Stylize_StarBurst_Angle = nameof(Stylize_StarBurst_Angle);
+
+        [LanguageKey, DefaultValue("閾値")]
+        public const string Stylize_StarBurst_Threshold = nameof(Stylize_StarBurst_Threshold);
+
+        [LanguageKey, DefaultValue("光条の色")]
+        public const string Stylize_StarBurst_Color = nameof(Stylize_StarBurst_Color);
+
+        [LanguageKey, DefaultValue("ブレンドモード")]
+        public const string Stylize_StarBurst_BlendMode = nameof(Stylize_StarBurst_BlendMode);
+
+        [LanguageKey, DefaultValue("合成順")]
+        public const string Stylize_StarBurst_CompositeOrder = nameof(Stylize_StarBurst_CompositeOrder);
+
+        [LanguageKey, DefaultValue("エッジの繰り返しモード")]
+        public const string Stylize_StarBurst_EdgeRepeatMode = nameof(Stylize_StarBurst_EdgeRepeatMode);
+
         // Level
 
         [DefaultValue("レベル")]

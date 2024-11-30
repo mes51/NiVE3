@@ -7,7 +7,6 @@ using System.Text;
 using System.Threading.Tasks;
 using ComputeSharp;
 using NiVE3.Image;
-using NiVE3.Image.Color;
 using NiVE3.Image.Drawing;
 using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Interfaces;
@@ -17,9 +16,8 @@ using NiVE3.Plugin.Resource;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.PresetPlugin.Effect.Util;
 using NiVE3.PresetPlugin.Effect.Util.Blur;
+using NiVE3.PresetPlugin.Effect.Util.Stylize;
 using NiVE3.PresetPlugin.Extension;
-using NiVE3.PresetPlugin.Internal;
-using NiVE3.PresetPlugin.Internal.ComputeShader;
 using NiVE3.PresetPlugin.Resource;
 
 namespace NiVE3.PresetPlugin.Effect.Stylize
@@ -60,7 +58,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
             return
             [
                 new DoubleProperty(PropertyRangeId, LanguageResourceDictionary.ResourceKeys.Stylize_Glow_Range, 10.0, 0.0, 10000.0, digit: 2),
-                new DoubleProperty(PropertyStrengthId, LanguageResourceDictionary.ResourceKeys.Stylize_Glow_Strength, 1.0, 0.0, 100.0, slideChangeValue: 0.1, digit: 3),
+                new DoubleProperty(PropertyStrengthId, LanguageResourceDictionary.ResourceKeys.Stylize_Glow_Strength, 1.0, 0.0, double.MaxValue, slideChangeValue: 0.1, digit: 3),
                 new DoubleProperty(PropertyThresholdId, LanguageResourceDictionary.ResourceKeys.Stylize_Glow_Threshold, 0.0, double.MinValue, double.MaxValue, slideChangeValue: 0.01, digit: 2),
                 new ColorProperty(PropertyColorId, LanguageResourceDictionary.ResourceKeys.Stylize_Glow_Color, LanguageResourceDictionary.ResourceKeys.Dialog_ColorDialog_Title_Color, LanguageResourceDictionary.ResourceKeys.Dialog_OK, LanguageResourceDictionary.ResourceKeys.Dialog_Cancel, Vector4.One),
                 new EnumProperty(PropertyBlendModeId, LanguageResourceDictionary.ResourceKeys.Stylize_Glow_BlendMode, typeof(BlendMode), typeof(LanguageResourceDictionary), BlendMode.Add, selectBoxWidth: 90.0),
@@ -147,48 +145,12 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
             var bottom = Math.Min((int)MathF.Ceiling(roi.Bottom + verticalRange * BlurRepeatCount), blurredImage.Height);
             var left = Math.Max((int)MathF.Floor(roi.Left - horizontalRange * BlurRepeatCount), 0);
             var right = Math.Min((int)Math.Ceiling(roi.Right + horizontalRange * BlurRepeatCount), blurredImage.Width);
-            var imageWidth = managedImage.Width;
-            var blurredImageData = blurredImage.Data;
-            Parallel.For(top, bottom, y =>
-            {
-                var blurredImageDataSpan = blurredImageData.AsSpan(y * imageWidth, imageWidth);
-                for (var x = left; x < right; x++)
-                {
-                    if (Vector4.Dot(blurredImageDataSpan[x], Const.ConvertToGrayScale) < threshold)
-                    {
-                        blurredImageDataSpan[x] = new Vector4(1.0F, 1.0F, 1.0F, 0.0F);
-                    }
-                }
-            });
+
+            GlowProcess.ThresholdCpu(blurredImage, new ROI(new Int32Point(), new Int32Size(blurredImage.Width, blurredImage.Height), left, top, right, bottom), threshold);
+
             blurredImage = BoxBlurProcess.ProcessCpu(blurredImage, roi, horizontalRange, verticalRange, BlurRepeatCount, edgeRepeatMode);
 
-            var imageData = managedImage.Data;
-            if (compositeOrder == CompositeOrder.Front)
-            {
-                Parallel.For(roi.Top, bottom, y =>
-                {
-                    var imageDataSpan = imageData.AsSpan(y * imageWidth, imageWidth);
-                    var blurredImageDataSpan = blurredImageData.AsSpan(y * imageWidth, imageWidth);
-
-                    for (var x = roi.Left; x < roi.Right; x++)
-                    {
-                        imageDataSpan[x] = Blend.Process(blendMode, imageDataSpan[x], blurredImageDataSpan[x] * strength * color);
-                    }
-                });
-            }
-            else
-            {
-                Parallel.For(roi.Top, bottom, y =>
-                {
-                    var imageDataSpan = imageData.AsSpan(y * imageWidth, imageWidth);
-                    var blurredImageDataSpan = blurredImageData.AsSpan(y * imageWidth, imageWidth);
-
-                    for (var x = roi.Left; x < roi.Right; x++)
-                    {
-                        imageDataSpan[x] = Blend.Process(blendMode, blurredImageDataSpan[x] * strength * color, imageDataSpan[x]);
-                    }
-                });
-            }
+            GlowProcess.CompositeCpu(managedImage, blurredImage, roi, strength, color, blendMode, compositeOrder);
 
             blurredImage.Dispose();
 
@@ -210,17 +172,11 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
             var left = Math.Max((int)MathF.Floor(roi.Left - horizontalRange * BlurRepeatCount), 0);
             var right = Math.Min((int)Math.Ceiling(roi.Right + horizontalRange * BlurRepeatCount), blurredImage.Width);
 
-            using (var context = device.CreateComputeContext())
-            {
-                context.For(right - left, bottom - top, new GlowThresholdProcess(blurredImage.Data, blurredImage.Width, threshold, left, top));
-            }
+            GlowProcess.ThresholdGpu(device, blurredImage, new ROI(new Int32Point(), new Int32Size(blurredImage.Width, blurredImage.Height), left, top, right, bottom), threshold);
 
             BoxBlurProcess.ProcessGpu(device, blurredImage, roi, horizontalRange, verticalRange, BlurRepeatCount, edgeRepeatMode);
 
-            using (var context = device.CreateComputeContext())
-            {
-                context.For(roi.Width, roi.Height, new GlowCompositeProcess(gpuImage.Data, blurredImage.Data, gpuImage.Width, strength, color, (int)blendMode, (int)compositeOrder, roi.Left, roi.Top));
-            }
+            GlowProcess.CompositeGpu(device, gpuImage, blurredImage, roi, strength, color, blendMode, compositeOrder);
 
             return gpuImage;
         }
@@ -231,39 +187,5 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
         HorizontalAndVertical,
         Horizontal,
         Vertical
-    }
-
-    [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
-    [GeneratedComputeShaderDescriptor]
-    readonly partial struct GlowThresholdProcess(ReadWriteBuffer<Float4> image, int width, float threshold, int startX, int startY) : IComputeShader
-    {
-        public void Execute()
-        {
-            var pos = (ThreadIds.Y + startY) * width + ThreadIds.X + startX;
-
-            if (Hlsl.Dot(image[pos].XYZ, Const.ConvertToGrayScaleFloat3) < threshold)
-            {
-                image[pos] = new Float4(1.0F, 1.0F, 1.0F, 0.0F);
-            }
-        }
-    }
-
-    [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
-    [GeneratedComputeShaderDescriptor]
-    readonly partial struct GlowCompositeProcess(ReadWriteBuffer<Float4> image, ReadWriteBuffer<Float4> blurredImage, int width, float strength, Float4 color, int blendMode, int compositeOrder, int startX, int startY) : IComputeShader
-    {
-        public void Execute()
-        {
-            var pos = (ThreadIds.Y + startY) * width + ThreadIds.X + startX;
-
-            if (compositeOrder == 0) // CompositeOrder.Front
-            {
-                image[pos] = BlendMethods.Process(blendMode, image[pos], blurredImage[pos] * strength * color);
-            }
-            else
-            {
-                image[pos] = BlendMethods.Process(blendMode, blurredImage[pos] * strength * color, image[pos]);
-            }
-        }
     }
 }
