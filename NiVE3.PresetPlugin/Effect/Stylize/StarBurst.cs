@@ -160,13 +160,13 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
                 {
                     if (c + 1 >= count)
                     {
-                        DirectionalBlurProcess.ProcessCpu(blurredImage, roi, rad + radianIncrement * c, length, edgeRepeatMode, true);
+                        DirectionalBlurProcess.BidirectionalCpu(blurredImage, roi, rad + radianIncrement * c, length, edgeRepeatMode, true);
                         ImageBlendProcess.SameSizeCpu(starBurstImage, blurredImage, roi, BlendMode.Add);
                     }
                     else
                     {
                         using var temp = (NManagedImage)blurredImage.Copy();
-                        DirectionalBlurProcess.ProcessCpu(temp, roi, rad + radianIncrement * c, length, edgeRepeatMode, true);
+                        DirectionalBlurProcess.BidirectionalCpu(temp, roi, rad + radianIncrement * c, length, edgeRepeatMode, true);
                         ImageBlendProcess.SameSizeCpu(starBurstImage, temp, roi, BlendMode.Add);
                     }
                 }
@@ -202,13 +202,13 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
                 {
                     if (c + 1 >= count)
                     {
-                        DirectionalBlurProcess.ProcessGpu(device, blurredImage, roi, rad + radianIncrement * c, length, edgeRepeatMode);
+                        DirectionalBlurProcess.BidirectionalGpu(device, blurredImage, roi, rad + radianIncrement * c, length, edgeRepeatMode);
                         ImageBlendProcess.SameSizeGpu(device, starBurstImage, blurredImage, roi, BlendMode.Add);
                     }
                     else
                     {
                         blurredImage.CopyTo(temp);
-                        DirectionalBlurProcess.ProcessGpu(device, temp, roi, rad + radianIncrement * c, length, edgeRepeatMode);
+                        DirectionalBlurProcess.BidirectionalGpu(device, temp, roi, rad + radianIncrement * c, length, edgeRepeatMode);
                         ImageBlendProcess.SameSizeGpu(device, starBurstImage, temp, roi, BlendMode.Add);
                     }
                 }

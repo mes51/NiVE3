@@ -28,6 +28,8 @@ namespace NiVE3.PresetPlugin.Effect.Blur
 
         const string PropertyAmountId = nameof(PropertyAmountId);
 
+        const string PropertyIsSingleDirectionId = nameof(PropertyIsSingleDirectionId);
+
         const string PropertyEdgeRepeatModeId = nameof(PropertyEdgeRepeatModeId);
 
         const string PropertyFastModeId = nameof(PropertyFastModeId);
@@ -45,6 +47,7 @@ namespace NiVE3.PresetPlugin.Effect.Blur
             [
                 new AngleProperty(PropertyAngleId, LanguageResourceDictionary.ResourceKeys.Blur_DirectionalBlur_Angle, 0.0, digit: 2),
                 new DoubleProperty(PropertyAmountId, LanguageResourceDictionary.ResourceKeys.Blur_DirectionalBlur_Amount, 0.0, 0.0, double.MaxValue, digit: 2),
+                new CheckBoxProperty(PropertyIsSingleDirectionId, LanguageResourceDictionary.ResourceKeys.Blur_DirectionalBlur_IsSingleDirection, false),
                 new EnumProperty(PropertyEdgeRepeatModeId, LanguageResourceDictionary.ResourceKeys.Blur_DirectionalBlur_EdgeRepeatMode, typeof(EdgeRepeatMode), typeof(LanguageResourceDictionary), EdgeRepeatMode.None, selectBoxWidth: 90.0),
                 new CheckBoxProperty(PropertyFastModeId, LanguageResourceDictionary.ResourceKeys.Blur_DirectionalBlur_FastMode, false)
             ];
@@ -53,6 +56,7 @@ namespace NiVE3.PresetPlugin.Effect.Blur
         public ROI CalcRoi(ROI baseRoi, double downSamplingRateX, double downSamplingRateY, double layerTime, IPropertyObject[] properties, ICompositionObject composition)
         {
             var edgeRepeatMode = properties.GetValue(PropertyEdgeRepeatModeId, layerTime, EdgeRepeatMode.None);
+            var isSingleDirection = properties.GetValue(PropertyIsSingleDirectionId, layerTime, false);
 
             if (edgeRepeatMode == EdgeRepeatMode.AddAmount)
             {
@@ -64,7 +68,20 @@ namespace NiVE3.PresetPlugin.Effect.Blur
 
                 var expandX = (int)Math.Ceiling(Math.Abs(maxRange * cos));
                 var expandY = (int)Math.Ceiling(Math.Abs(maxRange * sin));
-                return baseRoi.Expand(-expandX, -expandY, expandX, expandY);
+                if (isSingleDirection)
+                {
+                    return (cos > 0.0F, sin > 0.0F) switch
+                    {
+                        (false, false) => baseRoi.Expand(-expandX, -expandY, 0, 0),
+                        (false, true) => baseRoi.Expand(-expandX, 0, 0, expandY),
+                        (true, false) => baseRoi.Expand(0, -expandY, expandX, 0),
+                        _ => baseRoi.Expand(0, 0, expandX, expandY)
+                    };
+                }
+                else
+                {
+                    return baseRoi.Expand(-expandX, -expandY, expandX, expandY);
+                }
             }
             else
             {
@@ -78,6 +95,7 @@ namespace NiVE3.PresetPlugin.Effect.Blur
             var amount = (float)(properties.GetValue(PropertyAmountId, layerTime, 0.0) / downSamplingRateX);
             var edgeRepeatMode = properties.GetValue(PropertyEdgeRepeatModeId, layerTime, EdgeRepeatMode.None);
             var fastMode = properties.GetValue(PropertyFastModeId, layerTime, false);
+            var isSingleDirection = properties.GetValue(PropertyIsSingleDirectionId, layerTime, false);
 
             if (amount <= 0.0F)
             {
@@ -89,13 +107,27 @@ namespace NiVE3.PresetPlugin.Effect.Blur
             {
                 var device = AcceleratorObject.CurrentDevice;
                 var gpuImage = image.ToGpu(device);
-                DirectionalBlurProcess.ProcessGpu(device, gpuImage, roi, rad, amount, edgeRepeatMode);
+                if (isSingleDirection)
+                {
+                    DirectionalBlurProcess.UnidirectionalGpu(device, gpuImage, roi, rad, amount, edgeRepeatMode);
+                }
+                else
+                {
+                    DirectionalBlurProcess.BidirectionalGpu(device, gpuImage, roi, rad, amount, edgeRepeatMode);
+                }
                 return gpuImage;
             }
             else
             {
                 var managedImage = image.ToManaged();
-                DirectionalBlurProcess.ProcessCpu(managedImage, roi, rad, amount, edgeRepeatMode, fastMode);
+                if (isSingleDirection)
+                {
+                    DirectionalBlurProcess.UnidirectionalCpu(managedImage, roi, rad, amount, edgeRepeatMode, fastMode);
+                }
+                else
+                {
+                    DirectionalBlurProcess.BidirectionalCpu(managedImage, roi, rad, amount, edgeRepeatMode, fastMode);
+                }
                 return managedImage;
             }
         }

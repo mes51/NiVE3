@@ -117,6 +117,9 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("半径")]
         public const string Blur_DirectionalBlur_Amount = nameof(Blur_DirectionalBlur_Amount);
 
+        [LanguageKey, DefaultValue("片方向のみ")]
+        public const string Blur_DirectionalBlur_IsSingleDirection = nameof(Blur_DirectionalBlur_IsSingleDirection);
+
         [LanguageKey, DefaultValue("エッジの繰り返しモード")]
         public const string Blur_DirectionalBlur_EdgeRepeatMode = nameof(Blur_DirectionalBlur_EdgeRepeatMode);
 
