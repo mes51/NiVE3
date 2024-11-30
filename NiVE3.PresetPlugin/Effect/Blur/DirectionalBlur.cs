@@ -87,11 +87,24 @@ namespace NiVE3.PresetPlugin.Effect.Blur
             var rad = angle / 180.0 * Math.PI;
             if (useGpu && AcceleratorObject != null)
             {
-                return DirectionalBlurProcess.ProcessGpu(AcceleratorObject.CurrentDevice, image, roi, rad, amount, edgeRepeatMode);
+                var device = AcceleratorObject.CurrentDevice;
+                var gpuImage = image switch
+                {
+                    NManagedImage managedImage => managedImage.CopyToGpu(device),
+                    _ => (NGPUImage)image
+                };
+                DirectionalBlurProcess.ProcessGpu(device, gpuImage, roi, rad, amount, edgeRepeatMode);
+                return gpuImage;
             }
             else
             {
-                return DirectionalBlurProcess.ProcessCpu(image, roi, rad, amount, edgeRepeatMode, fastMode);
+                var managedImage = image switch
+                {
+                    NGPUImage gpuImage => gpuImage.CopyToCpu(),
+                    _ => (NManagedImage)image
+                };
+                DirectionalBlurProcess.ProcessCpu(managedImage, roi, rad, amount, edgeRepeatMode, fastMode);
+                return managedImage;
             }
         }
 

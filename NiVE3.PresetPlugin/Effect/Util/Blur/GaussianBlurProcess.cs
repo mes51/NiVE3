@@ -17,41 +17,27 @@ namespace NiVE3.PresetPlugin.Effect.Util.Blur
         const double InvertedSqrt2PI = 0.3989422804014327; // 1.0 / Math.Sqrt(Math.PI * 2.0)
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static NManagedImage ProcessCpu(NImage image, ROI roi, float horizontalAmount, float verticalAmount, EdgeRepeatMode edgeRepeatMode)
+        public static void ProcessCpu(NManagedImage image, ROI roi, float horizontalAmount, float verticalAmount, EdgeRepeatMode edgeRepeatMode)
         {
-            var managedImage = image switch
-            {
-                NGPUImage gpuImage => gpuImage.CopyToCpu(),
-                _ => (NManagedImage)image
-            };
-
             if (horizontalAmount > 0.0F && verticalAmount > 0.0F)
             {
-                HorizontalAndVertical(managedImage, roi, horizontalAmount, verticalAmount, edgeRepeatMode);
+                HorizontalAndVertical(image, roi, horizontalAmount, verticalAmount, edgeRepeatMode);
             }
             else if (horizontalAmount > 0.0F)
             {
-                Horizontal(managedImage, roi, horizontalAmount, edgeRepeatMode);
+                Horizontal(image, roi, horizontalAmount, edgeRepeatMode);
             }
             else
             {
-                Vertical(managedImage, roi, verticalAmount, edgeRepeatMode);
+                Vertical(image, roi, verticalAmount, edgeRepeatMode);
             }
-
-            return managedImage;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static NGPUImage ProcessGpu(GraphicsDevice device, NImage image, ROI roi, float horizontalAmount, float verticalAmount, EdgeRepeatMode edgeRepeatMode)
+        public static void ProcessGpu(GraphicsDevice device, NGPUImage image, ROI roi, float horizontalAmount, float verticalAmount, EdgeRepeatMode edgeRepeatMode)
         {
-            var gpuImage = image switch
-            {
-                NManagedImage managedImage => managedImage.CopyToGpu(device),
-                _ => (NGPUImage)image
-            };
-
-            using var temp = new NGPUImage(gpuImage.Width, gpuImage.Height, device);
-            gpuImage.CopyTo(temp);
+            using var temp = new NGPUImage(image.Width, image.Height, device);
+            image.CopyTo(temp);
             if (horizontalAmount > 0.0F && verticalAmount > 0.0F)
             {
                 var horizontalGaussian = GetGaussian(horizontalAmount);
@@ -59,31 +45,29 @@ namespace NiVE3.PresetPlugin.Effect.Util.Blur
                 using var horizontalGaussianBuffer = device.AllocateReadOnlyBuffer(horizontalGaussian);
                 using var verticalGaussianBuffer = device.AllocateReadOnlyBuffer(verticalGaussian);
                 using var context = device.CreateComputeContext();
-                context.For(roi.Width, roi.Height, new GaussianBlurHorizontalProcess(temp.Data, gpuImage.Data, gpuImage.Width, horizontalGaussianBuffer, horizontalGaussian.Sum(), (int)edgeRepeatMode, roi.Left, roi.Top));
+                context.For(roi.Width, roi.Height, new GaussianBlurHorizontalProcess(temp.Data, image.Data, image.Width, horizontalGaussianBuffer, horizontalGaussian.Sum(), (int)edgeRepeatMode, roi.Left, roi.Top));
                 context.Barrier(temp.Data);
-                context.Barrier(gpuImage.Data);
-                context.For(roi.Width, roi.Height, new GaussianBlurVerticalProcess(gpuImage.Data, temp.Data, gpuImage.Width, gpuImage.Height, verticalGaussianBuffer, verticalGaussian.Sum(), (int)edgeRepeatMode, roi.Left, roi.Top));
+                context.Barrier(image.Data);
+                context.For(roi.Width, roi.Height, new GaussianBlurVerticalProcess(image.Data, temp.Data, image.Width, image.Height, verticalGaussianBuffer, verticalGaussian.Sum(), (int)edgeRepeatMode, roi.Left, roi.Top));
                 context.Barrier(temp.Data);
-                context.Barrier(gpuImage.Data);
+                context.Barrier(image.Data);
             }
             else if (horizontalAmount > 0.0F)
             {
                 var horizontalGaussian = GetGaussian(horizontalAmount);
                 using var horizontalGaussianBuffer = device.AllocateReadOnlyBuffer(horizontalGaussian);
                 using var context = device.CreateComputeContext();
-                context.For(roi.Width, roi.Height, new GaussianBlurHorizontalProcess(gpuImage.Data, temp.Data, temp.Width, horizontalGaussianBuffer, horizontalGaussian.Sum(), (int)edgeRepeatMode, roi.Left, roi.Top));
-                context.Barrier(gpuImage.Data);
+                context.For(roi.Width, roi.Height, new GaussianBlurHorizontalProcess(image.Data, temp.Data, temp.Width, horizontalGaussianBuffer, horizontalGaussian.Sum(), (int)edgeRepeatMode, roi.Left, roi.Top));
+                context.Barrier(image.Data);
             }
             else
             {
                 var verticalGaussian = GetGaussian(verticalAmount);
                 using var verticalGaussianBuffer = device.AllocateReadOnlyBuffer(verticalGaussian);
                 using var context = device.CreateComputeContext();
-                context.For(roi.Width, roi.Height, new GaussianBlurVerticalProcess(gpuImage.Data, temp.Data, temp.Width, temp.Height, verticalGaussianBuffer, verticalGaussian.Sum(), (int)edgeRepeatMode, roi.Left, roi.Top));
-                context.Barrier(gpuImage.Data);
+                context.For(roi.Width, roi.Height, new GaussianBlurVerticalProcess(image.Data, temp.Data, temp.Width, temp.Height, verticalGaussianBuffer, verticalGaussian.Sum(), (int)edgeRepeatMode, roi.Left, roi.Top));
+                context.Barrier(image.Data);
             }
-
-            return gpuImage;
         }
 
         static void HorizontalAndVertical(NManagedImage image, ROI roi, float horizontal, float vertical, EdgeRepeatMode edgeRepeatMode)

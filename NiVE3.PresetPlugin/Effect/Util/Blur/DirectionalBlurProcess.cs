@@ -16,53 +16,39 @@ namespace NiVE3.PresetPlugin.Effect.Util.Blur
 {
     static class DirectionalBlurProcess
     {
-        public static NManagedImage ProcessCpu(NImage image, ROI roi, double radian, float amount, EdgeRepeatMode edgeRepeatMode, bool fastMode)
+        public static void ProcessCpu(NManagedImage image, ROI roi, double radian, float amount, EdgeRepeatMode edgeRepeatMode, bool fastMode)
         {
             if (fastMode)
             {
-                return ProcessCpuFast(image, roi, radian, amount, edgeRepeatMode);
+                ProcessCpuFast(image, roi, radian, amount, edgeRepeatMode);
             }
             else
             {
-                return ProcessCpuPrecision(image, roi, radian, amount, edgeRepeatMode);
+                ProcessCpuPrecision(image, roi, radian, amount, edgeRepeatMode);
             }
         }
 
-        public static NGPUImage ProcessGpu(GraphicsDevice device, NImage image, ROI roi, double radian, float amount, EdgeRepeatMode edgeRepeatMode)
+        public static void ProcessGpu(GraphicsDevice device, NGPUImage image, ROI roi, double radian, float amount, EdgeRepeatMode edgeRepeatMode)
         {
-            var gpuImage = image switch
-            {
-                NManagedImage managedImage => managedImage.CopyToGpu(device),
-                _ => (NGPUImage)image
-            };
-
             var cos = (float)Math.Cos(radian);
             var sin = (float)Math.Sin(radian);
 
-            using var sourceImage = new NGPUImage(gpuImage.Width, gpuImage.Height, device);
-            gpuImage.CopyTo(sourceImage);
+            using var sourceImage = new NGPUImage(image.Width, image.Height, device);
+            image.CopyTo(sourceImage);
 
             using var context = device.CreateComputeContext();
-            context.For(roi.Width, roi.Height, new DirectionalBlurGpuProcess(gpuImage.Data, sourceImage.Data, gpuImage.Width, gpuImage.Height, (int)edgeRepeatMode, sin, cos, amount, roi.Left, roi.Top));
-
-            return gpuImage;
+            context.For(roi.Width, roi.Height, new DirectionalBlurGpuProcess(image.Data, sourceImage.Data, image.Width, image.Height, (int)edgeRepeatMode, sin, cos, amount, roi.Left, roi.Top));
         }
 
-        static NManagedImage ProcessCpuPrecision(NImage image, ROI roi, double radian, float amount, EdgeRepeatMode edgeRepeatMode)
+        static void ProcessCpuPrecision(NManagedImage image, ROI roi, double radian, float amount, EdgeRepeatMode edgeRepeatMode)
         {
-            var managedImage = image switch
-            {
-                NGPUImage gpuImage => gpuImage.CopyToCpu(),
-                _ => (NManagedImage)image
-            };
-
-            using var sourceImage = (NManagedImage)managedImage.Copy();
+            using var sourceImage = (NManagedImage)image.Copy();
 
             var cos = (float)Math.Cos(radian);
             var sin = (float)Math.Sin(radian);
-            var imageWidth = managedImage.Width;
-            var imageHeight = managedImage.Height;
-            var imageData = managedImage.Data;
+            var imageWidth = image.Width;
+            var imageHeight = image.Height;
+            var imageData = image.Data;
             var count = amount * 2.0F + 1.0F;
             var edge = amount - (int)amount;
             var edgeRange = (int)MathF.Ceiling(amount);
@@ -118,24 +104,16 @@ namespace NiVE3.PresetPlugin.Effect.Util.Blur
                     imageDataSpan[x] = color;
                 }
             });
-
-            return managedImage;
         }
 
-        static NManagedImage ProcessCpuFast(NImage image, ROI roi, double radian, float amount, EdgeRepeatMode edgeRepeatMode)
+        static void ProcessCpuFast(NManagedImage image, ROI roi, double radian, float amount, EdgeRepeatMode edgeRepeatMode)
         {
-            var managedImage = image switch
-            {
-                NGPUImage gpuImage => gpuImage.CopyToCpu(),
-                _ => (NManagedImage)image
-            };
-
             var pz = (int)Math.Ceiling(amount);
             var fmz = pz - amount;
             var fz = 1.0F - fmz;
             var imageWidth = image.Width;
             var imageHeight = image.Height;
-            var imageData = managedImage.Data;
+            var imageData = image.Data;
             var count = amount * 2.0F + 1.0F;
             var totalPixelCount = pz * 2 + 1;
             var angle = (float)(-radian / Math.PI * 180.0);
@@ -155,11 +133,11 @@ namespace NiVE3.PresetPlugin.Effect.Util.Blur
             temp.AsSpan().Clear();
 
             matrix = Matrix3x3.CreateTranslate(-imageWidth * 0.5F, -imageHeight * 0.5F)
-                .Rotate((float)(-radian / Math.PI * 180.0))
+                .Rotate(angle)
                 .Translate(tempWidth * 0.5F, tempHeight * 0.5F);
             if (!Matrix3x3.Invert(matrix, out var sourceMatrix))
             {
-                return BoxBlurProcess.ProcessCpu(image, roi, 0.0F, amount, 1, edgeRepeatMode);
+                BoxBlurProcess.ProcessCpu(image, roi, 0.0F, amount, 1, edgeRepeatMode);
             }
 
             var bilinearEdgeMode = edgeRepeatMode switch
@@ -263,8 +241,6 @@ namespace NiVE3.PresetPlugin.Effect.Util.Blur
             });
 
             ArrayPool<Vector4>.Shared.Return(temp);
-
-            return managedImage;
         }
     }
 

@@ -140,7 +140,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
                 _ => (NManagedImage)image
             };
 
-            var blurredImage = (NManagedImage)managedImage.Copy();
+            using var blurredImage = (NManagedImage)managedImage.Copy();
             var top = Math.Max((int)MathF.Floor(roi.Top - verticalRange * BlurRepeatCount), 0);
             var bottom = Math.Min((int)MathF.Ceiling(roi.Bottom + verticalRange * BlurRepeatCount), blurredImage.Height);
             var left = Math.Max((int)MathF.Floor(roi.Left - horizontalRange * BlurRepeatCount), 0);
@@ -148,11 +148,9 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
 
             GlowProcess.ThresholdCpu(blurredImage, new ROI(new Int32Point(), new Int32Size(blurredImage.Width, blurredImage.Height), left, top, right, bottom), threshold);
 
-            blurredImage = BoxBlurProcess.ProcessCpu(blurredImage, roi, horizontalRange, verticalRange, BlurRepeatCount, edgeRepeatMode);
+            BoxBlurProcess.ProcessCpu(blurredImage, roi, horizontalRange, verticalRange, BlurRepeatCount, edgeRepeatMode);
 
             GlowProcess.CompositeCpu(managedImage, blurredImage, roi, strength, color, blendMode, compositeOrder);
-
-            blurredImage.Dispose();
 
             return managedImage;
         }

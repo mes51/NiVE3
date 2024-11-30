@@ -15,66 +15,52 @@ namespace NiVE3.PresetPlugin.Effect.Util.Blur
     static class BoxBlurProcess
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static NManagedImage ProcessCpu(NImage image, ROI roi, float horizontalAmount, float verticalAmount, int repeat, EdgeRepeatMode edgeRepeatMode)
+        public static void ProcessCpu(NManagedImage image, ROI roi, float horizontalAmount, float verticalAmount, int repeat, EdgeRepeatMode edgeRepeatMode)
         {
-            var managedImage = image switch
-            {
-                NGPUImage gpuImage => gpuImage.CopyToCpu(),
-                _ => (NManagedImage)image
-            };
-
             if (horizontalAmount > 0.0F && verticalAmount > 0.0)
             {
                 for (var i = 0; i < repeat; i++)
                 {
-                    HorizontalAndVertical(managedImage, roi, horizontalAmount, verticalAmount, edgeRepeatMode);
+                    HorizontalAndVertical(image, roi, horizontalAmount, verticalAmount, edgeRepeatMode);
                 }
             }
             else if (horizontalAmount > 0.0F)
             {
                 for (var i = 0; i < repeat; i++)
                 {
-                    Horizontal(managedImage, roi, horizontalAmount, edgeRepeatMode);
+                    Horizontal(image, roi, horizontalAmount, edgeRepeatMode);
                 }
             }
             else
             {
                 for (var i = 0; i < repeat; i++)
                 {
-                    Vertical(managedImage, roi, verticalAmount, edgeRepeatMode);
+                    Vertical(image, roi, verticalAmount, edgeRepeatMode);
                 }
             }
-
-            return managedImage;
         }
 
-        public static NGPUImage ProcessGpu(GraphicsDevice device, NImage image, ROI roi, float horizontalAmount, float verticalAmount, int repeat, EdgeRepeatMode edgeRepeatMode)
+        public static void ProcessGpu(GraphicsDevice device, NGPUImage image, ROI roi, float horizontalAmount, float verticalAmount, int repeat, EdgeRepeatMode edgeRepeatMode)
         {
-            var gpuImage = image switch
-            {
-                NManagedImage managedImage => managedImage.CopyToGpu(device),
-                _ => (NGPUImage)image
-            };
-
-            using var temp = new NGPUImage(gpuImage.Width, gpuImage.Height, device);
-            gpuImage.CopyTo(temp);
+            using var temp = new NGPUImage(image.Width, image.Height, device);
+            image.CopyTo(temp);
             if (horizontalAmount > 0.0F && verticalAmount > 0.0F)
             {
                 using var context = device.CreateComputeContext();
                 for (var i = 0; i < repeat; i++)
                 {
-                    context.For(roi.Width, roi.Height, new BoxBlurHorizontalProcess(temp.Data, gpuImage.Data, gpuImage.Width, horizontalAmount, (int)edgeRepeatMode, roi.Left, roi.Top));
+                    context.For(roi.Width, roi.Height, new BoxBlurHorizontalProcess(temp.Data, image.Data, image.Width, horizontalAmount, (int)edgeRepeatMode, roi.Left, roi.Top));
                     context.Barrier(temp.Data);
-                    context.Barrier(gpuImage.Data);
-                    context.For(roi.Width, roi.Height, new BoxBlurVerticalProcess(gpuImage.Data, temp.Data, gpuImage.Width, gpuImage.Height, verticalAmount, (int)edgeRepeatMode, roi.Left, roi.Top));
+                    context.Barrier(image.Data);
+                    context.For(roi.Width, roi.Height, new BoxBlurVerticalProcess(image.Data, temp.Data, image.Width, image.Height, verticalAmount, (int)edgeRepeatMode, roi.Left, roi.Top));
                     context.Barrier(temp.Data);
-                    context.Barrier(gpuImage.Data);
+                    context.Barrier(image.Data);
                 }
             }
             else if (horizontalAmount > 0.0F)
             {
                 var src = temp;
-                var dst = gpuImage;
+                var dst = image;
 
                 using (var context = device.CreateComputeContext())
                 {
@@ -89,13 +75,13 @@ namespace NiVE3.PresetPlugin.Effect.Util.Blur
 
                 if (dst == temp)
                 {
-                    temp.CopyTo(gpuImage);
+                    temp.CopyTo(image);
                 }
             }
             else
             {
                 var src = temp;
-                var dst = gpuImage;
+                var dst = image;
 
                 using (var context = device.CreateComputeContext())
                 {
@@ -110,11 +96,9 @@ namespace NiVE3.PresetPlugin.Effect.Util.Blur
 
                 if (dst == temp)
                 {
-                    temp.CopyTo(gpuImage);
+                    temp.CopyTo(image);
                 }
             }
-
-            return gpuImage;
         }
 
         static void HorizontalAndVertical(NManagedImage image, ROI roi, float horizontal, float vertical, EdgeRepeatMode edgeRepeatMode)

@@ -92,11 +92,24 @@ namespace NiVE3.PresetPlugin.Effect.Blur
             var verticalAmount = direction != BlurDirection.Horizontal ? (float)(amount / downSamplingRateY) : 0.0F;
             if (useGpu && AcceleratorObject != null)
             {
-                return GaussianBlurProcess.ProcessGpu(AcceleratorObject.CurrentDevice, image, roi, horizontalAmount, verticalAmount, edgeRepeatMode);
+                var device = AcceleratorObject.CurrentDevice;
+                var gpuImage = image switch
+                {
+                    NManagedImage managedImage => managedImage.CopyToGpu(device),
+                    _ => (NGPUImage)image
+                };
+                GaussianBlurProcess.ProcessGpu(AcceleratorObject.CurrentDevice, gpuImage, roi, horizontalAmount, verticalAmount, edgeRepeatMode);
+                return gpuImage;
             }
             else
             {
-                return GaussianBlurProcess.ProcessCpu(image, roi, horizontalAmount, verticalAmount, edgeRepeatMode);
+                var managedImage = image switch
+                {
+                    NGPUImage gpuImage => gpuImage.CopyToCpu(),
+                    _ => (NManagedImage)image
+                };
+                GaussianBlurProcess.ProcessCpu(managedImage, roi, horizontalAmount, verticalAmount, edgeRepeatMode);
+                return managedImage;
             }
         }
 
