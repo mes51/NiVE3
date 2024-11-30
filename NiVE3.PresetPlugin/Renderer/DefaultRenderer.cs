@@ -409,7 +409,7 @@ namespace NiVE3.PresetPlugin.Renderer
                     var renderer = new CPUMaskRender2D(trackMatte);
                     var downScale = Matrix3x3.CreateScale(1.0F / CurrentDownScaleRateX, 1.0F / CurrentDownScaleRateY);
                     var matrix = Matrix3x3.CreateScale(trackMatteImage.DownSampleRateX, trackMatteImage.DownSampleRateY) * CalcTransform2D(trackMatteImage.Transform, trackMatteImage.ParentTransforms) * downScale;
-                    renderer.Draw(trackMatteImage.Image, (float)trackMatteOpacity, matrix, trackMatteImage.InterpolationQuality, null, image.TrackMatteMode.Value);
+                    renderer.Draw(trackMatteImage.ROI.OriginalImagePosition, trackMatteImage.Image, (float)trackMatteOpacity, matrix, trackMatteImage.InterpolationQuality, null, image.TrackMatteMode.Value);
                 }
             }
 
@@ -447,7 +447,7 @@ namespace NiVE3.PresetPlugin.Renderer
                 var renderer = new CPUMaskRender2D(result);
                 var downScale = Matrix3x3.CreateScale(1.0F / CurrentDownScaleRateX, 1.0F / CurrentDownScaleRateY);
                 var matrix = Matrix3x3.CreateScale(image.DownSampleRateX, image.DownSampleRateY) * CalcTransform2D(image.Transform, image.ParentTransforms) * downScale;
-                renderer.Draw(image.Image, (float)opacity, matrix, image.InterpolationQuality, trackMatte, TrackMatteMode.Alpha);
+                renderer.Draw(image.ROI.OriginalImagePosition, image.Image, (float)opacity, matrix, image.InterpolationQuality, trackMatte, TrackMatteMode.Alpha);
             }
 
             return result;
@@ -918,7 +918,7 @@ namespace NiVE3.PresetPlugin.Renderer
                         var renderer = new CPUMaskRender2D(result);
                         var downScale = Matrix3x3.CreateScale(1.0F / CurrentDownScaleRateX, 1.0F / CurrentDownScaleRateY);
                         var matrix = Matrix3x3.CreateScale(i.DownSampleRateX, i.DownSampleRateY) * CalcTransform2D(trackMatteImage.Transform, trackMatteImage.ParentTransforms) * downScale;
-                        renderer.Draw(trackMatteImage.Image, (float)opacity, matrix, trackMatteImage.InterpolationQuality, null, i.TrackMatteMode.Value);
+                        renderer.Draw(i.ROI.OriginalImagePosition, trackMatteImage.Image, (float)opacity, matrix, trackMatteImage.InterpolationQuality, null, i.TrackMatteMode.Value);
                     }
                     return result;
                 }
@@ -1043,7 +1043,7 @@ namespace NiVE3.PresetPlugin.Renderer
                         var renderer = new GPUMaskRender2D(result, device);
                         var downScale = Matrix3x3.CreateScale(1.0F / CurrentDownScaleRateX, 1.0F / CurrentDownScaleRateY);
                         var matrix = Matrix3x3.CreateScale(i.DownSampleRateX, i.DownSampleRateY) * CalcTransform2D(trackMatteImage.Transform, trackMatteImage.ParentTransforms) * downScale;
-                        renderer.Draw(trackMatteImage.Image, (float)opacity, matrix, trackMatteImage.InterpolationQuality, null, i.TrackMatteMode.Value);
+                        renderer.Draw(trackMatteImage.ROI.OriginalImagePosition, trackMatteImage.Image, (float)opacity, matrix, trackMatteImage.InterpolationQuality, null, i.TrackMatteMode.Value);
                     }
                     return result;
                 }

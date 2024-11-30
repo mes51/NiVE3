@@ -52,7 +52,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
     abstract class MaskRender2DBase
     {
-        public abstract void Draw(NImage image, float opacity, Matrix3x3 transform, ImageInterpolationQuality interpolationQuality, RasterizedMaskImage? trackMatte, TrackMatteMode trackMatteMode);
+        public abstract void Draw(Int32Point roiOrigin, NImage image, float opacity, Matrix3x3 transform, ImageInterpolationQuality interpolationQuality, RasterizedMaskImage? trackMatte, TrackMatteMode trackMatteMode);
     }
 
     class CPURenderer2D : Renderer2DBase
@@ -281,8 +281,9 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             Target = target;
         }
 
-        public override void Draw(NImage image, float opacity, Matrix3x3 transform, ImageInterpolationQuality interpolationQuality, RasterizedMaskImage? trackMatte, TrackMatteMode trackMatteMode)
+        public override void Draw(Int32Point roiOrigin, NImage image, float opacity, Matrix3x3 transform, ImageInterpolationQuality interpolationQuality, RasterizedMaskImage? trackMatte, TrackMatteMode trackMatteMode)
         {
+            transform = Matrix3x3.CreateTranslate((float)-(roiOrigin.X + image.Origin.X), (float)-(roiOrigin.Y + image.Origin.Y)) * transform;
             if (!Matrix3x3.Invert(transform, out var inverted))
             {
                 return;
@@ -387,8 +388,9 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             Device = device;
         }
 
-        public override void Draw(NImage image, float opacity, Matrix3x3 transform, ImageInterpolationQuality interpolationQuality, RasterizedMaskImage? trackMatte, TrackMatteMode trackMatteMode)
+        public override void Draw(Int32Point roiOrigin, NImage image, float opacity, Matrix3x3 transform, ImageInterpolationQuality interpolationQuality, RasterizedMaskImage? trackMatte, TrackMatteMode trackMatteMode)
         {
+            transform = Matrix3x3.CreateTranslate((float)-(roiOrigin.X + image.Origin.X), (float)-(roiOrigin.Y + image.Origin.Y)) * transform;
             if (!Matrix3x3.Invert(transform, out var inverted))
             {
                 return;
