@@ -1793,16 +1793,8 @@ namespace NiVE3.Model
             if (useGpu)
             {
                 var device = AcceleratorModel.CurrentDevice;
-                var baseGpuImage = baseImage switch
-                {
-                    NManagedImage baseManagedImage => baseManagedImage.CopyToGpu(device),
-                    _ => (NGPUImage)baseImage
-                };
-                var targetGpuImage = blendTargetImage switch
-                {
-                    NManagedImage targetManagedImage => targetManagedImage.CopyToGpu(device),
-                    _ => (NGPUImage)blendTargetImage
-                };
+                var baseGpuImage = baseImage.ToGpu(device);
+                var targetGpuImage = blendTargetImage.ToGpu(device);
 
                 using (var context = device.CreateComputeContext())
                 {
@@ -1818,16 +1810,8 @@ namespace NiVE3.Model
             }
             else
             {
-                var baseManagedImage = baseImage switch
-                {
-                    NGPUImage baseGpuImage => baseGpuImage.CopyToCpu(),
-                    _ => (NManagedImage)baseImage
-                };
-                var targetManagedImage = blendTargetImage switch
-                {
-                    NGPUImage targetGpuImage => targetGpuImage.CopyToCpu(),
-                    _ => (NManagedImage)blendTargetImage
-                };
+                var baseManagedImage = baseImage.ToManaged();
+                var targetManagedImage = blendTargetImage.ToManaged();
 
                 var baseImageData = baseManagedImage.Data;
                 var targetImageData = targetManagedImage.Data;
@@ -1865,11 +1849,7 @@ namespace NiVE3.Model
             if (useGpu)
             {
                 var device = AcceleratorModel.CurrentDevice;
-                var gpuAddFrame = addFrame switch
-                {
-                    NManagedImage managedAddFrame => managedAddFrame.CopyToGpu(device),
-                    _ => (NGPUImage)addFrame
-                };
+                var gpuAddFrame = addFrame.ToGpu(device);
                 var gpuImage = (NGPUImage)baseImage;
 
                 using (var context = device.CreateComputeContext())
@@ -1884,11 +1864,7 @@ namespace NiVE3.Model
             }
             else
             {
-                var managedAddFrame = addFrame switch
-                {
-                    NGPUImage gpuAddFrame => gpuAddFrame.CopyToCpu(),
-                    _ => (NManagedImage)addFrame
-                };
+                var managedAddFrame = addFrame.ToManaged();
                 var addFrameData = managedAddFrame.Data;
                 var managedImage = (NManagedImage)baseImage;
                 var imageWidth = managedImage.Width;

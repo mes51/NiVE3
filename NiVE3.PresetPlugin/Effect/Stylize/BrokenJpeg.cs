@@ -145,11 +145,8 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
             var chrominanceQTMaxValue = (int)chrominanceQTGroup.GetValue(PropertyBrokenChrominanceQuantizeTableMaxValueId, layerTime, 0.0);
             var chrominanceQTRandomSeed = (int)chrominanceQTGroup.GetValue(PropertyBrokenChrominanceQuantizeTableRandomSeedId, layerTime, 0.0);
 
-            var (resultImage, compressImage) = image switch
-            {
-                NGPUImage gpuImage => (gpuImage.CopyToCpu(), gpuImage.CopyToCpu()),
-                _ => ((NManagedImage)image, (NManagedImage)image.Copy())
-            };
+            var resultImage = image.ToManaged();
+            var compressImage = (NManagedImage)resultImage.Copy();
             PreProcess(compressImage, backgroundColor);
 
             var encoder = colorSpace switch

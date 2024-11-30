@@ -96,16 +96,8 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
 
         static NManagedImage ProcessCpu(NImage image, ROI roi, NImage sourceImage, float rate, float displacementAmount, DisplacemenMapChannelType channel, DisplacementSourceLayerPositionType position)
         {
-            var managedImage = image switch
-            {
-                NGPUImage gpuImage => gpuImage.CopyToCpu(),
-                _ => (NManagedImage)image
-            };
-            var managedSourceImage = sourceImage switch
-            {
-                NGPUImage gpuSourceImage => gpuSourceImage.CopyToCpu(),
-                _ => (NManagedImage)sourceImage
-            };
+            var managedImage = image.ToManaged();
+            var managedSourceImage = sourceImage.ToManaged();
 
             using var originalImage = (NManagedImage)managedImage.Copy();
 
@@ -152,17 +144,8 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
 
         static NGPUImage ProcessGpu(GraphicsDevice device, NImage image, ROI roi, NImage sourceImage, float rate, float displacementAmount, DisplacemenMapChannelType channel, DisplacementSourceLayerPositionType position)
         {
-            var gpuImage = image switch
-            {
-                NManagedImage managedImage => managedImage.CopyToGpu(device),
-                _ => (NGPUImage)image
-            };
-
-            var gpuSourceImage = sourceImage switch
-            {
-                NManagedImage managedSourceImage => managedSourceImage.CopyToGpu(device),
-                _ => (NGPUImage)sourceImage
-            };
+            var gpuImage = image.ToGpu(device);
+            var gpuSourceImage = sourceImage.ToGpu(device);
 
             using var originalImage = new NGPUImage(gpuImage.Width, gpuImage.Height, device);
             gpuImage.CopyTo(originalImage);

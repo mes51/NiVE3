@@ -90,15 +90,7 @@ namespace NiVE3.PresetPlugin.Effect.ColorCollection
 
         static NManagedImage ProcessCpu(NImage image, ROI roi, ChannelType channel, float blackIn, float whiteIn, float blackOut, float whiteOut, float invertGamma)
         {
-            NManagedImage managedImage;
-            if (image is NGPUImage gpuImage)
-            {
-                managedImage = gpuImage.CopyToCpu();
-            }
-            else
-            {
-                managedImage = (NManagedImage)image;
-            }
+            var managedImage = image.ToManaged();
 
             var left = roi.Left;
             var targetLength = roi.Right - left;
@@ -178,15 +170,7 @@ namespace NiVE3.PresetPlugin.Effect.ColorCollection
 
         static NGPUImage ProcessGpu(GraphicsDevice device, NImage image, ROI roi, ChannelType channel, float blackIn, float whiteIn, float blackOut, float whiteOut, float invertGamma)
         {
-            NGPUImage gpuImage;
-            if (image is NManagedImage managedImage)
-            {
-                gpuImage = managedImage.CopyToGpu(device);
-            }
-            else
-            {
-                gpuImage = (NGPUImage)image;
-            }
+            var gpuImage = image.ToGpu(device);
 
             var inAdd = blackIn >= whiteIn ? 0.0F : (1.0F / (whiteIn - blackIn));
             var outAdd = whiteOut - blackOut;

@@ -97,11 +97,7 @@ namespace NiVE3.PresetPlugin.Output
             var filePath = $"{OutputFilePathPrefix}{CurrentFrameIndex.ToString(FrameCountFormat)}{OutputFilePathSuffix}";
             using var stream = new FileStream(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite);
 
-            var managedImage = image switch
-            {
-                NGPUImage gpuImage => gpuImage.CopyToCpu(),
-                _ => (NManagedImage)image
-            };
+            var managedImage = image.ToManaged();
 
             ImageBuffer.AsSpan().Clear();
             ImageConversion.ConvertToBGRA32(managedImage.GetDataSpan(), ImageBuffer, managedImage.DataLength);

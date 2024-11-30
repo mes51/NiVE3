@@ -235,16 +235,7 @@ namespace NiVE3.Model.UI
             var previewImage = Composition?.RenderFrame(time, DownScaleRate, true, ApplicationModel.UseGpu);
             if (previewImage != null && DownScaleRate != 1.0)
             {
-                var managedPreviewImage = previewImage switch
-                {
-                    NManagedImage managedImage => managedImage,
-                    NGPUImage gpuImage => gpuImage.CopyToCpu(),
-                    _ => null
-                };
-                if (managedPreviewImage == null)
-                {
-                    return null;
-                }
+                var managedPreviewImage = previewImage.ToManaged();
                 if (previewImage != managedPreviewImage)
                 {
                     previewImage.Dispose();

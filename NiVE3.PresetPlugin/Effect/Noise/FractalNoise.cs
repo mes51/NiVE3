@@ -222,11 +222,7 @@ namespace NiVE3.PresetPlugin.Effect.Noise
             BlendMode blendMode
         )
         {
-            var managedImage = image switch
-            {
-                NGPUImage gpuImage => gpuImage.CopyToCpu(),
-                _ => (NManagedImage)image
-            };
+            var managedImage = image.ToManaged();
 
             var center = new Vector2(roi.OriginalImageSize.Width, roi.OriginalImageSize.Height) * 0.5F + AnchorPointOffset;
             var transform = Matrix3x3.AffineTransform(center, scale.AsVector2(), angle, center + position.AsVector2());
@@ -453,11 +449,7 @@ namespace NiVE3.PresetPlugin.Effect.Noise
             BlendMode blendMode
         )
         {
-            var gpuImage = image switch
-            {
-                NManagedImage managedImage => managedImage.CopyToGpu(device),
-                _ => (NGPUImage)image
-            };
+            var gpuImage = image.ToGpu(device);
 
             var center = new Vector2(roi.OriginalImageSize.Width, roi.OriginalImageSize.Height) * 0.5F + AnchorPointOffset;
             var transform = Matrix3x3.AffineTransform(center, scale.AsVector2(), angle, center + position.AsVector2());

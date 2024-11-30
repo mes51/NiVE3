@@ -134,11 +134,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
 
         static NManagedImage ProcessCpu(NImage image, ROI roi, float horizontalRange, float verticalRange, float strength, float threshold, Vector4 color, BlendMode blendMode, CompositeOrder compositeOrder, EdgeRepeatMode edgeRepeatMode)
         {
-            var managedImage = image switch
-            {
-                NGPUImage gpuImage => gpuImage.CopyToCpu(),
-                _ => (NManagedImage)image
-            };
+            var managedImage = image.ToManaged();
 
             using var blurredImage = (NManagedImage)managedImage.Copy();
             var top = Math.Max((int)MathF.Floor(roi.Top - verticalRange * BlurRepeatCount), 0);
@@ -157,11 +153,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
 
         static NGPUImage ProcessGpu(GraphicsDevice device, NImage image, ROI roi, float horizontalRange, float verticalRange, float strength, float threshold, Vector4 color, BlendMode blendMode, CompositeOrder compositeOrder, EdgeRepeatMode edgeRepeatMode)
         {
-            var gpuImage = image switch
-            {
-                NManagedImage managedImage => managedImage.CopyToGpu(device),
-                _ => (NGPUImage)image
-            };
+            var gpuImage = image.ToGpu(device);
 
             var blurredImage = new NGPUImage(gpuImage.Width, gpuImage.Height, device);
             gpuImage.CopyTo(blurredImage);

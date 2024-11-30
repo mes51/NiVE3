@@ -47,11 +47,7 @@ namespace NiVE3.PresetPlugin.ToneMapper
 
         static NManagedImage ProcessCpu(NImage image)
         {
-            var managedImage = image switch
-            {
-                NGPUImage gpuImage => gpuImage.CopyToCpu(),
-                _ => (NManagedImage)image
-            };
+            var managedImage = image.ToManaged();
 
             const float a = 2.51F;
             const float b = 0.03F;
@@ -97,11 +93,7 @@ namespace NiVE3.PresetPlugin.ToneMapper
 
         static NGPUImage ProcessGpu(GraphicsDevice device, NImage image)
         {
-            var gpuImage = image switch
-            {
-                NManagedImage managedImage => managedImage.CopyToGpu(device),
-                _ => (NGPUImage)image
-            };
+            var gpuImage = image.ToGpu(device);
 
             using var context = device.CreateComputeContext();
             context.For(gpuImage.Width, gpuImage.Height, new ACESFilmicProcess(gpuImage.Data, gpuImage.Width));

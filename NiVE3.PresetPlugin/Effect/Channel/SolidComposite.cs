@@ -84,11 +84,7 @@ namespace NiVE3.PresetPlugin.Effect.Channel
 
         static NManagedImage ProcessCpu(NImage image, ROI roi, float sourceOpacity, Vector4 color, CompositeOrder order, BlendMode blendMode)
         {
-            var managedImage = image switch
-            {
-                NGPUImage gpuImage => gpuImage.CopyToCpu(),
-                _ => (NManagedImage)image
-            };
+            var managedImage = image.ToManaged();
 
             var imageData = managedImage.Data;
             if (order == CompositeOrder.Front)
@@ -123,11 +119,7 @@ namespace NiVE3.PresetPlugin.Effect.Channel
 
         static NGPUImage ProcessGpu(GraphicsDevice device, NImage image, ROI roi, float sourceOpacity, Vector4 color, CompositeOrder order, BlendMode blendMode)
         {
-            var gpuImage = image switch
-            {
-                NManagedImage managedImage => managedImage.CopyToGpu(device),
-                _ => (NGPUImage)image
-            };
+            var gpuImage = image.ToGpu(device);
 
             using var context = device.CreateComputeContext();
             context.For(roi.Width, roi.Height, new SolidCompositeProcess(gpuImage.Data, gpuImage.Width, sourceOpacity, color, (int)order, (int)blendMode, roi.Left, roi.Top));

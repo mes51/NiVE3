@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using ComputeSharp;
 using NiVE3.Numerics;
 
 namespace NiVE3.Image
@@ -89,6 +91,40 @@ namespace NiVE3.Image
         ~NImage()
         {
             Dispose(false);
+        }
+    }
+
+    public static class NImageExtensions
+    {
+        /// <summary>
+        /// NImageをNManagedImageに変換します
+        /// </summary>
+        /// <param name="image">変換するNImage</param>
+        /// <returns>変換後のNManagedImage。元がNManagedImageの場合は何もしません</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static NManagedImage ToManaged(this NImage image)
+        {
+            return image switch
+            {
+                NGPUImage gpuImage => gpuImage.CopyToCpu(),
+                _ => (NManagedImage)image
+            };
+        }
+
+        /// <summary>
+        /// NImageをNGPUImageに変換します
+        /// </summary>
+        /// <param name="image">変換するNImage</param>
+        /// <param name="device">変換時に使用するGraphicsDevice</param>
+        /// <returns>変換後のNGPUImage。元がNGPUImageの場合は何もしません</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static NGPUImage ToGpu(this NImage image, GraphicsDevice device)
+        {
+            return image switch
+            {
+                NManagedImage managedImage => managedImage.CopyToGpu(device),
+                _ => (NGPUImage)image
+            };
         }
     }
 }

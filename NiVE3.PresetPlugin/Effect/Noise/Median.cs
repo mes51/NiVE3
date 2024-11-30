@@ -71,11 +71,7 @@ namespace NiVE3.PresetPlugin.Effect.Noise
 
         static NManagedImage ProcessCpu(NImage image, ROI roi, int radius, bool applyToAlpha)
         {
-            var managedImage = image switch
-            {
-                NGPUImage gpuImage => gpuImage.CopyToCpu(),
-                _ => (NManagedImage)image
-            };
+            var managedImage = image.ToManaged();
 
             var imageData = managedImage.Data;
             var imageWidth = managedImage.Width;

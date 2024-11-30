@@ -58,16 +58,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
             var order = properties.GetValue(PropertySortOrderId, layerTime, SortOrder.Ascending);
             var channel = properties.GetValue(PropertySortTargetChannelId, layerTime, ChannelType.RGB);
 
-            NManagedImage managedImage;
-            if (image is NGPUImage gpuImage)
-            {
-                managedImage = gpuImage.CopyToCpu();
-                image.Dispose();
-            }
-            else
-            {
-                managedImage = (NManagedImage)image;
-            }
+            var managedImage = image.ToManaged();
 
             var comparison = (channel, order) switch
             {

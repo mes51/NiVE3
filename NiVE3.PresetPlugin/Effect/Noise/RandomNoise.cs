@@ -74,11 +74,7 @@ namespace NiVE3.PresetPlugin.Effect.Noise
 
         static NManagedImage ProcessCpu(NImage image, ROI roi, float amount, bool isColor, double time, uint seed)
         {
-            var managedImage = image switch
-            {
-                NGPUImage gpuImage => gpuImage.CopyToCpu(),
-                _ => (NManagedImage)image
-            };
+            var managedImage = image.ToManaged();
 
             var bx = roi.Left;
             var ex = roi.Right;
@@ -108,11 +104,7 @@ namespace NiVE3.PresetPlugin.Effect.Noise
 
         static NGPUImage ProcessGpu(GraphicsDevice device, NImage image, ROI roi, float amount, bool isColor, double time, uint seed)
         {
-            var gpuImage = image switch
-            {
-                NManagedImage managedImage => managedImage.CopyToGpu(device),
-                _ => (NGPUImage)image
-            };
+            var gpuImage = image.ToGpu(device);
 
             var imageOriginX = (float)(roi.OriginalImagePosition.X + image.Origin.X);
             var imageOriginY = (float)(roi.OriginalImagePosition.Y + image.Origin.Y);

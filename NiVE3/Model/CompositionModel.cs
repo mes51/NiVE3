@@ -811,11 +811,7 @@ namespace NiVE3.Model
                         {
                             using var subFrame = RenderFrameInternal(time, shatterStartTime +subFrameInterval * i, true, downSamplingRate, applyToneMapping, useGpu);
 
-                            var gpuImage = subFrame switch
-                            {
-                                NManagedImage managedImage => managedImage.CopyToGpu(device),
-                                _ => (NGPUImage)subFrame
-                            };
+                            var gpuImage = subFrame.ToGpu(device);
 
                             using (var context = device.CreateComputeContext())
                             {
@@ -845,11 +841,7 @@ namespace NiVE3.Model
                         {
                             using var subFrame = RenderFrameInternal(time, shatterStartTime + subFrameInterval * i, true, downSamplingRate, applyToneMapping, useGpu);
 
-                            var managedImage = subFrame switch
-                            {
-                                NGPUImage gpuImage => gpuImage.CopyToCpu(),
-                                _ => (NManagedImage)subFrame
-                            };
+                            var managedImage = subFrame.ToManaged();
 
                             Parallel.For(0, Height, y =>
                             {

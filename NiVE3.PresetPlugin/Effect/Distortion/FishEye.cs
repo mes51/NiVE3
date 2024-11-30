@@ -74,11 +74,7 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
 
         static NManagedImage ProcessCpu(NImage image, ROI roi, float amount)
         {
-            var managedImage = image switch
-            {
-                NGPUImage gpuImage => gpuImage.CopyToCpu(),
-                _ => (NManagedImage)image
-            };
+            var managedImage = image.ToManaged();
 
             using var sourceImage = (NManagedImage)managedImage.Copy();
 
@@ -107,11 +103,7 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
 
         static NGPUImage ProcessGpu(GraphicsDevice device, NImage image, ROI roi, float amount)
         {
-            var gpuImage = image switch
-            {
-                NManagedImage managedImage => managedImage.CopyToGpu(device),
-                _ => (NGPUImage)image
-            };
+            var gpuImage = image.ToGpu(device);
 
             using var sourceImage = new NGPUImage(gpuImage.Width, gpuImage.Height, device);
             gpuImage.CopyTo(sourceImage);

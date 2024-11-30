@@ -72,11 +72,7 @@ namespace NiVE3.PresetPlugin.Effect.ColorCollection
 
         static NManagedImage ProcessCpu(NImage image, ROI roi, float shadowClip, float highlightClip, float newColorRate)
         {
-            var managedImage = image switch
-            {
-                NGPUImage gpuImage => gpuImage.CopyToCpu(),
-                _ => (NManagedImage)image
-            };
+            var managedImage = image.ToManaged();
 
             var imageData = managedImage.Data;
             var ycbcrImage = ArrayPool<YCbCr>.Shared.Rent(managedImage.DataLength);
@@ -180,11 +176,7 @@ namespace NiVE3.PresetPlugin.Effect.ColorCollection
         /*
         static NGPUImage ProcessGpu(GraphicsDevice device, NImage image, ROI roi, float shadowClip, float highlightClip, float newColorRate)
         {
-            var gpuImage = image switch
-            {
-                NManagedImage managedImage => managedImage.CopyToGpu(device),
-                _ => (NGPUImage)image
-            };
+            var gpuImage = image.ToGpu(device);
 
             var binCpu = ArrayPool<int>.Shared.Rent(BinSize);
             using var bin = device.AllocateReadWriteBuffer<int>(BinSize);

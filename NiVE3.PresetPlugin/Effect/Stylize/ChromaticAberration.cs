@@ -125,11 +125,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
 
         static NManagedImage ProcessCpu(NImage image, ROI roi, ChromaticAberrationChannelType channel, Vector2 anchorPoint, in Matrix3x3 frontTransform, in Matrix3x3 backTransform, float distortion, float chromaDistortion, bool isMirrorEdge)
         {
-            var managedImage = image switch
-            {
-                NGPUImage gpuImage => gpuImage.CopyToCpu(),
-                _ => (NManagedImage)image
-            };
+            var managedImage = image.ToManaged();
 
             using var sourceImage = (NManagedImage)managedImage.Copy();
 
@@ -194,11 +190,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
 
         static NGPUImage ProcessGpu(GraphicsDevice device, NImage image, ROI roi, ChromaticAberrationChannelType channel, Vector2 anchorPoint, in Matrix3x3 frontTransform, in Matrix3x3 backTransform, float distortion, float chromaDistortion, bool isMirrorEdge)
         {
-            var gpuImage = image switch
-            {
-                NManagedImage managedImage => managedImage.CopyToGpu(device),
-                _ => (NGPUImage)image
-            };
+            var gpuImage = image.ToGpu(device);
 
             var center = anchorPoint / new Vector2(gpuImage.Width, gpuImage.Height);
             var (baseChannel, backChannel, frontChannel) = channel switch

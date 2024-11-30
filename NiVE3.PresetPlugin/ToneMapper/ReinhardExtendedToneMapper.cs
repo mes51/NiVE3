@@ -101,11 +101,7 @@ namespace NiVE3.PresetPlugin.ToneMapper
 
         static NManagedImage ProcessCpu(NImage image, float squaredMaxLuminance)
         {
-            var managedImage = image switch
-            {
-                NGPUImage gpuImage => gpuImage.CopyToCpu(),
-                _ => (NManagedImage)image
-            };
+            var managedImage = image.ToManaged();
 
             var imageWidth = managedImage.Width;
             var imageData = managedImage.Data;
@@ -137,11 +133,7 @@ namespace NiVE3.PresetPlugin.ToneMapper
 
         static NGPUImage ProcessGpu(GraphicsDevice device, NImage image, float squaredMaxLuminance)
         {
-            var gpuImage = image switch
-            {
-                NManagedImage managedImage => managedImage.CopyToGpu(device),
-                _ => (NGPUImage)image
-            };
+            var gpuImage = image.ToGpu(device);
 
             using var context = device.CreateComputeContext();
             context.For(gpuImage.Width, gpuImage.Height, new ReinhardExtendedProcess(gpuImage.Data, gpuImage.Width, squaredMaxLuminance));

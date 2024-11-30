@@ -113,11 +113,7 @@ namespace NiVE3.PresetPlugin.Effect.ColorCollection
 
         static NManagedImage ProcessCpu(NImage image, ROI roi, Vector4[] colorMap, float[] colorPositions, Vector4 overShadowRate, Vector4 overHighlightRate)
         {
-            var managedImage = image switch
-            {
-                NGPUImage gpuImage => gpuImage.CopyToCpu(),
-                _ => (NManagedImage)image
-            };
+            var managedImage = image.ToManaged();
 
             var imageWidth = managedImage.Width;
             var imageData = managedImage.Data;
@@ -161,11 +157,7 @@ namespace NiVE3.PresetPlugin.Effect.ColorCollection
 
         static NGPUImage ProcessGpu(GraphicsDevice device, NImage image, ROI roi, Vector4[] colorMap, float[] colorPositions, Vector4 overShadowRate, Vector4 overHighlightRate)
         {
-            var gpuImage = image switch
-            {
-                NManagedImage managedImage => managedImage.CopyToGpu(device),
-                _ => (NGPUImage)image
-            };
+            var gpuImage = image.ToGpu(device);
 
             using var colorMapBuffer = device.AllocateReadOnlyBuffer<Float4>(MemoryMarshal.Cast<Vector4, Float4>(colorMap));
             using var colorPositionBuffer = device.AllocateReadOnlyBuffer(colorPositions);

@@ -288,11 +288,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 return;
             }
 
-            var managedImage = image switch
-            {
-                NGPUImage gpuImage => gpuImage.CopyToCpu(),
-                _ => (NManagedImage)image
-            };
+            var managedImage = image.ToManaged();
             var managedTrackMatte = trackMatte switch
             {
                 GPURasterizedMaskImage gpuTrackMatte => gpuTrackMatte.CopyToCpu(),
@@ -398,11 +394,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 return;
             }
 
-            var gpuImage = image switch
-            {
-                NManagedImage managedImage => managedImage.CopyToGpu(Device),
-                _ => (NGPUImage)image
-            };
+            var gpuImage = image.ToGpu(Device);
             var gpuTrackMatte = trackMatte switch
             {
                 ManagedRasterizedMaskImage managedTrackMatte => managedTrackMatte.CopyToGpu(Device),

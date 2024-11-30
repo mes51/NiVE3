@@ -58,11 +58,7 @@ namespace NiVE3.PresetPlugin.Effect.Channel
 
         static NManagedImage ProcessCpu(NImage image, ROI roi)
         {
-            var managedImage = image switch
-            {
-                NGPUImage gpuImage => gpuImage.CopyToCpu(),
-                _ => (NManagedImage)image
-            };
+            var managedImage = image.ToManaged();
 
             var imageData = managedImage.Data;
             Parallel.For(roi.Top, roi.Bottom, y =>
@@ -112,11 +108,7 @@ namespace NiVE3.PresetPlugin.Effect.Channel
 
         static NGPUImage ProcessGpu(GraphicsDevice device, NImage image, ROI roi)
         {
-            var gpuImage = image switch
-            {
-                NManagedImage managedImage => managedImage.CopyToGpu(device),
-                _ => (NGPUImage)image
-            };
+            var gpuImage = image.ToGpu(device);
 
             using var context = device.CreateComputeContext();
             context.For(roi.Width, roi.Height, new UnmultProcess(gpuImage.Data, gpuImage.Width, roi.Left, roi.Top));

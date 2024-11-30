@@ -130,11 +130,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
 
         static NManagedImage ProcessCpu(NImage image, ROI roi, float strength, int count, float length, float angle, float threshold, Vector4 color, BlendMode blendMode, CompositeOrder compositeOrder, EdgeRepeatMode edgeRepeatMode)
         {
-            var managedImage = image switch
-            {
-                NGPUImage gpuImage => gpuImage.CopyToCpu(),
-                _ => (NManagedImage)image
-            };
+            var managedImage = image.ToManaged();
 
             var imageWidth = managedImage.Width;
 
@@ -175,11 +171,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
 
         static NGPUImage ProcessGpu(GraphicsDevice device, NImage image, ROI roi, float strength, int count, float length, float angle, float threshold, Vector4 color, BlendMode blendMode, CompositeOrder compositeOrder, EdgeRepeatMode edgeRepeatMode)
         {
-            var gpuImage = image switch
-            {
-                NManagedImage managedImage => managedImage.CopyToGpu(device),
-                _ => (NGPUImage)image
-            };
+            var gpuImage = image.ToGpu(device);
 
             using var starBurstImage = new NGPUImage(gpuImage.Width, gpuImage.Height, device);
             using (var blurredImage = new NGPUImage(gpuImage.Width, gpuImage.Height, device))

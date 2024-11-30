@@ -88,21 +88,13 @@ namespace NiVE3.PresetPlugin.Effect.Blur
             if (useGpu && AcceleratorObject != null)
             {
                 var device = AcceleratorObject.CurrentDevice;
-                var gpuImage = image switch
-                {
-                    NManagedImage managedImage => managedImage.CopyToGpu(device),
-                    _ => (NGPUImage)image
-                };
+                var gpuImage = image.ToGpu(device);
                 DirectionalBlurProcess.ProcessGpu(device, gpuImage, roi, rad, amount, edgeRepeatMode);
                 return gpuImage;
             }
             else
             {
-                var managedImage = image switch
-                {
-                    NGPUImage gpuImage => gpuImage.CopyToCpu(),
-                    _ => (NManagedImage)image
-                };
+                var managedImage = image.ToManaged();
                 DirectionalBlurProcess.ProcessCpu(managedImage, roi, rad, amount, edgeRepeatMode, fastMode);
                 return managedImage;
             }

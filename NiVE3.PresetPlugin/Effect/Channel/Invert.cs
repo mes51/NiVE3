@@ -77,11 +77,7 @@ namespace NiVE3.PresetPlugin.Effect.Channel
 
         static NManagedImage ProcessCpu(NImage image, ROI roi, WithHSLChannelType channelType, float blendOriginal)
         {
-            var managedImage = image switch
-            {
-                NGPUImage gpuImage => gpuImage.CopyToCpu(),
-                _ => (NManagedImage)image
-            };
+            var managedImage = image.ToManaged();
 
             var imageWidth = managedImage.Width;
             var imageData = managedImage.Data;
@@ -189,11 +185,7 @@ namespace NiVE3.PresetPlugin.Effect.Channel
 
         static NGPUImage ProcessGpu(GraphicsDevice device, NImage image, ROI roi, WithHSLChannelType channelType, float blendOriginal)
         {
-            var gpuImage = image switch
-            {
-                NManagedImage managedImage => managedImage.CopyToGpu(device),
-                _ => (NGPUImage)image
-            };
+            var gpuImage = image.ToGpu(device);
 
             using var context = device.CreateComputeContext();
             context.For(roi.Width, roi.Height, new InvertProcess(gpuImage.Data, gpuImage.Width, (int)channelType, blendOriginal, roi.Left, roi.Top));

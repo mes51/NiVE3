@@ -68,11 +68,7 @@ namespace NiVE3.PresetPlugin.Effect.Generate
 
         static NManagedImage ProcessCpu(NImage image, ROI roi, Vector4 color, bool keepAlpha)
         {
-            var managedImage = image switch
-            {
-                NGPUImage gpuImage => gpuImage.CopyToCpu(),
-                _ => (NManagedImage)image
-            };
+            var managedImage = image.ToManaged();
 
             var imageData = managedImage.Data;
             if (keepAlpha)
@@ -105,11 +101,7 @@ namespace NiVE3.PresetPlugin.Effect.Generate
 
         static NGPUImage ProcessGpu(GraphicsDevice device, NImage image, ROI roi, Vector4 color, bool keepAlpha)
         {
-            var gpuImage = image switch
-            {
-                NManagedImage managedImage => managedImage.CopyToGpu(device),
-                _ => (NGPUImage)image
-            };
+            var gpuImage = image.ToGpu(device);
 
             using var context = device.CreateComputeContext();
             context.For(roi.Width, roi.Height, new FillProcess(gpuImage.Data, gpuImage.Width, color, keepAlpha, roi.Left, roi.Top));
