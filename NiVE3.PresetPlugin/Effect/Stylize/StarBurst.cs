@@ -39,6 +39,8 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
 
         const string PropertyThresholdId = nameof(PropertyThresholdId);
 
+        const string PropertyLightBlurId = nameof(PropertyLightBlurId);
+
         const string PropertyColorId = nameof(PropertyColorId);
 
         const string PropertyBlendModeId = nameof(PropertyBlendModeId);
@@ -46,6 +48,10 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
         const string PropertyCompositeOrderId = nameof(PropertyCompositeOrderId);
 
         const string PropertyEdgeRepeatModeId = nameof(PropertyEdgeRepeatModeId);
+
+        const string PropertyDrawStarBurstOnly = nameof(PropertyDrawStarBurstOnly);
+
+        const int LightBlurRepeatCount = 3;
 
         IAcceleratorObject? AcceleratorObject { get; set; }
 
@@ -62,12 +68,13 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
             {
                 var rad = (properties.GetValue(PropertyAngleId, layerTime, 0.0) + 90.0) / 180.0 * Math.PI;
                 var length = (float)(properties.GetValue(PropertyLengthId, layerTime, 0.0) / downSamplingRateX);
+                var lightBlurRange = (int)MathF.Ceiling((float)(properties.GetValue(PropertyLightBlurId, layerTime, 0.0) / downSamplingRateX));
                 var count = (int)properties.GetValue(PropertyCountId, layerTime, 1.0);
                 var maxRange = (int)MathF.Ceiling(length) * 2;
                 var radianIncrement = Math.PI / count;
 
-                var maxExpandX = 0;
-                var maxExpandY = 0;
+                var maxExpandX = lightBlurRange;
+                var maxExpandY = lightBlurRange;
                 for (var i = 0; i < count; i++)
                 {
                     var sin = (float)Math.Sin(rad + radianIncrement * i);
@@ -93,10 +100,12 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
                 new DoubleProperty(PropertyLengthId, LanguageResourceDictionary.ResourceKeys.Stylize_StarBurst_Length, 10.0, 0.0, 10000.0, digit: 2),
                 new AngleProperty(PropertyAngleId, LanguageResourceDictionary.ResourceKeys.Stylize_StarBurst_Angle, 15.0, digit: 2),
                 new DoubleProperty(PropertyThresholdId, LanguageResourceDictionary.ResourceKeys.Stylize_StarBurst_Threshold, 0.6, double.MinValue, double.MaxValue, slideChangeValue: 0.01, digit: 2),
+                new DoubleProperty(PropertyLightBlurId, LanguageResourceDictionary.ResourceKeys.Stylize_StarBurst_LightBlur, 0.0, 0.0, 100.0, digit: 2),
                 new ColorProperty(PropertyColorId, LanguageResourceDictionary.ResourceKeys.Stylize_StarBurst_Color, LanguageResourceDictionary.ResourceKeys.Dialog_ColorDialog_Title_Color, LanguageResourceDictionary.ResourceKeys.Dialog_OK, LanguageResourceDictionary.ResourceKeys.Dialog_Cancel, Vector4.One),
                 new EnumProperty(PropertyBlendModeId, LanguageResourceDictionary.ResourceKeys.Stylize_StarBurst_BlendMode, typeof(BlendMode), typeof(LanguageResourceDictionary), BlendMode.Add, selectBoxWidth: 90.0),
                 new EnumProperty(PropertyCompositeOrderId, LanguageResourceDictionary.ResourceKeys.Stylize_StarBurst_CompositeOrder, typeof(CompositeOrder), typeof(LanguageResourceDictionary), CompositeOrder.Front, selectBoxWidth: 90.0),
                 new EnumProperty(PropertyEdgeRepeatModeId, LanguageResourceDictionary.ResourceKeys.Stylize_StarBurst_EdgeRepeatMode, typeof(EdgeRepeatMode), typeof(LanguageResourceDictionary), EdgeRepeatMode.None, selectBoxWidth: 90.0),
+                new CheckBoxProperty(PropertyDrawStarBurstOnly, LanguageResourceDictionary.ResourceKeys.Stylize_StarBurst_DrawStarBurstOnly, false)
             ];
         }
 
@@ -107,12 +116,14 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
             var length = (float)(properties.GetValue(PropertyLengthId, layerTime, 0.0) / downSamplingRateX);
             var angle = (float)properties.GetValue(PropertyAngleId, layerTime, 0.0);
             var threshold = (float)properties.GetValue(PropertyThresholdId, layerTime, 0.0);
+            var lightBlurAmount = (float)(properties.GetValue(PropertyLightBlurId, layerTime, 0.0) / downSamplingRateX / LightBlurRepeatCount);
             var color = properties.GetValue(PropertyColorId, layerTime, Vector4.UnitW);
             var blendMode = properties.GetValue(PropertyBlendModeId, layerTime, BlendMode.Add);
             var compositeOrder = properties.GetValue(PropertyCompositeOrderId, layerTime, CompositeOrder.Front);
             var edgeRepeatMode = properties.GetValue(PropertyEdgeRepeatModeId, layerTime, EdgeRepeatMode.None);
+            var drawStarBurstOnly = properties.GetValue(PropertyDrawStarBurstOnly, layerTime, false);
 
-            if ((strength <= 0.0 || length <= 0.0 || color == Vector4.UnitW) && blendMode == BlendMode.Add)
+            if ((strength <= 0.0 || length <= 0.0 || color == Vector4.UnitW) && blendMode == BlendMode.Add && !drawStarBurstOnly)
             {
                 return image;
             }
@@ -121,11 +132,11 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
 
             if (useGpu && AcceleratorObject != null)
             {
-                return ProcessGpu(AcceleratorObject.CurrentDevice, image, roi, strength, count, length, angle, threshold, color, blendMode, compositeOrder, edgeRepeatMode);
+                return ProcessGpu(AcceleratorObject.CurrentDevice, image, roi, strength, count, length, angle, threshold, lightBlurAmount, color, blendMode, compositeOrder, edgeRepeatMode, drawStarBurstOnly);
             }
             else
             {
-                return ProcessCpu(image, roi, strength, count, length, angle, threshold, color, blendMode, compositeOrder, edgeRepeatMode);
+                return ProcessCpu(image, roi, strength, count, length, angle, threshold, lightBlurAmount, color, blendMode, compositeOrder, edgeRepeatMode, drawStarBurstOnly);
             }
         }
 
@@ -136,7 +147,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
 
         public void Dispose() { }
 
-        static NManagedImage ProcessCpu(NImage image, ROI roi, float strength, int count, float length, float angle, float threshold, Vector4 color, BlendMode blendMode, CompositeOrder compositeOrder, EdgeRepeatMode edgeRepeatMode)
+        static NManagedImage ProcessCpu(NImage image, ROI roi, float strength, int count, float length, float angle, float threshold, float lightBlurAmount, Vector4 color, BlendMode blendMode, CompositeOrder compositeOrder, EdgeRepeatMode edgeRepeatMode, bool drawStarBurstOnly)
         {
             var managedImage = image.ToManaged();
 
@@ -152,32 +163,44 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
                 var bottom = Math.Min(roi.Bottom + maxRange, blurredImage.Height);
                 var left = Math.Max(roi.Left - maxRange, 0);
                 var right = Math.Min(roi.Right + maxRange, blurredImage.Width);
+                var blurredImageRoi = new ROI(new Int32Point(), new Int32Size(blurredImage.Width, blurredImage.Height), left, top, right, bottom);
 
-                GlowProcess.ThresholdCpu(blurredImage, new ROI(new Int32Point(), new Int32Size(blurredImage.Width, blurredImage.Height), left, top, right, bottom), threshold);
+                GlowProcess.ThresholdCpu(blurredImage, blurredImageRoi, threshold);
+                if (lightBlurAmount > 0.0F)
+                {
+                    BoxBlurProcess.ProcessCpu(blurredImage, blurredImageRoi, lightBlurAmount, lightBlurAmount, LightBlurRepeatCount, edgeRepeatMode);
+                }
 
                 var radianIncrement = Math.PI / count;
                 for (var c = 0; c < count; c++)
                 {
                     if (c + 1 >= count)
                     {
-                        DirectionalBlurProcess.BidirectionalCpu(blurredImage, roi, rad + radianIncrement * c, length, edgeRepeatMode, true);
+                        GaussianDirectionalBlurProcess.BidirectionalCpu(blurredImage, roi, rad + radianIncrement * c, length, edgeRepeatMode, true);
                         ImageBlendProcess.SameSizeCpu(starBurstImage, blurredImage, roi, BlendMode.Add);
                     }
                     else
                     {
                         using var temp = (NManagedImage)blurredImage.Copy();
-                        DirectionalBlurProcess.BidirectionalCpu(temp, roi, rad + radianIncrement * c, length, edgeRepeatMode, true);
+                        GaussianDirectionalBlurProcess.BidirectionalCpu(temp, roi, rad + radianIncrement * c, length, edgeRepeatMode, true);
                         ImageBlendProcess.SameSizeCpu(starBurstImage, temp, roi, BlendMode.Add);
                     }
                 }
             }
 
-            GlowProcess.CompositeCpu(managedImage, starBurstImage, roi, strength, color, blendMode, compositeOrder);
+            if (drawStarBurstOnly)
+            {
+                GlowProcess.TransferGlowCpu(managedImage, starBurstImage, roi, strength, color);
+            }
+            else
+            {
+                GlowProcess.CompositeCpu(managedImage, starBurstImage, roi, strength, color, blendMode, compositeOrder);
+            }
 
             return managedImage;
         }
 
-        static NGPUImage ProcessGpu(GraphicsDevice device, NImage image, ROI roi, float strength, int count, float length, float angle, float threshold, Vector4 color, BlendMode blendMode, CompositeOrder compositeOrder, EdgeRepeatMode edgeRepeatMode)
+        static NGPUImage ProcessGpu(GraphicsDevice device, NImage image, ROI roi, float strength, int count, float length, float angle, float threshold, float lightBlurAmount, Vector4 color, BlendMode blendMode, CompositeOrder compositeOrder, EdgeRepeatMode edgeRepeatMode, bool drawStarBurstOnly)
         {
             var gpuImage = image.ToGpu(device);
 
@@ -193,8 +216,13 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
                 var bottom = Math.Min(roi.Bottom + maxRange, blurredImage.Height);
                 var left = Math.Max(roi.Left - maxRange, 0);
                 var right = Math.Min(roi.Right + maxRange, blurredImage.Width);
-            
-                GlowProcess.ThresholdGpu(device, blurredImage, new ROI(new Int32Point(), new Int32Size(blurredImage.Width, blurredImage.Height), left, top, right, bottom), threshold);
+                var blurredImageRoi = new ROI(new Int32Point(), new Int32Size(blurredImage.Width, blurredImage.Height), left, top, right, bottom);
+
+                GlowProcess.ThresholdGpu(device, blurredImage, blurredImageRoi, threshold);
+                if (lightBlurAmount > 0.0F)
+                {
+                    BoxBlurProcess.ProcessGpu(device, blurredImage, blurredImageRoi, lightBlurAmount, lightBlurAmount, LightBlurRepeatCount, edgeRepeatMode);
+                }
             
                 var radianIncrement = Math.PI / count;
                 using var temp = new NGPUImage(gpuImage.Width, gpuImage.Height, device);
@@ -202,19 +230,26 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
                 {
                     if (c + 1 >= count)
                     {
-                        DirectionalBlurProcess.BidirectionalGpu(device, blurredImage, roi, rad + radianIncrement * c, length, edgeRepeatMode);
+                        GaussianDirectionalBlurProcess.BidirectionalGpu(device, blurredImage, roi, rad + radianIncrement * c, length, edgeRepeatMode);
                         ImageBlendProcess.SameSizeGpu(device, starBurstImage, blurredImage, roi, BlendMode.Add);
                     }
                     else
                     {
                         blurredImage.CopyTo(temp);
-                        DirectionalBlurProcess.BidirectionalGpu(device, temp, roi, rad + radianIncrement * c, length, edgeRepeatMode);
+                        GaussianDirectionalBlurProcess.BidirectionalGpu(device, temp, roi, rad + radianIncrement * c, length, edgeRepeatMode);
                         ImageBlendProcess.SameSizeGpu(device, starBurstImage, temp, roi, BlendMode.Add);
                     }
                 }
             }
 
-            GlowProcess.CompositeGpu(device, gpuImage, starBurstImage, roi, strength, color, blendMode, compositeOrder);
+            if (drawStarBurstOnly)
+            {
+                GlowProcess.TransferGlowGpu(device, gpuImage, starBurstImage, roi, strength, color);
+            }
+            else
+            {
+                GlowProcess.CompositeGpu(device, gpuImage, starBurstImage, roi, strength, color, blendMode, compositeOrder);
+            }
 
             return gpuImage;
         }

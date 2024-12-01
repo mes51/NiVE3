@@ -44,6 +44,8 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
 
         const string PropertyDirectionId = nameof(PropertyDirectionId);
 
+        const string PropertyDrawGlowOnlyId = nameof(PropertyDrawGlowOnlyId);
+
         const int BlurRepeatCount = 3;
 
         IAcceleratorObject? AcceleratorObject { get; set; }
@@ -64,7 +66,8 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
                 new EnumProperty(PropertyBlendModeId, LanguageResourceDictionary.ResourceKeys.Stylize_Glow_BlendMode, typeof(BlendMode), typeof(LanguageResourceDictionary), BlendMode.Add, selectBoxWidth: 90.0),
                 new EnumProperty(PropertyCompositeOrderId, LanguageResourceDictionary.ResourceKeys.Stylize_Glow_CompositeOrder, typeof(CompositeOrder), typeof(LanguageResourceDictionary), CompositeOrder.Front, selectBoxWidth: 90.0),
                 new EnumProperty(PropertyEdgeRepeatModeId, LanguageResourceDictionary.ResourceKeys.Stylize_Glow_EdgeRepeatMode, typeof(EdgeRepeatMode), typeof(LanguageResourceDictionary), EdgeRepeatMode.None, selectBoxWidth: 90.0),
-                new EnumProperty(PropertyDirectionId, LanguageResourceDictionary.ResourceKeys.Stylize_Glow_Direction, typeof(GlowDirection), typeof(LanguageResourceDictionary), GlowDirection.HorizontalAndVertical, selectBoxWidth: 90.0)
+                new EnumProperty(PropertyDirectionId, LanguageResourceDictionary.ResourceKeys.Stylize_Glow_Direction, typeof(GlowDirection), typeof(LanguageResourceDictionary), GlowDirection.HorizontalAndVertical, selectBoxWidth: 90.0),
+                new CheckBoxProperty(PropertyDrawGlowOnlyId, LanguageResourceDictionary.ResourceKeys.Stylize_Glow_DrawGlowOnly, false)
             ];
         }
 
@@ -105,8 +108,9 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
             var compositeOrder = properties.GetValue(PropertyCompositeOrderId, layerTime, CompositeOrder.Front);
             var edgeRepeatMode = properties.GetValue(PropertyEdgeRepeatModeId, layerTime, EdgeRepeatMode.None);
             var direction = properties.GetValue(PropertyDirectionId, layerTime, GlowDirection.HorizontalAndVertical);
+            var drawGlowOnly = properties.GetValue(PropertyDrawGlowOnlyId, layerTime, false);
 
-            if ((strength == 0.0 || color == Vector4.UnitW) && blendMode == BlendMode.Add)
+            if ((strength == 0.0 || color == Vector4.UnitW) && blendMode == BlendMode.Add && !drawGlowOnly)
             {
                 return image;
             }
@@ -117,11 +121,11 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
 
             if (useGpu && AcceleratorObject != null)
             {
-                return ProcessGpu(AcceleratorObject.CurrentDevice, image, roi, horizontalRange, verticalRange, strength, threshold, color, blendMode, compositeOrder, edgeRepeatMode);
+                return ProcessGpu(AcceleratorObject.CurrentDevice, image, roi, horizontalRange, verticalRange, strength, threshold, color, blendMode, compositeOrder, edgeRepeatMode, drawGlowOnly);
             }
             else
             {
-                return ProcessCpu(image, roi, horizontalRange, verticalRange, strength, threshold, color, blendMode, compositeOrder, edgeRepeatMode);
+                return ProcessCpu(image, roi, horizontalRange, verticalRange, strength, threshold, color, blendMode, compositeOrder, edgeRepeatMode, drawGlowOnly);
             }
         }
 
@@ -132,7 +136,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
 
         public void Dispose() { }
 
-        static NManagedImage ProcessCpu(NImage image, ROI roi, float horizontalRange, float verticalRange, float strength, float threshold, Vector4 color, BlendMode blendMode, CompositeOrder compositeOrder, EdgeRepeatMode edgeRepeatMode)
+        static NManagedImage ProcessCpu(NImage image, ROI roi, float horizontalRange, float verticalRange, float strength, float threshold, Vector4 color, BlendMode blendMode, CompositeOrder compositeOrder, EdgeRepeatMode edgeRepeatMode, bool drawGlowOnly)
         {
             var managedImage = image.ToManaged();
 
@@ -146,12 +150,19 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
 
             BoxBlurProcess.ProcessCpu(blurredImage, roi, horizontalRange, verticalRange, BlurRepeatCount, edgeRepeatMode);
 
-            GlowProcess.CompositeCpu(managedImage, blurredImage, roi, strength, color, blendMode, compositeOrder);
+            if (drawGlowOnly)
+            {
+                GlowProcess.TransferGlowCpu(managedImage, blurredImage, roi, strength, color);
+            }
+            else
+            {
+                GlowProcess.CompositeCpu(managedImage, blurredImage, roi, strength, color, blendMode, compositeOrder);
+            }
 
             return managedImage;
         }
 
-        static NGPUImage ProcessGpu(GraphicsDevice device, NImage image, ROI roi, float horizontalRange, float verticalRange, float strength, float threshold, Vector4 color, BlendMode blendMode, CompositeOrder compositeOrder, EdgeRepeatMode edgeRepeatMode)
+        static NGPUImage ProcessGpu(GraphicsDevice device, NImage image, ROI roi, float horizontalRange, float verticalRange, float strength, float threshold, Vector4 color, BlendMode blendMode, CompositeOrder compositeOrder, EdgeRepeatMode edgeRepeatMode, bool drawGlowOnly)
         {
             var gpuImage = image.ToGpu(device);
 
@@ -166,7 +177,14 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
 
             BoxBlurProcess.ProcessGpu(device, blurredImage, roi, horizontalRange, verticalRange, BlurRepeatCount, edgeRepeatMode);
 
-            GlowProcess.CompositeGpu(device, gpuImage, blurredImage, roi, strength, color, blendMode, compositeOrder);
+            if (drawGlowOnly)
+            {
+                GlowProcess.TransferGlowGpu(device, gpuImage, blurredImage, roi, strength, color);
+            }
+            else
+            {
+                GlowProcess.CompositeGpu(device, gpuImage, blurredImage, roi, strength, color, blendMode, compositeOrder);
+            }
 
             return gpuImage;
         }

@@ -283,6 +283,9 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("グローの方向")]
         public const string Stylize_Glow_Direction = nameof(Stylize_Glow_Direction);
 
+        [LanguageKey, DefaultValue("グローのみ表示")]
+        public const string Stylize_Glow_DrawGlowOnly = nameof(Stylize_Glow_DrawGlowOnly);
+
         // ChromaticAberration
 
         [DefaultValue("色収差")]
@@ -344,6 +347,9 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("閾値")]
         public const string Stylize_StarBurst_Threshold = nameof(Stylize_StarBurst_Threshold);
 
+        [LanguageKey, DefaultValue("光源のブラー")]
+        public const string Stylize_StarBurst_LightBlur = nameof(Stylize_StarBurst_LightBlur);
+
         [LanguageKey, DefaultValue("光条の色")]
         public const string Stylize_StarBurst_Color = nameof(Stylize_StarBurst_Color);
 
@@ -355,6 +361,9 @@ namespace NiVE3.PresetPlugin.Resource
 
         [LanguageKey, DefaultValue("エッジの繰り返しモード")]
         public const string Stylize_StarBurst_EdgeRepeatMode = nameof(Stylize_StarBurst_EdgeRepeatMode);
+
+        [LanguageKey, DefaultValue("光条のみ表示")]
+        public const string Stylize_StarBurst_DrawStarBurstOnly = nameof(Stylize_StarBurst_DrawStarBurstOnly);
 
         // Level
 
