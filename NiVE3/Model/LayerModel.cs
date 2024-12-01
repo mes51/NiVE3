@@ -1621,6 +1621,7 @@ namespace NiVE3.Model
 
             if (newRoi.Left < 0 || newRoi.Top < 0 || newRoi.Right > image.Width || newRoi.Bottom > image.Height)
             {
+                var originalSize = new Int32Size(image.Width, image.Height);
                 var expandLeft = Math.Max(-newRoi.Left, 0);
                 var expandTop = Math.Max(-newRoi.Top, 0);
                 var newSize = new Int32Size(Math.Max(newRoi.Right, image.Width) + expandLeft, Math.Max(newRoi.Bottom, image.Height) + expandTop);
@@ -1654,7 +1655,7 @@ namespace NiVE3.Model
 
                 var newLeft = Math.Max(newRoi.Left, 0);
                 var newTop = Math.Max(newRoi.Top, 0);
-                newRoi = new ROI(newRoi.OriginalImagePosition + new Int32Point(expandLeft, expandTop), new Int32Size(image.Width, image.Height), newLeft, newTop, newRoi.Right + expandLeft, newRoi.Bottom + expandTop);
+                newRoi = new ROI(newRoi.OriginalImagePosition + new Int32Point(expandLeft, expandTop), originalSize, newLeft, newTop, newRoi.Right + expandLeft, newRoi.Bottom + expandTop);
             }
 
             return (newRoi, image);

@@ -365,6 +365,32 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("光条のみ表示")]
         public const string Stylize_StarBurst_DrawStarBurstOnly = nameof(Stylize_StarBurst_DrawStarBurstOnly);
 
+        // DropShadow
+
+        [DefaultValue("ドロップシャドウ")]
+        public const string Stylize_DropShadow_Name = nameof(Stylize_DropShadow_Name);
+
+        [DefaultValue("画像のアルファを元に影を生成します")]
+        public const string Stylize_DropShadow_Description = nameof(Stylize_DropShadow_Description);
+
+        [LanguageKey, DefaultValue("角度")]
+        public const string Stylize_DropShadow_Angle = nameof(Stylize_DropShadow_Angle);
+
+        [LanguageKey, DefaultValue("距離")]
+        public const string Stylize_DropShadow_Distance = nameof(Stylize_DropShadow_Distance);
+
+        [LanguageKey, DefaultValue("影の色")]
+        public const string Stylize_DropShadow_ShadowColor = nameof(Stylize_DropShadow_ShadowColor);
+
+        [LanguageKey, DefaultValue("影の不透明度")]
+        public const string Stylize_DropShadow_ShadowOpacity = nameof(Stylize_DropShadow_ShadowOpacity);
+
+        [LanguageKey, DefaultValue("影のぼかし")]
+        public const string Stylize_DropShadow_ShadowBlur = nameof(Stylize_DropShadow_ShadowBlur);
+
+        [LanguageKey, DefaultValue("影のみ表示")]
+        public const string Stylize_DropShadow_DrawShadowOnly = nameof(Stylize_DropShadow_DrawShadowOnly);
+
         // Level
 
         [DefaultValue("レベル")]
