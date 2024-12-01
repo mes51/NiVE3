@@ -626,7 +626,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                     Rasterize(
                         Device,
                         trackMatteMode,
-                        RenderImage,
+                        interpolate,
                         triangleBuffer,
                         triangleStates,
                         textures,
