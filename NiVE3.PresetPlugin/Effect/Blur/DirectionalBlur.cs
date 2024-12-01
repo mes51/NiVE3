@@ -70,7 +70,7 @@ namespace NiVE3.PresetPlugin.Effect.Blur
                 var expandY = (int)Math.Ceiling(Math.Abs(maxRange * sin));
                 if (isSingleDirection)
                 {
-                    return (cos > 0.0F, sin > 0.0F) switch
+                    return (cos < 0.0F, sin < 0.0F) switch
                     {
                         (false, false) => baseRoi.Expand(-expandX, -expandY, 0, 0),
                         (false, true) => baseRoi.Expand(-expandX, 0, 0, expandY),
