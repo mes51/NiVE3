@@ -391,6 +391,20 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("影のみ表示")]
         public const string Stylize_DropShadow_DrawShadowOnly = nameof(Stylize_DropShadow_DrawShadowOnly);
 
+        // Vignette
+
+        [DefaultValue("ビネット")]
+        public const string Stylize_Vignette_Name = nameof(Stylize_Vignette_Name);
+
+        [DefaultValue("画像の周辺を暗くします")]
+        public const string Stylize_Vignette_Description = nameof(Stylize_Vignette_Description);
+
+        [LanguageKey, DefaultValue("減光量")]
+        public const string Stylize_Vignette_Amount = nameof(Stylize_Vignette_Amount);
+
+        [LanguageKey, DefaultValue("半径")]
+        public const string Stylize_Vignette_Radius = nameof(Stylize_Vignette_Radius);
+
         // Level
 
         [DefaultValue("レベル")]
