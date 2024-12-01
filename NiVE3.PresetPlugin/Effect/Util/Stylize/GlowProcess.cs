@@ -88,7 +88,7 @@ namespace NiVE3.PresetPlugin.Effect.Util.Stylize
 
             if (Hlsl.Dot(image[pos].XYZ, Const.ConvertToGrayScaleFloat3) < threshold)
             {
-                image[pos] = new Float4(1.0F, 1.0F, 1.0F, 0.0F);
+                image[pos] = Const.EmptyPixelFloat4;
             }
         }
     }

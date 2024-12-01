@@ -597,12 +597,12 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
                 }
                 else
                 {
-                    return new Float4(1.0F, 1.0F, 1.0F, 0.0F);
+                    return Const.EmptyPixelFloat4;
                 }
             }
             else if (ix < -1 || iy < -1 || ix >= width || iy >= height)
             {
-                return new Float4(1.0F, 1.0F, 1.0F, 0.0F);
+                return Const.EmptyPixelFloat4;
             }
 
             var pp = x - ix;
@@ -612,10 +612,10 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
             var mw = width - 1;
             var mh = height - 1;
 
-            var c1 = new Float4(1.0F, 1.0F, 1.0F, 0.0F);
-            var c2 = new Float4(1.0F, 1.0F, 1.0F, 0.0F);
-            var c3 = new Float4(1.0F, 1.0F, 1.0F, 0.0F);
-            var c4 = new Float4(1.0F, 1.0F, 1.0F, 0.0F);
+            var c1 = Const.EmptyPixelFloat4;
+            var c2 = Const.EmptyPixelFloat4;
+            var c3 = Const.EmptyPixelFloat4;
+            var c4 = Const.EmptyPixelFloat4;
             var pos = iy * width + ix;
 
             if (ix > -1)
@@ -676,7 +676,7 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
             var ta = Hlsl.Lerp(Hlsl.Lerp(c1, c3, qq), Hlsl.Lerp(c2, c4, qq), pp).W;
             if (ta <= 0.0F)
             {
-                return new Float4(1.0F, 1.0F, 1.0F, 0.0F);
+                return Const.EmptyPixelFloat4;
             }
             else
             {
@@ -707,7 +707,7 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
             var ta = Hlsl.Lerp(Hlsl.Lerp(c1, c3, qq), Hlsl.Lerp(c2, c4, qq), pp).W;
             if (ta <= 0.0F)
             {
-                return new Float4(1.0F, 1.0F, 1.0F, 0.0F);
+                return Const.EmptyPixelFloat4;
             }
             else
             {

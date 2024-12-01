@@ -517,7 +517,7 @@ namespace NiVE3.PresetPlugin.Effect.Util.Blur
             var ta = Hlsl.Lerp(Hlsl.Lerp(c1, c3, qq), Hlsl.Lerp(c2, c4, qq), pp).W;
             if (ta <= 0.0F)
             {
-                return new Float4(1.0F, 1.0F, 1.0F, 0.0F);
+                return Const.EmptyPixelFloat4;
             }
             else
             {
@@ -544,7 +544,7 @@ namespace NiVE3.PresetPlugin.Effect.Util.Blur
                     }
                     else
                     {
-                        return new Float4(1.0F, 1.0F, 1.0F, 0.0F);
+                        return Const.EmptyPixelFloat4;
                     }
             }
         }
@@ -615,7 +615,7 @@ namespace NiVE3.PresetPlugin.Effect.Util.Blur
             var ta = Hlsl.Lerp(Hlsl.Lerp(c1, c3, qq), Hlsl.Lerp(c2, c4, qq), pp).W;
             if (ta <= 0.0F)
             {
-                return new Float4(1.0F, 1.0F, 1.0F, 0.0F);
+                return Const.EmptyPixelFloat4;
             }
             else
             {
@@ -642,7 +642,7 @@ namespace NiVE3.PresetPlugin.Effect.Util.Blur
                     }
                     else
                     {
-                        return new Float4(1.0F, 1.0F, 1.0F, 0.0F);
+                        return Const.EmptyPixelFloat4;
                     }
             }
         }

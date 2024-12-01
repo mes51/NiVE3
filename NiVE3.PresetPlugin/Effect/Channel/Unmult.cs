@@ -14,6 +14,7 @@ using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Property;
 using NiVE3.Plugin.Resource;
 using NiVE3.Plugin.ValueObject;
+using NiVE3.PresetPlugin.Internal;
 using NiVE3.PresetPlugin.Resource;
 using NiVE3.Shared.Extension;
 
@@ -130,7 +131,7 @@ namespace NiVE3.PresetPlugin.Effect.Channel
             var irate = Hlsl.Max(Hlsl.Max(c.X, c.Y), c.Z);
             if (irate <= 0.0F)
             {
-                image[pos] = new Float4(1.0F, 1.0F, 1.0F, 0.0F);
+                image[pos] = Const.EmptyPixelFloat4;
                 return;
             }
 
@@ -156,7 +157,7 @@ namespace NiVE3.PresetPlugin.Effect.Channel
             }
             else
             {
-                image[pos] = new Float4(1.0F, 1.0F, 1.0F, 0.0F);
+                image[pos] = Const.EmptyPixelFloat4;
             }
         }
     }

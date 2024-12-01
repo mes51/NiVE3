@@ -17,6 +17,7 @@ using NiVE3.Plugin.Resource;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.PresetPlugin.Effect.Util;
 using NiVE3.PresetPlugin.Extension;
+using NiVE3.PresetPlugin.Internal;
 using NiVE3.PresetPlugin.Internal.Drawing;
 using NiVE3.PresetPlugin.Resource;
 
@@ -266,7 +267,7 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
             }
             else
             {
-                return new Float4(1.0F, 1.0F, 1.0F, 0.0F);
+                return Const.EmptyPixelFloat4;
             }
         }
 
