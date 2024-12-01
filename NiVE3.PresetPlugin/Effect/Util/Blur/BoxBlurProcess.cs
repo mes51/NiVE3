@@ -290,7 +290,7 @@ namespace NiVE3.PresetPlugin.Effect.Util.Blur
             var temp = tempImage.Data;
             var count = amount * 2.0F + 1.0F;
 
-            Parallel.For(roi.Top, roi.Bottom, delegate (int h)
+            Parallel.For(roi.Top, roi.Bottom, h =>
             {
                 var rgb = Vector4.Zero;
                 var a = 0.0F;

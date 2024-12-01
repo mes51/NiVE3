@@ -3,6 +3,8 @@ using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.CompilerServices;
+using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Threading.Tasks;
 using ComputeSharp;
@@ -14,8 +16,12 @@ using NiVE3.PresetPlugin.Internal.Drawing;
 
 namespace NiVE3.PresetPlugin.Effect.Util.Blur
 {
-    static class DirectionalBlurProcess
+    static class GaussianDirectionalBlurProcess
     {
+        const double Sigma = 0.1;
+
+        const double InvertedSqrt2PI = 1.2615662610100802; // 1.0 / Math.Sqrt(Math.PI * 2.0 * 0.1)
+
         public static void UnidirectionalCpu(NManagedImage image, ROI roi, double radian, float amount, EdgeRepeatMode edgeRepeatMode, bool fastMode)
         {
             if (fastMode)
@@ -48,8 +54,11 @@ namespace NiVE3.PresetPlugin.Effect.Util.Blur
             using var sourceImage = new NGPUImage(image.Width, image.Height, device);
             image.CopyTo(sourceImage);
 
+            var gaussian = GetUnidirectionalGaussian(amount);
+            var totalCoefficient = gaussian.Sum();
+            using var gaussianBuffer = device.AllocateReadOnlyBuffer(gaussian);
             using var context = device.CreateComputeContext();
-            context.For(roi.Width, roi.Height, new DirectionalBlurUnidirectionalProcess(image.Data, sourceImage.Data, image.Width, image.Height, (int)edgeRepeatMode, sin, cos, amount, roi.Left, roi.Top));
+            context.For(roi.Width, roi.Height, new GaussianDirectionalBlurUnidirectionalProcess(image.Data, sourceImage.Data, image.Width, image.Height, (int)edgeRepeatMode, sin, cos, gaussianBuffer, totalCoefficient, roi.Left, roi.Top));
         }
 
         public static void BidirectionalGpu(GraphicsDevice device, NGPUImage image, ROI roi, double radian, float amount, EdgeRepeatMode edgeRepeatMode)
@@ -60,8 +69,11 @@ namespace NiVE3.PresetPlugin.Effect.Util.Blur
             using var sourceImage = new NGPUImage(image.Width, image.Height, device);
             image.CopyTo(sourceImage);
 
+            var gaussian = GetBidirectionalGaussian(amount);
+            var totalCoefficient = gaussian.Sum();
+            using var gaussianBuffer = device.AllocateReadOnlyBuffer(gaussian);
             using var context = device.CreateComputeContext();
-            context.For(roi.Width, roi.Height, new DirectionalBlurBidirectionalProcess(image.Data, sourceImage.Data, image.Width, image.Height, (int)edgeRepeatMode, sin, cos, amount, roi.Left, roi.Top));
+            context.For(roi.Width, roi.Height, new GaussianDirectionalBlurBidirectionalProcess(image.Data, sourceImage.Data, image.Width, image.Height, (int)edgeRepeatMode, sin, cos, gaussianBuffer, totalCoefficient, roi.Left, roi.Top));
         }
 
         static void UnidirectionalCpuPrecision(NManagedImage image, ROI roi, double radian, float amount, EdgeRepeatMode edgeRepeatMode)
@@ -73,10 +85,8 @@ namespace NiVE3.PresetPlugin.Effect.Util.Blur
             var imageWidth = image.Width;
             var imageHeight = image.Height;
             var imageData = image.Data;
-            var count = amount + 1.0F;
-            var edge = amount - (int)amount;
-            var edgeRange = (int)MathF.Ceiling(amount);
-            var range = (int)MathF.Floor(amount);
+            var gaussian = GetUnidirectionalGaussian(amount);
+            var count = gaussian.Sum();
 
             var bilinearEdgeMode = edgeRepeatMode switch
             {
@@ -95,17 +105,10 @@ namespace NiVE3.PresetPlugin.Effect.Util.Blur
                 {
                     var color = Vector4.Zero;
                     var a = 0.0F;
-                    if (edge > 0.0F)
-                    {
-                        var tc = ImageInterpolation.Bilinear(sourceDataSpan, imageWidth, imageHeight, x + edgeRange * cos, y + edgeRange * sin, Const.EmptyPixel, bilinearEdgeMode);
-                        var ta = tc.W * edge;
-                        a += ta;
-                        color += tc * ta;
-                    }
-                    for (var r = 0; r <= range; r++)
+                    for (var r = 0; r < gaussian.Length; r++)
                     {
                         var tc = ImageInterpolation.Bilinear(sourceDataSpan, imageWidth, imageHeight, x + r * cos, y + r * sin, Const.EmptyPixel, bilinearEdgeMode);
-                        var ta = tc.W;
+                        var ta = tc.W * gaussian[r];
                         a += ta;
                         color += tc * ta;
                     }
@@ -133,10 +136,9 @@ namespace NiVE3.PresetPlugin.Effect.Util.Blur
             var imageWidth = image.Width;
             var imageHeight = image.Height;
             var imageData = image.Data;
-            var count = amount * 2.0F + 1.0F;
-            var edge = amount - (int)amount;
-            var edgeRange = (int)MathF.Ceiling(amount);
-            var range = (int)MathF.Floor(amount);
+            var gaussian = GetBidirectionalGaussian(amount);
+            var count = gaussian.Sum();
+            var range = (int)MathF.Ceiling(amount);
 
             var bilinearEdgeMode = edgeRepeatMode switch
             {
@@ -155,22 +157,10 @@ namespace NiVE3.PresetPlugin.Effect.Util.Blur
                 {
                     var color = Vector4.Zero;
                     var a = 0.0F;
-                    if (edge > 0.0F)
-                    {
-                        var tc = ImageInterpolation.Bilinear(sourceDataSpan, imageWidth, imageHeight, x + edgeRange * cos, y + edgeRange * sin, Const.EmptyPixel, bilinearEdgeMode);
-                        var ta = tc.W * edge;
-                        a += ta;
-                        color += tc * ta;
-
-                        tc = ImageInterpolation.Bilinear(sourceDataSpan, imageWidth, imageHeight, x - edgeRange * cos, y - edgeRange * sin, Const.EmptyPixel, bilinearEdgeMode);
-                        ta = tc.W * edge;
-                        a += ta;
-                        color += tc * ta;
-                    }
-                    for (var r = -range; r <= range; r++)
+                    for (int r = -range, g = 0; g < gaussian.Length; r++, g++)
                     {
                         var tc = ImageInterpolation.Bilinear(sourceDataSpan, imageWidth, imageHeight, x + r * cos, y + r * sin, Const.EmptyPixel, bilinearEdgeMode);
-                        var ta = tc.W;
+                        var ta = tc.W * gaussian[g];
                         a += ta;
                         color += tc * ta;
                     }
@@ -192,13 +182,11 @@ namespace NiVE3.PresetPlugin.Effect.Util.Blur
         static void UnidirectionalCpuFast(NManagedImage image, ROI roi, double radian, float amount, EdgeRepeatMode edgeRepeatMode)
         {
             var pz = (int)Math.Ceiling(amount);
-            var fmz = pz - amount;
-            var fz = 1.0F - fmz;
             var imageWidth = image.Width;
             var imageHeight = image.Height;
             var imageData = image.Data;
-            var count = amount + 1.0F;
-            var totalPixelCount = pz + 1;
+            var gaussian = GetUnidirectionalGaussian(amount);
+            var count = gaussian.Sum();
             var angle = (float)(-radian / Math.PI * 180.0);
 
             var cos = (float)Math.Cos(radian);
@@ -233,65 +221,31 @@ namespace NiVE3.PresetPlugin.Effect.Util.Blur
 
             Parallel.For(0, tempHeight, h =>
             {
-                var rgb = Vector4.Zero;
-                var a = 0.0F;
                 var data = imageData.AsSpan(0, image.DataLength);
-                var cache = ArrayPool<Vector4>.Shared.Rent(totalPixelCount);
+                var cache = ArrayPool<Vector4>.Shared.Rent(gaussian.Length);
 
+                for (int w = 0, ci = 0; w < pz; w++, ci++)
                 {
-                    if (fmz > 0.0F)
-                    {
-                        var (sx, sy) = sourceMatrix.Transform(pz - 1, h);
-                        var p = ImageInterpolation.Bilinear(data, imageWidth, imageHeight, sx, sy, Const.EmptyPixel, bilinearEdgeMode);
-                        cache[totalPixelCount - 1] = p;
-                        var ta = p.W * fz;
-                        rgb += p * ta;
-                        a += ta;
-                    }
-
-                    for (int w = 0, limit = pz - (fmz > 0.0F ? 2 : 1), ci = fmz > 0.0F ? 1 : 0; w <= limit; w++, ci++)
-                    {
-                        var (sx, sy) = sourceMatrix.Transform(w, h);
-                        var p = ImageInterpolation.Bilinear(data, imageWidth, imageHeight, sx, sy, Const.EmptyPixel, bilinearEdgeMode);
-                        cache[ci] = p;
-                        var ta = p.W;
-                        rgb += p * ta;
-                        a += ta;
-                    }
+                    var (sx, sy) = sourceMatrix.Transform(w, h);
+                    cache[ci] = ImageInterpolation.Bilinear(data, imageWidth, imageHeight, sx, sy, Const.EmptyPixel, bilinearEdgeMode);
                 }
 
-                var cacheIndex = totalPixelCount;
+                var cacheIndex = gaussian.Length - 1;
                 for (var w = 0; w < tempWidth; w++, cacheIndex++)
                 {
-                    var p = cache[(cacheIndex - totalPixelCount) % totalPixelCount];
-                    var ta = p.W * fz;
-                    rgb -= p * ta;
-                    a -= ta;
-
-                    if (fmz > 0.0F)
-                    {
-                        p = cache[(cacheIndex - totalPixelCount + 1) % totalPixelCount];
-                        ta = p.W * fmz;
-                        rgb -= p * ta;
-                        a -= ta;
-                    }
-
                     var l = w + pz;
                     var (sx, sy) = sourceMatrix.Transform(l, h);
-                    p = ImageInterpolation.Bilinear(data, imageWidth, imageHeight, sx, sy, Const.EmptyPixel, bilinearEdgeMode);
-                    cache[cacheIndex % totalPixelCount] = p;
-                    ta = p.W * fz;
-                    rgb += p * ta;
-                    a += ta;
+                    cache[cacheIndex % gaussian.Length] = ImageInterpolation.Bilinear(data, imageWidth, imageHeight, sx, sy, Const.EmptyPixel, bilinearEdgeMode);
 
-                    if (fmz > 0.0F)
+                    var rgb = Vector4.Zero;
+                    var a = 0.0F;
+                    for (var g = 0; g < gaussian.Length; g++)
                     {
-                        p = cache[(cacheIndex - 1) % totalPixelCount];
-                        ta = p.W * fmz;
-                        rgb += p * ta;
+                        var tc = cache[(cacheIndex - gaussian.Length + g + 1) % gaussian.Length];
+                        var ta = tc.W * gaussian[g];
                         a += ta;
+                        rgb += tc * ta;
                     }
-
                     if (a > 0.0F)
                     {
                         var result = rgb / a;
@@ -319,13 +273,12 @@ namespace NiVE3.PresetPlugin.Effect.Util.Blur
         static void BidirectionalCpuFast(NManagedImage image, ROI roi, double radian, float amount, EdgeRepeatMode edgeRepeatMode)
         {
             var pz = (int)Math.Ceiling(amount);
-            var fmz = pz - amount;
-            var fz = 1.0F - fmz;
             var imageWidth = image.Width;
             var imageHeight = image.Height;
             var imageData = image.Data;
-            var count = amount * 2.0F + 1.0F;
-            var totalPixelCount = pz * 2 + 1;
+            var gaussian = GetBidirectionalGaussian(amount);
+            //gaussian.AsSpan().Fill(1.0F);
+            var count = gaussian.Sum();
             var angle = (float)(-radian / Math.PI * 180.0);
 
             var cos = (float)Math.Cos(radian);
@@ -364,75 +317,31 @@ namespace NiVE3.PresetPlugin.Effect.Util.Blur
 
             Parallel.For(0, tempHeight, h =>
             {
-                var rgb = Vector4.Zero;
-                var a = 0.0F;
                 var data = imageData.AsSpan(0, image.DataLength);
-                var cache = ArrayPool<Vector4>.Shared.Rent(totalPixelCount);
+                var cache = ArrayPool<Vector4>.Shared.Rent(gaussian.Length);
 
+                for (int w = -pz, ci = 0; w < pz; w++, ci++)
                 {
-                    var w = -pz - 1;
-                    if (fmz > 0.0F)
-                    {
-                        var (sx, sy) = sourceMatrix.Transform(w, h);
-                        var p = ImageInterpolation.Bilinear(data, imageWidth, imageHeight, sx, sy, Const.EmptyPixel, bilinearEdgeMode);
-                        cache[0] = p;
-                        var ta = p.W * fz;
-                        rgb += p * ta;
-                        a += ta;
-
-                        (sx, sy) = sourceMatrix.Transform(pz - 1, h);
-                        p = ImageInterpolation.Bilinear(data, imageWidth, imageHeight, sx, sy, Const.EmptyPixel, bilinearEdgeMode);
-                        cache[totalPixelCount - 1] = p;
-                        ta = p.W * fz;
-                        rgb += p * ta;
-                        a += ta;
-
-                        w++;
-                    }
-
-                    for (int limit = pz - (fmz > 0.0F ? 2 : 1), ci = fmz > 0.0F ? 1 : 0; w <= limit; w++, ci++)
-                    {
-                        var (sx, sy) = sourceMatrix.Transform(w, h);
-                        var p = ImageInterpolation.Bilinear(data, imageWidth, imageHeight, sx, sy, Const.EmptyPixel, bilinearEdgeMode);
-                        cache[ci] = p;
-                        var ta = p.W;
-                        rgb += p * ta;
-                        a += ta;
-                    }
+                    var (sx, sy) = sourceMatrix.Transform(w, h);
+                    cache[ci] = ImageInterpolation.Bilinear(data, imageWidth, imageHeight, sx, sy, Const.EmptyPixel, bilinearEdgeMode);
                 }
 
-                var cacheIndex = totalPixelCount;
+                var cacheIndex = gaussian.Length - 1;
                 for (var w = 0; w < tempWidth; w++, cacheIndex++)
                 {
-                    var p = cache[(cacheIndex - totalPixelCount) % totalPixelCount];
-                    var ta = p.W * fz;
-                    rgb -= p * ta;
-                    a -= ta;
-
-                    if (fmz > 0.0F)
-                    {
-                        p = cache[(cacheIndex - totalPixelCount + 1) % totalPixelCount];
-                        ta = p.W * fmz;
-                        rgb -= p * ta;
-                        a -= ta;
-                    }
-
                     var l = w + pz;
                     var (sx, sy) = sourceMatrix.Transform(l, h);
-                    p = ImageInterpolation.Bilinear(data, imageWidth, imageHeight, sx, sy, Const.EmptyPixel, bilinearEdgeMode);
-                    cache[cacheIndex % totalPixelCount] = p;
-                    ta = p.W * fz;
-                    rgb += p * ta;
-                    a += ta;
+                    cache[cacheIndex % gaussian.Length] = ImageInterpolation.Bilinear(data, imageWidth, imageHeight, sx, sy, Const.EmptyPixel, bilinearEdgeMode);
 
-                    if (fmz > 0.0F)
+                    var rgb = Vector4.Zero;
+                    var a = 0.0F;
+                    for (var g = 0; g < gaussian.Length; g++)
                     {
-                        p = cache[(cacheIndex - 1) % totalPixelCount];
-                        ta = p.W * fmz;
-                        rgb += p * ta;
+                        var tc = cache[(cacheIndex - gaussian.Length + g + 1) % gaussian.Length];
+                        var ta = tc.W * gaussian[g];
                         a += ta;
+                        rgb += tc * ta;
                     }
-
                     if (a > 0.0F)
                     {
                         var result = rgb / a;
@@ -456,15 +365,42 @@ namespace NiVE3.PresetPlugin.Effect.Util.Blur
 
             ArrayPool<Vector4>.Shared.Return(temp);
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static float[] GetUnidirectionalGaussian(float range)
+        {
+            var gaussian = new float[(int)MathF.Ceiling(range) + 1];
+            var denom = 2.0 * range * range * Sigma;
+            for (var i = 0; i < gaussian.Length; i++)
+            {
+                gaussian[i] = (float)(InvertedSqrt2PI * Math.Exp(-i * i / denom));
+            }
+
+            return gaussian;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static float[] GetBidirectionalGaussian(float range)
+        {
+            var fz = (int)MathF.Ceiling(range);
+            var gaussian = new float[fz * 2 + 1];
+            var denom = 2.0 * range * range * Sigma;
+            for (var i = 0; i < gaussian.Length; i++)
+            {
+                var x = Math.Abs(fz - i);
+                gaussian[i] = (float)(InvertedSqrt2PI * Math.Exp(-x * x / denom));
+            }
+
+            return gaussian;
+        }
     }
 
     [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
     [GeneratedComputeShaderDescriptor]
-    readonly partial struct DirectionalBlurUnidirectionalProcess(ReadWriteBuffer<Float4> result, ReadWriteBuffer<Float4> image, int width, int height, int edgeRepeatMode, float sin, float cos, float amount, int startX, int startY) : IComputeShader
+    readonly partial struct GaussianDirectionalBlurUnidirectionalProcess(ReadWriteBuffer<Float4> result, ReadWriteBuffer<Float4> image, int width, int height, int edgeRepeatMode, float sin, float cos, ReadOnlyBuffer<float> gaussian, float totalCoefficient, int startX, int startY) : IComputeShader
     {
         public void Execute()
         {
-            var range = (int)Hlsl.Floor(amount);
             var x = ThreadIds.X + startX;
             var y = ThreadIds.Y + startY;
 
@@ -472,26 +408,18 @@ namespace NiVE3.PresetPlugin.Effect.Util.Blur
 
             var c = new Float4();
             var a = 0.0F;
-            for (var i = 0; i <= range; i++)
+            for (var i = 0; i < gaussian.Length; i++)
             {
                 var tc = Bilinear(x + i * cos, y + i * sin);
-                c += tc * tc.W;
-                a += tc.W;
-            }
-
-            var edge = (int)Hlsl.Ceil(amount);
-            if (edge != range)
-            {
-                var fz = amount - range;
-                var tc = Bilinear(x + edge * cos, y + edge * sin);
-                c += tc * tc.W * fz;
-                a += tc.W * fz;
+                var ta = tc.W * gaussian[i];
+                c += tc * ta;
+                a += ta;
             }
 
             if (a > 0.0F)
             {
                 var rc = c / a;
-                rc.W = a / (amount + 1.0F);
+                rc.W = a / totalCoefficient;
                 result[pos] = rc;
             }
             else
@@ -554,11 +482,10 @@ namespace NiVE3.PresetPlugin.Effect.Util.Blur
 
     [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
     [GeneratedComputeShaderDescriptor]
-    readonly partial struct DirectionalBlurBidirectionalProcess(ReadWriteBuffer<Float4> result, ReadWriteBuffer<Float4> image, int width, int height, int edgeRepeatMode, float sin, float cos, float amount, int startX, int startY) : IComputeShader
+    readonly partial struct GaussianDirectionalBlurBidirectionalProcess(ReadWriteBuffer<Float4> result, ReadWriteBuffer<Float4> image, int width, int height, int edgeRepeatMode, float sin, float cos, ReadOnlyBuffer<float> gaussian, float totalCoefficient, int startX, int startY) : IComputeShader
     {
         public void Execute()
         {
-            var range = (int)Hlsl.Floor(amount);
             var x = ThreadIds.X + startX;
             var y = ThreadIds.Y + startY;
 
@@ -566,30 +493,20 @@ namespace NiVE3.PresetPlugin.Effect.Util.Blur
 
             var c = new Float4();
             var a = 0.0F;
-            for (var i = -range; i <= range; i++)
+            var range = gaussian.Length / 2;
+            for (var i = 0; i < gaussian.Length; i++)
             {
-                var tc = Bilinear(x + i * cos, y + i * sin);
-                c += tc * tc.W;
-                a += tc.W;
-            }
-
-            var edge = (int)Hlsl.Ceil(amount);
-            if (edge != range)
-            {
-                var fz = amount - range;
-                var tc = Bilinear(x - edge * cos, y - edge * sin);
-                c += tc * tc.W * fz;
-                a += tc.W * fz;
-
-                tc = Bilinear(x + edge * cos, y + edge * sin);
-                c += tc * tc.W * fz;
-                a += tc.W * fz;
+                var r = i - range;
+                var tc = Bilinear(x + r * cos, y + r * sin);
+                var ta = tc.W * gaussian[i];
+                c += tc * ta;
+                a += ta;
             }
 
             if (a > 0.0F)
             {
                 var rc = c / a;
-                rc.W = a / (amount * 2.0F + 1.0F);
+                rc.W = a / totalCoefficient;
                 result[pos] = rc;
             }
             else

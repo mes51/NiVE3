@@ -14,7 +14,9 @@ namespace NiVE3.PresetPlugin.Effect.Util.Blur
 {
     static class GaussianBlurProcess
     {
-        const double InvertedSqrt2PI = 0.3989422804014327; // 1.0 / Math.Sqrt(Math.PI * 2.0)
+        const double Sigma = 0.1;
+
+        const double InvertedSqrt2PI = 1.2615662610100802; // 1.0 / Math.Sqrt(Math.PI * 2.0 * 0.1)
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ProcessCpu(NManagedImage image, ROI roi, float horizontalAmount, float verticalAmount, EdgeRepeatMode edgeRepeatMode)
@@ -241,7 +243,7 @@ namespace NiVE3.PresetPlugin.Effect.Util.Blur
         {
             var fz = (int)MathF.Ceiling(range) - 1;
             var gaussian = new float[fz * 2 + 1];
-            var denom = 2.0 * range * range;
+            var denom = 2.0 * range * range * Sigma;
             for (var i = 0; i < gaussian.Length; i++)
             {
                 var x = Math.Abs(fz - i);

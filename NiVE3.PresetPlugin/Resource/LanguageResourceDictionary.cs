@@ -126,6 +126,29 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("高速モード(CPU用)")]
         public const string Blur_DirectionalBlur_FastMode = nameof(Blur_DirectionalBlur_FastMode);
 
+        // GaussianDirectionalBlur
+
+        [DefaultValue("ガウス方向ブラー")]
+        public const string Blur_GaussianDirectionalBlur_Name = nameof(Blur_GaussianDirectionalBlur_Name);
+
+        [DefaultValue("指定した方向にガウスブラーを掛けます")]
+        public const string Blur_GaussianDirectionalBlur_Description = nameof(Blur_GaussianDirectionalBlur_Description);
+
+        [LanguageKey, DefaultValue("方向")]
+        public const string Blur_GaussianDirectionalBlur_Angle = nameof(Blur_GaussianDirectionalBlur_Angle);
+
+        [LanguageKey, DefaultValue("半径")]
+        public const string Blur_GaussianDirectionalBlur_Amount = nameof(Blur_GaussianDirectionalBlur_Amount);
+
+        [LanguageKey, DefaultValue("片方向のみ")]
+        public const string Blur_GaussianDirectionalBlur_IsSingleDirection = nameof(Blur_GaussianDirectionalBlur_IsSingleDirection);
+
+        [LanguageKey, DefaultValue("エッジの繰り返しモード")]
+        public const string Blur_GaussianDirectionalBlur_EdgeRepeatMode = nameof(Blur_GaussianDirectionalBlur_EdgeRepeatMode);
+
+        [LanguageKey, DefaultValue("高速モード(CPU用)")]
+        public const string Blur_GaussianDirectionalBlur_FastMode = nameof(Blur_GaussianDirectionalBlur_FastMode);
+
         // PixelSort
 
         [DefaultValue("ピクセルソート")]
