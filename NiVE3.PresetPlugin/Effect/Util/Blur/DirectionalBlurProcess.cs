@@ -500,9 +500,8 @@ namespace NiVE3.PresetPlugin.Effect.Util.Blur
 
         Float4 Bilinear(float x, float y)
         {
-
-            var ix = (int)x;
-            var iy = (int)y;
+            var ix = (int)Hlsl.Floor(x);
+            var iy = (int)Hlsl.Floor(y);
             if (ix == x && iy == y)
             {
                 return GetPixel(ix, iy);
@@ -599,9 +598,8 @@ namespace NiVE3.PresetPlugin.Effect.Util.Blur
 
         Float4 Bilinear(float x, float y)
         {
-
-            var ix = (int)x;
-            var iy = (int)y;
+            var ix = (int)Hlsl.Floor(x);
+            var iy = (int)Hlsl.Floor(y);
             if (ix == x && iy == y)
             {
                 return GetPixel(ix, iy);

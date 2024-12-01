@@ -45,23 +45,22 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render2D
 
         Float4 NearestNeighbor(Float2 imagePos)
         {
-            var ix = (int)imagePos.X;
-            var iy = (int)imagePos.Y;
+            var ix = (int)Hlsl.Floor(imagePos.X);
+            var iy = (int)Hlsl.Floor(imagePos.Y);
             if (ix > -1 && iy > -1 && ix < imageWidth && iy < imageHeight)
             {
                 return image[iy * imageWidth + ix];
             }
             else
             {
-                return new Float4(1.0F, 1.0F, 1.0F, 0.0F);
+                return Const.EmptyPixelFloat4;
             }
         }
 
         Float4 Bilinear(Float2 imagePos)
         {
-
-            var ix = (int)imagePos.X;
-            var iy = (int)imagePos.Y;
+            var ix = (int)Hlsl.Floor(imagePos.X);
+            var iy = (int)Hlsl.Floor(imagePos.Y);
             if (ix == imagePos.X && iy == imagePos.Y)
             {
                 if (ix > -1 && iy > -1 && ix < imageWidth && iy < imageHeight)
@@ -70,12 +69,12 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render2D
                 }
                 else
                 {
-                    return new Float4(1.0F, 1.0F, 1.0F, 0.0F);
+                    return Const.EmptyPixelFloat4;
                 }
             }
             else if (ix < -1 || iy < -1 || ix >= imageWidth || iy >= imageHeight)
             {
-                return new Float4(1.0F, 1.0F, 1.0F, 0.0F);
+                return Const.EmptyPixelFloat4;
             }
 
             var pp = imagePos.X - ix;
@@ -85,10 +84,10 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render2D
             var mw = imageWidth - 1;
             var mh = imageHeight - 1;
 
-            var c1 = new Float4(1.0F, 1.0F, 1.0F, 0.0F);
-            var c2 = new Float4(1.0F, 1.0F, 1.0F, 0.0F);
-            var c3 = new Float4(1.0F, 1.0F, 1.0F, 0.0F);
-            var c4 = new Float4(1.0F, 1.0F, 1.0F, 0.0F);
+            var c1 = Const.EmptyPixelFloat4;
+            var c2 = Const.EmptyPixelFloat4;
+            var c3 = Const.EmptyPixelFloat4;
+            var c4 = Const.EmptyPixelFloat4;
             var pos = iy * imageWidth + ix;
 
             if (ix > -1)
@@ -149,7 +148,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render2D
             var ta = Hlsl.Lerp(Hlsl.Lerp(c1, c3, qq), Hlsl.Lerp(c2, c4, qq), pp).W;
             if (ta <= 0.0F)
             {
-                return new Float4(1.0F, 1.0F, 1.0F, 0.0F);
+                return Const.EmptyPixelFloat4;
             }
             else
             {
@@ -213,23 +212,22 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render2D
 
         Float4 NearestNeighbor(Float2 imagePos)
         {
-            var ix = (int)imagePos.X;
-            var iy = (int)imagePos.Y;
+            var ix = (int)Hlsl.Floor(imagePos.X);
+            var iy = (int)Hlsl.Floor(imagePos.Y);
             if (ix > -1 && iy > -1 && ix < imageWidth && iy < imageHeight)
             {
                 return image[iy * imageWidth + ix];
             }
             else
             {
-                return new Float4(1.0F, 1.0F, 1.0F, 0.0F);
+                return Const.EmptyPixelFloat4;
             }
         }
 
         Float4 Bilinear(Float2 imagePos)
         {
-
-            var ix = (int)imagePos.X;
-            var iy = (int)imagePos.Y;
+            var ix = (int)Hlsl.Floor(imagePos.X);
+            var iy = (int)Hlsl.Floor(imagePos.Y);
             if (ix == imagePos.X && iy == imagePos.Y)
             {
                 if (ix > -1 && iy > -1 && ix < imageWidth && iy < imageHeight)
@@ -238,12 +236,12 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render2D
                 }
                 else
                 {
-                    return new Float4(1.0F, 1.0F, 1.0F, 0.0F);
+                    return Const.EmptyPixelFloat4;
                 }
             }
             else if (ix < -1 || iy < -1 || ix >= imageWidth || iy >= imageHeight)
             {
-                return new Float4(1.0F, 1.0F, 1.0F, 0.0F);
+                return Const.EmptyPixelFloat4;
             }
 
             var pp = imagePos.X - ix;
@@ -253,10 +251,10 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render2D
             var mw = imageWidth - 1;
             var mh = imageHeight - 1;
 
-            var c1 = new Float4(1.0F, 1.0F, 1.0F, 0.0F);
-            var c2 = new Float4(1.0F, 1.0F, 1.0F, 0.0F);
-            var c3 = new Float4(1.0F, 1.0F, 1.0F, 0.0F);
-            var c4 = new Float4(1.0F, 1.0F, 1.0F, 0.0F);
+            var c1 = Const.EmptyPixelFloat4;
+            var c2 = Const.EmptyPixelFloat4;
+            var c3 = Const.EmptyPixelFloat4;
+            var c4 = Const.EmptyPixelFloat4;
             var pos = iy * imageWidth + ix;
 
             if (ix > -1)
@@ -317,7 +315,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render2D
             var ta = Hlsl.Lerp(Hlsl.Lerp(c1, c3, qq), Hlsl.Lerp(c2, c4, qq), pp).W;
             if (ta <= 0.0F)
             {
-                return new Float4(1.0F, 1.0F, 1.0F, 0.0F);
+                return Const.EmptyPixelFloat4;
             }
             else
             {

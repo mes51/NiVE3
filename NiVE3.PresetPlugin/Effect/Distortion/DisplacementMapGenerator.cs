@@ -354,8 +354,8 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
 
         Float4 SourceImageBilinear(float x, float y)
         {
-            var ix = (int)x;
-            var iy = (int)y;
+            var ix = (int)Hlsl.Floor(x);
+            var iy = (int)Hlsl.Floor(y);
 
             if (ix == x && iy == y)
             {

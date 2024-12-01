@@ -203,8 +203,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
 
         Float4 NearestNeighbor(float x, float y)
         {
-            var ix = (int)x;
-            var iy = (int)y;
+            var ix = (int)Hlsl.Floor(x);
+            var iy = (int)Hlsl.Floor(y);
 
             if (ix > -1 && iy > -1 && ix < textureWidth && iy < textureHeight)
             {
@@ -212,14 +212,14 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
             }
             else
             {
-                return new Float4(1.0F, 1.0F, 1.0F, 0.0F);
+                return Const.EmptyPixelFloat4;
             }
         }
 
         Float4 Bilinear(float x, float y)
         {
-            var ix = (int)x;
-            var iy = (int)y;
+            var ix = (int)Hlsl.Floor(x);
+            var iy = (int)Hlsl.Floor(y);
 
             if (ix == x && iy == y)
             {
@@ -229,12 +229,12 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
                 }
                 else
                 {
-                    return new Float4(1.0F, 1.0F, 1.0F, 0.0F);
+                    return Const.EmptyPixelFloat4;
                 }
             }
             else if (ix < -1 || iy < -1 || ix >= textureWidth || iy >= textureHeight)
             {
-                return new Float4(1.0F, 1.0F, 1.0F, 0.0F);
+                return Const.EmptyPixelFloat4;
             }
 
             var pp = x - ix;
@@ -244,10 +244,10 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
             var mw = textureWidth - 1;
             var mh = textureHeight - 1;
 
-            var c1 = new Float4(1.0F, 1.0F, 1.0F, 0.0F);
-            var c2 = new Float4(1.0F, 1.0F, 1.0F, 0.0F);
-            var c3 = new Float4(1.0F, 1.0F, 1.0F, 0.0F);
-            var c4 = new Float4(1.0F, 1.0F, 1.0F, 0.0F);
+            var c1 = Const.EmptyPixelFloat4;
+            var c2 = Const.EmptyPixelFloat4;
+            var c3 = Const.EmptyPixelFloat4;
+            var c4 = Const.EmptyPixelFloat4;
             var pos = iy * textureWidth + ix;
 
             if (ix > -1)
@@ -308,7 +308,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
             var ta = Hlsl.Lerp(Hlsl.Lerp(c1, c3, qq), Hlsl.Lerp(c2, c4, qq), pp).W;
             if (ta <= 0.0F)
             {
-                return new Float4(1.0F, 1.0F, 1.0F, 0.0F);
+                return Const.EmptyPixelFloat4;
             }
             else
             {

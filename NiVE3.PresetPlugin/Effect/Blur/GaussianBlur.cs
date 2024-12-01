@@ -31,8 +31,6 @@ namespace NiVE3.PresetPlugin.Effect.Blur
 
         const string PropertyEdgeRepeatModeId = nameof(PropertyEdgeRepeatModeId);
 
-        const double InvertedSqrt2PI = 0.3989422804014327; // 1.0 / Math.Sqrt(Math.PI * 2.0)
-
         IAcceleratorObject? AcceleratorObject { get; set; }
 
         public void SetupAccelerator(IAcceleratorObject accelerator)
