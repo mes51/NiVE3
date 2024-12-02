@@ -673,6 +673,23 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("量")]
         public const string Distortion_FishEye_Amount = nameof(Distortion_FishEye_Amount);
 
+        // PolarDistortion
+
+        [DefaultValue("極座標")]
+        public const string Distortion_PolarDistortion_Name = nameof(Distortion_PolarDistortion_Name);
+
+        [DefaultValue("画像を直交座標から極座標に変換、またはその逆を行います")]
+        public const string Distortion_PolarDistortion_Description = nameof(Distortion_PolarDistortion_Description);
+
+        [LanguageKey, DefaultValue("変換")]
+        public const string Distortion_PolarDistortion_Transform = nameof(Distortion_PolarDistortion_Transform);
+
+        [LanguageKey, DefaultValue("変換方向")]
+        public const string Distortion_PolarDistortion_Mode = nameof(Distortion_PolarDistortion_Mode);
+
+        [LanguageKey, DefaultValue("前処理/後処理用")]
+        public const string Distortion_PolarDistortion_ForPreOrPostProcess = nameof(Distortion_PolarDistortion_ForPreOrPostProcess);
+
         // Dynamics
 
         [DefaultValue("ダイナミクス")]
@@ -1272,6 +1289,12 @@ namespace NiVE3.PresetPlugin.Resource
 
         [DefaultValue("緑&青")]
         public const string ChromaticAberrationChannelType_GreenAndBlue = nameof(ChromaticAberrationChannelType_GreenAndBlue);
+
+        [DefaultValue("長方形から極座標")]
+        public const string PolarDistortionMode_ToPolar = nameof(PolarDistortionMode_ToPolar);
+
+        [DefaultValue("極座標から長方形")]
+        public const string PolarDistortionMode_ToRect = nameof(PolarDistortionMode_ToRect);
 
         // unit
 
