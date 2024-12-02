@@ -79,6 +79,8 @@ namespace NiVE3.Model
 
         ViewStateModel ViewState { get; }
 
+        ProceduralInputListModel ProceduralInputListModel { get; }
+
         public event EventHandler<ShowLoadSettingEventArgs>? ShowLoadSetting;
 
         public event EventHandler<FootageModelEventArgs>? ShowFootagePreview;
@@ -89,7 +91,7 @@ namespace NiVE3.Model
 
         public event EventHandler<FootageEventArgs>? DeleteFootageByUndo;
 
-        public FootageListModel(AcceleratorModel acceleratorModel, HistoryModel historyModel, ViewStateModel viewState)
+        public FootageListModel(AcceleratorModel acceleratorModel, HistoryModel historyModel, ViewStateModel viewState, ProceduralInputListModel proceduralInputListModel)
         {
             var pluginCatalog = new DirectoryCatalog(Paths.PluginDirectory);
             var selfCatalog = new AssemblyCatalog(typeof(FootageListModel).Assembly);
@@ -102,6 +104,7 @@ namespace NiVE3.Model
             AcceleratorModel = acceleratorModel;
             HistoryModel = historyModel;
             ViewState = viewState;
+            ProceduralInputListModel = proceduralInputListModel;
 
             //TODO: イベントの追加方法をfieldに対し行うか、nullableにした上でコンストラクタでインスタンスをセットするのが良いか
             Footages = [];
@@ -113,6 +116,26 @@ namespace NiVE3.Model
             NullObjectFootage = new FootageModel(new InputModel(NullObjectInput.Instance, NullObjectInput.PluginId, false, NullObjectInput.PluginId), EmptyFootageSource.Instance, HistoryModel, NullObjectInput.PluginId);
             TextFootage = new FootageModel(new InputModel(TextInput.Instance, TextInput.PluginId, false, TextInput.PluginId), TextFootageSource.Instance, HistoryModel, TextInput.PluginId);
             ShapeFootage = new FootageModel(new InputModel(ShapeInput.Instance, ShapeInput.PluginId, false, ShapeInput.PluginId), ShapeFootageSource.Instance, HistoryModel, ShapeInput.PluginId);
+
+            var procedualFootageModels = new List<FootageModel>();
+            if (Inputs != null)
+            {
+                foreach (var procedualPlugin in Inputs.Where(p => p.Metadata.PluginType.IsAssignableTo(typeof(IProceduralInput))))
+                {
+                    var isSupportedGpu = procedualPlugin.Metadata.IsSupportLoadToGpu;
+                    var pluginId = Guid.Parse(procedualPlugin.Metadata.InputUuid);
+                    var procedualInput = procedualPlugin.CreateExport();
+                    if (procedualPlugin.Metadata.IsSupportLoadToGpu)
+                    {
+                        procedualInput.Value.SetupAccelerator(acceleratorModel);
+                    }
+
+                    var inputModel = new InputModel(procedualInput.Value, pluginId, isSupportedGpu, pluginId);
+                    procedualFootageModels.Add(new FootageModel(inputModel, ((IProceduralInput)procedualInput.Value).GetFootage(), historyModel));
+                }
+
+                proceduralInputListModel.SetProceduralFootages([..procedualFootageModels]);
+            }
         }
 
         public Guid? AddSolid()
@@ -342,6 +365,12 @@ namespace NiVE3.Model
             else if (ShapeFootage.FootageId == footageId)
             {
                 return [ShapeFootage];
+            }
+
+            var procedualFootage = ProceduralInputListModel.FindFootage(footageId);
+            if (procedualFootage != null)
+            {
+                return [procedualFootage];
             }
 
             var footage = FindModel(footageId, Footages);

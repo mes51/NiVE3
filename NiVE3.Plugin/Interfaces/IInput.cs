@@ -69,6 +69,18 @@ namespace NiVE3.Plugin.Interfaces
     }
 
     /// <summary>
+    /// プロシージャル生成を行う入力プラグインを表すインターフェース
+    /// </summary>
+    public interface IProceduralInput : IInput
+    {
+        /// <summary>
+        /// フッテージを取得します。識別子は常に一定である必要があります。
+        /// </summary>
+        /// <returns>プロシージャル生成を行うフッテージを表すICustomizableFootageSource</returns>
+        ICustomizableFootageSource GetFootage();
+    }
+
+    /// <summary>
     /// 読み込んだソースのまとまりを表すクラス
     /// </summary>
     public class FootageSourceGroup

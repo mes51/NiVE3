@@ -17,6 +17,7 @@ using NiVE3.PresetPlugin.Internal;
 using ComputeSharp;
 using NiVE3.Plugin.Resource;
 using NiVE3.PresetPlugin.Effect.Util;
+using NiVE3.PresetPlugin.Effect.Util.Noise;
 
 namespace NiVE3.PresetPlugin.Effect.Noise
 {
@@ -53,15 +54,20 @@ namespace NiVE3.PresetPlugin.Effect.Noise
         {
             var amount = (float)properties.GetValue(PropertyAmountId, layerTime, 0.0) * 0.01F;
             var isColor = (bool)properties.GetValue(PropertyIsColorNoiseId, layerTime, false);
-            var seed = (uint)properties.GetValue(PropertySeedId, layerTime, 0.0) + 201864043U;
+            var seed = (uint)properties.GetValue(PropertySeedId, layerTime, 0.0);
 
             if (useGpu && AcceleratorObject != null)
             {
-                return ProcessGpu(AcceleratorObject.CurrentDevice, image, roi, amount, isColor, layerTime, seed);
+                var device = AcceleratorObject.CurrentDevice;
+                var gpuImage = image.ToGpu(device);
+                RandomNoiseProcess.ProcessGpu(device, gpuImage, roi, amount, isColor, seed, layerTime);
+                return gpuImage;
             }
             else
             {
-                return ProcessCpu(image, roi, amount, isColor, layerTime, seed);
+                var managedImage = image.ToManaged();
+                RandomNoiseProcess.ProcessCpu(managedImage, roi, amount, isColor, seed, layerTime);
+                return managedImage;
             }
         }
 
@@ -71,82 +77,5 @@ namespace NiVE3.PresetPlugin.Effect.Noise
         }
 
         public void Dispose() { }
-
-        static NManagedImage ProcessCpu(NImage image, ROI roi, float amount, bool isColor, double time, uint seed)
-        {
-            var managedImage = image.ToManaged();
-
-            var bx = roi.Left;
-            var ex = roi.Right;
-            var imageOriginX = (float)(roi.OriginalImagePosition.X + image.Origin.X);
-            var imageOriginY = (float)(roi.OriginalImagePosition.Y + image.Origin.Y);
-            var uTime = unchecked((uint)time.GetHashCode());
-            Parallel.For(roi.Top, roi.Bottom, y =>
-            {
-                var imageSpan = managedImage.GetDataSpan().Slice((y * image.Width), image.Width);
-                var uy = BitConverter.SingleToUInt32Bits(y - imageOriginY);
-                for (var x = bx; x < ex; x++)
-                {
-                    var ux = BitConverter.SingleToUInt32Bits(x - imageOriginX);
-                    var noise = NoiseFunction.Pcg3DFloatCpu(ux, uy, uTime, seed);
-                    if (!isColor)
-                    {
-                        noise = new Vector4(Vector4.Dot(noise, Const.ConvertToGrayScale));
-                    }
-                    noise.W = 1.0F;
-
-                    imageSpan[x] = Vector4.Lerp(imageSpan[x], noise, amount);
-                }
-            });
-
-            return managedImage;
-        }
-
-        static NGPUImage ProcessGpu(GraphicsDevice device, NImage image, ROI roi, float amount, bool isColor, double time, uint seed)
-        {
-            var gpuImage = image.ToGpu(device);
-
-            var imageOriginX = (float)(roi.OriginalImagePosition.X + image.Origin.X);
-            var imageOriginY = (float)(roi.OriginalImagePosition.Y + image.Origin.Y);
-            using var context = device.CreateComputeContext();
-            if (isColor)
-            {
-                context.For(roi.Width, roi.Height, new ColorRandomNoiseProcess(gpuImage.Data, gpuImage.Width, amount, (float)time, seed, roi.Left, roi.Top, imageOriginX, imageOriginY));
-            }
-            else
-            {
-                context.For(roi.Width, roi.Height, new GrayScaleRandomNoiseProcess(gpuImage.Data, gpuImage.Width, amount, (float)time, seed, roi.Left, roi.Top, imageOriginX, imageOriginY));
-            }
-
-            return gpuImage;
-        }
-    }
-
-    [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
-    [GeneratedComputeShaderDescriptor]
-    readonly partial struct GrayScaleRandomNoiseProcess(ReadWriteBuffer<Float4> image, int width, float amount, float time, uint seed, int startX, int startY, float originX, float originY) : IComputeShader
-    {
-        public void Execute()
-        {
-            var v = Hlsl.AsUInt(new Float3(ThreadIds.X + startX - originX, ThreadIds.Y + startY - originY, time));
-            var noise = Hlsl.Dot(NoiseFunction.Pcg3DFloatGpu(v, seed), Const.ConvertToGrayScaleFloat3);
-
-            var pos = (ThreadIds.Y + startY) * width + ThreadIds.X + startX;
-            image[pos] = Hlsl.Lerp(image[pos], new Float4(noise, noise, noise, 1.0F), amount);
-        }
-    }
-
-    [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
-    [GeneratedComputeShaderDescriptor]
-    readonly partial struct ColorRandomNoiseProcess(ReadWriteBuffer<Float4> image, int width, float amount, float time, uint seed, int startX, int startY, float originX, float originY) : IComputeShader
-    {
-        public void Execute()
-        {
-            var v = Hlsl.AsUInt(new Float3(ThreadIds.X + startX - originX, ThreadIds.Y + startY - originY, time));
-            var noise = new Float4(NoiseFunction.Pcg3DFloatGpu(v, seed), 1.0F);
-
-            var pos = (ThreadIds.Y + startY) * width + ThreadIds.X + startX;
-            image[pos] = Hlsl.Lerp(image[pos], noise, amount);
-        }
     }
 }

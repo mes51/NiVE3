@@ -51,6 +51,7 @@ namespace NiVE3.Module
             Container.Register<ApplicationModel>(Reuse.Singleton, FactoryMethod.ConstructorWithResolvableArguments);
             Container.Register<HistoryModel>(Reuse.Singleton, FactoryMethod.ConstructorWithResolvableArguments);
             Container.Register<PlayControllerModel>(Reuse.Singleton, FactoryMethod.ConstructorWithResolvableArguments);
+            Container.Register<ProceduralInputListModel>(Reuse.Singleton, FactoryMethod.ConstructorWithResolvableArguments);
             Container.Register<FootageListModel>(Reuse.Singleton, FactoryMethod.ConstructorWithResolvableArguments);
             Container.Register<EffectListModel>(Reuse.Singleton, FactoryMethod.ConstructorWithResolvableArguments);
             Container.Register<RendererListModel>(Reuse.Singleton, FactoryMethod.ConstructorWithResolvableArguments);

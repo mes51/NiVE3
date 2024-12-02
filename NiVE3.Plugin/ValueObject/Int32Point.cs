@@ -15,6 +15,8 @@ namespace NiVE3.Plugin.ValueObject
     /// <param name="Y">Y座標</param>
     public readonly record struct Int32Point(int X, int Y)
     {
+        public static readonly Int32Point Zero = new Int32Point(0, 0);
+
         public override string ToString()
         {
             return $"< X = {X}, Y = {Y} >";

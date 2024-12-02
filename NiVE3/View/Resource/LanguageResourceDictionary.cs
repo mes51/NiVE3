@@ -359,6 +359,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("ヌルオブジェクト(_N)")]
         public static readonly string Timeline_ContextMenu_AddLayer_NullObject = nameof(Timeline_ContextMenu_AddLayer_NullObject);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("プロシージャル(_P)")]
+        public static readonly string Timeline_ContextMenu_AddLayer_Procedural = nameof(Timeline_ContextMenu_AddLayer_Procedural);
+
         [ShowInMarkup, LanguageKey, DefaultValue("エフェクト(_E)")]
         public static readonly string Timeline_ContextMenu_Effect = nameof(Timeline_ContextMenu_Effect);
 

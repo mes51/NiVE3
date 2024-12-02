@@ -417,6 +417,13 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref groupedEffects, value); }
         }
 
+        private ProceduralInputItem[] proceduralInputItems = [];
+        public ProceduralInputItem[] ProceduralInputItems
+        {
+            get { return proceduralInputItems; }
+            set { SetProperty(ref proceduralInputItems, value); }
+        }
+
         public ICommand ChangeEnableShyCommand { get; }
 
         public ICommand ChangeEnableFrameBlendCommand { get; }
@@ -458,6 +465,8 @@ namespace NiVE3.ViewModel
         public ICommand AddNullObjectCommand { get; }
 
         public ICommand AddTextCommand { get; }
+
+        public ICommand AddProceduralFootage { get; }
 
         public ICommand AddEffectCommand { get; }
 
@@ -518,6 +527,8 @@ namespace NiVE3.ViewModel
 
         EffectListStateModel EffectListStateModel { get; }
 
+        ProceduralInputListModel ProceduralInputListModel { get; }
+
         AudioPlayerModel AudioPlayerModel { get; }
 
         HistoryModel HistoryModel { get; }
@@ -536,10 +547,11 @@ namespace NiVE3.ViewModel
 
         DurationManipulationStateBase? DurationManipulation { get; set; }
 
-        public TimelineViewModel(ViewStateModel viewState, EffectListStateModel effectListStateModel, AudioPlayerModel audioPlayerModel, HistoryModel historyModel, EventHubModel eventHubModel, IDialogService dialogService)
+        public TimelineViewModel(ViewStateModel viewState, EffectListStateModel effectListStateModel, ProceduralInputListModel proceduralInputListModel, AudioPlayerModel audioPlayerModel, HistoryModel historyModel, EventHubModel eventHubModel, IDialogService dialogService)
         {
             ViewState = viewState;
             EffectListStateModel = effectListStateModel;
+            ProceduralInputListModel = proceduralInputListModel;
             AudioPlayerModel = audioPlayerModel;
             HistoryModel = historyModel;
             EventHubModel = eventHubModel;
@@ -557,6 +569,8 @@ namespace NiVE3.ViewModel
 
                 value.Add(e);
             }
+
+            ProceduralInputItems = proceduralInputListModel.ProceduralFootageItems;
 
             WiringModel();
 
@@ -772,6 +786,16 @@ namespace NiVE3.ViewModel
             AddNullObjectCommand = new DelegateCommand(() => CompositionModel?.AddNullObject(GetFirstSelectedLayerIndex()), () => CompositionModel != null).ObservesProperty(() => CompositionModel);
 
             AddTextCommand = new DelegateCommand(() => CompositionModel?.AddText(GetFirstSelectedLayerIndex()), () => CompositionModel != null).ObservesProperty(() => CompositionModel);
+
+            AddProceduralFootage = new DelegateCommand<ProceduralInputItem>(item =>
+            {
+                if (CompositionModel == null)
+                {
+                    return;
+                }
+
+                CompositionModel.InsertLayers(item.FootageId, GetFirstSelectedLayerIndex());
+            }, _ => CompositionModel != null).ObservesProperty(() => CompositionModel);
 
             AddEffectCommand = new DelegateCommand<EffectItem>(effectItem =>
             {

@@ -900,6 +900,26 @@ namespace NiVE3.PresetPlugin.Resource
         [ShowInMarkup, DefaultValue("影のアンチエイリアスを有効にする")]
         public const string DefaultRendererSettingView_EnableShadowAntiAlias = nameof(DefaultRendererSettingView_EnableShadowAntiAlias);
 
+        // Inputs
+
+        [DefaultValue("ランダムノイズ")]
+        public const string Input_RandomNoiseProceduralInput_Name = nameof(Input_RandomNoiseProceduralInput_Name);
+
+        [DefaultValue("ランダムノイズを生成します")]
+        public const string Input_RandomNoiseProceduralInput_Description = nameof(Input_RandomNoiseProceduralInput_Description);
+
+        [LanguageKey, DefaultValue("サイズ")]
+        public const string Input_RandomNoiseProceduralInput_ImageSize = nameof(Input_RandomNoiseProceduralInput_ImageSize);
+
+        [LanguageKey, DefaultValue("カラーノイズ")]
+        public const string Input_RandomNoiseProceduralInput_IsColorNoise = nameof(Input_RandomNoiseProceduralInput_IsColorNoise);
+
+        [LanguageKey, DefaultValue("ランダムシード")]
+        public const string Input_RandomNoiseProceduralInput_RandomSeed = nameof(Input_RandomNoiseProceduralInput_RandomSeed);
+
+        [LanguageKey, DefaultValue("進行")]
+        public const string Input_RandomNoiseProceduralInput_Advance = nameof(Input_RandomNoiseProceduralInput_Advance);
+
         // Outputs
 
         [DefaultValue("AVI出力")]
@@ -1300,6 +1320,9 @@ namespace NiVE3.PresetPlugin.Resource
 
         [LanguageKey, DefaultValue("ms")]
         public const string Unit_MilliSecond = nameof(Unit_MilliSecond);
+
+        [LanguageKey, DefaultValue("px")]
+        public const string Unit_Pixel = nameof(Unit_Pixel);
 
         [LanguageKey, DefaultValue("dB")]
         public const string Unit_Decibel = nameof(Unit_Decibel);
