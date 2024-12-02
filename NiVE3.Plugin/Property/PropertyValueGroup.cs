@@ -90,6 +90,26 @@ namespace NiVE3.Plugin.Property
         }
 
         /// <summary>
+        /// 指定したプロパティ、またはグループのIDの値を取得します
+        /// </summary>
+        /// <typeparam name="T">取得する値の型</typeparam>
+        /// <param name="propertyId">取得するプロパティ、またはグループのID</param>
+        /// <param name="defaultValue">値が存在しなかった場合のデフォルトの値</param>
+        /// <returns>値を取得、かつ指定した型だった場合は取得した値、それ以外の場合はデフォルトの値</returns>
+        public T GetValueOrDefault<T>(string propertyId, T defaultValue)
+        {
+            var result = TryGetValueInTree(propertyId, out var obj);
+            if (result && obj is T castedValue)
+            {
+                return castedValue;
+            }
+            else
+            {
+                return defaultValue;
+            }
+        }
+
+        /// <summary>
         /// 指定したプロパティ、またはグループのIDをグループ内から検索して取得します
         /// </summary>
         /// <param name="propertyId">検索するプロパティ、またはグループのID</param>
@@ -139,6 +159,26 @@ namespace NiVE3.Plugin.Property
             {
                 value = default;
                 return false;
+            }
+        }
+
+        /// <summary>
+        /// 指定したプロパティ、またはグループのIDをグループ内から検索して取得します
+        /// </summary>
+        /// <typeparam name="T">取得する値の型</typeparam>
+        /// <param name="propertyId">検索するプロパティ、またはグループのID</param>
+        /// <param name="defaultValue">値が存在しなかった場合のデフォルトの値</param>
+        /// <returns>値を取得、かつ指定した型だった場合は取得した値、それ以外の場合はデフォルトの値</returns>
+        public T GetValueOrDefaultInTree<T>(string propertyId, T defaultValue)
+        {
+            var result = TryGetValueInTree(propertyId, out var obj);
+            if (result && obj is T castedValue)
+            {
+                return castedValue;
+            }
+            else
+            {
+                return defaultValue;
             }
         }
 

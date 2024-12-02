@@ -920,6 +920,72 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("進行")]
         public const string Input_RandomNoiseProceduralInput_Advance = nameof(Input_RandomNoiseProceduralInput_Advance);
 
+        [DefaultValue("フラクタルノイズ")]
+        public const string Input_FractalNoiseProceduralInput_Name = nameof(Input_FractalNoiseProceduralInput_Name);
+
+        [DefaultValue("ノイズからパターンを生成します")]
+        public const string Input_Input_FractalNoiseProceduralInput_Description = nameof(Input_Input_FractalNoiseProceduralInput_Description);
+
+        [LanguageKey, DefaultValue("サイズ")]
+        public const string Input_Input_FractalNoiseProceduralInput_ImageSize = nameof(Input_Input_FractalNoiseProceduralInput_ImageSize);
+
+        [LanguageKey, DefaultValue("フラクタルの種類")]
+        public const string Input_Input_FractalNoiseProceduralInput_FractalType = nameof(Input_Input_FractalNoiseProceduralInput_FractalType);
+
+        [LanguageKey, DefaultValue("ノイズの種類")]
+        public const string Input_Input_FractalNoiseProceduralInput_NoiseType = nameof(Input_Input_FractalNoiseProceduralInput_NoiseType);
+
+        [LanguageKey, DefaultValue("反転")]
+        public const string Input_Input_FractalNoiseProceduralInput_Invert = nameof(Input_Input_FractalNoiseProceduralInput_Invert);
+
+        [LanguageKey, DefaultValue("コントラスト")]
+        public const string Input_Input_FractalNoiseProceduralInput_Contrast = nameof(Input_Input_FractalNoiseProceduralInput_Contrast);
+
+        [LanguageKey, DefaultValue("明るさ")]
+        public const string Input_Input_FractalNoiseProceduralInput_Luminance = nameof(Input_Input_FractalNoiseProceduralInput_Luminance);
+
+        [LanguageKey, DefaultValue("トランスフォーム")]
+        public const string Input_Input_FractalNoiseProceduralInput_Transform = nameof(Input_Input_FractalNoiseProceduralInput_Transform);
+
+        [LanguageKey, DefaultValue("位置")]
+        public const string Input_Input_FractalNoiseProceduralInput_Transform_Position = nameof(Input_Input_FractalNoiseProceduralInput_Transform_Position);
+
+        [LanguageKey, DefaultValue("スケール")]
+        public const string Input_Input_FractalNoiseProceduralInput_Transform_Scale = nameof(Input_Input_FractalNoiseProceduralInput_Transform_Scale);
+
+        [LanguageKey, DefaultValue("回転")]
+        public const string Input_Input_FractalNoiseProceduralInput_Transform_Angle = nameof(Input_Input_FractalNoiseProceduralInput_Transform_Angle);
+
+        [LanguageKey, DefaultValue("複雑度")]
+        public const string Input_Input_FractalNoiseProceduralInput_Octave = nameof(Input_Input_FractalNoiseProceduralInput_Octave);
+
+        [LanguageKey, DefaultValue("繰り返し設定")]
+        public const string Input_Input_FractalNoiseProceduralInput_OctaveSetting = nameof(Input_Input_FractalNoiseProceduralInput_OctaveSetting);
+
+        [LanguageKey, DefaultValue("影響度")]
+        public const string Input_Input_FractalNoiseProceduralInput_OctaveSetting_Amount = nameof(Input_Input_FractalNoiseProceduralInput_OctaveSetting_Amount);
+
+        [LanguageKey, DefaultValue("位置のオフセット")]
+        public const string Input_Input_FractalNoiseProceduralInput_OctaveSetting_PositionOffset = nameof(Input_Input_FractalNoiseProceduralInput_OctaveSetting_PositionOffset);
+
+        [LanguageKey, DefaultValue("スケール")]
+        public const string Input_Input_FractalNoiseProceduralInput_OctaveSetting_Scale = nameof(Input_Input_FractalNoiseProceduralInput_OctaveSetting_Scale);
+
+        [LanguageKey, DefaultValue("回転")]
+        public const string Input_Input_FractalNoiseProceduralInput_OctaveSetting_Angle = nameof(Input_Input_FractalNoiseProceduralInput_OctaveSetting_Angle);
+
+        [LanguageKey, DefaultValue("スケールの中心を合わせる")]
+        public const string Input_Input_FractalNoiseProceduralInput_OctaveSetting_CenteringScale = nameof(Input_Input_FractalNoiseProceduralInput_OctaveSetting_CenteringScale);
+
+        [LanguageKey, DefaultValue("展開")]
+        public const string Input_Input_FractalNoiseProceduralInput_Evolution = nameof(Input_Input_FractalNoiseProceduralInput_Evolution);
+
+        [LanguageKey, DefaultValue("ランダムシード")]
+        public const string Input_Input_FractalNoiseProceduralInput_RandomSeed = nameof(Input_Input_FractalNoiseProceduralInput_RandomSeed);
+
+        [LanguageKey, DefaultValue("不透明度")]
+        public const string Input_Input_FractalNoiseProceduralInput_Opacity = nameof(Input_Input_FractalNoiseProceduralInput_Opacity);
+
         // Outputs
 
         [DefaultValue("AVI出力")]

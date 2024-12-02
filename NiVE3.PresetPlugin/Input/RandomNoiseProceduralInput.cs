@@ -107,10 +107,10 @@ namespace NiVE3.PresetPlugin.Input
 
         public NImage ReadFrame(double time, double downSamplingRate, int compositionWidth, int compositionHeight, PropertyValueGroup properties, ImageInterpolationQuality imageInterpolationQuality, bool toGpu)
         {
-            properties.TryGetValue(PropertyImageSizeId, out Vector3d size);
-            properties.TryGetValue(PropertyIsColorNoiseId, out bool isColorNoise);
-            properties.TryGetValue(PropertyRandomSeedId, out double randomSeed);
-            properties.TryGetValue(PropertyAdvanceId, out double advance);
+            var size = properties.GetValueOrDefault(PropertyImageSizeId, Vector3d.Zero);
+            var isColorNoise = properties.GetValueOrDefault(PropertyIsColorNoiseId, false);
+            var randomSeed = (uint)properties.GetValueOrDefault(PropertyRandomSeedId, 0.0);
+            var advance = properties.GetValueOrDefault(PropertyAdvanceId, 0.0);
             var width = Math.Max((int)size.X, 1);
             var height = Math.Max((int)size.Y, 1);
             var origin = new Vector2d(width, height) * 0.5;
