@@ -131,7 +131,7 @@ namespace NiVE3.Model
                     }
 
                     var inputModel = new InputModel(procedualInput.Value, pluginId, isSupportedGpu, pluginId);
-                    procedualFootageModels.Add(new FootageModel(inputModel, ((IProceduralInput)procedualInput.Value).GetFootage(), historyModel));
+                    procedualFootageModels.Add(new FootageModel(inputModel, ((IProceduralInput)procedualInput.Value).GetFootage(), historyModel, pluginId));
                 }
 
                 proceduralInputListModel.SetProceduralFootages([..procedualFootageModels]);
