@@ -687,6 +687,12 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("変換方向")]
         public const string Distortion_PolarDistortion_Mode = nameof(Distortion_PolarDistortion_Mode);
 
+        [LanguageKey, DefaultValue("画像のオフセット")]
+        public const string Distortion_PolarDistortion_ImageOffset = nameof(Distortion_PolarDistortion_ImageOffset);
+
+        [LanguageKey, DefaultValue("表示領域のオフセット")]
+        public const string Distortion_PolarDistortion_DisplayAreaOffset = nameof(Distortion_PolarDistortion_DisplayAreaOffset);
+
         [LanguageKey, DefaultValue("前処理/後処理用")]
         public const string Distortion_PolarDistortion_ForPreOrPostProcess = nameof(Distortion_PolarDistortion_ForPreOrPostProcess);
 
