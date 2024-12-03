@@ -32,6 +32,7 @@ using Prism.Commands;
 using NiVE3.Model.UI;
 using Prism.Dialogs;
 using NiVE3.Plugin.Interfaces.RendererParams;
+using NiVE3.Data.Clipboard;
 
 namespace NiVE3.ViewModel
 {
@@ -701,10 +702,17 @@ namespace NiVE3.ViewModel
                         return;
                     }
 
-                    var data = ClipboardUtil.GetData<LayerData>();
-                    if (data != null)
+                    var layerData = ClipboardUtil.GetData<LayerData>();
+                    if (layerData != null && layerData.Type == CopyDataType.Layer)
                     {
-                        CompositionModel.PasteLayers(data, LastSelectedLayerId);
+                        CompositionModel.PasteLayers(layerData, LastSelectedLayerId);
+                        return;
+                    }
+                    
+                    var effectData = ClipboardUtil.GetData<EffectData>();
+                    if (effectData != null && effectData.Type == CopyDataType.Effect)
+                    {
+                        CompositionModel.PasteEffects(effectData, [..SelectedLayers.Select(l => l.LayerId)]);
                     }
                 }
             }, () => CompositionModel != null).ObservesProperty(() => CompositionModel);

@@ -1074,6 +1074,24 @@ namespace NiVE3.Model
             PasteLayersInternal(data, insertTargetId, false);
         }
 
+        public void PasteEffects(CopyData<EffectData> data, Guid[] ids)
+        {
+            var layers = Layers.Where(l => ids.Contains(l.LayerId)).OrderBy(Layers.IndexOf).ToArray();
+            if (layers.Length < 1)
+            {
+                return;
+            }
+
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_PasteEffects));
+
+            foreach (var l in layers)
+            {
+                l.PasteEffects(data, [], null);
+            }
+
+            HistoryModel.EndGroup();
+        }
+
         public void DuplicateLayers(Guid[] ids, Guid? insertTargetId)
         {
             PasteLayersInternal(CopyLayers(ids), insertTargetId, true);
