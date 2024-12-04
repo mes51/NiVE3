@@ -121,6 +121,7 @@
                             <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_ShiftSourceStartPointToPrevious10Frame}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=ShiftSourceStartPointToPrevious10FrameGesture}"/>
                             <Separator />
                             <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_ChangePlayRate}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=ChangeLayerPlayRateGesture}"/>
+                            <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_ChangeLayerFreezeFrame}" IsChecked="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.DataContext.IsFreezeFrame}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=ChangeLayerFreezeFrameGesture}"/>
                         </MenuItem>
                         <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_ChangeLayerTagsRandomly}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=ChangeLayerTagsRandomlyGesture}"/>
                         <Separator />

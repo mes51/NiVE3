@@ -71,6 +71,7 @@ namespace NiVE3.ViewModel
     [CommandHandling(nameof(MoveIndicatorToCompositionBeginCommand), nameof(ShortcutKeySetting.MoveIndicatorToCompositionBeginGesture))]
     [CommandHandling(nameof(MoveIndicatorToCompositionEndCommand), nameof(ShortcutKeySetting.MoveIndicatorToCompositionEndGesture))]
     [CommandHandling(nameof(PlayRateChangeCommand), nameof(ShortcutKeySetting.ChangeLayerPlayRateGesture))]
+    [CommandHandling(nameof(ChangeLayerFreezeFrameCommand), nameof(ShortcutKeySetting.ChangeLayerFreezeFrameGesture))]
     partial class TimelineViewModel : PaneViewModelBase, IDropTarget
     {
         private Guid compositionId;
@@ -502,6 +503,8 @@ namespace NiVE3.ViewModel
         public ICommand MoveIndicatorToCompositionEndCommand { get; }
 
         public ICommand PlayRateChangeCommand { get; }
+
+        public ICommand ChangeLayerFreezeFrameCommand { get; }
 
         WeakEventPublisher<EventArgs> CurrentTimeChangeByUserPublisher { get; } = new WeakEventPublisher<EventArgs>();
         public event EventHandler<EventArgs> CurrentTimeChangeByUser
@@ -1045,6 +1048,19 @@ namespace NiVE3.ViewModel
                 {
                     CompositionModel.ChangeLayerPlayRate([..SelectedLayers.Select(l => l.LayerId)], result.Parameters.GetValue<double>(nameof(PlayRateSettingViewModel.PlayRate)));
                 }
+            }, () => CompositionModel != null && SelectedLayers.Count > 0 && SelectedLayers.All(l => l.HasDuration))
+                .ObservesProperty(() => CompositionModel)
+                .ObservesProperty(() => SelectedLayers);
+
+            ChangeLayerFreezeFrameCommand = new DelegateCommand(() =>
+            {
+                if (CompositionModel == null || SelectedLayers.Count < 1)
+                {
+                    return;
+                }
+
+                var baseTargetLayer = SelectedLayers[0];
+                CompositionModel.ChangeFreezeFrame([..SelectedLayers.Select(l => l.LayerId)], !baseTargetLayer.IsFreezeFrame, CurrentTime);
             }, () => CompositionModel != null && SelectedLayers.Count > 0 && SelectedLayers.All(l => l.HasDuration))
                 .ObservesProperty(() => CompositionModel)
                 .ObservesProperty(() => SelectedLayers);

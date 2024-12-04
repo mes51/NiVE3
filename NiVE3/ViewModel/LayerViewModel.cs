@@ -21,12 +21,9 @@ using NiVE3.SourceGenerator.ViewModelWireGenerator;
 using NiVE3.UI.Command;
 using NiVE3.UI.Dialog;
 using NiVE3.Util;
-using NiVE3.View.Dialog;
 using NiVE3.View.Part;
 using NiVE3.View.Primitive;
-using NiVE3.ViewModel.Dialog;
 using Prism.Commands;
-using Prism.Dialogs;
 using Prism.Mvvm;
 
 namespace NiVE3.ViewModel
@@ -104,6 +101,22 @@ namespace NiVE3.ViewModel
         {
             get { return isEnableTimeRemap; }
             set { SetProperty(ref isEnableTimeRemap, value); }
+        }
+
+        private bool isFreezeFrame;
+        [NeedWire(nameof(LayerModel), IsOneWay = true)]
+        public bool IsFreezeFrame
+        {
+            get { return isFreezeFrame; }
+            set { SetProperty(ref isFreezeFrame, value); }
+        }
+
+        private double freezeFrameTime;
+        [NeedWire(nameof(LayerModel), IsOneWay = true)]
+        public double FreezeFrameTime
+        {
+            get { return freezeFrameTime; }
+            set { SetProperty(ref freezeFrameTime, value); }
         }
 
         private SourceType sourceType;
@@ -312,6 +325,14 @@ namespace NiVE3.ViewModel
         {
             get { return isNotRenderable; }
             set { SetProperty(ref isNotRenderable, value); }
+        }
+
+        private bool isDisableDuration;
+        [NeedWire(nameof(LayerModel), IsOneWay = true)]
+        public bool IsDisableDuration
+        {
+            get { return isDisableDuration; }
+            set { SetProperty(ref isDisableDuration, value); }
         }
 
         private double layerNumberColumnWudth;

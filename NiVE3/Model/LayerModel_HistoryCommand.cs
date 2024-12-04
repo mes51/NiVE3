@@ -399,5 +399,59 @@ namespace NiVE3.Model
 
             public void Dispose() { }
         }
+
+        private class ChangeFreezeFrameHistoryCommand : IHistoryCommand
+        {
+            public ChangeFreezeFrameHistoryCommand(LayerModel model, bool oldIsFreezeFrame, double oldFreezeFrameTime, double oldInPoint, double oldOutPoint, bool newIsFreezeFrame, double newFreezeFrameTime, double newInPoint, double newOutPoint)
+            {
+                Model = model;
+                OldIsFreezeFrame = oldIsFreezeFrame;
+                OldFreezeFrameTime = oldFreezeFrameTime;
+                OldInPoint = oldInPoint;
+                OldOutPoint = oldOutPoint;
+                NewIsFreezeFrame = newIsFreezeFrame;
+                NewFreezeFrameTime = newFreezeFrameTime;
+                NewInPoint = newInPoint;
+                NewOutPoint = newOutPoint;
+            }
+
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangeFreezeFrame);
+
+            LayerModel Model { get; }
+
+            bool OldIsFreezeFrame { get; }
+
+            double OldFreezeFrameTime { get; }
+
+            double OldInPoint { get; }
+
+            double OldOutPoint { get; }
+
+            bool NewIsFreezeFrame { get; }
+
+            double NewFreezeFrameTime { get; }
+
+            double NewInPoint { get; }
+
+            double NewOutPoint { get; }
+
+            public void Redo()
+            {
+                Model.IsFreezeFrame = NewIsFreezeFrame;
+                Model.FreezeFrameTime = NewFreezeFrameTime;
+                Model.InPoint = NewInPoint;
+                Model.OutPoint = NewOutPoint;
+            }
+
+            public void Undo()
+            {
+                Model.IsFreezeFrame = OldIsFreezeFrame;
+                Model.FreezeFrameTime = OldFreezeFrameTime;
+                Model.InPoint = OldInPoint;
+                Model.OutPoint = OldOutPoint;
+            }
+
+            public void Dispose() { }
+        }
     }
 }

@@ -110,6 +110,20 @@ namespace NiVE3.Model
             set { SetProperty(ref isEnableTimeRemap, value); }
         }
 
+        private bool isFreezeFrame;
+        public bool IsFreezeFrame
+        {
+            get { return isFreezeFrame; }
+            set { SetProperty(ref isFreezeFrame, value); }
+        }
+
+        private double freezeFrameTime;
+        public double FreezeFrameTime
+        {
+            get { return freezeFrameTime; }
+            set { SetProperty(ref freezeFrameTime, value); }
+        }
+
         private SourceType sourceType;
         public SourceType SourceType
         {
@@ -253,6 +267,8 @@ namespace NiVE3.Model
         public Guid LayerId { get; }
 
         public string SourceName => FootageModel.Name;
+
+        public bool IsDisableDuration => IsEnableTimeRemap || IsFreezeFrame;
 
         public bool IsComposition => FootageModel.InputModel.Input is CompositionInput;
 
@@ -1187,6 +1203,8 @@ namespace NiVE3.Model
             hash.Append(InPoint);
             hash.Append(OutPoint);
             hash.Append(IsEnableTimeRemap);
+            hash.Append(IsFreezeFrame);
+            hash.Append(FreezeFrameTime);
             hash.Append(IsEnableEffect);
             hash.Append(IsEnableFrameBlend);
             hash.Append(IsEnableMotionBlur);
@@ -1373,6 +1391,8 @@ namespace NiVE3.Model
                 InPoint = InPoint,
                 OutPoint = OutPoint,
                 IsEnableTimeRemap = IsEnableTimeRemap,
+                IsFreezeFrame = IsFreezeFrame,
+                FreezeFrameTime = FreezeFrameTime,
                 TagColor = TagColor,
                 IsEnableVideo = IsEnableVideo,
                 IsEnableAudio = IsEnableAudio,
@@ -1408,6 +1428,8 @@ namespace NiVE3.Model
             InPoint = data.InPoint;
             OutPoint = data.OutPoint;
             IsEnableTimeRemap = data.IsEnableTimeRemap;
+            IsFreezeFrame = data.IsFreezeFrame;
+            FreezeFrameTime = data.FreezeFrameTime;
             TagColor = data.TagColor;
             IsEnableVideo = data.IsEnableVideo;
             IsEnableAudio = data.IsEnableAudio;
@@ -1516,6 +1538,32 @@ namespace NiVE3.Model
             PasteEffectsInternal(data, [], insertTargetId, true);
         }
 
+        public void ChangeFreezeFrame(bool isFreezeFrame, double time, double compositionFrameDuration)
+        {
+            var layerTime = time - SourceStartPoint;
+            var newFreezeFrameTime = PlayRate >= 0.0 ? layerTime * PlayRate * 0.01 : SourceDuration + layerTime * PlayRate * 0.01;
+
+            // NOTE: フレーム固定をしない場合は時間変更は受け付けない
+            if (isFreezeFrame == IsFreezeFrame && (!isFreezeFrame || newFreezeFrameTime == FreezeFrameTime))
+            {
+                return;
+            }
+
+            var oldIsFreezeFrame = IsFreezeFrame;
+            var oldFreezeFrameTime = FreezeFrameTime;
+            var oldInPoint = InPoint;
+            var oldOutPoint = OutPoint;
+            IsFreezeFrame = isFreezeFrame;
+            FreezeFrameTime = newFreezeFrameTime;
+            if (!isFreezeFrame)
+            {
+                InPoint = Math.Min(Math.Max(InPoint, 0.0), TimeCalc.RoundTimeDigit(Duration - compositionFrameDuration));
+                OutPoint = Math.Min(Math.Max(OutPoint, TimeCalc.RoundTimeDigit(InPoint + compositionFrameDuration)), Duration);
+            }
+
+            HistoryModel.Add(new ChangeFreezeFrameHistoryCommand(this, oldIsFreezeFrame, oldFreezeFrameTime, oldInPoint, oldOutPoint, isFreezeFrame, newFreezeFrameTime, InPoint, OutPoint));
+        }
+
         public void UpdateCompositionDependProperties()
         {
             HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_UpdateValueByCompositionStateChanged));
@@ -1598,7 +1646,11 @@ namespace NiVE3.Model
         double CalcSourceTime(double layerTime)
         {
             // TODO: タイムリマップ使用時にそっち優先で反映
-            if (PlayRate >= 0.0)
+            if (IsFreezeFrame)
+            {
+                return FreezeFrameTime;
+            }
+            else if (PlayRate >= 0.0)
             {
                 return layerTime * PlayRate * 0.01;
             }
@@ -1922,9 +1974,16 @@ namespace NiVE3.Model
 
         private void LayerModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(PlayRate) || e.PropertyName == nameof(SourceDuration))
+            switch (e.PropertyName)
             {
-                Duration = Math.Abs(SourceDuration / (PlayRate * 0.01));
+                case nameof(PlayRate):
+                case nameof(SourceDuration):
+                    Duration = Math.Abs(SourceDuration / (PlayRate * 0.01));
+                    break;
+                case nameof(IsEnableTimeRemap):
+                case nameof(IsFreezeFrame):
+                    RaisePropertyChanged(nameof(IsDisableDuration));
+                    break;
             }
             if (e.PropertyName != nameof(IsLock) && e.PropertyName != nameof(IsEnableShy))
             {

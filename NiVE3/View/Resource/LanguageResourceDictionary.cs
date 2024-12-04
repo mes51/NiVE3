@@ -410,6 +410,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("再生速度を変更...(_S)")]
         public static readonly string Timeline_ContextMenu_ChangePlayRate = nameof(Timeline_ContextMenu_ChangePlayRate);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("レイヤーの表示フレームを現在時刻で固定(_F)")]
+        public static readonly string Timeline_ContextMenu_ChangeLayerFreezeFrame = nameof(Timeline_ContextMenu_ChangeLayerFreezeFrame);
+
         [ShowInMarkup, LanguageKey, DefaultValue("レイヤーのタグをランダムに変更(_R)")]
         public static readonly string Timeline_ContextMenu_ChangeLayerTagsRandomly = nameof(Timeline_ContextMenu_ChangeLayerTagsRandomly);
 
@@ -872,6 +875,9 @@ namespace NiVE3.View.Resource
 
         [DefaultValue("レイヤーの再生時間の変更")]
         public static readonly string History_ChangeLayerPlayRate = nameof(History_ChangeLayerPlayRate);
+
+        [DefaultValue("レイヤーのフレーム固定の変更")]
+        public static readonly string History_ChangeFreezeFrame = nameof(History_ChangeFreezeFrame);
 
         [DefaultValue("プロパティの変更")]
         public static readonly string History_ChangePropertyValue = nameof(History_ChangePropertyValue);
@@ -1410,6 +1416,9 @@ namespace NiVE3.View.Resource
         public static readonly string SourceTextPropertyControl_Edit = nameof(SourceTextPropertyControl_Edit);
 
         // ShortcutKeyNames
+
+        [DefaultValue("レイヤーの表示フレームを現在時刻で固定")]
+        public static readonly string ShortcutKeyName_ChangeLayerFreezeFrameGesture = nameof(ShortcutKeyName_ChangeLayerFreezeFrameGesture);
 
         [DefaultValue("再生速度を変更")]
         public static readonly string ShortcutKeyName_ChangeLayerPlayRateGesture = nameof(ShortcutKeyName_ChangeLayerPlayRateGesture);

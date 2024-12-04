@@ -375,6 +375,21 @@ namespace NiVE3.Config
             new PropertyMetadata(new KeyGesture(Key.None))
         );
 
+        public static readonly DependencyProperty ChangeLayerFreezeFrameGestureProperty = DependencyProperty.Register(
+            nameof(ChangeLayerFreezeFrameGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new KeyGesture(Key.None))
+        );
+
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Edit)]
+        [ShowInMarkup]
+        public InputGesture ChangeLayerFreezeFrameGesture
+        {
+            get { return (InputGesture)GetValue(ChangeLayerFreezeFrameGestureProperty); }
+            set { SetValue(ChangeLayerFreezeFrameGestureProperty, value); }
+        }
+
         [ShortcutKeyCategory(ShortcutKeyCategoryType.Edit)]
         [ShowInMarkup]
         public InputGesture ChangeLayerPlayRateGesture

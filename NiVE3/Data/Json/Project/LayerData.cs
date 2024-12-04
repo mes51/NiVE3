@@ -35,6 +35,10 @@ namespace NiVE3.Data.Json.Project
 
         public bool IsEnableTimeRemap { get; set; }
 
+        public bool IsFreezeFrame { get; set; }
+
+        public double FreezeFrameTime { get; set; }
+
         public Color TagColor { get; set; }
 
         public bool IsEnableVideo { get; set; }

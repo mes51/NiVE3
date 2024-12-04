@@ -648,7 +648,7 @@
                                OutPoint="{Binding OutPoint}"
                                CompositionFrameRate="{Binding ElementName=Root, Path=CompositionFrameRate}"
                                HasDuration="{Binding SourceType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static pi:SourceType.VideoAndAudio}}"
-                               IsEnableTimeRemap="{Binding IsEnableTimeRemap}"
+                               IsDisableDuration="{Binding IsDisableDuration}"
                                TagColor="{Binding TagColor}"
                                BeginEditDurationCommand="{Binding BeginEditDurationRequestCommand}"
                                UpdateDurationCommand="{Binding UpdateDurationRequestCommand}"

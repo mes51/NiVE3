@@ -74,7 +74,7 @@ namespace NiVE3.ViewModel.TimelineEditing
             foreach (var (layer, prevInPoint) in Layers.Zip(PrevInPoints))
             {
                 var max = TimeCalc.AlignFloor(layer.OutPoint - CompositionModel.FrameDuration, CompositionModel.FrameRate);
-                if (layer.HasDuration && !layer.IsEnableTimeRemap)
+                if (layer.HasDuration && !layer.IsDisableDuration)
                 {
                     max = Math.Max(max, 0.0);
                     layer.InPoint = Math.Min(Math.Max(prevInPoint + DiffTime, 0.0), max);
@@ -106,7 +106,7 @@ namespace NiVE3.ViewModel.TimelineEditing
             {
                 var min = TimeCalc.AlignFloor(layer.InPoint + CompositionModel.FrameDuration, CompositionModel.FrameRate);
 
-                if (layer.HasDuration && !layer.IsEnableTimeRemap)
+                if (layer.HasDuration && !layer.IsDisableDuration)
                 {
                     min = Math.Min(min, layer.Duration);
                     layer.OutPoint = Math.Min(Math.Max(prevOutPoint + DiffTime, min), layer.Duration);
@@ -155,7 +155,7 @@ namespace NiVE3.ViewModel.TimelineEditing
 
             if (DiffTime > 0.0)
             {
-                foreach (var (layer, prevInPoint, prevOutPoint, prevSourceStartPoint) in Layers.Zip(PrevInPoints, PrevOutPoints, PrevSourceStartPoints).Where(t => t.First.HasDuration && !t.First.IsEnableTimeRemap))
+                foreach (var (layer, prevInPoint, prevOutPoint, prevSourceStartPoint) in Layers.Zip(PrevInPoints, PrevOutPoints, PrevSourceStartPoints).Where(t => t.First.HasDuration && !t.First.IsDisableDuration))
                 {
                     var newInPoint = Math.Max(prevInPoint - DiffTime, 0.0);
                     var newDiffTime = prevInPoint - newInPoint;
@@ -167,7 +167,7 @@ namespace NiVE3.ViewModel.TimelineEditing
             }
             else
             {
-                foreach (var (layer, prevInPoint, prevOutPoint, prevSourceStartPoint) in Layers.Zip(PrevInPoints, PrevOutPoints, PrevSourceStartPoints).Where(t => t.First.HasDuration && !t.First.IsEnableTimeRemap))
+                foreach (var (layer, prevInPoint, prevOutPoint, prevSourceStartPoint) in Layers.Zip(PrevInPoints, PrevOutPoints, PrevSourceStartPoints).Where(t => t.First.HasDuration && !t.First.IsDisableDuration))
                 {
                     var newOutPoint = Math.Min(prevOutPoint - DiffTime, layer.Duration);
                     var newDiffTime = prevOutPoint - newOutPoint;
@@ -178,7 +178,7 @@ namespace NiVE3.ViewModel.TimelineEditing
                 }
             }
 
-            foreach (var (layer, prevInPoint, prevOutPoint, prevSourceStartPoint) in Layers.Zip(PrevInPoints, PrevOutPoints, PrevSourceStartPoints).Where(t => !t.First.HasDuration || t.First.IsEnableTimeRemap))
+            foreach (var (layer, prevInPoint, prevOutPoint, prevSourceStartPoint) in Layers.Zip(PrevInPoints, PrevOutPoints, PrevSourceStartPoints).Where(t => !t.First.HasDuration || t.First.IsDisableDuration))
             {
                 layer.SourceStartPoint = prevSourceStartPoint + DiffTime;
                 layer.InPoint = prevInPoint - DiffTime;

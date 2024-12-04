@@ -75,8 +75,9 @@ namespace NiVE3.View.Part
             new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsRender)
         );
 
-        public static readonly DependencyProperty IsEnableTimeRemapProperty = DependencyProperty.Register(
-            nameof(IsEnableTimeRemap),
+
+        public static readonly DependencyProperty IsDisableDurationProperty = DependencyProperty.Register(
+            nameof(IsDisableDuration),
             typeof(bool),
             typeof(DurationBar),
             new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsRender)
@@ -147,10 +148,10 @@ namespace NiVE3.View.Part
             set { SetValue(CompositionFrameRateProperty, value); }
         }
 
-        public bool IsEnableTimeRemap
+        public bool IsDisableDuration
         {
-            get { return (bool)GetValue(IsEnableTimeRemapProperty); }
-            set { SetValue(IsEnableTimeRemapProperty, value); }
+            get { return (bool)GetValue(IsDisableDurationProperty); }
+            set { SetValue(IsDisableDurationProperty, value); }
         }
 
         public bool HasDuration
@@ -288,7 +289,7 @@ namespace NiVE3.View.Part
                                 var newTime = TimeCalc.AlignRound(globalTime, frameRate) - SourceStartPoint;
                                 var max = TimeCalc.AlignFloor(OutPoint - frameDuration, frameRate);
                                 var newInPoint = Math.Min(newTime, max);
-                                if (HasDuration && !IsEnableTimeRemap)
+                                if (HasDuration && !IsDisableDuration)
                                 {
                                     max = Math.Max(max, 0.0);
                                     newInPoint = Math.Min(Math.Max(newTime, 0.0), max);
@@ -304,7 +305,7 @@ namespace NiVE3.View.Part
                                 var newTime = TimeCalc.AlignRound(globalTime, frameRate) - SourceStartPoint;
                                 var min = TimeCalc.AlignFloor(InPoint + frameDuration, frameRate);
                                 var newOutPoint = Math.Max(newTime, min);
-                                if (HasDuration && !IsEnableTimeRemap)
+                                if (HasDuration && !IsDisableDuration)
                                 {
                                     min = Math.Min(min, Duration);
                                     newOutPoint = Math.Min(Math.Max(newTime, min), Duration);
@@ -432,7 +433,7 @@ namespace NiVE3.View.Part
                 return;
             }
 
-            if (!HasDuration || IsEnableTimeRemap)
+            if (!HasDuration || IsDisableDuration)
             {
                 return;
             }
@@ -477,12 +478,12 @@ namespace NiVE3.View.Part
 
             drawingContext.DrawRectangle(Brushes.Transparent, null, new Rect(0.0, 0.0, ActualWidth, ActualHeight));
 
-            if (HasDuration && !IsEnableTimeRemap)
+            if (HasDuration && !IsDisableDuration)
             {
                 drawingContext.DrawRectangle(DurationBrush, null, new Rect((SourceStartPoint - RangeStart) * pixelPerTime + UIParameters.TimelineRangeThumbWidth, 0.0, Duration * pixelPerTime, ActualHeight));
             }
             drawingContext.DrawRectangle(EnableAreaBrush, null, new Rect((InPoint + SourceStartPoint - RangeStart) * pixelPerTime + UIParameters.TimelineRangeThumbWidth, 0.0, (OutPoint - InPoint) * pixelPerTime, ActualHeight));
-            if ((!HasDuration || IsEnableTimeRemap) && InPoint < 0.0)
+            if ((!HasDuration || IsDisableDuration) && InPoint < 0.0)
             {
                 drawingContext.DrawRectangle(BeforeZeroBrush, null, new Rect((InPoint + SourceStartPoint - RangeStart) * pixelPerTime + UIParameters.TimelineRangeThumbWidth, 0.0, -InPoint * pixelPerTime, ActualHeight));
             }
