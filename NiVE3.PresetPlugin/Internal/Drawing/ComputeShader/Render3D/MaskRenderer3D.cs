@@ -60,15 +60,15 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
             var eX = new Float4(((x + offsetX) * scaleRateX - triangle.VVEX).XYZ, 0.0F);
             var e = (eY - (triangle.EdgeY * eX)) * triangle.Denominator;
 
-            var ae = Float4Util.Mask(e, Hlsl.Abs(e) >= Epsilon);
+            var ae = FloatNUtil.Mask(e, Hlsl.Abs(e) >= Epsilon);
             if (Hlsl.Any(ae < 0.0F))
             {
                 return;
             }
 
-            var tw = Float4Util.Sum(triangle.W * e);
-            var tx = Float4Util.Sum((triangle.U * e) / tw) * textureWidth;
-            var ty = Float4Util.Sum((triangle.V * e) / tw) * textureHeight;
+            var tw = FloatNUtil.Sum(triangle.W * e);
+            var tx = FloatNUtil.Sum((triangle.U * e) / tw) * textureWidth;
+            var ty = FloatNUtil.Sum((triangle.V * e) / tw) * textureHeight;
 
             var color = triangle.InterpolationQuality == 0 ? NearestNeighbor(tx, ty) : Bilinear(tx, ty);
             color.W *= trackMatte[p % trackMatte.Length];

@@ -48,9 +48,9 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
 
                 var texturing = triangleTexturings[ti];
                 var p = (y - renderImageOffsetY) * renderImageWidth + x - renderImageOffsetX;
-                var tw = Float4Util.Sum(texturing.W * e);
-                var tx = Float4Util.Sum(texturing.U * e / tw) * textureWidth;
-                var ty = Float4Util.Sum(texturing.V * e / tw) * textureHeight;
+                var tw = FloatNUtil.Sum(texturing.W * e);
+                var tx = FloatNUtil.Sum(texturing.U * e / tw) * textureWidth;
+                var ty = FloatNUtil.Sum(texturing.V * e / tw) * textureHeight;
 
                 var color = texturing.InterpolationQuality == 0 ? NearestNeighbor(tx, ty) : Bilinear(tx, ty);
                 color.W *= trackMatte[p % trackMatte.Length] * texturing.Opacity;
@@ -221,9 +221,9 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
 
                 var texturing = triangleTexturings[ti];
                 var p = (y - renderImageOffsetY) * renderImageWidth + x - renderImageOffsetX;
-                var tw = Float4Util.Sum(texturing.W * e);
-                var tx = Float4Util.Sum(texturing.U * e / tw) * textureWidth;
-                var ty = Float4Util.Sum(texturing.V * e / tw) * textureHeight;
+                var tw = FloatNUtil.Sum(texturing.W * e);
+                var tx = FloatNUtil.Sum(texturing.U * e / tw) * textureWidth;
+                var ty = FloatNUtil.Sum(texturing.V * e / tw) * textureHeight;
 
                 var color = texturing.InterpolationQuality == 0 ? NearestNeighbor(tx, ty) : Bilinear(tx, ty);
                 color.W *= trackMatte[p % trackMatte.Length] * texturing.Opacity;
@@ -1237,15 +1237,15 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
                 var eX = new Float4(x, x, x, 0.0F) - triangle.VVEX;
                 var e = (eY - (triangle.EdgeY * eX)) * triangle.Denominator;
 
-                var ae = Float4Util.Mask(e, Hlsl.Abs(e) >= Epsilon);
+                var ae = FloatNUtil.Mask(e, Hlsl.Abs(e) >= Epsilon);
                 if (Hlsl.Any(ae < 0.0F))
                 {
                     continue;
                 }
 
-                var tw = Float4Util.Sum(triangle.W * e);
-                var tx = Float4Util.Sum(triangle.U * e / tw) * textureWidth;
-                var ty = Float4Util.Sum(triangle.V * e / tw) * textureHeight;
+                var tw = FloatNUtil.Sum(triangle.W * e);
+                var tx = FloatNUtil.Sum(triangle.U * e / tw) * textureWidth;
+                var ty = FloatNUtil.Sum(triangle.V * e / tw) * textureHeight;
 
                 var color = triangle.InterpolationQuality == 0 ? NearestNeighbor(tx, ty) : Bilinear(tx, ty);
 

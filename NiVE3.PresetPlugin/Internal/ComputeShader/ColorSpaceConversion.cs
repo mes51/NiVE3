@@ -75,5 +75,52 @@ namespace NiVE3.PresetPlugin.Internal.ComputeShader
                 ycbcr.W
             );
         }
+
+        // https://bottosson.github.io/posts/oklab/
+        public static Float4 RgbToOkLab(Float4 rgb)
+        {
+            var mask = rgb.XYZ >= 0.04045F;
+            var linear = FloatNUtil.Mask(Hlsl.Pow((rgb.XYZ + 0.055F) / 1.055F, 2.4F), mask) + FloatNUtil.NotMask(rgb.XYZ / 12.92F, mask);
+
+            var lmsMatrix = new Float3x3(
+                0.0514459929F, 0.5363325363F, 0.4122214708F,
+                0.1073969566F, 0.6806995451F, 0.2119034982F,
+                0.6299787005F, 0.2817188376F, 0.0883024619F
+            );
+            var lms = Hlsl.Pow(Hlsl.Mul(lmsMatrix, linear), 1.0F / 3.0F);
+
+            var labMatrix = new Float3x3(
+                0.2104542553F, 0.7936177850F, -0.0040720468F,
+                1.9779984951F, -2.4285922050F, 0.4505937099F,
+                0.0259040371F, 0.7827717662F, -0.8086757660F
+            );
+
+            return new Float4(Hlsl.Mul(labMatrix, lms), rgb.W);
+        }
+
+        // https://bottosson.github.io/posts/oklab/
+        public static Float4 OkLabToRgb(Float4 okLab)
+        {
+            var lmsMatrix = new Float3x3(
+                1.0F, 0.3963377774F, 0.2158037573F,
+                1.0F, -0.1055613458F, -0.0638541728F,
+                1.0F, -0.0894841775F, -1.2914855480F
+            );
+            var lms = Hlsl.Mul(lmsMatrix, okLab.XYZ);
+            lms = lms * lms * lms;
+
+            var rgbMatrix = new Float3x3(
+                -0.0041960863F, -0.7034186147F, 1.7076147010F,
+                -1.2684380046F, 2.6097574011F, -0.3413193965F,
+                4.0767416621F, -3.3077115913F, 0.2309699292F
+            );
+
+            var linear = Hlsl.Mul(rgbMatrix, lms);
+
+            var mask = linear >= 0.0031308F;
+            var rgb = FloatNUtil.Mask(Hlsl.Sign(linear) * (Hlsl.Pow(linear, 1.0F / 2.4F) * 1.055F - 0.055F), mask) + FloatNUtil.NotMask(linear * 12.92F, mask);
+
+            return new Float4(rgb, okLab.W);
+        }
     }
 }

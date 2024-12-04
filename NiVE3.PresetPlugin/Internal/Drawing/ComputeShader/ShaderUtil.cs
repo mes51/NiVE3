@@ -60,7 +60,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader
             var eX = new Float4(((x + offsetX) * scaleRateX - triangle.VVEX).XYZ, 0.0F);
             var e = (eY - (triangle.EdgeY * eX)) * triangle.Denominator;
 
-            var ae = Float4Util.Mask(e, Hlsl.Abs(e) >= Epsilon);
+            var ae = FloatNUtil.Mask(e, Hlsl.Abs(e) >= Epsilon);
             if (Hlsl.Any(ae < 0.0F))
             {
                 return -float.NaN;

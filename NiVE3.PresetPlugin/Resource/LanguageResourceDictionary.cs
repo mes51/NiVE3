@@ -805,6 +805,41 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("アルファを維持する")]
         public const string Generate_Fill_Keep_Alpha = nameof(Generate_Fill_Keep_Alpha);
 
+        // Gradient
+
+        [DefaultValue("グラデーション")]
+        public const string Generate_Gradient_Name = nameof(Generate_Gradient_Name);
+
+        [DefaultValue("画像を指定した2色のグラデーションで塗りつぶします")]
+        public const string Generate_Gradient_Description = nameof(Generate_Gradient_Description);
+
+        [LanguageKey, DefaultValue("開始点")]
+        public const string Generate_Gradient_BeginPoint = nameof(Generate_Gradient_BeginPoint);
+
+        [LanguageKey, DefaultValue("開始色")]
+        public const string Generate_Gradient_BeginColor = nameof(Generate_Gradient_BeginColor);
+
+        [LanguageKey, DefaultValue("開始不透明度")]
+        public const string Generate_Gradient_BeginOpacity = nameof(Generate_Gradient_BeginOpacity);
+
+        [LanguageKey, DefaultValue("終了点")]
+        public const string Generate_Gradient_EndPoint = nameof(Generate_Gradient_EndPoint);
+
+        [LanguageKey, DefaultValue("終了色")]
+        public const string Generate_Gradient_EndColor = nameof(Generate_Gradient_EndColor);
+
+        [LanguageKey, DefaultValue("終了不透明度")]
+        public const string Generate_Gradient_EndOpacity = nameof(Generate_Gradient_EndOpacity);
+
+        [LanguageKey, DefaultValue("形状")]
+        public const string Generate_Gradient_Type = nameof(Generate_Gradient_Type);
+
+        [LanguageKey, DefaultValue("OKLab色空間で補間する")]
+        public const string Generate_Gradient_UseOkLabInterpolation = nameof(Generate_Gradient_UseOkLabInterpolation);
+
+        [LanguageKey, DefaultValue("元画像のブレンド")]
+        public const string Generate_Gradient_BlendOriginal = nameof(Generate_Gradient_BlendOriginal);
+
         // Unmult
 
         [DefaultValue("Unmult")]
@@ -1387,6 +1422,12 @@ namespace NiVE3.PresetPlugin.Resource
 
         [DefaultValue("極座標から長方形")]
         public const string PolarDistortionMode_ToRect = nameof(PolarDistortionMode_ToRect);
+
+        [DefaultValue("線形")]
+        public const string GradientShapeType_Linear = nameof(GradientShapeType_Linear);
+
+        [DefaultValue("放射状")]
+        public const string GradientShapeType_Radial = nameof(GradientShapeType_Radial);
 
         // unit
 
