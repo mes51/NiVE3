@@ -33,7 +33,7 @@ namespace NiVE3.Data.Json.Project
 
         public Guid OutputPluginId { get; set; }
 
-        [JsonConverter(typeof(PluginOptionValueObjectConverter))]
+        [JsonConverter(typeof(PluginOptionValueObjectJsonConverter))]
         public object? OutputSetting { get; set; }
 
         public RenderQueueItemState State { get; set; }

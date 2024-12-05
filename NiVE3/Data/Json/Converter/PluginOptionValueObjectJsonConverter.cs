@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace NiVE3.Data.Json.Converter
 {
-    public class PluginOptionValueObjectConverter : JsonConverter<object>
+    public class PluginOptionValueObjectJsonConverter : JsonConverter<object>
     {
         public override object? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {

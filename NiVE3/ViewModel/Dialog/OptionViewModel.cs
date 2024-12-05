@@ -139,6 +139,7 @@ namespace NiVE3.ViewModel.Dialog
             ApplicationSetting.Setting.UseGpuLuid = UseGpuLuid;
 
             ApplicationSetting.Setting.RaiseUpdateSetting();
+            ApplicationSetting.Setting.Save();
 
             IsDirty = false;
         }

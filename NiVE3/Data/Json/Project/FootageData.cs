@@ -53,7 +53,7 @@ namespace NiVE3.Data.Json.Project
         // Placeholder用
         public Guid? InputPluginId { get; set; }
 
-        [JsonConverter(typeof(PluginOptionValueObjectConverter))]
+        [JsonConverter(typeof(PluginOptionValueObjectJsonConverter))]
         public object? InputOption { get; set; }
 
         public string? SourceId { get; set; }

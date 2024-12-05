@@ -53,6 +53,7 @@ namespace NiVE3.Windows
                 }
             }
 
+            ApplicationSetting.Setting.Save();
             ShortcutKeySetting.Setting.Save();
         }
 

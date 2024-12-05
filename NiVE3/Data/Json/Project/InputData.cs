@@ -19,7 +19,7 @@ namespace NiVE3.Data.Json.Project
 
         public string RelativeFilePath { get; set; } = "";
 
-        [JsonConverter(typeof(PluginOptionValueObjectConverter))]
+        [JsonConverter(typeof(PluginOptionValueObjectJsonConverter))]
         public object? InputOption { get; set; }
 
         public SourceData[] Sources { get; set; } = [];

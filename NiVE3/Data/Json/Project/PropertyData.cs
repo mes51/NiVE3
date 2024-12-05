@@ -19,7 +19,7 @@ namespace NiVE3.Data.Json.Project
 
         public string Name { get; set; } = "";
 
-        [JsonConverter(typeof(PluginOptionValueObjectConverter))]
+        [JsonConverter(typeof(PluginOptionValueObjectJsonConverter))]
         public object? Value { get; set; }
 
         public bool IsEnabled { get; set; } = true;

@@ -13,7 +13,7 @@ namespace NiVE3.Data.Json.Project
     {
         public double Time { get; set; }
 
-        [JsonConverter(typeof(PluginOptionValueObjectConverter))]
+        [JsonConverter(typeof(PluginOptionValueObjectJsonConverter))]
         public object? Value { get; set; }
 
         public Ease EaseIn { get; set; } = new Ease(0.0, 0.0);

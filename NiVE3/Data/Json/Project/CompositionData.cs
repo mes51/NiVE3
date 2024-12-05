@@ -42,10 +42,10 @@ namespace NiVE3.Data.Json.Project
 
         public Guid ToneMapperPluginId { get; set; }
 
-        [JsonConverter(typeof(PluginOptionValueObjectConverter))]
+        [JsonConverter(typeof(PluginOptionValueObjectJsonConverter))]
         public object? RendererSetting { get; set; }
 
-        [JsonConverter(typeof(PluginOptionValueObjectConverter))]
+        [JsonConverter(typeof(PluginOptionValueObjectJsonConverter))]
         public object? ToneMapperSetting { get; set; }
 
         // for timeline
