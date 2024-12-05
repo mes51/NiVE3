@@ -125,7 +125,7 @@
                 </Grid.ColumnDefinitions>
 
                 <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=CompositionSettingView_CompositionNameLabel}"/>
-                <TextBox Grid.Column="1" Text="{Binding Name}" Margin="{StaticResource ItemMargin}"/>
+                <TextBox Grid.Column="1" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Margin="{StaticResource ItemMargin}"/>
             </Grid>
 
             <Grid Grid.Row="1" HorizontalAlignment="Center" Margin="10,10,10,0">

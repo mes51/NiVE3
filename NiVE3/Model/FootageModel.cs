@@ -67,7 +67,11 @@ namespace NiVE3.Model
         public string Name
         {
             get { return name; }
-            set { SetProperty(ref name, value); }
+            set
+            {
+                SetProperty(ref name, value);
+                IsNameChanged = value != Source.Name;
+            }
         }
 
         private int width;
@@ -150,6 +154,8 @@ namespace NiVE3.Model
         public InputModel InputModel { get; }
 
         public ObservableCollection<IFootageModel>? Children => null;
+
+        bool IsNameChanged { get; set; }
 
         WeakEventPublisher<EventArgs> UpdateSampleImageRequestPublisher { get; } = new WeakEventPublisher<EventArgs>();
         public event EventHandler<EventArgs> UpdateSampleImageRequest
@@ -317,6 +323,11 @@ namespace NiVE3.Model
             LastUpdated = DateTime.Now;
             UpdateSampleImageRequestPublisher.Publish(this, EventArgs.Empty);
             FootageUpdatedPublisher.Publish(this, EventArgs.Empty);
+
+            if (!IsNameChanged)
+            {
+                Name = Source.Name ?? InputModel.FilePath;
+            }
         }
     }
 

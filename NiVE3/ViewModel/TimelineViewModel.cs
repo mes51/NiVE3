@@ -82,6 +82,14 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref compositionId, value); }
         }
 
+        private string name = "";
+        [ManualWire(nameof(CompositionModel), IsOneWay = true)]
+        public string Name
+        {
+            get { return name; }
+            set { SetProperty(ref name, value); }
+        }
+
         private double frameRate;
         [ManualWire(nameof(CompositionModel), IsOneWay = true)]
         public double FrameRate
@@ -1400,6 +1408,16 @@ namespace NiVE3.ViewModel
                         Title = CompositionModel.Name;
                     }
                     SelectedItemType = SelectItemType.None;
+                    break;
+                case nameof(Name):
+                    if (CompositionModel == null)
+                    {
+                        Title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Timeline_EmptyTitle);
+                    }
+                    else
+                    {
+                        Title = Name;
+                    }
                     break;
                 case nameof(Duration):
                 case nameof(TimeBarRange):
