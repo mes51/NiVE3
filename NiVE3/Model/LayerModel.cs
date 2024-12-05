@@ -1985,7 +1985,19 @@ namespace NiVE3.Model
                     RaisePropertyChanged(nameof(IsDisableDuration));
                     break;
             }
-            if (e.PropertyName != nameof(IsLock) && e.PropertyName != nameof(IsEnableShy))
+
+            var hasUseExpressionProperty = (TransformProperties?.ClearExpressionError() ?? false) ||
+                (LayerOptionProperties?.ClearExpressionError() ?? false) ||
+                (TextProperties?.ClearExpressionError() ?? false) ||
+                (ShapeProperties?.ClearExpressionError() ?? false) ||
+                (SourceOptionProperties?.ClearExpressionError() ?? false) ||
+                (AudioOptionProperties?.ClearExpressionError() ?? false);
+            foreach (var effect in Effects)
+            {
+                hasUseExpressionProperty |= effect.ClearExpressionError();
+            }
+
+            if (hasUseExpressionProperty || (e.PropertyName != nameof(IsLock) && e.PropertyName != nameof(IsEnableShy)))
             {
                 LayerUpdated?.Invoke(this, EventArgs.Empty);
             }

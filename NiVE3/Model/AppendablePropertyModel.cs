@@ -100,6 +100,17 @@ namespace NiVE3.Model
             return Property.CreateState(new CompositionViewModelProxy(CompositionModel), LayerModel != null ? new LayerViewModelProxy(LayerModel) : null, EffectModel != null ? new EffectViewModelProxy(EffectModel) : null, viewModel);
         }
 
+        public bool ClearExpressionError()
+        {
+            var result = false;
+            foreach (var c in Children)
+            {
+                result |= c.ClearExpressionError();
+            }
+
+            return result;
+        }
+
         public IReadOnlyCollection<IPropertyObject>? GetChildren()
         {
             return Children;

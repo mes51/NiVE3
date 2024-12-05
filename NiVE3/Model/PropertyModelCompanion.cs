@@ -37,6 +37,8 @@ namespace NiVE3.Model
 
         PropertyViewState CreateState(IPropertyViewModel propertyViewModel);
 
+        bool ClearExpressionError();
+
         void UpdateValueByCompositionStateChanged();
 
         bool HasCompositionDependProperty();

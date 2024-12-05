@@ -190,6 +190,11 @@ namespace NiVE3.Model
             Properties.UpdateValueByCompositionStateChanged();
         }
 
+        public bool ClearExpressionError()
+        {
+            return Properties.ClearExpressionError();
+        }
+
         public bool HasCompositionDependProperty()
         {
             return Properties.HasCompositionDependProperty();

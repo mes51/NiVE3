@@ -181,6 +181,13 @@ namespace NiVE3.Model
             return Property.CreateState(new CompositionViewModelProxy(CompositionModel), LayerModel != null ? new LayerViewModelProxy(LayerModel) : null, EffectModel != null ? new EffectViewModelProxy(EffectModel) : null, viewModel);
         }
 
+        public bool ClearExpressionError()
+        {
+            ExpressionErrorMessage = "";
+            ExpressionErrorSourceLocation = new SourceLocation();
+            return UseExpression && CompiledScript != null;
+        }
+
         public void CommitProperty(object? newValue, object? prevValue)
         {
             if (Equals(newValue, prevValue))
