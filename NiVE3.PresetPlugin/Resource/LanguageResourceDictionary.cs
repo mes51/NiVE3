@@ -519,6 +519,17 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("トーンカーブ")]
         public const string ColorCollection_ToneCurve_ToneCurve = nameof(ColorCollection_ToneCurve_ToneCurve);
 
+        // Sepia
+
+        [DefaultValue("セピア")]
+        public const string ColorCollection_Sepia_Name = nameof(ColorCollection_Sepia_Name);
+
+        [DefaultValue("画像をセピア調に変換します")]
+        public const string ColorCollection_Sepia_Description = nameof(ColorCollection_Sepia_Description);
+
+        [LanguageKey, DefaultValue("元画像のブレンド")]
+        public const string ColorCollection_Sepia_BlendOriginal = nameof(ColorCollection_Sepia_BlendOriginal);
+
         // RandomNoise
 
         [DefaultValue("ノイズ")]
