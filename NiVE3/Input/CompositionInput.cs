@@ -89,7 +89,7 @@ namespace NiVE3.Input
 
         public float[] ReadAudio(double time, double length)
         {
-            throw new NotImplementedException();
+            return Composition.RenderAudio(time, length);
         }
     }
 }
