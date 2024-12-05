@@ -707,6 +707,15 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("(デフォルト)")]
         public static readonly string OptionView_Performance_UseGpuDevice_Default = nameof(OptionView_Performance_UseGpuDevice_Default);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("キャッシュ設定")]
+        public static readonly string OptionView_Performance_CacheSetting = nameof(OptionView_Performance_CacheSetting);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("キャッシュサイズ:")]
+        public static readonly string OptionView_Performance_ImageCacheLimit_Label = nameof(OptionView_Performance_ImageCacheLimit_Label);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("(最大: {0}MiB)")]
+        public static readonly string OptionView_Performance_ImageCacheLimit_MaxSizeLabel = nameof(OptionView_Performance_ImageCacheLimit_MaxSizeLabel);
+
         [ShowInMarkup, LanguageKey, DefaultValue("ショートカットキー設定")]
         public static readonly string ShortcutKeySettingView_Title = nameof(ShortcutKeySettingView_Title);
 

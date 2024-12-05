@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using NiVE3.Config;
 using NiVE3.Image;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.Util;
@@ -14,13 +14,15 @@ namespace NiVE3.Cache
 {
     class ImageCache
     {
-        static readonly ImageCache Instance = new ImageCache();
+        const long MiB = 1024 * 1024;
 
         static readonly int ImageElementSize = Marshal.SizeOf<Vector4>();
 
+        static ImageCache Instance { get; } = new ImageCache();
+
         public static bool EnableCompress { get; set; }
 
-        public static long CacheLimit { get; set; } = 16L * 1024 * 1024 * 1024;
+        long CacheLimit { get; set; } = Math.Min(16L * 1024 * MiB, SystemInfo.MaxImageCacheLimit);
 
         private DualKeyDictionary<Guid, (double, Int128), (Guid, Int128), (IDisposable, long, ROI)> CachedImages { get; } = [];
 
@@ -28,7 +30,11 @@ namespace NiVE3.Cache
 
         private CacheKeyLru KeyLru { get; } = new CacheKeyLru();
 
-        private ImageCache() { }
+        private ImageCache()
+        {
+            CacheLimit = Math.Min(ApplicationSetting.Setting.ImageCacheLimit * MiB, SystemInfo.MaxImageCacheLimit);
+            ApplicationSetting.Setting.UpdateSetting += Setting_UpdateSetting;
+        }
 
         private (NManagedImage, ROI)? GetInternal(in Guid objectId, in Int128 key, double time)
         {
@@ -173,6 +179,11 @@ namespace NiVE3.Cache
             CachedImages.Clear();
             KeyLru.Clear();
             CachedSize = 0;
+        }
+
+        private void Setting_UpdateSetting(object? sender, EventArgs e)
+        {
+            CacheLimit = ApplicationSetting.Setting.ImageCacheLimit * MiB;
         }
 
         public static (NManagedImage, ROI)? Get(in Guid objectId, in Int128 key, double time)

@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using ComputeSharp;
 using NiVE3.Config;
+using NiVE3.Extension;
 using NiVE3.UI.Command;
+using NiVE3.Util;
 using NiVE3.View.Resource;
 using Prism.Commands;
 using Prism.Dialogs;
@@ -20,6 +20,8 @@ namespace NiVE3.ViewModel.Dialog
     class OptionViewModel : BindableBase, IDialogAware
     {
         public static Tuple<string, string>[] AvailableGpuDevices;
+
+        public static readonly double MaxImageCacheLimit = SystemInfo.MaxImageCacheLimitMiB; // for SlidableNumberTextBox.Maximum
 
         static HashSet<string> SettingPropertyNames { get; } = [];
 
@@ -57,6 +59,14 @@ namespace NiVE3.ViewModel.Dialog
             set { SetProperty(ref useGpuLuid, value); }
         }
 
+        private int imageCacheLimit;
+        [SettingProperty]
+        public int ImageCacheLimit
+        {
+            get { return imageCacheLimit; }
+            set { SetProperty(ref imageCacheLimit, value); }
+        }
+
         private Tuple<string, string> selectedGpuDevice = Tuple.Create("", "");
         public Tuple<string, string> SelectedGpuDevice
         {
@@ -92,7 +102,7 @@ namespace NiVE3.ViewModel.Dialog
             }
             AvailableGpuDevices = [..devices];
 
-            foreach (var p in typeof(OptionViewModel).GetProperties().Where(p => p.GetCustomAttribute<SettingPropertyAttribute>() != null))
+            foreach (var p in typeof(OptionViewModel).GetProperties().Where(p => p.IsApplied<SettingPropertyAttribute>()))
             {
                 SettingPropertyNames.Add(p.Name);
             }
@@ -126,6 +136,7 @@ namespace NiVE3.ViewModel.Dialog
             SolidFolderName = ApplicationSetting.Setting.SolidFolderName;
             ForceUseCpu = ApplicationSetting.Setting.ForceUseCpu;
             UseGpuLuid = ApplicationSetting.Setting.UseGpuLuid;
+            ImageCacheLimit = ApplicationSetting.Setting.ImageCacheLimit;
 
             SelectedGpuDevice = AvailableGpuDevices.FirstOrDefault(d => d.Item1 == UseGpuLuid, AvailableGpuDevices[0]);
 
@@ -137,6 +148,7 @@ namespace NiVE3.ViewModel.Dialog
             ApplicationSetting.Setting.ForceUseCpu = ForceUseCpu;
             ApplicationSetting.Setting.SolidFolderName = SolidFolderName;
             ApplicationSetting.Setting.UseGpuLuid = UseGpuLuid;
+            ApplicationSetting.Setting.ImageCacheLimit = ImageCacheLimit;
 
             ApplicationSetting.Setting.RaiseUpdateSetting();
             ApplicationSetting.Setting.Save();

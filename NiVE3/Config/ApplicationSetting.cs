@@ -9,6 +9,7 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Windows.Media;
 using NiVE3.Data.Json.Converter;
+using NiVE3.Extension;
 using NiVE3.Util;
 
 namespace NiVE3.Config
@@ -78,6 +79,9 @@ namespace NiVE3.Config
         [SerializableSetting]
         public int ExpressionTimeout { get; set; } = 10;
 
+        [SerializableSetting]
+        public int ImageCacheLimit { get; set; } = Math.Min(SystemInfo.MaxImageCacheLimitMiB, 16 * 1024);
+
         public void RaiseUpdateSetting()
         {
             UpdateSetting?.Invoke(this, EventArgs.Empty);
@@ -104,10 +108,14 @@ namespace NiVE3.Config
                     return;
                 }
 
-                foreach (var p in typeof(ApplicationSetting).GetProperties(BindingFlags.Instance | BindingFlags.Public).Where(p => p.IsDefined(typeof(SerializableSettingAttribute))))
+                foreach (var p in typeof(ApplicationSetting).GetProperties(BindingFlags.Instance | BindingFlags.Public).Where(p => p.IsApplied<SerializableSettingAttribute>()))
                 {
                     p.SetValue(this, p.GetValue(applicationSettingData));
                 }
+
+                ImageCacheLimit = Math.Min(SystemInfo.MaxImageCacheLimitMiB, ImageCacheLimit);
+
+                RaiseUpdateSetting();
             }
             catch { }
         }

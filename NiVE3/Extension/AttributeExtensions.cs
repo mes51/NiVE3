@@ -18,5 +18,10 @@ namespace NiVE3.Extension
         {
             return Attribute.IsDefined(obj.GetType(), typeof(T));
         }
+
+        public static bool IsApplied<T>(this MemberInfo member) where T : Attribute
+        {
+            return member.IsDefined(typeof(T));
+        }
     }
 }

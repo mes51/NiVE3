@@ -7,10 +7,12 @@
              xmlns:pr="http://prismlibrary.com/"
              xmlns:vm="clr-namespace:NiVE3.ViewModel.Dialog"
              xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
+             xmlns:upr="clr-namespace:NiVE3.UI.Primitive;assembly=NiVE3.UI"
              xmlns:ucv="clr-namespace:NiVE3.UI.Converter;assembly=NiVE3.UI"
              xmlns:cv="clr-namespace:NiVE3.View.Converter"
              xmlns:mk="clr-namespace:NiVE3.Wpf.Markup"
              xmlns:vl="clr-namespace:NiVE3.View.Validation"
+             xmlns:ut="clr-namespace:NiVE3.Util"
              mc:Ignorable="d" 
              pr:ViewModelLocator.AutoWireViewModel="True"
              d:Height="450"
@@ -28,14 +30,22 @@
             </cv:ConverterItem>
         </cv:ConverterCollection>
         <cv:BooleanInvertConverter x:Key="BooleanInvertConverter"/>
+        <cv:LocalizationConverter x:Key="MaxCacheLimitSizeConverter" LocalizeFormat="{gm:LanguageResource ResourceKey=OptionView_Performance_ImageCacheLimit_MaxSizeLabel}"/>
 
         <Thickness x:Key="ItemMargin">0,10,0,0</Thickness>
+        <Thickness x:Key="GroupMargin">0,10,0,0</Thickness>
         <Thickness x:Key="GroupBoxInnerMargin">10</Thickness>
 
         <Style x:Key="SettingPanelStyle" TargetType="{x:Type ScrollViewer}">
             <Setter Property="HorizontalScrollBarVisibility" Value="Hidden"/>
             <Setter Property="VerticalScrollBarVisibility" Value="Auto"/>
             <Setter Property="Margin" Value="10,0,0,0"/>
+        </Style>
+
+        <Style x:Key="SettingLabelTextBlockStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="Margin" Value="0,0,5,0"/>
         </Style>
 
         <Style x:Key="ExecApplyButtonStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
@@ -67,7 +77,7 @@
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
 
-        <ListBox Grid.Row="0" Grid.Column="0" x:Name="SettingType" Width="150" SelectedIndex="0">
+        <ListBox Grid.Row="0" Grid.Column="0" x:Name="SettingType" Width="150" SelectedIndex="0" d:SelectedIndex="0">
             <ListBoxItem Content="{gm:LanguageResource ResourceKey=OptionView_Category_General}"/>
             <ListBoxItem Content="{gm:LanguageResource ResourceKey=OptionView_Category_Performance}"/>
         </ListBox>
@@ -99,8 +109,23 @@
                                 <ColumnDefinition />
                             </Grid.ColumnDefinitions>
 
-                            <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=OptionView_Performance_UseGpuDevice_Label}" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=OptionView_Performance_UseGpuDevice_Label}" Style="{StaticResource SettingLabelTextBlockStyle}"/>
                             <ComboBox Grid.Column="1" ItemsSource="{x:Static vm:OptionViewModel.AvailableGpuDevices}" SelectedItem="{Binding SelectedGpuDevice}" DisplayMemberPath="Item2"/>
+                        </Grid>
+                    </StackPanel>
+                </GroupBox>
+                <GroupBox Header="{gm:LanguageResource ResourceKey=OptionView_Performance_CacheSetting}" Margin="{StaticResource GroupMargin}">
+                    <StackPanel Margin="{StaticResource GroupBoxInnerMargin}" Grid.IsSharedSizeScope="True">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="SettingName"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=OptionView_Performance_ImageCacheLimit_Label}" Style="{StaticResource SettingLabelTextBlockStyle}"/>
+                            <upr:SlidableNumberTextBox Grid.Column="1" Margin="0,0,5,0" Minimum="32" Maximum="{x:Static vm:OptionViewModel.MaxImageCacheLimit}" Value="{Binding ImageCacheLimit}" Digit="0" UnitText="MiB" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="2" Text="{Binding Source={x:Static ut:SystemInfo.MaxImageCacheLimitMiB}, Converter={StaticResource MaxCacheLimitSizeConverter}}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                         </Grid>
                     </StackPanel>
                 </GroupBox>
