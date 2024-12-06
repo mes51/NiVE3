@@ -15,5 +15,9 @@ namespace NiVE3.Util
         public const double AudioSampleTime = 1.0 / AudioSamplingRate;
 
         public const double DefaultCameraFov = 0.360000466176267;// Math.Tan(39.5978 * 0.5 * (Math.PI / 180.0))
+
+        public const long KiB = 1024;
+
+        public const long MiB = 1024 * 1024;
     }
 }

@@ -80,7 +80,10 @@ namespace NiVE3.Config
         public int ExpressionTimeout { get; set; } = 10;
 
         [SerializableSetting]
-        public int ImageCacheLimit { get; set; } = Math.Min(SystemInfo.MaxImageCacheLimitMiB, 16 * 1024);
+        public int ImageCacheLimit { get; set; } = Math.Min(SystemInfo.MaxCacheLimitMiB - Math.Min((int)Math.Floor(SystemInfo.MaxCacheLimitMiB * 0.25), 4 * 1024), 16 * 1024);
+
+        [SerializableSetting]
+        public int RamPreviewCacheLimit { get; set; } = Math.Min((int)Math.Floor(SystemInfo.MaxCacheLimitMiB * 0.25), 4 * 1024);
 
         public void RaiseUpdateSetting()
         {
@@ -113,7 +116,7 @@ namespace NiVE3.Config
                     p.SetValue(this, p.GetValue(applicationSettingData));
                 }
 
-                ImageCacheLimit = Math.Min(SystemInfo.MaxImageCacheLimitMiB, ImageCacheLimit);
+                ImageCacheLimit = Math.Min(SystemInfo.MaxCacheLimitMiB, ImageCacheLimit);
 
                 RaiseUpdateSetting();
             }

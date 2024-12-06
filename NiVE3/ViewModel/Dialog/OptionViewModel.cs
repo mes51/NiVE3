@@ -21,7 +21,7 @@ namespace NiVE3.ViewModel.Dialog
     {
         public static Tuple<string, string>[] AvailableGpuDevices;
 
-        public static readonly double MaxImageCacheLimit = SystemInfo.MaxImageCacheLimitMiB; // for SlidableNumberTextBox.Maximum
+        public static readonly double MaxImageCacheLimit = SystemInfo.MaxCacheLimitMiB - 32; // for SlidableNumberTextBox.Maximum
 
         static HashSet<string> SettingPropertyNames { get; } = [];
 
@@ -65,6 +65,21 @@ namespace NiVE3.ViewModel.Dialog
         {
             get { return imageCacheLimit; }
             set { SetProperty(ref imageCacheLimit, value); }
+        }
+
+        private int ramPreviewCacheLimit;
+        [SettingProperty]
+        public int RamPreviewCacheLimit
+        {
+            get { return ramPreviewCacheLimit; }
+            set { SetProperty(ref ramPreviewCacheLimit, value); }
+        }
+
+        private double maxRamPreviewCacheLimit;
+        public double MaxRamPreviewCacheLimit
+        {
+            get { return maxRamPreviewCacheLimit; }
+            set { SetProperty(ref maxRamPreviewCacheLimit, value); }
         }
 
         private Tuple<string, string> selectedGpuDevice = Tuple.Create("", "");
@@ -137,6 +152,7 @@ namespace NiVE3.ViewModel.Dialog
             ForceUseCpu = ApplicationSetting.Setting.ForceUseCpu;
             UseGpuLuid = ApplicationSetting.Setting.UseGpuLuid;
             ImageCacheLimit = ApplicationSetting.Setting.ImageCacheLimit;
+            RamPreviewCacheLimit = ApplicationSetting.Setting.RamPreviewCacheLimit;
 
             SelectedGpuDevice = AvailableGpuDevices.FirstOrDefault(d => d.Item1 == UseGpuLuid, AvailableGpuDevices[0]);
 
@@ -149,6 +165,7 @@ namespace NiVE3.ViewModel.Dialog
             ApplicationSetting.Setting.SolidFolderName = SolidFolderName;
             ApplicationSetting.Setting.UseGpuLuid = UseGpuLuid;
             ApplicationSetting.Setting.ImageCacheLimit = ImageCacheLimit;
+            ApplicationSetting.Setting.RamPreviewCacheLimit = RamPreviewCacheLimit;
 
             ApplicationSetting.Setting.RaiseUpdateSetting();
             ApplicationSetting.Setting.Save();
@@ -158,6 +175,11 @@ namespace NiVE3.ViewModel.Dialog
 
         private void OptionViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
+            if (e.PropertyName == nameof(ImageCacheLimit))
+            {
+                MaxRamPreviewCacheLimit = SystemInfo.MaxCacheLimitMiB - ImageCacheLimit;
+            }
+
             if (SettingPropertyNames.Contains(e.PropertyName ?? ""))
             {
                 IsDirty = true;

@@ -110,4 +110,9 @@ namespace NiVE3.ViewModel
             PropertyHierarchy = [..e.PropertyHierarchy, parent];
         }
     }
+
+    class StopRenderRamPreviewEventArgs : EventArgs
+    {
+        public int RenderedFrameCount { get; set; }
+    }
 }

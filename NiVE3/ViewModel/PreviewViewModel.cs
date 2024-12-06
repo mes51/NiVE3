@@ -31,6 +31,9 @@ using ComputeSharp;
 using NiVE3.InternalShader;
 using NiVE3.Exceptions;
 using NiVE3.Model.UI;
+using System.Threading;
+using System.Windows.Xps.Packaging;
+using System.Buffers;
 
 namespace NiVE3.ViewModel
 {
@@ -354,7 +357,7 @@ namespace NiVE3.ViewModel
 
         EventHubModel EventHubModel { get; }
 
-        ColoredPreviewBoundingBox[]? BoundingBoxesBuffer { get; set; }
+        ColoredPreviewBoundingBox[] BoundingBoxesBuffer { get; set; } = [];
 
         DispatcherTimer RealFrameRateUpdateTimer { get; }
 
@@ -378,6 +381,12 @@ namespace NiVE3.ViewModel
             add { CurrentTimeChangeByUserPublisher.Subscribe(value); }
             remove { CurrentTimeChangeByUserPublisher.Unsubscribe(value); }
         }
+
+        Task? RenderRamPreviewTask { get; set; }
+
+        CancellationTokenSource RenderRamPreviewTaskCancellationTokenSource { get; set; } = new CancellationTokenSource();
+
+        List<int[]> CachedRamPreviewFrames { get; set; } = [];
 
         public PreviewViewModel(PreviewModelBase previewModel, ViewStateModel viewState, ApplicationModel applicationModel, PlayControllerModel playControllerModel, AudioPlayerModel audioPlayerModel, AudioInformationModel audioInformationModel, AcceleratorModel acceleratorModel, EventHubModel eventHubModel)
         {
@@ -519,9 +528,20 @@ namespace NiVE3.ViewModel
             PlayControllerModel.PreviewPlay += PlayControllerModel_PreviewPlay;
             PlayControllerModel.Stopped += PlayControllerModel_Stopped;
             PlayControllerModel.PauseChanged += PlayControllerModel_PauseChanged;
+            PlayControllerModel.StartRenderRamPreview += PlayControllerModel_StartRenderRamPreview;
+            PlayControllerModel.StopRenderRamPreview += PlayControllerModel_StopRenderRamPreview;
 
             CompositionTarget.Rendering += (_, _) =>
             {
+                if (RenderRamPreviewTask != null)
+                {
+                    if (CachedRamPreviewFrames.Count > 0)
+                    {
+                        CurrentFrame.WritePixels(BufferImageSize, CachedRamPreviewFrames[^1], BufferImageSize.Width * 4, 0);
+                    }
+                    return;
+                }
+
                 if (IsDirtyImageBuffer)
                 {
                     CurrentFrame.WritePixels(BufferImageSize, ImageBuffer, BufferImageSize.Width * 4, 0);
@@ -535,12 +555,9 @@ namespace NiVE3.ViewModel
                 if (IsDirtyBoundingBoxesBuffer)
                 {
                     BoundingBoxes.Clear();
-                    if (BoundingBoxesBuffer != null)
+                    foreach (var bb in BoundingBoxesBuffer)
                     {
-                        foreach (var bb in BoundingBoxesBuffer)
-                        {
-                            BoundingBoxes.Add(bb);
-                        }
+                        BoundingBoxes.Add(bb);
                     }
                     IsDirtyBoundingBoxesBuffer = false;
                 }
@@ -644,88 +661,22 @@ namespace NiVE3.ViewModel
 
                 if (image != null && BufferImageSize.Width == image.Width && BufferImageSize.Height == image.Height)
                 {
-                    if (image is NGPUImage gpuImage)
+                    try
+                    {
+                        ConvertTo8bpcImage(AcceleratorModel, image, ImageBuffer, PreviewColorChannel);
+                    }
+                    catch (Exception ex)
                     {
                         try
                         {
-                            var device = AcceleratorModel.CurrentDevice;
-                            using var convertedImageData = device.AllocateReadWriteBuffer<int>(image.DataLength);
-                            using (var context = device.CreateComputeContext())
-                            {
-                                context.For(gpuImage.Width, gpuImage.Height, new ConvertToPreviewImage(gpuImage.Data, convertedImageData, gpuImage.Width, (int)PreviewColorChannel));
-                            }
-                            convertedImageData.CopyTo(ImageBuffer);
+                            image.Dispose();
                         }
-                        catch (Exception ex)
-                        {
-                            try
-                            {
-                                image.Dispose();
-                            }
-                            catch { }
+                        catch { }
 
-                            IsCurrentFrameUpdating = false;
-                            NeedUpdateFrameNextTick = true;
-                            ApplicationModel.CaughtGPUException(new GPUException(ex));
-                            return;
-                        }
-                    }
-                    else
-                    {
-                        var dataSize = image.DataLength;
-                        var imageData = image.GetData();
-                        var data = ImageBuffer;
-
-                        // TODO: SDR変換を入れるかどうか
-                        switch (PreviewColorChannel)
-                        {
-                            case PreviewColorChannel.R:
-                                Parallel.For(0, dataSize, i =>
-                                {
-                                    var p = Avx.Permute(Sse41.RoundCurrentDirection(imageData[i].AsVector128() * 255.0F), 0b10101010);
-                                    var p32 = Sse41.Min(Sse41.Max(Sse2.ConvertToVector128Int32(p), Vector128<int>.Zero), Vector128.Create(255));
-                                    var p16 = Sse2.PackSignedSaturate(p32, Vector128<int>.Zero);
-                                    var p8 = Sse2.PackUnsignedSaturate(p16, Vector128<short>.Zero);
-                                    data[i] = Sse2.ConvertToInt32(p8.AsInt32()) | Black;
-                                });
-                                break;
-                            case PreviewColorChannel.G:
-                                Parallel.For(0, dataSize, i =>
-                                {
-                                    var p = Avx.Permute(Sse41.RoundCurrentDirection(imageData[i].AsVector128() * 255.0F), 0b01010101);
-                                    var p32 = Sse41.Min(Sse41.Max(Sse2.ConvertToVector128Int32(p), Vector128<int>.Zero), Vector128.Create(255));
-                                    var p16 = Sse2.PackSignedSaturate(p32, Vector128<int>.Zero);
-                                    var p8 = Sse2.PackUnsignedSaturate(p16, Vector128<short>.Zero);
-                                    data[i] = Sse2.ConvertToInt32(p8.AsInt32()) | Black;
-                                });
-                                break;
-                            case PreviewColorChannel.B:
-                                Parallel.For(0, dataSize, i =>
-                                {
-                                    var p = Avx.Permute(Sse41.RoundCurrentDirection(imageData[i].AsVector128() * 255.0F), 0b00000000);
-                                    var p32 = Sse41.Min(Sse41.Max(Sse2.ConvertToVector128Int32(p), Vector128<int>.Zero), Vector128.Create(255));
-                                    var p16 = Sse2.PackSignedSaturate(p32, Vector128<int>.Zero);
-                                    var p8 = Sse2.PackUnsignedSaturate(p16, Vector128<short>.Zero);
-                                    data[i] = Sse2.ConvertToInt32(p8.AsInt32()) | Black;
-                                });
-                                break;
-                            case PreviewColorChannel.Alpha:
-                                Parallel.For(0, dataSize, i =>
-                                {
-                                    var p = Avx.Permute(Sse41.RoundCurrentDirection(imageData[i].AsVector128() * 255.0F), 0b11111111);
-                                    var p32 = Sse41.Min(Sse41.Max(Sse2.ConvertToVector128Int32(p), Vector128<int>.Zero), Vector128.Create(255));
-                                    var p16 = Sse2.PackSignedSaturate(p32, Vector128<int>.Zero);
-                                    var p8 = Sse2.PackUnsignedSaturate(p16, Vector128<short>.Zero);
-                                    data[i] = Sse2.ConvertToInt32(p8.AsInt32()) | Black;
-                                });
-                                break;
-                            case PreviewColorChannel.RgbStraight:
-                                ImageConversion.ConvertToBGR32(imageData, ImageBuffer, dataSize);
-                                break;
-                            default:
-                                ImageConversion.ConvertToBGRA32(imageData, ImageBuffer, dataSize);
-                                break;
-                        }
+                        IsCurrentFrameUpdating = false;
+                        NeedUpdateFrameNextTick = true;
+                        ApplicationModel.CaughtGPUException(new GPUException(ex));
+                        return;
                     }
                 }
                 else
@@ -752,7 +703,7 @@ namespace NiVE3.ViewModel
         {
             if (PreviewModel is not CompositionPreviewModel compositionPreviewModel || compositionPreviewModel.Composition == null || compositionPreviewModel.Composition.CompositionId != CurrentEditingCompositionId || SelectedLayerIds == null)
             {
-                BoundingBoxesBuffer = null;
+                BoundingBoxesBuffer = [];
                 return;
             }
             else
@@ -766,6 +717,92 @@ namespace NiVE3.ViewModel
         void OnWorkareaChanged()
         {
             WorkareaChangedPublisher.Publish(this, EventArgs.Empty);
+        }
+
+        void ClearCachedRenderedRamPreviewFrame()
+        {
+            foreach (var buffer in CachedRamPreviewFrames)
+            {
+                ArrayPool<int>.Shared.Return(buffer);
+            }
+            CachedRamPreviewFrames.Clear();
+        }
+
+        static void ConvertTo8bpcImage(AcceleratorModel acceleratorModel, NImage image, int[] buffer, PreviewColorChannel channel)
+        {
+            if (image is NGPUImage gpuImage)
+            {
+                try
+                {
+                    var device = acceleratorModel.CurrentDevice;
+                    using var convertedImageData = device.AllocateReadWriteBuffer<int>(image.DataLength);
+                    using (var context = device.CreateComputeContext())
+                    {
+                        context.For(gpuImage.Width, gpuImage.Height, new ConvertToPreviewImage(gpuImage.Data, convertedImageData, gpuImage.Width, (int)channel));
+                    }
+                    convertedImageData.CopyTo(buffer.AsSpan(0, image.DataLength));
+                }
+                catch (Exception ex)
+                {
+                    throw new GPUException(ex);
+                }
+            }
+            else
+            {
+                var dataSize = image.DataLength;
+                var imageData = image.GetData();
+
+                // TODO: SDR変換を入れるかどうか
+                switch (channel)
+                {
+                    case PreviewColorChannel.R:
+                        Parallel.For(0, dataSize, i =>
+                        {
+                            var p = Avx.Permute(Sse41.RoundCurrentDirection(imageData[i].AsVector128() * 255.0F), 0b10101010);
+                            var p32 = Sse41.Min(Sse41.Max(Sse2.ConvertToVector128Int32(p), Vector128<int>.Zero), Vector128.Create(255));
+                            var p16 = Sse2.PackSignedSaturate(p32, Vector128<int>.Zero);
+                            var p8 = Sse2.PackUnsignedSaturate(p16, Vector128<short>.Zero);
+                            buffer[i] = Sse2.ConvertToInt32(p8.AsInt32()) | Black;
+                        });
+                        break;
+                    case PreviewColorChannel.G:
+                        Parallel.For(0, dataSize, i =>
+                        {
+                            var p = Avx.Permute(Sse41.RoundCurrentDirection(imageData[i].AsVector128() * 255.0F), 0b01010101);
+                            var p32 = Sse41.Min(Sse41.Max(Sse2.ConvertToVector128Int32(p), Vector128<int>.Zero), Vector128.Create(255));
+                            var p16 = Sse2.PackSignedSaturate(p32, Vector128<int>.Zero);
+                            var p8 = Sse2.PackUnsignedSaturate(p16, Vector128<short>.Zero);
+                            buffer[i] = Sse2.ConvertToInt32(p8.AsInt32()) | Black;
+                        });
+                        break;
+                    case PreviewColorChannel.B:
+                        Parallel.For(0, dataSize, i =>
+                        {
+                            var p = Avx.Permute(Sse41.RoundCurrentDirection(imageData[i].AsVector128() * 255.0F), 0b00000000);
+                            var p32 = Sse41.Min(Sse41.Max(Sse2.ConvertToVector128Int32(p), Vector128<int>.Zero), Vector128.Create(255));
+                            var p16 = Sse2.PackSignedSaturate(p32, Vector128<int>.Zero);
+                            var p8 = Sse2.PackUnsignedSaturate(p16, Vector128<short>.Zero);
+                            buffer[i] = Sse2.ConvertToInt32(p8.AsInt32()) | Black;
+                        });
+                        break;
+                    case PreviewColorChannel.Alpha:
+                        Parallel.For(0, dataSize, i =>
+                        {
+                            var p = Avx.Permute(Sse41.RoundCurrentDirection(imageData[i].AsVector128() * 255.0F), 0b11111111);
+                            var p32 = Sse41.Min(Sse41.Max(Sse2.ConvertToVector128Int32(p), Vector128<int>.Zero), Vector128.Create(255));
+                            var p16 = Sse2.PackSignedSaturate(p32, Vector128<int>.Zero);
+                            var p8 = Sse2.PackUnsignedSaturate(p16, Vector128<short>.Zero);
+                            buffer[i] = Sse2.ConvertToInt32(p8.AsInt32()) | Black;
+                        });
+                        break;
+                    case PreviewColorChannel.RgbStraight:
+                        ImageConversion.ConvertToBGR32(imageData, buffer, dataSize);
+                        break;
+                    default:
+                        ImageConversion.ConvertToBGRA32(imageData, buffer, dataSize);
+                        break;
+                }
+            }
         }
 
         private void RealFrameRateUpdateTimer_Tick(object? sender, EventArgs e)
@@ -819,7 +856,26 @@ namespace NiVE3.ViewModel
                     {
                         AbortUseToolCommand.Execute(null);
                     }
-                    UpdateCurrentFrame();
+                    if (PlayControllerModel.IsPlaying && !PlayControllerModel.IsPaused && PlayControllerModel.UseRamPreview)
+                    {
+                        var frame = (int)Math.Round((CurrentTime - WorkareaBegin) * FrameRate);
+                        if (frame > -1 && frame < CachedRamPreviewFrames.Count)
+                        {
+                            IsCurrentFrameUpdating = true;
+                            var buffer = CachedRamPreviewFrames[frame];
+                            buffer.AsSpan(0, ImageBuffer.Length).CopyTo(ImageBuffer);
+                            IsDirtyImageBuffer = true;
+                            IsCurrentFrameUpdating = false;
+                        }
+                        else
+                        {
+                            UpdateCurrentFrame();
+                        }
+                    }
+                    else
+                    {
+                        UpdateCurrentFrame();
+                    }
                     if (PreviewModel.IsFootage && !PlayControllerModel.IsPlaying && Keyboard.IsKeyDown(Key.LeftCtrl))
                     {
                         var audio = PreviewModel.GetAudio(CurrentTime, 1.0 / FrameRate);
@@ -924,13 +980,18 @@ namespace NiVE3.ViewModel
             {
                 audio = footagePreviewModel.Footage.ReadAudio(0.0, Duration);
             }
-            AudioPlayerModel.SetPreviewAudio(audio, WorkareaBegin, WorkareaEnd);
+            AudioPlayerModel.SetPreviewAudio(audio, WorkareaBegin, PlayControllerModel.UseRamPreview ? PlayControllerModel.RamPreviewRenderedWorkareaEnd : WorkareaEnd);
             AudioPlayerModel.PreviewSpeed = 1.0;
             AudioPlayerModel.SetPlayingPosition(CurrentTime);
             RealFrameRateIsUpdated = false;
             RealFrameRate = -1.0;
             AudioPlayerModel.PlayPreview();
             RealFrameRateUpdateTimer.Start();
+            if (PlayControllerModel.UseRamPreview)
+            {
+                BoundingBoxesBuffer = [];
+                IsDirtyBoundingBoxesBuffer = true;
+            }
         }
 
         private void PlayControllerModel_Stopped(object? sender, EventArgs e)
@@ -940,6 +1001,12 @@ namespace NiVE3.ViewModel
             RealFrameRateIsUpdated = false;
             RealFrameRate = -1.0;
             AudioInformationModel.ClearLevel();
+            ClearCachedRenderedRamPreviewFrame();
+            if (PlayControllerModel.UseRamPreview)
+            {
+                UpdateBoundingBox();
+                UpdateCurrentFrame();
+            }
         }
 
         private void PlayControllerModel_PauseChanged(object? sender, EventArgs e)
@@ -956,6 +1023,68 @@ namespace NiVE3.ViewModel
                 AudioPlayerModel.PreviewSpeed = 1.0;
                 AudioPlayerModel.PlayPreview();
                 RealFrameRateUpdateTimer.Start();
+            }
+        }
+
+        private void PlayControllerModel_StartRenderRamPreview(object? sender, EventArgs e)
+        {
+            if (IsFootage)
+            {
+                PlayControllerModel.Play();
+            }
+            else
+            {
+                ClearCachedRenderedRamPreviewFrame();
+
+                RenderRamPreviewTaskCancellationTokenSource.Dispose();
+                RenderRamPreviewTaskCancellationTokenSource = new CancellationTokenSource();
+                var ct = RenderRamPreviewTaskCancellationTokenSource.Token;
+                RenderRamPreviewTask = Task.Run(() =>
+                {
+                    var currentTime = WorkareaBegin;
+                    while (currentTime < WorkareaEnd && CachedRamPreviewFrames.Sum(b => b.Length) / Const.MiB < ApplicationSetting.Setting.RamPreviewCacheLimit)
+                    {
+                        ct.ThrowIfCancellationRequested();
+
+                        try
+                        {
+                            using var checker = CycleChecker.StartCheck();
+                            using var image = PreviewModel.GetImage(currentTime);
+                            if (image == null)
+                            {
+                                break;
+                            }
+                            var buffer = ArrayPool<int>.Shared.Rent(image.DataLength);
+                            ConvertTo8bpcImage(AcceleratorModel, image, buffer, PreviewColorChannel);
+                            CachedRamPreviewFrames.Add(buffer);
+                        }
+                        catch (GPUException ex)
+                        {
+                            ApplicationModel.CaughtGPUException(ex);
+                            continue;
+                        }
+
+                        currentTime = TimeCalc.RoundTimeDigit(currentTime + 1.0 / FrameRate);
+                    }
+
+                    Application.Current?.Dispatcher.BeginInvoke(() => PlayControllerModel.Play(), DispatcherPriority.ApplicationIdle);
+                }, ct).ContinueWith(task => RenderRamPreviewTask = null);
+            }
+        }
+
+        private void PlayControllerModel_StopRenderRamPreview(object? sender, StopRenderRamPreviewEventArgs e)
+        {
+            if (IsFootage)
+            {
+                e.RenderedFrameCount = (int)Math.Round(Duration * FrameRate);
+            }
+            else
+            {
+                RenderRamPreviewTaskCancellationTokenSource.Cancel();
+                RenderRamPreviewTask?.Wait();
+                RenderRamPreviewTask = null;
+
+                e.RenderedFrameCount = CachedRamPreviewFrames.Count;
             }
         }
     }

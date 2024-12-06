@@ -30,7 +30,8 @@
             </cv:ConverterItem>
         </cv:ConverterCollection>
         <cv:BooleanInvertConverter x:Key="BooleanInvertConverter"/>
-        <cv:LocalizationConverter x:Key="MaxCacheLimitSizeConverter" LocalizeFormat="{gm:LanguageResource ResourceKey=OptionView_Performance_ImageCacheLimit_MaxSizeLabel}"/>
+        <cv:LocalizationConverter x:Key="CacheGroupWithCacheLimitSizeConverter" LocalizeFormat="{gm:LanguageResource ResourceKey=OptionView_Performance_CacheSetting}"/>
+        <cv:LocalizationConverter x:Key="MaxCacheLimitSizeConverter" LocalizeFormat="{gm:LanguageResource ResourceKey=OptionView_Performance_CacheLimit_MaxSizeLabel}"/>
 
         <Thickness x:Key="ItemMargin">0,10,0,0</Thickness>
         <Thickness x:Key="GroupMargin">0,10,0,0</Thickness>
@@ -77,7 +78,7 @@
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
 
-        <ListBox Grid.Row="0" Grid.Column="0" x:Name="SettingType" Width="150" SelectedIndex="0" d:SelectedIndex="0">
+        <ListBox Grid.Row="0" Grid.Column="0" x:Name="SettingType" Width="150" SelectedIndex="0" d:SelectedIndex="1">
             <ListBoxItem Content="{gm:LanguageResource ResourceKey=OptionView_Category_General}"/>
             <ListBoxItem Content="{gm:LanguageResource ResourceKey=OptionView_Category_Performance}"/>
         </ListBox>
@@ -114,7 +115,7 @@
                         </Grid>
                     </StackPanel>
                 </GroupBox>
-                <GroupBox Header="{gm:LanguageResource ResourceKey=OptionView_Performance_CacheSetting}" Margin="{StaticResource GroupMargin}">
+                <GroupBox Header="{Binding Source={x:Static ut:SystemInfo.MaxCacheLimitMiB}, Converter={StaticResource CacheGroupWithCacheLimitSizeConverter}}" Margin="{StaticResource GroupMargin}">
                     <StackPanel Margin="{StaticResource GroupBoxInnerMargin}" Grid.IsSharedSizeScope="True">
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -125,7 +126,18 @@
 
                             <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=OptionView_Performance_ImageCacheLimit_Label}" Style="{StaticResource SettingLabelTextBlockStyle}"/>
                             <upr:SlidableNumberTextBox Grid.Column="1" Margin="0,0,5,0" Minimum="32" Maximum="{x:Static vm:OptionViewModel.MaxImageCacheLimit}" Value="{Binding ImageCacheLimit}" Digit="0" UnitText="MiB" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                            <TextBlock Grid.Column="2" Text="{Binding Source={x:Static ut:SystemInfo.MaxImageCacheLimitMiB}, Converter={StaticResource MaxCacheLimitSizeConverter}}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="2" Text="{Binding Source={x:Static vm:OptionViewModel.MaxImageCacheLimit}, Converter={StaticResource MaxCacheLimitSizeConverter}}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                        </Grid>
+                        <Grid Margin="{StaticResource ItemMargin}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="SettingName"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=OptionView_Performance_RamPreviewCacheLimit_Label}" Style="{StaticResource SettingLabelTextBlockStyle}"/>
+                            <upr:SlidableNumberTextBox Grid.Column="1" Margin="0,0,5,0" Minimum="32" Maximum="{Binding MaxRamPreviewCacheLimit}" Value="{Binding RamPreviewCacheLimit}" Digit="0" UnitText="MiB" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="2" Text="{Binding MaxRamPreviewCacheLimit, Converter={StaticResource MaxCacheLimitSizeConverter}}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                         </Grid>
                     </StackPanel>
                 </GroupBox>

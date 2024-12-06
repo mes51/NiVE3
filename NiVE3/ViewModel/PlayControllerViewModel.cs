@@ -73,6 +73,22 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref isPaused, value); }
         }
 
+        private bool isRenderingRamPreview;
+        [NeedWire(nameof(PlayControllerModel), IsOneWay = true)]
+        public bool IsRenderingRamPreview
+        {
+            get { return isRenderingRamPreview; }
+            set { SetProperty(ref isRenderingRamPreview, value); }
+        }
+
+        private bool useRamPreview;
+        [NeedWire(nameof(PlayControllerModel))]
+        public bool UseRamPreview
+        {
+            get { return useRamPreview; }
+            set { SetProperty(ref useRamPreview, value); }
+        }
+
         public ICommand PlayCommand { get; }
 
         public ICommand PauseCommand { get; }
@@ -105,7 +121,7 @@ namespace NiVE3.ViewModel
             StopCommand = new RequerySuggestedCommand(() =>
             {
                 PlayControllerModel.Stop();
-            }, () => PlayControllerModel.CanPreview && IsPlaying);
+            }, () => PlayControllerModel.CanPreview && (IsPlaying || IsRenderingRamPreview));
 
             NextFrameCommand = new RequerySuggestedCommand(() => PlayControllerModel.MoveToNextFrame(), () => PlayControllerModel.CanPreview && !IsPlaying);
 

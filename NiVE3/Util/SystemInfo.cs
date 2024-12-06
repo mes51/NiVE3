@@ -9,13 +9,9 @@ namespace NiVE3.Util
 {
     static class SystemInfo
     {
-        const long MiB = 1024 * 1024;
+        public static readonly long MaxCacheLimit;
 
-        const long KiB = 1024;
-
-        public static readonly long MaxImageCacheLimit;
-
-        public static int MaxImageCacheLimitMiB => (int)(MaxImageCacheLimit / MiB);
+        public static int MaxCacheLimitMiB => (int)(MaxCacheLimit / Const.MiB);
 
         static SystemInfo()
         {
@@ -30,7 +26,7 @@ namespace NiVE3.Util
                     maxTotalVisibleMemory = Math.Min(maxTotalVisibleMemory, memorySize);
                 }
             }
-            MaxImageCacheLimit = (int)Math.Floor(maxTotalVisibleMemory / KiB * 0.75) * MiB; // 全体の3/4まで
+            MaxCacheLimit = (int)Math.Floor(maxTotalVisibleMemory / Const.KiB * 0.75) * Const.MiB; // 全体の3/4まで
         }
     }
 }

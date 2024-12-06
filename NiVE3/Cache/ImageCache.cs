@@ -14,15 +14,13 @@ namespace NiVE3.Cache
 {
     class ImageCache
     {
-        const long MiB = 1024 * 1024;
-
         static readonly int ImageElementSize = Marshal.SizeOf<Vector4>();
 
         static ImageCache Instance { get; } = new ImageCache();
 
         public static bool EnableCompress { get; set; }
 
-        long CacheLimit { get; set; } = Math.Min(16L * 1024 * MiB, SystemInfo.MaxImageCacheLimit);
+        long CacheLimit { get; set; } = Math.Min(16L * 1024 * Const.MiB, SystemInfo.MaxCacheLimit);
 
         private DualKeyDictionary<Guid, (double, Int128), (Guid, Int128), (IDisposable, long, ROI)> CachedImages { get; } = [];
 
@@ -32,7 +30,7 @@ namespace NiVE3.Cache
 
         private ImageCache()
         {
-            CacheLimit = Math.Min(ApplicationSetting.Setting.ImageCacheLimit * MiB, SystemInfo.MaxImageCacheLimit);
+            CacheLimit = Math.Min(ApplicationSetting.Setting.ImageCacheLimit * Const.MiB, SystemInfo.MaxCacheLimit);
             ApplicationSetting.Setting.UpdateSetting += Setting_UpdateSetting;
         }
 
@@ -183,7 +181,7 @@ namespace NiVE3.Cache
 
         private void Setting_UpdateSetting(object? sender, EventArgs e)
         {
-            CacheLimit = ApplicationSetting.Setting.ImageCacheLimit * MiB;
+            CacheLimit = ApplicationSetting.Setting.ImageCacheLimit * Const.MiB;
         }
 
         public static (NManagedImage, ROI)? Get(in Guid objectId, in Int128 key, double time)

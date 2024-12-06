@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:NiVE3.View.Pane"
              xmlns:cv="clr-namespace:NiVE3.View.Converter"
+             xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
@@ -19,13 +20,22 @@
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
 
-        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="5,0">
-            <Button Style="{StaticResource PrevFrameButton}" Command="{Binding PrevFrameCommand}"/>
-            <Button Style="{StaticResource NextFrameButton}" Margin="{StaticResource ButtonMargin}" Command="{Binding NextFrameCommand}"/>
-            <Button Style="{StaticResource StopButton}" Margin="{StaticResource ButtonMargin}" Command="{Binding StopCommand}"/>
-            <Button Style="{StaticResource PlayButton}" Margin="{StaticResource ButtonMargin}" Command="{Binding PlayCommand}"/>
-            <Button Style="{StaticResource PauseButton}" Margin="{StaticResource ButtonMargin}" Command="{Binding PauseCommand}"/>
-        </StackPanel>
+        <Grid Grid.Column="0" VerticalAlignment="Center">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Row="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="5,0">
+                <Button Style="{StaticResource PrevFrameButton}" Command="{Binding PrevFrameCommand}"/>
+                <Button Style="{StaticResource NextFrameButton}" Margin="{StaticResource ButtonMargin}" Command="{Binding NextFrameCommand}"/>
+                <Button Style="{StaticResource StopButton}" Margin="{StaticResource ButtonMargin}" Command="{Binding StopCommand}"/>
+                <Button Style="{StaticResource PlayButton}" Margin="{StaticResource ButtonMargin}" Command="{Binding PlayCommand}"/>
+                <Button Style="{StaticResource PauseButton}" Margin="{StaticResource ButtonMargin}" Command="{Binding PauseCommand}"/>
+            </StackPanel>
+
+            <CheckBox Grid.Row="1" Content="{gm:LanguageResource ResourceKey=PlayControlView_UseRamPreview}" Margin="5,5,0,0" IsChecked="{Binding UseRamPreview}"/>
+        </Grid>
 
         <Grid Grid.Column="1" VerticalAlignment="Center">
             <Grid.ColumnDefinitions>

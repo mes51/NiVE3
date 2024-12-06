@@ -110,6 +110,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("再生コントロール")]
         public static readonly string PlayControlView_Title = nameof(PlayControlView_Title);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("RAMプレビュー")]
+        public static readonly string PlayControlView_UseRamPreview = nameof(PlayControlView_UseRamPreview);
+
         [ShowInMarkup, LanguageKey, DefaultValue("フッテージ")]
         public static readonly string FootageListView_Title = nameof(FootageListView_Title);
 
@@ -707,14 +710,17 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("(デフォルト)")]
         public static readonly string OptionView_Performance_UseGpuDevice_Default = nameof(OptionView_Performance_UseGpuDevice_Default);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("キャッシュ設定")]
+        [ShowInMarkup, LanguageKey, DefaultValue("キャッシュ設定 (合計最大: {0}MiB)")]
         public static readonly string OptionView_Performance_CacheSetting = nameof(OptionView_Performance_CacheSetting);
 
         [ShowInMarkup, LanguageKey, DefaultValue("キャッシュサイズ:")]
         public static readonly string OptionView_Performance_ImageCacheLimit_Label = nameof(OptionView_Performance_ImageCacheLimit_Label);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("RAMプレビューサイズ:")]
+        public static readonly string OptionView_Performance_RamPreviewCacheLimit_Label = nameof(OptionView_Performance_RamPreviewCacheLimit_Label);
+
         [ShowInMarkup, LanguageKey, DefaultValue("(最大: {0}MiB)")]
-        public static readonly string OptionView_Performance_ImageCacheLimit_MaxSizeLabel = nameof(OptionView_Performance_ImageCacheLimit_MaxSizeLabel);
+        public static readonly string OptionView_Performance_CacheLimit_MaxSizeLabel = nameof(OptionView_Performance_CacheLimit_MaxSizeLabel);
 
         [ShowInMarkup, LanguageKey, DefaultValue("ショートカットキー設定")]
         public static readonly string ShortcutKeySettingView_Title = nameof(ShortcutKeySettingView_Title);

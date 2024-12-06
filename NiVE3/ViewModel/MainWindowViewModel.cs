@@ -445,6 +445,7 @@ namespace NiVE3.ViewModel
         {
             if (sender is PreviewViewModel vm)
             {
+                PlayControllerModel.Stop();
                 PlayControllerModel.WorkareaBegin = vm.WorkareaBegin;
                 PlayControllerModel.WorkareaEnd = vm.WorkareaEnd;
                 PlayControllerModel.Duration = vm.Duration;
@@ -457,6 +458,7 @@ namespace NiVE3.ViewModel
         {
             if (sender is PreviewViewModel vm && vm.IsSelected)
             {
+                PlayControllerModel.Stop();
                 PlayControllerModel.WorkareaBegin = vm.WorkareaBegin;
                 PlayControllerModel.WorkareaEnd = vm.WorkareaEnd;
                 PlayControllerModel.Duration = vm.Duration;
