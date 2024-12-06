@@ -888,7 +888,15 @@ namespace NiVE3.ViewModel
                     {
                         var startSample = (int)(CurrentTime * Const.AudioSamplingRate) * Const.AudioChannelCount;
                         var length = (int)((CurrentTime + 1.0 / FrameRate) * Const.AudioSamplingRate) * Const.AudioChannelCount - startSample;
-                        AudioInformationModel.CalcAudioLevel(AudioPlayerModel.Audio.AsSpan(startSample, length));
+                        length = Math.Min(length, AudioPlayerModel.Audio.Length - startSample);
+                        if (length > 0)
+                        {
+                            AudioInformationModel.CalcAudioLevel(AudioPlayerModel.Audio.AsSpan(startSample, length));
+                        }
+                        else
+                        {
+                            AudioInformationModel.ClearLevel();
+                        }
                     }
                     break;
                 case nameof(Duration):
