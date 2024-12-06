@@ -17,6 +17,8 @@ namespace NiVE3.Model.UI
     {
         public abstract bool IsFootage { get; }
 
+        public abstract bool CanRendering { get; }
+
         private string name = "";
         public string Name
         {
@@ -129,6 +131,8 @@ namespace NiVE3.Model.UI
     {
         public override bool IsFootage => true;
 
+        public override bool CanRendering => true;
+
         private FootageModel? footage;
         public FootageModel? Footage
         {
@@ -201,6 +205,8 @@ namespace NiVE3.Model.UI
     class CompositionPreviewModel : PreviewModelBase
     {
         public override bool IsFootage => false;
+
+        public override bool CanRendering => !(Composition?.IsRendering ?? true);
 
         private CompositionModel? composition;
         public CompositionModel? Composition

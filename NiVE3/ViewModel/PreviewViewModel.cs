@@ -634,7 +634,7 @@ namespace NiVE3.ViewModel
         {
             using (var checker = CycleChecker.StartCheck())
             {
-                if (IsDirtyImageBuffer || IsIgnoreUpdatePreview || IsCurrentFrameUpdating)
+                if (IsDirtyImageBuffer || IsIgnoreUpdatePreview || IsCurrentFrameUpdating || !PreviewModel.CanRendering)
                 {
                     NeedUpdateFrameNextTick = true;
                     return;

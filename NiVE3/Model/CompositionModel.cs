@@ -204,6 +204,8 @@ namespace NiVE3.Model
 
         public IReadOnlyCollection<LayerInfo> LayerIdentifiers => [..Layers.Select(l => new LayerInfo(l.LayerId, l.SourceType))];
 
+        public bool IsRendering { get; set; }
+
         WeakEventPublisher<EventArgs> CompositionUpdatedPublisher { get; } = new WeakEventPublisher<EventArgs>();
         public event EventHandler<EventArgs> CompositionUpdated
         {
@@ -802,6 +804,8 @@ namespace NiVE3.Model
 
         public NImage RenderFrame(double time, double downSamplingRate, bool applyToneMapping, bool useGpu)
         {
+            IsRendering = true;
+
             if (IsEnableMotionBlur && Layers.Any(l => l.IsMotionBlurTarget()))
             {
                 var shatterStartTime = FrameDuration * ShutterPhase / 360.0F;
@@ -845,6 +849,7 @@ namespace NiVE3.Model
                         using var managedResultImage = result.CopyToCpu();
                         ImageCache.Add(CompositionId, cacheKey, time, managedResultImage, ROI.Empty);
 
+                        IsRendering = false;
                         return result;
                     }
                     else
@@ -895,16 +900,19 @@ namespace NiVE3.Model
 
                         ImageCache.Add(CompositionId, cacheKey, time, result, ROI.Empty);
 
+                        IsRendering = false;
                         return result;
                     }
                 }
                 else
                 {
+                    IsRendering = false;
                     return cachedImage.Item1;
                 }
             }
             else
             {
+                IsRendering = false;
                 return RenderFrameInternal(time, 0.0, false, downSamplingRate, applyToneMapping, useGpu);
             }
         }

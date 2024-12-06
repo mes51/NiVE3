@@ -4,17 +4,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace NiVE3.Util
 {
     class CycleChecker : IDisposable
     {
-        static readonly object SyncObject = new object();
-
         static ConcurrentBag<Entry> Pool { get; } = [];
 
-        static CycleChecker? CurrentChecker { get; set; }
+        static ThreadLocal<CycleChecker?> CurrentChecker { get; set; } = new ThreadLocal<CycleChecker?>();
 
         List<Entry> Entries { get; } = new List<Entry>();
 
@@ -43,43 +42,43 @@ namespace NiVE3.Util
 
         void Leave(Entry entry)
         {
-            lock (SyncObject)
-            {
-                Entries.Remove(entry);
-                Pool.Add(entry);
-            }
+            Entries.Remove(entry);
+            Pool.Add(entry);
         }
 
         public static IDisposable StartCheck()
         {
             // TODO: 今後呼び出し階層が深くなると地獄が見えるので、何度も呼び出し可能にした上でDispose時に抜けていないEntryがないかどうか、checkerに名前を付けてデバッグしやすくする程度にする
-            if (CurrentChecker != null)
+            if (CurrentChecker.Value != null)
             {
                 throw new InvalidOperationException(); // bug
             }
 
-            CurrentChecker = new CycleChecker();
-            return CurrentChecker;
+            var result = new CycleChecker();
+            CurrentChecker.Value = result;
+            return result;
         }
 
         public static IDisposable? TryEnter(in Guid objectId)
         {
-            if (CurrentChecker == null)
+            var checker = CurrentChecker.Value;
+            if (checker == null)
             {
                 throw new InvalidOperationException(); // bug
             }
 
-            return CurrentChecker.TryEnterInternal(objectId);
+            return checker.TryEnterInternal(objectId);
         }
 
         public static IDisposable? TryEnter(in Int128 objectId)
         {
-            if (CurrentChecker == null)
+            var checker = CurrentChecker.Value;
+            if (checker == null)
             {
                 throw new InvalidOperationException(); // bug
             }
 
-            return CurrentChecker.TryEnterInternal(objectId);
+            return checker.TryEnterInternal(objectId);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -95,7 +94,7 @@ namespace NiVE3.Util
                 e.Dispose();
             }
 
-            CurrentChecker = null;
+            CurrentChecker.Value = null;
         }
 
         private class Entry : IDisposable
