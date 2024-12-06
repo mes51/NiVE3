@@ -1049,13 +1049,14 @@ namespace NiVE3.ViewModel
                 var ct = RenderRamPreviewTaskCancellationTokenSource.Token;
                 RenderRamPreviewTask = Task.Run(() =>
                 {
-                    var currentTime = WorkareaBegin;
-                    while (currentTime < WorkareaEnd && CachedRamPreviewFrames.Sum(b => b.Length) / Const.MiB < ApplicationSetting.Setting.RamPreviewCacheLimit)
+                    var frameCount = (int)Math.Round((WorkareaEnd - WorkareaBegin) * FrameRate);
+                    for (var i = 0; i < frameCount && CachedRamPreviewFrames.Sum(b => b.Length) / Const.MiB < ApplicationSetting.Setting.RamPreviewCacheLimit; i++)
                     {
                         ct.ThrowIfCancellationRequested();
 
                         try
                         {
+                            var currentTime = TimeCalc.RoundTimeDigit(WorkareaBegin + i / FrameRate);
                             using var checker = CycleChecker.StartCheck();
                             using var image = PreviewModel.GetImage(currentTime);
                             if (image == null)
@@ -1069,10 +1070,9 @@ namespace NiVE3.ViewModel
                         catch (GPUException ex)
                         {
                             ApplicationModel.CaughtGPUException(ex);
+                            i--;
                             continue;
                         }
-
-                        currentTime = TimeCalc.RoundTimeDigit(currentTime + 1.0 / FrameRate);
                     }
 
                     Application.Current?.Dispatcher.BeginInvoke(() => PlayControllerModel.Play(), DispatcherPriority.ApplicationIdle);
