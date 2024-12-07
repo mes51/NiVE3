@@ -992,7 +992,11 @@ namespace NiVE3.Model
 
             var result = new float[(int)(length * Const.AudioSamplingRate) * Const.AudioChannelCount];
             var startPos = (int)(Math.Max((InPoint + SourceStartPoint) - time, 0.0) * Const.AudioSamplingRate) * Const.AudioChannelCount;
-            audio.AsSpan(0, Math.Min(audio.Length, result.Length - startPos)).CopyTo(result.AsSpan(startPos));
+            var copyLength = Math.Min(audio.Length, result.Length - startPos);
+            if (copyLength > 0)
+            {
+                audio.AsSpan(0, copyLength).CopyTo(result.AsSpan(startPos));
+            }
 
             return result;
         }
