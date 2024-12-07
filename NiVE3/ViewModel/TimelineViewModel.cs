@@ -765,7 +765,7 @@ namespace NiVE3.ViewModel
                     SelectedLayers.Clear();
                     foreach (var layer in Layers)
                     {
-                        SelectedLayers.Add(layer);
+                        SelectLayer(layer.LayerId, true);
                     }
                     LastSelectedLayerId = Layers[0].LayerId;
                 }
