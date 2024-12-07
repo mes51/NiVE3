@@ -19,9 +19,21 @@ namespace NiVE3.ViewModel.Dialog
 {
     class OptionViewModel : BindableBase, IDialogAware
     {
-        public static Tuple<string, string>[] AvailableGpuDevices;
+        // for SlidableNumberTextBox.Maximum
 
-        public static readonly double MaxImageCacheLimit = SystemInfo.MaxCacheLimitMiB - 32; // for SlidableNumberTextBox.Maximum
+        public const double MinAutoSaveInterval = Const.MinAutoSaveInterval;
+
+        public const double MaxAutoSaveInterval = Const.MaxAutoSaveInterval;
+
+        public const double MinAutoSaveCount = Const.MinAutoSaveCount;
+
+        public const double MaxAutoSaveCount = Const.MaxAutoSaveCount;
+
+        public const double MinImageCacheSize = Const.MinImageCacheSizeMiB;
+
+        public static readonly double MaxImageCacheLimit = SystemInfo.MaxCacheLimitMiB - Const.MinImageCacheSizeMiB;
+
+        public static Tuple<string, string>[] AvailableGpuDevices;
 
         static HashSet<string> SettingPropertyNames { get; } = [];
 
@@ -73,6 +85,30 @@ namespace NiVE3.ViewModel.Dialog
         {
             get { return ramPreviewCacheLimit; }
             set { SetProperty(ref ramPreviewCacheLimit, value); }
+        }
+
+        private bool useAutoSave;
+        [SettingProperty]
+        public bool UseAutoSave
+        {
+            get { return useAutoSave; }
+            set { SetProperty(ref useAutoSave, value); }
+        }
+
+        private int autoSaveInterval;
+        [SettingProperty]
+        public int AutoSaveInterval
+        {
+            get { return autoSaveInterval; }
+            set { SetProperty(ref autoSaveInterval, value); }
+        }
+
+        private int autoSaveCount;
+        [SettingProperty]
+        public int AutoSaveCount
+        {
+            get { return autoSaveCount; }
+            set { SetProperty(ref autoSaveCount, value); }
         }
 
         private double maxRamPreviewCacheLimit;
@@ -153,6 +189,9 @@ namespace NiVE3.ViewModel.Dialog
             UseGpuLuid = ApplicationSetting.Setting.UseGpuLuid;
             ImageCacheLimit = ApplicationSetting.Setting.ImageCacheLimit;
             RamPreviewCacheLimit = ApplicationSetting.Setting.RamPreviewCacheLimit;
+            UseAutoSave = ApplicationSetting.Setting.UseAutoSave;
+            AutoSaveInterval = ApplicationSetting.Setting.AutoSaveInterval;
+            AutoSaveCount = ApplicationSetting.Setting.AutoSaveCount;
 
             SelectedGpuDevice = AvailableGpuDevices.FirstOrDefault(d => d.Item1 == UseGpuLuid, AvailableGpuDevices[0]);
 
@@ -166,6 +205,9 @@ namespace NiVE3.ViewModel.Dialog
             ApplicationSetting.Setting.UseGpuLuid = UseGpuLuid;
             ApplicationSetting.Setting.ImageCacheLimit = ImageCacheLimit;
             ApplicationSetting.Setting.RamPreviewCacheLimit = RamPreviewCacheLimit;
+            ApplicationSetting.Setting.UseAutoSave = UseAutoSave;
+            ApplicationSetting.Setting.AutoSaveInterval = AutoSaveInterval;
+            ApplicationSetting.Setting.AutoSaveCount = AutoSaveCount;
 
             ApplicationSetting.Setting.RaiseUpdateSetting();
             ApplicationSetting.Setting.Save();

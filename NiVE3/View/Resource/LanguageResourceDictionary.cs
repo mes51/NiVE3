@@ -701,6 +701,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("パフォーマンス")]
         public static readonly string OptionView_Category_Performance = nameof(OptionView_Category_Performance);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("オートセーブ")]
+        public static readonly string OptionView_Category_AutoSave = nameof(OptionView_Category_AutoSave);
+
         [ShowInMarkup, LanguageKey, DefaultValue("平面のフォルダ名")]
         public static readonly string OptionView_General_SolidFilderName = nameof(OptionView_General_SolidFilderName);
 
@@ -727,6 +730,15 @@ namespace NiVE3.View.Resource
 
         [ShowInMarkup, LanguageKey, DefaultValue("(最大: {0}MiB)")]
         public static readonly string OptionView_Performance_CacheLimit_MaxSizeLabel = nameof(OptionView_Performance_CacheLimit_MaxSizeLabel);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("オートセーブを使用する")]
+        public static readonly string OptionView_AutoSave_UseAutoSave = nameof(OptionView_AutoSave_UseAutoSave);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("オートセーブ間隔:")]
+        public static readonly string OptionView_AutoSave_Interval_Label = nameof(OptionView_AutoSave_Interval_Label);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("オートセーブの個数:")]
+        public static readonly string OptionView_AutoSave_Count_Labell = nameof(OptionView_AutoSave_Count_Labell);
 
         [ShowInMarkup, LanguageKey, DefaultValue("ショートカットキー設定")]
         public static readonly string ShortcutKeySettingView_Title = nameof(ShortcutKeySettingView_Title);
@@ -1048,6 +1060,12 @@ namespace NiVE3.View.Resource
 
         [DefaultValue("設定しようとしたキーの組み合わせは使用できません。他のキーの組み合わせを使用してください。")]
         public static readonly string Dialog_InvalidShortcutKeyCombination_Text = nameof(Dialog_InvalidShortcutKeyCombination_Text);
+
+        [DefaultValue("エラー")]
+        public static readonly string Dialog_RaiseAutoSaveError_Title = nameof(Dialog_RaiseAutoSaveError_Title);
+
+        [DefaultValue("プロジェクトのオートセーブに失敗したため、オートセーブ機能を一時停止しました。オートセーブ用ディレクトリの中に使用中のプロジェクトなど、ファイルをロックしているものがないか確認してください。")]
+        public static readonly string Dialog_RaiseAutoSaveError_Text = nameof(Dialog_RaiseAutoSaveError_Text);
 
         // ValidationRule
 
@@ -1607,6 +1625,12 @@ namespace NiVE3.View.Resource
 
         [ShowInMarkup, LanguageKey, DefaultValue("dB")]
         public static readonly string Unit_Decibel = nameof(Unit_Decibel);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("分")]
+        public static readonly string Unit_Minute = nameof(Unit_Minute);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("個")]
+        public static readonly string Unit_Pieces = nameof(Unit_Pieces);
 
         // Enum
 

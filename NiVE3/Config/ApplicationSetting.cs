@@ -85,6 +85,15 @@ namespace NiVE3.Config
         [SerializableSetting]
         public int RamPreviewCacheLimit { get; set; } = Math.Min((int)Math.Floor(SystemInfo.MaxCacheLimitMiB * 0.25), 4 * 1024);
 
+        [SerializableSetting]
+        public bool UseAutoSave { get; set; } = true;
+
+        [SerializableSetting]
+        public int AutoSaveInterval { get; set; } = 10;
+
+        [SerializableSetting]
+        public int AutoSaveCount { get; set; } = 10;
+
         public void RaiseUpdateSetting()
         {
             UpdateSetting?.Invoke(this, EventArgs.Empty);
@@ -116,7 +125,12 @@ namespace NiVE3.Config
                     p.SetValue(this, p.GetValue(applicationSettingData));
                 }
 
-                ImageCacheLimit = Math.Min(SystemInfo.MaxCacheLimitMiB, ImageCacheLimit);
+                // NOTE: 万一SystemInfo.MaxCacheLimitMiBがConst.MinImageCacheSizeMiB以下になったときのためにClampは使用しない
+                ImageCacheLimit = Math.Max(Math.Min(SystemInfo.MaxCacheLimitMiB, ImageCacheLimit), Const.MinImageCacheSizeMiB);
+                RamPreviewCacheLimit = Math.Max(Math.Min(SystemInfo.MaxCacheLimitMiB - ImageCacheLimit, RamPreviewCacheLimit), Const.MinImageCacheSizeMiB);
+
+                AutoSaveInterval = Math.Clamp(AutoSaveInterval, Const.MinAutoSaveInterval, Const.MaxAutoSaveInterval);
+                AutoSaveCount = Math.Clamp(AutoSaveCount, Const.MinAutoSaveCount, Const.MaxAutoSaveCount);
 
                 RaiseUpdateSetting();
             }

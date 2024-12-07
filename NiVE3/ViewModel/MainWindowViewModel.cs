@@ -144,6 +144,7 @@ namespace NiVE3.ViewModel
             projectModel.OpenCompositionTimeline += ProjectModel_OpenCompositionTimeline;
             projectModel.CompositionRemoved += ProjectModel_CompositionRemoved;
             projectModel.PreviewModels.CollectionChanged += PreviewModels_CollectionChanged;
+            projectModel.AutoSaveErrorRaised += ProjectModel_AutoSaveErrorRaised;
 
             eventHubModel.SelectLayerRequest += EventHubModel_SelectLayerRequest;
 
@@ -395,6 +396,13 @@ namespace NiVE3.ViewModel
                     viewModel.CompositionModel = null;
                 }
             }
+        }
+
+        private void ProjectModel_AutoSaveErrorRaised(object? sender, EventArgs e)
+        {
+            var title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_RaiseAutoSaveError_Title);
+            var text = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_RaiseAutoSaveError_Text);
+            MessageBox.Show(text, title, MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
         private void PreviewModels_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)

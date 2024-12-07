@@ -19,5 +19,15 @@ namespace NiVE3.Util
         public const long KiB = 1024;
 
         public const long MiB = 1024 * 1024;
+
+        public const int MinImageCacheSizeMiB = 32;
+
+        public const int MinAutoSaveInterval = 1;
+
+        public const int MaxAutoSaveInterval = 60;
+
+        public const int MinAutoSaveCount = 1;
+
+        public const int MaxAutoSaveCount = 100;
     }
 }

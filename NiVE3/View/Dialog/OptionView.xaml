@@ -78,12 +78,13 @@
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
 
-        <ListBox Grid.Row="0" Grid.Column="0" x:Name="SettingType" Width="150" SelectedIndex="0" d:SelectedIndex="1">
+        <ListBox Grid.Row="0" Grid.Column="0" x:Name="SettingType" Width="150" SelectedIndex="0" d:SelectedIndex="0">
             <ListBoxItem Content="{gm:LanguageResource ResourceKey=OptionView_Category_General}"/>
             <ListBoxItem Content="{gm:LanguageResource ResourceKey=OptionView_Category_Performance}"/>
+            <ListBoxItem Content="{gm:LanguageResource ResourceKey=OptionView_Category_AutoSave}"/>
         </ListBox>
 
-        <ScrollViewer Grid.Row="0" Grid.Column="1" Style="{StaticResource SettingPanelStyle}" Visibility="{Binding ElementName=SettingType, Path=SelectedIndex, Converter={StaticResource SelectTypeConverter}, ConverterParameter=0}">
+        <ScrollViewer Grid.Row="0" Grid.Column="1" Style="{StaticResource SettingPanelStyle}" Visibility="{Binding ElementName=SettingType, Path=SelectedIndex, Converter={StaticResource SelectTypeConverter}, ConverterParameter=0}" d:Visibility="Visible">
             <StackPanel>
                 <GroupBox Header="{gm:LanguageResource ResourceKey=OptionView_General_SolidFilderName}">
                     <TextBox x:Name="SolidFolderNameTextBox" Margin="{StaticResource GroupBoxInnerMargin}">
@@ -99,7 +100,7 @@
             </StackPanel>
         </ScrollViewer>
 
-        <ScrollViewer Grid.Row="0" Grid.Column="1" Style="{StaticResource SettingPanelStyle}" Visibility="{Binding ElementName=SettingType, Path=SelectedIndex, Converter={StaticResource SelectTypeConverter}, ConverterParameter=1}">
+        <ScrollViewer Grid.Row="0" Grid.Column="1" Style="{StaticResource SettingPanelStyle}" Visibility="{Binding ElementName=SettingType, Path=SelectedIndex, Converter={StaticResource SelectTypeConverter}, ConverterParameter=1}" d:Visibility="Collapsed">
             <StackPanel>
                 <GroupBox Header="{gm:LanguageResource ResourceKey=OptionView_Performance_GpuSetting}">
                     <StackPanel Margin="{StaticResource GroupBoxInnerMargin}">
@@ -125,7 +126,7 @@
                             </Grid.ColumnDefinitions>
 
                             <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=OptionView_Performance_ImageCacheLimit_Label}" Style="{StaticResource SettingLabelTextBlockStyle}"/>
-                            <upr:SlidableNumberTextBox Grid.Column="1" Margin="0,0,5,0" Minimum="32" Maximum="{x:Static vm:OptionViewModel.MaxImageCacheLimit}" Value="{Binding ImageCacheLimit}" Digit="0" UnitText="MiB" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                            <upr:SlidableNumberTextBox Grid.Column="1" Margin="0,0,5,0" Minimum="{x:Static vm:OptionViewModel.MinImageCacheSize}" Maximum="{x:Static vm:OptionViewModel.MaxImageCacheLimit}" Value="{Binding ImageCacheLimit}" Digit="0" UnitText="MiB" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                             <TextBlock Grid.Column="2" Text="{Binding Source={x:Static vm:OptionViewModel.MaxImageCacheLimit}, Converter={StaticResource MaxCacheLimitSizeConverter}}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                         </Grid>
                         <Grid Margin="{StaticResource ItemMargin}">
@@ -136,8 +137,39 @@
                             </Grid.ColumnDefinitions>
 
                             <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=OptionView_Performance_RamPreviewCacheLimit_Label}" Style="{StaticResource SettingLabelTextBlockStyle}"/>
-                            <upr:SlidableNumberTextBox Grid.Column="1" Margin="0,0,5,0" Minimum="32" Maximum="{Binding MaxRamPreviewCacheLimit}" Value="{Binding RamPreviewCacheLimit}" Digit="0" UnitText="MiB" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                            <upr:SlidableNumberTextBox Grid.Column="1" Margin="0,0,5,0" Minimum="{x:Static vm:OptionViewModel.MinImageCacheSize}" Maximum="{Binding MaxRamPreviewCacheLimit}" Value="{Binding RamPreviewCacheLimit}" Digit="0" UnitText="MiB" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                             <TextBlock Grid.Column="2" Text="{Binding MaxRamPreviewCacheLimit, Converter={StaticResource MaxCacheLimitSizeConverter}}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                        </Grid>
+                    </StackPanel>
+                </GroupBox>
+            </StackPanel>
+        </ScrollViewer>
+
+        <ScrollViewer Grid.Row="0" Grid.Column="1" Style="{StaticResource SettingPanelStyle}" Visibility="{Binding ElementName=SettingType, Path=SelectedIndex, Converter={StaticResource SelectTypeConverter}, ConverterParameter=2}" d:Visibility="Collapsed">
+            <StackPanel>
+                <GroupBox>
+                    <GroupBox.Header>
+                        <CheckBox Content="{gm:LanguageResource ResourceKey=OptionView_AutoSave_UseAutoSave}" IsChecked="{Binding UseAutoSave}"/>
+                    </GroupBox.Header>
+                    <StackPanel Margin="{StaticResource GroupBoxInnerMargin}" Grid.IsSharedSizeScope="True" IsEnabled="{Binding UseAutoSave}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="SettingName"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=OptionView_AutoSave_Interval_Label}" Style="{StaticResource SettingLabelTextBlockStyle}"/>
+                            <upr:SlidableNumberTextBox Grid.Column="1" Margin="0,0,5,0" Minimum="{x:Static vm:OptionViewModel.MinAutoSaveInterval}" Maximum="{x:Static vm:OptionViewModel.MaxAutoSaveInterval}" Value="{Binding AutoSaveInterval}" Digit="0" UnitText="{gm:LanguageResource ResourceKey=Unit_Minute}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                        </Grid>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="SettingName"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=OptionView_AutoSave_Count_Labell}" Style="{StaticResource SettingLabelTextBlockStyle}"/>
+                            <upr:SlidableNumberTextBox Grid.Column="1" Margin="0,0,5,0" Minimum="{x:Static vm:OptionViewModel.MinAutoSaveCount}" Maximum="{x:Static vm:OptionViewModel.MaxAutoSaveCount}" Value="{Binding AutoSaveCount}" Digit="0" UnitText="{gm:LanguageResource ResourceKey=Unit_Pieces}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                         </Grid>
                     </StackPanel>
                 </GroupBox>

@@ -188,6 +188,11 @@ namespace NiVE3.Model
             return RedoCommands.Count > 0;
         }
 
+        public bool IsEmpty()
+        {
+            return UndoCommands.Count < 1 && RedoCommands.Count < 1;
+        }
+
         public void Clear()
         {
             foreach (var c in RedoCommands)
