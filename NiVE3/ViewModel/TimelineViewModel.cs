@@ -72,6 +72,8 @@ namespace NiVE3.ViewModel
     [CommandHandling(nameof(MoveIndicatorToPrevious10FrameCommand), nameof(ShortcutKeySetting.MoveIndicatorToPrevious10FrameGesture))]
     [CommandHandling(nameof(MoveIndicatorToCompositionBeginCommand), nameof(ShortcutKeySetting.MoveIndicatorToCompositionBeginGesture))]
     [CommandHandling(nameof(MoveIndicatorToCompositionEndCommand), nameof(ShortcutKeySetting.MoveIndicatorToCompositionEndGesture))]
+    [CommandHandling(nameof(MoveIndicatorToSelectLayerInPointCommand), nameof(ShortcutKeySetting.MoveIndicatorToSelectLayerInPointGesture))]
+    [CommandHandling(nameof(MoveIndicatorToSelectLayerOutPointCommand), nameof(ShortcutKeySetting.MoveIndicatorToSelectLayerOutPointGesture))]
     [CommandHandling(nameof(PlayRateChangeCommand), nameof(ShortcutKeySetting.ChangeLayerPlayRateGesture))]
     [CommandHandling(nameof(ChangeLayerFreezeFrameCommand), nameof(ShortcutKeySetting.ChangeLayerFreezeFrameGesture))]
     partial class TimelineViewModel : PaneViewModelBase, IDropTarget
@@ -515,6 +517,10 @@ namespace NiVE3.ViewModel
         public ICommand MoveIndicatorToCompositionBeginCommand { get; }
 
         public ICommand MoveIndicatorToCompositionEndCommand { get; }
+
+        public ICommand MoveIndicatorToSelectLayerInPointCommand { get; }
+
+        public ICommand MoveIndicatorToSelectLayerOutPointCommand { get; }
 
         public ICommand PlayRateChangeCommand { get; }
 
@@ -1074,6 +1080,34 @@ namespace NiVE3.ViewModel
                 CurrentTime = TimeCalc.AlignRound(Duration - FrameDuration, FrameRate);
                 CurrentTimeChangeByUserPublisher.Publish(this, EventArgs.Empty);
             }, () => CompositionModel != null).ObservesProperty(() => CompositionModel);
+
+            MoveIndicatorToSelectLayerInPointCommand = new DelegateCommand(() =>
+            {
+                if (SelectedLayers.Count < 1)
+                {
+                    return;
+                }
+
+                var targetLayer = SelectedLayers[0];
+                CurrentTime = TimeCalc.AlignRound(targetLayer.SourceStartPoint + targetLayer.InPoint, FrameRate);
+                CurrentTimeChangeByUserPublisher.Publish(this, EventArgs.Empty);
+            }, () => CompositionModel != null && SelectedLayers.Count > 0)
+                .ObservesProperty(() => CompositionModel)
+                .ObservesProperty(() => SelectedLayers.Count);
+
+            MoveIndicatorToSelectLayerOutPointCommand = new DelegateCommand(() =>
+            {
+                if (SelectedLayers.Count < 1)
+                {
+                    return;
+                }
+
+                var targetLayer = SelectedLayers[0];
+                CurrentTime = TimeCalc.AlignRound(targetLayer.SourceStartPoint + targetLayer.OutPoint - FrameDuration, FrameRate);
+                CurrentTimeChangeByUserPublisher.Publish(this, EventArgs.Empty);
+            }, () => CompositionModel != null && SelectedLayers.Count > 0)
+                .ObservesProperty(() => CompositionModel)
+                .ObservesProperty(() => SelectedLayers.Count);
 
             PlayRateChangeCommand = new DelegateCommand(() =>
             {

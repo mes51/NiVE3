@@ -1462,6 +1462,12 @@ namespace NiVE3.View.Resource
         [DefaultValue("再生速度を変更")]
         public static readonly string ShortcutKeyName_ChangeLayerPlayRateGesture = nameof(ShortcutKeyName_ChangeLayerPlayRateGesture);
 
+        [DefaultValue("インジケーターを選択レイヤーのアウトポイントに移動")]
+        public static readonly string ShortcutKeyName_MoveIndicatorToSelectLayerOutPointGesture = nameof(ShortcutKeyName_MoveIndicatorToSelectLayerOutPointGesture);
+
+        [DefaultValue("インジケーターを選択レイヤーのインポイントに移動")]
+        public static readonly string ShortcutKeyName_MoveIndicatorToSelectLayerInPointGesture = nameof(ShortcutKeyName_MoveIndicatorToSelectLayerInPointGesture);
+
         [DefaultValue("インジケーターをコンポジションの最後に移動")]
         public static readonly string ShortcutKeyName_MoveIndicatorToCompositionEndGesture = nameof(ShortcutKeyName_MoveIndicatorToCompositionEndGesture);
 

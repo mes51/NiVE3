@@ -382,6 +382,20 @@ namespace NiVE3.Config
             new PropertyMetadata(new SingleKeyGesture(Key.End))
         );
 
+        public static readonly DependencyProperty MoveIndicatorToSelectLayerInPointGestureProperty = DependencyProperty.Register(
+            nameof(MoveIndicatorToSelectLayerInPointGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new SingleKeyGesture(Key.I))
+        );
+
+        public static readonly DependencyProperty MoveIndicatorToSelectLayerOutPointGestureProperty = DependencyProperty.Register(
+            nameof(MoveIndicatorToSelectLayerOutPointGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new SingleKeyGesture(Key.O))
+        );
+
         public static readonly DependencyProperty ChangeLayerPlayRateGestureProperty = DependencyProperty.Register(
             nameof(ChangeLayerPlayRateGesture),
             typeof(InputGesture),
@@ -410,6 +424,22 @@ namespace NiVE3.Config
         {
             get { return (InputGesture)GetValue(ChangeLayerPlayRateGestureProperty); }
             set { SetValue(ChangeLayerPlayRateGestureProperty, value); }
+        }
+
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Composition)]
+        [ShowInMarkup]
+        public InputGesture MoveIndicatorToSelectLayerOutPointGesture
+        {
+            get { return (InputGesture)GetValue(MoveIndicatorToSelectLayerOutPointGestureProperty); }
+            set { SetValue(MoveIndicatorToSelectLayerOutPointGestureProperty, value); }
+        }
+
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Composition)]
+        [ShowInMarkup]
+        public InputGesture MoveIndicatorToSelectLayerInPointGesture
+        {
+            get { return (InputGesture)GetValue(MoveIndicatorToSelectLayerInPointGestureProperty); }
+            set { SetValue(MoveIndicatorToSelectLayerInPointGestureProperty, value); }
         }
 
         [ShortcutKeyCategory(ShortcutKeyCategoryType.Composition)]
