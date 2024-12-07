@@ -392,6 +392,12 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("時間(_T)")]
         public static readonly string Timeline_ContextMenu_Time = nameof(Timeline_ContextMenu_Time);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("インポイントを基準にインジケーターの位置にレイヤー時間を移動(_B)")]
+        public static readonly string Timeline_ContextMenu_MoveSourceStartPointToIndicatorBaseInPoint = nameof(Timeline_ContextMenu_MoveSourceStartPointToIndicatorBaseInPoint);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("アウトポイントを基準にインジケーターの位置にレイヤー時間を移動(_E)")]
+        public static readonly string Timeline_ContextMenu_MoveSourceStartPointToIndicatorBaseOutPoint = nameof(Timeline_ContextMenu_MoveSourceStartPointToIndicatorBaseOutPoint);
+
         [ShowInMarkup, LanguageKey, DefaultValue("インポイントをインジケーターの位置に移動(_I)")]
         public static readonly string Timeline_ContextMenu_MoveInPointToIndicator = nameof(Timeline_ContextMenu_MoveInPointToIndicator);
 
@@ -1473,6 +1479,12 @@ namespace NiVE3.View.Resource
 
         [DefaultValue("インジケーターの位置にインポイントを移動")]
         public static readonly string ShortcutKeyName_MoveInPointToIndicatorGesture = nameof(ShortcutKeyName_MoveInPointToIndicatorGesture);
+
+        [DefaultValue("アウトポイントを基準にインジケーターの位置にレイヤー時間を移動")]
+        public static readonly string ShortcutKeyName_MoveSourceStartPointToIndicatorBaseOutPointGesture = nameof(ShortcutKeyName_MoveSourceStartPointToIndicatorBaseOutPointGesture);
+
+        [DefaultValue("インポイントを基準にインジケーターの位置にレイヤー時間を移動")]
+        public static readonly string ShortcutKeyName_MoveSourceStartPointToIndicatorBaseInPointGesture = nameof(ShortcutKeyName_MoveSourceStartPointToIndicatorBaseInPointGesture);
 
         [DefaultValue("レイヤーのタグをランダムに変更")]
         public static readonly string ShortcutKeyName_ChangeLayerTagsRandomlyGesture = nameof(ShortcutKeyName_ChangeLayerTagsRandomlyGesture);

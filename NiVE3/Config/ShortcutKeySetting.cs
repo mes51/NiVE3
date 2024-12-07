@@ -288,11 +288,25 @@ namespace NiVE3.Config
             nameof(MoveInPointToIndicatorGesture),
             typeof(InputGesture),
             typeof(ShortcutKeySetting),
-            new PropertyMetadata(new SingleKeyGesture(Key.OemOpenBrackets))
+            new PropertyMetadata(new KeyGesture(Key.OemOpenBrackets,  ModifierKeys.Alt))
         );
 
         public static readonly DependencyProperty MoveOutPointToIndicatorGestureProperty = DependencyProperty.Register(
             nameof(MoveOutPointToIndicatorGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new KeyGesture(Key.OemCloseBrackets, ModifierKeys.Alt))
+        );
+
+        public static readonly DependencyProperty MoveSourceStartPointToIndicatorBaseInPointGestureProperty = DependencyProperty.Register(
+            nameof(MoveSourceStartPointToIndicatorBaseInPointGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new SingleKeyGesture(Key.OemOpenBrackets))
+        );
+
+        public static readonly DependencyProperty MoveSourceStartPointToIndicatorBaseOutPointGestureProperty = DependencyProperty.Register(
+            nameof(MoveSourceStartPointToIndicatorBaseOutPointGesture),
             typeof(InputGesture),
             typeof(ShortcutKeySetting),
             new PropertyMetadata(new SingleKeyGesture(Key.OemCloseBrackets))
@@ -476,6 +490,22 @@ namespace NiVE3.Config
         {
             get { return (InputGesture)GetValue(ShiftSourceStartPointToNextFrameGestureProperty); }
             set { SetValue(ShiftSourceStartPointToNextFrameGestureProperty, value); }
+        }
+
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Edit)]
+        [ShowInMarkup]
+        public InputGesture MoveSourceStartPointToIndicatorBaseOutPointGesture
+        {
+            get { return (InputGesture)GetValue(MoveSourceStartPointToIndicatorBaseOutPointGestureProperty); }
+            set { SetValue(MoveSourceStartPointToIndicatorBaseOutPointGestureProperty, value); }
+        }
+
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Edit)]
+        [ShowInMarkup]
+        public InputGesture MoveSourceStartPointToIndicatorBaseInPointGesture
+        {
+            get { return (InputGesture)GetValue(MoveSourceStartPointToIndicatorBaseInPointGestureProperty); }
+            set { SetValue(MoveSourceStartPointToIndicatorBaseInPointGestureProperty, value); }
         }
 
         [ShortcutKeyCategory(ShortcutKeyCategoryType.Edit)]

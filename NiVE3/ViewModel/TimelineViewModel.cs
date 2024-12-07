@@ -58,6 +58,8 @@ namespace NiVE3.ViewModel
     [CommandHandling(nameof(AddTextCommand), nameof(ShortcutKeySetting.AddTextLayerGesture))]
     [CommandHandling(nameof(CompositionSettingCommand), nameof(ShortcutKeySetting.OpenCompositionSettingGesture))]
     [CommandHandling(nameof(ChangeLayerTagsRandomlyCommand), nameof(ShortcutKeySetting.ChangeLayerTagsRandomlyGesture))]
+    [CommandHandling(nameof(MoveSourceStartPointToIndicatorBaseInPointCommand), nameof(ShortcutKeySetting.MoveSourceStartPointToIndicatorBaseInPointGesture))]
+    [CommandHandling(nameof(MoveSourceStartPointToIndicatorBaseOutPointCommand), nameof(ShortcutKeySetting.MoveSourceStartPointToIndicatorBaseOutPointGesture))]
     [CommandHandling(nameof(MoveInPointToIndicatorCommand), nameof(ShortcutKeySetting.MoveInPointToIndicatorGesture))]
     [CommandHandling(nameof(MoveOutPointToIndicatorCommand), nameof(ShortcutKeySetting.MoveOutPointToIndicatorGesture))]
     [CommandHandling(nameof(ShiftSourceStartPointToNextFrameCommand), nameof(ShortcutKeySetting.ShiftSourceStartPointToNextFrameGesture))]
@@ -486,6 +488,10 @@ namespace NiVE3.ViewModel
 
         public ICommand MoveOutPointToIndicatorCommand { get; }
 
+        public ICommand MoveSourceStartPointToIndicatorBaseInPointCommand { get; }
+
+        public ICommand MoveSourceStartPointToIndicatorBaseOutPointCommand { get; }
+
         public ICommand ShiftSourceStartPointToNextFrameCommand { get; }
 
         public ICommand ShiftSourceStartPointToPreviousFrameCommand { get; }
@@ -856,12 +862,36 @@ namespace NiVE3.ViewModel
                     return;
                 }
 
-                CompositionModel.MoveLayerSourceStartPointToInPoint([..SelectedLayers.Select(l => l.LayerId)], CurrentTime);
+                CompositionModel.MoveLayerInPoint([.. SelectedLayers.Select(l => l.LayerId)], CurrentTime);
             }, () => CompositionModel != null && SelectedLayers.Count > 0)
                 .ObservesProperty(() => CompositionModel)
                 .ObservesProperty(() => SelectedLayers.Count);
 
             MoveOutPointToIndicatorCommand = new DelegateCommand(() =>
+            {
+                if (CompositionModel == null || SelectedLayers.Count < 1)
+                {
+                    return;
+                }
+
+                CompositionModel.MoveLayerOutPoint([.. SelectedLayers.Select(l => l.LayerId)], CurrentTime);
+            }, () => CompositionModel != null && SelectedLayers.Count > 0)
+                .ObservesProperty(() => CompositionModel)
+                .ObservesProperty(() => SelectedLayers.Count);
+
+            MoveSourceStartPointToIndicatorBaseInPointCommand = new DelegateCommand(() =>
+            {
+                if (CompositionModel == null || SelectedLayers.Count < 1)
+                {
+                    return;
+                }
+
+                CompositionModel.MoveLayerSourceStartPointToInPoint([..SelectedLayers.Select(l => l.LayerId)], CurrentTime);
+            }, () => CompositionModel != null && SelectedLayers.Count > 0)
+                .ObservesProperty(() => CompositionModel)
+                .ObservesProperty(() => SelectedLayers.Count);
+
+            MoveSourceStartPointToIndicatorBaseOutPointCommand = new DelegateCommand(() =>
             {
                 if (CompositionModel == null || SelectedLayers.Count < 1)
                 {

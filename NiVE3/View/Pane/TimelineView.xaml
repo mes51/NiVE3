@@ -114,6 +114,8 @@
                         <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_Delete}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=DeleteItemGesture}"/>
                         <Separator />
                         <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_Time}">
+                            <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_MoveSourceStartPointToIndicatorBaseInPoint}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=MoveSourceStartPointToIndicatorBaseInPointGesture}"/>
+                            <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_MoveSourceStartPointToIndicatorBaseOutPoint}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=MoveSourceStartPointToIndicatorBaseOutPointGesture}"/>
                             <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_MoveInPointToIndicator}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=MoveInPointToIndicatorGesture}"/>
                             <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_MoveOutPointToIndicator}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=MoveOutPointToIndicatorGesture}"/>
                             <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_ShiftSourceStartPointToNextFrame}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=ShiftSourceStartPointToNextFrameGesture}"/>

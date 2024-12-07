@@ -1283,6 +1283,64 @@ namespace NiVE3.Model
             HistoryModel.EndGroup();
         }
 
+        public void MoveLayerInPoint(Guid[] layerIds, double targetTime)
+        {
+            if (layerIds.Length < 1)
+            {
+                return;
+            }
+
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_EditLayerDuration));
+
+            foreach (var layer in Layers.Where(l => layerIds.Contains(l.LayerId)))
+            {
+                var newInPoint = TimeCalc.AlignRound(targetTime - layer.SourceStartPoint, FrameRate);
+                if (layer.IsImage)
+                {
+                    newInPoint = Math.Min(newInPoint, layer.OutPoint - FrameDuration);
+                }
+                else
+                {
+                    newInPoint = Math.Min(Math.Max(newInPoint, 0.0), layer.OutPoint - FrameDuration);
+                }
+                if (layer.InPoint != newInPoint)
+                {
+                    layer.CommitEditDuration(layer.InPoint, newInPoint, layer.OutPoint, layer.OutPoint, layer.SourceStartPoint, layer.SourceStartPoint);
+                }
+            }
+
+            HistoryModel.EndGroup();
+        }
+
+        public void MoveLayerOutPoint(Guid[] layerIds, double targetTime)
+        {
+            if (layerIds.Length < 1)
+            {
+                return;
+            }
+
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_EditLayerDuration));
+
+            foreach (var layer in Layers.Where(l => layerIds.Contains(l.LayerId)))
+            {
+                var newOutPoint = TimeCalc.AlignRound(targetTime - layer.SourceStartPoint + FrameDuration, FrameRate);
+                if (layer.IsImage)
+                {
+                    newOutPoint = Math.Max(newOutPoint, layer.InPoint + FrameDuration);
+                }
+                else
+                {
+                    newOutPoint = Math.Max(Math.Min(newOutPoint, layer.Duration), layer.InPoint + FrameDuration);
+                }
+                if (layer.OutPoint != newOutPoint)
+                {
+                    layer.CommitEditDuration(layer.InPoint, layer.InPoint, layer.OutPoint, newOutPoint, layer.SourceStartPoint, layer.SourceStartPoint);
+                }
+            }
+
+            HistoryModel.EndGroup();
+        }
+
         public void MoveLayerSourceStartPointToInPoint(Guid[] layerIds, double targetTime)
         {
             if (layerIds.Length < 1)
