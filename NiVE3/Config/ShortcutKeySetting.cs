@@ -344,28 +344,28 @@ namespace NiVE3.Config
             nameof(MoveIndicatorToNextFrameGesture),
             typeof(InputGesture),
             typeof(ShortcutKeySetting),
-            new PropertyMetadata(new KeyGesture(Key.Right, ModifierKeys.Control))
+            new PropertyMetadata(new KeyGesture(Key.Right, ModifierKeys.Alt))
         );
 
         public static readonly DependencyProperty MoveIndicatorToPreviousFrameGestureProperty = DependencyProperty.Register(
             nameof(MoveIndicatorToPreviousFrameGesture),
             typeof(InputGesture),
             typeof(ShortcutKeySetting),
-            new PropertyMetadata(new KeyGesture(Key.Left, ModifierKeys.Control))
+            new PropertyMetadata(new KeyGesture(Key.Left, ModifierKeys.Alt))
         );
 
         public static readonly DependencyProperty MoveIndicatorToNext10FrameGestureProperty = DependencyProperty.Register(
             nameof(MoveIndicatorToNext10FrameGesture),
             typeof(InputGesture),
             typeof(ShortcutKeySetting),
-            new PropertyMetadata(new KeyGesture(Key.Right, ModifierKeys.Shift | ModifierKeys.Control))
+            new PropertyMetadata(new KeyGesture(Key.Right, ModifierKeys.Shift | ModifierKeys.Alt))
         );
 
         public static readonly DependencyProperty MoveIndicatorToPrevious10FrameGestureProperty = DependencyProperty.Register(
             nameof(MoveIndicatorToPrevious10FrameGesture),
             typeof(InputGesture),
             typeof(ShortcutKeySetting),
-            new PropertyMetadata(new KeyGesture(Key.Left, ModifierKeys.Shift | ModifierKeys.Control))
+            new PropertyMetadata(new KeyGesture(Key.Left, ModifierKeys.Shift | ModifierKeys.Alt))
         );
 
         public static readonly DependencyProperty MoveIndicatorToCompositionBeginGestureProperty = DependencyProperty.Register(
