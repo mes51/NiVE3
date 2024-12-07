@@ -105,6 +105,18 @@ namespace NiVE3.View.Part
             InitializeComponent();
         }
 
+        private void Root_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (e.OldValue is LayerViewModel oldViewModel)
+            {
+                oldViewModel.FocusRequest -= ViewModel_FocusRequest;
+            }
+            if (e.NewValue is LayerViewModel newViewModel)
+            {
+                newViewModel.FocusRequest += ViewModel_FocusRequest;
+            }
+        }
+
         private void Root_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ChangedButton != MouseButton.Left && e.ChangedButton != MouseButton.Right)
@@ -151,6 +163,11 @@ namespace NiVE3.View.Part
         private void ParentLayerSelectBox_SelectItemChangedByUser(object sender, RoutedEventArgs e)
         {
             ViewModel?.ChangeParentLayerCommand?.Execute(ParentLayerSelectBox.SelectedItem);
+        }
+
+        private void ViewModel_FocusRequest(object? sender, EventArgs e)
+        {
+            Focus();
         }
     }
 }

@@ -26,6 +26,7 @@
              x:Name="Root"
              Focusable="True"
              FocusVisualStyle="{x:Null}"
+             DataContextChanged="Root_DataContextChanged"
              MouseDown="Root_MouseDown"
              pr:StackableItemsCollectionView.IsItemLocked="{Binding IsLock}"
              dd:DragDrop.DragSourceIgnore="True"

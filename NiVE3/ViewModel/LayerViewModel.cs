@@ -667,6 +667,13 @@ namespace NiVE3.ViewModel
             remove { PropertyValueCommitedPublisher.Unsubscribe(value); }
         }
 
+        WeakEventPublisher<EventArgs> FocusRequestPublisher { get; } = new WeakEventPublisher<EventArgs>();
+        public event EventHandler<EventArgs> FocusRequest
+        {
+            add { FocusRequestPublisher.Subscribe(value); }
+            remove { FocusRequestPublisher.Unsubscribe(value); }
+        }
+
         LayerModel LayerModel { get; }
 
         ViewStateModel ViewState { get; }
@@ -889,6 +896,7 @@ namespace NiVE3.ViewModel
                     ClipboardUtil.SetData(copyData);
                 }
                 SelectedEffects.Clear();
+                FocusRequestPublisher.Publish(this, EventArgs.Empty);
             }, () => EditingParameter == EditingLayerParameter.None && SelectedEffects.Count > 0)
                 .ObservesProperty(() => EditingParameter)
                 .ObservesProperty(() => SelectedEffects.Count);
@@ -938,6 +946,7 @@ namespace NiVE3.ViewModel
                     LayerModel.DeleteEffect([.. SelectedEffects.Select(e => e.EffectId)]);
                 }
                 SelectedEffects.Clear();
+                FocusRequestPublisher.Publish(this, EventArgs.Empty);
             }, () => EditingParameter == EditingLayerParameter.None && SelectedEffects.Count > 0)
                 .ObservesProperty(() => EditingParameter)
                 .ObservesProperty(() => SelectedEffects.Count);

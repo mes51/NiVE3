@@ -521,6 +521,13 @@ namespace NiVE3.ViewModel
             remove { CurrentTimeChangeByUserPublisher.Unsubscribe(value); }
         }
 
+        WeakEventPublisher<EventArgs> FocusRequestPublisher { get; } = new WeakEventPublisher<EventArgs>();
+        public event EventHandler<EventArgs> FocusRequest
+        {
+            add { FocusRequestPublisher.Subscribe(value); }
+            remove { FocusRequestPublisher.Unsubscribe(value); }
+        }
+
         private IViewModelShortcutCommand? selectedTarget;
         public IViewModelShortcutCommand? SelectedTarget
         {
@@ -652,6 +659,7 @@ namespace NiVE3.ViewModel
                         var ids = SelectedLayers.Select(l => l.LayerId).ToArray();
                         CompositionModel?.DeleteLayers(ids);
                         SelectedLayers.Clear();
+                        FocusRequestPublisher.Publish(this, EventArgs.Empty);
                     }
                 }
             }, () => CompositionModel != null && SelectedItemType != SelectItemType.None)
@@ -675,6 +683,7 @@ namespace NiVE3.ViewModel
                     var copyData = CompositionModel.CutLayers(ids);
                     ClipboardUtil.SetData(copyData);
                     SelectedLayers.Clear();
+                    FocusRequestPublisher.Publish(this, EventArgs.Empty);
                 }
             }, () => CompositionModel != null && SelectedItemType != SelectItemType.None)
                 .ObservesProperty(() => CompositionModel)

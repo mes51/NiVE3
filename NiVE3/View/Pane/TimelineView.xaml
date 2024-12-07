@@ -19,6 +19,7 @@
              xmlns:cgm="clr-namespace:NiVE3.Config.Wpf.GeneratedMarkup"
              mc:Ignorable="d" 
              x:Name="Root"
+             DataContextChanged="Root_DataContextChanged"
              PreviewMouseWheel="Root_PreviewMouseWheel"
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>

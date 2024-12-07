@@ -34,6 +34,18 @@ namespace NiVE3.View.Pane
             ViewModel?.ChangeCurrentTimeCommand?.Execute(null);
         }
 
+        private void Root_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (e.OldValue is TimelineViewModel oldViewModel)
+            {
+                oldViewModel.FocusRequest -= ViewModel_FocusRequest;
+            }
+            if (e.NewValue is TimelineViewModel newViewModel)
+            {
+                newViewModel.FocusRequest += ViewModel_FocusRequest;
+            }
+        }
+
         private void Root_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
             var viewModel = ViewModel;
@@ -80,6 +92,11 @@ namespace NiVE3.View.Pane
 
             var dir = Math.Sign(e.Delta);
             viewModel.TimeBarRangeStart = Math.Clamp(viewModel.TimeBarRangeStart + viewModel.TimeBarRange * 0.05 * dir, 0.0, viewModel.Duration - viewModel.TimeBarRange);
+        }
+
+        private void ViewModel_FocusRequest(object? sender, EventArgs e)
+        {
+            Focus();
         }
     }
 }
