@@ -140,14 +140,18 @@ namespace NiVE3.Model.UI
             remove { StopRenderRamPreviewPublisher.Unsubscribe(value); }
         }
 
+        ViewStateModel ViewState { get; }
+
         RingBuffer<TimeSpan> FrameRenderingTimes { get; } = new RingBuffer<TimeSpan>(RealFrameRateAvgCount);
 
         MultiMediaTimer Timer { get; }
 
         long? LastUpdateCurrentTime { get; set; }
 
-        public PlayControllerModel(HistoryModel historyModel)
+        public PlayControllerModel(HistoryModel historyModel, ViewStateModel viewState)
         {
+            ViewState = viewState;
+
             Timer = new MultiMediaTimer();
             Timer.Tick += Timer_Tick;
 
@@ -294,6 +298,10 @@ namespace NiVE3.Model.UI
             if (e.PropertyName == nameof(UseRamPreview))
             {
                 Stop();
+            }
+            else if (e.PropertyName == nameof(IsPlaying))
+            {
+                ViewState.IsPreviewPlaying = IsPlaying;
             }
         }
 

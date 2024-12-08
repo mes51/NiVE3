@@ -160,5 +160,12 @@ namespace NiVE3.Model.UI
             get { return isIgnoreUpdatePreview; }
             set { SetProperty(ref isIgnoreUpdatePreview, value); }
         }
+
+        private bool isPreviewPlaying;
+        public bool IsPreviewPlaying
+        {
+            get { return isPreviewPlaying; }
+            set { SetProperty(ref isPreviewPlaying, value); }
+        }
     }
 }

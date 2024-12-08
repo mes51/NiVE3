@@ -115,6 +115,14 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref expressionErrorSourceLocation, value); }
         }
 
+        private bool isPreviewPlaying;
+        [NeedWire(nameof(ApplicationViewState), IsOneWay = true)]
+        public bool IsPreviewPlaying
+        {
+            get { return isPreviewPlaying; }
+            set { SetProperty(ref isPreviewPlaying, value); }
+        }
+
         private bool hasExpressionError;
         public bool HasExpressionError
         {
@@ -614,15 +622,18 @@ namespace NiVE3.ViewModel
                 case nameof(CurrentTimeRawValue):
                 case nameof(CurrentTime):
                 case nameof(SourceStartPoint):
-                    CurrentTimeRawValue = CalculationRawValue();
-                    if (!ApplicationViewState.IsIgnoreUpdatePreview)
+                    if (!IsPreviewPlaying)
                     {
-                        CurrentTimeValue = CalculationValue();
-                    }
-                    else if (!IsSubscribedApplicationViewStatePropertyChanged)
-                    {
-                        ApplicationViewState.PropertyChanged += ApplicationViewState_PropertyChanged;
-                        IsSubscribedApplicationViewStatePropertyChanged = true;
+                        CurrentTimeRawValue = CalculationRawValue();
+                        if (!ApplicationViewState.IsIgnoreUpdatePreview)
+                        {
+                            CurrentTimeValue = CalculationValue();
+                        }
+                        else if (!IsSubscribedApplicationViewStatePropertyChanged)
+                        {
+                            ApplicationViewState.PropertyChanged += ApplicationViewState_PropertyChanged;
+                            IsSubscribedApplicationViewStatePropertyChanged = true;
+                        }
                     }
                     break;
                 case nameof(UseExpression):
@@ -632,6 +643,10 @@ namespace NiVE3.ViewModel
                 case nameof(ExpressionErrorMessage):
                     IsEnableExpression = PropertyModel.IsEnableExpression;
                     HasExpressionError = PropertyModel.HasExpressionError;
+                    break;
+                case nameof(IsPreviewPlaying) when !IsPreviewPlaying:
+                    CurrentTimeRawValue = CalculationRawValue();
+                    CurrentTimeValue = CalculationValue();
                     break;
             }
         }
