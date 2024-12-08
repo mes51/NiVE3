@@ -1456,6 +1456,12 @@ namespace NiVE3.View.Resource
 
         // ShortcutKeyNames
 
+        [DefaultValue("ワークエリアの終了をインジケーターの位置に移動")]
+        public static readonly string ShortcutKeyName_MoveWorkareaEndToIndicatorGesture = nameof(ShortcutKeyName_MoveWorkareaEndToIndicatorGesture);
+
+        [DefaultValue("ワークエリアの開始をインジケーターの位置に移動")]
+        public static readonly string ShortcutKeyName_MoveWorkareaBeginToIndicatorGesture = nameof(ShortcutKeyName_MoveWorkareaBeginToIndicatorGesture);
+
         [DefaultValue("レイヤーの表示フレームを現在時刻で固定")]
         public static readonly string ShortcutKeyName_ChangeLayerFreezeFrameGesture = nameof(ShortcutKeyName_ChangeLayerFreezeFrameGesture);
 

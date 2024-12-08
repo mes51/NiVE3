@@ -410,6 +410,36 @@ namespace NiVE3.Config
             new PropertyMetadata(new KeyGesture(Key.None))
         );
 
+        public static readonly DependencyProperty MoveWorkareaBeginToIndicatorGestureProperty = DependencyProperty.Register(
+            nameof(MoveWorkareaBeginToIndicatorGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new SingleKeyGesture(Key.B))
+        );
+
+        public static readonly DependencyProperty MoveWorkareaEndToIndicatorGestureProperty = DependencyProperty.Register(
+            nameof(MoveWorkareaEndToIndicatorGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new SingleKeyGesture(Key.N))
+        );
+
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Edit)]
+        [ShowInMarkup]
+        public InputGesture MoveWorkareaEndToIndicatorGesture
+        {
+            get { return (InputGesture)GetValue(MoveWorkareaEndToIndicatorGestureProperty); }
+            set { SetValue(MoveWorkareaEndToIndicatorGestureProperty, value); }
+        }
+
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Edit)]
+        [ShowInMarkup]
+        public InputGesture MoveWorkareaBeginToIndicatorGesture
+        {
+            get { return (InputGesture)GetValue(MoveWorkareaBeginToIndicatorGestureProperty); }
+            set { SetValue(MoveWorkareaBeginToIndicatorGestureProperty, value); }
+        }
+
         [ShortcutKeyCategory(ShortcutKeyCategoryType.Edit)]
         [ShowInMarkup]
         public InputGesture ChangeLayerFreezeFrameGesture

@@ -76,6 +76,8 @@ namespace NiVE3.ViewModel
     [CommandHandling(nameof(MoveIndicatorToSelectLayerOutPointCommand), nameof(ShortcutKeySetting.MoveIndicatorToSelectLayerOutPointGesture))]
     [CommandHandling(nameof(PlayRateChangeCommand), nameof(ShortcutKeySetting.ChangeLayerPlayRateGesture))]
     [CommandHandling(nameof(ChangeLayerFreezeFrameCommand), nameof(ShortcutKeySetting.ChangeLayerFreezeFrameGesture))]
+    [CommandHandling(nameof(MoveWorkareaBeginToIndicatorCommand), nameof(ShortcutKeySetting.MoveWorkareaBeginToIndicatorGesture))]
+    [CommandHandling(nameof(MoveWorkareaEndToIndicatorCommand), nameof(ShortcutKeySetting.MoveWorkareaEndToIndicatorGesture))]
     partial class TimelineViewModel : PaneViewModelBase, IDropTarget
     {
         private Guid compositionId;
@@ -525,6 +527,10 @@ namespace NiVE3.ViewModel
         public ICommand PlayRateChangeCommand { get; }
 
         public ICommand ChangeLayerFreezeFrameCommand { get; }
+
+        public ICommand MoveWorkareaBeginToIndicatorCommand { get; }
+
+        public ICommand MoveWorkareaEndToIndicatorCommand { get; }
 
         WeakEventPublisher<EventArgs> CurrentTimeChangeByUserPublisher { get; } = new WeakEventPublisher<EventArgs>();
         public event EventHandler<EventArgs> CurrentTimeChangeByUser
@@ -1149,6 +1155,16 @@ namespace NiVE3.ViewModel
             }, () => CompositionModel != null && SelectedLayers.Count > 0 && SelectedLayers.All(l => l.HasDuration))
                 .ObservesProperty(() => CompositionModel)
                 .ObservesProperty(() => SelectedLayers);
+
+            MoveWorkareaBeginToIndicatorCommand = new DelegateCommand(() =>
+            {
+                CompositionModel?.ChangeWorkarea(MathUtil.MaxAndMin(CurrentTime, 0.0, TimeCalc.AlignRound(WorkareaEnd - FrameDuration, FrameRate)), WorkareaEnd);
+            }, () => CompositionModel != null).ObservesProperty(() => CompositionModel);
+
+            MoveWorkareaEndToIndicatorCommand = new DelegateCommand(() =>
+            {
+                CompositionModel?.ChangeWorkarea(WorkareaBegin, MathUtil.MaxAndMin(CurrentTime, TimeCalc.AlignRound(WorkareaBegin + FrameDuration, FrameRate), Duration));
+            }, () => CompositionModel != null).ObservesProperty(() => CompositionModel);
 
             AudioPlayerModel = audioPlayerModel;
         }

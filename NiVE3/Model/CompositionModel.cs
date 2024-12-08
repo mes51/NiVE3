@@ -775,13 +775,15 @@ namespace NiVE3.Model
                 (begin, end) = (end, begin);
             }
 
-            if (prevWorkareaBegin == begin && prevWorkareaEnd == end)
+            var newWorkareaBegin = Math.Clamp(begin, 0.0, Duration - FrameDuration);
+            var newWorkareaEnd = Math.Clamp(end, WorkareaBegin + FrameDuration, Duration);
+            if (prevWorkareaBegin == newWorkareaBegin && prevWorkareaEnd == newWorkareaEnd)
             {
                 return;
             }
 
-            WorkareaBegin = Math.Clamp(begin, 0.0, Duration - FrameDuration);
-            WorkareaEnd = Math.Clamp(end, WorkareaBegin + FrameDuration, Duration);
+            WorkareaBegin = newWorkareaBegin;
+            WorkareaEnd = newWorkareaEnd;
 
             HistoryModel.Add(new ChangeWorkareaHistoryCommand(this, prevWorkareaBegin, prevWorkareaEnd, WorkareaBegin, WorkareaEnd));
         }
