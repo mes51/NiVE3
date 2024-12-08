@@ -192,6 +192,7 @@ namespace NiVE3.Plugin.Property
         internal void CalcHash(XxHash3 hash)
         {
             hash.Append(IsEnable.ConvertToSpan());
+            // NOTE: AppendableProperty以外は順番に依存しない想定だが、他でもハッシュの計算で順番依存の問題に引っかかったらソートを外す
             foreach (var (key, value) in Values.OrderBy(kv => kv.Key))
             {
                 var pt = PropertyTypes[key];
@@ -206,7 +207,7 @@ namespace NiVE3.Plugin.Property
                     case AppendablePropertyType:
                         if (value is PropertyValueGroup[] children)
                         {
-                            foreach (var child in children.OrderBy(c => c.PropertyGroupId))
+                            foreach (var child in children)
                             {
                                 child.CalcHash(hash);
                             }
