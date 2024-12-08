@@ -15,6 +15,7 @@ using NiVE3.View.Resource;
 using System.IO.Hashing;
 using NiVE3.Extension;
 using System.ComponentModel;
+using System.Collections.Specialized;
 
 namespace NiVE3.Model
 {
@@ -32,7 +33,14 @@ namespace NiVE3.Model
         public ObservableCollection<IPropertyModel> Children
         {
             get { return children; }
-            set { SetProperty(ref children, value); }
+            set
+            {
+                children.CollectionChanged -= Children_CollectionChanged;
+
+                SetProperty(ref children, value);
+
+                value.CollectionChanged += Children_CollectionChanged;
+            }
         }
 
         public PropertyBase Property { get; }
@@ -88,6 +96,8 @@ namespace NiVE3.Model
 
             // NOTE: 本来はモデル側から設定してもらうものだが、引き回しの経路が複雑になりすぎる(レイヤーからだったり、エフェクトやマスクだったり)ため、自分から取りに行く
             layerModel.PropertyChanged += LayerModel_PropertyChanged;
+
+            Children = [];
         }
 
         public PropertyControlBase CreateControl(IPropertyViewModel viewModel)
@@ -475,6 +485,11 @@ namespace NiVE3.Model
         private void Child_ValueCommited(object? sender, EventArgs e)
         {
             ValueCommited?.Invoke(sender, e);
+        }
+
+        private void Children_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            ValueCommited?.Invoke(this, EventArgs.Empty);
         }
 
         private void LayerModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
