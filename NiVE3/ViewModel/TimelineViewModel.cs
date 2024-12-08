@@ -1071,12 +1071,14 @@ namespace NiVE3.ViewModel
 
             MoveIndicatorToCompositionBeginCommand = new DelegateCommand(() =>
             {
+                TimeBarRangeStart = 0.0;
                 CurrentTime = 0.0;
                 CurrentTimeChangeByUserPublisher.Publish(this, EventArgs.Empty);
             }, () => CompositionModel != null).ObservesProperty(() => CompositionModel);
 
             MoveIndicatorToCompositionEndCommand = new DelegateCommand(() =>
             {
+                TimeBarRangeStart = Duration - TimeBarRange;
                 CurrentTime = TimeCalc.AlignRound(Duration - FrameDuration, FrameRate);
                 CurrentTimeChangeByUserPublisher.Publish(this, EventArgs.Empty);
             }, () => CompositionModel != null).ObservesProperty(() => CompositionModel);
@@ -1090,6 +1092,7 @@ namespace NiVE3.ViewModel
 
                 var targetLayer = SelectedLayers[0];
                 CurrentTime = TimeCalc.AlignRound(targetLayer.SourceStartPoint + targetLayer.InPoint, FrameRate);
+                TimeBarRangeStart = MathUtil.MaxAndMin(CurrentTime - TimeBarRange * 0.5, 0.0, Duration - TimeBarRange);
                 CurrentTimeChangeByUserPublisher.Publish(this, EventArgs.Empty);
             }, () => CompositionModel != null && SelectedLayers.Count > 0)
                 .ObservesProperty(() => CompositionModel)
@@ -1104,6 +1107,7 @@ namespace NiVE3.ViewModel
 
                 var targetLayer = SelectedLayers[0];
                 CurrentTime = TimeCalc.AlignRound(targetLayer.SourceStartPoint + targetLayer.OutPoint - FrameDuration, FrameRate);
+                TimeBarRangeStart = MathUtil.MaxAndMin(CurrentTime - TimeBarRange * 0.5, 0.0, Duration - TimeBarRange);
                 CurrentTimeChangeByUserPublisher.Publish(this, EventArgs.Empty);
             }, () => CompositionModel != null && SelectedLayers.Count > 0)
                 .ObservesProperty(() => CompositionModel)
