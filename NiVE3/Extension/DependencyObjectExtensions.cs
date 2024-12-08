@@ -80,5 +80,37 @@ namespace NiVE3.Extension
 
             return null;
         }
+
+        public static bool IsLogicalParent(this DependencyObject self, DependencyObject targetParent)
+        {
+            var parent = LogicalTreeHelper.GetParent(self);
+            while (parent != null)
+            {
+                if (parent == targetParent)
+                {
+                    return true;
+                }
+
+                parent = LogicalTreeHelper.GetParent(parent);
+            }
+
+            return false;
+        }
+
+        public static bool IsVisualParent(this DependencyObject self, DependencyObject targetParent)
+        {
+            var parent = VisualTreeHelper.GetParent(self);
+            while (parent != null)
+            {
+                if (parent == targetParent)
+                {
+                    return true;
+                }
+
+                parent = VisualTreeHelper.GetParent(parent);
+            }
+
+            return false;
+        }
     }
 }

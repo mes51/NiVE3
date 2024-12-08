@@ -105,6 +105,16 @@ namespace NiVE3.View.Part
             InitializeComponent();
         }
 
+        private void DurationBar_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Left && e.ClickCount == 2)
+            {
+                ViewModel?.ShowFootagePreviewCommand?.Execute(null);
+                e.Handled = true;
+                return;
+            }
+        }
+
         private void Root_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             if (e.OldValue is LayerViewModel oldViewModel)
@@ -123,16 +133,17 @@ namespace NiVE3.View.Part
             {
                 return;
             }
+            if (e.ChangedButton == MouseButton.Left && e.ClickCount == 2 && e.OriginalSource is DependencyObject element && element.IsVisualParent(LayerNameTextBlock))
+            {
+                ViewModel?.ShowFootagePreviewCommand?.Execute(null);
+                e.Handled = true;
+                return;
+            }
 
             Focus();
             ParentCollection?.SelectItem(this, Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift), Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl));
             ViewModel?.SelectItemCommand?.Execute(null);
             e.Handled = true;
-        }
-
-        private void Root_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-        {
-            ViewModel?.ShowFootagePreviewCommand?.Execute(null);
         }
 
         private void LayerCommentGrid_PreviewMouseDown(object sender, MouseButtonEventArgs e)
