@@ -169,9 +169,9 @@ namespace NiVE3.PresetPlugin.Property
             {
                 return toneCurvePoint;
             }
-            else if (value is IDictionary<string, object> dictionary && dictionary.TryGetValue(nameof(InValue), out float inValue) && dictionary.TryGetValue(nameof(OutValue), out float outValue))
+            else if (value is IDictionary<string, object> dictionary && dictionary.TryGetValue(nameof(InValue), out var inValue) && dictionary.TryGetValue(nameof(OutValue), out var outValue))
             {
-                return new ToneCurvePoint(inValue, inValue);
+                return new ToneCurvePoint(Convert.ToSingle(inValue), Convert.ToSingle(outValue));
             }
             else
             {
