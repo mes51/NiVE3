@@ -78,6 +78,7 @@ namespace NiVE3.ViewModel
     [CommandHandling(nameof(ChangeLayerFreezeFrameCommand), nameof(ShortcutKeySetting.ChangeLayerFreezeFrameGesture))]
     [CommandHandling(nameof(MoveWorkareaBeginToIndicatorCommand), nameof(ShortcutKeySetting.MoveWorkareaBeginToIndicatorGesture))]
     [CommandHandling(nameof(MoveWorkareaEndToIndicatorCommand), nameof(ShortcutKeySetting.MoveWorkareaEndToIndicatorGesture))]
+    [CommandHandling(nameof(PlayOrStopCommand), nameof(ShortcutKeySetting.PlayOrStopGesture))]
     partial class TimelineViewModel : PaneViewModelBase, IDropTarget
     {
         private Guid compositionId;
@@ -523,6 +524,8 @@ namespace NiVE3.ViewModel
         public ICommand MoveIndicatorToSelectLayerInPointCommand { get; }
 
         public ICommand MoveIndicatorToSelectLayerOutPointCommand { get; }
+
+        public ICommand PlayOrStopCommand { get; set; }
 
         public ICommand PlayRateChangeCommand { get; }
 
@@ -1118,6 +1121,8 @@ namespace NiVE3.ViewModel
             }, () => CompositionModel != null && SelectedLayers.Count > 0)
                 .ObservesProperty(() => CompositionModel)
                 .ObservesProperty(() => SelectedLayers.Count);
+
+            PlayOrStopCommand = new DelegateCommand(() => EventHubModel.NotifyPlayOrStop(), () => CompositionModel != null).ObservesProperty(() => CompositionModel);
 
             PlayRateChangeCommand = new DelegateCommand(() =>
             {

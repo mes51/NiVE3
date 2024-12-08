@@ -1456,6 +1456,9 @@ namespace NiVE3.View.Resource
 
         // ShortcutKeyNames
 
+        [DefaultValue("再生・停止")]
+        public static readonly string ShortcutKeyName_PlayOrStopGesture = nameof(ShortcutKeyName_PlayOrStopGesture);
+
         [DefaultValue("ワークエリアの終了をインジケーターの位置に移動")]
         public static readonly string ShortcutKeyName_MoveWorkareaEndToIndicatorGesture = nameof(ShortcutKeyName_MoveWorkareaEndToIndicatorGesture);
 
@@ -1975,6 +1978,9 @@ namespace NiVE3.View.Resource
 
         [DefaultValue("ツール")]
         public static readonly string ShortcutKeyCategoryType_Tool = nameof(ShortcutKeyCategoryType_Tool);
+
+        [DefaultValue("プレビュー")]
+        public static readonly string ShortcutKeyCategoryType_Preview = nameof(ShortcutKeyCategoryType_Preview);
 
         [DefaultValue("その他")]
         public static readonly string ShortcutKeyCategoryType_Other = nameof(ShortcutKeyCategoryType_Other);

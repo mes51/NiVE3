@@ -101,12 +101,15 @@ namespace NiVE3.ViewModel
 
         PlayControllerModel PlayControllerModel { get; }
 
+        EventHubModel EventHubModel { get; }
+
         bool CanPlay => ((int)(WorkareaEnd - WorkareaBegin) * FrameRate) > 1;
 
-        public PlayControllerViewModel(PlayControllerModel playControllerModel)
+        public PlayControllerViewModel(PlayControllerModel playControllerModel, EventHubModel eventHubModel)
         {
             Title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.PlayControlView_Title);
             PlayControllerModel = playControllerModel;
+            EventHubModel = eventHubModel;
 
             PlayCommand = new RequerySuggestedCommand(() =>
             {
@@ -127,9 +130,23 @@ namespace NiVE3.ViewModel
 
             PrevFrameCommand = new RequerySuggestedCommand(() => PlayControllerModel.MoveToPrevFrame(), () => PlayControllerModel.CanPreview && !IsPlaying);
 
+            EventHubModel.PlayOrStopRequest += EventHubModel_PlayOrStopRequest;
+
             WiringModel();
         }
 
         partial void WiringModel();
+
+        private void EventHubModel_PlayOrStopRequest(object? sender, EventArgs e)
+        {
+            if (IsPlaying && !IsPaused)
+            {
+                PlayControllerModel.Stop();
+            }
+            else
+            {
+                PlayControllerModel.Play();
+            }
+        }
     }
 }

@@ -424,6 +424,21 @@ namespace NiVE3.Config
             new PropertyMetadata(new SingleKeyGesture(Key.N))
         );
 
+        public static readonly DependencyProperty PlayOrStopGestureProperty = DependencyProperty.Register(
+            nameof(PlayOrStopGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new SingleKeyGesture(Key.Space))
+        );
+
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Preview)]
+        [ShowInMarkup]
+        public InputGesture PlayOrStopGesture
+        {
+            get { return (InputGesture)GetValue(PlayOrStopGestureProperty); }
+            set { SetValue(PlayOrStopGestureProperty, value); }
+        }
+
         [ShortcutKeyCategory(ShortcutKeyCategoryType.Edit)]
         [ShowInMarkup]
         public InputGesture MoveWorkareaEndToIndicatorGesture
@@ -456,7 +471,7 @@ namespace NiVE3.Config
             set { SetValue(ChangeLayerPlayRateGestureProperty, value); }
         }
 
-        [ShortcutKeyCategory(ShortcutKeyCategoryType.Composition)]
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Preview)]
         [ShowInMarkup]
         public InputGesture MoveIndicatorToSelectLayerOutPointGesture
         {
@@ -464,7 +479,7 @@ namespace NiVE3.Config
             set { SetValue(MoveIndicatorToSelectLayerOutPointGestureProperty, value); }
         }
 
-        [ShortcutKeyCategory(ShortcutKeyCategoryType.Composition)]
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Preview)]
         [ShowInMarkup]
         public InputGesture MoveIndicatorToSelectLayerInPointGesture
         {
@@ -472,7 +487,7 @@ namespace NiVE3.Config
             set { SetValue(MoveIndicatorToSelectLayerInPointGestureProperty, value); }
         }
 
-        [ShortcutKeyCategory(ShortcutKeyCategoryType.Composition)]
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Preview)]
         [ShowInMarkup]
         public InputGesture MoveIndicatorToCompositionEndGesture
         {
@@ -480,7 +495,7 @@ namespace NiVE3.Config
             set { SetValue(MoveIndicatorToCompositionEndGestureProperty, value); }
         }
 
-        [ShortcutKeyCategory(ShortcutKeyCategoryType.Composition)]
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Preview)]
         [ShowInMarkup]
         public InputGesture MoveIndicatorToCompositionBeginGesture
         {
@@ -488,7 +503,7 @@ namespace NiVE3.Config
             set { SetValue(MoveIndicatorToCompositionBeginGestureProperty, value); }
         }
 
-        [ShortcutKeyCategory(ShortcutKeyCategoryType.Composition)]
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Preview)]
         [ShowInMarkup]
         public InputGesture MoveIndicatorToPrevious10FrameGesture
         {
@@ -496,7 +511,7 @@ namespace NiVE3.Config
             set { SetValue(MoveIndicatorToPrevious10FrameGestureProperty, value); }
         }
 
-        [ShortcutKeyCategory(ShortcutKeyCategoryType.Composition)]
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Preview)]
         [ShowInMarkup]
         public InputGesture MoveIndicatorToNext10FrameGesture
         {
@@ -504,7 +519,7 @@ namespace NiVE3.Config
             set { SetValue(MoveIndicatorToNext10FrameGestureProperty, value); }
         }
 
-        [ShortcutKeyCategory(ShortcutKeyCategoryType.Composition)]
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Preview)]
         [ShowInMarkup]
         public InputGesture MoveIndicatorToPreviousFrameGesture
         {
@@ -512,7 +527,7 @@ namespace NiVE3.Config
             set { SetValue(MoveIndicatorToPreviousFrameGestureProperty, value); }
         }
 
-        [ShortcutKeyCategory(ShortcutKeyCategoryType.Composition)]
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Preview)]
         [ShowInMarkup]
         public InputGesture MoveIndicatorToNextFrameGesture
         {
@@ -1001,6 +1016,7 @@ namespace NiVE3.Config
         Composition,
         Layer,
         Tool,
+        Preview,
         Other
     }
 }
