@@ -1370,7 +1370,11 @@ namespace NiVE3.Model
 
         public void ReplaceFootage(FootageModel footageModel)
         {
+            FootageModel.FootageUpdated -= FootageModel_FootageUpdated;
+
             FootageModel = footageModel;
+
+            FootageModel.FootageUpdated += FootageModel_FootageUpdated;
         }
 
         public void UpdateTextProperty(string propertyId, object? value, double layerTime)
@@ -1961,8 +1965,31 @@ namespace NiVE3.Model
             LayerUpdated?.Invoke(this, EventArgs.Empty);
         }
 
-        private void FootageModel_FootageUpdated(object? sender, EventArgs e)
+        private void FootageModel_FootageUpdated(object? sender, NeedHistoryChangeEventArgs e)
         {
+            if (IsComposition)
+            {
+                SourceDuration = FootageModel.Duration;
+                Duration = Math.Abs(SourceDuration / (PlayRate * 0.01));
+
+                if (!IsFreezeFrame && !IsEnableTimeRemap)
+                {
+                    var oldInPoint = InPoint;
+                    var oldOutPoint = OutPoint;
+                    var newInPoint = Math.Min(oldInPoint, Duration - CompositionModel.FrameDuration);
+                    var newOutPoint = Math.Min(oldOutPoint, Duration);
+
+                    if (e.NeedHistoryChange)
+                    {
+                        CommitEditDuration(oldInPoint, newInPoint, oldOutPoint, newOutPoint, SourceStartPoint, SourceStartPoint);
+                    }
+                    else
+                    {
+                        InPoint = newInPoint;
+                        OutPoint = newOutPoint;
+                    }
+                }
+            }
             LayerUpdated?.Invoke(this, EventArgs.Empty);
         }
 

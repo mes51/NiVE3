@@ -273,7 +273,7 @@ namespace NiVE3.Model.UI
             return Composition?.RenderAudio(time, length);
         }
 
-        private void Composition_CompositionUpdated(object? sender, EventArgs e)
+        private void Composition_CompositionUpdated(object? sender, NeedHistoryChangeEventArgs e)
         {
             FrameUpdateRequestPublisher.Publish(this, EventArgs.Empty);
         }

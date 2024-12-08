@@ -233,7 +233,7 @@ namespace NiVE3.Model
                 }
 
                 Model.IsSettingChanging = false;
-                Model.OnCompositionUpdated();
+                Model.OnCompositionUpdated(false);
             }
 
             public void Undo()
@@ -298,7 +298,7 @@ namespace NiVE3.Model
                 }
 
                 Model.IsSettingChanging = false;
-                Model.OnCompositionUpdated();
+                Model.OnCompositionUpdated(false);
             }
 
             public void Dispose() { }

@@ -164,8 +164,8 @@ namespace NiVE3.Model
             remove { UpdateSampleImageRequestPublisher.Unsubscribe(value); }
         }
 
-        WeakEventPublisher<EventArgs> FootageUpdatedPublisher { get; } = new WeakEventPublisher<EventArgs>();
-        public event EventHandler<EventArgs> FootageUpdated
+        WeakEventPublisher<NeedHistoryChangeEventArgs> FootageUpdatedPublisher { get; } = new WeakEventPublisher<NeedHistoryChangeEventArgs>();
+        public event EventHandler<NeedHistoryChangeEventArgs> FootageUpdated
         {
             add { FootageUpdatedPublisher.Subscribe(value); }
             remove { FootageUpdatedPublisher.Unsubscribe(value); }
@@ -318,11 +318,16 @@ namespace NiVE3.Model
             };
         }
 
-        private void Composition_CompositionUpdated(object? sender, EventArgs e)
+        private void Composition_CompositionUpdated(object? sender, NeedHistoryChangeEventArgs e)
         {
+            Width = Source.Width;
+            Height = Source.Height;
+            FrameRate = Source.FrameRate;
+            Duration = Source.Duration;
             LastUpdated = DateTime.Now;
+
             UpdateSampleImageRequestPublisher.Publish(this, EventArgs.Empty);
-            FootageUpdatedPublisher.Publish(this, EventArgs.Empty);
+            FootageUpdatedPublisher.Publish(this, e);
 
             if (!IsNameChanged)
             {

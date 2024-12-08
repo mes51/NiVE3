@@ -206,8 +206,8 @@ namespace NiVE3.Model
 
         public bool IsRendering { get; set; }
 
-        WeakEventPublisher<EventArgs> CompositionUpdatedPublisher { get; } = new WeakEventPublisher<EventArgs>();
-        public event EventHandler<EventArgs> CompositionUpdated
+        WeakEventPublisher<NeedHistoryChangeEventArgs> CompositionUpdatedPublisher { get; } = new WeakEventPublisher<NeedHistoryChangeEventArgs>();
+        public event EventHandler<NeedHistoryChangeEventArgs> CompositionUpdated
         {
             add { CompositionUpdatedPublisher.Subscribe(value); }
             remove { CompositionUpdatedPublisher.Unsubscribe(value); }
@@ -715,7 +715,10 @@ namespace NiVE3.Model
             }
 
             IsSettingChanging = false;
-            OnCompositionUpdated();
+
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangeCompositionSetting));
+
+            OnCompositionUpdated(true);
 
             HistoryModel.Add(
                 new ChangeCompositionSettingHistoryCommand(
@@ -758,6 +761,8 @@ namespace NiVE3.Model
                     WorkareaEnd
                 )
             );
+
+            HistoryModel.EndGroup();
         }
 
         public void ChangeWorkarea(double begin, double end)
@@ -1883,10 +1888,10 @@ namespace NiVE3.Model
             }
         }
 
-        void OnCompositionUpdated()
+        void OnCompositionUpdated(bool needHistoryChange)
         {
             ImageCache.Clear(CompositionId);
-            CompositionUpdatedPublisher.Publish(this, EventArgs.Empty);
+            CompositionUpdatedPublisher.Publish(this, new NeedHistoryChangeEventArgs(needHistoryChange));
         }
 
         static CameraSetting CreateDefaultCameraSetting(int width, int height)
@@ -1973,7 +1978,7 @@ namespace NiVE3.Model
                 e.PropertyName != nameof(CurrentTime) &&
                 e.PropertyName != nameof(IsEnableShy))
             {
-                OnCompositionUpdated();
+                OnCompositionUpdated(false);
             }
         }
 
@@ -1985,10 +1990,10 @@ namespace NiVE3.Model
             }
             foreach (var newLayer in (e.NewItems?.Cast<LayerModel>() ?? []))
             {
-                newLayer.LayerUpdated += Layer_LayerUpdated; ;
+                newLayer.LayerUpdated += Layer_LayerUpdated;
             }
 
-            OnCompositionUpdated();
+            OnCompositionUpdated(false);
         }
 
         private void Layer_LayerUpdated(object? sender, EventArgs e)
@@ -2000,7 +2005,7 @@ namespace NiVE3.Model
                     layer.ClearCacheByLayerUpdated();
                 }
             }
-            OnCompositionUpdated();
+            OnCompositionUpdated(false);
         }
 
         public void Dispose()

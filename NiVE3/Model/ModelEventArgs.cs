@@ -197,4 +197,14 @@ namespace NiVE3.Model
             CompositionId = compositionId;
         }
     }
+
+    class NeedHistoryChangeEventArgs : EventArgs
+    {
+        public bool NeedHistoryChange { get; }
+
+        public NeedHistoryChangeEventArgs(bool needHistoryChange)
+        {
+            NeedHistoryChange = needHistoryChange;
+        }
+    }
 }
