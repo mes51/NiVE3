@@ -913,6 +913,23 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("元画像のブレンド")]
         public const string Channel_Invert_BlendOriginal = nameof(Channel_Invert_BlendOriginal);
 
+        // MinMax
+
+        [DefaultValue("最大・最小")]
+        public const string Channel_MinMax_Name = nameof(Channel_MinMax_Name);
+
+        [DefaultValue("指定半径内の色の最大、または最小値で置き換えます")]
+        public const string Channel_MinMax_Description = nameof(Channel_MinMax_Description);
+
+        [LanguageKey, DefaultValue("モード")]
+        public const string Channel_MinMax_Mode = nameof(Channel_MinMax_Mode);
+
+        [LanguageKey, DefaultValue("チャンネル")]
+        public const string Channel_MinMax_Channel = nameof(Channel_MinMax_Channel);
+
+        [LanguageKey, DefaultValue("半径")]
+        public const string Channel_MinMax_Radius = nameof(Channel_MinMax_Radius);
+
         // GlassDistortion
 
         [DefaultValue("ガラス歪み")]
@@ -1439,6 +1456,12 @@ namespace NiVE3.PresetPlugin.Resource
 
         [DefaultValue("放射状")]
         public const string GradientShapeType_Radial = nameof(GradientShapeType_Radial);
+
+        [DefaultValue("最小")]
+        public const string MinMaxMode_Min = nameof(MinMaxMode_Min);
+
+        [DefaultValue("最大")]
+        public const string MinMaxMode_Max = nameof(MinMaxMode_Max);
 
         // unit
 
