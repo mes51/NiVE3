@@ -213,7 +213,7 @@ namespace NiVE3.Model
                 Directory.CreateDirectory(Paths.AutoSaveProjectDirectory);
             }
 
-            var projectName = string.IsNullOrEmpty(ProjectName) ? "unnamed_project" : ProjectName;
+            var projectName = string.IsNullOrEmpty(ProjectName) ? "unnamed_project" : (Path.GetFileNameWithoutExtension(ProjectName) ?? "unnamed_project");
             var autosavedProjectFiles = new List<(string filePath, DateTime saveTime)>();
             foreach (var filePath in Directory.GetFiles(Paths.AutoSaveProjectDirectory, "*.nvp3"))
             {
