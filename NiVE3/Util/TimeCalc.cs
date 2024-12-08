@@ -26,25 +26,25 @@ namespace NiVE3.Util
         public static double CalcTimeFromPixelAligned(double x, double uiWidth, double range, double rangeStart, double frameRate, double min = double.MinValue, double max = double.MaxValue)
         {
             var time = CalcTimeFromPixel(x, uiWidth, range, rangeStart, min, max);
-            return (int)Math.Round(time * frameRate) / frameRate;
+            return RoundTimeDigit((int)Math.Round(time * frameRate) / frameRate);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double AlignRound(double time, double frameRate)
         {
-            return (int)Math.Round(time * frameRate) / frameRate;
+            return RoundTimeDigit((int)Math.Round(time * frameRate) / frameRate);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double AlignFloor(double time, double frameRate)
         {
-            return (int)Math.Round(time * frameRate, TimeDigit) / frameRate;
+            return RoundTimeDigit((int)Math.Round(time * frameRate, TimeDigit) / frameRate);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double AlignCeiling(double time, double frameRate)
         {
-            return (int)Math.Ceiling(Math.Round(time * frameRate, TimeDigit)) / frameRate;
+            return RoundTimeDigit((int)Math.Ceiling(Math.Round(time * frameRate, TimeDigit)) / frameRate);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
