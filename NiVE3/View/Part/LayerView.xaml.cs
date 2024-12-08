@@ -130,6 +130,11 @@ namespace NiVE3.View.Part
             e.Handled = true;
         }
 
+        private void Root_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            ViewModel?.ShowFootagePreviewCommand?.Execute(null);
+        }
+
         private void LayerCommentGrid_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.LeftButton != MouseButtonState.Pressed || e.ClickCount != 2)

@@ -302,6 +302,8 @@ namespace NiVE3.Model
 
         public int Index => CompositionModel.Layers.IndexOf(this) + 1;
 
+        public Guid FootageId => FootageModel.FootageId;
+
         private ObservableCollection<EffectModel> effects = [];
         public ObservableCollection<EffectModel> Effects
         {

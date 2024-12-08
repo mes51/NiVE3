@@ -599,6 +599,8 @@ namespace NiVE3.ViewModel
 
         public ICommand DeleteEffectCommand { get; }
 
+        public ICommand ShowFootagePreviewCommand { get; }
+
         public DelegateCommand<SelectItemType?> DeleteCommand { get; }
 
         public DelegateCommand<SelectItemType?> CutCommand { get; }
@@ -950,6 +952,8 @@ namespace NiVE3.ViewModel
             }, () => EditingParameter == EditingLayerParameter.None && SelectedEffects.Count > 0)
                 .ObservesProperty(() => EditingParameter)
                 .ObservesProperty(() => SelectedEffects.Count);
+
+            ShowFootagePreviewCommand = new DelegateCommand(() => EventHubModel.NotifyShowFootagePreview(LayerModel.FootageId));
 
             DeleteCommand = new DelegateCommand<SelectItemType?>(type => DeleteEffectCommand.Execute(null));
 

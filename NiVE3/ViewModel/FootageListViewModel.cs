@@ -11,6 +11,7 @@ using GongSolutions.Wpf.DragDrop;
 using Microsoft.Win32;
 using NiVE3.Config;
 using NiVE3.Model;
+using NiVE3.Model.UI;
 using NiVE3.Mvvm;
 using NiVE3.UI.Command;
 using NiVE3.View.Command;
@@ -132,13 +133,16 @@ namespace NiVE3.ViewModel
 
         FootageListModel FootageListModel { get; }
 
+        EventHubModel EventHubModel { get; }
+
         IDialogService DialogService { get; }
 
 #pragma warning disable CS8618 // 各フィールドには初期化時に必ず値を代入するため無視
-        public FootageListViewModel(FootageListModel footageListModel, ApplicationModel applicationModel, IDialogService dialogService)
+        public FootageListViewModel(FootageListModel footageListModel, ApplicationModel applicationModel, EventHubModel eventHubModel, IDialogService dialogService)
 #pragma warning restore CS8618
         {
             FootageListModel = footageListModel;
+            EventHubModel = eventHubModel;
             DialogService = dialogService;
             Footages = footageListModel.Footages.CreateViewCollection<IFootageModel, IFootageViewModel>(m => m is FootageModel footage ? new FootageViewModel(footage, applicationModel) : new FootageFolderViewModel((FootageFolderModel)m, applicationModel));
 
@@ -260,6 +264,9 @@ namespace NiVE3.ViewModel
             }, _ => EditingParameter == EditingFootageParameter.Comment).ObservesProperty(() => EditingParameter);
 
             FootageListModel.ShowLoadSetting += FootageListModel_ShowLoadSetting;
+
+            // TODO: TimelineViewModelからCompositionModel経由でFootageListModelにアクセスする方がいいかどうか検討する
+            EventHubModel.ShowFootagePreviewRequest += EventHubModel_ShowFootagePreviewRequest;
         }
 
         public void DragOver(IDropInfo dropInfo)
@@ -413,6 +420,11 @@ namespace NiVE3.ViewModel
             IDialogResult? result = null;
             DialogService.ShowDialog(nameof(PluginSettingView), param, r => result = r);
             e.IsOK = result?.Result == ButtonResult.OK;
+        }
+
+        private void EventHubModel_ShowFootagePreviewRequest(object? sender, ShowFootagePreviewEventArgs e)
+        {
+            FootageListModel.ShowPreview(e.FootageId);
         }
     }
 

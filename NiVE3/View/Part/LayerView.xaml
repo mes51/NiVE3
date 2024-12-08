@@ -28,6 +28,7 @@
              FocusVisualStyle="{x:Null}"
              DataContextChanged="Root_DataContextChanged"
              MouseDown="Root_MouseDown"
+             MouseDoubleClick="Root_MouseDoubleClick"
              pr:StackableItemsCollectionView.IsItemLocked="{Binding IsLock}"
              dd:DragDrop.DragSourceIgnore="True"
              d:DesignHeight="200" d:DesignWidth="800">

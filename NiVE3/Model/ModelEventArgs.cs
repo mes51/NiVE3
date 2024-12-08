@@ -207,4 +207,14 @@ namespace NiVE3.Model
             NeedHistoryChange = needHistoryChange;
         }
     }
+
+    class ShowFootagePreviewEventArgs : EventArgs
+    {
+        public Guid FootageId { get; }
+
+        public ShowFootagePreviewEventArgs(Guid footageId)
+        {
+            FootageId = footageId;
+        }
+    }
 }

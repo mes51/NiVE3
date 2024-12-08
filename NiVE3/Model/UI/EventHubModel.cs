@@ -68,6 +68,13 @@ namespace NiVE3.Model.UI
             remove { AbortEditDurationRequestPublisher.Unsubscribe(value); }
         }
 
+        WeakEventPublisher<ShowFootagePreviewEventArgs> ShowFootagePreviewRequestPublisher { get; } = new WeakEventPublisher<ShowFootagePreviewEventArgs>();
+        public event EventHandler<ShowFootagePreviewEventArgs> ShowFootagePreviewRequest
+        {
+            add { ShowFootagePreviewRequestPublisher.Subscribe(value); }
+            remove { ShowFootagePreviewRequestPublisher.Unsubscribe(value); }
+        }
+
         public void NotifySelectLayer(Guid compositionId, Guid? layerId)
         {
             SelectLayerRequestPublisher.Publish(this, new SelectLayerEventArgs(compositionId, layerId));
@@ -106,6 +113,11 @@ namespace NiVE3.Model.UI
         public void NotifyAbortEditDuration(Guid compositionId)
         {
             AbortEditDurationRequestPublisher.Publish(this, new AbortEditDurationEventArgs(compositionId));
+        }
+
+        public void NotifyShowFootagePreview(Guid footageId)
+        {
+            ShowFootagePreviewRequestPublisher.Publish(this, new ShowFootagePreviewEventArgs(footageId));
         }
     }
 }
