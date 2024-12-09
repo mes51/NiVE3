@@ -123,9 +123,10 @@ namespace NiVE3.Expression.Wrapper
         [ExpressionPublicMember]
         public KeyFrameWrapper? getKeyFrameNextTime(double time)
         {
+            var layerTime = time - PropertyModel.SourceStartPoint;
             foreach (var keyFrame in PropertyModel.KeyFrames)
             {
-                if (keyFrame.Time >= time)
+                if (keyFrame.Time >= layerTime)
                 {
                     return new KeyFrameWrapper(PropertyModel, keyFrame);
                 }
@@ -137,9 +138,10 @@ namespace NiVE3.Expression.Wrapper
         [ExpressionPublicMember]
         public KeyFrameWrapper? getKeyFramePrevTime(double time)
         {
+            var layerTime = time - PropertyModel.SourceStartPoint;
             foreach (var keyFrame in PropertyModel.KeyFrames.Reverse())
             {
-                if (keyFrame.Time <= time)
+                if (keyFrame.Time <= layerTime)
                 {
                     return new KeyFrameWrapper(PropertyModel, keyFrame);
                 }
