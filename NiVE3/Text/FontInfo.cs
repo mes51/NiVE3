@@ -16,7 +16,7 @@ namespace NiVE3.Text
 
         static readonly string UserFontFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Microsoft\\Windows\\Fonts");
 
-        static readonly string AdobeFontsFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Adobe\\CoreSync\\plugins\\livetype\\r");
+        static readonly string[] AdobeFontsFolders = [..new string[] { "r", "e", "s", "w" }.Select(dir => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Adobe\\CoreSync\\plugins\\livetype", dir))];
 
         public static FontInfo[] LoadedFonts { get; }
 
@@ -45,9 +45,12 @@ namespace NiVE3.Text
             {
                 fontFiles = fontFiles.Concat(GetFontPaths(UserFontFolder));
             }
-            if (Directory.Exists(AdobeFontsFolder))
+            foreach (var adobeFontFolder in AdobeFontsFolders)
             {
-                fontFiles = fontFiles.Concat(Directory.GetFiles(AdobeFontsFolder));
+                if (Directory.Exists(adobeFontFolder))
+                {
+                    fontFiles = fontFiles.Concat(Directory.GetFiles(adobeFontFolder));
+                }
             }
 
             var fontInfo = new List<FontInfo>();
