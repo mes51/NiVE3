@@ -194,7 +194,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
             using var shadowImage = new NGPUImage(shadowImageWidth, shadowImageHeight, device);
             using (var context = device.CreateComputeContext())
             {
-                context.For(originalWidth, originalWidth, new DropShadowGenerateShadowProcess(
+                context.For(originalWidth, originalHeight, new DropShadowGenerateShadowProcess(
                     shadowImage.Data, shadowImageWidth, gpuImage.Data, gpuImage.Width, shadowHorizontalBlurRange, shadowVerticalBlurRange, originalX, originalY, shadowColor
                 ));
             }
