@@ -293,6 +293,10 @@ namespace NiVE3.ViewModel
 
             BeginEditCommand = new DelegateCommand(() =>
             {
+                if (IsEditingExpression)
+                {
+                    CommitCurrentExpressionCode();
+                }
                 PrevValue = CurrentTimeRawValue;
                 IsEditing = true;
                 UseEditingValue = true;
@@ -335,6 +339,10 @@ namespace NiVE3.ViewModel
 
             SwitchUseKeyFrameCommand = new DelegateCommand(() =>
             {
+                if (IsEditingExpression)
+                {
+                    CommitCurrentExpressionCode();
+                }
                 if ((Keyboard.IsKeyDown(Key.LeftAlt) || Keyboard.IsKeyDown(Key.RightAlt)) && Property.PropertyType.IsSupportedExpression)
                 {
                     if (string.IsNullOrEmpty(PropertyModel.ExpressionCode))
@@ -362,16 +370,28 @@ namespace NiVE3.ViewModel
 
             MoveTimeKeyFramesCommand = new DelegateCommand<Tuple<KeyFrame[], double[]>>(t =>
             {
+                if (IsEditingExpression)
+                {
+                    CommitCurrentExpressionCode();
+                }
                 PropertyModel.MoveTimeKeyFrames(t.Item1, t.Item2);
             });
 
             ChangeKeyFramesInterpolationTypeCommand = new DelegateCommand<Tuple<KeyFrame[], InterpolationType>>(t =>
             {
+                if (IsEditingExpression)
+                {
+                    CommitCurrentExpressionCode();
+                }
                 PropertyModel.ChangeKeyFramesInterpolationType(t.Item1, t.Item2);
             });
 
             PlaceKeyFrameCommand = new DelegateCommand(() =>
             {
+                if (IsEditingExpression)
+                {
+                    CommitCurrentExpressionCode();
+                }
                 var time = CurrentTime;
                 var index = KeyFrames.FindLastIndex(k => Math.Abs(k.Time - time) < TimeCalc.TimeEpsilon || k.Time <= time);
                 if (index > -1 && Math.Abs(KeyFrames[index].Time - time) < TimeCalc.TimeEpsilon)
@@ -386,7 +406,14 @@ namespace NiVE3.ViewModel
 
             CommitExpressionCodeCommand = new DelegateCommand(() => PropertyModel.ChangeExpressionCode(ExpressionCode));
 
-            ChangeUseExpressionCommand = new DelegateCommand(() => PropertyModel.ChangeUseExpression(!UseExpression), () => !string.IsNullOrEmpty(ExpressionCode) && !HasExpressionError)
+            ChangeUseExpressionCommand = new DelegateCommand(() =>
+            {
+                if (IsEditingExpression)
+                {
+                    CommitCurrentExpressionCode();
+                }
+                PropertyModel.ChangeUseExpression(!UseExpression);
+            }, () => !string.IsNullOrEmpty(ExpressionCode) && !HasExpressionError)
                 .ObservesProperty(() => ExpressionCode)
                 .ObservesProperty(() => HasExpressionError);
 
@@ -406,6 +433,10 @@ namespace NiVE3.ViewModel
 
             AddKeyFrameToSelectedChildrenCommand = new DelegateCommand(() =>
             {
+                if (IsEditingExpression)
+                {
+                    CommitCurrentExpressionCode();
+                }
                 var time = CurrentTime;
                 var index = KeyFrames.FindLastIndex(k => Math.Abs(k.Time - time) < TimeCalc.TimeEpsilon || k.Time <= time);
                 if (index > -1 && Math.Abs(KeyFrames[index].Time - time) >= TimeCalc.TimeEpsilon)
@@ -414,10 +445,24 @@ namespace NiVE3.ViewModel
                 }
             });
 
-            ResetSelectedChildrenCommand = new DelegateCommand(() => PropertyModel.ResetProperty());
+            ResetSelectedChildrenCommand = new DelegateCommand(() =>
+            {
+                if (IsEditingExpression)
+                {
+                    ExpressionCode = PropertyModel.ExpressionCode;
+                    UpdateExpressionCodeDocument(PropertyModel.ExpressionCode);
+                    IsEditing = false;
+                    IsEditingExpression = false;
+                }
+                PropertyModel.ResetProperty();
+            });
 
             CutSelectedChildrenCommand = new DelegateCommand(() =>
             {
+                if (IsEditingExpression)
+                {
+                    CommitCurrentExpressionCode();
+                }
                 if (SelectedKeyFrameIds.Count > 0)
                 {
                     var keyFrames = SelectedKeyFrameIds.Select(id => KeyFrames.FirstOrDefault(k => k.Id == id)).NonNull().ToArray();
@@ -454,6 +499,10 @@ namespace NiVE3.ViewModel
 
             PasteToSelectedChildrenCommand = new RequerySuggestedCommand(() =>
             {
+                if (IsEditingExpression)
+                {
+                    CommitCurrentExpressionCode();
+                }
                 var propertyData = ClipboardUtil.GetData<PropertyData>();
                 if (propertyData != null)
                 {
@@ -463,6 +512,10 @@ namespace NiVE3.ViewModel
 
             DeleteSelectedChildrenCommand = new DelegateCommand(() =>
             {
+                if (IsEditingExpression)
+                {
+                    CommitCurrentExpressionCode();
+                }
                 var keyFrames = SelectedKeyFrameIds.Select(id => KeyFrames.FirstOrDefault(k => k.Id == id)).NonNull().ToArray();
                 if (keyFrames.Length > 0)
                 {
@@ -563,6 +616,13 @@ namespace NiVE3.ViewModel
         {
             ExpressionCodeDocument.Text = text;
             ExpressionCodeDocument.UndoStack.ClearAll();
+        }
+
+        void CommitCurrentExpressionCode()
+        {
+            PropertyModel.ChangeExpressionCode(ExpressionCodeDocument.Text);
+            IsEditing = false;
+            IsEditingExpression = false;
         }
 
         partial void WiringModel();

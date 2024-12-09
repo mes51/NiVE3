@@ -400,6 +400,22 @@ namespace NiVE3.UI.Primitive
             }
         }
 
+        private void ValueTextBlock_LostMouseCapture(object sender, MouseEventArgs e)
+        {
+            if (IsClicked && !IsAborting)
+            {
+                IsAborting = true;
+                Mouse.Capture(null);
+                ClearFocus();
+                SetCurrentValue(ValueProperty, PrevValue);
+                IsClicked = false;
+                e.Handled = true;
+
+                RaiseEvent(new RoutedEventArgs(AbortSlideEditValueEvent, this));
+                IsAborting = false;
+            }
+        }
+
         private void ValueTextBox_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter && e.ImeProcessedKey == Key.None)

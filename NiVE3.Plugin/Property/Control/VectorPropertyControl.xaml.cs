@@ -245,12 +245,6 @@ namespace NiVE3.Plugin.Property.Control
             set { SetValue(Is3DProperty, value); }
         }
 
-        public ICommand BeginEditCommand { get; }
-
-        public ICommand EndEditCommand { get; }
-
-        public ICommand AbortEditCommand { get; }
-
         bool IsValueChanging { get; set; }
 
         bool IsEditingProperty { get; set; }
@@ -259,32 +253,6 @@ namespace NiVE3.Plugin.Property.Control
 
         public VectorPropertyControl()
         {
-            BeginEditCommand = new ActionCommand(() => IsEditingProperty = true);
-
-            EndEditCommand = new ActionCommand(() =>
-            {
-                if (UseLinkRatio && IsLinkRatio)
-                {
-                    var baseValue = 1.0;
-                    if (RawValueX != 0.0)
-                    {
-                        baseValue = RawValueX;
-                    }
-                    else if (RawValueY != 0.0)
-                    {
-                        baseValue = RawValueY;
-                    }
-                    else if (RawValueZ != 0.0)
-                    {
-                        baseValue = RawValueZ;
-                    }
-                    ScaleRatio = new Vector3d(RawValueX, RawValueY, RawValueZ) / baseValue;
-                }
-                IsEditingProperty = false;
-            });
-
-            AbortEditCommand = new ActionCommand(() => IsEditingProperty = false);
-
             InitializeComponent();
         }
 
@@ -349,6 +317,16 @@ namespace NiVE3.Plugin.Property.Control
             }
         }
 
+        private void Root_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (ViewModel is INotifyPropertyChanged viewModel)
+            {
+                // NOTE: 多重削除自体は問題ないので、多重登録を防ぐために一度削除する
+                viewModel.PropertyChanged -= ViewModel_PropertyChanged;
+                viewModel.PropertyChanged += ViewModel_PropertyChanged;
+            }
+        }
+
         private void Root_Unloaded(object sender, RoutedEventArgs e)
         {
             if (ViewModel is INotifyPropertyChanged viewModel)
@@ -403,6 +381,41 @@ namespace NiVE3.Plugin.Property.Control
                 ValueY = RawValueY;
                 ValueZ = RawValueZ;
             }
+        }
+
+        private void SlidableNumberTextBox_BeginEditValue(object sender, RoutedEventArgs e)
+        {
+            IsEditingProperty = true;
+            ViewModel?.BeginEditCommand?.Execute(null);
+        }
+
+        private void SlidableNumberTextBox_EndEditValue(object sender, RoutedEventArgs e)
+        {
+            if (UseLinkRatio && IsLinkRatio)
+            {
+                var baseValue = 1.0;
+                if (RawValueX != 0.0)
+                {
+                    baseValue = RawValueX;
+                }
+                else if (RawValueY != 0.0)
+                {
+                    baseValue = RawValueY;
+                }
+                else if (RawValueZ != 0.0)
+                {
+                    baseValue = RawValueZ;
+                }
+                ScaleRatio = new Vector3d(RawValueX, RawValueY, RawValueZ) / baseValue;
+            }
+            IsEditingProperty = false;
+            ViewModel?.EndEditCommand?.Execute(null);
+        }
+
+        private void SlidableNumberTextBox_AbortEditValue(object sender, RoutedEventArgs e)
+        {
+            IsEditingProperty = false;
+            ViewModel?.AbortEditCommand?.Execute(null);
         }
 
         static void VectorValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)

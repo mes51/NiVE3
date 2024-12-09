@@ -37,5 +37,20 @@ namespace NiVE3.Plugin.Property.Control
         {
             InitializeComponent();
         }
+
+        private void SlidableNumberTextBox_BeginEditValue(object sender, RoutedEventArgs e)
+        {
+            ViewModel?.BeginEditCommand?.Execute(null);
+        }
+
+        private void SlidableNumberTextBox_EndEditValue(object sender, RoutedEventArgs e)
+        {
+            ViewModel?.EndEditCommand?.Execute(null);
+        }
+
+        private void SlidableNumberTextBox_AbortEditValue(object sender, RoutedEventArgs e)
+        {
+            ViewModel?.AbortEditCommand?.Execute(null);
+        }
     }
 }

@@ -148,6 +148,16 @@ namespace NiVE3.Plugin.Property.Control
             }
         }
 
+        private void Root_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (ViewModel is INotifyPropertyChanged viewModel)
+            {
+                // NOTE: 多重削除自体は問題ないので、多重登録を防ぐために一度削除する
+                viewModel.PropertyChanged -= ViewModel_PropertyChanged;
+                viewModel.PropertyChanged += ViewModel_PropertyChanged;
+            }
+        }
+
         private void Root_Unloaded(object sender, RoutedEventArgs e)
         {
             if (ViewModel is INotifyPropertyChanged viewModel)
@@ -184,6 +194,21 @@ namespace NiVE3.Plugin.Property.Control
                 ValueY = RawValueY;
                 ValueZ = RawValueZ;
             }
+        }
+
+        private void SlidableNumberTextBox_BeginEditValue(object sender, RoutedEventArgs e)
+        {
+            ViewModel?.BeginEditCommand?.Execute(null);
+        }
+
+        private void SlidableNumberTextBox_EndEditValue(object sender, RoutedEventArgs e)
+        {
+            ViewModel?.EndEditCommand?.Execute(null);
+        }
+
+        private void SlidableNumberTextBox_AbortEditValue(object sender, RoutedEventArgs e)
+        {
+            ViewModel?.AbortEditCommand?.Execute(null);
         }
 
         static void VectorValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)

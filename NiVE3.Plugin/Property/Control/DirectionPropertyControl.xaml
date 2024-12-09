@@ -10,6 +10,7 @@
                            mc:Ignorable="d" 
                            x:Name="Root"
                            DataContextChanged="Root_DataContextChanged"
+                           Loaded="Root_Loaded"
                            Unloaded="Root_Unloaded"
                            d:DesignHeight="450" d:DesignWidth="800">
     <local:PropertyControlBase.Resources>
@@ -17,6 +18,18 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/NiVE3.Plugin;component/Property/Control/Resources/Icons.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+
+            <Style x:Key="SlidableNumberTextBoxStyle" TargetType="{x:Type pr:SlidableNumberTextBox}" BasedOn="{StaticResource {x:Type pr:SlidableNumberTextBox}}">
+                <Setter Property="VerticalAlignment" Value="Center"/>
+                <Setter Property="UnitText" Value="°"/>
+
+                <EventSetter Event="BeginSlideEditValue" Handler="SlidableNumberTextBox_BeginEditValue"/>
+                <EventSetter Event="EndSlideEditValue" Handler="SlidableNumberTextBox_EndEditValue"/>
+                <EventSetter Event="AbortSlideEditValue" Handler="SlidableNumberTextBox_AbortEditValue"/>
+                <EventSetter Event="BeginTextEditValue" Handler="SlidableNumberTextBox_BeginEditValue"/>
+                <EventSetter Event="EndTextEditValue" Handler="SlidableNumberTextBox_EndEditValue"/>
+                <EventSetter Event="AbortTextEditValue" Handler="SlidableNumberTextBox_AbortEditValue"/>
+            </Style>
         </ResourceDictionary>
     </local:PropertyControlBase.Resources>
     <Grid>
@@ -28,73 +41,10 @@
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
 
-        <pr:SlidableNumberTextBox Grid.Column="0" x:Name="ValueXSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=RawValueX}" DisplayValue="{Binding ElementName=Root, Path=ValueX}" ShowDisplayValue="{Binding IsEnableExpression}" UnitText="°" Margin="5,0,2,0" VerticalAlignment="Center">
-            <i:Interaction.Triggers>
-                <i:EventTrigger EventName="BeginSlideEditValue">
-                    <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
-                </i:EventTrigger>
-                <i:EventTrigger EventName="EndSlideEditValue">
-                    <i:InvokeCommandAction Command="{Binding EndEditCommand}"/>
-                </i:EventTrigger>
-                <i:EventTrigger EventName="AbortSlideEditValue">
-                    <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
-                </i:EventTrigger>
-                <i:EventTrigger EventName="BeginTextEditValue">
-                    <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
-                </i:EventTrigger>
-                <i:EventTrigger EventName="EndTextEditValue">
-                    <i:InvokeCommandAction Command="{Binding EndEditCommand}"/>
-                </i:EventTrigger>
-                <i:EventTrigger EventName="AbortTextEditValue">
-                    <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
-                </i:EventTrigger>
-            </i:Interaction.Triggers>
-        </pr:SlidableNumberTextBox>
+        <pr:SlidableNumberTextBox Grid.Column="0" x:Name="ValueXSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=RawValueX}" DisplayValue="{Binding ElementName=Root, Path=ValueX}" ShowDisplayValue="{Binding IsEnableExpression}" Margin="5,0,2,0" Style="{StaticResource SlidableNumberTextBoxStyle}"/>
         <Path Grid.Column="1" Fill="{gm:AppearanceResource ResourceKey=TextBrush}" Data="{StaticResource CrossIcon}" VerticalAlignment="Center" Margin="0,4,0,0" />
-        <pr:SlidableNumberTextBox Grid.Column="2" x:Name="ValueYSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=RawValueY}" DisplayValue="{Binding ElementName=Root, Path=ValueY}" ShowDisplayValue="{Binding IsEnableExpression}" UnitText="°" Margin="5,0,2,0" VerticalAlignment="Center">
-            <i:Interaction.Triggers>
-                <i:EventTrigger EventName="BeginSlideEditValue">
-                    <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
-                </i:EventTrigger>
-                <i:EventTrigger EventName="EndSlideEditValue">
-                    <i:InvokeCommandAction Command="{Binding EndEditCommand}"/>
-                </i:EventTrigger>
-                <i:EventTrigger EventName="AbortSlideEditValue">
-                    <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
-                </i:EventTrigger>
-                <i:EventTrigger EventName="BeginTextEditValue">
-                    <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
-                </i:EventTrigger>
-                <i:EventTrigger EventName="EndTextEditValue">
-                    <i:InvokeCommandAction Command="{Binding EndEditCommand}"/>
-                </i:EventTrigger>
-                <i:EventTrigger EventName="AbortTextEditValue">
-                    <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
-                </i:EventTrigger>
-            </i:Interaction.Triggers>
-        </pr:SlidableNumberTextBox>
+        <pr:SlidableNumberTextBox Grid.Column="2" x:Name="ValueYSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=RawValueY}" DisplayValue="{Binding ElementName=Root, Path=ValueY}" ShowDisplayValue="{Binding IsEnableExpression}" Margin="5,0,2,0" Style="{StaticResource SlidableNumberTextBoxStyle}"/>
         <Path Grid.Column="3" Fill="{gm:AppearanceResource ResourceKey=TextBrush}" Data="{StaticResource CrossIcon}" VerticalAlignment="Center" Margin="0,4,0,0"/>
-        <pr:SlidableNumberTextBox Grid.Column="4" x:Name="ValueZSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=RawValueZ}" DisplayValue="{Binding ElementName=Root, Path=ValueZ}" ShowDisplayValue="{Binding IsEnableExpression}" UnitText="°" Margin="5,0,0,0" VerticalAlignment="Center">
-            <i:Interaction.Triggers>
-                <i:EventTrigger EventName="BeginSlideEditValue">
-                    <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
-                </i:EventTrigger>
-                <i:EventTrigger EventName="EndSlideEditValue">
-                    <i:InvokeCommandAction Command="{Binding EndEditCommand}"/>
-                </i:EventTrigger>
-                <i:EventTrigger EventName="AbortSlideEditValue">
-                    <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
-                </i:EventTrigger>
-                <i:EventTrigger EventName="BeginTextEditValue">
-                    <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
-                </i:EventTrigger>
-                <i:EventTrigger EventName="EndTextEditValue">
-                    <i:InvokeCommandAction Command="{Binding EndEditCommand}"/>
-                </i:EventTrigger>
-                <i:EventTrigger EventName="AbortTextEditValue">
-                    <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
-                </i:EventTrigger>
-            </i:Interaction.Triggers>
-        </pr:SlidableNumberTextBox>
+        <pr:SlidableNumberTextBox Grid.Column="4" x:Name="ValueZSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=RawValueZ}" DisplayValue="{Binding ElementName=Root, Path=ValueZ}" ShowDisplayValue="{Binding IsEnableExpression}" Margin="5,0,0,0" Style="{StaticResource SlidableNumberTextBoxStyle}"/>
     </Grid>
 </local:PropertyControlBase>

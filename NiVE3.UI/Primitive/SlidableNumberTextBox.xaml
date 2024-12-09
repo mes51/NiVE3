@@ -70,7 +70,7 @@
     <Grid>
         <TextBox x:Name="ValueTextBox" Style="{StaticResource ValueTextBoxStyle}" PreviewKeyDown="ValueTextBox_PreviewKeyDown" GotFocus="ValueTextBox_GotFocus" LostFocus="ValueTextBox_LostFocus" SourceUpdated="ValueTextBox_SourceUpdated"/>
         <Grid Style="{StaticResource ValueTextBlockWrapper}">
-            <TextBlock x:Name="ValueTextBlock" Style="{StaticResource ValueTextBlockStyle}" MouseDown="ValueTextBlock_MouseDown" MouseMove="ValueTextBlock_MouseMove" MouseUp="ValueTextBlock_MouseUp"/>
+            <TextBlock x:Name="ValueTextBlock" Style="{StaticResource ValueTextBlockStyle}" MouseDown="ValueTextBlock_MouseDown" MouseMove="ValueTextBlock_MouseMove" MouseUp="ValueTextBlock_MouseUp" Mouse.LostMouseCapture="ValueTextBlock_LostMouseCapture"/>
         </Grid>
     </Grid>
 </UserControl>

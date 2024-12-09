@@ -12,6 +12,7 @@
                            mc:Ignorable="d" 
                            x:Name="Root"
                            DataContextChanged="Root_DataContextChanged"
+                           Loaded="Root_Loaded"
                            Unloaded="Root_Unloaded"
                            d:DesignHeight="450" d:DesignWidth="800">
     <local:PropertyControlBase.Resources>
@@ -22,7 +23,16 @@
 
             <cv:LessThanConverter x:Key="LessThanConverter"/>
 
-            <Style x:Key="RotateCountSliderStyle" TargetType="{x:Type pr:SlidableNumberTextBox}" BasedOn="{StaticResource {x:Type pr:SlidableNumberTextBox}}">
+            <Style x:Key="SliderEventBindingStyle" TargetType="{x:Type pr:SlidableNumberTextBox}" BasedOn="{StaticResource {x:Type pr:SlidableNumberTextBox}}">
+                <EventSetter Event="BeginSlideEditValue" Handler="SlidableNumberTextBox_BeginEditValue"/>
+                <EventSetter Event="EndSlideEditValue" Handler="SlidableNumberTextBox_EndEditValue"/>
+                <EventSetter Event="AbortSlideEditValue" Handler="SlidableNumberTextBox_AbortEditValue"/>
+                <EventSetter Event="BeginTextEditValue" Handler="SlidableNumberTextBox_BeginEditValue"/>
+                <EventSetter Event="EndTextEditValue" Handler="SlidableNumberTextBox_EndEditValue"/>
+                <EventSetter Event="AbortTextEditValue" Handler="SlidableNumberTextBox_AbortEditValue"/>
+            </Style>
+
+            <Style x:Key="RotateCountSliderStyle" TargetType="{x:Type pr:SlidableNumberTextBox}" BasedOn="{StaticResource SliderEventBindingStyle}">
                 <Setter Property="Margin" Value="5,0,2,0"/>
                 <Setter Property="VerticalAlignment" Value="Center"/>
                 <Setter Property="Digit" Value="0"/>
@@ -35,7 +45,7 @@
                 </Style.Triggers>
             </Style>
 
-            <Style x:Key="AngleSliderStyle" TargetType="{x:Type pr:SlidableNumberTextBox}" BasedOn="{StaticResource {x:Type pr:SlidableNumberTextBox}}">
+            <Style x:Key="AngleSliderStyle" TargetType="{x:Type pr:SlidableNumberTextBox}" BasedOn="{StaticResource SliderEventBindingStyle}">
                 <Setter Property="Margin" Value="5,0,0,0"/>
                 <Setter Property="VerticalAlignment" Value="Center"/>
                 <Setter Property="UnitText" Value="°"/>
@@ -61,50 +71,8 @@
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
 
-        <pr:SlidableNumberTextBox Grid.Column="0" x:Name="RotateCountSlider" Value="{Binding ElementName=Root, Path=RawRotateCount}" DisplayValue="{Binding ElementName=Root, Path=RotateCount}" ShowDisplayValue="{Binding IsEnableExpression}" Style="{StaticResource RotateCountSliderStyle}">
-            <i:Interaction.Triggers>
-                <i:EventTrigger EventName="BeginSlideEditValue">
-                    <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
-                </i:EventTrigger>
-                <i:EventTrigger EventName="EndSlideEditValue">
-                    <i:InvokeCommandAction Command="{Binding EndEditCommand}"/>
-                </i:EventTrigger>
-                <i:EventTrigger EventName="AbortSlideEditValue">
-                    <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
-                </i:EventTrigger>
-                <i:EventTrigger EventName="BeginTextEditValue">
-                    <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
-                </i:EventTrigger>
-                <i:EventTrigger EventName="EndTextEditValue">
-                    <i:InvokeCommandAction Command="{Binding EndEditCommand}"/>
-                </i:EventTrigger>
-                <i:EventTrigger EventName="AbortTextEditValue">
-                    <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
-                </i:EventTrigger>
-            </i:Interaction.Triggers>
-        </pr:SlidableNumberTextBox>
+        <pr:SlidableNumberTextBox Grid.Column="0" x:Name="RotateCountSlider" Value="{Binding ElementName=Root, Path=RawRotateCount}" DisplayValue="{Binding ElementName=Root, Path=RotateCount}" ShowDisplayValue="{Binding IsEnableExpression}" Style="{StaticResource RotateCountSliderStyle}"/>
         <Path Grid.Column="1" Fill="{gm:AppearanceResource ResourceKey=TextBrush}" Data="{StaticResource CrossIcon}" VerticalAlignment="Center" Margin="0,4,0,0" />
-        <pr:SlidableNumberTextBox Grid.Column="2" x:Name="AngleSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=RawAngle}" DisplayValue="{Binding ElementName=Root, Path=Angle}" ShowDisplayValue="{Binding IsEnableExpression}" Style="{StaticResource AngleSliderStyle}">
-            <i:Interaction.Triggers>
-                <i:EventTrigger EventName="BeginSlideEditValue">
-                    <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
-                </i:EventTrigger>
-                <i:EventTrigger EventName="EndSlideEditValue">
-                    <i:InvokeCommandAction Command="{Binding EndEditCommand}"/>
-                </i:EventTrigger>
-                <i:EventTrigger EventName="AbortSlideEditValue">
-                    <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
-                </i:EventTrigger>
-                <i:EventTrigger EventName="BeginTextEditValue">
-                    <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
-                </i:EventTrigger>
-                <i:EventTrigger EventName="EndTextEditValue">
-                    <i:InvokeCommandAction Command="{Binding EndEditCommand}"/>
-                </i:EventTrigger>
-                <i:EventTrigger EventName="AbortTextEditValue">
-                    <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
-                </i:EventTrigger>
-            </i:Interaction.Triggers>
-        </pr:SlidableNumberTextBox>
+        <pr:SlidableNumberTextBox Grid.Column="2" x:Name="AngleSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=RawAngle}" DisplayValue="{Binding ElementName=Root, Path=Angle}" ShowDisplayValue="{Binding IsEnableExpression}" Style="{StaticResource AngleSliderStyle}"/>
     </Grid>
 </local:PropertyControlBase>

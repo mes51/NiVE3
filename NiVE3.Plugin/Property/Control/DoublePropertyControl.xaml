@@ -20,27 +20,12 @@
                                   VerticalAlignment="Center"
                                   HorizontalAlignment="Left"
                                   MinWidth="25"
-                                  UnitText="{Binding ElementName=Root, Path=Unit}">
-            <i:Interaction.Triggers>
-                <i:EventTrigger EventName="BeginSlideEditValue">
-                    <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
-                </i:EventTrigger>
-                <i:EventTrigger EventName="EndSlideEditValue">
-                    <i:InvokeCommandAction Command="{Binding EndEditCommand}"/>
-                </i:EventTrigger>
-                <i:EventTrigger EventName="AbortSlideEditValue">
-                    <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
-                </i:EventTrigger>
-                <i:EventTrigger EventName="BeginTextEditValue">
-                    <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
-                </i:EventTrigger>
-                <i:EventTrigger EventName="EndTextEditValue">
-                    <i:InvokeCommandAction Command="{Binding EndEditCommand}"/>
-                </i:EventTrigger>
-                <i:EventTrigger EventName="AbortTextEditValue">
-                    <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
-                </i:EventTrigger>
-            </i:Interaction.Triggers>
-        </pr:SlidableNumberTextBox>
+                                  UnitText="{Binding ElementName=Root, Path=Unit}"
+                                  BeginSlideEditValue="SlidableNumberTextBox_BeginEditValue"
+                                  EndSlideEditValue="SlidableNumberTextBox_EndEditValue"
+                                  AbortSlideEditValue="SlidableNumberTextBox_AbortEditValue"
+                                  BeginTextEditValue="SlidableNumberTextBox_BeginEditValue"
+                                  EndTextEditValue="SlidableNumberTextBox_EndEditValue"
+                                  AbortTextEditValue="SlidableNumberTextBox_AbortEditValue"/>
     </Grid>
 </local:PropertyControlBase>
