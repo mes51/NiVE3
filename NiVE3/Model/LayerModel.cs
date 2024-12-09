@@ -590,7 +590,7 @@ namespace NiVE3.Model
             var hash = new XxHash3();
             if (downSamplingRate == 1.0)
             {
-                CalcCacheKeyHash(hash, layerTime, false, false);
+                CalcCacheKeyHash(hash, globalTime, false, false);
 
                 if (IsVideo || HasRenderEveryFrameEffect)
                 {
@@ -681,7 +681,7 @@ namespace NiVE3.Model
 
             if (downSamplingRate == 1.0)
             {
-                CalcCacheKeyHash(hash, layerTime, withTrackMatte, frameBlend);
+                CalcCacheKeyHash(hash, time, withTrackMatte, frameBlend);
 
                 if (IsVideo || HasRenderEveryFrameEffect)
                 {
