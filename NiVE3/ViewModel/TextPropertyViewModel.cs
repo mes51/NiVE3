@@ -223,6 +223,8 @@ namespace NiVE3.ViewModel
 
         ViewStateModel ViewState { get; }
 
+        EventHubModel EventHubModel { get; }
+
         bool IsFontChanging { get; set; }
 
         bool IsPropertyEditing { get; set; }
@@ -241,11 +243,12 @@ namespace NiVE3.ViewModel
 
         bool FontSampleCreated { get; set; }
 
-        public TextPropertyViewModel(TextPropertyModel textPropertyModel, ProjectModel projectModel, ViewStateModel viewStateModel)
+        public TextPropertyViewModel(TextPropertyModel textPropertyModel, ProjectModel projectModel, ViewStateModel viewStateModel, EventHubModel eventHubModel)
         {
             TextPropertyModel = textPropertyModel;
             ProjectModel = projectModel;
             ViewState = viewStateModel;
+            EventHubModel = eventHubModel;
             Fonts.AddRange(textPropertyModel.FontGroups.Select(f => new FontGroupViewModel(f)));
 
             Title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.TextPropertyView_Title);
@@ -270,13 +273,10 @@ namespace NiVE3.ViewModel
             EndEditCommand = new DelegateCommand(() =>
             {
                 IsPropertyEditing = false;
-                if (SourceTextPropertyModel != null && TargetLayer != null)
+                if (CurrentEditingCompositionId != null && SourceTextPropertyModel != null && TargetLayer != null)
                 {
                     SourceTextPropertyModel.UseEditingValue = false;
-                    var newStyle = TextPropertyModel.GetStyle();
-                    SourceTextPropertyModel.CurrentTime = CurrentTime;
-                    SourceTextPropertyModel.SourceStartPoint = TargetLayer.SourceStartPoint;
-                    SourceTextPropertyModel.CommitProperty(SourceTextPropertyType.ReplaceDefaultStyle(PrevValue, newStyle), PrevValue);
+                    EventHubModel.NotifyTextStyleChange(CurrentEditingCompositionId.Value, LastSelectedLayerId, PrevValue);
                 }
             });
 
@@ -372,7 +372,7 @@ namespace NiVE3.ViewModel
 
         void ChangeTextLayerProperty()
         {
-            if (IsFontChanging || SourceTextPropertyModel == null || TargetLayer == null)
+            if (IsFontChanging || SourceTextPropertyModel == null || TargetLayer == null || CurrentEditingCompositionId == null)
             {
                 return;
             }
@@ -384,10 +384,7 @@ namespace NiVE3.ViewModel
             }
             else
             {
-                var prevValue = SourceTextPropertyModel.GetRawValue(CurrentTime - TargetLayer.SourceStartPoint);
-                SourceTextPropertyModel.CurrentTime = CurrentTime;
-                SourceTextPropertyModel.SourceStartPoint = TargetLayer.SourceStartPoint;
-                SourceTextPropertyModel.CommitProperty(SourceTextPropertyType.ReplaceDefaultStyle(prevValue, newStyle), prevValue);
+                EventHubModel.NotifyTextStyleChange(CurrentEditingCompositionId.Value, null, null);
             }
         }
 
@@ -405,13 +402,19 @@ namespace NiVE3.ViewModel
             {
                 case nameof(SelectedFontGroupIndex) when !IsFontChanging:
                     RaisePropertyChanged(nameof(SelectedFontGroup));
-                    SelectedFontSubFamilyIndex = 0;
                     break;
                 case nameof(SelectedFontSubFamilyIndex) when !IsFontChanging:
                     if (SelectedFontSubFamilyIndex > -1)
                     {
                         IsFontChanging = true;
                         TextPropertyModel.SelectedFont = SelectedFontGroup.SubFamiles[SelectedFontSubFamilyIndex].FontInfo;
+                        IsFontChanging = false;
+                    }
+                    else
+                    {
+                        IsFontChanging = true;
+                        SelectedFontSubFamilyIndex = 0;
+                        TextPropertyModel.SelectedFont = SelectedFontGroup.SubFamiles[0].FontInfo;
                         IsFontChanging = false;
                     }
                     ChangeTextLayerProperty();

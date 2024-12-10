@@ -621,6 +621,7 @@ namespace NiVE3.ViewModel
             eventHubModel.BeginEditDurationRequest += EventHubModel_BeginEditDurationRequest;
             eventHubModel.UpdateDurationRequest += EventHubModel_UpdateDurationRequest;
             eventHubModel.AbortEditDurationRequest += EventHubModel_AbortEditDurationRequest;
+            EventHubModel.TextStyleChangeRequest += EventHubModel_TextStyleChangeRequest;
             PropertyChanged += TimelineViewModel_PropertyChanged;
             PaneSelected += TimelineViewModel_PaneSelected;
 
@@ -1487,6 +1488,17 @@ namespace NiVE3.ViewModel
             }
 
             IsUsingTool = PreviewManipulation != null;
+        }
+
+        private void EventHubModel_TextStyleChangeRequest(object? sender, TextStyleChangeEventArgs e)
+        {
+            if (IsUsingTool || CompositionModel == null || e.CompositionId != CompositionId || SelectedLayers == null)
+            {
+                return;
+            }
+
+            var selectedTextLayerIds = SelectedLayers.Where(l => l.IsText).Select(l => l.LayerId).ToArray();
+            CompositionModel.ChangeTextStyle(selectedTextLayerIds, e.TargetLayerId, e.TargetLayerPrevValue);
         }
 
         private void TimelineViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using NiVE3.Mvvm;
 using NiVE3.Numerics;
 using NiVE3.Plugin.Interfaces.RendererParams;
+using NiVE3.Text;
 using Prism.Mvvm;
 
 namespace NiVE3.Model.UI
@@ -82,6 +83,13 @@ namespace NiVE3.Model.UI
             remove { PlayOrStopRequestPublisher.Unsubscribe(value); }
         }
 
+        WeakEventPublisher<TextStyleChangeEventArgs> TextStyleChangeRequestPublisher { get; } = new WeakEventPublisher<TextStyleChangeEventArgs>();
+        public event EventHandler<TextStyleChangeEventArgs> TextStyleChangeRequest
+        {
+            add { TextStyleChangeRequestPublisher.Subscribe(value); }
+            remove { TextStyleChangeRequestPublisher.Unsubscribe(value); }
+        }
+
         public void NotifySelectLayer(Guid compositionId, Guid? layerId)
         {
             SelectLayerRequestPublisher.Publish(this, new SelectLayerEventArgs(compositionId, layerId));
@@ -130,6 +138,11 @@ namespace NiVE3.Model.UI
         public void NotifyPlayOrStop()
         {
             PlayOrStopRequestPublisher.Publish(this, EventArgs.Empty);
+        }
+
+        public void NotifyTextStyleChange(Guid compositionId, Guid? targetLayer, object? targetLayerPrevValue)
+        {
+            TextStyleChangeRequestPublisher.Publish(this, new TextStyleChangeEventArgs(compositionId, targetLayer, targetLayerPrevValue));
         }
     }
 }

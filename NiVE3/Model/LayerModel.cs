@@ -1379,10 +1379,10 @@ namespace NiVE3.Model
             FootageModel.FootageUpdated += FootageModel_FootageUpdated;
         }
 
-        public void UpdateTextProperty(string propertyId, object? value, double layerTime)
+        public void UpdateTextProperty(string propertyId, object? value, object? prevValue, double layerTime)
         {
             var property = TextProperties?.FindProperty(propertyId) as PropertyModel;
-            property?.CommitProperty(value, property?.GetRawValue(layerTime));
+            property?.CommitProperty(value, prevValue ?? property?.GetRawValue(layerTime));
         }
 
         public LayerData SaveData()

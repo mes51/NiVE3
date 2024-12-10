@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using NiVE3.Numerics;
 using NiVE3.Plugin.Interfaces.RendererParams;
+using NiVE3.Text;
 
 namespace NiVE3.Model
 {
@@ -215,6 +216,22 @@ namespace NiVE3.Model
         public ShowFootagePreviewEventArgs(Guid footageId)
         {
             FootageId = footageId;
+        }
+    }
+
+    class TextStyleChangeEventArgs : EventArgs
+    {
+        public Guid CompositionId { get; }
+
+        public Guid? TargetLayerId { get; }
+
+        public object? TargetLayerPrevValue { get; }
+
+        public TextStyleChangeEventArgs(Guid compositionId, Guid? targetLayerId, object? targetLayerPrevValue)
+        {
+            CompositionId = compositionId;
+            TargetLayerId = targetLayerId;
+            TargetLayerPrevValue = targetLayerPrevValue;
         }
     }
 }

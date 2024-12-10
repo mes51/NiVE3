@@ -35,6 +35,7 @@ using ComputeSharp;
 using NiVE3.InternalShader.MotionBlur;
 using NiVE3.Model.UI;
 using NiVE3.Image.Color;
+using NiVE3.Text;
 
 namespace NiVE3.Model
 {
@@ -375,7 +376,7 @@ namespace NiVE3.Model
 
             HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_AddLayers));
 
-            TextPropertyModel.UpdateTextProperty(layer, 0.0);
+            TextPropertyModel.UpdateTextProperty(layer, 0.0, null);
             InsertLayerInternal([layer], insertIndex);
 
             HistoryModel.EndGroup();
@@ -1440,6 +1441,31 @@ namespace NiVE3.Model
             foreach (var layer in Layers.Where(l => layerIds.Contains(l.LayerId)))
             {
                 layer.ChangeFreezeFrame(isFreezeFrame, time, FrameDuration);
+            }
+
+            HistoryModel.EndGroup();
+        }
+
+        public void ChangeTextStyle(Guid[] layerIds, Guid? targetLayerId, object? targetLayerPrevValue)
+        {
+            var layers = Layers.Where(l => l.IsText && layerIds.Contains(l.LayerId)).ToArray();
+            if (layers.Length < 1)
+            {
+                return;
+            }
+
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangePropertyValue));
+
+            foreach (var l in layers)
+            {
+                if (l.LayerId == targetLayerId)
+                {
+                    TextPropertyModel.UpdateTextProperty(l, CurrentTime - l.SourceStartPoint, targetLayerPrevValue);
+                }
+                else
+                {
+                    TextPropertyModel.UpdateTextProperty(l, CurrentTime - l.SourceStartPoint, null);
+                }
             }
 
             HistoryModel.EndGroup();
