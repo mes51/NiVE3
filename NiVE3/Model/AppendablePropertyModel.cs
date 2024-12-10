@@ -80,6 +80,7 @@ namespace NiVE3.Model
             HistoryModel = historyModel;
             Name = property.DisplayName;
             SourceStartPoint = layerModel.SourceStartPoint;
+            Children = [];
 
             var objectIdHash = new XxHash3();
             objectIdHash.Append(parentPropertyModel.ObjectId);
@@ -96,8 +97,6 @@ namespace NiVE3.Model
 
             // NOTE: 本来はモデル側から設定してもらうものだが、引き回しの経路が複雑になりすぎる(レイヤーからだったり、エフェクトやマスクだったり)ため、自分から取りに行く
             layerModel.PropertyChanged += LayerModel_PropertyChanged;
-
-            Children = [];
         }
 
         public PropertyControlBase CreateControl(IPropertyViewModel viewModel)
