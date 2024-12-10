@@ -214,9 +214,31 @@ namespace NiVE3.Model
 
         public void CreateKeyFrame(object? value)
         {
-            var time = CurrentTime - SourceStartPoint;
-            var interpolationType = KeyFrames.LastOrDefault(k => k.Time <= time)?.InterpolationType ?? InterpolationType.Linear;
-            var keyFrame = new KeyFrame(TimeCalc.RoundTimeDigit(time), value, new Ease(0.0, 0.0), new Ease(0.0, 0.0), interpolationType);
+            var time = TimeCalc.RoundTimeDigit(CurrentTime - SourceStartPoint);
+            var prevKeyFrame = KeyFrames.LastOrDefault(k => k.Time <= time);
+            var interpolationType = InterpolationType.None;
+            if (prevKeyFrame != null)
+            {
+                interpolationType = prevKeyFrame.InterpolationType;
+            }
+            else
+            {
+                var supportedInterpolationType = Property.PropertyType.SupportedInterpolationTypes;
+                if (supportedInterpolationType.HasFlag(InterpolationType.Linear))
+                {
+                    interpolationType = InterpolationType.Linear;
+                }
+                else if (supportedInterpolationType.HasFlag(InterpolationType.CatmullRom))
+                {
+                    interpolationType = InterpolationType.CatmullRom;
+                }
+                // TODO: グラフエディタ実装後
+                //else if (supportedInterpolationType.HasFlag(InterpolationType.Bezier))
+                //{
+                //    interpolationType = InterpolationType.Bezier;
+                //}
+            }
+            var keyFrame = new KeyFrame(time, value, new Ease(0.0, 0.0), new Ease(0.0, 0.0), interpolationType);
             var index = KeyFrames.FindLastIndex(k => Math.Abs(k.Time - time) < TimeCalc.TimeEpsilon || k.Time <= time) + 1;
             if (index > 0 && Math.Abs(KeyFrames[index - 1].Time - time) < TimeCalc.TimeEpsilon)
             {
