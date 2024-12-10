@@ -402,6 +402,14 @@ namespace NiVE3.ViewModel
             {
                 case nameof(SelectedFontGroupIndex) when !IsFontChanging:
                     RaisePropertyChanged(nameof(SelectedFontGroup));
+                    if (SelectedFontSubFamilyIndex != 0)
+                    {
+                        SelectedFontSubFamilyIndex = 0;
+                    }
+                    else
+                    {
+                        ChangeTextLayerProperty();
+                    }
                     break;
                 case nameof(SelectedFontSubFamilyIndex) when !IsFontChanging:
                     if (SelectedFontSubFamilyIndex > -1)
@@ -409,15 +417,8 @@ namespace NiVE3.ViewModel
                         IsFontChanging = true;
                         TextPropertyModel.SelectedFont = SelectedFontGroup.SubFamiles[SelectedFontSubFamilyIndex].FontInfo;
                         IsFontChanging = false;
+                        ChangeTextLayerProperty();
                     }
-                    else
-                    {
-                        IsFontChanging = true;
-                        SelectedFontSubFamilyIndex = 0;
-                        TextPropertyModel.SelectedFont = SelectedFontGroup.SubFamiles[0].FontInfo;
-                        IsFontChanging = false;
-                    }
-                    ChangeTextLayerProperty();
                     RaisePropertyChanged(nameof(IsSupportBold));
                     RaisePropertyChanged(nameof(IsSupportItalic));
                     break;
