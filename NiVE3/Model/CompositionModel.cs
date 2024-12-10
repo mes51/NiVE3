@@ -1038,7 +1038,7 @@ namespace NiVE3.Model
             Width = data.Width;
             Height = data.Height;
             FrameRate = data.FrameRate;
-            Duration = data.Duration;
+            Duration = TimeCalc.AlignRound(data.Duration, data.FrameRate);
             IsRetentionFrameRate = data.IsRetentionFrameRate;
             ApplyToneMappingWhenNested = data.ApplyToneMappingWhenNested;
             ShutterAngle = data.ShutterAngle;

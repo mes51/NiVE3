@@ -270,7 +270,7 @@ namespace NiVE3.View.Part
             var time = TimeCalc.CalcTimeFromPixelAligned(e.GetPosition((IInputElement)sender).X - UIParameters.TimelineRangeThumbWidth, ActualWidth, Range, RangeStart, FrameRate, 0.0, Duration);
             if (time >= Duration)
             {
-                time = TimeCalc.AlignFloor(Duration - 1.0 / FrameRate, FrameRate);
+                time = TimeCalc.AlignRound(Duration - 1.0 / FrameRate, FrameRate);
             }
             SetCurrentValue(CurrentTimeProperty, time);
             RaiseEvent(new RoutedEventArgs(CurrentTimeChangeByUserEvent, this));
@@ -294,7 +294,7 @@ namespace NiVE3.View.Part
             var time = TimeCalc.CalcTimeFromPixelAligned(e.GetPosition((IInputElement)sender).X - UIParameters.TimelineRangeThumbWidth, ActualWidth, Range, RangeStart, FrameRate, 0.0, Duration);
             if (time >= Duration)
             {
-                time = TimeCalc.AlignFloor(Duration - 1.0 / FrameRate, FrameRate);
+                time = TimeCalc.AlignRound(Duration - 1.0 / FrameRate, FrameRate);
             }
             SetCurrentValue(CurrentTimeProperty, time);
             RaiseEvent(new RoutedEventArgs(CurrentTimeChangeByUserEvent, this));

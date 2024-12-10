@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
 using NiVE3.UI.Converter;
+using NiVE3.Util;
 
 namespace NiVE3.View.Converter
 {
@@ -99,7 +100,7 @@ namespace NiVE3.View.Converter
             }
             else
             {
-                return time * sign;
+                return TimeCalc.RoundTimeDigit(time) * sign;
             }
         }
 
