@@ -517,7 +517,7 @@ namespace NiVE3.Model
             if (cp != null)
             {
                 RawValue = cp.CoerceValue(RawValue, CompositionModel);
-                foreach (var k in oldKeyFrames.Select(k => new KeyFrame(k.Time, cp.CoerceValue(cp.PropertyType.DeserializeValue(k.Value), CompositionModel), k.EaseIn, k.EaseOut, k.InterpolationType, k.Id)))
+                foreach (var k in oldKeyFrames.Select(k => new KeyFrame(k.Time, cp.CoerceValue(k.Value, CompositionModel), k.EaseIn, k.EaseOut, k.InterpolationType, k.Id)))
                 {
                     KeyFrames.Add(k);
                 }
@@ -525,7 +525,7 @@ namespace NiVE3.Model
             else
             {
                 RawValue = Property.CoerceValue(RawValue);
-                foreach (var k in oldKeyFrames.Select(k => new KeyFrame(k.Time, Property.CoerceValue(Property.PropertyType.DeserializeValue(k.Value)), k.EaseIn, k.EaseOut, k.InterpolationType, k.Id)))
+                foreach (var k in oldKeyFrames.Select(k => new KeyFrame(k.Time, Property.CoerceValue(k.Value), k.EaseIn, k.EaseOut, k.InterpolationType, k.Id)))
                 {
                     KeyFrames.Add(k);
                 }
