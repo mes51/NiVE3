@@ -1200,7 +1200,7 @@ namespace NiVE3.Model
             hash.Append(LayerId);
             hash.Append(FootageModel.LastUpdated);
 
-            var layerTime = time - SourceStartPoint;
+            var layerTime = TimeCalc.RoundTimeDigit(time - SourceStartPoint);
             var sourceTime = CalcSourceTime(layerTime);
 
             var sourceOptionProperties = (TextProperties ?? ShapeProperties ?? SourceOptionProperties)?.GetValues(sourceTime, time, true);
@@ -1662,11 +1662,11 @@ namespace NiVE3.Model
             }
             else if (PlayRate >= 0.0)
             {
-                return layerTime * PlayRate * 0.01;
+                return TimeCalc.RoundTimeDigit(layerTime * PlayRate * 0.01);
             }
             else
             {
-                return SourceDuration + layerTime * PlayRate * 0.01;
+                return TimeCalc.RoundTimeDigit(SourceDuration + layerTime * PlayRate * 0.01);
             }
         }
 
