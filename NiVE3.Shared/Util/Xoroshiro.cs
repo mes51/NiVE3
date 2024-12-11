@@ -107,7 +107,7 @@ namespace NiVE3.Shared.Util
         {
             // SEE: https://prng.di.unimi.it/
             //      "Generating uniform doubles in the unit interval"
-            return (NextUInt64() >> 11) / (double)(1U << 53);
+            return (NextUInt64() >> 11) / (double)(1UL << 53);
         }
 
         public float NextSingle()
