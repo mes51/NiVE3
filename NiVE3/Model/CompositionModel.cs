@@ -1303,7 +1303,7 @@ namespace NiVE3.Model
             foreach (var layer in Layers.Where(l => layerIds.Contains(l.LayerId)))
             {
                 var newInPoint = TimeCalc.AlignRound(targetTime - layer.SourceStartPoint, FrameRate);
-                if (layer.IsImage)
+                if (layer.IsEnableTimeRemap || layer.IsFreezeFrame || layer.IsImage)
                 {
                     newInPoint = Math.Min(newInPoint, layer.OutPoint - FrameDuration);
                 }
@@ -1332,7 +1332,7 @@ namespace NiVE3.Model
             foreach (var layer in Layers.Where(l => layerIds.Contains(l.LayerId)))
             {
                 var newOutPoint = TimeCalc.AlignRound(targetTime - layer.SourceStartPoint + FrameDuration, FrameRate);
-                if (layer.IsImage)
+                if (layer.IsEnableTimeRemap || layer.IsFreezeFrame || layer.IsImage)
                 {
                     newOutPoint = Math.Max(newOutPoint, layer.InPoint + FrameDuration);
                 }
