@@ -68,6 +68,7 @@ namespace NiVE3.Expression
             }
             Engine.SetValue("thisProperty", new PropertyWrapper(propertyModel, globalTime));
             Engine.SetValue("Random", new ExpressionRandom(globalTime, propertyModel.ObjectId));
+            Engine.SetValue("Interpolation", typeof(ExpressionInterpolation));
         }
 
         public object? Evaluate(ExpressionScript script, object? value)
