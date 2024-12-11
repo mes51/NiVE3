@@ -1194,6 +1194,11 @@ namespace NiVE3.Model
             return new LayerSkeleton(LayerId, rect, IsEnable3D, transform, parentTransforms);
         }
 
+        public bool EffectsIsSupported(Guid[] effectUuids)
+        {
+            return !IsSpecial || (IsNullObject && effectUuids.All(id => EffectListModel.GetMetadata(id)?.IsDummyEffect ?? false));
+        }
+
         public void CalcCacheKeyHash(XxHash3 hash, double time, bool withTrackMatte, bool frameBlend)
         {
             hash.Append(frameBlend);

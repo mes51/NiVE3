@@ -1010,7 +1010,7 @@ namespace NiVE3.ViewModel
 
         public void DragOver(IDropInfo dropInfo)
         {
-            if (IsSpecial)
+            if (IsSpecial && !IsNullObject)
             {
                 dropInfo.NotHandled = true;
                 return;
@@ -1018,13 +1018,23 @@ namespace NiVE3.ViewModel
 
             switch (dropInfo.Data)
             {
-                case EffectListDragData effectListData when dropInfo.VisualTarget is EffectCollectionView:
-                    dropInfo.Effects = DragDropEffects.Copy;
-                    dropInfo.DropTargetAdorner = DropTargetAdorners.Insert;
-                    break;
                 case EffectListDragData effectListData:
-                    dropInfo.Effects = DragDropEffects.Copy;
-                    dropInfo.DropTargetAdorner = DropTargetAdorners.Highlight;
+                    if (LayerModel.EffectsIsSupported(effectListData.Effects))
+                    {
+                        dropInfo.Effects = DragDropEffects.Copy;
+                        if (dropInfo.VisualTarget is EffectCollectionView)
+                        {
+                            dropInfo.DropTargetAdorner = DropTargetAdorners.Insert;
+                        }
+                        else
+                        {
+                            dropInfo.DropTargetAdorner = DropTargetAdorners.Highlight;
+                        }
+                    }
+                    else
+                    {
+                        dropInfo.NotHandled = true;
+                    }
                     break;
                 case EffectViewModel effect when Effects.Contains(effect):
                 case ItemDragData<EffectViewModel> itemDragData when itemDragData.SelectedItems.All(Effects.Contains):
@@ -1039,7 +1049,7 @@ namespace NiVE3.ViewModel
 
         public void Drop(IDropInfo dropInfo)
         {
-            if (IsSpecial)
+            if (IsSpecial && !IsNullObject)
             {
                 return;
             }
@@ -1047,10 +1057,16 @@ namespace NiVE3.ViewModel
             switch (dropInfo.Data)
             {
                 case EffectListDragData effectListData when dropInfo.VisualTarget is EffectCollectionView:
-                    LayerModel.InsertEffect(effectListData.Effects, dropInfo.InsertIndex);
+                    if (LayerModel.EffectsIsSupported(effectListData.Effects))
+                    {
+                        LayerModel.InsertEffect(effectListData.Effects, dropInfo.InsertIndex);
+                    }
                     break;
                 case EffectListDragData effectListData:
-                    EventHubModel.NotifyAddEffectToSelectedLayers(LayerModel.ParentCompositionId, LayerId, effectListData.Effects);
+                    if (LayerModel.EffectsIsSupported(effectListData.Effects))
+                    {
+                        EventHubModel.NotifyAddEffectToSelectedLayers(LayerModel.ParentCompositionId, LayerId, effectListData.Effects);
+                    }
                     break;
                 case EffectViewModel effect:
                     {

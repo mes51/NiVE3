@@ -19,6 +19,8 @@ namespace NiVE3.Model
         [ImportMany]
         List<ExportFactory<IEffect, IEffectMetadata>>? Effects { get; set; }
 
+        Dictionary<Guid, IEffectMetadata> EffectMetadataDictionary { get; }
+
         AcceleratorModel AcceleratorModel { get; set; }
 
         public EffectListModel(AcceleratorModel acceleratorModel)
@@ -32,10 +34,12 @@ namespace NiVE3.Model
             if (Effects != null)
             {
                 EffectMetadatas = Effects.Select(e => e.Metadata).ToList();
+                EffectMetadataDictionary = EffectMetadatas.ToDictionary(m => Guid.Parse(m.EffectUuid));
             }
             else
             {
                 EffectMetadatas = [];
+                EffectMetadataDictionary = [];
             }
         }
 
@@ -55,6 +59,12 @@ namespace NiVE3.Model
             {
                 return null;
             }
+        }
+
+        public IEffectMetadata? GetMetadata(Guid effectUuid)
+        {
+            EffectMetadataDictionary.TryGetValue(effectUuid, out var metadata);
+            return metadata;
         }
     }
 }
