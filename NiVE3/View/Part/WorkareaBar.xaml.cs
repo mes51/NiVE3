@@ -13,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using NiVE3.Util;
 using NiVE3.View.Resource;
 
 namespace NiVE3.View.Part
@@ -323,7 +324,7 @@ namespace NiVE3.View.Part
             {
                 if (workareaBar.FrameRate > 0.0 && workareaBar.Duration > 0.0)
                 {
-                    return Math.Clamp((double)value, 0.0, workareaBar.Duration - 1.0 / workareaBar.FrameRate);
+                    return Math.Clamp((double)value, 0.0, TimeCalc.RoundTimeDigit(Math.Max(workareaBar.Duration - 1.0 / workareaBar.FrameRate, 1.0 / workareaBar.FrameRate)));
                 }
                 else
                 {
@@ -342,7 +343,7 @@ namespace NiVE3.View.Part
             {
                 if (workareaBar.FrameRate > 0.0 && workareaBar.Duration > 0.0)
                 {
-                    return Math.Clamp((double)value, 1.0 / workareaBar.FrameRate, workareaBar.Duration);
+                    return Math.Clamp((double)value, TimeCalc.RoundTimeDigit(1.0 / workareaBar.FrameRate), workareaBar.Duration);
                 }
                 else
                 {
