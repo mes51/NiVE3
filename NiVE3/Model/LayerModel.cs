@@ -866,7 +866,7 @@ namespace NiVE3.Model
             var layerTime = Math.Max(time - SourceStartPoint, InPoint);
             var audio = GetRawAudio(time, length);
 
-            foreach (var effect in Effects.Where(e => !e.IsDummyEffect && e.IsEnable && e.SupportedSource.IsSupportedSource(SourceType)))
+            foreach (var effect in Effects.Where(e => !e.IsDummyEffect && e.IsEnable && e.SupportedSource.IsSupportedSource(SourceType.Audio)))
             {
                 audio = effect.ProcessAudio(audio, layerTime);
             }
@@ -1673,7 +1673,7 @@ namespace NiVE3.Model
         (ROI, NImage) CalcAndExpandImage(NImage image, double downSamplingRateX, double downSamplingRateY, double layerTime)
         {
             var newRoi = new ROI(new Int32Point(), new Int32Size(image.Width, image.Height), 0, 0, image.Width, image.Height);
-            foreach (var e in Effects.Where(e => e.IsEnable && e.SupportedSource.IsSupportedSource(SourceType)))
+            foreach (var e in Effects.Where(e => e.IsEnable && e.SupportedSource.IsSupportedSource(SourceType.Image | SourceType.Video)))
             {
                 newRoi = e.CalcRoi(newRoi, downSamplingRateX, downSamplingRateY, layerTime);
                 var (left, right) = newRoi.Left > newRoi.Right ? (newRoi.Right, newRoi.Left) : (newRoi.Left, newRoi.Right);
@@ -1731,7 +1731,7 @@ namespace NiVE3.Model
             }
 
             var firstImage = image;
-            foreach (var e in Effects.Where(e => !e.IsDummyEffect && e.IsEnable && e.SupportedSource.IsSupportedSource(SourceType)))
+            foreach (var e in Effects.Where(e => !e.IsDummyEffect && e.IsEnable && e.SupportedSource.IsSupportedSource(SourceType.Image | SourceType.Video)))
             {
                 var processedImage = e.ProcessImage(image, roi, downSamplingRateX, downSamplingRateY, layerTime, useGpu);
                 if (processedImage != image && firstImage != image)
