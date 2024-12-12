@@ -140,7 +140,7 @@ namespace NiVE3.Plugin.Property.Control
             nameof(UseLinkRatio),
             typeof(bool),
             typeof(VectorPropertyControl),
-            new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+            new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, IsLinkRatioChanged)
         );
 
         public bool UseLinkRatio
