@@ -265,8 +265,8 @@ namespace NiVE3.ViewModel
                 IsPropertyEditing = true;
                 if (SourceTextPropertyModel != null)
                 {
-                    SourceTextPropertyModel.UseEditingValue = true;
                     PrevValue = SourceTextPropertyModel.GetRawValue(CurrentTime - SourceTextPropertyModel.SourceStartPoint);
+                    SourceTextPropertyModel.UseEditingValue = true;
                 }
             });
 
