@@ -592,7 +592,7 @@ namespace NiVE3.Model
             {
                 CalcCacheKeyHash(hash, globalTime, false, false);
 
-                if (IsVideo || HasRenderEveryFrameEffect)
+                if ((IsVideo && !IsFreezeFrame) || HasRenderEveryFrameEffect)
                 {
                     if (ImageCache.TryGet(LayerId, hash.ToInt128(), layerTime, out var cachedImage))
                     {
@@ -683,7 +683,7 @@ namespace NiVE3.Model
             {
                 CalcCacheKeyHash(hash, time, withTrackMatte, frameBlend);
 
-                if (IsVideo || HasRenderEveryFrameEffect)
+                if ((IsVideo && !IsFreezeFrame) || HasRenderEveryFrameEffect)
                 {
                     if (ImageCache.TryGet(LayerId, hash.ToInt128(), layerTime, out var cachedImage))
                     {
