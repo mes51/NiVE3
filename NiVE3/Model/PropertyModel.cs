@@ -265,8 +265,11 @@ namespace NiVE3.Model
         public void ClearKeyFrame()
         {
             var keyFrames = KeyFrames.ToArray();
+            var oldRawValue = RawValue;
+            var newRawValue = GetRawValue(CurrentTime);
             KeyFrames.Clear();
-            HistoryModel.Add(new ClearKeyFramesHistoryCommand(this, keyFrames));
+            RawValue = newRawValue;
+            HistoryModel.Add(new ClearKeyFramesHistoryCommand(this, keyFrames, oldRawValue, newRawValue));
             ValueCommited?.Invoke(this, EventArgs.Empty);
         }
 
@@ -706,12 +709,20 @@ namespace NiVE3.Model
             targetKeyframes = [.. targetKeyframes.OrderBy(KeyFrames.IndexOf)];
             var oldIndices = targetKeyframes.Select(KeyFrames.IndexOf).ToArray();
 
+            var oldRawValue = RawValue;
+            var newRawValue = GetRawValue(CurrentTime);
+
             foreach (var k in targetKeyframes)
             {
                 KeyFrames.Remove(k);
             }
 
-            HistoryModel.Add(new DeleteKeyFramesHistoryCommand(this, targetKeyframes, oldIndices, isCut));
+            if (KeyFrames.Count < 1)
+            {
+                RawValue = newRawValue;
+            }
+
+            HistoryModel.Add(new DeleteKeyFramesHistoryCommand(this, targetKeyframes, oldIndices, oldRawValue, newRawValue, isCut));
             ValueCommited?.Invoke(this, EventArgs.Empty);
         }
 

@@ -152,20 +152,28 @@ namespace NiVE3.Model
 
             KeyFrame[] KeyFrames { get; }
 
-            public ClearKeyFramesHistoryCommand(PropertyModel model, KeyFrame[] keyFrames)
+            object? OldRawValue { get; }
+
+            object? NewRawValue { get; }
+
+            public ClearKeyFramesHistoryCommand(PropertyModel model, KeyFrame[] keyFrames, object? oldRawValue, object? newRawValue)
             {
                 Model = model;
                 KeyFrames = keyFrames;
+                OldRawValue = oldRawValue;
+                NewRawValue = newRawValue;
             }
 
             public void Redo()
             {
                 Model.KeyFrames.Clear();
+                Model.RawValue = NewRawValue;
                 Model.ValueCommited?.Invoke(Model, EventArgs.Empty);
             }
 
             public void Undo()
             {
+                Model.RawValue = OldRawValue;
                 foreach (var k in KeyFrames)
                 {
                     Model.KeyFrames.Add(k);
@@ -244,11 +252,17 @@ namespace NiVE3.Model
 
             bool IsCut { get; }
 
-            public DeleteKeyFramesHistoryCommand(PropertyModel model, KeyFrame[] keyFrames, int[] indices, bool isCut)
+            object? OldRawValue { get; }
+
+            object? NewRawValue { get; }
+
+            public DeleteKeyFramesHistoryCommand(PropertyModel model, KeyFrame[] keyFrames, int[] indices, object? oldRawValue, object? newRawValue, bool isCut)
             {
                 Model = model;
                 KeyFrames = keyFrames;
                 Indices = indices;
+                OldRawValue = oldRawValue;
+                NewRawValue = newRawValue;
                 IsCut = isCut;
             }
 
@@ -258,11 +272,19 @@ namespace NiVE3.Model
                 {
                     Model.KeyFrames.Remove(k);
                 }
+                if (Model.KeyFrames.Count < 1)
+                {
+                    Model.RawValue = NewRawValue;
+                }
                 Model.ValueCommited?.Invoke(Model, EventArgs.Empty);
             }
 
             public void Undo()
             {
+                if (Model.KeyFrames.Count < 1)
+                {
+                    Model.RawValue = OldRawValue;
+                }
                 foreach (var (k, i) in KeyFrames.Zip(Indices))
                 {
                     Model.KeyFrames.Insert(i, k);
