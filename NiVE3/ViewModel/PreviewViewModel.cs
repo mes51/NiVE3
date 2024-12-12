@@ -587,7 +587,12 @@ namespace NiVE3.ViewModel
             var dpi = VisualTreeHelper.GetDpi(dropInfo.VisualTarget);
             var screenPos = (Vector2d)dropInfo.DropPosition - new Vector2d(ScreenX, ScreenY);
             var pos = screenPos * new Vector2d(dpi.DpiScaleX, dpi.DpiScaleY) / (Scale * 0.01);
-            var layerId = compositionPreviewModel.Composition.FindLayerByPreviewPosition(CurrentTime, pos);
+            var layerId = (Guid?)null;
+
+            using (var checker = CycleChecker.StartCheck())
+            {
+                layerId = compositionPreviewModel.Composition.FindLayerByPreviewPosition(CurrentTime, pos);
+            }
 
             switch (dropInfo.Data)
             {
@@ -612,7 +617,12 @@ namespace NiVE3.ViewModel
             var dpi = VisualTreeHelper.GetDpi(dropInfo.VisualTarget);
             var screenPos = (Vector2d)dropInfo.DropPosition - new Vector2d(ScreenX, ScreenY);
             var pos = screenPos * new Vector2d(dpi.DpiScaleX, dpi.DpiScaleY) / (Scale * 0.01);
-            var layerId = compositionPreviewModel.Composition.FindLayerByPreviewPosition(CurrentTime, pos);
+            var layerId = (Guid?)null;
+
+            using (var checker = CycleChecker.StartCheck())
+            {
+                layerId = compositionPreviewModel.Composition.FindLayerByPreviewPosition(CurrentTime, pos);
+            }
 
             switch (dropInfo.Data)
             {
