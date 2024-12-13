@@ -273,71 +273,69 @@ namespace NiVE3.PresetPlugin.Effect.Util.Noise
             var denom = 0.0F;
 
             using var noise = device.AllocateReadWriteBuffer<float>(gpuImage.DataLength);
-            using (var context = device.CreateComputeContext())
+            using var context = device.CreateComputeContext();
+            for (int o = 0, limit = (int)MathF.Ceiling(octave); o < limit; o++)
             {
-                for (int o = 0, limit = (int)MathF.Ceiling(octave); o < limit; o++)
+                var subTransform = Matrix3x3.AffineTransform(
+                    center * (1.0F + (octaveIsCenteringScale ? 0.0F : o * 2.0F)),
+                    new Vector2(MathF.Pow(octaveScale.X, o), MathF.Pow(octaveScale.Y, o)),
+                    octaveAngle * o,
+                    center + octavePositionOffset.AsVector2() * o
+                );
+                if (!Matrix3x3.Invert(subTransform * transform, out var inverted))
                 {
-                    var subTransform = Matrix3x3.AffineTransform(
-                        center * (1.0F + (octaveIsCenteringScale ? 0.0F : o * 2.0F)),
-                        new Vector2(MathF.Pow(octaveScale.X, o), MathF.Pow(octaveScale.Y, o)),
-                        octaveAngle * o,
-                        center + octavePositionOffset.AsVector2() * o
-                    );
-                    if (!Matrix3x3.Invert(subTransform * transform, out var inverted))
-                    {
-                        return;
-                    }
-
-                    var amount = MathF.Pow(octaveAmount, Math.Min(o, (int)octave)) * octaveAmount * Math.Min(octave - o, 1.0F);
-                    if (amount <= 0.0F)
-                    {
-                        if (o > 0)
-                        {
-                            break;
-                        }
-                        else
-                        {
-                            amount = 1.0F;
-                        }
-                    }
-                    denom += amount;
-
-                    context.For(
-                        roi.Width,
-                        roi.Height,
-                        new GenerateNoiseProcess(
-                            noise,
-                            gpuImage.Width,
-                            (int)fractalType,
-                            (int)noiseType,
-                            inverted.ToFloat3x3(),
-                            amount,
-                            evolution,
-                            randomSeed,
-                            roi.Left,
-                            roi.Top
-                        )
-                    );
-                    context.Barrier(noise);
+                    return;
                 }
+
+                var amount = MathF.Pow(octaveAmount, Math.Min(o, (int)octave)) * octaveAmount * Math.Min(octave - o, 1.0F);
+                if (amount <= 0.0F)
+                {
+                    if (o > 0)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        amount = 1.0F;
+                    }
+                }
+                denom += amount;
 
                 context.For(
                     roi.Width,
                     roi.Height,
-                    new FractalNoiseGenerateFinalProcess(
-                        gpuImage.Data,
-                        gpuImage.Width,
+                    new GenerateNoiseProcess(
                         noise,
-                        denom,
-                        contrast,
-                        luminance,
-                        isInvert,
-                        opacity,
+                        gpuImage.Width,
+                        (int)fractalType,
+                        (int)noiseType,
+                        inverted.ToFloat3x3(),
+                        amount,
+                        evolution,
+                        randomSeed,
                         roi.Left,
                         roi.Top
                     )
                 );
+                context.Barrier(noise);
             }
+
+            context.For(
+                roi.Width,
+                roi.Height,
+                new FractalNoiseGenerateFinalProcess(
+                    gpuImage.Data,
+                    gpuImage.Width,
+                    noise,
+                    denom,
+                    contrast,
+                    luminance,
+                    isInvert,
+                    opacity,
+                    roi.Left,
+                    roi.Top
+                )
+            );
         }
 
         public static void GenerateAndBlendsCpu(
@@ -591,72 +589,70 @@ namespace NiVE3.PresetPlugin.Effect.Util.Noise
             var denom = 0.0F;
 
             using var noise = device.AllocateReadWriteBuffer<float>(gpuImage.DataLength);
-            using (var context = device.CreateComputeContext())
+            using var context = device.CreateComputeContext();
+            for (int o = 0, limit = (int)MathF.Ceiling(octave); o < limit; o++)
             {
-                for (int o = 0, limit = (int)MathF.Ceiling(octave); o < limit; o++)
+                var subTransform = Matrix3x3.AffineTransform(
+                    center * (1.0F + (octaveIsCenteringScale ? 0.0F : o * 2.0F)),
+                    new Vector2(MathF.Pow(octaveScale.X, o), MathF.Pow(octaveScale.Y, o)),
+                    octaveAngle * o,
+                    center + octavePositionOffset.AsVector2() * o
+                );
+                if (!Matrix3x3.Invert(subTransform * transform, out var inverted))
                 {
-                    var subTransform = Matrix3x3.AffineTransform(
-                        center * (1.0F + (octaveIsCenteringScale ? 0.0F : o * 2.0F)),
-                        new Vector2(MathF.Pow(octaveScale.X, o), MathF.Pow(octaveScale.Y, o)),
-                        octaveAngle * o,
-                        center + octavePositionOffset.AsVector2() * o
-                    );
-                    if (!Matrix3x3.Invert(subTransform * transform, out var inverted))
-                    {
-                        return;
-                    }
-
-                    var amount = MathF.Pow(octaveAmount, Math.Min(o, (int)octave)) * octaveAmount * Math.Min(octave - o, 1.0F);
-                    if (amount <= 0.0F)
-                    {
-                        if (o > 0)
-                        {
-                            break;
-                        }
-                        else
-                        {
-                            amount = 1.0F;
-                        }
-                    }
-                    denom += amount;
-
-                    context.For(
-                        roi.Width,
-                        roi.Height,
-                        new GenerateNoiseProcess(
-                            noise,
-                            gpuImage.Width,
-                            (int)fractalType,
-                            (int)noiseType,
-                            inverted.ToFloat3x3(),
-                            amount,
-                            evolution,
-                            randomSeed,
-                            roi.Left,
-                            roi.Top
-                        )
-                    );
-                    context.Barrier(noise);
+                    return;
                 }
+
+                var amount = MathF.Pow(octaveAmount, Math.Min(o, (int)octave)) * octaveAmount * Math.Min(octave - o, 1.0F);
+                if (amount <= 0.0F)
+                {
+                    if (o > 0)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        amount = 1.0F;
+                    }
+                }
+                denom += amount;
 
                 context.For(
                     roi.Width,
                     roi.Height,
-                    new FractalNoiseBlendProcess(
-                        gpuImage.Data,
-                        gpuImage.Width,
+                    new GenerateNoiseProcess(
                         noise,
-                        denom,
-                        contrast,
-                        luminance,
-                        isInvert,
-                        opacity,
-                        (int)blendMode,
+                        gpuImage.Width,
+                        (int)fractalType,
+                        (int)noiseType,
+                        inverted.ToFloat3x3(),
+                        amount,
+                        evolution,
+                        randomSeed,
                         roi.Left,
                         roi.Top
                     )
                 );
+                context.Barrier(noise);
             }
+
+            context.For(
+                roi.Width,
+                roi.Height,
+                new FractalNoiseBlendProcess(
+                    gpuImage.Data,
+                    gpuImage.Width,
+                    noise,
+                    denom,
+                    contrast,
+                    luminance,
+                    isInvert,
+                    opacity,
+                    (int)blendMode,
+                    roi.Left,
+                    roi.Top
+                )
+            );
         }
 
         // http://riven8192.blogspot.com/2010/08/calculate-perlinnoise-twice-as-fast.html
