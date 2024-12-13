@@ -814,114 +814,117 @@ namespace NiVE3.Model
         {
             IsRendering = true;
 
-            if (IsEnableMotionBlur && Layers.Any(l => l.IsMotionBlurTarget()))
+            try
             {
-                var shatterStartTime = FrameDuration * ShutterPhase / 360.0F;
-                var hash = new XxHash3();
-                if (downSamplingRate == 1.0)
+                if (IsEnableMotionBlur && Layers.Any(l => l.IsMotionBlurTarget()))
                 {
-                    CalcCacheHash(hash, time, 0.0, false);
-                }
-
-                var cacheKey = hash.ToInt128();
-                if (downSamplingRate != 1.0 || !ImageCache.TryGet(CompositionId, cacheKey, time, out var cachedImage))
-                {
-                    var frameBlendRatio = 1.0F / MotionBlurSampleCount;
-                    var subFrameInterval = (FrameDuration * ShutterAngle / 360.0) / MotionBlurSampleCount;
-                    if (useGpu)
+                    var shatterStartTime = FrameDuration * ShutterPhase / 360.0F;
+                    var hash = new XxHash3();
+                    if (downSamplingRate == 1.0)
                     {
-                        var device = AcceleratorModel.CurrentDevice;
-                        var result = new NGPUImage(Width, Height, device);
-                        for (var i = 0; i < MotionBlurSampleCount; i++)
-                        {
-                            using var subFrame = RenderFrameInternal(time, shatterStartTime +subFrameInterval * i, true, downSamplingRate, applyToneMapping, useGpu);
+                        CalcCacheHash(hash, time, 0.0, false);
+                    }
 
-                            var gpuImage = subFrame.ToGpu(device);
+                    var cacheKey = hash.ToInt128();
+                    if (downSamplingRate != 1.0 || !ImageCache.TryGet(CompositionId, cacheKey, time, out var cachedImage))
+                    {
+                        var frameBlendRatio = 1.0F / MotionBlurSampleCount;
+                        var subFrameInterval = (FrameDuration * ShutterAngle / 360.0) / MotionBlurSampleCount;
+                        if (useGpu)
+                        {
+                            var device = AcceleratorModel.CurrentDevice;
+                            var result = new NGPUImage(Width, Height, device);
+                            for (var i = 0; i < MotionBlurSampleCount; i++)
+                            {
+                                using var subFrame = RenderFrameInternal(time, shatterStartTime + subFrameInterval * i, true, downSamplingRate, applyToneMapping, useGpu);
+
+                                var gpuImage = subFrame.ToGpu(device);
+
+                                using (var context = device.CreateComputeContext())
+                                {
+                                    context.For(Width, Height, new BlendSubFrame(result.Data, gpuImage.Data, Width, frameBlendRatio));
+                                }
+
+                                if (subFrame != gpuImage)
+                                {
+                                    gpuImage.Dispose();
+                                }
+                            }
 
                             using (var context = device.CreateComputeContext())
                             {
-                                context.For(Width, Height, new BlendSubFrame(result.Data, gpuImage.Data, Width, frameBlendRatio));
+                                context.For(Width, Height, new UnPremultiply(result.Data, Width));
                             }
 
-                            if (subFrame != gpuImage)
+                            using var managedResultImage = result.CopyToCpu();
+                            ImageCache.Add(CompositionId, cacheKey, time, managedResultImage, ROI.Empty);
+
+                            return result;
+                        }
+                        else
+                        {
+                            var result = new NManagedImage(Width, Height);
+                            for (var i = 0; i < MotionBlurSampleCount; i++)
                             {
-                                gpuImage.Dispose();
+                                using var subFrame = RenderFrameInternal(time, shatterStartTime + subFrameInterval * i, true, downSamplingRate, applyToneMapping, useGpu);
+
+                                var managedImage = subFrame.ToManaged();
+
+                                Parallel.For(0, Height, y =>
+                                {
+                                    var pos = y * Width;
+                                    var resultSpan = result.Data.AsSpan(pos, Width);
+                                    var subFrameSpan = managedImage.Data.AsSpan(pos, Width);
+                                    for (var i = 0; i < resultSpan.Length; i++)
+                                    {
+                                        var color = subFrameSpan[i];
+                                        var alpha = color.W * frameBlendRatio;
+                                        color *= alpha;
+                                        color.W = alpha;
+                                        resultSpan[i] += color;
+                                    }
+                                });
+
+                                if (subFrame != managedImage)
+                                {
+                                    managedImage.Dispose();
+                                }
                             }
-                        }
-
-                        using (var context = device.CreateComputeContext())
-                        {
-                            context.For(Width, Height, new UnPremultiply(result.Data, Width));
-                        }
-
-                        using var managedResultImage = result.CopyToCpu();
-                        ImageCache.Add(CompositionId, cacheKey, time, managedResultImage, ROI.Empty);
-
-                        IsRendering = false;
-                        return result;
-                    }
-                    else
-                    {
-                        var result = new NManagedImage(Width, Height);
-                        for (var i = 0; i < MotionBlurSampleCount; i++)
-                        {
-                            using var subFrame = RenderFrameInternal(time, shatterStartTime + subFrameInterval * i, true, downSamplingRate, applyToneMapping, useGpu);
-
-                            var managedImage = subFrame.ToManaged();
 
                             Parallel.For(0, Height, y =>
                             {
-                                var pos = y * Width;
-                                var resultSpan = result.Data.AsSpan(pos, Width);
-                                var subFrameSpan = managedImage.Data.AsSpan(pos, Width);
+                                var resultSpan = result.Data.AsSpan(y * Width, Width);
                                 for (var i = 0; i < resultSpan.Length; i++)
                                 {
-                                    var color = subFrameSpan[i];
-                                    var alpha = color.W * frameBlendRatio;
-                                    color *= alpha;
-                                    color.W = alpha;
-                                    resultSpan[i] += color;
+                                    var color = resultSpan[i];
+                                    if (color.W > 0.0F)
+                                    {
+                                        var alpha = color.W;
+                                        color /= alpha;
+                                        color.W = alpha;
+                                        resultSpan[i] = color;
+                                    }
                                 }
                             });
 
-                            if (subFrame != managedImage)
-                            {
-                                managedImage.Dispose();
-                            }
+                            ImageCache.Add(CompositionId, cacheKey, time, result, ROI.Empty);
+
+                            return result;
                         }
-
-                        Parallel.For(0, Height, y =>
-                        {
-                            var resultSpan = result.Data.AsSpan(y * Width, Width);
-                            for (var i = 0; i < resultSpan.Length; i++)
-                            {
-                                var color = resultSpan[i];
-                                if (color.W > 0.0F)
-                                {
-                                    var alpha = color.W;
-                                    color /= alpha;
-                                    color.W = alpha;
-                                    resultSpan[i] = color;
-                                }
-                            }
-                        });
-
-                        ImageCache.Add(CompositionId, cacheKey, time, result, ROI.Empty);
-
-                        IsRendering = false;
-                        return result;
+                    }
+                    else
+                    {
+                        return cachedImage.Item1;
                     }
                 }
                 else
                 {
-                    IsRendering = false;
-                    return cachedImage.Item1;
+                    return RenderFrameInternal(time, 0.0, false, downSamplingRate, applyToneMapping, useGpu);
                 }
             }
-            else
+            finally
             {
                 IsRendering = false;
-                return RenderFrameInternal(time, 0.0, false, downSamplingRate, applyToneMapping, useGpu);
             }
         }
 
