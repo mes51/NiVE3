@@ -84,7 +84,7 @@
             <ListBoxItem Content="{gm:LanguageResource ResourceKey=OptionView_Category_AutoSave}"/>
         </ListBox>
 
-        <ScrollViewer Grid.Row="0" Grid.Column="1" Style="{StaticResource SettingPanelStyle}" Visibility="{Binding ElementName=SettingType, Path=SelectedIndex, Converter={StaticResource SelectTypeConverter}, ConverterParameter=0}" d:Visibility="Visible">
+        <ScrollViewer Grid.Row="0" Grid.Column="1" Style="{StaticResource SettingPanelStyle}" Visibility="{Binding ElementName=SettingType, Path=SelectedIndex, Converter={StaticResource SelectTypeConverter}, ConverterParameter=0}" d:Visibility="Collapsed">
             <StackPanel>
                 <GroupBox Header="{gm:LanguageResource ResourceKey=OptionView_General_SolidFilderName}">
                     <TextBox x:Name="SolidFolderNameTextBox" Margin="{StaticResource GroupBoxInnerMargin}">
@@ -100,7 +100,7 @@
             </StackPanel>
         </ScrollViewer>
 
-        <ScrollViewer Grid.Row="0" Grid.Column="1" Style="{StaticResource SettingPanelStyle}" Visibility="{Binding ElementName=SettingType, Path=SelectedIndex, Converter={StaticResource SelectTypeConverter}, ConverterParameter=1}" d:Visibility="Collapsed">
+        <ScrollViewer Grid.Row="0" Grid.Column="1" Style="{StaticResource SettingPanelStyle}" Visibility="{Binding ElementName=SettingType, Path=SelectedIndex, Converter={StaticResource SelectTypeConverter}, ConverterParameter=1}" d:Visibility="Visible">
             <StackPanel>
                 <GroupBox Header="{gm:LanguageResource ResourceKey=OptionView_Performance_GpuSetting}">
                     <StackPanel Margin="{StaticResource GroupBoxInnerMargin}">
@@ -140,6 +140,7 @@
                             <upr:SlidableNumberTextBox Grid.Column="1" Margin="0,0,5,0" Minimum="{x:Static vm:OptionViewModel.MinImageCacheSize}" Maximum="{Binding MaxRamPreviewCacheLimit}" Value="{Binding RamPreviewCacheLimit}" Digit="0" UnitText="MiB" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                             <TextBlock Grid.Column="2" Text="{Binding MaxRamPreviewCacheLimit, Converter={StaticResource MaxCacheLimitSizeConverter}}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                         </Grid>
+                        <CheckBox Content="{gm:LanguageResource ResourceKey=OptionView_Performance_IsCompressCache}" Margin="{StaticResource ItemMargin}" IsChecked="{Binding IsCompressCache}"/>
                     </StackPanel>
                 </GroupBox>
             </StackPanel>

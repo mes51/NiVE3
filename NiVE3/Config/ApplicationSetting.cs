@@ -86,6 +86,9 @@ namespace NiVE3.Config
         public int RamPreviewCacheLimit { get; set; } = Math.Min((int)Math.Floor(SystemInfo.MaxCacheLimitMiB * 0.25), 4 * 1024);
 
         [SerializableSetting]
+        public bool IsCompressCache { get; set; } = false;
+
+        [SerializableSetting]
         public bool UseAutoSave { get; set; } = true;
 
         [SerializableSetting]

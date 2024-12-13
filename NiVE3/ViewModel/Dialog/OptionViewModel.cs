@@ -87,6 +87,14 @@ namespace NiVE3.ViewModel.Dialog
             set { SetProperty(ref ramPreviewCacheLimit, value); }
         }
 
+        private bool isCompressCache;
+        [SettingProperty]
+        public bool IsCompressCache
+        {
+            get { return isCompressCache; }
+            set { SetProperty(ref isCompressCache, value); }
+        }
+
         private bool useAutoSave;
         [SettingProperty]
         public bool UseAutoSave
@@ -189,6 +197,7 @@ namespace NiVE3.ViewModel.Dialog
             UseGpuLuid = ApplicationSetting.Setting.UseGpuLuid;
             ImageCacheLimit = ApplicationSetting.Setting.ImageCacheLimit;
             RamPreviewCacheLimit = ApplicationSetting.Setting.RamPreviewCacheLimit;
+            IsCompressCache = ApplicationSetting.Setting.IsCompressCache;
             UseAutoSave = ApplicationSetting.Setting.UseAutoSave;
             AutoSaveInterval = ApplicationSetting.Setting.AutoSaveInterval;
             AutoSaveCount = ApplicationSetting.Setting.AutoSaveCount;
@@ -205,6 +214,7 @@ namespace NiVE3.ViewModel.Dialog
             ApplicationSetting.Setting.UseGpuLuid = UseGpuLuid;
             ApplicationSetting.Setting.ImageCacheLimit = ImageCacheLimit;
             ApplicationSetting.Setting.RamPreviewCacheLimit = RamPreviewCacheLimit;
+            ApplicationSetting.Setting.IsCompressCache = IsCompressCache;
             ApplicationSetting.Setting.UseAutoSave = UseAutoSave;
             ApplicationSetting.Setting.AutoSaveInterval = AutoSaveInterval;
             ApplicationSetting.Setting.AutoSaveCount = AutoSaveCount;

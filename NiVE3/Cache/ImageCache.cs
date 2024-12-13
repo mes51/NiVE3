@@ -18,7 +18,7 @@ namespace NiVE3.Cache
 
         static ImageCache Instance { get; } = new ImageCache();
 
-        public static bool EnableCompress { get; set; }
+        static bool IsCompressCache { get; set; }
 
         long CacheLimit { get; set; } = Math.Min(16L * 1024 * Const.MiB, SystemInfo.MaxCacheLimit);
 
@@ -82,7 +82,7 @@ namespace NiVE3.Cache
             (IDisposable, int, ROI) compressedImage;
             // NOTE: 実際に確保したメモリの容量で判定する
             var managedImageSize = image.Data.Length * ImageElementSize;
-            if (EnableCompress)
+            if (IsCompressCache)
             {
                 var qoiImage = Qoi.Encode(image);
                 var size = qoiImage.GetAllocatedSize();
@@ -182,6 +182,11 @@ namespace NiVE3.Cache
         private void Setting_UpdateSetting(object? sender, EventArgs e)
         {
             CacheLimit = ApplicationSetting.Setting.ImageCacheLimit * Const.MiB;
+            if (ApplicationSetting.Setting.IsCompressCache != IsCompressCache)
+            {
+                ClearAllInternal();
+                IsCompressCache = ApplicationSetting.Setting.IsCompressCache;
+            }
         }
 
         public static (NManagedImage, ROI)? Get(in Guid objectId, in Int128 key, double time)

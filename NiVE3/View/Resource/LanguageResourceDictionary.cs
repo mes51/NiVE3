@@ -731,6 +731,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("(最大: {0}MiB)")]
         public static readonly string OptionView_Performance_CacheLimit_MaxSizeLabel = nameof(OptionView_Performance_CacheLimit_MaxSizeLabel);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("キャッシュを圧縮する(※変更時キャッシュがクリアされます)")]
+        public static readonly string OptionView_Performance_IsCompressCache = nameof(OptionView_Performance_IsCompressCache);
+
         [ShowInMarkup, LanguageKey, DefaultValue("オートセーブを使用する")]
         public static readonly string OptionView_AutoSave_UseAutoSave = nameof(OptionView_AutoSave_UseAutoSave);
 
