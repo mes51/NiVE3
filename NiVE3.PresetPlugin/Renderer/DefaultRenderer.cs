@@ -145,13 +145,13 @@ namespace NiVE3.PresetPlugin.Renderer
             {
                 if (downSamplingRate != 1.0)
                 {
-                    CurrentGpuFrame = new NGPUImage((int)Math.Floor(Width / downSamplingRate), (int)Math.Floor(Height / downSamplingRate), Accelerator.CurrentDevice, new Vector4(1.0F, 1.0F, 1.0F, 0.0F));
+                    CurrentGpuFrame = new NGPUImage((int)Math.Floor(Width / downSamplingRate), (int)Math.Floor(Height / downSamplingRate), Accelerator.CurrentDevice);
                     CurrentDownScaleRateX = Width / (float)CurrentGpuFrame.Width;
                     CurrentDownScaleRateY = Height / (float)CurrentGpuFrame.Height;
                 }
                 else
                 {
-                    CurrentGpuFrame = new NGPUImage(Width, Height, Accelerator.CurrentDevice, new Vector4(1.0F, 1.0F, 1.0F, 0.0F));
+                    CurrentGpuFrame = new NGPUImage(Width, Height, Accelerator.CurrentDevice);
                     CurrentDownScaleRateX = 1.0F;
                     CurrentDownScaleRateY = 1.0F;
                 }

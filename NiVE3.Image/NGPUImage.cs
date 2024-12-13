@@ -26,10 +26,7 @@ namespace NiVE3.Image
         /// <param name="width">幅</param>
         /// <param name="height">高さ</param>
         /// <param name="device">GPUのデバイス</param>
-        public NGPUImage(int width, int height, GraphicsDevice device) : base(width, height)
-        {
-            Data = device.AllocateReadWriteBuffer<Float4>(width * height);
-        }
+        public NGPUImage(int width, int height, GraphicsDevice device) : this(width, height, device, new Vector4(1.0F, 1.0F, 1.0F, 0.0F)) { }
 
         /// <summary>
         /// コンストラクタ
@@ -57,7 +54,7 @@ namespace NiVE3.Image
         /// <param name="height">高さ</param>
         /// <param name="device">GPUのデバイス</param>
         /// <param name="color">初期の各ピクセルの色</param>
-        public NGPUImage(int width, int height, GraphicsDevice device, Vector4 color) : this(width, height, device)
+        public NGPUImage(int width, int height, GraphicsDevice device, Vector4 color) : base(width, height)
         {
             Data = device.AllocateReadWriteBuffer<Float4>(width * height);
             using var context = device.CreateComputeContext();
