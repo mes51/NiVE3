@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using NiVE3.Extension;
 using NiVE3.Plugin.Property;
 using NiVE3.Shared.Extension;
+using NiVE3.Util;
 using NiVE3.View.Resource;
 
 namespace NiVE3.Model
@@ -225,16 +226,16 @@ namespace NiVE3.Model
                     Model.KeyFrames.Remove(k);
                 }
 
-                foreach (var k in newKeyFrames)
+                foreach (var nk in newKeyFrames)
                 {
-                    var index = Model.KeyFrames.FindLastIndex(k => k.Time <= k.Time) + 1;
-                    if (index > 0 && Model.KeyFrames[index - 1].Time == k.Time)
+                    var index = Model.KeyFrames.FindLastIndex(k => k.Time <= nk.Time) + 1;
+                    if (index > 0 && Math.Abs(Model.KeyFrames[index - 1].Time - nk.Time) < TimeCalc.TimeEpsilon)
                     {
-                        Model.KeyFrames[index - 1] = k;
+                        Model.KeyFrames[index - 1] = nk;
                     }
                     else
                     {
-                        Model.KeyFrames.Insert(index, k);
+                        Model.KeyFrames.Insert(index, nk);
                     }
                 }
             }
