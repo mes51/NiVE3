@@ -633,11 +633,18 @@ namespace NiVE3.Input
             var max = Vector128.Create(int.MinValue);
             foreach (var r in polygons.Select(g => Vector128.Create((int)MathF.Floor(g.MinX), (int)MathF.Floor(g.MinY), (int)MathF.Ceiling(g.MaxX), (int)MathF.Ceiling(g.MaxY))))
             {
-                min = Sse41.Min(min, r);
-                max = Sse41.Max(max, r);
+                min = Vector128.Min(min, r);
+                max = Vector128.Max(max, r);
             }
 
-            return Avx2.Blend(min, max, 0b1100);
+            if (Avx2.IsSupported)
+            {
+                return Avx2.Blend(min, max, 0b1100);
+            }
+            else
+            {
+                return (min & Vector128.Create(0, 0, -1, -1)) + (max & Vector128.Create(-1, -1, 0, 0));
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -943,10 +950,10 @@ namespace NiVE3.Input
         {
             var min = Vector128.Create(int.MaxValue);
             var max = Vector128.Create(int.MinValue);
-            foreach (var (_, _, _, r, blurMargin, _) in glyphPolygons)
+            foreach (var (_, outlinePolygons, textRun, r, blurMargin, _) in glyphPolygons)
             {
-                min = Sse41.Min(min, Sse2.Subtract(r, blurMargin));
-                max = Sse41.Max(max, Sse2.Add(r, blurMargin));
+                min = Vector128.Min(min, r - blurMargin);
+                max = Vector128.Max(max, r + blurMargin);
             }
 
             var imageOrigin = (Vector2d)glyphPolygons[0].Origin + new Vector2d(glyphPolygons[0].Rect.GetElement(0) - min.GetElement(0), glyphPolygons[0].Rect.GetElement(1) - min.GetElement(1));
