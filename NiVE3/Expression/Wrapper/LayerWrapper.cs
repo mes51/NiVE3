@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Model;
 using NiVE3.Shared.Extension;
+using NiVE3.Util;
 
 namespace NiVE3.Expression.Wrapper
 {
@@ -43,6 +44,12 @@ namespace NiVE3.Expression.Wrapper
 
         [ExpressionPublicMember]
         public double outPoint => LayerModel.OutPoint;
+
+        [ExpressionPublicMember]
+        public double globalInPoint => TimeCalc.RoundTimeDigit(LayerModel.SourceStartPoint + LayerModel.InPoint);
+
+        [ExpressionPublicMember]
+        public double globalOutPoint => TimeCalc.RoundTimeDigit(LayerModel.SourceStartPoint + LayerModel.OutPoint);
 
         //public bool isEnableTimeRemap => LayerModel.IsEnableTimeRemap;
 
@@ -86,6 +93,9 @@ namespace NiVE3.Expression.Wrapper
 
         [ExpressionPublicMember]
         public bool isEnable3D => LayerModel.IsEnable3D;
+
+        [ExpressionPublicMember]
+        public bool isFreezeFrame => LayerModel.IsFreezeFrame;
 
         [ExpressionPublicMember]
         public string interpolationQuality => LayerModel.InterpolationQuality.ToString();

@@ -125,7 +125,6 @@ namespace NiVE3.Property.Types
             if (expressionValue is string text)
             {
                 value = baseText.ChangeText(text);
-                return true;
             }
             else if (expressionValue is IDictionary<string, object?> dictionary)
             {
@@ -159,11 +158,13 @@ namespace NiVE3.Property.Types
                 }
 
                 value = new StyledText(styledText, defaultStyle, [..styles]);
-                return true;
+            }
+            else
+            {
+                value = baseText.ChangeText(expressionValue?.ToString() ?? "null");
             }
 
-            value = null;
-            return false;
+            return true;
         }
 
         public object? ConvertToExpressionValue(object? value)
