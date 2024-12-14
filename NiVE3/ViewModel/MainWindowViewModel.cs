@@ -216,9 +216,33 @@ namespace NiVE3.ViewModel
                 ProjectModel.LoadProject(open.FileName);
             });
 
-            SaveProjectCommand = new DelegateCommand(() => SaveProject(false), () => IsEdited).ObservesProperty(() => IsEdited);
+            SaveProjectCommand = new DelegateCommand(() =>
+            {
+                try
+                {
+                    SaveProject(false);
+                }
+                catch
+                {
+                    var errorTitle = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_RaiseSaveProjectError_Title);
+                    var errorText = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_RaiseSaveProjectError_Text);
+                    MessageBox.Show(errorText, errorTitle, MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }, () => IsEdited).ObservesProperty(() => IsEdited);
 
-            SaveProjectAsNewNameCommand = new DelegateCommand(() => SaveProject(true));
+            SaveProjectAsNewNameCommand = new DelegateCommand(() =>
+            {
+                try
+                {
+                    SaveProject(true);
+                }
+                catch
+                {
+                    var errorTitle = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_RaiseSaveProjectError_Title);
+                    var errorText = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_RaiseSaveProjectError_Text);
+                    MessageBox.Show(errorText, errorTitle, MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            });
 
             ExitCommand = new DelegateCommand(() => CloseRequest.Raise());
 
@@ -283,7 +307,17 @@ namespace NiVE3.ViewModel
                 switch (MessageBox.Show(text, title, MessageBoxButton.YesNoCancel, MessageBoxImage.Warning))
                 {
                     case MessageBoxResult.Yes:
-                        SaveProject(false);
+                        try
+                        {
+                            SaveProject(false);
+                            IsForceClosing = true;
+                        }
+                        catch
+                        {
+                            var errorTitle = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_RaiseSaveProjectError_Title);
+                            var errorText = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_RaiseSaveProjectError_Text);
+                            MessageBox.Show(errorText, errorTitle, MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
                         break;
                     case MessageBoxResult.No:
                         IsForceClosing = true;
@@ -314,6 +348,10 @@ namespace NiVE3.ViewModel
                 if (IsEdited)
                 {
                     SaveProjectBeforeCloseCommand.Execute(null);
+                }
+                else
+                {
+                    IsForceClosing = true;
                 }
             });
 

@@ -1046,6 +1046,12 @@ namespace NiVE3.View.Resource
         [DefaultValue("未保存の編集内容があります。アプリケーション終了前に保存しますか?")]
         public static readonly string Dialog_NotSaveEditedWhenClose_Text = nameof(Dialog_NotSaveEditedWhenClose_Text);
 
+        [DefaultValue("エラー")]
+        public static readonly string Dialog_RaiseSaveProjectError_Title = nameof(Dialog_RaiseSaveProjectError_Title);
+
+        [DefaultValue("プロジェクト保存中にエラーが発生しました。ファイルパスを変えるなど、他の場所に保存してください。")]
+        public static readonly string Dialog_RaiseSaveProjectError_Text = nameof(Dialog_RaiseSaveProjectError_Text);
+
         [DefaultValue("確認")]
         public static readonly string Dialog_StopRenderingWhenClose_Title = nameof(Dialog_StopRenderingWhenClose_Title);
 
