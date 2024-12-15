@@ -707,6 +707,29 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("前処理/後処理用")]
         public const string Distortion_PolarDistortion_ForPreOrPostProcess = nameof(Distortion_PolarDistortion_ForPreOrPostProcess);
 
+        // GlassDistortion
+
+        [DefaultValue("ガラス歪み")]
+        public const string Distortion_GlassDistortion_Name = nameof(Distortion_GlassDistortion_Name);
+
+        [DefaultValue("ソースレイヤーのグラデーションの向きに応じて画像を歪ませます")]
+        public const string Distortion_GlassDistortion_Description = nameof(Distortion_GlassDistortion_Description);
+
+        [LanguageKey, DefaultValue("ソースレイヤー")]
+        public const string Distortion_GlassDistortion_SourceLayer = nameof(Distortion_GlassDistortion_SourceLayer);
+
+        [LanguageKey, DefaultValue("チャンネル")]
+        public const string Distortion_GlassDistortion_Channel = nameof(Distortion_GlassDistortion_Channel);
+
+        [LanguageKey, DefaultValue("ソースレイヤーの位置")]
+        public const string Distortion_GlassDistortion_SourceLayerPosition = nameof(Distortion_GlassDistortion_SourceLayerPosition);
+
+        [LanguageKey, DefaultValue("適用率")]
+        public const string Distortion_GlassDistortion_Rate = nameof(Distortion_GlassDistortion_Rate);
+
+        [LanguageKey, DefaultValue("移動量")]
+        public const string Distortion_GlassDistortion_DisplacementAmount = nameof(Distortion_GlassDistortion_DisplacementAmount);
+
         // Dynamics
 
         [DefaultValue("ダイナミクス")]
@@ -930,28 +953,25 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("半径")]
         public const string Channel_MinMax_Radius = nameof(Channel_MinMax_Radius);
 
-        // GlassDistortion
+        // BlendLayer
 
-        [DefaultValue("ガラス歪み")]
-        public const string Distortion_GlassDistortion_Name = nameof(Distortion_GlassDistortion_Name);
+        [DefaultValue("ブレンド")]
+        public const string Channel_BlendLayer_Name = nameof(Channel_BlendLayer_Name);
 
-        [DefaultValue("ソースレイヤーのグラデーションの向きに応じて画像を歪ませます")]
-        public const string Distortion_GlassDistortion_Description = nameof(Distortion_GlassDistortion_Description);
+        [DefaultValue("指定したレイヤーをブレンドします")]
+        public const string Channel_BlendLayer_Description = nameof(Channel_BlendLayer_Description);
 
         [LanguageKey, DefaultValue("ソースレイヤー")]
-        public const string Distortion_GlassDistortion_SourceLayer = nameof(Distortion_GlassDistortion_SourceLayer);
+        public const string Channel_BlendLayer_SourceLayer = nameof(Channel_BlendLayer_SourceLayer);
 
-        [LanguageKey, DefaultValue("チャンネル")]
-        public const string Distortion_GlassDistortion_Channel = nameof(Distortion_GlassDistortion_Channel);
+        [LanguageKey, DefaultValue("ブレンドモード")]
+        public const string Channel_BlendLayer_BlendMode = nameof(Channel_BlendLayer_BlendMode);
 
-        [LanguageKey, DefaultValue("ソースレイヤーの位置")]
-        public const string Distortion_GlassDistortion_SourceLayerPosition = nameof(Distortion_GlassDistortion_SourceLayerPosition);
+        [LanguageKey, DefaultValue("ソースレイヤーの不透明度")]
+        public const string Channel_BlendLayer_SourceOpacity = nameof(Channel_BlendLayer_SourceOpacity);
 
-        [LanguageKey, DefaultValue("適用率")]
-        public const string Distortion_GlassDistortion_Rate = nameof(Distortion_GlassDistortion_Rate);
-
-        [LanguageKey, DefaultValue("移動量")]
-        public const string Distortion_GlassDistortion_DisplacementAmount = nameof(Distortion_GlassDistortion_DisplacementAmount);
+        [LanguageKey, DefaultValue("ソースレイヤーの配置")]
+        public const string Channel_BlendLayer_SourceLayerPosition = nameof(Channel_BlendLayer_SourceLayerPosition);
 
         // Renderers
 
@@ -1386,13 +1406,13 @@ namespace NiVE3.PresetPlugin.Resource
         public const string DisplacemenMapChannelType_Off = nameof(DisplacemenMapChannelType_Off);
 
         [DefaultValue("中央配置")]
-        public const string DisplacementSourceLayerPositionType_Center = nameof(DisplacementSourceLayerPositionType_Center);
+        public const string SourceLayerPositionType_Center = nameof(SourceLayerPositionType_Center);
 
         [DefaultValue("リサイズ")]
-        public const string DisplacementSourceLayerPositionType_Stretch = nameof(DisplacementSourceLayerPositionType_Stretch);
+        public const string SourceLayerPositionType_Stretch = nameof(SourceLayerPositionType_Stretch);
 
         [DefaultValue("ループ")]
-        public const string DisplacementSourceLayerPositionType_Loop = nameof(DisplacementSourceLayerPositionType_Loop);
+        public const string SourceLayerPositionType_Loop = nameof(SourceLayerPositionType_Loop);
 
         [DefaultValue("RGB")]
         public const string JpegColorSpace_Rgb = nameof(JpegColorSpace_Rgb);

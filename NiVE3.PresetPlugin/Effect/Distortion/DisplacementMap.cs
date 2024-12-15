@@ -15,6 +15,7 @@ using NiVE3.Plugin.Property;
 using NiVE3.Plugin.Property.Properties;
 using NiVE3.Plugin.Resource;
 using NiVE3.Plugin.ValueObject;
+using NiVE3.PresetPlugin.Effect.Util;
 using NiVE3.PresetPlugin.Extension;
 using NiVE3.PresetPlugin.Internal;
 using NiVE3.PresetPlugin.Internal.Drawing;
@@ -61,7 +62,7 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
                 new DoubleProperty(PropertyHorizontalMaxMoveId, LanguageResourceDictionary.ResourceKeys.Distortion_DisplacementMap_HorizontalMaxMove, 5.0, double.MinValue, double.MaxValue, digit: 2),
                 new EnumProperty(PropertyVerticalChannelId, LanguageResourceDictionary.ResourceKeys.Distortion_DisplacementMap_VerticalChannel, typeof(DisplacemenMapChannelType), typeof(LanguageResourceDictionary), DisplacemenMapChannelType.G),
                 new DoubleProperty(PropertyVerticalMaxMoveId, LanguageResourceDictionary.ResourceKeys.Distortion_DisplacementMap_VerticalMaxMove, 5.0, double.MinValue, double.MaxValue, digit: 2),
-                new EnumProperty(PropertySourceLayerPositionId, LanguageResourceDictionary.ResourceKeys.Distortion_DisplacementMap_SourceLayerPosition, typeof(DisplacementSourceLayerPositionType), typeof(LanguageResourceDictionary), DisplacementSourceLayerPositionType.Center),
+                new EnumProperty(PropertySourceLayerPositionId, LanguageResourceDictionary.ResourceKeys.Distortion_DisplacementMap_SourceLayerPosition, typeof(SourceLayerPositionType), typeof(LanguageResourceDictionary), SourceLayerPositionType.Center),
                 new CheckBoxProperty(PropertyIsLoopImageId, LanguageResourceDictionary.ResourceKeys.Distortion_DisplacementMap_IsLoopImage, false)
             ];
         }
@@ -73,7 +74,7 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
             var horizontalMaxMove = (float)properties.GetValue(PropertyHorizontalMaxMoveId, layerTime, 0.0);
             var verticalChannel = properties.GetValue(PropertyVerticalChannelId, layerTime, DisplacemenMapChannelType.R);
             var verticalMaxMove = (float)properties.GetValue(PropertyVerticalMaxMoveId, layerTime, 0.0);
-            var sourceLayerPosition = properties.GetValue(PropertySourceLayerPositionId, layerTime, DisplacementSourceLayerPositionType.Center);
+            var sourceLayerPosition = properties.GetValue(PropertySourceLayerPositionId, layerTime, SourceLayerPositionType.Center);
             var isLoopImage = properties.GetValue(PropertyIsLoopImageId, layerTime, false);
 
             var targetLayer = targetLayerId != UseLayerImageTarget.Empty ? composition.GetLayer(targetLayerId.LayerId) : null;
@@ -105,7 +106,7 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
 
         public void Dispose() { }
 
-        static NManagedImage ProcessCpu(NImage image, ROI roi, NImage sourceImage, DisplacemenMapChannelType horizontalChannel, float horizontalMaxMove, DisplacemenMapChannelType verticalChannel, float verticalMaxMove, DisplacementSourceLayerPositionType position, bool isLoopImage)
+        static NManagedImage ProcessCpu(NImage image, ROI roi, NImage sourceImage, DisplacemenMapChannelType horizontalChannel, float horizontalMaxMove, DisplacemenMapChannelType verticalChannel, float verticalMaxMove, SourceLayerPositionType position, bool isLoopImage)
         {
             var managedImage = image.ToManaged();
             var managedSourceImage = sourceImage.ToManaged();
@@ -114,12 +115,12 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
 
             var (sourceStartX, sourceStartY) = position switch
             {
-                DisplacementSourceLayerPositionType.Stretch => (0.0F, 0.0F),
+                SourceLayerPositionType.Stretch => (0.0F, 0.0F),
                 _ => ((managedSourceImage.Width - managedImage.Width) * 0.5F, (managedSourceImage.Height - managedImage.Height) * 0.5F)
             };
             var (sourceDiffX, sourceDiffY) = position switch
             {
-                DisplacementSourceLayerPositionType.Stretch => ((managedSourceImage.Width - 1) / (float)(managedImage.Width - 1), (managedSourceImage.Height - 1) / (float)(managedImage.Height - 1)),
+                SourceLayerPositionType.Stretch => ((managedSourceImage.Width - 1) / (float)(managedImage.Width - 1), (managedSourceImage.Height - 1) / (float)(managedImage.Height - 1)),
                 _ => (1.0F, 1.0F)
             };
             var bx = roi.Left;
@@ -133,7 +134,7 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
                 var sourceY = sourceStartY + sourceDiffY * y;
                 for (var x = bx; x < ex; x++, sourceX += sourceDiffX)
                 {
-                    var mapColor = position == DisplacementSourceLayerPositionType.Loop ? ImageInterpolation.BilinearLoop(sourceDataSpan, managedSourceImage.Width, managedSourceImage.Height, sourceX, sourceY) : EdgeRepeatBilinear(sourceDataSpan, managedSourceImage.Width, managedSourceImage.Height, sourceX, sourceY, Half);
+                    var mapColor = position == SourceLayerPositionType.Loop ? ImageInterpolation.BilinearLoop(sourceDataSpan, managedSourceImage.Width, managedSourceImage.Height, sourceX, sourceY) : EdgeRepeatBilinear(sourceDataSpan, managedSourceImage.Width, managedSourceImage.Height, sourceX, sourceY, Half);
 
                     var distortedX = x + CalcMoveRate(mapColor, horizontalChannel) * horizontalMaxMove;
                     var distortedY = y + CalcMoveRate(mapColor, verticalChannel) * verticalMaxMove;
@@ -150,7 +151,7 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
             return managedImage;
         }
 
-        static NGPUImage ProcessGpu(GraphicsDevice device, NImage image, ROI roi, NImage sourceImage, DisplacemenMapChannelType horizontalChannel, float horizontalMaxMove, DisplacemenMapChannelType verticalChannel, float verticalMaxMove, DisplacementSourceLayerPositionType position, bool isLoopImage)
+        static NGPUImage ProcessGpu(GraphicsDevice device, NImage image, ROI roi, NImage sourceImage, DisplacemenMapChannelType horizontalChannel, float horizontalMaxMove, DisplacemenMapChannelType verticalChannel, float verticalMaxMove, SourceLayerPositionType position, bool isLoopImage)
         {
             var gpuImage = image.ToGpu(device);
             var gpuSourceImage = sourceImage.ToGpu(device);

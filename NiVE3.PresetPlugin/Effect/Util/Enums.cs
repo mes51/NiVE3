@@ -31,4 +31,11 @@ namespace NiVE3.PresetPlugin.Effect.Util
         Front,
         Back
     }
+
+    enum SourceLayerPositionType
+    {
+        Center,
+        Stretch,
+        Loop
+    }
 }

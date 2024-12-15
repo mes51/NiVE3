@@ -20,11 +20,4 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
         Half,
         Off
     }
-
-    enum DisplacementSourceLayerPositionType
-    {
-        Center,
-        Stretch,
-        Loop
-    }
 }

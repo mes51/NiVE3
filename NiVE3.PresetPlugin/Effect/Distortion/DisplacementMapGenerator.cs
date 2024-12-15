@@ -19,7 +19,7 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
     static class DisplacementMapGenerator
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float[] Generate(NManagedImage sourceImage, int targetWidth, int targetHeight, DisplacemenMapChannelType channel, DisplacementSourceLayerPositionType position)
+        public static float[] Generate(NManagedImage sourceImage, int targetWidth, int targetHeight, DisplacemenMapChannelType channel, SourceLayerPositionType position)
         {
             var map = ArrayPool<float>.Shared.Rent(targetWidth * targetHeight);
 
@@ -31,7 +31,7 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
 
                 switch (position)
                 {
-                    case DisplacementSourceLayerPositionType.Center:
+                    case SourceLayerPositionType.Center:
                         {
                             var leftX = (targetWidth - sourceImage.Width) * 0.5F;
                             var topY = (targetHeight - sourceImage.Height) * 0.5F;
@@ -49,7 +49,7 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
                             });
                         }
                         break;
-                    case DisplacementSourceLayerPositionType.Loop:
+                    case SourceLayerPositionType.Loop:
                         {
                             Parallel.For(0, targetHeight, y =>
                             {
@@ -91,7 +91,7 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
             return map;
         }
 
-        public static ReadWriteBuffer<float> Generate(GraphicsDevice device, NGPUImage gpuImage, int targetWidth, int targetHeight, DisplacemenMapChannelType channel, DisplacementSourceLayerPositionType position)
+        public static ReadWriteBuffer<float> Generate(GraphicsDevice device, NGPUImage gpuImage, int targetWidth, int targetHeight, DisplacemenMapChannelType channel, SourceLayerPositionType position)
         {
             var map = device.AllocateReadWriteBuffer<float>(targetWidth * targetHeight);
 
