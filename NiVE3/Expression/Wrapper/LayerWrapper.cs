@@ -136,7 +136,7 @@ namespace NiVE3.Expression.Wrapper
         public LayerAudioLevelPropertiesWrapper? audioLevel { get; } = LayerModel.AudioOptionProperties != null ? new LayerAudioLevelPropertiesWrapper(LayerModel.AudioOptionProperties, GlobalTime) : null;
 
         [ExpressionPublicMember]
-        public PropertyGroupWrapper? text { get; } = LayerModel.TextProperties != null ? new PropertyGroupWrapper(LayerModel.TextProperties, GlobalTime) : null;
+        public LayerTextPropertyWrapper? text { get; } = LayerModel.TextProperties != null ? new LayerTextPropertyWrapper(LayerModel.TextProperties, GlobalTime) : null;
 
         [ExpressionPublicMember]
         public PropertyGroupWrapper? shape { get; } = LayerModel.ShapeProperties != null ? new PropertyGroupWrapper(LayerModel.ShapeProperties, GlobalTime) : null;

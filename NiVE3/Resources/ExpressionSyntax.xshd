@@ -92,7 +92,9 @@
 			<Word>Promise</Word>
 			<Word>Reflect</Word>
 			<Word>Proxy</Word>
-			<Word>Intl</Word>
+			<Word>Interpolation</Word>
+			<Word>VectorMath</Word>
+			<Word>StringUtil</Word>
         </Keywords>
 		<Keywords color="ExpressionIntrinsics">
 			<Word>Random</Word>

@@ -62,7 +62,9 @@ namespace NiVE3.Input
     {
         public const string SourceTextId = nameof(SourceTextId);
 
-        const string TextMoreOptionsGroupId = nameof(TextMoreOptionsGroupId);
+        public const string TextMoreOptionsGroupId = nameof(TextMoreOptionsGroupId);
+
+        public const string TextAnimatorsId = nameof(TextAnimatorsId);
 
         const string TextBaseAnchorPointRateId = nameof(TextBaseAnchorPointRateId);
 
@@ -73,8 +75,6 @@ namespace NiVE3.Input
         //const string TextVerticalModeId = nameof(TextVerticalModeId);
 
         const string TextInterCharacterBlendModeId = nameof(TextInterCharacterBlendModeId);
-
-        const string TextAnimatorsId = nameof(TextAnimatorsId);
 
         const string TextAnimatorAnimatorId = nameof(TextAnimatorAnimatorId);
 

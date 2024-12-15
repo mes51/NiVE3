@@ -70,6 +70,7 @@ namespace NiVE3.Expression
             Engine.SetValue("Random", new ExpressionRandom(globalTime, propertyModel.ObjectId));
             Engine.SetValue("Interpolation", typeof(ExpressionInterpolation));
             Engine.SetValue("VectorMath", typeof(ExpressionVectorMath));
+            Engine.SetValue("StringUtil", typeof(ExpressionStringUtil));
         }
 
         public object? Evaluate(ExpressionScript script, object? value)

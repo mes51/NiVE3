@@ -60,7 +60,7 @@ namespace NiVE3.Expression.Wrapper
             return null;
         }
 
-        static IPropertyWrapper Wrap(IPropertyModel propertyModel, double globalTime)
+        public static IPropertyWrapper Wrap(IPropertyModel propertyModel, double globalTime)
         {
             switch (propertyModel)
             {
