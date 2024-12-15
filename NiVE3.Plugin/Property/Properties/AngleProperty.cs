@@ -42,11 +42,26 @@ namespace NiVE3.Plugin.Property.Properties
         {
             if (value is double angle)
             {
-                return IsOnlyPositiveDirection ? Math.Max(angle, 0.0) : angle;
+                if (double.IsNaN(angle))
+                {
+                    return DefaultValue;
+                }
+                else if (double.IsPositiveInfinity(angle))
+                {
+                    return double.MaxValue;
+                }
+                else if (double.IsNegativeInfinity(angle))
+                {
+                    return IsOnlyPositiveDirection ? 0.0 : double.MinValue;
+                }
+                else
+                {
+                    return IsOnlyPositiveDirection ? Math.Max(angle, 0.0) : angle;
+                }
             }
             else
             {
-                return 0.0;
+                return DefaultValue;
             }
         }
     }

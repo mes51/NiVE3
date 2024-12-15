@@ -36,7 +36,21 @@ namespace NiVE3.Plugin.Property.Properties
 
         public override object? CoerceValue(object? value)
         {
-            return (Vector3d)(value ?? Vector3d.Zero) % 360.0;
+            if (value is Vector3d v)
+            {
+                if (v.IsNaN() || v.IsInfinty())
+                {
+                    return DefaultValue;
+                }
+                else
+                {
+                    return (Vector3d)(value ?? Vector3d.Zero) % 360.0;
+                }
+            }
+            else
+            {
+                return DefaultValue;
+            }
         }
     }
 }

@@ -20,6 +20,10 @@ namespace NiVE3.Numerics
 
         public static readonly Vector2d One = new Vector2d(1.0, 1.0);
 
+        public static readonly Vector2d MaxValue = new Vector2d(double.MaxValue);
+
+        public static readonly Vector2d MinValue = new Vector2d(double.MinValue);
+
         [JsonInclude]
         public readonly double X;
 
@@ -108,6 +112,51 @@ namespace NiVE3.Numerics
         public bool Equals(Vector2d other)
         {
             return X == other.X && Y == other.Y;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector2d Min(in Vector2d a, in Vector2d b)
+        {
+            return (Vector2d)Vector128.Min(a.AsVector128(), b.AsVector128());
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector2d Max(in Vector2d a, in Vector2d b)
+        {
+            return (Vector2d)Vector128.Max(a.AsVector128(), b.AsVector128());
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector2d Clamp(in Vector2d v, in Vector2d min, in Vector2d max)
+        {
+            return new Vector2d(Math.Clamp(v.X, min.X, max.X), Math.Clamp(v.Y, min.Y, max.Y));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector2d MinWithoutNaN(in Vector2d a, in Vector2d b)
+        {
+            return new Vector2d(
+                double.IsNaN(a.X) && double.IsNaN(b.X) ? 0.0 : Math.Min(a.X, b.X),
+                double.IsNaN(a.Y) && double.IsNaN(b.Y) ? 0.0 : Math.Min(a.Y, b.Y)
+            );
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector2d MaxWithoutNaN(in Vector2d a, in Vector2d b)
+        {
+            return new Vector2d(
+                double.IsNaN(a.X) && double.IsNaN(b.X) ? 0.0 : Math.Max(a.X, b.X),
+                double.IsNaN(a.Y) && double.IsNaN(b.Y) ? 0.0 : Math.Max(a.Y, b.Y)
+            );
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector2d ClampWithoutNaN(in Vector2d v, in Vector2d min, in Vector2d max)
+        {
+            return new Vector2d(
+                double.IsNaN(v.X) ? 0.0 : Math.Clamp(v.X, min.X, max.X),
+                double.IsNaN(v.Y) ? 0.0 : Math.Clamp(v.Y, min.Y, max.Y)
+            );
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -253,6 +302,12 @@ namespace NiVE3.Numerics
     {
         public static readonly Vector3d Zero = new Vector3d();
 
+        public static readonly Vector3d One = new Vector3d(1.0);
+
+        public static readonly Vector3d MaxValue = new Vector3d(double.MaxValue);
+
+        public static readonly Vector3d MinValue = new Vector3d(double.MinValue);
+
         [JsonInclude]
         public readonly double X;
 
@@ -345,6 +400,54 @@ namespace NiVE3.Numerics
         public bool Equals(Vector3d other)
         {
             return X == other.X && Y == other.Y && Z == other.Z;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector3d Min(in Vector3d a, in Vector3d b)
+        {
+            return (Vector3d)Vector256.Min(a.AsVector256(), b.AsVector256());
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector3d Max(in Vector3d a, in Vector3d b)
+        {
+            return (Vector3d)Vector256.Max(a.AsVector256(), b.AsVector256());
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector3d Clamp(in Vector3d v, in Vector3d min, in Vector3d max)
+        {
+            return new Vector3d(Math.Clamp(v.X, min.X, max.X), Math.Clamp(v.Y, min.Y, max.Y), Math.Clamp(v.Z, min.Z, max.Z));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector3d MinWithoutNaN(in Vector3d a, in Vector3d b)
+        {
+            return new Vector3d(
+                double.IsNaN(a.X) && double.IsNaN(b.X) ? 0.0 : Math.Min(a.X, b.X),
+                double.IsNaN(a.Y) && double.IsNaN(b.Y) ? 0.0 : Math.Min(a.Y, b.Y),
+                double.IsNaN(a.Z) && double.IsNaN(b.Z) ? 0.0 : Math.Min(a.Z, b.Z)
+            );
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector3d MaxWithoutNaN(in Vector3d a, in Vector3d b)
+        {
+            return new Vector3d(
+                double.IsNaN(a.X) && double.IsNaN(b.X) ? 0.0 : Math.Max(a.X, b.X),
+                double.IsNaN(a.Y) && double.IsNaN(b.Y) ? 0.0 : Math.Max(a.Y, b.Y),
+                double.IsNaN(a.Z) && double.IsNaN(b.Z) ? 0.0 : Math.Max(a.Z, b.Z)
+            );
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector3d ClampWithoutNaN(in Vector3d v, in Vector3d min, in Vector3d max)
+        {
+            return new Vector3d(
+                double.IsNaN(v.X) ? 0.0 : Math.Clamp(v.X, min.X, max.X),
+                double.IsNaN(v.Y) ? 0.0 : Math.Clamp(v.Y, min.Y, max.Y),
+                double.IsNaN(v.Z) ? 0.0 : Math.Clamp(v.Z, min.Z, max.Z)
+            );
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

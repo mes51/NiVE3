@@ -62,7 +62,29 @@ namespace NiVE3.Plugin.Property.Properties
 
         public override object? CoerceValue(object? value)
         {
-            return Math.Clamp((double)(value ?? 0.0), MinValue, MaxValue);
+            if (value is double v)
+            {
+                if (double.IsNaN(v))
+                {
+                    return DefaultValue;
+                }
+                else if (double.IsPositiveInfinity(v))
+                {
+                    return MaxValue;
+                }
+                else if (double.IsNegativeInfinity(v))
+                {
+                    return MinValue;
+                }
+                else
+                {
+                    return Math.Clamp(v, MinValue, MaxValue);
+                }
+            }
+            else
+            {
+                return DefaultValue;
+            }
         }
     }
 }
