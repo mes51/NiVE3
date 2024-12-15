@@ -952,8 +952,11 @@ namespace NiVE3.Input
             var max = Vector128.Create(int.MinValue);
             foreach (var (_, outlinePolygons, textRun, r, blurMargin, _) in glyphPolygons)
             {
-                min = Vector128.Min(min, r - blurMargin);
-                max = Vector128.Max(max, r + blurMargin);
+                if (textRun.Opacity > 0.0F && (textRun.FillColor.W > 0.0F || (outlinePolygons.Length > 0 && textRun.TextLineColor.W > 0.0F)))
+                {
+                    min = Vector128.Min(min, r - blurMargin);
+                    max = Vector128.Max(max, r + blurMargin);
+                }
             }
 
             var imageOrigin = (Vector2d)glyphPolygons[0].Origin + new Vector2d(glyphPolygons[0].Rect.GetElement(0) - min.GetElement(0), glyphPolygons[0].Rect.GetElement(1) - min.GetElement(1));
