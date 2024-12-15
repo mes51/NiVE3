@@ -642,20 +642,19 @@ namespace NiVE3.ViewModel
 
         void UpdateCurrentFrame()
         {
+            if (IsDirtyImageBuffer || IsIgnoreUpdatePreview || IsCurrentFrameUpdating || !PreviewModel.CanRendering)
+            {
+                NeedUpdateFrameNextTick = true;
+                return;
+            }
+            else if (SourceType == SourceType.Audio)
+            {
+                return;
+            }
+
+            IsCurrentFrameUpdating = true;
             using (var checker = CycleChecker.StartCheck())
             {
-                if (IsDirtyImageBuffer || IsIgnoreUpdatePreview || IsCurrentFrameUpdating || !PreviewModel.CanRendering)
-                {
-                    NeedUpdateFrameNextTick = true;
-                    return;
-                }
-                else if (SourceType == SourceType.Audio)
-                {
-                    return;
-                }
-
-                IsCurrentFrameUpdating = true;
-
                 NImage? image;
                 try
                 {
@@ -663,9 +662,9 @@ namespace NiVE3.ViewModel
                 }
                 catch (GPUException ex)
                 {
+                    ApplicationModel.CaughtGPUException(ex);
                     IsCurrentFrameUpdating = false;
                     NeedUpdateFrameNextTick = true;
-                    ApplicationModel.CaughtGPUException(ex);
                     return;
                 }
 
@@ -683,9 +682,9 @@ namespace NiVE3.ViewModel
                         }
                         catch { }
 
+                        ApplicationModel.CaughtGPUException(new GPUException(ex));
                         IsCurrentFrameUpdating = false;
                         NeedUpdateFrameNextTick = true;
-                        ApplicationModel.CaughtGPUException(new GPUException(ex));
                         return;
                     }
                 }
