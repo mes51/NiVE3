@@ -90,9 +90,10 @@ namespace NiVE3.Plugin.Interfaces
         /// <param name="time">読み込むタイミングの時間</param>
         /// <param name="compositionWidth">コンポジションの幅</param>
         /// <param name="compositionHeight">コンポジションの高さ</param>
+        /// <param name="withInvisible">非表示の範囲も含むかどうか</param>
         /// <param name="properties">オプションの値</param>
         /// <returns>読み込む画像の四角形を表すSourceFootageRect</returns>
-        SourceFootageRect CalcSize(double time, int compositionWidth, int compositionHeight, PropertyValueGroup properties);
+        SourceFootageRect CalcSize(double time, int compositionWidth, int compositionHeight, bool withInvisible, PropertyValueGroup properties);
 
         /// <summary>
         /// 画像を読み込みます

@@ -115,7 +115,7 @@ namespace NiVE3.PresetPlugin.Input
             AcceleratorObject = accelerator;
         }
 
-        public SourceFootageRect CalcSize(double time, int compositionWidth, int compositionHeight, PropertyValueGroup properties)
+        public SourceFootageRect CalcSize(double time, int compositionWidth, int compositionHeight, bool withInvisible, PropertyValueGroup properties)
         {
             properties.TryGetValue(PropertyImageSizeId, out Vector3d size);
             var width = Math.Max((int)size.X, 1);

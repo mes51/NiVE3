@@ -414,45 +414,34 @@ namespace NiVE3.Input
             return new NManagedImage(1, 1);
         }
 
-        public SourceFootageRect CalcSize(double time, int compositionWidth, int compositionHeight, PropertyValueGroup properties)
+        public SourceFootageRect CalcSize(double time, int compositionWidth, int compositionHeight, bool withInvisible, PropertyValueGroup properties)
         {
             var contents = (properties[ContentPropertyId] as PropertyValueGroup[]) ?? [];
             var tree = CreateShapeTree(contents);
-            var drawable = tree.GetDrawables(1.0F).ToArray();
+            var drawables = tree.GetDrawables(1.0F).ToArray();
 
-            var minX = int.MaxValue;
-            var minY = int.MaxValue;
-            var maxX = int.MinValue;
-            var maxY = int.MinValue;
-            foreach (var (_, _, _, p) in drawable)
+            var (minX, minY, maxX, maxY) = CalcBounds(drawables, withInvisible);
+
+            if (minX >= maxX || minY >= maxY)
             {
-                var pathBounds = p.Bounds;
-                minX = Math.Min(minX, (int)MathF.Floor(pathBounds.Left));
-                minY = Math.Min(minY, (int)MathF.Floor(pathBounds.Top));
-                maxX = Math.Max(maxX, (int)MathF.Ceiling(pathBounds.Right));
-                maxY = Math.Max(maxY, (int)MathF.Ceiling(pathBounds.Bottom));
+                return SourceFootageRect.Empty;
             }
-
-            return new SourceFootageRect(-new Vector2d(minX, minY), maxX - minX, maxY - minY);
+            else
+            {
+                return new SourceFootageRect(-new Vector2d(minX, minY), maxX - minX, maxY - minY);
+            }
         }
 
         public NImage ReadFrame(double time, double downSamplingRate, int compositionWidth, int compositionHeight, PropertyValueGroup properties, ImageInterpolationQuality imageInterpolationQuality, bool toGpu)
         {
             var contents = (properties[ContentPropertyId] as PropertyValueGroup[]) ?? [];
             var tree = CreateShapeTree(contents);
-            var drawable = tree.GetDrawables((float)(1.0 / downSamplingRate)).ToArray();
+            var drawables = tree.GetDrawables((float)(1.0 / downSamplingRate)).ToArray();
 
-            var minX = int.MaxValue;
-            var minY = int.MaxValue;
-            var maxX = int.MinValue;
-            var maxY = int.MinValue;
-            foreach (var (_, _, _, p) in drawable)
+            var (minX, minY, maxX, maxY) = CalcBounds(drawables, false);
+            if (minX >= maxX || minY >= maxY)
             {
-                var pathBounds = p.Bounds;
-                minX = Math.Min(minX, (int)MathF.Floor(pathBounds.Left));
-                minY = Math.Min(minY, (int)MathF.Floor(pathBounds.Top));
-                maxX = Math.Max(maxX, (int)MathF.Ceiling(pathBounds.Right));
-                maxY = Math.Max(maxY, (int)MathF.Ceiling(pathBounds.Bottom));
+                return new NManagedImage(1, 1);
             }
 
             var image = new NManagedImage(maxX - minX + 1, maxY - minY + 1)
@@ -460,7 +449,7 @@ namespace NiVE3.Input
                 Origin = -new Vector2d(minX, minY)
             };
 
-            foreach (var (brush, fillRule, blendMode, path) in drawable)
+            foreach (var (brush, fillRule, blendMode, path) in drawables)
             {
                 var bounds = path.Bounds;
                 var left = (int)MathF.Floor(bounds.Left);
@@ -770,6 +759,41 @@ namespace NiVE3.Input
         {
             return [..paths.SelectMany(p => p.Flatten()).Select(p => new Polygon(p.Points.Span))];
         }
+
+        static (int minX, int minY, int maxX, int maxY) CalcBounds(Drawable[] drawables, bool withInvisible)
+        {
+            var minX = int.MaxValue;
+            var minY = int.MaxValue;
+            var maxX = int.MinValue;
+            var maxY = int.MinValue;
+            if (withInvisible)
+            {
+                foreach (var (_, _, _, p) in drawables)
+                {
+                    var pathBounds = p.Bounds;
+                    minX = Math.Min(minX, (int)MathF.Floor(pathBounds.Left));
+                    minY = Math.Min(minY, (int)MathF.Floor(pathBounds.Top));
+                    maxX = Math.Max(maxX, (int)MathF.Ceiling(pathBounds.Right));
+                    maxY = Math.Max(maxY, (int)MathF.Ceiling(pathBounds.Bottom));
+                }
+            }
+            else
+            {
+                foreach (var (brush, _, _, p) in drawables)
+                {
+                    if (brush.IsVisible())
+                    {
+                        var pathBounds = p.Bounds;
+                        minX = Math.Min(minX, (int)MathF.Floor(pathBounds.Left));
+                        minY = Math.Min(minY, (int)MathF.Floor(pathBounds.Top));
+                        maxX = Math.Max(maxX, (int)MathF.Ceiling(pathBounds.Right));
+                        maxY = Math.Max(maxY, (int)MathF.Ceiling(pathBounds.Bottom));
+                    }
+                }
+            }
+
+            return (minX, minY, maxX, maxY);
+        }
     }
 
     enum ShapeFillRule
@@ -800,7 +824,7 @@ namespace NiVE3.Input
             Nodes.Add(node);
         }
 
-        public IEnumerable<(Brush brush, ShapeFillRule, BlendMode blendMode, IPathCollection paths)> GetDrawables(float downSampling)
+        public IEnumerable<Drawable> GetDrawables(float downSampling)
         {
             foreach (var node in Nodes.AsEnumerable().Reverse())
             {
@@ -821,7 +845,7 @@ namespace NiVE3.Input
                             brush.Transform(Matrix3x3.CreateScale(downSampling, downSampling));
                             var path = TraversePath(fill);
                             path = path.Transform(Matrix3x2.CreateScale(downSampling));
-                            yield return (brush, fill.FillRule, fill.BlendMode, path);
+                            yield return new Drawable(brush, fill.FillRule, fill.BlendMode, path);
                         }
                         break;
                     case ShapeStrokeBase stroke:
@@ -830,7 +854,7 @@ namespace NiVE3.Input
                             brush.Transform(Matrix3x3.CreateScale(downSampling, downSampling));
                             var path = (IPathCollection)new PathCollection(TraversePath(stroke).Select(p => p.GenerateOutline(stroke.Width)));
                             path = path.Transform(Matrix3x2.CreateScale(downSampling));
-                            yield return (brush, ShapeFillRule.NonZero, stroke.BlendMode, path);
+                            yield return new Drawable(brush, ShapeFillRule.NonZero, stroke.BlendMode, path);
                         }
                         break;
                 }
@@ -1299,4 +1323,6 @@ namespace NiVE3.Input
             }
         }
     }
+
+    record Drawable(Brush Brush, ShapeFillRule FillRule, BlendMode BlendMode, IPathCollection Paths);
 }

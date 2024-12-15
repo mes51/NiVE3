@@ -992,7 +992,7 @@ namespace NiVE3.Model
                 }
                 else
                 {
-                    var (origin, width, height) = layer.GetSourceFootageRect(time);
+                    var (origin, width, height) = layer.GetSourceFootageRect(time, false);
                     if (layer.IsEnable3D)
                     {
                         result.Add(new ColoredPreviewBoundingBox(Renderer.GetBoundingBox3D(origin, width, height, layer.GetTransform(time), layer.GetParentTransforms(time), activeCameraSetting), layer.TagColor));

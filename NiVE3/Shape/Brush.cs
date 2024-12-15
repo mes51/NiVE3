@@ -12,6 +12,8 @@ namespace NiVE3.Shape
 {
     abstract class Brush
     {
+        public abstract bool IsVisible();
+
         public abstract Vector4 GetColor(float x, float y);
 
         public abstract void Transform(Matrix3x3 matrix);
@@ -24,6 +26,11 @@ namespace NiVE3.Shape
         public SolidBrush(Vector4 color)
         {
             Color = color;
+        }
+
+        public override bool IsVisible()
+        {
+            return Color.W > 0.0F;
         }
 
         public override Vector4 GetColor(float x, float y)
@@ -60,6 +67,11 @@ namespace NiVE3.Shape
             End = end;
 
             UpdateGradientParams();
+        }
+
+        public override bool IsVisible()
+        {
+            return ColorGradient.OpacityStops.Any(o => o.Opacity > 0.0F);
         }
 
         public override Vector4 GetColor(float x, float y)
@@ -119,6 +131,11 @@ namespace NiVE3.Shape
             Begin = begin;
             End = end;
             Length = Vector2.Distance(begin, end);
+        }
+
+        public override bool IsVisible()
+        {
+            return ColorGradient.OpacityStops.Any(o => o.Opacity > 0.0F);
         }
 
         public override Vector4 GetColor(float x, float y)

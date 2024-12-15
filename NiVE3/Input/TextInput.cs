@@ -314,7 +314,7 @@ namespace NiVE3.Input
             return new NManagedImage(1, 1);
         }
 
-        public SourceFootageRect CalcSize(double time, int compositionWidth, int compositionHeight, PropertyValueGroup properties)
+        public SourceFootageRect CalcSize(double time, int compositionWidth, int compositionHeight, bool withInvisible, PropertyValueGroup properties)
         {
             var (textOption, glyphPolygons) = BuildGlyphPolygons(properties, 1.0);
             if (textOption == null || glyphPolygons.Count < 1)
@@ -324,9 +324,18 @@ namespace NiVE3.Input
 
             var sourceText = properties[SourceTextId] as StyledText ?? StyledText.Empty;
             var verticalMode = false; // (bool)(((PropertyValueGroup)(properties[TextMoreOptionsGroupId] ?? PropertyValueGroup.Empty))[TextVerticalModeId] ?? false);
-            var (min, max, imageOrigin) = CalcTextBounds(glyphPolygons, sourceText, textOption, verticalMode);
+            var (min, max, imageOrigin) = CalcTextBounds(glyphPolygons, sourceText, textOption, verticalMode, withInvisible);
 
-            return new SourceFootageRect(imageOrigin, max.GetElement(2) - min.GetElement(0) + 1, max.GetElement(3) - min.GetElement(1));
+            var width = max.GetElement(2) - min.GetElement(0) + 1;
+            var height = max.GetElement(3) - min.GetElement(1);
+            if (width < 1 || height < 1)
+            {
+                return SourceFootageRect.Empty;
+            }
+            else
+            {
+                return new SourceFootageRect(imageOrigin, width, height);
+            }
         }
 
         public NImage ReadFrame(double time, double downSamplingRate, int compositionWidth, int compositionHeight, PropertyValueGroup properties, ImageInterpolationQuality imageInterpolationQuality, bool toGpu)
@@ -339,10 +348,16 @@ namespace NiVE3.Input
 
             var sourceText = properties[SourceTextId] as StyledText ?? StyledText.Empty;
             var verticalMode = false; // (bool)(((PropertyValueGroup)(properties[TextMoreOptionsGroupId] ?? PropertyValueGroup.Empty))[TextVerticalModeId] ?? false);
-            var (min, max, imageOrigin) = CalcTextBounds(glyphPolygons, sourceText, textOption, verticalMode);
+            var (min, max, imageOrigin) = CalcTextBounds(glyphPolygons, sourceText, textOption, verticalMode, false);
+            var width = max.GetElement(2) - min.GetElement(0) + 1;
+            var height = max.GetElement(3) - min.GetElement(1);
+            if (width < 1 || height <1)
+            {
+                return new NManagedImage(1, 1);
+            }
 
             var interCharBlendMode = (BlendMode)((properties[TextMoreOptionsGroupId] as PropertyValueGroup)?[TextInterCharacterBlendModeId] ?? BlendMode.Normal);
-            var image = new NManagedImage(max.GetElement(2) - min.GetElement(0) + 1, max.GetElement(3) - min.GetElement(1))
+            var image = new NManagedImage(width, height)
             {
                 Origin = imageOrigin
             };
@@ -946,16 +961,27 @@ namespace NiVE3.Input
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static (Vector128<int> min, Vector128<int> max, Vector2d origin) CalcTextBounds(List<BuildedTextGlyphs> glyphPolygons, StyledText sourceText, TextOptions textOption, bool verticalMode)
+        static (Vector128<int> min, Vector128<int> max, Vector2d origin) CalcTextBounds(List<BuildedTextGlyphs> glyphPolygons, StyledText sourceText, TextOptions textOption, bool verticalMode, bool withInvisible)
         {
             var min = Vector128.Create(int.MaxValue);
             var max = Vector128.Create(int.MinValue);
-            foreach (var (_, outlinePolygons, textRun, r, blurMargin, _) in glyphPolygons)
+            if (withInvisible)
             {
-                if (textRun.Opacity > 0.0F && (textRun.FillColor.W > 0.0F || (outlinePolygons.Length > 0 && textRun.TextLineColor.W > 0.0F)))
+                foreach (var (_, outlinePolygons, textRun, r, blurMargin, _) in glyphPolygons)
                 {
                     min = Vector128.Min(min, r - blurMargin);
                     max = Vector128.Max(max, r + blurMargin);
+                }
+            }
+            else
+            {
+                foreach (var (_, outlinePolygons, textRun, r, blurMargin, _) in glyphPolygons)
+                {
+                    if (textRun.Opacity > 0.0F && (textRun.FillColor.W > 0.0F || (outlinePolygons.Length > 0 && textRun.TextLineColor.W > 0.0F)))
+                    {
+                        min = Vector128.Min(min, r - blurMargin);
+                        max = Vector128.Max(max, r + blurMargin);
+                    }
                 }
             }
 

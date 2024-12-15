@@ -168,7 +168,13 @@ namespace NiVE3.Expression.Wrapper
         [ExpressionPublicMember]
         public object[] getSourceRect(double time)
         {
-            var rect = LayerModel.GetSourceFootageRect(time);
+            return getSourceRect(time, true);
+        }
+
+        [ExpressionPublicMember]
+        public object[] getSourceRect(double time, bool withInvisible)
+        {
+            var rect = LayerModel.GetSourceFootageRect(time, withInvisible);
 
             return [rect.Origin.X, rect.Origin.Y, rect.Width, rect.Height];
         }

@@ -230,11 +230,11 @@ namespace NiVE3.Model
             }
         }
 
-        public SourceFootageRect CalcSize(double time, int compositionWidth, int compositionHeight, PropertyValueGroup? properties)
+        public SourceFootageRect CalcSize(double time, int compositionWidth, int compositionHeight, bool withInvisible, PropertyValueGroup? properties)
         {
             if (properties != null && Source is ICustomizableFootageSource customizableFootageSource)
             {
-                return customizableFootageSource.CalcSize(time, compositionWidth, compositionHeight, properties);
+                return customizableFootageSource.CalcSize(time, compositionWidth, compositionHeight, withInvisible, properties);
             }
             else
             {

@@ -1162,7 +1162,7 @@ namespace NiVE3.Model
             return [..parentTransforms];
         }
 
-        public SourceFootageRect GetSourceFootageRect(double time)
+        public SourceFootageRect GetSourceFootageRect(double time, bool withInvisible)
         {
             if (!HasImage || !IsContainsTime(time))
             {
@@ -1173,7 +1173,7 @@ namespace NiVE3.Model
             var sourceTime = CalcSourceTime(layerTime);
 
             var sourceOptionProperties = (TextProperties ?? ShapeProperties ?? SourceOptionProperties)?.GetValues(sourceTime, time, true);
-            return FootageModel.CalcSize(time, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties);
+            return FootageModel.CalcSize(time, CompositionModel.Width, CompositionModel.Height, withInvisible, sourceOptionProperties);
         }
 
         public LayerSkeleton? GetLayerSkeleton(double time)
@@ -1189,7 +1189,7 @@ namespace NiVE3.Model
             var transform = GetTransform(time);
             var parentTransforms = GetParentTransforms(time);
             var sourceOptionProperties = (TextProperties ?? ShapeProperties ?? SourceOptionProperties)?.GetValues(sourceTime, time, true);
-            var rect = FootageModel.CalcSize(sourceTime, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties);
+            var rect = FootageModel.CalcSize(sourceTime, CompositionModel.Width, CompositionModel.Height, false, sourceOptionProperties);
 
             return new LayerSkeleton(LayerId, rect, IsEnable3D, transform, parentTransforms);
         }
@@ -1770,7 +1770,7 @@ namespace NiVE3.Model
                 {
                     var sourceCurrentFrameTime = TimeCalc.AlignFloor(sourceTime, FootageModel.FrameRate);
                     image = FootageModel.ReadImage(sourceCurrentFrameTime, downSamplingRate, CompositionModel.Width, CompositionModel.Height, null, InterpolationQuality, useGpu);
-                    originalImageSize = downSamplingRate != 1.0 ? FootageModel.CalcSize(time, CompositionModel.Width, CompositionModel.Height, null) : new SourceFootageRect(Vector2d.Zero, image.Width, image.Height);
+                    originalImageSize = downSamplingRate != 1.0 ? FootageModel.CalcSize(time, CompositionModel.Width, CompositionModel.Height, false, null) : new SourceFootageRect(Vector2d.Zero, image.Width, image.Height);
 
                     var sourceNextFrameTime = TimeCalc.AlignRound(sourceCurrentFrameTime + footageFrameDuration, FootageModel.FrameRate);
                     var blendRate = (float)((sourceTime - sourceCurrentFrameTime) * FootageModel.FrameRate);
@@ -1796,7 +1796,7 @@ namespace NiVE3.Model
 
                     using (var firstFrame = FootageModel.ReadImage(startSoruceFrameTime, downSamplingRate, CompositionModel.Width, CompositionModel.Height, null, InterpolationQuality, useGpu))
                     {
-                        originalImageSize = downSamplingRate != 1.0 ? FootageModel.CalcSize(time, CompositionModel.Width, CompositionModel.Height, null) : new SourceFootageRect(Vector2d.Zero, firstFrame.Width, firstFrame.Height);
+                        originalImageSize = downSamplingRate != 1.0 ? FootageModel.CalcSize(time, CompositionModel.Width, CompositionModel.Height, false, null) : new SourceFootageRect(Vector2d.Zero, firstFrame.Width, firstFrame.Height);
                         image = useGpu ? new NGPUImage(firstFrame.Width, firstFrame.Height, AcceleratorModel.CurrentDevice) : new NManagedImage(firstFrame.Width, firstFrame.Height);
                         SumBlendFrame(image, firstFrame, (float)firstRate, useGpu);
                     }
@@ -1840,7 +1840,7 @@ namespace NiVE3.Model
             {
                 var sourceOptionProperties = (TextProperties ?? ShapeProperties ?? SourceOptionProperties)?.GetValues(sourceTime, time, true);
                 image = FootageModel.ReadImage(sourceTime, downSamplingRate, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties, InterpolationQuality, useGpu);
-                originalImageSize = downSamplingRate != 1.0 ? FootageModel.CalcSize(time, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties) : new SourceFootageRect(Vector2d.Zero, image.Width, image.Height);
+                originalImageSize = downSamplingRate != 1.0 ? FootageModel.CalcSize(time, CompositionModel.Width, CompositionModel.Height, false, sourceOptionProperties) : new SourceFootageRect(Vector2d.Zero, image.Width, image.Height);
             }
 
             return (image, originalImageSize, new ROI(new Int32Point(), new Int32Size(image.Width, image.Height), 0, 0, image.Width, image.Height));
