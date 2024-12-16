@@ -70,9 +70,7 @@ namespace NiVE3.Input
 
         const string TextBoxSizeId = nameof(TextBoxSizeId);
 
-        // NOTE: 縦書きはなぜか右揃え&アルファベットが左にズレるので後回し
-        // TODO: ズレる原因と回避方法の調査
-        //const string TextVerticalModeId = nameof(TextVerticalModeId);
+        const string TextIsEnableVerticalModeId = nameof(TextIsEnableVerticalModeId);
 
         const string TextInterCharacterBlendModeId = nameof(TextInterCharacterBlendModeId);
 
@@ -165,7 +163,8 @@ namespace NiVE3.Input
                 [
                     new Vector3dProperty(TextBaseAnchorPointRateId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextMoreOptions_BaseAnchorPointRate, new Vector3d(50.0), digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
                     new Vector3dProperty(TextBoxSizeId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextMoreOptions_TextBoxSize, new Vector3d(), new Vector3d(), digit: 2),
-                    new EnumProperty(TextInterCharacterBlendModeId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextMoreOptions_InterCharacterBlendMode, typeof(BlendMode), typeof(LanguageResourceDictionary), BlendMode.Normal)
+                    new EnumProperty(TextInterCharacterBlendModeId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextMoreOptions_InterCharacterBlendMode, typeof(BlendMode), typeof(LanguageResourceDictionary), BlendMode.Normal),
+                    new CheckBoxProperty(TextIsEnableVerticalModeId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextMoreOptions_IsEnableVerticalMode, false)
                 ]),
                 new AppendableProperty(TextAnimatorsId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator,
                 [
@@ -323,7 +322,7 @@ namespace NiVE3.Input
             }
 
             var sourceText = properties[SourceTextId] as StyledText ?? StyledText.Empty;
-            var verticalMode = false; // (bool)(((PropertyValueGroup)(properties[TextMoreOptionsGroupId] ?? PropertyValueGroup.Empty))[TextVerticalModeId] ?? false);
+            var verticalMode = (bool)(((PropertyValueGroup)(properties[TextMoreOptionsGroupId] ?? PropertyValueGroup.Empty))[TextIsEnableVerticalModeId] ?? false);
             var (min, max, imageOrigin) = CalcTextBounds(glyphPolygons, sourceText, textOption, verticalMode, withInvisible);
 
             var width = max.GetElement(2) - min.GetElement(0) + 1;
@@ -347,7 +346,7 @@ namespace NiVE3.Input
             }
 
             var sourceText = properties[SourceTextId] as StyledText ?? StyledText.Empty;
-            var verticalMode = false; // (bool)(((PropertyValueGroup)(properties[TextMoreOptionsGroupId] ?? PropertyValueGroup.Empty))[TextVerticalModeId] ?? false);
+            var verticalMode = (bool)(((PropertyValueGroup)(properties[TextMoreOptionsGroupId] ?? PropertyValueGroup.Empty))[TextIsEnableVerticalModeId] ?? false);
             var (min, max, imageOrigin) = CalcTextBounds(glyphPolygons, sourceText, textOption, verticalMode, false);
             var width = max.GetElement(2) - min.GetElement(0) + 1;
             var height = max.GetElement(3) - min.GetElement(1);
@@ -918,7 +917,7 @@ namespace NiVE3.Input
             var font = fontInfo.FontFamily.CreateFont((float)sourceText.DefaultStyle.FontSize);
             var textOption = new TextOptions(font);
             var wrappingSize = (Vector3d)(moreOptions[TextBoxSizeId] ?? new Vector3d());
-            //var verticalMode = (bool)(moreOptions[TextVerticalModeId] ?? false);
+            var verticalMode = (bool)(moreOptions[TextIsEnableVerticalModeId] ?? false);
             textOption.WrappingLength = wrappingSize.X > 0.0 ? (float)wrappingSize.X : -1.0F;
             textOption.WordBreaking = wrappingSize.X > 0.0 ? WordBreaking.BreakAll : WordBreaking.Standard;
             textOption.TextRuns = structuredExtendedTextRun.Flatten();
@@ -928,7 +927,7 @@ namespace NiVE3.Input
                 TextAlign.Right => TextAlignment.End,
                 _ => TextAlignment.Start,
             };
-            //textOption.LayoutMode = verticalMode ? LayoutMode.VerticalMixedRightLeft : LayoutMode.HorizontalTopBottom;
+            textOption.LayoutMode = verticalMode ? LayoutMode.VerticalMixedRightLeft : LayoutMode.HorizontalTopBottom;
             var baseAnchorPointRate = (Vector2)(Vector3d)(moreOptions[TextBaseAnchorPointRateId] ?? new Vector3d(50.0)) * 0.01F;
             var glyphBuilder = new StyledGlyphBuilder((float)wrappingSize.X, (float)wrappingSize.Y, downSamplingRate, baseAnchorPointRate);
             TextRenderer.RenderTextTo(glyphBuilder, structuredExtendedTextRun.SourceText, textOption);

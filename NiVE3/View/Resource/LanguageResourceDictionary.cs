@@ -1203,6 +1203,9 @@ namespace NiVE3.View.Resource
         [LanguageKey, DefaultValue("文字間のブレンドモード")]
         public static readonly string TextProperty_TextMoreOptions_InterCharacterBlendMode = nameof(TextProperty_TextMoreOptions_InterCharacterBlendMode);
 
+        [LanguageKey, DefaultValue("縦書き")]
+        public static readonly string TextProperty_TextMoreOptions_IsEnableVerticalMode = nameof(TextProperty_TextMoreOptions_IsEnableVerticalMode);
+
         [LanguageKey, DefaultValue("テキストアニメータ")]
         public static readonly string TextProperty_TextAnimator = nameof(TextProperty_TextAnimator);
 
