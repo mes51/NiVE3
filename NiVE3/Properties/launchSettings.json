@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "NiVE3": {
+      "commandName": "Project",
+      "nativeDebugging": false
+    }
+  }
+}

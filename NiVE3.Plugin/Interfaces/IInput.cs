@@ -85,6 +85,8 @@ namespace NiVE3.Plugin.Interfaces
     /// </summary>
     public class FootageSourceGroup
     {
+        public static readonly FootageSourceGroup Empty = new FootageSourceGroup([]);
+
         /// <summary>
         /// グループの名前。最上位のグループ以外はこの名前でフッテージパネルにフォルダが作成されます。
         /// </summary>
