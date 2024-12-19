@@ -1075,6 +1075,20 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("不透明度")]
         public const string Input_Input_FractalNoiseProceduralInput_Opacity = nameof(Input_Input_FractalNoiseProceduralInput_Opacity);
 
+        // Input setting views
+
+        [ShowInMarkup, DefaultValue("アルファチャンネルの読み込み")]
+        public const string DirectShowInputSettingView_Group_AlphaChannel = nameof(DirectShowInputSettingView_Group_AlphaChannel);
+
+        [ShowInMarkup, DefaultValue("ストレート")]
+        public const string DirectShowInputSettingView_AlphaChannel_Straight = nameof(DirectShowInputSettingView_AlphaChannel_Straight);
+
+        [ShowInMarkup, DefaultValue("乗算済みアルファ")]
+        public const string DirectShowInputSettingView_AlphaChannel_PreMultiply = nameof(DirectShowInputSettingView_AlphaChannel_PreMultiply);
+
+        [ShowInMarkup, DefaultValue("無視")]
+        public const string DirectShowInputSettingView_AlphaChannel_Ignore = nameof(DirectShowInputSettingView_AlphaChannel_Ignore);
+
         // Outputs
 
         [DefaultValue("AVI出力")]

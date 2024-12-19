@@ -1,0 +1,34 @@
+﻿<UserControl x:Class="NiVE3.PresetPlugin.Internal.View.DirectShowInputSettingView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:NiVE3.PresetPlugin.Internal.View"
+             xmlns:r="clr-namespace:NiVE3.PresetPlugin.Resource"
+             xmlns:ucv="clr-namespace:NiVE3.UI.Converter;assembly=NiVE3.UI"
+             xmlns:gm="clr-namespace:NiVE3.PresetPlugin.Resource.Wpf.GeneratedMarkup"
+             xmlns:i="clr-namespace:NiVE3.PresetPlugin.Input"
+             mc:Ignorable="d" 
+             Width="200"
+             d:DesignHeight="450">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <r:LanguageResourceDictionary />
+            </ResourceDictionary.MergedDictionaries>
+
+            <Thickness x:Key="SettingItemMargin">0,5,0,0</Thickness>
+
+            <ucv:EnumToBoolConverter x:Key="EnumToBoolConverter"/>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Grid>
+        <GroupBox Header="{gm:LanguageResource ResourceKey=DirectShowInputSettingView_Group_AlphaChannel}">
+            <StackPanel Orientation="Vertical" Margin="10">
+                <RadioButton Content="{gm:LanguageResource ResourceKey=DirectShowInputSettingView_AlphaChannel_Straight}" IsChecked="{Binding VideoAlphaType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static i:VideoAlphaType.Straight}}"/>
+                <RadioButton Margin="{StaticResource SettingItemMargin}" Content="{gm:LanguageResource ResourceKey=DirectShowInputSettingView_AlphaChannel_PreMultiply}" IsChecked="{Binding VideoAlphaType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static i:VideoAlphaType.PreMultiply}}"/>
+                <RadioButton Margin="{StaticResource SettingItemMargin}" Content="{gm:LanguageResource ResourceKey=DirectShowInputSettingView_AlphaChannel_Ignore}" IsChecked="{Binding VideoAlphaType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static i:VideoAlphaType.Ignore}}"/>
+            </StackPanel>
+        </GroupBox>
+    </Grid>
+</UserControl>

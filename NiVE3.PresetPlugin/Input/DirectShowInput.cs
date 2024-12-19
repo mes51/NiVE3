@@ -11,17 +11,22 @@ using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using NiVE3.Image;
 using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Interfaces;
+using NiVE3.Plugin.ValueObject;
 using NiVE3.PresetPlugin.Internal;
 using NiVE3.PresetPlugin.Internal.DirectShow;
+using NiVE3.PresetPlugin.Internal.View;
+using NiVE3.PresetPlugin.Internal.ViewModel;
+using NiVE3.Shared.Extension;
 using Vanara.PInvoke;
 
 namespace NiVE3.PresetPlugin.Input
 {
     [Export(typeof(IInput))]
-    [InputMetadata(typeof(DirectShowInput), "DirectShowInput", "", "mes51", ID, "*.avi")]
+    [InputMetadata(typeof(DirectShowInput), "DirectShowInput", "", "mes51", ID, "*.avi", true)]
     public sealed class DirectShowInput : IInput
     {
         const string ID = "BE18C71D-A752-4814-807A-2DD97D7656C3";
@@ -30,13 +35,15 @@ namespace NiVE3.PresetPlugin.Input
 
         DirectShowVideoReader? VideoReader { get; set; }
 
+        VideoAlphaType VideoAlphaType { get; set; } = VideoAlphaType.Ignore;
+
         public void SetupAccelerator(IAcceleratorObject accelerator) { }
 
         public FootageSourceGroup GetGroup()
         {
             if (VideoReader?.IsLoaded ?? false)
             {
-                return new FootageSourceGroup([new DirectShowVideoFootageSource(VideoReader, VideoAlphaType.PreMultiply)]);
+                return new FootageSourceGroup([new DirectShowVideoFootageSource(VideoReader, VideoAlphaType)]);
             }
             else
             {
@@ -51,70 +58,55 @@ namespace NiVE3.PresetPlugin.Input
             return VideoReader.IsLoaded;
         }
 
+        public object? SaveSetting()
+        {
+            return new DirectShowInputData
+            {
+                VideoAlphaType = VideoAlphaType
+            };
+        }
+
+        public bool LoadSetting(object? data)
+        {
+            if (data is IDictionary<string, object> dictionary && dictionary.TryGetValue(nameof(DirectShowInputData.VideoAlphaType), out int? videoAlphaType))
+            {
+                VideoAlphaType = (VideoAlphaType)videoAlphaType.Value;
+            }
+            else if (data is DirectShowInputData inputData)
+            {
+                VideoAlphaType = inputData.VideoAlphaType;
+            }
+
+            return true;
+        }
+
+        public FrameworkElement? GetLoadSetting(Int32Size? compositionSize)
+        {
+            if (VideoReader?.PossibilityArgb ?? false)
+            {
+                return new DirectShowInputSettingView
+                {
+                    DataContext = new DirectShowInputSettingViewModel { VideoAlphaType = VideoAlphaType.Straight }
+                };
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public bool ApplySetting(object? setting)
+        {
+            if (setting is DirectShowInputSettingViewModel viewModel)
+            {
+                VideoAlphaType = viewModel.VideoAlphaType;
+            }
+            return true;
+        }
+
         public void Dispose()
         {
             VideoReader?.Dispose();
-        }
-    }
-
-    class HiddenWindow : IDisposable
-    {
-        public User32.SafeHWND Handle { get; }
-
-        bool Disposed { get; set; }
-
-        User32.WNDCLASSEX WindowClassInfo { get; }
-
-        public HiddenWindow()
-        {
-            WindowClassInfo = GenerateWindowClass();
-
-            var windowClass = WindowClassInfo;
-            if (User32.RegisterClassEx(windowClass).IsInvalid)
-            {
-                throw new InvalidOperationException();
-            }
-
-            Handle = User32.CreateWindowEx(
-                User32.WindowStylesEx.WS_EX_APPWINDOW | User32.WindowStylesEx.WS_EX_WINDOWEDGE,
-                windowClass.lpszClassName,
-                "DirectShowInput dummy window",
-                0,
-                0,
-                0,
-                8,
-                8,
-                HWND.NULL,
-                HMENU.NULL,
-                HINSTANCE.NULL,
-                nint.Zero
-            );
-        }
-
-        public void Dispose()
-        {
-            if (!Disposed)
-            {
-                User32.DestroyWindow(Handle);
-                User32.UnregisterClass(WindowClassInfo.lpszClassName, HINSTANCE.NULL);
-                Disposed = true;
-            }
-        }
-
-        static int ID { get; set; } = 0;
-
-        static User32.WNDCLASSEX GenerateWindowClass()
-        {
-            ID++;
-            return new User32.WNDCLASSEX
-            {
-                cbSize = (uint)Marshal.SizeOf<User32.WNDCLASSEX>(),
-                lpszClassName = $"DirectShowInput_Dummy_{ID}",
-                style = User32.WindowClassStyles.CS_HREDRAW | User32.WindowClassStyles.CS_VREDRAW,
-                lpfnWndProc = User32.DefWindowProc,
-                hCursor = WindowClass.StdArrowCursor,
-                hInstance = Kernel32.GetModuleHandle()
-            };
         }
     }
 
@@ -631,6 +623,7 @@ namespace NiVE3.PresetPlugin.Input
         public DirectShowVideoFootageSource(DirectShowVideoReader videoReader, VideoAlphaType videoAlphaType)
         {
             VideoReader = videoReader;
+            VideoAlphaType = videoAlphaType;
             ChannelDataLength = VideoReader.Width * VideoReader.Height;
             BufferLineLength = VideoReader.Width * (VideoReader.PossibilityArgb ? 4 : 3);
             VectorAlignedBufferLineLength = (BufferLineLength / Vector<byte>.Count) * Vector<byte>.Count;
@@ -738,5 +731,10 @@ namespace NiVE3.PresetPlugin.Input
         Straight,
         PreMultiply,
         Ignore
+    }
+
+    file class DirectShowInputData
+    {
+        public VideoAlphaType VideoAlphaType { get; set; }
     }
 }
