@@ -150,27 +150,27 @@ namespace NiVE3.PresetPlugin.Internal.DirectShow
         #region IPersist
 
         [PreserveSig]
-        uint GetClassID(out Guid pClassID);
+        HRESULT GetClassID(out Guid pClassID);
 
         #endregion IPersist
 
         [PreserveSig]
-        uint Stop();
+        HRESULT Stop();
 
         [PreserveSig]
-        uint Pause();
+        HRESULT Pause();
 
         [PreserveSig]
-        uint Run(long tStart);
+        HRESULT Run(long tStart);
 
         [PreserveSig]
-        uint GetState(ushort dwMilliSecsTimeout, out FilterState State);
+        HRESULT GetState(ushort dwMilliSecsTimeout, out FilterState State);
 
         [PreserveSig]
-        uint SetSyncSource(IReferenceClock? pClock);
+        HRESULT SetSyncSource(IReferenceClock? pClock);
 
         [PreserveSig]
-        uint GetSyncSource(out IReferenceClock? pClock);
+        HRESULT GetSyncSource(out IReferenceClock? pClock);
     }
 
     [ComImport, Guid("56a86891-0ad4-11ce-b03a-0020af0ba770"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
@@ -243,7 +243,7 @@ namespace NiVE3.PresetPlugin.Internal.DirectShow
         HRESULT SetOneShot(bool OneShot);
 
         [PreserveSig]
-        HRESULT SetMediaType([In, MarshalAs(UnmanagedType.LPStruct)] PAMMediaType pType);
+        HRESULT SetMediaType([In, MarshalAs(UnmanagedType.LPStruct)] PAMMediaType? pType);
 
         [PreserveSig]
         HRESULT GetConnectedMediaType([Out, MarshalAs(UnmanagedType.LPStruct)] PAMMediaType pType);
@@ -630,15 +630,12 @@ namespace NiVE3.PresetPlugin.Internal.DirectShow
     {
         public byte[] SampledBuffer { get; private set; } = [];
 
-        double FrameRate { get; }
-
         public bool IsForceGet { get; private set; }
 
         double ToleranceTime { get; }
 
         public VideoSampler(double frameRate)
         {
-            FrameRate = frameRate;
             ToleranceTime = 1.0 / frameRate * 0.001;
         }
 
@@ -668,6 +665,99 @@ namespace NiVE3.PresetPlugin.Internal.DirectShow
                 }
 
                 OnSampleCompleted();
+            }
+            return HRESULT.S_OK;
+        }
+
+        public override HRESULT SampleCB(double SampleTime, IMediaSample pSample)
+        {
+            return HRESULT.S_OK;
+        }
+    }
+
+    class AudioSampler : SampleGrabberCallbackBase
+    {
+        public IReadOnlyList<byte> AudioData => AudioDataList;
+
+        List<byte> AudioDataList { get; } = [];
+
+        int SamplingRate { get; }
+
+        int BlockSize { get; }
+
+        double NeedLength { get; set; }
+
+        double CurrentTime { get; set; }
+
+        public AudioSampler(int samplingRate, int blockSize)
+        {
+            SamplingRate = samplingRate;
+            BlockSize = blockSize;
+        }
+
+        public void SetSampleLength(double needLength)
+        {
+            NeedLength = needLength;
+            CurrentTime = 0.0;
+            AudioDataList.Clear();
+        }
+
+        public override HRESULT BufferCB(double SampleTime, nint pBuffer, int BufferLen)
+        {
+            if (NeedLength <= 0.0)
+            {
+                return HRESULT.S_OK;
+            }
+
+            if (SampleTime <= TargetSamplingTime + NeedLength)
+            {
+                if (SampleTime <= CurrentTime)
+                {
+                    AudioDataList.Clear();
+                }
+
+                var pool = ArrayPool<byte>.Shared;
+                if (SampleTime < TargetSamplingTime)
+                {
+                    var offset = (int)((TargetSamplingTime - SampleTime) * SamplingRate) * BlockSize;
+                    if (offset < BufferLen)
+                    {
+                        var data = pool.Rent(BufferLen - offset);
+                        Marshal.Copy(pBuffer + offset, data, 0, BufferLen - offset);
+                        AudioDataList.AddRange(data);
+                        pool.Return(data);
+                    }
+                }
+                else
+                {
+                    if (AudioDataList.Count < 1)
+                    {
+                        var offset = (int)((SampleTime - TargetSamplingTime) * SamplingRate) * BlockSize;
+                        AudioDataList.AddRange(Enumerable.Repeat((byte)0, offset));
+                    }
+
+                    var trim = (int)(Math.Max((SampleTime + BufferLen / BlockSize / (double)SamplingRate) - TargetSamplingTime - NeedLength, 0.0) * SamplingRate) * BlockSize;
+                    if (trim < BufferLen)
+                    {
+                        var data = pool.Rent(BufferLen - trim);
+                        Marshal.Copy(pBuffer, data, 0, BufferLen - trim);
+                        AudioDataList.AddRange(data.AsSpan(0, BufferLen - trim));
+                        pool.Return(data);
+                    }
+
+                    var sampledTime = AudioDataList.Count / BlockSize / (double)SamplingRate;
+                    if (sampledTime >= NeedLength)
+                    {
+                        IsCompleted = true;
+                        OnSampleCompleted();
+                    }
+                }
+
+                CurrentTime = SampleTime;
+            }
+            else
+            {
+                OverTime = SampleTime;
             }
             return HRESULT.S_OK;
         }

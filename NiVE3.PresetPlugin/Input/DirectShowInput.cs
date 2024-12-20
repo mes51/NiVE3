@@ -17,11 +17,11 @@ using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.PresetPlugin.Internal;
+using NiVE3.PresetPlugin.Internal.Audio;
 using NiVE3.PresetPlugin.Internal.DirectShow;
 using NiVE3.PresetPlugin.Internal.View;
 using NiVE3.PresetPlugin.Internal.ViewModel;
 using NiVE3.Shared.Extension;
-using Vanara.PInvoke;
 
 namespace NiVE3.PresetPlugin.Input
 {
@@ -35,6 +35,8 @@ namespace NiVE3.PresetPlugin.Input
 
         DirectShowVideoReader? VideoReader { get; set; }
 
+        DirectShowAudioReader? AudioReader { get; set; }
+
         VideoAlphaType VideoAlphaType { get; set; } = VideoAlphaType.Ignore;
 
         public void SetupAccelerator(IAcceleratorObject accelerator) { }
@@ -43,7 +45,11 @@ namespace NiVE3.PresetPlugin.Input
         {
             if (VideoReader?.IsLoaded ?? false)
             {
-                return new FootageSourceGroup([new DirectShowVideoFootageSource(VideoReader, VideoAlphaType)]);
+                return new FootageSourceGroup([new DirectShowVideoFootageSource(VideoReader, AudioReader, VideoAlphaType)]);
+            }
+            else if (AudioReader?.IsLoaded ?? false)
+            {
+                return new FootageSourceGroup([new DirectShowAudioFootageSource(AudioReader)]);
             }
             else
             {
@@ -54,8 +60,14 @@ namespace NiVE3.PresetPlugin.Input
         public bool Load(string filePath)
         {
             VideoReader = new DirectShowVideoReader(filePath);
+            AudioReader = new DirectShowAudioReader(filePath, false);
+            if (!AudioReader.IsLoaded && Path.GetExtension(filePath) == ".wav")
+            {
+                AudioReader.Dispose();
+                AudioReader = new DirectShowAudioReader(filePath, true);
+            }
             FilePath = filePath;
-            return VideoReader.IsLoaded;
+            return VideoReader.IsLoaded || AudioReader.IsLoaded;
         }
 
         public object? SaveSetting()
@@ -107,488 +119,7 @@ namespace NiVE3.PresetPlugin.Input
         public void Dispose()
         {
             VideoReader?.Dispose();
-        }
-    }
-
-    class DirectShowVideoReader : IDisposable
-    {
-        const int TimeRoundDigit = 10;
-
-        const double MediaTimeRate = 10000000.0;
-
-        const int WaitingStateChangingCountLimit = 10;
-
-        const string AviDecoderName = "Avi Decoder";
-
-        [MemberNotNullWhen(true, nameof(VideoSampler))]
-        public bool IsLoaded { get; }
-
-        public bool PossibilityArgb { get; }
-
-        public double FrameRate { get; }
-
-        public double Duration { get; }
-
-        public int Width { get; }
-
-        public int Height { get; }
-
-        bool IsLocked { get; set; }
-
-        IGraphBuilder GraphBuilder { get; }
-
-        ISampleGrabber? VideoGrabber { get; }
-
-        IBaseFilter? VideoNullRenderer { get; }
-
-        IBaseFilter? AviDecoder { get; }
-
-        IMediaSeeking MediaSeeking => (IMediaSeeking)GraphBuilder;
-
-        IMediaControl MediaControl => (IMediaControl)GraphBuilder;
-
-        VideoSampler? VideoSampler { get; }
-
-        bool IsSupportedFrame { get; set; }
-
-        public DirectShowVideoReader(string filePath)
-        {
-            GraphBuilder = (IGraphBuilder)new FilterGraph();
-
-            VideoGrabber = (ISampleGrabber)new SampleGrabber();
-            VideoNullRenderer = (IBaseFilter)new NullRenderer();
-            AviDecoder = (IBaseFilter)new AviDecoder();
-            if (VideoGrabber == null || VideoNullRenderer == null || AviDecoder == null)
-            {
-                return;
-            }
-
-            var isAvi = Path.GetExtension(filePath) == ".avi";
-
-            try
-            {
-                using var mediaType = new PAMMediaType
-                {
-                    majortype = MediaType.Video,
-                    subtype = MediaSubType.RGB32,
-                    formattype = Format.VideoInfo
-                };
-
-                var hr = VideoGrabber.SetMediaType(mediaType);
-                hr.ThrowIfFailed();
-
-                hr = GraphBuilder.AddFilter((IBaseFilter)VideoGrabber, "Video SampleGrabber");
-                hr.ThrowIfFailed();
-
-                if (isAvi)
-                {
-                    hr = GraphBuilder.AddFilter(AviDecoder, AviDecoderName);
-                    hr.ThrowIfFailed();
-                }
-
-                hr = GraphBuilder.RenderFile(filePath, null);
-                hr.ThrowIfFailed();
-
-                using var am = new PAMMediaType();
-                hr = VideoGrabber.GetConnectedMediaType(am);
-                if (hr.Failed)
-                {
-                    return;
-                }
-
-                if (am.formattype != Format.VideoInfo || am.pbFormat == nint.Zero)
-                {
-                    return;
-                }
-
-                var videoInfo = Marshal.PtrToStructure<VIDEOINFOHEADER>(am.pbFormat);
-                GraphBuilder.AddFilter(VideoNullRenderer, "Video NullRenderer");
-                hr = ReconnectFilter(GraphBuilder, (IBaseFilter)VideoGrabber, GetConnectedFilter((IBaseFilter)VideoGrabber, PinDirection.Output), VideoNullRenderer);
-                hr.ThrowIfFailed();
-
-                FrameRate = Math.Round(MediaTimeRate / videoInfo.AvgTimePerFrame, TimeRoundDigit);
-                Width = videoInfo.bmiHeader.biWidth;
-                Height = videoInfo.bmiHeader.biHeight;
-
-                if (isAvi)
-                {
-                    var grabberBeforeIsDecoder = false;
-                    var grabberInputFilter = GetConnectedFilter((IBaseFilter)VideoGrabber, PinDirection.Input);
-                    if (grabberInputFilter != null)
-                    {
-                        using var filterInfo = new FilterInfo();
-                        grabberInputFilter.QueryFilterInfo(filterInfo);
-                        grabberBeforeIsDecoder = filterInfo.achName == AviDecoderName;
-                        Marshal.ReleaseComObject(grabberInputFilter);
-                    }
-
-                    if (grabberBeforeIsDecoder)
-                    {
-                        var pin = GetPinFirst(AviDecoder, PinDirection.Input);
-                        if (pin != null)
-                        {
-                            using var decoderMediaType = new PAMMediaType();
-                            if (pin.ConnectionMediaType(decoderMediaType).Succeeded)
-                            {
-                                if (decoderMediaType.formattype == Format.VideoInfo && decoderMediaType.pbFormat != nint.Zero)
-                                {
-                                    PossibilityArgb = Marshal.PtrToStructure<VIDEOINFOHEADER>(decoderMediaType.pbFormat).bmiHeader.biBitCount == 32;
-                                }
-                            }
-                            Marshal.ReleaseComObject(pin);
-                        }
-                    }
-                    else
-                    {
-                        var decoderInputFilter = GetConnectedFilter(AviDecoder, PinDirection.Input);
-                        if (decoderInputFilter == null)
-                        {
-                            var pin = GetPinFirst((IBaseFilter)VideoGrabber, PinDirection.Input);
-                            if (pin != null)
-                            {
-                                using var grabberMediaType = new PAMMediaType();
-                                if (pin.ConnectionMediaType(grabberMediaType).Succeeded)
-                                {
-                                    if (grabberMediaType.formattype == Format.VideoInfo && grabberMediaType.pbFormat != nint.Zero)
-                                    {
-                                        PossibilityArgb = Marshal.PtrToStructure<VIDEOINFOHEADER>(grabberMediaType.pbFormat).bmiHeader.biBitCount == 32;
-                                    }
-                                }
-                                Marshal.ReleaseComObject(pin);
-                            }
-                        }
-                        else
-                        {
-                            Marshal.ReleaseComObject(decoderInputFilter);
-                        }
-                    }
-                }
-
-                ((IMediaFilter)GraphBuilder).SetSyncSource(null);
-                IsSupportedFrame = FrameRate > 0.0 && MediaSeeking.IsFormatSupported(TimeFormat.Frame).Succeeded;
-
-                if (IsSupportedFrame)
-                {
-                    hr = MediaSeeking.SetTimeFormat(TimeFormat.Frame);
-                    hr.ThrowIfFailed();
-                    hr = MediaSeeking.GetDuration(out var durationFrames);
-                    hr.ThrowIfFailed();
-                    Duration = Math.Round(durationFrames / FrameRate, TimeRoundDigit);
-                }
-                else
-                {
-                    hr = MediaSeeking.SetTimeFormat(TimeFormat.MediaTime);
-                    hr.ThrowIfFailed();
-                    hr = MediaSeeking.GetDuration(out var durationMediaTime);
-                    hr.ThrowIfFailed();
-                    Duration = Math.Round(durationMediaTime / MediaTimeRate, TimeRoundDigit);
-                }
-
-                hr = MediaControl.Run();
-                hr.ThrowIfFailed();
-                hr = MediaControl.Pause();
-                hr.ThrowIfFailed();
-
-                VideoSampler = new VideoSampler(FrameRate);
-                VideoSampler.SampleCompleted += VideoSampler_SampleCompleted;
-                VideoGrabber.SetCallback(VideoSampler, 1);
-
-                IsLoaded = true;
-            }
-            catch { }
-        }
-
-        public byte[] GetImage(double time)
-        {
-            if (!IsLoaded)
-            {
-                throw new InvalidOperationException();
-            }
-
-            var diffFrame = (int)Math.Round(time * FrameRate) - (int)Math.Round(VideoSampler.TargetSamplingTime * FrameRate);
-
-            if (!SetTime(time))
-            {
-                return [];
-            }
-            if (diffFrame == 0 || diffFrame == 1)
-            {
-                VideoSampler.ForceGetNextFrame();
-            }
-
-            var backTime = time;
-            MediaControl.Run();
-            WaitToReady();
-            while (VideoSampler.OverTime > 0.0 && backTime > 0.0)
-            {
-                backTime = Math.Max(backTime - 1.0, 0.0);
-                SetTime(backTime);
-                VideoSampler.SetTargetSamplingTime(time);
-                MediaControl.Run();
-                WaitToReady();
-            }
-
-            if (VideoSampler.IsCompleted)
-            {
-                return VideoSampler.SampledBuffer;
-            }
-            else
-            {
-                return [];
-            }
-        }
-
-        bool SetTime(double time)
-        {
-            if (!IsLoaded)
-            {
-                return false;
-            }
-
-            VideoSampler.SetTargetSamplingTime(time);
-            while (IsLocked)
-            {
-                Thread.Sleep(1);
-            }
-
-            IsLocked = true;
-            var position = 0L;
-            if (IsSupportedFrame)
-            {
-                position = (long)Math.Round(time * FrameRate);
-            }
-            else
-            {
-                position = (long)Math.Round(time * MediaTimeRate);
-            }
-            var dummy = 0L;
-            var hr = MediaSeeking.SetPositions(position, AMSeekingFlags.AbsolutePositioning, ref dummy, AMSeekingFlags.NoPositioning);
-            IsLocked = false;
-
-            return hr.Succeeded || hr == 1;
-        }
-
-        void WaitToReady()
-        {
-            const int VFW_S_STATE_INTERMEDIATE = 0x40237;
-            const int VFW_S_CANT_CUE = 0x40268;
-
-            var state = FilterState.Running;
-            var oldTime = 0.0;
-            var lastCheckTick = 0L;
-            while (state == FilterState.Running)
-            {
-                var count = 0;
-                var hr = (HRESULT)HRESULT.S_OK;
-                do
-                {
-                    hr = MediaControl.GetState(1, out state);
-                    if (hr == VFW_S_STATE_INTERMEDIATE)
-                    {
-                        count++;
-                    }
-                    MediaSeeking.GetCurrentPosition(out var time);
-                    if ((IsSupportedFrame && time / FrameRate >= Duration) || time / MediaTimeRate >= Duration || (oldTime == time && DateTime.Now.Ticks - lastCheckTick > TimeSpan.TicksPerSecond))
-                    {
-                        Pause();
-                    }
-                    if (oldTime != time)
-                    {
-                        oldTime = time;
-                        lastCheckTick = DateTime.Now.Ticks;
-                    }
-                }
-                while (hr.Failed && hr != VFW_S_CANT_CUE && count < WaitingStateChangingCountLimit);
-            }
-        }
-
-        void Pause()
-        {
-            if (!IsLocked)
-            {
-                IsLocked = true;
-                MediaControl.Pause();
-                IsLocked = false;
-            }
-        }
-
-        private void VideoSampler_SampleCompleted(object? sender, EventArgs e)
-        {
-            Pause();
-        }
-
-        static HRESULT ReconnectFilter(IGraphBuilder graphBuilder, IBaseFilter outFilter, IBaseFilter? connected, IBaseFilter inFilter)
-        {
-            var hr = (HRESULT)HRESULT.E_ABORT;
-
-            var inPin = GetPinFirst(inFilter, PinDirection.Input);
-            if (inPin == null)
-            {
-                return hr;
-            }
-            var outPin = (IPin?)null;
-
-            if (connected != null)
-            {
-                outPin = GetConnectedPin(outFilter, connected, PinDirection.Output);
-                hr = graphBuilder.RemoveFilter(connected);
-                Marshal.ReleaseComObject(connected);
-            }
-            else
-            {
-                outPin = GetPinFirst(outFilter, PinDirection.Output);
-            }
-
-            if (outPin != null)
-            {
-                hr = graphBuilder.Connect(outPin, inPin);
-                Marshal.ReleaseComObject(outPin);
-            }
-            Marshal.ReleaseComObject(inPin);
-
-            return hr;
-        }
-
-        static IPin? GetConnectedPin(IBaseFilter outFilter, IBaseFilter inFilter, PinDirection direction)
-        {
-            var pin = (IPin?)null;
-
-            var targetFilter = direction == PinDirection.Output ? outFilter : inFilter;
-            var fromFilter = direction == PinDirection.Output ? inFilter : outFilter;
-            var fromDirection = direction == PinDirection.Output ? PinDirection.Input : PinDirection.Output;
-
-            var pins = GetAllPins(fromFilter, fromDirection);
-            if (pins.Length < 1)
-            {
-                return null;
-            }
-
-            foreach (var p in pins)
-            {
-                p.ConnectedTo(out var connectedPin);
-                if (connectedPin == null)
-                {
-                    continue;
-                }
-                using var info = new PinInfo();
-                connectedPin.QueryPinInfo(info);
-                if (outFilter == info.pFilter)
-                {
-                    pin = connectedPin;
-                    break;
-                }
-            }
-
-            foreach (var p in pins)
-            {
-                Marshal.ReleaseComObject(p);
-            }
-            return pin;
-        }
-
-        static IBaseFilter? GetConnectedFilter(IBaseFilter filter, PinDirection direction)
-        {
-            var pin = GetPinFirst(filter, direction);
-            if (pin == null)
-            {
-                return null;
-            }
-
-            pin.ConnectedTo(out var connected);
-            Marshal.ReleaseComObject(pin);
-
-            if (connected == null)
-            {
-                return null;
-            }
-
-            var info = new PinInfo();
-            connected.QueryPinInfo(info);
-            return info.pFilter;
-        }
-
-        static IPin[] GetAllPins(IBaseFilter filter, PinDirection direction)
-        {
-            filter.EnumPins(out var pins);
-            if (pins == null)
-            {
-                return [];
-            }
-
-            var result = new List<IPin>();
-            while (pins.Next(1, out var pin, out var fetch) == 0)
-            {
-                if (pin == null)
-                {
-                    continue;
-                }
-
-                pin.QueryDirection(out var dir);
-                if (dir == direction)
-                {
-                    result.Add(pin);
-                }
-                else
-                {
-                    Marshal.ReleaseComObject(pin);
-                }
-            }
-
-            Marshal.ReleaseComObject(pins);
-
-            return result.ToArray();
-        }
-
-        static IPin? GetPinFirst(IBaseFilter filter, PinDirection direction)
-        {
-            filter.EnumPins(out var pins);
-            if (pins == null)
-            {
-                return null;
-            }
-
-            var pin = (IPin?)null;
-            while (pins.Next(1, out pin, out var fetch) == 0)
-            {
-                if (pin == null)
-                {
-                    continue;
-                }
-
-                pin.QueryDirection(out var dir);
-                if (dir == direction)
-                {
-                    break;
-                }
-                else
-                {
-                    Marshal.ReleaseComObject(pin);
-                    pin = null;
-                }
-            }
-
-            Marshal.ReleaseComObject(pins);
-            return pin;
-        }
-
-        public void Dispose()
-        {
-            if (GraphBuilder != null)
-            {
-                Marshal.ReleaseComObject(GraphBuilder);
-            }
-            if (VideoGrabber != null)
-            {
-                Marshal.ReleaseComObject(VideoGrabber);
-            }
-            if (VideoNullRenderer != null)
-            {
-                Marshal.ReleaseComObject(VideoNullRenderer);
-            }
-            if (AviDecoder != null)
-            {
-                Marshal.ReleaseComObject(AviDecoder);
-            }
+            AudioReader?.Dispose();
         }
     }
 
@@ -608,9 +139,11 @@ namespace NiVE3.PresetPlugin.Input
 
         public double Duration => VideoReader.Duration;
 
-        public SourceType SourceType => SourceType.Video;
+        public SourceType SourceType => SourceType.Video | (AudioReader != null ? SourceType.Audio : SourceType.None);
 
         DirectShowVideoReader VideoReader { get; }
+
+        DirectShowAudioReader? AudioReader { get; }
 
         VideoAlphaType VideoAlphaType { get; }
 
@@ -620,9 +153,10 @@ namespace NiVE3.PresetPlugin.Input
 
         int VectorAlignedBufferLineLength { get; }
 
-        public DirectShowVideoFootageSource(DirectShowVideoReader videoReader, VideoAlphaType videoAlphaType)
+        public DirectShowVideoFootageSource(DirectShowVideoReader videoReader, DirectShowAudioReader? audioReader,  VideoAlphaType videoAlphaType)
         {
             VideoReader = videoReader;
+            AudioReader = audioReader;
             VideoAlphaType = videoAlphaType;
             ChannelDataLength = VideoReader.Width * VideoReader.Height;
             BufferLineLength = VideoReader.Width * (VideoReader.PossibilityArgb ? 4 : 3);
@@ -631,7 +165,13 @@ namespace NiVE3.PresetPlugin.Input
 
         public float[] ReadAudio(double time, double length)
         {
-            throw new NotImplementedException();
+            if (AudioReader == null)
+            {
+                return [];
+            }
+
+            var data = AudioReader.GetAudio(time, length);
+            return AudioConverter.ConvertToSpecificFormat(data, AudioReader.SamplingRate, AudioReader.Channel, AudioReader.BitPerSample);
         }
 
         public NImage ReadFrame(double time, double downSamplingRate, bool toGpu)
@@ -723,6 +263,41 @@ namespace NiVE3.PresetPlugin.Input
             }
 
             return result;
+        }
+    }
+
+    file class DirectShowAudioFootageSource : IFootageSource
+    {
+        public string SourceId => "audio";
+
+        public string? Name => null;
+
+        public double FrameRate => 0.0;
+
+        public int Width => 0;
+
+        public int Height => 0;
+
+        public double Duration => AudioReader.Duration;
+
+        public SourceType SourceType => SourceType.Audio;
+
+        DirectShowAudioReader AudioReader { get; }
+
+        public DirectShowAudioFootageSource(DirectShowAudioReader audioReader)
+        {
+            AudioReader = audioReader;
+        }
+
+        public float[] ReadAudio(double time, double length)
+        {
+            var data = AudioReader.GetAudio(time, length);
+            return AudioConverter.ConvertToSpecificFormat(data, AudioReader.SamplingRate, AudioReader.Channel, AudioReader.BitPerSample);
+        }
+
+        public NImage ReadFrame(double time, double downSamplingRate, bool toGpu)
+        {
+            throw new NotImplementedException();
         }
     }
 
