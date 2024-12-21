@@ -52,5 +52,34 @@ namespace NiVE3.Text
                 dic[nameof(Styles)] is Array styles ? styles.Cast<IDictionary<string, object?>>().Select(TextStyleRun.Deserialize).ToArray() : []
             );
         }
+
+        public virtual bool Equals(StyledText? other)
+        {
+            if (ReferenceEquals(null, other))
+            {
+                return false;
+            }
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+            return Text == other.Text &&
+                DefaultStyle == other.DefaultStyle &&
+                Styles.SequenceEqual(other.Styles);
+        }
+
+        public override int GetHashCode()
+        {
+            var hashCode = new HashCode();
+
+            hashCode.Add(Text);
+            hashCode.Add(DefaultStyle);
+            foreach (var s in Styles)
+            {
+                hashCode.Add(s);
+            }
+
+            return hashCode.ToHashCode();
+        }
     }
 }
