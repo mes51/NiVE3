@@ -589,7 +589,7 @@ namespace NiVE3.ViewModel
 
         object? CalculationRawValue()
         {
-            return PropertyModel.GetRawValue(CurrentTime - SourceStartPoint);
+            return PropertyModel.GetRawValue(TimeCalc.RoundTimeDigit(CurrentTime - SourceStartPoint));
         }
 
         object? CalculationValue()
@@ -598,7 +598,7 @@ namespace NiVE3.ViewModel
             var entries = PropertyModel.EnterCycricForCalcProperty();
             if (entries.HasValue)
             {
-                var result = PropertyModel.GetValue(CurrentTime - SourceStartPoint, CurrentTime);
+                var result = PropertyModel.GetValue(TimeCalc.RoundTimeDigit(CurrentTime - SourceStartPoint), CurrentTime);
 
                 entries.Value.effectEntry?.Dispose();
                 entries.Value.layerEntry.Dispose();
