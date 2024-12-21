@@ -305,15 +305,15 @@ namespace NiVE3.ViewModel
             EndEditCommand = new DelegateCommand(() =>
             {
                 PropertyModel.CommitProperty(CurrentTimeRawValue, PrevValue);
-                IsEditing = false;
                 UseEditingValue = false;
+                IsEditing = false;
             }, () => IsEditing && !IsEditingExpression).ObservesProperty(() => IsEditing).ObservesProperty(() => IsEditingExpression);
 
             AbortEditCommand = new DelegateCommand(() =>
             {
                 CurrentTimeRawValue = PrevValue;
-                IsEditing = false;
                 UseEditingValue = false;
+                IsEditing = false;
             }, () => IsEditing && !IsEditingExpression).ObservesProperty(() => IsEditing).ObservesProperty(() => IsEditingExpression);
 
             BeginEditExpressionCommand = new DelegateCommand(() =>
@@ -325,16 +325,16 @@ namespace NiVE3.ViewModel
             EndEditExpressionCommand = new DelegateCommand(() =>
             {
                 PropertyModel.ChangeExpressionCode(ExpressionCodeDocument.Text);
-                IsEditing = false;
                 IsEditingExpression = false;
+                IsEditing = false;
             }, () => IsEditing && IsEditingExpression).ObservesProperty(() => IsEditing).ObservesProperty(() => IsEditingExpression);
 
             AbortEditExpressionCommand = new DelegateCommand(() =>
             {
                 ExpressionCode = PropertyModel.ExpressionCode;
                 UpdateExpressionCodeDocument(PropertyModel.ExpressionCode);
-                IsEditing = false;
                 IsEditingExpression = false;
+                IsEditing = false;
             }, () => IsEditing && IsEditingExpression).ObservesProperty(() => IsEditing).ObservesProperty(() => IsEditingExpression);
 
             SwitchUseKeyFrameCommand = new DelegateCommand(() =>
@@ -682,6 +682,7 @@ namespace NiVE3.ViewModel
                 case nameof(CurrentTimeRawValue):
                 case nameof(CurrentTime):
                 case nameof(SourceStartPoint):
+                case nameof(IsEditing) when !IsEditing:
                     if (!IsPreviewPlaying)
                     {
                         CurrentTimeRawValue = CalculationRawValue();

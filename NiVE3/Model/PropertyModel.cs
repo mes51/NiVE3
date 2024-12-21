@@ -216,6 +216,11 @@ namespace NiVE3.Model
         {
             var time = TimeCalc.RoundTimeDigit(CurrentTime - SourceStartPoint);
             var prevKeyFrame = KeyFrames.LastOrDefault(k => k.Time <= time);
+            if (prevKeyFrame?.Time == time && prevKeyFrame.Value == value)
+            {
+                return;
+            }
+
             var interpolationType = InterpolationType.None;
             if (prevKeyFrame != null)
             {
