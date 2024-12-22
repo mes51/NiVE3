@@ -43,7 +43,7 @@ namespace NiVE3.PresetPlugin.Effect.Utility
             ];
         }
 
-        public ROI CalcRoi(ROI baseRoi, double downSamplingRateX, double downSamplingRateY, double layerTime, IPropertyObject[] properties, ICompositionObject composition)
+        public ROI CalcRoi(ROI baseRoi, double downSamplingRateX, double downSamplingRateY, Time layerTime, IPropertyObject[] properties, ICompositionObject composition)
         {
             var left = (int)properties.GetValue(PropertyLeftId, layerTime, 0.0);
             var top = (int)properties.GetValue(PropertyTopId, layerTime, 0.0);
@@ -60,12 +60,12 @@ namespace NiVE3.PresetPlugin.Effect.Utility
             }
         }
 
-        public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, double layerTime, IPropertyObject[] properties, ICompositionObject composition, bool useGpu)
+        public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, Time layerTime, IPropertyObject[] properties, ICompositionObject composition, bool useGpu)
         {
             throw new NotImplementedException();
         }
 
-        public float[] Process(float[] audio, double startTime, IPropertyObject[] properties, ICompositionObject composition)
+        public float[] Process(float[] audio, Time startTime, IPropertyObject[] properties, ICompositionObject composition)
         {
             throw new NotImplementedException();
         }

@@ -16,6 +16,7 @@ using System.IO.Hashing;
 using NiVE3.Extension;
 using System.ComponentModel;
 using System.Collections.Specialized;
+using NiVE3.Plugin.ValueObject;
 
 namespace NiVE3.Model
 {
@@ -125,7 +126,7 @@ namespace NiVE3.Model
             return Children;
         }
 
-        object? IPropertyObject.GetValue(double layerTime)
+        object? IPropertyObject.GetValue(Time layerTime)
         {
             return GetValue(layerTime, layerTime + SourceStartPoint);
         }

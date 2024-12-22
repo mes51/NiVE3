@@ -119,7 +119,7 @@ namespace NiVE3.Plugin.Interfaces
 
         IReadOnlyCollection<IPropertyObject>? GetChildren();
 
-        public object? GetValue(double layerTime);
+        public object? GetValue(Time layerTime);
 
         public PropertyValueGroup? GetValues(double layerTime, bool withoutDisableProperty = false);
     }

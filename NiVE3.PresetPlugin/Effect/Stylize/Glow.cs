@@ -71,7 +71,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
             ];
         }
 
-        public ROI CalcRoi(ROI baseRoi, double downSamplingRateX, double downSamplingRateY, double layerTime, IPropertyObject[] properties, ICompositionObject composition)
+        public ROI CalcRoi(ROI baseRoi, double downSamplingRateX, double downSamplingRateY, Time layerTime, IPropertyObject[] properties, ICompositionObject composition)
         {
             var edgeRepeatMode = properties.GetValue(PropertyEdgeRepeatModeId, layerTime, EdgeRepeatMode.None);
 
@@ -98,7 +98,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
             }
         }
 
-        public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, double layerTime, IPropertyObject[] properties, ICompositionObject composition, bool useGpu)
+        public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, Time layerTime, IPropertyObject[] properties, ICompositionObject composition, bool useGpu)
         {
             var range = properties.GetValue(PropertyRangeId, layerTime, 0.0);
             var strength = (float)properties.GetValue(PropertyStrengthId, layerTime, 0.0);
@@ -129,7 +129,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
             }
         }
 
-        public float[] Process(float[] audio, double startTime, IPropertyObject[] properties, ICompositionObject composition)
+        public float[] Process(float[] audio, Time startTime, IPropertyObject[] properties, ICompositionObject composition)
         {
             throw new NotImplementedException();
         }

@@ -22,6 +22,7 @@ using System.Diagnostics.CodeAnalysis;
 using Jint;
 using Jint.Runtime;
 using Acornima;
+using NiVE3.Plugin.ValueObject;
 
 namespace NiVE3.Model
 {
@@ -348,7 +349,7 @@ namespace NiVE3.Model
             }
         }
 
-        object? IPropertyObject.GetValue(double layerTime)
+        object? IPropertyObject.GetValue(Time layerTime)
         {
             return GetValue(layerTime, layerTime + SourceStartPoint);
         }

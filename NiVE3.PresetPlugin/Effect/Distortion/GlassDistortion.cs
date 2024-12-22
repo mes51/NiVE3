@@ -58,7 +58,7 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
             ];
         }
 
-        public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, double layerTime, IPropertyObject[] properties, ICompositionObject composition, bool useGpu)
+        public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, Time layerTime, IPropertyObject[] properties, ICompositionObject composition, bool useGpu)
         {
             var targetLayerId = properties.GetValue(PropertySourceLayerId, layerTime, UseLayerImageTarget.Empty);
             var channel = properties.GetValue(PropertyChannelId, layerTime, DisplacemenMapChannelType.Luminance);
@@ -88,7 +88,7 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
             }
         }
 
-        public float[] Process(float[] audio, double startTime, IPropertyObject[] properties, ICompositionObject composition)
+        public float[] Process(float[] audio, Time startTime, IPropertyObject[] properties, ICompositionObject composition)
         {
             throw new NotImplementedException();
         }

@@ -13,7 +13,7 @@ namespace NiVE3.PresetPlugin.Effect.Util.Noise
 {
     static class RandomNoiseProcess
     {
-        public static void ProcessCpu(NManagedImage managedImage, ROI roi, float amount, bool isColorNoise, uint randomSeed, double time)
+        public static void ProcessCpu(NManagedImage managedImage, ROI roi, float amount, bool isColorNoise, uint randomSeed, Time time)
         {
             randomSeed += 201864043U;
             var imageOriginX = (float)(roi.OriginalImagePosition.X + managedImage.Origin.X);
@@ -38,7 +38,7 @@ namespace NiVE3.PresetPlugin.Effect.Util.Noise
             });
         }
 
-        public static NGPUImage ProcessGpu(GraphicsDevice device, NGPUImage gpuImage, ROI roi, float amount, bool isColorNoise, uint randomSeed, double time)
+        public static NGPUImage ProcessGpu(GraphicsDevice device, NGPUImage gpuImage, ROI roi, float amount, bool isColorNoise, uint randomSeed, Time time)
         {
             randomSeed += 201864043U;
             var imageOriginX = (float)(roi.OriginalImagePosition.X + gpuImage.Origin.X);

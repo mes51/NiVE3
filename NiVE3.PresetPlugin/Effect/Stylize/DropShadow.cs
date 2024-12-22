@@ -65,7 +65,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
             ];
         }
 
-        public ROI CalcRoi(ROI baseRoi, double downSamplingRateX, double downSamplingRateY, double layerTime, IPropertyObject[] properties, ICompositionObject composition)
+        public ROI CalcRoi(ROI baseRoi, double downSamplingRateX, double downSamplingRateY, Time layerTime, IPropertyObject[] properties, ICompositionObject composition)
         {
             var rad = (properties.GetValue(PropertyAngleId, layerTime, 0.0) + 90.0) / 180.0 * Math.PI;
             var distance = (float)(properties.GetValue(PropertyDistanceId, layerTime, 0.0) / downSamplingRateY);
@@ -89,7 +89,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
             );
         }
 
-        public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, double layerTime, IPropertyObject[] properties, ICompositionObject composition, bool useGpu)
+        public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, Time layerTime, IPropertyObject[] properties, ICompositionObject composition, bool useGpu)
         {
             var rad = (properties.GetValue(PropertyAngleId, layerTime, 0.0) + 90.0) / 180.0 * Math.PI;
             var distance = (float)(properties.GetValue(PropertyDistanceId, layerTime, 0.0) / downSamplingRateY);
@@ -120,7 +120,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
             }
         }
 
-        public float[] Process(float[] audio, double startTime, IPropertyObject[] properties, ICompositionObject composition)
+        public float[] Process(float[] audio, Time startTime, IPropertyObject[] properties, ICompositionObject composition)
         {
             throw new NotImplementedException();
         }

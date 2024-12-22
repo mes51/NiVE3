@@ -51,7 +51,7 @@ namespace NiVE3.PresetPlugin.Effect.ColorCollection
             ];
         }
 
-        public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, double layerTime, IPropertyObject[] properties, ICompositionObject composition, bool useGpu)
+        public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, Time layerTime, IPropertyObject[] properties, ICompositionObject composition, bool useGpu)
         {
             var hue = (float)properties.GetValue(PropertyHueId, layerTime, 0.0);
             var saturation = (float)properties.GetValue(PropertySaturationId, layerTime, 0.0) * 0.01F + 1.0F;
@@ -67,7 +67,7 @@ namespace NiVE3.PresetPlugin.Effect.ColorCollection
             }
         }
 
-        public float[] Process(float[] audio, double startTime, IPropertyObject[] properties, ICompositionObject composition)
+        public float[] Process(float[] audio, Time startTime, IPropertyObject[] properties, ICompositionObject composition)
         {
             throw new NotImplementedException();
         }

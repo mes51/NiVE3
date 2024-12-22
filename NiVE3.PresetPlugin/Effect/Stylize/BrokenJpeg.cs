@@ -117,7 +117,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
             ];
         }
 
-        public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, double layerTime, IPropertyObject[] properties, ICompositionObject composition, bool useGpu)
+        public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, Time layerTime, IPropertyObject[] properties, ICompositionObject composition, bool useGpu)
         {
             var compressQuality = (float)properties.GetValue(PropertyCompressQualityId, layerTime, 100.0);
             var colorSpace = properties.GetValue(PropertyColorSpaceId, layerTime, JpegColorSpace.YCbCr444);
@@ -196,7 +196,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
             }
         }
 
-        public float[] Process(float[] audio, double startTime, IPropertyObject[] properties, ICompositionObject composition)
+        public float[] Process(float[] audio, Time startTime, IPropertyObject[] properties, ICompositionObject composition)
         {
             throw new NotImplementedException();
         }
@@ -215,7 +215,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
             });
         }
 
-        static void BreakScan(EncodeImageBase encoder, int brokenCount, double brokenRangeBegin, double brokenRangeEnd, int randomSeed, double time)
+        static void BreakScan(EncodeImageBase encoder, int brokenCount, double brokenRangeBegin, double brokenRangeEnd, int randomSeed, Time time)
         {
             if (brokenRangeBegin > brokenRangeEnd)
             {
@@ -240,7 +240,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
             }
         }
 
-        static void BreakQuantizeTable(QuantizeTable table, int tableIndex, int brokenPosition, int replaceValue, int brokenCount, int maxValue, int randomSeed, double time)
+        static void BreakQuantizeTable(QuantizeTable table, int tableIndex, int brokenPosition, int replaceValue, int brokenCount, int maxValue, int randomSeed, Time time)
         {
             table.Table[brokenPosition] = replaceValue;
 
