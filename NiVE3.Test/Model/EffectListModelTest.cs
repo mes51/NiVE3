@@ -17,6 +17,7 @@ namespace NiVE3.Test.Model
     public class EffectListModelTest
     {
         [Test]
+        [Ignore("モックを用意するまでテストしない")]
         public void TestCreateEffect()
         {
             // TODO: モックライブラリを探す

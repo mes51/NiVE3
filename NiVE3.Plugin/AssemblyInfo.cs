@@ -17,3 +17,5 @@ using System.Runtime.InteropServices;
 [assembly: InternalsVisibleTo("NiVE3")]
 [assembly: InternalsVisibleTo("NiVE3.View")]
 [assembly: InternalsVisibleTo("NiVE3.View.Resource")]
+[assembly: InternalsVisibleTo("NiVE3.Test.Plugin")]
+[assembly: InternalsVisibleTo("NiVE3.Test.Plugin.ValueObject")]

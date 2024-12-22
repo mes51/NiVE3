@@ -17,6 +17,7 @@ namespace NiVE3.Test.Model
     public class FootageListModelTest
     {
         [Test]
+        [Ignore("モックを用意するまでテストしない")]
         public void TestLoadFile_FileNotFound()
         {
             var model = CreateModel();
@@ -27,6 +28,7 @@ namespace NiVE3.Test.Model
         }
 
         [Test]
+        [Ignore("モックを用意するまでテストしない")]
         public void TestLoadFile_NotSupportedFile()
         {
             var model = CreateModel();
@@ -49,6 +51,7 @@ namespace NiVE3.Test.Model
         }
 
         [Test]
+        [Ignore("モックを用意するまでテストしない")]
         public void TestLoadFile_SingleSource()
         {
             var model = CreateModel();
@@ -72,6 +75,7 @@ namespace NiVE3.Test.Model
         }
 
         [Test]
+        [Ignore("モックを用意するまでテストしない")]
         public void TestLoadFile_MultipleSource()
         {
             var model = CreateModel();
