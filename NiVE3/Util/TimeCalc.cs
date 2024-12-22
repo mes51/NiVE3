@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using NiVE3.View.Resource;
 using System.Windows;
 using System.Runtime.CompilerServices;
+using NiVE3.Plugin.ValueObject;
 
 namespace NiVE3.Util
 {

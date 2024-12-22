@@ -314,7 +314,7 @@ namespace NiVE3.View.Part
             var selectedBrush = SelectedKeyFrameBrush;
             var timeOffset = SourceStartPoint - RangeStart;
             var selected = SelectedKeyFrameIds;
-            var diffTime = MoveTarget != null ? TimeCalc.AlignRound(KeyFrameMoveingTime + MoveTarget.Time, CompositionFrameRate) - MoveTarget.Time : 0.0;
+            var diffTime = MoveTarget != null ? TimeCalc.AlignRound(KeyFrameMoveingTime + MoveTarget.Time, CompositionFrameRate) - (double)MoveTarget.Time : 0.0; //XXX: doubleへのキャストの削除
             foreach (var (k, kp) in KeyFrames.Zip(KeyFrames.Prepend(KeyFrames.First())))
             {
                 var icon = KeyFrameIcons[(kp.InterpolationType, k.InterpolationType)];

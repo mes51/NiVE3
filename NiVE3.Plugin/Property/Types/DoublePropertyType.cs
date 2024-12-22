@@ -38,12 +38,12 @@ namespace NiVE3.Plugin.Property.Types
             switch (keyFrames[baseKeyFrameIndex].InterpolationType)
             {
                 case InterpolationType.Linear:
-                    return Interpolation.Linear((double)keyFrame1.Value!, (double)keyFrame2.Value!, keyFrame1.Time, keyFrame2.Time, (double)time);
+                    return Interpolation.Linear((double)keyFrame1.Value!, (double)keyFrame2.Value!, (double)keyFrame1.Time, (double)keyFrame2.Time, (double)time);
                 case InterpolationType.CatmullRom:
                     {
                         var keyFrame0 = baseKeyFrameIndex > 0 ? keyFrames[baseKeyFrameIndex - 1] : keyFrame1;
                         var keyFrame3 = baseKeyFrameIndex <= keyFrames.Count - 3 ? keyFrames[baseKeyFrameIndex + 2] : keyFrame2;
-                        return Interpolation.CatmullRom((double)keyFrame0.Value!, (double)keyFrame1.Value!, (double)keyFrame2.Value!, (double)keyFrame3.Value!, keyFrame1.Time, keyFrame2.Time, (double)time);
+                        return Interpolation.CatmullRom((double)keyFrame0.Value!, (double)keyFrame1.Value!, (double)keyFrame2.Value!, (double)keyFrame3.Value!, (double)keyFrame1.Time, (double)keyFrame2.Time, (double)time);
                     }
                 default:
                     return keyFrame1.Value;

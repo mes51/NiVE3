@@ -40,6 +40,8 @@ namespace NiVE3.Plugin.Property.Types
             var keyFrame1 = keyFrames[baseKeyFrameIndex];
             var keyFrame2 = keyFrames[baseKeyFrameIndex + 1];
             var t = (double)time;
+            var keyFrame1Time = (double)keyFrame1.Time;
+            var keyFrame2Time = (double)keyFrame2.Time;
             switch (keyFrames[baseKeyFrameIndex].InterpolationType)
             {
                 case InterpolationType.Linear:
@@ -47,9 +49,9 @@ namespace NiVE3.Plugin.Property.Types
                         var v1 = (Vector3d)keyFrame1.Value!;
                         var v2 = (Vector3d)keyFrame2.Value!;
                         return new Vector3d(
-                            Interpolation.Linear(v1.X, v2.X, keyFrame1.Time, keyFrame2.Time, t),
-                            Interpolation.Linear(v1.Y, v2.Y, keyFrame1.Time, keyFrame2.Time, t),
-                            Interpolation.Linear(v1.Z, v2.Z, keyFrame1.Time, keyFrame2.Time, t)
+                            Interpolation.Linear(v1.X, v2.X, keyFrame1Time, keyFrame2Time, t),
+                            Interpolation.Linear(v1.Y, v2.Y, keyFrame1Time, keyFrame2Time, t),
+                            Interpolation.Linear(v1.Z, v2.Z, keyFrame1Time, keyFrame2Time, t)
                         );
                     }
                 case InterpolationType.CatmullRom:
@@ -63,9 +65,9 @@ namespace NiVE3.Plugin.Property.Types
                         var v3 = (Vector3d)keyFrame3.Value!;
 
                         return new Vector3d(
-                            Interpolation.CatmullRom(v0.X, v1.X, v2.X, v3.X, keyFrame1.Time, keyFrame2.Time, t),
-                            Interpolation.CatmullRom(v0.Y, v1.Y, v2.Y, v3.Y, keyFrame1.Time, keyFrame2.Time, t),
-                            Interpolation.CatmullRom(v0.Z, v1.Z, v2.Z, v3.Z, keyFrame1.Time, keyFrame2.Time, t)
+                            Interpolation.CatmullRom(v0.X, v1.X, v2.X, v3.X, keyFrame1Time, keyFrame2Time, t),
+                            Interpolation.CatmullRom(v0.Y, v1.Y, v2.Y, v3.Y, keyFrame1Time, keyFrame2Time, t),
+                            Interpolation.CatmullRom(v0.Z, v1.Z, v2.Z, v3.Z, keyFrame1Time, keyFrame2Time, t)
                         );
                     }
                 default:
