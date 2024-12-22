@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
+using NiVE3.Plugin.ValueObject;
 
 namespace NiVE3.View.Converter
 {
@@ -25,20 +26,26 @@ namespace NiVE3.View.Converter
         /// <exception cref="ArgumentOutOfRangeException"></exception>
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            if (values.Any(v => v is not double))
-            {
-                return DependencyProperty.UnsetValue;
-            }
-            else if (values.Length < 2)
+            if (values.Length < 2)
             {
                 throw new ArgumentOutOfRangeException(nameof(values));
             }
+            if (values[1] is not double frameRate)
+            {
+                return DependencyProperty.UnsetValue;
+            }
+            if (values[0] is not double time)
+            {
+                if (values[0] is not Time structTime)
+                {
+                    return DependencyProperty.UnsetValue;
+                }
+                time = (double)structTime;
+            }
 
-            var time = (double)values[0];
             var sign = Math.Sign(time);
             time = Math.Abs(time);
 
-            var frameRate = (double)values[1];
             var hour = (int)(time / 3600);
             var minute = (int)((time % 3600) / 60);
             var second = (int)(time % 60);

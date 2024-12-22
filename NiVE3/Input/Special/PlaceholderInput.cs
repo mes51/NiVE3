@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using NiVE3.Image;
 using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Interfaces;
+using NiVE3.Plugin.ValueObject;
 
 namespace NiVE3.Input.Special
 {
@@ -35,13 +36,13 @@ namespace NiVE3.Input.Special
 
         int Height { get; }
 
-        double Duration { get; }
+        Time Duration { get; }
 
         SourceType SourceType { get; }
 
         object? InputOption { get; set; }
 
-        public PlaceholderInput(SourceType sourceType, int width, int height, double frameRate, double duration, object? inputOption, string sourceId, string? name)
+        public PlaceholderInput(SourceType sourceType, int width, int height, double frameRate, Time duration, object? inputOption, string sourceId, string? name)
         {
             SourceType = sourceType;
             Width = width;
@@ -133,13 +134,13 @@ namespace NiVE3.Input.Special
 
         public int Height { get; }
 
-        public double Duration { get; }
+        public Time Duration { get; }
 
         public SourceType SourceType { get; }
 
         string FileName {  get; }
 
-        public PlaceholderImageFootageSource(string fileName, SourceType sourceType, int width, int height, double frameRate, double duration, string sourceId, string? name)
+        public PlaceholderImageFootageSource(string fileName, SourceType sourceType, int width, int height, double frameRate, Time duration, string sourceId, string? name)
         {
             FileName = fileName;
             SourceType = sourceType;
@@ -151,7 +152,7 @@ namespace NiVE3.Input.Special
             Name = name;
         }
 
-        public NImage ReadFrame(double time, double downSamplingRate, bool toGpu)
+        public NImage ReadFrame(Time time, double downSamplingRate, bool toGpu)
         {
             var width = (int)(Width / downSamplingRate);
             var height = (int)(Height / downSamplingRate);
@@ -207,9 +208,9 @@ namespace NiVE3.Input.Special
             return result;
         }
 
-        public float[] ReadAudio(double time, double length)
+        public float[] ReadAudio(Time time, Time length)
         {
-            return PlaceholderAudioFootageSource.GenerateTone(time, length);
+            return PlaceholderAudioFootageSource.GenerateTone((double)time, (double)length);
         }
     }
 
@@ -225,25 +226,25 @@ namespace NiVE3.Input.Special
 
         public int Height => 0;
 
-        public double Duration { get; }
+        public Time Duration { get; }
 
         public SourceType SourceType => SourceType.Audio;
 
-        public PlaceholderAudioFootageSource(double duration, string sourceId, string? name)
+        public PlaceholderAudioFootageSource(Time duration, string sourceId, string? name)
         {
             SourceId = sourceId;
             Name = name;
             Duration = duration;
         }
 
-        public NImage ReadFrame(double time, double downSamplingRate, bool toGpu)
+        public NImage ReadFrame(Time time, double downSamplingRate, bool toGpu)
         {
             throw new NotImplementedException();
         }
 
-        public float[] ReadAudio(double time, double length)
+        public float[] ReadAudio(Time time, Time length)
         {
-            return GenerateTone(time, length);
+            return GenerateTone((double)time, (double)length);
         }
 
         public static float[] GenerateTone(double time, double length)
@@ -275,7 +276,7 @@ namespace NiVE3.Input.Special
 
         public int Height => 0;
 
-        public double Duration => 0.0;
+        public Time Duration => Time.Zero;
 
         public SourceType SourceType => SourceType.None;
 
@@ -285,12 +286,12 @@ namespace NiVE3.Input.Special
             Name = name;
         }
 
-        public NImage ReadFrame(double time, double downSamplingRate, bool toGpu)
+        public NImage ReadFrame(Time time, double downSamplingRate, bool toGpu)
         {
             throw new NotImplementedException();
         }
 
-        public float[] ReadAudio(double time, double length)
+        public float[] ReadAudio(Time time, Time length)
         {
             throw new NotImplementedException();
         }

@@ -9,6 +9,7 @@ using NiVE3.Image;
 using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Interfaces;
 using CommunityToolkit.Diagnostics;
+using NiVE3.Plugin.ValueObject;
 
 namespace NiVE3.Input
 {
@@ -71,7 +72,7 @@ namespace NiVE3.Input
 
         public int Height => Composition.Height;
 
-        public double Duration => Composition.Duration;
+        public Time Duration => Composition.Duration;
 
         public SourceType SourceType => SourceType.VideoAndAudio;
 
@@ -82,12 +83,12 @@ namespace NiVE3.Input
             Composition = composition;
         }
 
-        public NImage ReadFrame(double time, double downSamplingRate, bool toGpu)
+        public NImage ReadFrame(Time time, double downSamplingRate, bool toGpu)
         {
             return Composition.RenderFrame(time, downSamplingRate, Composition.ApplyToneMappingWhenNested, toGpu);
         }
 
-        public float[] ReadAudio(double time, double length)
+        public float[] ReadAudio(Time time, Time length)
         {
             return Composition.RenderAudio(time, length);
         }

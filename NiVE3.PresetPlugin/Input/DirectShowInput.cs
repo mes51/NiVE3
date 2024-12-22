@@ -137,7 +137,7 @@ namespace NiVE3.PresetPlugin.Input
 
         public int Height => VideoReader.Height;
 
-        public double Duration => VideoReader.Duration;
+        public Time Duration => (Time)VideoReader.Duration;
 
         public SourceType SourceType => SourceType.Video | (AudioReader != null ? SourceType.Audio : SourceType.None);
 
@@ -163,22 +163,22 @@ namespace NiVE3.PresetPlugin.Input
             VectorAlignedBufferLineLength = (BufferLineLength / Vector<byte>.Count) * Vector<byte>.Count;
         }
 
-        public float[] ReadAudio(double time, double length)
+        public float[] ReadAudio(Time time, Time length)
         {
             if (AudioReader == null)
             {
                 return [];
             }
 
-            var data = AudioReader.GetAudio(time, length);
+            var data = AudioReader.GetAudio((double)time, (double)length);
             return AudioConverter.ConvertToSpecificFormat(data, AudioReader.SamplingRate, AudioReader.Channel, AudioReader.BitPerSample);
         }
 
-        public NImage ReadFrame(double time, double downSamplingRate, bool toGpu)
+        public NImage ReadFrame(Time time, double downSamplingRate, bool toGpu)
         {
             var result = new NManagedImage(Width, Height);
 
-            var buffer = VideoReader.GetImage(time);
+            var buffer = VideoReader.GetImage((double)time);
             var width = Width;
             var height = Height;
             var imageData = result.Data;
@@ -278,7 +278,7 @@ namespace NiVE3.PresetPlugin.Input
 
         public int Height => 0;
 
-        public double Duration => AudioReader.Duration;
+        public Time Duration => (Time)AudioReader.Duration;
 
         public SourceType SourceType => SourceType.Audio;
 
@@ -289,13 +289,13 @@ namespace NiVE3.PresetPlugin.Input
             AudioReader = audioReader;
         }
 
-        public float[] ReadAudio(double time, double length)
+        public float[] ReadAudio(Time time, Time length)
         {
-            var data = AudioReader.GetAudio(time, length);
+            var data = AudioReader.GetAudio((double)time, (double)length);
             return AudioConverter.ConvertToSpecificFormat(data, AudioReader.SamplingRate, AudioReader.Channel, AudioReader.BitPerSample);
         }
 
-        public NImage ReadFrame(double time, double downSamplingRate, bool toGpu)
+        public NImage ReadFrame(Time time, double downSamplingRate, bool toGpu)
         {
             throw new NotImplementedException();
         }

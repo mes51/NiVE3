@@ -104,7 +104,7 @@ namespace NiVE3.PresetPlugin.Input
 
         public int Height => 0;
 
-        public double Duration => 0.0;
+        public Time Duration => Time.Zero;
 
         public SourceType SourceType => SourceType.Image;
 
@@ -115,7 +115,7 @@ namespace NiVE3.PresetPlugin.Input
             AcceleratorObject = accelerator;
         }
 
-        public SourceFootageRect CalcSize(double time, int compositionWidth, int compositionHeight, bool withInvisible, PropertyValueGroup properties)
+        public SourceFootageRect CalcSize(Time time, int compositionWidth, int compositionHeight, bool withInvisible, PropertyValueGroup properties)
         {
             properties.TryGetValue(PropertyImageSizeId, out Vector3d size);
             var width = Math.Max((int)size.X, 1);
@@ -155,12 +155,12 @@ namespace NiVE3.PresetPlugin.Input
             ];
         }
 
-        public float[] ReadAudio(double time, double length)
+        public float[] ReadAudio(Time time, Time length)
         {
             throw new NotImplementedException();
         }
 
-        public NImage ReadFrame(double time, double downSamplingRate, int compositionWidth, int compositionHeight, PropertyValueGroup properties, ImageInterpolationQuality imageInterpolationQuality, bool toGpu)
+        public NImage ReadFrame(Time time, double downSamplingRate, int compositionWidth, int compositionHeight, PropertyValueGroup properties, ImageInterpolationQuality imageInterpolationQuality, bool toGpu)
         {
             var fractalType = properties.GetValueOrDefault(PropertyFractalTypeId, FractalType.Normal);
             var noiseType = properties.GetValueOrDefault(PropertyNoiseTypeId, NoiseType.Parlin);
@@ -244,7 +244,7 @@ namespace NiVE3.PresetPlugin.Input
             }
         }
 
-        public NImage ReadFrame(double time, double downSamplingRate, bool toGpu)
+        public NImage ReadFrame(Time time, double downSamplingRate, bool toGpu)
         {
             return new NManagedImage(1, 1);
         }

@@ -32,7 +32,7 @@ namespace NiVE3.Model
 
         double FrameRate { get; }
 
-        double Duration { get; }
+        Time Duration { get; }
 
         string FilePath { get; }
 
@@ -95,8 +95,8 @@ namespace NiVE3.Model
             private set { SetProperty(ref frameRate, value); }
         }
 
-        private double duration;
-        public double Duration
+        private Time duration;
+        public Time Duration
         {
             get { return duration; }
             private set { SetProperty(ref duration, value); }
@@ -230,7 +230,7 @@ namespace NiVE3.Model
             }
         }
 
-        public SourceFootageRect CalcSize(double time, int compositionWidth, int compositionHeight, bool withInvisible, PropertyValueGroup? properties)
+        public SourceFootageRect CalcSize(Time time, int compositionWidth, int compositionHeight, bool withInvisible, PropertyValueGroup? properties)
         {
             if (properties != null && Source is ICustomizableFootageSource customizableFootageSource)
             {
@@ -242,7 +242,7 @@ namespace NiVE3.Model
             }
         }
 
-        public NImage ReadImage(double time, double downSamplingRate, int compositionWidth, int compositionHeight, PropertyValueGroup? properties, ImageInterpolationQuality imageInterpolationQuality, bool toGpu)
+        public NImage ReadImage(Time time, double downSamplingRate, int compositionWidth, int compositionHeight, PropertyValueGroup? properties, ImageInterpolationQuality imageInterpolationQuality, bool toGpu)
         {
             try
             {
@@ -272,7 +272,7 @@ namespace NiVE3.Model
             }
         }
 
-        public float[] ReadAudio(double time, double length)
+        public float[] ReadAudio(Time time, Time length)
         {
             return Source.ReadAudio(time, length);
         }
@@ -353,7 +353,7 @@ namespace NiVE3.Model
 
         public double FrameRate => 0.0;
 
-        public double Duration => 0.0;
+        public Time Duration => Time.Zero;
 
         public string FilePath => "";
 

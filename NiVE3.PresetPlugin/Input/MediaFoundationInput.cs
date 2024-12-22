@@ -127,7 +127,7 @@ namespace NiVE3.PresetPlugin.Input
 
         public int Height { get; }
 
-        public double Duration { get; }
+        public Time Duration { get; }
 
         public SourceType SourceType { get; }
 
@@ -142,16 +142,16 @@ namespace NiVE3.PresetPlugin.Input
             Width = reader.Width;
             Height = reader.Height;
             FrameRate = reader.FrameRate;
-            Duration = reader.Duration;
+            Duration = (Time)reader.Duration;
             SourceType = audio != null ? SourceType.VideoAndAudio : SourceType.Video;
         }
 
-        public NImage ReadFrame(double time, double downSamplingRate, bool toGpu)
+        public NImage ReadFrame(Time time, double downSamplingRate, bool toGpu)
         {
             // TODO: TerraFXへの移行が出来るかとComputeSharpに直接渡せるかの調査
 
             var result = new NManagedImage(Width, Height, false);
-            var data = VideoReader.GetFrame(time);
+            var data = VideoReader.GetFrame((double)time);
             var pixelCount = Width * Height;
             ImageConversion.ConvertToBGRA128(data, result.Data, pixelCount);
 
@@ -170,11 +170,11 @@ namespace NiVE3.PresetPlugin.Input
             return result;
         }
 
-        public float[] ReadAudio(double time, double length)
+        public float[] ReadAudio(Time time, Time length)
         {
             if (AudioReader != null)
             {
-                return AudioReader.Read(time, length);
+                return AudioReader.Read((double)time, (double)length);
             }
             else
             {
@@ -195,7 +195,7 @@ namespace NiVE3.PresetPlugin.Input
 
         public int Height => throw new NotImplementedException();
 
-        public double Duration => Reader.Duration;
+        public Time Duration => (Time)Reader.Duration;
 
         public SourceType SourceType => SourceType.Audio;
 
@@ -206,12 +206,12 @@ namespace NiVE3.PresetPlugin.Input
             Reader = reader;
         }
 
-        public float[] ReadAudio(double time, double length)
+        public float[] ReadAudio(Time time, Time length)
         {
-            return Reader.Read(time, length);
+            return Reader.Read((double)time, (double)length);
         }
 
-        public NImage ReadFrame(double time, double downSamplingRate, bool toGpu)
+        public NImage ReadFrame(Time time, double downSamplingRate, bool toGpu)
         {
             throw new NotImplementedException();
         }

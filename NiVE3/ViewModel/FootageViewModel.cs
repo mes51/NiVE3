@@ -20,6 +20,7 @@ using Prism.Commands;
 using Prism.Mvvm;
 using NiVE3.UI.Command;
 using NiVE3.Util;
+using NiVE3.Plugin.ValueObject;
 
 namespace NiVE3.ViewModel
 {
@@ -35,7 +36,7 @@ namespace NiVE3.ViewModel
 
         double FrameRate { get; }
 
-        double Duration { get; }
+        Time Duration { get; }
 
         string FilePath { get; }
 
@@ -95,9 +96,9 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref frameRate, value); }
         }
 
-        private double duration;
+        private Time duration;
         [NeedWire(nameof(Footage), IsOneWay = true)]
-        public double Duration
+        public Time Duration
         {
             get { return duration; }
             set { SetProperty(ref duration, value); }
@@ -301,7 +302,7 @@ namespace NiVE3.ViewModel
 
         public double FrameRate => 0.0;
 
-        public double Duration => 0.0;
+        public Time Duration => Time.Zero;
 
         public string FilePath => "";
 

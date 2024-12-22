@@ -114,7 +114,7 @@ namespace NiVE3.Input
 
         public double FrameRate => 0.0;
 
-        public double Duration => 0.0;
+        public Time Duration => Time.Zero;
 
         public int Width { get; internal set; }
 
@@ -126,7 +126,7 @@ namespace NiVE3.Input
 
         internal IAcceleratorObject? Accelerator { get; set; }
 
-        public NImage ReadFrame(double time, double downSamplingRate, bool toGpu)
+        public NImage ReadFrame(Time time, double downSamplingRate, bool toGpu)
         {
             var width = (int)(Width / downSamplingRate);
             var height = (int)(Height / downSamplingRate);
@@ -142,7 +142,7 @@ namespace NiVE3.Input
             }
         }
 
-        public float[] ReadAudio(double time, double length)
+        public float[] ReadAudio(Time time, Time length)
         {
             throw new NotImplementedException();
         }

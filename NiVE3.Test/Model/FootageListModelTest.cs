@@ -11,6 +11,7 @@ using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Interfaces;
 using System.Reflection;
 using NiVE3.Model.UI;
+using NiVE3.Plugin.ValueObject;
 
 namespace NiVE3.Test.Model
 {
@@ -179,7 +180,7 @@ namespace NiVE3.Test.Model
 
         public int Height => 1;
 
-        public double Duration => 0.0;
+        public Time Duration => Time.Zero;
 
         public SourceType SourceType => SourceType.None;
 
@@ -188,12 +189,12 @@ namespace NiVE3.Test.Model
             SourceId = id;
         }
 
-        public NImage ReadFrame(double time, double downSamplingRate, bool toGpu)
+        public NImage ReadFrame(Time time, double downSamplingRate, bool toGpu)
         {
             throw new NotImplementedException();
         }
 
-        public float[] ReadAudio(double time, double length)
+        public float[] ReadAudio(Time time, Time length)
         {
             throw new NotImplementedException();
         }

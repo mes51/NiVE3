@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using NiVE3.Image;
 using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Interfaces;
+using NiVE3.Plugin.ValueObject;
 using NiVE3.PresetPlugin.Internal;
 using NiVE3.PresetPlugin.Internal.Voicevox;
 using NiVE3.PresetPlugin.Internal.Voicevox.Data.Project;
@@ -114,7 +115,7 @@ namespace NiVE3.PresetPlugin.Input
 
         public int Height { get; }
 
-        public double Duration => Signal.Duration;
+        public Time Duration => (Time)Signal.Duration;
 
         public SourceType SourceType => SourceType.Audio;
 
@@ -129,10 +130,10 @@ namespace NiVE3.PresetPlugin.Input
             Signal = signal;
         }
 
-        public float[] ReadAudio(double time, double length)
+        public float[] ReadAudio(Time time, Time length)
         {
-            var pos = (int)(time * Const.AudioSamplingRate);
-            var result = new float[Math.Min((int)(length * Const.AudioSamplingRate), Signal.Samples.Length - pos) * 2];
+            var pos = (int)((double)time * Const.AudioSamplingRate);
+            var result = new float[Math.Min((int)((double)length * Const.AudioSamplingRate), Signal.Samples.Length - pos) * 2];
 
             for (int i = 0, p = pos; i < result.Length; i += 2, p++)
             {
@@ -142,7 +143,7 @@ namespace NiVE3.PresetPlugin.Input
             return result;
         }
 
-        public NImage ReadFrame(double time, double downSamplingRate, bool toGpu)
+        public NImage ReadFrame(Time time, double downSamplingRate, bool toGpu)
         {
             throw new NotImplementedException();
         }

@@ -31,7 +31,7 @@ namespace NiVE3.PresetPlugin.Input
         {
             if (LoadedImage != null)
             {
-                return new FootageSourceGroup([new TestPngFootageSource(LoadedImage)]);
+                return new FootageSourceGroup([new PngFootageSource(LoadedImage)]);
             }
             else
             {
@@ -82,7 +82,7 @@ namespace NiVE3.PresetPlugin.Input
         }
     }
 
-    file class TestPngFootageSource : IFootageSource
+    file class PngFootageSource : IFootageSource
     {
         public string SourceId => "0";
 
@@ -94,18 +94,18 @@ namespace NiVE3.PresetPlugin.Input
 
         public int Height => Image.Height;
 
-        public double Duration => 0.0;
+        public Time Duration => Time.Zero;
 
         public SourceType SourceType => SourceType.Image;
 
         NManagedImage Image { get; }
 
-        public TestPngFootageSource(NManagedImage image)
+        public PngFootageSource(NManagedImage image)
         {
             Image = image;
         }
 
-        public NImage ReadFrame(double time, double downSamplingRate, bool toGpu)
+        public NImage ReadFrame(Time time, double downSamplingRate, bool toGpu)
         {
             if (downSamplingRate != 1.0)
             {
@@ -120,7 +120,7 @@ namespace NiVE3.PresetPlugin.Input
             }
         }
 
-        public float[] ReadAudio(double time, double length)
+        public float[] ReadAudio(Time time, Time length)
         {
             throw new NotImplementedException();
         }
