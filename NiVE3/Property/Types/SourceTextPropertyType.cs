@@ -9,6 +9,7 @@ using System.Windows.Documents;
 using NiVE3.Plugin.Internal.Util;
 using NiVE3.Plugin.Property;
 using NiVE3.Plugin.Property.Types;
+using NiVE3.Plugin.ValueObject;
 using NiVE3.Shared.Extension;
 using NiVE3.Text;
 
@@ -24,9 +25,9 @@ namespace NiVE3.Property.Types
 
         private SourceTextPropertyType() { }
 
-        public object? Interpolate(IReadOnlyList<KeyFrame> keyFrames, double t)
+        public object? Interpolate(IReadOnlyList<KeyFrame> keyFrames, Time time)
         {
-            var baseKeyFrameIndex = keyFrames.FindLastIndex(k => k.Time <= t);
+            var baseKeyFrameIndex = keyFrames.FindLastIndex(k => k.Time <= time);
             if (baseKeyFrameIndex < 0)
             {
                 return keyFrames[0].Value;

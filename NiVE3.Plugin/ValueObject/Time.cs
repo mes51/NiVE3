@@ -1291,15 +1291,88 @@ namespace NiVE3.Plugin.ValueObject
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static explicit operator double(in Time a)
+        public static implicit operator double(in Time a)
         {
             return a.IsFrameTime ? RoundTimeDigit(a.Frame / a.FrameRate) : a.RealTime;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static explicit operator Time(double realTime)
+        public static implicit operator Time(double realTime)
         {
             return new Time(RoundTimeDigit(realTime));
+        }
+
+        // NOTE: 以下移行のための一時的な実装
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator >(Time a, double b)
+        {
+            return (double)a > b;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator >=(Time a, double b)
+        {
+            return (double)a >= b;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator <(Time a, double b)
+        {
+            return (double)a < b;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator <=(Time a, double b)
+        {
+            return (double)a <= b;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(Time a, double b)
+        {
+            return a.Equals(b);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator !=(Time a, double b)
+        {
+            return !a.Equals(b);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator >(double a, Time b)
+        {
+            return a > (double)b;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator >=(double a, Time b)
+        {
+            return a >= (double)b;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator <(double a, Time b)
+        {
+            return a < (double)b;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator <=(double a, Time b)
+        {
+            return a <= (double)b;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(double a, Time b)
+        {
+            return a == (double)b;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator !=(double a, Time b)
+        {
+            return a != (double)b;
         }
     }
 }

@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NiVE3.Plugin.ValueObject;
 
 namespace NiVE3.Plugin.Property.Types
 {
@@ -30,7 +31,7 @@ namespace NiVE3.Plugin.Property.Types
             throw new NotImplementedException();
         }
 
-        public object Interpolate(IReadOnlyList<KeyFrame> keyFrames, double t)
+        public object Interpolate(IReadOnlyList<KeyFrame> keyFrames, Time time)
         {
             throw new NotImplementedException();
         }

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Plugin.Property;
 using NiVE3.Plugin.Property.Types;
+using NiVE3.Plugin.ValueObject;
 using NiVE3.Shared.Extension;
 
 namespace NiVE3.PresetPlugin.Property.Types
@@ -19,9 +20,9 @@ namespace NiVE3.PresetPlugin.Property.Types
 
         private ToneCurvePropertyType() { }
 
-        public object? Interpolate(IReadOnlyList<KeyFrame> keyFrames, double t)
+        public object? Interpolate(IReadOnlyList<KeyFrame> keyFrames, Time time)
         {
-            var baseKeyFrameIndex = keyFrames.FindLastIndex(k => k.Time <= t);
+            var baseKeyFrameIndex = keyFrames.FindLastIndex(k => k.Time <= time);
             if (baseKeyFrameIndex < 0)
             {
                 return keyFrames[0].Value;
@@ -33,11 +34,11 @@ namespace NiVE3.PresetPlugin.Property.Types
             var keyFrame1 = keyFrames[baseKeyFrameIndex];
             var keyFrame2 = keyFrames[baseKeyFrameIndex + 1];
 
-            if (keyFrame1.Time == t)
+            if (keyFrame1.Time == time)
             {
                 return keyFrame1.Value;
             }
-            else if (keyFrame2.Time == t)
+            else if (keyFrame2.Time == time)
             {
                 return keyFrame2.Value;
             }
@@ -48,7 +49,7 @@ namespace NiVE3.PresetPlugin.Property.Types
                     {
                         var prevValue = (keyFrame1.Value as ToneCurveParameters) ?? ToneCurveParameters.Empty;
                         var nextValue = (keyFrame2.Value as ToneCurveParameters) ?? ToneCurveParameters.Empty;
-                        var tv = (float)((t - keyFrame1.Time) / (keyFrame2.Time - keyFrame1.Time));
+                        var tv = (float)(double)((time - keyFrame1.Time) / (keyFrame2.Time - keyFrame1.Time));
 
                         return new ToneCurveParameters(
                             InterpolatePoints(prevValue.Rgb, nextValue.Rgb, tv),

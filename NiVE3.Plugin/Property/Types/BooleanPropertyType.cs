@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NiVE3.Plugin.ValueObject;
 using NiVE3.Shared.Extension;
 
 namespace NiVE3.Plugin.Property.Types
@@ -22,9 +23,10 @@ namespace NiVE3.Plugin.Property.Types
 
         private BooleanPropertyType() { }
 
-        public object? Interpolate(IReadOnlyList<KeyFrame> keyFrames, double t)
+        public object? Interpolate(IReadOnlyList<KeyFrame> keyFrames, Time time)
         {
-            var baseKeyFrameIndex = keyFrames.FindLastIndex(k => k.Time <= t);
+
+            var baseKeyFrameIndex = keyFrames.FindLastIndex(k => k.Time <= time);
             if (baseKeyFrameIndex < 0)
             {
                 return keyFrames[0].Value;

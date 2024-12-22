@@ -10,6 +10,7 @@ using System.Runtime.InteropServices;
 using NiVE3.Plugin.Internal.Util;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
+using NiVE3.Plugin.ValueObject;
 
 namespace NiVE3.Plugin.Property.Types
 {
@@ -25,9 +26,9 @@ namespace NiVE3.Plugin.Property.Types
 
         private Vector3dPropertyType() { }
 
-        public object Interpolate(IReadOnlyList<KeyFrame> keyFrames, double t)
+        public object Interpolate(IReadOnlyList<KeyFrame> keyFrames, Time time)
         {
-            var baseKeyFrameIndex = keyFrames.FindLastIndex(k => k.Time <= t);
+            var baseKeyFrameIndex = keyFrames.FindLastIndex(k => k.Time <= time);
             if (baseKeyFrameIndex < 0)
             {
                 return keyFrames[0].Value!;
@@ -38,6 +39,7 @@ namespace NiVE3.Plugin.Property.Types
             }
             var keyFrame1 = keyFrames[baseKeyFrameIndex];
             var keyFrame2 = keyFrames[baseKeyFrameIndex + 1];
+            var t = (double)time;
             switch (keyFrames[baseKeyFrameIndex].InterpolationType)
             {
                 case InterpolationType.Linear:

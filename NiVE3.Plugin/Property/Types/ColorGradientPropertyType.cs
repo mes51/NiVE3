@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Image.Color;
 using NiVE3.Plugin.Internal.Util;
+using NiVE3.Plugin.ValueObject;
 using NiVE3.Shared.Extension;
 
 namespace NiVE3.Plugin.Property.Types
@@ -22,9 +23,9 @@ namespace NiVE3.Plugin.Property.Types
 
         private ColorGradientPropertyType() { }
 
-        public object? Interpolate(IReadOnlyList<KeyFrame> keyFrames, double t)
+        public object? Interpolate(IReadOnlyList<KeyFrame> keyFrames, Time time)
         {
-            var baseKeyFrameIndex = keyFrames.FindLastIndex(k => k.Time <= t);
+            var baseKeyFrameIndex = keyFrames.FindLastIndex(k => k.Time <= time);
             if (baseKeyFrameIndex < 0)
             {
                 return keyFrames[0].Value;
@@ -42,7 +43,7 @@ namespace NiVE3.Plugin.Property.Types
                     {
                         var prevValue = (ColorGradient)(keyFrame1.Value ?? ColorGradient.Empty);
                         var nextValue = (ColorGradient)(keyFrame2.Value ?? ColorGradient.Empty);
-                        var tv = (float)((t - keyFrame1.Time) / (keyFrame2.Time - keyFrame1.Time));
+                        var tv = (float)(double)((time - keyFrame1.Time) / (keyFrame2.Time - keyFrame1.Time));
 
                         var prevColorStops = prevValue.ColorStops;
                         var nextColorStops = nextValue.ColorStops;

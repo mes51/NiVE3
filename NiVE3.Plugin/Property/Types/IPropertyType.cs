@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Plugin.Interfaces;
+using NiVE3.Plugin.ValueObject;
 
 namespace NiVE3.Plugin.Property.Types
 {
@@ -27,9 +28,9 @@ namespace NiVE3.Plugin.Property.Types
         /// 2つのプロパティを補間します
         /// </summary>
         /// <param name="keyFrames">2つ以上の時間順でソートされたキーフレーム</param>
-        /// <param name="t">現在時刻。0～1で表されます</param>
+        /// <param name="t">現在時刻</param>
         /// <returns>補間された値</returns>
-        object? Interpolate(IReadOnlyList<KeyFrame> keyFrames, double t);
+        object? Interpolate(IReadOnlyList<KeyFrame> keyFrames, Time time);
 
         /// <summary>
         /// 値をJSONで保存可能な形式にシリアライズします
