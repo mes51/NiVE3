@@ -44,7 +44,7 @@ namespace NiVE3.PresetPlugin.Output
 
         public void SetupAccelerator(IAcceleratorObject accelerator) { }
 
-        public FrameworkElement? GetOutputSetting(string filePath, double startTime, double duration, double frameRate, Int32Size? size, SourceType outputSources)
+        public FrameworkElement? GetOutputSetting(string filePath, Time startTime, Time duration, double frameRate, Int32Size? size, SourceType outputSources)
         {
             var viewModel = new AviOutputSettingViewModel(size?.Width ?? 0, size?.Height ?? 0, outputSources)
             {
@@ -124,7 +124,7 @@ namespace NiVE3.PresetPlugin.Output
             return Path.ChangeExtension(baseFilePath, ".avi");
         }
 
-        public void BeginOutput(string filePath, double startTime, double duration, double frameRate, Int32Size? size, SourceType outputSources)
+        public void BeginOutput(string filePath, Time startTime, Time duration, double frameRate, Int32Size? size, SourceType outputSources)
         {
             if (Writer != null)
             {
@@ -146,7 +146,7 @@ namespace NiVE3.PresetPlugin.Output
                 IVideoEncoder encoder;
                 if (!string.IsNullOrEmpty(Setting.Codec))
                 {
-                    encoder = new CompressedVideoEncoder(size.Value.Width, size.Value.Height, bpc, Setting.Codec, (int)Math.Ceiling(duration * frameRate), (int)frameRate)
+                    encoder = new CompressedVideoEncoder(size.Value.Width, size.Value.Height, bpc, Setting.Codec, (int)Math.Ceiling((double)duration * frameRate), (int)frameRate)
                     {
                         Quality = Setting.Quality,
                         KeyFrameRate = Setting.UseKeyFrameRate ? Setting.KeyFrameRate : 0,
@@ -204,7 +204,7 @@ namespace NiVE3.PresetPlugin.Output
             return 1;
         }
 
-        public void ProcessFrame(int pass, double time, NImage image, bool useGpu)
+        public void ProcessFrame(int pass, Time time, NImage image, bool useGpu)
         {
             if (VideoStream == null)
             {

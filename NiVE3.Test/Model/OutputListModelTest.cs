@@ -34,7 +34,7 @@ namespace NiVE3.Test.Model
     {
         public const string ID = "D121D0DE-64E6-4476-8BF6-F5BEEF02DB26";
 
-        public void BeginOutput(string filePath, double startTime, double duration, double frameRate, Int32Size? size, SourceType outputSources)
+        public void BeginOutput(string filePath, Time startTime, Time duration, double frameRate, Int32Size? size, SourceType outputSources)
         {
             throw new NotImplementedException();
         }
@@ -69,7 +69,7 @@ namespace NiVE3.Test.Model
             throw new NotImplementedException();
         }
 
-        public void ProcessFrame(int pass, double time, NImage image, bool useGpu)
+        public void ProcessFrame(int pass, Time time, NImage image, bool useGpu)
         {
             throw new NotImplementedException();
         }

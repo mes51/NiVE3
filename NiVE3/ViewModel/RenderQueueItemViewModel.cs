@@ -15,6 +15,7 @@ using NiVE3.View.Dialog;
 using NiVE3.ViewModel.Dialog;
 using Prism.Commands;
 using Prism.Dialogs;
+using NiVE3.Plugin.ValueObject;
 
 namespace NiVE3.ViewModel
 {
@@ -53,33 +54,33 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref renderRangeType, value); }
         }
 
-        private double beginTime;
+        private Time beginTime;
         [NeedWire(nameof(RenderQueueItemModel), IsOneWay = true)]
-        public double BeginTime
+        public Time BeginTime
         {
             get { return beginTime; }
             set { SetProperty(ref beginTime, value); }
         }
 
-        private double endTime;
+        private Time endTime;
         [NeedWire(nameof(RenderQueueItemModel), IsOneWay = true)]
-        public double EndTime
+        public Time EndTime
         {
             get { return endTime; }
             set { SetProperty(ref endTime, value); }
         }
 
-        private double fixedBeginTime;
+        private Time fixedBeginTime;
         [NeedWire(nameof(RenderQueueItemModel), IsOneWay = true)]
-        public double FixedBeginTime
+        public Time FixedBeginTime
         {
             get { return fixedBeginTime; }
             set { SetProperty(ref fixedBeginTime, value); }
         }
 
-        private double fixedEndTime;
+        private Time fixedEndTime;
         [NeedWire(nameof(RenderQueueItemModel), IsOneWay = true)]
-        public double FixedEndTime
+        public Time FixedEndTime
         {
             get { return fixedEndTime; }
             set { SetProperty(ref fixedEndTime, value); }
@@ -141,25 +142,25 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref compositionName, value); }
         }
 
-        private double compositionWorkareaBegin;
+        private Time compositionWorkareaBegin;
         [NeedWire(nameof(RenderQueueItemModel), IsOneWay = true)]
-        public double CompositionWorkareaBegin
+        public Time CompositionWorkareaBegin
         {
             get { return compositionWorkareaBegin; }
             set { SetProperty(ref compositionWorkareaBegin, value); }
         }
 
-        private double compositionWorkareaEnd;
+        private Time compositionWorkareaEnd;
         [NeedWire(nameof(RenderQueueItemModel), IsOneWay = true)]
-        public double CompositionWorkareaEnd
+        public Time CompositionWorkareaEnd
         {
             get { return compositionWorkareaEnd; }
             set { SetProperty(ref compositionWorkareaEnd, value); }
         }
 
-        private double compositionDuration;
+        private Time compositionDuration;
         [NeedWire(nameof(RenderQueueItemModel), IsOneWay = true)]
-        public double CompositionDuration
+        public Time CompositionDuration
         {
             get { return compositionDuration; }
             set { SetProperty(ref compositionDuration, value); }
@@ -243,8 +244,8 @@ namespace NiVE3.ViewModel
                     RenderQueueItemModel.UpdateSetting(
                         settingResult.Parameters.GetValue<string>(nameof(RenderSettingViewModel.FilePath)),
                         settingResult.Parameters.GetValue<RenderRangeType>(nameof(RenderSettingViewModel.RenderRangeType)),
-                        settingResult.Parameters.GetValue<double>(nameof(RenderSettingViewModel.BeginTime)),
-                        settingResult.Parameters.GetValue<double>(nameof(RenderSettingViewModel.EndTime)),
+                        settingResult.Parameters.GetValue<Time>(nameof(RenderSettingViewModel.BeginTime)),
+                        settingResult.Parameters.GetValue<Time>(nameof(RenderSettingViewModel.EndTime)),
                         settingResult.Parameters.GetValue<bool>(nameof(RenderSettingViewModel.IsOutputVideo)),
                         settingResult.Parameters.GetValue<bool>(nameof(RenderSettingViewModel.IsOutputAudio)),
                         prevSetting,

@@ -46,29 +46,29 @@ namespace NiVE3.Model
             set { SetProperty(ref renderRangeType, value); }
         }
 
-        private double beginTime;
-        public double BeginTime
+        private Time beginTime;
+        public Time BeginTime
         {
             get { return beginTime; }
             set { SetProperty(ref beginTime, value); }
         }
 
-        private double endTime;
-        public double EndTime
+        private Time endTime;
+        public Time EndTime
         {
             get { return endTime; }
             set { SetProperty(ref endTime, value); }
         }
 
-        private double fixedBeginTime;
-        public double FixedBeginTime
+        private Time fixedBeginTime;
+        public Time FixedBeginTime
         {
             get { return fixedBeginTime; }
             set { SetProperty(ref fixedBeginTime, value); }
         }
 
-        private double fixedEndTime;
-        public double FixedEndTime
+        private Time fixedEndTime;
+        public Time FixedEndTime
         {
             get { return fixedEndTime; }
             set { SetProperty(ref fixedEndTime, value); }
@@ -123,22 +123,22 @@ namespace NiVE3.Model
             set { SetProperty(ref compositionName, value); }
         }
 
-        private double compositionWorkareaBegin;
-        public double CompositionWorkareaBegin
+        private Time compositionWorkareaBegin;
+        public Time CompositionWorkareaBegin
         {
             get { return compositionWorkareaBegin; }
             set { SetProperty(ref compositionWorkareaBegin, value); }
         }
 
-        private double compositionWorkareaEnd;
-        public double CompositionWorkareaEnd
+        private Time compositionWorkareaEnd;
+        public Time CompositionWorkareaEnd
         {
             get { return compositionWorkareaEnd; }
             set { SetProperty(ref compositionWorkareaEnd, value); }
         }
 
-        private double compositionDuration;
-        public double CompositionDuration
+        private Time compositionDuration;
+        public Time CompositionDuration
         {
             get { return compositionDuration; }
             set { SetProperty(ref compositionDuration, value); }
@@ -184,7 +184,7 @@ namespace NiVE3.Model
             PropertyChanged += RenderQueueItemModel_PropertyChanged;
         }
 
-        public void UpdateSetting(string filePath, RenderRangeType renderRangeType, double beginTime, double endTime, bool isOutputVideo, bool isOutputAudio, object? prevOutputSetting, ExportLifetimeContext<IOutput> output)
+        public void UpdateSetting(string filePath, RenderRangeType renderRangeType, Time beginTime, Time endTime, bool isOutputVideo, bool isOutputAudio, object? prevOutputSetting, ExportLifetimeContext<IOutput> output)
         {
             var prevFilePath = FilePath;
             var prevRenderRangeType = RenderRangeType;
@@ -304,11 +304,11 @@ namespace NiVE3.Model
             {
                 plugin.BeginOutput(filePath, beginTime, endTime - beginTime, frameRate, size, sourceTypes);
 
-                var lastProcessedDuration = 0.0;
+                var lastProcessedDuration = Time.Zero;
                 if (sourceTypes.HasFlag(SourceType.Video))
                 {
                     var passCount = plugin.GetPassCount();
-                    var frameCount = (int)Math.Ceiling((endTime - beginTime) * frameRate);
+                    var frameCount = (int)Math.Ceiling((double)(endTime - beginTime) * frameRate);
                     var totalFrameCount = frameCount * passCount;
                     setTotalFrameCount(totalFrameCount);
                     for (var pass = 0; pass < passCount && !isAborting(); pass++)
@@ -327,12 +327,12 @@ namespace NiVE3.Model
 
                             var startTimestamp = Stopwatch.GetTimestamp();
                             var useGpu = ProjectModel.UseGpu;
-                            var time = TimeCalc.RoundTimeDigit(beginTime + i * frameDuration);
+                            var time = beginTime + new Time(i, frameRate);
                             using var checker = CycleChecker.StartCheck();
                             using var image = CompositionModel.RenderFrame(time, 1.0, true, useGpu);
                             plugin.ProcessFrame(pass, time, image, useGpu);
                             setProgress(i + 1 + frameCount * pass, Stopwatch.GetElapsedTime(startTimestamp));
-                            lastProcessedDuration = (i + 1) * frameDuration;
+                            lastProcessedDuration = new Time(i + 1, frameRate);
                         }
                         plugin.EndPass();
                     }
@@ -418,18 +418,18 @@ namespace NiVE3.Model
             HistoryModel.Add(new UpdateStateFromReadyHistoryCommand(this, state));
         }
 
-        (double beginTime, double endTime) GetTimeRange()
+        (Time beginTime, Time endTime) GetTimeRange()
         {
             switch (RenderRangeType)
             {
                 case RenderRangeType.All:
-                    return (0.0, CompositionDuration);
+                    return (Time.Zero, CompositionDuration);
                 case RenderRangeType.Workarea:
                     return (CompositionWorkareaBegin, CompositionWorkareaEnd);
                 default:
                     {
-                        var beginTime = Math.Clamp(BeginTime, 0.0, TimeCalc.RoundTimeDigit(CompositionDuration - CompositionModel.FrameDuration));
-                        var endTime = Math.Clamp(EndTime, TimeCalc.RoundTimeDigit(beginTime + CompositionModel.FrameDuration), CompositionDuration);
+                        var beginTime = Time.Clamp(BeginTime, Time.Zero, CompositionDuration - CompositionModel.FrameDuration);
+                        var endTime = Time.Clamp(EndTime, beginTime + CompositionModel.FrameDuration, CompositionDuration);
                         return (beginTime, endTime);
                     }
             }

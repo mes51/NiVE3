@@ -28,7 +28,7 @@ namespace NiVE3.Plugin.Interfaces
         /// <param name="size">書き出す画像のサイズ。音声のみの場合はnull</param>
         /// <param name="outputSources">書き出すソースの種類</param>
         /// <returns>出力プラグインの設定画面のView。ファイルによって設定画面が存在しない場合はnull</returns>
-        FrameworkElement? GetOutputSetting(string filePath, double startTime, double duration, double frameRate, Int32Size? size, SourceType outputSources) => null;
+        FrameworkElement? GetOutputSetting(string filePath, Time startTime, Time duration, double frameRate, Int32Size? size, SourceType outputSources) => null;
 
         /// <summary>
         /// 現在の出力プラグインの状態を表すデータをシリアル化可能な状態で取得します
@@ -67,7 +67,7 @@ namespace NiVE3.Plugin.Interfaces
         /// <param name="frameRate">フレームレート</param>
         /// <param name="size">書き出す画像のサイズ。音声のみの場合はnull</param>
         /// <param name="outputSources">書き出すソースの種類</param>
-        void BeginOutput(string filePath, double startTime, double duration, double frameRate, Int32Size? size, SourceType outputSources);
+        void BeginOutput(string filePath, Time startTime, Time duration, double frameRate, Int32Size? size, SourceType outputSources);
 
         /// <summary>
         /// 書き出し処理を終了します。ユーザーが中断した場合など、すべてのフレームが書き出される前に呼び出されることがあります。
@@ -98,7 +98,7 @@ namespace NiVE3.Plugin.Interfaces
         /// <param name="time">書き出す画像のコンポジション内の時間</param>
         /// <param name="image">書き出す画像</param>
         /// <param name="useGpu">GPUを使用するかどうか。この値は書き出し前の画像の処理でGPUを使用するかどうかを表します</param>
-        void ProcessFrame(int pass, double time, NImage image, bool useGpu);
+        void ProcessFrame(int pass, Time time, NImage image, bool useGpu);
 
         /// <summary>
         /// 音声を書き出します。

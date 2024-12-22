@@ -44,15 +44,15 @@ namespace NiVE3.ViewModel.Dialog
             set { SetProperty(ref renderRangeType, value); }
         }
 
-        private double beginTime;
-        public double BeginTime
+        private Time beginTime;
+        public Time BeginTime
         {
             get { return beginTime; }
             set { SetProperty(ref beginTime, value); }
         }
 
-        private double endTime;
-        public double EndTime
+        private Time endTime;
+        public Time EndTime
         {
             get { return endTime; }
             set { SetProperty(ref endTime, value); }
@@ -65,29 +65,29 @@ namespace NiVE3.ViewModel.Dialog
             set { SetProperty(ref frameRate, value); }
         }
 
-        private double frameDuration;
-        public double FrameDuration
+        private Time frameDuration;
+        public Time FrameDuration
         {
             get { return frameDuration; }
             set { SetProperty(ref frameDuration, value); }
         }
 
-        private double compositionDuration;
-        public double CompositionDuration
+        private Time compositionDuration;
+        public Time CompositionDuration
         {
             get { return compositionDuration; }
             set { SetProperty(ref compositionDuration, value); }
         }
 
-        private double compositionWorkareaBegin;
-        public double CompositionWorkareaBegin
+        private Time compositionWorkareaBegin;
+        public Time CompositionWorkareaBegin
         {
             get { return compositionWorkareaBegin; }
             set { SetProperty(ref compositionWorkareaBegin, value); }
         }
 
-        private double compositionWorkareaEnd;
-        public double CompositionWorkareaEnd
+        private Time compositionWorkareaEnd;
+        public Time CompositionWorkareaEnd
         {
             get { return compositionWorkareaEnd; }
             set { SetProperty(ref compositionWorkareaEnd, value); }
@@ -135,15 +135,15 @@ namespace NiVE3.ViewModel.Dialog
             set { SetProperty(ref supportedSourceType, value); }
         }
 
-        private double renderRangeBeginLimit;
-        public double RenderRangeBeginLimit
+        private Time renderRangeBeginLimit;
+        public Time RenderRangeBeginLimit
         {
             get { return renderRangeBeginLimit; }
             set { SetProperty(ref renderRangeBeginLimit, value); }
         }
 
-        private double renderRangeEndStart;
-        public double RenderRangeEndStart
+        private Time renderRangeEndStart;
+        public Time RenderRangeEndStart
         {
             get { return renderRangeEndStart; }
             set { SetProperty(ref renderRangeEndStart, value); }
@@ -281,10 +281,10 @@ namespace NiVE3.ViewModel.Dialog
             CompositionWorkareaBegin = composition.WorkareaBegin;
             CompositionWorkareaEnd = composition.WorkareaEnd;
             RenderRangeType = parameters.GetValue<RenderRangeType>(nameof(RenderRangeType));
-            RenderRangeBeginLimit = 0.0;
+            RenderRangeBeginLimit = Time.Zero;
             RenderRangeEndStart = composition.FrameDuration;
-            BeginTime = parameters.GetValue<double>(nameof(BeginTime));
-            EndTime = parameters.GetValue<double>(nameof(EndTime));
+            BeginTime = parameters.GetValue<Time>(nameof(BeginTime));
+            EndTime = parameters.GetValue<Time>(nameof(EndTime));
             IsOutputVideo = parameters.GetValue<bool>(nameof(IsOutputVideo));
             IsOutputAudio = parameters.GetValue<bool>(nameof(IsOutputAudio));
             if (parameters.TryGetValue<ExportLifetimeContext<IOutput>>(OutputParameterName, out var output))
@@ -323,11 +323,11 @@ namespace NiVE3.ViewModel.Dialog
             return Output.Value.GetOutputSetting(FilePath, beginTime, endTime - beginTime, FrameRate, size, sourceTypes);
         }
 
-        (double, double) GetTimeRange()
+        (Time, Time) GetTimeRange()
         {
             return RenderRangeType switch
             {
-                RenderRangeType.All => (0.0, CompositionDuration),
+                RenderRangeType.All => (Time.Zero, CompositionDuration),
                 RenderRangeType.Workarea => (CompositionWorkareaBegin, CompositionWorkareaEnd),
                 _ => (BeginTime, EndTime)
             };
@@ -360,10 +360,10 @@ namespace NiVE3.ViewModel.Dialog
             switch (e.PropertyName)
             {
                 case nameof(BeginTime):
-                    RenderRangeEndStart = BeginTime + FrameDuration;
+                    RenderRangeEndStart = BeginTime + new Time(1, FrameRate);
                     break;
                 case nameof(EndTime):
-                    RenderRangeBeginLimit = EndTime - FrameDuration;
+                    RenderRangeBeginLimit = EndTime - new Time(1, FrameRate);
                     break;
                 case nameof(SelectedOutputPlugin):
                     if (Output != OriginalOutput)

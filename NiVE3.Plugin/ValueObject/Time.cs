@@ -193,7 +193,7 @@ namespace NiVE3.Plugin.ValueObject
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Time FromTime(double time, double frameRate)
         {
-            if (frameRate <= 0.0)
+            if (double.IsNaN(frameRate) || double.IsInfinity(frameRate) || frameRate <= 0.0)
             {
                 throw new ArgumentException(null, nameof(frameRate));
             }
@@ -1485,6 +1485,42 @@ namespace NiVE3.Plugin.ValueObject
         public static bool operator !=(double a, Time b)
         {
             return a != (double)b;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Time Clamp(in Time value, in Time min, double max)
+        {
+            return Clamp(value, min, (Time)max);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Time Clamp(in Time value, double min, in Time max)
+        {
+            return Clamp(value, (Time)min, max);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Time Clamp(in Time value, double min, double max)
+        {
+            return Clamp(value, (Time)min, (Time)max);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Time Clamp(double value, in Time min, double max)
+        {
+            return Clamp((Time)value, min, (Time)max);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Time Clamp(double value, double min, in Time max)
+        {
+            return Clamp((Time)value, (Time)min, max);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Time Clamp(double value, double min, double max)
+        {
+            return Clamp((Time)value, (Time)min, (Time)max);
         }
     }
 }

@@ -113,6 +113,17 @@ namespace NiVE3.Test.Plugin.ValueObject
         }
 
         [Test]
+        public void TestFromTimeThrowExceptionWhenInvalidFrameRate()
+        {
+            Assert.Multiple(() =>
+            {
+                Assert.Throws<ArgumentException>(() => Time.FromTime(1.0, 0.0));
+                Assert.Throws<ArgumentException>(() => Time.FromTime(1.0, double.NaN));
+                Assert.Throws<ArgumentException>(() => Time.FromTime(1.0, double.PositiveInfinity));
+            });
+        }
+
+        [Test]
         public void TestEquals()
         {
             Assert.Multiple(() =>

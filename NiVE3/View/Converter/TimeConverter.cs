@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
+using NiVE3.Plugin.ValueObject;
 using NiVE3.UI.Converter;
 using NiVE3.Util;
 
@@ -21,6 +22,19 @@ namespace NiVE3.View.Converter
             new PropertyMetadata(1.0)
         );
 
+        public static readonly DependencyProperty IsTimeStructProperty = DependencyProperty.Register(
+            nameof(IsTimeStruct),
+            typeof(bool),
+            typeof(TimeConverter),
+            new PropertyMetadata(false)
+        );
+
+        public bool IsTimeStruct
+        {
+            get { return (bool)GetValue(IsTimeStructProperty); }
+            set { SetValue(IsTimeStructProperty, value); }
+        }
+
         public double FrameRate
         {
             get { return (double)GetValue(FrameRateProperty); }
@@ -33,7 +47,11 @@ namespace NiVE3.View.Converter
         {
             if (value is not double time)
             {
-                return DependencyProperty.UnsetValue;
+                if (value is not Time structTime)
+                {
+                    return DependencyProperty.UnsetValue;
+                }
+                time = (double)structTime;
             }
 
             var sign = Math.Sign(time);
@@ -100,7 +118,15 @@ namespace NiVE3.View.Converter
             }
             else
             {
-                return TimeCalc.RoundTimeDigit(time) * sign;
+                var result = TimeCalc.RoundTimeDigit(time) * sign;
+                if (IsTimeStruct)
+                {
+                    return Time.FromTime(time, FrameRate);
+                }
+                else
+                {
+                    return result;
+                }
             }
         }
 

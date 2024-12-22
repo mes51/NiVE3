@@ -13,7 +13,7 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
         <cv:EnumToLocalizedNameConverter x:Key="EnumToLocalizedNameConverter"/>
-        <cv:TimeConverter x:Key="TimeConverter" FrameRate="{Binding CompositionFrameRate}"/>
+        <cv:TimeConverter x:Key="TimeConverter" FrameRate="{Binding CompositionFrameRate}" IsTimeStruct="True"/>
         <cv:EnumToBoolConverter x:Key="EnumToBoolConverter"/>
         <cv:BooleanInvertConverter x:Key="BooleanInvertConverter"/>
 

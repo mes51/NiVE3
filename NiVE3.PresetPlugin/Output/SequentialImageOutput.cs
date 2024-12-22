@@ -64,7 +64,7 @@ namespace NiVE3.PresetPlugin.Output
             return Path.Combine(Path.GetDirectoryName(baseFilePath) ?? "", fileName + extension);
         }
 
-        public void BeginOutput(string filePath, double startTime, double duration, double frameRate, Int32Size? size, SourceType outputSources)
+        public void BeginOutput(string filePath, Time startTime, Time duration, double frameRate, Int32Size? size, SourceType outputSources)
         {
             var replaceTarget = FrameCountRegex.Matches(filePath).Cast<Match>().Last();
             FrameCountFormat = "D0" + replaceTarget.Value.Replace("[", "").Replace("]", "").Length;
@@ -92,7 +92,7 @@ namespace NiVE3.PresetPlugin.Output
             return 1;
         }
 
-        public void ProcessFrame(int pass, double time, NImage image, bool useGpu)
+        public void ProcessFrame(int pass, Time time, NImage image, bool useGpu)
         {
             var filePath = $"{OutputFilePathPrefix}{CurrentFrameIndex.ToString(FrameCountFormat)}{OutputFilePathSuffix}";
             using var stream = new FileStream(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite);

@@ -33,6 +33,7 @@ using NiVE3.Model.UI;
 using Prism.Dialogs;
 using NiVE3.Plugin.Interfaces.RendererParams;
 using NiVE3.Data.Clipboard;
+using NiVE3.Plugin.ValueObject;
 
 namespace NiVE3.ViewModel
 {
@@ -1033,8 +1034,8 @@ namespace NiVE3.ViewModel
                 {
                     { RenderSettingViewModel.CompositionParameterName, CompositionModel },
                     { nameof(RenderSettingViewModel.RenderRangeType), RenderRangeType.Workarea },
-                    { nameof(RenderSettingViewModel.BeginTime), CompositionModel.WorkareaBegin },
-                    { nameof(RenderSettingViewModel.EndTime), CompositionModel.WorkareaEnd },
+                    { nameof(RenderSettingViewModel.BeginTime), (Time)CompositionModel.WorkareaBegin }, // XXX: CompositionModelのWorkareaBegin/WorkareaEndを直したときにキャストを外す
+                    { nameof(RenderSettingViewModel.EndTime), (Time)CompositionModel.WorkareaEnd },
                     { nameof(RenderSettingViewModel.IsOutputVideo), true },
                     { nameof(RenderSettingViewModel.IsOutputAudio), true },
                     { nameof(RenderSettingViewModel.Mode), RenderSettingMode.Enqueue },
@@ -1046,8 +1047,8 @@ namespace NiVE3.ViewModel
                     CompositionModel.EnqueueRender(
                         settingResult.Parameters.GetValue<string>(nameof(RenderSettingViewModel.FilePath)),
                         settingResult.Parameters.GetValue<RenderRangeType>(nameof(RenderSettingViewModel.RenderRangeType)),
-                        settingResult.Parameters.GetValue<double>(nameof(RenderSettingViewModel.BeginTime)),
-                        settingResult.Parameters.GetValue<double>(nameof(RenderSettingViewModel.EndTime)),
+                        settingResult.Parameters.GetValue<Time>(nameof(RenderSettingViewModel.BeginTime)),
+                        settingResult.Parameters.GetValue<Time>(nameof(RenderSettingViewModel.EndTime)),
                         settingResult.Parameters.GetValue<bool>(nameof(RenderSettingViewModel.IsOutputVideo)),
                         settingResult.Parameters.GetValue<bool>(nameof(RenderSettingViewModel.IsOutputAudio)),
                         settingResult.Parameters.GetValue<ExportLifetimeContext<IOutput>>(RenderSettingViewModel.OutputParameterName)

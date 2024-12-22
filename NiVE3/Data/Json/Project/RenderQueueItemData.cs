@@ -6,6 +6,7 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using NiVE3.Data.Json.Converter;
 using NiVE3.Model;
+using NiVE3.Plugin.ValueObject;
 
 namespace NiVE3.Data.Json.Project
 {
@@ -19,13 +20,17 @@ namespace NiVE3.Data.Json.Project
 
         public RenderRangeType RenderRangeType { get; set; }
 
-        public double BeginTime { get; set; }
+        [JsonConverter(typeof(TimeJsonConverter))]
+        public Time BeginTime { get; set; }
 
-        public double EndTime { get; set; }
+        [JsonConverter(typeof(TimeJsonConverter))]
+        public Time EndTime { get; set; }
 
-        public double FixedBeginTime { get; set; }
+        [JsonConverter(typeof(TimeJsonConverter))]
+        public Time FixedBeginTime { get; set; }
 
-        public double FixedEndTime { get; set; }
+        [JsonConverter(typeof(TimeJsonConverter))]
+        public Time FixedEndTime { get; set; }
 
         public bool IsOutputVideo { get; set; }
 

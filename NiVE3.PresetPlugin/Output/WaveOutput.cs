@@ -94,7 +94,7 @@ namespace NiVE3.PresetPlugin.Output
             return Path.ChangeExtension(baseFilePath, ".wav");
         }
 
-        public void BeginOutput(string filePath, double startTime, double duration, double frameRate, Int32Size? size, SourceType outputSources)
+        public void BeginOutput(string filePath, Time startTime, Time duration, double frameRate, Int32Size? size, SourceType outputSources)
         {
             FilePath = filePath;
         }
@@ -179,7 +179,7 @@ namespace NiVE3.PresetPlugin.Output
             }
         }
 
-        public void ProcessFrame(int pass, double time, NImage image, bool useGpu) { }
+        public void ProcessFrame(int pass, Time time, NImage image, bool useGpu) { }
 
         public void EndOutput() { }
 

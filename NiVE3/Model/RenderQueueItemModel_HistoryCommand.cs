@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Interfaces;
+using NiVE3.Plugin.ValueObject;
 using NiVE3.View.Resource;
 
 namespace NiVE3.Model
@@ -22,9 +23,9 @@ namespace NiVE3.Model
 
             RenderRangeType OldRenderRangeType { get; }
 
-            double OldBeginTime { get; }
+            Time OldBeginTime { get; }
 
-            double OldEndTime { get; }
+            Time OldEndTime { get; }
 
             bool OldIsOutputVideo { get; }
 
@@ -36,9 +37,9 @@ namespace NiVE3.Model
 
             RenderRangeType NewRenderRangeType { get; }
 
-            double NewBeginTime { get; } 
+            Time NewBeginTime { get; }
 
-            double NewEndTime { get; }
+            Time NewEndTime { get; }
 
             bool NewIsOutputVideo { get; }
 
@@ -50,15 +51,15 @@ namespace NiVE3.Model
                 RenderQueueItemModel model,
                 string oldFilePath,
                 RenderRangeType oldRenderRangeType,
-                double oldBeginTime,
-                double oldEndTime,
+                Time oldBeginTime,
+                Time oldEndTime,
                 bool oldIsOutputVideo,
                 bool oldIsOutputAudio,
                 object? oldSetting,
                 string newFilePath,
                 RenderRangeType newRenderRangeType,
-                double newBeginTime,
-                double newEndTime,
+                Time newBeginTime,
+                Time newEndTime,
                 bool newIsOutputVideo,
                 bool newIsOutputAudio,
                 object? newSetting
@@ -116,9 +117,9 @@ namespace NiVE3.Model
 
             RenderRangeType OldRenderRangeType { get; }
 
-            double OldBeginTime { get; }
+            Time OldBeginTime { get; }
 
-            double OldEndTime { get; }
+            Time OldEndTime { get; }
 
             bool OldIsOutputVideo { get; }
 
@@ -132,9 +133,9 @@ namespace NiVE3.Model
 
             RenderRangeType NewRenderRangeType { get; }
 
-            double NewBeginTime { get; }
+            Time NewBeginTime { get; }
 
-            double NewEndTime { get; }
+            Time NewEndTime { get; }
 
             bool NewIsOutputVideo { get; }
 
@@ -148,16 +149,16 @@ namespace NiVE3.Model
                 RenderQueueItemModel model,
                 string oldFilePath,
                 RenderRangeType oldRenderRangeType,
-                double oldBeginTime,
-                double oldEndTime,
+                Time oldBeginTime,
+                Time oldEndTime,
                 bool oldIsOutputVideo,
                 bool oldIsOutputAudio,
                 IOutputMetadata? oldOutputMetadata,
                 ExportLifetimeContext<IOutput>? oldOutput,
                 string newFilePath,
                 RenderRangeType newRenderRangeType,
-                double newBeginTime,
-                double newEndTime,
+                Time newBeginTime,
+                Time newEndTime,
                 bool newIsOutputVideo,
                 bool newIsOutputAudio,
                 IOutputMetadata? newOutputMetadata,
