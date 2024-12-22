@@ -1503,5 +1503,70 @@ namespace NiVE3.Test.Plugin.ValueObject
         }
 
         #endregion Compare
+
+        #region MinMax
+
+        [Test]
+        public void TestMin()
+        {
+            Assert.Multiple(() =>
+            {
+                Assert.That(Time.Min(new Time(1.0), new Time(29, 30.0)), Is.EqualTo(new Time(29, 30.0)));
+                Assert.That(Time.IsNaN(Time.Min(Time.NaN, new Time(29, 30.0))), Is.True);
+                Assert.That(Time.IsNaN(Time.Min(new Time(1.0), Time.NaN)), Is.True);
+            });
+        }
+
+        [Test]
+        public void TestMinNumber()
+        {
+            Assert.Multiple(() =>
+            {
+                Assert.That(Time.MinNumber(new Time(1.0), new Time(29, 30.0)), Is.EqualTo(new Time(29, 30.0)));
+                Assert.That(Time.MinNumber(Time.NaN, new Time(29, 30.0)), Is.EqualTo(new Time(29, 30.0)));
+                Assert.That(Time.MinNumber(new Time(1.0), Time.NaN), Is.EqualTo(new Time(1.0)));
+            });
+        }
+
+        [Test]
+        public void TestMax()
+        {
+            Assert.Multiple(() =>
+            {
+                Assert.That(Time.Max(new Time(1.0), new Time(29, 30.0)), Is.EqualTo(new Time(1.0)));
+                Assert.That(Time.IsNaN(Time.Max(Time.NaN, new Time(29, 30.0))), Is.True);
+                Assert.That(Time.IsNaN(Time.Max(new Time(1.0), Time.NaN)), Is.True);
+            });
+        }
+
+        [Test]
+        public void TestMaxNumber()
+        {
+            Assert.Multiple(() =>
+            {
+                Assert.That(Time.MaxNumber(new Time(1.0), new Time(29, 30.0)), Is.EqualTo(new Time(1.0)));
+                Assert.That(Time.MaxNumber(Time.NaN, new Time(29, 30.0)), Is.EqualTo(new Time(29, 30.0)));
+                Assert.That(Time.MaxNumber(new Time(1.0), Time.NaN), Is.EqualTo(new Time(1.0)));
+            });
+        }
+
+        [Test]
+        public void TestClamp()
+        {
+            Assert.Multiple(() =>
+            {
+                Assert.That(Time.Clamp(new Time(1.0), new Time(0.5), new Time(31, 30.0)), Is.EqualTo(new Time(1.0)));
+                Assert.That(Time.Clamp(new Time(1.0), new Time(70, 60.0), new Time(60, 30.0)), Is.EqualTo(new Time(70, 60.0)));
+                Assert.That(Time.Clamp(new Time(1.0), new Time(0.5), new Time(25, 30.0)), Is.EqualTo(new Time(25, 30.0)));
+            });
+        }
+
+        [Test]
+        public void TestClampMinGreaterThanMax()
+        {
+            Assert.Throws<ArgumentException>(() => Time.Clamp(Time.Zero, new Time(1.0), Time.Zero));
+        }
+
+        #endregion
     }
 }

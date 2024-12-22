@@ -36,6 +36,8 @@ namespace NiVE3.Plugin.ValueObject
 
         public static Time MinValue => new Time(double.MinValue);
 
+        public static Time NaN => new Time(double.NaN);
+
         /// <summary>
         /// フレームによらない実時間。フレーム数とフレームレートによって時間を表現する場合はNaN
         /// </summary>
@@ -597,6 +599,116 @@ namespace NiVE3.Plugin.ValueObject
         static bool INumberBase<Time>.TryConvertToTruncating<TOther>(Time value, [MaybeNullWhen(false)] out TOther result)
         {
             return TOther.TryConvertFromTruncating((double)value, out result);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Time Clamp(in Time value, in Time min, in Time max)
+        {
+            if (min > max)
+            {
+                throw new ArgumentException("min is greater than max", nameof(min));
+            }
+
+            return Min(Max(value, min), max);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Time CopySign(in Time value, in Time sign)
+        {
+            if (IsNegative(value) != IsNegative(sign))
+            {
+                return -value;
+            }
+            else
+            {
+                return value;
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Time Max(in Time x, in Time y)
+        {
+            if (x != y)
+            {
+                if (!IsNaN(x))
+                {
+                    return x > y ? x : y;
+                }
+                else
+                {
+                    return x;
+                }
+            }
+            else
+            {
+                return x;
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Time MaxNumber(in Time x, in Time y)
+        {
+            if (x != y)
+            {
+                if (!IsNaN(y))
+                {
+                    return x > y ? x : y;
+                }
+                else
+                {
+                    return x;
+                }
+            }
+            else
+            {
+                return x;
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Time Min (in Time x, in Time y)
+        {
+            if (x != y)
+            {
+                if (!IsNaN(x))
+                {
+                    return x < y ? x : y;
+                }
+                else
+                {
+                    return x;
+                }
+            }
+            else
+            {
+                return x;
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Time MinNumber(in Time x, in Time y)
+        {
+            if (x != y)
+            {
+                if (!IsNaN(y))
+                {
+                    return x < y ? x : y;
+                }
+                else
+                {
+                    return x;
+                }
+            }
+            else
+            {
+                return x;
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int Sign(in Time value)
+        {
+            return IsNegative(value) ? -1 : 1;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
