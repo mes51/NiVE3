@@ -63,13 +63,6 @@ namespace NiVE3.Plugin.ValueObject
         /// </summary>
         public readonly bool FrameRateIsInteger;
 
-        public Time(double realTime)
-        {
-            RealTime = realTime;
-            IsFrameTime = false;
-            FrameRateIsInteger = false;
-        }
-
         public Time(long frame, double frameRate)
         {
             if (double.IsNaN(frameRate) || double.IsInfinity(frameRate) || frameRate <= 0.0)
@@ -82,6 +75,13 @@ namespace NiVE3.Plugin.ValueObject
             FrameRate = frameRate;
             IsFrameTime = true;
             FrameRateIsInteger = IsIntegerFrame(frameRate);
+        }
+
+        internal Time(double realTime)
+        {
+            RealTime = realTime;
+            IsFrameTime = false;
+            FrameRateIsInteger = false;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -191,11 +191,15 @@ namespace NiVE3.Plugin.ValueObject
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Time FromTime(double time, double frameRate)
+        public static Time FromTime(double time, double frameRate = 0.0)
         {
-            if (double.IsNaN(frameRate) || double.IsInfinity(frameRate) || frameRate <= 0.0)
+            if (double.IsNaN(frameRate) || double.IsInfinity(frameRate) || frameRate < 0.0)
             {
                 throw new ArgumentException(null, nameof(frameRate));
+            }
+            if (frameRate == 0.0)
+            {
+                return new Time(RoundTimeDigit(time));
             }
 
             var frame = RoundFrameDigit(time * frameRate);
@@ -205,7 +209,7 @@ namespace NiVE3.Plugin.ValueObject
             }
             else
             {
-                return new Time(time);
+                return new Time(RoundTimeDigit(time));
             }
         }
 

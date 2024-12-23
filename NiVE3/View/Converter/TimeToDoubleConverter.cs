@@ -42,13 +42,13 @@ namespace NiVE3.View.Converter
         {
             if (value is double v)
             {
-                if (!double.IsNaN(FrameRate) && !double.IsInfinity(FrameRate) && FrameRate > 0.0)
+                if (!double.IsNaN(FrameRate) && !double.IsInfinity(FrameRate))
                 {
                     return Time.FromTime(v, FrameRate);
                 }
                 else
                 {
-                    return new Time(v);
+                    return Time.FromTime(v);
                 }
             }
             else

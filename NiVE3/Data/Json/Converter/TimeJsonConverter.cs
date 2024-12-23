@@ -19,15 +19,15 @@ namespace NiVE3.Data.Json.Converter
                     {
                         if (reader.TryGetInt32(out var intValue))
                         {
-                            return new Time(intValue);
+                            return Time.FromTime(intValue);
                         }
                         else if (reader.TryGetInt64(out var longValue))
                         {
-                            return new Time(longValue);
+                            return Time.FromTime(longValue);
                         }
                         else if (reader.TryGetDouble(out var doubleValue))
                         {
-                            return new Time(doubleValue);
+                            return Time.FromTime(doubleValue);
                         }
 
                         using var doc = JsonDocument.ParseValue(ref reader);

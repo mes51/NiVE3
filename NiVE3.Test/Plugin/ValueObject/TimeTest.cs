@@ -113,11 +113,24 @@ namespace NiVE3.Test.Plugin.ValueObject
         }
 
         [Test]
+        public void TimeFromTimeZeroFrameRate()
+        {
+            Assert.Multiple(() =>
+            {
+                var time = 1.0 / 30.0;
+                var actual = Time.FromTime(time, 0.0);
+                var expectedTime = Math.Round(time, TimeDigit);
+
+                Assert.That(actual.IsFrameTime, Is.False);
+                Assert.That(actual.RealTime, Is.EqualTo(expectedTime));
+            });
+        }
+
+        [Test]
         public void TestFromTimeThrowExceptionWhenInvalidFrameRate()
         {
             Assert.Multiple(() =>
             {
-                Assert.Throws<ArgumentException>(() => Time.FromTime(1.0, 0.0));
                 Assert.Throws<ArgumentException>(() => Time.FromTime(1.0, double.NaN));
                 Assert.Throws<ArgumentException>(() => Time.FromTime(1.0, double.PositiveInfinity));
             });
