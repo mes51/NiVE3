@@ -32,25 +32,25 @@ namespace NiVE3.Expression.Wrapper
         public string comment => LayerModel.Comment;
 
         [ExpressionPublicMember]
-        public double duration => LayerModel.Duration;
+        public double duration => (double)LayerModel.Duration;
 
         [ExpressionPublicMember]
-        public double sourceDuration => LayerModel.SourceDuration;
+        public double sourceDuration => (double)LayerModel.SourceDuration;
 
         [ExpressionPublicMember]
-        public double sourceStartPoint => LayerModel.SourceStartPoint;
+        public double sourceStartPoint => (double)LayerModel.SourceStartPoint;
 
         [ExpressionPublicMember]
-        public double inPoint => LayerModel.InPoint;
+        public double inPoint => (double)LayerModel.InPoint;
 
         [ExpressionPublicMember]
-        public double outPoint => LayerModel.OutPoint;
+        public double outPoint => (double)LayerModel.OutPoint;
 
         [ExpressionPublicMember]
-        public double globalInPoint => TimeCalc.RoundTimeDigit(LayerModel.SourceStartPoint + LayerModel.InPoint);
+        public double globalInPoint => (double)(LayerModel.SourceStartPoint + LayerModel.InPoint);
 
         [ExpressionPublicMember]
-        public double globalOutPoint => TimeCalc.RoundTimeDigit(LayerModel.SourceStartPoint + LayerModel.OutPoint);
+        public double globalOutPoint => (double)(LayerModel.SourceStartPoint + LayerModel.OutPoint);
 
         //public bool isEnableTimeRemap => LayerModel.IsEnableTimeRemap;
 
@@ -175,7 +175,7 @@ namespace NiVE3.Expression.Wrapper
         [ExpressionPublicMember]
         public object[] getSourceRect(double time, bool withInvisible)
         {
-            var rect = LayerModel.GetSourceFootageRect(time, withInvisible);
+            var rect = LayerModel.GetSourceFootageRect((Time)time, withInvisible);
 
             return [rect.Origin.X, rect.Origin.Y, rect.Width, rect.Height];
         }

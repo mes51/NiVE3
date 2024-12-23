@@ -14,7 +14,7 @@ namespace NiVE3.Expression.Wrapper
 #pragma warning disable IDE1006 // NOTE: エクスプレッション用メソッドのため、命名規則は camelCase を許容する
 
         [ExpressionPublicMember]
-        public double time => KeyFrame.Time;
+        public double time => (double)KeyFrame.Time;
 
         [ExpressionPublicMember]
         public object? value => PropertyModel.ToExpressionValue(KeyFrame.Value);
