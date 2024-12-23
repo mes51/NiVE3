@@ -179,6 +179,98 @@ namespace NiVE3.Test.Plugin.ValueObject
         }
 
         [Test]
+        public void TestRoundToFrameRateChangeFrameRate()
+        {
+            Assert.Multiple(() =>
+            {
+                const double NewFrameRate = 30.0;
+                var actual = new Time(5, 20.0).RoundToFrameRate(NewFrameRate);
+
+                Assert.That(actual.IsFrameTime, Is.True);
+                Assert.That(actual.FrameRateIsInteger, Is.True);
+                Assert.That(actual.Frame, Is.EqualTo(8));
+                Assert.That(actual.FrameRate, Is.EqualTo(NewFrameRate));
+            });
+        }
+
+        [Test]
+        public void TestRoundToFrameRateRealTime()
+        {
+            Assert.Multiple(() =>
+            {
+                const double NewFrameRate = 30.0;
+                var actual = new Time(0.41).RoundToFrameRate(NewFrameRate);
+
+                Assert.That(actual.IsFrameTime, Is.True);
+                Assert.That(actual.FrameRateIsInteger, Is.True);
+                Assert.That(actual.Frame, Is.EqualTo(12));
+                Assert.That(actual.FrameRate, Is.EqualTo(NewFrameRate));
+            });
+        }
+
+        [Test]
+        public void TestFloorToFrameRateChangeFrameRate()
+        {
+            Assert.Multiple(() =>
+            {
+                const double NewFrameRate = 30.0;
+                var actual = new Time(5, 20.0).FloorToFrameRate(NewFrameRate);
+
+                Assert.That(actual.IsFrameTime, Is.True);
+                Assert.That(actual.FrameRateIsInteger, Is.True);
+                Assert.That(actual.Frame, Is.EqualTo(7));
+                Assert.That(actual.FrameRate, Is.EqualTo(NewFrameRate));
+            });
+        }
+
+        [Test]
+        public void TestFloorToFrameRateRealTime()
+        {
+            Assert.Multiple(() =>
+            {
+                const double NewFrameRate = 30.0;
+                var actual = new Time(0.41).FloorToFrameRate(NewFrameRate);
+
+                Assert.That(actual.IsFrameTime, Is.True);
+                Assert.That(actual.FrameRateIsInteger, Is.True);
+                Assert.That(actual.Frame, Is.EqualTo(12));
+                Assert.That(actual.FrameRate, Is.EqualTo(NewFrameRate));
+            });
+        }
+
+        [Test]
+        public void TestCeilingToFrameRateChangeFrameRate()
+        {
+            Assert.Multiple(() =>
+            {
+                const double NewFrameRate = 30.0;
+                var actual = new Time(5, 20.0).CeilingToFrameRate(NewFrameRate);
+
+                Assert.That(actual.IsFrameTime, Is.True);
+                Assert.That(actual.FrameRateIsInteger, Is.True);
+                Assert.That(actual.Frame, Is.EqualTo(8));
+                Assert.That(actual.FrameRate, Is.EqualTo(NewFrameRate));
+            });
+        }
+
+        [Test]
+        public void TestCeilingToFrameRateRealTime()
+        {
+            Assert.Multiple(() =>
+            {
+                const double NewFrameRate = 30.0;
+                var actual = new Time(0.41).CeilingToFrameRate(NewFrameRate);
+
+                Assert.That(actual.IsFrameTime, Is.True);
+                Assert.That(actual.FrameRateIsInteger, Is.True);
+                Assert.That(actual.Frame, Is.EqualTo(13));
+                Assert.That(actual.FrameRate, Is.EqualTo(NewFrameRate));
+            });
+        }
+
+        #region Unary and Increment/Decrement
+
+        [Test]
         public void TestUnaryPlus()
         {
             Assert.Multiple(() =>
@@ -283,6 +375,8 @@ namespace NiVE3.Test.Plugin.ValueObject
 
             Assert.That(time, Is.EqualTo(new Time(0.0)));
         }
+
+        #endregion Unary and Increment/Decrement
 
         #region Add
 
