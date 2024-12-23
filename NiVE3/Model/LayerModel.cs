@@ -1757,8 +1757,7 @@ namespace NiVE3.Model
             NImage image;
             var originalImageSize = SourceFootageRect.Empty;
 
-            //var currentFrameDuration = new Time(1, Math.Abs(FootageModel.FrameRate * PlayRate * 0.01));
-            var currentFrameDuration = Math.Abs(1.0 / FootageModel.FrameRate / (PlayRate * 0.01));
+            var currentFrameDuration = FootageModel.FrameRate > 0.0 ? new Time(1, Math.Abs(FootageModel.FrameRate * PlayRate * 0.01)) : Time.Zero;
             // TODO: サイズ変更可能なビデオもフレームブレンドできるようにする?
             if (frameTime > 0.0 &&
                 (frameTime - currentFrameDuration) != Time.Zero &&
@@ -1769,11 +1768,11 @@ namespace NiVE3.Model
                 var footageFrameDuration = 1.0 / FootageModel.FrameRate;
                 if (frameTime < currentFrameDuration)
                 {
-                    var sourceCurrentFrameTime = TimeCalc.AlignFloor(sourceTime, FootageModel.FrameRate);
+                    var sourceCurrentFrameTime = sourceTime.FloorToFrameRate(FootageModel.FrameRate);
                     image = FootageModel.ReadImage(sourceCurrentFrameTime, downSamplingRate, CompositionModel.Width, CompositionModel.Height, null, InterpolationQuality, useGpu);
                     originalImageSize = downSamplingRate != 1.0 ? FootageModel.CalcSize(time, CompositionModel.Width, CompositionModel.Height, false, null) : new SourceFootageRect(Vector2d.Zero, image.Width, image.Height);
 
-                    var sourceNextFrameTime = TimeCalc.AlignRound(sourceCurrentFrameTime + footageFrameDuration, FootageModel.FrameRate);
+                    var sourceNextFrameTime = (sourceCurrentFrameTime + footageFrameDuration).RoundToFrameRate(FootageModel.FrameRate);
                     var blendRate = (float)((sourceTime - sourceCurrentFrameTime) * FootageModel.FrameRate);
                     var nextFrameImage = FootageModel.ReadImage(sourceNextFrameTime, downSamplingRate, CompositionModel.Width, CompositionModel.Height, null, InterpolationQuality, useGpu);
 
@@ -1790,8 +1789,8 @@ namespace NiVE3.Model
                 }
                 else
                 {
-                    var startSoruceFrameTime = PlayRate > 0.0 ? TimeCalc.AlignFloor(sourceTime, FootageModel.FrameRate) : TimeCalc.AlignCeiling(time, FootageModel.FrameRate);
-                    var frameCount = (int)Math.Ceiling(frameTime / currentFrameDuration) + (sourceTime - startSoruceFrameTime != Time.Zero ? 1 : 0);
+                    var startSoruceFrameTime = PlayRate > 0.0 ? sourceTime.FloorToFrameRate(FootageModel.FrameRate) : time.CeilingToFrameRate(FootageModel.FrameRate);
+                    var frameCount = (int)Math.Ceiling((double)(frameTime / currentFrameDuration)) + (sourceTime - startSoruceFrameTime != Time.Zero ? 1 : 0);
                     var firstRate = 1.0 - Time.Abs(sourceTime - startSoruceFrameTime) / currentFrameDuration;
                     var resultRate = (float)(frameTime / currentFrameDuration);
 
