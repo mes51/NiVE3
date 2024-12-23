@@ -104,9 +104,9 @@ namespace NiVE3.Plugin.Interfaces
 
         public string Name { get; }
 
-        NImage GetRawImage(double layerTime, double downSamplingRate, bool useGpu);
+        NImage GetRawImage(Time layerTime, double downSamplingRate, bool useGpu);
 
-        NImage GetEffectedImage(double layerTime, double downSamplingRate, bool useGpu);
+        NImage GetEffectedImage(Time layerTime, double downSamplingRate, bool useGpu);
     }
 
     public interface IEffectObject { }

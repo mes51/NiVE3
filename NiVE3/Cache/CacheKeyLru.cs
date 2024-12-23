@@ -3,25 +3,26 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NiVE3.Plugin.ValueObject;
 
 namespace NiVE3.Cache
 {
     class CacheKeyLru
     {
-        Dictionary<(Guid, Int128, double), LinkedListNode<(Guid, Int128, double)>> PrimaryKeys { get; } = [];
+        Dictionary<(Guid, Int128, Time), LinkedListNode<(Guid, Int128, Time)>> PrimaryKeys { get; } = [];
 
-        Dictionary<(Guid, Int128), List<(Guid, Int128, double)>> SecondaryKeys { get; } = [];
+        Dictionary<(Guid, Int128), List<(Guid, Int128, Time)>> SecondaryKeys { get; } = [];
 
-        LinkedList<(Guid, Int128, double)> PrimaryKeyLru { get; } = [];
+        LinkedList<(Guid, Int128, Time)> PrimaryKeyLru { get; } = [];
 
         public CacheKeyLru() { }
 
-        public void Add(in Guid objectId, in Int128 key, double time)
+        public void Add(in Guid objectId, in Int128 key, Time time)
         {
             var primaryKey = (objectId, key, time);
             if (!PrimaryKeys.TryGetValue(primaryKey, out var primaryKeyNode))
             {
-                primaryKeyNode = new LinkedListNode<(Guid, Int128, double)>(primaryKey);
+                primaryKeyNode = new LinkedListNode<(Guid, Int128, Time)>(primaryKey);
                 PrimaryKeys.Add(primaryKey, primaryKeyNode);
                 var secondaryKey = (objectId, key);
                 if (SecondaryKeys.TryGetValue(secondaryKey, out var primaryKeys))
@@ -50,7 +51,7 @@ namespace NiVE3.Cache
             }
         }
 
-        public (Guid, Int128, double) RemoveLast()
+        public (Guid, Int128, Time) RemoveLast()
         {
             var node = PrimaryKeyLru.Last;
             if (node != null)
@@ -68,11 +69,11 @@ namespace NiVE3.Cache
             }
             else
             {
-                return (Guid.Empty, 0, 0.0);
+                return (Guid.Empty, 0, Time.Zero);
             }
         }
 
-        public void Remove(Guid objectId, Int128 key, double time)
+        public void Remove(Guid objectId, Int128 key, Time time)
         {
             var primaryKey = (objectId, key, time);
             if (PrimaryKeys.TryGetValue(primaryKey, out var primaryKeyNode))

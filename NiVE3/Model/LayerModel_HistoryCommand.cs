@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
+using NiVE3.Plugin.ValueObject;
 using NiVE3.Shared.Extension;
 using NiVE3.View.Resource;
 
@@ -17,19 +18,19 @@ namespace NiVE3.Model
 
             LayerModel Model { get; set; }
 
-            double OldInPoint { get; set; }
+            Time OldInPoint { get; set; }
 
-            double OldOutPoint { get; set; }
+            Time OldOutPoint { get; set; }
 
-            double OldSourceStartPoint { get; set; }
+            Time OldSourceStartPoint { get; set; }
 
-            double NewInPoint { get; set; }
+            Time NewInPoint { get; set; }
 
-            double NewOutPoint { get; set; }
+            Time NewOutPoint { get; set; }
 
-            double NewSourceStartPoint { get; set; }
+            Time NewSourceStartPoint { get; set; }
 
-            public EditDurationHistoryCommand(LayerModel model, double oldInPoint, double oldOutPoint, double oldSourceStartPoint, double newInPoint, double newOutPoint, double newSourceStartPoint)
+            public EditDurationHistoryCommand(LayerModel model, Time oldInPoint, Time oldOutPoint, Time oldSourceStartPoint, Time newInPoint, Time newOutPoint, Time newSourceStartPoint)
             {
                 Model = model;
                 OldInPoint = oldInPoint;
@@ -362,17 +363,17 @@ namespace NiVE3.Model
 
             double OldPlayRate { get; }
 
-            double OldInPoint { get; }
+            Time OldInPoint { get; }
 
-            double OldOutPoint { get; }
+            Time OldOutPoint { get; }
 
             double NewPlayRate { get; }
 
-            double NewInPoint { get; }
+            Time NewInPoint { get; }
 
-            double NewOutPoint { get; }
+            Time NewOutPoint { get; }
 
-            public ChangePlayRateHistoryCommand(LayerModel model, double oldPlayRate, double oldInPoint, double oldOutPoint, double newPlayRate, double newInPoint, double newOutPoint)
+            public ChangePlayRateHistoryCommand(LayerModel model, double oldPlayRate, Time oldInPoint, Time oldOutPoint, double newPlayRate, Time newInPoint, Time newOutPoint)
             {
                 Model = model;
                 OldPlayRate = oldPlayRate;
@@ -402,7 +403,27 @@ namespace NiVE3.Model
 
         private class ChangeFreezeFrameHistoryCommand : IHistoryCommand
         {
-            public ChangeFreezeFrameHistoryCommand(LayerModel model, bool oldIsFreezeFrame, double oldFreezeFrameTime, double oldInPoint, double oldOutPoint, bool newIsFreezeFrame, double newFreezeFrameTime, double newInPoint, double newOutPoint)
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangeFreezeFrame);
+
+            LayerModel Model { get; }
+
+            bool OldIsFreezeFrame { get; }
+
+            Time OldFreezeFrameTime { get; }
+
+            Time OldInPoint { get; }
+
+            Time OldOutPoint { get; }
+
+            bool NewIsFreezeFrame { get; }
+
+            Time NewFreezeFrameTime { get; }
+
+            Time NewInPoint { get; }
+
+            Time NewOutPoint { get; }
+
+            public ChangeFreezeFrameHistoryCommand(LayerModel model, bool oldIsFreezeFrame, Time oldFreezeFrameTime, Time oldInPoint, Time oldOutPoint, bool newIsFreezeFrame, Time newFreezeFrameTime, Time newInPoint, Time newOutPoint)
             {
                 Model = model;
                 OldIsFreezeFrame = oldIsFreezeFrame;
@@ -414,26 +435,6 @@ namespace NiVE3.Model
                 NewInPoint = newInPoint;
                 NewOutPoint = newOutPoint;
             }
-
-            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangeFreezeFrame);
-
-            LayerModel Model { get; }
-
-            bool OldIsFreezeFrame { get; }
-
-            double OldFreezeFrameTime { get; }
-
-            double OldInPoint { get; }
-
-            double OldOutPoint { get; }
-
-            bool NewIsFreezeFrame { get; }
-
-            double NewFreezeFrameTime { get; }
-
-            double NewInPoint { get; }
-
-            double NewOutPoint { get; }
 
             public void Redo()
             {

@@ -2,10 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Windows.Media;
+using NiVE3.Data.Json.Converter;
 using NiVE3.Image.Drawing;
 using NiVE3.Plugin.Interfaces;
+using NiVE3.Plugin.ValueObject;
 
 namespace NiVE3.Data.Json.Project
 {
@@ -27,17 +30,21 @@ namespace NiVE3.Data.Json.Project
 
         public bool IsText { get; set; }
 
-        public double SourceStartPoint { get; set; }
+        [JsonConverter(typeof(TimeJsonConverter))]
+        public Time SourceStartPoint { get; set; }
 
-        public double InPoint { get; set; }
+        [JsonConverter(typeof(TimeJsonConverter))]
+        public Time InPoint { get; set; }
 
-        public double OutPoint { get; set; }
+        [JsonConverter(typeof(TimeJsonConverter))]
+        public Time OutPoint { get; set; }
 
         public bool IsEnableTimeRemap { get; set; }
 
         public bool IsFreezeFrame { get; set; }
 
-        public double FreezeFrameTime { get; set; }
+        [JsonConverter(typeof(TimeJsonConverter))]
+        public Time FreezeFrameTime { get; set; }
 
         public Color TagColor { get; set; }
 

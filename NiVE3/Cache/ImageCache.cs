@@ -22,7 +22,7 @@ namespace NiVE3.Cache
 
         long CacheLimit { get; set; } = Math.Min(16L * 1024 * Const.MiB, SystemInfo.MaxCacheLimit);
 
-        private DualKeyDictionary<Guid, (double, Int128), (Guid, Int128), (IDisposable, long, ROI)> CachedImages { get; } = [];
+        private DualKeyDictionary<Guid, (Time, Int128), (Guid, Int128), (IDisposable, long, ROI)> CachedImages { get; } = [];
 
         private long CachedSize { get; set; }
 
@@ -34,7 +34,7 @@ namespace NiVE3.Cache
             ApplicationSetting.Setting.UpdateSetting += Setting_UpdateSetting;
         }
 
-        private (NManagedImage, ROI)? GetInternal(in Guid objectId, in Int128 key, double time)
+        private (NManagedImage, ROI)? GetInternal(in Guid objectId, in Int128 key, Time time)
         {
             if (CachedImages.TryGetValue(objectId, (time, key), out var image))
             {
@@ -47,7 +47,7 @@ namespace NiVE3.Cache
             }
         }
 
-        private bool TryGetInternal(in Guid objectId, in Int128 key, double time, out (NManagedImage, ROI) image)
+        private bool TryGetInternal(in Guid objectId, in Int128 key, Time time, out (NManagedImage, ROI) image)
         {
             var result = CachedImages.TryGetValue(objectId, (time, key), out var compressedImage);
             if (result)
@@ -77,7 +77,7 @@ namespace NiVE3.Cache
             }
         }
 
-        private void AddInternal(Guid objectId, in Int128 key, double time, NManagedImage image, ROI roi)
+        private void AddInternal(Guid objectId, in Int128 key, Time time, NManagedImage image, ROI roi)
         {
             (IDisposable, int, ROI) compressedImage;
             // NOTE: 実際に確保したメモリの容量で判定する
@@ -139,7 +139,7 @@ namespace NiVE3.Cache
             }
         }
 
-        private double[] GetCachedTimeInternal(in Guid objectId)
+        private Time[] GetCachedTimeInternal(in Guid objectId)
         {
             if (CachedImages.ContainsUpdateKey(objectId))
             {
@@ -189,12 +189,12 @@ namespace NiVE3.Cache
             }
         }
 
-        public static (NManagedImage, ROI)? Get(in Guid objectId, in Int128 key, double time)
+        public static (NManagedImage, ROI)? Get(in Guid objectId, in Int128 key, Time time)
         {
             return Instance.GetInternal(objectId, key, time);
         }
 
-        public static bool TryGet(in Guid objectId, in Int128 key, double time, out (NManagedImage, ROI) image)
+        public static bool TryGet(in Guid objectId, in Int128 key, Time time, out (NManagedImage, ROI) image)
         {
             return Instance.TryGetInternal(objectId, key, time, out image);
         }
@@ -204,12 +204,12 @@ namespace NiVE3.Cache
             return Instance.TryGetInternal(objectId, key, out image);
         }
 
-        public static void Add(in Guid objectId, in Int128 key, double time, NManagedImage image, ROI roi)
+        public static void Add(in Guid objectId, in Int128 key, Time time, NManagedImage image, ROI roi)
         {
             Instance.AddInternal(objectId, key, time, image, roi);
         }
 
-        public static double[] GetCachedTime(in Guid objectId)
+        public static Time[] GetCachedTime(in Guid objectId)
         {
             return Instance.GetCachedTimeInternal(objectId);
         }

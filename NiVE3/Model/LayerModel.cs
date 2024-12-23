@@ -68,36 +68,36 @@ namespace NiVE3.Model
             set { SetProperty(ref comment, value); }
         }
 
-        private double sourceDuration;
-        public double SourceDuration
+        private Time sourceDuration;
+        public Time SourceDuration
         {
             get { return sourceDuration; }
             set { SetProperty(ref sourceDuration, value); }
         }
 
-        private double duration;
-        public double Duration
+        private Time duration;
+        public Time Duration
         {
             get { return duration; }
             set { SetProperty(ref duration, value); }
         }
 
-        private double sourceStartPoint;
-        public double SourceStartPoint
+        private Time sourceStartPoint;
+        public Time SourceStartPoint
         {
             get { return sourceStartPoint; }
             set { SetProperty(ref sourceStartPoint, value); }
         }
 
-        private double inPoint;
-        public double InPoint
+        private Time inPoint;
+        public Time InPoint
         {
             get { return inPoint; }
             set { SetProperty(ref inPoint, value); }
         }
 
-        private double outPoint;
-        public double OutPoint
+        private Time outPoint;
+        public Time OutPoint
         {
             get { return outPoint; }
             set { SetProperty(ref outPoint, value); }
@@ -117,8 +117,8 @@ namespace NiVE3.Model
             set { SetProperty(ref isFreezeFrame, value); }
         }
 
-        private double freezeFrameTime;
-        public double FreezeFrameTime
+        private Time freezeFrameTime;
+        public Time FreezeFrameTime
         {
             get { return freezeFrameTime; }
             set { SetProperty(ref freezeFrameTime, value); }
@@ -566,7 +566,7 @@ namespace NiVE3.Model
             PropertyChanged += LayerModel_PropertyChanged;
         }
 
-        NImage ILayerObject.GetRawImage(double layerTime, double downSamplingRate, bool useGpu)
+        NImage ILayerObject.GetRawImage(Time layerTime, double downSamplingRate, bool useGpu)
         {
             var globalTime = layerTime + SourceStartPoint;
 
@@ -576,7 +576,7 @@ namespace NiVE3.Model
             return FootageModel.ReadImage(sourceTime, downSamplingRate, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties, InterpolationQuality, useGpu);
         }
 
-        NImage ILayerObject.GetEffectedImage(double layerTime, double downSamplingRate, bool useGpu)
+        NImage ILayerObject.GetEffectedImage(Time layerTime, double downSamplingRate, bool useGpu)
         {
             var globalTime = layerTime + SourceStartPoint;
 
@@ -613,7 +613,7 @@ namespace NiVE3.Model
                 return image;
             }
 
-            (image, var originalImageSize, var roi) = GetFootageImage(layerTime + SourceStartPoint, IsImage ? 0.0 : 1.0 / FootageModel.FrameRate, downSamplingRate, useGpu, false);
+            (image, var originalImageSize, var roi) = GetFootageImage(layerTime + SourceStartPoint, IsImage ? Time.Zero : new Time(1, FootageModel.FrameRate), downSamplingRate, useGpu, false);
             var downSamplingRateX = originalImageSize.Width / (float)image.Width;
             var downSamplingRateY = originalImageSize.Height / (float)image.Height;
             if (IsEnableEffect)
@@ -651,7 +651,7 @@ namespace NiVE3.Model
             return image;
         }
 
-        public RenderableImage? GetImage(double time, double frameTime, double downSamplingRate, bool withTrackMatte, bool useGpu, bool frameBlend)
+        public RenderableImage? GetImage(Time time, Time frameTime, double downSamplingRate, bool withTrackMatte, bool useGpu, bool frameBlend)
         {
             if (!HasImage)
             {
@@ -764,7 +764,7 @@ namespace NiVE3.Model
             );
         }
 
-        public RenderableImage? GetRawImage(double time, double frameTime, double downSamplingRate, bool withTrackMatte, bool useGpu, bool frameBlend)
+        public RenderableImage? GetRawImage(Time time, Time frameTime, double downSamplingRate, bool withTrackMatte, bool useGpu, bool frameBlend)
         {
             if (!HasImage)
             {
@@ -806,7 +806,7 @@ namespace NiVE3.Model
             );
         }
 
-        public RenderableImage GetSameImage(double time, double frameTime, double downSamplingRate, bool withTrackMatte, bool useGpu, bool frameBlend, RenderableImage baseImage)
+        public RenderableImage GetSameImage(Time time, Time frameTime, double downSamplingRate, bool withTrackMatte, bool useGpu, bool frameBlend, RenderableImage baseImage)
         {
             var layerTime = time - SourceStartPoint;
 
@@ -834,7 +834,7 @@ namespace NiVE3.Model
             );
         }
 
-        public (ROI, NImage) ProcessAdjustment(double time, NImage currentFrame, double downSamplingRateX, double downSamplingRateY, bool useGpu)
+        public (ROI, NImage) ProcessAdjustment(Time time, NImage currentFrame, double downSamplingRateX, double downSamplingRateY, bool useGpu)
         {
             var layerTime = time - SourceStartPoint;
             var roi = new ROI(new Int32Point(), new Int32Size(currentFrame.Width, currentFrame.Height), 0, 0, currentFrame.Width, currentFrame.Height);
@@ -861,9 +861,9 @@ namespace NiVE3.Model
             return (roi, currentFrame);
         }
 
-        public float[] GetAudio(double time, double length)
+        public float[] GetAudio(Time time, Time length)
         {
-            var layerTime = Math.Max(time - SourceStartPoint, InPoint);
+            var layerTime = Time.Max(time - SourceStartPoint, InPoint);
             var audio = GetRawAudio(time, length);
 
             foreach (var effect in Effects.Where(e => !e.IsDummyEffect && e.IsEnable && e.SupportedSource.IsSupportedSource(SourceType.Audio)))
@@ -939,19 +939,19 @@ namespace NiVE3.Model
             return audio;
         }
 
-        public float[] GetRawAudio(double time, double length)
+        public float[] GetRawAudio(Time time, Time length)
         {
-            var layerTime = Math.Max(time - SourceStartPoint, InPoint);
-            var layerLength = Math.Min(length, OutPoint - layerTime);
+            var layerTime = Time.Max(time - SourceStartPoint, InPoint);
+            var layerLength = Time.Min(length, OutPoint - layerTime);
 
-            var sourceBeginTime = Math.Max(CalcSourceTime(layerTime), 0.0);
+            var sourceBeginTime = Time.Max(CalcSourceTime(layerTime), Time.Zero);
             var sourceEndTime = CalcSourceTime(layerTime + layerLength);
             var reversed = sourceEndTime < sourceBeginTime;
             if (reversed)
             {
                 (sourceBeginTime, sourceEndTime) = (sourceEndTime, sourceBeginTime);
             }
-            var sourceLength = Math.Max(sourceEndTime - sourceBeginTime, 0.0);
+            var sourceLength = Time.Max(sourceEndTime - sourceBeginTime, Time.Zero);
             if ((int)(sourceLength * Const.AudioSamplingRate) < 1)
             {
                 return [];
@@ -993,7 +993,7 @@ namespace NiVE3.Model
             }
 
             var result = new float[(int)(length * Const.AudioSamplingRate) * Const.AudioChannelCount];
-            var startPos = (int)(Math.Max((InPoint + SourceStartPoint) - time, 0.0) * Const.AudioSamplingRate) * Const.AudioChannelCount;
+            var startPos = (int)((double)Time.Max((InPoint + SourceStartPoint) - time, Time.Zero) * Const.AudioSamplingRate) * Const.AudioChannelCount;
             var copyLength = Math.Min(audio.Length, result.Length - startPos);
             if (copyLength > 0)
             {
@@ -1003,13 +1003,13 @@ namespace NiVE3.Model
             return result;
         }
 
-        public bool IsContainsTime(double time)
+        public bool IsContainsTime(Time time)
         {
             var layerTime = time - SourceStartPoint;
             return layerTime >= inPoint && layerTime < OutPoint;
         }
 
-        public bool IsContainsTimeRange(double begin, double end)
+        public bool IsContainsTimeRange(Time begin, Time end)
         {
             var layerBeginTime = begin - SourceStartPoint;
             var layerEndTime = end - SourceStartPoint;
@@ -1037,7 +1037,7 @@ namespace NiVE3.Model
             return (FootageModel.InputModel.Input as CompositionInput)?.Composition;
         }
 
-        public CameraSetting? GetCameraSetting(double time)
+        public CameraSetting? GetCameraSetting(Time time)
         {
             if (!IsCamera || !IsContainsTime(time))
             {
@@ -1059,7 +1059,7 @@ namespace NiVE3.Model
             );
         }
 
-        public LightSetting? GetLightSetting(double time)
+        public LightSetting? GetLightSetting(Time time)
         {
             if (!IsLight || !IsContainsTime(time))
             {
@@ -1095,7 +1095,7 @@ namespace NiVE3.Model
             );
         }
 
-        public PropertyValueGroup GetTransform(double time)
+        public PropertyValueGroup GetTransform(Time time)
         {
             if (TransformProperties == null)
             {
@@ -1105,19 +1105,19 @@ namespace NiVE3.Model
             return TransformProperties.GetValues(layerTime, time);
         }
 
-        public PropertyValueGroup? GetLayerOptions(double time)
+        public PropertyValueGroup? GetLayerOptions(Time time)
         {
             var layerTime = time - SourceStartPoint;
             return LayerOptionProperties?.GetValues(layerTime, time);
         }
 
-        public PropertyValueGroup? GetTextProperties(double time)
+        public PropertyValueGroup? GetTextProperties(Time time)
         {
             var layerTime = time - SourceStartPoint;
             return TextProperties?.GetValues(layerTime, time, true);
         }
 
-        public ParentTransform[] GetParentTransforms(double time)
+        public ParentTransform[] GetParentTransforms(Time time)
         {
             var parentTransforms = new List<ParentTransform>();
             var parentId = ParentLayerId;
@@ -1162,7 +1162,7 @@ namespace NiVE3.Model
             return [..parentTransforms];
         }
 
-        public SourceFootageRect GetSourceFootageRect(double time, bool withInvisible)
+        public SourceFootageRect GetSourceFootageRect(Time time, bool withInvisible)
         {
             if (!HasImage || !IsContainsTime(time))
             {
@@ -1176,7 +1176,7 @@ namespace NiVE3.Model
             return FootageModel.CalcSize(time, CompositionModel.Width, CompositionModel.Height, withInvisible, sourceOptionProperties);
         }
 
-        public LayerSkeleton? GetLayerSkeleton(double time)
+        public LayerSkeleton? GetLayerSkeleton(Time time)
         {
             if (!HasImage || !IsContainsTime(time))
             {
@@ -1199,13 +1199,13 @@ namespace NiVE3.Model
             return !IsSpecial || (IsNullObject && effectUuids.All(id => EffectListModel.GetMetadata(id)?.IsDummyEffect ?? false));
         }
 
-        public void CalcCacheKeyHash(XxHash3 hash, double time, bool withTrackMatte, bool frameBlend)
+        public void CalcCacheKeyHash(XxHash3 hash, Time time, bool withTrackMatte, bool frameBlend)
         {
             hash.Append(frameBlend);
             hash.Append(LayerId);
             hash.Append(FootageModel.LastUpdated);
 
-            var layerTime = TimeCalc.RoundTimeDigit(time - SourceStartPoint);
+            var layerTime = time - SourceStartPoint;
             var sourceTime = CalcSourceTime(layerTime);
 
             var sourceOptionProperties = (TextProperties ?? ShapeProperties ?? SourceOptionProperties)?.GetValues(sourceTime, time, true);
@@ -1250,7 +1250,7 @@ namespace NiVE3.Model
             GetTransform(time).CalcHash(hash);
         }
 
-        public void CommitEditDuration(double prevInPoint, double inPoint, double prevOutPoint, double outPoint, double prevSourceStartPoint, double sourceStartPoint)
+        public void CommitEditDuration(Time prevInPoint, Time inPoint, Time prevOutPoint, Time outPoint, Time prevSourceStartPoint, Time sourceStartPoint)
         {
             InPoint = inPoint;
             OutPoint = outPoint;
@@ -1280,7 +1280,7 @@ namespace NiVE3.Model
 
         public void ChangePlayRate(double newRate, double compositionFrameRate)
         {
-            var maxPlayRate = Duration * compositionFrameRate * 100.0;
+            var maxPlayRate = (double)Duration * compositionFrameRate * 100.0;
             newRate = Math.Clamp(newRate, -maxPlayRate, maxPlayRate);
             if (PlayRate == newRate)
             {
@@ -1291,9 +1291,9 @@ namespace NiVE3.Model
             var oldInPoint = InPoint;
             var oldOutPoint = OutPoint;
             PlayRate = newRate;
-            Duration = Math.Abs(SourceDuration / (newRate * 0.01));
-            InPoint = Math.Min(oldInPoint, Duration - CompositionModel.FrameDuration);
-            OutPoint = Math.Min(oldOutPoint, Duration);
+            Duration = Time.Abs(SourceDuration / (newRate * 0.01));
+            InPoint = Time.Min(oldInPoint, Duration - CompositionModel.FrameDuration);
+            OutPoint = Time.Min(oldOutPoint, Duration);
 
             HistoryModel.Add(new ChangePlayRateHistoryCommand(this, oldPlayRate, oldInPoint, oldOutPoint, newRate, InPoint, OutPoint));
         }
@@ -1384,7 +1384,7 @@ namespace NiVE3.Model
             FootageModel.FootageUpdated += FootageModel_FootageUpdated;
         }
 
-        public void UpdateTextProperty(string propertyId, object? value, object? prevValue, double layerTime)
+        public void UpdateTextProperty(string propertyId, object? value, object? prevValue, Time layerTime)
         {
             var property = TextProperties?.FindProperty(propertyId) as PropertyModel;
             property?.CommitProperty(value, prevValue ?? property?.GetRawValue(layerTime));
@@ -1553,7 +1553,7 @@ namespace NiVE3.Model
             PasteEffectsInternal(data, [], insertTargetId, true);
         }
 
-        public void ChangeFreezeFrame(bool isFreezeFrame, double time, double compositionFrameDuration)
+        public void ChangeFreezeFrame(bool isFreezeFrame, Time time, Time compositionFrameDuration)
         {
             var layerTime = time - SourceStartPoint;
             var newFreezeFrameTime = PlayRate >= 0.0 ? layerTime * PlayRate * 0.01 : SourceDuration + layerTime * PlayRate * 0.01;
@@ -1572,8 +1572,8 @@ namespace NiVE3.Model
             FreezeFrameTime = newFreezeFrameTime;
             if (!isFreezeFrame)
             {
-                InPoint = Math.Min(Math.Max(InPoint, 0.0), TimeCalc.RoundTimeDigit(Duration - compositionFrameDuration));
-                OutPoint = Math.Min(Math.Max(OutPoint, TimeCalc.RoundTimeDigit(InPoint + compositionFrameDuration)), Duration);
+                InPoint = Time.Min(Time.Max(InPoint, Time.Zero), Duration - compositionFrameDuration);
+                OutPoint = Time.Min(Time.Max(OutPoint, InPoint + compositionFrameDuration), Duration);
             }
 
             HistoryModel.Add(new ChangeFreezeFrameHistoryCommand(this, oldIsFreezeFrame, oldFreezeFrameTime, oldInPoint, oldOutPoint, isFreezeFrame, newFreezeFrameTime, InPoint, OutPoint));
@@ -1658,7 +1658,7 @@ namespace NiVE3.Model
             HistoryModel.Add(new PasteNewEffectsHistoryCommand(this, [.. addedEffect], insertStartIndex, isDuplicate));
         }
 
-        double CalcSourceTime(double layerTime)
+        Time CalcSourceTime(Time layerTime)
         {
             // TODO: タイムリマップ使用時にそっち優先で反映
             if (IsFreezeFrame)
@@ -1667,15 +1667,15 @@ namespace NiVE3.Model
             }
             else if (PlayRate >= 0.0)
             {
-                return TimeCalc.RoundTimeDigit(layerTime * PlayRate * 0.01);
+                return layerTime * PlayRate * 0.01;
             }
             else
             {
-                return TimeCalc.RoundTimeDigit(SourceDuration + layerTime * PlayRate * 0.01);
+                return SourceDuration + layerTime * PlayRate * 0.01;
             }
         }
 
-        (ROI, NImage) CalcAndExpandImage(NImage image, double downSamplingRateX, double downSamplingRateY, double layerTime)
+        (ROI, NImage) CalcAndExpandImage(NImage image, double downSamplingRateX, double downSamplingRateY, Time layerTime)
         {
             var newRoi = new ROI(new Int32Point(), new Int32Size(image.Width, image.Height), 0, 0, image.Width, image.Height);
             foreach (var e in Effects.Where(e => e.IsEnable && e.SupportedSource.IsSupportedSource(SourceType.Image | SourceType.Video)))
@@ -1728,7 +1728,7 @@ namespace NiVE3.Model
             return (newRoi, image);
         }
 
-        NImage ApplyEffect(NImage image, in ROI roi, double downSamplingRateX, double downSamplingRateY, double layerTime, bool useGpu)
+        NImage ApplyEffect(NImage image, in ROI roi, double downSamplingRateX, double downSamplingRateY, Time layerTime, bool useGpu)
         {
             if (roi.Width <= 0 || roi.Height <= 0)
             {
@@ -1749,7 +1749,7 @@ namespace NiVE3.Model
             return image;
         }
 
-        (NImage, SourceFootageRect, ROI) GetFootageImage(double time, double frameTime, double downSamplingRate, bool useGpu, bool frameBlend)
+        (NImage, SourceFootageRect, ROI) GetFootageImage(Time time, Time frameTime, double downSamplingRate, bool useGpu, bool frameBlend)
         {
             var layerTime = time - SourceStartPoint;
             var sourceTime = CalcSourceTime(layerTime);
@@ -1757,10 +1757,11 @@ namespace NiVE3.Model
             NImage image;
             var originalImageSize = SourceFootageRect.Empty;
 
+            //var currentFrameDuration = new Time(1, Math.Abs(FootageModel.FrameRate * PlayRate * 0.01));
             var currentFrameDuration = Math.Abs(1.0 / FootageModel.FrameRate / (PlayRate * 0.01));
             // TODO: サイズ変更可能なビデオもフレームブレンドできるようにする?
             if (frameTime > 0.0 &&
-                TimeCalc.RoundTimeDigit(frameTime - currentFrameDuration) != 0.0 &&
+                (frameTime - currentFrameDuration) != Time.Zero &&
                 ((IsComposition && (GetNestedComposition()?.IsRetentionFrameRate ?? false)) || (IsVideo && !IsComposition)) &&
                 !IsCustomizableFootageSource &&
                 frameBlend && IsEnableFrameBlend)
@@ -1790,8 +1791,8 @@ namespace NiVE3.Model
                 else
                 {
                     var startSoruceFrameTime = PlayRate > 0.0 ? TimeCalc.AlignFloor(sourceTime, FootageModel.FrameRate) : TimeCalc.AlignCeiling(time, FootageModel.FrameRate);
-                    var frameCount = (int)Math.Ceiling(frameTime / currentFrameDuration) + (TimeCalc.RoundTimeDigit(sourceTime - startSoruceFrameTime) != 0.0 ? 1 : 0);
-                    var firstRate = 1.0 - Math.Abs(sourceTime - startSoruceFrameTime) / currentFrameDuration;
+                    var frameCount = (int)Math.Ceiling(frameTime / currentFrameDuration) + (sourceTime - startSoruceFrameTime != Time.Zero ? 1 : 0);
+                    var firstRate = 1.0 - Time.Abs(sourceTime - startSoruceFrameTime) / currentFrameDuration;
                     var resultRate = (float)(frameTime / currentFrameDuration);
 
                     using (var firstFrame = FootageModel.ReadImage(startSoruceFrameTime, downSamplingRate, CompositionModel.Width, CompositionModel.Height, null, InterpolationQuality, useGpu))
@@ -1977,14 +1978,14 @@ namespace NiVE3.Model
             if (IsComposition)
             {
                 SourceDuration = FootageModel.Duration;
-                Duration = Math.Abs(SourceDuration / (PlayRate * 0.01));
+                Duration = Time.Abs(SourceDuration / (PlayRate * 0.01));
 
                 if (!IsFreezeFrame && !IsEnableTimeRemap)
                 {
                     var oldInPoint = InPoint;
                     var oldOutPoint = OutPoint;
-                    var newInPoint = Math.Min(oldInPoint, Duration - CompositionModel.FrameDuration);
-                    var newOutPoint = Math.Min(oldOutPoint, Duration);
+                    var newInPoint = Time.Min(oldInPoint, Duration - CompositionModel.FrameDuration);
+                    var newOutPoint = Time.Min(oldOutPoint, Duration);
 
                     if (e.NeedHistoryChange)
                     {
@@ -2016,7 +2017,7 @@ namespace NiVE3.Model
             {
                 case nameof(PlayRate):
                 case nameof(SourceDuration):
-                    Duration = Math.Abs(SourceDuration / (PlayRate * 0.01));
+                    Duration = Time.Abs(SourceDuration / (PlayRate * 0.01));
                     break;
                 case nameof(IsEnableTimeRemap):
                 case nameof(IsFreezeFrame):

@@ -109,12 +109,12 @@ namespace NiVE3.Model
             }
         }
 
-        public ROI CalcRoi(ROI baseRoi, double downSamplingRateX, double downSamplingRateY, double layerTime)
+        public ROI CalcRoi(ROI baseRoi, double downSamplingRateX, double downSamplingRateY, Time layerTime)
         {
             return Effect.Value.CalcRoi(baseRoi, downSamplingRateX, downSamplingRateY, layerTime, Properties.Children.ToArray(), CompositionModel);
         }
 
-        public NImage ProcessImage(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, double layerTime, bool useGpu)
+        public NImage ProcessImage(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, Time layerTime, bool useGpu)
         {
             try
             {
@@ -133,7 +133,7 @@ namespace NiVE3.Model
             }
         }
 
-        public float[] ProcessAudio(float[] audio, double startTime)
+        public float[] ProcessAudio(float[] audio, Time startTime)
         {
             return Effect.Value.Process(audio, startTime, Properties.Children.ToArray(), CompositionModel);
         }
@@ -180,7 +180,7 @@ namespace NiVE3.Model
             HistoryModel.Add(new OverwriteEffectHistoryCommand(this, oldData, data));
         }
 
-        public void CalcPropertyHash(double layerTime, double globalTime, XxHash3 hash)
+        public void CalcPropertyHash(Time layerTime, Time globalTime, XxHash3 hash)
         {
             Properties.GetValues(layerTime, globalTime).CalcHash(hash);
         }
