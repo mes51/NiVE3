@@ -5,12 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Model;
 using NiVE3.Plugin.Interfaces;
+using NiVE3.Plugin.ValueObject;
 
 namespace NiVE3.Expression.Wrapper
 {
     class LayerOptionPropertiesWrapper
     {
-        public LayerOptionPropertiesWrapper(PropertyGroupModel layerOptions, double globalTime)
+        public LayerOptionPropertiesWrapper(PropertyGroupModel layerOptions, Time globalTime)
         {
             if (layerOptions.FindProperty(ILayerObject.CameraLayerOptionZoomId) is PropertyModel zoomProperty)
             {

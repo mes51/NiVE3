@@ -5,12 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Input;
 using NiVE3.Model;
+using NiVE3.Plugin.ValueObject;
 
 namespace NiVE3.Expression.Wrapper
 {
     class LayerTextPropertyWrapper
     {
-        public LayerTextPropertyWrapper(PropertyGroupModel textProperty, double globalTime)
+        public LayerTextPropertyWrapper(PropertyGroupModel textProperty, Time globalTime)
         {
             if (textProperty.FindProperty(TextFootageSource.SourceTextId) is IPropertyModel sourceTextProperty)
             {

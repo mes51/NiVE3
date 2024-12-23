@@ -19,6 +19,7 @@ using NiVE3.Expression.Wrapper;
 using NiVE3.Model;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Property;
+using NiVE3.Plugin.ValueObject;
 using NiVE3.Shared.Extension;
 
 namespace NiVE3.Expression
@@ -37,7 +38,7 @@ namespace NiVE3.Expression
 
         PropertyModel PropertyModel { get; }
 
-        public ExpressionContext(double globalTime, ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, EffectModel? effectModel, PropertyModel propertyModel)
+        public ExpressionContext(Time globalTime, ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, EffectModel? effectModel, PropertyModel propertyModel)
         {
             ProjectModel = projectModel;
             LayerModel = layerModel;
@@ -58,7 +59,7 @@ namespace NiVE3.Expression
                 });
             });
             (Engine.GetValue("Math") as ObjectInstance)?.Delete("random");
-            Engine.SetValue("time", globalTime);
+            Engine.SetValue("time", (double)globalTime);
             Engine.SetValue("comp", (Func<string, CompositionWrapper?>)(key => FindComposition(this, key, globalTime)));
             Engine.SetValue("thisComp", new CompositionWrapper(compositionModel, globalTime));
             Engine.SetValue("thisLayer", new LayerWrapper(layerModel, compositionModel, globalTime));
@@ -134,7 +135,7 @@ namespace NiVE3.Expression
             }
         }
 
-        static CompositionWrapper? FindComposition(ExpressionContext context, string name, double time)
+        static CompositionWrapper? FindComposition(ExpressionContext context, string name, Time time)
         {
             foreach (var comp in context.ProjectModel.CompositionModels)
             {

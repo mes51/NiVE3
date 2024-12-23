@@ -6,6 +6,7 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using NiVE3.Plugin.ValueObject;
 using NiVE3.Shared.Util;
 
 namespace NiVE3.Expression.Utility
@@ -19,9 +20,9 @@ namespace NiVE3.Expression.Utility
 
         Xoroshiro Random { get; set; }
 
-        public ExpressionRandom(double time, Int128 objectId)
+        public ExpressionRandom(Time time, Int128 objectId)
         {
-            Time = time;
+            Time = (double)time;
             ObjectIdSeed = (ulong)((objectId >> 64) & 0xFFFFFFFFFFFFFFFFUL) ^ (ulong)(objectId & 0xFFFFFFFFFFFFFFFFUL);
             setSeed(0);
         }

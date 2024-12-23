@@ -5,12 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Model;
 using NiVE3.Plugin.Interfaces;
+using NiVE3.Plugin.ValueObject;
 
 namespace NiVE3.Expression.Wrapper
 {
     class LayerTransformPropertiesWrapper
     {
-        public LayerTransformPropertiesWrapper(PropertyGroupModel transform, double globalTime)
+        public LayerTransformPropertiesWrapper(PropertyGroupModel transform, Time globalTime)
         {
             if (transform.FindProperty(ILayerObject.TransformAnchorPointId) is PropertyModel anchorPointProperty)
             {

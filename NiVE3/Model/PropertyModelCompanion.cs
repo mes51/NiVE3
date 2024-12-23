@@ -10,6 +10,7 @@ using NiVE3.Plugin.Property.Control;
 using NiVE3.Plugin.Property;
 using NiVE3.Mvvm;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
+using NiVE3.Plugin.ValueObject;
 
 namespace NiVE3.Model
 {
@@ -17,7 +18,7 @@ namespace NiVE3.Model
     {
         string Name { get; }
 
-        double SourceStartPoint { get; }
+        Time SourceStartPoint { get; }
 
         ObservableCollection<KeyFrame>? KeyFrames { get; }
 
@@ -55,7 +56,7 @@ namespace NiVE3.Model
 
         void PasteProperty(PropertyData data);
 
-        object? GetValue(double time, double globalTime);
+        object? GetValue(Time time, Time globalTime);
     }
 
      interface IOverwriteablePropertyModel : IPropertyModel

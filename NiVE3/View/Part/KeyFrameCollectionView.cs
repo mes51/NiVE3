@@ -10,6 +10,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using NiVE3.Plugin.Property;
+using NiVE3.Plugin.ValueObject;
 using NiVE3.Shared.Extension;
 using NiVE3.Util;
 using NiVE3.View.Resource;
@@ -451,7 +452,7 @@ namespace NiVE3.View.Part
                 ReleaseMouseCapture();
 
                 var oldSelectedKeyFrame = SelectedKeyFrameIds.Where(id => KeyFrames.Any(k => k.Id == id)).Select(id => KeyFrames.First(k => k.Id == id)).ToArray();
-                var newTimes = oldSelectedKeyFrame.Select(k => TimeCalc.RoundTimeDigit(diffTime + k.Time)).ToArray();
+                var newTimes = oldSelectedKeyFrame.Select(k => TimeCalc.RoundTimeDigit(diffTime + k.Time)).Select(t => Time.FromTime(t)).ToArray(); // XXX: 全体的にTime構造体に置き換えた後に変換用のSelectを外す
 
                 if (oldSelectedKeyFrame.Select((k, i) => k.Time == newTimes[i]).All(b => b))
                 {
@@ -588,7 +589,7 @@ namespace NiVE3.View.Part
 
             var timeOffset = SourceStartPoint - RangeStart;
             var x = pos.X - UIParameters.TimelineRangeThumbWidth;
-            var clickedKeyFrame = KeyFrames.LastOrDefault(k => Math.Abs((k.Time + timeOffset) * pixelPerTime - x) < KeyFrameIconSize * 0.5);
+            var clickedKeyFrame = KeyFrames.LastOrDefault(k => Math.Abs((double)(k.Time + timeOffset) * pixelPerTime - x) < KeyFrameIconSize * 0.5);
             if (clickedKeyFrame != null)
             {
                 if (e.ClickCount == 2)

@@ -52,7 +52,7 @@ namespace NiVE3.PresetPlugin.Internal.DirectShow
 
         protected bool SetTime(double time)
         {
-            if (!IsLoaded)
+            if (!IsLoaded || Sampler == null)
             {
                 return false;
             }

@@ -24,7 +24,7 @@ namespace NiVE3.Model
     {
         public string Name { get; }
 
-        public double SourceStartPoint { get; set; }
+        public Time SourceStartPoint { get; set; }
 
         public bool IsEnable => true;
 
@@ -131,12 +131,12 @@ namespace NiVE3.Model
             return GetValue(layerTime, layerTime + SourceStartPoint);
         }
 
-        public object? GetValue(double time, double globalTime)
+        public object? GetValue(Time time, Time globalTime)
         {
             return GetChildPropertyValues(time, globalTime, false);
         }
 
-        PropertyValueGroup? IPropertyObject.GetValues(double layerTime, bool withoutDisableProperty)
+        PropertyValueGroup? IPropertyObject.GetValues(Time layerTime, bool withoutDisableProperty)
         {
             return null;
         }
@@ -257,7 +257,7 @@ namespace NiVE3.Model
             }
         }
 
-        public PropertyValueGroup[] GetChildPropertyValues(double time, double globalTime, bool withoutDisableProperty)
+        public PropertyValueGroup[] GetChildPropertyValues(Time time, Time globalTime, bool withoutDisableProperty)
         {
             if (withoutDisableProperty)
             {
@@ -496,7 +496,7 @@ namespace NiVE3.Model
         {
             if (e.PropertyName == nameof(LayerModel.SourceStartPoint))
             {
-                SourceStartPoint = LayerModel?.SourceStartPoint ?? 0.0;
+                SourceStartPoint = LayerModel?.SourceStartPoint ?? Time.Zero;
             }
         }
     }

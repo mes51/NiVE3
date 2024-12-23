@@ -5,12 +5,13 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Model;
+using NiVE3.Plugin.ValueObject;
 using NiVE3.Shared.Extension;
 using NiVE3.Util;
 
 namespace NiVE3.Expression.Wrapper
 {
-    record LayerWrapper(LayerModel LayerModel, CompositionModel CompositionModel, double GlobalTime)
+    record LayerWrapper(LayerModel LayerModel, CompositionModel CompositionModel, Time GlobalTime)
     {
         #region Expression members
 #pragma warning disable IDE1006 // NOTE: エクスプレッション用メソッドのため、命名規則は camelCase を許容する

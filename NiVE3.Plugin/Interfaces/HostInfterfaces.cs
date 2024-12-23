@@ -121,7 +121,7 @@ namespace NiVE3.Plugin.Interfaces
 
         public object? GetValue(Time layerTime);
 
-        public PropertyValueGroup? GetValues(double layerTime, bool withoutDisableProperty = false);
+        public PropertyValueGroup? GetValues(Time layerTime, bool withoutDisableProperty = false);
     }
 
     public interface ICompositionViewModel : INotifyPropertyChanged

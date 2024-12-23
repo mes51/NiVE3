@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using NiVE3.Plugin.Property;
+using NiVE3.Plugin.ValueObject;
 
 namespace NiVE3.View
 {
@@ -12,9 +13,9 @@ namespace NiVE3.View
     {
         public KeyFrame[] KeyFrames { get; }
 
-        public double[] NewTimes { get; }
+        public Time[] NewTimes { get; }
 
-        public KeyFrameMoveEventArgs(KeyFrame[] keyFrames, double[] newTimes, RoutedEvent routedEvent, object source) : base(routedEvent, source)
+        public KeyFrameMoveEventArgs(KeyFrame[] keyFrames, Time[] newTimes, RoutedEvent routedEvent, object source) : base(routedEvent, source)
         {
             KeyFrames = keyFrames;
             NewTimes = newTimes;

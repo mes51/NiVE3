@@ -5,12 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Model;
 using NiVE3.Plugin.Interfaces;
+using NiVE3.Plugin.ValueObject;
 
 namespace NiVE3.Expression.Wrapper
 {
     class LayerAudioLevelPropertiesWrapper
     {
-        public LayerAudioLevelPropertiesWrapper(PropertyGroupModel levels, double globalTime)
+        public LayerAudioLevelPropertiesWrapper(PropertyGroupModel levels, Time globalTime)
         {
             if (levels.FindProperty(ILayerObject.AudioLevelId) is PropertyModel levelProperty)
             {

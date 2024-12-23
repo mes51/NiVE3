@@ -34,15 +34,15 @@ namespace NiVE3.Model
 
         public bool IsEnable => true;
 
-        private double sourceStartPoint;
-        public double SourceStartPoint
+        private Time sourceStartPoint;
+        public Time SourceStartPoint
         {
             get { return sourceStartPoint; }
             set { SetProperty(ref sourceStartPoint, value); }
         }
 
-        private double currentTime;
-        public double CurrentTime
+        private Time currentTime;
+        public Time CurrentTime
         {
             get { return currentTime; }
             set { SetProperty(ref currentTime, value); }
@@ -215,7 +215,7 @@ namespace NiVE3.Model
 
         public void CreateKeyFrame(object? value)
         {
-            var time = TimeCalc.RoundTimeDigit(CurrentTime - SourceStartPoint);
+            var time = CurrentTime - SourceStartPoint;
             var prevKeyFrame = KeyFrames.LastOrDefault(k => k.Time <= time);
             if (prevKeyFrame?.Time == time && prevKeyFrame.Value == value)
             {
@@ -245,8 +245,8 @@ namespace NiVE3.Model
                 //}
             }
             var keyFrame = new KeyFrame(time, value, new Ease(0.0, 0.0), new Ease(0.0, 0.0), interpolationType);
-            var index = KeyFrames.FindLastIndex(k => Math.Abs(k.Time - time) < TimeCalc.TimeEpsilon || k.Time <= time) + 1;
-            if (index > 0 && Math.Abs(KeyFrames[index - 1].Time - time) < TimeCalc.TimeEpsilon)
+            var index = KeyFrames.FindLastIndex(k => Time.Abs(k.Time - time) < TimeCalc.TimeEpsilon || k.Time <= time) + 1;
+            if (index > 0 && Time.Abs(KeyFrames[index - 1].Time - time) < TimeCalc.TimeEpsilon)
             {
                 var oldKeyFrame = KeyFrames[index - 1];
                 KeyFrames[index - 1] = keyFrame;
@@ -310,7 +310,7 @@ namespace NiVE3.Model
             HistoryModel.Add(new ChangeUseExpressionHistoryCommand(this, oldUseExpression, useExpression));
         }
 
-        public void MoveTimeKeyFrames(KeyFrame[] targetKeyFrames, double[] newTime)
+        public void MoveTimeKeyFrames(KeyFrame[] targetKeyFrames, Time[] newTime)
         {
             var newKeyFrames = targetKeyFrames.Zip(newTime, (k, nt) => new KeyFrame(nt, k.Value, k.EaseIn, k.EaseOut, k.InterpolationType, k.Id)).OrderBy(k => k.Time).ToArray();
             ReplaceKeyFrames(targetKeyFrames, newKeyFrames, LanguageResourceDictionary.History_MoveKeyFrame);
@@ -337,7 +337,7 @@ namespace NiVE3.Model
             RawValue = value;
         }
 
-        public object? GetRawValue(double time)
+        public object? GetRawValue(Time time)
         {
             if (UseEditingValue || KeyFrames.Count < 1)
             {
@@ -354,7 +354,7 @@ namespace NiVE3.Model
             return GetValue(layerTime, layerTime + SourceStartPoint);
         }
 
-        public object? GetValue(double time, double globalTime)
+        public object? GetValue(Time time, Time globalTime)
         {
             var rawValue = GetRawValue(time);
             var value = rawValue;
@@ -438,7 +438,7 @@ namespace NiVE3.Model
             HistoryModel.EndGroup();
         }
 
-        PropertyValueGroup? IPropertyObject.GetValues(double layerTime, bool withoutDisableProperty)
+        PropertyValueGroup? IPropertyObject.GetValues(Time layerTime, bool withoutDisableProperty)
         {
             return null;
         }
@@ -576,7 +576,7 @@ namespace NiVE3.Model
                 {
                     foreach (var k in keyFrames)
                     {
-                        var newTime = TimeCalc.RoundTimeDigit(k.Time - startTime + CurrentTime - SourceStartPoint);
+                        var newTime = k.Time - startTime + CurrentTime - SourceStartPoint;
                         newKeyFrames.Add(new KeyFrame(newTime, cp.CoerceValue(cp.PropertyType.DeserializeValue(k.Value), CompositionModel), k.EaseIn, k.EaseOut, k.InterpolationType));
                     }
                 }
@@ -584,7 +584,7 @@ namespace NiVE3.Model
                 {
                     foreach (var k in keyFrames)
                     {
-                        var newTime = TimeCalc.RoundTimeDigit(k.Time - startTime + CurrentTime - SourceStartPoint);
+                        var newTime = k.Time - startTime + CurrentTime - SourceStartPoint;
                         newKeyFrames.Add(new KeyFrame(newTime, Property.CoerceValue(Property.PropertyType.DeserializeValue(k.Value)), k.EaseIn, k.EaseOut, k.InterpolationType));
                     }
                 }
@@ -599,7 +599,7 @@ namespace NiVE3.Model
                 var newKeyFrameIndices = new int[newKeyFrames.Count];
                 foreach (var nk in newKeyFrames)
                 {
-                    var index = KeyFrames.FindLastIndex(k => Math.Abs(k.Time - nk.Time) < TimeCalc.TimeEpsilon || k.Time <= nk.Time) + 1;
+                    var index = KeyFrames.FindLastIndex(k => Time.Abs(k.Time - nk.Time) < TimeCalc.TimeEpsilon || k.Time <= nk.Time) + 1;
                     KeyFrames.Insert(index, nk);
                 }
 
@@ -743,8 +743,8 @@ namespace NiVE3.Model
             oldKeyFrames.AddRange(targetKeyFrames);
             foreach (var nk in newKeyFrames)
             {
-                var index = KeyFrames.FindLastIndex(k => Math.Abs(k.Time - nk.Time) < TimeCalc.TimeEpsilon || k.Time <= nk.Time) + 1;
-                if (index > 0 && Math.Abs(KeyFrames[index - 1].Time - nk.Time) < TimeCalc.TimeEpsilon)
+                var index = KeyFrames.FindLastIndex(k => Time.Abs(k.Time - nk.Time) < TimeCalc.TimeEpsilon || k.Time <= nk.Time) + 1;
+                if (index > 0 && Time.Abs(KeyFrames[index - 1].Time - nk.Time) < TimeCalc.TimeEpsilon)
                 {
                     oldKeyFrames.Add(KeyFrames[index - 1]);
                     KeyFrames[index - 1] = nk;
@@ -785,7 +785,7 @@ namespace NiVE3.Model
         {
             if (e.PropertyName == nameof(LayerModel.SourceStartPoint))
             {
-                SourceStartPoint = LayerModel?.SourceStartPoint ?? 0.0;
+                SourceStartPoint = LayerModel?.SourceStartPoint ?? Time.Zero;
             }
         }
 

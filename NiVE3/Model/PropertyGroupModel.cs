@@ -29,7 +29,7 @@ namespace NiVE3.Model
             set { SetProperty(ref name, value); }
         }
 
-        public double SourceStartPoint { get; set; }
+        public Time SourceStartPoint { get; set; }
 
         private bool isEnabled = true;
         public bool IsEnable
@@ -156,17 +156,17 @@ namespace NiVE3.Model
             return null;
         }
 
-        public object? GetValue(double time, double globalTime)
+        public object? GetValue(Time time, Time globalTime)
         {
             return null;
         }
 
-        PropertyValueGroup IPropertyObject.GetValues(double layerTime, bool withoutDisableProperty)
+        PropertyValueGroup IPropertyObject.GetValues(Time layerTime, bool withoutDisableProperty)
         {
             return GetValues(layerTime, layerTime + SourceStartPoint, withoutDisableProperty);
         }
 
-        public PropertyValueGroup GetValues(double time, double globalTime, bool withoutDisableProperty = false)
+        public PropertyValueGroup GetValues(Time time, Time globalTime, bool withoutDisableProperty = false)
         {
             var result = new Dictionary<string, object?>();
             var propertyTypes = new Dictionary<string, IPropertyType>();

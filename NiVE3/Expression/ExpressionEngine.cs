@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Jint;
 using NiVE3.Expression.Converter;
 using NiVE3.Model;
+using NiVE3.Plugin.ValueObject;
 
 namespace NiVE3.Expression
 {
@@ -21,7 +22,7 @@ namespace NiVE3.Expression
             });
         }
 
-        public static ExpressionContext CreateContext(double globalTime, ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, EffectModel? effectModel, PropertyModel propertyModel)
+        public static ExpressionContext CreateContext(Time globalTime, ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, EffectModel? effectModel, PropertyModel propertyModel)
         {
             return new ExpressionContext(globalTime, projectModel, compositionModel, layerModel, effectModel, propertyModel);
         }

@@ -17,6 +17,7 @@ using NiVE3.Model.UI;
 using NiVE3.Mvvm;
 using NiVE3.Plugin.Property;
 using NiVE3.Plugin.Property.Control;
+using NiVE3.Plugin.ValueObject;
 using NiVE3.Shared.Extension;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
 using NiVE3.UI.Command;
@@ -41,17 +42,17 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref name, value); }
         }
 
-        private double sourceStartPoint;
+        private Time sourceStartPoint;
         [NeedWire(nameof(PropertyModel), IsOneWay = true)]
-        public double SourceStartPoint
+        public Time SourceStartPoint
         {
             get { return sourceStartPoint; }
             set { SetProperty(ref sourceStartPoint, value); }
         }
 
-        private double currentTime;
+        private Time currentTime;
         [NeedWire(nameof(PropertyModel), IsOneWay = true)]
-        public double CurrentTime
+        public Time CurrentTime
         {
             get { return currentTime; }
             set { SetProperty(ref currentTime, value); }
@@ -368,7 +369,7 @@ namespace NiVE3.ViewModel
                 }
             });
 
-            MoveTimeKeyFramesCommand = new DelegateCommand<Tuple<KeyFrame[], double[]>>(t =>
+            MoveTimeKeyFramesCommand = new DelegateCommand<Tuple<KeyFrame[], Time[]>>(t =>
             {
                 if (IsEditingExpression)
                 {
@@ -393,8 +394,8 @@ namespace NiVE3.ViewModel
                     CommitCurrentExpressionCode();
                 }
                 var time = CurrentTime;
-                var index = KeyFrames.FindLastIndex(k => Math.Abs(k.Time - time) < TimeCalc.TimeEpsilon || k.Time <= time);
-                if (index > -1 && Math.Abs(KeyFrames[index].Time - time) < TimeCalc.TimeEpsilon)
+                var index = KeyFrames.FindLastIndex(k => Time.Abs(k.Time - time) < TimeCalc.TimeEpsilon || k.Time <= time);
+                if (index > -1 && Time.Abs(KeyFrames[index].Time - time) < TimeCalc.TimeEpsilon)
                 {
                     PropertyModel.DeleteKeyFrames([KeyFrames[index]]);
                 }
@@ -438,8 +439,8 @@ namespace NiVE3.ViewModel
                     CommitCurrentExpressionCode();
                 }
                 var time = CurrentTime;
-                var index = KeyFrames.FindLastIndex(k => Math.Abs(k.Time - time) < TimeCalc.TimeEpsilon || k.Time <= time);
-                if (index > -1 && Math.Abs(KeyFrames[index].Time - time) >= TimeCalc.TimeEpsilon)
+                var index = KeyFrames.FindLastIndex(k => Time.Abs(k.Time - time) < TimeCalc.TimeEpsilon || k.Time <= time);
+                if (index > -1 && Time.Abs(KeyFrames[index].Time - time) >= TimeCalc.TimeEpsilon)
                 {
                     PropertyModel.CreateKeyFrame(CurrentTimeRawValue);
                 }
@@ -589,7 +590,7 @@ namespace NiVE3.ViewModel
 
         object? CalculationRawValue()
         {
-            return PropertyModel.GetRawValue(TimeCalc.RoundTimeDigit(CurrentTime - SourceStartPoint));
+            return PropertyModel.GetRawValue(CurrentTime - SourceStartPoint);
         }
 
         object? CalculationValue()
@@ -598,7 +599,7 @@ namespace NiVE3.ViewModel
             var entries = PropertyModel.EnterCycricForCalcProperty();
             if (entries.HasValue)
             {
-                var result = PropertyModel.GetValue(TimeCalc.RoundTimeDigit(CurrentTime - SourceStartPoint), CurrentTime);
+                var result = PropertyModel.GetValue(CurrentTime - SourceStartPoint, CurrentTime);
 
                 entries.Value.effectEntry?.Dispose();
                 entries.Value.layerEntry.Dispose();

@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Model;
+using NiVE3.Plugin.ValueObject;
 
 namespace NiVE3.Expression.Wrapper
 {
-    record EffectWrapper(EffectModel EffectModel, double GlobalTime)
+    record EffectWrapper(EffectModel EffectModel, Time GlobalTime)
     {
         #region Expression members
 #pragma warning disable IDE1006 // NOTE: エクスプレッション用メソッドのため、命名規則は camelCase を許容する

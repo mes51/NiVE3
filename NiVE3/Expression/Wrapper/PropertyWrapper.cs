@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Model;
+using NiVE3.Plugin.ValueObject;
 using NiVE3.Util;
 
 namespace NiVE3.Expression.Wrapper
@@ -20,7 +21,7 @@ namespace NiVE3.Expression.Wrapper
 #pragma warning restore IDE1006 // 命名スタイル
         #endregion Expression members
 
-        public static IPropertyWrapper? FindProperty(PropertyGroupModel propertyGroupModel, object key, double globalTime)
+        public static IPropertyWrapper? FindProperty(PropertyGroupModel propertyGroupModel, object key, Time globalTime)
         {
             if (key is string name)
             {
@@ -40,7 +41,7 @@ namespace NiVE3.Expression.Wrapper
             return null;
         }
 
-        public static IPropertyWrapper? FindProperty(AppendablePropertyModel appendablePropertyModel, object key, double globalTime)
+        public static IPropertyWrapper? FindProperty(AppendablePropertyModel appendablePropertyModel, object key, Time globalTime)
         {
             if (key is string name)
             {
@@ -60,7 +61,7 @@ namespace NiVE3.Expression.Wrapper
             return null;
         }
 
-        public static IPropertyWrapper Wrap(IPropertyModel propertyModel, double globalTime)
+        public static IPropertyWrapper Wrap(IPropertyModel propertyModel, Time globalTime)
         {
             switch (propertyModel)
             {
@@ -76,7 +77,7 @@ namespace NiVE3.Expression.Wrapper
         }
     }
 
-    record PropertyWrapper(PropertyModel PropertyModel, double GlobalTime) : IPropertyWrapper
+    record PropertyWrapper(PropertyModel PropertyModel, Time GlobalTime) : IPropertyWrapper
     {
         const string LoopModeCycle = "cycle";
 
@@ -106,7 +107,7 @@ namespace NiVE3.Expression.Wrapper
         [ExpressionPublicMember]
         public object? valueAtTime(double time)
         {
-            return PropertyModel.ToExpressionValue(PropertyModel.GetValue(time - PropertyModel.SourceStartPoint, time));
+            return PropertyModel.ToExpressionValue(PropertyModel.GetValue(time - PropertyModel.SourceStartPoint, (Time)time));
         }
 
         [ExpressionPublicMember]
@@ -206,17 +207,17 @@ namespace NiVE3.Expression.Wrapper
             var endKeyFrame = PropertyModel.KeyFrames[rangeEnd];
             var timeRange = endKeyFrame.Time - beginKeyFrame.Time;
 
-            var targetTime = 0.0;
-            var baseTime = TimeCalc.RoundTimeDigit(GlobalTime - PropertyModel.SourceStartPoint - beginKeyFrame.Time);
+            var targetTime = Time.Zero;
+            var baseTime = GlobalTime - PropertyModel.SourceStartPoint - beginKeyFrame.Time;
             switch (mode)
             {
                 case LoopModeCycle:
-                    targetTime = ((TimeCalc.RoundTimeDigit(baseTime % timeRange) + timeRange) % timeRange) + beginKeyFrame.Time;
+                    targetTime = (((baseTime % timeRange) + timeRange) % timeRange) + beginKeyFrame.Time;
                     break;
                 case LoopModePingPong:
                     {
-                        var b = Math.Abs(baseTime / timeRange) % 2.0;
-                        targetTime = (b - Math.Max(b - 1.0, 0.0) * 2.0) * timeRange + beginKeyFrame.Time;
+                        var b = Time.Abs(baseTime / timeRange) % 2.0;
+                        targetTime = (b - Time.Max(b - 1.0, Time.Zero) * 2.0) * timeRange + beginKeyFrame.Time;
                     }
                     break;
             }
@@ -244,7 +245,7 @@ namespace NiVE3.Expression.Wrapper
         #endregion Expression members
     }
 
-    record PropertyGroupWrapper(PropertyGroupModel PropertyGroupModel, double GlobalTime) : IPropertyWrapper
+    record PropertyGroupWrapper(PropertyGroupModel PropertyGroupModel, Time GlobalTime) : IPropertyWrapper
     {
         #region Expression members
 #pragma warning disable IDE1006 // NOTE: エクスプレッション用メソッドのため、命名規則は camelCase を許容する
@@ -265,7 +266,7 @@ namespace NiVE3.Expression.Wrapper
         #endregion Expression members
     }
 
-    record AppendablePropertyWrapper(AppendablePropertyModel AppendablePropertyModel, double GlobalTime) : IPropertyWrapper
+    record AppendablePropertyWrapper(AppendablePropertyModel AppendablePropertyModel, Time GlobalTime) : IPropertyWrapper
     {
         #region Expression members
 #pragma warning disable IDE1006 // NOTE: エクスプレッション用メソッドのため、命名規則は camelCase を許容する
