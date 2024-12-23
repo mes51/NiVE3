@@ -222,13 +222,31 @@ namespace NiVE3.Plugin.ValueObject
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static long GratestCommonDivisor(long a, long b)
         {
-            while (b != 0)
+            a = Math.Abs(a);
+            b = Math.Abs(b);
+            if (a == 0 || b == 0)
             {
-                var reminder = a % b;
-                a = b;
-                b = reminder;
+                return a + b;
             }
-            return a;
+            var tzcA = BitOperations.TrailingZeroCount(a);
+            var tzcB = BitOperations.TrailingZeroCount(b);
+            a >>= tzcA;
+            b >>= tzcB;
+            while (a != b)
+            {
+                if (a > b)
+                {
+                    a -= b;
+                    a >>= BitOperations.TrailingZeroCount(a);
+                }
+                else
+                {
+                    b -= a;
+                    b >>= BitOperations.TrailingZeroCount(b);
+                }
+            }
+
+            return a << Math.Min(tzcA, tzcB);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -803,17 +821,35 @@ namespace NiVE3.Plugin.ValueObject
                 }
                 else
                 {
-                    return new Time(RoundTimeDigit(a.Frame / a.FrameRate + b.Frame / b.FrameRate));
+                    return new Time(RoundTimeDigit(ToDoubleNonRounded(a) + ToDoubleNonRounded(b)));
                 }
             }
             else
             {
-                return (a.IsFrameTime, b.IsFrameTime) switch
+                var newTime = (a.IsFrameTime, b.IsFrameTime) switch
                 {
-                    (false, _) => a.RealTime == 0.0 ? b : new Time(RoundTimeDigit(a.RealTime + b.Frame / b.FrameRate)),
-                    (_, false) => b.RealTime == 0.0 ? a : new Time(RoundTimeDigit(a.Frame / a.FrameRate + b.RealTime)),
-                    _ => new Time(RoundTimeDigit(a.Frame / a.FrameRate + b.Frame / b.FrameRate))
+                    (false, _) => a.RealTime + ToDoubleNonRounded(b),
+                    (_, false) => ToDoubleNonRounded(a) + b.RealTime,
+                    _ => ToDoubleNonRounded(a) + ToDoubleNonRounded(b)
                 };
+                if (a.FrameRateIsInteger)
+                {
+                    var newFrame = RoundFrameDigit(newTime * a.FrameRate);
+                    if (IsIntegerFrame(newFrame))
+                    {
+                        return new Time((int)newFrame, a.FrameRate);
+                    }
+                }
+                else if (b.FrameRateIsInteger)
+                {
+                    var newFrame = RoundFrameDigit(newTime * b.FrameRate);
+                    if (IsIntegerFrame(newFrame))
+                    {
+                        return new Time((int)newFrame, b.FrameRate);
+                    }
+                }
+
+                return new Time(RoundTimeDigit(newTime));
             }
         }
 
@@ -891,17 +927,35 @@ namespace NiVE3.Plugin.ValueObject
                 }
                 else
                 {
-                    return new Time(RoundTimeDigit(a.Frame / a.FrameRate - b.Frame / b.FrameRate));
+                    return new Time(RoundTimeDigit(ToDoubleNonRounded(a) - ToDoubleNonRounded(b)));
                 }
             }
             else
             {
-                return (a.IsFrameTime, b.IsFrameTime) switch
+                var newTime = (a.IsFrameTime, b.IsFrameTime) switch
                 {
-                    (false, _) => a.RealTime == 0.0 ? b : new Time(RoundTimeDigit(a.RealTime - b.Frame / b.FrameRate)),
-                    (_, false) => b.RealTime == 0.0 ? a : new Time(RoundTimeDigit(a.Frame / a.FrameRate - b.RealTime)),
-                    _ => new Time(RoundTimeDigit(a.Frame / a.FrameRate - b.Frame / b.FrameRate))
+                    (false, _) => a.RealTime - ToDoubleNonRounded(b),
+                    (_, false) => ToDoubleNonRounded(a) - b.RealTime,
+                    _ => ToDoubleNonRounded(a) - ToDoubleNonRounded(b)
                 };
+                if (a.FrameRateIsInteger)
+                {
+                    var newFrame = RoundFrameDigit(newTime * a.FrameRate);
+                    if (IsIntegerFrame(newFrame))
+                    {
+                        return new Time((int)newFrame, a.FrameRate);
+                    }
+                }
+                else if (b.FrameRateIsInteger)
+                {
+                    var newFrame = RoundFrameDigit(newTime * b.FrameRate);
+                    if (IsIntegerFrame(newFrame))
+                    {
+                        return new Time((int)newFrame, b.FrameRate);
+                    }
+                }
+
+                return new Time(RoundTimeDigit(newTime));
             }
         }
 
@@ -998,17 +1052,35 @@ namespace NiVE3.Plugin.ValueObject
                 }
                 else
                 {
-                    return new Time(RoundTimeDigit(a.Frame / a.FrameRate * b.Frame / b.FrameRate));
+                    return new Time(RoundTimeDigit(ToDoubleNonRounded(a) * ToDoubleNonRounded(b)));
                 }
             }
             else
             {
-                return (a.IsFrameTime, b.IsFrameTime) switch
+                var newTime = (a.IsFrameTime, b.IsFrameTime) switch
                 {
-                    (false, _) => new Time(RoundTimeDigit(a.RealTime * b.Frame / b.FrameRate)),
-                    (_, false) => new Time(RoundTimeDigit(a.Frame / a.FrameRate * b.RealTime)),
-                    _ => new Time(RoundTimeDigit(a.Frame / a.FrameRate * b.Frame / b.FrameRate))
+                    (false, _) => a.RealTime * ToDoubleNonRounded(b),
+                    (_, false) => ToDoubleNonRounded(a) * b.RealTime,
+                    _ => ToDoubleNonRounded(a) * ToDoubleNonRounded(b)
                 };
+                if (a.FrameRateIsInteger)
+                {
+                    var newFrame = RoundFrameDigit(newTime * a.FrameRate);
+                    if (IsIntegerFrame(newFrame))
+                    {
+                        return new Time((int)newFrame, a.FrameRate);
+                    }
+                }
+                else if (b.FrameRateIsInteger)
+                {
+                    var newFrame = RoundFrameDigit(newTime * b.FrameRate);
+                    if (IsIntegerFrame(newFrame))
+                    {
+                        return new Time((int)newFrame, b.FrameRate);
+                    }
+                }
+
+                return new Time(RoundTimeDigit(newTime));
             }
         }
 
@@ -1142,12 +1214,30 @@ namespace NiVE3.Plugin.ValueObject
             }
             else
             {
-                return (a.IsFrameTime, b.IsFrameTime) switch
+                var newTime = (a.IsFrameTime, b.IsFrameTime) switch
                 {
-                    (false, _) => new Time(RoundTimeDigit(a.RealTime / (b.Frame / b.FrameRate))),
-                    (_, false) => new Time(RoundTimeDigit(a.Frame / a.FrameRate / b.RealTime)),
-                    _ => new Time(RoundTimeDigit(a.Frame / a.FrameRate / (b.Frame / b.FrameRate)))
+                    (false, _) => a.RealTime / ToDoubleNonRounded(b),
+                    (_, false) => ToDoubleNonRounded(a) / b.RealTime,
+                    _ => ToDoubleNonRounded(a) / ToDoubleNonRounded(b)
                 };
+                if (a.FrameRateIsInteger)
+                {
+                    var newFrame = RoundFrameDigit(newTime * a.FrameRate);
+                    if (IsIntegerFrame(newFrame))
+                    {
+                        return new Time((int)newFrame, a.FrameRate);
+                    }
+                }
+                else if (b.FrameRateIsInteger)
+                {
+                    var newFrame = RoundFrameDigit(newTime * b.FrameRate);
+                    if (IsIntegerFrame(newFrame))
+                    {
+                        return new Time((int)newFrame, b.FrameRate);
+                    }
+                }
+
+                return new Time(RoundTimeDigit(newTime));
             }
         }
 
@@ -1244,12 +1334,30 @@ namespace NiVE3.Plugin.ValueObject
             }
             else
             {
-                return (a.IsFrameTime, b.IsFrameTime) switch
+                var newTime = (a.IsFrameTime, b.IsFrameTime) switch
                 {
-                    (false, _) => new Time(RoundTimeDigit(a.RealTime % (b.Frame / b.FrameRate))),
-                    (_, false) => new Time(RoundTimeDigit((a.Frame / a.FrameRate) % b.RealTime)),
-                    _ => new Time(RoundTimeDigit((a.Frame / a.FrameRate) % (b.Frame / b.FrameRate)))
+                    (false, _) => a.RealTime % ToDoubleNonRounded(b),
+                    (_, false) => ToDoubleNonRounded(a) % b.RealTime,
+                    _ => ToDoubleNonRounded(a) % ToDoubleNonRounded(b)
                 };
+                if (a.FrameRateIsInteger)
+                {
+                    var newFrame = RoundFrameDigit(newTime * a.FrameRate);
+                    if (IsIntegerFrame(newFrame))
+                    {
+                        return new Time((int)newFrame, a.FrameRate);
+                    }
+                }
+                else if (b.FrameRateIsInteger)
+                {
+                    var newFrame = RoundFrameDigit(newTime * b.FrameRate);
+                    if (IsIntegerFrame(newFrame))
+                    {
+                        return new Time((int)newFrame, b.FrameRate);
+                    }
+                }
+
+                return new Time(RoundTimeDigit(newTime));
             }
         }
 

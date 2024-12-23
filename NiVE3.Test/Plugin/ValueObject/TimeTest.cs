@@ -11,7 +11,7 @@ namespace NiVE3.Test.Plugin.ValueObject
     {
         const int TimeDigit = 10;
 
-        const int FrameRateDigit = 2;
+        const int FrameDigit = 2;
 
         [Test]
         public void TestCreateFromFrameAndFrameRate()
@@ -378,15 +378,34 @@ namespace NiVE3.Test.Plugin.ValueObject
         }
 
         [Test]
-        public void TestAddRealTime()
+        public void TestAddRealTimeResultIntegerFrame()
         {
             Assert.Multiple(() =>
             {
                 const double FrameRate = 30.0;
-                var a = new Time(1, 30.0);
+                var a = new Time(1, FrameRate);
                 var b = new Time(1.0);
                 var actual = a + b;
-                var expectedTime = Math.Round(1.0 + 1.0 / FrameRate, TimeDigit);
+                var expectedFrame = 1 + (int)FrameRate;
+
+                Assert.That(actual.IsFrameTime, Is.True);
+                Assert.That(actual.FrameRateIsInteger, Is.True);
+                Assert.That(actual.FrameRate, Is.EqualTo(FrameRate));
+                Assert.That((a + b).Frame, Is.EqualTo(expectedFrame));
+                Assert.That((b + a).Frame, Is.EqualTo(expectedFrame));
+            });
+        }
+
+        [Test]
+        public void TestAddRealTimeResultNonIntegerFrame()
+        {
+            Assert.Multiple(() =>
+            {
+                const double FrameRate = 30.0;
+                var a = new Time(1, FrameRate);
+                var b = new Time(1.011);
+                var actual = a + b;
+                var expectedTime = Math.Round(b.RealTime + 1.0 / FrameRate, TimeDigit);
 
                 Assert.That(actual.IsFrameTime, Is.False);
                 Assert.That(actual.FrameRateIsInteger, Is.False);
@@ -576,16 +595,36 @@ namespace NiVE3.Test.Plugin.ValueObject
         }
 
         [Test]
-        public void TestSubtractRealTime()
+        public void TestSubtractRealTimeResultIntegerFrame()
         {
             Assert.Multiple(() =>
             {
                 const double FrameRate = 30.0;
-                var a = new Time(1, 30.0);
+                var a = new Time(1, FrameRate);
                 var b = new Time(1.0);
                 var actual = a - b;
-                var expectedTimeA = Math.Round(1.0 / FrameRate - 1.0, TimeDigit);
-                var expectedTimeB = Math.Round(1.0 - 1.0 / FrameRate, TimeDigit);
+                var expectedFrameA = 1 - (int)FrameRate;
+                var expectedFrameB = (int)FrameRate - 1;
+
+                Assert.That(actual.IsFrameTime, Is.True);
+                Assert.That(actual.FrameRateIsInteger, Is.True);
+                Assert.That(actual.FrameRate, Is.EqualTo(FrameRate));
+                Assert.That((a - b).Frame, Is.EqualTo(expectedFrameA));
+                Assert.That((b - a).Frame, Is.EqualTo(expectedFrameB));
+            });
+        }
+
+        [Test]
+        public void TestSubtractRealTimeResultNonIntegerFrame()
+        {
+            Assert.Multiple(() =>
+            {
+                const double FrameRate = 30.0;
+                var a = new Time(1, FrameRate);
+                var b = new Time(1.011);
+                var actual = a - b;
+                var expectedTimeA = Math.Round(1.0 / FrameRate - b.RealTime, TimeDigit);
+                var expectedTimeB = Math.Round(b.RealTime - 1.0 / FrameRate, TimeDigit);
 
                 Assert.That(actual.IsFrameTime, Is.False);
                 Assert.That(actual.FrameRateIsInteger, Is.False);
@@ -609,23 +648,6 @@ namespace NiVE3.Test.Plugin.ValueObject
                 Assert.That(actual.FrameRateIsInteger, Is.False);
                 Assert.That((a - b).RealTime, Is.EqualTo(expectedTimeA));
                 Assert.That((b - a).RealTime, Is.EqualTo(expectedTimeB));
-            });
-        }
-
-        [Test]
-        public void TestSubtractZero()
-        {
-            Assert.Multiple(() =>
-            {
-                const double FrameRate = 30.0;
-                var a = new Time(1, FrameRate);
-                var actual = a - Time.Zero;
-
-                Assert.That(actual.IsFrameTime, Is.True);
-                Assert.That(actual.FrameRateIsInteger, Is.True);
-                Assert.That(actual.Frame, Is.EqualTo(1));
-                Assert.That((a - Time.Zero).FrameRate, Is.EqualTo(FrameRate));
-                Assert.That((Time.Zero - a).FrameRate, Is.EqualTo(FrameRate));
             });
         }
 
@@ -750,14 +772,33 @@ namespace NiVE3.Test.Plugin.ValueObject
         }
 
         [Test]
-        public void TestMultiplyRealTime()
+        public void TestMultiplyRealTimeResultIntegerFrame()
         {
             Assert.Multiple(() =>
             {
                 const double FrameRate = 30.0;
-                var a = new Time(1, 30.0);
+                var a = new Time(4, FrameRate);
                 var b = new Time(2.0);
-                var actual = a - b;
+                var actual = a * b;
+                var expectedFrame = a.Frame * (int)b.RealTime;
+
+                Assert.That(actual.IsFrameTime, Is.True);
+                Assert.That(actual.FrameRateIsInteger, Is.True);
+                Assert.That(actual.FrameRate, Is.EqualTo(FrameRate));
+                Assert.That((a * b).Frame, Is.EqualTo(expectedFrame));
+                Assert.That((b * a).Frame, Is.EqualTo(expectedFrame));
+            });
+        }
+
+        [Test]
+        public void TestMultiplyRealTimeResultNonIntegerFrame()
+        {
+            Assert.Multiple(() =>
+            {
+                const double FrameRate = 30.0;
+                var a = new Time(1, FrameRate);
+                var b = new Time(2.011);
+                var actual = a * b;
                 var expectedTimeA = Math.Round(1.0 / FrameRate * b.RealTime, TimeDigit);
                 var expectedTimeB = Math.Round(b.RealTime * 1.0 / FrameRate, TimeDigit);
 
@@ -1024,13 +1065,33 @@ namespace NiVE3.Test.Plugin.ValueObject
         }
 
         [Test]
-        public void TestDivideRealTime()
+        public void TestDivideRealTimeResultIntegerFrame()
+        {
+            Assert.Multiple(() =>
+            {
+                const double FrameRate = 30.0;
+                var a = new Time(15, FrameRate);
+                var b = new Time(0.25);
+                var actual = a / b;
+                var expectedFrameA = (int)Math.Round((a.Frame / FrameRate) / b.RealTime * FrameRate, FrameDigit);
+                var expectedFrameB = (int)Math.Round(b.RealTime / (a.Frame / FrameRate) * FrameRate, FrameDigit);
+
+                Assert.That(actual.IsFrameTime, Is.True);
+                Assert.That(actual.FrameRateIsInteger, Is.True);
+                Assert.That(actual.FrameRate, Is.EqualTo(FrameRate));
+                Assert.That((a / b).Frame, Is.EqualTo(expectedFrameA));
+                Assert.That((b / a).Frame, Is.EqualTo(expectedFrameB));
+            });
+        }
+
+        [Test]
+        public void TestDivideRealTimeResultNonIntegerFrame()
         {
             Assert.Multiple(() =>
             {
                 const double FrameRate = 30.0;
                 var a = new Time(15, 30.0);
-                var b = new Time(0.25);
+                var b = new Time(0.2112);
                 var actual = a / b;
                 var expectedTimeA = Math.Round((a.Frame / FrameRate) / b.RealTime, TimeDigit);
                 var expectedTimeB = Math.Round(b.RealTime / (a.Frame / FrameRate), TimeDigit);
@@ -1133,23 +1194,6 @@ namespace NiVE3.Test.Plugin.ValueObject
             Assert.Throws<DivideByZeroException>(() => _ = new Time(1, 30.0) / 0.0);
         }
 
-        [Test]
-        public void TestDivideDoubleByTime()
-        {
-            Assert.Multiple(() =>
-            {
-                const double FrameRate = 30.0;
-                var a = 0.12;
-                var b = new Time(4, FrameRate);
-                var actual = a / b;
-                var expectedTime = Math.Round(a / (b.Frame / FrameRate), TimeDigit);
-
-                Assert.That(actual.IsFrameTime, Is.False);
-                Assert.That(actual.FrameRateIsInteger, Is.False);
-                Assert.That(actual.RealTime, Is.EqualTo(expectedTime));
-            });
-        }
-
         #endregion Divide
 
         #region Modulo
@@ -1247,7 +1291,27 @@ namespace NiVE3.Test.Plugin.ValueObject
         }
 
         [Test]
-        public void TestModuloRealTime()
+        public void TestModuloRealTimeResultIntegerFrame()
+        {
+            Assert.Multiple(() =>
+            {
+                const double FrameRate = 30.0;
+                var a = new Time(16, FrameRate);
+                var b = new Time(0.1);
+                var actual = a % b;
+                var expectedFrameA = (int)Math.Round(((a.Frame / FrameRate) % b.RealTime) * FrameRate, FrameDigit);
+                var expectedFrameB = (int)Math.Round((b.RealTime % (a.Frame / FrameRate)) * FrameRate, FrameDigit);
+
+                Assert.That(actual.IsFrameTime, Is.True);
+                Assert.That(actual.FrameRateIsInteger, Is.True);
+                Assert.That(actual.FrameRate, Is.EqualTo(FrameRate));
+                Assert.That((a % b).Frame, Is.EqualTo(expectedFrameA));
+                Assert.That((b % a).Frame, Is.EqualTo(expectedFrameB));
+            });
+        }
+
+        [Test]
+        public void TestModuloRealTimeResultNonIntegerFrame()
         {
             Assert.Multiple(() =>
             {
@@ -1343,23 +1407,6 @@ namespace NiVE3.Test.Plugin.ValueObject
                 var b = 0.12;
                 var actual = a % b;
                 var expectedTime = Math.Round(a.RealTime % b, TimeDigit);
-
-                Assert.That(actual.IsFrameTime, Is.False);
-                Assert.That(actual.FrameRateIsInteger, Is.False);
-                Assert.That(actual.RealTime, Is.EqualTo(expectedTime));
-            });
-        }
-
-        [Test]
-        public void TestModuloDoubleByTime()
-        {
-            Assert.Multiple(() =>
-            {
-                const double FrameRate = 30.0;
-                var a = 0.16;
-                var b = new Time(4, FrameRate);
-                var actual = a % b;
-                var expectedTime = Math.Round(a % (b.Frame / FrameRate), TimeDigit);
 
                 Assert.That(actual.IsFrameTime, Is.False);
                 Assert.That(actual.FrameRateIsInteger, Is.False);
