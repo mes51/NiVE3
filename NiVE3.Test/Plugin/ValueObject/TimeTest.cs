@@ -1675,6 +1675,7 @@ namespace NiVE3.Test.Plugin.ValueObject
                 Assert.That(new Time(3, 30.0) < new Time(0.1), Is.False);
                 Assert.That(new Time(0.2) < new Time(6, 30.0), Is.False);
                 Assert.That(new Time(1.0) < new Time(30 / 30.0), Is.False);
+                Assert.That(new Time(77, 30.0) < new Time(Math.Round(77 / 30.0, TimeDigit)), Is.False);
 
                 Assert.That(new Time(2, 30.0) < new Time(1, 30.0), Is.False);
                 Assert.That(new Time(3, 60.0) < new Time(1, 30.0), Is.False);
@@ -1702,6 +1703,7 @@ namespace NiVE3.Test.Plugin.ValueObject
                 Assert.That(new Time(3, 30.0) <= new Time(0.1), Is.True);
                 Assert.That(new Time(0.2) <= new Time(6, 30.0), Is.True);
                 Assert.That(new Time(1.0) <= new Time(30 / 30.0), Is.True);
+                Assert.That(new Time(77, 30.0) <= new Time(Math.Round(77 / 30.0, TimeDigit)), Is.True);
 
                 Assert.That(new Time(2, 30.0) <= new Time(1, 30.0), Is.False);
                 Assert.That(new Time(3, 60.0) <= new Time(1, 30.0), Is.False);
@@ -1729,6 +1731,7 @@ namespace NiVE3.Test.Plugin.ValueObject
                 Assert.That(new Time(3, 30.0) > new Time(0.1), Is.False);
                 Assert.That(new Time(0.2) > new Time(6, 30.0), Is.False);
                 Assert.That(new Time(1.0) > new Time(30 / 30.0), Is.False);
+                Assert.That(new Time(77, 30.0) > new Time(Math.Round(77 / 30.0, TimeDigit)), Is.False);
 
                 Assert.That(new Time(2, 30.0) > new Time(1, 30.0), Is.True);
                 Assert.That(new Time(3, 60.0) > new Time(1, 30.0), Is.True);
@@ -1756,6 +1759,7 @@ namespace NiVE3.Test.Plugin.ValueObject
                 Assert.That(new Time(3, 30.0) >= new Time(0.1), Is.True);
                 Assert.That(new Time(0.2) >= new Time(6, 30.0), Is.True);
                 Assert.That(new Time(1.0) >= new Time(30 / 30.0), Is.True);
+                Assert.That(new Time(77, 30.0) >= new Time(Math.Round(77 / 30.0, TimeDigit)), Is.True);
 
                 Assert.That(new Time(2, 30.0) >= new Time(1, 30.0), Is.True);
                 Assert.That(new Time(3, 60.0) >= new Time(1, 30.0), Is.True);

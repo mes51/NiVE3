@@ -1548,9 +1548,9 @@ namespace NiVE3.Plugin.ValueObject
             {
                 return (a.IsFrameTime, b.IsFrameTime) switch
                 {
-                    (true, true) => RoundFrameDigit(a.Frame / a.FrameRate) < RoundFrameDigit(b.Frame / b.FrameRate),
-                    (true, false) => RoundFrameDigit(a.Frame / a.FrameRate) < b.RealTime,
-                    (false, true) => a.RealTime < RoundFrameDigit(b.Frame / b.FrameRate),
+                    (true, true) => RoundTimeDigit(a.Frame / a.FrameRate) < RoundTimeDigit(b.Frame / b.FrameRate),
+                    (true, false) => RoundTimeDigit(a.Frame / a.FrameRate) < b.RealTime,
+                    (false, true) => a.RealTime < RoundTimeDigit(b.Frame / b.FrameRate),
                     _ => a.RealTime < b.RealTime
                 };
             }
@@ -1574,9 +1574,9 @@ namespace NiVE3.Plugin.ValueObject
             {
                 return (a.IsFrameTime, b.IsFrameTime) switch
                 {
-                    (true, true) => RoundFrameDigit(a.Frame / a.FrameRate) <= RoundFrameDigit(b.Frame / b.FrameRate),
-                    (true, false) => RoundFrameDigit(a.Frame / a.FrameRate) <= b.RealTime,
-                    (false, true) => a.RealTime <= RoundFrameDigit(b.Frame / b.FrameRate),
+                    (true, true) => RoundTimeDigit(a.Frame / a.FrameRate) <= RoundTimeDigit(b.Frame / b.FrameRate),
+                    (true, false) => RoundTimeDigit(a.Frame / a.FrameRate) <= b.RealTime,
+                    (false, true) => a.RealTime <= RoundTimeDigit(b.Frame / b.FrameRate),
                     _ => a.RealTime <= b.RealTime
                 };
             }
@@ -1600,9 +1600,9 @@ namespace NiVE3.Plugin.ValueObject
             {
                 return (a.IsFrameTime, b.IsFrameTime) switch
                 {
-                    (true, true) => RoundFrameDigit(a.Frame / a.FrameRate) > RoundFrameDigit(b.Frame / b.FrameRate),
-                    (true, false) => RoundFrameDigit(a.Frame / a.FrameRate) > b.RealTime,
-                    (false, true) => a.RealTime > RoundFrameDigit(b.Frame / b.FrameRate),
+                    (true, true) => RoundTimeDigit(a.Frame / a.FrameRate) > RoundTimeDigit(b.Frame / b.FrameRate),
+                    (true, false) => RoundTimeDigit(a.Frame / a.FrameRate) > b.RealTime,
+                    (false, true) => a.RealTime > RoundTimeDigit(b.Frame / b.FrameRate),
                     _ => a.RealTime > b.RealTime
                 };
             }
@@ -1626,9 +1626,9 @@ namespace NiVE3.Plugin.ValueObject
             {
                 return (a.IsFrameTime, b.IsFrameTime) switch
                 {
-                    (true, true) => RoundFrameDigit(a.Frame / a.FrameRate) >= RoundFrameDigit(b.Frame / b.FrameRate),
-                    (true, false) => RoundFrameDigit(a.Frame / a.FrameRate) >= b.RealTime,
-                    (false, true) => a.RealTime >= RoundFrameDigit(b.Frame / b.FrameRate),
+                    (true, true) => RoundTimeDigit(a.Frame / a.FrameRate) >= RoundTimeDigit(b.Frame / b.FrameRate),
+                    (true, false) => RoundTimeDigit(a.Frame / a.FrameRate) >= b.RealTime,
+                    (false, true) => a.RealTime >= RoundTimeDigit(b.Frame / b.FrameRate),
                     _ => a.RealTime >= b.RealTime
                 };
             }
