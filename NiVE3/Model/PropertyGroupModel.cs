@@ -606,7 +606,7 @@ namespace NiVE3.Model
         {
             if (e.PropertyName == nameof(LayerModel.SourceStartPoint))
             {
-                SourceStartPoint = LayerModel?.SourceStartPoint ?? 0.0;
+                SourceStartPoint = LayerModel?.SourceStartPoint ?? Time.Zero;
             }
         }
     }

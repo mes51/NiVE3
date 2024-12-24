@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Extension;
 using NiVE3.Plugin.Property;
+using NiVE3.Plugin.ValueObject;
 using NiVE3.Shared.Extension;
 using NiVE3.Util;
 using NiVE3.View.Resource;
@@ -229,7 +230,7 @@ namespace NiVE3.Model
                 foreach (var nk in newKeyFrames)
                 {
                     var index = Model.KeyFrames.FindLastIndex(k => k.Time <= nk.Time) + 1;
-                    if (index > 0 && Math.Abs(Model.KeyFrames[index - 1].Time - nk.Time) < TimeCalc.TimeEpsilon)
+                    if (index > 0 && Time.Abs(Model.KeyFrames[index - 1].Time - nk.Time) < TimeCalc.TimeEpsilon)
                     {
                         Model.KeyFrames[index - 1] = nk;
                     }
