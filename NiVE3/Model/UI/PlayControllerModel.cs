@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using NiVE3.Mvvm;
+using NiVE3.Plugin.ValueObject;
 using NiVE3.Util;
 using NiVE3.ViewModel;
 using Prism.Mvvm;
@@ -17,8 +18,8 @@ namespace NiVE3.Model.UI
     {
         const int RealFrameRateAvgCount = 5;
 
-        private double currentTime;
-        public double CurrentTime
+        private Time currentTime;
+        public Time CurrentTime
         {
             get { return currentTime; }
             set { SetProperty(ref currentTime, value); }
@@ -31,22 +32,22 @@ namespace NiVE3.Model.UI
             set { SetProperty(ref frameRate, value); }
         }
 
-        private double workareaBegin;
-        public double WorkareaBegin
+        private Time workareaBegin;
+        public Time WorkareaBegin
         {
             get { return workareaBegin; }
             set { SetProperty(ref workareaBegin, value); }
         }
 
-        private double workareaEnd;
-        public double WorkareaEnd
+        private Time workareaEnd;
+        public Time WorkareaEnd
         {
             get { return workareaEnd; }
             set { SetProperty(ref workareaEnd, value); }
         }
 
-        private double duration;
-        public double Duration
+        private Time duration;
+        public Time Duration
         {
             get { return duration; }
             set { SetProperty(ref duration, value); }
@@ -80,8 +81,8 @@ namespace NiVE3.Model.UI
             set { SetProperty(ref useRamPreview, value); }
         }
 
-        private double ramPreviewRenderedWorkareaEnd;
-        public double RamPreviewRenderedWorkareaEnd
+        private Time ramPreviewRenderedWorkareaEnd;
+        public Time RamPreviewRenderedWorkareaEnd
         {
             get { return ramPreviewRenderedWorkareaEnd; }
             set { SetProperty(ref ramPreviewRenderedWorkareaEnd, value); }
@@ -94,7 +95,7 @@ namespace NiVE3.Model.UI
             private set { SetProperty(ref realFrameRate, value); }
         }
 
-        public double FrameDuration => FrameRate > 0.0 ? 1.0 / FrameRate : 0.0;
+        public Time FrameDuration => FrameRate > 0.0 ? new Time(1, FrameRate) : Time.Zero;
 
         public bool CanPreview => FrameRate > 0.0 && Duration > 0.0 && WorkareaEnd - WorkareaBegin > FrameDuration;
 
@@ -180,7 +181,7 @@ namespace NiVE3.Model.UI
                     var eventArgs = new StopRenderRamPreviewEventArgs();
                     StopRenderRamPreviewPublisher.Publish(this, eventArgs);
                     IsRenderingRamPreview = false;
-                    RamPreviewRenderedWorkareaEnd = TimeCalc.RoundTimeDigit(WorkareaBegin + eventArgs.RenderedFrameCount * FrameDuration);
+                    RamPreviewRenderedWorkareaEnd = WorkareaBegin + eventArgs.RenderedFrameCount * FrameDuration;
 
                     if (RamPreviewRenderedWorkareaEnd - WorkareaBegin < FrameDuration * 2.0)
                     {
@@ -193,7 +194,7 @@ namespace NiVE3.Model.UI
                     FrameRenderingTimes.Clear();
                     RealFrameRate = -1.0;
                     PreviewPlayPublisher.Publish(this, EventArgs.Empty);
-                    Timer.Interval = FrameDuration * 1000.0;
+                    Timer.Interval = (double)FrameDuration * 1000.0;
                     Timer.Start();
                 }
             }
@@ -205,7 +206,7 @@ namespace NiVE3.Model.UI
                 FrameRenderingTimes.Clear();
                 RealFrameRate = -1.0;
                 PreviewPlayPublisher.Publish(this, EventArgs.Empty);
-                Timer.Interval = FrameDuration * 1000.0;
+                Timer.Interval = (double)FrameDuration * 1000.0;
                 Timer.Start();
             }
         }
@@ -250,13 +251,13 @@ namespace NiVE3.Model.UI
 
         public void MoveToNextFrame()
         {
-            CurrentTime = (int)(CurrentTime * FrameRate + 1) / FrameRate;
+            CurrentTime += FrameDuration;
             ChangeFrameRequestPublisher.Publish(this, EventArgs.Empty);
         }
 
         public void MoveToPrevFrame()
         {
-            CurrentTime = (int)(CurrentTime * FrameRate - 1) / FrameRate;
+            CurrentTime -= FrameDuration;
             ChangeFrameRequestPublisher.Publish(this, EventArgs.Empty);
         }
 
@@ -282,12 +283,12 @@ namespace NiVE3.Model.UI
                 var time = CurrentTime;
                 if (time < WorkareaBegin || time > workareaEnd)
                 {
-                    CurrentTime = (int)Math.Round(CurrentTime * FrameRate + 1) / FrameRate % Duration;
+                    CurrentTime = (CurrentTime + FrameDuration) % Duration;
                 }
                 else
                 {
-                    var workarea = workareaEnd - WorkareaBegin;
-                    CurrentTime = (int)Math.Round((CurrentTime - WorkareaBegin) * FrameRate + 1) / FrameRate % workarea + WorkareaBegin;
+                    var workarea = (workareaEnd - WorkareaBegin).RoundToFrameRate(FrameRate);
+                    CurrentTime = (CurrentTime - WorkareaBegin + FrameDuration) % workarea + WorkareaBegin;
                 }
                 ChangeFrameRequestPublisher.Publish(this, EventArgs.Empty);
             });
