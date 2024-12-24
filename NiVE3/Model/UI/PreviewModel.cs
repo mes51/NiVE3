@@ -10,6 +10,7 @@ using NiVE3.Image;
 using NiVE3.Plugin.Interfaces;
 using Prism.Mvvm;
 using NiVE3.Util;
+using NiVE3.Plugin.ValueObject;
 
 namespace NiVE3.Model.UI
 {
@@ -33,22 +34,22 @@ namespace NiVE3.Model.UI
             set { SetProperty(ref sourceType, value); }
         }
 
-        private double workareaBegin;
-        public double WorkareaBegin
+        private Time workareaBegin;
+        public Time WorkareaBegin
         {
             get { return workareaBegin; }
             set { SetProperty(ref workareaBegin, value); }
         }
 
-        private double workareaEnd;
-        public double WorkareaEnd
+        private Time workareaEnd;
+        public Time WorkareaEnd
         {
             get { return workareaEnd; }
             set { SetProperty(ref workareaEnd, value); }
         }
 
-        private double duration;
-        public double Duration
+        private Time duration;
+        public Time Duration
         {
             get { return duration; }
             set { SetProperty(ref duration, value); }
@@ -61,8 +62,8 @@ namespace NiVE3.Model.UI
             set { SetProperty(ref frameRate, value); }
         }
 
-        private double currentTime;
-        public double CurrentTime
+        private Time currentTime;
+        public Time CurrentTime
         {
             get { return currentTime; }
             set { SetProperty(ref currentTime, value); }
@@ -103,9 +104,9 @@ namespace NiVE3.Model.UI
             ApplicationModel = applicationModel;
         }
 
-        public abstract NImage? GetImage(double time);
+        public abstract NImage? GetImage(Time time);
 
-        public abstract float[]? GetAudio(double time, double length);
+        public abstract float[]? GetAudio(Time time, Time length);
 
         WeakEventPublisher<EventArgs> SourceChangedPublisher { get; } = new WeakEventPublisher<EventArgs>();
         public event EventHandler<EventArgs> SourceChanged
@@ -145,7 +146,7 @@ namespace NiVE3.Model.UI
             PropertyChanged += FootagePreviewModel_PropertyChanged;
         }
 
-        public override NImage? GetImage(double time)
+        public override NImage? GetImage(Time time)
         {
             if (Footage != null && (Footage.InputType.HasFlag(SourceType.Image) || Footage.InputType.HasFlag(SourceType.Video)))
             {
@@ -157,7 +158,7 @@ namespace NiVE3.Model.UI
             }
         }
 
-        public override float[]? GetAudio(double time, double length)
+        public override float[]? GetAudio(Time time, Time length)
         {
             if (Footage != null && Footage.InputType.HasFlag(SourceType.Audio))
             {
@@ -176,7 +177,7 @@ namespace NiVE3.Model.UI
                 if (Footage != null)
                 {
                     SourceType = Footage.InputType;
-                    WorkareaBegin = 0.0;
+                    WorkareaBegin = Time.Zero;
                     WorkareaEnd = Footage.Duration;
                     Duration = Footage.Duration;
                     FrameRate = Footage.InputType == SourceType.Audio ? 30.0 : Footage.FrameRate;
@@ -187,16 +188,16 @@ namespace NiVE3.Model.UI
                 else
                 {
                     SourceType = SourceType.None;
-                    WorkareaBegin = 0.0;
-                    WorkareaEnd = 0.0;
-                    Duration = 0.0;
+                    WorkareaBegin = Time.Zero;
+                    WorkareaEnd = Time.Zero;
+                    Duration = Time.Zero;
                     FrameRate = 30.0;
                     DownScaleRate = 1.0;
                     Width = 0;
                     Height = 0;
                     Name = "";
                 }
-                CurrentTime = 0.0;
+                CurrentTime = Time.Zero;
                 OnSourceChanged();
             }
         }
@@ -236,7 +237,7 @@ namespace NiVE3.Model.UI
             PropertyChanged += CompositionPreviewModel_PropertyChanged;
         }
 
-        public override NImage? GetImage(double time)
+        public override NImage? GetImage(Time time)
         {
             var previewImage = Composition?.RenderFrame(time, DownScaleRate, true, ApplicationModel.UseGpu);
             if (previewImage != null && DownScaleRate != 1.0)
@@ -268,7 +269,7 @@ namespace NiVE3.Model.UI
             return previewImage;
         }
 
-        public override float[]? GetAudio(double time, double length)
+        public override float[]? GetAudio(Time time, Time length)
         {
             return Composition?.RenderAudio(time, length);
         }
@@ -297,16 +298,16 @@ namespace NiVE3.Model.UI
                     else
                     {
                         SourceType = SourceType.None;
-                        WorkareaBegin = 0.0;
-                        WorkareaEnd = 0.0;
-                        Duration = 0.0;
+                        WorkareaBegin = Time.Zero;
+                        WorkareaEnd = Time.Zero;
+                        Duration = Time.Zero;
                         FrameRate = 30.0;
                         DownScaleRate = 1.0;
                         Width = 0;
                         Height = 0;
                         Name = "";
                     }
-                    CurrentTime = 0.0;
+                    CurrentTime = Time.Zero;
                     OnSourceChanged();
                     break;
                 case nameof(CurrentTime) when Composition != null:

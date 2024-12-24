@@ -15,6 +15,7 @@ using NiVE3.Config;
 using NiVE3.Data.Json.Project;
 using NiVE3.Input;
 using NiVE3.Model.UI;
+using NiVE3.Plugin.ValueObject;
 using NiVE3.Util;
 using NiVE3.View.Resource;
 using Prism.Mvvm;
@@ -129,7 +130,7 @@ namespace NiVE3.Model
             UpdateAutoSaveTimer();
         }
 
-        public void CreateComposition(string name, int width, int height, double frameRate, double duration, bool isRetentionFrameRate, bool applyToneMappingWhenNested, int shutterAngle, int shutterPhase, int motionBlurSampleCount, Guid rendererPluginId, object? rendererSettingData, Guid toneMapperPluginId, object? toneMapperSettingData)
+        public void CreateComposition(string name, int width, int height, double frameRate, Time duration, bool isRetentionFrameRate, bool applyToneMappingWhenNested, int shutterAngle, int shutterPhase, int motionBlurSampleCount, Guid rendererPluginId, object? rendererSettingData, Guid toneMapperPluginId, object? toneMapperSettingData)
         {
             var composition = new CompositionModel(rendererPluginId, toneMapperPluginId, FootageListModel, EffectListModel, RenderQueueModel, TextPropertyModel, RendererListModel, ToneMapperListModel, this, HistoryModel, AcceleratorModel)
             {
