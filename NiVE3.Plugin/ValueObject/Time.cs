@@ -87,22 +87,43 @@ namespace NiVE3.Plugin.ValueObject
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Time RoundToFrameRate(double newFrameRate)
         {
-            var time = IsFrameTime ? ToDoubleNonRounded(this) : RealTime;
-            return new Time((int)Math.Round(time * newFrameRate), newFrameRate);
+            if (IsFrameTime && FrameRate == newFrameRate)
+            {
+                return this;
+            }
+            else
+            {
+                var time = IsFrameTime ? ToDoubleNonRounded(this) : RealTime;
+                return new Time((int)Math.Round(time * newFrameRate), newFrameRate);
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Time FloorToFrameRate(double newFrameRate)
         {
-            var time = IsFrameTime ? ToDoubleNonRounded(this) : RealTime;
-            return new Time((int)Math.Floor(time * newFrameRate), newFrameRate);
+            if (IsFrameTime && FrameRate == newFrameRate)
+            {
+                return this;
+            }
+            else
+            {
+                var time = IsFrameTime ? ToDoubleNonRounded(this) : RealTime;
+                return new Time((int)Math.Floor(time * newFrameRate), newFrameRate);
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Time CeilingToFrameRate(double newFrameRate)
         {
-            var time = IsFrameTime ? ToDoubleNonRounded(this) : RealTime;
-            return new Time((int)Math.Ceiling(time * newFrameRate), newFrameRate);
+            if (IsFrameTime && FrameRate == newFrameRate)
+            {
+                return this;
+            }
+            else
+            {
+                var time = IsFrameTime ? ToDoubleNonRounded(this) : RealTime;
+                return new Time((int)Math.Ceiling(time * newFrameRate), newFrameRate);
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
