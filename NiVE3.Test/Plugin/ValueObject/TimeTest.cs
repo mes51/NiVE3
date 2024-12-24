@@ -1732,6 +1732,18 @@ namespace NiVE3.Test.Plugin.ValueObject
             Assert.Throws<ArgumentException>(() => Time.Clamp(Time.Zero, new Time(1.0), Time.Zero));
         }
 
+        [Test]
+        public void TestMaxAndMin()
+        {
+            Assert.Multiple(() =>
+            {
+                Assert.That(Time.MaxAndMin(new Time(1.0), new Time(0.5), new Time(31, 30.0)), Is.EqualTo(new Time(1.0)));
+                Assert.That(Time.MaxAndMin(new Time(1.0), new Time(70, 60.0), new Time(60, 30.0)), Is.EqualTo(new Time(70, 60.0)));
+                Assert.That(Time.MaxAndMin(new Time(1.0), new Time(0.5), new Time(25, 30.0)), Is.EqualTo(new Time(25, 30.0)));
+                Assert.That(Time.MaxAndMin(new Time(2.0), new Time(1.0), new Time(0.5)), Is.EqualTo(new Time(1.0)));
+            });
+        }
+
         #endregion
     }
 }

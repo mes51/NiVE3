@@ -666,6 +666,16 @@ namespace NiVE3.Plugin.ValueObject
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Time MaxAndMin(Time value, Time min, Time max)
+        {
+            if (min > max)
+            {
+                (min, max) = (max, min);
+            }
+            return Min(Max(value, min), max);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Time Clamp(in Time value, in Time min, in Time max)
         {
             if (min > max)
