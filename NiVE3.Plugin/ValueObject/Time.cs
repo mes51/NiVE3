@@ -38,6 +38,10 @@ namespace NiVE3.Plugin.ValueObject
 
         public static Time NaN => new Time(double.NaN);
 
+        public static Time PositiveInfinity => new Time(double.PositiveInfinity);
+
+        public static Time NegativeInfinity => new Time(double.NegativeInfinity);
+
         /// <summary>
         /// フレームによらない実時間。フレーム数とフレームレートによって時間を表現する場合はNaN
         /// </summary>
@@ -834,6 +838,15 @@ namespace NiVE3.Plugin.ValueObject
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Time operator +(Time a, Time b)
         {
+            if (IsNaN(a) || IsNaN(b))
+            {
+                return NaN;
+            }
+            else if (IsInfinity(a) || IsInfinity(b))
+            {
+                return new Time((double)a + (double)b);
+            }
+
             if (a.FrameRate == b.FrameRate)
             {
                 if (a.IsFrameTime)
@@ -908,6 +921,15 @@ namespace NiVE3.Plugin.ValueObject
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Time operator +(in Time a, double realTime)
         {
+            if (IsNaN(a) || double.IsNaN(realTime))
+            {
+                return NaN;
+            }
+            else if (IsInfinity(a) || double.IsInfinity(realTime))
+            {
+                return new Time((double)a + realTime);
+            }
+
             if (a.IsFrameTime)
             {
                 if (realTime == 0.0)
@@ -940,6 +962,15 @@ namespace NiVE3.Plugin.ValueObject
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Time operator -(Time a, Time b)
         {
+            if (IsNaN(a) || IsNaN(b))
+            {
+                return NaN;
+            }
+            else if (IsInfinity(a) || IsInfinity(b))
+            {
+                return new Time((double)a - (double)b);
+            }
+
             if (a.FrameRate == b.FrameRate)
             {
                 if (a.IsFrameTime)
@@ -1014,6 +1045,15 @@ namespace NiVE3.Plugin.ValueObject
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Time operator -(in Time a, double realTime)
         {
+            if (IsNaN(a) || double.IsNaN(realTime))
+            {
+                return NaN;
+            }
+            else if (IsInfinity(a) || double.IsInfinity(realTime))
+            {
+                return new Time((double)a - realTime);
+            }
+
             if (a.IsFrameTime)
             {
                 if (realTime == 0.0)
@@ -1066,7 +1106,15 @@ namespace NiVE3.Plugin.ValueObject
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Time operator *(Time a, Time b)
         {
-            if (b == One)
+            if (IsNaN(a) || IsNaN(b))
+            {
+                return NaN;
+            }
+            else if (IsInfinity(a) || IsInfinity(b))
+            {
+                return new Time((double)a * (double)b);
+            }
+            else if (b == One)
             {
                 return a;
             }
@@ -1139,7 +1187,15 @@ namespace NiVE3.Plugin.ValueObject
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Time operator *(in Time a, double realTime)
         {
-            if (realTime == 1.0)
+            if (IsNaN(a) || double.IsNaN(realTime))
+            {
+                return NaN;
+            }
+            else if (IsInfinity(a) || double.IsInfinity(realTime))
+            {
+                return new Time((double)a * realTime);
+            }
+            else if (realTime == 1.0)
             {
                 return a;
             }
@@ -1204,13 +1260,21 @@ namespace NiVE3.Plugin.ValueObject
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Time operator /(Time a, Time b)
         {
-            if (b == One)
+            if (IsNaN(a) || IsNaN(b))
+            {
+                return NaN;
+            }
+            else if (IsInfinity(a) || IsInfinity(b))
+            {
+                return new Time((double)a / (double)b);
+            }
+            else if (b == One)
             {
                 return a;
             }
             else if (b == Zero)
             {
-                throw new DivideByZeroException();
+                return new Time((double)a / 0.0);
             }
 
             if (a.FrameRate == b.FrameRate)
@@ -1296,13 +1360,21 @@ namespace NiVE3.Plugin.ValueObject
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Time operator /(in Time a, double realTime)
         {
-            if (realTime == 1.0)
+            if (IsNaN(a) || double.IsNaN(realTime))
+            {
+                return NaN;
+            }
+            else if (IsInfinity(a) || double.IsInfinity(realTime))
+            {
+                return new Time((double)a / realTime);
+            }
+            else if (realTime == 1.0)
             {
                 return a;
             }
             else if (realTime == 0.0)
             {
-                throw new DivideByZeroException();
+                return new Time((double)a / realTime);
             }
 
             if (a.IsFrameTime)
@@ -1333,13 +1405,17 @@ namespace NiVE3.Plugin.ValueObject
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Time operator %(Time a, Time b)
         {
-            if (b == One || b == -One)
+            if (IsNaN(a) || IsNaN(b) || IsInfinity(a) || b == Zero)
+            {
+                return NaN;
+            }
+            else if (IsInfinity(b))
+            {
+                return a;
+            }
+            else if(b == One || b == -One)
             {
                 return Zero;
-            }
-            else if (b == Zero)
-            {
-                throw new DivideByZeroException();
             }
 
             if (a.FrameRate == b.FrameRate)
@@ -1416,13 +1492,17 @@ namespace NiVE3.Plugin.ValueObject
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Time operator %(in Time a, double realTime)
         {
-            if (realTime == 1.0 || realTime == -1.0)
+            if (IsNaN(a) || double.IsNaN(realTime) || IsInfinity(a) || realTime == 0.0)
+            {
+                return NaN;
+            }
+            else if (double.IsInfinity(realTime))
+            {
+                return a;
+            }
+            else if (realTime == 1.0 || realTime == -1.0)
             {
                 return Zero;
-            }
-            else if (realTime == 0.0)
-            {
-                throw new DivideByZeroException();
             }
 
             if (a.IsFrameTime)

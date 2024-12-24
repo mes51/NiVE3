@@ -526,6 +526,18 @@ namespace NiVE3.Test.Plugin.ValueObject
         }
 
         [Test]
+        public void TestAddInfinityOrNaN()
+        {
+            Assert.Multiple(() =>
+            {
+                Assert.That(Time.IsNaN(Time.NaN + Time.One), Is.True);
+                Assert.That(Time.IsInfinity(Time.PositiveInfinity + Time.One), Is.True);
+                Assert.That(Time.IsInfinity(Time.NegativeInfinity + Time.One), Is.True);
+                Assert.That(Time.IsNaN(Time.NegativeInfinity + Time.PositiveInfinity), Is.True);
+            });
+        }
+
+        [Test]
         public void TestAddZero()
         {
             Assert.Multiple(() =>
@@ -589,6 +601,19 @@ namespace NiVE3.Test.Plugin.ValueObject
                 Assert.That(actual.IsFrameTime, Is.False);
                 Assert.That(actual.FrameRateIsInteger, Is.False);
                 Assert.That(actual.RealTime, Is.EqualTo(expectedTime));
+            });
+        }
+
+        [Test]
+        public void TestAddDoubleInfinityOrNaN()
+        {
+            Assert.Multiple(() =>
+            {
+                var frameTime = new Time(1, 30.0);
+                Assert.That(Time.IsNaN(frameTime + double.NaN), Is.True);
+                Assert.That(Time.IsInfinity(frameTime + double.PositiveInfinity), Is.True);
+                Assert.That(Time.IsInfinity(frameTime + double.NegativeInfinity), Is.True);
+                Assert.That(Time.IsNaN(Time.NegativeInfinity + double.PositiveInfinity), Is.True);
             });
         }
 
@@ -746,6 +771,18 @@ namespace NiVE3.Test.Plugin.ValueObject
         }
 
         [Test]
+        public void TestSubtractInfinityOrNaN()
+        {
+            Assert.Multiple(() =>
+            {
+                Assert.That(Time.IsNaN(Time.NaN - Time.One), Is.True);
+                Assert.That(Time.IsInfinity(Time.PositiveInfinity - Time.One), Is.True);
+                Assert.That(Time.IsInfinity(Time.NegativeInfinity - Time.One), Is.True);
+                Assert.That(Time.IsNaN(Time.PositiveInfinity - Time.PositiveInfinity), Is.True);
+            });
+        }
+
+        [Test]
         public void TestSubtractDoubleIntegerTime()
         {
             Assert.Multiple(() =>
@@ -799,6 +836,19 @@ namespace NiVE3.Test.Plugin.ValueObject
                 Assert.That(actual.FrameRateIsInteger, Is.False);
                 Assert.That((a - b).RealTime, Is.EqualTo(expectedTimeA));
                 Assert.That((b - a).RealTime, Is.EqualTo(expectedTimeB));
+            });
+        }
+
+        [Test]
+        public void TestSubtractDoubleInfinityOrNaN()
+        {
+            Assert.Multiple(() =>
+            {
+                var frameTime = new Time(1, 30.0);
+                Assert.That(Time.IsNaN(frameTime + double.NaN), Is.True);
+                Assert.That(Time.IsInfinity(frameTime + double.PositiveInfinity), Is.True);
+                Assert.That(Time.IsInfinity(frameTime + double.NegativeInfinity), Is.True);
+                Assert.That(Time.IsNaN(Time.NegativeInfinity + double.PositiveInfinity), Is.True);
             });
         }
 
@@ -921,6 +971,18 @@ namespace NiVE3.Test.Plugin.ValueObject
         }
 
         [Test]
+        public void TestMultiplyInfinityOrNaN()
+        {
+            Assert.Multiple(() =>
+            {
+                Assert.That(Time.IsNaN(Time.NaN * new Time(2.0)), Is.True);
+                Assert.That(Time.IsInfinity(Time.PositiveInfinity * new Time(2.0)), Is.True);
+                Assert.That(Time.IsInfinity(Time.NegativeInfinity * new Time(2.0)), Is.True);
+                Assert.That(Time.IsNaN(Time.PositiveInfinity * Time.NaN), Is.True);
+            });
+        }
+
+        [Test]
         public void TestMultiplyZero()
         {
             Assert.Multiple(() =>
@@ -1009,6 +1071,19 @@ namespace NiVE3.Test.Plugin.ValueObject
             var a = new Time(1, 30.0);
 
             Assert.That(a * 1.0, Is.EqualTo(a));
+        }
+
+        [Test]
+        public void TestMultiplyDoubleInfinityOrNaN()
+        {
+            Assert.Multiple(() =>
+            {
+                var frameTime = new Time(1, 30.0);
+                Assert.That(Time.IsNaN(frameTime * double.NaN), Is.True);
+                Assert.That(Time.IsInfinity(frameTime * double.PositiveInfinity), Is.True);
+                Assert.That(Time.IsInfinity(frameTime * double.NegativeInfinity), Is.True);
+                Assert.That(Time.IsNaN(Time.NegativeInfinity * double.NaN), Is.True);
+            });
         }
 
         [Test]
@@ -1216,7 +1291,20 @@ namespace NiVE3.Test.Plugin.ValueObject
         [Test]
         public void TestDivideZero()
         {
-            Assert.Throws<DivideByZeroException>(() => _ = new Time(1.0) / Time.Zero);
+            Assert.That(Time.IsInfinity(new Time(1.0) / Time.Zero), Is.True);
+            Assert.That(Time.IsNaN(Time.Zero / Time.Zero), Is.True);
+        }
+
+        [Test]
+        public void TestDivideInfinityOrNaN()
+        {
+            Assert.Multiple(() =>
+            {
+                Assert.That(Time.IsNaN(Time.NaN / Time.One), Is.True);
+                Assert.That(Time.IsInfinity(Time.PositiveInfinity / Time.One), Is.True);
+                Assert.That(Time.IsInfinity(Time.NegativeInfinity / Time.One), Is.True);
+                Assert.That(Time.IsNaN(Time.PositiveInfinity / Time.NegativeInfinity), Is.True);
+            });
         }
 
         [Test]
@@ -1285,7 +1373,21 @@ namespace NiVE3.Test.Plugin.ValueObject
         [Test]
         public void TestDivideDoubleZero()
         {
-            Assert.Throws<DivideByZeroException>(() => _ = new Time(1, 30.0) / 0.0);
+            Assert.That(Time.IsInfinity(new Time(1.0) / 0.0), Is.True);
+            Assert.That(Time.IsNaN(Time.Zero / 0.0), Is.True);
+        }
+
+        [Test]
+        public void TestDivideDoubleInfinityOrNaN()
+        {
+            Assert.Multiple(() =>
+            {
+                var frameTime = new Time(1, 30.0);
+                Assert.That(Time.IsNaN(frameTime / double.NaN), Is.True);
+                Assert.That(frameTime / double.PositiveInfinity, Is.EqualTo(Time.Zero));
+                Assert.That(frameTime / double.NegativeInfinity, Is.EqualTo(Time.Zero));
+                Assert.That(Time.IsNaN(Time.NegativeInfinity / double.NegativeInfinity), Is.True);
+            });
         }
 
         #endregion Divide
@@ -1442,7 +1544,21 @@ namespace NiVE3.Test.Plugin.ValueObject
         [Test]
         public void TestModuloZero()
         {
-            Assert.Throws<DivideByZeroException>(() => _ = new Time(1.0) % Time.Zero);
+            Assert.That(Time.IsNaN(new Time(1.0) % Time.Zero), Is.True);
+        }
+
+        [Test]
+        public void TestModuloInfinityOrNaN()
+        {
+            Assert.Multiple(() =>
+            {
+                var frameTime = new Time(1, 30.0);
+                Assert.That(Time.IsNaN(Time.NaN % Time.One), Is.True);
+                Assert.That(frameTime % Time.PositiveInfinity, Is.EqualTo(frameTime));
+                Assert.That(frameTime % Time.NegativeInfinity, Is.EqualTo(frameTime));
+                Assert.That(Time.IsNaN(Time.PositiveInfinity % Time.NegativeInfinity), Is.True);
+                Assert.That(Time.IsNaN(Time.PositiveInfinity % Time.One), Is.True);
+            });
         }
 
         [Test]
@@ -1521,7 +1637,21 @@ namespace NiVE3.Test.Plugin.ValueObject
         [Test]
         public void TestModuloDoubleZero()
         {
-            Assert.Throws<DivideByZeroException>(() => _ = new Time(4, 30.0) % 0.0);
+            Assert.That(Time.IsNaN(new Time(4, 30.0) % 0.0), Is.True);
+        }
+
+        [Test]
+        public void TestModuloDoubleInfinityOrNaN()
+        {
+            Assert.Multiple(() =>
+            {
+                var frameTime = new Time(1, 30.0);
+                Assert.That(Time.IsNaN(frameTime % double.NaN), Is.True);
+                Assert.That(frameTime % double.PositiveInfinity, Is.EqualTo(frameTime));
+                Assert.That(frameTime % double.NegativeInfinity, Is.EqualTo(frameTime));
+                Assert.That(Time.IsNaN(Time.NegativeInfinity % double.NegativeInfinity), Is.True);
+                Assert.That(Time.IsNaN(Time.NegativeInfinity % 1.0), Is.True);
+            });
         }
 
         #endregion Modulo
