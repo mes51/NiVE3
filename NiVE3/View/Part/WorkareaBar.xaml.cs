@@ -13,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using NiVE3.Plugin.ValueObject;
 using NiVE3.Util;
 using NiVE3.View.Resource;
 
@@ -67,9 +68,9 @@ namespace NiVE3.View.Part
 
         public static readonly DependencyProperty DurationProperty = DependencyProperty.Register(
             nameof(Duration),
-            typeof(double),
+            typeof(Time),
             typeof(WorkareaBar),
-            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange, TimeChanged)
+            new FrameworkPropertyMetadata(Time.Zero, FrameworkPropertyMetadataOptions.AffectsArrange, TimeChanged)
         );
 
         public static readonly DependencyProperty FrameRateProperty = DependencyProperty.Register(
@@ -81,30 +82,30 @@ namespace NiVE3.View.Part
 
         public static readonly DependencyProperty RangeProperty = DependencyProperty.Register(
             nameof(Range),
-            typeof(double),
+            typeof(Time),
             typeof(WorkareaBar),
-            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange, TimeChanged)
+            new FrameworkPropertyMetadata(Time.Zero, FrameworkPropertyMetadataOptions.AffectsArrange, TimeChanged)
         );
 
         public static readonly DependencyProperty RangeStartProperty = DependencyProperty.Register(
             nameof(RangeStart),
-            typeof(double),
+            typeof(Time),
             typeof(WorkareaBar),
-            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange, TimeChanged)
+            new FrameworkPropertyMetadata(Time.Zero, FrameworkPropertyMetadataOptions.AffectsArrange, TimeChanged)
         );
 
         public static readonly DependencyProperty WorkareaBeginProperty = DependencyProperty.Register(
             nameof(WorkareaBegin),
-            typeof(double),
+            typeof(Time),
             typeof(WorkareaBar),
-            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, TimeChanged, CoerceWorkareaBegin)
+            new FrameworkPropertyMetadata(Time.Zero, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, TimeChanged, CoerceWorkareaBegin)
         );
 
         public static readonly DependencyProperty WorkareaEndProperty = DependencyProperty.Register(
             nameof(WorkareaEnd),
-            typeof(double),
+            typeof(Time),
             typeof(WorkareaBar),
-            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, TimeChanged, CoerceWorkareaEnd)
+            new FrameworkPropertyMetadata(Time.Zero, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, TimeChanged, CoerceWorkareaEnd)
         );
 
         public static readonly DependencyProperty CommandProperty = DependencyProperty.Register(
@@ -120,27 +121,27 @@ namespace NiVE3.View.Part
             set { SetValue(CommandProperty, value); }
         }
 
-        public double WorkareaEnd
+        public Time WorkareaEnd
         {
-            get { return (double)GetValue(WorkareaEndProperty); }
+            get { return (Time)GetValue(WorkareaEndProperty); }
             set { SetValue(WorkareaEndProperty, value); }
         }
 
-        public double WorkareaBegin
+        public Time WorkareaBegin
         {
-            get { return (double)GetValue(WorkareaBeginProperty); }
+            get { return (Time)GetValue(WorkareaBeginProperty); }
             set { SetValue(WorkareaBeginProperty, value); }
         }
 
-        public double RangeStart
+        public Time RangeStart
         {
-            get { return (double)GetValue(RangeStartProperty); }
+            get { return (Time)GetValue(RangeStartProperty); }
             set { SetValue(RangeStartProperty, value); }
         }
 
-        public double Range
+        public Time Range
         {
-            get { return (double)GetValue(RangeProperty); }
+            get { return (Time)GetValue(RangeProperty); }
             set { SetValue(RangeProperty, value); }
         }
 
@@ -150,9 +151,9 @@ namespace NiVE3.View.Part
             set { SetValue(FrameRateProperty, value); }
         }
 
-        public double Duration
+        public Time Duration
         {
-            get { return (double)GetValue(DurationProperty); }
+            get { return (Time)GetValue(DurationProperty); }
             set { SetValue(DurationProperty, value); }
         }
 
@@ -205,7 +206,7 @@ namespace NiVE3.View.Part
 
         void UpdateBar()
         {
-            var pixelPerTime = (ActualWidth - UIParameters.TimelineRangeThumbTotalWidth) / Range;
+            var pixelPerTime = (ActualWidth - UIParameters.TimelineRangeThumbTotalWidth) / (double)Range;
             if (pixelPerTime < 0 || double.IsNaN(pixelPerTime) || double.IsInfinity(pixelPerTime))
             {
                 WorkareaGridWidth = ActualWidth;
@@ -213,11 +214,11 @@ namespace NiVE3.View.Part
                 return;
             }
 
-            BeforeWorkareaStartWidth = WorkareaBegin * pixelPerTime;
-            AfterWorkareaEndWidth = Math.Max(Duration - WorkareaEnd, 0.0) * pixelPerTime;
+            BeforeWorkareaStartWidth = (double)WorkareaBegin * pixelPerTime;
+            AfterWorkareaEndWidth = Math.Max((double)(Duration - WorkareaEnd), 0.0) * pixelPerTime;
             FrameRangeWidth = (1.0 / FrameRate) * pixelPerTime;
-            WorkareaGridWidth = Duration * pixelPerTime + UIParameters.TimelineRangeThumbTotalWidth;
-            WorkareaLeft = -RangeStart * pixelPerTime;
+            WorkareaGridWidth = (double)Duration * pixelPerTime + UIParameters.TimelineRangeThumbTotalWidth;
+            WorkareaLeft = -(double)RangeStart * pixelPerTime;
         }
 
         private void Root_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -240,9 +241,9 @@ namespace NiVE3.View.Part
                 return;
             }
 
-            var timePerPixel = Range / (ActualWidth - UIParameters.TimelineRangeThumbTotalWidth);
-            var frameDuration = 1.0 / FrameRate;
-            var time = (int)Math.Round(Math.Clamp(WorkareaBegin + e.HorizontalChange * timePerPixel, 0.0, WorkareaEnd - frameDuration) * FrameRate) * frameDuration;
+            var timePerPixel = (double)Range / (ActualWidth - UIParameters.TimelineRangeThumbTotalWidth);
+            var frameDuration = new Time(1, FrameRate);
+            var time = Time.Clamp(WorkareaBegin + e.HorizontalChange * timePerPixel, Time.Zero, WorkareaEnd - frameDuration).RoundToFrameRate(FrameRate);
             WorkareaBegin = time;
         }
 
@@ -268,9 +269,9 @@ namespace NiVE3.View.Part
                 return;
             }
 
-            var timePerPixel = Range / (ActualWidth - UIParameters.TimelineRangeThumbTotalWidth);
-            var frameDuration = 1.0 / FrameRate;
-            var time = (int)Math.Round(Math.Clamp(WorkareaEnd + e.HorizontalChange * timePerPixel, WorkareaBegin + frameDuration, Duration) * FrameRate) * frameDuration;
+            var timePerPixel = (double)Range / (ActualWidth - UIParameters.TimelineRangeThumbTotalWidth);
+            var frameDuration = new Time(1, FrameRate);
+            var time = Time.Clamp(WorkareaEnd + e.HorizontalChange * timePerPixel, WorkareaBegin + frameDuration, Duration).RoundToFrameRate(FrameRate);
             WorkareaEnd = time;
         }
 
@@ -296,9 +297,8 @@ namespace NiVE3.View.Part
                 return;
             }
 
-            var timePerPixel = Range / (ActualWidth - UIParameters.TimelineRangeThumbTotalWidth);
-            var frameDuration = 1.0 / FrameRate;
-            var diffTime = (int)Math.Round(Math.Clamp(e.HorizontalChange * timePerPixel, -WorkareaBegin, Duration - WorkareaEnd) * FrameRate) * frameDuration;
+            var timePerPixel = (double)Range / (ActualWidth - UIParameters.TimelineRangeThumbTotalWidth);
+            var diffTime = Time.Clamp((Time)(e.HorizontalChange * timePerPixel), -WorkareaBegin, Duration - WorkareaEnd).RoundToFrameRate(FrameRate);
             WorkareaBegin += diffTime;
             WorkareaEnd += diffTime;
         }
@@ -324,11 +324,12 @@ namespace NiVE3.View.Part
             {
                 if (workareaBar.FrameRate > 0.0 && workareaBar.Duration > 0.0)
                 {
-                    return Math.Clamp((double)value, 0.0, TimeCalc.RoundTimeDigit(Math.Max(workareaBar.Duration - 1.0 / workareaBar.FrameRate, 1.0 / workareaBar.FrameRate)));
+                    var frameDuration = new Time(1, workareaBar.FrameRate);
+                    return Time.Clamp((Time)value, Time.Zero, Time.Max(workareaBar.Duration - frameDuration, frameDuration));
                 }
                 else
                 {
-                    return 0.0;
+                    return Time.Zero;
                 }
             }
             else
@@ -343,11 +344,12 @@ namespace NiVE3.View.Part
             {
                 if (workareaBar.FrameRate > 0.0 && workareaBar.Duration > 0.0)
                 {
-                    return Math.Clamp((double)value, TimeCalc.RoundTimeDigit(1.0 / workareaBar.FrameRate), workareaBar.Duration);
+                    var frameDuration = new Time(1, workareaBar.FrameRate);
+                    return Time.Clamp((Time)value, frameDuration, workareaBar.Duration);
                 }
                 else
                 {
-                    return 0.0;
+                    return Time.Zero;
                 }
             }
             else

@@ -106,57 +106,57 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref frameRate, value); }
         }
 
-        private double frameDuration;
+        private Time frameDuration;
         [ManualWire(nameof(CompositionModel), IsOneWay = true)]
-        public double FrameDuration
+        public Time FrameDuration
         {
             get { return frameDuration; }
             set { SetProperty(ref frameDuration, value); }
         }
 
-        private double duration;
+        private Time duration;
         [ManualWire(nameof(CompositionModel), IsOneWay = true)]
-        public double Duration
+        public Time Duration
         {
             get { return duration; }
             set { SetProperty(ref duration, value); }
         }
 
-        private double timeBarRange;
+        private Time timeBarRange;
         [ManualWire(nameof(CompositionModel))]
-        public double TimeBarRange
+        public Time TimeBarRange
         {
             get { return timeBarRange; }
             set { SetProperty(ref timeBarRange, value); }
         }
 
-        private double timeBarRangeStart;
+        private Time timeBarRangeStart;
         [ManualWire(nameof(CompositionModel))]
-        public double TimeBarRangeStart
+        public Time TimeBarRangeStart
         {
             get { return timeBarRangeStart; }
             set { SetProperty(ref timeBarRangeStart, value); }
         }
 
-        private double currentTime;
+        private Time currentTime;
         [ManualWire(nameof(CompositionModel))]
-        public double CurrentTime
+        public Time CurrentTime
         {
             get { return currentTime; }
             set { SetProperty(ref currentTime, value); }
         }
 
-        private double workareaBegin;
+        private Time workareaBegin;
         [ManualWire(nameof(CompositionModel), IsOneWay = true)]
-        public double WorkareaBegin
+        public Time WorkareaBegin
         {
             get { return workareaBegin; }
             set { SetProperty(ref workareaBegin, value); }
         }
 
-        private double workareaEnd;
+        private Time workareaEnd;
         [ManualWire(nameof(CompositionModel), IsOneWay = true)]
-        public double WorkareaEnd
+        public Time WorkareaEnd
         {
             get { return workareaEnd; }
             set { SetProperty(ref workareaEnd, value); }
@@ -378,8 +378,8 @@ namespace NiVE3.ViewModel
             }
         }
 
-        private double timelineScrollBarMax;
-        public double TimelineScrollBarMax
+        private Time timelineScrollBarMax;
+        public Time TimelineScrollBarMax
         {
             get { return timelineScrollBarMax; }
             set { SetProperty(ref timelineScrollBarMax, value); }
@@ -650,7 +650,7 @@ namespace NiVE3.ViewModel
                 .ObservesProperty(() => SelectedTarget)
                 .ObservesProperty(() => SelectedLayers.Count);
 
-            ChangeWorkareaCommand = new DelegateCommand<Tuple<double, double>>(t => CompositionModel?.ChangeWorkarea(t.Item1, t.Item2));
+            ChangeWorkareaCommand = new DelegateCommand<Tuple<Time, Time>>(t => CompositionModel?.ChangeWorkarea(t.Item1, t.Item2));
 
             AddSolidLayerCommand = new DelegateCommand(() =>
             {
@@ -1007,7 +1007,7 @@ namespace NiVE3.ViewModel
                         result.Parameters.GetValue<int>(nameof(CompositionSettingViewModel.Width)),
                         result.Parameters.GetValue<int>(nameof(CompositionSettingViewModel.Height)),
                         result.Parameters.GetValue<double>(nameof(CompositionSettingViewModel.FrameRate)),
-                        result.Parameters.GetValue<double>(nameof(CompositionSettingViewModel.Duration)),
+                        result.Parameters.GetValue<Time>(nameof(CompositionSettingViewModel.Duration)),
                         result.Parameters.GetValue<bool>(nameof(CompositionSettingViewModel.IsRetentionFrameRate)),
                         result.Parameters.GetValue<bool>(nameof(CompositionSettingViewModel.ApplyToneMappingWhenNested)),
                         result.Parameters.GetValue<int>(nameof(CompositionSettingViewModel.ShutterAngle)),
@@ -1034,8 +1034,8 @@ namespace NiVE3.ViewModel
                 {
                     { RenderSettingViewModel.CompositionParameterName, CompositionModel },
                     { nameof(RenderSettingViewModel.RenderRangeType), RenderRangeType.Workarea },
-                    { nameof(RenderSettingViewModel.BeginTime), (Time)CompositionModel.WorkareaBegin }, // XXX: CompositionModelのWorkareaBegin/WorkareaEndを直したときにキャストを外す
-                    { nameof(RenderSettingViewModel.EndTime), (Time)CompositionModel.WorkareaEnd },
+                    { nameof(RenderSettingViewModel.BeginTime), CompositionModel.WorkareaBegin },
+                    { nameof(RenderSettingViewModel.EndTime), CompositionModel.WorkareaEnd },
                     { nameof(RenderSettingViewModel.IsOutputVideo), true },
                     { nameof(RenderSettingViewModel.IsOutputAudio), true },
                     { nameof(RenderSettingViewModel.Mode), RenderSettingMode.Enqueue },
@@ -1058,39 +1058,39 @@ namespace NiVE3.ViewModel
 
             MoveIndicatorToNextFrameCommand = new DelegateCommand(() =>
             {
-                CurrentTime = TimeCalc.AlignRound(CurrentTime + FrameDuration, FrameRate);
+                CurrentTime = (CurrentTime + FrameDuration).RoundToFrameRate(FrameRate);
                 CurrentTimeChangeByUserPublisher.Publish(this, EventArgs.Empty);
             }, () => CompositionModel != null).ObservesProperty(() => CompositionModel);
 
             MoveIndicatorToPreviousFrameCommand = new DelegateCommand(() =>
             {
-                CurrentTime = TimeCalc.AlignRound(CurrentTime - FrameDuration, FrameRate);
+                CurrentTime = (CurrentTime - FrameDuration).RoundToFrameRate(FrameRate);
                 CurrentTimeChangeByUserPublisher.Publish(this, EventArgs.Empty);
             }, () => CompositionModel != null).ObservesProperty(() => CompositionModel);
 
             MoveIndicatorToNext10FrameCommand = new DelegateCommand(() =>
             {
-                CurrentTime = TimeCalc.AlignRound(CurrentTime + FrameDuration * 10.0, FrameRate);
+                CurrentTime = (CurrentTime + FrameDuration * 10.0).RoundToFrameRate(FrameRate);
                 CurrentTimeChangeByUserPublisher.Publish(this, EventArgs.Empty);
             }, () => CompositionModel != null).ObservesProperty(() => CompositionModel);
 
             MoveIndicatorToPrevious10FrameCommand = new DelegateCommand(() =>
             {
-                CurrentTime = TimeCalc.AlignRound(CurrentTime - FrameDuration * 10.0, FrameRate);
+                CurrentTime = (CurrentTime - FrameDuration * 10.0).RoundToFrameRate(FrameRate);
                 CurrentTimeChangeByUserPublisher.Publish(this, EventArgs.Empty);
             }, () => CompositionModel != null).ObservesProperty(() => CompositionModel);
 
             MoveIndicatorToCompositionBeginCommand = new DelegateCommand(() =>
             {
-                TimeBarRangeStart = 0.0;
-                CurrentTime = 0.0;
+                TimeBarRangeStart = Time.Zero;
+                CurrentTime = Time.Zero;
                 CurrentTimeChangeByUserPublisher.Publish(this, EventArgs.Empty);
             }, () => CompositionModel != null).ObservesProperty(() => CompositionModel);
 
             MoveIndicatorToCompositionEndCommand = new DelegateCommand(() =>
             {
                 TimeBarRangeStart = Duration - TimeBarRange;
-                CurrentTime = TimeCalc.AlignRound(Duration - FrameDuration, FrameRate);
+                CurrentTime = (Duration - FrameDuration).RoundToFrameRate(FrameRate);
                 CurrentTimeChangeByUserPublisher.Publish(this, EventArgs.Empty);
             }, () => CompositionModel != null).ObservesProperty(() => CompositionModel);
 
@@ -1102,8 +1102,8 @@ namespace NiVE3.ViewModel
                 }
 
                 var targetLayer = SelectedLayers[0];
-                CurrentTime = TimeCalc.AlignRound(targetLayer.SourceStartPoint + targetLayer.InPoint, FrameRate);
-                TimeBarRangeStart = MathUtil.MaxAndMin(CurrentTime - TimeBarRange * 0.5, 0.0, Duration - TimeBarRange);
+                CurrentTime = (targetLayer.SourceStartPoint + targetLayer.InPoint).RoundToFrameRate(FrameRate);
+                TimeBarRangeStart = Time.MaxAndMin(CurrentTime - TimeBarRange * 0.5, Time.Zero, Duration - TimeBarRange);
                 CurrentTimeChangeByUserPublisher.Publish(this, EventArgs.Empty);
             }, () => CompositionModel != null && SelectedLayers.Count > 0)
                 .ObservesProperty(() => CompositionModel)
@@ -1117,8 +1117,8 @@ namespace NiVE3.ViewModel
                 }
 
                 var targetLayer = SelectedLayers[0];
-                CurrentTime = TimeCalc.AlignRound(targetLayer.SourceStartPoint + targetLayer.OutPoint - FrameDuration, FrameRate);
-                TimeBarRangeStart = MathUtil.MaxAndMin(CurrentTime - TimeBarRange * 0.5, 0.0, Duration - TimeBarRange);
+                CurrentTime = (targetLayer.SourceStartPoint + targetLayer.OutPoint - FrameDuration).RoundToFrameRate(FrameRate);
+                TimeBarRangeStart = Time.MaxAndMin(CurrentTime - TimeBarRange * 0.5, Time.Zero, Duration - TimeBarRange);
                 CurrentTimeChangeByUserPublisher.Publish(this, EventArgs.Empty);
             }, () => CompositionModel != null && SelectedLayers.Count > 0)
                 .ObservesProperty(() => CompositionModel)
@@ -1165,12 +1165,12 @@ namespace NiVE3.ViewModel
 
             MoveWorkareaBeginToIndicatorCommand = new DelegateCommand(() =>
             {
-                CompositionModel?.ChangeWorkarea(MathUtil.MaxAndMin(CurrentTime, 0.0, TimeCalc.AlignRound(WorkareaEnd - FrameDuration, FrameRate)), WorkareaEnd);
+                CompositionModel?.ChangeWorkarea(Time.MaxAndMin(CurrentTime, Time.Zero, (WorkareaEnd - FrameDuration).RoundToFrameRate(FrameRate)), WorkareaEnd);
             }, () => CompositionModel != null).ObservesProperty(() => CompositionModel);
 
             MoveWorkareaEndToIndicatorCommand = new DelegateCommand(() =>
             {
-                CompositionModel?.ChangeWorkarea(WorkareaBegin, MathUtil.MaxAndMin(CurrentTime, TimeCalc.AlignRound(WorkareaBegin + FrameDuration, FrameRate), Duration));
+                CompositionModel?.ChangeWorkarea(WorkareaBegin, Time.MaxAndMin(CurrentTime, (WorkareaBegin + FrameDuration).RoundToFrameRate(FrameRate), Duration));
             }, () => CompositionModel != null).ObservesProperty(() => CompositionModel);
 
             AudioPlayerModel = audioPlayerModel;
@@ -1510,9 +1510,9 @@ namespace NiVE3.ViewModel
                     if (CompositionModel == null)
                     {
                         Title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Timeline_EmptyTitle);
-                        Duration = 0.0;
+                        Duration = Time.Zero;
                         FrameRate = 30.0;
-                        FrameDuration = 1.0 / 30.0;
+                        FrameDuration = new Time(1, 30.0);
                     }
                     else
                     {

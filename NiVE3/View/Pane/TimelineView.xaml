@@ -8,6 +8,7 @@
              xmlns:local="clr-namespace:NiVE3.View.Pane"
              xmlns:vm="clr-namespace:NiVE3.ViewModel"
              xmlns:um="clr-namespace:NiVE3.Model.UI"
+             xmlns:uvo="clr-namespace:NiVE3.Plugin.ValueObject;assembly=NiVE3.Plugin"
              xmlns:r="clr-namespace:NiVE3.View.Resource"
              xmlns:cv="clr-namespace:NiVE3.View.Converter"
              xmlns:pr="clr-namespace:NiVE3.View.Primitive"
@@ -24,9 +25,9 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
-        <cv:TimeConverter x:Key="TimeConverter" FrameRate="{Binding FrameRate}"/>
         <cv:IsNullConverter x:Key="IsNullConverter"/>
         <cv:BooleanInvertConverter x:Key="BooleanInvertConverter"/>
+        <cv:TimeToDoubleConverter x:Key="TimeToDoubleConverter" FrameRate="{Binding FrameRate}"/>
 
         <r:BindingProxy x:Key="ViewModelProxy" Data="{Binding}"/>
 
@@ -204,9 +205,6 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <!-- 
-            <ui:SlidableNumberTextBox Value="{Binding CurrentTime}" Converter="{StaticResource TimeConverter}" SlideChangeValue="{Binding FrameDuration}" Margin="5"/>
-            -->
             <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,5,0">
                 <CheckBox IsChecked="{Binding IsEnableShy}" Style="{StaticResource ShyCheckBox}" Command="{Binding ChangeEnableShyCommand}"/>
                 <CheckBox IsChecked="{Binding IsEnableFrameBlend}" Style="{StaticResource FrameBlendCheckBox}" Margin="5,0,0,0" Command="{Binding ChangeEnableFrameBlendCommand}"/>
@@ -347,8 +345,8 @@
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
 
-            <pt:TimeScaleSlider Grid.Column="0" Width="100" Value="{Binding TimeBarRange}" Minimum="{Binding ElementName=TimeLocator, Path=MinimumRange}" Maximum="{Binding Duration}"/>
-            <pr:RangeScrollBar Grid.Column="1" Minimum="0" Maximum="{Binding Duration}" Range="{Binding TimeBarRange}" RangeStart="{Binding TimeBarRangeStart}" MinimumRange="{Binding ElementName=TimeLocator, Path=MinimumRange, Mode=OneWay}"/>
+            <pt:TimeScaleSlider Grid.Column="0" Width="100" Value="{Binding TimeBarRange, Converter={StaticResource TimeToDoubleConverter}}" Minimum="{Binding ElementName=TimeLocator, Path=MinimumRange, Converter={StaticResource TimeToDoubleConverter}}" Maximum="{Binding Duration, Converter={StaticResource TimeToDoubleConverter}}"/>
+            <pr:RangeScrollBar Grid.Column="1" Minimum="{x:Static uvo:Time.Zero}" Maximum="{Binding Duration}" Range="{Binding TimeBarRange}" RangeStart="{Binding TimeBarRangeStart}" MinimumRange="{Binding ElementName=TimeLocator, Path=MinimumRange, Mode=OneWay}"/>
         </Grid>
     </Grid>
 

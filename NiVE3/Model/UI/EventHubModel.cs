@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using NiVE3.Mvvm;
 using NiVE3.Numerics;
 using NiVE3.Plugin.Interfaces.RendererParams;
+using NiVE3.Plugin.ValueObject;
 using NiVE3.Text;
 using Prism.Mvvm;
 
@@ -120,7 +121,7 @@ namespace NiVE3.Model.UI
             BeginEditDurationRequestPublisher.Publish(this, new BeginEditDurationEventArgs(compositionId, layerId, durationType));
         }
 
-        public void NotifyUpdateDuration(Guid compositionId, double inPointDiff, double outPointDiff, double sourceStartPointDiff, bool isCommit)
+        public void NotifyUpdateDuration(Guid compositionId, Time inPointDiff, Time outPointDiff, Time sourceStartPointDiff, bool isCommit)
         {
             UpdateDurationRequestPublisher.Publish(this, new UpdateDurationEventArgs(compositionId, inPointDiff, outPointDiff, sourceStartPointDiff, isCommit));
         }

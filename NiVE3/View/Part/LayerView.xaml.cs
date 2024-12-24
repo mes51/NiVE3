@@ -15,6 +15,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using NiVE3.Extension;
 using NiVE3.Plugin.Interfaces;
+using NiVE3.Plugin.ValueObject;
 using NiVE3.View.Converter;
 using NiVE3.View.Resource;
 using NiVE3.ViewModel;
@@ -33,16 +34,16 @@ namespace NiVE3.View.Part
 
         public static readonly DependencyProperty RangeProperty = DependencyProperty.Register(
             nameof(Range),
-            typeof(double),
+            typeof(Time),
             typeof(LayerView),
-            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+            new FrameworkPropertyMetadata(Time.Zero, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
         public static readonly DependencyProperty RangeStartProperty = DependencyProperty.Register(
             nameof(RangeStart),
-            typeof(double),
+            typeof(Time),
             typeof(LayerView),
-            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+            new FrameworkPropertyMetadata(Time.Zero, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
         public static readonly DependencyProperty LayerControlAreaWidthProperty = DependencyProperty.Register(

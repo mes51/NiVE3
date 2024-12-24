@@ -6,13 +6,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using NiVE3.Plugin.ValueObject;
 using NiVE3.Util;
 using NiVE3.View.Primitive;
 using NiVE3.View.Resource;
@@ -28,30 +23,30 @@ namespace NiVE3.View.Part
 
         public static readonly DependencyProperty RangeProperty = DependencyProperty.Register(
             nameof(Range),
-            typeof(double),
+            typeof(Time),
             typeof(TimeLocatorView),
-            new FrameworkPropertyMetadata(1.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, TimeChanged)
+            new FrameworkPropertyMetadata(Time.One, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, TimeChanged)
         );
 
         public static readonly DependencyProperty RangeStartProperty = DependencyProperty.Register(
             nameof(RangeStart),
-            typeof(double),
+            typeof(Time),
             typeof(TimeLocatorView),
-            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, TimeChanged)
+            new FrameworkPropertyMetadata(Time.Zero, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, TimeChanged)
         );
 
         public static readonly DependencyProperty DurationProperty = DependencyProperty.Register(
             nameof(Duration),
-            typeof(double),
+            typeof(Time),
             typeof(TimeLocatorView),
-            new FrameworkPropertyMetadata(60.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, TimeChanged)
+            new FrameworkPropertyMetadata(new Time(60.0), FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, TimeChanged)
         );
 
         public static readonly DependencyProperty CurrentTimeProperty = DependencyProperty.Register(
             nameof(CurrentTime),
-            typeof(double),
+            typeof(Time),
             typeof(TimeLocatorView),
-            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, TimeChanged)
+            new FrameworkPropertyMetadata(Time.Zero, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, TimeChanged)
         );
 
         public static readonly DependencyProperty FrameRateProperty = DependencyProperty.Register(
@@ -136,9 +131,9 @@ namespace NiVE3.View.Part
 
         private static readonly DependencyPropertyKey MinimumRangePropertyKey = DependencyProperty.RegisterReadOnly(
             nameof(MinimumRange),
-            typeof(double),
+            typeof(Time),
             typeof(TimeLocatorView),
-            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+            new FrameworkPropertyMetadata(Time.Zero, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
         public static readonly DependencyProperty MinimumRangeProperty = MinimumRangePropertyKey.DependencyProperty;
@@ -153,9 +148,9 @@ namespace NiVE3.View.Part
             remove { RemoveHandler(CurrentTimeChangeByUserEvent, value); }
         }
 
-        public double MinimumRange
+        public Time MinimumRange
         {
-            get { return (double)GetValue(MinimumRangeProperty); }
+            get { return (Time)GetValue(MinimumRangeProperty); }
             private set { SetValue(MinimumRangePropertyKey, value); }
         }
 
@@ -213,9 +208,9 @@ namespace NiVE3.View.Part
             set { SetValue(ShowIndicatorLineInRangeBarProperty, value); }
         }
 
-        public double CurrentTime
+        public Time CurrentTime
         {
-            get { return (double)GetValue(CurrentTimeProperty); }
+            get { return (Time)GetValue(CurrentTimeProperty); }
             set { SetValue(CurrentTimeProperty, value); }
         }
 
@@ -225,21 +220,21 @@ namespace NiVE3.View.Part
             set { SetValue(FrameRateProperty, value); }
         }
 
-        public double Duration
+        public Time Duration
         {
-            get { return (double)GetValue(DurationProperty); }
+            get { return (Time)GetValue(DurationProperty); }
             set { SetValue(DurationProperty, value); }
         }
 
-        public double RangeStart
+        public Time RangeStart
         {
-            get { return (double)GetValue(RangeStartProperty); }
+            get { return (Time)GetValue(RangeStartProperty); }
             set { SetValue(RangeStartProperty, value); }
         }
 
-        public double Range
+        public Time Range
         {
-            get { return (double)GetValue(RangeProperty); }
+            get { return (Time)GetValue(RangeProperty); }
             set { SetValue(RangeProperty, value); }
         }
 
@@ -267,10 +262,10 @@ namespace NiVE3.View.Part
             ScrubbingArea.CaptureMouse();
             IsScrubbing = true;
 
-            var time = TimeCalc.CalcTimeFromPixelAligned(e.GetPosition((IInputElement)sender).X - UIParameters.TimelineRangeThumbWidth, ActualWidth, Range, RangeStart, FrameRate, 0.0, Duration);
+            var time = TimeCalc.CalcTimeFromPixelAligned(e.GetPosition((IInputElement)sender).X - UIParameters.TimelineRangeThumbWidth, ActualWidth, Range, RangeStart, FrameRate, Time.Zero, Duration);
             if (time >= Duration)
             {
-                time = TimeCalc.AlignRound(Duration - 1.0 / FrameRate, FrameRate);
+                time = (Duration - new Time(1, FrameRate)).RoundToFrameRate(FrameRate);
             }
             SetCurrentValue(CurrentTimeProperty, time);
             RaiseEvent(new RoutedEventArgs(CurrentTimeChangeByUserEvent, this));
@@ -291,10 +286,10 @@ namespace NiVE3.View.Part
                 return;
             }
 
-            var time = TimeCalc.CalcTimeFromPixelAligned(e.GetPosition((IInputElement)sender).X - UIParameters.TimelineRangeThumbWidth, ActualWidth, Range, RangeStart, FrameRate, 0.0, Duration);
+            var time = TimeCalc.CalcTimeFromPixelAligned(e.GetPosition((IInputElement)sender).X - UIParameters.TimelineRangeThumbWidth, ActualWidth, Range, RangeStart, FrameRate, Time.Zero, Duration);
             if (time >= Duration)
             {
-                time = TimeCalc.AlignRound(Duration - 1.0 / FrameRate, FrameRate);
+                time = (Duration - new Time(1, FrameRate)).RoundToFrameRate(FrameRate);
             }
             SetCurrentValue(CurrentTimeProperty, time);
             RaiseEvent(new RoutedEventArgs(CurrentTimeChangeByUserEvent, this));
@@ -334,10 +329,10 @@ namespace NiVE3.View.Part
                 return;
             }
 
-            var pixelPerTime = (timeLocatorView.ActualWidth - UIParameters.TimelineRangeThumbWidth * 2.0) / timeLocatorView.Range;
+            var pixelPerTime = (timeLocatorView.ActualWidth - UIParameters.TimelineRangeThumbWidth * 2.0) / (double)timeLocatorView.Range;
             if (!double.IsNaN(pixelPerTime) && !double.IsInfinity(pixelPerTime) && pixelPerTime > 0.0)
             {
-                timeLocatorView.IndicatorPosition = (timeLocatorView.CurrentTime - timeLocatorView.RangeStart) * pixelPerTime + UIParameters.TimelineRangeThumbWidth;
+                timeLocatorView.IndicatorPosition = (double)(timeLocatorView.CurrentTime - timeLocatorView.RangeStart) * pixelPerTime + UIParameters.TimelineRangeThumbWidth;
 
                 var frameRangeWidth = (1.0 / timeLocatorView.FrameRate) * pixelPerTime;
                 if (frameRangeWidth >= DisplayFrameRangeThreshold)
@@ -354,10 +349,10 @@ namespace NiVE3.View.Part
                 timeLocatorView.IndicatorPosition = UIParameters.TimelineRangeThumbWidth;
             }
 
-            var globalPixelPerTime = (timeLocatorView.ActualWidth - UIParameters.TimelineRangeThumbWidth * 2.0) / timeLocatorView.Duration;
+            var globalPixelPerTime = (timeLocatorView.ActualWidth - UIParameters.TimelineRangeThumbWidth * 2.0) / (double)timeLocatorView.Duration;
             if (!double.IsNaN(globalPixelPerTime) && !double.IsInfinity(globalPixelPerTime) && globalPixelPerTime > 0.0)
             {
-                timeLocatorView.RangeBarIndicatorPosition = timeLocatorView.CurrentTime * globalPixelPerTime + UIParameters.TimelineRangeThumbWidth;
+                timeLocatorView.RangeBarIndicatorPosition = (double)timeLocatorView.CurrentTime * globalPixelPerTime + UIParameters.TimelineRangeThumbWidth;
             }
             else
             {

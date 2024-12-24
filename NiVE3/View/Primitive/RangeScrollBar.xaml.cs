@@ -13,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using NiVE3.Plugin.ValueObject;
 using NiVE3.View.Resource;
 using Prism.Commands;
 
@@ -25,41 +26,41 @@ namespace NiVE3.View.Primitive
     {
         public static readonly DependencyProperty MinimumProperty = DependencyProperty.Register(
             nameof(Minimum),
-            typeof(double),
+            typeof(Time),
             typeof(RangeScrollBar),
-            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange, null, CoerceMinimum),
-            IsValidDouble
+            new FrameworkPropertyMetadata(Time.Zero, FrameworkPropertyMetadataOptions.AffectsArrange, null, CoerceMinimum),
+            IsValidTime
         );
 
         public static readonly DependencyProperty MaximumProperty = DependencyProperty.Register(
             nameof(Maximum),
-            typeof(double),
+            typeof(Time),
             typeof(RangeScrollBar),
-            new FrameworkPropertyMetadata(1.0, FrameworkPropertyMetadataOptions.AffectsArrange, null, CoerceMaximum),
-            IsValidDouble
+            new FrameworkPropertyMetadata(Time.One, FrameworkPropertyMetadataOptions.AffectsArrange, null, CoerceMaximum),
+            IsValidTime
         );
 
         public static readonly DependencyProperty MinimumRangeProperty = DependencyProperty.Register(
             nameof(MinimumRange),
-            typeof(double),
+            typeof(Time),
             typeof(RangeScrollBar),
-            new FrameworkPropertyMetadata(0.01, FrameworkPropertyMetadataOptions.AffectsArrange)
+            new FrameworkPropertyMetadata(new Time(0.01), FrameworkPropertyMetadataOptions.AffectsArrange)
         );
 
         public static readonly DependencyProperty RangeProperty = DependencyProperty.Register(
             nameof(Range),
-            typeof(double),
+            typeof(Time),
             typeof(RangeScrollBar),
-            new FrameworkPropertyMetadata(1.0, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault | FrameworkPropertyMetadataOptions.AffectsArrange, RangeChanged),
-            IsValidDouble
+            new FrameworkPropertyMetadata(Time.One, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault | FrameworkPropertyMetadataOptions.AffectsArrange, RangeChanged),
+            IsValidTime
         );
 
         public static readonly DependencyProperty RangeStartProperty = DependencyProperty.Register(
             nameof(RangeStart),
-            typeof(double),
+            typeof(Time),
             typeof(RangeScrollBar),
-            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault | FrameworkPropertyMetadataOptions.AffectsArrange, null, CoerceRangeStart),
-            IsValidDouble
+            new FrameworkPropertyMetadata(Time.Zero, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault | FrameworkPropertyMetadataOptions.AffectsArrange, null, CoerceRangeStart),
+            IsValidTime
         );
 
         public static readonly DependencyProperty RangeChangeRateProperty = DependencyProperty.Register(
@@ -75,40 +76,40 @@ namespace NiVE3.View.Primitive
             set { SetValue(RangeChangeRateProperty, value); }
         }
 
-        public double RangeStart
+        public Time RangeStart
         {
-            get { return (double)GetValue(RangeStartProperty); }
+            get { return (Time)GetValue(RangeStartProperty); }
             set { SetValue(RangeStartProperty, value); }
         }
 
-        public double Range
+        public Time Range
         {
-            get { return (double)GetValue(RangeProperty); }
+            get { return (Time)GetValue(RangeProperty); }
             set { SetValue(RangeProperty, value); }
         }
 
-        public double MinimumRange
+        public Time MinimumRange
         {
-            get { return (double)GetValue(MinimumRangeProperty); }
+            get { return (Time)GetValue(MinimumRangeProperty); }
             set { SetValue(MinimumRangeProperty, value); }
         }
 
-        public double Maximum
+        public Time Maximum
         {
-            get { return (double)GetValue(MaximumProperty); }
+            get { return (Time)GetValue(MaximumProperty); }
             set { SetValue(MaximumProperty, value); }
         }
 
-        public double Minimum
+        public Time Minimum
         {
-            get { return (double)GetValue(MinimumProperty); }
+            get { return (Time)GetValue(MinimumProperty); }
             set { SetValue(MinimumProperty, value); }
         }
 
         double RangeWidth => ActualWidth - UIParameters.TimelineRangeThumbTotalWidth;
 
         // NOTE: Bindingの値の更新タイミング的にRangeの更新よりも先にMaximumの更新が出来ない(っぽい?)ため、Coerceによる値の修正は行わず、使用時にClampする
-        double ClampedRange => Math.Clamp(Range, MinimumRange, Maximum);
+        Time ClampedRange => Time.Clamp(Range, MinimumRange, Maximum);
 
         bool IsRangeStartThumbDragging { get; set; }
 
@@ -134,15 +135,15 @@ namespace NiVE3.View.Primitive
 
             var totalRange = Maximum - Minimum;
             var rangeBounds = arrangeBounds.Width - UIParameters.TimelineRangeThumbTotalWidth;
-            if (rangeBounds < 0.0 || totalRange <= 0.0)
+            if (rangeBounds < 0.0 || totalRange <= Time.Zero)
             {
                 DecreaseButton.Width = 0.0;
                 IncreaseButton.Width = 0.0;
                 return arrangeBounds;
             }
 
-            var rangeGridWidth = (Range / totalRange) * rangeBounds + UIParameters.TimelineRangeThumbTotalWidth;
-            DecreaseButton.Width = (RangeStart / totalRange) * rangeBounds;
+            var rangeGridWidth = (double)(Range / totalRange) * rangeBounds + UIParameters.TimelineRangeThumbTotalWidth;
+            DecreaseButton.Width = (double)(RangeStart / totalRange) * rangeBounds;
             IncreaseButton.Width = Math.Max(arrangeBounds.Width - (DecreaseButton.Width + rangeGridWidth), 0.0);
 
             return arrangeBounds;
@@ -167,7 +168,7 @@ namespace NiVE3.View.Primitive
             var area = Maximum - Minimum;
             var rangePerPixel = area / RangeWidth;
             var prevRangeStart = RangeStart;
-            var changed = Math.Min(Math.Max(-e.HorizontalChange * rangePerPixel, MinimumRange - clampedRange), RangeStart);
+            var changed = Time.MaxAndMin(-e.HorizontalChange * rangePerPixel, MinimumRange - clampedRange, RangeStart);
             Range = clampedRange + changed;
             RangeStart = prevRangeStart - changed;
         }
@@ -194,7 +195,7 @@ namespace NiVE3.View.Primitive
 
             var area = Maximum - Minimum;
             var rangePerPixel = area / RangeWidth;
-            RangeStart += Math.Max(Math.Min(e.HorizontalChange * rangePerPixel, Maximum - (RangeStart + ClampedRange)), -RangeStart);
+            RangeStart += Time.MaxAndMin(e.HorizontalChange * rangePerPixel, Maximum - (RangeStart + ClampedRange), -RangeStart);
         }
 
         private void RangeThumb_DragCompleted(object sender, DragCompletedEventArgs e)
@@ -219,7 +220,7 @@ namespace NiVE3.View.Primitive
 
             var area = Maximum - Minimum;
             var rangePerPixel = area / RangeWidth;
-            var changed = Math.Min(Math.Max(e.HorizontalChange * rangePerPixel, MinimumRange - Range), Maximum - (RangeStart + Range));
+            var changed = Time.MaxAndMin(e.HorizontalChange * rangePerPixel, MinimumRange - Range, Maximum - (RangeStart + Range));
             var prevRangeStart = RangeStart;
             Range += changed;
             RangeStart = prevRangeStart;
@@ -234,8 +235,8 @@ namespace NiVE3.View.Primitive
         {
             if (d is RangeScrollBar scrollBar)
             {
-                var diff = (double)e.NewValue - (double)e.OldValue;
-                scrollBar.RangeStart = Math.Min(Math.Max(scrollBar.RangeStart - diff * 0.5, scrollBar.Minimum), scrollBar.Maximum - scrollBar.ClampedRange);
+                var diff = (Time)e.NewValue - (Time)e.OldValue;
+                scrollBar.RangeStart = Time.MaxAndMin(scrollBar.RangeStart - diff * 0.5, scrollBar.Minimum, scrollBar.Maximum - scrollBar.ClampedRange);
             }
         }
 
@@ -243,7 +244,7 @@ namespace NiVE3.View.Primitive
         {
             if (d is RangeScrollBar scrollBar)
             {
-                return Math.Min((double)value, scrollBar.Maximum);
+                return Time.Min((Time)value, scrollBar.Maximum);
             }
             else
             {
@@ -255,7 +256,7 @@ namespace NiVE3.View.Primitive
         {
             if (d is RangeScrollBar scrollBar)
             {
-                return Math.Max((double)value, scrollBar.Minimum);
+                return Time.Max((Time)value, scrollBar.Minimum);
             }
             else
             {
@@ -267,7 +268,7 @@ namespace NiVE3.View.Primitive
         {
             if (d is RangeScrollBar scrollBar)
             {
-                return Math.Min(Math.Max((double)value, scrollBar.Minimum), scrollBar.Maximum - scrollBar.ClampedRange);
+                return Time.MaxAndMin((Time)value, scrollBar.Minimum, scrollBar.Maximum - scrollBar.ClampedRange);
             }
             else
             {
@@ -275,11 +276,11 @@ namespace NiVE3.View.Primitive
             }
         }
 
-        static bool IsValidDouble(object value)
+        static bool IsValidTime(object value)
         {
-            if (value is double d)
+            if (value is Time d)
             {
-                return !double.IsNaN(d) && !double.IsInfinity(d);
+                return !Time.IsNaN(d) && !Time.IsInfinity(d);
             }
             else
             {

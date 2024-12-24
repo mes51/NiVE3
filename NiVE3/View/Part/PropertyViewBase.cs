@@ -9,6 +9,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using NiVE3.Plugin.Property;
+using NiVE3.Plugin.ValueObject;
 using NiVE3.View.Converter;
 using NiVE3.View.Resource;
 using NiVE3.ViewModel;
@@ -91,16 +92,16 @@ namespace NiVE3.View.Part
 
         public static readonly DependencyProperty RangeProperty = DependencyProperty.Register(
             nameof(Range),
-            typeof(double),
+            typeof(Time),
             typeof(PropertyViewBase),
-            new FrameworkPropertyMetadata(0.0)
+            new FrameworkPropertyMetadata(Time.Zero)
         );
 
         public static readonly DependencyProperty RangeStartProperty = DependencyProperty.Register(
             nameof(RangeStart),
-            typeof(double),
+            typeof(Time),
             typeof(PropertyViewBase),
-            new FrameworkPropertyMetadata(0.0)
+            new FrameworkPropertyMetadata(Time.Zero)
         );
 
         public static readonly DependencyProperty CompositionFrameRateProperty = DependencyProperty.Register(

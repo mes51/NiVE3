@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using NiVE3.Extension;
+using NiVE3.Plugin.ValueObject;
 
 namespace NiVE3.View.Primitive
 {
@@ -32,23 +33,23 @@ namespace NiVE3.View.Primitive
 
         public static readonly DependencyProperty DurationProperty = DependencyProperty.Register(
             nameof(Duration),
-            typeof(double),
+            typeof(Time),
             typeof(TimeBar),
-            new FrameworkPropertyMetadata(1.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsRender, DurationChanged)
+            new FrameworkPropertyMetadata(Time.One, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsRender, DurationChanged)
         );
 
         public static readonly DependencyProperty RangeProperty = DependencyProperty.Register(
             nameof(Range),
-            typeof(double),
+            typeof(Time),
             typeof(TimeBar),
-            new FrameworkPropertyMetadata(1.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsRender)
+            new FrameworkPropertyMetadata(Time.One, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsRender)
         );
 
         public static readonly DependencyProperty RangeStartProperty = DependencyProperty.Register(
             nameof(RangeStart),
-            typeof(double),
+            typeof(Time),
             typeof(TimeBar),
-            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsRender)
+            new FrameworkPropertyMetadata(Time.Zero, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsRender)
         );
 
         public static readonly DependencyProperty FrameRateProperty = DependencyProperty.Register(
@@ -67,9 +68,9 @@ namespace NiVE3.View.Primitive
 
         private static readonly DependencyPropertyKey MinimumRangePropertyKey = DependencyProperty.RegisterReadOnly(
             nameof(MinimumRange),
-            typeof(double),
+            typeof(Time),
             typeof(TimeBar),
-            new FrameworkPropertyMetadata(0.01, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+            new FrameworkPropertyMetadata(new Time(0.01), FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
         );
 
         public static readonly DependencyProperty MinimumRangeProperty = MinimumRangePropertyKey.DependencyProperty;
@@ -86,21 +87,21 @@ namespace NiVE3.View.Primitive
             set { SetValue(FrameRateProperty, value); }
         }
 
-        public double RangeStart
+        public Time RangeStart
         {
-            get { return (double)GetValue(RangeStartProperty); }
+            get { return (Time)GetValue(RangeStartProperty); }
             set { SetValue(RangeStartProperty, value); }
         }
 
-        public double Range
+        public Time Range
         {
-            get { return (double)GetValue(RangeProperty); }
+            get { return (Time)GetValue(RangeProperty); }
             set { SetValue(RangeProperty, value); }
         }
 
-        public double Duration
+        public Time Duration
         {
-            get { return (double)GetValue(DurationProperty); }
+            get { return (Time)GetValue(DurationProperty); }
             set { SetValue(DurationProperty, value); }
         }
 
@@ -116,9 +117,9 @@ namespace NiVE3.View.Primitive
             set { SetValue(SideSpacerWidthProperty, value); }
         }
 
-        public double MinimumRange
+        public Time MinimumRange
         {
-            get { return (double)GetValue(MinimumRangeProperty); }
+            get { return (Time)GetValue(MinimumRangeProperty); }
             private set { SetValue(MinimumRangePropertyKey, value); }
         }
 
@@ -137,7 +138,7 @@ namespace NiVE3.View.Primitive
         {
             base.OnRender(drawingContext);
 
-            var timePerPixel = Range / (ActualWidth - SideSpacerWidth * 2.0);
+            var timePerPixel = (double)Range / (ActualWidth - SideSpacerWidth * 2.0);
             if (timePerPixel <= 0.0)
             {
                 drawingContext.DrawRectangle(SideSpacerBrush, null, new Rect(0.0, 0.0, SideSpacerWidth, ActualHeight));
@@ -190,15 +191,15 @@ namespace NiVE3.View.Primitive
             }
 
             var minTextWidth = timePerGap / timePerPixel;
-            var rangeStartX = -RangeStart / timePerPixel;
+            var rangeStartX = -(double)RangeStart / timePerPixel;
 
             drawingContext.PushClip(new RectangleGeometry(new Rect(0.0, 0.0, ActualWidth, ActualHeight)));
 
             drawingContext.DrawRectangle(SideSpacerBrush, null, new Rect(rangeStartX, 0.0, SideSpacerWidth, ActualHeight));
-            drawingContext.DrawRectangle(SideSpacerBrush, null, new Rect(rangeStartX + Duration / timePerPixel + SideSpacerWidth, 0.0, SideSpacerWidth, ActualHeight));
+            drawingContext.DrawRectangle(SideSpacerBrush, null, new Rect(rangeStartX + (double)Duration / timePerPixel + SideSpacerWidth, 0.0, SideSpacerWidth, ActualHeight));
             for (double w = (rangeStartX % minTextWidth) + SideSpacerWidth, limit = ActualWidth + textWidth; w <= limit; w += minTextWidth)
             {
-                var time = Math.Round(timePerPixel * (w - SideSpacerWidth) + RangeStart, 7); // TODO: 7桁で足りるか?
+                var time = Math.Round(timePerPixel * (w - SideSpacerWidth) + (double)RangeStart, 7); // TODO: 7桁で足りるか?
                 var timeText = CreateTimeText(time, timeUnit, forceFullFormat);
                 var formattedText = this.CreateFormattedText(timeText, Foreground);
                 drawingContext.DrawText(formattedText, new Point(w - formattedText.Width * 0.5, ActualHeight - formattedText.Height - 5));
@@ -262,7 +263,7 @@ namespace NiVE3.View.Primitive
 
         void UpdateMinimumRange()
         {
-            var newMinimumRange = Math.Min((ActualWidth - SideSpacerWidth * 2.0) * (1.0 / FrameRate / MinGap), Duration);
+            var newMinimumRange = Time.Min((Time)((ActualWidth - SideSpacerWidth * 2.0) * (1.0 / FrameRate / MinGap)), Duration);
             MinimumRange = newMinimumRange;
         }
 

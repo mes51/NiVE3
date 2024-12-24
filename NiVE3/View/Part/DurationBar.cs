@@ -9,6 +9,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using NiVE3.Extension;
 using NiVE3.Model;
+using NiVE3.Plugin.ValueObject;
 using NiVE3.Util;
 using NiVE3.View.Resource;
 
@@ -28,44 +29,44 @@ namespace NiVE3.View.Part
 
         public static readonly DependencyProperty RangeProperty = DependencyProperty.Register(
             nameof(Range),
-            typeof(double),
+            typeof(Time),
             typeof(DurationBar),
-            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsRender)
+            new FrameworkPropertyMetadata(Time.Zero, FrameworkPropertyMetadataOptions.AffectsRender)
         );
 
         public static readonly DependencyProperty RangeStartProperty = DependencyProperty.Register(
             nameof(RangeStart),
-            typeof(double),
+            typeof(Time),
             typeof(DurationBar),
-            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsRender)
+            new FrameworkPropertyMetadata(Time.Zero, FrameworkPropertyMetadataOptions.AffectsRender)
         );
 
         public static readonly DependencyProperty DurationProperty = DependencyProperty.Register(
             nameof(Duration),
-            typeof(double),
+            typeof(Time),
             typeof(DurationBar),
-            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsRender)
+            new FrameworkPropertyMetadata(Time.Zero, FrameworkPropertyMetadataOptions.AffectsRender)
         );
 
         public static readonly DependencyProperty SourceStartPointProperty = DependencyProperty.Register(
             nameof(SourceStartPoint),
-            typeof(double),
+            typeof(Time),
             typeof(DurationBar),
-            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.BindsTwoWayByDefault)
+            new FrameworkPropertyMetadata(Time.Zero, FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.BindsTwoWayByDefault)
         );
 
         public static readonly DependencyProperty InPointProperty = DependencyProperty.Register(
             nameof(InPoint),
-            typeof(double),
+            typeof(Time),
             typeof(DurationBar),
-            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.BindsTwoWayByDefault)
+            new FrameworkPropertyMetadata(Time.Zero, FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.BindsTwoWayByDefault)
         );
 
         public static readonly DependencyProperty OutPointProperty = DependencyProperty.Register(
             nameof(OutPoint),
-            typeof(double),
+            typeof(Time),
             typeof(DurationBar),
-            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.BindsTwoWayByDefault)
+            new FrameworkPropertyMetadata(Time.Zero, FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.BindsTwoWayByDefault)
         );
 
         public static readonly DependencyProperty HasDurationProperty = DependencyProperty.Register(
@@ -160,39 +161,39 @@ namespace NiVE3.View.Part
             set { SetValue(HasDurationProperty, value); }
         }
 
-        public double OutPoint
+        public Time OutPoint
         {
-            get { return (double)GetValue(OutPointProperty); }
+            get { return (Time)GetValue(OutPointProperty); }
             set { SetValue(OutPointProperty, value); }
         }
 
-        public double InPoint
+        public Time InPoint
         {
-            get { return (double)GetValue(InPointProperty); }
+            get { return (Time)GetValue(InPointProperty); }
             set { SetValue(InPointProperty, value); }
         }
 
-        public double SourceStartPoint
+        public Time SourceStartPoint
         {
-            get { return (double)GetValue(SourceStartPointProperty); }
+            get { return (Time)GetValue(SourceStartPointProperty); }
             set { SetValue(SourceStartPointProperty, value); }
         }
 
-        public double Duration
+        public Time Duration
         {
-            get { return (double)GetValue(DurationProperty); }
+            get { return (Time)GetValue(DurationProperty); }
             set { SetValue(DurationProperty, value); }
         }
 
-        public double Range
+        public Time Range
         {
-            get { return (double)GetValue(RangeProperty); }
+            get { return (Time)GetValue(RangeProperty); }
             set { SetValue(RangeProperty, value); }
         }
 
-        public double RangeStart
+        public Time RangeStart
         {
-            get { return (double)GetValue(RangeStartProperty); }
+            get { return (Time)GetValue(RangeStartProperty); }
             set { SetValue(RangeStartProperty, value); }
         }
 
@@ -265,7 +266,7 @@ namespace NiVE3.View.Part
                 EditMode = DurationEditMode.None;
                 IsClicked = false;
                 ReleaseMouseCapture();
-                UpdateDurationCommand?.Execute(Tuple.Create(0.0, 0.0, 0.0, true));
+                UpdateDurationCommand?.Execute(Tuple.Create(Time.Zero, Time.Zero, Time.Zero, true));
                 e.Handled = true;
             }
         }
@@ -275,8 +276,8 @@ namespace NiVE3.View.Part
             if (IsClicked)
             {
                 var frameRate = CompositionFrameRate;
-                var frameDuration = 1.0 / frameRate;
-                var diffTime = TimeCalc.CalcTimeFromPixel(e.GetPosition(this).X - ClickX, ActualWidth, Range, 0.0);
+                var frameDuration = new Time(1, frameRate);
+                var diffTime = TimeCalc.CalcTimeFromPixel(e.GetPosition(this).X - ClickX, ActualWidth, Range, Time.Zero);
                 var globalTime = TimeCalc.CalcTimeFromPixelAligned(e.GetPosition(this).X - UIParameters.TimelineRangeThumbWidth, ActualWidth, Range, RangeStart, frameRate);
                 if (diffTime != 0.0)
                 {
@@ -286,65 +287,65 @@ namespace NiVE3.View.Part
                         case DurationEditMode.InPoint:
                             {
                                 var prev = InPoint;
-                                var newTime = TimeCalc.AlignRound(globalTime, frameRate) - SourceStartPoint;
-                                var max = TimeCalc.AlignFloor(OutPoint - frameDuration, frameRate);
-                                var newInPoint = Math.Min(newTime, max);
+                                var newTime = globalTime.RoundToFrameRate(frameRate) - SourceStartPoint;
+                                var max = (OutPoint - frameDuration).FloorToFrameRate(frameRate);
+                                var newInPoint = Time.Min(newTime, max);
                                 if (HasDuration && !IsDisableDuration)
                                 {
-                                    max = Math.Max(max, 0.0);
-                                    newInPoint = Math.Min(Math.Max(newTime, 0.0), max);
+                                    max = Time.Max(max, Time.Zero);
+                                    newInPoint = Time.MaxAndMin(newTime, Time.Zero, max);
                                 }
                                 changed = prev != newInPoint;
                                 diffTime = newInPoint - prev;
-                                UpdateDurationCommand?.Execute(Tuple.Create(diffTime, 0.0, 0.0, false));
+                                UpdateDurationCommand?.Execute(Tuple.Create(diffTime, Time.Zero, Time.Zero, false));
                             }
                             break;
                         case DurationEditMode.OutPoint:
                             {
                                 var prev = OutPoint;
-                                var newTime = TimeCalc.AlignRound(globalTime, frameRate) - SourceStartPoint;
-                                var min = TimeCalc.AlignFloor(InPoint + frameDuration, frameRate);
-                                var newOutPoint = Math.Max(newTime, min);
+                                var newTime = globalTime.RoundToFrameRate(frameRate) - SourceStartPoint;
+                                var min = (InPoint + frameDuration).FloorToFrameRate(frameRate);
+                                var newOutPoint = Time.Max(newTime, min);
                                 if (HasDuration && !IsDisableDuration)
                                 {
-                                    min = Math.Min(min, Duration);
-                                    newOutPoint = Math.Min(Math.Max(newTime, min), Duration);
+                                    min = Time.Min(min, Duration);
+                                    newOutPoint = Time.MaxAndMin(newTime, min, Duration);
                                 }
                                 changed = prev != newOutPoint;
                                 diffTime = newOutPoint - prev;
-                                UpdateDurationCommand?.Execute(Tuple.Create(0.0, diffTime, 0.0, false));
+                                UpdateDurationCommand?.Execute(Tuple.Create(Time.Zero, diffTime, Time.Zero, false));
                             }
                             break;
                         case DurationEditMode.SourceStartPoint:
                             {
-                                var subFrameTime = SourceStartPoint - TimeCalc.AlignFloor(SourceStartPoint, frameRate);
+                                var subFrameTime = SourceStartPoint - SourceStartPoint.FloorToFrameRate(frameRate);
                                 var prev = SourceStartPoint;
-                                var newSourceStartPoint = TimeCalc.AlignFloor(SourceStartPoint + diffTime, frameRate) + subFrameTime;
+                                var newSourceStartPoint = (SourceStartPoint + diffTime).FloorToFrameRate(frameRate) + subFrameTime;
                                 diffTime = newSourceStartPoint - prev;
                                 changed = prev != newSourceStartPoint;
-                                UpdateDurationCommand?.Execute(Tuple.Create(0.0, 0.0, diffTime, false));
+                                UpdateDurationCommand?.Execute(Tuple.Create(Time.Zero, Time.Zero, diffTime, false));
                             }
                             break;
                         case DurationEditMode.Slip:
                             {
-                                diffTime = TimeCalc.AlignRound(diffTime, frameRate);
-                                var newInPoint = 0.0;
-                                var newOutPoint = 0.0;
-                                if (diffTime > 0.0)
+                                diffTime = diffTime.RoundToFrameRate(frameRate);
+                                var newInPoint = Time.Zero;
+                                var newOutPoint = Time.Zero;
+                                if (diffTime > Time.Zero)
                                 {
-                                    newInPoint = Math.Max(InPoint - diffTime, 0.0);
+                                    newInPoint = Time.Max(InPoint - diffTime, Time.Zero);
                                     diffTime = InPoint - newInPoint;
-                                    newOutPoint = Math.Max(OutPoint - diffTime, newInPoint + frameDuration);
+                                    newOutPoint = Time.Max(OutPoint - diffTime, newInPoint + frameDuration);
                                 }
                                 else
                                 {
-                                    newOutPoint = Math.Min(OutPoint - diffTime, Duration);
+                                    newOutPoint = Time.Min(OutPoint - diffTime, Duration);
                                     diffTime = OutPoint - newOutPoint;
-                                    newInPoint = Math.Max(InPoint - diffTime, 0.0);
+                                    newInPoint = Time.Max(InPoint - diffTime, Time.Zero);
                                 }
                                 if (InPoint != newInPoint && OutPoint != newOutPoint)
                                 {
-                                    UpdateDurationCommand?.Execute(Tuple.Create(0.0, 0.0, diffTime, false));
+                                    UpdateDurationCommand?.Execute(Tuple.Create(Time.Zero, Time.Zero, diffTime, false));
                                     changed = true;
                                 }
                             }
@@ -352,8 +353,8 @@ namespace NiVE3.View.Part
                     }
                     if (changed)
                     {
-                        var timePerPixel = Range / (ActualWidth - UIParameters.TimelineRangeThumbTotalWidth);
-                        ClickX += diffTime / timePerPixel;
+                        var timePerPixel = (double)Range / (ActualWidth - UIParameters.TimelineRangeThumbTotalWidth);
+                        ClickX += (double)diffTime / timePerPixel;
                     }
                 }
                 e.Handled = true;
@@ -362,7 +363,7 @@ namespace NiVE3.View.Part
             {
                 Cursor = Cursors.Arrow;
 
-                var pixelPerTime = (ActualWidth - UIParameters.TimelineRangeThumbTotalWidth) / Range;
+                var pixelPerTime = (ActualWidth - UIParameters.TimelineRangeThumbTotalWidth) / (double)Range;
                 if (pixelPerTime < 0 || double.IsNaN(pixelPerTime) || double.IsInfinity(pixelPerTime))
                 {
                     return;
@@ -371,7 +372,7 @@ namespace NiVE3.View.Part
                 var posX = e.GetPosition(this).X;
                 var inPointPos = (InPoint + SourceStartPoint - RangeStart) * pixelPerTime + UIParameters.TimelineRangeThumbWidth;
                 var outPointPos = (OutPoint + SourceStartPoint - RangeStart) * pixelPerTime + UIParameters.TimelineRangeThumbWidth;
-                if (Math.Abs(inPointPos - posX) <= EdgeCursorChangeWidth || Math.Abs(outPointPos - posX) <= EdgeCursorChangeWidth)
+                if (Time.Abs(inPointPos - posX) <= EdgeCursorChangeWidth || Time.Abs(outPointPos - posX) <= EdgeCursorChangeWidth)
                 {
                     Cursor = Cursors.SizeWE;
                     return;
@@ -391,14 +392,14 @@ namespace NiVE3.View.Part
 
         private void DurationBar_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            var pixelPerTime = (ActualWidth - UIParameters.TimelineRangeThumbTotalWidth) / Range;
+            var pixelPerTime = (ActualWidth - UIParameters.TimelineRangeThumbTotalWidth) / (double)Range;
             if (pixelPerTime < 0 || double.IsNaN(pixelPerTime) || double.IsInfinity(pixelPerTime))
             {
                 return;
             }
 
             ClickX = e.GetPosition(this).X;
-            var inPointPos = (InPoint + SourceStartPoint - RangeStart) * pixelPerTime + UIParameters.TimelineRangeThumbWidth;
+            var inPointPos = (double)(InPoint + SourceStartPoint - RangeStart) * pixelPerTime + UIParameters.TimelineRangeThumbWidth;
             if (Math.Abs(inPointPos - ClickX) <= EdgeCursorChangeWidth)
             {
                 EditMode = DurationEditMode.InPoint;
@@ -410,7 +411,7 @@ namespace NiVE3.View.Part
                 return;
             }
 
-            var outPointPos = (OutPoint + SourceStartPoint - RangeStart) * pixelPerTime + UIParameters.TimelineRangeThumbWidth;
+            var outPointPos = (double)(OutPoint + SourceStartPoint - RangeStart) * pixelPerTime + UIParameters.TimelineRangeThumbWidth;
             if (Math.Abs(outPointPos - ClickX) <= EdgeCursorChangeWidth)
             {
                 EditMode = DurationEditMode.OutPoint;
@@ -468,7 +469,7 @@ namespace NiVE3.View.Part
         {
             base.OnRender(drawingContext);
 
-            var pixelPerTime = (ActualWidth - UIParameters.TimelineRangeThumbTotalWidth) / Range;
+            var pixelPerTime = (ActualWidth - UIParameters.TimelineRangeThumbTotalWidth) / (double)Range;
             if (pixelPerTime < 0 || double.IsNaN(pixelPerTime) || double.IsInfinity(pixelPerTime))
             {
                 return;
@@ -480,12 +481,12 @@ namespace NiVE3.View.Part
 
             if (HasDuration && !IsDisableDuration)
             {
-                drawingContext.DrawRectangle(DurationBrush, null, new Rect((SourceStartPoint - RangeStart) * pixelPerTime + UIParameters.TimelineRangeThumbWidth, 0.0, Duration * pixelPerTime, ActualHeight));
+                drawingContext.DrawRectangle(DurationBrush, null, new Rect((double)(SourceStartPoint - RangeStart) * pixelPerTime + UIParameters.TimelineRangeThumbWidth, 0.0, (double)Duration * pixelPerTime, ActualHeight));
             }
-            drawingContext.DrawRectangle(EnableAreaBrush, null, new Rect((InPoint + SourceStartPoint - RangeStart) * pixelPerTime + UIParameters.TimelineRangeThumbWidth, 0.0, (OutPoint - InPoint) * pixelPerTime, ActualHeight));
+            drawingContext.DrawRectangle(EnableAreaBrush, null, new Rect((double)(InPoint + SourceStartPoint - RangeStart) * pixelPerTime + UIParameters.TimelineRangeThumbWidth, 0.0, (double)(OutPoint - InPoint) * pixelPerTime, ActualHeight));
             if ((!HasDuration || IsDisableDuration) && InPoint < 0.0)
             {
-                drawingContext.DrawRectangle(BeforeZeroBrush, null, new Rect((InPoint + SourceStartPoint - RangeStart) * pixelPerTime + UIParameters.TimelineRangeThumbWidth, 0.0, -InPoint * pixelPerTime, ActualHeight));
+                drawingContext.DrawRectangle(BeforeZeroBrush, null, new Rect((double)(InPoint + SourceStartPoint - RangeStart) * pixelPerTime + UIParameters.TimelineRangeThumbWidth, 0.0, -(double)InPoint * pixelPerTime, ActualHeight));
             }
 
             drawingContext.Pop();

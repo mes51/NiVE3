@@ -39,23 +39,23 @@ namespace NiVE3.View.Part
 
         public static readonly DependencyProperty RangeProperty = DependencyProperty.Register(
             nameof(Range),
-            typeof(double),
+            typeof(Time),
             typeof(KeyFrameCollectionView),
-            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsRender)
+            new FrameworkPropertyMetadata(Time.Zero, FrameworkPropertyMetadataOptions.AffectsRender)
         );
 
         public static readonly DependencyProperty RangeStartProperty = DependencyProperty.Register(
             nameof(RangeStart),
-            typeof(double),
+            typeof(Time),
             typeof(KeyFrameCollectionView),
-            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsRender)
+            new FrameworkPropertyMetadata(Time.Zero, FrameworkPropertyMetadataOptions.AffectsRender)
         );
 
         public static readonly DependencyProperty SourceStartPointProperty = DependencyProperty.Register(
             nameof(SourceStartPoint),
-            typeof(double),
+            typeof(Time),
             typeof(KeyFrameCollectionView),
-            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsRender)
+            new FrameworkPropertyMetadata(Time.Zero, FrameworkPropertyMetadataOptions.AffectsRender)
         );
 
         public static readonly DependencyProperty CompositionFrameRateProperty = DependencyProperty.Register(
@@ -144,21 +144,21 @@ namespace NiVE3.View.Part
             set { SetValue(CompositionFrameRateProperty, value); }
         }
 
-        public double SourceStartPoint
+        public Time SourceStartPoint
         {
-            get { return (double)GetValue(SourceStartPointProperty); }
+            get { return (Time)GetValue(SourceStartPointProperty); }
             set { SetValue(SourceStartPointProperty, value); }
         }
 
-        public double Range
+        public Time Range
         {
-            get { return (double)GetValue(RangeProperty); }
+            get { return (Time)GetValue(RangeProperty); }
             set { SetValue(RangeProperty, value); }
         }
 
-        public double RangeStart
+        public Time RangeStart
         {
-            get { return (double)GetValue(RangeStartProperty); }
+            get { return (Time)GetValue(RangeStartProperty); }
             set { SetValue(RangeStartProperty, value); }
         }
 
@@ -186,7 +186,7 @@ namespace NiVE3.View.Part
 
         double SelectRangeEndX { get; set; }
 
-        double KeyFrameMoveingTime { get; set; }
+        Time KeyFrameMoveingTime { get; set; }
 
         InterpolationType[]? SupportedInterpolationTypeList { get; set; } = Enum.GetValues<InterpolationType>();
 
@@ -294,7 +294,7 @@ namespace NiVE3.View.Part
             var actualWidth = ActualWidth;
             drawingContext.DrawRectangle(Brushes.Transparent, null, new Rect(0.0, 0.0, actualWidth, ActualHeight));
 
-            var pixelPerTime = (actualWidth - UIParameters.TimelineRangeThumbTotalWidth) / Range;
+            var pixelPerTime = (actualWidth - UIParameters.TimelineRangeThumbTotalWidth) / (double)Range;
             if (pixelPerTime < 0 || double.IsNaN(pixelPerTime) || double.IsInfinity(pixelPerTime) || KeyFrames.Count < 1)
             {
                 return;
@@ -315,14 +315,14 @@ namespace NiVE3.View.Part
             var selectedBrush = SelectedKeyFrameBrush;
             var timeOffset = SourceStartPoint - RangeStart;
             var selected = SelectedKeyFrameIds;
-            var diffTime = MoveTarget != null ? TimeCalc.AlignRound(KeyFrameMoveingTime + MoveTarget.Time, CompositionFrameRate) - (double)MoveTarget.Time : 0.0; //XXX: doubleへのキャストの削除
+            var diffTime = MoveTarget != null ? (KeyFrameMoveingTime + MoveTarget.Time).RoundToFrameRate(CompositionFrameRate) - MoveTarget.Time : Time.Zero;
             foreach (var (k, kp) in KeyFrames.Zip(KeyFrames.Prepend(KeyFrames.First())))
             {
                 var icon = KeyFrameIcons[(kp.InterpolationType, k.InterpolationType)];
 
                 var isSelected = selected.Contains(k.Id);
-                var keyFrameTime = k.Time + (isSelected && IsKeyFrameClicked ? diffTime : 0.0);
-                var x = (timeOffset + keyFrameTime) * pixelPerTime;
+                var keyFrameTime = k.Time + (isSelected && IsKeyFrameClicked ? diffTime : Time.Zero);
+                var x = (double)(timeOffset + keyFrameTime) * pixelPerTime;
                 if (x > -KeyFrameIconSize && x < actualWidth)
                 {
                     drawingContext.PushTransform(new TranslateTransform(x, 0.0));
@@ -446,13 +446,13 @@ namespace NiVE3.View.Part
         {
             if (IsKeyFrameClicked && MoveTarget != null)
             {
-                var diffTime = TimeCalc.AlignRound(MoveTarget.Time + TimeCalc.CalcTimeFromPixel(e.GetPosition(this).X - ClickX, ActualWidth, Range, 0.0), CompositionFrameRate) - MoveTarget.Time;
+                var diffTime = (MoveTarget.Time + TimeCalc.CalcTimeFromPixel(e.GetPosition(this).X - ClickX, ActualWidth, Range, Time.Zero)).RoundToFrameRate(CompositionFrameRate) - MoveTarget.Time;
 
                 IsKeyFrameClicked = false;
                 ReleaseMouseCapture();
 
                 var oldSelectedKeyFrame = SelectedKeyFrameIds.Where(id => KeyFrames.Any(k => k.Id == id)).Select(id => KeyFrames.First(k => k.Id == id)).ToArray();
-                var newTimes = oldSelectedKeyFrame.Select(k => TimeCalc.RoundTimeDigit(diffTime + k.Time)).Select(t => Time.FromTime(t)).ToArray(); // XXX: 全体的にTime構造体に置き換えた後に変換用のSelectを外す
+                var newTimes = oldSelectedKeyFrame.Select(k => diffTime + k.Time).ToArray();
 
                 if (oldSelectedKeyFrame.Select((k, i) => k.Time == newTimes[i]).All(b => b))
                 {
@@ -476,7 +476,7 @@ namespace NiVE3.View.Part
                 IsRangeDragging = false;
                 ReleaseMouseCapture();
 
-                var pixelPerTime = (ActualWidth - UIParameters.TimelineRangeThumbTotalWidth) / Range;
+                var pixelPerTime = (ActualWidth - UIParameters.TimelineRangeThumbTotalWidth) / (double)Range;
                 if (pixelPerTime < 0 || double.IsNaN(pixelPerTime) || double.IsInfinity(pixelPerTime) || KeyFrames.Count < 1)
                 {
                     return;
@@ -489,7 +489,7 @@ namespace NiVE3.View.Part
                 var endX = Math.Max(ClickX, SelectRangeEndX) - UIParameters.TimelineRangeThumbWidth;
                 var targetKeyFrames = KeyFrames.Where(k =>
                 {
-                    var keyFrameStartX = (k.Time + timeOffset) * pixelPerTime - KeyFrameIconSize * 0.5;
+                    var keyFrameStartX = (double)(k.Time + timeOffset) * pixelPerTime - KeyFrameIconSize * 0.5;
                     return (keyFrameStartX + KeyFrameIconSize) > startX && keyFrameStartX < endX;
                 }).ToArray();
 
@@ -540,7 +540,7 @@ namespace NiVE3.View.Part
         {
             if (IsKeyFrameClicked)
             {
-                KeyFrameMoveingTime = TimeCalc.CalcTimeFromPixel(e.GetPosition(this).X - ClickX, ActualWidth, Range, 0.0);
+                KeyFrameMoveingTime = TimeCalc.CalcTimeFromPixel(e.GetPosition(this).X - ClickX, ActualWidth, Range, Time.Zero);
                 InvalidateVisual();
             }
             else if (IsRangeDragging)
@@ -566,7 +566,7 @@ namespace NiVE3.View.Part
             }
 
             e.Handled = true;
-            var pixelPerTime = (ActualWidth - UIParameters.TimelineRangeThumbTotalWidth) / Range;
+            var pixelPerTime = (ActualWidth - UIParameters.TimelineRangeThumbTotalWidth) / (double)Range;
             if (pixelPerTime < 0 || double.IsNaN(pixelPerTime) || double.IsInfinity(pixelPerTime) || KeyFrames.Count < 1)
             {
                 return;
@@ -611,7 +611,7 @@ namespace NiVE3.View.Part
                         IsKeyFrameClicked = true;
                         MoveTarget = clickedKeyFrame;
                         ClickX = pos.X;
-                        KeyFrameMoveingTime = 0.0;
+                        KeyFrameMoveingTime = Time.Zero;
                         CaptureMouse();
                     }
                 }

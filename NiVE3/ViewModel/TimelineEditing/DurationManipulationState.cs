@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Model;
 using NiVE3.Plugin.Interfaces;
+using NiVE3.Plugin.ValueObject;
 using NiVE3.Shared.Extension;
 using NiVE3.Util;
 using NiVE3.View.Resource;
@@ -31,9 +32,9 @@ namespace NiVE3.ViewModel.TimelineEditing
             }
         }
 
-        public abstract void Update(double inPointDiff, double outPointDiff, double sourceStartPointDiff);
+        public abstract void Update(Time inPointDiff, Time outPointDiff, Time sourceStartPointDiff);
 
-        public virtual void Commit(double inPointDiff, double outPointDiff, double sourceStartPointDiff)
+        public virtual void Commit(Time inPointDiff, Time outPointDiff, Time sourceStartPointDiff)
         {
             Update(inPointDiff, outPointDiff, sourceStartPointDiff);
 
@@ -58,30 +59,30 @@ namespace NiVE3.ViewModel.TimelineEditing
 
     class InPointDurationManipulationState : DurationManipulationStateBase
     {
-        double DiffTime { get; set; }
+        Time DiffTime { get; set; }
 
-        double[] PrevInPoints { get; set; }
+        Time[] PrevInPoints { get; set; }
 
         public InPointDurationManipulationState(CompositionModel compositionModel, LayerViewModel[] layers, HistoryModel historyModel) : base(compositionModel, layers, historyModel)
         {
             PrevInPoints = [..layers.Select(l => l.InPoint)];
         }
 
-        public override void Update(double inPointDiff, double outPointDiff, double sourceStartPointDiff)
+        public override void Update(Time inPointDiff, Time outPointDiff, Time sourceStartPointDiff)
         {
             DiffTime += inPointDiff;
 
             foreach (var (layer, prevInPoint) in Layers.Zip(PrevInPoints))
             {
-                var max = TimeCalc.AlignFloor(layer.OutPoint - CompositionModel.FrameDuration, CompositionModel.FrameRate);
+                var max = (layer.OutPoint - CompositionModel.FrameDuration).FloorToFrameRate(CompositionModel.FrameRate);
                 if (layer.HasDuration && !layer.IsDisableDuration)
                 {
-                    max = Math.Max(max, 0.0);
-                    layer.InPoint = Math.Min(Math.Max(prevInPoint + DiffTime, 0.0), max);
+                    max = Time.Max(max, Time.Zero);
+                    layer.InPoint = Time.MaxAndMin(prevInPoint + DiffTime, Time.Zero, max);
                 }
                 else
                 {
-                    layer.InPoint = Math.Min(prevInPoint + DiffTime, max);
+                    layer.InPoint = Time.Min(prevInPoint + DiffTime, max);
                 }
             }
         }
@@ -89,31 +90,31 @@ namespace NiVE3.ViewModel.TimelineEditing
 
     class OutPointDurationManipulationState : DurationManipulationStateBase
     {
-        double DiffTime { get; set; }
+        Time DiffTime { get; set; }
 
-        double[] PrevOutPoints { get; set; }
+        Time[] PrevOutPoints { get; set; }
 
         public OutPointDurationManipulationState(CompositionModel compositionModel, LayerViewModel[] layers, HistoryModel historyModel) : base(compositionModel, layers, historyModel)
         {
             PrevOutPoints = [..layers.Select(l => l.OutPoint)];
         }
 
-        public override void Update(double inPointDiff, double outPointDiff, double sourceStartPointDiff)
+        public override void Update(Time inPointDiff, Time outPointDiff, Time sourceStartPointDiff)
         {
             DiffTime += outPointDiff;
 
             foreach (var (layer, prevOutPoint) in Layers.Zip(PrevOutPoints))
             {
-                var min = TimeCalc.AlignFloor(layer.InPoint + CompositionModel.FrameDuration, CompositionModel.FrameRate);
+                var min = (layer.InPoint + CompositionModel.FrameDuration).FloorToFrameRate(CompositionModel.FrameRate);
 
                 if (layer.HasDuration && !layer.IsDisableDuration)
                 {
-                    min = Math.Min(min, layer.Duration);
-                    layer.OutPoint = Math.Min(Math.Max(prevOutPoint + DiffTime, min), layer.Duration);
+                    min = Time.Min(min, layer.Duration);
+                    layer.OutPoint = Time.MaxAndMin(prevOutPoint + DiffTime, min, layer.Duration);
                 }
                 else
                 {
-                    layer.OutPoint = Math.Max(prevOutPoint + DiffTime, min);
+                    layer.OutPoint = Time.Max(prevOutPoint + DiffTime, min);
                 }
             }
         }
@@ -123,7 +124,7 @@ namespace NiVE3.ViewModel.TimelineEditing
     {
         public SourceStartPointDurationManipulationState(CompositionModel compositionModel, LayerViewModel[] layers, HistoryModel historyModel) : base(compositionModel, layers, historyModel) { }
 
-        public override void Update(double inPointDiff, double outPointDiff, double sourceStartPointDiff)
+        public override void Update(Time inPointDiff, Time outPointDiff, Time sourceStartPointDiff)
         {
             foreach (var layer in Layers)
             {
@@ -134,13 +135,13 @@ namespace NiVE3.ViewModel.TimelineEditing
 
     class SlipDurationManipulationState : DurationManipulationStateBase
     {
-        double DiffTime { get; set; }
+        Time DiffTime { get; set; }
 
-        double[] PrevInPoints { get; }
+        Time[] PrevInPoints { get; }
 
-        double[] PrevOutPoints { get; }
+        Time[] PrevOutPoints { get; }
 
-        double[] PrevSourceStartPoints { get; }
+        Time[] PrevSourceStartPoints { get; }
 
         public SlipDurationManipulationState(CompositionModel compositionModel, LayerViewModel[] layers, HistoryModel historyModel) : base(compositionModel, layers, historyModel)
         {
@@ -149,7 +150,7 @@ namespace NiVE3.ViewModel.TimelineEditing
             PrevSourceStartPoints = [..layers.Select(l => l.SourceStartPoint)];
         }
 
-        public override void Update(double inPointDiff, double outPointDiff, double sourceStartPointDiff)
+        public override void Update(Time inPointDiff, Time outPointDiff, Time sourceStartPointDiff)
         {
             DiffTime += sourceStartPointDiff;
 
@@ -157,23 +158,23 @@ namespace NiVE3.ViewModel.TimelineEditing
             {
                 foreach (var (layer, prevInPoint, prevOutPoint, prevSourceStartPoint) in Layers.Zip(PrevInPoints, PrevOutPoints, PrevSourceStartPoints).Where(t => t.First.HasDuration && !t.First.IsDisableDuration))
                 {
-                    var newInPoint = Math.Max(prevInPoint - DiffTime, 0.0);
+                    var newInPoint = Time.Max(prevInPoint - DiffTime, Time.Zero);
                     var newDiffTime = prevInPoint - newInPoint;
 
                     layer.SourceStartPoint = prevSourceStartPoint + DiffTime;
                     layer.InPoint = newInPoint;
-                    layer.OutPoint = Math.Max(prevOutPoint - newDiffTime, newInPoint + CompositionModel.FrameDuration);
+                    layer.OutPoint = Time.Max(prevOutPoint - newDiffTime, newInPoint + CompositionModel.FrameDuration);
                 }
             }
             else
             {
                 foreach (var (layer, prevInPoint, prevOutPoint, prevSourceStartPoint) in Layers.Zip(PrevInPoints, PrevOutPoints, PrevSourceStartPoints).Where(t => t.First.HasDuration && !t.First.IsDisableDuration))
                 {
-                    var newOutPoint = Math.Min(prevOutPoint - DiffTime, layer.Duration);
+                    var newOutPoint = Time.Min(prevOutPoint - DiffTime, layer.Duration);
                     var newDiffTime = prevOutPoint - newOutPoint;
 
                     layer.SourceStartPoint = prevSourceStartPoint + DiffTime;
-                    layer.InPoint = Math.Max(prevInPoint - newDiffTime, 0.0);
+                    layer.InPoint = Time.Max(prevInPoint - newDiffTime, Time.Zero);
                     layer.OutPoint = newOutPoint;
                 }
             }

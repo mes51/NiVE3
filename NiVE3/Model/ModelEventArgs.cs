@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using NiVE3.Numerics;
 using NiVE3.Plugin.Interfaces.RendererParams;
+using NiVE3.Plugin.ValueObject;
 using NiVE3.Text;
 
 namespace NiVE3.Model
@@ -171,15 +172,15 @@ namespace NiVE3.Model
     {
         public Guid CompositionId { get; }
 
-        public double InPointDiff { get; }
+        public Time InPointDiff { get; }
 
-        public double OutPointDiff { get; }
+        public Time OutPointDiff { get; }
 
-        public double SourceStartPointDiff { get; }
+        public Time SourceStartPointDiff { get; }
 
         public bool IsCommit { get; }
 
-        public UpdateDurationEventArgs(Guid compositionId, double inPointDiff, double outPointDiff, double sourceStartPointDiff, bool isCommit)
+        public UpdateDurationEventArgs(Guid compositionId, Time inPointDiff, Time outPointDiff, Time sourceStartPointDiff, bool isCommit)
         {
             CompositionId = compositionId;
             InPointDiff = inPointDiff;

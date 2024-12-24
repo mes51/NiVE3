@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using NiVE3.Cache;
+using NiVE3.Plugin.ValueObject;
 using NiVE3.Util;
 using NiVE3.View.Resource;
 
@@ -15,23 +16,23 @@ namespace NiVE3.View.Part
     {
         public static readonly DependencyProperty RangeProperty = DependencyProperty.Register(
             nameof(Range),
-            typeof(double),
+            typeof(Time),
             typeof(CachedFrameIndicator),
-            new FrameworkPropertyMetadata(1.0, FrameworkPropertyMetadataOptions.AffectsRender)
+            new FrameworkPropertyMetadata(Time.One, FrameworkPropertyMetadataOptions.AffectsRender)
         );
 
         public static readonly DependencyProperty RangeStartProperty = DependencyProperty.Register(
             nameof(RangeStart),
-            typeof(double),
+            typeof(Time),
             typeof(CachedFrameIndicator),
-            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsRender)
+            new FrameworkPropertyMetadata(Time.Zero, FrameworkPropertyMetadataOptions.AffectsRender)
         );
 
         public static readonly DependencyProperty DurationProperty = DependencyProperty.Register(
             nameof(Duration),
-            typeof(double),
+            typeof(Time),
             typeof(CachedFrameIndicator),
-            new FrameworkPropertyMetadata(60.0, FrameworkPropertyMetadataOptions.AffectsRender)
+            new FrameworkPropertyMetadata(new Time(60.0), FrameworkPropertyMetadataOptions.AffectsRender)
         );
 
         public static readonly DependencyProperty FrameRateProperty = DependencyProperty.Register(
@@ -43,9 +44,9 @@ namespace NiVE3.View.Part
 
         public static readonly DependencyProperty CurrentTimeProperty = DependencyProperty.Register(
             nameof(CurrentTime),
-            typeof(double),
+            typeof(Time),
             typeof(CachedFrameIndicator),
-            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsRender)
+            new FrameworkPropertyMetadata(Time.Zero, FrameworkPropertyMetadataOptions.AffectsRender)
         );
 
         public static readonly DependencyProperty CacheLineBrushProperty = DependencyProperty.Register(
@@ -87,9 +88,9 @@ namespace NiVE3.View.Part
             set { SetValue(CacheLineBrushProperty, value); }
         }
 
-        public double CurrentTime
+        public Time CurrentTime
         {
-            get { return (double)GetValue(CurrentTimeProperty); }
+            get { return (Time)GetValue(CurrentTimeProperty); }
             set { SetValue(CurrentTimeProperty, value); }
         }
 
@@ -99,21 +100,21 @@ namespace NiVE3.View.Part
             set { SetValue(FrameRateProperty, value); }
         }
 
-        public double Duration
+        public Time Duration
         {
-            get { return (double)GetValue(DurationProperty); }
+            get { return (Time)GetValue(DurationProperty); }
             set { SetValue(DurationProperty, value); }
         }
 
-        public double RangeStart
+        public Time RangeStart
         {
-            get { return (double)GetValue(RangeStartProperty); }
+            get { return (Time)GetValue(RangeStartProperty); }
             set { SetValue(RangeStartProperty, value); }
         }
 
-        public double Range
+        public Time Range
         {
-            get { return (double)GetValue(RangeProperty); }
+            get { return (Time)GetValue(RangeProperty); }
             set { SetValue(RangeProperty, value); }
         }
 
@@ -128,7 +129,7 @@ namespace NiVE3.View.Part
             base.OnRender(drawingContext);
 
             var width = ActualWidth;
-            var timePerPixel = Range / (width - UIParameters.TimelineRangeThumbTotalWidth);
+            var timePerPixel = (double)Range / (width - UIParameters.TimelineRangeThumbTotalWidth);
             if (timePerPixel <= 0.0)
             {
                 return;
@@ -141,12 +142,12 @@ namespace NiVE3.View.Part
             var y = ActualHeight - lineWidth;
             var frameRate = FrameRate;
             var pixelPerFrame = 1.0 / frameRate / timePerPixel;
-            var rangeStartX = -RangeStart / timePerPixel + UIParameters.TimelineRangeThumbWidth;
+            var rangeStartX = -(double)RangeStart / timePerPixel + UIParameters.TimelineRangeThumbWidth;
             var cacheStarted = -1;
             var cachedFrames = 0;
             foreach (var frame in ImageCache.GetCachedTime(TargetObjectId))
             {
-                var currentFrame = (int)Math.Round(frame * frameRate);
+                var currentFrame = (int)Math.Round((double)frame * frameRate);
                 if (cacheStarted + cachedFrames == currentFrame)
                 {
                     cachedFrames++;

@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using NiVE3.Plugin.ValueObject;
 using NiVE3.ViewModel;
 using NiVE3.Wpf.Behavior;
 
@@ -57,20 +58,20 @@ namespace NiVE3.View.Pane
             var dir = -Math.Sign(e.Delta);
             if (Keyboard.IsKeyDown(Key.LeftShift) ||  Keyboard.IsKeyDown(Key.RightShift))
             {
-                viewModel.TimeBarRangeStart = Math.Clamp(viewModel.TimeBarRangeStart + viewModel.TimeBarRange * 0.05 * dir, 0.0, viewModel.Duration - viewModel.TimeBarRange);
+                viewModel.TimeBarRangeStart = Time.Clamp(viewModel.TimeBarRangeStart + viewModel.TimeBarRange * 0.05 * dir, Time.Zero, viewModel.Duration - viewModel.TimeBarRange);
                 e.Handled = true;
             }
             else if (Keyboard.IsKeyDown(Key.LeftAlt) ||  Keyboard.IsKeyDown(Key.RightAlt))
             {
                 if (e.Delta > 0)
                 {
-                    viewModel.TimeBarRange = Math.Max(viewModel.TimeBarRange * 0.5, TimeLocator.MinimumRange);
+                    viewModel.TimeBarRange = Time.Max(viewModel.TimeBarRange * 0.5, TimeLocator.MinimumRange);
                 }
                 else
                 {
-                    viewModel.TimeBarRange = Math.Min(viewModel.TimeBarRange * 2.0, viewModel.Duration);
+                    viewModel.TimeBarRange = Time.Min(viewModel.TimeBarRange * 2.0, viewModel.Duration);
                 }
-                viewModel.TimeBarRangeStart = Math.Clamp(viewModel.CurrentTime - viewModel.TimeBarRange * 0.5, 0.0, viewModel.Duration - viewModel.TimeBarRange);
+                viewModel.TimeBarRangeStart = Time.Clamp(viewModel.CurrentTime - viewModel.TimeBarRange * 0.5, Time.Zero, viewModel.Duration - viewModel.TimeBarRange);
 
                 e.Handled = true;
             }
@@ -91,7 +92,7 @@ namespace NiVE3.View.Pane
             }
 
             var dir = Math.Sign(e.Delta);
-            viewModel.TimeBarRangeStart = Math.Clamp(viewModel.TimeBarRangeStart + viewModel.TimeBarRange * 0.05 * dir, 0.0, viewModel.Duration - viewModel.TimeBarRange);
+            viewModel.TimeBarRangeStart = Time.Clamp(viewModel.TimeBarRangeStart + viewModel.TimeBarRange * 0.05 * dir, Time.Zero, viewModel.Duration - viewModel.TimeBarRange);
         }
 
         private void ViewModel_FocusRequest(object? sender, EventArgs e)

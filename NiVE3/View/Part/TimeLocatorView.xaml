@@ -7,6 +7,7 @@
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:pr="clr-namespace:NiVE3.View.Primitive"
              xmlns:ugm="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
+             xmlns:uvo="clr-namespace:NiVE3.Plugin.ValueObject;assembly=NiVE3.Plugin"
              xmlns:r="clr-namespace:NiVE3.View.Resource"
              mc:Ignorable="d" 
              x:Name="Root"
@@ -29,7 +30,7 @@
 
         <pr:RangeScrollBar Grid.Row="0"
                            Height="{StaticResource TimeLocatorRangeBarHeight}"
-                           Minimum="0"
+                           Minimum="{x:Static uvo:Time.Zero}"
                            Maximum="{Binding ElementName=Root, Path=Duration}"
                            Range="{Binding ElementName=Root, Path=Range, Mode=TwoWay}"
                            RangeStart="{Binding ElementName=Root, Path=RangeStart, Mode=TwoWay}"

@@ -10,6 +10,7 @@ using NiVE3.Model;
 using NiVE3.Numerics;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Interfaces.RendererParams;
+using NiVE3.Plugin.ValueObject;
 using NiVE3.View.Resource;
 
 namespace NiVE3.ViewModel.TimelineEditing
@@ -20,7 +21,7 @@ namespace NiVE3.ViewModel.TimelineEditing
 
         protected abstract PropertyViewModel[] Properties { get; }
 
-        protected double Time { get; }
+        protected Time Time { get; }
 
         protected CompositionModel CompositionModel { get; }
 
@@ -30,7 +31,7 @@ namespace NiVE3.ViewModel.TimelineEditing
 
         protected HistoryModel HistoryModel { get; }
 
-        protected PreviewManipulationStateBase(double time, CompositionModel compositionModel, CameraSetting cameraSetting, Vector2d startScreenPosition, HistoryModel historyModel)
+        protected PreviewManipulationStateBase(Time time, CompositionModel compositionModel, CameraSetting cameraSetting, Vector2d startScreenPosition, HistoryModel historyModel)
         {
             Time = time;
             CompositionModel = compositionModel;
@@ -94,7 +95,7 @@ namespace NiVE3.ViewModel.TimelineEditing
 
         protected override PropertyViewModel[] Properties => PositionProperties.Select(t => t.property).ToArray();
 
-        public PositionPreviewManipulationState(LayerViewModel[] layers, LayerSkeleton grabbingLayerSkeleton, double time, CompositionModel compositionModel, CameraSetting cameraSetting, Vector2d startScreenPosition, HistoryModel historyModel)
+        public PositionPreviewManipulationState(LayerViewModel[] layers, LayerSkeleton grabbingLayerSkeleton, Time time, CompositionModel compositionModel, CameraSetting cameraSetting, Vector2d startScreenPosition, HistoryModel historyModel)
             : base(time, compositionModel, cameraSetting, startScreenPosition, historyModel)
         {
             var properties = new List<(bool, PropertyViewModel)>();
@@ -148,7 +149,7 @@ namespace NiVE3.ViewModel.TimelineEditing
 
         Vector3d[] PrevDirections { get; }
 
-        public RotateAllPreviewManipulationState(LayerViewModel[] layers, double time, CompositionModel compositionModel, CameraSetting cameraSetting, Vector2d startScreenPosition, HistoryModel historyModel)
+        public RotateAllPreviewManipulationState(LayerViewModel[] layers, Time time, CompositionModel compositionModel, CameraSetting cameraSetting, Vector2d startScreenPosition, HistoryModel historyModel)
             : base(time, compositionModel, cameraSetting, startScreenPosition, historyModel)
         {
             var properties = new List<PropertyViewModel>();
@@ -192,7 +193,7 @@ namespace NiVE3.ViewModel.TimelineEditing
 
         double[] PrevX { get; }
 
-        public RotateXPreviewManipulationState(LayerViewModel[] layers, double time, CompositionModel compositionModel, CameraSetting cameraSetting, Vector2d startScreenPosition, HistoryModel historyModel) : base(time, compositionModel, cameraSetting, startScreenPosition, historyModel)
+        public RotateXPreviewManipulationState(LayerViewModel[] layers, Time time, CompositionModel compositionModel, CameraSetting cameraSetting, Vector2d startScreenPosition, HistoryModel historyModel) : base(time, compositionModel, cameraSetting, startScreenPosition, historyModel)
         {
             var properties = new List<PropertyViewModel>();
             var prevX = new List<double>();
@@ -227,7 +228,7 @@ namespace NiVE3.ViewModel.TimelineEditing
 
         double[] PrevY { get; }
 
-        public RotateYPreviewManipulationState(LayerViewModel[] layers, double time, CompositionModel compositionModel, CameraSetting cameraSetting, Vector2d startScreenPosition, HistoryModel historyModel) : base(time, compositionModel, cameraSetting, startScreenPosition, historyModel)
+        public RotateYPreviewManipulationState(LayerViewModel[] layers, Time time, CompositionModel compositionModel, CameraSetting cameraSetting, Vector2d startScreenPosition, HistoryModel historyModel) : base(time, compositionModel, cameraSetting, startScreenPosition, historyModel)
         {
             var properties = new List<PropertyViewModel>();
             var prevX = new List<double>();
@@ -266,7 +267,7 @@ namespace NiVE3.ViewModel.TimelineEditing
 
         double PrevPointRadian { get; set; }
 
-        public RotateZPreviewManipulationState(LayerViewModel[] layers, LayerSkeleton grabbingLayerSkeleton, double time, CompositionModel compositionModel, CameraSetting cameraSetting, Vector2d startScreenPosition, HistoryModel historyModel) : base(time, compositionModel, cameraSetting, startScreenPosition, historyModel)
+        public RotateZPreviewManipulationState(LayerViewModel[] layers, LayerSkeleton grabbingLayerSkeleton, Time time, CompositionModel compositionModel, CameraSetting cameraSetting, Vector2d startScreenPosition, HistoryModel historyModel) : base(time, compositionModel, cameraSetting, startScreenPosition, historyModel)
         {
             var properties = new List<PropertyViewModel>();
             var prevZ = new List<double>();
@@ -327,7 +328,7 @@ namespace NiVE3.ViewModel.TimelineEditing
 
         LayerSkeleton GrabbingLayerSkeleton { get; }
 
-        public ScalePreviewManipulationState(LayerViewModel[] layers, LayerSkeleton grabbingLayerSkeleton, double time, CompositionModel compositionModel, CameraSetting cameraSetting, Vector2d startScreenPosition, HistoryModel historyModel) : base(time, compositionModel, cameraSetting, startScreenPosition, historyModel)
+        public ScalePreviewManipulationState(LayerViewModel[] layers, LayerSkeleton grabbingLayerSkeleton, Time time, CompositionModel compositionModel, CameraSetting cameraSetting, Vector2d startScreenPosition, HistoryModel historyModel) : base(time, compositionModel, cameraSetting, startScreenPosition, historyModel)
         {
             var properties = new List<PropertyViewModel>();
             var prevScale = new List<Vector3d>();
@@ -387,7 +388,7 @@ namespace NiVE3.ViewModel.TimelineEditing
 
         Vector3d CameraPointOfInterest { get; }
 
-        public CameraOrbitPreviewManipulationState(LayerViewModel targetCameraLayer, double time, CompositionModel compositionModel, CameraSetting cameraSetting, Vector2d startScreenPosition, HistoryModel historyModel) : base(time, compositionModel, cameraSetting, startScreenPosition, historyModel)
+        public CameraOrbitPreviewManipulationState(LayerViewModel targetCameraLayer, Time time, CompositionModel compositionModel, CameraSetting cameraSetting, Vector2d startScreenPosition, HistoryModel historyModel) : base(time, compositionModel, cameraSetting, startScreenPosition, historyModel)
         {
             var cameraPositionProperty = targetCameraLayer.TransformProperties?.Children?.FirstOrDefault(p => p.Property.Id == ILayerObject.TransformPositionId);
             var cameraPoiProperty = targetCameraLayer.TransformProperties?.Children?.FirstOrDefault(p => p.Property.Id == ILayerObject.TransformPointOfInterestId);
@@ -440,7 +441,7 @@ namespace NiVE3.ViewModel.TimelineEditing
 
         PropertyViewModel? PointOfInterestProperty { get; }
 
-        public CameraPanPreviewManipulationState(LayerViewModel targetCameraLayer, double time, CompositionModel compositionModel, CameraSetting cameraSetting, Vector2d startScreenPosition, HistoryModel historyModel) : base(time, compositionModel, cameraSetting, startScreenPosition, historyModel)
+        public CameraPanPreviewManipulationState(LayerViewModel targetCameraLayer, Time time, CompositionModel compositionModel, CameraSetting cameraSetting, Vector2d startScreenPosition, HistoryModel historyModel) : base(time, compositionModel, cameraSetting, startScreenPosition, historyModel)
         {
             var cameraPositionProperty = targetCameraLayer.TransformProperties?.Children?.FirstOrDefault(p => p.Property.Id == ILayerObject.TransformPositionId);
             var cameraPoiProperty = targetCameraLayer.TransformProperties?.Children?.FirstOrDefault(p => p.Property.Id == ILayerObject.TransformPointOfInterestId);
@@ -493,7 +494,7 @@ namespace NiVE3.ViewModel.TimelineEditing
 
         PropertyViewModel? PointOfInterestProperty { get; }
 
-        public CameraDollyPreviewManipulationState(LayerViewModel targetCameraLayer, double time, CompositionModel compositionModel, CameraSetting cameraSetting, Vector2d startScreenPosition, HistoryModel historyModel) : base(time, compositionModel, cameraSetting, startScreenPosition, historyModel)
+        public CameraDollyPreviewManipulationState(LayerViewModel targetCameraLayer, Time time, CompositionModel compositionModel, CameraSetting cameraSetting, Vector2d startScreenPosition, HistoryModel historyModel) : base(time, compositionModel, cameraSetting, startScreenPosition, historyModel)
         {
             var cameraPositionProperty = targetCameraLayer.TransformProperties?.Children?.FirstOrDefault(p => p.Property.Id == ILayerObject.TransformPositionId);
             var cameraPoiProperty = targetCameraLayer.TransformProperties?.Children?.FirstOrDefault(p => p.Property.Id == ILayerObject.TransformPointOfInterestId);

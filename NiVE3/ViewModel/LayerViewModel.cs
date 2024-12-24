@@ -17,6 +17,7 @@ using NiVE3.Model;
 using NiVE3.Model.UI;
 using NiVE3.Mvvm;
 using NiVE3.Plugin.Interfaces;
+using NiVE3.Plugin.ValueObject;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
 using NiVE3.UI.Command;
 using NiVE3.UI.Dialog;
@@ -55,41 +56,41 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref comment, value); }
         }
 
-        private double sourceDuration;
+        private Time sourceDuration;
         [NeedWire(nameof(LayerModel), IsOneWay = true)]
-        public double SourceDuration
+        public Time SourceDuration
         {
             get { return sourceDuration; }
             set { SetProperty(ref sourceDuration, value); }
         }
 
-        private double duration;
+        private Time duration;
         [NeedWire(nameof(LayerModel), IsOneWay = true)]
-        public double Duration
+        public Time Duration
         {
             get { return duration; }
             set { SetProperty(ref duration, value); }
         }
 
-        private double sourceStartPoint;
+        private Time sourceStartPoint;
         [NeedWire(nameof(LayerModel))]
-        public double SourceStartPoint
+        public Time SourceStartPoint
         {
             get { return sourceStartPoint; }
             set { SetProperty(ref sourceStartPoint, value); }
         }
 
-        private double inPoint;
+        private Time inPoint;
         [NeedWire(nameof(LayerModel))]
-        public double InPoint
+        public Time InPoint
         {
             get { return inPoint; }
             set { SetProperty(ref inPoint, value); }
         }
 
-        private double outPoint;
+        private Time outPoint;
         [NeedWire(nameof(LayerModel))]
-        public double OutPoint
+        public Time OutPoint
         {
             get { return outPoint; }
             set { SetProperty(ref outPoint, value); }
@@ -111,9 +112,9 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref isFreezeFrame, value); }
         }
 
-        private double freezeFrameTime;
+        private Time freezeFrameTime;
         [NeedWire(nameof(LayerModel), IsOneWay = true)]
-        public double FreezeFrameTime
+        public Time FreezeFrameTime
         {
             get { return freezeFrameTime; }
             set { SetProperty(ref freezeFrameTime, value); }
@@ -686,11 +687,11 @@ namespace NiVE3.ViewModel
 
         string PrevComment { get; set; } = "";
 
-        double PrevInPoint { get; set; }
+        Time PrevInPoint { get; set; }
 
-        double PrevOutPoint { get; set; }
+        Time PrevOutPoint { get; set; }
 
-        double PrevSourceStartPoint { get; set; }
+        Time PrevSourceStartPoint { get; set; }
 
 #pragma warning disable CS8618 // 各フィールドには初期化時に必ず値を代入するため無視
         public LayerViewModel(LayerModel layerModel, ViewStateModel viewState, EventHubModel eventHubModel, IEnumerable<LayerModelProxy> trackMatteViewSource, IEnumerable<LayerModelProxy> parentLayerViewSource)
@@ -760,7 +761,7 @@ namespace NiVE3.ViewModel
                 EventHubModel.NotifyBeginEditDuration(LayerModel.ParentCompositionId, LayerId, type ?? BeginEditDurationEventArgs.DurationType.None);
             }, _ => EditingParameter == EditingLayerParameter.None).ObservesProperty(() => EditingParameter);
 
-            UpdateDurationRequestCommand = new DelegateCommand<Tuple<double, double, double, bool>>(t =>
+            UpdateDurationRequestCommand = new DelegateCommand<Tuple<Time, Time, Time, bool>>(t =>
             {
                 EventHubModel.NotifyUpdateDuration(LayerModel.ParentCompositionId, t.Item1, t.Item2, t.Item3, t.Item4);
             }, _ => EditingParameter == EditingLayerParameter.Duration).ObservesProperty(() => EditingParameter);
@@ -1003,7 +1004,7 @@ namespace NiVE3.ViewModel
             return eventArgs.Cycled;
         }
 
-        public float[] GetAudio(double time, double length)
+        public float[] GetAudio(Time time, Time length)
         {
             return LayerModel.GetAudio(time, length);
         }
