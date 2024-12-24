@@ -26,10 +26,10 @@ namespace NiVE3.Expression.Wrapper
         public double frameRate => CompositionModel.FrameRate;
 
         [ExpressionPublicMember]
-        public double frameDuration => CompositionModel.FrameDuration;
+        public double frameDuration => (double)CompositionModel.FrameDuration;
 
         [ExpressionPublicMember]
-        public double duration => CompositionModel.Duration;
+        public double duration => (double)CompositionModel.Duration;
 
         [ExpressionPublicMember]
         public bool isRetentionFrameRate => CompositionModel.IsRetentionFrameRate;
@@ -47,10 +47,10 @@ namespace NiVE3.Expression.Wrapper
         public int motionBlurSampleCount => CompositionModel.MotionBlurSampleCount;
 
         [ExpressionPublicMember]
-        public double workareaBegin => CompositionModel.WorkareaBegin;
+        public double workareaBegin => (double)CompositionModel.WorkareaBegin;
 
         [ExpressionPublicMember]
-        public double workareaEnd => CompositionModel.WorkareaEnd;
+        public double workareaEnd => (double)CompositionModel.WorkareaEnd;
 
         //public bool isEnableFrameBlend => CompositionModel.IsEnableFrameBlend;
 

@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Image.Drawing;
 using NiVE3.Plugin.Interfaces;
+using NiVE3.Plugin.ValueObject;
 using NiVE3.Shared.Extension;
 using NiVE3.View.Resource;
 
@@ -27,7 +28,7 @@ namespace NiVE3.Model
 
             double OldFrameRate { get; }
 
-            double OldDuration { get; }
+            Time OldDuration { get; }
 
             bool OldIsRetentionFrameRate { get; }
 
@@ -51,9 +52,9 @@ namespace NiVE3.Model
 
             Int128 OldToneMapperSettingHash { get; }
 
-            double OldWorkareaBegin { get; }
+            Time OldWorkareaBegin { get; }
 
-            double OldWorkareaEnd { get; }
+            Time OldWorkareaEnd { get; }
 
             string NewName { get; }
 
@@ -63,7 +64,7 @@ namespace NiVE3.Model
 
             double NewFrameRate { get; }
 
-            double NewDuration { get; }
+            Time NewDuration { get; }
 
             bool NewIsRetentionFrameRate { get; }
 
@@ -87,9 +88,9 @@ namespace NiVE3.Model
 
             Int128 NewToneMapperSettingHash { get; }
 
-            double NewWorkareaBegin { get; }
+            Time NewWorkareaBegin { get; }
 
-            double NewWorkareaEnd { get; }
+            Time NewWorkareaEnd { get; }
 
             public ChangeCompositionSettingHistoryCommand(
                 CompositionModel model,
@@ -97,7 +98,7 @@ namespace NiVE3.Model
                 int oldWidth,
                 int oldHeight,
                 double oldFrameRate,
-                double oldDuration,
+                Time oldDuration,
                 bool oldIsRetentionFrameRate,
                 bool oldApplyToneMappingWhenNested,
                 int oldShutterAngle,
@@ -109,13 +110,13 @@ namespace NiVE3.Model
                 Int128 oldRendererSettingHash,
                 object? oldToneMapperSetting,
                 Int128 oldToneMapperSettingHash,
-                double oldWorkareaBegin,
-                double oldWorkareaEnd,
+                Time oldWorkareaBegin,
+                Time oldWorkareaEnd,
                 string newName,
                 int newWidth,
                 int newHeight,
                 double newFrameRate,
-                double newDuration,
+                Time newDuration,
                 bool newIsRetentionFrameRate,
                 bool newApplyToneMappingWhenNested,
                 int newShutterAngle,
@@ -127,8 +128,8 @@ namespace NiVE3.Model
                 Int128 newRendererSettingHash,
                 object? newToneMapperSetting,
                 Int128 newToneMapperSettingHash,
-                double newWorkareaBegin,
-                double newWorkareaEnd
+                Time newWorkareaBegin,
+                Time newWorkareaEnd
             )
             {
                 Model = model;
@@ -216,7 +217,7 @@ namespace NiVE3.Model
 
                 Model.WorkareaBegin = NewWorkareaBegin;
                 Model.WorkareaEnd = NewWorkareaEnd;
-                Model.FrameDuration = 1.0 / NewFrameRate;
+                Model.FrameDuration = new Time(1, NewFrameRate);
 
                 if (Model.TimeBarRange > NewDuration)
                 {
@@ -224,7 +225,7 @@ namespace NiVE3.Model
                 }
                 if (Model.TimeBarRangeStart + Model.TimeBarRange > NewDuration)
                 {
-                    Model.TimeBarRangeStart = Math.Max(NewDuration - Model.TimeBarRangeStart, 0.0);
+                    Model.TimeBarRangeStart = Time.Max(NewDuration - Model.TimeBarRangeStart, Time.Zero);
                 }
 
                 if (OldWidth != NewWidth || OldHeight != NewHeight)
@@ -281,7 +282,7 @@ namespace NiVE3.Model
 
                 Model.WorkareaBegin = OldWorkareaBegin;
                 Model.WorkareaEnd = OldWorkareaEnd;
-                Model.FrameDuration = 1.0 / OldFrameRate;
+                Model.FrameDuration = new Time(1, OldFrameRate);
 
                 if (Model.TimeBarRange > OldDuration)
                 {
@@ -289,7 +290,7 @@ namespace NiVE3.Model
                 }
                 if (Model.TimeBarRangeStart + Model.TimeBarRange > OldDuration)
                 {
-                    Model.TimeBarRangeStart = Math.Max(OldDuration - Model.TimeBarRangeStart, 0.0);
+                    Model.TimeBarRangeStart = Time.Max(OldDuration - Model.TimeBarRangeStart, Time.Zero);
                 }
 
                 if (OldWidth != NewWidth || OldHeight != NewHeight)
@@ -310,15 +311,15 @@ namespace NiVE3.Model
 
             CompositionModel Model { get; }
 
-            double OldWorkareaBegin { get; }
+            Time OldWorkareaBegin { get; }
 
-            double OldWorkareaEnd { get; }
+            Time OldWorkareaEnd { get; }
 
-            double NewWorkareaBegin { get; }
+            Time NewWorkareaBegin { get; }
 
-            double NewWorkareaEnd { get; }
+            Time NewWorkareaEnd { get; }
 
-            public ChangeWorkareaHistoryCommand(CompositionModel model, double oldWorkareaBegin, double oldWorkareaEnd, double newWorkareaBegin, double newWorkareaEnd)
+            public ChangeWorkareaHistoryCommand(CompositionModel model, Time oldWorkareaBegin, Time oldWorkareaEnd, Time newWorkareaBegin, Time newWorkareaEnd)
             {
                 Model = model;
                 OldWorkareaBegin = oldWorkareaBegin;
@@ -728,11 +729,11 @@ namespace NiVE3.Model
 
             Dictionary<Guid, LayerModel> NewLayers { get; }
 
-            double[] OldOutPoints { get; }
+            Time[] OldOutPoints { get; }
 
-            double[] NewOutPoints { get; }
+            Time[] NewOutPoints { get; }
 
-            public SplitLayersHistoryCommand(CompositionModel model, LayerModel[] targetLayers, Dictionary<Guid, LayerModel> newLayers, double[] oldOutPoints, double[] newOutPoints)
+            public SplitLayersHistoryCommand(CompositionModel model, LayerModel[] targetLayers, Dictionary<Guid, LayerModel> newLayers, Time[] oldOutPoints, Time[] newOutPoints)
             {
                 Model = model;
                 TargetLayers = targetLayers;

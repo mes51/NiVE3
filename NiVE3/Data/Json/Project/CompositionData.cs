@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using NiVE3.Data.Json.Converter;
+using NiVE3.Plugin.ValueObject;
 
 namespace NiVE3.Data.Json.Project
 {
@@ -20,7 +21,8 @@ namespace NiVE3.Data.Json.Project
 
         public double FrameRate { get; set; }
 
-        public double Duration { get; set; }
+        [JsonConverter(typeof(TimeJsonConverter))]
+        public Time Duration { get; set; }
 
         public bool IsRetentionFrameRate { get; set; }
 
@@ -32,9 +34,11 @@ namespace NiVE3.Data.Json.Project
 
         public int MotionBlurSampleCount { get; set; }
 
-        public double WorkareaBegin { get; set; }
+        [JsonConverter(typeof(TimeJsonConverter))]
+        public Time WorkareaBegin { get; set; }
 
-        public double WorkareaEnd { get; set; }
+        [JsonConverter(typeof(TimeJsonConverter))]
+        public Time WorkareaEnd { get; set; }
 
         public LayerData[] Layers { get; set; } = [];
 
@@ -50,10 +54,13 @@ namespace NiVE3.Data.Json.Project
 
         // for timeline
 
-        public double TimeBarRange { get; set; }
+        [JsonConverter(typeof(TimeJsonConverter))]
+        public Time TimeBarRange { get; set; }
 
-        public double TimeBarRangeStart { get; set; }
+        [JsonConverter(typeof(TimeJsonConverter))]
+        public Time TimeBarRangeStart { get; set; }
 
-        public double CurrentTime { get; set; }
+        [JsonConverter(typeof(TimeJsonConverter))]
+        public Time CurrentTime { get; set; }
     }
 }

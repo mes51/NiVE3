@@ -71,15 +71,15 @@ namespace NiVE3.Model
             set { SetProperty(ref frameRate, value); }
         }
 
-        private double frameDuration;
-        public double FrameDuration
+        private Time frameDuration;
+        public Time FrameDuration
         {
             get { return frameDuration; }
             private set { SetProperty(ref frameDuration, value); }
         }
 
-        private double duration;
-        public double Duration
+        private Time duration;
+        public Time Duration
         {
             get { return duration; }
             set { SetProperty(ref duration, value); }
@@ -120,36 +120,36 @@ namespace NiVE3.Model
             set { SetProperty(ref motionBlurSampleCount, value); }
         }
 
-        private double timeBarRange;
-        public double TimeBarRange
+        private Time timeBarRange;
+        public Time TimeBarRange
         {
             get { return timeBarRange; }
             set { SetProperty(ref timeBarRange, value); }
         }
 
-        private double timeBarRangeStart;
-        public double TimeBarRangeStart
+        private Time timeBarRangeStart;
+        public Time TimeBarRangeStart
         {
             get { return timeBarRangeStart; }
             set { SetProperty(ref timeBarRangeStart, value); }
         }
 
-        private double currentTime;
-        public double CurrentTime
+        private Time currentTime;
+        public Time CurrentTime
         {
             get { return currentTime; }
             set { SetProperty(ref currentTime, value); }
         }
 
-        private double workareaBegin;
-        public double WorkareaBegin
+        private Time workareaBegin;
+        public Time WorkareaBegin
         {
             get { return workareaBegin; }
             set { SetProperty(ref workareaBegin, value); }
         }
 
-        private double workareaEnd;
-        public double WorkareaEnd
+        private Time workareaEnd;
+        public Time WorkareaEnd
         {
             get { return workareaEnd; }
             set { SetProperty(ref workareaEnd, value); }
@@ -304,12 +304,22 @@ namespace NiVE3.Model
             ToneMapperSettingHash = CalcPluginSettingHash(ToneMapperSetting);
         }
 
-        public void InsertLayers(Guid footageId, int index, double sourceStartPoint = 0.0, Vector3d? initialPosition = null)
+        public void InsertLayers(Guid footageId, int index, Vector3d? initialPosition = null)
+        {
+            InsertLayers(footageId, index, Time.Zero, initialPosition);
+        }
+
+        public void InsertLayers(Guid footageId, int index, Time sourceStartPoint, Vector3d? initialPosition = null)
         {
             InsertLayers([footageId], index, sourceStartPoint, initialPosition);
         }
 
-        public void InsertLayers(Guid[] footageIds, int index, double sourceStartPoint = 0.0, Vector3d? initialPosition = null)
+        public void InsertLayers(Guid[] footageIds, int index, Vector3d? initialPosition = null)
+        {
+            InsertLayers(footageIds, index, Time.Zero, initialPosition);
+        }
+
+        public void InsertLayers(Guid[] footageIds, int index, Time sourceStartPoint, Vector3d? initialPosition = null)
         {
             var footages = footageIds.SelectMany(FootageListModel.GetFootages);
             var addedLayers = new List<LayerModel>();
@@ -376,7 +386,7 @@ namespace NiVE3.Model
 
             HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_AddLayers));
 
-            TextPropertyModel.UpdateTextProperty(layer, 0.0, null);
+            TextPropertyModel.UpdateTextProperty(layer, Time.Zero, null);
             InsertLayerInternal([layer], insertIndex);
 
             HistoryModel.EndGroup();
@@ -581,7 +591,7 @@ namespace NiVE3.Model
             DeleteLayers(layerIds);
         }
 
-        public void EnqueueRender(string filePath, RenderRangeType renderRangeType, double beginTime, double endTime, bool isOutputVideo, bool isOutputAudio, ExportLifetimeContext<IOutput> output)
+        public void EnqueueRender(string filePath, RenderRangeType renderRangeType, Time beginTime, Time endTime, bool isOutputVideo, bool isOutputAudio, ExportLifetimeContext<IOutput> output)
         {
             RenderQueueModel.Enqueue(this, filePath, renderRangeType, beginTime, endTime, isOutputVideo, isOutputAudio, output);
         }
@@ -591,7 +601,7 @@ namespace NiVE3.Model
             int width,
             int height,
             double frameRate,
-            double duration,
+            Time duration,
             bool isRetentionFrameRate,
             bool applyToneMappingWhenNested,
             int shutterAngle,
@@ -691,14 +701,14 @@ namespace NiVE3.Model
                 ToneMapperSettingHash = CalcPluginSettingHash(ToneMapperSetting);
             }
 
-            FrameDuration = 1.0 / FrameRate;
+            FrameDuration = new Time(1, FrameRate);
             if (TimeBarRange > Duration)
             {
                 TimeBarRange = Duration;
             }
             if (TimeBarRangeStart + TimeBarRange > Duration)
             {
-                TimeBarRangeStart = Math.Max(Duration - TimeBarRangeStart, 0.0);
+                TimeBarRangeStart = Time.Max(Duration - TimeBarRangeStart, Time.Zero);
             }
             if (WorkareaBegin == 0.0 && WorkareaEnd == prevDuration)
             {
@@ -706,8 +716,8 @@ namespace NiVE3.Model
             }
             else
             {
-                WorkareaBegin = Math.Min(WorkareaBegin, Duration - FrameDuration);
-                WorkareaEnd = Math.Clamp(WorkareaEnd, WorkareaBegin + FrameDuration, Duration);
+                WorkareaBegin = Time.Min(WorkareaBegin, Duration - FrameDuration);
+                WorkareaEnd = Time.Clamp(WorkareaEnd, WorkareaBegin + FrameDuration, Duration);
             }
 
             if (prevWidth != Width || prevHeight != Height)
@@ -766,7 +776,7 @@ namespace NiVE3.Model
             HistoryModel.EndGroup();
         }
 
-        public void ChangeWorkarea(double begin, double end)
+        public void ChangeWorkarea(Time begin, Time end)
         {
             var prevWorkareaBegin = WorkareaBegin;
             var prevWorkareaEnd = WorkareaEnd;
@@ -776,8 +786,8 @@ namespace NiVE3.Model
                 (begin, end) = (end, begin);
             }
 
-            var newWorkareaBegin = Math.Clamp(begin, 0.0, Duration - FrameDuration);
-            var newWorkareaEnd = Math.Clamp(end, WorkareaBegin + FrameDuration, Duration);
+            var newWorkareaBegin = Time.Clamp(begin, Time.Zero, Duration - FrameDuration);
+            var newWorkareaEnd = Time.Clamp(end, WorkareaBegin + FrameDuration, Duration);
             if (prevWorkareaBegin == newWorkareaBegin && prevWorkareaEnd == newWorkareaEnd)
             {
                 return;
@@ -810,7 +820,7 @@ namespace NiVE3.Model
             HistoryModel.Add(new ChangeEnableMotionBlurHistoryCommand(this, IsEnableMotionBlur));
         }
 
-        public NImage RenderFrame(double time, double downSamplingRate, bool applyToneMapping, bool useGpu)
+        public NImage RenderFrame(Time time, double downSamplingRate, bool applyToneMapping, bool useGpu)
         {
             IsRendering = true;
 
@@ -822,7 +832,7 @@ namespace NiVE3.Model
                     var hash = new XxHash3();
                     if (downSamplingRate == 1.0)
                     {
-                        CalcCacheHash(hash, time, 0.0, false);
+                        CalcCacheHash(hash, time, Time.Zero, false);
                     }
 
                     var cacheKey = hash.ToInt128();
@@ -919,7 +929,7 @@ namespace NiVE3.Model
                 }
                 else
                 {
-                    return RenderFrameInternal(time, 0.0, false, downSamplingRate, applyToneMapping, useGpu);
+                    return RenderFrameInternal(time, Time.Zero, false, downSamplingRate, applyToneMapping, useGpu);
                 }
             }
             finally
@@ -928,7 +938,7 @@ namespace NiVE3.Model
             }
         }
 
-        public float[] RenderAudio(double time, double length)
+        public float[] RenderAudio(Time time, Time length)
         {
             var vectorLength = Vector<float>.Count;
 
@@ -960,7 +970,7 @@ namespace NiVE3.Model
             return result;
         }
 
-        public ColoredPreviewBoundingBox[] GetBoundingBoxes(Guid[] layerIds, double time)
+        public ColoredPreviewBoundingBox[] GetBoundingBoxes(Guid[] layerIds, Time time)
         {
             var layers = Layers.Where(l => (l.HasImage || l.IsSpecial) && layerIds.Contains(l.LayerId)).OrderBy(Layers.IndexOf);
             var result = new List<ColoredPreviewBoundingBox>();
@@ -1041,7 +1051,7 @@ namespace NiVE3.Model
             Width = data.Width;
             Height = data.Height;
             FrameRate = data.FrameRate;
-            Duration = TimeCalc.AlignRound(data.Duration, data.FrameRate);
+            Duration = data.Duration.RoundToFrameRate(data.FrameRate);
             IsRetentionFrameRate = data.IsRetentionFrameRate;
             ApplyToneMappingWhenNested = data.ApplyToneMappingWhenNested;
             ShutterAngle = data.ShutterAngle;
@@ -1129,10 +1139,10 @@ namespace NiVE3.Model
             PasteLayersInternal(CopyLayers(ids), insertTargetId, true);
         }
 
-        public void SplitLayers(Guid[] ids, double splitPositionTime)
+        public void SplitLayers(Guid[] ids, Time splitPositionTime)
         {
             var layers = Layers.Where(l => ids.Contains(l.LayerId))
-                .Where(l => l.InPoint < TimeCalc.RoundTimeDigit(splitPositionTime - l.SourceStartPoint) && l.OutPoint > TimeCalc.RoundTimeDigit(splitPositionTime - l.SourceStartPoint))
+                .Where(l => l.InPoint < (splitPositionTime - l.SourceStartPoint) && l.OutPoint > (splitPositionTime - l.SourceStartPoint))
                 .OrderBy(Layers.IndexOf)
                 .ToArray();
             if (layers.Length < 1)
@@ -1152,7 +1162,7 @@ namespace NiVE3.Model
                     continue;
                 }
 
-                layerData.InPoint = TimeCalc.RoundTimeDigit(splitPositionTime - layerData.SourceStartPoint);
+                layerData.InPoint = splitPositionTime - layerData.SourceStartPoint;
                 var newLayer = new LayerModel(ProjectModel, this, footageModels.First(), EffectListModel, HistoryModel, AcceleratorModel);
                 newLayer.LoadData(layerData, true);
                 var index = Layers.FindIndex(l => l.LayerId == layerData.LayerId);
@@ -1160,8 +1170,8 @@ namespace NiVE3.Model
                 addedLayer.Add(layerData.LayerId, newLayer);
             }
 
-            var oldOutPoint = new double[layers.Length];
-            var newOutPoint = new double[layers.Length];
+            var oldOutPoint = new Time[layers.Length];
+            var newOutPoint = new Time[layers.Length];
             for (var i = 0; i < layers.Length; i++)
             {
                 oldOutPoint[i] = layers[i].OutPoint;
@@ -1188,7 +1198,7 @@ namespace NiVE3.Model
             }
         }
 
-        public Guid? FindLayerByPreviewPosition(double time, Vector2d pos)
+        public Guid? FindLayerByPreviewPosition(Time time, Vector2d pos)
         {
             var activeCamera = Layers.FirstOrDefault(l => l.IsEnableVideo && l.IsCamera && l.IsContainsTime(time));
             var activeCameraSetting = activeCamera?.GetCameraSetting(time) ?? CreateDefaultCameraSetting(Width, Height);
@@ -1198,7 +1208,7 @@ namespace NiVE3.Model
             return Renderer.SelectLayer(activeCameraSetting, layers, pos);
         }
 
-        public LayerSkeleton? GetLayerSkeleton(Guid layerId, double time)
+        public LayerSkeleton? GetLayerSkeleton(Guid layerId, Time time)
         {
             return Layers.FirstOrDefault(l => l.LayerId == layerId)?.GetLayerSkeleton(time);
         }
@@ -1227,12 +1237,12 @@ namespace NiVE3.Model
             }
         }
 
-        public LayerModel? GetActiveCamera(double time)
+        public LayerModel? GetActiveCamera(Time time)
         {
             return Layers.FirstOrDefault(l => l.IsEnableVideo && l.IsCamera && l.IsContainsTime(time));
         }
 
-        public CameraSetting GetActiveCameraSetting(double time)
+        public CameraSetting GetActiveCameraSetting(Time time)
         {
             var activeCamera = GetActiveCamera(time);
             return activeCamera?.GetCameraSetting(time) ?? CreateDefaultCameraSetting(Width, Height);
@@ -1294,7 +1304,7 @@ namespace NiVE3.Model
             HistoryModel.EndGroup();
         }
 
-        public void MoveLayerInPoint(Guid[] layerIds, double targetTime)
+        public void MoveLayerInPoint(Guid[] layerIds, Time targetTime)
         {
             if (layerIds.Length < 1)
             {
@@ -1305,14 +1315,14 @@ namespace NiVE3.Model
 
             foreach (var layer in Layers.Where(l => layerIds.Contains(l.LayerId)))
             {
-                var newInPoint = TimeCalc.AlignRound(targetTime - layer.SourceStartPoint, FrameRate);
+                var newInPoint = (targetTime - layer.SourceStartPoint).RoundToFrameRate(FrameRate);
                 if (layer.IsSpecial || layer.IsEnableTimeRemap || layer.IsFreezeFrame || layer.IsImage)
                 {
-                    newInPoint = Math.Min(newInPoint, layer.OutPoint - FrameDuration);
+                    newInPoint = Time.Min(newInPoint, layer.OutPoint - FrameDuration);
                 }
                 else
                 {
-                    newInPoint = Math.Min(Math.Max(newInPoint, 0.0), layer.OutPoint - FrameDuration);
+                    newInPoint = Time.Min(Time.Max(newInPoint, Time.Zero), layer.OutPoint - FrameDuration);
                 }
                 if (layer.InPoint != newInPoint)
                 {
@@ -1323,7 +1333,7 @@ namespace NiVE3.Model
             HistoryModel.EndGroup();
         }
 
-        public void MoveLayerOutPoint(Guid[] layerIds, double targetTime)
+        public void MoveLayerOutPoint(Guid[] layerIds, Time targetTime)
         {
             if (layerIds.Length < 1)
             {
@@ -1334,14 +1344,14 @@ namespace NiVE3.Model
 
             foreach (var layer in Layers.Where(l => layerIds.Contains(l.LayerId)))
             {
-                var newOutPoint = TimeCalc.AlignRound(targetTime - layer.SourceStartPoint + FrameDuration, FrameRate);
+                var newOutPoint = (targetTime - layer.SourceStartPoint + FrameDuration).RoundToFrameRate(FrameRate);
                 if (layer.IsSpecial || layer.IsEnableTimeRemap || layer.IsFreezeFrame || layer.IsImage)
                 {
-                    newOutPoint = Math.Max(newOutPoint, layer.InPoint + FrameDuration);
+                    newOutPoint = Time.Max(newOutPoint, layer.InPoint + FrameDuration);
                 }
                 else
                 {
-                    newOutPoint = Math.Max(Math.Min(newOutPoint, layer.Duration), layer.InPoint + FrameDuration);
+                    newOutPoint = Time.Max(Time.Min(newOutPoint, layer.Duration), layer.InPoint + FrameDuration);
                 }
                 if (layer.OutPoint != newOutPoint)
                 {
@@ -1352,7 +1362,7 @@ namespace NiVE3.Model
             HistoryModel.EndGroup();
         }
 
-        public void MoveLayerSourceStartPointToInPoint(Guid[] layerIds, double targetTime)
+        public void MoveLayerSourceStartPointToInPoint(Guid[] layerIds, Time targetTime)
         {
             if (layerIds.Length < 1)
             {
@@ -1363,7 +1373,7 @@ namespace NiVE3.Model
 
             foreach (var layer in Layers.Where(l => layerIds.Contains(l.LayerId)))
             {
-                var newSourceStartPoint = TimeCalc.AlignRound(targetTime - layer.InPoint, FrameRate);
+                var newSourceStartPoint = (targetTime - layer.InPoint).RoundToFrameRate(FrameRate);
                 if (layer.SourceStartPoint != newSourceStartPoint)
                 {
                     layer.CommitEditDuration(layer.InPoint, layer.InPoint, layer.OutPoint, layer.OutPoint, layer.SourceStartPoint, newSourceStartPoint);
@@ -1373,7 +1383,7 @@ namespace NiVE3.Model
             HistoryModel.EndGroup();
         }
 
-        public void MoveLayerSourceStartPointToOutPoint(Guid[] layerIds, double targetTime)
+        public void MoveLayerSourceStartPointToOutPoint(Guid[] layerIds, Time targetTime)
         {
             if (layerIds.Length < 1)
             {
@@ -1384,7 +1394,7 @@ namespace NiVE3.Model
 
             foreach (var layer in Layers.Where(l => layerIds.Contains(l.LayerId)))
             {
-                var newSourceStartPoint = TimeCalc.AlignRound(targetTime - layer.OutPoint + FrameDuration, FrameRate);
+                var newSourceStartPoint = (targetTime - layer.OutPoint + FrameDuration).RoundToFrameRate(FrameRate);
                 if (layer.SourceStartPoint != newSourceStartPoint)
                 {
                     layer.CommitEditDuration(layer.InPoint, layer.InPoint, layer.OutPoint, layer.OutPoint, layer.SourceStartPoint, newSourceStartPoint);
@@ -1394,7 +1404,7 @@ namespace NiVE3.Model
             HistoryModel.EndGroup();
         }
 
-        public void MoveLayerSourceStartPoint(Guid[] layerIds, double diff)
+        public void MoveLayerSourceStartPoint(Guid[] layerIds, Time diff)
         {
             if (layerIds.Length < 1)
             {
@@ -1405,7 +1415,7 @@ namespace NiVE3.Model
 
             foreach (var layer in Layers.Where(l => layerIds.Contains(l.LayerId)))
             {
-                var newSourceStartPoint = TimeCalc.AlignRound(layer.SourceStartPoint + diff, FrameRate);
+                var newSourceStartPoint = (layer.SourceStartPoint + diff).RoundToFrameRate(FrameRate);
                 if (layer.SourceStartPoint != newSourceStartPoint)
                 {
                     layer.CommitEditDuration(layer.InPoint, layer.InPoint, layer.OutPoint, layer.OutPoint, layer.SourceStartPoint, newSourceStartPoint);
@@ -1432,7 +1442,7 @@ namespace NiVE3.Model
             HistoryModel.EndGroup();
         }
 
-        public void ChangeFreezeFrame(Guid[] layerIds, bool isFreezeFrame, double time)
+        public void ChangeFreezeFrame(Guid[] layerIds, bool isFreezeFrame, Time time)
         {
             if (layerIds.Length < 1)
             {
@@ -1479,7 +1489,7 @@ namespace NiVE3.Model
             return Layers.FirstOrDefault(l => l.LayerId == layerId);
         }
 
-        NImage RenderFrameInternal(double time, double shutterTime, bool isSubFrame, double downSamplingRate, bool applyToneMapping, bool useGpu)
+        NImage RenderFrameInternal(Time time, Time shutterTime, bool isSubFrame, double downSamplingRate, bool applyToneMapping, bool useGpu)
         {
             var cameraSetting = Layers.FirstOrDefault(l => l.IsEnableVideo && l.IsCamera && l.IsContainsTime(time))?.GetCameraSetting(time);
 
@@ -1488,7 +1498,7 @@ namespace NiVE3.Model
 
             var hasImageSolo = Layers.Any(l => l.HasImage && l.IsEnableVideo && l.IsEnableSolo);
             var useLayers = Layers.Where(l => l.HasImage && l.IsEnableVideo && (!hasImageSolo || l.IsEnableSolo)).Reverse().ToArray();
-            var subFrameTime = Math.Max(time + shutterTime, 0.0);
+            var subFrameTime = Time.Max(time + shutterTime, Time.Zero);
 
             var hash = new XxHash3();
             if (downSamplingRate == 1.0)
@@ -1842,11 +1852,11 @@ namespace NiVE3.Model
             HistoryModel.EndGroup();
         }
 
-        void CalcCacheHash(XxHash3 hash, double time, double shutterTime, bool isSubFrame)
+        void CalcCacheHash(XxHash3 hash, Time time, Time shutterTime, bool isSubFrame)
         {
             if (IsEnableMotionBlur)
             {
-                time = Math.Max(time + shutterTime, 0.0);
+                time = Time.Max(time + shutterTime, Time.Zero);
                 hash.Append(isSubFrame);
             }
 
@@ -1979,7 +1989,7 @@ namespace NiVE3.Model
             switch (e.PropertyName)
             {
                 case nameof(FrameRate):
-                    FrameDuration = 1.0 / FrameRate;
+                    FrameDuration = new Time(1, FrameRate);
                     break;
                 case nameof(Duration):
                     if (TimeBarRange < Duration)
@@ -1988,9 +1998,9 @@ namespace NiVE3.Model
                     }
                     if (TimeBarRangeStart + TimeBarRange > Duration)
                     {
-                        TimeBarRangeStart = Math.Max(Duration - TimeBarRangeStart, 0.0);
+                        TimeBarRangeStart = Time.Max(Duration - TimeBarRangeStart, Time.Zero);
                     }
-                    WorkareaBegin = 0.0;
+                    WorkareaBegin = Time.Zero;
                     WorkareaEnd = Duration;
                     break;
                 case nameof(Width):

@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Data;
 using NiVE3.Input;
+using NiVE3.Plugin.ValueObject;
 using NiVE3.Property.Types;
 using NiVE3.Text;
 using Prism.Mvvm;
@@ -158,7 +159,7 @@ namespace NiVE3.Model.UI
             TextLineColor = (FloatColor)style.TextLineColor;
         }
 
-        public void UpdateTextProperty(LayerModel targetLayer, double layerTime, object? prevValue)
+        public void UpdateTextProperty(LayerModel targetLayer, Time layerTime, object? prevValue)
         {
             var currentText = prevValue as StyledText ?? (targetLayer.GetTextProperties(layerTime)?.TryGetValueInTree(TextFootageSource.SourceTextId, out var styledText) ?? false ? styledText as StyledText ?? StyledText.Empty : StyledText.Empty);
             var newStyle = GetStyle();

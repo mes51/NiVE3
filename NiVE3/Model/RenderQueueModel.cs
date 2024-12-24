@@ -95,7 +95,7 @@ namespace NiVE3.Model
             HistoryModel = historyModel;
         }
 
-        public void Enqueue(CompositionModel compositionModel, string filePath, RenderRangeType renderRangeType, double beginTime, double endTime, bool isOutputVideo, bool isOutputAudio, ExportLifetimeContext<IOutput>? output)
+        public void Enqueue(CompositionModel compositionModel, string filePath, RenderRangeType renderRangeType, Time beginTime, Time endTime, bool isOutputVideo, bool isOutputAudio, ExportLifetimeContext<IOutput>? output)
         {
             var duplicateCount = 1;
             while (Items.Any(i => i.FilePath == filePath) || File.Exists(filePath))
