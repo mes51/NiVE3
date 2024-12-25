@@ -9,6 +9,7 @@ using NiVE3.Model;
 using NiVE3.Model.UI;
 using NiVE3.Mvvm;
 using NiVE3.Plugin.Interfaces;
+using NiVE3.Plugin.ValueObject;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
 using NiVE3.View.Dock;
 using NiVE3.View.Resource;
@@ -53,17 +54,17 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref currentEditingCompositionId, value); }
         }
 
-        private double timeBarRange;
+        private Time timeBarRange;
         [ManualWire(nameof(Composition))]
-        public double TimeBarRange
+        public Time TimeBarRange
         {
             get { return timeBarRange; }
             set { SetProperty(ref timeBarRange, value); }
         }
 
-        private double timeBarRangeStart;
+        private Time timeBarRangeStart;
         [ManualWire(nameof(Composition))]
-        public double TimeBarRangeStart
+        public Time TimeBarRangeStart
         {
             get { return timeBarRangeStart; }
             set { SetProperty(ref timeBarRangeStart, value); }

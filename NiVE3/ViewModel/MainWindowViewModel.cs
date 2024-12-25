@@ -23,6 +23,7 @@ using NiVE3.Model.UI;
 using NiVE3.UI.Command;
 using Prism.Navigation.Regions;
 using Prism.Dialogs;
+using NiVE3.Plugin.ValueObject;
 
 namespace NiVE3.ViewModel
 {
@@ -284,7 +285,7 @@ namespace NiVE3.ViewModel
                         result.Parameters.GetValue<int>(nameof(CompositionSettingViewModel.Width)),
                         result.Parameters.GetValue<int>(nameof(CompositionSettingViewModel.Height)),
                         result.Parameters.GetValue<double>(nameof(CompositionSettingViewModel.FrameRate)),
-                        result.Parameters.GetValue<double>(nameof(CompositionSettingViewModel.Duration)),
+                        result.Parameters.GetValue<Time>(nameof(CompositionSettingViewModel.Duration)),
                         result.Parameters.GetValue<bool>(nameof(CompositionSettingViewModel.IsRetentionFrameRate)),
                         result.Parameters.GetValue<bool>(nameof(CompositionSettingViewModel.ApplyToneMappingWhenNested)),
                         result.Parameters.GetValue<int>(nameof(CompositionSettingViewModel.ShutterAngle)),
@@ -476,7 +477,7 @@ namespace NiVE3.ViewModel
                 }
                 if (!ViewModels.OfType<PreviewViewModel>().Any())
                 {
-                    PlayControllerModel.Duration = 0.0;
+                    PlayControllerModel.Duration = Time.Zero;
                 }
 
                 foreach (var vm in removedPane.OfType<TimelineViewModel>())

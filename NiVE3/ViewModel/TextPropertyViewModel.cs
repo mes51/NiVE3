@@ -26,6 +26,7 @@ using NiVE3.Property.Types;
 using NiVE3.Data;
 using NiVE3.Model.UI;
 using NiVE3.Util;
+using NiVE3.Plugin.ValueObject;
 
 namespace NiVE3.ViewModel
 {
@@ -160,9 +161,9 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref lastSelectedLayerId, value); }
         }
 
-        private double currentTime;
+        private Time currentTime;
         [ManualWire(nameof(Composition), IsOneWay = true)]
-        public double CurrentTime
+        public Time CurrentTime
         {
             get { return currentTime; }
             set { SetProperty(ref currentTime, value); }

@@ -33,9 +33,6 @@ namespace NiVE3.ViewModel.Dialog
 
         public const string ToneMapperSettingViewData = nameof(ToneMapperSettingViewData);
 
-        // TODO: 要調整
-        const int FrameTimeDigit = 7;
-
         private string name = "";
         public string Name
         {
@@ -64,15 +61,15 @@ namespace NiVE3.ViewModel.Dialog
             set { SetProperty(ref frameRate, value); }
         }
 
-        private double frameDuration = 1.0 / 30.0;
-        public double FrameDuration
+        private Time frameDuration = new Time(1, 30.0);
+        public Time FrameDuration
         {
             get { return frameDuration; }
             set { SetProperty(ref frameDuration, value); }
         }
 
-        private double duration = 10.0;
-        public double Duration
+        private Time duration = new Time(300, 30.0);
+        public Time Duration
         {
             get { return duration; }
             set { SetProperty(ref duration, value); }
@@ -388,7 +385,7 @@ namespace NiVE3.ViewModel.Dialog
             if (parameters.TryGetValue<int>(nameof(Width), out var width) &&
                 parameters.TryGetValue<int>(nameof(Height), out var height) &&
                 parameters.TryGetValue<double>(nameof(FrameRate), out var frameRate) &&
-                parameters.TryGetValue<double>(nameof(Duration), out var duration) &&
+                parameters.TryGetValue<Time>(nameof(Duration), out var duration) &&
                 parameters.TryGetValue<bool>(nameof(IsRetentionFrameRate), out var isRetentionFrameRate) &&
                 parameters.TryGetValue<bool>(nameof(ApplyToneMappingWhenNested), out var applyToneMappingWhenNested) &&
                 parameters.TryGetValue<int>(nameof(ShutterAngle), out var shutterAngle) &&
@@ -427,10 +424,15 @@ namespace NiVE3.ViewModel.Dialog
             switch (e.PropertyName)
             {
                 case nameof(FrameRate):
-                    FrameDuration = 1.0 / FrameRate;
+                    FrameDuration = new Time(1, FrameRate);
                     break;
-                case nameof(FrameDuration) when FrameRate != Math.Round(1.0 / FrameDuration, FrameTimeDigit):
-                    FrameRate = Math.Round(1.0 / FrameDuration, FrameTimeDigit);
+                case nameof(FrameDuration) when FrameRate != FrameDuration.FrameRate:
+                    if (!FrameDuration.IsFrameTime)
+                    {
+                        FrameDuration = new Time(1, Math.Round(1.0 / (double)FrameDuration, 2));
+                        return;
+                    }
+                    FrameRate = FrameDuration.FrameRate;
                     break;
                 case nameof(SelectedPreset) when SelectedPreset != null:
                     IsChangingPreset = true;

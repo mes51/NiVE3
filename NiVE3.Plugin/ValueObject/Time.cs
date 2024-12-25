@@ -1647,13 +1647,13 @@ namespace NiVE3.Plugin.ValueObject
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator double(in Time a)
+        public static explicit operator double(in Time a)
         {
             return a.IsFrameTime ? RoundTimeDigit(a.Frame / a.FrameRate) : a.RealTime;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator Time(double realTime)
+        public static explicit operator Time(double realTime)
         {
             return new Time(RoundTimeDigit(realTime));
         }

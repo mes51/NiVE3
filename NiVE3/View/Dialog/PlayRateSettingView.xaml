@@ -22,6 +22,7 @@
     </pr:Dialog.WindowStyle>
     <UserControl.Resources>
         <cv:TimeConverter x:Key="TimeConverter" FrameRate="{Binding CompositionFrameRate}"/>
+        <cv:TimeToDoubleConverter x:Key="TimeToDoubleConverter" FrameRate="{Binding CompositionFrameRate}"/>
     </UserControl.Resources>
     <Grid Margin="10">
         <Grid.RowDefinitions>
@@ -53,7 +54,7 @@
                 </Grid.ColumnDefinitions>
 
                 <TextBlock Grid.Column="0" Margin="0,0,5,0" Text="{gm:LanguageResource ResourceKey=PlayRateSettingView_Duration}" HorizontalAlignment="Right"/>
-                <upr:SlidableNumberTextBox Grid.Column="1" Value="{Binding Duration}" Converter="{StaticResource TimeConverter}" SlideChangeValue="{Binding FrameDuration}" HorizontalAlignment="Left"/>
+                <upr:SlidableNumberTextBox Grid.Column="1" Value="{Binding Duration, Converter={StaticResource TimeToDoubleConverter}}" Converter="{StaticResource TimeConverter}" SlideChangeValue="{Binding DoubleFrameDuration}" HorizontalAlignment="Left"/>
             </Grid>
 
             <Grid Grid.Row="2" VerticalAlignment="Center">

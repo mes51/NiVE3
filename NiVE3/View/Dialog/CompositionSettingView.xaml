@@ -29,6 +29,7 @@
         <Thickness x:Key="ItemMargin">5,0,0,0</Thickness>
         <Thickness x:Key="ItemRowMargin">0,5,0,0</Thickness>
         <cv:TimeConverter x:Key="TimeConverter" FrameRate="{Binding FrameRate}"/>
+        <cv:TimeToDoubleConverter x:Key="TimeToDoubleConverter" FrameRate="{Binding FrameRate}"/>
         <!-- NOTE: ComboBoxがnullを選択できないので、ダミーの値をnullとして扱う -->
         <cv:NullToDummyConverter x:Key="NullToDummyConverter"/>
         <sys:String x:Key="DummyPreset">Dummy</sys:String>
@@ -193,7 +194,13 @@
                                     </Grid.ColumnDefinitions>
 
                                     <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=CompositionSettingView_DurationLabel}" Style="{StaticResource ItemLabel}"/>
-                                    <upr:SlidableNumberTextBox Grid.Column="1" Value="{Binding Duration}" Maximum="35999" Minimum="{Binding FrameDuration}" SlideChangeValue="{Binding FrameDuration}" Converter="{StaticResource TimeConverter}" Style="{StaticResource LargeSlidableNumberTextBox}"/>
+                                    <upr:SlidableNumberTextBox Grid.Column="1"
+                                                               Value="{Binding Duration, Converter={StaticResource TimeToDoubleConverter}}"
+                                                               Maximum="35999"
+                                                               Minimum="{Binding FrameDuration, Converter={StaticResource TimeToDoubleConverter}}"
+                                                               SlideChangeValue="{Binding FrameDuration, Converter={StaticResource TimeToDoubleConverter}}"
+                                                               Converter="{StaticResource TimeConverter}"
+                                                               Style="{StaticResource LargeSlidableNumberTextBox}"/>
                                 </Grid>
                                 <Grid Style="{StaticResource ItemRowGrid}">
                                     <CheckBox Content="{gm:LanguageResource ResourceKey=CompositionSettingView_RetentionFrameRate}" IsChecked="{Binding IsRetentionFrameRate}"/>

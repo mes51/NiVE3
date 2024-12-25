@@ -118,14 +118,13 @@ namespace NiVE3.View.Converter
             }
             else
             {
-                var result = TimeCalc.RoundTimeDigit(time) * sign;
                 if (IsTimeStruct)
                 {
-                    return Time.FromTime(time, FrameRate);
+                    return Time.FromTime(time * sign, FrameRate);
                 }
                 else
                 {
-                    return result;
+                    return Math.Round(time, TimeCalc.TimeDigit) * sign;
                 }
             }
         }

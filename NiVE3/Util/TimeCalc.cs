@@ -14,7 +14,7 @@ namespace NiVE3.Util
     {
         public const double TimeEpsilon = 1E-10;
 
-        const int TimeDigit = 10;
+        public const int TimeDigit = 10;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Time CalcTimeFromPixel(double x, double uiWidth, in Time range, in Time rangeStart)
@@ -52,30 +52,6 @@ namespace NiVE3.Util
         {
             var time = CalcTimeFromPixel(x, uiWidth, range, rangeStart, min, max);
             return time.RoundToFrameRate(frameRate);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static double AlignRound(double time, double frameRate)
-        {
-            return RoundTimeDigit((int)Math.Round(time * frameRate) / frameRate);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static double AlignFloor(double time, double frameRate)
-        {
-            return RoundTimeDigit((int)Math.Round(time * frameRate, TimeDigit) / frameRate);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static double AlignCeiling(double time, double frameRate)
-        {
-            return RoundTimeDigit((int)Math.Ceiling(Math.Round(time * frameRate, TimeDigit)) / frameRate);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static double RoundTimeDigit(double time)
-        {
-            return Math.Round(time, TimeDigit);
         }
     }
 }

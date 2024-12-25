@@ -10,6 +10,7 @@ using NiVE3.View.Resource;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
 using NiVE3.UI.Command;
 using NiVE3.Model.UI;
+using NiVE3.Plugin.ValueObject;
 
 namespace NiVE3.ViewModel
 {
@@ -25,33 +26,33 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref frameRate, value); }
         }
 
-        private double currentTime;
+        private Time currentTime;
         [NeedWire(nameof(PlayControllerModel))]
-        public double CurrentTime
+        public Time CurrentTime
         {
             get { return currentTime; }
             set { SetProperty(ref currentTime, value); }
         }
 
-        private double workareaBegin;
+        private Time workareaBegin;
         [NeedWire(nameof(PlayControllerModel))]
-        public double WorkareaBegin
+        public Time WorkareaBegin
         {
             get { return workareaBegin; }
             set { SetProperty(ref workareaBegin, value); }
         }
 
-        private double workareaEnd;
+        private Time workareaEnd;
         [NeedWire(nameof(PlayControllerModel))]
-        public double WorkareaEnd
+        public Time WorkareaEnd
         {
             get { return workareaEnd; }
             set { SetProperty(ref workareaEnd, value); }
         }
 
-        private double duration;
+        private Time duration;
         [NeedWire(nameof(PlayControllerModel))]
-        public double Duration
+        public Time Duration
         {
             get { return duration; }
             set { SetProperty(ref duration, value); }

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using NiVE3.Plugin.ValueObject;
 using NiVE3.View.Resource;
 using Prism.Commands;
 using Prism.Dialogs;
@@ -23,15 +24,15 @@ namespace NiVE3.ViewModel.Dialog
             set { SetProperty(ref playRate, value); }
         }
 
-        private double sourceDuration;
-        public double SourceDuration
+        private Time sourceDuration;
+        public Time SourceDuration
         {
             get { return sourceDuration; }
             set { SetProperty(ref sourceDuration, value); }
         }
 
-        private double duration;
-        public double Duration
+        private Time duration;
+        public Time Duration
         {
             get { return duration; }
             set { SetProperty(ref duration, value); }
@@ -64,7 +65,7 @@ namespace NiVE3.ViewModel.Dialog
 
         public DialogCloseListener RequestClose { get; }
 
-        double FrameDuration => 1.0 / CompositionFrameRate;
+        public double DoubleFrameDuration => 1.0 / CompositionFrameRate;
 
         bool IsChangingRate { get; set; }
 
@@ -99,13 +100,13 @@ namespace NiVE3.ViewModel.Dialog
             IsChangingRate = true;
 
             PlayRate = parameters.GetValue<double>(nameof(PlayRate));
-            SourceDuration = parameters.GetValue<double>(nameof(SourceDuration));
+            SourceDuration = parameters.GetValue<Time>(nameof(SourceDuration));
             CompositionFrameRate = parameters.GetValue<double>(nameof(CompositionFrameRate));
-            MinPlayRate = SourceDuration / FrameDuration * -100.0;
+            MinPlayRate = (double)SourceDuration / DoubleFrameDuration * -100.0;
             MaxPlayRate = -MinPlayRate;
-            Duration = Math.Abs(SourceDuration / (PlayRate * 0.01));
+            Duration = Time.Abs(SourceDuration / (PlayRate * 0.01));
 
-            RaisePropertyChanged(nameof(FrameDuration));
+            RaisePropertyChanged(nameof(DoubleFrameDuration));
 
             IsChangingRate = false;
         }
@@ -121,7 +122,7 @@ namespace NiVE3.ViewModel.Dialog
                     break;
                 case nameof(Duration) when !IsChangingRate:
                     IsChangingRate = true;
-                    PlayRate = Duration != 0.0 ? SourceDuration / Duration * 100.0 : MaxPlayRate;
+                    PlayRate = Duration != 0.0 ? (double)(SourceDuration / Duration) * 100.0 : MaxPlayRate;
                     IsChangingRate = false;
                     break;
             }
