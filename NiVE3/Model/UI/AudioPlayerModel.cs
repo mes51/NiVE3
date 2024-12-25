@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Audio;
+using NiVE3.Plugin.ValueObject;
 using NiVE3.Util;
 using Prism.Mvvm;
 
@@ -72,28 +73,28 @@ namespace NiVE3.Model.UI
             ScrubWaveProvider.AddSample(samples);
         }
 
-        public void SetPreviewAudio(float[] audio, double loopStart, double loopEnd)
+        public void SetPreviewAudio(float[] audio, Time loopStart, Time loopEnd)
         {
             PreviewWaveProvider.SetAudio(audio);
             PreviewWaveProvider.LoopStart = Math.Max((int)(loopStart * Const.AudioSamplingRate) * Const.AudioChannelCount, 0);
             PreviewWaveProvider.LoopEnd = Math.Min((int)(loopEnd * Const.AudioSamplingRate) * Const.AudioChannelCount, audio.Length);
         }
 
-        public double GetPlayingPosition()
+        public Time GetPlayingPosition()
         {
             if (PreviewPlayer != null)
             {
-                return PreviewWaveProvider.GetActualPosition(PreviewPlayer.GetPosition()) / Const.AudioChannelCount / (double)Const.AudioSamplingRate;
+                return (Time)(PreviewWaveProvider.GetActualPosition(PreviewPlayer.GetPosition()) / Const.AudioChannelCount / (double)Const.AudioSamplingRate);
             }
             else
             {
-                return 0.0;
+                return Time.Zero;
             }
         }
 
-        public void SetPlayingPosition(double position)
+        public void SetPlayingPosition(Time position)
         {
-            PreviewWaveProvider.Position = (int)(position * Const.AudioSamplingRate) * Const.AudioChannelCount;
+            PreviewWaveProvider.Position = (int)((double)position * Const.AudioSamplingRate) * Const.AudioChannelCount;
         }
 
         ~AudioPlayerModel()

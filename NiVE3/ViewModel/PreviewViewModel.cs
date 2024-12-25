@@ -34,6 +34,7 @@ using NiVE3.Model.UI;
 using System.Threading;
 using System.Windows.Xps.Packaging;
 using System.Buffers;
+using NiVE3.Plugin.ValueObject;
 
 namespace NiVE3.ViewModel
 {
@@ -78,25 +79,25 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref sourceType, value); }
         }
 
-        private double workareaBegin;
+        private Time workareaBegin;
         [NeedWire(nameof(PreviewModel), IsOneWay = true)]
-        public double WorkareaBegin
+        public Time WorkareaBegin
         {
             get { return workareaBegin; }
             set { SetProperty(ref workareaBegin, value); }
         }
 
-        private double workareaEnd;
+        private Time workareaEnd;
         [NeedWire(nameof(PreviewModel), IsOneWay = true)]
-        public double WorkareaEnd
+        public Time WorkareaEnd
         {
             get { return workareaEnd; }
             set { SetProperty(ref workareaEnd, value); }
         }
 
-        private double duration;
+        private Time duration;
         [NeedWire(nameof(PreviewModel), IsOneWay = true)]
-        public double Duration
+        public Time Duration
         {
             get { return duration; }
             set { SetProperty(ref duration, value); }
@@ -110,9 +111,9 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref frameRate, value); }
         }
 
-        private double currentTime;
+        private Time currentTime;
         [NeedWire(nameof(PreviewModel))]
-        public double CurrentTime
+        public Time CurrentTime
         {
             get { return currentTime; }
             set { SetProperty(ref currentTime, value); }
@@ -207,15 +208,15 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref realFrameRateIsUpdated, value); }
         }
 
-        private double timeBarRange;
-        public double TimeBarRange
+        private Time timeBarRange;
+        public Time TimeBarRange
         {
             get { return timeBarRange; }
             set { SetProperty(ref timeBarRange, value); }
         }
 
-        private double timeBarRangeStart;
-        public double TimeBarRangeStart
+        private Time timeBarRangeStart;
+        public Time TimeBarRangeStart
         {
             get { return timeBarRangeStart; }
             set { SetProperty(ref timeBarRangeStart, value); }
@@ -818,16 +819,16 @@ namespace NiVE3.ViewModel
         {
             if (SourceType == SourceType.Audio)
             {
-                CurrentTime = TimeCalc.AlignRound(AudioPlayerModel.GetPlayingPosition(), FrameRate);
+                CurrentTime = AudioPlayerModel.GetPlayingPosition().RoundToFrameRate(FrameRate);
                 return;
             }
 
             RealFrameRate = Math.Min(PlayControllerModel.RealFrameRate, FrameRate);
             if (RealFrameRate > 0.0)
             {
-                var tolerance = 1.0 / FrameRate * AudioShiftToleranceRate;
+                var tolerance = new Time(1, FrameRate / AudioShiftToleranceRate);
                 var audioPosition = AudioPlayerModel.GetPlayingPosition();
-                if (Math.Abs(CurrentTime - audioPosition) > tolerance)
+                if (Time.Abs(CurrentTime - audioPosition) > tolerance)
                 {
                     AudioPlayerModel.SetPlayingPosition(CurrentTime);
                     AudioPlayerModel.PreviewSpeed = RealFrameRate / FrameRate;
@@ -867,7 +868,7 @@ namespace NiVE3.ViewModel
                     }
                     if (PlayControllerModel.IsPlaying && !PlayControllerModel.IsPaused && PlayControllerModel.UseRamPreview)
                     {
-                        var frame = (int)Math.Round((CurrentTime - WorkareaBegin) * FrameRate);
+                        var frame = (int)Math.Round((double)(CurrentTime - WorkareaBegin) * FrameRate);
                         if (frame > -1 && frame < CachedRamPreviewFrames.Count)
                         {
                             IsCurrentFrameUpdating = true;
@@ -887,7 +888,7 @@ namespace NiVE3.ViewModel
                     }
                     if (PreviewModel.IsFootage && !PlayControllerModel.IsPlaying && Keyboard.IsKeyDown(Key.LeftCtrl))
                     {
-                        var audio = PreviewModel.GetAudio(CurrentTime, 1.0 / FrameRate);
+                        var audio = PreviewModel.GetAudio(CurrentTime, new Time(1, FrameRate));
                         if (audio != null)
                         {
                             AudioPlayerModel.AddScrubSample(audio);
@@ -895,8 +896,8 @@ namespace NiVE3.ViewModel
                     }
                     if (PlayControllerModel.IsPlaying && !PlayControllerModel.IsPaused)
                     {
-                        var startSample = (int)(CurrentTime * Const.AudioSamplingRate) * Const.AudioChannelCount;
-                        var length = (int)((CurrentTime + 1.0 / FrameRate) * Const.AudioSamplingRate) * Const.AudioChannelCount - startSample;
+                        var startSample = (int)((double)CurrentTime * Const.AudioSamplingRate) * Const.AudioChannelCount;
+                        var length = (int)((double)(CurrentTime + new Time(1, FrameRate)) * Const.AudioSamplingRate) * Const.AudioChannelCount - startSample;
                         length = Math.Min(length, AudioPlayerModel.Audio.Length - startSample);
                         if (length > 0)
                         {
@@ -914,7 +915,7 @@ namespace NiVE3.ViewModel
                         AbortUseToolCommand.Execute(null);
                     }
                     TimeBarRange = Duration;
-                    TimeBarRangeStart = 0.0;
+                    TimeBarRangeStart = Time.Zero;
                     OnWorkareaChanged();
                     break;
                 case nameof(WorkareaBegin):
@@ -967,7 +968,7 @@ namespace NiVE3.ViewModel
             IsStretchLimited = false;
             DownScaleRate = 1;
             previewColorChannel = PreviewColorChannel.Rgb;
-            CurrentTime = 0.0;
+            CurrentTime = Time.Zero;
             UpdateCurrentFrame();
             SourceChangedPublisher.Publish(this, EventArgs.Empty);
         }
@@ -991,11 +992,11 @@ namespace NiVE3.ViewModel
             var audio = Array.Empty<float>();
             if (PreviewModel is CompositionPreviewModel compositionPreviewModel && compositionPreviewModel.Composition != null)
             {
-                audio = compositionPreviewModel.Composition.RenderAudio(0.0, Duration);
+                audio = compositionPreviewModel.Composition.RenderAudio(Time.Zero, Duration);
             }
             else if (PreviewModel is FootagePreviewModel footagePreviewModel && footagePreviewModel.Footage != null && footagePreviewModel.SourceType.HasFlag(SourceType.Audio))
             {
-                audio = footagePreviewModel.Footage.ReadAudio(0.0, Duration);
+                audio = footagePreviewModel.Footage.ReadAudio(Time.Zero, Duration);
             }
             AudioPlayerModel.SetPreviewAudio(audio, WorkareaBegin, PlayControllerModel.UseRamPreview ? PlayControllerModel.RamPreviewRenderedWorkareaEnd : WorkareaEnd);
             AudioPlayerModel.PreviewSpeed = 1.0;
@@ -1058,14 +1059,14 @@ namespace NiVE3.ViewModel
                 var ct = RenderRamPreviewTaskCancellationTokenSource.Token;
                 RenderRamPreviewTask = Task.Run(() =>
                 {
-                    var frameCount = (int)Math.Round((WorkareaEnd - WorkareaBegin) * FrameRate);
+                    var frameCount = (int)Math.Round((double)(WorkareaEnd - WorkareaBegin) * FrameRate);
                     for (var i = 0; i < frameCount && CachedRamPreviewFrames.Sum(b => b.Length) / Const.MiB < ApplicationSetting.Setting.RamPreviewCacheLimit; i++)
                     {
                         ct.ThrowIfCancellationRequested();
 
                         try
                         {
-                            var currentTime = TimeCalc.RoundTimeDigit(WorkareaBegin + i / FrameRate);
+                            var currentTime = WorkareaBegin + new Time(i, FrameRate);
                             using var checker = CycleChecker.StartCheck();
                             using var image = PreviewModel.GetImage(currentTime);
                             if (image == null)
@@ -1093,7 +1094,7 @@ namespace NiVE3.ViewModel
         {
             if (IsFootage)
             {
-                e.RenderedFrameCount = (int)Math.Round(Duration * FrameRate);
+                e.RenderedFrameCount = (int)Math.Round((double)Duration * FrameRate);
             }
             else
             {
