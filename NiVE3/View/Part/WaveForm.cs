@@ -133,12 +133,12 @@ namespace NiVE3.View.Part
 
             var renderableHeight = rightLevels != null ? ActualHeight * 0.5 - WaveChannelMargin : ActualHeight;
 
-            drawingContext.DrawGeometry(Foreground, null, CreateWaveFormGeometry(leftLevels, isSampleTime, width, renderableHeight, Range));
+            drawingContext.DrawGeometry(Foreground, null, CreateWaveFormGeometry(leftLevels, isSampleTime, width, renderableHeight, (double)Range));
 
             if (rightLevels != null)
             {
                 drawingContext.PushTransform(new TranslateTransform(0.0, ActualHeight - renderableHeight));
-                drawingContext.DrawGeometry(Foreground, null, CreateWaveFormGeometry(rightLevels, isSampleTime, width, renderableHeight, Range));
+                drawingContext.DrawGeometry(Foreground, null, CreateWaveFormGeometry(rightLevels, isSampleTime, width, renderableHeight, (double)Range));
                 drawingContext.Pop();
             }
         }
