@@ -180,7 +180,7 @@
         <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,10,0,0" HorizontalAlignment="Right">
             <Button Content="{gm:LanguageResource ResourceKey=Dialog_Apply}" Style="{StaticResource ExecApplyButtonStyle}" Command="{Binding ApplyCommand}"/>
             <Button Content="{gm:LanguageResource ResourceKey=Dialog_OK}" Style="{StaticResource ExecApplyButtonStyle}" Margin="5,0,0,0" Command="{Binding OKCommand}"/>
-            <Button Content="{gm:LanguageResource ResourceKey=Dialog_Cancel}"  Margin="5,0,0,0" Command="{Binding CancelCommand}"/>
+            <Button Content="{gm:LanguageResource ResourceKey=Dialog_Cancel}" Style="{StaticResource DialogCancelButton}" Margin="5,0,0,0" Command="{Binding CancelCommand}"/>
         </StackPanel>
     </Grid>
 </UserControl>

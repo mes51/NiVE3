@@ -96,6 +96,7 @@
         </Style>
 
         <Style x:Key="OKButtonStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource DialogOKButton}">
+            <Setter Property="IsDefault" Value="True"/>
             <Setter Property="Content" Value="{gm:LanguageResource ResourceKey=RenderSettingView_Button_Enqueue, ReturnDynamicResource=True}"/>
 
             <Style.Triggers>
@@ -197,7 +198,7 @@
 
         <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,20,0,0" HorizontalAlignment="Right">
             <Button Style="{StaticResource OKButtonStyle}" Command="{Binding OKCommand}"/>
-            <Button Content="{gm:LanguageResource ResourceKey=Dialog_Cancel}" Margin="5,0,0,0" Style="{StaticResource DialogDefaultCancelButton}" Command="{Binding CancelCommand}"/>
+            <Button Content="{gm:LanguageResource ResourceKey=Dialog_Cancel}" Margin="5,0,0,0" Style="{StaticResource DialogCancelButton}" Command="{Binding CancelCommand}"/>
         </StackPanel>
     </Grid>
 </UserControl>

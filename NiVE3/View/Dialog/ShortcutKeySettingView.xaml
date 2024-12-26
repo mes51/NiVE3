@@ -254,8 +254,8 @@
         </DataGrid>
 
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Content="{gm:LanguageResource ResourceKey=Dialog_OK}" Margin="0,0,10,0" Style="{StaticResource DialogOKButton}" Command="{Binding OKCommand}"/>
-            <Button Content="{gm:LanguageResource ResourceKey=Dialog_Cancel}" Style="{StaticResource DialogDefaultCancelButton}" Command="{Binding CancelCommand}"/>
+            <Button Content="{gm:LanguageResource ResourceKey=Dialog_OK}" Margin="0,0,10,0" Style="{StaticResource DialogDefaultOKButton}" Command="{Binding OKCommand}"/>
+            <Button Content="{gm:LanguageResource ResourceKey=Dialog_Cancel}" Style="{StaticResource DialogCancelButton}" Command="{Binding CancelCommand}"/>
         </StackPanel>
     </Grid>
 </UserControl>
