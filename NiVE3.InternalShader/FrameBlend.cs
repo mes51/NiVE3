@@ -9,12 +9,12 @@ namespace NiVE3.InternalShader
 {
     [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
     [GeneratedComputeShaderDescriptor]
-    readonly partial struct BlendTwoFrame(ReadWriteBuffer<Float4> baseImage, ReadWriteBuffer<Float4> blendTargetImage, int width, float blendRate, float iBlendRate) : IComputeShader
+    readonly partial struct BlendTwoFrame(ReadWriteBuffer<Float4> baseImage, ReadWriteBuffer<Float4> blendTargetImage, int width, float blendRate) : IComputeShader
     {
         public void Execute()
         {
             var pos = ThreadIds.Y * width + ThreadIds.X;
-            baseImage[pos] = baseImage[pos] * iBlendRate +  blendTargetImage[pos] * blendRate;
+            baseImage[pos] = Hlsl.Lerp(baseImage[pos], blendTargetImage[pos], blendRate);
         }
     }
 

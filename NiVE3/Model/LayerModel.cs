@@ -1790,19 +1790,20 @@ namespace NiVE3.Model
                 else
                 {
                     var startSoruceFrameTime = PlayRate > 0.0 ? sourceTime.FloorToFrameRate(FootageModel.FrameRate) : time.CeilingToFrameRate(FootageModel.FrameRate);
-                    var frameCount = (int)Math.Ceiling((double)(frameTime / currentFrameDuration)) + (sourceTime - startSoruceFrameTime != Time.Zero ? 1 : 0);
-                    var firstRate = 1.0 - Time.Abs(sourceTime - startSoruceFrameTime) / currentFrameDuration;
                     var resultRate = (float)(frameTime / currentFrameDuration);
+                    var frameCount = (int)Math.Ceiling(resultRate);
+                    var firstRate = 1.0 - (double)(Time.Abs(sourceTime - startSoruceFrameTime) * currentFrameDuration);
+                    frameCount += (resultRate - Math.Truncate(resultRate)) > firstRate ? 1 : 0;
 
                     using (var firstFrame = FootageModel.ReadImage(startSoruceFrameTime, downSamplingRate, CompositionModel.Width, CompositionModel.Height, null, InterpolationQuality, useGpu))
                     {
                         originalImageSize = downSamplingRate != 1.0 ? FootageModel.CalcSize(time, CompositionModel.Width, CompositionModel.Height, false, null) : new SourceFootageRect(Vector2d.Zero, firstFrame.Width, firstFrame.Height);
-                        image = useGpu ? new NGPUImage(firstFrame.Width, firstFrame.Height, AcceleratorModel.CurrentDevice) : new NManagedImage(firstFrame.Width, firstFrame.Height);
+                        image = useGpu ? new NGPUImage(firstFrame.Width, firstFrame.Height, AcceleratorModel.CurrentDevice, Vector4.Zero) : new NManagedImage(firstFrame.Width, firstFrame.Height);
                         SumBlendFrame(image, firstFrame, (float)firstRate, useGpu);
                     }
 
                     var sign = Math.Sign(PlayRate);
-                    for (int i = 0, limit = frameCount - 1; i < limit; i++)
+                    for (int i = 1, limit = frameCount - 1; i < limit; i++)
                     {
                         using var frame = FootageModel.ReadImage(startSoruceFrameTime + footageFrameDuration * i * sign, downSamplingRate, CompositionModel.Width, CompositionModel.Height, null, InterpolationQuality, useGpu);
                         SumBlendFrame(image, frame, 1.0F, useGpu);
@@ -1857,7 +1858,6 @@ namespace NiVE3.Model
                 return blendTargetImage;
             }
 
-            var iBlendRate = 1.0F - blendRate;
             if (useGpu)
             {
                 var device = AcceleratorModel.CurrentDevice;
@@ -1866,7 +1866,7 @@ namespace NiVE3.Model
 
                 using (var context = device.CreateComputeContext())
                 {
-                    context.For(baseGpuImage.Width, baseGpuImage.Height, new BlendTwoFrame(baseGpuImage.Data, targetGpuImage.Data, baseGpuImage.Width, blendRate, iBlendRate));
+                    context.For(baseGpuImage.Width, baseGpuImage.Height, new BlendTwoFrame(baseGpuImage.Data, targetGpuImage.Data, baseGpuImage.Width, blendRate));
                 }
 
                 if (targetGpuImage != blendTargetImage)
@@ -1886,6 +1886,7 @@ namespace NiVE3.Model
                 var width = baseManagedImage.Width;
                 var vectoredLength = width - (width % Vector<float>.Count);
                 var remainLength = width - vectoredLength;
+                var iBlendRate = 1.0F - blendRate;
                 Parallel.For(0, baseManagedImage.Height, y =>
                 {
                     var baseImageDataSpan = baseImageData.AsSpan(y * width, width);
@@ -1899,7 +1900,7 @@ namespace NiVE3.Model
                     }
                     for (int i = vectoredLength, c = 0; c < remainLength; i++, c++)
                     {
-                        baseImageDataSpan[i] = baseImageDataSpan[i] * iBlendRate + targetImageDataSpan[i] * blendRate;
+                        baseImageDataSpan[i] = Vector4.Lerp(baseImageDataSpan[i], targetImageDataSpan[i], blendRate);
                     }
                 });
 
