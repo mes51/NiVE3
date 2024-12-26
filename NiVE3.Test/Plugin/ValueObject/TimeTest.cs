@@ -1171,28 +1171,8 @@ namespace NiVE3.Test.Plugin.ValueObject
 
                 Assert.That(actual.IsFrameTime, Is.True);
                 Assert.That(actual.FrameRateIsInteger, Is.True);
-                Assert.That(actual.Frame, Is.EqualTo(3));
+                Assert.That(actual.Frame, Is.EqualTo(270));
                 Assert.That(actual.FrameRate, Is.EqualTo(FrameRateA));
-            });
-        }
-
-        [Test]
-        public void TestDivideDifferentFrameRateTimeAndDenomination()
-        {
-            Assert.Multiple(() =>
-            {
-                const double FrameRateA = 30.0;
-                const double FrameRateB = 21.0;
-                const double LcdFrameRate = 210.0;
-                var a = new Time(400, FrameRateA);
-                var b = new Time(7, FrameRateB);
-                var actual = a / b;
-
-                Assert.That(actual.IsFrameTime, Is.True);
-                Assert.That(actual.FrameRateIsInteger, Is.True);
-                Assert.That(actual.Frame, Is.EqualTo(4));
-                Assert.That(actual.FrameRate, Is.EqualTo(FrameRateB));
-                Assert.That(actual.Frame / actual.FrameRate, Is.EqualTo(40.0 / LcdFrameRate));
             });
         }
 

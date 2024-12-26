@@ -316,7 +316,7 @@ namespace NiVE3.Plugin.ValueObject
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static bool IsIntegerFrame(double frameRate)
         {
-            return RoundFrameDigit(frameRate - (int)frameRate) == 0.0;
+            return RoundFrameDigit(frameRate - (long)frameRate) == 0.0;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1298,6 +1298,7 @@ namespace NiVE3.Plugin.ValueObject
             }
             else if (a.IsFrameTime && b.IsFrameTime)
             {
+                var newTime = ToDoubleNonRounded(a) / ToDoubleNonRounded(b);
                 if (a.FrameRateIsInteger && b.FrameRateIsInteger)
                 {
                     var frameRateA = (int)a.FrameRate;
@@ -1305,28 +1306,30 @@ namespace NiVE3.Plugin.ValueObject
                     var lcdFrameRate = LeastCommonMultiple(frameRateA, frameRateB);
                     var rateA = lcdFrameRate / frameRateA;
                     var rateB = lcdFrameRate / frameRateB;
-                    var newFrame = Math.DivRem(a.Frame * rateA, b.Frame * rateB, out var reminder);
+                    var newFrame = newTime * lcdFrameRate;
 
-                    if (reminder == 0)
+                    if (IsIntegerFrame(newFrame))
                     {
-                        if (newFrame % rateA == 0)
+                        var intNewFrame = (long)newFrame;
+                        var (quotient, reminder) = Math.DivRem(intNewFrame, rateA);
+                        if (reminder == 0)
                         {
-                            return new Time(newFrame / rateA, a.FrameRate);
+                            return new Time(quotient, a.FrameRate);
                         }
                         else
                         {
-                            var denom = GratestCommonDivisor(newFrame, lcdFrameRate);
+                            var denom = GratestCommonDivisor(intNewFrame, lcdFrameRate);
                             if (denom > 1)
                             {
-                                newFrame /= denom;
+                                intNewFrame /= denom;
                                 lcdFrameRate /= denom;
                             }
-                            return new Time(newFrame, lcdFrameRate);
+                            return new Time(intNewFrame, lcdFrameRate);
                         }
                     }
                 }
 
-                return new Time(RoundTimeDigit(a.Frame / a.FrameRate / (b.Frame / b.FrameRate)));
+                return new Time(RoundTimeDigit(newTime));
             }
             else
             {
