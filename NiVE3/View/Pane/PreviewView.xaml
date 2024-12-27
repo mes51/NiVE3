@@ -13,7 +13,9 @@
              xmlns:mk="clr-namespace:NiVE3.Shared.Wpf.Markup;assembly=NiVE3.Shared"
              xmlns:pl="clr-namespace:NiVE3.Plugin.Interfaces;assembly=NiVE3.Plugin"
              xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
+             xmlns:cgm="clr-namespace:NiVE3.Config.Wpf.GeneratedMarkup"
              xmlns:uig="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
+             xmlns:um="clr-namespace:NiVE3.Model.UI"
              mc:Ignorable="d" 
              x:Name="Root"
              SizeChanged="Root_SizeChanged"
@@ -26,7 +28,10 @@
         <cv:EnumToLocalizedNameConverter x:Key="EnumToLocalizedNameConverter"/>
         <cv:ColorToBrushConverter x:Key="ColorToBrushConverter"/>
         <cv:EnumToBoolConverter x:Key="EnumToBoolConverter"/>
+        <cv:BooleanInvertConverter x:Key="BooleanInvertConverter"/>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+
+        <r:BindingProxy x:Key="ViewModelProxy" Data="{Binding}"/>
 
         <r:ComboBoxDisplayChanger x:Key="ScaleComboBoxDisplayChanger">
             <r:ComboBoxDisplayChanger.ItemsTemplate>
@@ -268,6 +273,33 @@
 
         <Border Grid.Row="0" Style="{StaticResource PreviewColorChannelBorder}">
             <Canvas x:Name="PreviewCanvas" Background="Transparent" ClipToBounds="True" MouseDown="PreviewCanvas_MouseDown" MouseMove="PreviewCanvas_MouseMove" MouseUp="PreviewCanvas_MouseUp" MouseWheel="PreviewCanvas_MouseWheel" dd:DragDrop.DropHandler="{Binding}" dd:DragDrop.IsDropTarget="True" dd:DragDrop.DragSourceIgnore="False">
+                <Canvas.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddLayer}">
+                            <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddLayer_Shape}" Command="{Binding AddShapeCommand}"/>
+                            <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddLayer_Camera}" Command="{Binding AddCameraCommand}"/>
+                            <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddLayer_Light}" Command="{Binding AddLightCommand}"/>
+                            <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddLayer_NullObject}" Command="{Binding AddNullObjectCommand}"/>
+                            <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddLayer_Text}" Command="{Binding AddTextCommand}"/>
+                            <Separator />
+                            <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddLayer_Procedural}" ItemsSource="{Binding Source={StaticResource ViewModelProxy}, Path=Data.ProceduralInputItems}">
+                                <MenuItem.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type um:ProceduralInputItem}">
+                                        <TextBlock Text="{Binding Name}"/>
+                                    </DataTemplate>
+                                </MenuItem.ItemTemplate>
+                                <MenuItem.ItemContainerStyle>
+                                    <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource {x:Type MenuItem}}">
+                                        <Setter Property="Command" Value="{Binding Source={StaticResource ViewModelProxy}, Path=Data.AddProceduralFootageCommand}"/>
+                                        <Setter Property="CommandParameter" Value="{Binding}"/>
+                                    </Style>
+                                </MenuItem.ItemContainerStyle>
+                            </MenuItem>
+                        </MenuItem>
+                        <Separator />
+                        <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_CompositionSetting}" Command="{Binding CompositionSettingCommand}"/>
+                    </ContextMenu>
+                </Canvas.ContextMenu>
                 <Grid x:Name="PreviewAnchorGrid" Width="{Binding Width}" Height="{Binding Height}" Canvas.Left="{Binding ScreenX}" Canvas.Top="{Binding ScreenY}">
                     <Grid.LayoutTransform>
                         <ScaleTransform ScaleX="{Binding ElementName=Root, Path=PreviewAreaImageScaleX}" ScaleY="{Binding ElementName=Root, Path=PreviewAreaImageScaleY}"/>

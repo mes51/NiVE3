@@ -35,6 +35,9 @@ using System.Threading;
 using System.Windows.Xps.Packaging;
 using System.Buffers;
 using NiVE3.Plugin.ValueObject;
+using Prism.Dialogs;
+using NiVE3.ViewModel.Dialog;
+using NiVE3.View.Dialog;
 
 namespace NiVE3.ViewModel
 {
@@ -285,7 +288,7 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref boundingBoxes, value); }
         }
 
-        private ToolType toolType;
+        private ToolType toolType = ToolType.Select;
         public ToolType ToolType
         {
             get { return toolType; }
@@ -304,6 +307,13 @@ namespace NiVE3.ViewModel
         {
             get { return activeCameraTool; }
             set { SetProperty(ref activeCameraTool, value); }
+        }
+
+        private ProceduralInputItem[] proceduralInputItems = [];
+        public ProceduralInputItem[] ProceduralInputItems
+        {
+            get { return proceduralInputItems; }
+            set { SetProperty(ref proceduralInputItems, value); }
         }
 
         public PreviewModelBase PreviewModel { get; }
@@ -327,6 +337,20 @@ namespace NiVE3.ViewModel
         public ICommand ChangeToScaleCommand { get; }
 
         public ICommand ChangeToCameraToolCommand { get; }
+
+        public ICommand AddShapeCommand { get; }
+
+        public ICommand AddCameraCommand { get; }
+
+        public ICommand AddLightCommand { get; }
+
+        public ICommand AddNullObjectCommand { get; }
+
+        public ICommand AddTextCommand { get; }
+
+        public ICommand AddProceduralFootageCommand { get; }
+
+        public ICommand CompositionSettingCommand { get; }
 
         int[] ImageBuffer { get; set; }
 
@@ -357,6 +381,8 @@ namespace NiVE3.ViewModel
         AcceleratorModel AcceleratorModel { get; }
 
         EventHubModel EventHubModel { get; }
+
+        IDialogService DialogService { get; }
 
         ColoredPreviewBoundingBox[] BoundingBoxesBuffer { get; set; } = [];
 
@@ -389,7 +415,7 @@ namespace NiVE3.ViewModel
 
         List<int[]> CachedRamPreviewFrames { get; set; } = [];
 
-        public PreviewViewModel(PreviewModelBase previewModel, ViewStateModel viewState, ApplicationModel applicationModel, PlayControllerModel playControllerModel, AudioPlayerModel audioPlayerModel, AudioInformationModel audioInformationModel, AcceleratorModel acceleratorModel, EventHubModel eventHubModel)
+        public PreviewViewModel(PreviewModelBase previewModel, ViewStateModel viewState, ApplicationModel applicationModel, ProceduralInputListModel proceduralInputListModel, PlayControllerModel playControllerModel, AudioPlayerModel audioPlayerModel, AudioInformationModel audioInformationModel, AcceleratorModel acceleratorModel, EventHubModel eventHubModel, IDialogService dialogService)
         {
             PreviewModel = previewModel;
             ViewState = viewState;
@@ -399,6 +425,9 @@ namespace NiVE3.ViewModel
             AudioInformationModel = audioInformationModel;
             AcceleratorModel = acceleratorModel;
             EventHubModel = eventHubModel;
+            DialogService = dialogService;
+
+            ProceduralInputItems = proceduralInputListModel.ProceduralFootageItems;
 
             RealFrameRateUpdateTimer = new DispatcherTimer { Interval = AudioSpeedChangeInterval };
             RealFrameRateUpdateTimer.Tick += RealFrameRateUpdateTimer_Tick;
@@ -471,9 +500,11 @@ namespace NiVE3.ViewModel
                 EventHubModel.NotifyAbortUseTool(compositionPreviewModel.Composition.CompositionId);
             });
 
-            ChangeToHandToolCommand = new DelegateCommand(() => ToolType = ToolType.Hand, () => PreviewModel is CompositionPreviewModel compositionPreviewModel && compositionPreviewModel.Composition != null);
+            ChangeToHandToolCommand = new DelegateCommand(() => ToolType = ToolType.Hand, () => PreviewModel is CompositionPreviewModel compositionPreviewModel && compositionPreviewModel.Composition != null)
+                .ObservesProperty(() => PreviewModel);
 
-            ChangeToSelectToolCommand = new DelegateCommand(() => ToolType = ToolType.Select, () => PreviewModel is CompositionPreviewModel compositionPreviewModel && compositionPreviewModel.Composition != null);
+            ChangeToSelectToolCommand = new DelegateCommand(() => ToolType = ToolType.Select, () => PreviewModel is CompositionPreviewModel compositionPreviewModel && compositionPreviewModel.Composition != null)
+                .ObservesProperty(() => PreviewModel);
 
             ChangeToRotateToolCommand = new DelegateCommand(() =>
             {
@@ -490,7 +521,8 @@ namespace NiVE3.ViewModel
                 ToolType = ActiveRotateTool;
             }, () => PreviewModel is CompositionPreviewModel compositionPreviewModel && compositionPreviewModel.Composition != null);
 
-            ChangeToScaleCommand = new DelegateCommand(() => ToolType = ToolType.Scale, () => PreviewModel is CompositionPreviewModel compositionPreviewModel && compositionPreviewModel.Composition != null);
+            ChangeToScaleCommand = new DelegateCommand(() => ToolType = ToolType.Scale, () => PreviewModel is CompositionPreviewModel compositionPreviewModel && compositionPreviewModel.Composition != null)
+                .ObservesProperty(() => PreviewModel);
 
             ChangeToCameraToolCommand = new DelegateCommand(() =>
             {
@@ -504,7 +536,133 @@ namespace NiVE3.ViewModel
                     };
                 }
                 ToolType = ActiveCameraTool;
-            }, () => PreviewModel is CompositionPreviewModel compositionPreviewModel && compositionPreviewModel.Composition != null);
+            }, () => PreviewModel is CompositionPreviewModel compositionPreviewModel && compositionPreviewModel.Composition != null)
+                .ObservesProperty(() => PreviewModel);
+
+            AddShapeCommand = new DelegateCommand(() =>
+            {
+                if (PreviewModel is not CompositionPreviewModel compositionPreviewModel || compositionPreviewModel.Composition == null)
+                {
+                    return;
+                }
+
+                compositionPreviewModel.Composition.AddShape(0);
+            }, () => PreviewModel is CompositionPreviewModel compositionPreviewModel && compositionPreviewModel.Composition != null)
+                .ObservesProperty(() => PreviewModel);
+
+            AddCameraCommand = new DelegateCommand(() =>
+            {
+                if (PreviewModel is not CompositionPreviewModel compositionPreviewModel || compositionPreviewModel.Composition == null)
+                {
+                    return;
+                }
+
+                compositionPreviewModel.Composition.AddCamera(0);
+            }, () => PreviewModel is CompositionPreviewModel compositionPreviewModel && compositionPreviewModel.Composition != null)
+                .ObservesProperty(() => PreviewModel);
+
+            AddLightCommand = new DelegateCommand(() =>
+            {
+                if (PreviewModel is not CompositionPreviewModel compositionPreviewModel || compositionPreviewModel.Composition == null)
+                {
+                    return;
+                }
+
+                compositionPreviewModel.Composition.AddLight(0);
+            }, () => PreviewModel is CompositionPreviewModel compositionPreviewModel && compositionPreviewModel.Composition != null)
+                .ObservesProperty(() => PreviewModel);
+
+            AddNullObjectCommand = new DelegateCommand(() =>
+            {
+                if (PreviewModel is not CompositionPreviewModel compositionPreviewModel || compositionPreviewModel.Composition == null)
+                {
+                    return;
+                }
+
+                compositionPreviewModel.Composition.AddNullObject(0);
+            }, () => PreviewModel is CompositionPreviewModel compositionPreviewModel && compositionPreviewModel.Composition != null)
+                .ObservesProperty(() => PreviewModel);
+
+            AddTextCommand = new DelegateCommand(() =>
+            {
+                if (PreviewModel is not CompositionPreviewModel compositionPreviewModel || compositionPreviewModel.Composition == null)
+                {
+                    return;
+                }
+
+                compositionPreviewModel.Composition.AddText(0);
+            }, () => PreviewModel is CompositionPreviewModel compositionPreviewModel && compositionPreviewModel.Composition != null)
+                .ObservesProperty(() => PreviewModel);
+
+            AddProceduralFootageCommand = new DelegateCommand<ProceduralInputItem>(item =>
+            {
+                if (PreviewModel is not CompositionPreviewModel compositionPreviewModel || compositionPreviewModel.Composition == null)
+                {
+                    return;
+                }
+
+                compositionPreviewModel.Composition.InsertLayers(item.FootageId, 0);
+            }, _ => PreviewModel is CompositionPreviewModel compositionPreviewModel && compositionPreviewModel.Composition != null)
+                .ObservesProperty(() => PreviewModel);
+            
+
+            CompositionSettingCommand = new DelegateCommand(() =>
+            {
+                if (PreviewModel is not CompositionPreviewModel compositionPreviewModel || compositionPreviewModel.Composition == null)
+                {
+                    return;
+                }
+
+                var compositionModel = compositionPreviewModel.Composition;
+
+                var param = new DialogParameters
+                {
+                    { nameof(CompositionSettingViewModel.Name), compositionModel.Name },
+                    { nameof(CompositionSettingViewModel.Width), compositionModel.Width },
+                    { nameof(CompositionSettingViewModel.Height), compositionModel.Height },
+                    { nameof(CompositionSettingViewModel.FrameRate), compositionModel.FrameRate },
+                    { nameof(CompositionSettingViewModel.Duration), compositionModel.Duration },
+                    { nameof(CompositionSettingViewModel.IsRetentionFrameRate), compositionModel.IsRetentionFrameRate },
+                    { nameof(CompositionSettingViewModel.ApplyToneMappingWhenNested), compositionModel.ApplyToneMappingWhenNested },
+                    { nameof(CompositionSettingViewModel.ShutterAngle), compositionModel.ShutterAngle },
+                    { nameof(CompositionSettingViewModel.ShutterPhase), compositionModel.ShutterPhase },
+                    { nameof(CompositionSettingViewModel.MotionBlurSampleCount), compositionModel.MotionBlurSampleCount },
+                    { CompositionSettingViewModel.SelectedRendererPluginId, compositionModel.RendererPluginId },
+                    { CompositionSettingViewModel.SelectedToneMapperPluginId, compositionModel.ToneMapperPluginId }
+                };
+                if (compositionModel.RendererSetting != null)
+                {
+                    param.Add(nameof(CompositionSettingViewModel.RendererSetting), compositionModel.RendererSetting);
+                }
+                if (compositionModel.ToneMapperSetting != null)
+                {
+                    param.Add(nameof(CompositionSettingViewModel.ToneMapperSetting), compositionModel.ToneMapperSetting);
+                }
+                IDialogResult? result = null;
+                DialogService.ShowDialog(nameof(CompositionSettingView), param, r => result = r);
+                if (result?.Result == ButtonResult.OK)
+                {
+                    compositionModel.ChangeCompositionSetting(
+                        result.Parameters.GetValue<string>(nameof(CompositionSettingViewModel.Name)),
+                        result.Parameters.GetValue<int>(nameof(CompositionSettingViewModel.Width)),
+                        result.Parameters.GetValue<int>(nameof(CompositionSettingViewModel.Height)),
+                        result.Parameters.GetValue<double>(nameof(CompositionSettingViewModel.FrameRate)),
+                        result.Parameters.GetValue<Time>(nameof(CompositionSettingViewModel.Duration)),
+                        result.Parameters.GetValue<bool>(nameof(CompositionSettingViewModel.IsRetentionFrameRate)),
+                        result.Parameters.GetValue<bool>(nameof(CompositionSettingViewModel.ApplyToneMappingWhenNested)),
+                        result.Parameters.GetValue<int>(nameof(CompositionSettingViewModel.ShutterAngle)),
+                        result.Parameters.GetValue<int>(nameof(CompositionSettingViewModel.ShutterPhase)),
+                        result.Parameters.GetValue<int>(nameof(CompositionSettingViewModel.MotionBlurSampleCount)),
+                        result.Parameters.GetValue<Guid>(CompositionSettingViewModel.SelectedRendererPluginId),
+                        result.Parameters.GetValue<Guid>(CompositionSettingViewModel.SelectedToneMapperPluginId),
+                        result.Parameters.ContainsKey(CompositionSettingViewModel.RendererSettingViewData),
+                        result.Parameters.ContainsKey(CompositionSettingViewModel.RendererSettingViewData) ? result.Parameters.GetValue<object>(CompositionSettingViewModel.RendererSettingViewData) : null,
+                        result.Parameters.ContainsKey(CompositionSettingViewModel.ToneMapperSettingViewData),
+                        result.Parameters.ContainsKey(CompositionSettingViewModel.ToneMapperSettingViewData) ? result.Parameters.GetValue<object>(CompositionSettingViewModel.ToneMapperSettingViewData) : null
+                    );
+                }
+            }, () => PreviewModel is CompositionPreviewModel compositionPreviewModel && compositionPreviewModel.Composition != null)
+                .ObservesProperty(() => PreviewModel);
 
             WiringModel();
 
@@ -1117,17 +1275,18 @@ namespace NiVE3.ViewModel
         RgbStraight
     }
 
-    enum ToolType
+    enum ToolType : uint
     {
-        Hand,
-        Select,
-        RotateAll,
-        RotateX,
-        RotateY,
-        RotateZ,
-        Scale,
-        CameraOrbit,
-        CameraPan,
-        CameraDolly
+        LayerSelectableTool = 0x80000000U,
+        Hand = 0,
+        Select = LayerSelectableTool | 1,
+        RotateAll = LayerSelectableTool | 2,
+        RotateX = LayerSelectableTool | 3,
+        RotateY = LayerSelectableTool | 4,
+        RotateZ = LayerSelectableTool | 5,
+        Scale = LayerSelectableTool | 6,
+        CameraOrbit = 7,
+        CameraPan = 8,
+        CameraDolly = 9
     }
 }

@@ -80,7 +80,7 @@
                                 </MenuItem.ItemTemplate>
                                 <MenuItem.ItemContainerStyle>
                                     <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource {x:Type MenuItem}}">
-                                        <Setter Property="Command" Value="{Binding Source={StaticResource ViewModelProxy}, Path=Data.AddProceduralFootage}"/>
+                                        <Setter Property="Command" Value="{Binding Source={StaticResource ViewModelProxy}, Path=Data.AddProceduralFootageCommand}"/>
                                         <Setter Property="CommandParameter" Value="{Binding}"/>
                                     </Style>
                                 </MenuItem.ItemContainerStyle>
@@ -164,7 +164,7 @@
                                         </MenuItem.ItemTemplate>
                                         <MenuItem.ItemContainerStyle>
                                             <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource {x:Type MenuItem}}">
-                                                <Setter Property="Command" Value="{Binding Source={StaticResource ViewModelProxy}, Path=Data.AddProceduralFootage}"/>
+                                                <Setter Property="Command" Value="{Binding Source={StaticResource ViewModelProxy}, Path=Data.AddProceduralFootageCommand}"/>
                                                 <Setter Property="CommandParameter" Value="{Binding}"/>
                                             </Style>
                                         </MenuItem.ItemContainerStyle>

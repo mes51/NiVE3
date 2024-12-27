@@ -484,7 +484,7 @@ namespace NiVE3.ViewModel
 
         public ICommand AddTextCommand { get; }
 
-        public ICommand AddProceduralFootage { get; }
+        public ICommand AddProceduralFootageCommand { get; }
 
         public ICommand AddEffectCommand { get; }
 
@@ -622,7 +622,7 @@ namespace NiVE3.ViewModel
             eventHubModel.BeginEditDurationRequest += EventHubModel_BeginEditDurationRequest;
             eventHubModel.UpdateDurationRequest += EventHubModel_UpdateDurationRequest;
             eventHubModel.AbortEditDurationRequest += EventHubModel_AbortEditDurationRequest;
-            EventHubModel.TextStyleChangeRequest += EventHubModel_TextStyleChangeRequest;
+            eventHubModel.TextStyleChangeRequest += EventHubModel_TextStyleChangeRequest;
             PropertyChanged += TimelineViewModel_PropertyChanged;
             PaneSelected += TimelineViewModel_PaneSelected;
 
@@ -838,7 +838,7 @@ namespace NiVE3.ViewModel
 
             AddTextCommand = new DelegateCommand(() => CompositionModel?.AddText(GetFirstSelectedLayerIndex()), () => CompositionModel != null).ObservesProperty(() => CompositionModel);
 
-            AddProceduralFootage = new DelegateCommand<ProceduralInputItem>(item =>
+            AddProceduralFootageCommand = new DelegateCommand<ProceduralInputItem>(item =>
             {
                 if (CompositionModel == null)
                 {
