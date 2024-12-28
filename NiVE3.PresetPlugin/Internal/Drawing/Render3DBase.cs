@@ -54,6 +54,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 
         protected Dictionary<object, List<ShadowTriangle>> LightTriangles { get; }
 
+        bool UseLight { get; }
+
         public Renderer3DBase(int width, int height, List<PointLight> pointLights, List<SpotLight> spotLights, List<ParallelLight> parallelLights, List<AmbientLight> ambientLights)
         {
             Size = Math.Max(width, height);
@@ -65,6 +67,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             SpotLights = spotLights;
             ParallelLights = parallelLights;
             AmbientLights = ambientLights;
+            UseLight = pointLights.Count > 0 || spotLights.Count > 0 || parallelLights.Count > 0;
 
             LightTriangles = pointLights.Cast<object>().Concat(spotLights).Concat(parallelLights).ToDictionary(k => k, _ => new List<ShadowTriangle>());
             foreach (var pointLight in pointLights)
@@ -145,7 +148,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             var v3 = mvt.Transform(sv3);
             var v4 = mvt.Transform(sv4);
 
-            if ((((v2 - v1) & Const.WithoutWMask256).LengthSquared() > MaxTriangleEdgeLength ||
+            if (UseLight &&
+                (((v2 - v1) & Const.WithoutWMask256).LengthSquared() > MaxTriangleEdgeLength ||
                 ((v3 - v1) & Const.WithoutWMask256).LengthSquared() > MaxTriangleEdgeLength ||
                 ((v4 - v1) & Const.WithoutWMask256).LengthSquared() > MaxTriangleEdgeLength) &&
                 right - left > 1 && bottom - top > 1)
