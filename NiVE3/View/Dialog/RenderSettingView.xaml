@@ -83,14 +83,14 @@
 
         <Style x:Key="BeginTimeSliderStyle" TargetType="{x:Type upr:SlidableNumberTextBox}" BasedOn="{StaticResource {x:Type upr:SlidableNumberTextBox}}">
             <Setter Property="Minimum" Value="0"/>
-            <Setter Property="SlideChangeValue" Value="{Binding FrameDuration}"/>
+            <Setter Property="SlideChangeValue" Value="{Binding FrameDuration, Converter={StaticResource TimeToDoubleConverter}}"/>
             <Setter Property="Converter" Value="{StaticResource TimeConverter}"/>
             <Setter Property="HorizontalAlignment" Value="Left"/>
         </Style>
 
         <Style x:Key="EndTimeSliderStyle" TargetType="{x:Type upr:SlidableNumberTextBox}" BasedOn="{StaticResource {x:Type upr:SlidableNumberTextBox}}">
-            <Setter Property="Maximum" Value="{Binding CompositionDuration}"/>
-            <Setter Property="SlideChangeValue" Value="{Binding FrameDuration}"/>
+            <Setter Property="Maximum" Value="{Binding CompositionDuration, Converter={StaticResource TimeToDoubleConverter}}"/>
+            <Setter Property="SlideChangeValue" Value="{Binding FrameDuration, Converter={StaticResource TimeToDoubleConverter}}"/>
             <Setter Property="Converter" Value="{StaticResource TimeConverter}"/>
             <Setter Property="HorizontalAlignment" Value="Left"/>
         </Style>
@@ -164,7 +164,7 @@
                                                    Value="{Binding CompositionWorkareaBegin, Mode=OneWay, Converter={StaticResource TimeToDoubleConverter}}"
                                                    Visibility="{Binding RenderRangeType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter={x:Static m:RenderRangeType.Workarea}}"/>
                         <upr:SlidableNumberTextBox Grid.Column="1" Style="{StaticResource BeginTimeSliderStyle}"
-                                                   Maximum="{Binding RenderRangeBeginLimit}"
+                                                   Maximum="{Binding RenderRangeBeginLimit, Converter={StaticResource TimeToDoubleConverter}}"
                                                    Value="{Binding BeginTime, Converter={StaticResource TimeToDoubleConverter}}"
                                                    Visibility="{Binding RenderRangeType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter={x:Static m:RenderRangeType.Specific}}"/>
                     </Grid>
