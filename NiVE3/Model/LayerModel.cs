@@ -588,20 +588,21 @@ namespace NiVE3.Model
 
             NImage? image = null;
             var hash = new XxHash3();
+            var device = useGpu ? AcceleratorModel.CurrentDevice : null;
             if (downSamplingRate == 1.0)
             {
                 CalcCacheKeyHash(hash, globalTime, false, false);
 
                 if ((IsVideo && !IsFreezeFrame) || HasRenderEveryFrameEffect)
                 {
-                    if (ImageCache.TryGet(LayerId, hash.ToInt128(), layerTime, out var cachedImage))
+                    if (ImageCache.TryGet(LayerId, hash.ToInt128(), layerTime, device, out var cachedImage))
                     {
                         (image, _) = cachedImage;
                     }
                 }
                 else
                 {
-                    if (ImageCache.TryGet(LayerId, hash.ToInt128(), out var cachedImage))
+                    if (ImageCache.TryGet(LayerId, hash.ToInt128(), device, out var cachedImage))
                     {
                         (image, _) = cachedImage;
                     }
@@ -683,16 +684,17 @@ namespace NiVE3.Model
             {
                 CalcCacheKeyHash(hash, time, withTrackMatte, frameBlend);
 
+                var device = useGpu ? AcceleratorModel.CurrentDevice : null;
                 if ((IsVideo && !IsFreezeFrame) || HasRenderEveryFrameEffect)
                 {
-                    if (ImageCache.TryGet(LayerId, hash.ToInt128(), layerTime, out var cachedImage))
+                    if (ImageCache.TryGet(LayerId, hash.ToInt128(), layerTime, device, out var cachedImage))
                     {
                         (image, roi) = cachedImage;
                     }
                 }
                 else
                 {
-                    if (ImageCache.TryGet(LayerId, hash.ToInt128(), out var cachedImage))
+                    if (ImageCache.TryGet(LayerId, hash.ToInt128(), device, out var cachedImage))
                     {
                         (image, roi) = cachedImage;
                     }

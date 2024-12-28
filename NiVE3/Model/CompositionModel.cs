@@ -837,13 +837,13 @@ namespace NiVE3.Model
                     }
 
                     var cacheKey = hash.ToInt128();
-                    if (downSamplingRate != 1.0 || !ImageCache.TryGet(CompositionId, cacheKey, time, out var cachedImage))
+                    var device = useGpu ? AcceleratorModel.CurrentDevice : null;
+                    if (downSamplingRate != 1.0 || !ImageCache.TryGet(CompositionId, cacheKey, time, device, out var cachedImage))
                     {
                         var frameBlendRatio = 1.0F / MotionBlurSampleCount;
                         var subFrameInterval = (FrameDuration * ShutterAngle / 360.0) / MotionBlurSampleCount;
-                        if (useGpu)
+                        if (device != null)
                         {
-                            var device = AcceleratorModel.CurrentDevice;
                             var result = new NGPUImage(Width, Height, device);
                             for (var i = 0; i < MotionBlurSampleCount; i++)
                             {
@@ -1509,7 +1509,8 @@ namespace NiVE3.Model
 
             NImage result;
             var cacheKey = hash.ToInt128();
-            if (downSamplingRate != 1.0 || !ImageCache.TryGet(CompositionId, cacheKey, IsEnableMotionBlur ? subFrameTime : time, out var cachedImage))
+            var device = useGpu ? AcceleratorModel.CurrentDevice : null;
+            if (downSamplingRate != 1.0 || !ImageCache.TryGet(CompositionId, cacheKey, IsEnableMotionBlur ? subFrameTime : time, device, out var cachedImage))
             {
                 var allImages = new List<IDisposable>();
                 try

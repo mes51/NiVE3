@@ -5,6 +5,7 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using ComputeSharp;
 using NiVE3.Config;
 using NiVE3.Image;
 using NiVE3.Plugin.ValueObject;
@@ -34,25 +35,12 @@ namespace NiVE3.Cache
             ApplicationSetting.Setting.UpdateSetting += Setting_UpdateSetting;
         }
 
-        private (NManagedImage, ROI)? GetInternal(in Guid objectId, in Int128 key, Time time)
-        {
-            if (CachedImages.TryGetValue(objectId, (time, key), out var image))
-            {
-                KeyLru.Add(objectId, key, time);
-                return Decompress(image);
-            }
-            else
-            {
-                return null;
-            }
-        }
-
-        private bool TryGetInternal(in Guid objectId, in Int128 key, Time time, out (NManagedImage, ROI) image)
+        private bool TryGetInternal(in Guid objectId, in Int128 key, Time time, GraphicsDevice? device, out (NImage, ROI) image)
         {
             var result = CachedImages.TryGetValue(objectId, (time, key), out var compressedImage);
             if (result)
             {
-                image = Decompress(compressedImage);
+                image = Decompress(compressedImage, device);
                 KeyLru.Add(objectId, key, time);
             }
             else
@@ -62,11 +50,11 @@ namespace NiVE3.Cache
             return result;
         }
 
-        private bool TryGetInternal(in Guid objectId, in Int128 key, out (NManagedImage, ROI) image)
+        private bool TryGetInternal(in Guid objectId, in Int128 key, GraphicsDevice? device, out (NImage, ROI) image)
         {
             if (CachedImages.TryGetValues((objectId, key), out var values))
             {
-                image = Decompress(values[0]);
+                image = Decompress(values[0], device);
                 KeyLru.UpdateLastAccessBySecondaryKey(objectId, key);
                 return true;
             }
@@ -189,19 +177,14 @@ namespace NiVE3.Cache
             }
         }
 
-        public static (NManagedImage, ROI)? Get(in Guid objectId, in Int128 key, Time time)
+        public static bool TryGet(in Guid objectId, in Int128 key, Time time, GraphicsDevice? device, out (NImage, ROI) image)
         {
-            return Instance.GetInternal(objectId, key, time);
+            return Instance.TryGetInternal(objectId, key, time, device, out image);
         }
 
-        public static bool TryGet(in Guid objectId, in Int128 key, Time time, out (NManagedImage, ROI) image)
+        public static bool TryGet(in Guid objectId, in Int128 key, GraphicsDevice? device, out (NImage, ROI) image)
         {
-            return Instance.TryGetInternal(objectId, key, time, out image);
-        }
-
-        public static bool TryGet(in Guid objectId, in Int128 key, out (NManagedImage, ROI) image)
-        {
-            return Instance.TryGetInternal(objectId, key, out image);
+            return Instance.TryGetInternal(objectId, key, device, out image);
         }
 
         public static void Add(in Guid objectId, in Int128 key, Time time, NManagedImage image, ROI roi)
@@ -224,12 +207,19 @@ namespace NiVE3.Cache
             Instance.ClearAllInternal();
         }
 
-        static (NManagedImage, ROI) Decompress((IDisposable, long, ROI) compressedImage)
+        static (NImage, ROI) Decompress((IDisposable, long, ROI) compressedImage, GraphicsDevice? device)
         {
             var (image, _, roi) = compressedImage;
             if (image is NManagedImage notCompressed)
             {
-                return ((NManagedImage)notCompressed.Copy(), roi);
+                if (device != null)
+                {
+                    return (notCompressed.ToGpu(device), roi);
+                }
+                else
+                {
+                    return (notCompressed.Copy(), roi);
+                }
             }
             else
             {
