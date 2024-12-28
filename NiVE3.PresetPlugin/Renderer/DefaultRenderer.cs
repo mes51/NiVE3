@@ -357,100 +357,14 @@ namespace NiVE3.PresetPlugin.Renderer
 
         public RasterizedMaskImage RenderAdjustmentMask(RenderableImage image)
         {
-            var result = new ManagedRasterizedMaskImage(Width, Height);
-            var opacity = (double)(image.Transform[ILayerObject.TransformPropertyOpacityId] ?? 0.0) * 0.01;
-            if (opacity <= 0.0)
+            if (UseGpu)
             {
-                return result;
-            }
-
-            ManagedRasterizedMaskImage? trackMatte = null;
-            if (image.TrackMatteImage != null && image.TrackMatteMode.HasValue)
-            {
-                var trackMatteImage = image.TrackMatteImage;
-                trackMatte = new ManagedRasterizedMaskImage(Width, Height);
-                var trackMatteOpacity = (double)(trackMatteImage.Transform[ILayerObject.TransformPropertyOpacityId] ?? 0.0) * 0.01;
-                if (trackMatteOpacity <= 0.0)
-                {
-                    trackMatte.GetDataSpan().Fill((image.TrackMatteMode == TrackMatteMode.InvertAlpha || image.TrackMatteMode == TrackMatteMode.InvertLuminance) ? 1.0F : 0.0F);
-                }
-
-                if (trackMatteImage.IsEnable3D)
-                {
-                    var renderer = new MaskRenderer3D(trackMatte, Width, Height, PointLights, SpotLights, ParallelLights, AmbientLights)
-                    {
-                        ViewMatrix = ViewMatrix,
-                        FieldOfView = FieldOfView
-                    };
-
-                    renderer.AddRect(
-                        trackMatteImage.ROI.OriginalImagePosition,
-                        trackMatteImage.Image,
-                        trackMatteImage.InterpolationQuality,
-                        (float)trackMatteOpacity,
-                        trackMatteImage.BlendMode,
-                        Matrix4x4d.CreateScale(trackMatteImage.DownSampleRateX, trackMatteImage.DownSampleRateY, 1.0) * Calc3DModelMatrix(trackMatteImage.Transform, trackMatteImage.ParentTransforms, Width, Height),
-                        (ShadowCastMode)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionIsCastShadowId] ?? ShadowCastMode.None),
-                        (float)((double)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionLightTransmissionId] ?? 0.0) * 0.01),
-                        (bool)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionIsAcceptShadowId] ?? false),
-                        (bool)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionIsAcceptLightId] ?? false),
-                        (float)((double)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionAmbientId] ?? 0.0) * 0.01),
-                        (float)((double)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionDiffuseId] ?? 0.0) * 0.01),
-                        (float)((double)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionSpecularIntensityId] ?? 0.0) * 0.01),
-                        (float)((double)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionSpecularShininessId] ?? 0.0) * 0.01),
-                        (float)((double)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionMetalId] ?? 0.0) * 0.01),
-                        null
-                    );
-
-                    renderer.Render(image.TrackMatteMode.Value, EnableAntiAlias);
-                }
-                else
-                {
-                    var renderer = new CPUMaskRender2D(trackMatte);
-                    var downScale = Matrix3x3.CreateScale(1.0F / CurrentDownScaleRateX, 1.0F / CurrentDownScaleRateY);
-                    var matrix = Matrix3x3.CreateScale(trackMatteImage.DownSampleRateX, trackMatteImage.DownSampleRateY) * CalcTransform2D(trackMatteImage.Transform, trackMatteImage.ParentTransforms) * downScale;
-                    renderer.Draw(trackMatteImage.ROI.OriginalImagePosition, trackMatteImage.Image, (float)trackMatteOpacity, matrix, trackMatteImage.InterpolationQuality, null, image.TrackMatteMode.Value);
-                }
-            }
-
-            if (image.IsEnable3D)
-            {
-                var renderer = new MaskRenderer3D(result, Width, Height, [], [], [], [])
-                {
-                    ViewMatrix = ViewMatrix,
-                    FieldOfView = FieldOfView
-                };
-
-                renderer.AddRect(
-                    image.ROI.OriginalImagePosition,
-                    image.Image,
-                    image.InterpolationQuality,
-                    (float)opacity,
-                    image.BlendMode,
-                    Matrix4x4d.CreateScale(image.DownSampleRateX, image.DownSampleRateY, 1.0) * Calc3DModelMatrix(image.Transform, image.ParentTransforms, Width, Height),
-                    (ShadowCastMode)(image.LayerOptions?[ILayerObject.ImageLayerOptionIsCastShadowId] ?? ShadowCastMode.None),
-                    (float)((double)(image.LayerOptions?[ILayerObject.ImageLayerOptionLightTransmissionId] ?? 0.0) * 0.01),
-                    (bool)(image.LayerOptions?[ILayerObject.ImageLayerOptionIsAcceptShadowId] ?? false),
-                    (bool)(image.LayerOptions?[ILayerObject.ImageLayerOptionIsAcceptLightId] ?? false),
-                    (float)((double)(image.LayerOptions?[ILayerObject.ImageLayerOptionAmbientId] ?? 0.0) * 0.01),
-                    (float)((double)(image.LayerOptions?[ILayerObject.ImageLayerOptionDiffuseId] ?? 0.0) * 0.01),
-                    (float)((double)(image.LayerOptions?[ILayerObject.ImageLayerOptionSpecularIntensityId] ?? 0.0) * 0.01),
-                    (float)((double)(image.LayerOptions?[ILayerObject.ImageLayerOptionSpecularShininessId] ?? 0.0) * 0.01),
-                    (float)((double)(image.LayerOptions?[ILayerObject.ImageLayerOptionMetalId] ?? 0.0) * 0.01),
-                    trackMatte
-                );
-
-                renderer.Render(TrackMatteMode.Alpha, EnableAntiAlias);
+                return RenderAdjustmentMaskGpu(image);
             }
             else
             {
-                var renderer = new CPUMaskRender2D(result);
-                var downScale = Matrix3x3.CreateScale(1.0F / CurrentDownScaleRateX, 1.0F / CurrentDownScaleRateY);
-                var matrix = Matrix3x3.CreateScale(image.DownSampleRateX, image.DownSampleRateY) * CalcTransform2D(image.Transform, image.ParentTransforms) * downScale;
-                renderer.Draw(image.ROI.OriginalImagePosition, image.Image, (float)opacity, matrix, image.InterpolationQuality, trackMatte, TrackMatteMode.Alpha);
+                return RenderAdjustmentMaskCpu(image);
             }
-
-            return result;
         }
 
         public PreviewBoundingBox GetBoundingBox2D(Vector2d origin, int width, int height, PropertyValueGroup transform, ParentTransform[] parentTransforms)
@@ -1105,6 +1019,204 @@ namespace NiVE3.PresetPlugin.Renderer
                     renderer.Draw();
                 }
             }
+        }
+
+        ManagedRasterizedMaskImage RenderAdjustmentMaskCpu(RenderableImage image)
+        {
+            var result = new ManagedRasterizedMaskImage(Width, Height);
+            var opacity = (double)(image.Transform[ILayerObject.TransformPropertyOpacityId] ?? 0.0) * 0.01;
+            if (opacity <= 0.0)
+            {
+                return result;
+            }
+
+            ManagedRasterizedMaskImage? trackMatte = null;
+            if (image.TrackMatteImage != null && image.TrackMatteMode.HasValue)
+            {
+                var trackMatteImage = image.TrackMatteImage;
+                trackMatte = new ManagedRasterizedMaskImage(Width, Height);
+                var trackMatteOpacity = (double)(trackMatteImage.Transform[ILayerObject.TransformPropertyOpacityId] ?? 0.0) * 0.01;
+                if (trackMatteOpacity <= 0.0)
+                {
+                    trackMatte.GetDataSpan().Fill((image.TrackMatteMode == TrackMatteMode.InvertAlpha || image.TrackMatteMode == TrackMatteMode.InvertLuminance) ? 1.0F : 0.0F);
+                }
+
+                if (trackMatteImage.IsEnable3D)
+                {
+                    var renderer = new MaskRenderer3D(trackMatte, Width, Height, PointLights, SpotLights, ParallelLights, AmbientLights)
+                    {
+                        ViewMatrix = ViewMatrix,
+                        FieldOfView = FieldOfView
+                    };
+
+                    renderer.AddRect(
+                        trackMatteImage.ROI.OriginalImagePosition,
+                        trackMatteImage.Image,
+                        trackMatteImage.InterpolationQuality,
+                        (float)trackMatteOpacity,
+                        trackMatteImage.BlendMode,
+                        Matrix4x4d.CreateScale(trackMatteImage.DownSampleRateX, trackMatteImage.DownSampleRateY, 1.0) * Calc3DModelMatrix(trackMatteImage.Transform, trackMatteImage.ParentTransforms, Width, Height),
+                        (ShadowCastMode)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionIsCastShadowId] ?? ShadowCastMode.None),
+                        (float)((double)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionLightTransmissionId] ?? 0.0) * 0.01),
+                        (bool)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionIsAcceptShadowId] ?? false),
+                        (bool)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionIsAcceptLightId] ?? false),
+                        (float)((double)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionAmbientId] ?? 0.0) * 0.01),
+                        (float)((double)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionDiffuseId] ?? 0.0) * 0.01),
+                        (float)((double)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionSpecularIntensityId] ?? 0.0) * 0.01),
+                        (float)((double)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionSpecularShininessId] ?? 0.0) * 0.01),
+                        (float)((double)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionMetalId] ?? 0.0) * 0.01),
+                        null
+                    );
+
+                    renderer.Render(image.TrackMatteMode.Value, EnableAntiAlias);
+                }
+                else
+                {
+                    var renderer = new CPUMaskRender2D(trackMatte);
+                    var downScale = Matrix3x3.CreateScale(1.0F / CurrentDownScaleRateX, 1.0F / CurrentDownScaleRateY);
+                    var matrix = Matrix3x3.CreateScale(trackMatteImage.DownSampleRateX, trackMatteImage.DownSampleRateY) * CalcTransform2D(trackMatteImage.Transform, trackMatteImage.ParentTransforms) * downScale;
+                    renderer.Draw(trackMatteImage.ROI.OriginalImagePosition, trackMatteImage.Image, (float)trackMatteOpacity, matrix, trackMatteImage.InterpolationQuality, null, image.TrackMatteMode.Value);
+                }
+            }
+
+            if (image.IsEnable3D)
+            {
+                var renderer = new MaskRenderer3D(result, Width, Height, [], [], [], [])
+                {
+                    ViewMatrix = ViewMatrix,
+                    FieldOfView = FieldOfView
+                };
+
+                renderer.AddRect(
+                    image.ROI.OriginalImagePosition,
+                    image.Image,
+                    image.InterpolationQuality,
+                    (float)opacity,
+                    image.BlendMode,
+                    Matrix4x4d.CreateScale(image.DownSampleRateX, image.DownSampleRateY, 1.0) * Calc3DModelMatrix(image.Transform, image.ParentTransforms, Width, Height),
+                    (ShadowCastMode)(image.LayerOptions?[ILayerObject.ImageLayerOptionIsCastShadowId] ?? ShadowCastMode.None),
+                    (float)((double)(image.LayerOptions?[ILayerObject.ImageLayerOptionLightTransmissionId] ?? 0.0) * 0.01),
+                    (bool)(image.LayerOptions?[ILayerObject.ImageLayerOptionIsAcceptShadowId] ?? false),
+                    (bool)(image.LayerOptions?[ILayerObject.ImageLayerOptionIsAcceptLightId] ?? false),
+                    (float)((double)(image.LayerOptions?[ILayerObject.ImageLayerOptionAmbientId] ?? 0.0) * 0.01),
+                    (float)((double)(image.LayerOptions?[ILayerObject.ImageLayerOptionDiffuseId] ?? 0.0) * 0.01),
+                    (float)((double)(image.LayerOptions?[ILayerObject.ImageLayerOptionSpecularIntensityId] ?? 0.0) * 0.01),
+                    (float)((double)(image.LayerOptions?[ILayerObject.ImageLayerOptionSpecularShininessId] ?? 0.0) * 0.01),
+                    (float)((double)(image.LayerOptions?[ILayerObject.ImageLayerOptionMetalId] ?? 0.0) * 0.01),
+                    trackMatte
+                );
+
+                renderer.Render(TrackMatteMode.Alpha, EnableAntiAlias);
+            }
+            else
+            {
+                var renderer = new CPUMaskRender2D(result);
+                var downScale = Matrix3x3.CreateScale(1.0F / CurrentDownScaleRateX, 1.0F / CurrentDownScaleRateY);
+                var matrix = Matrix3x3.CreateScale(image.DownSampleRateX, image.DownSampleRateY) * CalcTransform2D(image.Transform, image.ParentTransforms) * downScale;
+                renderer.Draw(image.ROI.OriginalImagePosition, image.Image, (float)opacity, matrix, image.InterpolationQuality, trackMatte, TrackMatteMode.Alpha);
+            }
+
+            return result;
+        }
+
+        GPURasterizedMaskImage RenderAdjustmentMaskGpu(RenderableImage image)
+        {
+            if (Accelerator == null)
+            {
+                throw new InvalidOperationException(); // bug
+            }
+            var device = Accelerator.CurrentDevice;
+
+            var result = new GPURasterizedMaskImage(Width, Height, device);
+            var opacity = (double)(image.Transform[ILayerObject.TransformPropertyOpacityId] ?? 0.0) * 0.01;
+            if (opacity <= 0.0)
+            {
+                return result;
+            }
+
+            GPURasterizedMaskImage? trackMatte = null;
+            if (image.TrackMatteImage != null && image.TrackMatteMode.HasValue)
+            {
+                var trackMatteImage = image.TrackMatteImage;
+                var trackMatteOpacity = (double)(trackMatteImage.Transform[ILayerObject.TransformPropertyOpacityId] ?? 0.0) * 0.01;
+                trackMatte = new GPURasterizedMaskImage(Width, Height, device, (image.TrackMatteMode == TrackMatteMode.InvertAlpha || image.TrackMatteMode == TrackMatteMode.InvertLuminance) ? 1.0F : 0.0F);
+
+                if (trackMatteImage.IsEnable3D)
+                {
+                    var renderer = new GPUMaskRenderer3D(trackMatte, device, Width, Height, PointLights, SpotLights, ParallelLights, AmbientLights)
+                    {
+                        ViewMatrix = ViewMatrix,
+                        FieldOfView = FieldOfView
+                    };
+
+                    renderer.AddRect(
+                        trackMatteImage.ROI.OriginalImagePosition,
+                        trackMatteImage.Image,
+                        trackMatteImage.InterpolationQuality,
+                        (float)trackMatteOpacity,
+                        trackMatteImage.BlendMode,
+                        Matrix4x4d.CreateScale(trackMatteImage.DownSampleRateX, trackMatteImage.DownSampleRateY, 1.0) * Calc3DModelMatrix(trackMatteImage.Transform, trackMatteImage.ParentTransforms, Width, Height),
+                        (ShadowCastMode)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionIsCastShadowId] ?? ShadowCastMode.None),
+                        (float)((double)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionLightTransmissionId] ?? 0.0) * 0.01),
+                        (bool)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionIsAcceptShadowId] ?? false),
+                        (bool)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionIsAcceptLightId] ?? false),
+                        (float)((double)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionAmbientId] ?? 0.0) * 0.01),
+                        (float)((double)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionDiffuseId] ?? 0.0) * 0.01),
+                        (float)((double)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionSpecularIntensityId] ?? 0.0) * 0.01),
+                        (float)((double)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionSpecularShininessId] ?? 0.0) * 0.01),
+                        (float)((double)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionMetalId] ?? 0.0) * 0.01),
+                        null
+                    );
+
+                    renderer.Render(image.TrackMatteMode.Value, EnableAntiAlias);
+                }
+                else
+                {
+                    var renderer = new GPUMaskRender2D(trackMatte, device);
+                    var downScale = Matrix3x3.CreateScale(1.0F / CurrentDownScaleRateX, 1.0F / CurrentDownScaleRateY);
+                    var matrix = Matrix3x3.CreateScale(trackMatteImage.DownSampleRateX, trackMatteImage.DownSampleRateY) * CalcTransform2D(trackMatteImage.Transform, trackMatteImage.ParentTransforms) * downScale;
+                    renderer.Draw(trackMatteImage.ROI.OriginalImagePosition, trackMatteImage.Image, (float)trackMatteOpacity, matrix, trackMatteImage.InterpolationQuality, null, image.TrackMatteMode.Value);
+                }
+            }
+
+            if (image.IsEnable3D)
+            {
+                var renderer = new GPUMaskRenderer3D(result, device, Width, Height, [], [], [], [])
+                {
+                    ViewMatrix = ViewMatrix,
+                    FieldOfView = FieldOfView
+                };
+
+                renderer.AddRect(
+                    image.ROI.OriginalImagePosition,
+                    image.Image,
+                    image.InterpolationQuality,
+                    (float)opacity,
+                    image.BlendMode,
+                    Matrix4x4d.CreateScale(image.DownSampleRateX, image.DownSampleRateY, 1.0) * Calc3DModelMatrix(image.Transform, image.ParentTransforms, Width, Height),
+                    (ShadowCastMode)(image.LayerOptions?[ILayerObject.ImageLayerOptionIsCastShadowId] ?? ShadowCastMode.None),
+                    (float)((double)(image.LayerOptions?[ILayerObject.ImageLayerOptionLightTransmissionId] ?? 0.0) * 0.01),
+                    (bool)(image.LayerOptions?[ILayerObject.ImageLayerOptionIsAcceptShadowId] ?? false),
+                    (bool)(image.LayerOptions?[ILayerObject.ImageLayerOptionIsAcceptLightId] ?? false),
+                    (float)((double)(image.LayerOptions?[ILayerObject.ImageLayerOptionAmbientId] ?? 0.0) * 0.01),
+                    (float)((double)(image.LayerOptions?[ILayerObject.ImageLayerOptionDiffuseId] ?? 0.0) * 0.01),
+                    (float)((double)(image.LayerOptions?[ILayerObject.ImageLayerOptionSpecularIntensityId] ?? 0.0) * 0.01),
+                    (float)((double)(image.LayerOptions?[ILayerObject.ImageLayerOptionSpecularShininessId] ?? 0.0) * 0.01),
+                    (float)((double)(image.LayerOptions?[ILayerObject.ImageLayerOptionMetalId] ?? 0.0) * 0.01),
+                    trackMatte
+                );
+
+                renderer.Render(TrackMatteMode.Alpha, EnableAntiAlias);
+            }
+            else
+            {
+                var renderer = new GPUMaskRender2D(result, device);
+                var downScale = Matrix3x3.CreateScale(1.0F / CurrentDownScaleRateX, 1.0F / CurrentDownScaleRateY);
+                var matrix = Matrix3x3.CreateScale(image.DownSampleRateX, image.DownSampleRateY) * CalcTransform2D(image.Transform, image.ParentTransforms) * downScale;
+                renderer.Draw(image.ROI.OriginalImagePosition, image.Image, (float)opacity, matrix, image.InterpolationQuality, trackMatte, TrackMatteMode.Alpha);
+            }
+
+            return result;
         }
 
         static Matrix3x3 CalcTransform2D(PropertyValueGroup transform, ParentTransform[] parentTransforms)

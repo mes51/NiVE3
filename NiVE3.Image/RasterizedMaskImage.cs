@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using ComputeSharp;
 using NiVE3.Numerics;
 
 namespace NiVE3.Image
@@ -89,6 +91,40 @@ namespace NiVE3.Image
         ~RasterizedMaskImage()
         {
             Dispose();
+        }
+    }
+
+    public static class RasterizedMaskImageExtensions
+    {
+        /// <summary>
+        /// RasterizedMaskImageをManagedRasterizedMaskImageに変換します
+        /// </summary>
+        /// <param name="image">変換するRasterizedMaskImage</param>
+        /// <returns>変換後のManagedRasterizedMaskImage。元がManagedRasterizedMaskImageの場合は何もしません</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ManagedRasterizedMaskImage ToManaged(this RasterizedMaskImage image)
+        {
+            return image switch
+            {
+                GPURasterizedMaskImage gpuImage => gpuImage.CopyToCpu(),
+                _ => (ManagedRasterizedMaskImage)image
+            };
+        }
+
+        /// <summary>
+        /// RasterizedMaskImageをGPURasterizedMaskImageに変換します
+        /// </summary>
+        /// <param name="image">変換するRasterizedMaskImage</param>
+        /// <param name="device">変換時に使用するGraphicsDevice</param>
+        /// <returns>変換後のGPURasterizedMaskImage。元がGPURasterizedMaskImageの場合は何もしません</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static GPURasterizedMaskImage ToGpu(this RasterizedMaskImage image, GraphicsDevice device)
+        {
+            return image switch
+            {
+                ManagedRasterizedMaskImage managedImage => managedImage.CopyToGpu(device),
+                _ => (GPURasterizedMaskImage)image
+            };
         }
     }
 }

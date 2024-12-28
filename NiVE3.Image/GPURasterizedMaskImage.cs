@@ -87,12 +87,11 @@ namespace NiVE3.Image
         /// <summary>
         /// マスク画像データをCPU側にコピーしたRasterizedMaskImageを新たに生成します
         /// </summary>
-        /// <param name="needClear">ArrayPoolから取得した配列の0クリアが必要かどうか</param>
         /// <returns>生成されたManagedRasterizedMaskImage</returns>
         public ManagedRasterizedMaskImage CopyToCpu()
         {
             var result = new ManagedRasterizedMaskImage(Width, Height, false);
-            Data.CopyTo(result.Data[..Data.Length]);
+            Data.CopyTo(result.Data.AsSpan(0, Data.Length));
             return result;
         }
 

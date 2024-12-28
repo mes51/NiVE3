@@ -36,6 +36,7 @@ using NiVE3.InternalShader.MotionBlur;
 using NiVE3.Model.UI;
 using NiVE3.Image.Color;
 using NiVE3.Text;
+using NiVE3.InternalShader;
 
 namespace NiVE3.Model
 {
@@ -1553,31 +1554,16 @@ namespace NiVE3.Model
                                 continue;
                             }
 
-                            var mask = Renderer.RenderAdjustmentMask(adjustmentMaskImage);
+                            using var mask = Renderer.RenderAdjustmentMask(adjustmentMaskImage);
                             var currentRenderingFrame = Renderer.GetCurrentRenderedImage();
                             var (roi, currentFrame) = l.ProcessAdjustment(currentTime, currentRenderingFrame, Width / (double)currentRenderingFrame.Width, Height / (double)currentRenderingFrame.Height, useGpu);
 
-                            if (mask is GPURasterizedMaskImage gpuMaskImage)
+                            var maskedImage = (NImage)(useGpu ? ApplyMaskGpu(currentFrame, mask, roi) : ApplyMaskCpu(currentFrame, mask, roi));
+                            if (maskedImage != currentFrame)
                             {
-                                var managedImage = gpuMaskImage.CopyToCpu();
-                                mask.Dispose();
-                                mask = managedImage;
-                            }
-                            if (currentFrame is NGPUImage gpuCurrentFrame)
-                            {
-                                var managedImage = gpuCurrentFrame.CopyToCpu();
                                 currentFrame.Dispose();
-                                currentFrame = managedImage;
+                                currentFrame = maskedImage;
                             }
-                            Parallel.For(roi.OriginalImagePosition.Y, roi.OriginalImagePosition.Y + roi.OriginalImageSize.Height, y =>
-                            {
-                                var maskSpan = ((ManagedRasterizedMaskImage)mask).GetDataSpan().Slice((y - roi.OriginalImagePosition.Y) * mask.Width, mask.Width);
-                                var currentFrameSpan = ((NManagedImage)currentFrame).GetDataSpan().Slice(y * currentFrame.Width, currentFrame.Width);
-                                for (int x = roi.OriginalImagePosition.X, limit = x + roi.OriginalImageSize.Width, maskPos = 0, framePos = x; x < limit; x++, maskPos++, framePos++)
-                                {
-                                    currentFrameSpan[framePos].W *= maskSpan[maskPos];
-                                }
-                            });
 
                             Renderer.RenderAdjustmentLayer(currentFrame, roi, downSamplingRate, l.InterpolationQuality, l.BlendMode);
 
@@ -1933,6 +1919,48 @@ namespace NiVE3.Model
         {
             ImageCache.Clear(CompositionId);
             CompositionUpdatedPublisher.Publish(this, new NeedHistoryChangeEventArgs(needHistoryChange));
+        }
+
+        NManagedImage ApplyMaskCpu(NImage image, RasterizedMaskImage mask, ROI roi)
+        {
+            var managedMask = mask.ToManaged();
+            var managedImage = image.ToManaged();
+
+            Parallel.For(roi.OriginalImagePosition.Y, roi.OriginalImagePosition.Y + roi.OriginalImageSize.Height, y =>
+            {
+                var maskSpan = managedMask.GetDataSpan().Slice((y - roi.OriginalImagePosition.Y) * managedMask.Width, managedMask.Width);
+                var currentFrameSpan = managedImage.GetDataSpan().Slice(y * managedImage.Width, managedImage.Width);
+                for (int x = roi.OriginalImagePosition.X, limit = x + roi.OriginalImageSize.Width, maskPos = 0, framePos = x; x < limit; x++, maskPos++, framePos++)
+                {
+                    currentFrameSpan[framePos].W *= maskSpan[maskPos];
+                }
+            });
+
+            if (mask != managedMask)
+            {
+                managedImage.Dispose();
+            }
+
+            return managedImage;
+        }
+
+        NGPUImage ApplyMaskGpu(NImage image, RasterizedMaskImage mask, ROI roi)
+        {
+            var device = AcceleratorModel.CurrentDevice;
+            var gpuMask = mask.ToGpu(device);
+            var gpuImage = image.ToGpu(device);
+
+            using (var context = device.CreateComputeContext())
+            {
+                context.For(roi.Width, roi.Height, new MaskImage(gpuImage.Data, gpuImage.Width, gpuMask.Data, gpuMask.Width, roi.OriginalImagePosition.X, roi.OriginalImagePosition.Y, roi.Left, roi.Top));
+            }
+
+            if (mask != gpuMask)
+            {
+                gpuMask.Dispose();
+            }
+
+            return gpuImage;
         }
 
         static CameraSetting CreateDefaultCameraSetting(int width, int height)
