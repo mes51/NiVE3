@@ -134,6 +134,14 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref state, value); }
         }
 
+        private TimeSpan renderingTime;
+        [NeedWire(nameof(RenderQueueItemModel), IsOneWay = true)]
+        public TimeSpan RenderingTime
+        {
+            get { return renderingTime; }
+            set { SetProperty(ref renderingTime, value); }
+        }
+
         private string compositionName = "";
         [NeedWire(nameof(RenderQueueItemModel), IsOneWay = true)]
         public string CompositionName

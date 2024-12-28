@@ -216,6 +216,15 @@
                     <CheckBox Grid.Column="1" Content="{gm:LanguageResource ResourceKey=RenderQueueItemView_OutputSources_Video}" Margin="{StaticResource ColMargin}" IsChecked="{Binding IsOutputVideo}" IsEnabled="False" VerticalAlignment="Center"/>
                     <CheckBox Grid.Column="2" Content="{gm:LanguageResource ResourceKey=RenderQueueItemView_OutputSources_Audio}" Margin="{StaticResource ColMargin}" IsChecked="{Binding IsOutputAudio}" IsEnabled="False" VerticalAlignment="Center"/>
                 </Grid>
+                <Grid Margin="{StaticResource RowMargin}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="Label"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=RenderQueueItemView_RenderingTime}" HorizontalAlignment="Right"/>
+                    <TextBlock Grid.Column="1" Text="{Binding RenderingTime, StringFormat={}{0:d\\:hh\\:mm\\:ss}}" Margin="{StaticResource ColMargin}"/>
+                </Grid>
                 <Button Content="{gm:LanguageResource ResourceKey=RenderQueueItemView_Button_EditSetting}" Margin="{StaticResource RowMargin}" Width="150" HorizontalAlignment="Right" Command="{Binding ChangeSettingCommand}"/>
             </StackPanel>
         </Expander>

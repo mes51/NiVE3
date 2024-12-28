@@ -686,6 +686,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("オーディオ")]
         public static readonly string RenderQueueItemView_OutputSources_Audio = nameof(RenderQueueItemView_OutputSources_Audio);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("レンダリング時間:")]
+        public static readonly string RenderQueueItemView_RenderingTime = nameof(RenderQueueItemView_RenderingTime);
+
         [ShowInMarkup, LanguageKey, DefaultValue("参照")]
         public static readonly string RenderQueueItemView_Button_Reference = nameof(RenderQueueItemView_Button_Reference);
 

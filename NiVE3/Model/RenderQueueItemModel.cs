@@ -116,6 +116,13 @@ namespace NiVE3.Model
             set { SetProperty(ref state, value); }
         }
 
+        private TimeSpan renderingTime;
+        public TimeSpan RenderingTime
+        {
+            get { return renderingTime; }
+            set { SetProperty(ref renderingTime, value); }
+        }
+
         private string compositionName = "";
         public string CompositionName
         {
@@ -300,6 +307,7 @@ namespace NiVE3.Model
             var frameDuration = CompositionModel.FrameDuration;
             var (beginTime, endTime) = GetTimeRange();
 
+            var startRenderingTimestamp = Stopwatch.GetTimestamp();
             try
             {
                 plugin.BeginOutput(filePath, beginTime, endTime - beginTime, frameRate, size, sourceTypes);
@@ -364,6 +372,10 @@ namespace NiVE3.Model
                 dispatcher.Invoke(() => UpdateState(RenderQueueItemState.Error));
                 throw;
             }
+            finally
+            {
+                RenderingTime = Stopwatch.GetElapsedTime(startRenderingTimestamp);
+            }
         }
 
         public RenderQueueItemData SaveData()
@@ -383,6 +395,7 @@ namespace NiVE3.Model
                 OutputPluginId = OutputPluginId,
                 OutputSetting = Output?.Value?.SaveSetting(),
                 State = State,
+                RenderingTime = RenderingTime,
                 CompositionId = CompositionModel.CompositionId
             };
         }
@@ -400,6 +413,7 @@ namespace NiVE3.Model
             IsOutputAudio = data.IsOutputAudio;
             OutputPluginId = data.OutputPluginId;
             State = data.State;
+            RenderingTime = data.RenderingTime;
 
             var output = OutputListModel.CreateOutput(OutputPluginId);
             if (output != null)

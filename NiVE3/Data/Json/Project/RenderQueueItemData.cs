@@ -44,5 +44,7 @@ namespace NiVE3.Data.Json.Project
         public RenderQueueItemState State { get; set; }
 
         public Guid CompositionId { get; set; }
+
+        public TimeSpan RenderingTime { get; set; }
     }
 }
