@@ -65,28 +65,41 @@ namespace NiVE3.Cache
             }
         }
 
-        private void AddInternal(Guid objectId, in Int128 key, Time time, NManagedImage image, ROI roi)
+        private void AddInternal(Guid objectId, in Int128 key, Time time, NImage image, ROI roi)
         {
             (IDisposable, int, ROI) compressedImage;
+            var managedImage = image.ToManaged();
             // NOTE: 実際に確保したメモリの容量で判定する
-            var managedImageSize = image.Data.Length * ImageElementSize;
+            var managedImageSize = managedImage.Data.Length * ImageElementSize;
             if (IsCompressCache)
             {
-                var qoiImage = Qoi.Encode(image);
+                var qoiImage = Qoi.Encode(managedImage);
                 var size = qoiImage.GetAllocatedSize();
                 if (size < managedImageSize)
                 {
                     compressedImage = (qoiImage, size, roi);
+                    if (image != managedImage)
+                    {
+                        managedImage.Dispose();
+                    }
                 }
                 else
                 {
                     qoiImage.Dispose();
-                    compressedImage = (image.Copy(), managedImageSize, roi);
+                    if (managedImage == image)
+                    {
+                        managedImage = (NManagedImage)managedImage.Copy();
+                    }
+                    compressedImage = (managedImage, managedImageSize, roi);
                 }
             }
             else
             {
-                compressedImage = (image.Copy(), managedImageSize, roi);
+                if (managedImage == image)
+                {
+                    managedImage = (NManagedImage)managedImage.Copy();
+                }
+                compressedImage = (managedImage, managedImageSize, roi);
             }
             if (CachedImages.ContainsUpdateKey(objectId))
             {
@@ -187,7 +200,7 @@ namespace NiVE3.Cache
             return Instance.TryGetInternal(objectId, key, device, out image);
         }
 
-        public static void Add(in Guid objectId, in Int128 key, Time time, NManagedImage image, ROI roi)
+        public static void Add(in Guid objectId, in Int128 key, Time time, NImage image, ROI roi)
         {
             Instance.AddInternal(objectId, key, time, image, roi);
         }

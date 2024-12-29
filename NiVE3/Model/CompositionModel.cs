@@ -867,8 +867,7 @@ namespace NiVE3.Model
                                 context.For(Width, Height, new UnPremultiply(result.Data, Width));
                             }
 
-                            using var managedResultImage = result.CopyToCpu();
-                            ImageCache.Add(CompositionId, cacheKey, time, managedResultImage, ROI.Empty);
+                            ImageCache.Add(CompositionId, cacheKey, time, result, ROI.Empty);
 
                             return result;
                         }
@@ -1643,15 +1642,7 @@ namespace NiVE3.Model
 
                 if (downSamplingRate == 1.0)
                 {
-                    if (result is NGPUImage gpuImage)
-                    {
-                        using var managedImage = gpuImage.CopyToCpu();
-                        ImageCache.Add(CompositionId, cacheKey, time, managedImage, ROI.Empty);
-                    }
-                    else
-                    {
-                        ImageCache.Add(CompositionId, cacheKey, time, (NManagedImage)result, ROI.Empty);
-                    }
+                    ImageCache.Add(CompositionId, cacheKey, time, result, ROI.Empty);
                 }
             }
             else

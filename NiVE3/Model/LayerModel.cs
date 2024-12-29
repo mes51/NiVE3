@@ -637,15 +637,7 @@ namespace NiVE3.Model
 
                 if (downSamplingRate == 1.0)
                 {
-                    if (image is NGPUImage gpuImage)
-                    {
-                        using var managedImage = gpuImage.CopyToCpu();
-                        ImageCache.Add(LayerId, hash.ToInt128(), layerTime, managedImage, roi);
-                    }
-                    else if (image is NManagedImage managedImage)
-                    {
-                        ImageCache.Add(LayerId, hash.ToInt128(), layerTime, managedImage, roi);
-                    }
+                    ImageCache.Add(LayerId, hash.ToInt128(), layerTime, image, roi);
                 }
             }
 
@@ -730,15 +722,7 @@ namespace NiVE3.Model
 
                 if (downSamplingRate == 1.0)
                 {
-                    if (image is NGPUImage gpuImage)
-                    {
-                        using var managedImage = gpuImage.CopyToCpu();
-                        ImageCache.Add(LayerId, hash.ToInt128(), layerTime, managedImage, roi.Value);
-                    }
-                    else if (image is NManagedImage managedImage)
-                    {
-                        ImageCache.Add(LayerId, hash.ToInt128(), layerTime, managedImage, roi.Value);
-                    }
+                    ImageCache.Add(LayerId, hash.ToInt128(), layerTime, image, roi.Value);
                 }
             }
 
