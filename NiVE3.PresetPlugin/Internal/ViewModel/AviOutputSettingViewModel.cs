@@ -134,7 +134,7 @@ namespace NiVE3.PresetPlugin.Internal.ViewModel
             OpenCodecConfigureCommand = new RequerySuggestedCommand<DependencyObject>(ui =>
             {
                 var codec = CodecList[SelectedCodecIndex].Item1;
-                using var configurator = new CompressorConfigurator(codec, Width, Height, outputChannel.ToBitsPerPixel());
+                using var configurator = new CompressorConfigurator(codec, Width, Height, OutputChannel.ToBitsPerPixel());
                 var ownerWindow = Window.GetWindow(ui);
                 if (CodecState != null)
                 {
@@ -152,8 +152,9 @@ namespace NiVE3.PresetPlugin.Internal.ViewModel
             switch (e.PropertyName)
             {
                 case nameof(OutputChannel):
+                    UpdateCodecList();
                     break;
-                case nameof(SelectedCodecIndex):
+                case nameof(SelectedCodecIndex) when SelectedCodecIndex > -1: // NOTE: コーデックリスト更新中に-1になることがあるので無視する
                     {
                         var codec = CodecList[SelectedCodecIndex].Item1;
                         if (codec == 0)
@@ -166,7 +167,7 @@ namespace NiVE3.PresetPlugin.Internal.ViewModel
                         }
                         else
                         {
-                            using var configurator = new CompressorConfigurator(codec, Width, Height, outputChannel.ToBitsPerPixel());
+                            using var configurator = new CompressorConfigurator(codec, Width, Height, OutputChannel.ToBitsPerPixel());
                             CodecState = null;
                             SupportQuality = configurator.SupportQuality;
                             SupportKeyFrameRate = configurator.SupportKeyFrameRate;
@@ -186,15 +187,15 @@ namespace NiVE3.PresetPlugin.Internal.ViewModel
             }
 
             var selectedCodec = CodecList.Count > 0 ? CodecList[SelectedCodecIndex].Item1 : new FourCC(0);
-            CodecList.Clear();
-
+            var newCodecList = new ObservableCollection<Tuple<FourCC, string>>();
             var bpc = OutputChannel.ToBitsPerPixel();
             foreach (var t in CompressorConfigurator.GetSupportedCodec(Width, Height, bpc))
             {
-                CodecList.Add(t);
+                newCodecList.Add(t);
             }
 
-            SelectedCodecIndex = Math.Max(CodecList.FindIndex(t => t.Item1 == selectedCodec), 0);
+            CodecList = newCodecList;
+            SelectedCodecIndex = Math.Max(newCodecList.FindIndex(t => t.Item1 == selectedCodec), 0);
         }
     }
 }
