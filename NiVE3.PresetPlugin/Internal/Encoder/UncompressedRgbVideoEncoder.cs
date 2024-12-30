@@ -1,19 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Threading.Tasks;
 using SharpAvi;
-using SharpAvi.Codecs;
 
 namespace NiVE3.PresetPlugin.Internal.Encoder
 {
-    class UncompressedAlphaVideoEncoder : ISourceFormatChangeableVideoEncoder
+    class UncompressedRgbVideoEncoder : ISourceFormatChangeableVideoEncoder
     {
         public FourCC Codec => new FourCC(0);
 
-        public BitsPerPixel BitsPerPixel => BitsPerPixel.Bpp8;
+        public BitsPerPixel BitsPerPixel => BitsPerPixel.Bpp24;
 
         public int MaxEncodedSize { get; }
 
@@ -23,17 +21,20 @@ namespace NiVE3.PresetPlugin.Internal.Encoder
 
         int Height { get; }
 
+        int Stride { get; }
+
         int SrcStride { get; }
 
         int SourceImageDataSize { get; }
 
-        public UncompressedAlphaVideoEncoder(int width, int height)
+        public UncompressedRgbVideoEncoder(int width, int height)
         {
             Width = width;
             Height = height;
+            Stride = width * 3;
             SrcStride = width * 4;
             SourceImageDataSize = width * height * 4;
-            MaxEncodedSize = width * height;
+            MaxEncodedSize = width * height * 3;
         }
 
         public int EncodeFrame(byte[] source, int srcOffset, byte[] destination, int destOffset, out bool isKeyFrame)
@@ -62,14 +63,16 @@ namespace NiVE3.PresetPlugin.Internal.Encoder
                     throw new ArgumentOutOfRangeException(nameof(destination));
                 }
 
-                Parallel.For(0, Height, h =>
+                Parallel.For(0, Height, i =>
                 {
-                    var srcSpan = source.AsSpan(h * SrcStride + srcOffset, SrcStride);
-                    var dstSpan = destination.AsSpan((Height - h - 1) * Width + destOffset, Width);
+                    var srcSpan = source.AsSpan(i * SrcStride + srcOffset, SrcStride);
+                    var dstSpan = destination.AsSpan((Height - i - 1) * Stride + destOffset, Stride);
 
-                    for (var w = 0; w < Width; w++)
+                    for (int w = 0, sp = 0, dp = 0; w < Width; w++, sp += 4, dp += 3)
                     {
-                        dstSpan[w] = srcSpan[w * 4 + 3];
+                        dstSpan[dp] = srcSpan[sp];
+                        dstSpan[dp + 1] = srcSpan[sp + 1];
+                        dstSpan[dp + 2] = srcSpan[sp + 2];
                     }
                 });
             }
@@ -104,14 +107,16 @@ namespace NiVE3.PresetPlugin.Internal.Encoder
                     throw new ArgumentOutOfRangeException(nameof(destination));
                 }
 
-                for (var h = 0; h < Height; h++)
+                for (var i = 0; i < Height; i++)
                 {
-                    var srcSpan = source.Slice(h * SrcStride, SrcStride);
-                    var dstSpan = destination.Slice((Height - h - 1) * Width, Width);
+                    var srcSpan = source.Slice(i * SrcStride, SrcStride);
+                    var dstSpan = destination.Slice ((Height - i - 1) * Stride, Stride);
 
-                    for (var w = 0; w < Width; w++)
+                    for (int w = 0, sp = 0, dp = 0; w < Width; w++, sp += 4, dp += 3)
                     {
-                        dstSpan[w] = srcSpan[w * 4 + 3];
+                        dstSpan[dp] = srcSpan[sp];
+                        dstSpan[dp + 1] = srcSpan[sp + 1];
+                        dstSpan[dp + 2] = srcSpan[sp + 2];
                     }
                 }
             }

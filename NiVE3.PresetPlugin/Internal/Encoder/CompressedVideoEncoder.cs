@@ -14,7 +14,7 @@ using static Vanara.PInvoke.Msvfw32;
 
 namespace NiVE3.PresetPlugin.Internal.Encoder
 {
-    class CompressedVideoEncoder : IVideoEncoder, IVideoEncoderExtraData, IDisposable
+    class CompressedVideoEncoder : ISourceFormatChangeableVideoEncoder, IVideoEncoderExtraData, IDisposable
     {
         public FourCC Codec { get; }
 
@@ -37,6 +37,8 @@ namespace NiVE3.PresetPlugin.Internal.Encoder
         public int KeyFrameRate { get; set; }
 
         public bool CompressStarted { get; private set; }
+
+        public bool UseFormatConvertedSource { get; set; }
 
         bool Disposed { get; set; }
 
@@ -96,17 +98,24 @@ namespace NiVE3.PresetPlugin.Internal.Encoder
                 SetupCompressor();
             }
 
-            switch (BitsPerPixel)
+            if (UseFormatConvertedSource)
             {
-                case BitsPerPixel.Bpp32:
-                    FlipVerticalBitmapParallel(source, srcOffset, Buffer, Width, Height);
-                    break;
-                case BitsPerPixel.Bpp24:
-                    FlipAndConvertTo24Parallel(source, srcOffset, Buffer, Width, Height);
-                    break;
-                case BitsPerPixel.Bpp8:
-                    FlipAndConvertTo8Parallel(source, srcOffset, Buffer, Width, Height);
-                    break;
+                source.AsSpan(srcOffset, Buffer.Length).CopyTo(Buffer);
+            }
+            else
+            {
+                switch (BitsPerPixel)
+                {
+                    case BitsPerPixel.Bpp32:
+                        FlipVerticalBitmapParallel(source, srcOffset, Buffer, Width, Height);
+                        break;
+                    case BitsPerPixel.Bpp24:
+                        FlipAndConvertTo24Parallel(source, srcOffset, Buffer, Width, Height);
+                        break;
+                    case BitsPerPixel.Bpp8:
+                        FlipAndConvertTo8Parallel(source, srcOffset, Buffer, Width, Height);
+                        break;
+                }
             }
 
             return CompressFrame(destination.AsSpan(destOffset), out isKeyFrame);
@@ -119,17 +128,24 @@ namespace NiVE3.PresetPlugin.Internal.Encoder
                 SetupCompressor();
             }
 
-            switch (BitsPerPixel)
+            if (UseFormatConvertedSource)
             {
-                case BitsPerPixel.Bpp32:
-                    FlipVerticalBitmap(source, Buffer, Width, Height);
-                    break;
-                case BitsPerPixel.Bpp24:
-                    FlipAndConvertTo24(source, Buffer, Width, Height);
-                    break;
-                case BitsPerPixel.Bpp8:
-                    FlipAndConvertTo8(source, Buffer, Width, Height);
-                    break;
+                source[..Buffer.Length].CopyTo(Buffer);
+            }
+            else
+            {
+                switch (BitsPerPixel)
+                {
+                    case BitsPerPixel.Bpp32:
+                        FlipVerticalBitmap(source, Buffer, Width, Height);
+                        break;
+                    case BitsPerPixel.Bpp24:
+                        FlipAndConvertTo24(source, Buffer, Width, Height);
+                        break;
+                    case BitsPerPixel.Bpp8:
+                        FlipAndConvertTo8(source, Buffer, Width, Height);
+                        break;
+                }
             }
 
             return CompressFrame(destination, out isKeyFrame);

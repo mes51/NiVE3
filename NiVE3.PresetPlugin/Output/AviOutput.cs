@@ -9,6 +9,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using ComputeSharp;
 using NAudio.Dsp;
 using NAudio.Wave.SampleProviders;
 using NiVE3.Image;
@@ -29,7 +30,7 @@ using SharpAvi.Output;
 namespace NiVE3.PresetPlugin.Output
 {
     [Export(typeof(IOutput))]
-    [OutputMetadata(typeof(AviOutput), LanguageResourceDictionary.Output_AviOutput_Name, "mes51", LanguageResourceDictionary.Output_AviOutput_Description, ID, "*.avi", SourceType.VideoAndAudio, true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
+    [OutputMetadata(typeof(AviOutput), LanguageResourceDictionary.Output_AviOutput_Name, "mes51", LanguageResourceDictionary.Output_AviOutput_Description, ID, "*.avi", SourceType.VideoAndAudio, true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary), IsSupportGpu = true)]
     public sealed class AviOutput : IOutput
     {
         const string ID = "447492E0-E815-49DC-9D65-355CC3866285";
@@ -44,7 +45,14 @@ namespace NiVE3.PresetPlugin.Output
 
         IAviAudioStream? AudioStream { get; set; }
 
-        public void SetupAccelerator(IAcceleratorObject accelerator) { }
+        ISourceFormatChangeableVideoEncoder? Encoder { get; set; }
+
+        IAcceleratorObject? AcceleratorObject { get; set; }
+
+        public void SetupAccelerator(IAcceleratorObject accelerator)
+        {
+            AcceleratorObject = accelerator;
+        }
 
         public FrameworkElement? GetOutputSetting(string filePath, Time startTime, Time duration, double frameRate, Int32Size? size, SourceType outputSources)
         {
@@ -145,29 +153,28 @@ namespace NiVE3.PresetPlugin.Output
             {
                 var bpc = ((OutputChannel)Setting.OutputChannel).ToBitsPerPixel();
 
-                IVideoEncoder encoder;
                 if (!string.IsNullOrEmpty(Setting.Codec))
                 {
-                    encoder = new CompressedVideoEncoder(size.Value.Width, size.Value.Height, bpc, Setting.Codec, (int)Math.Ceiling((double)duration * frameRate), (int)frameRate)
+                    Encoder = new CompressedVideoEncoder(size.Value.Width, size.Value.Height, bpc, Setting.Codec, (int)Math.Ceiling((double)duration * frameRate), (int)frameRate)
                     {
                         Quality = Setting.Quality,
                         KeyFrameRate = Setting.UseKeyFrameRate ? Setting.KeyFrameRate : 0,
                     };
                     if (Setting.State != null)
                     {
-                        ((CompressedVideoEncoder)encoder).SetState(Convert.FromBase64String(Setting.State));
+                        ((CompressedVideoEncoder)Encoder).SetState(Convert.FromBase64String(Setting.State));
                     }
                 }
                 else
                 {
-                    encoder = bpc switch
+                    Encoder = bpc switch
                     {
                         BitsPerPixel.Bpp32 => new UncompressedRgbaVideoEncoder(size.Value.Width, size.Value.Height),
                         BitsPerPixel.Bpp8 => new UncompressedAlphaVideoEncoder(size.Value.Width, size.Value.Height),
-                        _ => new UncompressedVideoEncoder(size.Value.Width, size.Value.Height)
+                        _ => new UncompressedRgbVideoEncoder(size.Value.Width, size.Value.Height)
                     };
                 }
-                VideoStream = Writer.AddEncodingVideoStream(encoder, true, size.Value.Width, size.Value.Height);
+                VideoStream = Writer.AddEncodingVideoStream(Encoder, true, size.Value.Width, size.Value.Height);
             }
 
             if (outputSources.HasFlag(SourceType.Audio))
@@ -195,6 +202,7 @@ namespace NiVE3.PresetPlugin.Output
             VideoStream = null;
             AudioStream = null;
             Writer = null;
+            Encoder = null;
         }
 
         public void BeginPass(int pass) { }
@@ -208,32 +216,57 @@ namespace NiVE3.PresetPlugin.Output
 
         public void ProcessFrame(int pass, Time time, NImage image, bool useGpu)
         {
-            if (VideoStream == null)
+            if (VideoStream == null || Encoder == null)
             {
                 throw new InvalidOperationException();
             }
 
-            var data = ArrayPool<byte>.Shared.Rent(image.DataLength * 4);
-            if (image is NGPUImage gpuImage)
+            if (useGpu && AcceleratorObject != null && image is NGPUImage gpuImage)
             {
-                using var managedImage = gpuImage.CopyToCpu();
-                if (Setting.OutputChannel == (int)OutputChannel.Rgb)
-                {
-                    BlendBlack(managedImage);
-                }
-                ImageConversion.ConvertToBGRA32(managedImage.GetDataSpan(), data, managedImage.DataLength);
-            }
-            else if (image is NManagedImage managedImage)
-            {
-                if (Setting.OutputChannel == (int)OutputChannel.Rgb)
-                {
-                    BlendBlack(managedImage);
-                }
-                ImageConversion.ConvertToBGRA32(managedImage.GetDataSpan(), data, managedImage.DataLength);
-            }
+                var device = AcceleratorObject.CurrentDevice;
+                var bpc = ((OutputChannel)Setting.OutputChannel).ToBitsPerPixel();
+                using var convertedImage = device.AllocateReadWriteBuffer<int>((int)Math.Ceiling((gpuImage.DataLength * 4) / (double)((int)bpc / 8)));
+                using var readbackBuffer = device.AllocateReadBackBuffer<int>(convertedImage.Length);
 
-            // NOTE: 中で画像反転&bpc変換をマルチスレッドで行えるようにするため、byte[]版の方を使用する
-            VideoStream.WriteFrame(true, data, 0, image.DataLength * 4);
+                using (var context = device.CreateComputeContext())
+                {
+                    switch (bpc)
+                    {
+                        case BitsPerPixel.Bpp32:
+                            context.For(gpuImage.Width, gpuImage.Height, new AviOutputFlipAndQuantizeBitmap(gpuImage.Data, convertedImage, gpuImage.Width, gpuImage.Height));
+                            break;
+                        case BitsPerPixel.Bpp24:
+                            context.For(gpuImage.Width, gpuImage.Height, new AviOutputFlipAndConvertTo24Bpc(gpuImage.Data, convertedImage, gpuImage.Width, gpuImage.Height));
+                            break;
+                        case BitsPerPixel.Bpp8:
+                            context.For(gpuImage.Width, gpuImage.Height, new AviOutputFlipAndConvertTo8Bpc(gpuImage.Data, convertedImage, gpuImage.Width, gpuImage.Height));
+                            break;
+                    }
+                }
+
+                convertedImage.CopyTo(readbackBuffer);
+                Encoder.UseFormatConvertedSource = true;
+                VideoStream.WriteFrame(true, MemoryMarshal.Cast<int, byte>(readbackBuffer.Span));
+            }
+            else
+            {
+                var data = ArrayPool<byte>.Shared.Rent(image.DataLength * 4);
+                var managedImage = image.ToManaged();
+                if (Setting.OutputChannel == (int)OutputChannel.Rgb)
+                {
+                    BlendBlack(managedImage);
+                }
+                ImageConversion.ConvertToBGRA32(managedImage.GetDataSpan(), data, managedImage.DataLength);
+
+                Encoder.UseFormatConvertedSource = false;
+                // NOTE: 中で画像反転&bpc変換をマルチスレッドで行えるようにするため、byte[]版の方を使用する
+                VideoStream.WriteFrame(true, data, 0, image.DataLength * 4);
+
+                if (managedImage != image)
+                {
+                    managedImage.Dispose();
+                }
+            }
         }
 
         public void ProcessAudio(float[] audio)
@@ -334,6 +367,69 @@ namespace NiVE3.PresetPlugin.Output
                 OutputChannel.AlphaOnly => BitsPerPixel.Bpp8,
                 _ => BitsPerPixel.Bpp24
             };
+        }
+    }
+
+    [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
+    [GeneratedComputeShaderDescriptor]
+    readonly partial struct AviOutputFlipAndQuantizeBitmap(ReadWriteBuffer<Float4> src, ReadWriteBuffer<int> dst, int width, int height) : IComputeShader
+    {
+        public void Execute()
+        {
+            var srcPos = ThreadIds.Y * width + ThreadIds.X;
+            var dstPos = ((height - ThreadIds.Y - 1) * width + ThreadIds.X);
+            var pixel = (Int4)Hlsl.Round(Hlsl.Clamp(src[srcPos], 0.0F, 1.0F) * 255.0F);
+
+            dst[dstPos] = (pixel.X & 0xFF) | (pixel.Y & 0xFF) << 8 | (pixel.Z & 0xFF) << 16 | (pixel.W & 0xFF) << 24;
+        }
+    }
+
+    [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
+    [GeneratedComputeShaderDescriptor]
+    readonly partial struct AviOutputFlipAndConvertTo24Bpc(ReadWriteBuffer<Float4> src, ReadWriteBuffer<int> dst, int width, int height) : IComputeShader
+    {
+        public void Execute()
+        {
+            var srcPos = ThreadIds.Y * width + ThreadIds.X;
+            var dstBytePos = ((height - ThreadIds.Y - 1) * width + ThreadIds.X) * 3;
+            var dstPos = dstBytePos / 4;
+            var color = Hlsl.Clamp(src[srcPos], 0.0F, 1.0F);
+            color.XYZ *= color.W;
+            var pixel = (UInt3)Hlsl.Round(color.XYZ * 255.0F);
+
+            switch (srcPos % 4)
+            {
+                case 1:
+                    Hlsl.InterlockedOr(ref dst[dstPos], (int)((pixel.X & 0xFF) << 24));
+                    Hlsl.InterlockedOr(ref dst[dstPos + 1], (int)((pixel.Y & 0xFF) | (pixel.Z & 0xFF) << 8));
+                    break;
+                case 2:
+                    Hlsl.InterlockedOr(ref dst[dstPos], (int)((pixel.X & 0xFF) << 16 | (pixel.Y & 0xFF) << 24));
+                    Hlsl.InterlockedOr(ref dst[dstPos + 1], (int)(pixel.Z & 0xFF));
+                    break;
+                case 3:
+                    Hlsl.InterlockedOr(ref dst[dstPos], (int)((pixel.X & 0xFF) << 8 | (pixel.Y & 0xFF) << 16 | (pixel.Z & 0xFF) << 24));
+                    break;
+                default:
+                    Hlsl.InterlockedOr(ref dst[dstPos], (int)((pixel.X & 0xFF) | (pixel.Y & 0xFF) << 8 | (pixel.Z & 0xFF) << 16));
+                    break;
+            }
+        }
+    }
+
+    [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
+    [GeneratedComputeShaderDescriptor]
+    readonly partial struct AviOutputFlipAndConvertTo8Bpc(ReadWriteBuffer<Float4> src, ReadWriteBuffer<int> dst, int width, int height) : IComputeShader
+    {
+        public void Execute()
+        {
+            var srcPos = ThreadIds.Y * width + ThreadIds.X;
+            var dstBytePos = ((height - ThreadIds.Y - 1) * width + ThreadIds.X);
+            var dstPos = dstBytePos / 4;
+            var color = (uint)(Hlsl.Clamp(src[srcPos], 0.0F, 1.0F).W * 255.0F);
+            var pixel = (int)((color & 0xFF) << (8 * (srcPos % 4)));
+
+            Hlsl.InterlockedOr(ref dst[dstPos], pixel);
         }
     }
 }
