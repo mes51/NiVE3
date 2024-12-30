@@ -15,6 +15,8 @@ using NiVE3.Image;
 using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.ValueObject;
+using NiVE3.PresetPlugin.Internal;
+using NiVE3.PresetPlugin.Internal.Audio;
 using NiVE3.PresetPlugin.Internal.Encoder;
 using NiVE3.PresetPlugin.Internal.View;
 using NiVE3.PresetPlugin.Internal.ViewModel;
@@ -28,7 +30,7 @@ namespace NiVE3.PresetPlugin.Output
 {
     [Export(typeof(IOutput))]
     [OutputMetadata(typeof(AviOutput), LanguageResourceDictionary.Output_AviOutput_Name, "mes51", LanguageResourceDictionary.Output_AviOutput_Description, ID, "*.avi", SourceType.VideoAndAudio, true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
-    public class AviOutput : IOutput
+    public sealed class AviOutput : IOutput
     {
         const string ID = "447492E0-E815-49DC-9D65-355CC3866285";
 
@@ -240,20 +242,7 @@ namespace NiVE3.PresetPlugin.Output
                 throw new InvalidOperationException();
             }
 
-            if (BaseAudioSamplingRate != AudioStream.SamplesPerSecond)
-            {
-                var resampler = new WdlResampler();
-                resampler.SetMode(true, 2, true);
-                resampler.SetFilterParms();
-                resampler.SetFeedMode(false);
-                resampler.SetRates(BaseAudioSamplingRate, AudioStream.SamplesPerSecond);
-
-                var resampledAudio = new float[(int)(audio.Length / 2 / (double)BaseAudioSamplingRate * AudioStream.SamplesPerSecond) * 2];
-                var needed = resampler.ResamplePrepare(resampledAudio.Length / 2, 2, out var buffer, out var offset);
-                audio.AsSpan(0, Math.Min(audio.Length, needed * 2)).CopyTo(buffer.AsSpan(offset));
-                resampler.ResampleOut(resampledAudio, 0, needed, resampledAudio.Length / 2, 2);
-                audio = resampledAudio;
-            }
+            audio = AudioConverter.ConvertSamplingRate(audio, BaseAudioSamplingRate, AudioStream.SamplesPerSecond, Const.AudioChannelCount);
 
             switch (AudioStream.BitsPerSample)
             {
@@ -289,7 +278,10 @@ namespace NiVE3.PresetPlugin.Output
             }
         }
 
-        public void Dispose() { }
+        public void Dispose()
+        {
+            GC.SuppressFinalize(this);
+        }
 
         static void BlendBlack(NManagedImage image)
         {

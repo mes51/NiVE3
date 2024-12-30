@@ -38,15 +38,15 @@ namespace NiVE3.PresetPlugin.Internal.Encoder
 
         public int EncodeFrame(ReadOnlySpan<byte> source, Span<byte> destination, out bool isKeyFrame)
         {
-            if (source.Length > destination.Length)
+            if (source.Length / 4 > destination.Length)
             {
                 throw new ArgumentOutOfRangeException(nameof(destination));
             }
 
-            for (var i = 0; i < Height; i++)
+            for (var h = 0; h < Height; h++)
             {
-                var srcLine = source.Slice(i * SrcStride, SrcStride);
-                var dstLine = destination.Slice((Height - i - 1) * Height, Width);
+                var srcLine = source.Slice(h * SrcStride, SrcStride);
+                var dstLine = destination.Slice((Height - h - 1) * Width, Width);
 
                 for (var w = 0; w < Width; w++)
                 {

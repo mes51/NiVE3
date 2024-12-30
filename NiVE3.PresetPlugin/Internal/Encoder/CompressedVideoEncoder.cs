@@ -121,13 +121,17 @@ namespace NiVE3.PresetPlugin.Internal.Encoder
                 CompressStarted = true;
             }
 
-            if (BitsPerPixel == BitsPerPixel.Bpp32)
+            switch (BitsPerPixel)
             {
-                FlipVerticalBitmap(source, Buffer, Width, Height);
-            }
-            else
-            {
-                FlipAndConvertTo24(source, Buffer, Width, Height);
+                case BitsPerPixel.Bpp32:
+                    FlipVerticalBitmap(source, Buffer, Width, Height);
+                    break;
+                case BitsPerPixel.Bpp24:
+                    FlipAndConvertTo24(source, Buffer, Width, Height);
+                    break;
+                case BitsPerPixel.Bpp8:
+                    FlipAndConvertTo8(source, Buffer, Width, Height);
+                    break;
             }
 
             var inputHeader = InputBitmapHeader;
@@ -164,7 +168,7 @@ namespace NiVE3.PresetPlugin.Internal.Encoder
 
             Buffer.AsSpan().CopyTo(PrevBuffer);
 
-            return (int)OutputBitmapHeader.ToStruct<BITMAPINFOHEADER>().biSizeImage; ;
+            return (int)OutputBitmapHeader.ToStruct<BITMAPINFOHEADER>().biSizeImage;
         }
 
         public void SetState(byte[] state)
@@ -247,13 +251,33 @@ namespace NiVE3.PresetPlugin.Internal.Encoder
 
         static void FlipAndConvertTo24(ReadOnlySpan<byte> src, Span<byte> dst, int width, int height)
         {
+            var srcStride = width * 4;
+            var dstStride = width * 3;
             for (var h = 0; h < height; h++)
             {
-                for (int w = 0, sp = h * width * 4, dp = (height - h - 1) * width * 3; w < width; w++, sp += 4, dp += 3)
+                var srcLine = src.Slice(h * srcStride, srcStride);
+                var dstLine = dst.Slice((height - h - 1) * dstStride, dstStride);
+
+                for (int w = 0, sp = 0, dp = 0; w < width; w++, sp += 4, dp += 3)
                 {
-                    dst[dp] = src[sp];
-                    dst[dp + 1] = src[sp + 1];
-                    dst[dp + 2] = src[sp + 2];
+                    dstLine[dp] = srcLine[sp];
+                    dstLine[dp + 1] = srcLine[sp + 1];
+                    dstLine[dp + 2] = srcLine[sp + 2];
+                }
+            }
+        }
+
+        static void FlipAndConvertTo8(ReadOnlySpan<byte> src, Span<byte> dst, int width, int height)
+        {
+            var srcStride = width * 4;
+            for (var h = 0; h < height; h++)
+            {
+                var srcLine = src.Slice(h * srcStride, srcStride);
+                var dstLine = dst.Slice((height - h - 1) * width, width);
+
+                for (var w = 0; w < width; w++)
+                {
+                    dstLine[w] = srcLine[w * 4 + 3];
                 }
             }
         }
