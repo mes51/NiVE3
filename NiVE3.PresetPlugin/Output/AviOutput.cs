@@ -56,13 +56,12 @@ namespace NiVE3.PresetPlugin.Output
 
         public FrameworkElement? GetOutputSetting(string filePath, Time startTime, Time duration, double frameRate, Int32Size? size, SourceType outputSources)
         {
-            var viewModel = new AviOutputSettingViewModel(size?.Width ?? 0, size?.Height ?? 0, outputSources)
+            var viewModel = new AviOutputSettingViewModel(size?.Width ?? 0, size?.Height ?? 0, (OutputChannel)Setting.OutputChannel, outputSources)
             {
                 UseKeyFrameRate = Setting.UseKeyFrameRate,
                 KeyFrameRate = Setting.KeyFrameRate,
                 Quality = Setting.Quality,
                 Codec = string.IsNullOrEmpty(Setting.Codec) ? new FourCC(0) : new FourCC(Setting.Codec),
-                OutputChannel = (OutputChannel)Setting.OutputChannel,
                 CodecState = Setting.State != null ? Convert.FromBase64String(Setting.State) : null,
                 AudioSamplingRate = Setting.AudioSamplingRate,
                 AudioBitsPerSample = Setting.AudioBitsPerSample

@@ -123,12 +123,13 @@ namespace NiVE3.PresetPlugin.Internal.ViewModel
 
         int Height { get; }
 
-        public AviOutputSettingViewModel(int width, int height, SourceType outputSources)
+        public AviOutputSettingViewModel(int width, int height, OutputChannel outputChannel, SourceType outputSources)
         {
             Width = width;
             Height = height;
             HasVideo = outputSources.HasFlag(SourceType.Video);
             HasAudio = outputSources.HasFlag(SourceType.Audio);
+            OutputChannel = outputChannel;
             UpdateCodecList();
 
             OpenCodecConfigureCommand = new RequerySuggestedCommand<DependencyObject>(ui =>
