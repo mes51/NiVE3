@@ -30,7 +30,21 @@ namespace NiVE3.PresetPlugin.Internal.Encoder
 
         public int EncodeFrame(byte[] source, int srcOffset, byte[] destination, int destOffset, out bool isKeyFrame)
         {
-            return EncodeFrame(source.AsSpan(srcOffset), destination.AsSpan(destOffset), out isKeyFrame);
+            if (source.Length > destination.Length)
+            {
+                throw new ArgumentOutOfRangeException(nameof(destination));
+            }
+
+            Parallel.For(0, Height, i =>
+            {
+                var srcSpan = source.AsSpan(i * Stride + srcOffset, Stride);
+                var dstSpan = destination.AsSpan((Height - i - 1) * Stride + destOffset, Stride);
+
+                srcSpan.CopyTo(dstSpan);
+            });
+
+            isKeyFrame = true;
+            return MaxEncodedSize;
         }
 
         public int EncodeFrame(ReadOnlySpan<byte> source, Span<byte> destination, out bool isKeyFrame)

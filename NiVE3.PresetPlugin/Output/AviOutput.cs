@@ -232,7 +232,8 @@ namespace NiVE3.PresetPlugin.Output
                 ImageConversion.ConvertToBGRA32(managedImage.GetDataSpan(), data, managedImage.DataLength);
             }
 
-            VideoStream.WriteFrame(true, data.AsSpan(0, image.DataLength * 4));
+            // NOTE: 中で画像反転&bpc変換をマルチスレッドで行えるようにするため、byte[]版の方を使用する
+            VideoStream.WriteFrame(true, data, 0, image.DataLength * 4);
         }
 
         public void ProcessAudio(float[] audio)

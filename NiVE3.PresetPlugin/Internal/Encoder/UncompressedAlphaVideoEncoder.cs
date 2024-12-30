@@ -23,22 +23,42 @@ namespace NiVE3.PresetPlugin.Internal.Encoder
 
         int SrcStride { get; }
 
+        int ImageDataSize { get; }
+
         public UncompressedAlphaVideoEncoder(int width, int height)
         {
             Width = width;
             Height = height;
             SrcStride = width * 4;
+            ImageDataSize = width * height;
             MaxEncodedSize = width * height;
         }
 
         public int EncodeFrame(byte[] source, int srcOffset, byte[] destination, int destOffset, out bool isKeyFrame)
         {
-            return EncodeFrame(source.AsSpan(srcOffset), destination.AsSpan(destOffset), out isKeyFrame);
+            if ((source.Length - srcOffset) / 4 < ImageDataSize || destination.Length - destOffset < ImageDataSize)
+            {
+                throw new ArgumentOutOfRangeException(nameof(destination));
+            }
+
+            Parallel.For(0, Height, h =>
+            {
+                var srcLine = source.AsSpan(h * SrcStride + srcOffset, SrcStride);
+                var dstLine = destination.AsSpan((Height - h - 1) * Width + destOffset, Width);
+
+                for (var w = 0; w < Width; w++)
+                {
+                    dstLine[w] = srcLine[w * 4 + 3];
+                }
+            });
+
+            isKeyFrame = true;
+            return MaxEncodedSize;
         }
 
         public int EncodeFrame(ReadOnlySpan<byte> source, Span<byte> destination, out bool isKeyFrame)
         {
-            if (source.Length / 4 > destination.Length)
+            if (source.Length / 4 < ImageDataSize || destination.Length < ImageDataSize)
             {
                 throw new ArgumentOutOfRangeException(nameof(destination));
             }

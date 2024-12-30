@@ -91,34 +91,32 @@ namespace NiVE3.PresetPlugin.Internal.Encoder
 
         public int EncodeFrame(byte[] source, int srcOffset, byte[] destination, int destOffset, out bool isKeyFrame)
         {
-            return EncodeFrame(source.AsSpan(srcOffset), destination.AsSpan(destOffset), out isKeyFrame);
+            if (!CompressStarted)
+            {
+                SetupCompressor();
+            }
+
+            switch (BitsPerPixel)
+            {
+                case BitsPerPixel.Bpp32:
+                    FlipVerticalBitmapParallel(source, srcOffset, Buffer, Width, Height);
+                    break;
+                case BitsPerPixel.Bpp24:
+                    FlipAndConvertTo24Parallel(source, srcOffset, Buffer, Width, Height);
+                    break;
+                case BitsPerPixel.Bpp8:
+                    FlipAndConvertTo8Parallel(source, srcOffset, Buffer, Width, Height);
+                    break;
+            }
+
+            return CompressFrame(destination.AsSpan(destOffset), out isKeyFrame);
         }
 
         public int EncodeFrame(ReadOnlySpan<byte> source, Span<byte> destination, out bool isKeyFrame)
         {
             if (!CompressStarted)
             {
-                if (NeedCompressFrames)
-                {
-                    var compressFrames = new ICCOMPRESSFRAMES
-                    {
-                        lStartFrame = 0,
-                        lFrameCount = FrameCount,
-                        lQuality = Quality * 100,
-                        lKeyRate = KeyFrameRate,
-                        dwRate = (uint)FrameRate,
-                        dwScale = 1
-                    };
-                    if (!IC.CompressFramesInfo(CompressorHandle, compressFrames))
-                    {
-                        throw new InvalidOperationException();
-                    }
-                }
-                if (!IC.CompressBegin(CompressorHandle, InputBitmapHeader, OutputBitmapHeader))
-                {
-                    throw new InvalidOperationException();
-                }
-                CompressStarted = true;
+                SetupCompressor();
             }
 
             switch (BitsPerPixel)
@@ -134,6 +132,49 @@ namespace NiVE3.PresetPlugin.Internal.Encoder
                     break;
             }
 
+            return CompressFrame(destination, out isKeyFrame);
+        }
+
+        public void SetState(byte[] state)
+        {
+            if (!CompressStarted)
+            {
+                using var nativeState = new AllocatedNativeMemory(state.Length);
+                nativeState.CopyFrom(state);
+                IC.SetState(CompressorHandle, nativeState);
+
+                OutputBitmapHeader.Dispose();
+                OutputBitmapHeader = IC.GetFormat(CompressorHandle, InputBitmapHeader);
+            }
+        }
+
+        void SetupCompressor()
+        {
+            if (NeedCompressFrames)
+            {
+                var compressFrames = new ICCOMPRESSFRAMES
+                {
+                    lStartFrame = 0,
+                    lFrameCount = FrameCount,
+                    lQuality = Quality * 100,
+                    lKeyRate = KeyFrameRate,
+                    dwRate = (uint)FrameRate,
+                    dwScale = 1
+                };
+                if (!IC.CompressFramesInfo(CompressorHandle, compressFrames))
+                {
+                    throw new InvalidOperationException();
+                }
+            }
+            if (!IC.CompressBegin(CompressorHandle, InputBitmapHeader, OutputBitmapHeader))
+            {
+                throw new InvalidOperationException();
+            }
+            CompressStarted = true;
+        }
+
+        int CompressFrame(Span<byte> destination, out bool isKeyFrame)
+        {
             var inputHeader = InputBitmapHeader;
 
             var managedOutputHeader = OutputBitmapHeader.ToStruct<BITMAPINFOHEADER>();
@@ -169,19 +210,6 @@ namespace NiVE3.PresetPlugin.Internal.Encoder
             Buffer.AsSpan().CopyTo(PrevBuffer);
 
             return (int)OutputBitmapHeader.ToStruct<BITMAPINFOHEADER>().biSizeImage;
-        }
-
-        public void SetState(byte[] state)
-        {
-            if (!CompressStarted)
-            {
-                using var nativeState = new AllocatedNativeMemory(state.Length);
-                nativeState.CopyFrom(state);
-                IC.SetState(CompressorHandle, nativeState);
-
-                OutputBitmapHeader.Dispose();
-                OutputBitmapHeader = IC.GetFormat(CompressorHandle, InputBitmapHeader);
-            }
         }
 
         public void Dispose()
@@ -280,6 +308,51 @@ namespace NiVE3.PresetPlugin.Internal.Encoder
                     dstLine[w] = srcLine[w * 4 + 3];
                 }
             }
+        }
+
+        static void FlipVerticalBitmapParallel(byte[] src, int srcOffset, byte[] dst, int width, int height)
+        {
+            var stride = width * 4;
+            Parallel.For(0, height, h =>
+            {
+                var srcSpan = src.AsSpan(h * stride + srcOffset, stride);
+                var dstSpan = dst.AsSpan((height - h - 1) * stride, stride);
+
+                srcSpan.CopyTo(dstSpan);
+            });
+        }
+
+        static void FlipAndConvertTo24Parallel(byte[] src, int srcOffset, byte[] dst, int width, int height)
+        {
+            var srcStride = width * 4;
+            var dstStride = width * 3;
+            Parallel.For(0, height, h =>
+            {
+                var srcLine = src.AsSpan(h * srcStride + srcOffset, srcStride);
+                var dstLine = dst.AsSpan((height - h - 1) * dstStride, dstStride);
+
+                for (int w = 0, sp = 0, dp = 0; w < width; w++, sp += 4, dp += 3)
+                {
+                    dstLine[dp] = srcLine[sp];
+                    dstLine[dp + 1] = srcLine[sp + 1];
+                    dstLine[dp + 2] = srcLine[sp + 2];
+                }
+            });
+        }
+
+        static void FlipAndConvertTo8Parallel(byte[] src, int srcOffset, byte[] dst, int width, int height)
+        {
+            var srcStride = width * 4;
+            Parallel.For(0, height, h =>
+            {
+                var srcLine = src.AsSpan(h * srcStride + srcOffset, srcStride);
+                var dstLine = dst.AsSpan((height - h - 1) * width, width);
+
+                for (var w = 0; w < width; w++)
+                {
+                    dstLine[w] = srcLine[w * 4 + 3];
+                }
+            });
         }
     }
 }
