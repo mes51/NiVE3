@@ -9,6 +9,7 @@
              xmlns:r="clr-namespace:NiVE3.PresetPlugin.Resource"
              xmlns:o="clr-namespace:NiVE3.PresetPlugin.Output"
              xmlns:cv="clr-namespace:NiVE3.PresetPlugin.Internal.View.Converter"
+             xmlns:ucv="clr-namespace:NiVE3.UI.Converter;assembly=NiVE3.UI"
              xmlns:mk="clr-namespace:NiVE3.Shared.Wpf.Markup;assembly=NiVE3.Shared"
              mc:Ignorable="d" 
              x:Name="Root"
@@ -23,6 +24,7 @@
             <Thickness x:Key="SettingItemMargin">0,5,0,0</Thickness>
 
             <cv:EnumToLocalizedNameConverter x:Key="EnumToLocalizedNameConverter"/>
+            <ucv:EnumToBoolConverter x:Key="EnumToBoolConverter"/>
 
             <Style x:Key="SettingLabelTextBlock" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
                 <Setter Property="Margin" Value="0,0,5,0"/>
@@ -60,6 +62,12 @@
                     <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=AviOutputSettingView_Group_Video_Codec}" Style="{StaticResource SettingLabelTextBlock}"/>
                     <ComboBox Grid.Column="1" ItemsSource="{Binding CodecList}" SelectedIndex="{Binding SelectedCodecIndex}" DisplayMemberPath="Item2"/>
                 </Grid>
+                <GroupBox Header="{gm:LanguageResource ResourceKey=AviOutputSettingView_Group_Video_AlphaMode}" Margin="{StaticResource SettingItemMargin}" IsEnabled="{Binding OutputChannel, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static o:OutputChannel.Rgba}}" Style="{StaticResource GroupBoxStyle}">
+                    <UniformGrid Columns="2">
+                        <RadioButton Content="{gm:LanguageResource ResourceKey=AviOutputSettingView_Video_AlphaMode_Straight}" IsChecked="{Binding OutputAlphaMode, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static o:OutputAlphaMode.Straight}}"/>
+                        <RadioButton Content="{gm:LanguageResource ResourceKey=AviOutputSettingView_Video_AlphaMode_PreMultiply}" IsChecked="{Binding OutputAlphaMode, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static o:OutputAlphaMode.PreMultiply}}"/>
+                    </UniformGrid>
+                </GroupBox>
                 <GroupBox Header="{gm:LanguageResource ResourceKey=AviOutputSettingView_Group_Video_Quality}" Margin="{StaticResource SettingItemMargin}" IsEnabled="{Binding SupportQuality}" Style="{StaticResource GroupBoxStyle}">
                     <Grid>
                         <Grid.ColumnDefinitions>

@@ -1120,6 +1120,15 @@ namespace NiVE3.PresetPlugin.Resource
         [ShowInMarkup, DefaultValue("コーデック:")]
         public const string AviOutputSettingView_Group_Video_Codec = nameof(AviOutputSettingView_Group_Video_Codec);
 
+        [ShowInMarkup, DefaultValue("アルファ")]
+        public const string AviOutputSettingView_Group_Video_AlphaMode = nameof(AviOutputSettingView_Group_Video_AlphaMode);
+
+        [ShowInMarkup, DefaultValue("ストレート")]
+        public const string AviOutputSettingView_Video_AlphaMode_Straight = nameof(AviOutputSettingView_Video_AlphaMode_Straight);
+
+        [ShowInMarkup, DefaultValue("乗算済みアルファ")]
+        public const string AviOutputSettingView_Video_AlphaMode_PreMultiply = nameof(AviOutputSettingView_Video_AlphaMode_PreMultiply);
+
         [ShowInMarkup, DefaultValue("品質")]
         public const string AviOutputSettingView_Group_Video_Quality = nameof(AviOutputSettingView_Group_Video_Quality);
 

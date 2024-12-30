@@ -76,6 +76,13 @@ namespace NiVE3.PresetPlugin.Internal.ViewModel
             set { SetProperty(ref outputChannel, value); }
         }
 
+        private OutputAlphaMode outputAlphaMode;
+        public OutputAlphaMode OutputAlphaMode
+        {
+            get { return outputAlphaMode; }
+            set { SetProperty(ref outputAlphaMode, value); }
+        }
+
         private ObservableCollection<Tuple<FourCC, string>> codecList = [];
         public ObservableCollection<Tuple<FourCC, string>> CodecList
         {

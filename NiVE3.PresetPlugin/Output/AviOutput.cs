@@ -63,6 +63,7 @@ namespace NiVE3.PresetPlugin.Output
                 Quality = Setting.Quality,
                 Codec = string.IsNullOrEmpty(Setting.Codec) ? new FourCC(0) : new FourCC(Setting.Codec),
                 CodecState = Setting.State != null ? Convert.FromBase64String(Setting.State) : null,
+                OutputAlphaMode = (OutputAlphaMode)Setting.OutputAlphaMode,
                 AudioSamplingRate = Setting.AudioSamplingRate,
                 AudioBitsPerSample = Setting.AudioBitsPerSample
             };
@@ -87,6 +88,7 @@ namespace NiVE3.PresetPlugin.Output
                 dictionary.TryGetValue(nameof(CompressSetting.Quality), out int quality) &&
                 dictionary.TryGetValue(nameof(CompressSetting.Codec), out string? codec) &&
                 dictionary.TryGetValue(nameof(CompressSetting.OutputChannel), out int outputChannel) &&
+                dictionary.TryGetValue(nameof(CompressSetting.OutputAlphaMode), out int outputAlphaMode) &&
                 dictionary.TryGetValue(nameof(CompressSetting.State), out var codecState) && // NOTE: stateがnullである可能性があるため、通常のTryGetValueを使用する
                 dictionary.TryGetValue(nameof(CompressSetting.AudioSamplingRate), out int samplingRate) &&
                 dictionary.TryGetValue(nameof(CompressSetting.AudioBitsPerSample), out int bitsPerSample))
@@ -98,6 +100,7 @@ namespace NiVE3.PresetPlugin.Output
                     Quality = quality,
                     Codec = codec,
                     OutputChannel = outputChannel,
+                    OutputAlphaMode = outputAlphaMode,
                     State = codecState as string,
                     AudioSamplingRate = samplingRate,
                     AudioBitsPerSample = bitsPerSample
@@ -121,6 +124,7 @@ namespace NiVE3.PresetPlugin.Output
                 Quality = viewModel.Quality,
                 Codec = viewModel.Codec == 0 ? "" : viewModel.Codec.ToString(),
                 OutputChannel = (int)viewModel.OutputChannel,
+                OutputAlphaMode = (int)viewModel.OutputAlphaMode,
                 State = viewModel.CodecState != null ? Convert.ToBase64String(viewModel.CodecState) : null,
                 AudioSamplingRate = viewModel.AudioSamplingRate,
                 AudioBitsPerSample = viewModel.AudioBitsPerSample
@@ -232,7 +236,15 @@ namespace NiVE3.PresetPlugin.Output
                     switch (bpc)
                     {
                         case BitsPerPixel.Bpp32:
-                            context.For(gpuImage.Width, gpuImage.Height, new AviOutputFlipAndQuantizeBitmap(gpuImage.Data, convertedImage, gpuImage.Width, gpuImage.Height));
+                            switch ((OutputAlphaMode)Setting.OutputAlphaMode)
+                            {
+                                case OutputAlphaMode.PreMultiply:
+                                    context.For(gpuImage.Width, gpuImage.Height, new AviOutputFlipAndQuantizeBitmapPreMultiplyAlpha(gpuImage.Data, convertedImage, gpuImage.Width, gpuImage.Height));
+                                    break;
+                                default:
+                                    context.For(gpuImage.Width, gpuImage.Height, new AviOutputFlipAndQuantizeBitmapStraightAlpha(gpuImage.Data, convertedImage, gpuImage.Width, gpuImage.Height));
+                                    break;
+                            }
                             break;
                         case BitsPerPixel.Bpp24:
                             context.For(gpuImage.Width, gpuImage.Height, new AviOutputFlipAndConvertTo24Bpc(gpuImage.Data, convertedImage, gpuImage.Width, gpuImage.Height));
@@ -254,6 +266,22 @@ namespace NiVE3.PresetPlugin.Output
                 if (Setting.OutputChannel == (int)OutputChannel.Rgb)
                 {
                     BlendBlack(managedImage);
+                }
+                if (Setting.OutputChannel == (int)OutputChannel.Rgba && Setting.OutputAlphaMode == (int)OutputAlphaMode.PreMultiply)
+                {
+                    var imageData = managedImage.Data;
+                    var imageWidth = managedImage.Width;
+                    Parallel.For(0, managedImage.Height, y =>
+                    {
+                        var imageDataSpan = imageData.AsSpan(y * imageWidth, imageWidth);
+                        for (var x = 0; x < imageDataSpan.Length; x++)
+                        {
+                            var color = imageDataSpan[x];
+                            var alpha = new Vector4(color.W);
+                            alpha.W = 1.0F;
+                            imageDataSpan[x] = color * alpha;
+                        }
+                    });
                 }
                 ImageConversion.ConvertToBGRA32(managedImage.GetDataSpan(), data, managedImage.DataLength);
 
@@ -342,6 +370,8 @@ namespace NiVE3.PresetPlugin.Output
 
         public int OutputChannel { get; set; } = (int)Output.OutputChannel.Rgba;
 
+        public int OutputAlphaMode { get; set; }
+
         public string? State { get; set; }
 
         public int AudioSamplingRate { get; set; } = 48000;
@@ -354,6 +384,12 @@ namespace NiVE3.PresetPlugin.Output
         Rgb = 0,
         Rgba,
         AlphaOnly
+    }
+
+    enum OutputAlphaMode : int
+    {
+        Straight = 0,
+        PreMultiply
     }
 
     static class OutputChannelExtensions
@@ -371,13 +407,29 @@ namespace NiVE3.PresetPlugin.Output
 
     [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
     [GeneratedComputeShaderDescriptor]
-    readonly partial struct AviOutputFlipAndQuantizeBitmap(ReadWriteBuffer<Float4> src, ReadWriteBuffer<int> dst, int width, int height) : IComputeShader
+    readonly partial struct AviOutputFlipAndQuantizeBitmapStraightAlpha(ReadWriteBuffer<Float4> src, ReadWriteBuffer<int> dst, int width, int height) : IComputeShader
     {
         public void Execute()
         {
             var srcPos = ThreadIds.Y * width + ThreadIds.X;
             var dstPos = ((height - ThreadIds.Y - 1) * width + ThreadIds.X);
             var pixel = (Int4)Hlsl.Round(Hlsl.Clamp(src[srcPos], 0.0F, 1.0F) * 255.0F);
+
+            dst[dstPos] = (pixel.X & 0xFF) | (pixel.Y & 0xFF) << 8 | (pixel.Z & 0xFF) << 16 | (pixel.W & 0xFF) << 24;
+        }
+    }
+
+    [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
+    [GeneratedComputeShaderDescriptor]
+    readonly partial struct AviOutputFlipAndQuantizeBitmapPreMultiplyAlpha(ReadWriteBuffer<Float4> src, ReadWriteBuffer<int> dst, int width, int height) : IComputeShader
+    {
+        public void Execute()
+        {
+            var srcPos = ThreadIds.Y * width + ThreadIds.X;
+            var dstPos = ((height - ThreadIds.Y - 1) * width + ThreadIds.X);
+            var color = Hlsl.Clamp(src[srcPos], 0.0F, 1.0F);
+            color.XYZ *= color.W;
+            var pixel = (Int4)Hlsl.Round(color * 255.0F);
 
             dst[dstPos] = (pixel.X & 0xFF) | (pixel.Y & 0xFF) << 8 | (pixel.Z & 0xFF) << 16 | (pixel.W & 0xFF) << 24;
         }
