@@ -1785,6 +1785,10 @@ namespace NiVE3.Model
                 }
 
                 var newLayer = new LayerModel(ProjectModel, this, footageModels.First(), EffectListModel, HistoryModel, AcceleratorModel);
+                foreach (var effectData in layerData.Effects)
+                {
+                    effectData.EffectId = Guid.NewGuid();
+                }
                 newLayer.LoadData(layerData, true);
                 Layers.Insert(index, newLayer);
                 addedLayer.Add(newLayer);
