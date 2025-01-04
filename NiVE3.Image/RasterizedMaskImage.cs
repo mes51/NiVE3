@@ -90,7 +90,7 @@ namespace NiVE3.Image
 
         ~RasterizedMaskImage()
         {
-            Dispose();
+            Dispose(false);
         }
     }
 

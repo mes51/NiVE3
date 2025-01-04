@@ -894,6 +894,11 @@ namespace NiVE3.PresetPlugin.Renderer
                     renderer.Draw();
                 }
             }
+
+            foreach (var trackMatte in trackMattes.Values.NonNull())
+            {
+                trackMatte.Dispose();
+            }
         }
 
         void RenderGpu(RenderableImage[] images)
@@ -1018,6 +1023,11 @@ namespace NiVE3.PresetPlugin.Renderer
 
                     renderer.Draw();
                 }
+            }
+
+            foreach (var trackMatte in trackMattes.Values.NonNull())
+            {
+                trackMatte.Dispose();
             }
         }
 
