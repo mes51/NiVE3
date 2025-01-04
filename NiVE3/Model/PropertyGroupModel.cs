@@ -17,6 +17,7 @@ using System.IO.Hashing;
 using NiVE3.Extension;
 using System.ComponentModel;
 using NiVE3.Plugin.ValueObject;
+using NiVE3.Cache;
 
 namespace NiVE3.Model
 {
@@ -168,28 +169,35 @@ namespace NiVE3.Model
 
         public PropertyValueGroup GetValues(Time time, Time globalTime, bool withoutDisableProperty = false)
         {
-            var result = new Dictionary<string, object?>();
+            var values = new Dictionary<string, object?>();
             var propertyTypes = new Dictionary<string, IPropertyType>();
+
+            if (PropertyValueCache.TryGet(ObjectId, time, out PropertyValueGroup? cachedValue) && cachedValue != null)
+            {
+                return cachedValue;
+            }
 
             foreach (var p in Children)
             {
                 if (p is PropertyGroupModel pg)
                 {
-                    result.Add(pg.Property.Id, pg.GetValues(time, globalTime, withoutDisableProperty));
+                    values.Add(pg.Property.Id, pg.GetValues(time, globalTime, withoutDisableProperty));
                 }
                 else if (p is AppendablePropertyModel ap)
                 {
-                    result.Add(ap.Property.Id, ap.GetChildPropertyValues(time, globalTime, withoutDisableProperty));
+                    values.Add(ap.Property.Id, ap.GetChildPropertyValues(time, globalTime, withoutDisableProperty));
                 }
                 else if (p is PropertyModel pp)
                 {
-                    result.Add(pp.Property.Id, pp.GetValue(time, globalTime));
+                    values.Add(pp.Property.Id, pp.GetValue(time, globalTime));
                 }
 
                 propertyTypes.Add(p.Property.Id, p.Property.PropertyType);
             }
 
-            return new PropertyValueGroup(Property.Id, result, propertyTypes, IsEnable);
+            var result = new PropertyValueGroup(Property.Id, values, propertyTypes, IsEnable);
+            PropertyValueCache.Upsert(ObjectId, time, result);
+            return result;
         }
 
         public void UpdateValueByCompositionStateChanged()

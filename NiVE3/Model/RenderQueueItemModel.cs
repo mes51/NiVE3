@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using NiVE3.Cache;
 using NiVE3.Data.Json.Project;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.ValueObject;
@@ -310,6 +311,7 @@ namespace NiVE3.Model
             var startRenderingTimestamp = Stopwatch.GetTimestamp();
             try
             {
+                using var propertyCache = PropertyValueCache.Start();
                 plugin.BeginOutput(filePath, beginTime, endTime - beginTime, frameRate, size, sourceTypes);
 
                 var lastProcessedDuration = Time.Zero;

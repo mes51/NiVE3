@@ -23,6 +23,7 @@ using Jint;
 using Jint.Runtime;
 using Acornima;
 using NiVE3.Plugin.ValueObject;
+using NiVE3.Cache;
 
 namespace NiVE3.Model
 {
@@ -356,6 +357,11 @@ namespace NiVE3.Model
 
         public object? GetValue(Time time, Time globalTime)
         {
+            if (PropertyValueCache.TryGet(ObjectId, time, out object? cacheValue))
+            {
+                return cacheValue;
+            }
+
             var rawValue = GetRawValue(time);
             var value = rawValue;
 
@@ -401,6 +407,7 @@ namespace NiVE3.Model
                 }
             }
 
+            PropertyValueCache.Upsert(ObjectId, time, value);
             return value;
         }
 

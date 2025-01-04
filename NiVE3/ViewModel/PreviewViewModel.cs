@@ -38,6 +38,7 @@ using NiVE3.Plugin.ValueObject;
 using Prism.Dialogs;
 using NiVE3.ViewModel.Dialog;
 using NiVE3.View.Dialog;
+using NiVE3.Cache;
 
 namespace NiVE3.ViewModel
 {
@@ -1217,6 +1218,7 @@ namespace NiVE3.ViewModel
                 var ct = RenderRamPreviewTaskCancellationTokenSource.Token;
                 RenderRamPreviewTask = Task.Run(() =>
                 {
+                    using var propertyCache = PropertyValueCache.Start();
                     var frameCount = (int)Math.Round((double)(WorkareaEnd - WorkareaBegin) * FrameRate);
                     for (var i = 0; i < frameCount && CachedRamPreviewFrames.Sum(b => b.Length) / Const.MiB < ApplicationSetting.Setting.RamPreviewCacheLimit; i++)
                     {

@@ -17,6 +17,7 @@ using NiVE3.Extension;
 using System.ComponentModel;
 using System.Collections.Specialized;
 using NiVE3.Plugin.ValueObject;
+using NiVE3.Cache;
 
 namespace NiVE3.Model
 {
@@ -259,14 +260,23 @@ namespace NiVE3.Model
 
         public PropertyValueGroup[] GetChildPropertyValues(Time time, Time globalTime, bool withoutDisableProperty)
         {
+            if (PropertyValueCache.TryGet(ObjectId, time, out PropertyValueGroup[]? cachedValue) && cachedValue != null)
+            {
+                return cachedValue;
+            }
+
+            var result = Array.Empty<PropertyValueGroup>();
             if (withoutDisableProperty)
             {
-                return Children.OfType<PropertyGroupModel>().Where(m => m.IsEnable).Select(m => m.GetValues(time, globalTime, withoutDisableProperty)).ToArray();
+                result = Children.OfType<PropertyGroupModel>().Where(m => m.IsEnable).Select(m => m.GetValues(time, globalTime, withoutDisableProperty)).ToArray();
             }
             else
             {
-                return Children.OfType<PropertyGroupModel>().Select(m => m.GetValues(time, globalTime, withoutDisableProperty)).ToArray();
+                result = Children.OfType<PropertyGroupModel>().Select(m => m.GetValues(time, globalTime, withoutDisableProperty)).ToArray();
             }
+
+            PropertyValueCache.Upsert(ObjectId, time, result);
+            return result;
         }
 
         public PropertyData SaveData()
