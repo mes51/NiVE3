@@ -14,6 +14,7 @@ using Microsoft.Win32;
 using NiVE3.Model;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.ValueObject;
+using NiVE3.Shared.Extension;
 using NiVE3.Shared.Util;
 using NiVE3.UI.Command;
 using NiVE3.View.Dialog;
@@ -292,6 +293,9 @@ namespace NiVE3.ViewModel.Dialog
                 Output?.Dispose();
                 Output = output;
                 OriginalOutput = output;
+
+                var outputPluginId = OutputListModel.GetId(output.Value.GetType());
+                SelectedOutputPlugin = Math.Max(OutputPlugins.FindIndex(t => t.Item1 == outputPluginId), 0);
             }
             if (parameters.TryGetValue<string>(nameof(FilePath), out var filePath))
             {
