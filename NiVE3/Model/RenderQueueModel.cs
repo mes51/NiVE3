@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -20,6 +21,9 @@ namespace NiVE3.Model
 {
     partial class RenderQueueModel : BindableBase
     {
+        [GeneratedRegex("_([0-9]+)", RegexOptions.Compiled)]
+        private static partial Regex GenerateDuplicateCountRegex();
+
         const int EtaRingBufferSize = 30;
 
         private ObservableCollection<RenderQueueItemModel> items = [];
@@ -97,16 +101,9 @@ namespace NiVE3.Model
 
         public void Enqueue(CompositionModel compositionModel, string filePath, RenderRangeType renderRangeType, Time beginTime, Time endTime, bool isOutputVideo, bool isOutputAudio, ExportLifetimeContext<IOutput>? output)
         {
-            var duplicateCount = 1;
-            while (Items.Any(i => i.FilePath == filePath) || File.Exists(filePath))
-            {
-                filePath = Path.Combine(Path.GetDirectoryName(filePath) ?? "", Path.GetFileNameWithoutExtension(filePath) + $"_{duplicateCount}" + Path.GetExtension(filePath));
-                duplicateCount++;
-            }
-
             var queue = new RenderQueueItemModel(compositionModel, ProjectModel.Value, OutputListModel, HistoryModel, output)
             {
-                FilePath = filePath,
+                FilePath = GetDuplicateMarkedFilePath(filePath),
                 RenderRangeType = renderRangeType,
                 BeginTime = beginTime,
                 EndTime = endTime,
@@ -119,11 +116,6 @@ namespace NiVE3.Model
             HistoryModel.Add(new EnqueueHistoryCommand(this, queue));
 
             RenderQueueItemAdded?.Invoke(this, EventArgs.Empty);
-        }
-
-        public void RemoveQueue(Guid id)
-        {
-            RemoveQueues([id]);
         }
 
         public void RemoveQueues(Guid[] ids)
@@ -142,6 +134,39 @@ namespace NiVE3.Model
         public void RemoveQueuesByComposition(CompositionModel compositionModel)
         {
             RemoveQueues([..Items.Where(i => i.CompositionModel == compositionModel).Select(i => i.QueueId)]);
+        }
+
+        public void DuplicateQueue(Guid[] ids)
+        {
+            var targets = Items.Where(i => ids.Contains(i.QueueId)).OrderBy(Items.IndexOf).ToArray();
+            if (targets.Length < 1)
+            {
+                return;
+            }
+
+            var newQueues = new RenderQueueItemModel[targets.Length];
+            for (var i = 0; i < newQueues.Length; i++)
+            {
+                var target = targets[i];
+                var newQueue = new RenderQueueItemModel(target.CompositionModel, ProjectModel.Value, OutputListModel, HistoryModel, OutputListModel.CreateOutput(target.OutputPluginId))
+                {
+                    FilePath = GetDuplicateMarkedFilePath(target.FilePath),
+                    RenderRangeType = target.RenderRangeType,
+                    BeginTime = target.BeginTime,
+                    EndTime = target.EndTime,
+                    IsOutputVideo = target.IsOutputVideo,
+                    IsOutputAudio = target.IsOutputAudio
+                };
+                if (target.Output != null && newQueue.Output != null)
+                {
+                    newQueue.Output.Value.LoadSetting(target.Output.Value.SaveSetting());
+                }
+
+                newQueues[i] = newQueue;
+                Items.Add(newQueue);
+            }
+
+            HistoryModel.Add(new DuplicateQueuesHistoryCommand(this, newQueues));
         }
 
         public void Clear()
@@ -249,6 +274,28 @@ namespace NiVE3.Model
                 item.LoadData(queueData);
                 Items.Add(item);
             }
+        }
+
+        string GetDuplicateMarkedFilePath(string filePath)
+        {
+            var realFileName = Path.GetFileNameWithoutExtension(filePath);
+            var duplicateMark = GenerateDuplicateCountRegex().Match(realFileName);
+            if (!duplicateMark.Success || !int.TryParse(duplicateMark.Value, out var duplicateCount))
+            {
+                duplicateCount = 1;
+            }
+            else
+            {
+                realFileName = GenerateDuplicateCountRegex().Replace(realFileName, "");
+            }
+
+            while (Items.Any(i => i.FilePath == filePath) || File.Exists(filePath))
+            {
+                filePath = Path.Combine(Path.GetDirectoryName(filePath) ?? "", realFileName + $"_{duplicateCount}" + Path.GetExtension(filePath));
+                duplicateCount++;
+            }
+
+            return filePath;
         }
     }
 }

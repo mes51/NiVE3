@@ -659,7 +659,10 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("中止")]
         public static readonly string RenderQueueView_Button_Abort = nameof(RenderingProgressView_Button_Abort);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("削除")]
+        [ShowInMarkup, LanguageKey, DefaultValue("複製(_L)")]
+        public static readonly string RenderQueueView_ContextMenu_Duplicate = nameof(RenderQueueView_ContextMenu_Duplicate);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("削除(_D)")]
         public static readonly string RenderQueueView_ContextMenu_Delete = nameof(RenderQueueView_ContextMenu_Delete);
 
         [ShowInMarkup, LanguageKey, DefaultValue("出力パス:")]
@@ -992,6 +995,9 @@ namespace NiVE3.View.Resource
 
         [DefaultValue("レンダーキューの削除")]
         public static readonly string History_RemoveRenderQueues = nameof(History_RemoveRenderQueues);
+
+        [DefaultValue("レンダーキューの複製")]
+        public static readonly string History_DuplicateRenderQueues = nameof(History_DuplicateRenderQueues);
 
         [DefaultValue("レンダリング")]
         public static readonly string History_ExecuteRendering = nameof(History_ExecuteRendering);

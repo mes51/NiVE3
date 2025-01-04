@@ -102,6 +102,8 @@ namespace NiVE3.ViewModel
 
         public ICommand DeleteCommand { get; }
 
+        public ICommand DuplicateCommand { get; }
+
         RenderQueueModel RenderQueueModel { get; }
 
         Task? CalcEtaTask { get; set; }
@@ -151,7 +153,19 @@ namespace NiVE3.ViewModel
                 }
                 else
                 {
-                    RenderQueueModel.RemoveQueue(vm.QueueId);
+                    RenderQueueModel.RemoveQueues([vm.QueueId]);
+                }
+            }, _ => !IsRendering).ObservesProperty(() => IsRendering);
+
+            DuplicateCommand = new DelegateCommand<RenderQueueItemViewModel>(vm =>
+            {
+                if (vm.IsSelected)
+                {
+                    RenderQueueModel.DuplicateQueue([.. Items.Where(q => q.IsSelected).Select(q => q.QueueId)]);
+                }
+                else
+                {
+                    RenderQueueModel.DuplicateQueue([vm.QueueId]);
                 }
             }, _ => !IsRendering).ObservesProperty(() => IsRendering);
 

@@ -46,6 +46,8 @@
             <Setter Property="ContextMenu">
                 <Setter.Value>
                     <ContextMenu>
+                        <MenuItem Header="{gm:LanguageResource ResourceKey=RenderQueueView_ContextMenu_Duplicate}" Command="{Binding Source={StaticResource DataContextProxy}, Path=Data.DuplicateCommand}" CommandParameter="{Binding}"/>
+                        <Separator />
                         <MenuItem Header="{gm:LanguageResource ResourceKey=RenderQueueView_ContextMenu_Delete}" Command="{Binding Source={StaticResource DataContextProxy}, Path=Data.DeleteCommand}" CommandParameter="{Binding}"/>
                     </ContextMenu>
                 </Setter.Value>
@@ -107,6 +109,13 @@
             <Button Grid.Column="3" Style="{StaticResource RenderStartButtonStyle}" Command="{Binding RenderStartCommand}"/>
             <Button Grid.Column="4" Content="{gm:LanguageResource ResourceKey=RenderQueueView_Button_Abort}" Margin="5,0,0,0" Command="{Binding AbortCommand}"/>
         </Grid>
-        <ListView Grid.Row="1" Margin="0,10,0,0" ItemsSource="{Binding Items}" HorizontalContentAlignment="Stretch" SelectionMode="Extended" ItemTemplate="{StaticResource RenderQueueItemTemplate}" ItemContainerStyle="{StaticResource RenderQueueItemContainerStyle}" VirtualizingPanel.ScrollUnit="Pixel"/>
+        <ListView Grid.Row="1"
+                  Margin="0,10,0,0"
+                  ItemsSource="{Binding Items}"
+                  HorizontalContentAlignment="Stretch"
+                  SelectionMode="Extended"
+                  ItemTemplate="{StaticResource RenderQueueItemTemplate}"
+                  ItemContainerStyle="{StaticResource RenderQueueItemContainerStyle}"
+                  VirtualizingPanel.ScrollUnit="Pixel"/>
     </Grid>
 </UserControl>

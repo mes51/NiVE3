@@ -74,5 +74,44 @@ namespace NiVE3.Model
 
             public void Dispose() { }
         }
+
+        private class DuplicateQueuesHistoryCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_DuplicateRenderQueues);
+
+            RenderQueueModel Model { get; }
+
+            RenderQueueItemModel[] Items { get; }
+
+            public DuplicateQueuesHistoryCommand(RenderQueueModel model, RenderQueueItemModel[] items)
+            {
+                Model = model;
+                Items = items;
+            }
+
+            public void Redo()
+            {
+                foreach (var i in Items)
+                {
+                    Model.Items.Add(i);
+                }
+            }
+
+            public void Undo()
+            {
+                foreach (var i in Items)
+                {
+                    Model.Items.Remove(i);
+                }
+            }
+
+            public void Dispose()
+            {
+                foreach (var i in Items)
+                {
+                    i.Dispose();
+                }
+            }
+        }
     }
 }
