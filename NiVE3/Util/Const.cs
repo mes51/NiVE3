@@ -29,5 +29,9 @@ namespace NiVE3.Util
         public const int MinAutoSaveCount = 1;
 
         public const int MaxAutoSaveCount = 100;
+
+        public const double MinGpuCacheLimitRate = 1.0;
+
+        public const double MaxGpuCacheLimitRate = 80.0;
     }
 }

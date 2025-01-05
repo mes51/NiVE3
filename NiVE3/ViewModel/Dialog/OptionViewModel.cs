@@ -95,6 +95,22 @@ namespace NiVE3.ViewModel.Dialog
             set { SetProperty(ref isCompressCache, value); }
         }
 
+        private bool useGpuCache;
+        [SettingProperty]
+        public bool UseGpuCache
+        {
+            get { return useGpuCache; }
+            set { SetProperty(ref useGpuCache, value); }
+        }
+
+        private double gpuCacheLimitRate;
+        [SettingProperty]
+        public double GpuCacheLimitRate
+        {
+            get { return gpuCacheLimitRate; }
+            set { SetProperty(ref gpuCacheLimitRate, value); }
+        }
+
         private bool useAutoSave;
         [SettingProperty]
         public bool UseAutoSave
@@ -124,6 +140,13 @@ namespace NiVE3.ViewModel.Dialog
         {
             get { return maxRamPreviewCacheLimit; }
             set { SetProperty(ref maxRamPreviewCacheLimit, value); }
+        }
+
+        private long gpuCahceLimit;
+        public long GpuCacheLimit
+        {
+            get { return gpuCahceLimit; }
+            set { SetProperty(ref gpuCahceLimit, value); }
         }
 
         private Tuple<string, string> selectedGpuDevice = Tuple.Create("", "");
@@ -198,6 +221,8 @@ namespace NiVE3.ViewModel.Dialog
             ImageCacheLimit = ApplicationSetting.Setting.ImageCacheLimit;
             RamPreviewCacheLimit = ApplicationSetting.Setting.RamPreviewCacheLimit;
             IsCompressCache = ApplicationSetting.Setting.IsCompressCache;
+            UseGpuCache = ApplicationSetting.Setting.UseGpuCache;
+            GpuCacheLimitRate = ApplicationSetting.Setting.GpuCacheLimitRate;
             UseAutoSave = ApplicationSetting.Setting.UseAutoSave;
             AutoSaveInterval = ApplicationSetting.Setting.AutoSaveInterval;
             AutoSaveCount = ApplicationSetting.Setting.AutoSaveCount;
@@ -215,6 +240,8 @@ namespace NiVE3.ViewModel.Dialog
             ApplicationSetting.Setting.ImageCacheLimit = ImageCacheLimit;
             ApplicationSetting.Setting.RamPreviewCacheLimit = RamPreviewCacheLimit;
             ApplicationSetting.Setting.IsCompressCache = IsCompressCache;
+            ApplicationSetting.Setting.UseGpuCache = UseGpuCache;
+            ApplicationSetting.Setting.GpuCacheLimitRate = GpuCacheLimitRate;
             ApplicationSetting.Setting.UseAutoSave = UseAutoSave;
             ApplicationSetting.Setting.AutoSaveInterval = AutoSaveInterval;
             ApplicationSetting.Setting.AutoSaveCount = AutoSaveCount;

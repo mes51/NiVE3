@@ -143,6 +143,22 @@
                         <CheckBox Content="{gm:LanguageResource ResourceKey=OptionView_Performance_IsCompressCache}" Margin="{StaticResource ItemMargin}" IsChecked="{Binding IsCompressCache}"/>
                     </StackPanel>
                 </GroupBox>
+                <GroupBox Header="{gm:LanguageResource ResourceKey=OptionView_Performance_GpuCacheSetting}" Margin="{StaticResource GroupMargin}">
+                    <StackPanel Margin="{StaticResource GroupBoxInnerMargin}">
+                        <CheckBox Content="{gm:LanguageResource ResourceKey=OptionView_Performance_UseGpuCache}" IsChecked="{Binding UseGpuCache}"/>
+
+                        <Grid Margin="{StaticResource ItemMargin}" IsEnabled="{Binding UseGpuCache}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=OptionView_Performance_GpuCacheLimitRate_Label}" Style="{StaticResource SettingLabelTextBlockStyle}"/>
+                            <upr:SlidableNumberTextBox Grid.Column="1" Margin="0,0,5,0" Minimum="{x:Static ut:Const.MinGpuCacheLimitRate}" Maximum="{x:Static ut:Const.MaxGpuCacheLimitRate}" Value="{Binding GpuCacheLimitRate}" Digit="0" UnitText="{gm:LanguageResource ResourceKey=Unit_Percent}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                        </Grid>
+                        <TextBlock Text="{gm:LanguageResource ResourceKey=OptionView_Performance_GpuCacheLimitRate_Note}" Margin="0,5,0,0"/>
+                    </StackPanel>
+                </GroupBox>
             </StackPanel>
         </ScrollViewer>
 

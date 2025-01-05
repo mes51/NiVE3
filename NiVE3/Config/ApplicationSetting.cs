@@ -89,6 +89,12 @@ namespace NiVE3.Config
         public bool IsCompressCache { get; set; } = false;
 
         [SerializableSetting]
+        public bool UseGpuCache { get; set; } = true;
+
+        [SerializableSetting]
+        public double GpuCacheLimitRate { get; set; } = 30.0;
+
+        [SerializableSetting]
         public bool UseAutoSave { get; set; } = true;
 
         [SerializableSetting]
@@ -131,6 +137,7 @@ namespace NiVE3.Config
                 // NOTE: 万一SystemInfo.MaxCacheLimitMiBがConst.MinImageCacheSizeMiB以下になったときのためにClampは使用しない
                 ImageCacheLimit = Math.Max(Math.Min(SystemInfo.MaxCacheLimitMiB, ImageCacheLimit), Const.MinImageCacheSizeMiB);
                 RamPreviewCacheLimit = Math.Max(Math.Min(SystemInfo.MaxCacheLimitMiB - ImageCacheLimit, RamPreviewCacheLimit), Const.MinImageCacheSizeMiB);
+                GpuCacheLimitRate = Math.Clamp(GpuCacheLimitRate, Const.MinGpuCacheLimitRate, Const.MaxGpuCacheLimitRate);
 
                 AutoSaveInterval = Math.Clamp(AutoSaveInterval, Const.MinAutoSaveInterval, Const.MaxAutoSaveInterval);
                 AutoSaveCount = Math.Clamp(AutoSaveCount, Const.MinAutoSaveCount, Const.MaxAutoSaveCount);

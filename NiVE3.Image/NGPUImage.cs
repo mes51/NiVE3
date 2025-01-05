@@ -3,10 +3,12 @@ using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using ComputeSharp;
+using NiVE3.Image.Internal;
 
 namespace NiVE3.Image
 {
@@ -44,7 +46,8 @@ namespace NiVE3.Image
             }
 
             var float4Data = MemoryMarshal.Cast<Vector4, Float4>(data);
-            Data = device.AllocateReadWriteBuffer(float4Data[..(width * height)]);
+            Data = GPUBufferCache.GetInstance(device).RentImageBuffer(width * height);
+            Data.CopyFrom(float4Data[..(width * height)]);
         }
 
         /// <summary>
@@ -56,7 +59,7 @@ namespace NiVE3.Image
         /// <param name="color">初期の各ピクセルの色</param>
         public NGPUImage(int width, int height, GraphicsDevice device, Vector4 color) : base(width, height)
         {
-            Data = device.AllocateReadWriteBuffer<Float4>(width * height);
+            Data = GPUBufferCache.GetInstance(device).RentImageBuffer(width * height);
             using var context = device.CreateComputeContext();
             context.For(width, height, new ClearImage(Data, width, color));
         }
@@ -118,11 +121,15 @@ namespace NiVE3.Image
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
-            try
+            if (Data != null && disposing) // NOTE: 生成に失敗した場合 null になることがある
             {
-                Data.Dispose();
+                GPUBufferCache.GetInstance(Data.GraphicsDevice).ReturnImageBuffer(Data);
             }
-            catch { } // NOTE: 生成に失敗した場合 null になることがある
+            else
+            {
+                // NOTE: ファイナライザから呼ばれたときはすでにバッファをDisposeされている可能性があるので、キャッシュには戻さない
+                Data?.Dispose();
+            }
         }
     }
 

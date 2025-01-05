@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ComputeSharp;
+using NiVE3.Image.Internal;
 
 namespace NiVE3.Image
 {
@@ -27,7 +28,7 @@ namespace NiVE3.Image
         /// <param name="device">GPUのデバイス</param>
         public GPURasterizedMaskImage(int width, int height, GraphicsDevice device) : base(width, height)
         {
-            Data = device.AllocateReadWriteBuffer<float>(width * height);
+            Data = GPUBufferCache.GetInstance(device).RentMaskBuffer(width * height);
         }
 
         /// <summary>
@@ -45,7 +46,8 @@ namespace NiVE3.Image
                 throw new ArgumentOutOfRangeException(nameof(data));
             }
 
-            Data = device.AllocateReadWriteBuffer(data[..(width * height)]);
+            Data = GPUBufferCache.GetInstance(device).RentMaskBuffer(width * height);
+            Data.CopyFrom(data[..(width * height)]);
         }
 
         /// <summary>
@@ -57,11 +59,9 @@ namespace NiVE3.Image
         /// <param name="alpha">最初のアルファ値</param>
         public GPURasterizedMaskImage(int width, int height, GraphicsDevice device, float alpha) : base(width, height)
         {
-            var length = width * height;
-            var data = ArrayPool<float>.Shared.Rent(length);
-            data.AsSpan(0, length).Fill(alpha);
-            Data = device.AllocateReadWriteBuffer(data[..length]);
-            ArrayPool<float>.Shared.Return(data);
+            Data = GPUBufferCache.GetInstance(device).RentMaskBuffer(width * height);
+            using var context = device.CreateComputeContext();
+            context.For(width, height, new ClearMask(Data, width, alpha));
         }
 
         /// <summary>
@@ -112,11 +112,26 @@ namespace NiVE3.Image
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing)
-            {
-                Data.Dispose();
-            }
             base.Dispose(disposing);
+            if (Data != null && disposing) // NOTE: 生成に失敗した場合 null になることがある
+            {
+                GPUBufferCache.GetInstance(Data.GraphicsDevice).ReturnMaskBuffer(Data);
+            }
+            else
+            {
+                // NOTE: ファイナライザから呼ばれたときはすでにバッファをDisposeされている可能性があるので、キャッシュには戻さない
+                Data?.Dispose();
+            }
+        }
+    }
+
+    [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
+    [GeneratedComputeShaderDescriptor]
+    readonly partial struct ClearMask(ReadWriteBuffer<float> image, int width, float alpha) : IComputeShader
+    {
+        public void Execute()
+        {
+            image[ThreadIds.Y * width + ThreadIds.X] = alpha;
         }
     }
 }

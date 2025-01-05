@@ -740,6 +740,18 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("キャッシュを圧縮する(※変更時キャッシュがクリアされます)")]
         public static readonly string OptionView_Performance_IsCompressCache = nameof(OptionView_Performance_IsCompressCache);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("GPUキャッシュ設定")]
+        public static readonly string OptionView_Performance_GpuCacheSetting = nameof(OptionView_Performance_GpuCacheSetting);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("GPUキャッシュを使用する")]
+        public static readonly string OptionView_Performance_UseGpuCache = nameof(OptionView_Performance_UseGpuCache);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("キャッシュサイズの上限:")]
+        public static readonly string OptionView_Performance_GpuCacheLimitRate_Label = nameof(OptionView_Performance_GpuCacheLimitRate_Label);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("※キャッシュサイズは、占有メモリと共有メモリの合計値から割合で算出されます")]
+        public static readonly string OptionView_Performance_GpuCacheLimitRate_Note = nameof(OptionView_Performance_GpuCacheLimitRate_Note);
+
         [ShowInMarkup, LanguageKey, DefaultValue("オートセーブを使用する")]
         public static readonly string OptionView_AutoSave_UseAutoSave = nameof(OptionView_AutoSave_UseAutoSave);
 

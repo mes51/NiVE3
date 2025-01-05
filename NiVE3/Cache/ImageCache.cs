@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using ComputeSharp;
 using NiVE3.Config;
 using NiVE3.Image;
+using NiVE3.Image.Internal;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.Util;
 
@@ -32,6 +33,10 @@ namespace NiVE3.Cache
         private ImageCache()
         {
             CacheLimit = Math.Min(ApplicationSetting.Setting.ImageCacheLimit * Const.MiB, SystemInfo.MaxCacheLimit);
+            // TODO: GPUのバッファのキャッシュ周りの設定を他に持って行くかどうか検討する
+            GPUBufferCache.CacheLimitRate = ApplicationSetting.Setting.GpuCacheLimitRate * 0.01;
+            GPUBufferCache.SetUseCache(ApplicationSetting.Setting.UseGpuCache);
+
             ApplicationSetting.Setting.UpdateSetting += Setting_UpdateSetting;
         }
 
@@ -188,6 +193,10 @@ namespace NiVE3.Cache
                 ClearAllInternal();
                 IsCompressCache = ApplicationSetting.Setting.IsCompressCache;
             }
+
+            // TODO: GPUのバッファのキャッシュ周りの設定を他に持って行くかどうか検討する
+            GPUBufferCache.CacheLimitRate = ApplicationSetting.Setting.GpuCacheLimitRate * 0.01;
+            GPUBufferCache.SetUseCache(ApplicationSetting.Setting.UseGpuCache);
         }
 
         public static bool TryGet(in Guid objectId, in Int128 key, Time time, GraphicsDevice? device, out (NImage, ROI) image)

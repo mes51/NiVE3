@@ -290,11 +290,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             }
 
             var managedImage = image.ToManaged();
-            var managedTrackMatte = trackMatte switch
-            {
-                GPURasterizedMaskImage gpuTrackMatte => gpuTrackMatte.CopyToCpu(),
-                _ => (ManagedRasterizedMaskImage?)trackMatte
-            };
+            var managedTrackMatte = trackMatte?.ToManaged();
 
             var p1 = transform.Transform(new Vector2());
             var p2 = transform.Transform(new Vector2(image.Width, 0.0F));
@@ -397,11 +393,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             }
 
             var gpuImage = image.ToGpu(Device);
-            var gpuTrackMatte = trackMatte switch
-            {
-                ManagedRasterizedMaskImage managedTrackMatte => managedTrackMatte.CopyToGpu(Device),
-                _ => (GPURasterizedMaskImage?)trackMatte
-            };
+            var gpuTrackMatte = trackMatte?.ToGpu(Device);
 
             var trackMatteData = gpuTrackMatte?.Data ?? Device.AllocateReadWriteBuffer([1.0F]);
             using (var context = Device.CreateComputeContext())
