@@ -3,7 +3,6 @@ using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -636,7 +635,7 @@ namespace NiVE3.PresetPlugin.Internal.DirectShow
 
         public VideoSampler(double frameRate)
         {
-            ToleranceTime = 1.0 / frameRate * 0.001;
+            ToleranceTime = 1.0 / frameRate * 0.5;
         }
 
         public void ForceGetNextFrame()
@@ -653,6 +652,7 @@ namespace NiVE3.PresetPlugin.Internal.DirectShow
                     if (SampledBuffer.Length > 1)
                     {
                         ArrayPool<byte>.Shared.Return(SampledBuffer);
+                        SampledBuffer = [];
                     }
                     SampledBuffer = ArrayPool<byte>.Shared.Rent(BufferLen);
                     Marshal.Copy(pBuffer, SampledBuffer, 0, BufferLen);

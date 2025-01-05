@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Buffers;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Numerics;
@@ -13,12 +11,15 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using NiVE3.Image;
+using NiVE3.Image.Drawing;
+using NiVE3.Numerics;
 using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.PresetPlugin.Internal;
 using NiVE3.PresetPlugin.Internal.Audio;
 using NiVE3.PresetPlugin.Internal.DirectShow;
+using NiVE3.PresetPlugin.Internal.Drawing;
 using NiVE3.PresetPlugin.Internal.View;
 using NiVE3.PresetPlugin.Internal.ViewModel;
 using NiVE3.Shared.Extension;
@@ -45,7 +46,7 @@ namespace NiVE3.PresetPlugin.Input
         {
             if (VideoReader?.IsLoaded ?? false)
             {
-                return new FootageSourceGroup([new DirectShowVideoFootageSource(VideoReader, AudioReader, VideoAlphaType)]);
+                return new FootageSourceGroup([new DirectShowVideoFootageSource(VideoReader, (AudioReader?.IsLoaded ?? false) ? AudioReader : null, VideoAlphaType)]);
             }
             else if (AudioReader?.IsLoaded ?? false)
             {
@@ -67,6 +68,7 @@ namespace NiVE3.PresetPlugin.Input
                 AudioReader = new DirectShowAudioReader(filePath, true);
             }
             FilePath = filePath;
+
             return VideoReader.IsLoaded || AudioReader.IsLoaded;
         }
 
@@ -159,7 +161,7 @@ namespace NiVE3.PresetPlugin.Input
             AudioReader = audioReader;
             VideoAlphaType = videoAlphaType;
             ChannelDataLength = VideoReader.Width * VideoReader.Height;
-            BufferLineLength = VideoReader.Width * (VideoReader.PossibilityArgb ? 4 : 3);
+            BufferLineLength = VideoReader.Width * (VideoReader.OutputIs32bpc ? 4 : 3);
             VectorAlignedBufferLineLength = (BufferLineLength / Vector<byte>.Count) * Vector<byte>.Count;
         }
 
@@ -182,7 +184,7 @@ namespace NiVE3.PresetPlugin.Input
             var width = Width;
             var height = Height;
             var imageData = result.Data;
-            if (buffer.Length / ChannelDataLength < (VideoReader.PossibilityArgb ? 4 : 3))
+            if (buffer.Length / ChannelDataLength < (VideoReader.OutputIs32bpc ? 4 : 3))
             {
                 return result;
             }
@@ -251,15 +253,31 @@ namespace NiVE3.PresetPlugin.Input
             }
             else
             {
-                Parallel.For(0, height, y =>
+                if (VideoReader.OutputIs32bpc)
                 {
-                    var bufferSpan = buffer.AsSpan(y * width * 3, width * 3);
-                    var imageDataSpan = imageData.AsSpan(y * width, width);
-                    for (int x = 0, bi = 0; x < imageDataSpan.Length; x++, bi += 3)
+                    ImageConversion.ConvertToBGRA128(buffer, imageData, result.DataLength);
+                }
+                else
+                {
+                    Parallel.For(0, height, y =>
                     {
-                        imageDataSpan[x] = new Vector4(bufferSpan[bi], bufferSpan[bi + 1], bufferSpan[bi + 2], 255.0F) * ByteToFloat;
-                    }
-                });
+                        var bufferSpan = buffer.AsSpan(y * width * 3, width * 3);
+                        var imageDataSpan = imageData.AsSpan(y * width, width);
+                        for (int x = 0, bi = 0; x < imageDataSpan.Length; x++, bi += 3)
+                        {
+                            imageDataSpan[x] = new Vector4(bufferSpan[bi], bufferSpan[bi + 1], bufferSpan[bi + 2], 255.0F) * ByteToFloat;
+                        }
+                    });
+                }
+            }
+
+            if (downSamplingRate != 1.0)
+            {
+                var resizedResult = new NManagedImage((int)(Width / downSamplingRate), (int)(Height / downSamplingRate));
+                var renderer = new CPURenderer2D(resizedResult);
+                renderer.DrawSingleImage(new Int32Point(), result, 1.0F, Matrix3x3.CreateScale((float)(1.0 / downSamplingRate), (float)(1.0 / downSamplingRate)), ImageInterpolationQuality.Level2, BlendMode.Replace, null);
+                result.Dispose();
+                result = resizedResult;
             }
 
             return result;

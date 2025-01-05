@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using Vanara.PInvoke;
-using static Vanara.PInvoke.WinMm;
 
 namespace NiVE3.PresetPlugin.Internal.DirectShow
 {
@@ -27,7 +25,9 @@ namespace NiVE3.PresetPlugin.Internal.DirectShow
 
         protected IGraphBuilder GraphBuilder { get; }
 
-        protected ISampleGrabber SampleGrabber { get; }
+        protected ISampleGrabber VideoSampleGrabber { get; }
+
+        protected ISampleGrabber AudioSampleGrabber { get; }
 
         protected IBaseFilter NullRenderer { get; }
 
@@ -43,11 +43,35 @@ namespace NiVE3.PresetPlugin.Internal.DirectShow
 
         protected IMediaControl MediaControl => (IMediaControl)GraphBuilder;
 
-        protected DirectShowReaderBase()
+        protected DirectShowReaderBase(bool withoutAudioMediaType)
         {
             GraphBuilder = (IGraphBuilder)new FilterGraph();
-            SampleGrabber = (ISampleGrabber)new SampleGrabber();
+            VideoSampleGrabber = (ISampleGrabber)new SampleGrabber();
+            AudioSampleGrabber = (ISampleGrabber)new SampleGrabber();
             NullRenderer = (IBaseFilter)new NullRenderer();
+
+            var mediaType = new PAMMediaType
+            {
+                majortype = MediaType.Video,
+                subtype = MediaSubType.RGB32,
+                formattype = Format.VideoInfo
+            };
+
+            var hr = VideoSampleGrabber.SetMediaType(mediaType);
+            hr.ThrowIfFailed();
+
+            if (!withoutAudioMediaType)
+            {
+                mediaType = new PAMMediaType
+                {
+                    majortype = MediaType.Audio,
+                    subtype = MediaSubType.PCM,
+                    formattype = Format.WaveFormatEx
+                };
+
+                hr = AudioSampleGrabber.SetMediaType(mediaType);
+                hr.ThrowIfFailed();
+            }
         }
 
         protected bool SetTime(double time)
@@ -214,6 +238,18 @@ namespace NiVE3.PresetPlugin.Internal.DirectShow
             return info.pFilter;
         }
 
+        protected static HRESULT RemoveConnectedFilter(IGraphBuilder graphBuilder, IBaseFilter filter, PinDirection direction)
+        {
+            var connected = GetConnectedFilter(filter, direction);
+
+            if (connected == null)
+            {
+                return HRESULT.S_OK;
+            }
+
+            return graphBuilder.RemoveFilter(connected);
+        }
+
         protected static IPin[] GetAllPins(IBaseFilter filter, PinDirection direction)
         {
             filter.EnumPins(out var pins);
@@ -291,7 +327,8 @@ namespace NiVE3.PresetPlugin.Internal.DirectShow
         protected virtual void Dispose(bool disposing)
         {
             Marshal.ReleaseComObject(GraphBuilder);
-            Marshal.ReleaseComObject(SampleGrabber);
+            Marshal.ReleaseComObject(VideoSampleGrabber);
+            Marshal.ReleaseComObject(AudioSampleGrabber);
             Marshal.ReleaseComObject(NullRenderer);
         }
 
@@ -309,13 +346,15 @@ namespace NiVE3.PresetPlugin.Internal.DirectShow
 
         public bool PossibilityArgb { get; }
 
+        public bool OutputIs32bpc { get; }
+
         public int Width { get; }
 
         public int Height { get; }
 
         IBaseFilter AviDecoder { get; }
 
-        public DirectShowVideoReader(string filePath)
+        public DirectShowVideoReader(string filePath) : base(false)
         {
             AviDecoder = (IBaseFilter)new AviDecoder();
 
@@ -323,17 +362,9 @@ namespace NiVE3.PresetPlugin.Internal.DirectShow
 
             try
             {
-                using var mediaType = new PAMMediaType
-                {
-                    majortype = MediaType.Video,
-                    subtype = MediaSubType.RGB32,
-                    formattype = Format.VideoInfo
-                };
-
-                var hr = SampleGrabber.SetMediaType(mediaType);
+                var hr = GraphBuilder.AddFilter((IBaseFilter)VideoSampleGrabber, "Video SampleGrabber");
                 hr.ThrowIfFailed();
-
-                hr = GraphBuilder.AddFilter((IBaseFilter)SampleGrabber, "Video SampleGrabber");
+                hr = GraphBuilder.AddFilter((IBaseFilter)AudioSampleGrabber, "Audio SampleGrabber");
                 hr.ThrowIfFailed();
 
                 if (isAvi)
@@ -346,7 +377,7 @@ namespace NiVE3.PresetPlugin.Internal.DirectShow
                 hr.ThrowIfFailed();
 
                 using var am = new PAMMediaType();
-                hr = SampleGrabber.GetConnectedMediaType(am);
+                hr = VideoSampleGrabber.GetConnectedMediaType(am);
                 if (hr.Failed || am.formattype != Format.VideoInfo || am.pbFormat == nint.Zero)
                 {
                     return;
@@ -354,7 +385,7 @@ namespace NiVE3.PresetPlugin.Internal.DirectShow
 
                 var videoInfo = Marshal.PtrToStructure<VIDEOINFOHEADER>(am.pbFormat);
                 GraphBuilder.AddFilter(NullRenderer, "Video NullRenderer");
-                hr = ReconnectFilter(GraphBuilder, (IBaseFilter)SampleGrabber, GetConnectedFilter((IBaseFilter)SampleGrabber, PinDirection.Output), NullRenderer);
+                hr = ReconnectFilter(GraphBuilder, (IBaseFilter)VideoSampleGrabber, GetConnectedFilter((IBaseFilter)VideoSampleGrabber, PinDirection.Output), NullRenderer);
                 hr.ThrowIfFailed();
 
                 FrameRate = Math.Round(MediaTimeRate / videoInfo.AvgTimePerFrame, TimeRoundDigit);
@@ -364,7 +395,7 @@ namespace NiVE3.PresetPlugin.Internal.DirectShow
                 if (isAvi)
                 {
                     var grabberBeforeIsDecoder = false;
-                    var grabberInputFilter = GetConnectedFilter((IBaseFilter)SampleGrabber, PinDirection.Input);
+                    var grabberInputFilter = GetConnectedFilter((IBaseFilter)VideoSampleGrabber, PinDirection.Input);
                     if (grabberInputFilter != null)
                     {
                         using var filterInfo = new FilterInfo();
@@ -388,13 +419,27 @@ namespace NiVE3.PresetPlugin.Internal.DirectShow
                             }
                             Marshal.ReleaseComObject(pin);
                         }
+
+                        pin = GetPinFirst((IBaseFilter)VideoSampleGrabber, PinDirection.Input);
+                        if (pin != null)
+                        {
+                            using var grabberMediaType = new PAMMediaType();
+                            if (pin.ConnectionMediaType(grabberMediaType).Succeeded)
+                            {
+                                if (grabberMediaType.formattype == Format.VideoInfo && grabberMediaType.pbFormat != nint.Zero)
+                                {
+                                    OutputIs32bpc = Marshal.PtrToStructure<VIDEOINFOHEADER>(grabberMediaType.pbFormat).bmiHeader.biBitCount == 32;
+                                }
+                            }
+                            Marshal.ReleaseComObject(pin);
+                        }
                     }
                     else
                     {
                         var decoderInputFilter = GetConnectedFilter(AviDecoder, PinDirection.Input);
                         if (decoderInputFilter == null)
                         {
-                            var pin = GetPinFirst((IBaseFilter)SampleGrabber, PinDirection.Input);
+                            var pin = GetPinFirst((IBaseFilter)VideoSampleGrabber, PinDirection.Input);
                             if (pin != null)
                             {
                                 using var grabberMediaType = new PAMMediaType();
@@ -403,6 +448,7 @@ namespace NiVE3.PresetPlugin.Internal.DirectShow
                                     if (grabberMediaType.formattype == Format.VideoInfo && grabberMediaType.pbFormat != nint.Zero)
                                     {
                                         PossibilityArgb = Marshal.PtrToStructure<VIDEOINFOHEADER>(grabberMediaType.pbFormat).bmiHeader.biBitCount == 32;
+                                        OutputIs32bpc = PossibilityArgb;
                                     }
                                 }
                                 Marshal.ReleaseComObject(pin);
@@ -414,6 +460,11 @@ namespace NiVE3.PresetPlugin.Internal.DirectShow
                         }
                     }
                 }
+
+                hr = RemoveConnectedFilter(GraphBuilder, (IBaseFilter)AudioSampleGrabber, PinDirection.Output);
+                hr.ThrowIfFailed();
+                hr = GraphBuilder.RemoveFilter((IBaseFilter)AudioSampleGrabber);
+                hr.ThrowIfFailed();
 
                 ((IMediaFilter)GraphBuilder).SetSyncSource(null);
                 IsSupportedFrame = FrameRate > 0.0 && MediaSeeking.IsFormatSupported(TimeFormat.Frame).Succeeded;
@@ -442,7 +493,7 @@ namespace NiVE3.PresetPlugin.Internal.DirectShow
 
                 Sampler = new VideoSampler(FrameRate);
                 Sampler.SampleCompleted += Sampler_SampleCompleted;
-                SampleGrabber.SetCallback(Sampler, 1);
+                VideoSampleGrabber.SetCallback(Sampler, 1);
 
                 IsLoaded = true;
             }
@@ -465,6 +516,10 @@ namespace NiVE3.PresetPlugin.Internal.DirectShow
             if (diffFrame == 0 || diffFrame == 1)
             {
                 Sampler.ForceGetNextFrame();
+            }
+            else
+            {
+                Sampler.SetTargetSamplingTime(time);
             }
 
             var backTime = time;
@@ -516,47 +571,37 @@ namespace NiVE3.PresetPlugin.Internal.DirectShow
 
         public int BlockSize { get; }
 
-        public DirectShowAudioReader(string filePath, bool withoutMediaType)
+        public DirectShowAudioReader(string filePath, bool withoutMediaType) : base(withoutMediaType)
         {
             try
             {
-                var hr = (HRESULT)HRESULT.S_OK;
-
-                if (!withoutMediaType)
-                {
-                    var mediaType = new PAMMediaType
-                    {
-                        majortype = MediaType.Audio,
-                        subtype = MediaSubType.PCM,
-                        formattype = Format.WaveFormatEx
-                    };
-
-                    hr = SampleGrabber.SetMediaType(mediaType);
-                    hr.ThrowIfFailed();
-                }
-
-                hr = GraphBuilder.AddFilter((IBaseFilter)SampleGrabber, "Audio SampleGrabber");
+                var hr = GraphBuilder.AddFilter((IBaseFilter)AudioSampleGrabber, "Audio SampleGrabber");
+                hr.ThrowIfFailed();
+                hr = GraphBuilder.AddFilter((IBaseFilter)VideoSampleGrabber, "Video SampleGrabber");
                 hr.ThrowIfFailed();
 
                 hr = GraphBuilder.RenderFile(filePath, null);
                 hr.ThrowIfFailed();
 
                 using var am = new PAMMediaType();
-                hr = SampleGrabber.GetConnectedMediaType(am);
+                hr = AudioSampleGrabber.GetConnectedMediaType(am);
                 if (hr.Failed || am.formattype != Format.WaveFormatEx || am.pbFormat == nint.Zero)
                 {
                     return;
                 }
 
-                var waveFormat = Marshal.PtrToStructure<WAVEFORMATEX>(am.pbFormat);
+                var waveFormat = Marshal.PtrToStructure<WinMm.WAVEFORMATEX>(am.pbFormat);
                 GraphBuilder.AddFilter(NullRenderer, "Audio NullRenderer");
-                hr = ReconnectFilter(GraphBuilder, (IBaseFilter)SampleGrabber, GetConnectedFilter((IBaseFilter)SampleGrabber, PinDirection.Output), NullRenderer);
+                hr = ReconnectFilter(GraphBuilder, (IBaseFilter)AudioSampleGrabber, GetConnectedFilter((IBaseFilter)AudioSampleGrabber, PinDirection.Output), NullRenderer);
                 hr.ThrowIfFailed();
 
                 SamplingRate = (int)waveFormat.nSamplesPerSec;
                 Channel = waveFormat.nChannels;
                 BitPerSample = waveFormat.wBitsPerSample;
                 BlockSize = waveFormat.nBlockAlign;
+
+                hr = RemoveConnectedFilter(GraphBuilder, (IBaseFilter)VideoSampleGrabber, PinDirection.Output);
+                hr.ThrowIfFailed();
 
                 ((IMediaFilter)GraphBuilder).SetSyncSource(null);
 
@@ -573,7 +618,7 @@ namespace NiVE3.PresetPlugin.Internal.DirectShow
 
                 Sampler = new AudioSampler(SamplingRate, waveFormat.nBlockAlign);
                 Sampler.SampleCompleted += Sampler_SampleCompleted;
-                SampleGrabber.SetCallback(Sampler, 1);
+                AudioSampleGrabber.SetCallback(Sampler, 1);
 
                 IsLoaded = true;
             }
