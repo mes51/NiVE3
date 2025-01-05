@@ -27,6 +27,8 @@ namespace NiVE3.PresetPlugin.Effect.Util.Noise
         public static void GenerateCpu(
             NManagedImage managedImage,
             ROI roi,
+            float downSamplingRateX,
+            float downSamplingRateY,
             FractalType fractalType,
             NoiseType noiseType,
             bool isInvert,
@@ -47,7 +49,7 @@ namespace NiVE3.PresetPlugin.Effect.Util.Noise
         )
         {
             var center = new Vector2(roi.OriginalImageSize.Width, roi.OriginalImageSize.Height) * 0.5F + AnchorPointOffset;
-            var transform = Matrix3x3.AffineTransform(center, scale.AsVector2(), angle, center + position.AsVector2());
+            var transform = Matrix3x3.CreateScale(1.0F / downSamplingRateX, 1.0F / downSamplingRateY) * Matrix3x3.AffineTransform(center, scale.AsVector2(), angle, center + position.AsVector2());
 
             var bx = roi.Left;
             var ex = roi.Right;
@@ -249,6 +251,8 @@ namespace NiVE3.PresetPlugin.Effect.Util.Noise
             GraphicsDevice device,
             NGPUImage gpuImage,
             ROI roi,
+            float downSamplingRateX,
+            float downSamplingRateY,
             FractalType fractalType,
             NoiseType noiseType,
             bool isInvert,
@@ -269,7 +273,7 @@ namespace NiVE3.PresetPlugin.Effect.Util.Noise
         )
         {
             var center = new Vector2(roi.OriginalImageSize.Width, roi.OriginalImageSize.Height) * 0.5F + AnchorPointOffset;
-            var transform = Matrix3x3.AffineTransform(center, scale.AsVector2(), angle, center + position.AsVector2());
+            var transform = Matrix3x3.CreateScale(1.0F / downSamplingRateX, 1.0F / downSamplingRateY) * Matrix3x3.AffineTransform(center, scale.AsVector2(), angle, center + position.AsVector2());
             var denom = 0.0F;
 
             using var noise = device.AllocateReadWriteBuffer<float>(gpuImage.DataLength);
@@ -341,6 +345,8 @@ namespace NiVE3.PresetPlugin.Effect.Util.Noise
         public static void GenerateAndBlendsCpu(
             NManagedImage managedImage,
             ROI roi,
+            float downSamplingRateX,
+            float downSamplingRateY,
             FractalType fractalType,
             NoiseType noiseType,
             bool isInvert,
@@ -362,7 +368,7 @@ namespace NiVE3.PresetPlugin.Effect.Util.Noise
         )
         {
             var center = new Vector2(roi.OriginalImageSize.Width, roi.OriginalImageSize.Height) * 0.5F + AnchorPointOffset;
-            var transform = Matrix3x3.AffineTransform(center, scale.AsVector2(), angle, center + position.AsVector2());
+            var transform = Matrix3x3.CreateScale(1.0F / downSamplingRateX, 1.0F / downSamplingRateY) * Matrix3x3.AffineTransform(center, scale.AsVector2(), angle, center + position.AsVector2());
 
             var bx = roi.Left;
             var ex = roi.Right;
@@ -564,6 +570,8 @@ namespace NiVE3.PresetPlugin.Effect.Util.Noise
             GraphicsDevice device,
             NGPUImage gpuImage,
             ROI roi,
+            float downSamplingRateX,
+            float downSamplingRateY,
             FractalType fractalType,
             NoiseType noiseType,
             bool isInvert,
@@ -585,7 +593,7 @@ namespace NiVE3.PresetPlugin.Effect.Util.Noise
         )
         {
             var center = new Vector2(roi.OriginalImageSize.Width, roi.OriginalImageSize.Height) * 0.5F + AnchorPointOffset;
-            var transform = Matrix3x3.AffineTransform(center, scale.AsVector2(), angle, center + position.AsVector2());
+            var transform = Matrix3x3.CreateScale(1.0F / downSamplingRateX, 1.0F / downSamplingRateY) * Matrix3x3.AffineTransform(center, scale.AsVector2(), angle, center + position.AsVector2());
             var denom = 0.0F;
 
             using var noise = device.AllocateReadWriteBuffer<float>(gpuImage.DataLength);

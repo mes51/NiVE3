@@ -13,7 +13,7 @@ namespace NiVE3.PresetPlugin.Effect.Util.Noise
 {
     static class RandomNoiseProcess
     {
-        public static void ProcessCpu(NManagedImage managedImage, ROI roi, float amount, bool isColorNoise, uint randomSeed, Time time)
+        public static void ProcessCpu(NManagedImage managedImage, ROI roi, float downSamplingRateX, float downSamplingRateY, float amount, bool isColorNoise, uint randomSeed, Time time)
         {
             randomSeed += 201864043U;
             var imageOriginX = (float)(roi.OriginalImagePosition.X + managedImage.Origin.X);
@@ -22,10 +22,10 @@ namespace NiVE3.PresetPlugin.Effect.Util.Noise
             Parallel.For(roi.Top, roi.Bottom, y =>
             {
                 var imageSpan = managedImage.GetDataSpan().Slice((y * managedImage.Width), managedImage.Width);
-                var uy = BitConverter.SingleToUInt32Bits(y - imageOriginY);
+                var uy = BitConverter.SingleToUInt32Bits(y * downSamplingRateY - imageOriginY);
                 for (var x = roi.Left; x < roi.Right; x++)
                 {
-                    var ux = BitConverter.SingleToUInt32Bits(x - imageOriginX);
+                    var ux = BitConverter.SingleToUInt32Bits(x * downSamplingRateX - imageOriginX);
                     var noise = NoiseFunction.Pcg3DFloatCpu(ux, uy, uTime, randomSeed);
                     if (!isColorNoise)
                     {
@@ -38,7 +38,7 @@ namespace NiVE3.PresetPlugin.Effect.Util.Noise
             });
         }
 
-        public static NGPUImage ProcessGpu(GraphicsDevice device, NGPUImage gpuImage, ROI roi, float amount, bool isColorNoise, uint randomSeed, Time time)
+        public static NGPUImage ProcessGpu(GraphicsDevice device, NGPUImage gpuImage, ROI roi, float downSamplingRateX, float downSamplingRateY, float amount, bool isColorNoise, uint randomSeed, Time time)
         {
             randomSeed += 201864043U;
             var imageOriginX = (float)(roi.OriginalImagePosition.X + gpuImage.Origin.X);
@@ -46,11 +46,11 @@ namespace NiVE3.PresetPlugin.Effect.Util.Noise
             using var context = device.CreateComputeContext();
             if (isColorNoise)
             {
-                context.For(roi.Width, roi.Height, new ColorRandomNoiseProcess(gpuImage.Data, gpuImage.Width, amount, (float)time, randomSeed, roi.Left, roi.Top, imageOriginX, imageOriginY));
+                context.For(roi.Width, roi.Height, new ColorRandomNoiseProcess(gpuImage.Data, gpuImage.Width, downSamplingRateX, downSamplingRateY, amount, (float)time, randomSeed, roi.Left, roi.Top, imageOriginX, imageOriginY));
             }
             else
             {
-                context.For(roi.Width, roi.Height, new GrayScaleRandomNoiseProcess(gpuImage.Data, gpuImage.Width, amount, (float)time, randomSeed, roi.Left, roi.Top, imageOriginX, imageOriginY));
+                context.For(roi.Width, roi.Height, new GrayScaleRandomNoiseProcess(gpuImage.Data, gpuImage.Width, downSamplingRateX, downSamplingRateY, amount, (float)time, randomSeed, roi.Left, roi.Top, imageOriginX, imageOriginY));
             }
 
             return gpuImage;
@@ -59,11 +59,11 @@ namespace NiVE3.PresetPlugin.Effect.Util.Noise
 
     [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
     [GeneratedComputeShaderDescriptor]
-    readonly partial struct GrayScaleRandomNoiseProcess(ReadWriteBuffer<Float4> image, int width, float amount, float time, uint seed, int startX, int startY, float originX, float originY) : IComputeShader
+    readonly partial struct GrayScaleRandomNoiseProcess(ReadWriteBuffer<Float4> image, int width, float downSamplingRateX, float downSamplingRateY, float amount, float time, uint seed, int startX, int startY, float originX, float originY) : IComputeShader
     {
         public void Execute()
         {
-            var v = Hlsl.AsUInt(new Float3(ThreadIds.X + startX - originX, ThreadIds.Y + startY - originY, time));
+            var v = Hlsl.AsUInt(new Float3((ThreadIds.X + startX) * downSamplingRateX - originX, (ThreadIds.Y + startY) * downSamplingRateY - originY, time));
             var noise = Hlsl.Dot(NoiseFunction.Pcg3DFloatGpu(v, seed), Const.ConvertToGrayScaleFloat3);
 
             var pos = (ThreadIds.Y + startY) * width + ThreadIds.X + startX;
@@ -73,11 +73,11 @@ namespace NiVE3.PresetPlugin.Effect.Util.Noise
 
     [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
     [GeneratedComputeShaderDescriptor]
-    readonly partial struct ColorRandomNoiseProcess(ReadWriteBuffer<Float4> image, int width, float amount, float time, uint seed, int startX, int startY, float originX, float originY) : IComputeShader
+    readonly partial struct ColorRandomNoiseProcess(ReadWriteBuffer<Float4> image, int width, float downSamplingRateX, float downSamplingRateY, float amount, float time, uint seed, int startX, int startY, float originX, float originY) : IComputeShader
     {
         public void Execute()
         {
-            var v = Hlsl.AsUInt(new Float3(ThreadIds.X + startX - originX, ThreadIds.Y + startY - originY, time));
+            var v = Hlsl.AsUInt(new Float3((ThreadIds.X + startX) * downSamplingRateX - originX, (ThreadIds.Y + startY) * downSamplingRateY - originY, time));
             var noise = new Float4(NoiseFunction.Pcg3DFloatGpu(v, seed), 1.0F);
 
             var pos = (ThreadIds.Y + startY) * width + ThreadIds.X + startX;

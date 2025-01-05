@@ -182,7 +182,7 @@ namespace NiVE3.PresetPlugin.Input
             var octaveAngle = (float)properties.GetValueOrDefaultInTree(PropertyOctaveSettingAngleId, 0.0);
             var octaveCenteringScale = properties.GetValueOrDefaultInTree(PropertyOctaveSettingCenteringScaleId, false);
 
-            var size = properties.GetValueOrDefault(PropertyImageSizeId, Vector3d.Zero);
+            var size = properties.GetValueOrDefault(PropertyImageSizeId, Vector3d.Zero) / downSamplingRate;
             var width = Math.Max((int)size.X, 1);
             var height = Math.Max((int)size.Y, 1);
             var origin = new Vector2d(width, height) * 0.5;
@@ -196,6 +196,8 @@ namespace NiVE3.PresetPlugin.Input
                     device,
                     gpuImage,
                     roi,
+                    (float)downSamplingRate,
+                    (float)downSamplingRate,
                     fractalType,
                     noiseType,
                     invert,
@@ -222,6 +224,8 @@ namespace NiVE3.PresetPlugin.Input
                 FractalNoiseProcess.GenerateCpu(
                     managedImage,
                     roi,
+                    (float)downSamplingRate,
+                    (float)downSamplingRate,
                     fractalType,
                     noiseType,
                     invert,

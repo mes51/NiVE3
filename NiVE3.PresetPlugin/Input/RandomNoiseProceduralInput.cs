@@ -120,13 +120,13 @@ namespace NiVE3.PresetPlugin.Input
             {
                 var device = AcceleratorObject.CurrentDevice;
                 var gpuImage = new NGPUImage(width, height, device) { Origin = origin };
-                RandomNoiseProcess.ProcessGpu(device, gpuImage, roi, 1.0F, isColorNoise, (uint)randomSeed, advance);
+                RandomNoiseProcess.ProcessGpu(device, gpuImage, roi, (float)downSamplingRate, (float)downSamplingRate, 1.0F, isColorNoise, (uint)randomSeed, advance);
                 return gpuImage;
             }
             else
             {
                 var image = new NManagedImage(width, height) { Origin = origin };
-                RandomNoiseProcess.ProcessCpu(image, roi, 1.0F, isColorNoise, (uint)randomSeed, advance);
+                RandomNoiseProcess.ProcessCpu(image, roi, (float)downSamplingRate, (float)downSamplingRate, 1.0F, isColorNoise, (uint)randomSeed, advance);
                 return image;
             }
         }

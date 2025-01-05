@@ -148,6 +148,8 @@ namespace NiVE3.PresetPlugin.Effect.Noise
                     device,
                     gpuImage,
                     roi,
+                    (float)downSamplingRateX,
+                    (float)downSamplingRateY,
                     fractalType,
                     noiseType,
                     invert,
@@ -175,6 +177,8 @@ namespace NiVE3.PresetPlugin.Effect.Noise
                 FractalNoiseProcess.GenerateAndBlendsCpu(
                     managedImage,
                     roi,
+                    (float)downSamplingRateX,
+                    (float)downSamplingRateY,
                     fractalType,
                     noiseType,
                     invert,
