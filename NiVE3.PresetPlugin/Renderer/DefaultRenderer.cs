@@ -300,9 +300,11 @@ namespace NiVE3.PresetPlugin.Renderer
 
         public NImage GetCurrentRenderedImage()
         {
-            if (UseGpu && CurrentGpuFrame != null)
+            if (UseGpu && CurrentGpuFrame != null && Accelerator != null)
             {
-                return CurrentGpuFrame.Copy();
+                var result = new NGPUImage(Width, Height, Accelerator.CurrentDevice);
+                CurrentGpuFrame.CopyTo(result);
+                return result;
             }
             else if (CurrentManagedFrame != null)
             {
