@@ -225,7 +225,7 @@ namespace NiVE3.PresetPlugin.Internal.Encoder
 
             Buffer.AsSpan().CopyTo(PrevBuffer);
 
-            return (int)OutputBitmapHeader.ToStruct<BITMAPINFOHEADER>().biSizeImage;
+            return (int)managedOutputHeader.biSizeImage;
         }
 
         public void Dispose()
