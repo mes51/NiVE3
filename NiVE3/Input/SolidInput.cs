@@ -22,7 +22,7 @@ using NiVE3.ViewModel.Input;
 namespace NiVE3.Input
 {
     [Export(typeof(IInput))]
-    [InputMetadata(typeof(SolidInput), "SolidInput", "", "mes51", ID, "", true)]
+    [InputMetadata(typeof(SolidInput), "SolidInput", "", "mes51", ID, "", true, IsSupportLoadToGpu = true)]
     [InternalInput]
     class SolidInput : IInput
     {
