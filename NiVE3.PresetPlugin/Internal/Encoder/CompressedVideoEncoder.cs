@@ -66,8 +66,9 @@ namespace NiVE3.PresetPlugin.Internal.Encoder
             Height = height;
             FrameRate = frameRate;
             FrameCount = frameCount;
-            Buffer = new byte[Width * Height * (int)bitsPerPixel / 8];
-            PrevBuffer = new byte[Width * Height * (int)bitsPerPixel / 8];
+            var stride = (int)Math.Ceiling(width * ((int)bitsPerPixel / 8) / 4.0) * 4;
+            Buffer = new byte[stride * Height];
+            PrevBuffer = new byte[Buffer.Length];
             InputBitmapHeader = new BITMAPINFOHEADER
             {
                 biSize = (uint)Marshal.SizeOf<BITMAPINFOHEADER>(),
@@ -75,7 +76,7 @@ namespace NiVE3.PresetPlugin.Internal.Encoder
                 biHeight = height,
                 biPlanes = 1,
                 biBitCount = (ushort)bitsPerPixel,
-                biSizeImage = (uint)(width * height * ((int)bitsPerPixel / 8)),
+                biSizeImage = (uint)Buffer.Length,
                 biCompression = BitmapCompressionMode.BI_RGB
 
             };
@@ -296,7 +297,7 @@ namespace NiVE3.PresetPlugin.Internal.Encoder
         static void FlipAndConvertTo24(ReadOnlySpan<byte> src, Span<byte> dst, int width, int height)
         {
             var srcStride = width * 4;
-            var dstStride = width * 3;
+            var dstStride = (int)Math.Ceiling(width * 3 / 4.0) * 4;
             for (var h = 0; h < height; h++)
             {
                 var srcLine = src.Slice(h * srcStride, srcStride);
@@ -314,10 +315,11 @@ namespace NiVE3.PresetPlugin.Internal.Encoder
         static void FlipAndConvertTo8(ReadOnlySpan<byte> src, Span<byte> dst, int width, int height)
         {
             var srcStride = width * 4;
+            var dstStride = (int)Math.Ceiling(width / 4.0) * 4;
             for (var h = 0; h < height; h++)
             {
                 var srcLine = src.Slice(h * srcStride, srcStride);
-                var dstLine = dst.Slice((height - h - 1) * width, width);
+                var dstLine = dst.Slice((height - h - 1) * dstStride, dstStride);
 
                 for (var w = 0; w < width; w++)
                 {
@@ -341,7 +343,7 @@ namespace NiVE3.PresetPlugin.Internal.Encoder
         static void FlipAndConvertTo24Parallel(byte[] src, int srcOffset, byte[] dst, int width, int height)
         {
             var srcStride = width * 4;
-            var dstStride = width * 3;
+            var dstStride = (int)Math.Ceiling(width * 3 / 4.0) * 4;
             Parallel.For(0, height, h =>
             {
                 var srcLine = src.AsSpan(h * srcStride + srcOffset, srcStride);
@@ -359,10 +361,11 @@ namespace NiVE3.PresetPlugin.Internal.Encoder
         static void FlipAndConvertTo8Parallel(byte[] src, int srcOffset, byte[] dst, int width, int height)
         {
             var srcStride = width * 4;
+            var dstStride = (int)Math.Ceiling(width / 4.0) * 4;
             Parallel.For(0, height, h =>
             {
                 var srcLine = src.AsSpan(h * srcStride + srcOffset, srcStride);
-                var dstLine = dst.AsSpan((height - h - 1) * width, width);
+                var dstLine = dst.AsSpan((height - h - 1) * dstStride, dstStride);
 
                 for (var w = 0; w < width; w++)
                 {

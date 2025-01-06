@@ -262,7 +262,8 @@ namespace NiVE3.PresetPlugin.Output
             {
                 var device = AcceleratorObject.CurrentDevice;
                 var bpc = ((OutputChannel)Setting.OutputChannel).ToBitsPerPixel();
-                using var convertedImage = device.AllocateReadWriteBuffer<int>((int)Math.Ceiling((gpuImage.DataLength * 4) / (double)((int)bpc / 8)));
+                var stride = (int)Math.Ceiling(gpuImage.Width * ((int)bpc / 8) / 4.0) * 4;
+                using var convertedImage = device.AllocateReadWriteBuffer<int>(stride * gpuImage.Height);
                 using var readbackBuffer = device.AllocateReadBackBuffer<int>(convertedImage.Length);
 
                 using (var context = device.CreateComputeContext())
@@ -281,10 +282,10 @@ namespace NiVE3.PresetPlugin.Output
                             }
                             break;
                         case BitsPerPixel.Bpp24:
-                            context.For(gpuImage.Width, gpuImage.Height, new AviOutputFlipAndConvertTo24Bpc(gpuImage.Data, convertedImage, gpuImage.Width, gpuImage.Height));
+                            context.For(gpuImage.Width, gpuImage.Height, new AviOutputFlipAndConvertTo24Bpc(gpuImage.Data, convertedImage, gpuImage.Width, gpuImage.Height, stride / 4));
                             break;
                         case BitsPerPixel.Bpp8:
-                            context.For(gpuImage.Width, gpuImage.Height, new AviOutputFlipAndConvertTo8Bpc(gpuImage.Data, convertedImage, gpuImage.Width, gpuImage.Height));
+                            context.For(gpuImage.Width, gpuImage.Height, new AviOutputFlipAndConvertTo8Bpc(gpuImage.Data, convertedImage, gpuImage.Width, gpuImage.Height, stride / 4));
                             break;
                     }
                 }
@@ -489,18 +490,17 @@ namespace NiVE3.PresetPlugin.Output
 
     [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
     [GeneratedComputeShaderDescriptor]
-    readonly partial struct AviOutputFlipAndConvertTo24Bpc(ReadWriteBuffer<Float4> src, ReadWriteBuffer<int> dst, int width, int height) : IComputeShader
+    readonly partial struct AviOutputFlipAndConvertTo24Bpc(ReadWriteBuffer<Float4> src, ReadWriteBuffer<int> dst, int width, int height, int dstStride) : IComputeShader
     {
         public void Execute()
         {
             var srcPos = ThreadIds.Y * width + ThreadIds.X;
-            var dstBytePos = ((height - ThreadIds.Y - 1) * width + ThreadIds.X) * 3;
-            var dstPos = dstBytePos / 4;
+            var dstPos = (height - ThreadIds.Y - 1) * dstStride + (ThreadIds.X * 3 / 4);
             var color = Hlsl.Clamp(src[srcPos], 0.0F, 1.0F);
             color.XYZ *= color.W;
             var pixel = (UInt3)Hlsl.Round(color.XYZ * 255.0F);
 
-            switch (srcPos % 4)
+            switch (ThreadIds.X % 4)
             {
                 case 1:
                     Hlsl.InterlockedOr(ref dst[dstPos], (int)((pixel.X & 0xFF) << 24));
@@ -522,15 +522,14 @@ namespace NiVE3.PresetPlugin.Output
 
     [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
     [GeneratedComputeShaderDescriptor]
-    readonly partial struct AviOutputFlipAndConvertTo8Bpc(ReadWriteBuffer<Float4> src, ReadWriteBuffer<int> dst, int width, int height) : IComputeShader
+    readonly partial struct AviOutputFlipAndConvertTo8Bpc(ReadWriteBuffer<Float4> src, ReadWriteBuffer<int> dst, int width, int height, int dstStride) : IComputeShader
     {
         public void Execute()
         {
             var srcPos = ThreadIds.Y * width + ThreadIds.X;
-            var dstBytePos = ((height - ThreadIds.Y - 1) * width + ThreadIds.X);
-            var dstPos = dstBytePos / 4;
+            var dstPos = (height - ThreadIds.Y - 1) * dstStride + (ThreadIds.X / 4);
             var color = (uint)(Hlsl.Clamp(src[srcPos], 0.0F, 1.0F).W * 255.0F);
-            var pixel = (int)((color & 0xFF) << (8 * (srcPos % 4)));
+            var pixel = (int)((color & 0xFF) << (8 * (ThreadIds.X % 4)));
 
             Hlsl.InterlockedOr(ref dst[dstPos], pixel);
         }

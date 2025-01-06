@@ -21,7 +21,7 @@ namespace NiVE3.PresetPlugin.Internal.Encoder
 
         int Height { get; }
 
-        int Stride { get; }
+        int DstStride { get; }
 
         int SrcStride { get; }
 
@@ -31,10 +31,10 @@ namespace NiVE3.PresetPlugin.Internal.Encoder
         {
             Width = width;
             Height = height;
-            Stride = width * 3;
+            DstStride = (int)Math.Ceiling((width * 3) / 4.0) * 4;
             SrcStride = width * 4;
             SourceImageDataSize = width * height * 4;
-            MaxEncodedSize = width * height * 3;
+            MaxEncodedSize = DstStride * height;
         }
 
         public int EncodeFrame(byte[] source, int srcOffset, byte[] destination, int destOffset, out bool isKeyFrame)
@@ -66,7 +66,7 @@ namespace NiVE3.PresetPlugin.Internal.Encoder
                 Parallel.For(0, Height, i =>
                 {
                     var srcSpan = source.AsSpan(i * SrcStride + srcOffset, SrcStride);
-                    var dstSpan = destination.AsSpan((Height - i - 1) * Stride + destOffset, Stride);
+                    var dstSpan = destination.AsSpan((Height - i - 1) * DstStride + destOffset, DstStride);
 
                     for (int w = 0, sp = 0, dp = 0; w < Width; w++, sp += 4, dp += 3)
                     {
@@ -110,7 +110,7 @@ namespace NiVE3.PresetPlugin.Internal.Encoder
                 for (var i = 0; i < Height; i++)
                 {
                     var srcSpan = source.Slice(i * SrcStride, SrcStride);
-                    var dstSpan = destination.Slice ((Height - i - 1) * Stride, Stride);
+                    var dstSpan = destination.Slice ((Height - i - 1) * DstStride, DstStride);
 
                     for (int w = 0, sp = 0, dp = 0; w < Width; w++, sp += 4, dp += 3)
                     {
