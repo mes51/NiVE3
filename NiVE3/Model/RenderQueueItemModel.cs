@@ -314,7 +314,12 @@ namespace NiVE3.Model
                 using var propertyCache = PropertyValueCache.Start();
                 plugin.BeginOutput(filePath, beginTime, endTime - beginTime, frameRate, size, sourceTypes);
 
-                var lastProcessedDuration = Time.Zero;
+                if (sourceTypes.HasFlag(SourceType.Audio))
+                {
+                    var audio = CompositionModel.RenderAudio(beginTime, endTime - beginTime);
+                    plugin.ProcessAudio(audio);
+                }
+
                 if (sourceTypes.HasFlag(SourceType.Video))
                 {
                     var passCount = plugin.GetPassCount();
@@ -342,20 +347,9 @@ namespace NiVE3.Model
                             using var image = CompositionModel.RenderFrame(time, 1.0, true, useGpu);
                             plugin.ProcessFrame(pass, time, image, useGpu);
                             setProgress(i + 1 + frameCount * pass, Stopwatch.GetElapsedTime(startTimestamp));
-                            lastProcessedDuration = new Time(i + 1, frameRate);
                         }
                         plugin.EndPass();
                     }
-                }
-                else
-                {
-                    lastProcessedDuration = endTime - beginTime;
-                }
-
-                if (sourceTypes.HasFlag(SourceType.Audio))
-                {
-                    var audio = CompositionModel.RenderAudio(beginTime, lastProcessedDuration);
-                    plugin.ProcessAudio(audio);
                 }
 
                 plugin.EndOutput();

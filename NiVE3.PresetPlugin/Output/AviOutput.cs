@@ -49,6 +49,14 @@ namespace NiVE3.PresetPlugin.Output
 
         IAcceleratorObject? AcceleratorObject { get; set; }
 
+        int EstimateFrameCount { get; set; }
+
+        int WritedFrameCount { get; set; }
+
+        double FrameRate { get; set; }
+
+        float[] CurrentAudio { get; set; } = [];
+
         public void SetupAccelerator(IAcceleratorObject accelerator)
         {
             AcceleratorObject = accelerator;
@@ -154,11 +162,13 @@ namespace NiVE3.PresetPlugin.Output
 
             if (outputSources.HasFlag(SourceType.Video) && size.HasValue)
             {
+                EstimateFrameCount = (int)Math.Ceiling((double)duration * frameRate);
+                FrameRate = frameRate;
                 var bpc = ((OutputChannel)Setting.OutputChannel).ToBitsPerPixel();
 
                 if (!string.IsNullOrEmpty(Setting.Codec))
                 {
-                    Encoder = new CompressedVideoEncoder(size.Value.Width, size.Value.Height, bpc, Setting.Codec, (int)Math.Ceiling((double)duration * frameRate), (int)frameRate)
+                    Encoder = new CompressedVideoEncoder(size.Value.Width, size.Value.Height, bpc, Setting.Codec, EstimateFrameCount, (int)frameRate)
                     {
                         Quality = Setting.Quality,
                         KeyFrameRate = Setting.UseKeyFrameRate ? Setting.KeyFrameRate : 0,
@@ -179,6 +189,11 @@ namespace NiVE3.PresetPlugin.Output
                 }
                 VideoStream = Writer.AddEncodingVideoStream(Encoder, true, size.Value.Width, size.Value.Height);
             }
+            else
+            {
+                EstimateFrameCount = 0;
+                FrameRate = 0.0;
+            }
 
             if (outputSources.HasFlag(SourceType.Audio))
             {
@@ -191,6 +206,9 @@ namespace NiVE3.PresetPlugin.Output
                     AudioStream = Writer.AddAudioStream(2, Setting.AudioSamplingRate, Setting.AudioBitsPerSample);
                 }
             }
+
+            WritedFrameCount = 0;
+            CurrentAudio = [];
         }
 
         public void EndOutput()
@@ -198,6 +216,22 @@ namespace NiVE3.PresetPlugin.Output
             if (Writer == null)
             {
                 throw new InvalidOperationException();
+            }
+
+            if (CurrentAudio.Length > 0)
+            {
+                if (EstimateFrameCount < 1) // 音声のみ
+                {
+                    WriteAudio(0, CurrentAudio.Length);
+                }
+                else if (WritedFrameCount == EstimateFrameCount) // 余りの音声の出力
+                {
+                    var offsetAudioSample = (int)(WritedFrameCount / FrameRate * Const.AudioSamplingRate) * Const.AudioChannelCount;
+                    if (offsetAudioSample < CurrentAudio.Length)
+                    {
+                        WriteAudio(offsetAudioSample, CurrentAudio.Length - offsetAudioSample);
+                    }
+                }
             }
 
             Writer.Close();
@@ -294,6 +328,15 @@ namespace NiVE3.PresetPlugin.Output
                     managedImage.Dispose();
                 }
             }
+
+            if (CurrentAudio.Length > 0)
+            {
+                var offsetAudioSample = (int)(WritedFrameCount / FrameRate * Const.AudioSamplingRate) * Const.AudioChannelCount;
+                var sampleCount = ((int)((WritedFrameCount + 1) / FrameRate * Const.AudioSamplingRate) * Const.AudioChannelCount - offsetAudioSample);
+                WriteAudio(offsetAudioSample, sampleCount);
+            }
+
+            WritedFrameCount++;
         }
 
         public void ProcessAudio(float[] audio)
@@ -303,8 +346,17 @@ namespace NiVE3.PresetPlugin.Output
                 throw new InvalidOperationException();
             }
 
-            audio = AudioConverter.ConvertSamplingRate(audio, BaseAudioSamplingRate, AudioStream.SamplesPerSecond, Const.AudioChannelCount);
+            CurrentAudio = AudioConverter.ConvertSamplingRate(audio, BaseAudioSamplingRate, AudioStream.SamplesPerSecond, Const.AudioChannelCount);
+        }
 
+        void WriteAudio(int offset, int count)
+        {
+            if (AudioStream == null)
+            {
+                return;
+            }
+
+            var audio = CurrentAudio.AsSpan(offset, count);
             switch (AudioStream.BitsPerSample)
             {
                 case 8:
