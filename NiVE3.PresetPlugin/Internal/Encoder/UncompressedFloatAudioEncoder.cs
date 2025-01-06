@@ -19,9 +19,9 @@ namespace NiVE3.PresetPlugin.Internal.Encoder
 
         public int BytesPerSecond => SamplesPerSecond * Granularity;
 
-        public int Granularity => 8; // 4byte * 2ch
+        public int Granularity => sizeof(float) * ChannelCount;
 
-        public byte[] FormatSpecificData => [];
+        public byte[]? FormatSpecificData => null;
 
         public UncompressedFloatAudioEncoder(int samplingRate)
         {
@@ -36,7 +36,7 @@ namespace NiVE3.PresetPlugin.Internal.Encoder
         public int EncodeBlock(ReadOnlySpan<byte> source, Span<byte> destination)
         {
             source.CopyTo(destination);
-            return destination.Length;
+            return source.Length;
         }
 
         public int Flush(byte[] destination, int destinationOffset)
