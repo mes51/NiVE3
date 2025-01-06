@@ -10,6 +10,8 @@ using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using ComputeSharp;
+using ComputeSharp.Resources;
 using NiVE3.Image;
 using NiVE3.Image.Drawing;
 using NiVE3.Numerics;
@@ -27,7 +29,7 @@ using NiVE3.Shared.Extension;
 namespace NiVE3.PresetPlugin.Input
 {
     [Export(typeof(IInput))]
-    [InputMetadata(typeof(DirectShowInput), "DirectShowInput", "", "mes51", ID, "*.avi", true)]
+    [InputMetadata(typeof(DirectShowInput), "DirectShowInput", "", "mes51", ID, "*.avi", true, IsSupportLoadToGpu = true)]
     public sealed class DirectShowInput : IInput
     {
         const string ID = "BE18C71D-A752-4814-807A-2DD97D7656C3";
@@ -40,13 +42,18 @@ namespace NiVE3.PresetPlugin.Input
 
         VideoAlphaType VideoAlphaType { get; set; } = VideoAlphaType.Ignore;
 
-        public void SetupAccelerator(IAcceleratorObject accelerator) { }
+        IAcceleratorObject? AcceleratorObject { get; set; }
+
+        public void SetupAccelerator(IAcceleratorObject accelerator)
+        {
+            AcceleratorObject = accelerator;
+        }
 
         public FootageSourceGroup GetGroup()
         {
             if (VideoReader?.IsLoaded ?? false)
             {
-                return new FootageSourceGroup([new DirectShowVideoFootageSource(VideoReader, (AudioReader?.IsLoaded ?? false) ? AudioReader : null, VideoAlphaType)]);
+                return new FootageSourceGroup([new DirectShowVideoFootageSource(VideoReader, (AudioReader?.IsLoaded ?? false) ? AudioReader : null, VideoAlphaType, AcceleratorObject)]);
             }
             else if (AudioReader?.IsLoaded ?? false)
             {
@@ -161,20 +168,14 @@ namespace NiVE3.PresetPlugin.Input
 
         VideoAlphaType VideoAlphaType { get; }
 
-        int ChannelDataLength { get; }
+        IAcceleratorObject? AcceleratorObject { get; }
 
-        int BufferLineLength { get; }
-
-        int VectorAlignedBufferLineLength { get; }
-
-        public DirectShowVideoFootageSource(DirectShowVideoReader videoReader, DirectShowAudioReader? audioReader,  VideoAlphaType videoAlphaType)
+        public DirectShowVideoFootageSource(DirectShowVideoReader videoReader, DirectShowAudioReader? audioReader,  VideoAlphaType videoAlphaType, IAcceleratorObject? acceleratorObject)
         {
             VideoReader = videoReader;
             AudioReader = audioReader;
             VideoAlphaType = videoAlphaType;
-            ChannelDataLength = VideoReader.Width * VideoReader.Height;
-            BufferLineLength = VideoReader.Width * (VideoReader.OutputIs32bpc ? 4 : 3);
-            VectorAlignedBufferLineLength = (BufferLineLength / Vector<byte>.Count) * Vector<byte>.Count;
+            AcceleratorObject = acceleratorObject;
         }
 
         public float[] ReadAudio(Time time, Time length)
@@ -190,42 +191,56 @@ namespace NiVE3.PresetPlugin.Input
 
         public NImage ReadFrame(Time time, double downSamplingRate, bool toGpu)
         {
-            var result = new NManagedImage(Width, Height);
+            var ppb = (VideoReader.PossibilityArgb || VideoReader.OutputIs32bpc) ? 4 : 3;
+            var videoAlphaType = VideoReader.PossibilityArgb ? VideoAlphaType : VideoAlphaType.Straight;
+            if (toGpu && AcceleratorObject != null)
+            {
+                return ProcessGpu(AcceleratorObject.CurrentDevice, VideoReader.GetImage((double)time), Width, Height, videoAlphaType, ppb, downSamplingRate);
+            }
+            else
+            {
+                return ProcessCpu(VideoReader.GetImage((double)time), Width, Height, videoAlphaType, ppb, downSamplingRate);
+            }
+        }
 
-            var buffer = VideoReader.GetImage((double)time);
-            var width = Width;
-            var height = Height;
+        static NManagedImage ProcessCpu(byte[] buffer, int width, int height, VideoAlphaType videoAlphaType, int ppb, double downSamplingRate)
+        {
+            var result = new NManagedImage(width, height);
+
+            var channelDataLength = width * height;
             var imageData = result.Data;
-            if (buffer.Length / ChannelDataLength < (VideoReader.OutputIs32bpc ? 4 : 3))
+            if (buffer.Length / channelDataLength < ppb)
             {
                 return result;
             }
 
+            var bufferLineLength = width * ppb;
+            var vectorAlignedBufferLineLength = (bufferLineLength / Vector<byte>.Count) * Vector<byte>.Count;
             Parallel.For(0, height / 2, y =>
             {
-                var topBufferSpan = buffer.AsSpan(y * BufferLineLength, BufferLineLength);
-                var bottomBufferSpan = buffer.AsSpan((height - y) * BufferLineLength, BufferLineLength);
+                var topBufferSpan = buffer.AsSpan(y * bufferLineLength, bufferLineLength);
+                var bottomBufferSpan = buffer.AsSpan((height - y - 1) * bufferLineLength, bufferLineLength);
 
-                var vectorTopBufferSpan = MemoryMarshal.Cast<byte, Vector<byte>>(topBufferSpan[..VectorAlignedBufferLineLength]);
-                var vectorBottomBufferSpan = MemoryMarshal.Cast<byte, Vector<byte>>(bottomBufferSpan[..VectorAlignedBufferLineLength]);
+                var vectorTopBufferSpan = MemoryMarshal.Cast<byte, Vector<byte>>(topBufferSpan[..vectorAlignedBufferLineLength]);
+                var vectorBottomBufferSpan = MemoryMarshal.Cast<byte, Vector<byte>>(bottomBufferSpan[..vectorAlignedBufferLineLength]);
                 for (var i = 0; i < vectorTopBufferSpan.Length; i++)
                 {
                     (vectorTopBufferSpan[i], vectorBottomBufferSpan[i]) = (vectorBottomBufferSpan[i], vectorTopBufferSpan[i]);
                 }
-                for (var i = VectorAlignedBufferLineLength; i < topBufferSpan.Length; i++)
+                for (var i = vectorAlignedBufferLineLength; i < topBufferSpan.Length; i++)
                 {
                     (topBufferSpan[i], bottomBufferSpan[i]) = (bottomBufferSpan[i], topBufferSpan[i]);
                 }
             });
 
-            if (VideoReader.PossibilityArgb)
+            if (ppb == 4)
             {
-                switch (VideoAlphaType)
+                switch (videoAlphaType)
                 {
                     case VideoAlphaType.PreMultiply:
                         Parallel.For(0, height, y =>
                         {
-                            var bufferSpan = buffer.AsSpan(y * BufferLineLength, BufferLineLength);
+                            var bufferSpan = buffer.AsSpan(y * bufferLineLength, bufferLineLength);
                             var intBufferSpan = MemoryMarshal.Cast<byte, int>(bufferSpan);
                             var imageDataSpan = imageData.AsSpan(y * width, width);
                             for (int x = 0, bi = 3; x < imageDataSpan.Length; x++, bi += 4)
@@ -250,7 +265,7 @@ namespace NiVE3.PresetPlugin.Input
                     case VideoAlphaType.Ignore:
                         Parallel.For(0, height, y =>
                         {
-                            var bufferSpan = buffer.AsSpan(y * BufferLineLength, BufferLineLength);
+                            var bufferSpan = buffer.AsSpan(y * bufferLineLength, bufferLineLength);
                             var imageDataSpan = imageData.AsSpan(y * width, width);
                             for (int x = 0, bi = 0; x < imageDataSpan.Length; x++, bi += 4)
                             {
@@ -265,28 +280,75 @@ namespace NiVE3.PresetPlugin.Input
             }
             else
             {
-                if (VideoReader.OutputIs32bpc)
+                Parallel.For(0, height, y =>
                 {
-                    ImageConversion.ConvertToBGRA128(buffer, imageData, result.DataLength);
+                    var bufferSpan = buffer.AsSpan(y * width * 3, width * 3);
+                    var imageDataSpan = imageData.AsSpan(y * width, width);
+                    for (int x = 0, bi = 0; x < imageDataSpan.Length; x++, bi += 3)
+                    {
+                        imageDataSpan[x] = new Vector4(bufferSpan[bi], bufferSpan[bi + 1], bufferSpan[bi + 2], 255.0F) * ByteToFloat;
+                    }
+                });
+            }
+
+            if (downSamplingRate != 1.0)
+            {
+                var resizedResult = new NManagedImage((int)(width / downSamplingRate), (int)(height / downSamplingRate));
+                var renderer = new CPURenderer2D(resizedResult);
+                renderer.DrawSingleImage(new Int32Point(), result, 1.0F, Matrix3x3.CreateScale((float)(1.0 / downSamplingRate), (float)(1.0 / downSamplingRate)), ImageInterpolationQuality.Level2, BlendMode.Replace, null);
+                result.Dispose();
+                result = resizedResult;
+            }
+
+            return result;
+        }
+
+        static NGPUImage ProcessGpu(GraphicsDevice device, byte[] buffer, int width, int height, VideoAlphaType videoAlphaType, int ppb, double downSamplingRate)
+        {
+            var result = new NGPUImage(width, height, device);
+            if (buffer.Length / (width * height) < ppb)
+            {
+                return result;
+            }
+
+            using var sourceBuffer = device.AllocateReadOnlyBuffer<int>((int)Math.Ceiling(buffer.Length / 4.0));
+            if (ppb == 4)
+            {
+                sourceBuffer.CopyFrom(MemoryMarshal.Cast<byte, int>(buffer));
+            }
+            else
+            {
+                using var sourceUploadBuffer = device.AllocateUploadBuffer<int>(sourceBuffer.Length);
+                buffer.AsSpan().CopyTo(MemoryMarshal.Cast<int, byte>(sourceUploadBuffer.Span));
+                sourceBuffer.CopyFrom(sourceUploadBuffer);
+            }
+            using (var context = device.CreateComputeContext())
+            {
+                if (ppb == 4)
+                {
+                    switch (videoAlphaType)
+                    {
+                        case VideoAlphaType.PreMultiply:
+                            context.For(width, height, new DirectShowInputFlipPreMultiplyAlpha(sourceBuffer, result.Data, width, height));
+                            break;
+                        case VideoAlphaType.Ignore:
+                            context.For(width, height, new DirectShowInputFlipIgnoreAlpha(sourceBuffer, result.Data, width, height));
+                            break;
+                        default:
+                            context.For(width, height, new DirectShowInputFlipStraightAlpha(sourceBuffer, result.Data, width, height));
+                            break;
+                    }
                 }
                 else
                 {
-                    Parallel.For(0, height, y =>
-                    {
-                        var bufferSpan = buffer.AsSpan(y * width * 3, width * 3);
-                        var imageDataSpan = imageData.AsSpan(y * width, width);
-                        for (int x = 0, bi = 0; x < imageDataSpan.Length; x++, bi += 3)
-                        {
-                            imageDataSpan[x] = new Vector4(bufferSpan[bi], bufferSpan[bi + 1], bufferSpan[bi + 2], 255.0F) * ByteToFloat;
-                        }
-                    });
+                    context.For(width, height, new DirectShowInputFlipAndConverFrom24Bpc(sourceBuffer, result.Data, width, height));
                 }
             }
 
             if (downSamplingRate != 1.0)
             {
-                var resizedResult = new NManagedImage((int)(Width / downSamplingRate), (int)(Height / downSamplingRate));
-                var renderer = new CPURenderer2D(resizedResult);
+                var resizedResult = new NGPUImage((int)(width / downSamplingRate), (int)(height / downSamplingRate), device);
+                var renderer = new GPURenderer2D(resizedResult, device);
                 renderer.DrawSingleImage(new Int32Point(), result, 1.0F, Matrix3x3.CreateScale((float)(1.0 / downSamplingRate), (float)(1.0 / downSamplingRate)), ImageInterpolationQuality.Level2, BlendMode.Replace, null);
                 result.Dispose();
                 result = resizedResult;
@@ -341,5 +403,138 @@ namespace NiVE3.PresetPlugin.Input
     file class DirectShowInputData
     {
         public VideoAlphaType VideoAlphaType { get; set; }
+    }
+
+    [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
+    [GeneratedComputeShaderDescriptor]
+    readonly partial struct DirectShowInputFlipAndConverFrom24Bpc(ReadOnlyBuffer<int> src, ReadWriteBuffer<Float4> dst, int width, int height) : IComputeShader
+    {
+        public void Execute()
+        {
+            var srcBytePos = (ThreadIds.Y * width + ThreadIds.X) * 3;
+            var srcPos = srcBytePos / 4;
+            var dstPos = (height - ThreadIds.Y - 1) * width + ThreadIds.X;
+
+            switch (dstPos % 4)
+            {
+                case 1:
+                    {
+                        var srcPixel1 = src[srcPos];
+                        var srcPixel2 = src[srcPos + 1];
+                        dst[dstPos] = new Float4(
+                            (srcPixel1 >> 24) & 0xFF,
+                            srcPixel2 & 0xFF,
+                            (srcPixel2 >> 8) & 0xFF,
+                            255.0F
+                        ) / 255.0F;
+                    }
+                    break;
+                case 2:
+                    {
+                        var srcPixel1 = src[srcPos];
+                        var srcPixel2 = src[srcPos + 1];
+                        dst[dstPos] = new Float4(
+                            (srcPixel1 >> 16) & 0xFF,
+                            (srcPixel1 >> 24) & 0xFF,
+                            srcPixel2 & 0xFF,
+                            255.0F
+                        ) / 255.0F;
+                    }
+                    break;
+                case 3:
+                    {
+                        var srcPixel1 = src[srcPos];
+                        dst[dstPos] = new Float4(
+                            (srcPixel1 >> 8) & 0xFF,
+                            (srcPixel1 >> 16) & 0xFF,
+                            (srcPixel1 >> 24) & 0xFF,
+                            255.0F
+                        ) / 255.0F;
+                    }
+                    break;
+                default:
+                    {
+                        var srcPixel = src[srcPos];
+                        dst[dstPos] = new Float4(
+                            srcPixel & 0xFF,
+                            (srcPixel >> 8) & 0xFF,
+                            (srcPixel >> 16) & 0xFF,
+                            255.0F
+                        ) / 255.0F;
+                    }
+                    break;
+            }
+        }
+    }
+
+    [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
+    [GeneratedComputeShaderDescriptor]
+    readonly partial struct DirectShowInputFlipIgnoreAlpha(ReadOnlyBuffer<int> src, ReadWriteBuffer<Float4> dst, int width, int height) : IComputeShader
+    {
+        public void Execute()
+        {
+            var srcPos = ThreadIds.Y * width + ThreadIds.X;
+            var dstPos = (height - ThreadIds.Y - 1) * width + ThreadIds.X;
+
+            var srcPixel = src[srcPos];
+            dst[dstPos] = new Float4(
+                srcPixel & 0xFF,
+                (srcPixel >> 8) & 0xFF,
+                (srcPixel >> 16) & 0xFF,
+                255.0F
+            ) / 255.0F;
+        }
+    }
+
+    [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
+    [GeneratedComputeShaderDescriptor]
+    readonly partial struct DirectShowInputFlipPreMultiplyAlpha(ReadOnlyBuffer<int> src, ReadWriteBuffer<Float4> dst, int width, int height) : IComputeShader
+    {
+        public void Execute()
+        {
+            var srcPos = ThreadIds.Y * width + ThreadIds.X;
+            var dstPos = (height - ThreadIds.Y - 1) * width + ThreadIds.X;
+
+            var srcPixel = src[srcPos];
+            var dstColor = new Float4(
+                srcPixel & 0xFF,
+                (srcPixel >> 8) & 0xFF,
+                (srcPixel >> 16) & 0xFF,
+                (srcPixel >> 24) & 0xFF
+            ) / 255.0F;
+            if (dstColor.W > 0.0F)
+            {
+                dstColor.XYZ /= dstColor.W;
+            }
+            else
+            {
+                dstColor = Const.EmptyPixelFloat4;
+            }
+            dst[dstPos] = dstColor;
+        }
+    }
+
+    [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
+    [GeneratedComputeShaderDescriptor]
+    readonly partial struct DirectShowInputFlipStraightAlpha(ReadOnlyBuffer<int> src, ReadWriteBuffer<Float4> dst, int width, int height) : IComputeShader
+    {
+        public void Execute()
+        {
+            var srcPos = ThreadIds.Y * width + ThreadIds.X;
+            var dstPos = (height - ThreadIds.Y - 1) * width + ThreadIds.X;
+
+            var srcPixel = src[srcPos];
+            var dstColor = new Float4(
+                srcPixel & 0xFF,
+                (srcPixel >> 8) & 0xFF,
+                (srcPixel >> 16) & 0xFF,
+                (srcPixel >> 24) & 0xFF
+            ) / 255.0F;
+            if (dstColor.W <= 0.0F)
+            {
+                dstColor = Const.EmptyPixelFloat4;
+            }
+            dst[dstPos] = dstColor;
+        }
     }
 }
