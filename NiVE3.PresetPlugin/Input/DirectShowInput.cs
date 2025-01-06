@@ -60,16 +60,28 @@ namespace NiVE3.PresetPlugin.Input
 
         public bool Load(string filePath)
         {
-            VideoReader = new DirectShowVideoReader(filePath);
-            AudioReader = new DirectShowAudioReader(filePath, false);
-            if (!AudioReader.IsLoaded && Path.GetExtension(filePath) == ".wav")
+            if (Path.GetExtension(filePath) == ".wav")
             {
-                AudioReader.Dispose();
-                AudioReader = new DirectShowAudioReader(filePath, true);
+                AudioReader = new DirectShowAudioReader(filePath, true, false);
+                if (!AudioReader.IsLoaded)
+                {
+                    AudioReader.Dispose();
+                    AudioReader = new DirectShowAudioReader(filePath, true, true);
+                }
+            }
+            else
+            {
+                VideoReader = new DirectShowVideoReader(filePath);
+                AudioReader = new DirectShowAudioReader(filePath, false, false);
+                if (!AudioReader.IsLoaded)
+                {
+                    AudioReader.Dispose();
+                    AudioReader = new DirectShowAudioReader(filePath, false, true);
+                }
             }
             FilePath = filePath;
 
-            return VideoReader.IsLoaded || AudioReader.IsLoaded;
+            return (VideoReader?.IsLoaded ?? false) || (AudioReader?.IsLoaded ?? false);
         }
 
         public object? SaveSetting()

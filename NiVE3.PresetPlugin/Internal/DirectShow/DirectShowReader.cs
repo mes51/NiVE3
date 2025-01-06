@@ -43,7 +43,7 @@ namespace NiVE3.PresetPlugin.Internal.DirectShow
 
         protected IMediaControl MediaControl => (IMediaControl)GraphBuilder;
 
-        protected DirectShowReaderBase(bool withoutAudioMediaType)
+        protected DirectShowReaderBase(bool withoutAudioMediaType, bool audioSubTypeIsFloat)
         {
             GraphBuilder = (IGraphBuilder)new FilterGraph();
             VideoSampleGrabber = (ISampleGrabber)new SampleGrabber();
@@ -65,7 +65,7 @@ namespace NiVE3.PresetPlugin.Internal.DirectShow
                 mediaType = new PAMMediaType
                 {
                     majortype = MediaType.Audio,
-                    subtype = MediaSubType.PCM,
+                    subtype = audioSubTypeIsFloat ? MediaSubType.IEEEFloat : MediaSubType.PCM,
                     formattype = Format.WaveFormatEx
                 };
 
@@ -354,7 +354,7 @@ namespace NiVE3.PresetPlugin.Internal.DirectShow
 
         IBaseFilter AviDecoder { get; }
 
-        public DirectShowVideoReader(string filePath) : base(false)
+        public DirectShowVideoReader(string filePath) : base(false, false)
         {
             AviDecoder = (IBaseFilter)new AviDecoder();
 
@@ -571,7 +571,7 @@ namespace NiVE3.PresetPlugin.Internal.DirectShow
 
         public int BlockSize { get; }
 
-        public DirectShowAudioReader(string filePath, bool withoutMediaType) : base(withoutMediaType)
+        public DirectShowAudioReader(string filePath, bool withoutMediaType, bool audioSubTypeIsFloat) : base(withoutMediaType, audioSubTypeIsFloat)
         {
             try
             {
