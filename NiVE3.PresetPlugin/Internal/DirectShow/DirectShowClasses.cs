@@ -724,9 +724,10 @@ namespace NiVE3.PresetPlugin.Internal.DirectShow
                     var offset = (int)((TargetSamplingTime - SampleTime) * SamplingRate) * BlockSize;
                     if (offset < BufferLen)
                     {
-                        var data = pool.Rent(BufferLen - offset);
-                        Marshal.Copy(pBuffer + offset, data, 0, BufferLen - offset);
-                        AudioDataList.AddRange(data);
+                        var length = BufferLen - offset;
+                        var data = pool.Rent(length);
+                        Marshal.Copy(pBuffer + offset, data, 0, length);
+                        AudioDataList.AddRange(data.AsSpan(0, length));
                         pool.Return(data);
                     }
                 }
@@ -741,9 +742,10 @@ namespace NiVE3.PresetPlugin.Internal.DirectShow
                     var trim = (int)(Math.Max((SampleTime + BufferLen / BlockSize / (double)SamplingRate) - TargetSamplingTime - NeedLength, 0.0) * SamplingRate) * BlockSize;
                     if (trim < BufferLen)
                     {
-                        var data = pool.Rent(BufferLen - trim);
-                        Marshal.Copy(pBuffer, data, 0, BufferLen - trim);
-                        AudioDataList.AddRange(data.AsSpan(0, BufferLen - trim));
+                        var length = BufferLen - trim;
+                        var data = pool.Rent(length);
+                        Marshal.Copy(pBuffer, data, 0, length);
+                        AudioDataList.AddRange(data.AsSpan(0, length));
                         pool.Return(data);
                     }
 
