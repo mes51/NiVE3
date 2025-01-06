@@ -1136,7 +1136,7 @@ namespace NiVE3.Test.Plugin.ValueObject
 
                 Assert.That(actual.IsFrameTime, Is.True);
                 Assert.That(actual.FrameRateIsInteger, Is.True);
-                Assert.That(actual.Frame, Is.EqualTo(2));
+                Assert.That(actual.Frame, Is.EqualTo(60));
                 Assert.That(actual.FrameRate, Is.EqualTo(FrameRate));
             });
         }

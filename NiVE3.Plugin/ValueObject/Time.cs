@@ -1284,7 +1284,7 @@ namespace NiVE3.Plugin.ValueObject
                     var newFrame = Math.DivRem(a.Frame, b.Frame, out var reminder);
                     if (reminder == 0)
                     {
-                        return new Time(newFrame, a.FrameRate);
+                        return new Time(newFrame * (int)a.FrameRate, a.FrameRate);
                     }
                     else
                     {
