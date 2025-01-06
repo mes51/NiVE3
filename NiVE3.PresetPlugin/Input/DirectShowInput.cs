@@ -191,7 +191,7 @@ namespace NiVE3.PresetPlugin.Input
 
         public NImage ReadFrame(Time time, double downSamplingRate, bool toGpu)
         {
-            var ppb = (VideoReader.PossibilityArgb || VideoReader.OutputIs32bpc) ? 4 : 3;
+            var ppb = VideoReader.BitsPerPixel / 8;
             var videoAlphaType = VideoReader.PossibilityArgb ? VideoAlphaType : VideoAlphaType.Straight;
             if (toGpu && AcceleratorObject != null)
             {
@@ -203,23 +203,22 @@ namespace NiVE3.PresetPlugin.Input
             }
         }
 
-        static NManagedImage ProcessCpu(byte[] buffer, int width, int height, VideoAlphaType videoAlphaType, int ppb, double downSamplingRate)
+        static NManagedImage ProcessCpu(byte[] buffer, int width, int height, VideoAlphaType videoAlphaType, int bytesPerPixel, double downSamplingRate)
         {
             var result = new NManagedImage(width, height);
 
-            var channelDataLength = width * height;
+            var srcStride = (int)Math.Ceiling(width * bytesPerPixel / 4.0) * 4;
             var imageData = result.Data;
-            if (buffer.Length / channelDataLength < ppb)
+            if (buffer.Length < srcStride * height)
             {
                 return result;
             }
 
-            var bufferLineLength = width * ppb;
-            var vectorAlignedBufferLineLength = (bufferLineLength / Vector<byte>.Count) * Vector<byte>.Count;
+            var vectorAlignedBufferLineLength = (srcStride / Vector<byte>.Count) * Vector<byte>.Count;
             Parallel.For(0, height / 2, y =>
             {
-                var topBufferSpan = buffer.AsSpan(y * bufferLineLength, bufferLineLength);
-                var bottomBufferSpan = buffer.AsSpan((height - y - 1) * bufferLineLength, bufferLineLength);
+                var topBufferSpan = buffer.AsSpan(y * srcStride, srcStride);
+                var bottomBufferSpan = buffer.AsSpan((height - y - 1) * srcStride, srcStride);
 
                 var vectorTopBufferSpan = MemoryMarshal.Cast<byte, Vector<byte>>(topBufferSpan[..vectorAlignedBufferLineLength]);
                 var vectorBottomBufferSpan = MemoryMarshal.Cast<byte, Vector<byte>>(bottomBufferSpan[..vectorAlignedBufferLineLength]);
@@ -233,14 +232,14 @@ namespace NiVE3.PresetPlugin.Input
                 }
             });
 
-            if (ppb == 4)
+            if (bytesPerPixel == 4)
             {
                 switch (videoAlphaType)
                 {
                     case VideoAlphaType.PreMultiply:
                         Parallel.For(0, height, y =>
                         {
-                            var bufferSpan = buffer.AsSpan(y * bufferLineLength, bufferLineLength);
+                            var bufferSpan = buffer.AsSpan(y * srcStride, srcStride);
                             var intBufferSpan = MemoryMarshal.Cast<byte, int>(bufferSpan);
                             var imageDataSpan = imageData.AsSpan(y * width, width);
                             for (int x = 0, bi = 3; x < imageDataSpan.Length; x++, bi += 4)
@@ -265,7 +264,7 @@ namespace NiVE3.PresetPlugin.Input
                     case VideoAlphaType.Ignore:
                         Parallel.For(0, height, y =>
                         {
-                            var bufferSpan = buffer.AsSpan(y * bufferLineLength, bufferLineLength);
+                            var bufferSpan = buffer.AsSpan(y * srcStride, srcStride);
                             var imageDataSpan = imageData.AsSpan(y * width, width);
                             for (int x = 0, bi = 0; x < imageDataSpan.Length; x++, bi += 4)
                             {
@@ -282,7 +281,7 @@ namespace NiVE3.PresetPlugin.Input
             {
                 Parallel.For(0, height, y =>
                 {
-                    var bufferSpan = buffer.AsSpan(y * width * 3, width * 3);
+                    var bufferSpan = buffer.AsSpan(y * srcStride, srcStride);
                     var imageDataSpan = imageData.AsSpan(y * width, width);
                     for (int x = 0, bi = 0; x < imageDataSpan.Length; x++, bi += 3)
                     {
@@ -303,28 +302,20 @@ namespace NiVE3.PresetPlugin.Input
             return result;
         }
 
-        static NGPUImage ProcessGpu(GraphicsDevice device, byte[] buffer, int width, int height, VideoAlphaType videoAlphaType, int ppb, double downSamplingRate)
+        static NGPUImage ProcessGpu(GraphicsDevice device, byte[] buffer, int width, int height, VideoAlphaType videoAlphaType, int bytesPerPixel, double downSamplingRate)
         {
             var result = new NGPUImage(width, height, device);
-            if (buffer.Length / (width * height) < ppb)
+            var srcStride = (int)Math.Ceiling(width * bytesPerPixel / 4.0) * 4;
+            if (buffer.Length < srcStride * height)
             {
                 return result;
             }
 
-            using var sourceBuffer = device.AllocateReadOnlyBuffer<int>((int)Math.Ceiling(buffer.Length / 4.0));
-            if (ppb == 4)
-            {
-                sourceBuffer.CopyFrom(MemoryMarshal.Cast<byte, int>(buffer));
-            }
-            else
-            {
-                using var sourceUploadBuffer = device.AllocateUploadBuffer<int>(sourceBuffer.Length);
-                buffer.AsSpan().CopyTo(MemoryMarshal.Cast<int, byte>(sourceUploadBuffer.Span));
-                sourceBuffer.CopyFrom(sourceUploadBuffer);
-            }
+            using var sourceBuffer = device.AllocateReadOnlyBuffer<int>(srcStride * height);
+            sourceBuffer.CopyFrom(MemoryMarshal.Cast<byte, int>(buffer));
             using (var context = device.CreateComputeContext())
             {
-                if (ppb == 4)
+                if (bytesPerPixel == 4)
                 {
                     switch (videoAlphaType)
                     {
@@ -341,7 +332,7 @@ namespace NiVE3.PresetPlugin.Input
                 }
                 else
                 {
-                    context.For(width, height, new DirectShowInputFlipAndConverFrom24Bpc(sourceBuffer, result.Data, width, height));
+                    context.For(width, height, new DirectShowInputFlipAndConverFrom24Bpc(sourceBuffer, result.Data, width, height, srcStride / 4));
                 }
             }
 
@@ -407,15 +398,14 @@ namespace NiVE3.PresetPlugin.Input
 
     [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
     [GeneratedComputeShaderDescriptor]
-    readonly partial struct DirectShowInputFlipAndConverFrom24Bpc(ReadOnlyBuffer<int> src, ReadWriteBuffer<Float4> dst, int width, int height) : IComputeShader
+    readonly partial struct DirectShowInputFlipAndConverFrom24Bpc(ReadOnlyBuffer<int> src, ReadWriteBuffer<Float4> dst, int width, int height, int srcStride) : IComputeShader
     {
         public void Execute()
         {
-            var srcBytePos = (ThreadIds.Y * width + ThreadIds.X) * 3;
-            var srcPos = srcBytePos / 4;
+            var srcPos = ThreadIds.Y * srcStride + (ThreadIds.X * 3 / 4);
             var dstPos = (height - ThreadIds.Y - 1) * width + ThreadIds.X;
 
-            switch (dstPos % 4)
+            switch (ThreadIds.X % 4)
             {
                 case 1:
                     {

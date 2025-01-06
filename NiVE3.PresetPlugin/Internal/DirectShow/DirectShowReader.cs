@@ -346,7 +346,7 @@ namespace NiVE3.PresetPlugin.Internal.DirectShow
 
         public bool PossibilityArgb { get; }
 
-        public bool OutputIs32bpc { get; }
+        public int BitsPerPixel { get; }
 
         public int Width { get; }
 
@@ -428,7 +428,7 @@ namespace NiVE3.PresetPlugin.Internal.DirectShow
                             {
                                 if (grabberMediaType.formattype == Format.VideoInfo && grabberMediaType.pbFormat != nint.Zero)
                                 {
-                                    OutputIs32bpc = Marshal.PtrToStructure<VIDEOINFOHEADER>(grabberMediaType.pbFormat).bmiHeader.biBitCount == 32;
+                                    BitsPerPixel = Marshal.PtrToStructure<VIDEOINFOHEADER>(grabberMediaType.pbFormat).bmiHeader.biBitCount;
                                 }
                             }
                             Marshal.ReleaseComObject(pin);
@@ -447,8 +447,8 @@ namespace NiVE3.PresetPlugin.Internal.DirectShow
                                 {
                                     if (grabberMediaType.formattype == Format.VideoInfo && grabberMediaType.pbFormat != nint.Zero)
                                     {
-                                        PossibilityArgb = Marshal.PtrToStructure<VIDEOINFOHEADER>(grabberMediaType.pbFormat).bmiHeader.biBitCount == 32;
-                                        OutputIs32bpc = PossibilityArgb;
+                                        BitsPerPixel = Marshal.PtrToStructure<VIDEOINFOHEADER>(grabberMediaType.pbFormat).bmiHeader.biBitCount;
+                                        PossibilityArgb = BitsPerPixel == 32;
                                     }
                                 }
                                 Marshal.ReleaseComObject(pin);
@@ -459,6 +459,11 @@ namespace NiVE3.PresetPlugin.Internal.DirectShow
                             Marshal.ReleaseComObject(decoderInputFilter);
                         }
                     }
+                }
+
+                if (BitsPerPixel == 0)
+                {
+                    return;
                 }
 
                 hr = RemoveConnectedFilter(GraphBuilder, (IBaseFilter)AudioSampleGrabber, PinDirection.Output);
