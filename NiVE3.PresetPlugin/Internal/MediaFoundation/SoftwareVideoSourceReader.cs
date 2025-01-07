@@ -52,20 +52,17 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
             }
         }
 
-        /// <summary>
-        /// フレームの読み出し
-        /// </summary>
-        /// <param name="time">読み込む時間</param>
-        /// <returns>ArrayPool<byte>.Sharedから借りたbyte[]</byte></returns>
-        public override byte[] GetFrame(double time)
+        public override bool GetFrame(double time, Span<byte> dst)
         {
             using var sample = ReadSample(time);
             if (sample == null)
             {
-                return [];
+                return false;
             }
 
-            return ConvertSampleToByteArray(sample);
+            ConvertSample(sample, dst);
+
+            return true;
         }
     }
 }

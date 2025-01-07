@@ -2,6 +2,7 @@
 using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -30,12 +31,7 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
 
         protected FormatInfo Format { get; set; }
 
-        /// <summary>
-        /// フレームの読み出し
-        /// </summary>
-        /// <param name="time">読み込む時間</param>
-        /// <returns>ArrayPool&gt;byte&lt;.Sharedから借りたbyte[]</byte></returns>
-        public abstract byte[] GetFrame(double time);
+        public abstract bool GetFrame(double time, Span<byte> dest);
 
         protected VideoSourceReaderBase(string filePath)
         {
@@ -132,28 +128,19 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
             return sample;
         }
 
-        /// <summary>
-        /// IMFSampleから画像を読み出す
-        /// </summary>
-        /// <param name="sample">読み出すフレームを保持するIMFSample</param>
-        /// <returns>ArrayPool&gt;byte&lt;.Sharedから借りたbyte[]</byte></returns>
-        protected byte[] ConvertSampleToByteArray(IMFSample sample)
+        protected unsafe void ConvertSample(IMFSample sample, Span<byte> dst)
         {
             var expectedLength = Format.Height * Format.Width * 4;
             using var buffer = sample.ConvertToContiguousBuffer();
-            var result = Array.Empty<byte>();
             buffer.Lock(out var ptr, out var _, out var length);
 
-            if (length >= expectedLength)
+            if (dst.Length > 0)
             {
-                var requestSize = Math.Min(length, expectedLength);
-                result = ArrayPool<byte>.Shared.Rent(requestSize);
-                Marshal.Copy(ptr, result, 0, requestSize);
+                var bufferSpan = new Span<byte>(ptr.ToPointer(), length);
+                bufferSpan[..Math.Min(dst.Length, length)].CopyTo(dst);
             }
 
             buffer.Unlock();
-
-            return result;
         }
 
         public virtual void Dispose()

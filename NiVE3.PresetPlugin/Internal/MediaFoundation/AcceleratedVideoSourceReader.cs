@@ -92,22 +92,17 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
             }
         }
 
-        /// <summary>
-        /// フレームの読み出し
-        /// </summary>
-        /// <param name="time">読み込む時間</param>
-        /// <returns>ArrayPool<byte>.Sharedから借りたbyte[]</byte></returns>
-        public override byte[] GetFrame(double time)
+        public override bool GetFrame(double time, Span<byte> dst)
         {
             if (Transform == null || Sample == null)
             {
-                return [];
+                return false;
             }
 
             using var sample = ReadSample(time);
             if (sample == null)
             {
-                return [];
+                return false;
             }
 
             Transform.ProcessInput(0, sample, 0);
@@ -115,7 +110,9 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
             Transform.ProcessOutput(ProcessOutputFlags.None, 1, ref dataBuffer, out _);
             Transform.ProcessMessage(TMessageType.MessageCommandFlush, 0);
 
-            return ConvertSampleToByteArray(Sample);
+            ConvertSample(Sample, dst);
+
+            return true;
         }
 
         void ConfigureTransform()
