@@ -405,6 +405,20 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("半径")]
         public const string Stylize_Vignette_Radius = nameof(Stylize_Vignette_Radius);
 
+        // Vignette
+
+        [DefaultValue("モザイク")]
+        public const string Stylize_Mosaic_Name = nameof(Stylize_Mosaic_Name);
+
+        [DefaultValue("画像にモザイクを掛けます")]
+        public const string Stylize_Mosaic_Description = nameof(Stylize_Mosaic_Description);
+
+        [LanguageKey, DefaultValue("水平ブロック数")]
+        public const string Stylize_Mosaic_HorizontalBlock = nameof(Stylize_Mosaic_HorizontalBlock);
+
+        [LanguageKey, DefaultValue("垂直ブロック数")]
+        public const string Stylize_Mosaic_VerticalBlock = nameof(Stylize_Mosaic_VerticalBlock);
+
         // Level
 
         [DefaultValue("レベル")]
