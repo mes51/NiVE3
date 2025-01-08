@@ -110,6 +110,7 @@ namespace NiVE3.Expression
                 case double:
                 case decimal:
                 case string:
+                case bool:
                 case DateTime:
                     return value;
                 case object?[] array:
