@@ -744,6 +744,20 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("移動量")]
         public const string Distortion_GlassDistortion_DisplacementAmount = nameof(Distortion_GlassDistortion_DisplacementAmount);
 
+        // Twist
+
+        [DefaultValue("渦")]
+        public const string Distortion_Twist_Name = nameof(Distortion_Twist_Name);
+
+        [DefaultValue("画像を中心点から回転させます")]
+        public const string Distortion_Twist_Description = nameof(Distortion_Twist_Description);
+
+        [LanguageKey, DefaultValue("回転")]
+        public const string Distortion_Twist_Angle = nameof(Distortion_Twist_Angle);
+
+        [LanguageKey, DefaultValue("中心点")]
+        public const string Distortion_Twist_Center = nameof(Distortion_Twist_Center);
+
         // Dynamics
 
         [DefaultValue("ダイナミクス")]
