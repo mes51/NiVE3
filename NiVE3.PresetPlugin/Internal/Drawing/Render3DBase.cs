@@ -20,6 +20,9 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
 {
     abstract class Renderer3DBase
     {
+        // TODO: ボリゴンの境目が見えたり、斜めの補間エラーが出たりしたら調整する
+        const double MaxTriangleEdgeLength = 0.25;
+
         protected const int DepthRoundingDigit = 5; // TODO: 要調整
 
         protected const float ShininessStrength = 120.0F;
@@ -100,19 +103,17 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             RasterizedMaskImage? trackMatte
         )
         {
-            AddRectInternal(roiOrigin, texture, interpolationQuality, 0, 0, texture.Width, texture.Height, opacity, blendType, modelMatrix, shadowCastMode, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
+            AddRectInternal(roiOrigin, texture, interpolationQuality, 0, 0, texture.Width, texture.Height, texture.Width, texture.Height, opacity, blendType, modelMatrix, shadowCastMode, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
 
             LastId++;
         }
 
-        void AddRectInternal(
+        public void AddRect(
             Int32Point roiOrigin,
             NImage texture,
             ImageInterpolationQuality interpolationQuality,
-            int left,
-            int top,
-            int right,
-            int bottom,
+            double width,
+            double height,
             float opacity,
             BlendMode blendType,
             Matrix4x4d modelMatrix,
@@ -128,11 +129,64 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             RasterizedMaskImage? trackMatte
         )
         {
-            // TODO: ボリゴンの境目が見えたり、斜めの補間エラーが出たりしたら調整する
-            const double MaxTriangleEdgeLength = 0.25;
+            AddRectInternal(roiOrigin, texture, interpolationQuality, 0, 0, width, height, width, height, opacity, blendType, modelMatrix, shadowCastMode, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
 
-            var width = texture.Width;
-            var height = texture.Height;
+            LastId++;
+        }
+
+        public void AddRect(
+            Int32Point roiOrigin,
+            NImage texture,
+            ImageInterpolationQuality interpolationQuality,
+            double width,
+            double height,
+            int polygonBaseWidth,
+            int polyginBaseHeight,
+            float opacity,
+            BlendMode blendType,
+            Matrix4x4d modelMatrix,
+            ShadowCastMode shadowCastMode,
+            float lightTransmission,
+            bool isAcceptShadow,
+            bool isAcceptLight,
+            float ambient,
+            float diffuse,
+            float specularIntensity,
+            float specularShininess,
+            float metal,
+            RasterizedMaskImage? trackMatte
+        )
+        {
+            AddRectInternal(roiOrigin, texture, interpolationQuality, 0, 0, width, height, polygonBaseWidth, polyginBaseHeight, opacity, blendType, modelMatrix, shadowCastMode, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
+
+            LastId++;
+        }
+
+        void AddRectInternal(
+            Int32Point roiOrigin,
+            NImage texture,
+            ImageInterpolationQuality interpolationQuality,
+            int left,
+            int top,
+            int right,
+            int bottom,
+            int polygonBaseWidth,
+            int polyginBaseHeight,
+            float opacity,
+            BlendMode blendType,
+            Matrix4x4d modelMatrix,
+            ShadowCastMode shadowCastMode,
+            float lightTransmission,
+            bool isAcceptShadow,
+            bool isAcceptLight,
+            float ambient,
+            float diffuse,
+            float specularIntensity,
+            float specularShininess,
+            float metal,
+            RasterizedMaskImage? trackMatte
+        )
+        {
             var offsetX = (Size - Width) * 0.5 / Size;
             var offsetY = (Size - Height) * 0.5 / Size;
             var sv1 = Vector256.Create(left, top, 0.0, Size) / Size;
@@ -156,17 +210,150 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             {
                 var hSplit = (right - left) / 2 + left;
                 var tSplit = (bottom - top) / 2 + top;
-                AddRectInternal(roiOrigin, texture, interpolationQuality, left, top, hSplit, tSplit, opacity, blendType, modelMatrix, shadowCastMode, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
-                AddRectInternal(roiOrigin, texture, interpolationQuality, hSplit, top, right, tSplit, opacity, blendType, modelMatrix, shadowCastMode, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
-                AddRectInternal(roiOrigin, texture, interpolationQuality, left, tSplit, hSplit, bottom, opacity, blendType, modelMatrix, shadowCastMode, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
-                AddRectInternal(roiOrigin, texture, interpolationQuality, hSplit, tSplit, right, bottom, opacity, blendType, modelMatrix, shadowCastMode, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
+                AddRectInternal(roiOrigin, texture, interpolationQuality, left, top, hSplit, tSplit, polygonBaseWidth, polyginBaseHeight, opacity, blendType, modelMatrix, shadowCastMode, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
+                AddRectInternal(roiOrigin, texture, interpolationQuality, hSplit, top, right, tSplit, polygonBaseWidth, polyginBaseHeight, opacity, blendType, modelMatrix, shadowCastMode, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
+                AddRectInternal(roiOrigin, texture, interpolationQuality, left, tSplit, hSplit, bottom, polygonBaseWidth, polyginBaseHeight, opacity, blendType, modelMatrix, shadowCastMode, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
+                AddRectInternal(roiOrigin, texture, interpolationQuality, hSplit, tSplit, right, bottom, polygonBaseWidth, polyginBaseHeight, opacity, blendType, modelMatrix, shadowCastMode, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
                 return;
             }
 
-            var uLeft = left / (double)width;
-            var uRight = right / (double)width;
-            var vTop = top / (double)height;
-            var vBottom = bottom / (double)height;
+            var uLeft = left / (double)polygonBaseWidth;
+            var uRight = right / (double)polygonBaseWidth;
+            var vTop = top / (double)polyginBaseHeight;
+            var vBottom = bottom / (double)polyginBaseHeight;
+            var uv1 = new UVVertex(v1, uLeft, vTop);
+            var uv2 = new UVVertex(v2, uLeft, vBottom);
+            var uv3 = new UVVertex(v3, uRight, vBottom);
+            var uv4 = new UVVertex(v4, uRight, vTop);
+
+            Matrix4x4d.Invert(mv, out var invertedModelViewMatrix);
+            invertedModelViewMatrix = Matrix4x4d.Transpose(invertedModelViewMatrix);
+
+            var farPoint = mv.Transform(Vector256.Create(0.0, 0.0, -10000.0, 1.0)) & Const.WithoutWMask256;
+            if (shadowCastMode != ShadowCastMode.ShadowOnly)
+            {
+                Triangles.Add(new Triangle(uv1, uv2, uv3, farPoint, invertedModelViewMatrix, texture, interpolationQuality, opacity, blendType, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte, LastId));
+                Triangles.Add(new Triangle(uv1, uv3, uv4, farPoint, invertedModelViewMatrix, texture, interpolationQuality, opacity, blendType, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte, LastId));
+            }
+
+            if (shadowCastMode != ShadowCastMode.None)
+            {
+                foreach (var spotLight in SpotLights)
+                {
+                    if (!spotLight.IsEnableShadow)
+                    {
+                        continue;
+                    }
+                    var (lt1, lt2) = CreateLightTriangle(LastId, texture, interpolationQuality, opacity, lightTransmission, sv1, sv2, sv3, sv4, uLeft, vTop, uRight, vBottom, originOffsetedModelMatrix, mv, spotLight.LightViewMatrix, offsetX, offsetY);
+                    var triangles = LightTriangles[spotLight];
+                    triangles.Add(lt1);
+                    triangles.Add(lt2);
+                }
+                foreach (var parallelLight in ParallelLights)
+                {
+                    if (!parallelLight.IsEnableShadow)
+                    {
+                        continue;
+                    }
+                    var (lt1, lt2) = CreateLightTriangle(LastId, texture, interpolationQuality, opacity, lightTransmission, sv1, sv2, sv3, sv4, uLeft, vTop, uRight, vBottom, originOffsetedModelMatrix, mv, parallelLight.LightViewMatrix, offsetX, offsetY);
+                    var triangles = LightTriangles[parallelLight];
+                    triangles.Add(lt1);
+                    triangles.Add(lt2);
+                }
+                foreach (var pointLight in PointLights)
+                {
+                    if (!pointLight.IsEnableShadow)
+                    {
+                        continue;
+                    }
+                    var (lt1, lt2) = CreateLightTriangle(LastId, texture, interpolationQuality, opacity, lightTransmission, sv1, sv2, sv3, sv4, uLeft, vTop, uRight, vBottom, originOffsetedModelMatrix, mv, pointLight.FrontLightViewMatrix, offsetX, offsetY);
+                    var triangles = LightTriangles[new PointLightHolder(pointLight, PointLightShadowDirection.Front)];
+                    triangles.Add(lt1);
+                    triangles.Add(lt2);
+                    (lt1, lt2) = CreateLightTriangle(LastId, texture, interpolationQuality, opacity, lightTransmission, sv1, sv2, sv3, sv4, uLeft, vTop, uRight, vBottom, originOffsetedModelMatrix, mv, pointLight.BackLightViewMatrix, offsetX, offsetY);
+                    triangles = LightTriangles[new PointLightHolder(pointLight, PointLightShadowDirection.Back)];
+                    triangles.Add(lt1);
+                    triangles.Add(lt2);
+                    (lt1, lt2) = CreateLightTriangle(LastId, texture, interpolationQuality, opacity, lightTransmission, sv1, sv2, sv3, sv4, uLeft, vTop, uRight, vBottom, originOffsetedModelMatrix, mv, pointLight.LeftLightViewMatrix, offsetX, offsetY);
+                    triangles = LightTriangles[new PointLightHolder(pointLight, PointLightShadowDirection.Left)];
+                    triangles.Add(lt1);
+                    triangles.Add(lt2);
+                    (lt1, lt2) = CreateLightTriangle(LastId, texture, interpolationQuality, opacity, lightTransmission, sv1, sv2, sv3, sv4, uLeft, vTop, uRight, vBottom, originOffsetedModelMatrix, mv, pointLight.RightLightViewMatrix, offsetX, offsetY);
+                    triangles = LightTriangles[new PointLightHolder(pointLight, PointLightShadowDirection.Right)];
+                    triangles.Add(lt1);
+                    triangles.Add(lt2);
+                    (lt1, lt2) = CreateLightTriangle(LastId, texture, interpolationQuality, opacity, lightTransmission, sv1, sv2, sv3, sv4, uLeft, vTop, uRight, vBottom, originOffsetedModelMatrix, mv, pointLight.TopLightViewMatrix, offsetX, offsetY);
+                    triangles = LightTriangles[new PointLightHolder(pointLight, PointLightShadowDirection.Top)];
+                    triangles.Add(lt1);
+                    triangles.Add(lt2);
+                    (lt1, lt2) = CreateLightTriangle(LastId, texture, interpolationQuality, opacity, lightTransmission, sv1, sv2, sv3, sv4, uLeft, vTop, uRight, vBottom, originOffsetedModelMatrix, mv, pointLight.BottomLightViewMatrix, offsetX, offsetY);
+                    triangles = LightTriangles[new PointLightHolder(pointLight, PointLightShadowDirection.Bottom)];
+                    triangles.Add(lt1);
+                    triangles.Add(lt2);
+                }
+            }
+        }
+
+        void AddRectInternal(
+            Int32Point roiOrigin,
+            NImage texture,
+            ImageInterpolationQuality interpolationQuality,
+            double left,
+            double top,
+            double right,
+            double bottom,
+            double polygonBaseWidth,
+            double polyginBaseHeight,
+            float opacity,
+            BlendMode blendType,
+            Matrix4x4d modelMatrix,
+            ShadowCastMode shadowCastMode,
+            float lightTransmission,
+            bool isAcceptShadow,
+            bool isAcceptLight,
+            float ambient,
+            float diffuse,
+            float specularIntensity,
+            float specularShininess,
+            float metal,
+            RasterizedMaskImage? trackMatte
+        )
+        {
+
+            var offsetX = (Size - Width) * 0.5 / Size;
+            var offsetY = (Size - Height) * 0.5 / Size;
+            var sv1 = Vector256.Create(left, top, 0.0, Size) / Size;
+            var sv2 = Vector256.Create(left, bottom, 0.0, Size) / Size;
+            var sv3 = Vector256.Create(right, bottom, 0.0, Size) / Size;
+            var sv4 = Vector256.Create(right, top, 0.0, Size) / Size;
+
+            var originOffsetedModelMatrix = Matrix4x4d.CreateTranslate(-(roiOrigin.X + texture.Origin.X) / Size, -(roiOrigin.Y + texture.Origin.Y) / Size, 0.0) * modelMatrix;
+            var mv = originOffsetedModelMatrix * ViewMatrix;
+            var mvt = mv * Matrix4x4d.CreateTranslate(offsetX, offsetY, 0.0);
+            var v1 = mvt.Transform(sv1);
+            var v2 = mvt.Transform(sv2);
+            var v3 = mvt.Transform(sv3);
+            var v4 = mvt.Transform(sv4);
+
+            if (UseLight &&
+                (((v2 - v1) & Const.WithoutWMask256).LengthSquared() > MaxTriangleEdgeLength ||
+                ((v3 - v1) & Const.WithoutWMask256).LengthSquared() > MaxTriangleEdgeLength ||
+                ((v4 - v1) & Const.WithoutWMask256).LengthSquared() > MaxTriangleEdgeLength) &&
+                right - left > 1 && bottom - top > 1)
+            {
+                var hSplit = (int)((right - left) / 2.0 + left);
+                var tSplit = (int)((bottom - top) / 2.0 + top);
+                AddRectInternal(roiOrigin, texture, interpolationQuality, left, top, hSplit, tSplit, polygonBaseWidth, polyginBaseHeight, opacity, blendType, modelMatrix, shadowCastMode, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
+                AddRectInternal(roiOrigin, texture, interpolationQuality, hSplit, top, right, tSplit, polygonBaseWidth, polyginBaseHeight, opacity, blendType, modelMatrix, shadowCastMode, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
+                AddRectInternal(roiOrigin, texture, interpolationQuality, left, tSplit, hSplit, bottom, polygonBaseWidth, polyginBaseHeight, opacity, blendType, modelMatrix, shadowCastMode, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
+                AddRectInternal(roiOrigin, texture, interpolationQuality, hSplit, tSplit, right, bottom, polygonBaseWidth, polyginBaseHeight, opacity, blendType, modelMatrix, shadowCastMode, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
+                return;
+            }
+
+            var uLeft = left / polygonBaseWidth;
+            var uRight = right / polygonBaseWidth;
+            var vTop = top / polyginBaseHeight;
+            var vBottom = bottom / polyginBaseHeight;
             var uv1 = new UVVertex(v1, uLeft, vTop);
             var uv2 = new UVVertex(v2, uLeft, vBottom);
             var uv3 = new UVVertex(v3, uRight, vBottom);
