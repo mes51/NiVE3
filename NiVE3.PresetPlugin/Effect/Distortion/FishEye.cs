@@ -47,7 +47,7 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
             ];
         }
 
-        public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, Time layerTime, IPropertyObject[] properties, ICompositionObject composition, bool useGpu)
+        public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, Time layerTime, IPropertyObject[] properties, ICompositionObject composition, ILayerObject layer, bool useGpu)
         {
             var amount = (float)properties.GetValue(PropertyAmountId, layerTime, 0.0);
 
@@ -66,7 +66,7 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
             }
         }
 
-        public float[] Process(float[] audio, Time startTime, IPropertyObject[] properties, ICompositionObject composition)
+        public float[] Process(float[] audio, Time startTime, IPropertyObject[] properties, ICompositionObject composition, ILayerObject layer)
         {
             throw new NotImplementedException();
         }

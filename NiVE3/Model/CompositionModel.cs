@@ -1248,6 +1248,11 @@ namespace NiVE3.Model
             return activeCamera?.GetCameraSetting(time) ?? CreateDefaultCameraSetting(Width, Height);
         }
 
+        CameraSetting ICompositionObject.GetActiveCameraSetting(Time layerTime, ILayerObject layer)
+        {
+            return GetActiveCameraSetting(layerTime + ((LayerModel)layer).SourceStartPoint);
+        }
+
         public void AddEffectsToLayers(Guid[] layerIds, Guid[] effectUuids)
         {
             if (layerIds.Length < 1 || effectUuids.Length < 1)

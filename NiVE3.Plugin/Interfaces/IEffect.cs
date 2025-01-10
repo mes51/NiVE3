@@ -33,8 +33,9 @@ namespace NiVE3.Plugin.Interfaces
         /// <param name="layerTime">現在のレイヤーの時間</param>
         /// <param name="properties">プロパティ</param>
         /// <param name="composition">コンポジション</param>
+        /// <param name="layer">適用先のレイヤー</param>
         /// <returns>計算後のエフェクトの適用範囲</returns>
-        ROI CalcRoi(ROI baseRoi, double downSamplingRateX, double downSamplingRateY, Time layerTime, IPropertyObject[] properties, ICompositionObject composition) => baseRoi;
+        ROI CalcRoi(ROI baseRoi, double downSamplingRateX, double downSamplingRateY, Time layerTime, IPropertyObject[] properties, ICompositionObject composition, ILayerObject layer) => baseRoi;
 
         /// <summary>
         /// 画像にエフェクトを適用します
@@ -46,9 +47,10 @@ namespace NiVE3.Plugin.Interfaces
         /// <param name="layerTime">現在のレイヤーの時間</param>
         /// <param name="properties">プロパティ</param>
         /// <param name="composition">コンポジション</param>
+        /// <param name="layer">適用先のレイヤー</param>
         /// <param name="useGpu">GPUを使用するかどうか</param
         /// <returns>エフェクト適用後の画像</returns>
-        NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, Time layerTime, IPropertyObject[] properties, ICompositionObject composition, bool useGpu);
+        NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, Time layerTime, IPropertyObject[] properties, ICompositionObject composition, ILayerObject layer, bool useGpu);
 
         /// <summary>
         /// 音声にエフェクトを適用します
@@ -57,7 +59,8 @@ namespace NiVE3.Plugin.Interfaces
         /// <param name="startTime">音声の開始時間</param>
         /// <param name="properties">プロパティ</param>
         /// <param name="composition">コンポジション</param>
+        /// <param name="layer">適用先のレイヤー</param>
         /// <returns>エフェクト適用後の音声</returns>
-        float[] Process(float[] audio, Time startTime, IPropertyObject[] properties, ICompositionObject composition);
+        float[] Process(float[] audio, Time startTime, IPropertyObject[] properties, ICompositionObject composition, ILayerObject layer);
     }
 }

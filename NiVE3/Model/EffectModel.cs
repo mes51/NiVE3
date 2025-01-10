@@ -64,6 +64,8 @@ namespace NiVE3.Model
 
         CompositionModel CompositionModel { get; }
 
+        LayerModel LayerModel { get; }
+
         HistoryModel HistoryModel { get; }
 
         string EffectPropertyGroupId => $"{EffectName}_Properties";
@@ -79,6 +81,7 @@ namespace NiVE3.Model
             Name = metadata.Name;
             HistoryModel = historyModel;
             CompositionModel = compositionModel;
+            LayerModel = layerModel;
             EffectId = effectId ?? Guid.NewGuid();
             Properties = new PropertyGroupModel(new PropertyGroup(EffectPropertyGroupId, "", effect.Value.GetProperties(new Int32Size(layerModel.SourceWidth, layerModel.SourceHeight))), EffectId.ToInt128(), projectModel, compositionModel, layerModel, this, historyModel, false);
             IsSupportGpu = metadata.IsSupportGpu;
@@ -111,14 +114,14 @@ namespace NiVE3.Model
 
         public ROI CalcRoi(ROI baseRoi, double downSamplingRateX, double downSamplingRateY, Time layerTime)
         {
-            return Effect.Value.CalcRoi(baseRoi, downSamplingRateX, downSamplingRateY, layerTime, Properties.Children.ToArray(), CompositionModel);
+            return Effect.Value.CalcRoi(baseRoi, downSamplingRateX, downSamplingRateY, layerTime, Properties.Children.ToArray(), CompositionModel, LayerModel);
         }
 
         public NImage ProcessImage(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, Time layerTime, bool useGpu)
         {
             try
             {
-                return Effect.Value.Process(image, roi, downSamplingRateX, downSamplingRateY, layerTime, Properties.Children.ToArray(), CompositionModel, useGpu && IsSupportGpu);
+                return Effect.Value.Process(image, roi, downSamplingRateX, downSamplingRateY, layerTime, Properties.Children.ToArray(), CompositionModel, LayerModel, useGpu && IsSupportGpu);
             }
             catch (Exception ex)
             {
@@ -135,7 +138,7 @@ namespace NiVE3.Model
 
         public float[] ProcessAudio(float[] audio, Time startTime)
         {
-            return Effect.Value.Process(audio, startTime, Properties.Children.ToArray(), CompositionModel);
+            return Effect.Value.Process(audio, startTime, Properties.Children.ToArray(), CompositionModel, LayerModel);
         }
 
         public EffectData SaveData()

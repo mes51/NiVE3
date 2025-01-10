@@ -44,7 +44,7 @@ namespace NiVE3.PresetPlugin.Effect.Generate
             ];
         }
 
-        public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, Time layerTime, IPropertyObject[] properties, ICompositionObject composition, bool useGpu)
+        public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, Time layerTime, IPropertyObject[] properties, ICompositionObject composition, ILayerObject layer, bool useGpu)
         {
             var color = properties.GetValue(PropertyColorId, layerTime, Vector4.UnitW);
             var keepAlpha = properties.GetValue(PropertyKeepAlphaId, layerTime, false);
@@ -59,7 +59,7 @@ namespace NiVE3.PresetPlugin.Effect.Generate
             }
         }
 
-        public float[] Process(float[] audio, Time startTime, IPropertyObject[] properties, ICompositionObject composition)
+        public float[] Process(float[] audio, Time startTime, IPropertyObject[] properties, ICompositionObject composition, ILayerObject layer)
         {
             throw new NotImplementedException();
         }

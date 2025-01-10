@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using ComputeSharp;
 using NiVE3.Image;
+using NiVE3.Plugin.Interfaces.RendererParams;
 using NiVE3.Plugin.Property;
 using NiVE3.Plugin.ValueObject;
 
@@ -24,6 +25,11 @@ namespace NiVE3.Plugin.Interfaces
     public interface ICompositionObject
     {
         /// <summary>
+        /// コンポジションのフレームレートを取得します
+        /// </summary>
+        double FrameRate { get; }
+
+        /// <summary>
         /// レイヤーを表す識別子の一覧を取得します
         /// </summary>
         IReadOnlyCollection<LayerInfo> LayerIdentifiers { get; }
@@ -34,6 +40,14 @@ namespace NiVE3.Plugin.Interfaces
         /// <param name="layerIdentifier">レイヤーの識別子</param>
         /// <returns>レイヤーを表すILayerObject。一致するレイヤーがなかった場合はnull</returns>
         ILayerObject? GetLayer(Guid layerIdentifier);
+
+        /// <summary>
+        /// アクティブなカメラの設定を取得します
+        /// </summary>
+        /// <param name="layerTime">カメラ設定を取得するレイヤー時間</param>
+        /// <param name="layer">レイヤー時間の基準となるレイヤー</param>
+        /// <returns>取得したアクティブなカメラの設定</returns>
+        CameraSetting GetActiveCameraSetting(Time layerTime, ILayerObject layer);
     }
 
     public interface ILayerObject

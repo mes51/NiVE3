@@ -20,7 +20,7 @@ namespace NiVE3.PresetPlugin.Effect.Audio
 {
     [Export(typeof(IEffect))]
     [EffectMetadata(LanguageResourceDictionary.Audio_ParametricEqualizer_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_Audio, LanguageResourceDictionary.Audio_ParametricEqualizer_Description, ID, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary), SupportedSource = EffectSupportedSource.Audio)]
-    public class ParametricEqualizer : IEffect
+    public sealed class ParametricEqualizer : IEffect
     {
         const string ID = "E003C444-877F-47AD-8936-05B89EE5C53F";
 
@@ -97,12 +97,12 @@ namespace NiVE3.PresetPlugin.Effect.Audio
             ];
         }
 
-        public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, Time layerTime, IPropertyObject[] properties, ICompositionObject composition, bool useGpu)
+        public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, Time layerTime, IPropertyObject[] properties, ICompositionObject composition, ILayerObject layer, bool useGpu)
         {
             throw new NotImplementedException();
         }
 
-        public float[] Process(float[] audio, Time startTime, IPropertyObject[] properties, ICompositionObject composition)
+        public float[] Process(float[] audio, Time startTime, IPropertyObject[] properties, ICompositionObject composition, ILayerObject layer)
         {
             var leftFilters = new List<BiQuadFilter>();
             var rightFilters = new List<BiQuadFilter>();

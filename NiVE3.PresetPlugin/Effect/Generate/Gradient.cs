@@ -77,7 +77,7 @@ namespace NiVE3.PresetPlugin.Effect.Generate
             ];
         }
 
-        public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, Time layerTime, IPropertyObject[] properties, ICompositionObject composition, bool useGpu)
+        public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, Time layerTime, IPropertyObject[] properties, ICompositionObject composition, ILayerObject layer, bool useGpu)
         {
             var downSamplingRate3d = new Vector3d(downSamplingRateX, downSamplingRateY, 1.0);
             var beginPoint = ((Vector3)(properties.GetValue(PropertyBeginPointId, layerTime, Vector3d.Zero) / downSamplingRate3d)).AsVector2();
@@ -108,7 +108,7 @@ namespace NiVE3.PresetPlugin.Effect.Generate
             }
         }
 
-        public float[] Process(float[] audio, Time startTime, IPropertyObject[] properties, ICompositionObject composition)
+        public float[] Process(float[] audio, Time startTime, IPropertyObject[] properties, ICompositionObject composition, ILayerObject layer)
         {
             throw new NotImplementedException();
         }

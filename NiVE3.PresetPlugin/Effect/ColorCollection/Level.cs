@@ -62,7 +62,7 @@ namespace NiVE3.PresetPlugin.Effect.ColorCollection
             ];
         }
 
-        public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, Time layerTime, IPropertyObject[] properties, ICompositionObject composition, bool useGpu)
+        public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, Time layerTime, IPropertyObject[] properties, ICompositionObject composition, ILayerObject layer, bool useGpu)
         {
             var channel = properties.GetValue(PropertyChannelId, layerTime, ChannelType.RGB);
             var blackIn = (float)properties.GetValue(PropertyBlackInLevelId, layerTime, 0.0);
@@ -81,7 +81,7 @@ namespace NiVE3.PresetPlugin.Effect.ColorCollection
             }
         }
 
-        public float[] Process(float[] audio, Time startTime, IPropertyObject[] properties, ICompositionObject composition)
+        public float[] Process(float[] audio, Time startTime, IPropertyObject[] properties, ICompositionObject composition, ILayerObject layer)
         {
             throw new NotImplementedException();
         }

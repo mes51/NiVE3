@@ -20,7 +20,7 @@ namespace NiVE3.PresetPlugin.Effect.Audio
 {
     [Export(typeof(IEffect))]
     [EffectMetadata(LanguageResourceDictionary.Audio_Dynamics_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_Audio, LanguageResourceDictionary.Audio_Dynamics_Description, ID, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary), SupportedSource = EffectSupportedSource.Audio)]
-    public class Dynamics : IEffect
+    public sealed class Dynamics : IEffect
     {
         const string ID = "B244012D-AEA1-40E6-BB6B-FE253DE62D67";
 
@@ -51,12 +51,12 @@ namespace NiVE3.PresetPlugin.Effect.Audio
             ];
         }
 
-        public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, Time layerTime, IPropertyObject[] properties, ICompositionObject composition, bool useGpu)
+        public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, Time layerTime, IPropertyObject[] properties, ICompositionObject composition, ILayerObject layer, bool useGpu)
         {
             throw new NotImplementedException();
         }
 
-        public float[] Process(float[] audio, Time startTime, IPropertyObject[] properties, ICompositionObject composition)
+        public float[] Process(float[] audio, Time startTime, IPropertyObject[] properties, ICompositionObject composition, ILayerObject layer)
         {
             var mode = properties.GetValue(PropertyDynamicsProcessorTypeId, startTime, DynamicsMode.Compressor);
             var leftProcessor = new DynamicsProcessor(mode, Const.AudioSamplingRate, 0.0F, 2.0F);
