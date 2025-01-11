@@ -350,7 +350,7 @@ namespace NiVE3.Model
             }
         }
 
-        object? IPropertyObject.GetValue(Time layerTime)
+        object? IPropertyObject.GetValue(Time layerTime, bool withoutDisableProperty)
         {
             return GetValue(layerTime, layerTime + SourceStartPoint);
         }

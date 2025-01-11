@@ -152,8 +152,9 @@ namespace NiVE3.Plugin.Interfaces
         /// 指定した時間のプロパティの値を取得します
         /// </summary>
         /// <param name="layerTime">プロパティの値を取得する時のレイヤー時間</param>
+        /// <param name="withoutDisableProperty">AppendablePropertyの場合、IsEnableがfalseのプロパティを除外するかどうか</param>
         /// <returns>取得したプロパティの値。PropertyGroupの場合はnull</returns>
-        public object? GetValue(Time layerTime);
+        public object? GetValue(Time layerTime, bool withoutDisableProperty = false);
 
         /// <summary>
         /// 指定した時間のプロパティの値のグループを取得します

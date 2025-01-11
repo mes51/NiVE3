@@ -152,7 +152,7 @@ namespace NiVE3.Model
             return Children;
         }
 
-        object? IPropertyObject.GetValue(Time layerTime)
+        object? IPropertyObject.GetValue(Time layerTime, bool withoutDisableProperty)
         {
             return null;
         }

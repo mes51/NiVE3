@@ -127,9 +127,9 @@ namespace NiVE3.Model
             return Children;
         }
 
-        object? IPropertyObject.GetValue(Time layerTime)
+        object? IPropertyObject.GetValue(Time layerTime, bool withoutDisableProperty)
         {
-            return GetValue(layerTime, layerTime + SourceStartPoint);
+            return GetChildPropertyValues(layerTime, layerTime + SourceStartPoint, withoutDisableProperty);
         }
 
         public object? GetValue(Time time, Time globalTime)
