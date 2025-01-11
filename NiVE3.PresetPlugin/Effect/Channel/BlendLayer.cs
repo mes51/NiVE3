@@ -68,10 +68,11 @@ namespace NiVE3.PresetPlugin.Effect.Channel
                 return image;
             }
 
+            var globalTime = layerTime + layer.SourceStartPoint;
             using var sourceImage = targetLayerId.ImageProcessType switch
             {
-                LayerImageProcessType.Effected => targetLayer.GetEffectedImage(layerTime, downSamplingRateX, useGpu),
-                _ => targetLayer.GetRawImage(layerTime, downSamplingRateX, useGpu)
+                LayerImageProcessType.Effected => targetLayer.GetEffectedImage(globalTime, downSamplingRateX, useGpu),
+                _ => targetLayer.GetRawImage(globalTime, downSamplingRateX, useGpu)
             };
 
             if (useGpu && AcceleratorObject != null)

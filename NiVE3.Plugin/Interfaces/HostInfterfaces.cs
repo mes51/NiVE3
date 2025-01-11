@@ -44,10 +44,9 @@ namespace NiVE3.Plugin.Interfaces
         /// <summary>
         /// アクティブなカメラの設定を取得します
         /// </summary>
-        /// <param name="layerTime">カメラ設定を取得するレイヤー時間</param>
-        /// <param name="layer">レイヤー時間の基準となるレイヤー</param>
+        /// <param name="layerTime">カメラ設定を取得する時のコンポジションの時間</param>
         /// <returns>取得したアクティブなカメラの設定</returns>
-        CameraSetting GetActiveCameraSetting(Time layerTime, ILayerObject layer);
+        CameraSetting GetActiveCameraSetting(Time globalTime);
     }
 
     public interface ILayerObject
@@ -118,9 +117,25 @@ namespace NiVE3.Plugin.Interfaces
 
         public string Name { get; }
 
-        NImage GetRawImage(Time layerTime, double downSamplingRate, bool useGpu);
+        public Time SourceStartPoint { get; }
 
-        NImage GetEffectedImage(Time layerTime, double downSamplingRate, bool useGpu);
+        /// <summary>
+        /// フッテージから取得した画像そのままを取得します
+        /// </summary>
+        /// <param name="globalTime">画像を取得する時のコンポジションの時間</param>
+        /// <param name="downSamplingRate">ダウンサンプリングの割合</param>
+        /// <param name="useGpu">GPUを使用するかどうか</param>
+        /// <returns>取得した画像</returns>
+        NImage GetRawImage(Time globalTime, double downSamplingRate, bool useGpu);
+
+        /// <summary>
+        /// エフェクト適用済みのレイヤーの画像を取得します
+        /// </summary>
+        /// <param name="globalTime">画像を取得する時のコンポジションの時間</param>
+        /// <param name="downSamplingRate">ダウンサンプリングの割合</param>
+        /// <param name="useGpu">GPUを使用するかどうか</param>
+        /// <returns>取得した画像</returns>
+        NImage GetEffectedImage(Time globalTime, double downSamplingRate, bool useGpu);
     }
 
     public interface IEffectObject { }
@@ -133,8 +148,19 @@ namespace NiVE3.Plugin.Interfaces
 
         IReadOnlyCollection<IPropertyObject>? GetChildren();
 
+        /// <summary>
+        /// 指定した時間のプロパティの値を取得します
+        /// </summary>
+        /// <param name="layerTime">プロパティの値を取得する時のレイヤー時間</param>
+        /// <returns>取得したプロパティの値。PropertyGroupの場合はnull</returns>
         public object? GetValue(Time layerTime);
 
+        /// <summary>
+        /// 指定した時間のプロパティの値のグループを取得します
+        /// </summary>
+        /// <param name="layerTime">プロパティの値を取得する時のレイヤー時間</param>
+        /// <param name="withoutDisableProperty">子のAppendablePropertyで、IsEnableがfalseのプロパティを除外するかどうか</param>
+        /// <returns>取得したプロパティの値をまとめたPropertyValueGroup。PropertyGroup以外の場合はnull</returns>
         public PropertyValueGroup? GetValues(Time layerTime, bool withoutDisableProperty = false);
     }
 

@@ -1242,15 +1242,10 @@ namespace NiVE3.Model
             return Layers.FirstOrDefault(l => l.IsEnableVideo && l.IsCamera && l.IsContainsTime(time));
         }
 
-        public CameraSetting GetActiveCameraSetting(Time time)
+        public CameraSetting GetActiveCameraSetting(Time globalTime)
         {
-            var activeCamera = GetActiveCamera(time);
-            return activeCamera?.GetCameraSetting(time) ?? CreateDefaultCameraSetting(Width, Height);
-        }
-
-        CameraSetting ICompositionObject.GetActiveCameraSetting(Time layerTime, ILayerObject layer)
-        {
-            return GetActiveCameraSetting(layerTime + ((LayerModel)layer).SourceStartPoint);
+            var activeCamera = GetActiveCamera(globalTime);
+            return activeCamera?.GetCameraSetting(globalTime) ?? CreateDefaultCameraSetting(Width, Height);
         }
 
         public void AddEffectsToLayers(Guid[] layerIds, Guid[] effectUuids)

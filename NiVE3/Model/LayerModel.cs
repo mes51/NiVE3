@@ -566,24 +566,22 @@ namespace NiVE3.Model
             PropertyChanged += LayerModel_PropertyChanged;
         }
 
-        NImage ILayerObject.GetRawImage(Time layerTime, double downSamplingRate, bool useGpu)
+        NImage ILayerObject.GetRawImage(Time globalTime, double downSamplingRate, bool useGpu)
         {
-            var globalTime = layerTime + SourceStartPoint;
-
-            var sourceTime = CalcSourceTime(layerTime);
+            var sourceTime = CalcSourceTime(globalTime - SourceStartPoint);
             var sourceOptionProperties = (TextProperties ?? ShapeProperties ?? SourceOptionProperties)?.GetValues(sourceTime, globalTime, true);
 
             return FootageModel.ReadImage(sourceTime, downSamplingRate, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties, InterpolationQuality, useGpu);
         }
 
-        NImage ILayerObject.GetEffectedImage(Time layerTime, double downSamplingRate, bool useGpu)
+        NImage ILayerObject.GetEffectedImage(Time globalTime, double downSamplingRate, bool useGpu)
         {
-            var globalTime = layerTime + SourceStartPoint;
+            var layerTime = globalTime - SourceStartPoint;
 
             using var entry = CycleChecker.TryEnter(LayerId);
             if (entry == null)
             {
-                return ((ILayerObject)this).GetRawImage(layerTime, downSamplingRate, useGpu);
+                return ((ILayerObject)this).GetRawImage(globalTime, downSamplingRate, useGpu);
             }
 
             NImage? image = null;
@@ -614,7 +612,7 @@ namespace NiVE3.Model
                 return image;
             }
 
-            (image, var originalImageSize, var roi) = GetFootageImage(layerTime + SourceStartPoint, IsImage ? Time.Zero : new Time(1, FootageModel.FrameRate), downSamplingRate, useGpu, false);
+            (image, var originalImageSize, var roi) = GetFootageImage(globalTime, IsImage ? Time.Zero : new Time(1, FootageModel.FrameRate), downSamplingRate, useGpu, false);
             var downSamplingRateX = originalImageSize.Width / (float)image.Width;
             var downSamplingRateY = originalImageSize.Height / (float)image.Height;
             if (IsEnableEffect)
