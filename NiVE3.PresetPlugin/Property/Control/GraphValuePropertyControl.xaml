@@ -1,0 +1,61 @@
+﻿<pc:PropertyControlBase x:Class="NiVE3.PresetPlugin.Property.Control.GraphValuePropertyControl"
+                        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                        xmlns:local="clr-namespace:NiVE3.PresetPlugin.Property.Control"
+                        xmlns:pc="clr-namespace:NiVE3.Plugin.Property.Control;assembly=NiVE3.Plugin"
+                        xmlns:v="clr-namespace:NiVE3.PresetPlugin.Internal.View"
+                        xmlns:ugm="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
+                        xmlns:ur="clr-namespace:NiVE3.UI.Resources;assembly=NiVE3.UI"
+                        mc:Ignorable="d" 
+                        x:Name="Root"
+                        DataContextChanged="Root_DataContextChanged"
+                        Unloaded="Root_Unloaded"
+                        d:DesignHeight="450" d:DesignWidth="800">
+    <pc:PropertyControlBase.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ur:AppearanceResourceDictionary />
+            </ResourceDictionary.MergedDictionaries>
+
+            <Style x:Key="PresetButtonStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
+                <Setter Property="Width" Value="20"/>
+                <Setter Property="Height" Value="10"/>
+            </Style>
+        </ResourceDictionary>
+    </pc:PropertyControlBase.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Grid.Column="0" Margin="0,0,5,0" VerticalAlignment="Center">
+            <Button Style="{StaticResource PresetButtonStyle}" Click="ApplyPresetLinearUpButton_Click">
+                <Button.Content>
+                    <Line X1="0" Y1="6" X2="15" Y2="0" Stroke="{ugm:AppearanceResource ResourceKey=BorderBrush}"/>
+                </Button.Content>
+            </Button>
+            <Button Margin="0,5,0,0" Style="{StaticResource PresetButtonStyle}" Click="ApplyPresetLinearDownButton_Click">
+                <Button.Content>
+                    <Line X1="0" Y1="0" X2="15" Y2="6" Stroke="{ugm:AppearanceResource ResourceKey=BorderBrush}"/>
+                </Button.Content>
+            </Button>
+            <Button Margin="0,5,0,0" Style="{StaticResource PresetButtonStyle}" Click="ApplyPresetTriangleButton_Click">
+                <Button.Content>
+                    <Path Data="M0,6 7.5,0 15,6" Stroke="{ugm:AppearanceResource ResourceKey=BorderBrush}"/>
+                </Button.Content>
+            </Button>
+            <Button Margin="0,5,0,0" Style="{StaticResource PresetButtonStyle}" Click="ApplyPresetCurveButton_Click">
+                <Button.Content>
+                    <Path Data="M0,6 C 0.5,0 7.5,0 7.5,0 C 15,0 15,6 15,6" Stroke="{ugm:AppearanceResource ResourceKey=BorderBrush}"/>
+                </Button.Content>
+            </Button>
+        </StackPanel>
+
+        <Border Grid.Column="1" BorderBrush="{ugm:AppearanceResource ResourceKey=BorderBrush}" BorderThickness="1" VerticalAlignment="Center" HorizontalAlignment="Left">
+            <v:GraphValueEditView Height="60" Width="100" Values="{Binding ElementName=Root, Path=Values}" BeginEdit="GraphValueEditView_BeginEdit" EndEdit="GraphValueEditView_EndEdit" AbortEdit="GraphValueEditView_AbortEdit" UpdateValues="GraphValueEditView_UpdateValues"/>
+        </Border>
+    </Grid>
+</pc:PropertyControlBase>
