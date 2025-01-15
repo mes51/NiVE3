@@ -61,6 +61,12 @@ namespace NiVE3.Plugin.Resource
         public const string EffectCategory_Noise = nameof(EffectCategory_Noise);
 
         /// <summary>
+        /// エフェクトのシミュレーションカテゴリを表します
+        /// </summary>
+        [EffectCategory]
+        public const string EffectCategory_Simulation = nameof(EffectCategory_Simulation);
+
+        /// <summary>
         /// エフェクトのスタイライズカテゴリを表します
         /// </summary>
         [EffectCategory]
@@ -74,10 +80,11 @@ namespace NiVE3.Plugin.Resource
 
         static DefaultLanguageResourceNames()
         {
-            EffectCategories = [..typeof(DefaultLanguageResourceNames).GetFields().Where(f => f.GetCustomAttribute<EffectCategoryAttribute>() != null).Select(f => f.Name)];
+            EffectCategories = [..typeof(DefaultLanguageResourceNames).GetFields().Where(f => f.IsDefined(typeof(EffectCategoryAttribute))).Select(f => f.Name)];
         }
     }
 
+    [AttributeUsage(AttributeTargets.Field)]
     file class EffectCategoryAttribute : Attribute
     {
         public EffectCategoryAttribute() { }

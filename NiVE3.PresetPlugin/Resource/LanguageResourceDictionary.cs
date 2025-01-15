@@ -1001,6 +1001,140 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("ソースレイヤーの配置")]
         public const string Channel_BlendLayer_SourceLayerPosition = nameof(Channel_BlendLayer_SourceLayerPosition);
 
+        // Particle
+
+        [DefaultValue("パーティクル")]
+        public const string Simulation_Particle_Name = nameof(Simulation_Particle_Name);
+
+        [DefaultValue("細かい粒子状の平面を描画します")]
+        public const string Simulation_Particle_Description = nameof(Simulation_Particle_Description);
+
+        [LanguageKey, DefaultValue("キャノン")]
+        public const string Simulation_Particle_Cannon = nameof(Simulation_Particle_Cannon);
+
+        [LanguageKey, DefaultValue("パーティクル/秒")]
+        public const string Simulation_Particle_Cannon_GenerationRate = nameof(Simulation_Particle_Cannon_GenerationRate);
+
+        [LanguageKey, DefaultValue("キャノン半径")]
+        public const string Simulation_Particle_Cannon_Radius = nameof(Simulation_Particle_Cannon_Radius);
+
+        [LanguageKey, DefaultValue("方向")]
+        public const string Simulation_Particle_Cannon_Direction = nameof(Simulation_Particle_Cannon_Direction);
+
+        [LanguageKey, DefaultValue("方向の拡散")]
+        public const string Simulation_Particle_Cannon_RandomDirection = nameof(Simulation_Particle_Cannon_RandomDirection);
+
+        [LanguageKey, DefaultValue("パーティクルの初速")]
+        public const string Simulation_Particle_Cannon_InitialParticleSpeed = nameof(Simulation_Particle_Cannon_InitialParticleSpeed);
+
+        [LanguageKey, DefaultValue("パーティクルの初速のばらつき")]
+        public const string Simulation_Particle_Cannon_RandomInitialParticleSpeed = nameof(Simulation_Particle_Cannon_RandomInitialParticleSpeed);
+
+        [LanguageKey, DefaultValue("パーティクルの回転速度")]
+        public const string Simulation_Particle_Cannon_ParticleRotateSpeed = nameof(Simulation_Particle_Cannon_ParticleRotateSpeed);
+
+        [LanguageKey, DefaultValue("X回転")]
+        public const string Simulation_Particle_Cannon_ParticleRotateSpeed_X = nameof(Simulation_Particle_Cannon_ParticleRotateSpeed_X);
+
+        [LanguageKey, DefaultValue("Y回転")]
+        public const string Simulation_Particle_Cannon_ParticleRotateSpeed_Y = nameof(Simulation_Particle_Cannon_ParticleRotateSpeed_Y);
+
+        [LanguageKey, DefaultValue("Z回転")]
+        public const string Simulation_Particle_Cannon_ParticleRotateSpeed_Z = nameof(Simulation_Particle_Cannon_ParticleRotateSpeed_Z);
+
+        [LanguageKey, DefaultValue("パーティクルの回転速度のばらつき")]
+        public const string Simulation_Particle_Cannon_RandomParticleRotateSpeed = nameof(Simulation_Particle_Cannon_RandomParticleRotateSpeed);
+
+        [LanguageKey, DefaultValue("パーティクル")]
+        public const string Simulation_Particle_Partucle = nameof(Simulation_Particle_Partucle);
+
+        [LanguageKey, DefaultValue("生成時カラー")]
+        public const string Simulation_Particle_Partucle_BirthColor = nameof(Simulation_Particle_Partucle_BirthColor);
+
+        [LanguageKey, DefaultValue("消滅時カラー")]
+        public const string Simulation_Particle_Partucle_DeadColor = nameof(Simulation_Particle_Partucle_DeadColor);
+
+        [LanguageKey, DefaultValue("カラーマップ")]
+        public const string Simulation_Particle_Partucle_ColorGraph = nameof(Simulation_Particle_Partucle_ColorGraph);
+
+        [LanguageKey, DefaultValue("生成時サイズ")]
+        public const string Simulation_Particle_Partucle_BirthSize = nameof(Simulation_Particle_Partucle_BirthSize);
+
+        [LanguageKey, DefaultValue("消滅時サイズ")]
+        public const string Simulation_Particle_Partucle_DeadSize = nameof(Simulation_Particle_Partucle_DeadSize);
+
+        [LanguageKey, DefaultValue("サイズマップ")]
+        public const string Simulation_Particle_Partucle_SizeGraph = nameof(Simulation_Particle_Partucle_SizeGraph);
+
+        [LanguageKey, DefaultValue("生成時不透明度")]
+        public const string Simulation_Particle_Partucle_BirthOpacity = nameof(Simulation_Particle_Partucle_BirthOpacity);
+
+        [LanguageKey, DefaultValue("消滅時不透明度")]
+        public const string Simulation_Particle_Partucle_DeadOpacity = nameof(Simulation_Particle_Partucle_DeadOpacity);
+
+        [LanguageKey, DefaultValue("不透明度マップ")]
+        public const string Simulation_Particle_Partucle_OpacityGraph = nameof(Simulation_Particle_Partucle_OpacityGraph);
+
+        [LanguageKey, DefaultValue("ワールド")]
+        public const string Simulation_Particle_World = nameof(Simulation_Particle_World);
+
+        [LanguageKey, DefaultValue("重力")]
+        public const string Simulation_Particle_World_Gravity = nameof(Simulation_Particle_World_Gravity);
+
+        [LanguageKey, DefaultValue("重力方向")]
+        public const string Simulation_Particle_World_GravityDirection = nameof(Simulation_Particle_World_GravityDirection);
+
+        [LanguageKey, DefaultValue("空気抵抗")]
+        public const string Simulation_Particle_World_AirRegistance = nameof(Simulation_Particle_World_AirRegistance);
+
+        [LanguageKey, DefaultValue("カメラ")]
+        public const string Simulation_Particle_Camera = nameof(Simulation_Particle_Camera);
+
+        [LanguageKey, DefaultValue("コンポジションカメラを使用する")]
+        public const string Simulation_Particle_Camera_UseComposition = nameof(Simulation_Particle_Camera_UseComposition);
+
+        [LanguageKey, DefaultValue("目標点")]
+        public const string Simulation_Particle_Camera_PointOfInterest = nameof(Simulation_Particle_Camera_PointOfInterest);
+
+        [LanguageKey, DefaultValue("位置")]
+        public const string Simulation_Particle_Camera_Position = nameof(Simulation_Particle_Camera_Position);
+
+        [LanguageKey, DefaultValue("方向")]
+        public const string Simulation_Particle_Camera_Orientation = nameof(Simulation_Particle_Camera_Orientation);
+
+        [LanguageKey, DefaultValue("X回転")]
+        public const string Simulation_Particle_Camera_XAngle = nameof(Simulation_Particle_Camera_XAngle);
+
+        [LanguageKey, DefaultValue("Y回転")]
+        public const string Simulation_Particle_Camera_YAngle = nameof(Simulation_Particle_Camera_YAngle);
+
+        [LanguageKey, DefaultValue("Z回転")]
+        public const string Simulation_Particle_Camera_ZAngle = nameof(Simulation_Particle_Camera_ZAngle);
+
+        [LanguageKey, DefaultValue("ズーム")]
+        public const string Simulation_Particle_Camera_Zoom = nameof(Simulation_Particle_Camera_Zoom);
+
+        [LanguageKey, DefaultValue("ソースレイヤー")]
+        public const string Simulation_Particle_SourceLayer = nameof(Simulation_Particle_SourceLayer);
+
+        [LanguageKey, DefaultValue("レイヤー")]
+        public const string Simulation_Particle_SourceLayer_Layer = nameof(Simulation_Particle_SourceLayer_Layer);
+
+        [LanguageKey, DefaultValue("参照するレイヤー時間を指定する")]
+        public const string Simulation_Particle_SourceLayer_UseSpecificReferenceTime = nameof(Simulation_Particle_SourceLayer_UseSpecificReferenceTime);
+
+        [LanguageKey, DefaultValue("参照するレイヤー時間")]
+        public const string Simulation_Particle_SourceLayer_SpecificReferenceTime = nameof(Simulation_Particle_SourceLayer_SpecificReferenceTime);
+
+        [LanguageKey, DefaultValue("オプション")]
+        public const string Simulation_Particle_Option = nameof(Simulation_Particle_Option);
+
+        [LanguageKey, DefaultValue("パーティクルのシミュレーション粒度")]
+        public const string Simulation_Particle_Option_SimulationRate = nameof(Simulation_Particle_Option_SimulationRate);
+
+        [LanguageKey, DefaultValue("アンチエイリアス")]
+        public const string Simulation_Particle_Option_AntiAlias = nameof(Simulation_Particle_Option_AntiAlias);
+
         // Renderers
 
         [DefaultValue("デフォルトレンダラ")]

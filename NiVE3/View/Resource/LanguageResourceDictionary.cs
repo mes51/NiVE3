@@ -826,6 +826,9 @@ namespace NiVE3.View.Resource
         [DefaultValue("ノイズ")]
         public static readonly string EffectCategory_Noise = DefaultLanguageResourceNames.EffectCategory_Noise;
 
+        [DefaultValue("シミュレーション")]
+        public static readonly string EffectCategory_Simulation = DefaultLanguageResourceNames.EffectCategory_Simulation;
+
         [DefaultValue("スタイライズ")]
         public static readonly string EffectCategory_Stylize = DefaultLanguageResourceNames.EffectCategory_Stylize;
 

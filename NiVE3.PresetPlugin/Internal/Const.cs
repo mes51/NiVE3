@@ -17,6 +17,8 @@ namespace NiVE3.PresetPlugin.Internal
 
         public const double AudioSampleTime = 1.0 / AudioSamplingRate;
 
+        public const double DefaultCameraFov = 0.360000466176267;// Math.Tan(39.5978 * 0.5 * (Math.PI / 180.0))
+
         public static readonly Vector256<double> WithoutWMask256 = Vector256.Create(0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0).AsDouble();
 
         public static readonly Vector128<float> WithoutWMask128 = Vector128.Create(0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0).AsSingle();

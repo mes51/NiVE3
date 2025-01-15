@@ -196,5 +196,14 @@ namespace NiVE3.Shared.Extension
                     }
             }
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static IEnumerable<T> RepeatInfinity<T>(T value)
+        {
+            while (true)
+            {
+                yield return value;
+            }
+        }
     }
 }
