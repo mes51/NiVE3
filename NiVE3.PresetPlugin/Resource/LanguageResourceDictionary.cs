@@ -1015,6 +1015,9 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("パーティクル/秒")]
         public const string Simulation_Particle_Cannon_GenerationRate = nameof(Simulation_Particle_Cannon_GenerationRate);
 
+        [LanguageKey, DefaultValue("位置")]
+        public const string Simulation_Particle_Cannon_Position = nameof(Simulation_Particle_Cannon_Position);
+
         [LanguageKey, DefaultValue("キャノン半径")]
         public const string Simulation_Particle_Cannon_Radius = nameof(Simulation_Particle_Cannon_Radius);
 

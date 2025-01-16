@@ -31,6 +31,8 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
 
         const string PropertyCannonParticleGenerationRateId = nameof(PropertyCannonParticleGenerationRateId);
 
+        const string PropertyCannonPositionId = nameof(PropertyCannonPositionId);
+
         const string PropertyCannonRadiusId = nameof(PropertyCannonRadiusId);
 
         const string PropertyCannonDirectionId = nameof(PropertyCannonDirectionId);
@@ -135,6 +137,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                     LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Cannon,
                     [
                         new DoubleProperty(PropertyCannonParticleGenerationRateId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Cannon_GenerationRate, 30.0, 0.0, double.MaxValue, digit: 2),
+                        new Vector3dProperty(PropertyCannonPositionId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Cannon_Position, new Vector3d(sourceSize.Width, sourceSize.Height, 0.0) * 0.5, digit: 2, is3D: true),
                         new Vector3dProperty(PropertyCannonRadiusId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Cannon_Radius, new Vector3d(100.0, 100.0, 100.0), digit: 2, is3D: true),
                         new DirectionProperty(PropertyCannonDirectionId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Cannon_Direction, Vector3d.Zero, digit: 2),
                         new DoubleProperty(PropertyCannonRandomDirectionRateId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Cannon_RandomDirection, 20.0, 0.0, 180.0, digit: 2),
