@@ -563,6 +563,7 @@ namespace NiVE3.Numerics
 
     public static class Matrix4x4dExtension
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector256<double> Transform(this in Matrix4x4d matrix, in Vector256<double> v)
         {
             var m1 = Vector256.LoadUnsafe(in matrix.M11);
@@ -572,6 +573,12 @@ namespace NiVE3.Numerics
 
             return (Vector256.Create(v.GetElement(0)) * m1 + Vector256.Create(v.GetElement(1)) * m2) +
                 (Vector256.Create(v.GetElement(2)) * m3 + Vector256.Create(v.GetElement(3)) * m4);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector3d Transform(this in Matrix4x4d matrix, in Vector3d v)
+        {
+            return (Vector3d)matrix.Transform(v.AsVector256());
         }
     }
 }

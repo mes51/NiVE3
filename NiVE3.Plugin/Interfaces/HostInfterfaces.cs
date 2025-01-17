@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.IO.Hashing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -163,6 +164,12 @@ namespace NiVE3.Plugin.Interfaces
         /// <param name="withoutDisableProperty">子のAppendablePropertyで、IsEnableがfalseのプロパティを除外するかどうか</param>
         /// <returns>取得したプロパティの値をまとめたPropertyValueGroup。PropertyGroup以外の場合はnull</returns>
         public PropertyValueGroup? GetValues(Time layerTime, bool withoutDisableProperty = false);
+
+        /// <summary>
+        /// このオブジェクトの固有のIDとプロパティ、または子のプロパティのキーフレームを含めた値全体のハッシュを計算します
+        /// </summary>
+        /// <param name="hash">計算用のハッシュオブジェクト</param>
+        public void CalcValuesHash(XxHash3 hash);
     }
 
     public interface ICompositionViewModel : INotifyPropertyChanged

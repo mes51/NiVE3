@@ -450,6 +450,30 @@ namespace NiVE3.Model
             return null;
         }
 
+        public void CalcValuesHash(XxHash3 hash)
+        {
+            hash.Append(ObjectId);
+            if (KeyFrames.Count > 0)
+            {
+                foreach (var keyFrame in KeyFrames)
+                {
+                    hash.Append((double)keyFrame.Time);
+                    hash.Append(Property.PropertyType.ConvertToHashBase(keyFrame.Value));
+                    hash.Append(keyFrame.InterpolationType);
+                }
+            }
+            else
+            {
+                hash.Append(Property.PropertyType.ConvertToHashBase(RawValue));
+            }
+
+            hash.Append(UseExpression);
+            if (UseExpression)
+            {
+                hash.Append(ExpressionCode);
+            }
+        }
+
         public void UpdateValueByCompositionStateChanged()
         {
             if (Property is CompositionDependPropertyBase cp)

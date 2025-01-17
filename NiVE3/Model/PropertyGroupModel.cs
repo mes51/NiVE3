@@ -200,6 +200,15 @@ namespace NiVE3.Model
             return result;
         }
 
+        public void CalcValuesHash(XxHash3 hash)
+        {
+            hash.Append(ObjectId);
+            foreach (var child in Children)
+            {
+                child.CalcValuesHash(hash);
+            }
+        }
+
         public void UpdateValueByCompositionStateChanged()
         {
             HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_UpdateValueByCompositionStateChanged));

@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.IO.Hashing;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Image;
@@ -13,14 +16,17 @@ using NiVE3.Plugin.Property;
 using NiVE3.Plugin.Property.Properties;
 using NiVE3.Plugin.Resource;
 using NiVE3.Plugin.ValueObject;
+using NiVE3.PresetPlugin.Effect.Util;
+using NiVE3.PresetPlugin.Extension;
 using NiVE3.PresetPlugin.Internal;
+using NiVE3.PresetPlugin.Property;
 using NiVE3.PresetPlugin.Property.Properties;
 using NiVE3.PresetPlugin.Resource;
 
 namespace NiVE3.PresetPlugin.Effect.Simulation
 {
     [Export(typeof(IEffect))]
-    [EffectMetadata(LanguageResourceDictionary.Simulation_Particle_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_Simulation, LanguageResourceDictionary.Simulation_Particle_Description, ID, IsSupportGpu = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
+    [EffectMetadata(LanguageResourceDictionary.Simulation_Particle_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_Simulation, LanguageResourceDictionary.Simulation_Particle_Description, ID, IsRenderEveryFrame = true, IsSupportGpu = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
     public sealed class Particle : IEffect
     {
         const string ID = "9D42E697-F4E9-4253-9EE6-EF2D0B41E869";
@@ -43,6 +49,8 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
 
         const string PropertyCannonRandomInitialParticleSpeedId = nameof(PropertyCannonRandomInitialParticleSpeedId);
 
+        const string PropertyCannonAddCannonMoveVelocityId = nameof(PropertyCannonAddCannonMoveVelocityId);
+
         const string PropertyCannonParticleRotateSpeedGroupId = nameof(PropertyCannonParticleRotateSpeedGroupId);
 
         const string PropertyCannonParticleRotateSpeedXId = nameof(PropertyCannonParticleRotateSpeedXId);
@@ -55,7 +63,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
 
         const string PropertyParticleGroupId = nameof(PropertyParticleGroupId);
 
-        const string PropertyParticleLifetimeId = nameof(PropertyParticleLifetimeId);
+        const string PropertyCannonParticleLifetimeId = nameof(PropertyCannonParticleLifetimeId);
 
         const string PropertyParticleBirthColorId = nameof(PropertyParticleBirthColorId);
 
@@ -113,11 +121,31 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
 
         const string PropertyOptionSimulationRateId = nameof(PropertyOptionSimulationRateId);
 
+        const string PropertyOptionSimulationStartTimeOffsetId = nameof(PropertyOptionSimulationStartTimeOffsetId);
+
         const string PropertyOptionAntiAliasId = nameof(PropertyOptionAntiAliasId);
+
+        const string PropertyOptionRandomSeedId = nameof(PropertyOptionRandomSeedId);
 
         #endregion Property ids
 
         IAcceleratorObject? AcceleratorObject { get; set; }
+
+        Dictionary<Time, SimulatedParticleData[]> SimulatedParticles { get; } = [];
+
+        List<ParticleData> CurrentParticles { get; } = [];
+
+        Time LastSimulateTime { get; set; } = Time.Zero;
+
+        double LastSimulateFrameRate { get; set; }
+
+        int LastSimulationRate { get; set; }
+
+        double LastSimulateStartTimeOffset { get; set; }
+
+        uint LastSimulateRandomSeed { get; set; }
+
+        Int128 LastPropertyHash { get; set; }
 
         public void SetupAccelerator(IAcceleratorObject accelerator)
         {
@@ -137,12 +165,14 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                     LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Cannon,
                     [
                         new DoubleProperty(PropertyCannonParticleGenerationRateId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Cannon_GenerationRate, 30.0, 0.0, double.MaxValue, digit: 2),
+                        new DoubleProperty(PropertyCannonParticleLifetimeId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Cannon_ParticleLifeTime, 5.0, 0.001, double.MaxValue, digit: 3, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Second),
                         new Vector3dProperty(PropertyCannonPositionId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Cannon_Position, new Vector3d(sourceSize.Width, sourceSize.Height, 0.0) * 0.5, digit: 2, is3D: true),
                         new Vector3dProperty(PropertyCannonRadiusId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Cannon_Radius, new Vector3d(100.0, 100.0, 100.0), digit: 2, is3D: true),
                         new DirectionProperty(PropertyCannonDirectionId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Cannon_Direction, Vector3d.Zero, digit: 2),
                         new DoubleProperty(PropertyCannonRandomDirectionRateId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Cannon_RandomDirection, 20.0, 0.0, 180.0, digit: 2),
                         new DoubleProperty(PropertyCannonInitialParticleSpeedId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Cannon_InitialParticleSpeed, 100.0, 0.0, double.MaxValue, digit: 2),
                         new DoubleProperty(PropertyCannonRandomInitialParticleSpeedId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Cannon_RandomInitialParticleSpeed, 20.0, 0.0, double.MaxValue, digit: 2),
+                        new CheckBoxProperty(PropertyCannonAddCannonMoveVelocityId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Cannon_AddCannonMoveVelocity, true),
                         new PropertyGroup(
                             PropertyCannonParticleRotateSpeedGroupId,
                             LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Cannon_ParticleRotateSpeed,
@@ -198,15 +228,17 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                     [
                         new UseLayerImageProperty(PropertySourceLayerLayerId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_SourceLayer_Layer, 90.0),
                         new CheckBoxProperty(PropertySourceLayerUseSpecificReferenceTimeId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_SourceLayer_UseSpecificReferenceTime, false),
-                        new DoubleProperty(PropertySourceLayerSpecificReferenceTimeId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_SourceLayer_SpecificReferenceTime, 0.0, 0.0, double.MaxValue, digit: 2)
+                        new DoubleProperty(PropertySourceLayerSpecificReferenceTimeId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_SourceLayer_SpecificReferenceTime, 0.0, 0.0, double.MaxValue, false, digit: 2)
                     ]
                 ),
                 new PropertyGroup(
                     PropertyOptionGroupId,
                     LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Option,
                     [
-                        new DoubleProperty(PropertyOptionSimulationRateId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Option_SimulationRate, 16.0, 1.0, 100.0, digit: 0),
-                        new CheckBoxProperty(PropertyOptionAntiAliasId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Option_AntiAlias, true)
+                        new DoubleProperty(PropertyOptionSimulationRateId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Option_SimulationRate, 16.0, 1.0, 100.0, false, digit: 0),
+                        new DoubleProperty(PropertyOptionSimulationStartTimeOffsetId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Option_SimulationStartTimeOffset, 0.0, double.MinValue, double.MaxValue, false, digit: 2),
+                        new CheckBoxProperty(PropertyOptionAntiAliasId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Option_AntiAlias, true),
+                        new DoubleProperty(PropertyOptionRandomSeedId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Option_RandomSeed, 0, 0, int.MaxValue, false, digit: 0)
                     ]
                 )
             ];
@@ -214,6 +246,74 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
 
         public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, Time layerTime, IPropertyObject[] properties, ICompositionObject composition, ILayerObject layer, bool useGpu)
         {
+            var options = properties.First(p => p.Id == PropertyOptionGroupId).GetChildren() ?? [];
+            var simulationRate = (int)options.GetValue(PropertyOptionSimulationRateId, layerTime, 0.0);
+            var simulateionStartTimeOffset = options.GetValue(PropertyOptionSimulationStartTimeOffsetId, layerTime, 0.0);
+            var randomSeed = (uint)options.GetValue(PropertyOptionRandomSeedId, layerTime, 0.0);
+
+            var hash = new XxHash3();
+            foreach (var property in properties)
+            {
+                property.CalcValuesHash(hash);
+            }
+            var propertyHash = HashToInt128(hash);
+
+            if (LastSimulateFrameRate != composition.FrameRate ||
+                LastSimulationRate != simulationRate ||
+                LastSimulateStartTimeOffset != simulateionStartTimeOffset ||
+                LastSimulateRandomSeed != randomSeed ||
+                LastPropertyHash != propertyHash)
+            {
+                SimulatedParticles.Clear();
+                CurrentParticles.Clear();
+                LastSimulateTime = Time.Zero;
+            }
+
+            if (LastSimulateTime <= layerTime)
+            {
+                var cannon = properties.First(p => p.Id == PropertyCannonGroupId).GetChildren() ?? [];
+                var particleRotateSpeeds = cannon.First(p => p.Id == PropertyCannonParticleRotateSpeedGroupId).GetChildren() ?? [];
+                var particle = properties.First(p => p.Id == PropertyParticleGroupId).GetChildren() ?? [];
+                var world = properties.First(p => p.Id == PropertyWorldGroupId).GetChildren() ?? [];
+
+                SimulateParticle(
+                    layerTime + Time.FromTime(simulateionStartTimeOffset, composition.FrameRate) + new Time(1, composition.FrameRate),
+                    composition.FrameRate,
+                    cannon.First(p => p.Id == PropertyCannonParticleGenerationRateId),
+                    cannon.First(p => p.Id == PropertyCannonParticleLifetimeId),
+                    cannon.First(p => p.Id == PropertyCannonPositionId),
+                    cannon.First(p => p.Id == PropertyCannonRadiusId),
+                    cannon.First(p => p.Id == PropertyCannonDirectionId),
+                    cannon.First(p => p.Id == PropertyCannonInitialParticleSpeedId),
+                    cannon.First(p => p.Id == PropertyCannonRandomInitialParticleSpeedId),
+                    cannon.First(p => p.Id == PropertyCannonAddCannonMoveVelocityId),
+                    particleRotateSpeeds.First(p => p.Id == PropertyCannonParticleRotateSpeedXId),
+                    particleRotateSpeeds.First(p => p.Id == PropertyCannonParticleRotateSpeedYId),
+                    particleRotateSpeeds.First(p => p.Id == PropertyCannonParticleRotateSpeedZId),
+                    cannon.First(p => p.Id == PropertyCannonRandomParticleRotateSpeedId),
+                    particle.First(p => p.Id == PropertyParticleBirthColorId),
+                    particle.First(p => p.Id == PropertyParticleDeadColorId),
+                    particle.First(p => p.Id == PropertyParticleColorGraphId),
+                    particle.First(p => p.Id == PropertyParticleBirthSizeId),
+                    particle.First(p => p.Id == PropertyParticleDeadSizeId),
+                    particle.First(p => p.Id == PropertyParticleSizeGraphId),
+                    particle.First(p => p.Id == PropertyParticleBirthOpacityId),
+                    particle.First(p => p.Id == PropertyParticleDeadOpacityId),
+                    particle.First(p => p.Id == PropertyParticleOpacityGraphId),
+                    world.First(p => p.Id == PropertyWorldGravityId),
+                    world.First(p => p.Id == PropertyWorldGravityDirectionId),
+                    world.First(p => p.Id == PropertyWorldAirRegistanceId),
+                    simulationRate,
+                    randomSeed
+                );
+
+                LastSimulateFrameRate = composition.FrameRate;
+                LastSimulationRate = simulationRate;
+                LastSimulateStartTimeOffset = simulateionStartTimeOffset;
+                LastSimulateRandomSeed = randomSeed;
+                LastPropertyHash = propertyHash;
+            }
+
             return image;
         }
 
@@ -222,6 +322,267 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
             throw new NotImplementedException();
         }
 
+        void SimulateParticle(
+            Time toTime,
+            double frameRate,
+            IPropertyObject particleGenerationRateProperty,
+            IPropertyObject particleLifeTimeProperty,
+            IPropertyObject cannonPositionProperty,
+            IPropertyObject cannonRadiusProperty,
+            IPropertyObject cannonDirectionProperty,
+            IPropertyObject initialParticleSpeedProperty,
+            IPropertyObject randomInitialParticleSpeedProperty,
+            IPropertyObject addCannonMoveVelocityProperty,
+            IPropertyObject particleRotateSpeedXProperty,
+            IPropertyObject particleRotateSpeedYProperty,
+            IPropertyObject particleRotateSpeedZProperty,
+            IPropertyObject randomParticleRotateSpeedProperty,
+            IPropertyObject birthColorProperty,
+            IPropertyObject deadColorProperty,
+            IPropertyObject colorGraphProperty,
+            IPropertyObject birthSizeProperty,
+            IPropertyObject deadSizeProperty,
+            IPropertyObject sizeGraphProperty,
+            IPropertyObject birthOpacityProperty,
+            IPropertyObject deadOpacityProperty,
+            IPropertyObject opacityGraphProperty,
+            IPropertyObject gravityProperty,
+            IPropertyObject gravityDirectionProperty,
+            IPropertyObject airRegistanceProperty,
+            int simulationRate,
+            uint randomSeed
+        )
+        {
+            if (toTime <= 0.0)
+            {
+                return;
+            }
+
+            var frameDuration = new Time(1, frameRate * simulationRate);
+            var doubleFrameDuration = (double)frameDuration;
+            var particleGeneration = 0.0;
+            var isFirstParticleGeneration = true;
+            for (var currentTime = LastSimulateTime; currentTime < toTime; currentTime += frameDuration)
+            {
+                if (SimulatedParticles.ContainsKey(currentTime))
+                {
+                    continue;
+                }
+
+                var doubleCurrentTime = (double)currentTime;
+                var gravity = gravityProperty.GetValue(currentTime, 0.0);
+                var gravityDirection = CalcRotatedVector(gravityDirectionProperty.GetValue(currentTime, Vector3d.Zero));
+                var airRegistance = airRegistanceProperty.GetValue(currentTime, 0.0);
+                var removeParticle = new List<ParticleData>();
+                foreach (var particle in CurrentParticles)
+                {
+                    if (particle.DeadTime < doubleCurrentTime)
+                    {
+                        removeParticle.Add(particle);
+                        continue;
+                    }
+
+                    particle.Advance(doubleFrameDuration, gravity, gravityDirection, airRegistance);
+                }
+
+                foreach (var particle in removeParticle)
+                {
+                    CurrentParticles.Remove(particle);
+                }
+
+                var particleGenerationRate = particleGenerationRateProperty.GetValue(currentTime, 0.0);
+                if (particleGenerationRate > 0.0)
+                {
+                    if (isFirstParticleGeneration)
+                    {
+                        particleGeneration = particleGenerationRate > 1.0 ? 0.0 : 1.0;
+                    }
+
+                    particleGeneration += particleGenerationRate / simulationRate;
+
+                    var generate = (int)particleGeneration;
+                    if (generate > 0)
+                    {
+                        var lifeTime = particleLifeTimeProperty.GetValue(currentTime, 0.0);
+                        if (lifeTime <= 0.0)
+                        {
+                            continue;
+                        }
+                        var cannonPosition = cannonPositionProperty.GetValue(currentTime, Vector3d.Zero);
+                        var cannonRadius = cannonRadiusProperty.GetValue(currentTime, Vector3d.Zero);
+                        var cannonDirection = cannonDirectionProperty.GetValue(currentTime, Vector3d.Zero);
+                        var baseSpeed = CalcRotatedVector(cannonDirection) * initialParticleSpeedProperty.GetValue(currentTime, 0.0);
+                        var baseRotationSpeed = new Vector3d(
+                            particleRotateSpeedXProperty.GetValue(currentTime, 0.0),
+                            particleRotateSpeedYProperty.GetValue(currentTime, 0.0),
+                            particleRotateSpeedZProperty.GetValue(currentTime, 0.0)
+                        );
+                        var addCannonMoveVelocity = addCannonMoveVelocityProperty.GetValue<bool>(currentTime, false);
+                        var randomSpeedRate = randomInitialParticleSpeedProperty.GetValue(currentTime, 0.0);
+                        var randomRotationSpeed = randomParticleRotateSpeedProperty.GetValue(currentTime, 0.0);
+                        var birthColor = birthColorProperty.GetValue(currentTime, Vector4.One);
+                        var deadColor = deadColorProperty.GetValue(currentTime, Vector4.One);
+                        var colorGraphValue = colorGraphProperty.GetValue(currentTime, GraphValueParameter.Identity);
+                        var birthSize = birthSizeProperty.GetValue(currentTime, 0.0);
+                        var deadSize = deadSizeProperty.GetValue(currentTime, 0.0);
+                        var sizeGraphValue = sizeGraphProperty.GetValue(currentTime, GraphValueParameter.Identity);
+                        var birthOpacity = birthOpacityProperty.GetValue(currentTime, 0.0);
+                        var deadOpacity = deadOpacityProperty.GetValue(currentTime, 0.0);
+                        var opacityGraphValue = opacityGraphProperty.GetValue(currentTime, GraphValueParameter.Identity);
+                        var randomZValue = unchecked((uint)currentTime.GetHashCode());
+                        var cannonVelocity = Vector3d.Zero;
+                        if (addCannonMoveVelocity)
+                        {
+                            cannonVelocity = (cannonPosition - cannonPositionProperty.GetValue(currentTime - frameDuration, Vector3d.Zero)) / (double)frameDuration;
+                        }
+                        for (var g = 0; g < generate; g++)
+                        {
+                            CurrentParticles.Add(
+                                new ParticleData(
+                                    doubleCurrentTime,
+                                    lifeTime,
+                                    cannonPosition + cannonRadius * (1.0 - NoiseFunction.Pcg3D1FloatCpu(1, (uint)g, randomZValue, randomSeed) * 2.0),
+                                    baseSpeed * (1.0 + randomSpeedRate * (1.0 - NoiseFunction.Pcg3D1FloatCpu(2, (uint)g, randomZValue, randomSeed) * 2.0)) + cannonVelocity,
+                                    baseRotationSpeed * (1.0 + randomRotationSpeed * (1.0 - NoiseFunction.Pcg3D1FloatCpu(3, (uint)g, randomZValue, randomSeed) * 2.0)),
+                                    birthColor,
+                                    deadColor,
+                                    colorGraphValue,
+                                    (float)birthSize,
+                                    (float)deadSize,
+                                    sizeGraphValue,
+                                    (float)birthOpacity,
+                                    (float)deadOpacity,
+                                    opacityGraphValue
+                                )
+                            );
+                        }
+                        particleGeneration -= generate;
+                    }
+                }
+
+                SimulatedParticles.Add(currentTime, [..CurrentParticles.Select(p => p.ToSimulated(doubleCurrentTime))]);
+            }
+
+            LastSimulateTime = toTime;
+        }
+
         public void Dispose() { }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static Int128 HashToInt128(XxHash3 hash)
+        {
+            var result = (Int128)0;
+            var resultSpan = MemoryMarshal.CreateSpan(ref result, 1);
+            hash.GetCurrentHash(MemoryMarshal.Cast<Int128, byte>(resultSpan));
+
+            return result;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static Vector3d CalcRotatedVector(in Vector3d angles)
+        {
+            return Matrix4x4d.CreateRotateZ(angles.Z).RotateY(angles.Y).RotateX(angles.X).Transform(new Vector3d(0.0, 1.0, 0.0));
+        }
+    }
+
+    record SimulatedParticleData(
+        Vector3d Position,
+        Vector3d Angles,
+        Vector4 Color,
+        float Size,
+        float Opacity
+    );
+
+    class ParticleData
+    {
+        public double BirthTime { get; set; }
+
+        public double LifeTime { get; set; }
+
+        public double DeadTime { get; set; }
+
+        public Vector3d Position { get; set; }
+
+        public Vector3d Angles { get; set; }
+
+        public Vector3d Speed { get; set; }
+
+        public Vector3d RotateSpeed { get; set; }
+
+        public Vector4 BirthColor { get; set; }
+
+        public Vector4 DeadColor { get; set; }
+
+        public GraphValueParameter ColorGraphValue { get; }
+
+        public float BirthSize { get; set; }
+
+        public float DeadSize { get; set; }
+
+        public GraphValueParameter SizeGraphValue { get; }
+
+        public float BirthOpacity { get; set; }
+
+        public float DeadOpacity { get; set; }
+
+        public GraphValueParameter OpacityGraphValue { get; }
+
+        public ParticleData(
+            double birthTime,
+            double lifeTime,
+            in Vector3d position,
+            in Vector3d speed,
+            in Vector3d rotateSpeed,
+            in Vector4 birthColor,
+            in Vector4 deadColor,
+            GraphValueParameter colorGraphValue,
+            float birthSize,
+            float deadSize,
+            GraphValueParameter sizeGraphValue,
+            float birthOpacity,
+            float deadOpacity,
+            GraphValueParameter opacityGraphValue
+        )
+        {
+            BirthTime = birthTime;
+            LifeTime = lifeTime;
+            DeadTime = birthTime + lifeTime;
+            Position = position;
+            Speed = speed;
+            RotateSpeed = rotateSpeed;
+            BirthColor = birthColor;
+            DeadColor = deadColor;
+            ColorGraphValue = colorGraphValue;
+            BirthSize = birthSize;
+            DeadSize = deadSize;
+            SizeGraphValue = sizeGraphValue;
+            BirthOpacity = birthOpacity;
+            DeadOpacity = deadOpacity;
+            OpacityGraphValue = opacityGraphValue;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Advance(double time, double gravity, in Vector3d gravityDirection, double airRegistance)
+        {
+            var newSpeed = Speed + gravity * gravityDirection * time;
+            newSpeed -= newSpeed * airRegistance * time;
+
+            Position += Speed * time;
+            Angles += RotateSpeed * time;
+            Speed = newSpeed;
+            RotateSpeed -= RotateSpeed * airRegistance * time;
+        }
+
+        public SimulatedParticleData ToSimulated(double currentTime)
+        {
+            var t = (float)((currentTime - BirthTime) / LifeTime);
+            return new SimulatedParticleData(
+                Position,
+                Angles,
+                ColorGraphValue.Interpolation(BirthColor, DeadColor, t),
+                SizeGraphValue.Interpolation(BirthSize, DeadSize, t),
+                OpacityGraphValue.Interpolation(BirthOpacity, DeadOpacity, t)
+            );
+        }
     }
 }

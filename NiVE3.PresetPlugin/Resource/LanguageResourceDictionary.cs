@@ -1015,6 +1015,9 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("パーティクル/秒")]
         public const string Simulation_Particle_Cannon_GenerationRate = nameof(Simulation_Particle_Cannon_GenerationRate);
 
+        [LanguageKey, DefaultValue("パーティクルの生存時間")]
+        public const string Simulation_Particle_Cannon_ParticleLifeTime = nameof(Simulation_Particle_Cannon_ParticleLifeTime);
+
         [LanguageKey, DefaultValue("位置")]
         public const string Simulation_Particle_Cannon_Position = nameof(Simulation_Particle_Cannon_Position);
 
@@ -1032,6 +1035,9 @@ namespace NiVE3.PresetPlugin.Resource
 
         [LanguageKey, DefaultValue("パーティクルの初速のばらつき")]
         public const string Simulation_Particle_Cannon_RandomInitialParticleSpeed = nameof(Simulation_Particle_Cannon_RandomInitialParticleSpeed);
+
+        [LanguageKey, DefaultValue("キャノンの移動速度を加算する")]
+        public const string Simulation_Particle_Cannon_AddCannonMoveVelocity = nameof(Simulation_Particle_Cannon_AddCannonMoveVelocity);
 
         [LanguageKey, DefaultValue("パーティクルの回転速度")]
         public const string Simulation_Particle_Cannon_ParticleRotateSpeed = nameof(Simulation_Particle_Cannon_ParticleRotateSpeed);
@@ -1135,8 +1141,14 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("パーティクルのシミュレーション粒度")]
         public const string Simulation_Particle_Option_SimulationRate = nameof(Simulation_Particle_Option_SimulationRate);
 
+        [LanguageKey, DefaultValue("パーティクルのシミュレーション開始時間のオフセット")]
+        public const string Simulation_Particle_Option_SimulationStartTimeOffset = nameof(Simulation_Particle_Option_SimulationStartTimeOffset);
+
         [LanguageKey, DefaultValue("アンチエイリアス")]
         public const string Simulation_Particle_Option_AntiAlias = nameof(Simulation_Particle_Option_AntiAlias);
+
+        [LanguageKey, DefaultValue("ランダムシード")]
+        public const string Simulation_Particle_Option_RandomSeed = nameof(Simulation_Particle_Option_RandomSeed);
 
         // Renderers
 
@@ -1672,6 +1684,9 @@ namespace NiVE3.PresetPlugin.Resource
         public const string MinMaxMode_Max = nameof(MinMaxMode_Max);
 
         // unit
+
+        [LanguageKey, DefaultValue("s")]
+        public const string Unit_Second = nameof(Unit_Second);
 
         [LanguageKey, DefaultValue("ms")]
         public const string Unit_MilliSecond = nameof(Unit_MilliSecond);

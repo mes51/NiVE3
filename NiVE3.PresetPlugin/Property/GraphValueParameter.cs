@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Shared.Extension;
@@ -52,12 +53,50 @@ namespace NiVE3.PresetPlugin.Property
         {
             if (values.Length != ValueCount)
             {
-                return [.. values.Concat(EnumerableExtensions.RepeatInfinity(values[^1])).Take(GraphValueParameter.ValueCount)];
+                return [.. values.Concat(EnumerableExtensions.RepeatInfinity(values[^1])).Take(ValueCount)];
             }
             else
             {
                 return values;
             }
+        }
+
+        public float Interpolation(float value1, float value2, float t)
+        {
+            if (t <= 0.0)
+            {
+                return float.Lerp(value1, value2, Values[0]);
+            }
+            else if (t >= 1.0)
+            {
+                return float.Lerp(value1, value2, Values[^1]);
+            }
+
+            var current = t * (ValueCount - 1);
+            var prevIndex = (int)MathF.Floor(current);
+            var nextIndex = (int)MathF.Ceiling(current);
+
+            var interpolationDiff = current - prevIndex;
+            return float.Lerp(value1, value2, float.Lerp(Values[prevIndex], Values[nextIndex], interpolationDiff));
+        }
+
+        public Vector4 Interpolation(Vector4 value1, Vector4 value2, float t)
+        {
+            if (t <= 0.0)
+            {
+                return Vector4.Lerp(value1, value2, Values[0]);
+            }
+            else if (t >= 1.0)
+            {
+                return Vector4.Lerp(value1, value2, Values[^1]);
+            }
+
+            var current = t * (ValueCount - 1);
+            var prevIndex = (int)MathF.Floor(current);
+            var nextIndex = (int)MathF.Ceiling(current);
+
+            var interpolationDiff = current - prevIndex;
+            return Vector4.Lerp(value1, value2, float.Lerp(Values[prevIndex], Values[nextIndex], interpolationDiff));
         }
     }
 }
