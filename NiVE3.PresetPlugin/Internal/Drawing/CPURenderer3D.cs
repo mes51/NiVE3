@@ -155,6 +155,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                     triangle.FloatNormal,
                     managedTexture,
                     triangle.InterpolationQuality,
+                    triangle.MultiplyColor,
                     managedTrackMatte,
                     triangle.Opacity,
                     triangle.LightTransmission,
@@ -411,6 +412,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                         {
                             continue;
                         }
+                        color *= triangle.MultiplyColor;
 
                         if (useLight)
                         {
@@ -803,6 +805,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                         var ty = Vector128.Sum(v * e / tw) * textureHeight;
 
                         var color = triangle.InterpolationQuality == ImageInterpolationQuality.Level1 ? ImageInterpolation.NearestNeighbor(texture, textureWidth, textureHeight, tx, ty) : ImageInterpolation.Bilinear(texture, textureWidth, textureHeight, tx, ty);
+                        color *= triangle.MultiplyColor;
 
                         // α == 0 もしくはライト透過100%の白
                         if (color.W <= 0.0F || (triangle.LightTransmission >= 1.0F && color.X >= 1.0F && color.Y >= 1.0F && color.Z >= 1.0F))
@@ -1015,6 +1018,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             Vector3 FloatNormal,
             NManagedImage Texture,
             ImageInterpolationQuality InterpolationQuality,
+            Vector4 MultiplyColor,
             ManagedRasterizedMaskImage? TrackMatte,
             float Opacity,
             float LightTransmission,

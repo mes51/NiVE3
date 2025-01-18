@@ -42,7 +42,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
 
         readonly Matrix4x4d InvertMatrix;
 
-        protected TriangleBase(in UVVertex v1, in UVVertex v2, in UVVertex v3, in Vector256<double> farPoint, Matrix4x4d invertMatrix, int id)
+        protected TriangleBase(in UVVertex v1, in UVVertex v2, in UVVertex v3, in Vector256<double> farPoint, in Matrix4x4d invertMatrix, int id)
         {
             V1 = v1;
             V2 = v2;
@@ -120,14 +120,17 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
 
         public readonly ImageInterpolationQuality InterpolationQuality;
 
+        public readonly Vector4 MultiplyColor;
+
         public readonly float Opacity;
 
         public readonly float LightTransmission;
 
-        protected TexturedTriangleBase(in UVVertex v1, in UVVertex v2, in UVVertex v3, in Vector256<double> farPoint, Matrix4x4d invertMatrix, NImage texture, ImageInterpolationQuality interpolationQuality, float opacity, float lightTransmission, int id)
+        protected TexturedTriangleBase(in UVVertex v1, in UVVertex v2, in UVVertex v3, in Vector256<double> farPoint, in Matrix4x4d invertMatrix, NImage texture, ImageInterpolationQuality interpolationQuality, in Vector4 multiplyColor, float opacity, float lightTransmission, int id)
             : base(v1, v2, v3, farPoint, invertMatrix, id)
         {
             Texture = texture;
+            MultiplyColor = multiplyColor;
             InterpolationQuality = interpolationQuality;
             Opacity = opacity;
             LightTransmission = lightTransmission;
@@ -138,6 +141,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
         {
             Texture = baseTriangle.Texture;
             InterpolationQuality = baseTriangle.InterpolationQuality;
+            MultiplyColor = baseTriangle.MultiplyColor;
             Opacity = baseTriangle.Opacity;
             LightTransmission = baseTriangle.LightTransmission;
         }
@@ -171,6 +175,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
             in Matrix4x4d invertMatrix,
             NImage texture,
             ImageInterpolationQuality interpolationQuality,
+            in Vector4 multiplyColor,
             float opacity,
             BlendMode blendMode,
             float lightTransmission,
@@ -183,7 +188,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
             float metal,
             RasterizedMaskImage? trackMatte,
             int id
-        ) : base(v1, v2, v3, farPoint, invertMatrix, texture, interpolationQuality, opacity, lightTransmission, id)
+        ) : base(v1, v2, v3, farPoint, invertMatrix, texture, interpolationQuality, multiplyColor, opacity, lightTransmission, id)
         {
             BlendMode = blendMode;
             IsAcceptShadow = isAcceptShadow;
@@ -217,8 +222,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
 
     class ShadowTriangle : TexturedTriangleBase<ShadowTriangle>
     {
-        public ShadowTriangle(in UVVertex v1, in UVVertex v2, in UVVertex v3, in Vector256<double> farPoint, in Matrix4x4d invertMatrix, NImage texture, ImageInterpolationQuality interpolationQuality, float opacity, float lightTransmission, int id)
-            : base(v1, v2, v3, farPoint, invertMatrix, texture, interpolationQuality, opacity, lightTransmission, id) { }
+        public ShadowTriangle(in UVVertex v1, in UVVertex v2, in UVVertex v3, in Vector256<double> farPoint, in Matrix4x4d invertMatrix, NImage texture, ImageInterpolationQuality interpolationQuality, in Vector4 multiplyColor, float opacity, float lightTransmission, int id)
+            : base(v1, v2, v3, farPoint, invertMatrix, texture, interpolationQuality, multiplyColor, opacity, lightTransmission, id) { }
 
         public ShadowTriangle(ShadowTriangle baseTriangle, in UVVertex v1, in UVVertex v2, in UVVertex v3)
             : base(baseTriangle, v1, v2, v3) { }

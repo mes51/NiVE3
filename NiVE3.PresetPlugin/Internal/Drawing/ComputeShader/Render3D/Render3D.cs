@@ -59,7 +59,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
                     break;
                 }
 
-                renderTarget[p] = BlendMethods.Process(blendMode, renderTarget[p], color);
+                renderTarget[p] = BlendMethods.Process(blendMode, renderTarget[p], color * texturing.MultiplyColor);
 
                 break;
             }
@@ -235,7 +235,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
 #pragma warning disable IDE0017 // NOTE: ComputeSharpのSourceGeneratorでは非対応
                 var result = new GPURasterizedPixel();
 #pragma warning restore IDE0017 // オブジェクトの初期化を簡略化します
-                result.Color = color;
+                result.Color = color * texturing.MultiplyColor;
                 result.E = e;
                 result.TriangleIndex = ti + 1;
                 renderImage[p] = result;
@@ -1248,6 +1248,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
                 var ty = FloatNUtil.Sum(triangle.V * e / tw) * textureHeight;
 
                 var color = triangle.InterpolationQuality == 0 ? NearestNeighbor(tx, ty) : Bilinear(tx, ty);
+                color *= triangle.MultiplyColor;
 
                 // α == 0 もしくはライト透過100%の白
                 if (color.W <= 0.0F || (triangle.LightTransmission >= 1.0F && color.X >= 1.0F && color.Y >= 1.0F && color.Z >= 1.0F))

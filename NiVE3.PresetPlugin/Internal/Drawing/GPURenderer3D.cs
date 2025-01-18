@@ -160,6 +160,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                     v.AsFloat4(),
                     w.AsFloat4(),
                     (int)triangle.InterpolationQuality,
+                    triangle.MultiplyColor,
                     triangle.Opacity
                 ));
                 preProcessedTriangleLighting.Add(new GPUTriangleLighting(
@@ -842,6 +843,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                     vvZ.AsFloat4(),
                     denom.AsFloat4(),
                     (int)triangle.InterpolationQuality,
+                    triangle.MultiplyColor,
                     triangle.Opacity,
                     triangle.LightTransmission
                 );

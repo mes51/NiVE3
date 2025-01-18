@@ -40,6 +40,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
         Float4 V,
         Float4 W,
         int InterpolationQuality,
+        Float4 MultiplyColor,
         float Opacity
     )
     {
@@ -47,6 +48,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
         public readonly Float4 V = V;
         public readonly Float4 W = W;
         public readonly int InterpolationQuality = InterpolationQuality;
+        public readonly Float4 MultiplyColor = MultiplyColor;
         public readonly float Opacity = Opacity;
     }
 
@@ -166,6 +168,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
         Float4 VVZ,
         Float4 Denominator,
         int InterpolationQuality,
+        Float4 MultiplyColor,
         float Opacity,
         float LightTransmission
     )
@@ -191,6 +194,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
         public readonly Float4 VVZ = VVZ;
         public readonly Float4 Denominator = Denominator;
         public readonly int InterpolationQuality = InterpolationQuality;
+        public readonly Float4 MultiplyColor = MultiplyColor;
         public readonly float Opacity = Opacity;
         public readonly float LightTransmission = LightTransmission;
     }
