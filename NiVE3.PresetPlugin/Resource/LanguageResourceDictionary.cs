@@ -1135,6 +1135,18 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("参照するレイヤー時間")]
         public const string Simulation_Particle_SourceLayer_SpecificReferenceTime = nameof(Simulation_Particle_SourceLayer_SpecificReferenceTime);
 
+        [LanguageKey, DefaultValue("レンダリング設定")]
+        public const string Simulation_Particle_Rendering = nameof(Simulation_Particle_Rendering);
+
+        [LanguageKey, DefaultValue("アンチエイリアス")]
+        public const string Simulation_Particle_Rendering_AntiAlias = nameof(Simulation_Particle_Rendering_AntiAlias);
+
+        [LanguageKey, DefaultValue("ブレンドモード")]
+        public const string Simulation_Particle_Rendering_BlendMode = nameof(Simulation_Particle_Rendering_BlendMode);
+
+        [LanguageKey, DefaultValue("合成順")]
+        public const string Simulation_Particle_Rendering_CompositeOrder = nameof(Simulation_Particle_Rendering_CompositeOrder);
+
         [LanguageKey, DefaultValue("オプション")]
         public const string Simulation_Particle_Option = nameof(Simulation_Particle_Option);
 
@@ -1143,9 +1155,6 @@ namespace NiVE3.PresetPlugin.Resource
 
         [LanguageKey, DefaultValue("パーティクルのシミュレーション開始時間のオフセット")]
         public const string Simulation_Particle_Option_SimulationStartTimeOffset = nameof(Simulation_Particle_Option_SimulationStartTimeOffset);
-
-        [LanguageKey, DefaultValue("アンチエイリアス")]
-        public const string Simulation_Particle_Option_AntiAlias = nameof(Simulation_Particle_Option_AntiAlias);
 
         [LanguageKey, DefaultValue("ランダムシード")]
         public const string Simulation_Particle_Option_RandomSeed = nameof(Simulation_Particle_Option_RandomSeed);

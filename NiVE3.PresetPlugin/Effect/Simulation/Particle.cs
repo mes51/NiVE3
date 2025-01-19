@@ -125,13 +125,19 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
 
         const string PropertySourceLayerSpecificReferenceTimeId = nameof(PropertySourceLayerSpecificReferenceTimeId);
 
+        const string PropertyRenderingGroupId = nameof(PropertyRenderingGroupId);
+
+        const string PropertyRenderingAntiAliasId = nameof(PropertyRenderingAntiAliasId);
+
+        const string PropertyRenderingBlendModeId = nameof(PropertyRenderingBlendModeId);
+
+        const string PropertyRenderingCompositeOrderId = nameof(PropertyRenderingCompositeOrderId);
+
         const string PropertyOptionGroupId = nameof(PropertyOptionGroupId);
 
         const string PropertyOptionSimulationRateId = nameof(PropertyOptionSimulationRateId);
 
         const string PropertyOptionSimulationStartTimeOffsetId = nameof(PropertyOptionSimulationStartTimeOffsetId);
-
-        const string PropertyOptionAntiAliasId = nameof(PropertyOptionAntiAliasId);
 
         const string PropertyOptionRandomSeedId = nameof(PropertyOptionRandomSeedId);
 
@@ -243,12 +249,20 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                     ]
                 ),
                 new PropertyGroup(
+                    PropertyRenderingGroupId,
+                    LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Rendering,
+                    [
+                        new CheckBoxProperty(PropertyRenderingAntiAliasId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Rendering_AntiAlias, true),
+                        new EnumProperty(PropertyRenderingBlendModeId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Rendering_BlendMode, typeof(BlendMode), typeof(LanguageResourceDictionary), BlendMode.Normal, selectBoxWidth: 90.0),
+                        new EnumProperty(PropertyRenderingCompositeOrderId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Rendering_CompositeOrder, typeof(CompositeOrder), typeof(LanguageResourceDictionary), CompositeOrder.Front, selectBoxWidth: 90.0),
+                    ]
+                ),
+                new PropertyGroup(
                     PropertyOptionGroupId,
                     LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Option,
                     [
                         new DoubleProperty(PropertyOptionSimulationRateId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Option_SimulationRate, 16.0, 1.0, 100.0, false, digit: 0),
                         new DoubleProperty(PropertyOptionSimulationStartTimeOffsetId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Option_SimulationStartTimeOffset, 0.0, double.MinValue, double.MaxValue, false, digit: 2),
-                        new CheckBoxProperty(PropertyOptionAntiAliasId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Option_AntiAlias, true),
                         new DoubleProperty(PropertyOptionRandomSeedId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Option_RandomSeed, 0, 0, int.MaxValue, false, digit: 0)
                     ]
                 )
@@ -419,7 +433,8 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                 );
             }
 
-            var antialias = options.GetValue(PropertyOptionAntiAliasId, layerTime, false);
+            var rendering = properties.First(p => p.Id == PropertyRenderingGroupId).GetChildren() ?? [];
+            var antialias = rendering.GetValue(PropertyRenderingAntiAliasId, layerTime, false);
             switch (renderer)
             {
                 case GPURenderer3D g:
@@ -430,24 +445,52 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                     break;
             }
 
-            var blendMode = BlendMode.Normal;
+            var blendMode = rendering.GetValue(PropertyRenderingBlendModeId, layerTime, BlendMode.Normal);
+            var compositeOrder = rendering.GetValue(PropertyRenderingCompositeOrderId, layerTime, CompositeOrder.Front);
             if (useGpu && AcceleratorObject != null)
             {
                 var device = AcceleratorObject.CurrentDevice;
                 var result = image.ToGpu(device);
-                ImageBlendProcess.SameSizeGpu(device, result, (NGPUImage)renderTarget, roi, blendMode);
-
-                image = result;
+                switch (compositeOrder)
+                {
+                    case CompositeOrder.Front:
+                        ImageBlendProcess.SameSizeGpu(device, result, (NGPUImage)renderTarget, roi, blendMode);
+                        image = result;
+                        break;
+                    default:
+                        ImageBlendProcess.SameSizeGpu(device, (NGPUImage)renderTarget, result, roi, blendMode);
+                        if (image != result)
+                        {
+                            result.Dispose();
+                        }
+                        image = (NGPUImage)renderTarget;
+                        break;
+                }
             }
             else
             {
                 var result = image.ToManaged();
-                ImageBlendProcess.SameSizeCpu(result, (NManagedImage)renderTarget, roi, blendMode);
-
-                image = result;
+                switch (compositeOrder)
+                {
+                    case CompositeOrder.Front:
+                        ImageBlendProcess.SameSizeCpu(result, (NManagedImage)renderTarget, roi, blendMode);
+                        image = result;
+                        break;
+                    default:
+                        ImageBlendProcess.SameSizeCpu((NManagedImage)renderTarget, result, roi, blendMode);
+                        if (result != image)
+                        {
+                            result.Dispose();
+                        }
+                        image = (NManagedImage)renderTarget;
+                        break;
+                }
             }
 
-            renderTarget.Dispose();
+            if (compositeOrder != CompositeOrder.Back)
+            {
+                renderTarget.Dispose();
+            }
 
             return image;
         }
