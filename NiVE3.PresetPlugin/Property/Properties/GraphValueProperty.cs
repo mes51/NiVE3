@@ -16,12 +16,16 @@ namespace NiVE3.PresetPlugin.Property.Properties
     {
         bool IsSuppressNotifyUpdateValues { get; }
 
-        public GraphValueProperty(string id, string displayName, bool isSuppressNotifyUpdateValue) : base(id, displayName, GraphValuePropertyType.Instance, GraphValueParameter.LinearUp, true)
+        public GraphValueProperty(string id, string displayName, bool isSuppressNotifyUpdateValue) : this(id, displayName, isSuppressNotifyUpdateValue, GraphValueParameter.LinearUp) { }
+
+        public GraphValueProperty(string id, string displayName, bool isSuppressNotifyUpdateValue, GraphValueParameter defaultGraphValue) : base(id, displayName, GraphValuePropertyType.Instance, defaultGraphValue, true)
         {
             IsSuppressNotifyUpdateValues = isSuppressNotifyUpdateValue;
         }
 
-        public GraphValueProperty(string id, LanguageResourceKey displayNameKey, bool isSuppressNotifyUpdateValue) : base(id, displayNameKey, GraphValuePropertyType.Instance, GraphValueParameter.LinearUp, true)
+        public GraphValueProperty(string id, LanguageResourceKey displayNameKey, bool isSuppressNotifyUpdateValue) : this(id, displayNameKey, isSuppressNotifyUpdateValue, GraphValueParameter.LinearUp) { }
+
+        public GraphValueProperty(string id, LanguageResourceKey displayNameKey, bool isSuppressNotifyUpdateValue, GraphValueParameter defaultGraphValue) : base(id, displayNameKey, GraphValuePropertyType.Instance, defaultGraphValue, true)
         {
             IsSuppressNotifyUpdateValues = isSuppressNotifyUpdateValue;
         }

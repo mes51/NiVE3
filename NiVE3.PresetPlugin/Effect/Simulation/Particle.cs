@@ -200,14 +200,14 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                     LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Partucle,
                     [
                         new ColorProperty(PropertyParticleBirthColorId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Partucle_BirthColor, colorDialogTitle, dialogOk, dialogCancel, Vector4.One),
-                        new ColorProperty(PropertyParticleDeadColorId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Partucle_DeadColor, colorDialogTitle, dialogOk, dialogCancel, Vector4.One),
-                        new GraphValueProperty(PropertyParticleColorGraphId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Partucle_ColorGraph, true),
+                        new ColorProperty(PropertyParticleDeadColorId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Partucle_DeadColor, colorDialogTitle, dialogOk, dialogCancel, Vector4.UnitW),
+                        new GraphValueProperty(PropertyParticleColorGraphId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Partucle_ColorGraph, true, GraphValueParameter.Identity),
                         new DoubleProperty(PropertyParticleBirthSizeId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Partucle_BirthSize, 6.0, 0.0, double.MaxValue, digit: 2),
-                        new DoubleProperty(PropertyParticleDeadSizeId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Partucle_DeadSize, 6.0, 0.0, double.MaxValue, digit: 2),
-                        new GraphValueProperty(PropertyParticleSizeGraphId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Partucle_SizeGraph, true),
+                        new DoubleProperty(PropertyParticleDeadSizeId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Partucle_DeadSize, 60.0, 0.0, double.MaxValue, digit: 2),
+                        new GraphValueProperty(PropertyParticleSizeGraphId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Partucle_SizeGraph, true, GraphValueParameter.Identity),
                         new DoubleProperty(PropertyParticleBirthOpacityId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Partucle_BirthOpacity, 100.0, 0.0, 100.0, digit: 2),
                         new DoubleProperty(PropertyParticleDeadOpacityId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Partucle_DeadOpacity, 0.0, 0.0, 100.0, digit: 2),
-                        new GraphValueProperty(PropertyParticleOpacityGraphId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Partucle_OpacityGraph, true)
+                        new GraphValueProperty(PropertyParticleOpacityGraphId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Partucle_OpacityGraph, true, GraphValueParameter.LinearDown)
                     ]
                 ),
                 new PropertyGroup(
@@ -767,13 +767,13 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
         public SimulatedParticleData ToSimulated(double currentTime)
         {
             var t = (float)((currentTime - BirthTime) / LifeTime);
-            var size = SizeGraphValue.Interpolation(BirthSize, DeadSize, t);
+            var size = SizeGraphValue.Interpolation(DeadSize, BirthSize, t);
             return new SimulatedParticleData(
                 Position + new Vector3d(size, size, 0.0) * 0.5,
                 Angles,
-                ColorGraphValue.Interpolation(BirthColor, DeadColor, t),
+                ColorGraphValue.Interpolation(DeadColor, BirthColor, t),
                 size,
-                OpacityGraphValue.Interpolation(BirthOpacity, DeadOpacity, t) * 0.01F
+                OpacityGraphValue.Interpolation(DeadOpacity, BirthOpacity, t) * 0.01F
             );
         }
     }
