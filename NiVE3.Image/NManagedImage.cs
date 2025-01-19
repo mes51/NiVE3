@@ -36,6 +36,19 @@ namespace NiVE3.Image
         }
 
         /// <summary>
+        /// NManagedImageの新しいインスタンスを生成します。配列はArrayPoolから取得します
+        /// </summary>
+        /// <param name="width">画像の幅</param>
+        /// <param name="height">画像の高さ</param>
+        /// <param name="color">初期の色</param>
+        public NManagedImage(int width, int height, Vector4 color) : base(width, height)
+        {
+            var length = width * height;
+            Data = ArrayPool<Vector4>.Shared.Rent(length);
+            Data.AsSpan(0, length).Fill(color);
+        }
+
+        /// <summary>
         /// 画像データを取得します
         /// </summary>
         /// <returns>取得した画像データ。ArrayPoolから取得した配列のため、画像サイズ以上の長さの可能性があります。</returns>

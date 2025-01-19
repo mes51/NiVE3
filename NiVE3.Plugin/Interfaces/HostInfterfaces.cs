@@ -31,6 +31,16 @@ namespace NiVE3.Plugin.Interfaces
         double FrameRate { get; }
 
         /// <summary>
+        /// コンポジションの幅を取得します
+        /// </summary>
+        int Width { get; }
+
+        /// <summary>
+        /// コンポジションの高さを取得します
+        /// </summary>
+        int Height { get; }
+
+        /// <summary>
         /// レイヤーを表す識別子の一覧を取得します
         /// </summary>
         IReadOnlyCollection<LayerInfo> LayerIdentifiers { get; }

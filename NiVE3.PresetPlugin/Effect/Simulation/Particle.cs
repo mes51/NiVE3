@@ -6,19 +6,27 @@ using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Controls;
+using ComputeSharp;
 using NiVE3.Image;
+using NiVE3.Image.Drawing;
 using NiVE3.Numerics;
 using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Interfaces;
+using NiVE3.Plugin.Interfaces.RendererParams;
 using NiVE3.Plugin.Property;
 using NiVE3.Plugin.Property.Properties;
 using NiVE3.Plugin.Resource;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.PresetPlugin.Effect.Util;
+using NiVE3.PresetPlugin.Effect.Util.General;
 using NiVE3.PresetPlugin.Extension;
 using NiVE3.PresetPlugin.Internal;
+using NiVE3.PresetPlugin.Internal.Drawing;
 using NiVE3.PresetPlugin.Property;
 using NiVE3.PresetPlugin.Property.Properties;
 using NiVE3.PresetPlugin.Resource;
@@ -133,6 +141,8 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
 
         Dictionary<Time, SimulatedParticleData[]> SimulatedParticles { get; } = [];
 
+        List<Time> SimulatedParticleTimes { get; } = [];
+
         List<ParticleData> CurrentParticles { get; } = [];
 
         Time LastSimulateTime { get; set; } = Time.Zero;
@@ -213,6 +223,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                     PropertyCameraGroupId,
                     LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Camera,
                     [
+                        new CheckBoxProperty(PropertyCameraUseCompositionId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Camera_UseComposition, false),
                         new Vector3dProperty(PropertyCameraPointOfInterestId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Camera_PointOfInterest, new Vector3d(sourceSize.Width, sourceSize.Height, 0.0) * 0.5, digit: 2, is3D: true),
                         new Vector3dProperty(PropertyCameraPositionId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Camera_Position, new Vector3d(sourceSize.Width * 0.5, sourceSize.Height * 0.5, -cameraZoom), digit: 2, is3D: true),
                         new DirectionProperty(PropertyCameraOrientationId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Camera_Orientation, Vector3d.Zero, digit: 2),
@@ -265,6 +276,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                 LastPropertyHash != propertyHash)
             {
                 SimulatedParticles.Clear();
+                SimulatedParticleTimes.Clear();
                 CurrentParticles.Clear();
                 LastSimulateTime = Time.Zero;
             }
@@ -314,6 +326,129 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                 LastPropertyHash = propertyHash;
             }
 
+            var sourceLayer = properties.First(p => p.Id == PropertySourceLayerGroupId).GetChildren() ?? [];
+            var sourceLayerTarget = sourceLayer.GetValue(PropertySourceLayerLayerId, layerTime, UseLayerImageTarget.Empty);
+            var sourceLayerObject = composition.GetLayer(sourceLayerTarget.LayerId);
+            var sourceLayerReferenceTime = layerTime + layer.SourceStartPoint;
+            if (sourceLayer.GetValue(PropertySourceLayerUseSpecificReferenceTimeId, layerTime, false) && sourceLayerObject != null)
+            {
+                sourceLayerReferenceTime = Time.FromTime(sourceLayer.GetValue(PropertySourceLayerSpecificReferenceTimeId, layerTime, 0.0), composition.FrameRate) + sourceLayerObject.SourceStartPoint;
+            }
+
+            var realWidth = (int)Math.Round(image.Width * downSamplingRateX);
+            var realHeight = (int)Math.Round(image.Height * downSamplingRateY);
+            using var texture = GetLayerImage(sourceLayerObject, sourceLayerReferenceTime, sourceLayerTarget.ImageProcessType, downSamplingRateX, useGpu ? AcceleratorObject : null);
+            NImage renderTarget;
+            Renderer3DBase renderer;
+            if (useGpu && AcceleratorObject != null)
+            {
+
+                var device = AcceleratorObject.CurrentDevice;
+                renderTarget = new NGPUImage(image.Width, image.Height, device);
+                renderer = new GPURenderer3D((NGPUImage)renderTarget, device, realWidth, realHeight, [], [], [], []);
+            }
+            else
+            {
+                renderTarget = new NManagedImage(image.Width, image.Height);
+                renderer = new CPURenderer3D((NManagedImage)renderTarget, realWidth, realHeight, [], [], [], []);
+            }
+
+            var camera = properties.First(p => p.Id == PropertyCameraGroupId).GetChildren() ?? [];
+            var useCompositionCamera = camera.GetValue(PropertyCameraUseCompositionId, layerTime, false);
+            var originX = roi.OriginalImagePosition.X * downSamplingRateX;
+            var originY = roi.OriginalImagePosition.Y * downSamplingRateY;
+            var originalWidth = roi.OriginalImageSize.Width * downSamplingRateX;
+            var originalHeight = roi.OriginalImageSize.Height * downSamplingRateY;
+            if (useCompositionCamera)
+            {
+                var (fov, viewMatrix) = CreateCameraMatrix(composition.GetActiveCameraSetting(layerTime + layer.SourceStartPoint), realWidth, realHeight, originX, originY, composition.Width, composition.Height);
+                renderer.FieldOfView = fov;
+                renderer.ViewMatrix = viewMatrix;
+            }
+            else
+            {
+                var (fov, viewMatrix) = CreateCameraMatrix(
+                    new CameraSetting(
+                        camera.GetValue(PropertyCameraPointOfInterestId, layerTime, Vector3d.Zero),
+                        camera.GetValue(PropertyCameraPositionId, layerTime, Vector3d.Zero),
+                        camera.GetValue(PropertyCameraOrientationId, layerTime, Vector3d.Zero),
+                        camera.GetValue(PropertyCameraXAngleId, layerTime, 0.0),
+                        camera.GetValue(PropertyCameraYAngleId, layerTime, 0.0),
+                        camera.GetValue(PropertyCameraZAngleId, layerTime, 0.0),
+                        camera.GetValue(PropertyCameraZoomId, layerTime, 0.0),
+                        []
+                    ),
+                    realWidth,
+                    realHeight,
+                    originX,
+                    originY,
+                    originalWidth,
+                    originalHeight
+                );
+                renderer.FieldOfView = fov;
+                renderer.ViewMatrix = viewMatrix;
+            }
+
+            var particles = SimulatedParticles[SimulatedParticleTimes.First(t => t >= layerTime)];
+            var renderSize = Math.Max(realWidth, realHeight);
+            var (aspectX, aspectY) = texture.Width >= texture.Height ? (1.0F, texture.Height / (float)texture.Width) : (texture.Width / (float)texture.Height, 1.0F);
+            foreach (var particle in particles)
+            {
+                var particleSizeX = particle.Size * aspectX;
+                var particleSizeY = particle.Size * aspectY;
+                renderer.AddRect(
+                    Int32Point.Zero,
+                    texture,
+                    ImageInterpolationQuality.Level1,
+                    particle.Color,
+                    particleSizeX,
+                    particleSizeY,
+                    particle.Opacity,
+                    BlendMode.Normal,
+                    Matrix4x4d.AffineTransform(new Vector3d(particleSizeX, particleSizeY, 0.0) * 0.5 / renderSize, Vector3d.One, particle.Angles, 0.0, 0.0, 0.0, particle.Position / renderSize),
+                    ShadowCastMode.None,
+                    0.0F,
+                    false,
+                    false,
+                    1.0F,
+                    1.0F,
+                    1.0F,
+                    1.0F,
+                    1.0F,
+                    null
+                );
+            }
+
+            var antialias = options.GetValue(PropertyOptionAntiAliasId, layerTime, false);
+            switch (renderer)
+            {
+                case GPURenderer3D g:
+                    g.Render(antialias, antialias);
+                    break;
+                case CPURenderer3D c:
+                    c.Render(antialias, antialias);
+                    break;
+            }
+
+            var blendMode = BlendMode.Normal;
+            if (useGpu && AcceleratorObject != null)
+            {
+                var device = AcceleratorObject.CurrentDevice;
+                var result = image.ToGpu(device);
+                ImageBlendProcess.SameSizeGpu(device, result, (NGPUImage)renderTarget, roi, blendMode);
+
+                image = result;
+            }
+            else
+            {
+                var result = image.ToManaged();
+                ImageBlendProcess.SameSizeCpu(result, (NManagedImage)renderTarget, roi, blendMode);
+
+                image = result;
+            }
+
+            renderTarget.Dispose();
+
             return image;
         }
 
@@ -361,7 +496,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
             var frameDuration = new Time(1, frameRate * simulationRate);
             var doubleFrameDuration = (double)frameDuration;
             var particleGeneration = 0.0;
-            var isFirstParticleGeneration = true;
+            var isFirstParticleGeneration = CurrentParticles.Count < 1;
             for (var currentTime = LastSimulateTime; currentTime < toTime; currentTime += frameDuration)
             {
                 if (SimulatedParticles.ContainsKey(currentTime))
@@ -390,15 +525,16 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                     CurrentParticles.Remove(particle);
                 }
 
-                var particleGenerationRate = particleGenerationRateProperty.GetValue(currentTime, 0.0);
+                var particleGenerationRate = particleGenerationRateProperty.GetValue(currentTime, 0.0) / frameRate / simulationRate;
                 if (particleGenerationRate > 0.0)
                 {
                     if (isFirstParticleGeneration)
                     {
                         particleGeneration = particleGenerationRate > 1.0 ? 0.0 : 1.0;
+                        isFirstParticleGeneration = false;
                     }
 
-                    particleGeneration += particleGenerationRate / simulationRate;
+                    particleGeneration += particleGenerationRate;
 
                     var generate = (int)particleGeneration;
                     if (generate > 0)
@@ -431,6 +567,8 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                         var opacityGraphValue = opacityGraphProperty.GetValue(currentTime, GraphValueParameter.Identity);
                         var randomZValue = unchecked((uint)currentTime.GetHashCode());
                         var cannonVelocity = Vector3d.Zero;
+                        birthColor.W = 1.0F;
+                        deadColor.W = 1.0F;
                         if (addCannonMoveVelocity)
                         {
                             cannonVelocity = (cannonPosition - cannonPositionProperty.GetValue(currentTime - frameDuration, Vector3d.Zero)) / (double)frameDuration;
@@ -461,9 +599,9 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                 }
 
                 SimulatedParticles.Add(currentTime, [..CurrentParticles.Select(p => p.ToSimulated(doubleCurrentTime))]);
+                SimulatedParticleTimes.Add(currentTime);
+                LastSimulateTime = currentTime;
             }
-
-            LastSimulateTime = toTime;
         }
 
         public void Dispose() { }
@@ -482,6 +620,59 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
         static Vector3d CalcRotatedVector(in Vector3d angles)
         {
             return Matrix4x4d.CreateRotateZ(angles.Z).RotateY(angles.Y).RotateX(angles.X).Transform(new Vector3d(0.0, 1.0, 0.0));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static (double fov, Matrix4x4d viewMatrix) CreateCameraMatrix(CameraSetting cameraSetting, int width, int height, double originX, double originY, double originalWidth, double originalHeight)
+        {
+            var originOffset = Vector256.Create(originX, originY, 0.0, 0.0);
+            var size = Math.Max(width, height);
+            var pos256 = (cameraSetting.Position.AsVector256() + originOffset) / size;
+            var poi256 = (cameraSetting.PointOfInterest.AsVector256() + originOffset) / size;
+
+            var diff = poi256 - pos256;
+            var x = diff.GetElement(0);
+            var y = diff.GetElement(1);
+            var z = diff.GetElement(2);
+
+            var fov = Math.Atan(originalWidth / cameraSetting.Zoom * 0.5) * 2.0;
+            var viewMatrix = Matrix4x4d.Identity
+                .Translate(-pos256.GetElement(0), -pos256.GetElement(1), -pos256.GetElement(2))
+                .RotateY(-Math.Atan2(x, z) / Math.PI * 180.0)
+                .RotateX(Math.Atan2(y, Math.Sqrt(x * x + z * z)) / Math.PI * 180.0)
+                .RotateX(cameraSetting.Orientation.X)
+                .RotateY(cameraSetting.Orientation.Y)
+                .RotateZ(cameraSetting.Orientation.Z)
+                .RotateX(cameraSetting.AngleX)
+                .RotateY(cameraSetting.AngleY)
+                .RotateZ(cameraSetting.AngleZ)
+                .Translate(-(size - width) * 0.5 / size, -(size - height) * 0.5 / size, 0.0);
+            return (fov, viewMatrix);
+        }
+
+        static NImage GetLayerImage(ILayerObject? layerObject, Time referenceTime, LayerImageProcessType type, double downSamplingRate, IAcceleratorObject? acceleratorObject)
+        {
+            if (layerObject != null)
+            {
+                switch (type)
+                {
+                    case LayerImageProcessType.Effected:
+                        return layerObject.GetEffectedImage(referenceTime, downSamplingRate, acceleratorObject != null);
+                    default:
+                        return layerObject.GetRawImage(referenceTime, downSamplingRate, acceleratorObject != null);
+                }
+            }
+            else
+            {
+                if (acceleratorObject != null)
+                {
+                    return new NGPUImage(1, 1, acceleratorObject.CurrentDevice, Vector4.One);
+                }
+                else
+                {
+                    return new NManagedImage(1, 1, Vector4.One);
+                }
+            }
         }
     }
 
@@ -576,12 +767,13 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
         public SimulatedParticleData ToSimulated(double currentTime)
         {
             var t = (float)((currentTime - BirthTime) / LifeTime);
+            var size = SizeGraphValue.Interpolation(BirthSize, DeadSize, t);
             return new SimulatedParticleData(
-                Position,
+                Position + new Vector3d(size, size, 0.0) * 0.5,
                 Angles,
                 ColorGraphValue.Interpolation(BirthColor, DeadColor, t),
-                SizeGraphValue.Interpolation(BirthSize, DeadSize, t),
-                OpacityGraphValue.Interpolation(BirthOpacity, DeadOpacity, t)
+                size,
+                OpacityGraphValue.Interpolation(BirthOpacity, DeadOpacity, t) * 0.01F
             );
         }
     }
