@@ -1712,6 +1712,9 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("%")]
         public const string Unit_Percent = nameof(Unit_Percent);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("°")]
+        public static readonly string Unit_Angle = nameof(Unit_Angle);
+
         [LanguageKey, DefaultValue("°/s")]
         public const string Unit_AnglePerSec = nameof(Unit_AnglePerSec);
 

@@ -30,6 +30,7 @@ using NiVE3.PresetPlugin.Internal.Drawing;
 using NiVE3.PresetPlugin.Property;
 using NiVE3.PresetPlugin.Property.Properties;
 using NiVE3.PresetPlugin.Resource;
+using NiVE3.Shared.Extension;
 
 namespace NiVE3.PresetPlugin.Effect.Simulation
 {
@@ -51,7 +52,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
 
         const string PropertyCannonDirectionId = nameof(PropertyCannonDirectionId);
 
-        const string PropertyCannonRandomDirectionRateId = nameof(PropertyCannonRandomDirectionRateId);
+        const string PropertyCannonRandomDirectionId = nameof(PropertyCannonRandomDirectionId);
 
         const string PropertyCannonInitialParticleSpeedId = nameof(PropertyCannonInitialParticleSpeedId);
 
@@ -185,7 +186,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                         new Vector3dProperty(PropertyCannonPositionId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Cannon_Position, new Vector3d(sourceSize.Width, sourceSize.Height, 0.0) * 0.5, digit: 2, is3D: true),
                         new Vector3dProperty(PropertyCannonRadiusId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Cannon_Radius, new Vector3d(100.0, 100.0, 100.0), digit: 2, is3D: true),
                         new DirectionProperty(PropertyCannonDirectionId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Cannon_Direction, Vector3d.Zero, digit: 2),
-                        new DoubleProperty(PropertyCannonRandomDirectionRateId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Cannon_RandomDirection, 20.0, 0.0, 180.0, digit: 2),
+                        new DoubleProperty(PropertyCannonRandomDirectionId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Cannon_RandomDirection, 20.0, 0.0, 180.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Angle),
                         new DoubleProperty(PropertyCannonInitialParticleSpeedId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Cannon_InitialParticleSpeed, 100.0, 0.0, double.MaxValue, digit: 2),
                         new DoubleProperty(PropertyCannonRandomInitialParticleSpeedId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Cannon_RandomInitialParticleSpeed, 20.0, 0.0, double.MaxValue, digit: 2),
                         new CheckBoxProperty(PropertyCannonAddCannonMoveVelocityId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Cannon_AddCannonMoveVelocity, true),
@@ -245,7 +246,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                     [
                         new UseLayerImageProperty(PropertySourceLayerLayerId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_SourceLayer_Layer, 90.0),
                         new CheckBoxProperty(PropertySourceLayerUseSpecificReferenceTimeId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_SourceLayer_UseSpecificReferenceTime, false),
-                        new DoubleProperty(PropertySourceLayerSpecificReferenceTimeId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_SourceLayer_SpecificReferenceTime, 0.0, 0.0, double.MaxValue, false, digit: 2)
+                        new DoubleProperty(PropertySourceLayerSpecificReferenceTimeId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_SourceLayer_SpecificReferenceTime, 0.0, 0.0, double.MaxValue, false, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Second)
                     ]
                 ),
                 new PropertyGroup(
@@ -310,6 +311,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                     cannon.First(p => p.Id == PropertyCannonPositionId),
                     cannon.First(p => p.Id == PropertyCannonRadiusId),
                     cannon.First(p => p.Id == PropertyCannonDirectionId),
+                    cannon.First(p => p.Id == PropertyCannonRandomDirectionId),
                     cannon.First(p => p.Id == PropertyCannonInitialParticleSpeedId),
                     cannon.First(p => p.Id == PropertyCannonRandomInitialParticleSpeedId),
                     cannon.First(p => p.Id == PropertyCannonAddCannonMoveVelocityId),
@@ -508,6 +510,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
             IPropertyObject cannonPositionProperty,
             IPropertyObject cannonRadiusProperty,
             IPropertyObject cannonDirectionProperty,
+            IPropertyObject randomDirectionProperty,
             IPropertyObject initialParticleSpeedProperty,
             IPropertyObject randomInitialParticleSpeedProperty,
             IPropertyObject addCannonMoveVelocityProperty,
@@ -590,14 +593,15 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                         var cannonPosition = cannonPositionProperty.GetValue(currentTime, Vector3d.Zero);
                         var cannonRadius = cannonRadiusProperty.GetValue(currentTime, Vector3d.Zero);
                         var cannonDirection = cannonDirectionProperty.GetValue(currentTime, Vector3d.Zero);
-                        var baseSpeed = CalcRotatedVector(cannonDirection) * initialParticleSpeedProperty.GetValue(currentTime, 0.0);
+                        var randomDirection = randomDirectionProperty.GetValue(currentTime, 0.0);
+                        var baseSpeed = initialParticleSpeedProperty.GetValue(currentTime, 0.0);
                         var baseRotationSpeed = new Vector3d(
                             particleRotateSpeedXProperty.GetValue(currentTime, 0.0),
                             particleRotateSpeedYProperty.GetValue(currentTime, 0.0),
                             particleRotateSpeedZProperty.GetValue(currentTime, 0.0)
                         );
                         var addCannonMoveVelocity = addCannonMoveVelocityProperty.GetValue<bool>(currentTime, false);
-                        var randomSpeedRate = randomInitialParticleSpeedProperty.GetValue(currentTime, 0.0);
+                        var randomSpeed = randomInitialParticleSpeedProperty.GetValue(currentTime, 0.0);
                         var randomRotationSpeed = randomParticleRotateSpeedProperty.GetValue(currentTime, 0.0);
                         var birthColor = birthColorProperty.GetValue(currentTime, Vector4.One);
                         var deadColor = deadColorProperty.GetValue(currentTime, Vector4.One);
@@ -618,13 +622,15 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                         }
                         for (var g = 0; g < generate; g++)
                         {
+                            var speedDirection = CalcRotatedVector(cannonDirection + (Vector3d)(Vector4.One - NoiseFunction.Pcg3D1Vector4Cpu(1, (uint)g, randomZValue, randomSeed) * 2.0F).AsVector3() * randomDirection);
+                            var speed = speedDirection * baseSpeed;
                             CurrentParticles.Add(
                                 new ParticleData(
                                     doubleCurrentTime,
                                     lifeTime,
-                                    cannonPosition + cannonRadius * (1.0 - NoiseFunction.Pcg3D1FloatCpu(1, (uint)g, randomZValue, randomSeed) * 2.0),
-                                    baseSpeed * (1.0 + randomSpeedRate * (1.0 - NoiseFunction.Pcg3D1FloatCpu(2, (uint)g, randomZValue, randomSeed) * 2.0)) + cannonVelocity,
-                                    baseRotationSpeed * (1.0 + randomRotationSpeed * (1.0 - NoiseFunction.Pcg3D1FloatCpu(3, (uint)g, randomZValue, randomSeed) * 2.0)),
+                                    cannonPosition + cannonRadius * (Vector3d)(Vector4.One - NoiseFunction.Pcg3D1Vector4Cpu(2, (uint)g, randomZValue, randomSeed) * 2.0F).AsVector3(),
+                                    speed + speedDirection * randomSpeed * (1.0 - NoiseFunction.Pcg3D1FloatCpu(3, (uint)g, randomZValue, randomSeed) * 2.0) + cannonVelocity,
+                                    baseRotationSpeed + (Vector3d)(Vector4.One - NoiseFunction.Pcg3D1Vector4Cpu(4, (uint)g, randomZValue, randomSeed) * 2.0F).AsVector3(),
                                     birthColor,
                                     deadColor,
                                     colorGraphValue,
@@ -662,7 +668,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static Vector3d CalcRotatedVector(in Vector3d angles)
         {
-            return Matrix4x4d.CreateRotateZ(angles.Z).RotateY(angles.Y).RotateX(angles.X).Transform(new Vector3d(0.0, 1.0, 0.0));
+            return Matrix4x4d.CreateRotateZ(angles.Z + 180.0).RotateY(angles.Y).RotateX(angles.X).Transform(new Vector3d(0.0, 1.0, 0.0));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
