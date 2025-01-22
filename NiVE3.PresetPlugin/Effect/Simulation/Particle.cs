@@ -184,7 +184,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                         new DoubleProperty(PropertyCannonParticleGenerationRateId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Cannon_GenerationRate, 30.0, 0.0, double.MaxValue, digit: 2),
                         new DoubleProperty(PropertyCannonParticleLifetimeId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Cannon_ParticleLifeTime, 5.0, 0.001, double.MaxValue, digit: 3, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Second),
                         new Vector3dProperty(PropertyCannonPositionId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Cannon_Position, new Vector3d(sourceSize.Width, sourceSize.Height, 0.0) * 0.5, digit: 2, is3D: true),
-                        new Vector3dProperty(PropertyCannonRadiusId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Cannon_Radius, new Vector3d(100.0, 100.0, 100.0), digit: 2, is3D: true),
+                        new Vector3dProperty(PropertyCannonRadiusId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Cannon_Radius, Vector3d.Zero, digit: 2, is3D: true),
                         new DirectionProperty(PropertyCannonDirectionId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Cannon_Direction, Vector3d.Zero, digit: 2),
                         new DoubleProperty(PropertyCannonRandomDirectionId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Cannon_RandomDirection, 20.0, 0.0, 180.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Angle),
                         new DoubleProperty(PropertyCannonInitialParticleSpeedId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Cannon_InitialParticleSpeed, 100.0, 0.0, double.MaxValue, digit: 2),
@@ -221,7 +221,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                     PropertyWorldGroupId,
                     LanguageResourceDictionary.ResourceKeys.Simulation_Particle_World,
                     [
-                        new DoubleProperty(PropertyWorldGravityId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_World_Gravity, 10.0, 0.0, double.MaxValue, digit: 2),
+                        new DoubleProperty(PropertyWorldGravityId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_World_Gravity, 50.0, 0.0, double.MaxValue, digit: 2),
                         new DirectionProperty(PropertyWorldGravityDirectionId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_World_GravityDirection, new Vector3d(0.0, 0.0, 180.0), digit: 2),
                         new DoubleProperty(PropertyWorldAirRegistanceId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_World_AirRegistance, 0.001, 0.0, double.MaxValue, digit: 6)
                     ]
