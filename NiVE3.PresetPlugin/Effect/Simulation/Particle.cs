@@ -27,6 +27,7 @@ using NiVE3.PresetPlugin.Effect.Util.General;
 using NiVE3.PresetPlugin.Extension;
 using NiVE3.PresetPlugin.Internal;
 using NiVE3.PresetPlugin.Internal.Drawing;
+using NiVE3.PresetPlugin.Internal.Util;
 using NiVE3.PresetPlugin.Property;
 using NiVE3.PresetPlugin.Property.Properties;
 using NiVE3.PresetPlugin.Resource;
@@ -358,7 +359,6 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
             Renderer3DBase renderer;
             if (useGpu && AcceleratorObject != null)
             {
-
                 var device = AcceleratorObject.CurrentDevice;
                 renderTarget = new NGPUImage(image.Width, image.Height, device);
                 renderer = new GPURenderer3D((NGPUImage)renderTarget, device, realWidth, realHeight, [], [], [], []);
@@ -371,19 +371,22 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
 
             var camera = properties.First(p => p.Id == PropertyCameraGroupId).GetChildren() ?? [];
             var useCompositionCamera = camera.GetValue(PropertyCameraUseCompositionId, layerTime, false);
-            var originX = roi.OriginalImagePosition.X * downSamplingRateX;
-            var originY = roi.OriginalImagePosition.Y * downSamplingRateY;
             var originalWidth = roi.OriginalImageSize.Width * downSamplingRateX;
             var originalHeight = roi.OriginalImageSize.Height * downSamplingRateY;
+            var fov = 0.0;
+            Unsafe.SkipInit(out Matrix4x4d viewMatrix);
+            // TODO: ROI変更分のズレを合わせる
             if (useCompositionCamera)
             {
-                var (fov, viewMatrix) = CreateCameraMatrix(composition.GetActiveCameraSetting(layerTime + layer.SourceStartPoint), realWidth, realHeight, originX, originY, composition.Width, composition.Height);
-                renderer.FieldOfView = fov;
-                renderer.ViewMatrix = viewMatrix;
+                var cameraSetting = composition.GetActiveCameraSetting(layerTime + layer.SourceStartPoint);
+                fov = Math.Atan(realWidth / cameraSetting.Zoom * 0.5) * 2.0;
+                viewMatrix = Transform3D.Calc3DViewMatrix(cameraSetting, realWidth, realHeight);
             }
             else
             {
-                var (fov, viewMatrix) = CreateCameraMatrix(
+                var zoom = camera.GetValue(PropertyCameraZoomId, layerTime, 0.0);
+                fov = Math.Atan(realWidth / zoom * 0.5) * 2.0;
+                viewMatrix = Transform3D.Calc3DViewMatrix(
                     new CameraSetting(
                         camera.GetValue(PropertyCameraPointOfInterestId, layerTime, Vector3d.Zero),
                         camera.GetValue(PropertyCameraPositionId, layerTime, Vector3d.Zero),
@@ -391,19 +394,15 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                         camera.GetValue(PropertyCameraXAngleId, layerTime, 0.0),
                         camera.GetValue(PropertyCameraYAngleId, layerTime, 0.0),
                         camera.GetValue(PropertyCameraZAngleId, layerTime, 0.0),
-                        camera.GetValue(PropertyCameraZoomId, layerTime, 0.0),
+                        zoom,
                         []
                     ),
                     realWidth,
-                    realHeight,
-                    originX,
-                    originY,
-                    originalWidth,
-                    originalHeight
+                    realHeight
                 );
-                renderer.FieldOfView = fov;
-                renderer.ViewMatrix = viewMatrix;
             }
+            renderer.FieldOfView = fov;
+            renderer.ViewMatrix = viewMatrix;
 
             var particles = SimulatedParticles[SimulatedParticleTimes.First(t => t >= layerTime)];
             var renderSize = Math.Max(realWidth, realHeight);
@@ -669,34 +668,6 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
         static Vector3d CalcRotatedVector(in Vector3d angles)
         {
             return Matrix4x4d.CreateRotateZ(angles.Z + 180.0).RotateY(angles.Y).RotateX(angles.X).Transform(new Vector3d(0.0, 1.0, 0.0));
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static (double fov, Matrix4x4d viewMatrix) CreateCameraMatrix(CameraSetting cameraSetting, int width, int height, double originX, double originY, double originalWidth, double originalHeight)
-        {
-            var originOffset = Vector256.Create(originX, originY, 0.0, 0.0);
-            var size = Math.Max(width, height);
-            var pos256 = (cameraSetting.Position.AsVector256() + originOffset) / size;
-            var poi256 = (cameraSetting.PointOfInterest.AsVector256() + originOffset) / size;
-
-            var diff = poi256 - pos256;
-            var x = diff.GetElement(0);
-            var y = diff.GetElement(1);
-            var z = diff.GetElement(2);
-
-            var fov = Math.Atan(originalWidth / cameraSetting.Zoom * 0.5) * 2.0;
-            var viewMatrix = Matrix4x4d.Identity
-                .Translate(-pos256.GetElement(0), -pos256.GetElement(1), -pos256.GetElement(2))
-                .RotateY(-Math.Atan2(x, z) / Math.PI * 180.0)
-                .RotateX(Math.Atan2(y, Math.Sqrt(x * x + z * z)) / Math.PI * 180.0)
-                .RotateX(cameraSetting.Orientation.X)
-                .RotateY(cameraSetting.Orientation.Y)
-                .RotateZ(cameraSetting.Orientation.Z)
-                .RotateX(cameraSetting.AngleX)
-                .RotateY(cameraSetting.AngleY)
-                .RotateZ(cameraSetting.AngleZ)
-                .Translate(-(size - width) * 0.5 / size, -(size - height) * 0.5 / size, 0.0);
-            return (fov, viewMatrix);
         }
 
         static NImage GetLayerImage(ILayerObject? layerObject, Time referenceTime, LayerImageProcessType type, double downSamplingRate, IAcceleratorObject? acceleratorObject)

@@ -27,6 +27,7 @@ using NiVE3.PresetPlugin.Internal.ViewModel;
 using NiVE3.PresetPlugin.Internal.View;
 using ComputeSharp;
 using NiVE3.PresetPlugin.Internal.Drawing.ComputeShader;
+using NiVE3.PresetPlugin.Internal.Util;
 
 namespace NiVE3.PresetPlugin.Renderer
 {
@@ -185,14 +186,14 @@ namespace NiVE3.PresetPlugin.Renderer
 
         public void SetCamera(CameraSetting cameraSetting)
         {
-            ViewMatrix = Calc3DViewMatrix(cameraSetting, Width, Height);
+            ViewMatrix = Transform3D.Calc3DViewMatrix(cameraSetting, Width, Height);
             FieldOfView = Math.Atan((Width / cameraSetting.Zoom) * 0.5) * 2.0;
         }
 
         public void AddLight(LightSetting lightSetting)
         {
             var size = Math.Max(Width, Height);
-            var mv = CalcLightMatrix(lightSetting, Width, Height) * ViewMatrix * Matrix4x4d.CreateTranslate((size - Width) * 0.5 / size, (size - Height) * 0.5 / size, 0.0);
+            var mv = Transform3D.CalcLightMatrix(lightSetting, Width, Height) * ViewMatrix * Matrix4x4d.CreateTranslate((size - Width) * 0.5 / size, (size - Height) * 0.5 / size, 0.0);
             var pos = mv.Transform(Vector256.Create(0.0, 0.0, 0.0, 1.0));
 
             switch (lightSetting.LightType)
@@ -209,7 +210,7 @@ namespace NiVE3.PresetPlugin.Renderer
                             lightSetting.IsEnableShadow,
                             lightSetting.ShadowStrength * 0.01,
                             lightSetting.ShadowScatterSize,
-                            CalcLightViewMatrixWithoutOffset(lightSetting, Width, Height),
+                            Transform3D.CalcLightViewMatrixWithoutOffset(lightSetting, Width, Height),
                             Matrix4x4d.CreateTranslate(-(size - Width) * 0.5 / size, -(size - Height) * 0.5 / size, 0.0)
                         );
                         PointLights.Add(light);
@@ -232,7 +233,7 @@ namespace NiVE3.PresetPlugin.Renderer
                             lightSetting.IsEnableShadow,
                             lightSetting.ShadowStrength * 0.01,
                             lightSetting.ShadowScatterSize,
-                            CalcLightViewMatrixWithoutOffset(lightSetting, Width, Height).Translate(-(size - Width) * 0.5 / size, -(size - Height) * 0.5 / size, 0.0)
+                            Transform3D.CalcLightViewMatrixWithoutOffset(lightSetting, Width, Height).Translate(-(size - Width) * 0.5 / size, -(size - Height) * 0.5 / size, 0.0)
                         );
                         SpotLights.Add(light);
                     }
@@ -251,7 +252,7 @@ namespace NiVE3.PresetPlugin.Renderer
                             lightSetting.IsEnableShadow,
                             lightSetting.ShadowStrength * 0.01,
                             lightSetting.ShadowScatterSize,
-                            CalcLightViewMatrixWithoutOffset(lightSetting, Width, Height).Translate(-(size - Width) * 0.5 / size, -(size - Height) * 0.5 / size, 0.0)
+                            Transform3D.CalcLightViewMatrixWithoutOffset(lightSetting, Width, Height).Translate(-(size - Width) * 0.5 / size, -(size - Height) * 0.5 / size, 0.0)
                         );
                         ParallelLights.Add(light);
                     }
@@ -395,8 +396,8 @@ namespace NiVE3.PresetPlugin.Renderer
             var anchorPoint = (Vector3d)(transform[ILayerObject.TransformAnchorPointId] ?? new Vector3d());
 
             var projectionMatrix = Matrix4x4d.CreatePerspectiveFieldOfView(fov, 1.0, double.Epsilon, double.PositiveInfinity);
-            var modelMatrix = Calc3DModelMatrix(transform, parentTransforms, Width, Height);
-            var viewMatrix = Calc3DViewMatrix(cameraSetting, Width, Height);
+            var modelMatrix = Transform3D.Calc3DModelMatrix(transform, parentTransforms, Width, Height);
+            var viewMatrix = Transform3D.Calc3DViewMatrix(cameraSetting, Width, Height);
             var offsetX = (size - Width) * 0.5 / size;
             var offsetY = (size - Height) * 0.5 / size;
             var offsetMatrix = Matrix4x4d.CreateTranslate(offsetX, offsetY, 0.0);
@@ -506,23 +507,23 @@ namespace NiVE3.PresetPlugin.Renderer
             var fov = Math.Atan((Width / cameraSetting.Zoom) * 0.5) * 2.0;
 
             var projectionMatrix = Matrix4x4d.CreatePerspectiveFieldOfView(fov, 1.0, double.Epsilon, double.PositiveInfinity);
-            var viewMatrix = Calc3DViewMatrix(cameraSetting, Width, Height);
-            var modelMatrix = GetInvertedCameraMatrix(targetCameraSetting, Width, Height);
+            var viewMatrix = Transform3D.Calc3DViewMatrix(cameraSetting, Width, Height);
+            var modelMatrix = Transform3D.GetInvertedCameraMatrix(targetCameraSetting, Width, Height);
             foreach (var (type, parentTransform) in targetCameraSetting.ParentTransforms)
             {
                 switch (type)
                 {
                     case ParentType.Camera:
-                        modelMatrix *= GetInvertedCameraMatrix(parentTransform, Width, Height);
+                        modelMatrix *= Transform3D.GetInvertedCameraMatrix(parentTransform, Width, Height);
                         break;
                     case ParentType.SpotOrParallelLight:
                     case ParentType.PointLight:
-                        modelMatrix *= GetLightMatrix(type == ParentType.SpotOrParallelLight ? LightType.Spot : LightType.Point, parentTransform, Width, Height);
+                        modelMatrix *= Transform3D.GetLightMatrix(type == ParentType.SpotOrParallelLight ? LightType.Spot : LightType.Point, parentTransform, Width, Height);
                         break;
                     case ParentType.AmbientLight:
                         break;
                     default:
-                        modelMatrix *= GetTransform3D(parentTransform, size);
+                        modelMatrix *= Transform3D.GetTransform3D(parentTransform, size);
                         break;
                 }
             }
@@ -556,8 +557,8 @@ namespace NiVE3.PresetPlugin.Renderer
             var fov = Math.Atan((Width / cameraSetting.Zoom) * 0.5) * 2.0;
 
             var projectionMatrix = Matrix4x4d.CreatePerspectiveFieldOfView(fov, 1.0, double.Epsilon, double.PositiveInfinity);
-            var modelMatrix = CalcLightMatrix(lightSetting, Width, Height);
-            var viewMatrix = Calc3DViewMatrix(cameraSetting, Width, Height);
+            var modelMatrix = Transform3D.CalcLightMatrix(lightSetting, Width, Height);
+            var viewMatrix = Transform3D.Calc3DViewMatrix(cameraSetting, Width, Height);
 
             var mv = modelMatrix * viewMatrix * Matrix4x4d.CreateTranslate((size - Width) * 0.5 / size, (size - Height) * 0.5 / size, 0.0);
 
@@ -591,7 +592,7 @@ namespace NiVE3.PresetPlugin.Renderer
             var projectionOffset = Vector256.Create(offsetX, offsetY, 0.0, 0.0) * size;
             var clickPoint = Vector256.Create(pos.X, pos.Y, 0.0, 0.0);
 
-            var viewMatrix = Calc3DViewMatrix(cameraSetting, Width, Height);
+            var viewMatrix = Transform3D.Calc3DViewMatrix(cameraSetting, Width, Height);
             var fov = Math.Atan((Width / (cameraSetting.Zoom)) * 0.5) * 2.0;
             var projectionMatrix = Matrix4x4d.CreatePerspectiveFieldOfView(fov, 1.0, double.Epsilon, double.PositiveInfinity);
 
@@ -681,8 +682,8 @@ namespace NiVE3.PresetPlugin.Renderer
                 var size = Math.Max(Width, Height);
                 var fov = Math.Atan((Width / cameraSetting.Zoom) * 0.5) * 2.0;
                 var projectionMatrix = Matrix4x4d.CreatePerspectiveFieldOfView(fov, 1.0, double.Epsilon, double.PositiveInfinity);
-                var modelMatrix = Calc3DModelMatrix(baseLayer.Transform, baseLayer.ParentTransform, Width, Height);
-                var viewMatrix = Calc3DViewMatrix(cameraSetting, Width, Height);
+                var modelMatrix = Transform3D.Calc3DModelMatrix(baseLayer.Transform, baseLayer.ParentTransform, Width, Height);
+                var viewMatrix = Transform3D.Calc3DViewMatrix(cameraSetting, Width, Height);
                 var offsetX = (size - Width) * 0.5 / size;
                 var offsetY = (size - Height) * 0.5 / size;
                 var offsetMatrix = Matrix4x4d.CreateTranslate(offsetX, offsetY, 0.0);
@@ -704,7 +705,7 @@ namespace NiVE3.PresetPlugin.Renderer
             var size = Math.Max(Width, Height);
             var fov = Math.Atan((Width / cameraSetting.Zoom) * 0.5) * 2.0;
             var projectionMatrix = Matrix4x4d.CreatePerspectiveFieldOfView(fov, 1.0, double.Epsilon, double.PositiveInfinity);
-            var viewMatrix = Calc3DViewMatrix(cameraSetting, Width, Height);
+            var viewMatrix = Transform3D.Calc3DViewMatrix(cameraSetting, Width, Height);
             var offsetX = (size - Width) * 0.5 / size;
             var offsetY = (size - Height) * 0.5 / size;
             var offsetMatrix = Matrix4x4d.CreateTranslate(offsetX, offsetY, 0.0);
@@ -720,7 +721,7 @@ namespace NiVE3.PresetPlugin.Renderer
             {
                 var size = Math.Max(Width, Height);
                 var offset = Vector256.Create(size - Width, size - Height, 0.0, 0.0) * 0.5 / size;
-                var viewMatrix = Calc3DViewMatrix(cameraSetting, Width, Height);
+                var viewMatrix = Transform3D.Calc3DViewMatrix(cameraSetting, Width, Height);
                 var fov = Math.Atan((Width / (cameraSetting.Zoom)) * 0.5) * 2.0;
 
                 var minZ = (double)TriangleDivider.NearZ;
@@ -763,7 +764,7 @@ namespace NiVE3.PresetPlugin.Renderer
         {
             var size = Math.Max(Width, Height);
             var offset = Vector256.Create(size - Width, size - Height, 0.0, 0.0) * 0.5 / size;
-            var viewMatrix = Calc3DViewMatrix(cameraSetting, Width, Height);
+            var viewMatrix = Transform3D.Calc3DViewMatrix(cameraSetting, Width, Height);
             var fov = Math.Atan((Width / (cameraSetting.Zoom)) * 0.5) * 2.0;
 
             var offsetX = (size - Width) * 0.5 / size;
@@ -815,7 +816,7 @@ namespace NiVE3.PresetPlugin.Renderer
                             Vector4.One,
                             (float)opacity,
                             trackMatteImage.BlendMode,
-                            Matrix4x4d.CreateScale(trackMatteImage.DownSampleRateX, trackMatteImage.DownSampleRateY, 1.0) * Calc3DModelMatrix(trackMatteImage.Transform, trackMatteImage.ParentTransforms, Width, Height),
+                            Matrix4x4d.CreateScale(trackMatteImage.DownSampleRateX, trackMatteImage.DownSampleRateY, 1.0) * Transform3D.Calc3DModelMatrix(trackMatteImage.Transform, trackMatteImage.ParentTransforms, Width, Height),
                             (ShadowCastMode)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionIsCastShadowId] ?? ShadowCastMode.None),
                             (float)((double)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionLightTransmissionId] ?? 0.0) * 0.01),
                             (bool)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionIsAcceptShadowId] ?? false),
@@ -866,7 +867,7 @@ namespace NiVE3.PresetPlugin.Renderer
                             Vector4.One,
                             (float)opacity,
                             i.BlendMode,
-                            Matrix4x4d.CreateScale(i.DownSampleRateX, i.DownSampleRateY, 1.0) * Calc3DModelMatrix(i.Transform, i.ParentTransforms, Width, Height),
+                            Matrix4x4d.CreateScale(i.DownSampleRateX, i.DownSampleRateY, 1.0) * Transform3D.Calc3DModelMatrix(i.Transform, i.ParentTransforms, Width, Height),
                             (ShadowCastMode)(i.LayerOptions?[ILayerObject.ImageLayerOptionIsCastShadowId] ?? ShadowCastMode.None),
                             (float)((double)(i.LayerOptions?[ILayerObject.ImageLayerOptionLightTransmissionId] ?? 0.0) * 0.01),
                             (bool)(i.LayerOptions?[ILayerObject.ImageLayerOptionIsAcceptShadowId] ?? false),
@@ -947,7 +948,7 @@ namespace NiVE3.PresetPlugin.Renderer
                             Vector4.One,
                             (float)opacity,
                             trackMatteImage.BlendMode,
-                            Matrix4x4d.CreateScale(trackMatteImage.DownSampleRateX, trackMatteImage.DownSampleRateY, 1.0) * Calc3DModelMatrix(trackMatteImage.Transform, trackMatteImage.ParentTransforms, Width, Height),
+                            Matrix4x4d.CreateScale(trackMatteImage.DownSampleRateX, trackMatteImage.DownSampleRateY, 1.0) * Transform3D.Calc3DModelMatrix(trackMatteImage.Transform, trackMatteImage.ParentTransforms, Width, Height),
                             (ShadowCastMode)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionIsCastShadowId] ?? ShadowCastMode.None),
                             (float)((double)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionLightTransmissionId] ?? 0.0) * 0.01),
                             (bool)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionIsAcceptShadowId] ?? false),
@@ -998,7 +999,7 @@ namespace NiVE3.PresetPlugin.Renderer
                             Vector4.One,
                             (float)opacity,
                             i.BlendMode,
-                            Matrix4x4d.CreateScale(i.DownSampleRateX, i.DownSampleRateY, 1.0) * Calc3DModelMatrix(i.Transform, i.ParentTransforms, Width, Height),
+                            Matrix4x4d.CreateScale(i.DownSampleRateX, i.DownSampleRateY, 1.0) * Transform3D.Calc3DModelMatrix(i.Transform, i.ParentTransforms, Width, Height),
                             (ShadowCastMode)(i.LayerOptions?[ILayerObject.ImageLayerOptionIsCastShadowId] ?? ShadowCastMode.None),
                             (float)((double)(i.LayerOptions?[ILayerObject.ImageLayerOptionLightTransmissionId] ?? 0.0) * 0.01),
                             (bool)(i.LayerOptions?[ILayerObject.ImageLayerOptionIsAcceptShadowId] ?? false),
@@ -1072,7 +1073,7 @@ namespace NiVE3.PresetPlugin.Renderer
                         Vector4.One,
                         (float)trackMatteOpacity,
                         trackMatteImage.BlendMode,
-                        Matrix4x4d.CreateScale(trackMatteImage.DownSampleRateX, trackMatteImage.DownSampleRateY, 1.0) * Calc3DModelMatrix(trackMatteImage.Transform, trackMatteImage.ParentTransforms, Width, Height),
+                        Matrix4x4d.CreateScale(trackMatteImage.DownSampleRateX, trackMatteImage.DownSampleRateY, 1.0) * Transform3D.Calc3DModelMatrix(trackMatteImage.Transform, trackMatteImage.ParentTransforms, Width, Height),
                         (ShadowCastMode)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionIsCastShadowId] ?? ShadowCastMode.None),
                         (float)((double)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionLightTransmissionId] ?? 0.0) * 0.01),
                         (bool)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionIsAcceptShadowId] ?? false),
@@ -1111,7 +1112,7 @@ namespace NiVE3.PresetPlugin.Renderer
                     Vector4.One,
                     (float)opacity,
                     image.BlendMode,
-                    Matrix4x4d.CreateScale(image.DownSampleRateX, image.DownSampleRateY, 1.0) * Calc3DModelMatrix(image.Transform, image.ParentTransforms, Width, Height),
+                    Matrix4x4d.CreateScale(image.DownSampleRateX, image.DownSampleRateY, 1.0) * Transform3D.Calc3DModelMatrix(image.Transform, image.ParentTransforms, Width, Height),
                     (ShadowCastMode)(image.LayerOptions?[ILayerObject.ImageLayerOptionIsCastShadowId] ?? ShadowCastMode.None),
                     (float)((double)(image.LayerOptions?[ILayerObject.ImageLayerOptionLightTransmissionId] ?? 0.0) * 0.01),
                     (bool)(image.LayerOptions?[ILayerObject.ImageLayerOptionIsAcceptShadowId] ?? false),
@@ -1174,7 +1175,7 @@ namespace NiVE3.PresetPlugin.Renderer
                         Vector4.One,
                         (float)trackMatteOpacity,
                         trackMatteImage.BlendMode,
-                        Matrix4x4d.CreateScale(trackMatteImage.DownSampleRateX, trackMatteImage.DownSampleRateY, 1.0) * Calc3DModelMatrix(trackMatteImage.Transform, trackMatteImage.ParentTransforms, Width, Height),
+                        Matrix4x4d.CreateScale(trackMatteImage.DownSampleRateX, trackMatteImage.DownSampleRateY, 1.0) * Transform3D.Calc3DModelMatrix(trackMatteImage.Transform, trackMatteImage.ParentTransforms, Width, Height),
                         (ShadowCastMode)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionIsCastShadowId] ?? ShadowCastMode.None),
                         (float)((double)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionLightTransmissionId] ?? 0.0) * 0.01),
                         (bool)(trackMatteImage.LayerOptions?[ILayerObject.ImageLayerOptionIsAcceptShadowId] ?? false),
@@ -1213,7 +1214,7 @@ namespace NiVE3.PresetPlugin.Renderer
                     Vector4.One,
                     (float)opacity,
                     image.BlendMode,
-                    Matrix4x4d.CreateScale(image.DownSampleRateX, image.DownSampleRateY, 1.0) * Calc3DModelMatrix(image.Transform, image.ParentTransforms, Width, Height),
+                    Matrix4x4d.CreateScale(image.DownSampleRateX, image.DownSampleRateY, 1.0) * Transform3D.Calc3DModelMatrix(image.Transform, image.ParentTransforms, Width, Height),
                     (ShadowCastMode)(image.LayerOptions?[ILayerObject.ImageLayerOptionIsCastShadowId] ?? ShadowCastMode.None),
                     (float)((double)(image.LayerOptions?[ILayerObject.ImageLayerOptionLightTransmissionId] ?? 0.0) * 0.01),
                     (bool)(image.LayerOptions?[ILayerObject.ImageLayerOptionIsAcceptShadowId] ?? false),
@@ -1250,115 +1251,6 @@ namespace NiVE3.PresetPlugin.Renderer
             return matrix;
         }
 
-        static Matrix4x4d Calc3DModelMatrix(PropertyValueGroup transform, ParentTransform[] parentTransforms, double renderWidth, double renderHeight)
-        {
-            var size = Math.Max(renderWidth, renderHeight);
-            var matrix = GetTransform3D(transform, size);
-
-            foreach (var (type, parentTransform) in parentTransforms)
-            {
-                switch (type)
-                {
-                    case ParentType.Camera:
-                        matrix *= GetInvertedCameraMatrix(parentTransform, renderWidth, renderHeight);
-                        break;
-                    case ParentType.SpotOrParallelLight:
-                    case ParentType.PointLight:
-                        matrix *= GetLightMatrix(type == ParentType.SpotOrParallelLight ? LightType.Spot : LightType.Point, parentTransform, renderWidth, renderHeight);
-                        break;
-                    case ParentType.AmbientLight:
-                        break;
-                    default:
-                        matrix *= GetTransform3D(parentTransform, size);
-                        break;
-                }
-            }
-
-            return matrix;
-        }
-
-        static Matrix4x4d Calc3DViewMatrix(CameraSetting cameraSetting, double renderWidth, double renderHeight)
-        {
-            var size = Math.Max(renderWidth, renderHeight);
-            var view = GetCameraMatrix(cameraSetting, renderWidth, renderHeight);
-            foreach (var (type, parentTransform) in cameraSetting.ParentTransforms)
-            {
-                switch (type)
-                {
-                    case ParentType.Camera:
-                        view = GetCameraMatrix(parentTransform, renderWidth, renderHeight) * view;
-                        break;
-                    case ParentType.SpotOrParallelLight:
-                    case ParentType.PointLight:
-                        view = GetLightMatrix(type == ParentType.SpotOrParallelLight ? LightType.Spot : LightType.Point, parentTransform, renderWidth, renderHeight) * view;
-                        break;
-                    case ParentType.AmbientLight:
-                        break;
-                    default:
-                        if (Matrix4x4d.Invert(GetTransform3D(parentTransform, size), out var inverted))
-                        {
-                            view = inverted * view;
-                        }
-                        break;
-                }
-            }
-            return view.Translate(-(size - renderWidth) * 0.5 / size, -(size - renderHeight) * 0.5 / size, 0.0);
-        }
-
-        static Matrix4x4d CalcLightMatrix(LightSetting lightSetting, double renderWidth, double renderHeight)
-        {
-            var size = Math.Max(renderWidth, renderHeight);
-            var lightModelMatrix = GetLightMatrix(lightSetting, renderWidth, renderHeight);
-            foreach (var (type, parentTransform) in lightSetting.ParentTransforms)
-            {
-                switch (type)
-                {
-                    case ParentType.Camera:
-                        lightModelMatrix *= GetInvertedCameraMatrix(parentTransform, renderWidth, renderHeight);
-                        break;
-                    case ParentType.SpotOrParallelLight:
-                    case ParentType.PointLight:
-                        lightModelMatrix *= GetLightMatrix(type == ParentType.SpotOrParallelLight ? LightType.Spot : LightType.Point, parentTransform, renderWidth, renderHeight);
-                        break;
-                    case ParentType.AmbientLight:
-                        break;
-                    default:
-                        lightModelMatrix *= GetTransform3D(parentTransform, size);
-                        break;
-                }
-            }
-
-            return lightModelMatrix;
-        }
-
-        static Matrix4x4d CalcLightViewMatrixWithoutOffset(LightSetting lightSetting, double renderWidth, double renderHeight)
-        {
-            var size = Math.Max(renderWidth, renderHeight);
-            var view = GetLightViewMatrix(lightSetting.LightType, lightSetting.Position, lightSetting.PointOfInterest, lightSetting.Orientation, lightSetting.AngleX, lightSetting.AngleY, lightSetting.AngleZ, renderWidth, renderHeight);
-            foreach (var (type, parentTransform) in lightSetting.ParentTransforms)
-            {
-                switch (type)
-                {
-                    case ParentType.Camera:
-                        view = GetCameraMatrix(parentTransform, renderWidth, renderHeight) * view;
-                        break;
-                    case ParentType.SpotOrParallelLight:
-                    case ParentType.PointLight:
-                        view = GetLightMatrix(type == ParentType.SpotOrParallelLight ? LightType.Spot : LightType.Point, parentTransform, renderWidth, renderHeight) * view;
-                        break;
-                    case ParentType.AmbientLight:
-                        break;
-                    default:
-                        if (Matrix4x4d.Invert(GetTransform3D(parentTransform, size), out var inverted))
-                        {
-                            view = inverted * view;
-                        }
-                        break;
-                }
-            }
-            return view;
-        }
-
         static Matrix3x3 GetTransform2D(PropertyValueGroup transform)
         {
             var anchorPoint = (Vector3d)(transform[ILayerObject.TransformAnchorPointId] ?? transform[ILayerObject.TransformPointOfInterestId] ?? new Vector3d());
@@ -1368,198 +1260,13 @@ namespace NiVE3.PresetPlugin.Renderer
             return Matrix3x3.AffineTransform((Vector2)anchorPoint.AsVector2d(), (Vector2)scale.AsVector2d(), (float)angle, (Vector2)translate.AsVector2d());
         }
 
-        static Matrix4x4d GetTransform3D(PropertyValueGroup transform, double rendererSize)
-        {
-            var anchorPoint = (Vector3d)(transform[ILayerObject.TransformAnchorPointId] ?? new Vector3d()) / rendererSize;
-            var scale = (Vector3d)(transform[ILayerObject.TransformScaleId] ?? new Vector3d()) * 0.01;
-            var direction = (Vector3d)(transform[ILayerObject.TransformDirectionId] ?? new Vector3d());
-            var angleX = (double)(transform[ILayerObject.TransformXAngleId] ?? 0.0);
-            var angleY = (double)(transform[ILayerObject.TransformYAngleId] ?? 0.0);
-            var angleZ = (double)(transform[ILayerObject.TransformZAngleId] ?? 0.0);
-            var translate = (Vector3d)(transform[ILayerObject.TransformPositionId] ?? new Vector3d()) / rendererSize;
-
-            return Matrix4x4d.AffineTransform(anchorPoint, scale, direction, angleX, angleY, angleZ, translate);
-        }
-
-        static Matrix4x4d GetCameraMatrix(CameraSetting cameraSetting, double renderWidth, double renderHeight)
-        {
-            return GetCameraMatrix(cameraSetting.Position, cameraSetting.PointOfInterest, cameraSetting.Orientation, cameraSetting.AngleX, cameraSetting.AngleY, cameraSetting.AngleZ, renderWidth, renderHeight);
-        }
-
-        static Matrix4x4d GetCameraMatrix(PropertyValueGroup transform, double renderWidth, double renderHeight)
-        {
-            return GetCameraMatrix(
-                (Vector3d)(transform[ILayerObject.TransformPositionId] ?? new Vector3d()),
-                (Vector3d)(transform[ILayerObject.TransformPointOfInterestId] ?? new Vector3d()),
-                (Vector3d)(transform[ILayerObject.TransformOrientationId] ?? new Vector3d()),
-                (double)(transform[ILayerObject.TransformXAngleId] ?? 0.0),
-                (double)(transform[ILayerObject.TransformXAngleId] ?? 0.0),
-                (double)(transform[ILayerObject.TransformXAngleId] ?? 0.0),
-                renderWidth,
-                renderHeight
-            );
-        }
-
-        static Matrix4x4d GetCameraMatrix(in Vector3d pos, in Vector3d poi, in Vector3d orientation, double angleX, double angleY, double angleZ, double renderWidth, double renderHeight)
-        {
-            var size = Math.Max(renderWidth, renderHeight);
-            var pos256 = Avx.Divide(pos.AsVector256(), Vector256.Create(size));
-            var poi256 = Avx.Divide(poi.AsVector256(), Vector256.Create(size));
-
-            var diff = Avx.Subtract(poi256, pos256);
-            var x = diff.GetElement(0);
-            var y = diff.GetElement(1);
-            var z = diff.GetElement(2);
-
-            return Matrix4x4d.Identity
-                .Translate(-pos256.GetElement(0), -pos256.GetElement(1), -pos256.GetElement(2))
-                .RotateY(-Math.Atan2(x, z) / Math.PI * 180.0)
-                .RotateX(Math.Atan2(y, Math.Sqrt(x * x + z * z)) / Math.PI * 180.0)
-                .RotateX(orientation.X)
-                .RotateY(orientation.Y)
-                .RotateZ(orientation.Z)
-                .RotateX(angleX)
-                .RotateY(angleY)
-                .RotateZ(angleZ);
-        }
-
-        static Matrix4x4d GetInvertedCameraMatrix(CameraSetting cameraSetting, double renderWidth, double renderHeight)
-        {
-            return GetInvertedCameraMatrix(cameraSetting.PointOfInterest, cameraSetting.Position, cameraSetting.Orientation, cameraSetting.AngleX, cameraSetting.AngleY, cameraSetting.AngleZ, renderWidth, renderHeight);
-        }
-
-        static Matrix4x4d GetInvertedCameraMatrix(PropertyValueGroup transform, double renderWidth, double renderHeight)
-        {
-            return GetInvertedCameraMatrix(
-                (Vector3d)(transform[ILayerObject.TransformPositionId] ?? new Vector3d()),
-                (Vector3d)(transform[ILayerObject.TransformPointOfInterestId] ?? new Vector3d()),
-                (Vector3d)(transform[ILayerObject.TransformOrientationId] ?? new Vector3d()),
-                (double)(transform[ILayerObject.TransformXAngleId] ?? 0.0),
-                (double)(transform[ILayerObject.TransformYAngleId] ?? 0.0),
-                (double)(transform[ILayerObject.TransformZAngleId] ?? 0.0),
-                renderWidth,
-                renderHeight
-            );
-        }
-
-        static Matrix4x4d GetInvertedCameraMatrix(in Vector3d pos, in Vector3d poi, in Vector3d orientation, double angleX, double angleY, double angleZ, double renderWidth, double renderHeight)
-        {
-            var size = Math.Max(renderWidth, renderHeight);
-            var pos256 = Avx.Divide(pos.AsVector256(), Vector256.Create(size));
-            var poi256 = Avx.Divide(poi.AsVector256(), Vector256.Create(size));
-
-            var diff = Avx.Subtract(poi256, pos256);
-            var x = diff.GetElement(0);
-            var y = diff.GetElement(1);
-            var z = diff.GetElement(2);
-
-            return Matrix4x4d.Identity
-                .RotateZ(-angleZ)
-                .RotateY(-angleY)
-                .RotateX(-angleX)
-                .RotateZ(-orientation.Z)
-                .RotateY(-orientation.Y)
-                .RotateX(-orientation.X)
-                .RotateX(-Math.Atan2(y, Math.Sqrt(x * x + z * z)) / Math.PI * 180.0)
-                .RotateY(Math.Atan2(x, z) / Math.PI * 180.0)
-                .Translate(pos256.GetElement(0), pos256.GetElement(1), pos256.GetElement(2));
-        }
-
-        static Matrix4x4d GetLightMatrix(LightSetting lightSetting, double renderWidth, double renderHeight)
-        {
-            return GetLightMatrix(lightSetting.LightType, lightSetting.Position, lightSetting.PointOfInterest, lightSetting.Orientation, lightSetting.AngleX, lightSetting.AngleY, lightSetting.AngleZ, renderWidth, renderHeight);
-        }
-
-        static Matrix4x4d GetLightMatrix(LightType lightType, PropertyValueGroup transform, double renderWidth, double renderHeight)
-        {
-            return GetLightMatrix(
-                lightType,
-                (Vector3d)(transform[ILayerObject.TransformPositionId] ?? new Vector3d()),
-                (Vector3d)(transform[ILayerObject.TransformPointOfInterestId] ?? new Vector3d()),
-                (Vector3d)(transform[ILayerObject.TransformOrientationId] ?? new Vector3d()),
-                (double)(transform[ILayerObject.TransformXAngleId] ?? 0.0),
-                (double)(transform[ILayerObject.TransformXAngleId] ?? 0.0),
-                (double)(transform[ILayerObject.TransformXAngleId] ?? 0.0),
-                renderWidth,
-                renderHeight
-            );
-        }
-
-        static Matrix4x4d GetLightMatrix(LightType lightType, in Vector3d pos, in Vector3d poi, in Vector3d orientation, double angleX, double angleY, double angleZ, double renderWidth, double renderHeight)
-        {
-            var size = Math.Max(renderWidth, renderHeight);
-            var pos256 = Avx.Divide(pos.AsVector256(), Vector256.Create(size));
-            switch (lightType)
-            {
-                case LightType.Point:
-                    return Matrix4x4d.CreateTranslate(pos256.GetElement(0), pos256.GetElement(1), pos256.GetElement(2));
-                case LightType.Spot:
-                case LightType.Parallel:
-                    {
-                        var poi256 = Avx.Divide(poi.AsVector256(), Vector256.Create(size));
-
-                        var diff = Avx.Subtract(poi256, pos256);
-                        var x = diff.GetElement(0);
-                        var y = diff.GetElement(1);
-                        var z = diff.GetElement(2);
-
-                        return Matrix4x4d.Identity
-                            .RotateZ(-angleZ)
-                            .RotateY(-angleY)
-                            .RotateX(-angleX)
-                            .RotateZ(-orientation.Z)
-                            .RotateY(-orientation.Y)
-                            .RotateX(-orientation.X)
-                            .RotateX(-Math.Atan2(y, Math.Sqrt(x * x + z * z)) / Math.PI * 180.0)
-                            .RotateY(Math.Atan2(x, z) / Math.PI * 180.0)
-                            .Translate(pos256.GetElement(0), pos256.GetElement(1), pos256.GetElement(2));
-                    }
-                default:
-                    return Matrix4x4d.Identity;
-            }
-        }
-
-        static Matrix4x4d GetLightViewMatrix(LightType lightType, in Vector3d pos, in Vector3d poi, in Vector3d orientation, double angleX, double angleY, double angleZ, double renderWidth, double renderHeight)
-        {
-            var size = Math.Max(renderWidth, renderHeight);
-            var pos256 = Avx.Divide(pos.AsVector256(), Vector256.Create(size));
-            switch (lightType)
-            {
-                case LightType.Point:
-                    return Matrix4x4d.CreateTranslate(-pos256.GetElement(0), -pos256.GetElement(1), -pos256.GetElement(2));
-                case LightType.Spot:
-                case LightType.Parallel:
-                    {
-                        var poi256 = Avx.Divide(poi.AsVector256(), Vector256.Create(size));
-
-                        var diff = Avx.Subtract(poi256, pos256);
-                        var x = diff.GetElement(0);
-                        var y = diff.GetElement(1);
-                        var z = diff.GetElement(2);
-
-                        return Matrix4x4d.Identity
-                            .Translate(-pos256.GetElement(0), -pos256.GetElement(1), -pos256.GetElement(2))
-                            .RotateY(-Math.Atan2(x, z) / Math.PI * 180.0)
-                            .RotateX(Math.Atan2(y, Math.Sqrt(x * x + z * z)) / Math.PI * 180.0)
-                            .RotateX(orientation.X)
-                            .RotateY(orientation.Y)
-                            .RotateZ(orientation.Z)
-                            .RotateX(angleX)
-                            .RotateY(angleY)
-                            .RotateZ(angleZ);
-                    }
-                default:
-                    return Matrix4x4d.Identity;
-            }
-        }
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static (BoundingBoxTriangle, BoundingBoxTriangle) CreateBoundingBoxTriangles(LayerSkeleton layerSkeleton, int compositionWidth, int compositionHeight, in Matrix4x4d viewMatrix, in Matrix4x4d offsetMatrix, int index = 0)
         {
             var size = Math.Max(compositionWidth, compositionHeight);
             var (_, (origin, width, height), isEnable3D, transformProperty, parentTransformProperties) = layerSkeleton;
 
-            var modelMatrix = Matrix4x4d.CreateTranslate(-origin.X / size, -origin.Y / size, 0.0) * Calc3DModelMatrix(transformProperty, parentTransformProperties, compositionWidth, compositionHeight);
+            var modelMatrix = Matrix4x4d.CreateTranslate(-origin.X / size, -origin.Y / size, 0.0) * Transform3D.Calc3DModelMatrix(transformProperty, parentTransformProperties, compositionWidth, compositionHeight);
             var mv = modelMatrix * viewMatrix;
             var mvt = mv * offsetMatrix;
             var sv1 = Vector256.Create(0.0, 0.0, 0.0, size) / size;
