@@ -1141,6 +1141,9 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("アンチエイリアス")]
         public const string Simulation_Particle_Rendering_AntiAlias = nameof(Simulation_Particle_Rendering_AntiAlias);
 
+        [LanguageKey, DefaultValue("パーティクル間のブレンドモード")]
+        public const string Simulation_Particle_Rendering_ParticleBlendMode = nameof(Simulation_Particle_Rendering_ParticleBlendMode);
+
         [LanguageKey, DefaultValue("ブレンドモード")]
         public const string Simulation_Particle_Rendering_BlendMode = nameof(Simulation_Particle_Rendering_BlendMode);
 
@@ -1713,7 +1716,7 @@ namespace NiVE3.PresetPlugin.Resource
         public const string Unit_Percent = nameof(Unit_Percent);
 
         [ShowInMarkup, LanguageKey, DefaultValue("°")]
-        public static readonly string Unit_Angle = nameof(Unit_Angle);
+        public const string Unit_Angle = nameof(Unit_Angle);
 
         [LanguageKey, DefaultValue("°/s")]
         public const string Unit_AnglePerSec = nameof(Unit_AnglePerSec);

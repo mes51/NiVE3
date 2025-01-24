@@ -131,6 +131,8 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
 
         const string PropertyRenderingAntiAliasId = nameof(PropertyRenderingAntiAliasId);
 
+        const string PropertyRenderingParticleBlendModeId = nameof(PropertyRenderingParticleBlendModeId);
+
         const string PropertyRenderingBlendModeId = nameof(PropertyRenderingBlendModeId);
 
         const string PropertyRenderingCompositeOrderId = nameof(PropertyRenderingCompositeOrderId);
@@ -213,8 +215,8 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                         new DoubleProperty(PropertyParticleBirthSizeId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Partucle_BirthSize, 6.0, 0.0, double.MaxValue, digit: 2),
                         new DoubleProperty(PropertyParticleDeadSizeId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Partucle_DeadSize, 60.0, 0.0, double.MaxValue, digit: 2),
                         new GraphValueProperty(PropertyParticleSizeGraphId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Partucle_SizeGraph, true, GraphValueParameter.Identity),
-                        new DoubleProperty(PropertyParticleBirthOpacityId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Partucle_BirthOpacity, 100.0, 0.0, 100.0, digit: 2),
-                        new DoubleProperty(PropertyParticleDeadOpacityId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Partucle_DeadOpacity, 0.0, 0.0, 100.0, digit: 2),
+                        new DoubleProperty(PropertyParticleBirthOpacityId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Partucle_BirthOpacity, 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
+                        new DoubleProperty(PropertyParticleDeadOpacityId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Partucle_DeadOpacity, 0.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
                         new GraphValueProperty(PropertyParticleOpacityGraphId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Partucle_OpacityGraph, true, GraphValueParameter.LinearDown)
                     ]
                 ),
@@ -255,6 +257,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                     LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Rendering,
                     [
                         new CheckBoxProperty(PropertyRenderingAntiAliasId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Rendering_AntiAlias, true),
+                        new EnumProperty(PropertyRenderingParticleBlendModeId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Rendering_ParticleBlendMode, typeof(BlendMode), typeof(LanguageResourceDictionary), BlendMode.Normal, selectBoxWidth: 90.0),
                         new EnumProperty(PropertyRenderingBlendModeId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Rendering_BlendMode, typeof(BlendMode), typeof(LanguageResourceDictionary), BlendMode.Normal, selectBoxWidth: 90.0),
                         new EnumProperty(PropertyRenderingCompositeOrderId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Rendering_CompositeOrder, typeof(CompositeOrder), typeof(LanguageResourceDictionary), CompositeOrder.Front, selectBoxWidth: 90.0),
                     ]
@@ -405,6 +408,8 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
             renderer.ViewMatrix = viewMatrix;
 
             var particles = SimulatedParticles[SimulatedParticleTimes.First(t => t >= layerTime)];
+            var rendering = properties.First(p => p.Id == PropertyRenderingGroupId).GetChildren() ?? [];
+            var particleBlendMode = rendering.GetValue(PropertyRenderingParticleBlendModeId, layerTime, BlendMode.Normal);
             var renderSize = Math.Max(realWidth, realHeight);
             var (aspectX, aspectY) = texture.Width >= texture.Height ? (1.0F, texture.Height / (float)texture.Width) : (texture.Width / (float)texture.Height, 1.0F);
             foreach (var particle in particles)
@@ -419,7 +424,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                     particleSizeX,
                     particleSizeY,
                     particle.Opacity,
-                    BlendMode.Normal,
+                    particleBlendMode,
                     Matrix4x4d.AffineTransform(new Vector3d(particleSizeX, particleSizeY, 0.0) * 0.5 / renderSize, Vector3d.One, particle.Angles, 0.0, 0.0, 0.0, particle.Position / renderSize),
                     ShadowCastMode.None,
                     0.0F,
@@ -434,7 +439,6 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                 );
             }
 
-            var rendering = properties.First(p => p.Id == PropertyRenderingGroupId).GetChildren() ?? [];
             var antialias = rendering.GetValue(PropertyRenderingAntiAliasId, layerTime, false);
             switch (renderer)
             {
