@@ -1060,8 +1060,32 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("生成時カラー")]
         public const string Simulation_Particle_Partucle_BirthColor = nameof(Simulation_Particle_Partucle_BirthColor);
 
+        [LanguageKey, DefaultValue("生成時カラーのばらつき")]
+        public const string Simulation_Particle_Partucle_BirthColorVariation = nameof(Simulation_Particle_Partucle_BirthColorVariation);
+
+        [LanguageKey, DefaultValue("色相")]
+        public const string Simulation_Particle_Partucle_BirthColorVariation_Hue = nameof(Simulation_Particle_Partucle_BirthColorVariation_Hue);
+
+        [LanguageKey, DefaultValue("彩度")]
+        public const string Simulation_Particle_Partucle_BirthColorVariation_Saturation = nameof(Simulation_Particle_Partucle_BirthColorVariation_Saturation);
+
+        [LanguageKey, DefaultValue("明度")]
+        public const string Simulation_Particle_Partucle_BirthColorVariation_Value = nameof(Simulation_Particle_Partucle_BirthColorVariation_Value);
+
         [LanguageKey, DefaultValue("消滅時カラー")]
         public const string Simulation_Particle_Partucle_DeadColor = nameof(Simulation_Particle_Partucle_DeadColor);
+
+        [LanguageKey, DefaultValue("消滅時カラーのばらつき")]
+        public const string Simulation_Particle_Partucle_DeadColorVariation = nameof(Simulation_Particle_Partucle_DeadColorVariation);
+
+        [LanguageKey, DefaultValue("色相")]
+        public const string Simulation_Particle_Partucle_DeadColorVariation_Hue = nameof(Simulation_Particle_Partucle_DeadColorVariation_Hue);
+
+        [LanguageKey, DefaultValue("彩度")]
+        public const string Simulation_Particle_Partucle_DeadColorVariation_Saturation = nameof(Simulation_Particle_Partucle_DeadColorVariation_Saturation);
+
+        [LanguageKey, DefaultValue("明度")]
+        public const string Simulation_Particle_Partucle_DeadColorVariation_Value = nameof(Simulation_Particle_Partucle_DeadColorVariation_Value);
 
         [LanguageKey, DefaultValue("カラーマップ")]
         public const string Simulation_Particle_Partucle_ColorGraph = nameof(Simulation_Particle_Partucle_ColorGraph);
@@ -1069,8 +1093,14 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("生成時サイズ")]
         public const string Simulation_Particle_Partucle_BirthSize = nameof(Simulation_Particle_Partucle_BirthSize);
 
+        [LanguageKey, DefaultValue("生成時サイズのばらつき")]
+        public const string Simulation_Particle_Partucle_BirthSizeVariation = nameof(Simulation_Particle_Partucle_BirthSizeVariation);
+
         [LanguageKey, DefaultValue("消滅時サイズ")]
         public const string Simulation_Particle_Partucle_DeadSize = nameof(Simulation_Particle_Partucle_DeadSize);
+
+        [LanguageKey, DefaultValue("消滅時サイズ")]
+        public const string Simulation_Particle_Partucle_DeadSizeVariation = nameof(Simulation_Particle_Partucle_DeadSizeVariation);
 
         [LanguageKey, DefaultValue("サイズマップ")]
         public const string Simulation_Particle_Partucle_SizeGraph = nameof(Simulation_Particle_Partucle_SizeGraph);
@@ -1078,8 +1108,14 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("生成時不透明度")]
         public const string Simulation_Particle_Partucle_BirthOpacity = nameof(Simulation_Particle_Partucle_BirthOpacity);
 
+        [LanguageKey, DefaultValue("生成時不透明度のばらつき")]
+        public const string Simulation_Particle_Partucle_BirthOpacityVariation = nameof(Simulation_Particle_Partucle_BirthOpacityVariation);
+
         [LanguageKey, DefaultValue("消滅時不透明度")]
         public const string Simulation_Particle_Partucle_DeadOpacity = nameof(Simulation_Particle_Partucle_DeadOpacity);
+
+        [LanguageKey, DefaultValue("消滅時不透明度のばらつき")]
+        public const string Simulation_Particle_Partucle_DeadOpacityVariation = nameof(Simulation_Particle_Partucle_DeadOpacityVariation);
 
         [LanguageKey, DefaultValue("不透明度マップ")]
         public const string Simulation_Particle_Partucle_OpacityGraph = nameof(Simulation_Particle_Partucle_OpacityGraph);

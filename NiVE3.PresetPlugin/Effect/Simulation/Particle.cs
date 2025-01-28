@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using System.Windows.Controls;
 using ComputeSharp;
 using NiVE3.Image;
+using NiVE3.Image.Color;
 using NiVE3.Image.Drawing;
 using NiVE3.Numerics;
 using NiVE3.Plugin.Attributes;
@@ -77,19 +78,43 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
 
         const string PropertyParticleBirthColorId = nameof(PropertyParticleBirthColorId);
 
+        const string PropertyParticleBirthColorVariationGroupId = nameof(PropertyParticleBirthColorVariationGroupId);
+
+        const string PropertyParticleBirthColorVariationHueId = nameof(PropertyParticleBirthColorVariationHueId);
+
+        const string PropertyParticleBirthColorVariationSaturationId = nameof(PropertyParticleBirthColorVariationSaturationId);
+
+        const string PropertyParticleBirthColorVariationValueId = nameof(PropertyParticleBirthColorVariationValueId);
+
         const string PropertyParticleDeadColorId = nameof(PropertyParticleDeadColorId);
+
+        const string PropertyParticleDeadColorVariationGroupId = nameof(PropertyParticleDeadColorVariationGroupId);
+
+        const string PropertyParticleDeadColorVariationHueId = nameof(PropertyParticleDeadColorVariationHueId);
+
+        const string PropertyParticleDeadColorVariationSaturationId = nameof(PropertyParticleDeadColorVariationSaturationId);
+
+        const string PropertyParticleDeadColorVariationValueId = nameof(PropertyParticleDeadColorVariationValueId);
 
         const string PropertyParticleColorGraphId = nameof(PropertyParticleColorGraphId);
 
         const string PropertyParticleBirthSizeId = nameof(PropertyParticleBirthSizeId);
 
+        const string PropertyParticleBirthSizeVariationId = nameof(PropertyParticleBirthSizeVariationId);
+
         const string PropertyParticleDeadSizeId = nameof(PropertyParticleDeadSizeId);
+
+        const string PropertyParticleDeadSizeVariationId = nameof(PropertyParticleDeadSizeVariationId);
 
         const string PropertyParticleSizeGraphId = nameof(PropertyParticleSizeGraphId);
 
         const string PropertyParticleBirthOpacityId = nameof(PropertyParticleBirthOpacityId);
 
+        const string PropertyParticleBirthOpacityVariationId = nameof(PropertyParticleBirthOpacityVariationId);
+
         const string PropertyParticleDeadOpacityId = nameof(PropertyParticleDeadOpacityId);
+
+        const string PropertyParticleDeadOpacityVariationId = nameof(PropertyParticleDeadOpacityVariationId);
 
         const string PropertyParticleOpacityGraphId = nameof(PropertyParticleOpacityGraphId);
 
@@ -146,6 +171,34 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
         const string PropertyOptionRandomSeedId = nameof(PropertyOptionRandomSeedId);
 
         #endregion Property ids
+
+        const int SpeedRandomKey = 1;
+
+        const int CannonPositionRandomKey = 2;
+
+        const int CannonDirectionRandomKey = 3;
+
+        const int RotationRandomKey = 4;
+
+        const int BirthColorHueRandomKey = 5;
+
+        const int BirthColorSaturationRandomKey = 6;
+
+        const int BirthColorValueRandomKey = 7;
+
+        const int DeadColorHueRandomKey = 8;
+
+        const int DeadColorSaturationRandomKey = 9;
+
+        const int DeadColorValueRandomKey = 10;
+
+        const int BirthSizeRandomKey = 11;
+
+        const int DeadSizeRandomKey = 12;
+
+        const int BirthOpacityRandomKey = 13;
+
+        const int DeadOpacityRandomKey = 14;
 
         IAcceleratorObject? AcceleratorObject { get; set; }
 
@@ -210,13 +263,35 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                     LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Partucle,
                     [
                         new ColorProperty(PropertyParticleBirthColorId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Partucle_BirthColor, colorDialogTitle, dialogOk, dialogCancel, Vector4.One),
+                        new PropertyGroup(
+                            PropertyParticleBirthColorVariationGroupId,
+                            LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Partucle_BirthColorVariation,
+                            [
+                                new DoubleProperty(PropertyParticleBirthColorVariationHueId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Partucle_BirthColorVariation_Hue, 0.0, 0.0, 360.0, digit: 2),
+                                new DoubleProperty(PropertyParticleBirthColorVariationSaturationId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Partucle_BirthColorVariation_Saturation, 0.0, 0.0, 1.0, slideChangeValue: 0.01, digit: 2),
+                                new DoubleProperty(PropertyParticleBirthColorVariationValueId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Partucle_BirthColorVariation_Value, 0.0, 0.0, 1.0, slideChangeValue: 0.01, digit: 2),
+                            ]
+                        ),
                         new ColorProperty(PropertyParticleDeadColorId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Partucle_DeadColor, colorDialogTitle, dialogOk, dialogCancel, Vector4.UnitW),
+                        new PropertyGroup(
+                            PropertyParticleDeadColorVariationGroupId,
+                            LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Partucle_DeadColorVariation,
+                            [
+                                new DoubleProperty(PropertyParticleDeadColorVariationHueId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Partucle_DeadColorVariation_Hue, 0.0, 0.0, 180.0, digit: 2),
+                                new DoubleProperty(PropertyParticleDeadColorVariationSaturationId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Partucle_DeadColorVariation_Saturation, 0.0, 0.0, 1.0, digit: 2),
+                                new DoubleProperty(PropertyParticleDeadColorVariationValueId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Partucle_DeadColorVariation_Value, 0.0, 0.0, 1.0, digit: 2),
+                            ]
+                        ),
                         new GraphValueProperty(PropertyParticleColorGraphId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Partucle_ColorGraph, true, GraphValueParameter.Identity),
                         new DoubleProperty(PropertyParticleBirthSizeId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Partucle_BirthSize, 6.0, 0.0, double.MaxValue, digit: 2),
+                        new DoubleProperty(PropertyParticleBirthSizeVariationId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Partucle_BirthSizeVariation, 0.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
                         new DoubleProperty(PropertyParticleDeadSizeId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Partucle_DeadSize, 60.0, 0.0, double.MaxValue, digit: 2),
+                        new DoubleProperty(PropertyParticleDeadSizeVariationId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Partucle_DeadSizeVariation, 0.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
                         new GraphValueProperty(PropertyParticleSizeGraphId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Partucle_SizeGraph, true, GraphValueParameter.Identity),
                         new DoubleProperty(PropertyParticleBirthOpacityId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Partucle_BirthOpacity, 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
+                        new DoubleProperty(PropertyParticleBirthOpacityVariationId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Partucle_BirthOpacityVariation, 0.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
                         new DoubleProperty(PropertyParticleDeadOpacityId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Partucle_DeadOpacity, 0.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
+                        new DoubleProperty(PropertyParticleDeadOpacityVariationId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Partucle_DeadOpacityVariation, 0.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
                         new GraphValueProperty(PropertyParticleOpacityGraphId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Partucle_OpacityGraph, true, GraphValueParameter.LinearDown)
                     ]
                 ),
@@ -305,6 +380,8 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                 var cannon = properties.First(p => p.Id == PropertyCannonGroupId).GetChildren() ?? [];
                 var particleRotateSpeeds = cannon.First(p => p.Id == PropertyCannonParticleRotateSpeedGroupId).GetChildren() ?? [];
                 var particle = properties.First(p => p.Id == PropertyParticleGroupId).GetChildren() ?? [];
+                var birthColorVariation = particle.First(p => p.Id == PropertyParticleBirthColorVariationGroupId).GetChildren() ?? [];
+                var deadColorVariation = particle.First(p => p.Id == PropertyParticleDeadColorVariationGroupId).GetChildren() ?? [];
                 var world = properties.First(p => p.Id == PropertyWorldGroupId).GetChildren() ?? [];
 
                 SimulateParticle(
@@ -324,13 +401,23 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                     particleRotateSpeeds.First(p => p.Id == PropertyCannonParticleRotateSpeedZId),
                     cannon.First(p => p.Id == PropertyCannonRandomParticleRotateSpeedId),
                     particle.First(p => p.Id == PropertyParticleBirthColorId),
+                    birthColorVariation.First(p => p.Id == PropertyParticleBirthColorVariationHueId),
+                    birthColorVariation.First(p => p.Id == PropertyParticleBirthColorVariationSaturationId),
+                    birthColorVariation.First(p => p.Id == PropertyParticleBirthColorVariationValueId),
                     particle.First(p => p.Id == PropertyParticleDeadColorId),
+                    deadColorVariation.First(p => p.Id == PropertyParticleDeadColorVariationHueId),
+                    deadColorVariation.First(p => p.Id == PropertyParticleDeadColorVariationSaturationId),
+                    deadColorVariation.First(p => p.Id == PropertyParticleDeadColorVariationValueId),
                     particle.First(p => p.Id == PropertyParticleColorGraphId),
                     particle.First(p => p.Id == PropertyParticleBirthSizeId),
+                    particle.First(p => p.Id == PropertyParticleBirthSizeVariationId),
                     particle.First(p => p.Id == PropertyParticleDeadSizeId),
+                    particle.First(p => p.Id == PropertyParticleDeadSizeVariationId),
                     particle.First(p => p.Id == PropertyParticleSizeGraphId),
                     particle.First(p => p.Id == PropertyParticleBirthOpacityId),
+                    particle.First(p => p.Id == PropertyParticleBirthOpacityVariationId),
                     particle.First(p => p.Id == PropertyParticleDeadOpacityId),
+                    particle.First(p => p.Id == PropertyParticleDeadOpacityVariationId),
                     particle.First(p => p.Id == PropertyParticleOpacityGraphId),
                     world.First(p => p.Id == PropertyWorldGravityId),
                     world.First(p => p.Id == PropertyWorldGravityDirectionId),
@@ -522,13 +609,23 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
             IPropertyObject particleRotateSpeedZProperty,
             IPropertyObject randomParticleRotateSpeedProperty,
             IPropertyObject birthColorProperty,
+            IPropertyObject birthColorVariationHueProperty,
+            IPropertyObject birthColorVariationSaturationProperty,
+            IPropertyObject birthColorVariationValueProperty,
             IPropertyObject deadColorProperty,
+            IPropertyObject deadColorVariationHueProperty,
+            IPropertyObject deadColorVariationSaturationProperty,
+            IPropertyObject deadColorVariationValueProperty,
             IPropertyObject colorGraphProperty,
             IPropertyObject birthSizeProperty,
+            IPropertyObject birthSizeVariationProperty,
             IPropertyObject deadSizeProperty,
+            IPropertyObject deadSizeVariationProperty,
             IPropertyObject sizeGraphProperty,
             IPropertyObject birthOpacityProperty,
+            IPropertyObject birthOpacityVariationProperty,
             IPropertyObject deadOpacityProperty,
+            IPropertyObject deadOpacityVariationProperty,
             IPropertyObject opacityGraphProperty,
             IPropertyObject gravityProperty,
             IPropertyObject gravityDirectionProperty,
@@ -606,42 +703,60 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                         var addCannonMoveVelocity = addCannonMoveVelocityProperty.GetValue<bool>(currentTime, false);
                         var randomSpeed = randomInitialParticleSpeedProperty.GetValue(currentTime, 0.0);
                         var randomRotationSpeed = randomParticleRotateSpeedProperty.GetValue(currentTime, 0.0);
-                        var birthColor = birthColorProperty.GetValue(currentTime, Vector4.One);
-                        var deadColor = deadColorProperty.GetValue(currentTime, Vector4.One);
+                        var birthColor = Hsv.FromRgb(birthColorProperty.GetValue(currentTime, Vector4.One));
+                        var birthColorVariationHue = birthColorVariationHueProperty.GetValue(currentTime, 0.0);
+                        var birthColorVariationSaturation = birthColorVariationSaturationProperty.GetValue(currentTime, 0.0);
+                        var birthColorVariationValue = birthColorVariationValueProperty.GetValue(currentTime, 0.0);
+                        var deadColor = Hsv.FromRgb(deadColorProperty.GetValue(currentTime, Vector4.One));
+                        var deadColorVariationHue = deadColorVariationHueProperty.GetValue(currentTime, 0.0);
+                        var deadColorVariationSaturation = deadColorVariationSaturationProperty.GetValue(currentTime, 0.0);
+                        var deadColorVariationValue = deadColorVariationValueProperty.GetValue(currentTime, 0.0);
                         var colorGraphValue = colorGraphProperty.GetValue(currentTime, GraphValueParameter.Identity);
                         var birthSize = birthSizeProperty.GetValue(currentTime, 0.0);
+                        var birthSizeVariation = birthSize * birthSizeVariationProperty.GetValue(currentTime, 0.0) * 0.01;
                         var deadSize = deadSizeProperty.GetValue(currentTime, 0.0);
+                        var deadSizeVariation = deadSize * deadSizeVariationProperty.GetValue(currentTime, 0.0) * 0.01;
                         var sizeGraphValue = sizeGraphProperty.GetValue(currentTime, GraphValueParameter.Identity);
                         var birthOpacity = birthOpacityProperty.GetValue(currentTime, 0.0);
+                        var birthOpacityVariation = birthOpacity * birthOpacityVariationProperty.GetValue(currentTime, 0.0) * 0.01;
                         var deadOpacity = deadOpacityProperty.GetValue(currentTime, 0.0);
+                        var deadOpacityVariation = deadOpacity * deadOpacityVariationProperty.GetValue(currentTime, 0.0) * 0.01;
                         var opacityGraphValue = opacityGraphProperty.GetValue(currentTime, GraphValueParameter.Identity);
                         var randomZValue = unchecked((uint)currentTime.GetHashCode());
                         var cannonVelocity = Vector3d.Zero;
-                        birthColor.W = 1.0F;
-                        deadColor.W = 1.0F;
                         if (addCannonMoveVelocity)
                         {
                             cannonVelocity = (cannonPosition - cannonPositionProperty.GetValue(currentTime - frameDuration, Vector3d.Zero)) / (double)frameDuration;
                         }
                         for (var g = 0; g < generate; g++)
                         {
-                            var speedDirection = CalcRotatedVector(cannonDirection + (Vector3d)(Vector4.One - NoiseFunction.Pcg3D1Vector4Cpu(1, (uint)g, randomZValue, randomSeed) * 2.0F).AsVector3() * randomDirection);
+                            var speedDirection = CalcRotatedVector(cannonDirection + (Vector3d)(Vector4.One - NoiseFunction.Pcg3D1Vector4Cpu(SpeedRandomKey, (uint)g, randomZValue, randomSeed) * 2.0F).AsVector3() * randomDirection);
                             var speed = speedDirection * baseSpeed;
+
+                            var currentBirthColor = birthColor;
+                            var currentDeadColor = deadColor;
+                            currentBirthColor.Hue += (float)((1.0 - NoiseFunction.Pcg3D1FloatCpu(BirthColorHueRandomKey, (uint)g, randomZValue, randomSeed) * 2.0) * birthColorVariationHue);
+                            currentBirthColor.Saturation += (float)((1.0 - NoiseFunction.Pcg3D1FloatCpu(BirthColorSaturationRandomKey, (uint)g, randomZValue, randomSeed) * 2.0) * birthColorVariationSaturation);
+                            currentBirthColor.Value += (float)((1.0 - NoiseFunction.Pcg3D1FloatCpu(BirthColorValueRandomKey, (uint)g, randomZValue, randomSeed) * 2.0) * birthColorVariationValue);
+                            currentDeadColor.Hue += (float)((1.0 - NoiseFunction.Pcg3D1FloatCpu(DeadColorHueRandomKey, (uint)g, randomZValue, randomSeed) * 2.0) * deadColorVariationHue);
+                            currentDeadColor.Saturation += (float)((1.0 - NoiseFunction.Pcg3D1FloatCpu(DeadColorSaturationRandomKey, (uint)g, randomZValue, randomSeed) * 2.0) * deadColorVariationSaturation);
+                            currentDeadColor.Value += (float)((1.0 - NoiseFunction.Pcg3D1FloatCpu(DeadColorValueRandomKey, (uint)g, randomZValue, randomSeed) * 2.0) * deadColorVariationValue);
+
                             CurrentParticles.Add(
                                 new ParticleData(
                                     doubleCurrentTime,
                                     lifeTime,
-                                    cannonPosition + cannonRadius * (Vector3d)(Vector4.One - NoiseFunction.Pcg3D1Vector4Cpu(2, (uint)g, randomZValue, randomSeed) * 2.0F).AsVector3(),
-                                    speed + speedDirection * randomSpeed * (1.0 - NoiseFunction.Pcg3D1FloatCpu(3, (uint)g, randomZValue, randomSeed) * 2.0) + cannonVelocity,
-                                    baseRotationSpeed + (Vector3d)(Vector4.One - NoiseFunction.Pcg3D1Vector4Cpu(4, (uint)g, randomZValue, randomSeed) * 2.0F).AsVector3(),
-                                    birthColor,
-                                    deadColor,
+                                    cannonPosition + cannonRadius * (Vector3d)(Vector4.One - NoiseFunction.Pcg3D1Vector4Cpu(CannonPositionRandomKey, (uint)g, randomZValue, randomSeed) * 2.0F).AsVector3(),
+                                    speed + speedDirection * randomSpeed * (1.0 - NoiseFunction.Pcg3D1FloatCpu(CannonDirectionRandomKey, (uint)g, randomZValue, randomSeed) * 2.0) + cannonVelocity,
+                                    baseRotationSpeed + (Vector3d)(Vector4.One - NoiseFunction.Pcg3D1Vector4Cpu(RotationRandomKey, (uint)g, randomZValue, randomSeed) * 2.0F).AsVector3(),
+                                    currentBirthColor.ToRgb(),
+                                    currentDeadColor.ToRgb(),
                                     colorGraphValue,
-                                    (float)birthSize,
-                                    (float)deadSize,
+                                    (float)Math.Max(birthSize + (1.0 - NoiseFunction.Pcg3D1FloatCpu(BirthSizeRandomKey, (uint)g, randomZValue, randomSeed) * 2.0F) * birthSizeVariation, 0.0),
+                                    (float)Math.Max(deadSize + (1.0 - NoiseFunction.Pcg3D1FloatCpu(DeadSizeRandomKey, (uint)g, randomZValue, randomSeed) * 2.0F) * deadSizeVariation, 0.0),
                                     sizeGraphValue,
-                                    (float)birthOpacity,
-                                    (float)deadOpacity,
+                                    (float)Math.Clamp(birthOpacity + (1.0 - NoiseFunction.Pcg3D1FloatCpu(BirthOpacityRandomKey, (uint)g, randomZValue, randomSeed) * 2.0F) * birthOpacityVariation, 0.0, 100.0),
+                                    (float)Math.Clamp(deadOpacity + (1.0 - NoiseFunction.Pcg3D1FloatCpu(DeadOpacityRandomKey, (uint)g, randomZValue, randomSeed) * 2.0F) * deadOpacityVariation, 0.0, 100.0),
                                     opacityGraphValue
                                 )
                             );
