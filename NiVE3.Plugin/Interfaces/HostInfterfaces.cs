@@ -136,8 +136,8 @@ namespace NiVE3.Plugin.Interfaces
         /// <param name="globalTime">画像を取得する時のコンポジションの時間</param>
         /// <param name="downSamplingRate">ダウンサンプリングの割合</param>
         /// <param name="useGpu">GPUを使用するかどうか</param>
-        /// <returns>取得した画像</returns>
-        NImage GetRawImage(Time globalTime, double downSamplingRate, bool useGpu);
+        /// <returns>取得した画像。指定した時間がソースの長さを超えていた場合はnull</returns>
+        NImage? GetRawImage(Time globalTime, double downSamplingRate, bool useGpu);
 
         /// <summary>
         /// エフェクト適用済みのレイヤーの画像を取得します
@@ -145,8 +145,8 @@ namespace NiVE3.Plugin.Interfaces
         /// <param name="globalTime">画像を取得する時のコンポジションの時間</param>
         /// <param name="downSamplingRate">ダウンサンプリングの割合</param>
         /// <param name="useGpu">GPUを使用するかどうか</param>
-        /// <returns>取得した画像</returns>
-        NImage GetEffectedImage(Time globalTime, double downSamplingRate, bool useGpu);
+        /// <returns>取得した画像。指定した時間がソースの長さを超えていた場合はnull</returns>
+        NImage? GetEffectedImage(Time globalTime, double downSamplingRate, bool useGpu);
     }
 
     public interface IEffectObject { }

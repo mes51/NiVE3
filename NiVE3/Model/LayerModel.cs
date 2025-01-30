@@ -566,17 +566,27 @@ namespace NiVE3.Model
             PropertyChanged += LayerModel_PropertyChanged;
         }
 
-        NImage ILayerObject.GetRawImage(Time globalTime, double downSamplingRate, bool useGpu)
+        NImage? ILayerObject.GetRawImage(Time globalTime, double downSamplingRate, bool useGpu)
         {
             var sourceTime = CalcSourceTime(globalTime - SourceStartPoint);
+            if (SourceType.HasFlag(SourceType.Video) && (sourceTime < Time.Zero || sourceTime > SourceDuration))
+            {
+                return null;
+            }
+
             var sourceOptionProperties = (TextProperties ?? ShapeProperties ?? SourceOptionProperties)?.GetValues(sourceTime, globalTime, true);
 
             return FootageModel.ReadImage(sourceTime, downSamplingRate, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties, InterpolationQuality, useGpu);
         }
 
-        NImage ILayerObject.GetEffectedImage(Time globalTime, double downSamplingRate, bool useGpu)
+        NImage? ILayerObject.GetEffectedImage(Time globalTime, double downSamplingRate, bool useGpu)
         {
             var layerTime = globalTime - SourceStartPoint;
+            var sourceTime = CalcSourceTime(globalTime - SourceStartPoint);
+            if (SourceType.HasFlag(SourceType.Video) && (sourceTime < Time.Zero || sourceTime > SourceDuration))
+            {
+                return null;
+            }
 
             using var entry = CycleChecker.TryEnter(LayerId);
             if (entry == null)

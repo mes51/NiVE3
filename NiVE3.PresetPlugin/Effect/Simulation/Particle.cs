@@ -791,15 +791,19 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
 
         static NImage GetLayerImage(ILayerObject? layerObject, Time referenceTime, LayerImageProcessType type, double downSamplingRate, IAcceleratorObject? acceleratorObject)
         {
+            NImage? result = null;
             if (layerObject != null)
             {
-                switch (type)
+                result = type switch
                 {
-                    case LayerImageProcessType.Effected:
-                        return layerObject.GetEffectedImage(referenceTime, downSamplingRate, acceleratorObject != null);
-                    default:
-                        return layerObject.GetRawImage(referenceTime, downSamplingRate, acceleratorObject != null);
-                }
+                    LayerImageProcessType.Effected => layerObject.GetEffectedImage(referenceTime, downSamplingRate, acceleratorObject != null),
+                    _ => layerObject.GetRawImage(referenceTime, downSamplingRate, acceleratorObject != null)
+                };
+            }
+
+            if (result != null)
+            {
+                return result;
             }
             else
             {
