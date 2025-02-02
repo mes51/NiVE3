@@ -489,6 +489,21 @@ namespace NiVE3.Model
             }
         }
 
+        public void UpdateValueByReplacedLayerId(Dictionary<Guid, Guid> layerIdMap)
+        {
+            if (Property is CompositionDependPropertyBase cp)
+            {
+                var oldValue = RawValue;
+                RawValue = cp.ChangeValueByReplaceLayerId(RawValue, layerIdMap, CompositionModel);
+
+                if (oldValue != RawValue)
+                {
+                    ValueCommited?.Invoke(this, EventArgs.Empty);
+                    HistoryModel.Add(new UpdateValueByReplacedLayerIdHistoryCommand(this, oldValue, RawValue));
+                }
+            }
+        }
+
         public bool HasCompositionDependProperty()
         {
             return Property is CompositionDependPropertyBase;

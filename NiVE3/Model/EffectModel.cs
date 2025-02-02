@@ -193,6 +193,11 @@ namespace NiVE3.Model
             Properties.UpdateValueByCompositionStateChanged();
         }
 
+        public void ReplaceCompositionDependPropertiesLayerId(Dictionary<Guid, Guid> layerIdMap)
+        {
+            Properties.UpdateValueByReplacedLayerId(layerIdMap);
+        }
+
         public bool ClearExpressionError()
         {
             return Properties.ClearExpressionError();

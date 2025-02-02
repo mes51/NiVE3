@@ -42,6 +42,8 @@ namespace NiVE3.Model
 
         void UpdateValueByCompositionStateChanged();
 
+        void UpdateValueByReplacedLayerId(Dictionary<Guid, Guid> layerIdMap);
+
         bool HasCompositionDependProperty();
 
         bool HasKeyFrames();

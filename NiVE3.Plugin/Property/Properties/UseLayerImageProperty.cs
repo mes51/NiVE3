@@ -48,6 +48,23 @@ namespace NiVE3.Plugin.Property.Properties
             return UseLayerImageTarget.Empty;
         }
 
+        public override object? ChangeValueByReplaceLayerId(object? value, Dictionary<Guid, Guid> layerIdMap, ICompositionObject composition)
+        {
+            if (value is UseLayerImageTarget target)
+            {
+                if (layerIdMap.TryGetValue(target.LayerId, out var newLayerId))
+                {
+                    return new UseLayerImageTarget(newLayerId, target.ImageProcessType);
+                }
+                else
+                {
+                    return target;
+                }
+            }
+
+            return UseLayerImageTarget.Empty;
+        }
+
         public override bool ValidateValue(object? value, ICompositionObject composition)
         {
             if (value is UseLayerImageTarget target)

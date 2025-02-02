@@ -475,6 +475,38 @@ namespace NiVE3.Model
             public void Dispose() { }
         }
 
+        private class UpdateValueByReplacedLayerIdHistoryCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_UpdateValueByReplacedLayerId);
+
+            PropertyModel Model { get; }
+
+            object? OldValue { get; }
+
+            object? NewValue { get; }
+
+            public UpdateValueByReplacedLayerIdHistoryCommand(PropertyModel model, object? oldValue, object? newValue)
+            {
+                Model = model;
+                OldValue = oldValue;
+                NewValue = newValue;
+            }
+
+            public void Redo()
+            {
+                Model.RawValue = NewValue;
+                Model.ValueCommited?.Invoke(Model, EventArgs.Empty);
+            }
+
+            public void Undo()
+            {
+                Model.RawValue = OldValue;
+                Model.ValueCommited?.Invoke(Model, EventArgs.Empty);
+            }
+
+            public void Dispose() { }
+        }
+
         private class ChangeExpressionCodeHistoryCommand : IHistoryCommand
         {
             public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangeExpression);

@@ -157,6 +157,15 @@ namespace NiVE3.Plugin.Property
         /// <returns>変更後の値</returns>
         public abstract object? ChangeValueByCompositionStateChanged(object? value, ICompositionObject composition);
 
+        /// <summary>
+        /// レイヤーのペーストなどでLayerIdが変更された際に値を更新行います
+        /// </summary>
+        /// <param name="value">更新前の値</param>
+        /// <param name="layerIdMap">LayerIdと新しいLayerIdのマップ。変更がなかった場合はマップに含まれません</param>
+        /// <param name="composition">コンポジション</param>
+        /// <returns>変更後の値</returns>
+        public abstract object? ChangeValueByReplaceLayerId(object? value, Dictionary<Guid, Guid> layerIdMap, ICompositionObject composition);
+
         [EditorBrowsable(EditorBrowsableState.Never)]
         public override object? CoerceValue(object? value)
         {

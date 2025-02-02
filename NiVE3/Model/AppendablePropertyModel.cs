@@ -163,6 +163,18 @@ namespace NiVE3.Model
             HistoryModel.EndGroup();
         }
 
+        public void UpdateValueByReplacedLayerId(Dictionary<Guid, Guid> layerIdMap)
+        {
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_UpdateValueByReplacedLayerId));
+
+            foreach (var child in Children)
+            {
+                child.UpdateValueByReplacedLayerId(layerIdMap);
+            }
+
+            HistoryModel.EndGroup();
+        }
+
         public bool HasCompositionDependProperty()
         {
             return Children.Any(c => c.HasCompositionDependProperty());

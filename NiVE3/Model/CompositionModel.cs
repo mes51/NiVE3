@@ -1827,6 +1827,7 @@ namespace NiVE3.Model
 
             foreach (var layer in layers)
             {
+                layer.ReplaceCompositionDependPropertiesLayerId(newLayerIds);
                 layer.UpdateCompositionDependProperties();
             }
             HistoryModel.Add(new PasteLayersHistoryCommand(this, [.. addedLayer], insertStartIndex, isDuplicate));

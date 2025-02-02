@@ -1020,6 +1020,9 @@ namespace NiVE3.View.Resource
         [DefaultValue("コンポジション更新に伴うプロパティの更新")]
         public static readonly string History_UpdateValueByCompositionStateChanged = nameof(History_UpdateValueByCompositionStateChanged);
 
+        [DefaultValue("レイヤー更新に伴うプロパティの更新")]
+        public static readonly string History_UpdateValueByReplacedLayerId = nameof(History_UpdateValueByReplacedLayerId);
+
         // Dialog
 
         [DefaultValue("フッテージの削除")]

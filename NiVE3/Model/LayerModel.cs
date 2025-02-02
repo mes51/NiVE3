@@ -1587,6 +1587,20 @@ namespace NiVE3.Model
             HistoryModel.EndGroup();
         }
 
+        public void ReplaceCompositionDependPropertiesLayerId(Dictionary<Guid, Guid> layerIdMap)
+        {
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_UpdateValueByReplacedLayerId));
+
+            LayerOptionProperties?.UpdateValueByReplacedLayerId(layerIdMap);
+            SourceOptionProperties?.UpdateValueByReplacedLayerId(layerIdMap);
+            foreach (var effect in Effects)
+            {
+                effect.ReplaceCompositionDependPropertiesLayerId(layerIdMap);
+            }
+
+            HistoryModel.EndGroup();
+        }
+
         public void ClearCacheByLayerUpdated()
         {
             if ((LayerOptionProperties?.HasCompositionDependProperty() ?? false) ||
