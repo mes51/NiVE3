@@ -28,11 +28,12 @@ using LinearGradientBrush = NiVE3.Shape.LinearGradientBrush;
 using RadialGradientBrush = NiVE3.Shape.RadialGradientBrush;
 using NiVE3.Plugin.ValueObject;
 using System.Windows.Media;
+using ComputeSharp;
 
 namespace NiVE3.Input
 {
     [Export(typeof(IInput))]
-    [InputMetadata(typeof(ShapeInput), nameof(TextInput), "", "mes51", ID, "", false)]
+    [InputMetadata(typeof(ShapeInput), nameof(TextInput), "", "mes51", ID, "", false, IsSupportLoadToGpu = true)]
     [InternalInput]
     class ShapeInput : IInput
     {
@@ -56,7 +57,10 @@ namespace NiVE3.Input
             return true;
         }
 
-        public void SetupAccelerator(IAcceleratorObject accelerator) { }
+        public void SetupAccelerator(IAcceleratorObject accelerator)
+        {
+            ShapeFootageSource.Instance.SetAcceleratorObject(accelerator);
+        }
 
         public void Dispose() { }
     }
@@ -239,7 +243,14 @@ namespace NiVE3.Input
 
         public Time Duration => Time.Zero;
 
+        IAcceleratorObject? AcceleratorObject { get; set; }
+
         public SourceType SourceType => SourceType.Image;
+
+        public void SetAcceleratorObject(IAcceleratorObject acceleratorObject)
+        {
+            AcceleratorObject = acceleratorObject;
+        }
 
         public PropertyBase[] GetOptionProperties()
         {
@@ -444,6 +455,18 @@ namespace NiVE3.Input
                 return new NManagedImage(1, 1);
             }
 
+            if (toGpu && AcceleratorObject != null)
+            {
+                return ProcessGpu(AcceleratorObject.CurrentDevice, minX, minY, maxX, maxY, drawables, imageInterpolationQuality);
+            }
+            else
+            {
+                return ProcessCpu(minX, minY, maxX, maxY, drawables, imageInterpolationQuality);
+            }
+        }
+
+        static NManagedImage ProcessCpu(int minX, int minY, int maxX, int maxY, Drawable[] drawables, ImageInterpolationQuality imageInterpolationQuality)
+        {
             var image = new NManagedImage(maxX - minX + 1, maxY - minY + 1)
             {
                 Origin = -new Vector2d(minX, minY)
@@ -454,19 +477,50 @@ namespace NiVE3.Input
                 var bounds = path.Bounds;
                 var left = (int)MathF.Floor(bounds.Left);
                 var top = (int)MathF.Floor(bounds.Top);
+                var polygons = ToPolygons(path);
                 switch (fillRule, imageInterpolationQuality)
                 {
                     case (ShapeFillRule.NonZero, ImageInterpolationQuality.Level1):
-                        ShapeRender.FillPolygonNonZeroAiliased(ToPolygons(path), image, brush, minX, minY, blendMode);
+                        ShapeRender.FillPolygonNonZeroAiliased(polygons, image, brush, minX, minY, blendMode);
                         break;
                     case (ShapeFillRule.NonZero, _):
-                        ShapeRender.FillPolygonNonZero(ToPolygons(path), image, brush, minX, minY, blendMode);
+                        ShapeRender.FillPolygonNonZero(polygons, image, brush, minX, minY, blendMode);
                         break;
                     case (ShapeFillRule.EvenOdd, ImageInterpolationQuality.Level1):
-                        ShapeRender.FillPolygonEvenOddAiliased(ToPolygons(path), image, brush, minX, minY, blendMode);
+                        ShapeRender.FillPolygonEvenOddAiliased(polygons, image, brush, minX, minY, blendMode);
                         break;
                     case (ShapeFillRule.EvenOdd, _):
-                        ShapeRender.FillPolygonEvenOdd(ToPolygons(path), image, brush, minX, minY, blendMode);
+                        ShapeRender.FillPolygonEvenOdd(polygons, image, brush, minX, minY, blendMode);
+                        break;
+                }
+            }
+
+            return image;
+        }
+
+        static NGPUImage ProcessGpu(GraphicsDevice device, int minX, int minY, int maxX, int maxY, Drawable[] drawables, ImageInterpolationQuality imageInterpolationQuality)
+        {
+            var image = new NGPUImage(maxX - minX + 1, maxY - minY + 1, device)
+            {
+                Origin = -new Vector2d(minX, minY)
+            };
+
+            foreach (var (brush, fillRule, blendMode, path) in drawables)
+            {
+                var bounds = path.Bounds;
+                var left = (int)MathF.Floor(bounds.Left);
+                var top = (int)MathF.Floor(bounds.Top);
+                var polygons = ToPolygons(path);
+                switch (fillRule, imageInterpolationQuality)
+                {
+                    case (ShapeFillRule.NonZero, ImageInterpolationQuality.Level1):
+                        break;
+                    case (ShapeFillRule.NonZero, _):
+                        ShapeRenderGPU.FillPolygonNonZero(device, polygons, image, brush, minX, minY, blendMode);
+                        break;
+                    case (ShapeFillRule.EvenOdd, ImageInterpolationQuality.Level1):
+                        break;
+                    case (ShapeFillRule.EvenOdd, _):
                         break;
                 }
             }
