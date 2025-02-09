@@ -521,6 +521,7 @@ namespace NiVE3.Input
                     case (ShapeFillRule.EvenOdd, ImageInterpolationQuality.Level1):
                         break;
                     case (ShapeFillRule.EvenOdd, _):
+                        ShapeRenderGPU.FillPolyginEvenOdd(device, polygons, image, brush, minX, minY, blendMode);
                         break;
                 }
             }

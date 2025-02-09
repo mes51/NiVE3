@@ -35,7 +35,48 @@ namespace NiVE3.Shape
                     device.For(
                         width,
                         height,
-                        new ShapeRenderNonZeroAntiAliasedSolid(
+                        new NonZeroAntiAliasedSolid(
+                            image.Data,
+                            image.Width,
+                            lineHits,
+                            lineHitIndices,
+                            SuperSamplingCount,
+                            offsetX + 1.0F,
+                            solidBrush.Color,
+                            (int)blendMode,
+                            startX,
+                            startY
+                        )
+                    );
+                    break;
+            }
+
+            lineHitIndices.Dispose();
+            lineHits.Dispose();
+        }
+
+        public static void FillPolyginEvenOdd(GraphicsDevice device, Polygon[] polygons, NGPUImage image, Brush brush, float offsetX = 0.0F, float offsetY = 0.0F, BlendMode blendMode = BlendMode.Normal)
+        {
+            if (polygons.Length < 1)
+            {
+                return;
+            }
+
+            var (startX, width, startY, height, lineHitIndices, lineHits) = GetHitLines(device, polygons, image.Width, image.Height, SuperSamplingCount, offsetX, offsetY);
+            if (width < 1 || height < 1)
+            {
+                lineHitIndices.Dispose();
+                lineHits.Dispose();
+                return;
+            }
+
+            switch (brush)
+            {
+                case SolidBrush solidBrush:
+                    device.For(
+                        width,
+                        height,
+                        new EvenOddAntiAliasedSolid(
                             image.Data,
                             image.Width,
                             lineHits,
@@ -64,14 +105,14 @@ namespace NiVE3.Shape
             var maxX = Math.Min((int)MathF.Ceiling(polygons.Max(p => p.MaxX) - offsetX) + 1, imageWidth);
             var lineHits = new List<GPULineHit>[(maxY - minY) * superSamplingCount];
             var samplingRate = 1.0F / superSamplingCount;
-            Parallel.For(minY, maxY, h =>
+            Parallel.For(minY, maxY, (Action<int>)(h =>
             {
                 var li = (h - minY) * superSamplingCount;
 
                 for (var s = 0; s < superSamplingCount; s++, li++)
                 {
                     var max = float.MinValue;
-                    var hitLine = new List<GPULineHit>();
+                    var hitLine = new List<InternalShader.Shape.GPULineHit>();
                     for (var i = 0; i < polygons.Length; i++)
                     {
                         var y = h + samplingRate * s + offsetY;
@@ -84,7 +125,7 @@ namespace NiVE3.Shape
                                 if (p.Value > float.MinValue)
                                 {
                                     max = Math.Max(max, p.Value);
-                                    hitLine.Add(new GPULineHit(p.Value, p.IsDown));
+                                    hitLine.Add((GPULineHit)new InternalShader.Shape.GPULineHit(p.Value, p.IsDown));
                                 }
                             }
                         }
@@ -100,7 +141,7 @@ namespace NiVE3.Shape
                         lineHits[li] = [];
                     }
                 }
-            });
+            }));
 
             using var lineHitIndicesUploadBuffer = device.AllocateUploadBuffer<Int2>(lineHits.Length);
             using var lineHitsUploadBuffer = device.AllocateUploadBuffer<GPULineHit>(lineHits.Sum(l => l.Count));
