@@ -181,7 +181,7 @@ namespace NiVE3.Shape
             });
         }
 
-        public static void FillPolygonNonZeroAiliased(Polygon[] polygons, NManagedImage image, Brush brush, float offsetX = 0.0F, float offsetY = 0.0F, BlendMode blendMode = BlendMode.Normal)
+        public static void FillPolygonNonZeroAliased(Polygon[] polygons, NManagedImage image, Brush brush, float offsetX = 0.0F, float offsetY = 0.0F, BlendMode blendMode = BlendMode.Normal)
         {
             if (brush is SolidBrush solidBrush)
             {
@@ -429,7 +429,7 @@ namespace NiVE3.Shape
             });
         }
 
-        public static void FillPolygonEvenOddAiliased(Polygon[] polygons, NManagedImage image, Brush brush, float offsetX = 0.0F, float offsetY = 0.0F, BlendMode blendMode = BlendMode.Normal)
+        public static void FillPolygonEvenOddAliased(Polygon[] polygons, NManagedImage image, Brush brush, float offsetX = 0.0F, float offsetY = 0.0F, BlendMode blendMode = BlendMode.Normal)
         {
             if (brush is SolidBrush solidBrush)
             {
