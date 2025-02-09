@@ -520,6 +520,7 @@ namespace NiVE3.Input
                         ShapeRenderGPU.FillPolygonNonZero(device, polygons, image, brush, minX, minY, blendMode);
                         break;
                     case (ShapeFillRule.EvenOdd, ImageInterpolationQuality.Level1):
+                        ShapeRenderGPU.FillPolyginEvenOddAliased(device, polygons, image, brush, minX, minY, blendMode);
                         break;
                     case (ShapeFillRule.EvenOdd, _):
                         ShapeRenderGPU.FillPolyginEvenOdd(device, polygons, image, brush, minX, minY, blendMode);

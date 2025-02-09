@@ -136,6 +136,46 @@ namespace NiVE3.Shape
             lineHits.Dispose();
         }
 
+        public static void FillPolyginEvenOddAliased(GraphicsDevice device, Polygon[] polygons, NGPUImage image, Brush brush, float offsetX = 0.0F, float offsetY = 0.0F, BlendMode blendMode = BlendMode.Normal)
+        {
+            if (polygons.Length < 1)
+            {
+                return;
+            }
+
+            var (startX, width, startY, height, lineHitIndices, lineHits) = GetHitLines(device, polygons, image.Width, image.Height, 1, offsetX - 1.0F, offsetY);
+            if (width < 1 || height < 1)
+            {
+                lineHitIndices.Dispose();
+                lineHits.Dispose();
+                return;
+            }
+
+            switch (brush)
+            {
+                case SolidBrush solidBrush:
+                    device.For(
+                        width,
+                        height,
+                        new EvenOddAliasedSolid(
+                            image.Data,
+                            image.Width,
+                            lineHits,
+                            lineHitIndices,
+                            offsetX,
+                            solidBrush.Color,
+                            (int)blendMode,
+                            startX,
+                            startY
+                        )
+                    );
+                    break;
+            }
+
+            lineHitIndices.Dispose();
+            lineHits.Dispose();
+        }
+
         static (int minX, int width, int minY, int height, ReadOnlyBuffer<Int2> lineHitIndices, ReadOnlyBuffer<GPULineHit> lineHits) GetHitLines(GraphicsDevice device, Polygon[] polygons, int imageWidth, int imageHeight, int superSamplingCount, float offsetX, float offsetY)
         {
             offsetX++;

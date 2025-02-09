@@ -9,7 +9,7 @@ namespace NiVE3.InternalShader.Shape
 {
     [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
     [GeneratedComputeShaderDescriptor]
-    readonly partial struct NonZeroAliasedSolid(
+    readonly partial struct EvenOddAliasedSolid(
         ReadWriteBuffer<Float4> image,
         int imageWidth,
         ReadOnlyBuffer<GPULineHit> lineHits,
@@ -34,8 +34,7 @@ namespace NiVE3.InternalShader.Shape
                 return;
             }
 
-            var depth = 0;
-            var dir = false;
+            var inout = false;
             for (var li = lineHitIndexBegin; li < lineHitIndexEnd; li++)
             {
                 var lineHit = lineHits[li];
@@ -45,25 +44,10 @@ namespace NiVE3.InternalShader.Shape
                     break;
                 }
 
-                if (depth > 0)
-                {
-                    if (dir != lineHit.IsDown)
-                    {
-                        depth--;
-                    }
-                    else
-                    {
-                        depth++;
-                    }
-                }
-                else
-                {
-                    dir = lineHit.IsDown;
-                    depth++;
-                }
+                inout = !inout;
             }
 
-            if (depth > 0)
+            if (inout)
             {
                 var pos = py * imageWidth + px;
                 image[pos] = BlendMethods.Process(blendMode, image[pos], new Float4(color.XYZ, 1.0F));
