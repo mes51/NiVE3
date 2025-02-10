@@ -29,8 +29,18 @@ namespace NiVE3.InternalShader.Shape
             var px = ThreadIds.X + startX;
             var py = ThreadIds.Y + startY;
 
-            var x = px + offsetX;
-            var ly = ThreadIds.Y * superSamplingCount;
+            var area = CalcArea(ThreadIds.X, ThreadIds.Y);
+            if (area > 0.0F)
+            {
+                var pos = py * imageWidth + px;
+                image[pos] = BlendMethods.Process(blendMode, image[pos], new Float4(color.XYZ, area));
+            }
+        }
+
+        float CalcArea(int tx, int ty)
+        {
+            var x = tx + startX + offsetX;
+            var ly = ty * superSamplingCount;
             var totalArea = 0.0F;
             for (var s = 0; s < superSamplingCount; s++)
             {
@@ -97,8 +107,7 @@ namespace NiVE3.InternalShader.Shape
                 totalArea += area;
             }
 
-            var pos = py * imageWidth + px;
-            image[pos] = BlendMethods.Process(blendMode, image[pos], new Float4(color.XYZ, totalArea * SamplingRate));
+            return totalArea * SamplingRate;
         }
     }
 }

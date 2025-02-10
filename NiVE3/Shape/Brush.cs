@@ -41,15 +41,24 @@ namespace NiVE3.Shape
         public override void Transform(Matrix3x3 matrix) { }
     }
 
-    class LinearGradientBrush : Brush
+    abstract class GradientBrush : Brush
     {
-        ColorGradient ColorGradient { get; }
+        public ColorGradient ColorGradient { get; }
 
-        bool UseOkLabInterpolation { get; }
+        public bool UseOkLabInterpolation { get; }
 
-        Vector2 Begin { get; set; }
+        protected GradientBrush(ColorGradient colorGradient, bool useOkLabInterpolation)
+        {
+            ColorGradient = colorGradient;
+            UseOkLabInterpolation = useOkLabInterpolation;
+        }
+    }
 
-        Vector2 End { get; set; }
+    class LinearGradientBrush : GradientBrush
+    {
+        public Vector2 Begin { get; private set; }
+
+        public Vector2 End { get; private set; }
 
         float Length { get; set; }
 
@@ -60,9 +69,8 @@ namespace NiVE3.Shape
         float Cos { get; set; }
 
         public LinearGradientBrush(ColorGradient colorGradient, bool useOkLabInterpolation, Vector2 begin, Vector2 end)
+            : base(colorGradient, useOkLabInterpolation)
         {
-            ColorGradient = colorGradient;
-            UseOkLabInterpolation = useOkLabInterpolation;
             Begin = begin;
             End = end;
 
@@ -77,10 +85,6 @@ namespace NiVE3.Shape
         public override Vector4 GetColor(float x, float y)
         {
             var p = Sin * (x - Begin.X) + Cos * (y - Begin.Y);
-            if (Reversed)
-            {
-                p = Length - p;
-            }
             var pos = (Reversed ? Length - p : p) / Length;
             return ColorGradient.GetrColor(pos, UseOkLabInterpolation);
         }
@@ -112,22 +116,17 @@ namespace NiVE3.Shape
         }
     }
 
-    class RadialGradientBrush : Brush
+    class RadialGradientBrush : GradientBrush
     {
-        ColorGradient ColorGradient { get; }
+        public Vector2 Begin { get; private set; }
 
-        bool UseOkLabInterpolation { get; }
-
-        Vector2 Begin { get; set; }
-
-        Vector2 End { get; set; }
+        public Vector2 End { get; private set; }
 
         float Length { get; set; }
 
         public RadialGradientBrush(ColorGradient colorGradient, bool useOkLabInterpolation, Vector2 begin, Vector2 end)
+            : base(colorGradient, useOkLabInterpolation)
         {
-            ColorGradient = colorGradient;
-            UseOkLabInterpolation = useOkLabInterpolation;
             Begin = begin;
             End = end;
             Length = Vector2.Distance(begin, end);

@@ -364,17 +364,4 @@ namespace NiVE3.InternalShader
             return Hlsl.Min(Hlsl.Min(v.X, v.Y), v.Z);
         }
     }
-
-    static class FloatNUtil
-    {
-        public static Float4 Mask(Float4 v, Bool4 mask)
-        {
-            return new Float4(mask.X ? v.X : 0.0F, mask.Y ? v.Y : 0.0F, mask.Z ? v.Z : 0.0F, mask.W ? v.W : 0.0F);
-        }
-
-        public static Float4 NotMask(Float4 v, Bool4 mask)
-        {
-            return new Float4(mask.X ? 0.0F : v.X, mask.Y ? 0.0F : v.Y, mask.Z ? 0.0F : v.Z, mask.W ? 0.0F : v.W);
-        }
-    }
 }

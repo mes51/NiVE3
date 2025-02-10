@@ -13,4 +13,8 @@
     <PackageReference Include="ComputeSharp" Version="3.1.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\NiVE3.Numerics\NiVE3.Numerics.csproj" />
+  </ItemGroup>
+
 </Project>
