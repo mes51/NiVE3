@@ -297,6 +297,39 @@ namespace NiVE3.Shape
                         opacityPositions.Dispose();
                     }
                     break;
+                case RadialGradientBrush radialGradientBrush:
+                    {
+                        var gpuBrush = new GPURadialGradientBrush(radialGradientBrush.UseOkLabInterpolation, radialGradientBrush.Begin, radialGradientBrush.End);
+                        var (colorValues, colorPositions, opacityValues, opacityPositions) = CopyToGPUGradientBuffers(device, radialGradientBrush);
+
+                        device.For(
+                            width,
+                            height,
+                            new EvenOddAntiAliasedRadialGradient(
+                                image.Data,
+                                image.Width,
+                                lineHits,
+                                lineHitIndices,
+                                SuperSamplingCount,
+                                offsetX + 1.0F,
+                                offsetY,
+                                colorValues,
+                                colorPositions,
+                                opacityValues,
+                                opacityPositions,
+                                gpuBrush,
+                                (int)blendMode,
+                                startX,
+                                startY
+                            )
+                        );
+
+                        colorValues.Dispose();
+                        colorPositions.Dispose();
+                        opacityValues.Dispose();
+                        opacityPositions.Dispose();
+                    }
+                    break;
             }
 
             lineHitIndices.Dispose();
@@ -346,6 +379,38 @@ namespace NiVE3.Shape
                             width,
                             height,
                             new EvenOddAliasedLinearGradient(
+                                image.Data,
+                                image.Width,
+                                lineHits,
+                                lineHitIndices,
+                                offsetX,
+                                offsetY,
+                                colorValues,
+                                colorPositions,
+                                opacityValues,
+                                opacityPositions,
+                                gpuBrush,
+                                (int)blendMode,
+                                startX,
+                                startY
+                            )
+                        );
+
+                        colorValues.Dispose();
+                        colorPositions.Dispose();
+                        opacityValues.Dispose();
+                        opacityPositions.Dispose();
+                    }
+                    break;
+                case RadialGradientBrush radialGradientBrush:
+                    {
+                        var gpuBrush = new GPURadialGradientBrush(radialGradientBrush.UseOkLabInterpolation, radialGradientBrush.Begin, radialGradientBrush.End);
+                        var (colorValues, colorPositions, opacityValues, opacityPositions) = CopyToGPUGradientBuffers(device, radialGradientBrush);
+
+                        device.For(
+                            width,
+                            height,
+                            new EvenOddAliasedRadialGradient(
                                 image.Data,
                                 image.Width,
                                 lineHits,
