@@ -23,15 +23,27 @@ namespace NiVE3.InternalShader.Shape
     {
         public void Execute()
         {
-            var px = ThreadIds.X + startX;
-            var py = ThreadIds.Y + startY;
-            var x = px + offsetX;
-
-            var lineHitIndexBegin = lineHitIndices[ThreadIds.Y].X;
-            var lineHitIndexEnd = lineHitIndices[ThreadIds.Y].Y;
-            if (lineHitIndexEnd - lineHitIndexBegin < 1)
+            if (!IsHit(ThreadIds.X, ThreadIds.Y))
             {
                 return;
+            }
+
+            var px = ThreadIds.X + startX;
+            var py = ThreadIds.Y + startY;
+
+            var pos = py * imageWidth + px;
+            image[pos] = BlendMethods.Process(blendMode, image[pos], new Float4(color.XYZ, 1.0F));
+        }
+
+        bool IsHit(int tx, int ty)
+        {
+            var x = tx + startX + offsetX;
+
+            var lineHitIndexBegin = lineHitIndices[ty].X;
+            var lineHitIndexEnd = lineHitIndices[ty].Y;
+            if (lineHitIndexEnd - lineHitIndexBegin < 1)
+            {
+                return false;
             }
 
             var depth = 0;
@@ -63,11 +75,7 @@ namespace NiVE3.InternalShader.Shape
                 }
             }
 
-            if (depth > 0)
-            {
-                var pos = py * imageWidth + px;
-                image[pos] = BlendMethods.Process(blendMode, image[pos], new Float4(color.XYZ, 1.0F));
-            }
+            return depth > 0;
         }
     }
 }

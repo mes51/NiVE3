@@ -42,4 +42,20 @@ namespace NiVE3.InternalShader.Shape
             SinCos = new Float2((float)Math.Sin(rad), (float)Math.Cos(rad));
         }
     }
+
+    readonly struct GPURadialGradientBrush
+    {
+        public readonly Float2 Begin;
+
+        public readonly Bool UseOKLabInterpolation;
+
+        public readonly float Length;
+
+        public GPURadialGradientBrush(bool useOKLabInterpolation, Vector2 begin, Vector2 end)
+        {
+            UseOKLabInterpolation = useOKLabInterpolation;
+            Begin = begin;
+            Length = Vector2.Distance(begin, end);
+        }
+    }
 }

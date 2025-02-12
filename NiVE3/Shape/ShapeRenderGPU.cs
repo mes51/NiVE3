@@ -86,6 +86,39 @@ namespace NiVE3.Shape
                         opacityPositions.Dispose();
                     }
                     break;
+                case RadialGradientBrush radialGradientBrush:
+                    {
+                        var gpuBrush = new GPURadialGradientBrush(radialGradientBrush.UseOkLabInterpolation, radialGradientBrush.Begin, radialGradientBrush.End);
+                        var (colorValues, colorPositions, opacityValues, opacityPositions) = CopyToGPUGradientBuffers(device, radialGradientBrush);
+
+                        device.For(
+                            width,
+                            height,
+                            new NonZeroAntiAliasedRadialGradient(
+                                image.Data,
+                                image.Width,
+                                lineHits,
+                                lineHitIndices,
+                                SuperSamplingCount,
+                                offsetX,
+                                offsetY,
+                                colorValues,
+                                colorPositions,
+                                opacityValues,
+                                opacityPositions,
+                                gpuBrush,
+                                (int)blendMode,
+                                startX,
+                                startY
+                            )
+                        );
+
+                        colorValues.Dispose();
+                        colorPositions.Dispose();
+                        opacityValues.Dispose();
+                        opacityPositions.Dispose();
+                    }
+                    break;
             }
 
             lineHitIndices.Dispose();
@@ -125,6 +158,70 @@ namespace NiVE3.Shape
                             startY
                         )
                     );
+                    break;
+                case LinearGradientBrush linearGradientBrush:
+                    {
+                        var gpuBrush = new GPULinearGradientBrush(linearGradientBrush.UseOkLabInterpolation, linearGradientBrush.Begin, linearGradientBrush.End);
+                        var (colorValues, colorPositions, opacityValues, opacityPositions) = CopyToGPUGradientBuffers(device, linearGradientBrush);
+
+                        device.For(
+                            width,
+                            height,
+                            new NonZeroAliasedLinearGradient(
+                                image.Data,
+                                image.Width,
+                                lineHits,
+                                lineHitIndices,
+                                offsetX,
+                                offsetY,
+                                colorValues,
+                                colorPositions,
+                                opacityValues,
+                                opacityPositions,
+                                gpuBrush,
+                                (int)blendMode,
+                                startX,
+                                startY
+                            )
+                        );
+
+                        colorValues.Dispose();
+                        colorPositions.Dispose();
+                        opacityValues.Dispose();
+                        opacityPositions.Dispose();
+                    }
+                    break;
+                case RadialGradientBrush radialGradientBrush:
+                    {
+                        var gpuBrush = new GPURadialGradientBrush(radialGradientBrush.UseOkLabInterpolation, radialGradientBrush.Begin, radialGradientBrush.End);
+                        var (colorValues, colorPositions, opacityValues, opacityPositions) = CopyToGPUGradientBuffers(device, radialGradientBrush);
+
+                        device.For(
+                            width,
+                            height,
+                            new NonZeroAliasedRadialGradient(
+                                image.Data,
+                                image.Width,
+                                lineHits,
+                                lineHitIndices,
+                                offsetX,
+                                offsetY,
+                                colorValues,
+                                colorPositions,
+                                opacityValues,
+                                opacityPositions,
+                                gpuBrush,
+                                (int)blendMode,
+                                startX,
+                                startY
+                            )
+                        );
+
+                        colorValues.Dispose();
+                        colorPositions.Dispose();
+                        opacityValues.Dispose();
+                        opacityPositions.Dispose();
+                    }
                     break;
             }
 
