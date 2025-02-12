@@ -67,7 +67,7 @@ namespace NiVE3.Shape
                                 lineHits,
                                 lineHitIndices,
                                 SuperSamplingCount,
-                                offsetX,
+                                offsetX + 1.0F,
                                 offsetY,
                                 colorValues,
                                 colorPositions,
@@ -100,7 +100,7 @@ namespace NiVE3.Shape
                                 lineHits,
                                 lineHitIndices,
                                 SuperSamplingCount,
-                                offsetX,
+                                offsetX + 1.0F,
                                 offsetY,
                                 colorValues,
                                 colorPositions,
@@ -264,6 +264,39 @@ namespace NiVE3.Shape
                         )
                     );
                     break;
+                case LinearGradientBrush linearGradientBrush:
+                    {
+                        var gpuBrush = new GPULinearGradientBrush(linearGradientBrush.UseOkLabInterpolation, linearGradientBrush.Begin, linearGradientBrush.End);
+                        var (colorValues, colorPositions, opacityValues, opacityPositions) = CopyToGPUGradientBuffers(device, linearGradientBrush);
+
+                        device.For(
+                            width,
+                            height,
+                            new EvenOddAntiAliasedLinearGradient(
+                                image.Data,
+                                image.Width,
+                                lineHits,
+                                lineHitIndices,
+                                SuperSamplingCount,
+                                offsetX + 1.0F,
+                                offsetY,
+                                colorValues,
+                                colorPositions,
+                                opacityValues,
+                                opacityPositions,
+                                gpuBrush,
+                                (int)blendMode,
+                                startX,
+                                startY
+                            )
+                        );
+
+                        colorValues.Dispose();
+                        colorPositions.Dispose();
+                        opacityValues.Dispose();
+                        opacityPositions.Dispose();
+                    }
+                    break;
             }
 
             lineHitIndices.Dispose();
@@ -303,6 +336,38 @@ namespace NiVE3.Shape
                             startY
                         )
                     );
+                    break;
+                case LinearGradientBrush linearGradientBrush:
+                    {
+                        var gpuBrush = new GPULinearGradientBrush(linearGradientBrush.UseOkLabInterpolation, linearGradientBrush.Begin, linearGradientBrush.End);
+                        var (colorValues, colorPositions, opacityValues, opacityPositions) = CopyToGPUGradientBuffers(device, linearGradientBrush);
+
+                        device.For(
+                            width,
+                            height,
+                            new EvenOddAliasedLinearGradient(
+                                image.Data,
+                                image.Width,
+                                lineHits,
+                                lineHitIndices,
+                                offsetX,
+                                offsetY,
+                                colorValues,
+                                colorPositions,
+                                opacityValues,
+                                opacityPositions,
+                                gpuBrush,
+                                (int)blendMode,
+                                startX,
+                                startY
+                            )
+                        );
+
+                        colorValues.Dispose();
+                        colorPositions.Dispose();
+                        opacityValues.Dispose();
+                        opacityPositions.Dispose();
+                    }
                     break;
             }
 
