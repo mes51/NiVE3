@@ -239,7 +239,7 @@ namespace NiVE3.Model
         public void AddChild(AppendablePropertyItem item)
         {
             var child = AddChildInternal(item, null);
-            ValueCommited?.Invoke(this, EventArgs.Empty);
+            OnValueCommited();
 
             HistoryModel.Add(new AddAppendablePropertyChildHistoryCommand(this, child, Children.IndexOf(child)));
         }
@@ -271,7 +271,7 @@ namespace NiVE3.Model
             newOrderedChildren.AddRange(prevOrderedChildren.Except(newOrderedChildren.ToArray()));
 
             Children.SortBy(newOrderedChildren.IndexOf);
-            ValueCommited?.Invoke(this, EventArgs.Empty);
+            OnValueCommited();
 
             if (!prevOrderedChildren.SequenceEqual(Children))
             {
@@ -418,7 +418,7 @@ namespace NiVE3.Model
 
             HistoryModel.Add(new ChangeIsEnableHistoryCommand(this, children, oldState, isEnable));
 
-            ValueCommited?.Invoke(this, EventArgs.Empty);
+            OnValueCommited();
         }
 
         PropertyGroupModel AddChildInternal(AppendablePropertyItem item, Guid? instanceId)
@@ -476,7 +476,7 @@ namespace NiVE3.Model
             {
                 RemoveInternal(c);
             }
-            ValueCommited?.Invoke(this, EventArgs.Empty);
+            OnValueCommited();
 
             HistoryModel.Add(new DeleteAppendablePropertyChildHistoryCommand(this, children, indices, isCut));
         }
@@ -508,19 +508,24 @@ namespace NiVE3.Model
             }
         }
 
+        void OnValueCommited(object? sender = null, EventArgs? e = null)
+        {
+            ValueCommited?.Invoke(sender ?? this, e ?? EventArgs.Empty);
+        }
+
         private void Child_ValueUpdated(object? sender, EventArgs e)
         {
-            ValueUpdated?.Invoke(sender, e);
+            OnValueCommited(sender, e);
         }
 
         private void Child_ValueCommited(object? sender, EventArgs e)
         {
-            ValueCommited?.Invoke(sender, e);
+            OnValueCommited(sender, e);
         }
 
         private void Children_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
-            ValueCommited?.Invoke(this, EventArgs.Empty);
+            OnValueCommited();
         }
 
         private void LayerModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)

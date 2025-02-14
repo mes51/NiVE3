@@ -635,13 +635,13 @@ namespace NiVE3.Model
             public void Redo()
             {
                 Model.InsertInternal(Index, Child);
-                Model.ValueCommited?.Invoke(Model, EventArgs.Empty);
+                Model.OnValueCommited();
             }
 
             public void Undo()
             {
                 Model.RemoveInternal(Child);
-                Model.ValueCommited?.Invoke(Model, EventArgs.Empty);
+                Model.OnValueCommited();
             }
 
             public void Dispose() { }
@@ -673,7 +673,7 @@ namespace NiVE3.Model
                 {
                     Model.RemoveInternal(c);
                 }
-                Model.ValueCommited?.Invoke(Model, EventArgs.Empty);
+                Model.OnValueCommited();
             }
 
             public void Undo()
@@ -682,7 +682,7 @@ namespace NiVE3.Model
                 {
                     Model.InsertInternal(i, c);
                 }
-                Model.ValueCommited?.Invoke(Model, EventArgs.Empty);
+                Model.OnValueCommited();
             }
 
             public void Dispose() { }
@@ -708,13 +708,13 @@ namespace NiVE3.Model
             public void Redo()
             {
                 Model.Children.SortBy(c => Array.IndexOf(NewOrderedChildren, c));
-                Model.ValueCommited?.Invoke(Model, EventArgs.Empty);
+                Model.OnValueCommited();
             }
 
             public void Undo()
             {
                 Model.Children.SortBy(c => Array.IndexOf(PrevOrderedChildren, c));
-                Model.ValueCommited?.Invoke(Model, EventArgs.Empty);
+                Model.OnValueCommited();
             }
 
             public void Dispose() { }
@@ -822,6 +822,7 @@ namespace NiVE3.Model
                 {
                     c.IsEnable = NewState;
                 }
+                Model.OnValueCommited();
             }
 
             public void Undo()
@@ -830,6 +831,7 @@ namespace NiVE3.Model
                 {
                     c.IsEnable = old;
                 }
+                Model.OnValueCommited();
             }
 
             public void Dispose() { }
