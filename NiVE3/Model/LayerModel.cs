@@ -236,6 +236,13 @@ namespace NiVE3.Model
             set { SetProperty(ref hasEffect, value); }
         }
 
+        private bool hasMask;
+        public bool HasMask
+        {
+            get { return hasMask; }
+            set { SetProperty(ref hasMask, value); }
+        }
+
         private BlendMode blendMode = BlendMode.Normal;
         public BlendMode BlendMode
         {
@@ -310,12 +317,23 @@ namespace NiVE3.Model
             get { return effects; }
             set
             {
-                if (effects!= value)
-                {
-                    effects.CollectionChanged -= Effects_CollectionChanged;
-                    value.CollectionChanged += Effects_CollectionChanged;
-                }
+                effects.CollectionChanged -= Effects_CollectionChanged;
+                value.CollectionChanged += Effects_CollectionChanged;
+
                 SetProperty(ref effects, value);
+            }
+        }
+
+        private ObservableCollection<MaskModel> masks = [];
+        public ObservableCollection<MaskModel> Masks
+        {
+            get { return masks; }
+            set
+            {
+                masks.CollectionChanged -= Masks_CollectionChanged;
+                value.CollectionChanged += Masks_CollectionChanged;
+
+                SetProperty(ref masks, value);
             }
         }
 
@@ -352,6 +370,7 @@ namespace NiVE3.Model
         public LayerModel(ProjectModel projectModel, CompositionModel compositionModel, FootageModel footageModel, EffectListModel effectListModel, HistoryModel historyModel, AcceleratorModel acceleratorModel, Guid? layerId)
         {
             Effects = [];
+            Masks = [];
             FootageModel = footageModel;
             EffectListModel = effectListModel;
             ProjectModel = projectModel;
@@ -1228,6 +1247,13 @@ namespace NiVE3.Model
                     e.CalcPropertyHash(layerTime, time, hash);
                 }
             }
+            foreach (var m in Masks)
+            {
+                if (m.IsEnable)
+                {
+                    m.CalcPropertyHash(layerTime, time, hash);
+                }
+            }
 
             LayerOptionProperties?.GetValues(layerTime, time)?.CalcHash(hash);
             foreach (var pt in GetParentTransforms(time))
@@ -1979,6 +2005,11 @@ namespace NiVE3.Model
             }
 
             LayerUpdated?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void Masks_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            HasMask = Masks.Count > 0;
         }
 
         private void FootageModel_FootageUpdated(object? sender, NeedHistoryChangeEventArgs e)

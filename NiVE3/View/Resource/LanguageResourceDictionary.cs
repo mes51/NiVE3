@@ -1488,6 +1488,24 @@ namespace NiVE3.View.Resource
         [LanguageKey, DefaultValue("オフセット")]
         public static readonly string ShapeProperty_TrimmingGroup_Offset = nameof(ShapeProperty_TrimmingGroup_Offset);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("マスク設定")]
+        public static readonly string MaskProperty_Setting = nameof(MaskProperty_Setting);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("形状")]
+        public static readonly string MaskProperty_Setting_ShapeType = nameof(MaskProperty_Setting_ShapeType);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("サイズ")]
+        public static readonly string MaskProperty_Setting_Size = nameof(MaskProperty_Setting_Size);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("位置")]
+        public static readonly string MaskProperty_Setting_Position = nameof(MaskProperty_Setting_Position);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("マスクの不透明度")]
+        public static readonly string MaskProperty_Setting_Opacity = nameof(MaskProperty_Setting_Opacity);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("マスクのブレンドモード")]
+        public static readonly string MaskProperty_Setting_BlendMode = nameof(MaskProperty_Setting_BlendMode);
+
         // Property Control
 
         [ShowInMarkup, LanguageKey, DefaultValue("編集")]
@@ -1930,6 +1948,30 @@ namespace NiVE3.View.Resource
 
         [DefaultValue("中マド")]
         public static readonly string ClippingOperation_Xor = nameof(ClippingOperation_Xor);
+
+        [DefaultValue("長方形")]
+        public static readonly string MaskShapeType_Rectangle = nameof(MaskShapeType_Rectangle);
+
+        [DefaultValue("楕円形")]
+        public static readonly string MaskShapeType_Ellipse = nameof(MaskShapeType_Ellipse);
+
+        [DefaultValue("加算")]
+        public static readonly string MaskBlendMode_Add = nameof(MaskBlendMode_Add);
+
+        [DefaultValue("減算")]
+        public static readonly string MaskBlendMode_Subtract = nameof(MaskBlendMode_Subtract);
+
+        [DefaultValue("乗算")]
+        public static readonly string MaskBlendMode_Multiply = nameof(MaskBlendMode_Multiply);
+
+        [DefaultValue("比較(暗)")]
+        public static readonly string MaskBlendMode_Darken = nameof(MaskBlendMode_Darken);
+
+        [DefaultValue("比較(明)")]
+        public static readonly string MaskBlendMode_Lighten = nameof(MaskBlendMode_Lighten);
+
+        [DefaultValue("差")]
+        public static readonly string MaskBlendMode_Difference = nameof(MaskBlendMode_Difference);
 
         [DefaultValue("ステレオ")]
         public static readonly string WaveFormType_Stereo = nameof(WaveFormType_Stereo);
