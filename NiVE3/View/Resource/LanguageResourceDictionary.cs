@@ -1023,6 +1023,9 @@ namespace NiVE3.View.Resource
         [DefaultValue("レイヤー更新に伴うプロパティの更新")]
         public static readonly string History_UpdateValueByReplacedLayerId = nameof(History_UpdateValueByReplacedLayerId);
 
+        [DefaultValue("マスクの名前変更")]
+        public static readonly string History_ChangeMaskName = nameof(History_ChangeMaskName);
+
         // Dialog
 
         [DefaultValue("フッテージの削除")]

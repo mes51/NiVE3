@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO.Hashing;
 using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using NiVE3.Data.Json.Project;
 using NiVE3.Extension;
 using NiVE3.Numerics;
 using NiVE3.Plugin.Property;
@@ -15,7 +17,7 @@ using Prism.Mvvm;
 
 namespace NiVE3.Model
 {
-    class MaskModel : BindableBase
+    partial class MaskModel : BindableBase
     {
         const string PropertyMaskSettingId = nameof(PropertyMaskSettingId);
 
@@ -49,6 +51,8 @@ namespace NiVE3.Model
 
         HistoryModel HistoryModel { get; }
 
+        public event EventHandler<EventArgs>? MaskUpdated;
+
         public MaskModel(ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, HistoryModel historyModel) : this(projectModel, compositionModel, layerModel, historyModel, null) { }
 
         public MaskModel(ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, HistoryModel historyModel, Guid? maskId)
@@ -78,6 +82,26 @@ namespace NiVE3.Model
                 historyModel,
                 true
             );
+
+            Properties.ValueUpdated += Properties_ValueUpdated;
+
+            PropertyChanged += MaskModel_PropertyChanged;
+        }
+
+        public void ChangeName(string name)
+        {
+            if (name != Name)
+            {
+                var oldNeme = Name;
+                Name = name;
+
+                HistoryModel.Add(new ChangeNameHistoryCommand(this, oldNeme, name));
+            }
+        }
+
+        public void CoerceProperties()
+        {
+            Properties.CoerceValues();
         }
 
         public void CalcPropertyHash(Time layerTime, Time globalTime, XxHash3 hash)
@@ -85,6 +109,47 @@ namespace NiVE3.Model
             hash.Append(Name);
             hash.Append(IsEnable);
             Properties.GetValues(layerTime, globalTime).CalcHash(hash);
+        }
+
+        public bool ClearExpressionError()
+        {
+            return Properties.ClearExpressionError();
+        }
+
+        public bool PropertyIsChangeableByTime()
+        {
+            return Properties.IsChangeableByTime();
+        }
+
+        public void LoadData(MaskData data)
+        {
+            Name = data.Name;
+            IsEnable = data.IsEnabled;
+            if (data.Properties != null)
+            {
+                Properties.LoadData(data.Properties);
+            }
+        }
+
+        public MaskData SaveData()
+        {
+            return new MaskData
+            {
+                 MaskId = MaskId,
+                 Name = Name,
+                 IsEnabled = IsEnable,
+                 Properties = Properties.SaveData()
+            };
+        }
+
+        private void Properties_ValueUpdated(object? sender, EventArgs e)
+        {
+            MaskUpdated?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void MaskModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            MaskUpdated?.Invoke(this, EventArgs.Empty);
         }
     }
 

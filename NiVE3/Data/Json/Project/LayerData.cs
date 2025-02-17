@@ -82,6 +82,8 @@ namespace NiVE3.Data.Json.Project
 
         public EffectData[] Effects { get; set; } = [];
 
+        public MaskData[] Masks { get; set; } = [];
+
         public PropertyData? TransformProperties { get; set; }
 
         public PropertyData? LayerOptionProperties { get; set; }

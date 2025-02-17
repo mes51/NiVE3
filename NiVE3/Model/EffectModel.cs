@@ -208,14 +208,14 @@ namespace NiVE3.Model
             return Properties.HasCompositionDependProperty();
         }
 
-        private void Property_ValueUpdated(object? sender, EventArgs e)
-        {
-            EffectUpdated?.Invoke(this, EventArgs.Empty);
-        }
-
         public bool PropertyIsChangeableByTime()
         {
             return Properties.IsChangeableByTime();
+        }
+
+        private void Property_ValueUpdated(object? sender, EventArgs e)
+        {
+            EffectUpdated?.Invoke(this, EventArgs.Empty);
         }
 
         private void EffectModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)

@@ -1445,7 +1445,8 @@ namespace NiVE3.Model
                 TrackMatteLayerId = TrackMatteLayerId,
                 TrackMatteMode = TrackMatteMode,
                 ParentLayerId = ParentLayerId,
-                Effects = Effects.Select(e => e.SaveData()).ToArray(),
+                Effects = [..Effects.Select(e => e.SaveData())],
+                Masks = [..Masks.Select(m => m.SaveData())],
                 TransformProperties = TransformProperties?.SaveData(),
                 LayerOptionProperties = LayerOptionProperties?.SaveData(),
                 TextProperties = TextProperties?.SaveData(),
@@ -1518,6 +1519,13 @@ namespace NiVE3.Model
 
                 effectModel.LoadData(effectData);
                 Effects.Add(effectModel);
+            }
+
+            foreach (var maskData in data.Masks)
+            {
+                var maskModel = new MaskModel(ProjectModel, CompositionModel, this, HistoryModel, maskData.MaskId);
+                maskModel.LoadData(maskData);
+                Masks.Add(maskModel);
             }
 
             if (coerceProperties)
@@ -1645,7 +1653,8 @@ namespace NiVE3.Model
                 (TextProperties?.IsChangeableByTime() ?? false) ||
                 (ShapeProperties?.IsChangeableByTime() ?? false) ||
                 (SourceOptionProperties?.IsChangeableByTime() ?? false) ||
-                Effects.Any(e => e.IsRenderEveryFrame || e.PropertyIsChangeableByTime()));
+                Effects.Any(e => e.IsRenderEveryFrame || e.PropertyIsChangeableByTime())) ||
+                Masks.Any(m => m.PropertyIsChangeableByTime());
         }
 
         void DeleteEffectInternal(Guid[] ids, bool isCut)
@@ -2010,6 +2019,17 @@ namespace NiVE3.Model
         private void Masks_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             HasMask = Masks.Count > 0;
+
+            foreach (var oldMask in (e.OldItems?.Cast<MaskModel>() ?? []))
+            {
+                oldMask.MaskUpdated -= Mask_MaskUpdated;
+            }
+            foreach (var newMask in (e.NewItems?.Cast<MaskModel>() ?? []))
+            {
+                newMask.MaskUpdated += Mask_MaskUpdated;
+            }
+
+            LayerUpdated?.Invoke(this, EventArgs.Empty);
         }
 
         private void FootageModel_FootageUpdated(object? sender, NeedHistoryChangeEventArgs e)
@@ -2074,6 +2094,10 @@ namespace NiVE3.Model
             {
                 hasUseExpressionProperty |= effect.ClearExpressionError();
             }
+            foreach (var mask in Masks)
+            {
+                hasUseExpressionProperty |= mask.ClearExpressionError();
+            }
 
             if (hasUseExpressionProperty || (e.PropertyName != nameof(IsLock) && e.PropertyName != nameof(IsEnableShy)))
             {
@@ -2082,6 +2106,11 @@ namespace NiVE3.Model
         }
 
         private void Effect_EffectUpdated(object? sender, EventArgs e)
+        {
+            LayerUpdated?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void Mask_MaskUpdated(object? sender, EventArgs e)
         {
             LayerUpdated?.Invoke(this, EventArgs.Empty);
         }
