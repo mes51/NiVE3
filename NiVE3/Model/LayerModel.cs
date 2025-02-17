@@ -1542,6 +1542,15 @@ namespace NiVE3.Model
             ShapeProperties?.CoerceValues();
             SourceOptionProperties?.CoerceValues();
             AudioOptionProperties?.CoerceValues();
+
+            foreach (var effect in Effects)
+            {
+                effect.CoerceProperties();
+            }
+            foreach (var mask in Masks)
+            {
+                mask.CoerceProperties();
+            }
         }
 
         public CopyData<EffectData> CutEffects(Guid[] ids)
