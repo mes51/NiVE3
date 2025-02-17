@@ -1214,6 +1214,8 @@ namespace NiVE3.Model
 
         public void CalcCacheKeyHash(XxHash3 hash, Time time, bool withTrackMatte, bool frameBlend)
         {
+            hash.Append(Name);
+            hash.Append(Comment);
             hash.Append(frameBlend);
             hash.Append(LayerId);
             hash.Append(FootageModel.LastUpdated);

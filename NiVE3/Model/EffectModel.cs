@@ -185,6 +185,9 @@ namespace NiVE3.Model
 
         public void CalcPropertyHash(Time layerTime, Time globalTime, XxHash3 hash)
         {
+            hash.Append(Name);
+            hash.Append(Comment);
+
             Properties.GetValues(layerTime, globalTime).CalcHash(hash);
         }
 
