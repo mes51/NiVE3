@@ -47,18 +47,19 @@ namespace NiVE3.Model
 
         public PropertyGroupModel Properties { get; }
 
+        MaskShapeType DefaultShapeType { get; }
+
         Guid MaskId { get; }
 
         HistoryModel HistoryModel { get; }
 
         public event EventHandler<EventArgs>? MaskUpdated;
 
-        public MaskModel(ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, HistoryModel historyModel) : this(projectModel, compositionModel, layerModel, historyModel, null) { }
-
-        public MaskModel(ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, HistoryModel historyModel, Guid? maskId)
+        public MaskModel(ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, HistoryModel historyModel, MaskShapeType shapeType = MaskShapeType.Rectangle, Guid? maskId = null)
         {
             MaskId = maskId ?? Guid.NewGuid();
             HistoryModel = historyModel;
+            DefaultShapeType = shapeType;
 
             var maskWidth = layerModel.SourceWidth;
             var maskHeight = layerModel.SourceHeight;
@@ -67,7 +68,7 @@ namespace NiVE3.Model
                     PropertyMaskSettingId,
                     LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting,
                     [
-                        new EnumProperty(PropertyMaskSettingShapeTypeId, LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting_ShapeType, typeof(MaskShapeType), typeof(LanguageResourceDictionary), MaskShapeType.Rectangle, false, 90.0),
+                        new EnumProperty(PropertyMaskSettingShapeTypeId, LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting_ShapeType, typeof(MaskShapeType), typeof(LanguageResourceDictionary), shapeType, false, 90.0),
                         new Vector3dProperty(PropertyMaskSettingSizeId, LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting_Size, new Vector3d(maskWidth, maskHeight, 0.0), digit: 2, useLinkRatio: true),
                         new Vector3dProperty(PropertyMaskSettingPositionId, LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting_Position, new Vector3d(maskWidth * 0.5, maskHeight * 0.5, 0.0), digit: 2),
                         new DoubleProperty(PropertyMaskSettingOpacityId, LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting_Opacity, 100.0, 0.0, 100.0, digit: 2),
@@ -136,6 +137,7 @@ namespace NiVE3.Model
             return new MaskData
             {
                  MaskId = MaskId,
+                 DefaultShapeType = DefaultShapeType,
                  Name = Name,
                  IsEnabled = IsEnable,
                  Properties = Properties.SaveData()
@@ -153,7 +155,7 @@ namespace NiVE3.Model
         }
     }
 
-    enum MaskShapeType
+    public enum MaskShapeType
     {
         Rectangle,
         Ellipse,

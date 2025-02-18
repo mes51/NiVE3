@@ -368,6 +368,15 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("エフェクト(_E)")]
         public static readonly string Timeline_ContextMenu_Effect = nameof(Timeline_ContextMenu_Effect);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("マスク(_M)")]
+        public static readonly string Timeline_ContextMenu_Mask = nameof(Timeline_ContextMenu_Mask);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("長方形を追加(_R)")]
+        public static readonly string Timeline_ContextMenu_Mask_AddRectangle = nameof(Timeline_ContextMenu_Mask_AddRectangle);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("楕円形を追加(_E)")]
+        public static readonly string Timeline_ContextMenu_Mask_AddEllipse = nameof(Timeline_ContextMenu_Mask_AddEllipse);
+
         [ShowInMarkup, LanguageKey, DefaultValue("テキスト(_T)")]
         public static readonly string Timeline_ContextMenu_AddLayer_Text = nameof(Timeline_ContextMenu_AddLayer_Text);
 
@@ -1023,6 +1032,9 @@ namespace NiVE3.View.Resource
         [DefaultValue("レイヤー更新に伴うプロパティの更新")]
         public static readonly string History_UpdateValueByReplacedLayerId = nameof(History_UpdateValueByReplacedLayerId);
 
+        [DefaultValue("マスクの追加")]
+        public static readonly string History_AddMask = nameof(History_AddMask);
+
         [DefaultValue("マスクの名前変更")]
         public static readonly string History_ChangeMaskName = nameof(History_ChangeMaskName);
 
@@ -1518,6 +1530,12 @@ namespace NiVE3.View.Resource
 
         [DefaultValue("再生・停止")]
         public static readonly string ShortcutKeyName_PlayOrStopGesture = nameof(ShortcutKeyName_PlayOrStopGesture);
+
+        [DefaultValue("長方形のマスクを追加")]
+        public static readonly string ShortcutKeyName_AddRectangleMaskGesture = nameof(ShortcutKeyName_AddRectangleMaskGesture);
+
+        [DefaultValue("楕円形のマスクを追加")]
+        public static readonly string ShortcutKeyName_AddEllipseMaskGesture = nameof(ShortcutKeyName_AddEllipseMaskGesture);
 
         [DefaultValue("ワークエリアの終了をインジケーターの位置に移動")]
         public static readonly string ShortcutKeyName_MoveWorkareaEndToIndicatorGesture = nameof(ShortcutKeyName_MoveWorkareaEndToIndicatorGesture);

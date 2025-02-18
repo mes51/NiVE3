@@ -107,6 +107,11 @@
                             </MenuItem.ItemTemplate>
                         </MenuItem>
                         <Separator />
+                        <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_Mask}">
+                            <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_Mask_AddRectangle}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=AddRectangleMaskGesture}"/>
+                            <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_Mask_AddEllipse}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=AddEllipseMaskGesture}"/>
+                        </MenuItem>
+                        <Separator />
                         <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_Cut}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=CutItemGesture}"/>
                         <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_Copy}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=CopyItemGesture}"/>
                         <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_Paste}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=PasteItemGesture}"/>

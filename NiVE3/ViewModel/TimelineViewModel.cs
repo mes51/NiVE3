@@ -57,6 +57,8 @@ namespace NiVE3.ViewModel
     [CommandHandling(nameof(AddLightCommand), nameof(ShortcutKeySetting.AddLightLayerGesture))]
     [CommandHandling(nameof(AddNullObjectCommand), nameof(ShortcutKeySetting.AddNullObjectLayerGesture))]
     [CommandHandling(nameof(AddTextCommand), nameof(ShortcutKeySetting.AddTextLayerGesture))]
+    [CommandHandling(nameof(AddRectangleMaskCommand), nameof(ShortcutKeySetting.AddRectangleMaskGesture))]
+    [CommandHandling(nameof(AddEllipseMaskCommand), nameof(ShortcutKeySetting.AddEllipseMaskGesture))]
     [CommandHandling(nameof(CompositionSettingCommand), nameof(ShortcutKeySetting.OpenCompositionSettingGesture))]
     [CommandHandling(nameof(ChangeLayerTagsRandomlyCommand), nameof(ShortcutKeySetting.ChangeLayerTagsRandomlyGesture))]
     [CommandHandling(nameof(MoveSourceStartPointToIndicatorBaseInPointCommand), nameof(ShortcutKeySetting.MoveSourceStartPointToIndicatorBaseInPointGesture))]
@@ -488,6 +490,10 @@ namespace NiVE3.ViewModel
 
         public ICommand AddEffectCommand { get; }
 
+        public ICommand AddRectangleMaskCommand { get; }
+
+        public ICommand AddEllipseMaskCommand { get; }
+
         public ICommand ChangeLayerTagsRandomlyCommand { get; }
 
         public ICommand MoveInPointToIndicatorCommand { get; }
@@ -857,6 +863,30 @@ namespace NiVE3.ViewModel
 
                 CompositionModel.AddEffectsToLayers([..SelectedLayers.Select(l => l.LayerId)], [effectItem.PluginId]);
             }, _ => CompositionModel != null && SelectedLayers.Count > 0)
+                .ObservesProperty(() => CompositionModel)
+                .ObservesProperty(() => SelectedLayers.Count);
+
+            AddRectangleMaskCommand = new DelegateCommand(() =>
+            {
+                if (CompositionModel == null || SelectedLayers.Count < 1)
+                {
+                    return;
+                }
+
+                CompositionModel.AddMaskToLayers([.. SelectedLayers.Select(l => l.LayerId)], MaskShapeType.Rectangle);
+            }, () => CompositionModel != null && SelectedLayers.Count > 0)
+                .ObservesProperty(() => CompositionModel)
+                .ObservesProperty(() => SelectedLayers.Count);
+
+            AddEllipseMaskCommand = new DelegateCommand(() =>
+            {
+                if (CompositionModel == null || SelectedLayers.Count < 1)
+                {
+                    return;
+                }
+
+                CompositionModel.AddMaskToLayers([.. SelectedLayers.Select(l => l.LayerId)], MaskShapeType.Rectangle);
+            }, () => CompositionModel != null && SelectedLayers.Count > 0)
                 .ObservesProperty(() => CompositionModel)
                 .ObservesProperty(() => SelectedLayers.Count);
 

@@ -424,6 +424,20 @@ namespace NiVE3.Config
             new PropertyMetadata(new SingleKeyGesture(Key.N))
         );
 
+        public static readonly DependencyProperty AddRectangleMaskGestureProperty = DependencyProperty.Register(
+            nameof(AddRectangleMaskGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new KeyGesture(Key.None))
+        );
+
+        public static readonly DependencyProperty AddEllipseMaskGestureProperty = DependencyProperty.Register(
+            nameof(AddEllipseMaskGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new KeyGesture(Key.None))
+        );
+
         public static readonly DependencyProperty PlayOrStopGestureProperty = DependencyProperty.Register(
             nameof(PlayOrStopGesture),
             typeof(InputGesture),
@@ -445,6 +459,22 @@ namespace NiVE3.Config
         {
             get { return (InputGesture)GetValue(MoveWorkareaEndToIndicatorGestureProperty); }
             set { SetValue(MoveWorkareaEndToIndicatorGestureProperty, value); }
+        }
+
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Edit)]
+        [ShowInMarkup]
+        public InputGesture AddEllipseMaskGesture
+        {
+            get { return (InputGesture)GetValue(AddEllipseMaskGestureProperty); }
+            set { SetValue(AddEllipseMaskGestureProperty, value); }
+        }
+
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Edit)]
+        [ShowInMarkup]
+        public InputGesture AddRectangleMaskGesture
+        {
+            get { return (InputGesture)GetValue(AddRectangleMaskGestureProperty); }
+            set { SetValue(AddRectangleMaskGestureProperty, value); }
         }
 
         [ShortcutKeyCategory(ShortcutKeyCategoryType.Edit)]

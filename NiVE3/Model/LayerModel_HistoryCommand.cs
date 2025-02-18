@@ -454,5 +454,35 @@ namespace NiVE3.Model
 
             public void Dispose() { }
         }
+
+        private class InsertMaskHistoryCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_AddMask);
+
+            LayerModel Model { get; }
+
+            MaskModel NewMask { get; }
+
+            int Index { get; }
+
+            public InsertMaskHistoryCommand(LayerModel model, MaskModel newMask, int index)
+            {
+                Model = model;
+                NewMask = newMask;
+                Index = index;
+            }
+
+            public void Redo()
+            {
+                Model.Masks.Insert(Index, NewMask);
+            }
+
+            public void Undo()
+            {
+                Model.Masks.Remove(NewMask);
+            }
+
+            public void Dispose() { }
+        }
     }
 }

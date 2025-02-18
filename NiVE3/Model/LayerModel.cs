@@ -1386,6 +1386,19 @@ namespace NiVE3.Model
             DeleteEffectInternal(ids, false);
         }
 
+        public void AddMask(MaskShapeType shapeType)
+        {
+            InsertMask(shapeType, Masks.Count);
+        }
+
+        public void InsertMask(MaskShapeType shapeType, int index)
+        {
+            var maskModel = new MaskModel(ProjectModel, CompositionModel, this, HistoryModel, shapeType);
+            Masks.Insert(index, maskModel);
+
+            HistoryModel.Add(new InsertMaskHistoryCommand(this, maskModel, index));
+        }
+
         public void ChangeTagColor(Color color)
         {
             if (TagColor != color)
@@ -1525,7 +1538,7 @@ namespace NiVE3.Model
 
             foreach (var maskData in data.Masks)
             {
-                var maskModel = new MaskModel(ProjectModel, CompositionModel, this, HistoryModel, maskData.MaskId);
+                var maskModel = new MaskModel(ProjectModel, CompositionModel, this, HistoryModel, maskData.DefaultShapeType, maskData.MaskId);
                 maskModel.LoadData(maskData);
                 Masks.Add(maskModel);
             }
