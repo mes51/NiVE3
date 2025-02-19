@@ -168,17 +168,14 @@ namespace NiVE3.Model
 
             LayerModel LayerModel { get; }
 
-            EffectModel[] Effects { get; }
-
-            int[] PrevIndices { get; }
+            EffectModel[] OldOrderedEffects { get; }
 
             EffectModel[] NewOrderedEffects { get; }
 
-            public MoveEffectsHistoryCommand(LayerModel compositionModel, EffectModel[] effects, int[] prevIndices, EffectModel[] newOrderedEffects)
+            public MoveEffectsHistoryCommand(LayerModel compositionModel, EffectModel[] oldOrderedEffects, EffectModel[] newOrderedEffects)
             {
                 LayerModel = compositionModel;
-                Effects = effects;
-                PrevIndices = prevIndices;
+                OldOrderedEffects = oldOrderedEffects;
                 NewOrderedEffects = newOrderedEffects;
             }
 
@@ -189,15 +186,7 @@ namespace NiVE3.Model
 
             public void Undo()
             {
-                foreach (var l in Effects)
-                {
-                    LayerModel.Effects.Remove(l);
-                }
-
-                foreach (var (l, i) in Effects.Zip(PrevIndices))
-                {
-                    LayerModel.Effects.Insert(i, l);
-                }
+                LayerModel.Effects.SortBy(l => Array.IndexOf(OldOrderedEffects, l));
             }
 
             public void Dispose() { }
@@ -323,6 +312,36 @@ namespace NiVE3.Model
                     e.Dispose();
                 }
             }
+        }
+
+        private class MoveMasksHistoryCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_MoveMasks);
+
+            LayerModel LayerModel { get; }
+
+            MaskModel[] OldOrderedMasks { get; }
+
+            MaskModel[] NewOrderedMasks { get; }
+
+            public MoveMasksHistoryCommand(LayerModel layerModel, MaskModel[] oldOrderedMasks, MaskModel[] newOrderedMasks)
+            {
+                LayerModel = layerModel;
+                OldOrderedMasks = oldOrderedMasks;
+                NewOrderedMasks = newOrderedMasks;
+            }
+
+            public void Redo()
+            {
+                LayerModel.Masks.SortBy(m => Array.IndexOf(NewOrderedMasks, m));
+            }
+
+            public void Undo()
+            {
+                LayerModel.Masks.SortBy(m => Array.IndexOf(OldOrderedMasks, m));
+            }
+
+            public void Dispose() { }
         }
 
         private class ChangeMasksEnableHistoryCommand : IHistoryCommand

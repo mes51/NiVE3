@@ -1123,7 +1123,9 @@ namespace NiVE3.ViewModel
                     }
                     break;
                 case EffectViewModel effect when Effects.Contains(effect):
-                case ItemDragData<EffectViewModel> itemDragData when itemDragData.SelectedItems.All(Effects.Contains):
+                case MaskViewModel mask when Masks.Contains(mask):
+                case ItemDragData<EffectViewModel> effectItemDragData when effectItemDragData.SelectedItems.All(Effects.Contains):
+                case ItemDragData<MaskViewModel> maskItemDragData when maskItemDragData.SelectedItems.All(Masks.Contains):
                     dropInfo.Effects = DragDropEffects.Move;
                     dropInfo.DropTargetAdorner = DropTargetAdorners.Insert;
                     break;
@@ -1164,14 +1166,24 @@ namespace NiVE3.ViewModel
                         LayerModel.MoveEffect(effect.EffectId, newIndex);
                     }
                     break;
-                case ItemDragData<EffectViewModel> itemDragData:
+                case ItemDragData<EffectViewModel> effectItemDragData:
                     {
                         var newIndex = dropInfo.InsertIndex;
-                        if (Effects.IndexOf(itemDragData.DragItem) < newIndex)
+                        if (Effects.IndexOf(effectItemDragData.DragItem) < newIndex)
                         {
                             newIndex--;
                         }
-                        LayerModel.MoveEffects(itemDragData.SelectedItems.Select(l => l.EffectId).ToArray(), itemDragData.DragItem.EffectId, newIndex);
+                        LayerModel.MoveEffects([..effectItemDragData.SelectedItems.Select(l => l.EffectId)], effectItemDragData.DragItem.EffectId, newIndex);
+                    }
+                    break;
+                case ItemDragData<MaskViewModel> maskItemDragData:
+                    {
+                        var newIndex = dropInfo.InsertIndex;
+                        if (Masks.IndexOf(maskItemDragData.DragItem) < newIndex)
+                        {
+                            newIndex--;
+                        }
+                        LayerModel.MoveMasks([..maskItemDragData.SelectedItems.Select(m => m.MaskId)], maskItemDragData.DragItem.MaskId, newIndex);
                     }
                     break;
                 default:
@@ -1186,7 +1198,12 @@ namespace NiVE3.ViewModel
             {
                 e.DeSelect();
             }
+            foreach (var m in SelectedMasks)
+            {
+                m.DeSelect();
+            }
             SelectedEffects.Clear();
+            SelectedMasks.Clear();
             TransformProperties?.DeSelect();
             LayerOptionProperties?.DeSelect();
             TextProperties?.DeSelect();

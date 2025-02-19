@@ -1035,8 +1035,8 @@ namespace NiVE3.View.Resource
         [DefaultValue("マスクの追加")]
         public static readonly string History_AddMask = nameof(History_AddMask);
 
-        [DefaultValue("マスクの名前変更")]
-        public static readonly string History_ChangeMaskName = nameof(History_ChangeMaskName);
+        [DefaultValue("マスクの移動")]
+        public static readonly string History_MoveMasks = nameof(History_MoveMasks);
 
         [DefaultValue("マスクの有効・無効切り替え")]
         public static readonly string History_ChangeMasksEnable = nameof(History_ChangeMasksEnable);
@@ -1052,6 +1052,9 @@ namespace NiVE3.View.Resource
 
         [DefaultValue("マスクの複製")]
         public static readonly string History_DuplicateMasks = nameof(History_DuplicateMasks);
+
+        [DefaultValue("マスクの名前変更")]
+        public static readonly string History_ChangeMaskName = nameof(History_ChangeMaskName);
 
         // Dialog
 

@@ -1352,19 +1352,19 @@ namespace NiVE3.Model
             }
 
             var effects = Effects.Where(l => effectIds.Contains(l.EffectId)).OrderBy(Effects.IndexOf).ToArray();
-            var prevIndices = effects.Select(l => Effects.IndexOf(l)).ToArray();
+            var prevIndices = effects.Select(Effects.IndexOf).ToArray();
+            var oldOrderedEffects = Effects.ToArray();
             var startIndex = newIndex - effects.FindIndex(l => l.EffectId == referenceEffectId);
             var newOrderedEffects = new List<EffectModel>(Effects.Count);
             newOrderedEffects.AddRange(Effects.Except(effects).Take(startIndex));
             newOrderedEffects.AddRange(effects);
             newOrderedEffects.AddRange(Effects.Except([..newOrderedEffects]));
 
-            Effects.SortBy(l => newOrderedEffects.IndexOf(l));
+            Effects.SortBy(newOrderedEffects.IndexOf);
 
-            if (!prevIndices.SequenceEqual(effects.Select(l => Effects.IndexOf(l))))
+            if (!prevIndices.SequenceEqual(effects.Select(Effects.IndexOf)))
             {
-                // TODO: 古いインデックスを保持するのでは無く、古いEffectsを配列にしたものを渡す
-                HistoryModel.Add(new MoveEffectsHistoryCommand(this, effects, prevIndices, [..newOrderedEffects]));
+                HistoryModel.Add(new MoveEffectsHistoryCommand(this, oldOrderedEffects, [..newOrderedEffects]));
             }
         }
 
@@ -1434,6 +1434,35 @@ namespace NiVE3.Model
             Masks.Insert(index, maskModel);
 
             HistoryModel.Add(new InsertMaskHistoryCommand(this, maskModel, index));
+        }
+
+        public void MoveMask(Guid maskId, int newIndex)
+        {
+            MoveMasks([maskId], maskId, newIndex);
+        }
+
+        public void MoveMasks(Guid[] maskIds, Guid referenceMaskId, int newIndex)
+        {
+            if (Masks.Count == maskIds.Length)
+            {
+                return;
+            }
+
+            var masks = Masks.Where(m => maskIds.Contains(m.MaskId)).OrderBy(Masks.IndexOf).ToArray();
+            var prevIndices = masks.Select(Masks.IndexOf).ToArray();
+            var oldOrderedMasks = Masks.ToArray();
+            var startIndex = newIndex - masks.FindIndex(m => m.MaskId == referenceMaskId);
+            var newOrderedMasks = new List<MaskModel>(Masks.Count);
+            newOrderedMasks.AddRange(Masks.Except(masks).Take(startIndex));
+            newOrderedMasks.AddRange(masks);
+            newOrderedMasks.AddRange(masks.Except([.. newOrderedMasks]));
+
+            Masks.SortBy(newOrderedMasks.IndexOf);
+
+            if (!prevIndices.SequenceEqual(masks.Select(Masks.IndexOf)))
+            {
+                HistoryModel.Add(new MoveMasksHistoryCommand(this, [.. newOrderedMasks], oldOrderedMasks));
+            }
         }
 
         public void DeleteMask(Guid[] maskIds)
