@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NiVE3.Data.Json.Project;
 using NiVE3.View.Resource;
 
 namespace NiVE3.Model
@@ -34,6 +35,36 @@ namespace NiVE3.Model
             public void Undo()
             {
                 Model.Name = OldName;
+            }
+
+            public void Dispose() { }
+        }
+
+        private class OverwriteMaskHistoryCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_PasteMasks);
+
+            MaskModel Model { get; }
+
+            MaskData OldData { get; }
+
+            MaskData NewData { get; }
+
+            public OverwriteMaskHistoryCommand(MaskModel model, MaskData oldData, MaskData newData)
+            {
+                Model = model;
+                OldData = oldData;
+                NewData = newData;
+            }
+
+            public void Redo()
+            {
+                Model.LoadData(NewData);
+            }
+
+            public void Undo()
+            {
+                Model.LoadData(OldData);
             }
 
             public void Dispose() { }

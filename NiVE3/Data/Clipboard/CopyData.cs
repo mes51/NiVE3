@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -25,6 +26,7 @@ namespace NiVE3.Data.Clipboard
         None,
         Layer,
         Effect,
+        Mask,
         Property,
         PropertyGroup,
         AppendablePropertyChildren,

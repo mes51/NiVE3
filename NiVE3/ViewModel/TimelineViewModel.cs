@@ -1779,7 +1779,7 @@ namespace NiVE3.ViewModel
                 SelectedItemType = e.SelectItemType;
                 SelectedTarget = e.SelectItemType switch
                 {
-                    SelectItemType.Effect or SelectItemType.Property or SelectItemType.KeyFrame => e.CommandableOriginalParent,
+                    SelectItemType.Effect or ViewModel.SelectItemType.Mask or SelectItemType.Property or SelectItemType.KeyFrame => e.CommandableOriginalParent,
                     _ => null,
                 };
                 if (e.SelectItemType == SelectItemType.Layer && SelectedLayers != null)
@@ -1823,6 +1823,7 @@ namespace NiVE3.ViewModel
         None,
         Layer,
         Effect,
+        Mask,
         Property,
         KeyFrame,
     }

@@ -12,6 +12,7 @@ using System.Windows.Media;
 using GongSolutions.Wpf.DragDrop;
 using NiVE3.Data.Clipboard;
 using NiVE3.Data.Json.Project;
+using NiVE3.Extension;
 using NiVE3.Image.Drawing;
 using NiVE3.Model;
 using NiVE3.Model.UI;
@@ -505,6 +506,13 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref effects, value); }
         }
 
+        private ObservableCollectionView<MaskModel, MaskViewModel> masks;
+        public ObservableCollectionView<MaskModel, MaskViewModel> Masks
+        {
+            get { return masks; }
+            set { SetProperty(ref masks, value); }
+        }
+
         private ObservableCollection<EffectViewModel> selectedEffects = [];
         public ObservableCollection<EffectViewModel> SelectedEffects
         {
@@ -517,11 +525,30 @@ namespace NiVE3.ViewModel
             }
         }
 
+        private ObservableCollection<MaskViewModel> selectedMasks = [];
+        public ObservableCollection<MaskViewModel> SelectedMasks
+        {
+            get { return selectedMasks; }
+            set
+            {
+                selectedMasks.CollectionChanged -= SelectedMasks_CollectionChanged;
+                value.CollectionChanged += SelectedMasks_CollectionChanged;
+                SetProperty(ref selectedMasks, value);
+            }
+        }
+
         private EffectViewModel? lastSelectedEffect;
         public EffectViewModel? LastSelectedEffect
         {
             get { return lastSelectedEffect; }
             set { SetProperty(ref lastSelectedEffect, value); }
+        }
+
+        private MaskViewModel? lastSelectedMask;
+        public MaskViewModel? LastSelectedMask
+        {
+            get { return lastSelectedMask; }
+            set { SetProperty(ref lastSelectedMask, value); }
         }
 
         public PropertyGroupViewModel TransformProperties { get; }
@@ -703,6 +730,7 @@ namespace NiVE3.ViewModel
             TrackMatteViewSource = trackMatteViewSource;
             ParentLayerViewSource = parentLayerViewSource;
             SelectedEffects = [];
+            SelectedMasks = [];
 
             Effects = layerModel.Effects.CreateViewCollection(e =>
             {
@@ -710,6 +738,15 @@ namespace NiVE3.ViewModel
                 vm.EffectEnableChangeRequest += Effect_EffectEnableChangeRequest;
                 vm.SelectItemChanged += Effect_SelectItemChanged;
                 vm.PropertyValueCommited += Effect_PropertyValueCommited;
+                return vm;
+            });
+
+            Masks = layerModel.Masks.CreateViewCollection(m =>
+            {
+                var vm = new MaskViewModel(m, viewState);
+                vm.MaskEnableChangeRequest += Mask_MaskEnableChangeRequest;
+                vm.SelectItemChanged += Mask_SelectItemChanged;
+                vm.PropertyValueCommited += Mask_PropertyValueCommited;
                 return vm;
             });
 
@@ -893,26 +930,49 @@ namespace NiVE3.ViewModel
 
             CutEffectCommand = new DelegateCommand(() =>
             {
-                if (EditingParameter == EditingLayerParameter.None && SelectedEffects.Count > 0)
+                if (EditingParameter != EditingLayerParameter.None)
                 {
-                    var copyData = LayerModel.CutEffects([.. SelectedEffects.Select(e => e.EffectId)]);
-                    ClipboardUtil.SetData(copyData);
+                    return;
                 }
-                SelectedEffects.Clear();
-                FocusRequestPublisher.Publish(this, EventArgs.Empty);
-            }, () => EditingParameter == EditingLayerParameter.None && SelectedEffects.Count > 0)
+
+                if (SelectedEffects.Count > 0)
+                {
+                    var copyData = LayerModel.CutEffects([..SelectedEffects.Select(e => e.EffectId)]);
+                    ClipboardUtil.SetData(copyData);
+                    SelectedEffects.Clear();
+                    FocusRequestPublisher.Publish(this, EventArgs.Empty);
+                }
+                else if (SelectedMasks.Count > 0)
+                {
+                    var copyData = LayerModel.CutMasks([..SelectedMasks.Select(m => m.MaskId)]);
+                    ClipboardUtil.SetData(copyData);
+                    SelectedMasks.Clear();
+                    FocusRequestPublisher.Publish(this, EventArgs.Empty);
+                }
+            }, () => EditingParameter == EditingLayerParameter.None && (SelectedEffects.Count > 0 || SelectedMasks.Count > 0))
                 .ObservesProperty(() => EditingParameter)
-                .ObservesProperty(() => SelectedEffects.Count);
+                .ObservesProperty(() => SelectedEffects.Count)
+                .ObservesProperty(() => SelectedMasks.Count);
 
             CopyEffectCommand = new DelegateCommand(() =>
             {
-                if (EditingParameter == EditingLayerParameter.None && SelectedEffects.Count > 0)
+                if (EditingParameter != EditingLayerParameter.None)
                 {
-                    ClipboardUtil.SetData(LayerModel.CopyEffects([.. SelectedEffects.Select(e => e.EffectId)]));
+                    return;
+                }
+
+                if (SelectedEffects.Count > 0)
+                {
+                    ClipboardUtil.SetData(LayerModel.CopyEffects([..SelectedEffects.Select(e => e.EffectId)]));
+                }
+                else if (SelectedMasks.Count > 0)
+                {
+                    ClipboardUtil.SetData(LayerModel.CopyMasks([..SelectedMasks.Select(m => m.MaskId)]));
                 }
             }, () => EditingParameter == EditingLayerParameter.None && SelectedEffects.Count > 0)
                 .ObservesProperty(() => EditingParameter)
-                .ObservesProperty(() => SelectedEffects.Count);
+                .ObservesProperty(() => SelectedEffects.Count)
+                .ObservesProperty(() => SelectedMasks.Count);
 
             PasteEffectCommand = new RequerySuggestedCommand(() =>
             {
@@ -921,38 +981,63 @@ namespace NiVE3.ViewModel
                     return;
                 }
 
-                var data = ClipboardUtil.GetData<EffectData>();
-                if (data != null)
+                if (ClipboardUtil.GetData<EffectData>() is CopyData<EffectData> effectData)
                 {
                     var insertTargetId = LastSelectedEffect?.EffectId;
-                    LayerModel.PasteEffects(data, [.. SelectedEffects.Select(e => e.EffectId)], insertTargetId);
+                    LayerModel.PasteEffects(effectData, [..SelectedEffects.Select(e => e.EffectId)], insertTargetId);
                 }
-            }, () => EditingParameter == EditingLayerParameter.None && ClipboardUtil.GetData<EffectData>()?.Type == CopyDataType.Effect);
+                else if (ClipboardUtil.GetData<MaskData>() is CopyData<MaskData> maskData)
+                {
+                    var insertTargetId = LastSelectedMask?.MaskId;
+                    LayerModel.PasteMasks(maskData, [..SelectedMasks.Select(m => m.MaskId)], insertTargetId);
+                }
+            }, () => EditingParameter == EditingLayerParameter.None && ClipboardUtil.GetDataType().Is(CopyDataType.Effect, CopyDataType.Mask));
 
             DuplicateEffectCommand = new DelegateCommand(() =>
             {
-                if (EditingParameter != EditingLayerParameter.None && SelectedEffects.Count < 1)
+                if (EditingParameter != EditingLayerParameter.None)
                 {
                     return;
                 }
 
-                var insertTargetId = LastSelectedEffect?.EffectId;
-                LayerModel.DuplicateEffects([.. SelectedEffects.Select(e => e.EffectId)], insertTargetId);
+                if (SelectedEffects.Count > 0)
+                {
+                    var insertTargetId = LastSelectedEffect?.EffectId;
+                    LayerModel.DuplicateEffects([..SelectedEffects.Select(e => e.EffectId)], insertTargetId);
+                }
+                else if (SelectedMasks.Count > 0)
+                {
+                    var insertTargetId = LastSelectedMask?.MaskId;
+                    LayerModel.DuplicateMasks([..SelectedMasks.Select(m => m.MaskId)], insertTargetId);
+                }
             }, () => EditingParameter == EditingLayerParameter.None && SelectedEffects.Count > 0)
                 .ObservesProperty(() => EditingParameter)
-                .ObservesProperty(() => SelectedEffects.Count);
+                .ObservesProperty(() => SelectedEffects.Count)
+                .ObservesProperty(() => SelectedMasks.Count);
 
             DeleteEffectCommand = new DelegateCommand(() =>
             {
-                if (EditingParameter == EditingLayerParameter.None && SelectedEffects.Count > 0)
+                if (EditingParameter != EditingLayerParameter.None)
                 {
-                    LayerModel.DeleteEffect([.. SelectedEffects.Select(e => e.EffectId)]);
+                    return;
                 }
-                SelectedEffects.Clear();
-                FocusRequestPublisher.Publish(this, EventArgs.Empty);
+
+                if (SelectedEffects.Count > 0)
+                {
+                    LayerModel.DeleteEffect([..SelectedEffects.Select(e => e.EffectId)]);
+                    SelectedEffects.Clear();
+                    FocusRequestPublisher.Publish(this, EventArgs.Empty);
+                }
+                else if (SelectedMasks.Count > 0)
+                {
+                    LayerModel.DeleteMask([..SelectedMasks.Select(m => m.MaskId)]);
+                    SelectedMasks.Clear();
+                    FocusRequestPublisher.Publish(this, EventArgs.Empty);
+                }
             }, () => EditingParameter == EditingLayerParameter.None && SelectedEffects.Count > 0)
                 .ObservesProperty(() => EditingParameter)
-                .ObservesProperty(() => SelectedEffects.Count);
+                .ObservesProperty(() => SelectedEffects.Count)
+                .ObservesProperty(() => SelectedMasks.Count);
 
             ShowFootagePreviewCommand = new DelegateCommand(() => EventHubModel.NotifyShowFootagePreview(LayerModel.FootageId));
 
@@ -1153,7 +1238,7 @@ namespace NiVE3.ViewModel
                 targetEffects.AddRange(SelectedEffects);
             }
 
-            LayerModel.ChangeEffectEnable(targetEffects.Select(e => e.EffectId).ToArray(), e.IsEnabled);
+            LayerModel.ChangeEffectsEnable([..targetEffects.Select(e => e.EffectId)], e.IsEnabled);
         }
 
         private void Effect_SelectItemChanged(object? sender, SelectItemEventArgs e)
@@ -1161,13 +1246,14 @@ namespace NiVE3.ViewModel
             SelectItemChangedPublisher.Publish(sender, new SelectItemEventArgs(e, this));
             if (e.SelectItemType != SelectItemType.Effect)
             {
-                foreach (var effect in SelectedEffects.Where(v => v != e.Effect).ToArray())
+                var targetEffect = e.Effect;
+                foreach (var effect in SelectedEffects.Where(v => v != targetEffect).ToArray())
                 {
                     SelectedEffects.Remove(effect);
                 }
-                if (e.Effect != null && !SelectedEffects.Contains(e.Effect))
+                if (targetEffect != null && !SelectedEffects.Contains(targetEffect))
                 {
-                    SelectedEffects.Add(e.Effect);
+                    SelectedEffects.Add(targetEffect);
 
                     TransformProperties?.DeSelect();
                     LayerOptionProperties?.DeSelect();
@@ -1175,6 +1261,11 @@ namespace NiVE3.ViewModel
                     ShapeProperties?.DeSelect();
                     SourceOptionProperties?.DeSelect();
                     AudioOptionProperties?.DeSelect();
+                    foreach (var mask in SelectedMasks)
+                    {
+                        mask.DeSelect();
+                    }
+                    SelectedMasks.Clear();
                 }
             }
             else
@@ -1191,6 +1282,79 @@ namespace NiVE3.ViewModel
                 SourceOptionProperties?.DeSelect();
                 AudioOptionProperties?.DeSelect();
             }
+        }
+
+        private void Effect_PropertyValueCommited(object? sender, PropertyValueCommitedEventArgs e)
+        {
+            PropertyValueCommitedPublisher.Publish(this, e);
+        }
+
+        private void Mask_MaskEnableChangeRequest(object? sender, MaskEnableChangeEventArgs e)
+        {
+            if (sender is not MaskViewModel mask)
+            {
+                return;
+            }
+
+            var targetMasks = new List<MaskViewModel>();
+            if (SelectedMasks.Count < 1 || !SelectedMasks.Contains(mask))
+            {
+                targetMasks.Add(mask);
+            }
+            else
+            {
+                targetMasks.AddRange(SelectedMasks);
+            }
+
+            LayerModel.ChangeMasksEnable([..targetMasks.Select(m => m.MaskId)], e.IsEnabled);
+        }
+
+        private void Mask_SelectItemChanged(object? sender, SelectItemEventArgs e)
+        {
+            SelectItemChangedPublisher.Publish(sender, new SelectItemEventArgs(e, this));
+            if (e.SelectItemType != SelectItemType.Mask)
+            {
+                var targetMask = e.Mask;
+                foreach (var mask in SelectedMasks.Where(v => v != targetMask).ToArray())
+                {
+                    SelectedMasks.Remove(mask);
+                }
+                if (targetMask != null && !SelectedMasks.Contains(targetMask))
+                {
+                    SelectedMasks.Add(targetMask);
+
+                    TransformProperties?.DeSelect();
+                    LayerOptionProperties?.DeSelect();
+                    TextProperties?.DeSelect();
+                    ShapeProperties?.DeSelect();
+                    SourceOptionProperties?.DeSelect();
+                    AudioOptionProperties?.DeSelect();
+                    foreach (var effect in SelectedEffects)
+                    {
+                        effect.DeSelect();
+                    }
+                    SelectedEffects.Clear();
+                }
+            }
+            else
+            {
+                // NOTE: マスクのプロパティのみ選択解除する
+                foreach (var mask in SelectedMasks)
+                {
+                    mask.DeSelect();
+                }
+                TransformProperties?.DeSelect();
+                LayerOptionProperties?.DeSelect();
+                TextProperties?.DeSelect();
+                ShapeProperties?.DeSelect();
+                SourceOptionProperties?.DeSelect();
+                AudioOptionProperties?.DeSelect();
+            }
+        }
+
+        private void Mask_PropertyValueCommited(object? sender, PropertyValueCommitedEventArgs e)
+        {
+            PropertyValueCommitedPublisher.Publish(this, e);
         }
 
         private void SelectedEffects_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -1211,9 +1375,22 @@ namespace NiVE3.ViewModel
             }
         }
 
-        private void Effect_PropertyValueCommited(object? sender, PropertyValueCommitedEventArgs e)
+        private void SelectedMasks_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
-            PropertyValueCommitedPublisher.Publish(this, e);
+            if (e.Action == NotifyCollectionChangedAction.Reset)
+            {
+                foreach (var mask in Masks)
+                {
+                    mask.DeSelect();
+                }
+            }
+            else
+            {
+                foreach (var mask in e.OldItems?.OfType<MaskViewModel>() ?? [])
+                {
+                    mask.DeSelect();
+                }
+            }
         }
 
         private void PropertyGroupViewModel_SelectItemChanged(object? sender, SelectItemEventArgs e)

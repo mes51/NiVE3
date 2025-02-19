@@ -63,6 +63,16 @@ namespace NiVE3.ViewModel
         }
     }
 
+    class MaskEnableChangeEventArgs : EventArgs
+    {
+        public bool IsEnabled { get; }
+
+        public MaskEnableChangeEventArgs(bool isEnabled)
+        {
+            IsEnabled = isEnabled;
+        }
+    }
+
     class SelectItemEventArgs : EventArgs
     {
         public SelectItemType SelectItemType { get; }
@@ -76,6 +86,8 @@ namespace NiVE3.ViewModel
         public IViewModelShortcutCommand? CommandableOriginalParent => ObjectHierarchy.Skip(1).FirstOrDefault() as IViewModelShortcutCommand;
 
         public EffectViewModel? Effect => ObjectHierarchy.FirstOrDefault(o => o is EffectViewModel) as EffectViewModel;
+
+        public MaskViewModel? Mask => ObjectHierarchy.FirstOrDefault(o => o is MaskViewModel) as MaskViewModel;
 
         public LayerViewModel? Layer => ObjectHierarchy.FirstOrDefault(o => o is LayerViewModel) as LayerViewModel;
 

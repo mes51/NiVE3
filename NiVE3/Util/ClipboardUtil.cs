@@ -37,5 +37,22 @@ namespace NiVE3.Util
                 return null;
             }
         }
+
+        public static CopyDataType GetDataType()
+        {
+            if (!Clipboard.ContainsText())
+            {
+                return CopyDataType.None;
+            }
+
+            try
+            {
+                return JsonSerializer.Deserialize<CopyData<object>>(Clipboard.GetText())?.Type ?? CopyDataType.None;
+            }
+            catch
+            {
+                return CopyDataType.None;
+            }
+        }
     }
 }

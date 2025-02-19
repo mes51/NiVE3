@@ -1368,7 +1368,7 @@ namespace NiVE3.Model
             }
         }
 
-        public void ChangeEffectEnable(Guid[] effectIds, bool isEnable)
+        public void ChangeEffectsEnable(Guid[] effectIds, bool isEnable)
         {
             var effects = Effects.Where(e => effectIds.Contains(e.EffectId)).OrderBy(Effects.IndexOf).ToArray();
             var oldValues = effects.Select(e => e.IsEnable).ToArray();
@@ -1378,12 +1378,49 @@ namespace NiVE3.Model
                 e.IsEnable = isEnable;
             }
 
-            HistoryModel.Add(new ChangeEffectEnableHistoryCommand(effects, oldValues, isEnable));
+            HistoryModel.Add(new ChangeEffectsEnableHistoryCommand(effects, oldValues, isEnable));
         }
 
-        public void DeleteEffect(Guid[] ids)
+        public void DeleteEffect(Guid[] effectIds)
         {
-            DeleteEffectInternal(ids, false);
+            DeleteEffectInternal(effectIds, false);
+        }
+
+        public CopyData<EffectData> CutEffects(Guid[] effectIds)
+        {
+            var result = CopyEffects(effectIds);
+            DeleteEffectInternal(effectIds, true);
+
+            return result;
+        }
+
+        public CopyData<EffectData> CopyEffects(Guid[] effectIds)
+        {
+            var effects = Effects.Where(e => effectIds.Contains(e.EffectId)).OrderBy(Effects.IndexOf);
+            return new CopyData<EffectData>(CopyDataType.Effect, [..effects.Select(e => e.SaveData())]);
+        }
+
+        public void PasteEffects(CopyData<EffectData> data, Guid[] selectedEffectIds, Guid? insertTargetId)
+        {
+            if (data.Type != CopyDataType.Effect || data.Data.Length < 1)
+            {
+                return;
+            }
+
+            if (selectedEffectIds.Length == 1 && Effects.FirstOrDefault(e => e.EffectId == selectedEffectIds[0]) is EffectModel targetEffect && targetEffect.EffectPluginId == data.Data[0].EffectPluginId)
+            {
+                targetEffect.OverwriteEffect(data.Data[0]);
+            }
+            else
+            {
+                PasteEffectsInternal(data, selectedEffectIds, insertTargetId, false);
+            }
+        }
+
+        public void DuplicateEffects(Guid[] effectIds, Guid? insertTargetId)
+        {
+            var data = CopyEffects(effectIds);
+            PasteEffectsInternal(data, [], insertTargetId, true);
         }
 
         public void AddMask(MaskShapeType shapeType)
@@ -1397,6 +1434,61 @@ namespace NiVE3.Model
             Masks.Insert(index, maskModel);
 
             HistoryModel.Add(new InsertMaskHistoryCommand(this, maskModel, index));
+        }
+
+        public void DeleteMask(Guid[] maskIds)
+        {
+            DeleteMaskInternal(maskIds, false);
+        }
+
+        public CopyData<MaskData> CutMasks(Guid[] maskIds)
+        {
+            var result = CopyMasks(maskIds);
+            DeleteMaskInternal(maskIds, true);
+
+            return result;
+        }
+
+        public CopyData<MaskData> CopyMasks(Guid[] maskIds)
+        {
+            var masks = Masks.Where(m => maskIds.Contains(m.MaskId)).OrderBy(Masks.IndexOf);
+            return new CopyData<MaskData>(CopyDataType.Mask, [..masks.Select(m => m.SaveData())]);
+        }
+
+        public void PasteMasks(CopyData<MaskData> data, Guid[] selectedMaskIds, Guid? insertTargetId)
+        {
+            if (data.Type != CopyDataType.Mask || data.Data.Length < 1)
+            {
+                return;
+            }
+
+            if (selectedMaskIds.Length == 1 && Masks.FirstOrDefault(m => m.MaskId == selectedMaskIds[0]) is MaskModel targetMask)
+            {
+                targetMask.OverwriteMask(data.Data[0]);
+            }
+            else
+            {
+                PasteMasksInternal(data, selectedMaskIds, insertTargetId, false);
+            }
+        }
+
+        public void DuplicateMasks(Guid[] maskIds, Guid? insertTargetId)
+        {
+            var data = CopyMasks(maskIds);
+            PasteMasksInternal(data, [], insertTargetId, true);
+        }
+
+        public void ChangeMasksEnable(Guid[] maskIds, bool isEnable)
+        {
+            var masks = Masks.Where(m => maskIds.Contains(m.MaskId)).OrderBy(Masks.IndexOf).ToArray();
+            var oldValues = masks.Select(m => m.IsEnable).ToArray();
+
+            foreach (var m in masks)
+            {
+                m.IsEnable = isEnable;
+            }
+
+            HistoryModel.Add(new ChangeMasksEnableHistoryCommand(masks, oldValues, isEnable));
         }
 
         public void ChangeTagColor(Color color)
@@ -1568,43 +1660,6 @@ namespace NiVE3.Model
             }
         }
 
-        public CopyData<EffectData> CutEffects(Guid[] ids)
-        {
-            var result = CopyEffects(ids);
-            DeleteEffectInternal(ids, true);
-
-            return result;
-        }
-
-        public CopyData<EffectData> CopyEffects(Guid[] ids)
-        {
-            var effects = Effects.Where(e => ids.Contains(e.EffectId)).OrderBy(Effects.IndexOf);
-            return new CopyData<EffectData>(CopyDataType.Effect, [..effects.Select(e => e.SaveData())]);
-        }
-
-        public void PasteEffects(CopyData<EffectData> data, Guid[] selectedEffectIds, Guid? insertTargetId)
-        {
-            if (data.Type != CopyDataType.Effect || data.Data.Length < 1)
-            {
-                return;
-            }
-
-            if (selectedEffectIds.Length == 1 && Effects.FirstOrDefault(e => e.EffectId == selectedEffectIds[0]) is EffectModel targetEffect && targetEffect.EffectPluginId == data.Data[0].EffectPluginId)
-            {
-                targetEffect.OverwriteEffect(data.Data[0]);
-            }
-            else
-            {
-                PasteEffectsInternal(data, selectedEffectIds, insertTargetId, false);
-            }
-        }
-
-        public void DuplicateEffects(Guid[] ids, Guid? insertTargetId)
-        {
-            var data = CopyEffects(ids);
-            PasteEffectsInternal(data, [], insertTargetId, true);
-        }
-
         public void ChangeFreezeFrame(bool isFreezeFrame, Time time, Time compositionFrameDuration)
         {
             var layerTime = time - SourceStartPoint;
@@ -1681,9 +1736,9 @@ namespace NiVE3.Model
                 Masks.Any(m => m.PropertyIsChangeableByTime());
         }
 
-        void DeleteEffectInternal(Guid[] ids, bool isCut)
+        void DeleteEffectInternal(Guid[] effectIds, bool isCut)
         {
-            var effects = Effects.Where(l => ids.Contains(l.EffectId)).OrderBy(Effects.IndexOf).ToArray();
+            var effects = Effects.Where(l => effectIds.Contains(l.EffectId)).OrderBy(Effects.IndexOf).ToArray();
             var oldIndices = effects.Select(Effects.IndexOf).ToArray();
 
             foreach (var e in effects)
@@ -1696,7 +1751,7 @@ namespace NiVE3.Model
 
         void PasteEffectsInternal(CopyData<EffectData> data, Guid[] selectedEffectIds, Guid? insertTargetId, bool isDuplicate)
         {
-            var addedEffect = new List<EffectModel>();
+            var addedEffects = new List<EffectModel>();
             var insertStartIndex = insertTargetId.HasValue ? Effects.FindIndex(e => e.EffectId == insertTargetId) : -1;
             if (insertStartIndex < 0)
             {
@@ -1718,11 +1773,50 @@ namespace NiVE3.Model
 
                 newEffect.LoadData(effectData);
                 Effects.Insert(index, newEffect);
-                addedEffect.Add(newEffect);
+                addedEffects.Add(newEffect);
                 index++;
             }
 
-            HistoryModel.Add(new PasteNewEffectsHistoryCommand(this, [.. addedEffect], insertStartIndex, isDuplicate));
+            HistoryModel.Add(new PasteNewEffectsHistoryCommand(this, [..addedEffects], insertStartIndex, isDuplicate));
+        }
+
+        void DeleteMaskInternal(Guid[] maskIds, bool isCut)
+        {
+            var masks = Masks.Where(m => maskIds.Contains(m.MaskId)).OrderBy(Masks.IndexOf).ToArray();
+            var oldIndices = masks.Select(Masks.IndexOf).ToArray();
+
+            foreach (var m in masks)
+            {
+                Masks.Remove(m);
+            }
+
+            HistoryModel.Add(new DeleteMaskHistoryCommand(this, masks, oldIndices, isCut));
+        }
+
+        void PasteMasksInternal(CopyData<MaskData> data, Guid[] selectedMaskIds, Guid? insertTargetId, bool isDuplicate)
+        {
+            var addedMasks = new List<MaskModel>();
+            var insertStartIndex = insertTargetId.HasValue ? Masks.FindIndex(m => m.MaskId == insertTargetId) : -1;
+            if (insertStartIndex < 0)
+            {
+                insertStartIndex = Masks.Count;
+            }
+            else
+            {
+                insertStartIndex++;
+            }
+
+            var index = insertStartIndex;
+            foreach (var maskData in data.Data)
+            {
+                var newMask = new MaskModel(ProjectModel, CompositionModel, this, HistoryModel, maskData.DefaultShapeType);
+                newMask.LoadData(maskData);
+                Masks.Insert(index, newMask);
+                addedMasks.Add(newMask);
+                index++;
+            }
+
+            HistoryModel.Add(new PasteNewMasksHistoryCommand(this, [..addedMasks], insertStartIndex, isDuplicate));
         }
 
         Time CalcSourceTime(Time layerTime)

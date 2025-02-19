@@ -6,6 +6,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using NiVE3.Data.Clipboard;
 using NiVE3.Data.Json.Project;
 using NiVE3.Extension;
 using NiVE3.Numerics;
@@ -31,6 +32,8 @@ namespace NiVE3.Model
 
         const string PropertyMaskSettingBlendModeId = nameof(PropertyMaskSettingBlendModeId);
 
+        public Guid MaskId { get; }
+
         private string name = "";
         public string Name
         {
@@ -48,8 +51,6 @@ namespace NiVE3.Model
         public PropertyGroupModel Properties { get; }
 
         MaskShapeType DefaultShapeType { get; }
-
-        Guid MaskId { get; }
 
         HistoryModel HistoryModel { get; }
 
@@ -120,6 +121,14 @@ namespace NiVE3.Model
         public bool PropertyIsChangeableByTime()
         {
             return Properties.IsChangeableByTime();
+        }
+
+        public void OverwriteMask(MaskData data)
+        {
+            var oldData = SaveData();
+            LoadData(data);
+
+            HistoryModel.Add(new OverwriteMaskHistoryCommand(this, oldData, data));
         }
 
         public void LoadData(MaskData data)

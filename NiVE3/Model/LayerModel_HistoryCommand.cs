@@ -203,7 +203,7 @@ namespace NiVE3.Model
             public void Dispose() { }
         }
 
-        private class ChangeEffectEnableHistoryCommand : IHistoryCommand
+        private class ChangeEffectsEnableHistoryCommand : IHistoryCommand
         {
             public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangeEffectsEnable);
 
@@ -213,7 +213,7 @@ namespace NiVE3.Model
 
             bool NewValue { get; }
 
-            public ChangeEffectEnableHistoryCommand(EffectModel[] effects, bool[] oldValues, bool newValue)
+            public ChangeEffectsEnableHistoryCommand(EffectModel[] effects, bool[] oldValues, bool newValue)
             {
                 Effects = effects;
                 OldValues = oldValues;
@@ -323,6 +323,122 @@ namespace NiVE3.Model
                     e.Dispose();
                 }
             }
+        }
+
+        private class ChangeMasksEnableHistoryCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangeMasksEnable);
+
+            MaskModel[] Masks { get; }
+
+            bool[] OldValues { get; }
+
+            bool NewValue { get; }
+
+            public ChangeMasksEnableHistoryCommand(MaskModel[] masks, bool[] oldValues, bool newValue)
+            {
+                Masks = masks;
+                OldValues = oldValues;
+                NewValue = newValue;
+            }
+
+            public void Redo()
+            {
+                foreach (var m in Masks)
+                {
+                    m.IsEnable = NewValue;
+                }
+            }
+
+            public void Undo()
+            {
+                foreach (var (m, enable) in Masks.Zip(OldValues))
+                {
+                    m.IsEnable = enable;
+                }
+            }
+
+            public void Dispose() { }
+        }
+
+        private class DeleteMaskHistoryCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(IsCut ? LanguageResourceDictionary.History_CutMasks : LanguageResourceDictionary.History_RemoveMasks);
+
+            LayerModel Model { get; }
+
+            MaskModel[] Masks { get; }
+
+            int[] Indices { get; }
+
+            bool IsCut { get; }
+
+            public DeleteMaskHistoryCommand(LayerModel model, MaskModel[] masks, int[] indices, bool isCut)
+            {
+                Model = model;
+                Masks = masks;
+                Indices = indices;
+                IsCut = isCut;
+            }
+
+            public void Redo()
+            {
+                foreach (var m in Masks)
+                {
+                    Model.Masks.Remove(m);
+                }
+            }
+
+            public void Undo()
+            {
+                foreach (var (m, i) in Masks.Zip(Indices))
+                {
+                    Model.Masks.Insert(i, m);
+                }
+            }
+
+            public void Dispose() { }
+        }
+
+        private class PasteNewMasksHistoryCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(IsDuplicate ? LanguageResourceDictionary.History_DuplicateMasks : LanguageResourceDictionary.History_PasteMasks);
+
+            LayerModel Model { get; }
+
+            MaskModel[] NewMasks { get; }
+
+            int InsertStartIndex { get; }
+
+            bool IsDuplicate { get; }
+
+            public PasteNewMasksHistoryCommand(LayerModel model, MaskModel[] newMasks, int insertStartIndex, bool isDuplicate)
+            {
+                Model = model;
+                NewMasks = newMasks;
+                InsertStartIndex = insertStartIndex;
+                IsDuplicate = isDuplicate;
+            }
+
+            public void Redo()
+            {
+                var index = InsertStartIndex;
+                foreach (var m in NewMasks)
+                {
+                    Model.Masks.Insert(index, m);
+                    index++;
+                }
+            }
+
+            public void Undo()
+            {
+                foreach (var m in NewMasks)
+                {
+                    Model.Masks.Remove(m);
+                }
+            }
+
+            public void Dispose() { }
         }
 
         private class ChangeTagColorHistoryCommand : IHistoryCommand
