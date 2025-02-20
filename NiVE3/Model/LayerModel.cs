@@ -1431,6 +1431,17 @@ namespace NiVE3.Model
         public void InsertMask(MaskShapeType shapeType, int index)
         {
             var maskModel = new MaskModel(ProjectModel, CompositionModel, this, HistoryModel, shapeType);
+
+            var count = 1;
+            var nameTemplate = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.LayerModel_NewMaskTemplate);
+            var name = string.Format(nameTemplate, count);
+            while (Masks.Any(m => m.Name == name))
+            {
+                count++;
+                name = string.Format(nameTemplate, count);
+            }
+            maskModel.Name = name;
+
             Masks.Insert(index, maskModel);
 
             HistoryModel.Add(new InsertMaskHistoryCommand(this, maskModel, index));

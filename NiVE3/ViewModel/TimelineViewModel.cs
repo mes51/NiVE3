@@ -885,7 +885,7 @@ namespace NiVE3.ViewModel
                     return;
                 }
 
-                CompositionModel.AddMaskToLayers([.. SelectedLayers.Select(l => l.LayerId)], MaskShapeType.Rectangle);
+                CompositionModel.AddMaskToLayers([.. SelectedLayers.Select(l => l.LayerId)], MaskShapeType.Ellipse);
             }, () => CompositionModel != null && SelectedLayers.Count > 0)
                 .ObservesProperty(() => CompositionModel)
                 .ObservesProperty(() => SelectedLayers.Count);

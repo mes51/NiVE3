@@ -658,6 +658,31 @@
         </Grid>
 
         <StackPanel Grid.Row="1" Visibility="{Binding IsExpanded, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <pt:LayerItemExpander HeaderText="{gm:LanguageResource ResourceKey=Layer_Masks}"
+                                  IndentLevel="1"
+                                  IsAVSwitchColumnVisible="{Binding ElementName=Root, Path=DataContext.IsAVSwitchColumnVisible}"
+                                  IsTagColumnVisible="{Binding ElementName=Root, Path=DataContext.IsTagColumnVisible}"
+                                  NameAreaWidth="{Binding ElementName=Root, Path=DataContext.PropertyNameAreaWidth}"
+                                  ControlAreaWidth="{Binding ElementName=Root, Path=LayerControlAreaWidth}"
+                                  Visibility="{Binding HasMask, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <pt:MaskCollectionView x:Name="MaskCollectionView"
+                                       ItemsSource="{Binding Masks}"
+                                       IndentLevel="2"
+                                       ControlAreaWidth="{Binding ElementName=Root, Path=LayerControlAreaWidth}"
+                                       NameAreaWidth="{Binding ElementName=Root, Path=DataContext.PropertyNameAreaWidth}"
+                                       IsAVSwitchColumnVisible="{Binding ElementName=Root, Path=DataContext.IsAVSwitchColumnVisible}"
+                                       IsTagColumnVisible="{Binding ElementName=Root, Path=DataContext.IsTagColumnVisible}"
+                                       IsCommentColumnVisible="{Binding ElementName=Root, Path=DataContext.IsLayerCommentColumnVisible}"
+                                       Range="{Binding ElementName=Root, Path=Range}"
+                                       RangeStart="{Binding ElementName=Root, Path=RangeStart}"
+                                       CompositionFrameRate="{Binding ElementName=Root, Path=CompositionFrameRate}"
+                                       SelectedItems="{Binding SelectedMasks}"
+                                       dd:DragDrop.DropHandler="{Binding}"
+                                       dd:DragDrop.DragHandler="{Binding RelativeSource={RelativeSource Self}}"
+                                       dd:DragDrop.IsDragSource="True"
+                                       dd:DragDrop.IsDropTarget="True"
+                                       dd:DragDrop.DragSourceIgnore="False"/>
+            </pt:LayerItemExpander>
             <pt:LayerItemExpander HeaderText="{gm:LanguageResource ResourceKey=Layer_Effects}"
                                   IndentLevel="1"
                                   IsAVSwitchColumnVisible="{Binding ElementName=Root, Path=DataContext.IsAVSwitchColumnVisible}"
@@ -788,5 +813,6 @@
         </StackPanel>
 
         <r:ReadOnlyPropertyWire Reciever="{Binding ElementName=EffectCollectionView, Path=LastSelected}" Sender="{Binding LastSelectedEffect}"/>
+        <r:ReadOnlyPropertyWire Reciever="{Binding ElementName=MaskCollectionView, Path=LastSelected}" Sender="{Binding LastSelectedMask}"/>
     </Grid>
 </UserControl>

@@ -443,6 +443,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("なし")]
         public static readonly string Layer_EmptyParentLayer = nameof(Layer_EmptyParentLayer);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("マスク")]
+        public static readonly string Layer_Masks = nameof(Layer_Masks);
+
         [ShowInMarkup, LanguageKey, DefaultValue("エフェクト")]
         public static readonly string Layer_Effects = nameof(Layer_Effects);
 
@@ -1543,6 +1546,11 @@ namespace NiVE3.View.Resource
 
         [ShowInMarkup, LanguageKey, DefaultValue("編集")]
         public static readonly string SourceTextPropertyControl_Edit = nameof(SourceTextPropertyControl_Edit);
+
+        // Model Data
+
+        [DefaultValue("マスク {0}")]
+        public static readonly string LayerModel_NewMaskTemplate = nameof(LayerModel_NewMaskTemplate);
 
         // ShortcutKeyNames
 

@@ -28,6 +28,7 @@
         <cv:IsNullConverter x:Key="IsNullConverter"/>
         <cv:BooleanInvertConverter x:Key="BooleanInvertConverter"/>
         <cv:TimeToDoubleConverter x:Key="TimeToDoubleConverter" FrameRate="{Binding FrameRate}"/>
+        <cv:EnumToVisibilityConverter x:Key="EnumToVisibilityConverter" UseAndCompare="True"/>
 
         <r:BindingProxy x:Key="ViewModelProxy" Data="{Binding}"/>
 
@@ -107,11 +108,11 @@
                             </MenuItem.ItemTemplate>
                         </MenuItem>
                         <Separator />
-                        <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_Mask}">
+                        <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_Mask}" Visibility="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.DataContext.SourceType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter={x:Static local:TimelineView.CompositionDisplayableSourceType}}">
                             <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_Mask_AddRectangle}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=AddRectangleMaskGesture}"/>
                             <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_Mask_AddEllipse}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=AddEllipseMaskGesture}"/>
                         </MenuItem>
-                        <Separator />
+                        <Separator Visibility="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.DataContext.SourceType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter={x:Static local:TimelineView.CompositionDisplayableSourceType}}"/>
                         <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_Cut}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=CutItemGesture}"/>
                         <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_Copy}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=CopyItemGesture}"/>
                         <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_Paste}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=PasteItemGesture}"/>

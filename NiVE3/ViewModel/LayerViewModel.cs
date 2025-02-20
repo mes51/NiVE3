@@ -249,6 +249,14 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref hasEffect, value); }
         }
 
+        private bool hasMask;
+        [NeedWire(nameof(LayerModel), IsOneWay = true)]
+        public bool HasMask
+        {
+            get { return hasMask; }
+            set { SetProperty(ref hasMask, value); }
+        }
+
         private BlendMode blendMode;
         [NeedWire(nameof(LayerModel), IsOneWay = true)]
         public BlendMode BlendMode

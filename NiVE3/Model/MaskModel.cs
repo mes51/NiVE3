@@ -41,7 +41,7 @@ namespace NiVE3.Model
             set { SetProperty(ref name, value); }
         }
 
-        private bool isEnable;
+        private bool isEnable = true;
         public bool IsEnable
         {
             get { return isEnable; }
@@ -72,7 +72,7 @@ namespace NiVE3.Model
                         new EnumProperty(PropertyMaskSettingShapeTypeId, LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting_ShapeType, typeof(MaskShapeType), typeof(LanguageResourceDictionary), shapeType, false, 90.0),
                         new Vector3dProperty(PropertyMaskSettingSizeId, LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting_Size, new Vector3d(maskWidth, maskHeight, 0.0), digit: 2, useLinkRatio: true),
                         new Vector3dProperty(PropertyMaskSettingPositionId, LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting_Position, new Vector3d(maskWidth * 0.5, maskHeight * 0.5, 0.0), digit: 2),
-                        new DoubleProperty(PropertyMaskSettingOpacityId, LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting_Opacity, 100.0, 0.0, 100.0, digit: 2),
+                        new DoubleProperty(PropertyMaskSettingOpacityId, LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting_Opacity, 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
                         new EnumProperty(PropertyMaskSettingBlendModeId, LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting_BlendMode, typeof(MaskBlendMode), typeof(LanguageResourceDictionary), MaskBlendMode.Add, false, 90.0),
                     ]
                 ),
