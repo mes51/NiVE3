@@ -977,7 +977,7 @@ namespace NiVE3.ViewModel
                 {
                     ClipboardUtil.SetData(LayerModel.CopyMasks([..SelectedMasks.Select(m => m.MaskId)]));
                 }
-            }, () => EditingParameter == EditingLayerParameter.None && SelectedEffects.Count > 0)
+            }, () => EditingParameter == EditingLayerParameter.None && (SelectedEffects.Count > 0 || SelectedMasks.Count > 0))
                 .ObservesProperty(() => EditingParameter)
                 .ObservesProperty(() => SelectedEffects.Count)
                 .ObservesProperty(() => SelectedMasks.Count);
@@ -989,12 +989,12 @@ namespace NiVE3.ViewModel
                     return;
                 }
 
-                if (ClipboardUtil.GetData<EffectData>() is CopyData<EffectData> effectData)
+                if (ClipboardUtil.GetData<EffectData>(CopyDataType.Effect) is CopyData<EffectData> effectData)
                 {
                     var insertTargetId = LastSelectedEffect?.EffectId;
                     LayerModel.PasteEffects(effectData, [..SelectedEffects.Select(e => e.EffectId)], insertTargetId);
                 }
-                else if (ClipboardUtil.GetData<MaskData>() is CopyData<MaskData> maskData)
+                else if (ClipboardUtil.GetData<MaskData>(CopyDataType.Mask) is CopyData<MaskData> maskData)
                 {
                     var insertTargetId = LastSelectedMask?.MaskId;
                     LayerModel.PasteMasks(maskData, [..SelectedMasks.Select(m => m.MaskId)], insertTargetId);
@@ -1018,7 +1018,7 @@ namespace NiVE3.ViewModel
                     var insertTargetId = LastSelectedMask?.MaskId;
                     LayerModel.DuplicateMasks([..SelectedMasks.Select(m => m.MaskId)], insertTargetId);
                 }
-            }, () => EditingParameter == EditingLayerParameter.None && SelectedEffects.Count > 0)
+            }, () => EditingParameter == EditingLayerParameter.None && (SelectedEffects.Count > 0 || SelectedMasks.Count > 0))
                 .ObservesProperty(() => EditingParameter)
                 .ObservesProperty(() => SelectedEffects.Count)
                 .ObservesProperty(() => SelectedMasks.Count);
@@ -1042,7 +1042,7 @@ namespace NiVE3.ViewModel
                     SelectedMasks.Clear();
                     FocusRequestPublisher.Publish(this, EventArgs.Empty);
                 }
-            }, () => EditingParameter == EditingLayerParameter.None && SelectedEffects.Count > 0)
+            }, () => EditingParameter == EditingLayerParameter.None && (SelectedEffects.Count > 0 || SelectedMasks.Count > 0))
                 .ObservesProperty(() => EditingParameter)
                 .ObservesProperty(() => SelectedEffects.Count)
                 .ObservesProperty(() => SelectedMasks.Count);

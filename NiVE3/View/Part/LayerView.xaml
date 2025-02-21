@@ -681,7 +681,17 @@
                                        dd:DragDrop.DragHandler="{Binding RelativeSource={RelativeSource Self}}"
                                        dd:DragDrop.IsDragSource="True"
                                        dd:DragDrop.IsDropTarget="True"
-                                       dd:DragDrop.DragSourceIgnore="False"/>
+                                       dd:DragDrop.DragSourceIgnore="False">
+                    <pt:MaskCollectionView.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="{gm:LanguageResource ResourceKey=Layer_Mask_ContextMenu_Cut}" a:MenuItemGestureBindingProperty.InputGesture="{cgm:ShortcutKeyBinding ResourceKey=CutItemGesture}" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.DataContext.CutEffectCommand}"/>
+                            <MenuItem Header="{gm:LanguageResource ResourceKey=Layer_Mask_ContextMenu_Copy}" a:MenuItemGestureBindingProperty.InputGesture="{cgm:ShortcutKeyBinding ResourceKey=CopyItemGesture}" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.DataContext.CopyEffectCommand}"/>
+                            <MenuItem Header="{gm:LanguageResource ResourceKey=Layer_Mask_ContextMenu_Paste}" a:MenuItemGestureBindingProperty.InputGesture="{cgm:ShortcutKeyBinding ResourceKey=PasteItemGesture}" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.DataContext.PasteEffectCommand}"/>
+                            <MenuItem Header="{gm:LanguageResource ResourceKey=Layer_Mask_ContextMenu_Duplicate}" a:MenuItemGestureBindingProperty.InputGesture="{cgm:ShortcutKeyBinding ResourceKey=DuplicateItemGesture}" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.DataContext.DuplicateEffectCommand}"/>
+                            <MenuItem Header="{gm:LanguageResource ResourceKey=Layer_Mask_ContextMenu_Delete}" a:MenuItemGestureBindingProperty.InputGesture="{cgm:ShortcutKeyBinding ResourceKey=DeleteItemGesture}" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.DataContext.DeleteEffectCommand}"/>
+                        </ContextMenu>
+                    </pt:MaskCollectionView.ContextMenu>
+                </pt:MaskCollectionView>
             </pt:LayerItemExpander>
             <pt:LayerItemExpander HeaderText="{gm:LanguageResource ResourceKey=Layer_Effects}"
                                   IndentLevel="1"

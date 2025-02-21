@@ -38,6 +38,31 @@ namespace NiVE3.Util
             }
         }
 
+        public static CopyData<T>? GetData<T>(CopyDataType targetType)
+        {
+            if (!Clipboard.ContainsText())
+            {
+                return null;
+            }
+
+            try
+            {
+                var result = JsonSerializer.Deserialize<CopyData<T>>(Clipboard.GetText());
+                if (result?.Type == targetType)
+                {
+                    return result;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
         public static CopyDataType GetDataType()
         {
             if (!Clipboard.ContainsText())

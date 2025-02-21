@@ -1116,9 +1116,9 @@ namespace NiVE3.Model
             PasteLayersInternal(data, insertTargetId, false);
         }
 
-        public void PasteEffects(CopyData<EffectData> data, Guid[] ids)
+        public void PasteEffects(CopyData<EffectData> data, Guid[] layerIds)
         {
-            var layers = Layers.Where(l => ids.Contains(l.LayerId)).OrderBy(Layers.IndexOf).ToArray();
+            var layers = Layers.Where(l => layerIds.Contains(l.LayerId)).OrderBy(Layers.IndexOf).ToArray();
             if (layers.Length < 1)
             {
                 return;
@@ -1129,6 +1129,24 @@ namespace NiVE3.Model
             foreach (var l in layers)
             {
                 l.PasteEffects(data, [], null);
+            }
+
+            HistoryModel.EndGroup();
+        }
+
+        public void PasteMasks(CopyData<MaskData> data, Guid[] layerIds)
+        {
+            var layers = Layers.Where(l => layerIds.Contains(l.LayerId)).OrderBy(Layers.IndexOf).ToArray();
+            if (layers.Length < 1)
+            {
+                return;
+            }
+
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_PasteMasks));
+
+            foreach (var l in layers)
+            {
+                l.PasteMasks(data, [], null);
             }
 
             HistoryModel.EndGroup();

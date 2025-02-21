@@ -497,6 +497,21 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("削除(_D)")]
         public static readonly string Layer_Effect_ContextMenu_Delete = nameof(Layer_Effect_ContextMenu_Delete);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("切り取り(_X)")]
+        public static readonly string Layer_Mask_ContextMenu_Cut = nameof(Layer_Mask_ContextMenu_Cut);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("コピー(_C)")]
+        public static readonly string Layer_Mask_ContextMenu_Copy = nameof(Layer_Mask_ContextMenu_Copy);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("ペースト(_P)")]
+        public static readonly string Layer_Mask_ContextMenu_Paste = nameof(Layer_Mask_ContextMenu_Paste);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("複製(_L)")]
+        public static readonly string Layer_Mask_ContextMenu_Duplicate = nameof(Layer_Mask_ContextMenu_Duplicate);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("削除(_D)")]
+        public static readonly string Layer_Mask_ContextMenu_Delete = nameof(Layer_Mask_ContextMenu_Delete);
+
         [ShowInMarkup, LanguageKey, DefaultValue("名前")]
         public static readonly string EffectList_Name = nameof(EffectList_Name);
 

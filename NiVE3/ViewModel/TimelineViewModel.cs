@@ -751,17 +751,23 @@ namespace NiVE3.ViewModel
                         return;
                     }
 
-                    var layerData = ClipboardUtil.GetData<LayerData>();
-                    if (layerData != null && layerData.Type == CopyDataType.Layer)
+                    var layerData = ClipboardUtil.GetData<LayerData>(CopyDataType.Layer);
+                    if (layerData != null)
                     {
                         CompositionModel.PasteLayers(layerData, LastSelectedLayerId);
                         return;
                     }
                     
-                    var effectData = ClipboardUtil.GetData<EffectData>();
-                    if (effectData != null && effectData.Type == CopyDataType.Effect)
+                    var effectData = ClipboardUtil.GetData<EffectData>(CopyDataType.Effect);
+                    if (effectData != null)
                     {
                         CompositionModel.PasteEffects(effectData, [..SelectedLayers.Select(l => l.LayerId)]);
+                    }
+
+                    var maskData = ClipboardUtil.GetData<MaskData>(CopyDataType.Mask);
+                    if (maskData != null)
+                    {
+                        CompositionModel.PasteMasks(maskData, [.. SelectedLayers.Select(l => l.LayerId)]);
                     }
                 }
             }, () => CompositionModel != null).ObservesProperty(() => CompositionModel);
