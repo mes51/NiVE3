@@ -527,6 +527,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("プロパティコントロール - なし")]
         public static readonly string LayerPropertyControllerView_Title_Empty = nameof(LayerPropertyControllerView_Title_Empty);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("マスク")]
+        public static readonly string LayerPropertyControllerView_Masks = nameof(LayerPropertyControllerView_Masks);
+
         [ShowInMarkup, LanguageKey, DefaultValue("エフェクト")]
         public static readonly string LayerPropertyControllerView_Effects = nameof(LayerPropertyControllerView_Effects);
 
