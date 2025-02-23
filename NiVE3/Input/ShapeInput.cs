@@ -481,16 +481,16 @@ namespace NiVE3.Input
                 switch (fillRule, imageInterpolationQuality)
                 {
                     case (ShapeFillRule.NonZero, ImageInterpolationQuality.Level1):
-                        ShapeRender.FillPolygonNonZeroAliased(polygons, image, brush, minX, minY, blendMode);
+                        ShapeRendererCPU.FillPolygonNonZeroAliased(polygons, image, brush, minX, minY, blendMode);
                         break;
                     case (ShapeFillRule.NonZero, _):
-                        ShapeRender.FillPolygonNonZero(polygons, image, brush, minX, minY, blendMode);
+                        ShapeRendererCPU.FillPolygonNonZero(polygons, image, brush, minX, minY, blendMode);
                         break;
                     case (ShapeFillRule.EvenOdd, ImageInterpolationQuality.Level1):
-                        ShapeRender.FillPolygonEvenOddAliased(polygons, image, brush, minX, minY, blendMode);
+                        ShapeRendererCPU.FillPolygonEvenOddAliased(polygons, image, brush, minX, minY, blendMode);
                         break;
                     case (ShapeFillRule.EvenOdd, _):
-                        ShapeRender.FillPolygonEvenOdd(polygons, image, brush, minX, minY, blendMode);
+                        ShapeRendererCPU.FillPolygonEvenOdd(polygons, image, brush, minX, minY, blendMode);
                         break;
                 }
             }
@@ -514,16 +514,16 @@ namespace NiVE3.Input
                 switch (fillRule, imageInterpolationQuality)
                 {
                     case (ShapeFillRule.NonZero, ImageInterpolationQuality.Level1):
-                        ShapeRenderGPU.FillPolygonNonZeroAliased(device, polygons, image, brush, minX, minY, blendMode);
+                        ShapeRendererGPU.FillPolygonNonZeroAliased(device, polygons, image, brush, minX, minY, blendMode);
                         break;
                     case (ShapeFillRule.NonZero, _):
-                        ShapeRenderGPU.FillPolygonNonZero(device, polygons, image, brush, minX, minY, blendMode);
+                        ShapeRendererGPU.FillPolygonNonZero(device, polygons, image, brush, minX, minY, blendMode);
                         break;
                     case (ShapeFillRule.EvenOdd, ImageInterpolationQuality.Level1):
-                        ShapeRenderGPU.FillPolyginEvenOddAliased(device, polygons, image, brush, minX, minY, blendMode);
+                        ShapeRendererGPU.FillPolyginEvenOddAliased(device, polygons, image, brush, minX, minY, blendMode);
                         break;
                     case (ShapeFillRule.EvenOdd, _):
-                        ShapeRenderGPU.FillPolyginEvenOdd(device, polygons, image, brush, minX, minY, blendMode);
+                        ShapeRendererGPU.FillPolyginEvenOdd(device, polygons, image, brush, minX, minY, blendMode);
                         break;
                 }
             }

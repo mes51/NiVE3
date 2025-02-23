@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using ComputeSharp;
@@ -362,6 +363,58 @@ namespace NiVE3.InternalShader
         static float HorizontalMin(Float3 v)
         {
             return Hlsl.Min(Hlsl.Min(v.X, v.Y), v.Z);
+        }
+    }
+
+    static class MaskBlendMethods
+    {
+        public static float Process(int blendMode, float back, float front)
+        {
+            switch (blendMode)
+            {
+                case 1:
+                    return Subtract(back, front);
+                case 2:
+                    return Multiply(back, front);
+                case 3:
+                    return Darken(back, front);
+                case 4:
+                    return Lighten(back, front);
+                case 5:
+                    return Difference(back, front);
+                default:
+                    return Add(back, front);
+            }
+        }
+
+        static float Add(float back, float front)
+        {
+            return Hlsl.Clamp(back + front, 0.0F, 1.0F);
+        }
+
+        static float Subtract(float back, float front)
+        {
+            return Hlsl.Clamp(back - front, 0.0F, 1.0F);
+        }
+
+        static float Multiply(float back, float front)
+        {
+            return back * front;
+        }
+
+        static float Darken(float back, float front)
+        {
+            return Hlsl.Min(back, front);
+        }
+
+        static float Lighten(float back, float front)
+        {
+            return Hlsl.Max(back, front);
+        }
+
+        static float Difference(float back, float front)
+        {
+            return Hlsl.Abs(back - front);
         }
     }
 }

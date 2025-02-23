@@ -13,6 +13,7 @@ using NiVE3.Numerics;
 using NiVE3.Plugin.Property;
 using NiVE3.Plugin.Property.Properties;
 using NiVE3.Plugin.ValueObject;
+using NiVE3.Shape;
 using NiVE3.View.Resource;
 using Prism.Mvvm;
 
@@ -169,15 +170,5 @@ namespace NiVE3.Model
         Rectangle,
         Ellipse,
         //Path
-    }
-
-    enum MaskBlendMode
-    {
-        Add,
-        Subtract,
-        Multiply,
-        Darken,
-        Lighten,
-        Difference
     }
 }

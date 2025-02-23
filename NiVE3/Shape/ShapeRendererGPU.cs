@@ -14,7 +14,7 @@ using NiVE3.Shared.Extension;
 
 namespace NiVE3.Shape
 {
-    static class ShapeRenderGPU
+    static class ShapeRendererGPU
     {
         const int SuperSamplingCount = 8;
 

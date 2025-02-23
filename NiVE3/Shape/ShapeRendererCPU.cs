@@ -10,7 +10,7 @@ using NiVE3.Image.Drawing;
 
 namespace NiVE3.Shape
 {
-    static class ShapeRender
+    static class ShapeRendererCPU
     {
         const int SuperSamplingCount = 8;
 

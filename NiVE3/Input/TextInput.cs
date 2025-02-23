@@ -383,22 +383,22 @@ namespace NiVE3.Input
                             case TextLineDrawOrder.AfterFill:
                                 if (fillColor.W > 0.0F)
                                 {
-                                    ShapeRender.FillPolygonNonZeroAiliased(fillPolygons, glyphImage, fillColor, glyphLeft, glyphTop, BlendMode.Replace);
+                                    ShapeRendererCPU.FillPolygonNonZeroAiliased(fillPolygons, glyphImage, fillColor, glyphLeft, glyphTop, BlendMode.Replace);
                                 }
-                                ShapeRender.FillPolygonNonZeroAiliased(outlinePolygons, glyphImage, textLineColor, glyphLeft, glyphTop);
+                                ShapeRendererCPU.FillPolygonNonZeroAiliased(outlinePolygons, glyphImage, textLineColor, glyphLeft, glyphTop);
                                 break;
                             default:
-                                ShapeRender.FillPolygonNonZeroAiliased(outlinePolygons, glyphImage, textLineColor, glyphLeft, glyphTop, BlendMode.Replace);
+                                ShapeRendererCPU.FillPolygonNonZeroAiliased(outlinePolygons, glyphImage, textLineColor, glyphLeft, glyphTop, BlendMode.Replace);
                                 if (fillColor.W > 0.0F)
                                 {
-                                    ShapeRender.FillPolygonNonZeroAiliased(fillPolygons, glyphImage, fillColor, glyphLeft, glyphTop);
+                                    ShapeRendererCPU.FillPolygonNonZeroAiliased(fillPolygons, glyphImage, fillColor, glyphLeft, glyphTop);
                                 }
                                 break;
                         }
                     }
                     else
                     {
-                        ShapeRender.FillPolygonNonZeroAiliased(fillPolygons, glyphImage, fillColor, glyphLeft, glyphTop, BlendMode.Replace);
+                        ShapeRendererCPU.FillPolygonNonZeroAiliased(fillPolygons, glyphImage, fillColor, glyphLeft, glyphTop, BlendMode.Replace);
                     }
                 }
                 else
@@ -410,22 +410,22 @@ namespace NiVE3.Input
                             case TextLineDrawOrder.AfterFill:
                                 if (fillColor.W > 0.0F)
                                 {
-                                    ShapeRender.FillPolygonNonZero(fillPolygons, glyphImage, fillColor, glyphLeft, glyphTop, BlendMode.Replace);
+                                    ShapeRendererCPU.FillPolygonNonZero(fillPolygons, glyphImage, fillColor, glyphLeft, glyphTop, BlendMode.Replace);
                                 }
-                                ShapeRender.FillPolygonNonZero(outlinePolygons, glyphImage, textLineColor, glyphLeft, glyphTop);
+                                ShapeRendererCPU.FillPolygonNonZero(outlinePolygons, glyphImage, textLineColor, glyphLeft, glyphTop);
                                 break;
                             default:
-                                ShapeRender.FillPolygonNonZero(outlinePolygons, glyphImage, textLineColor, glyphLeft, glyphTop, BlendMode.Replace);
+                                ShapeRendererCPU.FillPolygonNonZero(outlinePolygons, glyphImage, textLineColor, glyphLeft, glyphTop, BlendMode.Replace);
                                 if (fillColor.W > 0.0F)
                                 {
-                                    ShapeRender.FillPolygonNonZero(fillPolygons, glyphImage, fillColor, glyphLeft, glyphTop);
+                                    ShapeRendererCPU.FillPolygonNonZero(fillPolygons, glyphImage, fillColor, glyphLeft, glyphTop);
                                 }
                                 break;
                         }
                     }
                     else
                     {
-                        ShapeRender.FillPolygonNonZero(fillPolygons, glyphImage, fillColor, glyphLeft, glyphTop, BlendMode.Replace);
+                        ShapeRendererCPU.FillPolygonNonZero(fillPolygons, glyphImage, fillColor, glyphLeft, glyphTop, BlendMode.Replace);
                     }
                 }
 
