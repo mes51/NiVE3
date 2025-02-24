@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using NiVE3.Data.Clipboard;
 using NiVE3.Data.Json.Project;
 using NiVE3.Extension;
+using NiVE3.Image;
 using NiVE3.Numerics;
 using NiVE3.Plugin.Property;
 using NiVE3.Plugin.Property.Properties;
@@ -55,12 +56,15 @@ namespace NiVE3.Model
 
         HistoryModel HistoryModel { get; }
 
+        AcceleratorModel AcceleratorModel { get; }
+
         public event EventHandler<EventArgs>? MaskUpdated;
 
-        public MaskModel(ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, HistoryModel historyModel, MaskShapeType shapeType = MaskShapeType.Rectangle, Guid? maskId = null)
+        public MaskModel(ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, AcceleratorModel acceleratorModel, HistoryModel historyModel, MaskShapeType shapeType = MaskShapeType.Rectangle, Guid? maskId = null)
         {
             MaskId = maskId ?? Guid.NewGuid();
             HistoryModel = historyModel;
+            AcceleratorModel = acceleratorModel;
             DefaultShapeType = shapeType;
 
             var maskWidth = layerModel.SourceWidth;

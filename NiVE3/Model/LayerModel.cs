@@ -1430,7 +1430,7 @@ namespace NiVE3.Model
 
         public void InsertMask(MaskShapeType shapeType, int index)
         {
-            var maskModel = new MaskModel(ProjectModel, CompositionModel, this, HistoryModel, shapeType);
+            var maskModel = new MaskModel(ProjectModel, CompositionModel, this, AcceleratorModel, HistoryModel, shapeType);
 
             var count = 1;
             var nameTemplate = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.LayerModel_NewMaskTemplate);
@@ -1670,7 +1670,7 @@ namespace NiVE3.Model
 
             foreach (var maskData in data.Masks)
             {
-                var maskModel = new MaskModel(ProjectModel, CompositionModel, this, HistoryModel, maskData.DefaultShapeType, maskData.MaskId);
+                var maskModel = new MaskModel(ProjectModel, CompositionModel, this, AcceleratorModel, HistoryModel, maskData.DefaultShapeType, maskData.MaskId);
                 maskModel.LoadData(maskData);
                 Masks.Add(maskModel);
             }
@@ -1849,7 +1849,7 @@ namespace NiVE3.Model
             var index = insertStartIndex;
             foreach (var maskData in data.Data)
             {
-                var newMask = new MaskModel(ProjectModel, CompositionModel, this, HistoryModel, maskData.DefaultShapeType);
+                var newMask = new MaskModel(ProjectModel, CompositionModel, this, AcceleratorModel, HistoryModel, maskData.DefaultShapeType);
                 newMask.LoadData(maskData);
                 Masks.Insert(index, newMask);
                 addedMasks.Add(newMask);
