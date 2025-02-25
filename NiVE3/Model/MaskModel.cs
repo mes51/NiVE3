@@ -141,7 +141,7 @@ namespace NiVE3.Model
             HistoryModel.Add(new OverwriteMaskHistoryCommand(this, oldData, data));
         }
 
-        public RasterizedMaskImage RenderMask(Time layerTime, Time globalTime, RasterizedMaskImage image, ImageInterpolationQuality imageInterpolationQuality, bool useGpu)
+        public RasterizedMaskImage RenderMask(Time layerTime, Time globalTime, RasterizedMaskImage image, ImageInterpolationQuality imageInterpolationQuality, double downSamplingRateX, double downSamplingRateY, bool useGpu)
         {
             using var entry = CycleChecker.TryEnter(MaskId);
             if (entry == null)
@@ -156,8 +156,8 @@ namespace NiVE3.Model
             }
 
             var shapeType = (MaskShapeType)(setting[PropertyMaskSettingShapeTypeId] ?? MaskShapeType.Rectangle);
-            var size = (Vector2)(Vector3d)(setting[PropertyMaskSettingSizeId] ?? Vector3d.Zero);
-            var position = (Vector2)(Vector3d)(setting[PropertyMaskSettingPositionId] ?? Vector3d.Zero);
+            var size = (Vector2)((Vector3d)(setting[PropertyMaskSettingSizeId] ?? Vector3d.Zero) / new Vector3d(downSamplingRateX, downSamplingRateY, 1.0));
+            var position = (Vector2)((Vector3d)(setting[PropertyMaskSettingPositionId] ?? Vector3d.Zero) / new Vector3d(downSamplingRateX, downSamplingRateY, 1.0));
             var opacity = (float)(double)(setting[PropertyMaskSettingOpacityId] ?? 0.0);
             var blendMode = (MaskBlendMode)(setting[PropertyMaskSettingBlendModeId] ?? MaskBlendMode.Add);
 
@@ -167,7 +167,7 @@ namespace NiVE3.Model
                 return image;
             }
 
-            position += (Vector2)image.Origin;
+            position += (Vector2)(image.Origin + new Vector2d(image.Width, image.Height) * 0.5);
             var polygons = (shapeType switch
             {
                 MaskShapeType.Ellipse => (IPath)new EllipsePolygon(position.X, position.Y, size.X, size.Y),
