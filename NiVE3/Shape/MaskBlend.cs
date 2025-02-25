@@ -69,4 +69,17 @@ namespace NiVE3.Shape
         Lighten,
         Difference
     }
+
+    static class MaskBlendModeExtensions
+    {
+        /// <summary>
+        /// 初期状態に1.0Fである必要があるもの
+        /// </summary>
+        /// <param name="blendMode"></param>
+        /// <returns></returns>
+        public static bool IsInverted(this MaskBlendMode blendMode)
+        {
+            return blendMode == MaskBlendMode.Subtract || blendMode == MaskBlendMode.Multiply;
+        }
+    }
 }

@@ -6,17 +6,22 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using NAudio.CoreAudioApi;
+using System.Windows.Xps.Packaging;
 using NiVE3.Data.Clipboard;
 using NiVE3.Data.Json.Project;
 using NiVE3.Extension;
 using NiVE3.Image;
 using NiVE3.Numerics;
+using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Property;
 using NiVE3.Plugin.Property.Properties;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.Shape;
+using NiVE3.Util;
 using NiVE3.View.Resource;
 using Prism.Mvvm;
+using SixLabors.ImageSharp.Drawing;
 
 namespace NiVE3.Model
 {
@@ -134,6 +139,70 @@ namespace NiVE3.Model
             LoadData(data);
 
             HistoryModel.Add(new OverwriteMaskHistoryCommand(this, oldData, data));
+        }
+
+        public RasterizedMaskImage RenderMask(Time layerTime, Time globalTime, RasterizedMaskImage image, ImageInterpolationQuality imageInterpolationQuality, bool useGpu)
+        {
+            using var entry = CycleChecker.TryEnter(MaskId);
+            if (entry == null)
+            {
+                return image;
+            }
+
+            var propertyValues = Properties.GetValues(layerTime, globalTime);
+            if (!propertyValues.TryGetValue(PropertyMaskSettingId, out var group) || group is not PropertyValueGroup setting)
+            {
+                return image;
+            }
+
+            var shapeType = (MaskShapeType)(setting[PropertyMaskSettingShapeTypeId] ?? MaskShapeType.Rectangle);
+            var size = (Vector2)(Vector3d)(setting[PropertyMaskSettingSizeId] ?? Vector3d.Zero);
+            var position = (Vector2)(Vector3d)(setting[PropertyMaskSettingPositionId] ?? Vector3d.Zero);
+            var opacity = (float)(double)(setting[PropertyMaskSettingOpacityId] ?? 0.0);
+            var blendMode = (MaskBlendMode)(setting[PropertyMaskSettingBlendModeId] ?? MaskBlendMode.Add);
+
+            var noOp = (blendMode == MaskBlendMode.Add || blendMode == MaskBlendMode.Subtract) && opacity <= 0.0F;
+            if (noOp || size.X <= 0.0 || size.Y <= 0.0)
+            {
+                return image;
+            }
+
+            position += (Vector2)image.Origin;
+            var polygons = (shapeType switch
+            {
+                MaskShapeType.Ellipse => (IPath)new EllipsePolygon(position.X, position.Y, size.X, size.Y),
+                _ => new RectangularPolygon(position.X, position.Y, size.X, size.Y)
+            }).Flatten().Select(p => new NiVE3.Shape.Polygon(p.Points.Span)).ToArray();
+
+            if (useGpu)
+            {
+                var device = AcceleratorModel.CurrentDevice;
+                var gpuImage = image.ToGpu(device);
+                switch (imageInterpolationQuality)
+                {
+                    case ImageInterpolationQuality.Level1:
+                        ShapeMaskRenderGPU.FillAliased(device, polygons, gpuImage, opacity, blendMode: blendMode);
+                        break;
+                    default:
+                        ShapeMaskRenderGPU.Fill(device, polygons, gpuImage, opacity, blendMode: blendMode);
+                        break;
+                }
+                return gpuImage;
+            }
+            else
+            {
+                var managedImage = image.ToManaged();
+                switch (imageInterpolationQuality)
+                {
+                    case ImageInterpolationQuality.Level1:
+                        ShapeMaskRendererCPU.FillAiliased(polygons, managedImage, opacity, blendMode: blendMode);
+                        break;
+                    default:
+                        ShapeMaskRendererCPU.Fill(polygons, managedImage, opacity, blendMode: blendMode);
+                        break;
+                }
+                return managedImage;
+            }
         }
 
         public void LoadData(MaskData data)
