@@ -1184,6 +1184,16 @@ namespace NiVE3.ViewModel
                         LayerModel.MoveEffects([..effectItemDragData.SelectedItems.Select(l => l.EffectId)], effectItemDragData.DragItem.EffectId, newIndex);
                     }
                     break;
+                case MaskViewModel mask:
+                    {
+                        var newIndex = dropInfo.InsertIndex;
+                        if (Masks.IndexOf(mask) < newIndex)
+                        {
+                            newIndex--;
+                        }
+                        LayerModel.MoveMask(mask.MaskId, newIndex);
+                    }
+                    break;
                 case ItemDragData<MaskViewModel> maskItemDragData:
                     {
                         var newIndex = dropInfo.InsertIndex;

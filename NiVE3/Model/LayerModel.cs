@@ -1475,13 +1475,13 @@ namespace NiVE3.Model
             var newOrderedMasks = new List<MaskModel>(Masks.Count);
             newOrderedMasks.AddRange(Masks.Except(masks).Take(startIndex));
             newOrderedMasks.AddRange(masks);
-            newOrderedMasks.AddRange(masks.Except([.. newOrderedMasks]));
+            newOrderedMasks.AddRange(Masks.Except([..newOrderedMasks]));
 
             Masks.SortBy(newOrderedMasks.IndexOf);
 
             if (!prevIndices.SequenceEqual(masks.Select(Masks.IndexOf)))
             {
-                HistoryModel.Add(new MoveMasksHistoryCommand(this, [.. newOrderedMasks], oldOrderedMasks));
+                HistoryModel.Add(new MoveMasksHistoryCommand(this, oldOrderedMasks,[..newOrderedMasks]));
             }
         }
 
