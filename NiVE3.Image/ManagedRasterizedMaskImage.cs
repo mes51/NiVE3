@@ -29,6 +29,13 @@ namespace NiVE3.Image
             }
         }
 
+        public ManagedRasterizedMaskImage(int width, int height, float opacity) : base(width, height)
+        {
+            var length = width * height;
+            Data = ArrayPool<float>.Shared.Rent(length);
+            Data.AsSpan(0, length).Fill(opacity);
+        }
+
         /// <summary>
         /// マスク画像データを取得します
         /// </summary>

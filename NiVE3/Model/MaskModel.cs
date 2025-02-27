@@ -149,16 +149,12 @@ namespace NiVE3.Model
                 return image;
             }
 
-            var propertyValues = Properties.GetValues(layerTime, globalTime);
-            if (!propertyValues.TryGetValue(PropertyMaskSettingId, out var group) || group is not PropertyValueGroup setting)
-            {
-                return image;
-            }
+            var setting = Properties.GetValues(layerTime, globalTime);
 
             var shapeType = (MaskShapeType)(setting[PropertyMaskSettingShapeTypeId] ?? MaskShapeType.Rectangle);
             var size = (Vector2)((Vector3d)(setting[PropertyMaskSettingSizeId] ?? Vector3d.Zero) / new Vector3d(downSamplingRateX, downSamplingRateY, 1.0));
             var position = (Vector2)((Vector3d)(setting[PropertyMaskSettingPositionId] ?? Vector3d.Zero) / new Vector3d(downSamplingRateX, downSamplingRateY, 1.0));
-            var opacity = (float)(double)(setting[PropertyMaskSettingOpacityId] ?? 0.0);
+            var opacity = (float)(double)(setting[PropertyMaskSettingOpacityId] ?? 0.0) * 0.01F;
             var blendMode = (MaskBlendMode)(setting[PropertyMaskSettingBlendModeId] ?? MaskBlendMode.Add);
 
             var noOp = (blendMode == MaskBlendMode.Add || blendMode == MaskBlendMode.Subtract) && opacity <= 0.0F;
@@ -167,10 +163,10 @@ namespace NiVE3.Model
                 return image;
             }
 
-            position += (Vector2)(image.Origin + new Vector2d(image.Width, image.Height) * 0.5);
+            position += (Vector2)(image.Origin - (Vector2d)size * 0.5);
             var polygons = (shapeType switch
             {
-                MaskShapeType.Ellipse => (IPath)new EllipsePolygon(position.X, position.Y, size.X, size.Y),
+                MaskShapeType.Ellipse => (IPath)new EllipsePolygon(position.X + size.X * 0.5F, position.Y + size.Y * 0.5F, size.X, size.Y),
                 _ => new RectangularPolygon(position.X, position.Y, size.X, size.Y)
             }).Flatten().Select(p => new NiVE3.Shape.Polygon(p.Points.Span)).ToArray();
 
@@ -203,6 +199,19 @@ namespace NiVE3.Model
                 }
                 return managedImage;
             }
+        }
+
+        public bool IsInverted(Time layerTime, Time globalTime)
+        {
+            using var entry = CycleChecker.TryEnter(MaskId);
+            if (entry == null)
+            {
+                return false;
+            }
+
+            var setting = Properties.GetValues(layerTime, globalTime);
+
+            return ((MaskBlendMode)(setting[PropertyMaskSettingBlendModeId] ?? MaskBlendMode.Add)).IsInverted();
         }
 
         public void LoadData(MaskData data)

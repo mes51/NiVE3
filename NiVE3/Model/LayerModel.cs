@@ -726,6 +726,15 @@ namespace NiVE3.Model
 
                 downSamplingRateX = originalImageSize.Width / (float)image.Width;
                 downSamplingRateY = originalImageSize.Height / (float)image.Height;
+                if (HasMask && Masks.Any(m => m.IsEnable))
+                {
+                    var maskedImage = ApplyMask(image, downSamplingRateX, downSamplingRateY, layerTime, time, useGpu);
+                    if (maskedImage != image)
+                    {
+                        image.Dispose();
+                        image = maskedImage;
+                    }
+                }
                 if (IsEnableEffect)
                 {
                     // TODO: モジュラーエフェクトの反映
@@ -1873,6 +1882,66 @@ namespace NiVE3.Model
             else
             {
                 return SourceDuration + layerTime * PlayRate * 0.01;
+            }
+        }
+
+        NImage ApplyMask(NImage image, double downSamplingRateX, double downSamplingRateY, Time layerTime, Time globalTime, bool useGpu)
+        {
+            var clearOpaque = Masks.First(m => m.IsEnable).IsInverted(layerTime, globalTime);
+            if (useGpu)
+            {
+                var device = AcceleratorModel.CurrentDevice;
+                var gpuImage = image.ToGpu(device);
+                var gpuMaskImage = new GPURasterizedMaskImage(gpuImage.Width, gpuImage.Height, device, clearOpaque ? 1.0F : 0.0F);
+
+                foreach (var mask in Masks.Where(m => m.IsEnable))
+                {
+                    var newMaskImage = mask.RenderMask(layerTime, globalTime, gpuMaskImage, InterpolationQuality, downSamplingRateX, downSamplingRateY, useGpu);
+                    if (gpuMaskImage != newMaskImage)
+                    {
+                        gpuMaskImage.Dispose();
+                        gpuMaskImage = newMaskImage.ToGpu(device);
+                    }
+                }
+
+                device.For(gpuImage.Width, gpuImage.Height, new MaskImage(gpuImage.Data, gpuImage.Width, gpuMaskImage.Data, gpuMaskImage.Width, 0, 0, 0, 0));
+
+                gpuMaskImage.Dispose();
+                return gpuImage;
+            }
+            else
+            {
+                var managedImage = image.ToManaged();
+                var managedMaskImage = new ManagedRasterizedMaskImage(managedImage.Width, managedImage.Height, clearOpaque ? 1.0F : 0.0F);
+
+                foreach (var mask in Masks.Where(m => m.IsEnable))
+                {
+                    var newMaskImage = mask.RenderMask(layerTime, globalTime, managedMaskImage, InterpolationQuality, downSamplingRateX, downSamplingRateY, useGpu);
+                    if (managedMaskImage != newMaskImage)
+                    {
+                        managedMaskImage.Dispose();
+                        managedMaskImage = newMaskImage.ToManaged();
+                    }
+                }
+
+                var imageData = managedImage.Data;
+                var imageWidth = managedImage.Width;
+                var maskData = managedMaskImage.Data;
+                Parallel.For(0, managedImage.Height, y =>
+                {
+                    var imageDataSpan = imageData.AsSpan(y * imageWidth, imageWidth);
+                    var maskDataSpan = maskData.AsSpan(y * imageWidth, imageWidth);
+
+                    for (var x = 0; x < imageWidth; x++)
+                    {
+                        var color = imageDataSpan[x];
+                        color.W *= maskDataSpan[x];
+                        imageDataSpan[x] = color;
+                    }
+                });
+
+                managedMaskImage.Dispose();
+                return managedImage;
             }
         }
 
