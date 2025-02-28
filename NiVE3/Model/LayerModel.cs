@@ -307,6 +307,10 @@ namespace NiVE3.Model
 
         public int SourceHeight => IsCustomizableFootageSource ? CompositionModel.Height : FootageModel.Height;
 
+        public int FootageWidth => IsCustomizableFootageSource ? 0 : FootageModel.Width;
+
+        public int FootageHeight => IsCustomizableFootageSource ? 0 : FootageModel.Height;
+
         public int Index => CompositionModel.Layers.IndexOf(this) + 1;
 
         public Guid FootageId => FootageModel.FootageId;
@@ -1892,7 +1896,10 @@ namespace NiVE3.Model
             {
                 var device = AcceleratorModel.CurrentDevice;
                 var gpuImage = image.ToGpu(device);
-                var gpuMaskImage = new GPURasterizedMaskImage(gpuImage.Width, gpuImage.Height, device, clearOpaque ? 1.0F : 0.0F);
+                var gpuMaskImage = new GPURasterizedMaskImage(gpuImage.Width, gpuImage.Height, device, clearOpaque ? 1.0F : 0.0F)
+                {
+                    Origin = image.Origin
+                };
 
                 foreach (var mask in Masks.Where(m => m.IsEnable))
                 {
@@ -1912,7 +1919,10 @@ namespace NiVE3.Model
             else
             {
                 var managedImage = image.ToManaged();
-                var managedMaskImage = new ManagedRasterizedMaskImage(managedImage.Width, managedImage.Height, clearOpaque ? 1.0F : 0.0F);
+                var managedMaskImage = new ManagedRasterizedMaskImage(managedImage.Width, managedImage.Height, clearOpaque ? 1.0F : 0.0F)
+                {
+                    Origin = image.Origin
+                };
 
                 foreach (var mask in Masks.Where(m => m.IsEnable))
                 {
