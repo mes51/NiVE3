@@ -796,6 +796,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
             {
                 result = type switch
                 {
+                    LayerImageProcessType.Masked => layerObject.GetMaskedImage(referenceTime, downSamplingRate, acceleratorObject != null),
                     LayerImageProcessType.Effected => layerObject.GetEffectedImage(referenceTime, downSamplingRate, acceleratorObject != null),
                     _ => layerObject.GetRawImage(referenceTime, downSamplingRate, acceleratorObject != null)
                 };

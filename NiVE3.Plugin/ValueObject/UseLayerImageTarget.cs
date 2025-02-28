@@ -29,8 +29,6 @@ namespace NiVE3.Plugin.ValueObject
         /// <summary>
         /// マスク適用済み
         /// </summary>
-        // TODO: マスク実装後に属性を外す
-        [EditorBrowsable(EditorBrowsableState.Never)]
         Masked,
         /// <summary>
         /// マスクとエフェクト適用済み

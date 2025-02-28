@@ -140,7 +140,16 @@ namespace NiVE3.Plugin.Interfaces
         NImage? GetRawImage(Time globalTime, double downSamplingRate, bool useGpu);
 
         /// <summary>
-        /// エフェクト適用済みのレイヤーの画像を取得します
+        /// マスク適用済みのレイヤーの画像を取得します
+        /// </summary>
+        /// <param name="globalTime">画像を取得する時のコンポジションの時間</param>
+        /// <param name="downSamplingRate">ダウンサンプリングの割合</param>
+        /// <param name="useGpu">GPUを使用するかどうか</param>
+        /// <returns>取得した画像。指定した時間がソースの長さを超えていた場合はnull</returns>
+        NImage? GetMaskedImage(Time globalTime, double downSamplingRate, bool useGpu);
+
+        /// <summary>
+        /// マスクとエフェクト適用済みのレイヤーの画像を取得します
         /// </summary>
         /// <param name="globalTime">画像を取得する時のコンポジションの時間</param>
         /// <param name="downSamplingRate">ダウンサンプリングの割合</param>

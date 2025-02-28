@@ -602,6 +602,37 @@ namespace NiVE3.Model
             return FootageModel.ReadImage(sourceTime, downSamplingRate, CompositionModel.Width, CompositionModel.Height, sourceOptionProperties, InterpolationQuality, useGpu);
         }
 
+        NImage? ILayerObject.GetMaskedImage(Time globalTime, double downSamplingRate, bool useGpu)
+        {
+            var layerTime = globalTime - SourceStartPoint;
+            var sourceTime = CalcSourceTime(globalTime - SourceStartPoint);
+            if (SourceType.HasFlag(SourceType.Video) && (sourceTime < Time.Zero || sourceTime > SourceDuration))
+            {
+                return null;
+            }
+
+            using var entry = CycleChecker.TryEnter(LayerId);
+            if (entry == null)
+            {
+                return ((ILayerObject)this).GetRawImage(globalTime, downSamplingRate, useGpu);
+            }
+
+            var (image, originalImageSize, _) = GetFootageImage(globalTime, IsImage ? Time.Zero : new Time(1, FootageModel.FrameRate), downSamplingRate, useGpu, false);
+            var downSamplingRateX = originalImageSize.Width / (float)image.Width;
+            var downSamplingRateY = originalImageSize.Height / (float)image.Height;
+            if (HasMask && Masks.Any(m => m.IsEnable))
+            {
+                var maskedImage = ApplyMask(image, downSamplingRateX, downSamplingRateY, layerTime, globalTime, useGpu);
+                if (maskedImage != image)
+                {
+                    image.Dispose();
+                    image = maskedImage;
+                }
+            }
+
+            return image;
+        }
+
         NImage? ILayerObject.GetEffectedImage(Time globalTime, double downSamplingRate, bool useGpu)
         {
             var layerTime = globalTime - SourceStartPoint;
@@ -648,6 +679,15 @@ namespace NiVE3.Model
             (image, var originalImageSize, var roi) = GetFootageImage(globalTime, IsImage ? Time.Zero : new Time(1, FootageModel.FrameRate), downSamplingRate, useGpu, false);
             var downSamplingRateX = originalImageSize.Width / (float)image.Width;
             var downSamplingRateY = originalImageSize.Height / (float)image.Height;
+            if (HasMask && Masks.Any(m => m.IsEnable))
+            {
+                var maskedImage = ApplyMask(image, downSamplingRateX, downSamplingRateY, layerTime, globalTime, useGpu);
+                if (maskedImage != image)
+                {
+                    image.Dispose();
+                    image = maskedImage;
+                }
+            }
             if (IsEnableEffect)
             {
                 // TODO: モジュラーエフェクト反映
