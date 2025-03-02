@@ -185,9 +185,10 @@ namespace NiVE3.Model
 
         public void CalcPropertyHash(Time layerTime, Time globalTime, XxHash3 hash)
         {
+            hash.Append(EffectPluginId);
             hash.Append(Name);
             hash.Append(Comment);
-
+            hash.Append(IsEnable);
             Properties.GetValues(layerTime, globalTime).CalcHash(hash);
         }
 

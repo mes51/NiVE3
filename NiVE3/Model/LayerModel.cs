@@ -1297,17 +1297,11 @@ namespace NiVE3.Model
             hash.Append(PlayRate);
             foreach (var e in Effects)
             {
-                if (e.IsEnable)
-                {
-                    e.CalcPropertyHash(layerTime, time, hash);
-                }
+                e.CalcPropertyHash(layerTime, time, hash);
             }
             foreach (var m in Masks)
             {
-                if (m.IsEnable)
-                {
-                    m.CalcPropertyHash(layerTime, time, hash);
-                }
+                m.CalcPropertyHash(layerTime, time, hash);
             }
 
             LayerOptionProperties?.GetValues(layerTime, time)?.CalcHash(hash);
