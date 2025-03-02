@@ -596,7 +596,7 @@ namespace NiVE3.Input
 
                     if (size.X > 0.0F && size.Y > 0.0F)
                     {
-                        tree.AddNode(new ShapePath(new EllipsePolygon(position.X, position.Y, size.X, size.Y)));
+                        tree.AddNode(new ShapePath(new BezierEllipsePolygon(position.X, position.Y, size.X, size.Y)));
                     }
                 }
                 else if (property.TryGetValue(RegularPolygonPointCountId, out var regularPolygonPointCount))

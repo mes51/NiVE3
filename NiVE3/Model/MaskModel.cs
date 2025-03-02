@@ -167,7 +167,7 @@ namespace NiVE3.Model
             position += (Vector2)(image.Origin - (Vector2d)size * 0.5);
             var polygons = (shapeType switch
             {
-                MaskShapeType.Ellipse => (IPath)new EllipsePolygon(position.X + size.X * 0.5F, position.Y + size.Y * 0.5F, size.X, size.Y),
+                MaskShapeType.Ellipse => (IPath)new BezierEllipsePolygon(position.X + size.X * 0.5F, position.Y + size.Y * 0.5F, size.X, size.Y),
                 _ => new RectangularPolygon(position.X, position.Y, size.X, size.Y)
             }).Flatten().Select(p => new NiVE3.Shape.Polygon(p.Points.Span)).ToArray();
 
