@@ -110,6 +110,75 @@ namespace NiVE3.Plugin.Property
         }
     }
 
+    public abstract class LayerDependPropertyBase : PropertyBase
+    {
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="id">プロパティのID</param>
+        /// <param name="displayName">プロパティの名前</param>
+        /// <param name="propertyType">使用するPropertyType</param>
+        /// <param name="defaultValue">デフォルトの値</param>
+        protected LayerDependPropertyBase(string id, string displayName, IPropertyType propertyType, object? defaultValue) : base(id, displayName, propertyType, defaultValue, false) { }
+
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="id">プロパティのID</param>
+        /// <param name="displayNameKey">プロパティの名前のLanguageResourceKey</param>
+        /// <param name="propertyType">使用するPropertyType</param>
+        /// <param name="defaultValue">デフォルトの値</param>
+        protected LayerDependPropertyBase(string id, LanguageResourceKey displayNameKey, IPropertyType propertyType, object? defaultValue) : base(id, displayNameKey, propertyType, defaultValue, false) { }
+
+        /// <summary>
+        /// 値がこのプロパティで使用できるか検証します
+        /// </summary>
+        /// <param name="value">検証対象の値</param>
+        /// <param name="layer">レイヤー</param>
+        /// <returns>使用できる場合はtrue、出来ない場合はfalse</returns>
+        public abstract bool ValidateValue(object? value, ILayerObject layer);
+
+        /// <summary>
+        /// 値をこのプロパティの範囲、型に変更します
+        /// </summary>
+        /// <param name="value">変更対象の値</param>
+        /// <param name="layer">レイヤー</param>
+        /// <returns>変更後の値</returns>
+        public abstract object? CoerceValue(object? value, ILayerObject layer);
+
+        /// <summary>
+        /// レイヤーに変更があった事による値の更新を行います
+        /// </summary>
+        /// <param name="value">更新前の値</param>
+        /// <param name="layer">レイヤー</param>
+        /// <returns>変更後の値</returns>
+        public abstract object? ChangeValueByLayerStateChanged(object? value, ILayerObject layer);
+
+        /// <summary>
+        /// マスクのペーストなどでMaskIdが変更された際に値を更新行います
+        /// </summary>
+        /// <param name="value">更新前の値</param>
+        /// <param name="maskIdMap">MaskIdと新しいMaskIdのマップ。変更がなかった場合はマップに含まれません</param>
+        /// <param name="layer">レイヤー</param>
+        /// <returns>変更後の値</returns>
+        public abstract object? ChangeValueByReplaceMaskId(object? value, Dictionary<Guid, Guid> maskIdMap, ILayerObject layer);
+
+        /// <summary>
+        /// エフェクトのペーストなどでEffectIdが変更された際に値を更新行います
+        /// </summary>
+        /// <param name="value">更新前の値</param>
+        /// <param name="effectIdMap">EffectIdと新しいEffectIdのマップ。変更がなかった場合はマップに含まれません</param>
+        /// <param name="layer">レイヤー</param>
+        /// <returns>変更後の値</returns>
+        public abstract object? ChangeValueByReplaceEffectId(object? value, Dictionary<Guid, Guid> effectIdMap, ILayerObject layer);
+
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public override object? CoerceValue(object? value)
+        {
+            return value;
+        }
+    }
+
     /// <summary>
     /// コンポジションの状態に依存するプロパティを表します
     /// </summary>

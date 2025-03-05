@@ -475,9 +475,9 @@ namespace NiVE3.Model
             public void Dispose() { }
         }
 
-        private class UpdateValueByReplacedLayerIdHistoryCommand : IHistoryCommand
+        private class UpdateValueByLayerStateChangedHistoryCommand : IHistoryCommand
         {
-            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_UpdateValueByReplacedLayerId);
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_UpdateValueByLayerStateChanged);
 
             PropertyModel Model { get; }
 
@@ -485,7 +485,39 @@ namespace NiVE3.Model
 
             object? NewValue { get; }
 
-            public UpdateValueByReplacedLayerIdHistoryCommand(PropertyModel model, object? oldValue, object? newValue)
+            public UpdateValueByLayerStateChangedHistoryCommand(PropertyModel model, object? oldValue, object? newValue)
+            {
+                Model = model;
+                OldValue = oldValue;
+                NewValue = newValue;
+            }
+
+            public void Redo()
+            {
+                Model.RawValue = NewValue;
+                Model.ValueCommited?.Invoke(Model, EventArgs.Empty);
+            }
+
+            public void Undo()
+            {
+                Model.RawValue = OldValue;
+                Model.ValueCommited?.Invoke(Model, EventArgs.Empty);
+            }
+
+            public void Dispose() { }
+        }
+
+        private class UpdateValueByReplacedObjectIdHistoryCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_UpdateValueByLayerStateChanged);
+
+            PropertyModel Model { get; }
+
+            object? OldValue { get; }
+
+            object? NewValue { get; }
+
+            public UpdateValueByReplacedObjectIdHistoryCommand(PropertyModel model, object? oldValue, object? newValue)
             {
                 Model = model;
                 OldValue = oldValue;

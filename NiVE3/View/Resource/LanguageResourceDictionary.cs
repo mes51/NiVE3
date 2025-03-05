@@ -1051,7 +1051,7 @@ namespace NiVE3.View.Resource
         public static readonly string History_UpdateValueByCompositionStateChanged = nameof(History_UpdateValueByCompositionStateChanged);
 
         [DefaultValue("レイヤー更新に伴うプロパティの更新")]
-        public static readonly string History_UpdateValueByReplacedLayerId = nameof(History_UpdateValueByReplacedLayerId);
+        public static readonly string History_UpdateValueByLayerStateChanged = nameof(History_UpdateValueByLayerStateChanged);
 
         [DefaultValue("マスクの追加")]
         public static readonly string History_AddMask = nameof(History_AddMask);

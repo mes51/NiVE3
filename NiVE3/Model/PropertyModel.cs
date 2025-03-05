@@ -489,6 +489,51 @@ namespace NiVE3.Model
             }
         }
 
+        public void UpdateValueByLayerStateChanged()
+        {
+            if (Property is LayerDependPropertyBase lp)
+            {
+                var oldValue = RawValue;
+                RawValue = lp.ChangeValueByLayerStateChanged(RawValue, LayerModel);
+
+                if (oldValue != RawValue)
+                {
+                    ValueCommited?.Invoke(this, EventArgs.Empty);
+                    HistoryModel.Add(new UpdateValueByLayerStateChangedHistoryCommand(this, oldValue, RawValue));
+                }
+            }
+        }
+
+        public void UpdateValueByReplacedEffectId(Dictionary<Guid, Guid> effectIdMap)
+        {
+            if (Property is LayerDependPropertyBase lp)
+            {
+                var oldValue = RawValue;
+                RawValue = lp.ChangeValueByReplaceEffectId(RawValue, effectIdMap, LayerModel);
+
+                if (oldValue != RawValue)
+                {
+                    ValueCommited?.Invoke(this, EventArgs.Empty);
+                    HistoryModel.Add(new UpdateValueByReplacedObjectIdHistoryCommand(this, oldValue, RawValue));
+                }
+            }
+        }
+
+        public void UpdateValueByReplacedMaskId(Dictionary<Guid, Guid> maskIdMap)
+        {
+            if (Property is LayerDependPropertyBase lp)
+            {
+                var oldValue = RawValue;
+                RawValue = lp.ChangeValueByReplaceMaskId(RawValue, maskIdMap, LayerModel);
+
+                if (oldValue != RawValue)
+                {
+                    ValueCommited?.Invoke(this, EventArgs.Empty);
+                    HistoryModel.Add(new UpdateValueByReplacedObjectIdHistoryCommand(this, oldValue, RawValue));
+                }
+            }
+        }
+
         public void UpdateValueByReplacedLayerId(Dictionary<Guid, Guid> layerIdMap)
         {
             if (Property is CompositionDependPropertyBase cp)
@@ -499,7 +544,7 @@ namespace NiVE3.Model
                 if (oldValue != RawValue)
                 {
                     ValueCommited?.Invoke(this, EventArgs.Empty);
-                    HistoryModel.Add(new UpdateValueByReplacedLayerIdHistoryCommand(this, oldValue, RawValue));
+                    HistoryModel.Add(new UpdateValueByReplacedObjectIdHistoryCommand(this, oldValue, RawValue));
                 }
             }
         }

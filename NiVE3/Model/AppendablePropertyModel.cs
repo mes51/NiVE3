@@ -163,9 +163,45 @@ namespace NiVE3.Model
             HistoryModel.EndGroup();
         }
 
+        public void UpdateValueByLayerStateChanged()
+        {
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_UpdateValueByLayerStateChanged));
+
+            foreach (var child in Children)
+            {
+                child.UpdateValueByLayerStateChanged();
+            }
+
+            HistoryModel.EndGroup();
+        }
+
+        public void UpdateValueByReplacedEffectId(Dictionary<Guid, Guid> effectIdMap)
+        {
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_UpdateValueByLayerStateChanged));
+
+            foreach (var child in Children)
+            {
+                child.UpdateValueByReplacedEffectId(effectIdMap);
+            }
+
+            HistoryModel.EndGroup();
+        }
+
+        public void UpdateValueByReplacedMaskId(Dictionary<Guid, Guid> maskIdMap)
+        {
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_UpdateValueByLayerStateChanged));
+
+            foreach (var child in Children)
+            {
+                child.UpdateValueByReplacedMaskId(maskIdMap);
+            }
+
+            HistoryModel.EndGroup();
+        }
+
         public void UpdateValueByReplacedLayerId(Dictionary<Guid, Guid> layerIdMap)
         {
-            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_UpdateValueByReplacedLayerId));
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_UpdateValueByLayerStateChanged));
 
             foreach (var child in Children)
             {

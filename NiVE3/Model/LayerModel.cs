@@ -1411,7 +1411,16 @@ namespace NiVE3.Model
 
             if (!prevIndices.SequenceEqual(effects.Select(Effects.IndexOf)))
             {
+                HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_MoveEffects));
+
+                foreach (var effect in Effects)
+                {
+                    effect.UpdateLayerDependProperties();
+                }
+                // TODO: TextProperties?.UpdateLayerDependProperties();
                 HistoryModel.Add(new MoveEffectsHistoryCommand(this, oldOrderedEffects, [..newOrderedEffects]));
+
+                HistoryModel.EndGroup();
             }
         }
 
@@ -1519,7 +1528,16 @@ namespace NiVE3.Model
 
             if (!prevIndices.SequenceEqual(masks.Select(Masks.IndexOf)))
             {
+                HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_MoveMasks));
+
+                foreach (var effect in Effects)
+                {
+                    effect.UpdateLayerDependProperties();
+                }
+                // TODO: TextProperties?.UpdateLayerDependProperties();
                 HistoryModel.Add(new MoveMasksHistoryCommand(this, oldOrderedMasks,[..newOrderedMasks]));
+
+                HistoryModel.EndGroup();
             }
         }
 
@@ -1787,9 +1805,52 @@ namespace NiVE3.Model
             HistoryModel.EndGroup();
         }
 
+        public void UpdateLayerDependProperties()
+        {
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_UpdateValueByLayerStateChanged));
+
+            LayerOptionProperties?.UpdateValueByCompositionStateChanged();
+            SourceOptionProperties?.UpdateValueByCompositionStateChanged();
+            foreach (var effect in Effects)
+            {
+                effect.UpdateLayerDependProperties();
+            }
+            // TODO: TextProperties?.UpdateValueByLayerStateChanged();
+
+            HistoryModel.EndGroup();
+        }
+
+        public void ReplaceLayerDependPropertiesEffectId(Dictionary<Guid, Guid> effectIdMap)
+        {
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_UpdateValueByLayerStateChanged));
+
+            LayerOptionProperties?.UpdateValueByReplacedEffectId(effectIdMap);
+            SourceOptionProperties?.UpdateValueByReplacedEffectId(effectIdMap);
+            foreach (var effect in Effects)
+            {
+                effect.ReplaceLayerDependPropertiesEffectId(effectIdMap);
+            }
+
+            HistoryModel.EndGroup();
+        }
+
+        public void ReplaceLayerDependPropertiesMaskId(Dictionary<Guid, Guid> maskIdMap)
+        {
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_UpdateValueByLayerStateChanged));
+
+            LayerOptionProperties?.UpdateValueByReplacedMaskId(maskIdMap);
+            SourceOptionProperties?.UpdateValueByReplacedMaskId(maskIdMap);
+            foreach (var effect in Effects)
+            {
+                effect.ReplaceLayerDependPropertiesMaskId(maskIdMap);
+            }
+
+            HistoryModel.EndGroup();
+        }
+
         public void ReplaceCompositionDependPropertiesLayerId(Dictionary<Guid, Guid> layerIdMap)
         {
-            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_UpdateValueByReplacedLayerId));
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_UpdateValueByLayerStateChanged));
 
             LayerOptionProperties?.UpdateValueByReplacedLayerId(layerIdMap);
             SourceOptionProperties?.UpdateValueByReplacedLayerId(layerIdMap);
@@ -1833,7 +1894,16 @@ namespace NiVE3.Model
                 Effects.Remove(e);
             }
 
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(isCut ? LanguageResourceDictionary.History_CutEffects : LanguageResourceDictionary.History_RemoveEffects));
+
+            foreach (var effect in Effects)
+            {
+                effect.UpdateLayerDependProperties();
+            }
+            // TODO: TextProperties?.UpdateValueByLayerStateChanged();
             HistoryModel.Add(new DeleteEffectHistoryCommand(this, effects, oldIndices, isCut));
+
+            HistoryModel.EndGroup();
         }
 
         void PasteEffectsInternal(CopyData<EffectData> data, Guid[] selectedEffectIds, Guid? insertTargetId, bool isDuplicate)
@@ -1850,6 +1920,7 @@ namespace NiVE3.Model
             }
 
             var index = insertStartIndex;
+            var newEffectId = new Dictionary<Guid, Guid>();
             foreach (var effectData in data.Data)
             {
                 var newEffect = EffectListModel.CreateEffect(effectData.EffectPluginId, ProjectModel, CompositionModel, this, HistoryModel);
@@ -1862,7 +1933,16 @@ namespace NiVE3.Model
                 Effects.Insert(index, newEffect);
                 addedEffects.Add(newEffect);
                 index++;
+
+                newEffectId.Add(effectData.EffectId, newEffect.EffectId);
             }
+
+            foreach (var effect in addedEffects)
+            {
+                effect.ReplaceLayerDependPropertiesEffectId(newEffectId);
+                effect.UpdateLayerDependProperties();
+            }
+            // TODO: TextProperties?.UpdateValueByLayerStateChanged();
 
             HistoryModel.Add(new PasteNewEffectsHistoryCommand(this, [..addedEffects], insertStartIndex, isDuplicate));
         }
@@ -1877,11 +1957,23 @@ namespace NiVE3.Model
                 Masks.Remove(m);
             }
 
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(isCut ? LanguageResourceDictionary.History_CutMasks : LanguageResourceDictionary.History_RemoveMasks));
+
+            foreach (var effect in Effects)
+            {
+                effect.UpdateLayerDependProperties();
+            }
+
+            // TODO: TextProperties?.UpdateValueByLayerStateChanged();
             HistoryModel.Add(new DeleteMaskHistoryCommand(this, masks, oldIndices, isCut));
+
+            HistoryModel.EndGroup();
         }
 
         void PasteMasksInternal(CopyData<MaskData> data, Guid[] selectedMaskIds, Guid? insertTargetId, bool isDuplicate)
         {
+            // NOTE: マスクにLayerDependPropertyBaseを追加したら更新用の処理を追加する
+
             var addedMasks = new List<MaskModel>();
             var insertStartIndex = insertTargetId.HasValue ? Masks.FindIndex(m => m.MaskId == insertTargetId) : -1;
             if (insertStartIndex < 0)
@@ -1903,6 +1995,7 @@ namespace NiVE3.Model
                 index++;
             }
 
+            // TODO: TextProperties?.UpdateValueByLayerStateChanged();
             HistoryModel.Add(new PasteNewMasksHistoryCommand(this, [..addedMasks], insertStartIndex, isDuplicate));
         }
 

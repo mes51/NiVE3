@@ -42,6 +42,12 @@ namespace NiVE3.Model
 
         void UpdateValueByCompositionStateChanged();
 
+        void UpdateValueByLayerStateChanged();
+
+        void UpdateValueByReplacedEffectId(Dictionary<Guid, Guid> effectIdMap);
+
+        void UpdateValueByReplacedMaskId(Dictionary<Guid, Guid> maskIdMap);
+
         void UpdateValueByReplacedLayerId(Dictionary<Guid, Guid> layerIdMap);
 
         bool HasCompositionDependProperty();

@@ -197,6 +197,21 @@ namespace NiVE3.Model
             Properties.UpdateValueByCompositionStateChanged();
         }
 
+        public void UpdateLayerDependProperties()
+        {
+            Properties.UpdateValueByLayerStateChanged();
+        }
+
+        public void ReplaceLayerDependPropertiesEffectId(Dictionary<Guid, Guid> effectIdMap)
+        {
+            Properties.UpdateValueByReplacedEffectId(effectIdMap);
+        }
+
+        public void ReplaceLayerDependPropertiesMaskId(Dictionary<Guid, Guid> maskIdMap)
+        {
+            Properties.UpdateValueByReplacedMaskId(maskIdMap);
+        }
+
         public void ReplaceCompositionDependPropertiesLayerId(Dictionary<Guid, Guid> layerIdMap)
         {
             Properties.UpdateValueByReplacedLayerId(layerIdMap);

@@ -424,7 +424,7 @@ namespace NiVE3.Model
 
             Layers.SortBy(l => newOrderedLayers.IndexOf(l));
 
-            if (!prevIndices.SequenceEqual(layers.Select(l => Layers.IndexOf(l))))
+            if (!prevIndices.SequenceEqual(layers.Select(Layers.IndexOf)))
             {
                 HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_MoveLayers));
 
@@ -1172,6 +1172,9 @@ namespace NiVE3.Model
 
             var data = CopyLayers(ids);
             var addedLayer = new Dictionary<Guid, LayerModel>();
+            var newLayerIds = new Dictionary<Guid, Guid>();
+            var newEffectIds = new Dictionary<Guid, Dictionary<Guid, Guid>>();
+            var newMaskIds = new Dictionary<Guid, Dictionary<Guid, Guid>>();
             foreach (var layerData in data.Data)
             {
                 var footageModels = FootageListModel.GetFootages(layerData.FootageId);
@@ -1181,11 +1184,30 @@ namespace NiVE3.Model
                 }
 
                 layerData.InPoint = splitPositionTime - layerData.SourceStartPoint;
+                var effectIdMap = new Dictionary<Guid, Guid>();
+                var maskIdMap = new Dictionary<Guid, Guid>();
+                foreach (var effectData in layerData.Effects)
+                {
+                    var newId = Guid.NewGuid();
+                    effectIdMap.Add(effectData.EffectId, newId);
+                    effectData.EffectId = newId;
+                }
+                foreach (var maskData in layerData.Masks)
+                {
+                    var newId = Guid.NewGuid();
+                    maskIdMap.Add(maskData.MaskId, newId);
+                    maskData.MaskId = newId;
+                }
+
                 var newLayer = new LayerModel(ProjectModel, this, footageModels.First(), EffectListModel, HistoryModel, AcceleratorModel);
                 newLayer.LoadData(layerData, true);
                 var index = Layers.FindIndex(l => l.LayerId == layerData.LayerId);
                 Layers.Insert(index, newLayer);
                 addedLayer.Add(layerData.LayerId, newLayer);
+
+                newLayerIds.Add(layerData.LayerId, newLayer.LayerId);
+                newEffectIds.Add(newLayer.LayerId, effectIdMap);
+                newMaskIds.Add(newLayer.LayerId, maskIdMap);
             }
 
             var oldOutPoint = new Time[layers.Length];
@@ -1199,9 +1221,16 @@ namespace NiVE3.Model
 
             HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_SplitLayers));
 
-            foreach (var layer in layers)
+            foreach (var layer in Layers)
             {
+                if (newEffectIds.ContainsKey(layer.LayerId))
+                {
+                    layer.ReplaceLayerDependPropertiesEffectId(newEffectIds[layer.LayerId]);
+                    layer.ReplaceLayerDependPropertiesMaskId(newMaskIds[layer.LayerId]);
+                    layer.ReplaceCompositionDependPropertiesLayerId(newLayerIds);
+                }
                 layer.UpdateCompositionDependProperties();
+                layer.UpdateLayerDependProperties();
             }
             HistoryModel.Add(new SplitLayersHistoryCommand(this, layers, addedLayer, oldOutPoint, newOutPoint));
 
@@ -1820,6 +1849,8 @@ namespace NiVE3.Model
 
             var index = insertStartIndex;
             var newLayerIds = new Dictionary<Guid, Guid>();
+            var newEffectIds = new Dictionary<Guid, Dictionary<Guid, Guid>>();
+            var newMaskIds = new Dictionary<Guid, Dictionary<Guid, Guid>>();
             foreach (var layerData in data.Data)
             {
                 var footageModels = FootageListModel.GetFootages(layerData.FootageId);
@@ -1828,17 +1859,30 @@ namespace NiVE3.Model
                     continue;
                 }
 
-                var newLayer = new LayerModel(ProjectModel, this, footageModels.First(), EffectListModel, HistoryModel, AcceleratorModel);
+                var effectIdMap = new Dictionary<Guid, Guid>();
+                var maskIdMap = new Dictionary<Guid, Guid>();
                 foreach (var effectData in layerData.Effects)
                 {
-                    effectData.EffectId = Guid.NewGuid();
+                    var newId = Guid.NewGuid();
+                    effectIdMap.Add(effectData.EffectId, newId);
+                    effectData.EffectId = newId;
                 }
+                foreach (var maskData in layerData.Masks)
+                {
+                    var newId = Guid.NewGuid();
+                    maskIdMap.Add(maskData.MaskId, newId);
+                    maskData.MaskId = newId;
+                }
+
+                var newLayer = new LayerModel(ProjectModel, this, footageModels.First(), EffectListModel, HistoryModel, AcceleratorModel);
                 newLayer.LoadData(layerData, true);
                 Layers.Insert(index, newLayer);
                 addedLayer.Add(newLayer);
                 index++;
 
                 newLayerIds.Add(layerData.LayerId, newLayer.LayerId);
+                newEffectIds.Add(newLayer.LayerId, effectIdMap);
+                newMaskIds.Add(newLayer.LayerId, maskIdMap);
             }
 
             foreach (var layer in addedLayer)
@@ -1869,10 +1913,16 @@ namespace NiVE3.Model
 
             HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(isDuplicate ? LanguageResourceDictionary.History_DuplicateLayers : LanguageResourceDictionary.History_PasteLayers));
 
-            foreach (var layer in layers)
+            foreach (var layer in Layers)
             {
-                layer.ReplaceCompositionDependPropertiesLayerId(newLayerIds);
+                if (newEffectIds.ContainsKey(layer.LayerId))
+                {
+                    layer.ReplaceLayerDependPropertiesEffectId(newEffectIds[layer.LayerId]);
+                    layer.ReplaceLayerDependPropertiesMaskId(newMaskIds[layer.LayerId]);
+                    layer.ReplaceCompositionDependPropertiesLayerId(newLayerIds);
+                }
                 layer.UpdateCompositionDependProperties();
+                layer.UpdateLayerDependProperties();
             }
             HistoryModel.Add(new PasteLayersHistoryCommand(this, [.. addedLayer], insertStartIndex, isDuplicate));
 
