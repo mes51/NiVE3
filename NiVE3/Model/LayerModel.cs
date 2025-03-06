@@ -353,6 +353,10 @@ namespace NiVE3.Model
 
         public PropertyGroupModel? AudioOptionProperties { get; }
 
+        public IReadOnlyCollection<Guid> EffectIdentifiers => [..Effects.Select(e => e.EffectId)];
+
+        public IReadOnlyCollection<Guid> MaskIdentifiers => [..Masks.Select(m => m.MaskId)];
+
         public event EventHandler<EventArgs>? LayerUpdated;
 
         FootageModel FootageModel { get; set; }
@@ -587,6 +591,16 @@ namespace NiVE3.Model
                 AudioOptionProperties.ValueCommited += Properties_ValueCommited;
             }
             PropertyChanged += LayerModel_PropertyChanged;
+        }
+
+        public IEffectObject? GetEffect(Guid effectIdentifier)
+        {
+            return Effects.FirstOrDefault(e => e.EffectId == effectIdentifier);
+        }
+
+        public IMaskObject? GetMask(Guid maskIdentifier)
+        {
+            return Masks.FirstOrDefault(m => m.MaskId == maskIdentifier);
         }
 
         NImage? ILayerObject.GetRawImage(Time globalTime, double downSamplingRate, bool useGpu)

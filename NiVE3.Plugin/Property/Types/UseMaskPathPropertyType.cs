@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,15 +10,15 @@ using NiVE3.Shared.Extension;
 
 namespace NiVE3.Plugin.Property.Types
 {
-    internal class UseLayerImagePropertyType : ICompositionDependIPropertyType
+    public class UseMaskPathPropertyType : ILayerDependPropertyType
     {
-        public static readonly UseLayerImagePropertyType Instance = new UseLayerImagePropertyType();
+        public static readonly UseMaskPathPropertyType Instance = new UseMaskPathPropertyType();
 
         public InterpolationType SupportedInterpolationTypes => InterpolationType.None;
 
         public bool IsSupportedExpression => false;
 
-        private UseLayerImagePropertyType() { }
+        private UseMaskPathPropertyType() { }
 
         public object? Interpolate(IReadOnlyList<KeyFrame> keyFrames, Time time)
         {
@@ -42,36 +41,36 @@ namespace NiVE3.Plugin.Property.Types
 
         public object? DeserializeValue(object? serializedValue)
         {
-            if (serializedValue is UseLayerImageTarget target)
+            if (serializedValue is UseMaskPathTarget target)
             {
                 return target;
             }
-            else if (serializedValue is IDictionary<string, object> dictionary && dictionary.TryGetValue(nameof(UseLayerImageTarget.LayerId), out var value))
+            else if (serializedValue is IDictionary<string, object> dictionary && dictionary.TryGetValue(nameof(UseMaskPathTarget.MaskId), out var value))
             {
-                var layerId = value switch
+                var maskId = value switch
                 {
                     Guid guid => guid,
                     string str => Guid.Parse(str),
                     _ => Guid.Empty
                 };
 
-                return new UseLayerImageTarget(layerId, (LayerImageProcessType)(int)dictionary[nameof(UseLayerImageTarget.ImageProcessType)]);
+                return new UseMaskPathTarget(maskId);
             }
             else
             {
-                return UseLayerImageTarget.Empty;
+                return UseMaskPathTarget.Empty;
             }
         }
 
         public Span<byte> ConvertToHashBase(object? value)
         {
-            if (value is UseLayerImageTarget target)
+            if (value is UseMaskPathTarget target)
             {
-                return (target.LayerId, target.ImageProcessType).ConvertToSpan();
+                return target.MaskId.ConvertToSpan();
             }
-            else if (value is Guid layerId)
+            else if (value is Guid maskId)
             {
-                return layerId.ConvertToSpan();
+                return maskId.ConvertToSpan();
             }
             else
             {
@@ -79,12 +78,12 @@ namespace NiVE3.Plugin.Property.Types
             }
         }
 
-        public bool TryConvertFromExpressionValue(object? expressionValue, object? rawValue, out object? value)
+        public bool TryConvertFromExpressionValue(object? expressionValue, object? rawValue, ILayerObject layer, out object? value)
         {
             throw new NotImplementedException();
         }
 
-        public bool TryConvertFromExpressionValue(object? expressionValue, object? rawValue, ICompositionObject composition, out object? value)
+        public bool TryConvertFromExpressionValue(object? expressionValue, object? rawValue, out object? value)
         {
             throw new NotImplementedException();
         }
@@ -94,11 +93,11 @@ namespace NiVE3.Plugin.Property.Types
             throw new NotImplementedException();
         }
 
-        public object? ConvertToExpressionValue(object? value, ICompositionObject composition)
+        public object? ConvertToExpressionValue(object? value, ILayerObject layer)
         {
-            if (value is UseLayerImageTarget target)
+            if (value is UseMaskPathTarget target)
             {
-                return composition.GetLayer(target.LayerId)?.Name ?? "";
+                return layer.GetMask(target.MaskId)?.Name ?? "";
             }
             else
             {

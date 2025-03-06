@@ -25,7 +25,7 @@ using SixLabors.ImageSharp.Drawing;
 
 namespace NiVE3.Model
 {
-    partial class MaskModel : BindableBase
+    partial class MaskModel : BindableBase, IMaskObject
     {
         const string PropertyMaskSettingId = nameof(PropertyMaskSettingId);
 

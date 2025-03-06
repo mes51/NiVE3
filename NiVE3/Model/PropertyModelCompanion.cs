@@ -11,6 +11,7 @@ using NiVE3.Plugin.Property;
 using NiVE3.Mvvm;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
 using NiVE3.Plugin.ValueObject;
+using System.Collections.Specialized;
 
 namespace NiVE3.Model
 {
@@ -125,11 +126,18 @@ namespace NiVE3.Model
             set { SetProperty(ref sourceType, value); }
         }
 
+        public IReadOnlyCollection<IEffectViewModel> EffectViewModels { get; }
+
+        public IReadOnlyCollection<IMaskViewModel> MaskViewModels { get; }
+
         LayerModel LayerModel { get; }
 
         public LayerViewModelProxy(LayerModel layerModel)
         {
             LayerModel = layerModel;
+
+            EffectViewModels = LayerModel.Effects.CreateViewCollection(e => new EffectViewModelProxy(e));
+            MaskViewModels = LayerModel.Masks.CreateViewCollection(m => new MaskViewModelProxy(m));
 
             WiringModel();
         }
@@ -137,8 +145,25 @@ namespace NiVE3.Model
         partial void WiringModel();
     }
 
-    class EffectViewModelProxy : WeakPropertyChangedBindingBase, IEffectViewModel
+    [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
+    partial class EffectViewModelProxy : WeakPropertyChangedBindingBase, IEffectViewModel
     {
+        private Guid effectId;
+        [NeedWire(nameof(EffectModel), IsOneWay = true)]
+        public Guid EffectId
+        {
+            get { return effectId; }
+            set { SetProperty(ref effectId, value); }
+        }
+
+        private string name = "";
+        [NeedWire(nameof(EffectModel), IsOneWay = true)]
+        public string Name
+        {
+            get { return name; }
+            set { SetProperty(ref name, value); }
+        }
+
 #pragma warning disable IDE0052 // 読み取られていないプライベート メンバーを削除
         EffectModel EffectModel { get; }
 #pragma warning restore IDE0052 // 読み取られていないプライベート メンバーを削除
@@ -147,5 +172,38 @@ namespace NiVE3.Model
         {
             EffectModel = effectModel;
         }
+
+        partial void WiringModel();
+    }
+
+    [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
+    partial class MaskViewModelProxy : WeakPropertyChangedBindingBase, IMaskViewModel
+    {
+        private Guid maskId;
+        [NeedWire(nameof(MaskModel), IsOneWay = true)]
+        public Guid MaskId
+        {
+            get { return maskId; }
+            set { SetProperty(ref maskId, value); }
+        }
+
+        private string name = "";
+        [NeedWire(nameof(MaskModel), IsOneWay = true)]
+        public string Name
+        {
+            get { return name; }
+            set { SetProperty(ref name, value); }
+        }
+
+#pragma warning disable IDE0052 // 読み取られていないプライベート メンバーを削除
+        MaskModel MaskModel { get; }
+#pragma warning restore IDE0052 // 読み取られていないプライベート メンバーを削除
+
+        public MaskViewModelProxy(MaskModel maskModel)
+        {
+            MaskModel = maskModel;
+        }
+
+        partial void WiringModel();
     }
 }

@@ -31,6 +31,9 @@ namespace NiVE3.Plugin.Internal.View.Resources
         [DefaultValue("なし")]
         public const string PropertyControl_UseLayerImagePropertyControl_None = nameof(PropertyControl_UseLayerImagePropertyControl_None);
 
+        [DefaultValue("なし")]
+        public const string PropertyControl_UseMaskPropertyControl_None = nameof(PropertyControl_UseMaskPropertyControl_None);
+
         [DefaultValue("OK")]
         public static readonly string Dialog_OK = nameof(Dialog_OK);
 

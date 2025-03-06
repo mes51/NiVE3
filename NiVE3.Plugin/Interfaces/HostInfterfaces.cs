@@ -131,6 +131,30 @@ namespace NiVE3.Plugin.Interfaces
         public Time SourceStartPoint { get; }
 
         /// <summary>
+        /// エフェクトを表す識別子の一覧を取得します
+        /// </summary>
+        public IReadOnlyCollection<Guid> EffectIdentifiers { get; }
+
+        /// <summary>
+        /// マスクを表す識別子の一覧を取得します
+        /// </summary>
+        public IReadOnlyCollection<Guid> MaskIdentifiers { get; }
+
+        /// <summary>
+        /// エフェクトの識別子からエフェクトを取得します
+        /// </summary>
+        /// <param name="effectIdentifier">エフェクトの識別子</param>
+        /// <returns>エフェクトを表すIEffectObject。一致するエフェクトが存在しなかった場合はnull</returns>
+        IEffectObject? GetEffect(Guid effectIdentifier);
+
+        /// <summary>
+        /// マスクの識別子からマスクを取得します
+        /// </summary>
+        /// <param name="maskIdentifier">マスクの識別子</param>
+        /// <returns>マスクを表すIMaskObject。一致するマスクが存在しなかった場合はnull</returns>
+        IMaskObject? GetMask(Guid maskIdentifier);
+
+        /// <summary>
         /// フッテージから取得した画像そのままを取得します
         /// </summary>
         /// <param name="globalTime">画像を取得する時のコンポジションの時間</param>
@@ -159,6 +183,11 @@ namespace NiVE3.Plugin.Interfaces
     }
 
     public interface IEffectObject { }
+
+    public interface IMaskObject
+    {
+        string Name { get; }
+    }
 
     public interface IPropertyObject
     {
@@ -210,9 +239,31 @@ namespace NiVE3.Plugin.Interfaces
         SourceType SourceType { get; }
 
         bool IsEnable3D { get; }
+
+        /// <summary>
+        /// エフェクトのViewModelの一覧を取得します。INotifyCollectionChangedでもあります。
+        /// </summary>
+        IReadOnlyCollection<IEffectViewModel> EffectViewModels { get; }
+
+        /// <summary>
+        /// マスクのViewModelの一覧を取得します。INotifyCollectionChangedでもあります。
+        /// </summary>
+        IReadOnlyCollection<IMaskViewModel> MaskViewModels { get; }
     }
 
-    public interface IEffectViewModel : INotifyPropertyChanged { }
+    public interface IEffectViewModel : INotifyPropertyChanged
+    {
+        Guid EffectId { get; }
+
+        string Name { get; }
+    }
+
+    public interface IMaskViewModel : INotifyPropertyChanged
+    {
+        Guid MaskId { get; }
+
+        string Name { get; }
+    }
 
     public interface IPropertyViewModel : INotifyPropertyChanged
     {

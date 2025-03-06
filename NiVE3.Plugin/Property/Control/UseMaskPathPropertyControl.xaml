@@ -1,0 +1,97 @@
+﻿<local:PropertyControlBase x:Class="NiVE3.Plugin.Property.Control.UseMaskPathPropertyControl"
+                           xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                           xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                           xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                           xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                           xmlns:local="clr-namespace:NiVE3.Plugin.Property.Control"
+                           xmlns:upr="clr-namespace:NiVE3.UI.Primitive;assembly=NiVE3.UI"
+                           xmlns:ucv="clr-namespace:NiVE3.UI.Converter;assembly=NiVE3.UI"
+                           xmlns:cv="clr-namespace:NiVE3.Plugin.Property.Control.Converter"
+                           xmlns:ur="clr-namespace:NiVE3.UI.Resources;assembly=NiVE3.UI"
+                           xmlns:r="clr-namespace:NiVE3.Plugin.Internal.View.Resources"
+                           mc:Ignorable="d" 
+                           x:Name="Root"
+                           d:DesignHeight="450" d:DesignWidth="800"
+                           DataContextChanged="Root_DataContextChanged">
+    <local:PropertyControlBase.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <r:LanguageResourceDictionary />
+            </ResourceDictionary.MergedDictionaries>
+
+            <ucv:EqualMultiValueConverter x:Key="EqualMultiValueConverter"/>
+            <cv:CollectionIndexConverter x:Key="CollectionIndexConverter" Offset="1"/>
+
+            <CollectionViewSource x:Key="MaskCollectionViewSource" Source="{Binding Source={x:Reference Root}, Path=MaskCollectionSource}"/>
+            <CompositeCollection x:Key="MaskCollection">
+                <x:Null />
+                <upr:ContextMenuSelectBoxSeparator />
+                <CollectionContainer Collection="{Binding Source={StaticResource MaskCollectionViewSource}}"/>
+            </CompositeCollection>
+
+            <!-- NOTE: INotifyCollectionChangeの変更はBindingでは拾ってくれないため、無理矢理拾わせるためのクラスでラップする -->
+            <ur:CollectionChangeNotifier x:Key="MaskCollectionNotifier" Collection="{Binding Source={x:Reference Root}, Path=MaskCollectionSource}"/>
+
+            <Style x:Key="MaskSelectBoxStyle" TargetType="{x:Type upr:ContextMenuSelectBox}" BasedOn="{StaticResource {x:Type upr:ContextMenuSelectBox}}">
+                <Setter Property="Margin" Value="5,2,0,2"/>
+                <Setter Property="IsTabStop" Value="False"/>
+
+                <Setter Property="ItemContainerStyle">
+                    <Setter.Value>
+                        <Style TargetType="{x:Type MenuItem}">
+                            <Setter Property="IsChecked" Value="False"/>
+                            <Setter Property="IsEnabled" Value="True"/>
+
+                            <Style.Triggers>
+                                <DataTrigger Value="True">
+                                    <DataTrigger.Binding>
+                                        <MultiBinding Converter="{StaticResource EqualMultiValueConverter}">
+                                            <Binding Path="DataContext" RelativeSource="{RelativeSource Self}"/>
+                                            <Binding Path="PlacementTarget.SelectedItem" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType={x:Type ContextMenu}}"/>
+                                        </MultiBinding>
+                                    </DataTrigger.Binding>
+                                    <Setter Property="IsChecked" Value="True"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="ItemTemplate">
+                    <Setter.Value>
+                        <DataTemplate>
+                            <TextBlock x:Name="MaskName">
+                                <TextBlock.Tag>
+                                    <MultiBinding Converter="{StaticResource CollectionIndexConverter}">
+                                        <Binding Path="Collection" Source="{StaticResource MaskCollectionNotifier}"/>
+                                        <Binding />
+                                        <!-- NOTE: INotifyCollectionChange通知用 -->
+                                        <Binding Path="Update" Source="{StaticResource MaskCollectionNotifier}"/>
+                                    </MultiBinding>
+                                </TextBlock.Tag>
+                                <TextBlock.Text>
+                                    <MultiBinding StringFormat="{}{0}: {1}">
+                                        <Binding Path="Tag" RelativeSource="{RelativeSource Self}"/>
+                                        <Binding Path="Name"/>
+                                    </MultiBinding>
+                                </TextBlock.Text>
+                            </TextBlock>
+
+                            <DataTemplate.Triggers>
+                                <Trigger Property="DataContext" Value="{x:Null}">
+                                    <Setter TargetName="MaskName" Property="Text" Value="{DynamicResource {x:Static r:LanguageResourceDictionary.PropertyControl_UseMaskPropertyControl_None}}"/>
+                                </Trigger>
+                            </DataTemplate.Triggers>
+                        </DataTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </ResourceDictionary>
+    </local:PropertyControlBase.Resources>
+    <Grid>
+        <upr:ContextMenuSelectBox Width="{Binding Property.SelectBoxWidth}"
+                                  SelectedItem="{Binding ElementName=Root, Path=SelectedMask}"
+                                  ItemsSource="{Binding MaskCollection}"
+                                  Style="{StaticResource MaskSelectBoxStyle}"
+                                  SelectItemChangedByUser="MaskSelectBox_SelectItemChangedByUser"/>
+    </Grid>
+</local:PropertyControlBase>
