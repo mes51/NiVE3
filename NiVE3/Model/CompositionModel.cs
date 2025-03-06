@@ -1172,7 +1172,6 @@ namespace NiVE3.Model
 
             var data = CopyLayers(ids);
             var addedLayer = new Dictionary<Guid, LayerModel>();
-            var newLayerIds = new Dictionary<Guid, Guid>();
             var newEffectIds = new Dictionary<Guid, Dictionary<Guid, Guid>>();
             var newMaskIds = new Dictionary<Guid, Dictionary<Guid, Guid>>();
             foreach (var layerData in data.Data)
@@ -1205,7 +1204,6 @@ namespace NiVE3.Model
                 Layers.Insert(index, newLayer);
                 addedLayer.Add(layerData.LayerId, newLayer);
 
-                newLayerIds.Add(layerData.LayerId, newLayer.LayerId);
                 newEffectIds.Add(newLayer.LayerId, effectIdMap);
                 newMaskIds.Add(newLayer.LayerId, maskIdMap);
             }
@@ -1223,11 +1221,10 @@ namespace NiVE3.Model
 
             foreach (var layer in Layers)
             {
-                if (newEffectIds.ContainsKey(layer.LayerId))
+                if (newEffectIds.TryGetValue(layer.LayerId, out var effectIdMap) && newMaskIds.TryGetValue(layer.LayerId, out var maskIdMap))
                 {
-                    layer.ReplaceLayerDependPropertiesEffectId(newEffectIds[layer.LayerId]);
-                    layer.ReplaceLayerDependPropertiesMaskId(newMaskIds[layer.LayerId]);
-                    layer.ReplaceCompositionDependPropertiesLayerId(newLayerIds);
+                    layer.ReplaceLayerDependPropertiesEffectId(effectIdMap);
+                    layer.ReplaceLayerDependPropertiesMaskId(maskIdMap);
                 }
                 layer.UpdateCompositionDependProperties();
                 layer.UpdateLayerDependProperties();
