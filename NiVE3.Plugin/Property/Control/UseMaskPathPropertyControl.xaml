@@ -34,6 +34,7 @@
 
             <Style x:Key="MaskSelectBoxStyle" TargetType="{x:Type upr:ContextMenuSelectBox}" BasedOn="{StaticResource {x:Type upr:ContextMenuSelectBox}}">
                 <Setter Property="Margin" Value="5,2,0,2"/>
+                <Setter Property="HorizontalAlignment" Value="Left"/>
                 <Setter Property="IsTabStop" Value="False"/>
 
                 <Setter Property="ItemContainerStyle">
@@ -90,7 +91,7 @@
     <Grid>
         <upr:ContextMenuSelectBox Width="{Binding Property.SelectBoxWidth}"
                                   SelectedItem="{Binding ElementName=Root, Path=SelectedMask}"
-                                  ItemsSource="{Binding MaskCollection}"
+                                  ItemsSource="{StaticResource MaskCollection}"
                                   Style="{StaticResource MaskSelectBoxStyle}"
                                   SelectItemChangedByUser="MaskSelectBox_SelectItemChangedByUser"/>
     </Grid>

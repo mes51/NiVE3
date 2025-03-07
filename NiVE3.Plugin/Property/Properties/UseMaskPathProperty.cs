@@ -27,7 +27,18 @@ namespace NiVE3.Plugin.Property.Properties
 
         public override PropertyControlBase CreateControl(ICompositionViewModel composition, ILayerViewModel? layer, IEffectViewModel? effect, IPropertyViewModel viewModel)
         {
-            throw new NotImplementedException();
+            if (layer == null)
+            {
+                // TODO: 本体側でのハンドリング or コンポジションプロパティの取りやめ
+                throw new NotSupportedException();
+            }
+
+            var control = new UseMaskPathPropertyControl(layer)
+            {
+                DataContext = viewModel,
+                MaskCollectionSource = layer.MaskViewModels
+            };
+            return control;
         }
 
         public override object? ChangeValueByLayerStateChanged(object? value, ILayerObject layer)

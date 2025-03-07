@@ -171,6 +171,8 @@ namespace NiVE3.Model
         public EffectViewModelProxy(EffectModel effectModel)
         {
             EffectModel = effectModel;
+
+            WiringModel();
         }
 
         partial void WiringModel();
@@ -202,6 +204,8 @@ namespace NiVE3.Model
         public MaskViewModelProxy(MaskModel maskModel)
         {
             MaskModel = maskModel;
+
+            WiringModel();
         }
 
         partial void WiringModel();
