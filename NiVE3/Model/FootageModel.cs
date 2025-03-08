@@ -230,11 +230,11 @@ namespace NiVE3.Model
             }
         }
 
-        public SourceFootageRect CalcSize(Time time, int compositionWidth, int compositionHeight, bool withInvisible, PropertyValueGroup? properties)
+        public SourceFootageRect CalcSize(Time time, int compositionWidth, int compositionHeight, bool withInvisible, LayerModel layer, PropertyValueGroup? properties)
         {
             if (properties != null && Source is ICustomizableFootageSource customizableFootageSource)
             {
-                return customizableFootageSource.CalcSize(time, compositionWidth, compositionHeight, withInvisible, properties);
+                return customizableFootageSource.CalcSize(time, compositionWidth, compositionHeight, withInvisible, layer, properties);
             }
             else
             {
@@ -242,13 +242,13 @@ namespace NiVE3.Model
             }
         }
 
-        public NImage ReadImage(Time time, double downSamplingRate, int compositionWidth, int compositionHeight, PropertyValueGroup? properties, ImageInterpolationQuality imageInterpolationQuality, bool toGpu)
+        public NImage ReadImage(Time time, double downSamplingRate, int compositionWidth, int compositionHeight, LayerModel? layer, PropertyValueGroup? properties, ImageInterpolationQuality imageInterpolationQuality, bool toGpu)
         {
             try
             {
-                if (properties != null && Source is ICustomizableFootageSource customizableFootageSource)
+                if (properties != null && Source is ICustomizableFootageSource customizableFootageSource && layer != null)
                 {
-                    return customizableFootageSource.ReadFrame(time, downSamplingRate, compositionWidth, compositionHeight, properties, imageInterpolationQuality, toGpu && IsSupportLoadToGpu);
+                    return customizableFootageSource.ReadFrame(time, downSamplingRate, compositionWidth, compositionHeight, layer, properties, imageInterpolationQuality, toGpu && IsSupportLoadToGpu);
                 }
                 else
                 {

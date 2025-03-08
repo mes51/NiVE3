@@ -59,6 +59,8 @@ namespace NiVE3.Model
 
         MaskShapeType DefaultShapeType { get; }
 
+        LayerModel LayerModel { get; }
+
         HistoryModel HistoryModel { get; }
 
         AcceleratorModel AcceleratorModel { get; }
@@ -68,6 +70,7 @@ namespace NiVE3.Model
         public MaskModel(ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, AcceleratorModel acceleratorModel, HistoryModel historyModel, MaskShapeType shapeType = MaskShapeType.Rectangle, Guid? maskId = null)
         {
             MaskId = maskId ?? Guid.NewGuid();
+            LayerModel = layerModel;
             HistoryModel = historyModel;
             AcceleratorModel = acceleratorModel;
             DefaultShapeType = shapeType;
@@ -99,6 +102,29 @@ namespace NiVE3.Model
             Properties.ValueUpdated += Properties_ValueUpdated;
 
             PropertyChanged += MaskModel_PropertyChanged;
+        }
+
+        public BezierPath GetPath(Time globalTime, double downSamplingRate)
+        {
+            var layerTime = globalTime - LayerModel.SourceStartPoint;
+
+            using var entry = CycleChecker.TryEnter(MaskId);
+            if (entry == null)
+            {
+                return BezierPath.Empty;
+            }
+
+            var setting = Properties.GetValues(layerTime, globalTime);
+
+            var shapeType = (MaskShapeType)(setting[PropertyMaskSettingShapeTypeId] ?? MaskShapeType.Rectangle);
+            var size = (Vector2)((Vector3d)(setting[PropertyMaskSettingSizeId] ?? Vector3d.Zero) / downSamplingRate);
+            var position = (Vector2)((Vector3d)(setting[PropertyMaskSettingPositionId] ?? Vector3d.Zero) / downSamplingRate);
+
+            return shapeType switch
+            {
+                MaskShapeType.Ellipse => new BezierEllipsePolygon(position.X + size.X * 0.5F, position.Y + size.Y * 0.5F, size.X, size.Y).BezierPath,
+                _ => new RectangularPolygon(position.X, position.Y, size.X, size.Y).ToBezierPath()
+            };
         }
 
         public void ChangeName(string name)
@@ -253,5 +279,19 @@ namespace NiVE3.Model
         Rectangle,
         Ellipse,
         //Path
+    }
+
+    file static class PathPolygonExtensions
+    {
+        public static BezierPath ToBezierPath(this RectangularPolygon polygon)
+        {
+            var points = polygon.Points.Span;
+            var bezierPoints = new BeziePoint[points.Length - 1];
+            for (var i = 0; i < bezierPoints.Length; i++)
+            {
+                bezierPoints[i] = new BeziePoint(Vector2d.Zero, Vector2d.Zero, (Vector2d)(Vector2)points[i + 1], true);
+            }
+            return new BezierPath((Vector2d)(Vector2)points[0], bezierPoints, true);
+        }
     }
 }

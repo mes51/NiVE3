@@ -425,7 +425,7 @@ namespace NiVE3.Input
             return new NManagedImage(1, 1);
         }
 
-        public SourceFootageRect CalcSize(Time time, int compositionWidth, int compositionHeight, bool withInvisible, PropertyValueGroup properties)
+        public SourceFootageRect CalcSize(Time time, int compositionWidth, int compositionHeight, bool withInvisible, IFootageSourceUsingLayerObject layer, PropertyValueGroup properties)
         {
             var contents = (properties[ContentPropertyId] as PropertyValueGroup[]) ?? [];
             var tree = CreateShapeTree(contents);
@@ -443,7 +443,7 @@ namespace NiVE3.Input
             }
         }
 
-        public NImage ReadFrame(Time time, double downSamplingRate, int compositionWidth, int compositionHeight, PropertyValueGroup properties, ImageInterpolationQuality imageInterpolationQuality, bool toGpu)
+        public NImage ReadFrame(Time time, double downSamplingRate, int compositionWidth, int compositionHeight, IFootageSourceUsingLayerObject layer, PropertyValueGroup properties, ImageInterpolationQuality imageInterpolationQuality, bool toGpu)
         {
             var contents = (properties[ContentPropertyId] as PropertyValueGroup[]) ?? [];
             var tree = CreateShapeTree(contents);

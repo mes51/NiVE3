@@ -10,6 +10,8 @@ namespace NiVE3.Plugin.ValueObject
 {
     public class BezierPath
     {
+        public static readonly BezierPath Empty = new BezierPath(Vector2d.Zero, [], false);
+
         public Vector2d BeginPoint { get; }
 
         public ImmutableArray<BeziePoint> Points { get; }
@@ -28,6 +30,11 @@ namespace NiVE3.Plugin.ValueObject
             BeginPoint = beginPoint;
             Points = ImmutableArray.Create(points);
             IsClosed = isClosed;
+        }
+
+        public bool IsEmpty()
+        {
+            return Points.Length < 1;
         }
     }
 

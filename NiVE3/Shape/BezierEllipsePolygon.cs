@@ -4,6 +4,9 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using Acornima;
+using NiVE3.Numerics;
+using NiVE3.Plugin.ValueObject;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing;
 
@@ -22,7 +25,7 @@ namespace NiVE3.Shape
             {
                 if (FlattenedPoints == null)
                 {
-                    var flattenedPointMemory = BezierPath.Flatten();
+                    var flattenedPointMemory = NativeSegment.Flatten();
                     FlattenedPoints = new PointF[flattenedPointMemory.Length];
                     flattenedPointMemory.CopyTo(FlattenedPoints);
                 }
@@ -35,7 +38,9 @@ namespace NiVE3.Shape
 
         public RectangleF Bounds { get; }
 
-        public CubicBezierLineSegment BezierPath { get; }
+        public BezierPath BezierPath { get; }
+
+        public CubicBezierLineSegment NativeSegment { get; }
 
         PointF[]? FlattenedPoints { get; set; }
 
@@ -50,7 +55,18 @@ namespace NiVE3.Shape
 
             Bounds = new RectangleF(leftTop, new SizeF(size.X, size.Y));
 
-            BezierPath = new CubicBezierLineSegment([
+            BezierPath = new BezierPath(
+                new Vector2d(position.X, leftTop.Y),
+                [
+                    new BeziePoint(new Vector2d(position.X + controlPointOffset.X, leftTop.Y), new Vector2d(rightBottom.X, position.Y - controlPointOffset.Y), new Vector2d(rightBottom.X, position.Y), false),
+                    new BeziePoint(new Vector2d(rightBottom.X, position.Y + controlPointOffset.Y), new Vector2d(position.X + controlPointOffset.X, rightBottom.Y), new Vector2d(position.X, rightBottom.Y), false),
+                    new BeziePoint(new Vector2d(position.X - controlPointOffset.X, rightBottom.Y), new Vector2d(leftTop.X, position.Y + controlPointOffset.Y), new Vector2d(leftTop.X, position.Y), false),
+                    new BeziePoint(new Vector2d(leftTop.X, position.Y - controlPointOffset.Y), new Vector2d(position.X - controlPointOffset.X, leftTop.Y), new Vector2d(position.X, leftTop.Y), false)
+                ],
+                true
+            );
+
+            NativeSegment = new CubicBezierLineSegment([
                 new PointF(position.X, leftTop.Y),
                 new PointF(position.X + controlPointOffset.X, leftTop.Y),
                 new PointF(rightBottom.X, position.Y - controlPointOffset.Y),
@@ -73,7 +89,14 @@ namespace NiVE3.Shape
 
         private BezierEllipsePolygon(BezierEllipsePolygon basePolygon, Matrix3x2 transform)
         {
-            BezierPath = basePolygon.BezierPath.Transform(transform);
+            NativeSegment = basePolygon.NativeSegment.Transform(transform);
+
+            var controlPoints = NativeSegment.ControlPoints;
+            BezierPath = new BezierPath(
+                (Vector2d)(Vector2)controlPoints[0],
+                controlPoints.Skip(1).Chunk(3).Select(p => new BeziePoint((Vector2d)(Vector2)p[0], (Vector2d)(Vector2)p[1], (Vector2d)(Vector2)p[2], false)),
+                true
+            );
 
             var baseBounds = basePolygon.Bounds;
             var p1 = Vector2.Transform(new Vector2(baseBounds.Left, baseBounds.Top), transform);

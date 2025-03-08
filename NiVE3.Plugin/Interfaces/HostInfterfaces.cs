@@ -182,11 +182,36 @@ namespace NiVE3.Plugin.Interfaces
         NImage? GetEffectedImage(Time globalTime, double downSamplingRate, bool useGpu);
     }
 
+    public interface IFootageSourceUsingLayerObject
+    {
+        public Time SourceStartPoint { get; }
+
+        /// <summary>
+        /// マスクを表す識別子の一覧を取得します
+        /// </summary>
+        public IReadOnlyCollection<Guid> MaskIdentifiers { get; }
+
+        /// <summary>
+        /// マスクの識別子からマスクを取得します
+        /// </summary>
+        /// <param name="maskIdentifier">マスクの識別子</param>
+        /// <returns>マスクを表すIMaskObject。一致するマスクが存在しなかった場合はnull</returns>
+        IMaskObject? GetMask(Guid maskIdentifier);
+    }
+
     public interface IEffectObject { }
 
     public interface IMaskObject
     {
         string Name { get; }
+
+        /// <summary>
+        /// このマスクのパスを取得します
+        /// </summary>
+        /// <param name="globalTime">マスクのパスを取得する時のコンポジション時間</param>
+        /// <param name="downSamplingRate">ダウンサンプリングの割合</param>
+        /// <returns>取得したパス</returns>
+        BezierPath GetPath(Time globalTime, double downSamplingRate);
     }
 
     public interface IPropertyObject

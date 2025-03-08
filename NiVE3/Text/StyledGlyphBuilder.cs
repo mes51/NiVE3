@@ -49,7 +49,7 @@ namespace NiVE3.Text
                 var nextPoints = points.Skip(1);
                 if (textPath.IsClosed)
                 {
-                    nextPoints.Append(points[0]);
+                    nextPoints = nextPoints.Append(points[0]);
                 }
                 TextPathPoints = points.Zip(nextPoints, (f, s) =>
                 {

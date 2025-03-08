@@ -91,9 +91,10 @@ namespace NiVE3.Plugin.Interfaces
         /// <param name="compositionWidth">コンポジションの幅</param>
         /// <param name="compositionHeight">コンポジションの高さ</param>
         /// <param name="withInvisible">非表示の範囲も含むかどうか</param>
+        /// <param name="layer">現在のレイヤー</param>
         /// <param name="properties">オプションの値</param>
         /// <returns>読み込む画像の四角形を表すSourceFootageRect</returns>
-        SourceFootageRect CalcSize(Time time, int compositionWidth, int compositionHeight, bool withInvisible, PropertyValueGroup properties);
+        SourceFootageRect CalcSize(Time time, int compositionWidth, int compositionHeight, bool withInvisible, IFootageSourceUsingLayerObject layer, PropertyValueGroup properties);
 
         /// <summary>
         /// 画像を読み込みます
@@ -102,11 +103,12 @@ namespace NiVE3.Plugin.Interfaces
         /// <param name="downSamplingRate">ダウンサンプリングの比率</param>
         /// <param name="compositionWidth">コンポジションの幅</param>
         /// <param name="compositionHeight">コンポジションの高さ</param>
+        /// <param name="layer">現在のレイヤー</param>
         /// <param name="properties">オプションの値</param>
         /// <param name="imageInterpolationQuality">画像のレンダリング時の補間方法</param>
         /// <param name="toGpu">GPU上に直接読み込む場合はtrue、CPU上に読み込む場合はfalse</param>
         /// <returns>読み込んだ画像を表すNImage</returns>
         // TODO: Acceleratorをラップしたものを渡す
-        NImage ReadFrame(Time time, double downSamplingRate, int compositionWidth, int compositionHeight, PropertyValueGroup properties, ImageInterpolationQuality imageInterpolationQuality, bool toGpu);
+        NImage ReadFrame(Time time, double downSamplingRate, int compositionWidth, int compositionHeight, IFootageSourceUsingLayerObject layer, PropertyValueGroup properties, ImageInterpolationQuality imageInterpolationQuality, bool toGpu);
     }
 }

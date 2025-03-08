@@ -264,7 +264,7 @@ namespace NiVE3.ViewModel
             if (Footage.InputType == SourceType.Image || (Footage.InputType & SourceType.Video) != SourceType.None)
             {
                 using var checker = CycleChecker.StartCheck();
-                using var image = Footage.ReadImage(Duration * 0.5, 1.0, 0, 0, null, ImageInterpolationQuality.Level2, ApplicationModel.UseGpu);
+                using var image = Footage.ReadImage(Duration * 0.5, 1.0, 0, 0, null, null, ImageInterpolationQuality.Level2, ApplicationModel.UseGpu);
                 if (image != null)
                 {
                     var data = ArrayPool<byte>.Shared.Rent(image.DataLength * 4);

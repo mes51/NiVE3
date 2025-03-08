@@ -24,6 +24,8 @@ using NiVE3.Shared.Util;
 using NiVE3.Text;
 using NiVE3.View.Resource;
 using SixLabors.Fonts;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Drawing;
 using Polygon = NiVE3.Shape.Polygon;
 
 namespace NiVE3.Input
@@ -64,6 +66,8 @@ namespace NiVE3.Input
 
         public const string TextMoreOptionsGroupId = nameof(TextMoreOptionsGroupId);
 
+        public const string TextPathOptionsGroupId = nameof(TextPathOptionsGroupId);
+
         public const string TextAnimatorsId = nameof(TextAnimatorsId);
 
         const string TextBaseAnchorPointRateId = nameof(TextBaseAnchorPointRateId);
@@ -73,6 +77,16 @@ namespace NiVE3.Input
         const string TextIsEnableVerticalModeId = nameof(TextIsEnableVerticalModeId);
 
         const string TextInterCharacterBlendModeId = nameof(TextInterCharacterBlendModeId);
+
+        const string TextPathTargetMaskId = nameof(TextPathTargetMaskId);
+
+        const string TextPathIsInvertId = nameof(TextPathIsInvertId);
+
+        const string TextPathAlignmentEvenlyId = nameof(TextPathAlignmentEvenlyId);
+
+        const string TextPathBeginMarginId = nameof(TextPathBeginMarginId);
+
+        const string TextPathEndMarginId = nameof(TextPathEndMarginId);
 
         const string TextAnimatorAnimatorId = nameof(TextAnimatorAnimatorId);
 
@@ -165,6 +179,14 @@ namespace NiVE3.Input
                     new Vector3dProperty(TextBoxSizeId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextMoreOptions_TextBoxSize, new Vector3d(), new Vector3d(), digit: 2),
                     new EnumProperty(TextInterCharacterBlendModeId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextMoreOptions_InterCharacterBlendMode, typeof(BlendMode), typeof(LanguageResourceDictionary), BlendMode.Normal),
                     new CheckBoxProperty(TextIsEnableVerticalModeId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextMoreOptions_IsEnableVerticalMode, false)
+                ]),
+                new PropertyGroup(TextPathOptionsGroupId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextPathOptions,
+                [
+                    new UseMaskPathProperty(TextPathTargetMaskId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextPath_TargetMask, 90.0),
+                    new CheckBoxProperty(TextPathIsInvertId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextPath_IsInvert, false),
+                    new CheckBoxProperty(TextPathAlignmentEvenlyId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextPath_AlignmentEvenly, false),
+                    new DoubleProperty(TextPathBeginMarginId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextPath_BeginMargin, 0.0, double.MinValue, double.MaxValue, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
+                    new DoubleProperty(TextPathEndMarginId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextPath_EndMargin, 0.0, double.MinValue, double.MaxValue, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
                 ]),
                 new AppendableProperty(TextAnimatorsId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator,
                 [
@@ -313,9 +335,9 @@ namespace NiVE3.Input
             return new NManagedImage(1, 1);
         }
 
-        public SourceFootageRect CalcSize(Time time, int compositionWidth, int compositionHeight, bool withInvisible, PropertyValueGroup properties)
+        public SourceFootageRect CalcSize(Time time, int compositionWidth, int compositionHeight, bool withInvisible, IFootageSourceUsingLayerObject layer, PropertyValueGroup properties)
         {
-            var (textOption, glyphPolygons) = BuildGlyphPolygons(properties, 1.0);
+            var (textOption, glyphPolygons) = BuildGlyphPolygons(time + layer.SourceStartPoint, layer, properties, 1.0);
             if (textOption == null || glyphPolygons.Count < 1)
             {
                 return new SourceFootageRect(Vector2d.Zero, 1, 1);
@@ -337,9 +359,9 @@ namespace NiVE3.Input
             }
         }
 
-        public NImage ReadFrame(Time time, double downSamplingRate, int compositionWidth, int compositionHeight, PropertyValueGroup properties, ImageInterpolationQuality imageInterpolationQuality, bool toGpu)
+        public NImage ReadFrame(Time time, double downSamplingRate, int compositionWidth, int compositionHeight, IFootageSourceUsingLayerObject layer, PropertyValueGroup properties, ImageInterpolationQuality imageInterpolationQuality, bool toGpu)
         {
-            var (textOption, glyphPolygons) = BuildGlyphPolygons(properties, downSamplingRate);
+            var (textOption, glyphPolygons) = BuildGlyphPolygons(time + layer.SourceStartPoint, layer, properties, downSamplingRate);
             if (textOption == null || glyphPolygons.Count < 1)
             {
                 return new NManagedImage(1, 1);
@@ -897,7 +919,7 @@ namespace NiVE3.Input
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static (TextOptions? textOption, List<BuildedTextGlyphs> glyphPolygons) BuildGlyphPolygons(PropertyValueGroup properties, double downSamplingRate)
+        static (TextOptions? textOption, List<BuildedTextGlyphs> glyphPolygons) BuildGlyphPolygons(Time globalTime, IFootageSourceUsingLayerObject layer, PropertyValueGroup properties, double downSamplingRate)
         {
             var sourceText = properties[SourceTextId] as StyledText ?? StyledText.Empty;
             if (string.IsNullOrEmpty(sourceText.Text))
@@ -911,6 +933,11 @@ namespace NiVE3.Input
                 ApplyAnimator(structuredExtendedTextRun, animator);
             }
             structuredExtendedTextRun = structuredExtendedTextRun.ReconstructTextRunWithOffset();
+
+            var pathOptions = (PropertyValueGroup)(properties[TextPathOptionsGroupId] ?? PropertyValueGroup.Empty);
+            var targetMaskId = (UseMaskPathTarget)(pathOptions[TextPathTargetMaskId] ?? UseMaskPathTarget.Empty);
+            var mask = layer.GetMask(targetMaskId.MaskId)?.GetPath(globalTime, downSamplingRate) ?? BezierPath.Empty;
+            var path = mask.Flatten();
 
             var moreOptions = (PropertyValueGroup)(properties[TextMoreOptionsGroupId] ?? PropertyValueGroup.Empty);
             var fontInfo = FontInfo.FindByUniqueId(sourceText.DefaultStyle.FontUniqueId) ?? FontInfo.FallbackFont;
@@ -929,7 +956,7 @@ namespace NiVE3.Input
             };
             textOption.LayoutMode = verticalMode ? LayoutMode.VerticalMixedRightLeft : LayoutMode.HorizontalTopBottom;
             var baseAnchorPointRate = (Vector2)(Vector3d)(moreOptions[TextBaseAnchorPointRateId] ?? new Vector3d(50.0)) * 0.01F;
-            var glyphBuilder = new StyledGlyphBuilder((float)wrappingSize.X, (float)wrappingSize.Y, downSamplingRate, baseAnchorPointRate);
+            var glyphBuilder = new StyledGlyphBuilder((float)wrappingSize.X, (float)wrappingSize.Y, downSamplingRate, baseAnchorPointRate, path);
             TextRenderer.RenderTextTo(glyphBuilder, structuredExtendedTextRun.SourceText, textOption);
             var glyphPolygons = new List<BuildedTextGlyphs>();
             foreach (var glyph in glyphBuilder.GetRenderableGlyhps())
@@ -1026,5 +1053,38 @@ namespace NiVE3.Input
         RampDown,
         Triangle,
         Circle
+    }
+
+    static file class BezierPathExtensions
+    {
+        public static ISimplePath? Flatten(this BezierPath? path)
+        {
+            if (path == null || path.IsEmpty())
+            {
+                return null;
+            }
+
+            var pathBuilder = new PathBuilder();
+            pathBuilder.StartFigure();
+            pathBuilder.MoveTo((Vector2)path.BeginPoint);
+            foreach (var p in path.Points)
+            {
+                if (p.IsLinear)
+                {
+                    pathBuilder.LineTo((Vector2)p.EndPoint);
+                }
+                else
+                {
+                    pathBuilder.CubicBezierTo((Vector2)p.ControlPoint1, (Vector2)p.ControlPoint2, (Vector2)p.EndPoint);
+                }
+            }
+
+            if (path.IsClosed)
+            {
+                pathBuilder.CloseFigure();
+            }
+
+            return pathBuilder.Build().Flatten().First();
+        }
     }
 }
