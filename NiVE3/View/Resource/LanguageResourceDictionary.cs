@@ -1296,14 +1296,8 @@ namespace NiVE3.View.Resource
         [LanguageKey, DefaultValue("テキストの開始位置を反転")]
         public static readonly string TextProperty_TextPath_IsInvert = nameof(TextProperty_TextPath_IsInvert);
 
-        [LanguageKey, DefaultValue("均等配列")]
-        public static readonly string TextProperty_TextPath_AlignmentEvenly = nameof(TextProperty_TextPath_AlignmentEvenly);
-
         [LanguageKey, DefaultValue("開始位置のマージン")]
         public static readonly string TextProperty_TextPath_BeginMargin = nameof(TextProperty_TextPath_BeginMargin);
-
-        [LanguageKey, DefaultValue("終了位置のマージン")]
-        public static readonly string TextProperty_TextPath_EndMargin = nameof(TextProperty_TextPath_EndMargin);
 
         [LanguageKey, DefaultValue("テキストアニメータ")]
         public static readonly string TextProperty_TextAnimator = nameof(TextProperty_TextAnimator);

@@ -82,11 +82,7 @@ namespace NiVE3.Input
 
         const string TextPathIsInvertId = nameof(TextPathIsInvertId);
 
-        const string TextPathAlignmentEvenlyId = nameof(TextPathAlignmentEvenlyId);
-
         const string TextPathBeginMarginId = nameof(TextPathBeginMarginId);
-
-        const string TextPathEndMarginId = nameof(TextPathEndMarginId);
 
         const string TextAnimatorAnimatorId = nameof(TextAnimatorAnimatorId);
 
@@ -184,9 +180,7 @@ namespace NiVE3.Input
                 [
                     new UseMaskPathProperty(TextPathTargetMaskId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextPath_TargetMask, 90.0),
                     new CheckBoxProperty(TextPathIsInvertId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextPath_IsInvert, false),
-                    new CheckBoxProperty(TextPathAlignmentEvenlyId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextPath_AlignmentEvenly, false),
                     new DoubleProperty(TextPathBeginMarginId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextPath_BeginMargin, 0.0, double.MinValue, double.MaxValue, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
-                    new DoubleProperty(TextPathEndMarginId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextPath_EndMargin, 0.0, double.MinValue, double.MaxValue, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
                 ]),
                 new AppendableProperty(TextAnimatorsId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator,
                 [
@@ -936,6 +930,8 @@ namespace NiVE3.Input
 
             var pathOptions = (PropertyValueGroup)(properties[TextPathOptionsGroupId] ?? PropertyValueGroup.Empty);
             var targetMaskId = (UseMaskPathTarget)(pathOptions[TextPathTargetMaskId] ?? UseMaskPathTarget.Empty);
+            var isInvert = (bool)(pathOptions[TextPathIsInvertId] ?? false);
+            var beginOffset = (double)(pathOptions[TextPathBeginMarginId] ?? 0.0) * 0.01;
             var mask = layer.GetMask(targetMaskId.MaskId)?.GetPath(globalTime, downSamplingRate) ?? BezierPath.Empty;
             var path = mask.Flatten();
 
@@ -956,7 +952,7 @@ namespace NiVE3.Input
             };
             textOption.LayoutMode = verticalMode ? LayoutMode.VerticalMixedRightLeft : LayoutMode.HorizontalTopBottom;
             var baseAnchorPointRate = (Vector2)(Vector3d)(moreOptions[TextBaseAnchorPointRateId] ?? new Vector3d(50.0)) * 0.01F;
-            var glyphBuilder = new StyledGlyphBuilder((float)wrappingSize.X, (float)wrappingSize.Y, downSamplingRate, baseAnchorPointRate, path);
+            var glyphBuilder = new StyledGlyphBuilder((float)wrappingSize.X, (float)wrappingSize.Y, downSamplingRate, baseAnchorPointRate, path != null ? new TextLayoutPath(path, isInvert, beginOffset) : null);
             TextRenderer.RenderTextTo(glyphBuilder, structuredExtendedTextRun.SourceText, textOption);
             var glyphPolygons = new List<BuildedTextGlyphs>();
             foreach (var glyph in glyphBuilder.GetRenderableGlyhps())

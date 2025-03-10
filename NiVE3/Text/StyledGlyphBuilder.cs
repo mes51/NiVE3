@@ -24,7 +24,7 @@ namespace NiVE3.Text
 
         PathBuilder Builder { get; }
 
-        (Vector2 first, Vector2 second, float length)[]? TextPathPoints { get; }
+        TextLayoutPath? TextPath { get; }
 
         float TextBoxWidth { get; }
 
@@ -36,28 +36,14 @@ namespace NiVE3.Text
 
         bool CurrentIsDiscardGlyph { get; set; }
 
-        public StyledGlyphBuilder(float textBoxWidth, float textBoxHeight, double downSamplingRate, Vector2 baseAnchorPointRate, ISimplePath? textPath = null)
+        public StyledGlyphBuilder(float textBoxWidth, float textBoxHeight, double downSamplingRate, Vector2 baseAnchorPointRate, TextLayoutPath? textPath = null)
         {
             TextBoxWidth = textBoxWidth;
             TextBoxHeight = textBoxHeight;
             DownSampling = 1.0F / (float)downSamplingRate;
             BaseAnchorPointRate = baseAnchorPointRate;
+            TextPath = textPath;
             Builder = new PathBuilder();
-            if (textPath != null && textPath.Points.Length > 1)
-            {
-                var points = textPath.Points.ToArray();
-                var nextPoints = points.Skip(1);
-                if (textPath.IsClosed)
-                {
-                    nextPoints = nextPoints.Append(points[0]);
-                }
-                TextPathPoints = points.Zip(nextPoints, (f, s) =>
-                {
-                    var fv = (Vector2)f;
-                    var sv = (Vector2)s;
-                    return (fv, sv, (sv - fv).Length());
-                }).ToArray();
-            }
         }
 
         public void BeginFigure()
@@ -102,33 +88,12 @@ namespace NiVE3.Text
                 transform *= affine;
             }
 
-            if (TextPathPoints != null)
+            if (TextPath != null)
             {
                 var centerX = bounds.Width * 0.5F;
                 var posX = bounds.X + centerX + ShiftedLetterSpacing;
-                var hit = false;
 
-                while (!hit)
-                {
-                    foreach (var (first, second, length) in TextPathPoints)
-                    {
-                        if (posX > length)
-                        {
-                            posX -= length;
-                            continue;
-                        }
-
-                        var pos = Vector2.Lerp(first, second, posX / length);
-                        var diff = first - second;
-                        var rad = MathF.Atan2(diff.Y, diff.X);
-                        var location = new Vector2(bounds.X, bounds.Y);
-
-                        transform *= Matrix3x2.CreateTranslation(pos - location + new Vector2(-centerX, bounds.Top)) * Matrix3x2.CreateRotation(rad - MathF.PI, pos);
-
-                        hit = true;
-                        break;
-                    }
-                }
+                transform *= TextPath.AlignToPath(posX, new Vector2(bounds.X + centerX, bounds.Y - bounds.Top));
             }
             else
             {
