@@ -10,6 +10,8 @@ namespace NiVE3.Text
 {
     class TextLayoutPath
     {
+        bool NotRotateCharacter { get; }
+
         float BeginOffsetPosition { get; }
 
         bool IsClosed { get; }
@@ -24,8 +26,9 @@ namespace NiVE3.Text
 
         float RadianOffset { get; }
 
-        public TextLayoutPath(ISimplePath path, bool isInvert, double beginOffset)
+        public TextLayoutPath(ISimplePath path, bool isInvert, bool notRotateCharacter, double beginOffset)
         {
+            NotRotateCharacter = notRotateCharacter;
             IsClosed = path.IsClosed;
 
             var points = path.Points.ToArray();
@@ -83,12 +86,28 @@ namespace NiVE3.Text
                 if (x < 0.0F)
                 {
                     var pos = Vector2.Lerp(TextPathPoints[0].first, TextPathPoints[0].second, x / TextPathPoints[0].length);
-                    return Matrix3x2.CreateTranslation(pos - location) * Matrix3x2.CreateRotation(BeginRadian, pos);
+                    var translate = Matrix3x2.CreateTranslation(pos - location);
+                    if (NotRotateCharacter)
+                    {
+                        return translate;
+                    }
+                    else
+                    {
+                        return translate * Matrix3x2.CreateRotation(BeginRadian, pos);
+                    }
                 }
                 else if (x >= TotalLength)
                 {
                     var pos = Vector2.Lerp(TextPathPoints[^1].first, TextPathPoints[^1].second, (x - TotalLength) / TextPathPoints[^1].length);
-                    return Matrix3x2.CreateTranslation(pos - location) * Matrix3x2.CreateRotation(EndRadian, pos);
+                    var translate = Matrix3x2.CreateTranslation(pos - location);
+                    if (NotRotateCharacter)
+                    {
+                        return translate;
+                    }
+                    else
+                    {
+                        return translate * Matrix3x2.CreateRotation(EndRadian, pos);
+                    }
                 }
             }
             if (x < 0.0F)
@@ -109,7 +128,15 @@ namespace NiVE3.Text
                     var diff = first - second;
                     var rad = MathF.Atan2(diff.Y, diff.X);
 
-                    return Matrix3x2.CreateTranslation(pos - location) * Matrix3x2.CreateRotation(rad - RadianOffset, pos);
+                    var translate = Matrix3x2.CreateTranslation(pos - location);
+                    if (NotRotateCharacter)
+                    {
+                        return translate;
+                    }
+                    else
+                    {
+                        return translate * Matrix3x2.CreateRotation(rad - RadianOffset, pos);
+                    }
                 }
             }
         }

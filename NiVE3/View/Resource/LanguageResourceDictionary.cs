@@ -1296,6 +1296,9 @@ namespace NiVE3.View.Resource
         [LanguageKey, DefaultValue("テキストの開始位置を反転")]
         public static readonly string TextProperty_TextPath_IsInvert = nameof(TextProperty_TextPath_IsInvert);
 
+        [LanguageKey, DefaultValue("文字を回転しない")]
+        public static readonly string TextProperty_TextPath_NotRotateCharacter = nameof(TextProperty_TextPath_NotRotateCharacter);
+
         [LanguageKey, DefaultValue("開始位置のマージン")]
         public static readonly string TextProperty_TextPath_BeginMargin = nameof(TextProperty_TextPath_BeginMargin);
 
