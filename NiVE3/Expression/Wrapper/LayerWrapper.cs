@@ -158,9 +158,30 @@ namespace NiVE3.Expression.Wrapper
                     }
                 }
             }
-            else if (key is double index && index > 0 && index <= LayerModel.Effects.Count)
+            else if (ExpressionInternalUtil.TryConvertToIndex(key, out var index) && index > -1 && index < LayerModel.Effects.Count)
             {
-                return new EffectWrapper(LayerModel.Effects[(int)index - 1], GlobalTime);
+                return new EffectWrapper(LayerModel.Effects[index], GlobalTime);
+            }
+
+            return null;
+        }
+
+        [ExpressionPublicMember]
+        public MaskWrapper? mask(object key)
+        {
+            if (key is string name)
+            {
+                foreach (var mask in LayerModel.Masks)
+                {
+                    if (mask.Name == name)
+                    {
+                        return new MaskWrapper(mask, GlobalTime);
+                    }
+                }
+            }
+            else if (ExpressionInternalUtil.TryConvertToIndex(key, out var index) && index > -1 && index < LayerModel.Masks.Count)
+            {
+                return new MaskWrapper(LayerModel.Masks[index], GlobalTime);
             }
 
             return null;

@@ -86,9 +86,9 @@ namespace NiVE3.Expression.Wrapper
                     }
                 }
             }
-            else if (key is double index && index > 0 && CompositionModel.Layers.Count <= index)
+            else if (ExpressionInternalUtil.TryConvertToIndex(key, out var index) && index > -1 && index < CompositionModel.Layers.Count)
             {
-                return new LayerWrapper(CompositionModel.Layers[(int)index - 1], CompositionModel, GlobalTime);
+                return new LayerWrapper(CompositionModel.Layers[index], CompositionModel, GlobalTime);
             }
 
             return null;

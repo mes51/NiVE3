@@ -33,9 +33,9 @@ namespace NiVE3.Expression.Wrapper
                     }
                 }
             }
-            else if (key is double index && index > 0 && index <= propertyGroupModel.Children.Count)
+            else if (ExpressionInternalUtil.TryConvertToIndex(key, out var index) && index > -1 && index < propertyGroupModel.Children.Count)
             {
-                return Wrap(propertyGroupModel.Children[(int)index - 1], globalTime);
+                return Wrap(propertyGroupModel.Children[index], globalTime);
             }
 
             return null;
@@ -53,9 +53,9 @@ namespace NiVE3.Expression.Wrapper
                     }
                 }
             }
-            else if (key is double index && index > 0 && index <= appendablePropertyModel.Children.Count)
+            else if (ExpressionInternalUtil.TryConvertToIndex(key, out var index) && index > -1 && index < appendablePropertyModel.Children.Count)
             {
-                return Wrap(appendablePropertyModel.Children[(int)index - 1], globalTime);
+                return Wrap(appendablePropertyModel.Children[index], globalTime);
             }
 
             return null;
