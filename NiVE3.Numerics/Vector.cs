@@ -6,6 +6,7 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics;
+using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
@@ -157,6 +158,16 @@ namespace NiVE3.Numerics
                 double.IsNaN(v.X) ? 0.0 : Math.Clamp(v.X, min.X, max.X),
                 double.IsNaN(v.Y) ? 0.0 : Math.Clamp(v.Y, min.Y, max.Y)
             );
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector2d Lerp(in Vector2d v1, in Vector2d v2, double t)
+        {
+            var vv1 = Vector128.LoadUnsafe(in v1.X);
+            var vv2 = Vector128.LoadUnsafe(in v2.X);
+            var result = (vv1 * (1.0 - t)) + vv2 * t;
+
+            return Unsafe.BitCast<Vector128<double>, Vector2d>(result);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -448,6 +459,16 @@ namespace NiVE3.Numerics
                 double.IsNaN(v.Y) ? 0.0 : Math.Clamp(v.Y, min.Y, max.Y),
                 double.IsNaN(v.Z) ? 0.0 : Math.Clamp(v.Z, min.Z, max.Z)
             );
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector3d Lerp(in Vector3d v1, in Vector3d v2, double t)
+        {
+            var vv1 = Vector256.Create(v1.X, v1.Y, v1.Z, 0.0);
+            var vv2 = Vector256.Create(v2.X, v2.Y, v2.Z, 0.0);
+            var result = (vv1 * (1.0 - t)) + vv2 * t;
+
+            return new Vector3d(result.GetElement(0), result.GetElement(1), result.GetElement(2));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

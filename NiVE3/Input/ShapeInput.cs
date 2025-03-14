@@ -29,6 +29,7 @@ using RadialGradientBrush = NiVE3.Shape.RadialGradientBrush;
 using NiVE3.Plugin.ValueObject;
 using System.Windows.Media;
 using ComputeSharp;
+using NiVE3.Property;
 
 namespace NiVE3.Input
 {
@@ -130,6 +131,10 @@ namespace NiVE3.Input
         const string StarPositionId = nameof(StarPositionId);
 
         const string StarAngleId = nameof(StarAngleId);
+
+        const string PathGroupId = nameof(PathGroupId);
+
+        const string PathBezierPathId = nameof(PathBezierPathId);
 
         const string SolidFillGroupId = nameof(SolidFillGroupId);
 
@@ -291,6 +296,11 @@ namespace NiVE3.Input
                         new DoubleProperty(StarInnerRoundedId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_StarGroup_InnerRounded, 0.0, double.MinValue, double.MaxValue, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
                         new Vector3dProperty(StarPositionId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_ShapeObjectGroup_Position, Vector3d.Zero, digit: 2),
                         new AngleProperty(StarAngleId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_ShapeObjectGroup_Angle, 0.0, digit: 2)
+                    ])),
+                new AppendablePropertyItem(PathGroupId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_PathGroup, () =>
+                    new PropertyGroup(PathGroupId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_PathGroup,
+                    [
+                        new BezierPathProperty(PathBezierPathId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_PathGroup_BezierPath)
                     ])),
                 AppendablePropertyItemSeparator.Instance,
                 new AppendablePropertyItem(SolidFillGroupId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_SolidFillGroup, () =>

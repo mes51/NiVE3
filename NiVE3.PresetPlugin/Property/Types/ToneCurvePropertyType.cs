@@ -43,7 +43,7 @@ namespace NiVE3.PresetPlugin.Property.Types
                 return keyFrame2.Value;
             }
 
-            switch(keyFrame1.InterpolationType)
+            switch (keyFrame1.InterpolationType)
             {
                 case InterpolationType.Linear:
                     {
@@ -62,8 +62,6 @@ namespace NiVE3.PresetPlugin.Property.Types
                 default:
                     return keyFrame1.Value;
             }
-
-            throw new NotImplementedException();
         }
 
         public object? SerializeValue(object? value)

@@ -1476,6 +1476,12 @@ namespace NiVE3.View.Resource
         [LanguageKey, DefaultValue("回転")]
         public static readonly string ShapeProperty_ShapeObjectGroup_Angle = nameof(ShapeProperty_ShapeObjectGroup_Angle);
 
+        [LanguageKey, DefaultValue("パス")]
+        public static readonly string ShapeProperty_PathGroup = nameof(ShapeProperty_PathGroup);
+
+        [LanguageKey, DefaultValue("パス")]
+        public static readonly string ShapeProperty_PathGroup_BezierPath = nameof(ShapeProperty_PathGroup_BezierPath);
+
         [LanguageKey, DefaultValue("塗り")]
         public static readonly string ShapeProperty_SolidFillGroup = nameof(ShapeProperty_SolidFillGroup);
 
