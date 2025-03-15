@@ -136,6 +136,8 @@ namespace NiVE3.Input
 
         const string PathBezierPathId = nameof(PathBezierPathId);
 
+        const string PathPositionId = nameof(PathPositionId);
+
         const string SolidFillGroupId = nameof(SolidFillGroupId);
 
         const string SolidFillRuleId = nameof(SolidFillRuleId);
@@ -300,7 +302,8 @@ namespace NiVE3.Input
                 new AppendablePropertyItem(PathGroupId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_PathGroup, () =>
                     new PropertyGroup(PathGroupId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_PathGroup,
                     [
-                        new BezierPathProperty(PathBezierPathId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_PathGroup_BezierPath)
+                        new BezierPathProperty(PathBezierPathId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_PathGroup_BezierPath),
+                        new Vector3dProperty(PathPositionId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_ShapeObjectGroup_Position, Vector3d.Zero, digit: 2)
                     ])),
                 AppendablePropertyItemSeparator.Instance,
                 new AppendablePropertyItem(SolidFillGroupId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_SolidFillGroup, () =>
@@ -716,6 +719,37 @@ namespace NiVE3.Input
                     var transform = Matrix3x2.CreateRotation(angle / 180.0F * MathF.PI) * Matrix3x2.CreateTranslation(position.X, position.Y);
                     tree.AddNode(new ShapePath(pathBuilder.Build().Transform(transform)));
                 }
+                else if (property.TryGetValue(PathBezierPathId, out var bezierPath))
+                {
+                    var path = (BezierPath)(bezierPath ?? BezierPath.Empty);
+                    if (!path.IsEmpty())
+                    {
+                        var position = (Vector3)(Vector3d)(property[PathPositionId] ?? Vector3d.Zero);
+
+                        var pathBuilder = new PathBuilder();
+                        pathBuilder.StartFigure();
+                        pathBuilder.MoveTo((Vector2)path.BeginPoint);
+                        foreach (var p in path.Points)
+                        {
+                            if (p.IsLinear)
+                            {
+                                pathBuilder.LineTo((Vector2)p.EndPoint);
+                            }
+                            else
+                            {
+                                pathBuilder.CubicBezierTo((Vector2)p.ControlPoint1, (Vector2)p.ControlPoint2, (Vector2)p.EndPoint);
+                            }
+                        }
+
+                        if (path.IsClosed)
+                        {
+                            pathBuilder.CloseFigure();
+                        }
+
+                        var transform = Matrix3x2.CreateTranslation(position.X, position.Y);
+                        tree.AddNode(new ShapePath(pathBuilder.Build().Transform(transform)));
+                    }
+                }
                 else if (property.TryGetValue(SolidFillColorId, out var solifFillColor))
                 {
                     var color = (Vector4)(solifFillColor ?? Vector4.Zero);
@@ -785,14 +819,14 @@ namespace NiVE3.Input
                     ShapePath newShape;
                     if (operation != ClippingOperation.None)
                     {
-                        var path = paths.First();
+                        var path = paths.First().AsClosedPath();
                         var option = new ShapeOptions
                         {
                             IntersectionRule = IntersectionRule.NonZero,
                             ClippingOperation = operation
                         };
 
-                        newShape = new ShapePath(path.Clip(option, paths.Skip(1)));
+                        newShape = new ShapePath(path.Clip(option, paths.Skip(1).Select(p => p.AsClosedPath())));
                     }
                     else
                     {
@@ -910,7 +944,7 @@ namespace NiVE3.Input
                         {
                             var brush = fill.GetBrush();
                             brush.Transform(Matrix3x3.CreateScale(downSampling, downSampling));
-                            var path = TraversePath(fill);
+                            var path = (IPathCollection)new PathCollection(TraversePath(fill).Select(p => p.AsClosedPath()));
                             path = path.Transform(Matrix3x2.CreateScale(downSampling));
                             yield return new Drawable(brush, fill.FillRule, fill.BlendMode, path);
                         }
