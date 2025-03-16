@@ -8,7 +8,7 @@ using NiVE3.Numerics;
 
 namespace NiVE3.Plugin.Internal.Util
 {
-    static class VectorSerDe
+    static class VectorSerializer
     {
         public static IDictionary<string, object> Serialize(Vector2 v)
         {

@@ -377,6 +377,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("楕円形を追加(_E)")]
         public static readonly string Timeline_ContextMenu_Mask_AddEllipse = nameof(Timeline_ContextMenu_Mask_AddEllipse);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("パスを追加(_P)")]
+        public static readonly string Timeline_ContextMenu_Mask_AddBezier = nameof(Timeline_ContextMenu_Mask_AddBezier);
+
         [ShowInMarkup, LanguageKey, DefaultValue("テキスト(_T)")]
         public static readonly string Timeline_ContextMenu_AddLayer_Text = nameof(Timeline_ContextMenu_AddLayer_Text);
 
@@ -1566,6 +1569,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("マスク設定")]
         public static readonly string MaskProperty_Setting = nameof(MaskProperty_Setting);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("パス")]
+        public static readonly string MaskProperty_Setting_BezierPath = nameof(MaskProperty_Setting_BezierPath);
+
         [ShowInMarkup, LanguageKey, DefaultValue("形状")]
         public static readonly string MaskProperty_Setting_ShapeType = nameof(MaskProperty_Setting_ShapeType);
 
@@ -1601,6 +1607,9 @@ namespace NiVE3.View.Resource
 
         [DefaultValue("楕円形のマスクを追加")]
         public static readonly string ShortcutKeyName_AddEllipseMaskGesture = nameof(ShortcutKeyName_AddEllipseMaskGesture);
+
+        [DefaultValue("バスのマスクを追加")]
+        public static readonly string ShortcutKeyName_AddBezierMaskGesture = nameof(ShortcutKeyName_AddBezierMaskGesture);
 
         [DefaultValue("ワークエリアの終了をインジケーターの位置に移動")]
         public static readonly string ShortcutKeyName_MoveWorkareaEndToIndicatorGesture = nameof(ShortcutKeyName_MoveWorkareaEndToIndicatorGesture);

@@ -438,6 +438,13 @@ namespace NiVE3.Config
             new PropertyMetadata(new KeyGesture(Key.None))
         );
 
+        public static readonly DependencyProperty AddBezierMaskGestureProperty = DependencyProperty.Register(
+            nameof(AddBezierMaskGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new KeyGesture(Key.None))
+        );
+
         public static readonly DependencyProperty PlayOrStopGestureProperty = DependencyProperty.Register(
             nameof(PlayOrStopGesture),
             typeof(InputGesture),
@@ -459,6 +466,14 @@ namespace NiVE3.Config
         {
             get { return (InputGesture)GetValue(MoveWorkareaEndToIndicatorGestureProperty); }
             set { SetValue(MoveWorkareaEndToIndicatorGestureProperty, value); }
+        }
+
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Edit)]
+        [ShowInMarkup]
+        public InputGesture AddBezierMaskGesture
+        {
+            get { return (InputGesture)GetValue(AddBezierMaskGestureProperty); }
+            set { SetValue(AddBezierMaskGestureProperty, value); }
         }
 
         [ShortcutKeyCategory(ShortcutKeyCategoryType.Edit)]

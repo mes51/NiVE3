@@ -937,7 +937,7 @@ namespace NiVE3.Input
             var notRotateCharacter = (bool)(pathOptions[TextPathNotRotateCharacterId] ?? false);
             var beginOffset = (double)(pathOptions[TextPathBeginMarginId] ?? 0.0) * 0.01;
             var mask = layer.GetMask(targetMaskId.MaskId)?.GetPath(globalTime, downSamplingRate) ?? BezierPath.Empty;
-            var path = mask.Flatten();
+            var path = mask.BuildPath()?.Flatten()?.First();
 
             var moreOptions = (PropertyValueGroup)(properties[TextMoreOptionsGroupId] ?? PropertyValueGroup.Empty);
             var fontInfo = FontInfo.FindByUniqueId(sourceText.DefaultStyle.FontUniqueId) ?? FontInfo.FallbackFont;
@@ -1053,38 +1053,5 @@ namespace NiVE3.Input
         RampDown,
         Triangle,
         Circle
-    }
-
-    static file class BezierPathExtensions
-    {
-        public static ISimplePath? Flatten(this BezierPath? path)
-        {
-            if (path == null || path.IsEmpty())
-            {
-                return null;
-            }
-
-            var pathBuilder = new PathBuilder();
-            pathBuilder.StartFigure();
-            pathBuilder.MoveTo((Vector2)path.BeginPoint);
-            foreach (var p in path.Points)
-            {
-                if (p.IsLinear)
-                {
-                    pathBuilder.LineTo((Vector2)p.EndPoint);
-                }
-                else
-                {
-                    pathBuilder.CubicBezierTo((Vector2)p.ControlPoint1, (Vector2)p.ControlPoint2, (Vector2)p.EndPoint);
-                }
-            }
-
-            if (path.IsClosed)
-            {
-                pathBuilder.CloseFigure();
-            }
-
-            return pathBuilder.Build().Flatten().First();
-        }
     }
 }

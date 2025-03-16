@@ -59,6 +59,7 @@ namespace NiVE3.ViewModel
     [CommandHandling(nameof(AddTextCommand), nameof(ShortcutKeySetting.AddTextLayerGesture))]
     [CommandHandling(nameof(AddRectangleMaskCommand), nameof(ShortcutKeySetting.AddRectangleMaskGesture))]
     [CommandHandling(nameof(AddEllipseMaskCommand), nameof(ShortcutKeySetting.AddEllipseMaskGesture))]
+    [CommandHandling(nameof(AddBezierMaskCommand), nameof(ShortcutKeySetting.AddBezierMaskGesture))]
     [CommandHandling(nameof(CompositionSettingCommand), nameof(ShortcutKeySetting.OpenCompositionSettingGesture))]
     [CommandHandling(nameof(ChangeLayerTagsRandomlyCommand), nameof(ShortcutKeySetting.ChangeLayerTagsRandomlyGesture))]
     [CommandHandling(nameof(MoveSourceStartPointToIndicatorBaseInPointCommand), nameof(ShortcutKeySetting.MoveSourceStartPointToIndicatorBaseInPointGesture))]
@@ -494,6 +495,8 @@ namespace NiVE3.ViewModel
 
         public ICommand AddEllipseMaskCommand { get; }
 
+        public ICommand AddBezierMaskCommand { get; }
+
         public ICommand ChangeLayerTagsRandomlyCommand { get; }
 
         public ICommand MoveInPointToIndicatorCommand { get; }
@@ -879,7 +882,7 @@ namespace NiVE3.ViewModel
                     return;
                 }
 
-                CompositionModel.AddMaskToLayers([.. SelectedLayers.Select(l => l.LayerId)], MaskShapeType.Rectangle);
+                CompositionModel.AddShapedMaskToLayers([..SelectedLayers.Select(l => l.LayerId)], MaskShapeType.Rectangle);
             }, () => CompositionModel != null && SelectedLayers.Count > 0)
                 .ObservesProperty(() => CompositionModel)
                 .ObservesProperty(() => SelectedLayers.Count);
@@ -891,7 +894,19 @@ namespace NiVE3.ViewModel
                     return;
                 }
 
-                CompositionModel.AddMaskToLayers([.. SelectedLayers.Select(l => l.LayerId)], MaskShapeType.Ellipse);
+                CompositionModel.AddShapedMaskToLayers([..SelectedLayers.Select(l => l.LayerId)], MaskShapeType.Ellipse);
+            }, () => CompositionModel != null && SelectedLayers.Count > 0)
+                .ObservesProperty(() => CompositionModel)
+                .ObservesProperty(() => SelectedLayers.Count);
+
+            AddBezierMaskCommand = new DelegateCommand(() =>
+            {
+                if (CompositionModel == null || SelectedLayers.Count < 1)
+                {
+                    return;
+                }
+
+                CompositionModel.AddBezierMaskToLayers([..SelectedLayers.Select(l => l.LayerId)]);
             }, () => CompositionModel != null && SelectedLayers.Count > 0)
                 .ObservesProperty(() => CompositionModel)
                 .ObservesProperty(() => SelectedLayers.Count);

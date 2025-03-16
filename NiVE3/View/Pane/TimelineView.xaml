@@ -111,6 +111,8 @@
                         <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_Mask}" Visibility="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.DataContext.SourceType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter={x:Static local:TimelineView.CompositionDisplayableSourceType}}">
                             <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_Mask_AddRectangle}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=AddRectangleMaskGesture}"/>
                             <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_Mask_AddEllipse}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=AddEllipseMaskGesture}"/>
+                            <Separator />
+                            <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_Mask_AddBezier}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=AddBezierMaskGesture}"/>
                         </MenuItem>
                         <Separator Visibility="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.DataContext.SourceType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter={x:Static local:TimelineView.CompositionDisplayableSourceType}}"/>
                         <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_Cut}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=CutItemGesture}"/>

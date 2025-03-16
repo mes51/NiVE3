@@ -1318,7 +1318,7 @@ namespace NiVE3.Model
             }
         }
 
-        public void AddMaskToLayers(Guid[] layerIds, MaskShapeType shapeType)
+        public void AddShapedMaskToLayers(Guid[] layerIds, MaskShapeType shapeType)
         {
             if (layerIds.Length < 1)
             {
@@ -1329,7 +1329,7 @@ namespace NiVE3.Model
             {
                 var layerId = layerIds[0];
                 var layer = Layers.FirstOrDefault(l => l.LayerId == layerId);
-                layer?.AddMask(shapeType);
+                layer?.AddShapedMask(shapeType);
             }
             else
             {
@@ -1337,7 +1337,33 @@ namespace NiVE3.Model
 
                 foreach (var l in Layers.Where(l => layerIds.Contains(l.LayerId)))
                 {
-                    l.AddMask(shapeType);
+                    l.AddShapedMask(shapeType);
+                }
+
+                HistoryModel.EndGroup();
+            }
+        }
+
+        public void AddBezierMaskToLayers(Guid[] layerIds)
+        {
+            if (layerIds.Length < 1)
+            {
+                return;
+            }
+
+            if (layerIds.Length == 1)
+            {
+                var layerId = layerIds[0];
+                var layer = Layers.FirstOrDefault(l => l.LayerId == layerId);
+                layer?.AddBezierMask();
+            }
+            else
+            {
+                HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_AddMask));
+
+                foreach (var l in Layers.Where(l => layerIds.Contains(l.LayerId)))
+                {
+                    l.AddBezierMask();
                 }
 
                 HistoryModel.EndGroup();

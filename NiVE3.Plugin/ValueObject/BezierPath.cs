@@ -2,6 +2,11 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Net;
+using System.Numerics;
+using System.Runtime.CompilerServices;
+using System.Runtime.Intrinsics;
+using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Numerics;
@@ -42,7 +47,7 @@ namespace NiVE3.Plugin.ValueObject
         {
             return new Dictionary<string, object>
             {
-                { nameof(BeginPoint), VectorSerDe.Serialize(BeginPoint) },
+                { nameof(BeginPoint), VectorSerializer.Serialize(BeginPoint) },
                 { nameof(Points), Points.Select(p => p.Serialize()).ToArray() },
                 { nameof(IsClosed), IsClosed }
             };
@@ -55,7 +60,7 @@ namespace NiVE3.Plugin.ValueObject
                 !dictionary.TryGetValue(nameof(Points), out var pointsValue) ||
                 !dictionary.TryGetValue(nameof(IsClosed), out var isClosedValue) ||
                 pointsValue is not object[] pointsValueArray ||
-                !VectorSerDe.TryDeserializeVector2d(beginPointValue, out var beginPoint) ||
+                !VectorSerializer.TryDeserializeVector2d(beginPointValue, out var beginPoint) ||
                 isClosedValue is not bool isClosed)
             {
                 return null;
@@ -75,6 +80,26 @@ namespace NiVE3.Plugin.ValueObject
 
             return new BezierPath(beginPoint, points, isClosed);
         }
+
+        public BezierPath Transform(in Matrix3x2 matrix)
+        {
+            var matrixD = new Matrix3x2d(matrix);
+
+            var newPoints = new BeziePoint[Points.Length];
+            for (var i = 0; i < Points.Length; i++)
+            {
+                var p = Points[i];
+                if (p.IsLinear)
+                {
+                    newPoints[i] = new BeziePoint(Vector2d.Zero, Vector2d.Zero, matrixD.Transform(p.EndPoint), true);
+                }
+                else
+                {
+                    newPoints[i] = new BeziePoint(matrixD.Transform(p.ControlPoint1), matrixD.Transform(p.ControlPoint2), matrixD.Transform(p.EndPoint), false);
+                }
+            }
+            return new BezierPath(matrixD.Transform(BeginPoint), newPoints, IsClosed);
+        }
     }
 
     public record BeziePoint(Vector2d ControlPoint1, Vector2d ControlPoint2, Vector2d EndPoint, bool IsLinear)
@@ -83,9 +108,9 @@ namespace NiVE3.Plugin.ValueObject
         {
             return new Dictionary<string, object>
             {
-                { nameof(ControlPoint1), VectorSerDe.Serialize(ControlPoint1) },
-                { nameof(ControlPoint2), VectorSerDe.Serialize(ControlPoint2) },
-                { nameof(EndPoint), VectorSerDe.Serialize(EndPoint) },
+                { nameof(ControlPoint1), VectorSerializer.Serialize(ControlPoint1) },
+                { nameof(ControlPoint2), VectorSerializer.Serialize(ControlPoint2) },
+                { nameof(EndPoint), VectorSerializer.Serialize(EndPoint) },
                 { nameof(IsLinear), IsLinear }
             };
         }
@@ -101,15 +126,49 @@ namespace NiVE3.Plugin.ValueObject
                      dictionary.TryGetValue(nameof(ControlPoint2), out var controlPoint2Value) &&
                      dictionary.TryGetValue(nameof(EndPoint), out var endPointValue) &&
                      dictionary.TryGetValue(nameof(IsLinear), out var isLinearValue) &&
-                     VectorSerDe.TryDeserializeVector2d(controlPoint1Value, out var controlPoint1) &&
-                     VectorSerDe.TryDeserializeVector2d(controlPoint2Value, out var controlPoint2) &&
-                     VectorSerDe.TryDeserializeVector2d(endPointValue, out var endPoint) &&
+                     VectorSerializer.TryDeserializeVector2d(controlPoint1Value, out var controlPoint1) &&
+                     VectorSerializer.TryDeserializeVector2d(controlPoint2Value, out var controlPoint2) &&
+                     VectorSerializer.TryDeserializeVector2d(endPointValue, out var endPoint) &&
                      isLinearValue is bool isLinear)
             {
                 return new BeziePoint(controlPoint1, controlPoint2, endPoint, isLinear);
             }
 
             return null;
+        }
+    }
+
+    file readonly ref struct Matrix3x2d
+    {
+        public readonly Vector128<double> RowX;
+
+        public readonly Vector128<double> RowY;
+
+        public readonly Vector128<double> RowZ;
+
+        public Matrix3x2d(in Matrix3x2 matrix)
+        {
+            RowX = Vector128.Create(matrix.M11, matrix.M12);
+
+            RowY = Vector128.Create(matrix.M21, matrix.M22);
+
+            RowZ = Vector128.Create(matrix.M31, matrix.M32);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Vector2d Transform(in Vector2d v)
+        {
+            var result = RowX * v.X;
+            if (Fma.IsSupported)
+            {
+                result = Fma.MultiplyAdd(RowY, Vector128.Create(v.Y), result);
+            }
+            else
+            {
+                result = RowY * v.Y + result;
+            }
+
+            return Unsafe.BitCast<Vector128<double>, Vector2d>(result + RowZ);
         }
     }
 }

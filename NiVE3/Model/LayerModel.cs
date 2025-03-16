@@ -1493,28 +1493,28 @@ namespace NiVE3.Model
             PasteEffectsInternal(data, [], insertTargetId, true);
         }
 
-        public void AddMask(MaskShapeType shapeType)
+        public void AddShapedMask(MaskShapeType shapeType)
         {
-            InsertMask(shapeType, Masks.Count);
+            InsertShapedMask(shapeType, Masks.Count);
         }
 
-        public void InsertMask(MaskShapeType shapeType, int index)
+        public void AddBezierMask()
         {
-            var maskModel = new MaskModel(ProjectModel, CompositionModel, this, AcceleratorModel, HistoryModel, shapeType);
+            InsertBezierMask(Masks.Count);
+        }
 
-            var count = 1;
-            var nameTemplate = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.LayerModel_NewMaskTemplate);
-            var name = string.Format(nameTemplate, count);
-            while (Masks.Any(m => m.Name == name))
-            {
-                count++;
-                name = string.Format(nameTemplate, count);
-            }
-            maskModel.Name = name;
+        public void InsertShapedMask(MaskShapeType shapeType, int index)
+        {
+            var maskModel = new MaskModel(ProjectModel, CompositionModel, this, AcceleratorModel, HistoryModel, false, shapeType);
 
-            Masks.Insert(index, maskModel);
+            InsertMaskInternal(maskModel, index);
+        }
 
-            HistoryModel.Add(new InsertMaskHistoryCommand(this, maskModel, index));
+        public void InsertBezierMask(int index)
+        {
+            var maskModel = new MaskModel(ProjectModel, CompositionModel, this, AcceleratorModel, HistoryModel, true);
+
+            InsertMaskInternal(maskModel, index);
         }
 
         public void MoveMask(Guid maskId, int newIndex)
@@ -1749,7 +1749,7 @@ namespace NiVE3.Model
 
             foreach (var maskData in data.Masks)
             {
-                var maskModel = new MaskModel(ProjectModel, CompositionModel, this, AcceleratorModel, HistoryModel, maskData.DefaultShapeType, maskData.MaskId);
+                var maskModel = new MaskModel(ProjectModel, CompositionModel, this, AcceleratorModel, HistoryModel, maskData.IsBezierPath, maskData.DefaultShapeType, maskData.MaskId);
                 maskModel.LoadData(maskData);
                 Masks.Add(maskModel);
             }
@@ -1964,6 +1964,23 @@ namespace NiVE3.Model
             HistoryModel.EndGroup();
         }
 
+        void InsertMaskInternal(MaskModel maskModel, int index)
+        {
+            var count = 1;
+            var nameTemplate = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.LayerModel_NewMaskTemplate);
+            var name = string.Format(nameTemplate, count);
+            while (Masks.Any(m => m.Name == name))
+            {
+                count++;
+                name = string.Format(nameTemplate, count);
+            }
+            maskModel.Name = name;
+
+            Masks.Insert(index, maskModel);
+
+            HistoryModel.Add(new InsertMaskHistoryCommand(this, maskModel, index));
+        }
+
         void DeleteMaskInternal(Guid[] maskIds, bool isCut)
         {
             var masks = Masks.Where(m => maskIds.Contains(m.MaskId)).OrderBy(Masks.IndexOf).ToArray();
@@ -2005,7 +2022,7 @@ namespace NiVE3.Model
             var index = insertStartIndex;
             foreach (var maskData in data.Data)
             {
-                var newMask = new MaskModel(ProjectModel, CompositionModel, this, AcceleratorModel, HistoryModel, maskData.DefaultShapeType);
+                var newMask = new MaskModel(ProjectModel, CompositionModel, this, AcceleratorModel, HistoryModel, maskData.IsBezierPath, maskData.DefaultShapeType);
                 newMask.LoadData(maskData);
                 Masks.Insert(index, newMask);
                 addedMasks.Add(newMask);

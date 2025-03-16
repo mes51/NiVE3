@@ -22,12 +22,16 @@ using NiVE3.Util;
 using NiVE3.View.Resource;
 using Prism.Mvvm;
 using SixLabors.ImageSharp.Drawing;
+using NiVE3.Property;
+using Polygon = NiVE3.Shape.Polygon;
 
 namespace NiVE3.Model
 {
     partial class MaskModel : BindableBase, IMaskObject
     {
         const string PropertyMaskSettingId = nameof(PropertyMaskSettingId);
+
+        const string PropertyMaskSettingBezierPathId = nameof(PropertyMaskSettingBezierPathId);
 
         const string PropertyMaskSettingShapeTypeId = nameof(PropertyMaskSettingShapeTypeId);
 
@@ -55,6 +59,8 @@ namespace NiVE3.Model
             set { SetProperty(ref isEnable, value); }
         }
 
+        public bool IsBezierPath { get; }
+
         public PropertyGroupModel Properties { get; }
 
         MaskShapeType DefaultShapeType { get; }
@@ -67,9 +73,10 @@ namespace NiVE3.Model
 
         public event EventHandler<EventArgs>? MaskUpdated;
 
-        public MaskModel(ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, AcceleratorModel acceleratorModel, HistoryModel historyModel, MaskShapeType shapeType = MaskShapeType.Rectangle, Guid? maskId = null)
+        public MaskModel(ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, AcceleratorModel acceleratorModel, HistoryModel historyModel, bool isBezierPath, MaskShapeType shapeType = MaskShapeType.Rectangle, Guid? maskId = null)
         {
             MaskId = maskId ?? Guid.NewGuid();
+            IsBezierPath = isBezierPath;
             LayerModel = layerModel;
             HistoryModel = historyModel;
             AcceleratorModel = acceleratorModel;
@@ -78,26 +85,51 @@ namespace NiVE3.Model
             var maskWidth = layerModel.SourceWidth;
             var maskHeight = layerModel.SourceHeight;
             var maskCenter = new Vector3d(layerModel.FootageWidth, layerModel.FootageHeight, 0.0) * 0.5;
-            Properties = new PropertyGroupModel(
-                new PropertyGroup(
-                    PropertyMaskSettingId,
-                    LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting,
-                    [
-                        new EnumProperty(PropertyMaskSettingShapeTypeId, LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting_ShapeType, typeof(MaskShapeType), typeof(LanguageResourceDictionary), shapeType, false, 90.0),
-                        new Vector3dProperty(PropertyMaskSettingSizeId, LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting_Size, new Vector3d(maskWidth, maskHeight, 0.0), digit: 2, useLinkRatio: true),
-                        new Vector3dProperty(PropertyMaskSettingPositionId, LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting_Position, maskCenter, digit: 2),
-                        new DoubleProperty(PropertyMaskSettingOpacityId, LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting_Opacity, 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
-                        new EnumProperty(PropertyMaskSettingBlendModeId, LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting_BlendMode, typeof(MaskBlendMode), typeof(LanguageResourceDictionary), MaskBlendMode.Add, false, 90.0),
-                    ]
-                ),
-                MaskId.ToInt128(),
-                projectModel,
-                compositionModel,
-                layerModel,
-                null,
-                historyModel,
-                true
-            );
+            if (isBezierPath)
+            {
+                Properties = new PropertyGroupModel(
+                    new PropertyGroup(
+                        PropertyMaskSettingId,
+                        LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting,
+                        [
+                            new BezierPathProperty(PropertyMaskSettingBezierPathId, LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting_BezierPath),
+                            new Vector3dProperty(PropertyMaskSettingPositionId, LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting_Position, maskCenter, digit: 2),
+                            new DoubleProperty(PropertyMaskSettingOpacityId, LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting_Opacity, 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
+                            new EnumProperty(PropertyMaskSettingBlendModeId, LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting_BlendMode, typeof(MaskBlendMode), typeof(LanguageResourceDictionary), MaskBlendMode.Add, false, 90.0),
+                        ]
+                    ),
+                    MaskId.ToInt128(),
+                    projectModel,
+                    compositionModel,
+                    layerModel,
+                    null,
+                    historyModel,
+                    true
+                );
+            }
+            else
+            {
+                Properties = new PropertyGroupModel(
+                    new PropertyGroup(
+                        PropertyMaskSettingId,
+                        LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting,
+                        [
+                            new EnumProperty(PropertyMaskSettingShapeTypeId, LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting_ShapeType, typeof(MaskShapeType), typeof(LanguageResourceDictionary), shapeType, false, 90.0),
+                            new Vector3dProperty(PropertyMaskSettingSizeId, LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting_Size, new Vector3d(maskWidth, maskHeight, 0.0), digit: 2, useLinkRatio: true),
+                            new Vector3dProperty(PropertyMaskSettingPositionId, LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting_Position, maskCenter, digit: 2),
+                            new DoubleProperty(PropertyMaskSettingOpacityId, LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting_Opacity, 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
+                            new EnumProperty(PropertyMaskSettingBlendModeId, LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting_BlendMode, typeof(MaskBlendMode), typeof(LanguageResourceDictionary), MaskBlendMode.Add, false, 90.0),
+                        ]
+                    ),
+                    MaskId.ToInt128(),
+                    projectModel,
+                    compositionModel,
+                    layerModel,
+                    null,
+                    historyModel,
+                    true
+                );
+            }
 
             Properties.ValueUpdated += Properties_ValueUpdated;
 
@@ -115,16 +147,24 @@ namespace NiVE3.Model
             }
 
             var setting = Properties.GetValues(layerTime, globalTime);
-
-            var shapeType = (MaskShapeType)(setting[PropertyMaskSettingShapeTypeId] ?? MaskShapeType.Rectangle);
-            var size = (Vector2)((Vector3d)(setting[PropertyMaskSettingSizeId] ?? Vector3d.Zero) / downSamplingRate);
             var position = (Vector2)((Vector3d)(setting[PropertyMaskSettingPositionId] ?? Vector3d.Zero) / downSamplingRate);
 
-            return shapeType switch
+            if (IsBezierPath)
             {
-                MaskShapeType.Ellipse => new BezierEllipsePolygon(position.X + size.X * 0.5F, position.Y + size.Y * 0.5F, size.X, size.Y).BezierPath,
-                _ => new RectangularPolygon(position.X, position.Y, size.X, size.Y).ToBezierPath()
-            };
+                var path = (BezierPath)(setting[PropertyMaskSettingBezierPathId] ?? BezierPath.Empty);
+                return path.Transform(Matrix3x2.CreateTranslation(position.X, position.Y));
+            }
+            else
+            {
+                var shapeType = (MaskShapeType)(setting[PropertyMaskSettingShapeTypeId] ?? MaskShapeType.Rectangle);
+                var size = (Vector2)((Vector3d)(setting[PropertyMaskSettingSizeId] ?? Vector3d.Zero) / downSamplingRate);
+
+                return shapeType switch
+                {
+                    MaskShapeType.Ellipse => new BezierEllipsePolygon(position.X + size.X * 0.5F, position.Y + size.Y * 0.5F, size.X, size.Y).BezierPath,
+                    _ => new RectangularPolygon(position.X, position.Y, size.X, size.Y).ToBezierPath()
+                };
+            }
         }
 
         public void ChangeName(string name)
@@ -178,24 +218,45 @@ namespace NiVE3.Model
 
             var setting = Properties.GetValues(layerTime, globalTime);
 
-            var shapeType = (MaskShapeType)(setting[PropertyMaskSettingShapeTypeId] ?? MaskShapeType.Rectangle);
-            var size = (Vector2)((Vector3d)(setting[PropertyMaskSettingSizeId] ?? Vector3d.Zero) / new Vector3d(downSamplingRateX, downSamplingRateY, 1.0));
             var position = (Vector2)((Vector3d)(setting[PropertyMaskSettingPositionId] ?? Vector3d.Zero) / new Vector3d(downSamplingRateX, downSamplingRateY, 1.0));
             var opacity = (float)(double)(setting[PropertyMaskSettingOpacityId] ?? 0.0) * 0.01F;
             var blendMode = (MaskBlendMode)(setting[PropertyMaskSettingBlendModeId] ?? MaskBlendMode.Add);
 
             var noOp = (blendMode == MaskBlendMode.Add || blendMode == MaskBlendMode.Subtract) && opacity <= 0.0F;
-            if (noOp || size.X <= 0.0 || size.Y <= 0.0)
-            {
-                return image;
-            }
 
-            position += (Vector2)(image.Origin - (Vector2d)size * 0.5);
-            var polygons = (shapeType switch
+            Polygon[] polygons;
+            if (IsBezierPath)
             {
-                MaskShapeType.Ellipse => (IPath)new BezierEllipsePolygon(position.X + size.X * 0.5F, position.Y + size.Y * 0.5F, size.X, size.Y),
-                _ => new RectangularPolygon(position.X, position.Y, size.X, size.Y)
-            }).Flatten().Select(p => new NiVE3.Shape.Polygon(p.Points.Span)).ToArray();
+                var path = (BezierPath)(setting[PropertyMaskSettingBezierPathId] ?? BezierPath.Empty);
+                if (noOp || path.IsEmpty() || !path.IsClosed)
+                {
+                    return image;
+                }
+
+                var flattendPath = path.Transform(Matrix3x2.CreateTranslation(position.X, position.Y)).BuildPath()?.Flatten();
+                if (flattendPath == null)
+                {
+                    return image;
+                }
+
+                polygons = [..flattendPath.Select(p => new Polygon(p.Points.Span))];
+            }
+            else
+            {
+                var shapeType = (MaskShapeType)(setting[PropertyMaskSettingShapeTypeId] ?? MaskShapeType.Rectangle);
+                var size = (Vector2)((Vector3d)(setting[PropertyMaskSettingSizeId] ?? Vector3d.Zero) / new Vector3d(downSamplingRateX, downSamplingRateY, 1.0));
+                if (noOp || size.X <= 0.0 || size.Y <= 0.0)
+                {
+                    return image;
+                }
+
+                position += (Vector2)(image.Origin - (Vector2d)size * 0.5);
+                polygons = [..(shapeType switch
+                {
+                    MaskShapeType.Ellipse => (IPath)new BezierEllipsePolygon(position.X + size.X * 0.5F, position.Y + size.Y * 0.5F, size.X, size.Y),
+                    _ => new RectangularPolygon(position.X, position.Y, size.X, size.Y)
+                }).Flatten().Select(p => new Polygon(p.Points.Span))];
+            }
 
             if (useGpu)
             {
@@ -256,6 +317,7 @@ namespace NiVE3.Model
             return new MaskData
             {
                  MaskId = MaskId,
+                 IsBezierPath = IsBezierPath,
                  DefaultShapeType = DefaultShapeType,
                  Name = Name,
                  IsEnabled = IsEnable,
@@ -277,8 +339,7 @@ namespace NiVE3.Model
     public enum MaskShapeType
     {
         Rectangle,
-        Ellipse,
-        //Path
+        Ellipse
     }
 
     file static class PathPolygonExtensions

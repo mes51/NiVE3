@@ -30,6 +30,7 @@ using NiVE3.Plugin.ValueObject;
 using System.Windows.Media;
 using ComputeSharp;
 using NiVE3.Property;
+using NiVE3.Extension;
 
 namespace NiVE3.Input
 {
@@ -721,33 +722,13 @@ namespace NiVE3.Input
                 }
                 else if (property.TryGetValue(PathBezierPathId, out var bezierPath))
                 {
-                    var path = (BezierPath)(bezierPath ?? BezierPath.Empty);
-                    if (!path.IsEmpty())
+                    var path = ((BezierPath)(bezierPath ?? BezierPath.Empty)).BuildPath();
+                    if (path != null)
                     {
                         var position = (Vector3)(Vector3d)(property[PathPositionId] ?? Vector3d.Zero);
 
-                        var pathBuilder = new PathBuilder();
-                        pathBuilder.StartFigure();
-                        pathBuilder.MoveTo((Vector2)path.BeginPoint);
-                        foreach (var p in path.Points)
-                        {
-                            if (p.IsLinear)
-                            {
-                                pathBuilder.LineTo((Vector2)p.EndPoint);
-                            }
-                            else
-                            {
-                                pathBuilder.CubicBezierTo((Vector2)p.ControlPoint1, (Vector2)p.ControlPoint2, (Vector2)p.EndPoint);
-                            }
-                        }
-
-                        if (path.IsClosed)
-                        {
-                            pathBuilder.CloseFigure();
-                        }
-
                         var transform = Matrix3x2.CreateTranslation(position.X, position.Y);
-                        tree.AddNode(new ShapePath(pathBuilder.Build().Transform(transform)));
+                        tree.AddNode(new ShapePath(path.Transform(transform)));
                     }
                 }
                 else if (property.TryGetValue(SolidFillColorId, out var solifFillColor))

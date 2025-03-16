@@ -11,6 +11,8 @@ namespace NiVE3.Data.Json.Project
     {
         public Guid MaskId { get; set; }
 
+        public bool IsBezierPath { get; set; }
+
         public MaskShapeType DefaultShapeType { get; set; }
 
         public string Name { get; set; } = "";

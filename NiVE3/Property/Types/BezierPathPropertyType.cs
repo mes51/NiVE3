@@ -156,12 +156,12 @@ namespace NiVE3.Property.Types
                     return false;
                 }
 
-                dictionary.TryGetValue("isLinear", out var isLinearValue);
+                pointDictionary.TryGetValue("isLinear", out var isLinearValue);
                 var isLinear = (bool)(isLinearValue ?? false);
 
                 if (isLinear ||
-                    !dictionary.TryGetValue("controlPoint1", out var controlPoint1Value) ||
-                    !dictionary.TryGetValue("controlPoint2", out var controlPoint2Value) ||
+                    !pointDictionary.TryGetValue("controlPoint1", out var controlPoint1Value) ||
+                    !pointDictionary.TryGetValue("controlPoint2", out var controlPoint2Value) ||
                     !TryConvertFromExpressionValueVector2d(controlPoint1Value, out var controlPoint1) ||
                     !TryConvertFromExpressionValueVector2d(controlPoint2Value, out var controlPoint2))
                 {
