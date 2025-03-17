@@ -85,7 +85,9 @@ namespace NiVE3.Model
             EffectId = effectId ?? Guid.NewGuid();
             Properties = new PropertyGroupModel(new PropertyGroup(EffectPropertyGroupId, "", effect.Value.GetProperties(new Int32Size(layerModel.SourceWidth, layerModel.SourceHeight))), EffectId.ToInt128(), projectModel, compositionModel, layerModel, this, historyModel, false);
             IsSupportGpu = metadata.IsSupportGpu;
+
             Properties.ValueUpdated += Property_ValueUpdated;
+            Properties.ValueCommited += Properties_ValueCommited;
 
             PropertyChanged += EffectModel_PropertyChanged;
         }
@@ -233,6 +235,11 @@ namespace NiVE3.Model
         }
 
         private void Property_ValueUpdated(object? sender, EventArgs e)
+        {
+            EffectUpdated?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void Properties_ValueCommited(object? sender, EventArgs e)
         {
             EffectUpdated?.Invoke(this, EventArgs.Empty);
         }

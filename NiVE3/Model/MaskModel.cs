@@ -132,6 +132,7 @@ namespace NiVE3.Model
             }
 
             Properties.ValueUpdated += Properties_ValueUpdated;
+            Properties.ValueCommited += Properties_ValueCommited;
 
             PropertyChanged += MaskModel_PropertyChanged;
         }
@@ -326,6 +327,11 @@ namespace NiVE3.Model
         }
 
         private void Properties_ValueUpdated(object? sender, EventArgs e)
+        {
+            MaskUpdated?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void Properties_ValueCommited(object? sender, EventArgs e)
         {
             MaskUpdated?.Invoke(this, EventArgs.Empty);
         }
