@@ -203,6 +203,11 @@ namespace NiVE3.Model
 
         public void OverwriteMask(MaskData data)
         {
+            if (data.IsBezierPath != IsBezierPath)
+            {
+                return;
+            }
+
             var oldData = SaveData();
             LoadData(data);
 
