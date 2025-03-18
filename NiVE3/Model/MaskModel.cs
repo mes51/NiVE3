@@ -214,6 +214,35 @@ namespace NiVE3.Model
             HistoryModel.Add(new OverwriteMaskHistoryCommand(this, oldData, data));
         }
 
+        public bool IsOperativeMask(Time layerTime, Time globalTime)
+        {
+            using var entry = CycleChecker.TryEnter(MaskId);
+            if (entry == null)
+            {
+                return false;
+            }
+
+            var setting = Properties.GetValues(layerTime, globalTime);
+            var opacity = (float)(double)(setting[PropertyMaskSettingOpacityId] ?? 0.0) * 0.01F;
+            var blendMode = (MaskBlendMode)(setting[PropertyMaskSettingBlendModeId] ?? MaskBlendMode.Add);
+
+            if ((blendMode == MaskBlendMode.Add || blendMode == MaskBlendMode.Subtract) && opacity <= 0.0F)
+            {
+                return false;
+            }
+
+            if (IsBezierPath)
+            {
+                var path = (BezierPath)(setting[PropertyMaskSettingBezierPathId] ?? BezierPath.Empty);
+
+                return path.IsClosed && !path.IsEmpty();
+            }
+            else
+            {
+                return true;
+            }
+        }
+
         public RasterizedMaskImage RenderMask(Time layerTime, Time globalTime, RasterizedMaskImage image, ImageInterpolationQuality imageInterpolationQuality, double downSamplingRateX, double downSamplingRateY, bool useGpu)
         {
             using var entry = CycleChecker.TryEnter(MaskId);

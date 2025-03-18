@@ -2056,7 +2056,13 @@ namespace NiVE3.Model
 
         NImage ApplyMask(NImage image, double downSamplingRateX, double downSamplingRateY, Time layerTime, Time globalTime, bool useGpu)
         {
-            var clearOpaque = Masks.First(m => m.IsEnable).IsInverted(layerTime, globalTime);
+            var operativeMasks = Masks.Where(m => m.IsEnable && m.IsOperativeMask(layerTime, globalTime)).ToArray();
+            if (operativeMasks.Length < 1)
+            {
+                return image;
+            }
+
+            var clearOpaque = operativeMasks[0].IsInverted(layerTime, globalTime);
             if (useGpu)
             {
                 var device = AcceleratorModel.CurrentDevice;
@@ -2066,7 +2072,7 @@ namespace NiVE3.Model
                     Origin = image.Origin
                 };
 
-                foreach (var mask in Masks.Where(m => m.IsEnable))
+                foreach (var mask in operativeMasks)
                 {
                     var newMaskImage = mask.RenderMask(layerTime, globalTime, gpuMaskImage, InterpolationQuality, downSamplingRateX, downSamplingRateY, useGpu);
                     if (gpuMaskImage != newMaskImage)
@@ -2089,7 +2095,7 @@ namespace NiVE3.Model
                     Origin = image.Origin
                 };
 
-                foreach (var mask in Masks.Where(m => m.IsEnable))
+                foreach (var mask in operativeMasks)
                 {
                     var newMaskImage = mask.RenderMask(layerTime, globalTime, managedMaskImage, InterpolationQuality, downSamplingRateX, downSamplingRateY, useGpu);
                     if (managedMaskImage != newMaskImage)
