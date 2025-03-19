@@ -54,7 +54,7 @@ namespace NiVE3.Text
             })];
 
             TotalLength = TextPathPoints.Aggregate(0.0F, (m, t) => t.length + m);
-            BeginOffsetPosition = (float)(beginOffset * TotalLength);
+            BeginOffsetPosition = (float)(beginOffset * TotalLength * (isInvert ? -1.0 : 1.0));
         }
 
         public Matrix3x2 AlignToPath(float x, Vector2 location)
