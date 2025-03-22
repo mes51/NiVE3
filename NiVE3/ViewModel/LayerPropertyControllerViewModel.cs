@@ -5,14 +5,18 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
+using NiVE3.Config;
 using NiVE3.Model;
 using NiVE3.Model.UI;
 using NiVE3.Mvvm;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
+using NiVE3.View.Command;
 using NiVE3.View.Dock;
 using NiVE3.View.Resource;
+using Prism.Commands;
 using Prism.Dialogs;
 
 namespace NiVE3.ViewModel
@@ -20,6 +24,10 @@ namespace NiVE3.ViewModel
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
     [ManualViewModelWireable(nameof(Composition), nameof(BindComposition), nameof(UnbindComposition), WithInitializeProperty = true)]
     [PaneLocation(PaneLocation.Left2Center)]
+    [CommandHandling(nameof(AddRectangleMaskCommand), nameof(ShortcutKeySetting.AddRectangleMaskGesture))]
+    [CommandHandling(nameof(AddEllipseMaskCommand), nameof(ShortcutKeySetting.AddEllipseMaskGesture))]
+    [CommandHandling(nameof(AddBezierMaskCommand), nameof(ShortcutKeySetting.AddBezierMaskGesture))]
+    [CommandHandling(nameof(ChangeLayerTagsRandomlyCommand), nameof(ShortcutKeySetting.ChangeLayerTagsRandomlyGesture))]
     partial class LayerPropertyControllerViewModel : SingletonePaneViewModelBase
     {
         private double layerNameColumnWidth;
@@ -84,7 +92,19 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref targetLayer, value); }
         }
 
+        public ICommand AddEffectCommand { get; }
+
+        public ICommand AddRectangleMaskCommand { get; }
+
+        public ICommand AddEllipseMaskCommand { get; }
+
+        public ICommand AddBezierMaskCommand { get; }
+
+        public ICommand ChangeLayerTagsRandomlyCommand { get; }
+
         ProjectModel ProjectModel { get; }
+
+        EffectListStateModel EffectListStateModel { get; }
 
         ViewStateModel ViewState { get; }
 
@@ -113,12 +133,91 @@ namespace NiVE3.ViewModel
             }
         }
 
-        public LayerPropertyControllerViewModel(ProjectModel project, ViewStateModel viewState, EventHubModel eventHubModel)
+        private Dictionary<string, List<EffectItem>> groupedEffects = [];
+        public Dictionary<string, List<EffectItem>> GroupedEffects
+        {
+            get { return groupedEffects; }
+            set { SetProperty(ref groupedEffects, value); }
+        }
+
+        public LayerPropertyControllerViewModel(ProjectModel project, ViewStateModel viewState, EffectListStateModel effectListStateModel, EventHubModel eventHubModel)
         {
             ProjectModel = project;
             ViewState = viewState;
+            EffectListStateModel = effectListStateModel;
             EventHubModel = eventHubModel;
             Title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.LayerPropertyControllerView_Title_Empty);
+
+            foreach (var e in effectListStateModel.Effects)
+            {
+                if (!GroupedEffects.TryGetValue(e.Category, out var value))
+                {
+                    value = [];
+                    GroupedEffects.Add(e.Category, value);
+                }
+
+                value.Add(e);
+            }
+
+            AddEffectCommand = new DelegateCommand<EffectItem>(effectItem =>
+            {
+                if (Composition == null || TargetLayer == null || TargetLayer.IsSpecial)
+                {
+                    return;
+                }
+
+                Composition.AddEffectsToLayers([TargetLayer.LayerId], [effectItem.PluginId]);
+            }, _ => Composition != null && TargetLayer != null && !TargetLayer.IsSpecial)
+                .ObservesProperty(() => Composition)
+                .ObservesProperty(() => TargetLayer);
+
+            AddRectangleMaskCommand = new DelegateCommand<EffectItem>(effectItem =>
+            {
+                if (Composition == null || TargetLayer == null || TargetLayer.IsSpecial)
+                {
+                    return;
+                }
+
+                Composition.AddShapedMaskToLayers([TargetLayer.LayerId], MaskShapeType.Rectangle);
+            }, _ => Composition != null && TargetLayer != null && !TargetLayer.IsSpecial)
+                .ObservesProperty(() => Composition)
+                .ObservesProperty(() => TargetLayer);
+
+            AddEllipseMaskCommand = new DelegateCommand<EffectItem>(effectItem =>
+            {
+                if (Composition == null || TargetLayer == null || TargetLayer.IsSpecial)
+                {
+                    return;
+                }
+
+                Composition.AddShapedMaskToLayers([TargetLayer.LayerId], MaskShapeType.Ellipse);
+            }, _ => Composition != null && TargetLayer != null && !TargetLayer.IsSpecial)
+                .ObservesProperty(() => Composition)
+                .ObservesProperty(() => TargetLayer);
+
+            AddBezierMaskCommand = new DelegateCommand<EffectItem>(effectItem =>
+            {
+                if (Composition == null || TargetLayer == null || TargetLayer.IsSpecial)
+                {
+                    return;
+                }
+
+                Composition.AddBezierMaskToLayers([TargetLayer.LayerId]);
+            }, _ => Composition != null && TargetLayer != null && !TargetLayer.IsSpecial)
+                .ObservesProperty(() => Composition)
+                .ObservesProperty(() => TargetLayer);
+
+            ChangeLayerTagsRandomlyCommand = new DelegateCommand<EffectItem>(effectItem =>
+            {
+                if (Composition == null || TargetLayer == null)
+                {
+                    return;
+                }
+
+                Composition.ChangeLayerTagsRandomly([TargetLayer.LayerId]);
+            }, _ => Composition != null && TargetLayer != null)
+                .ObservesProperty(() => Composition)
+                .ObservesProperty(() => TargetLayer);
 
             WiringModel();
 

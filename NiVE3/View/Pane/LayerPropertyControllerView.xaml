@@ -8,11 +8,14 @@
              xmlns:pi="clr-namespace:NiVE3.Plugin.Interfaces;assembly=NiVE3.Plugin"
              xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
              xmlns:ugm="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
+             xmlns:cgm="clr-namespace:NiVE3.Config.Wpf.GeneratedMarkup"
              xmlns:mk="clr-namespace:NiVE3.Wpf.Markup"
+             xmlns:a="clr-namespace:NiVE3.Wpf.Attach"
+             xmlns:um="clr-namespace:NiVE3.Model.UI"
+             xmlns:vm="clr-namespace:NiVE3.ViewModel"
              xmlns:r="clr-namespace:NiVE3.View.Resource"
              xmlns:ur="clr-namespace:NiVE3.UI.Resources;assembly=NiVE3.UI"
              xmlns:cv="clr-namespace:NiVE3.View.Converter"
-             xmlns:vm="clr-namespace:NiVE3.ViewModel"
              xmlns:pr="clr-namespace:NiVE3.View.Primitive"
              xmlns:pt="clr-namespace:NiVE3.View.Part"
              xmlns:dd="urn:gong-wpf-dragdrop"
@@ -28,14 +31,11 @@
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <cv:IsNullConverter x:Key="IsNullConverter"/>
         <cv:BooleanToVisibilityHiddenConverter x:Key="BooleanToVisibilityHiddenConverter"/>
+        <cv:BooleanInvertConverter x:Key="BooleanInvertConverter"/>
         <cv:EnumToBoolConverter x:Key="EnumToBoolConverter" UseAndCompare="True"/>
+        <cv:EnumToVisibilityConverter x:Key="EnumToVisibilityConverter" UseAndCompare="True"/>
         <cv:OffsetGridLengthConverter x:Key="GridLengthConverter"/>
         <cv:ColorToBrushConverter x:Key="ColorToBrushConverter"/>
-
-        <cv:ConverterCollection x:Key="AVTypeVisibleConverter">
-            <cv:ConverterItem Converter="{StaticResource EnumToBoolConverter}" TargetType="{x:Type sys:Boolean}"/>
-            <cv:ConverterItem Converter="{StaticResource BooleanToVisibilityHiddenConverter}" TargetType="{x:Type Visibility}"/>
-        </cv:ConverterCollection>
 
         <Style x:Key="IconContainer" TargetType="{x:Type Grid}">
             <Setter Property="Width" Value="12"/>
@@ -179,6 +179,58 @@
             </Style.Triggers>
         </Style>
 
+        <Style x:Key="WrapperGridStyle" TargetType="{x:Type Grid}">
+            <Setter Property="ContextMenu">
+                <Setter.Value>
+                    <ContextMenu>
+                        <MenuItem Header="{gm:LanguageResource ResourceKey=LayerProperty_ContextMenu_Effect}" ItemsSource="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.DataContext.GroupedEffects}">
+                            <MenuItem.ItemTemplate>
+                                <HierarchicalDataTemplate ItemsSource="{Binding Value}">
+                                    <TextBlock Text="{Binding Key}"/>
+
+                                    <HierarchicalDataTemplate.ItemTemplate>
+                                        <DataTemplate DataType="{x:Type um:EffectItem}">
+                                            <TextBlock Text="{Binding Name}"/>
+                                        </DataTemplate>
+                                    </HierarchicalDataTemplate.ItemTemplate>
+                                    <HierarchicalDataTemplate.ItemContainerStyle>
+                                        <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource {x:Type MenuItem}}">
+                                            <Setter Property="Command" Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.DataContext.AddEffectCommand}"/>
+                                            <Setter Property="CommandParameter" Value="{Binding}"/>
+                                        </Style>
+                                    </HierarchicalDataTemplate.ItemContainerStyle>
+                                </HierarchicalDataTemplate>
+                            </MenuItem.ItemTemplate>
+                        </MenuItem>
+                        <Separator />
+                        <MenuItem Header="{gm:LanguageResource ResourceKey=LayerProperty_ContextMenu_Mask}" Visibility="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.DataContext.TargetLayer.SourceType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter={x:Static local:LayerPropertyControllerView.CompositionDisplayableSourceType}}">
+                            <MenuItem Header="{gm:LanguageResource ResourceKey=LayerProperty_ContextMenu_Mask_AddRectangle}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=AddRectangleMaskGesture}"/>
+                            <MenuItem Header="{gm:LanguageResource ResourceKey=LayerProperty_ContextMenu_Mask_AddEllipse}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=AddEllipseMaskGesture}"/>
+                            <Separator />
+                            <MenuItem Header="{gm:LanguageResource ResourceKey=LayerProperty_ContextMenu_Mask_AddBezier}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=AddBezierMaskGesture}"/>
+                        </MenuItem>
+                        <Separator Visibility="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.DataContext.TargetLayer.SourceType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter={x:Static local:LayerPropertyControllerView.CompositionDisplayableSourceType}}"/>
+                        <MenuItem Header="{gm:LanguageResource ResourceKey=LayerProperty_ContextMenu_ChangeLayerTagsRandomly}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=ChangeLayerTagsRandomlyGesture}"/>
+                    </ContextMenu>
+                </Setter.Value>
+            </Setter>
+
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding TargetLayer}" Value="{x:Null}">
+                    <Setter Property="ContextMenu" Value="{x:Null}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding TargetLayer.IsSpecial}" Value="True">
+                    <Setter Property="ContextMenu">
+                        <Setter.Value>
+                            <ContextMenu>
+                                <MenuItem Header="{gm:LanguageResource ResourceKey=LayerProperty_ContextMenu_ChangeLayerTagsRandomly}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=ChangeLayerTagsRandomlyGesture}"/>
+                            </ContextMenu>
+                        </Setter.Value>
+                    </Setter>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
         <ur:DataTemplateCollection x:Key="LayerPropertyControllerInner" DefaultIsEmpty="True">
             <DataTemplate DataType="{x:Type vm:LayerViewModel}">
                 <Grid x:Name="InnerRoot" Margin="0,2" ClipToBounds="True">
@@ -220,7 +272,7 @@
                                                              Width="15"
                                                              Height="15"
                                                              Margin="1,0,0,0"
-                                                             Visibility="{Binding SourceType, Converter={StaticResource AVTypeVisibleConverter}, ConverterParameter={x:Static local:LayerPropertyControllerView.CompositionDisplayableSourceType}}"
+                                                             Visibility="{Binding SourceType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter={x:Static local:LayerPropertyControllerView.CompositionDisplayableSourceType}}"
                                                              Command="{Binding ChangeInterpolationQualityCommand}">
                                     <pt:MultipleStateLayerSwitchItem State="{x:Static pi:ImageInterpolationQuality.Level1}" Icon="{StaticResource ImageInterpolationLevel1Icon}"/>
                                     <pt:MultipleStateLayerSwitchItem State="{x:Static pi:ImageInterpolationQuality.Level2}" Icon="{StaticResource ImageInterpolationLevel2Icon}"/>
@@ -236,21 +288,21 @@
                                 <CheckBox Content="{StaticResource FrameBlendIcon}"
                                           Style="{StaticResource LayerSwitch}"
                                           IsChecked="{Binding IsEnableFrameBlend, Mode=OneWay}"
-                                          Visibility="{Binding SourceType, Converter={StaticResource AVTypeVisibleConverter}, ConverterParameter={x:Static pi:SourceType.Video}}"
+                                          Visibility="{Binding SourceType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter={x:Static pi:SourceType.Video}}"
                                           Command="{Binding ChangeLayerSwitchCommand}"
                                           CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableFrameBlend}"/>
 
                                 <CheckBox Content="{StaticResource MotionBlurIcon}"
                                           Style="{StaticResource LayerSwitch}"
                                           IsChecked="{Binding IsEnableMotionBlur, Mode=OneWay}"
-                                          Visibility="{Binding SourceType, Converter={StaticResource AVTypeVisibleConverter}, ConverterParameter={x:Static local:LayerPropertyControllerView.CompositionDisplayableSourceType}}"
+                                          Visibility="{Binding SourceType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter={x:Static local:LayerPropertyControllerView.CompositionDisplayableSourceType}}"
                                           Command="{Binding ChangeLayerSwitchCommand}"
                                           CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableMotionBlur}"/>
 
                                 <CheckBox Content="{gm:FontawesomeResource ResourceKey=CircleHalfStroke, ReturnDynamicResource=True}"
                                           Style="{StaticResource LayerSwitch}"
                                           IsChecked="{Binding IsEnableAdjustmentLayer, Mode=OneWay}"
-                                          Visibility="{Binding SourceType, Converter={StaticResource AVTypeVisibleConverter}, ConverterParameter={x:Static local:LayerPropertyControllerView.CompositionDisplayableSourceType}}"
+                                          Visibility="{Binding SourceType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter={x:Static local:LayerPropertyControllerView.CompositionDisplayableSourceType}}"
                                           Command="{Binding ChangeLayerSwitchCommand}"
                                           CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableAdjustmentLayer}"/>
 
@@ -390,7 +442,7 @@
             </DataTemplate>
         </ur:DataTemplateCollection>
     </UserControl.Resources>
-    <Grid>
+    <Grid Style="{StaticResource WrapperGridStyle}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition />

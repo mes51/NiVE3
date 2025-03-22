@@ -440,6 +440,24 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("コンポジションの設定...(_O)")]
         public static readonly string Timeline_ContextMenu_CompositionSetting = nameof(Timeline_ContextMenu_CompositionSetting);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("エフェクト(_E)")]
+        public static readonly string LayerProperty_ContextMenu_Effect = nameof(LayerProperty_ContextMenu_Effect);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("マスク(_M)")]
+        public static readonly string LayerProperty_ContextMenu_Mask = nameof(LayerProperty_ContextMenu_Mask);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("長方形を追加(_R)")]
+        public static readonly string LayerProperty_ContextMenu_Mask_AddRectangle = nameof(LayerProperty_ContextMenu_Mask_AddRectangle);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("楕円形を追加(_E)")]
+        public static readonly string LayerProperty_ContextMenu_Mask_AddEllipse = nameof(LayerProperty_ContextMenu_Mask_AddEllipse);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("パスを追加(_P)")]
+        public static readonly string LayerProperty_ContextMenu_Mask_AddBezier = nameof(LayerProperty_ContextMenu_Mask_AddBezier);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("レイヤーのタグをランダムに変更(_R)")]
+        public static readonly string LayerProperty_ContextMenu_ChangeLayerTagsRandomly = nameof(LayerProperty_ContextMenu_ChangeLayerTagsRandomly);
+
         [ShowInMarkup, LanguageKey, DefaultValue("なし")]
         public static readonly string Layer_EmptyTrackMatte = nameof(Layer_EmptyTrackMatte);
 
