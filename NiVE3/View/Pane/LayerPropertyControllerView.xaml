@@ -338,6 +338,16 @@
                                                    dd:DragDrop.IsDragSource="True"
                                                    dd:DragDrop.IsDropTarget="True"
                                                    dd:DragDrop.DragSourceIgnore="False">
+                                <pt:MaskCollectionView.ContextMenu>
+                                    <ContextMenu>
+                                        <!-- NOTE: 本来は別でリソースを定義するべきだが、テンプレート自体をLayerViewのものと合わせたいので流用する -->
+                                        <MenuItem Header="{gm:LanguageResource ResourceKey=Layer_Mask_ContextMenu_Cut, ReturnDynamicResource=True}" a:MenuItemGestureBindingProperty.InputGesture="{cgm:ShortcutKeyBinding ResourceKey=CutItemGesture}" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.DataContext.CutEffectCommand}"/>
+                                        <MenuItem Header="{gm:LanguageResource ResourceKey=Layer_Mask_ContextMenu_Copy, ReturnDynamicResource=True}" a:MenuItemGestureBindingProperty.InputGesture="{cgm:ShortcutKeyBinding ResourceKey=CopyItemGesture}" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.DataContext.CopyEffectCommand}"/>
+                                        <MenuItem Header="{gm:LanguageResource ResourceKey=Layer_Mask_ContextMenu_Paste, ReturnDynamicResource=True}" a:MenuItemGestureBindingProperty.InputGesture="{cgm:ShortcutKeyBinding ResourceKey=PasteItemGesture}" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.DataContext.PasteEffectCommand}"/>
+                                        <MenuItem Header="{gm:LanguageResource ResourceKey=Layer_Mask_ContextMenu_Duplicate, ReturnDynamicResource=True}" a:MenuItemGestureBindingProperty.InputGesture="{cgm:ShortcutKeyBinding ResourceKey=DuplicateItemGesture}" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.DataContext.DuplicateEffectCommand}"/>
+                                        <MenuItem Header="{gm:LanguageResource ResourceKey=Layer_Mask_ContextMenu_Delete, ReturnDynamicResource=True}" a:MenuItemGestureBindingProperty.InputGesture="{cgm:ShortcutKeyBinding ResourceKey=DeleteItemGesture}" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.DataContext.DeleteEffectCommand}"/>
+                                    </ContextMenu>
+                                </pt:MaskCollectionView.ContextMenu>
                             </pt:MaskCollectionView>
                         </pt:LayerItemExpander>
                         <pt:LayerItemExpander HeaderText="{gm:LanguageResource ResourceKey=LayerPropertyControllerView_Effects, ReturnDynamicResource=True}"
@@ -363,7 +373,18 @@
                                                      dd:DragDrop.DragHandler="{Binding RelativeSource={RelativeSource Self}}"
                                                      dd:DragDrop.IsDragSource="True"
                                                      dd:DragDrop.IsDropTarget="True"
-                                                     dd:DragDrop.DragSourceIgnore="False"/>
+                                                     dd:DragDrop.DragSourceIgnore="False">
+                                <pt:EffectCollectionView.ContextMenu>
+                                    <ContextMenu>
+                                        <!-- NOTE: 本来は別でリソースを定義するべきだが、テンプレート自体をLayerViewのものと合わせたいので流用する -->
+                                        <MenuItem Header="{gm:LanguageResource ResourceKey=Layer_Effect_ContextMenu_Cut, ReturnDynamicResource=True}" a:MenuItemGestureBindingProperty.InputGesture="{cgm:ShortcutKeyBinding ResourceKey=CutItemGesture}" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.DataContext.CutEffectCommand}"/>
+                                        <MenuItem Header="{gm:LanguageResource ResourceKey=Layer_Effect_ContextMenu_Copy, ReturnDynamicResource=True}" a:MenuItemGestureBindingProperty.InputGesture="{cgm:ShortcutKeyBinding ResourceKey=CopyItemGesture}" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.DataContext.CopyEffectCommand}"/>
+                                        <MenuItem Header="{gm:LanguageResource ResourceKey=Layer_Effect_ContextMenu_Paste, ReturnDynamicResource=True}" a:MenuItemGestureBindingProperty.InputGesture="{cgm:ShortcutKeyBinding ResourceKey=PasteItemGesture}" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.DataContext.PasteEffectCommand}"/>
+                                        <MenuItem Header="{gm:LanguageResource ResourceKey=Layer_Effect_ContextMenu_Duplicate, ReturnDynamicResource=True}" a:MenuItemGestureBindingProperty.InputGesture="{cgm:ShortcutKeyBinding ResourceKey=DuplicateItemGesture}" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.DataContext.DuplicateEffectCommand}"/>
+                                        <MenuItem Header="{gm:LanguageResource ResourceKey=Layer_Effect_ContextMenu_Delete, ReturnDynamicResource=True}" a:MenuItemGestureBindingProperty.InputGesture="{cgm:ShortcutKeyBinding ResourceKey=DeleteItemGesture}" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.DataContext.DeleteEffectCommand}"/>
+                                    </ContextMenu>
+                                </pt:EffectCollectionView.ContextMenu>
+                            </pt:EffectCollectionView>
                         </pt:LayerItemExpander>
                         <Grid Style="{StaticResource TextGridStyle}">
                             <pt:PropertyGroupView DataContext="{Binding TextProperties}"
