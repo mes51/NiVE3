@@ -1212,16 +1212,8 @@ namespace NiVE3.ViewModel
 
         public void DeSelect()
         {
-            foreach (var e in SelectedEffects)
-            {
-                e.DeSelect();
-            }
-            foreach (var m in SelectedMasks)
-            {
-                m.DeSelect();
-            }
-            SelectedEffects.Clear();
-            SelectedMasks.Clear();
+            DeSelectEffects();
+            DeSelectMasks();
             TransformProperties?.DeSelect();
             LayerOptionProperties?.DeSelect();
             TextProperties?.DeSelect();
@@ -1230,13 +1222,31 @@ namespace NiVE3.ViewModel
             AudioOptionProperties?.DeSelect();
         }
 
-        partial void WiringModel();
-
         void RefreshLayerProxies()
         {
             TrackMatteLayerProxy = TrackMatteViewSource.FirstOrDefault(l => l.LayerId == TrackMatteLayerId);
             ParentLayerProxy = ParentLayerViewSource.FirstOrDefault(l => l.LayerId == ParentLayerId);
         }
+
+        void DeSelectEffects()
+        {
+            foreach (var effect in SelectedEffects)
+            {
+                effect.DeSelect();
+            }
+            SelectedEffects.Clear();
+        }
+
+        void DeSelectMasks()
+        {
+            foreach (var mask in SelectedMasks)
+            {
+                mask.DeSelect();
+            }
+            SelectedMasks.Clear();
+        }
+
+        partial void WiringModel();
 
         private void LayerViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
@@ -1290,17 +1300,13 @@ namespace NiVE3.ViewModel
                 {
                     SelectedEffects.Add(targetEffect);
 
+                    DeSelectMasks();
                     TransformProperties?.DeSelect();
                     LayerOptionProperties?.DeSelect();
                     TextProperties?.DeSelect();
                     ShapeProperties?.DeSelect();
                     SourceOptionProperties?.DeSelect();
                     AudioOptionProperties?.DeSelect();
-                    foreach (var mask in SelectedMasks)
-                    {
-                        mask.DeSelect();
-                    }
-                    SelectedMasks.Clear();
                 }
             }
             else
@@ -1310,6 +1316,8 @@ namespace NiVE3.ViewModel
                 {
                     effect.DeSelect();
                 }
+
+                DeSelectMasks();
                 TransformProperties?.DeSelect();
                 LayerOptionProperties?.DeSelect();
                 TextProperties?.DeSelect();
@@ -1358,17 +1366,13 @@ namespace NiVE3.ViewModel
                 {
                     SelectedMasks.Add(targetMask);
 
+                    DeSelectEffects();
                     TransformProperties?.DeSelect();
                     LayerOptionProperties?.DeSelect();
                     TextProperties?.DeSelect();
                     ShapeProperties?.DeSelect();
                     SourceOptionProperties?.DeSelect();
                     AudioOptionProperties?.DeSelect();
-                    foreach (var effect in SelectedEffects)
-                    {
-                        effect.DeSelect();
-                    }
-                    SelectedEffects.Clear();
                 }
             }
             else
@@ -1378,6 +1382,8 @@ namespace NiVE3.ViewModel
                 {
                     mask.DeSelect();
                 }
+
+                DeSelectEffects();
                 TransformProperties?.DeSelect();
                 LayerOptionProperties?.DeSelect();
                 TextProperties?.DeSelect();
@@ -1431,11 +1437,8 @@ namespace NiVE3.ViewModel
         private void PropertyGroupViewModel_SelectItemChanged(object? sender, SelectItemEventArgs e)
         {
             SelectItemChangedPublisher.Publish(sender, new SelectItemEventArgs(e, this));
-            foreach (var effect in SelectedEffects)
-            {
-                effect.DeSelect();
-            }
-            SelectedEffects.Clear();
+            DeSelectEffects();
+            DeSelectMasks();
         }
 
         private void PropertyGroupViewModel_PropertyValueCommited(object? sender, PropertyValueCommitedEventArgs e)
