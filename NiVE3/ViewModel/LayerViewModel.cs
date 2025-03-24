@@ -249,6 +249,14 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref hasEffect, value); }
         }
 
+        private bool hasNonDummyEffect;
+        [NeedWire(nameof(LayerModel), IsOneWay = true)]
+        public bool HasNonDummyEffect
+        {
+            get { return  hasNonDummyEffect; }
+            set { SetProperty(ref  hasNonDummyEffect, value); }
+        }
+
         private bool hasMask;
         [NeedWire(nameof(LayerModel), IsOneWay = true)]
         public bool HasMask

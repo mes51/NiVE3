@@ -236,6 +236,13 @@ namespace NiVE3.Model
             set { SetProperty(ref hasEffect, value); }
         }
 
+        private bool hasNonDummyEffect;
+        public bool HasNonDummyEffect
+        {
+            get { return hasNonDummyEffect; }
+            set { SetProperty(ref hasNonDummyEffect, value); }
+        }
+
         private bool hasMask;
         public bool HasMask
         {
@@ -2410,6 +2417,7 @@ namespace NiVE3.Model
         private void Effects_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             HasEffect = Effects.Count > 0;
+            HasNonDummyEffect = Effects.Any(e => !e.IsDummyEffect);
             HasRenderEveryFrameEffect = Effects.Any(e => e.IsRenderEveryFrame);
 
             foreach (var oldEffect in (e.OldItems?.Cast<EffectModel>() ?? []))

@@ -1667,7 +1667,7 @@ namespace NiVE3.Model
                         }
                         else
                         {
-                            var isRawImage = l.IsImage && !l.IsCustomizableFootageSource && !l.HasEffect;
+                            var isRawImage = l.IsImage && !l.IsCustomizableFootageSource && !l.HasNonDummyEffect;
 
                             var (prevLayer, rawImage) = isRawImage ? rawImages.FirstOrDefault(t => l.IsSameFootage(t.Item1)) : (null, null);
                             var image = (prevLayer != null && rawImage != null ? l.GetSameImage(currentTime, FrameDuration, downSamplingRate, true, useGpu, IsEnableFrameBlend, rawImage) : null) ?? l.GetImage(currentTime, FrameDuration, downSamplingRate, true, useGpu, IsEnableFrameBlend);
