@@ -31,6 +31,8 @@ namespace NiVE3.Model
 
         Int128 ObjectId { get; }
 
+        bool ParentLayerIsLock { get; }
+
         event EventHandler<EventArgs>? ValueUpdated;
 
         event EventHandler<EventArgs>? ValueCommited;

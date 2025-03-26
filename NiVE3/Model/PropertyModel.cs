@@ -111,6 +111,8 @@ namespace NiVE3.Model
 
         public Int128 ObjectId { get; }
 
+        public bool ParentLayerIsLock => LayerModel.IsLock;
+
         public string Id => Property.Id;
 
         public bool HasExpressionError => !string.IsNullOrEmpty(ExpressionErrorMessage);

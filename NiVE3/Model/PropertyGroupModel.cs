@@ -56,6 +56,8 @@ namespace NiVE3.Model
 
         public Int128 ObjectId { get; }
 
+        public bool ParentLayerIsLock => LayerModel.IsLock;
+
         public string Id => Property.Id;
 
         public bool UseEnableSwitch { get; }
@@ -68,7 +70,7 @@ namespace NiVE3.Model
 
         CompositionModel CompositionModel { get; }
 
-        LayerModel? LayerModel { get; }
+        LayerModel LayerModel { get; }
 
         EffectModel? EffectModel { get; }
 

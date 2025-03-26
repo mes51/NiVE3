@@ -337,7 +337,11 @@ namespace NiVE3.ViewModel
         private void Property_SelectItemChanged(object? sender, SelectItemEventArgs e)
         {
             SelectItemChangedPublisher.Publish(sender, new SelectItemEventArgs(e, this));
-            if (e.OriginalSender is IInternalPropertyViewModel property && Children.Contains(property))
+            if (PropertyGroupModel.ParentLayerIsLock)
+            {
+                DeSelect();
+            }
+            else if (e.OriginalSender is IInternalPropertyViewModel property && Children.Contains(property))
             {
                 foreach (var child in Children)
                 {

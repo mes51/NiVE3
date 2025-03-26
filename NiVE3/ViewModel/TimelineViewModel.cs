@@ -1244,14 +1244,22 @@ namespace NiVE3.ViewModel
                     }
                     else
                     {
-                        SelectedLayers.Add(Layers.First(l => l.LayerId == layerId));
+                        var layer = Layers.First(l => l.LayerId == layerId);
+                        if (layer.IsLock)
+                        {
+                            SelectedLayers.Add(layer);
+                        }
                     }
                 }
-                else if (!SelectedLayers.Any(l => l.LayerId == layerId))
+                else if (SelectedLayers.All(l => l.LayerId != layerId))
                 {
                     SelectedLayers.Clear();
                     CurrentEditingCompositionId = CompositionModel?.CompositionId;
-                    SelectedLayers.Add(Layers.First(l => l.LayerId == layerId));
+                    var layer = Layers.First(l => l.LayerId == layerId);
+                    if (!layer.IsLock)
+                    {
+                        SelectedLayers.Add(layer);
+                    }
                 }
 
                 if (SelectedLayers.Count > 0)
@@ -1428,7 +1436,7 @@ namespace NiVE3.ViewModel
 
                 if ((SelectedLayers != null && SelectedLayers.Any(l => l.LayerId == e.TargetLayerId)))
                 {
-                    CompositionModel.AddEffectsToLayers([.. SelectedLayers.Select(l => l.LayerId)], e.EffectPluginIds);
+                    CompositionModel.AddEffectsToLayers([..SelectedLayers.Select(l => l.LayerId)], e.EffectPluginIds);
                 }
                 else
                 {
@@ -1818,7 +1826,7 @@ namespace NiVE3.ViewModel
                     layer.DeSelect();
                     SelectedLayers.Remove(layer);
                 }
-                if (e.Layer != null && !SelectedLayers.Contains(e.Layer))
+                if (e.Layer != null && !e.Layer.IsLock && !SelectedLayers.Contains(e.Layer))
                 {
                     SelectedLayers.Add(e.Layer);
                 }

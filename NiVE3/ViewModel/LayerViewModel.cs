@@ -1112,7 +1112,7 @@ namespace NiVE3.ViewModel
 
         public void DragOver(IDropInfo dropInfo)
         {
-            if (IsSpecial && !IsNullObject)
+            if (IsLock || (IsSpecial && !IsNullObject))
             {
                 dropInfo.NotHandled = true;
                 return;
@@ -1153,7 +1153,7 @@ namespace NiVE3.ViewModel
 
         public void Drop(IDropInfo dropInfo)
         {
-            if (IsSpecial && !IsNullObject)
+            if (IsLock || (IsSpecial && !IsNullObject))
             {
                 return;
             }
@@ -1297,7 +1297,11 @@ namespace NiVE3.ViewModel
         private void Effect_SelectItemChanged(object? sender, SelectItemEventArgs e)
         {
             SelectItemChangedPublisher.Publish(sender, new SelectItemEventArgs(e, this));
-            if (e.SelectItemType != SelectItemType.Effect)
+            if (IsLock)
+            {
+                DeSelect();
+            }
+            else if (e.SelectItemType != SelectItemType.Effect)
             {
                 var targetEffect = e.Effect;
                 foreach (var effect in SelectedEffects.Where(v => v != targetEffect).ToArray())
@@ -1363,7 +1367,11 @@ namespace NiVE3.ViewModel
         private void Mask_SelectItemChanged(object? sender, SelectItemEventArgs e)
         {
             SelectItemChangedPublisher.Publish(sender, new SelectItemEventArgs(e, this));
-            if (e.SelectItemType != SelectItemType.Mask)
+            if (IsLock)
+            {
+                DeSelect();
+            }
+            else if (e.SelectItemType != SelectItemType.Mask)
             {
                 var targetMask = e.Mask;
                 foreach (var mask in SelectedMasks.Where(v => v != targetMask).ToArray())
