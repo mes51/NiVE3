@@ -19,9 +19,11 @@ using NiVE3.Util;
 using NiVE3.Data.Json.Project;
 using NiVE3.Data.Clipboard;
 using NiVE3.Model.UI;
+using NiVE3.SourceGenerator.ViewModelWireGenerator;
 
 namespace NiVE3.ViewModel
 {
+    [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
     partial class AppendablePropertyViewModel : BindableBase, IInternalPropertyViewModel, IDropTarget, INameEditableParentViewModel
     {
         public bool IsEnable => true;
@@ -29,6 +31,14 @@ namespace NiVE3.ViewModel
         public string Name { get; }
 
         public PropertyViewState ViewState { get; }
+
+        private bool parentLayerIsLock;
+        [NeedWire(nameof(AppendablePropertyModel), IsOneWay = true)]
+        public bool ParentLayerIsLock
+        {
+            get { return parentLayerIsLock; }
+            set { SetProperty(ref parentLayerIsLock, value); }
+        }
 
         public ObservableCollection<KeyFrame>? KeyFrames => throw new NotImplementedException();
 
@@ -245,6 +255,8 @@ namespace NiVE3.ViewModel
             ResetPropertyCommand = new DelegateCommand<SelectItemType?>(_ => ResetSelectedChildrenCommand.Execute(null));
 
             AppendItemCommand = new DelegateCommand<AppendablePropertyItem>(i => AppendablePropertyModel.AddChild(i));
+
+            WiringModel();
         }
 
         public void DeSelect()
@@ -353,6 +365,8 @@ namespace NiVE3.ViewModel
                     break;
             }
         }
+
+        partial void WiringModel();
 
         private void SelectedChildren_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {

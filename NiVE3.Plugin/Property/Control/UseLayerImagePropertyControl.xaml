@@ -22,6 +22,7 @@
 
             <ucv:EnumToBoolConverter x:Key="EnumToBoolConverter" UseAndCompare="True"/>
             <ucv:EqualMultiValueConverter x:Key="EqualMultiValueConverter"/>
+            <ucv:BooleanInvertConverter x:Key="BooleanInvertConverter"/>
             <cv:CollectionIndexConverter x:Key="CollectionIndexConverter" Offset="1"/>
             <cv:EnumToLocalizedNameConverter x:Key="EnumToLocalizedNameConverter" EnumType="{x:Type vo:LayerImageProcessType}" LanguageResourceDictionaryType="{x:Type r:LanguageResourceDictionary}"/>
             <cv:EnumTypeToArrayConverter x:Key="EnumTypeToArrayConverter" FilterNeverEditorBrowsable="True"/>
@@ -118,11 +119,13 @@
                                   Width="{Binding Property.SelectBoxWidth}"
                                   SelectedItem="{Binding ElementName=Root, Path=SelectedLayer}"
                                   ItemsSource="{StaticResource LayerCollection}"
+                                  IsEnabled="{Binding ParentLayerIsLock, Converter={StaticResource BooleanInvertConverter}}"
                                   Style="{StaticResource LayerSelectBoxStyle}"
                                   SelectItemChangedByUser="LayerSelectBox_SelectItemChangedByUser"/>
         <upr:ContextMenuSelectBox Grid.Column="1"
                                   SelectedItem="{Binding ElementName=Root, Path=SelectedImageProcessType}"
                                   ItemsSource="{Binding Source={x:Type vo:LayerImageProcessType}, Converter={StaticResource EnumTypeToArrayConverter}}"
+                                  IsEnabled="{Binding ParentLayerIsLock, Converter={StaticResource BooleanInvertConverter}}"
                                   Style="{StaticResource ImageProcessTypeSelectBoxStyle}"
                                   SelectItemChangedByUser="ImageProcessTypeSelectBox_SelectItemChangedByUser"/>
     </Grid>

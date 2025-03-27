@@ -7,6 +7,7 @@
              xmlns:local="clr-namespace:NiVE3.View.Part"
              xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
              xmlns:cv="clr-namespace:NiVE3.View.Converter"
+             xmlns:ucv="clr-namespace:NiVE3.UI.Converter;assembly=NiVE3.UI"
              xmlns:m="clr-namespace:NiVE3.Model"
              mc:Ignorable="d" 
              x:Name="Root"
@@ -15,7 +16,7 @@
         <cv:EnumToLocalizedNameConverter x:Key="EnumToLocalizedNameConverter"/>
         <cv:TimeConverter x:Key="TimeConverter" FrameRate="{Binding CompositionFrameRate}" IsTimeStruct="True"/>
         <cv:EnumToBoolConverter x:Key="EnumToBoolConverter"/>
-        <cv:BooleanInvertConverter x:Key="BooleanInvertConverter"/>
+        <ucv:BooleanInvertConverter x:Key="BooleanInvertConverter"/>
 
         <sys:Double x:Key="AllBeginTime">0</sys:Double>
         <Thickness x:Key="RowMargin">0,5,0,0</Thickness>

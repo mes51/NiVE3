@@ -11,6 +11,7 @@
                     xmlns:pt="clr-namespace:NiVE3.View.Part"
                     xmlns:pr="clr-namespace:NiVE3.View.Primitive"
                     xmlns:cv="clr-namespace:NiVE3.View.Converter"
+                    xmlns:ucv="clr-namespace:NiVE3.UI.Converter;assembly=NiVE3.UI"
                     xmlns:ugm="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
                     xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
                     xmlns:cgm="clr-namespace:NiVE3.Config.Wpf.GeneratedMarkup"
@@ -62,7 +63,7 @@
         <Style.Resources>
             <cv:ConverterCollection x:Key="InvertBooleanToVisibilityHiddenConverter">
                 <cv:ConverterItem TargetType="{x:Type sys:Boolean}">
-                    <cv:BooleanInvertConverter />
+                    <ucv:BooleanInvertConverter />
                 </cv:ConverterItem>
                 <cv:ConverterItem TargetType="{x:Type Visibility}">
                     <cv:BooleanToVisibilityHiddenConverter />

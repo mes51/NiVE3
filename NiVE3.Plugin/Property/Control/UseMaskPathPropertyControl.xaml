@@ -20,6 +20,7 @@
             </ResourceDictionary.MergedDictionaries>
 
             <ucv:EqualMultiValueConverter x:Key="EqualMultiValueConverter"/>
+            <ucv:BooleanInvertConverter x:Key="BooleanInvertConverter"/>
             <cv:CollectionIndexConverter x:Key="CollectionIndexConverter" Offset="1"/>
 
             <CollectionViewSource x:Key="MaskCollectionViewSource" Source="{Binding Source={x:Reference Root}, Path=MaskCollectionSource}"/>
@@ -92,6 +93,7 @@
         <upr:ContextMenuSelectBox Width="{Binding Property.SelectBoxWidth}"
                                   SelectedItem="{Binding ElementName=Root, Path=SelectedMask}"
                                   ItemsSource="{StaticResource MaskCollection}"
+                                  IsEnabled="{Binding ParentLayerIsLock, Converter={StaticResource BooleanInvertConverter}}"
                                   Style="{StaticResource MaskSelectBoxStyle}"
                                   SelectItemChangedByUser="MaskSelectBox_SelectItemChangedByUser"/>
     </Grid>

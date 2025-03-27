@@ -6,6 +6,7 @@
                            xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
                            xmlns:local="clr-namespace:NiVE3.Plugin.Property.Control"
                            xmlns:pr="clr-namespace:NiVE3.UI.Primitive;assembly=NiVE3.UI"
+                           xmlns:ucv="clr-namespace:NiVE3.UI.Converter;assembly=NiVE3.UI"
                            xmlns:gm="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
                            mc:Ignorable="d" 
                            x:Name="Root"
@@ -19,6 +20,7 @@
                 <ResourceDictionary Source="/NiVE3.Plugin;component/Property/Control/Resources/Icons.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
+            <ucv:BooleanInvertConverter x:Key="BooleanInvertConverter"/>
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
 
             <Style x:Key="SlidableNumberTextBoxStyle" TargetType="{x:Type pr:SlidableNumberTextBox}" BasedOn="{StaticResource {x:Type pr:SlidableNumberTextBox}}">
@@ -91,7 +93,7 @@
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
 
-        <CheckBox Grid.Column="0" IsChecked="{Binding ElementName=Root, Path=IsLinkRatio}" Visibility="{Binding ElementName=Root, Path=UseLinkRatio, Converter={StaticResource BooleanToVisibilityConverter}}" Style="{StaticResource LinkCheckBox}"/>
+        <CheckBox Grid.Column="0" IsChecked="{Binding ElementName=Root, Path=IsLinkRatio}" Visibility="{Binding ElementName=Root, Path=UseLinkRatio, Converter={StaticResource BooleanToVisibilityConverter}}" IsEnabled="{Binding ParentLayerIsLock, Converter={StaticResource BooleanInvertConverter}}" Style="{StaticResource LinkCheckBox}"/>
         <pr:SlidableNumberTextBox x:Name="ValueXSlider"
                                   Grid.Column="1"
                                   Digit="{Binding Property.Digit}"
@@ -102,6 +104,7 @@
                                   Maximum="{Binding ElementName=Root, Path=MaximumX}"
                                   UnitText="{Binding ElementName=Root, Path=Unit}"
                                   Margin="5,0,2,0"
+                                  IsEnabled="{Binding ParentLayerIsLock, Converter={StaticResource BooleanInvertConverter}}"
                                   Style="{StaticResource SlidableNumberTextBoxStyle}"/>
         <Grid  Grid.Column="2" Style="{StaticResource CrossSeparatorGridStyle}">
             <Path Fill="{gm:AppearanceResource ResourceKey=TextBrush}" Data="{StaticResource CrossIcon}" VerticalAlignment="Center" Margin="0,4,0,0"/>
@@ -119,6 +122,7 @@
                                   Maximum="{Binding ElementName=Root, Path=MaximumY}"
                                   UnitText="{Binding ElementName=Root, Path=Unit}"
                                   Margin="5,0,2,0"
+                                  IsEnabled="{Binding ParentLayerIsLock, Converter={StaticResource BooleanInvertConverter}}"
                                   Style="{StaticResource SlidableNumberTextBoxStyle}"/>
         <Grid Grid.Column="4" Style="{StaticResource CrossSeparatorGridStyle}">
             <Path Fill="{gm:AppearanceResource ResourceKey=TextBrush}" Data="{StaticResource CrossIcon}" VerticalAlignment="Center" Margin="0,4,0,0" Visibility="{Binding ElementName=Root, Path=Is3D, Converter={StaticResource BooleanToVisibilityConverter}}"/>
@@ -136,6 +140,7 @@
                                   Maximum="{Binding ElementName=Root, Path=MaximumZ}"
                                   UnitText="{Binding ElementName=Root, Path=Unit}"
                                   Margin="5,0,0,0"
+                                  IsEnabled="{Binding ParentLayerIsLock, Converter={StaticResource BooleanInvertConverter}}"
                                   Visibility="{Binding ElementName=Root, Path=Is3D, Converter={StaticResource BooleanToVisibilityConverter}}"
                                   Style="{StaticResource SlidableNumberTextBoxStyle}"/>
     </Grid>

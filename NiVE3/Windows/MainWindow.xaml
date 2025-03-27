@@ -12,6 +12,7 @@
         xmlns:da="clr-namespace:System.Windows.Data;assembly=PresentationFramework"
         xmlns:vd="clr-namespace:NiVE3.View.Dock"
         xmlns:cv="clr-namespace:NiVE3.View.Converter"
+        xmlns:ucv="clr-namespace:NiVE3.UI.Converter;assembly=NiVE3.UI"
         xmlns:vm="clr-namespace:NiVE3.ViewModel"
         xmlns:um="clr-namespace:NiVE3.Model.UI"
         xmlns:a="clr-namespace:NiVE3.Wpf.Attach"
@@ -46,7 +47,7 @@
                 </cv:ConverterItem.Converter>
             </cv:ConverterItem>
         </cv:ConverterCollection>
-        <cv:BooleanInvertConverter x:Key="BooleanInvertConverter"/>
+        <ucv:BooleanInvertConverter x:Key="BooleanInvertConverter"/>
 
         <r:BindingProxy x:Key="IsRenderLock" Data="{Binding IsRendering, Converter={StaticResource BooleanInvertConverter}}"/>
         <r:BindingProxy x:Key="ViewModelProxy" Data="{Binding}"/>

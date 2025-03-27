@@ -45,13 +45,18 @@ namespace NiVE3.Model
             }
         }
 
+        private bool parentLayerIsLock;
+        public bool ParentLayerIsLock
+        {
+            get { return parentLayerIsLock; }
+            set { SetProperty(ref parentLayerIsLock, value); }
+        }
+
         public PropertyBase Property { get; }
 
         public IPropertyModel ParentPropertyModel { get; }
 
         public Int128 ObjectId { get; }
-
-        public bool ParentLayerIsLock => LayerModel.IsLock;
 
         public string Id => Property.Id;
 
@@ -84,6 +89,7 @@ namespace NiVE3.Model
             HistoryModel = historyModel;
             Name = property.DisplayName;
             SourceStartPoint = layerModel.SourceStartPoint;
+            ParentLayerIsLock = layerModel.IsLock;
             Children = [];
 
             var objectIdHash = new XxHash3();
@@ -110,7 +116,7 @@ namespace NiVE3.Model
 
         public PropertyViewState CreateState(IPropertyViewModel viewModel)
         {
-            return Property.CreateState(new CompositionViewModelProxy(CompositionModel), LayerModel != null ? new LayerViewModelProxy(LayerModel) : null, EffectModel != null ? new EffectViewModelProxy(EffectModel) : null, viewModel);
+            return Property.CreateState(new CompositionViewModelProxy(CompositionModel), new LayerViewModelProxy(LayerModel), EffectModel != null ? new EffectViewModelProxy(EffectModel) : null, viewModel);
         }
 
         public bool ClearExpressionError()
@@ -568,9 +574,14 @@ namespace NiVE3.Model
 
         private void LayerModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(LayerModel.SourceStartPoint))
+            switch (e.PropertyName)
             {
-                SourceStartPoint = LayerModel?.SourceStartPoint ?? Time.Zero;
+                case nameof(LayerModel.SourceStartPoint):
+                    SourceStartPoint = LayerModel.SourceStartPoint;
+                    break;
+                case nameof(LayerModel.IsLock):
+                    ParentLayerIsLock = LayerModel.IsLock;
+                    break;
             }
         }
     }

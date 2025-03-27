@@ -11,6 +11,7 @@
              xmlns:uvo="clr-namespace:NiVE3.Plugin.ValueObject;assembly=NiVE3.Plugin"
              xmlns:r="clr-namespace:NiVE3.View.Resource"
              xmlns:cv="clr-namespace:NiVE3.View.Converter"
+             xmlns:ucv="clr-namespace:NiVE3.UI.Converter;assembly=NiVE3.UI"
              xmlns:pr="clr-namespace:NiVE3.View.Primitive"
              xmlns:pt="clr-namespace:NiVE3.View.Part"
              xmlns:a="clr-namespace:NiVE3.Wpf.Attach"
@@ -26,7 +27,7 @@
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <cv:IsNullConverter x:Key="IsNullConverter"/>
-        <cv:BooleanInvertConverter x:Key="BooleanInvertConverter"/>
+        <ucv:BooleanInvertConverter x:Key="BooleanInvertConverter"/>
         <cv:TimeToDoubleConverter x:Key="TimeToDoubleConverter" FrameRate="{Binding FrameRate}"/>
         <cv:EnumToVisibilityConverter x:Key="EnumToVisibilityConverter" UseAndCompare="True"/>
 

@@ -29,7 +29,7 @@
                 <BooleanToVisibilityConverter />
             </cv:ConverterItem>
         </cv:ConverterCollection>
-        <cv:BooleanInvertConverter x:Key="BooleanInvertConverter"/>
+        <ucv:BooleanInvertConverter x:Key="BooleanInvertConverter"/>
         <cv:LocalizationConverter x:Key="CacheGroupWithCacheLimitSizeConverter" LocalizeFormat="{gm:LanguageResource ResourceKey=OptionView_Performance_CacheSetting}"/>
         <cv:LocalizationConverter x:Key="MaxCacheLimitSizeConverter" LocalizeFormat="{gm:LanguageResource ResourceKey=OptionView_Performance_CacheLimit_MaxSizeLabel}"/>
 

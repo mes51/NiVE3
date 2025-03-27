@@ -39,6 +39,14 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref isEnable, value); }
         }
 
+        private bool parentLayerIsLock;
+        [NeedWire(nameof(PropertyGroupModel), IsOneWay = true)]
+        public bool ParentLayerIsLock
+        {
+            get { return parentLayerIsLock; }
+            set { SetProperty(ref parentLayerIsLock, value); }
+        }
+
         [NeedWire(nameof(PropertyGroupModel), IsOneWay = true)]
         public bool UseEnableSwitch { get; set; }
 

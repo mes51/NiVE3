@@ -5,13 +5,17 @@
                          xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
                          xmlns:local="clr-namespace:NiVE3.Property.Control"
                          xmlns:plc="clr-namespace:NiVE3.Plugin.Property.Control;assembly=NiVE3.Plugin"
+                         xmlns:ucv="clr-namespace:NiVE3.UI.Converter;assembly=NiVE3.UI"
                          xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
                          mc:Ignorable="d" 
                          x:Name="Root"
                          DataContextChanged="Root_DataContextChanged"
                          d:DesignHeight="450" d:DesignWidth="800">
+    <plc:PropertyControlBase.Resources>
+        <ucv:BooleanInvertConverter x:Key="BooleanInvertConverter"/>
+    </plc:PropertyControlBase.Resources>
     <Grid>
-        <Button x:Name="EditButton" Content="{gm:LanguageResource ResourceKey=SourceTextPropertyControl_Edit}" Width="Auto" HorizontalAlignment="Left" Click="EditButton_Click"/>
+        <Button x:Name="EditButton" Content="{gm:LanguageResource ResourceKey=SourceTextPropertyControl_Edit}" Width="Auto" HorizontalAlignment="Left" IsEnabled="{Binding ParentLayerIsLock, Converter={StaticResource BooleanInvertConverter}}" Click="EditButton_Click"/>
 
         <Popup x:Name="EditPopup" StaysOpen="True" Placement="Bottom" PlacementTarget="{Binding ElementName=EditButton}" MinWidth="200" MinHeight="100">
             <Border Background="White" BorderBrush="DarkGray" BorderThickness="1">

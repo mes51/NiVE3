@@ -18,6 +18,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using NiVE3.Shared.Extension;
+using NiVE3.UI.Converter;
 using NiVE3.View.Converter;
 
 namespace NiVE3.View.Primitive

@@ -298,6 +298,8 @@ namespace NiVE3.Plugin.Interfaces
 
         object? CurrentTimeRawValue { get; set; }
 
+        bool ParentLayerIsLock { get; }
+
         bool IsEnableExpression { get; }
 
         ICommand BeginEditCommand { get; }

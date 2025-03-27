@@ -74,6 +74,14 @@ namespace NiVE3.ViewModel
             }
         }
 
+        private bool parentLayerIsLock;
+        [NeedWire(nameof(PropertyModel), IsOneWay = true)]
+        public bool ParentLayerIsLock
+        {
+            get { return parentLayerIsLock; }
+            set { SetProperty(ref parentLayerIsLock, value); }
+        }
+
         public ObservableCollectionView<IPropertyModel, IInternalPropertyViewModel>? Children => null;
 
         private bool useEditingValue;

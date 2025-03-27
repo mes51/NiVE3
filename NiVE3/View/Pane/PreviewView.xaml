@@ -8,6 +8,7 @@
              xmlns:pr="clr-namespace:NiVE3.View.Primitive"
              xmlns:pt="clr-namespace:NiVE3.View.Part"
              xmlns:r="clr-namespace:NiVE3.View.Resource"
+             xmlns:ucv="clr-namespace:NiVE3.UI.Converter;assembly=NiVE3.UI"
              xmlns:cv="clr-namespace:NiVE3.View.Converter"
              xmlns:vm="clr-namespace:NiVE3.ViewModel"
              xmlns:mk="clr-namespace:NiVE3.Shared.Wpf.Markup;assembly=NiVE3.Shared"
@@ -28,7 +29,7 @@
         <cv:EnumToLocalizedNameConverter x:Key="EnumToLocalizedNameConverter"/>
         <cv:ColorToBrushConverter x:Key="ColorToBrushConverter"/>
         <cv:EnumToBoolConverter x:Key="EnumToBoolConverter"/>
-        <cv:BooleanInvertConverter x:Key="BooleanInvertConverter"/>
+        <ucv:BooleanInvertConverter x:Key="BooleanInvertConverter"/>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
 
         <r:BindingProxy x:Key="ViewModelProxy" Data="{Binding}"/>

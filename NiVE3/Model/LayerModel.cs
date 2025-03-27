@@ -37,10 +37,11 @@ using ComputeSharp;
 using NiVE3.InternalShader;
 using NiVE3.Config;
 using NAudio.Dsp;
+using NiVE3.Mvvm;
 
 namespace NiVE3.Model
 {
-    partial class LayerModel : BindableBase, IDisposable, ILayerObject, IFootageSourceUsingLayerObject
+    partial class LayerModel : WeakPropertyChangedBindingBase, IDisposable, ILayerObject, IFootageSourceUsingLayerObject
     {
         const string TransformGroupId = nameof(TransformGroupId);
 

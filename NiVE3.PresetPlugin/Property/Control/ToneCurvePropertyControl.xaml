@@ -8,6 +8,7 @@
                         xmlns:pc="clr-namespace:NiVE3.Plugin.Property.Control;assembly=NiVE3.Plugin"
                         xmlns:v="clr-namespace:NiVE3.PresetPlugin.Internal.View"
                         xmlns:cv="clr-namespace:NiVE3.PresetPlugin.Internal.View.Converter"
+                        xmlns:ucv="clr-namespace:NiVE3.UI.Converter;assembly=NiVE3.UI"
                         xmlns:r="clr-namespace:NiVE3.PresetPlugin.Resource"
                         xmlns:ur="clr-namespace:NiVE3.UI.Resources;assembly=NiVE3.UI"
                         xmlns:gm="clr-namespace:NiVE3.PresetPlugin.Resource.Wpf.GeneratedMarkup"
@@ -30,6 +31,7 @@
             <sys:Int32 x:Key="Three">3</sys:Int32>
             <sys:Int32 x:Key="Four">4</sys:Int32>
 
+            <ucv:BooleanInvertConverter x:Key="BooleanInvertConverter"/>
             <cv:EqualToVisibilityConverter x:Key="EqualToVisibilityConverter"/>
             <cv:EqualToVisibilityConverter x:Key="InvertedEqualToVisibilityConverter" Inverted="True"/>
 
@@ -161,18 +163,56 @@
                         </Grid>
 
                         <!-- display only -->
-                        <v:ToneCurvePointEditView Points="{Binding ElementName=Root, Path=APoints}" IsDashed="True" Visibility="{Binding ElementName=EditChannelComboBox, Path=SelectedIndex, Converter={StaticResource InvertedEqualToVisibilityConverter}, ConverterParameter={StaticResource Four}}" Style="{StaticResource BlackLineBackgroundToneCurvePointEditViewStyle}"/>
-                        <v:ToneCurvePointEditView Points="{Binding ElementName=Root, Path=BPoints}" LineBrush="#0000FF" Visibility="{Binding ElementName=EditChannelComboBox, Path=SelectedIndex, Converter={StaticResource InvertedEqualToVisibilityConverter}, ConverterParameter={StaticResource Three}}" Style="{StaticResource BackgroundToneCurvePointEditViewStyle}"/>
-                        <v:ToneCurvePointEditView Points="{Binding ElementName=Root, Path=GPoints}" LineBrush="#00FF00" Visibility="{Binding ElementName=EditChannelComboBox, Path=SelectedIndex, Converter={StaticResource InvertedEqualToVisibilityConverter}, ConverterParameter={StaticResource Two}}" Style="{StaticResource BackgroundToneCurvePointEditViewStyle}"/>
-                        <v:ToneCurvePointEditView Points="{Binding ElementName=Root, Path=RPoints}" LineBrush="#FF0000" Visibility="{Binding ElementName=EditChannelComboBox, Path=SelectedIndex, Converter={StaticResource InvertedEqualToVisibilityConverter}, ConverterParameter={StaticResource One}}" Style="{StaticResource BackgroundToneCurvePointEditViewStyle}"/>
-                        <v:ToneCurvePointEditView Points="{Binding ElementName=Root, Path=RgbPoints}" Visibility="{Binding ElementName=EditChannelComboBox, Path=SelectedIndex, Converter={StaticResource InvertedEqualToVisibilityConverter}, ConverterParameter={StaticResource Zero}}" Style="{StaticResource BlackLineBackgroundToneCurvePointEditViewStyle}"/>
+                        <v:ToneCurvePointEditView Points="{Binding ElementName=Root, Path=APoints}" 
+                                                  IsDashed="True"
+                                                  Visibility="{Binding ElementName=EditChannelComboBox, Path=SelectedIndex, Converter={StaticResource InvertedEqualToVisibilityConverter}, ConverterParameter={StaticResource Four}}"
+                                                  IsEnabled="{Binding ParentLayerIsLock, Converter={StaticResource BooleanInvertConverter}}"
+                                                  Style="{StaticResource BlackLineBackgroundToneCurvePointEditViewStyle}"/>
+                        <v:ToneCurvePointEditView Points="{Binding ElementName=Root, Path=BPoints}"
+                                                  LineBrush="#0000FF"
+                                                  Visibility="{Binding ElementName=EditChannelComboBox, Path=SelectedIndex, Converter={StaticResource InvertedEqualToVisibilityConverter}, ConverterParameter={StaticResource Three}}"
+                                                  IsEnabled="{Binding ParentLayerIsLock, Converter={StaticResource BooleanInvertConverter}}"
+                                                  Style="{StaticResource BackgroundToneCurvePointEditViewStyle}"/>
+                        <v:ToneCurvePointEditView Points="{Binding ElementName=Root, Path=GPoints}"
+                                                  LineBrush="#00FF00"
+                                                  Visibility="{Binding ElementName=EditChannelComboBox, Path=SelectedIndex, Converter={StaticResource InvertedEqualToVisibilityConverter}, ConverterParameter={StaticResource Two}}"
+                                                  IsEnabled="{Binding ParentLayerIsLock, Converter={StaticResource BooleanInvertConverter}}"
+                                                  Style="{StaticResource BackgroundToneCurvePointEditViewStyle}"/>
+                        <v:ToneCurvePointEditView Points="{Binding ElementName=Root, Path=RPoints}"
+                                                  LineBrush="#FF0000"
+                                                  Visibility="{Binding ElementName=EditChannelComboBox, Path=SelectedIndex, Converter={StaticResource InvertedEqualToVisibilityConverter}, ConverterParameter={StaticResource One}}"
+                                                  IsEnabled="{Binding ParentLayerIsLock, Converter={StaticResource BooleanInvertConverter}}"
+                                                  Style="{StaticResource BackgroundToneCurvePointEditViewStyle}"/>
+                        <v:ToneCurvePointEditView Points="{Binding ElementName=Root, Path=RgbPoints}"
+                                                  Visibility="{Binding ElementName=EditChannelComboBox, Path=SelectedIndex, Converter={StaticResource InvertedEqualToVisibilityConverter}, ConverterParameter={StaticResource Zero}}"
+                                                  IsEnabled="{Binding ParentLayerIsLock, Converter={StaticResource BooleanInvertConverter}}"
+                                                  Style="{StaticResource BlackLineBackgroundToneCurvePointEditViewStyle}"/>
 
                         <!-- editable -->
-                        <v:ToneCurvePointEditView Points="{Binding ElementName=Root, Path=APoints}" IsDashed="True" Visibility="{Binding ElementName=EditChannelComboBox, Path=SelectedIndex, Converter={StaticResource EqualToVisibilityConverter}, ConverterParameter={StaticResource Four}}" Style="{StaticResource BlackLineEditableToneCurvePointEditViewStyle}"/>
-                        <v:ToneCurvePointEditView Points="{Binding ElementName=Root, Path=BPoints}" LineBrush="#0000FF" Visibility="{Binding ElementName=EditChannelComboBox, Path=SelectedIndex, Converter={StaticResource EqualToVisibilityConverter}, ConverterParameter={StaticResource Three}}" Style="{StaticResource EditableToneCurvePointEditViewStyle}"/>
-                        <v:ToneCurvePointEditView Points="{Binding ElementName=Root, Path=GPoints}" LineBrush="#00FF00" Visibility="{Binding ElementName=EditChannelComboBox, Path=SelectedIndex, Converter={StaticResource EqualToVisibilityConverter}, ConverterParameter={StaticResource Two}}" Style="{StaticResource EditableToneCurvePointEditViewStyle}"/>
-                        <v:ToneCurvePointEditView Points="{Binding ElementName=Root, Path=RPoints}" LineBrush="#FF0000" Visibility="{Binding ElementName=EditChannelComboBox, Path=SelectedIndex, Converter={StaticResource EqualToVisibilityConverter}, ConverterParameter={StaticResource One}}" Style="{StaticResource EditableToneCurvePointEditViewStyle}"/>
-                        <v:ToneCurvePointEditView Points="{Binding ElementName=Root, Path=RgbPoints}" Visibility="{Binding ElementName=EditChannelComboBox, Path=SelectedIndex, Converter={StaticResource EqualToVisibilityConverter}, ConverterParameter={StaticResource Zero}}" Style="{StaticResource BlackLineEditableToneCurvePointEditViewStyle}"/>
+                        <v:ToneCurvePointEditView Points="{Binding ElementName=Root, Path=APoints}"
+                                                  IsDashed="True"
+                                                  Visibility="{Binding ElementName=EditChannelComboBox, Path=SelectedIndex, Converter={StaticResource EqualToVisibilityConverter}, ConverterParameter={StaticResource Four}}"
+                                                  IsEnabled="{Binding ParentLayerIsLock, Converter={StaticResource BooleanInvertConverter}}"
+                                                  Style="{StaticResource BlackLineEditableToneCurvePointEditViewStyle}"/>
+                        <v:ToneCurvePointEditView Points="{Binding ElementName=Root, Path=BPoints}"
+                                                  LineBrush="#0000FF"
+                                                  Visibility="{Binding ElementName=EditChannelComboBox, Path=SelectedIndex, Converter={StaticResource EqualToVisibilityConverter}, ConverterParameter={StaticResource Three}}"
+                                                  IsEnabled="{Binding ParentLayerIsLock, Converter={StaticResource BooleanInvertConverter}}"
+                                                  Style="{StaticResource EditableToneCurvePointEditViewStyle}"/>
+                        <v:ToneCurvePointEditView Points="{Binding ElementName=Root, Path=GPoints}"
+                                                  LineBrush="#00FF00"
+                                                  Visibility="{Binding ElementName=EditChannelComboBox, Path=SelectedIndex, Converter={StaticResource EqualToVisibilityConverter}, ConverterParameter={StaticResource Two}}"
+                                                  IsEnabled="{Binding ParentLayerIsLock, Converter={StaticResource BooleanInvertConverter}}"
+                                                  Style="{StaticResource EditableToneCurvePointEditViewStyle}"/>
+                        <v:ToneCurvePointEditView Points="{Binding ElementName=Root, Path=RPoints}"
+                                                  LineBrush="#FF0000"
+                                                  Visibility="{Binding ElementName=EditChannelComboBox, Path=SelectedIndex, Converter={StaticResource EqualToVisibilityConverter}, ConverterParameter={StaticResource One}}"
+                                                  IsEnabled="{Binding ParentLayerIsLock, Converter={StaticResource BooleanInvertConverter}}"
+                                                  Style="{StaticResource EditableToneCurvePointEditViewStyle}"/>
+                        <v:ToneCurvePointEditView Points="{Binding ElementName=Root, Path=RgbPoints}"
+                                                  Visibility="{Binding ElementName=EditChannelComboBox, Path=SelectedIndex, Converter={StaticResource EqualToVisibilityConverter}, ConverterParameter={StaticResource Zero}}"
+                                                  IsEnabled="{Binding ParentLayerIsLock, Converter={StaticResource BooleanInvertConverter}}"
+                                                  Style="{StaticResource BlackLineEditableToneCurvePointEditViewStyle}"/>
                     </Grid>
                 </Border>
             </Grid>

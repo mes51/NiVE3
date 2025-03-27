@@ -4,12 +4,12 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Data;
+using System.Windows;
 
-namespace NiVE3.View.Converter
+namespace NiVE3.UI.Converter
 {
-    class BooleanInvertConverter : IValueConverter
+    public class BooleanInvertConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {

@@ -9,6 +9,7 @@
                            xmlns:gm="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
                            xmlns:pr="clr-namespace:NiVE3.UI.Primitive;assembly=NiVE3.UI"
                            xmlns:cv="clr-namespace:NiVE3.Plugin.Property.Control.Converter"
+                           xmlns:ucv="clr-namespace:NiVE3.UI.Converter;assembly=NiVE3.UI"
                            mc:Ignorable="d" 
                            x:Name="Root"
                            DataContextChanged="Root_DataContextChanged"
@@ -21,6 +22,7 @@
                 <ResourceDictionary Source="/NiVE3.Plugin;component/Property/Control/Resources/Icons.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
+            <ucv:BooleanInvertConverter x:Key="BooleanInvertConverter"/>
             <cv:LessThanConverter x:Key="LessThanConverter"/>
 
             <Style x:Key="SliderEventBindingStyle" TargetType="{x:Type pr:SlidableNumberTextBox}" BasedOn="{StaticResource {x:Type pr:SlidableNumberTextBox}}">
@@ -71,8 +73,8 @@
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
 
-        <pr:SlidableNumberTextBox Grid.Column="0" x:Name="RotateCountSlider" Value="{Binding ElementName=Root, Path=RawRotateCount}" DisplayValue="{Binding ElementName=Root, Path=RotateCount}" ShowDisplayValue="{Binding IsEnableExpression}" Style="{StaticResource RotateCountSliderStyle}"/>
+        <pr:SlidableNumberTextBox Grid.Column="0" x:Name="RotateCountSlider" Value="{Binding ElementName=Root, Path=RawRotateCount}" DisplayValue="{Binding ElementName=Root, Path=RotateCount}" ShowDisplayValue="{Binding IsEnableExpression}" IsEnabled="{Binding ParentLayerIsLock, Converter={StaticResource BooleanInvertConverter}}" Style="{StaticResource RotateCountSliderStyle}"/>
         <Path Grid.Column="1" Fill="{gm:AppearanceResource ResourceKey=TextBrush}" Data="{StaticResource CrossIcon}" VerticalAlignment="Center" Margin="0,4,0,0" />
-        <pr:SlidableNumberTextBox Grid.Column="2" x:Name="AngleSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=RawAngle}" DisplayValue="{Binding ElementName=Root, Path=Angle}" ShowDisplayValue="{Binding IsEnableExpression}" Style="{StaticResource AngleSliderStyle}"/>
+        <pr:SlidableNumberTextBox Grid.Column="2" x:Name="AngleSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=RawAngle}" DisplayValue="{Binding ElementName=Root, Path=Angle}" ShowDisplayValue="{Binding IsEnableExpression}" IsEnabled="{Binding ParentLayerIsLock, Converter={StaticResource BooleanInvertConverter}}" Style="{StaticResource AngleSliderStyle}"/>
     </Grid>
 </local:PropertyControlBase>

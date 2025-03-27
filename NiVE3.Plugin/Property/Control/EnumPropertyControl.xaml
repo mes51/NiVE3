@@ -6,6 +6,7 @@
                            xmlns:local="clr-namespace:NiVE3.Plugin.Property.Control"
                            xmlns:upr="clr-namespace:NiVE3.UI.Primitive;assembly=NiVE3.UI"
                            xmlns:cv="clr-namespace:NiVE3.Plugin.Property.Control.Converter"
+                           xmlns:ucv="clr-namespace:NiVE3.UI.Converter;assembly=NiVE3.UI"
                            mc:Ignorable="d" 
                            x:Name="Root"
                            DataContextChanged="Root_DataContextChanged"
@@ -13,6 +14,7 @@
     <local:PropertyControlBase.Resources>
         <cv:EnumToLocalizedNameConverter x:Key="EnumToLocalizedNameConverter" EnumType="{Binding Property.EnumType}" LanguageResourceDictionaryType="{Binding Property.EnumNameLanguageResourceDictionaryType}"/>
         <cv:EnumTypeToArrayConverter x:Key="EnumTypeToArrayConverter"/>
+        <ucv:BooleanInvertConverter x:Key="BooleanInvertConverter"/>
 
         <Style x:Key="SelectBoxStyle" TargetType="{x:Type upr:ContextMenuSelectBox}" BasedOn="{StaticResource {x:Type upr:ContextMenuSelectBox}}">
             <Setter Property="Margin" Value="5,2,0,2"/>
@@ -32,6 +34,7 @@
                                   Style="{StaticResource SelectBoxStyle}"
                                   SelectedItem="{Binding ElementName=Root, Path=SelectedValue}"
                                   ItemsSource="{Binding Property.EnumType, Converter={StaticResource EnumTypeToArrayConverter}}"
+                                  IsEnabled="{Binding ParentLayerIsLock, Converter={StaticResource BooleanInvertConverter}}"
                                   SelectItemChangedByUser="ContextMenuSelectBox_SelectItemChangedByUser"/>
     </Grid>
 </local:PropertyControlBase>

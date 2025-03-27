@@ -7,6 +7,7 @@
                            xmlns:local="clr-namespace:NiVE3.Plugin.Property.Control"
                            xmlns:pr="clr-namespace:NiVE3.UI.Primitive;assembly=NiVE3.UI"
                            xmlns:gm="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
+                           xmlns:ucv="clr-namespace:NiVE3.UI.Converter;assembly=NiVE3.UI"
                            mc:Ignorable="d" 
                            x:Name="Root"
                            DataContextChanged="Root_DataContextChanged"
@@ -18,6 +19,8 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/NiVE3.Plugin;component/Property/Control/Resources/Icons.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+
+            <ucv:BooleanInvertConverter x:Key="BooleanInvertConverter"/>
 
             <Style x:Key="SlidableNumberTextBoxStyle" TargetType="{x:Type pr:SlidableNumberTextBox}" BasedOn="{StaticResource {x:Type pr:SlidableNumberTextBox}}">
                 <Setter Property="VerticalAlignment" Value="Center"/>
@@ -41,10 +44,10 @@
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
 
-        <pr:SlidableNumberTextBox Grid.Column="0" x:Name="ValueXSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=RawValueX}" DisplayValue="{Binding ElementName=Root, Path=ValueX}" ShowDisplayValue="{Binding IsEnableExpression}" Margin="5,0,2,0" Style="{StaticResource SlidableNumberTextBoxStyle}"/>
+        <pr:SlidableNumberTextBox Grid.Column="0" x:Name="ValueXSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=RawValueX}" DisplayValue="{Binding ElementName=Root, Path=ValueX}" ShowDisplayValue="{Binding IsEnableExpression}" Margin="5,0,2,0" IsEnabled="{Binding ParentLayerIsLock, Converter={StaticResource BooleanInvertConverter}}" Style="{StaticResource SlidableNumberTextBoxStyle}"/>
         <Path Grid.Column="1" Fill="{gm:AppearanceResource ResourceKey=TextBrush}" Data="{StaticResource CrossIcon}" VerticalAlignment="Center" Margin="0,4,0,0" />
-        <pr:SlidableNumberTextBox Grid.Column="2" x:Name="ValueYSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=RawValueY}" DisplayValue="{Binding ElementName=Root, Path=ValueY}" ShowDisplayValue="{Binding IsEnableExpression}" Margin="5,0,2,0" Style="{StaticResource SlidableNumberTextBoxStyle}"/>
+        <pr:SlidableNumberTextBox Grid.Column="2" x:Name="ValueYSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=RawValueY}" DisplayValue="{Binding ElementName=Root, Path=ValueY}" ShowDisplayValue="{Binding IsEnableExpression}" Margin="5,0,2,0" IsEnabled="{Binding ParentLayerIsLock, Converter={StaticResource BooleanInvertConverter}}" Style="{StaticResource SlidableNumberTextBoxStyle}"/>
         <Path Grid.Column="3" Fill="{gm:AppearanceResource ResourceKey=TextBrush}" Data="{StaticResource CrossIcon}" VerticalAlignment="Center" Margin="0,4,0,0"/>
-        <pr:SlidableNumberTextBox Grid.Column="4" x:Name="ValueZSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=RawValueZ}" DisplayValue="{Binding ElementName=Root, Path=ValueZ}" ShowDisplayValue="{Binding IsEnableExpression}" Margin="5,0,0,0" Style="{StaticResource SlidableNumberTextBoxStyle}"/>
+        <pr:SlidableNumberTextBox Grid.Column="4" x:Name="ValueZSlider" Digit="{Binding Property.Digit}" Value="{Binding ElementName=Root, Path=RawValueZ}" DisplayValue="{Binding ElementName=Root, Path=ValueZ}" ShowDisplayValue="{Binding IsEnableExpression}" Margin="5,0,0,0" IsEnabled="{Binding ParentLayerIsLock, Converter={StaticResource BooleanInvertConverter}}" Style="{StaticResource SlidableNumberTextBoxStyle}"/>
     </Grid>
 </local:PropertyControlBase>
