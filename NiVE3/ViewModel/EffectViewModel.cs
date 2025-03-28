@@ -48,6 +48,14 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref isEnable, value); }
         }
 
+        private bool parentLayerIsLock;
+        [NeedWire(nameof(EffectModel), IsOneWay = true)]
+        public bool ParentLayerIsLock
+        {
+            get { return parentLayerIsLock; }
+            set { SetProperty(ref parentLayerIsLock, value); }
+        }
+
         private bool isExpanded;
         public bool IsExpanded
         {
@@ -140,7 +148,8 @@ namespace NiVE3.ViewModel
             {
                 IsNameEditing = true;
                 PrevName = Name;
-            }, () => !IsNameEditing && !IsCommentEditing)
+            }, () => !ParentLayerIsLock && !IsNameEditing && !IsCommentEditing)
+                .ObservesProperty(() => ParentLayerIsLock)
                 .ObservesProperty(() => IsNameEditing)
                 .ObservesProperty(() => IsCommentEditing);
 
@@ -148,7 +157,8 @@ namespace NiVE3.ViewModel
             {
                 IsCommentEditing = true;
                 PrevComment = Comment;
-            }, () => !IsNameEditing && !IsCommentEditing)
+            }, () => !ParentLayerIsLock && !IsNameEditing && !IsCommentEditing)
+                .ObservesProperty(() => ParentLayerIsLock)
                 .ObservesProperty(() => IsNameEditing)
                 .ObservesProperty(() => IsCommentEditing);
 

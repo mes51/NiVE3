@@ -289,7 +289,9 @@ namespace NiVE3.ViewModel
             {
                 PrevName = Name;
                 IsNameEditing = true;
-            }, () => IsRenameable && !IsNameEditing).ObservesProperty(() => IsNameEditing);
+            }, () => !ParentLayerIsLock && IsRenameable && !IsNameEditing)
+                .ObservesProperty(() => ParentLayerIsLock)
+                .ObservesProperty(() => IsNameEditing);
 
             EndEditNameCommand = new DelegateCommand<bool?>(commit =>
             {

@@ -9,6 +9,7 @@
              xmlns:pt="clr-namespace:NiVE3.View.Part"
              xmlns:pr="clr-namespace:NiVE3.View.Primitive"
              xmlns:cv="clr-namespace:NiVE3.View.Converter"
+             xmlns:ucv="clr-namespace:NiVE3.UI.Converter;assembly=NiVE3.UI"
              xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
              mc:Ignorable="d" 
              x:Name="Root"
@@ -20,6 +21,7 @@
     <UserControl.Resources>
         <BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
         <cv:EnumerableIsEmptyConverter x:Key="EnumerableIsEmptyConverter"/>
+        <ucv:BooleanInvertConverter x:Key="BooleanInvertConverter"/>
     </UserControl.Resources>
     <pt:LayerItemExpander HeaderText="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                           IndentLevel="{Binding ElementName=Root, Path=IndentLevel}"
@@ -37,12 +39,12 @@
                           HideExpander="{Binding Properties.Children, Converter={StaticResource EnumerableIsEmptyConverter}}">
         <pt:LayerItemExpander.Switches>
             <Grid Margin="1.5,0,0,0">
-                <CheckBox Content="{gm:FontawesomeResource ResourceKey=FlorinSign}" Style="{StaticResource LayerSwitchCheckBox}" IsChecked="{Binding IsEnable, Mode=OneWay}" HorizontalAlignment="Left" Command="{Binding ChangeIsEnableCommand}"/>
+                <CheckBox Content="{gm:FontawesomeResource ResourceKey=FlorinSign}" Style="{StaticResource LayerSwitchCheckBox}" IsChecked="{Binding IsEnable, Mode=OneWay}" IsEnabled="{Binding ParentLayerIsLock, Converter={StaticResource BooleanInvertConverter}}" HorizontalAlignment="Left" Command="{Binding ChangeIsEnableCommand}"/>
             </Grid>
         </pt:LayerItemExpander.Switches>
         <pt:LayerItemExpander.HeaderSubItem>
             <Grid Width="{Binding ElementName=Root, Path=CommentAreaWidth}" Visibility="{Binding ElementName=Root, Path=IsCommentColumnVisible, Converter={StaticResource BoolToVisibilityConverter}}" HorizontalAlignment="Left" PreviewMouseDown="CommentGrid_PreviewMouseDown">
-                <pr:EditableTextBlock Text="{Binding Comment}" IsEditing="{Binding IsCommentEditing}" EndEditCommand="{Binding EndEditCommentCommand}"/>
+                <pr:EditableTextBlock Text="{Binding Comment}" IsEditing="{Binding IsCommentEditing}" IsEnabled="{Binding ParentLayerIsLock, Converter={StaticResource BooleanInvertConverter}}" EndEditCommand="{Binding EndEditCommentCommand}"/>
             </Grid>
         </pt:LayerItemExpander.HeaderSubItem>
         <pt:PropertyCollectionView ItemsSource="{Binding Properties.Children}"

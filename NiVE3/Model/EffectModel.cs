@@ -42,6 +42,13 @@ namespace NiVE3.Model
             set { SetProperty(ref isEnable, value); }
         }
 
+        private bool parentLayerIsLock;
+        public bool ParentLayerIsLock
+        {
+            get { return parentLayerIsLock; }
+            set { SetProperty(ref parentLayerIsLock, value); }
+        }
+
         public PropertyGroupModel Properties { get; }
 
         public string EffectName => Metadata.Name;
@@ -86,9 +93,9 @@ namespace NiVE3.Model
             Properties = new PropertyGroupModel(new PropertyGroup(EffectPropertyGroupId, "", effect.Value.GetProperties(new Int32Size(layerModel.SourceWidth, layerModel.SourceHeight))), EffectId.ToInt128(), projectModel, compositionModel, layerModel, this, historyModel, false);
             IsSupportGpu = metadata.IsSupportGpu;
 
+            LayerModel.PropertyChanged += LayerModel_PropertyChanged;
             Properties.ValueUpdated += Property_ValueUpdated;
             Properties.ValueCommited += Properties_ValueCommited;
-
             PropertyChanged += EffectModel_PropertyChanged;
         }
 
@@ -232,6 +239,14 @@ namespace NiVE3.Model
         public bool PropertyIsChangeableByTime()
         {
             return Properties.IsChangeableByTime();
+        }
+
+        private void LayerModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(LayerModel.IsLock))
+            {
+                ParentLayerIsLock = LayerModel.IsLock;
+            }
         }
 
         private void Property_ValueUpdated(object? sender, EventArgs e)

@@ -7,6 +7,7 @@
                         xmlns:dd="urn:gong-wpf-dragdrop"
                         xmlns:a="clr-namespace:NiVE3.Wpf.Attach"
                         xmlns:pr="clr-namespace:NiVE3.View.Primitive"
+                        xmlns:ucv="clr-namespace:NiVE3.UI.Converter;assembly=NiVE3.UI"
                         xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
                         xmlns:cgm="clr-namespace:NiVE3.Config.Wpf.GeneratedMarkup"
                         mc:Ignorable="d" 
@@ -18,6 +19,7 @@
                         d:DesignHeight="450" d:DesignWidth="800">
     <local:PropertyViewBase.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <ucv:BooleanInvertConverter x:Key="BooleanInvertConverter"/>
 
         <Style x:Key="LayerItemExpanderStyle" TargetType="{x:Type local:LayerItemExpander}" BasedOn="{StaticResource {x:Type local:LayerItemExpander}}">
             <Style.Triggers>
@@ -49,7 +51,7 @@
                              Style="{StaticResource LayerItemExpanderStyle}">
         <local:LayerItemExpander.Switches>
             <Grid Margin="1.5,0,0,0" Visibility="{Binding UseEnableSwitch, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue={x:Static Visibility.Collapsed}}">
-                <CheckBox Content="{gm:FontawesomeResource ResourceKey=Eye}" Style="{StaticResource LayerSwitchCheckBox}" IsChecked="{Binding IsEnable, Mode=OneWay}" HorizontalAlignment="Left" Command="{Binding ChangeIsEnableCommand}"/>
+                <CheckBox Content="{gm:FontawesomeResource ResourceKey=Eye}" Style="{StaticResource LayerSwitchCheckBox}" IsChecked="{Binding IsEnable, Mode=OneWay}" HorizontalAlignment="Left" IsEnabled="{Binding ParentLayerIsLock, Converter={StaticResource BooleanInvertConverter}}" Command="{Binding ChangeIsEnableCommand}"/>
             </Grid>
         </local:LayerItemExpander.Switches>
         <local:PropertyCollectionView ItemsSource="{Binding Children}"

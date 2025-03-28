@@ -111,17 +111,31 @@ namespace NiVE3.View.Part
 
         private void PropertyViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(PropertyViewModel.ExpressionCode))
+            switch (e.PropertyName)
             {
-                HasExpression = !string.IsNullOrEmpty(ViewModel?.ExpressionCode);
-                BeforeNameSpaceWidth = KeyFrameSwitchWidth + (HasExpression ? UIParameters.ArrowWidth : 0.0);
+                case nameof(PropertyViewModel.ExpressionCode):
+                    HasExpression = !string.IsNullOrEmpty(ViewModel?.ExpressionCode);
+                    BeforeNameSpaceWidth = KeyFrameSwitchWidth + (HasExpression ? UIParameters.ArrowWidth : 0.0);
+                    break;
+                case nameof(PropertyViewModel.ParentLayerIsLock):
+                    {
+                        var viewModel = ViewModel;
+                        if (viewModel == null || !viewModel.ParentLayerIsLock || !viewModel.EndEditExpressionCommand.CanExecute(null))
+                        {
+                            return;
+                        }
+
+                        viewModel.EndEditExpressionCommand.Execute(null);
+                        Mouse.Capture(null);
+                    }
+                    break;
             }
         }
 
         private void ExpressionCodeTextBlock_MouseDown(object sender, MouseButtonEventArgs e)
         {
             var viewModel = ViewModel;
-            if (viewModel == null || !viewModel.BeginEditExpressionCommand.CanExecute(null))
+            if (viewModel == null || viewModel.ParentLayerIsLock || !viewModel.BeginEditExpressionCommand.CanExecute(null))
             {
                 return;
             }

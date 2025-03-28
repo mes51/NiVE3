@@ -45,6 +45,7 @@
         <cv:EnumToLocalizedNameConverter x:Key="EnumToLocalizedNameConverter"/>
         <cv:CollectionIndexConverter x:Key="CollectionIndexConverter" Offset="1"/>
         <ucv:EqualMultiValueConverter x:Key="EqualMultiValueConverter"/>
+        <ucv:BooleanInvertConverter x:Key="BooleanInvertConverter"/>
 
         <cv:ConverterCollection x:Key="AVTypeVisibleConverter">
             <cv:ConverterItem Converter="{StaticResource EnumToBoolConverter}" TargetType="{x:Type sys:Boolean}"/>
@@ -559,7 +560,7 @@
                 </Grid>
 
                 <Grid Grid.Column="2" Style="{StaticResource ColumnGrid}" dd:DragDrop.DragSourceIgnore="True">
-                    <Button Style="{StaticResource TagColorButton}"/>
+                    <Button Style="{StaticResource TagColorButton}" IsEnabled="{Binding IsLock, Converter={StaticResource BooleanInvertConverter}}"/>
                 </Grid>
 
                 <Grid Grid.Column="3" Style="{StaticResource ColumnGrid}">
@@ -577,11 +578,13 @@
                 <Grid Grid.Column="6" Style="{StaticResource ColumnGrid}">
                     <StackPanel Orientation="Horizontal" Margin="1.5,0,0,0">
                         <CheckBox IsChecked="{Binding IsEnableShy, Mode=OneWay}"
+                                  IsEnabled="{Binding IsLock, Converter={StaticResource BooleanInvertConverter}}"
                                   Style="{StaticResource ShyLayerSwitch}"
                                   Command="{Binding ChangeLayerSwitchCommand}"
                                   CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableShy}"/>
 
                         <CheckBox Content="{gm:FontawesomeResource ResourceKey=Sun}"
+                                  IsEnabled="{Binding IsLock, Converter={StaticResource BooleanInvertConverter}}"
                                   Style="{StaticResource CollapseSwitch}"
                                   IsChecked="{Binding IsEnableCollapse, Mode=OneWay}"
                                   Command="{Binding ChangeLayerSwitchCommand, Mode=OneWay}"
@@ -592,12 +595,14 @@
                                                      Height="15"
                                                      Margin="1,0,0,0"
                                                      Visibility="{Binding SourceType, Converter={StaticResource AVTypeVisibleConverter}, ConverterParameter={x:Static local:LayerView.CompositionDisplayableSourceType}}"
+                                                     IsEnabled="{Binding IsLock, Converter={StaticResource BooleanInvertConverter}}"
                                                      Command="{Binding ChangeInterpolationQualityCommand}">
                             <pt:MultipleStateLayerSwitchItem State="{x:Static pi:ImageInterpolationQuality.Level1}" Icon="{StaticResource ImageInterpolationLevel1Icon}"/>
                             <pt:MultipleStateLayerSwitchItem State="{x:Static pi:ImageInterpolationQuality.Level2}" Icon="{StaticResource ImageInterpolationLevel2Icon}"/>
                         </pt:MultipleStateLayerSwitch>
 
                         <CheckBox Content="{gm:FontawesomeResource ResourceKey=FlorinSign}"
+                                  IsEnabled="{Binding IsLock, Converter={StaticResource BooleanInvertConverter}}"
                                   Style="{StaticResource LayerSwitch}"
                                   IsChecked="{Binding IsEnableEffect, Mode=OneWay}"
                                   Visibility="{Binding HasEffect, Converter={StaticResource BooleanToVisibilityHiddenConverter}}"
@@ -605,6 +610,7 @@
                                   CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableEffect}"/>
 
                         <CheckBox Content="{StaticResource FrameBlendIcon}"
+                                  IsEnabled="{Binding IsLock, Converter={StaticResource BooleanInvertConverter}}"
                                   Style="{StaticResource LayerSwitch}"
                                   IsChecked="{Binding IsEnableFrameBlend, Mode=OneWay}"
                                   Visibility="{Binding SourceType, Converter={StaticResource AVTypeVisibleConverter}, ConverterParameter={x:Static pi:SourceType.Video}}"
@@ -612,6 +618,7 @@
                                   CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableFrameBlend}"/>
 
                         <CheckBox Content="{StaticResource MotionBlurIcon}"
+                                  IsEnabled="{Binding IsLock, Converter={StaticResource BooleanInvertConverter}}"
                                   Style="{StaticResource LayerSwitch}"
                                   IsChecked="{Binding IsEnableMotionBlur, Mode=OneWay}"
                                   Visibility="{Binding SourceType, Converter={StaticResource AVTypeVisibleConverter}, ConverterParameter={x:Static local:LayerView.CompositionDisplayableSourceType}}"
@@ -619,6 +626,7 @@
                                   CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableMotionBlur}"/>
 
                         <CheckBox Content="{gm:FontawesomeResource ResourceKey=CircleHalfStroke}"
+                                  IsEnabled="{Binding IsLock, Converter={StaticResource BooleanInvertConverter}}"
                                   Style="{StaticResource LayerSwitch}"
                                   IsChecked="{Binding IsEnableAdjustmentLayer, Mode=OneWay}"
                                   Visibility="{Binding SourceType, Converter={StaticResource AVTypeVisibleConverter}, ConverterParameter={x:Static local:LayerView.CompositionDisplayableSourceType}}"
@@ -626,6 +634,7 @@
                                   CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableAdjustmentLayer}"/>
 
                         <CheckBox Content="{gm:FontawesomeResource ResourceKey=Cube}"
+                                  IsEnabled="{Binding IsLock, Converter={StaticResource BooleanInvertConverter}}"
                                   Style="{StaticResource Enable3DSwitchStyle}"
                                   IsChecked="{Binding IsEnable3D, Mode=OneWay}"
                                   Command="{Binding ChangeLayerSwitchCommand}"
@@ -634,7 +643,13 @@
                 </Grid>
 
                 <Grid Grid.Column="7" Style="{StaticResource ColumnGrid}">
-                    <upr:ContextMenuSelectBox x:Name="BlendModeSelectBox" SelectedItem="{Binding BlendMode, Mode=OneWay}" ItemsSource="{smk:EnumValues EnumType={x:Type dr:BlendMode}}" Style="{StaticResource BlendModeSelectBoxStyle}" SelectItemChangedByUser="BlendModeSelectBox_SelectItemChangedByUser" dd:DragDrop.DragSourceIgnore="True"/>
+                    <upr:ContextMenuSelectBox x:Name="BlendModeSelectBox"
+                                              SelectedItem="{Binding BlendMode, Mode=OneWay}"
+                                              ItemsSource="{smk:EnumValues EnumType={x:Type dr:BlendMode}}"
+                                              IsEnabled="{Binding IsLock, Converter={StaticResource BooleanInvertConverter}}"
+                                              Style="{StaticResource BlendModeSelectBoxStyle}"
+                                              SelectItemChangedByUser="BlendModeSelectBox_SelectItemChangedByUser"
+                                              dd:DragDrop.DragSourceIgnore="True"/>
                 </Grid>
 
                 <Grid Grid.Column="8" Style="{StaticResource ColumnGrid}">
@@ -643,12 +658,32 @@
                         <ColumnDefinition />
                     </Grid.ColumnDefinitions>
 
-                    <upr:ContextMenuSelectBox Grid.Column="0" x:Name="TrackMatteSelectBox" SelectedItem="{Binding TrackMatteLayerProxy, Mode=OneWay}" ItemsSource="{StaticResource TrackMatteLayerCollection}" Style="{StaticResource TrackMatteSelectBoxStyle}" SelectItemChangedByUser="TrackMatteSelectBox_SelectItemChangedByUser" dd:DragDrop.DragSourceIgnore="True"/>
-                    <upr:ContextMenuSelectBox Grid.Column="1" x:Name="TrackMatteModeSelectBox" SelectedItem="{Binding TrackMatteMode, Mode=OneWay}" ItemsSource="{smk:EnumValues EnumType={x:Type pi:TrackMatteMode}}" Style="{StaticResource TrackMatteModeSelectBoxStyle}" SelectItemChangedByUser="TrackMatteModeSelectBox_SelectItemChangedByUser" dd:DragDrop.DragSourceIgnore="True"/>
+                    <upr:ContextMenuSelectBox Grid.Column="0"
+                                              x:Name="TrackMatteSelectBox"
+                                              SelectedItem="{Binding TrackMatteLayerProxy, Mode=OneWay}"
+                                              ItemsSource="{StaticResource TrackMatteLayerCollection}"
+                                              IsEnabled="{Binding IsLock, Converter={StaticResource BooleanInvertConverter}}"
+                                              Style="{StaticResource TrackMatteSelectBoxStyle}"
+                                              SelectItemChangedByUser="TrackMatteSelectBox_SelectItemChangedByUser"
+                                              dd:DragDrop.DragSourceIgnore="True"/>
+                    <upr:ContextMenuSelectBox Grid.Column="1"
+                                              x:Name="TrackMatteModeSelectBox"
+                                              SelectedItem="{Binding TrackMatteMode, Mode=OneWay}"
+                                              ItemsSource="{smk:EnumValues EnumType={x:Type pi:TrackMatteMode}}"
+                                              IsEnabled="{Binding IsLock, Converter={StaticResource BooleanInvertConverter}}"
+                                              Style="{StaticResource TrackMatteModeSelectBoxStyle}"
+                                              SelectItemChangedByUser="TrackMatteModeSelectBox_SelectItemChangedByUser"
+                                              dd:DragDrop.DragSourceIgnore="True"/>
                 </Grid>
 
                 <Grid Grid.Column="9" Style="{StaticResource ColumnGrid}">
-                    <upr:ContextMenuSelectBox x:Name="ParentLayerSelectBox" SelectedItem="{Binding ParentLayerProxy, Mode=OneWay}" ItemsSource="{StaticResource ParentLayerCollection}" Style="{StaticResource ParentLayerSelectBoxStyle}" SelectItemChangedByUser="ParentLayerSelectBox_SelectItemChangedByUser" dd:DragDrop.DragSourceIgnore="True"/>
+                    <upr:ContextMenuSelectBox x:Name="ParentLayerSelectBox"
+                                              SelectedItem="{Binding ParentLayerProxy, Mode=OneWay}"
+                                              ItemsSource="{StaticResource ParentLayerCollection}"
+                                              IsEnabled="{Binding IsLock, Converter={StaticResource BooleanInvertConverter}}"
+                                              Style="{StaticResource ParentLayerSelectBoxStyle}"
+                                              SelectItemChangedByUser="ParentLayerSelectBox_SelectItemChangedByUser"
+                                              dd:DragDrop.DragSourceIgnore="True"/>
                 </Grid>
             </Grid>
 
@@ -665,6 +700,7 @@
                                HasDuration="{Binding SourceType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static pi:SourceType.VideoAndAudio}}"
                                IsDisableDuration="{Binding IsDisableDuration}"
                                TagColor="{Binding TagColor}"
+                               IsEnabled="{Binding IsLock, Converter={StaticResource BooleanInvertConverter}}"
                                BeginEditDurationCommand="{Binding BeginEditDurationRequestCommand}"
                                UpdateDurationCommand="{Binding UpdateDurationRequestCommand}"
                                AbortEditDurationCommand="{Binding AbortEditDurationRequestCommand}"

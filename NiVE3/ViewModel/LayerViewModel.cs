@@ -908,13 +908,17 @@ namespace NiVE3.ViewModel
             {
                 PrevName = Name;
                 EditingParameter = EditingLayerParameter.Name;
-            }, () => EditingParameter == EditingLayerParameter.None).ObservesProperty(() => EditingParameter);
+            }, () => !IsLock && EditingParameter == EditingLayerParameter.None)
+                .ObservesProperty(() => IsLock)
+                .ObservesProperty(() => EditingParameter);
 
             BeginEditCommentCommand = new DelegateCommand(() =>
             {
                 PrevComment = Comment;
                 EditingParameter = EditingLayerParameter.Comment;
-            }, () => EditingParameter == EditingLayerParameter.None).ObservesProperty(() => EditingParameter);
+            }, () => !IsLock && EditingParameter == EditingLayerParameter.None)
+                .ObservesProperty(() => IsLock)
+                .ObservesProperty(() => EditingParameter);
 
             EndEditNameCommand = new DelegateCommand<bool?>(commit =>
             {

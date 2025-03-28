@@ -6,6 +6,7 @@
                         xmlns:local="clr-namespace:NiVE3.View.Part"
                         xmlns:ae="http://icsharpcode.net/sharpdevelop/avalonedit"
                         xmlns:cv="clr-namespace:NiVE3.View.Converter"
+                        xmlns:ucv="clr-namespace:NiVE3.UI.Converter;assembly=NiVE3.UI"
                         xmlns:pr="clr-namespace:NiVE3.View.Primitive"
                         xmlns:r="clr-namespace:NiVE3.View.Resource"
                         xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
@@ -16,6 +17,7 @@
                         d:DesignHeight="450" d:DesignWidth="800">
     <local:PropertyViewBase.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <ucv:BooleanInvertConverter x:Key="BooleanInvertConverter"/>
         <cv:OffsetGridLengthConverter x:Key="GridLengthConverter"/>
 
         <Style x:Key="KeyFrameSwitchCheckBox" TargetType="{x:Type CheckBox}" BasedOn="{StaticResource IconCheckBoxBase}">
@@ -154,10 +156,16 @@
             </Grid.ColumnDefinitions>
 
             <Grid Grid.Column="0" ClipToBounds="True">
-                <Button Style="{StaticResource KeyFramePlaceButtonStyle}" Command="{Binding PlaceKeyFrameCommand}"/>
+                <Button Style="{StaticResource KeyFramePlaceButtonStyle}" IsEnabled="{Binding ParentLayerIsLock, Converter={StaticResource BooleanInvertConverter}}" Command="{Binding PlaceKeyFrameCommand}"/>
             </Grid>
             <ToggleButton x:Name="ExpressionCodeFoldButton" Grid.Column="1" Style="{StaticResource ArrowExpanderStyle}" Visibility="{Binding ElementName=Root, Path=HasExpression, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-            <CheckBox Grid.Column="2" IsChecked="{Binding HasKeyFrame, Mode=OneWay}" Style="{StaticResource KeyFrameSwitchCheckBox}" VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="{Binding Property.IsSupportKeyFrame, Converter={StaticResource BooleanToVisibilityConverter}}" Command="{Binding SwitchUseKeyFrameCommand}"/>
+            <CheckBox Grid.Column="2"
+                      IsChecked="{Binding HasKeyFrame, Mode=OneWay}"
+                      Style="{StaticResource KeyFrameSwitchCheckBox}"
+                      VerticalAlignment="Center" HorizontalAlignment="Center"
+                      Visibility="{Binding Property.IsSupportKeyFrame, Converter={StaticResource BooleanToVisibilityConverter}}"
+                      IsEnabled="{Binding ParentLayerIsLock, Converter={StaticResource BooleanInvertConverter}}"
+                      Command="{Binding SwitchUseKeyFrameCommand}"/>
             <Grid Grid.Column="3" Style="{StaticResource PropertyNameGridStyle}">
                 <TextBlock Text="{Binding ViewState.SourceDisplayName}" Style="{StaticResource PropertyNameTextBlockStyle}" MouseDown="PropertyNameTextBlock_MouseDown"/>
             </Grid>
@@ -173,6 +181,7 @@
                                       CompositionFrameRate="{Binding ElementName=Root, Path=CompositionFrameRate}"
                                       SelectedKeyFrameIds="{Binding SelectedKeyFrameIds}"
                                       SupportedInterpolationTypes="{Binding Property.PropertyType.SupportedInterpolationTypes}"
+                                      IsEnabled="{Binding ParentLayerIsLock, Converter={StaticResource BooleanInvertConverter}}"
                                       SelectItemCommand="{Binding SelectKeyFrameCommand}"
                                       KeyFrameMoveRequest="KeyFrameCollectionView_KeyFrameMoveRequest"
                                       KeyFrameInterpolationTypeChangeRequest="KeyFrameCollectionView_KeyFrameInterpolationTypeChangeRequest"/>
@@ -238,6 +247,7 @@
                            HorizontalScrollBarVisibility="Auto"
                            VerticalScrollBarVisibility="Auto"
                            Visibility="{Binding IsEditingExpression, Converter={StaticResource BooleanToVisibilityConverter}}"
+                           IsEnabled="{Binding ParentLayerIsLock, Converter={StaticResource BooleanInvertConverter}}"
                            LostFocus="ExpressionCodeEditor_LostFocus"
                            KeyDown="ExpressionCodeEditor_KeyDown">
                 <pr:CodeEditor.ContextMenu>
