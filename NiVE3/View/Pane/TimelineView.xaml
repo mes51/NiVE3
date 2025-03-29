@@ -46,6 +46,7 @@
             <Setter Property="Width" Value="12"/>
             <Setter Property="Height" Value="12"/>
             <Setter Property="Margin" Value="{StaticResource IconMargin}"/>
+            <Setter Property="Background" Value="Transparent"/>
         </Style>
 
         <Style x:Key="HeaderIconPanel" TargetType="{x:Type StackPanel}">
@@ -215,63 +216,68 @@
             </Grid.ColumnDefinitions>
 
             <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,5,0">
-                <CheckBox IsChecked="{Binding IsEnableShy}" Style="{StaticResource ShyCheckBox}" Command="{Binding ChangeEnableShyCommand}"/>
-                <CheckBox IsChecked="{Binding IsEnableFrameBlend}" Style="{StaticResource FrameBlendCheckBox}" Margin="5,0,0,0" Command="{Binding ChangeEnableFrameBlendCommand}"/>
-                <CheckBox IsChecked="{Binding IsEnableMotionBlur}" Style="{StaticResource MotionBlurCheckBox}" Margin="5,0,0,0" Command="{Binding ChangeEnableMotionBlurCommand}"/>
+                <CheckBox IsChecked="{Binding IsEnableShy}" Style="{StaticResource ShyCheckBox}" Command="{Binding ChangeEnableShyCommand}" ToolTip="{gm:LanguageResource ResourceKey=Timeline_ToolTip_IsEnableShy}"/>
+                <CheckBox IsChecked="{Binding IsEnableFrameBlend}" Style="{StaticResource FrameBlendCheckBox}" Margin="5,0,0,0" Command="{Binding ChangeEnableFrameBlendCommand}" ToolTip="{gm:LanguageResource ResourceKey=Timeline_ToolTip_IsEnableFrameBlend}"/>
+                <CheckBox IsChecked="{Binding IsEnableMotionBlur}" Style="{StaticResource MotionBlurCheckBox}" Margin="5,0,0,0" Command="{Binding ChangeEnableMotionBlurCommand}" ToolTip="{gm:LanguageResource ResourceKey=Timeline_ToolTip_IsEnableMotionBlur}"/>
             </StackPanel>
         </Grid>
 
         <pr:ItemResizableStackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,2,0" Background="Transparent">
             <StackPanel Style="{StaticResource HeaderIconPanel}" Visibility="{Binding IsAVSwitchColumnVisible, Converter={StaticResource BooleanToVisibilityConverter}}" pr:ItemResizableStackPanel.ItemSize="69" pr:ItemResizableStackPanel.IsLocked="True">
-                <Grid Style="{StaticResource IconContainer}" Margin="3,0,0,0">
+                <Grid Style="{StaticResource IconContainer}" Margin="3,0,0,0" ToolTip="{gm:LanguageResource ResourceKey=Timeline_ToolTip_IsEnableVideo}">
                     <Path Data="{gm:FontawesomeResource ResourceKey=Eye}" Style="{StaticResource HeaderIconPath}"/>
                 </Grid>
-                <Grid Style="{StaticResource IconContainer}">
+                <Grid Style="{StaticResource IconContainer}" ToolTip="{gm:LanguageResource ResourceKey=Timeline_ToolTip_IsEnableAudio}">
                     <Path Data="{gm:FontawesomeResource ResourceKey=VolumeHigh}" Style="{StaticResource HeaderIconPath}"/>
                 </Grid>
-                <Grid Style="{StaticResource IconContainer}">
+                <Grid Style="{StaticResource IconContainer}" ToolTip="{gm:LanguageResource ResourceKey=Timeline_ToolTip_IsEnableSolo}">
                     <Path Data="{gm:FontawesomeResource ResourceKey=Circle}" Style="{StaticResource HeaderIconPath}"/>
                 </Grid>
-                <Grid Style="{StaticResource IconContainer}">
+                <Grid Style="{StaticResource IconContainer}" ToolTip="{gm:LanguageResource ResourceKey=Timeline_ToolTip_IsLock}">
                     <Path Data="{gm:FontawesomeResource ResourceKey=Lock}" Style="{StaticResource HeaderIconPath}"/>
                 </Grid>
             </StackPanel>
 
             <Grid pr:ItemResizableStackPanel.ItemSize="{x:Static r:UIParameters.ArrowWidth}" pr:ItemResizableStackPanel.IsLocked="True"/>
 
-            <Grid VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="{Binding IsTagColumnVisible, Converter={StaticResource BooleanToVisibilityConverter}}" pr:ItemResizableStackPanel.ItemSize="{x:Static r:UIParameters.TagAreaWidth}" pr:ItemResizableStackPanel.IsLocked="True">
+            <Grid VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="{Binding IsTagColumnVisible, Converter={StaticResource BooleanToVisibilityConverter}}" ToolTip="{gm:LanguageResource ResourceKey=Timeline_ToolTip_LayerTagColor}" pr:ItemResizableStackPanel.ItemSize="{x:Static r:UIParameters.TagAreaWidth}" pr:ItemResizableStackPanel.IsLocked="True">
                 <Path Data="{gm:FontawesomeResource ResourceKey=Tag}" Style="{StaticResource HeaderIconPath}"/>
             </Grid>
 
-            <TextBlock Text="#" Style="{StaticResource HeaderTextBlock}" Visibility="{Binding IsLayerNumberColumnVisible, Converter={StaticResource BooleanToVisibilityConverter}}" pr:ItemResizableStackPanel.ItemMinSize="21" pr:ItemResizableStackPanel.ItemSize="{Binding LayerNumberColumnWidth}"/>
+            <TextBlock Text="#"
+                       Style="{StaticResource HeaderTextBlock}"
+                       Visibility="{Binding IsLayerNumberColumnVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
+                       ToolTip="{gm:LanguageResource ResourceKey=Timeline_ToolTip_LayerNumber}"
+                       pr:ItemResizableStackPanel.ItemMinSize="21"
+                       pr:ItemResizableStackPanel.ItemSize="{Binding LayerNumberColumnWidth}"/>
 
             <TextBlock Text="{gm:LanguageResource ResourceKey=Timeline_LayerNameColumn}" Style="{StaticResource HeaderTextBlock}" pr:ItemResizableStackPanel.ItemMinSize="55" pr:ItemResizableStackPanel.ItemSize="{Binding LayerNameColumnWidth}"/>
 
             <TextBlock Text="{gm:LanguageResource ResourceKey=Timeline_LayerCommentColumn}" Style="{StaticResource HeaderTextBlock}" Visibility="{Binding IsLayerCommentColumnVisible, Converter={StaticResource BooleanToVisibilityConverter}}" pr:ItemResizableStackPanel.ItemMinSize="53" pr:ItemResizableStackPanel.ItemSize="{Binding LayerCommentColumnWidth}"/>
 
             <StackPanel Style="{StaticResource HeaderIconPanel}" Visibility="{Binding IsLayerSwitchColumnVisible, Converter={StaticResource BooleanToVisibilityConverter}}" pr:ItemResizableStackPanel.ItemMinSize="133" pr:ItemResizableStackPanel.ItemSize="{Binding LayerSwitchColumnWidth}">
-                <Grid Style="{StaticResource IconContainer}" Margin="3,0,0,0">
+                <Grid Style="{StaticResource IconContainer}" Margin="3,0,0,0" ToolTip="{gm:LanguageResource ResourceKey=Timeline_ToolTip_LayerSwitch_IsEnableShy}">
                     <Path Data="{StaticResource ShyIcon}" Style="{StaticResource HeaderIconPath}"/>
                 </Grid>
-                <Grid Style="{StaticResource IconContainer}">
+                <Grid Style="{StaticResource IconContainer}" ToolTip="{gm:LanguageResource ResourceKey=Timeline_ToolTip_LayerSwitch_IsEnableCollapse}">
                     <Path Data="{gm:FontawesomeResource ResourceKey=Sun}" Style="{StaticResource HeaderIconPath}"/>
                 </Grid>
-                <Grid Style="{StaticResource IconContainer}">
+                <Grid Style="{StaticResource IconContainer}" ToolTip="{gm:LanguageResource ResourceKey=Timeline_ToolTip_LayerSwitch_InterpolationQuality}">
                     <Path Data="{StaticResource ImageInterpolationLevel1Icon}" Style="{StaticResource HeaderIconPath}"/>
                 </Grid>
-                <Grid Style="{StaticResource IconContainer}">
+                <Grid Style="{StaticResource IconContainer}" ToolTip="{gm:LanguageResource ResourceKey=Timeline_ToolTip_LayerSwitch_IsEnableEffect}">
                     <Path Data="{gm:FontawesomeResource ResourceKey=FlorinSign}" Style="{StaticResource HeaderIconPath}"/>
                 </Grid>
-                <Grid Style="{StaticResource IconContainer}">
+                <Grid Style="{StaticResource IconContainer}" ToolTip="{gm:LanguageResource ResourceKey=Timeline_ToolTip_LayerSwitch_IsEnableFrameBlend}">
                     <Path Data="{StaticResource FrameBlendIcon}" Style="{StaticResource HeaderIconPath}"/>
                 </Grid>
-                <Grid Style="{StaticResource IconContainer}">
+                <Grid Style="{StaticResource IconContainer}" ToolTip="{gm:LanguageResource ResourceKey=Timeline_ToolTip_LayerSwitch_IsEnableMotionBlur}">
                     <Path Data="{StaticResource MotionBlurIcon}" Style="{StaticResource HeaderIconPath}"/>
                 </Grid>
-                <Grid Style="{StaticResource IconContainer}">
+                <Grid Style="{StaticResource IconContainer}" ToolTip="{gm:LanguageResource ResourceKey=Timeline_ToolTip_LayerSwitch_IsEnableAdjustmentLayer}">
                     <Path Data="{gm:FontawesomeResource ResourceKey=CircleHalfStroke}" Style="{StaticResource HeaderIconPath}"/>
                 </Grid>
-                <Grid Style="{StaticResource IconContainer}">
+                <Grid Style="{StaticResource IconContainer}" ToolTip="{gm:LanguageResource ResourceKey=Timeline_ToolTip_LayerSwitch_IsEnable3D}">
                     <Path Data="{gm:FontawesomeResource ResourceKey=Cube}" Style="{StaticResource HeaderIconPath}"/>
                 </Grid>
             </StackPanel>
@@ -310,7 +316,8 @@
                         RangeStart="{Binding TimeBarRangeStart}"
                         WorkareaBegin="{Binding WorkareaBegin}"
                         WorkareaEnd="{Binding WorkareaEnd}"
-                        Command="{Binding ChangeWorkareaCommand}"/>
+                        Command="{Binding ChangeWorkareaCommand}"
+                        ToolTip="{gm:LanguageResource ResourceKey=Timeline_ToolTip_WorkareaBar}"/>
 
         <pt:LayerCollectionView x:Name="LayerCollectionView"
                                 Grid.Row="3"
@@ -355,7 +362,7 @@
             </Grid.ColumnDefinitions>
 
             <pt:TimeScaleSlider Grid.Column="0" Width="100" Value="{Binding TimeBarRange, Converter={StaticResource TimeToDoubleConverter}}" Minimum="{Binding ElementName=TimeLocator, Path=MinimumRange, Converter={StaticResource TimeToDoubleConverter}}" Maximum="{Binding Duration, Converter={StaticResource TimeToDoubleConverter}}"/>
-            <pr:RangeScrollBar Grid.Column="1" Minimum="{x:Static uvo:Time.Zero}" Maximum="{Binding Duration}" Range="{Binding TimeBarRange}" RangeStart="{Binding TimeBarRangeStart}" MinimumRange="{Binding ElementName=TimeLocator, Path=MinimumRange, Mode=OneWay}"/>
+            <pr:RangeScrollBar Grid.Column="1" Minimum="{x:Static uvo:Time.Zero}" Maximum="{Binding Duration}" Range="{Binding TimeBarRange}" RangeStart="{Binding TimeBarRangeStart}" MinimumRange="{Binding ElementName=TimeLocator, Path=MinimumRange, Mode=OneWay}" ToolTip="{gm:LanguageResource ResourceKey=Timeline_ToolTip_RangeScrollBar}"/>
         </Grid>
     </Grid>
 

@@ -440,6 +440,63 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("コンポジションの設定...(_O)")]
         public static readonly string Timeline_ContextMenu_CompositionSetting = nameof(Timeline_ContextMenu_CompositionSetting);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("シャイが有効なレイヤーの表示/非表示")]
+        public static readonly string Timeline_ToolTip_IsEnableShy = nameof(Timeline_ToolTip_IsEnableShy);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("フレームブレンドの有効/無効")]
+        public static readonly string Timeline_ToolTip_IsEnableFrameBlend = nameof(Timeline_ToolTip_IsEnableFrameBlend);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("モーションブラーの有効/無効")]
+        public static readonly string Timeline_ToolTip_IsEnableMotionBlur = nameof(Timeline_ToolTip_IsEnableMotionBlur);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("画像・映像の表示/非表示")]
+        public static readonly string Timeline_ToolTip_IsEnableVideo = nameof(Timeline_ToolTip_IsEnableVideo);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("音声の有効/無効")]
+        public static readonly string Timeline_ToolTip_IsEnableAudio = nameof(Timeline_ToolTip_IsEnableAudio);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("ソロの有効/無効")]
+        public static readonly string Timeline_ToolTip_IsEnableSolo = nameof(Timeline_ToolTip_IsEnableSolo);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("レイヤーのロック")]
+        public static readonly string Timeline_ToolTip_IsLock = nameof(Timeline_ToolTip_IsLock);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("レイヤーのタグの色")]
+        public static readonly string Timeline_ToolTip_LayerTagColor = nameof(Timeline_ToolTip_LayerTagColor);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("レイヤー番号")]
+        public static readonly string Timeline_ToolTip_LayerNumber = nameof(Timeline_ToolTip_LayerNumber);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("シャイの有効/無効")]
+        public static readonly string Timeline_ToolTip_LayerSwitch_IsEnableShy = nameof(Timeline_ToolTip_LayerSwitch_IsEnableShy);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("未実装")]
+        public static readonly string Timeline_ToolTip_LayerSwitch_IsEnableCollapse = nameof(Timeline_ToolTip_LayerSwitch_IsEnableCollapse);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("画像の補間品質")]
+        public static readonly string Timeline_ToolTip_LayerSwitch_InterpolationQuality = nameof(Timeline_ToolTip_LayerSwitch_InterpolationQuality);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("エフェクトの有効/無効")]
+        public static readonly string Timeline_ToolTip_LayerSwitch_IsEnableEffect = nameof(Timeline_ToolTip_LayerSwitch_IsEnableEffect);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("フレームブレンドの有効/無効")]
+        public static readonly string Timeline_ToolTip_LayerSwitch_IsEnableFrameBlend = nameof(Timeline_ToolTip_LayerSwitch_IsEnableFrameBlend);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("モーションブラーの有効/無効")]
+        public static readonly string Timeline_ToolTip_LayerSwitch_IsEnableMotionBlur = nameof(Timeline_ToolTip_LayerSwitch_IsEnableMotionBlur);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("調整レイヤー化する/しない")]
+        public static readonly string Timeline_ToolTip_LayerSwitch_IsEnableAdjustmentLayer = nameof(Timeline_ToolTip_LayerSwitch_IsEnableAdjustmentLayer);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("3Dレイヤー化する/しない")]
+        public static readonly string Timeline_ToolTip_LayerSwitch_IsEnable3D = nameof(Timeline_ToolTip_LayerSwitch_IsEnable3D);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("ワークエリアの範囲指定")]
+        public static readonly string Timeline_ToolTip_WorkareaBar = nameof(Timeline_ToolTip_WorkareaBar);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("タイムラインの時間軸のスクロール、拡大/縮小")]
+        public static readonly string Timeline_ToolTip_RangeScrollBar = nameof(Timeline_ToolTip_RangeScrollBar);
+
         [ShowInMarkup, LanguageKey, DefaultValue("エフェクト(_E)")]
         public static readonly string LayerProperty_ContextMenu_Effect = nameof(LayerProperty_ContextMenu_Effect);
 
