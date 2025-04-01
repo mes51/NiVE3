@@ -1245,7 +1245,7 @@ namespace NiVE3.ViewModel
                     else
                     {
                         var layer = Layers.First(l => l.LayerId == layerId);
-                        if (layer.IsLock)
+                        if (!layer.IsLock)
                         {
                             SelectedLayers.Add(layer);
                         }
