@@ -2064,10 +2064,18 @@ namespace NiVE3.Model
             var gpuMask = mask.ToGpu(device);
             var gpuImage = image.ToGpu(device);
 
-            using (var context = device.CreateComputeContext())
-            {
-                context.For(roi.Width, roi.Height, new MaskImage(gpuImage.Data, gpuImage.Width, gpuMask.Data, gpuMask.Width, roi.OriginalImagePosition.X, roi.OriginalImagePosition.Y, roi.Left, roi.Top));
-            }
+            device.For(
+                roi.OriginalImagePosition.X + roi.OriginalImageSize.Width,
+                roi.OriginalImagePosition.Y + roi.OriginalImageSize.Height,
+                new MaskImage(
+                    gpuImage.Data,
+                    gpuImage.Width,
+                    gpuMask.Data,
+                    gpuMask.Width,
+                    roi.OriginalImagePosition.X,
+                    roi.OriginalImagePosition.Y
+                )
+            );
 
             if (mask != gpuMask)
             {

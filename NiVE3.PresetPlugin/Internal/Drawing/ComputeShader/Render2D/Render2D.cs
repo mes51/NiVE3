@@ -20,13 +20,17 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render2D
         ReadWriteBuffer<float> trackMatte,
         float opacity,
         int blendMode,
-        Float3x3 transform
+        Float3x3 transform,
+        int startX,
+        int startY
     ) : IComputeShader
     {
         public void Execute()
         {
-            var pos = ThreadIds.Y * targetWidth + ThreadIds.X;
-            var imagePos = transform * new Float3(ThreadIds.X, ThreadIds.Y, 1.0F);
+            var x = ThreadIds.X + startX;
+            var y = ThreadIds.Y + startY;
+            var pos = y * targetWidth + x;
+            var imagePos = transform * new Float3(x, y, 1.0F);
 
             var c = Float4.Zero;
             switch (interpolationQuality)

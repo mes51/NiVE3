@@ -2090,7 +2090,7 @@ namespace NiVE3.Model
                     }
                 }
 
-                device.For(gpuImage.Width, gpuImage.Height, new MaskImage(gpuImage.Data, gpuImage.Width, gpuMaskImage.Data, gpuMaskImage.Width, 0, 0, 0, 0));
+                device.For(gpuImage.Width, gpuImage.Height, new MaskImage(gpuImage.Data, gpuImage.Width, gpuMaskImage.Data, gpuMaskImage.Width, 0, 0));
 
                 gpuMaskImage.Dispose();
                 return gpuImage;

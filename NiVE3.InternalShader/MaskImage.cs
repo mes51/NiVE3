@@ -9,12 +9,12 @@ namespace NiVE3.InternalShader
 {
     [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
     [GeneratedComputeShaderDescriptor]
-    readonly partial struct MaskImage(ReadWriteBuffer<Float4> image, int width, ReadWriteBuffer<float> mask, int maskWidth, int maskOriginX, int maskOriginY, int startX, int startY) : IComputeShader
+    readonly partial struct MaskImage(ReadWriteBuffer<Float4> image, int width, ReadWriteBuffer<float> mask, int maskWidth, int startX, int startY) : IComputeShader
     {
         public void Execute()
         {
             var imagePos = ((startY + ThreadIds.Y) * width) + startX + ThreadIds.X;
-            var maskPos = (startY + maskOriginY + ThreadIds.Y) * maskWidth + startX + maskOriginX + ThreadIds.X;
+            var maskPos = ThreadIds.Y * maskWidth + ThreadIds.X;
 
             image[imagePos].W *= mask[maskPos];
         }

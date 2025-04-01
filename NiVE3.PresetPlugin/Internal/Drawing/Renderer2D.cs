@@ -224,8 +224,17 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             using (var emptyTrackMatte = Device.AllocateReadWriteBuffer([1.0F]))
             using (var context = Device.CreateComputeContext())
             {
-                foreach (var (image, opacity, _, inverted, interpolationQuality, blendMode, trackMatte) in RenderImages)
+                foreach (var (image, opacity, transform, inverted, interpolationQuality, blendMode, trackMatte) in RenderImages)
                 {
+                    var p1 = transform.Transform(new Vector2());
+                    var p2 = transform.Transform(new Vector2(image.Width, 0.0F));
+                    var p3 = transform.Transform(new Vector2(image.Width, image.Height));
+                    var p4 = transform.Transform(new Vector2(0.0F, image.Height));
+                    var minX = Math.Max((int)Math.Floor(Math.Min(Math.Min(Math.Min(p1.X, p2.X), p3.X), p4.X)), 0);
+                    var minY = Math.Max((int)Math.Floor(Math.Min(Math.Min(Math.Min(p1.Y, p2.Y), p3.Y), p4.Y)), 0);
+                    var maxX = Math.Min((int)Math.Ceiling(Math.Max(Math.Max(Math.Max(p1.X, p2.X), p3.X), p4.X)), Target.Width);
+                    var maxY = Math.Min((int)Math.Ceiling(Math.Max(Math.Max(Math.Max(p1.Y, p2.Y), p3.Y), p4.Y)), Target.Height);
+
                     var gpuImage = image switch
                     {
                         NManagedImage => convertedImage[image],
@@ -239,8 +248,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                     var trackMatteData = gpuTrackMatte?.Data ?? emptyTrackMatte;
 
                     context.For(
-                        Target.Width,
-                        Target.Height,
+                        maxX - minX,
+                        maxY - minY,
                         new Render2D(
                             Target.Data,
                             Target.Width,
@@ -251,7 +260,9 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                             trackMatteData,
                             opacity,
                             (int)blendMode,
-                            inverted.ToFloat3x3()
+                            inverted.ToFloat3x3(),
+                            minX,
+                            minY
                         )
                     );
 
