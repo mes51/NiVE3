@@ -295,7 +295,7 @@ namespace NiVE3.PresetPlugin.Renderer
                 frameWidth = CurrentManagedFrame.Width;
                 frameHeight = CurrentManagedFrame.Height;
             }
-            var matrix = Matrix3x3.Identity.Translate((frameWidth - roi.OriginalImageSize.Width) * 0.5F + roi.OriginalImagePosition.X, (frameHeight - roi.OriginalImageSize.Height) * 0.5F + roi.OriginalImagePosition.Y);
+            var matrix = Matrix3x3.Identity.Translate((frameWidth - roi.OriginalImageSize.Width) * 0.5F, (frameHeight - roi.OriginalImageSize.Height) * 0.5F);
             renderer?.DrawSingleImage(roi.OriginalImagePosition, image, 1.0F, matrix, interpolationQuality, blendMode, null);
         }
 
