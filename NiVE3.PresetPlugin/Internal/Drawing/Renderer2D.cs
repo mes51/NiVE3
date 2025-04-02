@@ -235,6 +235,11 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                     var maxX = Math.Min((int)Math.Ceiling(Math.Max(Math.Max(Math.Max(p1.X, p2.X), p3.X), p4.X)), Target.Width);
                     var maxY = Math.Min((int)Math.Ceiling(Math.Max(Math.Max(Math.Max(p1.Y, p2.Y), p3.Y), p4.Y)), Target.Height);
 
+                    if (minX >= maxX || minY >= maxY)
+                    {
+                        continue;
+                    }
+
                     var gpuImage = image switch
                     {
                         NManagedImage => convertedImage[image],
