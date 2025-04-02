@@ -224,6 +224,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             using (var emptyTrackMatte = Device.AllocateReadWriteBuffer([1.0F]))
             using (var context = Device.CreateComputeContext())
             {
+                var isDrawed = false;
                 foreach (var (image, opacity, transform, inverted, interpolationQuality, blendMode, trackMatte) in RenderImages)
                 {
                     var p1 = transform.Transform(new Vector2());
@@ -272,9 +273,13 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                     );
 
                     context.Barrier(Target.Data);
+                    isDrawed = true;
                 }
 
-                context.Barrier(Target.Data);
+                if (isDrawed)
+                {
+                    context.Barrier(Target.Data);
+                }
             }
 
             foreach (var i in convertedImage.Values)
