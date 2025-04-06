@@ -643,6 +643,16 @@ namespace NiVE3.ViewModel
 
         public ICommand DeleteEffectCommand { get; }
 
+        public ICommand CutMaskCommand { get; }
+
+        public ICommand CopyMaskCommand { get; }
+
+        public ICommand PasteMaskCommand { get; }
+
+        public ICommand DuplicateMaskCommand { get; }
+
+        public ICommand DeleteMaskCommand { get; }
+
         public ICommand ShowFootagePreviewCommand { get; }
 
         public DelegateCommand<SelectItemType?> DeleteCommand { get; }
@@ -962,17 +972,9 @@ namespace NiVE3.ViewModel
                     SelectedEffects.Clear();
                     FocusRequestPublisher.Publish(this, EventArgs.Empty);
                 }
-                else if (SelectedMasks.Count > 0)
-                {
-                    var copyData = LayerModel.CutMasks([..SelectedMasks.Select(m => m.MaskId)]);
-                    ClipboardUtil.SetData(copyData);
-                    SelectedMasks.Clear();
-                    FocusRequestPublisher.Publish(this, EventArgs.Empty);
-                }
-            }, () => EditingParameter == EditingLayerParameter.None && (SelectedEffects.Count > 0 || SelectedMasks.Count > 0))
+            }, () => EditingParameter == EditingLayerParameter.None && SelectedEffects.Count > 0)
                 .ObservesProperty(() => EditingParameter)
-                .ObservesProperty(() => SelectedEffects.Count)
-                .ObservesProperty(() => SelectedMasks.Count);
+                .ObservesProperty(() => SelectedEffects.Count);
 
             CopyEffectCommand = new DelegateCommand(() =>
             {
@@ -985,14 +987,9 @@ namespace NiVE3.ViewModel
                 {
                     ClipboardUtil.SetData(LayerModel.CopyEffects([..SelectedEffects.Select(e => e.EffectId)]));
                 }
-                else if (SelectedMasks.Count > 0)
-                {
-                    ClipboardUtil.SetData(LayerModel.CopyMasks([..SelectedMasks.Select(m => m.MaskId)]));
-                }
-            }, () => EditingParameter == EditingLayerParameter.None && (SelectedEffects.Count > 0 || SelectedMasks.Count > 0))
+            }, () => EditingParameter == EditingLayerParameter.None && SelectedEffects.Count > 0)
                 .ObservesProperty(() => EditingParameter)
-                .ObservesProperty(() => SelectedEffects.Count)
-                .ObservesProperty(() => SelectedMasks.Count);
+                .ObservesProperty(() => SelectedEffects.Count);
 
             PasteEffectCommand = new RequerySuggestedCommand(() =>
             {
@@ -1006,12 +1003,7 @@ namespace NiVE3.ViewModel
                     var insertTargetId = LastSelectedEffect?.EffectId;
                     LayerModel.PasteEffects(effectData, [..SelectedEffects.Select(e => e.EffectId)], insertTargetId);
                 }
-                else if (ClipboardUtil.GetData<MaskData>(CopyDataType.Mask) is CopyData<MaskData> maskData)
-                {
-                    var insertTargetId = LastSelectedMask?.MaskId;
-                    LayerModel.PasteMasks(maskData, [..SelectedMasks.Select(m => m.MaskId)], insertTargetId);
-                }
-            }, () => EditingParameter == EditingLayerParameter.None && ClipboardUtil.GetDataType().Is(CopyDataType.Effect, CopyDataType.Mask));
+            }, () => EditingParameter == EditingLayerParameter.None && ClipboardUtil.GetDataType() == CopyDataType.Effect);
 
             DuplicateEffectCommand = new DelegateCommand(() =>
             {
@@ -1025,15 +1017,9 @@ namespace NiVE3.ViewModel
                     var insertTargetId = LastSelectedEffect?.EffectId;
                     LayerModel.DuplicateEffects([..SelectedEffects.Select(e => e.EffectId)], insertTargetId);
                 }
-                else if (SelectedMasks.Count > 0)
-                {
-                    var insertTargetId = LastSelectedMask?.MaskId;
-                    LayerModel.DuplicateMasks([..SelectedMasks.Select(m => m.MaskId)], insertTargetId);
-                }
-            }, () => EditingParameter == EditingLayerParameter.None && (SelectedEffects.Count > 0 || SelectedMasks.Count > 0))
+            }, () => EditingParameter == EditingLayerParameter.None && SelectedEffects.Count > 0)
                 .ObservesProperty(() => EditingParameter)
-                .ObservesProperty(() => SelectedEffects.Count)
-                .ObservesProperty(() => SelectedMasks.Count);
+                .ObservesProperty(() => SelectedEffects.Count);
 
             DeleteEffectCommand = new DelegateCommand(() =>
             {
@@ -1048,28 +1034,151 @@ namespace NiVE3.ViewModel
                     SelectedEffects.Clear();
                     FocusRequestPublisher.Publish(this, EventArgs.Empty);
                 }
-                else if (SelectedMasks.Count > 0)
+            }, () => EditingParameter == EditingLayerParameter.None && SelectedEffects.Count > 0)
+                .ObservesProperty(() => EditingParameter)
+                .ObservesProperty(() => SelectedEffects.Count);
+
+            CutMaskCommand = new DelegateCommand(() =>
+            {
+                if (EditingParameter != EditingLayerParameter.None)
                 {
-                    LayerModel.DeleteMask([..SelectedMasks.Select(m => m.MaskId)]);
+                    return;
+                }
+
+                if (SelectedMasks.Count > 0)
+                {
+                    var copyData = LayerModel.CutMasks([.. SelectedMasks.Select(m => m.MaskId)]);
+                    ClipboardUtil.SetData(copyData);
                     SelectedMasks.Clear();
                     FocusRequestPublisher.Publish(this, EventArgs.Empty);
                 }
-            }, () => EditingParameter == EditingLayerParameter.None && (SelectedEffects.Count > 0 || SelectedMasks.Count > 0))
+            }, () => EditingParameter == EditingLayerParameter.None && SelectedMasks.Count > 0)
                 .ObservesProperty(() => EditingParameter)
-                .ObservesProperty(() => SelectedEffects.Count)
+                .ObservesProperty(() => SelectedMasks.Count);
+
+            CopyMaskCommand = new DelegateCommand(() =>
+            {
+                if (EditingParameter != EditingLayerParameter.None)
+                {
+                    return;
+                }
+
+                if (SelectedMasks.Count > 0)
+                {
+                    ClipboardUtil.SetData(LayerModel.CopyMasks([.. SelectedMasks.Select(m => m.MaskId)]));
+                }
+            }, () => EditingParameter == EditingLayerParameter.None && SelectedMasks.Count > 0)
+                .ObservesProperty(() => EditingParameter)
+                .ObservesProperty(() => SelectedMasks.Count);
+
+            PasteMaskCommand = new RequerySuggestedCommand(() =>
+            {
+                if (EditingParameter != EditingLayerParameter.None)
+                {
+                    return;
+                }
+
+                if (ClipboardUtil.GetData<MaskData>(CopyDataType.Mask) is CopyData<MaskData> maskData)
+                {
+                    var insertTargetId = LastSelectedMask?.MaskId;
+                    LayerModel.PasteMasks(maskData, [.. SelectedMasks.Select(m => m.MaskId)], insertTargetId);
+                }
+            }, () => EditingParameter == EditingLayerParameter.None && ClipboardUtil.GetDataType() ==  CopyDataType.Mask);
+
+            DuplicateMaskCommand = new DelegateCommand(() =>
+            {
+                if (EditingParameter != EditingLayerParameter.None)
+                {
+                    return;
+                }
+
+                if (SelectedMasks.Count > 0)
+                {
+                    var insertTargetId = LastSelectedMask?.MaskId;
+                    LayerModel.DuplicateMasks([.. SelectedMasks.Select(m => m.MaskId)], insertTargetId);
+                }
+            }, () => EditingParameter == EditingLayerParameter.None && SelectedMasks.Count > 0)
+                .ObservesProperty(() => EditingParameter)
+                .ObservesProperty(() => SelectedMasks.Count);
+
+            DeleteMaskCommand = new DelegateCommand(() =>
+            {
+                if (EditingParameter != EditingLayerParameter.None)
+                {
+                    return;
+                }
+
+                if (SelectedMasks.Count > 0)
+                {
+                    LayerModel.DeleteMask([.. SelectedMasks.Select(m => m.MaskId)]);
+                    SelectedMasks.Clear();
+                    FocusRequestPublisher.Publish(this, EventArgs.Empty);
+                }
+            }, () => EditingParameter == EditingLayerParameter.None && SelectedMasks.Count > 0)
+                .ObservesProperty(() => EditingParameter)
                 .ObservesProperty(() => SelectedMasks.Count);
 
             ShowFootagePreviewCommand = new DelegateCommand(() => EventHubModel.NotifyShowFootagePreview(LayerModel.FootageId));
 
-            DeleteCommand = new DelegateCommand<SelectItemType?>(type => DeleteEffectCommand.Execute(null));
+            DeleteCommand = new DelegateCommand<SelectItemType?>(type =>
+            {
+                if (type == SelectItemType.Mask)
+                {
+                    DeleteMaskCommand.Execute(null);
+                }
+                else
+                {
+                    DeleteEffectCommand.Execute(null);
+                }
+            });
 
-            CutCommand = new DelegateCommand<SelectItemType?>(type => CutEffectCommand.Execute(null));
+            CutCommand = new DelegateCommand<SelectItemType?>(type =>
+            {
+                if (type == SelectItemType.Mask)
+                {
+                    CutMaskCommand.Execute(null);
+                }
+                else
+                {
+                    CutEffectCommand.Execute(null);
+                }
+            });
 
-            CopyCommand = new DelegateCommand<SelectItemType?>(type => CopyEffectCommand.Execute(null));
+            CopyCommand = new DelegateCommand<SelectItemType?>(type =>
+            {
+                if (type == SelectItemType.Mask)
+                {
+                    CopyMaskCommand.Execute(null);
+                }
+                else
+                {
+                    CopyEffectCommand.Execute(null);
+                }
+            });
 
-            PasteCommand = new DelegateCommand<SelectItemType?>(type => PasteEffectCommand.Execute(null));
+            PasteCommand = new DelegateCommand<SelectItemType?>(type =>
+            {
+                if (type == SelectItemType.Mask)
+                {
+                    PasteMaskCommand.Execute(null);
+                }
+                else
+                {
+                    PasteEffectCommand.Execute(null);
+                }
+            });
 
-            DuplicateCommand = new DelegateCommand<SelectItemType?>(type => DuplicateEffectCommand.Execute(null));
+            DuplicateCommand = new DelegateCommand<SelectItemType?>(type =>
+            {
+                if (type == SelectItemType.Mask)
+                {
+                    DuplicateMaskCommand.Execute(null);
+                }
+                else
+                {
+                    DuplicateEffectCommand.Execute(null);
+                }
+            });
 
             SelectAllCommand = new DelegateCommand<SelectItemType?>(_ =>
             {
@@ -1078,10 +1187,22 @@ namespace NiVE3.ViewModel
                     return;
                 }
 
+                var selectTargetIsMask = SelectedMasks.Count > 0;
+
                 DeSelect();
-                foreach (var e in Effects)
+                if (selectTargetIsMask)
                 {
-                    SelectedEffects.Add(e);
+                    foreach (var m in Masks)
+                    {
+                        SelectedMasks.Add(m);
+                    }
+                }
+                else
+                {
+                    foreach (var e in Effects)
+                    {
+                        SelectedEffects.Add(e);
+                    }
                 }
             });
 
