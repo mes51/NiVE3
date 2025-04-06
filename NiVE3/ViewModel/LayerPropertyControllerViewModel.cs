@@ -24,6 +24,11 @@ namespace NiVE3.ViewModel
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
     [ManualViewModelWireable(nameof(Composition), nameof(BindComposition), nameof(UnbindComposition), WithInitializeProperty = true)]
     [PaneLocation(PaneLocation.Left2Center)]
+    [CommandHandling(nameof(DeleteCommand), nameof(ShortcutKeySetting.DeleteItemGesture))]
+    [CommandHandling(nameof(CutCommand), nameof(ShortcutKeySetting.CutItemGesture))]
+    [CommandHandling(nameof(CopyCommand), nameof(ShortcutKeySetting.CopyItemGesture))]
+    [CommandHandling(nameof(PasteCommand), nameof(ShortcutKeySetting.PasteItemGesture))]
+    [CommandHandling(nameof(DuplicateCommand), nameof(ShortcutKeySetting.DuplicateItemGesture))]
     [CommandHandling(nameof(AddRectangleMaskCommand), nameof(ShortcutKeySetting.AddRectangleMaskGesture))]
     [CommandHandling(nameof(AddEllipseMaskCommand), nameof(ShortcutKeySetting.AddEllipseMaskGesture))]
     [CommandHandling(nameof(AddBezierMaskCommand), nameof(ShortcutKeySetting.AddBezierMaskGesture))]
@@ -92,6 +97,18 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref targetLayer, value); }
         }
 
+        public ICommand DeleteCommand { get; }
+
+        public ICommand CutCommand { get; }
+
+        public ICommand CopyCommand { get; }
+
+        public ICommand PasteCommand { get; }
+
+        public ICommand DuplicateCommand { get; }
+
+        public ICommand SelectAllCommand { get; }
+
         public ICommand AddEffectCommand { get; }
 
         public ICommand AddRectangleMaskCommand { get; }
@@ -158,6 +175,78 @@ namespace NiVE3.ViewModel
 
                 value.Add(e);
             }
+
+            DeleteCommand = new DelegateCommand(() =>
+            {
+                if (Composition == null || TargetLayer == null)
+                {
+                    return;
+                }
+
+                TargetLayer.DeleteCommand.Execute(TargetLayer.SelectedMasks.Count > 0 ? SelectItemType.Mask : SelectItemType.Effect);
+            }, () => Composition != null && TargetLayer != null)
+                .ObservesProperty(() => Composition)
+                .ObservesProperty(() => TargetLayer);
+
+            CutCommand = new DelegateCommand(() =>
+            {
+                if (Composition == null || TargetLayer == null)
+                {
+                    return;
+                }
+
+                TargetLayer.CutCommand.Execute(TargetLayer.SelectedMasks.Count > 0 ? SelectItemType.Mask : SelectItemType.Effect);
+            }, () => Composition != null && TargetLayer != null)
+                .ObservesProperty(() => Composition)
+                .ObservesProperty(() => TargetLayer);
+
+            CopyCommand = new DelegateCommand(() =>
+            {
+                if (Composition == null || TargetLayer == null)
+                {
+                    return;
+                }
+
+                TargetLayer.CopyCommand.Execute(TargetLayer.SelectedMasks.Count > 0 ? SelectItemType.Mask : SelectItemType.Effect);
+            }, () => Composition != null && TargetLayer != null)
+                .ObservesProperty(() => Composition)
+                .ObservesProperty(() => TargetLayer);
+
+            PasteCommand = new DelegateCommand(() =>
+            {
+                if (Composition == null || TargetLayer == null)
+                {
+                    return;
+                }
+
+                TargetLayer.PasteCommand.Execute(TargetLayer.SelectedMasks.Count > 0 ? SelectItemType.Mask : SelectItemType.Effect);
+            }, () => Composition != null && TargetLayer != null)
+                .ObservesProperty(() => Composition)
+                .ObservesProperty(() => TargetLayer);
+
+            DuplicateCommand = new DelegateCommand(() =>
+            {
+                if (Composition == null || TargetLayer == null)
+                {
+                    return;
+                }
+
+                TargetLayer.DuplicateCommand.Execute(TargetLayer.SelectedMasks.Count > 0 ? SelectItemType.Mask : SelectItemType.Effect);
+            }, () => Composition != null && TargetLayer != null)
+                .ObservesProperty(() => Composition)
+                .ObservesProperty(() => TargetLayer);
+
+            SelectAllCommand = new DelegateCommand(() =>
+            {
+                if (Composition == null || TargetLayer == null)
+                {
+                    return;
+                }
+
+                TargetLayer.SelectAllCommand.Execute(TargetLayer.SelectedMasks.Count > 0 ? SelectItemType.Mask : SelectItemType.Effect);
+            }, () => Composition != null && TargetLayer != null)
+                .ObservesProperty(() => Composition)
+                .ObservesProperty(() => TargetLayer);
 
             AddEffectCommand = new DelegateCommand<EffectItem>(effectItem =>
             {
