@@ -189,7 +189,7 @@
             </Style.Triggers>
         </Style>
     </UserControl.Resources>
-    <Grid>
+    <Grid Background="Transparent">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition MinWidth="100"/>
