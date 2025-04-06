@@ -30,7 +30,7 @@ using NiVE3.Plugin.ValueObject;
 
 namespace NiVE3.ViewModel
 {
-    [PaneLocation(PaneLocation.Right1Center)]
+    [PaneLocation(PaneLocation.Right1Center, Size = 351)]
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
     [ManualViewModelWireable(nameof(Composition), nameof(BindComposition), nameof(UnbindComposition), WithInitializeProperty = true)]
     partial class TextPropertyViewModel : SingletonePaneViewModelBase

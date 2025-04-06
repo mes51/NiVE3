@@ -110,9 +110,9 @@ namespace NiVE3.View.Dock
             var pane = new LayoutAnchorablePane
             {
                 Name = location.ToString(),
-                DockHeight = size != 0.0 ? new GridLength(size) : PanelSize
+                DockHeight = size != 0.0 ? new GridLength(size, GridUnitType.Star) : PanelSize
             };
-            pane.PropertyChanged += Pane_PropertyChanged;
+            //pane.PropertyChanged += Pane_PropertyChanged;
             if (size != 0.0)
             {
                 SetDefaultHeight(pane, size);
@@ -191,18 +191,20 @@ namespace NiVE3.View.Dock
         }
 
         // NOTE: AvalonDockの中で起動時にDockHeightが強制的に"*"に変えられてしまうため、書き換わったタイミングで設定したい値に戻す
-        private void Pane_PropertyChanged(object? sender, PropertyChangedEventArgs e)
-        {
-            if (sender is LayoutAnchorablePane pane && e.PropertyName == nameof(LayoutAnchorablePane.DockHeight))
-            {
-                var defaultHeight = GetDefaultHeight(pane);
-                if (defaultHeight != 0.0)
-                {
-                    pane.DockHeight = new GridLength(defaultHeight);
-                }
-                pane.PropertyChanged -= Pane_PropertyChanged;
-            }
-        }
+        // NOTE: レイアウトの保存時、DockHeightがStarでない場合にちゃんとレイアウトが保存されないため、固定サイズでのレイアウトをやめる
+        // TODO: どうにかして抜け穴を探す
+        //private void Pane_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        //{
+        //    if (sender is LayoutAnchorablePane pane && e.PropertyName == nameof(LayoutAnchorablePane.DockHeight))
+        //    {
+        //        var defaultHeight = GetDefaultHeight(pane);
+        //        if (defaultHeight != 0.0)
+        //        {
+        //            pane.DockHeight = new GridLength(defaultHeight);
+        //        }
+        //        pane.PropertyChanged -= Pane_PropertyChanged;
+        //    }
+        //}
 
         static string GetPaneName(PaneLocation location)
         {

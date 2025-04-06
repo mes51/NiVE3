@@ -55,6 +55,11 @@ namespace NiVE3.ViewModel
             remove { OpenPaneRequestPublisher.Unsubscribe(value); }
         }
 
+        protected PaneViewModelBase()
+        {
+            ContentId = GetType().Name;
+        }
+
         public virtual void OpenPane()
         {
             IsSelected = true;

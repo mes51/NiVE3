@@ -30,6 +30,7 @@
         x:Name="RootWindow"
         WindowStartupLocation="CenterScreen"
         Closing="Window_Closing"
+        ContentRendered="Window_ContentRendered"
         Height="1000" Width="1800"
         KeyboardNavigation.ControlTabNavigation="None"
         a:ShortcutKeyBindingProperty.InputBinding="True"
@@ -96,51 +97,61 @@
             <vd:LayoutItemContainerStyle ViewModelType="{x:Type vm:FootageListViewModel}">
                 <Style TargetType="{x:Type ad:LayoutAnchorableItem}" BasedOn="{StaticResource LayoutItemContainerStyleBase}">
                     <Setter Property="Visibility" Value="{Binding Model.Visibility, Mode=TwoWay}"/>
+                    <Setter Property="ContentId" Value="{Binding Model.ContentId}"/>
                 </Style>
             </vd:LayoutItemContainerStyle>
             <vd:LayoutItemContainerStyle ViewModelType="{x:Type vm:PreviewViewModel}">
                 <Style TargetType="{x:Type ad:LayoutItem}" BasedOn="{StaticResource LayoutItemContainerStyleBase}">
                     <Setter Property="CanClose" Value="True"/>
+                    <Setter Property="ContentId" Value="{Binding Model.ContentId}"/>
                 </Style>
             </vd:LayoutItemContainerStyle>
             <vd:LayoutItemContainerStyle ViewModelType="{x:Type vm:TimelineViewModel}">
                 <Style TargetType="{x:Type ad:LayoutAnchorableItem}" BasedOn="{StaticResource LayoutItemContainerStyleBase}">
                     <Setter Property="CanClose" Value="True"/>
+                    <Setter Property="ContentId" Value="{Binding Model.ContentId}"/>
                 </Style>
             </vd:LayoutItemContainerStyle>
             <vd:LayoutItemContainerStyle ViewModelType="{x:Type vm:EffectListViewModel}">
                 <Style TargetType="{x:Type ad:LayoutAnchorableItem}" BasedOn="{StaticResource LayoutItemContainerStyleBase}">
                     <Setter Property="Visibility" Value="{Binding Model.Visibility, Mode=TwoWay}"/>
+                    <Setter Property="ContentId" Value="{Binding Model.ContentId}"/>
                 </Style>
             </vd:LayoutItemContainerStyle>
             <vd:LayoutItemContainerStyle ViewModelType="{x:Type vm:PlayControllerViewModel}">
                 <Style TargetType="{x:Type ad:LayoutAnchorableItem}" BasedOn="{StaticResource LayoutItemContainerStyleBase}">
                     <Setter Property="Visibility" Value="{Binding Model.Visibility, Mode=TwoWay}"/>
+                    <Setter Property="ContentId" Value="{Binding Model.ContentId}"/>
                 </Style>
             </vd:LayoutItemContainerStyle>
             <vd:LayoutItemContainerStyle ViewModelType="{x:Type vm:HistoryViewModel}">
                 <Style TargetType="{x:Type ad:LayoutAnchorableItem}" BasedOn="{StaticResource LayoutItemContainerStyleBase}">
                     <Setter Property="Visibility" Value="{Binding Model.Visibility, Mode=TwoWay}"/>
+                    <Setter Property="ContentId" Value="{Binding Model.ContentId}"/>
                 </Style>
             </vd:LayoutItemContainerStyle>
             <vd:LayoutItemContainerStyle ViewModelType="{x:Type vm:LayerPropertyControllerViewModel}">
                 <Style TargetType="{x:Type ad:LayoutAnchorableItem}" BasedOn="{StaticResource LayoutItemContainerStyleBase}">
                     <Setter Property="Visibility" Value="{Binding Model.Visibility, Mode=TwoWay}"/>
+                    <Setter Property="ContentId" Value="{Binding Model.ContentId}"/>
                 </Style>
             </vd:LayoutItemContainerStyle>
             <vd:LayoutItemContainerStyle ViewModelType="{x:Type vm:TextPropertyViewModel}">
                 <Style TargetType="{x:Type ad:LayoutAnchorableItem}" BasedOn="{StaticResource LayoutItemContainerStyleBase}">
                     <Setter Property="Visibility" Value="{Binding Model.Visibility, Mode=TwoWay}"/>
+                    <Setter Property="ContentId" Value="{Binding Model.ContentId}"/>
                 </Style>
             </vd:LayoutItemContainerStyle>
             <vd:LayoutItemContainerStyle ViewModelType="{x:Type vm:AudioInformationViewModel}">
                 <Style TargetType="{x:Type ad:LayoutAnchorableItem}" BasedOn="{StaticResource LayoutItemContainerStyleBase}">
                     <Setter Property="Visibility" Value="{Binding Model.Visibility, Mode=TwoWay}"/>
+                    <Setter Property="ContentId" Value="{Binding Model.ContentId}"/>
                 </Style>
             </vd:LayoutItemContainerStyle>
             <vd:LayoutItemContainerStyle ViewModelType="{x:Type vm:RenderQueueViewModel}">
                 <Style TargetType="{x:Type ad:LayoutAnchorableItem}" BasedOn="{StaticResource LayoutItemContainerStyleBase}">
                     <Setter Property="Visibility" Value="{Binding Model.Visibility, Mode=TwoWay}"/>
+                    <Setter Property="ContentId" Value="{Binding Model.ContentId}"/>
                 </Style>
             </vd:LayoutItemContainerStyle>
         </vd:LayoutItemContainerStyleSelector>

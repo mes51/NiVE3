@@ -14,7 +14,7 @@ using NiVE3.Plugin.ValueObject;
 
 namespace NiVE3.ViewModel
 {
-    [PaneLocation(PaneLocation.Left1Bottom, Size = 75)]
+    [PaneLocation(PaneLocation.Left1Bottom, Size = 80)]
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
     partial class PlayControllerViewModel : SingletonePaneViewModelBase
     {
