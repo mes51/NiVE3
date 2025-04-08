@@ -260,7 +260,7 @@ namespace NiVE3.ViewModel
                 .ObservesProperty(() => Composition)
                 .ObservesProperty(() => TargetLayer);
 
-            AddRectangleMaskCommand = new DelegateCommand<EffectItem>(effectItem =>
+            AddRectangleMaskCommand = new DelegateCommand(() =>
             {
                 if (Composition == null || TargetLayer == null || TargetLayer.IsSpecial)
                 {
@@ -268,11 +268,11 @@ namespace NiVE3.ViewModel
                 }
 
                 Composition.AddShapedMaskToLayers([TargetLayer.LayerId], MaskShapeType.Rectangle);
-            }, _ => Composition != null && TargetLayer != null && !TargetLayer.IsSpecial)
+            }, () => Composition != null && TargetLayer != null && !TargetLayer.IsSpecial)
                 .ObservesProperty(() => Composition)
                 .ObservesProperty(() => TargetLayer);
 
-            AddEllipseMaskCommand = new DelegateCommand<EffectItem>(effectItem =>
+            AddEllipseMaskCommand = new DelegateCommand(() =>
             {
                 if (Composition == null || TargetLayer == null || TargetLayer.IsSpecial)
                 {
@@ -280,11 +280,11 @@ namespace NiVE3.ViewModel
                 }
 
                 Composition.AddShapedMaskToLayers([TargetLayer.LayerId], MaskShapeType.Ellipse);
-            }, _ => Composition != null && TargetLayer != null && !TargetLayer.IsSpecial)
+            }, () => Composition != null && TargetLayer != null && !TargetLayer.IsSpecial)
                 .ObservesProperty(() => Composition)
                 .ObservesProperty(() => TargetLayer);
 
-            AddBezierMaskCommand = new DelegateCommand<EffectItem>(effectItem =>
+            AddBezierMaskCommand = new DelegateCommand(() =>
             {
                 if (Composition == null || TargetLayer == null || TargetLayer.IsSpecial)
                 {
@@ -292,11 +292,11 @@ namespace NiVE3.ViewModel
                 }
 
                 Composition.AddBezierMaskToLayers([TargetLayer.LayerId]);
-            }, _ => Composition != null && TargetLayer != null && !TargetLayer.IsSpecial)
+            }, () => Composition != null && TargetLayer != null && !TargetLayer.IsSpecial)
                 .ObservesProperty(() => Composition)
                 .ObservesProperty(() => TargetLayer);
 
-            ChangeLayerTagsRandomlyCommand = new DelegateCommand<EffectItem>(effectItem =>
+            ChangeLayerTagsRandomlyCommand = new DelegateCommand(() =>
             {
                 if (Composition == null || TargetLayer == null)
                 {
@@ -304,7 +304,7 @@ namespace NiVE3.ViewModel
                 }
 
                 Composition.ChangeLayerTagsRandomly([TargetLayer.LayerId]);
-            }, _ => Composition != null && TargetLayer != null)
+            }, () => Composition != null && TargetLayer != null)
                 .ObservesProperty(() => Composition)
                 .ObservesProperty(() => TargetLayer);
 

@@ -511,7 +511,7 @@
             </StackPanel>
         </pr:ItemResizableStackPanel>
 
-        <ScrollViewer Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Visible" Focusable="False" dd:DragDrop.IsDropTarget="{Binding TargetLayer, Converter={StaticResource IsNullConverter}, ConverterParameter={StaticResource TrueValue}}" dd:DragDrop.DropHandler="{Binding TargetLayer}">
+        <ScrollViewer Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Visible" dd:DragDrop.IsDropTarget="{Binding TargetLayer, Converter={StaticResource IsNullConverter}, ConverterParameter={StaticResource TrueValue}}" dd:DragDrop.DropHandler="{Binding TargetLayer}">
             <ContentPresenter Content="{Binding TargetLayer}" ContentTemplateSelector="{StaticResource LayerPropertyControllerInner}" VerticalAlignment="Top"/>
         </ScrollViewer>
     </Grid>
