@@ -21,8 +21,8 @@ namespace NiVE3.Model
 
         public GPUException? LastGPUException { get; private set; }
 
-        WeakEventPublisher<EventArgs> RaiseGPUExceptionPublisher { get; } = new WeakEventPublisher<EventArgs>();
-        public event EventHandler<EventArgs> RaiseGPUException
+        WeakEventPublisher<RaiseGPUExceptionEventArgs> RaiseGPUExceptionPublisher { get; } = new WeakEventPublisher<RaiseGPUExceptionEventArgs>();
+        public event EventHandler<RaiseGPUExceptionEventArgs> RaiseGPUException
         {
             add { RaiseGPUExceptionPublisher.Subscribe(value); }
             remove { RaiseGPUExceptionPublisher.Unsubscribe(value); }
@@ -37,7 +37,7 @@ namespace NiVE3.Model
         {
             LastGPUException = ex;
             UseGpu = false;
-            RaiseGPUExceptionPublisher.Publish(this, EventArgs.Empty);
+            RaiseGPUExceptionPublisher.Publish(this, new RaiseGPUExceptionEventArgs(ex));
         }
     }
 }

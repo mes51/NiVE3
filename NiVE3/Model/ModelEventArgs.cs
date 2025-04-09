@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using NiVE3.Exceptions;
 using NiVE3.Numerics;
 using NiVE3.Plugin.Interfaces.RendererParams;
 using NiVE3.Plugin.ValueObject;
@@ -233,6 +234,16 @@ namespace NiVE3.Model
             CompositionId = compositionId;
             TargetLayerId = targetLayerId;
             TargetLayerPrevValue = targetLayerPrevValue;
+        }
+    }
+
+    class RaiseGPUExceptionEventArgs : EventArgs
+    {
+        public GPUException Exception { get; }
+
+        public RaiseGPUExceptionEventArgs(GPUException exception)
+        {
+            Exception = exception;
         }
     }
 }

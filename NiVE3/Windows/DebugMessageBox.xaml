@@ -1,0 +1,138 @@
+﻿<Window x:Class="NiVE3.Windows.DebugMessageBox"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:NiVE3.Windows"
+        xmlns:cv="clr-namespace:NiVE3.View.Converter"
+        xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
+        xmlns:win="clr-namespace:System.Windows;assembly=PresentationFramework"
+        mc:Ignorable="d"
+        x:Name="Root"
+        ShowInTaskbar="False"
+        MinWidth="200"
+        MaxWidth="800"
+        MinHeight="150"
+        ResizeMode="NoResize"
+        SizeToContent="WidthAndHeight"
+        WindowStartupLocation="CenterScreen"
+        Activated="Root_Activated"
+        d:Height="450" d:Width="800">
+    <Window.Resources>
+        <Style x:Key="IconImageStyle" TargetType="{x:Type Image}">
+            <Setter Property="Width" Value="{x:Static local:DebugMessageBox.IconSize}"/>
+            <Setter Property="Height" Value="{x:Static local:DebugMessageBox.IconSize}"/>
+            <Setter Property="Margin" Value="0,0,10,0"/>
+            <Setter Property="Visibility" Value="Visible"/>
+
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ElementName=Root, Path=MessageBoxIcon}" Value="{x:Null}">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="ExceptionInfoExpanderStyle" TargetType="{x:Type Expander}" BasedOn="{StaticResource {x:Type Expander}}">
+            <Setter Property="Margin" Value="30,0,30,20"/>
+            <Setter Property="Header" Value="{gm:LanguageResource ResourceKey=DebugMessageBox_ExceptionInfo_Header, ReturnDynamicResource=True}"/>
+            <Setter Property="Visibility" Value="Visible"/>
+
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ElementName=Root, Path=ExceptionInfo}" Value="{x:Null}">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        
+        <Style x:Key="ButtonStyleBase" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Width" Value="75"/>
+            <Setter Property="Margin" Value="15,0,0,0"/>
+            <Setter Property="Visibility" Value="Collapsed"/>
+        </Style>
+
+        <Style x:Key="OKButtonStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource ButtonStyleBase}">
+            <Setter Property="Content" Value="{gm:LanguageResource ResourceKey=Dialog_OK, ReturnDynamicResource=True}"/>
+
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ElementName=Root, Path=MessageBoxButton}" Value="{x:Static win:MessageBoxButton.OK}">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding ElementName=Root, Path=MessageBoxButton}" Value="{x:Static win:MessageBoxButton.OKCancel}">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="CancelButtonStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource ButtonStyleBase}">
+            <Setter Property="Content" Value="{gm:LanguageResource ResourceKey=Dialog_Cancel, ReturnDynamicResource=True}"/>
+            <Setter Property="IsCancel" Value="True"/>
+
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ElementName=Root, Path=MessageBoxButton}" Value="{x:Static win:MessageBoxButton.OKCancel}">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding ElementName=Root, Path=MessageBoxButton}" Value="{x:Static win:MessageBoxButton.YesNoCancel}">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="YesButtonStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource ButtonStyleBase}">
+            <Setter Property="Content" Value="{gm:LanguageResource ResourceKey=Dialog_Yes, ReturnDynamicResource=True}"/>
+
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ElementName=Root, Path=MessageBoxButton}" Value="{x:Static win:MessageBoxButton.YesNo}">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding ElementName=Root, Path=MessageBoxButton}" Value="{x:Static win:MessageBoxButton.YesNoCancel}">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="NoButtonStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource ButtonStyleBase}">
+            <Setter Property="Content" Value="{gm:LanguageResource ResourceKey=Dialog_No, ReturnDynamicResource=True}"/>
+
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ElementName=Root, Path=MessageBoxButton}" Value="{x:Static win:MessageBoxButton.YesNo}">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding ElementName=Root, Path=MessageBoxButton}" Value="{x:Static win:MessageBoxButton.YesNoCancel}">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="30">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+
+            <Image Grid.Column="0" Source="{Binding ElementName=Root, Path=MessageBoxIcon}" Style="{StaticResource IconImageStyle}"/>
+            <TextBlock Grid.Column="1" Text="{Binding ElementName=Root, Path=Message}" VerticalAlignment="Center"/>
+        </Grid>
+
+        <Expander Grid.Row="1" Style="{StaticResource ExceptionInfoExpanderStyle}">
+            <Grid Margin="10,5,10,10">
+                <TextBox Text="{Binding ElementName=Root, Path=ExceptionInfo, Mode=OneWay}" IsReadOnly="True" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible" MaxHeight="300"/>
+            </Grid>
+        </Expander>
+
+        <Grid Grid.Row="2" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
+            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="30,20">
+                <Button Style="{StaticResource OKButtonStyle}" Command="{Binding ElementName=Root, Path=OKCommand}"/>
+                <Button Style="{StaticResource YesButtonStyle}" Command="{Binding ElementName=Root, Path=YesCommand}"/>
+                <Button Style="{StaticResource NoButtonStyle}" Command="{Binding ElementName=Root, Path=NoCommand}"/>
+                <Button Style="{StaticResource CancelButtonStyle}" Command="{Binding ElementName=Root, Path=CancelCommand}"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>

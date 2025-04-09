@@ -24,6 +24,7 @@ using NiVE3.UI.Command;
 using Prism.Navigation.Regions;
 using Prism.Dialogs;
 using NiVE3.Plugin.ValueObject;
+using NiVE3.Windows;
 
 namespace NiVE3.ViewModel
 {
@@ -395,13 +396,14 @@ namespace NiVE3.ViewModel
             return true;
         }
 
-        private void ApplicationModel_RaiseGPUException(object? sender, EventArgs e)
+        private void ApplicationModel_RaiseGPUException(object? sender, RaiseGPUExceptionEventArgs e)
         {
             if (!ProjectModel.IsRendering)
             {
                 var title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_RaiseGPUException_Title);
                 var text = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_RaiseGPUException_Text);
-                MessageBox.Show(text, title, MessageBoxButton.OK, MessageBoxImage.Error);
+                DebugMessageBox.Show(text, title, MessageBoxButton.OKCancel, MessageBoxImage.Error, e.Exception);
+                //MessageBox.Show(text, title, MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 

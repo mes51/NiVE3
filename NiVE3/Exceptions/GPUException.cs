@@ -8,6 +8,6 @@ namespace NiVE3.Exceptions
 {
     class GPUException : Exception
     {
-        public GPUException(Exception inner) : base("", inner) { }
+        public GPUException(Exception inner) : base(inner.Message, inner) { }
     }
 }

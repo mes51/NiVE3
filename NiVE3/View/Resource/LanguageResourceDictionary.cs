@@ -308,6 +308,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("色の選択")]
         public static readonly string ColorPickerDialog_Title = nameof(ColorPickerDialog_Title);
 
+        [ShowInMarkup, DefaultValue("エラー情報")]
+        public static readonly string DebugMessageBox_ExceptionInfo_Header = nameof(DebugMessageBox_ExceptionInfo_Header);
+
         [ShowInMarkup, LanguageKey, DefaultValue("適用")]
         public static readonly string Dialog_Apply = nameof(Dialog_Apply);
 
@@ -316,6 +319,12 @@ namespace NiVE3.View.Resource
 
         [ShowInMarkup, LanguageKey, DefaultValue("キャンセル")]
         public static readonly string Dialog_Cancel = nameof(Dialog_Cancel);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("はい")]
+        public static readonly string Dialog_Yes = nameof(Dialog_Yes);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("いいえ")]
+        public static readonly string Dialog_No = nameof(Dialog_No);
 
         [ShowInMarkup, LanguageKey, DefaultValue("A/V機能")]
         public static readonly string Timeline_AVSwitchColumn = nameof(Timeline_AVSwitchColumn);
