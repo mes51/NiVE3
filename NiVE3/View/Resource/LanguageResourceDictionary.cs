@@ -311,6 +311,15 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, DefaultValue("エラー情報")]
         public static readonly string DebugMessageBox_ExceptionInfo_Header = nameof(DebugMessageBox_ExceptionInfo_Header);
 
+        [ShowInMarkup, DefaultValue("予期されなかったエラー")]
+        public static readonly string UnhandledExceptionWindow_Title = nameof(UnhandledExceptionWindow_Title);
+
+        [ShowInMarkup, DefaultValue("予期されなかったエラーが発生したため、動作を停止しました。申し訳ありません。")]
+        public static readonly string UnhandledExceptionWindow_Message = nameof(UnhandledExceptionWindow_Message);
+
+        [ShowInMarkup, DefaultValue("例外情報:")]
+        public static readonly string UnhandledExceptionWindow_ExceptionInfo = nameof(UnhandledExceptionWindow_ExceptionInfo);
+
         [ShowInMarkup, LanguageKey, DefaultValue("適用")]
         public static readonly string Dialog_Apply = nameof(Dialog_Apply);
 

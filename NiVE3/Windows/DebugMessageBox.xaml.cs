@@ -131,7 +131,7 @@ namespace NiVE3.Windows
                 icon.Dispose();
             }
 
-            ExceptionInfo = FormatException(exception);
+            ExceptionInfo = ErrorLog.FormatExceptionMessage(exception);
 
             OKCommand = new DelegateCommand(() =>
             {
@@ -171,34 +171,6 @@ namespace NiVE3.Windows
             var messageBox = new DebugMessageBox(message, title, messageBoxButton, messageBoxImage, exception);
             messageBox.ShowDialog();
             return messageBox.Result;
-        }
-
-        static string? FormatException(Exception? exception, int indent = 0)
-        {
-            if (exception == null)
-            {
-                return null;
-            }
-
-            var innerException = FormatException(exception.InnerException, indent + 1);
-
-            var indentSpace = string.Join("", Enumerable.Repeat("    ", indent));
-            var result = $"""
-            {indentSpace}{exception.GetType().Name}: {exception.Message}
-
-            {indentSpace}StackTrace:
-            {indentSpace}{exception.StackTrace}
-            """;
-
-            if (innerException != null)
-            {
-                result += Environment.NewLine + $"""
-                {indentSpace}InnerException:
-                {innerException}
-                """;
-            }
-
-            return result;
         }
     }
 }

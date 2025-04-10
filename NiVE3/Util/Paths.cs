@@ -19,6 +19,8 @@ namespace NiVE3.Util
 
         public static readonly string AutoSaveProjectDirectory = Path.Combine(ExecutionFileDirectory, "AutoSave");
 
+        public static readonly string ErrorLogDirectory = Path.Combine(ExecutionFileDirectory, "ErrorLog");
+
         public static readonly string CompositionPresetFilePath = Path.Combine(ConfigDirectory, "composition_preset.json");
 
         static Paths()

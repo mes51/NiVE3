@@ -1,6 +1,7 @@
 ﻿using AvalonDock;
 using NiVE3.Module;
 using NiVE3.Region;
+using NiVE3.Util;
 using NiVE3.ViewModel;
 using NiVE3.Windows;
 using Prism.DryIoc;
@@ -15,6 +16,7 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Threading;
 
 namespace NiVE3
 {
@@ -44,6 +46,14 @@ namespace NiVE3
             return catalog;
         }
 
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+            DispatcherUnhandledException += App_DispatcherUnhandledException;
+
+            base.OnStartup(e);
+        }
+
         protected override void ConfigureRegionAdapterMappings(RegionAdapterMappings regionAdapterMappings)
         {
             base.ConfigureRegionAdapterMappings(regionAdapterMappings);
@@ -58,6 +68,22 @@ namespace NiVE3
             base.ConfigureViewModelLocator();
 
             ViewModelLocationProvider.Register<MainWindow, MainWindowViewModel>();
+        }
+
+        private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            if (e.ExceptionObject is Exception ex)
+            {
+                ErrorLog.ExportErrorLog(ex);
+                new UnhandledExceptionWindow(ex).ShowDialog();
+            }
+        }
+
+        private void App_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+        {
+            var ex = e.Exception;
+            ErrorLog.ExportErrorLog(ex);
+            new UnhandledExceptionWindow(ex).ShowDialog();
         }
     }
 }
