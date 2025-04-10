@@ -242,6 +242,15 @@ namespace NiVE3.Model
             SaveProjectAs(newAutoSaveProjectPath);
         }
 
+        public void EmergencySaveProject(string projectPath)
+        {
+            try
+            {
+                SaveProjectAs(projectPath);
+            }
+            catch { }
+        }
+
         public void LoadProject(string filePath)
         {
             var json = File.ReadAllText(filePath);

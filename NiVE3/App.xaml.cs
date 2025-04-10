@@ -2,6 +2,7 @@
 using NiVE3.Module;
 using NiVE3.Region;
 using NiVE3.Util;
+using NiVE3.View.Resource;
 using NiVE3.ViewModel;
 using NiVE3.Windows;
 using Prism.DryIoc;
@@ -25,6 +26,8 @@ namespace NiVE3
     /// </summary>
     public partial class App : PrismApplication
     {
+        bool HandledUnhandledException { get; set; }
+
         protected override Window CreateShell()
         {
             return Container.Resolve<MainWindow>();
@@ -74,16 +77,41 @@ namespace NiVE3
         {
             if (e.ExceptionObject is Exception ex)
             {
-                ErrorLog.ExportErrorLog(ex);
-                new UnhandledExceptionWindow(ex).ShowDialog();
+                HandleUnhandledException(ex);
             }
         }
 
         private void App_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
-            var ex = e.Exception;
+            HandleUnhandledException(e.Exception);
+            e.Handled = true;
+        }
+
+        void HandleUnhandledException(Exception ex)
+        {
+            if (HandledUnhandledException)
+            {
+                return;
+            }
+
             ErrorLog.ExportErrorLog(ex);
             new UnhandledExceptionWindow(ex).ShowDialog();
+
+            var viewModel = Container.Resolve<MainWindowViewModel>();
+            if (viewModel.IsEdited)
+            {
+                var title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_SaveChanceWhenThrownUnhandledException_Title);
+                var text = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_SaveChanceWhenThrownUnhandledException_Text);
+                if (MessageBox.Show(text, title, MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
+                {
+                    viewModel.EmergencySaveProject();
+                }
+            }
+            viewModel.IsForceClosing = true;
+
+            HandledUnhandledException = true;
+
+            Current.Shutdown();
         }
     }
 }

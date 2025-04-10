@@ -1253,6 +1253,12 @@ namespace NiVE3.View.Resource
         [DefaultValue("プロジェクトのオートセーブに失敗したため、オートセーブ機能を一時停止しました。オートセーブ用ディレクトリの中に使用中のプロジェクトなど、ファイルをロックしているものがないか確認してください。")]
         public static readonly string Dialog_RaiseAutoSaveError_Text = nameof(Dialog_RaiseAutoSaveError_Text);
 
+        [DefaultValue("予期されなかったエラー")]
+        public static readonly string Dialog_SaveChanceWhenThrownUnhandledException_Title = nameof(Dialog_SaveChanceWhenThrownUnhandledException_Title);
+
+        [DefaultValue("終了前に、1度だけ保存にチャレンジできます。\r\n(正常に保存できる保証はないため、上書き保存はしないでください)")]
+        public static readonly string Dialog_SaveChanceWhenThrownUnhandledException_Text = nameof(Dialog_SaveChanceWhenThrownUnhandledException_Text);
+
         // ValidationRule
 
         [DefaultValue("入力が文字列ではありません")]

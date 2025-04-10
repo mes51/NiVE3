@@ -304,6 +304,12 @@ namespace NiVE3.ViewModel
 
             SaveProjectBeforeCloseCommand = new DelegateCommand(() =>
             {
+                // NOTE: 強制終了時はすでにIsForceClosingはtrueになっている
+                if (IsForceClosing)
+                {
+                    return;
+                }
+
                 var title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_NotSaveEditedWhenClose_Title);
                 var text = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_NotSaveEditedWhenClose_Text);
                 switch (MessageBox.Show(text, title, MessageBoxButton.YesNoCancel, MessageBoxImage.Warning))
@@ -329,6 +335,12 @@ namespace NiVE3.ViewModel
 
             StopRenderingBeforeCloseCommand = new DelegateCommand(() =>
             {
+                // NOTE: 強制終了時はすでにIsForceClosingはtrueになっている
+                if (IsForceClosing)
+                {
+                    return;
+                }
+
                 var title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_StopRenderingWhenClose_Title);
                 var text = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_StopRenderingWhenClose_Text);
                 if (MessageBox.Show(text, title, MessageBoxButton.OKCancel, MessageBoxImage.Warning) == MessageBoxResult.OK)
@@ -372,6 +384,20 @@ namespace NiVE3.ViewModel
             MainRegion.Add(timelineViewModel);
 
             WiringModel();
+        }
+
+        public void EmergencySaveProject()
+        {
+            var save = new SaveFileDialog
+            {
+                Filter = $"{LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_OpenSaveProject_Filter_Project)}(*.nvp3)|*.nvp3"
+            };
+            if (!(save.ShowDialog() ?? false))
+            {
+                return;
+            }
+
+            ProjectModel.EmergencySaveProject(save.FileName);
         }
 
         partial void WiringModel();
