@@ -66,6 +66,9 @@ namespace NiVE3.View.Pane
         {
             InitializeComponent();
 
+            // NOTE: デフォルト値初期化
+            SelectedItems = new ObservableCollection<object>();
+            SelectedFootages = new ObservableCollection<IFootageViewModel>();
             SelectedItems.CollectionChanged += SelectedItems_CollectionChanged;
             AddHandler(ButtonBase.ClickEvent, new RoutedEventHandler(GridViewColumnHeader_Clicked));
         }
