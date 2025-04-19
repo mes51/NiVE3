@@ -7,6 +7,9 @@
 
     <IsPackable>false</IsPackable>
     <LangVersion>13</LangVersion>
+    <AssemblyVersion>3.0.0.0</AssemblyVersion>
+    <Copyright>Copyright © mes 2022 - 2025</Copyright>
+    <Authors>mes</Authors>
   </PropertyGroup>
 
   <ItemGroup>

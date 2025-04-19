@@ -41,6 +41,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("ツール(_T)")]
         public static readonly string MainWindow_Menu_Tool = nameof(MainWindow_Menu_Tool);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("ヘルプ(_H)")]
+        public static readonly string MainWindow_Menu_Help = nameof(MainWindow_Menu_Help);
+
         [ShowInMarkup, LanguageKey, DefaultValue("新規(_N)")]
         public static readonly string MainWindow_Menu_File_New = nameof(MainWindow_Menu_File_New);
 
@@ -106,6 +109,9 @@ namespace NiVE3.View.Resource
 
         [ShowInMarkup, LanguageKey, DefaultValue("ショートカットキー設定(_S)...")]
         public static readonly string MainWindow_MenuItem_Tool_OpenShortcutKeySetting = nameof(MainWindow_MenuItem_Tool_OpenShortcutKeySetting);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("NicoVisualEffectsについて(_A)...")]
+        public static readonly string MainWindow_MenuItem_Help_About = nameof(MainWindow_MenuItem_Help_About);
 
         [ShowInMarkup, LanguageKey, DefaultValue("再生コントロール")]
         public static readonly string PlayControlView_Title = nameof(PlayControlView_Title);

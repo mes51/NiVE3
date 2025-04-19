@@ -108,6 +108,8 @@ namespace NiVE3.ViewModel
 
         public ICommand OpenShortcutKeySettingCommand { get; }
 
+        public ICommand OpenAboutCommand { get; }
+
         public ICommand NewCompositionCommand { get; }
 
         public ICommand RemoveViewModelCommand { get; }
@@ -256,6 +258,11 @@ namespace NiVE3.ViewModel
             OpenShortcutKeySettingCommand = new DelegateCommand(() =>
             {
                 DialogService.ShowDialog(nameof(ShortcutKeySettingView));
+            });
+
+            OpenAboutCommand = new DelegateCommand(() =>
+            {
+                DialogService.ShowDialog(nameof(AboutView));
             });
 
             NewCompositionCommand = new DelegateCommand(() =>

@@ -9,6 +9,9 @@
 	  <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 	  <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 	  <LangVersion>13</LangVersion>
+	  <Authors>mes</Authors>
+	  <AssemblyVersion>3.0.0.0</AssemblyVersion>
+	  <Copyright>Copyright © mes 2022 - 2025</Copyright>
   </PropertyGroup>
 
   <ItemGroup>

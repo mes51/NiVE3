@@ -1,0 +1,34 @@
+﻿<UserControl x:Class="NiVE3.View.Dialog.AboutView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:NiVE3.View.Dialog"
+             xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
+             xmlns:pr="http://prismlibrary.com/"
+             mc:Ignorable="d" 
+             pr:ViewModelLocator.AutoWireViewModel="True"
+             d:DesignWidth="350"
+             d:DesignHeight="150">
+    <pr:Dialog.WindowStyle>
+        <Style TargetType="{x:Type Window}">
+            <Setter Property="pr:Dialog.WindowStartupLocation" Value="CenterOwner"/>
+            <Setter Property="ResizeMode" Value="NoResize"/>
+            <Setter Property="Width" Value="350"/>
+            <Setter Property="Height" Value="150"/>
+            <Setter Property="ShowInTaskbar" Value="False"/>
+        </Style>
+    </pr:Dialog.WindowStyle>
+    <Grid Margin="10">
+        <StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="NicoVisualEffects ver"/>
+                <TextBlock Text="{Binding VersionString}" Margin="5,0,0,0"/>
+            </StackPanel>
+
+            <TextBlock Text="本バージョンの再配布を禁止します。" Margin="0,20,0,0"/>
+        </StackPanel>
+
+        <Button Content="{gm:LanguageResource ResourceKey=Dialog_OK}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Command="{Binding CloseCommand}"/>
+    </Grid>
+</UserControl>

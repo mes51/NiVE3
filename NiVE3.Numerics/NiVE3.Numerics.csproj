@@ -7,6 +7,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <AllowUnsafeBlocks>False</AllowUnsafeBlocks>
     <LangVersion>13</LangVersion>
+    <Copyright>Copyright © mes 2022 - 2025</Copyright>
+    <Authors>mes</Authors>
+    <AssemblyVersion>3.0.0.0</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
