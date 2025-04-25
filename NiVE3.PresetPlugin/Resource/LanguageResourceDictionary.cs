@@ -902,6 +902,53 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("元画像のブレンド")]
         public const string Generate_Gradient_BlendOriginal = nameof(Generate_Gradient_BlendOriginal);
 
+        // CheckerBoard
+
+        [DefaultValue("チェッカーボード")]
+        public const string Generate_CheckerBoard_Name = nameof(Generate_CheckerBoard_Name);
+
+        [DefaultValue("格子状に四角形を描画します")]
+        public const string Generate_CheckerBoard_Description = nameof(Generate_CheckerBoard_Description);
+
+        [LanguageKey, DefaultValue("色1")]
+        public const string Generate_CheckerBoard_Color1 = nameof(Generate_CheckerBoard_Color1);
+
+        [LanguageKey, DefaultValue("不透明度1")]
+        public const string Generate_CheckerBoard_Opacity1 = nameof(Generate_CheckerBoard_Opacity1);
+
+        [LanguageKey, DefaultValue("色2")]
+        public const string Generate_CheckerBoard_Color2 = nameof(Generate_CheckerBoard_Color2);
+
+        [LanguageKey, DefaultValue("不透明度2")]
+        public const string Generate_CheckerBoard_Opacity2 = nameof(Generate_CheckerBoard_Opacity2);
+
+        [LanguageKey, DefaultValue("アンカー")]
+        public const string Generate_CheckerBoard_Anchor = nameof(Generate_CheckerBoard_Anchor);
+
+        [LanguageKey, DefaultValue("グリッドサイズ")]
+        public const string Generate_CheckerBoard_GridSize = nameof(Generate_CheckerBoard_GridSize);
+
+        [LanguageKey, DefaultValue("タイプ")]
+        public const string Generate_CheckerBoard_GridSize_Type = nameof(Generate_CheckerBoard_GridSize_Type);
+
+        [LanguageKey, DefaultValue("コーナー")]
+        public const string Generate_CheckerBoard_GridSize_Corner = nameof(Generate_CheckerBoard_GridSize_Corner);
+
+        [LanguageKey, DefaultValue("幅")]
+        public const string Generate_CheckerBoard_GridSize_Width = nameof(Generate_CheckerBoard_GridSize_Width);
+
+        [LanguageKey, DefaultValue("高さ")]
+        public const string Generate_CheckerBoard_GridSize_Height = nameof(Generate_CheckerBoard_GridSize_Height);
+
+        [LanguageKey, DefaultValue("ぼかし幅")]
+        public const string Generate_CheckerBoard_BlurWidth = nameof(Generate_CheckerBoard_BlurWidth);
+
+        [LanguageKey, DefaultValue("ぼかし高さ")]
+        public const string Generate_CheckerBoard_BlurHeight = nameof(Generate_CheckerBoard_BlurHeight);
+
+        [LanguageKey, DefaultValue("ブレンドモード")]
+        public const string Generate_CheckerBoard_BlendMode = nameof(Generate_CheckerBoard_BlendMode);
+
         // Unmult
 
         [DefaultValue("Unmult")]
@@ -1730,6 +1777,15 @@ namespace NiVE3.PresetPlugin.Resource
 
         [DefaultValue("最大")]
         public const string MinMaxMode_Max = nameof(MinMaxMode_Max);
+
+        [DefaultValue("幅")]
+        public const string CheckerBoardGridSizeType_Width = nameof(CheckerBoardGridSizeType_Width);
+
+        [DefaultValue("幅&高さ")]
+        public const string CheckerBoardGridSizeType_WidthAndHeight = nameof(CheckerBoardGridSizeType_WidthAndHeight);
+
+        [DefaultValue("コーナー")]
+        public const string CheckerBoardGridSizeType_Corner = nameof(CheckerBoardGridSizeType_Corner);
 
         // unit
 
