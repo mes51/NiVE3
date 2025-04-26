@@ -149,6 +149,23 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("高速モード(CPU用)")]
         public const string Blur_GaussianDirectionalBlur_FastMode = nameof(Blur_GaussianDirectionalBlur_FastMode);
 
+        // RadialBlur
+
+        [DefaultValue("放射ブラー")]
+        public const string Blur_RadialBlur_Name = nameof(Blur_RadialBlur_Name);
+
+        [DefaultValue("指定した点を中心に放射状にブラーを掛けます")]
+        public const string Blur_RadialBlur_Description = nameof(Blur_RadialBlur_Description);
+
+        [LanguageKey, DefaultValue("中心点")]
+        public const string Blur_RadialBlur_Center = nameof(Blur_RadialBlur_Center);
+
+        [LanguageKey, DefaultValue("量")]
+        public const string Blur_RadialBlur_Amount = nameof(Blur_RadialBlur_Amount);
+
+        [LanguageKey, DefaultValue("高速モード(CPU用)")]
+        public const string Blur_RadialBlur_FastMode = nameof(Blur_RadialBlur_FastMode);
+
         // PixelSort
 
         [DefaultValue("ピクセルソート")]

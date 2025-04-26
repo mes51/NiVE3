@@ -16,7 +16,7 @@ using NiVE3.PresetPlugin.Internal.Drawing;
 
 namespace NiVE3.PresetPlugin.Effect.Util.Blur
 {
-    static class GaussianDirectionalBlurProcess
+    static class GaussianDirectionalBlurProcessor
     {
         const double Sigma = 0.1;
 
@@ -208,7 +208,7 @@ namespace NiVE3.PresetPlugin.Effect.Util.Blur
                 .Translate(tempWidth * 0.5F, tempHeight * 0.5F);
             if (!Matrix3x3.Invert(matrix, out var sourceMatrix))
             {
-                BoxBlurProcess.ProcessCpu(image, roi, 0.0F, amount, 1, edgeRepeatMode);
+                BoxBlurProcessor.ProcessCpu(image, roi, 0.0F, amount, 1, edgeRepeatMode);
             }
 
             var bilinearEdgeMode = edgeRepeatMode switch
@@ -304,7 +304,7 @@ namespace NiVE3.PresetPlugin.Effect.Util.Blur
                 .Translate(tempWidth * 0.5F, tempHeight * 0.5F);
             if (!Matrix3x3.Invert(matrix, out var sourceMatrix))
             {
-                BoxBlurProcess.ProcessCpu(image, roi, 0.0F, amount, 1, edgeRepeatMode);
+                BoxBlurProcessor.ProcessCpu(image, roi, 0.0F, amount, 1, edgeRepeatMode);
             }
 
             var bilinearEdgeMode = edgeRepeatMode switch

@@ -12,7 +12,7 @@ using NiVE3.Plugin.ValueObject;
 
 namespace NiVE3.PresetPlugin.Effect.Util.Blur
 {
-    static class GaussianBlurProcess
+    static class GaussianBlurProcessor
     {
         const double Sigma = 0.1;
 

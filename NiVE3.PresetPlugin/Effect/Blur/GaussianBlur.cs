@@ -92,13 +92,13 @@ namespace NiVE3.PresetPlugin.Effect.Blur
             {
                 var device = AcceleratorObject.CurrentDevice;
                 var gpuImage = image.ToGpu(device);
-                GaussianBlurProcess.ProcessGpu(AcceleratorObject.CurrentDevice, gpuImage, roi, horizontalAmount, verticalAmount, edgeRepeatMode);
+                GaussianBlurProcessor.ProcessGpu(AcceleratorObject.CurrentDevice, gpuImage, roi, horizontalAmount, verticalAmount, edgeRepeatMode);
                 return gpuImage;
             }
             else
             {
                 var managedImage = image.ToManaged();
-                GaussianBlurProcess.ProcessCpu(managedImage, roi, horizontalAmount, verticalAmount, edgeRepeatMode);
+                GaussianBlurProcessor.ProcessCpu(managedImage, roi, horizontalAmount, verticalAmount, edgeRepeatMode);
                 return managedImage;
             }
         }

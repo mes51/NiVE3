@@ -165,10 +165,10 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
                 var right = Math.Min(roi.Right + maxRange, blurredImage.Width);
                 var blurredImageRoi = new ROI(new Int32Point(), new Int32Size(blurredImage.Width, blurredImage.Height), left, top, right, bottom);
 
-                GlowProcess.ThresholdCpu(blurredImage, blurredImageRoi, threshold);
+                GlowProcessor.ThresholdCpu(blurredImage, blurredImageRoi, threshold);
                 if (lightBlurAmount > 0.0F)
                 {
-                    BoxBlurProcess.ProcessCpu(blurredImage, blurredImageRoi, lightBlurAmount, lightBlurAmount, LightBlurRepeatCount, edgeRepeatMode);
+                    BoxBlurProcessor.ProcessCpu(blurredImage, blurredImageRoi, lightBlurAmount, lightBlurAmount, LightBlurRepeatCount, edgeRepeatMode);
                 }
 
                 var radianIncrement = Math.PI / count;
@@ -176,25 +176,25 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
                 {
                     if (c + 1 >= count)
                     {
-                        GaussianDirectionalBlurProcess.BidirectionalCpu(blurredImage, roi, rad + radianIncrement * c, length, edgeRepeatMode, true);
-                        ImageBlendProcess.SameSizeCpu(starBurstImage, blurredImage, roi, BlendMode.Add);
+                        GaussianDirectionalBlurProcessor.BidirectionalCpu(blurredImage, roi, rad + radianIncrement * c, length, edgeRepeatMode, true);
+                        ImageBlendProcessor.SameSizeCpu(starBurstImage, blurredImage, roi, BlendMode.Add);
                     }
                     else
                     {
                         using var temp = (NManagedImage)blurredImage.Copy();
-                        GaussianDirectionalBlurProcess.BidirectionalCpu(temp, roi, rad + radianIncrement * c, length, edgeRepeatMode, true);
-                        ImageBlendProcess.SameSizeCpu(starBurstImage, temp, roi, BlendMode.Add);
+                        GaussianDirectionalBlurProcessor.BidirectionalCpu(temp, roi, rad + radianIncrement * c, length, edgeRepeatMode, true);
+                        ImageBlendProcessor.SameSizeCpu(starBurstImage, temp, roi, BlendMode.Add);
                     }
                 }
             }
 
             if (drawStarBurstOnly)
             {
-                GlowProcess.TransferGlowCpu(managedImage, starBurstImage, roi, strength, color);
+                GlowProcessor.TransferGlowCpu(managedImage, starBurstImage, roi, strength, color);
             }
             else
             {
-                GlowProcess.CompositeCpu(managedImage, starBurstImage, roi, strength, color, blendMode, compositeOrder);
+                GlowProcessor.CompositeCpu(managedImage, starBurstImage, roi, strength, color, blendMode, compositeOrder);
             }
 
             return managedImage;
@@ -218,10 +218,10 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
                 var right = Math.Min(roi.Right + maxRange, blurredImage.Width);
                 var blurredImageRoi = new ROI(new Int32Point(), new Int32Size(blurredImage.Width, blurredImage.Height), left, top, right, bottom);
 
-                GlowProcess.ThresholdGpu(device, blurredImage, blurredImageRoi, threshold);
+                GlowProcessor.ThresholdGpu(device, blurredImage, blurredImageRoi, threshold);
                 if (lightBlurAmount > 0.0F)
                 {
-                    BoxBlurProcess.ProcessGpu(device, blurredImage, blurredImageRoi, lightBlurAmount, lightBlurAmount, LightBlurRepeatCount, edgeRepeatMode);
+                    BoxBlurProcessor.ProcessGpu(device, blurredImage, blurredImageRoi, lightBlurAmount, lightBlurAmount, LightBlurRepeatCount, edgeRepeatMode);
                 }
             
                 var radianIncrement = Math.PI / count;
@@ -230,25 +230,25 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
                 {
                     if (c + 1 >= count)
                     {
-                        GaussianDirectionalBlurProcess.BidirectionalGpu(device, blurredImage, roi, rad + radianIncrement * c, length, edgeRepeatMode);
-                        ImageBlendProcess.SameSizeGpu(device, starBurstImage, blurredImage, roi, BlendMode.Add);
+                        GaussianDirectionalBlurProcessor.BidirectionalGpu(device, blurredImage, roi, rad + radianIncrement * c, length, edgeRepeatMode);
+                        ImageBlendProcessor.SameSizeGpu(device, starBurstImage, blurredImage, roi, BlendMode.Add);
                     }
                     else
                     {
                         blurredImage.CopyTo(temp);
-                        GaussianDirectionalBlurProcess.BidirectionalGpu(device, temp, roi, rad + radianIncrement * c, length, edgeRepeatMode);
-                        ImageBlendProcess.SameSizeGpu(device, starBurstImage, temp, roi, BlendMode.Add);
+                        GaussianDirectionalBlurProcessor.BidirectionalGpu(device, temp, roi, rad + radianIncrement * c, length, edgeRepeatMode);
+                        ImageBlendProcessor.SameSizeGpu(device, starBurstImage, temp, roi, BlendMode.Add);
                     }
                 }
             }
 
             if (drawStarBurstOnly)
             {
-                GlowProcess.TransferGlowGpu(device, gpuImage, starBurstImage, roi, strength, color);
+                GlowProcessor.TransferGlowGpu(device, gpuImage, starBurstImage, roi, strength, color);
             }
             else
             {
-                GlowProcess.CompositeGpu(device, gpuImage, starBurstImage, roi, strength, color, blendMode, compositeOrder);
+                GlowProcessor.CompositeGpu(device, gpuImage, starBurstImage, roi, strength, color, blendMode, compositeOrder);
             }
 
             return gpuImage;

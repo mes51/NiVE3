@@ -109,11 +109,11 @@ namespace NiVE3.PresetPlugin.Effect.Blur
                 var gpuImage = image.ToGpu(device);
                 if (isSingleDirection)
                 {
-                    DirectionalBlurProcess.UnidirectionalGpu(device, gpuImage, roi, rad, amount, edgeRepeatMode);
+                    DirectionalBlurProcessor.UnidirectionalGpu(device, gpuImage, roi, rad, amount, edgeRepeatMode);
                 }
                 else
                 {
-                    DirectionalBlurProcess.BidirectionalGpu(device, gpuImage, roi, rad, amount, edgeRepeatMode);
+                    DirectionalBlurProcessor.BidirectionalGpu(device, gpuImage, roi, rad, amount, edgeRepeatMode);
                 }
                 return gpuImage;
             }
@@ -122,11 +122,11 @@ namespace NiVE3.PresetPlugin.Effect.Blur
                 var managedImage = image.ToManaged();
                 if (isSingleDirection)
                 {
-                    DirectionalBlurProcess.UnidirectionalCpu(managedImage, roi, rad, amount, edgeRepeatMode, fastMode);
+                    DirectionalBlurProcessor.UnidirectionalCpu(managedImage, roi, rad, amount, edgeRepeatMode, fastMode);
                 }
                 else
                 {
-                    DirectionalBlurProcess.BidirectionalCpu(managedImage, roi, rad, amount, edgeRepeatMode, fastMode);
+                    DirectionalBlurProcessor.BidirectionalCpu(managedImage, roi, rad, amount, edgeRepeatMode, fastMode);
                 }
                 return managedImage;
             }

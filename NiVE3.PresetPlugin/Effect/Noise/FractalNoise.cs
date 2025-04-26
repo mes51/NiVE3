@@ -144,7 +144,7 @@ namespace NiVE3.PresetPlugin.Effect.Noise
             {
                 var device = AcceleratorObject.CurrentDevice;
                 var gpuImage = image.ToGpu(device);
-                FractalNoiseProcess.GenerateAndBlendGpu(
+                FractalNoiseProcessor.GenerateAndBlendGpu(
                     device,
                     gpuImage,
                     roi,
@@ -174,7 +174,7 @@ namespace NiVE3.PresetPlugin.Effect.Noise
             else
             {
                 var managedImage = image.ToManaged();
-                FractalNoiseProcess.GenerateAndBlendsCpu(
+                FractalNoiseProcessor.GenerateAndBlendsCpu(
                     managedImage,
                     roi,
                     (float)downSamplingRateX,

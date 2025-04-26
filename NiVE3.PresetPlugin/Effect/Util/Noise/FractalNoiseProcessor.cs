@@ -18,7 +18,7 @@ using NiVE3.PresetPlugin.Extension;
 
 namespace NiVE3.PresetPlugin.Effect.Util.Noise
 {
-    static class FractalNoiseProcess
+    static class FractalNoiseProcessor
     {
         static readonly Vector2 AnchorPointOffset = new Vector2(0.3F, 0.7F);
 

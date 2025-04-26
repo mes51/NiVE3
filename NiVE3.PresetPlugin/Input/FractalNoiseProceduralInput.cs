@@ -192,7 +192,7 @@ namespace NiVE3.PresetPlugin.Input
             {
                 var device = AcceleratorObject.CurrentDevice;
                 var gpuImage = new NGPUImage(width, height, device) { Origin = origin };
-                FractalNoiseProcess.GenerateGpu(
+                FractalNoiseProcessor.GenerateGpu(
                     device,
                     gpuImage,
                     roi,
@@ -221,7 +221,7 @@ namespace NiVE3.PresetPlugin.Input
             else
             {
                 var managedImage = new NManagedImage(width, height) { Origin = origin };
-                FractalNoiseProcess.GenerateCpu(
+                FractalNoiseProcessor.GenerateCpu(
                     managedImage,
                     roi,
                     (float)downSamplingRate,

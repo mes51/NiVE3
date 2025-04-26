@@ -146,17 +146,17 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
             var left = Math.Max((int)MathF.Floor(roi.Left - horizontalRange * BlurRepeatCount), 0);
             var right = Math.Min((int)Math.Ceiling(roi.Right + horizontalRange * BlurRepeatCount), blurredImage.Width);
 
-            GlowProcess.ThresholdCpu(blurredImage, new ROI(new Int32Point(), new Int32Size(blurredImage.Width, blurredImage.Height), left, top, right, bottom), threshold);
+            GlowProcessor.ThresholdCpu(blurredImage, new ROI(new Int32Point(), new Int32Size(blurredImage.Width, blurredImage.Height), left, top, right, bottom), threshold);
 
-            BoxBlurProcess.ProcessCpu(blurredImage, roi, horizontalRange, verticalRange, BlurRepeatCount, edgeRepeatMode);
+            BoxBlurProcessor.ProcessCpu(blurredImage, roi, horizontalRange, verticalRange, BlurRepeatCount, edgeRepeatMode);
 
             if (drawGlowOnly)
             {
-                GlowProcess.TransferGlowCpu(managedImage, blurredImage, roi, strength, color);
+                GlowProcessor.TransferGlowCpu(managedImage, blurredImage, roi, strength, color);
             }
             else
             {
-                GlowProcess.CompositeCpu(managedImage, blurredImage, roi, strength, color, blendMode, compositeOrder);
+                GlowProcessor.CompositeCpu(managedImage, blurredImage, roi, strength, color, blendMode, compositeOrder);
             }
 
             return managedImage;
@@ -173,17 +173,17 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
             var left = Math.Max((int)MathF.Floor(roi.Left - horizontalRange * BlurRepeatCount), 0);
             var right = Math.Min((int)Math.Ceiling(roi.Right + horizontalRange * BlurRepeatCount), blurredImage.Width);
 
-            GlowProcess.ThresholdGpu(device, blurredImage, new ROI(new Int32Point(), new Int32Size(blurredImage.Width, blurredImage.Height), left, top, right, bottom), threshold);
+            GlowProcessor.ThresholdGpu(device, blurredImage, new ROI(new Int32Point(), new Int32Size(blurredImage.Width, blurredImage.Height), left, top, right, bottom), threshold);
 
-            BoxBlurProcess.ProcessGpu(device, blurredImage, roi, horizontalRange, verticalRange, BlurRepeatCount, edgeRepeatMode);
+            BoxBlurProcessor.ProcessGpu(device, blurredImage, roi, horizontalRange, verticalRange, BlurRepeatCount, edgeRepeatMode);
 
             if (drawGlowOnly)
             {
-                GlowProcess.TransferGlowGpu(device, gpuImage, blurredImage, roi, strength, color);
+                GlowProcessor.TransferGlowGpu(device, gpuImage, blurredImage, roi, strength, color);
             }
             else
             {
-                GlowProcess.CompositeGpu(device, gpuImage, blurredImage, roi, strength, color, blendMode, compositeOrder);
+                GlowProcessor.CompositeGpu(device, gpuImage, blurredImage, roi, strength, color, blendMode, compositeOrder);
             }
 
             return gpuImage;

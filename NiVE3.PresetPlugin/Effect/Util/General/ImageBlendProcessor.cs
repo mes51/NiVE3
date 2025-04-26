@@ -11,7 +11,7 @@ using NiVE3.PresetPlugin.Internal.ComputeShader;
 
 namespace NiVE3.PresetPlugin.Effect.Util.General
 {
-    static class ImageBlendProcess
+    static class ImageBlendProcessor
     {
         public static void SameSizeCpu(NManagedImage backImage, NManagedImage frontImage, ROI roi, BlendMode blendMode)
         {

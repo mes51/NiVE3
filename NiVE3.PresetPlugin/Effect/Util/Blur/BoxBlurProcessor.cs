@@ -12,7 +12,7 @@ using NiVE3.Plugin.ValueObject;
 
 namespace NiVE3.PresetPlugin.Effect.Util.Blur
 {
-    static class BoxBlurProcess
+    static class BoxBlurProcessor
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ProcessCpu(NManagedImage image, ROI roi, float horizontalAmount, float verticalAmount, int repeat, EdgeRepeatMode edgeRepeatMode)

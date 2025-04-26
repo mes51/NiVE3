@@ -11,7 +11,7 @@ using NiVE3.PresetPlugin.Internal;
 
 namespace NiVE3.PresetPlugin.Effect.Util.Noise
 {
-    static class RandomNoiseProcess
+    static class RandomNoiseProcessor
     {
         public static void ProcessCpu(NManagedImage managedImage, ROI roi, float downSamplingRateX, float downSamplingRateY, float amount, bool isColorNoise, uint randomSeed, Time time)
         {

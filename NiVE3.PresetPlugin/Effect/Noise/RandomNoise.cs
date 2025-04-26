@@ -60,13 +60,13 @@ namespace NiVE3.PresetPlugin.Effect.Noise
             {
                 var device = AcceleratorObject.CurrentDevice;
                 var gpuImage = image.ToGpu(device);
-                RandomNoiseProcess.ProcessGpu(device, gpuImage, roi, (float)downSamplingRateX, (float)downSamplingRateY, amount, isColor, seed, layerTime);
+                RandomNoiseProcessor.ProcessGpu(device, gpuImage, roi, (float)downSamplingRateX, (float)downSamplingRateY, amount, isColor, seed, layerTime);
                 return gpuImage;
             }
             else
             {
                 var managedImage = image.ToManaged();
-                RandomNoiseProcess.ProcessCpu(managedImage, roi, (float)downSamplingRateX, (float)downSamplingRateY, amount, isColor, seed, layerTime);
+                RandomNoiseProcessor.ProcessCpu(managedImage, roi, (float)downSamplingRateX, (float)downSamplingRateY, amount, isColor, seed, layerTime);
                 return managedImage;
             }
         }

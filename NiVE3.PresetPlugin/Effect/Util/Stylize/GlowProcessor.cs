@@ -13,7 +13,7 @@ using NiVE3.PresetPlugin.Internal.ComputeShader;
 
 namespace NiVE3.PresetPlugin.Effect.Util.Stylize
 {
-    static class GlowProcess
+    static class GlowProcessor
     {
         public static void ThresholdCpu(NManagedImage image, ROI roi, float threshold)
         {

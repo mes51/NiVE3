@@ -219,11 +219,11 @@ namespace NiVE3.PresetPlugin.Effect.Generate
 
                 if (blurWidth > 0.0F &&  blurHeight > 0.0F)
                 {
-                    BoxBlurProcess.ProcessCpu(checkerBoardImage, roi, blurWidth, blurHeight, 1, EdgeRepeatMode.Mirror);
+                    BoxBlurProcessor.ProcessCpu(checkerBoardImage, roi, blurWidth, blurHeight, 1, EdgeRepeatMode.Mirror);
                 }
             }
 
-            ImageBlendProcess.SameSizeCpu(managedImage, checkerBoardImage, roi, blendMode);
+            ImageBlendProcessor.SameSizeCpu(managedImage, checkerBoardImage, roi, blendMode);
 
             return managedImage;
         }
@@ -239,11 +239,11 @@ namespace NiVE3.PresetPlugin.Effect.Generate
 
                 if (blurWidth > 0.0F || blurHeight > 0.0F)
                 {
-                    BoxBlurProcess.ProcessGpu(device, checkerBoardImage, roi, blurWidth, blurHeight, 1, EdgeRepeatMode.Mirror);
+                    BoxBlurProcessor.ProcessGpu(device, checkerBoardImage, roi, blurWidth, blurHeight, 1, EdgeRepeatMode.Mirror);
                 }
             }
 
-            ImageBlendProcess.SameSizeGpu(device, gpuImage, checkerBoardImage, roi, blendMode);
+            ImageBlendProcessor.SameSizeGpu(device, gpuImage, checkerBoardImage, roi, blendMode);
 
             return gpuImage;
         }

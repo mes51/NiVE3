@@ -4,6 +4,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using ComputeSharp;
 using NiVE3.Image;
 using NiVE3.Image.Drawing;
@@ -21,6 +22,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
         private List<ImageInfo> Images { get; } = [];
 
         protected IReadOnlyList<ImageInfo> RenderImages => Images;
+
+        public Int32Rect? Clip { get; set; }
 
         public void AddImage(Int32Point roiOrigin, NImage image, float opacity, Matrix3x3 transform, ImageInterpolationQuality interpolationQuality, BlendMode blendMode, RasterizedMaskImage? trackMatte)
         {
@@ -69,6 +72,10 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             var convertedImages = new Dictionary<NImage, NManagedImage>();
             var convertedTrackMatte = new Dictionary<RasterizedMaskImage, ManagedRasterizedMaskImage>();
 
+            var targetMinX = Clip.HasValue ? Math.Max(Clip.Value.X, 0) : 0;
+            var targetMinY = Clip.HasValue ? Math.Max(Clip.Value.Y, 0) : 0;
+            var targetMaxX = Clip.HasValue ? Math.Min(Clip.Value.X + Clip.Value.Width, Target.Width) : Target.Width;
+            var targetMaxY = Clip.HasValue ? Math.Min(Clip.Value.Y + Clip.Value.Height, Target.Height) : Target.Height;
             foreach (var (image, opacity, transform, inverted, interpolationQuality, blendMode, trackMatte) in RenderImages)
             {
                 NManagedImage managedImage;
@@ -103,10 +110,10 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 var p2 = transform.Transform(new Vector2(image.Width, 0.0F));
                 var p3 = transform.Transform(new Vector2(image.Width, image.Height));
                 var p4 = transform.Transform(new Vector2(0.0F, image.Height));
-                var minX = Math.Max((int)Math.Floor(Math.Min(Math.Min(Math.Min(p1.X, p2.X), p3.X), p4.X)), 0);
-                var minY = Math.Max((int)Math.Floor(Math.Min(Math.Min(Math.Min(p1.Y, p2.Y), p3.Y), p4.Y)), 0);
-                var maxX = Math.Min((int)Math.Ceiling(Math.Max(Math.Max(Math.Max(p1.X, p2.X), p3.X), p4.X)), Target.Width);
-                var maxY = Math.Min((int)Math.Ceiling(Math.Max(Math.Max(Math.Max(p1.Y, p2.Y), p3.Y), p4.Y)), Target.Height);
+                var minX = Math.Max((int)Math.Floor(Math.Min(Math.Min(Math.Min(p1.X, p2.X), p3.X), p4.X)), targetMinX);
+                var minY = Math.Max((int)Math.Floor(Math.Min(Math.Min(Math.Min(p1.Y, p2.Y), p3.Y), p4.Y)), targetMinY);
+                var maxX = Math.Min((int)Math.Ceiling(Math.Max(Math.Max(Math.Max(p1.X, p2.X), p3.X), p4.X)), targetMaxX);
+                var maxY = Math.Min((int)Math.Ceiling(Math.Max(Math.Max(Math.Max(p1.Y, p2.Y), p3.Y), p4.Y)), targetMaxY);
 
                 var width = Target.Width;
                 if (managedTrackMatte != null)
@@ -225,16 +232,20 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             using (var context = Device.CreateComputeContext())
             {
                 var isDrawed = false;
+                var targetMinX = Clip.HasValue ? Math.Max(Clip.Value.X, 0) : 0;
+                var targetMinY = Clip.HasValue ? Math.Max(Clip.Value.Y, 0) : 0;
+                var targetMaxX = Clip.HasValue ? Math.Min(Clip.Value.X + Clip.Value.Width, Target.Width) : Target.Width;
+                var targetMaxY = Clip.HasValue ? Math.Min(Clip.Value.Y + Clip.Value.Height, Target.Height) : Target.Height;
                 foreach (var (image, opacity, transform, inverted, interpolationQuality, blendMode, trackMatte) in RenderImages)
                 {
                     var p1 = transform.Transform(new Vector2());
                     var p2 = transform.Transform(new Vector2(image.Width, 0.0F));
                     var p3 = transform.Transform(new Vector2(image.Width, image.Height));
                     var p4 = transform.Transform(new Vector2(0.0F, image.Height));
-                    var minX = Math.Max((int)Math.Floor(Math.Min(Math.Min(Math.Min(p1.X, p2.X), p3.X), p4.X)), 0);
-                    var minY = Math.Max((int)Math.Floor(Math.Min(Math.Min(Math.Min(p1.Y, p2.Y), p3.Y), p4.Y)), 0);
-                    var maxX = Math.Min((int)Math.Ceiling(Math.Max(Math.Max(Math.Max(p1.X, p2.X), p3.X), p4.X)), Target.Width);
-                    var maxY = Math.Min((int)Math.Ceiling(Math.Max(Math.Max(Math.Max(p1.Y, p2.Y), p3.Y), p4.Y)), Target.Height);
+                    var minX = Math.Max((int)Math.Floor(Math.Min(Math.Min(Math.Min(p1.X, p2.X), p3.X), p4.X)), targetMinX);
+                    var minY = Math.Max((int)Math.Floor(Math.Min(Math.Min(Math.Min(p1.Y, p2.Y), p3.Y), p4.Y)), targetMinY);
+                    var maxX = Math.Min((int)Math.Ceiling(Math.Max(Math.Max(Math.Max(p1.X, p2.X), p3.X), p4.X)), targetMaxX);
+                    var maxY = Math.Min((int)Math.Ceiling(Math.Max(Math.Max(Math.Max(p1.Y, p2.Y), p3.Y), p4.Y)), targetMaxY);
 
                     if (minX >= maxX || minY >= maxY)
                     {

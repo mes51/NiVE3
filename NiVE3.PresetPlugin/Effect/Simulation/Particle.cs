@@ -546,11 +546,11 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                 switch (compositeOrder)
                 {
                     case CompositeOrder.Front:
-                        ImageBlendProcess.SameSizeGpu(device, result, (NGPUImage)renderTarget, roi, blendMode);
+                        ImageBlendProcessor.SameSizeGpu(device, result, (NGPUImage)renderTarget, roi, blendMode);
                         image = result;
                         break;
                     default:
-                        ImageBlendProcess.SameSizeGpu(device, (NGPUImage)renderTarget, result, roi, blendMode);
+                        ImageBlendProcessor.SameSizeGpu(device, (NGPUImage)renderTarget, result, roi, blendMode);
                         if (image != result)
                         {
                             result.Dispose();
@@ -565,11 +565,11 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                 switch (compositeOrder)
                 {
                     case CompositeOrder.Front:
-                        ImageBlendProcess.SameSizeCpu(result, (NManagedImage)renderTarget, roi, blendMode);
+                        ImageBlendProcessor.SameSizeCpu(result, (NManagedImage)renderTarget, roi, blendMode);
                         image = result;
                         break;
                     default:
-                        ImageBlendProcess.SameSizeCpu((NManagedImage)renderTarget, result, roi, blendMode);
+                        ImageBlendProcessor.SameSizeCpu((NManagedImage)renderTarget, result, roi, blendMode);
                         if (result != image)
                         {
                             result.Dispose();

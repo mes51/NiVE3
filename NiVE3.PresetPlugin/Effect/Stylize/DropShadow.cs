@@ -159,7 +159,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
 
             if (shadowHorizontalBlurRange > 0 || shadowVerticalBlurRange > 0)
             {
-                BoxBlurProcess.ProcessCpu(shadowImage, new ROI(new Int32Point(shadowHorizontalBlurRange, shadowHorizontalBlurRange), roi.OriginalImageSize, 0, 0, shadowImageWidth, shadowImageHeight), shadowHorizontalBlur / ShadowBlurRepeatCount, shadowVerticalBlur / ShadowBlurRepeatCount, ShadowBlurRepeatCount, EdgeRepeatMode.None);
+                BoxBlurProcessor.ProcessCpu(shadowImage, new ROI(new Int32Point(shadowHorizontalBlurRange, shadowHorizontalBlurRange), roi.OriginalImageSize, 0, 0, shadowImageWidth, shadowImageHeight), shadowHorizontalBlur / ShadowBlurRepeatCount, shadowVerticalBlur / ShadowBlurRepeatCount, ShadowBlurRepeatCount, EdgeRepeatMode.None);
             }
 
             var shadowTransformedX = distance * cos - originalX + shadowHorizontalBlurRange;
@@ -201,7 +201,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
 
             if (shadowHorizontalBlur > 0.0F || shadowVerticalBlur > 0.0F)
             {
-                BoxBlurProcess.ProcessGpu(device, shadowImage, new ROI(new Int32Point(shadowHorizontalBlurRange, shadowHorizontalBlurRange), roi.OriginalImageSize, 0, 0, shadowImageWidth, shadowImageHeight), shadowHorizontalBlur / ShadowBlurRepeatCount, shadowVerticalBlur / ShadowBlurRepeatCount, ShadowBlurRepeatCount, EdgeRepeatMode.None);
+                BoxBlurProcessor.ProcessGpu(device, shadowImage, new ROI(new Int32Point(shadowHorizontalBlurRange, shadowHorizontalBlurRange), roi.OriginalImageSize, 0, 0, shadowImageWidth, shadowImageHeight), shadowHorizontalBlur / ShadowBlurRepeatCount, shadowVerticalBlur / ShadowBlurRepeatCount, ShadowBlurRepeatCount, EdgeRepeatMode.None);
             }
 
             var shadowTransformedX = distance * cos - originalX + shadowHorizontalBlurRange;
