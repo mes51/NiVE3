@@ -303,6 +303,41 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("グローのみ表示")]
         public const string Stylize_Glow_DrawGlowOnly = nameof(Stylize_Glow_DrawGlowOnly);
 
+        // LightShaft
+
+        [DefaultValue("ライトシャフト")]
+        public const string Stylize_LightShaft_Name = nameof(Stylize_LightShaft_Name);
+
+        [DefaultValue("明るい部分から光の柱が伸びているような効果を適用します")]
+        public const string Stylize_LightShaft_Description = nameof(Stylize_Glow_Description);
+
+        [LanguageKey, DefaultValue("中心点")]
+        public const string Stylize_LightShaft_Center = nameof(Stylize_LightShaft_Center);
+
+        [LanguageKey, DefaultValue("長さ")]
+        public const string Stylize_LightShaft_Length = nameof(Stylize_LightShaft_Length);
+
+        [LanguageKey, DefaultValue("光柱の強度")]
+        public const string Stylize_LightShaft_Strength = nameof(Stylize_LightShaft_Strength);
+
+        [LanguageKey, DefaultValue("閾値")]
+        public const string Stylize_LightShaft_Threshold = nameof(Stylize_LightShaft_Threshold);
+
+        [LanguageKey, DefaultValue("光柱の色")]
+        public const string Stylize_LightShaft_Color = nameof(Stylize_LightShaft_Color);
+
+        [LanguageKey, DefaultValue("ブレンドモード")]
+        public const string Stylize_LightShaft_BlendMode = nameof(Stylize_LightShaft_BlendMode);
+
+        [LanguageKey, DefaultValue("合成順")]
+        public const string Stylize_LightShaft_CompositeOrder = nameof(Stylize_LightShaft_CompositeOrder);
+
+        [LanguageKey, DefaultValue("光柱のみ表示")]
+        public const string Stylize_LightShaft_DrawLightShaftOnly = nameof(Stylize_LightShaft_DrawLightShaftOnly);
+
+        [LanguageKey, DefaultValue("高速モード(CPU用)")]
+        public const string Stylize_LightShaft_FastMode = nameof(Stylize_LightShaft_FastMode);
+
         // ChromaticAberration
 
         [DefaultValue("色収差")]
