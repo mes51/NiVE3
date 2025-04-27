@@ -1580,6 +1580,30 @@ namespace NiVE3.ViewModel
             SelectItemChangedPublisher.Publish(sender, new SelectItemEventArgs(e, this));
             DeSelectEffects();
             DeSelectMasks();
+            if (!e.ObjectHierarchy.Contains(TransformProperties))
+            {
+                TransformProperties?.DeSelect();
+            }
+            if (!e.ObjectHierarchy.Contains(LayerOptionProperties))
+            {
+                LayerOptionProperties?.DeSelect();
+            }
+            if (!e.ObjectHierarchy.Contains(TextProperties))
+            {
+                TextProperties?.DeSelect();
+            }
+            if (!e.ObjectHierarchy.Contains(ShapeProperties))
+            {
+                ShapeProperties?.DeSelect();
+            }
+            if (!e.ObjectHierarchy.Contains(SourceOptionProperties))
+            {
+                SourceOptionProperties?.DeSelect();
+            }
+            if (!e.ObjectHierarchy.Contains(AudioOptionProperties))
+            {
+                AudioOptionProperties?.DeSelect();
+            }
         }
 
         private void PropertyGroupViewModel_PropertyValueCommited(object? sender, PropertyValueCommitedEventArgs e)
