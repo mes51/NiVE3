@@ -615,14 +615,14 @@ namespace NiVE3.Model
                 return;
             }
 
-            ExpressionCode = data.ExpressionCode;
-            UseExpression = data.UseExpression;
-
             KeyFrames.Clear();
             foreach (var k in data.KeyFrames.Select(k => new KeyFrame(k.Time, Property.PropertyType.DeserializeValue(k.Value), k.EaseIn, k.EaseOut, k.InterpolationType, k.Id)))
             {
                 KeyFrames.Add(k);
             }
+
+            ExpressionCode = data.ExpressionCode;
+            UseExpression = data.UseExpression;
         }
 
         public void CoerceValues()
@@ -842,6 +842,8 @@ namespace NiVE3.Model
 
         void ReplaceKeyFrames(KeyFrame[] targetKeyFrames, KeyFrame[] newKeyFrames, string historyNameKey)
         {
+            var hasExpressionError = HasExpressionError;
+
             foreach (var k in targetKeyFrames)
             {
                 KeyFrames.Remove(k);
@@ -861,6 +863,11 @@ namespace NiVE3.Model
                 {
                     KeyFrames.Insert(index, nk);
                 }
+            }
+
+            if (UseExpression && !hasExpressionError)
+            {
+                ClearExpressionError();
             }
 
             oldKeyFrames.Sort((a, b) => a.Time.CompareTo(b.Time));
