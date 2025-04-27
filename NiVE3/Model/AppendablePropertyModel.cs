@@ -78,6 +78,12 @@ namespace NiVE3.Model
 
         HistoryModel HistoryModel { get; }
 
+        CompositionViewModelProxy CompositionProxy { get; }
+
+        LayerViewModelProxy LayerProxy { get; }
+
+        EffectViewModelProxy? EffectProxy { get; }
+
         public AppendablePropertyModel(PropertyBase property, IPropertyModel parentPropertyModel, ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, EffectModel? effectModel, HistoryModel historyModel)
         {
             Property = property;
@@ -91,6 +97,9 @@ namespace NiVE3.Model
             SourceStartPoint = layerModel.SourceStartPoint;
             ParentLayerIsLock = layerModel.IsLock;
             Children = [];
+            CompositionProxy = new CompositionViewModelProxy(compositionModel);
+            LayerProxy = new LayerViewModelProxy(layerModel);
+            EffectProxy = effectModel != null ? new EffectViewModelProxy(effectModel) : null;
 
             var objectIdHash = new XxHash3();
             objectIdHash.Append(parentPropertyModel.ObjectId);
@@ -116,7 +125,7 @@ namespace NiVE3.Model
 
         public PropertyViewState CreateState(IPropertyViewModel viewModel)
         {
-            return Property.CreateState(new CompositionViewModelProxy(CompositionModel), new LayerViewModelProxy(LayerModel), EffectModel != null ? new EffectViewModelProxy(EffectModel) : null, viewModel);
+            return Property.CreateState(CompositionProxy, LayerProxy, EffectProxy, viewModel);
         }
 
         public bool ClearExpressionError()

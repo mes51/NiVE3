@@ -85,7 +85,7 @@ namespace NiVE3.Model
         }
     }
 
-    [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
+    [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true, KeepStrongReferenceBinder = true)]
     partial class LayerViewModelProxy : WeakPropertyChangedBindingBase, ILayerViewModel
     {
         private Guid layerId;

@@ -152,6 +152,12 @@ namespace NiVE3.Model
 
         ExpressionScript? CompiledScript { get; set; }
 
+        CompositionViewModelProxy CompositionProxy { get; }
+
+        LayerViewModelProxy LayerProxy { get; }
+
+        EffectViewModelProxy? EffectProxy { get; }
+
         public PropertyModel(PropertyBase property, IPropertyModel parentPropertyModel, ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, HistoryModel historyModel) : this(property, parentPropertyModel, projectModel, compositionModel, layerModel, null, historyModel) { }
 
         public PropertyModel(PropertyBase property, IPropertyModel parentPropertyModel, ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, EffectModel? effectModel, HistoryModel historyModel)
@@ -168,6 +174,9 @@ namespace NiVE3.Model
             SourceStartPoint = layerModel.SourceStartPoint;
             ParentLayerIsLock = layerModel.IsLock;
             CurrentTime = compositionModel.CurrentTime;
+            CompositionProxy = new CompositionViewModelProxy(compositionModel);
+            LayerProxy = new LayerViewModelProxy(layerModel);
+            EffectProxy = effectModel != null ? new EffectViewModelProxy(effectModel) : null;
 
             var objectIdHash = new XxHash3();
             objectIdHash.Append(parentPropertyModel.ObjectId);
@@ -183,12 +192,12 @@ namespace NiVE3.Model
 
         public PropertyControlBase CreateControl(IPropertyViewModel viewModel)
         {
-            return Property.CreateControl(new CompositionViewModelProxy(CompositionModel), new LayerViewModelProxy(LayerModel), EffectModel != null ? new EffectViewModelProxy(EffectModel) : null, viewModel);
+            return Property.CreateControl(CompositionProxy, LayerProxy, EffectProxy, viewModel);
         }
 
         public PropertyViewState CreateState(IPropertyViewModel viewModel)
         {
-            return Property.CreateState(new CompositionViewModelProxy(CompositionModel), new LayerViewModelProxy(LayerModel), EffectModel != null ? new EffectViewModelProxy(EffectModel) : null, viewModel);
+            return Property.CreateState(CompositionProxy, LayerProxy, EffectProxy, viewModel);
         }
 
         public bool ClearExpressionError()

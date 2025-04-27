@@ -81,6 +81,12 @@ namespace NiVE3.Model
 
         HistoryModel HistoryModel { get; }
 
+        CompositionViewModelProxy CompositionProxy { get; }
+
+        LayerViewModelProxy LayerProxy { get; }
+
+        EffectViewModelProxy? EffectProxy { get; }
+
         public PropertyGroupModel(PropertyBase property, IPropertyModel parentPropertyModel, ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, EffectModel? effectModel, HistoryModel historyModel, bool useEnableSwitch = false, Guid? instanceId = null)
             : this(property, parentPropertyModel, 0, projectModel, compositionModel, layerModel, effectModel, historyModel, useEnableSwitch, instanceId) { }
 
@@ -101,6 +107,9 @@ namespace NiVE3.Model
             InstanceId = instanceId ?? Guid.NewGuid();
             SourceStartPoint = layerModel.SourceStartPoint;
             ParentLayerIsLock = layerModel.IsLock;
+            CompositionProxy = new CompositionViewModelProxy(compositionModel);
+            LayerProxy = new LayerViewModelProxy(layerModel);
+            EffectProxy = effectModel != null ? new EffectViewModelProxy(effectModel) : null;
 
             var objectIdHash = new XxHash3();
             objectIdHash.Append(parentPropertyModel?.ObjectId ?? parentObjectId);
@@ -141,7 +150,7 @@ namespace NiVE3.Model
 
         public PropertyViewState CreateState(IPropertyViewModel viewModel)
         {
-            return Property.CreateState(new CompositionViewModelProxy(CompositionModel), new LayerViewModelProxy(LayerModel), EffectModel != null ? new EffectViewModelProxy(EffectModel) : null, viewModel);
+            return Property.CreateState(CompositionProxy, LayerProxy, EffectProxy, viewModel);
         }
 
         public bool ClearExpressionError()

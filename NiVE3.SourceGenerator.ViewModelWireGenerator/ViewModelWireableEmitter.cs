@@ -30,6 +30,8 @@ sealed class ViewModelWireableAttribute : Attribute
 
     public bool WithInitializeProperty { get; set; }
 
+    public bool KeepStrongReferenceBinder { get; set; }
+
     public ViewModelWireableAttribute(string bindMethodName)
     {
         BindMethodName = bindMethodName;
@@ -125,7 +127,8 @@ sealed class NeedWireAttribute : Attribute
             context.CancellationToken.ThrowIfCancellationRequested();
 
             var withInitializeProperty = (bool?)wireableAttribute.NamedArguments.FirstOrDefault(a => a.Key == "WithInitializeProperty").Value.Value ?? false;
-            var (binderClasses, bindingCodes) = GenerateBinderCode(typeSymbol, propertyHandlers.Values.ToArray(), withInitializeProperty);
+            var keepStrongReferenceBinder = (bool?)wireableAttribute.NamedArguments.FirstOrDefault(a => a.Key == "KeepStrongReferenceBinder").Value.Value ?? false;
+            var (binderClasses, bindingCodes) = GenerateBinderCode(typeSymbol, propertyHandlers.Values.ToArray(), withInitializeProperty, keepStrongReferenceBinder);
 
             context.CancellationToken.ThrowIfCancellationRequested();
 
@@ -313,7 +316,7 @@ partial class {{typeSymbol.Name}}
             return handlers;
         }
 
-        static (string, string) GenerateBinderCode(INamedTypeSymbol typeSymbol, Handlers[] handlers, bool withInitializeProperty)
+        static (string, string) GenerateBinderCode(INamedTypeSymbol typeSymbol, Handlers[] handlers, bool withInitializeProperty, bool keepStrongReferenceBinder)
         {
             var binderClasses = new StringBuilder();
             var bindingCodes = new StringBuilder();
@@ -348,6 +351,8 @@ partial class {{typeSymbol.Name}}
                 binderClasses.AppendLine($$"""
 file class {{binderTypeName}}
 {
+    static List<{{binderTypeName}}> Instances { get; } = [];
+
     WeakReference<{{typeSymbol}}> ViewModel { get; }
 
     WeakReference<{{h.SourceType}}> Model { get; }
@@ -359,6 +364,8 @@ file class {{binderTypeName}}
 
         viewModel.PropertyChanged += ViewModelPropertyChanged;
         model.PropertyChanged += ModelPropertyChanged;
+
+        {{(keepStrongReferenceBinder ? "Instances.Add(this);" : "")}}
     }
 
     private void ViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -401,6 +408,8 @@ file class {{binderTypeName}}
         {
             model.PropertyChanged -= ModelPropertyChanged;
         }
+
+        Instances.Remove(this);
     }
 }
 """);
