@@ -303,7 +303,7 @@ namespace NiVE3.PresetPlugin.Renderer
         {
             if (UseGpu && CurrentGpuFrame != null && Accelerator != null)
             {
-                var result = new NGPUImage(Width, Height, Accelerator.CurrentDevice);
+                var result = new NGPUImage(CurrentGpuFrame.Width, CurrentGpuFrame.Height, Accelerator.CurrentDevice);
                 CurrentGpuFrame.CopyTo(result);
                 return result;
             }
