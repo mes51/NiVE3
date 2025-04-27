@@ -75,10 +75,10 @@ namespace NiVE3.PresetPlugin.Property
             }
 
             var rgb = serializedRgb.Select(ToneCurvePoint.Deserialize).NonNull().DistinctBy(p => p.InValue);
-            var r = serializedRgb.Select(ToneCurvePoint.Deserialize).NonNull().DistinctBy(p => p.InValue);
-            var g = serializedRgb.Select(ToneCurvePoint.Deserialize).NonNull().DistinctBy(p => p.InValue);
-            var b = serializedRgb.Select(ToneCurvePoint.Deserialize).NonNull().DistinctBy(p => p.InValue);
-            var a = serializedRgb.Select(ToneCurvePoint.Deserialize).NonNull().DistinctBy(p => p.InValue);
+            var r = serializedR.Select(ToneCurvePoint.Deserialize).NonNull().DistinctBy(p => p.InValue);
+            var g = serializedG.Select(ToneCurvePoint.Deserialize).NonNull().DistinctBy(p => p.InValue);
+            var b = serializedB.Select(ToneCurvePoint.Deserialize).NonNull().DistinctBy(p => p.InValue);
+            var a = serializedA.Select(ToneCurvePoint.Deserialize).NonNull().DistinctBy(p => p.InValue);
 
             return new ToneCurveParameters(rgb, r, g, b, a);
         }
