@@ -844,17 +844,14 @@ namespace NiVE3.Model
                         var subFrameInterval = (FrameDuration * ShutterAngle / 360.0) / MotionBlurSampleCount;
                         if (device != null)
                         {
-                            var result = new NGPUImage(Width, Height, device);
+                            var result = new NGPUImage(Width, Height, device, Vector4.Zero);
                             for (var i = 0; i < MotionBlurSampleCount; i++)
                             {
                                 using var subFrame = RenderFrameInternal(time, shatterStartTime + subFrameInterval * i, true, downSamplingRate, applyToneMapping, useGpu);
 
                                 var gpuImage = subFrame.ToGpu(device);
 
-                                using (var context = device.CreateComputeContext())
-                                {
-                                    context.For(Width, Height, new BlendSubFrame(result.Data, gpuImage.Data, Width, frameBlendRatio));
-                                }
+                                device.For(Width, Height, new BlendSubFrame(result.Data, gpuImage.Data, Width, frameBlendRatio));
 
                                 if (subFrame != gpuImage)
                                 {
@@ -862,10 +859,7 @@ namespace NiVE3.Model
                                 }
                             }
 
-                            using (var context = device.CreateComputeContext())
-                            {
-                                context.For(Width, Height, new UnPremultiply(result.Data, Width));
-                            }
+                            device.For(Width, Height, new UnPremultiply(result.Data, Width));
 
                             ImageCache.Add(CompositionId, cacheKey, time, result, ROI.Empty);
 
