@@ -40,6 +40,12 @@ namespace NiVE3.Data.Json.Project
         [JsonConverter(typeof(TimeJsonConverter))]
         public Time WorkareaEnd { get; set; }
 
+        public bool IsEnableShy { get; set; }
+
+        public bool IsEnableFrameBlend { get; set; }
+
+        public bool IsEnableMotionBlur { get; set; }
+
         public LayerData[] Layers { get; set; } = [];
 
         public Guid RendererPluginId { get; set; }

@@ -1028,6 +1028,9 @@ namespace NiVE3.Model
                 MotionBlurSampleCount = MotionBlurSampleCount,
                 WorkareaBegin = WorkareaBegin,
                 WorkareaEnd = WorkareaEnd,
+                IsEnableShy = IsEnableShy,
+                IsEnableFrameBlend = IsEnableFrameBlend,
+                IsEnableMotionBlur = IsEnableMotionBlur,
                 RendererPluginId = RendererPluginId,
                 ToneMapperPluginId = ToneMapperPluginId,
                 RendererSetting = Renderer.SaveSetting(),
@@ -1051,6 +1054,9 @@ namespace NiVE3.Model
             ShutterAngle = data.ShutterAngle;
             ShutterPhase = data.ShutterPhase;
             MotionBlurSampleCount = data.MotionBlurSampleCount;
+            IsEnableShy = data.IsEnableShy;
+            IsEnableFrameBlend = data.IsEnableFrameBlend;
+            IsEnableMotionBlur = data.IsEnableMotionBlur;
             RendererSetting = data.RendererSetting;
             RendererSettingHash = CalcPluginSettingHash(data.RendererSetting);
             Renderer.LoadSetting(data.RendererSetting);
