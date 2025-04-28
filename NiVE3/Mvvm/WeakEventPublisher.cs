@@ -29,7 +29,7 @@ namespace NiVE3.Mvvm
 
         public void Publish(object? sender, T args)
         {
-            foreach (var h in Handlers)
+            foreach (var h in Handlers.ToArray())
             {
                 h.TryGetHandler()?.Invoke(sender, args);
             }
