@@ -15,6 +15,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Xml;
 using AvalonDock.Layout.Serialization;
 using NiVE3.Config;
 using NiVE3.ViewModel;
@@ -37,10 +38,40 @@ namespace NiVE3.Windows
             using var writer = new StringWriter();
             serializer.Serialize(writer);
 
+            var serializedLayoutXml = writer.ToString();
+            var serializedLayoutDoc = new XmlDocument();
+            serializedLayoutDoc.LoadXml(serializedLayoutXml);
+            var timelinePanels = serializedLayoutDoc.SelectNodes($"//*[@ContentId=\"{typeof(TimelineViewModel).Name}\"]");
+            if (timelinePanels != null && timelinePanels.Count > 1)
+            {
+                var parent = timelinePanels[0]?.ParentNode;
+                if (parent != null)
+                {
+                    var nodes = new List<XmlNode>();
+                    for (var i = 1; i < timelinePanels.Count; i++)
+                    {
+                        var node = timelinePanels[i];
+                        if (node != null)
+                        {
+                            nodes.Add(node);
+                        }
+                    }
+
+                    foreach (var node in nodes)
+                    {
+                        parent.RemoveChild(node);
+                    }
+                }
+
+                using var editedWriter = new StringWriter();
+                serializedLayoutDoc.Save(editedWriter);
+                serializedLayoutXml = editedWriter.ToString();
+            }
+
             WindowLayoutSetting.Setting.Location = new Point(Left, Top);
             WindowLayoutSetting.Setting.Size = new Size(Width, Height);
             WindowLayoutSetting.Setting.WindowState = WindowState;
-            WindowLayoutSetting.Setting.DockingLayout = writer.ToString();
+            WindowLayoutSetting.Setting.DockingLayout = serializedLayoutXml;
             WindowLayoutSetting.Setting.Save();
         }
 
