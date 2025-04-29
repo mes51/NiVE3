@@ -171,7 +171,7 @@ namespace NiVE3.Model.UI
     {
         public string FontName { get; } = FontInfos.FirstOrDefault()?.Name ?? "";
 
-        public Dictionary<string, FontInfo> SubFamiles { get; } = FontInfos.ToDictionary(i =>
+        public Dictionary<string, FontInfo> SubFamiles { get; } = FontInfos.GroupBy(i =>
         {
             if (string.IsNullOrEmpty(i.TypographicSubFamilyName))
             {
@@ -181,6 +181,6 @@ namespace NiVE3.Model.UI
             {
                 return i.TypographicSubFamilyName;
             }
-        });
+        }).ToDictionary(g => g.Key, g => g.Last());
     }
 }
