@@ -55,6 +55,12 @@ namespace NiVE3.Plugin.Resource
         public const string EffectCategory_Generate = nameof(EffectCategory_Generate);
 
         /// <summary>
+        /// エフェクトのキーイングカテゴリを表します
+        /// </summary>
+        [EffectCategory]
+        public const string EffectCategory_Keying = nameof(EffectCategory_Keying);
+
+        /// <summary>
         /// エフェクトのノイズカテゴリを表します
         /// </summary>
         [EffectCategory]

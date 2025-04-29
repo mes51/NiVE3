@@ -955,6 +955,9 @@ namespace NiVE3.View.Resource
         [DefaultValue("描画")]
         public static readonly string EffectCategory_Generate = DefaultLanguageResourceNames.EffectCategory_Generate;
 
+        [DefaultValue("キーイング")]
+        public static readonly string EffectCategory_Keying = DefaultLanguageResourceNames.EffectCategory_Keying;
+
         [DefaultValue("ノイズ")]
         public static readonly string EffectCategory_Noise = DefaultLanguageResourceNames.EffectCategory_Noise;
 

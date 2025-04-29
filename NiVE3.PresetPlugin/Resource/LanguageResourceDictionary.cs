@@ -1297,6 +1297,23 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("ランダムシード")]
         public const string Simulation_Particle_Option_RandomSeed = nameof(Simulation_Particle_Option_RandomSeed);
 
+        // ColorKey
+
+        [DefaultValue("カラーキー")]
+        public const string Keying_ColorKey_Name = nameof(Keying_ColorKey_Name);
+
+        [DefaultValue("指定した色でキーイングを行います")]
+        public const string Keying_ColorKey_Description = nameof(Keying_ColorKey_Description);
+
+        [LanguageKey, DefaultValue("キーカラー")]
+        public const string Keying_ColorKey_KeyColor = nameof(Keying_ColorKey_KeyColor);
+
+        [LanguageKey, DefaultValue("許容範囲")]
+        public const string Keying_ColorKey_Tolerance = nameof(Keying_ColorKey_Tolerance);
+
+        [LanguageKey, DefaultValue("柔らかさ")]
+        public const string Keying_ColorKey_Softness = nameof(Keying_ColorKey_Softness);
+
         // Renderers
 
         [DefaultValue("デフォルトレンダラ")]
