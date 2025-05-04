@@ -76,6 +76,8 @@ namespace NiVE3.Model
 
         EffectModel? EffectModel { get; }
 
+        MaskModel? MaskModel { get; }
+
         HistoryModel HistoryModel { get; }
 
         CompositionViewModelProxy CompositionProxy { get; }
@@ -84,7 +86,7 @@ namespace NiVE3.Model
 
         EffectViewModelProxy? EffectProxy { get; }
 
-        public AppendablePropertyModel(PropertyBase property, IPropertyModel parentPropertyModel, ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, EffectModel? effectModel, HistoryModel historyModel)
+        public AppendablePropertyModel(PropertyBase property, IPropertyModel parentPropertyModel, ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, EffectModel? effectModel, MaskModel? maskModel, HistoryModel historyModel)
         {
             Property = property;
             ParentPropertyModel = parentPropertyModel;
@@ -92,6 +94,7 @@ namespace NiVE3.Model
             CompositionModel = compositionModel;
             LayerModel = layerModel;
             EffectModel = effectModel;
+            MaskModel = maskModel;
             HistoryModel = historyModel;
             Name = property.DisplayName;
             SourceStartPoint = layerModel.SourceStartPoint;
@@ -477,7 +480,7 @@ namespace NiVE3.Model
         PropertyGroupModel AddChildInternal(AppendablePropertyItem item, Guid? instanceId)
         {
             var group = item.CreateFunc();
-            var groupModel = new PropertyGroupModel(group, this, ProjectModel, CompositionModel, LayerModel, EffectModel, HistoryModel, UseEnableSwitch, instanceId);
+            var groupModel = new PropertyGroupModel(group, this, ProjectModel, CompositionModel, LayerModel, EffectModel, MaskModel, HistoryModel, UseEnableSwitch, instanceId);
             groupModel.ValueUpdated += Child_ValueUpdated;
             groupModel.ValueCommited += Child_ValueCommited;
 

@@ -22,9 +22,9 @@ namespace NiVE3.Expression
             });
         }
 
-        public static ExpressionContext CreateContext(Time globalTime, ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, EffectModel? effectModel, PropertyModel propertyModel)
+        public static ExpressionContext CreateContext(Time globalTime, ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, EffectModel? effectModel, MaskModel? maskModel, PropertyModel propertyModel)
         {
-            return new ExpressionContext(globalTime, projectModel, compositionModel, layerModel, effectModel, propertyModel);
+            return new ExpressionContext(globalTime, projectModel, compositionModel, layerModel, effectModel, maskModel, propertyModel);
         }
 
         public static ExpressionScript Compile(string code)

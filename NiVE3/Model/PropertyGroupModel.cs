@@ -79,6 +79,8 @@ namespace NiVE3.Model
 
         EffectModel? EffectModel { get; }
 
+        MaskModel? MaskModel { get; }
+
         HistoryModel HistoryModel { get; }
 
         CompositionViewModelProxy CompositionProxy { get; }
@@ -87,13 +89,16 @@ namespace NiVE3.Model
 
         EffectViewModelProxy? EffectProxy { get; }
 
-        public PropertyGroupModel(PropertyBase property, IPropertyModel parentPropertyModel, ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, EffectModel? effectModel, HistoryModel historyModel, bool useEnableSwitch = false, Guid? instanceId = null)
-            : this(property, parentPropertyModel, 0, projectModel, compositionModel, layerModel, effectModel, historyModel, useEnableSwitch, instanceId) { }
+        public PropertyGroupModel(PropertyBase property, Int128 parentObjectId, ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, HistoryModel historyModel, bool useEnableSwitch = false, Guid? instanceId = null)
+            : this(property, null, parentObjectId, projectModel, compositionModel, layerModel, null, null, historyModel, useEnableSwitch, instanceId) { }
 
-        public PropertyGroupModel(PropertyBase property, Int128 parentObjectId, ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, EffectModel? effectModel, HistoryModel historyModel, bool useEnableSwitch = false, Guid? instanceId = null)
-            : this(property, null, parentObjectId, projectModel, compositionModel, layerModel, effectModel, historyModel, useEnableSwitch, instanceId) { }
+        public PropertyGroupModel(PropertyBase property, IPropertyModel parentPropertyModel, ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, EffectModel? effectModel, MaskModel? maskModel, HistoryModel historyModel, bool useEnableSwitch = false, Guid? instanceId = null)
+            : this(property, parentPropertyModel, 0, projectModel, compositionModel, layerModel, effectModel, maskModel, historyModel, useEnableSwitch, instanceId) { }
 
-        private PropertyGroupModel(PropertyBase property, IPropertyModel? parentPropertyModel, Int128 parentObjectId, ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, EffectModel? effectModel, HistoryModel historyModel, bool useEnableSwitch, Guid? instanceId = null)
+        public PropertyGroupModel(PropertyBase property, Int128 parentObjectId, ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, EffectModel? effectModel, MaskModel? maskModel, HistoryModel historyModel, bool useEnableSwitch = false, Guid? instanceId = null)
+            : this(property, null, parentObjectId, projectModel, compositionModel, layerModel, effectModel, maskModel, historyModel, useEnableSwitch, instanceId) { }
+
+        private PropertyGroupModel(PropertyBase property, IPropertyModel? parentPropertyModel, Int128 parentObjectId, ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, EffectModel? effectModel, MaskModel? maskModel, HistoryModel historyModel, bool useEnableSwitch, Guid? instanceId = null)
         {
             Property = property;
             ParentPropertyModel = parentPropertyModel;
@@ -101,6 +106,7 @@ namespace NiVE3.Model
             CompositionModel = compositionModel;
             LayerModel = layerModel;
             EffectModel = effectModel;
+            MaskModel = maskModel;
             HistoryModel = historyModel;
             Name = property.DisplayName;
             UseEnableSwitch = useEnableSwitch;
@@ -124,15 +130,15 @@ namespace NiVE3.Model
             {
                 if (c is PropertyGroup)
                 {
-                    Children.Add(new PropertyGroupModel(c, this, 0, projectModel, compositionModel, layerModel, effectModel, historyModel, false));
+                    Children.Add(new PropertyGroupModel(c, this, 0, projectModel, compositionModel, layerModel, effectModel, maskModel, historyModel, false));
                 }
                 else if (c is AppendableProperty)
                 {
-                    Children.Add(new AppendablePropertyModel(c, this, projectModel, compositionModel, layerModel, effectModel, historyModel));
+                    Children.Add(new AppendablePropertyModel(c, this, projectModel, compositionModel, layerModel, effectModel, maskModel, historyModel));
                 }
                 else
                 {
-                    Children.Add(new PropertyModel(c, this, projectModel, compositionModel, layerModel, effectModel, historyModel));
+                    Children.Add(new PropertyModel(c, this, projectModel, compositionModel, layerModel, effectModel, maskModel, historyModel));
                 }
             }
 

@@ -103,6 +103,7 @@ namespace NiVE3.Model
                     compositionModel,
                     layerModel,
                     null,
+                    this,
                     historyModel,
                     true
                 );
@@ -126,6 +127,7 @@ namespace NiVE3.Model
                     compositionModel,
                     layerModel,
                     null,
+                    this,
                     historyModel,
                     true
                 );

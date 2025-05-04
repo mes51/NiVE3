@@ -38,7 +38,7 @@ namespace NiVE3.Expression
 
         PropertyModel PropertyModel { get; }
 
-        public ExpressionContext(Time globalTime, ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, EffectModel? effectModel, PropertyModel propertyModel)
+        public ExpressionContext(Time globalTime, ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, EffectModel? effectModel, MaskModel? maskModel, PropertyModel propertyModel)
         {
             ProjectModel = projectModel;
             LayerModel = layerModel;
@@ -66,6 +66,10 @@ namespace NiVE3.Expression
             if (effectModel != null)
             {
                 Engine.SetValue("thisEffect", new EffectWrapper(effectModel, globalTime));
+            }
+            if (maskModel != null)
+            {
+                Engine.SetValue("thisMask", new MaskWrapper(maskModel, globalTime));
             }
             Engine.SetValue("thisProperty", new PropertyWrapper(propertyModel, globalTime));
             Engine.SetValue("Random", new ExpressionRandom(globalTime, propertyModel.ObjectId));

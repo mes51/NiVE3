@@ -52,7 +52,8 @@ namespace NiVE3.Expression.Wrapper
         [ExpressionPublicMember]
         public double workareaEnd => (double)CompositionModel.WorkareaEnd;
 
-        //public bool isEnableFrameBlend => CompositionModel.IsEnableFrameBlend;
+        [ExpressionPublicMember]
+        public bool isEnableFrameBlend => CompositionModel.IsEnableFrameBlend;
 
         [ExpressionPublicMember]
         public bool isEnableMotionBlur => CompositionModel.IsEnableMotionBlur;

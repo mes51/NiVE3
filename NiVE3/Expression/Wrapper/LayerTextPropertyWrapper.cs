@@ -21,6 +21,10 @@ namespace NiVE3.Expression.Wrapper
             {
                 options = IPropertyWrapper.Wrap(optionsProperty, globalTime);
             }
+            if (textProperty.FindProperty(TextFootageSource.TextPathOptionsGroupId) is IPropertyModel pathOptionsProperty)
+            {
+                pathOptions = IPropertyWrapper.Wrap(pathOptionsProperty, globalTime);
+            }
             if (textProperty.FindProperty(TextFootageSource.TextAnimatorsId) is IPropertyModel animatorsProperty)
             {
                 animators = IPropertyWrapper.Wrap(animatorsProperty, globalTime);
@@ -35,6 +39,9 @@ namespace NiVE3.Expression.Wrapper
 
         [ExpressionPublicMember]
         public IPropertyWrapper? options { get; }
+
+        [ExpressionPublicMember]
+        public IPropertyWrapper? pathOptions { get; }
 
         [ExpressionPublicMember]
         public IPropertyWrapper? animators { get; }

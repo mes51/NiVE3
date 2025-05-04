@@ -148,6 +148,8 @@ namespace NiVE3.Model
 
         EffectModel? EffectModel { get; }
 
+        MaskModel? MaskModel { get; }
+
         HistoryModel HistoryModel { get; }
 
         ExpressionScript? CompiledScript { get; set; }
@@ -158,9 +160,9 @@ namespace NiVE3.Model
 
         EffectViewModelProxy? EffectProxy { get; }
 
-        public PropertyModel(PropertyBase property, IPropertyModel parentPropertyModel, ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, HistoryModel historyModel) : this(property, parentPropertyModel, projectModel, compositionModel, layerModel, null, historyModel) { }
+        public PropertyModel(PropertyBase property, IPropertyModel parentPropertyModel, ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, HistoryModel historyModel) : this(property, parentPropertyModel, projectModel, compositionModel, layerModel, null, null, historyModel) { }
 
-        public PropertyModel(PropertyBase property, IPropertyModel parentPropertyModel, ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, EffectModel? effectModel, HistoryModel historyModel)
+        public PropertyModel(PropertyBase property, IPropertyModel parentPropertyModel, ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, EffectModel? effectModel, MaskModel? maskModel, HistoryModel historyModel)
         {
             Property = property;
             ParentPropertyModel = parentPropertyModel;
@@ -168,6 +170,7 @@ namespace NiVE3.Model
             CompositionModel = compositionModel;
             LayerModel = layerModel;
             EffectModel = effectModel;
+            MaskModel = maskModel;
             HistoryModel = historyModel;
             Name = property.DisplayName;
             RawValue = property.DefaultValue;
@@ -391,7 +394,7 @@ namespace NiVE3.Model
 
                     try
                     {
-                        using var context = ExpressionEngine.CreateContext(globalTime, ProjectModel, CompositionModel, LayerModel, EffectModel, this);
+                        using var context = ExpressionEngine.CreateContext(globalTime, ProjectModel, CompositionModel, LayerModel, EffectModel, MaskModel, this);
                         var expressionResult = context.Evaluate(CompiledScript, expressionValue);
 
                         if (Property.PropertyType.TryConvertFromExpressionValue(expressionResult, rawValue, out var newValue))

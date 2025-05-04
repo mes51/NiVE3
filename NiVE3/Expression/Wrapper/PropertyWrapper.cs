@@ -154,25 +154,25 @@ namespace NiVE3.Expression.Wrapper
         [ExpressionPublicMember]
         public object? loop()
         {
-            return loop(LoopModeCycle, LoopDirectionInfinity, 0, PropertyModel.KeyFrames.Count);
+            return loop(LoopModeCycle, LoopDirectionInfinity, 1, PropertyModel.KeyFrames.Count);
         }
 
         [ExpressionPublicMember]
         public object? loop(string mode)
         {
-            return loop(mode, LoopDirectionInfinity, 0, PropertyModel.KeyFrames.Count);
+            return loop(mode, LoopDirectionInfinity, 1, PropertyModel.KeyFrames.Count);
         }
 
         [ExpressionPublicMember]
         public object? loop(string mode, string direction)
         {
-            return loop(mode, direction, 0, PropertyModel.KeyFrames.Count);
+            return loop(mode, direction, 1, PropertyModel.KeyFrames.Count);
         }
 
         [ExpressionPublicMember]
-        public object? loop(string mode, string direction, int rangeStart)
+        public object? loop(string mode, string direction, int rangeBegin)
         {
-            return loop(mode, direction, rangeStart, PropertyModel.KeyFrames.Count);
+            return loop(mode, direction, rangeBegin, PropertyModel.KeyFrames.Count);
         }
 
         [ExpressionPublicMember]
