@@ -259,6 +259,11 @@ namespace NiVE3.View.Part
 
         private void ScrubbingArea_MouseDown(object sender, MouseButtonEventArgs e)
         {
+            if (FrameRate <= 0.0)
+            {
+                return;
+            }
+
             ScrubbingArea.CaptureMouse();
             IsScrubbing = true;
 
