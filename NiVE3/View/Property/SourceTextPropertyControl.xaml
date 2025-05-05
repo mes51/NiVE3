@@ -1,9 +1,9 @@
-﻿<plc:PropertyControlBase x:Class="NiVE3.Property.Control.SourceTextPropertyControl"
+﻿<plc:PropertyControlBase x:Class="NiVE3.View.Property.SourceTextPropertyControl"
                          xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                          xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                          xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
                          xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-                         xmlns:local="clr-namespace:NiVE3.Property.Control"
+                         xmlns:local="clr-namespace:NiVE3.View.Property"
                          xmlns:plc="clr-namespace:NiVE3.Plugin.Property.Control;assembly=NiVE3.Plugin"
                          xmlns:ucv="clr-namespace:NiVE3.UI.Converter;assembly=NiVE3.UI"
                          xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
@@ -25,7 +25,7 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <TextBox Grid.Row="0" Text="{Binding ElementName=Root, Path=SourceText}" AcceptsReturn="True" AcceptsTab="True"/>
+                    <TextBox Grid.Row="0" Text="{Binding ElementName=Root, Path=SourceText, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" AcceptsTab="True" PreviewKeyDown="TextBox_PreviewKeyDown"/>
 
                     <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button Content="{gm:LanguageResource ResourceKey=Dialog_Cancel}" Margin="0,5,5,0" Style="{StaticResource DialogDefaultCancelButton}" Click="EditCancelButton_Click"/>

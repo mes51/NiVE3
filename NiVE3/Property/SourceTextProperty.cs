@@ -7,9 +7,9 @@ using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Property;
 using NiVE3.Plugin.Property.Control;
 using NiVE3.Plugin.Resource;
-using NiVE3.Property.Control;
 using NiVE3.Property.Types;
 using NiVE3.Text;
+using NiVE3.View.Property;
 
 namespace NiVE3.Property
 {

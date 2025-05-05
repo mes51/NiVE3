@@ -9,8 +9,8 @@ using NiVE3.Plugin.Property.Control;
 using NiVE3.Plugin.Property.Types;
 using NiVE3.Plugin.Resource;
 using NiVE3.Plugin.ValueObject;
-using NiVE3.Property.Control;
 using NiVE3.Property.Types;
+using NiVE3.View.Property;
 
 namespace NiVE3.Property
 {

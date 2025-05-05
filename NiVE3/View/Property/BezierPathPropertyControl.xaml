@@ -1,10 +1,10 @@
-﻿<plc:PropertyControlBase x:Class="NiVE3.Property.Control.BezierPathPropertyControl"
+﻿<plc:PropertyControlBase x:Class="NiVE3.View.Property.BezierPathPropertyControl"
                          xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                          xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                          xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
                          xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
                          xmlns:plc="clr-namespace:NiVE3.Plugin.Property.Control;assembly=NiVE3.Plugin"
-                         xmlns:local="clr-namespace:NiVE3.Property.Control"
+                         xmlns:local="clr-namespace:NiVE3.View.Property"
                          mc:Ignorable="d" 
                          d:DesignHeight="450" d:DesignWidth="800">
     <Grid>

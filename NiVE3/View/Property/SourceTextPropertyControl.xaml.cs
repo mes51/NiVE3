@@ -17,7 +17,7 @@ using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Property.Control;
 using NiVE3.Text;
 
-namespace NiVE3.Property.Control
+namespace NiVE3.View.Property
 {
     /// <summary>
     /// SourceTextPropertyControl.xaml の相互作用ロジック
@@ -28,7 +28,7 @@ namespace NiVE3.Property.Control
             nameof(SourceText),
             typeof(string),
             typeof(SourceTextPropertyControl),
-            new FrameworkPropertyMetadata("", FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+            new FrameworkPropertyMetadata("")
         );
 
         public string SourceText
@@ -88,9 +88,7 @@ namespace NiVE3.Property.Control
             }
 
             viewModel.BeginEditCommand.Execute(null);
-
             viewModel.CurrentTimeRawValue = d.ChangeText(SourceText);
-
             viewModel.EndEditCommand.Execute(null);
         }
 
@@ -99,6 +97,26 @@ namespace NiVE3.Property.Control
             if (e.PropertyName == nameof(IPropertyViewModel.CurrentTimeRawValue) && ViewModel?.CurrentTimeRawValue is StyledText d)
             {
                 SetCurrentValue(SourceTextProperty, d.Text);
+            }
+        }
+
+        private void TextBox_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter && (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl)))
+            {
+                var viewModel = ViewModel;
+                if (viewModel == null || viewModel.CurrentTimeRawValue is not StyledText d)
+                {
+                    return;
+                }
+
+                EditPopup.IsOpen = false;
+
+                viewModel.BeginEditCommand.Execute(null);
+                viewModel.CurrentTimeRawValue = d.ChangeText(SourceText);
+                viewModel.EndEditCommand.Execute(null);
+
+                e.Handled = true;
             }
         }
     }

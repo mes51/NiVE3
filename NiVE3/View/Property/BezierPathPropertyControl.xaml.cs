@@ -14,7 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using NiVE3.Plugin.Property.Control;
 
-namespace NiVE3.Property.Control
+namespace NiVE3.View.Property
 {
     /// <summary>
     /// BezierPathPropertyControl.xaml の相互作用ロジック
