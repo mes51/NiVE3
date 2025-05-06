@@ -1247,7 +1247,7 @@ namespace NiVE3.Model
             var activeCamera = Layers.FirstOrDefault(l => l.IsEnableVideo && l.IsCamera && l.IsContainsTime(time));
             var activeCameraSetting = activeCamera?.GetCameraSetting(time) ?? CreateDefaultCameraSetting(Width, Height);
             var hasImageSolo = Layers.Any(l => l.HasImage && l.IsEnableVideo && l.IsEnableSolo);
-            var layers = Layers.Where(l => l.HasImage && l.IsEnableVideo && (!hasImageSolo || l.IsEnableSolo)).Select(l => l.GetLayerSkeleton(time)).NonNull().Reverse().ToArray();
+            var layers = Layers.Where(l => l.HasImage && l.IsEnableVideo && !l.IsLock && (!hasImageSolo || l.IsEnableSolo)).Select(l => l.GetLayerSkeleton(time)).NonNull().Reverse().ToArray();
 
             return Renderer.SelectLayer(activeCameraSetting, layers, pos);
         }
