@@ -891,6 +891,21 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("下")]
         public const string Utility_ChangeROI_Bottom = nameof(Utility_ChangeROI_Bottom);
 
+        [DefaultValue("ヒストグラム")]
+        public const string Utility_Histogram_Name = nameof(Utility_Histogram_Name);
+
+        [DefaultValue("ヒストグラムを計測し、画像に表示します")]
+        public const string Utility_Histogram_Description = nameof(Utility_Histogram_Description);
+
+        [LanguageKey, DefaultValue("チャンネル")]
+        public const string Utility_Histogram_Channel = nameof(Utility_Histogram_Channel);
+
+        [LanguageKey, DefaultValue("表示位置")]
+        public const string Utility_Histogram_Position = nameof(Utility_Histogram_Position);
+
+        [LanguageKey, DefaultValue("スケール")]
+        public const string Utility_Histogram_Scale = nameof(Utility_Histogram_Scale);
+
         // Median
 
         [DefaultValue("メディアン")]
