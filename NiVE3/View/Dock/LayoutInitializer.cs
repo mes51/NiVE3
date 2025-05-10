@@ -55,13 +55,7 @@ namespace NiVE3.View.Dock
                 return;
             }
 
-            void closed(object? sender, EventArgs e)
-            {
-                ViewModel?.RemoveViewModelCommand?.Execute(anchorableShown.Content);
-                anchorableShown.Closed -= closed;
-            }
-
-            anchorableShown.Closed += closed;
+            BindClosed(() => ViewModel, anchorableShown);
         }
 
         public void AfterInsertDocument(LayoutRoot layout, LayoutDocument anchorableShown)
@@ -71,14 +65,7 @@ namespace NiVE3.View.Dock
                 return;
             }
 
-            EventHandler? closed = null;
-            closed += (object? sender, EventArgs e) =>
-            {
-                ViewModel?.RemoveViewModelCommand?.Execute(anchorableShown.Content);
-                anchorableShown.Closed -= closed;
-            };
-
-            anchorableShown.Closed += closed;
+            BindClosed(() => ViewModel, anchorableShown);
         }
 
         public bool BeforeInsertAnchorable(LayoutRoot layout, LayoutAnchorable anchorableToShow, ILayoutContainer destinationContainer)
@@ -140,6 +127,17 @@ namespace NiVE3.View.Dock
             }
 
             return pane;
+        }
+
+        public static void BindClosed(Func<MainWindowViewModel?> viewModelGetter, LayoutContent layoutContent)
+        {
+            void closed(object? sender, EventArgs e)
+            {
+                viewModelGetter()?.RemoveViewModelCommand?.Execute(layoutContent.Content);
+                layoutContent.Closed -= closed;
+            }
+
+            layoutContent.Closed += closed;
         }
 
         // NOTE: (多分LayoutRoot.CollectGarbageが呼ばれるせいで)XAML上でLayoutAnchorablePaneGroupを定義してもいなくなってしまうため、必要になったら生成する

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Markup;
 using System.Windows;
+using AvalonDock.Controls;
 
 namespace NiVE3.View.Dock
 {

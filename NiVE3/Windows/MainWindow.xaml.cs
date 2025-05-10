@@ -16,8 +16,10 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Xml;
+using AvalonDock.Layout;
 using AvalonDock.Layout.Serialization;
 using NiVE3.Config;
+using NiVE3.View.Dock;
 using NiVE3.ViewModel;
 
 namespace NiVE3.Windows
@@ -89,6 +91,19 @@ namespace NiVE3.Windows
                 {
                     using var reader = new StringReader(WindowLayoutSetting.Setting.DockingLayout);
                     var serializer = new XmlLayoutSerializer(Manager);
+                    // NOTE: レイアウトのデシリアライズ時にAnchorableやDocumentを再生成され、LayoutInitializerで設定したイベントハンドラが消えるので再設定する
+                    //       また、Documentは起動時には存在しないため、レイアウト復元時にはパネル自体表示しないようにする
+                    serializer.LayoutSerializationCallback += (sender, e) =>
+                    {
+                        if (e.Model is LayoutDocument)
+                        {
+                            e.Cancel = true;
+                        }
+                        else if (e.Content is not SingletonePaneViewModelBase)
+                        {
+                            LayoutInitializer.BindClosed(() => DataContext as MainWindowViewModel, e.Model);
+                        }
+                    };
                     serializer.Deserialize(reader);
                 }
                 catch { }
