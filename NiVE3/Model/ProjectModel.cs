@@ -197,6 +197,8 @@ namespace NiVE3.Model
                 }
             }
 
+            ProjectName = "";
+            ProjectPath = "";
             IsEdited = false;
         }
 
@@ -451,7 +453,7 @@ namespace NiVE3.Model
 
         private void ProjectModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(ProjectPath))
+            if (e.PropertyName == nameof(ProjectPath) && !string.IsNullOrEmpty(ProjectPath))
             {
                 ProjectName = Path.GetFileName(ProjectPath);
             }
