@@ -307,7 +307,7 @@ namespace NiVE3.Model
                 return;
             }
 
-            var ext = Path.GetExtension(filePath).Trim('.');
+            var ext = Path.GetExtension(filePath).Trim('.').ToLower();
             foreach (var (t, supported) in SupportedFileTypes)
             {
                 if (!supported.Contains(ext))
@@ -752,7 +752,7 @@ namespace NiVE3.Model
                 InputMetadatas = new ReadOnlyDictionary<Type, IInputMetadata>(new Dictionary<Type, IInputMetadata>());
             }
 
-            SupportedFileTypes = InputMetadatas.ToDictionary(m => m.Key, m => m.Value.SupportedFileType.Split(",").Select(e => e.Trim('*', '.')).ToArray());
+            SupportedFileTypes = InputMetadatas.ToDictionary(m => m.Key, m => m.Value.SupportedFileType.Split(",").Select(e => e.Trim('*', '.').ToLower()).ToArray());
             SupportedAllExtensions = [..SupportedFileTypes.Values.SelectMany(_ => _).Where(s => !string.IsNullOrEmpty(s)).Select(s => "*." + s)];
         }
 
