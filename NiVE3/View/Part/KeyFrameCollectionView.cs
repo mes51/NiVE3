@@ -322,7 +322,7 @@ namespace NiVE3.View.Part
 
                 var isSelected = selected.Contains(k.Id);
                 var keyFrameTime = k.Time + (isSelected && IsKeyFrameClicked ? diffTime : Time.Zero);
-                var x = (double)(timeOffset + keyFrameTime) * pixelPerTime;
+                var x = (double)(timeOffset + keyFrameTime) * pixelPerTime + 1.0;
                 if (x > -KeyFrameIconSize && x < actualWidth)
                 {
                     drawingContext.PushTransform(new TranslateTransform(x, 0.0));
