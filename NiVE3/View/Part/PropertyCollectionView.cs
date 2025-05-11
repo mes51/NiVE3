@@ -74,6 +74,19 @@ namespace NiVE3.View.Part
             new FrameworkPropertyMetadata(false)
         );
 
+        public static readonly DependencyProperty CurrentPropertyGroupProperty = DependencyProperty.Register(
+            nameof(CurrentPropertyGroup),
+            typeof(IInternalPropertyViewModel),
+            typeof(PropertyCollectionView),
+            new FrameworkPropertyMetadata(null)
+        );
+
+        public IInternalPropertyViewModel? CurrentPropertyGroup
+        {
+            get { return (IInternalPropertyViewModel)GetValue(CurrentPropertyGroupProperty); }
+            set { SetValue(CurrentPropertyGroupProperty, value); }
+        }
+
         public bool IsAppendablePropertyChild
         {
             get { return (bool)GetValue(IsAppendablePropertyChildProperty); }

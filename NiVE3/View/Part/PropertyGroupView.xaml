@@ -64,6 +64,7 @@
                                       RangeStart="{Binding ElementName=Root, Path=RangeStart}"
                                       CompositionFrameRate="{Binding ElementName=Root, Path=CompositionFrameRate}"
                                       ParentHasExpanderArrow="{Binding ElementName=Root, Path=ParentHasExpanderArrow}"
-                                      SelectedItems="{Binding SelectedChildren}"/>
+                                      SelectedItems="{Binding SelectedChildren}"
+                                      CurrentPropertyGroup="{Binding}"/>
     </local:LayerItemExpander>
 </local:PropertyViewBase>

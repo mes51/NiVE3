@@ -196,7 +196,7 @@
                                          RangeStart="{Binding RelativeSource={RelativeSource AncestorType={x:Type pt:PropertyCollectionView}}, Path=RangeStart}"
                                          CompositionFrameRate="{Binding RelativeSource={RelativeSource AncestorType={x:Type pt:PropertyCollectionView}}, Path=CompositionFrameRate}"
                                          ParentHasExpanderArrow="{Binding RelativeSource={RelativeSource AncestorType={x:Type pt:PropertyCollectionView}}, Path=ParentHasExpanderArrow}"
-                                         Tag="{Binding RelativeSource={RelativeSource AncestorType={x:Type pt:PropertyCollectionView}}, Path=DataContext}">
+                                         Tag="{Binding RelativeSource={RelativeSource AncestorType={x:Type pt:PropertyCollectionView}}, Path=CurrentPropertyGroup}">
                             <pt:PropertyView.ContextMenu>
                                 <ContextMenu>
                                     <MenuItem Header="{gm:LanguageResource ResourceKey=PropertyCollection_ContextMenu_AddKeyFrame, ReturnDynamicResource=True}" a:MenuItemGestureBindingProperty.InputGesture="{cgm:ShortcutKeyBinding ResourceKey=AddKeyFrameGesture}" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.Tag.AddKeyFrameToSelectedChildrenCommand}"/>

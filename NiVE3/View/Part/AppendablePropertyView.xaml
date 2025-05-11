@@ -81,6 +81,7 @@
                                       ParentHasExpanderArrow="{Binding ElementName=Root, Path=ParentHasExpanderArrow}"
                                       SelectedItems="{Binding SelectedChildren}"
                                       IsAppendablePropertyChild="True"
+                                      CurrentPropertyGroup="{Binding}"
                                       dd:DragDrop.DropHandler="{Binding}"
                                       dd:DragDrop.DragHandler="{Binding RelativeSource={RelativeSource Self}}"
                                       dd:DragDrop.IsDragSource="True"

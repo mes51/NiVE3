@@ -57,6 +57,7 @@
                                    RangeStart="{Binding ElementName=Root, Path=RangeStart}"
                                    CompositionFrameRate="{Binding ElementName=Root, Path=CompositionFrameRate}"
                                    ParentHasExpanderArrow="{Binding ElementName=Root, Path=ParentHasExpanderArrow}"
-                                   SelectedItems="{Binding Properties.SelectedChildren}"/>
+                                   SelectedItems="{Binding Properties.SelectedChildren}"
+                                   CurrentPropertyGroup="{Binding Properties}"/>
     </pt:LayerItemExpander>
 </UserControl>
