@@ -1198,7 +1198,7 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("消滅時サイズ")]
         public const string Simulation_Particle_Partucle_DeadSize = nameof(Simulation_Particle_Partucle_DeadSize);
 
-        [LanguageKey, DefaultValue("消滅時サイズ")]
+        [LanguageKey, DefaultValue("消滅時サイズのばらつき")]
         public const string Simulation_Particle_Partucle_DeadSizeVariation = nameof(Simulation_Particle_Partucle_DeadSizeVariation);
 
         [LanguageKey, DefaultValue("サイズマップ")]
