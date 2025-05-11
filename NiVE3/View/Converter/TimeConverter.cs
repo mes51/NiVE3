@@ -71,38 +71,38 @@ namespace NiVE3.View.Converter
                 return DependencyProperty.UnsetValue;
             }
 
-            var part = timeText.Split(":");
+            var part = timeText.Split(":").Take(4).Select(ParseValue).ToArray();
+            if (part.Any(double.IsNaN))
+            {
+                return DependencyProperty.UnsetValue;
+            }
             Array.Reverse(part);
             var time = 0.0;
             var sign = 1.0;
             if (part.Length > 0)
             {
-                var parsedValue = ParseValue(part[0]);
-                time += Math.Abs(parsedValue) / FrameRate;
-                sign = Math.Sign(parsedValue);
+                time += Math.Abs(part[0]) / FrameRate;
+                sign = Math.Sign(part[0]);
             }
             if (part.Length > 1)
             {
-                var parsedValue = ParseValue(part[1]);
-                time += Math.Abs(parsedValue);
-                sign = Math.Sign(parsedValue);
+                time += Math.Abs(part[1]);
+                sign = Math.Sign(part[1]);
             }
             if (part.Length > 2)
             {
-                var parsedValue = ParseValue(part[2]);
-                time += Math.Abs(parsedValue) * 60.0;
-                sign = Math.Sign(parsedValue);
+                time += Math.Abs(part[2]) * 60.0;
+                sign = Math.Sign(part[2]);
             }
             if (part.Length > 3)
             {
-                var parsedValue = ParseValue(part[3]);
-                time += Math.Abs(parsedValue) * 3600.0;
-                sign = Math.Sign(parsedValue);
+                time += Math.Abs(part[3]) * 3600.0;
+                sign = Math.Sign(part[3]);
             }
 
             if (sign == 0.0)
             {
-                if (part[^1].StartsWith("-"))
+                if (part[^1] < 0.0)
                 {
                     sign = -1.0;
                 }
