@@ -43,6 +43,11 @@ namespace NiVE3.Util
         public static extern uint TimeKillEvent(uint uTimerID);
 
         #endregion winmm.dl
+
+
+
+        [DllImport("shcore.dll", SetLastError = true)]
+        public static extern void GetDpiForMonitor(nint hMonitor, MonitorDpiType dpiType, out uint dpiX, out uint dpiY);
     }
 
     delegate void TimeProc(uint uTimerID, uint uMsg, nint dwUser, nint dw1, nint dw2);
@@ -97,6 +102,14 @@ namespace NiVE3.Util
         TIME_CALLBACK_FUNCTION = 0x00,
         TIME_CALLBACK_EVENT_SET = 0x10,
         TIME_CALLBACK_EVENT_PULSE = 0x20
+    }
+
+    enum MonitorDpiType : uint
+    {
+        MDT_EFFECTIVE_DPI = 0,
+        MDT_ANGULAR_DPI = 1,
+        MDT_RAW_DPI = 2,
+        MDT_DEFAULT
     }
 
     [StructLayout(LayoutKind.Sequential)]

@@ -63,7 +63,7 @@ namespace NiVE3.Wpf.Behavior
             }
 
             var rcWork = monitorInfo.rcWork;
-            switch (CheckHasAppBarAutoHide(monitorInfo.rcMonitor))
+            switch (MonitorDimension.CheckHasAppBarAutoHide(monitorInfo.rcMonitor))
             {
                 case (true, _, _, _):
                     rcWork.Left += HideAppBarSpace;
@@ -90,73 +90,23 @@ namespace NiVE3.Wpf.Behavior
 
         static void CalcMinMax(nint hwnd, nint lParam)
         {
-            var hMonitor = NativeMethods.MonitorFromWindow(hwnd, MonitorFromWindowFlags.MONITOR_DEFAULTTONEAREST);
-            if (hMonitor == IntPtr.Zero)
+            var maxRect = MonitorDimension.CalcMaxRectFromWindow(hwnd);
+            if (maxRect == WindowMaxRect.Empty)
             {
                 return;
             }
 
-            var monitorInfo = new MONITORINFO();
-            if (!NativeMethods.GetMonitorInfo(hMonitor, ref monitorInfo))
-            {
-                return;
-            }
-
-            var rcWork = monitorInfo.rcWork;
-            var rcMonitor = monitorInfo.rcMonitor;
             var mmi = Marshal.PtrToStructure<MINMAXINFO>(lParam);
 
-            mmi.ptMaxPosition.x = Math.Abs(rcWork.Left - rcMonitor.Left);
-            mmi.ptMaxPosition.y = Math.Abs(rcWork.Top - rcMonitor.Top);
-            mmi.ptMaxSize.x = Math.Abs(rcWork.Right - rcWork.Left) + 2;
-            mmi.ptMaxSize.y = Math.Abs(rcWork.Bottom - rcWork.Top) + 2;
-            mmi.ptMaxTrackSize = mmi.ptMaxSize;
+            mmi.ptMaxPosition.x = maxRect.MaxPositionX;
+            mmi.ptMaxPosition.y = maxRect.MaxPositionY;
+            mmi.ptMaxSize.x = maxRect.MaxWidth;
+            mmi.ptMaxSize.y = maxRect.MaxHeight;
+            mmi.ptMaxTrackSize.x = maxRect.maxTrackWidth;
+            mmi.ptMaxTrackSize.y = maxRect.maxTrackHeight;
             mmi.ptMinTrackSize = new POINT { x = 800, y = 600 }; // TODO: 最小サイズの調整
 
-            switch (CheckHasAppBarAutoHide(rcMonitor))
-            {
-                case (true, _, _, _):
-                    mmi.ptMaxPosition.x += HideAppBarSpace;
-                    mmi.ptMaxTrackSize.x -= HideAppBarSpace;
-                    mmi.ptMaxSize.x -= HideAppBarSpace;
-                    break;
-                case (_, true, _, _):
-                    mmi.ptMaxPosition.y += HideAppBarSpace;
-                    mmi.ptMaxTrackSize.y -= HideAppBarSpace;
-                    mmi.ptMaxSize.y -= HideAppBarSpace;
-                    break;
-                case (_, _, true, _):
-                    mmi.ptMaxTrackSize.x -= HideAppBarSpace;
-                    mmi.ptMaxSize.x -= HideAppBarSpace;
-                    break;
-                case (_, _, _, true):
-                    mmi.ptMaxTrackSize.y -= HideAppBarSpace;
-                    mmi.ptMaxSize.y -= HideAppBarSpace;
-                    break;
-            }
-
             Marshal.StructureToPtr(mmi, lParam, true);
-        }
-
-        static (bool left, bool top, bool right, bool bottom) CheckHasAppBarAutoHide(RECT rc)
-        {
-            return (
-                HasAppBarAutoHide(rc, ABE.ABE_LEFT),
-                HasAppBarAutoHide(rc, ABE.ABE_TOP),
-                HasAppBarAutoHide(rc, ABE.ABE_RIGHT),
-                HasAppBarAutoHide(rc, ABE.ABE_BOTTOM)
-            );
-        }
-
-        static bool HasAppBarAutoHide(RECT rc, ABE edge)
-        {
-            var data = new APPBARDATA
-            {
-                uEdge = (uint)edge,
-                rc = rc
-            };
-            var hAppbar = NativeMethods.SHAppBarMessage(ABM.ABM_GETAUTOHIDEBAREX, ref data);
-            return NativeMethods.IsWindow(hAppbar);
         }
     }
 }

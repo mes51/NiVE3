@@ -11,6 +11,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
@@ -19,6 +20,7 @@ using System.Xml;
 using AvalonDock.Layout;
 using AvalonDock.Layout.Serialization;
 using NiVE3.Config;
+using NiVE3.Util;
 using NiVE3.View.Dock;
 using NiVE3.ViewModel;
 
@@ -33,6 +35,12 @@ namespace NiVE3.Windows
         {
             InitializeComponent();
         }
+
+        Point OriginalLocation { get; set; }
+
+        Size OriginalSize { get; set; }
+
+        bool IsLoadingLayout {  get; set; }
 
         void SaveLayout()
         {
@@ -70,8 +78,16 @@ namespace NiVE3.Windows
                 serializedLayoutXml = editedWriter.ToString();
             }
 
-            WindowLayoutSetting.Setting.Location = new Point(Left, Top);
-            WindowLayoutSetting.Setting.Size = new Size(Width, Height);
+            if (WindowState == WindowState.Maximized)
+            {
+                WindowLayoutSetting.Setting.Location = OriginalLocation;
+                WindowLayoutSetting.Setting.Size = OriginalSize;
+            }
+            else
+            {
+                WindowLayoutSetting.Setting.Location = new Point(Left, Top);
+                WindowLayoutSetting.Setting.Size = new Size(Width, Height);
+            }
             WindowLayoutSetting.Setting.WindowState = WindowState;
             WindowLayoutSetting.Setting.DockingLayout = serializedLayoutXml;
             WindowLayoutSetting.Setting.Save();
@@ -79,10 +95,22 @@ namespace NiVE3.Windows
 
         void LoadLayout()
         {
+            IsLoadingLayout = true;
+
             Left = WindowLayoutSetting.Setting.Location.X;
             Top = WindowLayoutSetting.Setting.Location.Y;
-            Width = WindowLayoutSetting.Setting.Size.Width;
-            Height = WindowLayoutSetting.Setting.Size.Height;
+
+            // NOTE: 画面サイズが最大まで大きくなっているとき、最大化してもWM_NCCALCSIZEが呼ばれず、画面端まで完全に広がらないため、少し画面サイズを小さくする
+            // TODO: WM_NCCALCSIZEが呼ばれない原因を調査する
+            var maxRect = MonitorDimension.CalcMaxRectFromWindow(new WindowInteropHelper(this).Handle);
+            var dpi = MonitorDimension.GetMonitorDpiScale(this);
+            Width = Math.Min(WindowLayoutSetting.Setting.Size.Width, maxRect.MaxWidth / dpi.DpiScaleX - 20.0);
+            Height = Math.Min(WindowLayoutSetting.Setting.Size.Height, maxRect.MaxHeight / dpi.DpiScaleY - 20.0);
+            if (WindowLayoutSetting.Setting.WindowState == WindowState.Maximized)
+            {
+                OriginalLocation = WindowLayoutSetting.Setting.Location;
+                OriginalSize = WindowLayoutSetting.Setting.Size;
+            }
             WindowState = WindowLayoutSetting.Setting.WindowState;
 
             if (!string.IsNullOrEmpty(WindowLayoutSetting.Setting.DockingLayout))
@@ -108,6 +136,8 @@ namespace NiVE3.Windows
                 }
                 catch { }
             }
+
+            IsLoadingLayout = false;
         }
 
         private void Window_Closing(object sender, CancelEventArgs e)
@@ -137,6 +167,15 @@ namespace NiVE3.Windows
             ApplicationSetting.Setting.Save();
             ShortcutKeySetting.Setting.Save();
             SaveLayout();
+        }
+
+        private void Window_StateChanged(object sender, EventArgs e)
+        {
+            if (!IsLoadingLayout && WindowState == WindowState.Maximized)
+            {
+                OriginalLocation = new Point(Left, Top);
+                OriginalSize = new Size(Width, Height);
+            }
         }
 
         private void Window_ContentRendered(object sender, EventArgs e)

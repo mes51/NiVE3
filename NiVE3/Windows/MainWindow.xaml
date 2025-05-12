@@ -31,6 +31,7 @@
         WindowStartupLocation="CenterScreen"
         Closing="Window_Closing"
         ContentRendered="Window_ContentRendered"
+        StateChanged="Window_StateChanged"
         Height="1000" Width="1800"
         KeyboardNavigation.ControlTabNavigation="None"
         a:ShortcutKeyBindingProperty.InputBinding="True"
