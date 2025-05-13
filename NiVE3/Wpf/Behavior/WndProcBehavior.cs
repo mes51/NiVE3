@@ -79,8 +79,8 @@ namespace NiVE3.Wpf.Behavior
             {
                 UnInitializeBehavior();
                 NativeWindowSource?.RemoveHook(Process);
-                // NOTE: 取ってきたHwndSourceDisposeはしてはダメ
-                // see: https://referencesource.microsoft.com/#PresentationCore/Core/CSharp/System/Windows/Interop/HwndSource.cs,069dde8204f5aa36,references
+                // NOTE: 取ってきたHwndSourceはDisposeしてはダメ
+                // see: https://source.dot.net/#PresentationCore/System/Windows/InterOp/HwndSource.cs,069dde8204f5aa36,references
                 // see; https://stackoverflow.com/questions/8082895/how-to-use-hwndsource
                 NativeWindowSource = null;
                 Initialized = false;

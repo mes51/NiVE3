@@ -99,13 +99,8 @@ namespace NiVE3.Windows
 
             Left = WindowLayoutSetting.Setting.Location.X;
             Top = WindowLayoutSetting.Setting.Location.Y;
-
-            // NOTE: 画面サイズが最大まで大きくなっているとき、最大化してもWM_NCCALCSIZEが呼ばれず、画面端まで完全に広がらないため、少し画面サイズを小さくする
-            // TODO: WM_NCCALCSIZEが呼ばれない原因を調査する
-            var maxRect = MonitorDimension.CalcMaxRectFromWindow(new WindowInteropHelper(this).Handle);
-            var dpi = MonitorDimension.GetMonitorDpiScale(this);
-            Width = Math.Min(WindowLayoutSetting.Setting.Size.Width, maxRect.MaxWidth / dpi.DpiScaleX - 20.0);
-            Height = Math.Min(WindowLayoutSetting.Setting.Size.Height, maxRect.MaxHeight / dpi.DpiScaleY - 20.0);
+            Width = WindowLayoutSetting.Setting.Size.Width;
+            Height = WindowLayoutSetting.Setting.Size.Height;
             if (WindowLayoutSetting.Setting.WindowState == WindowState.Maximized)
             {
                 OriginalLocation = WindowLayoutSetting.Setting.Location;

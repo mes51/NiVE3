@@ -71,6 +71,7 @@ namespace NiVE3.Util
         WVR_ALIGNLEFT = 0x0020,
         WVR_ALIGNBOTTOM = 0x0040,
         WVR_ALIGNRIGHT = 0x0080,
+        WVR_REDRAW = 0x0300,
         WVR_VALIDRECTS = 0x0400
     }
 

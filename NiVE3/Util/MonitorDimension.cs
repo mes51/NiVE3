@@ -10,6 +10,8 @@ namespace NiVE3.Util
 {
     static class MonitorDimension
     {
+        // SEE: https://mntone.hateblo.jp/entry/2020/08/02/111309
+
         public const int HideAppBarSpace = 2;
 
         public static WindowMaxRect CalcMaxRectFromWindow(Window window)
@@ -43,21 +45,21 @@ namespace NiVE3.Util
 
             switch (CheckHasAppBarAutoHide(rcMonitor))
             {
-                case (true, _, _, _):
+                case AppBarHideMode.Left:
                     maxPositionX += HideAppBarSpace;
                     maxTrackWidth -= HideAppBarSpace;
                     maxWidth -= HideAppBarSpace;
                     break;
-                case (_, true, _, _):
+                case AppBarHideMode.Top:
                     maxPositionY += HideAppBarSpace;
                     maxTrackHeight -= HideAppBarSpace;
                     maxHeight -= HideAppBarSpace;
                     break;
-                case (_, _, true, _):
+                case AppBarHideMode.Right:
                     maxTrackWidth -= HideAppBarSpace;
                     maxWidth -= HideAppBarSpace;
                     break;
-                case (_, _, _, true):
+                case AppBarHideMode.Bottom:
                     maxTrackHeight -= HideAppBarSpace;
                     maxHeight -= HideAppBarSpace;
                     break;
@@ -84,17 +86,31 @@ namespace NiVE3.Util
             return new DpiScale(dpiX / 96.0, dpiY / 96.0);
         }
 
-        public static (bool left, bool top, bool right, bool bottom) CheckHasAppBarAutoHide(RECT rc)
+        public static AppBarHideMode CheckHasAppBarAutoHide(RECT rc)
         {
-            return (
-                HasAppBarAutoHide(rc, ABE.ABE_LEFT),
-                HasAppBarAutoHide(rc, ABE.ABE_TOP),
-                HasAppBarAutoHide(rc, ABE.ABE_RIGHT),
-                HasAppBarAutoHide(rc, ABE.ABE_BOTTOM)
-            );
+            if (HasAutoHideAppBar(rc, ABE.ABE_LEFT))
+            {
+                return AppBarHideMode.Left;
+            }
+            else if (HasAutoHideAppBar(rc, ABE.ABE_TOP))
+            {
+                return AppBarHideMode.Top;
+            }
+            else if (HasAutoHideAppBar(rc, ABE.ABE_RIGHT))
+            {
+                return AppBarHideMode.Right;
+            }
+            else if (HasAutoHideAppBar(rc, ABE.ABE_BOTTOM))
+            {
+                return AppBarHideMode.Bottom;
+            }
+            else
+            {
+                return AppBarHideMode.None;
+            }
         }
 
-        static bool HasAppBarAutoHide(RECT rc, ABE edge)
+        static bool HasAutoHideAppBar(RECT rc, ABE edge)
         {
             var data = new APPBARDATA
             {
@@ -109,5 +125,14 @@ namespace NiVE3.Util
     readonly record struct WindowMaxRect(int MaxPositionX, int MaxPositionY, int MaxWidth, int MaxHeight, int maxTrackWidth, int maxTrackHeight)
     {
         public static readonly WindowMaxRect Empty = new WindowMaxRect();
+    }
+
+    enum AppBarHideMode
+    {
+        None,
+        Left,
+        Top,
+        Right,
+        Bottom
     }
 }

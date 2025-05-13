@@ -29,10 +29,6 @@ namespace NiVE3.Wpf.Behavior
                         }
                     }
                     break;
-                case (uint)WM.WM_GETMINMAXINFO:
-                    CalcMinMax(hwnd, lParam);
-                    handled = true;
-                    break;
             }
             return nint.Zero;
         }
@@ -41,7 +37,7 @@ namespace NiVE3.Wpf.Behavior
         {
             if (!NativeMethods.IsZoomed(hwnd))
             {
-                return nint.Zero;
+                return (nint)WVP.WVR_REDRAW;
             }
 
             var size = Marshal.PtrToStructure<NCCALCSIZE_PARAMS>(lParam);
@@ -65,16 +61,16 @@ namespace NiVE3.Wpf.Behavior
             var rcWork = monitorInfo.rcWork;
             switch (MonitorDimension.CheckHasAppBarAutoHide(monitorInfo.rcMonitor))
             {
-                case (true, _, _, _):
+                case AppBarHideMode.Left:
                     rcWork.Left += HideAppBarSpace;
                     break;
-                case (_, true, _, _):
+                case AppBarHideMode.Top:
                     rcWork.Top += HideAppBarSpace;
                     break;
-                case (_, _, true, _):
+                case AppBarHideMode.Right:
                     rcWork.Right -= HideAppBarSpace;
                     break;
-                case (_, _, _, true):
+                case AppBarHideMode.Bottom:
                     rcWork.Bottom -= HideAppBarSpace;
                     break;
             }
@@ -85,28 +81,7 @@ namespace NiVE3.Wpf.Behavior
             Marshal.StructureToPtr(size, lParam, true);
 
             handled = true;
-            return (nint)(WVP.WVR_ALIGNTOP | WVP.WVR_ALIGNLEFT | WVP.WVR_VALIDRECTS);
-        }
-
-        static void CalcMinMax(nint hwnd, nint lParam)
-        {
-            var maxRect = MonitorDimension.CalcMaxRectFromWindow(hwnd);
-            if (maxRect == WindowMaxRect.Empty)
-            {
-                return;
-            }
-
-            var mmi = Marshal.PtrToStructure<MINMAXINFO>(lParam);
-
-            mmi.ptMaxPosition.x = maxRect.MaxPositionX;
-            mmi.ptMaxPosition.y = maxRect.MaxPositionY;
-            mmi.ptMaxSize.x = maxRect.MaxWidth;
-            mmi.ptMaxSize.y = maxRect.MaxHeight;
-            mmi.ptMaxTrackSize.x = maxRect.maxTrackWidth;
-            mmi.ptMaxTrackSize.y = maxRect.maxTrackHeight;
-            mmi.ptMinTrackSize = new POINT { x = 800, y = 600 }; // TODO: 最小サイズの調整
-
-            Marshal.StructureToPtr(mmi, lParam, true);
+            return (nint)(WVP.WVR_ALIGNTOP | WVP.WVR_ALIGNLEFT | WVP.WVR_ALIGNRIGHT | WVP.WVR_ALIGNBOTTOM | WVP.WVR_VALIDRECTS);
         }
     }
 }
