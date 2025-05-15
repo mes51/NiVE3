@@ -44,10 +44,12 @@ namespace NiVE3.Util
 
         #endregion winmm.dl
 
-
+        #region shcore.dll
 
         [DllImport("shcore.dll", SetLastError = true)]
         public static extern void GetDpiForMonitor(nint hMonitor, MonitorDpiType dpiType, out uint dpiX, out uint dpiY);
+
+        #endregion shcore.dll
     }
 
     delegate void TimeProc(uint uTimerID, uint uMsg, nint dwUser, nint dw1, nint dw2);
