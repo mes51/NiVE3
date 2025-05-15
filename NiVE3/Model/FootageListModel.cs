@@ -296,7 +296,7 @@ namespace NiVE3.Model
 
         public bool CheckSupportFile(string filePath)
         {
-            var ext = Path.GetExtension(filePath).Trim('.');
+            var ext = Path.GetExtension(filePath).Trim('.').ToLower();
             return SupportedFileTypes.Values.Any(e => e.Contains(ext));
         }
 
