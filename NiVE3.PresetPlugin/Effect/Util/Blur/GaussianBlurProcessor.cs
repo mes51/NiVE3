@@ -240,7 +240,7 @@ namespace NiVE3.PresetPlugin.Effect.Util.Blur
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static float[] GetGaussian(float range)
+        public static float[] GetGaussian(float range)
         {
             var fz = (int)MathF.Ceiling(range) - 1;
             var gaussian = new float[fz * 2 + 1];

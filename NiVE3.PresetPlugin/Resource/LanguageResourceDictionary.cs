@@ -166,6 +166,23 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("高速モード(CPU用)")]
         public const string Blur_RadialBlur_FastMode = nameof(Blur_RadialBlur_FastMode);
 
+        // BilateralBlur
+
+        [DefaultValue("バイラテラルブラー")]
+        public const string Blur_BilateralBlur_Name = nameof(Blur_BilateralBlur_Name);
+
+        [DefaultValue("バイラテラルブラーを適用します")]
+        public const string Blur_BilateralBlur_Description = nameof(Blur_BilateralBlur_Description);
+
+        [LanguageKey, DefaultValue("半径")]
+        public const string Blur_BilateralBlur_Amount = nameof(Blur_BilateralBlur_Amount);
+
+        [LanguageKey, DefaultValue("輪郭")]
+        public const string Blur_BilateralBlur_Contour = nameof(Blur_BilateralBlur_Contour);
+
+        [LanguageKey, DefaultValue("エッジの繰り返しモード")]
+        public const string Blur_BilateralBlur_EdgeRepeatMode = nameof(Blur_BilateralBlur_EdgeRepeatMode);
+
         // PixelSort
 
         [DefaultValue("ピクセルソート")]
