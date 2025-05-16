@@ -62,9 +62,27 @@ namespace NiVE3.PresetPlugin.Effect.Blur
             ];
         }
 
+        public ROI CalcRoi(ROI baseRoi, double downSamplingRateX, double downSamplingRateY, Time layerTime, IPropertyObject[] properties, ICompositionObject composition, ILayerObject layer)
+        {
+            var edgeRepeatMode = properties.GetValue(PropertyEdgeRepeatModeId, layerTime, EdgeRepeatMode.None);
+
+            if (edgeRepeatMode == EdgeRepeatMode.AddAmount)
+            {
+                var amount = (float)properties.GetValue(PropertyAmountId, layerTime, 0.0);
+
+                var expandX = (int)Math.Ceiling(amount / downSamplingRateX);
+                var expandY = (int)Math.Ceiling(amount / downSamplingRateY);
+                return baseRoi.Expand(-expandX, -expandY, expandX, expandY);
+            }
+            else
+            {
+                return baseRoi;
+            }
+        }
+
         public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, Time layerTime, IPropertyObject[] properties, ICompositionObject composition, ILayerObject layer, bool useGpu)
         {
-            var amount = (float)properties.GetValue(PropertyAmountId, layerTime, 0.0);
+            var amount = (float)(properties.GetValue(PropertyAmountId, layerTime, 0.0) / downSamplingRateX);
             var contour = (float)properties.GetValue(PropertyContourId, layerTime, 0.0);
             var edgeRepeatMode = properties.GetValue(PropertyEdgeRepeatModeId, layerTime, EdgeRepeatMode.None);
 
