@@ -47,7 +47,8 @@ namespace NiVE3.PresetPlugin.Effect.Util.Blur
                 using var horizontalGaussianBuffer = device.AllocateReadOnlyBuffer(horizontalGaussian);
                 using var verticalGaussianBuffer = device.AllocateReadOnlyBuffer(verticalGaussian);
                 using var context = device.CreateComputeContext();
-                context.For(roi.Width, roi.Height, new GaussianBlurHorizontalProcess(temp.Data, image.Data, image.Width, horizontalGaussianBuffer, horizontalGaussian.Sum(), (int)edgeRepeatMode, roi.Left, roi.Top));
+                var verticalRange = horizontalGaussian.Length / 2;
+                context.For(roi.Width, Math.Min(roi.Height + verticalRange * 2, image.Height), new GaussianBlurHorizontalProcess(temp.Data, image.Data, image.Width, horizontalGaussianBuffer, horizontalGaussian.Sum(), (int)edgeRepeatMode, roi.Left, Math.Max(roi.Top - verticalRange, 0)));
                 context.Barrier(temp.Data);
                 context.Barrier(image.Data);
                 context.For(roi.Width, roi.Height, new GaussianBlurVerticalProcess(image.Data, temp.Data, image.Width, image.Height, verticalGaussianBuffer, verticalGaussian.Sum(), (int)edgeRepeatMode, roi.Left, roi.Top));

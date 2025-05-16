@@ -44,12 +44,13 @@ namespace NiVE3.PresetPlugin.Effect.Util.Blur
         {
             using var temp = new NGPUImage(image.Width, image.Height, device);
             image.CopyTo(temp);
+            var verticalMargin = (int)MathF.Ceiling(horizontalAmount);
             if (horizontalAmount > 0.0F && verticalAmount > 0.0F)
             {
                 using var context = device.CreateComputeContext();
                 for (var i = 0; i < repeat; i++)
                 {
-                    context.For(roi.Width, roi.Height, new BoxBlurHorizontalProcess(temp.Data, image.Data, image.Width, horizontalAmount, (int)edgeRepeatMode, roi.Left, roi.Top));
+                    context.For(roi.Width, Math.Min(roi.Height + verticalMargin * 2, image.Height), new BoxBlurHorizontalProcess(temp.Data, image.Data, image.Width, horizontalAmount, (int)edgeRepeatMode, roi.Left, Math.Max(roi.Top - verticalMargin, 0)));
                     context.Barrier(temp.Data);
                     context.Barrier(image.Data);
                     context.For(roi.Width, roi.Height, new BoxBlurVerticalProcess(image.Data, temp.Data, image.Width, image.Height, verticalAmount, (int)edgeRepeatMode, roi.Left, roi.Top));
