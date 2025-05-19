@@ -4,12 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ComputeSharp;
+using NiVE3.Shape.Internal;
 
-namespace NiVE3.InternalShader.Shape
+namespace NiVE3.Shape.Internal.Shader
 {
     [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
     [GeneratedComputeShaderDescriptor]
-    readonly partial struct EvenOddAliasedRadialGradient(
+    readonly partial struct EvenOddAliasedLinearGradient(
         ReadWriteBuffer<Float4> image,
         int imageWidth,
         ReadOnlyBuffer<GPULineHit> lineHits,
@@ -20,7 +21,7 @@ namespace NiVE3.InternalShader.Shape
         ReadOnlyBuffer<float> colorGradientPositions,
         ReadOnlyBuffer<float> opacityGradientValues,
         ReadOnlyBuffer<float> opacityGradientPositions,
-        GPURadialGradientBrush brushState,
+        GPULinearGradientBrush brushState,
         int blendMode,
         int startX,
         int startY
@@ -68,7 +69,8 @@ namespace NiVE3.InternalShader.Shape
 
         float CalcGradientPosition(Float2 pos)
         {
-            return Hlsl.Distance(pos, brushState.Begin) / brushState.Length;
+            var p = Hlsl.Dot(brushState.SinCos, (pos - brushState.Begin));
+            return (brushState.Reversed ? brushState.Length - p : p) / brushState.Length;
         }
 
         Float3 CalcColor(float gradientPos)

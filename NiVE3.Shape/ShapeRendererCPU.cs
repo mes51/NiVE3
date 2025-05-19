@@ -7,10 +7,11 @@ using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Image;
 using NiVE3.Image.Drawing;
+using NiVE3.Shape.Internal;
 
 namespace NiVE3.Shape
 {
-    static class ShapeRendererCPU
+    public static class ShapeRendererCPU
     {
         const int SuperSamplingCount = 8;
 

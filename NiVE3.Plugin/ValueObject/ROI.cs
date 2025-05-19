@@ -45,5 +45,23 @@ namespace NiVE3.Plugin.ValueObject
         {
             return new ROI(OriginalImagePosition, OriginalImageSize, Left + left, Top + top, Right + right, Bottom + bottom);
         }
+
+        /// <summary>
+        /// エフェクトの適用範囲を指定した四角形と交差する範囲に変更します
+        /// </summary>
+        /// <param name="left">四角形の左</param>
+        /// <param name="top">四角形の上</param>
+        /// <param name="right">四角形の右</param>
+        /// <param name="bottom">四角形の下</param>
+        /// <returns>新しいエフェクトの適用範囲</returns>
+        public ROI Intersect(int left, int top, int right, int bottom, bool offsetOrignalPosition = false)
+        {
+            var newLeft = Math.Max(Left, left);
+            var newTop = Math.Max(Top, top);
+            var newRight = Math.Min(Right, right);
+            var newBottom = Math.Min(Bottom, bottom);
+
+            return new ROI(OriginalImagePosition, OriginalImageSize, newLeft, newTop, newRight, newBottom);
+        }
     }
 }

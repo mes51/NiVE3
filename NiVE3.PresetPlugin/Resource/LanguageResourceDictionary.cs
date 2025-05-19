@@ -183,6 +183,44 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("エッジの繰り返しモード")]
         public const string Blur_BilateralBlur_EdgeRepeatMode = nameof(Blur_BilateralBlur_EdgeRepeatMode);
 
+        // LensBlur
+
+        [DefaultValue("レンズブラー")]
+        public const string Blur_LensBlur_Name = nameof(Blur_LensBlur_Name);
+
+        [DefaultValue("レンズブラーを適用します")]
+        public const string Blur_LensBlur_Description = nameof(Blur_LensBlur_Description);
+
+        [LanguageKey, DefaultValue("半径")]
+        public const string Blur_LensBlur_Amount = nameof(Blur_LensBlur_Amount);
+
+        [LanguageKey, DefaultValue("アイリス")]
+        public const string Blur_LensBlur_Iris = nameof(Blur_LensBlur_Iris);
+
+        [LanguageKey, DefaultValue("アイリスの形状")]
+        public const string Blur_LensBlur_Iris_Type = nameof(Blur_LensBlur_Iris_Type);
+
+        [LanguageKey, DefaultValue("アイリスの角丸")]
+        public const string Blur_LensBlur_Iris_CornerRound = nameof(Blur_LensBlur_Iris_CornerRound);
+
+        [LanguageKey, DefaultValue("アイリスの角度")]
+        public const string Blur_LensBlur_Iris_Angle = nameof(Blur_LensBlur_Iris_Angle);
+
+        [LanguageKey, DefaultValue("ハイライト")]
+        public const string Blur_LensBlur_Highlight = nameof(Blur_LensBlur_Highlight);
+
+        [LanguageKey, DefaultValue("強さ")]
+        public const string Blur_LensBlur_Highlight_Gain = nameof(Blur_LensBlur_Highlight_Gain);
+
+        [LanguageKey, DefaultValue("閾値")]
+        public const string Blur_LensBlur_Highlight_Threshold = nameof(Blur_LensBlur_Highlight_Threshold);
+
+        [LanguageKey, DefaultValue("彩度")]
+        public const string Blur_LensBlur_Highlight_Saturation = nameof(Blur_LensBlur_Highlight_Saturation);
+
+        [LanguageKey, DefaultValue("エッジの繰り返しモード")]
+        public const string Blur_LensBlur_EdgeRepeatMode = nameof(Blur_LensBlur_EdgeRepeatMode);
+
         // PixelSort
 
         [DefaultValue("ピクセルソート")]
@@ -1887,6 +1925,33 @@ namespace NiVE3.PresetPlugin.Resource
 
         [DefaultValue("コーナー")]
         public const string CheckerBoardGridSizeType_Corner = nameof(CheckerBoardGridSizeType_Corner);
+
+        [DefaultValue("三角形")]
+        public const string LensBlurIrisType_Triangle = nameof(LensBlurIrisType_Triangle);
+
+        [DefaultValue("四角形")]
+        public const string LensBlurIrisType_Rectangle = nameof(LensBlurIrisType_Rectangle);
+
+        [DefaultValue("五角形")]
+        public const string LensBlurIrisType_Pentagon = nameof(LensBlurIrisType_Pentagon);
+
+        [DefaultValue("六角形")]
+        public const string LensBlurIrisType_Hexagon = nameof(LensBlurIrisType_Hexagon);
+
+        [DefaultValue("七角形")]
+        public const string LensBlurIrisType_Heptagon = nameof(LensBlurIrisType_Heptagon);
+
+        [DefaultValue("八角形")]
+        public const string LensBlurIrisType_Octagon = nameof(LensBlurIrisType_Octagon);
+
+        [DefaultValue("九角形")]
+        public const string LensBlurIrisType_Nonagon = nameof(LensBlurIrisType_Nonagon);
+
+        [DefaultValue("十角形")]
+        public const string LensBlurIrisType_Decagon = nameof(LensBlurIrisType_Decagon);
+
+        [DefaultValue("円")]
+        public const string LensBlurIrisType_Circle = nameof(LensBlurIrisType_Circle);
 
         // unit
 

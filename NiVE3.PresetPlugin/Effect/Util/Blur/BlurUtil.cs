@@ -103,5 +103,51 @@ namespace NiVE3.PresetPlugin.Effect.Util.Blur
                     }
             }
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector4 GetPixel(ReadOnlySpan<Vector4> data, int width, int height, int l, int t, EdgeRepeatMode edgeRepeatMode)
+        {
+            switch (edgeRepeatMode)
+            {
+                case EdgeRepeatMode.Wrap:
+                    return data[CoordWrap.Wrap(t, height) * width + CoordWrap.Wrap(l, width)];
+                case EdgeRepeatMode.Repeat:
+                    return data[CoordWrap.Repeat(t, height) * width + CoordWrap.Repeat(l, width)];
+                case EdgeRepeatMode.Mirror:
+                    return data[CoordWrap.Mirror(t, height) * width + CoordWrap.Mirror(l, width)];
+                default:
+                    if (l > -1 && l < width && t > -1 && t < height)
+                    {
+                        return data[t * width + l];
+                    }
+                    else
+                    {
+                        return Vector4.Zero;
+                    }
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T GetPixel<T>(ReadOnlySpan<T> data, int width, int height, int l, int t, EdgeRepeatMode edgeRepeatMode) where T : INumber<T>
+        {
+            switch (edgeRepeatMode)
+            {
+                case EdgeRepeatMode.Wrap:
+                    return data[CoordWrap.Wrap(t, height) * width + CoordWrap.Wrap(l, width)];
+                case EdgeRepeatMode.Repeat:
+                    return data[CoordWrap.Repeat(t, height) * width + CoordWrap.Repeat(l, width)];
+                case EdgeRepeatMode.Mirror:
+                    return data[CoordWrap.Mirror(t, height) * width + CoordWrap.Mirror(l, width)];
+                default:
+                    if (l > -1 && l < width && t > -1 && t < height)
+                    {
+                        return data[t * width + l];
+                    }
+                    else
+                    {
+                        return T.Zero;
+                    }
+            }
+        }
     }
 }

@@ -6,12 +6,13 @@ using System.Threading.Tasks;
 using ComputeSharp;
 using NiVE3.Image.Drawing;
 using NiVE3.Image;
-using NiVE3.InternalShader.Shape;
+using NiVE3.Shape.Internal;
+using NiVE3.Shape.Internal.Shader;
 
 namespace NiVE3.Shape
 {
     // NOTE: マスクはNonZeroのみ
-    static class ShapeMaskRenderGPU
+    public static class ShapeMaskRenderGPU
     {
         const int SuperSamplingCount = 8;
 
@@ -102,7 +103,7 @@ namespace NiVE3.Shape
                 for (var s = 0; s < superSamplingCount; s++, li++)
                 {
                     var max = float.MinValue;
-                    var hitLine = new List<InternalShader.Shape.GPULineHit>();
+                    var hitLine = new List<GPULineHit>();
                     for (var i = 0; i < polygons.Length; i++)
                     {
                         var y = h + samplingRate * s + offsetY;
@@ -115,7 +116,7 @@ namespace NiVE3.Shape
                                 if (p.Value > float.MinValue)
                                 {
                                     max = Math.Max(max, p.Value);
-                                    hitLine.Add((GPULineHit)new InternalShader.Shape.GPULineHit(p.Value, p.IsDown));
+                                    hitLine.Add(new GPULineHit(p.Value, p.IsDown));
                                 }
                             }
                         }

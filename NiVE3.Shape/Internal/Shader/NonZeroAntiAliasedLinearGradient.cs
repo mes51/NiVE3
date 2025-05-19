@@ -4,12 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ComputeSharp;
+using NiVE3.Shape.Internal;
 
-namespace NiVE3.InternalShader.Shape
+namespace NiVE3.Shape.Internal.Shader
 {
     [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
     [GeneratedComputeShaderDescriptor]
-    readonly partial struct EvenOddAntiAliasedRadialGradient(
+    readonly partial struct NonZeroAntiAliasedLinearGradient(
         ReadWriteBuffer<Float4> image,
         int imageWidth,
         ReadOnlyBuffer<GPULineHit> lineHits,
@@ -21,7 +22,7 @@ namespace NiVE3.InternalShader.Shape
         ReadOnlyBuffer<float> colorGradientPositions,
         ReadOnlyBuffer<float> opacityGradientValues,
         ReadOnlyBuffer<float> opacityGradientPositions,
-        GPURadialGradientBrush brushState,
+        GPULinearGradientBrush brushState,
         int blendMode,
         int startX,
         int startY
@@ -57,6 +58,8 @@ namespace NiVE3.InternalShader.Shape
                     continue;
                 }
 
+                var depth = 0;
+                var dir = false;
                 var prev = false;
                 var area = 0.0F;
                 for (var li = lineHitIndexBegin; li < lineHitIndexEnd; li++)
@@ -69,23 +72,43 @@ namespace NiVE3.InternalShader.Shape
                     }
 
                     var d = x - value;
-                    if (d < 1.0F && d > 0.0F)
+                    if (depth > 0)
                     {
-                        var diff = (1.0F - (value - (int)Hlsl.Floor(value))) * (prev ? -1.0F : 1.0F);
-                        area += diff;
-                    }
-                    else
-                    {
-                        if (prev && value < x)
+                        if (dir != lineHit.IsDown)
                         {
-                            area = 0.0F;
+                            depth--;
                         }
                         else
                         {
-                            area = 1.0F;
+                            depth++;
                         }
                     }
-                    prev = !prev;
+                    else
+                    {
+                        dir = lineHit.IsDown;
+                        depth++;
+                    }
+
+                    if (prev != depth > 0)
+                    {
+                        if (d < 1.0F && d > 0.0F)
+                        {
+                            var diff = (1.0F - (value - (int)Hlsl.Floor(value))) * (prev ? -1.0F : 1.0F);
+                            area += diff;
+                        }
+                        else
+                        {
+                            if (prev && value < x)
+                            {
+                                area = 0.0F;
+                            }
+                            else
+                            {
+                                area = 1.0F;
+                            }
+                        }
+                        prev = depth > 0;
+                    }
                 }
 
                 totalArea += area;
@@ -96,7 +119,8 @@ namespace NiVE3.InternalShader.Shape
 
         float CalcGradientPosition(Float2 pos)
         {
-            return Hlsl.Distance(pos, brushState.Begin) / brushState.Length;
+            var p = Hlsl.Dot(brushState.SinCos, (pos - brushState.Begin));
+            return (brushState.Reversed ? brushState.Length - p : p) / brushState.Length;
         }
 
         Float3 CalcColor(float gradientPos)

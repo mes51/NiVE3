@@ -4,12 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ComputeSharp;
+using NiVE3.Shape.Internal;
 
-namespace NiVE3.InternalShader.Shape
+namespace NiVE3.Shape.Internal.Shader
 {
     [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
     [GeneratedComputeShaderDescriptor]
-    readonly partial struct NonZeroAliasedRadialGradient(
+    readonly partial struct EvenOddAliasedRadialGradient(
         ReadWriteBuffer<Float4> image,
         int imageWidth,
         ReadOnlyBuffer<GPULineHit> lineHits,
@@ -28,17 +29,15 @@ namespace NiVE3.InternalShader.Shape
     {
         public void Execute()
         {
-            if (!IsHit(ThreadIds.X, ThreadIds.Y))
-            {
-                return;
-            }
-
             var px = ThreadIds.X + startX;
             var py = ThreadIds.Y + startY;
 
-            var pos = py * imageWidth + px;
-            var gradientPos = CalcGradientPosition(new Float2(px + offsetX, py + offsetY));
-            image[pos] = BlendMethods.Process(blendMode, image[pos], new Float4(CalcColor(gradientPos), CalcOpacity(gradientPos)));
+            if (IsHit(ThreadIds.X, ThreadIds.Y))
+            {
+                var pos = py * imageWidth + px;
+                var gradientPos = CalcGradientPosition(new Float2(px + offsetX, py + offsetY));
+                image[pos] = BlendMethods.Process(blendMode, image[pos], new Float4(CalcColor(gradientPos), CalcOpacity(gradientPos)));
+            }
         }
 
         bool IsHit(int tx, int ty)
@@ -52,8 +51,7 @@ namespace NiVE3.InternalShader.Shape
                 return false;
             }
 
-            var depth = 0;
-            var dir = false;
+            var inout = false;
             for (var li = lineHitIndexBegin; li < lineHitIndexEnd; li++)
             {
                 var lineHit = lineHits[li];
@@ -63,25 +61,10 @@ namespace NiVE3.InternalShader.Shape
                     break;
                 }
 
-                if (depth > 0)
-                {
-                    if (dir != lineHit.IsDown)
-                    {
-                        depth--;
-                    }
-                    else
-                    {
-                        depth++;
-                    }
-                }
-                else
-                {
-                    dir = lineHit.IsDown;
-                    depth++;
-                }
+                inout = !inout;
             }
 
-            return depth > 0;
+            return inout;
         }
 
         float CalcGradientPosition(Float2 pos)

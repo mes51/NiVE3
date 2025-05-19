@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 using ComputeSharp;
 using NiVE3.Numerics;
 
-namespace NiVE3.InternalShader.Shape
+namespace NiVE3.Shape.Internal
 {
     readonly struct GPULinearGradientBrush
     {
-        public readonly Float2 Begin;
+        public readonly float2 Begin;
 
         public readonly Bool UseOKLabInterpolation;
 
@@ -19,7 +19,7 @@ namespace NiVE3.InternalShader.Shape
 
         public readonly Bool Reversed;
 
-        public readonly Float2 SinCos;
+        public readonly float2 SinCos;
 
         public GPULinearGradientBrush(bool useOKLabInterpolation, Vector2 begin, Vector2 end)
         {
@@ -39,13 +39,13 @@ namespace NiVE3.InternalShader.Shape
                 Reversed = true;
             }
             Length = Math.Max(Reversed ? tsy - tey : tey - tsy, float.Epsilon);
-            SinCos = new Float2((float)Math.Sin(rad), (float)Math.Cos(rad));
+            SinCos = new float2((float)Math.Sin(rad), (float)Math.Cos(rad));
         }
     }
 
     readonly struct GPURadialGradientBrush
     {
-        public readonly Float2 Begin;
+        public readonly float2 Begin;
 
         public readonly Bool UseOKLabInterpolation;
 

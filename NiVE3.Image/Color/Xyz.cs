@@ -28,9 +28,9 @@ namespace NiVE3.Image.Color
         public readonly Vector4 ToRgb()
         {
             // from: http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.html
-            var rgbRow1 = new Vector4( 3.2404542F, -1.5371385F, -0.4985314F, 0.0F);
-            var rgbRow2 = new Vector4(-0.9692660F,  1.8760108F,  0.0415560F, 0.0F);
-            var rgbRow3 = new Vector4( 0.0556434F, -0.2040259F,  1.0572252F, 0.0F);
+            var rgbRow1 = new Vector4(3.2404542F, -1.5371385F, -0.4985314F, 0.0F);
+            var rgbRow2 = new Vector4(-0.9692660F, 1.8760108F, 0.0415560F, 0.0F);
+            var rgbRow3 = new Vector4(0.0556434F, -0.2040259F, 1.0572252F, 0.0F);
 
             var xyz = Unsafe.BitCast<Xyz, Vector4>(this);
             return new Vector4(
@@ -42,7 +42,24 @@ namespace NiVE3.Image.Color
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Xyz FromRgb(Vector4 color)
+        public readonly Vector128<float> ToRgbVector128()
+        {
+            // from: http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.html
+            var rgbRow1 = Vector128.Create(3.2404542F, -1.5371385F, -0.4985314F, 0.0F);
+            var rgbRow2 = Vector128.Create(-0.9692660F, 1.8760108F, 0.0415560F, 0.0F);
+            var rgbRow3 = Vector128.Create(0.0556434F, -0.2040259F, 1.0572252F, 0.0F);
+
+            var xyz = Unsafe.BitCast<Xyz, Vector128<float>>(this);
+            return Vector128.Create(
+                Vector128.Dot(xyz, rgbRow3),
+                Vector128.Dot(xyz, rgbRow2),
+                Vector128.Dot(xyz, rgbRow1),
+                1.0F
+            );
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Xyz FromRgb(in Vector4 color)
         {
             // from: http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.html
             var xyzRow1 = new Vector4(0.1804375F, 0.3575761F, 0.4124564F, 0.0F);
@@ -53,6 +70,21 @@ namespace NiVE3.Image.Color
                 Vector4.Dot(color, xyzRow1),
                 Vector4.Dot(color, xyzRow2),
                 Vector4.Dot(color, xyzRow3)
+            );
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Xyz FromRgb(in Vector128<float> color)
+        {
+            // from: http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.html
+            var xyzRow1 = Vector128.Create(0.1804375F, 0.3575761F, 0.4124564F, 0.0F);
+            var xyzRow2 = Vector128.Create(0.0721750F, 0.7151522F, 0.2126729F, 0.0F);
+            var xyzRow3 = Vector128.Create(0.9503041F, 0.1191920F, 0.0193339F, 0.0F);
+
+            return new Xyz(
+                Vector128.Dot(color, xyzRow1),
+                Vector128.Dot(color, xyzRow2),
+                Vector128.Dot(color, xyzRow3)
             );
         }
     }

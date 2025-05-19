@@ -9,12 +9,13 @@ using SixLabors.ImageSharp;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 using System.Numerics;
+using NiVE3.Shape.Internal;
 
 namespace NiVE3.Shape
 {
-    class Polygon
+    public class Polygon
     {
-        public Line[] Lines { get; }
+        internal Line[] Lines { get; }
 
         public float MinX { get; }
 

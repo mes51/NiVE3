@@ -7,11 +7,12 @@ using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Image.Drawing;
 using NiVE3.Image;
+using NiVE3.Shape.Internal;
 
 namespace NiVE3.Shape
 {
     // NOTE: マスクはNonZeroのみ
-    static class ShapeMaskRendererCPU
+    public static class ShapeMaskRendererCPU
     {
         const int SuperSamplingCount = 8;
 

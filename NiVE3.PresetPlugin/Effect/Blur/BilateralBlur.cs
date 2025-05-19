@@ -28,7 +28,7 @@ namespace NiVE3.PresetPlugin.Effect.Blur
     [EffectMetadata(LanguageResourceDictionary.Blur_BilateralBlur_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_Blur, LanguageResourceDictionary.Blur_BilateralBlur_Description, ID, IsSupportGpu = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
     public sealed class BilateralBlur : IEffect
     {
-        public const int ContourQuantizeMax = 1023;
+        internal const int ContourQuantizeMax = 1023;
 
         const string ID = "A5360A2E-B74C-4C88-B8DD-C83425101C9F";
 

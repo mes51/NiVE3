@@ -60,7 +60,7 @@ namespace NiVE3.Shape
         }
     }
 
-    enum MaskBlendMode
+    public enum MaskBlendMode
     {
         Add,
         Subtract,
@@ -70,7 +70,7 @@ namespace NiVE3.Shape
         Difference
     }
 
-    static class MaskBlendModeExtensions
+    public static class MaskBlendModeExtensions
     {
         /// <summary>
         /// 初期状態に1.0Fである必要があるもの

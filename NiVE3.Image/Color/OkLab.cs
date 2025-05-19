@@ -25,9 +25,15 @@ namespace NiVE3.Image.Color
         readonly float Spacer;
 #pragma warning restore IDE0040
 
-        // https://bottosson.github.io/posts/oklab/
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly Vector4 ToRgb()
+        {
+            return Unsafe.BitCast<Vector128<float>, Vector4>(ToRgbVector128());
+        }
+
+        // https://bottosson.github.io/posts/oklab/
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly Vector128<float> ToRgbVector128()
         {
             var lab = Vector128.LoadUnsafe(in L);
             var lmsRow1 = Vector128.Create(1.0F, 0.3963377774F, 0.2158037573F, 0.0F);
@@ -62,18 +68,23 @@ namespace NiVE3.Image.Color
                 Sse.And(linear.SignWithoutZero() * (linear.Pow(Vector128.Create(1.0F / 2.4F)) * 1.055F - Vector128.Create(0.055F)), mask),
                 //Sse.And((linear * Vector128.Create(1.055F)).Pow(Vector128.Create(1.0F / 2.4F - 0.055F)), mask),
                 Sse.And(linear * 12.92F, mask.Not())
-            ).AsVector4() + new Vector4(0.0F, 0.0F, 0.0F, 1.0F);
+            ) + Vector128.Create(0.0F, 0.0F, 0.0F, 1.0F);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static OkLab FromRgb(in Vector4 color)
+        {
+            return FromRgb(color.AsVector128());
         }
 
         // https://bottosson.github.io/posts/oklab/
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static OkLab FromRgb(in Vector4 color)
+        public static OkLab FromRgb(in Vector128<float> color)
         {
-            var vColor = color.AsVector128();
-            var mask = Sse.CompareGreaterThanOrEqual(vColor, Vector128.Create(0.04045F));
+            var mask = Sse.CompareGreaterThanOrEqual(color, Vector128.Create(0.04045F));
             var linear = Sse.Or(
-                Sse.And(((vColor + Vector128.Create(0.055F)) / 1.055F).Pow(Vector128.Create(2.4F)), mask),
-                Sse.And(vColor / 12.92F, mask.Not())
+                Sse.And(((color + Vector128.Create(0.055F)) / 1.055F).Pow(Vector128.Create(2.4F)), mask),
+                Sse.And(color / 12.92F, mask.Not())
             );
 
             var lmsRow1 = Vector128.Create(0.0514459929F, 0.5363325363F, 0.4122214708F, 0.0F);

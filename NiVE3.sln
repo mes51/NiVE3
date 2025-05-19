@@ -35,6 +35,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpAvi", "SharpAvi\SharpA
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NiVE3.InternalShader", "NiVE3.InternalShader\NiVE3.InternalShader.csproj", "{BBDCAF4F-5DB5-4135-B574-55B380DD212C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NiVE3.Shape", "NiVE3.Shape\NiVE3.Shape.csproj", "{580D6A1B-668F-443A-88EE-5F4538F7763B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -93,6 +95,10 @@ Global
 		{BBDCAF4F-5DB5-4135-B574-55B380DD212C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BBDCAF4F-5DB5-4135-B574-55B380DD212C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BBDCAF4F-5DB5-4135-B574-55B380DD212C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{580D6A1B-668F-443A-88EE-5F4538F7763B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{580D6A1B-668F-443A-88EE-5F4538F7763B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{580D6A1B-668F-443A-88EE-5F4538F7763B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{580D6A1B-668F-443A-88EE-5F4538F7763B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

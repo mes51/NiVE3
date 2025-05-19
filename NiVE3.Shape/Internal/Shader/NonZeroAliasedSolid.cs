@@ -5,11 +5,11 @@ using System.Text;
 using System.Threading.Tasks;
 using ComputeSharp;
 
-namespace NiVE3.InternalShader.Shape
+namespace NiVE3.Shape.Internal.Shader
 {
     [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
     [GeneratedComputeShaderDescriptor]
-    readonly partial struct EvenOddAliasedSolid(
+    readonly partial struct NonZeroAliasedSolid(
         ReadWriteBuffer<Float4> image,
         int imageWidth,
         ReadOnlyBuffer<GPULineHit> lineHits,
@@ -23,14 +23,16 @@ namespace NiVE3.InternalShader.Shape
     {
         public void Execute()
         {
+            if (!IsHit(ThreadIds.X, ThreadIds.Y))
+            {
+                return;
+            }
+
             var px = ThreadIds.X + startX;
             var py = ThreadIds.Y + startY;
 
-            if (IsHit(ThreadIds.X, ThreadIds.Y))
-            {
-                var pos = py * imageWidth + px;
-                image[pos] = BlendMethods.Process(blendMode, image[pos], new Float4(color.XYZ, 1.0F));
-            }
+            var pos = py * imageWidth + px;
+            image[pos] = BlendMethods.Process(blendMode, image[pos], new Float4(color.XYZ, 1.0F));
         }
 
         bool IsHit(int tx, int ty)
@@ -44,7 +46,8 @@ namespace NiVE3.InternalShader.Shape
                 return false;
             }
 
-            var inout = false;
+            var depth = 0;
+            var dir = false;
             for (var li = lineHitIndexBegin; li < lineHitIndexEnd; li++)
             {
                 var lineHit = lineHits[li];
@@ -54,10 +57,25 @@ namespace NiVE3.InternalShader.Shape
                     break;
                 }
 
-                inout = !inout;
+                if (depth > 0)
+                {
+                    if (dir != lineHit.IsDown)
+                    {
+                        depth--;
+                    }
+                    else
+                    {
+                        depth++;
+                    }
+                }
+                else
+                {
+                    dir = lineHit.IsDown;
+                    depth++;
+                }
             }
 
-            return inout;
+            return depth > 0;
         }
     }
 }

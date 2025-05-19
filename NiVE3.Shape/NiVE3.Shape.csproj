@@ -1,23 +1,21 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0-windows7.0</TargetFramework>
+    <TargetFramework>net8.0-windows</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
-	<UseWPF>true</UseWPF>
-    <LangVersion>13</LangVersion>
-    <Authors>mes</Authors>
-    <Copyright>Copyright © mes 2022 - 2025</Copyright>
-    <AssemblyVersion>3.0.0.0</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="ComputeSharp" Version="3.2.0" />
+    <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="2.1.6" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\NiVE3.Image\NiVE3.Image.csproj" />
     <ProjectReference Include="..\NiVE3.Numerics\NiVE3.Numerics.csproj" />
+    <ProjectReference Include="..\NiVE3.Shared\NiVE3.Shared.csproj" />
   </ItemGroup>
 
 </Project>

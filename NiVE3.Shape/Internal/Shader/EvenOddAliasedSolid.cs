@@ -5,11 +5,11 @@ using System.Text;
 using System.Threading.Tasks;
 using ComputeSharp;
 
-namespace NiVE3.InternalShader.Shape
+namespace NiVE3.Shape.Internal.Shader
 {
     [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
     [GeneratedComputeShaderDescriptor]
-    readonly partial struct NonZeroAliasedSolid(
+    readonly partial struct EvenOddAliasedSolid(
         ReadWriteBuffer<Float4> image,
         int imageWidth,
         ReadOnlyBuffer<GPULineHit> lineHits,
@@ -23,16 +23,14 @@ namespace NiVE3.InternalShader.Shape
     {
         public void Execute()
         {
-            if (!IsHit(ThreadIds.X, ThreadIds.Y))
-            {
-                return;
-            }
-
             var px = ThreadIds.X + startX;
             var py = ThreadIds.Y + startY;
 
-            var pos = py * imageWidth + px;
-            image[pos] = BlendMethods.Process(blendMode, image[pos], new Float4(color.XYZ, 1.0F));
+            if (IsHit(ThreadIds.X, ThreadIds.Y))
+            {
+                var pos = py * imageWidth + px;
+                image[pos] = BlendMethods.Process(blendMode, image[pos], new Float4(color.XYZ, 1.0F));
+            }
         }
 
         bool IsHit(int tx, int ty)
@@ -46,8 +44,7 @@ namespace NiVE3.InternalShader.Shape
                 return false;
             }
 
-            var depth = 0;
-            var dir = false;
+            var inout = false;
             for (var li = lineHitIndexBegin; li < lineHitIndexEnd; li++)
             {
                 var lineHit = lineHits[li];
@@ -57,25 +54,10 @@ namespace NiVE3.InternalShader.Shape
                     break;
                 }
 
-                if (depth > 0)
-                {
-                    if (dir != lineHit.IsDown)
-                    {
-                        depth--;
-                    }
-                    else
-                    {
-                        depth++;
-                    }
-                }
-                else
-                {
-                    dir = lineHit.IsDown;
-                    depth++;
-                }
+                inout = !inout;
             }
 
-            return depth > 0;
+            return inout;
         }
     }
 }

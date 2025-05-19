@@ -5,18 +5,18 @@ using System.Text;
 using System.Threading.Tasks;
 using ComputeSharp;
 
-namespace NiVE3.InternalShader.Shape
+namespace NiVE3.Shape.Internal.Shader
 {
     [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
     [GeneratedComputeShaderDescriptor]
-    readonly partial struct MaskFillAntiAliased(
-        ReadWriteBuffer<float> image,
+    readonly partial struct NonZeroAntiAliasedSolid(
+        ReadWriteBuffer<Float4> image,
         int imageWidth,
         ReadOnlyBuffer<GPULineHit> lineHits,
         ReadOnlyBuffer<Int2> lineHitIndices,
         int superSamplingCount,
         float offsetX,
-        float opacity,
+        Float4 color,
         int blendMode,
         int startX,
         int startY
@@ -33,7 +33,7 @@ namespace NiVE3.InternalShader.Shape
             if (area > 0.0F)
             {
                 var pos = py * imageWidth + px;
-                image[pos] = MaskBlendMethods.Process(blendMode, image[pos], opacity * area);
+                image[pos] = BlendMethods.Process(blendMode, image[pos], new Float4(color.XYZ, area));
             }
         }
 

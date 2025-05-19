@@ -4,12 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ComputeSharp;
+using NiVE3.Shape.Internal;
 
-namespace NiVE3.InternalShader.Shape
+namespace NiVE3.Shape.Internal.Shader
 {
     [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
     [GeneratedComputeShaderDescriptor]
-    readonly partial struct EvenOddAliasedLinearGradient(
+    readonly partial struct NonZeroAliasedRadialGradient(
         ReadWriteBuffer<Float4> image,
         int imageWidth,
         ReadOnlyBuffer<GPULineHit> lineHits,
@@ -20,7 +21,7 @@ namespace NiVE3.InternalShader.Shape
         ReadOnlyBuffer<float> colorGradientPositions,
         ReadOnlyBuffer<float> opacityGradientValues,
         ReadOnlyBuffer<float> opacityGradientPositions,
-        GPULinearGradientBrush brushState,
+        GPURadialGradientBrush brushState,
         int blendMode,
         int startX,
         int startY
@@ -28,15 +29,17 @@ namespace NiVE3.InternalShader.Shape
     {
         public void Execute()
         {
+            if (!IsHit(ThreadIds.X, ThreadIds.Y))
+            {
+                return;
+            }
+
             var px = ThreadIds.X + startX;
             var py = ThreadIds.Y + startY;
 
-            if (IsHit(ThreadIds.X, ThreadIds.Y))
-            {
-                var pos = py * imageWidth + px;
-                var gradientPos = CalcGradientPosition(new Float2(px + offsetX, py + offsetY));
-                image[pos] = BlendMethods.Process(blendMode, image[pos], new Float4(CalcColor(gradientPos), CalcOpacity(gradientPos)));
-            }
+            var pos = py * imageWidth + px;
+            var gradientPos = CalcGradientPosition(new Float2(px + offsetX, py + offsetY));
+            image[pos] = BlendMethods.Process(blendMode, image[pos], new Float4(CalcColor(gradientPos), CalcOpacity(gradientPos)));
         }
 
         bool IsHit(int tx, int ty)
@@ -50,7 +53,8 @@ namespace NiVE3.InternalShader.Shape
                 return false;
             }
 
-            var inout = false;
+            var depth = 0;
+            var dir = false;
             for (var li = lineHitIndexBegin; li < lineHitIndexEnd; li++)
             {
                 var lineHit = lineHits[li];
@@ -60,16 +64,30 @@ namespace NiVE3.InternalShader.Shape
                     break;
                 }
 
-                inout = !inout;
+                if (depth > 0)
+                {
+                    if (dir != lineHit.IsDown)
+                    {
+                        depth--;
+                    }
+                    else
+                    {
+                        depth++;
+                    }
+                }
+                else
+                {
+                    dir = lineHit.IsDown;
+                    depth++;
+                }
             }
 
-            return inout;
+            return depth > 0;
         }
 
         float CalcGradientPosition(Float2 pos)
         {
-            var p = Hlsl.Dot(brushState.SinCos, (pos - brushState.Begin));
-            return (brushState.Reversed ? brushState.Length - p : p) / brushState.Length;
+            return Hlsl.Distance(pos, brushState.Begin) / brushState.Length;
         }
 
         Float3 CalcColor(float gradientPos)

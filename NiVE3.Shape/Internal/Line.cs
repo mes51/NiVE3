@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using SixLabors.ImageSharp;
 
-namespace NiVE3.Shape
+namespace NiVE3.Shape.Internal
 {
     readonly struct Line
     {
@@ -38,11 +38,11 @@ namespace NiVE3.Shape
 
         public Hit GetCrossHorizonalPositionAndDirection(float y)
         {
-            float sy = StartY - y;
-            float ey = EndY - y;
+            var sy = StartY - y;
+            var ey = EndY - y;
             if (sy > 0.0F == ey <= 0.0F)
             {
-                return new Hit((-sy / DY) * DX + StartX, IsDown);
+                return new Hit(-sy / DY * DX + StartX, IsDown);
             }
             else
             {

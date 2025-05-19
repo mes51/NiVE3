@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ComputeSharp;
 
-namespace NiVE3.InternalShader.Shape
+namespace NiVE3.Shape.Internal
 {
     readonly struct GPULineHit : IComparable<GPULineHit>
     {

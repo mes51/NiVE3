@@ -10,7 +10,7 @@ using NiVE3.Shared.Extension;
 
 namespace NiVE3.Shape
 {
-    abstract class Brush
+    public abstract class Brush
     {
         public abstract bool IsVisible();
 
@@ -19,7 +19,7 @@ namespace NiVE3.Shape
         public abstract void Transform(Matrix3x3 matrix);
     }
 
-    class SolidBrush : Brush
+    public class SolidBrush : Brush
     {
         public Vector4 Color { get; }
 
@@ -41,7 +41,7 @@ namespace NiVE3.Shape
         public override void Transform(Matrix3x3 matrix) { }
     }
 
-    abstract class GradientBrush : Brush
+    public abstract class GradientBrush : Brush
     {
         public ColorGradient ColorGradient { get; }
 
@@ -54,7 +54,7 @@ namespace NiVE3.Shape
         }
     }
 
-    class LinearGradientBrush : GradientBrush
+    public class LinearGradientBrush : GradientBrush
     {
         public Vector2 Begin { get; private set; }
 
@@ -116,7 +116,7 @@ namespace NiVE3.Shape
         }
     }
 
-    class RadialGradientBrush : GradientBrush
+    public class RadialGradientBrush : GradientBrush
     {
         public Vector2 Begin { get; private set; }
 
