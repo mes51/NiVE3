@@ -203,6 +203,12 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("アイリスの角丸")]
         public const string Blur_LensBlur_Iris_CornerRound = nameof(Blur_LensBlur_Iris_CornerRound);
 
+        [LanguageKey, DefaultValue("アイリスにマスクを使用する")]
+        public const string Blur_LensBlur_Iris_UseLayerMask = nameof(Blur_LensBlur_Iris_UseLayerMask);
+
+        [LanguageKey, DefaultValue("使用するマスク")]
+        public const string Blur_LensBlur_Iris_TargetLayerMask = nameof(Blur_LensBlur_Iris_TargetLayerMask);
+
         [LanguageKey, DefaultValue("アイリスの角度")]
         public const string Blur_LensBlur_Iris_Angle = nameof(Blur_LensBlur_Iris_Angle);
 

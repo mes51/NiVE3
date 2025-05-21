@@ -54,6 +54,10 @@ namespace NiVE3.PresetPlugin.Effect.Blur
 
         const string PropertyIrisCornerRoundId = nameof(PropertyIrisCornerRoundId);
 
+        const string PropertyIrisUseLayerMaskId = nameof(PropertyIrisUseLayerMaskId);
+
+        const string PropertyIrisTargetLayerMaskId = nameof(PropertyIrisTargetLayerMaskId);
+
         const string PropertyIrisAngleId = nameof(PropertyIrisAngleId);
 
         const string PropertyHighlightGroupId = nameof(PropertyHighlightGroupId);
@@ -100,7 +104,9 @@ namespace NiVE3.PresetPlugin.Effect.Blur
                 [
                     new EnumProperty(PropertyIrisTypeId, LanguageResourceDictionary.ResourceKeys.Blur_LensBlur_Iris_Type, typeof(LensBlurIrisType), typeof(LanguageResourceDictionary), LensBlurIrisType.Hexagon, selectBoxWidth: 90.0),
                     new DoubleProperty(PropertyIrisCornerRoundId, LanguageResourceDictionary.ResourceKeys.Blur_LensBlur_Iris_CornerRound, 0.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
-                    new AngleProperty(PropertyIrisAngleId, LanguageResourceDictionary.ResourceKeys.Blur_LensBlur_Iris_Angle, 15.0, digit: 2)
+                    new AngleProperty(PropertyIrisAngleId, LanguageResourceDictionary.ResourceKeys.Blur_LensBlur_Iris_Angle, 15.0, digit: 2),
+                    new CheckBoxProperty(PropertyIrisUseLayerMaskId, LanguageResourceDictionary.ResourceKeys.Blur_LensBlur_Iris_UseLayerMask, false),
+                    new UseMaskPathProperty(PropertyIrisTargetLayerMaskId, LanguageResourceDictionary.ResourceKeys.Blur_LensBlur_Iris_TargetLayerMask, selectBoxWidth: 90.0)
                 ]),
                 new PropertyGroup(PropertyHighlightGroupId, LanguageResourceDictionary.ResourceKeys.Blur_LensBlur_Highlight,
                 [
@@ -118,6 +124,8 @@ namespace NiVE3.PresetPlugin.Effect.Blur
             var irisGroup = properties.First(p => p.Id == PropertyIrisGroupId).GetChildren() ?? [];
             var irisType = irisGroup.GetValue(PropertyIrisTypeId, layerTime, LensBlurIrisType.Hexagon);
             var irisCornerRound = (float)(irisGroup.GetValue(PropertyIrisCornerRoundId, layerTime, 0.0) * 0.01);
+            var irisUseLayerMask = irisGroup.GetValue(PropertyIrisUseLayerMaskId, layerTime, false);
+            var irisTargetLayerMask = irisGroup.GetValue(PropertyIrisTargetLayerMaskId, layerTime, UseMaskPathTarget.Empty);
             var irisAngle = (float)irisGroup.GetValue(PropertyIrisAngleId, layerTime, 0.0);
             var highlightGroup = properties.First(p => p.Id == PropertyHighlightGroupId).GetChildren() ?? [];
             var highlightGain = (float)(highlightGroup.GetValue(PropertyHighlightGainId, layerTime, 0.0) * 0.01);
@@ -130,7 +138,10 @@ namespace NiVE3.PresetPlugin.Effect.Blur
                 return image;
             }
 
-            using var irisMask = GenerateIrisMask(irisType, amount, irisCornerRound, irisAngle);
+            var layerMaskPath = irisUseLayerMask ? layer.GetMask(irisTargetLayerMask.MaskId)?.GetPath(layerTime + layer.SourceStartPoint, downSamplingRateX) : null;
+            using var irisMask = (layerMaskPath != null && layerMaskPath.IsClosed && !layerMaskPath.IsEmpty()) ?
+                GenerateMaskByLayerMask(layerMaskPath, amount) :
+                GenerateIrisMask(irisType, amount, irisCornerRound, irisAngle);
 
             if (useGpu && AcceleratorObject != null)
             {
@@ -290,13 +301,39 @@ namespace NiVE3.PresetPlugin.Effect.Blur
             return gpuImage;
         }
 
+        static IrisMask GenerateMaskByLayerMask(BezierPath layerMaskPath, float size)
+        {
+            size += 0.5F;
+            var path = BuildNonEmptyClosedPath(layerMaskPath);
+
+            var originalBounds = path.Bounds;
+            var resizeRate = size / Math.Max(originalBounds.Width, originalBounds.Height);
+            var transform = Matrix3x2.CreateTranslation(-originalBounds.X - originalBounds.Width * 0.5F, -originalBounds.Y - originalBounds.Height * 0.5F)
+                * Matrix3x2.CreateScale(resizeRate, resizeRate)
+                * Matrix3x2.CreateRotation(MathF.PI);
+            path = path.Transform(transform);
+
+            var maskRadius = (int)MathF.Ceiling(Math.Max(path.Bounds.Width, path.Bounds.Height) * 0.5F);
+            var maskSize = maskRadius * 2 + 1;
+            var maskImage = new ManagedRasterizedMaskImage(maskSize, maskSize);
+            path = path.Transform(Matrix3x2.CreateTranslation(-path.Bounds.X + (maskSize - path.Bounds.Width) * 0.5F, -path.Bounds.Y + (maskSize - path.Bounds.Height) * 0.5F));
+            var polygons = path.Flatten().Select(p => new Polygon(p.Points.Span)).ToArray();
+            ShapeMaskRendererCPU.Fill(polygons, maskImage, 1.0F);
+
+            return new IrisMask(maskImage, maskRadius, maskSize);
+        }
+
         static IrisMask GenerateIrisMask(LensBlurIrisType irisType, float size, float cornerRound, float angle)
         {
+            var maskRadius = (int)MathF.Ceiling(size - 0.5F);
+            var maskSize = maskRadius * 2 + 1;
+            var maskImageCenter = maskSize * 0.5F;
+
             size += 0.5F;
             var path = (IPath)EmptyPath.ClosedPath;
             if (irisType == LensBlurIrisType.Circle)
             {
-                path = new EllipsePolygon(new PointF(), size);
+                path = new EllipsePolygon(new PointF(maskImageCenter, maskImageCenter), size);
             }
             else
             {
@@ -330,19 +367,38 @@ namespace NiVE3.PresetPlugin.Effect.Blur
                 }
                 pathBuilder.CloseFigure();
 
-                path = pathBuilder.Build().Transform(Matrix3x2.CreateRotation((angle / 180.0F + 1.0F) * MathF.PI));
+                path = pathBuilder.Build().Transform(Matrix3x2.CreateRotation((angle / 180.0F + 1.0F) * MathF.PI) * Matrix3x2.CreateTranslation(maskImageCenter, maskImageCenter));
             }
-
-            var maskRadius = (int)MathF.Ceiling(Math.Max(path.Bounds.Width, path.Bounds.Height) * 0.5F);
-            var maskSize = maskRadius * 2 + 1;
             var maskImage = new ManagedRasterizedMaskImage(maskSize, maskSize);
-
-            path = path.Transform(Matrix3x2.CreateTranslation(-path.Bounds.X + (maskSize - path.Bounds.Width) * 0.5F, -path.Bounds.Y + (maskSize - path.Bounds.Height) * 0.5F));
-
             var polygons = path.Flatten().Select(p => new Polygon(p.Points.Span)).ToArray();
             ShapeMaskRendererCPU.Fill(polygons, maskImage, 1.0F);
 
             return new IrisMask(maskImage, maskRadius, maskSize);
+        }
+
+        static IPath BuildNonEmptyClosedPath(BezierPath path)
+        {
+            var pathBuilder = new PathBuilder();
+            pathBuilder.StartFigure();
+            pathBuilder.MoveTo((Vector2)path.BeginPoint);
+            foreach (var p in path.Points)
+            {
+                if (p.IsLinear)
+                {
+                    pathBuilder.LineTo((Vector2)p.EndPoint);
+                }
+                else
+                {
+                    pathBuilder.CubicBezierTo((Vector2)p.ControlPoint1, (Vector2)p.ControlPoint2, (Vector2)p.EndPoint);
+                }
+            }
+
+            if (path.IsClosed)
+            {
+                pathBuilder.CloseFigure();
+            }
+
+            return pathBuilder.Build();
         }
     }
 
