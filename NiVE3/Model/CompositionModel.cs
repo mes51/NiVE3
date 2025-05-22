@@ -243,6 +243,8 @@ namespace NiVE3.Model
 
         IToneMapper ToneMapper => ToneMapperContext.Value;
 
+        ITransformer? Transformer { get; set; }
+
         Int128 RendererSettingHash { get; set; }
 
         Int128 ToneMapperSettingHash { get; set; }
@@ -666,6 +668,7 @@ namespace NiVE3.Model
             ShutterPhase = shutterPhase;
             MotionBlurSampleCount = motionBlurSampleCount;
 
+            Transformer?.SetSize(Width, Height);
             if (RendererPluginId != rendererPluginId)
             {
                 RendererContext.Dispose();
@@ -678,6 +681,7 @@ namespace NiVE3.Model
                 }
                 RendererSetting = RendererContext.Value.SaveSetting();
                 RendererSettingHash = CalcPluginSettingHash(RendererSetting);
+                Transformer = null;
             }
             else if (rendererSettingChanged && RendererContext.Value.ApplySetting(rendererSettingData))
             {
@@ -972,6 +976,12 @@ namespace NiVE3.Model
             var activeCamera = Layers.FirstOrDefault(l => l.IsEnableVideo && l.IsCamera && l.IsContainsTime(time));
             var activeCameraSetting = GetActiveCameraSetting(time);
 
+            if (Transformer == null)
+            {
+                Transformer = RendererListModel.CreateTransfomer(RendererPluginId);
+                Transformer.SetSize(Width, Height);
+            }
+
             foreach (var layer in layers)
             {
                 if (layer.IsCamera)
@@ -983,7 +993,7 @@ namespace NiVE3.Model
                     var cameraSetting = layer.GetCameraSetting(time);
                     if (cameraSetting != null)
                     {
-                        result.Add(new ColoredPreviewBoundingBox(Renderer.GetCameraBoundingBox(cameraSetting, activeCameraSetting), layer.TagColor));
+                        result.Add(new ColoredPreviewBoundingBox(Transformer.GetCameraBoundingBox(cameraSetting, activeCameraSetting), layer.TagColor));
                     }
                 }
                 else if (layer.IsLight)
@@ -991,7 +1001,7 @@ namespace NiVE3.Model
                     var lightSetting = layer.GetLightSetting(time);
                     if (lightSetting != null)
                     {
-                        result.Add(new ColoredPreviewBoundingBox(Renderer.GetLightBoundingBox(lightSetting, activeCameraSetting), layer.TagColor));
+                        result.Add(new ColoredPreviewBoundingBox(Transformer.GetLightBoundingBox(lightSetting, activeCameraSetting), layer.TagColor));
                     }
                 }
                 else
@@ -999,11 +1009,11 @@ namespace NiVE3.Model
                     var (origin, width, height) = layer.GetSourceFootageRect(time, false);
                     if (layer.IsEnable3D)
                     {
-                        result.Add(new ColoredPreviewBoundingBox(Renderer.GetBoundingBox3D(origin, width, height, layer.GetTransform(time), layer.GetParentTransforms(time), activeCameraSetting), layer.TagColor));
+                        result.Add(new ColoredPreviewBoundingBox(Transformer.GetBoundingBox3D(origin, width, height, layer.GetTransform(time), layer.GetParentTransforms(time), activeCameraSetting), layer.TagColor));
                     }
                     else
                     {
-                        result.Add(new ColoredPreviewBoundingBox(Renderer.GetBoundingBox2D(origin, width, height, layer.GetTransform(time), layer.GetParentTransforms(time)), layer.TagColor));
+                        result.Add(new ColoredPreviewBoundingBox(Transformer.GetBoundingBox2D(origin, width, height, layer.GetTransform(time), layer.GetParentTransforms(time)), layer.TagColor));
                     }
                 }
             }
@@ -1249,7 +1259,13 @@ namespace NiVE3.Model
             var hasImageSolo = Layers.Any(l => l.HasImage && l.IsEnableVideo && l.IsEnableSolo);
             var layers = Layers.Where(l => l.HasImage && l.IsEnableVideo && !l.IsLock && (!hasImageSolo || l.IsEnableSolo)).Select(l => l.GetLayerSkeleton(time)).NonNull().Reverse().ToArray();
 
-            return Renderer.SelectLayer(activeCameraSetting, layers, pos);
+            if (Transformer == null)
+            {
+                Transformer = RendererListModel.CreateTransfomer(RendererPluginId);
+                Transformer.SetSize(Width, Height);
+            }
+
+            return Transformer.SelectLayer(activeCameraSetting, layers, pos);
         }
 
         public LayerSkeleton? GetLayerSkeleton(Guid layerId, Time time)
@@ -1259,25 +1275,37 @@ namespace NiVE3.Model
 
         public Vector2d Projection(CameraSetting cameraSetting, LayerSkeleton? baseLayerSkeleton, Vector3d pos)
         {
+            if (Transformer == null)
+            {
+                Transformer = RendererListModel.CreateTransfomer(RendererPluginId);
+                Transformer.SetSize(Width, Height);
+            }
+
             if (baseLayerSkeleton != null)
             {
-                return Renderer.LocalCoordToScreenCoord(cameraSetting, baseLayerSkeleton, pos);
+                return Transformer.LocalCoordToScreenCoord(cameraSetting, baseLayerSkeleton, pos);
             }
             else
             {
-                return Renderer.WorldCoordToScreenCoord(cameraSetting, pos);
+                return Transformer.WorldCoordToScreenCoord(cameraSetting, pos);
             }
         }
 
         public Vector3d Unprojection(CameraSetting cameraSetting, LayerSkeleton? baseLayerSkeleton, Vector2d pos)
         {
+            if (Transformer == null)
+            {
+                Transformer = RendererListModel.CreateTransfomer(RendererPluginId);
+                Transformer.SetSize(Width, Height);
+            }
+
             if (baseLayerSkeleton != null)
             {
-                return Renderer.ScreenCoordToLocalCoord(cameraSetting, baseLayerSkeleton, pos);
+                return Transformer.ScreenCoordToLocalCoord(cameraSetting, baseLayerSkeleton, pos);
             }
             else
             {
-                return Renderer.ScreenCoordToWorldCoord(cameraSetting, pos);
+                return Transformer.ScreenCoordToWorldCoord(cameraSetting, pos);
             }
         }
 

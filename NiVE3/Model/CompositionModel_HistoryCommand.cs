@@ -185,6 +185,7 @@ namespace NiVE3.Model
                 Model.ShutterAngle = NewShutterAngle;
                 Model.ShutterPhase = NewShutterPhase;
                 Model.MotionBlurSampleCount = NewMotionBlurSampleCount;
+                Model.Transformer?.SetSize(NewWidth, NewHeight);
 
                 if (Model.RendererPluginId != NewRendererPluginId)
                 {
@@ -194,6 +195,7 @@ namespace NiVE3.Model
                     Model.RendererContext.Value.SetSize(NewWidth, NewHeight);
                     Model.RendererContext.Value.LoadSetting(NewRendererSetting);
                     Model.RendererSettingHash = NewRendererSettingHash;
+                    Model.Transformer = null;
                 }
                 else if (Model.RendererSettingHash != NewRendererSettingHash)
                 {
@@ -251,6 +253,7 @@ namespace NiVE3.Model
                 Model.ShutterAngle = OldShutterAngle;
                 Model.ShutterPhase = OldShutterPhase;
                 Model.MotionBlurSampleCount = OldMotionBlurSampleCount;
+                Model.Transformer?.SetSize(OldWidth, OldHeight);
 
                 if (Model.RendererPluginId != OldRendererPluginId)
                 {
@@ -260,6 +263,7 @@ namespace NiVE3.Model
                     Model.RendererContext.Value.SetSize(OldWidth, OldHeight);
                     Model.RendererContext.Value.LoadSetting(OldRendererSetting);
                     Model.RendererSettingHash = OldRendererSettingHash;
+                    Model.Transformer = null;
                 }
                 else if (Model.RendererSettingHash != OldRendererSettingHash)
                 {

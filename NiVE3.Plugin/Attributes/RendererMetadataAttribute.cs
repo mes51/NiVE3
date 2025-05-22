@@ -16,6 +16,11 @@ namespace NiVE3.Plugin.Attributes
         Type PluginType { get; }
 
         /// <summary>
+        /// 対応するITransformerの型
+        /// </summary>
+        Type TransformerType { get; }
+
+        /// <summary>
         /// レンダラの表示名
         /// </summary>
         string Name { get; }
@@ -60,6 +65,8 @@ namespace NiVE3.Plugin.Attributes
 
         public Type PluginType { get; }
 
+        public Type TransformerType { get; }
+
         public string Author { get; }
 
         public string RendererUuid { get; }
@@ -86,15 +93,18 @@ namespace NiVE3.Plugin.Attributes
         /// <summary>
         /// コンストラクタ
         /// </summary>
+        /// <param name="pluginType">プラグインの型</param>
+        /// <paramref name="pluginType"/>対応するITransformerの型</param>
         /// <param name="name">レンダラの表示名、またはResourceDictionaryのキー</param>
         /// <param name="author">レンダラの作成者</param>
         /// <param name="description">レンダラの概要、またはResourceDictionaryのキー</param>
         /// <param name="rendererUuid">レンダラの識別のためのGuid</param>
-        public RendererMetadataAttribute(Type pluginType, string name, string author, string description, string rendererUuid)
+        public RendererMetadataAttribute(Type pluginType, Type transformerType, string name, string author, string description, string rendererUuid)
         {
             NameKey = name;
             DescriptionKey = description;
             PluginType = pluginType;
+            TransformerType = transformerType;
             Author = author;
             RendererUuid = rendererUuid;
         }

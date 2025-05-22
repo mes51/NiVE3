@@ -53,5 +53,22 @@ namespace NiVE3.Model
             }
             return result;
         }
+
+        public ITransformer CreateTransfomer(Guid rendererPluginId)
+        {
+            if (Renderers == null)
+            {
+                throw new Exception(); // bug
+            }
+
+            var transformerType = Renderers.First(f => Guid.Parse(f.Metadata.RendererUuid) == rendererPluginId).Metadata.TransformerType;
+            var transformer = Activator.CreateInstance(transformerType) as ITransformer;
+            if (transformer == null)
+            {
+                throw new InvalidOperationException("renderer haven't transformer");
+            }
+
+            return transformer;
+        }
     }
 }
