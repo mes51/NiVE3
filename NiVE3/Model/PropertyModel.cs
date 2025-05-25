@@ -27,7 +27,7 @@ using NiVE3.Cache;
 
 namespace NiVE3.Model
 {
-    partial class PropertyModel : BindableBase, IPropertyModel, IOverwriteablePropertyModel
+    partial class PropertyModel : BindableBase, IPropertyModel
     {
         public const string RawValueUpdateKey = nameof(RawValue);
 

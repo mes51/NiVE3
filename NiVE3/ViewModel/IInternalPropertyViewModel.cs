@@ -10,6 +10,8 @@ using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Property;
 using System.Windows.Input;
 using NiVE3.Model.UI;
+using Microsoft.Win32;
+using NiVE3.View.Resource;
 
 namespace NiVE3.ViewModel
 {
@@ -42,6 +44,10 @@ namespace NiVE3.ViewModel
 
         ICommand DuplicateSelectedChildrenCommand { get; }
 
+        ICommand SavePropertyPresetCommand { get; }
+
+        ICommand LoadPropertyPresetCommand { get; }
+
         event EventHandler<SelectItemEventArgs> SelectItemChanged;
 
         event EventHandler<PropertyValueCommitedEventArgs> PropertyValueCommited;
@@ -64,6 +70,40 @@ namespace NiVE3.ViewModel
             else
             {
                 return new PropertyViewModel((PropertyModel)model, viewState);
+            }
+        }
+
+        public static string? ShowPropertyPresetSaveDialog()
+        {
+            var save = new SaveFileDialog
+            {
+                Filter = $"{LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_OpenSavePropertyPreset_Filter_PropertyPreset)}(*.nvpp3)|*.nvpp3"
+            };
+
+            if (save.ShowDialog() ?? false)
+            {
+                return save.FileName;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public static string? ShowPropertyPresetOpenDialog()
+        {
+            var save = new OpenFileDialog
+            {
+                Filter = $"{LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_OpenSavePropertyPreset_Filter_PropertyPreset)}(*.nvpp3)|*.nvpp3"
+            };
+
+            if (save.ShowDialog() ?? false)
+            {
+                return save.FileName;
+            }
+            else
+            {
+                return null;
             }
         }
     }

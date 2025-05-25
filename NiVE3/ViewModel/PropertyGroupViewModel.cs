@@ -5,18 +5,21 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
+using NiVE3.Data.Clipboard;
+using NiVE3.Data.Json.Project;
+using NiVE3.Model;
+using NiVE3.Model.UI;
+using NiVE3.Mvvm;
+using NiVE3.Plugin.Interfaces;
+using NiVE3.Plugin.Property;
+using NiVE3.SourceGenerator.ViewModelWireGenerator;
+using NiVE3.UI.Command;
+using NiVE3.Util;
+using NiVE3.View.Resource;
 using Prism.Commands;
 using Prism.Mvvm;
-using NiVE3.Model;
-using NiVE3.Mvvm;
-using NiVE3.Plugin.Property;
-using NiVE3.UI.Command;
-using NiVE3.SourceGenerator.ViewModelWireGenerator;
-using NiVE3.Data.Json.Project;
-using NiVE3.Util;
-using NiVE3.Data.Clipboard;
-using NiVE3.Model.UI;
 
 namespace NiVE3.ViewModel
 {
@@ -130,6 +133,10 @@ namespace NiVE3.ViewModel
 
         public DelegateCommand<SelectItemType?> ResetPropertyCommand { get; }
 
+        public DelegateCommand<SelectItemType?> SavePresetCommand { get; }
+
+        public DelegateCommand<SelectItemType?> LoadPresetCommand { get; }
+
         public ICommand BeginEditNameCommand { get; }
 
         public ICommand EndEditNameCommand { get; }
@@ -149,6 +156,10 @@ namespace NiVE3.ViewModel
         public ICommand DeleteSelectedChildrenCommand { get; }
 
         public ICommand DuplicateSelectedChildrenCommand { get; }
+
+        public ICommand SavePropertyPresetCommand { get; }
+
+        public ICommand LoadPropertyPresetCommand { get; }
 
         public ICommand PasteExpressionOnlyCommand { get; }
 
@@ -262,6 +273,56 @@ namespace NiVE3.ViewModel
 
             DuplicateSelectedChildrenCommand = new DelegateCommand(() => { });
 
+            SavePropertyPresetCommand = new RequerySuggestedCommand(() =>
+            {
+                if (SelectedChildren.Count < 1)
+                {
+                    return;
+                }
+
+                var filePath = InternalPropertyViewModel.ShowPropertyPresetSaveDialog();
+                if (string.IsNullOrEmpty(filePath))
+                {
+                    return;
+                }
+
+                try
+                {
+                    PropertyGroupModel.SavePropertyPreset(filePath, [..SelectedChildren.Select(c => c.Property.Id)]);
+                }
+                catch
+                {
+                    var title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_SavePresetError_Title);
+                    var text = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_SavePresetError_Text);
+                    MessageBox.Show(text, title, MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }, () => SelectedChildren.Count > 0);
+
+            LoadPropertyPresetCommand = new RequerySuggestedCommand(() =>
+            {
+                if (SelectedChildren.Count < 1)
+                {
+                    return;
+                }
+
+                var filePath = InternalPropertyViewModel.ShowPropertyPresetOpenDialog();
+                if (string.IsNullOrEmpty(filePath))
+                {
+                    return;
+                }
+
+                try
+                {
+                    PropertyGroupModel.LoadPropertyPreset(filePath, [..SelectedChildren.Select(c => c.Property.Id)]);
+                }
+                catch
+                {
+                    var title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_LoadPresetError_Title);
+                    var text = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_LoadPresetError_Text);
+                    MessageBox.Show(text, title, MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }, () => SelectedChildren.Count > 0);
+
             DeleteCommand = new DelegateCommand<SelectItemType?>(_ => DeleteSelectedChildrenCommand.Execute(null));
 
             CutCommand = new DelegateCommand<SelectItemType?>(_ => CutSelectedChildrenCommand.Execute(null));
@@ -284,6 +345,10 @@ namespace NiVE3.ViewModel
             AddKeyFrameCommand = new DelegateCommand<SelectItemType?>(_ => AddKeyFrameToSelectedChildrenCommand.Execute(null));
 
             ResetPropertyCommand = new DelegateCommand<SelectItemType?>(_ => ResetSelectedChildrenCommand.Execute(null));
+
+            SavePresetCommand = new DelegateCommand<SelectItemType?>(_ => SavePropertyPresetCommand.Execute(null));
+
+            LoadPresetCommand = new DelegateCommand<SelectItemType?>(_ => LoadPropertyPresetCommand.Execute(null));
 
             BeginEditNameCommand = new DelegateCommand(() =>
             {

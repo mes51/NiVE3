@@ -686,6 +686,12 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("プロパティを複製(_E)")]
         public static readonly string PropertyCollection_ContextMenu_DuplicatePropertyGroup = nameof(PropertyCollection_ContextMenu_DuplicatePropertyGroup);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("プロパティプリセットとして保存(_S)...")]
+        public static readonly string PropertyCollection_ContextMenu_SavePropertyPreset = nameof(PropertyCollection_ContextMenu_SavePropertyPreset);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("プロパティプリセットを適用(_L)...")]
+        public static readonly string PropertyCollection_ContextMenu_LoadPropertyPreset = nameof(PropertyCollection_ContextMenu_LoadPropertyPreset);
+
         [ShowInMarkup, LanguageKey, DefaultValue("エクスプレッション")]
         public static readonly string PropertyView_Expression = nameof(PropertyView_Expression);
 
@@ -1086,6 +1092,9 @@ namespace NiVE3.View.Resource
         [DefaultValue("プロパティの複製")]
         public static readonly string History_DuplicateProperty = nameof(History_DuplicateProperty);
 
+        [DefaultValue("プロパティプリセットの適用")]
+        public static readonly string History_LoadPropertyPreset = nameof(History_LoadPropertyPreset);
+
         [DefaultValue("エクスプレッションの変更")]
         public static readonly string History_ChangeExpression = nameof(History_ChangeExpression);
 
@@ -1262,11 +1271,26 @@ namespace NiVE3.View.Resource
         [DefaultValue("プロジェクトのオートセーブに失敗したため、オートセーブ機能を一時停止しました。オートセーブ用ディレクトリの中に使用中のプロジェクトなど、ファイルをロックしているものがないか確認してください。")]
         public static readonly string Dialog_RaiseAutoSaveError_Text = nameof(Dialog_RaiseAutoSaveError_Text);
 
+        [DefaultValue("エラー")]
+        public static readonly string Dialog_SavePresetError_Title = nameof(Dialog_SavePresetError_Title);
+
+        [DefaultValue("プリセット保存中にエラーが発生しました。ファイルパスを変えるなど、他の場所に保存してください。")]
+        public static readonly string Dialog_SavePresetError_Text = nameof(Dialog_SavePresetError_Text);
+
+        [DefaultValue("エラー")]
+        public static readonly string Dialog_LoadPresetError_Title = nameof(Dialog_LoadPresetError_Title);
+
+        [DefaultValue("プリセット適用中にエラーが発生しました。ファイルが破損していないか、またはプロパティの適用先が正しいか確認してください。")]
+        public static readonly string Dialog_LoadPresetError_Text = nameof(Dialog_LoadPresetError_Text);
+
         [DefaultValue("予期されなかったエラー")]
         public static readonly string Dialog_SaveChanceWhenThrownUnhandledException_Title = nameof(Dialog_SaveChanceWhenThrownUnhandledException_Title);
 
         [DefaultValue("終了前に、1度だけ保存にチャレンジできます。\r\n(正常に保存できる保証はないため、上書き保存はしないでください)")]
         public static readonly string Dialog_SaveChanceWhenThrownUnhandledException_Text = nameof(Dialog_SaveChanceWhenThrownUnhandledException_Text);
+
+        [DefaultValue("プロパティプリセット")]
+        public static readonly string Dialog_OpenSavePropertyPreset_Filter_PropertyPreset = nameof(Dialog_OpenSavePropertyPreset_Filter_PropertyPreset);
 
         // ValidationRule
 
@@ -1706,6 +1730,12 @@ namespace NiVE3.View.Resource
         public static readonly string LayerModel_NewMaskTemplate = nameof(LayerModel_NewMaskTemplate);
 
         // ShortcutKeyNames
+
+        [DefaultValue("プリセットとを適用")]
+        public static readonly string ShortcutKeyName_LoadPresetGesture = nameof(ShortcutKeyName_LoadPresetGesture);
+
+        [DefaultValue("プリセットとして保存")]
+        public static readonly string ShortcutKeyName_SavePresetGesture = nameof(ShortcutKeyName_SavePresetGesture);
 
         [DefaultValue("再生・停止")]
         public static readonly string ShortcutKeyName_PlayOrStopGesture = nameof(ShortcutKeyName_PlayOrStopGesture);

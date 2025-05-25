@@ -18,10 +18,13 @@ using NiVE3.Extension;
 using System.ComponentModel;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.Cache;
+using NiVE3.Data.Json.Preset;
+using System.Text.Json;
+using System.IO;
 
 namespace NiVE3.Model
 {
-    partial class PropertyGroupModel : BindableBase, IPropertyModel, IOverwriteablePropertyModel
+    partial class PropertyGroupModel : BindableBase, IPropertyModel
     {
         private string name = "";
         public string Name
@@ -415,7 +418,7 @@ namespace NiVE3.Model
                 IsEnabled = IsEnable,
                 PropertyTypeName = Property.PropertyType.GetType().FullName ?? "",
                 Name = Name,
-                Children = Children.Select(p => p.SaveData()).ToArray()
+                Children = [..Children.Select(p => p.SaveData())]
             };
         }
 
@@ -432,6 +435,56 @@ namespace NiVE3.Model
             {
                 Children.FirstOrDefault(c => c.Property.Id == childData.PropertyId)?.LoadData(childData);
             }
+        }
+
+        public void SavePropertyPreset(string filePath, string[] ids)
+        {
+            var children = Children.Where(p => ids.Contains(p.Property.Id)).OrderBy(Children.IndexOf);
+            var propertyData = new PropertyData
+            {
+                PropertyId = Property.Id,
+                InstanceId = InstanceId,
+                PropertyTypeName = Property.PropertyType.GetType().FullName ?? "",
+                Name = Name,
+                Children = [..children.Select(c => c.SaveData())]
+            };
+            var data = new PropertyPreset
+            {
+                Type = propertyData.Children.Length > 1 ? PropertyPresetType.PropertyGroup : PropertyPresetType.Property,
+                ParentPropertyId = Property.Id,
+                PropertyData = propertyData
+            };
+
+            var json = JsonSerializer.Serialize(data);
+            File.WriteAllText(filePath, json);
+        }
+
+        public void LoadPropertyPreset(string filePath, string[] ids)
+        {
+            var json = File.ReadAllText(filePath);
+            var data = JsonSerializer.Deserialize<PropertyPreset>(json);
+            if (data == null)
+            {
+                throw new InvalidOperationException("file is not property preset");
+            }
+
+            if (data.PropertyData == null)
+            {
+                return;
+            }
+
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_LoadPropertyPreset));
+
+            if (data.Type == PropertyPresetType.PropertyGroup)
+            {
+                PasteChildrenPropertyInternal(data.PropertyData, ids);
+            }
+            else if (ids.Length == 1 && Children.FirstOrDefault(c => c.Property.Id == ids[0]) is IPropertyModel targetChild)
+            {
+                targetChild.PasteProperty(data.PropertyData);
+            }
+
+            HistoryModel.EndGroup();
         }
 
         public void CoerceValues()
@@ -469,8 +522,7 @@ namespace NiVE3.Model
                     // NOTE: 複数同時貼り付けの場合は同一のグループにしか貼り付けられない
                     if (propertyData.PropertyId == Property.Id)
                     {
-                        // NOTE: 数を合わせるために一旦IOverwriteablePropertyModelでとってくる
-                        var targetChildren = Children.Where(c => propertyData.Children.Any(d => d.PropertyId == c.Property.Id)).OrderBy(c => propertyData.Children.FindIndex(d => d.PropertyId == c.Property.Id)).OfType<IOverwriteablePropertyModel>();
+                        var targetChildren = Children.Where(c => propertyData.Children.Any(d => d.PropertyId == c.Property.Id)).OrderBy(c => propertyData.Children.FindIndex(d => d.PropertyId == c.Property.Id)).AsEnumerable();
                         if (ids.Length > 0)
                         {
                             targetChildren = targetChildren.Where(c => ids.Contains(c.Property.Id));
@@ -543,7 +595,7 @@ namespace NiVE3.Model
 
             HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_PasteProperty));
 
-            var targetChildren = Children.Where(c => data.Children.Any(d => d.PropertyId == c.Property.Id)).OrderBy(c => data.Children.FindIndex(d => d.PropertyId == c.Property.Id)).OfType<IOverwriteablePropertyModel>();
+            var targetChildren = Children.Where(c => data.Children.Any(d => d.PropertyId == c.Property.Id)).OrderBy(c => data.Children.FindIndex(d => d.PropertyId == c.Property.Id));
             foreach (var (childData, child) in data.Children.Zip(targetChildren))
             {
                 child.OverwriteProperty(childData);
@@ -624,34 +676,33 @@ namespace NiVE3.Model
             if (data.Children.Length > 1)
             {
                 // NOTE: 複数同時貼り付けの場合は同一のグループにしか貼り付けられない
-                if (data.PropertyId == Property.Id)
-                {
-                    var targetChildren = Children.Where(c => data.Children.Any(d => d.PropertyId == c.Property.Id)).OrderBy(c => data.Children.FindIndex(d => d.PropertyId == c.Property.Id)).OfType<IOverwriteablePropertyModel>();
-                    if (ids.Length > 0)
-                    {
-                        targetChildren = targetChildren.Where(c => ids.Contains(c.Property.Id));
-                    }
-                    foreach (var (childData, child) in data.Children.Zip(targetChildren))
-                    {
-                        switch (child)
-                        {
-                            case PropertyModel:
-                            case AppendableProperty:
-                                child.PasteProperty(childData);
-                                break;
-                            default:
-                                // NOTE: グループの貼り付けは孫以降すべて上書きする
-                                child.OverwriteProperty(childData);
-                                break;
-                        }
-                        child.OverwriteProperty(childData);
-                    }
-                    HistoryModel.EndGroup();
-                }
-                else
+                if (data.PropertyId != Property.Id)
                 {
                     HistoryModel.AbortGroup();
+                    return;
                 }
+
+                var targetChildren = Children.Where(c => data.Children.Any(d => d.PropertyId == c.Property.Id)).OrderBy(c => data.Children.FindIndex(d => d.PropertyId == c.Property.Id)).AsEnumerable();
+                if (ids.Length > 0)
+                {
+                    targetChildren = targetChildren.Where(c => ids.Contains(c.Property.Id));
+                }
+                foreach (var (childData, child) in data.Children.Zip(targetChildren))
+                {
+                    switch (child)
+                    {
+                        case PropertyModel:
+                        case AppendableProperty:
+                            child.PasteProperty(childData);
+                            break;
+                        default:
+                            // NOTE: グループの貼り付けは孫以降すべて上書きする
+                            child.OverwriteProperty(childData);
+                            break;
+                    }
+                    child.OverwriteProperty(childData);
+                }
+                HistoryModel.EndGroup();
             }
             else if (ids.Length > 0)
             {

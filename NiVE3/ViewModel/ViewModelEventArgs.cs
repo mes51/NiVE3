@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using NiVE3.Plugin.Interfaces;
-using NiVE3.Plugin.Property;
 
 namespace NiVE3.ViewModel
 {
@@ -126,5 +124,27 @@ namespace NiVE3.ViewModel
     class StopRenderRamPreviewEventArgs : EventArgs
     {
         public int RenderedFrameCount { get; set; }
+    }
+
+    class SavePropertyPresetRequestEventArgs : EventArgs
+    {
+        public IInternalPropertyViewModel[][] PropertyHierarchy { get; }
+
+        public IInternalPropertyViewModel[] RootParent => PropertyHierarchy.LastOrDefault() ?? [];
+
+        public SavePropertyPresetRequestEventArgs(IInternalPropertyViewModel sender)
+        {
+            PropertyHierarchy = [[sender]];
+        }
+
+        public SavePropertyPresetRequestEventArgs(IInternalPropertyViewModel parent, IEnumerable<IInternalPropertyViewModel> children)
+        {
+            PropertyHierarchy = [[..children], [parent]];
+        }
+
+        public SavePropertyPresetRequestEventArgs(SavePropertyPresetRequestEventArgs e, IInternalPropertyViewModel parent)
+        {
+            PropertyHierarchy = [..e.PropertyHierarchy, [parent]];
+        }
     }
 }

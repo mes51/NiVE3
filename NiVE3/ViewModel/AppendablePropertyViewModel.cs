@@ -20,6 +20,7 @@ using NiVE3.Data.Json.Project;
 using NiVE3.Data.Clipboard;
 using NiVE3.Model.UI;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
+using NiVE3.View.Resource;
 
 namespace NiVE3.ViewModel
 {
@@ -104,6 +105,10 @@ namespace NiVE3.ViewModel
 
         public ICommand DuplicateSelectedChildrenCommand { get; }
 
+        public ICommand SavePropertyPresetCommand { get; }
+
+        public ICommand LoadPropertyPresetCommand { get; }
+
         public DelegateCommand<SelectItemType?> DeleteCommand { get; }
 
         public DelegateCommand<SelectItemType?> CutCommand { get; }
@@ -119,6 +124,10 @@ namespace NiVE3.ViewModel
         public DelegateCommand<SelectItemType?> AddKeyFrameCommand { get; }
 
         public DelegateCommand<SelectItemType?> ResetPropertyCommand { get; }
+
+        public DelegateCommand<SelectItemType?> SavePresetCommand { get; }
+
+        public DelegateCommand<SelectItemType?> LoadPresetCommand { get; }
 
         public ICommand AppendItemCommand { get; }
 
@@ -169,7 +178,7 @@ namespace NiVE3.ViewModel
                     return;
                 }
 
-                AppendablePropertyModel.CreateKeyFrames([.. SelectedChildren.OfType<PropertyGroupViewModel>().Select(c => c.InstanceId)]);
+                AppendablePropertyModel.CreateKeyFrames([..SelectedChildren.OfType<PropertyGroupViewModel>().Select(c => c.InstanceId)]);
             }, () => SelectedChildren.Count > 0).ObservesProperty(() => SelectedChildren.Count);
 
             ResetSelectedChildrenCommand = new DelegateCommand(() =>
@@ -179,7 +188,7 @@ namespace NiVE3.ViewModel
                     return;
                 }
 
-                AppendablePropertyModel.ResetProperties([.. SelectedChildren.OfType<PropertyGroupViewModel>().Select(c => c.InstanceId)]);
+                AppendablePropertyModel.ResetProperties([..SelectedChildren.OfType<PropertyGroupViewModel>().Select(c => c.InstanceId)]);
             }, () => SelectedChildren.Count > 0).ObservesProperty(() => SelectedChildren.Count);
 
             CutSelectedChildrenCommand = new DelegateCommand(() =>
@@ -200,7 +209,7 @@ namespace NiVE3.ViewModel
                     return;
                 }
 
-                var data = AppendablePropertyModel.CopyChildrenProperty([.. SelectedChildren.OfType<PropertyGroupViewModel>().Select(p => p.InstanceId)]);
+                var data = AppendablePropertyModel.CopyChildrenProperty([..SelectedChildren.OfType<PropertyGroupViewModel>().Select(p => p.InstanceId)]);
                 ClipboardUtil.SetData(data);
             }, () => SelectedChildren.Count > 0).ObservesProperty(() => SelectedChildren.Count);
 
@@ -228,8 +237,53 @@ namespace NiVE3.ViewModel
                     return;
                 }
 
-                AppendablePropertyModel.DuplicateChildrenProperty([.. SelectedChildren.OfType<PropertyGroupViewModel>().Select(p => p.InstanceId)]);
-            }, () => SelectedChildren.Count > 0).ObservesProperty(() => SelectedChildren.Count); ;
+                AppendablePropertyModel.DuplicateChildrenProperty([..SelectedChildren.OfType<PropertyGroupViewModel>().Select(p => p.InstanceId)]);
+            }, () => SelectedChildren.Count > 0).ObservesProperty(() => SelectedChildren.Count);
+
+            SavePropertyPresetCommand = new DelegateCommand(() =>
+            {
+                if (SelectedChildren.Count < 1)
+                {
+                    return;
+                }
+
+                var filePath = InternalPropertyViewModel.ShowPropertyPresetSaveDialog();
+                if (string.IsNullOrEmpty(filePath))
+                {
+                    return;
+                }
+
+                try
+                {
+                    AppendablePropertyModel.SavePropertyPreset(filePath, [..SelectedChildren.OfType<PropertyGroupViewModel>().Select(p => p.InstanceId)]);
+                }
+                catch
+                {
+                    var title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_SavePresetError_Title);
+                    var text = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_SavePresetError_Text);
+                    MessageBox.Show(text, title, MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }, () => SelectedChildren.Count > 0).ObservesProperty(() => SelectedChildren.Count);
+
+            LoadPropertyPresetCommand = new DelegateCommand(() =>
+            {
+                var filePath = InternalPropertyViewModel.ShowPropertyPresetOpenDialog();
+                if (string.IsNullOrEmpty(filePath))
+                {
+                    return;
+                }
+
+                try
+                {
+                    AppendablePropertyModel.LoadPropertyPreset(filePath, SelectedChildren.OfType<PropertyGroupViewModel>().FirstOrDefault()?.InstanceId);
+                }
+                catch
+                {
+                    var title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_LoadPresetError_Title);
+                    var text = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_LoadPresetError_Text);
+                    MessageBox.Show(text, title, MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            });
 
             DeleteCommand = new DelegateCommand<SelectItemType?>(_ => DeleteSelectedChildrenCommand.Execute(null));
 
@@ -253,6 +307,10 @@ namespace NiVE3.ViewModel
             AddKeyFrameCommand = new DelegateCommand<SelectItemType?>(_ => AddKeyFrameToSelectedChildrenCommand.Execute(null));
 
             ResetPropertyCommand = new DelegateCommand<SelectItemType?>(_ => ResetSelectedChildrenCommand.Execute(null));
+
+            SavePresetCommand = new DelegateCommand<SelectItemType?>(_ => SavePropertyPresetCommand.Execute(null));
+
+            LoadPresetCommand = new DelegateCommand<SelectItemType?>(_ => LoadPropertyPresetCommand.Execute(null));
 
             AppendItemCommand = new DelegateCommand<AppendablePropertyItem>(i => AppendablePropertyModel.AddChild(i));
 

@@ -22,6 +22,7 @@ using NiVE3.Shared.Extension;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
 using NiVE3.UI.Command;
 using NiVE3.Util;
+using NiVE3.View.Resource;
 using Prism.Commands;
 using Prism.Mvvm;
 
@@ -230,6 +231,10 @@ namespace NiVE3.ViewModel
 
         public ICommand DuplicateSelectedChildrenCommand { get; }
 
+        public ICommand SavePropertyPresetCommand { get; }
+
+        public ICommand LoadPropertyPresetCommand { get; }
+
         public ICommand SelectKeyFrameCommand { get; }
 
         public ICommand ChangeKeyFramesInterpolationTypeCommand { get; }
@@ -255,6 +260,8 @@ namespace NiVE3.ViewModel
         public DelegateCommand<SelectItemType?> AddKeyFrameCommand { get; }
 
         public DelegateCommand<SelectItemType?> ResetPropertyCommand { get; }
+
+        public DelegateCommand<SelectItemType?> SavePresetCommand { get; }
 
         private bool isEditing;
         bool IsEditing
@@ -534,6 +541,10 @@ namespace NiVE3.ViewModel
             }, () => SelectedKeyFrameIds.Count > 0).ObservesProperty(() => SelectedKeyFrameIds.Count);
 
             DuplicateSelectedChildrenCommand = new DelegateCommand(() => { });
+
+            SavePropertyPresetCommand = new DelegateCommand(() => { });
+
+            LoadPropertyPresetCommand = new DelegateCommand(() => { });
 
             DeleteCommand = new DelegateCommand<SelectItemType?>(_ => DeleteSelectedChildrenCommand.Execute(null));
 

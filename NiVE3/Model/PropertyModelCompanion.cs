@@ -68,12 +68,9 @@ namespace NiVE3.Model
         void PasteProperty(PropertyData data);
 
         object? GetValue(Time time, Time globalTime);
-    }
 
-     interface IOverwriteablePropertyModel : IPropertyModel
-     {
         void OverwriteProperty(PropertyData data);
-     }
+    }
 
     class CompositionViewModelProxy : WeakPropertyChangedBindingBase, ICompositionViewModel
     {

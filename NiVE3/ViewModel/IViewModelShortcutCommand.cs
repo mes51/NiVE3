@@ -27,5 +27,9 @@ namespace NiVE3.ViewModel
         DelegateCommand<SelectItemType?> AddKeyFrameCommand => Empty;
 
         DelegateCommand<SelectItemType?> ResetPropertyCommand => Empty;
+
+        DelegateCommand<SelectItemType?> SavePresetCommand => Empty;
+
+        DelegateCommand<SelectItemType?> LoadPresetCommand => Empty;
     }
 }

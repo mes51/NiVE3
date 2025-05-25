@@ -452,6 +452,36 @@ namespace NiVE3.Config
             new PropertyMetadata(new SingleKeyGesture(Key.Space))
         );
 
+        public static readonly DependencyProperty SavePresetGestureProperty = DependencyProperty.Register(
+            nameof(SavePresetGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new KeyGesture(Key.None))
+        );
+
+        public static readonly DependencyProperty LoadPresetGestureProperty = DependencyProperty.Register(
+            nameof(LoadPresetGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new KeyGesture(Key.None))
+        );
+
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Edit)]
+        [ShowInMarkup]
+        public InputGesture LoadPresetGesture
+        {
+            get { return (InputGesture)GetValue(LoadPresetGestureProperty); }
+            set { SetValue(LoadPresetGestureProperty, value); }
+        }
+
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Edit)]
+        [ShowInMarkup]
+        public InputGesture SavePresetGesture
+        {
+            get { return (InputGesture)GetValue(SavePresetGestureProperty); }
+            set { SetValue(SavePresetGestureProperty, value); }
+        }
+
         [ShortcutKeyCategory(ShortcutKeyCategoryType.Preview)]
         [ShowInMarkup]
         public InputGesture PlayOrStopGesture

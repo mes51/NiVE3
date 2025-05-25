@@ -83,6 +83,8 @@ namespace NiVE3.ViewModel
     [CommandHandling(nameof(MoveWorkareaBeginToIndicatorCommand), nameof(ShortcutKeySetting.MoveWorkareaBeginToIndicatorGesture))]
     [CommandHandling(nameof(MoveWorkareaEndToIndicatorCommand), nameof(ShortcutKeySetting.MoveWorkareaEndToIndicatorGesture))]
     [CommandHandling(nameof(PlayOrStopCommand), nameof(ShortcutKeySetting.PlayOrStopGesture))]
+    [CommandHandling(nameof(SavePresetCommand), nameof(ShortcutKeySetting.SavePresetGesture))]
+    [CommandHandling(nameof(LoadPresetCommand), nameof(ShortcutKeySetting.LoadPresetGesture))]
     partial class TimelineViewModel : PaneViewModelBase, IDropTarget
     {
         private Guid compositionId;
@@ -544,6 +546,10 @@ namespace NiVE3.ViewModel
         public ICommand MoveWorkareaBeginToIndicatorCommand { get; }
 
         public ICommand MoveWorkareaEndToIndicatorCommand { get; }
+
+        public ICommand SavePresetCommand { get; }
+
+        public ICommand LoadPresetCommand { get; }
 
         WeakEventPublisher<EventArgs> CurrentTimeChangeByUserPublisher { get; } = new WeakEventPublisher<EventArgs>();
         public event EventHandler<EventArgs> CurrentTimeChangeByUser
@@ -1223,6 +1229,30 @@ namespace NiVE3.ViewModel
             {
                 CompositionModel?.ChangeWorkarea(WorkareaBegin, Time.MaxAndMin(CurrentTime, (WorkareaBegin + FrameDuration).RoundToFrameRate(FrameRate), Duration));
             }, () => CompositionModel != null).ObservesProperty(() => CompositionModel);
+
+            SavePresetCommand = new DelegateCommand(() =>
+            {
+                if (CompositionModel == null || SelectedTarget == null)
+                {
+                    return;
+                }
+
+                SelectedTarget.SavePresetCommand.Execute(SelectedItemType);
+            }, () => CompositionModel != null && SelectedTarget != null)
+                .ObservesProperty(() => CompositionModel)
+                .ObservesProperty(() => SelectedTarget);
+
+            LoadPresetCommand = new DelegateCommand(() =>
+            {
+                if (CompositionModel == null || SelectedTarget == null)
+                {
+                    return;
+                }
+
+                SelectedTarget.LoadPresetCommand.Execute(SelectedItemType);
+            }, () => CompositionModel != null && SelectedTarget != null)
+                .ObservesProperty(() => CompositionModel)
+                .ObservesProperty(() => SelectedTarget);
 
             AudioPlayerModel = audioPlayerModel;
         }

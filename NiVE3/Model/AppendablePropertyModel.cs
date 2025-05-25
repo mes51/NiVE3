@@ -1,27 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
+using System.IO;
+using System.IO.Hashing;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
+using NiVE3.Cache;
 using NiVE3.Data.Clipboard;
+using NiVE3.Data.Json.Preset;
 using NiVE3.Data.Json.Project;
+using NiVE3.Extension;
 using NiVE3.Plugin.Interfaces;
-using NiVE3.Plugin.Property.Control;
 using NiVE3.Plugin.Property;
-using Prism.Mvvm;
+using NiVE3.Plugin.Property.Control;
+using NiVE3.Plugin.ValueObject;
 using NiVE3.Shared.Extension;
 using NiVE3.View.Resource;
-using System.IO.Hashing;
-using NiVE3.Extension;
-using System.ComponentModel;
-using System.Collections.Specialized;
-using NiVE3.Plugin.ValueObject;
-using NiVE3.Cache;
+using Prism.Mvvm;
 
 namespace NiVE3.Model
 {
-    partial class AppendablePropertyModel : BindableBase, IPropertyModel, IOverwriteablePropertyModel
+    partial class AppendablePropertyModel : BindableBase, IPropertyModel
     {
         public string Name { get; }
 
@@ -363,7 +366,7 @@ namespace NiVE3.Model
                 PropertyId = Property.Id,
                 PropertyTypeName = Property.PropertyType.GetType().FullName ?? "",
                 Name = Name,
-                Children = Children.Select(p => p.SaveData()).ToArray()
+                Children = [..Children.Select(p => p.SaveData())]
             };
         }
 
@@ -386,6 +389,57 @@ namespace NiVE3.Model
 
                 AddChildInternal(item, childData.InstanceId).LoadData(childData);
             }
+        }
+
+        public void SavePropertyPreset(string filePath, Guid[] ids)
+        {
+            var children = Children.OfType<PropertyGroupModel>().Where(p => ids.Contains(p.InstanceId)).OrderBy(Children.IndexOf);
+            var propertyData = new PropertyData
+            {
+                PropertyId = Property.Id,
+                PropertyTypeName = Property.PropertyType.GetType().FullName ?? "",
+                Name = Name,
+                Children = [.. children.Select(c => c.SaveData())]
+            };
+            var data = new PropertyPreset
+            {
+                Type = PropertyPresetType.AppendablePropertyChildren,
+                ParentPropertyId = Property.Id,
+                PropertyData = propertyData
+            };
+
+            var json = JsonSerializer.Serialize(data);
+            File.WriteAllText(filePath, json);
+        }
+
+        public void LoadPropertyPreset(string filePath, Guid? targetId)
+        {
+            var json = File.ReadAllText(filePath);
+            var data = JsonSerializer.Deserialize<PropertyPreset>(json);
+            if (data == null)
+            {
+                throw new InvalidOperationException("file is not property preset");
+            }
+
+            if (data.PropertyData == null)
+            {
+                return;
+            }
+
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_LoadPropertyPreset));
+
+            if (data.Type == PropertyPresetType.AppendablePropertyChildren && data.PropertyData.PropertyId == Property.Id)
+            {
+                PasteChildrenInternal(data.PropertyData, false);
+            }
+            else if (data.Type == PropertyPresetType.PropertyGroup &&
+                Children.OfType<PropertyGroupModel>().FirstOrDefault(c => c.InstanceId == targetId) is IPropertyModel targetChild &&
+                targetChild.Property.Id == data.PropertyData.PropertyId)
+            {
+                targetChild.OverwriteProperty(data.PropertyData);
+            }
+
+            HistoryModel.EndGroup();
         }
 
         public void CoerceValues()
@@ -449,7 +503,7 @@ namespace NiVE3.Model
                 PasteChildrenInternal(data.Data[0], false);
             }
             else if (data.Type == CopyDataType.PropertyGroup &&
-                Children.OfType<PropertyGroupModel>().FirstOrDefault(c => c.InstanceId == targetId) is IOverwriteablePropertyModel targetChild &&
+                Children.OfType<PropertyGroupModel>().FirstOrDefault(c => c.InstanceId == targetId) is IPropertyModel targetChild &&
                 targetChild.Property.Id == data.Data[0].PropertyId)
             {
                 targetChild.OverwriteProperty(data.Data[0]);
