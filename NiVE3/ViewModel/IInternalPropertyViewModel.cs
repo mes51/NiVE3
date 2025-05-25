@@ -12,6 +12,7 @@ using System.Windows.Input;
 using NiVE3.Model.UI;
 using Microsoft.Win32;
 using NiVE3.View.Resource;
+using NiVE3.Util;
 
 namespace NiVE3.ViewModel
 {
@@ -77,7 +78,7 @@ namespace NiVE3.ViewModel
         {
             var save = new SaveFileDialog
             {
-                Filter = $"{LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_OpenSavePropertyPreset_Filter_PropertyPreset)}(*.nvpp3)|*.nvpp3"
+                Filter = $"{LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_OpenSavePropertyPreset_Filter_PropertyPreset)}({Const.PropertyPresetExtensionFilter})|{Const.PropertyPresetExtensionFilter}"
             };
 
             if (save.ShowDialog() ?? false)
@@ -94,7 +95,7 @@ namespace NiVE3.ViewModel
         {
             var save = new OpenFileDialog
             {
-                Filter = $"{LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_OpenSavePropertyPreset_Filter_PropertyPreset)}(*.nvpp3)|*.nvpp3"
+                Filter = $"{LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_OpenSavePropertyPreset_Filter_PropertyPreset)}({Const.PropertyPresetExtensionFilter})|{Const.PropertyPresetExtensionFilter}"
             };
 
             if (save.ShowDialog() ?? false)

@@ -139,6 +139,8 @@
                         </MenuItem>
                         <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_ChangeLayerTagsRandomly}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=ChangeLayerTagsRandomlyGesture}"/>
                         <Separator />
+                        <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_LoadEffectOrMaskPreset}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=LoadPresetGesture}" IsEnabled="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.DataContext.IsSpecial, Converter={StaticResource BooleanInvertConverter}}"/>
+                        <Separator />
                         <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_CompositionSetting}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=OpenCompositionSettingGesture}" CommandTarget="{Binding Source={x:Reference Root}}"/>
                     </ContextMenu>
                 </Setter.Value>

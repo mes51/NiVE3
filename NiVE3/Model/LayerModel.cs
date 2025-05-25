@@ -38,6 +38,9 @@ using NiVE3.InternalShader;
 using NiVE3.Config;
 using NAudio.Dsp;
 using NiVE3.Mvvm;
+using NiVE3.Data.Json.Preset;
+using System.Text.Json;
+using System.IO;
 
 namespace NiVE3.Model
 {
@@ -1491,14 +1494,50 @@ namespace NiVE3.Model
             }
             else
             {
-                PasteEffectsInternal(data, selectedEffectIds, insertTargetId, false);
+                PasteEffectsInternal(data.Data, selectedEffectIds, insertTargetId, false);
             }
+        }
+
+        public void SaveEffectPreset(string filePath, Guid[] effectIds)
+        {
+            var effects = Effects.Where(e => effectIds.Contains(e.EffectId)).OrderBy(Effects.IndexOf);
+            var data = new EffectPreset
+            {
+                Effects = [..effects.Select(e => e.SaveData())]
+            };
+
+            var json = JsonSerializer.Serialize(data);
+            File.WriteAllText(filePath, json);
+        }
+
+        public void LoadEffectPreset(string filePath, Guid[] selectedEffectIds, Guid? insertTargetId)
+        {
+            var json = File.ReadAllText(filePath);
+            var data = JsonSerializer.Deserialize<EffectPreset>(json);
+
+            if (data == null || data.Effects.Length < 1)
+            {
+                return;
+            }
+
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_LoadEffectPreset));
+
+            if (selectedEffectIds.Length == 1 && Effects.FirstOrDefault(e => e.EffectId == selectedEffectIds[0]) is EffectModel targetEffect && targetEffect.EffectPluginId == data.Effects[0].EffectPluginId)
+            {
+                targetEffect.OverwriteEffect(data.Effects[0]);
+            }
+            else
+            {
+                PasteEffectsInternal(data.Effects, selectedEffectIds, insertTargetId, false);
+            }
+
+            HistoryModel.EndGroup();
         }
 
         public void DuplicateEffects(Guid[] effectIds, Guid? insertTargetId)
         {
             var data = CopyEffects(effectIds);
-            PasteEffectsInternal(data, [], insertTargetId, true);
+            PasteEffectsInternal(data.Data, [], insertTargetId, true);
         }
 
         public void AddShapedMask(MaskShapeType shapeType)
@@ -1928,7 +1967,7 @@ namespace NiVE3.Model
             HistoryModel.EndGroup();
         }
 
-        void PasteEffectsInternal(CopyData<EffectData> data, Guid[] selectedEffectIds, Guid? insertTargetId, bool isDuplicate)
+        void PasteEffectsInternal(EffectData[] data, Guid[] selectedEffectIds, Guid? insertTargetId, bool isDuplicate)
         {
             var addedEffects = new List<EffectModel>();
             var insertStartIndex = insertTargetId.HasValue ? Effects.FindIndex(e => e.EffectId == insertTargetId) : -1;
@@ -1943,7 +1982,7 @@ namespace NiVE3.Model
 
             var index = insertStartIndex;
             var newEffectId = new Dictionary<Guid, Guid>();
-            foreach (var effectData in data.Data)
+            foreach (var effectData in data)
             {
                 var newEffect = EffectListModel.CreateEffect(effectData.EffectPluginId, ProjectModel, CompositionModel, this, HistoryModel);
                 if (newEffect == null)

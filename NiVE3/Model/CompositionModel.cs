@@ -35,7 +35,6 @@ using ComputeSharp;
 using NiVE3.InternalShader.MotionBlur;
 using NiVE3.Model.UI;
 using NiVE3.Image.Color;
-using NiVE3.Text;
 using NiVE3.InternalShader;
 
 namespace NiVE3.Model
@@ -1575,6 +1574,24 @@ namespace NiVE3.Model
                 {
                     TextPropertyModel.UpdateTextProperty(l, CurrentTime - l.SourceStartPoint, null);
                 }
+            }
+
+            HistoryModel.EndGroup();
+        }
+
+        public void LoadEffectPreset(Guid[] layerIds, string filePath)
+        {
+            var layers = Layers.Where(l => layerIds.Contains(l.LayerId)).OrderBy(Layers.IndexOf).ToArray();
+            if (layers.Length < 1)
+            {
+                return;
+            }
+
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_LoadEffectPreset));
+
+            foreach (var l in layers)
+            {
+                l.LoadEffectPreset(filePath, [], null);
             }
 
             HistoryModel.EndGroup();

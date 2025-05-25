@@ -34,6 +34,8 @@ using Prism.Dialogs;
 using NiVE3.Plugin.Interfaces.RendererParams;
 using NiVE3.Data.Clipboard;
 using NiVE3.Plugin.ValueObject;
+using Microsoft.Win32;
+using System.IO;
 
 namespace NiVE3.ViewModel
 {
@@ -1244,15 +1246,47 @@ namespace NiVE3.ViewModel
 
             LoadPresetCommand = new DelegateCommand(() =>
             {
-                if (CompositionModel == null || SelectedTarget == null)
+                if (SelectedTarget != null)
                 {
-                    return;
+                    SelectedTarget.LoadPresetCommand.Execute(SelectedItemType);
                 }
+                else
+                {
+                    if (CompositionModel == null || SelectedLayers.Count < 1 && SelectedLayers.Any(l => l.EditingParameter != EditingLayerParameter.None))
+                    {
+                        return;
+                    }
 
-                SelectedTarget.LoadPresetCommand.Execute(SelectedItemType);
-            }, () => CompositionModel != null && SelectedTarget != null)
-                .ObservesProperty(() => CompositionModel)
-                .ObservesProperty(() => SelectedTarget);
+                    var open = new OpenFileDialog
+                    {
+                        Filter = $"{LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_OpenEffectOrMaskPreset_Filter_EffectPreset)}({Const.PropertyEffectExtensionFilter},{Const.PropertyMaskExtensionFilter})|{Const.PropertyEffectExtensionFilter};{Const.PropertyMaskExtensionFilter}"
+                    };
+                    if (!(open.ShowDialog() ?? false))
+                    {
+                        return;
+                    }
+
+                    var ids = SelectedLayers.Select(l => l.LayerId).ToArray();
+                    try
+                    {
+                        if (Path.GetExtension(open.FileName).Contains(Const.PropertyEffectExtension))
+                        {
+                            CompositionModel.LoadEffectPreset(ids, open.FileName);
+                        }
+                        else
+                        {
+
+                        }
+                    }
+                    catch
+                    {
+                        var title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_LoadPresetError_Title);
+                        var text = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_LoadPresetError_Text);
+                        MessageBox.Show(text, title, MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+            }, () => CompositionModel != null)
+                .ObservesProperty(() => CompositionModel);
 
             AudioPlayerModel = audioPlayerModel;
         }

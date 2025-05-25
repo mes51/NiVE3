@@ -92,7 +92,7 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("ペースト(_P)")]
         public static readonly string MainWindow_MenuItem_Edit_Paste = nameof(MainWindow_MenuItem_Edit_Paste);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("複製(_E)")]
+        [ShowInMarkup, LanguageKey, DefaultValue("複製(_L)")]
         public static readonly string MainWindow_MenuItem_Edit_Duplicate = nameof(MainWindow_MenuItem_Edit_Duplicate);
 
         [ShowInMarkup, LanguageKey, DefaultValue("レイヤーを分割(_S)")]
@@ -461,6 +461,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("レイヤーのタグをランダムに変更(_R)")]
         public static readonly string Timeline_ContextMenu_ChangeLayerTagsRandomly = nameof(Timeline_ContextMenu_ChangeLayerTagsRandomly);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("エフェクト/マスクプリセットの適用(_G)...")]
+        public static readonly string Timeline_ContextMenu_LoadEffectOrMaskPreset = nameof(Timeline_ContextMenu_LoadEffectOrMaskPreset);
+
         [ShowInMarkup, LanguageKey, DefaultValue("コンポジションの設定...(_O)")]
         public static readonly string Timeline_ContextMenu_CompositionSetting = nameof(Timeline_ContextMenu_CompositionSetting);
 
@@ -598,6 +601,12 @@ namespace NiVE3.View.Resource
 
         [ShowInMarkup, LanguageKey, DefaultValue("削除(_D)")]
         public static readonly string Layer_Effect_ContextMenu_Delete = nameof(Layer_Effect_ContextMenu_Delete);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("エフェクトプリセットとして保存(_S)...")]
+        public static readonly string Layer_Effect_ContextMenu_SaveEffectPreset = nameof(Layer_Effect_ContextMenu_SaveEffectPreset);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("エフェクトプリセットを適用(_G)...")]
+        public static readonly string Layer_Effect_ContextMenu_LoadEffectPreset = nameof(Layer_Effect_ContextMenu_LoadEffectPreset);
 
         [ShowInMarkup, LanguageKey, DefaultValue("切り取り(_X)")]
         public static readonly string Layer_Mask_ContextMenu_Cut = nameof(Layer_Mask_ContextMenu_Cut);
@@ -1146,6 +1155,9 @@ namespace NiVE3.View.Resource
         [DefaultValue("エフェクトのコメント変更")]
         public static readonly string History_ChangeEffectComment = nameof(History_ChangeEffectComment);
 
+        [DefaultValue("エフェクトプリセットの適用")]
+        public static readonly string History_LoadEffectPreset = nameof(History_LoadEffectPreset);
+
         [DefaultValue("レンダーキューに追加")]
         public static readonly string History_EnqueueRender = nameof(History_EnqueueRender);
 
@@ -1291,6 +1303,12 @@ namespace NiVE3.View.Resource
 
         [DefaultValue("プロパティプリセット")]
         public static readonly string Dialog_OpenSavePropertyPreset_Filter_PropertyPreset = nameof(Dialog_OpenSavePropertyPreset_Filter_PropertyPreset);
+
+        [DefaultValue("エフェクトプリセット")]
+        public static readonly string Dialog_OpenSaveEffectPreset_Filter_EffectPreset = nameof(Dialog_OpenSaveEffectPreset_Filter_EffectPreset);
+
+        [DefaultValue("エフェクトプリセット、マスクプリセット")]
+        public static readonly string Dialog_OpenEffectOrMaskPreset_Filter_EffectPreset = nameof(Dialog_OpenEffectOrMaskPreset_Filter_EffectPreset);
 
         // ValidationRule
 
@@ -1731,11 +1749,11 @@ namespace NiVE3.View.Resource
 
         // ShortcutKeyNames
 
-        [DefaultValue("プリセットとを適用")]
-        public static readonly string ShortcutKeyName_LoadPresetGesture = nameof(ShortcutKeyName_LoadPresetGesture);
+        [DefaultValue("プリセットを適用")]
+        public static readonly string ShortcutKeyName_LoadPropertyPresetGesture = nameof(ShortcutKeyName_LoadPropertyPresetGesture);
 
         [DefaultValue("プリセットとして保存")]
-        public static readonly string ShortcutKeyName_SavePresetGesture = nameof(ShortcutKeyName_SavePresetGesture);
+        public static readonly string ShortcutKeyName_SavePropertyPresetGesture = nameof(ShortcutKeyName_SavePropertyPresetGesture);
 
         [DefaultValue("再生・停止")]
         public static readonly string ShortcutKeyName_PlayOrStopGesture = nameof(ShortcutKeyName_PlayOrStopGesture);

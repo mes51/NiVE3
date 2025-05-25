@@ -10,6 +10,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using GongSolutions.Wpf.DragDrop;
+using Microsoft.Win32;
 using NiVE3.Data.Clipboard;
 using NiVE3.Data.Json.Project;
 using NiVE3.Image.Drawing;
@@ -24,6 +25,7 @@ using NiVE3.UI.Dialog;
 using NiVE3.Util;
 using NiVE3.View.Part;
 using NiVE3.View.Primitive;
+using NiVE3.View.Resource;
 using Prism.Commands;
 using Prism.Mvvm;
 
@@ -642,6 +644,10 @@ namespace NiVE3.ViewModel
 
         public ICommand DeleteEffectCommand { get; }
 
+        public ICommand SaveEffectPresetCommand { get; }
+
+        public ICommand LoadEffectPresetCommand { get; }
+
         public ICommand CutMaskCommand { get; }
 
         public ICommand CopyMaskCommand { get; }
@@ -665,6 +671,10 @@ namespace NiVE3.ViewModel
         public DelegateCommand<SelectItemType?> DuplicateCommand { get; }
 
         public DelegateCommand<SelectItemType?> SelectAllCommand { get; }
+
+        public DelegateCommand<SelectItemType?> SavePresetCommand { get; }
+
+        public DelegateCommand<SelectItemType?> LoadPresetCommand { get; }
 
         WeakEventPublisher<LayerSwitchEventArgs> LayerSwitchChangeRequestPublisher { get; } = new WeakEventPublisher<LayerSwitchEventArgs>();
         public event EventHandler<LayerSwitchEventArgs> LayerSwitchChangeRequest
@@ -1037,6 +1047,65 @@ namespace NiVE3.ViewModel
                 .ObservesProperty(() => EditingParameter)
                 .ObservesProperty(() => SelectedEffects.Count);
 
+            SaveEffectPresetCommand = new DelegateCommand(() =>
+            {
+                if (EditingParameter != EditingLayerParameter.None || SelectedEffects.Count < 1)
+                {
+                    return;
+                }
+
+                var save = new SaveFileDialog
+                {
+                    Filter = $"{LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_OpenSaveEffectPreset_Filter_EffectPreset)}({Const.PropertyEffectExtensionFilter})|({Const.PropertyEffectExtensionFilter}"
+                };
+                if (!(save.ShowDialog() ?? false))
+                {
+                    return;
+                }
+
+                try
+                {
+                    LayerModel.SaveEffectPreset(save.FileName, [..SelectedEffects.Select(e => e.EffectId)]);
+                }
+                catch
+                {
+                    var title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_SavePresetError_Title);
+                    var text = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_SavePresetError_Text);
+                    MessageBox.Show(text, title, MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }, () => EditingParameter == EditingLayerParameter.None && SelectedEffects.Count > 0)
+                .ObservesProperty(() => EditingParameter)
+                .ObservesProperty(() => SelectedEffects.Count);
+
+            LoadEffectPresetCommand = new DelegateCommand(() =>
+            {
+                if (EditingParameter != EditingLayerParameter.None)
+                {
+                    return;
+                }
+
+                var open = new OpenFileDialog
+                {
+                    Filter = $"{LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_OpenSaveEffectPreset_Filter_EffectPreset)}(({Const.PropertyEffectExtensionFilter})|({Const.PropertyEffectExtensionFilter}"
+                };
+                if (!(open.ShowDialog() ?? false))
+                {
+                    return;
+                }
+
+                var insertTargetId = LastSelectedEffect?.EffectId;
+                try
+                {
+                    LayerModel.LoadEffectPreset(open.FileName, [..SelectedEffects.Select(e => e.EffectId)], insertTargetId);
+                }
+                catch
+                {
+                    var title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_SavePresetError_Title);
+                    var text = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_SavePresetError_Text);
+                    MessageBox.Show(text, title, MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }, () => EditingParameter == EditingLayerParameter.None).ObservesProperty(() => EditingParameter);
+
             CutMaskCommand = new DelegateCommand(() =>
             {
                 if (EditingParameter != EditingLayerParameter.None)
@@ -1202,6 +1271,30 @@ namespace NiVE3.ViewModel
                     {
                         SelectedEffects.Add(e);
                     }
+                }
+            });
+
+            SavePresetCommand = new DelegateCommand<SelectItemType?>(type =>
+            {
+                if (type == SelectItemType.Mask)
+                {
+
+                }
+                else
+                {
+                    SaveEffectPresetCommand.Execute(null);
+                }
+            });
+
+            LoadPresetCommand = new DelegateCommand<SelectItemType?>(type =>
+            {
+                if (type == SelectItemType.Mask)
+                {
+
+                }
+                else
+                {
+                    LoadEffectPresetCommand.Execute(null);
                 }
             });
 

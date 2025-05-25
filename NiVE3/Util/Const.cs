@@ -33,5 +33,17 @@ namespace NiVE3.Util
         public const double MinGpuCacheLimitRate = 1.0;
 
         public const double MaxGpuCacheLimitRate = 80.0;
+
+        public const string PropertyPresetExtension = "nvpp3";
+
+        public const string PropertyPresetExtensionFilter = $"*.{PropertyPresetExtension}";
+
+        public const string PropertyEffectExtension = "nvep3";
+
+        public const string PropertyEffectExtensionFilter = $"*.{PropertyEffectExtension}";
+
+        public const string PropertyMaskExtension = "nvmp3";
+
+        public const string PropertyMaskExtensionFilter = $"*.{PropertyMaskExtension}";
     }
 }
