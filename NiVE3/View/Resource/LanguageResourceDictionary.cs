@@ -623,6 +623,12 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("削除(_D)")]
         public static readonly string Layer_Mask_ContextMenu_Delete = nameof(Layer_Mask_ContextMenu_Delete);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("マスクプリセットとして保存(_S)...")]
+        public static readonly string Layer_Mask_ContextMenu_SaveMaskPreset = nameof(Layer_Mask_ContextMenu_SaveMaskPreset);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("マスクプリセットを適用(_K)...")]
+        public static readonly string Layer_Mask_ContextMenu_LoadMaskPreset = nameof(Layer_Mask_ContextMenu_LoadMaskPreset);
+
         [ShowInMarkup, LanguageKey, DefaultValue("名前")]
         public static readonly string EffectList_Name = nameof(EffectList_Name);
 
@@ -1203,6 +1209,9 @@ namespace NiVE3.View.Resource
         [DefaultValue("マスクの名前変更")]
         public static readonly string History_ChangeMaskName = nameof(History_ChangeMaskName);
 
+        [DefaultValue("マスクプリセットの適用")]
+        public static readonly string History_LoadMaskPreset = nameof(History_LoadMaskPreset);
+
         // Dialog
 
         [DefaultValue("フッテージの削除")]
@@ -1306,6 +1315,9 @@ namespace NiVE3.View.Resource
 
         [DefaultValue("エフェクトプリセット")]
         public static readonly string Dialog_OpenSaveEffectPreset_Filter_EffectPreset = nameof(Dialog_OpenSaveEffectPreset_Filter_EffectPreset);
+
+        [DefaultValue("マスクプリセット")]
+        public static readonly string Dialog_OpenSaveMaskPreset_Filter_MaskPreset = nameof(Dialog_OpenSaveMaskPreset_Filter_MaskPreset);
 
         [DefaultValue("エフェクトプリセット、マスクプリセット")]
         public static readonly string Dialog_OpenEffectOrMaskPreset_Filter_EffectPreset = nameof(Dialog_OpenEffectOrMaskPreset_Filter_EffectPreset);

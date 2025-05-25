@@ -1481,6 +1481,12 @@ namespace NiVE3.Model
             return new CopyData<EffectData>(CopyDataType.Effect, [..effects.Select(e => e.SaveData())]);
         }
 
+        public void DuplicateEffects(Guid[] effectIds, Guid? insertTargetId)
+        {
+            var data = CopyEffects(effectIds);
+            PasteEffectsInternal(data.Data, [], insertTargetId, true);
+        }
+
         public void PasteEffects(CopyData<EffectData> data, Guid[] selectedEffectIds, Guid? insertTargetId)
         {
             if (data.Type != CopyDataType.Effect || data.Data.Length < 1)
@@ -1532,12 +1538,6 @@ namespace NiVE3.Model
             }
 
             HistoryModel.EndGroup();
-        }
-
-        public void DuplicateEffects(Guid[] effectIds, Guid? insertTargetId)
-        {
-            var data = CopyEffects(effectIds);
-            PasteEffectsInternal(data.Data, [], insertTargetId, true);
         }
 
         public void AddShapedMask(MaskShapeType shapeType)
@@ -1634,14 +1634,49 @@ namespace NiVE3.Model
             }
             else
             {
-                PasteMasksInternal(data, selectedMaskIds, insertTargetId, false);
+                PasteMasksInternal(data.Data, selectedMaskIds, insertTargetId, false);
             }
         }
 
         public void DuplicateMasks(Guid[] maskIds, Guid? insertTargetId)
         {
             var data = CopyMasks(maskIds);
-            PasteMasksInternal(data, [], insertTargetId, true);
+            PasteMasksInternal(data.Data, [], insertTargetId, true);
+        }
+
+        public void SaveMaskPreset(string filePath, Guid[] maskIds)
+        {
+            var masks = Masks.Where(m => maskIds.Contains(m.MaskId)).OrderBy(Masks.IndexOf);
+            var data = new MaskPreset
+            {
+                Masks = [..masks.Select(m => m.SaveData())]
+            };
+
+            var json = JsonSerializer.Serialize(data);
+            File.WriteAllText(filePath, json);
+        }
+
+        public void LoadMaskPreset(string filePath, Guid[] selectedMaskIds, Guid? insertTargetId)
+        {
+            var json = File.ReadAllText(filePath);
+            var data = JsonSerializer.Deserialize<MaskPreset>(json);
+            if (data == null || data.Masks.Length < 1)
+            {
+                return;
+            }
+
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_LoadMaskPreset));
+
+            if (selectedMaskIds.Length == 1 && Masks.FirstOrDefault(m => m.MaskId == selectedMaskIds[0]) is MaskModel targetMask)
+            {
+                targetMask.OverwriteMask(data.Masks[0]);
+            }
+            else
+            {
+                PasteMasksInternal(data.Masks, selectedMaskIds, insertTargetId, false);
+            }
+
+            HistoryModel.EndGroup();
         }
 
         public void ChangeMasksEnable(Guid[] maskIds, bool isEnable)
@@ -2051,7 +2086,7 @@ namespace NiVE3.Model
             HistoryModel.EndGroup();
         }
 
-        void PasteMasksInternal(CopyData<MaskData> data, Guid[] selectedMaskIds, Guid? insertTargetId, bool isDuplicate)
+        void PasteMasksInternal(MaskData[] data, Guid[] selectedMaskIds, Guid? insertTargetId, bool isDuplicate)
         {
             // NOTE: マスクにLayerDependPropertyBaseを追加したら更新用の処理を追加する
 
@@ -2067,7 +2102,7 @@ namespace NiVE3.Model
             }
 
             var index = insertStartIndex;
-            foreach (var maskData in data.Data)
+            foreach (var maskData in data)
             {
                 var newMask = new MaskModel(ProjectModel, CompositionModel, this, AcceleratorModel, HistoryModel, maskData.IsBezierPath, maskData.DefaultShapeType);
                 newMask.LoadData(maskData);

@@ -1597,6 +1597,24 @@ namespace NiVE3.Model
             HistoryModel.EndGroup();
         }
 
+        public void LoadMaskPreset(Guid[] layerIds, string filePath)
+        {
+            var layers = Layers.Where(l => layerIds.Contains(l.LayerId)).OrderBy(Layers.IndexOf).ToArray();
+            if (layers.Length < 1)
+            {
+                return;
+            }
+
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_LoadMaskPreset));
+
+            foreach (var l in layers)
+            {
+                l.LoadMaskPreset(filePath, [], null);
+            }
+
+            HistoryModel.EndGroup();
+        }
+
         public ILayerObject? GetLayer(Guid layerId)
         {
             return Layers.FirstOrDefault(l => l.LayerId == layerId);

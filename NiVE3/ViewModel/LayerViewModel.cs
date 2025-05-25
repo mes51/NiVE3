@@ -648,6 +648,10 @@ namespace NiVE3.ViewModel
 
         public ICommand LoadEffectPresetCommand { get; }
 
+        public ICommand SaveMaskPresetCommand { get; }
+
+        public ICommand LoadMaskPresetCommand { get; }
+
         public ICommand CutMaskCommand { get; }
 
         public ICommand CopyMaskCommand { get; }
@@ -1100,8 +1104,8 @@ namespace NiVE3.ViewModel
                 }
                 catch
                 {
-                    var title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_SavePresetError_Title);
-                    var text = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_SavePresetError_Text);
+                    var title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_LoadPresetError_Title);
+                    var text = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_LoadPresetError_Text);
                     MessageBox.Show(text, title, MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }, () => EditingParameter == EditingLayerParameter.None).ObservesProperty(() => EditingParameter);
@@ -1185,6 +1189,65 @@ namespace NiVE3.ViewModel
             }, () => EditingParameter == EditingLayerParameter.None && SelectedMasks.Count > 0)
                 .ObservesProperty(() => EditingParameter)
                 .ObservesProperty(() => SelectedMasks.Count);
+
+            SaveMaskPresetCommand = new DelegateCommand(() =>
+            {
+                if (EditingParameter != EditingLayerParameter.None || SelectedMasks.Count < 1)
+                {
+                    return;
+                }
+
+                var save = new SaveFileDialog
+                {
+                    Filter = $"{LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_OpenSaveMaskPreset_Filter_MaskPreset)}({Const.PropertyMaskExtensionFilter})|{Const.PropertyMaskExtensionFilter}"
+                };
+                if (!(save.ShowDialog() ?? false))
+                {
+                    return;
+                }
+
+                try
+                {
+                    LayerModel.SaveMaskPreset(save.FileName, [..SelectedMasks.Select(m => m.MaskId)]);
+                }
+                catch
+                {
+                    var title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_SavePresetError_Title);
+                    var text = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_SavePresetError_Text);
+                    MessageBox.Show(text, title, MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }, () => EditingParameter == EditingLayerParameter.None && SelectedMasks.Count > 0)
+                .ObservesProperty(() => EditingParameter)
+                .ObservesProperty(() => SelectedMasks.Count);
+
+            LoadMaskPresetCommand = new DelegateCommand(() =>
+            {
+                if (EditingParameter != EditingLayerParameter.None)
+                {
+                    return;
+                }
+
+                var open = new OpenFileDialog
+                {
+                    Filter = $"{LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_OpenSaveMaskPreset_Filter_MaskPreset)}(({Const.PropertyMaskExtensionFilter})|{Const.PropertyMaskExtensionFilter}"
+                };
+                if (!(open.ShowDialog() ?? false))
+                {
+                    return;
+                }
+
+                var insertTargetId = LastSelectedMask?.MaskId;
+                try
+                {
+                    LayerModel.LoadMaskPreset(open.FileName, [..SelectedMasks.Select(m => m.MaskId)], insertTargetId);
+                }
+                catch
+                {
+                    var title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_LoadPresetError_Title);
+                    var text = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_LoadPresetError_Text);
+                    MessageBox.Show(text, title, MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            });
 
             ShowFootagePreviewCommand = new DelegateCommand(() => EventHubModel.NotifyShowFootagePreview(LayerModel.FootageId));
 
@@ -1278,7 +1341,7 @@ namespace NiVE3.ViewModel
             {
                 if (type == SelectItemType.Mask)
                 {
-
+                    SaveMaskPresetCommand.Execute(null);
                 }
                 else
                 {
@@ -1290,7 +1353,7 @@ namespace NiVE3.ViewModel
             {
                 if (type == SelectItemType.Mask)
                 {
-
+                    LoadMaskPresetCommand.Execute(null);
                 }
                 else
                 {

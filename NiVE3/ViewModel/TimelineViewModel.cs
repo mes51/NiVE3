@@ -1275,7 +1275,7 @@ namespace NiVE3.ViewModel
                         }
                         else
                         {
-
+                            CompositionModel.LoadMaskPreset(ids, open.FileName);
                         }
                     }
                     catch
