@@ -26,6 +26,15 @@ namespace NiVE3.PresetPlugin.Effect.Util
         Saturation
     }
 
+    public enum LuminanceAndSingleChannelType
+    {
+        R,
+        G,
+        B,
+        A,
+        Luminance
+    }
+
     enum CompositeOrder : int
     {
         Front,

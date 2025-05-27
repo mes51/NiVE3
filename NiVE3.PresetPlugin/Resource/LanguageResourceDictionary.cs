@@ -227,6 +227,32 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("エッジの繰り返しモード")]
         public const string Blur_LensBlur_EdgeRepeatMode = nameof(Blur_LensBlur_EdgeRepeatMode);
 
+        // CombineBlur
+
+        [DefaultValue("合成ブラー")]
+        public const string Blur_CombineBlur_Name = nameof(Blur_CombineBlur_Name);
+
+        [DefaultValue("他のレイヤーを元にブラーを適用します")]
+        public const string Blur_CombineBlur_Description = nameof(Blur_CombineBlur_Description);
+
+        [LanguageKey, DefaultValue("ソースレイヤー")]
+        public const string Blur_CombineBlur_SourceLayer = nameof(Blur_CombineBlur_SourceLayer);
+
+        [LanguageKey, DefaultValue("チャンネル")]
+        public const string Blur_CombineBlur_Channel = nameof(Blur_CombineBlur_Channel);
+
+        [LanguageKey, DefaultValue("ソースレイヤーの位置")]
+        public const string Blur_CombineBlur_SourceLayerPosition = nameof(Blur_CombineBlur_SourceLayerPosition);
+
+        [LanguageKey, DefaultValue("水平半径")]
+        public const string Blur_CombineBlur_HorizontalAmount = nameof(Blur_CombineBlur_HorizontalAmount);
+
+        [LanguageKey, DefaultValue("垂直半径")]
+        public const string Blur_CombineBlur_VerticalAmount = nameof(Blur_CombineBlur_VerticalAmount);
+
+        [LanguageKey, DefaultValue("エッジの繰り返しモード")]
+        public const string Blur_CombineBlur_EdgeRepeatMode = nameof(Blur_CombineBlur_EdgeRepeatMode);
+
         // PixelSort
 
         [DefaultValue("ピクセルソート")]
@@ -1958,6 +1984,21 @@ namespace NiVE3.PresetPlugin.Resource
 
         [DefaultValue("円")]
         public const string LensBlurIrisType_Circle = nameof(LensBlurIrisType_Circle);
+
+        [DefaultValue("赤")]
+        public const string LuminanceAndSingleChannelType_R = nameof(LuminanceAndSingleChannelType_R);
+
+        [DefaultValue("緑")]
+        public const string LuminanceAndSingleChannelType_G = nameof(LuminanceAndSingleChannelType_G);
+
+        [DefaultValue("青")]
+        public const string LuminanceAndSingleChannelType_B = nameof(LuminanceAndSingleChannelType_B);
+
+        [DefaultValue("アルファ")]
+        public const string LuminanceAndSingleChannelType_A = nameof(LuminanceAndSingleChannelType_A);
+
+        [DefaultValue("輝度")]
+        public const string LuminanceAndSingleChannelType_Luminance = nameof(LuminanceAndSingleChannelType_Luminance);
 
         // unit
 
