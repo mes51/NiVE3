@@ -752,7 +752,7 @@ namespace NiVE3.PresetPlugin.Effect.Blur
             var color = Float4.Zero;
             for (int t = y - currentVerticalRange, my = 0; my <= currentVerticalSize; t++, my++)
             {
-                var tz = (my == 0 || my == currentVerticalRange) ? verticalEdgeAmount : 1.0F;
+                var tz = (my == 0 || my == currentVerticalSize) ? verticalEdgeAmount : 1.0F;
                 for (int l = x - currentHorizontalRange, mx = 0; mx <= currentHorizontalSize; l++, mx++)
                 {
                     var lz = (mx == 0 || mx == currentHorizontalSize) ? horizontalEdgeAmount : 1.0F;
