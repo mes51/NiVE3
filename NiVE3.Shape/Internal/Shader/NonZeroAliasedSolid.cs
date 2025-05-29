@@ -32,7 +32,7 @@ namespace NiVE3.Shape.Internal.Shader
             var py = ThreadIds.Y + startY;
 
             var pos = py * imageWidth + px;
-            image[pos] = BlendMethods.Process(blendMode, image[pos], new Float4(color.XYZ, 1.0F));
+            image[pos] = BlendMethods.Process(blendMode, image[pos], color);
         }
 
         bool IsHit(int tx, int ty)

@@ -33,7 +33,7 @@ namespace NiVE3.Shape.Internal.Shader
             if (area > 0.0F)
             {
                 var pos = py * imageWidth + px;
-                image[pos] = BlendMethods.Process(blendMode, image[pos], new Float4(color.XYZ, area));
+                image[pos] = BlendMethods.Process(blendMode, image[pos], new Float4(color.XYZ, color.W * area));
             }
         }
 
