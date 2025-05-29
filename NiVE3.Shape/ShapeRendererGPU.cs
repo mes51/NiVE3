@@ -56,7 +56,7 @@ namespace NiVE3.Shape
                     break;
                 case LinearGradientBrush linearGradientBrush:
                     {
-                        var gpuBrush = new GPULinearGradientBrush(linearGradientBrush.UseOkLabInterpolation, linearGradientBrush.Begin, linearGradientBrush.End);
+                        var gpuBrush = new GPULinearGradientBrush(linearGradientBrush.UseOkLabInterpolation, linearGradientBrush.Opacity, linearGradientBrush.Begin, linearGradientBrush.End);
                         var (colorValues, colorPositions, opacityValues, opacityPositions) = CopyToGPUGradientBuffers(device, linearGradientBrush);
 
                         device.For(
@@ -89,7 +89,7 @@ namespace NiVE3.Shape
                     break;
                 case RadialGradientBrush radialGradientBrush:
                     {
-                        var gpuBrush = new GPURadialGradientBrush(radialGradientBrush.UseOkLabInterpolation, radialGradientBrush.Begin, radialGradientBrush.End);
+                        var gpuBrush = new GPURadialGradientBrush(radialGradientBrush.UseOkLabInterpolation, radialGradientBrush.Opacity, radialGradientBrush.Begin, radialGradientBrush.End);
                         var (colorValues, colorPositions, opacityValues, opacityPositions) = CopyToGPUGradientBuffers(device, radialGradientBrush);
 
                         device.For(
@@ -162,7 +162,7 @@ namespace NiVE3.Shape
                     break;
                 case LinearGradientBrush linearGradientBrush:
                     {
-                        var gpuBrush = new GPULinearGradientBrush(linearGradientBrush.UseOkLabInterpolation, linearGradientBrush.Begin, linearGradientBrush.End);
+                        var gpuBrush = new GPULinearGradientBrush(linearGradientBrush.UseOkLabInterpolation, linearGradientBrush.Opacity, linearGradientBrush.Begin, linearGradientBrush.End);
                         var (colorValues, colorPositions, opacityValues, opacityPositions) = CopyToGPUGradientBuffers(device, linearGradientBrush);
 
                         device.For(
@@ -194,7 +194,7 @@ namespace NiVE3.Shape
                     break;
                 case RadialGradientBrush radialGradientBrush:
                     {
-                        var gpuBrush = new GPURadialGradientBrush(radialGradientBrush.UseOkLabInterpolation, radialGradientBrush.Begin, radialGradientBrush.End);
+                        var gpuBrush = new GPURadialGradientBrush(radialGradientBrush.UseOkLabInterpolation, radialGradientBrush.Opacity, radialGradientBrush.Begin, radialGradientBrush.End);
                         var (colorValues, colorPositions, opacityValues, opacityPositions) = CopyToGPUGradientBuffers(device, radialGradientBrush);
 
                         device.For(
@@ -267,7 +267,7 @@ namespace NiVE3.Shape
                     break;
                 case LinearGradientBrush linearGradientBrush:
                     {
-                        var gpuBrush = new GPULinearGradientBrush(linearGradientBrush.UseOkLabInterpolation, linearGradientBrush.Begin, linearGradientBrush.End);
+                        var gpuBrush = new GPULinearGradientBrush(linearGradientBrush.UseOkLabInterpolation, linearGradientBrush.Opacity, linearGradientBrush.Begin, linearGradientBrush.End);
                         var (colorValues, colorPositions, opacityValues, opacityPositions) = CopyToGPUGradientBuffers(device, linearGradientBrush);
 
                         device.For(
@@ -300,7 +300,7 @@ namespace NiVE3.Shape
                     break;
                 case RadialGradientBrush radialGradientBrush:
                     {
-                        var gpuBrush = new GPURadialGradientBrush(radialGradientBrush.UseOkLabInterpolation, radialGradientBrush.Begin, radialGradientBrush.End);
+                        var gpuBrush = new GPURadialGradientBrush(radialGradientBrush.UseOkLabInterpolation, radialGradientBrush.Opacity, radialGradientBrush.Begin, radialGradientBrush.End);
                         var (colorValues, colorPositions, opacityValues, opacityPositions) = CopyToGPUGradientBuffers(device, radialGradientBrush);
 
                         device.For(
@@ -373,7 +373,7 @@ namespace NiVE3.Shape
                     break;
                 case LinearGradientBrush linearGradientBrush:
                     {
-                        var gpuBrush = new GPULinearGradientBrush(linearGradientBrush.UseOkLabInterpolation, linearGradientBrush.Begin, linearGradientBrush.End);
+                        var gpuBrush = new GPULinearGradientBrush(linearGradientBrush.UseOkLabInterpolation, linearGradientBrush.Opacity, linearGradientBrush.Begin, linearGradientBrush.End);
                         var (colorValues, colorPositions, opacityValues, opacityPositions) = CopyToGPUGradientBuffers(device, linearGradientBrush);
 
                         device.For(
@@ -405,7 +405,7 @@ namespace NiVE3.Shape
                     break;
                 case RadialGradientBrush radialGradientBrush:
                     {
-                        var gpuBrush = new GPURadialGradientBrush(radialGradientBrush.UseOkLabInterpolation, radialGradientBrush.Begin, radialGradientBrush.End);
+                        var gpuBrush = new GPURadialGradientBrush(radialGradientBrush.UseOkLabInterpolation, radialGradientBrush.Opacity, radialGradientBrush.Begin, radialGradientBrush.End);
                         var (colorValues, colorPositions, opacityValues, opacityPositions) = CopyToGPUGradientBuffers(device, radialGradientBrush);
 
                         device.For(

@@ -747,11 +747,11 @@ namespace NiVE3.Input
                     var type = (GradientType)(property[GradientFillTypeId] ?? GradientType.Linear);
                     var begin = (Vector3)(Vector3d)(property[GradientFillBeginPositionId] ?? Vector3d.Zero);
                     var end = (Vector3)(Vector3d)(property[GradientFillEndPositionId] ?? Vector3d.Zero);
-                    var opacity = (float)(double)(property[GradientFillOpacityId] ?? 0.0);
+                    var opacity = (float)(double)(property[GradientFillOpacityId] ?? 0.0) * 0.01F;
                     var fillRule = (ShapeFillRule)(property[GradientFillRuleId] ?? ShapeFillRule.NonZero);
                     var blendModel = (BlendMode)(property[GradientFillBlendModeId] ?? BlendMode.Normal);
 
-                    tree.AddNode(new ShapeGradientFill(color, useOkLabInterpolation, type, begin.AsVector2(), end.AsVector2(), fillRule, blendModel));
+                    tree.AddNode(new ShapeGradientFill(color, useOkLabInterpolation, type, begin.AsVector2(), end.AsVector2(), fillRule, blendModel) { Opacity = opacity });
                 }
                 else if (property.TryGetValue(SolidStrokeColorId, out var solifStrokeColor))
                 {
@@ -1329,11 +1329,11 @@ namespace NiVE3.Input
         {
             if (Type == GradientType.Radial)
             {
-                return new RadialGradientBrush(Color, UseOkLabInterpolation, BeginPosition, EndPosition);
+                return new RadialGradientBrush(Color, Opacity, UseOkLabInterpolation, BeginPosition, EndPosition);
             }
             else
             {
-                return new LinearGradientBrush(Color, UseOkLabInterpolation, BeginPosition, EndPosition);
+                return new LinearGradientBrush(Color, Opacity, UseOkLabInterpolation, BeginPosition, EndPosition);
             }
         }
     }
@@ -1397,11 +1397,11 @@ namespace NiVE3.Input
         {
             if (Type == GradientType.Radial)
             {
-                return new RadialGradientBrush(Color, UseOkLabInterpolation, BeginPosition, EndPosition);
+                return new RadialGradientBrush(Color, Opacity, UseOkLabInterpolation, BeginPosition, EndPosition);
             }
             else
             {
-                return new LinearGradientBrush(Color, UseOkLabInterpolation, BeginPosition, EndPosition);
+                return new LinearGradientBrush(Color, Opacity, UseOkLabInterpolation, BeginPosition, EndPosition);
             }
         }
     }

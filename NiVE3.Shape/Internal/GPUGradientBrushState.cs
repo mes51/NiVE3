@@ -11,7 +11,7 @@ namespace NiVE3.Shape.Internal
 {
     readonly struct GPULinearGradientBrush
     {
-        public readonly float2 Begin;
+        public readonly Float2 Begin;
 
         public readonly Bool UseOKLabInterpolation;
 
@@ -19,11 +19,14 @@ namespace NiVE3.Shape.Internal
 
         public readonly Bool Reversed;
 
-        public readonly float2 SinCos;
+        public readonly Float2 SinCos;
 
-        public GPULinearGradientBrush(bool useOKLabInterpolation, Vector2 begin, Vector2 end)
+        public readonly float Opacity;
+
+        public GPULinearGradientBrush(bool useOKLabInterpolation, float opacity, Vector2 begin, Vector2 end)
         {
             UseOKLabInterpolation = useOKLabInterpolation;
+            Opacity = opacity;
             Begin = begin;
 
             // 逆算のためXが先
@@ -45,15 +48,18 @@ namespace NiVE3.Shape.Internal
 
     readonly struct GPURadialGradientBrush
     {
-        public readonly float2 Begin;
+        public readonly Float2 Begin;
 
         public readonly Bool UseOKLabInterpolation;
 
         public readonly float Length;
 
-        public GPURadialGradientBrush(bool useOKLabInterpolation, Vector2 begin, Vector2 end)
+        public readonly float Opacity;
+
+        public GPURadialGradientBrush(bool useOKLabInterpolation, float opacity, Vector2 begin, Vector2 end)
         {
             UseOKLabInterpolation = useOKLabInterpolation;
+            Opacity = opacity;
             Begin = begin;
             Length = Vector2.Distance(begin, end);
         }

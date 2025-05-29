@@ -45,11 +45,14 @@ namespace NiVE3.Shape
     {
         public ColorGradient ColorGradient { get; }
 
+        public float Opacity { get; }
+
         public bool UseOkLabInterpolation { get; }
 
-        protected GradientBrush(ColorGradient colorGradient, bool useOkLabInterpolation)
+        protected GradientBrush(ColorGradient colorGradient, float opacity, bool useOkLabInterpolation)
         {
             ColorGradient = colorGradient;
+            Opacity = opacity;
             UseOkLabInterpolation = useOkLabInterpolation;
         }
     }
@@ -68,8 +71,8 @@ namespace NiVE3.Shape
 
         float Cos { get; set; }
 
-        public LinearGradientBrush(ColorGradient colorGradient, bool useOkLabInterpolation, Vector2 begin, Vector2 end)
-            : base(colorGradient, useOkLabInterpolation)
+        public LinearGradientBrush(ColorGradient colorGradient, float opacity, bool useOkLabInterpolation, Vector2 begin, Vector2 end)
+            : base(colorGradient, opacity, useOkLabInterpolation)
         {
             Begin = begin;
             End = end;
@@ -86,7 +89,9 @@ namespace NiVE3.Shape
         {
             var p = Sin * (x - Begin.X) + Cos * (y - Begin.Y);
             var pos = (Reversed ? Length - p : p) / Length;
-            return ColorGradient.GetrColor(pos, UseOkLabInterpolation);
+            var color = ColorGradient.GetrColor(pos, UseOkLabInterpolation);
+            color.W *= Opacity;
+            return color;
         }
 
         public override void Transform(Matrix3x3 matrix)
@@ -124,8 +129,8 @@ namespace NiVE3.Shape
 
         float Length { get; set; }
 
-        public RadialGradientBrush(ColorGradient colorGradient, bool useOkLabInterpolation, Vector2 begin, Vector2 end)
-            : base(colorGradient, useOkLabInterpolation)
+        public RadialGradientBrush(ColorGradient colorGradient, float opacity, bool useOkLabInterpolation, Vector2 begin, Vector2 end)
+            : base(colorGradient, opacity, useOkLabInterpolation)
         {
             Begin = begin;
             End = end;
@@ -140,7 +145,9 @@ namespace NiVE3.Shape
         public override Vector4 GetColor(float x, float y)
         {
             var pos = Vector2.Distance(new Vector2(x, y), Begin) / Length;
-            return ColorGradient.GetrColor(pos, UseOkLabInterpolation);
+            var color = ColorGradient.GetrColor(pos, UseOkLabInterpolation);
+            color.W *= Opacity;
+            return color;
         }
 
         public override void Transform(Matrix3x3 matrix)

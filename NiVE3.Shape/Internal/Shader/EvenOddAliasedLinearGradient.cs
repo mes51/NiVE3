@@ -36,7 +36,7 @@ namespace NiVE3.Shape.Internal.Shader
             {
                 var pos = py * imageWidth + px;
                 var gradientPos = CalcGradientPosition(new Float2(px + offsetX, py + offsetY));
-                image[pos] = BlendMethods.Process(blendMode, image[pos], new Float4(CalcColor(gradientPos), CalcOpacity(gradientPos)));
+                image[pos] = BlendMethods.Process(blendMode, image[pos], new Float4(CalcColor(gradientPos), CalcOpacity(gradientPos) * brushState.Opacity));
             }
         }
 
