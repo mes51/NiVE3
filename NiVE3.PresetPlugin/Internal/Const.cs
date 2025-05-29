@@ -19,9 +19,13 @@ namespace NiVE3.PresetPlugin.Internal
 
         public const double DefaultCameraFov = 0.360000466176267;// Math.Tan(39.5978 * 0.5 * (Math.PI / 180.0))
 
-        public static readonly Vector256<double> WithoutWMask256 = Vector256.Create(0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0).AsDouble();
+        public static readonly Vector256<double> WithoutWMask256 = Vector256.Create(0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0UL).AsDouble();
 
-        public static readonly Vector128<float> WithoutWMask128 = Vector128.Create(0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0).AsSingle();
+        public static readonly Vector256<double> WMask256 = Vector256.Create(0UL, 0UL, 0UL, 0xFFFFFFFFFFFFFFFFUL).AsDouble();
+
+        public static readonly Vector128<float> WithoutWMask128 = Vector128.Create(0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0U).AsSingle();
+
+        public static readonly Vector128<float> WMask128 = Vector128.Create(0U, 0U, 0U, 0xFFFFFFFFU).AsSingle();
 
         public static readonly Vector4 ConvertToGrayScale = new Vector4(0.114478F, 0.586611F, 0.298912F, 0.0F);
 
