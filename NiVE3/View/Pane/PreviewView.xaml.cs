@@ -130,6 +130,36 @@ namespace NiVE3.View.Pane
 
         public static readonly DependencyProperty PreviewAreaImageScaleYProperty = PreviewAreaImageScaleYPropertyKey.DependencyProperty;
 
+        private static readonly DependencyPropertyKey PointedPixelColorBrushPropertyKey = DependencyProperty.RegisterReadOnly(
+            nameof(PointedPixelColorBrush),
+            typeof(Brush),
+            typeof(PreviewView),
+            new FrameworkPropertyMetadata(Brushes.Transparent, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        public static readonly DependencyProperty PointedPixelColorBrushProperty = PointedPixelColorBrushPropertyKey.DependencyProperty;
+
+        private static readonly DependencyPropertyKey PointedPixelInfoTextPropertyKey = DependencyProperty.RegisterReadOnly(
+            nameof(PointedPixelInfoText),
+            typeof(string),
+            typeof(PreviewView),
+            new FrameworkPropertyMetadata("", FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        public static readonly DependencyProperty PointedPixelInfoTextProperty = PointedPixelInfoTextPropertyKey.DependencyProperty;
+
+        public string PointedPixelInfoText
+        {
+            get { return (string)GetValue(PointedPixelInfoTextProperty); }
+            private set { SetValue(PointedPixelInfoTextPropertyKey, value); }
+        }
+
+        public Brush PointedPixelColorBrush
+        {
+            get { return (Brush)GetValue(PointedPixelColorBrushProperty); }
+            private set { SetValue(PointedPixelColorBrushPropertyKey, value); }
+        }
+
         public double PreviewAreaImageScaleY
         {
             get { return (double)GetValue(PreviewAreaImageScaleYProperty); }
@@ -343,32 +373,57 @@ namespace NiVE3.View.Pane
 
         private void PreviewCanvas_MouseMove(object sender, MouseEventArgs e)
         {
+            var viewModel = ViewModel;
+            if (viewModel == null)
+            {
+                return;
+            }
+
+            var mousePos = e.GetPosition(PreviewCanvas);
             if (IsMouseDown)
             {
-                var viewModel = ViewModel;
-                var newPoint = e.GetPosition(PreviewCanvas);
                 switch (UsingToolType)
                 {
                     case ToolType.Hand:
-                        var diff = newPoint - ClickPoint + PrevPoint;
+                        var diff = mousePos - ClickPoint + PrevPoint;
                         MovePreviewArea(diff.X, diff.Y, true);
                         break;
                     default:
                         var dpi = VisualTreeHelper.GetDpi(this);
-                        var compositionPoint = new Vector2d(viewModel?.ScreenX ?? 0.0, viewModel?.ScreenY ?? 0.0);
+                        var compositionPos = new Vector2d(viewModel.ScreenX, viewModel.ScreenY);
                         var dpiScale = new Vector2d(dpi.DpiScaleX, dpi.DpiScaleY);
-                        var beginPos = ((Vector2d)ClickPoint - compositionPoint) * dpiScale;
-                        if (!IsMovedByTool && (newPoint - ClickPoint).Length > ToolMoveThreshold)
+                        var beginPos = ((Vector2d)ClickPoint - compositionPos) * dpiScale;
+                        if (!IsMovedByTool && (mousePos - ClickPoint).Length > ToolMoveThreshold)
                         {
-                            viewModel?.BeginUseToolCommand.Execute(beginPos);
+                            viewModel.BeginUseToolCommand.Execute(beginPos);
                             IsMovedByTool = true;
                         }
                         if (IsMovedByTool)
                         {
-                            var nextPoint = ((Vector2d)newPoint - compositionPoint) * dpiScale;
-                            viewModel?.MoveLayersByToolCommand?.Execute(Tuple.Create(nextPoint, false));
+                            var nextPoint = ((Vector2d)mousePos - compositionPos) * dpiScale;
+                            viewModel.MoveLayersByToolCommand?.Execute(Tuple.Create(nextPoint, false));
                         }
                         break;
+                }
+            }
+            else
+            {
+                var dpi = VisualTreeHelper.GetDpi(this);
+                var compositionPos = new Vector2d(viewModel.ScreenX, viewModel.ScreenY);
+                var dpiScale = new Vector2d(dpi.DpiScaleX, dpi.DpiScaleY);
+                var pixelPos = (((Vector2d)mousePos - compositionPos) * dpiScale) / (viewModel.Scale * 0.01);
+                var intX = (int)pixelPos.X;
+                var intY = (int)pixelPos.Y;
+                if (pixelPos.X < 0.0 || pixelPos.X >= viewModel.Width || pixelPos.Y < 0.0 || pixelPos.Y >= viewModel.Height)
+                {
+                    PointedPixelColorBrush = Brushes.Transparent;
+                    PointedPixelInfoText = $"X = {intX}, Y = {intY}";
+                }
+                else
+                {
+                    var color = viewModel.GetPixel(intX, intY).ToColor();
+                    PointedPixelColorBrush = new SolidColorBrush(color);
+                    PointedPixelInfoText = $"R = {color.R}, G = {color.G}, B = {color.B}, A = {color.A}, X = {intX}, Y = {intY}";
                 }
             }
         }

@@ -39,6 +39,8 @@ using Prism.Dialogs;
 using NiVE3.ViewModel.Dialog;
 using NiVE3.View.Dialog;
 using NiVE3.Cache;
+using System.Numerics;
+using NiVE3.Shared.Extension;
 
 namespace NiVE3.ViewModel
 {
@@ -678,6 +680,7 @@ namespace NiVE3.ViewModel
             PropertyChanged += PreviewViewModel_PropertyChanged;
 
             ImageBuffer = new int[BufferImageSize.Width * BufferImageSize.Height];
+            ImageBuffer.AsSpan().Fill(new Vector4(1.0F, 1.0F, 1.0F, 0.0F).ToIntColor());
             FrameUpdateDebouncer = new Debouncer(1);
             FrameUpdateDebouncer.Tick += (_, _) =>
             {
@@ -727,6 +730,18 @@ namespace NiVE3.ViewModel
                     FrameUpdateDebouncer.ResetAndStart();
                 }
             };
+        }
+
+        public Vector4 GetPixel(int x, int y)
+        {
+            if (x < 0 || x > Width || y < 0 || y > Height)
+            {
+                return new Vector4(1.0F, 1.0F, 1.0F, 0.0F);
+            }
+            else
+            {
+                return ImageConversion.ToBGRA128(ImageBuffer[y * Width + x]);
+            }
         }
 
         public void Unbind()
