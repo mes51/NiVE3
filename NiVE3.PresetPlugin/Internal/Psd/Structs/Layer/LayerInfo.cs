@@ -44,7 +44,7 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Structs.Layer
             var channelImageData = new ChannelImageData[layerRecordCount];
             for (var i = 0; i < channelImageData.Length; i++)
             {
-                channelImageData[i] = ChannelImageData.Parse(reader, layerRecords[i].Channels, header);
+                channelImageData[i] = ChannelImageData.Parse(reader, layerRecords[i], header);
             }
 
             reader.Position = end;

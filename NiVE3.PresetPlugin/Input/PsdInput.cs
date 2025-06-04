@@ -57,7 +57,11 @@ namespace NiVE3.PresetPlugin.Input
                 return false;
             }
 
-            var rawCompositedImage = PsdFile.ReadImageData();
+            var rawCompositedImage = PsdFile.DebugReadFirstLayer();
+            if (rawCompositedImage.Length < PsdFile.Width * PsdFile.Height)
+            {
+                rawCompositedImage = PsdFile.ReadImageData();
+            }
             if (rawCompositedImage.Length < PsdFile.Width * PsdFile.Height)
             {
                 return false;

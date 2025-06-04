@@ -17,7 +17,7 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Structs.Layer
 
         public BlendMode BlendMode { get; }
 
-        public byte Opacity {  get; }
+        public float Opacity {  get; }
 
         public byte Clipping { get; }
 
@@ -29,12 +29,14 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Structs.Layer
 
         public AdditionalLayerInfo[] AdditionalLayerInfos { get; }
 
+        public bool IsVisible => (Flags & 0b0010) != 0;
+
         private LayerRecord(RectTLBR bounds, ChannelInformation[] channels, BlendMode blendMode, byte opacity, byte clipping, byte flags, LayerMaskData? layerMaskData, string layerName, AdditionalLayerInfo[] additionalLayerInfos)
         {
             Bounds = bounds;
             Channels = channels;
             BlendMode = blendMode;
-            Opacity = opacity;
+            Opacity = opacity / 255.0F;
             Clipping = clipping;
             Flags = flags;
             LayerMaskData = layerMaskData;

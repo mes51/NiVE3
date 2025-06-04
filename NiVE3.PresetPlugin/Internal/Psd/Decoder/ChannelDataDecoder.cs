@@ -8,20 +8,29 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using NiVE3.PresetPlugin.Internal.IO;
+using NiVE3.PresetPlugin.Internal.Psd.Structs;
 using SharpGen.Runtime;
 
 namespace NiVE3.PresetPlugin.Internal.Psd.Decoder
 {
     static class ChannelDataDecoder
     {
-        public static IChannelDataStream[] Raw(RandomAccessFileReader reader, int width, int height, int channelDepth, int channelCount, long begin)
+        public static IChannelDataStream[] Empty(int channelDepth, int channelCount)
         {
+            return [..Enumerable.Range(0, channelCount).Select(_ => new EmptyChannelDataStream(channelDepth))];
+        }
+
+        public static IChannelDataStream[] Raw(RandomAccessFileReader reader, in RectTLBR rect, int channelDepth, int channelCount, long begin)
+        {
+            var width = rect.Width;
             var result = new IChannelDataStream[channelCount];
             var alignedLineDataLength = channelDepth switch
             {
                 1 => (int)MathF.Ceiling(width / 8.0F),
                 _ => channelDepth / 8 * width,
             };
+
+            var height = rect.Height;
             var channelLength = height * alignedLineDataLength;
             for (var i = 0; i < result.Length; i++)
             {
@@ -31,10 +40,11 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Decoder
             return result;
         }
 
-        public static IChannelDataStream[] Rle(RandomAccessFileReader reader, int width, int height, int channelDepth, int channelCount, long begin, bool isPsb)
+        public static IChannelDataStream[] Rle(RandomAccessFileReader reader, in RectTLBR rect, int channelDepth, int channelCount, long begin, bool isPsb)
         {
             var byteCounts = new int[channelCount][];
             reader.Position = begin;
+            var height = rect.Height;
             for (var i = 0; i < byteCounts.Length; i++)
             {
                 var byteCount = new int[height];
@@ -61,7 +71,7 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Decoder
             var currentBegin = reader.Position;
             for (var i = 0; i < result.Length; i++)
             {
-                result[i] = new RleChannelDataStream(reader, width, height, channelDepth, currentBegin, byteCounts[i]);
+                result[i] = new RleChannelDataStream(reader, rect.Width, height, channelDepth, currentBegin, byteCounts[i]);
                 currentBegin += byteCounts[i].Sum();
             }
 
@@ -74,6 +84,34 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Decoder
         float ReadChannel();
 
         byte[] ReadBytes();
+    }
+
+    file class EmptyChannelDataStream : IChannelDataStream
+    {
+        int ChannelDepth { get; }
+
+        public EmptyChannelDataStream(int channelDepth)
+        {
+            ChannelDepth = channelDepth;
+        }
+
+        public byte[] ReadBytes()
+        {
+            switch (ChannelDepth)
+            {
+                case 16:
+                    return [0, 0];
+                case 32:
+                    return [0, 0, 0, 0];
+                default:
+                    return [0];
+            }
+        }
+
+        public float ReadChannel()
+        {
+            return 0.0F;
+        }
     }
 
     file class RawChannelDataStream : IChannelDataStream

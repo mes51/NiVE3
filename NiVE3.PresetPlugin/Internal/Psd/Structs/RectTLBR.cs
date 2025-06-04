@@ -19,5 +19,17 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Structs
         public readonly int Bottom;
 
         public readonly int Right;
+
+        public int Width => Right - Left;
+
+        public int Height => Bottom - Top;
+
+        public RectTLBR(int top, int left, int bottom, int right)
+        {
+            Top = top;
+            Left = left;
+            Bottom = bottom;
+            Right = right;
+        }
     }
 }

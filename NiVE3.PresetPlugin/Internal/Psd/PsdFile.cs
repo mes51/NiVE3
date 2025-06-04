@@ -60,6 +60,14 @@ namespace NiVE3.PresetPlugin.Internal.Psd
             return ImageData.ReadImage(reader, IndexedColorTable, transparencyIndex);
         }
 
+        public Vector4[] DebugReadFirstLayer()
+        {
+            using var reader = new RandomAccessFileReader(FilePath, true, true);
+
+            var transparencyIndex = (short)(ImageResources.FirstOrDefault(i => i.ResourceId == ImageResourceType.TransparencyIndex)?.ParseData(reader) ?? (short)-1);
+            return LayerAndMaskInformation.LayerInfo.ChannelData.FirstOrDefault(l => !l.IsEmpty)?.ReadImage(reader, IndexedColorTable, transparencyIndex) ?? [];
+        }
+
         public static PsdFile Parse(string filePath)
         {
             using var reader = new RandomAccessFileReader(filePath, true, true);

@@ -26,7 +26,7 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Structs
 
         public Vector4[] ReadImage(RandomAccessFileReader reader, Vector4[] indexedColorTable, short transparencyIndex)
         {
-            return ImageDecoder.DecodeImage(reader, Header, indexedColorTable, transparencyIndex, [CompressionMethod], [DataRange.begin]) ?? [];
+            return ImageDecoder.DecodeImage(reader, Header, new RectTLBR(0, 0, Header.ImageHeight, Header.ImageWidth), indexedColorTable, transparencyIndex, Header.ColorChannels, [CompressionMethod], [DataRange.begin]) ?? [];
         }
 
         public static ImageData Parse(RandomAccessFileReader reader, in PsdFileHeader header)
