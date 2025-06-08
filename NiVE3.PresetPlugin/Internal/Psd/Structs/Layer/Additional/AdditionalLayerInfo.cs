@@ -20,10 +20,13 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Structs.Layer.Additional
 
         public object? ParsedData { get; }
 
+        public AdditionalLayerInfoType Type { get; }
+
         private AdditionalLayerInfo(string key, object? parsedData)
         {
             Key = key;
             ParsedData = parsedData;
+            Type = Enum.TryParse<AdditionalLayerInfoType>(Key, out var type) ? type : AdditionalLayerInfoType.Unsupported;
         }
 
         public static AdditionalLayerInfo? Parse(RandomAccessFileReader reader, bool isPsb)
@@ -55,6 +58,8 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Structs.Layer.Additional
                 "luni" => reader.ReadUnicodeString(),
                 "lyid" => reader.ReadInt32(),
                 "lsct" => SectionDividerSetting.Parse(reader, length),
+                "lsdk" => SectionDividerSetting.Parse(reader, length),
+                "iOpa" => reader.ReadByte() / 255.0F,
                 _ => (object?)null,
             };
 
@@ -66,5 +71,46 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Structs.Layer.Additional
         {
             return isPsb && (key == "LMsk" || key == "Lr16" || key == "Lr32" || key == "Layr" || key == "Mt16" || key == "Mt32" || key == "Mtrn" || key == "Alph" || key == "FMsk" || key == "lnk2" || key == "FEid" || key == "FXid" || key == "PxSD");
         }
+    }
+
+    enum AdditionalLayerInfoType
+    {
+        /// <summary>
+        /// Layer Name (Unicode)
+        /// </summary>
+        luni,
+        /// <summary>
+        /// Layer ID
+        /// </summary>
+        lyid,
+        /// <summary>
+        /// Section Divider Setting
+        /// </summary>
+        lsct,
+        /// <summary>
+        /// Section Divider Setting (undocumented)
+        /// </summary>
+        /// <see cref="https://github.com/psd-tools/psd-tools/issues/16"/>
+        lsdk,
+        LMsk,
+        Lr16,
+        Lr32,
+        Layr,
+        Mt16,
+        Mt32,
+        Mtrn,
+        Alph,
+        FMsk,
+        lnk2,
+        FEid,
+        FXid,
+        PxSD,
+        /// <summary>
+        /// Fill Opacity (undocumented)
+        /// </summary>
+        /// <see cref="https://qiita.com/yunyundetective/items/d29098ab3dbf8facee03"/>
+        iOpa,
+
+        Unsupported
     }
 }

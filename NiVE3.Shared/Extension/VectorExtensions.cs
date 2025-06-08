@@ -116,7 +116,7 @@ namespace NiVE3.Shared.Extension
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector128<float> Not(this in Vector128<float> v)
         {
-            return Sse2.Xor(v.AsInt32(), Sse2.CompareEqual(v.AsInt32(), v.AsInt32())).AsSingle();
+            return Vector128.Xor(v, Vector128<float>.AllBitsSet);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

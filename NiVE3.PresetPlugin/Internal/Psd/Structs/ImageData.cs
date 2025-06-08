@@ -1,4 +1,5 @@
-﻿using NiVE3.PresetPlugin.Internal.IO;
+﻿using NiVE3.Image;
+using NiVE3.PresetPlugin.Internal.IO;
 using NiVE3.PresetPlugin.Internal.Psd.Decoder;
 using System;
 using System.Collections.Generic;
@@ -24,9 +25,9 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Structs
             Header = header;
         }
 
-        public Vector4[] ReadImage(RandomAccessFileReader reader, Vector4[] indexedColorTable, short transparencyIndex)
+        public NManagedImage? ReadImage(RandomAccessFileReader reader, Vector4[] indexedColorTable, short transparencyIndex)
         {
-            return ImageDecoder.DecodeImage(reader, Header, new RectTLBR(0, 0, Header.ImageHeight, Header.ImageWidth), indexedColorTable, transparencyIndex, Header.ColorChannels, [CompressionMethod], [DataRange.begin]) ?? [];
+            return ImageDecoder.DecodeImage(reader, Header, new RectTLBR(0, 0, Header.ImageHeight, Header.ImageWidth), indexedColorTable, transparencyIndex, Header.ColorChannels, [CompressionMethod], [DataRange.begin]);
         }
 
         public static ImageData Parse(RandomAccessFileReader reader, in PsdFileHeader header)

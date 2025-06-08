@@ -1,4 +1,5 @@
-﻿using NiVE3.PresetPlugin.Internal.IO;
+﻿using NiVE3.Image;
+using NiVE3.PresetPlugin.Internal.IO;
 using NiVE3.PresetPlugin.Internal.Psd.Decoder;
 using NiVE3.PresetPlugin.Internal.Psd.Enums;
 using NiVE3.Shared.Extension;
@@ -13,9 +14,9 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Structs.Layer
 {
     class ChannelImageData
     {
-        static readonly int[] GrayScaleChannelIds = new int[] { 0, -1 };
+        static readonly int[] GrayScaleChannelIds = [0, -1];
 
-        static readonly int[] RgbChannelIds = new int[] { 0, 1, 2, -1 };
+        static readonly int[] RgbChannelIds = [0, 1, 2, -1];
 
         public int DataCount => CompressionMethods.Length;
 
@@ -40,18 +41,18 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Structs.Layer
             ChannelInformations = channelInformations;
         }
 
-        public Vector4[] ReadImage(RandomAccessFileReader reader, Vector4[] indexedColorTable, short transparencyIndex)
+        public NManagedImage? ReadImage(RandomAccessFileReader reader, Vector4[] indexedColorTable, short transparencyIndex)
         {
             var targetChannelIds = Header.ColorMode switch
             {
                 ColorMode.GrayScale => GrayScaleChannelIds,
                 ColorMode.RGB => RgbChannelIds,
-                _ => []
+                _ => null
             };
 
-            if (targetChannelIds.Length < 1)
+            if (targetChannelIds == null)
             {
-                return [];
+                return null;
             }
 
             var channelIndices = targetChannelIds.Take(Header.ColorChannels).Select(id => ChannelInformations.FindIndex(ci => ci.Id == id)).ToArray();
@@ -59,7 +60,7 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Structs.Layer
             var compressionMethods = channelIndices.Select(i => i > -1 && DataRanges[i].length > 0 ? CompressionMethods[i] : int.MinValue).ToArray();
             var imageDataBegins = channelIndices.Select(i => i > -1 ? DataRanges[i].begin : 0L).ToArray();
 
-            return ImageDecoder.DecodeImage(reader, Header, Bounds, indexedColorTable, transparencyIndex, 1, compressionMethods, imageDataBegins) ?? [];
+            return ImageDecoder.DecodeImage(reader, Header, Bounds, indexedColorTable, transparencyIndex, 1, compressionMethods, imageDataBegins);
         }
 
         public static ChannelImageData Parse(RandomAccessFileReader reader, LayerRecord layerRecord, in PsdFileHeader header)

@@ -1,4 +1,5 @@
-﻿using NiVE3.PresetPlugin.Internal.IO;
+﻿using NiVE3.Image;
+using NiVE3.PresetPlugin.Internal.IO;
 using NiVE3.PresetPlugin.Internal.Psd.Enums;
 using NiVE3.PresetPlugin.Internal.Psd.Extensions;
 using NiVE3.PresetPlugin.Internal.Psd.Structs;
@@ -52,7 +53,7 @@ namespace NiVE3.PresetPlugin.Internal.Psd
             }
         }
 
-        public Vector4[] ReadImageData()
+        public NManagedImage? ReadImageData()
         {
             using var reader = new RandomAccessFileReader(FilePath, true, true);
 
@@ -60,12 +61,15 @@ namespace NiVE3.PresetPlugin.Internal.Psd
             return ImageData.ReadImage(reader, IndexedColorTable, transparencyIndex);
         }
 
-        public Vector4[] DebugReadFirstLayer()
+        public NManagedImage? ReadCompositedImage()
         {
-            using var reader = new RandomAccessFileReader(FilePath, true, true);
+            if (LayerAndMaskInformation.LayerInfo.LayerRecords.Length < 1 || LayerAndMaskInformation.LayerInfo.ChannelData.All(l => l.IsEmpty))
+            {
+                return null;
+            }
 
-            var transparencyIndex = (short)(ImageResources.FirstOrDefault(i => i.ResourceId == ImageResourceType.TransparencyIndex)?.ParseData(reader) ?? (short)-1);
-            return LayerAndMaskInformation.LayerInfo.ChannelData.FirstOrDefault(l => !l.IsEmpty)?.ReadImage(reader, IndexedColorTable, transparencyIndex) ?? [];
+            using var reader = new RandomAccessFileReader(FilePath, true, true);
+            return LayerAndMaskInformation.LayerInfo.ReadCompositedImage(reader, Header);
         }
 
         public static PsdFile Parse(string filePath)

@@ -29,7 +29,11 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Structs.Layer
 
         public AdditionalLayerInfo[] AdditionalLayerInfos { get; }
 
-        public bool IsVisible => (Flags & 0b0010) != 0;
+        public bool IsVisible => (Flags & 0b0010) == 0;
+
+        public bool IsDisplayable => IsVisible && TotalOpacity > 0.0F;
+
+        public float TotalOpacity { get; }
 
         private LayerRecord(RectTLBR bounds, ChannelInformation[] channels, BlendMode blendMode, byte opacity, byte clipping, byte flags, LayerMaskData? layerMaskData, string layerName, AdditionalLayerInfo[] additionalLayerInfos)
         {
@@ -42,6 +46,13 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Structs.Layer
             LayerMaskData = layerMaskData;
             LayerName = layerName;
             AdditionalLayerInfos = additionalLayerInfos;
+
+            TotalOpacity = opacity / 255.0F * (float)(additionalLayerInfos.FirstOrDefault(ai => ai.Type == AdditionalLayerInfoType.iOpa)?.ParsedData ?? 1.0F);
+        }
+
+        public SectionDividerSetting? GetSectionDividerSetting()
+        {
+            return AdditionalLayerInfos.FirstOrDefault(ai => ai.Type == AdditionalLayerInfoType.lsct || ai.Type == AdditionalLayerInfoType.lsdk)?.ParsedData as SectionDividerSetting;
         }
 
         public static LayerRecord Parse(RandomAccessFileReader reader, bool isPsb)

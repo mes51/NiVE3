@@ -4,6 +4,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using NiVE3.Image;
 using NiVE3.PresetPlugin.Internal.IO;
 using NiVE3.PresetPlugin.Internal.Psd.Enums;
 using NiVE3.PresetPlugin.Internal.Psd.Structs;
@@ -15,7 +16,7 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Decoder
     {
         const float InvertedGamma = 1.0F / 2.2F;
 
-        public static Vector4[]? DecodeImage(RandomAccessFileReader reader, in PsdFileHeader header, in RectTLBR rect, Vector4[] indexedColorTable, short transparencyIndex, int needColorChannelPerItem, int[] compressionMethods, long[] imageDataBegins)
+        public static NManagedImage? DecodeImage(RandomAccessFileReader reader, in PsdFileHeader header, in RectTLBR rect, Vector4[] indexedColorTable, short transparencyIndex, int needColorChannelPerItem, int[] compressionMethods, long[] imageDataBegins)
         {
             switch (header.ColorMode)
             {
@@ -30,7 +31,7 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Decoder
             }
         }
 
-        static Vector4[]? DecodeGrayScale(RandomAccessFileReader reader, PsdFileHeader header, RectTLBR rect, int needColorChannels, int[] compressionMethods, long[] imageDataBegins)
+        static NManagedImage? DecodeGrayScale(RandomAccessFileReader reader, PsdFileHeader header, RectTLBR rect, int needColorChannels, int[] compressionMethods, long[] imageDataBegins)
         {
             var streams = compressionMethods.Zip(imageDataBegins, (c, b) => CreateStream(reader, header, rect, needColorChannels, c, b)).SelectMany(_ => _).ToArray();
             if (streams.Length < 1)
@@ -39,7 +40,8 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Decoder
             }
 
             var width = header.ImageWidth;
-            var result = new Vector4[width * header.ImageHeight];
+            var result = new NManagedImage(width, header.ImageHeight);
+            var resultData = result.GetDataSpan();
             if (header.ColorDepth >= 32)
             {
                 switch (streams.Length)
@@ -52,7 +54,7 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Decoder
                             {
                                 var g = MathF.Pow(streams[0].ReadChannel(), InvertedGamma);
 
-                                result[pos] = new Vector4(g, g, g, 1.0F);
+                                resultData[pos] = new Vector4(g, g, g, 1.0F);
                             }
                         }
                         break;
@@ -65,7 +67,7 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Decoder
                                 var g = MathF.Pow(streams[0].ReadChannel(), InvertedGamma);
                                 var a = streams[1].ReadChannel();
 
-                                result[pos] = new Vector4(g, g, g, a);
+                                resultData[pos] = new Vector4(g, g, g, a);
                             }
                         }
                         break;
@@ -83,7 +85,7 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Decoder
                             {
                                 var g = streams[0].ReadChannel();
 
-                                result[pos] = new Vector4(g, g, g, 1.0F);
+                                resultData[pos] = new Vector4(g, g, g, 1.0F);
                             }
                         }
                         break;
@@ -96,7 +98,7 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Decoder
                                 var g = streams[0].ReadChannel();
                                 var a = streams[1].ReadChannel();
 
-                                result[pos] = new Vector4(g, g, g, a);
+                                resultData[pos] = new Vector4(g, g, g, a);
                             }
                         }
                         break;
@@ -106,7 +108,7 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Decoder
             return result;
         }
 
-        static Vector4[]? DecodeIndexed(RandomAccessFileReader reader, PsdFileHeader header, RectTLBR rect, Vector4[] indexedColorTable, short transparencyIndex, int[] compressionMethods, long[] imageDataBegins)
+        static NManagedImage? DecodeIndexed(RandomAccessFileReader reader, PsdFileHeader header, RectTLBR rect, Vector4[] indexedColorTable, short transparencyIndex, int[] compressionMethods, long[] imageDataBegins)
         {
             var stream = compressionMethods.Zip(imageDataBegins, (c, b) => CreateStream(reader, header, rect, 1, c, b)).SelectMany(_ => _).ToArray().FirstOrDefault();
             if (stream == null)
@@ -115,8 +117,8 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Decoder
             }
 
             var width = header.ImageWidth;
-            var result = new Vector4[width * header.ImageHeight];
-
+            var result = new NManagedImage(width, header.ImageHeight);
+            var resultData = result.GetDataSpan();
             for (var y = rect.Top; y < rect.Bottom; y++)
             {
                 var pos = y * width + rect.Left;
@@ -125,11 +127,11 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Decoder
                     var index = stream.ReadBytes()[0];
                     if (index == transparencyIndex)
                     {
-                        result[pos] = Const.EmptyPixel;
+                        resultData[pos] = Const.EmptyPixel;
                     }
                     else
                     {
-                        result[pos] = indexedColorTable[index];
+                        resultData[pos] = indexedColorTable[index];
                     }
                 }
             }
@@ -137,7 +139,7 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Decoder
             return result;
         }
 
-        static Vector4[]? DecodeRGBA(RandomAccessFileReader reader, PsdFileHeader header, RectTLBR rect, int needColorChannels, int[] compressionMethods, long[] imageDataBegins)
+        static NManagedImage? DecodeRGBA(RandomAccessFileReader reader, PsdFileHeader header, RectTLBR rect, int needColorChannels, int[] compressionMethods, long[] imageDataBegins)
         {
             var streams = compressionMethods.Zip(imageDataBegins, (c, b) => CreateStream(reader, header, rect, needColorChannels, c, b)).SelectMany(_ => _).ToArray();
             if (streams.Length < 1)
@@ -146,7 +148,8 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Decoder
             }
 
             var width = header.ImageWidth;
-            var result = new Vector4[header.ImageWidth * header.ImageHeight];
+            var result = new NManagedImage(width, header.ImageHeight);
+            var resultData = result.GetDataSpan();
             if (header.ColorDepth >= 32)
             {
                 switch (streams.Length)
@@ -159,7 +162,7 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Decoder
                             {
                                 var r = MathF.Pow(streams[0].ReadChannel(), InvertedGamma);
 
-                                result[pos] = new Vector4(0.0F, 0.0F, r, 1.0F);
+                                resultData[pos] = new Vector4(0.0F, 0.0F, r, 1.0F);
                             }
                         }
                         break;
@@ -172,7 +175,7 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Decoder
                                 var r = MathF.Pow(streams[0].ReadChannel(), InvertedGamma);
                                 var g = MathF.Pow(streams[1].ReadChannel(), InvertedGamma);
 
-                                result[pos] = new Vector4(0.0F, g, r, 1.0F);
+                                resultData[pos] = new Vector4(0.0F, g, r, 1.0F);
                             }
                         }
                         break;
@@ -186,7 +189,7 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Decoder
                                 var g = MathF.Pow(streams[1].ReadChannel(), InvertedGamma);
                                 var b = MathF.Pow(streams[2].ReadChannel(), InvertedGamma);
 
-                                result[pos] = new Vector4(b, g, r, 1.0F);
+                                resultData[pos] = new Vector4(b, g, r, 1.0F);
                             }
                         }
                         break;
@@ -201,7 +204,7 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Decoder
                                 var b = MathF.Pow(streams[2].ReadChannel(), InvertedGamma);
                                 var a = streams[3].ReadChannel();
 
-                                result[pos] = new Vector4(b, g, r, a);
+                                resultData[pos] = new Vector4(b, g, r, a);
                             }
                         }
                         break;
@@ -219,7 +222,7 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Decoder
                             {
                                 var r = streams[0].ReadChannel();
 
-                                result[pos] = new Vector4(0.0F, 0.0F, r, 1.0F);
+                                resultData[pos] = new Vector4(0.0F, 0.0F, r, 1.0F);
                             }
                         }
                         break;
@@ -232,7 +235,7 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Decoder
                                 var r = streams[0].ReadChannel();
                                 var g = streams[1].ReadChannel();
 
-                                result[pos] = new Vector4(0.0F, g, r, 1.0F);
+                                resultData[pos] = new Vector4(0.0F, g, r, 1.0F);
                             }
                         }
                         break;
@@ -246,7 +249,7 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Decoder
                                 var g = streams[1].ReadChannel();
                                 var b = streams[2].ReadChannel();
 
-                                result[pos] = new Vector4(b, g, r, 1.0F);
+                                resultData[pos] = new Vector4(b, g, r, 1.0F);
                             }
                         }
                         break;
@@ -261,7 +264,7 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Decoder
                                 var b = streams[2].ReadChannel();
                                 var a = streams[3].ReadChannel();
 
-                                result[pos] = new Vector4(b, g, r, a);
+                                resultData[pos] = new Vector4(b, g, r, a);
                             }
                         }
                         break;

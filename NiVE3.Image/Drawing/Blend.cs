@@ -74,8 +74,7 @@ namespace NiVE3.Image.Drawing
         static Vector4 Normal(in Vector4 back, in Vector4 front)
         {
             var ra = back.W + front.W - back.W * front.W;
-            var invRa = 1.0F / ra;
-            var result = (front * front.W + (1.0F - front.W) * back * back.W) * invRa;
+            var result = (front * front.W + (1.0F - front.W) * back * back.W) / ra;
             result.W = ra;
 
             return result;
@@ -86,8 +85,7 @@ namespace NiVE3.Image.Drawing
         {
             var fba = front.W * back.W;
             var ra = back.W + front.W - fba;
-            var invRa = 1.0F / ra;
-            var result = (fba * convertedFront + (front.W - fba) * front + (back.W - fba) * back) * invRa;
+            var result = (fba * convertedFront + (front.W - fba) * front + (back.W - fba) * back) / ra;
             result.W = ra;
 
             return result;

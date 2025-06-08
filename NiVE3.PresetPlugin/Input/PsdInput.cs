@@ -57,18 +57,11 @@ namespace NiVE3.PresetPlugin.Input
                 return false;
             }
 
-            var rawCompositedImage = PsdFile.DebugReadFirstLayer();
-            if (rawCompositedImage.Length < PsdFile.Width * PsdFile.Height)
-            {
-                rawCompositedImage = PsdFile.ReadImageData();
-            }
-            if (rawCompositedImage.Length < PsdFile.Width * PsdFile.Height)
+            CompositedImage = PsdFile.ReadCompositedImage() ?? PsdFile.ReadImageData();
+            if (CompositedImage == null)
             {
                 return false;
             }
-
-            CompositedImage = new NManagedImage(PsdFile.Width, PsdFile.Height);
-            rawCompositedImage.AsSpan().CopyTo(CompositedImage.GetDataSpan());
 
             return true;
         }
