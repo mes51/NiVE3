@@ -31,7 +31,9 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Structs.Layer
 
         public bool IsVisible => (Flags & 0b0010) == 0;
 
-        public bool IsDisplayable => IsVisible && TotalOpacity > 0.0F;
+        public bool IsDisplayable => IsVisible && !IsClippingLayer && TotalOpacity > 0.0F;
+
+        public bool IsClippingLayer => Clipping != 0;
 
         public float TotalOpacity { get; }
 
