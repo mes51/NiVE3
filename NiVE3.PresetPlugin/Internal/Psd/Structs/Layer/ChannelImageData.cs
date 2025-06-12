@@ -59,8 +59,9 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Structs.Layer
 
             var compressionMethods = channelIndices.Select(i => i > -1 && DataRanges[i].length > 0 ? CompressionMethods[i] : int.MinValue).ToArray();
             var imageDataBegins = channelIndices.Select(i => i > -1 ? DataRanges[i].begin : 0L).ToArray();
+            var imageDataLengths = channelIndices.Select(i => i > -1 ? DataRanges[i].length : 0L).ToArray();
 
-            return ImageDecoder.DecodeImage(reader, Header, Bounds, indexedColorTable, transparencyIndex, 1, compressionMethods, imageDataBegins);
+            return ImageDecoder.DecodeImage(reader, Header, Bounds, indexedColorTable, transparencyIndex, 1, compressionMethods, imageDataBegins, imageDataLengths);
         }
 
         public static ChannelImageData Parse(RandomAccessFileReader reader, LayerRecord layerRecord, in PsdFileHeader header)

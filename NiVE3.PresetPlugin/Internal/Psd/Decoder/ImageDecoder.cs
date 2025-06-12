@@ -8,7 +8,7 @@ using NiVE3.Image;
 using NiVE3.PresetPlugin.Internal.IO;
 using NiVE3.PresetPlugin.Internal.Psd.Enums;
 using NiVE3.PresetPlugin.Internal.Psd.Structs;
-using SharpGen.Runtime;
+using NiVE3.Shared.Extension;
 
 namespace NiVE3.PresetPlugin.Internal.Psd.Decoder
 {
@@ -16,24 +16,24 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Decoder
     {
         const float InvertedGamma = 1.0F / 2.2F;
 
-        public static NManagedImage? DecodeImage(RandomAccessFileReader reader, in PsdFileHeader header, in RectTLBR rect, Vector4[] indexedColorTable, short transparencyIndex, int needColorChannelPerItem, int[] compressionMethods, long[] imageDataBegins)
+        public static NManagedImage? DecodeImage(RandomAccessFileReader reader, in PsdFileHeader header, in RectTLBR rect, Vector4[] indexedColorTable, short transparencyIndex, int needColorChannelPerItem, int[] compressionMethods, long[] imageDataBegins, long[] imageDataLengths)
         {
             switch (header.ColorMode)
             {
                 case ColorMode.GrayScale:
-                    return DecodeGrayScale(reader, header, rect, needColorChannelPerItem, compressionMethods, imageDataBegins);
+                    return DecodeGrayScale(reader, header, rect, needColorChannelPerItem, compressionMethods, imageDataBegins, imageDataLengths);
                 case ColorMode.Indexed:
-                    return DecodeIndexed(reader, header, rect, indexedColorTable, transparencyIndex, compressionMethods, imageDataBegins);
+                    return DecodeIndexed(reader, header, rect, indexedColorTable, transparencyIndex, compressionMethods, imageDataBegins, imageDataLengths);
                 case ColorMode.RGB:
-                    return DecodeRGBA(reader, header, rect, needColorChannelPerItem, compressionMethods, imageDataBegins);
+                    return DecodeRGBA(reader, header, rect, needColorChannelPerItem, compressionMethods, imageDataBegins, imageDataLengths);
                 default: // unsupported color mode
                     return null;
             }
         }
 
-        static NManagedImage? DecodeGrayScale(RandomAccessFileReader reader, PsdFileHeader header, RectTLBR rect, int needColorChannels, int[] compressionMethods, long[] imageDataBegins)
+        static NManagedImage? DecodeGrayScale(RandomAccessFileReader reader, PsdFileHeader header, RectTLBR rect, int needColorChannels, int[] compressionMethods, long[] imageDataBegins, long[] imageDataLengths)
         {
-            var streams = compressionMethods.Zip(imageDataBegins, (c, b) => CreateStream(reader, header, rect, needColorChannels, c, b)).SelectMany(_ => _).ToArray();
+            var streams = compressionMethods.Zip(imageDataBegins, imageDataLengths, (c, b, l) => CreateStream(reader, header, rect, needColorChannels, c, b, l)).SelectMany(_ => _).ToArray();
             if (streams.Length < 1)
             {
                 return null;
@@ -108,9 +108,9 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Decoder
             return result;
         }
 
-        static NManagedImage? DecodeIndexed(RandomAccessFileReader reader, PsdFileHeader header, RectTLBR rect, Vector4[] indexedColorTable, short transparencyIndex, int[] compressionMethods, long[] imageDataBegins)
+        static NManagedImage? DecodeIndexed(RandomAccessFileReader reader, PsdFileHeader header, RectTLBR rect, Vector4[] indexedColorTable, short transparencyIndex, int[] compressionMethods, long[] imageDataBegins, long[] imageDataLengths)
         {
-            var stream = compressionMethods.Zip(imageDataBegins, (c, b) => CreateStream(reader, header, rect, 1, c, b)).SelectMany(_ => _).ToArray().FirstOrDefault();
+            var stream = compressionMethods.Zip(imageDataBegins, imageDataLengths, (c, b, l) => CreateStream(reader, header, rect, 1, c, b, l)).SelectMany(_ => _).ToArray().FirstOrDefault();
             if (stream == null)
             {
                 return null;
@@ -139,9 +139,9 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Decoder
             return result;
         }
 
-        static NManagedImage? DecodeRGBA(RandomAccessFileReader reader, PsdFileHeader header, RectTLBR rect, int needColorChannels, int[] compressionMethods, long[] imageDataBegins)
+        static NManagedImage? DecodeRGBA(RandomAccessFileReader reader, PsdFileHeader header, RectTLBR rect, int needColorChannels, int[] compressionMethods, long[] imageDataBegins, long[] imageDataLengths)
         {
-            var streams = compressionMethods.Zip(imageDataBegins, (c, b) => CreateStream(reader, header, rect, needColorChannels, c, b)).SelectMany(_ => _).ToArray();
+            var streams = compressionMethods.Zip(imageDataBegins, imageDataLengths, (c, b, l) => CreateStream(reader, header, rect, needColorChannels, c, b, l)).SelectMany(_ => _).ToArray();
             if (streams.Length < 1)
             {
                 return null;
@@ -274,7 +274,7 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Decoder
             return result;
         }
 
-        static IChannelDataStream[] CreateStream(RandomAccessFileReader reader, in PsdFileHeader header, in RectTLBR rect, int needColorChannels, int compressionMethod, long begin)
+        static IChannelDataStream[] CreateStream(RandomAccessFileReader reader, in PsdFileHeader header, in RectTLBR rect, int needColorChannels, int compressionMethod, long begin, long length)
         {
             switch (compressionMethod)
             {
@@ -284,6 +284,10 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Decoder
                     return ChannelDataDecoder.Raw(reader, rect, header.ColorDepth, needColorChannels, begin);
                 case 1:
                     return ChannelDataDecoder.Rle(reader, rect, header.ColorDepth, needColorChannels, begin, header.IsPsb);
+                case 2:
+                    return ChannelDataDecoder.Zip(reader, rect, header.ColorDepth, needColorChannels, begin, length, false);
+                case 3:
+                    return ChannelDataDecoder.Zip(reader, rect, header.ColorDepth, needColorChannels, begin, length, true);
                 default:
                     return [];
             }

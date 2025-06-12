@@ -35,7 +35,7 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Structs.Layer
             var additionalLayerInfos = new List<AdditionalLayerInfo>();
             while (reader.Position < end)
             {
-                var info = AdditionalLayerInfo.Parse(reader, header.IsPsb);
+                var info = AdditionalLayerInfo.Parse(reader, header);
                 if (info != null)
                 {
                     additionalLayerInfos.Add(info);
@@ -45,6 +45,9 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Structs.Layer
                     break;
                 }
             }
+
+            // NOTE: AdditionalLayerInfoにLayerInfoがある場合はそっちを優先
+            layerInfo = (additionalLayerInfos.FirstOrDefault(ai => ai.Type == AdditionalLayerInfoType.Layr || ai.Type == AdditionalLayerInfoType.Lr16 || ai.Type == AdditionalLayerInfoType.Lr32)?.ParsedData as LayerInfo) ?? layerInfo;
 
             reader.Position = end;
 

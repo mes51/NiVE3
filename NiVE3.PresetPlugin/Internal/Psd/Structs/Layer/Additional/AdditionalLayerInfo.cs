@@ -29,7 +29,7 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Structs.Layer.Additional
             Type = Enum.TryParse<AdditionalLayerInfoType>(Key, out var type) ? type : AdditionalLayerInfoType.Unsupported;
         }
 
-        public static AdditionalLayerInfo? Parse(RandomAccessFileReader reader, bool isPsb)
+        public static AdditionalLayerInfo? Parse(RandomAccessFileReader reader, in PsdFileHeader header)
         {
             var signature = reader.ReadUInt32();
             if (signature != Signature8BIM && signature != Signature8B64)
@@ -39,8 +39,8 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Structs.Layer.Additional
             }
 
             var key = reader.ReadFixedSizeAsciiString(4);
-            var length = DataLengthIsLarge(isPsb, key) ? reader.ReadInt64() : reader.ReadInt32();
-            var data = ParseInfo(reader, isPsb, key, length);
+            var length = DataLengthIsLarge(header.IsPsb, key) ? reader.ReadInt64() : reader.ReadInt32();
+            var data = ParseInfo(reader, header, key, length);
 
             if (length % 4 != 0)
             {
@@ -50,9 +50,13 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Structs.Layer.Additional
             return new AdditionalLayerInfo(key, data);
         }
 
-        static object? ParseInfo(RandomAccessFileReader reader, bool isPsb, string key, long length)
+        static object? ParseInfo(RandomAccessFileReader reader, in PsdFileHeader header, string key, long length)
         {
             var end = reader.Position + length;
+            if (key == "Layr" || key == "Lr16" || key == "Lr32")
+            {
+                reader.Position -= header.IsPsb ? sizeof(long) : sizeof(int);
+            }
             var result = key switch
             {
                 "luni" => reader.ReadUnicodeString(),
@@ -60,6 +64,9 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Structs.Layer.Additional
                 "lsct" => SectionDividerSetting.Parse(reader, length),
                 "lsdk" => SectionDividerSetting.Parse(reader, length),
                 "iOpa" => reader.ReadByte() / 255.0F,
+                "Layr" => LayerInfo.Parse(reader, header),
+                "Lr16" => LayerInfo.Parse(reader, header),
+                "Lr32" => LayerInfo.Parse(reader, header),
                 _ => (object?)null,
             };
 

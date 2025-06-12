@@ -63,7 +63,7 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Structs.Layer
             var layerRecords = new LayerRecord[layerRecordCount];
             for (var i = 0; i < layerRecords.Length; i++)
             {
-                layerRecords[i] = LayerRecord.Parse(reader, header.IsPsb);
+                layerRecords[i] = LayerRecord.Parse(reader, header);
             }
 
             var channelImageData = new ChannelImageData[layerRecordCount];

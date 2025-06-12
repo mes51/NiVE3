@@ -57,7 +57,7 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Structs.Layer
             return AdditionalLayerInfos.FirstOrDefault(ai => ai.Type == AdditionalLayerInfoType.lsct || ai.Type == AdditionalLayerInfoType.lsdk)?.ParsedData as SectionDividerSetting;
         }
 
-        public static LayerRecord Parse(RandomAccessFileReader reader, bool isPsb)
+        public static LayerRecord Parse(RandomAccessFileReader reader, in PsdFileHeader header)
         {
             var bounds = reader.ReadStruct<RectTLBR>();
 
@@ -65,7 +65,7 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Structs.Layer
             var channels = new ChannelInformation[channelCount];
             for (var i = 0; i < channelCount; i++)
             {
-                channels[i] = ChannelInformation.Parse(reader, isPsb);
+                channels[i] = ChannelInformation.Parse(reader, header.IsPsb);
             }
 
             var blendMode = reader.ReadStruct<BlendMode>();
@@ -90,7 +90,7 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Structs.Layer
             var additionalLayerInfos = new List<AdditionalLayerInfo>();
             while (reader.Position < extraEnd)
             {
-                var info = AdditionalLayerInfo.Parse(reader, isPsb);
+                var info = AdditionalLayerInfo.Parse(reader, header);
                 if (info != null)
                 {
                     additionalLayerInfos.Add(info);
