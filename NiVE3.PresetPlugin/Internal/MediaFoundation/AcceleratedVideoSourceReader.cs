@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using Vortice.Direct3D;
@@ -92,7 +91,7 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
             }
         }
 
-        public override bool GetFrame(double time, Span<byte> dst)
+        public override bool GetFrame(double time, Span<byte> dest)
         {
             if (Transform == null || Sample == null)
             {
@@ -110,7 +109,7 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
             Transform.ProcessOutput(ProcessOutputFlags.None, 1, ref dataBuffer, out _);
             Transform.ProcessMessage(TMessageType.MessageCommandFlush, 0);
 
-            ConvertSample(Sample, dst);
+            ConvertSample(Sample, dest);
 
             return true;
         }

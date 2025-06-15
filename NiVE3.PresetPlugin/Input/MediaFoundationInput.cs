@@ -52,15 +52,18 @@ namespace NiVE3.PresetPlugin.Input
         {
             FilePath = filePath;
 
-            try
-            {
-                VideoReader = new AcceleratedVideoSourceReader(filePath);
-            }
-            catch { }
-            if (!VideoReader?.Succeeded ?? false)
+            // NOTE: GPUを使用するとデコード結果が壊れるのでCPUを使用する
+            // TODO: GPUでデコードしても壊れないようにする
+            //try
+            //{
+            //    VideoReader = new AcceleratedVideoSourceReader(filePath);
+            //}
+            //catch { }
+            if (!(VideoReader?.Succeeded ?? false))
             {
                 try
                 {
+                    VideoReader?.Dispose();
                     VideoReader = new SoftwareVideoSourceReader(filePath);
                 }
                 catch { }
