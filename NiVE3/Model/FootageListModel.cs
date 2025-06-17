@@ -153,7 +153,7 @@ namespace NiVE3.Model
             var loaded = LoadFile(solidInput, "", solidFolder.FootageId, null, SolidInput.PluginId, true);
             if (createFolder)
             {
-                if (loaded != null)
+                if (loaded.Type == FootageLoadResultType.Success)
                 {
                     HistoryModel.EndGroup();
                 }
@@ -163,7 +163,7 @@ namespace NiVE3.Model
                 }
             }
 
-            return loaded switch
+            return loaded.Footage switch
             {
                 FootageModel solid => (Guid?)solid.FootageId,
                 FootageFolderModel folder => (Guid?)Flatten(folder.Children).First().FootageId,
@@ -300,14 +300,15 @@ namespace NiVE3.Model
             return SupportedFileTypes.Values.Any(e => e.Contains(ext));
         }
 
-        public void LoadFile(string filePath, Guid? targetFolderId)
+        public FootageLoadResultType LoadFile(string filePath, Guid? targetFolderId)
         {
             if (Inputs == null || !File.Exists(filePath))
             {
-                return;
+                return FootageLoadResultType.CannotLoad;
             }
 
             var ext = Path.GetExtension(filePath).Trim('.').ToLower();
+            var lastResultType = FootageLoadResultType.NotSupported;
             foreach (var (t, supported) in SupportedFileTypes)
             {
                 if (!supported.Contains(ext))
@@ -317,15 +318,24 @@ namespace NiVE3.Model
 
                 var factory = Inputs.First(i => i.Metadata.PluginType == t);
                 var context = factory.CreateExport();
-                if (LoadFile(context.Value, filePath, targetFolderId, context, Guid.Parse(factory.Metadata.InputUuid), factory.Metadata.IsSupportLoadToGpu) != null)
+                var result = LoadFile(context.Value, filePath, targetFolderId, context, Guid.Parse(factory.Metadata.InputUuid), factory.Metadata.IsSupportLoadToGpu);
+                if (result.Type == FootageLoadResultType.Success)
                 {
-                    break;
+                    return FootageLoadResultType.Success;
                 }
                 else
                 {
                     context.Dispose();
                 }
+
+                lastResultType = result.Type;
+                if (lastResultType == FootageLoadResultType.Cancel)
+                {
+                    break;
+                }
             }
+
+            return lastResultType;
         }
 
         public void ShowPreview(Guid footageId)
@@ -615,7 +625,7 @@ namespace NiVE3.Model
                 .FirstOrDefault();
         }
 
-        IFootageModel? LoadFile(IInput plugin, string fileName, Guid? targetFolderId, ExportLifetimeContext<IInput>? pluginContext, Guid pluginId, bool isSupportLoadToGpu)
+        FootageLoadResult LoadFile(IInput plugin, string fileName, Guid? targetFolderId, ExportLifetimeContext<IInput>? pluginContext, Guid pluginId, bool isSupportLoadToGpu)
         {
             if (isSupportLoadToGpu)
             {
@@ -624,7 +634,7 @@ namespace NiVE3.Model
             if (!plugin.Load(fileName))
             {
                 plugin.Dispose();
-                return null;
+                return FootageLoadResult.CannotLoad;
             }
 
             if (InputMetadatas[plugin.GetType()].HasSettingView)
@@ -639,13 +649,13 @@ namespace NiVE3.Model
                     if (!e.IsOK)
                     {
                         plugin.Dispose();
-                        return null;
+                        return FootageLoadResult.Cancel;
                     }
 
                     if (!plugin.ApplySetting(view.DataContext))
                     {
                         plugin.Dispose();
-                        return null;
+                        return FootageLoadResult.CannotLoad;
                     }
                 }
             }
@@ -657,7 +667,7 @@ namespace NiVE3.Model
             {
                 // ソースが何もなかった
                 plugin.Dispose();
-                return null;
+                return FootageLoadResult.CannotLoad;
             }
 
             IFootageModel loadedFootage;
@@ -675,7 +685,7 @@ namespace NiVE3.Model
 
             HistoryModel.Add(new LoadFileHistoryCommand(this, inputModel, loadedFootage, targetFolderId));
 
-            return loadedFootage;
+            return new FootageLoadResult(loadedFootage, FootageLoadResultType.Success);
         }
 
         FootageFolderModel AddFootageSourceGroup(InputModel inputModel, FootageSourceGroup group, Guid? targetFolderId)
@@ -924,5 +934,22 @@ namespace NiVE3.Model
                 _ => x.Name.CompareTo(y.Name),
             };
         }
+    }
+
+    record FootageLoadResult(IFootageModel? Footage, FootageLoadResultType Type)
+    {
+        public static readonly FootageLoadResult Cancel = new FootageLoadResult(null, FootageLoadResultType.Cancel);
+
+        public static readonly FootageLoadResult CannotLoad = new FootageLoadResult(null, FootageLoadResultType.CannotLoad);
+
+        public static readonly FootageLoadResult NotSupported = new FootageLoadResult(null, FootageLoadResultType.NotSupported);
+    }
+
+    enum FootageLoadResultType
+    {
+        Success,
+        Cancel,
+        CannotLoad,
+        NotSupported
     }
 }

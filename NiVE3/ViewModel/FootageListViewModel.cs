@@ -185,7 +185,11 @@ namespace NiVE3.ViewModel
                 };
                 if (open.ShowDialog() ?? false)
                 {
-                    FootageListModel.LoadFile(open.FileName, null);
+                    var result = FootageListModel.LoadFile(open.FileName, null);
+                    if (result != FootageLoadResultType.Success)
+                    {
+                        ShowFootageLoadErrorDialog([result], false);
+                    }
                 }
             });
 
@@ -318,7 +322,6 @@ namespace NiVE3.ViewModel
         {
             var target = dropInfo.TargetItem as IFootageViewModelList ?? this;
 
-
             switch (dropInfo.Data)
             {
                 case IFootageViewModel footageViewModel:
@@ -351,9 +354,15 @@ namespace NiVE3.ViewModel
                     if (dataObject.GetData(DataFormats.FileDrop) is string[] files)
                     {
                         var targetFolderId = (target as IFootageViewModel)?.FootageId;
+                        var results = new List<FootageLoadResultType>();
                         foreach (var f in files)
                         {
-                            FootageListModel.LoadFile(f, targetFolderId);
+                            results.Add(FootageListModel.LoadFile(f, targetFolderId));
+                        }
+
+                        if (results.Any(r => r != FootageLoadResultType.Success))
+                        {
+                            ShowFootageLoadErrorDialog([..results.Where(r => r != FootageLoadResultType.Success)], true);
                         }
                     }
                     break;
@@ -395,6 +404,51 @@ namespace NiVE3.ViewModel
         public bool TryCatchOccurredException(Exception exception)
         {
             return false;
+        }
+
+        static void ShowFootageLoadErrorDialog(FootageLoadResultType[] footageLoadResultType, bool ignoreCancel)
+        {
+            var targetTypes = footageLoadResultType.Except(ignoreCancel ? [FootageLoadResultType.Success, FootageLoadResultType.Cancel] : [FootageLoadResultType.Success]).ToArray();
+            if (targetTypes.Length < 1)
+            {
+                return;
+            }
+
+
+            var title = "";
+            var text = "";
+            if (targetTypes.Length > 1)
+            {
+                title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_LoadFootageCannotLoadMultiple_Title);
+                text = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_LoadFootageCannotLoadMultiple_Text);
+            }
+            else
+            {
+                switch (footageLoadResultType[0])
+                {
+                    case FootageLoadResultType.Cancel:
+                        if (ignoreCancel)
+                        {
+                            return;
+                        }
+                        else
+                        {
+                            title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_LoadFootageCancel_Title);
+                            text = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_LoadFootageCancel_Text);
+                            break;
+                        }
+                    case FootageLoadResultType.CannotLoad:
+                        title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_LoadFootageCannotLoad_Title);
+                        text = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_LoadFootageCannotLoad_Text);
+                        break;
+                    case FootageLoadResultType.NotSupported:
+                        title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_LoadFootageNotSupported_Title);
+                        text = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_LoadFootageNotSupported_Text);
+                        break;
+                }
+            }
+
+            MessageBox.Show(text, title, MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
         static bool IsContainsTree(IEnumerable<IFootageViewModel> items, IFootageViewModelList target)

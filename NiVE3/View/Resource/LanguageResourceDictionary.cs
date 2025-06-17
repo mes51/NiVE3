@@ -1220,6 +1220,30 @@ namespace NiVE3.View.Resource
         [DefaultValue("フッテージを削除すると、各コンポジションからこのフッテージを使用しているレイヤーが削除されます。このフッテージを削除しますか?")]
         public static readonly string Dialog_ConfirmDeleteFootage_Text = nameof(Dialog_ConfirmDeleteFootage_Text);
 
+        [DefaultValue("エラー")]
+        public static readonly string Dialog_LoadFootageCannotLoad_Title = nameof(Dialog_LoadFootageCannotLoad_Title);
+
+        [DefaultValue("ファイルを読み込めませんでした。ファイルが破損しているか、プラグインが対応していない可能性があります。")]
+        public static readonly string Dialog_LoadFootageCannotLoad_Text = nameof(Dialog_LoadFootageCannotLoad_Text);
+
+        [DefaultValue("エラー")]
+        public static readonly string Dialog_LoadFootageNotSupported_Title = nameof(Dialog_LoadFootageNotSupported_Title);
+
+        [DefaultValue("ファイルを読み込めませんでした。現在読み込まれているプラグインでは対応していないファイル形式です。")]
+        public static readonly string Dialog_LoadFootageNotSupported_Text = nameof(Dialog_LoadFootageNotSupported_Text);
+
+        [DefaultValue("エラー")]
+        public static readonly string Dialog_LoadFootageCancel_Title = nameof(Dialog_LoadFootageCancel_Title);
+
+        [DefaultValue("ファイルを読みの読み込みをキャンセルしました。")]
+        public static readonly string Dialog_LoadFootageCancel_Text = nameof(Dialog_LoadFootageCancel_Text);
+
+        [DefaultValue("エラー")]
+        public static readonly string Dialog_LoadFootageCannotLoadMultiple_Title = nameof(Dialog_LoadFootageCannotLoadMultiple_Title);
+
+        [DefaultValue("いくつかのファイルの読み込みに失敗しました。読み込めなかったファイルはファイルが破損しているか、プラグインが対応していない可能性があります。")]
+        public static readonly string Dialog_LoadFootageCannotLoadMultiple_Text = nameof(Dialog_LoadFootageCannotLoadMultiple_Text);
+
         [DefaultValue("フォルダを削除すると、中に含まれているフッテージも一緒に削除され、各コンポジションからも含まれているフッテージを使用しているレイヤーが削除されます。このフォルダを削除しますか?")]
         public static readonly string Dialog_ConfirmDeleteFootageFolder_Text = nameof(Dialog_ConfirmDeleteFootageFolder_Text);
 
