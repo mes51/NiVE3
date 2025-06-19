@@ -32,7 +32,7 @@ namespace NiVE3.PresetPlugin.Input
         {
             if (CompositedImage != null)
             {
-                return new FootageSourceGroup([new PsdCompositedImageFootageSource(CompositedImage)]);
+                return new FootageSourceGroup([new SingleImageFootageSource(CompositedImage)]);
             }
             else
             {
@@ -71,50 +71,6 @@ namespace NiVE3.PresetPlugin.Input
         public void Dispose()
         {
             CompositedImage?.Dispose();
-        }
-    }
-
-    file class PsdCompositedImageFootageSource : IFootageSource
-    {
-        public string SourceId => "composited image";
-
-        public string? Name => null;
-
-        public double FrameRate => 0.0;
-
-        public int Width => Image.Width;
-
-        public int Height => Image.Height;
-
-        public Time Duration => Time.Zero;
-
-        public SourceType SourceType => SourceType.Image;
-
-        NManagedImage Image { get; }
-
-        public PsdCompositedImageFootageSource(NManagedImage image)
-        {
-            Image = image;
-        }
-
-        public float[] ReadAudio(Time time, Time length)
-        {
-            throw new NotImplementedException();
-        }
-
-        public NImage ReadFrame(Time time, double downSamplingRate, bool toGpu)
-        {
-            if (downSamplingRate != 1.0)
-            {
-                var result = new NManagedImage((int)(Width / downSamplingRate), (int)(Height / downSamplingRate));
-                var renderer = new CPURenderer2D(result);
-                renderer.DrawSingleImage(new Int32Point(), Image, 1.0F, Matrix3x3.CreateScale(result.Width / (float)Width, result.Height / (float)Height), ImageInterpolationQuality.Level2, BlendMode.Replace, null);
-                return result;
-            }
-            else
-            {
-                return Image.Copy();
-            }
         }
     }
 }
