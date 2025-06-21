@@ -39,6 +39,8 @@ namespace NiVE3.Model
 
         const string PropertyMaskSettingPositionId = nameof(PropertyMaskSettingPositionId);
 
+        const string PropertyMaskSettingBlurId = nameof(PropertyMaskSettingBlurId);
+
         const string PropertyMaskSettingOpacityId = nameof(PropertyMaskSettingOpacityId);
 
         const string PropertyMaskSettingBlendModeId = nameof(PropertyMaskSettingBlendModeId);
@@ -96,6 +98,7 @@ namespace NiVE3.Model
                         [
                             new BezierPathProperty(PropertyMaskSettingBezierPathId, LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting_BezierPath),
                             new Vector3dProperty(PropertyMaskSettingPositionId, LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting_Position, maskCenter, digit: 2),
+                            new Vector3dProperty(PropertyMaskSettingBlurId, LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting_Blur, Vector3d.Zero, digit: 2),
                             new DoubleProperty(PropertyMaskSettingOpacityId, LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting_Opacity, 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
                             new EnumProperty(PropertyMaskSettingBlendModeId, LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting_BlendMode, typeof(MaskBlendMode), typeof(LanguageResourceDictionary), MaskBlendMode.Add, false, 90.0),
                             new CheckBoxProperty(PropertyMaskSettingIsInvertId, LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting_IsInvert, false)
@@ -121,6 +124,7 @@ namespace NiVE3.Model
                             new EnumProperty(PropertyMaskSettingShapeTypeId, LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting_ShapeType, typeof(MaskShapeType), typeof(LanguageResourceDictionary), shapeType, false, 90.0),
                             new Vector3dProperty(PropertyMaskSettingSizeId, LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting_Size, new Vector3d(maskWidth, maskHeight, 0.0), digit: 2, useLinkRatio: true),
                             new Vector3dProperty(PropertyMaskSettingPositionId, LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting_Position, maskCenter, digit: 2),
+                            new Vector3dProperty(PropertyMaskSettingBlurId, LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting_Blur, Vector3d.Zero, digit: 2),
                             new DoubleProperty(PropertyMaskSettingOpacityId, LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting_Opacity, 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
                             new EnumProperty(PropertyMaskSettingBlendModeId, LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting_BlendMode, typeof(MaskBlendMode), typeof(LanguageResourceDictionary), MaskBlendMode.Add, false, 90.0),
                             new CheckBoxProperty(PropertyMaskSettingIsInvertId, LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting_IsInvert, false)
@@ -255,6 +259,7 @@ namespace NiVE3.Model
             var setting = Properties.GetValues(layerTime, globalTime);
 
             var position = (Vector2)((Vector3d)(setting[PropertyMaskSettingPositionId] ?? Vector3d.Zero) / new Vector3d(downSamplingRateX, downSamplingRateY, 1.0));
+            var blur = (Vector2)((Vector3d)(setting[PropertyMaskSettingBlurId] ?? Vector3d.Zero) / new Vector3d(downSamplingRateX, downSamplingRateY, 1.0));
             var opacity = (float)(double)(setting[PropertyMaskSettingOpacityId] ?? 0.0) * 0.01F;
             var blendMode = (MaskBlendMode)(setting[PropertyMaskSettingBlendModeId] ?? MaskBlendMode.Add);
             var isInvert = (bool)(setting[PropertyMaskSettingIsInvertId] ?? false);
@@ -329,6 +334,12 @@ namespace NiVE3.Model
                         ShapeMaskRenderGPU.Fill(device, polygons, gpuImage, 1.0F);
                         break;
                 }
+
+                if (blur.X > 0.0F || blur.Y > 0.0F)
+                {
+                    MaskBlur.ProcessGpu(device, gpuImage, blur.X, blur.Y);
+                }
+
                 return new LayerMaskImage(gpuImage, opacity, blendMode, isInvert);
             }
             else
@@ -343,6 +354,12 @@ namespace NiVE3.Model
                         ShapeMaskRendererCPU.Fill(polygons, managedImage, 1.0F);
                         break;
                 }
+
+                if (blur.X > 0.0F || blur.Y > 0.0F)
+                {
+                    MaskBlur.ProcessCpu(managedImage, blur.X, blur.Y);
+                }
+
                 return new LayerMaskImage(managedImage, opacity, blendMode, isInvert);
             }
         }

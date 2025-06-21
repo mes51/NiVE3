@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Shape;
 
-namespace NiVE3.Util
+namespace NiVE3.Image
 {
     static class MaskBlend
     {

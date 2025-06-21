@@ -1767,6 +1767,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("位置")]
         public static readonly string MaskProperty_Setting_Position = nameof(MaskProperty_Setting_Position);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("マスクのぼかし")]
+        public static readonly string MaskProperty_Setting_Blur = nameof(MaskProperty_Setting_Blur);
+
         [ShowInMarkup, LanguageKey, DefaultValue("マスクの不透明度")]
         public static readonly string MaskProperty_Setting_Opacity = nameof(MaskProperty_Setting_Opacity);
 
