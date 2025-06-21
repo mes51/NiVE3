@@ -16,7 +16,7 @@ namespace NiVE3.Shape
     {
         const int SuperSamplingCount = 8;
 
-        public static void Fill(GraphicsDevice device, Polygon[] polygons, GPURasterizedMaskImage image, float opacity, float offsetX = 0.0F, float offsetY = 0.0F, MaskBlendMode blendMode = MaskBlendMode.Add)
+        public static void Fill(GraphicsDevice device, Polygon[] polygons, GPURasterizedMaskImage image, float opacity, float offsetX = 0.0F, float offsetY = 0.0F)
         {
             if (polygons.Length < 1)
             {
@@ -42,7 +42,6 @@ namespace NiVE3.Shape
                     SuperSamplingCount,
                     offsetX + 1.0F,
                     opacity,
-                    (int)blendMode,
                     startX,
                     startY
                 )
@@ -52,7 +51,7 @@ namespace NiVE3.Shape
             lineHits.Dispose();
         }
 
-        public static void FillAliased(GraphicsDevice device, Polygon[] polygons, GPURasterizedMaskImage image, float opacity, float offsetX = 0.0F, float offsetY = 0.0F, MaskBlendMode blendMode = MaskBlendMode.Add)
+        public static void FillAliased(GraphicsDevice device, Polygon[] polygons, GPURasterizedMaskImage image, float opacity, float offsetX = 0.0F, float offsetY = 0.0F)
         {
             if (polygons.Length < 1)
             {
@@ -77,7 +76,6 @@ namespace NiVE3.Shape
                     lineHitIndices,
                     offsetX,
                     opacity,
-                    (int)blendMode,
                     startX,
                     startY
                 )

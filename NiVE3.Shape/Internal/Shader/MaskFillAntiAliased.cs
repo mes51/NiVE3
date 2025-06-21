@@ -17,7 +17,6 @@ namespace NiVE3.Shape.Internal.Shader
         int superSamplingCount,
         float offsetX,
         float opacity,
-        int blendMode,
         int startX,
         int startY
     ) : IComputeShader
@@ -30,11 +29,7 @@ namespace NiVE3.Shape.Internal.Shader
             var py = ThreadIds.Y + startY;
 
             var area = CalcArea(ThreadIds.X, ThreadIds.Y);
-            if (area > 0.0F)
-            {
-                var pos = py * imageWidth + px;
-                image[pos] = MaskBlendMethods.Process(blendMode, image[pos], opacity * area);
-            }
+            image[py * imageWidth + px] = opacity * area;
         }
 
         float CalcArea(int tx, int ty)

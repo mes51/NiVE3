@@ -1,46 +1,46 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using System.Windows.Media;
+using System.ComponentModel;
+using System.IO;
+using System.IO.Hashing;
 using System.Linq;
+using System.Numerics;
+using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
+using System.Windows.Media;
+using ComputeSharp;
+using NAudio.Dsp;
+using NiVE3.Cache;
+using NiVE3.Config;
+using NiVE3.Data.Clipboard;
+using NiVE3.Data.Json.Preset;
+using NiVE3.Data.Json.Project;
+using NiVE3.Extension;
 using NiVE3.Image;
-using NiVE3.Numerics;
-using NiVE3.Plugin.Interfaces;
+using NiVE3.Image.Drawing;
 using NiVE3.Input;
+using NiVE3.Input.Special;
+using NiVE3.InternalShader;
+using NiVE3.InternalShader.Mask;
+using NiVE3.Mvvm;
+using NiVE3.Numerics;
+using NiVE3.Plugin.Attributes;
+using NiVE3.Plugin.Image;
+using NiVE3.Plugin.Interfaces;
+using NiVE3.Plugin.Interfaces.RendererParams;
 using NiVE3.Plugin.Property;
 using NiVE3.Plugin.Property.Properties;
-using Prism.Mvvm;
-using NiVE3.View.Resource;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.Property;
-using System.ComponentModel;
 using NiVE3.Shared.Extension;
-using NiVE3.Extension;
-using NiVE3.Plugin.Image;
-using NiVE3.Input.Special;
-using NiVE3.Plugin.Interfaces.RendererParams;
-using System.Numerics;
-using System.Runtime.Intrinsics;
-using NiVE3.Data.Json.Project;
-using NiVE3.Image.Drawing;
 using NiVE3.Util;
-using System.Buffers;
-using System.Runtime.InteropServices;
-using NiVE3.Plugin.Attributes;
-using NiVE3.Data.Clipboard;
-using System.IO.Hashing;
-using NiVE3.Cache;
-using ComputeSharp;
-using NiVE3.InternalShader;
-using NiVE3.Config;
-using NAudio.Dsp;
-using NiVE3.Mvvm;
-using NiVE3.Data.Json.Preset;
-using System.Text.Json;
-using System.IO;
+using NiVE3.View.Resource;
 
 namespace NiVE3.Model
 {
@@ -2149,46 +2149,91 @@ namespace NiVE3.Model
             {
                 var device = AcceleratorModel.CurrentDevice;
                 var gpuImage = image.ToGpu(device);
-                var gpuMaskImage = new GPURasterizedMaskImage(gpuImage.Width, gpuImage.Height, device, clearOpaque ? 1.0F : 0.0F)
+                using var gpuMaskImage = new GPURasterizedMaskImage(gpuImage.Width, gpuImage.Height, device, clearOpaque ? 1.0F : 0.0F)
                 {
                     Origin = image.Origin
                 };
 
                 foreach (var mask in operativeMasks)
                 {
-                    var newMaskImage = mask.RenderMask(layerTime, globalTime, gpuMaskImage, InterpolationQuality, downSamplingRateX, downSamplingRateY, useGpu);
-                    if (gpuMaskImage != newMaskImage)
+                    using var newMaskImage = mask.RenderMask(layerTime, globalTime, gpuImage.Width, gpuImage.Height, image.Origin, InterpolationQuality, downSamplingRateX, downSamplingRateY, useGpu);
+                    if (newMaskImage == null)
                     {
-                        gpuMaskImage.Dispose();
-                        gpuMaskImage = newMaskImage.ToGpu(device);
+                        continue;
+                    }
+
+                    var newGpuMaskImage = newMaskImage.MaskImage.ToGpu(device);
+
+                    device.For(gpuMaskImage.Width, gpuMaskImage.Height, new BlendMask(gpuMaskImage.Data, newGpuMaskImage.Data, gpuMaskImage.Width, newMaskImage.Opacity, (int)newMaskImage.BlendMode, newMaskImage.IsInvert));
+
+                    if (newGpuMaskImage != newMaskImage.MaskImage)
+                    {
+                        newGpuMaskImage.Dispose();
                     }
                 }
 
                 device.For(gpuImage.Width, gpuImage.Height, new MaskImage(gpuImage.Data, gpuImage.Width, gpuMaskImage.Data, gpuMaskImage.Width, 0, 0));
 
-                gpuMaskImage.Dispose();
                 return gpuImage;
             }
             else
             {
                 var managedImage = image.ToManaged();
-                var managedMaskImage = new ManagedRasterizedMaskImage(managedImage.Width, managedImage.Height, clearOpaque ? 1.0F : 0.0F)
+                using var managedMaskImage = new ManagedRasterizedMaskImage(managedImage.Width, managedImage.Height, clearOpaque ? 1.0F : 0.0F)
                 {
                     Origin = image.Origin
                 };
 
+                var imageWidth = managedImage.Width;
+                var managedMaskData = managedMaskImage.Data;
                 foreach (var mask in operativeMasks)
                 {
-                    var newMaskImage = mask.RenderMask(layerTime, globalTime, managedMaskImage, InterpolationQuality, downSamplingRateX, downSamplingRateY, useGpu);
-                    if (managedMaskImage != newMaskImage)
+                    using var newMaskImage = mask.RenderMask(layerTime, globalTime, managedMaskImage.Width, managedMaskImage.Height, image.Origin, InterpolationQuality, downSamplingRateX, downSamplingRateY, useGpu);
+                    if (newMaskImage == null)
                     {
-                        managedMaskImage.Dispose();
-                        managedMaskImage = newMaskImage.ToManaged();
+                        continue;
+                    }
+
+                    var newManagedMaskImage = newMaskImage.MaskImage.ToManaged();
+
+                    var newManagedMaskData = newManagedMaskImage.Data;
+                    var opacity = newMaskImage.Opacity;
+                    var blendMode = newMaskImage.BlendMode;
+                    if (newMaskImage.IsInvert)
+                    {
+                        Parallel.For(0, managedMaskImage.Height, y =>
+                        {
+                            var backSpan = managedMaskData.AsSpan(y * imageWidth, imageWidth);
+                            var frontSpan = newManagedMaskData.AsSpan(y * imageWidth, imageWidth);
+
+                            for (var x = 0; x < imageWidth; x++)
+                            {
+                                backSpan[x] = MaskBlend.Process(blendMode, backSpan[x], (1.0F - frontSpan[x]) * opacity);
+                            }
+                        });
+                    }
+                    else
+                    {
+                        Parallel.For(0, managedMaskImage.Height, y =>
+                        {
+                            var backSpan = managedMaskData.AsSpan(y * imageWidth, imageWidth);
+                            var frontSpan = newManagedMaskData.AsSpan(y * imageWidth, imageWidth);
+
+                            for (var x = 0; x < imageWidth; x++)
+                            {
+                                backSpan[x] = MaskBlend.Process(blendMode, backSpan[x], frontSpan[x] * opacity);
+                            }
+                        });
+                    }
+
+
+                    if (newManagedMaskImage != newMaskImage.MaskImage)
+                    {
+                        newManagedMaskImage.Dispose();
                     }
                 }
 
                 var imageData = managedImage.Data;
-                var imageWidth = managedImage.Width;
                 var maskData = managedMaskImage.Data;
                 Parallel.For(0, managedImage.Height, y =>
                 {
@@ -2203,7 +2248,6 @@ namespace NiVE3.Model
                     }
                 });
 
-                managedMaskImage.Dispose();
                 return managedImage;
             }
         }

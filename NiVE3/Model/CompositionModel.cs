@@ -36,6 +36,7 @@ using NiVE3.InternalShader.MotionBlur;
 using NiVE3.Model.UI;
 using NiVE3.Image.Color;
 using NiVE3.InternalShader;
+using NiVE3.InternalShader.Mask;
 
 namespace NiVE3.Model
 {

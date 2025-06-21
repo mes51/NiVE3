@@ -1773,6 +1773,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("マスクのブレンドモード")]
         public static readonly string MaskProperty_Setting_BlendMode = nameof(MaskProperty_Setting_BlendMode);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("反転")]
+        public static readonly string MaskProperty_Setting_IsInvert = nameof(MaskProperty_Setting_IsInvert);
+
         // Property Control
 
         [ShowInMarkup, LanguageKey, DefaultValue("編集")]

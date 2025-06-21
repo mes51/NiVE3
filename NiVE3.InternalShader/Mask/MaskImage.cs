@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ComputeSharp;
 
-namespace NiVE3.InternalShader
+namespace NiVE3.InternalShader.Mask
 {
     [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
     [GeneratedComputeShaderDescriptor]

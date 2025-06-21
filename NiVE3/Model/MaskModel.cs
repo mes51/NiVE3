@@ -43,6 +43,8 @@ namespace NiVE3.Model
 
         const string PropertyMaskSettingBlendModeId = nameof(PropertyMaskSettingBlendModeId);
 
+        const string PropertyMaskSettingIsInvertId = nameof(PropertyMaskSettingIsInvertId);
+
         public Guid MaskId { get; }
 
         private string name = "";
@@ -96,6 +98,7 @@ namespace NiVE3.Model
                             new Vector3dProperty(PropertyMaskSettingPositionId, LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting_Position, maskCenter, digit: 2),
                             new DoubleProperty(PropertyMaskSettingOpacityId, LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting_Opacity, 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
                             new EnumProperty(PropertyMaskSettingBlendModeId, LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting_BlendMode, typeof(MaskBlendMode), typeof(LanguageResourceDictionary), MaskBlendMode.Add, false, 90.0),
+                            new CheckBoxProperty(PropertyMaskSettingIsInvertId, LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting_IsInvert, false)
                         ]
                     ),
                     MaskId.ToInt128(),
@@ -120,6 +123,7 @@ namespace NiVE3.Model
                             new Vector3dProperty(PropertyMaskSettingPositionId, LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting_Position, maskCenter, digit: 2),
                             new DoubleProperty(PropertyMaskSettingOpacityId, LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting_Opacity, 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
                             new EnumProperty(PropertyMaskSettingBlendModeId, LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting_BlendMode, typeof(MaskBlendMode), typeof(LanguageResourceDictionary), MaskBlendMode.Add, false, 90.0),
+                            new CheckBoxProperty(PropertyMaskSettingIsInvertId, LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting_IsInvert, false)
                         ]
                     ),
                     MaskId.ToInt128(),
@@ -228,11 +232,6 @@ namespace NiVE3.Model
             var opacity = (float)(double)(setting[PropertyMaskSettingOpacityId] ?? 0.0) * 0.01F;
             var blendMode = (MaskBlendMode)(setting[PropertyMaskSettingBlendModeId] ?? MaskBlendMode.Add);
 
-            if ((blendMode == MaskBlendMode.Add || blendMode == MaskBlendMode.Subtract) && opacity <= 0.0F)
-            {
-                return false;
-            }
-
             if (IsBezierPath)
             {
                 var path = (BezierPath)(setting[PropertyMaskSettingBezierPathId] ?? BezierPath.Empty);
@@ -245,12 +244,12 @@ namespace NiVE3.Model
             }
         }
 
-        public RasterizedMaskImage RenderMask(Time layerTime, Time globalTime, RasterizedMaskImage image, ImageInterpolationQuality imageInterpolationQuality, double downSamplingRateX, double downSamplingRateY, bool useGpu)
+        public LayerMaskImage? RenderMask(Time layerTime, Time globalTime, int width, int height, Vector2d imageOrigin, ImageInterpolationQuality imageInterpolationQuality, double downSamplingRateX, double downSamplingRateY, bool useGpu)
         {
             using var entry = CycleChecker.TryEnter(MaskId);
             if (entry == null)
             {
-                return image;
+                return null;
             }
 
             var setting = Properties.GetValues(layerTime, globalTime);
@@ -258,6 +257,7 @@ namespace NiVE3.Model
             var position = (Vector2)((Vector3d)(setting[PropertyMaskSettingPositionId] ?? Vector3d.Zero) / new Vector3d(downSamplingRateX, downSamplingRateY, 1.0));
             var opacity = (float)(double)(setting[PropertyMaskSettingOpacityId] ?? 0.0) * 0.01F;
             var blendMode = (MaskBlendMode)(setting[PropertyMaskSettingBlendModeId] ?? MaskBlendMode.Add);
+            var isInvert = (bool)(setting[PropertyMaskSettingIsInvertId] ?? false);
 
             var noOp = (blendMode == MaskBlendMode.Add || blendMode == MaskBlendMode.Subtract) && opacity <= 0.0F;
 
@@ -267,13 +267,27 @@ namespace NiVE3.Model
                 var path = (BezierPath)(setting[PropertyMaskSettingBezierPathId] ?? BezierPath.Empty);
                 if (noOp || path.IsEmpty() || !path.IsClosed)
                 {
-                    return image;
+                    if (useGpu)
+                    {
+                        return new LayerMaskImage(new GPURasterizedMaskImage(width, height, AcceleratorModel.CurrentDevice, 1.0F) { Origin = imageOrigin }, opacity, blendMode, isInvert);
+                    }
+                    else
+                    {
+                        return new LayerMaskImage(new ManagedRasterizedMaskImage(width, height) { Origin = imageOrigin }, opacity, blendMode, isInvert);
+                    }
                 }
 
                 var flattendPath = path.Transform(Matrix3x2.CreateTranslation(position.X, position.Y)).BuildPath()?.Flatten();
                 if (flattendPath == null)
                 {
-                    return image;
+                    if (useGpu)
+                    {
+                        return new LayerMaskImage(new GPURasterizedMaskImage(width, height, AcceleratorModel.CurrentDevice, 1.0F) { Origin = imageOrigin }, opacity, blendMode, isInvert);
+                    }
+                    else
+                    {
+                        return new LayerMaskImage(new ManagedRasterizedMaskImage(width, height) { Origin = imageOrigin }, opacity, blendMode, isInvert);
+                    }
                 }
 
                 polygons = [..flattendPath.Select(p => new Polygon(p.Points.Span))];
@@ -284,10 +298,17 @@ namespace NiVE3.Model
                 var size = (Vector2)((Vector3d)(setting[PropertyMaskSettingSizeId] ?? Vector3d.Zero) / new Vector3d(downSamplingRateX, downSamplingRateY, 1.0));
                 if (noOp || size.X <= 0.0 || size.Y <= 0.0)
                 {
-                    return image;
+                    if (useGpu)
+                    {
+                        return new LayerMaskImage(new GPURasterizedMaskImage(width, height, AcceleratorModel.CurrentDevice, 1.0F) { Origin = imageOrigin }, opacity, blendMode, isInvert);
+                    }
+                    else
+                    {
+                        return new LayerMaskImage(new ManagedRasterizedMaskImage(width, height) { Origin = imageOrigin }, opacity, blendMode, isInvert);
+                    }
                 }
 
-                position += (Vector2)(image.Origin - (Vector2d)size * 0.5);
+                position += (Vector2)(imageOrigin - (Vector2d)size * 0.5);
                 polygons = [..(shapeType switch
                 {
                     MaskShapeType.Ellipse => (IPath)new BezierEllipsePolygon(position.X + size.X * 0.5F, position.Y + size.Y * 0.5F, size.X, size.Y),
@@ -298,31 +319,31 @@ namespace NiVE3.Model
             if (useGpu)
             {
                 var device = AcceleratorModel.CurrentDevice;
-                var gpuImage = image.ToGpu(device);
+                var gpuImage = new GPURasterizedMaskImage(width, height, device, 0.0F) { Origin = imageOrigin };
                 switch (imageInterpolationQuality)
                 {
                     case ImageInterpolationQuality.Level1:
-                        ShapeMaskRenderGPU.FillAliased(device, polygons, gpuImage, opacity, blendMode: blendMode);
+                        ShapeMaskRenderGPU.FillAliased(device, polygons, gpuImage, 1.0F);
                         break;
                     default:
-                        ShapeMaskRenderGPU.Fill(device, polygons, gpuImage, opacity, blendMode: blendMode);
+                        ShapeMaskRenderGPU.Fill(device, polygons, gpuImage, 1.0F);
                         break;
                 }
-                return gpuImage;
+                return new LayerMaskImage(gpuImage, opacity, blendMode, isInvert);
             }
             else
             {
-                var managedImage = image.ToManaged();
+                var managedImage = new ManagedRasterizedMaskImage(width, height) { Origin = imageOrigin };
                 switch (imageInterpolationQuality)
                 {
                     case ImageInterpolationQuality.Level1:
-                        ShapeMaskRendererCPU.FillAiliased(polygons, managedImage, opacity, blendMode: blendMode);
+                        ShapeMaskRendererCPU.FillAiliased(polygons, managedImage, 1.0F);
                         break;
                     default:
-                        ShapeMaskRendererCPU.Fill(polygons, managedImage, opacity, blendMode: blendMode);
+                        ShapeMaskRendererCPU.Fill(polygons, managedImage, 1.0F);
                         break;
                 }
-                return managedImage;
+                return new LayerMaskImage(managedImage, opacity, blendMode, isInvert);
             }
         }
 
@@ -382,6 +403,14 @@ namespace NiVE3.Model
     {
         Rectangle,
         Ellipse
+    }
+
+    record LayerMaskImage(RasterizedMaskImage MaskImage, float Opacity, MaskBlendMode BlendMode, bool IsInvert) : IDisposable
+    {
+        public void Dispose()
+        {
+            MaskImage.Dispose();
+        }
     }
 
     file static class PathPolygonExtensions

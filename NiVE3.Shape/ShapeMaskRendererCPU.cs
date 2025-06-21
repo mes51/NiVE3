@@ -18,7 +18,7 @@ namespace NiVE3.Shape
 
         const float SamplingRate = 1.0F / SuperSamplingCount;
 
-        public static void Fill(Polygon[] polygons, ManagedRasterizedMaskImage image, float opacity, float offsetX = 0.0F, float offsetY = 0.0F, MaskBlendMode blendMode = MaskBlendMode.Add)
+        public static void Fill(Polygon[] polygons, ManagedRasterizedMaskImage image, float opacity, float offsetX = 0.0F, float offsetY = 0.0F)
         {
             if (polygons.Length < 1)
             {
@@ -169,7 +169,7 @@ namespace NiVE3.Shape
                 {
                     if (temp[w] > 0.0F)
                     {
-                        data[w] = MaskBlend.Process(blendMode, data[w], opacity * temp[w] * SamplingRate);
+                        data[w] = opacity * temp[w] * SamplingRate;
                     }
                 }
 
@@ -177,7 +177,7 @@ namespace NiVE3.Shape
             });
         }
 
-        public static void FillAiliased(Polygon[] polygons, ManagedRasterizedMaskImage image, float opacity, float offsetX = 0.0F, float offsetY = 0.0F, MaskBlendMode blendMode = MaskBlendMode.Add)
+        public static void FillAiliased(Polygon[] polygons, ManagedRasterizedMaskImage image, float opacity, float offsetX = 0.0F, float offsetY = 0.0F)
         {
             if (polygons.Length < 1)
             {
@@ -283,7 +283,7 @@ namespace NiVE3.Shape
 
                         if (inout)
                         {
-                            data[w] = MaskBlend.Process(blendMode, data[w], opacity);
+                            data[w] = opacity;
                         }
                         if (hi >= hitLine.Count)
                         {

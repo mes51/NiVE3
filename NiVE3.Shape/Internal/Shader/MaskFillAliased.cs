@@ -16,23 +16,24 @@ namespace NiVE3.Shape.Internal.Shader
         ReadOnlyBuffer<Int2> lineHitIndices,
         float offsetX,
         float opacity,
-        int blendMode,
         int startX,
         int startY
     ) : IComputeShader
     {
         public void Execute()
         {
-            if (!IsHit(ThreadIds.X, ThreadIds.Y))
-            {
-                return;
-            }
-
             var px = ThreadIds.X + startX;
             var py = ThreadIds.Y + startY;
-
             var pos = py * imageWidth + px;
-            image[pos] = MaskBlendMethods.Process(blendMode, image[pos], opacity);
+
+            if (IsHit(ThreadIds.X, ThreadIds.Y))
+            {
+                image[pos] = opacity;
+            }
+            else
+            {
+                image[pos] = 0.0F;
+            }
         }
 
         bool IsHit(int tx, int ty)
