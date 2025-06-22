@@ -47,6 +47,8 @@ namespace NiVE3.PresetPlugin.Effect.Generate
 
         const string PropertyUseOkLabInterpolationId = nameof(PropertyUseOkLabInterpolationId);
 
+        const string PropertyBlendModeId = nameof(PropertyBlendModeId);
+
         const string PropertyBlendOriginalId = nameof(PropertyBlendOriginalId);
 
         IAcceleratorObject? AcceleratorObject { get; set; }
@@ -73,6 +75,7 @@ namespace NiVE3.PresetPlugin.Effect.Generate
                 new DoubleProperty(PropertyEndOpacityId, LanguageResourceDictionary.ResourceKeys.Generate_Gradient_EndOpacity, 100.0, 0.0, 100.0, digit: 2),
                 new EnumProperty(PropertyTypeId, LanguageResourceDictionary.ResourceKeys.Generate_Gradient_Type, typeof(GradientShapeType), typeof(LanguageResourceDictionary), GradientShapeType.Linear, selectBoxWidth: 90.0),
                 new CheckBoxProperty(PropertyUseOkLabInterpolationId, LanguageResourceDictionary.ResourceKeys.Generate_Gradient_UseOkLabInterpolation, false),
+                new EnumProperty(PropertyBlendModeId, LanguageResourceDictionary.ResourceKeys.Generate_Gradient_BlendMode, typeof(BlendMode), typeof(LanguageResourceDictionary), BlendMode.Replace, selectBoxWidth: 90.0),
                 new DoubleProperty(PropertyBlendOriginalId, LanguageResourceDictionary.ResourceKeys.Generate_Gradient_BlendOriginal, 0.0, 0.0, 100.0, digit: 2)
             ];
         }
@@ -88,6 +91,7 @@ namespace NiVE3.PresetPlugin.Effect.Generate
             var endOpacity = (float)properties.GetValue(PropertyEndOpacityId, layerTime, 0.0) * 0.01F;
             var type = properties.GetValue(PropertyTypeId, layerTime, GradientShapeType.Linear);
             var useOkLabInterpolation = properties.GetValue(PropertyUseOkLabInterpolationId, layerTime, false);
+            var blendMode = properties.GetValue(PropertyBlendModeId, layerTime, BlendMode.Replace);
             var blendOriginal = (float)properties.GetValue(PropertyBlendOriginalId, layerTime, 0.0) * 0.01F;
 
             if (blendOriginal >= 1.0F)
@@ -100,11 +104,11 @@ namespace NiVE3.PresetPlugin.Effect.Generate
 
             if (useGpu && AcceleratorObject != null)
             {
-                return ProcessGpu(AcceleratorObject.CurrentDevice, image, roi, beginPoint, beginColor, endPoint, endColor, type, useOkLabInterpolation, blendOriginal);
+                return ProcessGpu(AcceleratorObject.CurrentDevice, image, roi, beginPoint, beginColor, endPoint, endColor, type, useOkLabInterpolation, blendMode, blendOriginal);
             }
             else
             {
-                return ProcessCpu(image, roi, beginPoint, beginColor, endPoint, endColor, type, useOkLabInterpolation, blendOriginal);
+                return ProcessCpu(image, roi, beginPoint, beginColor, endPoint, endColor, type, useOkLabInterpolation, blendMode, blendOriginal);
             }
         }
 
@@ -115,7 +119,7 @@ namespace NiVE3.PresetPlugin.Effect.Generate
 
         public void Dispose() { }
 
-        static NManagedImage ProcessCpu(NImage image, ROI roi, Vector2 beginPoint, Vector4 beginColor, Vector2 endPoint, Vector4 endColor, GradientShapeType type, bool useOkLabInterpolation, float blendOriginal)
+        static NManagedImage ProcessCpu(NImage image, ROI roi, Vector2 beginPoint, Vector4 beginColor, Vector2 endPoint, Vector4 endColor, GradientShapeType type, bool useOkLabInterpolation, BlendMode blendMode, float blendOriginal)
         {
             var managedImage = image.ToManaged();
 
@@ -149,7 +153,8 @@ namespace NiVE3.PresetPlugin.Effect.Generate
                                         _ => Unsafe.BitCast<Vector4, OkLab>(Vector4.Lerp(beginOkLabColor, endOkLabColor, diff)).ToRgb()
                                     };
                                     color.W = float.Lerp(beginOpacity, endOpacity, diff);
-                                    imageDataSpan[x] = Vector4.Lerp(color, imageDataSpan[x], blendOriginal);
+                                    var back = imageDataSpan[x];
+                                    imageDataSpan[x] = Vector4.Lerp(Blend.ProcessNoSkipTransparentFront(blendMode, back, color), back, blendOriginal);
                                 }
                             });
                         }
@@ -167,7 +172,8 @@ namespace NiVE3.PresetPlugin.Effect.Generate
                                         _ when 1.0F <= diff => endColor,
                                         _ => Vector4.Lerp(beginColor, endColor, diff)
                                     };
-                                    imageDataSpan[x] = Vector4.Lerp(color, imageDataSpan[x], blendOriginal);
+                                    var back = imageDataSpan[x];
+                                    imageDataSpan[x] = Vector4.Lerp(Blend.ProcessNoSkipTransparentFront(blendMode, back, color), back, blendOriginal);
                                 }
                             });
                         }
@@ -207,7 +213,8 @@ namespace NiVE3.PresetPlugin.Effect.Generate
                                         _ => Unsafe.BitCast<Vector4, OkLab>(Vector4.Lerp(beginOkLabColor, endOkLabColor, t)).ToRgb()
                                     };
                                     color.W = float.Lerp(beginOpacity, endOpacity, t);
-                                    imageDataSpan[x] = Vector4.Lerp(color, imageDataSpan[x], blendOriginal);
+                                    var back = imageDataSpan[x];
+                                    imageDataSpan[x] = Vector4.Lerp(Blend.ProcessNoSkipTransparentFront(blendMode, back, color), back, blendOriginal);
                                 }
                             });
                         }
@@ -225,7 +232,8 @@ namespace NiVE3.PresetPlugin.Effect.Generate
                                         _ when sourceEndY < ty => endColor,
                                         _ => Vector4.Lerp(beginColor, endColor, (ty - sourceBeginY) / diff)
                                     };
-                                    imageDataSpan[x] = Vector4.Lerp(color, imageDataSpan[x], blendOriginal);
+                                    var back = imageDataSpan[x];
+                                    imageDataSpan[x] = Vector4.Lerp(Blend.ProcessNoSkipTransparentFront(blendMode, back, color), back, blendOriginal);
                                 }
                             });
                         }
@@ -236,7 +244,7 @@ namespace NiVE3.PresetPlugin.Effect.Generate
             return managedImage;
         }
 
-        static NGPUImage ProcessGpu(GraphicsDevice device, NImage image, ROI roi, Vector2 beginPoint, Vector4 beginColor, Vector2 endPoint, Vector4 endColor, GradientShapeType type, bool useOkLabInterpolation, float blendOriginal)
+        static NGPUImage ProcessGpu(GraphicsDevice device, NImage image, ROI roi, Vector2 beginPoint, Vector4 beginColor, Vector2 endPoint, Vector4 endColor, GradientShapeType type, bool useOkLabInterpolation, BlendMode blendMode, float blendOriginal)
         {
             var gpuImage = image.ToGpu(device);
 
@@ -255,11 +263,11 @@ namespace NiVE3.PresetPlugin.Effect.Generate
                         {
                             var beginOkLabColor = Unsafe.BitCast<OkLab, Vector4>(OkLab.FromRgb(beginColor));
                             var endOkLabColor = Unsafe.BitCast<OkLab, Vector4>(OkLab.FromRgb(endColor));
-                            context.For(roi.Width, roi.Height, new GradientRadialOkLabProcess(gpuImage.Data, gpuImage.Width, distance, beginPoint, beginColor, beginOkLabColor, endColor, endOkLabColor, blendOriginal, roi.Left, roi.Top));
+                            context.For(roi.Width, roi.Height, new GradientRadialOkLabProcess(gpuImage.Data, gpuImage.Width, distance, beginPoint, beginColor, beginOkLabColor, endColor, endOkLabColor, (int)blendMode, blendOriginal, roi.Left, roi.Top));
                         }
                         else
                         {
-                            context.For(roi.Width, roi.Height, new GradientRadialRgbProcess(gpuImage.Data, gpuImage.Width, distance, beginPoint, beginColor, endColor, blendOriginal, roi.Left, roi.Top));
+                            context.For(roi.Width, roi.Height, new GradientRadialRgbProcess(gpuImage.Data, gpuImage.Width, distance, beginPoint, beginColor, endColor, (int)blendMode, blendOriginal, roi.Left, roi.Top));
                         }
                     }
                     break;
@@ -280,11 +288,11 @@ namespace NiVE3.PresetPlugin.Effect.Generate
                         {
                             var beginOkLabColor = Unsafe.BitCast<OkLab, Vector4>(OkLab.FromRgb(beginColor));
                             var endOkLabColor = Unsafe.BitCast<OkLab, Vector4>(OkLab.FromRgb(endColor));
-                            context.For(roi.Width, roi.Height, new GradientLinearOkLabProcess(gpuImage.Data, gpuImage.Width, sourceBeginY, beginColor, beginOkLabColor, sourceEndY, endColor, endOkLabColor, blendOriginal, matrix.ToFloat3x3(), roi.Left, roi.Top));
+                            context.For(roi.Width, roi.Height, new GradientLinearOkLabProcess(gpuImage.Data, gpuImage.Width, sourceBeginY, beginColor, beginOkLabColor, sourceEndY, endColor, endOkLabColor, (int)blendMode, blendOriginal, matrix.ToFloat3x3(), roi.Left, roi.Top));
                         }
                         else
                         {
-                            context.For(roi.Width, roi.Height, new GradientLinearRgbProcess(gpuImage.Data, gpuImage.Width, sourceBeginY, beginColor, sourceEndY, endColor, blendOriginal, matrix.ToFloat3x3(), roi.Left, roi.Top));
+                            context.For(roi.Width, roi.Height, new GradientLinearRgbProcess(gpuImage.Data, gpuImage.Width, sourceBeginY, beginColor, sourceEndY, endColor, (int)blendMode, blendOriginal, matrix.ToFloat3x3(), roi.Left, roi.Top));
                         }
                     }
                     break;
@@ -302,7 +310,7 @@ namespace NiVE3.PresetPlugin.Effect.Generate
 
     [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
     [GeneratedComputeShaderDescriptor]
-    readonly partial struct GradientLinearRgbProcess(ReadWriteBuffer<Float4> image, int width, float sourceBegintY, Float4 beginColor, float sourceEndY, Float4 endColor, float blendOriginal, Float3x3 matrix, int startX, int startY) : IComputeShader
+    readonly partial struct GradientLinearRgbProcess(ReadWriteBuffer<Float4> image, int width, float sourceBegintY, Float4 beginColor, float sourceEndY, Float4 endColor, int blendMode, float blendOriginal, Float3x3 matrix, int startX, int startY) : IComputeShader
     {
         public void Execute()
         {
@@ -321,13 +329,14 @@ namespace NiVE3.PresetPlugin.Effect.Generate
                 color = Hlsl.Lerp(beginColor, endColor, (ty - sourceBegintY) / (sourceEndY - sourceBegintY));
             }
 
-            image[pos] = Hlsl.Lerp(color, image[pos], blendOriginal);
+            var back = image[pos];
+            image[pos] = Hlsl.Lerp(BlendMethods.ProcessNoSkipTransparentFront(blendMode, back, color), back, blendOriginal);
         }
     }
 
     [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
     [GeneratedComputeShaderDescriptor]
-    readonly partial struct GradientLinearOkLabProcess(ReadWriteBuffer<Float4> image, int width, float sourceBegintY, Float4 beginColor, Float4 beginOkLabColor, float sourceEndY, Float4 endColor, Float4 endOkLabColor, float blendOriginal, Float3x3 matrix, int startX, int startY) : IComputeShader
+    readonly partial struct GradientLinearOkLabProcess(ReadWriteBuffer<Float4> image, int width, float sourceBegintY, Float4 beginColor, Float4 beginOkLabColor, float sourceEndY, Float4 endColor, Float4 endOkLabColor, int blendMode, float blendOriginal, Float3x3 matrix, int startX, int startY) : IComputeShader
     {
         public void Execute()
         {
@@ -348,13 +357,14 @@ namespace NiVE3.PresetPlugin.Effect.Generate
                 color = new Float4(ColorSpaceConversion.OkLabToRgb(okLabInterpolated).XYZ, Hlsl.Lerp(beginColor.W, endColor.W, t));
             }
 
-            image[pos] = Hlsl.Lerp(color, image[pos], blendOriginal);
+            var back = image[pos];
+            image[pos] = Hlsl.Lerp(BlendMethods.ProcessNoSkipTransparentFront(blendMode, back, color), back, blendOriginal);
         }
     }
 
     [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
     [GeneratedComputeShaderDescriptor]
-    readonly partial struct GradientRadialRgbProcess(ReadWriteBuffer<Float4> image, int width, float distance, Float2 beginPoint, Float4 beginColor, Float4 endColor, float blendOriginal, int startX, int startY) : IComputeShader
+    readonly partial struct GradientRadialRgbProcess(ReadWriteBuffer<Float4> image, int width, float distance, Float2 beginPoint, Float4 beginColor, Float4 endColor, int blendMode, float blendOriginal, int startX, int startY) : IComputeShader
     {
         public void Execute()
         {
@@ -373,13 +383,14 @@ namespace NiVE3.PresetPlugin.Effect.Generate
                 color = Hlsl.Lerp(beginColor, endColor, diff);
             }
 
-            image[pos] = Hlsl.Lerp(color, image[pos], blendOriginal);
+            var back = image[pos];
+            image[pos] = Hlsl.Lerp(BlendMethods.ProcessNoSkipTransparentFront(blendMode, back, color), back, blendOriginal);
         }
     }
 
     [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
     [GeneratedComputeShaderDescriptor]
-    readonly partial struct GradientRadialOkLabProcess(ReadWriteBuffer<Float4> image, int width, float distance, Float2 beginPoint, Float4 beginColor, Float4 beginOkLabColor, Float4 endColor, Float4 endOkLabColor, float blendOriginal, int startX, int startY) : IComputeShader
+    readonly partial struct GradientRadialOkLabProcess(ReadWriteBuffer<Float4> image, int width, float distance, Float2 beginPoint, Float4 beginColor, Float4 beginOkLabColor, Float4 endColor, Float4 endOkLabColor, int blendMode, float blendOriginal, int startX, int startY) : IComputeShader
     {
         public void Execute()
         {
@@ -399,7 +410,8 @@ namespace NiVE3.PresetPlugin.Effect.Generate
                 color = new Float4(ColorSpaceConversion.OkLabToRgb(okLabInterpolated).XYZ, Hlsl.Lerp(beginColor.W, endColor.W, diff));
             }
 
-            image[pos] = Hlsl.Lerp(color, image[pos], blendOriginal);
+            var back = image[pos];
+            image[pos] = Hlsl.Lerp(BlendMethods.ProcessNoSkipTransparentFront(blendMode, back, color), back, blendOriginal);
         }
     }
 }

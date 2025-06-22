@@ -1053,6 +1053,9 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("OKLab色空間で補間する")]
         public const string Generate_Gradient_UseOkLabInterpolation = nameof(Generate_Gradient_UseOkLabInterpolation);
 
+        [LanguageKey, DefaultValue("ブレンドモード")]
+        public const string Generate_Gradient_BlendMode = nameof(Generate_Gradient_BlendMode);
+
         [LanguageKey, DefaultValue("元画像のブレンド")]
         public const string Generate_Gradient_BlendOriginal = nameof(Generate_Gradient_BlendOriginal);
 

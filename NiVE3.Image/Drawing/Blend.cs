@@ -70,6 +70,50 @@ namespace NiVE3.Image.Drawing
             };
         }
 
+        /// <summary>
+        /// 指定したブレンドモードで色を合成します。前景色が透明であっても処理をスキップしません
+        /// </summary>
+        /// <param name="blendMode">使用するブレンドモード</param>
+        /// <param name="back">背景色</param>
+        /// <param name="front">合成する色</param>
+        /// <returns>合成後の色</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector4 ProcessNoSkipTransparentFront(BlendMode blendMode, in Vector4 back, in Vector4 front)
+        {
+            if (back.W <= 0.0F)
+            {
+                return front;
+            }
+
+            return blendMode switch
+            {
+                BlendMode.Replace => front,
+                BlendMode.Add => Add(back, front),
+                BlendMode.Subtract => Subtract(back, front),
+                BlendMode.Multiply => Multiply(back, front),
+                BlendMode.Screen => Screen(back, front),
+                BlendMode.Overlay => Overlay(back, front),
+                BlendMode.HardLight => HardLight(back, front),
+                BlendMode.SoftLight => SoftLight(back, front),
+                BlendMode.VividLight => VividLight(back, front),
+                BlendMode.LinearLight => LinearLight(back, front),
+                BlendMode.PinLight => PinLight(back, front),
+                BlendMode.ColorDodge => ColorDodge(back, front),
+                BlendMode.LinearDodge => LinearDodge(back, front),
+                BlendMode.ColorBurn => ColorBurn(back, front),
+                BlendMode.LinearBurn => LinearBurn(back, front),
+                BlendMode.Darken => Darken(back, front),
+                BlendMode.Lighten => Lighten(back, front),
+                BlendMode.Difference => Difference(back, front),
+                BlendMode.Exclusion => Exclusion(back, front),
+                BlendMode.Hue => Hue(back, front),
+                BlendMode.Saturation => Saturation(back, front),
+                BlendMode.Color => Color(back, front),
+                BlendMode.Luminance => Luminance(back, front),
+                _ => Normal(back, front),
+            };
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static Vector4 Normal(in Vector4 back, in Vector4 front)
         {

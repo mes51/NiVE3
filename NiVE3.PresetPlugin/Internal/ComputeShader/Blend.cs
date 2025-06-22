@@ -75,6 +75,66 @@ namespace NiVE3.PresetPlugin.Internal.ComputeShader
             }
         }
 
+        public static Float4 ProcessNoSkipTransparentFront(int blendMode, Float4 back, Float4 front)
+        {
+            if (back.W <= 0.0F)
+            {
+                return front;
+            }
+
+            switch (blendMode)
+            {
+                case 1:
+                    return front;
+                case 2:
+                    return Add(back, front);
+                case 3:
+                    return Subtract(back, front);
+                case 4:
+                    return Multiply(back, front);
+                case 5:
+                    return Screen(back, front);
+                case 6:
+                    return Overlay(back, front);
+                case 7:
+                    return HardLight(back, front);
+                case 8:
+                    return SoftLight(back, front);
+                case 9:
+                    return VividLight(back, front);
+                case 10:
+                    return LinearLight(back, front);
+                case 11:
+                    return PinLight(back, front);
+                case 12:
+                    return ColorDodge(back, front);
+                case 13:
+                    return LinearDodge(back, front);
+                case 14:
+                    return ColorBurn(back, front);
+                case 15:
+                    return LinearBurn(back, front);
+                case 16:
+                    return Darken(back, front);
+                case 17:
+                    return Lighten(back, front);
+                case 18:
+                    return Difference(back, front);
+                case 19:
+                    return Exclusion(back, front);
+                case 20:
+                    return Hue(back, front);
+                case 21:
+                    return Saturation(back, front);
+                case 22:
+                    return Color(back, front);
+                case 23:
+                    return Luminance(back, front);
+                default:
+                    return Normal(back, front);
+            }
+        }
+
         static Float4 Normal(Float4 back, Float4 front)
         {
             var ra = back.W + front.W - back.W * front.W;
