@@ -16,6 +16,8 @@ using System.Windows.Shapes;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Property.Control;
 using NiVE3.Text;
+using NiVE3.View.Property.Popup;
+using Prism.Commands;
 
 namespace NiVE3.View.Property
 {
@@ -24,85 +26,11 @@ namespace NiVE3.View.Property
     /// </summary>
     public partial class SourceTextPropertyControl : PropertyControlBase
     {
-        public static readonly DependencyProperty SourceTextProperty = DependencyProperty.Register(
-            nameof(SourceText),
-            typeof(string),
-            typeof(SourceTextPropertyControl),
-            new FrameworkPropertyMetadata("")
-        );
-
-        public string SourceText
-        {
-            get { return (string)GetValue(SourceTextProperty); }
-            set { SetValue(SourceTextProperty, value); }
-        }
+        public ICommand OpenDialogCommand { get; }
 
         public SourceTextPropertyControl()
         {
-            InitializeComponent();
-        }
-
-        private void Root_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            if (DataContext is not IPropertyViewModel viewModel)
-            {
-                return;
-            }
-
-            if (e.OldValue is IPropertyViewModel oldViewModel)
-            {
-                oldViewModel.PropertyChanged -= ViewModel_PropertyChanged;
-            }
-            if (e.NewValue is IPropertyViewModel newViewModel)
-            {
-                newViewModel.PropertyChanged += ViewModel_PropertyChanged;
-                if (newViewModel.CurrentTimeRawValue is StyledText d)
-                {
-                    SetCurrentValue(SourceTextProperty, d.Text);
-                }
-            }
-        }
-
-        private void EditButton_Click(object sender, RoutedEventArgs e)
-        {
-            EditPopup.IsOpen = true;
-        }
-
-        private void EditCancelButton_Click(object sender, RoutedEventArgs e)
-        {
-            EditPopup.IsOpen = false;
-            if (ViewModel?.CurrentTimeRawValue is StyledText d)
-            {
-                SetCurrentValue(SourceTextProperty, d.Text);
-            }
-        }
-
-        private void EditOKButton_Click(object sender, RoutedEventArgs e)
-        {
-            EditPopup.IsOpen = false;
-
-            var viewModel = ViewModel;
-            if (viewModel == null || viewModel.CurrentTimeRawValue is not StyledText d)
-            {
-                return;
-            }
-
-            viewModel.BeginEditCommand.Execute(null);
-            viewModel.CurrentTimeRawValue = d.ChangeText(SourceText);
-            viewModel.EndEditCommand.Execute(null);
-        }
-
-        private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(IPropertyViewModel.CurrentTimeRawValue) && ViewModel?.CurrentTimeRawValue is StyledText d)
-            {
-                SetCurrentValue(SourceTextProperty, d.Text);
-            }
-        }
-
-        private void TextBox_PreviewKeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter && (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl)))
+            OpenDialogCommand = new DelegateCommand(() =>
             {
                 var viewModel = ViewModel;
                 if (viewModel == null || viewModel.CurrentTimeRawValue is not StyledText d)
@@ -110,14 +38,25 @@ namespace NiVE3.View.Property
                     return;
                 }
 
-                EditPopup.IsOpen = false;
+                var windowLocation = EditButton.PointToScreen(new Point(0.0, EditButton.Height));
+                var dpi = VisualTreeHelper.GetDpi(EditButton);
 
-                viewModel.BeginEditCommand.Execute(null);
-                viewModel.CurrentTimeRawValue = d.ChangeText(SourceText);
-                viewModel.EndEditCommand.Execute(null);
+                var dialog = new SourceTextPropertyEditPopupWindow
+                {
+                    Owner = Application.Current.MainWindow,
+                    Left = windowLocation.X / dpi.DpiScaleX,
+                    Top = windowLocation.Y / dpi.DpiScaleY,
+                    SourceText = d.Text
+                };
+                if (dialog.ShowDialog() ?? false)
+                {
+                    viewModel.BeginEditCommand.Execute(null);
+                    viewModel.CurrentTimeRawValue = d.ChangeText(dialog.SourceText);
+                    viewModel.EndEditCommand.Execute(null);
+                }
+            });
 
-                e.Handled = true;
-            }
+            InitializeComponent();
         }
     }
 }
