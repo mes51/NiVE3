@@ -640,6 +640,7 @@ namespace NiVE3.ViewModel
             eventHubModel.UpdateDurationRequest += EventHubModel_UpdateDurationRequest;
             eventHubModel.AbortEditDurationRequest += EventHubModel_AbortEditDurationRequest;
             eventHubModel.TextStyleChangeRequest += EventHubModel_TextStyleChangeRequest;
+            historyModel.HistoryChanged += HistoryModel_HistoryChanged;
             PropertyChanged += TimelineViewModel_PropertyChanged;
             PaneSelected += TimelineViewModel_PaneSelected;
 
@@ -1623,6 +1624,18 @@ namespace NiVE3.ViewModel
 
             var selectedTextLayerIds = SelectedLayers.Where(l => l.IsText).Select(l => l.LayerId).ToArray();
             CompositionModel.ChangeTextStyle(selectedTextLayerIds, e.TargetLayerId, e.TargetLayerPrevValue);
+        }
+
+        private void HistoryModel_HistoryChanged(object? sender, EventArgs e)
+        {
+            if (!IsUsingTool || PreviewManipulation == null)
+            {
+                return;
+            }
+
+            PreviewManipulation.Abort();
+            IsUsingTool = false;
+            PreviewManipulation = null;
         }
 
         private void TimelineViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
