@@ -75,6 +75,8 @@
                             <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddLayer_NullObject}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=AddNullObjectLayerGesture}" CommandTarget="{Binding Source={x:Reference Root}}"/>
                             <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddLayer_Text}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=AddTextLayerGesture}" CommandTarget="{Binding Source={x:Reference Root}}"/>
                             <Separator />
+                            <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddLayer_LoadSolid}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=AddSolidLayerGesture}" CommandTarget="{Binding Source={x:Reference Root}}"/>
+                            <Separator />
                             <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddLayer_Procedural}" ItemsSource="{Binding Source={StaticResource ViewModelProxy}, Path=Data.ProceduralInputItems}">
                                 <MenuItem.ItemTemplate>
                                     <DataTemplate DataType="{x:Type um:ProceduralInputItem}">
@@ -167,6 +169,8 @@
                                     <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddLayer_Light}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=AddLightLayerGesture}" CommandTarget="{Binding Source={x:Reference Root}}"/>
                                     <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddLayer_NullObject}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=AddNullObjectLayerGesture}" CommandTarget="{Binding Source={x:Reference Root}}"/>
                                     <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddLayer_Text}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=AddTextLayerGesture}" CommandTarget="{Binding Source={x:Reference Root}}"/>
+                                    <Separator />
+                                    <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddLayer_LoadSolid}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=AddSolidLayerGesture}" CommandTarget="{Binding Source={x:Reference Root}}"/>
                                     <Separator />
                                     <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddLayer_Procedural}" ItemsSource="{Binding Source={StaticResource ViewModelProxy}, Path=Data.ProceduralInputItems}">
                                         <MenuItem.ItemTemplate>

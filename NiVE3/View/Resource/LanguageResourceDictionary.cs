@@ -374,7 +374,7 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("追加(_A)")]
         public static readonly string Timeline_ContextMenu_AddLayer = nameof(Timeline_ContextMenu_AddLayer);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("シェイプ(_S)")]
+        [ShowInMarkup, LanguageKey, DefaultValue("シェイプ(_G)")]
         public static readonly string Timeline_ContextMenu_AddLayer_Shape = nameof(Timeline_ContextMenu_AddLayer_Shape);
 
         [ShowInMarkup, LanguageKey, DefaultValue("カメラ(_C)")]
@@ -385,6 +385,9 @@ namespace NiVE3.View.Resource
 
         [ShowInMarkup, LanguageKey, DefaultValue("ヌルオブジェクト(_N)")]
         public static readonly string Timeline_ContextMenu_AddLayer_NullObject = nameof(Timeline_ContextMenu_AddLayer_NullObject);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("平面(_S)...")]
+        public static readonly string Timeline_ContextMenu_AddLayer_LoadSolid = nameof(Timeline_ContextMenu_AddLayer_LoadSolid);
 
         [ShowInMarkup, LanguageKey, DefaultValue("プロシージャル(_P)")]
         public static readonly string Timeline_ContextMenu_AddLayer_Procedural = nameof(Timeline_ContextMenu_AddLayer_Procedural);
