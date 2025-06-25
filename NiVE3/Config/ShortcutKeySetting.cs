@@ -284,6 +284,20 @@ namespace NiVE3.Config
             new PropertyMetadata(new KeyGesture(Key.None))
         );
 
+        public static readonly DependencyProperty MoveLayerOrderUpGestureProperty = DependencyProperty.Register(
+            nameof(MoveLayerOrderUpGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new KeyGesture(Key.None))
+        );
+
+        public static readonly DependencyProperty MoveLayerOrderDownGestureProperty = DependencyProperty.Register(
+            nameof(MoveLayerOrderDownGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new KeyGesture(Key.None))
+        );
+
         public static readonly DependencyProperty MoveInPointToIndicatorGestureProperty = DependencyProperty.Register(
             nameof(MoveInPointToIndicatorGesture),
             typeof(InputGesture),
@@ -672,6 +686,22 @@ namespace NiVE3.Config
         {
             get { return (InputGesture)GetValue(MoveInPointToIndicatorGestureProperty); }
             set { SetValue(MoveInPointToIndicatorGestureProperty, value); }
+        }
+
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Edit)]
+        [ShowInMarkup]
+        public InputGesture MoveLayerOrderDownGesture
+        {
+            get { return (InputGesture)GetValue(MoveLayerOrderDownGestureProperty); }
+            set { SetValue(MoveLayerOrderDownGestureProperty, value); }
+        }
+
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Edit)]
+        [ShowInMarkup]
+        public InputGesture MoveLayerOrderUpGesture
+        {
+            get { return (InputGesture)GetValue(MoveLayerOrderUpGestureProperty); }
+            set { SetValue(MoveLayerOrderUpGestureProperty, value); }
         }
 
         [ShortcutKeyCategory(ShortcutKeyCategoryType.Edit)]

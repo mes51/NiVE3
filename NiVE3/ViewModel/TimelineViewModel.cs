@@ -63,6 +63,8 @@ namespace NiVE3.ViewModel
     [CommandHandling(nameof(AddEllipseMaskCommand), nameof(ShortcutKeySetting.AddEllipseMaskGesture))]
     [CommandHandling(nameof(AddBezierMaskCommand), nameof(ShortcutKeySetting.AddBezierMaskGesture))]
     [CommandHandling(nameof(CompositionSettingCommand), nameof(ShortcutKeySetting.OpenCompositionSettingGesture))]
+    [CommandHandling(nameof(MoveLayerOrderUpCommand), nameof(ShortcutKeySetting.MoveLayerOrderUpGesture))]
+    [CommandHandling(nameof(MoveLayerOrderDownCommand), nameof(ShortcutKeySetting.MoveLayerOrderDownGesture))]
     [CommandHandling(nameof(ChangeLayerTagsRandomlyCommand), nameof(ShortcutKeySetting.ChangeLayerTagsRandomlyGesture))]
     [CommandHandling(nameof(MoveSourceStartPointToIndicatorBaseInPointCommand), nameof(ShortcutKeySetting.MoveSourceStartPointToIndicatorBaseInPointGesture))]
     [CommandHandling(nameof(MoveSourceStartPointToIndicatorBaseOutPointCommand), nameof(ShortcutKeySetting.MoveSourceStartPointToIndicatorBaseOutPointGesture))]
@@ -501,6 +503,10 @@ namespace NiVE3.ViewModel
 
         public ICommand AddBezierMaskCommand { get; }
 
+        public ICommand MoveLayerOrderUpCommand { get; }
+
+        public ICommand MoveLayerOrderDownCommand { get; }
+
         public ICommand ChangeLayerTagsRandomlyCommand { get; }
 
         public ICommand MoveInPointToIndicatorCommand { get; }
@@ -916,6 +922,34 @@ namespace NiVE3.ViewModel
                 }
 
                 CompositionModel.AddBezierMaskToLayers([..SelectedLayers.Select(l => l.LayerId)]);
+            }, () => CompositionModel != null && SelectedLayers.Count > 0)
+                .ObservesProperty(() => CompositionModel)
+                .ObservesProperty(() => SelectedLayers.Count);
+
+            MoveLayerOrderUpCommand = new DelegateCommand(() =>
+            {
+                if (CompositionModel == null || Layers == null || SelectedLayers.Count < 1)
+                {
+                    return;
+                }
+
+                var firstLayer = SelectedLayers.OrderBy(Layers.IndexOf).First();
+                var newIndex = Math.Clamp(Layers.IndexOf(firstLayer) - 1, 0, Layers.Count - 1);
+                CompositionModel.MoveLayers([..SelectedLayers.Select(l => l.LayerId)], firstLayer.LayerId, newIndex);
+            }, () => CompositionModel != null && SelectedLayers.Count > 0)
+                .ObservesProperty(() => CompositionModel)
+                .ObservesProperty(() => SelectedLayers.Count);
+
+            MoveLayerOrderDownCommand = new DelegateCommand(() =>
+            {
+                if (CompositionModel == null || Layers == null || SelectedLayers.Count < 1)
+                {
+                    return;
+                }
+
+                var lastLayer = SelectedLayers.OrderBy(Layers.IndexOf).First();
+                var newIndex = Math.Clamp(Layers.IndexOf(lastLayer) + 1, 0, Layers.Count - 1);
+                CompositionModel.MoveLayers([.. SelectedLayers.Select(l => l.LayerId)], lastLayer.LayerId, newIndex);
             }, () => CompositionModel != null && SelectedLayers.Count > 0)
                 .ObservesProperty(() => CompositionModel)
                 .ObservesProperty(() => SelectedLayers.Count);

@@ -461,6 +461,12 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("レイヤーの表示フレームを現在時刻で固定(_F)")]
         public static readonly string Timeline_ContextMenu_ChangeLayerFreezeFrame = nameof(Timeline_ContextMenu_ChangeLayerFreezeFrame);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("レイヤーの順番を1つ上げる(_U)")]
+        public static readonly string Timeline_ContextMenu_MoveLayerOrderUp = nameof(Timeline_ContextMenu_MoveLayerOrderUp);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("レイヤーの順番を1つ下げる(_W)")]
+        public static readonly string Timeline_ContextMenu_MoveLayerOrderDown = nameof(Timeline_ContextMenu_MoveLayerOrderDown);
+
         [ShowInMarkup, LanguageKey, DefaultValue("レイヤーのタグをランダムに変更(_R)")]
         public static readonly string Timeline_ContextMenu_ChangeLayerTagsRandomly = nameof(Timeline_ContextMenu_ChangeLayerTagsRandomly);
 
@@ -1871,6 +1877,12 @@ namespace NiVE3.View.Resource
 
         [DefaultValue("インポイントを基準にインジケーターの位置にレイヤー時間を移動")]
         public static readonly string ShortcutKeyName_MoveSourceStartPointToIndicatorBaseInPointGesture = nameof(ShortcutKeyName_MoveSourceStartPointToIndicatorBaseInPointGesture);
+
+        [DefaultValue("レイヤーの順番を1つ下げる")]
+        public static readonly string ShortcutKeyName_MoveLayerOrderDownGesture = nameof(ShortcutKeyName_MoveLayerOrderDownGesture);
+
+        [DefaultValue("レイヤーの順番を1つ上げる")]
+        public static readonly string ShortcutKeyName_MoveLayerOrderUpGesture = nameof(ShortcutKeyName_MoveLayerOrderUpGesture);
 
         [DefaultValue("レイヤーのタグをランダムに変更")]
         public static readonly string ShortcutKeyName_ChangeLayerTagsRandomlyGesture = nameof(ShortcutKeyName_ChangeLayerTagsRandomlyGesture);
