@@ -180,6 +180,22 @@ namespace NiVE3.Plugin.Interfaces
         /// <param name="useGpu">GPUを使用するかどうか</param>
         /// <returns>取得した画像。指定した時間がソースの長さを超えていた場合はnull</returns>
         NImage? GetEffectedImage(Time globalTime, double downSamplingRate, bool useGpu);
+
+        /// <summary>
+        /// フッテージから取得した音声そのままを取得します
+        /// </summary>
+        /// <param name="globalTime">音声を取得する時のコンポジション時間</param>
+        /// <param name="length">取得する音声の長さ</param>
+        /// <returns>取得した音声。指定した時間がソースの長さを超えていた場合はその分短くなります</returns>
+        float[] GetRawAudio(Time globalTime, Time length);
+
+        /// <summary>
+        /// エフェクト適用済みのレイヤーの音声を取得します
+        /// </summary>
+        /// <param name="globalTime">音声を取得する時のコンポジション時間</param>
+        /// <param name="length">取得する音声の長さ</param>
+        /// <returns>取得した音声。指定した時間がソースの長さを超えていた場合はその分短くなります</returns>
+        float[] GetEffectedAudio(Time globalTime, Time length);
     }
 
     public interface IFootageSourceUsingLayerObject

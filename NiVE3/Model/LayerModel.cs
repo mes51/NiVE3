@@ -740,6 +740,16 @@ namespace NiVE3.Model
             return image;
         }
 
+        float[] ILayerObject.GetRawAudio(Time globalTime, Time length)
+        {
+            return GetRawAudio(globalTime, length);
+        }
+
+        float[] ILayerObject.GetEffectedAudio(Time globalTime, Time length)
+        {
+            return GetAudio(globalTime, length);
+        }
+
         public RenderableImage? GetImage(Time time, Time frameTime, double downSamplingRate, bool withTrackMatte, bool useGpu, bool frameBlend)
         {
             if (!HasImage)

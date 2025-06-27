@@ -32,6 +32,9 @@ namespace NiVE3.Plugin.Internal.View.Resources
         public const string PropertyControl_UseLayerImagePropertyControl_None = nameof(PropertyControl_UseLayerImagePropertyControl_None);
 
         [DefaultValue("なし")]
+        public const string PropertyControl_UseLayerAudioPropertyControl_None = nameof(PropertyControl_UseLayerAudioPropertyControl_None);
+
+        [DefaultValue("なし")]
         public const string PropertyControl_UseMaskPropertyControl_None = nameof(PropertyControl_UseMaskPropertyControl_None);
 
         [DefaultValue("OK")]
@@ -53,6 +56,12 @@ namespace NiVE3.Plugin.Internal.View.Resources
 
         [DefaultValue("エフェクト")]
         public const string LayerImageProcessType_Effected = nameof(LayerImageProcessType_Effected);
+
+        [DefaultValue("ソース")]
+        public const string LayerAudioProcessType_Raw = nameof(LayerAudioProcessType_Raw);
+
+        [DefaultValue("エフェクト")]
+        public const string LayerAudioProcessType_Effected = nameof(LayerAudioProcessType_Effected);
 
         public static LanguageResourceDictionary Dictionary { get; }
 
