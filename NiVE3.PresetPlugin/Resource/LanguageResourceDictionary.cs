@@ -1106,6 +1106,62 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("ブレンドモード")]
         public const string Generate_CheckerBoard_BlendMode = nameof(Generate_CheckerBoard_BlendMode);
 
+        // AudioSpectrum
+
+        [DefaultValue("オーディオスペクトラム")]
+        public const string Generate_AudioSpectrum_Name = nameof(Generate_AudioSpectrum_Name);
+
+        [DefaultValue("音声のスペクトラムを描画します")]
+        public const string Generate_AudioSpectrum_Description = nameof(Generate_AudioSpectrum_Description);
+
+        [LanguageKey, DefaultValue("レイヤー")]
+        public const string Generate_AudioSpectrum_Layer = nameof(Generate_AudioSpectrum_Layer);
+
+        [LanguageKey, DefaultValue("音声のサンプル数")]
+        public const string Generate_AudioSpectrum_AudioLength = nameof(Generate_AudioSpectrum_AudioLength);
+
+        [LanguageKey, DefaultValue("窓関数")]
+        public const string Generate_AudioSpectrum_WindowFunction = nameof(Generate_AudioSpectrum_WindowFunction);
+
+        [LanguageKey, DefaultValue("音声のオフセット")]
+        public const string Generate_AudioSpectrum_AudioOffset = nameof(Generate_AudioSpectrum_AudioOffset);
+
+        [LanguageKey, DefaultValue("周波数カウント")]
+        public const string Generate_AudioSpectrum_FrequencyBandCount = nameof(Generate_AudioSpectrum_FrequencyBandCount);
+
+        [LanguageKey, DefaultValue("開始点")]
+        public const string Generate_AudioSpectrum_BeginPoint = nameof(Generate_AudioSpectrum_BeginPoint);
+
+        [LanguageKey, DefaultValue("終了点")]
+        public const string Generate_AudioSpectrum_EndPoint = nameof(Generate_AudioSpectrum_EndPoint);
+
+        [LanguageKey, DefaultValue("パスに沿って配置する")]
+        public const string Generate_AudioSpectrum_UseMaskPath = nameof(Generate_AudioSpectrum_UseMaskPath);
+
+        [LanguageKey, DefaultValue("パス")]
+        public const string Generate_AudioSpectrum_MaskPath = nameof(Generate_AudioSpectrum_MaskPath);
+
+        [LanguageKey, DefaultValue("最大高さ")]
+        public const string Generate_AudioSpectrum_MaxHeight = nameof(Generate_AudioSpectrum_MaxHeight);
+
+        [LanguageKey, DefaultValue("スペクトラムの幅")]
+        public const string Generate_AudioSpectrum_SpectrumWidth = nameof(Generate_AudioSpectrum_SpectrumWidth);
+
+        [LanguageKey, DefaultValue("周波数のスケール")]
+        public const string Generate_AudioSpectrum_FrequencyScaleType = nameof(Generate_AudioSpectrum_FrequencyScaleType);
+
+        [LanguageKey, DefaultValue("表示")]
+        public const string Generate_AudioSpectrum_DisplayMode = nameof(Generate_AudioSpectrum_DisplayMode);
+
+        [LanguageKey, DefaultValue("形状")]
+        public const string Generate_AudioSpectrum_SpectrumShapeType = nameof(Generate_AudioSpectrum_SpectrumShapeType);
+
+        [LanguageKey, DefaultValue("色")]
+        public const string Generate_AudioSpectrum_Color = nameof(Generate_AudioSpectrum_Color);
+
+        [LanguageKey, DefaultValue("ブレンドモード")]
+        public const string Generate_AudioSpectrum_BlendMode = nameof(Generate_AudioSpectrum_BlendMode);
+
         // Unmult
 
         [DefaultValue("Unmult")]
@@ -2002,6 +2058,72 @@ namespace NiVE3.PresetPlugin.Resource
 
         [DefaultValue("輝度")]
         public const string LuminanceAndSingleChannelType_Luminance = nameof(LuminanceAndSingleChannelType_Luminance);
+
+        [DefaultValue("128")]
+        public const string AudioSpectrumAudioLengthType_Length128 = nameof(AudioSpectrumAudioLengthType_Length128);
+
+        [DefaultValue("256")]
+        public const string AudioSpectrumAudioLengthType_Length256 = nameof(AudioSpectrumAudioLengthType_Length256);
+
+        [DefaultValue("512")]
+        public const string AudioSpectrumAudioLengthType_Length512 = nameof(AudioSpectrumAudioLengthType_Length512);
+
+        [DefaultValue("1024")]
+        public const string AudioSpectrumAudioLengthType_Length1024 = nameof(AudioSpectrumAudioLengthType_Length1024);
+
+        [DefaultValue("2048")]
+        public const string AudioSpectrumAudioLengthType_Length2048 = nameof(AudioSpectrumAudioLengthType_Length2048);
+
+        [DefaultValue("4096")]
+        public const string AudioSpectrumAudioLengthType_Length4096 = nameof(AudioSpectrumAudioLengthType_Length4096);
+
+        [DefaultValue("8192")]
+        public const string AudioSpectrumAudioLengthType_Length8192 = nameof(AudioSpectrumAudioLengthType_Length8192);
+
+        [DefaultValue("16384")]
+        public const string AudioSpectrumAudioLengthType_Length16384 = nameof(AudioSpectrumAudioLengthType_Length16384);
+
+        [DefaultValue("32768")]
+        public const string AudioSpectrumAudioLengthType_Length32768 = nameof(AudioSpectrumAudioLengthType_Length32768);
+
+        [DefaultValue("65536")]
+        public const string AudioSpectrumAudioLengthType_Length65536 = nameof(AudioSpectrumAudioLengthType_Length65536);
+
+        [DefaultValue("ハン窓")]
+        public const string AudioSpectrumWindowFunctionType_Hann = nameof(AudioSpectrumWindowFunctionType_Hann);
+
+        [DefaultValue("ハミング窓")]
+        public const string AudioSpectrumWindowFunctionType_Hamming = nameof(AudioSpectrumWindowFunctionType_Hamming);
+
+        [DefaultValue("ブラックマン-ハリス窓")]
+        public const string AudioSpectrumWindowFunctionType_BlackmannHarris = nameof(AudioSpectrumWindowFunctionType_BlackmannHarris);
+
+        [DefaultValue("上")]
+        public const string AudioSpectrumDisplayMode_Up = nameof(AudioSpectrumDisplayMode_Up);
+
+        [DefaultValue("下")]
+        public const string AudioSpectrumDisplayMode_Down = nameof(AudioSpectrumDisplayMode_Down);
+
+        [DefaultValue("両方")]
+        public const string AudioSpectrumDisplayMode_Both = nameof(AudioSpectrumDisplayMode_Both);
+
+        [DefaultValue("バー")]
+        public const string AudioSpectrumShapeType_Bar = nameof(AudioSpectrumShapeType_Bar);
+
+        [DefaultValue("ライン")]
+        public const string AudioSpectrumShapeType_Line = nameof(AudioSpectrumShapeType_Line);
+
+        [DefaultValue("ドット")]
+        public const string AudioSpectrumShapeType_Dot = nameof(AudioSpectrumShapeType_Dot);
+
+        [DefaultValue("線形")]
+        public const string AudioSpectrumFrequencyScaleType_Linear = nameof(AudioSpectrumFrequencyScaleType_Linear);
+
+        [DefaultValue("対数")]
+        public const string AudioSpectrumFrequencyScaleType_Log = nameof(AudioSpectrumFrequencyScaleType_Log);
+
+        [DefaultValue("メル")]
+        public const string AudioSpectrumFrequencyScaleType_Mel = nameof(AudioSpectrumFrequencyScaleType_Mel);
 
         // unit
 

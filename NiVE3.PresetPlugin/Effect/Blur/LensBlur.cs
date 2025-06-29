@@ -140,7 +140,7 @@ namespace NiVE3.PresetPlugin.Effect.Blur
 
             var layerMaskPath = irisUseLayerMask ? layer.GetMask(irisTargetLayerMask.MaskId)?.GetPath(layerTime + layer.SourceStartPoint, downSamplingRateX) : null;
             using var irisMask = (layerMaskPath != null && layerMaskPath.IsClosed && !layerMaskPath.IsEmpty()) ?
-                GenerateMaskByLayerMask(layerMaskPath, amount) :
+                GenerateMaskByLayerNonEmptyMask(layerMaskPath, amount) :
                 GenerateIrisMask(irisType, amount, irisCornerRound, irisAngle);
 
             if (useGpu && AcceleratorObject != null)
@@ -301,10 +301,14 @@ namespace NiVE3.PresetPlugin.Effect.Blur
             return gpuImage;
         }
 
-        static IrisMask GenerateMaskByLayerMask(BezierPath layerMaskPath, float size)
+        static IrisMask GenerateMaskByLayerNonEmptyMask(BezierPath layerMaskPath, float size)
         {
             size += 0.5F;
-            var path = BuildNonEmptyClosedPath(layerMaskPath);
+            var path = layerMaskPath.BuildPath() ?? EmptyPath.ClosedPath;
+            if (path == EmptyPath.ClosedPath)
+            {
+                throw new Exception(); // bug
+            }
 
             var originalBounds = path.Bounds;
             var resizeRate = size / Math.Max(originalBounds.Width, originalBounds.Height);
@@ -374,31 +378,6 @@ namespace NiVE3.PresetPlugin.Effect.Blur
             ShapeMaskRendererCPU.Fill(polygons, maskImage, 1.0F);
 
             return new IrisMask(maskImage, maskRadius, maskSize);
-        }
-
-        static IPath BuildNonEmptyClosedPath(BezierPath path)
-        {
-            var pathBuilder = new PathBuilder();
-            pathBuilder.StartFigure();
-            pathBuilder.MoveTo((Vector2)path.BeginPoint);
-            foreach (var p in path.Points)
-            {
-                if (p.IsLinear)
-                {
-                    pathBuilder.LineTo((Vector2)p.EndPoint);
-                }
-                else
-                {
-                    pathBuilder.CubicBezierTo((Vector2)p.ControlPoint1, (Vector2)p.ControlPoint2, (Vector2)p.EndPoint);
-                }
-            }
-
-            if (path.IsClosed)
-            {
-                pathBuilder.CloseFigure();
-            }
-
-            return pathBuilder.Build();
         }
     }
 

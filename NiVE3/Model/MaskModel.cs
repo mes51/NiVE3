@@ -170,6 +170,7 @@ namespace NiVE3.Model
                 var shapeType = (MaskShapeType)(setting[PropertyMaskSettingShapeTypeId] ?? MaskShapeType.Rectangle);
                 var size = (Vector2)((Vector3d)(setting[PropertyMaskSettingSizeId] ?? Vector3d.Zero) / downSamplingRate);
 
+                position -= size * 0.5F;
                 return shapeType switch
                 {
                     MaskShapeType.Ellipse => new BezierEllipsePolygon(position.X + size.X * 0.5F, position.Y + size.Y * 0.5F, size.X, size.Y).BezierPath,
