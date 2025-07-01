@@ -1221,6 +1221,9 @@ namespace NiVE3.View.Resource
         [DefaultValue("マスクプリセットの適用")]
         public static readonly string History_LoadMaskPreset = nameof(History_LoadMaskPreset);
 
+        [DefaultValue("マーカーの移動")]
+        public static readonly string History_MoveCompositionMarker = nameof(History_MoveCompositionMarker);
+
         // Dialog
 
         [DefaultValue("フッテージの削除")]

@@ -8,6 +8,7 @@ using NiVE3.Image.Drawing;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.Shared.Extension;
+using NiVE3.ValueObject;
 using NiVE3.View.Resource;
 
 namespace NiVE3.Model
@@ -856,6 +857,42 @@ namespace NiVE3.Model
             public void Undo()
             {
                 Model.IsEnableMotionBlur = !NewState;
+            }
+
+            public void Dispose() { }
+        }
+
+        private class MoveMarkerHistoryCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_MoveCompositionMarker);
+
+            CompositionModel Model { get; }
+
+            Marker OldMarker { get; }
+
+            Marker NewMarker { get; }
+
+            public MoveMarkerHistoryCommand(CompositionModel model, Marker oldMarker, Marker newMarker)
+            {
+                Model = model;
+                OldMarker = oldMarker;
+                NewMarker = newMarker;
+            }
+
+            public void Redo()
+            {
+                var index = Model.CompositionMarkers.FindIndex(m => m.Id == OldMarker.Id);
+
+                Model.CompositionMarkers[index] = NewMarker;
+                Model.CompositionMarkers.Sort((a, b) => a.Time.CompareTo(b.Time));
+            }
+
+            public void Undo()
+            {
+                var index = Model.CompositionMarkers.FindIndex(m => m.Id == NewMarker.Id);
+
+                Model.CompositionMarkers[index] = OldMarker;
+                Model.CompositionMarkers.Sort((a, b) => a.Time.CompareTo(b.Time));
             }
 
             public void Dispose() { }

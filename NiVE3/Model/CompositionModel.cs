@@ -192,6 +192,13 @@ namespace NiVE3.Model
             }
         }
 
+        private ObservableCollection<Marker> compositionMarkers = [];
+        public ObservableCollection<Marker> CompositionMarkers
+        {
+            get { return compositionMarkers; }
+            set { SetProperty(ref compositionMarkers, value); }
+        }
+
         public Guid RendererPluginId { get; private set; }
 
         public Guid ToneMapperPluginId { get; private set; }
@@ -1642,6 +1649,23 @@ namespace NiVE3.Model
             }
 
             HistoryModel.EndGroup();
+        }
+
+        public void MoveMarker(Marker marker, Time newTime)
+        {
+            var oldMarkerIndex = CompositionMarkers.FindIndex(m => m.Id == marker.Id);
+            if (oldMarkerIndex < 0)
+            {
+                return;
+            }
+
+            var oldMarker = CompositionMarkers[oldMarkerIndex];
+            var newMarker = new Marker(marker.Id, newTime, marker.Name);
+
+            CompositionMarkers[oldMarkerIndex] = newMarker;
+            CompositionMarkers.Sort((a, b) => a.Time.CompareTo(b.Time));
+
+            HistoryModel.Add(new MoveMarkerHistoryCommand(this, oldMarker, newMarker));
         }
 
         public ILayerObject? GetLayer(Guid layerId)

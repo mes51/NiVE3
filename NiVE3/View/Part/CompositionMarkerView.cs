@@ -1,0 +1,282 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Media3D;
+using NiVE3.Plugin.ValueObject;
+using NiVE3.Util;
+using NiVE3.ValueObject;
+using NiVE3.View.Resource;
+
+namespace NiVE3.View.Part
+{
+    class CompositionMarkerView : FrameworkElement
+    {
+        const double MarkerWidth = 10.0;
+
+        const double MarkerHeight = UIParameters.TimeLocatorTimeBarHeight * 0.5;
+
+        static readonly Geometry MarkerIcon;
+
+        public static readonly DependencyProperty MarkerBrushProperty = DependencyProperty.Register(
+            nameof(MarkerBrush),
+            typeof(Brush),
+            typeof(CompositionMarkerView),
+            new FrameworkPropertyMetadata(Brushes.Gray, FrameworkPropertyMetadataOptions.AffectsRender)
+        );
+
+        public static readonly DependencyProperty RangeProperty = DependencyProperty.Register(
+            nameof(Range),
+            typeof(Time),
+            typeof(CompositionMarkerView),
+            new FrameworkPropertyMetadata(Time.Zero, FrameworkPropertyMetadataOptions.AffectsRender)
+        );
+
+        public static readonly DependencyProperty RangeStartProperty = DependencyProperty.Register(
+            nameof(RangeStart),
+            typeof(Time),
+            typeof(CompositionMarkerView),
+            new FrameworkPropertyMetadata(Time.Zero, FrameworkPropertyMetadataOptions.AffectsRender)
+        );
+
+        public static readonly DependencyProperty FrameRateProperty = DependencyProperty.Register(
+            nameof(FrameRate),
+            typeof(double),
+            typeof(CompositionMarkerView),
+            new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsRender)
+        );
+
+        public static readonly DependencyProperty CompositionMarkersProperty = DependencyProperty.Register(
+            nameof(CompositionMarkers),
+            typeof(ObservableCollection<Marker>),
+            typeof(CompositionMarkerView),
+            new FrameworkPropertyMetadata(new ObservableCollection<Marker>(), FrameworkPropertyMetadataOptions.AffectsRender, CompositionMarkersChanged)
+        );
+
+        public static readonly RoutedEvent MarkerMoveRequestEvent = EventManager.RegisterRoutedEvent(
+            nameof(MarkerMoveRequest), RoutingStrategy.Direct, typeof(EventHandler<MarkerMoveEventArgs>), typeof(CompositionMarkerView)
+        );
+
+        public event EventHandler<MarkerMoveEventArgs> MarkerMoveRequest
+        {
+            add { AddHandler(MarkerMoveRequestEvent, value); }
+            remove { RemoveHandler(MarkerMoveRequestEvent, value); }
+        }
+
+        public ObservableCollection<Marker> CompositionMarkers
+        {
+            get { return (ObservableCollection<Marker>)GetValue(CompositionMarkersProperty); }
+            set { SetValue(CompositionMarkersProperty, value); }
+        }
+
+        public double FrameRate
+        {
+            get { return (double)GetValue(FrameRateProperty); }
+            set { SetValue(FrameRateProperty, value); }
+        }
+
+        public Time RangeStart
+        {
+            get { return (Time)GetValue(RangeStartProperty); }
+            set { SetValue(RangeStartProperty, value); }
+        }
+
+        public Time Range
+        {
+            get { return (Time)GetValue(RangeProperty); }
+            set { SetValue(RangeProperty, value); }
+        }
+
+        public Brush MarkerBrush
+        {
+            get { return (Brush)GetValue(MarkerBrushProperty); }
+            set { SetValue(MarkerBrushProperty, value); }
+        }
+
+        bool IsClicked { get; set; }
+
+        double ClickX { get; set; }
+
+        Marker? MoveTarget { get; set; }
+
+        Time MarkerMovingTime { get; set; }
+
+        static CompositionMarkerView()
+        {
+            var markerIconGeometry = new StreamGeometry();
+
+            using (var context = markerIconGeometry.Open())
+            {
+                context.BeginFigure(new Point(MarkerWidth * 0.5, 0.0), true, true);
+                context.LineTo(new Point(0.0, MarkerHeight * 0.5), true, false);
+                context.LineTo(new Point(0.0, MarkerHeight), true, false);
+                context.LineTo(new Point(MarkerWidth, MarkerHeight), true, false);
+                context.LineTo(new Point(MarkerWidth, MarkerHeight * 0.5), true, false);
+                context.LineTo(new Point(MarkerWidth * 0.5, 0.0), true, false);
+            }
+
+            MarkerIcon = markerIconGeometry;
+        }
+
+        public CompositionMarkerView()
+        {
+            MouseDown += CompositionMarkerView_MouseDown;
+            MouseMove += CompositionMarkerView_MouseMove;
+            MouseUp += CompositionMarkerView_MouseUp;
+        }
+
+        protected override HitTestResult? HitTestCore(PointHitTestParameters hitTestParameters)
+        {
+            if (Mouse.RightButton == MouseButtonState.Pressed)
+            {
+                return new PointHitTestResult(this, hitTestParameters.HitPoint);
+            }
+            else if (hitTestParameters.HitPoint.Y < ActualHeight - MarkerHeight)
+            {
+                return null;
+            }
+
+            var pixelPerTime = (ActualWidth - UIParameters.TimelineRangeThumbTotalWidth) / (double)Range;
+            if (pixelPerTime < 0 || double.IsNaN(pixelPerTime) || double.IsInfinity(pixelPerTime) || CompositionMarkers.Count < 1)
+            {
+                return null;
+            }
+
+            var rangeStart = RangeStart;
+            var diffTime = MoveTarget != null ? (MarkerMovingTime + MoveTarget.Time).RoundToFrameRate(FrameRate) - MoveTarget.Time : Time.Zero;
+            var posX = hitTestParameters.HitPoint.X - UIParameters.TimelineRangeThumbWidth;
+            foreach (var m in CompositionMarkers)
+            {
+                var isMoving = MoveTarget == m;
+                var markerTime = m.Time + (isMoving ? diffTime : Time.Zero);
+
+                if (Math.Abs(posX - (double)(markerTime - rangeStart) * pixelPerTime) < MarkerWidth * 0.5)
+                {
+                    return new PointHitTestResult(this, hitTestParameters.HitPoint);
+                }
+            }
+
+            return null;
+        }
+
+        protected override void OnRender(DrawingContext drawingContext)
+        {
+            base.OnRender(drawingContext);
+            var actualWidth = ActualWidth;
+            drawingContext.DrawRectangle(Brushes.Transparent, null, new Rect(0.0, 0.0, actualWidth, ActualHeight));
+
+            var pixelPerTime = (actualWidth - UIParameters.TimelineRangeThumbTotalWidth) / (double)Range;
+            if (pixelPerTime < 0 || double.IsNaN(pixelPerTime) || double.IsInfinity(pixelPerTime) || CompositionMarkers.Count < 1)
+            {
+                return;
+            }
+
+            drawingContext.PushClip(new RectangleGeometry(new Rect(0.0, 0.0, actualWidth, ActualHeight)));
+
+            drawingContext.PushTransform(new TranslateTransform(UIParameters.TimelineRangeThumbWidth - MarkerWidth * 0.5 - 1.0, ActualHeight - MarkerHeight));
+
+            var brush = MarkerBrush;
+            var rangeStart = RangeStart;
+            var diffTime = MoveTarget != null ? (MarkerMovingTime + MoveTarget.Time).RoundToFrameRate(FrameRate) - MoveTarget.Time : Time.Zero;
+            foreach (var (m, mp) in CompositionMarkers.Zip(CompositionMarkers.Prepend(CompositionMarkers.First())))
+            {
+                var isMoving = MoveTarget == m;
+                var markerTime = m.Time + (isMoving ? diffTime : Time.Zero);
+                var x = (double)(markerTime - rangeStart) * pixelPerTime + 1.0;
+                if (x > -MarkerWidth && x < actualWidth)
+                {
+                    drawingContext.PushTransform(new TranslateTransform(x, 0.0));
+                    drawingContext.DrawGeometry(brush, null, MarkerIcon);
+                    drawingContext.Pop();
+                }
+            }
+            drawingContext.Pop();
+            drawingContext.Pop();
+        }
+
+        private void CompositionMarkerView_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if (!IsClicked || MoveTarget == null)
+            {
+                return;
+            }
+
+            IsClicked = false;
+            ReleaseMouseCapture();
+
+            var diffTime = (MarkerMovingTime + MoveTarget.Time).RoundToFrameRate(FrameRate) - MoveTarget.Time;
+            var newTime = MoveTarget.Time + diffTime;
+            var eventArgs = new MarkerMoveEventArgs(MoveTarget, newTime, MarkerMoveRequestEvent, this);
+            RaiseEvent(eventArgs);
+
+            MoveTarget = null;
+            InvalidateVisual();
+        }
+
+        private void CompositionMarkerView_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (!IsClicked)
+            {
+                return;
+            }
+
+            MarkerMovingTime = TimeCalc.CalcTimeFromPixel(e.GetPosition(this).X - ClickX, ActualWidth, Range, Time.Zero);
+            InvalidateVisual();
+        }
+
+        private void CompositionMarkerView_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton != MouseButton.Left)
+            {
+                return;
+            }
+
+            var pixelPerTime = (ActualWidth - UIParameters.TimelineRangeThumbTotalWidth) / (double)Range;
+            if (pixelPerTime < 0 || double.IsNaN(pixelPerTime) || double.IsInfinity(pixelPerTime) || CompositionMarkers.Count < 1)
+            {
+                return;
+            }
+
+            var pos = e.GetPosition(this);
+            var x = pos.X - UIParameters.TimelineRangeThumbWidth;
+            var rangeStart = RangeStart;
+            var clickedMarker = CompositionMarkers.LastOrDefault(m => Math.Abs((double)(m.Time - rangeStart) * pixelPerTime - x) < MarkerWidth * 0.5);
+            if (clickedMarker != null)
+            {
+                MoveTarget = clickedMarker;
+                ClickX = pos.X;
+                IsClicked = true;
+                CaptureMouse();
+                e.Handled = true;
+            }
+        }
+
+        private void CompositionMarkers_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            InvalidateVisual();
+        }
+
+        private static void CompositionMarkersChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is not CompositionMarkerView view)
+            {
+                return;
+            }
+
+            if (e.OldValue is ObservableCollection<Marker> oldValue)
+            {
+                oldValue.CollectionChanged -= view.CompositionMarkers_CollectionChanged;
+            }
+            if (e.NewValue is ObservableCollection<Marker> newValue)
+            {
+                newValue.CollectionChanged += view.CompositionMarkers_CollectionChanged;
+            }
+        }
+    }
+}

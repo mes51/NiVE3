@@ -36,6 +36,7 @@ using NiVE3.Data.Clipboard;
 using NiVE3.Plugin.ValueObject;
 using Microsoft.Win32;
 using System.IO;
+using NiVE3.ValueObject;
 
 namespace NiVE3.ViewModel
 {
@@ -193,6 +194,14 @@ namespace NiVE3.ViewModel
         {
             get { return isEnableMotionBlur; }
             set { SetProperty(ref isEnableMotionBlur, value); }
+        }
+
+        private ObservableCollection<Marker> compositionMarkers = [];
+        [ManualWire(nameof(CompositionModel), IsOneWay = true)]
+        public ObservableCollection<Marker> CompositionMarkers
+        {
+            get { return compositionMarkers; }
+            set { SetProperty(ref compositionMarkers, value); }
         }
 
         private double layerNumberColumnWudth;
@@ -558,6 +567,8 @@ namespace NiVE3.ViewModel
         public ICommand SavePresetCommand { get; }
 
         public ICommand LoadPresetCommand { get; }
+
+        public ICommand MoveMarkerCommand { get; }
 
         WeakEventPublisher<EventArgs> CurrentTimeChangeByUserPublisher { get; } = new WeakEventPublisher<EventArgs>();
         public event EventHandler<EventArgs> CurrentTimeChangeByUser
@@ -1320,8 +1331,17 @@ namespace NiVE3.ViewModel
                         MessageBox.Show(text, title, MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                 }
-            }, () => CompositionModel != null)
-                .ObservesProperty(() => CompositionModel);
+            }, () => CompositionModel != null).ObservesProperty(() => CompositionModel);
+
+            MoveMarkerCommand = new DelegateCommand<Tuple<Marker, Time>>(t =>
+            {
+                if (CompositionModel == null)
+                {
+                    return;
+                }
+
+                CompositionModel.MoveMarker(t.Item1, t.Item2);
+            }, _ => CompositionModel != null).ObservesProperty(() => CompositionModel);
 
             AudioPlayerModel = audioPlayerModel;
         }

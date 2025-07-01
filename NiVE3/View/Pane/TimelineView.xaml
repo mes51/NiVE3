@@ -327,6 +327,13 @@
                         WorkareaEnd="{Binding WorkareaEnd}"
                         Command="{Binding ChangeWorkareaCommand}"
                         ToolTip="{gm:LanguageResource ResourceKey=Timeline_ToolTip_WorkareaBar}"/>
+        <pt:CompositionMarkerView Grid.Row="2"
+                                  Grid.Column="1"
+                                  CompositionMarkers="{Binding CompositionMarkers}"
+                                  FrameRate="{Binding FrameRate}"
+                                  Range="{Binding TimeBarRange}"
+                                  RangeStart="{Binding TimeBarRangeStart}"
+                                  MarkerMoveRequest="CompositionMarkerView_MarkerMoveRequest"/>
 
         <pt:LayerCollectionView x:Name="LayerCollectionView"
                                 Grid.Row="3"
