@@ -962,6 +962,12 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("再生速度:")]
         public static readonly string PlayRateSettingView_PlayRate = nameof(PlayRateSettingView_PlayRate);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("マーカーを追加(_A)")]
+        public static readonly string MarkerCollection_ContextMenu_AddCompositionMarker = nameof(MarkerCollection_ContextMenu_AddCompositionMarker);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("マーカーを削除(_D)")]
+        public static readonly string MarkerCollection_ContextMenu_DeleteCompositionMarker = nameof(MarkerCollection_ContextMenu_DeleteCompositionMarker);
+
         // Effect category names
 
         [DefaultValue("オーディオ")]
@@ -1223,6 +1229,12 @@ namespace NiVE3.View.Resource
 
         [DefaultValue("マーカーの移動")]
         public static readonly string History_MoveCompositionMarker = nameof(History_MoveCompositionMarker);
+
+        [DefaultValue("マーカーの追加")]
+        public static readonly string History_AddCompositionMarker = nameof(History_AddCompositionMarker);
+
+        [DefaultValue("マーカーの削除")]
+        public static readonly string History_DeleteCompositionMarker = nameof(History_DeleteCompositionMarker);
 
         // Dialog
 

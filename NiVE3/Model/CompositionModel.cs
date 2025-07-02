@@ -1668,6 +1668,33 @@ namespace NiVE3.Model
             HistoryModel.Add(new MoveMarkerHistoryCommand(this, oldMarker, newMarker));
         }
 
+        public void AddMarker(Time time)
+        {
+            var newMarker = new Marker(Guid.NewGuid(), time, "");
+
+            var insertIndex = CompositionMarkers.FindIndex(m => m.Time > time);
+            if (insertIndex < 0)
+            {
+                insertIndex = CompositionMarkers.Count;
+            }
+            CompositionMarkers.Insert(insertIndex, newMarker);
+
+            HistoryModel.Add(new AddMarkerHistoryCommand(this, newMarker, insertIndex));
+        }
+
+        public void DeleteMarker(Marker marker)
+        {
+            var index = CompositionMarkers.IndexOf(marker);
+            if (index < 0)
+            {
+                return;
+            }
+
+            CompositionMarkers.Remove(marker);
+
+            HistoryModel.Add(new DeleteMarkerHistoryCommand(this, marker, index));
+        }
+
         public ILayerObject? GetLayer(Guid layerId)
         {
             return Layers.FirstOrDefault(l => l.LayerId == layerId);

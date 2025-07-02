@@ -570,6 +570,10 @@ namespace NiVE3.ViewModel
 
         public ICommand MoveMarkerCommand { get; }
 
+        public ICommand AddMarkerCommand { get; }
+
+        public ICommand DeleteMarkerCommand { get; }
+
         WeakEventPublisher<EventArgs> CurrentTimeChangeByUserPublisher { get; } = new WeakEventPublisher<EventArgs>();
         public event EventHandler<EventArgs> CurrentTimeChangeByUser
         {
@@ -1341,6 +1345,26 @@ namespace NiVE3.ViewModel
                 }
 
                 CompositionModel.MoveMarker(t.Item1, t.Item2);
+            }, _ => CompositionModel != null).ObservesProperty(() => CompositionModel);
+
+            AddMarkerCommand = new DelegateCommand<Time?>(time =>
+            {
+                if (CompositionModel == null || !time.HasValue)
+                {
+                    return;
+                }
+
+                CompositionModel.AddMarker(time.Value);
+            }, _ => CompositionModel != null).ObservesProperty(() => CompositionModel);
+
+            DeleteMarkerCommand = new DelegateCommand<Marker>(marker =>
+            {
+                if (CompositionModel == null || !(CompositionMarkers?.Contains(marker) ?? false))
+                {
+                    return;
+                }
+
+                CompositionModel.DeleteMarker(marker);
             }, _ => CompositionModel != null).ObservesProperty(() => CompositionModel);
 
             AudioPlayerModel = audioPlayerModel;

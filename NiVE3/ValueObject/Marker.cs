@@ -7,7 +7,7 @@ using NiVE3.Plugin.ValueObject;
 
 namespace NiVE3.ValueObject
 {
-    record Marker(Guid Id, Time Time, string Name = "")
+    record Marker(Guid Id, Time Time, string Name)
     {
     }
 }

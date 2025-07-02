@@ -99,7 +99,7 @@ namespace NiVE3.View.Pane
             viewModel.TimeBarRangeStart = Time.Clamp(viewModel.TimeBarRangeStart + viewModel.TimeBarRange * 0.05 * dir, Time.Zero, viewModel.Duration - viewModel.TimeBarRange);
         }
 
-        private void CompositionMarkerView_MarkerMoveRequest(object sender, MarkerMoveEventArgs e)
+        private void CompositionMarkerCollectionView_MarkerMoveRequest(object sender, MarkerMoveEventArgs e)
         {
             var viewModel = ViewModel;
             if (viewModel == null)

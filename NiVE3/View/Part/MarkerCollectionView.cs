@@ -6,17 +6,19 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Media3D;
 using NiVE3.Plugin.ValueObject;
+using NiVE3.UI.Command;
 using NiVE3.Util;
 using NiVE3.ValueObject;
 using NiVE3.View.Resource;
 
 namespace NiVE3.View.Part
 {
-    class CompositionMarkerView : FrameworkElement
+    class MarkerCollectionView : FrameworkElement
     {
         const double MarkerWidth = 10.0;
 
@@ -27,46 +29,72 @@ namespace NiVE3.View.Part
         public static readonly DependencyProperty MarkerBrushProperty = DependencyProperty.Register(
             nameof(MarkerBrush),
             typeof(Brush),
-            typeof(CompositionMarkerView),
+            typeof(MarkerCollectionView),
             new FrameworkPropertyMetadata(Brushes.Gray, FrameworkPropertyMetadataOptions.AffectsRender)
         );
 
         public static readonly DependencyProperty RangeProperty = DependencyProperty.Register(
             nameof(Range),
             typeof(Time),
-            typeof(CompositionMarkerView),
+            typeof(MarkerCollectionView),
             new FrameworkPropertyMetadata(Time.Zero, FrameworkPropertyMetadataOptions.AffectsRender)
         );
 
         public static readonly DependencyProperty RangeStartProperty = DependencyProperty.Register(
             nameof(RangeStart),
             typeof(Time),
-            typeof(CompositionMarkerView),
+            typeof(MarkerCollectionView),
             new FrameworkPropertyMetadata(Time.Zero, FrameworkPropertyMetadataOptions.AffectsRender)
         );
 
         public static readonly DependencyProperty FrameRateProperty = DependencyProperty.Register(
             nameof(FrameRate),
             typeof(double),
-            typeof(CompositionMarkerView),
+            typeof(MarkerCollectionView),
             new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsRender)
         );
 
         public static readonly DependencyProperty CompositionMarkersProperty = DependencyProperty.Register(
             nameof(CompositionMarkers),
             typeof(ObservableCollection<Marker>),
-            typeof(CompositionMarkerView),
+            typeof(MarkerCollectionView),
             new FrameworkPropertyMetadata(new ObservableCollection<Marker>(), FrameworkPropertyMetadataOptions.AffectsRender, CompositionMarkersChanged)
         );
 
+        public static readonly DependencyProperty AddMarkerCommandProperty = DependencyProperty.Register(
+            nameof(AddMarkerCommand),
+            typeof(ICommand),
+            typeof(MarkerCollectionView),
+            new FrameworkPropertyMetadata(null)
+        );
+
+        public static readonly DependencyProperty DeleteMarkerCommandProperty = DependencyProperty.Register(
+            nameof(DeleteMarkerCommand),
+            typeof(ICommand),
+            typeof(MarkerCollectionView),
+            new FrameworkPropertyMetadata(null)
+        );
+
         public static readonly RoutedEvent MarkerMoveRequestEvent = EventManager.RegisterRoutedEvent(
-            nameof(MarkerMoveRequest), RoutingStrategy.Direct, typeof(EventHandler<MarkerMoveEventArgs>), typeof(CompositionMarkerView)
+            nameof(MarkerMoveRequest), RoutingStrategy.Direct, typeof(EventHandler<MarkerMoveEventArgs>), typeof(MarkerCollectionView)
         );
 
         public event EventHandler<MarkerMoveEventArgs> MarkerMoveRequest
         {
             add { AddHandler(MarkerMoveRequestEvent, value); }
             remove { RemoveHandler(MarkerMoveRequestEvent, value); }
+        }
+
+        public ICommand? DeleteMarkerCommand
+        {
+            get { return (ICommand)GetValue(DeleteMarkerCommandProperty); }
+            set { SetValue(DeleteMarkerCommandProperty, value); }
+        }
+
+        public ICommand? AddMarkerCommand
+        {
+            get { return (ICommand)GetValue(AddMarkerCommandProperty); }
+            set { SetValue(AddMarkerCommandProperty, value); }
         }
 
         public ObservableCollection<Marker> CompositionMarkers
@@ -99,15 +127,23 @@ namespace NiVE3.View.Part
             set { SetValue(MarkerBrushProperty, value); }
         }
 
+        public ICommand AddMarkerCommandWrapper { get; }
+
+        public ICommand DeleteMarkerCommandWrapper { get; }
+
         bool IsClicked { get; set; }
 
         double ClickX { get; set; }
 
         Marker? MoveTarget { get; set; }
 
+        Marker? RightClickedMarker { get; set; }
+
+        Time RightClickedTime { get; set; }
+
         Time MarkerMovingTime { get; set; }
 
-        static CompositionMarkerView()
+        static MarkerCollectionView()
         {
             var markerIconGeometry = new StreamGeometry();
 
@@ -124,11 +160,25 @@ namespace NiVE3.View.Part
             MarkerIcon = markerIconGeometry;
         }
 
-        public CompositionMarkerView()
+        public MarkerCollectionView()
         {
+            AddMarkerCommandWrapper = new RequerySuggestedCommand(() =>
+            {
+                AddMarkerCommand?.Execute(RightClickedTime);
+            }, () => AddMarkerCommand?.CanExecute(RightClickedTime) ?? false);
+
+            DeleteMarkerCommandWrapper = new RequerySuggestedCommand(() =>
+            {
+                if (RightClickedMarker != null)
+                {
+                    DeleteMarkerCommand?.Execute(RightClickedMarker);
+                }
+            }, () => RightClickedMarker != null && (DeleteMarkerCommand?.CanExecute(RightClickedMarker) ?? false));
+
             MouseDown += CompositionMarkerView_MouseDown;
             MouseMove += CompositionMarkerView_MouseMove;
             MouseUp += CompositionMarkerView_MouseUp;
+            ContextMenuOpening += CompositionMarkerView_ContextMenuOpening;
         }
 
         protected override HitTestResult? HitTestCore(PointHitTestParameters hitTestParameters)
@@ -200,6 +250,27 @@ namespace NiVE3.View.Part
             drawingContext.Pop();
         }
 
+        private void CompositionMarkerView_ContextMenuOpening(object sender, ContextMenuEventArgs e)
+        {
+            if (FrameRate < 0.0 && Range < Time.Zero)
+            {
+                return;
+            }
+
+            var pixelPerTime = (ActualWidth - UIParameters.TimelineRangeThumbTotalWidth) / (double)Range;
+            if (pixelPerTime < 0 || double.IsNaN(pixelPerTime) || double.IsInfinity(pixelPerTime))
+            {
+                return;
+            }
+
+            var x = e.CursorLeft - UIParameters.TimelineRangeThumbWidth;
+            var rangeStart = RangeStart;
+            var clickedMarker = CompositionMarkers.LastOrDefault(m => Math.Abs((double)(m.Time - rangeStart) * pixelPerTime - x) < MarkerWidth * 0.5);
+
+            RightClickedTime = TimeCalc.CalcTimeFromPixelAligned(x, ActualWidth, Range, RangeStart, FrameRate);
+            RightClickedMarker = CompositionMarkers.LastOrDefault(m => Math.Abs((double)(m.Time - rangeStart) * pixelPerTime - x) < MarkerWidth * 0.5);
+        }
+
         private void CompositionMarkerView_MouseUp(object sender, MouseButtonEventArgs e)
         {
             if (!IsClicked || MoveTarget == null)
@@ -226,7 +297,7 @@ namespace NiVE3.View.Part
                 return;
             }
 
-            MarkerMovingTime = TimeCalc.CalcTimeFromPixel(e.GetPosition(this).X - ClickX, ActualWidth, Range, Time.Zero);
+            MarkerMovingTime = TimeCalc.CalcTimeFromPixel(e.GetPosition(this).X - ClickX, ActualWidth, Range, RangeStart);
             InvalidateVisual();
         }
 
@@ -264,7 +335,7 @@ namespace NiVE3.View.Part
 
         private static void CompositionMarkersChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is not CompositionMarkerView view)
+            if (d is not MarkerCollectionView view)
             {
                 return;
             }

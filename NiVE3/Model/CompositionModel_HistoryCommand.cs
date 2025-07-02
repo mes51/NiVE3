@@ -897,5 +897,65 @@ namespace NiVE3.Model
 
             public void Dispose() { }
         }
+
+        private class AddMarkerHistoryCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_AddCompositionMarker);
+
+            CompositionModel Model { get; }
+
+            Marker Marker { get; }
+
+            int InsertIndex { get; }
+
+            public AddMarkerHistoryCommand(CompositionModel model, Marker marker, int insertIndex)
+            {
+                Model = model;
+                Marker = marker;
+                InsertIndex = insertIndex;
+            }
+
+            public void Redo()
+            {
+                Model.CompositionMarkers.Insert(InsertIndex, Marker);
+            }
+
+            public void Undo()
+            {
+                Model.CompositionMarkers.Remove(Marker);
+            }
+
+            public void Dispose() { }
+        }
+
+        private class DeleteMarkerHistoryCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_DeleteCompositionMarker);
+
+            CompositionModel Model { get; }
+
+            Marker Marker { get; }
+
+            int InsertIndex { get; }
+
+            public DeleteMarkerHistoryCommand(CompositionModel model, Marker marker, int insertIndex)
+            {
+                Model = model;
+                Marker = marker;
+                InsertIndex = insertIndex;
+            }
+
+            public void Redo()
+            {
+                Model.CompositionMarkers.Remove(Marker);
+            }
+
+            public void Undo()
+            {
+                Model.CompositionMarkers.Insert(InsertIndex, Marker);
+            }
+
+            public void Dispose() { }
+        }
     }
 }
