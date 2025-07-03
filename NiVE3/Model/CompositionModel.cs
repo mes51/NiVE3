@@ -1055,7 +1055,8 @@ namespace NiVE3.Model
                 TimeBarRange = TimeBarRange,
                 TimeBarRangeStart = TimeBarRangeStart,
                 CurrentTime = CurrentTime,
-                Layers = Layers.Select(l => l.SaveData()).ToArray()
+                Layers = Layers.Select(l => l.SaveData()).ToArray(),
+                CompositionMarkers = CompositionMarkers.Select(m => new MarkerData { Id = m.Id, Time = m.Time, Name = m.Name }).ToArray()
             };
         }
 
@@ -1111,6 +1112,11 @@ namespace NiVE3.Model
                     layer.ParentLayerId = null;
                 }
                 layer.CoerceProperties();
+            }
+
+            foreach (var markerData in data.CompositionMarkers)
+            {
+                CompositionMarkers.Add(new Marker(markerData.Id, markerData.Time, markerData.Name));
             }
         }
 

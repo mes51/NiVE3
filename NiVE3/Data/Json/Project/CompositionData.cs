@@ -48,6 +48,8 @@ namespace NiVE3.Data.Json.Project
 
         public LayerData[] Layers { get; set; } = [];
 
+        public MarkerData[] CompositionMarkers { get; set; } = [];
+
         public Guid RendererPluginId { get; set; }
 
         public Guid ToneMapperPluginId { get; set; }
