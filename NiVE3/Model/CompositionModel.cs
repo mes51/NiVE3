@@ -1668,10 +1668,22 @@ namespace NiVE3.Model
             var oldMarker = CompositionMarkers[oldMarkerIndex];
             var newMarker = new Marker(marker.Id, newTime, marker.Name);
 
-            CompositionMarkers[oldMarkerIndex] = newMarker;
-            CompositionMarkers.Sort((a, b) => a.Time.CompareTo(b.Time));
+            var sameTimeMarkerIndex = CompositionMarkers.FindIndex(m => m.Time == newTime);
+            if (sameTimeMarkerIndex < 0)
+            {
+                CompositionMarkers[oldMarkerIndex] = newMarker;
+                CompositionMarkers.Sort((a, b) => a.Time.CompareTo(b.Time));
 
-            HistoryModel.Add(new MoveMarkerHistoryCommand(this, oldMarker, newMarker));
+                HistoryModel.Add(new MoveMarkerHistoryCommand(this, oldMarker, newMarker));
+            }
+            else
+            {
+                var replaceTargetMarker = CompositionMarkers[sameTimeMarkerIndex];
+                CompositionMarkers[sameTimeMarkerIndex] = newMarker;
+                CompositionMarkers.Remove(oldMarker);
+
+                HistoryModel.Add(new MoveAndReplaceMarkerHistoryCommand(this, oldMarker, newMarker, replaceTargetMarker, oldMarkerIndex, sameTimeMarkerIndex));
+            }
         }
 
         public void AddMarker(Time time)
@@ -1690,15 +1702,16 @@ namespace NiVE3.Model
 
         public void DeleteMarker(Marker marker)
         {
-            var index = CompositionMarkers.IndexOf(marker);
+            var index = CompositionMarkers.FindIndex(m => m.Id == marker.Id);
             if (index < 0)
             {
                 return;
             }
 
+            var oldMarker = CompositionMarkers[index];
             CompositionMarkers.Remove(marker);
 
-            HistoryModel.Add(new DeleteMarkerHistoryCommand(this, marker, index));
+            HistoryModel.Add(new DeleteMarkerHistoryCommand(this, oldMarker, index));
         }
 
         public void ChangeMarkerName(Marker marker, string newName)
@@ -1709,11 +1722,12 @@ namespace NiVE3.Model
                 return;
             }
 
-            var newMarker = new Marker(marker.Id, marker.Time, newName);
+            var oldMarker = CompositionMarkers[index];
+            var newMarker = new Marker(oldMarker.Id, oldMarker.Time, newName);
 
             CompositionMarkers[index] = newMarker;
 
-            HistoryModel.Add(new ChangeMarkerNameHistoryCommand(this, marker, newMarker, index));
+            HistoryModel.Add(new ChangeMarkerNameHistoryCommand(this, oldMarker, newMarker, index));
         }
 
         public ILayerObject? GetLayer(Guid layerId)

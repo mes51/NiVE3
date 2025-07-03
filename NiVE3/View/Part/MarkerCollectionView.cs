@@ -355,6 +355,7 @@ namespace NiVE3.View.Part
                     MoveTarget = clickedMarker;
                     ClickX = pos.X;
                     IsClicked = true;
+                    MarkerMovingTime = Time.Zero;
                     CaptureMouse();
                 }
                 e.Handled = true;

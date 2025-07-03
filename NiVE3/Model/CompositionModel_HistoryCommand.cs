@@ -898,6 +898,47 @@ namespace NiVE3.Model
             public void Dispose() { }
         }
 
+        private class MoveAndReplaceMarkerHistoryCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_MoveCompositionMarker);
+
+            CompositionModel Model { get; }
+
+            Marker OldMarker { get; }
+
+            Marker NewMarker { get; }
+
+            Marker ReplaceTargetMarker { get; }
+
+            int OldIndex { get; }
+
+            int ReplaceTargetIndex { get; }
+
+            public MoveAndReplaceMarkerHistoryCommand(CompositionModel model, Marker oldMarker, Marker newMarker, Marker replaceTargetMarker, int oldIndex, int replaceTargetIndex)
+            {
+                Model = model;
+                OldMarker = oldMarker;
+                NewMarker = newMarker;
+                ReplaceTargetMarker = replaceTargetMarker;
+                OldIndex = oldIndex;
+                ReplaceTargetIndex = replaceTargetIndex;
+            }
+
+            public void Redo()
+            {
+                Model.CompositionMarkers[ReplaceTargetIndex] = NewMarker;
+                Model.CompositionMarkers.Remove(OldMarker);
+            }
+
+            public void Undo()
+            {
+                Model.CompositionMarkers.Insert(OldIndex, OldMarker);
+                Model.CompositionMarkers[ReplaceTargetIndex] = ReplaceTargetMarker;
+            }
+
+            public void Dispose() { }
+        }
+
         private class AddMarkerHistoryCommand : IHistoryCommand
         {
             public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_AddCompositionMarker);
