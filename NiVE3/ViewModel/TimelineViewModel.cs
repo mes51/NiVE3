@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,14 +13,22 @@ using System.Windows.Input;
 using System.Windows.Media.Media3D;
 using System.Xml.Linq;
 using GongSolutions.Wpf.DragDrop;
+using Microsoft.Win32;
+using NAudio.SoundFont;
 using NiVE3.Config;
+using NiVE3.Data.Clipboard;
 using NiVE3.Data.Json.Project;
 using NiVE3.Image.Drawing;
 using NiVE3.Model;
+using NiVE3.Model.UI;
 using NiVE3.Mvvm;
 using NiVE3.Plugin.Interfaces;
+using NiVE3.Plugin.Interfaces.RendererParams;
+using NiVE3.Plugin.ValueObject;
+using NiVE3.Shared.Extension;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
 using NiVE3.Util;
+using NiVE3.ValueObject;
 using NiVE3.View.Command;
 using NiVE3.View.Dialog;
 using NiVE3.View.Dock;
@@ -27,16 +36,8 @@ using NiVE3.View.Primitive;
 using NiVE3.View.Resource;
 using NiVE3.ViewModel.Dialog;
 using NiVE3.ViewModel.TimelineEditing;
-using NiVE3.Shared.Extension;
 using Prism.Commands;
-using NiVE3.Model.UI;
 using Prism.Dialogs;
-using NiVE3.Plugin.Interfaces.RendererParams;
-using NiVE3.Data.Clipboard;
-using NiVE3.Plugin.ValueObject;
-using Microsoft.Win32;
-using System.IO;
-using NiVE3.ValueObject;
 
 namespace NiVE3.ViewModel
 {
@@ -570,6 +571,8 @@ namespace NiVE3.ViewModel
         public ICommand AddMarkerCommand { get; }
 
         public ICommand DeleteMarkerCommand { get; }
+
+        public ICommand EditMarkerNameCommand { get; }
 
         public ICommand AddMarkerToCurrentTimeCommand { get; }
 
@@ -1313,6 +1316,32 @@ namespace NiVE3.ViewModel
                 }
 
                 CompositionModel.DeleteMarker(marker);
+            }, _ => CompositionModel != null).ObservesProperty(() => CompositionModel);
+
+            EditMarkerNameCommand = new DelegateCommand<Marker>(marker =>
+            {
+                if (CompositionModel == null || !(CompositionMarkers?.Contains(marker) ?? false))
+                {
+                    return;
+                }
+
+                var param = new DialogParameters
+                {
+                    { nameof(NameSettingViewModel.Title), LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_MarkerName_Title) },
+                    { nameof(NameSettingViewModel.Label), LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_MarkerName_Label) },
+                    { nameof(NameSettingViewModel.Name), marker.Name },
+                    { nameof(NameSettingViewModel.AllowEmptyName), true }
+                };
+                IDialogResult? result = null;
+                DialogService.ShowDialog(nameof(NameSettingView), param, r => result = r);
+                if (result != null && result.Result == ButtonResult.OK)
+                {
+                    var newName = result.Parameters.GetValue<string>(nameof(NameSettingViewModel.Name));
+                    if (marker.Name != newName)
+                    {
+                        CompositionModel.ChangeMarkerName(marker, newName);
+                    }
+                }
             }, _ => CompositionModel != null).ObservesProperty(() => CompositionModel);
 
             AddMarkerToCurrentTimeCommand = new DelegateCommand(() =>

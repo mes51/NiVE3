@@ -30,7 +30,20 @@
             </Setter>
 
             <Style.Triggers>
-                <DataTrigger Binding="{Binding CanOverwrite}" Value="True">
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding CanOverwrite}" Value="True"/>
+                        <Condition Binding="{Binding AllowEmptyName}" Value="True"/>
+                    </MultiDataTrigger.Conditions>
+                    
+                    <Setter Property="Text" Value="{Binding Name, UpdateSourceTrigger=PropertyChanged}"/>
+                </MultiDataTrigger>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding CanOverwrite}" Value="True"/>
+                        <Condition Binding="{Binding AllowEmptyName}" Value="False"/>
+                    </MultiDataTrigger.Conditions>
+
                     <Setter Property="Text">
                         <Setter.Value>
                             <Binding Path="Name" UpdateSourceTrigger="PropertyChanged">
@@ -40,7 +53,23 @@
                             </Binding>
                         </Setter.Value>
                     </Setter>
-                </DataTrigger>
+                </MultiDataTrigger>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding CanOverwrite}" Value="False"/>
+                        <Condition Binding="{Binding AllowEmptyName}" Value="True"/>
+                    </MultiDataTrigger.Conditions>
+
+                    <Setter Property="Text">
+                        <Setter.Value>
+                            <Binding Path="Name" UpdateSourceTrigger="PropertyChanged">
+                                <Binding.ValidationRules>
+                                    <vl:RegisteredNamesValidationRule Names="{StaticResource RegisteredNames}"/>
+                                </Binding.ValidationRules>
+                            </Binding>
+                        </Setter.Value>
+                    </Setter>
+                </MultiDataTrigger>
             </Style.Triggers>
         </Style>
     </UserControl.Resources>
@@ -63,9 +92,14 @@
                             <DataTrigger Binding="{Binding ElementName=NameTextBox, Path=(Validation.HasError)}" Value="True">
                                 <Setter Property="IsEnabled" Value="False"/>
                             </DataTrigger>
-                            <DataTrigger Binding="{Binding Name}" Value="">
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding AllowEmptyName}" Value="False"/>
+                                    <Condition Binding="{Binding Name}" Value=""/>
+                                </MultiDataTrigger.Conditions>
+
                                 <Setter Property="IsEnabled" Value="False"/>
-                            </DataTrigger>
+                            </MultiDataTrigger>
                         </Style.Triggers>
                     </Style>
                 </Button.Style>

@@ -308,8 +308,9 @@
             <Setter.Value>
                 <ContextMenu>
                     <MenuItem Header="{gm:LanguageResource ResourceKey=MarkerCollection_ContextMenu_AddCompositionMarker}" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.AddMarkerCommandWrapper}"/>
-                    <Separator />
                     <MenuItem Header="{gm:LanguageResource ResourceKey=MarkerCollection_ContextMenu_DeleteCompositionMarker}" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.DeleteMarkerCommandWrapper}"/>
+                    <Separator />
+                    <MenuItem Header="{gm:LanguageResource ResourceKey=MarkerCollection_ContextMenu_EditMarkerName}" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.EditMarkerNameCommandWrapper}"/>
                 </ContextMenu>
             </Setter.Value>
         </Setter>

@@ -335,6 +335,7 @@
                                  RangeStart="{Binding TimeBarRangeStart}"
                                  AddMarkerCommand="{Binding AddMarkerCommand}"
                                  DeleteMarkerCommand="{Binding DeleteMarkerCommand}"
+                                 EditMarkerNameCommand="{Binding EditMarkerNameCommand}"
                                  MarkerMoveRequest="CompositionMarkerCollectionView_MarkerMoveRequest"/>
 
         <pt:LayerCollectionView x:Name="LayerCollectionView"

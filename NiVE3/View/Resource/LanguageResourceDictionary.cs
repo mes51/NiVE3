@@ -968,6 +968,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("マーカーを削除(_D)")]
         public static readonly string MarkerCollection_ContextMenu_DeleteCompositionMarker = nameof(MarkerCollection_ContextMenu_DeleteCompositionMarker);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("マーカーを名前の変更(_N)...")]
+        public static readonly string MarkerCollection_ContextMenu_EditMarkerName = nameof(MarkerCollection_ContextMenu_EditMarkerName);
+
         // Effect category names
 
         [DefaultValue("オーディオ")]
@@ -1236,6 +1239,9 @@ namespace NiVE3.View.Resource
         [DefaultValue("マーカーの削除")]
         public static readonly string History_DeleteCompositionMarker = nameof(History_DeleteCompositionMarker);
 
+        [DefaultValue("マーカーの名前の変更")]
+        public static readonly string History_ChangeCompositionMarkerName = nameof(History_ChangeCompositionMarkerName);
+
         // Dialog
 
         [DefaultValue("フッテージの削除")]
@@ -1297,6 +1303,12 @@ namespace NiVE3.View.Resource
 
         [DefaultValue("プリセット名:")]
         public static readonly string Dialog_CompositionPresetName_Label = nameof(Dialog_CompositionPresetName_Label);
+
+        [DefaultValue("マーカーの名前の編集")]
+        public static readonly string Dialog_MarkerName_Title = nameof(Dialog_MarkerName_Title);
+
+        [DefaultValue("マーカーの名前:")]
+        public static readonly string Dialog_MarkerName_Label = nameof(Dialog_MarkerName_Label);
 
         [DefaultValue("エラー")]
         public static readonly string Dialog_RaiseGPUException_Title = nameof(Dialog_RaiseGPUException_Title);

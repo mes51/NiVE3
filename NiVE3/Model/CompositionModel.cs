@@ -1695,6 +1695,21 @@ namespace NiVE3.Model
             HistoryModel.Add(new DeleteMarkerHistoryCommand(this, marker, index));
         }
 
+        public void ChangeMarkerName(Marker marker, string newName)
+        {
+            var index = CompositionMarkers.IndexOf(marker);
+            if (index < 0)
+            {
+                return;
+            }
+
+            var newMarker = new Marker(marker.Id, marker.Time, newName);
+
+            CompositionMarkers[index] = newMarker;
+
+            HistoryModel.Add(new ChangeMarkerNameHistoryCommand(this, marker, newMarker, index));
+        }
+
         public ILayerObject? GetLayer(Guid layerId)
         {
             return Layers.FirstOrDefault(l => l.LayerId == layerId);

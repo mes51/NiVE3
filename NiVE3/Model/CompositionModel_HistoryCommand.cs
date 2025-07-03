@@ -957,5 +957,38 @@ namespace NiVE3.Model
 
             public void Dispose() { }
         }
+
+        private class ChangeMarkerNameHistoryCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangeMaskName);
+
+            CompositionModel Model { get; }
+
+            Marker OldMarker { get; }
+
+            Marker NewMarker { get; }
+
+            int Index { get; }
+
+            public ChangeMarkerNameHistoryCommand(CompositionModel model, Marker oldMarker, Marker newMarker, int index)
+            {
+                Model = model;
+                OldMarker = oldMarker;
+                NewMarker = newMarker;
+                Index = index;
+            }
+
+            public void Redo()
+            {
+                Model.CompositionMarkers[Index] = NewMarker;
+            }
+
+            public void Undo()
+            {
+                Model.CompositionMarkers[Index] = OldMarker;
+            }
+
+            public void Dispose() { }
+        }
     }
 }

@@ -35,6 +35,13 @@ namespace NiVE3.ViewModel.Dialog
             set { SetProperty(ref name, value); }
         }
 
+        private bool allowEmptyName;
+        public bool AllowEmptyName
+        {
+            get { return allowEmptyName; }
+            set { SetProperty(ref allowEmptyName, value); }
+        }
+
         private bool canOverwrite;
         public bool CanOverwrite
         {
@@ -92,6 +99,10 @@ namespace NiVE3.ViewModel.Dialog
             if (parameters.TryGetValue<bool>(nameof(CanOverwrite), out var canOverwrite))
             {
                 CanOverwrite = canOverwrite;
+            }
+            if (parameters.TryGetValue<bool>(nameof(AllowEmptyName), out var allowEmptyName))
+            {
+                AllowEmptyName = allowEmptyName;
             }
             if (parameters.TryGetValue<string[]>(nameof(RegisteredNames), out var registeredNames))
             {

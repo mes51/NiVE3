@@ -75,6 +75,13 @@ namespace NiVE3.View.Part
             new FrameworkPropertyMetadata(null)
         );
 
+        public static readonly DependencyProperty EditMarkerNameCommandProperty = DependencyProperty.Register(
+            nameof(EditMarkerNameCommand),
+            typeof(ICommand),
+            typeof(MarkerCollectionView),
+            new FrameworkPropertyMetadata(null)
+        );
+
         public static readonly RoutedEvent MarkerMoveRequestEvent = EventManager.RegisterRoutedEvent(
             nameof(MarkerMoveRequest), RoutingStrategy.Direct, typeof(EventHandler<MarkerMoveEventArgs>), typeof(MarkerCollectionView)
         );
@@ -83,6 +90,12 @@ namespace NiVE3.View.Part
         {
             add { AddHandler(MarkerMoveRequestEvent, value); }
             remove { RemoveHandler(MarkerMoveRequestEvent, value); }
+        }
+
+        public ICommand? EditMarkerNameCommand
+        {
+            get { return (ICommand)GetValue(EditMarkerNameCommandProperty); }
+            set { SetValue(EditMarkerNameCommandProperty, value); }
         }
 
         public ICommand? DeleteMarkerCommand
@@ -131,6 +144,8 @@ namespace NiVE3.View.Part
 
         public ICommand DeleteMarkerCommandWrapper { get; }
 
+        public ICommand EditMarkerNameCommandWrapper { get; }
+
         bool IsClicked { get; set; }
 
         double ClickX { get; set; }
@@ -174,6 +189,14 @@ namespace NiVE3.View.Part
                     DeleteMarkerCommand?.Execute(RightClickedMarker);
                 }
             }, () => RightClickedMarker != null && (DeleteMarkerCommand?.CanExecute(RightClickedMarker) ?? false));
+
+            EditMarkerNameCommandWrapper = new RequerySuggestedCommand(() =>
+            {
+                if (RightClickedMarker != null)
+                {
+                    EditMarkerNameCommand?.Execute(RightClickedMarker);
+                }
+            }, () => RightClickedMarker != null && (EditMarkerNameCommand?.CanExecute(RightClickedMarker) ?? false));
 
             MouseDown += CompositionMarkerView_MouseDown;
             MouseMove += CompositionMarkerView_MouseMove;
@@ -283,8 +306,11 @@ namespace NiVE3.View.Part
 
             var diffTime = (MarkerMovingTime + MoveTarget.Time).RoundToFrameRate(FrameRate) - MoveTarget.Time;
             var newTime = MoveTarget.Time + diffTime;
-            var eventArgs = new MarkerMoveEventArgs(MoveTarget, newTime, MarkerMoveRequestEvent, this);
-            RaiseEvent(eventArgs);
+            if (newTime != MoveTarget.Time)
+            {
+                var eventArgs = new MarkerMoveEventArgs(MoveTarget, newTime, MarkerMoveRequestEvent, this);
+                RaiseEvent(eventArgs);
+            }
 
             MoveTarget = null;
             InvalidateVisual();
@@ -320,10 +346,17 @@ namespace NiVE3.View.Part
             var clickedMarker = CompositionMarkers.LastOrDefault(m => Math.Abs((double)(m.Time - rangeStart) * pixelPerTime - x) < MarkerWidth * 0.5);
             if (clickedMarker != null)
             {
-                MoveTarget = clickedMarker;
-                ClickX = pos.X;
-                IsClicked = true;
-                CaptureMouse();
+                if (e.ClickCount == 2)
+                {
+                    EditMarkerNameCommand?.Execute(clickedMarker);
+                }
+                else
+                {
+                    MoveTarget = clickedMarker;
+                    ClickX = pos.X;
+                    IsClicked = true;
+                    CaptureMouse();
+                }
                 e.Handled = true;
             }
         }
