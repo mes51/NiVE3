@@ -1824,6 +1824,9 @@ namespace NiVE3.View.Resource
         [DefaultValue("再生・停止")]
         public static readonly string ShortcutKeyName_PlayOrStopGesture = nameof(ShortcutKeyName_PlayOrStopGesture);
 
+        [DefaultValue("インジケーターの位置にマーカーを追加")]
+        public static readonly string ShortcutKeyName_AddMarkerToCurrentTimeGesture = nameof(ShortcutKeyName_AddMarkerToCurrentTimeGesture);
+
         [DefaultValue("長方形のマスクを追加")]
         public static readonly string ShortcutKeyName_AddRectangleMaskGesture = nameof(ShortcutKeyName_AddRectangleMaskGesture);
 

@@ -87,6 +87,7 @@ namespace NiVE3.ViewModel
     [CommandHandling(nameof(ChangeLayerFreezeFrameCommand), nameof(ShortcutKeySetting.ChangeLayerFreezeFrameGesture))]
     [CommandHandling(nameof(MoveWorkareaBeginToIndicatorCommand), nameof(ShortcutKeySetting.MoveWorkareaBeginToIndicatorGesture))]
     [CommandHandling(nameof(MoveWorkareaEndToIndicatorCommand), nameof(ShortcutKeySetting.MoveWorkareaEndToIndicatorGesture))]
+    [CommandHandling(nameof(AddMarkerToCurrentTimeCommand), nameof(ShortcutKeySetting.AddMarkerToCurrentTimeGesture))]
     [CommandHandling(nameof(PlayOrStopCommand), nameof(ShortcutKeySetting.PlayOrStopGesture))]
     [CommandHandling(nameof(SavePresetCommand), nameof(ShortcutKeySetting.SavePresetGesture))]
     [CommandHandling(nameof(LoadPresetCommand), nameof(ShortcutKeySetting.LoadPresetGesture))]
@@ -564,15 +565,17 @@ namespace NiVE3.ViewModel
 
         public ICommand MoveWorkareaEndToIndicatorCommand { get; }
 
-        public ICommand SavePresetCommand { get; }
-
-        public ICommand LoadPresetCommand { get; }
-
         public ICommand MoveMarkerCommand { get; }
 
         public ICommand AddMarkerCommand { get; }
 
         public ICommand DeleteMarkerCommand { get; }
+
+        public ICommand AddMarkerToCurrentTimeCommand { get; }
+
+        public ICommand SavePresetCommand { get; }
+
+        public ICommand LoadPresetCommand { get; }
 
         WeakEventPublisher<EventArgs> CurrentTimeChangeByUserPublisher { get; } = new WeakEventPublisher<EventArgs>();
         public event EventHandler<EventArgs> CurrentTimeChangeByUser
@@ -1282,6 +1285,46 @@ namespace NiVE3.ViewModel
                 CompositionModel?.ChangeWorkarea(WorkareaBegin, Time.MaxAndMin(CurrentTime, (WorkareaBegin + FrameDuration).RoundToFrameRate(FrameRate), Duration));
             }, () => CompositionModel != null).ObservesProperty(() => CompositionModel);
 
+            MoveMarkerCommand = new DelegateCommand<Tuple<Marker, Time>>(t =>
+            {
+                if (CompositionModel == null)
+                {
+                    return;
+                }
+
+                CompositionModel.MoveMarker(t.Item1, t.Item2);
+            }, _ => CompositionModel != null).ObservesProperty(() => CompositionModel);
+
+            AddMarkerCommand = new DelegateCommand<Time?>(time =>
+            {
+                if (CompositionModel == null || !time.HasValue)
+                {
+                    return;
+                }
+
+                CompositionModel.AddMarker(time.Value);
+            }, _ => CompositionModel != null).ObservesProperty(() => CompositionModel);
+
+            DeleteMarkerCommand = new DelegateCommand<Marker>(marker =>
+            {
+                if (CompositionModel == null || !(CompositionMarkers?.Contains(marker) ?? false))
+                {
+                    return;
+                }
+
+                CompositionModel.DeleteMarker(marker);
+            }, _ => CompositionModel != null).ObservesProperty(() => CompositionModel);
+
+            AddMarkerToCurrentTimeCommand = new DelegateCommand(() =>
+            {
+                if (CompositionModel == null)
+                {
+                    return;
+                }
+
+                CompositionModel.AddMarker(CurrentTime);
+            }, () => CompositionModel != null).ObservesProperty(() => CompositionModel);
+
             SavePresetCommand = new DelegateCommand(() =>
             {
                 if (CompositionModel == null || SelectedTarget == null)
@@ -1336,36 +1379,6 @@ namespace NiVE3.ViewModel
                     }
                 }
             }, () => CompositionModel != null).ObservesProperty(() => CompositionModel);
-
-            MoveMarkerCommand = new DelegateCommand<Tuple<Marker, Time>>(t =>
-            {
-                if (CompositionModel == null)
-                {
-                    return;
-                }
-
-                CompositionModel.MoveMarker(t.Item1, t.Item2);
-            }, _ => CompositionModel != null).ObservesProperty(() => CompositionModel);
-
-            AddMarkerCommand = new DelegateCommand<Time?>(time =>
-            {
-                if (CompositionModel == null || !time.HasValue)
-                {
-                    return;
-                }
-
-                CompositionModel.AddMarker(time.Value);
-            }, _ => CompositionModel != null).ObservesProperty(() => CompositionModel);
-
-            DeleteMarkerCommand = new DelegateCommand<Marker>(marker =>
-            {
-                if (CompositionModel == null || !(CompositionMarkers?.Contains(marker) ?? false))
-                {
-                    return;
-                }
-
-                CompositionModel.DeleteMarker(marker);
-            }, _ => CompositionModel != null).ObservesProperty(() => CompositionModel);
 
             AudioPlayerModel = audioPlayerModel;
         }

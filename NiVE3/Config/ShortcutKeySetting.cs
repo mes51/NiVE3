@@ -459,6 +459,13 @@ namespace NiVE3.Config
             new PropertyMetadata(new KeyGesture(Key.None))
         );
 
+        public static readonly DependencyProperty AddMarkerToCurrentTimeGestureProperty = DependencyProperty.Register(
+            nameof(AddMarkerToCurrentTimeGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new KeyGesture(Key.Oem1, ModifierKeys.Shift | ModifierKeys.Control | ModifierKeys.Alt))
+        );
+
         public static readonly DependencyProperty PlayOrStopGestureProperty = DependencyProperty.Register(
             nameof(PlayOrStopGesture),
             typeof(InputGesture),
@@ -502,6 +509,14 @@ namespace NiVE3.Config
         {
             get { return (InputGesture)GetValue(PlayOrStopGestureProperty); }
             set { SetValue(PlayOrStopGestureProperty, value); }
+        }
+
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Edit)]
+        [ShowInMarkup]
+        public InputGesture AddMarkerToCurrentTimeGesture
+        {
+            get { return (InputGesture)GetValue(AddMarkerToCurrentTimeGestureProperty); }
+            set { SetValue(AddMarkerToCurrentTimeGestureProperty, value); }
         }
 
         [ShortcutKeyCategory(ShortcutKeyCategoryType.Edit)]
