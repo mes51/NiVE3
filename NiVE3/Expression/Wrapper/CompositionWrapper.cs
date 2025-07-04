@@ -65,6 +65,9 @@ namespace NiVE3.Expression.Wrapper
         public int layerCount => CompositionModel.Layers.Count;
 
         [ExpressionPublicMember]
+        public int markerCount => CompositionModel.CompositionMarkers.Count;
+
+        [ExpressionPublicMember]
         public LayerWrapper? activeCamera
         {
             get
@@ -92,6 +95,53 @@ namespace NiVE3.Expression.Wrapper
                 return new LayerWrapper(CompositionModel.Layers[index], CompositionModel, GlobalTime);
             }
 
+            return null;
+        }
+
+        [ExpressionPublicMember]
+        public MarkerWrapper? marker(object key)
+        {
+            if (key is string name)
+            {
+                foreach (var marker in CompositionModel.CompositionMarkers)
+                {
+                    if (marker.Name == name)
+                    {
+                        return new MarkerWrapper(marker);
+                    }
+                }
+            }
+            else if (ExpressionInternalUtil.TryConvertToIndex(key, out var index) && index > -1 && index < CompositionModel.Layers.Count)
+            {
+                return new MarkerWrapper(CompositionModel.CompositionMarkers[index]);
+            }
+
+            return null;
+        }
+
+        [ExpressionPublicMember]
+        public MarkerWrapper? getMarkerNextTime(double time)
+        {
+            foreach (var marker in CompositionModel.CompositionMarkers)
+            {
+                if (marker.Time >= time)
+                {
+                    return new MarkerWrapper(marker);
+                }
+            }
+            return null;
+        }
+
+        [ExpressionPublicMember]
+        public MarkerWrapper? getMarkerPrevTime(double time)
+        {
+            foreach (var marker in CompositionModel.CompositionMarkers.Reverse())
+            {
+                if (marker.Time <= time)
+                {
+                    return new MarkerWrapper(marker);
+                }
+            }
             return null;
         }
 
