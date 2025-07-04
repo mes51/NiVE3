@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -82,9 +83,24 @@ namespace NiVE3.View.Part
             new FrameworkPropertyMetadata(null)
         );
 
+        private static readonly DependencyPropertyKey ToolTipIsVisiblePropertyKey = DependencyProperty.RegisterReadOnly(
+            nameof(ToolTipIsVisible),
+            typeof(bool),
+            typeof(MarkerCollectionView),
+            new FrameworkPropertyMetadata(true)
+        );
+
+        public static readonly DependencyProperty ToolTipIsVisibleProperty = ToolTipIsVisiblePropertyKey.DependencyProperty;
+
         public static readonly RoutedEvent MarkerMoveRequestEvent = EventManager.RegisterRoutedEvent(
             nameof(MarkerMoveRequest), RoutingStrategy.Direct, typeof(EventHandler<MarkerMoveEventArgs>), typeof(MarkerCollectionView)
         );
+
+        public bool ToolTipIsVisible
+        {
+            get { return (bool)GetValue(ToolTipIsVisibleProperty); }
+            private set { SetValue(ToolTipIsVisiblePropertyKey, value); }
+        }
 
         public event EventHandler<MarkerMoveEventArgs> MarkerMoveRequest
         {
@@ -140,10 +156,13 @@ namespace NiVE3.View.Part
             set { SetValue(MarkerBrushProperty, value); }
         }
 
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public ICommand AddMarkerCommandWrapper { get; }
 
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public ICommand DeleteMarkerCommandWrapper { get; }
 
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public ICommand EditMarkerNameCommandWrapper { get; }
 
         bool IsClicked { get; set; }
@@ -280,18 +299,8 @@ namespace NiVE3.View.Part
                 return;
             }
 
-            var pixelPerTime = (ActualWidth - UIParameters.TimelineRangeThumbTotalWidth) / (double)Range;
-            if (pixelPerTime < 0 || double.IsNaN(pixelPerTime) || double.IsInfinity(pixelPerTime))
-            {
-                return;
-            }
-
-            var x = e.CursorLeft - UIParameters.TimelineRangeThumbWidth;
-            var rangeStart = RangeStart;
-            var clickedMarker = CompositionMarkers.LastOrDefault(m => Math.Abs((double)(m.Time - rangeStart) * pixelPerTime - x) < MarkerWidth * 0.5);
-
-            RightClickedTime = TimeCalc.CalcTimeFromPixelAligned(x, ActualWidth, Range, RangeStart, FrameRate);
-            RightClickedMarker = CompositionMarkers.LastOrDefault(m => Math.Abs((double)(m.Time - rangeStart) * pixelPerTime - x) < MarkerWidth * 0.5);
+            RightClickedTime = TimeCalc.CalcTimeFromPixelAligned(e.CursorLeft - UIParameters.TimelineRangeThumbTotalWidth, ActualWidth, Range, RangeStart, FrameRate);
+            RightClickedMarker = GetMarkerByPosition(e.CursorLeft);
         }
 
         private void CompositionMarkerView_MouseUp(object sender, MouseButtonEventArgs e)
@@ -302,6 +311,7 @@ namespace NiVE3.View.Part
             }
 
             IsClicked = false;
+            ToolTipIsVisible = true;
             ReleaseMouseCapture();
 
             var diffTime = (MarkerMovingTime + MoveTarget.Time).RoundToFrameRate(FrameRate) - MoveTarget.Time;
@@ -318,13 +328,33 @@ namespace NiVE3.View.Part
 
         private void CompositionMarkerView_MouseMove(object sender, MouseEventArgs e)
         {
-            if (!IsClicked)
+            if (IsClicked)
             {
-                return;
+                MarkerMovingTime = TimeCalc.CalcTimeFromPixel(e.GetPosition(this).X - ClickX, ActualWidth, Range, RangeStart);
+                InvalidateVisual();
             }
+            else
+            {
+                var toolTip = ToolTip as ToolTip;
+                if (toolTip == null)
+                {
+                    return;
+                }
 
-            MarkerMovingTime = TimeCalc.CalcTimeFromPixel(e.GetPosition(this).X - ClickX, ActualWidth, Range, RangeStart);
-            InvalidateVisual();
+                var pos = e.GetPosition(this);
+                var targetMarker = GetMarkerByPosition(pos.X);
+                if (targetMarker == null || string.IsNullOrEmpty(targetMarker.Name))
+                {
+                    toolTip.Visibility = Visibility.Collapsed;
+                }
+                else
+                {
+                    toolTip.Visibility = Visibility.Visible;
+                    toolTip.Content = targetMarker.Name;
+                    toolTip.HorizontalOffset = pos.X + 16.0;
+                    toolTip.VerticalOffset = pos.Y + 16.0;
+                }
+            }
         }
 
         private void CompositionMarkerView_MouseDown(object sender, MouseButtonEventArgs e)
@@ -334,16 +364,8 @@ namespace NiVE3.View.Part
                 return;
             }
 
-            var pixelPerTime = (ActualWidth - UIParameters.TimelineRangeThumbTotalWidth) / (double)Range;
-            if (pixelPerTime < 0 || double.IsNaN(pixelPerTime) || double.IsInfinity(pixelPerTime) || CompositionMarkers.Count < 1)
-            {
-                return;
-            }
-
             var pos = e.GetPosition(this);
-            var x = pos.X - UIParameters.TimelineRangeThumbWidth;
-            var rangeStart = RangeStart;
-            var clickedMarker = CompositionMarkers.LastOrDefault(m => Math.Abs((double)(m.Time - rangeStart) * pixelPerTime - x) < MarkerWidth * 0.5);
+            var clickedMarker = GetMarkerByPosition(pos.X);
             if (clickedMarker != null)
             {
                 if (e.ClickCount == 2)
@@ -355,11 +377,25 @@ namespace NiVE3.View.Part
                     MoveTarget = clickedMarker;
                     ClickX = pos.X;
                     IsClicked = true;
+                    ToolTipIsVisible = false;
                     MarkerMovingTime = Time.Zero;
                     CaptureMouse();
                 }
                 e.Handled = true;
             }
+        }
+
+        Marker? GetMarkerByPosition(double posX)
+        {
+            var pixelPerTime = (ActualWidth - UIParameters.TimelineRangeThumbTotalWidth) / (double)Range;
+            if (pixelPerTime < 0 || double.IsNaN(pixelPerTime) || double.IsInfinity(pixelPerTime) || CompositionMarkers.Count < 1)
+            {
+                return null;
+            }
+
+            var x = posX - UIParameters.TimelineRangeThumbWidth;
+            var rangeStart = RangeStart;
+            return CompositionMarkers.LastOrDefault(m => Math.Abs((double)(m.Time - rangeStart) * pixelPerTime - x) < MarkerWidth * 0.5);
         }
 
         private void CompositionMarkers_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)

@@ -304,6 +304,11 @@
     </Style>
 
     <Style TargetType="{x:Type pt:MarkerCollectionView}">
+        <Setter Property="ToolTip">
+            <Setter.Value>
+                <ToolTip Placement="Relative"/>
+            </Setter.Value>
+        </Setter>
         <Setter Property="ContextMenu">
             <Setter.Value>
                 <ContextMenu>
@@ -314,6 +319,12 @@
                 </ContextMenu>
             </Setter.Value>
         </Setter>
+
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=ToolTipIsVisible}" Value="False">
+                <Setter Property="ToolTip" Value="{x:Null}"/>
+            </DataTrigger>
+        </Style.Triggers>
     </Style>
 
     <Style TargetType="{x:Type ae:LineNumberMargin}">
