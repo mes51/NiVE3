@@ -27,8 +27,8 @@
                 <DataTrigger Value="True">
                     <DataTrigger.Binding>
                         <MultiBinding Converter="{StaticResource EqualMultiValueConverter}">
-                            <Binding Path="(ListView.AlternationIndex)" RelativeSource="{RelativeSource Self}"/>
-                            <Binding Path="DataContext.UndoCommands.Count" Source="{x:Reference Root}"/>
+                            <Binding />
+                            <Binding Path="DataContext.LatestUndoCommand" Source="{x:Reference Root}"/>
                         </MultiBinding>
                     </DataTrigger.Binding>
                     <Setter Property="Background" Value="Gray"/>

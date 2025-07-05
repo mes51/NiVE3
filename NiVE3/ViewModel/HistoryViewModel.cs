@@ -26,20 +26,30 @@ namespace NiVE3.ViewModel
     {
         public IEnumerable<IHistoryCommand> FirstHistoryCommand { get; } = [NewProjectHistoryCommand.Instance];
 
-        private ObservableStack<IHistoryCommand> undoCommands = new ObservableStack<IHistoryCommand>();
+        private ObservableStack<IHistoryCommand> undoCommands = [];
         [NeedWire(nameof(HistoryModel), IsOneWay = true)]
         public ObservableStack<IHistoryCommand> UndoCommands
         {
             get { return undoCommands; }
-            set { SetProperty(ref undoCommands, value); }
+            set
+            {
+                undoCommands.CollectionChanged -= UndoCommands_CollectionChanged;
+                value.CollectionChanged += UndoCommands_CollectionChanged;
+                SetProperty(ref undoCommands, value);
+            }
         }
 
-        private ObservableStack<IHistoryCommand> redoCommands = new ObservableStack<IHistoryCommand>();
+        private ObservableStack<IHistoryCommand> redoCommands = [];
         [NeedWire(nameof(HistoryModel), IsOneWay = true)]
         public ObservableStack<IHistoryCommand> RedoCommands
         {
             get { return redoCommands; }
-            set { SetProperty(ref redoCommands, value); }
+            set
+            {
+                RedoCommands.CollectionChanged -= RedoCommands_CollectionChanged;
+                value.CollectionChanged += RedoCommands_CollectionChanged;
+                SetProperty(ref redoCommands, value);
+            }
         }
 
         private bool isIgnoreUpdatePreview;
@@ -52,6 +62,8 @@ namespace NiVE3.ViewModel
 
         // NOTE: なぜかStackをそのままCollectionContainer等に渡すと順番がひっくり返るため、順序を固定する
         public IEnumerable<IHistoryCommand> ReversedRedoCommands => [..RedoCommands];
+
+        public IHistoryCommand LatestUndoCommand => UndoCommands.Count > 0 ? UndoCommands.Peek() : FirstHistoryCommand.First();
 
         public ICommand UndoCommand { get; }
 
@@ -111,11 +123,14 @@ namespace NiVE3.ViewModel
             });
 
             WiringModel();
-
-            RedoCommands.CollectionChanged += RedoCommands_CollectionChanged;
         }
 
         partial void WiringModel();
+
+        private void UndoCommands_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            RaisePropertyChanged(nameof(LatestUndoCommand));
+        }
 
         private void RedoCommands_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
