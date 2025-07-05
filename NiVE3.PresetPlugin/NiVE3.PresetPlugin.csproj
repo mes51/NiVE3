@@ -19,8 +19,8 @@
     <PackageReference Include="HG.NWaves" Version="0.9.6" />
     <PackageReference Include="NAudio.Core" Version="2.2.1" />
     <PackageReference Include="Svg" Version="3.4.7" />
-    <PackageReference Include="Vanara.PInvoke.Gdi32" Version="4.1.1" />
-    <PackageReference Include="Vanara.PInvoke.Multimedia" Version="4.1.1" />
+    <PackageReference Include="Vanara.PInvoke.Gdi32" Version="4.1.6" />
+    <PackageReference Include="Vanara.PInvoke.Multimedia" Version="4.1.6" />
     <PackageReference Include="Vortice.Direct3D11" Version="3.6.2" />
     <PackageReference Include="Vortice.MediaFoundation" Version="3.6.2" />
   </ItemGroup>
