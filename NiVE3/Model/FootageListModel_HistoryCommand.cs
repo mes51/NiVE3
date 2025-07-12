@@ -9,6 +9,133 @@ namespace NiVE3.Model
 {
     partial class FootageListModel
     {
+        private class ImportFootagesHistoryCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ImportFootages);
+
+            FootageListModel Model { get; }
+
+            InputModel[] InputModels { get; }
+
+            InputModel[] PlaceholderInputModels { get; }
+
+            (IFootageModel, Guid?)[] FootageModels { get; }
+
+            public ImportFootagesHistoryCommand(FootageListModel model, InputModel[] inputModels, InputModel[] placeholderInputModels, (IFootageModel, Guid?)[] footageModels)
+            {
+                Model = model;
+                InputModels = inputModels;
+                PlaceholderInputModels = placeholderInputModels;
+                FootageModels = footageModels;
+            }
+
+            public void Redo()
+            {
+                foreach (var i in InputModels)
+                {
+                    Model.AddInput(i);
+                }
+                Model.PlaceholderInputs.AddRange(PlaceholderInputModels);
+                foreach (var (footage, folderId) in FootageModels)
+                {
+                    Model.AddFootage(footage, folderId);
+                }
+            }
+
+            public void Undo()
+            {
+                foreach (var (footage, folderId) in FootageModels.Reverse())
+                {
+                    Model.DeleteFootageInternal(footage);
+                }
+                foreach (var i in InputModels)
+                {
+                    Model.DeleteInput(i);
+                }
+                Model.PlaceholderInputs.RemoveAll(PlaceholderInputModels.Contains);
+            }
+
+            public void Dispose()
+            {
+                foreach (var i in InputModels.Concat(PlaceholderInputModels))
+                {
+                    i.Dispose();
+                }
+            }
+        }
+
+        private class ReplaceCompositionFootageHistoryCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ReplaceCompositionFootages);
+
+            FootageListModel Model { get; }
+
+            InputModel[] PlaceholderInputModels { get; }
+
+            InputModel[] CompositionInputModels { get; }
+
+            (FootageModel, Guid?)[] PlaceholderFootageModels { get; }
+
+            (FootageModel, Guid?)[] CompositionFootageModels { get; }
+
+            public ReplaceCompositionFootageHistoryCommand(FootageListModel model, InputModel[] placeholderInputModels, InputModel[] compositionInputModels, (FootageModel, Guid?)[] placeholderFootageModels, (FootageModel, Guid?)[] compositionFootageModels)
+            {
+                Model = model;
+                PlaceholderInputModels = placeholderInputModels;
+                CompositionInputModels = compositionInputModels;
+                PlaceholderFootageModels = placeholderFootageModels;
+                CompositionFootageModels = compositionFootageModels;
+            }
+
+            public void Redo()
+            {
+                foreach (var p in PlaceholderInputModels)
+                {
+                    Model.PlaceholderInputs.Remove(p);
+                }
+                foreach (var i in CompositionInputModels)
+                {
+                    Model.AddInput(i);
+                }
+
+                foreach (var (p, _) in PlaceholderFootageModels)
+                {
+                    Model.DeleteFootageInternal(p);
+                }
+                foreach (var (c, parentFolderId) in CompositionFootageModels)
+                {
+                    Model.AddFootage(c, parentFolderId);
+                }
+            }
+
+            public void Undo()
+            {
+                Model.PlaceholderInputs.AddRange(PlaceholderInputModels);
+
+                foreach (var (c, _) in PlaceholderFootageModels)
+                {
+                    Model.DeleteFootageInternal(c);
+                }
+                foreach (var (p, parentFolderId) in PlaceholderFootageModels)
+                {
+                    Model.AddFootage(p, parentFolderId);
+                }
+
+                foreach (var i in CompositionInputModels)
+                {
+                    Model.DeleteInput(i);
+                }
+            }
+
+            public void Dispose()
+            {
+                foreach (var i in CompositionInputModels)
+                {
+                    i.Dispose();
+                }
+            }
+        }
+
         private class AddFolderHistoryCommand : IHistoryCommand
         {
             public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_AddFolder);

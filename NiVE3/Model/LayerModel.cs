@@ -1715,11 +1715,13 @@ namespace NiVE3.Model
 
         public void ReplaceFootage(FootageModel footageModel)
         {
+            var oldFootage = FootageModel;
+
             FootageModel.FootageUpdated -= FootageModel_FootageUpdated;
-
             FootageModel = footageModel;
-
             FootageModel.FootageUpdated += FootageModel_FootageUpdated;
+
+            HistoryModel.Add(new ReplaceFootageHistoryCommand(this, oldFootage, footageModel));
         }
 
         public void UpdateTextProperty(string propertyId, object? value, object? prevValue, Time layerTime)
@@ -2541,6 +2543,31 @@ namespace NiVE3.Model
                     managedAddFrame.Dispose();
                 }
             }
+        }
+
+        public static (Guid oldId, Guid newId, Dictionary<Guid, Guid> effectIdMa, Dictionary<Guid, Guid> maskIdMapp) ConvertDataForImport(LayerData layerData, Dictionary<Guid, Guid> footageIdMap)
+        {
+            var oldId = layerData.LayerId;
+            layerData.LayerId = Guid.NewGuid();
+
+            var effectIdMap = new Dictionary<Guid, Guid>();
+            foreach (var e in layerData.Effects)
+            {
+                var (oldEffectId, newEffectId) = EffectModel.ConvertDataForImport(e);
+                effectIdMap.Add(oldEffectId, newEffectId);
+            }
+            var maskIdMap = new Dictionary<Guid, Guid>();
+            foreach (var m in layerData.Masks)
+            {
+                var (oldMaskId, newMaskId) = MaskModel.ConvertDataForImport(m);
+                maskIdMap.Add(oldMaskId, newMaskId);
+            }
+            if (footageIdMap.TryGetValue(layerData.FootageId, out var newFootageId))
+            {
+                layerData.FootageId = newFootageId;
+            }
+
+            return (oldId, layerData.LayerId, effectIdMap, maskIdMap);
         }
 
         private void Effects_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)

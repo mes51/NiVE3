@@ -9,15 +9,15 @@ namespace NiVE3.Model
 {
     partial class ProjectModel
     {
-        private class AddCompositionCommand : IHistoryCommand
+        private class AddCompositionHistoryCommand : IHistoryCommand
         {
             public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_AddComposition);
 
-            ProjectModel ProjectModel { get; set; }
+            ProjectModel ProjectModel { get; }
 
-            CompositionModel Composition { get; set; }
+            CompositionModel Composition { get; }
 
-            public AddCompositionCommand(ProjectModel projectModel, CompositionModel composition)
+            public AddCompositionHistoryCommand(ProjectModel projectModel, CompositionModel composition)
             {
                 ProjectModel = projectModel;
                 Composition = composition;
@@ -38,15 +38,16 @@ namespace NiVE3.Model
                 Composition.Dispose();
             }
         }
-        private class DeleteCompositionCommand : IHistoryCommand
+
+        private class DeleteCompositionHistoryCommand : IHistoryCommand
         {
             public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_RemoveComposition);
 
-            ProjectModel ProjectModel { get; set; }
+            ProjectModel ProjectModel { get; }
 
-            CompositionModel Composition { get; set; }
+            CompositionModel Composition { get; }
 
-            public DeleteCompositionCommand(ProjectModel projectModel, CompositionModel composition)
+            public DeleteCompositionHistoryCommand(ProjectModel projectModel, CompositionModel composition)
             {
                 ProjectModel = projectModel;
                 Composition = composition;
@@ -63,6 +64,45 @@ namespace NiVE3.Model
             }
 
             public void Dispose() { }
+        }
+
+        private class ImportCompositionHistoryCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ImportProjectFile);
+
+            ProjectModel Model { get; }
+
+            CompositionModel[] Compositions { get; }
+
+            public ImportCompositionHistoryCommand(ProjectModel model, CompositionModel[] compositions)
+            {
+                Model = model;
+                Compositions = compositions;
+            }
+
+            public void Redo()
+            {
+                foreach (var c in Compositions)
+                {
+                    Model.CompositionModels.Add(c);
+                }
+            }
+
+            public void Undo()
+            {
+                foreach (var c in Compositions)
+                {
+                    Model.CompositionModels.Remove(c);
+                }
+            }
+
+            public void Dispose()
+            {
+                foreach (var c in Compositions)
+                {
+                    c.Dispose();
+                }
+            }
         }
     }
 }

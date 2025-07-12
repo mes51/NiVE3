@@ -881,7 +881,7 @@ namespace NiVE3.Model
 
             public void Redo()
             {
-                var index = Model.CompositionMarkers.FindIndex(m => m.Id == OldMarker.Id);
+                var index = Model.CompositionMarkers.FindIndex(m => m.MarkerId == OldMarker.MarkerId);
 
                 Model.CompositionMarkers[index] = NewMarker;
                 Model.CompositionMarkers.Sort((a, b) => a.Time.CompareTo(b.Time));
@@ -889,7 +889,7 @@ namespace NiVE3.Model
 
             public void Undo()
             {
-                var index = Model.CompositionMarkers.FindIndex(m => m.Id == NewMarker.Id);
+                var index = Model.CompositionMarkers.FindIndex(m => m.MarkerId == NewMarker.MarkerId);
 
                 Model.CompositionMarkers[index] = OldMarker;
                 Model.CompositionMarkers.Sort((a, b) => a.Time.CompareTo(b.Time));

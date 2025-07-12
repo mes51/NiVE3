@@ -57,6 +57,15 @@ namespace NiVE3.Model
         void ChangeComment(string name);
 
         FootageData SaveData();
+
+        public static (Guid oldId, Guid newId) ConvertDataForImport(FootageData footageData, Dictionary<Guid, Guid> inputIdMap)
+        {
+            var oldId = footageData.FootageId;
+            footageData.FootageId = Guid.NewGuid();
+            footageData.InputId = footageData.InputId.HasValue ? inputIdMap[footageData.InputId.Value] : null;
+
+            return (oldId, footageData.FootageId);
+        }
     }
 
     class FootageModel : BindableBase, IFootageModel

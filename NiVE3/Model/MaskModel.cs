@@ -401,6 +401,14 @@ namespace NiVE3.Model
             };
         }
 
+        public static (Guid oldId, Guid newId) ConvertDataForImport(MaskData maskData)
+        {
+            var oldId = maskData.MaskId;
+            maskData.MaskId = Guid.NewGuid();
+
+            return (oldId, maskData.MaskId);
+        }
+
         private void Properties_ValueUpdated(object? sender, EventArgs e)
         {
             MaskUpdated?.Invoke(this, EventArgs.Empty);

@@ -9,6 +9,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media.Effects;
@@ -73,6 +74,8 @@ namespace NiVE3.Model
 
         List<InputModel> PlaceholderInputs { get; } = [];
 
+        Lazy<ProjectModel> ProjectModel { get; }
+
         HistoryModel HistoryModel { get; }
 
         AcceleratorModel AcceleratorModel { get; }
@@ -91,7 +94,7 @@ namespace NiVE3.Model
 
         public event EventHandler<FootageEventArgs>? DeleteFootageByUndo;
 
-        public FootageListModel(AcceleratorModel acceleratorModel, HistoryModel historyModel, ViewStateModel viewState, ProceduralInputListModel proceduralInputListModel)
+        public FootageListModel(Lazy<ProjectModel> projectModel, AcceleratorModel acceleratorModel, HistoryModel historyModel, ViewStateModel viewState, ProceduralInputListModel proceduralInputListModel)
         {
             var pluginCatalog = new DirectoryCatalog(Paths.PluginDirectory);
             var selfCatalog = new AssemblyCatalog(typeof(FootageListModel).Assembly);
@@ -101,6 +104,7 @@ namespace NiVE3.Model
 
             InitializePlugin();
 
+            ProjectModel = projectModel;
             AcceleratorModel = acceleratorModel;
             HistoryModel = historyModel;
             ViewState = viewState;
@@ -147,7 +151,7 @@ namespace NiVE3.Model
             if (solidFolder == null)
             {
                 HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_LoadFootageFile));
-                solidFolder = AddFolderInternal(ApplicationSetting.Setting.SolidFolderName);
+                solidFolder = AddFolderInternal(ApplicationSetting.Setting.SolidFolderName, null);
                 createFolder = true;
             }
             var loaded = LoadFile(solidInput, "", solidFolder.FootageId, null, SolidInput.PluginId, true);
@@ -179,7 +183,7 @@ namespace NiVE3.Model
 
         public void AddFolder()
         {
-            AddFolderInternal(null);
+            AddFolderInternal(null, null);
         }
 
         public void MoveFootage(Guid sourceFootageId, Guid targetFolderId)
@@ -297,7 +301,7 @@ namespace NiVE3.Model
         public bool CheckSupportFile(string filePath)
         {
             var ext = Path.GetExtension(filePath).Trim('.').ToLower();
-            return SupportedFileTypes.Values.Any(e => e.Contains(ext));
+            return ext == "nvp3" || SupportedFileTypes.Values.Any(e => e.Contains(ext));
         }
 
         public FootageLoadResultType LoadFile(string filePath, Guid? targetFolderId)
@@ -309,6 +313,11 @@ namespace NiVE3.Model
 
             var ext = Path.GetExtension(filePath).Trim('.').ToLower();
             var lastResultType = FootageLoadResultType.NotSupported;
+            if (ext == "nvp3")
+            {
+                return ImportProject(filePath, targetFolderId).Type;
+            }
+
             foreach (var (t, supported) in SupportedFileTypes)
             {
                 if (!supported.Contains(ext))
@@ -432,6 +441,13 @@ namespace NiVE3.Model
             SortKey = (FootageSortKey)data.SortKey;
             SortIsAscending = data.SortIsAscending;
 
+            ImportFromData(data, projectDir, null);
+        }
+
+        public void ImportFromData(FootageListData data, string projectDir, Guid? targetFolderId)
+        {
+            var addInputs = new List<InputModel>();
+            var addPlaceholderInputs = new List<InputModel>();
             var inputSources = new Dictionary<(Guid, string), (InputModel, IFootageSource)>();
             foreach (var inputData in data.Inputs.Concat(data.Placeholders))
             {
@@ -444,7 +460,7 @@ namespace NiVE3.Model
                         var placeholderInput = new PlaceholderInput(sourceData.SourceType, sourceData.Width, sourceData.Height, sourceData.FrameRate, sourceData.Duration, inputData.InputOption, sourceData.SourceId, sourceData.Name);
                         placeholderInput.Load(inputData.FilePath);
                         var placeholderInputModel = new InputModel(placeholderInput, inputData.PluginId, false, inputData.InputId);
-                        PlaceholderInputs.Add(placeholderInputModel);
+                        addPlaceholderInputs.Add(placeholderInputModel);
                         inputSources.Add((inputData.InputId, sourceData.SourceId), (placeholderInputModel, placeholderInput.GetGroup().Sources.First()));
                     }
                     continue;
@@ -456,7 +472,7 @@ namespace NiVE3.Model
                 {
                     var inputModel = new InputModel(input, inputData.PluginId, inputPlugin.Metadata.IsSupportLoadToGpu, inputData.InputId);
 
-                    AddInput(inputModel);
+                    addInputs.Add(inputModel);
                     foreach (var source in input.Value.GetGroup().Flatten())
                     {
                         if (inputSources.TryGetValue((inputData.InputId, source.SourceId), out var alreadyLoaded))
@@ -468,6 +484,15 @@ namespace NiVE3.Model
                             }
                             else
                             {
+                                foreach (var i in addInputs.Concat(addPlaceholderInputs))
+                                {
+                                    try
+                                    {
+                                        i.Dispose();
+                                    }
+                                    catch { }
+                                }
+
                                 // NOTE: プレースホルダーでないのに被った場合は入力プラグイン側のbug(SourceIdの重複は許されないため)
                                 // TODO: 読み込み時の処理と合わせて専用の例外クラスを用意する
                                 throw new Exception(string.Format("duplicate source id. plugin id: {0}", inputData.PluginId));
@@ -486,13 +511,14 @@ namespace NiVE3.Model
                         var placeholderInput = new PlaceholderInput(sourceData.SourceType, sourceData.Width, sourceData.Height, sourceData.FrameRate, sourceData.Duration, inputData.InputOption, sourceData.SourceId, sourceData.Name);
                         placeholderInput.Load(inputData.FilePath);
                         var placeholderInputModel = new InputModel(placeholderInput, inputData.PluginId, false, inputData.InputId);
-                        PlaceholderInputs.Add(placeholderInputModel);
+                        addPlaceholderInputs.Add(placeholderInputModel);
                         inputSources.Add((inputData.InputId, sourceData.SourceId), (placeholderInputModel, placeholderInput.GetGroup().Sources.First()));
                     }
                 }
             }
 
-            var footageDataQueue = new Queue<(Guid?, FootageData)>(data.Footages.Select(f => ((Guid?)null, f)));
+            var addedFootages = new List<(IFootageModel, Guid?)>();
+            var footageDataQueue = new Queue<(Guid?, FootageData)>(data.Footages.Select(f => (targetFolderId, f)));
             while (footageDataQueue.Count > 0)
             {
                 var (parentFolderId, footageData) = footageDataQueue.Dequeue();
@@ -515,11 +541,13 @@ namespace NiVE3.Model
                         var placeholderInput = new PlaceholderInput(footageData.InputType, footageData.Width, footageData.Height, footageData.FrameRate, footageData.Duration, footageData.InputOption, footageData.SourceId, footageData.Name);
                         placeholderInput.Load(footageData.FilePath);
                         inputModel = new InputModel(placeholderInput, footageData.InputPluginId.Value, false, footageData.InputId);
+                        addPlaceholderInputs.Add(inputModel);
                         source = placeholderInput.GetGroup().Sources.First();
                     }
 
                     var footageModel = new FootageModel(inputModel, source, HistoryModel, footageData.FootageId);
                     AddFootage(footageModel, parentFolderId);
+                    addedFootages.Add((footageModel, parentFolderId));
                 }
                 else
                 {
@@ -528,6 +556,7 @@ namespace NiVE3.Model
                         Name = footageData.Name
                     };
                     AddFootage(folder, parentFolderId);
+                    addedFootages.Add((folder, parentFolderId));
 
                     foreach (var child in (footageData.Children ?? []))
                     {
@@ -535,24 +564,41 @@ namespace NiVE3.Model
                     }
                 }
             }
+
+            foreach (var input in addInputs)
+            {
+                AddInput(input);
+            }
+            PlaceholderInputs.AddRange(addPlaceholderInputs);
+
+            HistoryModel.Add(new ImportFootagesHistoryCommand(this, [.. addInputs], [.. addPlaceholderInputs], [.. addedFootages]));
         }
 
-        public FootageModel[] LoadCompositionFootageFromData(FootageListData data, CompositionModel[] compositions)
+        public FootageModel[] ReplaceCompositionFootage(FootageListData data, CompositionModel[] compositions)
         {
             var inputSources = new Dictionary<Guid, InputModel>();
+            var removedPlaceholderInputModels = new List<InputModel>();
+            var compositionInputModels = new List<InputModel>();
             foreach (var inputData in data.Inputs.Where(i => i.PluginId == CompositionInput.PluginId))
             {
                 var inputModel = new InputModel(new CompositionInput(inputData.InputOption, compositions), CompositionInput.PluginId, true, inputData.InputId);
                 AddInput(inputModel);
-                PlaceholderInputs.Remove(PlaceholderInputs.First(p => p.InputId == inputData.InputId));
+                compositionInputModels.Add(inputModel);
                 inputSources.Add(inputData.InputId, inputModel);
+
+                var placeholderInputModel = PlaceholderInputs.First(p => p.InputId == inputData.InputId);
+                PlaceholderInputs.Remove(placeholderInputModel);
+                removedPlaceholderInputModels.Add(placeholderInputModel);
             }
 
-            var footageDataQueue = new Queue<(Guid?, FootageData)>(data.Footages.Select(f => ((Guid?)null, f)));
             var result = new List<FootageModel>();
+
+            var removedPlaceholderFootageModels = new List<(FootageModel, Guid?)>();
+            var addedCompositionFootageModels = new List<(FootageModel, Guid?)>();
+            var footageDataQueue = new Queue<FootageData>(data.Footages);
             while (footageDataQueue.Count > 0)
             {
-                var (parentFolderId, footageData) = footageDataQueue.Dequeue();
+                var footageData = footageDataQueue.Dequeue();
                 if (footageData.DataType == FootageDataType.Source)
                 {
                     if (!footageData.InputId.HasValue || footageData.SourceId == null || !footageData.InputPluginId.HasValue)
@@ -567,27 +613,32 @@ namespace NiVE3.Model
                         var footageModel = new FootageModel(inputModel, source, HistoryModel, footageData.FootageId);
                         result.Add(footageModel);
 
+                        var parentFolder = FindParent(footageData.FootageId);
                         var placeholderFootage = FindModel(footageData.FootageId, Footages);
-                        if (placeholderFootage != null)
+                        if (placeholderFootage is FootageModel pfm)
                         {
-                            DeleteFootageInternal(placeholderFootage);
+                            DeleteFootageInternal(pfm);
+                            removedPlaceholderFootageModels.Add((pfm, parentFolder?.FootageId));
                         }
-                        AddFootage(footageModel, parentFolderId);
+                        AddFootage(footageModel, parentFolder?.FootageId);
+                        addedCompositionFootageModels.Add((footageModel, parentFolder?.FootageId));
                     }
                 }
                 else
                 {
                     foreach (var child in (footageData.Children ?? []))
                     {
-                        footageDataQueue.Enqueue((footageData.FootageId, child));
+                        footageDataQueue.Enqueue(child);
                     }
                 }
             }
 
+            HistoryModel.Add(new ReplaceCompositionFootageHistoryCommand(this, [..removedPlaceholderInputModels], [..compositionInputModels], [..removedPlaceholderFootageModels], [..addedCompositionFootageModels]));
+
             return [..result];
         }
 
-        FootageFolderModel AddFolderInternal(string? name)
+        FootageFolderModel AddFolderInternal(string? name, Guid? targetFolderId)
         {
             var folder = new FootageFolderModel(HistoryModel);
             if (!string.IsNullOrEmpty(name))
@@ -688,6 +739,25 @@ namespace NiVE3.Model
             return new FootageLoadResult(loadedFootage, FootageLoadResultType.Success);
         }
 
+        FootageLoadResult ImportProject(string filePath, Guid? targetFolderId)
+        {
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ImportProjectFile));
+
+            var name = Path.GetFileName(filePath);
+            var projectFolder = AddFolderInternal(name, targetFolderId);
+
+            if (ProjectModel.Value.ImportProject(filePath, projectFolder.FootageId))
+            {
+                HistoryModel.EndGroup();
+                return new FootageLoadResult(projectFolder, FootageLoadResultType.Success);
+            }
+            else
+            {
+                HistoryModel.AbortGroup();
+                return FootageLoadResult.CannotLoad;
+            }
+        }
+
         FootageFolderModel AddFootageSourceGroup(InputModel inputModel, FootageSourceGroup group, Guid? targetFolderId)
         {
             var folder = new FootageFolderModel(HistoryModel) { Name = group.Name };
@@ -763,7 +833,7 @@ namespace NiVE3.Model
             }
 
             SupportedFileTypes = InputMetadatas.ToDictionary(m => m.Key, m => m.Value.SupportedFileType.Split(",").Select(e => e.Trim('*', '.').ToLower()).ToArray());
-            SupportedAllExtensions = [..SupportedFileTypes.Values.SelectMany(_ => _).Where(s => !string.IsNullOrEmpty(s)).Select(s => "*." + s)];
+            SupportedAllExtensions = [..SupportedFileTypes.Values.SelectMany(_ => _).Where(s => !string.IsNullOrEmpty(s)).Select(s => "*." + s).Append("*.nvp3")];
         }
 
         void OnShowFootagePreview(FootageModel footage)
@@ -784,6 +854,33 @@ namespace NiVE3.Model
         void OnFootageDeleted(IFootageModel[] footages)
         {
             FootageDeleted?.Invoke(this, new FootageEventArgs(footages));
+        }
+
+        public static Dictionary<Guid, Guid> ConvertDataForImport(FootageListData data)
+        {
+            var inputIdMap = new Dictionary<Guid, Guid>();
+            foreach (var inputData in data.Inputs.Concat(data.Placeholders))
+            {
+                var (oldInputId, newInputId) = InputModel.ConvertDataForImport(inputData);
+                inputIdMap.Add(oldInputId, newInputId);
+            }
+
+            var footageIdMap = new Dictionary<Guid, Guid>();
+            foreach (var footageData in data.Footages)
+            {
+                var (oldFootageId, newFootageId) = IFootageModel.ConvertDataForImport(footageData, inputIdMap);
+                footageIdMap.Add(oldFootageId, newFootageId);
+            }
+
+            return footageIdMap;
+        }
+
+        public static void ConvertCompositionInputDataForImport(FootageListData data, Dictionary<Guid, Guid> compositionIdMap)
+        {
+            foreach (var inputData in data.Inputs.Where(i => i.PluginId == CompositionInput.PluginId))
+            {
+                inputData.InputOption = CompositionInput.ConvertDataForImport(inputData.InputOption, compositionIdMap);
+            }
         }
 
         static CompositionModel? FindComposition(Guid compositionId, IEnumerable<IFootageModel> list)

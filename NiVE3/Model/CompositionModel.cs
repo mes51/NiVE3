@@ -1056,7 +1056,7 @@ namespace NiVE3.Model
                 TimeBarRangeStart = TimeBarRangeStart,
                 CurrentTime = CurrentTime,
                 Layers = Layers.Select(l => l.SaveData()).ToArray(),
-                CompositionMarkers = CompositionMarkers.Select(m => new MarkerData { Id = m.Id, Time = m.Time, Name = m.Name }).ToArray()
+                CompositionMarkers = CompositionMarkers.Select(m => new MarkerData { MarkerId = m.MarkerId, Time = m.Time, Name = m.Name }).ToArray()
             };
         }
 
@@ -1116,7 +1116,7 @@ namespace NiVE3.Model
 
             foreach (var markerData in data.CompositionMarkers)
             {
-                CompositionMarkers.Add(new Marker(markerData.Id, markerData.Time, markerData.Name));
+                CompositionMarkers.Add(new Marker(markerData.MarkerId, markerData.Time, markerData.Name));
             }
         }
 
@@ -1259,10 +1259,14 @@ namespace NiVE3.Model
 
         public void ReplacePlaceholder(FootageModel newFootageModel)
         {
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ReplaceFootage));
+
             foreach (var layer in Layers.Where(l => l.FootageIsPlaceholder(newFootageModel.FootageId)))
             {
                 layer.ReplaceFootage(newFootageModel);
             }
+
+            HistoryModel.EndGroup();
         }
 
         public Guid? FindLayerByPreviewPosition(Time time, Vector2d pos)
@@ -1659,14 +1663,14 @@ namespace NiVE3.Model
 
         public void MoveMarker(Marker marker, Time newTime)
         {
-            var oldMarkerIndex = CompositionMarkers.FindIndex(m => m.Id == marker.Id);
+            var oldMarkerIndex = CompositionMarkers.FindIndex(m => m.MarkerId == marker.MarkerId);
             if (oldMarkerIndex < 0)
             {
                 return;
             }
 
             var oldMarker = CompositionMarkers[oldMarkerIndex];
-            var newMarker = new Marker(marker.Id, newTime, marker.Name);
+            var newMarker = new Marker(marker.MarkerId, newTime, marker.Name);
 
             var sameTimeMarkerIndex = CompositionMarkers.FindIndex(m => m.Time == newTime);
             if (sameTimeMarkerIndex < 0)
@@ -1702,7 +1706,7 @@ namespace NiVE3.Model
 
         public void DeleteMarker(Marker marker)
         {
-            var index = CompositionMarkers.FindIndex(m => m.Id == marker.Id);
+            var index = CompositionMarkers.FindIndex(m => m.MarkerId == marker.MarkerId);
             if (index < 0)
             {
                 return;
@@ -1723,7 +1727,7 @@ namespace NiVE3.Model
             }
 
             var oldMarker = CompositionMarkers[index];
-            var newMarker = new Marker(oldMarker.Id, oldMarker.Time, newName);
+            var newMarker = new Marker(oldMarker.MarkerId, oldMarker.Time, newName);
 
             CompositionMarkers[index] = newMarker;
 
@@ -1733,6 +1737,18 @@ namespace NiVE3.Model
         public ILayerObject? GetLayer(Guid layerId)
         {
             return Layers.FirstOrDefault(l => l.LayerId == layerId);
+        }
+
+        public void UpdatePropertyForImport(Dictionary<Guid, Guid> layerIdMap, Dictionary<Guid, Dictionary<Guid, Guid>> effectIdMaps, Dictionary<Guid, Dictionary<Guid, Guid>> maskIdMaps)
+        {
+            foreach (var layer in Layers)
+            {
+                layer.ReplaceLayerDependPropertiesEffectId(effectIdMaps[layer.LayerId]);
+                layer.ReplaceLayerDependPropertiesMaskId(maskIdMaps[layer.LayerId]);
+                layer.ReplaceCompositionDependPropertiesLayerId(layerIdMap);
+                layer.UpdateCompositionDependProperties();
+                layer.UpdateLayerDependProperties();
+            }
         }
 
         NImage RenderFrameInternal(Time time, Time shutterTime, bool isSubFrame, double downSamplingRate, bool applyToneMapping, bool useGpu)
@@ -2235,6 +2251,29 @@ namespace NiVE3.Model
             return gpuImage;
         }
 
+        public static CompositionDataImportConvertionResult ConvertDataForImport(CompositionData compositionData, Dictionary<Guid, Guid> footageIdMap)
+        {
+            var oldId = compositionData.CompositionId;
+            compositionData.CompositionId = Guid.NewGuid();
+
+            var layerIdMap = new Dictionary<Guid, Guid>();
+            var effectIdMaps = new Dictionary<Guid, Dictionary<Guid, Guid>>();
+            var maskIdMaps = new Dictionary<Guid, Dictionary<Guid, Guid>>();
+            foreach (var l in compositionData.Layers)
+            {
+                var (oldLayerId, newLayerId, effectIdMap, maskIdMap) = LayerModel.ConvertDataForImport(l, footageIdMap);
+                layerIdMap.Add(oldLayerId, newLayerId);
+                effectIdMaps.Add(oldLayerId, effectIdMap);
+                maskIdMaps.Add(newLayerId, maskIdMap);
+            }
+            foreach (var m in compositionData.CompositionMarkers)
+            {
+                m.MarkerId = Guid.NewGuid();
+            }
+
+            return new CompositionDataImportConvertionResult(oldId, compositionData.CompositionId, layerIdMap, effectIdMaps, maskIdMaps);
+        }
+
         static CameraSetting CreateDefaultCameraSetting(int width, int height)
         {
             var zoom = width / Const.DefaultCameraFov * 0.5;
@@ -2357,4 +2396,12 @@ namespace NiVE3.Model
             ToneMapperContext.Dispose();
         }
     }
+
+    record CompositionDataImportConvertionResult(
+        Guid OldCompositionId,
+        Guid NewCompositionId,
+        Dictionary<Guid, Guid> LayerIdMap,
+        Dictionary<Guid, Dictionary<Guid, Guid>> EffectIdMaps,
+        Dictionary<Guid, Dictionary<Guid, Guid>> MaskIdMaps
+    );
 }

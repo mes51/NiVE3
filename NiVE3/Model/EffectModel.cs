@@ -241,6 +241,14 @@ namespace NiVE3.Model
             return Properties.IsChangeableByTime();
         }
 
+        public static (Guid oldId, Guid newId) ConvertDataForImport(EffectData effectData)
+        {
+            var oldId = effectData.EffectId;
+            effectData.EffectId = Guid.NewGuid();
+
+            return (oldId, effectData.EffectId);
+        }
+
         private void LayerModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(LayerModel.IsLock))

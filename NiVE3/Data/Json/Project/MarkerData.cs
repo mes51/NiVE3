@@ -11,7 +11,7 @@ namespace NiVE3.Data.Json.Project
 {
     public class MarkerData
     {
-        public Guid Id { get; set; }
+        public Guid MarkerId { get; set; }
 
         [JsonConverter(typeof(TimeJsonConverter))]
         public Time Time { get; set; }

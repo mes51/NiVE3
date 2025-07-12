@@ -619,5 +619,39 @@ namespace NiVE3.Model
 
             public void Dispose() { }
         }
+
+        private class ReplaceFootageHistoryCommand : IHistoryCommand
+        {
+            public string Name => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ReplaceFootage);
+
+            LayerModel Model { get; }
+
+            FootageModel OldFootage { get; }
+
+            FootageModel NewFootage { get; }
+
+            public ReplaceFootageHistoryCommand(LayerModel model, FootageModel oldFootage, FootageModel newFootage)
+            {
+                Model = model;
+                OldFootage = oldFootage;
+                NewFootage = newFootage;
+            }
+
+            public void Redo()
+            {
+                Model.FootageModel.FootageUpdated -= Model.FootageModel_FootageUpdated;
+                Model.FootageModel = NewFootage;
+                Model.FootageModel.FootageUpdated += Model.FootageModel_FootageUpdated;
+            }
+
+            public void Undo()
+            {
+                Model.FootageModel.FootageUpdated -= Model.FootageModel_FootageUpdated;
+                Model.FootageModel = OldFootage;
+                Model.FootageModel.FootageUpdated += Model.FootageModel_FootageUpdated;
+            }
+
+            public void Dispose() { }
+        }
     }
 }

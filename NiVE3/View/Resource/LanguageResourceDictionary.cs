@@ -1020,6 +1020,15 @@ namespace NiVE3.View.Resource
         [DefaultValue("ファイルの読み込み")]
         public static readonly string History_LoadFootageFile = nameof(History_LoadFootageFile);
 
+        [DefaultValue("フッテージのインポート")]
+        public static readonly string History_ImportFootages = nameof(History_ImportFootages);
+
+        [DefaultValue("コンポジションのフッテージ置き換え")]
+        public static readonly string History_ReplaceCompositionFootages = nameof(History_ReplaceCompositionFootages);
+
+        [DefaultValue("プロジェクトのインポート")]
+        public static readonly string History_ImportProjectFile = nameof(History_ImportProjectFile);
+
         [DefaultValue("フッテージの移動")]
         public static readonly string History_MoveFootage = nameof(History_MoveFootage);
 
@@ -1229,6 +1238,9 @@ namespace NiVE3.View.Resource
 
         [DefaultValue("マスクプリセットの適用")]
         public static readonly string History_LoadMaskPreset = nameof(History_LoadMaskPreset);
+
+        [DefaultValue("フッテージの置き換え")]
+        public static readonly string History_ReplaceFootage = nameof(History_ReplaceFootage);
 
         [DefaultValue("マーカーの移動")]
         public static readonly string History_MoveCompositionMarker = nameof(History_MoveCompositionMarker);

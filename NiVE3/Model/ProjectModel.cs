@@ -147,7 +147,7 @@ namespace NiVE3.Model
             };
             composition.ApplyInitialSettingData(rendererSettingData, toneMapperSettingData);
             HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_AddComposition));
-            HistoryModel.Add(new AddCompositionCommand(this, composition));
+            HistoryModel.Add(new AddCompositionHistoryCommand(this, composition));
             CompositionModels.Add(composition);
             FootageListModel.AddComposition(composition);
             HistoryModel.EndGroup();
@@ -278,7 +278,7 @@ namespace NiVE3.Model
                     CompositionModels.Add(composition);
                 }
 
-                var compositionFootages = FootageListModel.LoadCompositionFootageFromData(projectData.FootageList, [..CompositionModels]);
+                var compositionFootages = FootageListModel.ReplaceCompositionFootage(projectData.FootageList, [..CompositionModels]);
                 foreach (var composition in CompositionModels)
                 {
                     foreach (var footage in compositionFootages)
@@ -301,6 +301,70 @@ namespace NiVE3.Model
 
             ProjectPath = filePath;
             IsEdited = false;
+        }
+
+        public bool ImportProject(string filePath, Guid? targetFolderId)
+        {
+            var json = File.ReadAllText(filePath);
+            var projectData = JsonSerializer.Deserialize<ProjectData>(json);
+
+            if (projectData == null)
+            {
+                return false;
+            }
+
+            var newFootageIds = FootageListModel.ConvertDataForImport(projectData.FootageList);
+            var compositionDataConvertionResults = new Dictionary<Guid, CompositionDataImportConvertionResult>();
+            var compositionIdMap = new Dictionary<Guid, Guid>();
+            foreach (var compositionData in projectData.Compositions)
+            {
+                var conversionResult = CompositionModel.ConvertDataForImport(compositionData, newFootageIds);
+                compositionDataConvertionResults.Add(conversionResult.NewCompositionId, conversionResult);
+                compositionIdMap.Add(conversionResult.OldCompositionId, conversionResult.NewCompositionId);
+            }
+            FootageListModel.ConvertCompositionInputDataForImport(projectData.FootageList, compositionIdMap);
+
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ImportProjectFile));
+
+            try
+            {
+                var projectDir = Path.GetDirectoryName(filePath) ?? "";
+                FootageListModel.ImportFromData(projectData.FootageList, projectDir, targetFolderId);
+                var newCompositions = new List<CompositionModel>();
+                foreach (var compositionData in projectData.Compositions)
+                {
+                    var composition = new CompositionModel(compositionData.RendererPluginId, compositionData.ToneMapperPluginId, FootageListModel, EffectListModel, RenderQueueModel, TextPropertyModel, RendererListModel, ToneMapperListModel, this, HistoryModel, AcceleratorModel, compositionData.CompositionId);
+                    composition.LoadData(compositionData);
+                    newCompositions.Add(composition);
+                }
+
+                var compositionFootages = FootageListModel.ReplaceCompositionFootage(projectData.FootageList, [..newCompositions]);
+                foreach (var composition in CompositionModels)
+                {
+                    foreach (var footage in compositionFootages)
+                    {
+                        composition.ReplacePlaceholder(footage);
+                    }
+                }
+
+                foreach (var composition in newCompositions)
+                {
+                    var conversionResult = compositionDataConvertionResults[composition.CompositionId];
+                    composition.UpdatePropertyForImport(conversionResult.LayerIdMap, conversionResult.EffectIdMaps, conversionResult.MaskIdMaps);
+                    CompositionModels.Add(composition);
+                }
+
+                HistoryModel.Add(new ImportCompositionHistoryCommand(this, [..newCompositions]));
+
+                HistoryModel.EndGroup();
+
+                return true;
+            }
+            catch
+            {
+                HistoryModel.AbortGroup();
+                return false;
+            }
         }
 
         public void ShowCompositionPreview(CompositionModel composition)
@@ -423,7 +487,7 @@ namespace NiVE3.Model
                     RenderQueueModel.RemoveQueuesByComposition(input.Composition);
 
                     RemoveCompositionModel(input.Composition);
-                    HistoryModel.Add(new DeleteCompositionCommand(this, input.Composition));
+                    HistoryModel.Add(new DeleteCompositionHistoryCommand(this, input.Composition));
                 }
 
                 var preview = PreviewModels.OfType<FootagePreviewModel>().FirstOrDefault(p => p.Footage == f);

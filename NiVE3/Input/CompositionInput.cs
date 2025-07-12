@@ -57,6 +57,19 @@ namespace NiVE3.Input
             return new FootageSourceGroup([new CompositionFootageSource(Composition)]);
         }
 
+        public static object? ConvertDataForImport(object? inputOption, Dictionary<Guid, Guid> compositionIdMap)
+        {
+            var compositionIdString = inputOption?.ToString();
+            if (string.IsNullOrWhiteSpace(compositionIdString) || !Guid.TryParse(compositionIdString, out var oldCompositionId))
+            {
+                return inputOption;
+            }
+            else
+            {
+                return compositionIdMap[oldCompositionId];
+            }
+        }
+
         public void Dispose() { }
     }
 

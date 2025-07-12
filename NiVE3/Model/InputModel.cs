@@ -92,5 +92,13 @@ namespace NiVE3.Model
         {
             InputContext?.Dispose();
         }
+
+        public static (Guid oldId, Guid newId) ConvertDataForImport(InputData inputData)
+        {
+            var oldId = inputData.InputId;
+            inputData.InputId = Guid.NewGuid();
+
+            return (oldId, inputData.InputId);
+        }
     }
 }
