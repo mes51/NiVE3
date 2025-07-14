@@ -866,10 +866,17 @@ namespace NiVE3.Model
             }
 
             var footageIdMap = new Dictionary<Guid, Guid>();
-            foreach (var footageData in data.Footages)
+            var footageDataQueue = new Queue<FootageData>(data.Footages);
+            while (footageDataQueue.Count > 0)
             {
+                var footageData = footageDataQueue.Dequeue();
                 var (oldFootageId, newFootageId) = IFootageModel.ConvertDataForImport(footageData, inputIdMap);
                 footageIdMap.Add(oldFootageId, newFootageId);
+
+                foreach (var child in footageData.Children ?? [])
+                {
+                    footageDataQueue.Enqueue(child);
+                }
             }
 
             return footageIdMap;
