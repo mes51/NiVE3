@@ -84,7 +84,7 @@ namespace NiVE3.Model
             {
                 foreach (var c in Compositions)
                 {
-                    Model.CompositionModels.Add(c);
+                    Model.AddCompositionModel(c);
                 }
             }
 
@@ -92,7 +92,7 @@ namespace NiVE3.Model
             {
                 foreach (var c in Compositions)
                 {
-                    Model.CompositionModels.Remove(c);
+                    Model.RemoveCompositionModel(c);
                 }
             }
 

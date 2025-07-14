@@ -148,7 +148,7 @@ namespace NiVE3.Model
             composition.ApplyInitialSettingData(rendererSettingData, toneMapperSettingData);
             HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_AddComposition));
             HistoryModel.Add(new AddCompositionHistoryCommand(this, composition));
-            CompositionModels.Add(composition);
+            AddCompositionModel(composition);
             FootageListModel.AddComposition(composition);
             HistoryModel.EndGroup();
 
@@ -353,7 +353,7 @@ namespace NiVE3.Model
                     var conversionResult = compositionDataConvertionResults[composition.CompositionId];
                     composition.UpdatePropertyForImport(conversionResult.LayerIdMap, conversionResult.EffectIdMaps, conversionResult.MaskIdMaps);
                     composition.CoerceProperties();
-                    CompositionModels.Add(composition);
+                    AddCompositionModel(composition);
                 }
 
                 HistoryModel.Add(new ImportCompositionHistoryCommand(this, [..newCompositions]));
