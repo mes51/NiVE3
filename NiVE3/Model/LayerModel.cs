@@ -1933,6 +1933,8 @@ namespace NiVE3.Model
             HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_UpdateValueByLayerStateChanged));
 
             LayerOptionProperties?.UpdateValueByReplacedEffectId(effectIdMap);
+            TextProperties?.UpdateValueByReplacedEffectId(effectIdMap);
+            ShapeProperties?.UpdateValueByReplacedEffectId(effectIdMap);
             SourceOptionProperties?.UpdateValueByReplacedEffectId(effectIdMap);
             foreach (var effect in Effects)
             {
@@ -1947,6 +1949,8 @@ namespace NiVE3.Model
             HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_UpdateValueByLayerStateChanged));
 
             LayerOptionProperties?.UpdateValueByReplacedMaskId(maskIdMap);
+            TextProperties?.UpdateValueByReplacedMaskId(maskIdMap);
+            ShapeProperties?.UpdateValueByReplacedMaskId(maskIdMap);
             SourceOptionProperties?.UpdateValueByReplacedMaskId(maskIdMap);
             foreach (var effect in Effects)
             {
@@ -1961,6 +1965,8 @@ namespace NiVE3.Model
             HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_UpdateValueByLayerStateChanged));
 
             LayerOptionProperties?.UpdateValueByReplacedLayerId(layerIdMap);
+            TextProperties?.UpdateValueByReplacedLayerId(layerIdMap);
+            ShapeProperties?.UpdateValueByReplacedLayerId(layerIdMap);
             SourceOptionProperties?.UpdateValueByReplacedLayerId(layerIdMap);
             foreach (var effect in Effects)
             {

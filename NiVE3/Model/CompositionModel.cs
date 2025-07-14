@@ -1096,11 +1096,18 @@ namespace NiVE3.Model
                 }
 
                 var layer = new LayerModel(ProjectModel, this, footageModels.First(), EffectListModel, HistoryModel, AcceleratorModel, layerData.LayerId);
-                // NOTE: CompositionDependPropertyBaseが全てのレイヤーをロードしてからでないと正しくCoerceValueが行えないので後からCoercePropertiesを呼ぶ
                 layer.LoadData(layerData, false);
                 Layers.Add(layer);
             }
 
+            foreach (var markerData in data.CompositionMarkers)
+            {
+                CompositionMarkers.Add(new Marker(markerData.MarkerId, markerData.Time, markerData.Name));
+            }
+        }
+
+        public void CoerceProperties()
+        {
             foreach (var layer in Layers)
             {
                 if (Layers.All(l => l.LayerId != layer.TrackMatteLayerId))
@@ -1112,11 +1119,6 @@ namespace NiVE3.Model
                     layer.ParentLayerId = null;
                 }
                 layer.CoerceProperties();
-            }
-
-            foreach (var markerData in data.CompositionMarkers)
-            {
-                CompositionMarkers.Add(new Marker(markerData.MarkerId, markerData.Time, markerData.Name));
             }
         }
 
@@ -1743,6 +1745,29 @@ namespace NiVE3.Model
         {
             foreach (var layer in Layers)
             {
+                if (layer.TrackMatteLayerId.HasValue)
+                {
+                    if (layerIdMap.TryGetValue(layer.TrackMatteLayerId.Value, out var newTrackMatteLayerId))
+                    {
+                        layer.TrackMatteLayerId = newTrackMatteLayerId;
+                    }
+                    else
+                    {
+                        layer.TrackMatteLayerId = null;
+                    }
+                }
+                if (layer.ParentLayerId.HasValue)
+                {
+                    if (layerIdMap.TryGetValue(layer.ParentLayerId.Value, out var newParentLayerId))
+                    {
+                        layer.ParentLayerId = newParentLayerId;
+                    }
+                    else
+                    {
+                        layer.ParentLayerId = null;
+                    }
+                }
+
                 layer.ReplaceLayerDependPropertiesEffectId(effectIdMaps[layer.LayerId]);
                 layer.ReplaceLayerDependPropertiesMaskId(maskIdMaps[layer.LayerId]);
                 layer.ReplaceCompositionDependPropertiesLayerId(layerIdMap);
@@ -2263,7 +2288,7 @@ namespace NiVE3.Model
             {
                 var (oldLayerId, newLayerId, effectIdMap, maskIdMap) = LayerModel.ConvertDataForImport(l, footageIdMap);
                 layerIdMap.Add(oldLayerId, newLayerId);
-                effectIdMaps.Add(oldLayerId, effectIdMap);
+                effectIdMaps.Add(newLayerId, effectIdMap);
                 maskIdMaps.Add(newLayerId, maskIdMap);
             }
             foreach (var m in compositionData.CompositionMarkers)

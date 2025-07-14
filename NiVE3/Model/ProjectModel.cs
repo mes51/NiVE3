@@ -285,6 +285,7 @@ namespace NiVE3.Model
                     {
                         composition.ReplacePlaceholder(footage);
                     }
+                    composition.CoerceProperties();
                 }
 
                 RenderQueueModel.LoadData(projectData.RenderQueueItems, [..CompositionModels]);
@@ -351,6 +352,7 @@ namespace NiVE3.Model
                 {
                     var conversionResult = compositionDataConvertionResults[composition.CompositionId];
                     composition.UpdatePropertyForImport(conversionResult.LayerIdMap, conversionResult.EffectIdMaps, conversionResult.MaskIdMaps);
+                    composition.CoerceProperties();
                     CompositionModels.Add(composition);
                 }
 

@@ -633,11 +633,18 @@ namespace NiVE3.Model
             var oldKeyFrames = KeyFrames.ToArray();
             KeyFrames.Clear();
 
-            var cp = Property as CompositionDependPropertyBase;
-            if (cp != null)
+            if (Property is CompositionDependPropertyBase cp)
             {
                 RawValue = cp.CoerceValue(RawValue, CompositionModel);
                 foreach (var k in oldKeyFrames.Select(k => new KeyFrame(k.Time, cp.CoerceValue(k.Value, CompositionModel), k.EaseIn, k.EaseOut, k.InterpolationType, k.Id)))
+                {
+                    KeyFrames.Add(k);
+                }
+            }
+            else if (Property is LayerDependPropertyBase lp)
+            {
+                RawValue = lp.CoerceValue(RawValue, LayerModel);
+                foreach (var k in oldKeyFrames.Select(k => new KeyFrame(k.Time, lp.CoerceValue(k.Value, LayerModel), k.EaseIn, k.EaseOut, k.InterpolationType, k.Id)))
                 {
                     KeyFrames.Add(k);
                 }
