@@ -558,6 +558,38 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("垂直ブロック数")]
         public const string Stylize_Mosaic_VerticalBlock = nameof(Stylize_Mosaic_VerticalBlock);
 
+        // LongShadow
+
+        [DefaultValue("ロングシャドウ")]
+        public const string Stylize_LongShadow_Name = nameof(Stylize_LongShadow_Name);
+
+        [DefaultValue("画像のα値を元に、長い影を描画します")]
+        public const string Stylize_LongShadow_Description = nameof(Stylize_LongShadow_Description);
+
+        [LanguageKey, DefaultValue("長さ")]
+        public const string Stylize_LongShadow_Length = nameof(Stylize_LongShadow_Length);
+
+        [LanguageKey, DefaultValue("影の形状")]
+        public const string Stylize_LongShadow_ShapeType = nameof(Stylize_LongShadow_ShapeType);
+
+        [LanguageKey, DefaultValue("角度")]
+        public const string Stylize_LongShadow_Angle = nameof(Stylize_LongShadow_Angle);
+
+        [LanguageKey, DefaultValue("放射の中心位置")]
+        public const string Stylize_LongShadow_RadiateCenter = nameof(Stylize_LongShadow_RadiateCenter);
+
+        [LanguageKey, DefaultValue("α値の閾値")]
+        public const string Stylize_LongShadow_AlphaThreshold = nameof(Stylize_LongShadow_AlphaThreshold);
+
+        [LanguageKey, DefaultValue("グラデーション")]
+        public const string Stylize_LongShadow_Gradient = nameof(Stylize_LongShadow_Gradient);
+
+        [LanguageKey, DefaultValue("OKLab色空間で補間する")]
+        public const string Stylize_LongShadow_UseOkLabInterpolation = nameof(Stylize_LongShadow_UseOkLabInterpolation);
+
+        [LanguageKey, DefaultValue("ブレンドモード")]
+        public const string Stylize_LongShadow_BlendMode = nameof(Stylize_LongShadow_BlendMode);
+
         // Level
 
         [DefaultValue("レベル")]
@@ -2124,6 +2156,15 @@ namespace NiVE3.PresetPlugin.Resource
 
         [DefaultValue("メル")]
         public const string AudioSpectrumFrequencyScaleType_Mel = nameof(AudioSpectrumFrequencyScaleType_Mel);
+
+        [DefaultValue("平行")]
+        public const string LongShadowShapeType_Parallel = nameof(LongShadowShapeType_Parallel);
+
+        [DefaultValue("放射状")]
+        public const string LongShadowShapeType_Radiate = nameof(LongShadowShapeType_Radiate);
+
+        [DefaultValue("逆放射状")]
+        public const string LongShadowShapeType_InvertRadiate = nameof(LongShadowShapeType_InvertRadiate);
 
         // unit
 
