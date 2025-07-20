@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 using Acornima;
 using ICSharpCode.AvalonEdit.Document;
 using NiVE3.Data.Clipboard;
@@ -15,8 +16,11 @@ using NiVE3.Data.Json.Project;
 using NiVE3.Model;
 using NiVE3.Model.UI;
 using NiVE3.Mvvm;
+using NiVE3.Numerics;
+using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Property;
 using NiVE3.Plugin.Property.Control;
+using NiVE3.Plugin.Property.Interaction;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.Shared.Extension;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
@@ -29,7 +33,7 @@ using Prism.Mvvm;
 namespace NiVE3.ViewModel
 {
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
-    partial class PropertyViewModel : BindableBase, IInternalPropertyViewModel
+    partial class PropertyViewModel : BindableBase, IInternalPropertyViewModel, IPreviewInteractionTarget
     {
         public bool IsEnable => true;
 
@@ -199,6 +203,8 @@ namespace NiVE3.ViewModel
 
         public PropertyBase Property { get; }
 
+        public Guid ParentLayerId => PropertyModel.ParentLayerId;
+
         public ICommand BeginEditCommand { get; }
 
         public ICommand EndEditCommand { get; }
@@ -296,6 +302,8 @@ namespace NiVE3.ViewModel
 
         bool NeedPublishPropertyValueUpdate { get; set; }
 
+        PropertyInteractionBase? PropertyInteraction { get; set; }
+
         public PropertyViewModel(PropertyModel propertyModel, ViewStateModel viewState)
         {
             PropertyModel = propertyModel;
@@ -306,6 +314,7 @@ namespace NiVE3.ViewModel
             SelectedKeyFrameIds = [];
             ExpressionCodeDocument.Text = propertyModel.ExpressionCode;
             ExpressionCodeDocument.UndoStack.ClearAll();
+            PropertyInteraction = Property.CreatePropertyInteraction(new PropertyInteractionViewModelWrapper(this));
 
             BeginEditCommand = new DelegateCommand(() =>
             {
@@ -607,6 +616,16 @@ namespace NiVE3.ViewModel
             IsSelectingAll = false;
         }
 
+        public void Render(DrawingContext drawingContext, Vector2d previewImagePosition, Vector2d previewImageScale, ICoordTransformerObject coordTransformer)
+        {
+            if (PropertyInteraction == null)
+            {
+                return;
+            }
+
+            PropertyInteraction.Render(drawingContext, previewImagePosition, previewImageScale, coordTransformer);
+        }
+
         object? CalculationRawValue()
         {
             return PropertyModel.GetRawValue(CurrentTime - SourceStartPoint);
@@ -781,6 +800,34 @@ namespace NiVE3.ViewModel
                 ApplicationViewState.PropertyChanged -= ApplicationViewState_PropertyChanged;
                 IsSubscribedApplicationViewStatePropertyChanged = false;
             }
+        }
+    }
+
+    file class PropertyInteractionViewModelWrapper : IPropertyInteractionViewModel
+    {
+        public PropertyBase Property => ViewModel.Property;
+
+        public object? CurrentTimeValue => ViewModel.CurrentTimeValue;
+
+        public object? CurrentTimeRawValue
+        {
+            get => ViewModel.CurrentTimeRawValue;
+            set { ViewModel.CurrentTimeRawValue = value; }
+        }
+
+        public bool IsEnableExpression => ViewModel.IsEnableExpression;
+
+        public ICommand BeginEditCommand => ViewModel.BeginEditCommand;
+
+        public ICommand EndEditCommand => ViewModel.EndEditCommand;
+
+        public ICommand AbortEditCommand => ViewModel.AbortEditCommand;
+
+        PropertyViewModel ViewModel { get; }
+
+        public PropertyInteractionViewModelWrapper(PropertyViewModel viewModel)
+        {
+            ViewModel = viewModel;
         }
     }
 }

@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Media;
 using NiVE3.Exceptions;
 using NiVE3.Numerics;
-using NiVE3.Plugin.Interfaces.RendererParams;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.Text;
 
@@ -234,6 +234,28 @@ namespace NiVE3.Model
             CompositionId = compositionId;
             TargetLayerId = targetLayerId;
             TargetLayerPrevValue = targetLayerPrevValue;
+        }
+    }
+
+    class RenderPreviewInteractionEventArgs : EventArgs
+    {
+        public Guid CompositionId { get; }
+
+        public Time CurrentTime { get; }
+
+        public DrawingContext DrawingContext { get; }
+
+        public Vector2d PreviewImagePosition { get; }
+
+        public Vector2d PreviewImageScale { get; }
+
+        public RenderPreviewInteractionEventArgs(Guid compositionId, Time currentTime, DrawingContext drawingContext, Vector2d previewImagePosition, Vector2d previewImageScale)
+        {
+            CompositionId = compositionId;
+            CurrentTime = currentTime;
+            DrawingContext = drawingContext;
+            PreviewImagePosition = previewImagePosition;
+            PreviewImageScale = previewImageScale;
         }
     }
 

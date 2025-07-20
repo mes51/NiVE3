@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Property.Control;
+using NiVE3.Plugin.Property.Interaction;
 using NiVE3.Plugin.Property.Types;
 using NiVE3.Plugin.Resource;
 
@@ -107,6 +108,16 @@ namespace NiVE3.Plugin.Property
         public virtual PropertyViewState CreateState(ICompositionViewModel composition, ILayerViewModel? layer, IEffectViewModel? effect, IPropertyViewModel viewModel)
         {
             return new PropertyViewState(DisplayName);
+        }
+
+        /// <summary>
+        /// プレビューパネルからプロパティを操作するためのPropertyInteractionを生成します
+        /// </summary>
+        /// <param name="viewModel">このプロパティのPropertyInteraction用のViewModel</param>
+        /// <returns>プロパティを操作するためのPropertyInteraction。プレビューパネルからの操作に対応しない場合はnull</returns>
+        public virtual PropertyInteractionBase? CreatePropertyInteraction(IPropertyInteractionViewModel viewModel)
+        {
+            return null;
         }
     }
 

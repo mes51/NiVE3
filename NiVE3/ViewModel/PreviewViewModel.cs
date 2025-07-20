@@ -355,6 +355,9 @@ namespace NiVE3.ViewModel
 
         public ICommand CompositionSettingCommand { get; }
 
+        // TODO: 描画をコマンドにするべき?
+        public ICommand RenderPropertyInteractionCommand { get; }
+
         int[] ImageBuffer { get; set; }
 
         Int32Rect BufferImageSize { get; set; }
@@ -608,7 +611,6 @@ namespace NiVE3.ViewModel
             }, _ => PreviewModel is CompositionPreviewModel compositionPreviewModel && compositionPreviewModel.Composition != null)
                 .ObservesProperty(() => PreviewModel);
             
-
             CompositionSettingCommand = new DelegateCommand(() =>
             {
                 if (PreviewModel is not CompositionPreviewModel compositionPreviewModel || compositionPreviewModel.Composition == null)
@@ -665,6 +667,19 @@ namespace NiVE3.ViewModel
                     );
                 }
             }, () => PreviewModel is CompositionPreviewModel compositionPreviewModel && compositionPreviewModel.Composition != null)
+                .ObservesProperty(() => PreviewModel);
+
+            RenderPropertyInteractionCommand = new DelegateCommand<Tuple<DrawingContext, Vector2d, Vector2d>>(t =>
+            {
+                var compositionId = (PreviewModel as CompositionPreviewModel)?.Composition?.CompositionId;
+                if (!compositionId.HasValue)
+                {
+                    return;
+                }
+
+                var (drawingContext, previewImagePosition, previewImageScale) = t;
+                EventHubModel.NotifyRenderPreviewInteractionRequest(compositionId.Value, CurrentTime, drawingContext, previewImagePosition, previewImageScale);
+            }, _ => PreviewModel is CompositionPreviewModel compositionPreviewModel && compositionPreviewModel.Composition != null)
                 .ObservesProperty(() => PreviewModel);
 
             WiringModel();

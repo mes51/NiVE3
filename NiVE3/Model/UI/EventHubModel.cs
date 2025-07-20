@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media;
 using NiVE3.Mvvm;
 using NiVE3.Numerics;
 using NiVE3.Plugin.Interfaces.RendererParams;
@@ -91,6 +92,13 @@ namespace NiVE3.Model.UI
             remove { TextStyleChangeRequestPublisher.Unsubscribe(value); }
         }
 
+        WeakEventPublisher<RenderPreviewInteractionEventArgs> RenderPreviewInteractionRequestPublisher { get; } = new WeakEventPublisher<RenderPreviewInteractionEventArgs>();
+        public event EventHandler<RenderPreviewInteractionEventArgs> RenderPreviewInteractionRequest
+        {
+            add { RenderPreviewInteractionRequestPublisher.Subscribe(value); }
+            remove { RenderPreviewInteractionRequestPublisher.Unsubscribe(value); }
+        }
+
         public void NotifySelectLayer(Guid compositionId, Guid? layerId)
         {
             SelectLayerRequestPublisher.Publish(this, new SelectLayerEventArgs(compositionId, layerId));
@@ -144,6 +152,11 @@ namespace NiVE3.Model.UI
         public void NotifyTextStyleChange(Guid compositionId, Guid? targetLayer, object? targetLayerPrevValue)
         {
             TextStyleChangeRequestPublisher.Publish(this, new TextStyleChangeEventArgs(compositionId, targetLayer, targetLayerPrevValue));
+        }
+
+        public void NotifyRenderPreviewInteractionRequest(Guid compositionId, Time currentTime, DrawingContext drawingContext, Vector2d previewImagePosition, Vector2d previewImageScale)
+        {
+            RenderPreviewInteractionRequestPublisher.Publish(this, new RenderPreviewInteractionEventArgs(compositionId, currentTime, drawingContext, previewImagePosition, previewImageScale));
         }
     }
 }

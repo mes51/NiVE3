@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using ComputeSharp;
 using NiVE3.Image;
+using NiVE3.Numerics;
 using NiVE3.Plugin.Interfaces.RendererParams;
 using NiVE3.Plugin.Property;
 using NiVE3.Plugin.ValueObject;
@@ -314,7 +315,22 @@ namespace NiVE3.Plugin.Interfaces
 
         object? CurrentTimeRawValue { get; set; }
 
-        bool ParentLayerIsLock { get; }
+        bool IsEnableExpression { get; }
+
+        ICommand BeginEditCommand { get; }
+
+        ICommand EndEditCommand { get; }
+
+        ICommand AbortEditCommand { get; }
+    }
+
+    public interface IPropertyInteractionViewModel
+    {
+        PropertyBase Property { get; }
+
+        object? CurrentTimeValue { get; }
+
+        object? CurrentTimeRawValue { get; set; }
 
         bool IsEnableExpression { get; }
 
@@ -323,5 +339,12 @@ namespace NiVE3.Plugin.Interfaces
         ICommand EndEditCommand { get; }
 
         ICommand AbortEditCommand { get; }
+    }
+
+    public interface ICoordTransformerObject
+    {
+        Vector3d ScreenCoordToLocalCoord(Vector2d screenPosition);
+
+        Vector3d ScreenCoordToWorldCoord(Vector2d screenPosition);
     }
 }

@@ -125,6 +125,8 @@ namespace NiVE3.Model
         [MemberNotNullWhen(true, nameof(CompiledScript))]
         public bool IsEnableExpression => UseExpression && !HasExpressionError && CompiledScript != null;
 
+        public Guid ParentLayerId => LayerModel.LayerId;
+
         public event EventHandler<EventArgs>? ValueUpdated;
 
         public event EventHandler<EventArgs>? ValueCommited;

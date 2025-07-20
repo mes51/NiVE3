@@ -1776,6 +1776,18 @@ namespace NiVE3.Model
             }
         }
 
+        public ICoordTransformerObject GetCoordTransformer(Time time, Guid layerId)
+        {
+            var layer = Layers.First(l => l.LayerId == layerId);
+            if (Transformer == null)
+            {
+                Transformer = RendererListModel.CreateTransfomer(RendererPluginId);
+                Transformer.SetSize(Width, Height);
+            }
+
+            return new CoordTransformerWrapper(Transformer, this, layer, currentTime);
+        }
+
         NImage RenderFrameInternal(Time time, Time shutterTime, bool isSubFrame, double downSamplingRate, bool applyToneMapping, bool useGpu)
         {
             var hasLightSolo = Layers.Any(l => l.IsLight && l.IsEnableVideo && l.IsEnableSolo);
@@ -2429,4 +2441,39 @@ namespace NiVE3.Model
         Dictionary<Guid, Dictionary<Guid, Guid>> EffectIdMaps,
         Dictionary<Guid, Dictionary<Guid, Guid>> MaskIdMaps
     );
+
+    file class CoordTransformerWrapper : ICoordTransformerObject
+    {
+        ITransformer Transformer { get; }
+
+        CompositionModel CompositionModel { get; }
+
+        LayerModel Layer { get; }
+
+        Time CurrentTime { get; }
+
+        public CoordTransformerWrapper(ITransformer transformer, CompositionModel composition, LayerModel layer, Time currentTime)
+        {
+            Transformer = transformer;
+            CompositionModel = composition;
+            Layer = layer;
+            CurrentTime = currentTime;
+        }
+
+        public Vector3d ScreenCoordToLocalCoord(Vector2d screenPosition)
+        {
+            var layerSkeleton = Layer.GetLayerSkeleton(CurrentTime);
+            if (layerSkeleton == null)
+            {
+                return Vector3d.Zero;
+            }
+
+            return Transformer.ScreenCoordToLocalCoord(CompositionModel.GetActiveCameraSetting(CurrentTime), layerSkeleton, screenPosition);
+        }
+
+        public Vector3d ScreenCoordToWorldCoord(Vector2d screenPosition)
+        {
+            return Transformer.ScreenCoordToWorldCoord(CompositionModel.GetActiveCameraSetting(CurrentTime), screenPosition);
+        }
+    }
 }

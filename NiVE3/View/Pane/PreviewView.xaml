@@ -275,67 +275,70 @@
         </Grid.RowDefinitions>
 
         <Border Grid.Row="0" Style="{StaticResource PreviewColorChannelBorder}">
-            <Canvas x:Name="PreviewCanvas" Background="Transparent" ClipToBounds="True" MouseDown="PreviewCanvas_MouseDown" MouseMove="PreviewCanvas_MouseMove" MouseUp="PreviewCanvas_MouseUp" MouseWheel="PreviewCanvas_MouseWheel" dd:DragDrop.DropHandler="{Binding}" dd:DragDrop.IsDropTarget="True" dd:DragDrop.DragSourceIgnore="False">
-                <Canvas.ContextMenu>
-                    <ContextMenu>
-                        <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddLayer}">
-                            <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddLayer_Shape}" Command="{Binding AddShapeCommand}"/>
-                            <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddLayer_Camera}" Command="{Binding AddCameraCommand}"/>
-                            <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddLayer_Light}" Command="{Binding AddLightCommand}"/>
-                            <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddLayer_NullObject}" Command="{Binding AddNullObjectCommand}"/>
-                            <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddLayer_Text}" Command="{Binding AddTextCommand}"/>
-                            <Separator />
-                            <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddLayer_Procedural}" ItemsSource="{Binding Source={StaticResource ViewModelProxy}, Path=Data.ProceduralInputItems}">
-                                <MenuItem.ItemTemplate>
-                                    <DataTemplate DataType="{x:Type um:ProceduralInputItem}">
-                                        <TextBlock Text="{Binding Name}"/>
-                                    </DataTemplate>
-                                </MenuItem.ItemTemplate>
-                                <MenuItem.ItemContainerStyle>
-                                    <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource {x:Type MenuItem}}">
-                                        <Setter Property="Command" Value="{Binding Source={StaticResource ViewModelProxy}, Path=Data.AddProceduralFootageCommand}"/>
-                                        <Setter Property="CommandParameter" Value="{Binding}"/>
-                                    </Style>
-                                </MenuItem.ItemContainerStyle>
+            <Grid>
+                <Canvas x:Name="PreviewCanvas" Background="Transparent" ClipToBounds="True" MouseDown="PreviewCanvas_MouseDown" MouseMove="PreviewCanvas_MouseMove" MouseUp="PreviewCanvas_MouseUp" MouseWheel="PreviewCanvas_MouseWheel" dd:DragDrop.DropHandler="{Binding}" dd:DragDrop.IsDropTarget="True" dd:DragDrop.DragSourceIgnore="False">
+                    <Canvas.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddLayer}">
+                                <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddLayer_Shape}" Command="{Binding AddShapeCommand}"/>
+                                <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddLayer_Camera}" Command="{Binding AddCameraCommand}"/>
+                                <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddLayer_Light}" Command="{Binding AddLightCommand}"/>
+                                <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddLayer_NullObject}" Command="{Binding AddNullObjectCommand}"/>
+                                <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddLayer_Text}" Command="{Binding AddTextCommand}"/>
+                                <Separator />
+                                <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddLayer_Procedural}" ItemsSource="{Binding Source={StaticResource ViewModelProxy}, Path=Data.ProceduralInputItems}">
+                                    <MenuItem.ItemTemplate>
+                                        <DataTemplate DataType="{x:Type um:ProceduralInputItem}">
+                                            <TextBlock Text="{Binding Name}"/>
+                                        </DataTemplate>
+                                    </MenuItem.ItemTemplate>
+                                    <MenuItem.ItemContainerStyle>
+                                        <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource {x:Type MenuItem}}">
+                                            <Setter Property="Command" Value="{Binding Source={StaticResource ViewModelProxy}, Path=Data.AddProceduralFootageCommand}"/>
+                                            <Setter Property="CommandParameter" Value="{Binding}"/>
+                                        </Style>
+                                    </MenuItem.ItemContainerStyle>
+                                </MenuItem>
                             </MenuItem>
-                        </MenuItem>
-                        <Separator />
-                        <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_CompositionSetting}" Command="{Binding CompositionSettingCommand}"/>
-                    </ContextMenu>
-                </Canvas.ContextMenu>
-                <Grid x:Name="PreviewAnchorGrid" Width="{Binding Width}" Height="{Binding Height}" Canvas.Left="{Binding ScreenX}" Canvas.Top="{Binding ScreenY}">
-                    <Grid.LayoutTransform>
-                        <ScaleTransform ScaleX="{Binding ElementName=Root, Path=PreviewAreaImageScaleX}" ScaleY="{Binding ElementName=Root, Path=PreviewAreaImageScaleY}"/>
-                    </Grid.LayoutTransform>
-                    <Grid Width="{Binding Width}" Height="{Binding Height}" Style="{StaticResource PreviewAreaStyle}" SizeChanged="PreviewArea_SizeChanged">
-                        <Rectangle Visibility="{Binding ElementName=ShowCheckerboradCheckBox, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <Rectangle.Fill>
-                                <DrawingBrush Stretch="None" TileMode="Tile" Viewport="0,0,20,20" ViewportUnits="Absolute">
-                                    <DrawingBrush.Drawing>
-                                        <DrawingGroup>
-                                            <GeometryDrawing Geometry="M0,0 20,0 20,20 0,20z" Brush="White"/>
-                                            <GeometryDrawing Geometry="M0,10 20,10 20,20 10,20 10,0 0,0z" Brush="LightGray"/>
-                                        </DrawingGroup>
-                                    </DrawingBrush.Drawing>
-                                    <DrawingBrush.RelativeTransform>
-                                        <ScaleTransform ScaleX="{Binding ElementName=Root, Path=PreviewAreaScaleRateInvert}" ScaleY="{Binding ElementName=Root, Path=PreviewAreaScaleRateInvert}"/>
-                                    </DrawingBrush.RelativeTransform>
-                                </DrawingBrush>
-                            </Rectangle.Fill>
-                        </Rectangle>
-                        <Image Source="{Binding CurrentFrame}" Style="{StaticResource PreviewImageStyle}"/>
+                            <Separator />
+                            <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_CompositionSetting}" Command="{Binding CompositionSettingCommand}"/>
+                        </ContextMenu>
+                    </Canvas.ContextMenu>
+                    <Grid x:Name="PreviewAnchorGrid" Width="{Binding Width}" Height="{Binding Height}" Canvas.Left="{Binding ScreenX}" Canvas.Top="{Binding ScreenY}">
+                        <Grid.LayoutTransform>
+                            <ScaleTransform ScaleX="{Binding ElementName=Root, Path=PreviewAreaImageScaleX}" ScaleY="{Binding ElementName=Root, Path=PreviewAreaImageScaleY}"/>
+                        </Grid.LayoutTransform>
+                        <Grid Width="{Binding Width}" Height="{Binding Height}" Style="{StaticResource PreviewAreaStyle}" SizeChanged="PreviewArea_SizeChanged">
+                            <Rectangle Visibility="{Binding ElementName=ShowCheckerboradCheckBox, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <Rectangle.Fill>
+                                    <DrawingBrush Stretch="None" TileMode="Tile" Viewport="0,0,20,20" ViewportUnits="Absolute">
+                                        <DrawingBrush.Drawing>
+                                            <DrawingGroup>
+                                                <GeometryDrawing Geometry="M0,0 20,0 20,20 0,20z" Brush="White"/>
+                                                <GeometryDrawing Geometry="M0,10 20,10 20,20 10,20 10,0 0,0z" Brush="LightGray"/>
+                                            </DrawingGroup>
+                                        </DrawingBrush.Drawing>
+                                        <DrawingBrush.RelativeTransform>
+                                            <ScaleTransform ScaleX="{Binding ElementName=Root, Path=PreviewAreaScaleRateInvert}" ScaleY="{Binding ElementName=Root, Path=PreviewAreaScaleRateInvert}"/>
+                                        </DrawingBrush.RelativeTransform>
+                                    </DrawingBrush>
+                                </Rectangle.Fill>
+                            </Rectangle>
+                            <Image Source="{Binding CurrentFrame}" Style="{StaticResource PreviewImageStyle}"/>
+                        </Grid>
+                        <Grid IsHitTestVisible="False">
+                            <ItemsControl ItemsSource="{Binding BoundingBoxes}" ItemTemplate="{Binding ElementName=Root, Path=BoundingBoxTemplate}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <Grid />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                            </ItemsControl>
+                        </Grid>
                     </Grid>
-                    <Grid IsHitTestVisible="False">
-                        <ItemsControl ItemsSource="{Binding BoundingBoxes}" ItemTemplate="{Binding ElementName=Root, Path=BoundingBoxTemplate}">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <Grid />
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                        </ItemsControl>
-                    </Grid>
-                </Grid>
-            </Canvas>
+                </Canvas>
+                <pt:PropertyInteractionVisual PreviewImageLeft="{Binding ScreenX}" PreviewImageTop="{Binding ScreenY}" PreviewImageScaleX="{Binding ElementName=Root, Path=PreviewAreaImageScaleX}" PreviewImageScaleY="{Binding ElementName=Root, Path=PreviewAreaImageScaleY}"/>
+            </Grid>
         </Border>
 
         <pt:TimeLocatorView x:Name="TimeLocator" Grid.Row="1" Duration="{Binding Duration}" Range="{Binding TimeBarRange}" RangeStart="{Binding TimeBarRangeStart}" CurrentTime="{Binding CurrentTime}" FrameRate="{Binding FrameRate}" CurrentTimeChangeByUser="TimeLocatorView_CurrentTimeChangeByUser">
