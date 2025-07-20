@@ -337,7 +337,7 @@
                         </Grid>
                     </Grid>
                 </Canvas>
-                <pt:PropertyInteractionVisual PreviewImageLeft="{Binding ScreenX}" PreviewImageTop="{Binding ScreenY}" PreviewImageScaleX="{Binding ElementName=Root, Path=PreviewAreaImageScaleX}" PreviewImageScaleY="{Binding ElementName=Root, Path=PreviewAreaImageScaleY}"/>
+                <pt:PropertyInteractionVisual PreviewViewModel="{Binding}" PreviewImageLeft="{Binding ScreenX}" PreviewImageTop="{Binding ScreenY}" PreviewImageScaleX="{Binding ElementName=Root, Path=PreviewAreaImageScaleX}" PreviewImageScaleY="{Binding ElementName=Root, Path=PreviewAreaImageScaleY}"/>
             </Grid>
         </Border>
 

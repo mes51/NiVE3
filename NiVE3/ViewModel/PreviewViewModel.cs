@@ -415,6 +415,13 @@ namespace NiVE3.ViewModel
             remove { CurrentTimeChangeByUserPublisher.Unsubscribe(value); }
         }
 
+        WeakEventPublisher<EventArgs> UpdatePropertyInteractionRequestPublisher { get; } = new WeakEventPublisher<EventArgs>();
+        public event EventHandler<EventArgs> UpdatePropertyInteractionRequest
+        {
+            add { UpdatePropertyInteractionRequestPublisher.Subscribe(value); }
+            remove { UpdatePropertyInteractionRequestPublisher.Unsubscribe(value); }
+        }
+
         Task? RenderRamPreviewTask { get; set; }
 
         CancellationTokenSource RenderRamPreviewTaskCancellationTokenSource { get; set; } = new CancellationTokenSource();
@@ -895,6 +902,7 @@ namespace NiVE3.ViewModel
 
             IsDirtyImageBuffer = true;
             UpdateBoundingBox();
+            UpdatePropertyInteraction();
             IsCurrentFrameUpdating = false;
         }
 
@@ -911,6 +919,11 @@ namespace NiVE3.ViewModel
                 BoundingBoxesBuffer = compositionPreviewModel.Composition.GetBoundingBoxes([..SelectedLayerIds], CurrentTime);
             }
             IsDirtyBoundingBoxesBuffer = true;
+        }
+
+        void UpdatePropertyInteraction()
+        {
+            UpdatePropertyInteractionRequestPublisher.Publish(this, EventArgs.Empty);
         }
 
         void OnWorkareaChanged()
@@ -1129,6 +1142,7 @@ namespace NiVE3.ViewModel
                         AbortUseToolCommand.Execute(null);
                     }
                     UpdateBoundingBox();
+                    UpdatePropertyInteraction();
                     break;
                 case nameof(IsScrubbing) when PreviewModel.IsFootage && !PlayControllerModel.IsPlaying:
                     if (IsScrubbing)
@@ -1165,6 +1179,7 @@ namespace NiVE3.ViewModel
         private void SelectedLayerIds_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             UpdateBoundingBox();
+            UpdatePropertyInteraction();
         }
 
         private void PlayControllerModel_PreviewPlay(object? sender, EventArgs e)
@@ -1212,6 +1227,7 @@ namespace NiVE3.ViewModel
             if (PlayControllerModel.UseRamPreview)
             {
                 UpdateBoundingBox();
+                UpdatePropertyInteraction();
                 UpdateCurrentFrame();
             }
         }

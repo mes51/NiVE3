@@ -568,7 +568,7 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref lastSelectedMask, value); }
         }
 
-        public PropertyGroupViewModel TransformProperties { get; }
+        public PropertyGroupViewModel? TransformProperties { get; }
 
         public PropertyGroupViewModel? LayerOptionProperties { get; }
 

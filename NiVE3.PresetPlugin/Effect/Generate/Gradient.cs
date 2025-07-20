@@ -21,7 +21,6 @@ using NiVE3.PresetPlugin.Extension;
 using NiVE3.PresetPlugin.Internal.ComputeShader;
 using NiVE3.PresetPlugin.Resource;
 using NiVE3.Shared.Extension;
-using static Vanara.PInvoke.Gdi32;
 
 namespace NiVE3.PresetPlugin.Effect.Generate
 {
@@ -67,10 +66,10 @@ namespace NiVE3.PresetPlugin.Effect.Generate
             var centerY = sourceSize.Height * 0.5;
             return
             [
-                new Vector3dProperty(PropertyBeginPointId, LanguageResourceDictionary.ResourceKeys.Generate_Gradient_BeginPoint, new Vector3d(centerX - 100.0, centerY - 100.0, 0.0), digit: 2),
+                new Vector3dProperty(PropertyBeginPointId, LanguageResourceDictionary.ResourceKeys.Generate_Gradient_BeginPoint, new Vector3d(centerX - 100.0, centerY - 100.0, 0.0), digit: 2, useInteraction: true),
                 new ColorProperty(PropertyBeginColorId, LanguageResourceDictionary.ResourceKeys.Generate_Gradient_BeginColor, colorDialogTitle, dialogOK, dialogCancel, Vector4.One),
                 new DoubleProperty(PropertyBeginOpacityId, LanguageResourceDictionary.ResourceKeys.Generate_Gradient_BeginOpacity, 100.0, 0.0, 100.0, digit: 2),
-                new Vector3dProperty(PropertyEndPointId, LanguageResourceDictionary.ResourceKeys.Generate_Gradient_EndPoint, new Vector3d(centerX + 100.0, centerY + 100.0, 0.0), digit: 2),
+                new Vector3dProperty(PropertyEndPointId, LanguageResourceDictionary.ResourceKeys.Generate_Gradient_EndPoint, new Vector3d(centerX + 100.0, centerY + 100.0, 0.0), digit: 2, useInteraction: true),
                 new ColorProperty(PropertyEndColorId, LanguageResourceDictionary.ResourceKeys.Generate_Gradient_EndColor, colorDialogTitle, dialogOK, dialogCancel, Vector4.UnitW),
                 new DoubleProperty(PropertyEndOpacityId, LanguageResourceDictionary.ResourceKeys.Generate_Gradient_EndOpacity, 100.0, 0.0, 100.0, digit: 2),
                 new EnumProperty(PropertyTypeId, LanguageResourceDictionary.ResourceKeys.Generate_Gradient_Type, typeof(GradientShapeType), typeof(LanguageResourceDictionary), GradientShapeType.Linear, selectBoxWidth: 90.0),

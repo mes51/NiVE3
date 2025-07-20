@@ -44,7 +44,7 @@ namespace NiVE3.View.Part
             nameof(PreviewViewModel),
             typeof(PreviewViewModel),
             typeof(PropertyInteractionVisual),
-            new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender)
+            new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender, PreviewViewModelChanged)
         );
 
         public PreviewViewModel? PreviewViewModel
@@ -87,6 +87,28 @@ namespace NiVE3.View.Part
             base.OnRender(drawingContext);
 
             PreviewViewModel?.RenderPropertyInteractionCommand.Execute(Tuple.Create(drawingContext, new Vector2d(PreviewImageLeft, PreviewImageTop), new Vector2d(PreviewImageScaleX, PreviewImageScaleY)));
+        }
+
+        private void ViewModel_UpdatePropertyInteractionRequest(object? sender, EventArgs e)
+        {
+            InvalidateVisual();
+        }
+
+        private static void PreviewViewModelChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is not PropertyInteractionVisual visual)
+            {
+                return;
+            }
+
+            if (e.OldValue is PreviewViewModel oldValue)
+            {
+                oldValue.UpdatePropertyInteractionRequest -= visual.ViewModel_UpdatePropertyInteractionRequest;
+            }
+            if (e.NewValue is PreviewViewModel newValue)
+            {
+                newValue.UpdatePropertyInteractionRequest += visual.ViewModel_UpdatePropertyInteractionRequest;
+            }
         }
     }
 }

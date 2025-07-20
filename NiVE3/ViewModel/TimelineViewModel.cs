@@ -12,6 +12,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Media3D;
 using System.Xml.Linq;
+using DryIoc.ImTools;
 using GongSolutions.Wpf.DragDrop;
 using Microsoft.Win32;
 using NAudio.SoundFont;
@@ -596,9 +597,11 @@ namespace NiVE3.ViewModel
 
         object? SelectedTarget { get; set; }
 
-        SelectItemType SelectedItemType { get; set; }
+        object? SelectedTargetParent { get; set; }
 
-        IViewModelShortcutCommand? SelectedShortcutCommand => SelectedTarget as IViewModelShortcutCommand;
+        IViewModelShortcutCommand? SelectedShortcutCommandTarget => SelectedTargetParent as IViewModelShortcutCommand;
+
+        SelectItemType SelectedItemType { get; set; }
 
         ViewStateModel ViewState { get; }
 
@@ -672,20 +675,20 @@ namespace NiVE3.ViewModel
 
             BeginEditNameCommand = new DelegateCommand(() =>
             {
-                if (SelectedShortcutCommand == null && SelectedLayers.Count > 0 && SelectedLayers.First().BeginEditNameCommand.CanExecute(null))
+                if (SelectedShortcutCommandTarget == null && SelectedLayers.Count > 0 && SelectedLayers.First().BeginEditNameCommand.CanExecute(null))
                 {
                     SelectedLayers.First().BeginEditNameCommand.Execute(null);
                 }
                 else
                 {
-                    var targetChild = (SelectedShortcutCommand as INameEditableParentViewModel)?.TargetChild;
+                    var targetChild = (SelectedShortcutCommandTarget as INameEditableParentViewModel)?.TargetChild;
                     if (targetChild?.BeginEditNameCommand?.CanExecute(null) ?? false)
                     {
                         targetChild.BeginEditNameCommand.Execute(null);
                     }
                 }
-            }, () => SelectedShortcutCommand != null || SelectedLayers.Count > 0)
-                .ObservesProperty(() => SelectedShortcutCommand)
+            }, () => SelectedShortcutCommandTarget != null || SelectedLayers.Count > 0)
+                .ObservesProperty(() => SelectedShortcutCommandTarget)
                 .ObservesProperty(() => SelectedLayers.Count);
 
             ChangeWorkareaCommand = new DelegateCommand<Tuple<Time, Time>>(t => CompositionModel?.ChangeWorkarea(t.Item1, t.Item2));
@@ -709,9 +712,9 @@ namespace NiVE3.ViewModel
 
             DeleteCommand = new DelegateCommand(() =>
             {
-                if (SelectedShortcutCommand != null)
+                if (SelectedShortcutCommandTarget != null)
                 {
-                    SelectedShortcutCommand.DeleteCommand.Execute(SelectedItemType);
+                    SelectedShortcutCommandTarget.DeleteCommand.Execute(SelectedItemType);
                 }
                 else
                 {
@@ -729,9 +732,9 @@ namespace NiVE3.ViewModel
 
             CutCommand = new DelegateCommand(() =>
             {
-                if (SelectedShortcutCommand != null)
+                if (SelectedShortcutCommandTarget != null)
                 {
-                    SelectedShortcutCommand.CutCommand.Execute(SelectedItemType);
+                    SelectedShortcutCommandTarget.CutCommand.Execute(SelectedItemType);
                 }
                 else
                 {
@@ -752,9 +755,9 @@ namespace NiVE3.ViewModel
 
             CopyCommand = new DelegateCommand(() =>
             {
-                if (SelectedShortcutCommand != null)
+                if (SelectedShortcutCommandTarget != null)
                 {
-                    SelectedShortcutCommand.CopyCommand.Execute(SelectedItemType);
+                    SelectedShortcutCommandTarget.CopyCommand.Execute(SelectedItemType);
                 }
                 else
                 {
@@ -772,9 +775,9 @@ namespace NiVE3.ViewModel
 
             PasteCommand = new DelegateCommand(() =>
             {
-                if (SelectedShortcutCommand != null)
+                if (SelectedShortcutCommandTarget != null)
                 {
-                    SelectedShortcutCommand.PasteCommand.Execute(SelectedItemType);
+                    SelectedShortcutCommandTarget.PasteCommand.Execute(SelectedItemType);
                 }
                 else
                 {
@@ -806,9 +809,9 @@ namespace NiVE3.ViewModel
 
             DuplicateCommand = new DelegateCommand(() =>
             {
-                if (SelectedShortcutCommand != null)
+                if (SelectedShortcutCommandTarget != null)
                 {
-                    SelectedShortcutCommand.DuplicateCommand.Execute(SelectedItemType);
+                    SelectedShortcutCommandTarget.DuplicateCommand.Execute(SelectedItemType);
                 }
                 else
                 {
@@ -826,9 +829,9 @@ namespace NiVE3.ViewModel
 
             SelectAllCommand = new DelegateCommand(() =>
             {
-                if (SelectedShortcutCommand != null)
+                if (SelectedShortcutCommandTarget != null)
                 {
-                    SelectedShortcutCommand.SelectAllCommand.Execute(SelectedItemType);
+                    SelectedShortcutCommandTarget.SelectAllCommand.Execute(SelectedItemType);
                 }
                 else
                 {
@@ -847,11 +850,11 @@ namespace NiVE3.ViewModel
                 }
             }, () => CompositionModel != null).ObservesProperty(() => CompositionModel);
 
-            AddKeyFrameCommand = new DelegateCommand(() => SelectedShortcutCommand?.AddKeyFrameCommand?.Execute(SelectedItemType), () => CompositionModel != null && SelectedItemType == SelectItemType.Property)
+            AddKeyFrameCommand = new DelegateCommand(() => SelectedShortcutCommandTarget?.AddKeyFrameCommand?.Execute(SelectedItemType), () => CompositionModel != null && SelectedItemType == SelectItemType.Property)
                 .ObservesProperty(() => CompositionModel)
                 .ObservesProperty(() => SelectedItemType);
 
-            ResetPropertyCommand = new DelegateCommand(() => SelectedShortcutCommand?.ResetPropertyCommand?.Execute(SelectedItemType), () => CompositionModel != null && SelectedItemType == SelectItemType.Property)
+            ResetPropertyCommand = new DelegateCommand(() => SelectedShortcutCommandTarget?.ResetPropertyCommand?.Execute(SelectedItemType), () => CompositionModel != null && SelectedItemType == SelectItemType.Property)
                 .ObservesProperty(() => CompositionModel)
                 .ObservesProperty(() => SelectedItemType);
 
@@ -1349,21 +1352,21 @@ namespace NiVE3.ViewModel
 
             SavePresetCommand = new DelegateCommand(() =>
             {
-                if (CompositionModel == null || SelectedShortcutCommand == null)
+                if (CompositionModel == null || SelectedShortcutCommandTarget == null)
                 {
                     return;
                 }
 
-                SelectedShortcutCommand.SavePresetCommand.Execute(SelectedItemType);
-            }, () => CompositionModel != null && SelectedShortcutCommand != null)
+                SelectedShortcutCommandTarget.SavePresetCommand.Execute(SelectedItemType);
+            }, () => CompositionModel != null && SelectedShortcutCommandTarget != null)
                 .ObservesProperty(() => CompositionModel)
-                .ObservesProperty(() => SelectedShortcutCommand);
+                .ObservesProperty(() => SelectedShortcutCommandTarget);
 
             LoadPresetCommand = new DelegateCommand(() =>
             {
-                if (SelectedShortcutCommand != null)
+                if (SelectedShortcutCommandTarget != null)
                 {
-                    SelectedShortcutCommand.LoadPresetCommand.Execute(SelectedItemType);
+                    SelectedShortcutCommandTarget.LoadPresetCommand.Execute(SelectedItemType);
                 }
                 else
                 {
@@ -2006,11 +2009,8 @@ namespace NiVE3.ViewModel
             if (e.IsUserAction)
             {
                 SelectedItemType = e.SelectItemType;
-                SelectedTarget = e.SelectItemType switch
-                {
-                    SelectItemType.Effect or ViewModel.SelectItemType.Mask or SelectItemType.Property or SelectItemType.KeyFrame => e.CommandableOriginalParent,
-                    _ => null,
-                };
+                SelectedTargetParent = e.ObjectHierarchy.Skip(1).FirstOrDefault();
+                SelectedTarget = e.ObjectHierarchy[0];
                 if (e.SelectItemType == SelectItemType.Layer && SelectedLayers != null)
                 {
                     foreach (var layer in SelectedLayers)
@@ -2031,7 +2031,7 @@ namespace NiVE3.ViewModel
                     SelectedLayers.Add(e.Layer);
                 }
             }
-            if (SelectedShortcutCommand != null || (e.SelectItemType == SelectItemType.Layer && e.Layer != null && (SelectedLayers?.Contains(e.Layer) ?? false)))
+            if (SelectedShortcutCommandTarget != null || (e.SelectItemType == SelectItemType.Layer && e.Layer != null && (SelectedLayers?.Contains(e.Layer) ?? false)))
             {
                 CurrentEditingCompositionId = CompositionModel?.CompositionId;
                 LastSelectedLayerId = e.Layer?.LayerId;
@@ -2039,6 +2039,8 @@ namespace NiVE3.ViewModel
             else
             {
                 LastSelectedLayerId = null;
+                SelectedTarget = null;
+                SelectedTargetParent = null;
                 if ((SelectedLayers?.Count ?? 0) < 1)
                 {
                     SelectedItemType = SelectItemType.None;

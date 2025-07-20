@@ -346,5 +346,9 @@ namespace NiVE3.Plugin.Interfaces
         Vector3d ScreenCoordToLocalCoord(Vector2d screenPosition);
 
         Vector3d ScreenCoordToWorldCoord(Vector2d screenPosition);
+
+        Vector2d LocalCoordToScreenCoord(Vector3d localPosition);
+
+        Vector2d WorldCoordToScreenCoord(Vector3d worldPosition);
     }
 }

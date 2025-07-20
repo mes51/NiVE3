@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using NiVE3.Numerics;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Property.Control;
+using NiVE3.Plugin.Property.Interaction;
 using NiVE3.Plugin.Property.Types;
 using NiVE3.Plugin.Resource;
 
@@ -31,16 +32,19 @@ namespace NiVE3.Plugin.Property.Properties
 
         bool UseLinkRatio { get; }
 
-        public Vector3dProperty(string id, string displayName, Vector3d defaultValue, bool isSupportKeyFrame = true, int digit = -1, bool is3D = false, string? unit = null, string? separator = null, bool useLinkRatio = false) : base(id, displayName, Vector3dPropertyType.Instance, defaultValue, isSupportKeyFrame)
+        bool UseInteraction { get; }
+
+        public Vector3dProperty(string id, string displayName, Vector3d defaultValue, bool isSupportKeyFrame = true, int digit = -1, bool is3D = false, string? unit = null, string? separator = null, bool useLinkRatio = false, bool useInteraction = false) : base(id, displayName, Vector3dPropertyType.Instance, defaultValue, isSupportKeyFrame)
         {
             Digit = digit;
             Is3D = is3D;
             RawUnit = unit;
             Separator = separator;
             UseLinkRatio = useLinkRatio;
+            UseInteraction = useInteraction;
         }
 
-        public Vector3dProperty(string id, string displayName, Vector3d defaultValue, Vector3d minValue, bool isSupportKeyFrame = true, int digit = -1, bool is3D = false, string? unit = null, string? separator = null, bool useLinkRatio = false) : base(id, displayName, Vector3dPropertyType.Instance, defaultValue, isSupportKeyFrame)
+        public Vector3dProperty(string id, string displayName, Vector3d defaultValue, Vector3d minValue, bool isSupportKeyFrame = true, int digit = -1, bool is3D = false, string? unit = null, string? separator = null, bool useLinkRatio = false, bool useInteraction = false) : base(id, displayName, Vector3dPropertyType.Instance, defaultValue, isSupportKeyFrame)
         {
             Digit = digit;
             Is3D = is3D;
@@ -48,9 +52,10 @@ namespace NiVE3.Plugin.Property.Properties
             MinValue = minValue;
             Separator = separator;
             UseLinkRatio = useLinkRatio;
+            UseInteraction = useInteraction;
         }
 
-        public Vector3dProperty(string id, string displayName, Vector3d defaultValue, Vector3d minValue, Vector3d maxValue, bool isSupportKeyFrame = true, int digit = -1, bool is3D = false, string? unit = null, string? separator = null, bool useLinkRatio = false) : base(id, displayName, Vector3dPropertyType.Instance, defaultValue, isSupportKeyFrame)
+        public Vector3dProperty(string id, string displayName, Vector3d defaultValue, Vector3d minValue, Vector3d maxValue, bool isSupportKeyFrame = true, int digit = -1, bool is3D = false, string? unit = null, string? separator = null, bool useLinkRatio = false, bool useInteraction = false) : base(id, displayName, Vector3dPropertyType.Instance, defaultValue, isSupportKeyFrame)
         {
             Digit = digit;
             Is3D = is3D;
@@ -59,18 +64,20 @@ namespace NiVE3.Plugin.Property.Properties
             MaxValue = maxValue;
             Separator = separator;
             UseLinkRatio = useLinkRatio;
+            UseInteraction = useInteraction;
         }
 
-        public Vector3dProperty(string id, LanguageResourceKey displayNameKey, Vector3d defaultValue, bool isSupportKeyFrame = true, int digit = -1, bool is3D = false, LanguageResourceKey? unitKey = null, string? separator = null, bool useLinkRatio = false) : base(id, displayNameKey, Vector3dPropertyType.Instance, defaultValue, isSupportKeyFrame)
+        public Vector3dProperty(string id, LanguageResourceKey displayNameKey, Vector3d defaultValue, bool isSupportKeyFrame = true, int digit = -1, bool is3D = false, LanguageResourceKey? unitKey = null, string? separator = null, bool useLinkRatio = false, bool useInteraction = false) : base(id, displayNameKey, Vector3dPropertyType.Instance, defaultValue, isSupportKeyFrame)
         {
             Digit = digit;
             Is3D = is3D;
             UnitKey = unitKey;
             Separator = separator;
             UseLinkRatio = useLinkRatio;
+            UseInteraction = useInteraction;
         }
 
-        public Vector3dProperty(string id, LanguageResourceKey displayNameKey, Vector3d defaultValue, Vector3d minValue, bool isSupportKeyFrame = true, int digit = -1, bool is3D = false, LanguageResourceKey? unitKey = null, string? separator = null, bool useLinkRatio = false) : base(id, displayNameKey, Vector3dPropertyType.Instance, defaultValue, isSupportKeyFrame)
+        public Vector3dProperty(string id, LanguageResourceKey displayNameKey, Vector3d defaultValue, Vector3d minValue, bool isSupportKeyFrame = true, int digit = -1, bool is3D = false, LanguageResourceKey? unitKey = null, string? separator = null, bool useLinkRatio = false, bool useInteraction = false) : base(id, displayNameKey, Vector3dPropertyType.Instance, defaultValue, isSupportKeyFrame)
         {
             Digit = digit;
             Is3D = is3D;
@@ -78,9 +85,10 @@ namespace NiVE3.Plugin.Property.Properties
             MinValue = minValue;
             Separator = separator;
             UseLinkRatio = useLinkRatio;
+            UseInteraction = useInteraction;
         }
 
-        public Vector3dProperty(string id, LanguageResourceKey displayNameKey, Vector3d defaultValue, Vector3d minValue, Vector3d maxValue, bool isSupportKeyFrame = true, int digit = -1, bool is3D = false, LanguageResourceKey? unitKey = null, string? separator = null, bool useLinkRatio = false) : base(id, displayNameKey, Vector3dPropertyType.Instance, defaultValue, isSupportKeyFrame)
+        public Vector3dProperty(string id, LanguageResourceKey displayNameKey, Vector3d defaultValue, Vector3d minValue, Vector3d maxValue, bool isSupportKeyFrame = true, int digit = -1, bool is3D = false, LanguageResourceKey? unitKey = null, string? separator = null, bool useLinkRatio = false, bool useInteraction = false) : base(id, displayNameKey, Vector3dPropertyType.Instance, defaultValue, isSupportKeyFrame)
         {
             Digit = digit;
             Is3D = is3D;
@@ -89,6 +97,7 @@ namespace NiVE3.Plugin.Property.Properties
             MaxValue = maxValue;
             Separator = separator;
             UseLinkRatio = useLinkRatio;
+            UseInteraction = useInteraction;
         }
 
         public override PropertyControlBase CreateControl(ICompositionViewModel composition, ILayerViewModel? layer, IEffectViewModel? effect, IPropertyViewModel viewModel)
@@ -126,6 +135,18 @@ namespace NiVE3.Plugin.Property.Properties
             else
             {
                 return DefaultValue;
+            }
+        }
+
+        public override PropertyInteractionBase? CreatePropertyInteraction(IPropertyInteractionViewModel viewModel)
+        {
+            if (UseInteraction)
+            {
+                return new Vector3dPropertyInteraction(viewModel);
+            }
+            else
+            {
+                return base.CreatePropertyInteraction(viewModel);
             }
         }
     }

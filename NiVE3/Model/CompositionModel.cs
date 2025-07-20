@@ -2475,5 +2475,21 @@ namespace NiVE3.Model
         {
             return Transformer.ScreenCoordToWorldCoord(CompositionModel.GetActiveCameraSetting(CurrentTime), screenPosition);
         }
+
+        public Vector2d LocalCoordToScreenCoord(Vector3d localPosition)
+        {
+            var layerSkeleton = Layer.GetLayerSkeleton(CurrentTime);
+            if (layerSkeleton == null)
+            {
+                return Vector2d.Zero;
+            }
+
+            return Transformer.LocalCoordToScreenCoord(CompositionModel.GetActiveCameraSetting(CurrentTime), layerSkeleton, localPosition);
+        }
+
+        public Vector2d WorldCoordToScreenCoord(Vector3d worldPosition)
+        {
+            return Transformer.WorldCoordToScreenCoord(CompositionModel.GetActiveCameraSetting(CurrentTime), worldPosition);
+        }
     }
 }
