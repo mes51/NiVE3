@@ -469,6 +469,11 @@ namespace NiVE3.Model
             HistoryModel.Add(new OverwritePropertyHistoryCommand(this, oldChildren, [.. Children]));
         }
 
+        public bool IsAlive(IPropertyModel child)
+        {
+            return Children.Contains(child) && ParentPropertyModel.IsAlive(this);
+        }
+
         public CopyData<PropertyData> CutChildren(Guid[] propertyInstanceIds)
         {
             var result = CopyChildrenProperty(propertyInstanceIds);

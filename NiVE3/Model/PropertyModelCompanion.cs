@@ -70,6 +70,8 @@ namespace NiVE3.Model
         object? GetValue(Time time, Time globalTime);
 
         void OverwriteProperty(PropertyData data);
+
+        bool IsAlive(IPropertyModel child);
     }
 
     class CompositionViewModelProxy : WeakPropertyChangedBindingBase, ICompositionViewModel

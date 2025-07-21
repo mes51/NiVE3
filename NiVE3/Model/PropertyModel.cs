@@ -742,6 +742,11 @@ namespace NiVE3.Model
             HistoryModel.Add(new OverwritePropertyHistoryCommand(this, oldKeyFrames, oldValue, [..KeyFrames], RawValue));
         }
 
+        public bool IsAlive(IPropertyModel child)
+        {
+            return ParentPropertyModel.IsAlive(this);
+        }
+
         public CopyData<PropertyData> CopyProperty()
         {
             var data = new PropertyData

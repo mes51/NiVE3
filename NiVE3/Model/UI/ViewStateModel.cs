@@ -154,6 +154,13 @@ namespace NiVE3.Model.UI
             set { SetProperty(ref currentEditingCompositionId, value); }
         }
 
+        private int lastSelectedObjectHashCode;
+        public int LastSelectedObjectHashCode
+        {
+            get { return lastSelectedObjectHashCode; }
+            set { SetProperty(ref lastSelectedObjectHashCode, value); }
+        }
+
         private bool isIgnoreUpdatePreview;
         public bool IsIgnoreUpdatePreview
         {

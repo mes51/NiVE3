@@ -616,15 +616,20 @@ namespace NiVE3.ViewModel
             IsSelectingAll = false;
         }
 
-        public void Render(DrawingContext drawingContext, Vector2d previewImagePosition, Vector2d previewImageScale, ICoordTransformerObject coordTransformer)
+        public void Render(DrawingContext drawingContext, Vector2d previewImagePosition, Vector2d previewImageScale, Color tagColor, ICoordTransformerObject coordTransformer)
         {
             if (PropertyInteraction == null)
             {
                 return;
             }
 
-            PropertyInteraction.Render(drawingContext, previewImagePosition, previewImageScale, coordTransformer);
+            PropertyInteraction.Render(drawingContext, previewImagePosition, previewImageScale, tagColor, coordTransformer);
         }
+
+        public bool IsAlive()
+        {
+            return PropertyModel.IsAlive(PropertyModel);
+        }   
 
         object? CalculationRawValue()
         {

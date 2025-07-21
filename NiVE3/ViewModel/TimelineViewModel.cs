@@ -351,6 +351,14 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref currentEditingCompositionId, value); }
         }
 
+        private int lastSelectedObjectHashCode;
+        [NeedWire(nameof(ViewState))]
+        public int LastSelectedObjectHashCode
+        {
+            get { return lastSelectedObjectHashCode; }
+            set { SetProperty(ref lastSelectedObjectHashCode, value); }
+        }
+
         private CompositionModel? compositionModel;
         public CompositionModel? CompositionModel
         {
@@ -595,11 +603,9 @@ namespace NiVE3.ViewModel
             remove { FocusRequestPublisher.Unsubscribe(value); }
         }
 
-        object? SelectedTarget { get; set; }
+        object[]? SelectedTargetTree { get; set; }
 
-        object? SelectedTargetParent { get; set; }
-
-        IViewModelShortcutCommand? SelectedShortcutCommandTarget => SelectedTargetParent as IViewModelShortcutCommand;
+        IViewModelShortcutCommand? SelectedShortcutCommandTarget => SelectedTargetTree?.Skip(1)?.FirstOrDefault() as IViewModelShortcutCommand;
 
         SelectItemType SelectedItemType { get; set; }
 
@@ -1744,12 +1750,13 @@ namespace NiVE3.ViewModel
 
         private void EventHubModel_RenderPreviewInteractionRequest(object? sender, RenderPreviewInteractionEventArgs e)
         {
-            if (CompositionModel == null || e.CompositionId != CompositionId || SelectedTarget is not IPreviewInteractionTarget interaction)
+            if (CompositionModel == null || e.CompositionId != CompositionId || SelectedTargetTree == null || SelectedTargetTree?[0] is not IPreviewInteractionTarget interaction || !interaction.IsAlive())
             {
                 return;
             }
 
-            interaction.Render(e.DrawingContext, e.PreviewImagePosition, e.PreviewImagePosition, CompositionModel.GetCoordTransformer(e.CurrentTime, interaction.ParentLayerId));
+            var tagColor = SelectedTargetTree.OfType<LayerViewModel>().FirstOrDefault()?.TagColor ?? System.Windows.Media.Colors.Red;
+            interaction.Render(e.DrawingContext, e.PreviewImagePosition, e.PreviewImageScale, tagColor, CompositionModel.GetCoordTransformer(e.CurrentTime, interaction.ParentLayerId));
         }
 
         private void HistoryModel_HistoryChanged(object? sender, EventArgs e)
@@ -1857,6 +1864,8 @@ namespace NiVE3.ViewModel
                 }
                 SelectedLayerIdsForPreview?.Clear();
                 SelectedItemType = SelectItemType.None;
+                SelectedTargetTree = null;
+                LastSelectedObjectHashCode = 0;
             }
             else
             {
@@ -2009,8 +2018,8 @@ namespace NiVE3.ViewModel
             if (e.IsUserAction)
             {
                 SelectedItemType = e.SelectItemType;
-                SelectedTargetParent = e.ObjectHierarchy.Skip(1).FirstOrDefault();
-                SelectedTarget = e.ObjectHierarchy[0];
+                SelectedTargetTree = e.ObjectHierarchy;
+                LastSelectedObjectHashCode = e.ObjectHierarchy[0].GetHashCode();
                 if (e.SelectItemType == SelectItemType.Layer && SelectedLayers != null)
                 {
                     foreach (var layer in SelectedLayers)
@@ -2039,8 +2048,8 @@ namespace NiVE3.ViewModel
             else
             {
                 LastSelectedLayerId = null;
-                SelectedTarget = null;
-                SelectedTargetParent = null;
+                SelectedTargetTree = null;
+                LastSelectedObjectHashCode = 0;
                 if ((SelectedLayers?.Count ?? 0) < 1)
                 {
                     SelectedItemType = SelectItemType.None;

@@ -1741,6 +1741,11 @@ namespace NiVE3.Model
             return Layers.FirstOrDefault(l => l.LayerId == layerId);
         }
 
+        public bool LayerIsChild(Guid layerId)
+        {
+            return Layers.Any(l => l.LayerId == layerId);
+        }
+
         public void UpdatePropertyForImport(Dictionary<Guid, Guid> layerIdMap, Dictionary<Guid, Dictionary<Guid, Guid>> effectIdMaps, Dictionary<Guid, Dictionary<Guid, Guid>> maskIdMaps)
         {
             foreach (var layer in Layers)
@@ -2479,12 +2484,15 @@ namespace NiVE3.Model
         public Vector2d LocalCoordToScreenCoord(Vector3d localPosition)
         {
             var layerSkeleton = Layer.GetLayerSkeleton(CurrentTime);
-            if (layerSkeleton == null)
-            {
-                return Vector2d.Zero;
-            }
 
-            return Transformer.LocalCoordToScreenCoord(CompositionModel.GetActiveCameraSetting(CurrentTime), layerSkeleton, localPosition);
+            if (layerSkeleton != null)
+            {
+                return Transformer.LocalCoordToScreenCoord(CompositionModel.GetActiveCameraSetting(CurrentTime), layerSkeleton, localPosition);
+            }
+            else
+            {
+                return Transformer.WorldCoordToScreenCoord(CompositionModel.GetActiveCameraSetting(CurrentTime), localPosition);
+            }
         }
 
         public Vector2d WorldCoordToScreenCoord(Vector3d worldPosition)

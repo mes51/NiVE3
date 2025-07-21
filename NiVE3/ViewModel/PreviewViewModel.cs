@@ -715,6 +715,7 @@ namespace NiVE3.ViewModel
             PlayControllerModel.PauseChanged += PlayControllerModel_PauseChanged;
             PlayControllerModel.StartRenderRamPreview += PlayControllerModel_StartRenderRamPreview;
             PlayControllerModel.StopRenderRamPreview += PlayControllerModel_StopRenderRamPreview;
+            ViewState.PropertyChanged += ViewState_PropertyChanged;
 
             CompositionTarget.Rendering += (_, _) =>
             {
@@ -1309,6 +1310,14 @@ namespace NiVE3.ViewModel
                 RenderRamPreviewTask = null;
 
                 e.RenderedFrameCount = CachedRamPreviewFrames.Count;
+            }
+        }
+
+        private void ViewState_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(ViewStateModel.LastSelectedObjectHashCode))
+            {
+                UpdatePropertyInteraction();
             }
         }
     }

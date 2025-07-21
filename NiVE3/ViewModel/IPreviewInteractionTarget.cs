@@ -13,6 +13,8 @@ namespace NiVE3.ViewModel
     {
         Guid ParentLayerId { get; }
 
-        void Render(DrawingContext drawingContext, Vector2d previewImagePosition, Vector2d previewImageScale, ICoordTransformerObject coordTransformer);
+        void Render(DrawingContext drawingContext, Vector2d previewImagePosition, Vector2d previewImageScale, Color tagColor, ICoordTransformerObject coordTransformer);
+
+        bool IsAlive();
     }
 }

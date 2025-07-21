@@ -753,5 +753,18 @@ namespace NiVE3.Model
                     break;
             }
         }
+
+        public bool IsAlive(IPropertyModel child)
+        {
+            if (!Children.Contains(child))
+            {
+                return false;
+            }
+
+            return ParentPropertyModel?.IsAlive(this) ??
+                MaskModel?.IsAlive() ??
+                EffectModel?.IsAlive() ??
+                LayerModel.IsAlive(this);
+        }
     }
 }

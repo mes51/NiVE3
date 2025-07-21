@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using NiVE3.Numerics;
@@ -26,6 +26,6 @@ namespace NiVE3.Plugin.Property.Interaction
 
         public abstract bool MouseUp(Point mousePositionInPreview, MouseButton mouseButton, Vector2d previewImageScale, ICoordTransformerObject coordTransformer);
 
-        public abstract void Render(DrawingContext drawingContext, Vector2d previewImagePosition, Vector2d previewImageScale, ICoordTransformerObject coordTransformer);
+        public abstract void Render(DrawingContext drawingContext, Vector2d previewImagePosition, Vector2d previewImageScale, Color tagColor, ICoordTransformerObject coordTransformer);
     }
 }

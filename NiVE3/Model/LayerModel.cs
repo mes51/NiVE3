@@ -1998,6 +1998,27 @@ namespace NiVE3.Model
                 Masks.Any(m => m.PropertyIsChangeableByTime());
         }
 
+        public bool IsAlive(MaskModel mask)
+        {
+            return Masks.Any(m => m.MaskId == mask.MaskId) && CompositionModel.LayerIsChild(LayerId);
+        }
+
+        public bool IsAlive(EffectModel effect)
+        {
+            return Effects.Any(e => e.EffectId == effect.EffectId) && CompositionModel.LayerIsChild(LayerId);
+        }
+
+        public bool IsAlive(PropertyGroupModel propertyGroup)
+        {
+            return (TransformProperties == propertyGroup ||
+                LayerOptionProperties == propertyGroup ||
+                TextProperties == propertyGroup ||
+                ShapeProperties == propertyGroup ||
+                SourceOptionProperties == propertyGroup ||
+                AudioOptionProperties == propertyGroup) &&
+                CompositionModel.LayerIsChild(LayerId);
+        }
+
         void DeleteEffectInternal(Guid[] effectIds, bool isCut)
         {
             var effects = Effects.Where(l => effectIds.Contains(l.EffectId)).OrderBy(Effects.IndexOf).ToArray();

@@ -241,6 +241,11 @@ namespace NiVE3.Model
             return Properties.IsChangeableByTime();
         }
 
+        public bool IsAlive()
+        {
+            return LayerModel.IsAlive(this);
+        }
+
         public static (Guid oldId, Guid newId) ConvertDataForImport(EffectData effectData)
         {
             var oldId = effectData.EffectId;

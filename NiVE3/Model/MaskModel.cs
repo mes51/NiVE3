@@ -401,6 +401,11 @@ namespace NiVE3.Model
             };
         }
 
+        public bool IsAlive()
+        {
+            return LayerModel.IsAlive(this);
+        }
+
         public static (Guid oldId, Guid newId) ConvertDataForImport(MaskData maskData)
         {
             var oldId = maskData.MaskId;
