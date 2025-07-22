@@ -484,7 +484,7 @@ namespace NiVE3.ViewModel
                     _ => throw new Exception() // bug
                 };
                 IsUsingTool = true;
-                EventHubModel.NotifyBeginUseTool(compositionPreviewModel.Composition.CompositionId, p.Value / (Scale * 0.01), propertyType);
+                EventHubModel.NotifyBeginUseTool(compositionPreviewModel.Composition.CompositionId, p.Value / (Scale * 0.01), propertyType, CurrentTime);
             });
 
             MoveLayersByToolCommand = new DelegateCommand<Tuple<Vector2d, bool>>(t =>
@@ -498,7 +498,7 @@ namespace NiVE3.ViewModel
                 nextPos /= Scale * 0.01;
                 IsUsingTool = !isCommit;
 
-                EventHubModel.NotifyMoveLayersByTool(compositionPreviewModel.Composition.CompositionId, nextPos, isCommit);
+                EventHubModel.NotifyMoveLayersByTool(compositionPreviewModel.Composition.CompositionId, nextPos, isCommit, CurrentTime);
             });
 
             AbortUseToolCommand = new DelegateCommand(() =>

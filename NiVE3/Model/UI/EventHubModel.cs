@@ -104,14 +104,14 @@ namespace NiVE3.Model.UI
             SelectLayerRequestPublisher.Publish(this, new SelectLayerEventArgs(compositionId, layerId));
         }
 
-        public void NotifyBeginUseTool(Guid compositionId, Vector2d startScreenPos, BeginUseToolEventArgs.PropertyType propertyType)
+        public void NotifyBeginUseTool(Guid compositionId, Vector2d startScreenPos, BeginUseToolEventArgs.PropertyType propertyType, Time currentTime)
         {
-            BeginUseToolRequestPublisher.Publish(this, new BeginUseToolEventArgs(compositionId, startScreenPos, propertyType));
+            BeginUseToolRequestPublisher.Publish(this, new BeginUseToolEventArgs(compositionId, startScreenPos, propertyType, currentTime));
         }
 
-        public void NotifyMoveLayersByTool(Guid compositionId, Vector2d nextScreenPos, bool isCommit)
+        public void NotifyMoveLayersByTool(Guid compositionId, Vector2d nextScreenPos, bool isCommit, Time currentTime)
         {
-            MoveLayersByToolRequestPublisher.Publish(this, new MoveLayersByToolEventArgs(compositionId, nextScreenPos, isCommit));
+            MoveLayersByToolRequestPublisher.Publish(this, new MoveLayersByToolEventArgs(compositionId, nextScreenPos, isCommit, currentTime));
         }
 
         public void NotifyAbortUseTool(Guid compositionId)

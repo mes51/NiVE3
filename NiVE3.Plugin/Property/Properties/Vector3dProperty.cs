@@ -142,7 +142,7 @@ namespace NiVE3.Plugin.Property.Properties
         {
             if (UseInteraction)
             {
-                return new Vector3dPropertyInteraction(viewModel);
+                return new Vector3dPropertyInteraction(viewModel, Is3D);
             }
             else
             {

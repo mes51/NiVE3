@@ -10,12 +10,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Media.Media3D;
-using System.Xml.Linq;
 using DryIoc.ImTools;
 using GongSolutions.Wpf.DragDrop;
 using Microsoft.Win32;
-using NAudio.SoundFont;
 using NiVE3.Config;
 using NiVE3.Data.Clipboard;
 using NiVE3.Data.Json.Project;
@@ -606,6 +603,8 @@ namespace NiVE3.ViewModel
         object[]? SelectedTargetTree { get; set; }
 
         IViewModelShortcutCommand? SelectedShortcutCommandTarget => SelectedTargetTree?.Skip(1)?.FirstOrDefault() as IViewModelShortcutCommand;
+
+        IPreviewInteractionTarget? SelectedPreviewInteractionTarget => SelectedTargetTree?.First() as IPreviewInteractionTarget;
 
         SelectItemType SelectedItemType { get; set; }
 
@@ -1638,7 +1637,17 @@ namespace NiVE3.ViewModel
 
         private void EventHubModel_AbortUseToolRequest(object? sender, AbortUseToolEventArgs e)
         {
-            if (!IsUsingTool || CompositionModel == null || e.CompositionId != CompositionId || PreviewManipulation == null)
+            if (CompositionModel == null || e.CompositionId != CompositionId)
+            {
+                return;
+            }
+
+            if (SelectedPreviewInteractionTarget is IPreviewInteractionTarget interaction && interaction.IsInteracting)
+            {
+                interaction.AbortInteraction();
+                return;
+            }
+            else if (!IsUsingTool || PreviewManipulation == null)
             {
                 return;
             }
@@ -1650,7 +1659,25 @@ namespace NiVE3.ViewModel
 
         private void EventHubModel_MoveLayersByToolRequest(object? sender, MoveLayersByToolEventArgs e)
         {
-            if (!IsUsingTool || CompositionModel == null || e.CompositionId != CompositionId || PreviewManipulation == null)
+            if (CompositionModel == null || e.CompositionId != CompositionId)
+            {
+                return;
+            }
+
+
+            if (SelectedPreviewInteractionTarget is IPreviewInteractionTarget interaction && interaction.IsInteracting)
+            {
+                if (e.IsCommit)
+                {
+                    interaction.MouseLeftButtonUp(e.NextScreenPos, CompositionModel.GetCoordTransformer(e.CurrentTime, interaction.ParentLayerId));
+                }
+                else
+                {
+                    interaction.MouseLeftButtonDrag(e.NextScreenPos, CompositionModel.GetCoordTransformer(e.CurrentTime, interaction.ParentLayerId));
+                }
+                return;
+            }
+            else if (!IsUsingTool || PreviewManipulation == null)
             {
                 return;
             }
@@ -1669,7 +1696,20 @@ namespace NiVE3.ViewModel
 
         private void EventHubModel_BeginUseToolRequest(object? sender, BeginUseToolEventArgs e)
         {
-            if (IsEditingAny || CompositionModel == null || Layers == null || e.CompositionId != CompositionId || (SelectedItemType != SelectItemType.Layer && e.Type.HasFlag(BeginUseToolEventArgs.PropertyType.LayerProperty)))
+            if (IsEditingAny || CompositionModel == null || Layers == null || e.CompositionId != CompositionId)
+            {
+                return;
+            }
+
+            if (SelectedPreviewInteractionTarget is IPreviewInteractionTarget interaction)
+            {
+                if (interaction.MouseLeftButtonDown(e.StartScreenPosition, CompositionModel.GetCoordTransformer(e.CurrentTime, interaction.ParentLayerId)))
+                {
+                    return;
+                }
+            }
+
+            if ((SelectedItemType != SelectItemType.Layer && e.Type.HasFlag(BeginUseToolEventArgs.PropertyType.LayerProperty)))
             {
                 return;
             }
@@ -1750,12 +1790,12 @@ namespace NiVE3.ViewModel
 
         private void EventHubModel_RenderPreviewInteractionRequest(object? sender, RenderPreviewInteractionEventArgs e)
         {
-            if (CompositionModel == null || e.CompositionId != CompositionId || SelectedTargetTree == null || SelectedTargetTree?[0] is not IPreviewInteractionTarget interaction || !interaction.IsAlive())
+            if (CompositionModel == null || e.CompositionId != CompositionId || SelectedPreviewInteractionTarget is not IPreviewInteractionTarget interaction || !interaction.IsAlive())
             {
                 return;
             }
 
-            var tagColor = SelectedTargetTree.OfType<LayerViewModel>().FirstOrDefault()?.TagColor ?? System.Windows.Media.Colors.Red;
+            var tagColor = SelectedTargetTree?.OfType<LayerViewModel>()?.FirstOrDefault()?.TagColor ?? System.Windows.Media.Colors.Red;
             interaction.Render(e.DrawingContext, e.PreviewImagePosition, e.PreviewImageScale, tagColor, CompositionModel.GetCoordTransformer(e.CurrentTime, interaction.ParentLayerId));
         }
 
@@ -1864,6 +1904,7 @@ namespace NiVE3.ViewModel
                 }
                 SelectedLayerIdsForPreview?.Clear();
                 SelectedItemType = SelectItemType.None;
+                SelectedPreviewInteractionTarget?.AbortInteraction();
                 SelectedTargetTree = null;
                 LastSelectedObjectHashCode = 0;
             }
@@ -2017,6 +2058,10 @@ namespace NiVE3.ViewModel
         {
             if (e.IsUserAction)
             {
+                if (SelectedPreviewInteractionTarget?.IsInteracting ?? false)
+                {
+                    SelectedPreviewInteractionTarget.AbortInteraction();
+                }
                 SelectedItemType = e.SelectItemType;
                 SelectedTargetTree = e.ObjectHierarchy;
                 LastSelectedObjectHashCode = e.ObjectHierarchy[0].GetHashCode();

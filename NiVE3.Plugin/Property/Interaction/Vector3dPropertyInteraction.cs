@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Input;
 using System.Windows.Media;
 using NiVE3.Numerics;
 using NiVE3.Plugin.Interfaces;
@@ -15,9 +14,19 @@ namespace NiVE3.Plugin.Property.Interaction
     {
         const double BorderThickness = 1.0;
 
+        const double PointHandleArea = 5.0;
+
         static readonly Geometry PointGeometry;
 
         static readonly Pen PointBorderPen = new Pen(Brushes.White, BorderThickness);
+
+        bool Is3D { get; }
+
+        Vector2d InteractionStartPoint { get; set; }
+
+        Vector3d InteractionStartValue { get; set; }
+
+        Vector3d PrevCurrentRawValue { get; set; }
 
         static Vector3dPropertyInteraction()
         {
@@ -44,21 +53,73 @@ namespace NiVE3.Plugin.Property.Interaction
             PointBorderPen.Freeze();
         }
 
-        public Vector3dPropertyInteraction(IPropertyInteractionViewModel viewModel) : base(viewModel) { }
-
-        public override bool MouseDown(Point mousePositionInPreview, MouseButton mouseButton, Vector2d previewImageScale, ICoordTransformerObject coordTransformer)
+        public Vector3dPropertyInteraction(IPropertyInteractionViewModel viewModel, bool is3D) : base(viewModel)
         {
-            throw new NotImplementedException();
+            Is3D = is3D;
         }
 
-        public override bool MouseMove(Point mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer)
+        public override bool MouseLeftButtonDown(Vector2d mousePositionInPreview, ICoordTransformerObject coordTransformer)
         {
-            throw new NotImplementedException();
+            var value = (Vector3d)(ViewModel.CurrentTimeValue ?? Vector3d.Zero);
+            var screenPos = coordTransformer.LocalCoordToScreenCoord(value);
+
+            if (Math.Abs(screenPos.X - mousePositionInPreview.X) <= PointHandleArea && Math.Abs(screenPos.Y - mousePositionInPreview.Y) <= PointHandleArea)
+            {
+                InteractionStartPoint = mousePositionInPreview;
+                InteractionStartValue = coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
+                PrevCurrentRawValue = value;
+                IsInteracting = true;
+                ViewModel.BeginEditCommand.Execute(null);
+
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
-        public override bool MouseUp(Point mousePositionInPreview, MouseButton mouseButton, Vector2d previewImageScale, ICoordTransformerObject coordTransformer)
+        public override void MouseLeftButtonDrag(Vector2d mousePositionInPreview, ICoordTransformerObject coordTransformer)
         {
-            throw new NotImplementedException();
+            if (!IsInteracting)
+            {
+                return;
+            }
+
+            var pos = coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
+            var diff = pos - InteractionStartValue;
+
+            if (!Is3D)
+            {
+                diff = new Vector3d(diff.X, diff.Y, 0.0);
+            }
+            ViewModel.CurrentTimeRawValue = PrevCurrentRawValue + diff;
+        }
+
+        public override void MouseLeftButtonUp(Vector2d mousePositionInPreview, ICoordTransformerObject coordTransformer)
+        {
+            if (!IsInteracting)
+            {
+                return;
+            }
+
+            var pos = coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
+            var diff = pos - InteractionStartValue;
+
+            if (!Is3D)
+            {
+                diff = new Vector3d(diff.X, diff.Y, 0.0);
+            }
+            ViewModel.CurrentTimeRawValue = PrevCurrentRawValue + diff;
+
+            ViewModel.EndEditCommand.Execute(null);
+            IsInteracting = false;
+        }
+
+        public override void AbortInteraction()
+        {
+            ViewModel.AbortEditCommand.Execute(null);
+            IsInteracting = false;
         }
 
         public override void Render(DrawingContext drawingContext, Vector2d previewImagePosition, Vector2d previewImageScale, Color tagColor, ICoordTransformerObject coordTransformer)

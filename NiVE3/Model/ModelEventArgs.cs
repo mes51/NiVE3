@@ -77,11 +77,14 @@ namespace NiVE3.Model
 
         public PropertyType Type { get; }
 
-        public BeginUseToolEventArgs(Guid compositionId, Vector2d startScreenPosition, PropertyType type)
+        public Time CurrentTime { get; }
+
+        public BeginUseToolEventArgs(Guid compositionId, Vector2d startScreenPosition, PropertyType type, Time currentTime)
         {
             CompositionId = compositionId;
             StartScreenPosition = startScreenPosition;
             Type = type;
+            CurrentTime = currentTime;
         }
 
         [Flags]
@@ -110,11 +113,14 @@ namespace NiVE3.Model
 
         public bool IsCommit { get; }
 
-        public MoveLayersByToolEventArgs(Guid compositionId, Vector2d nextScreenPos, bool isCommit)
+        public Time CurrentTime { get; }
+
+        public MoveLayersByToolEventArgs(Guid compositionId, Vector2d nextScreenPos, bool isCommit, Time currentTime)
         {
             CompositionId = compositionId;
             NextScreenPos = nextScreenPos;
             IsCommit = isCommit;
+            CurrentTime = currentTime;
         }
     }
 

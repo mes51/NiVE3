@@ -187,6 +187,12 @@ namespace NiVE3.ViewModel
             }
         }
 
+        public PropertyBase Property { get; }
+
+        public Guid ParentLayerId => PropertyModel.ParentLayerId;
+
+        public bool IsInteracting => PropertyInteraction?.IsInteracting ?? false;
+
         WeakEventPublisher<SelectItemEventArgs> SelectItemChangedPublisher { get; } = new WeakEventPublisher<SelectItemEventArgs>();
         public event EventHandler<SelectItemEventArgs> SelectItemChanged
         {
@@ -200,10 +206,6 @@ namespace NiVE3.ViewModel
             add { PropertyValueUpdatePublisher.Subscribe(value); }
             remove { PropertyValueUpdatePublisher.Unsubscribe(value); }
         }
-
-        public PropertyBase Property { get; }
-
-        public Guid ParentLayerId => PropertyModel.ParentLayerId;
 
         public ICommand BeginEditCommand { get; }
 
@@ -614,6 +616,26 @@ namespace NiVE3.ViewModel
                 SelectedKeyFrameIds.Add(k.Id);
             }
             IsSelectingAll = false;
+        }
+
+        public bool MouseLeftButtonDown(Vector2d mousePositionInPreview, ICoordTransformerObject coordTransformer)
+        {
+            return PropertyInteraction?.MouseLeftButtonDown(mousePositionInPreview, coordTransformer) ?? false;
+        }
+
+        public void MouseLeftButtonDrag(Vector2d mousePositionInPreview, ICoordTransformerObject coordTransformer)
+        {
+            PropertyInteraction?.MouseLeftButtonDrag(mousePositionInPreview, coordTransformer);
+        }
+
+        public void MouseLeftButtonUp(Vector2d mousePositionInPreview, ICoordTransformerObject coordTransformer)
+        {
+            PropertyInteraction?.MouseLeftButtonUp(mousePositionInPreview, coordTransformer);
+        }
+
+        public void AbortInteraction()
+        {
+            PropertyInteraction?.AbortInteraction();
         }
 
         public void Render(DrawingContext drawingContext, Vector2d previewImagePosition, Vector2d previewImageScale, Color tagColor, ICoordTransformerObject coordTransformer)
