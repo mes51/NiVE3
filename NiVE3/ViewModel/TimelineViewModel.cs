@@ -855,11 +855,11 @@ namespace NiVE3.ViewModel
                 }
             }, () => CompositionModel != null).ObservesProperty(() => CompositionModel);
 
-            AddKeyFrameCommand = new DelegateCommand(() => SelectedShortcutCommandTarget?.AddKeyFrameCommand?.Execute(SelectedItemType), () => CompositionModel != null && SelectedItemType == SelectItemType.Property)
+            AddKeyFrameCommand = new DelegateCommand(() => SelectedShortcutCommandTarget?.AddKeyFrameCommand?.Execute(SelectedItemType), () => CompositionModel != null && (SelectedItemType == SelectItemType.Property || SelectedItemType == SelectItemType.PropertyGroup))
                 .ObservesProperty(() => CompositionModel)
                 .ObservesProperty(() => SelectedItemType);
 
-            ResetPropertyCommand = new DelegateCommand(() => SelectedShortcutCommandTarget?.ResetPropertyCommand?.Execute(SelectedItemType), () => CompositionModel != null && SelectedItemType == SelectItemType.Property)
+            ResetPropertyCommand = new DelegateCommand(() => SelectedShortcutCommandTarget?.ResetPropertyCommand?.Execute(SelectedItemType), () => CompositionModel != null && (SelectedItemType == SelectItemType.Property || SelectedItemType == SelectItemType.PropertyGroup))
                 .ObservesProperty(() => CompositionModel)
                 .ObservesProperty(() => SelectedItemType);
 
@@ -1450,14 +1450,14 @@ namespace NiVE3.ViewModel
 
                 if (SelectedLayers.Count > 0)
                 {
-                    if (SelectedItemType != SelectItemType.Layer)
+                    if (SelectedItemType != SelectItemType.Layer && SelectedItemType != SelectItemType.Property)
                     {
                         foreach (var layer in SelectedLayers)
                         {
                             layer.DeSelect();
                         }
+                        SelectedItemType = SelectItemType.Layer;
                     }
-                    SelectedItemType = SelectItemType.Layer;
                 }
                 else
                 {
@@ -2110,6 +2110,7 @@ namespace NiVE3.ViewModel
         Effect,
         Mask,
         Property,
+        PropertyGroup,
         KeyFrame,
     }
 }

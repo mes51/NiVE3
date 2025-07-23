@@ -374,7 +374,7 @@ namespace NiVE3.ViewModel
             SelectItemCommand = new DelegateCommand(() =>
             {
                 DeSelect();
-                SelectItemChangedPublisher.Publish(this, new SelectItemEventArgs(SelectItemType.Property, true, this));
+                SelectItemChangedPublisher.Publish(this, new SelectItemEventArgs(SelectItemType.PropertyGroup, true, this));
             });
 
             PasteExpressionOnlyCommand = new RequerySuggestedCommand(() =>
