@@ -1457,11 +1457,13 @@ namespace NiVE3.ViewModel
                             layer.DeSelect();
                         }
                         SelectedItemType = SelectItemType.Layer;
+                        SelectedTargetTree = [SelectedLayers.First(l => l.LayerId == layerId)];
                     }
                 }
                 else
                 {
                     SelectedItemType = SelectItemType.None;
+                    SelectedTargetTree = null;
                 }
             }
         }
