@@ -66,6 +66,15 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("スライダー")]
         public const string ExpressionControl_SliderControl_PropertyName = nameof(ExpressionControl_SliderControl_PropertyName);
 
+        [DefaultValue("3Dポイント制御")]
+        public const string ExpressionControl_Point3DControl_Name = nameof(ExpressionControl_Point3DControl_Name);
+
+        [DefaultValue("エクスプレッションで使用する3次元のポイント制御")]
+        public const string ExpressionControl_Point3DControl_Description = nameof(ExpressionControl_Point3DControl_Description);
+
+        [LanguageKey, DefaultValue("ポイント")]
+        public const string ExpressionControl_Point3DControl_PropertyName = nameof(ExpressionControl_Point3DControl_PropertyName);
+
         // BoxBlur
 
         [DefaultValue("ボックスブラー")]

@@ -11,16 +11,16 @@ using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Property;
 using NiVE3.Plugin.Property.Properties;
 using NiVE3.Plugin.Resource;
-using NiVE3.PresetPlugin.Resource;
 using NiVE3.Plugin.ValueObject;
+using NiVE3.PresetPlugin.Resource;
 
 namespace NiVE3.PresetPlugin.Effect.ExpressionControl
 {
     [Export(typeof(IEffect))]
-    [EffectMetadata(LanguageResourceDictionary.ExpressionControl_PointControl_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_ExpressionControl, LanguageResourceDictionary.ExpressionControl_PointControl_Description, ID, IsDummyEffect = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
-    public sealed class PointControl : IEffect
+    [EffectMetadata(LanguageResourceDictionary.ExpressionControl_Point3DControl_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_ExpressionControl, LanguageResourceDictionary.ExpressionControl_Point3DControl_Description, ID, IsDummyEffect = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
+    public sealed class Point3DControl : IEffect
     {
-        const string ID = "6836A601-35DC-405D-8D77-D6DC52A36845";
+        const string ID = "29C847AD-C9DD-422A-AD32-71D0C380DD51";
 
         const string PropertyPointId = nameof(PropertyPointId);
 
@@ -28,20 +28,21 @@ namespace NiVE3.PresetPlugin.Effect.ExpressionControl
 
         public PropertyBase[] GetProperties(Int32Size sourceSize)
         {
+            var defaultValue = new Vector3d(sourceSize.Width, sourceSize.Height, 0.0) * 0.5;
             return
             [
-                new Vector3dProperty(PropertyPointId, LanguageResourceDictionary.ResourceKeys.ExpressionControl_PointControl_PropertyName, new Vector3d(sourceSize.Width * 0.5, sourceSize.Height * 0.5, 0.0), digit: 2, useInteraction: true)
+                new Vector3dProperty(PropertyPointId, LanguageResourceDictionary.ResourceKeys.ExpressionControl_Point3DControl_PropertyName, defaultValue, digit: 2, is3D: true, useInteraction: true)
             ];
         }
 
         public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, Time layerTime, IPropertyObject[] properties, ICompositionObject composition, ILayerObject layer, bool useGpu)
         {
-            return image;
+            throw new NotImplementedException();
         }
 
         public float[] Process(float[] audio, Time startTime, IPropertyObject[] properties, ICompositionObject composition, ILayerObject layer)
         {
-            return audio;
+            throw new NotImplementedException();
         }
 
         public void Dispose() { }
