@@ -20,6 +20,7 @@ using NiVE3.Image.Drawing;
 using NiVE3.Model;
 using NiVE3.Model.UI;
 using NiVE3.Mvvm;
+using NiVE3.Numerics;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Interfaces.RendererParams;
 using NiVE3.Plugin.ValueObject;
@@ -1450,7 +1451,7 @@ namespace NiVE3.ViewModel
 
                 if (SelectedLayers.Count > 0)
                 {
-                    if (SelectedItemType != SelectItemType.Layer && SelectedItemType != SelectItemType.Property)
+                    if (SelectedItemType != SelectItemType.Layer)
                     {
                         foreach (var layer in SelectedLayers)
                         {
@@ -1458,14 +1459,42 @@ namespace NiVE3.ViewModel
                         }
                         SelectedItemType = SelectItemType.Layer;
                         SelectedTargetTree = [SelectedLayers.First(l => l.LayerId == layerId)];
+                        LastSelectedObjectHashCode = SelectedTargetTree[0].GetHashCode();
                     }
                 }
                 else
                 {
                     SelectedItemType = SelectItemType.None;
                     SelectedTargetTree = null;
+                    LastSelectedObjectHashCode = 0;
                 }
             }
+        }
+
+        public void SelectByPreview(Vector2d screenPos, Time currentTime)
+        {
+            if (CompositionModel == null || Layers == null)
+            {
+                return;
+            }
+
+            Guid layerId;
+            using (var checker = CycleChecker.StartCheck())
+            {
+                layerId = CompositionModel.FindLayerByPreviewPosition(CurrentTime, screenPos) ?? Guid.Empty;
+            }
+
+            if (layerId == Guid.Empty)
+            {
+                return;
+            }
+
+            if (SelectedPreviewInteractionTarget is IPreviewInteractionTarget interaction && interaction.HitTestInteraction(screenPos, CompositionModel.GetCoordTransformer(currentTime, layerId)))
+            {
+                return;
+            }
+            var layer = Layers.First(l => l.LayerId == layerId);
+            SelectLayer(layer.LayerId, Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl) || Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift));
         }
 
         public void DragOver(IDropInfo dropInfo)

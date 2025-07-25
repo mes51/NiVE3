@@ -58,6 +58,14 @@ namespace NiVE3.Plugin.Property.Interaction
             Is3D = is3D;
         }
 
+        public override bool HitTestInteraction(Vector2d mousePositionInPreview, ICoordTransformerObject coordTransformer)
+        {
+            var value = (Vector3d)(ViewModel.CurrentTimeValue ?? Vector3d.Zero);
+            var screenPos = coordTransformer.LocalCoordToScreenCoord(value);
+
+            return Math.Abs(screenPos.X - mousePositionInPreview.X) <= PointHandleArea && Math.Abs(screenPos.Y - mousePositionInPreview.Y) <= PointHandleArea;
+        }
+
         public override bool MouseLeftButtonDown(Vector2d mousePositionInPreview, ICoordTransformerObject coordTransformer)
         {
             var value = (Vector3d)(ViewModel.CurrentTimeValue ?? Vector3d.Zero);

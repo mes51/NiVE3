@@ -618,6 +618,11 @@ namespace NiVE3.ViewModel
             IsSelectingAll = false;
         }
 
+        public bool HitTestInteraction(Vector2d mousePositionInPreview, ICoordTransformerObject coordTransformer)
+        {
+            return PropertyInteraction?.HitTestInteraction(mousePositionInPreview, coordTransformer) ?? false;
+        }
+
         public bool MouseLeftButtonDown(Vector2d mousePositionInPreview, ICoordTransformerObject coordTransformer)
         {
             return PropertyInteraction?.MouseLeftButtonDown(mousePositionInPreview, coordTransformer) ?? false;

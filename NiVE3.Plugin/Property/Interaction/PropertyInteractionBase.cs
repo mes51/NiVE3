@@ -20,6 +20,8 @@ namespace NiVE3.Plugin.Property.Interaction
             ViewModel = viewModel;
         }
 
+        public abstract bool HitTestInteraction(Vector2d mousePositionInPreview, ICoordTransformerObject coordTransformer);
+
         public abstract bool MouseLeftButtonDown(Vector2d mousePositionInPreview, ICoordTransformerObject coordTransformer);
 
         public abstract void MouseLeftButtonDrag(Vector2d mousePositionInPreview, ICoordTransformerObject coordTransformer);

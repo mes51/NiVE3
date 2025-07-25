@@ -607,7 +607,7 @@ namespace NiVE3.ViewModel
             if (viewModel != null)
             {
                 viewModel.OpenPane();
-                viewModel.SelectLayer(e.LayerId, Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl) || Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift));
+                viewModel.SelectByPreview(e.ScreenPosition, e.CurrentTime);
             }
         }
     }

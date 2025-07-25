@@ -455,12 +455,7 @@ namespace NiVE3.ViewModel
                 }
 
                 var pos = p.Value / (Scale * 0.01);
-                Guid? layerId;
-                using (var checker = CycleChecker.StartCheck())
-                {
-                    layerId = compositionPreviewModel.Composition.FindLayerByPreviewPosition(CurrentTime, pos);
-                }
-                EventHubModel.NotifySelectLayer(compositionPreviewModel.Composition.CompositionId, layerId);
+                EventHubModel.NotifySelectLayer(compositionPreviewModel.Composition.CompositionId, pos, CurrentTime);
             });
 
             BeginUseToolCommand = new DelegateCommand<Vector2d?>(p =>

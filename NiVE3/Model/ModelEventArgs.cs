@@ -60,12 +60,15 @@ namespace NiVE3.Model
     {
         public Guid CompositionId { get; }
 
-        public Guid? LayerId { get; }
+        public Vector2d ScreenPosition { get; }
 
-        public SelectLayerEventArgs(Guid compositionId, Guid? layerId)
+        public Time CurrentTime { get; }
+
+        public SelectLayerEventArgs(Guid compositionId, Vector2d screenPosition, Time currentTime)
         {
             CompositionId = compositionId;
-            LayerId = layerId;
+            ScreenPosition = screenPosition;
+            CurrentTime = currentTime;
         }
     }
 

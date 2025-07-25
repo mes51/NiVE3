@@ -16,6 +16,8 @@ namespace NiVE3.ViewModel
 
         bool IsInteracting { get; }
 
+        bool HitTestInteraction(Vector2d mousePositionInPreview, ICoordTransformerObject coordTransformer);
+
         bool MouseLeftButtonDown(Vector2d mousePositionInPreview, ICoordTransformerObject coordTransformer);
 
         void MouseLeftButtonDrag(Vector2d mousePositionInPreview, ICoordTransformerObject coordTransformer);

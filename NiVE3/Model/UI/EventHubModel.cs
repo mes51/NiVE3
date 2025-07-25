@@ -99,9 +99,9 @@ namespace NiVE3.Model.UI
             remove { RenderPreviewInteractionRequestPublisher.Unsubscribe(value); }
         }
 
-        public void NotifySelectLayer(Guid compositionId, Guid? layerId)
+        public void NotifySelectLayer(Guid compositionId, Vector2d screenPos, Time currentTime)
         {
-            SelectLayerRequestPublisher.Publish(this, new SelectLayerEventArgs(compositionId, layerId));
+            SelectLayerRequestPublisher.Publish(this, new SelectLayerEventArgs(compositionId, screenPos, currentTime));
         }
 
         public void NotifyBeginUseTool(Guid compositionId, Vector2d startScreenPos, BeginUseToolEventArgs.PropertyType propertyType, Time currentTime)
