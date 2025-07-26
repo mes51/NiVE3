@@ -54,7 +54,7 @@ namespace NiVE3.PresetPlugin.Effect.Utility
             return
             [
                 new EnumProperty(PropertyChannelId, LanguageResourceDictionary.ResourceKeys.Utility_Histogram_Channel, typeof(ChannelType), typeof(LanguageResourceDictionary), ChannelType.RGB, selectBoxWidth: 90.0),
-                new Vector3dProperty(PropertyPositionId, LanguageResourceDictionary.ResourceKeys.Utility_Histogram_Position, Vector3d.Zero, digit: 2),
+                new Vector3dProperty(PropertyPositionId, LanguageResourceDictionary.ResourceKeys.Utility_Histogram_Position, Vector3d.Zero, digit: 2, useInteraction: true),
                 new Vector3dProperty(PropertyScaleId, LanguageResourceDictionary.ResourceKeys.Utility_Histogram_Scale, new Vector3d(100.0, 100.0, 0.0), Vector3d.Zero, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent, useLinkRatio: true)
             ];
         }

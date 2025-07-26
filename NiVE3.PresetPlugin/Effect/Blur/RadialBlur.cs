@@ -43,7 +43,7 @@ namespace NiVE3.PresetPlugin.Effect.Blur
         {
             return
             [
-                new Vector3dProperty(PropertyCenterId, LanguageResourceDictionary.ResourceKeys.Blur_RadialBlur_Center, new Vector3d(sourceSize.Width, sourceSize.Height, 0.0) * 0.5, digit: 2),
+                new Vector3dProperty(PropertyCenterId, LanguageResourceDictionary.ResourceKeys.Blur_RadialBlur_Center, new Vector3d(sourceSize.Width, sourceSize.Height, 0.0) * 0.5, digit: 2, useInteraction: true),
                 new DoubleProperty(PropertyAmountId, LanguageResourceDictionary.ResourceKeys.Blur_RadialBlur_Amount, 0.0, 0.0, 100.0, digit: 2),
                 new CheckBoxProperty(PropertyFastModeId, LanguageResourceDictionary.ResourceKeys.Blur_RadialBlur_FastMode, true)
             ];

@@ -95,7 +95,7 @@ namespace NiVE3.PresetPlugin.Effect.Noise
                 new DoubleProperty(PropertyLuminanceId, LanguageResourceDictionary.ResourceKeys.Noise_FractalNoise_Luminance, 0.0, -10000.0, 10000.0, digit: 2),
                 new PropertyGroup(PropertyTransformGroupId, LanguageResourceDictionary.ResourceKeys.Noise_FractalNoise_Transform,
                 [
-                    new Vector3dProperty(PropertyTransformPositionId, LanguageResourceDictionary.ResourceKeys.Noise_FractalNoise_Transform_Position, new Vector3d(), digit: 2),
+                    new Vector3dProperty(PropertyTransformPositionId, LanguageResourceDictionary.ResourceKeys.Noise_FractalNoise_Transform_Position, new Vector3d(), digit: 2, useInteraction: true),
                     new Vector3dProperty(PropertyTransformScaleId, LanguageResourceDictionary.ResourceKeys.Noise_FractalNoise_Transform_Scale, new Vector3d(100.0), new Vector3d(0.01), digit: 2, useLinkRatio: true),
                     new AngleProperty(PropertyTransformAngleId, LanguageResourceDictionary.ResourceKeys.Noise_FractalNoise_Transform_Angle, 0.0, digit: 2),
                 ]),
@@ -103,7 +103,7 @@ namespace NiVE3.PresetPlugin.Effect.Noise
                 new PropertyGroup(PropertyOctaveSettingGroupId, LanguageResourceDictionary.ResourceKeys.Noise_FractalNoise_OctaveSetting,
                 [
                     new DoubleProperty(PropertyOctaveSettingAmountId, LanguageResourceDictionary.ResourceKeys.Noise_FractalNoise_OctaveSetting_Amount, 70.0, 0.0, 1000.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
-                    new Vector3dProperty(PropertyOctaveSettingPositionOffsetId, LanguageResourceDictionary.ResourceKeys.Noise_FractalNoise_OctaveSetting_PositionOffset, new Vector3d(), digit: 2),
+                    new Vector3dProperty(PropertyOctaveSettingPositionOffsetId, LanguageResourceDictionary.ResourceKeys.Noise_FractalNoise_OctaveSetting_PositionOffset, new Vector3d(), digit: 2, useInteraction : true),
                     new Vector3dProperty(PropertyOctaveSettingScaleId, LanguageResourceDictionary.ResourceKeys.Noise_FractalNoise_OctaveSetting_Scale, new Vector3d(56.0), new Vector3d(0.01), digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent, useLinkRatio: true),
                     new AngleProperty(PropertyOctaveSettingAngleId, LanguageResourceDictionary.ResourceKeys.Noise_FractalNoise_OctaveSetting_Angle, 0.0, digit: 2),
                     new CheckBoxProperty(PropertyOctaveSettingCenteringScaleId, LanguageResourceDictionary.ResourceKeys.Noise_FractalNoise_OctaveSetting_CenteringScale, false)

@@ -74,7 +74,7 @@ namespace NiVE3.PresetPlugin.Effect.Generate
             var colorDialogTitle = LanguageResourceDictionary.ResourceKeys.Dialog_ColorDialog_Title_Color;
             return
             [
-                new Vector3dProperty(PropertyAnchorId, LanguageResourceDictionary.ResourceKeys.Generate_CheckerBoard_Anchor, anchor, digit: 2),
+                new Vector3dProperty(PropertyAnchorId, LanguageResourceDictionary.ResourceKeys.Generate_CheckerBoard_Anchor, anchor, digit: 2, useInteraction : true),
                 new ColorProperty(PropertyColor1Id, LanguageResourceDictionary.ResourceKeys.Generate_CheckerBoard_Color1, colorDialogTitle, dialogOK, dialogCancel, Vector4.One),
                 new DoubleProperty(PropertyOpacity1Id, LanguageResourceDictionary.ResourceKeys.Generate_CheckerBoard_Opacity1, 100.0, 0.0, 100.0, digit: 2),
                 new ColorProperty(PropertyColor2Id, LanguageResourceDictionary.ResourceKeys.Generate_CheckerBoard_Color2, colorDialogTitle, dialogOK, dialogCancel, Vector4.UnitW),

@@ -55,8 +55,8 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
             [
                 new DoubleProperty(PropertyTransformId, LanguageResourceDictionary.ResourceKeys.Distortion_PolarDistortion_Transform, 0.0, 0.0, 100.0, digit: 2),
                 new EnumProperty(PropertyModeId, LanguageResourceDictionary.ResourceKeys.Distortion_PolarDistortion_Mode, typeof(PolarDistortionMode), typeof(LanguageResourceDictionary), PolarDistortionMode.ToPolar, selectBoxWidth: 90.0),
-                new Vector3dProperty(PropertyImageOffsetId, LanguageResourceDictionary.ResourceKeys.Distortion_PolarDistortion_ImageOffset, Vector3d.Zero, digit: 2),
-                new Vector3dProperty(PropertyDisplayAreaOffsetId, LanguageResourceDictionary.ResourceKeys.Distortion_PolarDistortion_DisplayAreaOffset, Vector3d.Zero, digit: 2),
+                new Vector3dProperty(PropertyImageOffsetId, LanguageResourceDictionary.ResourceKeys.Distortion_PolarDistortion_ImageOffset, Vector3d.Zero, digit: 2, useInteraction: true),
+                new Vector3dProperty(PropertyDisplayAreaOffsetId, LanguageResourceDictionary.ResourceKeys.Distortion_PolarDistortion_DisplayAreaOffset, Vector3d.Zero, digit: 2, useInteraction: true),
                 new CheckBoxProperty(PropertyForPreOrPostProcessId, LanguageResourceDictionary.ResourceKeys.Distortion_PolarDistortion_ForPreOrPostProcess, false)
             ];
         }

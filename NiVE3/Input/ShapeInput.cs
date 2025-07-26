@@ -271,14 +271,14 @@ namespace NiVE3.Input
                     new PropertyGroup(RectangleGroupId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_RectangleGroup,
                     [
                         new Vector3dProperty(RectangleSizeId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_ShapeObjectGroup_Size, new Vector3d(100.0), Vector3d.Zero, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Pixel, separator: ",", useLinkRatio: true),
-                        new Vector3dProperty(RectanglePositionId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_ShapeObjectGroup_Position, new Vector3d(), digit: 2),
+                        new Vector3dProperty(RectanglePositionId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_ShapeObjectGroup_Position, new Vector3d(), digit: 2, useInteraction: true),
                         new DoubleProperty(RectangleCornerRoundedId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_RectangleGroup_CornerRounded, 0.0, 0.0, double.MaxValue, digit: 2)
                     ])),
                 new AppendablePropertyItem(CircleGroupId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_CircleGroup, () =>
                     new PropertyGroup(CircleGroupId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_CircleGroup,
                     [
                         new Vector3dProperty(CircleSizeId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_ShapeObjectGroup_Size, new Vector3d(100.0), Vector3d.Zero, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Pixel, separator: ",", useLinkRatio: true),
-                        new Vector3dProperty(CirclePositionId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_ShapeObjectGroup_Position, new Vector3d(), digit: 2)
+                        new Vector3dProperty(CirclePositionId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_ShapeObjectGroup_Position, new Vector3d(), digit: 2, useInteraction : true)
                     ])),
                 new AppendablePropertyItem(RegularPolygonGroupId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_RegularPolygonGroup, () =>
                     new PropertyGroup(RegularPolygonGroupId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_RegularPolygonGroup,
@@ -286,7 +286,7 @@ namespace NiVE3.Input
                         new DoubleProperty(RegularPolygonPointCountId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_PolygonGroup_Points, 5.0, 3.0, 10000.0, digit: 0),
                         new DoubleProperty(RegularPolygonRadiusId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_RegularPolygonGroup_Radius, 100.0, 0.0, double.MaxValue, digit: 2),
                         new DoubleProperty(RegularPolygonRoundedId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_RegularPolygonGroup_Rounded, 0.0, double.MinValue, double.MaxValue, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
-                        new Vector3dProperty(RegularPolygonPositionId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_ShapeObjectGroup_Position, Vector3d.Zero, digit: 2),
+                        new Vector3dProperty(RegularPolygonPositionId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_ShapeObjectGroup_Position, Vector3d.Zero, digit: 2, useInteraction : true),
                         new AngleProperty(RegularPolygonAngleId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_ShapeObjectGroup_Angle, 0.0, digit: 2)
                     ])),
                 new AppendablePropertyItem(StarGroupId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_StarGroup, () =>
@@ -297,14 +297,14 @@ namespace NiVE3.Input
                         new DoubleProperty(StarInnerRadiusId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_StarGroup_InnerRadius, 50.0, 0.0, double.MaxValue, digit: 2),
                         new DoubleProperty(StarOuterRoundedId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_StarGroup_OuterRounded, 0.0, double.MinValue, double.MaxValue, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
                         new DoubleProperty(StarInnerRoundedId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_StarGroup_InnerRounded, 0.0, double.MinValue, double.MaxValue, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
-                        new Vector3dProperty(StarPositionId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_ShapeObjectGroup_Position, Vector3d.Zero, digit: 2),
+                        new Vector3dProperty(StarPositionId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_ShapeObjectGroup_Position, Vector3d.Zero, digit: 2, useInteraction : true),
                         new AngleProperty(StarAngleId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_ShapeObjectGroup_Angle, 0.0, digit: 2)
                     ])),
                 new AppendablePropertyItem(PathGroupId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_PathGroup, () =>
                     new PropertyGroup(PathGroupId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_PathGroup,
                     [
                         new BezierPathProperty(PathBezierPathId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_PathGroup_BezierPath),
-                        new Vector3dProperty(PathPositionId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_ShapeObjectGroup_Position, Vector3d.Zero, digit: 2)
+                        new Vector3dProperty(PathPositionId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_ShapeObjectGroup_Position, Vector3d.Zero, digit: 2, useInteraction : true)
                     ])),
                 AppendablePropertyItemSeparator.Instance,
                 new AppendablePropertyItem(SolidFillGroupId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_SolidFillGroup, () =>
@@ -327,8 +327,8 @@ namespace NiVE3.Input
                     [
                         new EnumProperty(GradientFillRuleId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_FillGroup_FillRule, typeof(ShapeFillRule), typeof(LanguageResourceDictionary), ShapeFillRule.NonZero, selectBoxWidth: 100.0),
                         new EnumProperty(GradientFillTypeId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_GradientGroup_Type, typeof(GradientType), typeof(LanguageResourceDictionary), GradientType.Linear, selectBoxWidth: 100.0),
-                        new Vector3dProperty(GradientFillBeginPositionId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_GradientGroup_BeginPosition, Vector3d.Zero, digit: 2),
-                        new Vector3dProperty(GradientFillEndPositionId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_GradientGroup_EndPosition, new Vector3d(100.0, 0.0, 0.0), digit: 2),
+                        new Vector3dProperty(GradientFillBeginPositionId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_GradientGroup_BeginPosition, Vector3d.Zero, digit: 2, useInteraction : true),
+                        new Vector3dProperty(GradientFillEndPositionId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_GradientGroup_EndPosition, new Vector3d(100.0, 0.0, 0.0), digit: 2, useInteraction : true),
                         new ColorGradientProperty(
                             GradientFillColorId,
                             LanguageResourceDictionary.ResourceKeys.ShapeProperty_Drawing_Color,
@@ -362,8 +362,8 @@ namespace NiVE3.Input
                     new PropertyGroup(GradientStrokeGroupId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_GradientStrokeGroup,
                     [
                         new EnumProperty(GradientStrokeTypeId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_GradientGroup_Type, typeof(GradientType), typeof(LanguageResourceDictionary), GradientType.Linear, selectBoxWidth: 100.0),
-                        new Vector3dProperty(GradientStrokeBeginPositionId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_GradientGroup_BeginPosition, Vector3d.Zero, digit: 2),
-                        new Vector3dProperty(GradientStrokeEndPositionId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_GradientGroup_EndPosition, new Vector3d(100.0, 0.0, 0.0), digit: 2),
+                        new Vector3dProperty(GradientStrokeBeginPositionId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_GradientGroup_BeginPosition, Vector3d.Zero, digit: 2, useInteraction : true),
+                        new Vector3dProperty(GradientStrokeEndPositionId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_GradientGroup_EndPosition, new Vector3d(100.0, 0.0, 0.0), digit: 2, useInteraction : true),
                         new ColorGradientProperty(
                             GradientStrokeColorId,
                             LanguageResourceDictionary.ResourceKeys.ShapeProperty_Drawing_Color,
@@ -387,8 +387,8 @@ namespace NiVE3.Input
                         new DoubleProperty(RepeaterOffsetId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_RepeaterGroup_Offset, 0.0, double.MinValue, double.MaxValue, digit: 1),
                         new PropertyGroup(RepeaterTransformGroupId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Transform,
                         [
-                            new Vector3dProperty(RepeaterTransformAnchorPointId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Transform_AnchorPoint, Vector3d.Zero, digit: 2),
-                            new Vector3dProperty(RepeaterTransformPositionId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Transform_Position, new Vector3d(100.0, 0.0, 0.0), digit: 2),
+                            new Vector3dProperty(RepeaterTransformAnchorPointId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Transform_AnchorPoint, Vector3d.Zero, digit: 2, useInteraction : true),
+                            new Vector3dProperty(RepeaterTransformPositionId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Transform_Position, new Vector3d(100.0, 0.0, 0.0), digit: 2, useInteraction : true),
                             new Scale3dProperty(RepeaterTransformScaleId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Transform_Scale, new Vector3d(100.0), digit: 2),
                             new AngleProperty(RepeaterTransformAngleId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Transform_Angle, 0.0, digit: 2),
                             new DoubleProperty(RepeaterTransformBeginPointOpacityId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_RepeaterGroup_Transform_BeginPointOpacity, 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
@@ -414,8 +414,8 @@ namespace NiVE3.Input
                     new AppendableProperty(GroupContentPropertyId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Group_Content, groupItems, useEnableSwitch: true),
                     new PropertyGroup(GroupTransformGroupId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Transform,
                     [
-                        new Vector3dProperty(GroupTransformAnchorPointId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Transform_AnchorPoint, Vector3d.Zero, digit: 2),
-                        new Vector3dProperty(GroupTransformPositionId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Transform_Position, Vector3d.Zero, digit: 2),
+                        new Vector3dProperty(GroupTransformAnchorPointId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Transform_AnchorPoint, Vector3d.Zero, digit: 2, useInteraction : true),
+                        new Vector3dProperty(GroupTransformPositionId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Transform_Position, Vector3d.Zero, digit: 2, useInteraction : true),
                         new Scale3dProperty(GroupTransformScaleId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Transform_Scale, new Vector3d(100.0), digit: 2),
                         new DoubleProperty(GroupTransformSkewId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Transform_Skew, 0.0, -100.0, 100.0, digit: 2),
                         new AngleProperty(GroupTransformSkewAxisId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Transform_SkewAxis, 0.0, digit: 2),

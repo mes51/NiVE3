@@ -65,7 +65,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
                 new DoubleProperty(PropertyLengthId, LanguageResourceDictionary.ResourceKeys.Stylize_LongShadow_Length, 100.0, 0.0, double.MaxValue, digit: 2),
                 new EnumProperty(PropertyShapeTypeId, LanguageResourceDictionary.ResourceKeys.Stylize_LongShadow_ShapeType, typeof(LongShadowShapeType), typeof(LanguageResourceDictionary), LongShadowShapeType.Parallel, selectBoxWidth: 90.0),
                 new AngleProperty(PropertyAngleId, LanguageResourceDictionary.ResourceKeys.Stylize_LongShadow_Angle, 45.0, digit: 2),
-                new Vector3dProperty(PropertyRadiateCenterId, LanguageResourceDictionary.ResourceKeys.Stylize_LongShadow_RadiateCenter, radiateCenter, digit: 2),
+                new Vector3dProperty(PropertyRadiateCenterId, LanguageResourceDictionary.ResourceKeys.Stylize_LongShadow_RadiateCenter, radiateCenter, digit: 2, useInteraction : true),
                 new DoubleProperty(PropertyAlphaThresholdId, LanguageResourceDictionary.ResourceKeys.Stylize_LongShadow_AlphaThreshold, 1.0, 0.0, 1.0, slideChangeValue: 0.01, digit: 2),
                 new ColorGradientProperty(PropertyGradientId, LanguageResourceDictionary.ResourceKeys.Stylize_LongShadow_Gradient, LanguageResourceDictionary.ResourceKeys.Dialog_ColorDialog_Title_Color, LanguageResourceDictionary.ResourceKeys.Dialog_OK, LanguageResourceDictionary.ResourceKeys.Dialog_Cancel),
                 new CheckBoxProperty(PropertyUseOkLabInterpolationId, LanguageResourceDictionary.ResourceKeys.Stylize_LongShadow_UseOkLabInterpolation, false),

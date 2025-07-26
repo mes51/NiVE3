@@ -59,7 +59,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
         {
             return
             [
-                new Vector3dProperty(PropertyCenterId, LanguageResourceDictionary.ResourceKeys.Stylize_LightShaft_Center, new Vector3d(sourceSize.Width, sourceSize.Height, 0.0) * 0.5, digit: 2),
+                new Vector3dProperty(PropertyCenterId, LanguageResourceDictionary.ResourceKeys.Stylize_LightShaft_Center, new Vector3d(sourceSize.Width, sourceSize.Height, 0.0) * 0.5, digit: 2, useInteraction: true),
                 new DoubleProperty(PropertyLengthId, LanguageResourceDictionary.ResourceKeys.Stylize_LightShaft_Length, 10.0, 0.0, 100.0, digit: 2),
                 new DoubleProperty(PropertyStrengthId, LanguageResourceDictionary.ResourceKeys.Stylize_LightShaft_Strength, 1.0, 0.0, double.MaxValue, slideChangeValue: 0.1, digit: 3),
                 new DoubleProperty(PropertyThresholdId, LanguageResourceDictionary.ResourceKeys.Stylize_LightShaft_Threshold, 0.0, double.MinValue, double.MaxValue, slideChangeValue: 0.01, digit: 2),

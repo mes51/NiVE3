@@ -173,8 +173,8 @@ namespace NiVE3.Input
                 new SourceTextProperty(SourceTextId, LanguageResourceDictionary.ResourceKeys.TextProperty_SourceText, StyledText.Empty),
                 new PropertyGroup(TextMoreOptionsGroupId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextMoreOptions,
                 [
-                    new Vector3dProperty(TextBaseAnchorPointRateId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextMoreOptions_BaseAnchorPointRate, new Vector3d(50.0), digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
-                    new Vector3dProperty(TextBoxSizeId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextMoreOptions_TextBoxSize, new Vector3d(), new Vector3d(), digit: 2),
+                    new Vector3dProperty(TextBaseAnchorPointRateId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextMoreOptions_BaseAnchorPointRate, new Vector3d(50.0), digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent, useInteraction: true),
+                    new Vector3dProperty(TextBoxSizeId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextMoreOptions_TextBoxSize, new Vector3d(), new Vector3d(), digit: 2, useInteraction: true),
                     new EnumProperty(TextInterCharacterBlendModeId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextMoreOptions_InterCharacterBlendMode, typeof(BlendMode), typeof(LanguageResourceDictionary), BlendMode.Normal),
                     new CheckBoxProperty(TextIsEnableVerticalModeId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextMoreOptions_IsEnableVerticalMode, false)
                 ]),
@@ -214,12 +214,12 @@ namespace NiVE3.Input
                                 new AppendablePropertyItem(TextAnimatorValueAnchorPointId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_AnchorPoint, () =>
                                     new PropertyGroup(TextAnimatorValueAnchorPointId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_AnchorPoint,
                                     [
-                                        new Vector3dProperty(TextAnimatorValueAnchorPointId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_AnchorPoint, new Vector3d(), digit: 2)
+                                        new Vector3dProperty(TextAnimatorValueAnchorPointId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_AnchorPoint, new Vector3d(), digit: 2, useInteraction : true)
                                     ])),
                                 new AppendablePropertyItem(TextAnimatorValuePositionId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_Position, () =>
                                     new PropertyGroup(TextAnimatorValuePositionId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_Position,
                                     [
-                                        new Vector3dProperty(TextAnimatorValuePositionId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_Position, new Vector3d(), digit: 2)
+                                        new Vector3dProperty(TextAnimatorValuePositionId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_Position, new Vector3d(), digit: 2, useInteraction : true)
                                     ])),
                                 new AppendablePropertyItem(TextAnimatorValueScaleId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_Scale, () =>
                                     new PropertyGroup(TextAnimatorValueScaleId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_Scale,

@@ -43,7 +43,7 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
             return
             [
                 new AngleProperty(PropertyAngleId, LanguageResourceDictionary.ResourceKeys.Distortion_Twist_Angle, 0.0, digit: 2),
-                new Vector3dProperty(PropertyCenterId, LanguageResourceDictionary.ResourceKeys.Distortion_Twist_Center, new Vector3d(sourceSize.Width, sourceSize.Height, 0.0) * 0.5, digit: 2)
+                new Vector3dProperty(PropertyCenterId, LanguageResourceDictionary.ResourceKeys.Distortion_Twist_Center, new Vector3d(sourceSize.Width, sourceSize.Height, 0.0) * 0.5, digit: 2, useInteraction: true)
             ];
         }
 

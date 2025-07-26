@@ -69,7 +69,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
                 new EnumProperty(PropertyChannelId, LanguageResourceDictionary.ResourceKeys.Stylize_ChromaticAberration_Channel, typeof(ChromaticAberrationChannelType), typeof(LanguageResourceDictionary), ChromaticAberrationChannelType.RedAndBlue, selectBoxWidth: 90.0),
                 new PropertyGroup(PropertyTransformGroupId, LanguageResourceDictionary.ResourceKeys.Stylize_ChromaticAberration_Transform_Group,
                 [
-                    new Vector3dProperty(PropertyTransformAnchorPointId, LanguageResourceDictionary.ResourceKeys.Stylize_ChromaticAberration_Transform_AnchorPoint, new Vector3d(sourceSize.Width * 0.5, sourceSize.Height * 0.5, 0.0)),
+                    new Vector3dProperty(PropertyTransformAnchorPointId, LanguageResourceDictionary.ResourceKeys.Stylize_ChromaticAberration_Transform_AnchorPoint, new Vector3d(sourceSize.Width * 0.5, sourceSize.Height * 0.5, 0.0), useInteraction: true),
                     new DoubleProperty(PropertyTransformPositionId, LanguageResourceDictionary.ResourceKeys.Stylize_ChromaticAberration_Transform_Position, 0.5, double.MinValue, double.MaxValue, digit: 2),
                     new DoubleProperty(PropertyTransformScaleId, LanguageResourceDictionary.ResourceKeys.Stylize_ChromaticAberration_Transform_Scale, 100.0, double.MinValue, double.MaxValue, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
                     new AngleProperty(PropertyTransformAngleId, LanguageResourceDictionary.ResourceKeys.Stylize_ChromaticAberration_Transform_Angle, 0.0, digit: 2)
