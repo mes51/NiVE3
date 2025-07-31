@@ -14,20 +14,18 @@ using NiVE3.Plugin.Property.Properties;
 using NiVE3.Plugin.Resource;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.PresetPlugin.Extension;
+using NiVE3.PresetPlugin.Internal;
 using NiVE3.PresetPlugin.Resource;
-using NiVE3.Shared.Extension;
 
 namespace NiVE3.PresetPlugin.Effect.Keying
 {
     [Export(typeof(IEffect))]
-    [EffectMetadata(LanguageResourceDictionary.Keying_ColorKey_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_Keying, LanguageResourceDictionary.Keying_ColorKey_Description, ID, IsSupportGpu = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
-    public sealed class ColorKey : IEffect
+    [EffectMetadata(LanguageResourceDictionary.Keying_LuminanceKey_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_Keying, LanguageResourceDictionary.Keying_LuminanceKey_Description, ID, IsSupportGpu = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
+    public sealed class LuminanceKey : IEffect
     {
-        const string ID = "8766F65A-26DA-4086-AEF8-1B756E224600";
+        const string ID = "EA9E7C2E-C4EB-4A76-BC3A-BCF1F20461B9";
 
-        const double MaxTolerance = 1.7320508075688772; // Vector3.Distance(Vector3.Zero, Vector3.One) = Math.Sqrt(3.0);
-
-        const string PropertyKeyColorId = nameof(PropertyKeyColorId);
+        const string PropertyKeyLuminanceId = nameof(PropertyKeyLuminanceId);
 
         const string PropertyToleranceId = nameof(PropertyToleranceId);
 
@@ -44,25 +42,25 @@ namespace NiVE3.PresetPlugin.Effect.Keying
         {
             return
             [
-                new ColorProperty(PropertyKeyColorId, LanguageResourceDictionary.ResourceKeys.Keying_ColorKey_KeyColor, LanguageResourceDictionary.ResourceKeys.Dialog_ColorDialog_Title_Color, LanguageResourceDictionary.ResourceKeys.Dialog_OK, LanguageResourceDictionary.ResourceKeys.Dialog_Cancel, new Vector4(1.0F, 0.0F, 0.0F, 1.0F)),
-                new DoubleProperty(PropertyToleranceId, LanguageResourceDictionary.ResourceKeys.Keying_ColorKey_Tolerance, 10.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
-                new DoubleProperty(PropertySoftnessId, LanguageResourceDictionary.ResourceKeys.Keying_ColorKey_Softness, 20.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent)
+                new DoubleProperty(PropertyKeyLuminanceId, LanguageResourceDictionary.ResourceKeys.Keying_LuminanceKey_KeyLuminance, 0.5, double.MinValue, double.MaxValue, slideChangeValue: 0.01, digit: 2),
+                new DoubleProperty(PropertyToleranceId, LanguageResourceDictionary.ResourceKeys.Keying_LuminanceKey_Tolerance, 10.0, 0.0, 100.0, digit: 2),
+                new DoubleProperty(PropertySoftnessId, LanguageResourceDictionary.ResourceKeys.Keying_LuminanceKey_Softness, 50.0, 0.0, 100.0, digit: 2)
             ];
         }
 
         public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, Time layerTime, IPropertyObject[] properties, ICompositionObject composition, ILayerObject layer, bool useGpu)
         {
-            var keyColor = properties.GetValue(PropertyKeyColorId, layerTime, Vector4.Zero).AsVector3();
-            var tolerance = (float)(properties.GetValue(PropertyToleranceId, layerTime, 0.0) * 0.01 * MaxTolerance);
+            var keyLuminance = (float)properties.GetValue(PropertyKeyLuminanceId, layerTime, 0.0);
+            var tolerance = (float)(properties.GetValue(PropertyToleranceId, layerTime, 0.0) * 0.01);
             var softness = (float)(properties.GetValue(PropertySoftnessId, layerTime, 0.0) * 0.01);
 
             if (useGpu && AcceleratorObject != null)
             {
-                return ProcessGpu(AcceleratorObject.CurrentDevice, image, roi, keyColor, tolerance, softness * tolerance);
+                return ProcessGpu(AcceleratorObject.CurrentDevice, image, roi, keyLuminance, tolerance, softness * tolerance);
             }
             else
             {
-                return ProcessCpu(image, roi, keyColor, tolerance, softness * tolerance);
+                return ProcessCpu(image, roi, keyLuminance, tolerance, softness * tolerance);
             }
         }
 
@@ -73,7 +71,7 @@ namespace NiVE3.PresetPlugin.Effect.Keying
 
         public void Dispose() { }
 
-        static NManagedImage ProcessCpu(NImage image, ROI roi, Vector3 keyColor, float tolerance, float softnessRange)
+        static NManagedImage ProcessCpu(NImage image, ROI roi, float keyLuminance, float tolerance, float softnessRange)
         {
             var managedImage = image.ToManaged();
 
@@ -88,7 +86,7 @@ namespace NiVE3.PresetPlugin.Effect.Keying
                 for (var x = roi.Left; x < roi.Right; x++)
                 {
                     var color = imageDataSpan[x];
-                    var distance = Vector3.Distance(color.AsVector3(), keyColor);
+                    var distance = Math.Abs(Vector4.Dot(color, Const.ConvertToGrayScale) - keyLuminance);
                     if (distance > tolerance)
                     {
                         continue;
@@ -109,11 +107,11 @@ namespace NiVE3.PresetPlugin.Effect.Keying
             return managedImage;
         }
 
-        static NGPUImage ProcessGpu(GraphicsDevice device, NImage image, ROI roi, Vector3 keyColor, float tolerance, float softnessRange)
+        static NGPUImage ProcessGpu(GraphicsDevice device, NImage image, ROI roi, float keyLuminance, float tolerance, float softnessRange)
         {
             var gpuImage = image.ToGpu(device);
 
-            device.For(roi.Width, roi.Height, new ColorKeyProcess(gpuImage.Data, gpuImage.Width, keyColor, tolerance, softnessRange, roi.Left, roi.Top));
+            device.For(roi.Width, roi.Height, new LuminanceKeyProcess(gpuImage.Data, gpuImage.Width, keyLuminance, tolerance, softnessRange, roi.Left, roi.Top));
 
             return gpuImage;
         }
@@ -121,7 +119,7 @@ namespace NiVE3.PresetPlugin.Effect.Keying
 
     [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
     [GeneratedComputeShaderDescriptor]
-    readonly partial struct ColorKeyProcess(ReadWriteBuffer<Float4> image, int width, Float3 keyColor, float tolerance, float softnessRange, int startX, int startY) : IComputeShader
+    readonly partial struct LuminanceKeyProcess(ReadWriteBuffer<Float4> image, int width, float keyLuminance, float tolerance, float softnessRange, int startX, int startY) : IComputeShader
     {
         readonly float EdgeSoftnessRange = tolerance - softnessRange;
 
@@ -130,7 +128,7 @@ namespace NiVE3.PresetPlugin.Effect.Keying
             var pos = (ThreadIds.Y + startY) * width + ThreadIds.X + startX;
             var color = image[pos];
 
-            var distance = Hlsl.Distance(color.XYZ, keyColor);
+            var distance = Hlsl.Abs(Hlsl.Dot(color.XYZ, Const.ConvertToGrayScaleFloat3) - keyLuminance);
             if (distance <= tolerance)
             {
                 if (distance > EdgeSoftnessRange)

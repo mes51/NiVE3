@@ -1516,6 +1516,23 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("柔らかさ")]
         public const string Keying_ColorKey_Softness = nameof(Keying_ColorKey_Softness);
 
+        // LuminanceKey
+
+        [DefaultValue("ルミナンスキー")]
+        public const string Keying_LuminanceKey_Name = nameof(Keying_LuminanceKey_Name);
+
+        [DefaultValue("指定した輝度でキーイングを行います")]
+        public const string Keying_LuminanceKey_Description = nameof(Keying_LuminanceKey_Description);
+
+        [LanguageKey, DefaultValue("輝度")]
+        public const string Keying_LuminanceKey_KeyLuminance = nameof(Keying_LuminanceKey_KeyLuminance);
+
+        [LanguageKey, DefaultValue("許容範囲")]
+        public const string Keying_LuminanceKey_Tolerance = nameof(Keying_LuminanceKey_Tolerance);
+
+        [LanguageKey, DefaultValue("柔らかさ")]
+        public const string Keying_LuminanceKey_Softness = nameof(Keying_LuminanceKey_Softness);
+
         // Renderers
 
         [DefaultValue("デフォルトレンダラ")]
