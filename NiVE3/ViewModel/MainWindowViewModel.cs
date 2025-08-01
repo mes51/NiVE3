@@ -607,7 +607,7 @@ namespace NiVE3.ViewModel
             if (viewModel != null)
             {
                 viewModel.OpenPane();
-                viewModel.SelectByPreview(e.ScreenPosition, e.CurrentTime);
+                viewModel.SelectByPreview(e.ScreenPosition, e.PreviewImageScale, e.CurrentTime);
             }
         }
     }

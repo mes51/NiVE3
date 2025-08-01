@@ -62,12 +62,15 @@ namespace NiVE3.Model
 
         public Vector2d ScreenPosition { get; }
 
+        public Vector2d PreviewImageScale { get; }
+
         public Time CurrentTime { get; }
 
-        public SelectLayerEventArgs(Guid compositionId, Vector2d screenPosition, Time currentTime)
+        public SelectLayerEventArgs(Guid compositionId, Vector2d screenPosition, Vector2d previewImageScale, Time currentTime)
         {
             CompositionId = compositionId;
             ScreenPosition = screenPosition;
+            PreviewImageScale = previewImageScale;
             CurrentTime = currentTime;
         }
     }
@@ -78,14 +81,17 @@ namespace NiVE3.Model
 
         public Vector2d StartScreenPosition { get; }
 
+        public Vector2d PreviewImageScale { get; }
+
         public PropertyType Type { get; }
 
         public Time CurrentTime { get; }
 
-        public BeginUseToolEventArgs(Guid compositionId, Vector2d startScreenPosition, PropertyType type, Time currentTime)
+        public BeginUseToolEventArgs(Guid compositionId, Vector2d startScreenPosition, Vector2d previewImageScale, PropertyType type, Time currentTime)
         {
             CompositionId = compositionId;
             StartScreenPosition = startScreenPosition;
+            PreviewImageScale = previewImageScale;
             Type = type;
             CurrentTime = currentTime;
         }
@@ -114,14 +120,17 @@ namespace NiVE3.Model
 
         public Vector2d NextScreenPos { get; }
 
+        public Vector2d PreviewImageScale { get; }
+
         public bool IsCommit { get; }
 
         public Time CurrentTime { get; }
 
-        public MoveLayersByToolEventArgs(Guid compositionId, Vector2d nextScreenPos, bool isCommit, Time currentTime)
+        public MoveLayersByToolEventArgs(Guid compositionId, Vector2d nextScreenPos, Vector2d previewImageScale, bool isCommit, Time currentTime)
         {
             CompositionId = compositionId;
             NextScreenPos = nextScreenPos;
+            PreviewImageScale = previewImageScale;
             IsCommit = isCommit;
             CurrentTime = currentTime;
         }

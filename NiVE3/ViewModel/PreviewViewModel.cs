@@ -32,7 +32,6 @@ using NiVE3.InternalShader;
 using NiVE3.Exceptions;
 using NiVE3.Model.UI;
 using System.Threading;
-using System.Windows.Xps.Packaging;
 using System.Buffers;
 using NiVE3.Plugin.ValueObject;
 using Prism.Dialogs;
@@ -447,20 +446,20 @@ namespace NiVE3.ViewModel
 
             ChangeCurrentTimeCommand = new DelegateCommand(() => CurrentTimeChangeByUserPublisher.Publish(this, EventArgs.Empty));
 
-            SelectLayerCommand = new DelegateCommand<Vector2d?>(p =>
+            SelectLayerCommand = new DelegateCommand<Tuple<Vector2d, Vector2d>>(t =>
             {
-                if (p == null || PreviewModel is not CompositionPreviewModel compositionPreviewModel || compositionPreviewModel.Composition == null)
+                if (PreviewModel is not CompositionPreviewModel compositionPreviewModel || compositionPreviewModel.Composition == null)
                 {
                     return;
                 }
 
-                var pos = p.Value / (Scale * 0.01);
-                EventHubModel.NotifySelectLayer(compositionPreviewModel.Composition.CompositionId, pos, CurrentTime);
+                var (pos, scale) = t;
+                EventHubModel.NotifySelectLayer(compositionPreviewModel.Composition.CompositionId, pos, scale, CurrentTime);
             });
 
-            BeginUseToolCommand = new DelegateCommand<Vector2d?>(p =>
+            BeginUseToolCommand = new DelegateCommand<Tuple<Vector2d, Vector2d>>(t =>
             {
-                if (!p.HasValue || ToolType == ToolType.Hand || PreviewModel is not CompositionPreviewModel compositionPreviewModel || compositionPreviewModel.Composition == null)
+                if (ToolType == ToolType.Hand || PreviewModel is not CompositionPreviewModel compositionPreviewModel || compositionPreviewModel.Composition == null)
                 {
                     return;
                 }
@@ -479,21 +478,21 @@ namespace NiVE3.ViewModel
                     _ => throw new Exception() // bug
                 };
                 IsUsingTool = true;
-                EventHubModel.NotifyBeginUseTool(compositionPreviewModel.Composition.CompositionId, p.Value / (Scale * 0.01), propertyType, CurrentTime);
+                var (pos, scale) = t;
+                EventHubModel.NotifyBeginUseTool(compositionPreviewModel.Composition.CompositionId, pos, scale, propertyType, CurrentTime);
             });
 
-            MoveLayersByToolCommand = new DelegateCommand<Tuple<Vector2d, bool>>(t =>
+            MoveLayersByToolCommand = new DelegateCommand<Tuple<Vector2d, Vector2d, bool>>(t =>
             {
                 if (!IsUsingTool || PreviewModel is not CompositionPreviewModel compositionPreviewModel || compositionPreviewModel.Composition == null)
                 {
                     return;
                 }
 
-                var (nextPos, isCommit) = t;
-                nextPos /= Scale * 0.01;
+                var (nextPos, scale, isCommit) = t;
                 IsUsingTool = !isCommit;
 
-                EventHubModel.NotifyMoveLayersByTool(compositionPreviewModel.Composition.CompositionId, nextPos, isCommit, CurrentTime);
+                EventHubModel.NotifyMoveLayersByTool(compositionPreviewModel.Composition.CompositionId, nextPos, scale, isCommit, CurrentTime);
             });
 
             AbortUseToolCommand = new DelegateCommand(() =>

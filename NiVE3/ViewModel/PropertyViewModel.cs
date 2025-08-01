@@ -618,24 +618,24 @@ namespace NiVE3.ViewModel
             IsSelectingAll = false;
         }
 
-        public bool HitTestInteraction(Vector2d mousePositionInPreview, ICoordTransformerObject coordTransformer)
+        public bool HitTestInteraction(Vector2d mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer)
         {
-            return PropertyInteraction?.HitTestInteraction(mousePositionInPreview, coordTransformer) ?? false;
+            return PropertyInteraction?.HitTestInteraction(mousePositionInPreview, previewImageScale, coordTransformer) ?? false;
         }
 
-        public bool MouseLeftButtonDown(Vector2d mousePositionInPreview, ICoordTransformerObject coordTransformer)
+        public bool MouseLeftButtonDown(Vector2d mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer)
         {
-            return PropertyInteraction?.MouseLeftButtonDown(mousePositionInPreview, coordTransformer) ?? false;
+            return PropertyInteraction?.MouseLeftButtonDown(mousePositionInPreview, previewImageScale, coordTransformer) ?? false;
         }
 
-        public void MouseLeftButtonDrag(Vector2d mousePositionInPreview, ICoordTransformerObject coordTransformer)
+        public void MouseLeftButtonDrag(Vector2d mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer)
         {
-            PropertyInteraction?.MouseLeftButtonDrag(mousePositionInPreview, coordTransformer);
+            PropertyInteraction?.MouseLeftButtonDrag(mousePositionInPreview, previewImageScale, coordTransformer);
         }
 
-        public void MouseLeftButtonUp(Vector2d mousePositionInPreview, ICoordTransformerObject coordTransformer)
+        public void MouseLeftButtonUp(Vector2d mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer)
         {
-            PropertyInteraction?.MouseLeftButtonUp(mousePositionInPreview, coordTransformer);
+            PropertyInteraction?.MouseLeftButtonUp(mousePositionInPreview, previewImageScale, coordTransformer);
         }
 
         public void AbortInteraction()

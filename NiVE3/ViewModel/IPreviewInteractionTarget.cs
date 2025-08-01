@@ -16,13 +16,13 @@ namespace NiVE3.ViewModel
 
         bool IsInteracting { get; }
 
-        bool HitTestInteraction(Vector2d mousePositionInPreview, ICoordTransformerObject coordTransformer);
+        bool HitTestInteraction(Vector2d mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer);
 
-        bool MouseLeftButtonDown(Vector2d mousePositionInPreview, ICoordTransformerObject coordTransformer);
+        bool MouseLeftButtonDown(Vector2d mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer);
 
-        void MouseLeftButtonDrag(Vector2d mousePositionInPreview, ICoordTransformerObject coordTransformer);
+        void MouseLeftButtonDrag(Vector2d mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer);
 
-        void MouseLeftButtonUp(Vector2d mousePositionInPreview, ICoordTransformerObject coordTransformer);
+        void MouseLeftButtonUp(Vector2d mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer);
 
         void AbortInteraction();
 

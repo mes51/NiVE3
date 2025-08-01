@@ -20,16 +20,53 @@ namespace NiVE3.Plugin.Property.Interaction
             ViewModel = viewModel;
         }
 
-        public abstract bool HitTestInteraction(Vector2d mousePositionInPreview, ICoordTransformerObject coordTransformer);
+        /// <summary>
+        /// マウスの左ボタンを押下したとき、のヒットテストを実行します
+        /// </summary>
+        /// <param name="mousePositionInPreview">プレビューパネル上のマウスの位置。これはDPIの補正、拡大率を適用した後の値です</param>
+        /// <param name="previewImageScale">プレビューエリアの拡大率。これはDPIによる補正も含みます</param>
+        /// <param name="coordTransformer">現在のコンポジションの座標系を表すICoordTransformerObject</param>
+        /// <returns>インタラクションを開始できる場合はtrue、そうでない場合はfalse</returns>
+        public abstract bool HitTestInteraction(Vector2d mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer);
 
-        public abstract bool MouseLeftButtonDown(Vector2d mousePositionInPreview, ICoordTransformerObject coordTransformer);
+        /// <summary>
+        /// マウスの左ボタンを押下したときの処理を実行します
+        /// </summary>
+        /// <param name="mousePositionInPreview">プレビューパネル上のマウスの位置。これはDPIの補正、拡大率を適用した後の値です</param>
+        /// <param name="previewImageScale">プレビューエリアの拡大率。これはDPIによる補正も含みます</param>
+        /// <param name="coordTransformer">現在のコンポジションの座標系を表すICoordTransformerObject</param>
+        /// <returns>インタラクションを開始した場合はtrue、そうでない場合はfalse</returns>
+        public abstract bool MouseLeftButtonDown(Vector2d mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer);
 
-        public abstract void MouseLeftButtonDrag(Vector2d mousePositionInPreview, ICoordTransformerObject coordTransformer);
+        /// <summary>
+        /// マウスの左ボタンを押下した状態でマウスを動かしたときの処理を実行します
+        /// </summary>
+        /// <param name="mousePositionInPreview">プレビューパネル上のマウスの位置。これはDPIの補正、拡大率を適用した後の値です</param>
+        /// <param name="previewImageScale">プレビューエリアの拡大率。これはDPIによる補正も含みます</param>
+        /// <param name="coordTransformer">現在のコンポジションの座標系を表すICoordTransformerObject</param>
+        public abstract void MouseLeftButtonDrag(Vector2d mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer);
 
-        public abstract void MouseLeftButtonUp(Vector2d mousePositionInPreview, ICoordTransformerObject coordTransformer);
+        /// <summary>
+        /// マウスの左ボタンを離した時の処理を実行します
+        /// </summary>
+        /// <param name="mousePositionInPreview">プレビューパネル上のマウスの位置。これはDPIの補正、拡大率を適用した後の値です</param>
+        /// <param name="previewImageScale">プレビューエリアの拡大率。これはDPIによる補正も含みます</param>
+        /// <param name="coordTransformer">現在のコンポジションの座標系を表すICoordTransformerObject</param>
+        public abstract void MouseLeftButtonUp(Vector2d mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer);
 
+        /// <summary>
+        /// インタラクションを中断します
+        /// </summary>
         public abstract void AbortInteraction();
 
+        /// <summary>
+        /// プレビューパネルに操作・および現在値のプロパティを描画します
+        /// </summary>
+        /// <param name="drawingContext">描画対象のDrawingContext</param>
+        /// <param name="previewImagePosition">プレビューエリアの位置</param>
+        /// <param name="previewImageScale">プレビューエリアの拡大率。これはDPIによる補正も含みます</param>
+        /// <param name="tagColor">レイヤーのタグの色</param>
+        /// <param name="coordTransformer">現在のコンポジションの座標系を表すICoordTransformerObject</param>
         public abstract void Render(DrawingContext drawingContext, Vector2d previewImagePosition, Vector2d previewImageScale, Color tagColor, ICoordTransformerObject coordTransformer);
     }
 }

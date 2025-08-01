@@ -364,8 +364,9 @@ namespace NiVE3.View.Pane
                 else
                 {
                     var dpi = VisualTreeHelper.GetDpi(this);
-                    var beginPos = (Vector2d)(pos - prevPoint) * new Vector2d(dpi.DpiScaleX, dpi.DpiScaleY);
-                    viewModel.SelectLayerCommand.Execute(beginPos);
+                    var previewImageScale = (viewModel.Scale * 0.01) / new Vector2d(dpi.DpiScaleX, dpi.DpiScaleY);
+                    var beginPos = (Vector2d)(pos - prevPoint) * new Vector2d(dpi.DpiScaleX, dpi.DpiScaleY) / (viewModel.Scale * 0.01);
+                    viewModel.SelectLayerCommand.Execute(Tuple.Create(beginPos, previewImageScale));
                 }
                 PreviewCanvas.CaptureMouse();
             }
@@ -392,16 +393,17 @@ namespace NiVE3.View.Pane
                         var dpi = VisualTreeHelper.GetDpi(this);
                         var compositionPos = new Vector2d(viewModel.ScreenX, viewModel.ScreenY);
                         var dpiScale = new Vector2d(dpi.DpiScaleX, dpi.DpiScaleY);
-                        var beginPos = ((Vector2d)ClickPoint - compositionPos) * dpiScale;
+                        var beginPos = ((Vector2d)ClickPoint - compositionPos) * dpiScale / (viewModel.Scale * 0.01);
+                        var previewImageScale = (viewModel.Scale * 0.01) / dpiScale;
                         if (!IsMovedByTool && (mousePos - ClickPoint).Length > ToolMoveThreshold)
                         {
-                            viewModel.BeginUseToolCommand.Execute(beginPos);
+                            viewModel.BeginUseToolCommand.Execute(Tuple.Create(beginPos, previewImageScale));
                             IsMovedByTool = true;
                         }
                         if (IsMovedByTool)
                         {
-                            var nextPoint = ((Vector2d)mousePos - compositionPos) * dpiScale;
-                            viewModel.MoveLayersByToolCommand?.Execute(Tuple.Create(nextPoint, false));
+                            var nextPoint = ((Vector2d)mousePos - compositionPos) * dpiScale / (viewModel.Scale * 0.01);
+                            viewModel.MoveLayersByToolCommand?.Execute(Tuple.Create(nextPoint, previewImageScale, false));
                         }
                         break;
                 }
@@ -430,31 +432,39 @@ namespace NiVE3.View.Pane
 
         private void PreviewCanvas_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (IsMouseDown)
+            if (!IsMouseDown)
             {
-                var viewModel = ViewModel;
-                var newPoint = e.GetPosition(PreviewCanvas);
-                var dpi = VisualTreeHelper.GetDpi(this);
-                switch (UsingToolType)
-                {
-                    case ToolType.Hand:
-                        var diff = newPoint - ClickPoint + PrevPoint;
-                        MovePreviewArea(diff.X, diff.Y, true);
-                        break;
-                    default:
-                        if (IsMovedByTool)
-                        {
-                            var compositionPoint = new Vector2d(viewModel?.ScreenX ?? 0.0, viewModel?.ScreenY ?? 0.0);
-                            var dpiScale = new Vector2d(dpi.DpiScaleX, dpi.DpiScaleY);
-                            var nextPoint = ((Vector2d)newPoint - compositionPoint) * dpiScale;
-                            ViewModel?.MoveLayersByToolCommand?.Execute(Tuple.Create(nextPoint, true));
-                        }
-                        break;
-                }
-
-                PreviewCanvas.ReleaseMouseCapture();
-                IsMouseDown = false;
+                return;
             }
+
+            var viewModel = ViewModel;
+            if (viewModel == null)
+            {
+                return;
+            }
+
+            var newPoint = e.GetPosition(PreviewCanvas);
+            var dpi = VisualTreeHelper.GetDpi(this);
+            switch (UsingToolType)
+            {
+                case ToolType.Hand:
+                    var diff = newPoint - ClickPoint + PrevPoint;
+                    MovePreviewArea(diff.X, diff.Y, true);
+                    break;
+                default:
+                    if (IsMovedByTool)
+                    {
+                        var compositionPoint = new Vector2d(viewModel.ScreenX, viewModel.ScreenY);
+                        var dpiScale = new Vector2d(dpi.DpiScaleX, dpi.DpiScaleY);
+                        var nextPoint = ((Vector2d)newPoint - compositionPoint) * dpiScale / (viewModel.Scale * 0.01);
+                        var previewImageScale = (viewModel.Scale * 0.01) / dpiScale;
+                        ViewModel?.MoveLayersByToolCommand?.Execute(Tuple.Create(nextPoint, previewImageScale, true));
+                    }
+                    break;
+            }
+
+            PreviewCanvas.ReleaseMouseCapture();
+            IsMouseDown = false;
         }
 
         private void PreviewCanvas_MouseWheel(object sender, MouseWheelEventArgs e)

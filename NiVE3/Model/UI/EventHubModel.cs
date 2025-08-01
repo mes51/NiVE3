@@ -99,19 +99,19 @@ namespace NiVE3.Model.UI
             remove { RenderPreviewInteractionRequestPublisher.Unsubscribe(value); }
         }
 
-        public void NotifySelectLayer(Guid compositionId, Vector2d screenPos, Time currentTime)
+        public void NotifySelectLayer(Guid compositionId, Vector2d screenPos, Vector2d previewImageScale, Time currentTime)
         {
-            SelectLayerRequestPublisher.Publish(this, new SelectLayerEventArgs(compositionId, screenPos, currentTime));
+            SelectLayerRequestPublisher.Publish(this, new SelectLayerEventArgs(compositionId, screenPos, previewImageScale, currentTime));
         }
 
-        public void NotifyBeginUseTool(Guid compositionId, Vector2d startScreenPos, BeginUseToolEventArgs.PropertyType propertyType, Time currentTime)
+        public void NotifyBeginUseTool(Guid compositionId, Vector2d startScreenPos, Vector2d previewImageScale, BeginUseToolEventArgs.PropertyType propertyType, Time currentTime)
         {
-            BeginUseToolRequestPublisher.Publish(this, new BeginUseToolEventArgs(compositionId, startScreenPos, propertyType, currentTime));
+            BeginUseToolRequestPublisher.Publish(this, new BeginUseToolEventArgs(compositionId, startScreenPos, previewImageScale, propertyType, currentTime));
         }
 
-        public void NotifyMoveLayersByTool(Guid compositionId, Vector2d nextScreenPos, bool isCommit, Time currentTime)
+        public void NotifyMoveLayersByTool(Guid compositionId, Vector2d nextScreenPos, Vector2d previewImageScale, bool isCommit, Time currentTime)
         {
-            MoveLayersByToolRequestPublisher.Publish(this, new MoveLayersByToolEventArgs(compositionId, nextScreenPos, isCommit, currentTime));
+            MoveLayersByToolRequestPublisher.Publish(this, new MoveLayersByToolEventArgs(compositionId, nextScreenPos, previewImageScale, isCommit, currentTime));
         }
 
         public void NotifyAbortUseTool(Guid compositionId)

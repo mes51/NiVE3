@@ -1419,6 +1419,9 @@ namespace NiVE3.ViewModel
             if (layerId == null && !isMultiSelect)
             {
                 SelectedLayers?.Clear();
+                SelectedItemType = SelectItemType.None;
+                SelectedTargetTree = null;
+                LastSelectedObjectHashCode = 0;
             }
             else if (Layers != null && SelectedLayers != null)
             {
@@ -1471,9 +1474,14 @@ namespace NiVE3.ViewModel
             }
         }
 
-        public void SelectByPreview(Vector2d screenPos, Time currentTime)
+        public void SelectByPreview(Vector2d screenPos, Vector2d previewImageScale, Time currentTime)
         {
             if (CompositionModel == null || Layers == null)
+            {
+                return;
+            }
+
+            if (SelectedPreviewInteractionTarget is IPreviewInteractionTarget interaction && SelectedTargetTree?.Last() is LayerViewModel selectedLayer && interaction.HitTestInteraction(screenPos, previewImageScale, CompositionModel.GetCoordTransformer(currentTime, selectedLayer.LayerId)))
             {
                 return;
             }
@@ -1486,11 +1494,10 @@ namespace NiVE3.ViewModel
 
             if (layerId == Guid.Empty)
             {
-                return;
-            }
-
-            if (SelectedPreviewInteractionTarget is IPreviewInteractionTarget interaction && interaction.HitTestInteraction(screenPos, CompositionModel.GetCoordTransformer(currentTime, layerId)))
-            {
+                SelectedLayers?.Clear();
+                SelectedItemType = SelectItemType.None;
+                SelectedTargetTree = null;
+                LastSelectedObjectHashCode = 0;
                 return;
             }
             var layer = Layers.First(l => l.LayerId == layerId);
@@ -1695,16 +1702,15 @@ namespace NiVE3.ViewModel
                 return;
             }
 
-
             if (SelectedPreviewInteractionTarget is IPreviewInteractionTarget interaction && interaction.IsInteracting)
             {
                 if (e.IsCommit)
                 {
-                    interaction.MouseLeftButtonUp(e.NextScreenPos, CompositionModel.GetCoordTransformer(e.CurrentTime, interaction.ParentLayerId));
+                    interaction.MouseLeftButtonUp(e.NextScreenPos, e.PreviewImageScale, CompositionModel.GetCoordTransformer(e.CurrentTime, interaction.ParentLayerId));
                 }
                 else
                 {
-                    interaction.MouseLeftButtonDrag(e.NextScreenPos, CompositionModel.GetCoordTransformer(e.CurrentTime, interaction.ParentLayerId));
+                    interaction.MouseLeftButtonDrag(e.NextScreenPos, e.PreviewImageScale, CompositionModel.GetCoordTransformer(e.CurrentTime, interaction.ParentLayerId));
                 }
                 return;
             }
@@ -1734,7 +1740,7 @@ namespace NiVE3.ViewModel
 
             if (SelectedPreviewInteractionTarget is IPreviewInteractionTarget interaction)
             {
-                if (interaction.MouseLeftButtonDown(e.StartScreenPosition, CompositionModel.GetCoordTransformer(e.CurrentTime, interaction.ParentLayerId)))
+                if (interaction.MouseLeftButtonDown(e.StartScreenPosition, e.PreviewImageScale, CompositionModel.GetCoordTransformer(e.CurrentTime, interaction.ParentLayerId)))
                 {
                     return;
                 }

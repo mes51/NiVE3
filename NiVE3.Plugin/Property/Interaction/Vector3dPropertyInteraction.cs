@@ -58,20 +58,22 @@ namespace NiVE3.Plugin.Property.Interaction
             Is3D = is3D;
         }
 
-        public override bool HitTestInteraction(Vector2d mousePositionInPreview, ICoordTransformerObject coordTransformer)
+        public override bool HitTestInteraction(Vector2d mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer)
         {
             var value = (Vector3d)(ViewModel.CurrentTimeValue ?? Vector3d.Zero);
             var screenPos = coordTransformer.LocalCoordToScreenCoord(value);
+            var hitArea = PointHandleArea / previewImageScale;
 
-            return Math.Abs(screenPos.X - mousePositionInPreview.X) <= PointHandleArea && Math.Abs(screenPos.Y - mousePositionInPreview.Y) <= PointHandleArea;
+            return Math.Abs(screenPos.X - mousePositionInPreview.X) <= hitArea.X && Math.Abs(screenPos.Y - mousePositionInPreview.Y) <= hitArea.Y;
         }
 
-        public override bool MouseLeftButtonDown(Vector2d mousePositionInPreview, ICoordTransformerObject coordTransformer)
+        public override bool MouseLeftButtonDown(Vector2d mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer)
         {
             var value = (Vector3d)(ViewModel.CurrentTimeValue ?? Vector3d.Zero);
             var screenPos = coordTransformer.LocalCoordToScreenCoord(value);
+            var hitArea = PointHandleArea / previewImageScale;
 
-            if (Math.Abs(screenPos.X - mousePositionInPreview.X) <= PointHandleArea && Math.Abs(screenPos.Y - mousePositionInPreview.Y) <= PointHandleArea)
+            if (Math.Abs(screenPos.X - mousePositionInPreview.X) <= hitArea.X && Math.Abs(screenPos.Y - mousePositionInPreview.Y) <= hitArea.Y)
             {
                 InteractionStartPoint = mousePositionInPreview;
                 InteractionStartValue = coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
@@ -87,7 +89,7 @@ namespace NiVE3.Plugin.Property.Interaction
             }
         }
 
-        public override void MouseLeftButtonDrag(Vector2d mousePositionInPreview, ICoordTransformerObject coordTransformer)
+        public override void MouseLeftButtonDrag(Vector2d mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer)
         {
             if (!IsInteracting)
             {
@@ -104,7 +106,7 @@ namespace NiVE3.Plugin.Property.Interaction
             ViewModel.CurrentTimeRawValue = PrevCurrentRawValue + diff;
         }
 
-        public override void MouseLeftButtonUp(Vector2d mousePositionInPreview, ICoordTransformerObject coordTransformer)
+        public override void MouseLeftButtonUp(Vector2d mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer)
         {
             if (!IsInteracting)
             {
