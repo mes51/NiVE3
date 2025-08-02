@@ -7,12 +7,15 @@ using System.Windows;
 using System.Windows.Media;
 using NiVE3.Numerics;
 using NiVE3.Plugin.Interfaces;
+using NiVE3.Plugin.ValueObject;
 
 namespace NiVE3.Plugin.Property.Interaction
 {
     class Vector3dPropertyInteraction : PropertyInteractionBase
     {
         const double BorderThickness = 1.0;
+
+        const double PreviewPropertyPointSize = 2.0;
 
         const double PointHandleArea = 5.0;
 
@@ -132,12 +135,59 @@ namespace NiVE3.Plugin.Property.Interaction
             IsInteracting = false;
         }
 
-        public override void Render(DrawingContext drawingContext, Vector2d previewImagePosition, Vector2d previewImageScale, Color tagColor, ICoordTransformerObject coordTransformer)
+        public override void Render(DrawingContext drawingContext, Vector2d previewImagePosition, Vector2d previewImageScale, Time globalTime, double frameRate, int previewFrameRange, Color tagColor, ICoordTransformerObject coordTransformer)
         {
-            var value = (Vector3d)(ViewModel.CurrentTimeValue ?? Vector3d.Zero);
-            var screenPos = coordTransformer.LocalCoordToScreenCoord(value);
+            var points = new List<Point>(previewFrameRange * 2 + 1);
+            for (var i = 0; i < previewFrameRange; i++)
+            {
+                var value = (Vector3d)(ViewModel.GetValue(globalTime - new Time(previewFrameRange - i - 1, frameRate)) ?? Vector3d.Zero);
+                var screenPos = coordTransformer.LocalCoordToScreenCoord(value);
+                points.Add(new Point(screenPos.X * previewImageScale.X + previewImagePosition.X, screenPos.Y * previewImageScale.Y + previewImagePosition.Y));
+            }
 
-            var transform = new TranslateTransform(screenPos.X * previewImageScale.X + previewImagePosition.X, screenPos.Y * previewImageScale.Y + previewImagePosition.Y);
+            var currentValue = (Vector3d)(ViewModel.CurrentTimeValue ?? Vector3d.Zero);
+            var currentScreenPos = coordTransformer.LocalCoordToScreenCoord(currentValue);
+            points.Add(new Point(currentScreenPos.X * previewImageScale.X + previewImagePosition.X, currentScreenPos.Y * previewImageScale.Y + previewImagePosition.Y));
+
+            for (var i = 0; i < previewFrameRange; i++)
+            {
+                var value = (Vector3d)(ViewModel.GetValue(globalTime + new Time(i + 1, frameRate)) ?? Vector3d.Zero);
+                var screenPos = coordTransformer.LocalCoordToScreenCoord(value);
+                points.Add(new Point(screenPos.X * previewImageScale.X + previewImagePosition.X, screenPos.Y * previewImageScale.Y + previewImagePosition.Y));
+            }
+
+            var brush = new SolidColorBrush(tagColor);
+
+            if (points.Count > 1)
+            {
+                brush.Freeze();
+                var pen = new Pen(brush, 1.0);
+
+                var line = new StreamGeometry();
+                using (var context = line.Open())
+                {
+                    context.BeginFigure(points[0], false, false);
+                    for (var i = 1; i < points.Count; i++)
+                    {
+                        context.LineTo(points[i], true, false);
+                    }
+                }
+
+                drawingContext.DrawGeometry(null, pen, line);
+
+                for (var i = 0; i < points.Count; i++)
+                {
+                    if (i == previewFrameRange)
+                    {
+                        continue;
+                    }
+
+                    drawingContext.DrawEllipse(brush, null, points[i], PreviewPropertyPointSize, PreviewPropertyPointSize);
+                }
+            }
+
+            var currentPos = points[previewFrameRange];
+            var transform = new TranslateTransform(currentPos.X, currentPos.Y);
 
             drawingContext.PushTransform(transform);
             drawingContext.DrawGeometry(null, PointBorderPen, PointGeometry);

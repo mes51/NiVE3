@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Media;
 using NiVE3.Numerics;
 using NiVE3.Plugin.Interfaces;
+using NiVE3.Plugin.ValueObject;
 
 namespace NiVE3.ViewModel
 {
@@ -26,7 +27,7 @@ namespace NiVE3.ViewModel
 
         void AbortInteraction();
 
-        void Render(DrawingContext drawingContext, Vector2d previewImagePosition, Vector2d previewImageScale, Color tagColor, ICoordTransformerObject coordTransformer);
+        void Render(DrawingContext drawingContext, Vector2d previewImagePosition, Vector2d previewImageScale, Time currentTime, double frameRate, int previewFrameRange, Color tagColor, ICoordTransformerObject coordTransformer);
 
         bool IsAlive();
     }

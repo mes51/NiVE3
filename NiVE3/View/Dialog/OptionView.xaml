@@ -84,7 +84,7 @@
             <ListBoxItem Content="{gm:LanguageResource ResourceKey=OptionView_Category_AutoSave}"/>
         </ListBox>
 
-        <ScrollViewer Grid.Row="0" Grid.Column="1" Style="{StaticResource SettingPanelStyle}" Visibility="{Binding ElementName=SettingType, Path=SelectedIndex, Converter={StaticResource SelectTypeConverter}, ConverterParameter=0}" d:Visibility="Collapsed">
+        <ScrollViewer Grid.Row="0" Grid.Column="1" Style="{StaticResource SettingPanelStyle}" Visibility="{Binding ElementName=SettingType, Path=SelectedIndex, Converter={StaticResource SelectTypeConverter}, ConverterParameter=0}" d:Visibility="Visible">
             <StackPanel>
                 <GroupBox Header="{gm:LanguageResource ResourceKey=OptionView_General_SolidFilderName}">
                     <TextBox x:Name="SolidFolderNameTextBox" Margin="{StaticResource GroupBoxInnerMargin}">
@@ -97,10 +97,21 @@
                         </TextBox.Text>
                     </TextBox>
                 </GroupBox>
+                <GroupBox Header="{gm:LanguageResource ResourceKey=OptionView_General_PreviewProperty}" Margin="{StaticResource GroupMargin}">
+                    <Grid Margin="{StaticResource GroupBoxInnerMargin}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Text="{gm:LanguageResource ResourceKey=OptionView_General_PreviewProperty_DisplayFrameCount}" Style="{StaticResource SettingLabelTextBlockStyle}"/>
+                        <upr:SlidableNumberTextBox Grid.Column="1" Minimum="0" Maximum="600" Value="{Binding DisplayFrameRangePropertyInPreview}" UnitText="{gm:LanguageResource ResourceKey=Unit_Frame}"/>
+                    </Grid>
+                </GroupBox>
             </StackPanel>
         </ScrollViewer>
 
-        <ScrollViewer Grid.Row="0" Grid.Column="1" Style="{StaticResource SettingPanelStyle}" Visibility="{Binding ElementName=SettingType, Path=SelectedIndex, Converter={StaticResource SelectTypeConverter}, ConverterParameter=1}" d:Visibility="Visible">
+        <ScrollViewer Grid.Row="0" Grid.Column="1" Style="{StaticResource SettingPanelStyle}" Visibility="{Binding ElementName=SettingType, Path=SelectedIndex, Converter={StaticResource SelectTypeConverter}, ConverterParameter=1}" d:Visibility="Collapsed">
             <StackPanel>
                 <GroupBox Header="{gm:LanguageResource ResourceKey=OptionView_Performance_GpuSetting}">
                     <StackPanel Margin="{StaticResource GroupBoxInnerMargin}">

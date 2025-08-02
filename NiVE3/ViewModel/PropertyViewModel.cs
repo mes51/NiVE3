@@ -643,20 +643,25 @@ namespace NiVE3.ViewModel
             PropertyInteraction?.AbortInteraction();
         }
 
-        public void Render(DrawingContext drawingContext, Vector2d previewImagePosition, Vector2d previewImageScale, Color tagColor, ICoordTransformerObject coordTransformer)
+        public void Render(DrawingContext drawingContext, Vector2d previewImagePosition, Vector2d previewImageScale, Time currentTime, double frameRate, int previewFrameRange, Color tagColor, ICoordTransformerObject coordTransformer)
         {
             if (PropertyInteraction == null)
             {
                 return;
             }
 
-            PropertyInteraction.Render(drawingContext, previewImagePosition, previewImageScale, tagColor, coordTransformer);
+            PropertyInteraction.Render(drawingContext, previewImagePosition, previewImageScale, currentTime, frameRate, previewFrameRange, tagColor, coordTransformer);
         }
 
         public bool IsAlive()
         {
             return PropertyModel.IsAlive(PropertyModel);
-        }   
+        }
+
+        public object? GetValue(Time time, Time globalTime)
+        {
+            return PropertyModel.GetValue(time, globalTime);
+        }
 
         object? CalculationRawValue()
         {
@@ -860,6 +865,11 @@ namespace NiVE3.ViewModel
         public PropertyInteractionViewModelWrapper(PropertyViewModel viewModel)
         {
             ViewModel = viewModel;
+        }
+
+        public object? GetValue(Time time)
+        {
+            return ViewModel.GetValue(time - ViewModel.SourceStartPoint, time);
         }
     }
 }

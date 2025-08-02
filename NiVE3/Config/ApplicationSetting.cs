@@ -80,6 +80,9 @@ namespace NiVE3.Config
         public int ExpressionTimeout { get; set; } = 10;
 
         [SerializableSetting]
+        public int DisplayFrameRangePropertyInPreview { get; set; } = 5;
+
+        [SerializableSetting]
         public int ImageCacheLimit { get; set; } = Math.Min(SystemInfo.MaxCacheLimitMiB - Math.Min((int)Math.Floor(SystemInfo.MaxCacheLimitMiB * 0.25), 4 * 1024), 16 * 1024);
 
         [SerializableSetting]

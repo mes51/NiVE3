@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows.Media;
 using NiVE3.Numerics;
 using NiVE3.Plugin.Interfaces;
+using NiVE3.Plugin.ValueObject;
 
 namespace NiVE3.Plugin.Property.Interaction
 {
@@ -65,8 +66,11 @@ namespace NiVE3.Plugin.Property.Interaction
         /// <param name="drawingContext">描画対象のDrawingContext</param>
         /// <param name="previewImagePosition">プレビューエリアの位置</param>
         /// <param name="previewImageScale">プレビューエリアの拡大率。これはDPIによる補正も含みます</param>
+        /// <param name="globalTime">プレビューに表示している現在時間</param>
+        /// <param name="frameRate">コンポジションのフレームレート</param>
+        /// <param name="previewFrameRange">プレビューに表示するプロパティの前後フレーム数の幅</param>
         /// <param name="tagColor">レイヤーのタグの色</param>
         /// <param name="coordTransformer">現在のコンポジションの座標系を表すICoordTransformerObject</param>
-        public abstract void Render(DrawingContext drawingContext, Vector2d previewImagePosition, Vector2d previewImageScale, Color tagColor, ICoordTransformerObject coordTransformer);
+        public abstract void Render(DrawingContext drawingContext, Vector2d previewImagePosition, Vector2d previewImageScale, Time globalTime, double frameRate, int previewFrameRange, Color tagColor, ICoordTransformerObject coordTransformer);
     }
 }

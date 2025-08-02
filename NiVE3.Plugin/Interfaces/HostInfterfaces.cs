@@ -339,6 +339,8 @@ namespace NiVE3.Plugin.Interfaces
         ICommand EndEditCommand { get; }
 
         ICommand AbortEditCommand { get; }
+
+        object? GetValue(Time time);
     }
 
     public interface ICoordTransformerObject

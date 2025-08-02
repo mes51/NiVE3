@@ -1833,7 +1833,7 @@ namespace NiVE3.ViewModel
             }
 
             var tagColor = SelectedTargetTree?.OfType<LayerViewModel>()?.FirstOrDefault()?.TagColor ?? System.Windows.Media.Colors.Red;
-            interaction.Render(e.DrawingContext, e.PreviewImagePosition, e.PreviewImageScale, tagColor, CompositionModel.GetCoordTransformer(e.CurrentTime, interaction.ParentLayerId));
+            interaction.Render(e.DrawingContext, e.PreviewImagePosition, e.PreviewImageScale, e.CurrentTime, FrameRate, ApplicationSetting.Setting.DisplayFrameRangePropertyInPreview, tagColor, CompositionModel.GetCoordTransformer(e.CurrentTime, interaction.ParentLayerId));
         }
 
         private void HistoryModel_HistoryChanged(object? sender, EventArgs e)

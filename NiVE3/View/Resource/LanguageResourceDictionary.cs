@@ -875,6 +875,12 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("平面のフォルダ名")]
         public static readonly string OptionView_General_SolidFilderName = nameof(OptionView_General_SolidFilderName);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("プロパティのプレビュー")]
+        public static readonly string OptionView_General_PreviewProperty = nameof(OptionView_General_PreviewProperty);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("表示する前後のフレーム数:")]
+        public static readonly string OptionView_General_PreviewProperty_DisplayFrameCount = nameof(OptionView_General_PreviewProperty_DisplayFrameCount);
+
         [ShowInMarkup, LanguageKey, DefaultValue("GPU設定")]
         public static readonly string OptionView_Performance_GpuSetting = nameof(OptionView_Performance_GpuSetting);
 
@@ -2053,6 +2059,9 @@ namespace NiVE3.View.Resource
 
         [ShowInMarkup, LanguageKey, DefaultValue("個")]
         public static readonly string Unit_Pieces = nameof(Unit_Pieces);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("フレーム")]
+        public static readonly string Unit_Frame = nameof(Unit_Frame);
 
         // Enum
 

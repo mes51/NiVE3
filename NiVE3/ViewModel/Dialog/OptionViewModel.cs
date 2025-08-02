@@ -135,6 +135,14 @@ namespace NiVE3.ViewModel.Dialog
             set { SetProperty(ref autoSaveCount, value); }
         }
 
+        private int displayFrameRangePropertyInPreview;
+        [SettingProperty]
+        public int DisplayFrameRangePropertyInPreview
+        {
+            get { return displayFrameRangePropertyInPreview; }
+            set { SetProperty(ref displayFrameRangePropertyInPreview, value); }
+        }
+
         private double maxRamPreviewCacheLimit;
         public double MaxRamPreviewCacheLimit
         {
@@ -226,6 +234,7 @@ namespace NiVE3.ViewModel.Dialog
             UseAutoSave = ApplicationSetting.Setting.UseAutoSave;
             AutoSaveInterval = ApplicationSetting.Setting.AutoSaveInterval;
             AutoSaveCount = ApplicationSetting.Setting.AutoSaveCount;
+            DisplayFrameRangePropertyInPreview = ApplicationSetting.Setting.DisplayFrameRangePropertyInPreview;
 
             SelectedGpuDevice = AvailableGpuDevices.FirstOrDefault(d => d.Item1 == UseGpuLuid, AvailableGpuDevices[0]);
 
@@ -245,6 +254,7 @@ namespace NiVE3.ViewModel.Dialog
             ApplicationSetting.Setting.UseAutoSave = UseAutoSave;
             ApplicationSetting.Setting.AutoSaveInterval = AutoSaveInterval;
             ApplicationSetting.Setting.AutoSaveCount = AutoSaveCount;
+            ApplicationSetting.Setting.DisplayFrameRangePropertyInPreview = DisplayFrameRangePropertyInPreview;
 
             ApplicationSetting.Setting.RaiseUpdateSetting();
             ApplicationSetting.Setting.Save();
