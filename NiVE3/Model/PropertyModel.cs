@@ -401,14 +401,12 @@ namespace NiVE3.Model
 
                         if (Property.PropertyType.TryConvertFromExpressionValue(expressionResult, rawValue, out var newValue))
                         {
-                            if (Property is CompositionDependPropertyBase cp)
+                            value = Property switch
                             {
-                                value = cp.CoerceValue(newValue, CompositionModel);
-                            }
-                            else
-                            {
-                                value = Property.CoerceValue(newValue);
-                            }
+                                CompositionDependPropertyBase cp => cp.CoerceValue(newValue, CompositionModel),
+                                LayerDependPropertyBase lp => lp.CoerceValue(newValue, LayerModel),
+                                _ => Property.CoerceValue(newValue)
+                            };
                         }
                         else
                         {
@@ -674,6 +672,7 @@ namespace NiVE3.Model
                 var newValue = Property switch
                 {
                     CompositionDependPropertyBase cp => cp.CoerceValue(Property.PropertyType.DeserializeValue(data.Value), CompositionModel),
+                    LayerDependPropertyBase lp => lp.CoerceValue(Property.PropertyType.DeserializeValue(data.Value), LayerModel),
                     _ => Property.CoerceValue(Property.PropertyType.DeserializeValue(data.Value))
                 };
                 var oldValue = RawValue;
@@ -692,15 +691,7 @@ namespace NiVE3.Model
             {
                 var startTime = keyFrames[0].Time;
                 var newKeyFrames = new List<KeyFrame>();
-                if (Property is CompositionDependPropertyBase cp)
-                {
-                    foreach (var k in keyFrames)
-                    {
-                        var newTime = k.Time - startTime + CurrentTime - SourceStartPoint;
-                        newKeyFrames.Add(new KeyFrame(newTime, cp.CoerceValue(cp.PropertyType.DeserializeValue(k.Value), CompositionModel), k.EaseIn, k.EaseOut, k.InterpolationType));
-                    }
-                }
-                else
+                if (Property is not CompositionDependPropertyBase && Property is not LayerDependPropertyBase)
                 {
                     foreach (var k in keyFrames)
                     {
