@@ -388,6 +388,7 @@ namespace NiVE3.PresetPlugin.Renderer
             {
                 var size = Math.Max(Width, Height);
                 var offset = Vector256.Create(size - Width, size - Height, 0.0, 0.0) * 0.5 / size;
+                var modelMatrix = Transform3D.Calc3DModelMatrix(baseLayer.Transform, baseLayer.ParentTransform, Width, Height);
                 var viewMatrix = Transform3D.Calc3DViewMatrix(cameraSetting, Width, Height);
                 var fov = Math.Atan((Width / (cameraSetting.Zoom)) * 0.5) * 2.0;
 
@@ -411,7 +412,7 @@ namespace NiVE3.PresetPlugin.Renderer
                 }
 
                 var projectionMatrix = Matrix4x4d.CreatePerspectiveFieldOfView(fov, 1.0, minZ, maxZ);
-                Matrix4x4d.Invert(viewMatrix * projectionMatrix, out var invertedViewProjection);
+                Matrix4x4d.Invert(modelMatrix * viewMatrix * projectionMatrix, out var invertedViewProjection);
 
                 var p = Vector256.Create(pos.X, pos.Y, size * 0.5, size * 0.5) / (size * 0.5) - Vector256.Create(1.0, 1.0, 0.0, 0.0);
                 var result = invertedViewProjection.Transform(p);
