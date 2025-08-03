@@ -10,12 +10,13 @@ using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Property.Control;
 using NiVE3.Plugin.Property.Properties;
 using NiVE3.Plugin.Resource;
+using NiVE3.View.Resource;
 
 namespace NiVE3.Property
 {
-    class Scale2DOr3DProperty : Scale3dProperty
+    class Scale2DOr3DProperty : Vector3dProperty
     {
-        public Scale2DOr3DProperty(string id, LanguageResourceKey displayNameKey, Vector3d defaultValue, bool isSupportKeyFrame = true, int digit = -1) : base(id, displayNameKey, defaultValue, isSupportKeyFrame, digit, true) { }
+        public Scale2DOr3DProperty(string id, LanguageResourceKey displayNameKey, Vector3d defaultValue, bool isSupportKeyFrame = true, int digit = -1) : base(id, displayNameKey, defaultValue, isSupportKeyFrame, digit, true, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent, separator: ",", useLinkRatio: true) { }
 
         public override PropertyControlBase CreateControl(ICompositionViewModel composition, ILayerViewModel? layer, IEffectViewModel? effect, IPropertyViewModel viewModel)
         {

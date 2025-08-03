@@ -389,7 +389,7 @@ namespace NiVE3.Input
                         [
                             new Vector3dProperty(RepeaterTransformAnchorPointId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Transform_AnchorPoint, Vector3d.Zero, digit: 2, useInteraction : true),
                             new Vector3dProperty(RepeaterTransformPositionId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Transform_Position, new Vector3d(100.0, 0.0, 0.0), digit: 2, useInteraction : true),
-                            new Scale3dProperty(RepeaterTransformScaleId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Transform_Scale, new Vector3d(100.0), digit: 2),
+                            new Vector3dProperty(RepeaterTransformScaleId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Transform_Scale, new Vector3d(100.0), digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent, separator: ",", useLinkRatio: true),
                             new AngleProperty(RepeaterTransformAngleId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Transform_Angle, 0.0, digit: 2),
                             new DoubleProperty(RepeaterTransformBeginPointOpacityId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_RepeaterGroup_Transform_BeginPointOpacity, 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
                             new DoubleProperty(RepeaterTransformEndPointOpacityId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_RepeaterGroup_Transform_EndPointOpacity, 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent)
@@ -416,7 +416,7 @@ namespace NiVE3.Input
                     [
                         new Vector3dProperty(GroupTransformAnchorPointId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Transform_AnchorPoint, Vector3d.Zero, digit: 2, useInteraction : true),
                         new Vector3dProperty(GroupTransformPositionId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Transform_Position, Vector3d.Zero, digit: 2, useInteraction : true),
-                        new Scale3dProperty(GroupTransformScaleId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Transform_Scale, new Vector3d(100.0), digit: 2),
+                        new Vector3dProperty(GroupTransformScaleId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Transform_Scale, new Vector3d(100.0), digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent, separator: ",", useLinkRatio: true),
                         new DoubleProperty(GroupTransformSkewId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Transform_Skew, 0.0, -100.0, 100.0, digit: 2),
                         new AngleProperty(GroupTransformSkewAxisId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Transform_SkewAxis, 0.0, digit: 2),
                         new AngleProperty(GroupTransformAngleId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Transform_Angle, 0.0, digit: 2),

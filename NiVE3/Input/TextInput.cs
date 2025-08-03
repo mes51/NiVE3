@@ -224,7 +224,7 @@ namespace NiVE3.Input
                                 new AppendablePropertyItem(TextAnimatorValueScaleId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_Scale, () =>
                                     new PropertyGroup(TextAnimatorValueScaleId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_Scale,
                                     [
-                                        new Scale3dProperty(TextAnimatorValueScaleId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_Scale, new Vector3d(100.0), digit: 2)
+                                        new Vector3dProperty(TextAnimatorValueScaleId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_Scale, new Vector3d(100.0), digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent, separator: ",", useLinkRatio: true)
                                     ])),
                                 new AppendablePropertyItem(TextAnimatorValueAngleId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_Angle, () =>
                                     new PropertyGroup(TextAnimatorValueAngleId, LanguageResourceDictionary.ResourceKeys.TextProperty_TextAnimator_Animator_Value_Angle,
