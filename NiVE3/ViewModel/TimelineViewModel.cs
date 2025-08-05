@@ -35,6 +35,7 @@ using NiVE3.View.Primitive;
 using NiVE3.View.Resource;
 using NiVE3.ViewModel.Dialog;
 using NiVE3.ViewModel.TimelineEditing;
+using NiVE3.ViewModel.Visualize;
 using Prism.Commands;
 using Prism.Dialogs;
 
@@ -1827,13 +1828,22 @@ namespace NiVE3.ViewModel
 
         private void EventHubModel_RenderPreviewInteractionRequest(object? sender, RenderPreviewInteractionEventArgs e)
         {
-            if (CompositionModel == null || e.CompositionId != CompositionId || SelectedPreviewInteractionTarget is not IPreviewInteractionTarget interaction || !interaction.IsAlive())
+            if (CompositionModel == null || e.CompositionId != CompositionId)
             {
                 return;
             }
 
-            var tagColor = SelectedTargetTree?.OfType<LayerViewModel>()?.FirstOrDefault()?.TagColor ?? System.Windows.Media.Colors.Red;
-            interaction.Render(e.DrawingContext, e.PreviewImagePosition, e.PreviewImageScale, e.CurrentTime, FrameRate, ApplicationSetting.Setting.DisplayFrameRangePropertyInPreview, tagColor, CompositionModel.GetCoordTransformer(e.CurrentTime, interaction.ParentLayerId));
+            if (SelectedPreviewInteractionTarget is IPreviewInteractionTarget interaction && interaction.IsAlive())
+            {
+                var tagColor = SelectedTargetTree?.OfType<LayerViewModel>()?.FirstOrDefault()?.TagColor ?? System.Windows.Media.Colors.Red;
+                interaction.Render(e.DrawingContext, e.PreviewImagePosition, e.PreviewImageScale, e.CurrentTime, FrameRate, ApplicationSetting.Setting.DisplayFrameRangePropertyInPreview, tagColor, CompositionModel.GetCoordTransformer(e.CurrentTime, interaction.ParentLayerId));
+                return;
+            }
+
+            if (SelectedLayers?.FirstOrDefault(l => l.LayerId == LastSelectedLayerId) is LayerViewModel selectedLayer)
+            {
+                LayerTranslateVisualizer.Render(e.DrawingContext, e.PreviewImagePosition, e.PreviewImageScale, selectedLayer, e.CurrentTime, FrameRate, selectedLayer.TagColor, CompositionModel.GetCoordTransformer(e.CurrentTime, selectedLayer.LayerId));
+            }
         }
 
         private void HistoryModel_HistoryChanged(object? sender, EventArgs e)

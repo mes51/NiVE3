@@ -2465,39 +2465,41 @@ namespace NiVE3.Model
             CurrentTime = currentTime;
         }
 
-        public Vector3d ScreenCoordToLocalCoord(Vector2d screenPosition)
+        public Vector3d ScreenCoordToLocalCoord(Vector2d screenPosition, Time? time = null)
         {
-            var layerSkeleton = Layer.GetLayerSkeleton(CurrentTime);
+            var targetTime = time ?? CurrentTime;
+            var layerSkeleton = Layer.GetLayerSkeletonWithoutContainsTime(targetTime);
             if (layerSkeleton == null)
             {
                 return Vector3d.Zero;
             }
 
-            return Transformer.ScreenCoordToLocalCoord(CompositionModel.GetActiveCameraSetting(CurrentTime), layerSkeleton, screenPosition);
+            return Transformer.ScreenCoordToLocalCoord(CompositionModel.GetActiveCameraSetting(targetTime), layerSkeleton, screenPosition);
         }
 
-        public Vector3d ScreenCoordToWorldCoord(Vector2d screenPosition)
+        public Vector3d ScreenCoordToWorldCoord(Vector2d screenPosition, Time? time = null)
         {
-            return Transformer.ScreenCoordToWorldCoord(CompositionModel.GetActiveCameraSetting(CurrentTime), screenPosition);
+            return Transformer.ScreenCoordToWorldCoord(CompositionModel.GetActiveCameraSetting(time ?? CurrentTime), screenPosition);
         }
 
-        public Vector2d LocalCoordToScreenCoord(Vector3d localPosition)
+        public Vector2d LocalCoordToScreenCoord(Vector3d localPosition, Time? time = null)
         {
-            var layerSkeleton = Layer.GetLayerSkeleton(CurrentTime);
+            var targetTime = time ?? CurrentTime;
+            var layerSkeleton = Layer.GetLayerSkeletonWithoutContainsTime(targetTime);
 
             if (layerSkeleton != null)
             {
-                return Transformer.LocalCoordToScreenCoord(CompositionModel.GetActiveCameraSetting(CurrentTime), layerSkeleton, localPosition);
+                return Transformer.LocalCoordToScreenCoord(CompositionModel.GetActiveCameraSetting(targetTime), layerSkeleton, localPosition);
             }
             else
             {
-                return Transformer.WorldCoordToScreenCoord(CompositionModel.GetActiveCameraSetting(CurrentTime), localPosition);
+                return Transformer.WorldCoordToScreenCoord(CompositionModel.GetActiveCameraSetting(targetTime), localPosition);
             }
         }
 
-        public Vector2d WorldCoordToScreenCoord(Vector3d worldPosition)
+        public Vector2d WorldCoordToScreenCoord(Vector3d worldPosition, Time? time = null)
         {
-            return Transformer.WorldCoordToScreenCoord(CompositionModel.GetActiveCameraSetting(CurrentTime), worldPosition);
+            return Transformer.WorldCoordToScreenCoord(CompositionModel.GetActiveCameraSetting(time ?? CurrentTime), worldPosition);
         }
     }
 }

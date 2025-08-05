@@ -1295,6 +1295,19 @@ namespace NiVE3.Model
             return new LayerSkeleton(LayerId, rect, IsEnable3D, transform, parentTransforms);
         }
 
+        public LayerSkeleton GetLayerSkeletonWithoutContainsTime(Time time)
+        {
+            var layerTime = time - SourceStartPoint;
+            var sourceTime = CalcSourceTime(layerTime);
+
+            var transform = GetTransform(time);
+            var parentTransforms = GetParentTransforms(time);
+            var sourceOptionProperties = (TextProperties ?? ShapeProperties ?? SourceOptionProperties)?.GetValues(sourceTime, time, true);
+            var rect = FootageModel.CalcSize(sourceTime, CompositionModel.Width, CompositionModel.Height, false, this, sourceOptionProperties);
+
+            return new LayerSkeleton(LayerId, rect, IsEnable3D, transform, parentTransforms);
+        }
+
         public bool EffectsIsSupported(Guid[] effectUuids)
         {
             return !IsSpecial || (IsNullObject && effectUuids.All(id => EffectListModel.GetMetadata(id)?.IsDummyEffect ?? false));

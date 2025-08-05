@@ -345,12 +345,12 @@ namespace NiVE3.Plugin.Interfaces
 
     public interface ICoordTransformerObject
     {
-        Vector3d ScreenCoordToLocalCoord(Vector2d screenPosition);
+        Vector3d ScreenCoordToLocalCoord(Vector2d screenPosition, Time? time = null);
 
-        Vector3d ScreenCoordToWorldCoord(Vector2d screenPosition);
+        Vector3d ScreenCoordToWorldCoord(Vector2d screenPosition, Time? time = null);
 
-        Vector2d LocalCoordToScreenCoord(Vector3d localPosition);
+        Vector2d LocalCoordToScreenCoord(Vector3d localPosition, Time? time = null);
 
-        Vector2d WorldCoordToScreenCoord(Vector3d worldPosition);
+        Vector2d WorldCoordToScreenCoord(Vector3d worldPosition, Time? time = null);
     }
 }
