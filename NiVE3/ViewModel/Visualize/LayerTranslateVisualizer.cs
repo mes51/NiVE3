@@ -54,7 +54,7 @@ namespace NiVE3.ViewModel.Visualize
             var brush = new SolidColorBrush(tagColor);
             var pen = new Pen(brush, 1.0);
 
-            if (points.Count > 1)
+            if (points.Distinct().Count() > 1)
             {
                 var line = new StreamGeometry();
                 using (var context = line.Open())
