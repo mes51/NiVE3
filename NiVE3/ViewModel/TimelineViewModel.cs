@@ -1836,12 +1836,14 @@ namespace NiVE3.ViewModel
             if (SelectedPreviewInteractionTarget is IPreviewInteractionTarget interaction && interaction.IsAlive())
             {
                 var tagColor = SelectedTargetTree?.OfType<LayerViewModel>()?.FirstOrDefault()?.TagColor ?? System.Windows.Media.Colors.Red;
+                using var checker = CycleChecker.StartCheck();
                 interaction.Render(e.DrawingContext, e.PreviewImagePosition, e.PreviewImageScale, e.CurrentTime, FrameRate, ApplicationSetting.Setting.DisplayFrameRangePropertyInPreview, tagColor, CompositionModel.GetCoordTransformer(e.CurrentTime, interaction.ParentLayerId));
                 return;
             }
 
             if (SelectedLayers?.FirstOrDefault(l => l.LayerId == LastSelectedLayerId) is LayerViewModel selectedLayer)
             {
+                using var checker = CycleChecker.StartCheck();
                 LayerTranslateVisualizer.Render(e.DrawingContext, e.PreviewImagePosition, e.PreviewImageScale, selectedLayer, e.CurrentTime, FrameRate, selectedLayer.TagColor, CompositionModel.GetCoordTransformer(e.CurrentTime, selectedLayer.LayerId));
             }
         }
