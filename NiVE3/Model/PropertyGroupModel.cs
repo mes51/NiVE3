@@ -233,6 +233,10 @@ namespace NiVE3.Model
             {
                 child.CalcValuesHash(hash);
             }
+            if (UseEnableSwitch)
+            {
+                hash.Append(IsEnable);
+            }
         }
 
         public void UpdateValueByCompositionStateChanged()

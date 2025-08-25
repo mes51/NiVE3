@@ -187,6 +187,7 @@ namespace NiVE3.Plugin.Property
             PropertyGroupId = propertyGroupId;
             PropertyTypes = propertyTypes;
             Values = values;
+            IsEnable = isEnable;
         }
 
         internal void CalcHash(XxHash3 hash)

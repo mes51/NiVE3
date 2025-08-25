@@ -128,22 +128,6 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
 
         const string PropertyCameraGroupId = nameof(PropertyCameraGroupId);
 
-        const string PropertyCameraUseCompositionId = nameof(PropertyCameraUseCompositionId);
-
-        const string PropertyCameraPointOfInterestId = nameof(PropertyCameraPointOfInterestId);
-
-        const string PropertyCameraPositionId = nameof(PropertyCameraPositionId);
-
-        const string PropertyCameraOrientationId = nameof(PropertyCameraOrientationId);
-
-        const string PropertyCameraXAngleId = nameof(PropertyCameraXAngleId);
-
-        const string PropertyCameraYAngleId = nameof(PropertyCameraYAngleId);
-
-        const string PropertyCameraZAngleId = nameof(PropertyCameraZAngleId);
-
-        const string PropertyCameraZoomId = nameof(PropertyCameraZoomId);
-
         const string PropertySourceLayerGroupId = nameof(PropertySourceLayerGroupId);
 
         const string PropertySourceLayerLayerId = nameof(PropertySourceLayerLayerId);
@@ -308,14 +292,14 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                     PropertyCameraGroupId,
                     LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Camera,
                     [
-                        new CheckBoxProperty(PropertyCameraUseCompositionId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Camera_UseComposition, false),
-                        new Vector3dProperty(PropertyCameraPointOfInterestId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Camera_PointOfInterest, new Vector3d(sourceSize.Width, sourceSize.Height, 0.0) * 0.5, digit: 2, is3D: true, useInteraction : true),
-                        new Vector3dProperty(PropertyCameraPositionId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Camera_Position, new Vector3d(sourceSize.Width * 0.5, sourceSize.Height * 0.5, -cameraZoom), digit: 2, is3D: true, useInteraction : true),
-                        new DirectionProperty(PropertyCameraOrientationId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Camera_Orientation, Vector3d.Zero, digit: 2),
-                        new AngleProperty(PropertyCameraXAngleId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Camera_XAngle, 0.0, digit: 2),
-                        new AngleProperty(PropertyCameraYAngleId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Camera_YAngle, 0.0, digit: 2),
-                        new AngleProperty(PropertyCameraZAngleId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Camera_ZAngle, 0.0, digit: 2),
-                        new DoubleProperty(PropertyCameraZoomId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Camera_Zoom, cameraZoom, 0.01, double.MaxValue, digit: 2)
+                        new CheckBoxProperty(CameraProperties.PropertyCameraUseCompositionId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Camera_UseComposition, false),
+                        new Vector3dProperty(CameraProperties.PropertyCameraPointOfInterestId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Camera_PointOfInterest, new Vector3d(sourceSize.Width, sourceSize.Height, 0.0) * 0.5, digit: 2, is3D: true, useInteraction : true),
+                        new Vector3dProperty(CameraProperties.PropertyCameraPositionId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Camera_Position, new Vector3d(sourceSize.Width * 0.5, sourceSize.Height * 0.5, -cameraZoom), digit: 2, is3D: true, useInteraction : true),
+                        new DirectionProperty(CameraProperties.PropertyCameraOrientationId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Camera_Orientation, Vector3d.Zero, digit: 2),
+                        new AngleProperty(CameraProperties.PropertyCameraXAngleId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Camera_XAngle, 0.0, digit: 2),
+                        new AngleProperty(CameraProperties.PropertyCameraYAngleId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Camera_YAngle, 0.0, digit: 2),
+                        new AngleProperty(CameraProperties.PropertyCameraZAngleId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Camera_ZAngle, 0.0, digit: 2),
+                        new DoubleProperty(CameraProperties.PropertyCameraZoomId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Camera_Zoom, cameraZoom, 0.01, double.MaxValue, digit: 2)
                     ]
                 ),
                 new PropertyGroup(
@@ -361,7 +345,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
             {
                 property.CalcValuesHash(hash);
             }
-            var propertyHash = HashToInt128(hash);
+            var propertyHash = hash.ToInt128();
 
             if (LastSimulateFrameRate != composition.FrameRate ||
                 LastSimulationRate != simulationRate ||
@@ -460,37 +444,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
             }
 
             var camera = properties.First(p => p.Id == PropertyCameraGroupId).GetChildren() ?? [];
-            var useCompositionCamera = camera.GetValue(PropertyCameraUseCompositionId, layerTime, false);
-            var originalWidth = roi.OriginalImageSize.Width * downSamplingRateX;
-            var originalHeight = roi.OriginalImageSize.Height * downSamplingRateY;
-            var fov = 0.0;
-            Unsafe.SkipInit(out Matrix4x4d viewMatrix);
-            // TODO: ROI変更分のズレを合わせる
-            if (useCompositionCamera)
-            {
-                var cameraSetting = composition.GetActiveCameraSetting(layerTime + layer.SourceStartPoint);
-                fov = Math.Atan(realWidth / cameraSetting.Zoom * 0.5) * 2.0;
-                viewMatrix = Transform3D.Calc3DViewMatrix(cameraSetting, realWidth, realHeight);
-            }
-            else
-            {
-                var zoom = camera.GetValue(PropertyCameraZoomId, layerTime, 0.0);
-                fov = Math.Atan(realWidth / zoom * 0.5) * 2.0;
-                viewMatrix = Transform3D.Calc3DViewMatrix(
-                    new CameraSetting(
-                        camera.GetValue(PropertyCameraPointOfInterestId, layerTime, Vector3d.Zero),
-                        camera.GetValue(PropertyCameraPositionId, layerTime, Vector3d.Zero),
-                        camera.GetValue(PropertyCameraOrientationId, layerTime, Vector3d.Zero),
-                        camera.GetValue(PropertyCameraXAngleId, layerTime, 0.0),
-                        camera.GetValue(PropertyCameraYAngleId, layerTime, 0.0),
-                        camera.GetValue(PropertyCameraZAngleId, layerTime, 0.0),
-                        zoom,
-                        []
-                    ),
-                    realWidth,
-                    realHeight
-                );
-            }
+            var (viewMatrix, fov) = CameraProperties.GetViewMatrixAndFov(camera, composition, layer, layerTime, roi, image.Width, image.Height, downSamplingRateX, downSamplingRateY);
             renderer.FieldOfView = fov;
             renderer.ViewMatrix = viewMatrix;
 
@@ -772,16 +726,6 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
         }
 
         public void Dispose() { }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static Int128 HashToInt128(XxHash3 hash)
-        {
-            var result = (Int128)0;
-            var resultSpan = MemoryMarshal.CreateSpan(ref result, 1);
-            hash.GetCurrentHash(MemoryMarshal.Cast<Int128, byte>(resultSpan));
-
-            return result;
-        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static Vector3d CalcRotatedVector(in Vector3d angles)

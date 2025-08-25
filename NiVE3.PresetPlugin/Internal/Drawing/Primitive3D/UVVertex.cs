@@ -6,6 +6,7 @@ using System.Runtime.Intrinsics;
 using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Numerics;
+using System.Runtime.CompilerServices;
 
 namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
 {
@@ -31,19 +32,34 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.Primitive3D
             V = v;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public UVVertex Transform(Matrix4x4d matrix)
         {
             return new UVVertex(matrix.Transform(Vertex), U, V);
         }
 
-        public static UVVertex operator *(in UVVertex v, double s)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static UVVertex operator +(in UVVertex a, in UVVertex b)
         {
-            return new UVVertex(Avx.Multiply(v.Vertex, Vector256.Create(s)), v.U * s, v.V * s);
+            return new UVVertex(a.Vertex + b.Vertex, a.U + b.U, a.V + b.V);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static UVVertex operator -(in UVVertex a, in UVVertex b)
+        {
+            return new UVVertex(a.Vertex - b.Vertex, a.U - b.U, a.V - b.V);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static UVVertex operator *(in UVVertex v, double s)
+        {
+            return new UVVertex(v.Vertex * s, v.U * s, v.V * s);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static UVVertex operator /(in UVVertex v, double s)
         {
-            return new UVVertex(Avx.Divide(v.Vertex, Vector256.Create(s)), v.U / s, v.V / s);
+            return new UVVertex(v.Vertex / s, v.U / s, v.V / s);
         }
     }
 }

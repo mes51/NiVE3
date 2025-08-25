@@ -1499,6 +1499,104 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("ランダムシード")]
         public const string Simulation_Particle_Option_RandomSeed = nameof(Simulation_Particle_Option_RandomSeed);
 
+        // Shatter
+
+        [DefaultValue("シャター")]
+        public const string Simulation_Shatter_Name = nameof(Simulation_Shatter_Name);
+
+        [DefaultValue("画像を指定された図形に分割、力を掛けて粉砕します")]
+        public const string Simulation_Shatter_Description = nameof(Simulation_Shatter_Description);
+
+        [LanguageKey, DefaultValue("形状")]
+        public const string Simulation_Shatter_Shape = nameof(Simulation_Shatter_Shape);
+
+        [LanguageKey, DefaultValue("形状")]
+        public const string Simulation_Shatter_Shape_ShapeType = nameof(Simulation_Shatter_Shape_ShapeType);
+
+        [LanguageKey, DefaultValue("形状のランダムシード")]
+        public const string Simulation_Shatter_Shape_ShapeRandomSeed = nameof(Simulation_Shatter_Shape_ShapeRandomSeed);
+
+        [LanguageKey, DefaultValue("サイズ")]
+        public const string Simulation_Shatter_Shape_Size = nameof(Simulation_Shatter_Shape_Size);
+
+        [LanguageKey, DefaultValue("フォース")]
+        public const string Simulation_Shatter_Force = nameof(Simulation_Shatter_Force);
+
+        [LanguageKey, DefaultValue("フォース")]
+        public const string Simulation_Shatter_Force_ForceItem = nameof(Simulation_Shatter_Force_ForceItem);
+
+        [LanguageKey, DefaultValue("フォース")]
+        public const string Simulation_Shatter_Force_Force = nameof(Simulation_Shatter_Force_Force);
+
+        [LanguageKey, DefaultValue("位置")]
+        public const string Simulation_Shatter_Force_Position = nameof(Simulation_Shatter_Force_Position);
+
+        [LanguageKey, DefaultValue("フォースの半径")]
+        public const string Simulation_Shatter_Force_Radius = nameof(Simulation_Shatter_Force_Radius);
+
+        [LanguageKey, DefaultValue("フォースのパワー")]
+        public const string Simulation_Shatter_Force_Power = nameof(Simulation_Shatter_Force_Power);
+
+        [LanguageKey, DefaultValue("フォースを掛け始める時間")]
+        public const string Simulation_Shatter_Force_StartTime = nameof(Simulation_Shatter_Force_StartTime);
+
+        [LanguageKey, DefaultValue("ワールド")]
+        public const string Simulation_Shatter_World = nameof(Simulation_Shatter_World);
+
+        [LanguageKey, DefaultValue("重力")]
+        public const string Simulation_Shatter_World_Gravity = nameof(Simulation_Shatter_World_Gravity);
+
+        [LanguageKey, DefaultValue("重力方向")]
+        public const string Simulation_Shatter_World_GravityDirection = nameof(Simulation_Shatter_World_GravityDirection);
+
+        [LanguageKey, DefaultValue("空気抵抗")]
+        public const string Simulation_Shatter_World_AirRegistance = nameof(Simulation_Shatter_World_AirRegistance);
+
+        [LanguageKey, DefaultValue("カメラ")]
+        public const string Simulation_Shatter_Camera = nameof(Simulation_Shatter_Camera);
+
+        [LanguageKey, DefaultValue("コンポジションカメラを使用する")]
+        public const string Simulation_Shatter_Camera_UseComposition = nameof(Simulation_Shatter_Camera_UseComposition);
+
+        [LanguageKey, DefaultValue("目標点")]
+        public const string Simulation_Shatter_Camera_PointOfInterest = nameof(Simulation_Shatter_Camera_PointOfInterest);
+
+        [LanguageKey, DefaultValue("位置")]
+        public const string Simulation_Shatter_Camera_Position = nameof(Simulation_Shatter_Camera_Position);
+
+        [LanguageKey, DefaultValue("方向")]
+        public const string Simulation_Shatter_Camera_Orientation = nameof(Simulation_Shatter_Camera_Orientation);
+
+        [LanguageKey, DefaultValue("X回転")]
+        public const string Simulation_Shatter_Camera_XAngle = nameof(Simulation_Shatter_Camera_XAngle);
+
+        [LanguageKey, DefaultValue("Y回転")]
+        public const string Simulation_Shatter_Camera_YAngle = nameof(Simulation_Shatter_Camera_YAngle);
+
+        [LanguageKey, DefaultValue("Z回転")]
+        public const string Simulation_Shatter_Camera_ZAngle = nameof(Simulation_Shatter_Camera_ZAngle);
+
+        [LanguageKey, DefaultValue("ズーム")]
+        public const string Simulation_Shatter_Camera_Zoom = nameof(Simulation_Shatter_Camera_Zoom);
+
+        [LanguageKey, DefaultValue("レンダリング")]
+        public const string Simulation_Shatter_Rendering = nameof(Simulation_Shatter_Rendering);
+
+        [LanguageKey, DefaultValue("表示")]
+        public const string Simulation_Shatter_Rendering_DisplayType = nameof(Simulation_Shatter_Rendering_DisplayType);
+
+        [LanguageKey, DefaultValue("アンチエイリアス")]
+        public const string Simulation_Shatter_Rendering_AntiAlias = nameof(Simulation_Particle_Rendering_AntiAlias);
+
+        [LanguageKey, DefaultValue("オプション")]
+        public const string Simulation_Shatter_Option = nameof(Simulation_Shatter_Option);
+
+        [LanguageKey, DefaultValue("シャターのシミュレーション粒度")]
+        public const string Simulation_Shatter_Option_SimulationRate = nameof(Simulation_Shatter_Option_SimulationRate);
+
+        [LanguageKey, DefaultValue("ランダムシード")]
+        public const string Simulation_Shatter_Option_RandomSeed = nameof(Simulation_Shatter_Option_RandomSeed);
+
         // ColorKey
 
         [DefaultValue("カラーキー")]
@@ -2191,6 +2289,36 @@ namespace NiVE3.PresetPlugin.Resource
 
         [DefaultValue("逆放射状")]
         public const string LongShadowShapeType_InvertRadiate = nameof(LongShadowShapeType_InvertRadiate);
+
+        [DefaultValue("三角形1")]
+        public const string ShatterShapeType_Triangle1 = nameof(ShatterShapeType_Triangle1);
+
+        [DefaultValue("三角形2")]
+        public const string ShatterShapeType_Triangle2 = nameof(ShatterShapeType_Triangle2);
+
+        [DefaultValue("四角形")]
+        public const string ShatterShapeType_Rectangle = nameof(ShatterShapeType_Rectangle);
+
+        [DefaultValue("六角形")]
+        public const string ShatterShapeType_Hexagon = nameof(ShatterShapeType_Hexagon);
+
+        [DefaultValue("レンガ")]
+        public const string ShatterShapeType_Brick = nameof(ShatterShapeType_Brick);
+
+        [DefaultValue("ひし形")]
+        public const string ShatterShapeType_Rhombus = nameof(ShatterShapeType_Rhombus);
+
+        [DefaultValue("ランダム")]
+        public const string ShatterShapeType_Random = nameof(ShatterShapeType_Random);
+
+        [DefaultValue("ワイヤーフレーム")]
+        public const string ShatterDisplayType_Wireframe = nameof(ShatterDisplayType_Wireframe);
+
+        [DefaultValue("ワイヤーフレーム+フォース")]
+        public const string ShatterDisplayType_WireframeWithForce = nameof(ShatterDisplayType_WireframeWithForce);
+
+        [DefaultValue("レンダリング")]
+        public const string ShatterDisplayType_Rendering = nameof(ShatterDisplayType_Rendering);
 
         // unit
 

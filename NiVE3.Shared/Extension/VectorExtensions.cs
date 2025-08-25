@@ -376,6 +376,12 @@ namespace NiVE3.Shared.Extension
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double Length(this in Vector256<double> v)
+        {
+            return Math.Sqrt(Vector256.Dot(v, v));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector256<double> Normalize(this in Vector256<double> v)
         {
             var length = Math.Sqrt(Vector256.Dot(v, v));
@@ -406,7 +412,7 @@ namespace NiVE3.Shared.Extension
         {
             var resultMask = Vector256.Create(0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0).AsDouble();
             Vector256<double> result;
-            if (Avx.IsSupported)
+            if (Avx2.IsSupported)
             {
                 var tmp0 = Avx2.Permute4x64(a, 0b11001001);
                 var tmp1 = Avx2.Permute4x64(b, 0b11010010);
@@ -434,6 +440,12 @@ namespace NiVE3.Shared.Extension
             }
 
             return Avx.And(result, resultMask);
+        }
+
+        public static Vector256<double> CrossProduct3D(this in Vector256<double> a, in Vector256<double> b)
+        {
+            var mask = Vector256.Create(0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0).AsDouble();
+            return (a & mask).CrossProduct(b & mask);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

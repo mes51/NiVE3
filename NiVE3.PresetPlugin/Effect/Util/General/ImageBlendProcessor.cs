@@ -32,10 +32,28 @@ namespace NiVE3.PresetPlugin.Effect.Util.General
 
         public static void SameSizeGpu(GraphicsDevice device, NGPUImage backImage, NGPUImage frontImage, ROI roi, BlendMode blendMode)
         {
-            using (var context = device.CreateComputeContext())
+            using var context = device.CreateComputeContext();
+            context.For(roi.Width, roi.Height, new SameSizeBlendProcess(backImage.Data, frontImage.Data, backImage.Width, (int)blendMode, roi.Left, roi.Top));
+        }
+
+        public static void TransferImageCpu(NManagedImage backImage, NManagedImage frontImage, ROI roi)
+        {
+            var imageWidth = backImage.Width;
+            var imageData = backImage.Data;
+            var frontImageData = frontImage.Data;
+            Parallel.For(roi.Top, roi.Bottom, y =>
             {
-                context.For(roi.Width, roi.Height, new SameSizeBlendProcess(backImage.Data, frontImage.Data, backImage.Width, (int)blendMode, roi.Left, roi.Top));
-            }
+                var backImageDataSpan = imageData.AsSpan(y * imageWidth + roi.Left, roi.Width);
+                var frontImageDataSpan = frontImageData.AsSpan(y * imageWidth + roi.Left, roi.Width);
+
+                frontImageDataSpan.CopyTo(backImageDataSpan);
+            });
+        }
+
+        public static void TransferImageGpu(GraphicsDevice device, NGPUImage backImage, NGPUImage frontImage, ROI roi)
+        {
+            using var context = device.CreateComputeContext();
+            context.For(roi.Width, roi.Height, new TransferImageProcess(backImage.Data, frontImage.Data, backImage.Width, roi.Left, roi.Top));
         }
     }
 
@@ -48,6 +66,18 @@ namespace NiVE3.PresetPlugin.Effect.Util.General
             var pos = (ThreadIds.Y + startY) * width + ThreadIds.X + startX;
 
             back[pos] = BlendMethods.Process(blendMode, back[pos], front[pos]);
+        }
+    }
+
+    [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
+    [GeneratedComputeShaderDescriptor]
+    readonly partial struct TransferImageProcess(ReadWriteBuffer<Float4> back, ReadWriteBuffer<Float4> front, int width, int startX, int startY) : IComputeShader
+    {
+        public void Execute()
+        {
+            var pos = (ThreadIds.Y + startY) * width + ThreadIds.X + startX;
+
+            back[pos] = front[pos];
         }
     }
 }

@@ -165,6 +165,116 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             LastId++;
         }
 
+        public void AddTriangle(
+            Int32Point roiOrigin,
+            NImage texture,
+            ImageInterpolationQuality interpolationQuality,
+            in Vector4 multiplyColor,
+            in UVVertex v1,
+            in UVVertex v2,
+            in UVVertex v3,
+            float opacity,
+            BlendMode blendType,
+            Matrix4x4d modelMatrix,
+            ShadowCastMode shadowCastMode,
+            float lightTransmission,
+            bool isAcceptShadow,
+            bool isAcceptLight,
+            float ambient,
+            float diffuse,
+            float specularIntensity,
+            float specularShininess,
+            float metal,
+            RasterizedMaskImage? trackMatte
+        )
+        {
+            var offsetX = (Size - Width) * 0.5 / Size;
+            var offsetY = (Size - Height) * 0.5 / Size;
+
+            var originOffsetedModelMatrix = Matrix4x4d.CreateTranslate(-(roiOrigin.X + texture.Origin.X) / Size, -(roiOrigin.Y + texture.Origin.Y) / Size, 0.0) * modelMatrix;
+            var mv = originOffsetedModelMatrix * ViewMatrix;
+            var mvt = mv * Matrix4x4d.CreateTranslate(offsetX, offsetY, 0.0);
+            var uv1 = v1.Transform(mvt);
+            var uv2 = v2.Transform(mvt);
+            var uv3 = v3.Transform(mvt);
+
+            if (UseLight &&
+                (((uv2.Vertex - uv1.Vertex) & Const.WithoutWMask256).LengthSquared() > MaxTriangleEdgeLength ||
+                ((uv3.Vertex - uv1.Vertex) & Const.WithoutWMask256).LengthSquared() > MaxTriangleEdgeLength ||
+                ((uv3.Vertex - uv2.Vertex) & Const.WithoutWMask256).LengthSquared() > MaxTriangleEdgeLength))
+            {
+                var v12c = (v2 - v1) * 0.5 + v1;
+                var v23c = (v3 - v2) * 0.5 + v2;
+                var v31c = (v1 - v3) * 0.5 + v3;
+
+                AddTriangle(roiOrigin, texture, interpolationQuality, multiplyColor, v1, v12c, v31c, opacity, blendType, modelMatrix, shadowCastMode, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
+                AddTriangle(roiOrigin, texture, interpolationQuality, multiplyColor, v12c, v2, v23c, opacity, blendType, modelMatrix, shadowCastMode, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
+                AddTriangle(roiOrigin, texture, interpolationQuality, multiplyColor, v31c, v23c, v3, opacity, blendType, modelMatrix, shadowCastMode, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
+                AddTriangle(roiOrigin, texture, interpolationQuality, multiplyColor, v12c, v23c, v31c, opacity, blendType, modelMatrix, shadowCastMode, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
+                return;
+            }
+
+            Matrix4x4d.Invert(mv, out var invertedModelViewMatrix);
+            invertedModelViewMatrix = Matrix4x4d.Transpose(invertedModelViewMatrix);
+
+            var farPoint = mv.Transform(Vector256.Create(0.0, 0.0, -10000.0, 1.0)) & Const.WithoutWMask256;
+            if (shadowCastMode != ShadowCastMode.ShadowOnly)
+            {
+                Triangles.Add(new Triangle(uv1, uv2, uv3, farPoint, invertedModelViewMatrix, texture, interpolationQuality, multiplyColor, opacity, blendType, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte, LastId));
+            }
+
+            if (shadowCastMode != ShadowCastMode.None)
+            {
+                foreach (var spotLight in SpotLights)
+                {
+                    if (!spotLight.IsEnableShadow)
+                    {
+                        continue;
+                    }
+                    var lt = CreateLightTriangle(LastId, texture, interpolationQuality, multiplyColor, opacity, lightTransmission, v1, v2, v3, originOffsetedModelMatrix, mv, spotLight.LightViewMatrix, offsetX, offsetY);
+                    var triangles = LightTriangles[spotLight];
+                    triangles.Add(lt);
+                }
+                foreach (var parallelLight in ParallelLights)
+                {
+                    if (!parallelLight.IsEnableShadow)
+                    {
+                        continue;
+                    }
+                    var lt = CreateLightTriangle(LastId, texture, interpolationQuality, multiplyColor, opacity, lightTransmission, v1, v2, v3, originOffsetedModelMatrix, mv, parallelLight.LightViewMatrix, offsetX, offsetY);
+                    var triangles = LightTriangles[parallelLight];
+                    triangles.Add(lt);
+                }
+                foreach (var pointLight in PointLights)
+                {
+                    if (!pointLight.IsEnableShadow)
+                    {
+                        continue;
+                    }
+                    var lt = CreateLightTriangle(LastId, texture, interpolationQuality, multiplyColor, opacity, lightTransmission, v1, v2, v3, originOffsetedModelMatrix, mv, pointLight.FrontLightViewMatrix, offsetX, offsetY);
+                    var triangles = LightTriangles[new PointLightHolder(pointLight, PointLightShadowDirection.Front)];
+                    triangles.Add(lt);
+                    lt = CreateLightTriangle(LastId, texture, interpolationQuality, multiplyColor, opacity, lightTransmission, v1, v2, v3, originOffsetedModelMatrix, mv, pointLight.BackLightViewMatrix, offsetX, offsetY);
+                    triangles = LightTriangles[new PointLightHolder(pointLight, PointLightShadowDirection.Back)];
+                    triangles.Add(lt);
+                    lt = CreateLightTriangle(LastId, texture, interpolationQuality, multiplyColor, opacity, lightTransmission, v1, v2, v3, originOffsetedModelMatrix, mv, pointLight.LeftLightViewMatrix, offsetX, offsetY);
+                    triangles = LightTriangles[new PointLightHolder(pointLight, PointLightShadowDirection.Left)];
+                    triangles.Add(lt);
+                    lt = CreateLightTriangle(LastId, texture, interpolationQuality, multiplyColor, opacity, lightTransmission, v1, v2, v3, originOffsetedModelMatrix, mv, pointLight.RightLightViewMatrix, offsetX, offsetY);
+                    triangles = LightTriangles[new PointLightHolder(pointLight, PointLightShadowDirection.Right)];
+                    triangles.Add(lt);
+                    lt = CreateLightTriangle(LastId, texture, interpolationQuality, multiplyColor, opacity, lightTransmission, v1, v2, v3, originOffsetedModelMatrix, mv, pointLight.TopLightViewMatrix, offsetX, offsetY);
+                    triangles = LightTriangles[new PointLightHolder(pointLight, PointLightShadowDirection.Top)];
+                    triangles.Add(lt);
+                    lt = CreateLightTriangle(LastId, texture, interpolationQuality, multiplyColor, opacity, lightTransmission, v1, v2, v3, originOffsetedModelMatrix, mv, pointLight.BottomLightViewMatrix, offsetX, offsetY);
+                    triangles = LightTriangles[new PointLightHolder(pointLight, PointLightShadowDirection.Bottom)];
+                    triangles.Add(lt);
+                }
+            }
+
+            LastId++;
+        }
+
         void AddRectInternal(
             Int32Point roiOrigin,
             NImage texture,
@@ -248,7 +358,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                     {
                         continue;
                     }
-                    var (lt1, lt2) = CreateLightTriangle(LastId, texture, interpolationQuality, multiplyColor, opacity, lightTransmission, sv1, sv2, sv3, sv4, uLeft, vTop, uRight, vBottom, originOffsetedModelMatrix, mv, spotLight.LightViewMatrix, offsetX, offsetY);
+                    var (lt1, lt2) = CreateLightTriangleForRect(LastId, texture, interpolationQuality, multiplyColor, opacity, lightTransmission, sv1, sv2, sv3, sv4, uLeft, vTop, uRight, vBottom, originOffsetedModelMatrix, mv, spotLight.LightViewMatrix, offsetX, offsetY);
                     var triangles = LightTriangles[spotLight];
                     triangles.Add(lt1);
                     triangles.Add(lt2);
@@ -259,7 +369,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                     {
                         continue;
                     }
-                    var (lt1, lt2) = CreateLightTriangle(LastId, texture, interpolationQuality, multiplyColor, opacity, lightTransmission, sv1, sv2, sv3, sv4, uLeft, vTop, uRight, vBottom, originOffsetedModelMatrix, mv, parallelLight.LightViewMatrix, offsetX, offsetY);
+                    var (lt1, lt2) = CreateLightTriangleForRect(LastId, texture, interpolationQuality, multiplyColor, opacity, lightTransmission, sv1, sv2, sv3, sv4, uLeft, vTop, uRight, vBottom, originOffsetedModelMatrix, mv, parallelLight.LightViewMatrix, offsetX, offsetY);
                     var triangles = LightTriangles[parallelLight];
                     triangles.Add(lt1);
                     triangles.Add(lt2);
@@ -270,27 +380,27 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                     {
                         continue;
                     }
-                    var (lt1, lt2) = CreateLightTriangle(LastId, texture, interpolationQuality, multiplyColor, opacity, lightTransmission, sv1, sv2, sv3, sv4, uLeft, vTop, uRight, vBottom, originOffsetedModelMatrix, mv, pointLight.FrontLightViewMatrix, offsetX, offsetY);
+                    var (lt1, lt2) = CreateLightTriangleForRect(LastId, texture, interpolationQuality, multiplyColor, opacity, lightTransmission, sv1, sv2, sv3, sv4, uLeft, vTop, uRight, vBottom, originOffsetedModelMatrix, mv, pointLight.FrontLightViewMatrix, offsetX, offsetY);
                     var triangles = LightTriangles[new PointLightHolder(pointLight, PointLightShadowDirection.Front)];
                     triangles.Add(lt1);
                     triangles.Add(lt2);
-                    (lt1, lt2) = CreateLightTriangle(LastId, texture, interpolationQuality, multiplyColor, opacity, lightTransmission, sv1, sv2, sv3, sv4, uLeft, vTop, uRight, vBottom, originOffsetedModelMatrix, mv, pointLight.BackLightViewMatrix, offsetX, offsetY);
+                    (lt1, lt2) = CreateLightTriangleForRect(LastId, texture, interpolationQuality, multiplyColor, opacity, lightTransmission, sv1, sv2, sv3, sv4, uLeft, vTop, uRight, vBottom, originOffsetedModelMatrix, mv, pointLight.BackLightViewMatrix, offsetX, offsetY);
                     triangles = LightTriangles[new PointLightHolder(pointLight, PointLightShadowDirection.Back)];
                     triangles.Add(lt1);
                     triangles.Add(lt2);
-                    (lt1, lt2) = CreateLightTriangle(LastId, texture, interpolationQuality, multiplyColor, opacity, lightTransmission, sv1, sv2, sv3, sv4, uLeft, vTop, uRight, vBottom, originOffsetedModelMatrix, mv, pointLight.LeftLightViewMatrix, offsetX, offsetY);
+                    (lt1, lt2) = CreateLightTriangleForRect(LastId, texture, interpolationQuality, multiplyColor, opacity, lightTransmission, sv1, sv2, sv3, sv4, uLeft, vTop, uRight, vBottom, originOffsetedModelMatrix, mv, pointLight.LeftLightViewMatrix, offsetX, offsetY);
                     triangles = LightTriangles[new PointLightHolder(pointLight, PointLightShadowDirection.Left)];
                     triangles.Add(lt1);
                     triangles.Add(lt2);
-                    (lt1, lt2) = CreateLightTriangle(LastId, texture, interpolationQuality, multiplyColor, opacity, lightTransmission, sv1, sv2, sv3, sv4, uLeft, vTop, uRight, vBottom, originOffsetedModelMatrix, mv, pointLight.RightLightViewMatrix, offsetX, offsetY);
+                    (lt1, lt2) = CreateLightTriangleForRect(LastId, texture, interpolationQuality, multiplyColor, opacity, lightTransmission, sv1, sv2, sv3, sv4, uLeft, vTop, uRight, vBottom, originOffsetedModelMatrix, mv, pointLight.RightLightViewMatrix, offsetX, offsetY);
                     triangles = LightTriangles[new PointLightHolder(pointLight, PointLightShadowDirection.Right)];
                     triangles.Add(lt1);
                     triangles.Add(lt2);
-                    (lt1, lt2) = CreateLightTriangle(LastId, texture, interpolationQuality, multiplyColor, opacity, lightTransmission, sv1, sv2, sv3, sv4, uLeft, vTop, uRight, vBottom, originOffsetedModelMatrix, mv, pointLight.TopLightViewMatrix, offsetX, offsetY);
+                    (lt1, lt2) = CreateLightTriangleForRect(LastId, texture, interpolationQuality, multiplyColor, opacity, lightTransmission, sv1, sv2, sv3, sv4, uLeft, vTop, uRight, vBottom, originOffsetedModelMatrix, mv, pointLight.TopLightViewMatrix, offsetX, offsetY);
                     triangles = LightTriangles[new PointLightHolder(pointLight, PointLightShadowDirection.Top)];
                     triangles.Add(lt1);
                     triangles.Add(lt2);
-                    (lt1, lt2) = CreateLightTriangle(LastId, texture, interpolationQuality, multiplyColor, opacity, lightTransmission, sv1, sv2, sv3, sv4, uLeft, vTop, uRight, vBottom, originOffsetedModelMatrix, mv, pointLight.BottomLightViewMatrix, offsetX, offsetY);
+                    (lt1, lt2) = CreateLightTriangleForRect(LastId, texture, interpolationQuality, multiplyColor, opacity, lightTransmission, sv1, sv2, sv3, sv4, uLeft, vTop, uRight, vBottom, originOffsetedModelMatrix, mv, pointLight.BottomLightViewMatrix, offsetX, offsetY);
                     triangles = LightTriangles[new PointLightHolder(pointLight, PointLightShadowDirection.Bottom)];
                     triangles.Add(lt1);
                     triangles.Add(lt2);
@@ -382,7 +492,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                     {
                         continue;
                     }
-                    var (lt1, lt2) = CreateLightTriangle(LastId, texture, interpolationQuality, multiplyColor, opacity, lightTransmission, sv1, sv2, sv3, sv4, uLeft, vTop, uRight, vBottom, originOffsetedModelMatrix, mv, spotLight.LightViewMatrix, offsetX, offsetY);
+                    var (lt1, lt2) = CreateLightTriangleForRect(LastId, texture, interpolationQuality, multiplyColor, opacity, lightTransmission, sv1, sv2, sv3, sv4, uLeft, vTop, uRight, vBottom, originOffsetedModelMatrix, mv, spotLight.LightViewMatrix, offsetX, offsetY);
                     var triangles = LightTriangles[spotLight];
                     triangles.Add(lt1);
                     triangles.Add(lt2);
@@ -393,7 +503,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                     {
                         continue;
                     }
-                    var (lt1, lt2) = CreateLightTriangle(LastId, texture, interpolationQuality, multiplyColor, opacity, lightTransmission, sv1, sv2, sv3, sv4, uLeft, vTop, uRight, vBottom, originOffsetedModelMatrix, mv, parallelLight.LightViewMatrix, offsetX, offsetY);
+                    var (lt1, lt2) = CreateLightTriangleForRect(LastId, texture, interpolationQuality, multiplyColor, opacity, lightTransmission, sv1, sv2, sv3, sv4, uLeft, vTop, uRight, vBottom, originOffsetedModelMatrix, mv, parallelLight.LightViewMatrix, offsetX, offsetY);
                     var triangles = LightTriangles[parallelLight];
                     triangles.Add(lt1);
                     triangles.Add(lt2);
@@ -404,27 +514,27 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                     {
                         continue;
                     }
-                    var (lt1, lt2) = CreateLightTriangle(LastId, texture, interpolationQuality, multiplyColor, opacity, lightTransmission, sv1, sv2, sv3, sv4, uLeft, vTop, uRight, vBottom, originOffsetedModelMatrix, mv, pointLight.FrontLightViewMatrix, offsetX, offsetY);
+                    var (lt1, lt2) = CreateLightTriangleForRect(LastId, texture, interpolationQuality, multiplyColor, opacity, lightTransmission, sv1, sv2, sv3, sv4, uLeft, vTop, uRight, vBottom, originOffsetedModelMatrix, mv, pointLight.FrontLightViewMatrix, offsetX, offsetY);
                     var triangles = LightTriangles[new PointLightHolder(pointLight, PointLightShadowDirection.Front)];
                     triangles.Add(lt1);
                     triangles.Add(lt2);
-                    (lt1, lt2) = CreateLightTriangle(LastId, texture, interpolationQuality, multiplyColor, opacity, lightTransmission, sv1, sv2, sv3, sv4, uLeft, vTop, uRight, vBottom, originOffsetedModelMatrix, mv, pointLight.BackLightViewMatrix, offsetX, offsetY);
+                    (lt1, lt2) = CreateLightTriangleForRect(LastId, texture, interpolationQuality, multiplyColor, opacity, lightTransmission, sv1, sv2, sv3, sv4, uLeft, vTop, uRight, vBottom, originOffsetedModelMatrix, mv, pointLight.BackLightViewMatrix, offsetX, offsetY);
                     triangles = LightTriangles[new PointLightHolder(pointLight, PointLightShadowDirection.Back)];
                     triangles.Add(lt1);
                     triangles.Add(lt2);
-                    (lt1, lt2) = CreateLightTriangle(LastId, texture, interpolationQuality, multiplyColor, opacity, lightTransmission, sv1, sv2, sv3, sv4, uLeft, vTop, uRight, vBottom, originOffsetedModelMatrix, mv, pointLight.LeftLightViewMatrix, offsetX, offsetY);
+                    (lt1, lt2) = CreateLightTriangleForRect(LastId, texture, interpolationQuality, multiplyColor, opacity, lightTransmission, sv1, sv2, sv3, sv4, uLeft, vTop, uRight, vBottom, originOffsetedModelMatrix, mv, pointLight.LeftLightViewMatrix, offsetX, offsetY);
                     triangles = LightTriangles[new PointLightHolder(pointLight, PointLightShadowDirection.Left)];
                     triangles.Add(lt1);
                     triangles.Add(lt2);
-                    (lt1, lt2) = CreateLightTriangle(LastId, texture, interpolationQuality, multiplyColor, opacity, lightTransmission, sv1, sv2, sv3, sv4, uLeft, vTop, uRight, vBottom, originOffsetedModelMatrix, mv, pointLight.RightLightViewMatrix, offsetX, offsetY);
+                    (lt1, lt2) = CreateLightTriangleForRect(LastId, texture, interpolationQuality, multiplyColor, opacity, lightTransmission, sv1, sv2, sv3, sv4, uLeft, vTop, uRight, vBottom, originOffsetedModelMatrix, mv, pointLight.RightLightViewMatrix, offsetX, offsetY);
                     triangles = LightTriangles[new PointLightHolder(pointLight, PointLightShadowDirection.Right)];
                     triangles.Add(lt1);
                     triangles.Add(lt2);
-                    (lt1, lt2) = CreateLightTriangle(LastId, texture, interpolationQuality, multiplyColor, opacity, lightTransmission, sv1, sv2, sv3, sv4, uLeft, vTop, uRight, vBottom, originOffsetedModelMatrix, mv, pointLight.TopLightViewMatrix, offsetX, offsetY);
+                    (lt1, lt2) = CreateLightTriangleForRect(LastId, texture, interpolationQuality, multiplyColor, opacity, lightTransmission, sv1, sv2, sv3, sv4, uLeft, vTop, uRight, vBottom, originOffsetedModelMatrix, mv, pointLight.TopLightViewMatrix, offsetX, offsetY);
                     triangles = LightTriangles[new PointLightHolder(pointLight, PointLightShadowDirection.Top)];
                     triangles.Add(lt1);
                     triangles.Add(lt2);
-                    (lt1, lt2) = CreateLightTriangle(LastId, texture, interpolationQuality, multiplyColor, opacity, lightTransmission, sv1, sv2, sv3, sv4, uLeft, vTop, uRight, vBottom, originOffsetedModelMatrix, mv, pointLight.BottomLightViewMatrix, offsetX, offsetY);
+                    (lt1, lt2) = CreateLightTriangleForRect(LastId, texture, interpolationQuality, multiplyColor, opacity, lightTransmission, sv1, sv2, sv3, sv4, uLeft, vTop, uRight, vBottom, originOffsetedModelMatrix, mv, pointLight.BottomLightViewMatrix, offsetX, offsetY);
                     triangles = LightTriangles[new PointLightHolder(pointLight, PointLightShadowDirection.Bottom)];
                     triangles.Add(lt1);
                     triangles.Add(lt2);
@@ -432,7 +542,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             }
         }
 
-        static (ShadowTriangle, ShadowTriangle) CreateLightTriangle(
+        static (ShadowTriangle, ShadowTriangle) CreateLightTriangleForRect(
             int triangleId,
             NImage texture,
             ImageInterpolationQuality interpolationQuality,
@@ -474,6 +584,37 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                 new ShadowTriangle(luv1, luv2, luv3, lfarPoint, invertedLightModelViewMatrix, texture, interpolationQuality, multiplyColor, opacity, lightTransmission, triangleId),
                 new ShadowTriangle(luv1, luv3, luv4, lfarPoint, invertedLightModelViewMatrix, texture, interpolationQuality, multiplyColor, opacity, lightTransmission, triangleId)
             );
+        }
+
+        static ShadowTriangle CreateLightTriangle(
+            int triangleId,
+            NImage texture,
+            ImageInterpolationQuality interpolationQuality,
+            in Vector4 multiplyColor,
+            float opacity,
+            float lightTransmission,
+            in UVVertex suv1,
+            in UVVertex suv2,
+            in UVVertex suv3,
+            in Matrix4x4d modelMatrix,
+            in Matrix4x4d modelViewMatrix,
+            in Matrix4x4d lightViewMatrix,
+            double offsetX,
+            double offsetY
+        )
+        {
+            var lmv = modelMatrix * lightViewMatrix;
+            var lmvt = lmv * Matrix4x4d.CreateTranslate(offsetX, offsetY, 0.0);
+            var luv1 = suv1.Transform(lmvt);
+            var luv2 = suv2.Transform(lmvt);
+            var luv3 = suv3.Transform(lmvt);
+
+            Matrix4x4d.Invert(modelViewMatrix, out var invertedLightModelViewMatrix);
+            invertedLightModelViewMatrix = Matrix4x4d.Transpose(invertedLightModelViewMatrix);
+
+            var lfarPoint = lmv.Transform(Vector256.Create(0.0, 0.0, -10000.0, 1.0)) & Const.WithoutWMask256;
+
+            return new ShadowTriangle(luv1, luv2, luv3, lfarPoint, invertedLightModelViewMatrix, texture, interpolationQuality, multiplyColor, opacity, lightTransmission, triangleId);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
