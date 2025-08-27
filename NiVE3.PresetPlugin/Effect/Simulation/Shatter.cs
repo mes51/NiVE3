@@ -39,7 +39,7 @@ using Polygon = NiVE3.Shape.Polygon;
 namespace NiVE3.PresetPlugin.Effect.Simulation
 {
     [Export(typeof(IEffect))]
-    [EffectMetadata(LanguageResourceDictionary.Simulation_Shatter_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_Simulation, LanguageResourceDictionary.Simulation_Shatter_Description, ID, IsRenderEveryFrame = true, IsSupportGpu = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
+    [EffectMetadata(LanguageResourceDictionary.Simulation_Shatter_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_Simulation, LanguageResourceDictionary.Simulation_Shatter_Description, ID, IsRenderEveryFrame = true, IsSupportGpu = true, UseCompositionCamera = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
     public sealed class Shatter : IEffect
     {
         const float ShapeWireframeThickness = 1.0F;

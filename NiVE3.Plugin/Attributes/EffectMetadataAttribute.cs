@@ -75,6 +75,11 @@ namespace NiVE3.Plugin.Attributes
         bool IsSupportGpu { get; }
 
         /// <summary>
+        /// コンポジションのカメラを使用する可能性があるかどうかを表します
+        /// </summary>
+        bool UseCompositionCamera { get; }
+
+        /// <summary>
         /// エフェクトが処理できるソースを表します
         /// </summary>
         EffectSupportedSource SupportedSource { get; }
@@ -111,6 +116,11 @@ namespace NiVE3.Plugin.Attributes
         /// GPUによるアクセラレーションに対応しているかどうか
         /// </summary>
         public bool IsSupportGpu { get; set; }
+
+        /// <summary>
+        /// コンポジションのカメラを使用する可能性があるかどうか
+        /// </summary>
+        public bool UseCompositionCamera { get; set; }
 
         /// <summary>
         /// エフェクトが処理できるソース

@@ -37,7 +37,7 @@ using NiVE3.Shared.Extension;
 namespace NiVE3.PresetPlugin.Effect.Simulation
 {
     [Export(typeof(IEffect))]
-    [EffectMetadata(LanguageResourceDictionary.Simulation_Particle_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_Simulation, LanguageResourceDictionary.Simulation_Particle_Description, ID, IsRenderEveryFrame = true, IsSupportGpu = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
+    [EffectMetadata(LanguageResourceDictionary.Simulation_Particle_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_Simulation, LanguageResourceDictionary.Simulation_Particle_Description, ID, IsRenderEveryFrame = true, IsSupportGpu = true, UseCompositionCamera = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
     public sealed class Particle : IEffect
     {
         const string ID = "9D42E697-F4E9-4253-9EE6-EF2D0B41E869";

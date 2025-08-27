@@ -1993,7 +1993,7 @@ namespace NiVE3.Model
         {
             if ((LayerOptionProperties?.HasCompositionDependProperty() ?? false) ||
                 (SourceOptionProperties?.HasCompositionDependProperty() ?? false) ||
-                effects.Any(e => e.HasCompositionDependProperty()))
+                effects.Any(e => e.UseCompositionCamera || e.HasCompositionDependProperty()))
             {
                 ImageCache.Clear(LayerId);
             }

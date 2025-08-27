@@ -57,6 +57,8 @@ namespace NiVE3.Model
 
         public bool IsDummyEffect => Metadata.IsDummyEffect;
 
+        public bool UseCompositionCamera => Metadata.UseCompositionCamera;
+
         public EffectSupportedSource SupportedSource => Metadata.SupportedSource;
 
         public Guid EffectId { get; }
