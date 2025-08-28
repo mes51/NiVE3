@@ -50,6 +50,8 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
 
         const int ForceSamplingCount = 10;
 
+        const int ForceCirclePointCount = 32;
+
         const string ID = "6F0AF393-2661-4B2E-B637-89D1E34D4216";
 
         const string PropertyShapeGroupId = nameof(PropertyShapeGroupId);
@@ -98,7 +100,9 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
 
         static readonly Vector4 ShapeWireframeColor = Vector4.One;
 
-        static readonly Vector4 ForceWireframeColor = new Vector4(1.0F, 0.0F, 0.0F, 1.0F);
+        static readonly Vector4 ForceWireframeColor = new Vector4(1.0F, 0.2F, 0.2F, 1.0F);
+
+        static readonly Vector256<double>[][] ForceCircles;
 
         IAcceleratorObject? AcceleratorObject { get; set; }
 
@@ -117,6 +121,29 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
         int LastSimulationRate { get; set; }
 
         int LastSimulationRandomSeed { get; set; }
+
+        static Shatter()
+        {
+            ForceCircles = new Vector256<double>[3][];
+            ForceCircles[0] = new Vector256<double>[ForceCirclePointCount];
+            ForceCircles[1] = new Vector256<double>[ForceCirclePointCount];
+            ForceCircles[2] = new Vector256<double>[ForceCirclePointCount];
+
+            for (var i = 0; i < ForceCirclePointCount; i++)
+            {
+                ForceCircles[0][i] = Vector256.Create(Math.Cos(Math.PI / ForceCirclePointCount * i * 2.0), Math.Sin(Math.PI / ForceCirclePointCount * i * 2.0), 0.0, 0.0);
+            }
+
+            for (var i = 0; i < ForceCirclePointCount; i++)
+            {
+                ForceCircles[1][i] = Vector256.Create(0.0, Math.Sin(Math.PI / ForceCirclePointCount * i * 2.0), Math.Cos(Math.PI / ForceCirclePointCount * i * 2.0), 0.0);
+            }
+
+            for (var i = 0; i < ForceCirclePointCount; i++)
+            {
+                ForceCircles[2][i] = Vector256.Create(Math.Cos(Math.PI / ForceCirclePointCount * i * 2.0), 0.0, Math.Sin(Math.PI / ForceCirclePointCount * i * 2.0), 0.0);
+            }
+        }
 
         public void SetupAccelerator(IAcceleratorObject accelerator)
         {
@@ -918,36 +945,38 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
 
         static Polygon[] CreateForcePolygon(int imageWidth, int imageHeight, ROI roi, IReadOnlyCollection<IPropertyObject> forces, IReadOnlyCollection<IPropertyObject> cameraGroup, ICompositionObject composition, ILayerObject layer, Time layerTime, double downSamplingRateX, double downSamplingRateY)
         {
-            var (viewMatrix, fov) = CameraProperties.GetViewMatrixAndFov(cameraGroup, composition, layer, layerTime, roi, imageWidth, imageHeight, downSamplingRateX, downSamplingRateY);
-            var projectionMatrix = Matrix4x4d.CreatePerspectiveFieldOfView(fov, 1.0, double.Epsilon, double.PositiveInfinity);
             var realWidth = (int)Math.Round(imageWidth * downSamplingRateX);
             var realHeight = (int)Math.Round(imageHeight * downSamplingRateY);
             var size = Math.Max(realWidth, realHeight);
             var offsetX = (size - realWidth) * 0.5 / size;
             var offsetY = (size - realHeight) * 0.5 / size;
-            var offsetMatrix = Matrix4x4d.CreateTranslate(offsetX, offsetY, 0.0);
-            var projectionOffset = Vector256.Create(offsetX, offsetY, 0.0, 0.0) * size;
-
-            var mvt = viewMatrix * offsetMatrix;
 
             var result = new List<Polygon>();
+            Span<UVVertex> points = stackalloc UVVertex[ForceCirclePointCount];
             foreach (var force in forces)
             {
                 var forceProperties = force.GetChildren() ?? [];
                 var position = forceProperties.GetValue(PropertyForcePositionId, layerTime, Vector3d.Zero).AsVector256() + Vector256.Create(0.0, 0.0, 0.0, size);
                 var radius = forceProperties.GetValue(PropertyForceRadiusId, layerTime, 0.0);
-                var forceTopPos = position + Vector256.Create(0.0, radius, 0.0, 0.0);
 
-                var uvp = projectionMatrix.Transform(mvt.Transform(position / size));
-                var uvr = projectionMatrix.Transform(mvt.Transform(forceTopPos / size));
-                uvp /= uvp.GetElement(3);
-                uvr /= uvr.GetElement(3);
-                var dvp = Avx.ExtractVector128((uvp + Vector256.Create(1.0, 1.0, 0.0, 0.0)) * Vector256.Create(size * 0.5, size * 0.5, 1.0, 1.0) - projectionOffset, 0);
-                var dvr = Avx.ExtractVector128((uvr + Vector256.Create(1.0, 1.0, 0.0, 0.0)) * Vector256.Create(size * 0.5, size * 0.5, 1.0, 1.0) - projectionOffset, 0);
+                var uvc = new UVVertex(position / size, 0.0, 0.0);
+                for (var i = 0; i < ForceCircles.Length; i++)
+                {
+                    var currentCircle = ForceCircles[i];
+                    for (var n = 0; n < ForceCirclePointCount; n++)
+                    {
+                        points[n] = new UVVertex((position + currentCircle[n] * radius) / size, 0.0, 0.0);
+                    }
 
-                var length = (float)Math.Sqrt((dvr - dvp).LengthSquared());
-                var circle = new EllipsePolygon(new PointF((float)dvp.GetElement(0), (float)dvp.GetElement(1)), length);
-                result.AddRange(circle.GenerateOutline(ForceWireframeThickness).Flatten().Select(p => new Polygon(p.Points.Span)));
+                    var triangles = new List<(UVVertex, UVVertex, UVVertex)>();
+                    for (var n = 1; n <= ForceCirclePointCount; n++)
+                    {
+                        triangles.Add((uvc, points[n - 1], points[n % ForceCirclePointCount]));
+                    }
+                    var shape = new ShatterShape([..triangles]);
+
+                    result.AddRange(ConvertShapeToPolygon(imageWidth, imageHeight, roi, [shape.ToSimulated()], cameraGroup, composition, layer, layerTime, downSamplingRateX, downSamplingRateY));
+                }
             }
 
             return [..result];
