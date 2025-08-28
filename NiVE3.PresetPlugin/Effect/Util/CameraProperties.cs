@@ -41,9 +41,12 @@ namespace NiVE3.PresetPlugin.Effect.Util
             // TODO: ROI変更分のズレを合わせる
             if (useCompositionCamera)
             {
+                var size = Math.Max(realWidth, realHeight);
                 var cameraSetting = composition.GetActiveCameraSetting(layerTime + layer.SourceStartPoint);
                 fov = Math.Atan(realWidth / cameraSetting.Zoom * 0.5) * 2.0;
-                return (Transform3D.Calc3DViewMatrix(cameraSetting, realWidth, realHeight), fov);
+                var offsetX = (composition.Width - originalWidth) * 0.5 / size;
+                var offsetY = (composition.Height - originalHeight) * 0.5 / size;
+                return (Transform3D.Calc3DViewMatrix(cameraSetting, realWidth, realHeight) * Matrix4x4d.CreateTranslate(offsetX, offsetY, 0.0), fov);
             }
             else
             {
